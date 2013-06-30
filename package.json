@@ -17,7 +17,8 @@
     "readdirp": "*",
     "async": "*",
     "optimist": "*",
-    "express": "*"
+    "express": "*",
+    "superagent": "*"
   },
   "scripts": {
   }
