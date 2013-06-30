@@ -57,18 +57,19 @@ function saveIndex(callback) {
 var fsWatchTimer;
 function listenToChanges() {
     fsWatcher = fs.watch(argv.r, {}, function (event, filename) {
-        if (!fsWatchTimer) {
-            fsWatchTimer = setTimeout(function () {
-                index.update(function (error, result) {
-                    if (error) {
-                        console.log('[EE] Unable to update the index', error);
-                        return;
-                    }
-                    console.log('[II] Index update successful');
-                });
-                fsWatchTimer = undefined;
-            }, 2000);
-        }
+        if (fsWatchTimer)
+            return;
+
+        fsWatchTimer = setTimeout(function () {
+            index.update(function (error, result) {
+                if (error) {
+                    console.log('[EE] Unable to update the index', error);
+                    return;
+                }
+                console.log('[II] Index update successful');
+            });
+            fsWatchTimer = undefined;
+        }, 2000);
     });
 }
 
