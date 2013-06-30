@@ -30,7 +30,8 @@ console.log('[II] Loading index...');
 var indexFileName = argv.i || 'index.json';
 var port = argv.p || 3000;
 var root = argv.r;
-var index = new dirIndex.DirIndex(root);
+var index = new dirIndex.DirIndex();
+index.update(root, function () { });
 
 var app = express();
 var multipart = express.multipart({ keepExtensions: true, maxFieldsSize: 2 * 1024 * 1024 }); // multipart/form-data
