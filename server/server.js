@@ -31,7 +31,9 @@ var indexFileName = argv.i || 'index.json';
 var port = argv.p || 3000;
 var root = argv.r;
 var index = new dirIndex.DirIndex();
-index.update(root, function () { });
+index.update(root, function () {
+    console.log(index.entryList);
+});
 
 var app = express();
 var multipart = express.multipart({ uploadDir: process.cwd(), keepExtensions: true, maxFieldsSize: 2 * 1024 * 1024 }); // multipart/form-data
@@ -93,13 +95,14 @@ app.post('/file', function (req, res, next) {
             res.send('OK');
         });
     } else if (data.action === 'remove') {
-        if (entry) return next(new HttpError(404, 'File does not exist'));
+        if (!entry) return next(new HttpError(404, 'File does not exist'));
         fs.unlink(root + '/' + data.filename, function (err) {
             if (err) return next(new HttpError(500, err.toString()));
             index.removeEntry(data.filename);
             res.send('OK');
         });
     } else if (data.action === 'update') {
+        if (!entry) return next(new HttpError(404, 'File does not exist'));
         if (!req.files.file) return next(new HttpError(400, 'file not provided'));
         if (!data.mtime) return next(new HttpError(400, 'mtime not specified'));
         fs.rename(req.files.file.path, root + '/' + data.filename, function (err) {
