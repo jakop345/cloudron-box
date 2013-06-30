@@ -28,7 +28,8 @@ var port = argv.p || 3000;
 var index = new dirIndex.DirIndex(argv.r);
 
 var app = express();
-app.get('/index', function (req, res, next) {
+app.get('/dirIndex', function (req, res, next) {
+    res.send(index.json());
 });
 
 app.listen(port);
