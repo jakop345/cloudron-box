@@ -7,7 +7,8 @@ var dirIndex = require('../lib/dirindex'),
     express = require('express'),
     util = require('util'),
     http = require('http'),
-    HttpError = require('./httperror');
+    HttpError = require('./httperror'),
+    fs = require('fs');
 
 var argv = optimist.usage('Usage: $0 --root <directory>')
     .alias('h', 'help')
@@ -28,7 +29,8 @@ console.log('[II] Loading index...');
 
 var indexFileName = argv.i || 'index.json';
 var port = argv.p || 3000;
-var index = new dirIndex.DirIndex(argv.r);
+var root = argv.r;
+var index = new dirIndex.DirIndex(root);
 
 var app = express();
 var multipart = express.multipart({ keepExtensions: true, maxFieldsSize: 2 * 1024 * 1024 }); // multipart/form-data
