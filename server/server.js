@@ -91,24 +91,22 @@ app.post('/file', function (req, res, next) {
         if (entry) return next(new HttpError(409, 'File already exists'));
         fs.rename(req.files.file.path, root + '/' + data.filename, function (err) {
             if (err) return next(new HttpError(500, err.toString()));
-            index.addEntry(data.filename);
-            res.send('OK');
+            index.addEntry(root, data.filename, function () { res.send('OK'); });
         });
     } else if (data.action === 'remove') {
         if (!entry) return next(new HttpError(404, 'File does not exist'));
         fs.unlink(root + '/' + data.filename, function (err) {
             if (err) return next(new HttpError(500, err.toString()));
-            index.removeEntry(data.filename);
-            res.send('OK');
+            index.removeEntry(root, data.filename, function() { res.send('OK'); });
         });
     } else if (data.action === 'update') {
         if (!entry) return next(new HttpError(404, 'File does not exist'));
         if (!req.files.file) return next(new HttpError(400, 'file not provided'));
         if (!data.mtime) return next(new HttpError(400, 'mtime not specified'));
+        if (data.mtime < entry.mtime) return next(new HttpError(400, 'Outdated'));
         fs.rename(req.files.file.path, root + '/' + data.filename, function (err) {
             if (err) return next(new HttpError(500, err.toString()));
-            index.updateEntry(data.filename);
-            res.send('OK');
+            index.updateEntry(root, data.filename, function() { res.send('OK'); });
         });
     } else {
         res.send(new HttpError(400, 'Unknown action'));
