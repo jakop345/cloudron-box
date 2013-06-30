@@ -79,13 +79,13 @@ app.post('/file', function (req, res, next) {
 
     if (!data.filename) return next(new HttpError(400, 'filename not specified'));
     if (!data.action) return next(new HttpError(400, 'action not specified'));
-    if (!req.files.file) return next(new HttpError(400, 'file not provided'));
 
     var entry = index.entry(data.filename);
 
-    console.log('Processing ', data, req.files.file.path);
+    console.log('Processing ', data);
 
     if (data.action === 'add') {
+        if (!req.files.file) return next(new HttpError(400, 'file not provided'));
         if (entry) return next(new HttpError(409, 'File already exists'));
         fs.rename(req.files.file.path, root + '/' + data.filename, function (err) {
             if (err) return next(new HttpError(500, err.toString()));
@@ -100,6 +100,7 @@ app.post('/file', function (req, res, next) {
             res.send('OK');
         });
     } else if (data.action === 'update') {
+        if (!req.files.file) return next(new HttpError(400, 'file not provided'));
         if (!data.mtime) return next(new HttpError(400, 'mtime not specified'));
         fs.rename(req.files.file.path, root + '/' + data.filename, function (err) {
             if (err) return next(new HttpError(500, err.toString()));

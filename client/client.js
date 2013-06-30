@@ -68,7 +68,6 @@ function processTransactions() {
         return;
     }
 
-    console.log('[II] current pending transactions');
     var transaction = transactions.shift();
     console.log('[II] do transaction', transaction);
 
