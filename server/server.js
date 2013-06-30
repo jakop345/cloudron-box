@@ -34,7 +34,7 @@ var index = new dirIndex.DirIndex();
 index.update(root, function () { });
 
 var app = express();
-var multipart = express.multipart({ keepExtensions: true, maxFieldsSize: 2 * 1024 * 1024 }); // multipart/form-data
+var multipart = express.multipart({ uploadDir: process.cwd(), keepExtensions: true, maxFieldsSize: 2 * 1024 * 1024 }); // multipart/form-data
 
 // Error handlers. These are called until one of them sends headers
 function clientErrorHandler(err, req, res, next) {

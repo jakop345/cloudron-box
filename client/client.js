@@ -71,10 +71,12 @@ function processTransactions() {
     var transaction = transactions.shift();
     console.log('[II] do transaction', transaction);
 
+    var stats = fs.statSync(transaction.data.filename);
     var requestUrl = backupServer + '/file';
     var requestObject = {
         action: transaction.action,
-        filename: transaction.data.filename
+        filename: transaction.data.filename,
+        mtime: stats.mtime.getTime()
     };
 
     var postStream = request.post(requestUrl);
@@ -85,7 +87,7 @@ function processTransactions() {
     }
 
     postStream.end(function (res) {
-        console.log(res.statusCode);
+        processTransactions();
     });
 }
 
