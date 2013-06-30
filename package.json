@@ -16,7 +16,8 @@
   "dependencies": {
     "readdirp": "*",
     "async": "*",
-    "optimist": "*"
+    "optimist": "*",
+    "express": "*"
   },
   "scripts": {
   }
