@@ -3,6 +3,7 @@
 'use strict';
 
 var dirIndex = require('../lib/dirindex');
+var transactions = require('./transactions');
 var optimist = require('optimist');
 var fs = require('fs');
 var request = require('superagent');
@@ -10,37 +11,50 @@ var request = require('superagent');
 var argv = optimist.usage('Usage: $0 --root <directory>')
     .alias('h', 'help')
     .describe('h', 'Show this help.')
+
     .alias('r', 'root')
     .demand('r')
     .describe('r', 'Sync directory root')
     .string('r')
+
     .alias('i', 'index')
     .describe('i', 'Directory index file')
     .string('i')
+
+    .alias('w', 'fs-watch-delay')
+    .describe('w', 'Filesystem watch notification delay to batch changes')
+    .string('w')
+
     .alias('s', 'server')
     .describe('s', 'Backup server address')
     .demand('s')
     .string('s')
+
     .argv;
 
 console.log('[II] Start client using root', argv.r);
 console.log('[II] Loading index...');
 
-var indexFileName = argv.i ? argv.i : 'index.json';
+var config = {
+    rootFolder: argv.r + '/',
+    backupServer: argv.s,
+    fsWatchDelay: argv.w,
+    indexFileName: argv.i || 'index.json'
+};
+
 var index = new dirIndex.DirIndex();
-var rootFolder = argv.r + '/';
-var backupServer = argv.s;
 var fsWatcher;
-var transactions = [];
+var transactionQueue = new transactions.TransactionQueue();
+
 
 function loadIndex(callback) {
-    index.loadFromFile(indexFileName, function(error) {
+    index.loadFromFile(config.indexFileName, function(error) {
         if (error) {
-            console.log('[WW] Unable to load index "' + indexFileName + '"', error);
+            console.log('[WW] Unable to load index "' + config.indexFileName + '"', error);
             console.log('[II] Build fresh index...');
         }
 
-        index.update(rootFolder, function (error) {
+        index.update(config.rootFolder, function (error) {
             if (error) {
                 console.log('[EE] Unable to build index. Nothing we can do.', error);
                 process.exit(2);
@@ -53,7 +67,7 @@ function loadIndex(callback) {
 }
 
 function saveIndex(callback) {
-    index.save(indexFileName, function (error) {
+    index.save(config.indexFileName, function (error) {
         if (error) {
             console.log('[EE] Unable to save index to disk', error);
         }
@@ -62,37 +76,8 @@ function saveIndex(callback) {
     });
 }
 
-function processTransactions() {
-    if (!transactions.length) {
-        console.log('[II] No pending transactions.');
-        return;
-    }
-
-    var transaction = transactions.shift();
-    console.log('[II] do transaction', transaction);
-
-    var stats = fs.statSync(transaction.data.filename);
-    var requestUrl = backupServer + '/file';
-    var requestObject = {
-        action: transaction.action,
-        filename: transaction.data.filename,
-        mtime: stats.mtime.getTime()
-    };
-
-    var postStream = request.post(requestUrl);
-    postStream.field('data', JSON.stringify(requestObject));
-
-    if (transaction.action !== 'remove') {
-        postStream.attach('file', rootFolder + transaction.data.filename);
-    }
-
-    postStream.end(function (res) {
-        processTransactions();
-    });
-}
-
 function getRemoteIndex() {
-    var requestUrl = backupServer + '/dirIndex';
+    var requestUrl = config.backupServer + '/dirIndex';
     console.log('[II] refresh index from server: ' + requestUrl);
 
     request(requestUrl, function (error, response, body) {
@@ -120,24 +105,25 @@ function listenToChanges() {
             return;
 
         fsWatchTimer = setTimeout(function () {
-            index.update(rootFolder, function (error, result) {
+            index.update(config.rootFolder, function (error, result) {
                 if (error) {
                     console.log('[EE] Unable to update the index', error);
                     return;
                 }
+
                 console.log('[II] Index update successful', result);
 
                 result.removed.forEach(function(entry) {
-                    transactions.push({ action: "remove", data: entry });
+                    transactionQueue.add(new transactions.Transaction('remove', entry, config));
                 });
                 result.added.forEach(function(entry) {
-                    transactions.push({ action: "add", data: entry });
+                    transactionQueue.add(new transactions.Transaction('add', entry, config));
                 });
                 result.modified.forEach(function(entry) {
-                    transactions.push({ action: "update", data: entry });
+                    transactionQueue.add(new transactions.Transaction('update', entry, config));
                 });
 
-                processTransactions();
+                transactionQueue.process();
             });
             fsWatchTimer = undefined;
         }, 2000);
