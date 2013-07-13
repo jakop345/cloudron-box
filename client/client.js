@@ -46,6 +46,10 @@ var index = new dirIndex.DirIndex();
 var fsWatcher;
 var transactionQueue = new transactions.TransactionQueue();
 
+transactionQueue.on('done', function () {
+    console.log('[II] No more transactions in the queue.');
+    getRemoteIndex();
+});
 
 function loadIndex(callback) {
     index.loadFromFile(config.indexFileName, function(error) {
@@ -77,23 +81,41 @@ function saveIndex(callback) {
 }
 
 function getRemoteIndex() {
+    // we still have things to fetch
+    if (transactionQueue.busy) {
+        return;
+    }
+
     var requestUrl = config.backupServer + '/dirIndex';
     console.log('[II] refresh index from server: ' + requestUrl);
 
-    request(requestUrl, function (error, response, body) {
+    request(requestUrl, function (error, response) {
         if (error || response.statusCode !== 200) {
-            console.log('[EE] Unable to fetch index from server', error, response.statusCode);
+            console.log('[EE] Unable to fetch index from server', error ? error.code : '', response ? response.statusCode : '');
             return;
         }
 
         var remoteIndex = new dirIndex.DirIndex();
-        remoteIndex.loadFromJSON(body, function (error) {
+        remoteIndex.loadFromJSON(response.text, function (error) {
             if (error) {
                 console.log('[EE] Unable to parse server index');
                 return;
             }
 
-            console.log('index diff', dirIndex.diff(remoteIndex, index));
+            var diff = dirIndex.diff(index, remoteIndex);
+            console.log('index diff', diff);
+
+            diff.removed.forEach(function(entry) {
+                transactionQueue.add(new transactions.ClientTransaction('remove', entry, config));
+            });
+            diff.added.forEach(function(entry) {
+                transactionQueue.add(new transactions.ClientTransaction('add', entry, config));
+            });
+            diff.modified.forEach(function(entry) {
+                transactionQueue.add(new transactions.ClientTransaction('update', entry, config));
+            });
+
+            transactionQueue.process();
         });
     });
 }
@@ -114,13 +136,13 @@ function listenToChanges() {
                 console.log('[II] Index update successful', result);
 
                 result.removed.forEach(function(entry) {
-                    transactionQueue.add(new transactions.Transaction('remove', entry, config));
+                    transactionQueue.add(new transactions.ServerTransaction('remove', entry, config));
                 });
                 result.added.forEach(function(entry) {
-                    transactionQueue.add(new transactions.Transaction('add', entry, config));
+                    transactionQueue.add(new transactions.ServerTransaction('add', entry, config));
                 });
                 result.modified.forEach(function(entry) {
-                    transactionQueue.add(new transactions.Transaction('update', entry, config));
+                    transactionQueue.add(new transactions.ServerTransaction('update', entry, config));
                 });
 
                 transactionQueue.process();
@@ -136,5 +158,5 @@ var dirIndexInterval;
 loadIndex(function () {
     listenToChanges();
 
-    // dirIndexInterval = setInterval(getRemoteIndex, 2000);
+    dirIndexInterval = setInterval(getRemoteIndex, 2000);
 });
