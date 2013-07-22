@@ -5,6 +5,7 @@ var superagent = require('superagent');
 var assert = require('assert');
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
+var path = require('path');
 
 function ClientTransaction(action, fileEntry, config) {
     return new Transaction(action, fileEntry, 'client', config);
@@ -39,7 +40,11 @@ Transaction.prototype.merge = function(t) {
 
 Transaction.prototype.process = function(callback) {
     assert(typeof callback === 'function');
+
+    var that = this;
     var requestUrl = this.config.backupServer + '/file';
+
+    console.log('[II] Process transaction:', this.target, this.action, this.fileEntry.filename);
 
     if (this.target === 'server') {
         var stats = fs.statSync(this.fileEntry.filename);
@@ -63,18 +68,31 @@ Transaction.prototype.process = function(callback) {
                 console.log("unlink", error, result);
                 callback();
             });
-        } else if (this.action === 'add') {
-            superagent(requestUrl, function (error, response) {
+        } else if (this.action === 'add' || this.action === 'update') {
+            var getUrl = requestUrl + '/' + this.fileEntry.filename;
+
+            superagent(getUrl, function (error, response) {
                 if (error || response.statusCode !== 200) {
                     console.log('[EE] Unable to download file', error ? error.code : '', response ? response.statusCode : '');
-                    callback(response);
                 }
 
-                console.log(response);
-                callback();
-            });
-        } else if (this.action === 'update') {
+                var buffer;
+                response.on('data', function (data) {
+                    if (!buffer) buffer = data;
+                    else buffer += data;
 
+                    console.log('got data', data, buffer);
+                });
+
+                response.on('end', function () {
+                    var absoluteFilePath = path.join(that.config.rootFolder, that.fileEntry.filename);
+
+                    console.log('got end', buffer, absoluteFilePath);
+
+                    fs.writeFileSync(absoluteFilePath, buffer);
+                    callback();
+                });
+            });
         }
     } else {
         console.log('[EE] Unsupported transaction target', this.target);
@@ -89,6 +107,10 @@ function TransactionQueue() {
     this.busy = false;
 }
 util.inherits(TransactionQueue, EventEmitter);
+
+TransactionQueue.prototype.empty = function() {
+    return !this.queue.length;
+};
 
 TransactionQueue.prototype.process = function() {
     var that = this;
@@ -124,7 +146,7 @@ TransactionQueue.prototype.process = function() {
 TransactionQueue.prototype.add = function(transaction) {
     var merged = false;
 
-    console.log('[II] Add transaction', transaction.action, transaction.fileEntry.filename);
+    console.log('[II] New transaction:', transaction.target, transaction.action, transaction.fileEntry.filename);
 
     for (var i = 0; i < this.queue.length; ++i) {
         var t = this.queue[i];

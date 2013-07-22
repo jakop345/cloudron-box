@@ -8,6 +8,7 @@ var dirIndex = require('../lib/dirindex'),
     util = require('util'),
     http = require('http'),
     HttpError = require('./httperror'),
+    path = require('path'),
     fs = require('fs');
 
 var argv = optimist.usage('Usage: $0 --root <directory>')
@@ -24,13 +25,15 @@ var argv = optimist.usage('Usage: $0 --root <directory>')
     .describe('p', 'Server port')
     .argv;
 
-console.log('[II] Start server using root', argv.r);
-console.log('[II] Loading index...');
 
 var indexFileName = argv.i || 'index.json';
 var port = argv.p || 3000;
-var root = argv.r;
+var root = path.resolve(argv.r);
 var index = new dirIndex.DirIndex();
+
+console.log('[II] Start server using root \'' + root + '\' on port \'' + port + '\'');
+console.log('[II] Loading index...');
+
 index.update(root, function () {
     console.log(index.entryList);
 });
@@ -69,6 +72,17 @@ app.configure(function () {
 app.get('/dirIndex', function (req, res, next) {
     res.send(index.json());
 });
+
+app.get('/file/:filename', function (req, res, next) {
+    var absoluteFilePath = path.join(root, req.params.filename);
+
+    fs.exists(absoluteFilePath, function (exists) {
+        if (!exists) return next(new HttpError(404));
+
+        res.sendfile(absoluteFilePath);
+    });
+});
+
 app.post('/file', function (req, res, next) {
     if (!req.body.data) return next(new HttpError(400, 'data field missing'));
     var data;

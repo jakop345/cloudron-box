@@ -87,7 +87,7 @@ function getRemoteIndex() {
     }
 
     var requestUrl = config.backupServer + '/dirIndex';
-    console.log('[II] refresh index from server: ' + requestUrl);
+    console.log('[II] Refresh index from server: ' + requestUrl);
 
     request(requestUrl, function (error, response) {
         if (error || response.statusCode !== 200) {
@@ -103,7 +103,7 @@ function getRemoteIndex() {
             }
 
             var diff = dirIndex.diff(index, remoteIndex);
-            console.log('index diff', diff);
+            console.log('Index diff', diff);
 
             diff.removed.forEach(function(entry) {
                 transactionQueue.add(new transactions.ClientTransaction('remove', entry, config));
@@ -115,7 +115,9 @@ function getRemoteIndex() {
                 transactionQueue.add(new transactions.ClientTransaction('update', entry, config));
             });
 
-            transactionQueue.process();
+            if (!transactionQueue.empty()) {
+                transactionQueue.process();
+            }
         });
     });
 }
