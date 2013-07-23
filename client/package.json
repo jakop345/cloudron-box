@@ -1,0 +1,20 @@
+{
+    "name": "client-nw",
+    "main": "src/index.html",
+    "window": {
+        "icon": "",
+        "toolbar": false,
+        "frame": true,
+        "width": 800,
+        "height": 600
+    },
+    "dependencies": {
+        "readdirp": "*",
+        "async": "*",
+        "optimist": "*",
+        "express": "*",
+        "superagent": "*",
+        "bungee": "*",
+        "browserify": "2.17.4"
+    }
+}
