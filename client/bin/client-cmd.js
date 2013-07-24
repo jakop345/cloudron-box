@@ -2,11 +2,12 @@
 
 'use strict';
 
-var dirIndex = require('../lib/dirindex');
-var transactions = require('./transactions');
+var dirIndex = require('../../lib/dirindex.js');
+var transactions = require('../src/transactions.js');
 var optimist = require('optimist');
 var fs = require('fs');
 var request = require('superagent');
+var assert = require('assert');
 
 var argv = optimist.usage('Usage: $0 --root <directory>')
     .alias('h', 'help')
@@ -30,6 +31,9 @@ var argv = optimist.usage('Usage: $0 --root <directory>')
     .demand('s')
     .string('s')
 
+    .describe('initial', 'Initial sync. This will upload all files to the remote')
+    .boolean('initial')
+
     .argv;
 
 console.log('[II] Start client using root', argv.r);
@@ -39,6 +43,7 @@ var config = {
     rootFolder: argv.r + '/',
     backupServer: argv.s,
     fsWatchDelay: argv.w,
+    initial: argv.initial,
     indexFileName: argv.i || 'index.json'
 };
 
@@ -78,6 +83,16 @@ function saveIndex(callback) {
 
         callback();
     });
+}
+
+function initialSync() {
+    index.entryList.forEach(function(entry) {
+        transactionQueue.add(new transactions.ServerTransaction('add', entry, config));
+    });
+
+    if (!transactionQueue.empty()) {
+        transactionQueue.process();
+    }
 }
 
 function getRemoteIndex() {
@@ -160,5 +175,9 @@ var dirIndexInterval;
 loadIndex(function () {
     listenToChanges();
 
-    dirIndexInterval = setInterval(getRemoteIndex, 2000);
+    if (config.initial) {
+        initialSync();
+    } else {
+        dirIndexInterval = setInterval(getRemoteIndex, 2000);
+    }
 });

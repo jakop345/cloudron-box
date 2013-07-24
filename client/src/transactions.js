@@ -43,11 +43,12 @@ Transaction.prototype.process = function(callback) {
 
     var that = this;
     var requestUrl = this.config.backupServer + '/file';
+    var absoluteFilePath = path.join(this.config.rootFolder, this.fileEntry.filename);
 
     console.log('[II] Process transaction:', this.target, this.action, this.fileEntry.filename);
 
     if (this.target === 'server') {
-        var stats = fs.statSync(this.fileEntry.filename);
+        var stats = fs.statSync(absoluteFilePath);
         var requestObject = {
             action: this.action,
             filename: this.fileEntry.filename,
@@ -58,7 +59,7 @@ Transaction.prototype.process = function(callback) {
         postStream.field('data', JSON.stringify(requestObject));
 
         if (this.action !== 'remove') {
-            postStream.attach('file', this.config.rootFolder + this.fileEntry.filename);
+            postStream.attach('file', absoluteFilePath);
         }
 
         postStream.end(callback);
@@ -85,8 +86,6 @@ Transaction.prototype.process = function(callback) {
                 });
 
                 response.on('end', function () {
-                    var absoluteFilePath = path.join(that.config.rootFolder, that.fileEntry.filename);
-
                     console.log('got end', buffer, absoluteFilePath);
 
                     fs.writeFileSync(absoluteFilePath, buffer);
