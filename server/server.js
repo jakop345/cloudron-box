@@ -9,7 +9,8 @@ var dirIndex = require('../lib/dirindex'),
     http = require('http'),
     HttpError = require('./httperror'),
     path = require('path'),
-    fs = require('fs');
+    fs = require('fs'),
+    mkdirp = require('mkdirp');
 
 var argv = optimist.usage('Usage: $0 --root <directory>')
     .alias('h', 'help')
@@ -97,15 +98,20 @@ app.post('/file', function (req, res, next) {
     if (!data.action) return next(new HttpError(400, 'action not specified'));
 
     var entry = index.entry(data.filename);
+    var absoluteFilePath = path.join(root, data.filename);
 
     console.log('Processing ', data);
 
     if (data.action === 'add') {
         if (!req.files.file) return next(new HttpError(400, 'file not provided'));
         if (entry) return next(new HttpError(409, 'File already exists'));
-        fs.rename(req.files.file.path, root + '/' + data.filename, function (err) {
-            if (err) return next(new HttpError(500, err.toString()));
-            index.addEntry(root, data.filename, function () { res.send('OK'); });
+
+        // make sure the folder exists
+        mkdirp(path.dirname(absoluteFilePath), function (error) {
+            fs.rename(req.files.file.path, absoluteFilePath, function (err) {
+                if (err) return next(new HttpError(500, err.toString()));
+                index.addEntry(root, data.filename, function () { res.send('OK'); });
+            });
         });
     } else if (data.action === 'remove') {
         if (!entry) return next(new HttpError(404, 'File does not exist'));
@@ -118,7 +124,7 @@ app.post('/file', function (req, res, next) {
         if (!req.files.file) return next(new HttpError(400, 'file not provided'));
         if (!data.mtime) return next(new HttpError(400, 'mtime not specified'));
         if (data.mtime < entry.mtime) return next(new HttpError(400, 'Outdated'));
-        fs.rename(req.files.file.path, root + '/' + data.filename, function (err) {
+        fs.rename(req.files.file.path, absoluteFilePath, function (err) {
             if (err) return next(new HttpError(500, err.toString()));
             index.updateEntry(root, data.filename, function() { res.send('OK'); });
         });

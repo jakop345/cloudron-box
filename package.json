@@ -15,6 +15,7 @@
   ],
   "dependencies": {
     "readdirp": "*",
+    "mkdirp": "*",
     "async": "*",
     "optimist": "*",
     "express": "*",
