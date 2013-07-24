@@ -118,28 +118,32 @@ TransactionQueue.prototype.process = function() {
         return;
     }
 
-    if (!this.queue.length) {
-        this.emit('done');
-        this.busy = false;
-        return;
-    }
-
-    this.busy = true;
-
-    console.log('[II] Process next transaction');
-
-    var t = this.queue.shift();
-    t.process(function (res) {
-        if (res && res.statusCode !== 200) {
-            console.log('[EE] Error processing transaction', t);
-            console.log('[EE] Response', res.statusCode, res.text);
-        } else {
-            console.log('[II] Transaction successful.');
+    function internalProcess() {
+        if (!that.queue.length) {
+            that.emit('done');
+            that.busy = false;
+            return;
         }
 
-        that.processing = false;
-        that.process();
-    });
+        that.busy = true;
+
+        console.log('[II] Process next transaction');
+
+        var t = that.queue.shift();
+        t.process(function (res) {
+            if (res && res.statusCode !== 200) {
+                console.log('[EE] Error processing transaction', t);
+                console.log('[EE] Response', res.statusCode, res.text);
+            } else {
+                console.log('[II] Transaction successful.');
+            }
+
+            that.processing = false;
+            internalProcess();
+        });
+    }
+
+    internalProcess();
 };
 
 TransactionQueue.prototype.add = function(transaction) {
