@@ -10,7 +10,8 @@ var dirIndex = require('../lib/dirindex'),
     HttpError = require('./httperror'),
     path = require('path'),
     fs = require('fs'),
-    mkdirp = require('mkdirp');
+    mkdirp = require('mkdirp'),
+    db = require('./database');
 
 var argv = optimist.usage('Usage: $0 --root <directory>')
     .alias('h', 'help')
@@ -26,13 +27,19 @@ var argv = optimist.usage('Usage: $0 --root <directory>')
     .describe('p', 'Server port')
     .argv;
 
-
 var indexFileName = argv.i || 'index.json';
 var port = argv.p || 3000;
 var root = path.resolve(argv.r);
 var index = new dirIndex.DirIndex();
 
 console.log('[II] Start server using root \'' + root + '\' on port \'' + port + '\'');
+
+mkdirp(root);
+if (!db.initializeSync(root + '/db')) {
+    console.error('Error initializing database');
+    process.exit(1);
+}
+
 console.log('[II] Loading index...');
 
 index.update(root, function () {
@@ -60,11 +67,26 @@ function serverErrorHandler(err, req, res, next) {
     util.debug(err.stack);
 }
 
+function endsWith(string, suffix) {
+    return string.indexOf(suffix, string.length - suffix.length) !== -1;
+}
+
+function redirectIfFirstTime(req, res, next) {
+    // attempt to redirect html pages for initial access
+    if (req.url != '/firsttime.html' && endsWith(req.url, '.html')
+        && db.firstTime()) {
+        res.redirect('/webadmin/firsttime.html');
+        return;
+    }
+    next();
+}
+
 app.configure(function () {
     app.use(express.logger({ format: 'dev', immediate: false }))
        .use(express.timeout(10000))
        .use(multipart)
        .use(app.router)
+       .use('/webadmin', redirectIfFirstTime)
        .use('/webadmin', express.static(__dirname + '/webadmin'))
        .use(clientErrorHandler)
        .use(serverErrorHandler);
