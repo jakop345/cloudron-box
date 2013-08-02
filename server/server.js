@@ -65,6 +65,7 @@ app.configure(function () {
        .use(express.timeout(10000))
        .use(multipart)
        .use(app.router)
+       .use('/webadmin', express.static(__dirname + '/webadmin'))
        .use(clientErrorHandler)
        .use(serverErrorHandler);
 });
