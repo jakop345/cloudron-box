@@ -140,6 +140,10 @@ app.post('/api/v1/createadmin', function (req, res, next) {
     });
 });
 
+app.get('/api/v1/firstTime', function (req, res, next) {
+    res.send({ firstTime: db.firstTime() });
+});
+
 app.get('/dirIndex', function (req, res, next) {
     res.send(index.json());
 });
