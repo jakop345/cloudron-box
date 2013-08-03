@@ -71,16 +71,6 @@ function endsWith(string, suffix) {
     return string.indexOf(suffix, string.length - suffix.length) !== -1;
 }
 
-function redirectIfFirstTime(req, res, next) {
-    // attempt to redirect html pages for initial access
-    if (req.url != '/firsttime.html' && endsWith(req.url, '.html')
-        && db.firstTime()) {
-        res.redirect('/webadmin/firsttime.html');
-        return;
-    }
-    next();
-}
-
 var json = express.json({ strict: true, limit: 2000 }), // application/json
     urlencoded = express.urlencoded({ limit: 2000 }), // application/x-www-form-urlencoded
     multipart = express.multipart({ uploadDir: process.cwd(), keepExtensions: true, maxFieldsSize: 2 * 1024 * 1024 }); // multipart/form-data
@@ -92,7 +82,6 @@ app.configure(function () {
        .use(urlencoded)
        .use(multipart)
        .use(app.router)
-       .use('/webadmin', redirectIfFirstTime)
        .use('/webadmin', express.static(__dirname + '/webadmin'))
        .use(clientErrorHandler)
        .use(serverErrorHandler);
