@@ -20,14 +20,10 @@ var argv = optimist.usage('Usage: $0 --root <directory>')
     .demand('r')
     .describe('r', 'Sync directory root')
     .string('r')
-    .alias('i', 'index')
-    .describe('i', 'Directory index file')
-    .string('i')
     .alias('p', 'port')
     .describe('p', 'Server port')
     .argv;
 
-var indexFileName = argv.i || 'index.json';
 var port = argv.p || 3000;
 var root = path.resolve(argv.r);
 var index = new dirIndex.DirIndex();
