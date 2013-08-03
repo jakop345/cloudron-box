@@ -83,6 +83,7 @@
 
   <script>
     function showModalDialog(header, body, options) {
+        options = options || { okButton: true };
         $('#modalDialog .modal-title').text(header);
         $('#modalDialog .modal-body p').text(body);
         if (options.okButton) {
@@ -122,7 +123,7 @@
           url = $form.attr('action');
 
         if (!username || !password || !email) {
-          showModalDialog('Oops...', 'Username, password or email is empty.', { okButton: true });
+          showModalDialog('Oops...', 'Username, password or email is empty.');
           return;
         }
 
@@ -133,7 +134,7 @@
           url: url,
           data: $form.serialize(),
           success: function (data) {
-            showModalDialog('User created', 'Try logging in now!', { okButton: true });
+            showModalDialog('User created', 'Try logging in now!');
           },
           error: errorHandler('User creation failed')
         });
