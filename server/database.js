@@ -9,7 +9,7 @@ exports = module.exports = {
     // tables
     USERS_TABLE: null,
 
-    initializeSync: initializeSync,
+    initialize: initialize,
     firstTime: firstTime,
 
     DatabaseError: DatabaseError,
@@ -51,10 +51,9 @@ Table.prototype.put = function (user, callback) {
     fs.writeFile(this.dbFile, JSON.stringify(user), callback);
 };
 
-function initializeSync(dbDir) {
-    if (!fs.existsSync(dbDir)) fs.mkdirSync(dbDir);
-
-    rootDir = dbDir;
+function initialize(config) {
+    rootDir = config.root + '/db';
+    if (!fs.existsSync(rootDir)) fs.mkdirSync(rootDir);
 
     exports.USERS_TABLE = new Table(rootDir + '/users', {
         username: { type: 'String', hashKey: true },

@@ -1,6 +1,7 @@
 'use strict';
 
 exports = module.exports = {
-    user: require('./user')
+    user: require('./user'),
+    file: require('./file')
 };
 
