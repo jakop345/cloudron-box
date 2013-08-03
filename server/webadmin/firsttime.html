@@ -78,7 +78,7 @@
     </div><!-- /.modal-dialog -->
   </div><!-- /.modal -->
 
-  <script src="jquery.js"></script>
+  <script src="jquery/jquery.js"></script>
   <script src="bootstrap/js/bootstrap.min.js"></script>
 
   <script>
@@ -134,7 +134,7 @@
           url: url,
           data: $form.serialize(),
           success: function (data) {
-            showModalDialog('User created', 'Try logging in now!');
+            showModalDialog('User created', 'Try logging in now!'); // ## TODO: redirect user
           },
           error: errorHandler('User creation failed')
         });

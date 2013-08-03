@@ -8,6 +8,7 @@ var rootDir = '';
 exports = module.exports = {
     // tables
     USERS_TABLE: null,
+    TOKENS_TABLE: null,
 
     initialize: initialize,
     firstTime: firstTime,
@@ -45,10 +46,39 @@ function Table(dbFile, schema) {
     }
 
     if (!('hashKey' in this)) throw(new Error('Table does not define a primary key'));
+
+    try {
+        var data = fs.readFileSync(this.dbFile);
+        this.cache = data ? JSON.parse(data) : { };
+    } catch (e) {
+        this.cache = { };
+    }
 }
 
 Table.prototype.put = function (user, callback) {
-    fs.writeFile(this.dbFile, JSON.stringify(user), callback);
+    var key = user[this.hashKey];
+    if (key in this.cache) return callback(new DatabaseError(null, DatabaseError.ALREADY_EXISTS));
+
+    this.cache[key] = user;
+    fs.writeFileSync(this.dbFile, JSON.stringify(this.cache));
+    callback();
+};
+
+Table.prototype.get = function (key, callback) {
+    if (key in this.cache) return callback(null, this.cache[key]);
+    return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
+};
+
+Table.prototype.removePrivates = function (obj) {
+    var res = { };
+
+    for (var p in this.schema) {
+        if (this.schema[p].priv || !(p in obj))
+            continue;
+        res[p] = obj[p]; // ## make deep copy?
+    }
+
+    return res;
 };
 
 function initialize(config) {
@@ -62,6 +92,12 @@ function initialize(config) {
         salt: { type: 'String', priv: true },
         created_at: { type: 'String' },
         modified_at: { type: 'String' }
+    });
+
+    exports.TOKENS_TABLE = new Table(rootDir + '/tokens', {
+        token: { type: 'String', hashKey: true },
+        username: { type: 'String', priv: true },
+        expires: { type: 'String' }
     });
 
     return true;

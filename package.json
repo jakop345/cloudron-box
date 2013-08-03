@@ -19,7 +19,8 @@
     "async": "*",
     "optimist": "*",
     "express": "*",
-    "superagent": "*"
+    "superagent": "*",
+    "debug": "*"
   },
   "scripts": {
   }

@@ -53,17 +53,20 @@ app.configure(function () {
 
     app.use(express.logger({ format: 'dev', immediate: false }))
        .use(express.timeout(10000))
+       .use('/webadmin', express.static(__dirname + '/webadmin'))
        .use(json)
        .use(urlencoded)
        .use(multipart)
+       // API calls that do not require authorization
+       .use('/api/v1/createadmin', routes.user.createAdmin) // ## FIXME: allow this before auth for now
+       .use('/api/v1/firstTime', routes.user.firstTime)
+       .use(routes.user.authenticate)
        .use(app.router)
-       .use('/webadmin', express.static(__dirname + '/webadmin'))
        .use(clientErrorHandler)
        .use(serverErrorHandler);
 
     // routes controlled by app.routes
-    app.post('/api/v1/createadmin', routes.user.createAdmin);
-    app.get('/api/v1/firstTime', routes.user.firstTime);
+    app.post('/api/v1/token', routes.user.createToken);
 
     app.get('/dirIndex', routes.file.listing);
     app.get('/file/:filename', routes.file.read);
