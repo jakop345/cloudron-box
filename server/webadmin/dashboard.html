@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title> Welcome to Yellow Tent </title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+  <style>
+    body {
+      background-color: #f5f5f5;
+    }
+    .container {
+        margin-top: 100px;
+        width: 40%;
+        margin-left: 30%;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="navbar navbar-inverse navbar navbar-fixed-top">
+    <a href="#" class="navbar-brand">Yellow Tent</a>
+
+    <div class="navbar-text pull-right dropdown">
+      <a class="navbar-link" data-toggle="dropdown" href="#">Signed in as</a>
+      <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+        <li><a tabindex="-1" href="#">Preferences</a></li>
+        <li class="divider"></li>
+        <li><a tabindex="-1" href="index.html" id="signout">Sign out</a></li>
+      </ul>
+    </div>  <!-- signed-in dropdown -->
+  </div> <!-- navbar -->
+
+  <div class="container">
+    <ul class="nav nav-tabs nav-justified">
+      <li class="active"><a href="#">Home</a></li>
+      <li><a href="#">My Devices</a></li>
+      <li><a href="#">Files</a></li>
+      <li><a href="#">Users & Groups</a></li>
+      <li><a href="#">Logs</a></li>
+    </ul>
+  </div> <!-- container -->
+
+  <script src="jquery/jquery.js"></script>
+  <script src="jquery/jquery.base64.min.js"></script>
+  <script src="jquery/jquery.cookie.js"></script>
+  <script src="bootstrap/js/bootstrap.min.js"></script>
+  <script>
+    var token;
+
+    $(document).ready(function () {
+      token = $.cookie('token');
+      if (!token) {
+        window.location.replace('index.html');
+      }
+
+    $('#logout').click(function (event) {
+      $.removeCookie('token');
+      // the default click handler navigates to index.html
+    });
+
+    });
+  </script>
+</body>
+
+</html>
