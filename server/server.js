@@ -2,15 +2,16 @@
 
 'use strict';
 
-var dirIndex = require('../lib/dirindex'),
-    optimist = require('optimist'),
+var optimist = require('optimist'),
     express = require('express'),
     util = require('util'),
     http = require('http'),
     HttpError = require('./httperror'),
     path = require('path'),
     fs = require('fs'),
-    mkdirp = require('mkdirp');
+    mkdirp = require('mkdirp'),
+    db = require('./database'),
+    sync = require('./sync');
 
 var argv = optimist.usage('Usage: $0 --root <directory>')
     .alias('h', 'help')
@@ -19,28 +20,11 @@ var argv = optimist.usage('Usage: $0 --root <directory>')
     .demand('r')
     .describe('r', 'Sync directory root')
     .string('r')
-    .alias('i', 'index')
-    .describe('i', 'Directory index file')
-    .string('i')
     .alias('p', 'port')
     .describe('p', 'Server port')
     .argv;
 
-
-var indexFileName = argv.i || 'index.json';
-var port = argv.p || 3000;
-var root = path.resolve(argv.r);
-var index = new dirIndex.DirIndex();
-
-console.log('[II] Start server using root \'' + root + '\' on port \'' + port + '\'');
-console.log('[II] Loading index...');
-
-index.update(root, function () {
-    console.log(index.entryList);
-});
-
 var app = express();
-var multipart = express.multipart({ uploadDir: process.cwd(), keepExtensions: true, maxFieldsSize: 2 * 1024 * 1024 }); // multipart/form-data
 
 // Error handlers. These are called until one of them sends headers
 function clientErrorHandler(err, req, res, next) {
@@ -61,76 +45,62 @@ function serverErrorHandler(err, req, res, next) {
 }
 
 app.configure(function () {
+    var json = express.json({ strict: true, limit: 2000 }), // application/json
+        urlencoded = express.urlencoded({ limit: 2000 }), // application/x-www-form-urlencoded
+        multipart = express.multipart({ uploadDir: process.cwd(), keepExtensions: true, maxFieldsSize: 2 * 1024 * 1024 }); // multipart/form-data
+
+    var routes = require('./routes');
+
     app.use(express.logger({ format: 'dev', immediate: false }))
        .use(express.timeout(10000))
+       .use('/webadmin', express.static(__dirname + '/webadmin'))
+       .use(json)
+       .use(urlencoded)
        .use(multipart)
+       // API calls that do not require authorization
+       .use('/api/v1/createadmin', routes.user.createAdmin) // ## FIXME: allow this before auth for now
+       .use('/api/v1/firstTime', routes.user.firstTime)
+       .use(routes.user.authenticate)
        .use(app.router)
        .use(clientErrorHandler)
        .use(serverErrorHandler);
+
+    // routes controlled by app.routes
+    app.post('/api/v1/token', routes.user.createToken);
+
+    app.get('/dirIndex', routes.file.listing);
+    app.get('/file/:filename', routes.file.read);
+    app.post('/file', routes.file.update);
 });
 
-// routes controlled by app.routes
-app.get('/dirIndex', function (req, res, next) {
-    res.send(index.json());
-});
+function initialize() {
+    var config = {
+        port: argv.p || 3000,
+        root: path.resolve(argv.r)
+    };
 
-app.get('/file/:filename', function (req, res, next) {
-    var absoluteFilePath = path.join(root, req.params.filename);
+    app.set('port', config.port);
 
-    fs.exists(absoluteFilePath, function (exists) {
-        if (!exists) return next(new HttpError(404));
+    mkdirp(config.root);
+    if (!db.initialize(config)) {
+        console.error('Error initializing database');
+        process.exit(1);
+    }
 
-        res.sendfile(absoluteFilePath);
+    sync.initialize(config);
+}
+
+function listen(next) {
+    next = next || function () { }
+
+    http.createServer(app).listen(app.get('port'), function () {
+        console.log('Server listening on port ' + app.get('port') + ' in ' + app.get('env') + ' mode');
+        next();
     });
-});
+}
 
-app.post('/file', function (req, res, next) {
-    if (!req.body.data) return next(new HttpError(400, 'data field missing'));
-    var data;
+if (require.main === module) {
+    initialize();
+    listen();
+}
 
-    try {
-        data = JSON.parse(req.body.data);
-    } catch (e) {
-        return next(new HttpError(400, 'cannot parse data field:' + e.message));
-    }
-
-    if (!data.filename) return next(new HttpError(400, 'filename not specified'));
-    if (!data.action) return next(new HttpError(400, 'action not specified'));
-
-    var entry = index.entry(data.filename);
-    var absoluteFilePath = path.join(root, data.filename);
-
-    console.log('Processing ', data);
-
-    if (data.action === 'add') {
-        if (!req.files.file) return next(new HttpError(400, 'file not provided'));
-        if (entry) return next(new HttpError(409, 'File already exists'));
-
-        // make sure the folder exists
-        mkdirp(path.dirname(absoluteFilePath), function (error) {
-            fs.rename(req.files.file.path, absoluteFilePath, function (err) {
-                if (err) return next(new HttpError(500, err.toString()));
-                index.addEntry(root, data.filename, function () { res.send('OK'); });
-            });
-        });
-    } else if (data.action === 'remove') {
-        if (!entry) return next(new HttpError(404, 'File does not exist'));
-        fs.unlink(root + '/' + data.filename, function (err) {
-            if (err) return next(new HttpError(500, err.toString()));
-            index.removeEntry(root, data.filename, function() { res.send('OK'); });
-        });
-    } else if (data.action === 'update') {
-        if (!entry) return next(new HttpError(404, 'File does not exist'));
-        if (!req.files.file) return next(new HttpError(400, 'file not provided'));
-        if (!data.mtime) return next(new HttpError(400, 'mtime not specified'));
-        if (data.mtime < entry.mtime) return next(new HttpError(400, 'Outdated'));
-        fs.rename(req.files.file.path, absoluteFilePath, function (err) {
-            if (err) return next(new HttpError(500, err.toString()));
-            index.updateEntry(root, data.filename, function() { res.send('OK'); });
-        });
-    } else {
-        res.send(new HttpError(400, 'Unknown action'));
-    }
-});
-
-app.listen(port);
