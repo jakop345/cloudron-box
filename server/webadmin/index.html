@@ -119,14 +119,14 @@
     }
 
     function auth(username, password) {
-        return 'Basic ' + $.base64.encode(username + ':' + password);
+        return $.base64.encode(username + ':' + password);
     }
 
     function getToken(username, password) {
       $.ajax({
         type: 'POST',
         url: '/api/v1/token',
-        beforeSend: function(xhr) {
+        beforeSend: function (xhr) {
           xhr.setRequestHeader('Authorization', auth(username, password));
         },
         dataType: 'json',
@@ -149,7 +149,7 @@
         getToken(username, password);
     });
 
-    $(document).ready(function() {
+    $(document).ready(function () {
       $('form:first *:input[type!=hidden]:first').focus();
     });
   </script>

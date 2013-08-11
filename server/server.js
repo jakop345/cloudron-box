@@ -53,10 +53,11 @@ app.configure(function () {
 
     app.use(express.logger({ format: 'dev', immediate: false }))
        .use(express.timeout(10000))
-       .use('/webadmin', express.static(__dirname + '/webadmin'))
+       .use('/', express.static(__dirname + '/webadmin')) // use '/' for now so cookie is not restricted to '/webadmin'
        .use(json)
        .use(urlencoded)
        .use(multipart)
+       .use(express.cookieParser())
        // API calls that do not require authorization
        .use('/api/v1/createadmin', routes.user.createAdmin) // ## FIXME: allow this before auth for now
        .use('/api/v1/firstTime', routes.user.firstTime)
@@ -65,8 +66,9 @@ app.configure(function () {
        .use(clientErrorHandler)
        .use(serverErrorHandler);
 
-    // routes controlled by app.routes
+    // routes controlled by app.router
     app.post('/api/v1/token', routes.user.createToken);
+    app.get('/api/v1/userInfo', routes.user.userInfo);
 
     app.get('/dirIndex', routes.file.listing);
     app.get('/file/:filename', routes.file.read);
@@ -91,7 +93,7 @@ function initialize() {
 }
 
 function listen(next) {
-    next = next || function () { }
+    next = next || function () { };
 
     http.createServer(app).listen(app.get('port'), function () {
         console.log('Server listening on port ' + app.get('port') + ' in ' + app.get('env') + ' mode');

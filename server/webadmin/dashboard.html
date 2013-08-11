@@ -21,7 +21,7 @@
     <a href="#" class="navbar-brand">Yellow Tent</a>
 
     <div class="navbar-text pull-right dropdown">
-      <a class="navbar-link" data-toggle="dropdown" href="#">Signed in as</a>
+      <a class="navbar-link" data-toggle="dropdown" href="#" id="user-dropdown-trigger">Signed in as</a>
       <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
         <li><a tabindex="-1" href="#">Preferences</a></li>
         <li class="divider"></li>
@@ -53,11 +53,17 @@
         window.location.replace('index.html');
       }
 
-    $('#logout').click(function (event) {
-      $.removeCookie('token');
-      // the default click handler navigates to index.html
-    });
+      $('#logout').click(function (event) {
+        $.removeCookie('token');
+        // the default click handler navigates to index.html
+      });
 
+      $.getJSON('/api/v1/userInfo', function (data) {
+          $("#user-dropdown-trigger").text("Signed in as " + data.username);
+      }).fail(function(error) {
+        console.error('Unable to get username.', error);
+          $("#user-dropdown-trigger").text("Invalid user");
+      });
     });
   </script>
 </body>
