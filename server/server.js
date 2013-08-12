@@ -58,6 +58,7 @@ app.configure(function () {
        .use(urlencoded)
        .use(multipart)
        .use(express.cookieParser())
+       .use(express.favicon(__dirname + "/webadmin/assets/favicon.ico"))
        // API calls that do not require authorization
        .use('/api/v1/createadmin', routes.user.createAdmin) // ## FIXME: allow this before auth for now
        .use('/api/v1/firstTime', routes.user.firstTime)
