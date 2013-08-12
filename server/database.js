@@ -69,6 +69,18 @@ Table.prototype.get = function (key, callback) {
     return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
 };
 
+Table.prototype.remove = function (key, callback) {
+    var value = this.cache[key];
+    if (value) {
+        delete this.cache[key];
+        fs.writeFileSync(this.dbFile, JSON.stringify(this.cache));
+
+        return callback(null, value);
+    }
+
+    return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
+};
+
 Table.prototype.removePrivates = function (obj) {
     var res = { };
 

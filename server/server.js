@@ -68,6 +68,7 @@ app.configure(function () {
 
     // routes controlled by app.router
     app.post('/api/v1/token', routes.user.createToken);
+    app.get('/api/v1/logout', routes.user.logout);
     app.get('/api/v1/userInfo', routes.user.userInfo);
 
     app.get('/dirIndex', routes.file.listing);

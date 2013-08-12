@@ -4,68 +4,132 @@
   <title> Welcome to Yellow Tent </title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
-  <style>
-    body {
-      background-color: #f5f5f5;
-    }
-    .container {
-        margin-top: 100px;
-        width: 40%;
-        margin-left: 30%;
-    }
-  </style>
+
+  <script>
+
+
+
+  </script>
+
 </head>
 
 <body>
-  <div class="navbar navbar-inverse navbar navbar-fixed-top">
+  <div class="navbar">
+    <img width="48px" src="/assets/yellow_tent.png"/>
     <a href="#" class="navbar-brand">Yellow Tent</a>
 
     <div class="navbar-text pull-right dropdown">
-      <a class="navbar-link" data-toggle="dropdown" href="#" id="user-dropdown-trigger">Signed in as</a>
+      <a class="navbar-link" data-toggle="dropdown" href="#">
+        <span id="user-dropdown-trigger">Signed in as</span>
+        <b class="caret"></b>
+      </a>
       <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
         <li><a tabindex="-1" href="#">Preferences</a></li>
         <li class="divider"></li>
-        <li><a tabindex="-1" href="index.html" id="signout">Sign out</a></li>
+        <li><a tabindex="-1" href="#" id="logout-button">Sign out</a></li>
       </ul>
     </div>  <!-- signed-in dropdown -->
   </div> <!-- navbar -->
 
   <div class="container">
-    <ul class="nav nav-tabs nav-justified">
-      <li class="active"><a href="#">Home</a></li>
-      <li><a href="#">My Devices</a></li>
-      <li><a href="#">Files</a></li>
-      <li><a href="#">Users & Groups</a></li>
-      <li><a href="#">Logs</a></li>
+    <ul class="nav nav-pills nav-justified">
+      <li id="home-link"><a href="#home">Home</a></li>
+      <li id="devices-link"><a href="#devices">My Devices</a></li>
+      <li id="files-link"><a href="#files">Files</a></li>
+      <li id="usersgroups-link"><a href="#usersgroups">Users &amp; Groups</a></li>
+      <li id="logs-link"><a href="#logs">Logs</a></li>
     </ul>
   </div> <!-- container -->
+
+  <div class="container">
+    <div id="home-container" class="container hide">
+      Home
+    </div>
+
+    <div id="devices-container" class="container hide">
+      My Devices
+    </div>
+
+    <div id="files-container" class="container hide">
+      Files
+    </div>
+
+    <div id="usersgroups-container" class="container hide">
+      Users &amp; Groups
+    </div>
+
+    <div id="logs-container" class="container hide">
+      Logs
+    </div>
+  </div>
 
   <script src="jquery/jquery.js"></script>
   <script src="jquery/jquery.base64.min.js"></script>
   <script src="jquery/jquery.cookie.js"></script>
   <script src="bootstrap/js/bootstrap.min.js"></script>
+
   <script>
-    var token;
 
     $(document).ready(function () {
+      var token;
+      var currentView;
+
+
+      // check for token to proceed
       token = $.cookie('token');
       if (!token) {
         window.location.replace('index.html');
       }
 
-      $('#logout').click(function (event) {
-        $.removeCookie('token');
-        // the default click handler navigates to index.html
-      });
 
+      // select current view - if window.location.hash is set it already contains the # to reference with jquery
+      function updateCurrentView() {
+        var view = window.location.hash ? window.location.hash.slice(1) : "home";
+
+        if (currentView === view) {
+          return;
+        }
+
+        if (currentView) {
+          document.getElementById(currentView + "-container").classList.add("hide");
+          document.getElementById(currentView + "-link").classList.remove("active");
+        }
+
+        currentView = view;
+        document.getElementById(currentView + "-container").classList.remove("hide");
+        document.getElementById(currentView + "-link").classList.add("active");
+      }
+
+
+      // update view according to the current hash
+      updateCurrentView();
+
+
+      // get user info to update avatar ui
       $.getJSON('/api/v1/userInfo', function (data) {
           $("#user-dropdown-trigger").text("Signed in as " + data.username);
       }).fail(function(error) {
         console.error('Unable to get username.', error);
           $("#user-dropdown-trigger").text("Invalid user");
       });
+
+
+      // setup event handler
+      window.onhashchange = function hashChangeListener(e) {
+        updateCurrentView();
+      }
+
+
+      // setup onclick handler
+      $('#logout-button').click(function (event) {
+        $.get('/api/v1/logout', function (data) {}).always(function() {
+          $.removeCookie('token');
+          window.location.href = "index.html";
+        });
+      });
     });
   </script>
+
 </body>
 
 </html>

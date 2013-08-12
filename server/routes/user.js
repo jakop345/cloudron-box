@@ -12,6 +12,7 @@ exports = module.exports = {
     createAdmin: createAdmin,
     authenticate: authenticate,
     createToken: createToken,
+    logout: logout,
     userInfo: userInfo
 };
 
@@ -103,16 +104,18 @@ function authenticate(req, res, next) {
 
             var saltBinary = new Buffer(user.salt, 'hex');
             crypto.pbkdf2(auth.password, saltBinary, 10000 /* iterations */, 512 /* bits */, function (err, derivedKey) {
-                if (err) return next(new HttpError(500, 'Failed to hash password'), false);
+                if (err) {
+                    return next(new HttpError(500, 'Failed to hash password'), false);
+                }
 
                 var derivedKeyHex = new Buffer(derivedKey, 'binary').toString('hex');
-                if (derivedKeyHex != user.password) return next(new HttpError(401, 'Username and password does not match'), false);
+                if (derivedKeyHex != user.password)  {
+                    return next(new HttpError(401, 'Username and password does not match'), false);
+                }
 
-                delete user.salt;
-                delete user.password;
-                user.loginAuthenticator = true;
-
-                req.user = user;
+                req.user = {
+                    username: user.username
+                };
 
                 next();
             });
@@ -134,10 +137,11 @@ function authenticate(req, res, next) {
             }
 
             var now = Date(), expires = Date(token.expires);
-
             if (now > expires) return next(new HttpError(401, 'Token expired'));
 
-            req.user = { username: token.username, tokenAuthenticator: true };
+            req.user = {
+                username: token.username
+            };
 
             next();
         });
@@ -175,7 +179,18 @@ function createToken(req, res, next) {
 }
 
 function userInfo(req, res, next) {
-    res.send({
-        username: req.user.username
+    res.send(req.user);
+}
+
+function logout(req, res, next) {
+    var req_token = req.query.auth_token ? req.query.auth_token : req.cookies.token;
+
+    // Invalidate token so the cookie cannot be reused after logout
+    db.TOKENS_TABLE.remove(req_token, function (error, result) {
+        if (error) {
+            return next(error.reason === DatabaseError.NOT_FOUND ? new HttpError(401, 'Invalid token') : error);
+        }
+
+        res.send(200);
     });
 }
