@@ -134,7 +134,7 @@
           url: url,
           data: $form.serialize(),
           success: function (data) {
-            showModalDialog('User created', 'Try logging in now!'); // ## TODO: redirect user
+            window.location.href = "index.html";
           },
           error: errorHandler('User creation failed')
         });
