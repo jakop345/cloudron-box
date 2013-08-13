@@ -11,7 +11,8 @@ var optimist = require('optimist'),
     fs = require('fs'),
     mkdirp = require('mkdirp'),
     db = require('./database'),
-    sync = require('./sync');
+    sync = require('./sync'),
+    routes = require('./routes');
 
 var argv = optimist.usage('Usage: $0 --root <directory>')
     .alias('h', 'help')
@@ -44,12 +45,11 @@ function serverErrorHandler(err, req, res, next) {
     util.debug(err.stack);
 }
 
+
 app.configure(function () {
     var json = express.json({ strict: true, limit: 2000 }), // application/json
         urlencoded = express.urlencoded({ limit: 2000 }), // application/x-www-form-urlencoded
         multipart = express.multipart({ uploadDir: process.cwd(), keepExtensions: true, maxFieldsSize: 2 * 1024 * 1024 }); // multipart/form-data
-
-    var routes = require('./routes');
 
     app.use(express.logger({ format: 'dev', immediate: false }))
        .use(express.timeout(10000))
@@ -72,7 +72,7 @@ app.configure(function () {
     app.get('/api/v1/logout', routes.user.logout);
     app.get('/api/v1/userInfo', routes.user.userInfo);
 
-    app.get('/dirIndex', routes.file.listing);
+    app.get('/api/v1/file/dirIndex', routes.file.listing);
     app.get('/file/:filename', routes.file.read);
     app.post('/file', routes.file.update);
 });
@@ -92,6 +92,8 @@ function initialize() {
     }
 
     sync.initialize(config);
+    routes.file.initialize(config, sync);
+    routes.volume.initialize(config, app);
 }
 
 function listen(next) {

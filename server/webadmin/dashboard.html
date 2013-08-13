@@ -4,13 +4,6 @@
   <title> Welcome to Yellow Tent </title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
-
-  <script>
-
-
-
-  </script>
-
 </head>
 
 <body>
@@ -51,7 +44,6 @@
     </div>
 
     <div id="files-container" class="container hide">
-      Files
     </div>
 
     <div id="usersgroups-container" class="container hide">
@@ -69,6 +61,62 @@
   <script src="bootstrap/js/bootstrap.min.js"></script>
 
   <script>
+
+    // should go into files/utils library
+    function printableSize(size) {
+      var kb = 1024;
+      var mb = kb * 1024;
+      var gb = mb * 1024;
+
+      if (size < mb) {
+        return (size/kb).toPrecision(4) + " KB";
+      } else if (size < gb) {
+        return (size/mb).toPrecision(4) + " MB";
+      } else {
+        return (size/gb).toPrecision(4) + " GB";
+      }
+    }
+
+    function createFileListingDelegate(data) {
+      var elem = document.createElement("a");
+      elem.classList.add("list-group-item");
+      elem.innerText = data.filename + (data.isDirectory ? "/" : "");
+      elem.href = "#files";
+      elem.onclick = function () {
+        if (data.isDirectory) {
+          getFileListing(null, data.path);
+        }
+      }
+
+      var badge = document.createElement("span");
+      badge.classList.add("badge");
+      badge.innerText = printableSize(data.stat.size);
+
+      elem.appendChild(badge);
+
+      return elem;
+    }
+
+    function getFileListing(volume, folder) {
+      volume = volume ? volume : 0;
+      folder = folder ? folder : ".";
+
+      $.getJSON("/api/v1/volume/" + volume + "/list/" + folder, function (data) {
+          var container = document.getElementById("files-container");
+          container.removeChild(container.firstChild);
+
+          var group = document.createElement("ul");
+          group.classList.add("list-group");
+
+          data.forEach(function (e) {
+            group.appendChild(createFileListingDelegate(e));
+          });
+
+          container.appendChild(group);
+      }).fail(function(error) {
+        console.error("Unable to get file listing.", error);
+      });
+    }
 
     $(document).ready(function () {
       var token;
@@ -103,6 +151,7 @@
 
       // update view according to the current hash
       updateCurrentView();
+      getFileListing();
 
 
       // get user info to update avatar ui

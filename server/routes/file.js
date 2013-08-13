@@ -4,15 +4,20 @@ var fs = require('fs'),
     sync = require('../sync');
 
 exports = module.exports = {
+    initialize: initialize,
     listing: listing,
     read: read,
     update: update
 };
 
-var index = sync.index;
+var sync;
+
+function initialize(config, s) {
+    sync = s;
+}
 
 function listing(req, res, next) {
-    res.send(index.json());
+    res.send(sync.index.json());
 }
 
 function read(req, res, next) {
@@ -38,7 +43,7 @@ function update(req, res, next) {
     if (!data.filename) return next(new HttpError(400, 'filename not specified'));
     if (!data.action) return next(new HttpError(400, 'action not specified'));
 
-    var entry = index.entry(data.filename);
+    var entry = sync.index.entry(data.filename);
     var absoluteFilePath = path.join(root, data.filename);
 
     console.log('Processing ', data);
@@ -51,14 +56,14 @@ function update(req, res, next) {
         mkdirp(path.dirname(absoluteFilePath), function (error) {
             fs.rename(req.files.file.path, absoluteFilePath, function (err) {
                 if (err) return next(new HttpError(500, err.toString()));
-                index.addEntry(root, data.filename, function () { res.send('OK'); });
+                sync.index.addEntry(root, data.filename, function () { res.send('OK'); });
             });
         });
     } else if (data.action === 'remove') {
         if (!entry) return next(new HttpError(404, 'File does not exist'));
         fs.unlink(root + '/' + data.filename, function (err) {
             if (err) return next(new HttpError(500, err.toString()));
-            index.removeEntry(root, data.filename, function() { res.send('OK'); });
+            sync.index.removeEntry(root, data.filename, function() { res.send('OK'); });
         });
     } else if (data.action === 'update') {
         if (!entry) return next(new HttpError(404, 'File does not exist'));
@@ -67,7 +72,7 @@ function update(req, res, next) {
         if (data.mtime < entry.mtime) return next(new HttpError(400, 'Outdated'));
         fs.rename(req.files.file.path, absoluteFilePath, function (err) {
             if (err) return next(new HttpError(500, err.toString()));
-            index.updateEntry(root, data.filename, function() { res.send('OK'); });
+            sync.index.updateEntry(root, data.filename, function() { res.send('OK'); });
         });
     } else {
         res.send(new HttpError(400, 'Unknown action'));

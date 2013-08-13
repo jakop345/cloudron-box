@@ -1,7 +1,8 @@
 'use strict';
 
 exports = module.exports = {
-    user: require('./user'),
-    file: require('./file')
+    user: require('./user.js'),
+    file: require('./file.js'),
+    volume: require('./volume.js')
 };
 

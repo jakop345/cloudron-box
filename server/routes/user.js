@@ -179,6 +179,7 @@ function createToken(req, res, next) {
 }
 
 function userInfo(req, res, next) {
+    // req.user is filled by the authentication step
     res.send(req.user);
 }
 
