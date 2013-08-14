@@ -1,0 +1,21 @@
+{
+  "name": "node-encfs",
+  "description": "encfs wrapper for nodejs",
+  "version": "0.0.1",
+  "author": {
+    "name": "Yellow tent authors",
+    "email": "doesntexist@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gramakri/yellowtent.git"
+  },
+  "engines": [
+    "node >= 0.8.0"
+  ],
+  "dependencies": {
+    "mkdirp" : ""
+  },
+  "scripts": {
+  }
+}
