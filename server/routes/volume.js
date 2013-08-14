@@ -14,8 +14,21 @@ var config;
 function initialize(cfg, app) {
     config = cfg;
 
+    app.get("/api/v1/volume/list", listVolumes);
     app.get("/api/v1/volume/*/list/", list);
     app.get("/api/v1/volume/*/list/*", list);
+    app.post("/api/v1/volume/*/mount", mount);
+    app.post("/api/v1/volume/*/unmount", unmount);
+}
+
+function listVolumes(req, res, next) {
+    res.send([{
+        name: "Photos",
+        id: 0
+    }, {
+        name: "Documents",
+        id: 1
+    }]);
 }
 
 function list(req, res, next) {
@@ -59,4 +72,12 @@ function list(req, res, next) {
 
         res.send(JSON.stringify(ret));
     });
+}
+
+function mount(req, res, next) {
+    console.log(req);
+}
+
+function unmount(req, res, next) {
+
 }

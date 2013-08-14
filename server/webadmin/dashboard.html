@@ -44,6 +44,12 @@
     </div>
 
     <div id="files-container" class="container hide">
+      <h3>Volumes</h3>
+      <div id="volume-list-container" class="container">
+      </div>
+      <h3>Files</h3>
+      <div id="file-list-container" class="container">
+      </div>
     </div>
 
     <div id="usersgroups-container" class="container hide">
@@ -97,14 +103,48 @@
       return elem;
     }
 
+    function createVolumeListingDelegate(data) {
+      var elem = document.createElement("a");
+      elem.classList.add("list-group-item");
+      elem.innerText = data.name
+      elem.href = "#files";
+      elem.onclick = function () {
+        getFileListing(data.id);
+      }
+
+      return elem;
+    }
+
+    function getVolumeListing() {
+      var container = document.getElementById("volume-list-container");
+      if (container.firstChild) {
+        container.removeChild(container.firstChild);
+      }
+
+      $.getJSON("/api/v1/volume/list", function (data) {
+          var group = document.createElement("ul");
+          group.classList.add("list-group");
+
+          data.forEach(function (e) {
+            group.appendChild(createVolumeListingDelegate(e));
+          });
+
+          container.appendChild(group);
+      }).fail(function (error) {
+        console.error("Unable to get volume listing", error);
+      });
+    }
+
     function getFileListing(volume, folder) {
       volume = volume ? volume : 0;
       folder = folder ? folder : ".";
 
-      $.getJSON("/api/v1/volume/" + volume + "/list/" + folder, function (data) {
-          var container = document.getElementById("files-container");
-          container.removeChild(container.firstChild);
+      var container = document.getElementById("file-list-container");
+      if (container.firstChild) {
+        container.removeChild(container.firstChild);
+      }
 
+      $.getJSON("/api/v1/volume/" + volume + "/list/" + folder, function (data) {
           var group = document.createElement("ul");
           group.classList.add("list-group");
 
@@ -113,7 +153,7 @@
           });
 
           container.appendChild(group);
-      }).fail(function(error) {
+      }).fail(function (error) {
         console.error("Unable to get file listing.", error);
       });
     }
@@ -151,7 +191,7 @@
 
       // update view according to the current hash
       updateCurrentView();
-      getFileListing();
+      getVolumeListing();
 
 
       // get user info to update avatar ui
