@@ -53,13 +53,18 @@ function createFileListingDelegate(data) {
 }
 
 function createVolumeListingDelegate(data) {
-    var elem = document.createElement("a");
+    var elem = document.createElement("li");
     elem.classList.add("list-group-item");
     elem.innerText = data.name;
     elem.href = "#files";
-    elem.onclick = function () {
+    elem.onclick = function (event) {
         getFileListing(data.id);
     };
+
+    var deleteBtn = document.createElement("button");
+    deleteBtn.classList.add("btn", "btn-danger", "btn-xs", "pull-right");
+    deleteBtn.innerText = "Delete";
+    elem.appendChild(deleteBtn);
 
     return elem;
 }
