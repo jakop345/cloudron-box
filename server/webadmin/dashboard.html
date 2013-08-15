@@ -44,12 +44,22 @@
     </div>
 
     <div id="files-container" class="container hide">
-      <h3>Volumes</h3>
-      <div id="volume-list-container" class="container">
-      </div>
-      <h3>Files</h3>
-      <div id="file-list-container" class="container">
-      </div>
+      <form class="form-inline" id="form-volume-create" action="/api/v1/volume/create">
+        <fieldset>
+          <legend>New Volume</legend>
+          <div class="form-group">
+            <label for="name">Volume Name</label>
+            <input type="text" class="form-control" id="name" name="name" placeholder="Enter Name">
+          </div>
+          <button type="submit" class="btn btn-default">Create</button>
+        </fieldset>
+      </form>
+
+      <legend>Volumes</legend>
+      <div id="volume-list-container" class="container"></div>
+
+      <legend>Files</legend>
+      <div id="file-list-container" class="container"></div>
     </div>
 
     <div id="usersgroups-container" class="container hide">
@@ -61,102 +71,34 @@
     </div>
   </div>
 
+  <div id="modalDialog" class="modal fade">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">Title</h4>
+        </div>
+        <div class="modal-body">
+          <p>Body</p>
+          <div class="progress progress-striped active">
+            <div class="progress-bar" style="width: 100%"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="button1" class="btn btn-default btn-primary" data-dismiss="modal">OK</button>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+
   <script src="jquery/jquery.js"></script>
   <script src="jquery/jquery.base64.min.js"></script>
   <script src="jquery/jquery.cookie.js"></script>
   <script src="bootstrap/js/bootstrap.min.js"></script>
+  <script src="util.js"></script>
+  <script src="volume-client.js"></script>
 
   <script>
-
-    // should go into files/utils library
-    function printableSize(size) {
-      var kb = 1024;
-      var mb = kb * 1024;
-      var gb = mb * 1024;
-
-      if (size < mb) {
-        return (size/kb).toPrecision(4) + " KB";
-      } else if (size < gb) {
-        return (size/mb).toPrecision(4) + " MB";
-      } else {
-        return (size/gb).toPrecision(4) + " GB";
-      }
-    }
-
-    function createFileListingDelegate(data) {
-      var elem = document.createElement("a");
-      elem.classList.add("list-group-item");
-      elem.innerText = data.filename + (data.isDirectory ? "/" : "");
-      elem.href = "#files";
-      elem.onclick = function () {
-        if (data.isDirectory) {
-          getFileListing(null, data.path);
-        }
-      }
-
-      var badge = document.createElement("span");
-      badge.classList.add("badge");
-      badge.innerText = printableSize(data.stat.size);
-
-      elem.appendChild(badge);
-
-      return elem;
-    }
-
-    function createVolumeListingDelegate(data) {
-      var elem = document.createElement("a");
-      elem.classList.add("list-group-item");
-      elem.innerText = data.name
-      elem.href = "#files";
-      elem.onclick = function () {
-        getFileListing(data.id);
-      }
-
-      return elem;
-    }
-
-    function getVolumeListing() {
-      var container = document.getElementById("volume-list-container");
-      if (container.firstChild) {
-        container.removeChild(container.firstChild);
-      }
-
-      $.getJSON("/api/v1/volume/list", function (data) {
-          var group = document.createElement("ul");
-          group.classList.add("list-group");
-
-          data.forEach(function (e) {
-            group.appendChild(createVolumeListingDelegate(e));
-          });
-
-          container.appendChild(group);
-      }).fail(function (error) {
-        console.error("Unable to get volume listing", error);
-      });
-    }
-
-    function getFileListing(volume, folder) {
-      volume = volume ? volume : 0;
-      folder = folder ? folder : ".";
-
-      var container = document.getElementById("file-list-container");
-      if (container.firstChild) {
-        container.removeChild(container.firstChild);
-      }
-
-      $.getJSON("/api/v1/volume/" + volume + "/list/" + folder, function (data) {
-          var group = document.createElement("ul");
-          group.classList.add("list-group");
-
-          data.forEach(function (e) {
-            group.appendChild(createFileListingDelegate(e));
-          });
-
-          container.appendChild(group);
-      }).fail(function (error) {
-        console.error("Unable to get file listing.", error);
-      });
-    }
 
     $(document).ready(function () {
       var token;
@@ -208,6 +150,7 @@
         updateCurrentView();
       }
 
+      $("#form-volume-create").submit(createVolume);
 
       // setup onclick handler
       $('#logout-button').click(function (event) {
