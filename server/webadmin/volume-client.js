@@ -70,27 +70,29 @@ function createFileListingDelegate(data) {
 }
 
 function createVolumeListingDelegate(data) {
-    var elem = document.createElement("a");
-    elem.classList.add("list-group-item");
-    elem.innerText = data.name;
-    elem.href = "#files";
-    elem.onclick = function (event) {
+    var elem = $('<a href="#files" class="list-group-item">' + data.name + '</a>');
+    elem.click(function (event) {
         getFileListing(data.id);
-    };
+    });
 
-    // TODO replace by glyphicon button?
-    var deleteBtn = document.createElement("button");
-    deleteBtn.classList.add("btn", "btn-danger", "btn-xs", "pull-right");
-    deleteBtn.style.padding = "1px";
-    deleteBtn.innerText = "Delete";
-    deleteBtn.onclick = function (event) {
+    var btnGroup = $('<div class="btn-group btn-group-xs pull-right"></div>');
+    var btn = $('<button class="btn btn-primary btn-xs glyphicon glyphicon-edit"></button>');
+    btn.click(function (event) {
         event.stopPropagation();
+    });
+    btn.appendTo(btnGroup);
 
+    btn = $('<button class="btn btn-danger btn-xs glyphicon glyphicon-trash"></button>');
+    btn.click(function (event) {
+        event.stopPropagation();
+        // TODO let the user confirm ;-)
         deleteVolume(data.id);
-    };
-    elem.appendChild(deleteBtn);
+    });
+    btn.appendTo(btnGroup);
 
-    return elem;
+    btnGroup.appendTo(elem);
+
+    return elem[0];
 }
 
 function getVolumeListing() {
