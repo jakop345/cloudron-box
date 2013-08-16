@@ -1,9 +1,10 @@
 'use strict';
 
 var fs = require("fs"),
-    debug = require('debug')('volume.js'),
-    HttpError = require('../httperror'),
-    encfs = require('../../node-encfs/index.js'),
+    debug = require("debug")("volume.js"),
+    HttpError = require("../httperror"),
+    encfs = require("../../node-encfs/index.js"),
+    wrench = require("wrench"),
     path = require("path");
 
 exports = module.exports = {
@@ -16,11 +17,59 @@ function initialize(cfg, app) {
     config = cfg;
 
     app.get("/api/v1/volume/list", listVolumes);
-    app.post("/api/v1/volume/create", createVolume);
     app.get("/api/v1/volume/*/list/", list);
     app.get("/api/v1/volume/*/list/*", list);
+
+    app.post("/api/v1/volume/create", createVolume);
+    app.post("/api/v1/volume/*/delete", deleteVolume);
     app.post("/api/v1/volume/*/mount", mount);
     app.post("/api/v1/volume/*/unmount", unmount);
+}
+
+function resolveVolumeRootPath(volume) {
+    return path.join(config.root, "." + volume);
+}
+
+function resolveVolumeMountPoint(volume) {
+    return path.join(config.root, volume);
+}
+
+// TODO maybe also check for password?
+function deleteVolume(req, res, next) {
+    if (!req.params[0]) {
+        return next(new HttpError(400, 'volume name not specified'));
+    }
+
+    var rootPath = resolveVolumeRootPath(req.params[0]);
+    var mountPoint = resolveVolumeMountPoint(req.params[0]);
+
+    fs.exists(rootPath, function (exists) {
+        if (!exists) {
+            return next(new HttpError(404, 'No such volume'));
+        }
+
+        var volume = new encfs.Root(rootPath, mountPoint);
+        volume.unmount(function (error) {
+            if (error) {
+                console.log("Error unmounting the volume.", error);
+            }
+
+            wrench.rmdirRecursive(rootPath, function (error) {
+                if (error) {
+                    console.log("Failed to delete volume root path.", error);
+                }
+
+                wrench.rmdirRecursive(mountPoint, function (error) {
+                    if (error) {
+                        console.log("Failed to delete volume mount point.", error);
+                    }
+
+                    // TODO how to handle any errors in folder deletion?
+                    res.send(200);
+                });
+            });
+        });
+    });
 }
 
 function listVolumes(req, res, next) {

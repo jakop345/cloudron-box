@@ -28,8 +28,25 @@ function createVolume(event) {
             showModalDialog("Create Volume", "failed");
         }
     });
+}
 
-    return false;
+function deleteVolume(volumeId) {
+    var requestBody = {};
+
+    showModalDialog("Deleting Volume", "Hold on...", { indeterminate: true });
+
+    $.ajax({
+        type: "POST",
+        url: "/api/v1/volume/" + volumeId + "/delete",
+        data: requestBody,
+        success: function (data) {
+            hideModalDialog();
+            getVolumeListing();
+        },
+        error: function () {
+            showModalDialog("Deleting Volume", "failed");
+        }
+    });
 }
 
 function createFileListingDelegate(data) {
@@ -53,7 +70,7 @@ function createFileListingDelegate(data) {
 }
 
 function createVolumeListingDelegate(data) {
-    var elem = document.createElement("li");
+    var elem = document.createElement("a");
     elem.classList.add("list-group-item");
     elem.innerText = data.name;
     elem.href = "#files";
@@ -61,9 +78,16 @@ function createVolumeListingDelegate(data) {
         getFileListing(data.id);
     };
 
+    // TODO replace by glyphicon button?
     var deleteBtn = document.createElement("button");
     deleteBtn.classList.add("btn", "btn-danger", "btn-xs", "pull-right");
+    deleteBtn.style.padding = "1px";
     deleteBtn.innerText = "Delete";
+    deleteBtn.onclick = function (event) {
+        event.stopPropagation();
+
+        deleteVolume(data.id);
+    };
     elem.appendChild(deleteBtn);
 
     return elem;
