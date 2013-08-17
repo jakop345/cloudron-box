@@ -48,10 +48,11 @@ function tree(commit, callback) {
         var lines = out.split('\n');
         var entries = [ ];
         lines.forEach(function (line) {
+            if (line == '') return;
             var id, mode, name, type, _ref;
             // sample line : 100644 blob e69de29bb2d1d6434b8b29ae775ad8c2e48c5391 README
             var parts = line.split(/[\t ]+/, 4);
-            var mode = parts[0], type = parts[1], name = parts[3];
+            var mode = parts[0];
             entries.push({
                 stat: { mode: parseInt(parts[0], 8) }, // match fs.Stat object
                 sha1: parts[2],
