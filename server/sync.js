@@ -11,7 +11,7 @@ function initialize(config) {
     var index = exports.index = new dirIndex.DirIndex();
 
     index.update(config.root, function () {
-        console.log(index.entryList);
+//        console.log(index.entryList);
     });
 }
 
