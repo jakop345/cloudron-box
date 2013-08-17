@@ -42,6 +42,8 @@ function commit(commit, callback) {
 }
 
 function tree(commit, callback) {
+    if (commit == '') return callback(null, [ ]);
+
     git('ls-tree -r ' + commit, function (err, out) {
         var lines = out.split('\n');
         var entries = [ ];
