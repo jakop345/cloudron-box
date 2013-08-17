@@ -12,7 +12,9 @@ var optimist = require('optimist'),
     mkdirp = require('mkdirp'),
     db = require('./database'),
     sync = require('./sync'),
-    routes = require('./routes');
+    routes = require('./routes'),
+    repo = require('./repo'),
+    debug = require('debug');
 
 var argv = optimist.usage('Usage: $0 --root <directory>')
     .alias('h', 'help')
@@ -77,7 +79,7 @@ app.configure(function () {
     app.post('/file', routes.file.update);
 });
 
-function initialize() {
+function initialize(callback) {
     var config = {
         port: argv.p || 3000,
         root: path.resolve(argv.r)
@@ -87,13 +89,14 @@ function initialize() {
 
     mkdirp(config.root);
     if (!db.initialize(config)) {
-        console.error('Error initializing database');
-        process.exit(1);
+        return callback(new Error('Error initializing database'));
     }
 
     sync.initialize(config);
     routes.file.initialize(config, sync);
     routes.volume.initialize(config, app);
+
+    repo.initialize(config, callback);
 }
 
 function listen(next) {
@@ -103,10 +106,17 @@ function listen(next) {
         console.log('Server listening on port ' + app.get('port') + ' in ' + app.get('env') + ' mode');
         next();
     });
+
+    repo.tree(repo.head, function (err, entries) { console.log(entries); });
 }
 
 if (require.main === module) {
-    initialize();
-    listen();
+    initialize(function (err) {
+        if (err) {
+            console.error('error initializing', err);
+            process.exit(1);
+        }
+        listen();
+    });
 }
 
