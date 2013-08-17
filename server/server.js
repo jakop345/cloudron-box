@@ -107,8 +107,6 @@ function listen(next) {
         console.log('Server listening on port ' + app.get('port') + ' in ' + app.get('env') + ' mode');
         next();
     });
-
-    // repo.tree(repo.head, function (err, entries) { console.log(entries); });
 }
 
 if (require.main === module) {

@@ -6,7 +6,8 @@ var exec = require('child_process').exec,
 exports = module.exports = {
     initialize: initialize,
     head: null,
-    tree: tree
+    tree: tree,
+    hasFileChanged: hasFileChanged
 };
 
 var gitDir;
@@ -26,7 +27,7 @@ function initialize(config, callback) {
 
     git('rev-parse HEAD', function (err, sha1) {
         if (err) return callback(err);
-        exports.head = sha1;
+        exports.head = sha1.slice(0, -1);
         callback();
     });
 }
@@ -47,6 +48,23 @@ function tree(treeish, callback) {
             });
         });
         callback(null, entries);
+    });
+}
+
+function hasFileChanged(file, fromRev, toRev, callback) {
+    if (typeof callback === 'undefined') {
+        callback = toRev;
+        toRev = fromRev;
+        fromRev = '';
+    }
+
+    var cmd = fromRev == ''
+        ? 'log ' + fromRev + ' -- '+ file
+        : 'log ' + fromRev + '..' + toRev + ' -- ' + file;
+    git(cmd, function (err, out) {
+        console.log('I AM HERE', err, cmd);
+        if (err) return callback(err);
+        callback(null, out.length != 0);
     });
 }
 
