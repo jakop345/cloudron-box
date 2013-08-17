@@ -7,7 +7,8 @@ exports = module.exports = {
     initialize: initialize,
     head: null,
     tree: tree,
-    hasFileChanged: hasFileChanged
+    hasFileChanged: hasFileChanged,
+    commit: commit
 };
 
 var gitDir;
@@ -32,8 +33,16 @@ function initialize(config, callback) {
     });
 }
 
-function tree(treeish, callback) {
-    git('ls-tree -r ' + treeish, function (err, out) {
+function commit(commit, callback) {
+    git('show -s --pretty=%T,%ci ' + commit, function (err, out) {
+        if (err) return callback(err);
+        var parts = out.split(',');
+        callback(null, { treeSha1: parts[0], commitDate: new Date(parts[1])});
+    });
+}
+
+function tree(commit, callback) {
+    git('ls-tree -r ' + commit, function (err, out) {
         var lines = out.split('\n');
         var entries = [ ];
         lines.forEach(function (line) {
