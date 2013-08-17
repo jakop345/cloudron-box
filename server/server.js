@@ -96,7 +96,8 @@ function initialize(callback) {
     routes.file.initialize(config, sync);
     routes.volume.initialize(config, app);
 
-    repo.initialize(config, callback);
+    // repo.initialize(config, callback);
+    callback();
 }
 
 function listen(next) {
@@ -107,7 +108,7 @@ function listen(next) {
         next();
     });
 
-    repo.tree(repo.head, function (err, entries) { console.log(entries); });
+    // repo.tree(repo.head, function (err, entries) { console.log(entries); });
 }
 
 if (require.main === module) {
