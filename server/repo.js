@@ -7,7 +7,9 @@ exports = module.exports = {
     initialize: initialize,
     head: null,
     tree: tree,
-    hasFileChanged: hasFileChanged,
+    fileChangeTime: fileChangeTime,
+    isTracked: isTracked,
+    mtime: mtime,
     commit: commit
 };
 
@@ -17,6 +19,7 @@ function git(command, callback) {
     var options = {
         env: { GIT_DIR: gitDir }
     };
+    debug('git ' + command);
     exec('git ' + command, options, function (error, stdout, stderr) {
         if (error) return callback(error);
         return callback(null, stdout);
@@ -63,7 +66,20 @@ function tree(commit, callback) {
     });
 }
 
-function hasFileChanged(file, fromRev, toRev, callback) {
+function isTracked(file, callback) {
+    git('ls-files --error-unmatch ' + file, function (err, out) {
+        return callback(null, !err); // FIXME: check err.code
+    });
+}
+
+function mtime(file, callback) {
+    git('log --pretty=%ci -- ' + file, function (err, out) {
+        if (err) return callback(err);
+        callback(null, new Date(out));
+    });
+}
+
+function fileChangeTime(file, fromRev, toRev, callback) {
     if (typeof callback === 'undefined') {
         callback = toRev;
         toRev = fromRev;
@@ -71,12 +87,12 @@ function hasFileChanged(file, fromRev, toRev, callback) {
     }
 
     var cmd = fromRev == ''
-        ? 'log ' + fromRev + ' -- '+ file
-        : 'log ' + fromRev + '..' + toRev + ' -- ' + file;
+        ? 'log ' + fromRev + ' --pretty=%ci -- '+ file
+        : 'log ' + fromRev + '..' + toRev + ' --pretty=%ci -- ' + file;
     git(cmd, function (err, out) {
-        console.log('I AM HERE', err, cmd);
         if (err) return callback(err);
-        callback(null, out.length != 0);
+        if (out.length == 0) return callback(null);
+        callback(null, new Date(out));
     });
 }
 
