@@ -10,10 +10,13 @@ function createVolume(event) {
     };
 
     if (!requestBody.name) {
-        showModalDialog("Create Volume", "Volume name is empty.");
+        console.error("Create Volume", "Volume name is empty.");
+        $("#new-volume-dialog-form").addClass("has-error");
         return;
     }
 
+    $("#new-volume-dialog-form").removeClass("has-error");
+    $("#new-volume-dialog").modal("hide");
     showModalDialog("Create Volume", "Hold on...", { indeterminate: true });
 
     $.ajax({
@@ -75,14 +78,14 @@ function createVolumeListingDelegate(data) {
         getFileListing(data.id);
     });
 
-    var btnGroup = $('<div class="btn-group btn-group-mini pull-right"></div>');
-    var btn = $('<button class="btn btn-primary btn-mini glyphicon glyphicon-edit"></button>');
+    var btnGroup = $('<div class="btn-group btn-group-xs pull-right"></div>');
+    var btn = $('<button class="btn btn-primary btn-xs glyphicon glyphicon-edit"></button>');
     btn.click(function (event) {
         event.stopPropagation();
     });
     btn.appendTo(btnGroup);
 
-    btn = $('<button class="btn btn-danger btn-mini glyphicon glyphicon-trash"></button>');
+    btn = $('<button class="btn btn-danger btn-xs glyphicon glyphicon-trash"></button>');
     btn.click(function (event) {
         event.stopPropagation();
         // TODO let the user confirm ;-)
