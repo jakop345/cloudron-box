@@ -3,19 +3,6 @@
 <head>
   <title> Yellow Tent Login </title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script>
-    var ajax = new XMLHttpRequest();
-    ajax.onreadystatechange = function () {
-      if (ajax.readyState === 4) {
-        if (ajax.status == 200) {
-          if (JSON.parse(ajax.responseText).firstTime)
-              window.location.assign('firsttime.html');
-        }
-      }
-    }
-    ajax.open('GET', '/api/v1/firstTime', false /* async */);
-    ajax.send();
-  </script>
   <link href="bootstrap/css/bootstrap-theme.min.css" rel="stylesheet" media="screen">
   <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
   <style>
@@ -38,8 +25,8 @@
       <div class="panel-heading">
         <h4 class="panel-title">Login</h4>
       </div>
-      <div class="panel-content">
-        <form id="loginForm" class="form-horizontal">
+      <div class="panel-content" style="padding: 20px;">
+        <form id="loginForm" class="form-horizontal" role="form">
           <div class="form-group">
             <label for="username" class="col-lg-2 control-label">Username</label>
             <div class="col-lg-10">

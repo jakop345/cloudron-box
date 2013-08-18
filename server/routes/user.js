@@ -8,7 +8,7 @@ var db = require('../database'),
     express = require('express');
 
 exports = module.exports = {
-    firstTime: firstTime,
+    firstTimeCheck: firstTimeCheck,
     createAdmin: createAdmin,
     authenticate: authenticate,
     createToken: createToken,
@@ -16,9 +16,20 @@ exports = module.exports = {
     userInfo: userInfo
 };
 
-function firstTime(req, res, next) {
-    if (req.method !== 'GET') return next(new HttpError(405, 'Only GET allowed'));
-    res.send({ firstTime: db.firstTime() });
+function firstTimeCheck(req, res, next) {
+    if (req.method !== 'GET') return next();
+    // TODO: poor man's check if its an html page ;-)
+    if (req.url.indexOf('html') < 0) return next();
+
+    // if its not not first time but firsttime.html is requested, redirect to index.html
+    if (!db.firstTime()) {
+        if (req.url === "/firsttime.html") return res.redirect("index.html");
+        return next();
+    }
+
+    if (req.url === "/firsttime.html") return next();
+
+    res.redirect("firsttime.html");
 }
 
 function createAdmin(req, res, next) {

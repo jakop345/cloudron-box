@@ -16,13 +16,25 @@ var optimist = require('optimist'),
     repo = require('./repo'),
     debug = require('debug');
 
-var argv = optimist.usage('Usage: $0 --root <directory>')
+var argv = optimist.usage('Usage: $0 --dataRoot <directory>')
     .alias('h', 'help')
     .describe('h', 'Show this help.')
-    .alias('r', 'root')
-    .demand('r')
-    .describe('r', 'Sync directory root')
-    .string('r')
+
+    .alias('d', 'dataRoot')
+    .default('d', '.data')
+    .describe('d', 'Volume data storage directory.')
+    .string('d')
+
+    .alias('m', 'mountRoot')
+    .default('m', '.mount')
+    .describe('m', 'Volume mount point directory.')
+    .string('m')
+
+    .alias('c', 'configRoot')
+    .default('c', '.config')
+    .describe('c', 'Server config root directory for storing user db and meta data.')
+    .string('c')
+
     .alias('p', 'port')
     .describe('p', 'Server port')
     .argv;
@@ -55,6 +67,7 @@ app.configure(function () {
 
     app.use(express.logger({ format: 'dev', immediate: false }))
        .use(express.timeout(10000))
+       .use(routes.user.firstTimeCheck)
        .use('/', express.static(__dirname + '/webadmin')) // use '/' for now so cookie is not restricted to '/webadmin'
        .use(json)
        .use(urlencoded)
@@ -63,7 +76,6 @@ app.configure(function () {
        .use(express.favicon(__dirname + "/webadmin/assets/favicon.ico"))
        // API calls that do not require authorization
        .use('/api/v1/createadmin', routes.user.createAdmin) // ## FIXME: allow this before auth for now
-       .use('/api/v1/firstTime', routes.user.firstTime)
        .use(routes.user.authenticate)
        .use(app.router)
        .use(clientErrorHandler)
@@ -82,18 +94,28 @@ app.configure(function () {
 function initialize(callback) {
     var config = {
         port: argv.p || 3000,
-        root: path.resolve(argv.r)
+        dataRoot: path.resolve(argv.d),
+        configRoot: path.resolve(argv.c),
+        mountRoot: path.resolve(argv.m)
     };
 
     app.set('port', config.port);
 
-    mkdirp(config.root);
+    console.log("Using data root:", config.dataRoot);
+    console.log("Using config root:", config.configRoot);
+    console.log("Using mount root:", config.mountRoot);
+
+    // ensure data/config/mount paths
+    mkdirp(config.dataRoot);
+    mkdirp(config.configRoot);
+    mkdirp(config.mountRoot);
+
     if (!db.initialize(config)) {
         return callback(new Error('Error initializing database'));
     }
 
-    sync.initialize(config);
-    routes.file.initialize(config, sync);
+    // sync.initialize(config);
+    // routes.file.initialize(config, sync);
     routes.volume.initialize(config, app);
 
     // repo.initialize(config, callback);

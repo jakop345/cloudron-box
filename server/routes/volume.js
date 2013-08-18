@@ -27,11 +27,11 @@ function initialize(cfg, app) {
 }
 
 function resolveVolumeRootPath(volume) {
-    return path.join(config.root, "." + volume);
+    return path.join(config.dataRoot, volume);
 }
 
 function resolveVolumeMountPoint(volume) {
-    return path.join(config.root, volume);
+    return path.join(config.mountRoot, volume);
 }
 
 // TODO maybe also check for password?
@@ -73,7 +73,7 @@ function deleteVolume(req, res, next) {
 }
 
 function listVolumes(req, res, next) {
-    fs.readdir(config.root, function (error, files) {
+    fs.readdir(config.dataRoot, function (error, files) {
         if (error) {
             return next(new HttpError(404, 'Unable to read root folder'));
         }
@@ -81,10 +81,6 @@ function listVolumes(req, res, next) {
         var ret = [];
 
         files.forEach(function (file) {
-            if (file[0] === ".") {
-                return;
-            }
-
             var tmp = {};
             tmp.name = file;
             tmp.id = file;
@@ -103,8 +99,8 @@ function createVolume(req, res, next) {
         return next(new HttpError(400, 'volume name not specified'));
     }
 
-    var volumeRoot = path.join(config.root, "." + req.body.name);
-    var volumeMountPoint = path.join(config.root, req.body.name);
+    var volumeRoot = resolveVolumeRootPath(req.body.name);
+    var volumeMountPoint = resolveVolumeMountPoint(req.body.name);
 
     encfs.create(volumeRoot, volumeMountPoint, "foobar1337", function (error, result) {
         if (error) {
@@ -120,7 +116,7 @@ function list(req, res, next) {
     req.params[0] = req.params[0] ? req.params[0] : "0";
     req.params[1] = req.params[1] ? req.params[1] : ".";
 
-    var folder = path.join(config.root, req.params[0], req.params[1]);
+    var folder = path.join(resolveVolumeMountPoint(req.params[0]), req.params[1]);
 
     fs.readdir(folder, function (error, files) {
         if (error) {
@@ -129,7 +125,7 @@ function list(req, res, next) {
 
         var ret = [];
 
-        if (folder !== path.join(config.root, req.params[0])) {
+        if (folder !== resolveVolumeMountPoint(req.params[0])) {
             var dirUp = {};
             dirUp.filename = "..";
             dirUp.path = path.join(req.params[1], "..");

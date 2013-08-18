@@ -94,7 +94,7 @@ Table.prototype.removePrivates = function (obj) {
 };
 
 function initialize(config) {
-    rootDir = config.root + '/db';
+    rootDir = config.configRoot + '/db';
     if (!fs.existsSync(rootDir)) fs.mkdirSync(rootDir);
 
     exports.USERS_TABLE = new Table(rootDir + '/users', {
