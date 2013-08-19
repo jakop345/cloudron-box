@@ -89,6 +89,14 @@ app.configure(function () {
     app.get('/api/v1/file/dirIndex', routes.file.listing);
     app.get('/file/:filename', routes.file.read);
     app.post('/file', routes.file.update);
+
+    app.get('/api/v1/volume/*/list/', routes.volume.listFiles);
+    app.get('/api/v1/volume/*/list/*', routes.volume.listFiles);
+    app.get('/api/v1/volume/list', routes.volume.listVolumes);
+    app.post('/api/v1/volume/create', routes.volume.createVolume);
+    app.post('/api/v1/volume/*/delete', routes.volume.deleteVolume);
+    app.post('/api/v1/volume/*/mount', routes.volume.mount);
+    app.post('/api/v1/volume/*/unmount', routes.volume.unmount);
 });
 
 function initialize(callback) {
@@ -101,9 +109,9 @@ function initialize(callback) {
 
     app.set('port', config.port);
 
-    console.log("Using data root:", config.dataRoot);
-    console.log("Using config root:", config.configRoot);
-    console.log("Using mount root:", config.mountRoot);
+    console.log('Using data root:', config.dataRoot);
+    console.log('Using config root:', config.configRoot);
+    console.log('Using mount root:', config.mountRoot);
 
     // ensure data/config/mount paths
     mkdirp(config.dataRoot);
@@ -116,7 +124,7 @@ function initialize(callback) {
 
     // sync.initialize(config);
     // routes.file.initialize(config, sync);
-    routes.volume.initialize(config, app);
+    routes.volume.initialize(config);
 
     // repo.initialize(config, callback);
     callback();

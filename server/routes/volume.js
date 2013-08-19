@@ -8,22 +8,19 @@ var fs = require("fs"),
     path = require("path");
 
 exports = module.exports = {
-    initialize: initialize
+    initialize: initialize,
+    listFiles: listFiles,
+    listVolumes: listVolumes,
+    createVolume: createVolume,
+    deleteVolume: deleteVolume,
+    mount: mount,
+    unmount: unmount
 };
 
 var config;
 
-function initialize(cfg, app) {
+function initialize(cfg) {
     config = cfg;
-
-    app.get("/api/v1/volume/list", listVolumes);
-    app.get("/api/v1/volume/*/list/", list);
-    app.get("/api/v1/volume/*/list/*", list);
-
-    app.post("/api/v1/volume/create", createVolume);
-    app.post("/api/v1/volume/*/delete", deleteVolume);
-    app.post("/api/v1/volume/*/mount", mount);
-    app.post("/api/v1/volume/*/unmount", unmount);
 }
 
 function resolveVolumeRootPath(volume) {
@@ -112,7 +109,7 @@ function createVolume(req, res, next) {
     });
 }
 
-function list(req, res, next) {
+function listFiles(req, res, next) {
     req.params[0] = req.params[0] ? req.params[0] : "0";
     req.params[1] = req.params[1] ? req.params[1] : ".";
 
