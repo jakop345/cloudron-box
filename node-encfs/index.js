@@ -3,6 +3,7 @@
 var assert = require("assert"),
     path = require("path"),
     mkdirp = require('mkdirp'),
+    exec = require('child_process').exec,
     spawn = require("child_process").spawn;
 
 exports = module.exports = {
@@ -52,8 +53,6 @@ function createOrMount(root, password, callback) {
     var absMountPoint = path.resolve(__dirname, root.mountPoint);
 
     var args = ENCFS_CMD_ARGS.concat([absRootPath, absMountPoint]);
-
-    console.log(args);
 
     // The callbackWrapper makes sure we only call back once!
     var calledBack = false;
@@ -145,4 +144,16 @@ Root.prototype.unmount = function(callback) {
 
 Root.prototype.info = function(callback) {
     assert(typeof callback === "function", "1 argument must be a callback function");
+};
+
+Root.prototype.isMounted = function(callback) {
+    var that = this;
+
+    exec('mount', {}, function (error, stdout, stderr) {
+        if (error) {
+            return callback(error);
+        }
+
+        return callback(null, (stdout.indexOf(that.mountPoint) >= 0));
+    });
 };
