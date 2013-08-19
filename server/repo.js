@@ -4,103 +4,107 @@ var exec = require('child_process').exec,
     debug = require('debug')('repo.js'),
     path = require('path'),
     mkdirp = require('mkdirp'),
-    fs = require('fs');
+    fs = require('fs'),
+    assert = require('assert');
 
-exports = module.exports = {
-    initialize: initialize,
-    head: null,
-    tree: tree,
-    fileChangeTime: fileChangeTime,
-    isTracked: isTracked,
-    mtime: mtime,
-    commit: commit,
-    create: create,
-    addFile: addFile,
-    updateFile: updateFile,
-    removeFile: removeFile,
-    createReadStream: createReadStream
-};
+exports = module.exports = Repo;
 
-var gitDir, checkoutDir;
+// creates a repo. before you do anything, call initialize()
+function Repo(config) {
+    this.gitDir = config.root + '/.git';
+    this.checkoutDir = config.root;
+    this.head = '';
+}
 
-function git(command, callback) {
+// run arbitrary git command on this repo
+Repo.prototype.git = function (command, callback) {
     var options = {
-        env: { GIT_DIR: gitDir },
-        cwd: checkoutDir
+        env: { GIT_DIR: this.gitDir },
+        cwd: this.checkoutDir
     };
-    debug('GIT_DIR=' + gitDir + ' git ' + command);
+    debug('GIT_DIR=' + this.gitDir + ' git ' + command);
     exec('git ' + command, options, function (error, stdout, stderr) {
         if (error) return callback(error);
         return callback(null, stdout);
     });
-}
+};
 
-function initialize(config, callback) {
-    gitDir = config.root + '/.git';
-    checkoutDir = config.root;
-
-    updateHead(callback);
-}
-
-function updateHead(callback) {
-    git('rev-parse HEAD', function (err, sha1) {
+// FIXME: make head a commit
+Repo.prototype._updateHead = function (callback) {
+    var that = this;
+    this.git('rev-parse HEAD', function (err, sha1) {
         if (err) return callback(err);
-        exports.head = sha1.slice(0, -1);
+        that.head = sha1.trimRight();
         callback();
     });
-}
+};
 
-function create(options, callback) {
-    git('init', function (err) {
+Repo.prototype.initialize = function (callback) {
+    if (!fs.existsSync(this.gitDir)) return callback();
+    this._updateHead(callback);
+};
+
+Repo.prototype.create = function (options, callback) {
+    assert(options.name && options.email);
+    var that = this;
+    mkdirp(this.checkoutDir, function (err) {
         if (err) return callback(err);
-        git('config user.name ' + options.name + ' && git config user.email ' + options.email, callback);
+        that.git('init', function (err) {
+            if (err) return callback(err);
+            that.git('config user.name ' + options.name + ' && git config user.email ' + options.email, callback);
+        });
+    });
+};
+
+Repo.prototype._getCommit = function (commitish, callback) {
+    this.git('show -s --pretty=%T,%ci,%P,%s ' + commitish, function (err, out) {
+        if (err) return callback(err);
+        var parts = out.trimRight().split(',');
+        callback(null, {
+            treeSha1: parts[0],
+            commitDate: new Date(parts[1]),
+            parentSha1: parts[2],
+            subject: parts[3]
+        });
     });
 }
 
-function commit(commit, callback) {
-    git('show -s --pretty=%T,%ci,%P, ' + commit, function (err, out) {
-        if (err) return callback(err);
-        var parts = out.split(',');
-        callback(null, { treeSha1: parts[0], commitDate: new Date(parts[1]), parentSha1: parts[2]});
-    });
-}
+Repo.prototype.getTree = function (treeish, callback) {
+    var tree = { entries: [ ] };
 
-function tree(commit, callback) {
-    if (commit == '') return callback(null, [ ]);
+    if (treeish == '') return callback(null, tree);
 
-    git('ls-tree -r ' + commit, function (err, out) {
-        var lines = out.split('\n');
-        var entries = [ ];
+    this.git('ls-tree -r ' + treeish, function (err, out) {
+        var lines = out.trimRight().split('\n');
         lines.forEach(function (line) {
-            if (line == '') return;
             var id, mode, name, type, _ref;
             // sample line : 100644 blob e69de29bb2d1d6434b8b29ae775ad8c2e48c5391 README
             var parts = line.split(/[\t ]+/, 4);
             var mode = parts[0];
-            entries.push({
+            tree.entries.push({
                 stat: { mode: parseInt(parts[0], 8) }, // match fs.Stat object
                 sha1: parts[2],
                 path: parts[3]
             });
         });
-        callback(null, entries);
+        callback(null, tree);
     });
-}
+};
 
-function isTracked(file, callback) {
-    git('ls-files --error-unmatch ' + file, function (err, out) {
-        return callback(null, !err); // FIXME: check err.code
+Repo.prototype.isTracked = function (file, callback) {
+    this.git('ls-files --error-unmatch ' + file, function (err, out) {
+        return callback(null, !err);
     });
-}
+};
 
-function mtime(file, callback) {
-    git('log --pretty=%ci -- ' + file, function (err, out) {
+Repo.prototype.mtime = function (file, callback) {
+    this.git('log --pretty=%ci -- ' + file, function (err, out) {
         if (err) return callback(null, 0);
         callback(null, new Date(out));
     });
 }
 
-function fileChangeTime(file, fromRev, toRev, callback) {
+Repo.prototype.fileChangeTime = function (file, fromRev, toRev, callback) {
     if (typeof callback === 'undefined') {
         callback = toRev;
         toRev = fromRev;
@@ -110,58 +114,79 @@ function fileChangeTime(file, fromRev, toRev, callback) {
     var cmd = fromRev == ''
         ? 'log ' + fromRev + ' --pretty=%ci -- '+ file
         : 'log ' + fromRev + '..' + toRev + ' --pretty=%ci -- ' + file;
-    git(cmd, function (err, out) {
+    this.git(cmd, function (err, out) {
         if (err) return callback(err);
         if (out.length == 0) return callback(null);
         callback(null, new Date(out));
     });
-}
+};
 
-function createCommit(message, callback) {
-     git('commit -a -m \'' + message + '\'', function (err, out) {
+Repo.prototype._createCommit = function (message, callback) {
+    var that = this;
+    this.git('commit -a -m \'' + message + '\'', function (err, out) {
         if (err) return callback(err);
-        updateHead(function (err) {
+        that._updateHead(function (err) {
             if (err) return callback(err);
-            commit(exports.head, callback);
+            that._getCommit(that.head, callback);
         });
-     });
-}
+    });
+};
 
-function addFile(file, options, callback) {
-    // FIXME: ensure this is a new file
-    if (!options.message) options.message = 'Adding file ' + file;
-    mkdirp(path.dirname(file), function (ignoredErr) {
-        fs.rename(options.path, path.join(checkoutDir, file), function (err) {
+// FIXME: make stream API
+// FIXME: needs checkout lock
+Repo.prototype.addFile = function (file, options, callback) {
+    var that = this;
+    var absoluteFilePath = path.join(this.checkoutDir, file);
+    if (fs.existsSync(absoluteFilePath)) {
+        return callback(new Error('File already exists'));
+    }
+
+    if (!options.message) options.message = 'Add ' + file;
+
+    mkdirp(path.dirname(absoluteFilePath), function (ignoredErr) {
+        fs.rename(options.file, absoluteFilePath, function (err) {
             if (err) return callback(err);
-            git('add ' + file, function (err) {
+            that.git('add ' + file, function (err) {
                 if (err) return callback(err);
-                createCommit(options.message, callback);
+                that._createCommit(options.message, callback);
             });
         });
     });
-}
+};
 
-function updateFile(file, options, callback) {
-    // FIXME: ensure this is an updated file
-    if (!options.message) options.message = 'Updating file ' + file;
-    fs.rename(options.path, path.join(checkoutDir, file), function (err) {
+Repo.prototype.updateFile = function (file, options, callback) {
+    var that = this;
+    var absoluteFilePath = path.join(this.checkoutDir, file);
+    if (!fs.existsSync(absoluteFilePath)) {
+        return callback(new Error('File does not exist'));
+    }
+
+    if (!options.message) options.message = 'Update ' + file;
+
+    fs.rename(options.file, absoluteFilePath, function (err) {
         if (err) return callback(err);
-        git('add ' + file, function (err) {
+        that.git('add ' + file, function (err) {
             if (err) return callback(err);
-            createCommit(options.message, callback);
+            that._createCommit(options.message, callback);
         });
     });
 }
 
-function removeFile(file, callback) {
-    var message = 'Removing file ' + file;
-    fs.unlink(path.join(checkoutDir, file), function (err) {
-        if (err) return callback(err);
-        createCommit(message, callback);
-    });
-}
+Repo.prototype.removeFile = function (file, callback) {
+    var absoluteFilePath = path.join(this.checkoutDir, file);
+    if (!fs.existsSync(absoluteFilePath)) {
+        return callback(new Error('File does not exist'));
+    }
 
-function createReadStream(file) {
-    return fs.createReadStream(path.join(checkoutDir, file));
-}
+    var message = 'Remove ' + file;
+    var that = this;
+    fs.unlink(path.join(this.checkoutDir, file), function (err) {
+        if (err) return callback(err);
+        that._createCommit(message, callback);
+    });
+};
+
+Repo.prototype.createReadStream = function (file, options) {
+    return fs.createReadStream(path.join(this.checkoutDir, file), options);
+};
 
