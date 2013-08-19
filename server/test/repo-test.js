@@ -93,6 +93,14 @@ describe('create', function () {
         });
     });
 
+    it('fileEntry', function (done) {
+        repo.fileEntry('README', function (err, entry) {
+            expect(entry.stat.size == 'README_UPDATED_CONTENTS'.length).to.be.ok();
+            expect(entry.stat.mtime instanceof Date ).to.be.ok();
+            done();
+        });
+    });
+
     it('removeFile - valid file', function (done) {
         repo.removeFile('README', function (err, commit) {
             expect(commit.subject == 'Remove README').to.be.ok();

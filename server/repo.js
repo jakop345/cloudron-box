@@ -68,24 +68,26 @@ Repo.prototype.create = function (options, callback) {
     });
 };
 
+function parseTreeLine(line) {
+    var id, mode, name, type, _ref;
+    // sample line : 100644 blob e69de29bb2d1d6434b8b29ae775ad8c2e48c5391 43 README
+    var parts = line.split(/[\t ]+/, 5);
+    var mode = parts[0];
+    return {
+        stat: { mode: parseInt(parts[0], 8), size: parseInt(parts[3]) }, // match fs.Stat object
+        sha1: parts[2],
+        path: parts[4]
+    };
+}
+
 Repo.prototype.getTree = function (treeish, callback) {
     var tree = { entries: [ ] };
 
     if (treeish == '') return callback(null, tree);
 
-    this.git('ls-tree -r ' + treeish, function (err, out) {
+    this.git('ls-tree -r -l ' + treeish, function (err, out) {
         var lines = out.trimRight().split('\n');
-        lines.forEach(function (line) {
-            var id, mode, name, type, _ref;
-            // sample line : 100644 blob e69de29bb2d1d6434b8b29ae775ad8c2e48c5391 README
-            var parts = line.split(/[\t ]+/, 4);
-            var mode = parts[0];
-            tree.entries.push({
-                stat: { mode: parseInt(parts[0], 8) }, // match fs.Stat object
-                sha1: parts[2],
-                path: parts[3]
-            });
-        });
+        lines.forEach(function (line) { tree.entries.push(parseTreeLine(line)); });
         callback(null, tree);
     });
 };
@@ -96,10 +98,21 @@ Repo.prototype.isTracked = function (file, callback) {
     });
 };
 
-Repo.prototype.mtime = function (file, callback) {
-    this.git('log --pretty=%ci -- ' + file, function (err, out) {
-        if (err) return callback(null, 0);
-        callback(null, new Date(out));
+Repo.prototype.fileEntry = function (file, callback) {
+    var that = this;
+
+    this.git('ls-tree -l HEAD -- ' + file, function (err, out) {
+        if (err) return callback(err);
+
+        var entry = parseTreeLine(out.trimRight());
+
+        // TODO: This is expensive potentially. One option is to stat the checkout
+        // dir (would that work after we recreated the repo from recovery?)
+        that.git('log -1 --pretty=%ci -- ' + file, function (err, out) {
+            if (err) return callback(null, 0);
+            entry.stat.mtime = new Date(out);
+            callback(null, entry);
+        });
     });
 }
 
