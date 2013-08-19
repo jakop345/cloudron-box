@@ -22,7 +22,8 @@
     "superagent": "*",
     "wrench": "*",
     "debug": "*",
-    "mime": "*"
+    "mime": "*",
+    "encfs": "*"
   },
   "devDependencies": {
     "mocha": "*",

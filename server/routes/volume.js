@@ -3,7 +3,7 @@
 var fs = require('fs'),
     debug = require('debug')('volume.js'),
     HttpError = require('../httperror'),
-    encfs = require('../../node-encfs/index.js'),
+    encfs = require('encfs'),
     wrench = require('wrench'),
     path = require('path'),
     Repo = require('../repo'),
