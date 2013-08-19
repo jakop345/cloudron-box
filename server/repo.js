@@ -98,40 +98,23 @@ Repo.prototype.isTracked = function (file, callback) {
     });
 };
 
-Repo.prototype.fileEntry = function (file, callback) {
+Repo.prototype.fileEntry = function (file, commitish, callback) {
     var that = this;
 
-    this.git('ls-tree -l HEAD -- ' + file, function (err, out) {
+    this.git('ls-tree -l ' + commitish + ' -- ' + file, function (err, out) {
         if (err) return callback(err);
 
         var entry = parseTreeLine(out.trimRight());
 
-        // TODO: This is expensive potentially. One option is to stat the checkout
+        // TODO: This is expensive potentially. One option for HEAD is to stat the checkout
         // dir (would that work after we recreated the repo from recovery?)
-        that.git('log -1 --pretty=%ci -- ' + file, function (err, out) {
+        that.git('log -1 --pretty=%ci ' + commitish + ' -- ' + file, function (err, out) {
             if (err) return callback(null, 0);
             entry.stat.mtime = new Date(out);
             callback(null, entry);
         });
     });
 }
-
-Repo.prototype.fileChangeTime = function (file, fromRev, toRev, callback) {
-    if (typeof callback === 'undefined') {
-        callback = toRev;
-        toRev = fromRev;
-        fromRev = '';
-    }
-
-    var cmd = fromRev == ''
-        ? 'log ' + fromRev + ' --pretty=%ci -- '+ file
-        : 'log ' + fromRev + '..' + toRev + ' --pretty=%ci -- ' + file;
-    this.git(cmd, function (err, out) {
-        if (err) return callback(err);
-        if (out.length == 0) return callback(null);
-        callback(null, new Date(out));
-    });
-};
 
 Repo.prototype._createCommit = function (message, callback) {
     var that = this;

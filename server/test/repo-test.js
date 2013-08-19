@@ -93,9 +93,17 @@ describe('create', function () {
         });
     });
 
-    it('fileEntry', function (done) {
-        repo.fileEntry('README', function (err, entry) {
+    it('fileEntry - HEAD', function (done) {
+        repo.fileEntry('README', 'HEAD', function (err, entry) {
             expect(entry.stat.size == 'README_UPDATED_CONTENTS'.length).to.be.ok();
+            expect(entry.stat.mtime instanceof Date ).to.be.ok();
+            done();
+        });
+    });
+
+    it('fileEntry - HEAD~1', function (done) {
+        repo.fileEntry('README', 'HEAD~1', function (err, entry) {
+            expect(entry.stat.size == 'README_NEW_CONTENTS'.length).to.be.ok();
             expect(entry.stat.mtime instanceof Date ).to.be.ok();
             done();
         });
