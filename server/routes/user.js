@@ -19,7 +19,7 @@ exports = module.exports = {
 function firstTimeCheck(req, res, next) {
     if (req.method !== 'GET') return next();
     // TODO: poor man's check if its an html page ;-)
-    if (req.url.indexOf('html') < 0) return next();
+    if (req.url.indexOf('html') < 0 && req.url !== '/') return next();
 
     // if its not not first time but firsttime.html is requested, redirect to index.html
     if (!db.firstTime()) {
