@@ -1,11 +1,11 @@
 'use strict';
 
-var fs = require("fs"),
-    debug = require("debug")("volume.js"),
-    HttpError = require("../httperror"),
-    encfs = require("../../node-encfs/index.js"),
-    wrench = require("wrench"),
-    path = require("path");
+var fs = require('fs'),
+    debug = require('debug')('volume.js'),
+    HttpError = require('../httperror'),
+    encfs = require('../../node-encfs/index.js'),
+    wrench = require('wrench'),
+    path = require('path');
 
 exports = module.exports = {
     initialize: initialize,
@@ -48,17 +48,17 @@ function deleteVolume(req, res, next) {
         var volume = new encfs.Root(rootPath, mountPoint);
         volume.unmount(function (error) {
             if (error) {
-                console.log("Error unmounting the volume.", error);
+                console.log('Error unmounting the volume.', error);
             }
 
             wrench.rmdirRecursive(rootPath, function (error) {
                 if (error) {
-                    console.log("Failed to delete volume root path.", error);
+                    console.log('Failed to delete volume root path.', error);
                 }
 
                 wrench.rmdirRecursive(mountPoint, function (error) {
                     if (error) {
-                        console.log("Failed to delete volume mount point.", error);
+                        console.log('Failed to delete volume mount point.', error);
                     }
 
                     // TODO how to handle any errors in folder deletion?
@@ -99,10 +99,10 @@ function createVolume(req, res, next) {
     var volumeRoot = resolveVolumeRootPath(req.body.name);
     var volumeMountPoint = resolveVolumeMountPoint(req.body.name);
 
-    encfs.create(volumeRoot, volumeMountPoint, "foobar1337", function (error, result) {
+    encfs.create(volumeRoot, volumeMountPoint, 'foobar1337', function (error, result) {
         if (error) {
-            console.log("Creating volume failed:", error);
-            return next(new HttpError(400, "volume creation failed: " + error));
+            console.log('Creating volume failed:', error);
+            return next(new HttpError(400, 'volume creation failed: ' + error));
         }
 
         res.send(200);
@@ -110,8 +110,8 @@ function createVolume(req, res, next) {
 }
 
 function listFiles(req, res, next) {
-    req.params[0] = req.params[0] ? req.params[0] : "0";
-    req.params[1] = req.params[1] ? req.params[1] : ".";
+    req.params[0] = req.params[0] ? req.params[0] : '0';
+    req.params[1] = req.params[1] ? req.params[1] : '.';
 
     var folder = path.join(resolveVolumeMountPoint(req.params[0]), req.params[1]);
 
@@ -124,8 +124,8 @@ function listFiles(req, res, next) {
 
         if (folder !== resolveVolumeMountPoint(req.params[0])) {
             var dirUp = {};
-            dirUp.filename = "..";
-            dirUp.path = path.join(req.params[1], "..");
+            dirUp.filename = '..';
+            dirUp.path = path.join(req.params[1], '..');
             dirUp.isDirectory = true;
             dirUp.isFile = false;
             dirUp.stat = { size: 0 };
@@ -142,7 +142,7 @@ function listFiles(req, res, next) {
                 tmp.isFile = tmp.stat.isFile();
                 tmp.isDirectory = tmp.stat.isDirectory();
             } catch (e) {
-                console.log("Error getting file information", e);
+                console.log('Error getting file information', e);
             }
 
             ret.push(tmp);
@@ -153,9 +153,9 @@ function listFiles(req, res, next) {
 }
 
 function mount(req, res, next) {
-    console.log(req);
+    // TODO
 }
 
 function unmount(req, res, next) {
-
+    // TODO
 }
