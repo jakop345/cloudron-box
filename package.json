@@ -23,6 +23,8 @@
     "wrench": "*",
     "debug": "*"
   },
-  "scripts": {
+  "devDependencies": {
+    "mocha": "*",
+    "expect.js": "*"
   }
 }
