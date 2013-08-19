@@ -13,7 +13,7 @@ exports = module.exports = Repo;
 function Repo(config) {
     this.gitDir = config.root + '/.git';
     this.checkoutDir = config.root;
-    this.head = '';
+    this.head = null;
 }
 
 // run arbitrary git command on this repo
@@ -29,13 +29,25 @@ Repo.prototype.git = function (command, callback) {
     });
 };
 
-// FIXME: make head a commit
+Repo.prototype._getCommit = function (commitish, callback) {
+    this.git('show -s --pretty=%T,%ci,%P,%s ' + commitish, function (err, out) {
+        if (err) return callback(err);
+        var parts = out.trimRight().split(',');
+        callback(null, {
+            treeSha1: parts[0],
+            commitDate: new Date(parts[1]),
+            parentSha1: parts[2],
+            subject: parts[3]
+        });
+    });
+}
+
 Repo.prototype._updateHead = function (callback) {
     var that = this;
-    this.git('rev-parse HEAD', function (err, sha1) {
+    this._getCommit('HEAD', function (err, commit) {
         if (err) return callback(err);
-        that.head = sha1.trimRight();
-        callback();
+        that.head = commit;
+        callback(null, commit);
     });
 };
 
@@ -55,19 +67,6 @@ Repo.prototype.create = function (options, callback) {
         });
     });
 };
-
-Repo.prototype._getCommit = function (commitish, callback) {
-    this.git('show -s --pretty=%T,%ci,%P,%s ' + commitish, function (err, out) {
-        if (err) return callback(err);
-        var parts = out.trimRight().split(',');
-        callback(null, {
-            treeSha1: parts[0],
-            commitDate: new Date(parts[1]),
-            parentSha1: parts[2],
-            subject: parts[3]
-        });
-    });
-}
 
 Repo.prototype.getTree = function (treeish, callback) {
     var tree = { entries: [ ] };
@@ -125,10 +124,7 @@ Repo.prototype._createCommit = function (message, callback) {
     var that = this;
     this.git('commit -a -m \'' + message + '\'', function (err, out) {
         if (err) return callback(err);
-        that._updateHead(function (err) {
-            if (err) return callback(err);
-            that._getCommit(that.head, callback);
-        });
+        that._updateHead(callback);
     });
 };
 
