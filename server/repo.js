@@ -114,7 +114,7 @@ Repo.prototype.fileEntry = function (file, commitish, callback) {
             callback(null, entry);
         });
     });
-}
+};
 
 Repo.prototype._createCommit = function (message, callback) {
     var that = this;
@@ -125,6 +125,18 @@ Repo.prototype._createCommit = function (message, callback) {
 };
 
 // FIXME: make stream API
+Repo.prototype._writeFileAndCommit = function (file, options, callback) {
+    var that = this;
+    var absoluteFilePath = path.join(this.checkoutDir, file);
+    fs.rename(options.file, absoluteFilePath, function (err) {
+        if (err) return callback(err);
+        that.git('add ' + file, function (err) {
+            if (err) return callback(err);
+            that._createCommit(options.message, callback);
+        });
+    });
+};
+
 // FIXME: needs checkout lock
 Repo.prototype.addFile = function (file, options, callback) {
     var that = this;
@@ -136,13 +148,7 @@ Repo.prototype.addFile = function (file, options, callback) {
     if (!options.message) options.message = 'Add ' + file;
 
     mkdirp(path.dirname(absoluteFilePath), function (ignoredErr) {
-        fs.rename(options.file, absoluteFilePath, function (err) {
-            if (err) return callback(err);
-            that.git('add ' + file, function (err) {
-                if (err) return callback(err);
-                that._createCommit(options.message, callback);
-            });
-        });
+        that._writeFileAndCommit(file, options, callback);
     });
 };
 
@@ -155,14 +161,8 @@ Repo.prototype.updateFile = function (file, options, callback) {
 
     if (!options.message) options.message = 'Update ' + file;
 
-    fs.rename(options.file, absoluteFilePath, function (err) {
-        if (err) return callback(err);
-        that.git('add ' + file, function (err) {
-            if (err) return callback(err);
-            that._createCommit(options.message, callback);
-        });
-    });
-}
+    this._writeFileAndCommit(file, options, callback);
+};
 
 Repo.prototype.removeFile = function (file, callback) {
     var absoluteFilePath = path.join(this.checkoutDir, file);
