@@ -11,9 +11,8 @@ var optimist = require('optimist'),
     fs = require('fs'),
     mkdirp = require('mkdirp'),
     db = require('./database'),
-    sync = require('./sync'),
     routes = require('./routes'),
-    repo = require('./repo'),
+    Repo = require('./repo'),
     debug = require('debug');
 
 var argv = optimist.usage('Usage: $0 --dataRoot <directory>')
@@ -47,6 +46,7 @@ function clientErrorHandler(err, req, res, next) {
     if (status >= 400 && status <= 499) {
         util.debug(http.STATUS_CODES[status] + ' : ' + err.message);
         res.send(status, JSON.stringify({ status: http.STATUS_CODES[status], message: err.message }));
+        util.debug(err.stack);
     } else {
         next(err);
     }
@@ -58,7 +58,6 @@ function serverErrorHandler(err, req, res, next) {
     util.debug(http.STATUS_CODES[status] + ' : ' + err.message);
     util.debug(err.stack);
 }
-
 
 app.configure(function () {
     var json = express.json({ strict: true, limit: 2000 }), // application/json
@@ -85,6 +84,8 @@ app.configure(function () {
     app.post('/api/v1/token', routes.user.createToken);
     app.get('/api/v1/logout', routes.user.logout);
     app.get('/api/v1/userInfo', routes.user.userInfo);
+
+    app.post('/api/v1/sync/*/diff', routes.volume.attachRepo, routes.sync.diff);
 
     app.get('/api/v1/file/dirIndex', routes.file.listing);
     app.get('/file/:filename', routes.file.read);
@@ -122,11 +123,11 @@ function initialize(callback) {
         return callback(new Error('Error initializing database'));
     }
 
-    // sync.initialize(config);
+    routes.sync.initialize(config);
+
     // routes.file.initialize(config, sync);
     routes.volume.initialize(config);
 
-    // repo.initialize(config, callback);
     callback();
 }
 

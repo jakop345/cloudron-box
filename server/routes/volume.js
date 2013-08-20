@@ -5,7 +5,8 @@ var fs = require('fs'),
     HttpError = require('../httperror'),
     encfs = require('../../node-encfs/index.js'),
     wrench = require('wrench'),
-    path = require('path');
+    path = require('path'),
+    Repo = require('../repo');
 
 exports = module.exports = {
     initialize: initialize,
@@ -14,7 +15,8 @@ exports = module.exports = {
     createVolume: createVolume,
     deleteVolume: deleteVolume,
     mount: mount,
-    unmount: unmount
+    unmount: unmount,
+    attachRepo: attachRepo
 };
 
 var config;
@@ -159,3 +161,12 @@ function mount(req, res, next) {
 function unmount(req, res, next) {
     // TODO
 }
+
+function attachRepo(req, res, next) {
+    var volume = req.params[0];
+    if (!volume) return next(400, new HttpError('Volume not specified'));
+    // FIXME: validate repo name and cache the repo objects per volume
+    req.repo = new Repo({ root: resolveVolumeMountPoint(volume) });
+    next();
+}
+
