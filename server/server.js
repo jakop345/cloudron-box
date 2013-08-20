@@ -85,7 +85,7 @@ app.configure(function () {
     app.get('/api/v1/logout', routes.user.logout);
     app.get('/api/v1/userInfo', routes.user.userInfo);
 
-    app.post('/api/v1/sync/*/diff', routes.volume.attachRepo, routes.sync.diff);
+    app.post('/api/v1/sync/:volume/diff', routes.volume.attachRepo, routes.sync.diff);
 
     app.get('/api/v1/file/dirIndex', routes.file.listing);
     app.get('/file/:filename', routes.file.read);
