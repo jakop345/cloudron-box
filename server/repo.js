@@ -29,22 +29,23 @@ Repo.prototype.git = function (command, callback) {
     });
 };
 
-Repo.prototype._getCommit = function (commitish, callback) {
-    this.git('show -s --pretty=%T,%ci,%P,%s ' + commitish, function (err, out) {
+Repo.prototype.getCommit = function (commitish, callback) {
+    this.git('show -s --pretty=%T,%ci,%P,%s,%H ' + commitish, function (err, out) {
         if (err) return callback(err);
         var parts = out.trimRight().split(',');
         callback(null, {
             treeSha1: parts[0],
             commitDate: new Date(parts[1]),
             parentSha1: parts[2],
-            subject: parts[3]
+            subject: parts[3],
+            sha1: parts[4]
         });
     });
 }
 
 Repo.prototype._updateHead = function (callback) {
     var that = this;
-    this._getCommit('HEAD', function (err, commit) {
+    this.getCommit('HEAD', function (err, commit) {
         if (err) return callback(err);
         that.head = commit;
         callback(null, commit);
