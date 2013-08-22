@@ -104,6 +104,8 @@ Repo.prototype.fileEntry = function (file, commitish, callback) {
 
     this.git('ls-tree -l ' + commitish + ' -- ' + file, function (err, out) {
         if (err) return callback(err);
+        out = out.trimRight();
+        if (out.length == 0) return callback(null, null); // file was removed
 
         var entry = parseTreeLine(out.trimRight());
 

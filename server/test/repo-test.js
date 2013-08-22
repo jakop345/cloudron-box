@@ -93,7 +93,7 @@ describe('create', function () {
         });
     });
 
-    it('fileEntry - HEAD', function (done) {
+    it('fileEntry - valid file @HEAD', function (done) {
         repo.fileEntry('README', 'HEAD', function (err, entry) {
             expect(entry.stat.size == 'README_UPDATED_CONTENTS'.length).to.be.ok();
             expect(entry.stat.mtime instanceof Date ).to.be.ok();
@@ -101,7 +101,7 @@ describe('create', function () {
         });
     });
 
-    it('fileEntry - HEAD~1', function (done) {
+    it('fileEntry - valid file @HEAD~1', function (done) {
         repo.fileEntry('README', 'HEAD~1', function (err, entry) {
             expect(entry.stat.size == 'README_NEW_CONTENTS'.length).to.be.ok();
             expect(entry.stat.mtime instanceof Date ).to.be.ok();
@@ -109,9 +109,25 @@ describe('create', function () {
         });
     });
 
+    it('fileEntry - invalid file @HEAD', function (done) {
+        repo.fileEntry('RANDOM', 'HEAD', function (err, entry) {
+            expect(!err).to.be.ok();
+            expect(entry == null).to.be.ok();
+            done();
+        });
+    });
+
     it('removeFile - valid file', function (done) {
         repo.removeFile('README', function (err, commit) {
             expect(commit.subject == 'Remove README').to.be.ok();
+            done();
+        });
+    });
+
+    it('fileEntry - removed file @HEAD', function (done) {
+        repo.fileEntry('README', 'HEAD', function (err, entry) {
+            expect(!err).to.be.ok();
+            expect(entry == null).to.be.ok();
             done();
         });
     });

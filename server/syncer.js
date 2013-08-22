@@ -85,6 +85,7 @@ function whatChanged(leftEntry, baseEntry, rightEntry) {
         if (baseEntry.sha1 == leftEntry.sha1 && leftEntry.stat.mtime <= baseEntry.stat.mtime) {
             result = { action: 'unlink', path: leftEntry.path, conflict: false };
         } else {
+            // note that we add even if leftEntry.mtime < rightEntry.deletionTime
             result = { action: 'add', path: leftEntry.path, conflict: true };
         }
     }
