@@ -15,22 +15,28 @@ var optimist = require('optimist'),
     Repo = require('./repo'),
     debug = require('debug');
 
+function getUserHomeDir() {
+    return process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+}
+
+var homeDir = path.join(getUserHomeDir(), '.yellowtent');
+
 var argv = optimist.usage('Usage: $0 --dataRoot <directory>')
     .alias('h', 'help')
     .describe('h', 'Show this help.')
 
     .alias('d', 'dataRoot')
-    .default('d', '.data')
+    .default('d', path.join(homeDir, 'data'))
     .describe('d', 'Volume data storage directory.')
     .string('d')
 
     .alias('m', 'mountRoot')
-    .default('m', '.mount')
+    .default('m', path.join(homeDir, 'mount'))
     .describe('m', 'Volume mount point directory.')
     .string('m')
 
     .alias('c', 'configRoot')
-    .default('c', '.config')
+    .default('c', path.join(homeDir, 'config'))
     .describe('c', 'Server config root directory for storing user db and meta data.')
     .string('c')
 
@@ -117,9 +123,9 @@ function initialize(callback) {
     console.log('Using mount root:', config.mountRoot);
 
     // ensure data/config/mount paths
-    mkdirp(config.dataRoot);
-    mkdirp(config.configRoot);
-    mkdirp(config.mountRoot);
+    mkdirp.sync(config.dataRoot);
+    mkdirp.sync(config.configRoot);
+    mkdirp.sync(config.mountRoot);
 
     if (!db.initialize(config)) {
         return callback(new Error('Error initializing database'));
