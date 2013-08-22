@@ -96,7 +96,7 @@ app.configure(function () {
     app.post('/api/v1/sync/:volume/diff', routes.sync.diff);
 
     app.get('/api/v1/file/dirIndex', routes.file.listing);
-    app.get('/file/:filename', routes.file.read);
+    app.get('/api/v1/file/:volume/*', routes.file.read);
     app.post('/file', routes.file.update);
 
     app.get('/api/v1/volume/*/list/', routes.volume.listFiles);

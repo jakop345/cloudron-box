@@ -1,6 +1,7 @@
 'use strict';
 
 var fs = require('fs'),
+    HttpError = require('../httperror'),
     sync = require('../sync');
 
 exports = module.exports = {
@@ -21,13 +22,14 @@ function listing(req, res, next) {
 }
 
 function read(req, res, next) {
-    var absoluteFilePath = path.join(root, req.params.filename);
+    var filePath = req.params[0];
 
-    fs.exists(absoluteFilePath, function (exists) {
-        if (!exists) return next(new HttpError(404));
-
-        res.sendfile(absoluteFilePath);
+    var file = req.repo.createReadStream(filePath);
+    file.on('error', function (err) {
+        if (err.code == 'ENOENT' || err.code == 'ENOTDIR') return next(new HttpError(404, 'Not found'));
+        return next(new HttpError(500, 'Stream error:' + err));
     });
+    file.pipe(res);
 }
 
 function update(req, res, next) {
