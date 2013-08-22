@@ -12,7 +12,7 @@ var syncer = require('../syncer'),
 var assert = require('assert');
 var expect = require('expect.js');
 
-describe('create', function () {
+describe('diff', function () {
     var leftTree, baseTree, rightTree;
 
     function initTrees() {
@@ -127,3 +127,6 @@ describe('create', function () {
     });
 });
  
+describe('canUpdate', function() {
+});
+

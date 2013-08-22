@@ -4,7 +4,8 @@ var assert = require('assert'),
     debug = require('debug')('syncer.js');
 
 exports = module.exports = {
-    diff: diff
+    diff: diff,
+    whatChanged: whatChanged
 };
 
 // n-way tree traversal

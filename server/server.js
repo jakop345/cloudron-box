@@ -97,7 +97,7 @@ app.configure(function () {
 
     app.get('/api/v1/file/dirIndex', routes.file.listing);
     app.get('/api/v1/file/:volume/*', routes.file.read);
-    app.post('/file', routes.file.update);
+    app.post('/api/v1/file/:volume/*', routes.file.update);
 
     app.get('/api/v1/volume/*/list/', routes.volume.listFiles);
     app.get('/api/v1/volume/*/list/*', routes.volume.listFiles);

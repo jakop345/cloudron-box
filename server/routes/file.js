@@ -2,7 +2,7 @@
 
 var fs = require('fs'),
     HttpError = require('../httperror'),
-    sync = require('../sync');
+    syncer = require('../syncer');
 
 exports = module.exports = {
     initialize: initialize,
@@ -11,10 +11,7 @@ exports = module.exports = {
     update: update
 };
 
-var sync;
-
-function initialize(config, s) {
-    sync = s;
+function initialize(config) {
 }
 
 function listing(req, res, next) {
@@ -42,42 +39,43 @@ function update(req, res, next) {
         return next(new HttpError(400, 'cannot parse data field:' + e.message));
     }
 
-    if (!data.filename) return next(new HttpError(400, 'filename not specified'));
-    if (!data.action) return next(new HttpError(400, 'action not specified'));
+    if (!data.entry || !data.entry.path) return next(new HttpError(400, 'path not specified'));
+    if (!data.entry.sha1) return next(new HttpError(400, 'sha1 not specified'));
+    if (!data.entry.stat || !data.entry.stat.mtime) return next(new HttpError(400, 'mtime not specified'));
 
-    var entry = sync.index.entry(data.filename);
-    var absoluteFilePath = path.join(root, data.filename);
+    if (!data.action) return next(new HttpError(400, 'action not specified'));
+    if (!data.lastSyncRevision) return next(new HttpError(400, 'lastSyncRevision not specified'));
+
+    if (data.action == 'add' || data.action == 'update') {
+        if (!req.files.file) return next(new HttpError(400, 'file not provided'));
+    } else if (data.action != 'remove') {
+        res.send(new HttpError(400, 'Unknown action'));
+    }
 
     console.log('Processing ', data);
 
-    if (data.action === 'add') {
-        if (!req.files.file) return next(new HttpError(400, 'file not provided'));
-        if (entry) return next(new HttpError(409, 'File already exists'));
+    var leftEntry = data.entry;
 
-        // make sure the folder exists
-        mkdirp(path.dirname(absoluteFilePath), function (error) {
-            fs.rename(req.files.file.path, absoluteFilePath, function (err) {
-                if (err) return next(new HttpError(500, err.toString()));
-                sync.index.addEntry(root, data.filename, function () { res.send('OK'); });
-            });
+    repo.fileEntry(leftEntry.path, data.lastSyncRevision, function (err, baseEntry) {
+        if (err) return next(new HttpError(400, 'File does not exist at lastSyncRevision'));
+        repo.fileEntry(leftEntry.path, 'HEAD', function (err, rightEntry) {
+            if (err) return next(new HttpError(400, 'File does not exist in HEAD'));
+            var change = whatChanged(leftEntry, baseEntry, rightEntry);
+            if (conflict.length != 0) return next(new HttpError(409, JSON.stringify(conflict)));
+
+            // actually update the file!
+            if (data.action == 'add' || data.action == 'update') {
+                repo.addFile(data.path, req.files.file.path, function (err, fileSha1, commit) {
+                    if (err) return next(new HttpError(500, err.toString()));
+                    res.send(200, { serverRevision: commit.sha1, fileRevision: fileSha1, canFastForward: commit.parentSha1 == data.lastSyncRevision });
+                });
+            } else if (data.action == 'remove') {
+                repo.removeFile(data.path, function (err, commit) {
+                    if (err) return next(new HttpError(500, err.toString()));
+                    res.send(200, { serverRevision: commit.sha1, canFastForward: commit.parentSha1 == data.lastSyncRevision });
+                });
+            }
         });
-    } else if (data.action === 'remove') {
-        if (!entry) return next(new HttpError(404, 'File does not exist'));
-        fs.unlink(root + '/' + data.filename, function (err) {
-            if (err) return next(new HttpError(500, err.toString()));
-            sync.index.removeEntry(root, data.filename, function() { res.send('OK'); });
-        });
-    } else if (data.action === 'update') {
-        if (!entry) return next(new HttpError(404, 'File does not exist'));
-        if (!req.files.file) return next(new HttpError(400, 'file not provided'));
-        if (!data.mtime) return next(new HttpError(400, 'mtime not specified'));
-        if (data.mtime < entry.mtime) return next(new HttpError(400, 'Outdated'));
-        fs.rename(req.files.file.path, absoluteFilePath, function (err) {
-            if (err) return next(new HttpError(500, err.toString()));
-            sync.index.updateEntry(root, data.filename, function() { res.send('OK'); });
-        });
-    } else {
-        res.send(new HttpError(400, 'Unknown action'));
-    }
+    });
 }
 
