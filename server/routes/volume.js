@@ -162,8 +162,7 @@ function unmount(req, res, next) {
     // TODO
 }
 
-function attachRepo(req, res, next) {
-    var volume = req.params.volume;
+function attachRepo(req, res, next, volume) {
     if (!volume) return next(400, new HttpError('Volume not specified'));
     // FIXME: validate repo name and cache the repo objects per volume
     req.repo = new Repo({ root: resolveVolumeMountPoint(volume) });
