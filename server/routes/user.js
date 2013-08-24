@@ -124,6 +124,8 @@ function authenticate(req, res, next) {
                     return next(new HttpError(401, 'Username and password does not match'), false);
                 }
 
+                debug('authenticated');
+
                 req.user = {
                     username: user.username
                 };
