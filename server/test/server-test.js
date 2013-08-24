@@ -92,5 +92,14 @@ describe('volume', function () {
             done(err);
         });
     });
+
+    it('bad volume', function (done) {
+        request.get(SERVER_URL + '/api/v1/file/whatever/volume')
+               .set('Authorization', AUTH)
+               .end(function (err, res) {
+            expect(res.statusCode == 404).to.be.ok();
+            done(err);
+        });
+    });
 });
 

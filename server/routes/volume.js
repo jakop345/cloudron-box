@@ -181,7 +181,7 @@ function attachRepo(req, res, next, volumeId) {
     if (!volumeId) return next(400, new HttpError('Volume not specified'));
 
     req.repo = repos[volumeId];
-    if (!req.repo) return next(404, new HttpError('No such repo'));
+    if (!req.repo) return next(new HttpError(404, 'No such repo'));
 
     next();
 }
