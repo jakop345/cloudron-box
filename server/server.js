@@ -114,7 +114,6 @@ app.configure(function () {
 
     app.post('/api/v1/sync/:volume/diff', routes.sync.diff);
 
-    app.get('/api/v1/file/dirIndex', routes.file.listing);
     app.get('/api/v1/file/:volume/*', routes.file.read);
     app.post('/api/v1/file/:volume/*', routes.file.update);
 
@@ -152,7 +151,6 @@ function initialize(callback) {
 
     routes.sync.initialize(config);
 
-    // routes.file.initialize(config, sync);
     routes.volume.initialize(config, callback);
 }
 

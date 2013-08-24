@@ -2,31 +2,27 @@
 
 var fs = require('fs'),
     HttpError = require('../httperror'),
-    syncer = require('../syncer');
+    syncer = require('../syncer'),
+    mime = require('mime');
 
 exports = module.exports = {
-    initialize: initialize,
-    listing: listing,
     read: read,
     update: update
 };
-
-function initialize(config) {
-}
-
-function listing(req, res, next) {
-    res.send(sync.index.json());
-}
 
 function read(req, res, next) {
     var filePath = req.params[0];
 
     var file = req.repo.createReadStream(filePath);
+    file.on('open', function () {
+        // not setting the Content-Length explicitly sends the data using chunked encoding
+        res.writeHead(200, { 'Content-Type' : mime.lookup(filePath) });
+        file.pipe(res);
+    });
     file.on('error', function (err) {
         if (err.code == 'ENOENT' || err.code == 'ENOTDIR') return next(new HttpError(404, 'Not found'));
         return next(new HttpError(500, 'Stream error:' + err));
     });
-    file.pipe(res);
 }
 
 function update(req, res, next) {

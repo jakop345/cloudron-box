@@ -1,5 +1,5 @@
 {
-  "name": "YellowTent",
+  "name": "yellowtent",
   "description": "Yellow tent",
   "version": "0.0.1",
   "author": {
@@ -21,7 +21,8 @@
     "express": "*",
     "superagent": "*",
     "wrench": "*",
-    "debug": "*"
+    "debug": "*",
+    "mime": "*"
   },
   "devDependencies": {
     "mocha": "*",

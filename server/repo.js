@@ -6,14 +6,15 @@ var exec = require('child_process').exec,
     mkdirp = require('mkdirp'),
     fs = require('fs'),
     assert = require('assert'),
-    crypto = require('crypto');
+    crypto = require('crypto'),
+    debug = require('debug')('repo.js');
 
 exports = module.exports = Repo;
 
 // creates a repo. before you do anything
 function Repo(config) {
-    this.gitDir = config.root + '/.git';
-    this.checkoutDir = config.root;
+    this.gitDir = config.rootDir + '/.git';
+    this.checkoutDir = config.rootDir;
 }
 
 // run arbitrary git command on this repo

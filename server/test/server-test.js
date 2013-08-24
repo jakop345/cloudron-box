@@ -86,7 +86,7 @@ describe('volume', function () {
                .end(function (err, res) {
             var foundReadme = false;
             res.body.forEach(function (entry) {
-                if (entry.filename == 'README') foundReadme = true;
+                if (entry.filename == 'README.md') foundReadme = true;
             });
             expect(foundReadme == true).to.be.ok();
             done(err);
@@ -98,6 +98,18 @@ describe('volume', function () {
                .set('Authorization', AUTH)
                .end(function (err, res) {
             expect(res.statusCode == 404).to.be.ok();
+            done(err);
+        });
+    });
+});
+
+describe('file', function () {
+    it('read', function (done) {
+        request.get(SERVER_URL + '/api/v1/file/' + TESTVOLUME + '/README.md')
+               .set('Authorization', AUTH)
+               .end(function (err, res) {
+            expect(res.statusCode == 200).to.be.ok();
+            expect(res.text == 'README').to.be.ok();
             done(err);
         });
     });

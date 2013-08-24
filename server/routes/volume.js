@@ -114,10 +114,10 @@ function createVolume(req, res, next) {
         }
 
         // ## move this to repo
-        var repo = new Repo({ root: volumeMountPoint });
+        var repo = new Repo({ rootDir: volumeMountPoint });
         repo.create({ name: 'nobody', email: 'somebody@like.me' }, function (error) {
             if (error) return next(new HttpError(500, 'Error creating repo in volume'));
-            repo.addFile('README', { contents: 'Say something useful here' }, function (error, commit) {
+            repo.addFile('README.md', { contents: 'README' }, function (error, commit) {
                 if (error) return next(new HttpError(500, 'Error adding README: ' + error));
                 repos[req.body.name] = repo;
                 res.send(201);
