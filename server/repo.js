@@ -10,11 +10,10 @@ var exec = require('child_process').exec,
 
 exports = module.exports = Repo;
 
-// creates a repo. before you do anything, call initialize()
+// creates a repo. before you do anything
 function Repo(config) {
     this.gitDir = config.root + '/.git';
     this.checkoutDir = config.root;
-    this.head = null;
 }
 
 // run arbitrary git command on this repo
@@ -43,20 +42,6 @@ Repo.prototype.getCommit = function (commitish, callback) {
         });
     });
 }
-
-Repo.prototype._updateHead = function (callback) {
-    var that = this;
-    this.getCommit('HEAD', function (err, commit) {
-        if (err) return callback(err);
-        that.head = commit;
-        callback(null, commit);
-    });
-};
-
-Repo.prototype.initialize = function (callback) {
-    if (!fs.existsSync(this.gitDir)) return callback();
-    this._updateHead(callback);
-};
 
 Repo.prototype.create = function (options, callback) {
     assert(options.name && options.email);
@@ -124,7 +109,7 @@ Repo.prototype._createCommit = function (message, callback) {
     var that = this;
     this.git('commit -a -m \'' + message + '\'', function (err, out) {
         if (err) return callback(err);
-        that._updateHead(callback);
+        that.getCommit('HEAD', callback);
     });
 };
 

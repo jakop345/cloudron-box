@@ -19,10 +19,6 @@ var repo = new Repo({ root: path.join(os.tmpdir(), tmpdirname) });
 console.log('repo test dir', repo.checkoutDir);
 
 describe('create', function () {
-    it('initialize should not err on non-git dir', function (done) {
-        repo.initialize(done);
-    });
-
     it('create', function (done) {
         repo.create({ name: 'nobody', email: 'no@bo.dy' }, function () {
             expect(fs.existsSync(repo.gitDir)).to.be.ok();

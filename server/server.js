@@ -11,7 +11,6 @@ var optimist = require('optimist'),
     mkdirp = require('mkdirp'),
     db = require('./database'),
     routes = require('./routes'),
-    Repo = require('./repo'),
     debug = require('debug'),
     crypto = require('crypto'),
     os = require('os');
@@ -32,7 +31,7 @@ var baseDir = path.join(getUserHomeDir(), '.yellowtent');
 
 app.configure('testing', function () {
     // to make sure tests can run repeatedly, set the basedir to something random
-    var tmpdirname = 'repo-test-' + crypto.randomBytes(4).readUInt32LE(0);
+    var tmpdirname = 'yellowtent-' + crypto.randomBytes(4).readUInt32LE(0);
     baseDir = path.join(os.tmpdir(), tmpdirname);
 });
 
