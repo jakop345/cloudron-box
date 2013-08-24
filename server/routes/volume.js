@@ -6,7 +6,8 @@ var fs = require('fs'),
     encfs = require('../../node-encfs/index.js'),
     wrench = require('wrench'),
     path = require('path'),
-    Repo = require('../repo');
+    Repo = require('../repo'),
+    debug = require('debug')('volume.js');
 
 exports = module.exports = {
     initialize: initialize,
@@ -21,9 +22,22 @@ exports = module.exports = {
 
 var config, repos = { };
 
-function initialize(cfg) {
+function initialize(cfg, callback) {
     config = cfg;
-    // TODO: populate repos with existing repos
+
+    fs.readdir(config.dataRoot, function (error, files) {
+        if (error) {
+            return callback(new Error('Unable to read root folder'));
+        }
+
+        files.forEach(function (file) {
+            var repo = new Repo({ rootDir: resolveVolumeMountPoint(file) });
+            repos[file] = repo;
+            debug('Detected repo : ' + file);
+        });
+
+        callback();
+    });
 }
 
 function resolveVolumeRootPath(volume) {
@@ -74,23 +88,11 @@ function deleteVolume(req, res, next) {
 }
 
 function listVolumes(req, res, next) {
-    fs.readdir(config.dataRoot, function (error, files) {
-        if (error) {
-            return next(new HttpError(404, 'Unable to read root folder'));
-        }
-
-        var ret = [];
-
-        files.forEach(function (file) {
-            var tmp = {};
-            tmp.name = file;
-            tmp.id = file;
-
-            ret.push(tmp);
-        });
-
-        res.send(200, ret);
-    });
+    var tmp = [ ];
+    for (var repoId in repos) {
+        tmp.push({ name: repoId, id: repoId });
+    }
+    res.send(200, tmp);
 }
 
 function createVolume(req, res, next) {
@@ -175,10 +177,12 @@ function unmount(req, res, next) {
     // TODO
 }
 
-function attachRepo(req, res, next, volume) {
-    if (!volume) return next(400, new HttpError('Volume not specified'));
-    // FIXME: validate repo name and cache the repo objects per volume
-    req.repo = new Repo({ root: resolveVolumeMountPoint(volume) });
+function attachRepo(req, res, next, volumeId) {
+    if (!volumeId) return next(400, new HttpError('Volume not specified'));
+
+    req.repo = repos[volumeId];
+    if (!req.repo) return next(404, new HttpError('No such repo'));
+
     next();
 }
 

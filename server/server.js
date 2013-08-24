@@ -153,9 +153,7 @@ function initialize(callback) {
     routes.sync.initialize(config);
 
     // routes.file.initialize(config, sync);
-    routes.volume.initialize(config);
-
-    callback();
+    routes.volume.initialize(config, callback);
 }
 
 function listen(callback) {
