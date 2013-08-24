@@ -19,10 +19,11 @@ exports = module.exports = {
     attachRepo: attachRepo
 };
 
-var config;
+var config, repos = { };
 
 function initialize(cfg) {
     config = cfg;
+    // TODO: populate repos with existing repos
 }
 
 function resolveVolumeRootPath(volume) {
@@ -63,6 +64,7 @@ function deleteVolume(req, res, next) {
                         console.log('Failed to delete volume mount point.', error);
                     }
 
+                    delete repos[req.params[0]];
                     // TODO how to handle any errors in folder deletion?
                     res.send(200);
                 });
@@ -87,15 +89,17 @@ function listVolumes(req, res, next) {
             ret.push(tmp);
         });
 
-        res.send(JSON.stringify(ret));
+        res.send(200, ret);
     });
 }
 
 function createVolume(req, res, next) {
-    // TODO check for existing volumes
-
     if (!req.body.name) {
         return next(new HttpError(400, 'volume name not specified'));
+    }
+
+    if (req.body.name in repos) {
+        return next(new HttpError(409, 'volume already exists'));
     }
 
     var volumeRoot = resolveVolumeRootPath(req.body.name);
@@ -104,10 +108,19 @@ function createVolume(req, res, next) {
     encfs.create(volumeRoot, volumeMountPoint, 'foobar1337', function (error, result) {
         if (error) {
             console.log('Creating volume failed:', error);
-            return next(new HttpError(400, 'volume creation failed: ' + error));
+            return next(new HttpError(500, 'volume creation failed: ' + error));
         }
 
-        res.send(200);
+        // ## move this to repo
+        var repo = new Repo({ root: volumeMountPoint });
+        repo.create({ name: 'nobody', email: 'somebody@like.me' }, function (error) {
+            if (error) return next(new HttpError(500, 'Error creating repo in volume'));
+            repo.addFile('README', { contents: 'Say something useful here' }, function (error, commit) {
+                if (error) return next(new HttpError(500, 'Error adding README: ' + error));
+                repos[req.body.name] = repo;
+                res.send(201);
+            });
+        });
     });
 }
 
@@ -150,7 +163,7 @@ function listFiles(req, res, next) {
             ret.push(tmp);
         });
 
-        res.send(JSON.stringify(ret));
+        res.send(200, ret);
     });
 }
 

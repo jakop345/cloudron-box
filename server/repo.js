@@ -5,7 +5,8 @@ var exec = require('child_process').exec,
     path = require('path'),
     mkdirp = require('mkdirp'),
     fs = require('fs'),
-    assert = require('assert');
+    assert = require('assert'),
+    crypto = require('crypto');
 
 exports = module.exports = Repo;
 
@@ -127,10 +128,22 @@ Repo.prototype._createCommit = function (message, callback) {
     });
 };
 
+function createTempFileSync(dir, contents) {
+    // dir is required because renames won't work across file systems
+    var filename = path.join(dir, '___addFile___' + crypto.randomBytes(4).readUInt32LE(0));
+    fs.writeFileSync(filename, contents);
+    return filename;
+}
+
 // FIXME: make stream API
 Repo.prototype._writeFileAndCommit = function (file, options, callback) {
     var that = this;
     var absoluteFilePath = path.join(this.checkoutDir, file);
+
+    if (options.contents) {
+        options.file = createTempFileSync(this.checkoutDir, options.contents);
+    }
+
     fs.rename(options.file, absoluteFilePath, function (err) {
         if (err) return callback(err);
         that.git('add ' + file, function (err) {

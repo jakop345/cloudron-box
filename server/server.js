@@ -12,7 +12,9 @@ var optimist = require('optimist'),
     db = require('./database'),
     routes = require('./routes'),
     Repo = require('./repo'),
-    debug = require('debug');
+    debug = require('debug'),
+    crypto = require('crypto'),
+    os = require('os');
 
 var app = express();
 
@@ -26,24 +28,31 @@ function getUserHomeDir() {
     return process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
 }
 
-var homeDir = path.join(getUserHomeDir(), '.yellowtent');
+var baseDir = path.join(getUserHomeDir(), '.yellowtent');
+
+app.configure('testing', function () {
+    // to make sure tests can run repeatedly, set the basedir to something random
+    var tmpdirname = 'repo-test-' + crypto.randomBytes(4).readUInt32LE(0);
+    baseDir = path.join(os.tmpdir(), tmpdirname);
+});
+
 
 var argv = optimist.usage('Usage: $0 --dataRoot <directory>')
     .alias('h', 'help')
     .describe('h', 'Show this help.')
 
     .alias('d', 'dataRoot')
-    .default('d', path.join(homeDir, 'data'))
+    .default('d', path.join(baseDir, 'data'))
     .describe('d', 'Volume data storage directory.')
     .string('d')
 
     .alias('m', 'mountRoot')
-    .default('m', path.join(homeDir, 'mount'))
+    .default('m', path.join(baseDir, 'mount'))
     .describe('m', 'Volume mount point directory.')
     .string('m')
 
     .alias('c', 'configRoot')
-    .default('c', path.join(homeDir, 'config'))
+    .default('c', path.join(baseDir, 'config'))
     .describe('c', 'Server config root directory for storing user db and meta data.')
     .string('c')
 

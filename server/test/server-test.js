@@ -1,3 +1,6 @@
+
+process.env.NODE_ENV = 'testing'; // ugly
+
 var server = require('../server'),
     request = require('superagent'),
     expect = require('expect.js'),
@@ -6,6 +9,7 @@ var server = require('../server'),
 var SERVER_URL;
 var USERNAME = 'admin', PASSWORD = 'admin';
 var AUTH = new Buffer(USERNAME + ':' + PASSWORD).toString('base64');
+var TESTVOLUME = 'testvolume';
 
 before(function (done) {
     server.start(function () {
@@ -14,14 +18,16 @@ before(function (done) {
     });
 });
 
-describe('api', function () {
+describe('bad requests', function () {
     it('random', function (done) {
         request.get(SERVER_URL + '/random', function (err, res) {
             expect(res.statusCode == 401).to.be.ok();
             done(err);
         });
     });
+});
 
+describe('version', function () {
     it('version', function (done) {
         request.get(SERVER_URL + '/api/v1/version', function (err, res) {
             expect(res.statusCode == 200).to.be.ok();
@@ -29,7 +35,9 @@ describe('api', function () {
             done(err);
         });
     });
+});
 
+describe('user', function () {
     it('admin', function (done) {
         request.post(SERVER_URL + '/api/v1/createadmin')
                .send({ username: USERNAME, password: PASSWORD, email: 'silly@me.com' })
@@ -49,3 +57,40 @@ describe('api', function () {
         });
     });
 });
+
+describe('volume', function () {
+    it('create', function (done) {
+        request.post(SERVER_URL + '/api/v1/volume/create')
+               .set('Authorization', AUTH)
+               .send({ name: TESTVOLUME })
+               .end(function (err, res) {
+            expect(res.statusCode == 201).to.be.ok();
+            done(err);
+        });
+    });
+
+    it('list', function (done) {
+        request.get(SERVER_URL + '/api/v1/volume/list')
+               .set('Authorization', AUTH)
+               .end(function (err, res) {
+            expect(res.body.length == 1).to.be.ok();
+            expect(res.body[0].name == TESTVOLUME).to.be.ok();
+            expect(res.statusCode == 200).to.be.ok();
+            done(err);
+        });
+    });
+
+    it('listFiles', function (done) {
+        request.get(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/list/')
+               .set('Authorization', AUTH)
+               .end(function (err, res) {
+            var foundReadme = false;
+            res.body.forEach(function (entry) {
+                if (entry.filename == 'README') foundReadme = true;
+            });
+            expect(foundReadme == true).to.be.ok();
+            done(err);
+        });
+    });
+});
+
