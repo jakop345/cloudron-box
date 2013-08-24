@@ -4,7 +4,6 @@
 
 var optimist = require('optimist'),
     express = require('express'),
-    util = require('util'),
     http = require('http'),
     HttpError = require('./httperror'),
     path = require('path'),
@@ -14,6 +13,14 @@ var optimist = require('optimist'),
     routes = require('./routes'),
     Repo = require('./repo'),
     debug = require('debug');
+
+var app = express();
+
+exports = module.exports = {
+    start: start,
+    app: app,
+    VERSION: '0.0.1' // get this from package.json?
+};
 
 function getUserHomeDir() {
     return process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
@@ -44,15 +51,13 @@ var argv = optimist.usage('Usage: $0 --dataRoot <directory>')
     .describe('p', 'Server port')
     .argv;
 
-var app = express();
-
 // Error handlers. These are called until one of them sends headers
 function clientErrorHandler(err, req, res, next) {
     var status = err.status || err.statusCode; // connect/express or our app
     if (status >= 400 && status <= 499) {
-        util.debug(http.STATUS_CODES[status] + ' : ' + err.message);
+        console.error(http.STATUS_CODES[status] + ' : ' + err.message);
         res.send(status, JSON.stringify({ status: http.STATUS_CODES[status], message: err.message }));
-        util.debug(err.stack);
+        console.error(err.stack);
     } else {
         next(err);
     }
@@ -61,8 +66,13 @@ function clientErrorHandler(err, req, res, next) {
 function serverErrorHandler(err, req, res, next) {
     var status = err.status || err.statusCode || 500;
     res.send(status, http.STATUS_CODES[status] + ' : ' + err.message);
-    util.debug(http.STATUS_CODES[status] + ' : ' + err.message);
-    util.debug(err.stack);
+    console.error(http.STATUS_CODES[status] + ' : ' + err.message);
+    console.error(err.stack);
+}
+
+function getVersion(req, res, next) {
+    if (req.method !== 'GET') return next(new HttpError(405, 'Only GET supported'));
+    res.send({ version: exports.VERSION });
 }
 
 app.configure(function () {
@@ -80,6 +90,7 @@ app.configure(function () {
        .use(express.cookieParser())
        .use(express.favicon(__dirname + "/webadmin/assets/favicon.ico"))
        // API calls that do not require authorization
+       .use('/api/v1/version', getVersion)
        .use('/api/v1/createadmin', routes.user.createAdmin) // ## FIXME: allow this before auth for now
        .use(routes.user.authenticate)
        .use(app.router)
@@ -139,22 +150,30 @@ function initialize(callback) {
     callback();
 }
 
-function listen(next) {
-    next = next || function () { };
-
-    http.createServer(app).listen(app.get('port'), function () {
+function listen(callback) {
+    http.createServer(app).listen(app.get('port'), function (err) {
+        if (err) return callback(err);
         console.log('Server listening on port ' + app.get('port') + ' in ' + app.get('env') + ' mode');
-        next();
+        callback();
+    });
+}
+
+function start(callback) {
+    function printAndDie(msg, err) {
+        console.error(msg, err);
+        process.exit(1);
+    }
+
+    initialize(function (err) {
+        if (err) printAndDie('Error initializing', err);
+        listen(function (err) {
+            if (err) printAndDie('Error listening', err);
+            callback();
+        });
     });
 }
 
 if (require.main === module) {
-    initialize(function (err) {
-        if (err) {
-            console.error('error initializing', err);
-            process.exit(1);
-        }
-        listen();
-    });
+    start(function () { });
 }
 
