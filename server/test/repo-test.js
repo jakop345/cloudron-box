@@ -29,8 +29,9 @@ describe('create', function () {
     it('addFile', function (done) {
         var tmpfile = path.join(os.tmpdir(), 'README');
         fs.writeFileSync(tmpfile, 'README_NEW_CONTENTS');
-        repo.addFile('README', { file: tmpfile }, function (err, commit) {
+        repo.addFile('README', { file: tmpfile }, function (err, fileInfo, commit) {
             expect(commit.subject == 'Add README').to.be.ok();
+            expect(fileInfo.sha1 == '2180e82647ff9a3e1a93ab43b81c82025c33c6e2').to.be.ok();
             done();
         });
     });
@@ -83,8 +84,9 @@ describe('create', function () {
     it('updateFile', function (done) {
         var tmpfile = path.join(os.tmpdir(), 'README');
         fs.writeFileSync(tmpfile, 'README_UPDATED_CONTENTS');
-        repo.updateFile('README', { file: tmpfile }, function (err, commit) {
+        repo.updateFile('README', { file: tmpfile }, function (err, fileInfo, commit) {
             expect(commit.subject == 'Update README').to.be.ok();
+            expect(fileInfo.sha1 == '39b8a10eed1304c9e779bae47ce4cb60a9b9b9bb').to.be.ok();
             done();
         });
     });

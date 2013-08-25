@@ -128,6 +128,18 @@ function createTempFileSync(dir, contents) {
     return filename;
 }
 
+function parseIndexLine(line) {
+    var mode, sha1, stage, name;
+    // sample line : 100644 294c76dd833e77480ba85bdff83b4ef44fa4c08f 0  repo-test.js
+    var parts = line.split(/[\t ]+/, 4);
+    var mode = parts[0];
+    return {
+        stat: { mode: parseInt(parts[0], 8) }, // match fs.Stat object
+        sha1: parts[1],
+        path: parts[3]
+    };
+}
+
 // FIXME: make stream API
 Repo.prototype._writeFileAndCommit = function (file, options, callback) {
     var that = this;
@@ -139,9 +151,13 @@ Repo.prototype._writeFileAndCommit = function (file, options, callback) {
 
     fs.rename(options.file, absoluteFilePath, function (err) {
         if (err) return callback(err);
-        that.git('add ' + file, function (err) {
+        that.git(['add ' + file, 'ls-files -s -- ' + file], function (err, out) {
             if (err) return callback(err);
-            that._createCommit(options.message, callback);
+            var fileInfo = parseIndexLine(out.trimRight());
+            that._createCommit(options.message, function (err, commit) {
+                if (err) return callback(err);
+                callback(null, fileInfo, commit);
+            });
         });
     });
 };
