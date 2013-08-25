@@ -3,11 +3,14 @@
 var fs = require('fs'),
     HttpError = require('../httperror'),
     syncer = require('../syncer'),
-    mime = require('mime');
+    mime = require('mime'),
+    debug = require('debug')('file.js'),
+    express = require('express');
 
 exports = module.exports = {
     read: read,
-    update: update
+    update: update,
+    multipart: multipart
 };
 
 function read(req, res, next) {
@@ -23,6 +26,11 @@ function read(req, res, next) {
         if (err.code == 'ENOENT' || err.code == 'ENOTDIR') return next(new HttpError(404, 'Not found'));
         return next(new HttpError(500, 'Stream error:' + err));
     });
+}
+
+function multipart(req, res, next) {
+    var parser = express.multipart({ uploadDir: req.volume.tmpDir, keepExtensions: true, maxFieldsSize: 2 * 1024 * 1024 }); // multipart/form-data
+    parser(req, res, next);
 }
 
 function update(req, res, next) {

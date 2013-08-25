@@ -85,8 +85,7 @@ function getVersion(req, res, next) {
 
 app.configure(function () {
     var json = express.json({ strict: true, limit: 2000 }), // application/json
-        urlencoded = express.urlencoded({ limit: 2000 }), // application/x-www-form-urlencoded
-        multipart = express.multipart({ uploadDir: process.cwd(), keepExtensions: true, maxFieldsSize: 2 * 1024 * 1024 }); // multipart/form-data
+        urlencoded = express.urlencoded({ limit: 2000 }); // application/x-www-form-urlencoded
 
     app.use(express.logger({ format: 'dev', immediate: false }))
        .use(express.timeout(10000))
@@ -94,7 +93,6 @@ app.configure(function () {
        .use('/', express.static(__dirname + '/webadmin')) // use '/' for now so cookie is not restricted to '/webadmin'
        .use(json)
        .use(urlencoded)
-       .use(multipart)
        .use(express.cookieParser())
        .use(express.favicon(__dirname + "/webadmin/assets/favicon.ico"))
        // API calls that do not require authorization
@@ -115,7 +113,7 @@ app.configure(function () {
     app.post('/api/v1/sync/:volume/diff', routes.sync.diff);
 
     app.get('/api/v1/file/:volume/*', routes.file.read);
-    app.post('/api/v1/file/:volume/*', routes.file.update);
+    app.post('/api/v1/file/:volume/*', routes.file.multipart, routes.file.update);
 
     app.get('/api/v1/volume/*/list/', routes.volume.listFiles);
     app.get('/api/v1/volume/*/list/*', routes.volume.listFiles);
