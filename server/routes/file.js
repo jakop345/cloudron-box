@@ -34,6 +34,7 @@ function multipart(req, res, next) {
 }
 
 function update(req, res, next) {
+    // FIXME: grab path from req.params[0] ?
     if (!req.body.data) return next(new HttpError(400, 'data field missing'));
     var data;
 
@@ -44,39 +45,43 @@ function update(req, res, next) {
     }
 
     if (!data.entry || !data.entry.path) return next(new HttpError(400, 'path not specified'));
-    if (!data.entry.sha1) return next(new HttpError(400, 'sha1 not specified'));
-    if (!data.entry.stat || !data.entry.stat.mtime) return next(new HttpError(400, 'mtime not specified'));
 
     if (!data.action) return next(new HttpError(400, 'action not specified'));
-    if (!data.lastSyncRevision) return next(new HttpError(400, 'lastSyncRevision not specified'));
+    if (!('lastSyncRevision' in data)) return next(new HttpError(400, 'lastSyncRevision not specified'));
 
     if (data.action == 'add' || data.action == 'update') {
         if (!req.files.file) return next(new HttpError(400, 'file not provided'));
+        if (!data.entry.stat || !data.entry.stat.mtime) return next(new HttpError(400, 'mtime not specified'));
     } else if (data.action != 'remove') {
         res.send(new HttpError(400, 'Unknown action'));
     }
 
     console.log('Processing ', data);
 
-    var leftEntry = data.entry;
+    var leftEntry = data.entry, repo = req.repo;
 
     repo.fileEntry(leftEntry.path, data.lastSyncRevision, function (err, baseEntry) {
-        if (err) return next(new HttpError(400, 'File does not exist at lastSyncRevision'));
+        if (err) return next(new HttpError(400, 'input error:' + err));
         repo.fileEntry(leftEntry.path, 'HEAD', function (err, rightEntry) {
-            if (err) return next(new HttpError(400, 'File does not exist in HEAD'));
-            var change = whatChanged(leftEntry, baseEntry, rightEntry);
-            if (conflict.length != 0) return next(new HttpError(409, JSON.stringify(conflict)));
+            if (err) return next(new HttpError(500, 'failed to get fileEntry:' + err));
+            var change = syncer.whatChanged(data.action != 'remove' ? leftEntry : null, baseEntry, rightEntry);
+            if (change.conflict) return next(new HttpError(409, JSON.stringify(change)));
 
             // actually update the file!
-            if (data.action == 'add' || data.action == 'update') {
-                repo.addFile(data.path, req.files.file.path, function (err, fileSha1, commit) {
+            if (data.action == 'add') {
+                repo.addFile(leftEntry.path, { file: req.files.file.path }, function (err, fileInfo, commit) {
                     if (err) return next(new HttpError(500, err.toString()));
-                    res.send(200, { serverRevision: commit.sha1, fileRevision: fileSha1, canFastForward: commit.parentSha1 == data.lastSyncRevision });
+                    res.send(201, { serverRevision: commit.sha1, sha1: fileInfo.sha1, fastForward: commit.parentSha1 === data.lastSyncRevision });
+                });
+            } else if (data.action == 'update') {
+                repo.updateFile(leftEntry.path, { file: req.files.file.path }, function (err, fileInfo, commit) {
+                    if (err) return next(new HttpError(500, err.toString()));
+                    res.send(201, { serverRevision: commit.sha1, sha1: fileInfo.sha1, fastForward: commit.parentSha1 === data.lastSyncRevision });
                 });
             } else if (data.action == 'remove') {
-                repo.removeFile(data.path, function (err, commit) {
+                repo.removeFile(leftEntry.path, function (err, commit) {
                     if (err) return next(new HttpError(500, err.toString()));
-                    res.send(200, { serverRevision: commit.sha1, canFastForward: commit.parentSha1 == data.lastSyncRevision });
+                    res.send(200, { serverRevision: commit.sha1, fastForward: commit.parentSha1 === data.lastSyncRevision });
                 });
             }
         });

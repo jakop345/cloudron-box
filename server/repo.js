@@ -33,6 +33,7 @@ Repo.prototype.git = function (commands, callback) {
 
     debug('GIT_DIR=' + this.gitDir + command);
     exec(command, options, function (error, stdout, stderr) {
+        if (error) debug('Git error ' + error);
         if (error) return callback(error);
         return callback(null, stdout);
     });
@@ -115,7 +116,9 @@ Repo.prototype.fileEntry = function (file, commitish, callback) {
 
 Repo.prototype._createCommit = function (message, callback) {
     var that = this;
-    this.git('commit -a -m \'' + message + '\'', function (err, out) {
+    // --allow-empty allows us to create a new revision even if file didn't change
+    // this could happen if the same file is uploaded from another client
+    this.git('commit --allow-empty -a -m \'' + message + '\'', function (err, out) {
         if (err) return callback(err);
         that.getCommit('HEAD', callback);
     });

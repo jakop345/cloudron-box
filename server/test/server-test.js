@@ -4,12 +4,23 @@ process.env.NODE_ENV = 'testing'; // ugly
 var server = require('../server'),
     request = require('superagent'),
     expect = require('expect.js'),
-    database = require('../database');
+    database = require('../database'),
+    crypto = require('crypto'),
+    fs = require('fs'),
+    path = require('path'),
+    os = require('os');
 
 var SERVER_URL;
 var USERNAME = 'admin', PASSWORD = 'admin';
 var AUTH = new Buffer(USERNAME + ':' + PASSWORD).toString('base64');
 var TESTVOLUME = 'testvolume';
+
+function now() { return (new Date).getTime(); }
+function tempFile(contents) {
+    var file = path.join(os.tmpdir(), '' + crypto.randomBytes(4).readUInt32LE(0));
+    fs.writeFileSync(file, contents);
+    return file;
+}
 
 before(function (done) {
     server.start(function () {
@@ -110,6 +121,51 @@ describe('file', function () {
                .end(function (err, res) {
             expect(res.statusCode == 200).to.be.ok();
             expect(res.text == 'README').to.be.ok();
+            done(err);
+        });
+    });
+
+    var serverRevision = '';
+
+    it('update - add', function (done) {
+        request.post(SERVER_URL + '/api/v1/file/' + TESTVOLUME + '/NEWFILE')
+               .set('Authorization', AUTH)
+               .field('data', JSON.stringify({ action: 'add', lastSyncRevision: '', entry: { path: 'NEWFILE', stat: { mtime: now() } }}))
+               .attach('file', tempFile('BLAH BLAH'))
+               .end(function (err, res) {
+            expect(res.statusCode == 201).to.be.ok();
+            expect(res.body.sha1 == 'e3f27b2dbefe2f9c5efece6bdbc0f44e9fb8875a');
+            expect(res.body.serverRevision.length != 0).to.be.ok();
+            serverRevision = res.body.serverRevision;
+            expect(res.body.fastForward == false);
+            done(err);
+        });
+    });
+
+    it('update - update', function (done) {
+        request.post(SERVER_URL + '/api/v1/file/' + TESTVOLUME + '/NEWFILE')
+               .set('Authorization', AUTH)
+               .field('data', JSON.stringify({ action: 'update', lastSyncRevision: serverRevision, entry: { path: 'NEWFILE', stat: { mtime: now() } }}))
+               .attach('file', tempFile('BLAH BLAH2'))
+               .end(function (err, res) {
+            expect(res.statusCode == 201).to.be.ok();
+            expect(res.body.sha1 == '321f24c9a2669b35cd2df0cab5c42b2bb2958e9a');
+            expect(res.body.serverRevision.length != 0).to.be.ok();
+            serverRevision = res.body.serverRevision;
+            expect(res.body.fastForward == true);
+            done(err);
+        });
+    });
+
+    it('update - del', function (done) {
+        request.post(SERVER_URL + '/api/v1/file/' + TESTVOLUME + '/NEWFILE')
+               .set('Authorization', AUTH)
+               .field('data', JSON.stringify({ action: 'remove', lastSyncRevision: serverRevision, entry: { path: 'NEWFILE' } }))
+               .end(function (err, res) {
+            expect(res.statusCode == 200).to.be.ok();
+            expect(res.body.serverRevision.length != 0).to.be.ok();
+            serverRevision = res.body.serverRevision;
+            expect(res.body.fastForward == true);
             done(err);
         });
     });

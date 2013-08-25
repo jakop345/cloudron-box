@@ -1,7 +1,8 @@
 'use strict';
 
 var assert = require('assert'),
-    debug = require('debug')('syncer.js');
+    debug = require('debug')('syncer.js'),
+    util = require('util');
 
 exports = module.exports = {
     diff: diff,
@@ -48,9 +49,9 @@ function traverse(entries, processEntries) {
 }
 
 function whatChanged(leftEntry, baseEntry, rightEntry) {
-    debug('Process: ', leftEntry ? leftEntry.path : 'null',
-                       baseEntry ? baseEntry.path : 'null',
-                       rightEntry ? rightEntry.path : 'null');
+    debug('Left: ', leftEntry ?  util.inspect(leftEntry) : 'null');
+    debug('Base: ', baseEntry ?  util.inspect(baseEntry) : 'null');
+    debug('Right: ', rightEntry ? util.inspect(rightEntry) : 'null');
 
     assert(leftEntry || baseEntry || rightEntry); // this is impossible!
 
@@ -72,9 +73,9 @@ function whatChanged(leftEntry, baseEntry, rightEntry) {
         if (leftEntry.sha1 == rightEntry.sha1) {
             result = null;
         } else if (leftEntry.stat.mtime > rightEntry.stat.mtime) {
-            result = { action: 'update', path: rightEntry.path, conflict: true };
+            result = { action: 'update', path: rightEntry.path, conflict: baseEntry.sha1 != rightEntry.sha1 };
         } else {
-            result = { action: 'download', path: rightEntry.path, conflict: true };
+            result = { action: 'download', path: rightEntry.path, conflict: baseEntry.sha1 != rightEntry.sha1 };
         }
     } else if (leftEntry && !baseEntry && rightEntry) { // file appeared in two places
         if (leftEntry.stat.mtime > rightEntry.stat.mtime) {
