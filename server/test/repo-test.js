@@ -115,6 +115,15 @@ describe('create', function () {
         });
     });
 
+    it('index', function (done) {
+        repo.indexEntries(function (err, entries) {
+            expect(entries.length == 1).to.be.ok();
+            expect(entries[0].stat.size == 'README_UPDATED_CONTENTS'.length).to.be.ok();
+            expect(entries[0].mtime != 0).to.be.ok();
+            done(err);
+        });
+    });
+
     it('removeFile - valid file', function (done) {
         repo.removeFile('README', function (err, commit) {
             expect(commit.subject == 'Remove README').to.be.ok();

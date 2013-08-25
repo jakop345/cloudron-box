@@ -166,6 +166,34 @@ Repo.prototype._writeFileAndCommit = function (file, options, callback) {
     });
 };
 
+function parseIndexLines(lines, i) {
+    /*
+        100644 81cc9ef1205995550f8faea11180a1ff7806ed81 0   webadmin/volume-client.js
+          ctime: 1376890412:218737065
+          mtime: 1376890412:218737065
+          dev: 2049 ino: 3391167
+          uid: 1000 gid: 1000
+          size: 3994    flags: 0
+     */
+    var entry = parseIndexLine(lines[i]);
+    entry.stat.mtime = parseInt(lines[i+1].split(/:/)[1]);
+    entry.stat.size = parseInt(lines[i+5].split(/:/)[1]);
+    return entry;
+}
+
+Repo.prototype.indexEntries = function (callback) {
+    this.git('ls-files -s --debug', function (err, out) {
+        if (err) return callback(err);
+        out = out.trimRight();
+        var lines = out.split('\n');
+        var entries = [ ];
+        for (var i = 0; i < lines.length; i += 6) {
+            entries.push(parseIndexLines(lines, i));
+        }
+        callback(null, entries);
+    });
+};
+
 // FIXME: needs checkout lock
 Repo.prototype.addFile = function (file, options, callback) {
     var that = this;
