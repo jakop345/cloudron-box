@@ -38,7 +38,7 @@ describe('diff', function () {
     it('diff - never synced. conflicts', function (done) {
         initTrees();
         // Same file on both sides, mtime wins
-        rightTree.entries.push({ path: 'A', sha1: 'SHA1', stat: { mtime: 10, size: 20 } });
+        rightTree.entries.push({ path: 'A', sha1: 'SHA0', stat: { mtime: 10, size: 20 } });
         leftTree.entries.push({ path: 'A', sha1: 'SHA1', stat: { mtime: 30, size: 20 } });
 
         // B is more recent on client

@@ -41,12 +41,12 @@ Repo.prototype.git = function (commands, callback) {
 };
 
 Repo.prototype.getCommit = function (commitish, callback) {
-    this.git('show -s --pretty=%T,%ci,%P,%s,%H ' + commitish, function (err, out) {
+    this.git('show -s --pretty=%T,%ct,%P,%s,%H ' + commitish, function (err, out) {
         if (err) return callback(err);
         var parts = out.trimRight().split(',');
         callback(null, {
             treeSha1: parts[0],
-            commitDate: new Date(parts[1]),
+            commitDate: parseInt(parts[1]),
             parentSha1: parts[2],
             subject: parts[3],
             sha1: parts[4]
@@ -107,9 +107,9 @@ Repo.prototype.fileEntry = function (file, commitish, callback) {
 
         // TODO: This is expensive potentially. One option for HEAD is to stat the checkout
         // dir (would that work after we recreated the repo from recovery?)
-        that.git('log -1 --pretty=%ci ' + commitish + ' -- ' + file, function (err, out) {
+        that.git('log -1 --pretty=%ct ' + commitish + ' -- ' + file, function (err, out) {
             if (err) return callback(null, 0);
-            entry.stat.mtime = new Date(out);
+            entry.stat.mtime = parseInt(out.trimRight());
             callback(null, entry);
         });
     });

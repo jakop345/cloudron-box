@@ -125,7 +125,7 @@ describe('file', function () {
         });
     });
 
-    var serverRevision = '';
+    var serverRevision = '', newFileSha1 = '';
 
     it('update - add', function (done) {
         request.post(SERVER_URL + '/api/v1/file/' + TESTVOLUME + '/NEWFILE')
@@ -135,9 +135,36 @@ describe('file', function () {
                .end(function (err, res) {
             expect(res.statusCode == 201).to.be.ok();
             expect(res.body.sha1 == 'e3f27b2dbefe2f9c5efece6bdbc0f44e9fb8875a');
+            newFileSha1 = res.body.sha1;
             expect(res.body.serverRevision.length != 0).to.be.ok();
             serverRevision = res.body.serverRevision;
             expect(res.body.fastForward == false);
+            done(err);
+        });
+    });
+
+    it('diff', function (done) {
+        var index = {
+            entries: [
+                { path: 'NEWFILE', sha1: '', stat: { mtime: now()+10, size: 20 } } // file changed, so no sha1
+            ]
+        };
+
+        request.post(SERVER_URL + '/api/v1/sync/' + TESTVOLUME + '/diff')
+               .set('Authorization', AUTH)
+               .send({ index: index, lastSyncRevision: serverRevision })
+               .end(function (err, res) {
+
+            expect(res.statusCode == 200).to.be.ok();
+            expect(res.body.serverRevision.length != 0).to.be.ok();
+            expect(res.body.changes.length == 2);
+            expect(res.body.changes[0].action == 'update');
+            expect(res.body.changes[0].path == 'NEWFILE');
+            expect(res.body.changes[0].conflict == false);
+            expect(res.body.changes[1].action == 'remove');
+            expect(res.body.changes[1].path == 'README.md');
+            expect(res.body.changes[1].conflict == false);
+
             done(err);
         });
     });
