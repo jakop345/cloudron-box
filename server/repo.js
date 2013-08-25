@@ -7,7 +7,8 @@ var exec = require('child_process').exec,
     fs = require('fs'),
     assert = require('assert'),
     crypto = require('crypto'),
-    debug = require('debug')('repo.js');
+    debug = require('debug')('repo.js'),
+    util = require('util');
 
 exports = module.exports = Repo;
 
@@ -18,13 +19,20 @@ function Repo(config) {
 }
 
 // run arbitrary git command on this repo
-Repo.prototype.git = function (command, callback) {
+Repo.prototype.git = function (commands, callback) {
     var options = {
         env: { GIT_DIR: this.gitDir },
         cwd: this.checkoutDir
     };
-    debug('GIT_DIR=' + this.gitDir + ' git ' + command);
-    exec('git ' + command, options, function (error, stdout, stderr) {
+    if (!util.isArray(commands)) commands = [ commands ];
+
+    for (var i = 0; i < commands.length; i++) {
+        commands[i] = 'git ' + commands[i];
+    }
+    var command = commands.join(' && ');
+
+    debug('GIT_DIR=' + this.gitDir + command);
+    exec(command, options, function (error, stdout, stderr) {
         if (error) return callback(error);
         return callback(null, stdout);
     });
@@ -51,7 +59,7 @@ Repo.prototype.create = function (options, callback) {
         if (err) return callback(err);
         that.git('init', function (err) {
             if (err) return callback(err);
-            that.git('config user.name ' + options.name + ' && git config user.email ' + options.email, callback);
+            that.git(['config user.name ' + options.name, 'config user.email ' + options.email], callback);
         });
     });
 };
