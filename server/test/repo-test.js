@@ -14,7 +14,7 @@ var expect = require('expect.js');
 
 var tmpdirname = 'repo-test-' + crypto.randomBytes(4).readUInt32LE(0);
 
-var repo = new Repo({ root: path.join(os.tmpdir(), tmpdirname) });
+var repo = new Repo({ rootDir: path.join(os.tmpdir(), tmpdirname) });
 
 console.log('repo test dir', repo.checkoutDir);
 
