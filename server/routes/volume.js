@@ -17,7 +17,8 @@ exports = module.exports = {
     deleteVolume: deleteVolume,
     mount: mount,
     unmount: unmount,
-    attachRepo: attachRepo
+    attachRepo: attachRepo,
+    attachVolume: attachVolume
 };
 
 var config, repos = { };
@@ -113,6 +114,8 @@ function createVolume(req, res, next) {
             return next(new HttpError(500, 'volume creation failed: ' + error));
         }
 
+        fs.mkdirSync(path.join(volumeMountPoint, 'tmp'));
+
         // ## move this to repo
         var repo = new Repo({ rootDir: volumeMountPoint });
         repo.create({ name: 'nobody', email: 'somebody@like.me' }, function (error) {
@@ -183,6 +186,15 @@ function attachRepo(req, res, next, volumeId) {
     req.repo = repos[volumeId];
     if (!req.repo) return next(new HttpError(404, 'No such repo'));
 
+    next();
+}
+
+function attachVolume(req, res, next, volumeId) {
+    if (!volumeId) return next(400, new HttpError('Volume not specified'));
+    if (!req.repo) return next(new HttpError(404, 'No such repo'));
+
+    // FIXME: volume should become an object and route code should just use it
+    req.volume = { tmpDir: path.join(resolveVolumeMountPoint(volumeId), 'tmp') };
     next();
 }
 

@@ -110,7 +110,7 @@ app.configure(function () {
     app.get('/api/v1/logout', routes.user.logout);
     app.get('/api/v1/userInfo', routes.user.userInfo);
 
-    app.param('volume', routes.volume.attachRepo);
+    app.param('volume', routes.volume.attachRepo, routes.volume.attachVolume);
 
     app.post('/api/v1/sync/:volume/diff', routes.sync.diff);
 
