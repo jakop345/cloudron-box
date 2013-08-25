@@ -23,6 +23,14 @@ exports = module.exports = {
 
 var config, repos = { };
 
+function resolveVolumeRootPath(volume) {
+    return path.join(config.dataRoot, volume);
+}
+
+function resolveVolumeMountPoint(volume) {
+    return path.join(config.mountRoot, volume);
+}
+
 function initialize(cfg, callback) {
     config = cfg;
 
@@ -32,21 +40,15 @@ function initialize(cfg, callback) {
         }
 
         files.forEach(function (file) {
-            var repo = new Repo({ rootDir: resolveVolumeMountPoint(file) });
+            var volumeMountPoint = resolveVolumeMountPoint(file) ;
+            var tmpDir = path.join(volumeMountPoint, 'tmp');
+            var repo = new Repo({ rootDir: volumeMountPoint, tmpDir: tmpDir });
             repos[file] = repo;
             debug('Detected repo : ' + file);
         });
 
         callback();
     });
-}
-
-function resolveVolumeRootPath(volume) {
-    return path.join(config.dataRoot, volume);
-}
-
-function resolveVolumeMountPoint(volume) {
-    return path.join(config.mountRoot, volume);
 }
 
 // TODO maybe also check for password?
@@ -114,10 +116,11 @@ function createVolume(req, res, next) {
             return next(new HttpError(500, 'volume creation failed: ' + error));
         }
 
-        fs.mkdirSync(path.join(volumeMountPoint, 'tmp'));
+        var tmpDir = path.join(volumeMountPoint, 'tmp');
+        fs.mkdirSync(tmpDir);
 
         // ## move this to repo
-        var repo = new Repo({ rootDir: volumeMountPoint });
+        var repo = new Repo({ rootDir: volumeMountPoint, tmpDir: tmpDir });
         repo.create({ name: 'nobody', email: 'somebody@like.me' }, function (error) {
             if (error) return next(new HttpError(500, 'Error creating repo in volume'));
             repo.addFile('README.md', { contents: 'README' }, function (error, commit) {

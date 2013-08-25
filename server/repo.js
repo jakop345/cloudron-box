@@ -16,6 +16,7 @@ exports = module.exports = Repo;
 function Repo(config) {
     this.gitDir = config.rootDir + '/.git';
     this.checkoutDir = config.rootDir;
+    this.tmpDir = config.tmpDir;
 }
 
 // run arbitrary git command on this repo
@@ -149,7 +150,7 @@ Repo.prototype._writeFileAndCommit = function (file, options, callback) {
     var absoluteFilePath = path.join(this.checkoutDir, file);
 
     if (options.contents) {
-        options.file = createTempFileSync(this.checkoutDir, options.contents);
+        options.file = createTempFileSync(this.tmpDir, options.contents);
     }
 
     fs.rename(options.file, absoluteFilePath, function (err) {

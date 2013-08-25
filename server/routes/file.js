@@ -56,7 +56,7 @@ function update(req, res, next) {
         res.send(new HttpError(400, 'Unknown action'));
     }
 
-    console.log('Processing ', data);
+    debug('Processing ', data);
 
     var leftEntry = data.entry, repo = req.repo;
 
