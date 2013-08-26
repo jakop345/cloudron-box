@@ -41,18 +41,22 @@ Repo.prototype.git = function (commands, callback) {
 };
 
 Repo.prototype.getCommit = function (commitish, callback) {
-    this.git('show -s --pretty=%T,%ct,%P,%s,%H ' + commitish, function (err, out) {
+    this.git('show -s --pretty=%T,%ct,%P,%s,%H,%an,%ae ' + commitish, function (err, out) {
         if (err) return callback(err);
         var parts = out.trimRight().split(',');
         callback(null, {
             treeSha1: parts[0],
-            commitDate: parseInt(parts[1]),
+            commitDate: parseInt(parts[1], 10),
             parentSha1: parts[2],
             subject: parts[3],
-            sha1: parts[4]
+            sha1: parts[4],
+            author: {
+                name: parts[5],
+                email: parts[6]
+            }
         });
     });
-}
+};
 
 Repo.prototype.create = function (options, callback) {
     assert(options.name && options.email);

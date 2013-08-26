@@ -12,6 +12,9 @@ var Repo = require('../repo'),
 var assert = require('assert');
 var expect = require('expect.js');
 
+var EMAIL = 'no@bo.dy';
+var USERNAME = 'nobody';
+
 var tmpdirname = 'repo-test-' + crypto.randomBytes(4).readUInt32LE(0);
 
 var repo = new Repo({ rootDir: path.join(os.tmpdir(), tmpdirname) });
@@ -20,7 +23,7 @@ console.log('repo test dir', repo.checkoutDir);
 
 describe('create', function () {
     it('create', function (done) {
-        repo.create({ name: 'nobody', email: 'no@bo.dy' }, function () {
+        repo.create({ name: USERNAME, email: EMAIL }, function () {
             expect(fs.existsSync(repo.gitDir)).to.be.ok();
             done();
         });
@@ -32,6 +35,8 @@ describe('create', function () {
         repo.addFile('README', { file: tmpfile }, function (err, fileInfo, commit) {
             expect(commit.subject == 'Add README').to.be.ok();
             expect(fileInfo.sha1 == '2180e82647ff9a3e1a93ab43b81c82025c33c6e2').to.be.ok();
+            expect(commit.author.name == USERNAME).to.be.ok();
+            expect(commit.author.email == EMAIL).to.be.ok();
             done();
         });
     });
@@ -40,7 +45,7 @@ describe('create', function () {
         var readme = repo.createReadStream('README');
         var data = '';
         readme.on('data', function (d) { data += d; });
-        readme.on('end', function () { 
+        readme.on('end', function () {
             expect(data == 'README_NEW_CONTENTS').to.be.ok();
             done();
         });
@@ -76,7 +81,7 @@ describe('create', function () {
 
     it('getTree - null tree', function (done) {
         repo.getTree('', function (err, tree) {
-            expect(tree.entries.length == 0).to.be.ok();
+            expect(tree.entries.length === 0).to.be.ok();
             done();
         });
     });
