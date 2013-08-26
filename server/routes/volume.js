@@ -40,6 +40,20 @@ function initialize(cfg, callback) {
         }
 
         files.forEach(function (file) {
+            var stat;
+
+            try {
+                stat = fs.statSync(path.join(config.dataRoot, file));
+            } catch (e) {
+                debug('Unable to stat "' + file + '".');
+                return;
+            }
+
+            // ignore everythin else than directories
+            if (!stat.isDirectory()) {
+                return;
+            }
+
             var volumeMountPoint = resolveVolumeMountPoint(file) ;
             var tmpDir = path.join(volumeMountPoint, 'tmp');
             var repo = new Repo({ rootDir: volumeMountPoint, tmpDir: tmpDir });
