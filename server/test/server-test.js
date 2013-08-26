@@ -1,3 +1,8 @@
+'use strict';
+
+/* global it:false */
+/* global describe:false */
+/* global before:false */
 
 process.env.NODE_ENV = 'testing'; // ugly
 
@@ -11,11 +16,11 @@ var server = require('../server'),
     os = require('os');
 
 var SERVER_URL;
-var USERNAME = 'admin', PASSWORD = 'admin';
+var USERNAME = 'admin', PASSWORD = 'admin', EMAIL ='silly@me.com';
 var AUTH = new Buffer(USERNAME + ':' + PASSWORD).toString('base64');
 var TESTVOLUME = 'testvolume';
 
-function now() { return (new Date).getTime(); }
+function now() { return (new Date()).getTime(); }
 function tempFile(contents) {
     var file = path.join(os.tmpdir(), '' + crypto.randomBytes(4).readUInt32LE(0));
     fs.writeFileSync(file, contents);
@@ -51,7 +56,7 @@ describe('version', function () {
 describe('user', function () {
     it('admin', function (done) {
         request.post(SERVER_URL + '/api/v1/createadmin')
-               .send({ username: USERNAME, password: PASSWORD, email: 'silly@me.com' })
+               .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
                .end(function (err, res) {
             expect(res.statusCode == 202).to.be.ok();
             done(err);
@@ -99,7 +104,7 @@ describe('volume', function () {
             res.body.forEach(function (entry) {
                 if (entry.filename == 'README.md') foundReadme = true;
             });
-            expect(foundReadme == true).to.be.ok();
+            expect(foundReadme === true).to.be.ok();
             done(err);
         });
     });
@@ -136,9 +141,9 @@ describe('file', function () {
             expect(res.statusCode == 201).to.be.ok();
             expect(res.body.sha1 == 'e3f27b2dbefe2f9c5efece6bdbc0f44e9fb8875a');
             newFileSha1 = res.body.sha1;
-            expect(res.body.serverRevision.length != 0).to.be.ok();
+            expect(res.body.serverRevision.length !== 0).to.be.ok();
             serverRevision = res.body.serverRevision;
-            expect(res.body.fastForward == false);
+            expect(res.body.fastForward === false).to.be.ok();
             done(err);
         });
     });
@@ -156,14 +161,14 @@ describe('file', function () {
                .end(function (err, res) {
 
             expect(res.statusCode == 200).to.be.ok();
-            expect(res.body.serverRevision.length != 0).to.be.ok();
+            expect(res.body.serverRevision.length !== 0).to.be.ok();
             expect(res.body.changes.length == 2);
             expect(res.body.changes[0].action == 'update');
             expect(res.body.changes[0].path == 'NEWFILE');
-            expect(res.body.changes[0].conflict == false);
+            expect(res.body.changes[0].conflict === false);
             expect(res.body.changes[1].action == 'remove');
             expect(res.body.changes[1].path == 'README.md');
-            expect(res.body.changes[1].conflict == false);
+            expect(res.body.changes[1].conflict === false);
 
             done(err);
         });
@@ -177,9 +182,9 @@ describe('file', function () {
                .end(function (err, res) {
             expect(res.statusCode == 201).to.be.ok();
             expect(res.body.sha1 == '321f24c9a2669b35cd2df0cab5c42b2bb2958e9a');
-            expect(res.body.serverRevision.length != 0).to.be.ok();
+            expect(res.body.serverRevision.length !== 0).to.be.ok();
             serverRevision = res.body.serverRevision;
-            expect(res.body.fastForward == true);
+            expect(res.body.fastForward === true);
             done(err);
         });
     });
@@ -190,9 +195,9 @@ describe('file', function () {
                .field('data', JSON.stringify({ action: 'remove', lastSyncRevision: serverRevision, entry: { path: 'NEWFILE' } }))
                .end(function (err, res) {
             expect(res.statusCode == 200).to.be.ok();
-            expect(res.body.serverRevision.length != 0).to.be.ok();
+            expect(res.body.serverRevision.length !== 0).to.be.ok();
             serverRevision = res.body.serverRevision;
-            expect(res.body.fastForward == true);
+            expect(res.body.fastForward === true);
             done(err);
         });
     });
