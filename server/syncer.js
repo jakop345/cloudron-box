@@ -6,6 +6,7 @@ var assert = require('assert'),
 
 exports = module.exports = {
     diff: diff,
+    diffEntries: diffEntries,
     whatChanged: whatChanged
 };
 
@@ -104,6 +105,18 @@ function diff(leftTree, baseTree, rightTree) {
     var changes = [ ];
 
     traverse([leftTree.entries, baseTree.entries, rightTree.entries], function (entries) {
+        var leftEntry = entries[0], baseEntry = entries[1], rightEntry = entries[2];
+        var change = whatChanged(leftEntry, baseEntry, rightEntry);
+        if (change) changes.push(change);
+    });
+
+    return changes;
+}
+
+function diffEntries(leftEntries, baseEntries, rightEntries) {
+    var changes = [ ];
+
+    traverse([leftEntries, baseEntries, rightEntries], function (entries) {
         var leftEntry = entries[0], baseEntry = entries[1], rightEntry = entries[2];
         var change = whatChanged(leftEntry, baseEntry, rightEntry);
         if (change) changes.push(change);
