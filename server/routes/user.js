@@ -40,7 +40,7 @@ function createAdmin(req, res, next) {
     var email = req.body.email || '';
     var password = req.body.password || '';
 
-    if (username.length === 0 || password.length === 0 || email.length == 0) {
+    if (username.length === 0 || password.length === 0 || email.length === 0) {
         return next(new HttpError(400, 'Bad username, password or email'));
     }
 
@@ -127,7 +127,8 @@ function authenticate(req, res, next) {
                 debug('authenticated');
 
                 req.user = {
-                    username: user.username
+                    username: user.username,
+                    email: user.email
                 };
 
                 next();
@@ -142,18 +143,19 @@ function authenticate(req, res, next) {
             return next(new HttpError(401, 'Bad token'));
         }
 
-        db.TOKENS_TABLE.get(req_token, function (err, token) {
+        db.TOKENS_TABLE.get(req_token, function (err, result) {
             if (err) {
                 return next(err.reason === DatabaseError.NOT_FOUND
                     ? new HttpError(401, 'Invalid token')
                     : err);
             }
 
-            var now = Date(), expires = Date(token.expires);
+            var now = Date(), expires = Date(result.expires);
             if (now > expires) return next(new HttpError(401, 'Token expired'));
 
             req.user = {
-                username: token.username
+                username: result.username,
+                email: result.email
             };
 
             next();
@@ -181,6 +183,7 @@ function createToken(req, res, next) {
         var token = {
             token: hexToken,
             username: req.user.username,
+            email: req.user.email,
             expires: expires
         };
 

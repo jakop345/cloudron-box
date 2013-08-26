@@ -121,7 +121,7 @@ function createVolume(req, res, next) {
 
         // ## move this to repo
         var repo = new Repo({ rootDir: volumeMountPoint, tmpDir: tmpDir });
-        repo.create({ name: 'nobody', email: 'somebody@like.me' }, function (error) {
+        repo.create({ name: req.user.username, email: req.user.email }, function (error) {
             if (error) return next(new HttpError(500, 'Error creating repo in volume'));
             repo.addFile('README.md', { contents: 'README' }, function (error, commit) {
                 if (error) return next(new HttpError(500, 'Error adding README: ' + error));

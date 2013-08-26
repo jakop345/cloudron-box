@@ -116,6 +116,7 @@ function initialize(config) {
     exports.TOKENS_TABLE = new Table(rootDir + '/tokens', {
         token: { type: 'String', hashKey: true },
         username: { type: 'String', priv: true },
+        email: { type: 'String', priv: true },
         expires: { type: 'String' }
     });
 
