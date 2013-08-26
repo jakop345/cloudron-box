@@ -4,7 +4,7 @@ var fs = require('fs'),
     debug = require('debug')('volume.js'),
     HttpError = require('../httperror'),
     encfs = require('encfs'),
-    wrench = require('wrench'),
+    rimraf = require('rimraf'),
     path = require('path'),
     Repo = require('../repo'),
     debug = require('debug')('volume.js');
@@ -71,12 +71,12 @@ function deleteVolume(req, res, next) {
                 console.log('Error unmounting the volume.', error);
             }
 
-            wrench.rmdirRecursive(rootPath, function (error) {
+            rimraf(rootPath, function (error) {
                 if (error) {
                     console.log('Failed to delete volume root path.', error);
                 }
 
-                wrench.rmdirRecursive(mountPoint, function (error) {
+                rimraf(mountPoint, function (error) {
                     if (error) {
                         console.log('Failed to delete volume mount point.', error);
                     }

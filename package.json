@@ -20,7 +20,7 @@
     "optimist": "*",
     "express": "*",
     "superagent": "*",
-    "wrench": "*",
+    "rimraf": "*",
     "debug": "*",
     "mime": "*",
     "encfs": "*"
