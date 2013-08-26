@@ -45,6 +45,7 @@ function deleteVolume(volumeId) {
         success: function (data) {
             hideModalDialog();
             getVolumeListing();
+            clearFileListing();
         },
         error: function () {
             showModalDialog("Deleting Volume", "failed");
@@ -98,11 +99,15 @@ function createVolumeListingDelegate(data) {
     return elem[0];
 }
 
-function getVolumeListing() {
+function clearVolumeListing() {
     var container = document.getElementById("volume-list-container");
     if (container.firstChild) {
         container.removeChild(container.firstChild);
     }
+}
+
+function getVolumeListing() {
+    clearVolumeListing();
 
     $.getJSON("/api/v1/volume/list", function (data) {
         var group = document.createElement("ul");
@@ -112,20 +117,24 @@ function getVolumeListing() {
             group.appendChild(createVolumeListingDelegate(e));
         });
 
-        container.appendChild(group);
+        document.getElementById("volume-list-container").appendChild(group);
     }).fail(function (error) {
         console.error("Unable to get volume listing", error);
     });
+}
+
+function clearFileListing() {
+    var container = document.getElementById("file-list-container");
+    if (container.firstChild) {
+        container.removeChild(container.firstChild);
+    }
 }
 
 function getFileListing(volume, folder) {
     volume = volume ? volume : 0;
     folder = folder ? folder : ".";
 
-    var container = document.getElementById("file-list-container");
-    if (container.firstChild) {
-        container.removeChild(container.firstChild);
-    }
+    clearFileListing();
 
     $.getJSON("/api/v1/volume/" + volume + "/list/" + folder, function (data) {
         var group = document.createElement("ul");
@@ -136,7 +145,7 @@ function getFileListing(volume, folder) {
             group.appendChild(createFileListingDelegate(e));
         });
 
-        container.appendChild(group);
+        document.getElementById("file-list-container").appendChild(group);
     }).fail(function (error) {
         console.error("Unable to get file listing.", error);
     });
