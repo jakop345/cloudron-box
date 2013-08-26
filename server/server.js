@@ -63,9 +63,9 @@ var argv = optimist.usage('Usage: $0 --dataRoot <directory>')
 function clientErrorHandler(err, req, res, next) {
     var status = err.status || err.statusCode; // connect/express or our app
     if (status >= 400 && status <= 499) {
-        console.error(http.STATUS_CODES[status] + ' : ' + err.message);
         res.send(status, JSON.stringify({ status: http.STATUS_CODES[status], message: err.message }));
-        console.error(err.stack);
+        debug(http.STATUS_CODES[status] + ' : ' + err.message);
+        debug(err.stack);
     } else {
         next(err);
     }
@@ -87,8 +87,11 @@ app.configure(function () {
     var json = express.json({ strict: true, limit: 2000 }), // application/json
         urlencoded = express.urlencoded({ limit: 2000 }); // application/x-www-form-urlencoded
 
-    app.use(express.logger({ format: 'dev', immediate: false }))
-       .use(express.timeout(10000))
+    if (app.get('env') != 'testing') {
+        app.use(express.logger({ format: 'dev', immediate: false }))
+    }
+
+    app.use(express.timeout(10000))
        .use(routes.user.firstTimeCheck)
        .use('/', express.static(__dirname + '/webadmin')) // use '/' for now so cookie is not restricted to '/webadmin'
        .use(json)
