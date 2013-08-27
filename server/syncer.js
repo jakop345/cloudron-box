@@ -75,7 +75,7 @@ function whatChanged(leftEntry, baseEntry, rightEntry) {
             result = null;
         } else if (baseEntry.sha1 == rightEntry.sha1) { // file hasn't changed on server
             result = { action: 'update', path: rightEntry.path, conflict: false };
-        } else if (leftEntry.stat.mtime > rightEntry.stat.mtime) {
+        } else if (leftEntry.mtime > rightEntry.mtime) {
             result = { action: 'update', path: rightEntry.path, conflict: true };
         } else {
             result = { action: 'download', path: rightEntry.path, conflict: true };
@@ -83,7 +83,7 @@ function whatChanged(leftEntry, baseEntry, rightEntry) {
     } else if (leftEntry && !baseEntry && rightEntry) { // file appeared in two places
         if (leftEntry.sha1 == rightEntry.sha1) {
             result = null;
-        } else if (leftEntry.stat.mtime > rightEntry.stat.mtime) {
+        } else if (leftEntry.mtime > rightEntry.mtime) {
             result = { action: 'update', path: rightEntry.path, conflict: true };
         } else {
             result = { action: 'download', path: rightEntry.path, conflict: true };

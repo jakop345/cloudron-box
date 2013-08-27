@@ -135,7 +135,7 @@ describe('file', function () {
     it('update - add', function (done) {
         request.post(SERVER_URL + '/api/v1/file/' + TESTVOLUME + '/NEWFILE')
                .set('Authorization', AUTH)
-               .field('data', JSON.stringify({ action: 'add', lastSyncRevision: '', entry: { path: 'NEWFILE', stat: { mtime: now() } }}))
+               .field('data', JSON.stringify({ action: 'add', lastSyncRevision: '', entry: { path: 'NEWFILE', mtime: now() } }))
                .attach('file', tempFile('BLAH BLAH'))
                .end(function (err, res) {
             expect(res.statusCode == 201).to.be.ok();
@@ -151,7 +151,7 @@ describe('file', function () {
     it('diff', function (done) {
         var index = {
             entries: [
-                { path: 'NEWFILE', sha1: '', stat: { mtime: now()+10, size: 20 } } // file changed, so no sha1
+                { path: 'NEWFILE', sha1: '', mtime: now()+10, size: 20 } // file changed, so no sha1
             ]
         };
 
@@ -177,7 +177,7 @@ describe('file', function () {
     it('update - update', function (done) {
         request.post(SERVER_URL + '/api/v1/file/' + TESTVOLUME + '/NEWFILE')
                .set('Authorization', AUTH)
-               .field('data', JSON.stringify({ action: 'update', lastSyncRevision: serverRevision, entry: { path: 'NEWFILE', stat: { mtime: now() } }}))
+               .field('data', JSON.stringify({ action: 'update', lastSyncRevision: serverRevision, entry: { path: 'NEWFILE', mtime: now() }}))
                .attach('file', tempFile('BLAH BLAH2'))
                .end(function (err, res) {
             expect(res.statusCode == 201).to.be.ok();

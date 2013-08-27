@@ -51,7 +51,7 @@ function update(req, res, next) {
 
     if (data.action == 'add' || data.action == 'update') {
         if (!req.files.file) return next(new HttpError(400, 'file not provided'));
-        if (!data.entry.stat || !data.entry.stat.mtime) return next(new HttpError(400, 'mtime not specified'));
+        if (!data.entry.mtime) return next(new HttpError(400, 'mtime not specified'));
     } else if (data.action != 'remove') {
         res.send(new HttpError(400, 'Unknown action'));
     }

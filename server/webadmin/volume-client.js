@@ -65,7 +65,7 @@ function createFileListingDelegate(data) {
 
     var badge = document.createElement("span");
     badge.classList.add("badge");
-    badge.innerText = printableSize(data.stat.size);
+    badge.innerText = printableSize(data.size);
 
     elem.appendChild(badge);
 

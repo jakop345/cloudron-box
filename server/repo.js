@@ -76,7 +76,8 @@ function parseTreeLine(line) {
     var parts = line.split(/[\t ]+/, 5);
     var mode = parts[0];
     return {
-        stat: { mode: parseInt(parts[0], 8), size: parseInt(parts[3]) }, // match fs.Stat object
+        mode: parseInt(parts[0], 8),
+        size: parseInt(parts[3]),
         sha1: parts[2],
         path: parts[4]
     };
@@ -113,7 +114,7 @@ Repo.prototype.fileEntry = function (file, commitish, callback) {
         // dir (would that work after we recreated the repo from recovery?)
         that.git('log -1 --pretty=%ct ' + commitish + ' -- ' + file, function (err, out) {
             if (err) return callback(null, 0);
-            entry.stat.mtime = parseInt(out.trimRight());
+            entry.mtime = parseInt(out.trimRight());
             callback(null, entry);
         });
     });
@@ -142,7 +143,7 @@ function parseIndexLine(line) {
     var parts = line.split(/[\t ]+/, 4);
     var mode = parts[0];
     return {
-        stat: { mode: parseInt(parts[0], 8) }, // match fs.Stat object
+        mode: parseInt(parts[0], 8),
         sha1: parts[1],
         path: parts[3]
     };
@@ -180,8 +181,8 @@ function parseIndexLines(lines, i) {
           size: 3994    flags: 0
      */
     var entry = parseIndexLine(lines[i]);
-    entry.stat.mtime = parseInt(lines[i+1].split(/:/)[1]);
-    entry.stat.size = parseInt(lines[i+5].split(/:/)[1]);
+    entry.mtime = parseInt(lines[i+1].split(/:/)[1]);
+    entry.size = parseInt(lines[i+5].split(/:/)[1]);
     return entry;
 }
 
