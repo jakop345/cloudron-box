@@ -76,6 +76,7 @@ describe('user', function () {
 
 describe('volume', function () {
     it('create', function (done) {
+        this.timeout(5000); // on the Mac, creating volumes takes a lot of time on low battery
         request.post(SERVER_URL + '/api/v1/volume/create')
                .set('Authorization', AUTH)
                .send({ name: TESTVOLUME })
