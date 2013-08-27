@@ -31,7 +31,7 @@ function diff(req, res, next) {
             repo.getTree(lastSyncRevision, function (err, baseTree) {
                 if (err) return next(new HttpError(500, 'Base tree invalid'));
 
-                var changes = syncer.diffEntries(clientIndex.entries, baseTree.entries, serverIndex);
+                var changes = syncer.diffEntries(clientIndex, baseTree.entries, serverIndex);
                 debug(util.inspect(changes));
                 res.send(200, { serverRevision: headCommit.sha1, changes: changes });
             });
