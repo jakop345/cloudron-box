@@ -26,12 +26,12 @@ describe('diff', function () {
         rightTree.entries.push({ path: 'A', sha1: 'SHA1', mtime: 10, size: 20 });
         leftTree.entries.push({ path: 'B', sha1: 'SHA1', mtime: 10, size: 20 });
         var changes = syncer.diff(leftTree, baseTree, rightTree);
-        expect(changes[0].action == 'download').to.be.ok();
-        expect(changes[0].path == 'A').to.be.ok();
-        expect(changes[0].conflict == false).to.be.ok();
-        expect(changes[1].action == 'add').to.be.ok();
-        expect(changes[1].path == 'B').to.be.ok();
-        expect(changes[1].conflict == false).to.be.ok();
+        expect(changes[0].action).to.equal('download');
+        expect(changes[0].path).to.equal('A');
+        expect(changes[0].conflict).to.equal(false);
+        expect(changes[1].action).to.equal('add');
+        expect(changes[1].path).to.equal('B');
+        expect(changes[1].conflict).to.equal(false);
         done();
     });
 
@@ -50,15 +50,15 @@ describe('diff', function () {
         leftTree.entries.push({ path: 'C', sha1: 'SHA5', mtime: 40, size: 23 });
 
         var changes = syncer.diff(leftTree, baseTree, rightTree);
-        expect(changes[0].action == 'update').to.be.ok();
-        expect(changes[0].path == 'A').to.be.ok();
-        expect(changes[0].conflict == true).to.be.ok();
-        expect(changes[1].action == 'update').to.be.ok();
-        expect(changes[1].path == 'B').to.be.ok();
-        expect(changes[1].conflict == true).to.be.ok();
-        expect(changes[2].action == 'download').to.be.ok();
-        expect(changes[2].path == 'C').to.be.ok();
-        expect(changes[2].conflict == true).to.be.ok();
+        expect(changes[0].action).to.equal('update');
+        expect(changes[0].path).to.equal('A');
+        expect(changes[0].conflict).to.equal(true);
+        expect(changes[1].action).to.equal('update');
+        expect(changes[1].path).to.equal('B');
+        expect(changes[1].conflict).to.equal(true);
+        expect(changes[2].action).to.equal('download');
+        expect(changes[2].path).to.equal('C');
+        expect(changes[2].conflict).to.equal(true);
         done();
     });
 
@@ -79,12 +79,12 @@ describe('diff', function () {
         leftTree.entries.push({ path: 'C', sha1: 'SHA3', mtime: 10, size: 20 });
 
         var changes = syncer.diff(leftTree, baseTree, rightTree);
-        expect(changes[0].action == 'remove').to.be.ok();
-        expect(changes[0].path == 'B').to.be.ok();
-        expect(changes[0].conflict == false).to.be.ok();
-        expect(changes[1].action == 'unlink').to.be.ok();
-        expect(changes[1].path == 'C').to.be.ok();
-        expect(changes[1].conflict == false).to.be.ok();
+        expect(changes[0].action).to.equal('remove');
+        expect(changes[0].path).to.equal('B');
+        expect(changes[0].conflict).to.equal(false);
+        expect(changes[1].action).to.equal('unlink');
+        expect(changes[1].path).to.equal('C');
+        expect(changes[1].conflict).to.equal(false);
         done();
     });
 
@@ -110,18 +110,18 @@ describe('diff', function () {
         leftTree.entries.push({ path: 'D', sha1: 'SHA0', mtime: 20, size: 20 });
 
         var changes = syncer.diff(leftTree, baseTree, rightTree);
-        expect(changes[0].action == 'download').to.be.ok();
-        expect(changes[0].path == 'A').to.be.ok();
-        expect(changes[0].conflict == true).to.be.ok();
-        expect(changes[1].action == 'update').to.be.ok();
-        expect(changes[1].path == 'B').to.be.ok();
-        expect(changes[1].conflict == true).to.be.ok();
-        expect(changes[2].action == 'download').to.be.ok();
-        expect(changes[2].path == 'C').to.be.ok();
-        expect(changes[2].conflict == true).to.be.ok();
-        expect(changes[3].action == 'add').to.be.ok();
-        expect(changes[3].path == 'D').to.be.ok();
-        expect(changes[3].conflict == true).to.be.ok();
+        expect(changes[0].action).to.equal('download');
+        expect(changes[0].path).to.equal('A');
+        expect(changes[0].conflict).to.equal(true);
+        expect(changes[1].action).to.equal('update');
+        expect(changes[1].path).to.equal('B');
+        expect(changes[1].conflict).to.equal(true);
+        expect(changes[2].action).to.equal('download');
+        expect(changes[2].path).to.equal('C');
+        expect(changes[2].conflict).to.equal(true);
+        expect(changes[3].action).to.equal('add');
+        expect(changes[3].path).to.equal('D');
+        expect(changes[3].conflict).to.equal(true);
 
         done();
     });

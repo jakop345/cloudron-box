@@ -33,10 +33,10 @@ describe('create', function () {
         var tmpfile = path.join(os.tmpdir(), 'README');
         fs.writeFileSync(tmpfile, 'README_NEW_CONTENTS');
         repo.addFile('README', { file: tmpfile }, function (err, fileInfo, commit) {
-            expect(commit.subject == 'Add README').to.be.ok();
-            expect(fileInfo.sha1 == '2180e82647ff9a3e1a93ab43b81c82025c33c6e2').to.be.ok();
-            expect(commit.author.name == USERNAME).to.be.ok();
-            expect(commit.author.email == EMAIL).to.be.ok();
+            expect(commit.subject).to.equal('Add README');
+            expect(fileInfo.sha1).to.equal('2180e82647ff9a3e1a93ab43b81c82025c33c6e2');
+            expect(commit.author.name).to.equal(USERNAME);
+            expect(commit.author.email).to.equal(EMAIL);
             done();
         });
     });
@@ -46,7 +46,7 @@ describe('create', function () {
         var data = '';
         readme.on('data', function (d) { data += d; });
         readme.on('end', function () {
-            expect(data == 'README_NEW_CONTENTS').to.be.ok();
+            expect(data).to.equal('README_NEW_CONTENTS');
             done();
         });
     });
@@ -73,15 +73,15 @@ describe('create', function () {
 
     it('getTree - valid tree', function (done) {
         repo.getTree('HEAD', function (err, tree) {
-            expect(tree.entries.length == 1).to.be.ok();
-            expect(tree.entries[0].path == 'README');
+            expect(tree.entries.length).to.equal(1);
+            expect(tree.entries[0].path).to.equal('README');
             done();
         });
     });
 
     it('getTree - null tree', function (done) {
         repo.getTree('', function (err, tree) {
-            expect(tree.entries.length === 0).to.be.ok();
+            expect(tree.entries.length).to.equal(0);
             done();
         });
     });
@@ -90,63 +90,64 @@ describe('create', function () {
         var tmpfile = path.join(os.tmpdir(), 'README');
         fs.writeFileSync(tmpfile, 'README_UPDATED_CONTENTS');
         repo.updateFile('README', { file: tmpfile }, function (err, fileInfo, commit) {
-            expect(commit.subject == 'Update README').to.be.ok();
-            expect(fileInfo.sha1 == '39b8a10eed1304c9e779bae47ce4cb60a9b9b9bb').to.be.ok();
+            expect(commit.subject).to.equal('Update README');
+            expect(fileInfo.sha1).to.equal('39b8a10eed1304c9e779bae47ce4cb60a9b9b9bb');
             done();
         });
     });
 
     it('fileEntry - valid file @HEAD', function (done) {
         repo.fileEntry('README', 'HEAD', function (err, entry) {
-            expect(entry.size == 'README_UPDATED_CONTENTS'.length).to.be.ok();
-            expect(entry.mtime != 0).to.be.ok();
+            expect(entry.size).to.equal('README_UPDATED_CONTENTS'.length);
+            expect(entry.mtime).to.not.equal(0);
             done();
         });
     });
 
     it('fileEntry - valid file @HEAD~1', function (done) {
         repo.fileEntry('README', 'HEAD~1', function (err, entry) {
-            expect(entry.size == 'README_NEW_CONTENTS'.length).to.be.ok();
-            expect(entry.mtime != 0).to.be.ok();
+            expect(entry.size).to.equal('README_NEW_CONTENTS'.length);
+            expect(entry.mtime).to.not.equal(0);
             done();
         });
     });
 
     it('fileEntry - invalid file @HEAD', function (done) {
         repo.fileEntry('RANDOM', 'HEAD', function (err, entry) {
-            expect(!err).to.be.ok();
-            expect(entry == null).to.be.ok();
+            expect(err).to.equal(null);
+            expect(entry).to.equal(null);
             done();
         });
     });
 
     it('index', function (done) {
         repo.indexEntries(function (err, entries) {
-            expect(entries.length == 1).to.be.ok();
-            expect(entries[0].size == 'README_UPDATED_CONTENTS'.length).to.be.ok();
-            expect(entries[0].mtime != 0).to.be.ok();
+            expect(entries.length).to.equal(1);
+            expect(entries[0].size).to.equal('README_UPDATED_CONTENTS'.length);
+            expect(entries[0].mtime).to.not.equal(0);
             done(err);
         });
     });
 
     it('removeFile - valid file', function (done) {
         repo.removeFile('README', function (err, commit) {
-            expect(commit.subject == 'Remove README').to.be.ok();
+            expect(commit.subject).to.equal('Remove README');
             done();
         });
     });
 
     it('fileEntry - removed file @HEAD', function (done) {
         repo.fileEntry('README', 'HEAD', function (err, entry) {
-            expect(!err).to.be.ok();
-            expect(entry == null).to.be.ok();
+            expect(err).to.be(null);
+            expect(entry).to.be(null);
             done();
         });
     });
 
     it('removeFile - invalid file', function (done) {
         repo.removeFile('RANDOM', function (err, commit) {
-            expect(err && !commit).to.be.ok();
+            expect(err).to.not.be(null);
+            expect(commit).to.be(undefined);
             done();
         });
     });
