@@ -150,11 +150,9 @@ describe('file', function () {
     });
 
     it('diff', function (done) {
-        var index = {
-            entries: [
-                { path: 'NEWFILE', sha1: '', mtime: now()+10, size: 20 } // file changed, so no sha1
-            ]
-        };
+        var index = [
+            { path: 'NEWFILE', sha1: '', mtime: now()+10, size: 20 } // file changed, so no sha1
+        ];
 
         request.post(SERVER_URL + '/api/v1/sync/' + TESTVOLUME + '/diff')
                .set('Authorization', AUTH)
