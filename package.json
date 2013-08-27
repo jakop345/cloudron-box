@@ -30,6 +30,6 @@
     "expect.js": "*"
   },
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha -R spec test;"
+    "test": "./node_modules/mocha/bin/mocha -R spec src/test;"
   }
 }
