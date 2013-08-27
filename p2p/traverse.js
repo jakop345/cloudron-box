@@ -1,21 +1,9 @@
 var fs = require('fs');
 var crypto = require('crypto');
 
-// var f = {path:file};
-// console.log("Reading " + file);
-// results[file] = "";
-// fs.readFile(file, function(err, buf) {
-//     if (buf) {
-//         results[file] = crypto.createHash('sha256').digest(buf);
-//     }
-
-//     console.log("Reading " + file + " " + (buf ? buf.length : "no buf"));
-// });
-
 function buildManifest(outer, cb) {
     var walk = function(dir, done) {
         var results = {};
-        // console.log("dir " + dir);
         fs.readdir(dir, function(err, list) {
             if (err)
                 return done(err);
@@ -30,7 +18,6 @@ function buildManifest(outer, cb) {
                     if (stat) {
                         if (stat.isDirectory()) {
                             walk(file, function(err, res) {
-                                // console.log("Walking recursively " + file);
                                 for (var p in res)
                                     results[p] = res[p];
                                 --pendingFiles;
@@ -40,38 +27,26 @@ function buildManifest(outer, cb) {
                         } else if (stat.isFile()) {
                             var relative = file.substr(outer.length + 1);
                             ++pendingHashes;
-                            var f = {path:file};
-                            // console.log("Reading " + file + " " + JSON.stringify(stat));
                             results[relative] = {lastModified:stat.mtime};
                             fs.readFile(file, function(err, buf) {
-                                // console.log("Got file callback " + !!buf + " " + pendingHashes);
                                 if (buf) {
                                     var hash = crypto.createHash('sha256');
                                     hash.update(buf);
                                     results[relative].sha256 = hash.digest().toString("hex");
-                                    // results[relative].length = buf.length;
                                 }
                                 --pendingHashes;
-                                if (check()) {
-                                    // console.log("Calling done with " + JSON.stringify(results));
+                                if (check())
                                     done(null, results);
-                                }
-
-                                // console.log("Reading " + file + " " + (buf ? buf.length : "no buf"));
                             });
                             --pendingFiles;
-                            // + " " + err + " " + res);
-                            // if (check())
-                            //     done(null, results);
                         }
                     }
                 });
             });
         });
     };
-    walk(outer, function(err, results) { console.log("got onDone " + results.length); if (err) { cb(err); } else { cb(results); } });
+    walk(outer, function(err, results) { if (err) { cb(err); } else { cb(results); } });
 }
 
-// console.log(process.cwd());
 buildManifest(process.cwd(), function(manifest) { console.log("Got manifest " + JSON.stringify(manifest, null, 4)); });
 
