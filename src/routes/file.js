@@ -70,17 +70,26 @@ function update(req, res, next) {
             // actually update the file!
             if (data.action == 'add') {
                 repo.addFile(leftEntry.path, { file: req.files.file.path }, function (err, fileInfo, commit) {
-                    if (err) return next(new HttpError(500, err.toString()));
+                    if (err) {
+                        if (err.code == 'ENOENT') return next(new HttpError(404, 'File not found'));
+                        return next(new HttpError(500, err.toString()));
+                    }
                     res.send(201, { serverRevision: commit.sha1, sha1: fileInfo.sha1, fastForward: commit.parentSha1 === data.lastSyncRevision });
                 });
             } else if (data.action == 'update') {
                 repo.updateFile(leftEntry.path, { file: req.files.file.path }, function (err, fileInfo, commit) {
-                    if (err) return next(new HttpError(500, err.toString()));
+                    if (err) {
+                        if (err.code == 'ENOENT') return next(new HttpError(404, 'File not found'));
+                        return next(new HttpError(500, err.toString()));
+                    }
                     res.send(201, { serverRevision: commit.sha1, sha1: fileInfo.sha1, fastForward: commit.parentSha1 === data.lastSyncRevision });
                 });
             } else if (data.action == 'remove') {
                 repo.removeFile(leftEntry.path, function (err, commit) {
-                    if (err) return next(new HttpError(500, err.toString()));
+                    if (err) {
+                        if (err.code == 'ENOENT') return next(new HttpError(404, 'File not found'));
+                        return next(new HttpError(500, err.toString()));
+                    }
                     res.send(200, { serverRevision: commit.sha1, fastForward: commit.parentSha1 === data.lastSyncRevision });
                 });
             }
