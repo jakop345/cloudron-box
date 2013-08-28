@@ -61,39 +61,39 @@ function whatChanged(leftEntry, baseEntry, rightEntry) {
     if (!leftEntry && baseEntry && !rightEntry) {
         result = null;
     } else if (!leftEntry && !baseEntry && rightEntry) {
-        result = { action: 'download', path: rightEntry.path, conflict: false };
+        result = { action: 'download', path: rightEntry.path, sha1: rightEntry.sha1, conflict: false };
     } else if (!leftEntry && baseEntry && rightEntry) {
-        if (baseEntry.sha1 == rightEntry.sha1) {
-            result = { action: 'remove', path: rightEntry.path, conflict: false };
+        if (baseEntry.sha1 === rightEntry.sha1) {
+            result = { action: 'remove', path: rightEntry.path, sha1: rightEntry.sha1, conflict: false };
         } else {
-            result = { action: 'download', path: rightEntry.path, conflict: true };
+            result = { action: 'download', path: rightEntry.path, sha1: rightEntry.sha1, conflict: true };
         }
     } else if (leftEntry && !baseEntry && !rightEntry) {
-        return { action: 'add', path: leftEntry.path, conflict: false };
+        return { action: 'add', path: leftEntry.path, sha1: leftEntry.sha1, conflict: false };
     } else if (leftEntry && baseEntry && rightEntry) {
         if (leftEntry.sha1 == rightEntry.sha1) {
             result = null;
         } else if (baseEntry.sha1 == rightEntry.sha1) { // file hasn't changed on server
-            result = { action: 'update', path: rightEntry.path, conflict: false };
+            result = { action: 'update', path: rightEntry.path, sha1: rightEntry.sha1, conflict: false };
         } else if (leftEntry.mtime > rightEntry.mtime) {
-            result = { action: 'update', path: rightEntry.path, conflict: true };
+            result = { action: 'update', path: leftEntry.path, sha1: leftEntry.sha1, conflict: true };
         } else {
-            result = { action: 'download', path: rightEntry.path, conflict: true };
+            result = { action: 'download', path: rightEntry.path, sha1: rightEntry.sha1, conflict: true };
         }
     } else if (leftEntry && !baseEntry && rightEntry) { // file appeared in two places
         if (leftEntry.sha1 == rightEntry.sha1) {
             result = null;
         } else if (leftEntry.mtime > rightEntry.mtime) {
-            result = { action: 'update', path: rightEntry.path, conflict: true };
+            result = { action: 'update', path: leftEntry.path, sha1: leftEntry.sha1, conflict: true };
         } else {
-            result = { action: 'download', path: rightEntry.path, conflict: true };
+            result = { action: 'download', path: rightEntry.path, sha1: rightEntry.sha1, conflict: true };
         }
     } else if (leftEntry && baseEntry && !rightEntry) { // another client removed the file
         if (baseEntry.sha1 == leftEntry.sha1) {
-            result = { action: 'unlink', path: leftEntry.path, conflict: false };
+            result = { action: 'unlink', path: leftEntry.path, sha1: leftEntry.sha1, conflict: false };
         } else {
             // note that we add even if leftEntry.mtime < rightEntry.deletionTime
-            result = { action: 'add', path: leftEntry.path, conflict: true };
+            result = { action: 'add', path: leftEntry.path, sha1: leftEntry.sha1, conflict: true };
         }
     }
 
