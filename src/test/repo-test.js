@@ -21,7 +21,7 @@ var repo = new Repo({ rootDir: path.join(os.tmpdir(), tmpdirname) });
 
 console.log('repo test dir', repo.checkoutDir);
 
-describe('create', function () {
+describe('repo', function () {
     it('create', function (done) {
         repo.create({ name: USERNAME, email: EMAIL }, function () {
             expect(fs.existsSync(repo.gitDir)).to.be.ok();
@@ -56,6 +56,10 @@ describe('create', function () {
         readme.on('error', function () { done(); });
     });
 
+    it('createReadStream - invalid path', function (done) {
+        var readme = repo.createReadStream('../README');
+        readme.on('error', function () { done(); });
+    });
 
     it('tracked', function (done) {
         repo.isTracked('README', function (err, tracked) {
@@ -132,6 +136,13 @@ describe('create', function () {
     it('removeFile - valid file', function (done) {
         repo.removeFile('README', function (err, commit) {
             expect(commit.subject).to.equal('Remove README');
+            done();
+        });
+    });
+
+    it('removeFile - invalid path', function (done) {
+        repo.removeFile('../README', function (err, commit) {
+            expect(err).to.not.be(null);
             done();
         });
     });

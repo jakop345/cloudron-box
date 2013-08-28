@@ -8,7 +8,8 @@ var exec = require('child_process').exec,
     assert = require('assert'),
     crypto = require('crypto'),
     debug = require('debug')('repo.js'),
-    util = require('util');
+    util = require('util'),
+    EventEmitter = require('events').EventEmitter;
 
 exports = module.exports = Repo;
 
@@ -199,10 +200,21 @@ Repo.prototype.indexEntries = function (callback) {
     });
 };
 
+Repo.prototype._absoluteFilePath = function (filePath) {
+    var absoluteFilePath = path.resolve(path.join(this.checkoutDir, filePath));
+    return absoluteFilePath.slice(0, this.checkoutDir.length) == this.checkoutDir
+            ? absoluteFilePath
+            : ''; // the path is outside the repo
+}
+
 // FIXME: needs checkout lock
 Repo.prototype.addFile = function (file, options, callback) {
     var that = this;
-    var absoluteFilePath = path.join(this.checkoutDir, file);
+    var absoluteFilePath = this._absoluteFilePath(file);
+    if (absoluteFilePath.length == 0) {
+        return callback(new Error('Invalid file path'));
+    }
+
     if (fs.existsSync(absoluteFilePath)) {
         return callback(new Error('File already exists'));
     }
@@ -216,7 +228,11 @@ Repo.prototype.addFile = function (file, options, callback) {
 
 Repo.prototype.updateFile = function (file, options, callback) {
     var that = this;
-    var absoluteFilePath = path.join(this.checkoutDir, file);
+    var absoluteFilePath = this._absoluteFilePath(file);
+    if (absoluteFilePath.length == 0) {
+        return callback(new Error('Invalid file path'));
+    }
+
     if (!fs.existsSync(absoluteFilePath)) {
         return callback(new Error('File does not exist'));
     }
@@ -227,7 +243,11 @@ Repo.prototype.updateFile = function (file, options, callback) {
 };
 
 Repo.prototype.removeFile = function (file, callback) {
-    var absoluteFilePath = path.join(this.checkoutDir, file);
+    var absoluteFilePath = this._absoluteFilePath(file);
+    if (absoluteFilePath.length == 0) {
+        return callback(new Error('Invalid file path'));
+    }
+
     if (!fs.existsSync(absoluteFilePath)) {
         return callback(new Error('File does not exist'));
     }
@@ -241,6 +261,13 @@ Repo.prototype.removeFile = function (file, callback) {
 };
 
 Repo.prototype.createReadStream = function (file, options) {
-    return fs.createReadStream(path.join(this.checkoutDir, file), options);
+    var absoluteFilePath = this._absoluteFilePath(file);
+    if (absoluteFilePath.length == 0) {
+        var ee = new EventEmitter();
+        process.nextTick(function () { ee.emit('error', new Error('Invalid file path')); });
+        return ee;
+    }
+
+    return fs.createReadStream(absoluteFilePath, options);
 };
 
