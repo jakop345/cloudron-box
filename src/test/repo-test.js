@@ -64,6 +64,25 @@ describe('repo', function () {
         });
     });
 
+    it('createReadStream @rev', function (done) {
+        var readme = repo.createReadStream('README', { rev: '2180e82647' });
+        var data = '';
+        readme.on('data', function (d) { data += d; });
+        readme.on('end', function () {
+            expect(data).to.equal('README_NEW_CONTENTS');
+            done();
+        });
+    });
+
+    it('createReadStream @bad_rev', function (done) {
+        var readme = repo.createReadStream('README', { rev: '123457' });
+        readme.on('error', function (err) {
+            expect(err).to.be.ok();
+            done();
+        });
+    });
+
+
     it('tracked', function (done) {
         repo.isTracked('README', function (err, tracked) {
             expect(tracked).to.be.ok();

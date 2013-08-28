@@ -14,14 +14,13 @@ exports = module.exports = {
 };
 
 function read(req, res, next) {
-    var filePath = req.params[0];
+    var filePath = req.params[0], rev = req.query.rev;
 
-    var file = req.repo.createReadStream(filePath);
-    file.on('open', function () {
-        // not setting the Content-Length explicitly sends the data using chunked encoding
-        res.writeHead(200, { 'Content-Type' : mime.lookup(filePath) });
-        file.pipe(res);
-    });
+    var file = req.repo.createReadStream(filePath, { rev: rev });
+    // not setting the Content-Length explicitly sends the data using chunked encoding
+    res.writeHead(200, { 'Content-Type' : mime.lookup(filePath) });
+    file.pipe(res);
+
     file.on('error', function (err) {
         if (err.code == 'ENOENT' || err.code == 'ENOTDIR') return next(new HttpError(404, 'Not found'));
         return next(new HttpError(500, 'Stream error:' + err));

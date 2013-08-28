@@ -9,7 +9,8 @@ var exec = require('child_process').exec,
     crypto = require('crypto'),
     debug = require('debug')('repo.js'),
     util = require('util'),
-    EventEmitter = require('events').EventEmitter;
+    EventEmitter = require('events').EventEmitter,
+    spawn = require('child_process').spawn;
 
 exports = module.exports = Repo;
 
@@ -43,13 +44,38 @@ Repo.prototype.git = function (commands, callback) {
     }
     var command = commands.join(' && ');
 
-    debug('GIT_DIR=' + this.gitDir + command);
+    debug('GIT_DIR=' + this.gitDir + ' ' + command);
     exec(command, options, function (error, stdout, stderr) {
         if (error) debug('Git error ' + error);
         if (error) return callback(error);
         return callback(null, stdout);
     });
 };
+
+Repo.prototype.spawn = function (args) {
+    var args = [ '--no-pager' ].concat(args);
+    var options = {
+        env: { GIT_DIR: this.gitDir },
+        cwd: this.checkoutDir
+    };
+
+    debug('GIT_DIR=' + this.gitDir + 'git ' + args.join(' '));
+    var proc = spawn('git', args, options);
+    proc.on('error', function (code, signal) {
+        proc.stdout.emit('error', new RepoError(code, 'Error code:' + code + ' Signal:' + signal));
+    });
+
+    proc.on('exit', function (code, signal) {
+        if (code !== 0) {
+            return proc.stdout.emit('error', new RepoError(code, 'Error code:' + code + ' Signal:' + signal));
+        }
+
+        proc.stdout.emit('exit');
+    });
+
+    proc.stderr.on('data', function (data) { debug(data); });
+    return proc.stdout;
+}
 
 Repo.prototype.getCommit = function (commitish, callback) {
     this.git('show -s --pretty=%T,%ct,%P,%s,%H,%an,%ae ' + commitish, function (err, out) {
@@ -272,12 +298,16 @@ Repo.prototype.removeFile = function (file, callback) {
 
 Repo.prototype.createReadStream = function (file, options) {
     var absoluteFilePath = this._absoluteFilePath(file);
+    var ee = new EventEmitter();
     if (absoluteFilePath.length == 0) {
-        var ee = new EventEmitter();
         process.nextTick(function () { ee.emit('error', new RepoError('ENOENT', 'Invalid file path')); });
         return ee;
     }
 
-    return fs.createReadStream(absoluteFilePath, options);
+    if (options && options.rev) {
+        return this.spawn(['cat-file', '-p', options.rev]);
+    } else {
+        return this.spawn(['show', 'HEAD:' + file]);
+    }
 };
 
