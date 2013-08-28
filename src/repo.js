@@ -39,7 +39,7 @@ Repo.prototype.git = function (commands, callback) {
     if (!util.isArray(commands)) commands = [ commands ];
 
     for (var i = 0; i < commands.length; i++) {
-        commands[i] = 'git ' + commands[i];
+        commands[i] = 'git --no-pager ' + commands[i];
     }
     var command = commands.join(' && ');
 
