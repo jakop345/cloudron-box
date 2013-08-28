@@ -58,7 +58,10 @@ describe('repo', function () {
 
     it('createReadStream - invalid path', function (done) {
         var readme = repo.createReadStream('../README');
-        readme.on('error', function () { done(); });
+        readme.on('error', function (err) {
+            expect(err.code).to.equal('ENOENT');
+            done();
+        });
     });
 
     it('tracked', function (done) {
@@ -142,7 +145,7 @@ describe('repo', function () {
 
     it('removeFile - invalid path', function (done) {
         repo.removeFile('../README', function (err, commit) {
-            expect(err).to.not.be(null);
+            expect(err.code).to.equal('ENOENT');
             done();
         });
     });

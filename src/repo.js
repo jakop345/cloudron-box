@@ -13,6 +13,16 @@ var exec = require('child_process').exec,
 
 exports = module.exports = Repo;
 
+function RepoError(code, msg) {
+    Error.call(this);
+    Error.captureStackTrace(this, this.constructor);
+
+    this.name = this.constructor.name;
+    this.code = code;
+    this.message = msg;
+}
+util.inherits(RepoError, Error);
+
 // creates a repo. before you do anything
 function Repo(config) {
     this.gitDir = config.rootDir + '/.git';
@@ -212,11 +222,11 @@ Repo.prototype.addFile = function (file, options, callback) {
     var that = this;
     var absoluteFilePath = this._absoluteFilePath(file);
     if (absoluteFilePath.length == 0) {
-        return callback(new Error('Invalid file path'));
+        return callback(new RepoError('ENOENT', 'Invalid file path'));
     }
 
     if (fs.existsSync(absoluteFilePath)) {
-        return callback(new Error('File already exists'));
+        return callback(new RepoError('ENOENT', 'File already exists'));
     }
 
     if (!options.message) options.message = 'Add ' + file;
@@ -230,11 +240,11 @@ Repo.prototype.updateFile = function (file, options, callback) {
     var that = this;
     var absoluteFilePath = this._absoluteFilePath(file);
     if (absoluteFilePath.length == 0) {
-        return callback(new Error('Invalid file path'));
+        return callback(new RepoError('ENOENT', 'Invalid file path'));
     }
 
     if (!fs.existsSync(absoluteFilePath)) {
-        return callback(new Error('File does not exist'));
+        return callback(new RepoError('ENOENT', 'File does not exist'));
     }
 
     if (!options.message) options.message = 'Update ' + file;
@@ -245,11 +255,11 @@ Repo.prototype.updateFile = function (file, options, callback) {
 Repo.prototype.removeFile = function (file, callback) {
     var absoluteFilePath = this._absoluteFilePath(file);
     if (absoluteFilePath.length == 0) {
-        return callback(new Error('Invalid file path'));
+        return callback(new RepoError('ENOENT', 'Invalid file path'));
     }
 
     if (!fs.existsSync(absoluteFilePath)) {
-        return callback(new Error('File does not exist'));
+        return callback(new RepoError('ENOENT', 'File does not exist'));
     }
 
     var message = 'Remove ' + file;
@@ -264,7 +274,7 @@ Repo.prototype.createReadStream = function (file, options) {
     var absoluteFilePath = this._absoluteFilePath(file);
     if (absoluteFilePath.length == 0) {
         var ee = new EventEmitter();
-        process.nextTick(function () { ee.emit('error', new Error('Invalid file path')); });
+        process.nextTick(function () { ee.emit('error', new RepoError('ENOENT', 'Invalid file path')); });
         return ee;
     }
 
