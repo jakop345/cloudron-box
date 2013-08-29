@@ -111,20 +111,20 @@ app.configure(function () {
     app.get('/api/v1/logout', routes.user.logout);
     app.get('/api/v1/userInfo', routes.user.userInfo);
 
-    app.param('volume', routes.volume.attachRepo, routes.volume.attachVolume);
+    app.param('volume', routes.volume.attachVolume);
 
     app.post('/api/v1/sync/:volume/diff', routes.sync.diff);
 
     app.get('/api/v1/file/:volume/*', routes.file.read);
     app.post('/api/v1/file/:volume/*', routes.file.multipart, routes.file.update);
 
-    app.get('/api/v1/volume/*/list/', routes.volume.listFiles);
-    app.get('/api/v1/volume/*/list/*', routes.volume.listFiles);
+    app.get('/api/v1/volume/:volume/list/', routes.volume.listFiles);
+    app.get('/api/v1/volume/:volume/list/*', routes.volume.listFiles);
     app.get('/api/v1/volume/list', routes.volume.listVolumes);
     app.post('/api/v1/volume/create', routes.volume.createVolume);
-    app.post('/api/v1/volume/*/delete', routes.volume.deleteVolume);
-    app.post('/api/v1/volume/*/mount', routes.volume.mount);
-    app.post('/api/v1/volume/*/unmount', routes.volume.unmount);
+    app.post('/api/v1/volume/:volume/delete', routes.volume.deleteVolume);
+    app.post('/api/v1/volume/:volume/mount', routes.volume.mount);
+    app.post('/api/v1/volume/:volume/unmount', routes.volume.unmount);
 });
 
 function initialize(callback) {
@@ -151,8 +151,9 @@ function initialize(callback) {
     }
 
     routes.sync.initialize(config);
+    routes.volume.initialize(config);
 
-    routes.volume.initialize(config, callback);
+    callback();
 }
 
 function listen(callback) {

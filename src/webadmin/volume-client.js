@@ -76,7 +76,7 @@ function createFileListingDelegate(data) {
 function createVolumeListingDelegate(data) {
     var elem = $('<a href="#files" class="list-group-item">' + data.name + '</a>');
     elem.click(function (event) {
-        getFileListing(data.id);
+        getFileListing(data.name);
     });
 
     var btnGroup = $('<div class="btn-group btn-group-xs pull-right"></div>');
@@ -90,7 +90,7 @@ function createVolumeListingDelegate(data) {
     btn.click(function (event) {
         event.stopPropagation();
         // TODO let the user confirm ;-)
-        deleteVolume(data.id);
+        deleteVolume(data.name);
     });
     btn.appendTo(btnGroup);
 

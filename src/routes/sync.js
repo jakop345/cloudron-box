@@ -14,7 +14,9 @@ function initialize(config) {
 }
 
 function diff(req, res, next) {
-    var repo = req.repo;
+    if (!req.volume) return next(new HttpError(404, 'No such volume'));
+
+    var repo = req.volume.repo;
 
     if (!('index' in req.body)) return next(new HttpError(400, 'Index not provided'));
     if (!('lastSyncRevision' in req.body)) return next(new HttpError(400, 'lastSyncRevision not provided'));

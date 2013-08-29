@@ -1,13 +1,7 @@
 'use strict';
 
-var fs = require('fs'),
-    debug = require('debug')('volume.js'),
-    HttpError = require('../httperror'),
-    encfs = require('encfs'),
-    rimraf = require('rimraf'),
-    path = require('path'),
-    Repo = require('../repo'),
-    debug = require('debug')('volume.js');
+var HttpError = require('../httperror'),
+    volume = require('../volume.js');
 
 exports = module.exports = {
     initialize: initialize,
@@ -17,99 +11,37 @@ exports = module.exports = {
     deleteVolume: deleteVolume,
     mount: mount,
     unmount: unmount,
-    attachRepo: attachRepo,
     attachVolume: attachVolume
 };
 
-var config, repos = { };
+var config;
 
-function resolveVolumeRootPath(volume) {
-    return path.join(config.dataRoot, volume);
-}
-
-function resolveVolumeMountPoint(volume) {
-    return path.join(config.mountRoot, volume);
-}
-
-function initialize(cfg, callback) {
+function initialize(cfg) {
     config = cfg;
-
-    fs.readdir(config.dataRoot, function (error, files) {
-        if (error) {
-            return callback(new Error('Unable to read root folder'));
-        }
-
-        files.forEach(function (file) {
-            var stat;
-
-            try {
-                stat = fs.statSync(path.join(config.dataRoot, file));
-            } catch (e) {
-                debug('Unable to stat "' + file + '".');
-                return;
-            }
-
-            // ignore everythin else than directories
-            if (!stat.isDirectory()) {
-                return;
-            }
-
-            var volumeMountPoint = resolveVolumeMountPoint(file) ;
-            var tmpDir = path.join(volumeMountPoint, 'tmp');
-            var repo = new Repo({ rootDir: volumeMountPoint, tmpDir: tmpDir });
-            repos[file] = repo;
-            debug('Detected repo : ' + file);
-        });
-
-        callback();
-    });
 }
 
-// TODO maybe also check for password?
+// TODO maybe also check for password? - Johannes
 function deleteVolume(req, res, next) {
-    if (!req.params[0]) {
-        return next(new HttpError(400, 'volume name not specified'));
-    }
+    if (!req.volume) return next(new HttpError(404, 'No such volume'));
 
-    var rootPath = resolveVolumeRootPath(req.params[0]);
-    var mountPoint = resolveVolumeMountPoint(req.params[0]);
-
-    fs.exists(rootPath, function (exists) {
-        if (!exists) {
-            return next(new HttpError(404, 'No such volume'));
+    req.volume.destroy(function (error) {
+        if (error) {
+            return next(new HttpError(500, 'Unable to destroy volume: ' + error));
         }
 
-        var volume = new encfs.Root(rootPath, mountPoint);
-        volume.unmount(function (error) {
-            if (error) {
-                console.log('Error unmounting the volume.', error);
-            }
-
-            rimraf(rootPath, function (error) {
-                if (error) {
-                    console.log('Failed to delete volume root path.', error);
-                }
-
-                rimraf(mountPoint, function (error) {
-                    if (error) {
-                        console.log('Failed to delete volume mount point.', error);
-                    }
-
-                    delete repos[req.params[0]];
-                    // TODO how to handle any errors in folder deletion?
-                    res.send(200);
-                });
-            });
-        });
+        delete req.volume;
+        res.send(200) ;
     });
 }
 
 function listVolumes(req, res, next) {
-    var tmp = [ ];
-    for (var repoId in repos) {
-        tmp.push({ name: repoId, id: repoId });
-    }
-    res.send(200, tmp);
+    volume.list(req.user.username, config, function (error, result) {
+        if (error) {
+            return next(new HttpError(500, 'Unable to list volumes: ' + error));
+        }
+
+        res.send(200, result);
+    });
 }
 
 function createVolume(req, res, next) {
@@ -117,75 +49,33 @@ function createVolume(req, res, next) {
         return next(new HttpError(400, 'volume name not specified'));
     }
 
-    if (req.body.name in repos) {
+    if (volume.get(req.body.name, req.user.username, config)) {
         return next(new HttpError(409, 'volume already exists'));
     }
 
-    var volumeRoot = resolveVolumeRootPath(req.body.name);
-    var volumeMountPoint = resolveVolumeMountPoint(req.body.name);
-
-    encfs.create(volumeRoot, volumeMountPoint, 'foobar1337', function (error, result) {
+    // TODO use real password, would help :-) - Johannes
+    var password = 'foobar1337';
+    volume.create(req.body.name, req.user.username, req.user.email, password, config, function (error, result) {
         if (error) {
-            console.log('Creating volume failed:', error);
             return next(new HttpError(500, 'volume creation failed: ' + error));
         }
 
-        var tmpDir = path.join(volumeMountPoint, 'tmp');
-        fs.mkdirSync(tmpDir);
-
-        // ## move this to repo
-        var repo = new Repo({ rootDir: volumeMountPoint, tmpDir: tmpDir });
-        repo.create({ name: req.user.username, email: req.user.email }, function (error) {
-            if (error) return next(new HttpError(500, 'Error creating repo in volume'));
-            repo.addFile('README.md', { contents: 'README' }, function (error, commit) {
-                if (error) return next(new HttpError(500, 'Error adding README: ' + error));
-                repos[req.body.name] = repo;
-                res.send(201);
-            });
-        });
+        res.send(201);
     });
 }
 
 function listFiles(req, res, next) {
-    req.params[0] = req.params[0] ? req.params[0] : '0';
-    req.params[1] = req.params[1] ? req.params[1] : '.';
+    if (!req.volume) return next(new HttpError(404, 'No such volume'));
 
-    var folder = path.join(resolveVolumeMountPoint(req.params[0]), req.params[1]);
+    // TODO this is unsafe params index might change - Johannes
+    var directory = req.params[0] ? req.params[0] : '.';
 
-    fs.readdir(folder, function (error, files) {
+    req.volume.listFiles(directory, function (error, files) {
         if (error) {
             return next(new HttpError(404, 'Unable to read folder'));
         }
 
-        var ret = [];
-
-        if (folder !== resolveVolumeMountPoint(req.params[0])) {
-            var dirUp = {};
-            dirUp.filename = '..';
-            dirUp.path = path.join(req.params[1], '..');
-            dirUp.isDirectory = true;
-            dirUp.isFile = false;
-            dirUp.stat = { size: 0 };
-            ret.push(dirUp);
-        }
-
-        files.forEach(function (file) {
-            var tmp = {};
-            tmp.filename = file;
-            tmp.path = path.join(req.params[1], file);
-
-            try {
-                tmp.stat = fs.statSync(path.join(folder, file));
-                tmp.isFile = tmp.stat.isFile();
-                tmp.isDirectory = tmp.stat.isDirectory();
-            } catch (e) {
-                console.log('Error getting file information', e);
-            }
-
-            ret.push(tmp);
-        });
-
-        res.send(200, ret);
+        res.send(200, files);
     });
 }
 
@@ -197,21 +87,11 @@ function unmount(req, res, next) {
     // TODO
 }
 
-function attachRepo(req, res, next, volumeId) {
-    if (!volumeId) return next(400, new HttpError('Volume not specified'));
-
-    req.repo = repos[volumeId];
-    if (!req.repo) return next(new HttpError(404, 'No such repo'));
-
-    next();
-}
-
 function attachVolume(req, res, next, volumeId) {
     if (!volumeId) return next(400, new HttpError('Volume not specified'));
-    if (!req.repo) return next(new HttpError(404, 'No such repo'));
 
-    // FIXME: volume should become an object and route code should just use it
-    req.volume = { tmpDir: path.join(resolveVolumeMountPoint(volumeId), 'tmp') };
+    // Try to get the volume, in case we fail further routes should do error handling? - Johannes
+    req.volume = volume.get(volumeId, req.user.username, config);
     next();
 }
 

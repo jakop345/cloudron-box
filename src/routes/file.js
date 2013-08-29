@@ -14,9 +14,11 @@ exports = module.exports = {
 };
 
 function read(req, res, next) {
+    if (!req.volume) return next(new HttpError(404, 'No such volume'));
+
     var filePath = req.params[0], rev = req.query.rev;
 
-    var file = req.repo.createReadStream(filePath, { rev: rev });
+    var file = req.volume.repo.createReadStream(filePath, { rev: rev });
     // not setting the Content-Length explicitly sends the data using chunked encoding
     res.writeHead(200, { 'Content-Type' : mime.lookup(filePath) });
     file.pipe(res);
@@ -28,11 +30,15 @@ function read(req, res, next) {
 }
 
 function multipart(req, res, next) {
-    var parser = express.multipart({ uploadDir: req.volume.tmpDir, keepExtensions: true, maxFieldsSize: 2 * 1024 * 1024 }); // multipart/form-data
+    if (!req.volume) return next(new HttpError(404, 'No such volume'));
+
+    var parser = express.multipart({ uploadDir: req.volume.tmpPath, keepExtensions: true, maxFieldsSize: 2 * 1024 * 1024 }); // multipart/form-data
     parser(req, res, next);
 }
 
 function update(req, res, next) {
+    if (!req.volume) return next(new HttpError(404, 'No such volume'));
+
     // FIXME: grab path from req.params[0] ?
     if (!req.body.data) return next(new HttpError(400, 'data field missing'));
     var data;
@@ -57,7 +63,7 @@ function update(req, res, next) {
 
     debug('Processing ', data);
 
-    var leftEntry = data.entry, repo = req.repo;
+    var leftEntry = data.entry, repo = req.volume.repo;
 
     repo.fileEntry(leftEntry.path, data.lastSyncRevision, function (err, baseEntry) {
         if (err) return next(new HttpError(400, 'input error:' + err));

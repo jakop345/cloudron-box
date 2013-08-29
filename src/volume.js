@@ -18,7 +18,7 @@ exports = module.exports = {
 };
 
 function Volume(name, config) {
-    this.volumeName = name;
+    this.name = name;
     this.config = config;
     this.dataPath = this._resolveVolumeRootPath();
     this.mountPoint = this._resolveVolumeMountPoint();
@@ -28,11 +28,11 @@ function Volume(name, config) {
 }
 
 Volume.prototype._resolveVolumeRootPath = function() {
-    return path.join(this.config.dataRoot, this.volumeName);
+    return path.join(this.config.dataRoot, this.name);
 };
 
 Volume.prototype._resolveVolumeMountPoint = function() {
-    return path.join(this.config.mountRoot, this.volumeName);
+    return path.join(this.config.mountRoot, this.name);
 };
 
 Volume.prototype.open = function(password, callback) {
@@ -81,6 +81,81 @@ Volume.prototype.close = function(callback) {
 
             callback();
         });
+    });
+};
+
+// TODO this does not have error reporting yet - Johannes
+Volume.prototype.destroy = function (callback) {
+    assert(typeof callback === 'function');
+
+    var that = this;
+
+    this.encfs.unmount(function (error) {
+        if (error) {
+            console.log('Error unmounting the volume.', error);
+        }
+
+        rimraf(that.dataPath, function (error) {
+            if (error) {
+                console.log('Failed to delete volume root path.', error);
+            }
+
+            rimraf(that.mountPoint, function (error) {
+                if (error) {
+                    console.log('Failed to delete volume mount point.', error);
+                }
+
+                callback();
+            });
+        });
+    });
+};
+
+Volume.prototype.listFiles = function (directory, callback) {
+    assert(typeof directory === 'string');
+    assert(typeof callback === 'function');
+
+    if (directory.length === 0) {
+        directory = '.';
+    }
+
+    var that = this;
+    var folder = path.join(this.mountPoint, directory);
+
+    fs.readdir(folder, function (error, files) {
+        if (error) {
+            return callback(error);
+        }
+
+        var ret = [];
+
+        if (folder !== that.mountPoint) {
+            var dirUp = {};
+            dirUp.filename = '..';
+            dirUp.path = path.join(directory, '..');
+            dirUp.isDirectory = true;
+            dirUp.isFile = false;
+            dirUp.stat = { size: 0 };
+            ret.push(dirUp);
+        }
+
+        files.forEach(function (file) {
+            var tmp = {};
+            tmp.filename = file;
+            tmp.path = path.join(directory, file);
+
+            try {
+                tmp.stat = fs.statSync(path.join(folder, file));
+                tmp.isFile = tmp.stat.isFile();
+                tmp.isDirectory = tmp.stat.isDirectory();
+            } catch (e) {
+                console.log('Error getting file information', e);
+            }
+
+            ret.push(tmp);
+        });
+
+        callback(null, ret);
     });
 };
 
@@ -170,25 +245,7 @@ function destroyVolume(name, username, config, callback) {
         return callback(new Error('No such volume for this user.'));
     }
 
-    vol.encfs.unmount(function (error) {
-        if (error) {
-            console.log('Error unmounting the volume.', error);
-        }
-
-        rimraf(vol.dataPath, function (error) {
-            if (error) {
-                console.log('Failed to delete volume root path.', error);
-            }
-
-            rimraf(vol.mountPoint, function (error) {
-                if (error) {
-                    console.log('Failed to delete volume mount point.', error);
-                }
-
-                callback();
-            });
-        });
-    });
+    vol.destroy(callback);
 }
 
 function getVolume(name, username, config) {

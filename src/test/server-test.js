@@ -103,6 +103,10 @@ describe('volume', function () {
                .end(function (err, res) {
             var foundReadme = false;
             res.body.forEach(function (entry) {
+                expect(entry.filename).to.be.a("string");
+                expect(entry.stat).to.be.an("object");
+                expect(entry.stat.size).to.be.a("number");
+
                 if (entry.filename === 'README.md') foundReadme = true;
             });
             expect(foundReadme).to.be(true);
