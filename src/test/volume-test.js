@@ -48,8 +48,6 @@ describe('Volume', function () {
             mkdirp.sync(config.configRoot);
             mkdirp.sync(config.mountRoot);
 
-            console.log(config);
-
             done();
         });
     });
