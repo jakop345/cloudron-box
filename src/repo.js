@@ -320,11 +320,37 @@ Repo.prototype.createReadStream = function (file, options) {
 function parseRawDiffLine(line) {
     // :100644 100644 78681069871a08110373201344e5016e218604ea 8b58e26f01a1af730e727b0eb0f1ff3b33a79de2 M      package.json
     var parts = line.split(/[ \t]+/);
-    return {
+
+    var result = {
+        oldRev: parts[2],
         rev: parts[3],
+        oldMode: parseInt(parts[0].substr(1), 8),
         mode: parseInt(parts[1], 8),
-        path: parts[5]
+        status: '', // filled below
+        oldPath: '', // filled below
+        path: '' // filled below
     };
+
+    switch (parts[4].charAt(0)) {
+    case 'A': result.status = 'ADDED'; break;
+    case 'C': result.status = 'COPIED'; break;
+    case 'D': result.status = 'DELETED'; break;
+    case 'M': result.status = 'MODIFIED'; break;
+    case 'R': result.status = 'RENAMED'; break;
+    case 'T': result.status = 'MODECHANGED'; break;
+    case 'U': case 'X': // internal error
+        break;
+    }
+
+    if (result.status === 'Renamed' || result.status === 'Copied') {
+        result.oldPath = parts[5];
+        result.path = parts[6];
+    } else {
+        delete result.oldPath;
+        result.path = parts[5];
+    }
+
+    return result;
 }
 
 Repo.prototype._getFileSizes = function (sha1s, callback) {
@@ -382,6 +408,17 @@ Repo.prototype.getRevisions = function (file, options, callback) {
             sizes.forEach(function (size, idx) { revisionBySha1[sha1s[idx]].size = sizes[idx]; });
             return callback(null, revisions);
         });
+    });
+};
+
+Repo.prototype.diffTree = function (treeish1 /* from */, treeish2 /* to */, callback) {
+    this.git('diff-tree -r ' + treeish1 + ' ' + treeish2, function (err, out) {
+        if (err) return callback(err);
+        var lines = out.trimRight().split('\n'), changes = [ ];
+        lines.forEach(function (line) {
+            changes.push(parseRawDiffLine(line));
+        });
+        callback(null, changes);
     });
 };
 

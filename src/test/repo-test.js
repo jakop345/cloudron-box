@@ -184,6 +184,17 @@ describe('repo', function () {
         });
     });
 
+    it('diffTree - removed file', function (done) {
+        repo.diffTree('HEAD~1', 'HEAD', function (err, changes) {
+            expect(changes.length).to.equal(1);
+            expect(changes[0].path).to.equal('README');
+            expect(changes[0].status).to.equal('DELETED');
+            expect(changes[0].mode).to.equal(0);
+            expect(changes[0].rev).to.equal('0000000000000000000000000000000000000000');
+            done(err);
+        });
+    });
+
     it('fileEntry - removed file @HEAD', function (done) {
         repo.fileEntry('README', 'HEAD', function (err, entry) {
             expect(err).to.be(null);
