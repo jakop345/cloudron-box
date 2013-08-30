@@ -74,7 +74,7 @@ Repo.prototype.spawn = function (args) {
     });
 
     proc.stderr.on('data', function (data) { debug(data); });
-    return proc.stdout;
+    return proc;
 }
 
 Repo.prototype.getCommit = function (commitish, callback) {
@@ -305,9 +305,9 @@ Repo.prototype.createReadStream = function (file, options) {
     }
 
     if (options && options.rev) {
-        return this.spawn(['cat-file', '-p', options.rev]);
+        return this.spawn(['cat-file', '-p', options.rev]).stdout;
     } else {
-        return this.spawn(['show', 'HEAD:' + file]);
+        return this.spawn(['show', 'HEAD:' + file]).stdout;
     }
 };
 
