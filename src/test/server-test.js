@@ -114,6 +114,15 @@ describe('volume', function () {
         });
     });
 
+    it('destroy', function(done) {
+        request.post(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/delete')
+               .set('Authorization', AUTH)
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            done(err);
+        });
+    });
+
     it('bad volume', function (done) {
         request.get(SERVER_URL + '/api/v1/file/whatever/volume')
                .set('Authorization', AUTH)
@@ -125,6 +134,25 @@ describe('volume', function () {
 });
 
 describe('file', function () {
+
+    before(function(done) {
+        this.timeout(5000); // on the Mac, creating volumes takes a lot of time on low battery
+        request.post(SERVER_URL + '/api/v1/volume/create')
+               .set('Authorization', AUTH)
+               .send({ name: TESTVOLUME })
+               .end(function (err, res) {
+            done(err);
+        });
+    });
+
+    after(function(done) {
+        request.post(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/delete')
+               .set('Authorization', AUTH)
+               .end(function (err, res) {
+            done(err);
+        });
+    });
+
     it('read', function (done) {
         request.get(SERVER_URL + '/api/v1/file/' + TESTVOLUME + '/README.md')
                .set('Authorization', AUTH)
@@ -205,4 +233,3 @@ describe('file', function () {
         });
     });
 });
-
