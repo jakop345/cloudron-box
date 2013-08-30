@@ -90,11 +90,7 @@ Volume.prototype.destroy = function (callback) {
 
     var that = this;
 
-    this.encfs.unmount(function (error) {
-        if (error) {
-            console.log('Error unmounting the volume.', error);
-        }
-
+    function cleanupFolders() {
         rimraf(that.dataPath, function (error) {
             if (error) {
                 console.log('Failed to delete volume root path.', error);
@@ -107,6 +103,21 @@ Volume.prototype.destroy = function (callback) {
 
                 callback();
             });
+        });
+    }
+
+    this.encfs.isMounted(function (error, mounted) {
+        if (!mounted) {
+            cleanupFolders();
+            return;
+        }
+
+        that.encfs.unmount(function (error) {
+            if (error) {
+                console.log('Error unmounting the volume.', error);
+            }
+
+            cleanupFolders();
         });
     });
 };
