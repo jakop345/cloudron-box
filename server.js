@@ -5,12 +5,12 @@
 var optimist = require('optimist'),
     express = require('express'),
     http = require('http'),
-    HttpError = require('./httperror'),
+    HttpError = require('./src/httperror'),
     path = require('path'),
     fs = require('fs'),
     mkdirp = require('mkdirp'),
-    db = require('./database'),
-    routes = require('./routes'),
+    db = require('./src/database.js'),
+    routes = require('./src/routes'),
     debug = require('debug'),
     crypto = require('crypto'),
     os = require('os');
@@ -97,7 +97,7 @@ app.configure(function () {
        .use(json)
        .use(urlencoded)
        .use(express.cookieParser())
-       .use(express.favicon(__dirname + "/webadmin/assets/favicon.ico"))
+       .use(express.favicon(__dirname + "/assets/favicon.ico"))
        // API calls that do not require authorization
        .use('/api/v1/version', getVersion)
        .use('/api/v1/createadmin', routes.user.createAdmin) // ## FIXME: allow this before auth for now

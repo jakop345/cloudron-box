@@ -6,10 +6,10 @@
 
 process.env.NODE_ENV = 'testing'; // ugly
 
-var server = require('../server'),
+var server = require('../../server.js'),
     request = require('superagent'),
     expect = require('expect.js'),
-    database = require('../database'),
+    database = require('../database.js'),
     crypto = require('crypto'),
     fs = require('fs'),
     path = require('path'),
