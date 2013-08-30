@@ -74,12 +74,17 @@ function createAdmin(req, res, next) {
 }
 
 function extractCredentialsFromHeaders (req) {
-    if (!req.headers || ! req.headers.authorization) {
+    if (!req.headers || !req.headers.authorization) {
         debug("No authorization header.");
         return null;
     }
 
-    var b = new Buffer(req.headers.authorization, 'base64');
+    if (req.headers.authorization.substr(0, 6) !== 'Basic ') {
+        debug("Only basic authorization supported.");
+        return null;
+    }
+
+    var b = new Buffer(req.headers.authorization.substr(6), 'base64');
     var s = b.toString('utf8');
     if (!s) {
         debug("Authorization header does not contain a valid string.");

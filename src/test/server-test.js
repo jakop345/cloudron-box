@@ -17,7 +17,6 @@ var server = require('../server'),
 
 var SERVER_URL;
 var USERNAME = 'admin', PASSWORD = 'admin', EMAIL ='silly@me.com';
-var AUTH = new Buffer(USERNAME + ':' + PASSWORD).toString('base64');
 var TESTVOLUME = 'testvolume';
 
 function now() { return (new Date()).getTime(); }
@@ -65,7 +64,7 @@ describe('user', function () {
 
     it('userInfo', function (done) {
         request.get(SERVER_URL + '/api/v1/userInfo')
-               .set('Authorization', AUTH)
+               .auth(USERNAME, PASSWORD)
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
             expect(res.body.username).to.equal('admin');
@@ -78,7 +77,7 @@ describe('volume', function () {
     it('create', function (done) {
         this.timeout(5000); // on the Mac, creating volumes takes a lot of time on low battery
         request.post(SERVER_URL + '/api/v1/volume/create')
-               .set('Authorization', AUTH)
+               .auth(USERNAME, PASSWORD)
                .send({ name: TESTVOLUME })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(201);
@@ -88,7 +87,7 @@ describe('volume', function () {
 
     it('list', function (done) {
         request.get(SERVER_URL + '/api/v1/volume/list')
-               .set('Authorization', AUTH)
+               .auth(USERNAME, PASSWORD)
                .end(function (err, res) {
             expect(res.body.length).to.equal(1);
             expect(res.body[0].name).to.equal(TESTVOLUME);
@@ -99,7 +98,7 @@ describe('volume', function () {
 
     it('listFiles', function (done) {
         request.get(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/list/')
-               .set('Authorization', AUTH)
+               .auth(USERNAME, PASSWORD)
                .end(function (err, res) {
             var foundReadme = false;
             res.body.forEach(function (entry) {
@@ -116,7 +115,7 @@ describe('volume', function () {
 
     it('destroy', function(done) {
         request.post(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/delete')
-               .set('Authorization', AUTH)
+               .auth(USERNAME, PASSWORD)
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
             done(err);
@@ -125,7 +124,7 @@ describe('volume', function () {
 
     it('bad volume', function (done) {
         request.get(SERVER_URL + '/api/v1/file/whatever/volume')
-               .set('Authorization', AUTH)
+               .auth(USERNAME, PASSWORD)
                .end(function (err, res) {
             expect(res.statusCode).to.equal(404);
             done(err);
@@ -138,7 +137,7 @@ describe('file', function () {
     before(function(done) {
         this.timeout(5000); // on the Mac, creating volumes takes a lot of time on low battery
         request.post(SERVER_URL + '/api/v1/volume/create')
-               .set('Authorization', AUTH)
+               .auth(USERNAME, PASSWORD)
                .send({ name: TESTVOLUME })
                .end(function (err, res) {
             done(err);
@@ -147,7 +146,7 @@ describe('file', function () {
 
     after(function(done) {
         request.post(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/delete')
-               .set('Authorization', AUTH)
+               .auth(USERNAME, PASSWORD)
                .end(function (err, res) {
             done(err);
         });
@@ -155,7 +154,7 @@ describe('file', function () {
 
     it('read', function (done) {
         request.get(SERVER_URL + '/api/v1/file/' + TESTVOLUME + '/README.md')
-               .set('Authorization', AUTH)
+               .auth(USERNAME, PASSWORD)
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
             expect(res.text).to.equal('README');
@@ -167,7 +166,7 @@ describe('file', function () {
 
     it('update - add', function (done) {
         request.post(SERVER_URL + '/api/v1/file/' + TESTVOLUME + '/NEWFILE')
-               .set('Authorization', AUTH)
+               .auth(USERNAME, PASSWORD)
                .field('data', JSON.stringify({ action: 'add', lastSyncRevision: '', entry: { path: 'NEWFILE', mtime: now() } }))
                .attach('file', tempFile('BLAH BLAH'))
                .end(function (err, res) {
@@ -187,7 +186,7 @@ describe('file', function () {
         ];
 
         request.post(SERVER_URL + '/api/v1/sync/' + TESTVOLUME + '/diff')
-               .set('Authorization', AUTH)
+               .auth(USERNAME, PASSWORD)
                .send({ index: index, lastSyncRevision: serverRevision })
                .end(function (err, res) {
 
@@ -207,7 +206,7 @@ describe('file', function () {
 
     it('update - update', function (done) {
         request.post(SERVER_URL + '/api/v1/file/' + TESTVOLUME + '/NEWFILE')
-               .set('Authorization', AUTH)
+               .auth(USERNAME, PASSWORD)
                .field('data', JSON.stringify({ action: 'update', lastSyncRevision: serverRevision, entry: { path: 'NEWFILE', mtime: now() }}))
                .attach('file', tempFile('BLAH BLAH2'))
                .end(function (err, res) {
@@ -222,7 +221,7 @@ describe('file', function () {
 
     it('revisions', function (done) {
         request.get(SERVER_URL + '/api/v1/revisions/' + TESTVOLUME + '/NEWFILE')
-               .set('Authorization', AUTH)
+               .auth(USERNAME, PASSWORD)
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
             expect(res.body.revisions.length == 2);
@@ -240,7 +239,7 @@ describe('file', function () {
 
     it('update - del', function (done) {
         request.post(SERVER_URL + '/api/v1/file/' + TESTVOLUME + '/NEWFILE')
-               .set('Authorization', AUTH)
+               .auth(USERNAME, PASSWORD)
                .field('data', JSON.stringify({ action: 'remove', lastSyncRevision: serverRevision, entry: { path: 'NEWFILE' } }))
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
