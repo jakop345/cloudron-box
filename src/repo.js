@@ -77,21 +77,27 @@ Repo.prototype.spawn = function (args) {
     return proc;
 }
 
+var LOG_LINE_FORMAT = '%T,%ct,%P,%s,%H,%an,%ae';
+
+function parseLogLine(line) {
+    var parts = line.split(',');
+    return {
+        treeSha1: parts[0],
+        commitDate: parseInt(parts[1], 10),
+        parentSha1: parts[2],
+        subject: parts[3],
+        sha1: parts[4],
+        author: {
+            name: parts[5],
+            email: parts[6]
+        }
+    };
+}
+ 
 Repo.prototype.getCommit = function (commitish, callback) {
-    this.git('show -s --pretty=%T,%ct,%P,%s,%H,%an,%ae ' + commitish, function (err, out) {
+    this.git('show -s --pretty=' + LOG_LINE_FORMAT + ' ' + commitish, function (err, out) {
         if (err) return callback(err);
-        var parts = out.trimRight().split(',');
-        callback(null, {
-            treeSha1: parts[0],
-            commitDate: parseInt(parts[1], 10),
-            parentSha1: parts[2],
-            subject: parts[3],
-            sha1: parts[4],
-            author: {
-                name: parts[5],
-                email: parts[6]
-            }
-        });
+        callback(null, parseLogLine(out.trimRight()));
     });
 };
 
