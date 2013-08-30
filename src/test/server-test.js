@@ -220,6 +220,24 @@ describe('file', function () {
         });
     });
 
+    it('revisions', function (done) {
+        request.get(SERVER_URL + '/api/v1/revisions/' + TESTVOLUME + '/NEWFILE')
+               .set('Authorization', AUTH)
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            expect(res.body.revisions.length == 2);
+            expect(res.body.revisions[0].sha1).to.equal('321f24c9a2669b35cd2df0cab5c42b2bb2958e9a');
+            expect(res.body.revisions[0].size).to.equal(10);
+            expect(res.body.revisions[0].author.email).to.equal(EMAIL);
+            expect(res.body.revisions[0].author.name).to.equal(USERNAME);
+            expect(res.body.revisions[1].sha1).to.equal('e3f27b2dbefe2f9c5efece6bdbc0f44e9fb8875a');
+            expect(res.body.revisions[1].size).to.equal(9);
+            expect(res.body.revisions[1].author.email).to.equal(EMAIL);
+            expect(res.body.revisions[1].author.name).to.equal(USERNAME);
+            done(err);
+        });
+    });
+
     it('update - del', function (done) {
         request.post(SERVER_URL + '/api/v1/file/' + TESTVOLUME + '/NEWFILE')
                .set('Authorization', AUTH)

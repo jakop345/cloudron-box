@@ -9,6 +9,7 @@ var fs = require('fs'),
 
 exports = module.exports = {
     read: read,
+    revisions: revisions,
     update: update,
     multipart: multipart
 };
@@ -26,6 +27,21 @@ function read(req, res, next) {
     file.on('error', function (err) {
         if (err.code == 'ENOENT' || err.code == 'ENOTDIR') return next(new HttpError(404, 'Not found'));
         return next(new HttpError(500, 'Stream error:' + err));
+    });
+}
+
+function revisions(req, res, next) {
+    if (!req.volume) return next(new HttpError(404, 'No such volume'));
+
+    var filePath = req.params[0], limit = req.query.limit || 10;
+
+    req.volume.repo.getRevisions(filePath, { limit: limit }, function (err, revisions) {
+        if (err) {
+            if (err.code == 'ENOENT' || err.code == 'ENOTDIR') return next(new HttpError(404, 'Not found'));
+            return next(new HttpError(500, 'Revision error:' + err));
+        }
+
+        res.send(200, { revisions: revisions });
     });
 }
 
