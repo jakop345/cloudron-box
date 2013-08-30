@@ -219,6 +219,33 @@ describe('file', function () {
         });
     });
 
+    it('delta', function (done) {
+        request.post(SERVER_URL + '/api/v1/sync/' + TESTVOLUME + '/delta')
+               .auth(USERNAME, PASSWORD)
+               .send({ clientRevision: '' }) // virgin client
+               .end(function (err, res) {
+            expect(res.body.serverRevision).to.equal(serverRevision);
+            expect(res.body.changes.length).to.equal(2);
+            expect(res.body.changes[0].status).to.equal('ADDED');
+            expect(res.body.changes[0].path).to.equal('NEWFILE');
+            expect(res.body.changes[1].status).to.equal('ADDED');
+            expect(res.body.changes[1].path).to.equal('README.md');
+            done(err);
+        });
+    });
+
+    it('delta', function (done) {
+        request.post(SERVER_URL + '/api/v1/sync/' + TESTVOLUME + '/delta')
+               .auth(USERNAME, PASSWORD)
+               .query({ clientRevision: serverRevision }) // uptodate client
+               .send() // for POST, send calls query to get query params
+               .end(function (err, res) {
+            expect(res.body.serverRevision).to.equal(serverRevision);
+            expect(res.body.changes.length).to.equal(0);
+            done(err);
+        });
+    });
+
     it('revisions', function (done) {
         request.get(SERVER_URL + '/api/v1/revisions/' + TESTVOLUME + '/NEWFILE')
                .auth(USERNAME, PASSWORD)

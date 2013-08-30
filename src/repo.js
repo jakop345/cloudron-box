@@ -339,7 +339,7 @@ function parseRawDiffLine(line) {
     case 'R': result.status = 'RENAMED'; break;
     case 'T': result.status = 'MODECHANGED'; break;
     case 'U': case 'X': // internal error
-        break;
+        return null;
     }
 
     if (result.status === 'Renamed' || result.status === 'Copied') {
@@ -412,10 +412,19 @@ Repo.prototype.getRevisions = function (file, options, callback) {
 };
 
 Repo.prototype.diffTree = function (treeish1 /* from */, treeish2 /* to */, callback) {
+    if (treeish1 === '') {
+        // this is an empty tree to diff against. git mktree < /dev/null
+        // for some reason --root doesn't work as expected
+        treeish1 = '4b825dc642cb6eb9a060e54bf8d69288fbee4904';
+    }
+
     this.git('diff-tree -r ' + treeish1 + ' ' + treeish2, function (err, out) {
         if (err) return callback(err);
-        var lines = out.trimRight().split('\n'), changes = [ ];
-        lines.forEach(function (line) {
+        var changes = [ ];
+        out = out.trimRight();
+        if (out === '') return callback(null, changes); // nothing changed
+
+        out.split('\n').forEach(function (line) {
             changes.push(parseRawDiffLine(line));
         });
         callback(null, changes);

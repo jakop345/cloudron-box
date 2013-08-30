@@ -114,6 +114,7 @@ app.configure(function () {
     app.param('volume', routes.volume.attachVolume);
 
     app.post('/api/v1/sync/:volume/diff', routes.sync.diff);
+    app.post('/api/v1/sync/:volume/delta', routes.sync.delta);
 
     app.get('/api/v1/revisions/:volume/*', routes.file.revisions);
     app.get('/api/v1/file/:volume/*', routes.file.read);

@@ -7,7 +7,8 @@ var debug = require('debug')('sync.js'),
 
 exports = module.exports = {
     initialize: initialize,
-    diff: diff
+    diff: diff,
+    delta: delta
 };
 
 function initialize(config) {
@@ -37,6 +38,21 @@ function diff(req, res, next) {
                 debug(util.inspect(changes));
                 res.send(200, { serverRevision: headCommit.sha1, changes: changes });
             });
+        });
+    });
+}
+
+function delta(req, res, next) {
+    if (!req.volume) return next(new HttpError(404, 'No such volume'));
+
+    var repo = req.volume.repo;
+    var clientRevision = req.query.clientRevision || '';
+
+    repo.getCommit('HEAD', function (err, headCommit) {
+        if (err) return next(new HttpError(500, 'HEAD commit invalid'));
+        repo.diffTree(clientRevision, headCommit.sha1, function (err, changes) {
+            if (err) return next(new HttpError(400, 'invalid cursor'));
+            res.send(200, { changes: changes, serverRevision: headCommit.sha1 });
         });
     });
 }

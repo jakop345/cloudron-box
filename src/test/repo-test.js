@@ -146,6 +146,15 @@ describe('repo', function () {
         });
     });
 
+    it('diffTree - empty tree', function (done) {
+        repo.diffTree('', 'HEAD', function (err, changes) {
+            expect(changes.length).to.equal(1);
+            expect(changes[0].path).to.equal('README');
+            expect(changes[0].status).to.equal('ADDED');
+            done(err);
+        });
+    });
+
     it('getRevisions', function (done) {
         repo.getRevisions('README', function (err, revisions) {
             expect(err).to.equal(null);
