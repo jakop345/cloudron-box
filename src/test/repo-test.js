@@ -146,6 +146,21 @@ describe('repo', function () {
         });
     });
 
+    it('getRevisions', function (done) {
+        repo.getRevisions('README', function (err, revisions) {
+            expect(err).to.equal(null);
+            expect(revisions.length).to.equal(2);
+            expect(revisions[0].path).to.equal('README');
+            expect(revisions[0].subject).to.equal('Update README');
+            expect(revisions[0].size).to.equal(23);
+
+            expect(revisions[1].path).to.equal('README');
+            expect(revisions[1].subject).to.equal('Add README');
+            expect(revisions[1].size).to.equal(19);
+            done();
+        });
+    });
+
     it('index', function (done) {
         repo.indexEntries(function (err, entries) {
             expect(entries.length).to.equal(1);

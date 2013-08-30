@@ -317,3 +317,71 @@ Repo.prototype.createReadStream = function (file, options) {
     }
 };
 
+function parseRawDiffLine(line) {
+    // :100644 100644 78681069871a08110373201344e5016e218604ea 8b58e26f01a1af730e727b0eb0f1ff3b33a79de2 M      package.json
+    var parts = line.split(/[ \t]+/);
+    return {
+        rev: parts[3],
+        mode: parseInt(parts[1], 8),
+        path: parts[5]
+    };
+}
+
+Repo.prototype._getFileSizes = function (sha1s, callback) {
+    var proc = this.spawn(['cat-file', '--batch-check']), data = '';
+    proc.stdout.setEncoding('utf8');
+    proc.stdout.on('data', function (d) { data += d });
+    proc.stdout.on('end', function () {
+        var sizes = [ ];
+        data.trimRight().split('\n').forEach(function (line) {
+            var parts = line.split(' ');
+            var sha1 = parts[0], size = parseInt(parts[2]);
+            sizes.push(size);
+        });
+        callback(null, sizes);
+    });
+    proc.stdout.on('error', callback);
+
+    proc.stdin.write(sha1s.join('\n'));
+    proc.stdin.end('\n');
+};
+
+Repo.prototype.getRevisions = function (file, options, callback) {
+    if (typeof options === 'function') {
+        callback = options;
+        options = { };
+    }
+
+    var limit = options.limit || 10;
+    var revisions = [ ], that = this;
+
+    this.git('log --no-abbrev --pretty=' + LOG_LINE_FORMAT + ' --raw -n ' + limit + ' -- ' + file, function (err, out) {
+        if (err) return callback(err);
+        var revisionBySha1 = { }, sha1s = [ ];
+        var lines = out.trimRight().split('\n');
+        for (var i = 0; i < lines.length; i += 3) {
+            var commit = parseLogLine(lines[i].trimRight());
+            var diff = parseRawDiffLine(lines[i+2].trimRight());
+            var revision = {
+                sha1: diff.rev,
+                mode: diff.mode,
+                path: diff.path,
+                date: commit.commitDate,
+                author: commit.author,
+                subject: commit.subject,
+                size: 0 // this will be filled up below
+            };
+
+            revisionBySha1[diff.rev] = revision;
+            sha1s.push(diff.rev);
+            revisions.push(revision);
+        }
+
+        that._getFileSizes(sha1s, function (err, sizes) {
+            if (err) return callback(err);
+            sizes.forEach(function (size, idx) { revisionBySha1[sha1s[idx]].size = sizes[idx]; });
+            return callback(null, revisions);
+        });
+    });
+};
+
