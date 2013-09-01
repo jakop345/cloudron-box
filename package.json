@@ -31,6 +31,6 @@
     "expect.js": "*"
   },
   "scripts": {
-    "test": "./node_modules/istanbul/lib/cli.js test ./node_modules/mocha/bin/_mocha -- ./src/test"
+    "test": "./node_modules/istanbul/lib/cli.js test ./node_modules/mocha/bin/_mocha -- ./api/test"
   }
 }
