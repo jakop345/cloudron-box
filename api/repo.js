@@ -59,7 +59,7 @@ Repo.prototype.spawn = function (args) {
         cwd: this.checkoutDir
     };
 
-    debug('GIT_DIR=' + this.gitDir + 'git ' + args.join(' '));
+    debug('GIT_DIR=' + this.gitDir + ' git ' + args.join(' '));
     var proc = spawn('git', args, options);
     proc.on('error', function (code, signal) {
         proc.stdout.emit('error', new RepoError(code, 'Error code:' + code + ' Signal:' + signal));
@@ -325,7 +325,7 @@ Repo.prototype.createReadStream = function (file, options) {
     if (options && options.rev) {
         return this.spawn(['cat-file', '-p', options.rev]).stdout;
     } else {
-        return this.spawn(['show', 'HEAD:' + file]).stdout;
+        return this.spawn(['cat-file', '-p', 'HEAD:' + file]).stdout;
     }
 };
 
