@@ -151,6 +151,11 @@ Volume.prototype.listFiles = function (directory, callback) {
         }
 
         files.forEach(function (file) {
+            // filter .git
+            if (file === '.git') {
+                return;
+            }
+
             var tmp = {};
             tmp.filename = file;
             tmp.path = path.join(directory, file);
