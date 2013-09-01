@@ -88,10 +88,12 @@ function unmount(req, res, next) {
 }
 
 function attachVolume(req, res, next, volumeId) {
-    if (!volumeId) return next(400, new HttpError('Volume not specified'));
+    if (!volumeId) return next(new HttpError(400, 'Volume not specified'));
 
-    // Try to get the volume, in case we fail further routes should do error handling? - Johannes
     req.volume = volume.get(volumeId, req.user.username, config);
+
+    if (!req.volume) return next(new HttpError(404, 'No such volume'));
+
     next();
 }
 

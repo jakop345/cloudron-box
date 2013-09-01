@@ -16,8 +16,6 @@ exports = module.exports = {
 };
 
 function read(req, res, next) {
-    if (!req.volume) return next(new HttpError(404, 'No such volume'));
-
     var filePath = req.params[0], rev = req.query.rev;
 
     var file = req.volume.repo.createReadStream(filePath, { rev: rev });
@@ -32,8 +30,6 @@ function read(req, res, next) {
 }
 
 function revisions(req, res, next) {
-    if (!req.volume) return next(new HttpError(404, 'No such volume'));
-
     var filePath = req.params[0], limit = req.query.limit || 10;
 
     req.volume.repo.getRevisions(filePath, { limit: limit }, function (err, revisions) {
@@ -47,7 +43,6 @@ function revisions(req, res, next) {
 }
 
 function metadata(req, res, next) {
-    if (!req.volume) return next(new HttpError(404, 'No such volume'));
     var filePath = req.params[0], rev = req.query.rev;
 
     if (!rev) {
@@ -67,15 +62,11 @@ function metadata(req, res, next) {
 }
 
 function multipart(req, res, next) {
-    if (!req.volume) return next(new HttpError(404, 'No such volume'));
-
     var parser = express.multipart({ uploadDir: req.volume.tmpPath, keepExtensions: true, maxFieldsSize: 2 * 1024 * 1024 }); // multipart/form-data
     parser(req, res, next);
 }
 
 function update(req, res, next) {
-    if (!req.volume) return next(new HttpError(404, 'No such volume'));
-
     // FIXME: grab path from req.params[0] ?
     if (!req.body.data) return next(new HttpError(400, 'data field missing'));
     var data;

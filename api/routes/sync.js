@@ -15,8 +15,6 @@ function initialize(config) {
 }
 
 function diff(req, res, next) {
-    if (!req.volume) return next(new HttpError(404, 'No such volume'));
-
     var repo = req.volume.repo;
 
     if (!('index' in req.body)) return next(new HttpError(400, 'Index not provided'));
@@ -43,8 +41,6 @@ function diff(req, res, next) {
 }
 
 function delta(req, res, next) {
-    if (!req.volume) return next(new HttpError(404, 'No such volume'));
-
     var repo = req.volume.repo;
     var clientRevision = req.query.clientRevision || '';
 
