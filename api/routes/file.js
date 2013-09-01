@@ -10,6 +10,7 @@ var fs = require('fs'),
 exports = module.exports = {
     read: read,
     revisions: revisions,
+    metadata: metadata,
     update: update,
     multipart: multipart
 };
@@ -43,6 +44,26 @@ function revisions(req, res, next) {
 
         res.send(200, { revisions: revisions });
     });
+}
+
+function metadata(req, res, next) {
+    if (!req.volume) return next(new HttpError(404, 'No such volume'));
+    var filePath = req.params[0], rev = req.query.rev;
+
+    if (!rev) {
+        // Use the index to provide mtime information
+        req.volume.repo.indexEntries({ path: filePath }, function (err, entries) {
+            if (err) return next(new HttpError(500, 'Cannot get index: ' + err.message));
+            res.send(200, { entries: entries });
+        });
+    } else {
+        // No easy way to provide mtime information. If this is needed we have to create an
+        // alternate git tree structure which also contains the mtime.
+        req.volume.repo.getTree(rev, { path: filePath }, function (err, tree) {
+            if (err) return next(new HttpError(400, 'Invalid revision: ' + err.message));
+            res.send(200, { entries: tree.entries });
+        });
+    }
 }
 
 function multipart(req, res, next) {

@@ -11,7 +11,7 @@ var optimist = require('optimist'),
     mkdirp = require('mkdirp'),
     db = require('./api/database.js'),
     routes = require('./api/routes'),
-    debug = require('debug'),
+    debug = require('debug')('server.js'),
     crypto = require('crypto'),
     os = require('os');
 
@@ -118,6 +118,7 @@ app.configure(function () {
 
     app.get('/api/v1/revisions/:volume/*', routes.file.revisions);
     app.get('/api/v1/file/:volume/*', routes.file.read);
+    app.get('/api/v1/metadata/:volume/*', routes.file.metadata);
     app.post('/api/v1/file/:volume/*', routes.file.multipart, routes.file.update);
 
     app.get('/api/v1/volume/:volume/list/', routes.volume.listFiles);

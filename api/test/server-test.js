@@ -251,7 +251,7 @@ describe('file', function () {
                .auth(USERNAME, PASSWORD)
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
-            expect(res.body.revisions.length == 2);
+            expect(res.body.revisions.length).to.be(2);
             expect(res.body.revisions[0].sha1).to.equal('321f24c9a2669b35cd2df0cab5c42b2bb2958e9a');
             expect(res.body.revisions[0].size).to.equal(10);
             expect(res.body.revisions[0].author.email).to.equal(EMAIL);
@@ -260,6 +260,51 @@ describe('file', function () {
             expect(res.body.revisions[1].size).to.equal(9);
             expect(res.body.revisions[1].author.email).to.equal(EMAIL);
             expect(res.body.revisions[1].author.name).to.equal(USERNAME);
+            done(err);
+        });
+    });
+
+    it('metadata - root, no rev', function (done) {
+        request.get(SERVER_URL + '/api/v1/metadata/' + TESTVOLUME + '/')
+               .auth(USERNAME, PASSWORD)
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            expect(res.body.entries.length).to.be(2);
+            expect(res.body.entries[0].path).to.equal('NEWFILE');
+            expect(res.body.entries[0].mtime).to.be.a('number');
+            expect(res.body.entries[0].size).to.be('BLAH BLAH2'.length);
+            expect(res.body.entries[1].path).to.equal('README.md');
+            expect(res.body.entries[1].mtime).to.be.a('number');
+
+            done(err);
+        });
+    });
+
+    it('metadata - file, no rev', function (done) {
+        request.get(SERVER_URL + '/api/v1/metadata/' + TESTVOLUME + '/NEWFILE')
+               .auth(USERNAME, PASSWORD)
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            expect(res.body.entries.length).to.be(1);
+            expect(res.body.entries[0].path).to.equal('NEWFILE');
+            expect(res.body.entries[0].mtime).to.be.a('number');
+            expect(res.body.entries[0].size).to.be('BLAH BLAH2'.length);
+
+            done(err);
+        });
+    });
+
+    it('metadata - file, rev', function (done) {
+        request.get(SERVER_URL + '/api/v1/metadata/' + TESTVOLUME + '/NEWFILE')
+               .auth(USERNAME, PASSWORD)
+               .query({ rev: 'HEAD'})
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            expect(res.body.entries.length).to.be(1);
+            expect(res.body.entries[0].path).to.equal('NEWFILE');
+            expect(res.body.entries[0].mtime).to.be(undefined);
+            expect(res.body.entries[0].size).to.be('BLAH BLAH2'.length);
+
             done(err);
         });
     });

@@ -126,12 +126,18 @@ function parseTreeLine(line) {
     };
 }
 
-Repo.prototype.getTree = function (treeish, callback) {
+Repo.prototype.getTree = function (treeish, options, callback) {
+    if (typeof options === 'function') {
+        callback = options;
+        options = { };
+    }
+
     var tree = { entries: [ ] };
 
     if (treeish == '') return callback(null, tree);
 
-    this.git('ls-tree -r -l ' + treeish, function (err, out) {
+    var path = options.path || '';
+    this.git('ls-tree -r -l ' + treeish + ' -- ' + path, function (err, out) {
         var lines = out.trimRight().split('\n');
         lines.forEach(function (line) { tree.entries.push(parseTreeLine(line)); });
         callback(null, tree);
@@ -229,8 +235,14 @@ function parseIndexLines(lines, i) {
     return entry;
 }
 
-Repo.prototype.indexEntries = function (callback) {
-    this.git('ls-files -s --debug', function (err, out) {
+Repo.prototype.indexEntries = function (options, callback) {
+    if (typeof options === 'function') {
+        callback = options;
+        options = { };
+    }
+
+    var path = options.path || '';
+    this.git('ls-files -s --debug -- ' + path, function (err, out) {
         if (err) return callback(err);
         out = out.trimRight();
         var lines = out.split('\n');
