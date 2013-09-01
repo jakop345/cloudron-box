@@ -7,7 +7,8 @@ var Repo = require('../repo'),
     crypto = require('crypto'),
     fs = require('fs'),
     path = require('path'),
-    os = require('os');
+    os = require('os'),
+    constants = require('constants');
 
 var assert = require('assert');
 var expect = require('expect.js');
@@ -137,6 +138,18 @@ describe('repo', function () {
             done();
         });
     });
+
+    it('fileEntry - valid dir @HEAD', function (done) {
+        repo.fileEntry('/', 'HEAD', function (err, entry) {
+            expect(entry.path).to.equal('/');
+            expect(entry.sha1).to.be.ok();
+            expect(entry.mode & constants.S_IFMT).to.be(constants.S_IFDIR);
+            expect(entry.size).to.equal(0);
+            expect(entry.mtime).to.be(undefined);
+            done();
+        });
+    });
+
 
     it('fileEntry - invalid file @HEAD', function (done) {
         repo.fileEntry('RANDOM', 'HEAD', function (err, entry) {

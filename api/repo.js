@@ -10,7 +10,8 @@ var exec = require('child_process').exec,
     debug = require('debug')('repo.js'),
     util = require('util'),
     EventEmitter = require('events').EventEmitter,
-    spawn = require('child_process').spawn;
+    spawn = require('child_process').spawn,
+    constants = require('constants'); // internal module? same as process.binding('constants')
 
 exports = module.exports = Repo;
 
@@ -23,6 +24,14 @@ function RepoError(code, msg) {
     this.message = msg;
 }
 util.inherits(RepoError, Error);
+
+function isDir(mode) {
+    return (mode & constants.S_IFMT) === constants.S_IFDIR;
+}
+
+function isFile(mode) {
+    return (mode & constants.S_IFMT) === constants.S_IFREG;
+}
 
 // creates a repo. before you do anything
 function Repo(config) {
@@ -120,7 +129,7 @@ function parseTreeLine(line) {
     var mode = parts[0];
     return {
         mode: parseInt(parts[0], 8),
-        size: parseInt(parts[3]),
+        size: parseInt(parts[3]) || 0, // for dirs, size field is '-' and parseInt will return NaN
         sha1: parts[2],
         path: parts[4]
     };
@@ -153,11 +162,30 @@ Repo.prototype.isTracked = function (file, callback) {
 Repo.prototype.fileEntry = function (file, commitish, callback) {
     var that = this;
 
+    if (file === '/') { // ls-tree won't give root info :(
+        this.getCommit(commitish, function (err, commit) {
+            if (err) return callback(err);
+            callback(null, {
+                mode: parseInt('040000', 8),
+                size: 0,
+                sha1: commit.treeSha1,
+                path: '/'
+            });
+        });
+        return;
+    }
+
+    // ls-tree shows dir contents if there is a trailing '/', so strip it
+    if (file.charAt(file.length-1) === '/') file = file.substr(0, file.length - 1);
+
     this.git('ls-tree -l ' + commitish + ' -- ' + file, function (err, out) {
         out = out ? out.trimRight() : '';
         if (out.length == 0) return callback(null, null); // file was removed
 
         var entry = parseTreeLine(out);
+
+        // dirs don't have mtime information
+        if (isDir(entry.mode)) return callback(null, entry);
 
         // TODO: This is expensive potentially. One option for HEAD is to stat the checkout
         // dir (would that work after we recreated the repo from recovery?)

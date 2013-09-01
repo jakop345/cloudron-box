@@ -264,6 +264,8 @@ describe('file', function () {
         });
     });
 
+    var treeHash;
+
     it('metadata - root, no rev', function (done) {
         request.get(SERVER_URL + '/api/v1/metadata/' + TESTVOLUME + '/')
                .auth(USERNAME, PASSWORD)
@@ -275,6 +277,19 @@ describe('file', function () {
             expect(res.body.entries[0].size).to.be('BLAH BLAH2'.length);
             expect(res.body.entries[1].path).to.equal('README.md');
             expect(res.body.entries[1].mtime).to.be.a('number');
+
+            treeHash = res.body.hash;
+
+            done(err);
+        });
+    });
+
+    it('metadata - root, no rev, hash', function (done) {
+        request.get(SERVER_URL + '/api/v1/metadata/' + TESTVOLUME + '/')
+               .auth(USERNAME, PASSWORD)
+               .query({ hash: treeHash })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(304); // unchanged
 
             done(err);
         });
@@ -290,6 +305,7 @@ describe('file', function () {
             expect(res.body.entries[0].mtime).to.be.a('number');
             expect(res.body.entries[0].size).to.be('BLAH BLAH2'.length);
 
+            expect(res.body.hash).to.equal('321f24c9a2669b35cd2df0cab5c42b2bb2958e9a'); // same as file rev
             done(err);
         });
     });
@@ -305,6 +321,7 @@ describe('file', function () {
             expect(res.body.entries[0].mtime).to.be(undefined);
             expect(res.body.entries[0].size).to.be('BLAH BLAH2'.length);
 
+            expect(res.body.hash).to.be(undefined); // metadata with rev never changes, so hash makes no sense
             done(err);
         });
     });
