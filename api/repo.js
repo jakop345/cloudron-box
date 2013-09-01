@@ -136,8 +136,8 @@ Repo.prototype.getTree = function (treeish, options, callback) {
 
     if (treeish == '') return callback(null, tree);
 
-    var path = options.path || '';
-    this.git('ls-tree -r -l ' + treeish + ' -- ' + path, function (err, out) {
+    var path = options.path || '', dirs = options.dirs ? '-t ' : '';
+    this.git('ls-tree -r -l ' + dirs + treeish + ' -- ' + path, function (err, out) {
         var lines = out.trimRight().split('\n');
         lines.forEach(function (line) { tree.entries.push(parseTreeLine(line)); });
         callback(null, tree);
