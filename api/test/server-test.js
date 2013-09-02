@@ -46,7 +46,7 @@ describe('version', function () {
     it('version', function (done) {
         request.get(SERVER_URL + '/api/v1/version', function (err, res) {
             expect(res.statusCode).to.equal(200);
-            expect(res.body.version).to.equal(server.VERSION);
+            expect(res.body.version).to.equal(require('../../package.json').version);
             done(err);
         });
     });

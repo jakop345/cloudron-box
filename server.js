@@ -13,14 +13,15 @@ var optimist = require('optimist'),
     routes = require('./api/routes'),
     debug = require('debug')('server.js'),
     crypto = require('crypto'),
-    os = require('os');
+    os = require('os'),
+    pkg = require('./package.json');
 
 var app = express();
 
 exports = module.exports = {
     start: start,
     app: app,
-    VERSION: '0.0.1' // get this from package.json?
+    VERSION: pkg.version
 };
 
 function getUserHomeDir() {
