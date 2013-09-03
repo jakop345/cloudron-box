@@ -50,11 +50,11 @@ describe('Repo', function () {
         });
     });
 
-    it('addFile - conflict', function (done) {
+    it('addFile - again', function (done) {
         var tmpfile = path.join(os.tmpdir(), 'README');
         fs.writeFileSync(tmpfile, 'README_NEW_CONTENTS');
-        repo.addFile('README', { file: tmpfile, renamePattern: 'ConflictedCopy' }, function (err, fileInfo, commit) {
-            expect(commit.subject).to.equal('Add README-ConflictedCopy');
+        repo.addFile('README2', { file: tmpfile }, function (err, fileInfo, commit) {
+            expect(commit.subject).to.equal('Add README2');
             expect(fileInfo.sha1).to.equal('2180e82647ff9a3e1a93ab43b81c82025c33c6e2');
             expect(commit.author.name).to.equal(USERNAME);
             expect(commit.author.email).to.equal(EMAIL);

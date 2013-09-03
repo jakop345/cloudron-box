@@ -492,5 +492,49 @@ describe('Server API', function () {
                 done(err);
             });
         });
+
+        var fileRevision;
+        it('put - file initial revision', function (done) {
+            request.put(SERVER_URL + '/api/v1/file/' + TESTVOLUME + '/newt')
+                   .auth(USERNAME, PASSWORD)
+                   .field('data', JSON.stringify({ }))
+                   .attach('file', tempFile('BLAH BLAH'))
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(200);
+                expect(res.body.sha1).to.equal('e3f27b2dbefe2f9c5efece6bdbc0f44e9fb8875a');
+                fileRevision = res.body.sha1;
+                expect(res.body.path).to.equal('newt');
+                expect(res.body.serverRevision.length).to.not.be(0);
+                done(err);
+            });
+        });
+
+        it('put - file new revision', function (done) {
+            request.put(SERVER_URL + '/api/v1/file/' + TESTVOLUME + '/newt')
+                   .auth(USERNAME, PASSWORD)
+                   .field('data', JSON.stringify({ parentRev: fileRevision, overwrite: false}))
+                   .attach('file', tempFile('BLAH BLAH2'))
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(200);
+                expect(res.body.sha1).to.equal('321f24c9a2669b35cd2df0cab5c42b2bb2958e9a');
+                expect(res.body.path).to.equal('newt');
+                expect(res.body.serverRevision.length).to.not.be(0);
+                done(err);
+            });
+        });
+
+        it('put - file conflict', function (done) {
+            request.put(SERVER_URL + '/api/v1/file/' + TESTVOLUME + '/newt')
+                   .auth(USERNAME, PASSWORD)
+                   .field('data', JSON.stringify({ parentRev: fileRevision, overwrite: false })) // old revision, so conflict
+                   .attach('file', tempFile('BLAH BLAH3'))
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(200);
+                expect(res.body.sha1).to.equal('fc0443d1b179974e052f5c8982f6adb41edbaf57');
+                expect(res.body.path).to.equal('newt-ConflictedCopy');
+                expect(res.body.serverRevision.length).to.not.be(0);
+                done(err);
+            });
+        });
     });
 });

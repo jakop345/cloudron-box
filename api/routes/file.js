@@ -5,14 +5,17 @@ var fs = require('fs'),
     syncer = require('../syncer'),
     mime = require('mime'),
     debug = require('debug')('file.js'),
-    express = require('express');
+    express = require('express'),
+    util = require('util'),
+    path = require('path');
 
 exports = module.exports = {
     read: read,
     revisions: revisions,
     metadata: metadata,
     update: update,
-    multipart: multipart
+    multipart: multipart,
+    putFile: putFile
 };
 
 function read(req, res, next) {
@@ -68,6 +71,60 @@ function metadata(req, res, next) {
 function multipart(req, res, next) {
     var parser = express.multipart({ uploadDir: req.volume.tmpPath, keepExtensions: true, maxFieldsSize: 2 * 1024 * 1024 }); // multipart/form-data
     parser(req, res, next);
+}
+
+function _getRenameFilename(file, checkoutDir, renamePattern) {
+    var idx = file.indexOf('.');
+    var baseName = idx == -1 ? file : file.substr(0, idx);
+    var ext = idx == -1 ? '' : file.substr(idx); // includes '.' if any
+
+    for (var i = 0; true; i++) {
+        file = util.format("%s-%s%s%s", baseName, renamePattern, i ? ' ' + i : '', ext);
+        if (!fs.existsSync(path.join(checkoutDir, file))) break;
+    }
+    return file;
+};
+
+function putFile(req, res, next) {
+    var data;
+    try {
+        data = JSON.parse(req.body.data);
+    } catch (e) {
+        return next(new HttpError(400, 'Cannot parse data field:' + e.message));
+    }
+
+    if (!req.files.file) return next(new HttpError(400, 'file not provided'));
+
+    var filePath = req.params[0];
+    var parentRev = data.parentRev;
+    var overwrite = data.overwrite;
+
+    req.volume.repo.fileEntry(filePath, 'HEAD', function (err, entry) {
+        if (err) return next(new HttpError(400, 'Error getting fileEntry' + e));
+        if (!entry) {
+            if (data.parentRev) return next(new HttpError(400, 'No such revision'));
+            req.volume.repo.addFile(filePath, { file: req.files.file.path }, function (err, fileInfo, commit) {
+                if (err) return next(new HttpError(500, 'Error adding file'));
+                fileInfo.serverRevision = commit.sha1;
+                res.send(200, fileInfo);
+            });
+        } else {
+            if (entry.sha1 === parentRev || overwrite) {
+                req.volume.repo.updateFile(filePath, { file: req.files.file.path }, function (err, fileInfo, commit) {
+                    if (err) return next(new HttpError(500, 'Error updating file'));
+                    fileInfo.serverRevision = commit.sha1;
+                    res.send(200, fileInfo);
+                });
+            } else {
+                var newName = _getRenameFilename(filePath, req.volume.repo.checkoutDir, 'ConflictedCopy');
+                req.volume.repo.addFile(newName, { file: req.files.file.path }, function (err, fileInfo, commit) {
+                    if (err) return next(new HttpError(500, 'Error adding file'));
+                    fileInfo.serverRevision = commit.sha1;
+                    res.send(200, fileInfo);
+                });
+            }
+        }
+    });
 }
 
 function update(req, res, next) {

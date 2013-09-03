@@ -245,18 +245,6 @@ Repo.prototype._addFileAndCommit = function (file, options, callback) {
     });
 };
 
-Repo.prototype._getRenameFilename = function (file, renamePattern) {
-    var idx = file.indexOf('.');
-    var baseName = idx == -1 ? file : file.substr(0, idx);
-    var ext = idx == -1 ? '' : file.substr(idx); // includes '.' if any
-
-    for (var i = 0; true; i++) {
-        file = util.format("%s-%s%s%s", baseName, renamePattern, i ? ' ' + i : '', ext);
-        if (!fs.existsSync(path.join(this.checkoutDir, file))) break;
-    }
-    return file;
-};
-
 // FIXME: make stream API
 Repo.prototype._writeFileAndCommit = function (file, options, callback) {
     var that = this;
@@ -264,11 +252,6 @@ Repo.prototype._writeFileAndCommit = function (file, options, callback) {
 
     if (options.contents) {
         options.file = createTempFileSync(this.tmpDir, options.contents);
-    }
-
-    if (options.renamePattern) {
-        file = this._getRenameFilename(file, options.renamePattern);
-        absoluteFilePath = path.join(this.checkoutDir, file);
     }
 
     fs.rename(options.file, absoluteFilePath, function (err) {
@@ -330,7 +313,7 @@ Repo.prototype.addFile = function (file, options, callback) {
     }
 
     if (fs.existsSync(absoluteFilePath)) {
-        if (!options.renamePattern) return callback(new RepoError('ENOENT', 'File already exists'));
+        return callback(new RepoError('ENOENT', 'File already exists'));
     }
 
     options._op = 'Add';
@@ -341,7 +324,6 @@ Repo.prototype.addFile = function (file, options, callback) {
 };
 
 Repo.prototype.updateFile = function (file, options, callback) {
-    assert(!options.renamePattern); // use add() instead
     var that = this;
     var absoluteFilePath = this._absoluteFilePath(file);
     if (absoluteFilePath.length == 0) {
