@@ -42,6 +42,18 @@ describe('repo', function () {
         });
     });
 
+    it('addFile - conflict', function (done) {
+        var tmpfile = path.join(os.tmpdir(), 'README');
+        fs.writeFileSync(tmpfile, 'README_NEW_CONTENTS');
+        repo.addFile('README', { file: tmpfile, renamePattern: 'ConflictedCopy' }, function (err, fileInfo, commit) {
+            expect(commit.subject).to.equal('Add README-ConflictedCopy');
+            expect(fileInfo.sha1).to.equal('2180e82647ff9a3e1a93ab43b81c82025c33c6e2');
+            expect(commit.author.name).to.equal(USERNAME);
+            expect(commit.author.email).to.equal(EMAIL);
+            done();
+        });
+    });
+
     it('createReadStream - valid file', function (done) {
         var readme = repo.createReadStream('README');
         var data = '';
@@ -100,7 +112,7 @@ describe('repo', function () {
 
     it('getTree - valid tree', function (done) {
         repo.getTree('HEAD', function (err, tree) {
-            expect(tree.entries.length).to.equal(1);
+            expect(tree.entries.length).to.equal(2);
             expect(tree.entries[0].path).to.equal('README');
             done();
         });
@@ -161,7 +173,7 @@ describe('repo', function () {
 
     it('diffTree - empty tree', function (done) {
         repo.diffTree('', 'HEAD', function (err, changes) {
-            expect(changes.length).to.equal(1);
+            expect(changes.length).to.equal(2);
             expect(changes[0].path).to.equal('README');
             expect(changes[0].status).to.equal('ADDED');
             done(err);
@@ -185,7 +197,7 @@ describe('repo', function () {
 
     it('index', function (done) {
         repo.indexEntries(function (err, entries) {
-            expect(entries.length).to.equal(1);
+            expect(entries.length).to.equal(2);
             expect(entries[0].size).to.equal('README_UPDATED_CONTENTS'.length);
             expect(entries[0].mtime).to.not.equal(0);
             done(err);

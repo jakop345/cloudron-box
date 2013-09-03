@@ -226,6 +226,18 @@ function parseIndexLine(line) {
     };
 }
 
+Repo.prototype._getRenameFilename = function (file, renamePattern) {
+    var idx = file.indexOf('.');
+    var baseName = idx == -1 ? file : file.substr(0, idx);
+    var ext = idx == -1 ? '' : file.substr(idx); // includes '.' if any
+
+    for (var i = 0; true; i++) {
+        file = util.format("%s-%s%s%s", baseName, renamePattern, i ? ' ' + i : '', ext);
+        if (!fs.existsSync(path.join(this.checkoutDir, file))) break;
+    }
+    return file;
+}
+
 // FIXME: make stream API
 Repo.prototype._writeFileAndCommit = function (file, options, callback) {
     var that = this;
@@ -235,12 +247,18 @@ Repo.prototype._writeFileAndCommit = function (file, options, callback) {
         options.file = createTempFileSync(this.tmpDir, options.contents);
     }
 
+    if (options.renamePattern) {
+        file = this._getRenameFilename(file, options.renamePattern);
+        absoluteFilePath = path.join(this.checkoutDir, file);
+    }
+
     fs.rename(options.file, absoluteFilePath, function (err) {
         if (err) return callback(err);
         that.git(['add ' + file, 'ls-files -s -- ' + file], function (err, out) {
             if (err) return callback(err);
             var fileInfo = parseIndexLine(out.trimRight());
-            that._createCommit(options.message, function (err, commit) {
+            var message = options.message || (options._op + ' ' + file);
+            that._createCommit(message, function (err, commit) {
                 if (err) return callback(err);
                 callback(null, fileInfo, commit);
             });
@@ -298,10 +316,10 @@ Repo.prototype.addFile = function (file, options, callback) {
     }
 
     if (fs.existsSync(absoluteFilePath)) {
-        return callback(new RepoError('ENOENT', 'File already exists'));
+        if (!options.renamePattern) return callback(new RepoError('ENOENT', 'File already exists'));
     }
 
-    if (!options.message) options.message = 'Add ' + file;
+    options._op = 'Add';
 
     mkdirp(path.dirname(absoluteFilePath), function (ignoredErr) {
         that._writeFileAndCommit(file, options, callback);
@@ -309,6 +327,7 @@ Repo.prototype.addFile = function (file, options, callback) {
 };
 
 Repo.prototype.updateFile = function (file, options, callback) {
+    assert(!options.renamePattern); // use add() instead
     var that = this;
     var absoluteFilePath = this._absoluteFilePath(file);
     if (absoluteFilePath.length == 0) {
@@ -319,7 +338,7 @@ Repo.prototype.updateFile = function (file, options, callback) {
         return callback(new RepoError('ENOENT', 'File does not exist'));
     }
 
-    if (!options.message) options.message = 'Update ' + file;
+    options._op = 'Update';
 
     this._writeFileAndCommit(file, options, callback);
 };
