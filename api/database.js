@@ -69,6 +69,22 @@ Table.prototype.get = function (key, callback) {
     return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
 };
 
+Table.prototype.count = function (callback) {
+    var i = 0;
+
+    for (var e in this.cache) {
+        if (this.cache.hasOwnProperty(e)) {
+            ++i;
+        }
+    }
+
+    if (typeof callback === 'function') {
+        callback(i);
+    }
+
+    return i;
+};
+
 Table.prototype.remove = function (key, callback) {
     var value = this.cache[key];
     if (value) {

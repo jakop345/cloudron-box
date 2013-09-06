@@ -77,6 +77,15 @@ describe('user', function () {
         });
     });
 
+    it('create second admin should fail', function (done) {
+        request.post(SERVER_URL + '/api/v1/createadmin')
+               .send({ username: USERNAME_2, password: PASSWORD, email: EMAIL })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(404);
+            done(err);
+        });
+    });
+
     it('create second user as admin', function (done) {
         request.post(SERVER_URL + '/api/v1/user/create')
                .auth(USERNAME, PASSWORD)

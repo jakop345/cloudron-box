@@ -36,9 +36,14 @@ function firstTimeCheck(req, res, next) {
 }
 
 function createAdmin(req, res, next) {
-    if (req.method !== 'POST') return next(new HttpError(405, 'Only POST allowed'));
+    if (req.method !== 'POST') {
+        return next(new HttpError(405, 'Only POST allowed'));
+    }
 
-    // TODO: check that no other admin user exists
+    if (db.USERS_TABLE.count() > 0) {
+        return next(new HttpError(404, 'Only one admin allowed'));
+    }
+
     createUser(req, res, next);
 }
 

@@ -76,10 +76,12 @@ function createUser(username, password, email, options, callback) {
             }
 
             var now = (new Date()).toUTCString();
+            var admin = !(db.USERS_TABLE.count()); // currently the first user is the admin
             var user = {
                 username: username,
                 email: email,
                 password: new Buffer(derivedKey, 'binary').toString('hex'),
+                admin: admin,
                 salt: salt.toString('hex'),
                 created_at: now,
                 updated_at: now
