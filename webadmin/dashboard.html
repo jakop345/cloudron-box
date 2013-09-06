@@ -153,7 +153,7 @@
 
 
       // get user info to update avatar ui
-      $.getJSON('/api/v1/userInfo', function (data) {
+      $.getJSON('/api/v1/user/info', function (data) {
           $("#user-dropdown-trigger").text("Signed in as " + data.username);
       }).fail(function(error) {
         console.error('Unable to get username.', error);

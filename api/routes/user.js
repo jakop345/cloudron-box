@@ -2,6 +2,8 @@
 
 var db = require('../database'),
     DatabaseError = db.DatabaseError,
+    user = require('../user.js'),
+    UserError = user.UserError,
     crypto = require('crypto'),
     debug = require('debug')('user.js'),
     HttpError = require('../httperror'),
@@ -13,7 +15,8 @@ exports = module.exports = {
     authenticate: authenticate,
     createToken: createToken,
     logout: logout,
-    userInfo: userInfo
+    info: info,
+    create: createUser
 };
 
 function firstTimeCheck(req, res, next) {
@@ -33,43 +36,30 @@ function firstTimeCheck(req, res, next) {
 }
 
 function createAdmin(req, res, next) {
-    // TODO: check that no other admin user exists
     if (req.method !== 'POST') return next(new HttpError(405, 'Only POST allowed'));
 
+    // TODO: check that no other admin user exists
+    createUser(req, res, next);
+}
+
+function createUser(req, res, next) {
+    // TODO: I guess only the admin should be allowed to do so? - Johannes
     var username = req.body.username || '';
-    var email = req.body.email || '';
     var password = req.body.password || '';
+    var email = req.body.email || '';
 
-    if (username.length === 0 || password.length === 0 || email.length === 0) {
-        return next(new HttpError(400, 'Bad username, password or email'));
-    }
+    user.create(username, password, email, {}, function (error, result) {
+        if (error) {
+            if (error.reason === UserError.ARGUMENTS) {
+                return next(new HttpError(400, error.message));
+            } else if (error.reason === UserError.ALREADY_EXISTS) {
+                return next(new HttpError(404, 'Already exists'));
+            } else {
+                return next(new HttpError(500, error.message));
+            }
+        }
 
-    crypto.randomBytes(64 /* 512-bit salt */, function (err, salt) {
-        if (err) return next(new HttpError(500, 'Failed to generate random bytes'));
-
-        crypto.pbkdf2(password, salt, 10000 /* iterations */, 512 /* bits */, function (err, derivedKey) {
-            if (err) return next(new HttpError(500, 'Failed to hash password'));
-
-            var now = (new Date()).toUTCString();
-            var user = {
-                username: username,
-                email: email,
-                password: new Buffer(derivedKey, 'binary').toString('hex'),
-                salt: salt.toString('hex'),
-                created_at: now,
-                updated_at: now
-            };
-            db.USERS_TABLE.put(user, function (err) {
-                if (err) {
-                    if (err.reason === DatabaseError.ALREADY_EXISTS) {
-                        return next(new HttpError(404, 'Already exists'));
-                    }
-                    return next(err);
-                }
-
-                res.send(202);
-            });
-        });
+        res.send(202);
     });
 }
 
@@ -111,33 +101,20 @@ function authenticate(req, res, next) {
             return next(new HttpError(400, 'Bad username or password'), false);
         }
 
-        db.USERS_TABLE.get(auth.username, function (err, user) {
-            if (err) {
-                return next(err.reason === DatabaseError.NOT_FOUND
-                    ? new HttpError(401, 'Username and password does not match')
-                    : err, false);
+        user.verify(auth.username, auth.password, function (error, result) {
+            if (error) {
+                if (error.reason === UserError.ARGUMENTS) {
+                    return next(new HttpError(400, error.message));
+                } else if (error.reason === UserError.NOT_FOUND || error.reason === UserError.WRONG_USER_OR_PASSWORD) {
+                    return next(new HttpError(401, 'Username or password do not match'));
+                } else {
+                    return next(new HttpError(500, error.message));
+                }
             }
 
-            var saltBinary = new Buffer(user.salt, 'hex');
-            crypto.pbkdf2(auth.password, saltBinary, 10000 /* iterations */, 512 /* bits */, function (err, derivedKey) {
-                if (err) {
-                    return next(new HttpError(500, 'Failed to hash password'), false);
-                }
+            req.user = result;
 
-                var derivedKeyHex = new Buffer(derivedKey, 'binary').toString('hex');
-                if (derivedKeyHex != user.password)  {
-                    return next(new HttpError(401, 'Username and password does not match'), false);
-                }
-
-                debug('authenticated');
-
-                req.user = {
-                    username: user.username,
-                    email: user.email
-                };
-
-                next();
-            });
+            next();
         });
     }
 
@@ -199,7 +176,7 @@ function createToken(req, res, next) {
     });
 }
 
-function userInfo(req, res, next) {
+function info(req, res, next) {
     // req.user is filled by the authentication step
     res.send(req.user);
 }

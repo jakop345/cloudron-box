@@ -143,6 +143,7 @@ function removeUser(username, password, callback) {
             return callback(error);
         }
 
+        // TODO we might want to cleanup volumes assigned to this user as well - Johannes
         db.USERS_TABLE.remove(username, function (error, user) {
             if (error) {
                 return callback(error);
@@ -156,11 +157,23 @@ function removeUser(username, password, callback) {
 function updateUser(username, password, options, callback) {
     ensureArgs(arguments, ['string', 'string', 'object', 'function']);
 
-    callback(new UserError('not implemented', UserError.INTERNAL_ERROR));
+    verifyUser(username, password, function (error, result) {
+        if (error) {
+            return callback(error);
+        }
+
+        callback(new UserError('not implemented', UserError.INTERNAL_ERROR));
+    });
 }
 
 function changePassword(username, oldPassword, newPassword, callback) {
     ensureArgs(arguments, ['string', 'string', 'string', 'function']);
 
-    callback(new UserError('not implemented', UserError.INTERNAL_ERROR));
+    verifyUser(username, oldPassword, function (error, result) {
+        if (error) {
+            return callback(error);
+        }
+
+        callback(new UserError('not implemented', UserError.INTERNAL_ERROR));
+    });
 }

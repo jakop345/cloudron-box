@@ -110,7 +110,8 @@ app.configure(function () {
     // routes controlled by app.router
     app.post('/api/v1/token', routes.user.createToken);
     app.get('/api/v1/logout', routes.user.logout);
-    app.get('/api/v1/userInfo', routes.user.userInfo);
+    app.post('/api/v1/user/create', routes.user.create);
+    app.get('/api/v1/user/info', routes.user.info);
 
     app.param('volume', routes.volume.attachVolume);
 

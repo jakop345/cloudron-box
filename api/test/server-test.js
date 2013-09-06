@@ -17,6 +17,7 @@ var server = require('../../server.js'),
 
 var SERVER_URL;
 var USERNAME = 'admin', PASSWORD = 'admin', EMAIL ='silly@me.com';
+var USERNAME_2 = 'user', PASSWORD_2 = 'userpassword', EMAIL_2 = 'user@foo.bar';
 var TESTVOLUME = 'testvolume';
 
 function now() { return (new Date()).getTime(); }
@@ -53,7 +54,10 @@ describe('version', function () {
 });
 
 describe('user', function () {
-    it('admin', function (done) {
+    // TODO: we actually exceed 2000ms on my atom machine!! not quite acceptable - Johannes
+    this.timeout(3000);
+
+    it('create admin', function (done) {
         request.post(SERVER_URL + '/api/v1/createadmin')
                .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
                .end(function (err, res) {
@@ -62,12 +66,34 @@ describe('user', function () {
         });
     });
 
-    it('userInfo', function (done) {
-        request.get(SERVER_URL + '/api/v1/userInfo')
+    it('admin userInfo', function (done) {
+        request.get(SERVER_URL + '/api/v1/user/info')
                .auth(USERNAME, PASSWORD)
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
-            expect(res.body.username).to.equal('admin');
+            expect(res.body.username).to.equal(USERNAME);
+            expect(res.body.email).to.equal(EMAIL);
+            done(err);
+        });
+    });
+
+    it('create second user as admin', function (done) {
+        request.post(SERVER_URL + '/api/v1/user/create')
+               .auth(USERNAME, PASSWORD)
+               .send({ username: USERNAME_2, password: PASSWORD_2, email: EMAIL_2 })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(202);
+            done(err);
+        });
+    });
+
+    it('second user userInfo', function (done) {
+        request.get(SERVER_URL + '/api/v1/user/info')
+               .auth(USERNAME_2, PASSWORD_2)
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            expect(res.body.username).to.equal(USERNAME_2);
+            expect(res.body.email).to.equal(EMAIL_2);
             done(err);
         });
     });
