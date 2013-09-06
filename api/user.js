@@ -95,7 +95,7 @@ function createUser(username, password, email, options, callback) {
                     return callback(error);
                 }
 
-                callback(null, {username: username, email: email});
+                callback(null, {username: username, email: email, admin: admin});
             });
         });
     });
@@ -132,40 +132,28 @@ function verifyUser(username, password, callback) {
                 return callback(new UserError('Username and password does not match', UserError.WRONG_USER_OR_PASSWORD));
             }
 
-            callback(null, { username: user.username, email: user.email });
+            callback(null, { username: user.username, email: user.email, admin: user.admin });
         });
     });
 }
 
-function removeUser(username, password, callback) {
-    ensureArgs(arguments, ['string', 'string', 'function']);
+function removeUser(username, callback) {
+    ensureArgs(arguments, ['string', 'function']);
 
-    verifyUser(username, password, function (error, result) {
+    // TODO we might want to cleanup volumes assigned to this user as well - Johannes
+    db.USERS_TABLE.remove(username, function (error, user) {
         if (error) {
             return callback(error);
         }
 
-        // TODO we might want to cleanup volumes assigned to this user as well - Johannes
-        db.USERS_TABLE.remove(username, function (error, user) {
-            if (error) {
-                return callback(error);
-            }
-
-            callback(null, user);
-        });
+        callback(null, user);
     });
 }
 
-function updateUser(username, password, options, callback) {
-    ensureArgs(arguments, ['string', 'string', 'object', 'function']);
+function updateUser(username, options, callback) {
+    ensureArgs(arguments, ['string', 'object', 'function']);
 
-    verifyUser(username, password, function (error, result) {
-        if (error) {
-            return callback(error);
-        }
-
-        callback(new UserError('not implemented', UserError.INTERNAL_ERROR));
-    });
+    callback(new UserError('not implemented', UserError.INTERNAL_ERROR));
 }
 
 function changePassword(username, oldPassword, newPassword, callback) {

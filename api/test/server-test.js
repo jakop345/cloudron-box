@@ -18,6 +18,7 @@ var server = require('../../server.js'),
 var SERVER_URL;
 var USERNAME = 'admin', PASSWORD = 'admin', EMAIL ='silly@me.com';
 var USERNAME_2 = 'user', PASSWORD_2 = 'userpassword', EMAIL_2 = 'user@foo.bar';
+var USERNAME_3 = 'userTheThird', PASSWORD_3 = 'userpassword333', EMAIL_3 = 'user3@foo.bar';
 var TESTVOLUME = 'testvolume';
 
 function now() { return (new Date()).getTime(); }
@@ -86,13 +87,20 @@ describe('user', function () {
         });
     });
 
-    it('create second user as admin', function (done) {
+    it('create second and third user as admin', function (done) {
         request.post(SERVER_URL + '/api/v1/user/create')
                .auth(USERNAME, PASSWORD)
                .send({ username: USERNAME_2, password: PASSWORD_2, email: EMAIL_2 })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(202);
-            done(err);
+
+            request.post(SERVER_URL + '/api/v1/user/create')
+                   .auth(USERNAME, PASSWORD)
+                   .send({ username: USERNAME_3, password: PASSWORD_3, email: EMAIL_3 })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(202);
+                done(err);
+            });
         });
     });
 
@@ -106,9 +114,66 @@ describe('user', function () {
             done(err);
         });
     });
+
+    it('remove admin user by normal user should fail', function (done) {
+        request.post(SERVER_URL + '/api/v1/user/remove')
+               .auth(USERNAME_2, PASSWORD_2)
+               .send({ username: USERNAME })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(400);
+            done(err);
+        });
+    });
+
+    it('removes itself', function (done) {
+        request.post(SERVER_URL + '/api/v1/user/remove')
+               .auth(USERNAME_2, PASSWORD_2)
+               .send({ username: USERNAME_2 })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            done(err);
+        });
+    });
+
+    it('admin removes normal user', function (done) {
+        request.post(SERVER_URL + '/api/v1/user/remove')
+               .auth(USERNAME, PASSWORD)
+               .send({ username: USERNAME_3 })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            done(err);
+        });
+    });
+
+    it('admin removes himself', function (done) {
+        request.post(SERVER_URL + '/api/v1/user/remove')
+               .auth(USERNAME, PASSWORD)
+               .send({ username: USERNAME })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            done(err);
+        });
+    });
 });
 
 describe('volume', function () {
+    before(function (done) {
+        request.post(SERVER_URL + '/api/v1/createadmin')
+               .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
+               .end(function (err, res) {
+            done(err);
+        });
+    });
+
+    after(function (done) {
+        request.post(SERVER_URL + '/api/v1/user/remove')
+               .auth(USERNAME, PASSWORD)
+               .send({ username: USERNAME })
+               .end(function (err, res) {
+            done(err);
+        });
+    });
+
     it('create', function (done) {
         this.timeout(5000); // on the Mac, creating volumes takes a lot of time on low battery
         request.post(SERVER_URL + '/api/v1/volume/create')
@@ -168,14 +233,17 @@ describe('volume', function () {
 });
 
 describe('file', function () {
-
     before(function(done) {
         this.timeout(5000); // on the Mac, creating volumes takes a lot of time on low battery
-        request.post(SERVER_URL + '/api/v1/volume/create')
-               .auth(USERNAME, PASSWORD)
-               .send({ name: TESTVOLUME })
+        request.post(SERVER_URL + '/api/v1/createadmin')
+               .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
                .end(function (err, res) {
-            done(err);
+            request.post(SERVER_URL + '/api/v1/volume/create')
+                   .auth(USERNAME, PASSWORD)
+                   .send({ name: TESTVOLUME })
+                   .end(function (err, res) {
+                done(err);
+            });
         });
     });
 
@@ -183,7 +251,12 @@ describe('file', function () {
         request.post(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/delete')
                .auth(USERNAME, PASSWORD)
                .end(function (err, res) {
-            done(err);
+            request.post(SERVER_URL + '/api/v1/user/remove')
+                   .auth(USERNAME, PASSWORD)
+                   .send({ username: USERNAME })
+                   .end(function (err, res) {
+                done(err);
+            });
         });
     });
 

@@ -16,7 +16,8 @@ exports = module.exports = {
     createToken: createToken,
     logout: logout,
     info: info,
-    create: createUser
+    create: createUser,
+    remove: removeUser
 };
 
 function firstTimeCheck(req, res, next) {
@@ -197,4 +198,26 @@ function logout(req, res, next) {
 
         res.send(200);
     });
+}
+
+function removeUser(req, res, next) {
+    var username = req.body.username || '';
+
+    // rules:
+    // - admin can remove any user
+    // - user can only remove himself
+    // - TODO should the admin user be able to remove himself? - Johannes
+    if (req.user.admin || req.user.username === username) {
+        user.remove(username, function (error, result) {
+            if (error) {
+                return next(new HttpError(500, error.message));
+            }
+
+            return res.send(200);
+        });
+
+        return;
+    }
+
+    return next(new HttpError(400, 'Not allowed to remove this user.'));
 }

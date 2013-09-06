@@ -30,7 +30,7 @@ var config = {
 };
 
 function cleanupUser(done) {
-    user.remove(USERNAME, PASSWORD, function () {
+    user.remove(USERNAME, function () {
         done();
     });
 }

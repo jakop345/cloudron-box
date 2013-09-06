@@ -111,6 +111,7 @@ app.configure(function () {
     app.post('/api/v1/token', routes.user.createToken);
     app.get('/api/v1/logout', routes.user.logout);
     app.post('/api/v1/user/create', routes.user.create);
+    app.post('/api/v1/user/remove', routes.user.remove);
     app.get('/api/v1/user/info', routes.user.info);
 
     app.param('volume', routes.volume.attachVolume);
