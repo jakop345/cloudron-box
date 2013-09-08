@@ -40,12 +40,18 @@ function Repo(config) {
     this.tmpDir = config.tmpDir;
 }
 
-// run arbitrary git command on this repo
-Repo.prototype.git = function (commands, callback) {
+// run arbitrary commands on this repo
+Repo.prototype._exec = function (command, callback) {
     var options = {
         env: { GIT_DIR: this.gitDir },
         cwd: this.checkoutDir
     };
+
+    exec(command, options, callback);
+};
+
+// run arbitrary git command on this repo
+Repo.prototype.git = function (commands, callback) {
     if (!util.isArray(commands)) commands = [ commands ];
 
     for (var i = 0; i < commands.length; i++) {
@@ -54,7 +60,7 @@ Repo.prototype.git = function (commands, callback) {
     var command = commands.join(' && ');
 
     debug('GIT_DIR=' + this.gitDir + ' ' + command);
-    exec(command, options, function (error, stdout, stderr) {
+    this._exec(command, function (error, stdout, stderr) {
         if (error) debug('Git error ' + error);
         if (error) return callback(error);
         return callback(null, stdout);
