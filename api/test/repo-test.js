@@ -8,10 +8,9 @@ var Repo = require('../repo'),
     fs = require('fs'),
     path = require('path'),
     os = require('os'),
+    assert = require('assert'),
+    expect = require('expect.js'),
     constants = require('constants');
-
-var assert = require('assert');
-var expect = require('expect.js');
 
 var EMAIL = 'no@bo.dy';
 var USERNAME = 'nobody';
@@ -20,9 +19,7 @@ var tmpdirname = 'repo-test-' + crypto.randomBytes(4).readUInt32LE(0);
 
 var repo = new Repo({ rootDir: path.join(os.tmpdir(), tmpdirname) });
 
-console.log('repo test dir', repo.checkoutDir);
-
-describe('repo', function () {
+describe('Repo', function () {
     it('create', function (done) {
         repo.create({ name: USERNAME, email: EMAIL }, function () {
             expect(fs.existsSync(repo.gitDir)).to.be.ok();

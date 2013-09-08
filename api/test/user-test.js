@@ -12,10 +12,9 @@ var user = require('../user.js'),
     mkdirp = require('mkdirp'),
     crypto = require('crypto'),
     rimraf = require('rimraf'),
-    db = require('../database.js');
-
-var assert = require('assert');
-var expect = require('expect.js');
+    db = require('../database.js'),
+    assert = require('assert'),
+    expect = require('expect.js');
 
 var USERNAME = 'nobody';
 var EMAIL = 'nobody@no.body';
@@ -24,9 +23,9 @@ var PASSWORD = 'foobar';
 var tmpdirname = 'user-test-' + crypto.randomBytes(4).readUInt32LE(0);
 var config = {
     port: 3000,
-    dataRoot: path.resolve(os.tmpdir(), tmpdirname),
-    configRoot: path.resolve(os.tmpdir(), tmpdirname),
-    mountRoot: path.resolve(os.tmpdir(), tmpdirname)
+    dataRoot: path.resolve(os.tmpdir(), tmpdirname + '/data'),
+    configRoot: path.resolve(os.tmpdir(), tmpdirname + '/config'),
+    mountRoot: path.resolve(os.tmpdir(), tmpdirname + '/mount')
 };
 
 function cleanupUser(done) {

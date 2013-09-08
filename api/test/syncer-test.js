@@ -7,12 +7,11 @@ var syncer = require('../syncer'),
     crypto = require('crypto'),
     fs = require('fs'),
     path = require('path'),
+    assert = require('assert'),
+    expect = require('expect.js'),
     os = require('os');
 
-var assert = require('assert');
-var expect = require('expect.js');
-
-describe('diff', function () {
+describe('Diff', function () {
     var leftTree, baseTree, rightTree;
 
     function initTrees() {
@@ -143,7 +142,6 @@ describe('diff', function () {
         done();
     });
 });
- 
+
 describe('canUpdate', function() {
 });
-

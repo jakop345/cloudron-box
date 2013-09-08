@@ -10,10 +10,11 @@ var volume = require('../volume.js'),
     path = require('path'),
     exec = require('child_process').exec,
     mkdirp = require('mkdirp'),
+    rimraf = require('rimraf'),
+    crypto = require('crypto'),
+    assert = require('assert'),
+    expect = require('expect.js'),
     os = require('os');
-
-var assert = require('assert');
-var expect = require('expect.js');
 
 var USERNAME = 'nobody';
 var EMAIL = 'nobody@no.body';
@@ -22,19 +23,28 @@ var VOLUME = 'test_volume';
 var VOLUME_2 = 'second_volume';
 var VOLUME_3 = 'third_volume';
 
-var basePath = os.tmpdir();
-
+var tmpdirname = 'volume-test-' + crypto.randomBytes(4).readUInt32LE(0);
 var config = {
     port: 3000,
-    dataRoot: path.resolve(basePath, 'yellowtent/data'),
-    configRoot: path.resolve(basePath, 'yellowtent/config'),
-    mountRoot: path.resolve(basePath, 'yellowtent/mount')
+    dataRoot: path.resolve(os.tmpdir(), tmpdirname + '/data'),
+    configRoot: path.resolve(os.tmpdir(), tmpdirname + '/config'),
+    mountRoot: path.resolve(os.tmpdir(), tmpdirname + '/mount')
 };
 
+// ensure data/config/mount paths
+function setup(done) {
+    mkdirp.sync(config.dataRoot);
+    mkdirp.sync(config.configRoot);
+    mkdirp.sync(config.mountRoot);
+
+    done();
+}
+
+// remove all temporary folders
 function cleanup(done) {
-    exec('rm -rf ' + config.dataRoot, {}, function (error, stdout, stderr) {
-        exec('rm -rf ' + config.configRoot, {}, function (error, stdout, stderr) {
-            exec('rm -rf ' + config.mountRoot, {}, function (error, stdout, stderr) {
+    rimraf(config.dataRoot, function (error) {
+        rimraf(config.configRoot, function (error) {
+            rimraf(config.mountRoot, function (error) {
                 done();
             });
         });
@@ -42,23 +52,13 @@ function cleanup(done) {
 }
 
 describe('Volume', function () {
-    before(function (done) {
-        cleanup(function() {
-            mkdirp.sync(config.dataRoot);
-            mkdirp.sync(config.configRoot);
-            mkdirp.sync(config.mountRoot);
-
-            done();
-        });
-    });
-
+    before(setup);
     after(cleanup);
 
     it('create', function (done) {
         volume.create(VOLUME, USERNAME, EMAIL, PASSWORD, config, function (error, result) {
             expect(error).not.to.be.ok();
             expect(result).to.be.ok();
-
             done();
         });
     });
@@ -154,4 +154,3 @@ describe('Volume', function () {
         });
     });
 });
-
