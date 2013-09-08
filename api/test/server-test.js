@@ -434,6 +434,30 @@ describe('file', function () {
         });
     });
 
+    it('copy', function (done) {
+        request.post(SERVER_URL + '/api/v1/fileops/' + TESTVOLUME + '/copy')
+               .auth(USERNAME, PASSWORD)
+               .send({ from_path: 'README.md', to_path: 'README.md.copy', rev: '*' })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            expect(res.body.path).to.equal('README.md.copy');
+            expect(res.body.sha1).to.equal('100b93820ade4c16225673b4ca62bb3ade63c313');
+            done(err);
+        });
+    });
+
+    it('move', function (done) {
+        request.post(SERVER_URL + '/api/v1/fileops/' + TESTVOLUME + '/move')
+               .auth(USERNAME, PASSWORD)
+               .send({ from_path: 'README.md.copy', to_path: 'README.md.move', rev: '100b93820ade4c16225673b4ca62bb3ade63c313' })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            expect(res.body.path).to.equal('README.md.move');
+            expect(res.body.sha1).to.equal('100b93820ade4c16225673b4ca62bb3ade63c313');
+            done(err);
+        });
+    });
+
     it('delete - no revision', function (done) {
         request.post(SERVER_URL + '/api/v1/fileops/' + TESTVOLUME + '/delete')
                .auth(USERNAME, PASSWORD)

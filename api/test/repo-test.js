@@ -54,6 +54,22 @@ describe('repo', function () {
         });
     });
 
+    it('copyFile', function (done) {
+        repo.copyFile('README', 'README.copy', function (err, fileInfo, commit) {
+            expect(fileInfo.path).to.equal('README.copy');
+            expect(commit.subject).to.equal('Copy from README to README.copy');
+            done();
+        });
+    });
+
+    it('moveFile', function (done) {
+        repo.moveFile('README.copy', 'README.move', function (err, fileInfo, commit) {
+            expect(fileInfo.path).to.equal('README.move');
+            expect(commit.subject).to.equal('Move from README.copy to README.move');
+            done();
+        });
+    });
+
     it('createReadStream - valid file', function (done) {
         var readme = repo.createReadStream('README');
         var data = '';
@@ -112,7 +128,7 @@ describe('repo', function () {
 
     it('getTree - valid tree', function (done) {
         repo.getTree('HEAD', function (err, tree) {
-            expect(tree.entries.length).to.equal(2);
+            expect(tree.entries.length).to.equal(3);
             expect(tree.entries[0].path).to.equal('README');
             done();
         });
@@ -173,7 +189,7 @@ describe('repo', function () {
 
     it('diffTree - empty tree', function (done) {
         repo.diffTree('', 'HEAD', function (err, changes) {
-            expect(changes.length).to.equal(2);
+            expect(changes.length).to.equal(3);
             expect(changes[0].path).to.equal('README');
             expect(changes[0].status).to.equal('ADDED');
             done(err);
@@ -197,7 +213,7 @@ describe('repo', function () {
 
     it('index', function (done) {
         repo.indexEntries(function (err, entries) {
-            expect(entries.length).to.equal(2);
+            expect(entries.length).to.equal(3);
             expect(entries[0].size).to.equal('README_UPDATED_CONTENTS'.length);
             expect(entries[0].mtime).to.not.equal(0);
             done(err);

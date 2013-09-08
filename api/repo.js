@@ -378,6 +378,35 @@ Repo.prototype.removeFile = function (file, options, callback) {
     });
 };
 
+Repo.prototype.moveFile = function (from, to, callback) {
+    var that = this;
+    this.git('mv ' + from + ' ' + to, function (err, out) {
+        if (err) return callback(new RepoError('ENOENT', 'File does not exist'));
+
+        var message = 'Move from ' + from + ' to ' + to;
+        that._addFileAndCommit(to, { message: message }, callback);
+    });
+};
+
+Repo.prototype.copyFile = function (from, to, callback) {
+    var fromAbsoluteFilePath = this._absoluteFilePath(from);
+    if (fromAbsoluteFilePath.length == 0) {
+        return callback(new RepoError('ENOENT', 'Invalid from path'));
+    }
+    var toAbsoluteFilePath = this._absoluteFilePath(to);
+    if (toAbsoluteFilePath.length == 0) {
+        return callback(new RepoError('ENOENT', 'Invalid to path'));
+    }
+
+    var that = this;
+    this._exec('cp -r ' + fromAbsoluteFilePath + ' ' + toAbsoluteFilePath, function (err, out) {
+        if (err) return callback(new RepoError('ENOENT', 'File does not exist'));
+
+        var message = 'Copy from ' + from + ' to ' + to;
+        that._addFileAndCommit(to, { message: message }, callback);
+    });
+};
+
 Repo.prototype.createReadStream = function (file, options) {
     var absoluteFilePath = this._absoluteFilePath(file);
     var ee = new EventEmitter();
