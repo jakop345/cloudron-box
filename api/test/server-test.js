@@ -434,6 +434,27 @@ describe('file', function () {
         });
     });
 
+    it('delete - no revision', function (done) {
+        request.post(SERVER_URL + '/api/v1/fileops/' + TESTVOLUME + '/delete')
+               .auth(USERNAME, PASSWORD)
+               .send({ path: 'README.md' })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(409);
+            done(err);
+        });
+    });
+
+    it('delete - wildcard revision', function (done) {
+        request.post(SERVER_URL + '/api/v1/fileops/' + TESTVOLUME + '/delete')
+               .auth(USERNAME, PASSWORD)
+               .send({ path: 'README.md', rev: '*' })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            expect(res.body.sha1).to.equal('100b93820ade4c16225673b4ca62bb3ade63c313');
+            done(err);
+        });
+    });
+
     it('update - del', function (done) {
         request.post(SERVER_URL + '/api/v1/file/' + TESTVOLUME + '/NEWFILE')
                .auth(USERNAME, PASSWORD)

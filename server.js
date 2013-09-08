@@ -124,6 +124,9 @@ app.configure(function () {
     app.get('/api/v1/metadata/:volume/*', routes.file.metadata);
     app.post('/api/v1/file/:volume/*', routes.file.multipart, routes.file.update);
 
+    app.post('/api/v1/fileops/:volume/delete', express.json({ strict: true }), routes.fileops.remove);
+    app.del('/api/v1/fileops/:volume/*', routes.fileops.remove);
+
     app.get('/api/v1/volume/:volume/list/', routes.volume.listFiles);
     app.get('/api/v1/volume/:volume/list/*', routes.volume.listFiles);
     app.get('/api/v1/volume/list', routes.volume.listVolumes);
