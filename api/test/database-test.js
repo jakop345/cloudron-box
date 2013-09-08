@@ -27,12 +27,13 @@ var USER_1 = {
     password: 'sennahoj'
 };
 
-var tmpdirname = 'database-test-' + crypto.randomBytes(4).readUInt32LE(0);
+var tmpdirname = 'volume-test-' + crypto.randomBytes(4).readUInt32LE(0);
+var tmpdir = path.resolve(os.tmpdir(), tmpdirname);
 var config = {
     port: 3000,
-    dataRoot: path.resolve(os.tmpdir(), tmpdirname + '/data'),
-    configRoot: path.resolve(os.tmpdir(), tmpdirname + '/config'),
-    mountRoot: path.resolve(os.tmpdir(), tmpdirname + '/mount')
+    dataRoot: path.resolve(tmpdir, 'data'),
+    configRoot: path.resolve(tmpdir, 'config'),
+    mountRoot: path.resolve(tmpdir, 'mount')
 };
 
 // ensure data/config/mount paths
@@ -46,12 +47,8 @@ function setup(done) {
 
 // remove all temporary folders
 function cleanup(done) {
-    rimraf(config.dataRoot, function (error) {
-        rimraf(config.configRoot, function (error) {
-            rimraf(config.mountRoot, function (error) {
-                done();
-            });
-        });
+    rimraf(tmpdir, function (error) {
+        done();
     });
 }
 

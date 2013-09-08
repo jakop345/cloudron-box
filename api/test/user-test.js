@@ -20,12 +20,13 @@ var USERNAME = 'nobody';
 var EMAIL = 'nobody@no.body';
 var PASSWORD = 'foobar';
 
-var tmpdirname = 'user-test-' + crypto.randomBytes(4).readUInt32LE(0);
+var tmpdirname = 'volume-test-' + crypto.randomBytes(4).readUInt32LE(0);
+var tmpdir = path.resolve(os.tmpdir(), tmpdirname);
 var config = {
     port: 3000,
-    dataRoot: path.resolve(os.tmpdir(), tmpdirname + '/data'),
-    configRoot: path.resolve(os.tmpdir(), tmpdirname + '/config'),
-    mountRoot: path.resolve(os.tmpdir(), tmpdirname + '/mount')
+    dataRoot: path.resolve(tmpdir, 'data'),
+    configRoot: path.resolve(tmpdir, 'config'),
+    mountRoot: path.resolve(tmpdir, 'mount')
 };
 
 function cleanupUser(done) {
@@ -40,7 +41,7 @@ function createUser(done) {
     });
 }
 
-function setupDatabase(done) {
+function setup(done) {
     // ensure data/config/mount paths
     mkdirp.sync(config.dataRoot);
     mkdirp.sync(config.configRoot);
@@ -51,19 +52,15 @@ function setupDatabase(done) {
     done();
 }
 
-function cleanupDatabase(done) {
-    rimraf(config.dataRoot, function (error) {
-        rimraf(config.configRoot, function (error) {
-            rimraf(config.mountRoot, function (error) {
-                done();
-            });
-        });
+function cleanup(done) {
+    rimraf(tmpdir, function (error) {
+        done();
     });
 }
 
 describe('User', function () {
-    before(setupDatabase);
-    after(cleanupDatabase);
+    before(setup);
+    after(cleanup);
 
     describe('create', function() {
         before(cleanupUser);

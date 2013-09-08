@@ -2,12 +2,15 @@
 
 /* global it:false */
 /* global describe:false */
+/* global before:false */
+/* global after:false */
 
 var Repo = require('../repo'),
     crypto = require('crypto'),
     fs = require('fs'),
     path = require('path'),
     os = require('os'),
+    rimraf = require('rimraf'),
     assert = require('assert'),
     expect = require('expect.js'),
     constants = require('constants');
@@ -16,10 +19,18 @@ var EMAIL = 'no@bo.dy';
 var USERNAME = 'nobody';
 
 var tmpdirname = 'repo-test-' + crypto.randomBytes(4).readUInt32LE(0);
+var tmpdir = path.join(os.tmpdir(), tmpdirname);
+var repo = new Repo({ rootDir: tmpdir });
 
-var repo = new Repo({ rootDir: path.join(os.tmpdir(), tmpdirname) });
+function cleanup(done) {
+    rimraf(tmpdir, function (error) {
+        done();
+    });
+}
 
 describe('Repo', function () {
+    after(cleanup);
+
     it('create', function (done) {
         repo.create({ name: USERNAME, email: EMAIL }, function () {
             expect(fs.existsSync(repo.gitDir)).to.be.ok();
