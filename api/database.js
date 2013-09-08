@@ -35,6 +35,7 @@ DatabaseError.SERVER_ERROR = 1;
 DatabaseError.INTERNAL_ERROR = 2;
 DatabaseError.ALREADY_EXISTS = 3;
 DatabaseError.NOT_FOUND = 4;
+DatabaseError.RECORD_SCHEMA = 5;
 
 function Table(dbFile, schema) {
     this.dbFile = dbFile;
@@ -57,7 +58,18 @@ function Table(dbFile, schema) {
 
 Table.prototype.put = function (user, callback) {
     var key = user[this.hashKey];
+    if (!key) return callback(new DatabaseError('no hash key found', DatabaseError.RECORD_SCHEMA));
     if (key in this.cache) return callback(new DatabaseError(null, DatabaseError.ALREADY_EXISTS));
+
+    this.cache[key] = user;
+    fs.writeFileSync(this.dbFile, JSON.stringify(this.cache));
+    callback();
+};
+
+Table.prototype.update = function (user, callback) {
+    var key = user[this.hashKey];
+    if (!key) return callback(new DatabaseError('no hash key found', DatabaseError.RECORD_SCHEMA));
+    if (!(key in this.cache)) return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
 
     this.cache[key] = user;
     fs.writeFileSync(this.dbFile, JSON.stringify(this.cache));
@@ -69,17 +81,13 @@ Table.prototype.get = function (key, callback) {
     return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
 };
 
-Table.prototype.count = function (callback) {
+Table.prototype.count = function () {
     var i = 0;
 
     for (var e in this.cache) {
         if (this.cache.hasOwnProperty(e)) {
             ++i;
         }
-    }
-
-    if (typeof callback === 'function') {
-        callback(i);
     }
 
     return i;
