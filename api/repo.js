@@ -343,20 +343,23 @@ Repo.prototype.updateFile = function (file, options, callback) {
     this._writeFileAndCommit(file, options, callback);
 };
 
-Repo.prototype.removeFile = function (file, callback) {
+Repo.prototype.removeFile = function (file, options, callback) {
+    if (typeof options === 'function') {
+        callback = options;
+        options = { };
+    }
+
     var absoluteFilePath = this._absoluteFilePath(file);
     if (absoluteFilePath.length == 0) {
         return callback(new RepoError('ENOENT', 'Invalid file path'));
     }
 
-    if (!fs.existsSync(absoluteFilePath)) {
-        return callback(new RepoError('ENOENT', 'File does not exist'));
-    }
-
-    var message = 'Remove ' + file;
+    var recursive = options.recursive ? '-r ' : '';
     var that = this;
-    fs.unlink(path.join(this.checkoutDir, file), function (err) {
-        if (err) return callback(err);
+    this.git('rm ' + recursive + file, function (err, out) {
+        if (err) return callback(new RepoError('ENOENT', 'File does not exist'));
+
+        var message = 'Remove ' + file;
         that._createCommit(message, callback);
     });
 };
