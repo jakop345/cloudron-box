@@ -26,9 +26,9 @@ var basePath = os.tmpdir();
 
 var config = {
     port: 3000,
-    dataRoot: path.resolve(path.join(basePath, '/yellowtent/data')),
-    configRoot: path.resolve(path.join(basePath, '/yellowtent/config')),
-    mountRoot: path.resolve(path.join(basePath, '/yellowtent/mount'))
+    dataRoot: path.resolve(basePath, 'yellowtent/data'),
+    configRoot: path.resolve(basePath, 'yellowtent/config'),
+    mountRoot: path.resolve(basePath, 'yellowtent/mount')
 };
 
 function cleanup(done) {

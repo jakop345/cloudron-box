@@ -312,7 +312,7 @@ Repo.prototype.indexEntries = function (options, callback) {
 };
 
 Repo.prototype._absoluteFilePath = function (filePath) {
-    var absoluteFilePath = path.resolve(path.join(this.checkoutDir, filePath));
+    var absoluteFilePath = path.resolve(this.checkoutDir, filePath);
     return absoluteFilePath.slice(0, this.checkoutDir.length) == this.checkoutDir
             ? absoluteFilePath
             : ''; // the path is outside the repo
