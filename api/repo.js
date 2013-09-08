@@ -312,6 +312,9 @@ Repo.prototype.indexEntries = function (options, callback) {
 };
 
 Repo.prototype._absoluteFilePath = function (filePath) {
+    var relativeFilePath = path.relative(this.gitDir, filePath);
+    if (relativeFilePath.slice(0, 3) !== '../') return ''; // inside .git
+
     var absoluteFilePath = path.resolve(this.checkoutDir, filePath);
     return absoluteFilePath.slice(0, this.checkoutDir.length) == this.checkoutDir
             ? absoluteFilePath
