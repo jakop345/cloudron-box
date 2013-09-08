@@ -232,6 +232,19 @@ function parseIndexLine(line) {
     };
 }
 
+Repo.prototype._addFileAndCommit = function (file, options, callback) {
+    var that = this;
+    this.git(['add ' + file, 'ls-files -s -- ' + file], function (err, out) {
+        if (err) return callback(err);
+        var fileInfo = parseIndexLine(out.trimRight());
+        var message = options.message || (options._op + ' ' + file);
+        that._createCommit(message, function (err, commit) {
+            if (err) return callback(err);
+            callback(null, fileInfo, commit);
+        });
+    });
+};
+
 Repo.prototype._getRenameFilename = function (file, renamePattern) {
     var idx = file.indexOf('.');
     var baseName = idx == -1 ? file : file.substr(0, idx);
@@ -242,7 +255,7 @@ Repo.prototype._getRenameFilename = function (file, renamePattern) {
         if (!fs.existsSync(path.join(this.checkoutDir, file))) break;
     }
     return file;
-}
+};
 
 // FIXME: make stream API
 Repo.prototype._writeFileAndCommit = function (file, options, callback) {
@@ -260,15 +273,7 @@ Repo.prototype._writeFileAndCommit = function (file, options, callback) {
 
     fs.rename(options.file, absoluteFilePath, function (err) {
         if (err) return callback(err);
-        that.git(['add ' + file, 'ls-files -s -- ' + file], function (err, out) {
-            if (err) return callback(err);
-            var fileInfo = parseIndexLine(out.trimRight());
-            var message = options.message || (options._op + ' ' + file);
-            that._createCommit(message, function (err, commit) {
-                if (err) return callback(err);
-                callback(null, fileInfo, commit);
-            });
-        });
+        that._addFileAndCommit(file, options, callback);
     });
 };
 
