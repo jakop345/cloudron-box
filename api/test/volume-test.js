@@ -52,49 +52,76 @@ describe('Volume', function () {
     before(setup);
     after(cleanup);
 
-    it('create', function (done) {
-        volume.create(VOLUME, USERNAME, EMAIL, PASSWORD, config, function (error, result) {
-            expect(error).not.to.be.ok();
-            expect(result).to.be.ok();
-            done();
+    describe('create', function () {
+        it('succeeds', function (done) {
+            volume.create(VOLUME, USERNAME, EMAIL, PASSWORD, config, function (error, result) {
+                expect(error).not.to.be.ok();
+                expect(result).to.be.ok();
+                done();
+            });
+        });
+
+        xit('fails because it already exists', function (done) {
+            volume.create(VOLUME, USERNAME, EMAIL, PASSWORD, config, function (error, result) {
+                expect(error).not.be.ok();
+                expect(result).to.not.be.ok();
+                done();
+            });
+        });
+
+        it('second', function (done) {
+            volume.create(VOLUME_2, USERNAME, EMAIL, PASSWORD, config, function (error, result) {
+                expect(error).not.to.be.ok();
+                expect(result).to.be.ok();
+                done();
+            });
         });
     });
 
-    it('create second', function (done) {
-        volume.create(VOLUME_2, USERNAME, EMAIL, PASSWORD, config, function (error, result) {
-            expect(error).not.to.be.ok();
-            expect(result).to.be.ok();
+    describe('get', function () {
+        it('succeeds', function () {
+            var vol = volume.get(VOLUME, USERNAME, config);
+            expect(vol).to.be.ok();
+            expect(vol).to.be.an(volume.Volume);
+        });
 
-            done();
+        it('fails, no such volume', function () {
+            var vol = volume.get(VOLUME_3, USERNAME, config);
+            expect(vol).to.not.be.ok();
+        });
+
+        it('list', function (done) {
+            volume.list(USERNAME, config, function (error, result) {
+                expect(error).not.to.be.ok();
+                expect(result).to.be.ok();
+                expect(result).to.be.an(Array);
+                expect(result.length).to.be.equal(2);
+                expect(result[0]).to.be.an(volume.Volume);
+                expect(result[1]).to.be.an(volume.Volume);
+
+                done();
+            });
         });
     });
 
-    it('get', function () {
-        var vol = volume.get(VOLUME, USERNAME, config);
-        expect(vol).to.be.ok();
-        expect(vol).to.be.an(volume.Volume);
-    });
-
-    it('list', function (done) {
-        volume.list(USERNAME, config, function (error, result) {
-            expect(error).not.to.be.ok();
-            expect(result).to.be.ok();
-            expect(result).to.be.an(Array);
-            expect(result.length).to.be.equal(2);
-            expect(result[0]).to.be.an(volume.Volume);
-            expect(result[1]).to.be.an(volume.Volume);
-
-            done();
+    describe('destroy', function () {
+        it('first volume', function (done) {
+            volume.destroy(VOLUME, USERNAME, config, function (error) {
+                expect(error).not.to.be.ok();
+                done();
+            });
         });
-    });
 
-    it('destroy both', function (done) {
-        volume.destroy(VOLUME, USERNAME, config, function (error) {
-            expect(error).not.to.be.ok();
+        it('fails, no such volume', function (done) {
+            volume.destroy(VOLUME, USERNAME, config, function (error) {
+                expect(error).to.be.ok();
+                done();
+            });
+        });
 
+        it('second volume', function (done) {
             volume.destroy(VOLUME_2, USERNAME, config, function (error) {
                 expect(error).not.to.be.ok();
-
                 done();
             });
         });
