@@ -1,5 +1,9 @@
 "use strict";
 
+function auth(username, password) {
+    return 'Basic ' + $.base64.encode(username + ':' + password);
+}
+
 function createVolume(event) {
     event.preventDefault();
 
@@ -22,13 +26,24 @@ function createVolume(event) {
     $.ajax({
         type: "POST",
         url: form.attr("action"),
+        beforeSend: function (xhr) {
+            var username = window.yellowtent.username;
+            var password = form.find("input[name='password']").val();
+            xhr.setRequestHeader('Authorization', auth(username, password));
+        },
         data: requestBody,
         success: function (data) {
             hideModalDialog();
             getVolumeListing();
         },
-        error: function () {
-            showModalDialog("Create Volume", "failed");
+        error: function (error) {
+            var msg = 'Failed.';
+
+            try {
+                msg = JSON.parse(error.responseText).message;
+            } catch (e) {}
+
+            showModalDialog('Create Volume', msg);
         }
     });
 }

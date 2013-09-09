@@ -1,6 +1,7 @@
 'use strict';
 
 var HttpError = require('../httperror'),
+    user = require('../user.js'),
     volume = require('../volume.js');
 
 exports = module.exports = {
@@ -46,21 +47,29 @@ function listVolumes(req, res, next) {
 
 function createVolume(req, res, next) {
     if (!req.body.name) {
-        return next(new HttpError(400, 'volume name not specified'));
+        return next(new HttpError(400, 'New volume name not specified'));
     }
 
-    if (volume.get(req.body.name, req.user.username, config)) {
-        return next(new HttpError(409, 'volume already exists'));
+    if (!req.user.password) {
+        return next(new HttpError(400, 'Password not specified'));
     }
 
-    // TODO use real password, would help :-) - Johannes
-    var password = 'foobar1337';
-    volume.create(req.body.name, req.user.username, req.user.email, password, config, function (error, result) {
+    user.verify(req.user.username, req.user.password, function (error, result) {
         if (error) {
-            return next(new HttpError(500, 'volume creation failed: ' + error));
+            return next(new HttpError(401, 'Wrong password entered'));
         }
 
-        res.send(201);
+        if (volume.get(req.body.name, req.user.username, config)) {
+            return next(new HttpError(409, 'Volume already exists'));
+        }
+
+        volume.create(req.body.name, req.user.username, req.user.email, req.user.password, config, function (error, result) {
+            if (error) {
+                return next(new HttpError(500, 'Volume creation failed: ' + error));
+            }
+
+            res.send(201);
+        });
     });
 }
 

@@ -119,6 +119,7 @@ function authenticate(req, res, next) {
             }
 
             req.user = result;
+            req.user.password = auth.password;
 
             next();
         });
@@ -146,16 +147,22 @@ function authenticate(req, res, next) {
                 email: result.email
             };
 
+            // attach the password in case it was sent via auth headers
+            var auth = extractCredentialsFromHeaders(req);
+            if (auth && auth.username === result.username) {
+                req.user.password = auth.password;
+            }
+
             next();
         });
     }
 
-    if (req.headers.authorization) {
-        debug('using login authentication');
-        loginAuthenticator(req, res, next);
-    } else if (req.query.auth_token || req.cookies.token) {
+    if (req.query.auth_token || req.cookies.token) {
         debug('using token based authentication');
         tokenAuthenticator(req, res, next);
+    } else if (req.headers.authorization) {
+        debug('using login authentication');
+        loginAuthenticator(req, res, next);
     } else {
         next(new HttpError(401, 'No credentials'));
     }
