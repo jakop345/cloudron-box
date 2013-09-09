@@ -1,11 +1,13 @@
 'use strict';
 
 var fs = require('fs'),
+    db = require('./database.js'),
     debug = require('debug')('volume.js'),
     encfs = require('encfs'),
     rimraf = require('rimraf'),
     path = require('path'),
     assert = require('assert'),
+    crypto = require('crypto'),
     HttpError = require('./httperror.js'),
     Repo = require('./repo.js');
 
@@ -17,6 +19,10 @@ exports = module.exports = {
     get: getVolume
 };
 
+function generateNewVolumePassword() {
+    return crypto.randomBytes(32).readUInt32LE(0);
+}
+
 function Volume(name, config) {
     this.name = name;
     this.config = config;
@@ -25,6 +31,7 @@ function Volume(name, config) {
     this.tmpPath = path.join(this.mountPoint, 'tmp');
     this.encfs = new encfs.Root(this.dataPath, this.mountPoint);
     this.repo = undefined;
+    this.meta = undefined;
 }
 
 Volume.prototype._resolveVolumeRootPath = function() {
@@ -35,12 +42,22 @@ Volume.prototype._resolveVolumeMountPoint = function() {
     return path.join(this.config.mountRoot, this.name);
 };
 
+Volume.prototype._initMetaDatabase = function () {
+    this.meta = new db.Table(this.dataPath + '/.meta', {
+        username: { type: 'String', hashKey: true },
+        password: { type: 'String', priv: true },
+        salt: { type: 'String', priv: true },
+    });
+};
+
 Volume.prototype.open = function(password, callback) {
     assert(typeof password === 'string');
     assert(password.length !== 0);
     assert(typeof callback === 'function');
 
     var that = this;
+
+    this._initMetaDatabase();
 
     this.encfs.isMounted(function (error, mounted) {
         if (error) {
@@ -175,6 +192,35 @@ Volume.prototype.listFiles = function (directory, callback) {
     });
 };
 
+Volume.prototype.addUser = function (user, password, callback) {
+    if (!this.meta) {
+        return callback(new Error('Volume not valid'));
+    }
+
+    // TODO encrypt password with user's password
+    var record = {
+        username: user.username,
+        password: password
+    };
+
+    // pretend to encrypt the password with the users password
+    this.meta.put(record, function (error) {
+        if (error) {
+            return callback(error);
+        }
+
+        return callback(null, record);
+    });
+};
+
+Volume.prototype.removeUser = function (user, callback) {
+    if (!this.meta) {
+        return callback(new Error('Volume not valid'));
+    }
+
+    this.meta.remove(user.username, callback);
+};
+
 function listVolumes(username, config, callback) {
     assert(typeof username === 'string');
     assert(username.length !== 0);
@@ -217,13 +263,18 @@ function listVolumes(username, config, callback) {
     });
 }
 
-function createVolume(name, username, email, password, config, callback) {
+function createVolume(name, user, config, callback) {
     assert(typeof name === 'string');
     assert(typeof callback === 'function');
 
+    // TODO check if the sequence of creating things is fine - Johannes
     var vol = new Volume(name, config);
+    vol._initMetaDatabase();
+    // TODO use strong password instead of users - Johannes
+    // var volPassword = generateNewVolumePassword();
+    var volPassword = user.password;
 
-    encfs.create(vol.dataPath, vol.mountPoint, password, function (error, result) {
+    encfs.create(vol.dataPath, vol.mountPoint, volPassword, function (error, result) {
         if (error) {
             return callback(new Error('Volume creation failed: ' + JSON.stringify(error)));
         }
@@ -231,19 +282,25 @@ function createVolume(name, username, email, password, config, callback) {
         var tmpDir = path.join(vol.mountPoint, 'tmp');
         fs.mkdirSync(tmpDir);
 
-        // ## move this to repo
-        vol.repo = new Repo({ rootDir: vol.mountPoint, tmpDir: tmpDir });
-        vol.repo.create({ name: username, email: email }, function (error) {
+        vol.addUser(user, volPassword, function (error, result) {
             if (error) {
-                return callback(new Error('Error creating repo in volume'));
+                return callback(new Error('Adding user to volume failed.'));
             }
 
-            vol.repo.addFile('README.md', { contents: 'README' }, function (error, commit) {
+            // ## move this to repo
+            vol.repo = new Repo({ rootDir: vol.mountPoint, tmpDir: tmpDir });
+            vol.repo.create(user, function (error) {
                 if (error) {
-                    return callback(new Error('Error adding README: ' + error));
+                    return callback(new Error('Error creating repo in volume'));
                 }
 
-                callback(null, vol);
+                vol.repo.addFile('README.md', { contents: 'README' }, function (error, commit) {
+                    if (error) {
+                        return callback(new Error('Error adding README: ' + error));
+                    }
+
+                    callback(null, vol);
+                });
             });
         });
     });

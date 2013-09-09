@@ -63,7 +63,7 @@ function createVolume(req, res, next) {
             return next(new HttpError(409, 'Volume already exists'));
         }
 
-        volume.create(req.body.name, req.user.username, req.user.email, req.user.password, config, function (error, result) {
+        volume.create(req.body.name, req.user, config, function (error, result) {
             if (error) {
                 return next(new HttpError(500, 'Volume creation failed: ' + error));
             }

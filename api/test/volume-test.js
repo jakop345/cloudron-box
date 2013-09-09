@@ -23,6 +23,12 @@ var VOLUME = 'test_volume';
 var VOLUME_2 = 'second_volume';
 var VOLUME_3 = 'third_volume';
 
+var USER = {
+    username: USERNAME,
+    password: PASSWORD,
+    email: EMAIL
+};
+
 var tmpdirname = 'volume-test-' + crypto.randomBytes(4).readUInt32LE(0);
 var tmpdir = path.resolve(os.tmpdir(), tmpdirname);
 var config = {
@@ -54,7 +60,7 @@ describe('Volume', function () {
 
     describe('create', function () {
         it('succeeds', function (done) {
-            volume.create(VOLUME, USERNAME, EMAIL, PASSWORD, config, function (error, result) {
+            volume.create(VOLUME, USER, config, function (error, result) {
                 expect(error).not.to.be.ok();
                 expect(result).to.be.ok();
                 done();
@@ -62,7 +68,7 @@ describe('Volume', function () {
         });
 
         xit('fails because it already exists', function (done) {
-            volume.create(VOLUME, USERNAME, EMAIL, PASSWORD, config, function (error, result) {
+            volume.create(VOLUME, USER, config, function (error, result) {
                 expect(error).not.be.ok();
                 expect(result).to.not.be.ok();
                 done();
@@ -70,7 +76,7 @@ describe('Volume', function () {
         });
 
         it('second', function (done) {
-            volume.create(VOLUME_2, USERNAME, EMAIL, PASSWORD, config, function (error, result) {
+            volume.create(VOLUME_2, USER, config, function (error, result) {
                 expect(error).not.to.be.ok();
                 expect(result).to.be.ok();
                 done();
@@ -131,7 +137,7 @@ describe('Volume', function () {
         var vol;
 
         before(function (done) {
-            volume.create(VOLUME_3, USERNAME, EMAIL, PASSWORD, config, function (error, result) {
+            volume.create(VOLUME_3, USER, config, function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
                 expect(result).to.be.an(volume.Volume);

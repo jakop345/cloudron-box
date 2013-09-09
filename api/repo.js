@@ -108,7 +108,7 @@ function parseLogLine(line) {
         }
     };
 }
- 
+
 Repo.prototype.getCommit = function (commitish, callback) {
     this.git('show -s --pretty=' + LOG_LINE_FORMAT + ' ' + commitish, function (err, out) {
         if (err) return callback(err);
@@ -117,13 +117,13 @@ Repo.prototype.getCommit = function (commitish, callback) {
 };
 
 Repo.prototype.create = function (options, callback) {
-    assert(options.name && options.email);
+    assert(options.username && options.email);
     var that = this;
     mkdirp(this.checkoutDir, function (err) {
         if (err) return callback(err);
         that.git('init', function (err) {
             if (err) return callback(err);
-            that.git(['config user.name ' + options.name, 'config user.email ' + options.email], callback);
+            that.git(['config user.name ' + options.username, 'config user.email ' + options.email], callback);
         });
     });
 };
