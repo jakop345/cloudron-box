@@ -1,7 +1,10 @@
 var fs = require('fs');
 var crypto = require('crypto');
+var path = require('path');
 
 function buildManifest(outer, cb) {
+    // console.log("About to walk shit " + outer);
+    outer = path.normalize(outer + '/');
     var walk = function(dir, done) {
         var results = {};
         fs.readdir(dir, function(err, list) {
@@ -48,5 +51,7 @@ function buildManifest(outer, cb) {
     walk(outer, function(err, results) { if (err) { cb(err); } else { cb(results); } });
 }
 
-buildManifest(process.cwd(), function(manifest) { console.log("Got manifest " + JSON.stringify(manifest, null, 4)); });
+module.exports = { build: buildManifest };
+
+// buildManifest(process.cwd(), function(manifest) { console.log("Got manifest " + JSON.stringify(manifest, null, 4)); });
 
