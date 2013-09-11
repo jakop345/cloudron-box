@@ -2,7 +2,8 @@
 
 var HttpError = require('../httperror'),
     user = require('../user.js'),
-    volume = require('../volume.js');
+    volume = require('../volume.js'),
+    VolumeError = volume.VolumeError;
 
 exports = module.exports = {
     initialize: initialize,
@@ -51,7 +52,7 @@ function createVolume(req, res, next) {
     }
 
     if (!req.user.password) {
-        return next(new HttpError(400, 'Password not specified'));
+        return next(new HttpError(400, 'No password provided'));
     }
 
     user.verify(req.user.username, req.user.password, function (error, result) {
@@ -74,14 +75,16 @@ function createVolume(req, res, next) {
 }
 
 function listFiles(req, res, next) {
-    if (!req.volume) return next(new HttpError(404, 'No such volume'));
-
     // TODO this is unsafe params index might change - Johannes
     var directory = req.params[0] ? req.params[0] : '.';
 
     req.volume.listFiles(directory, function (error, files) {
-        if (error) {
+        if (error && error.reason === VolumeError.READ_ERROR) {
             return next(new HttpError(404, 'Unable to read folder'));
+        } else if (error && error.reason === VolumeError.NOT_MOUNTED) {
+            return next(new HttpError(401, 'Volume not mounted'));
+        } else if (error) {
+            return next(new HttpError(500, 'Internal server error'));
         }
 
         res.send(200, files);
@@ -89,11 +92,27 @@ function listFiles(req, res, next) {
 }
 
 function mount(req, res, next) {
-    // TODO
+    if (!req.user.password) {
+        return next(new HttpError(401, 'No password provided'));
+    }
+
+    req.volume.open(req.user.password, function (error) {
+        if (error) {
+            return next(new HttpError(402, 'Unable to open volume'));
+        }
+
+        res.send(200);
+    });
 }
 
 function unmount(req, res, next) {
-    // TODO
+    req.volume.close(function (error) {
+        if (error) {
+            return next(new HttpError(500, 'Unable to close volume'));
+        }
+
+        res.send(200);
+    });
 }
 
 function attachVolume(req, res, next, volumeId) {

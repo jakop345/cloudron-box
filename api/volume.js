@@ -8,16 +8,37 @@ var fs = require('fs'),
     path = require('path'),
     assert = require('assert'),
     crypto = require('crypto'),
+    util = require('util'),
     HttpError = require('./httperror.js'),
     Repo = require('./repo.js');
 
 exports = module.exports = {
     Volume: Volume,
+    VolumeError: VolumeError,
     list: listVolumes,
     create: createVolume,
     destroy: destroyVolume,
     get: getVolume
 };
+
+// http://dustinsenos.com/articles/customErrorsInNode
+// http://code.google.com/p/v8/wiki/JavaScriptStackTraceApi
+function VolumeError(err, reason) {
+    Error.call(this);
+    Error.captureStackTrace(this, this.constructor);
+
+    this.name = this.constructor.name;
+    this.message = JSON.stringify(err);
+    this.code = err ? err.code : null;
+    this.reason = reason || VolumeError.INTERNAL_ERROR;
+    this.statusCode = 500; // any db error is a server error
+}
+util.inherits(VolumeError, Error);
+VolumeError.INTERNAL_ERROR = 1;
+VolumeError.NOT_MOUNTED = 2;
+VolumeError.READ_ERROR = 3;
+VolumeError.META_MISSING = 4;
+VolumeError.NO_SUCH_VOLUME = 5;
 
 function generateNewVolumePassword() {
     return crypto.randomBytes(32).readUInt32LE(0);
@@ -150,51 +171,65 @@ Volume.prototype.listFiles = function (directory, callback) {
     var that = this;
     var folder = path.join(this.mountPoint, directory);
 
-    fs.readdir(folder, function (error, files) {
+    this.encfs.isMounted(function (error, mounted) {
         if (error) {
+            debug('Error checking if encfs for volume "' + that.name + '" is mounted.');
             return callback(error);
         }
 
-        var ret = [];
-
-        if (folder !== that.mountPoint) {
-            var dirUp = {};
-            dirUp.filename = '..';
-            dirUp.path = path.join(directory, '..');
-            dirUp.isDirectory = true;
-            dirUp.isFile = false;
-            dirUp.stat = { size: 0 };
-            ret.push(dirUp);
+        if (!mounted) {
+            debug('Encfs for volume "' + that.name + '" is not mounted.');
+            return callback(new VolumeError(null, VolumeError.NOT_MOUNTED));
         }
 
-        files.forEach(function (file) {
-            // filter .git
-            if (file === '.git') {
-                return;
+        fs.readdir(folder, function (error, files) {
+            if (error) {
+                debug('Unable to read directory "' + folder + '" for volume "' + that.name + '".');
+                return callback(new VolumeError(error, VolumeError.READ_ERROR));
             }
 
-            var tmp = {};
-            tmp.filename = file;
-            tmp.path = path.join(directory, file);
+            var ret = [];
 
-            try {
-                tmp.stat = fs.statSync(path.join(folder, file));
-                tmp.isFile = tmp.stat.isFile();
-                tmp.isDirectory = tmp.stat.isDirectory();
-            } catch (e) {
-                console.log('Error getting file information', e);
+            if (folder !== that.mountPoint) {
+                var dirUp = {};
+                dirUp.filename = '..';
+                dirUp.path = path.join(directory, '..');
+                dirUp.isDirectory = true;
+                dirUp.isFile = false;
+                dirUp.stat = { size: 0 };
+                ret.push(dirUp);
             }
 
-            ret.push(tmp);
+            files.forEach(function (file) {
+                // filter .git
+                if (file === '.git') {
+                    return;
+                }
+
+                var tmp = {};
+                tmp.filename = file;
+                tmp.path = path.join(directory, file);
+
+                try {
+                    tmp.stat = fs.statSync(path.join(folder, file));
+                    tmp.isFile = tmp.stat.isFile();
+                    tmp.isDirectory = tmp.stat.isDirectory();
+                } catch (e) {
+                    debug('Error getting file information:' + JSON.stringify(e));
+                }
+
+                ret.push(tmp);
+            });
+
+            callback(null, ret);
         });
-
-        callback(null, ret);
     });
 };
 
 Volume.prototype.addUser = function (user, password, callback) {
     if (!this.meta) {
-        return callback(new Error('Volume not valid'));
+        debug('Invalid volume "' + this.name + '". Misses the meta database.');
+        return callback(new VolumeError(null, VolumeError.META_MISSING));
     }
 
     // TODO encrypt password with user's password
@@ -206,6 +241,7 @@ Volume.prototype.addUser = function (user, password, callback) {
     // pretend to encrypt the password with the users password
     this.meta.put(record, function (error) {
         if (error) {
+            debug('Unable to add user to meta db. ' + JSON.stringify(error));
             return callback(error);
         }
 
@@ -215,7 +251,8 @@ Volume.prototype.addUser = function (user, password, callback) {
 
 Volume.prototype.removeUser = function (user, callback) {
     if (!this.meta) {
-        return callback(new Error('Volume not valid'));
+        debug('Invalid volume "' + this.name + '". Misses the meta database.');
+        return callback(new VolumeError(null, VolumeError.META_MISSING));
     }
 
     this.meta.remove(user.username, callback);
@@ -231,7 +268,8 @@ function listVolumes(username, config, callback) {
 
     fs.readdir(config.dataRoot, function (error, files) {
         if (error) {
-            return callback(new Error('Unable to read root folder'));
+            debug('Unable to list volumes.' + JSON.stringify(error));
+            return callback(new VolumeError(error, VolumeError.READ_ERROR));
         }
 
         var ret = [];
@@ -256,7 +294,7 @@ function listVolumes(username, config, callback) {
 
             ret.push(vol);
 
-            debug('Detected repo : ' + file);
+            debug('Detected volume with repo: "' + file + '".');
         });
 
         callback(null, ret);
@@ -276,7 +314,8 @@ function createVolume(name, user, config, callback) {
 
     encfs.create(vol.dataPath, vol.mountPoint, volPassword, function (error, result) {
         if (error) {
-            return callback(new Error('Volume creation failed: ' + JSON.stringify(error)));
+            debug('Unable to create encfs container for volume "' + name + '". ' + JSON.stringify(error));
+            return callback(new VolumeError(error, VolumeError.INTERNAL_ERROR));
         }
 
         var tmpDir = path.join(vol.mountPoint, 'tmp');
@@ -284,19 +323,19 @@ function createVolume(name, user, config, callback) {
 
         vol.addUser(user, volPassword, function (error, result) {
             if (error) {
-                return callback(new Error('Adding user to volume failed.'));
+                return callback(error);
             }
 
             // ## move this to repo
             vol.repo = new Repo({ rootDir: vol.mountPoint, tmpDir: tmpDir });
             vol.repo.create(user, function (error) {
                 if (error) {
-                    return callback(new Error('Error creating repo in volume'));
+                    return callback(new VolumeError(error, VolumeError.INTERNAL_ERROR));
                 }
 
                 vol.repo.addFile('README.md', { contents: 'README' }, function (error, commit) {
                     if (error) {
-                        return callback(new Error('Error adding README: ' + error));
+                        return callback(new VolumeError(error, VolumeError.INTERNAL_ERROR));
                     }
 
                     callback(null, vol);
@@ -315,7 +354,7 @@ function destroyVolume(name, username, config, callback) {
 
     var vol = getVolume(name, username, config);
     if (!vol) {
-        return callback(new Error('No such volume for this user.'));
+        return callback(new VolumeError(null, VolumeError.NO_SUCH_VOLUME));
     }
 
     vol.destroy(callback);
@@ -332,10 +371,11 @@ function getVolume(name, username, config) {
     var vol = new Volume(name, config);
     try {
         if (!fs.existsSync(vol.dataPath)) {
+            debug('No volume "' + name + '" for user "' + username + '".');
             return null;
         }
     } catch (e) {
-        debug('No such volume');
+        debug('No volume "' + name + '" for user "' + username + '". ' + JSON.stringify(e));
         return null;
     }
 

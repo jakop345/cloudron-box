@@ -163,5 +163,51 @@ function getFileListing(volume, folder) {
         document.getElementById("file-list-container").appendChild(group);
     }).fail(function (error) {
         console.error("Unable to get file listing.", error);
+        if (error.status === 401) {
+            mountVolume(volume, function (error) {
+                if (error) {
+                    console.error('Failed to mount volume: ' + error);
+                    return;
+                }
+
+                getFileListing(volume, folder);
+            });
+        }
+    });
+}
+
+function mountVolume(volume, callback) {
+    $("#password-dialog").modal();
+    $('#password-dialog-ok-button').on('click', function (e) {
+        e.preventDefault();
+        $('#password-dialog-form').submit();
+    });
+
+    $('#password-dialog-form').submit(function (event) {
+        event.preventDefault();
+        var form = $(this);
+
+        $.ajax({
+            type: "POST",
+            url: '/api/v1/volume/' + volume + '/mount',
+            beforeSend: function (xhr) {
+                var username = window.yellowtent.username;
+                var password = form.find("input[name='password']").val();
+                xhr.setRequestHeader('Authorization', auth(username, password));
+            },
+            success: function (data) {
+                $("#password-dialog").modal("hide");
+                callback(null);
+            },
+            error: function (error) {
+                var msg = 'Failed.';
+
+                try {
+                    msg = JSON.parse(error.responseText).message;
+                } catch (e) {}
+
+                callback(msg);
+            }
+        });
     });
 }

@@ -62,6 +62,31 @@
     </div>
   </div>
 
+  <div id="password-dialog" class="modal fade">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">Authorization</h4>
+        </div>
+        <div class="modal-body">
+          <form id="password-dialog-form" class="form-horizontal" action="" autocomplete="off">
+            <div class="form-group">
+              <label for="password" class="col-lg-2 control-label">Password</label>
+              <div class="col-lg-10">
+                <input type="password" class="form-control" id="password" placeholder="Password" name="password">
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default btn-primary" data-dismiss="modal">Cancel</button>
+          <button type="button" id="password-dialog-ok-button" class="btn btn-default btn-primary">OK</button>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+
   <div id="new-volume-dialog" class="modal fade">
     <div class="modal-dialog">
       <div class="modal-content">
