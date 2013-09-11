@@ -1,7 +1,8 @@
 {
-  "name": "",
+  "name": "Yellowtent",
   "description": "Yellow tent",
   "version": "0.0.1",
+  "private" : "true",
   "author": {
     "name": "Yellow tent authors",
     "email": "doesntexist@gmail.com"
