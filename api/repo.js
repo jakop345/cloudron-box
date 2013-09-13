@@ -157,6 +157,9 @@ function parseTreeLine(line) {
 }
 
 Repo.prototype.getTree = function (treeish, options, callback) {
+    assert(typeof treeish === 'string');
+    assert(typeof options === 'object' || typeof options === 'function');
+
     if (typeof options === 'function') {
         callback = options;
         options = { };
@@ -176,6 +179,7 @@ Repo.prototype.getTree = function (treeish, options, callback) {
 
 Repo.prototype.isTracked = function (file, callback) {
     assert(typeof file === 'string');
+    assert(typeof callback === 'function');
 
     this.git('ls-files --error-unmatch ' + file, function (err, out) {
         return callback(null, !err);
@@ -183,6 +187,10 @@ Repo.prototype.isTracked = function (file, callback) {
 };
 
 Repo.prototype.fileEntry = function (file, commitish, callback) {
+    assert(typeof file === 'string');
+    assert(typeof commitish === 'string');
+    assert(typeof callback === 'function');
+
     var that = this;
 
     if (file === '/') { // ls-tree won't give root info :(
@@ -221,6 +229,8 @@ Repo.prototype.fileEntry = function (file, commitish, callback) {
 };
 
 Repo.prototype._createCommit = function (message, callback) {
+    assert(typeof message === 'string');
+
     var that = this;
     // --allow-empty allows us to create a new revision even if file didn't change
     // this could happen if the same file is uploaded from another client
@@ -295,6 +305,8 @@ function parseIndexLines(lines, i) {
 }
 
 Repo.prototype.indexEntries = function (options, callback) {
+    assert(typeof options === 'object' || typeof options === 'function');
+
     if (typeof options === 'function') {
         callback = options;
         options = { };
@@ -325,6 +337,14 @@ Repo.prototype._absoluteFilePath = function (filePath) {
 
 // FIXME: needs checkout lock
 Repo.prototype.addFile = function (file, options, callback) {
+    assert(typeof file === 'string');
+    assert(typeof options === 'object' || typeof options === 'function');
+
+    if (typeof options === 'function') {
+        callback = options;
+        options = { };
+    }
+
     var that = this;
     var absoluteFilePath = this._absoluteFilePath(file);
     if (absoluteFilePath.length == 0) {
@@ -343,6 +363,14 @@ Repo.prototype.addFile = function (file, options, callback) {
 };
 
 Repo.prototype.updateFile = function (file, options, callback) {
+    assert(typeof file === 'string');
+    assert(typeof options === 'object' || typeof options === 'function');
+
+    if (typeof options === 'function') {
+        callback = options;
+        options = { };
+    }
+
     var that = this;
     var absoluteFilePath = this._absoluteFilePath(file);
     if (absoluteFilePath.length == 0) {
@@ -359,6 +387,9 @@ Repo.prototype.updateFile = function (file, options, callback) {
 };
 
 Repo.prototype.removeFile = function (file, options, callback) {
+    assert(typeof file === 'string');
+    assert(typeof options === 'object' || typeof options === 'function');
+
     if (typeof options === 'function') {
         callback = options;
         options = { };
@@ -380,6 +411,10 @@ Repo.prototype.removeFile = function (file, options, callback) {
 };
 
 Repo.prototype.moveFile = function (from, to, callback) {
+    assert(typeof from === 'string');
+    assert(typeof to === 'string');
+    assert(typeof callback === 'function');
+
     var that = this;
     this.git('mv ' + from + ' ' + to, function (err, out) {
         if (err) return callback(new RepoError('ENOENT', 'File does not exist'));
@@ -390,6 +425,10 @@ Repo.prototype.moveFile = function (from, to, callback) {
 };
 
 Repo.prototype.copyFile = function (from, to, callback) {
+    assert(typeof from === 'string');
+    assert(typeof to === 'string');
+    assert(typeof callback === 'function');
+
     var fromAbsoluteFilePath = this._absoluteFilePath(from);
     if (fromAbsoluteFilePath.length == 0) {
         return callback(new RepoError('ENOENT', 'Invalid from path'));
@@ -409,6 +448,9 @@ Repo.prototype.copyFile = function (from, to, callback) {
 };
 
 Repo.prototype.createReadStream = function (file, options) {
+    assert(typeof file === 'string');
+    options = options || { };
+
     var absoluteFilePath = this._absoluteFilePath(file);
     var ee = new EventEmitter();
     if (absoluteFilePath.length == 0) {
@@ -416,7 +458,7 @@ Repo.prototype.createReadStream = function (file, options) {
         return ee;
     }
 
-    if (options && options.rev) {
+    if (options.rev) {
         return this.spawn(['cat-file', '-p', options.rev]).stdout;
     } else {
         return this.spawn(['cat-file', '-p', 'HEAD:' + file]).stdout;
@@ -424,6 +466,8 @@ Repo.prototype.createReadStream = function (file, options) {
 };
 
 function parseRawDiffLine(line) {
+    assert(typeof line === 'string');
+
     // :100644 100644 78681069871a08110373201344e5016e218604ea 8b58e26f01a1af730e727b0eb0f1ff3b33a79de2 M      package.json
     var parts = line.split(/[ \t]+/);
 
@@ -479,6 +523,9 @@ Repo.prototype._getFileSizes = function (sha1s, callback) {
 };
 
 Repo.prototype.getRevisions = function (file, options, callback) {
+    assert(typeof file === 'string');
+    assert(typeof options === 'object' || typeof options === 'function');
+
     if (typeof options === 'function') {
         callback = options;
         options = { };
@@ -518,6 +565,10 @@ Repo.prototype.getRevisions = function (file, options, callback) {
 };
 
 Repo.prototype.diffTree = function (treeish1 /* from */, treeish2 /* to */, callback) {
+    assert(typeof treeish1 === 'string');
+    assert(typeof treeish2 === 'string');
+    assert(typeof callback === 'function');
+
     if (treeish1 === '') {
         // this is an empty tree to diff against. git mktree < /dev/null
         // for some reason --root doesn't work as expected
