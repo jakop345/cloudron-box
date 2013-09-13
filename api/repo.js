@@ -42,6 +42,8 @@ function Repo(config) {
 
 // run arbitrary commands on this repo
 Repo.prototype._exec = function (command, callback) {
+    assert(typeof command === 'string');
+
     var options = {
         env: { GIT_DIR: this.gitDir },
         cwd: this.checkoutDir
@@ -52,6 +54,8 @@ Repo.prototype._exec = function (command, callback) {
 
 // run arbitrary git command on this repo
 Repo.prototype.git = function (commands, callback) {
+    assert(typeof commands === 'string' || util.isArray(commands));
+
     if (!util.isArray(commands)) commands = [ commands ];
 
     for (var i = 0; i < commands.length; i++) {
@@ -68,6 +72,8 @@ Repo.prototype.git = function (commands, callback) {
 };
 
 Repo.prototype.spawn = function (args) {
+    assert(util.isArray(args));
+
     var args = [ '--no-pager' ].concat(args);
     var options = {
         env: { GIT_DIR: this.gitDir },
@@ -95,6 +101,8 @@ Repo.prototype.spawn = function (args) {
 var LOG_LINE_FORMAT = '%T,%ct,%P,%s,%H,%an,%ae';
 
 function parseLogLine(line) {
+    assert(typeof line === 'string');
+
     var parts = line.split(',');
     return {
         treeSha1: parts[0],
@@ -110,6 +118,9 @@ function parseLogLine(line) {
 }
 
 Repo.prototype.getCommit = function (commitish, callback) {
+    assert(typeof commitish === 'string');
+    assert(typeof callback === 'function');
+
     this.git('show -s --pretty=' + LOG_LINE_FORMAT + ' ' + commitish, function (err, out) {
         if (err) return callback(err);
         callback(null, parseLogLine(out.trimRight()));
@@ -129,6 +140,8 @@ Repo.prototype.create = function (options, callback) {
 };
 
 function parseTreeLine(line) {
+    assert(typeof line === 'string');
+
     var id, mode, name, type, _ref;
     // sample line : 100644 blob e69de29bb2d1d6434b8b29ae775ad8c2e48c5391 43 README
     var parts = line.split(/[\t ]+/, 5);
@@ -160,6 +173,8 @@ Repo.prototype.getTree = function (treeish, options, callback) {
 };
 
 Repo.prototype.isTracked = function (file, callback) {
+    assert(typeof file === 'string');
+
     this.git('ls-files --error-unmatch ' + file, function (err, out) {
         return callback(null, !err);
     });
@@ -221,6 +236,8 @@ function createTempFileSync(dir, contents) {
 }
 
 function parseIndexLine(line) {
+    assert(typeof line === 'string');
+
     var mode, sha1, stage, name;
     // sample line : 100644 294c76dd833e77480ba85bdff83b4ef44fa4c08f 0  repo-test.js
     var parts = line.split(/[\t ]+/, 4);
