@@ -56,22 +56,22 @@ function Table(dbFile, schema) {
     }
 }
 
-Table.prototype.put = function (user, callback) {
-    var key = user[this.hashKey];
+Table.prototype.put = function (obj, callback) {
+    var key = obj[this.hashKey];
     if (!key) return callback(new DatabaseError('no hash key found', DatabaseError.RECORD_SCHEMA));
     if (key in this.cache) return callback(new DatabaseError(null, DatabaseError.ALREADY_EXISTS));
 
-    this.cache[key] = user;
+    this.cache[key] = obj;
     fs.writeFileSync(this.dbFile, JSON.stringify(this.cache));
     callback();
 };
 
-Table.prototype.update = function (user, callback) {
-    var key = user[this.hashKey];
+Table.prototype.update = function (obj, callback) {
+    var key = obj[this.hashKey];
     if (!key) return callback(new DatabaseError('no hash key found', DatabaseError.RECORD_SCHEMA));
     if (!(key in this.cache)) return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
 
-    this.cache[key] = user;
+    this.cache[key] = obj;
     fs.writeFileSync(this.dbFile, JSON.stringify(this.cache));
     callback();
 };
