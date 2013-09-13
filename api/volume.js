@@ -328,7 +328,7 @@ function createVolume(name, user, config, callback) {
 
             // ## move this to repo
             vol.repo = new Repo({ rootDir: vol.mountPoint, tmpDir: tmpDir });
-            vol.repo.create(user, function (error) {
+            vol.repo.create(user.username, user.email, function (error) {
                 if (error) {
                     return callback(new VolumeError(error, VolumeError.INTERNAL_ERROR));
                 }

@@ -127,14 +127,16 @@ Repo.prototype.getCommit = function (commitish, callback) {
     });
 };
 
-Repo.prototype.create = function (options, callback) {
-    assert(options.username && options.email);
+Repo.prototype.create = function (username, email, callback) {
+    assert(typeof username === 'string' && username.length != 0);
+    assert(typeof email === 'string' && email.length != 0);
+
     var that = this;
     mkdirp(this.checkoutDir, function (err) {
         if (err) return callback(err);
         that.git('init', function (err) {
             if (err) return callback(err);
-            that.git(['config user.name ' + options.username, 'config user.email ' + options.email], callback);
+            that.git(['config user.name ' + username, 'config user.email ' + email], callback);
         });
     });
 };

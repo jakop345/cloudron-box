@@ -32,7 +32,7 @@ describe('Repo', function () {
     after(cleanup);
 
     it('create', function (done) {
-        repo.create({ username: USERNAME, email: EMAIL }, function () {
+        repo.create(USERNAME, EMAIL, function () {
             expect(fs.existsSync(repo.gitDir)).to.be.ok();
             done();
         });
