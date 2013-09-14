@@ -15,6 +15,9 @@ function remove(req, res, next) {
     var rev = req.body.rev;
 
     repo.fileEntry(filePath, 'HEAD', function (err, fileEntry) {
+        if (err) return next(new HttpError(500, 'Internal error'));
+        if (!fileEntry) return next(new HttpError(400, 'No such file'));
+
         if (fileEntry.sha1 !== rev && rev !== '*') return next(new HttpError(409, 'Out of date'));
 
         repo.removeFile(filePath, { recursive: true }, function (err, commit) {
@@ -36,6 +39,9 @@ function move(req, res, next) {
     if (!toPath) return next(400, 'to_path not specified');
 
     repo.fileEntry(fromPath, 'HEAD', function (err, fileEntry) {
+        if (err) return next(new HttpError(500, 'Internal error'));
+        if (!fileEntry) return next(new HttpError(400, 'No such file'));
+
         if (fileEntry.sha1 !== rev && rev !== '*') return next(new HttpError(409, 'Out of date'));
 
         repo.moveFile(fromPath, toPath, function (err, newEntry, commit) {
@@ -57,6 +63,8 @@ function copy(req, res, next) {
     if (!toPath) return next(400, 'to_path not specified');
 
     repo.fileEntry(fromPath, 'HEAD', function (err, fileEntry) {
+        if (err) return next(new HttpError(500, 'Internal error'));
+        if (!fileEntry) return next(new HttpError(400, 'No such file'));
         if (fileEntry.sha1 !== rev && rev !== '*') return next(new HttpError(409, 'Out of date'));
 
         repo.copyFile(fromPath, toPath, function (err, newEntry, commit) {

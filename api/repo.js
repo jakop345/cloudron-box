@@ -221,8 +221,7 @@ Repo.prototype.fileEntry = function (file, commitish, callback) {
         // TODO: This is expensive potentially. One option for HEAD is to stat the checkout
         // dir (would that work after we recreated the repo from recovery?)
         that.git('log -1 --pretty=%ct ' + commitish + ' -- ' + file, function (err, out) {
-            if (err) return callback(null, 0);
-            entry.mtime = parseInt(out.trimRight());
+            entry.mtime = !err && out ? parseInt(out.trimRight()) : 0;
             callback(null, entry);
         });
     });
