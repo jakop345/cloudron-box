@@ -8,6 +8,7 @@ var fs = require('fs'),
     path = require('path'),
     assert = require('assert'),
     crypto = require('crypto'),
+    aes = require("aes-helper"),
     util = require('util'),
     HttpError = require('./httperror.js'),
     Repo = require('./repo.js');
@@ -40,8 +41,17 @@ VolumeError.READ_ERROR = 3;
 VolumeError.META_MISSING = 4;
 VolumeError.NO_SUCH_VOLUME = 5;
 
+// TODO is this even a good password generator? - Johannes
 function generateNewVolumePassword() {
-    return crypto.randomBytes(32).readUInt32LE(0);
+    var chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()_+?{}[]|:;'~`<>,.-=";
+    var charsLength = chars.length;
+    var password = "";
+
+    for (var i = 0; i < 64; ++i) {
+        password += chars.charAt(Math.floor(Math.random() * charsLength));
+    }
+
+    return password;
 }
 
 function Volume(name, config) {
@@ -66,12 +76,13 @@ Volume.prototype._resolveVolumeMountPoint = function() {
 Volume.prototype._initMetaDatabase = function () {
     this.meta = new db.Table(this.dataPath + '/.meta', {
         username: { type: 'String', hashKey: true },
-        password: { type: 'String', priv: true },
-        salt: { type: 'String', priv: true },
+        passwordCypher: { type: 'String', priv: true }
     });
 };
 
-Volume.prototype.open = function(password, callback) {
+Volume.prototype.open = function(username, password, callback) {
+    assert(typeof username === 'string');
+    assert(username.length !== 0);
     assert(typeof password === 'string');
     assert(password.length !== 0);
     assert(typeof callback === 'function');
@@ -89,12 +100,21 @@ Volume.prototype.open = function(password, callback) {
             return callback();
         }
 
-        that.encfs.mount(password, function (error, result) {
+        that.meta.get(username, function (error, record) {
             if (error) {
+                debug('Unable to get user from meta db. ' + JSON.stringify(error));
                 return callback(error);
             }
 
-            callback();
+            var volPassword = aes.decrypt(record.passwordCypher, password);
+
+            that.encfs.mount(volPassword, function (error, result) {
+                if (error) {
+                    return callback(error);
+                }
+
+                callback();
+            });
         });
     });
 };
@@ -235,7 +255,7 @@ Volume.prototype.addUser = function (user, password, callback) {
     // TODO encrypt password with user's password
     var record = {
         username: user.username,
-        password: password
+        passwordCypher: aes.encrypt(password, user.password)
     };
 
     // pretend to encrypt the password with the users password
@@ -307,10 +327,9 @@ function createVolume(name, user, config, callback) {
 
     // TODO check if the sequence of creating things is fine - Johannes
     var vol = new Volume(name, config);
+    var volPassword = generateNewVolumePassword();
+
     vol._initMetaDatabase();
-    // TODO use strong password instead of users - Johannes
-    // var volPassword = generateNewVolumePassword();
-    var volPassword = user.password;
 
     encfs.create(vol.dataPath, vol.mountPoint, volPassword, function (error, result) {
         if (error) {

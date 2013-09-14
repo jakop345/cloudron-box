@@ -24,6 +24,7 @@
     "rimraf": "*",
     "debug": "*",
     "mime": "*",
+    "aes-helper": "*",
     "encfs": "*"
   },
   "devDependencies": {

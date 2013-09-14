@@ -96,7 +96,7 @@ function mount(req, res, next) {
         return next(new HttpError(401, 'No password provided'));
     }
 
-    req.volume.open(req.user.password, function (error) {
+    req.volume.open(req.user.username, req.user.password, function (error) {
         if (error) {
             return next(new HttpError(402, 'Unable to open volume'));
         }

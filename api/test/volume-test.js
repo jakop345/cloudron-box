@@ -156,7 +156,7 @@ describe('Volume', function () {
         });
 
         it('open', function (done) {
-            vol.open(PASSWORD, function (error) {
+            vol.open(USERNAME, PASSWORD, function (error) {
                 expect(error).to.not.be.ok();
                 done();
             });
@@ -170,7 +170,7 @@ describe('Volume', function () {
         });
 
         it('open', function (done) {
-            vol.open(PASSWORD, function (error) {
+            vol.open(USERNAME, PASSWORD, function (error) {
                 expect(error).to.not.be.ok();
                 done();
             });
