@@ -588,3 +588,35 @@ Repo.prototype.diffTree = function (treeish1 /* from */, treeish2 /* to */, call
     });
 };
 
+Repo.prototype.metadata = function (filePath, options, callback) {
+    assert(typeof filePath === 'string');
+    assert(typeof options === 'object' || typeof options === 'function');
+
+    if (typeof options === 'function') {
+        callback = options;
+        options = { };
+    }
+
+    var rev = options.rev, hash = options.hash, that = this;
+
+    if (!rev) {
+        this.fileEntry(filePath, 'HEAD', function (err, entry) {
+            if (err) return callback(err);
+            if (entry.sha1 === hash) return callback(null);
+
+            // Use the index to provide mtime information
+            that.indexEntries({ path: filePath }, function (err, entries) {
+                if (err) return callback(err);
+                return callback(null, entries, entry.sha1);
+            });
+        });
+    } else {
+        // No easy way to provide mtime information. If this is needed we have to create an
+        // alternate git tree structure which also contains the mtime.
+        this.getTree(rev, { path: filePath }, function (err, tree) {
+            if (err) return callback(err);
+            return callback(null, tree.entries, tree.sha1); // no hash since rev'ed metadata never changes
+        });
+    }
+};
+

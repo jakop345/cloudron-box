@@ -48,24 +48,15 @@ function revisions(req, res, next) {
 function metadata(req, res, next) {
     var filePath = req.params[0], rev = req.query.rev, hash = req.query.hash;
 
-    if (!rev) {
-        req.volume.repo.fileEntry(filePath, 'HEAD', function (err, entry) {
-            if (err) return next(new HttpError(500, 'Error getting HEAD'));
-            if (entry.sha1 === hash) return res.send(304, 'Not modified');
-            // Use the index to provide mtime information
-            req.volume.repo.indexEntries({ path: filePath }, function (err, entries) {
-                if (err) return next(new HttpError(500, 'Cannot get index: ' + err.message));
-                res.send(200, { entries: entries, hash: entry.sha1 });
-            });
-        });
-    } else {
-        // No easy way to provide mtime information. If this is needed we have to create an
-        // alternate git tree structure which also contains the mtime.
-        req.volume.repo.getTree(rev, { path: filePath }, function (err, tree) {
-            if (err) return next(new HttpError(400, 'Invalid revision: ' + err.message));
-            res.send(200, { entries: tree.entries }); // no hash since rev'ed metadata never changes
-        });
-    }
+    req.volume.repo.metadata(filePath, { rev: rev, hash: hash }, function (err, entries, hash) {
+        if (err) {
+            if (err.code == 'ENOENT' || err.code == 'ENOTDIR') return next(new HttpError(404, 'Not found'));
+            return next(new HttpError(500, 'Error getting HEAD'));
+        }
+
+        if (!entries) return res.send(304, 'Not modified');
+        res.send(200, { entries: entries, hash: hash });
+    });
 }
 
 function multipart(req, res, next) {
