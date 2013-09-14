@@ -91,7 +91,7 @@ function putFile(req, res, next) {
     var overwrite = data.overwrite;
 
     req.volume.repo.fileEntry(filePath, 'HEAD', function (err, entry) {
-        if (err) return next(new HttpError(400, 'Error getting fileEntry' + e));
+        if (err) return next(new HttpError(400, 'Error getting fileEntry' + err));
         if (!entry) {
             if (data.parentRev) return next(new HttpError(400, 'No such revision'));
             req.volume.repo.addFile(filePath, { file: req.files.file.path }, function (err, fileInfo, commit) {
