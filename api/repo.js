@@ -211,7 +211,7 @@ Repo.prototype.fileEntry = function (file, commitish, callback) {
 
     this.git('ls-tree -l ' + commitish + ' -- ' + file, function (err, out) {
         out = out ? out.trimRight() : '';
-        if (out.length == 0) return callback(null, null); // file was removed
+        if (out.length == 0) return callback(new RepoError('ENOENT', 'File removed'));
 
         var entry = parseTreeLine(out);
 

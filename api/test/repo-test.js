@@ -189,8 +189,8 @@ describe('Repo', function () {
 
     it('fileEntry - invalid file @HEAD', function (done) {
         repo.fileEntry('RANDOM', 'HEAD', function (err, entry) {
-            expect(err).to.equal(null);
-            expect(entry).to.equal(null);
+            expect(err.code).to.equal('ENOENT');
+            expect(entry).to.be(undefined);
             done();
         });
     });
@@ -255,8 +255,8 @@ describe('Repo', function () {
 
     it('fileEntry - removed file @HEAD', function (done) {
         repo.fileEntry('README', 'HEAD', function (err, entry) {
-            expect(err).to.be(null);
-            expect(entry).to.be(null);
+            expect(err.code).to.be('ENOENT');
+            expect(entry).to.be(undefined);
             done();
         });
     });

@@ -91,7 +91,11 @@ function putFile(req, res, next) {
     var overwrite = data.overwrite;
 
     req.volume.repo.fileEntry(filePath, 'HEAD', function (err, entry) {
-        if (err) return next(new HttpError(400, 'Error getting fileEntry' + err));
+        if (err) {
+            if (err.code !== 'ENOENT') return next(new HttpError(400, 'Error getting fileEntry' + err));
+            entry = null;
+        }
+
         if (!entry) {
             if (data.parentRev) return next(new HttpError(400, 'No such revision'));
             req.volume.repo.addFile(filePath, { file: req.files.file.path }, function (err, fileInfo, commit) {
@@ -146,9 +150,17 @@ function update(req, res, next) {
     var leftEntry = data.entry, repo = req.volume.repo;
 
     repo.fileEntry(leftEntry.path, data.lastSyncRevision, function (err, baseEntry) {
-        if (err) return next(new HttpError(400, 'input error:' + err));
+        if (err) {
+            if (err.code !== 'ENOENT') return next(new HttpError(400, 'input error:' + err));
+            baseEntry = null;
+        }
+
         repo.fileEntry(leftEntry.path, 'HEAD', function (err, rightEntry) {
-            if (err) return next(new HttpError(500, 'failed to get fileEntry:' + err));
+            if (err) {
+                if (err.code !== 'ENOENT') return next(new HttpError(500, 'failed to get fileEntry:' + err));
+                rightEntry = null;
+            }
+
             var change = syncer.whatChanged(data.action != 'remove' ? leftEntry : null, baseEntry, rightEntry);
             if (change.conflict) return next(new HttpError(409, JSON.stringify(change)));
 
