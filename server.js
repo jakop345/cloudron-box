@@ -18,6 +18,9 @@ var optimist = require('optimist'),
 
 var app = express();
 
+// some configs, should maybe go into a config file? - Johannes
+var REQUEST_LIMIT='10mb';
+
 exports = module.exports = {
     start: start,
     app: app,
@@ -85,11 +88,11 @@ function getVersion(req, res, next) {
 }
 
 app.configure(function () {
-    var json = express.json({ strict: true, limit: 2000 }), // application/json
-        urlencoded = express.urlencoded({ limit: 2000 }); // application/x-www-form-urlencoded
+    var json = express.json({ strict: true, limit: REQUEST_LIMIT }), // application/json
+        urlencoded = express.urlencoded({ limit: REQUEST_LIMIT }); // application/x-www-form-urlencoded
 
     if (app.get('env') != 'testing') {
-        app.use(express.logger({ format: 'dev', immediate: false }))
+        app.use(express.logger({ format: 'dev', immediate: false }));
     }
 
     app.use(express.timeout(10000))
