@@ -464,7 +464,7 @@ describe('Server API', function () {
                    .auth(USERNAME, PASSWORD)
                    .send({ path: 'README.md' })
                    .end(function (err, res) {
-                expect(res.statusCode).to.equal(409);
+                expect(res.statusCode).to.equal(400);
                 done(err);
             });
         });

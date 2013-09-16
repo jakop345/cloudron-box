@@ -14,6 +14,8 @@ function remove(req, res, next) {
     var repo = req.volume.repo;
     var rev = req.body.rev;
 
+    if (!rev) return next(new HttpError(400, 'No revision specified'));
+
     repo.fileEntry(filePath, 'HEAD', function (err, fileEntry) {
         if (err) {
             if (err.code === 'ENOENT') return next(new HttpError(400, 'No such file'));
@@ -39,6 +41,7 @@ function move(req, res, next) {
 
     if (!fromPath) return next(400, 'from_path not specified');
     if (!toPath) return next(400, 'to_path not specified');
+    if (!rev) return next(new HttpError(400, 'No revision specified'));
 
     repo.fileEntry(fromPath, 'HEAD', function (err, fileEntry) {
         if (err) {
@@ -65,6 +68,7 @@ function copy(req, res, next) {
 
     if (!fromPath) return next(400, 'from_path not specified');
     if (!toPath) return next(400, 'to_path not specified');
+    if (!rev) return next(new HttpError(400, 'No revision specified'));
 
     repo.fileEntry(fromPath, 'HEAD', function (err, fileEntry) {
         if (err) {
