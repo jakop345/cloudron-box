@@ -352,7 +352,7 @@ function createVolume(name, user, config, callback) {
                     return callback(new VolumeError(error, VolumeError.INTERNAL_ERROR));
                 }
 
-                vol.repo.addFile('README.md', { contents: 'README' }, function (error, commit) {
+                vol.repo.addFileWithData('README.md', 'README', function (error, commit) {
                     if (error) {
                         return callback(new VolumeError(error, VolumeError.INTERNAL_ERROR));
                     }

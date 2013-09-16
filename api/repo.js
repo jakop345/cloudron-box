@@ -274,13 +274,9 @@ Repo.prototype._addFileAndCommit = function (file, options, callback) {
 };
 
 // FIXME: make stream API
-Repo.prototype._writeFileAndCommit = function (file, options, callback) {
+Repo.prototype._renameFileAndCommit = function (file, options, callback) {
     var that = this;
     var absoluteFilePath = path.join(this.checkoutDir, file);
-
-    if (options.contents) {
-        options.file = createTempFileSync(this.tmpDir, options.contents);
-    }
 
     fs.rename(options.file, absoluteFilePath, function (err) {
         if (err) return callback(err);
@@ -332,9 +328,23 @@ Repo.prototype._absoluteFilePath = function (filePath) {
     return absoluteFilePath.slice(0, this.checkoutDir.length) == this.checkoutDir
             ? absoluteFilePath
             : ''; // the path is outside the repo
-}
+};
 
 // FIXME: needs checkout lock
+Repo.prototype.addFileWithData = function (file, data, options, callback) {
+    assert(typeof file === 'string');
+    assert(typeof data === 'string' || Buffer.isBuffer(data));
+    assert(typeof options === 'object' || typeof options === 'function');
+
+    if (typeof options === 'function') {
+        callback = options;
+        options = { };
+    }
+
+    options.file = createTempFileSync(this.tmpDir, data);
+    this.addFile(file, options, callback);
+};
+
 Repo.prototype.addFile = function (file, options, callback) {
     assert(typeof file === 'string');
     assert(typeof options === 'object' || typeof options === 'function');
@@ -357,7 +367,7 @@ Repo.prototype.addFile = function (file, options, callback) {
     options._operation = 'Add';
 
     mkdirp(path.dirname(absoluteFilePath), function (ignoredErr) {
-        that._writeFileAndCommit(file, options, callback);
+        that._renameFileAndCommit(file, options, callback);
     });
 };
 
@@ -382,7 +392,7 @@ Repo.prototype.updateFile = function (file, options, callback) {
 
     options._operation = 'Update';
 
-    this._writeFileAndCommit(file, options, callback);
+    this._renameFileAndCommit(file, options, callback);
 };
 
 Repo.prototype.removeFile = function (file, options, callback) {
