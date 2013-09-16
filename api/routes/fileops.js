@@ -16,21 +16,13 @@ function remove(req, res, next) {
 
     if (!rev) return next(new HttpError(400, 'No revision specified'));
 
-    repo.fileEntry(filePath, 'HEAD', function (err, fileEntry) {
+    repo.removeFile(filePath, { recursive: true, rev: rev }, function (err, fileEntry, commit) {
         if (err) {
-            if (err.code === 'ENOENT') return next(new HttpError(400, 'No such file'));
-            return next(new HttpError(500, 'Internal error'));
+            if (err.code == 'ENOENT' || err.code == 'ENOTDIR') return next(new HttpError(404, 'Not found'));
+            if (err.code == 'EOUTOFDATE') return next(new HttpError(409, 'Out of date'));
+            return next(new HttpError(500, err.message));
         }
-
-        if (fileEntry.sha1 !== rev && rev !== '*') return next(new HttpError(409, 'Out of date'));
-
-        repo.removeFile(filePath, { recursive: true }, function (err, commit) {
-            if (err) {
-                if (err.code == 'ENOENT' || err.code == 'ENOTDIR') return next(new HttpError(404, 'Not found'));
-                return next(new HttpError(500, err.message));
-            }
-            res.send(200, fileEntry);
-        });
+        res.send(200, fileEntry);
     });
 }
 
@@ -43,21 +35,13 @@ function move(req, res, next) {
     if (!toPath) return next(400, 'to_path not specified');
     if (!rev) return next(new HttpError(400, 'No revision specified'));
 
-    repo.fileEntry(fromPath, 'HEAD', function (err, fileEntry) {
+    repo.moveFile(fromPath, toPath, { rev: rev }, function (err, newEntry, commit) {
         if (err) {
-            if (err.code === 'ENOENT') return next(new HttpError(400, 'No such file'));
-            return next(new HttpError(500, 'Internal error'));
+            if (err.code == 'ENOENT' || err.code == 'ENOTDIR') return next(new HttpError(404, 'Not found'));
+            if (err.code == 'EOUTOFDATE') return next(new HttpError(409, 'Out of date'));
+            return next(new HttpError(500, err.message));
         }
-
-        if (fileEntry.sha1 !== rev && rev !== '*') return next(new HttpError(409, 'Out of date'));
-
-        repo.moveFile(fromPath, toPath, function (err, newEntry, commit) {
-            if (err) {
-                if (err.code == 'ENOENT' || err.code == 'ENOTDIR') return next(new HttpError(404, 'Not found'));
-                return next(new HttpError(500, err.message));
-            }
-            res.send(200, newEntry);
-        });
+        res.send(200, newEntry);
     });
 }
 
@@ -70,21 +54,13 @@ function copy(req, res, next) {
     if (!toPath) return next(400, 'to_path not specified');
     if (!rev) return next(new HttpError(400, 'No revision specified'));
 
-    repo.fileEntry(fromPath, 'HEAD', function (err, fileEntry) {
+    repo.copyFile(fromPath, toPath, { rev: rev }, function (err, newEntry, commit) {
         if (err) {
-            if (err.code === 'ENOENT') return next(new HttpError(400, 'No such file'));
-            return next(new HttpError(500, 'Internal error'));
+           if (err.code == 'ENOENT' || err.code == 'ENOTDIR') return next(new HttpError(404, 'Not found'));
+           if (err.code == 'EOUTOFDATE') return next(new HttpError(409, 'Out of date'));
+           return next(new HttpError(500, err.message));
         }
-
-        if (fileEntry.sha1 !== rev && rev !== '*') return next(new HttpError(409, 'Out of date'));
-
-        repo.copyFile(fromPath, toPath, function (err, newEntry, commit) {
-            if (err) {
-                if (err.code == 'ENOENT' || err.code == 'ENOTDIR') return next(new HttpError(404, 'Not found'));
-                return next(new HttpError(500, err.message));
-            }
-            res.send(200, newEntry);
-        });
+        res.send(200, newEntry);
     });
 }
 

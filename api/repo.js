@@ -399,34 +399,57 @@ Repo.prototype.removeFile = function (file, options, callback) {
         return callback(new RepoError('ENOENT', 'Invalid file path'));
     }
 
-    var recursive = options.recursive ? '-r ' : '';
     var that = this;
-    this.git('rm ' + recursive + file, function (err, out) {
-        if (err) return callback(new RepoError('ENOENT', 'File does not exist'));
+    this.fileEntry(file, 'HEAD', function (err, entry) {
+        if (err) return callback(err);
+        var rev = options.rev || '*';
+        if (entry.sha1 !== rev && rev !== '*') return callback(new RepoError('EOUTOFDATE', 'Out of date'));
 
-        var message = 'Remove ' + file;
-        that._createCommit(message, callback);
+        var recursive = options.recursive ? '-r ' : '';
+        that.git('rm ' + recursive + file, function (err, out) {
+            if (err) return callback(new RepoError('ENOENT', 'File does not exist'));
+
+            var message = 'Remove ' + file;
+            that._createCommit(message, function (err, commit) { return callback(err, entry, commit); });
+        });
     });
 };
 
-Repo.prototype.moveFile = function (from, to, callback) {
+Repo.prototype.moveFile = function (from, to, options, callback) {
     assert(typeof from === 'string');
     assert(typeof to === 'string');
-    assert(typeof callback === 'function');
+    assert(typeof options === 'object' || typeof options === 'function');
+
+    if (typeof options === 'function') {
+        callback = options;
+        options = { };
+    }
 
     var that = this;
-    this.git('mv ' + from + ' ' + to, function (err, out) {
-        if (err) return callback(new RepoError('ENOENT', 'File does not exist'));
+    this.fileEntry(from, 'HEAD', function (err, entry) {
+        if (err) return callback(err);
+        var rev = options.rev || '*';
 
-        var message = 'Move from ' + from + ' to ' + to;
-        that._addFileAndCommit(to, { message: message }, callback);
+        if (entry.sha1 !== rev && rev !== '*') return next(new RepoError('EOUTOFDATE', 'Out of date'));
+
+        that.git('mv ' + from + ' ' + to, function (err, out) {
+            if (err) return callback(new RepoError('ENOENT', 'File does not exist'));
+
+            var message = 'Move from ' + from + ' to ' + to;
+            that._addFileAndCommit(to, { message: message }, callback);
+        });
     });
 };
 
-Repo.prototype.copyFile = function (from, to, callback) {
+Repo.prototype.copyFile = function (from, to, options, callback) {
     assert(typeof from === 'string');
     assert(typeof to === 'string');
-    assert(typeof callback === 'function');
+    assert(typeof options === 'object' || typeof options === 'function');
+
+    if (typeof options === 'function') {
+        callback = options;
+        options = { };
+    }
 
     var fromAbsoluteFilePath = this._absoluteFilePath(from);
     if (fromAbsoluteFilePath.length == 0) {
@@ -438,11 +461,18 @@ Repo.prototype.copyFile = function (from, to, callback) {
     }
 
     var that = this;
-    this._exec('cp -r ' + fromAbsoluteFilePath + ' ' + toAbsoluteFilePath, function (err, out) {
-        if (err) return callback(new RepoError('ENOENT', 'File does not exist'));
+    this.fileEntry(from, 'HEAD', function (err, entry) {
+        if (err) return callback(err);
+        var rev = options.rev || '*';
 
-        var message = 'Copy from ' + from + ' to ' + to;
-        that._addFileAndCommit(to, { message: message }, callback);
+        if (entry.sha1 !== rev && rev !== '*') return next(new RepoError('EOUTOFDATE', 'Out of date'));
+
+        that._exec('cp -r ' + fromAbsoluteFilePath + ' ' + toAbsoluteFilePath, function (err, out) {
+            if (err) return callback(new RepoError('ENOENT', 'File does not exist'));
+
+            var message = 'Copy from ' + from + ' to ' + to;
+            that._addFileAndCommit(to, { message: message }, callback);
+        });
     });
 };
 

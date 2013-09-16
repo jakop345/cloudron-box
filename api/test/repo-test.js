@@ -229,7 +229,7 @@ describe('Repo', function () {
     });
 
     it('removeFile - valid file', function (done) {
-        repo.removeFile('README', function (err, commit) {
+        repo.removeFile('README', function (err, entry, commit) {
             expect(commit.subject).to.equal('Remove README');
             done();
         });
