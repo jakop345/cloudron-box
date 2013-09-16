@@ -649,3 +649,30 @@ Repo.prototype.metadata = function (filePath, options, callback) {
     }
 };
 
+// can add or update a file
+Repo.prototype.putFile = function (filePath, newFile, options, callback) {
+    var that = this;
+    var overwrite = options.overwrite;
+    var parentRev = options.parentRev;
+    var getConflictFilenameSync = options.getConflictFilenameSync;
+
+    this.fileEntry(filePath, 'HEAD', function (err, entry) {
+        if (err) {
+            if (err.code !== 'ENOENT') return callback(err);
+            entry = null;
+        }
+
+        if (!entry) {
+            if (options.parentRev) return callback(new RepoError('EINVAL', 'Invalid parent revision'));
+            that.addFile(filePath, { file: newFile }, callback);
+        } else {
+            if (entry.sha1 === parentRev || overwrite) {
+                that.updateFile(filePath, { file: newFile }, callback);
+            } else {
+                var newName = getConflictFilenameSync(filePath, that.checkoutDir);
+                that.addFile(newName, { file: newFile }, callback);
+            }
+        }
+    });
+};
+
