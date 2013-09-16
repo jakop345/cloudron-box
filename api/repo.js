@@ -53,15 +53,10 @@ Repo.prototype._exec = function (command, callback) {
 };
 
 // run arbitrary git command on this repo
-Repo.prototype.git = function (commands, callback) {
-    assert(typeof commands === 'string' || util.isArray(commands));
+Repo.prototype.git = function (command, callback) {
+    assert(typeof command === 'string');
 
-    if (!util.isArray(commands)) commands = [ commands ];
-
-    for (var i = 0; i < commands.length; i++) {
-        commands[i] = 'git --no-pager ' + commands[i];
-    }
-    var command = commands.join(' && ');
+    command = 'git --no-pager ' + command;
 
     debug('GIT_DIR=' + this.gitDir + ' ' + command);
     this._exec(command, function (error, stdout, stderr) {
@@ -136,7 +131,10 @@ Repo.prototype.create = function (username, email, callback) {
         if (err) return callback(err);
         that.git('init', function (err) {
             if (err) return callback(err);
-            that.git(['config user.name ' + username, 'config user.email ' + email], callback);
+            that.git('config user.name ' + username, function (err) {
+                if (err) return callback(err);
+                that.git('config user.email ' + email, callback);
+            });
         });
     });
 };
@@ -262,13 +260,16 @@ function parseIndexLine(line) {
 
 Repo.prototype._addFileAndCommit = function (file, options, callback) {
     var that = this;
-    this.git(['add ' + file, 'ls-files -s -- ' + file], function (err, out) {
+    this.git('add ' + file, function (err) {
         if (err) return callback(err);
-        var fileInfo = parseIndexLine(out.trimRight());
-        var message = options.message || (options._operation + ' ' + file);
-        that._createCommit(message, function (err, commit) {
+        that.git('ls-files -s -- ' + file, function (err, out) {
             if (err) return callback(err);
-            callback(null, fileInfo, commit);
+            var fileInfo = parseIndexLine(out.trimRight());
+            var message = options.message || (options._operation + ' ' + file);
+            that._createCommit(message, function (err, commit) {
+                if (err) return callback(err);
+                callback(null, fileInfo, commit);
+            });
         });
     });
 };
