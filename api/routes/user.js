@@ -104,11 +104,13 @@ function authenticate(req, res, next) {
         var auth = extractCredentialsFromHeaders(req);
 
         if (!auth) {
+            debug('Could not extract credentials.');
             return next(new HttpError(400, 'Bad username or password'), false);
         }
 
         user.verify(auth.username, auth.password, function (error, result) {
             if (error) {
+                debug('User ' + auth.username  + ' could not be verified.');
                 if (error.reason === UserError.ARGUMENTS) {
                     return next(new HttpError(400, error.message));
                 } else if (error.reason === UserError.NOT_FOUND || error.reason === UserError.WRONG_USER_OR_PASSWORD) {
@@ -117,6 +119,8 @@ function authenticate(req, res, next) {
                     return next(new HttpError(500, error.message));
                 }
             }
+
+            debug('User ' + auth.username + ' was successfully verified.');
 
             req.user = result;
             req.user.password = auth.password;

@@ -252,13 +252,12 @@ Volume.prototype.addUser = function (user, password, callback) {
         return callback(new VolumeError(null, VolumeError.META_MISSING));
     }
 
-    // TODO encrypt password with user's password
+    // TODO salt is currently fixed in aes-helper module - Johannes
     var record = {
         username: user.username,
         passwordCypher: aes.encrypt(password, user.password)
     };
 
-    // pretend to encrypt the password with the users password
     this.meta.put(record, function (error) {
         if (error) {
             debug('Unable to add user to meta db. ' + JSON.stringify(error));
