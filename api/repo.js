@@ -265,7 +265,7 @@ Repo.prototype._addFileAndCommit = function (file, options, callback) {
     this.git(['add ' + file, 'ls-files -s -- ' + file], function (err, out) {
         if (err) return callback(err);
         var fileInfo = parseIndexLine(out.trimRight());
-        var message = options.message || (options._op + ' ' + file);
+        var message = options.message || (options._operation + ' ' + file);
         that._createCommit(message, function (err, commit) {
             if (err) return callback(err);
             callback(null, fileInfo, commit);
@@ -354,7 +354,7 @@ Repo.prototype.addFile = function (file, options, callback) {
         return callback(new RepoError('ENOENT', 'File already exists'));
     }
 
-    options._op = 'Add';
+    options._operation = 'Add';
 
     mkdirp(path.dirname(absoluteFilePath), function (ignoredErr) {
         that._writeFileAndCommit(file, options, callback);
@@ -380,7 +380,7 @@ Repo.prototype.updateFile = function (file, options, callback) {
         return callback(new RepoError('ENOENT', 'File does not exist'));
     }
 
-    options._op = 'Update';
+    options._operation = 'Update';
 
     this._writeFileAndCommit(file, options, callback);
 };
