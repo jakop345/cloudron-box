@@ -14,6 +14,7 @@ var optimist = require('optimist'),
     debug = require('debug')('server.js'),
     crypto = require('crypto'),
     os = require('os'),
+    polo = require('polo'),
     pkg = require('./package.json');
 
 var app = express();
@@ -179,6 +180,14 @@ function listen(callback) {
     });
 }
 
+function announce(callback) {
+    var services = polo();
+    services.put({
+        name: 'yellowtent',
+        port: app.get('port')
+    });
+}
+
 function start(callback) {
     function printAndDie(msg, err) {
         console.error(msg, err);
@@ -189,7 +198,13 @@ function start(callback) {
         if (err) printAndDie('Error initializing', err);
         listen(function (err) {
             if (err) printAndDie('Error listening', err);
-            callback();
+            announce(function (err) {
+                if (err) {
+                    console.warn('Unable to announce server via mdns', err);
+                }
+
+                callback();
+            });
         });
     });
 }
