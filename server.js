@@ -186,6 +186,8 @@ function announce(callback) {
         name: 'yellowtent',
         port: app.get('port')
     });
+
+    callback();
 }
 
 function start(callback) {
