@@ -33,8 +33,8 @@ describe('Server API', function () {
     this.timeout(5000);
 
     before(function (done) {
-        server.start(function () {
-            SERVER_URL = 'http://localhost:' + server.app.get('port');
+        server.start(function (err, app) {
+            SERVER_URL = 'http://localhost:' + app.get('port');
             database.USERS_TABLE.removeAll(done);
         });
     });

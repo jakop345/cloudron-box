@@ -15,16 +15,16 @@ var optimist = require('optimist'),
     crypto = require('crypto'),
     os = require('os'),
     polo = require('polo'),
+    assert = require('assert'),
     pkg = require('./package.json');
 
-var app = express();
 
 // some configs, should maybe go into a config file? - Johannes
 var REQUEST_LIMIT='10mb';
 
 exports = module.exports = {
     start: start,
-    app: app,
+    stop: stop,
     VERSION: pkg.version
 };
 
@@ -33,13 +33,6 @@ function getUserHomeDir() {
 }
 
 var baseDir = path.join(getUserHomeDir(), '.yellowtent');
-
-app.configure('testing', function () {
-    // to make sure tests can run repeatedly, set the basedir to something random
-    var tmpdirname = 'yellowtent-' + crypto.randomBytes(4).readUInt32LE(0);
-    baseDir = path.join(os.tmpdir(), tmpdirname);
-});
-
 
 var argv = optimist.usage('Usage: $0 --dataRoot <directory>')
     .alias('h', 'help')
@@ -88,61 +81,6 @@ function getVersion(req, res, next) {
     res.send({ version: exports.VERSION });
 }
 
-app.configure(function () {
-    var json = express.json({ strict: true, limit: REQUEST_LIMIT }), // application/json
-        urlencoded = express.urlencoded({ limit: REQUEST_LIMIT }); // application/x-www-form-urlencoded
-
-    if (app.get('env') != 'testing') {
-        app.use(express.logger({ format: 'dev', immediate: false }));
-    }
-
-    app.use(express.timeout(10000))
-       .use(routes.user.firstTimeCheck)
-       .use('/', express.static(__dirname + '/webadmin')) // use '/' for now so cookie is not restricted to '/webadmin'
-       .use(json)
-       .use(urlencoded)
-       .use(express.cookieParser())
-       .use(express.favicon(__dirname + "/assets/favicon.ico"))
-       // API calls that do not require authorization
-       .use('/api/v1/version', getVersion)
-       .use('/api/v1/createadmin', routes.user.createAdmin) // ## FIXME: allow this before auth for now
-       .use(routes.user.authenticate)
-       .use(app.router)
-       .use(clientErrorHandler)
-       .use(serverErrorHandler);
-
-    // routes controlled by app.router
-    app.post('/api/v1/token', routes.user.createToken);
-    app.get('/api/v1/logout', routes.user.logout);
-    app.post('/api/v1/user/create', routes.user.create);
-    app.post('/api/v1/user/remove', routes.user.remove);
-    app.get('/api/v1/user/info', routes.user.info);
-
-    app.param('volume', routes.volume.attachVolume);
-
-    app.post('/api/v1/sync/:volume/diff', routes.sync.diff);
-    app.post('/api/v1/sync/:volume/delta', routes.sync.delta);
-
-    app.get('/api/v1/revisions/:volume/*', routes.file.revisions);
-    app.get('/api/v1/file/:volume/*', routes.file.read);
-    app.get('/api/v1/metadata/:volume/*', routes.file.metadata);
-    app.post('/api/v1/file/:volume/*', routes.file.multipart, routes.file.update);
-    app.put('/api/v1/file/:volume/*', routes.file.multipart, routes.file.putFile);
-
-    app.post('/api/v1/fileops/:volume/copy', express.json({ strict: true }), routes.fileops.copy);
-    app.post('/api/v1/fileops/:volume/move', express.json({ strict: true }), routes.fileops.move);
-    app.post('/api/v1/fileops/:volume/delete', express.json({ strict: true }), routes.fileops.remove);
-    app.del('/api/v1/fileops/:volume/*', routes.fileops.remove);
-
-    app.get('/api/v1/volume/:volume/list/', routes.volume.listFiles);
-    app.get('/api/v1/volume/:volume/list/*', routes.volume.listFiles);
-    app.get('/api/v1/volume/list', routes.volume.listVolumes);
-    app.post('/api/v1/volume/create', routes.volume.createVolume);
-    app.post('/api/v1/volume/:volume/delete', routes.volume.deleteVolume);
-    app.post('/api/v1/volume/:volume/mount', routes.volume.mount);
-    app.post('/api/v1/volume/:volume/unmount', routes.volume.unmount);
-});
-
 function initialize(callback) {
     var config = {
         port: argv.p || 3000,
@@ -150,6 +88,69 @@ function initialize(callback) {
         configRoot: path.resolve(argv.c),
         mountRoot: path.resolve(argv.m)
     };
+
+    var app = express();
+
+    app.configure('testing', function () {
+        // to make sure tests can run repeatedly, set the basedir to something random
+        var tmpdirname = 'yellowtent-' + crypto.randomBytes(4).readUInt32LE(0);
+        baseDir = path.join(os.tmpdir(), tmpdirname);
+    });
+
+    app.configure(function () {
+        var json = express.json({ strict: true, limit: REQUEST_LIMIT }), // application/json
+            urlencoded = express.urlencoded({ limit: REQUEST_LIMIT }); // application/x-www-form-urlencoded
+
+        if (app.get('env') != 'testing') {
+            app.use(express.logger({ format: 'dev', immediate: false }));
+        }
+
+        app.use(express.timeout(10000))
+           .use(routes.user.firstTimeCheck)
+           .use('/', express.static(__dirname + '/webadmin')) // use '/' for now so cookie is not restricted to '/webadmin'
+           .use(json)
+           .use(urlencoded)
+           .use(express.cookieParser())
+           .use(express.favicon(__dirname + "/assets/favicon.ico"))
+           // API calls that do not require authorization
+           .use('/api/v1/version', getVersion)
+           .use('/api/v1/createadmin', routes.user.createAdmin) // ## FIXME: allow this before auth for now
+           .use(routes.user.authenticate)
+           .use(app.router)
+           .use(clientErrorHandler)
+           .use(serverErrorHandler);
+
+        // routes controlled by app.router
+        app.post('/api/v1/token', routes.user.createToken);
+        app.get('/api/v1/logout', routes.user.logout);
+        app.post('/api/v1/user/create', routes.user.create);
+        app.post('/api/v1/user/remove', routes.user.remove);
+        app.get('/api/v1/user/info', routes.user.info);
+
+        app.param('volume', routes.volume.attachVolume);
+
+        app.post('/api/v1/sync/:volume/diff', routes.sync.diff);
+        app.post('/api/v1/sync/:volume/delta', routes.sync.delta);
+
+        app.get('/api/v1/revisions/:volume/*', routes.file.revisions);
+        app.get('/api/v1/file/:volume/*', routes.file.read);
+        app.get('/api/v1/metadata/:volume/*', routes.file.metadata);
+        app.post('/api/v1/file/:volume/*', routes.file.multipart, routes.file.update);
+        app.put('/api/v1/file/:volume/*', routes.file.multipart, routes.file.putFile);
+
+        app.post('/api/v1/fileops/:volume/copy', express.json({ strict: true }), routes.fileops.copy);
+        app.post('/api/v1/fileops/:volume/move', express.json({ strict: true }), routes.fileops.move);
+        app.post('/api/v1/fileops/:volume/delete', express.json({ strict: true }), routes.fileops.remove);
+        app.del('/api/v1/fileops/:volume/*', routes.fileops.remove);
+
+        app.get('/api/v1/volume/:volume/list/', routes.volume.listFiles);
+        app.get('/api/v1/volume/:volume/list/*', routes.volume.listFiles);
+        app.get('/api/v1/volume/list', routes.volume.listVolumes);
+        app.post('/api/v1/volume/create', routes.volume.createVolume);
+        app.post('/api/v1/volume/:volume/delete', routes.volume.deleteVolume);
+        app.post('/api/v1/volume/:volume/mount', routes.volume.mount);
+        app.post('/api/v1/volume/:volume/unmount', routes.volume.unmount);
+    });
 
     app.set('port', config.port);
 
@@ -169,18 +170,33 @@ function initialize(callback) {
     routes.sync.initialize(config);
     routes.volume.initialize(config);
 
-    callback();
+    callback(null, app);
 }
 
-function listen(callback) {
-    http.createServer(app).listen(app.get('port'), function (err) {
-        if (err) return callback(err);
+function listen(app, callback) {
+    app.httpServer = http.createServer(app);
+
+    function callbackWrapper(error) {
+        if (callback) {
+            callback(error);
+            callback = undefined;
+        } else {
+            console.error('Try to call back twice', error);
+        }
+    }
+
+    app.httpServer.listen(app.get('port'), function (err) {
+        if (err) return callbackWrapper(err);
         console.log('Server listening on port ' + app.get('port') + ' in ' + app.get('env') + ' mode');
-        callback();
+        callbackWrapper();
+    });
+
+    app.httpServer.on('error', function (err) {
+        callbackWrapper(err);
     });
 }
 
-function announce(callback) {
+function announce(app, callback) {
     var services = polo();
     services.put({
         name: 'yellowtent',
@@ -191,27 +207,43 @@ function announce(callback) {
 }
 
 function start(callback) {
-    function printAndDie(msg, err) {
-        console.error(msg, err);
-        process.exit(1);
-    }
+    initialize(function (err, app) {
+        if (err) return callback(err);
 
-    initialize(function (err) {
-        if (err) printAndDie('Error initializing', err);
-        listen(function (err) {
-            if (err) printAndDie('Error listening', err);
-            announce(function (err) {
-                if (err) {
-                    console.warn('Unable to announce server via mdns', err);
-                }
+        listen(app, function (err) {
+            if (err) return callback(err);
 
-                callback();
+            announce(app, function (err) {
+                if (err) return callback(err);
+
+                callback(null, app);
             });
         });
     });
 }
 
-if (require.main === module) {
-    start(function () { });
+function stop(app, callback) {
+    assert(app);
+
+    if (!app.httpServer) {
+        return callback();
+    }
+
+    app.httpServer.close(function () {
+        app.httpServer.unref();
+        // TODO should delete the app variable
+        app = undefined;
+
+        callback();
+    });
 }
 
+if (require.main === module) {
+    start(function (err) {
+        if (err) {
+            console.error('Error starting server', err);
+            process.exit(1);
+        }
+        console.log('Server is up and running');
+    });
+}
