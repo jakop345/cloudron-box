@@ -53,23 +53,25 @@ Repo.prototype._exec = function (command, callback) {
 };
 
 // run arbitrary git command on this repo
-Repo.prototype.git = function (command, callback) {
-    assert(typeof command === 'string');
+Repo.prototype.git = function (args, callback) {
+    assert(util.isArray(args));
 
-    command = 'git --no-pager ' + command;
-
-    debug('GIT_DIR=' + this.gitDir + ' ' + command);
-    this._exec(command, function (error, stdout, stderr) {
-        if (error) debug('Git error ' + error);
-        if (error) return callback(error);
-        return callback(null, stdout);
+    var stdout = '', stderr = '';
+    var proc = this.spawn(args);
+    proc.stdout.on('data', function (data) { stdout += data; });
+    proc.stderr.on('data', function (data) { stderr += data; });
+    proc.on('close', function (code, signal) { // close guarantess stdio streams are closed unlike 'exit'
+        var error = code !== 0 ? new RepoError(code, code) : null;
+        callback(error, stdout, stderr);
     });
 };
 
 Repo.prototype.spawn = function (args) {
     assert(util.isArray(args));
 
-    var args = [ '--no-pager' ].concat(args);
+    args = args.filter(function removeNullArgs(arg) { return arg !== ''; });
+    args = [ '--no-pager' ].concat(args);
+
     var options = {
         env: { GIT_DIR: this.gitDir },
         cwd: this.checkoutDir
@@ -77,18 +79,6 @@ Repo.prototype.spawn = function (args) {
 
     debug('GIT_DIR=' + this.gitDir + ' git ' + args.join(' '));
     var proc = spawn('git', args, options);
-    proc.on('error', function (code, signal) {
-        proc.stdout.emit('error', new RepoError(code, 'Error code:' + code + ' Signal:' + signal));
-    });
-
-    proc.on('exit', function (code, signal) {
-        if (code !== 0) {
-            return proc.stdout.emit('error', new RepoError(code, 'Error code:' + code + ' Signal:' + signal));
-        }
-
-        proc.stdout.emit('exit');
-    });
-
     proc.stderr.on('data', function (data) { debug(data); });
     return proc;
 }
@@ -116,7 +106,7 @@ Repo.prototype.getCommit = function (commitish, callback) {
     assert(typeof commitish === 'string');
     assert(typeof callback === 'function');
 
-    this.git('show -s --pretty=' + LOG_LINE_FORMAT + ' ' + commitish, function (err, out) {
+    this.git(['show', '-s', '--pretty=' + LOG_LINE_FORMAT, commitish], function (err, out) {
         if (err) return callback(err);
         callback(null, parseLogLine(out.trimRight()));
     });
@@ -129,11 +119,11 @@ Repo.prototype.create = function (username, email, callback) {
     var that = this;
     mkdirp(this.checkoutDir, function (err) {
         if (err) return callback(err);
-        that.git('init', function (err) {
+        that.git(['init'], function (err) {
             if (err) return callback(err);
-            that.git('config user.name ' + username, function (err) {
+            that.git(['config', 'user.name', username], function (err) {
                 if (err) return callback(err);
-                that.git('config user.email ' + email, callback);
+                that.git(['config', 'user.email', email], callback);
             });
         });
     });
@@ -167,8 +157,9 @@ Repo.prototype.getTree = function (treeish, options, callback) {
 
     if (treeish == '') return callback(null, tree);
 
-    var path = options.path || '', listSubtrees = options.listSubtrees ? '-t ' : '';
-    this.git('ls-tree -r -l ' + listSubtrees + treeish + ' -- ' + path, function (err, out) {
+    var path = options.path || '', listSubtrees = options.listSubtrees ? '-t' : '';
+    this.git(['ls-tree', '-r', '-l', listSubtrees, treeish, '--', path], function (err, out) {
+        if (err) return callback(err);
         var lines = out.trimRight().split('\n');
         lines.forEach(function (line) { tree.entries.push(parseTreeLine(line)); });
         callback(null, tree);
@@ -179,7 +170,7 @@ Repo.prototype.isTracked = function (file, callback) {
     assert(typeof file === 'string');
     assert(typeof callback === 'function');
 
-    this.git('ls-files --error-unmatch ' + file, function (err, out) {
+    this.git(['ls-files', '--error-unmatch', file], function (err, out) {
         return callback(null, !err);
     });
 };
@@ -207,7 +198,7 @@ Repo.prototype.fileEntry = function (file, commitish, callback) {
     // ls-tree shows dir contents if there is a trailing '/', so strip it
     if (file.charAt(file.length-1) === '/') file = file.substr(0, file.length - 1);
 
-    this.git('ls-tree -l ' + commitish + ' -- ' + file, function (err, out) {
+    this.git(['ls-tree', '-l', commitish, '--', file], function (err, out) {
         out = out ? out.trimRight() : '';
         if (out.length == 0) return callback(new RepoError('ENOENT', 'File removed'));
 
@@ -218,7 +209,7 @@ Repo.prototype.fileEntry = function (file, commitish, callback) {
 
         // TODO: This is expensive potentially. One option for HEAD is to stat the checkout
         // dir (would that work after we recreated the repo from recovery?)
-        that.git('log -1 --pretty=%ct ' + commitish + ' -- ' + file, function (err, out) {
+        that.git(['log', '-1', '--pretty=%ct', commitish, '--', file], function (err, out) {
             entry.mtime = !err && out ? parseInt(out.trimRight()) : 0;
             callback(null, entry);
         });
@@ -231,7 +222,7 @@ Repo.prototype._createCommit = function (message, callback) {
     var that = this;
     // --allow-empty allows us to create a new revision even if file didn't change
     // this could happen if the same file is uploaded from another client
-    this.git('commit --allow-empty -a -m \'' + message + '\'', function (err, out) {
+    this.git(['commit', '--allow-empty', '-a', '-m', message], function (err, out) {
         if (err) return callback(err);
         that.getCommit('HEAD', callback);
     });
@@ -260,9 +251,9 @@ function parseIndexLine(line) {
 
 Repo.prototype._addFileAndCommit = function (file, options, callback) {
     var that = this;
-    this.git('add ' + file, function (err) {
+    this.git(['add', file], function (err) {
         if (err) return callback(err);
-        that.git('ls-files -s -- ' + file, function (err, out) {
+        that.git(['ls-files', '-s', '--', file], function (err, out) {
             if (err) return callback(err);
             var fileInfo = parseIndexLine(out.trimRight());
             var message = options.message || (options._operation + ' ' + file);
@@ -309,7 +300,7 @@ Repo.prototype.indexEntries = function (options, callback) {
     }
 
     var path = options.path || '';
-    this.git('ls-files -s --debug -- ' + path, function (err, out) {
+    this.git(['ls-files', '-s', '--debug', '--', path], function (err, out) {
         if (err) return callback(err);
         out = out.trimRight();
         var lines = out.split('\n');
@@ -416,8 +407,8 @@ Repo.prototype.removeFile = function (file, options, callback) {
         var rev = options.rev || '*';
         if (entry.sha1 !== rev && rev !== '*') return callback(new RepoError('EOUTOFDATE', 'Out of date'));
 
-        var recursive = options.recursive ? '-r ' : '';
-        that.git('rm ' + recursive + file, function (err, out) {
+        var recursive = options.recursive ? '-r' : '';
+        that.git(['rm', recursive, file], function (err, out) {
             if (err) return callback(new RepoError('ENOENT', 'File does not exist'));
 
             var message = 'Remove ' + file;
@@ -443,7 +434,7 @@ Repo.prototype.moveFile = function (from, to, options, callback) {
 
         if (entry.sha1 !== rev && rev !== '*') return next(new RepoError('EOUTOFDATE', 'Out of date'));
 
-        that.git('mv ' + from + ' ' + to, function (err, out) {
+        that.git(['mv', from, to], function (err, out) {
             if (err) return callback(new RepoError('ENOENT', 'File does not exist'));
 
             var message = 'Move from ' + from + ' to ' + to;
@@ -498,11 +489,22 @@ Repo.prototype.createReadStream = function (file, options) {
         return ee;
     }
 
-    if (options.rev) {
-        return this.spawn(['cat-file', '-p', options.rev]).stdout;
-    } else {
-        return this.spawn(['cat-file', '-p', 'HEAD:' + file]).stdout;
-    }
+    var proc = this.spawn(['cat-file', '-p', options.rev ? options.rev : 'HEAD:' + file]);
+
+    // raise error on stream if the process errored
+    proc.on('error', function (code, signal) {
+        proc.stdout.emit('error', new RepoError(code, 'Error code:' + code + ' Signal:' + signal));
+    });
+
+    proc.on('exit', function (code, signal) {
+        if (code !== 0) {
+            return proc.stdout.emit('error', new RepoError(code, 'Error code:' + code + ' Signal:' + signal));
+        }
+
+        proc.stdout.emit('exit');
+    });
+
+    return proc.stdout;
 };
 
 function parseRawDiffLine(line) {
@@ -574,7 +576,7 @@ Repo.prototype.getRevisions = function (file, options, callback) {
     var limit = options.limit || 10;
     var revisions = [ ], that = this;
 
-    this.git('log --no-abbrev --pretty=' + LOG_LINE_FORMAT + ' --raw -n ' + limit + ' -- ' + file, function (err, out) {
+    this.git(['log', '--no-abbrev', '--pretty=' + LOG_LINE_FORMAT, '--raw', '-n', limit, '--', file], function (err, out) {
         if (err) return callback(err);
         var revisionBySha1 = { }, sha1s = [ ];
         var lines = out.trimRight().split('\n');
@@ -615,7 +617,7 @@ Repo.prototype.diffTree = function (treeish1 /* from */, treeish2 /* to */, call
         treeish1 = '4b825dc642cb6eb9a060e54bf8d69288fbee4904';
     }
 
-    this.git('diff-tree -r ' + treeish1 + ' ' + treeish2, function (err, out) {
+    this.git(['diff-tree', '-r', treeish1, treeish2], function (err, out) {
         if (err) return callback(err);
         var changes = [ ];
         out = out.trimRight();
