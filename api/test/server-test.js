@@ -21,7 +21,8 @@ var CONFIG = {
     port: 3000,
     dataRoot: path.resolve(BASE_DIR, 'data'),
     configRoot: path.resolve(BASE_DIR, 'config'),
-    mountRoot: path.resolve(BASE_DIR, 'mount')
+    mountRoot: path.resolve(BASE_DIR, 'mount'),
+    silent: true
 };
 
 // remove all temporary folders

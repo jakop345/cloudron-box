@@ -48,6 +48,11 @@ var argv = optimist.usage('Usage: $0 --dataRoot <directory>')
     .describe('m', 'Volume mount point directory.')
     .string('m')
 
+    .alias('s', 'silent')
+    .default('s', false)
+    .describe('s', 'Suppress console output for non errors.')
+    .boolean('s')
+
     .alias('c', 'configRoot')
     .default('c', path.join(baseDir, 'config'))
     .describe('c', 'Server config root directory for storing user db and meta data.')
@@ -56,6 +61,12 @@ var argv = optimist.usage('Usage: $0 --dataRoot <directory>')
     .alias('p', 'port')
     .describe('p', 'Server port')
     .argv;
+
+// print help and die if requested
+if (argv.h) {
+    optimist.showHelp();
+    process.exit(0);
+}
 
 // Error handlers. These are called until one of them sends headers
 function clientErrorHandler(err, req, res, next) {
@@ -88,7 +99,7 @@ function initialize(config, callback) {
         var json = express.json({ strict: true, limit: REQUEST_LIMIT }), // application/json
             urlencoded = express.urlencoded({ limit: REQUEST_LIMIT }); // application/x-www-form-urlencoded
 
-        if (app.get('env') != 'testing') {
+        if (!config.silent) {
             app.use(express.logger({ format: 'dev', immediate: false }));
         }
 
@@ -141,9 +152,12 @@ function initialize(config, callback) {
 
     app.set('port', config.port);
 
-    console.log('Using data root:', config.dataRoot);
-    console.log('Using config root:', config.configRoot);
-    console.log('Using mount root:', config.mountRoot);
+    if (!config.silent) {
+        console.log('Server listening on port ' + app.get('port'));
+        console.log('Using data root:', config.dataRoot);
+        console.log('Using config root:', config.configRoot);
+        console.log('Using mount root:', config.mountRoot);
+    }
 
     // ensure data/config/mount paths
     mkdirp.sync(config.dataRoot);
@@ -174,7 +188,6 @@ function listen(app, callback) {
 
     app.httpServer.listen(app.get('port'), function (err) {
         if (err) return callbackWrapper(err);
-        console.log('Server listening on port ' + app.get('port') + ' in ' + app.get('env') + ' mode');
         callbackWrapper();
     });
 
@@ -232,7 +245,8 @@ if (require.main === module) {
         port: argv.p || 3000,
         dataRoot: path.resolve(argv.d),
         configRoot: path.resolve(argv.c),
-        mountRoot: path.resolve(argv.m)
+        mountRoot: path.resolve(argv.m),
+        silent: argv.s
     };
 
     start(config, function (err) {
@@ -240,6 +254,5 @@ if (require.main === module) {
             console.error('Error starting server', err);
             process.exit(1);
         }
-        console.log('Server is up and running');
     });
 }
