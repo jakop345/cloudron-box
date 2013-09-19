@@ -81,21 +81,8 @@ function getVersion(req, res, next) {
     res.send({ version: exports.VERSION });
 }
 
-function initialize(callback) {
-    var config = {
-        port: argv.p || 3000,
-        dataRoot: path.resolve(argv.d),
-        configRoot: path.resolve(argv.c),
-        mountRoot: path.resolve(argv.m)
-    };
-
+function initialize(config, callback) {
     var app = express();
-
-    app.configure('testing', function () {
-        // to make sure tests can run repeatedly, set the basedir to something random
-        var tmpdirname = 'yellowtent-' + crypto.randomBytes(4).readUInt32LE(0);
-        baseDir = path.join(os.tmpdir(), tmpdirname);
-    });
 
     app.configure(function () {
         var json = express.json({ strict: true, limit: REQUEST_LIMIT }), // application/json
@@ -206,8 +193,8 @@ function announce(app, callback) {
     callback();
 }
 
-function start(callback) {
-    initialize(function (err, app) {
+function start(config, callback) {
+    initialize(config, function (err, app) {
         if (err) return callback(err);
 
         listen(app, function (err) {
@@ -238,8 +225,17 @@ function stop(app, callback) {
     });
 }
 
+// main entry point when running standalone
+// TODO Maybe this should go into a new 'executeable' file - Johannes
 if (require.main === module) {
-    start(function (err) {
+    var config = {
+        port: argv.p || 3000,
+        dataRoot: path.resolve(argv.d),
+        configRoot: path.resolve(argv.c),
+        mountRoot: path.resolve(argv.m)
+    };
+
+    start(config, function (err) {
         if (err) {
             console.error('Error starting server', err);
             process.exit(1);

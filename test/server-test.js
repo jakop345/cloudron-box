@@ -5,22 +5,40 @@
 /* global before:false */
 /* global after:false */
 
-process.env.NODE_ENV = 'testing'; // ugly
-
 var server = require('../server.js'),
     request = require('superagent'),
+    path = require('path'),
+    crypto = require('crypto'),
+    rimraf = require('rimraf'),
+    os = require('os'),
     expect = require('expect.js');
 
 var SERVER_URL = 'http://localhost:3000';
+var BASE_DIR = path.resolve(os.tmpdir(), 'volume-test-' + crypto.randomBytes(4).readUInt32LE(0));
+var CONFIG = {
+    port: 3000,
+    dataRoot: path.resolve(BASE_DIR, 'data'),
+    configRoot: path.resolve(BASE_DIR, 'config'),
+    mountRoot: path.resolve(BASE_DIR, 'mount')
+};
+
+// remove all temporary folders
+function cleanup(done) {
+    rimraf(BASE_DIR, function (error) {
+        done();
+    });
+}
 
 describe('Server', function () {
     this.timeout(5000);
+
+    after(cleanup);
 
     describe('startup', function () {
         var serverApp;
 
         it('succeeds', function (done) {
-            server.start(function (error, app) {
+            server.start(CONFIG, function (error, app) {
                 expect(error).to.not.be.ok();
                 expect(app).to.be.ok();
 
@@ -38,7 +56,7 @@ describe('Server', function () {
         });
 
         it('should fail because already running', function (done) {
-            server.start(function (error, app) {
+            server.start(CONFIG, function (error, app) {
                 expect(error).to.be.ok();
                 expect(app).to.not.be.ok();
 
@@ -57,7 +75,7 @@ describe('Server', function () {
         var serverApp;
 
         before(function (done) {
-            server.start(function (err, app) {
+            server.start(CONFIG, function (err, app) {
                 serverApp = app;
                 done();
             });

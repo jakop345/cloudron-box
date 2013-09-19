@@ -5,16 +5,31 @@
 /* global before:false */
 /* global after:false */
 
-process.env.NODE_ENV = 'testing'; // ugly
-
 var server = require('../../server.js'),
     request = require('superagent'),
     expect = require('expect.js'),
     database = require('../database.js'),
     crypto = require('crypto'),
     fs = require('fs'),
+    rimraf = require('rimraf'),
     path = require('path'),
     os = require('os');
+
+var SERVER_URL = 'http://localhost:3000';
+var BASE_DIR = path.resolve(os.tmpdir(), 'volume-test-' + crypto.randomBytes(4).readUInt32LE(0));
+var CONFIG = {
+    port: 3000,
+    dataRoot: path.resolve(BASE_DIR, 'data'),
+    configRoot: path.resolve(BASE_DIR, 'config'),
+    mountRoot: path.resolve(BASE_DIR, 'mount')
+};
+
+// remove all temporary folders
+function cleanup(done) {
+    rimraf(BASE_DIR, function (error) {
+        done();
+    });
+}
 
 var SERVER_URL;
 var USERNAME = 'admin', PASSWORD = 'admin', EMAIL ='silly@me.com';
@@ -33,11 +48,13 @@ describe('Server API', function () {
     this.timeout(5000);
 
     before(function (done) {
-        server.start(function (err, app) {
+        server.start(CONFIG, function (err, app) {
             SERVER_URL = 'http://localhost:' + app.get('port');
             database.USERS_TABLE.removeAll(done);
         });
     });
+
+    after(cleanup);
 
     describe('bad requests', function () {
         it('random', function (done) {
