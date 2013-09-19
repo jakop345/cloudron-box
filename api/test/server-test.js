@@ -97,6 +97,35 @@ describe('Server API', function () {
             });
         });
 
+        it('create token fails due to wrong credentials', function (done) {
+            request.post(SERVER_URL + '/api/v1/token')
+                   .auth(USERNAME, 'wrong' + PASSWORD)
+                   .end(function (err, res) {
+                expect(err).to.not.be.ok();
+                expect(res.statusCode).to.equal(401);
+                done(err);
+            });
+        });
+
+        it('create token fails due to wrong arguments', function (done) {
+            request.post(SERVER_URL + '/api/v1/token')
+                   .auth(USERNAME, '')
+                   .end(function (err, res) {
+                expect(err).to.not.be.ok();
+                expect(res.statusCode).to.equal(400);
+                done(err);
+            });
+        });
+
+        it('create token', function (done) {
+            request.post(SERVER_URL + '/api/v1/token')
+                   .auth(USERNAME, PASSWORD)
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(200);
+                done(err);
+            });
+        });
+
         it('create second admin should fail', function (done) {
             request.post(SERVER_URL + '/api/v1/createadmin')
                    .send({ username: USERNAME_2, password: PASSWORD, email: EMAIL })
