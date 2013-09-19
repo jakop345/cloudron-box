@@ -106,6 +106,23 @@ describe('Server API', function () {
             });
         });
 
+        it('create user missing arguments should fail', function (done) {
+            request.post(SERVER_URL + '/api/v1/user/create')
+                   .auth(USERNAME, PASSWORD)
+                   .send({ username: USERNAME_2, email: EMAIL })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(400);
+
+                request.post(SERVER_URL + '/api/v1/user/create')
+                       .auth(USERNAME, PASSWORD)
+                       .send({ username: USERNAME_2, password: PASSWORD })
+                       .end(function (err, res) {
+                    expect(res.statusCode).to.equal(400);
+                    done(err);
+                });
+            });
+        });
+
         it('create second and third user as admin', function (done) {
             request.post(SERVER_URL + '/api/v1/user/create')
                    .auth(USERNAME, PASSWORD)
@@ -120,6 +137,16 @@ describe('Server API', function () {
                     expect(res.statusCode).to.equal(202);
                     done(err);
                 });
+            });
+        });
+
+        it('create user with same username should fail', function (done) {
+            request.post(SERVER_URL + '/api/v1/user/create')
+                   .auth(USERNAME, PASSWORD)
+                   .send({ username: USERNAME_2, password: PASSWORD, email: EMAIL })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(404);
+                done(err);
             });
         });
 
