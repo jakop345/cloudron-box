@@ -67,9 +67,9 @@ describe('Volume', function () {
             });
         });
 
-        xit('fails because it already exists', function (done) {
+        it('fails because it already exists', function (done) {
             volume.create(VOLUME, USER, config, function (error, result) {
-                expect(error).not.be.ok();
+                expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
                 done();
             });
