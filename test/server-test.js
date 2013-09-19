@@ -38,6 +38,18 @@ describe('Server', function () {
     describe('startup', function () {
         var serverApp;
 
+        it('fails due to wrong arguments', function (done) {
+            expect(function () { server.start(); }).to.throwException();
+            expect(function () { server.start(function () {}); }).to.throwException();
+            expect(function () { server.start('foobar', function () {}); }).to.throwException();
+            expect(function () { server.start(1337, function () {}); }).to.throwException();
+            expect(function () { server.start(CONFIG); }).to.throwException();
+            expect(function () { server.start(CONFIG, 'not a function'); }).to.throwException();
+            expect(function () { server.start(CONFIG, 1337); }).to.throwException();
+
+            done();
+        });
+
         it('succeeds', function (done) {
             server.start(CONFIG, function (error, app) {
                 expect(error).to.not.be.ok();
@@ -80,6 +92,18 @@ describe('Server', function () {
                 serverApp = app;
                 done();
             });
+        });
+
+        it('fails due to wrong arguments', function (done) {
+            expect(function () { server.stop(); }).to.throwException();
+            expect(function () { server.stop(function () {}); }).to.throwException();
+            expect(function () { server.stop('foobar', function () {}); }).to.throwException();
+            expect(function () { server.stop(1337, function () {}); }).to.throwException();
+            expect(function () { server.stop({}, function () {}); }).to.throwException();
+            expect(function () { server.stop({ httpServer: {} }, 'something else'); }).to.throwException();
+            expect(function () { server.stop({ httpServer: {} }, {}); }).to.throwException();
+
+            done();
         });
 
         it('succeeds', function (done) {

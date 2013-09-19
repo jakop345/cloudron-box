@@ -207,6 +207,9 @@ function announce(app, callback) {
 }
 
 function start(config, callback) {
+    assert(typeof config === 'object');
+    assert(typeof callback === 'function');
+
     initialize(config, function (err, app) {
         if (err) return callback(err);
 
@@ -223,7 +226,9 @@ function start(config, callback) {
 }
 
 function stop(app, callback) {
-    assert(app);
+    // Any other way to check if app is an object we expect?
+    assert(app && app.httpServer);
+    assert(typeof callback === 'function');
 
     if (!app.httpServer) {
         return callback();
