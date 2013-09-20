@@ -9,6 +9,14 @@ exports = module.exports = {
     copy: copy
 };
 
+/*
+ * Removes a file or directory
+ * @urlparam {string} path The path of the file (for 'DELETE' requests)
+ * @bodyparam {string} path The path of the file (for 'POST' requests)
+ * @bodyparam {string} rev The last known revision of the file
+ *
+ * The delete succeeds only if rev is the latest revision.
+ */
 function remove(req, res, next) {
     var filePath = req.method === 'DELETE' ? req.params[0] : req.body.path;
     var repo = req.volume.repo;
@@ -26,6 +34,14 @@ function remove(req, res, next) {
     });
 }
 
+/*
+ * Moves a file or directory
+ * @bodyparam {string} from_path The source path
+ * @bodyparam {string} to_path The destination path
+ * @bodyparam {string} rev The last known revision of the file
+ *
+ * The move succeeds only if rev is the latest revision.
+ */
 function move(req, res, next) {
     var fromPath = req.body.from_path, toPath = req.body.to_path;
     var repo = req.volume.repo;
@@ -45,6 +61,14 @@ function move(req, res, next) {
     });
 }
 
+/*
+ * Copies a file or directory
+ * @bodyparam {string} from_path The source path
+ * @bodyparam {string} to_path The destination path
+ * @bodyparam {string} rev The last known revision of the file
+ *
+ * The copy succeeds only if rev is the latest revision.
+ */
 function copy(req, res, next) {
     var fromPath = req.body.from_path, toPath = req.body.to_path;
     var repo = req.volume.repo;
@@ -63,4 +87,3 @@ function copy(req, res, next) {
         res.send(200, newEntry);
     });
 }
-

@@ -18,6 +18,11 @@ exports = module.exports = {
     putFile: putFile
 };
 
+/*
+ * Outputs file with Content-Type set based on the file's extension.
+ * @uriparam {string} path The path of the file
+ * @queryparam {string} rev The revision of the file
+ */
 function read(req, res, next) {
     var filePath = req.params[0], rev = req.query.rev;
 
@@ -32,6 +37,15 @@ function read(req, res, next) {
     });
 }
 
+/*
+ * Outputs revision of a file.
+ * @uriparam {string} path The path of the file
+ * @queryparam {number} limit The number of revisions (default: 10)
+ * @return {revision}
+ *
+ * A revision object contains the following:
+ *  sha1, mode, path, date, author, subject, size
+ */
 function revisions(req, res, next) {
     var filePath = req.params[0], limit = req.query.limit || 10;
 
@@ -45,6 +59,21 @@ function revisions(req, res, next) {
     });
 }
 
+/*
+ * Outputs the metadata of a file.
+ * @uriparam {string} path The path of the file
+ * @queryparam {string} rev The revision for which metadata is requested (default: current revision)
+ * @queryparam {string} hash The revision since the last metadata query was made
+ * @return {metadata}
+ *
+ * A metadata object contains the following
+ *   [entries], hash
+ *
+ * For directories, hash is the tree sha1. For files, hash is the same as the revision of the file.
+ *
+ * An entry object contains the following:
+ *   sha1, mode, path, mtime, size
+ */
 function metadata(req, res, next) {
     var filePath = req.params[0], rev = req.query.rev, hash = req.query.hash;
 
@@ -59,12 +88,16 @@ function metadata(req, res, next) {
     });
 }
 
+/*
+ * Add this to the route to allow multipart file uploads to be extracted to the repo's tmp dir.
+ * This is required because rename() works only within the same file system.
+ */
 function multipart(req, res, next) {
     var parser = express.multipart({ uploadDir: req.volume.tmpPath, keepExtensions: true, maxFieldsSize: 2 * 1024 * 1024 }); // multipart/form-data
     parser(req, res, next);
 }
 
-function getConflictFilenameSync(renamePattern, file, checkoutDir) {
+function _getConflictFilenameSync(renamePattern, file, checkoutDir) {
     var idx = file.indexOf('.');
     var baseName = idx == -1 ? file : file.substr(0, idx);
     var ext = idx == -1 ? '' : file.substr(idx); // includes '.' if any
@@ -76,6 +109,16 @@ function getConflictFilenameSync(renamePattern, file, checkoutDir) {
     return file;
 };
 
+/*
+ * Put a file using multipart file upload
+ * @urlparam {string} path The path of the file
+ * @bodyparam {string} parentRev The parent revision of the file (default: latest)
+ * @bodyparam {bool} overwrite Overwrite file (default: true)
+ * @bodyparam {data} file contents 
+ *
+ * The file can already exist, in which case it's renamed after uploaded.
+ *
+ */
 function putFile(req, res, next) {
     var data;
     try {
@@ -90,7 +133,7 @@ function putFile(req, res, next) {
     var options = {
         parentRev: data.parentRev,
         overwrite: data.overwrite,
-        getConflictFilenameSync: getConflictFilenameSync.bind(null, 'ConflictedCopy')
+        getConflictFilenameSync: _getConflictFilenameSync.bind(null, 'ConflictedCopy')
     };
 
     req.volume.repo.putFile(filePath, req.files.file.path, options, function (err, fileInfo, commit) {

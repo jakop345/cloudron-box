@@ -40,6 +40,20 @@ function diff(req, res, next) {
     });
 }
 
+/*
+ * Outputs the delta operations required to sync with the server.
+ * @queryparam {string} clientRevision The revision of the client
+ * @return {delta} 
+ *
+ * The delta object contains:
+ *   { changes: [change], serverRevision }
+ *
+ * The change object contains:
+ *   oldRev, rev, oldMode, mode, status, oldPath, path
+ *
+ * status is a character which is one of
+ *   A (added), C (copied), D (deleted), M (modified), R (renamed), T (mode changed)
+ */
 function delta(req, res, next) {
     var repo = req.volume.repo;
     var clientRevision = req.query.clientRevision || '';

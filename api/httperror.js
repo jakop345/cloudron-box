@@ -17,4 +17,3 @@ function HttpError(statusCode, message) {
     }
 }
 util.inherits(HttpError, Error);
-
