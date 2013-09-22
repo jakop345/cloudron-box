@@ -148,6 +148,6 @@ function initialize(config) {
 }
 
 function firstTime() {
-    return !fs.existsSync(rootDir + '/users');
+    return (exports.USERS_TABLE.count() === 0);
 }
 

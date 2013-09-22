@@ -104,7 +104,6 @@ function initialize(config, callback) {
         }
 
         app.use(express.timeout(10000))
-           .use(routes.user.firstTimeCheck)
            .use('/', express.static(__dirname + '/webadmin')) // use '/' for now so cookie is not restricted to '/webadmin'
            .use(json)
            .use(urlencoded)
@@ -112,6 +111,7 @@ function initialize(config, callback) {
            .use(express.favicon(__dirname + "/assets/favicon.ico"))
            // API calls that do not require authorization
            .use('/api/v1/version', getVersion)
+           .use('/api/v1/firsttime', routes.user.firstTime)
            .use('/api/v1/createadmin', routes.user.createAdmin) // ## FIXME: allow this before auth for now
            .use(routes.user.authenticate)
            .use(app.router)

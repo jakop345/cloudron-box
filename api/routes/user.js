@@ -10,7 +10,7 @@ var db = require('../database'),
     express = require('express');
 
 exports = module.exports = {
-    firstTimeCheck: firstTimeCheck,
+    firstTime: firstTime,
     createAdmin: createAdmin,
     authenticate: authenticate,
     createToken: createToken,
@@ -20,20 +20,22 @@ exports = module.exports = {
     remove: removeUser
 };
 
-function firstTimeCheck(req, res, next) {
-    if (req.method !== 'GET') return next();
-    // TODO: poor man's check if its an html page ;-)
-    if (req.url.indexOf('html') < 0 && req.url !== '/') return next();
-
-    // if its not not first time but firsttime.html is requested, redirect to index.html
-    if (!db.firstTime()) {
-        if (req.url === "/firsttime.html") return res.redirect("index.html");
-        return next();
+/*
+ * Ask the device if it is in first time activation mode.
+ *
+ * The GET request will be answered with 200 in case the the device is in
+ * first time activation mode, otherwise will return a 404.
+ */
+function firstTime(req, res, next) {
+    if (req.method !== 'GET') {
+        return next(new HttpError(405, 'Only GET allowed'));
     }
 
-    if (req.url === "/firsttime.html") return next();
+    if (!db.firstTime()) {
+        return next(new HttpError(404, 'Box is already setup.'));
+    }
 
-    res.redirect("firsttime.html");
+    return res.send(200);
 }
 
 function createAdmin(req, res, next) {

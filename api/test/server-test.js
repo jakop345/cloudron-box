@@ -77,11 +77,27 @@ describe('Server API', function () {
     });
 
     describe('user', function () {
+        it('device is in first time mode', function (done) {
+            request.get(SERVER_URL + '/api/v1/firsttime')
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(200);
+                done(err);
+            });
+        });
+
         it('create admin', function (done) {
             request.post(SERVER_URL + '/api/v1/createadmin')
                    .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(202);
+                done(err);
+            });
+        });
+
+        it('device left first time mode', function (done) {
+            request.get(SERVER_URL + '/api/v1/firsttime')
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(404);
                 done(err);
             });
         });
