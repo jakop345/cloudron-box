@@ -198,9 +198,14 @@ function listen(app, callback) {
 
 function announce(app, callback) {
     var services = polo();
+
     services.put({
         name: 'yellowtent',
         port: app.get('port')
+    });
+
+    services.on('error', function (error) {
+        console.error('Unable to announce the device.', error);
     });
 
     callback();
