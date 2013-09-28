@@ -309,7 +309,7 @@ function listVolumes(username, config, callback) {
             }
 
             var vol = new Volume(file, config);
-            vol.repo = new Repo({ rootDir: vol.mountPoint, tmpDir: vol.tmpPath });
+            vol.repo = new Repo({ rootDir: path.join(vol.mountPoint, 'repo'), tmpDir: vol.tmpPath });
 
             ret.push(vol);
 
