@@ -190,7 +190,7 @@ function createToken(req, res, next) {
 
         db.TOKENS_TABLE.put(token, function (err) {
             if (err) return next(err);
-            res.send(200, JSON.stringify(db.TOKENS_TABLE.removePrivates(token)));
+            res.send(200, db.TOKENS_TABLE.removePrivates(token));
         });
     });
 }

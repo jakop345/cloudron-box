@@ -138,6 +138,10 @@ describe('Server API', function () {
                    .auth(USERNAME, PASSWORD)
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(200);
+                expect(res.body.token).to.be.a('string');
+                expect(res.body.expires).to.be.a('string');
+                expect(res.body.username).to.not.be.ok();
+                expect(res.body.email).to.not.be.ok();
                 done(err);
             });
         });
