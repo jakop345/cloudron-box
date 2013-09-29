@@ -80,9 +80,9 @@ function copy(req, res, next) {
 
     repo.copyFile(fromPath, toPath, { rev: rev }, function (err, newEntry, commit) {
         if (err) {
-           if (err.code == 'ENOENT' || err.code == 'ENOTDIR') return next(new HttpError(404, 'Not found'));
-           if (err.code == 'EOUTOFDATE') return next(new HttpError(409, 'Out of date'));
-           return next(new HttpError(500, err.message));
+            if (err.code === 'ENOENT' || err.code === 'ENOTDIR') return next(new HttpError(404, 'Not found'));
+            if (err.code === 'EOUTOFDATE') return next(new HttpError(409, 'Out of date'));
+            return next(new HttpError(500, err.message));
         }
         res.send(200, newEntry);
     });
