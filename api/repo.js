@@ -81,7 +81,7 @@ Repo.prototype.spawn = function (args) {
     var proc = spawn('git', args, options);
     proc.stderr.on('data', function (data) { debug(data); });
     return proc;
-}
+};
 
 var LOG_LINE_FORMAT = '%T,%ct,%P,%s,%H,%an,%ae';
 
@@ -113,8 +113,8 @@ Repo.prototype.getCommit = function (commitish, callback) {
 };
 
 Repo.prototype.create = function (username, email, callback) {
-    assert(typeof username === 'string' && username.length != 0);
-    assert(typeof email === 'string' && email.length != 0);
+    assert(typeof username === 'string' && username.length !== 0);
+    assert(typeof email === 'string' && email.length !== 0);
 
     var that = this;
     mkdirp(this.checkoutDir, function (err) {
@@ -135,10 +135,9 @@ function parseTreeLine(line) {
     var id, mode, name, type, _ref;
     // sample line : 100644 blob e69de29bb2d1d6434b8b29ae775ad8c2e48c5391 43 README
     var parts = line.split(/[\t ]+/, 5);
-    var mode = parts[0];
     return {
         mode: parseInt(parts[0], 8),
-        size: parseInt(parts[3]) || 0, // for dirs, size field is '-' and parseInt will return NaN
+        size: parseInt(parts[3], 10) || 0, // for dirs, size field is '-' and parseInt will return NaN
         sha1: parts[2],
         path: parts[4]
     };
@@ -155,7 +154,7 @@ Repo.prototype.getTree = function (treeish, options, callback) {
 
     var tree = { entries: [ ] };
 
-    if (treeish == '') return callback(null, tree);
+    if (treeish === '') return callback(null, tree);
 
     var path = options.path || '', listSubtrees = options.listSubtrees ? '-t' : '';
     this.git(['ls-tree', '-r', '-l', listSubtrees, treeish, '--', path], function (err, out) {
@@ -200,7 +199,7 @@ Repo.prototype.fileEntry = function (file, commitish, callback) {
 
     this.git(['ls-tree', '-l', commitish, '--', file], function (err, out) {
         out = out ? out.trimRight() : '';
-        if (out.length == 0) return callback(new RepoError('ENOENT', 'File removed'));
+        if (out.length === 0) return callback(new RepoError('ENOENT', 'File removed'));
 
         var entry = parseTreeLine(out);
 
@@ -210,7 +209,7 @@ Repo.prototype.fileEntry = function (file, commitish, callback) {
         // TODO: This is expensive potentially. One option for HEAD is to stat the checkout
         // dir (would that work after we recreated the repo from recovery?)
         that.git(['log', '-1', '--pretty=%ct', commitish, '--', file], function (err, out) {
-            entry.mtime = !err && out ? parseInt(out.trimRight()) : 0;
+            entry.mtime = !err && out ? parseInt(out.trimRight(), 10) : 0;
             callback(null, entry);
         });
     });
@@ -241,7 +240,6 @@ function parseIndexLine(line) {
     var mode, sha1, stage, name;
     // sample line : 100644 294c76dd833e77480ba85bdff83b4ef44fa4c08f 0  repo-test.js
     var parts = line.split(/[\t ]+/, 4);
-    var mode = parts[0];
     return {
         mode: parseInt(parts[0], 8),
         sha1: parts[1],
@@ -286,8 +284,8 @@ function parseIndexLines(lines, i) {
           size: 3994    flags: 0
      */
     var entry = parseIndexLine(lines[i]);
-    entry.mtime = parseInt(lines[i+1].split(/:/)[1]);
-    entry.size = parseInt(lines[i+5].split(/:/)[1]);
+    entry.mtime = parseInt(lines[i+1].split(/:/)[1], 10);
+    entry.size = parseInt(lines[i+5].split(/:/)[1], 10);
     return entry;
 }
 
@@ -348,7 +346,7 @@ Repo.prototype.addFile = function (file, options, callback) {
 
     var that = this;
     var absoluteFilePath = this._absoluteFilePath(file);
-    if (absoluteFilePath.length == 0) {
+    if (absoluteFilePath.length === 0) {
         return callback(new RepoError('ENOENT', 'Invalid file path'));
     }
 
@@ -374,7 +372,7 @@ Repo.prototype.updateFile = function (file, options, callback) {
 
     var that = this;
     var absoluteFilePath = this._absoluteFilePath(file);
-    if (absoluteFilePath.length == 0) {
+    if (absoluteFilePath.length === 0) {
         return callback(new RepoError('ENOENT', 'Invalid file path'));
     }
 
@@ -397,7 +395,7 @@ Repo.prototype.removeFile = function (file, options, callback) {
     }
 
     var absoluteFilePath = this._absoluteFilePath(file);
-    if (absoluteFilePath.length == 0) {
+    if (absoluteFilePath.length === 0) {
         return callback(new RepoError('ENOENT', 'Invalid file path'));
     }
 
@@ -432,7 +430,7 @@ Repo.prototype.moveFile = function (from, to, options, callback) {
         if (err) return callback(err);
         var rev = options.rev || '*';
 
-        if (entry.sha1 !== rev && rev !== '*') return next(new RepoError('EOUTOFDATE', 'Out of date'));
+        if (entry.sha1 !== rev && rev !== '*') return callback(new RepoError('EOUTOFDATE', 'Out of date'));
 
         that.git(['mv', from, to], function (err, out) {
             if (err) return callback(new RepoError('ENOENT', 'File does not exist'));
@@ -454,11 +452,11 @@ Repo.prototype.copyFile = function (from, to, options, callback) {
     }
 
     var fromAbsoluteFilePath = this._absoluteFilePath(from);
-    if (fromAbsoluteFilePath.length == 0) {
+    if (fromAbsoluteFilePath.length === 0) {
         return callback(new RepoError('ENOENT', 'Invalid from path'));
     }
     var toAbsoluteFilePath = this._absoluteFilePath(to);
-    if (toAbsoluteFilePath.length == 0) {
+    if (toAbsoluteFilePath.length === 0) {
         return callback(new RepoError('ENOENT', 'Invalid to path'));
     }
 
@@ -467,7 +465,7 @@ Repo.prototype.copyFile = function (from, to, options, callback) {
         if (err) return callback(err);
         var rev = options.rev || '*';
 
-        if (entry.sha1 !== rev && rev !== '*') return next(new RepoError('EOUTOFDATE', 'Out of date'));
+        if (entry.sha1 !== rev && rev !== '*') return callback(new RepoError('EOUTOFDATE', 'Out of date'));
 
         that._exec('cp -r ' + fromAbsoluteFilePath + ' ' + toAbsoluteFilePath, function (err, out) {
             if (err) return callback(new RepoError('ENOENT', 'File does not exist'));
@@ -484,7 +482,7 @@ Repo.prototype.createReadStream = function (file, options) {
 
     var absoluteFilePath = this._absoluteFilePath(file);
     var ee = new EventEmitter();
-    if (absoluteFilePath.length == 0) {
+    if (absoluteFilePath.length === 0) {
         process.nextTick(function () { ee.emit('error', new RepoError('ENOENT', 'Invalid file path')); });
         return ee;
     }
@@ -548,12 +546,12 @@ function parseRawDiffLine(line) {
 Repo.prototype._getFileSizes = function (sha1s, callback) {
     var proc = this.spawn(['cat-file', '--batch-check']), data = '';
     proc.stdout.setEncoding('utf8');
-    proc.stdout.on('data', function (d) { data += d });
+    proc.stdout.on('data', function (d) { data += d; });
     proc.stdout.on('end', function () {
         var sizes = [ ];
         data.trimRight().split('\n').forEach(function (line) {
             var parts = line.split(' ');
-            var sha1 = parts[0], size = parseInt(parts[2]);
+            var sha1 = parts[0], size = parseInt(parts[2], 10);
             sizes.push(size);
         });
         callback(null, sizes);
