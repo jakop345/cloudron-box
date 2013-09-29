@@ -13,15 +13,18 @@ exports = module.exports = {
 // n-way tree traversal
 function traverse(entries, processEntries) {
     var treeIts = [ ]; // tree iterators (indices)
-    for (var i = 0; i < entries.length; i++) treeIts[i] = 0;
+    var i, curTree, curTreePos;
+
+    for (i = 0; i < entries.length; i++) treeIts[i] = 0;
 
     while (true) {
         var firstEntry = -1; // the tree with the first entry
-        for (var i = 0; i < entries.length; i++) {
-            var curTree = entries[i], curTreePos = treeIts[i];
-            if (curTreePos == curTree.length) continue; // end of this tree
+        for (i = 0; i < entries.length; i++) {
+            curTree = entries[i];
+            curTreePos = treeIts[i];
+            if (curTreePos === curTree.length) continue; // end of this tree
 
-            if (firstEntry == -1 || (curTree[curTreePos].path < entries[firstEntry][treeIts[firstEntry]].path)) {
+            if (firstEntry === -1 || (curTree[curTreePos].path < entries[firstEntry][treeIts[firstEntry]].path)) {
                 firstEntry = i;
             }
         }
@@ -30,10 +33,10 @@ function traverse(entries, processEntries) {
 
         var entriesToProcess = [ ];
         var mask = 0;
-        for (var i = 0; i < entries.length; i++) {
-            var curTree = entries[i], curTreePos = treeIts[i];
-            if (curTreePos != curTree.length
-                && curTree[curTreePos].path == entries[firstEntry][treeIts[firstEntry]].path) {
+        for (i = 0; i < entries.length; i++) {
+            curTree = entries[i];
+            curTreePos = treeIts[i];
+            if (curTreePos !== curTree.length && curTree[curTreePos].path == entries[firstEntry][treeIts[firstEntry]].path) {
                 entriesToProcess[i] = curTree[curTreePos];
                 mask |= (1 << i);
             } else {
@@ -43,7 +46,7 @@ function traverse(entries, processEntries) {
 
         processEntries(entriesToProcess);
 
-        for (var i = 0; i < entries.length; i++) {
+        for (i = 0; i < entries.length; i++) {
             if (mask & (1 << i)) ++treeIts[i];
         }
     }
