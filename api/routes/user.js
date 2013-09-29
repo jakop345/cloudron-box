@@ -153,12 +153,6 @@ function authenticate(req, res, next) {
                 email: result.email
             };
 
-            // attach the password in case it was sent via auth headers
-            var auth = extractCredentialsFromHeaders(req);
-            if (auth && auth.username === result.username) {
-                req.user.password = auth.password;
-            }
-
             next();
         });
     }
