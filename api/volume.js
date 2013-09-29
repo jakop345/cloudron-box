@@ -22,6 +22,8 @@ exports = module.exports = {
     get: getVolume
 };
 
+var REPO_SUBFOLDER = 'repo';
+
 // http://dustinsenos.com/articles/customErrorsInNode
 // http://code.google.com/p/v8/wiki/JavaScriptStackTraceApi
 function VolumeError(err, reason) {
@@ -189,7 +191,7 @@ Volume.prototype.listFiles = function (directory, callback) {
     }
 
     var that = this;
-    var folder = path.join(this.mountPoint, directory);
+    var folder = path.join(this.mountPoint, REPO_SUBFOLDER, directory);
 
     this.encfs.isMounted(function (error, mounted) {
         if (error) {
@@ -308,11 +310,12 @@ function listVolumes(username, config, callback) {
                 return;
             }
 
-            var vol = new Volume(file, config);
-            vol.repo = new Repo({ rootDir: path.join(vol.mountPoint, 'repo'), tmpDir: vol.tmpPath });
+            var vol = getVolume(file, username, config);
+            if (!vol) {
+                return;
+            }
 
             ret.push(vol);
-
             debug('Detected volume with repo: "' + file + '".');
         });
 
@@ -336,16 +339,15 @@ function createVolume(name, user, config, callback) {
             return callback(new VolumeError(error, VolumeError.INTERNAL_ERROR));
         }
 
-        var tmpDir = path.join(vol.mountPoint, 'tmp');
-        fs.mkdirSync(tmpDir);
-
         vol.addUser(user, volPassword, function (error, result) {
             if (error) {
                 return callback(error);
             }
 
-            // ## move this to repo
-            vol.repo = new Repo({ rootDir: vol.mountPoint, tmpDir: tmpDir });
+            var tmpDir = path.join(vol.mountPoint, 'tmp');
+            fs.mkdirSync(tmpDir);
+
+            vol.repo = new Repo(path.join(vol.mountPoint, REPO_SUBFOLDER), tmpDir);
             vol.repo.create(user.username, user.email, function (error) {
                 if (error) {
                     return callback(new VolumeError(error, VolumeError.INTERNAL_ERROR));
@@ -397,7 +399,7 @@ function getVolume(name, username, config) {
         return null;
     }
 
-    vol.repo = new Repo({ rootDir: vol.mountPoint, tmpDir: vol.tmpPath });
+    vol.repo = new Repo(path.join(vol.mountPoint, REPO_SUBFOLDER), vol.tmpPath);
 
     return vol;
 }

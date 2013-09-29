@@ -20,11 +20,15 @@ var USERNAME = 'nobody';
 
 var tmpdirname = 'repo-test-' + crypto.randomBytes(4).readUInt32LE(0);
 var tmpdir = path.join(os.tmpdir(), tmpdirname);
-var repo = new Repo({ rootDir: tmpdir });
+var rootdirname = 'repo-test-' + crypto.randomBytes(4).readUInt32LE(0);
+var rootdir = path.join(os.tmpdir(), rootdirname);
+var repo = new Repo(rootdir, tmpdir);
 
 function cleanup(done) {
     rimraf(tmpdir, function (error) {
-        done();
+        rimraf(tmpdir, function (error) {
+            done();
+        });
     });
 }
 

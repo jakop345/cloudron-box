@@ -34,10 +34,10 @@ function isFile(mode) {
 }
 
 // creates a repo. before you do anything
-function Repo(config) {
-    this.gitDir = path.join(config.rootDir, '.git'); // must not contain trailing slash
-    this.checkoutDir = config.rootDir;
-    this.tmpDir = config.tmpDir;
+function Repo(rootDir, tmpDir) {
+    this.gitDir = path.join(rootDir, '.git'); // must not contain trailing slash
+    this.checkoutDir = rootDir;
+    this.tmpDir = tmpDir;
 }
 
 // run arbitrary commands on this repo
