@@ -10,7 +10,8 @@ function createVolume(event) {
     var form = $(this);
 
     var requestBody = {
-        name: form.find("input[name='name']").val()
+        name: form.find("input[name='name']").val(),
+        password: form.find("input[name='password']").val()
     };
 
     if (!requestBody.name) {
@@ -48,23 +49,40 @@ function createVolume(event) {
     });
 }
 
-function deleteVolume(volumeId) {
-    var requestBody = {};
+function deleteVolume(volume, callback) {
+    $("#password-dialog").modal();
+    $('#password-dialog-ok-button').on('click', function (e) {
+        e.preventDefault();
+        $('#password-dialog-form').submit();
+    });
 
-    showModalDialog("Deleting Volume", "Hold on...", { indeterminate: true });
+    $('#password-dialog-form').submit(function (event) {
+        event.preventDefault();
+        var form = $(this);
+        var username = window.yellowtent.username;
+        var password = form.find("input[name='password']").val();
 
-    $.ajax({
-        type: "POST",
-        url: "/api/v1/volume/" + volumeId + "/delete",
-        data: requestBody,
-        success: function (data) {
-            hideModalDialog();
-            getVolumeListing();
-            clearFileListing();
-        },
-        error: function () {
-            showModalDialog("Deleting Volume", "failed");
-        }
+        $.ajax({
+            type: "POST",
+            url: '/api/v1/volume/' + volume + '/delete',
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader('Authorization', auth(username, password));
+            },
+            data: { password: password },
+            success: function (data) {
+                $("#password-dialog").modal("hide");
+                callback && callback(null);
+            },
+            error: function (error) {
+                var msg = 'Failed.';
+
+                try {
+                    msg = JSON.parse(error.responseText).message;
+                } catch (e) {}
+
+                callback && callback(msg);
+            }
+        });
     });
 }
 

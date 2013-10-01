@@ -16,6 +16,7 @@ var optimist = require('optimist'),
     os = require('os'),
     polo = require('polo'),
     assert = require('assert'),
+    user = require('./api/user.js'),
     pkg = require('./package.json');
 
 
@@ -92,6 +93,27 @@ function getVersion(req, res, next) {
     res.send({ version: exports.VERSION });
 }
 
+
+/*
+    Step which makes the route require a password in the body besides a token.
+    Needed for mounting/deletion/creation of volumes.
+*/
+function requirePassword(req, res, next) {
+    if (!req.body.password) {
+        return next(new HttpError(400, 'API call requires the users password.'));
+    }
+
+    // req.user.username is either set via the auth user/pw tuple or the auth token
+    user.verify(req.user.username, req.body.password, function (error, result) {
+        if (error) {
+            return next(new HttpError(401, 'Wrong password entered'));
+        }
+
+        next();
+    });
+}
+
+
 function initialize(config, callback) {
     var app = express();
 
@@ -144,10 +166,10 @@ function initialize(config, callback) {
         app.get('/api/v1/volume/:volume/list/', routes.volume.listFiles);
         app.get('/api/v1/volume/:volume/list/*', routes.volume.listFiles);
         app.get('/api/v1/volume/list', routes.volume.listVolumes);
-        app.post('/api/v1/volume/create', routes.volume.createVolume);
-        app.post('/api/v1/volume/:volume/delete', routes.volume.deleteVolume);
-        app.post('/api/v1/volume/:volume/mount', routes.volume.mount);
-        app.post('/api/v1/volume/:volume/unmount', routes.volume.unmount);
+        app.post('/api/v1/volume/create', requirePassword, routes.volume.createVolume);
+        app.post('/api/v1/volume/:volume/delete', requirePassword, routes.volume.deleteVolume);
+        app.post('/api/v1/volume/:volume/mount', requirePassword, routes.volume.mount);
+        app.post('/api/v1/volume/:volume/unmount', requirePassword, routes.volume.unmount);
     });
 
     app.set('port', config.port);

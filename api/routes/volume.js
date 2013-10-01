@@ -1,7 +1,6 @@
 'use strict';
 
 var HttpError = require('../httperror'),
-    user = require('../user.js'),
     volume = require('../volume.js'),
     VolumeError = volume.VolumeError;
 
@@ -51,26 +50,16 @@ function createVolume(req, res, next) {
         return next(new HttpError(400, 'New volume name not specified'));
     }
 
-    if (!req.user.password) {
-        return next(new HttpError(400, 'No password provided'));
+    if (volume.get(req.body.name, req.user.username, config)) {
+        return next(new HttpError(409, 'Volume already exists'));
     }
 
-    user.verify(req.user.username, req.user.password, function (error, result) {
+    volume.create(req.body.name, req.user, config, function (error, result) {
         if (error) {
-            return next(new HttpError(401, 'Wrong password entered'));
+            return next(new HttpError(500, 'Volume creation failed: ' + error));
         }
 
-        if (volume.get(req.body.name, req.user.username, config)) {
-            return next(new HttpError(409, 'Volume already exists'));
-        }
-
-        volume.create(req.body.name, req.user, config, function (error, result) {
-            if (error) {
-                return next(new HttpError(500, 'Volume creation failed: ' + error));
-            }
-
-            res.send(201);
-        });
+        res.send(201);
     });
 }
 
@@ -92,11 +81,7 @@ function listFiles(req, res, next) {
 }
 
 function mount(req, res, next) {
-    if (!req.user.password) {
-        return next(new HttpError(401, 'No password provided'));
-    }
-
-    req.volume.open(req.user.username, req.user.password, function (error) {
+    req.volume.open(req.user.username, req.body.password, function (error) {
         if (error) {
             return next(new HttpError(402, 'Unable to open volume'));
         }
