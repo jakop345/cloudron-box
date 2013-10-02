@@ -157,12 +157,12 @@ function authenticate(req, res, next) {
         });
     }
 
-    if (req.query.auth_token || req.cookies.token) {
-        debug('using token based authentication');
-        tokenAuthenticator(req, res, next);
-    } else if (req.headers.authorization) {
+    if (req.headers.authorization) {
         debug('using login authentication');
         loginAuthenticator(req, res, next);
+    } else if (req.query.auth_token || req.cookies.token) {
+        debug('using token based authentication');
+        tokenAuthenticator(req, res, next);
     } else {
         next(new HttpError(401, 'No credentials'));
     }

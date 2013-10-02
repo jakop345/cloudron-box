@@ -133,15 +133,49 @@ describe('Server API', function () {
             });
         });
 
+        var token;
         it('create token', function (done) {
             request.post(SERVER_URL + '/api/v1/token')
                    .auth(USERNAME, PASSWORD)
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(200);
                 expect(res.body.token).to.be.a('string');
+                token = res.body.token;
                 expect(res.body.expires).to.be.a('string');
                 expect(res.body.username).to.not.be.ok();
                 expect(res.body.email).to.not.be.ok();
+                done(err);
+            });
+        });
+
+        it('can get userInfo with token', function (done) {
+            request.get(SERVER_URL + '/api/v1/user/info')
+                   .query({ auth_token: token })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(200);
+                expect(res.body.username).to.equal(USERNAME);
+                expect(res.body.email).to.equal(EMAIL);
+                done(err);
+            });
+        });
+
+        it('cannot get userInfo with invalid token', function (done) {
+            request.get(SERVER_URL + '/api/v1/user/info')
+                   .query({ auth_token: 'x' + token })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(401);
+                done(err);
+            });
+        });
+
+        it('can get userInfo with valid password but invalid token', function (done) {
+            request.get(SERVER_URL + '/api/v1/user/info')
+                   .auth(USERNAME, PASSWORD)
+                   .query({ auth_token: 'somerandomstuff' })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(200);
+                expect(res.body.username).to.equal(USERNAME);
+                expect(res.body.email).to.equal(EMAIL);
                 done(err);
             });
         });
