@@ -13,7 +13,6 @@ exports = module.exports = {
     read: read,
     revisions: revisions,
     metadata: metadata,
-    update: update,
     multipart: multipart,
     putFile: putFile
 };
@@ -107,14 +106,14 @@ function _getConflictFilenameSync(renamePattern, file, checkoutDir) {
         if (!fs.existsSync(path.join(checkoutDir, file))) break;
     }
     return file;
-};
+}
 
 /*
  * Put a file using multipart file upload
  * @urlparam {string} path The path of the file
  * @bodyparam {string} parentRev The parent revision of the file (default: latest)
  * @bodyparam {bool} overwrite Overwrite file (default: true)
- * @bodyparam {data} file contents 
+ * @bodyparam {file} file contents 
  *
  * The file can already exist, in which case it's renamed after uploaded.
  *
@@ -142,79 +141,6 @@ function putFile(req, res, next) {
             return next(new HttpError(500, 'Error putting file : ' + err.message));
         }
         fileInfo.serverRevision = commit.sha1;
-        res.send(200, fileInfo);
+        res.send(201, fileInfo);
     });
 }
-
-function update(req, res, next) {
-    // FIXME: grab path from req.params[0] ?
-    if (!req.body.data) return next(new HttpError(400, 'data field missing'));
-    var data;
-
-    try {
-        data = JSON.parse(req.body.data);
-    } catch (e) {
-        return next(new HttpError(400, 'cannot parse data field:' + e.message));
-    }
-
-    if (!data.entry || !data.entry.path) return next(new HttpError(400, 'path not specified'));
-
-    if (!data.action) return next(new HttpError(400, 'action not specified'));
-    if (!('lastSyncRevision' in data)) return next(new HttpError(400, 'lastSyncRevision not specified'));
-
-    if (data.action == 'add' || data.action == 'update') {
-        if (!req.files.file) return next(new HttpError(400, 'file not provided'));
-        if (!data.entry.mtime) return next(new HttpError(400, 'mtime not specified'));
-    } else if (data.action != 'remove') {
-        res.send(new HttpError(400, 'Unknown action'));
-    }
-
-    debug('Processing ', data);
-
-    var leftEntry = data.entry, repo = req.volume.repo;
-
-    repo.fileEntry(leftEntry.path, data.lastSyncRevision, function (err, baseEntry) {
-        if (err) {
-            if (err.code !== 'ENOENT') return next(new HttpError(400, 'input error:' + err));
-            baseEntry = null;
-        }
-
-        repo.fileEntry(leftEntry.path, 'HEAD', function (err, rightEntry) {
-            if (err) {
-                if (err.code !== 'ENOENT') return next(new HttpError(500, 'failed to get fileEntry:' + err));
-                rightEntry = null;
-            }
-
-            var change = syncer.whatChanged(data.action != 'remove' ? leftEntry : null, baseEntry, rightEntry);
-            if (change.conflict) return next(new HttpError(409, JSON.stringify(change)));
-
-            // actually update the file!
-            if (data.action == 'add') {
-                repo.addFile(leftEntry.path, { file: req.files.file.path }, function (err, fileInfo, commit) {
-                    if (err) {
-                        if (err.code == 'ENOENT') return next(new HttpError(404, 'File not found'));
-                        return next(new HttpError(500, err.toString()));
-                    }
-                    res.send(201, { serverRevision: commit.sha1, sha1: fileInfo.sha1, fastForward: commit.parentSha1 === data.lastSyncRevision });
-                });
-            } else if (data.action == 'update') {
-                repo.updateFile(leftEntry.path, { file: req.files.file.path }, function (err, fileInfo, commit) {
-                    if (err) {
-                        if (err.code == 'ENOENT') return next(new HttpError(404, 'File not found'));
-                        return next(new HttpError(500, err.toString()));
-                    }
-                    res.send(201, { serverRevision: commit.sha1, sha1: fileInfo.sha1, fastForward: commit.parentSha1 === data.lastSyncRevision });
-                });
-            } else if (data.action == 'remove') {
-                repo.removeFile(leftEntry.path, function (err, commit) {
-                    if (err) {
-                        if (err.code == 'ENOENT') return next(new HttpError(404, 'File not found'));
-                        return next(new HttpError(500, err.toString()));
-                    }
-                    res.send(200, { serverRevision: commit.sha1, fastForward: commit.parentSha1 === data.lastSyncRevision });
-                });
-            }
-        });
-    });
-}
-

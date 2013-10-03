@@ -18,7 +18,7 @@ exports = module.exports = {
  * The delete succeeds only if rev is the latest revision.
  */
 function remove(req, res, next) {
-    var filePath = req.method === 'DELETE' ? req.params[0] : req.body.path;
+    var filePath = req.body.path;
     var repo = req.volume.repo;
     var rev = req.body.rev;
 
@@ -30,6 +30,7 @@ function remove(req, res, next) {
             if (err.code == 'EOUTOFDATE') return next(new HttpError(409, 'Out of date'));
             return next(new HttpError(500, err.message));
         }
+        fileEntry.serverRevision = commit.sha1;
         res.send(200, fileEntry);
     });
 }
@@ -57,6 +58,7 @@ function move(req, res, next) {
             if (err.code == 'EOUTOFDATE') return next(new HttpError(409, 'Out of date'));
             return next(new HttpError(500, err.message));
         }
+        newEntry.serverRevision = commit.sha1;
         res.send(200, newEntry);
     });
 }
@@ -84,6 +86,7 @@ function copy(req, res, next) {
             if (err.code === 'EOUTOFDATE') return next(new HttpError(409, 'Out of date'));
             return next(new HttpError(500, err.message));
         }
+        newEntry.serverRevision = commit.sha1;
         res.send(200, newEntry);
     });
 }

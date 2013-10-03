@@ -421,20 +421,19 @@ describe('Server API', function () {
             });
         });
 
-        var serverRevision = '', newFileSha1 = '';
+        var serverRevision = '', newFileRev = '';
 
-        it('update - add', function (done) {
-            request.post(SERVER_URL + '/api/v1/file/' + TESTVOLUME + '/NEWFILE')
+        it('put - add', function (done) {
+            request.put(SERVER_URL + '/api/v1/file/' + TESTVOLUME + '/NEWFILE')
                    .auth(USERNAME, PASSWORD)
-                   .field('data', JSON.stringify({ action: 'add', lastSyncRevision: '', entry: { path: 'NEWFILE', mtime: now() } }))
+                   .field('data', JSON.stringify({ parentRev: '' }))
                    .attach('file', tempFile('BLAH BLAH'))
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(201);
                 expect(res.body.sha1).to.equal('e3f27b2dbefe2f9c5efece6bdbc0f44e9fb8875a');
-                newFileSha1 = res.body.sha1;
+                newFileRev = res.body.sha1;
                 expect(res.body.serverRevision.length).to.not.be.equal(0);
                 serverRevision = res.body.serverRevision;
-                expect(res.body.fastForward).to.be(false);
                 done(err);
             });
         });
@@ -463,14 +462,15 @@ describe('Server API', function () {
             });
         });
 
-        it('update - update', function (done) {
-            request.post(SERVER_URL + '/api/v1/file/' + TESTVOLUME + '/NEWFILE')
+        it('put - update', function (done) {
+            request.put(SERVER_URL + '/api/v1/file/' + TESTVOLUME + '/NEWFILE')
                    .auth(USERNAME, PASSWORD)
-                   .field('data', JSON.stringify({ action: 'update', lastSyncRevision: serverRevision, entry: { path: 'NEWFILE', mtime: now() }}))
+                   .field('data', JSON.stringify({ parentRev: newFileRev }))
                    .attach('file', tempFile('BLAH BLAH2'))
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(201);
                 expect(res.body.sha1).to.equal('321f24c9a2669b35cd2df0cab5c42b2bb2958e9a');
+                newFileRev = res.body.sha1;
                 expect(res.body.serverRevision.length).to.not.equal(0);
                 serverRevision = res.body.serverRevision;
                 expect(res.body.fastForward === true);
@@ -630,15 +630,14 @@ describe('Server API', function () {
             });
         });
 
-        it('update - del', function (done) {
-            request.post(SERVER_URL + '/api/v1/file/' + TESTVOLUME + '/NEWFILE')
+        it('del - non-wildcard revision', function (done) {
+            request.post(SERVER_URL + '/api/v1/fileops/' + TESTVOLUME + '/delete')
                    .auth(USERNAME, PASSWORD)
-                   .field('data', JSON.stringify({ action: 'remove', lastSyncRevision: serverRevision, entry: { path: 'NEWFILE' } }))
+                   .send({ path: 'NEWFILE', rev: newFileRev })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(200);
                 expect(res.body.serverRevision.length).to.not.equal(0);
                 serverRevision = res.body.serverRevision;
-                expect(res.body.fastForward === true);
                 done(err);
             });
         });
@@ -650,7 +649,7 @@ describe('Server API', function () {
                    .field('data', JSON.stringify({ }))
                    .attach('file', tempFile('BLAH BLAH'))
                    .end(function (err, res) {
-                expect(res.statusCode).to.equal(200);
+                expect(res.statusCode).to.equal(201);
                 expect(res.body.sha1).to.equal('e3f27b2dbefe2f9c5efece6bdbc0f44e9fb8875a');
                 fileRevision = res.body.sha1;
                 expect(res.body.path).to.equal('newt');
@@ -665,7 +664,7 @@ describe('Server API', function () {
                    .field('data', JSON.stringify({ parentRev: fileRevision, overwrite: false}))
                    .attach('file', tempFile('BLAH BLAH2'))
                    .end(function (err, res) {
-                expect(res.statusCode).to.equal(200);
+                expect(res.statusCode).to.equal(201);
                 expect(res.body.sha1).to.equal('321f24c9a2669b35cd2df0cab5c42b2bb2958e9a');
                 expect(res.body.path).to.equal('newt');
                 expect(res.body.serverRevision.length).to.not.be(0);
@@ -679,7 +678,7 @@ describe('Server API', function () {
                    .field('data', JSON.stringify({ parentRev: fileRevision, overwrite: false })) // old revision, so conflict
                    .attach('file', tempFile('BLAH BLAH3'))
                    .end(function (err, res) {
-                expect(res.statusCode).to.equal(200);
+                expect(res.statusCode).to.equal(201);
                 expect(res.body.sha1).to.equal('fc0443d1b179974e052f5c8982f6adb41edbaf57');
                 expect(res.body.path).to.equal('newt-ConflictedCopy');
                 expect(res.body.serverRevision.length).to.not.be(0);

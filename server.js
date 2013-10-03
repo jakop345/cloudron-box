@@ -155,13 +155,11 @@ function initialize(config, callback) {
         app.get('/api/v1/revisions/:volume/*', routes.file.revisions);
         app.get('/api/v1/file/:volume/*', routes.file.read);
         app.get('/api/v1/metadata/:volume/*', routes.file.metadata);
-        app.post('/api/v1/file/:volume/*', routes.file.multipart, routes.file.update);
         app.put('/api/v1/file/:volume/*', routes.file.multipart, routes.file.putFile);
 
         app.post('/api/v1/fileops/:volume/copy', express.json({ strict: true }), routes.fileops.copy);
         app.post('/api/v1/fileops/:volume/move', express.json({ strict: true }), routes.fileops.move);
         app.post('/api/v1/fileops/:volume/delete', express.json({ strict: true }), routes.fileops.remove);
-        app.del('/api/v1/fileops/:volume/*', routes.fileops.remove);
 
         app.get('/api/v1/volume/:volume/list/', routes.volume.listFiles);
         app.get('/api/v1/volume/:volume/list/*', routes.volume.listFiles);
