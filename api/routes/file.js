@@ -2,7 +2,6 @@
 
 var fs = require('fs'),
     HttpError = require('../httperror'),
-    syncer = require('../syncer'),
     mime = require('mime'),
     debug = require('debug')('file.js'),
     express = require('express'),
