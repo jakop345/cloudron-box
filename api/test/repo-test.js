@@ -272,5 +272,72 @@ describe('Repo', function () {
             done();
         });
     });
-});
 
+    it('putFile - invalid file', function (done) {
+        var tmpfile = path.join(os.tmpdir(), 'NEWFILE');
+        fs.writeFileSync(tmpfile, 'NEWFILE_CONTENTS');
+        repo.putFile('NEWFILE', tmpfile, { parentRev: 'doesnt exist' }, function (err, fileInfo, commit) {
+            expect(err.code).to.equal('EINVAL');
+            done();
+        });
+    });
+
+    var newFileRev = '';
+
+    it('putFile - add', function (done) {
+        var tmpfile = path.join(os.tmpdir(), 'NEWFILE');
+        fs.writeFileSync(tmpfile, 'NEWFILE_CONTENTS');
+        repo.putFile('NEWFILE', tmpfile, function (err, fileInfo, commit) {
+            expect(commit.subject).to.equal('Add NEWFILE');
+            expect(fileInfo.sha1).to.equal('88e12295e7718805ac086c5499dfae50b07be54a');
+            newFileRev = fileInfo.sha1;
+            done();
+        });
+    });
+
+    it('putFile - same contents/hash', function (done) {
+        var tmpfile = path.join(os.tmpdir(), 'NEWFILE');
+        fs.writeFileSync(tmpfile, 'NEWFILE_CONTENTS');
+        repo.putFile('NEWFILE', tmpfile, { hash: newFileRev }, function (err, fileInfo, commit) {
+            expect(commit.subject).to.equal('Unchanged NEWFILE');
+            expect(fileInfo.sha1).to.equal(newFileRev);
+            done();
+        });
+    });
+
+    it('putFile - update', function (done) {
+        var tmpfile = path.join(os.tmpdir(), 'NEWFILE');
+        fs.writeFileSync(tmpfile, 'NEWFILE_CONTENTS_UPDATED');
+        repo.putFile('NEWFILE', tmpfile, { parentRev: newFileRev }, function (err, fileInfo, commit) {
+            expect(commit.subject).to.equal('Update NEWFILE');
+            expect(fileInfo.sha1).to.equal('625ea1620ba8bf5245049b73117a58c4b4d95918');
+            done();
+        });
+    });
+
+    function getConflictFilenameSync(fileName, filePath) {
+        return fileName + '-Conflict';
+    }
+
+    it('putFile - conflict', function (done) {
+        var tmpfile = path.join(os.tmpdir(), 'NEWFILE');
+        fs.writeFileSync(tmpfile, 'NEWFILE_CONTENTS_UPDATED_AGAIN');
+        repo.putFile('NEWFILE', tmpfile, { parentRev: newFileRev, getConflictFilenameSync: getConflictFilenameSync }, function (err, fileInfo, commit) {
+            expect(commit.subject).to.equal('Add NEWFILE-Conflict');
+            expect(fileInfo.path).to.equal('NEWFILE-Conflict');
+            expect(fileInfo.sha1).to.equal('6bc781ba12da5d54911bc0ee867c9cff93bbeee0');
+            done();
+        });
+    });
+
+    it('putFile - overwrite', function (done) {
+        var tmpfile = path.join(os.tmpdir(), 'NEWFILE');
+        fs.writeFileSync(tmpfile, 'NEWFILE_CONTENTS_UPDATED_OVERWRITE');
+        repo.putFile('NEWFILE', tmpfile, { parentRev: newFileRev, overwrite: true }, function (err, fileInfo, commit) {
+            expect(commit.subject).to.equal('Update NEWFILE');
+            expect(fileInfo.path).to.equal('NEWFILE');
+            expect(fileInfo.sha1).to.equal('fc5640aae67df3211955256e81a1de847956ca32');
+            done();
+        });
+    });
+});

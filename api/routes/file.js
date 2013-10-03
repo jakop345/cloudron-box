@@ -91,7 +91,8 @@ function metadata(req, res, next) {
  * This is required because rename() works only within the same file system.
  */
 function multipart(req, res, next) {
-    var parser = express.multipart({ uploadDir: req.volume.tmpPath, keepExtensions: true, maxFieldsSize: 2 * 1024 * 1024 }); // multipart/form-data
+    // FIXME: hash is necessary only for the conflict case of putFile
+    var parser = express.multipart({ hash: 'sha1', uploadDir: req.volume.tmpPath, keepExtensions: true, maxFieldsSize: 2 * 1024 * 1024 }); // multipart/form-data
     parser(req, res, next);
 }
 
@@ -131,7 +132,8 @@ function putFile(req, res, next) {
     var options = {
         parentRev: data.parentRev,
         overwrite: data.overwrite,
-        getConflictFilenameSync: _getConflictFilenameSync.bind(null, 'ConflictedCopy')
+        getConflictFilenameSync: _getConflictFilenameSync.bind(null, 'ConflictedCopy'),
+        hash: req.files.file.hash
     };
 
     req.volume.repo.putFile(filePath, req.files.file.path, options, function (err, fileInfo, commit) {
