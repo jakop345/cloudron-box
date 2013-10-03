@@ -662,6 +662,13 @@ Repo.prototype.metadata = function (filePath, options, callback) {
     }
 };
 
+Repo.prototype.hashObject = function (filePath, callback) {
+    this.git(['hash-object', filePath], function (err, out) {
+        if (err) return callback(err);
+        callback(null, out.trimRight());
+    });
+};
+
 // can add or update a file
 Repo.prototype.putFile = function (filePath, newFile, options, callback) {
     assert(typeof filePath === 'string');
@@ -677,7 +684,6 @@ Repo.prototype.putFile = function (filePath, newFile, options, callback) {
     var overwrite = options.overwrite;
     var parentRev = options.parentRev;
     var getConflictFilenameSync = options.getConflictFilenameSync;
-    var hash = options.hash;
 
     this.fileEntry(filePath, 'HEAD', function (err, entry) {
         if (err) {
@@ -688,16 +694,23 @@ Repo.prototype.putFile = function (filePath, newFile, options, callback) {
         if (!entry) {
             if (options.parentRev) return callback(new RepoError('EINVAL', 'Invalid parent revision'));
             that.addFile(filePath, { file: newFile }, callback);
-        } else {
+            return;
+        }
+
+        if (entry.sha1 === parentRev || overwrite) {
+            that.updateFile(filePath, { file: newFile }, callback);
+            return;
+        }
+
+        // check if the file is different
+        that.hashObject(newFile, function (err, hash) {
+            if (err) return callback(err);
             if (entry.sha1 === hash) { // file is unchanged
                 that._addFileAndCommit(filePath, { _operation: "Unchanged" }, callback);
-            } else if (entry.sha1 === parentRev || overwrite) {
-                that.updateFile(filePath, { file: newFile }, callback);
             } else {
                 var newName = getConflictFilenameSync(filePath, that.checkoutDir);
                 that.addFile(newName, { file: newFile }, callback);
             }
-        }
+        });
     });
 };
-
