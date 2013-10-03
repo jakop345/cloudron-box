@@ -663,6 +663,8 @@ Repo.prototype.metadata = function (filePath, options, callback) {
 };
 
 Repo.prototype.hashObject = function (filePath, callback) {
+    assert(typeof filePath === 'string');
+
     this.git(['hash-object', filePath], function (err, out) {
         if (err) return callback(err);
         callback(null, out.trimRight());
