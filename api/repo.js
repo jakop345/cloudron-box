@@ -1,7 +1,6 @@
 'use strict';
 
 var exec = require('child_process').exec,
-    debug = require('debug')('repo.js'),
     path = require('path'),
     mkdirp = require('mkdirp'),
     fs = require('fs'),
@@ -79,6 +78,9 @@ Repo.prototype.spawn = function (args) {
 
     debug('GIT_DIR=' + this.gitDir + ' git ' + args.join(' '));
     var proc = spawn('git', args, options);
+    proc.on('error', function (error) {
+        debug('Error spawning git process:', error);
+    });
     proc.stderr.on('data', function (data) { debug(data); });
     return proc;
 };
