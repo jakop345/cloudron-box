@@ -82,7 +82,20 @@ Volume.prototype._initMetaDatabase = function () {
     });
 };
 
-Volume.prototype.open = function(username, password, callback) {
+Volume.prototype.isMounted = function (callback) {
+    assert(typeof callback === 'function');
+
+    this.encfs.isMounted(function (error, mounted) {
+        if (error) {
+            debug('Error checking if encfs volume is mounted', error);
+            return callback(error);
+        }
+
+        return callback(null, mounted);
+    });
+};
+
+Volume.prototype.open = function (username, password, callback) {
     assert(typeof username === 'string');
     assert(username.length !== 0);
     assert(typeof password === 'string');

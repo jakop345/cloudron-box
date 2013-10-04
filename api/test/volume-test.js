@@ -155,16 +155,10 @@ describe('Volume', function () {
             });
         });
 
-        it('open', function (done) {
-            vol.open(USERNAME, PASSWORD, function (error) {
+        it('is mounted after creation', function (done) {
+            vol.isMounted(function (error, isMounted) {
                 expect(error).to.not.be.ok();
-                done();
-            });
-        });
-
-        it('close', function (done) {
-            vol.close(function (error) {
-                expect(error).to.not.be.ok();
+                expect(isMounted).to.be.ok();
                 done();
             });
         });
@@ -179,6 +173,28 @@ describe('Volume', function () {
         it('close', function (done) {
             vol.close(function (error) {
                 expect(error).to.not.be.ok();
+                done();
+            });
+        });
+
+        it('open', function (done) {
+            vol.open(USERNAME, PASSWORD, function (error) {
+                expect(error).to.not.be.ok();
+                done();
+            });
+        });
+
+        it('close', function (done) {
+            vol.close(function (error) {
+                expect(error).to.not.be.ok();
+                done();
+            });
+        });
+
+        it('is not mounted', function (done) {
+            vol.isMounted(function (error, isMounted) {
+                expect(error).to.not.be.ok();
+                expect(isMounted).to.not.be.ok();
                 done();
             });
         });
