@@ -109,4 +109,3 @@ function attachVolume(req, res, next, volumeId) {
 
     next();
 }
-
