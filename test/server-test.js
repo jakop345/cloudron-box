@@ -84,6 +84,40 @@ describe('Server', function () {
         });
     });
 
+    describe('runtime', function () {
+        var serverApp;
+
+        before(function (done) {
+            server.start(CONFIG, function (err, app) {
+                serverApp = app;
+                done();
+            });
+        });
+
+        it('random bad requests', function (done) {
+            request.get(SERVER_URL + '/random', function (err, res) {
+                expect(err).to.not.be.ok();
+                expect(res.statusCode).to.equal(401);
+                done(err);
+            });
+        });
+
+        it('version', function (done) {
+            request.get(SERVER_URL + '/api/v1/version', function (err, res) {
+                expect(err).to.not.be.ok();
+                expect(res.statusCode).to.equal(200);
+                expect(res.body.version).to.equal(require('../package.json').version);
+                done(err);
+            });
+        });
+
+        after(function (done) {
+            server.stop(serverApp, function () {
+                done();
+            });
+        });
+    });
+
     describe('shutdown', function () {
         var serverApp;
 
