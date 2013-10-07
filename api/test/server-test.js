@@ -33,9 +33,14 @@ function setup(done) {
         SERVER_URL = 'http://localhost:' + app.get('port');
         database.USERS_TABLE.removeAll(function () {
             request.post(SERVER_URL + '/api/v1/createadmin')
-                 .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
-                 .end(function (err, res) {
-                done();
+                   .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
+                   .end(function (err, res) {
+                request.post(SERVER_URL + '/api/v1/volume/create')
+                       .auth(USERNAME, PASSWORD)
+                       .send({ password: PASSWORD, name: TESTVOLUME })
+                       .end(function (err, res) {
+                    done(err);
+                });
             });
         });
     });
@@ -43,8 +48,13 @@ function setup(done) {
 
 // remove all temporary folders
 function cleanup(done) {
-    rimraf(BASE_DIR, function (error) {
-        done();
+    request.post(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/delete')
+           .auth(USERNAME, PASSWORD)
+           .send({ password: PASSWORD })
+           .end(function (err, res) {
+        rimraf(BASE_DIR, function (error) {
+            done();
+        });
     });
 }
 
@@ -80,132 +90,7 @@ describe('Server API', function () {
         });
     });
 
-    describe('volume', function () {
-        before(function (done) {
-            request.post(SERVER_URL + '/api/v1/createadmin')
-                   .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
-                   .end(function (err, res) {
-                done(err);
-            });
-        });
-
-        after(function (done) {
-            request.post(SERVER_URL + '/api/v1/user/remove')
-                   .auth(USERNAME, PASSWORD)
-                   .send({ username: USERNAME })
-                   .end(function (err, res) {
-                done(err);
-            });
-        });
-
-        it('create fails due to missing password', function (done) {
-            this.timeout(5000); // on the Mac, creating volumes takes a lot of time on low battery
-            request.post(SERVER_URL + '/api/v1/volume/create')
-                   .auth(USERNAME, PASSWORD)
-                   .send({ name: TESTVOLUME })
-                   .end(function (err, res) {
-                expect(res.statusCode).to.equal(400);
-                done(err);
-            });
-        });
-
-        it('create', function (done) {
-            this.timeout(5000); // on the Mac, creating volumes takes a lot of time on low battery
-            request.post(SERVER_URL + '/api/v1/volume/create')
-                   .auth(USERNAME, PASSWORD)
-                   .send({ password: PASSWORD, name: TESTVOLUME })
-                   .end(function (err, res) {
-                expect(res.statusCode).to.equal(201);
-                done(err);
-            });
-        });
-
-        it('list', function (done) {
-            request.get(SERVER_URL + '/api/v1/volume/list')
-                   .auth(USERNAME, PASSWORD)
-                   .end(function (err, res) {
-                expect(res.body.length).to.equal(1);
-                expect(res.body[0].name).to.equal(TESTVOLUME);
-                expect(res.statusCode).to.equal(200);
-                done(err);
-            });
-        });
-
-        it('listFiles', function (done) {
-            request.get(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/list/')
-                   .auth(USERNAME, PASSWORD)
-                   .end(function (err, res) {
-                var foundReadme = false;
-                res.body.forEach(function (entry) {
-                    expect(entry.filename).to.be.a("string");
-                    expect(entry.stat).to.be.an("object");
-                    expect(entry.stat.size).to.be.a("number");
-
-                    if (entry.filename === 'README.md') foundReadme = true;
-                });
-                expect(foundReadme).to.be(true);
-                done(err);
-            });
-        });
-
-        it('destroy fails due to missing password', function(done) {
-            request.post(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/delete')
-                   .auth(USERNAME, PASSWORD)
-                   .end(function (err, res) {
-                expect(res.statusCode).to.equal(400);
-                done(err);
-            });
-        });
-
-        it('destroy', function(done) {
-            request.post(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/delete')
-                   .auth(USERNAME, PASSWORD)
-                   .send({ password: PASSWORD })
-                   .end(function (err, res) {
-                expect(res.statusCode).to.equal(200);
-                done(err);
-            });
-        });
-
-        it('bad volume', function (done) {
-            request.get(SERVER_URL + '/api/v1/file/whatever/volume')
-                   .auth(USERNAME, PASSWORD)
-                   .end(function (err, res) {
-                expect(res.statusCode).to.equal(404);
-                done(err);
-            });
-        });
-    });
-
     describe('file', function () {
-        before(function(done) {
-            this.timeout(5000); // on the Mac, creating volumes takes a lot of time on low battery
-            request.post(SERVER_URL + '/api/v1/createadmin')
-                   .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
-                   .end(function (err, res) {
-                request.post(SERVER_URL + '/api/v1/volume/create')
-                       .auth(USERNAME, PASSWORD)
-                       .send({ password: PASSWORD, name: TESTVOLUME })
-                       .end(function (err, res) {
-                    done(err);
-                });
-            });
-        });
-
-        after(function(done) {
-            request.post(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/delete')
-                   .auth(USERNAME, PASSWORD)
-                   .send({ password: PASSWORD })
-                   .end(function (err, res) {
-                request.post(SERVER_URL + '/api/v1/user/remove')
-                       .auth(USERNAME, PASSWORD)
-                       .send({ username: USERNAME })
-                       .end(function (err, res) {
-                    done(err);
-                });
-            });
-        });
-
         it('read', function (done) {
             request.get(SERVER_URL + '/api/v1/file/' + TESTVOLUME + '/README.md')
                    .auth(USERNAME, PASSWORD)
