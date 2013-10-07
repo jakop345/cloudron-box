@@ -110,6 +110,26 @@ describe('Server Volume API', function () {
         });
     });
 
+    it('unmount volume', function (done) {
+        request.post(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/unmount')
+               .auth(USERNAME, PASSWORD)
+               .send({ password: PASSWORD })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            done(err);
+        });
+    });
+
+    it('mount volume', function (done) {
+        request.post(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/mount')
+               .auth(USERNAME, PASSWORD)
+               .send({ password: PASSWORD })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            done(err);
+        });
+    });
+
     it('destroy fails due to missing password', function(done) {
         request.post(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/delete')
                .auth(USERNAME, PASSWORD)

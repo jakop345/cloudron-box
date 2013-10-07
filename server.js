@@ -93,22 +93,6 @@ function getVersion(req, res, next) {
     res.send({ version: exports.VERSION });
 }
 
-function requireMountedVolume(req, res, next) {
-    req.volume.isMounted(function (error, isMounted) {
-        if (error) {
-            return next(new HttpError(500, 'Unable to check volume mount state'));
-        }
-
-        if (!isMounted) {
-            return next(new HttpError(405, 'Volume not mounted'));
-        }
-
-        next();
-    });
-}
-
-
-
 /*
     Step which makes the route require a password in the body besides a token.
     Needed for mounting/deletion/creation of volumes.
@@ -164,20 +148,20 @@ function initialize(config, callback) {
 
         app.param('volume', routes.volume.attachVolume);
 
-        app.post('/api/v1/sync/:volume/diff', requireMountedVolume, routes.sync.diff);
-        app.post('/api/v1/sync/:volume/delta', requireMountedVolume, routes.sync.delta);
+        app.post('/api/v1/sync/:volume/diff', routes.volume.requireMountedVolume, routes.sync.diff);
+        app.post('/api/v1/sync/:volume/delta', routes.volume.requireMountedVolume, routes.sync.delta);
 
-        app.get('/api/v1/revisions/:volume/*', requireMountedVolume, routes.file.revisions);
-        app.get('/api/v1/file/:volume/*', requireMountedVolume, routes.file.read);
-        app.get('/api/v1/metadata/:volume/*', requireMountedVolume, routes.file.metadata);
-        app.put('/api/v1/file/:volume/*', requireMountedVolume, routes.file.multipart, routes.file.putFile);
+        app.get('/api/v1/revisions/:volume/*', routes.volume.requireMountedVolume, routes.file.revisions);
+        app.get('/api/v1/file/:volume/*', routes.volume.requireMountedVolume, routes.file.read);
+        app.get('/api/v1/metadata/:volume/*', routes.volume.requireMountedVolume, routes.file.metadata);
+        app.put('/api/v1/file/:volume/*', routes.volume.requireMountedVolume, routes.file.multipart, routes.file.putFile);
 
-        app.post('/api/v1/fileops/:volume/copy', requireMountedVolume, express.json({ strict: true }), routes.fileops.copy);
-        app.post('/api/v1/fileops/:volume/move', requireMountedVolume, express.json({ strict: true }), routes.fileops.move);
-        app.post('/api/v1/fileops/:volume/delete', requireMountedVolume, express.json({ strict: true }), routes.fileops.remove);
+        app.post('/api/v1/fileops/:volume/copy', routes.volume.requireMountedVolume, express.json({ strict: true }), routes.fileops.copy);
+        app.post('/api/v1/fileops/:volume/move', routes.volume.requireMountedVolume, express.json({ strict: true }), routes.fileops.move);
+        app.post('/api/v1/fileops/:volume/delete', routes.volume.requireMountedVolume, express.json({ strict: true }), routes.fileops.remove);
 
-        app.get('/api/v1/volume/:volume/list/', requireMountedVolume, routes.volume.listFiles);
-        app.get('/api/v1/volume/:volume/list/*', requireMountedVolume, routes.volume.listFiles);
+        app.get('/api/v1/volume/:volume/list/', routes.volume.requireMountedVolume, routes.volume.listFiles);
+        app.get('/api/v1/volume/:volume/list/*', routes.volume.requireMountedVolume, routes.volume.listFiles);
         app.get('/api/v1/volume/list', routes.volume.listVolumes);
         app.post('/api/v1/volume/create', requirePassword, routes.volume.createVolume);
         app.post('/api/v1/volume/:volume/delete', requirePassword, routes.volume.deleteVolume);

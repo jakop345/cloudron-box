@@ -12,7 +12,8 @@ exports = module.exports = {
     deleteVolume: deleteVolume,
     mount: mount,
     unmount: unmount,
-    attachVolume: attachVolume
+    attachVolume: attachVolume,
+    requireMountedVolume: requireMountedVolume
 };
 
 var config;
@@ -21,10 +22,7 @@ function initialize(cfg) {
     config = cfg;
 }
 
-// TODO maybe also check for password? - Johannes
 function deleteVolume(req, res, next) {
-    if (!req.volume) return next(new HttpError(404, 'No such volume'));
-
     req.volume.destroy(function (error) {
         if (error) {
             return next(new HttpError(500, 'Unable to destroy volume: ' + error));
@@ -108,4 +106,18 @@ function attachVolume(req, res, next, volumeId) {
     if (!req.volume) return next(new HttpError(404, 'No such volume'));
 
     next();
+}
+
+function requireMountedVolume(req, res, next) {
+    req.volume.isMounted(function (error, isMounted) {
+        if (error) {
+            return next(new HttpError(500, 'Unable to check volume mount state'));
+        }
+
+        if (!isMounted) {
+            return next(new HttpError(405, 'Volume not mounted'));
+        }
+
+        next();
+    });
 }
