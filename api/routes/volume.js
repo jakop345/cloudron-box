@@ -12,6 +12,7 @@ exports = module.exports = {
     deleteVolume: deleteVolume,
     mount: mount,
     unmount: unmount,
+    isMounted: isMounted,
     attachVolume: attachVolume,
     requireMountedVolume: requireMountedVolume
 };
@@ -95,6 +96,16 @@ function unmount(req, res, next) {
         }
 
         res.send(200);
+    });
+}
+
+function isMounted(req, res, next) {
+    req.volume.isMounted(function (error, mounted) {
+        if (error) {
+            return next(new HttpError(500, 'Unable to check if volume is mounted'));
+        }
+
+        res.send(200, { mounted: mounted });
     });
 }
 

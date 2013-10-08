@@ -120,12 +120,32 @@ describe('Server Volume API', function () {
         });
     });
 
+    it('volume should not be mounted', function (done) {
+        request.post(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/ismounted')
+               .auth(USERNAME, PASSWORD)
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            expect(res.body.mounted).to.not.be.ok();
+            done(err);
+        });
+    });
+
     it('mount volume', function (done) {
         request.post(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/mount')
                .auth(USERNAME, PASSWORD)
                .send({ password: PASSWORD })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
+            done(err);
+        });
+    });
+
+    it('volume should be mounted', function (done) {
+        request.post(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/ismounted')
+               .auth(USERNAME, PASSWORD)
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            expect(res.body.mounted).to.be.ok();
             done(err);
         });
     });
