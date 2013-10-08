@@ -167,7 +167,7 @@ function initialize(config, callback) {
         app.post('/api/v1/volume/:volume/delete', requirePassword, routes.volume.deleteVolume);
         app.post('/api/v1/volume/:volume/mount', requirePassword, routes.volume.mount);
         app.post('/api/v1/volume/:volume/unmount', requirePassword, routes.volume.unmount);
-        app.post('/api/v1/volume/:volume/ismounted', routes.volume.isMounted);
+        app.get('/api/v1/volume/:volume/ismounted', routes.volume.isMounted);
     });
 
     app.set('port', config.port);

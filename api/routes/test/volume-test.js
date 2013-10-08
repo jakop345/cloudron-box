@@ -121,7 +121,7 @@ describe('Server Volume API', function () {
     });
 
     it('volume should not be mounted', function (done) {
-        request.post(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/ismounted')
+        request.get(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/ismounted')
                .auth(USERNAME, PASSWORD)
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
@@ -141,7 +141,7 @@ describe('Server Volume API', function () {
     });
 
     it('volume should be mounted', function (done) {
-        request.post(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/ismounted')
+        request.get(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/ismounted')
                .auth(USERNAME, PASSWORD)
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
