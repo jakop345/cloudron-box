@@ -20,11 +20,11 @@ exports = module.exports = {
     remove: removeUser
 };
 
-/*
+ /*
  * Ask the device if it is in first time activation mode.
  *
- * The GET request will be answered with 200 in case the the device is in
- * first time activation mode, otherwise will return a 404.
+ * @statuscode {200} Ok - Device is not yet initialized
+ * @statuscode {410} Gone - Device was already initialized
  */
 function firstTime(req, res, next) {
     if (req.method !== 'GET') {
@@ -32,24 +32,52 @@ function firstTime(req, res, next) {
     }
 
     if (!db.firstTime()) {
-        return next(new HttpError(404, 'Box is already setup.'));
+        return next(new HttpError(410, 'Box is already setup.'));
     }
 
     return res.send(200);
 }
 
+/*
+ * Create an admin user.
+ *
+ * @bodyparam {string} username (required)
+ * @bodyparam {string} password (required)
+ * @bodyparam {string} email (required)
+ * @statuscode {201} Created - Admin user successfully created
+ * @statuscode {403} Forbidden - Admin user already exists
+ *
+ * This method can only be called when the device is in first time activation mode.
+ * Currently there is only one admin user allowed per device.
+ * Creating an admin user also puts the device out of first time activation mode.
+ */
 function createAdmin(req, res, next) {
     if (req.method !== 'POST') {
         return next(new HttpError(405, 'Only POST allowed'));
     }
 
     if (db.USERS_TABLE.count() > 0) {
-        return next(new HttpError(404, 'Only one admin allowed'));
+        return next(new HttpError(403, 'Only one admin allowed'));
     }
 
     createUser(req, res, next);
 }
 
+/*
+ * Create an normal user.
+ *
+ * @bodyparam {string} username (required)
+ * @bodyparam {string} password (required)
+ * @bodyparam {string} email (required)
+ * @statuscode {201} Created - User successfully created
+ * @statuscode {400} Bad Request - Required body parameters missing
+ * @statuscode {409} Conflict - User with username already exists
+ * @statuscode {500} Internal Server Error - Unable to create user
+ *
+ * Only the administrator is allowed to create a new user.
+ * A normal user can create its own volumes and is able to share those
+ * with other users.
+ */
 function createUser(req, res, next) {
     // TODO: I guess only the admin should be allowed to do so? - Johannes
     var username = req.body.username || '';
@@ -61,13 +89,13 @@ function createUser(req, res, next) {
             if (error.reason === UserError.ARGUMENTS) {
                 return next(new HttpError(400, error.message));
             } else if (error.reason === UserError.ALREADY_EXISTS) {
-                return next(new HttpError(404, 'Already exists'));
+                return next(new HttpError(409, 'Already exists'));
             } else {
                 return next(new HttpError(500, error.message));
             }
         }
 
-        res.send(202);
+        res.send(201);
     });
 }
 

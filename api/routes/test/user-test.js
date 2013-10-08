@@ -55,11 +55,20 @@ describe('Server User API', function () {
         });
     });
 
+    it('create admin fails due to missing parameters', function (done) {
+        request.post(SERVER_URL + '/api/v1/createadmin')
+               .send({ username: USERNAME })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(400);
+            done(err);
+        });
+    });
+
     it('create admin', function (done) {
         request.post(SERVER_URL + '/api/v1/createadmin')
                .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
                .end(function (err, res) {
-            expect(res.statusCode).to.equal(202);
+            expect(res.statusCode).to.equal(201);
             done(err);
         });
     });
@@ -67,7 +76,7 @@ describe('Server User API', function () {
     it('device left first time mode', function (done) {
         request.get(SERVER_URL + '/api/v1/firsttime')
                .end(function (err, res) {
-            expect(res.statusCode).to.equal(404);
+            expect(res.statusCode).to.equal(410);
             done(err);
         });
     });
@@ -154,7 +163,7 @@ describe('Server User API', function () {
         request.post(SERVER_URL + '/api/v1/createadmin')
                .send({ username: USERNAME_2, password: PASSWORD, email: EMAIL })
                .end(function (err, res) {
-            expect(res.statusCode).to.equal(404);
+            expect(res.statusCode).to.equal(403);
             done(err);
         });
     });
@@ -181,13 +190,13 @@ describe('Server User API', function () {
                .auth(USERNAME, PASSWORD)
                .send({ username: USERNAME_2, password: PASSWORD_2, email: EMAIL_2 })
                .end(function (err, res) {
-            expect(res.statusCode).to.equal(202);
+            expect(res.statusCode).to.equal(201);
 
             request.post(SERVER_URL + '/api/v1/user/create')
                    .auth(USERNAME, PASSWORD)
                    .send({ username: USERNAME_3, password: PASSWORD_3, email: EMAIL_3 })
                    .end(function (err, res) {
-                expect(res.statusCode).to.equal(202);
+                expect(res.statusCode).to.equal(201);
                 done(err);
             });
         });
@@ -198,7 +207,7 @@ describe('Server User API', function () {
                .auth(USERNAME, PASSWORD)
                .send({ username: USERNAME_2, password: PASSWORD, email: EMAIL })
                .end(function (err, res) {
-            expect(res.statusCode).to.equal(404);
+            expect(res.statusCode).to.equal(409);
             done(err);
         });
     });
