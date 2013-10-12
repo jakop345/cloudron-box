@@ -3,7 +3,7 @@
 var fs = require('fs'),
     HttpError = require('../httperror'),
     mime = require('mime'),
-    debug = require('debug')('file.js'),
+    debug = require('debug')('server:routes/file'),
     express = require('express'),
     util = require('util'),
     path = require('path');

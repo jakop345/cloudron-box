@@ -5,7 +5,7 @@ var db = require('../database'),
     user = require('../user.js'),
     UserError = user.UserError,
     crypto = require('crypto'),
-    debug = require('debug')('user.js'),
+    debug = require('debug')('server:routes/user'),
     HttpError = require('../httperror'),
     express = require('express');
 

@@ -4,7 +4,7 @@ var db = require('./database.js'),
     DatabaseError = db.DatabaseError,
     crypto = require('crypto'),
     util = require('util'),
-    debug = require('debug')('user.js'),
+    debug = require('debug')('server:user'),
     assert = require('assert');
 
 exports = module.exports = {

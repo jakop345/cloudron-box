@@ -1,6 +1,6 @@
 'use strict';
 
-var debug = require('debug')('sync.js'),
+var debug = require('debug')('server:routes/sync'),
     syncer = require('../syncer.js'),
     HttpError = require('../httperror.js'),
     util = require('util');

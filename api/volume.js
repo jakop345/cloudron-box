@@ -2,7 +2,7 @@
 
 var fs = require('fs'),
     db = require('./database.js'),
-    debug = require('debug')('volume.js'),
+    debug = require('debug')('server:volume'),
     encfs = require('encfs'),
     rimraf = require('rimraf'),
     path = require('path'),
