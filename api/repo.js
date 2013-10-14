@@ -316,12 +316,12 @@ Repo.prototype.indexEntries = function (options, callback) {
 
 Repo.prototype._absoluteFilePath = function (filePath) {
     var relativeFilePath = path.relative(this.gitDir, filePath);
-    if (relativeFilePath.slice(0, 3) !== '../') return ''; // inside .git
+    if (relativeFilePath.slice(0, 3) !== '../') return null; // inside .git
 
     var absoluteFilePath = path.resolve(this.checkoutDir, filePath);
     return absoluteFilePath.slice(0, this.checkoutDir.length) == this.checkoutDir
             ? absoluteFilePath
-            : ''; // the path is outside the repo
+            : null; // the path is outside the repo
 };
 
 // FIXME: needs checkout lock
@@ -350,7 +350,7 @@ Repo.prototype.addFile = function (file, options, callback) {
 
     var that = this;
     var absoluteFilePath = this._absoluteFilePath(file);
-    if (absoluteFilePath.length === 0) {
+    if (absoluteFilePath === null) {
         return callback(new RepoError('ENOENT', 'Invalid file path'));
     }
 
@@ -376,7 +376,7 @@ Repo.prototype.updateFile = function (file, options, callback) {
 
     var that = this;
     var absoluteFilePath = this._absoluteFilePath(file);
-    if (absoluteFilePath.length === 0) {
+    if (absoluteFilePath === null) {
         return callback(new RepoError('ENOENT', 'Invalid file path'));
     }
 
@@ -399,7 +399,7 @@ Repo.prototype.removeFile = function (file, options, callback) {
     }
 
     var absoluteFilePath = this._absoluteFilePath(file);
-    if (absoluteFilePath.length === 0) {
+    if (absoluteFilePath === null) {
         return callback(new RepoError('ENOENT', 'Invalid file path'));
     }
 
@@ -456,11 +456,11 @@ Repo.prototype.copyFile = function (from, to, options, callback) {
     }
 
     var fromAbsoluteFilePath = this._absoluteFilePath(from);
-    if (fromAbsoluteFilePath.length === 0) {
+    if (fromAbsoluteFilePath === null) {
         return callback(new RepoError('ENOENT', 'Invalid from path'));
     }
     var toAbsoluteFilePath = this._absoluteFilePath(to);
-    if (toAbsoluteFilePath.length === 0) {
+    if (toAbsoluteFilePath === null) {
         return callback(new RepoError('ENOENT', 'Invalid to path'));
     }
 
@@ -486,7 +486,7 @@ Repo.prototype.createReadStream = function (file, options) {
 
     var absoluteFilePath = this._absoluteFilePath(file);
     var ee = new EventEmitter();
-    if (absoluteFilePath.length === 0) {
+    if (absoluteFilePath === null) {
         process.nextTick(function () { ee.emit('error', new RepoError('ENOENT', 'Invalid file path')); });
         return ee;
     }
