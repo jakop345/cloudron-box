@@ -92,7 +92,10 @@ function metadata(req, res, next) {
  */
 function multipart(req, res, next) {
     var parser = express.multipart({ uploadDir: req.volume.tmpPath, keepExtensions: true, maxFieldsSize: 2 * 1024 * 1024 }); // multipart/form-data
-    parser(req, res, next);
+
+    // increase timeout of file uploads to 3 mins
+    if (req.clearTimeout) req.clearTimeout();
+    express.timeout(3 * 60 * 1000)(req, res, function () { parser(req, res, next); });
 }
 
 function _getConflictFilenameSync(renamePattern, file, checkoutDir) {
