@@ -19,10 +19,6 @@ var optimist = require('optimist'),
     user = require('./api/user.js'),
     pkg = require('./package.json');
 
-
-// some configs, should maybe go into a config file? - Johannes
-var REQUEST_LIMIT='10mb';
-
 exports = module.exports = {
     start: start,
     stop: stop,
@@ -117,6 +113,8 @@ function initialize(config, callback) {
     var app = express();
 
     app.configure(function () {
+        var REQUEST_LIMIT='10mb';
+
         var json = express.json({ strict: true, limit: REQUEST_LIMIT }), // application/json
             urlencoded = express.urlencoded({ limit: REQUEST_LIMIT }); // application/x-www-form-urlencoded
 

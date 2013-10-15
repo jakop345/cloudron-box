@@ -91,7 +91,12 @@ function metadata(req, res, next) {
  * This is required because rename() works only within the same file system.
  */
 function multipart(req, res, next) {
-    var parser = express.multipart({ uploadDir: req.volume.tmpPath, keepExtensions: true, maxFieldsSize: 2 * 1024 * 1024 }); // multipart/form-data
+    var parser = express.multipart({
+        uploadDir: req.volume.tmpPath, // this makes rename() possible
+        keepExtensions: true,
+        maxFieldsSize: 2 * 1024, // only field size, not files
+        limit: '521mb' // file sizes
+    }); // multipart/form-data
 
     // increase timeout of file uploads to 3 mins
     if (req.clearTimeout) req.clearTimeout();
