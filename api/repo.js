@@ -581,7 +581,7 @@ Repo.prototype.getRevisions = function (file, options, callback) {
     var limit = options.limit || 10;
     var revisions = [ ], that = this;
 
-    this.git(['log', '--no-abbrev', '--pretty=' + LOG_LINE_FORMAT, '--raw', '-n', limit, '--', file], function (err, out) {
+    this.git(['log', '--no-abbrev', '--find-renames', '--pretty=' + LOG_LINE_FORMAT, '--raw', '-n', limit, '--', file], function (err, out) {
         if (err) return callback(err);
         var revisionBySha1 = { }, sha1s = [ ];
         var lines = out.trimRight().split('\n');
@@ -622,7 +622,7 @@ Repo.prototype.diffTree = function (treeish1 /* from */, treeish2 /* to */, call
         treeish1 = '4b825dc642cb6eb9a060e54bf8d69288fbee4904';
     }
 
-    this.git(['diff-tree', '-r', treeish1, treeish2], function (err, out) {
+    this.git(['diff-tree', '-r', '--find-renames', treeish1, treeish2], function (err, out) {
         if (err) return callback(err);
         var changes = [ ];
         out = out.trimRight();
