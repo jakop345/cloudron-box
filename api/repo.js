@@ -135,8 +135,11 @@ function parseTreeLine(line) {
     assert(typeof line === 'string' && line.length !== 0);
 
     var id, mode, name, type, _ref;
-    // sample line : 100644 blob e69de29bb2d1d6434b8b29ae775ad8c2e48c5391 43 README
+    // long line format: <mode> SP <type> SP <object> SP+ <object size> TAB <file>
+    // object size is right justified to a min of 7
+    // sample line : 100644 blob e69de29bb2d1d6434b8b29ae775ad8c2e48c5391     43\tREADME
     var parts = line.split(/[\t ]+/, 5);
+
     return {
         mode: parseInt(parts[0], 8),
         size: parseInt(parts[3], 10) || 0, // for dirs, size field is '-' and parseInt will return NaN
@@ -159,10 +162,10 @@ Repo.prototype.getTree = function (treeish, options, callback) {
     if (treeish === '') return callback(null, tree);
 
     var path = options.path || '', listSubtrees = options.listSubtrees ? '-t' : '';
-    this.git(['ls-tree', '-r', '-l', listSubtrees, treeish, '--', path], function (err, out) {
+    this.git(['ls-tree', '-z', '-r', '-l', listSubtrees, treeish, '--', path], function (err, out) {
         if (err) return callback(err);
-        var lines = out.trimRight().split('\n');
-        lines.forEach(function (line) { tree.entries.push(parseTreeLine(line)); });
+        var lines = out.split('\0');
+        lines.forEach(function (line) { if (line.length !== 0) tree.entries.push(parseTreeLine(line)); });
         callback(null, tree);
     });
 };
@@ -199,11 +202,10 @@ Repo.prototype.fileEntry = function (file, commitish, callback) {
     // ls-tree shows dir contents if there is a trailing '/', so strip it
     if (file.charAt(file.length-1) === '/') file = file.substr(0, file.length - 1);
 
-    this.git(['ls-tree', '-l', commitish, '--', file], function (err, out) {
-        out = out ? out.trimRight() : '';
-        if (out.length === 0) return callback(new RepoError('ENOENT', 'File removed'));
+    this.git(['ls-tree', '-z', '-l', commitish, '--', file], function (err, out) {
+        if (!out || out.length === 0) return callback(new RepoError('ENOENT', 'File removed'));
 
-        var entry = parseTreeLine(out);
+        var entry = parseTreeLine(out.slice(0, -1));
 
         // dirs don't have mtime information
         if (isDir(entry.mode)) return callback(null, entry);
