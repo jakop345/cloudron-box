@@ -283,7 +283,7 @@ Repo.prototype._renameFileAndCommit = function (file, options, callback) {
     });
 };
 
-function parseIndexLines(lines, i) {
+function parseIndexLines(out) {
     /*
         100644 81cc9ef1205995550f8faea11180a1ff7806ed81 0\twebadmin/volume-client.js\0ctime: 1376890412:218737065
           mtime: 1376890412:218737065
@@ -291,10 +291,19 @@ function parseIndexLines(lines, i) {
           uid: 1000 gid: 1000
           size: 3994    flags: 0
      */
-    var entry = parseIndexLine(lines[i].substr(0, lines[i].lastIndexOf('\0')));
-    entry.mtime = parseInt(lines[i+1].split(/:/)[1], 10);
-    entry.size = parseInt(lines[i+4].split(/:/)[1], 10);
-    return entry;
+
+    var lines = out.split('\n');
+    var entries = [ ];
+    for (var i = 0; i < lines.length; i += 5) {
+        if (lines[i].length === 0) break;
+
+        var entry = parseIndexLine(lines[i].substr(0, lines[i].lastIndexOf('\0')));
+        entry.mtime = parseInt(lines[i+1].split(/:/)[1], 10);
+        entry.size = parseInt(lines[i+4].split(/:/)[1], 10);
+
+        entries.push(entry);
+    }
+    return entries;
 }
 
 Repo.prototype.indexEntries = function (options, callback) {
@@ -308,12 +317,7 @@ Repo.prototype.indexEntries = function (options, callback) {
     var path = options.path || '';
     this.git(['ls-files', '-z', '-s', '--debug', '--', path], function (err, out) {
         if (err) return callback(err);
-        var lines = out.split('\n');
-        var entries = [ ];
-        for (var i = 0; i < lines.length; i += 5) {
-            if (lines[i].length !== 0) entries.push(parseIndexLines(lines, i));
-        }
-        callback(null, entries);
+        callback(null, parseIndexLines(out));
     });
 };
 
