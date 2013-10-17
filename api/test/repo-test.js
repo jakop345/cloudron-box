@@ -17,6 +17,7 @@ var Repo = require('../repo'),
 
 var EMAIL = 'no@bo.dy';
 var USERNAME = 'nobody';
+var SPECIAL_FILE = 'SPECIAL ~`!@#$%^&*()_+-=[]{}|,.<>?';
 
 var tmpdirname = 'repo-test-' + crypto.randomBytes(4).readUInt32LE(0);
 var tmpdir = path.join(os.tmpdir(), tmpdirname);
@@ -60,6 +61,18 @@ describe('Repo', function () {
         repo.addFile('README2', { file: tmpfile }, function (err, fileInfo, commit) {
             expect(commit.subject).to.equal('Add README2');
             expect(fileInfo.sha1).to.equal('2180e82647ff9a3e1a93ab43b81c82025c33c6e2');
+            expect(commit.author.name).to.equal(USERNAME);
+            expect(commit.author.email).to.equal(EMAIL);
+            done();
+        });
+    });
+
+    it('addFile - special chars', function (done) {
+        var tmpfile = path.join(os.tmpdir(), 'README');
+        fs.writeFileSync(tmpfile, 'SPECIAL');
+        repo.addFile(SPECIAL_FILE, { file: tmpfile }, function (err, fileInfo, commit) {
+            expect(commit.subject).to.equal('Add ' + SPECIAL_FILE);
+            expect(fileInfo.sha1).to.equal('47a3659e3583447f22c1abaced92065056baf177');
             expect(commit.author.name).to.equal(USERNAME);
             expect(commit.author.email).to.equal(EMAIL);
             done();
@@ -140,8 +153,10 @@ describe('Repo', function () {
 
     it('getTree - valid tree', function (done) {
         repo.getTree('HEAD', function (err, tree) {
-            expect(tree.entries.length).to.equal(3);
-            expect(tree.entries[0].path).to.equal('README');
+            expect(tree.entries.length).to.greaterThan(3);
+            var paths = tree.entries.map(function (entry) { return entry.path; });
+            expect(paths).to.contain('README');
+            expect(paths).to.contain(SPECIAL_FILE);
             done();
         });
     });
@@ -201,14 +216,19 @@ describe('Repo', function () {
 
     it('diffTree - empty tree', function (done) {
         repo.diffTree('', 'HEAD', function (err, changes) {
-            expect(changes.length).to.equal(3);
+            expect(changes.length).to.be.greaterThan(3);
+            var paths = changes.map(function (change) { return change.path; });
+
             expect(changes[0].path).to.equal('README');
             expect(changes[0].status).to.equal('ADDED');
+
+            expect(paths).to.contain(SPECIAL_FILE);
+
             done(err);
         });
     });
 
-    it('getRevisions', function (done) {
+    it('getRevisions - README', function (done) {
         repo.getRevisions('README', function (err, revisions) {
             expect(err).to.equal(null);
             expect(revisions.length).to.equal(2);
@@ -223,11 +243,28 @@ describe('Repo', function () {
         });
     });
 
+    it('getRevisions - SPECIAL_FILE', function (done) {
+        repo.getRevisions(SPECIAL_FILE, function (err, revisions) {
+            expect(err).to.equal(null);
+            expect(revisions.length).to.equal(1);
+            expect(revisions[0].path).to.equal(SPECIAL_FILE);
+            expect(revisions[0].subject).to.equal('Add ' + SPECIAL_FILE);
+            expect(revisions[0].size).to.equal('SPECIAL'.length);
+
+            done();
+        });
+    });
+
     it('index', function (done) {
         repo.indexEntries(function (err, entries) {
-            expect(entries.length).to.equal(3);
+            expect(entries.length).to.be.greaterThan(3);
+
             expect(entries[0].size).to.equal('README_UPDATED_CONTENTS'.length);
             expect(entries[0].mtime).to.not.equal(0);
+
+            var paths = entries.map(function (entry) { return entry.path; });
+            expect(paths).to.contain(SPECIAL_FILE);
+
             done(err);
         });
     });
@@ -337,6 +374,17 @@ describe('Repo', function () {
             expect(commit.subject).to.equal('Update NEWFILE');
             expect(fileInfo.path).to.equal('NEWFILE');
             expect(fileInfo.sha1).to.equal('fc5640aae67df3211955256e81a1de847956ca32');
+            done();
+        });
+    });
+
+    it('putFile - overwrite SPECIAL_FILE', function (done) {
+        var tmpfile = path.join(os.tmpdir(), 'SPECIAL');
+        fs.writeFileSync(tmpfile, 'SPECIAL_FILE_CONTENTS_UPDATED_OVERWRITE');
+        repo.putFile(SPECIAL_FILE, tmpfile, { overwrite: true }, function (err, fileInfo, commit) {
+            expect(commit.subject).to.equal('Update ' + SPECIAL_FILE);
+            expect(fileInfo.path).to.equal(SPECIAL_FILE);
+            expect(fileInfo.sha1).to.equal('dbffeabd7c9bc0aecaa3f733c59c65940ab28df0');
             done();
         });
     });
