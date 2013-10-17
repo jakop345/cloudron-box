@@ -85,32 +85,38 @@ Repo.prototype.spawn = function (args) {
     return proc;
 };
 
-var LOG_LINE_FORMAT = '%T,%ct,%P,%s,%H,%an,%ae';
+var LOG_LINE_FORMAT = '%T%x00%ct%x00%P%x00%s%x00%H%x00%an%x00%ae%x00';
+var LOG_LINE_FORMAT_FIELD_COUNT = LOG_LINE_FORMAT.split('%x00').length;
 
-function parseLogLine(line) {
+function parseLogLine(line, startPos) {
     assert(typeof line === 'string' && line.length !== 0);
+    var pos = [ startPos ];
+    for (var i = 1; i <= LOG_LINE_FORMAT_FIELD_COUNT; i++) {
+        pos[i] = line.indexOf('\0', pos[i-1]) + 1;
+    }
 
-    var parts = line.split(',');
-    return {
-        treeSha1: parts[0],
-        commitDate: parseInt(parts[1], 10),
-        parentSha1: parts[2],
-        subject: parts[3],
-        sha1: parts[4],
+    var commit = {
+        treeSha1: line.slice(pos[0], pos[1] - 1),
+        commitDate: parseInt(line.slice(pos[1], pos[2] - 1), 10),
+        parentSha1: line.slice(pos[2], pos[3] - 1),
+        subject: line.slice(pos[3], pos[4] - 1),
+        sha1: line.slice(pos[4], pos[5] - 1),
         author: {
-            name: parts[5],
-            email: parts[6]
+            name: line.slice(pos[5], pos[6] - 1),
+            email: line.slice(pos[6], pos[7] - 1)
         }
     };
+
+    return { commit: commit, pos: pos[7] };
 }
 
 Repo.prototype.getCommit = function (commitish, callback) {
     assert(typeof commitish === 'string');
     assert(typeof callback === 'function');
 
-    this.git(['show', '-s', '--pretty=' + LOG_LINE_FORMAT, commitish], function (err, out) {
+    this.git(['show', '-z', '--raw', '-s', '--pretty=' + LOG_LINE_FORMAT, commitish], function (err, out) {
         if (err) return callback(err);
-        callback(null, parseLogLine(out.trimRight()));
+        callback(null, parseLogLine(out, 0).commit);
     });
 };
 
@@ -516,42 +522,63 @@ Repo.prototype.createReadStream = function (file, options) {
     return proc.stdout;
 };
 
-function parseRawDiffLine(line) {
+function parseRawDiffLine(line, startPos) {
     assert(typeof line === 'string' && line.length !== 0);
 
-    // :100644 100644 78681069871a08110373201344e5016e218604ea 8b58e26f01a1af730e727b0eb0f1ff3b33a79de2 M      package.json
-    var parts = line.split(/[ \t]+/);
+    // :100644 100644 78681069871a08110373201344e5016e218604ea 8b58e26f01a1af730e727b0eb0f1ff3b33a79de2 M\0package.json\0[newpath\0]
+    // pos records the position of each parts
+    var pos = [ ];
+    pos[0] = startPos + 1;
+    pos[1] = line.indexOf(' ', pos[0]) + 1;
+    pos[2] = line.indexOf(' ', pos[1]) + 1;
+    pos[3] = line.indexOf(' ', pos[2]) + 1;
+    pos[4] = line.indexOf(' ', pos[3]) + 1;
+    pos[5] = line.indexOf('\0', pos[4]) + 1;
+    pos[6] = line.indexOf('\0', pos[5]) + 1;
 
-    var result = {
-        oldRev: parts[2],
-        rev: parts[3],
-        oldMode: parseInt(parts[0].substr(1), 8),
-        mode: parseInt(parts[1], 8),
+    var change = {
+        oldRev: line.substr(pos[2], 40),
+        rev: line.substr(pos[3], 40),
+        oldMode: parseInt(line.substr(pos[0], 6), 8),
+        mode: parseInt(line.substr(pos[1], 6), 8),
         status: '', // filled below
         oldPath: '', // filled below
         path: '' // filled below
     };
 
-    switch (parts[4].charAt(0)) {
-    case 'A': result.status = 'ADDED'; break;
-    case 'C': result.status = 'COPIED'; break;
-    case 'D': result.status = 'DELETED'; break;
-    case 'M': result.status = 'MODIFIED'; break;
-    case 'R': result.status = 'RENAMED'; break;
-    case 'T': result.status = 'MODECHANGED'; break;
+    switch (line.charAt(pos[4])) {
+    case 'A': change.status = 'ADDED'; break;
+    case 'C': change.status = 'COPIED'; break;
+    case 'D': change.status = 'DELETED'; break;
+    case 'M': change.status = 'MODIFIED'; break;
+    case 'R': change.status = 'RENAMED'; break;
+    case 'T': change.status = 'MODECHANGED'; break;
     case 'U': case 'X': // internal error
         return null;
     }
 
-    if (result.status === 'Renamed' || result.status === 'Copied') {
-        result.oldPath = parts[5];
-        result.path = parts[6];
+    if (change.status === 'Renamed' || change.status === 'Copied') {
+        change.oldPath = line.substr(pos[5], pos[6] - pos[5] - 1);
+        pos[7] = line.indexOf('\0', pos[6]) + 1;
+        change.path = line.substr(pos[6], pos[7] - pos[6] - 1);
+        return { change: change, pos: pos[7] };
     } else {
-        delete result.oldPath;
-        result.path = parts[5];
+        delete change.oldPath;
+        change.path = line.substr(pos[5], pos[6] - pos[5] - 1);
+        return { change: change, pos: pos[6] };
+    }
+}
+
+function parseRawDiffLines(out) {
+    var pos = 0;
+    var changes = [ ];
+    while (pos < out.length) {
+        var result = parseRawDiffLine(out, pos);
+        changes.push(result.change);
+        pos = result.pos;
     }
 
-    return result;
+    return changes;
 }
 
 Repo.prototype._getFileSizes = function (sha1s, callback) {
@@ -585,13 +612,22 @@ Repo.prototype.getRevisions = function (file, options, callback) {
     var limit = options.limit || 10;
     var revisions = [ ], that = this;
 
-    this.git(['log', '--no-abbrev', '--find-renames', '--pretty=' + LOG_LINE_FORMAT, '--raw', '-n', limit, '--', file], function (err, out) {
+    this.git(['log', '-z', '--no-abbrev', '--find-renames', '--pretty=' + LOG_LINE_FORMAT, '--raw', '-n', limit, '--', file], function (err, out) {
         if (err) return callback(err);
         var revisionBySha1 = { }, sha1s = [ ];
-        var lines = out.trimRight().split('\n');
-        for (var i = 0; i < lines.length; i += 3) {
-            var commit = parseLogLine(lines[i].trimRight());
-            var diff = parseRawDiffLine(lines[i+2].trimRight());
+
+        var pos = 0;
+        while (pos < out.length) {
+            var logResult = parseLogLine(out, pos);
+            var commit = logResult.commit;
+            pos = logResult.pos;
+
+            pos += 2; // skip over a \0 and a \n
+
+            var diffResult = parseRawDiffLine(out, pos);
+            var diff = diffResult.change;
+            pos = diffResult.pos;
+
             var revision = {
                 sha1: diff.rev,
                 mode: diff.mode,
@@ -626,16 +662,9 @@ Repo.prototype.diffTree = function (treeish1 /* from */, treeish2 /* to */, call
         treeish1 = '4b825dc642cb6eb9a060e54bf8d69288fbee4904';
     }
 
-    this.git(['diff-tree', '-r', '--find-renames', treeish1, treeish2], function (err, out) {
+    this.git(['diff-tree', '-z', '-r', '--find-renames', treeish1, treeish2], function (err, out) {
         if (err) return callback(err);
-        var changes = [ ];
-        out = out.trimRight();
-        if (out === '') return callback(null, changes); // nothing changed
-
-        out.split('\n').forEach(function (line) {
-            changes.push(parseRawDiffLine(line));
-        });
-        callback(null, changes);
+        callback(null, parseRawDiffLines(out));
     });
 };
 
