@@ -138,13 +138,14 @@ function parseTreeLine(line) {
     // long line format: <mode> SP <type> SP <object> SP+ <object size> TAB <file>
     // object size is right justified to a min of 7
     // sample line : 100644 blob e69de29bb2d1d6434b8b29ae775ad8c2e48c5391     43\tREADME
-    var parts = line.split(/[\t ]+/, 5);
+    var parts = line.split(/[\t ]+/, 4);
+    var endPos = parts[0].length + 1 + parts[1].length + 1 + parts[2].length + 1 + Math.max(7, parts[3].length) + 1;
 
     return {
         mode: parseInt(parts[0], 8),
         size: parseInt(parts[3], 10) || 0, // for dirs, size field is '-' and parseInt will return NaN
         sha1: parts[2],
-        path: parts[4]
+        path: line.substr(endPos)
     };
 }
 
