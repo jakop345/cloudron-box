@@ -55,7 +55,7 @@ Repo.prototype._exec = function (command, callback) {
 Repo.prototype.git = function (args, callback) {
     assert(util.isArray(args));
 
-    var stdout = '', stderr = '';
+    var stdout = '', stderr = ''; // FIXME: work with Buffer instead of strings
     var proc = this.spawn(args);
     proc.stdout.on('data', function (data) { stdout += data; });
     proc.stderr.on('data', function (data) { stderr += data; });
