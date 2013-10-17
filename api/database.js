@@ -1,7 +1,8 @@
 'use strict';
 
 var fs = require('fs'),
-    util = require('util');
+    util = require('util'),
+    safe = require('safetydance');
 
 var rootDir = '';
 
@@ -48,12 +49,8 @@ function Table(dbFile, schema) {
 
     if (!('hashKey' in this)) throw(new Error('Table does not define a primary key'));
 
-    try {
-        var data = fs.readFileSync(this.dbFile);
-        this.cache = data ? JSON.parse(data) : { };
-    } catch (e) {
-        this.cache = { };
-    }
+    var data = safe.fs.readFileSync(this.dbFile);
+    this.cache = safe.JSON.parse(data) || { };
 }
 
 Table.prototype.put = function (obj, callback) {

@@ -11,7 +11,8 @@ var fs = require('fs'),
     aes = require("aes-helper"),
     util = require('util'),
     HttpError = require('./httperror.js'),
-    Repo = require('./repo.js');
+    Repo = require('./repo.js'),
+    safe = require('safetydance');
 
 exports = module.exports = {
     Volume: Volume,
@@ -245,12 +246,12 @@ Volume.prototype.listFiles = function (directory, callback) {
                 tmp.filename = file;
                 tmp.path = path.join(directory, file);
 
-                try {
-                    tmp.stat = fs.statSync(path.join(folder, file));
+                tmp.stat = safe.fs.statSync(path.join(folder, file));
+                if (tmp.stat) {
                     tmp.isFile = tmp.stat.isFile();
                     tmp.isDirectory = tmp.stat.isDirectory();
-                } catch (e) {
-                    debug('Error getting file information:' + JSON.stringify(e));
+                } else {
+                    debug('Error getting file information:' + safe.error.message);
                 }
 
                 ret.push(tmp);
@@ -309,11 +310,8 @@ function listVolumes(username, config, callback) {
         var ret = [];
 
         files.forEach(function (file) {
-            var stat;
-
-            try {
-                stat = fs.statSync(path.join(config.dataRoot, file));
-            } catch (e) {
+            var stat = safe.fs.statSync(path.join(config.dataRoot, file));
+            if (!stat) {
                 debug('Unable to stat "' + file + '".');
                 return;
             }
@@ -402,13 +400,8 @@ function getVolume(name, username, config) {
 
     // TODO check if username has access and if it exists
     var vol = new Volume(name, config);
-    try {
-        if (!fs.existsSync(vol.dataPath)) {
-            debug('No volume "' + name + '" for user "' + username + '".');
-            return null;
-        }
-    } catch (e) {
-        debug('No volume "' + name + '" for user "' + username + '". ' + JSON.stringify(e));
+    if (!safe.fs.existsSync(vol.dataPath)) {
+        debug('No volume "' + name + '" for user "' + username + '". ' + JSON.stringify(safe.error));
         return null;
     }
 

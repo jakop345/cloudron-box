@@ -6,7 +6,8 @@ var fs = require('fs'),
     debug = require('debug')('server:routes/file'),
     express = require('express'),
     util = require('util'),
-    path = require('path');
+    path = require('path'),
+    safe = require('safetydance');
 
 exports = module.exports = {
     read: read,
@@ -126,11 +127,9 @@ function _getConflictFilenameSync(renamePattern, file, checkoutDir) {
  *
  */
 function putFile(req, res, next) {
-    var data;
-    try {
-        data = JSON.parse(req.body.data);
-    } catch (e) {
-        return next(new HttpError(400, 'Cannot parse data field:' + e.message));
+    var data = safe.JSON.parse(req.body.data);
+    if (!data) {
+        return next(new HttpError(400, 'Cannot parse data field:' + safe.error.message));
     }
 
     if (!req.files.file) return next(new HttpError(400, 'file not provided'));

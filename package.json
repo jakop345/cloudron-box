@@ -26,7 +26,8 @@
     "mime": "*",
     "aes-helper": "*",
     "polo": "*",
-    "encfs": "*"
+    "encfs": "*",
+    "safetydance": "*"
   },
   "devDependencies": {
     "mocha": "*",
