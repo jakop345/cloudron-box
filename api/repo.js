@@ -587,7 +587,8 @@ Repo.prototype._getFileSizes = function (sha1s, callback) {
     proc.stdout.on('data', function (d) { data += d; });
     proc.stdout.on('end', function () {
         var sizes = [ ];
-        data.trimRight().split('\n').forEach(function (line) {
+        data.split('\n').forEach(function (line) {
+            if (line.length === 0) return;
             var parts = line.split(' ');
             var sha1 = parts[0], size = parseInt(parts[2], 10);
             sizes.push(size);
@@ -705,7 +706,7 @@ Repo.prototype.hashObject = function (filePath, callback) {
 
     this.git(['hash-object', filePath], function (err, out) {
         if (err) return callback(err);
-        callback(null, out.trimRight());
+        callback(null, out.slice(0, -1));
     });
 };
 
