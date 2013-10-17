@@ -5,7 +5,8 @@ var db = require('./database.js'),
     crypto = require('crypto'),
     util = require('util'),
     debug = require('debug')('server:user'),
-    assert = require('assert');
+    assert = require('assert'),
+    safe = require('safetydance');
 
 exports = module.exports = {
     UserError: UserError,
@@ -28,7 +29,7 @@ function UserError(err, reason) {
     Error.captureStackTrace(this, this.constructor);
 
     this.name = this.constructor.name;
-    this.message = JSON.stringify(err);
+    this.message = safe.JSON.stringify(err);
     this.code = err ? err.code : null;
     this.reason = reason || UserError.INTERNAL_ERROR;
 }

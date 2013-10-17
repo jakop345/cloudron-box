@@ -26,7 +26,7 @@ function DatabaseError(err, reason) {
     Error.captureStackTrace(this, this.constructor);
 
     this.name = this.constructor.name;
-    this.message = JSON.stringify(err);
+    this.message = safe.JSON.stringify(err);
     this.code = err ? err.code : null;
     this.reason = reason || DatabaseError.SERVER_ERROR;
     this.statusCode = 500; // any db error is a server error
@@ -59,7 +59,7 @@ Table.prototype.put = function (obj, callback) {
     if (key in this.cache) return callback(new DatabaseError(null, DatabaseError.ALREADY_EXISTS));
 
     this.cache[key] = obj;
-    fs.writeFileSync(this.dbFile, JSON.stringify(this.cache));
+    fs.writeFileSync(this.dbFile, safe.JSON.stringify(this.cache));
     callback();
 };
 
@@ -69,7 +69,7 @@ Table.prototype.update = function (obj, callback) {
     if (!(key in this.cache)) return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
 
     this.cache[key] = obj;
-    fs.writeFileSync(this.dbFile, JSON.stringify(this.cache));
+    fs.writeFileSync(this.dbFile, safe.JSON.stringify(this.cache));
     callback();
 };
 
@@ -94,7 +94,7 @@ Table.prototype.remove = function (key, callback) {
     var value = this.cache[key];
     if (value) {
         delete this.cache[key];
-        fs.writeFileSync(this.dbFile, JSON.stringify(this.cache));
+        fs.writeFileSync(this.dbFile, safe.JSON.stringify(this.cache));
 
         return callback(null, value);
     }

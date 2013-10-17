@@ -1,6 +1,7 @@
 'use strict';
 
-var util = require('util');
+var util = require('util'),
+    safe = require('safetydance');
 
 module.exports = HttpError;
 
@@ -13,7 +14,7 @@ function HttpError(statusCode, message) {
     if (typeof message == 'string') {
         this.message = message;
     } else {
-        this.message = JSON.stringify(message);
+        this.message = safe.JSON.stringify(message);
     }
 }
 util.inherits(HttpError, Error);

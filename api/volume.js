@@ -32,7 +32,7 @@ function VolumeError(err, reason) {
     Error.captureStackTrace(this, this.constructor);
 
     this.name = this.constructor.name;
-    this.message = JSON.stringify(err);
+    this.message = safe.JSON.stringify(err);
     this.code = err ? err.code : null;
     this.reason = reason || VolumeError.INTERNAL_ERROR;
     this.statusCode = 500; // any db error is a server error
@@ -118,7 +118,7 @@ Volume.prototype.open = function (username, password, callback) {
 
         that.meta.get(username, function (error, record) {
             if (error) {
-                debug('Unable to get user from meta db. ' + JSON.stringify(error));
+                debug('Unable to get user from meta db. ' + safe.JSON.stringify(error));
                 return callback(error);
             }
 
@@ -276,7 +276,7 @@ Volume.prototype.addUser = function (user, password, callback) {
 
     this.meta.put(record, function (error) {
         if (error) {
-            debug('Unable to add user to meta db. ' + JSON.stringify(error));
+            debug('Unable to add user to meta db. ' + safe.JSON.stringify(error));
             return callback(error);
         }
 
@@ -303,7 +303,7 @@ function listVolumes(username, config, callback) {
 
     fs.readdir(config.dataRoot, function (error, files) {
         if (error) {
-            debug('Unable to list volumes.' + JSON.stringify(error));
+            debug('Unable to list volumes.' + safe.JSON.stringify(error));
             return callback(new VolumeError(error, VolumeError.READ_ERROR));
         }
 
@@ -346,7 +346,7 @@ function createVolume(name, user, config, callback) {
 
     encfs.create(vol.dataPath, vol.mountPoint, volPassword, function (error, result) {
         if (error) {
-            debug('Unable to create encfs container for volume "' + name + '". ' + JSON.stringify(error));
+            debug('Unable to create encfs container for volume "' + name + '". ' + safe.JSON.stringify(error));
             return callback(new VolumeError(error, VolumeError.INTERNAL_ERROR));
         }
 
@@ -401,7 +401,7 @@ function getVolume(name, username, config) {
     // TODO check if username has access and if it exists
     var vol = new Volume(name, config);
     if (!safe.fs.existsSync(vol.dataPath)) {
-        debug('No volume "' + name + '" for user "' + username + '". ' + JSON.stringify(safe.error));
+        debug('No volume "' + name + '" for user "' + username + '". ' + safe.JSON.stringify(safe.error));
         return null;
     }
 
