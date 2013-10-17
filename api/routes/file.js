@@ -111,7 +111,7 @@ function _getConflictFilenameSync(renamePattern, file, checkoutDir) {
 
     for (var i = 0; true; i++) {
         file = util.format("%s-%s%s%s", baseName, renamePattern, i ? ' ' + i : '', ext);
-        if (!fs.existsSync(path.join(checkoutDir, file))) break;
+        if (!safe.fs.existsSync(path.join(checkoutDir, file))) break;
     }
     return file;
 }

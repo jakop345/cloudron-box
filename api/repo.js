@@ -10,7 +10,8 @@ var exec = require('child_process').exec,
     util = require('util'),
     EventEmitter = require('events').EventEmitter,
     spawn = require('child_process').spawn,
-    constants = require('constants'); // internal module? same as process.binding('constants')
+    constants = require('constants'), // internal module? same as process.binding('constants')
+    safe = require('safetydance');
 
 exports = module.exports = Repo;
 
@@ -367,7 +368,7 @@ Repo.prototype.addFile = function (file, options, callback) {
         return callback(new RepoError('ENOENT', 'Invalid file path'));
     }
 
-    if (fs.existsSync(absoluteFilePath)) {
+    if (safe.fs.existsSync(absoluteFilePath)) {
         return callback(new RepoError('ENOENT', 'File already exists'));
     }
 
@@ -393,7 +394,7 @@ Repo.prototype.updateFile = function (file, options, callback) {
         return callback(new RepoError('ENOENT', 'Invalid file path'));
     }
 
-    if (!fs.existsSync(absoluteFilePath)) {
+    if (!safe.fs.existsSync(absoluteFilePath)) {
         return callback(new RepoError('ENOENT', 'File does not exist'));
     }
 
