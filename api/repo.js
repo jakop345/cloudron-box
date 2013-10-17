@@ -245,12 +245,14 @@ function parseIndexLine(line) {
     assert(typeof line === 'string' && line.length !== 0);
 
     var mode, sha1, stage, name;
-    // sample line : 100644 294c76dd833e77480ba85bdff83b4ef44fa4c08f 0  repo-test.js
-    var parts = line.split(/[\t ]+/, 4);
+    // sample line : 100644 294c76dd833e77480ba85bdff83b4ef44fa4c08f 0\trepo-test.js
+    var parts = line.split(/[\t ]+/, 3);
+    var endPos = parts[0].length + 1 + parts[1].length + 1 + parts[2].length  + 1;
+
     return {
         mode: parseInt(parts[0], 8),
         sha1: parts[1],
-        path: parts[3]
+        path: line.substr(endPos)
     };
 }
 
@@ -258,9 +260,9 @@ Repo.prototype._addFileAndCommit = function (file, options, callback) {
     var that = this;
     this.git(['add', file], function (err) {
         if (err) return callback(err);
-        that.git(['ls-files', '-s', '--', file], function (err, out) {
+        that.git(['ls-files', '-z', '-s', '--', file], function (err, out) {
             if (err) return callback(err);
-            var fileInfo = parseIndexLine(out.trimRight());
+            var fileInfo = parseIndexLine(out.slice(0, -1));
             var message = options.message || (options._operation + ' ' + file);
             that._createCommit(message, function (err, commit) {
                 if (err) return callback(err);
@@ -283,16 +285,15 @@ Repo.prototype._renameFileAndCommit = function (file, options, callback) {
 
 function parseIndexLines(lines, i) {
     /*
-        100644 81cc9ef1205995550f8faea11180a1ff7806ed81 0   webadmin/volume-client.js
-          ctime: 1376890412:218737065
+        100644 81cc9ef1205995550f8faea11180a1ff7806ed81 0\twebadmin/volume-client.js\0ctime: 1376890412:218737065
           mtime: 1376890412:218737065
           dev: 2049 ino: 3391167
           uid: 1000 gid: 1000
           size: 3994    flags: 0
      */
-    var entry = parseIndexLine(lines[i]);
+    var entry = parseIndexLine(lines[i].substr(0, lines[i].lastIndexOf('\0')));
     entry.mtime = parseInt(lines[i+1].split(/:/)[1], 10);
-    entry.size = parseInt(lines[i+5].split(/:/)[1], 10);
+    entry.size = parseInt(lines[i+4].split(/:/)[1], 10);
     return entry;
 }
 
@@ -305,13 +306,12 @@ Repo.prototype.indexEntries = function (options, callback) {
     }
 
     var path = options.path || '';
-    this.git(['ls-files', '-s', '--debug', '--', path], function (err, out) {
+    this.git(['ls-files', '-z', '-s', '--debug', '--', path], function (err, out) {
         if (err) return callback(err);
-        out = out.trimRight();
         var lines = out.split('\n');
         var entries = [ ];
-        for (var i = 0; i < lines.length; i += 6) {
-            entries.push(parseIndexLines(lines, i));
+        for (var i = 0; i < lines.length; i += 5) {
+            if (lines[i].length !== 0) entries.push(parseIndexLines(lines, i));
         }
         callback(null, entries);
     });
