@@ -88,7 +88,7 @@ Repo.prototype.spawn = function (args) {
 var LOG_LINE_FORMAT = '%T,%ct,%P,%s,%H,%an,%ae';
 
 function parseLogLine(line) {
-    assert(typeof line === 'string');
+    assert(typeof line === 'string' && line.length !== 0);
 
     var parts = line.split(',');
     return {
@@ -132,7 +132,7 @@ Repo.prototype.create = function (username, email, callback) {
 };
 
 function parseTreeLine(line) {
-    assert(typeof line === 'string');
+    assert(typeof line === 'string' && line.length !== 0);
 
     var id, mode, name, type, _ref;
     // sample line : 100644 blob e69de29bb2d1d6434b8b29ae775ad8c2e48c5391 43 README
@@ -239,7 +239,7 @@ function createTempFileSync(dir, contents) {
 }
 
 function parseIndexLine(line) {
-    assert(typeof line === 'string');
+    assert(typeof line === 'string' && line.length !== 0);
 
     var mode, sha1, stage, name;
     // sample line : 100644 294c76dd833e77480ba85bdff83b4ef44fa4c08f 0  repo-test.js
@@ -510,7 +510,7 @@ Repo.prototype.createReadStream = function (file, options) {
 };
 
 function parseRawDiffLine(line) {
-    assert(typeof line === 'string');
+    assert(typeof line === 'string' && line.length !== 0);
 
     // :100644 100644 78681069871a08110373201344e5016e218604ea 8b58e26f01a1af730e727b0eb0f1ff3b33a79de2 M      package.json
     var parts = line.split(/[ \t]+/);
