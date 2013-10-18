@@ -61,7 +61,7 @@ Table.prototype.put = function (obj, callback) {
     if (key in this.cache) return callback(new DatabaseError(null, DatabaseError.ALREADY_EXISTS));
 
     this.cache[key] = obj;
-    fs.writeFileSync(this.dbFile, safe.JSON.stringify(this.cache));
+    fs.writeFileSync(this.dbFile, safe.JSON.stringify(this.cache, null, 4));
     callback();
 };
 
@@ -71,7 +71,7 @@ Table.prototype.update = function (obj, callback) {
     if (!(key in this.cache)) return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
 
     this.cache[key] = obj;
-    fs.writeFileSync(this.dbFile, safe.JSON.stringify(this.cache));
+    fs.writeFileSync(this.dbFile, safe.JSON.stringify(this.cache, null, 4));
     callback();
 };
 
@@ -96,7 +96,7 @@ Table.prototype.remove = function (key, callback) {
     var value = this.cache[key];
     if (value) {
         delete this.cache[key];
-        fs.writeFileSync(this.dbFile, safe.JSON.stringify(this.cache));
+        fs.writeFileSync(this.dbFile, safe.JSON.stringify(this.cache, null, 4));
 
         return callback(null, value);
     }
