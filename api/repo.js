@@ -544,26 +544,25 @@ function parseRawDiffLine(line, startPos) {
 
     // :100644 100644 78681069871a08110373201344e5016e218604ea 8b58e26f01a1af730e727b0eb0f1ff3b33a79de2 M\0package.json\0[newpath\0]
     // pos records the position of each parts
-    var pos = [ ];
-    pos[0] = startPos + 1;
-    pos[1] = line.indexOf(' ', pos[0]) + 1;
-    pos[2] = line.indexOf(' ', pos[1]) + 1;
-    pos[3] = line.indexOf(' ', pos[2]) + 1;
-    pos[4] = line.indexOf(' ', pos[3]) + 1;
-    pos[5] = line.indexOf('\0', pos[4]) + 1;
-    pos[6] = line.indexOf('\0', pos[5]) + 1;
+    var oldModePos = startPos + 1; // skip colon
+    var modePos = line.indexOf(' ', oldModePos) + 1;
+    var oldRevPos = line.indexOf(' ', modePos) + 1;
+    var revPos = line.indexOf(' ', oldRevPos) + 1;
+    var statusPos = line.indexOf(' ', revPos) + 1;
+    var pathPos = line.indexOf('\0', statusPos) + 1;
+    var maybeNewPathPos = line.indexOf('\0', pathPos) + 1;
 
     var change = {
-        oldRev: line.substr(pos[2], 40),
-        rev: line.substr(pos[3], 40),
-        oldMode: parseInt(line.substr(pos[0], 6), 8),
-        mode: parseInt(line.substr(pos[1], 6), 8),
+        oldRev: line.substr(oldRevPos, 40),
+        rev: line.substr(revPos, 40),
+        oldMode: parseInt(line.substr(oldModePos, 6), 8),
+        mode: parseInt(line.substr(modePos, 6), 8),
         status: '', // filled below
         oldPath: '', // filled below
         path: '' // filled below
     };
 
-    switch (line.charAt(pos[4])) {
+    switch (line.charAt(statusPos)) {
     case 'A': change.status = 'ADDED'; break;
     case 'C': change.status = 'COPIED'; break;
     case 'D': change.status = 'DELETED'; break;
@@ -575,14 +574,14 @@ function parseRawDiffLine(line, startPos) {
     }
 
     if (change.status === 'Renamed' || change.status === 'Copied') {
-        change.oldPath = line.substr(pos[5], pos[6] - pos[5] - 1);
-        pos[7] = line.indexOf('\0', pos[6]) + 1;
-        change.path = line.substr(pos[6], pos[7] - pos[6] - 1);
-        return { change: change, pos: pos[7] };
+        change.oldPath = line.substr(pathPos, maybeNewPathPos - pathPos - 1);
+        var endPos = line.indexOf('\0', maybeNewPathPos) + 1;
+        change.path = line.substr(maybeNewPathPos, endPos - maybeNewPathPos - 1);
+        return { change: change, pos: endPos };
     } else {
         delete change.oldPath;
-        change.path = line.substr(pos[5], pos[6] - pos[5] - 1);
-        return { change: change, pos: pos[6] };
+        change.path = line.substr(pathPos, maybeNewPathPos - pathPos - 1);
+        return { change: change, pos: maybeNewPathPos };
     }
 }
 
