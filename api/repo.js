@@ -238,7 +238,7 @@ Repo.prototype._createCommit = function (message, callback) {
     // this could happen if the same file is uploaded from another client
     // note that git commits have a 1 second precision, so --allow-empty may return
     // the reference to the previous commit if we are fast enough
-    var proc = this.git(['commit', '--allow-empty', '-a', '-F', '-'], function (err, out) {
+    var proc = this.git(['commit', '--allow-empty', '--cleanup=verbatim', '-a', '-F', '-'], function (err, out) {
         if (err) return callback(err);
         that.getCommit('HEAD', callback);
     });
