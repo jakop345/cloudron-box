@@ -89,7 +89,7 @@ Repo.prototype.spawn = function (args) {
     return proc;
 };
 
-var LOG_LINE_FORMAT = '%T%x00%ct%x00%P%x00%s%x00%H%x00%an%x00%ae%x00';
+var LOG_LINE_FORMAT = '%T%x00%ct%x00%P%x00%B%x00%H%x00%an%x00%ae%x00';
 var LOG_LINE_FORMAT_FIELD_COUNT = LOG_LINE_FORMAT.split('%x00').length;
 
 function parseLogLine(line, startPos) {
@@ -103,7 +103,7 @@ function parseLogLine(line, startPos) {
         treeSha1: line.slice(pos[0], pos[1] - 1),
         commitDate: parseInt(line.slice(pos[1], pos[2] - 1), 10),
         parentSha1: line.slice(pos[2], pos[3] - 1),
-        subject: line.slice(pos[3], pos[4] - 1),
+        subject: line.slice(pos[3], pos[4] - 1), // contains raw subject and body
         sha1: line.slice(pos[4], pos[5] - 1),
         author: {
             name: line.slice(pos[5], pos[6] - 1),
