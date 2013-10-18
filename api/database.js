@@ -2,7 +2,9 @@
 
 var fs = require('fs'),
     util = require('util'),
-    safe = require('safetydance');
+    safe = require('safetydance'),
+    path = require('path'),
+    mkdirp = require('mkdirp');
 
 var rootDir = '';
 
@@ -122,8 +124,8 @@ Table.prototype.removePrivates = function (obj) {
 };
 
 function initialize(config) {
-    rootDir = config.configRoot + '/db';
-    if (!fs.existsSync(rootDir)) fs.mkdirSync(rootDir);
+    rootDir = path.join(config.configRoot, 'db');
+    mkdirp.sync(rootDir);
 
     exports.USERS_TABLE = new Table(rootDir + '/users', {
         username: { type: 'String', hashKey: true },
