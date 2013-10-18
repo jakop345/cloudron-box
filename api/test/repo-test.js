@@ -88,11 +88,37 @@ describe('Repo', function () {
         });
     });
 
+    // we don't do copy detection intentionally since it's expensive
+    it('diffTree - copy file', function (done) {
+        repo.diffTree('HEAD~1', 'HEAD', function (err, changes) {
+            expect(changes.length).to.equal(1);
+            expect(changes[0].path).to.equal('README.copy');
+            expect(changes[0].status).to.equal('ADDED');
+            expect(changes[0].mode).to.equal(parseInt('100644', 8));
+            expect(changes[0].rev).to.equal('2180e82647ff9a3e1a93ab43b81c82025c33c6e2');
+            done(err);
+        });
+    });
+
     it('moveFile', function (done) {
         repo.moveFile('README.copy', 'README.move', function (err, fileInfo, commit) {
             expect(fileInfo.path).to.equal('README.move');
             expect(commit.subject).to.equal('Move from README.copy to README.move');
             done();
+        });
+    });
+
+    it('diffTree - renamed/moved file', function (done) {
+        repo.diffTree('HEAD~1', 'HEAD', function (err, changes) {
+            expect(changes.length).to.equal(1);
+            expect(changes[0].oldPath).to.equal('README.copy');
+            expect(changes[0].path).to.equal('README.move');
+            expect(changes[0].status).to.equal('RENAMED');
+            expect(changes[0].oldMode).to.equal(parseInt('100644', 8));
+            expect(changes[0].mode).to.equal(parseInt('100644', 8));
+            expect(changes[0].oldRev).to.equal('2180e82647ff9a3e1a93ab43b81c82025c33c6e2');
+            expect(changes[0].rev).to.equal('2180e82647ff9a3e1a93ab43b81c82025c33c6e2');
+            done(err);
         });
     });
 

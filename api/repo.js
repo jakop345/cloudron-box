@@ -573,7 +573,7 @@ function parseRawDiffLine(line, startPos) {
         return null;
     }
 
-    if (change.status === 'Renamed' || change.status === 'Copied') {
+    if (change.status === 'RENAMED' || change.status === 'COPIED') {
         change.oldPath = line.substr(pathPos, maybeNewPathPos - pathPos - 1);
         var endPos = line.indexOf('\0', maybeNewPathPos) + 1;
         change.path = line.substr(maybeNewPathPos, endPos - maybeNewPathPos - 1);
@@ -590,6 +590,7 @@ function parseRawDiffLines(out) {
     var changes = [ ];
     while (pos < out.length) {
         var result = parseRawDiffLine(out, pos);
+        if (result == null) break;
         changes.push(result.change);
         pos = result.pos;
     }
@@ -642,6 +643,8 @@ Repo.prototype.getRevisions = function (file, options, callback) {
             pos += 2; // skip over a \0 and a \n
 
             var diffResult = parseRawDiffLine(out, pos);
+            if (diffResult == null) break;
+
             var diff = diffResult.change;
             pos = diffResult.pos;
 
