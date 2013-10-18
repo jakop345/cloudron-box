@@ -25,6 +25,8 @@ function RepoError(code, msg) {
 }
 util.inherits(RepoError, Error);
 
+var NULL_SHA1 = '0000000000000000000000000000000000000000';
+
 function isDir(mode) {
     return (mode & constants.S_IFMT) === constants.S_IFDIR;
 }
@@ -724,7 +726,7 @@ Repo.prototype.putFile = function (filePath, newFile, options, callback) {
 
     var that = this;
     var overwrite = options.overwrite;
-    var parentRev = options.parentRev;
+    var parentRev = options.parentRev || NULL_SHA1;
     var getConflictFilenameSync = options.getConflictFilenameSync;
 
     this.fileEntry(filePath, 'HEAD', function (err, entry) {
@@ -734,7 +736,9 @@ Repo.prototype.putFile = function (filePath, newFile, options, callback) {
         }
 
         if (!entry) {
-            if (options.parentRev) return callback(new RepoError('EINVAL', 'Invalid parent revision'));
+            if (parentRev !== NULL_SHA1) {
+                return callback(new RepoError('EINVAL', 'Invalid parent revision'));
+            }
             that.addFile(filePath, { file: newFile }, callback);
             return;
         }
