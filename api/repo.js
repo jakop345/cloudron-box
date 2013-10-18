@@ -66,6 +66,7 @@ Repo.prototype.git = function (args, callback) {
         var error = code !== 0 ? new RepoError(code, code) : null;
         callback(error, stdout, stderr);
     });
+    return proc;
 };
 
 Repo.prototype.spawn = function (args) {
@@ -237,10 +238,11 @@ Repo.prototype._createCommit = function (message, callback) {
     // this could happen if the same file is uploaded from another client
     // note that git commits have a 1 second precision, so --allow-empty may return
     // the reference to the previous commit if we are fast enough
-    this.git(['commit', '--allow-empty', '-a', '-m', message], function (err, out) {
+    var proc = this.git(['commit', '--allow-empty', '-a', '-F', '-'], function (err, out) {
         if (err) return callback(err);
         that.getCommit('HEAD', callback);
     });
+    proc.stdin.end(message);
 };
 
 function createTempFileSync(dir, contents) {
