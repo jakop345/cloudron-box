@@ -356,7 +356,9 @@ function createVolume(name, user, config, callback) {
             }
 
             var tmpDir = path.join(vol.mountPoint, 'tmp');
-            fs.mkdirSync(tmpDir);
+            if (!safe.fs.mkdirSync(tmpDir)) {
+                return callback(new VolumeError(safe.error, VolumeError.INTERNAL_ERROR));
+            }
 
             vol.repo = new Repo(path.join(vol.mountPoint, REPO_SUBFOLDER), tmpDir);
             vol.repo.create(user.username, user.email, function (error) {
