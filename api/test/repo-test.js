@@ -18,7 +18,7 @@ var Repo = require('../repo'),
 var EMAIL = 'no@bo.dy';
 var USERNAME = 'nobody';
 // \u00A3 - pound, \u20AC - euro
-var SPECIAL_FILE = 'SPECIAL \t~`!@#$%^&*()_+-=[]{}|,.<>?\u00A3\u20AC ';
+var SPECIAL_FILE = 'SPECIAL \t\n~`!@#$%^&*()_+-=[]{}|,.<>?\u00A3\u20AC ';
 
 var tmpdirname = 'repo-test-' + crypto.randomBytes(4).readUInt32LE(0);
 var tmpdir = path.join(os.tmpdir(), tmpdirname);

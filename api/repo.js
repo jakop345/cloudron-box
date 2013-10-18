@@ -296,24 +296,36 @@ Repo.prototype._renameFileAndCommit = function (file, options, callback) {
 
 function parseIndexLines(out) {
     /*
-        100644 81cc9ef1205995550f8faea11180a1ff7806ed81 0\twebadmin/volume-client.js\0ctime: 1376890412:218737065
-          mtime: 1376890412:218737065
+        100644 81cc9ef1205995550f8faea11180a1ff7806ed81 0\twebadmin/volume-client.js\0ctime: 1376890412:0
+          mtime: 1376890412:0
           dev: 2049 ino: 3391167
           uid: 1000 gid: 1000
           size: 3994    flags: 0
      */
 
-    var lines = out.split('\n');
     var entries = [ ];
-    for (var i = 0; i < lines.length; i += 5) {
-        if (lines[i].length === 0) break;
+    var startPos = 0;
 
-        var entry = parseIndexLine(lines[i].substr(0, lines[i].lastIndexOf('\0')));
-        entry.mtime = parseInt(lines[i+1].split(/:/)[1], 10);
-        entry.size = parseInt(lines[i+4].split(/:/)[1], 10);
+    while (startPos < out.length) {
+        var fileNameEndPos = out.indexOf('\0', startPos);
+        if (fileNameEndPos == -1) break;
+
+        var line2StartPos = out.indexOf('\n', fileNameEndPos) + 1;
+        var mtimePos = out.indexOf(':', line2StartPos) + 1;
+        var line3StartPos = out.indexOf('\n', line2StartPos) + 1;
+        var line4StartPos = out.indexOf('\n', line3StartPos) + 1;
+        var line5StartPos = out.indexOf('\n', line4StartPos) + 1;
+        var sizePos = out.indexOf(':', line5StartPos) + 1;
+
+        var entry = parseIndexLine(out.slice(startPos, fileNameEndPos));
+        entry.mtime = parseInt(out.substr(mtimePos, 15), 10);
+        entry.size = parseInt(out.substr(sizePos, 15), 10);
 
         entries.push(entry);
+
+        startPos = out.indexOf('\n', line5StartPos) + 1;
     }
+
     return entries;
 }
 
