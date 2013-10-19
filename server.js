@@ -69,7 +69,7 @@ if (argv.h) {
 function clientErrorHandler(err, req, res, next) {
     var status = err.status || err.statusCode; // connect/express or our app
     if (status >= 400 && status <= 499) {
-        res.send(status, JSON.stringify({ status: http.STATUS_CODES[status], message: err.message }));
+        res.send(status, { status: http.STATUS_CODES[status], message: err.message });
         debug(http.STATUS_CODES[status] + ' : ' + err.message);
         debug(err.stack);
     } else {
@@ -79,7 +79,7 @@ function clientErrorHandler(err, req, res, next) {
 
 function serverErrorHandler(err, req, res, next) {
     var status = err.status || err.statusCode || 500;
-    res.send(status, http.STATUS_CODES[status] + ' : ' + err.message);
+    res.send(status, { status: http.STATUS_CODES[status], message: err.message });
     console.error(http.STATUS_CODES[status] + ' : ' + err.message);
     console.error(err.stack);
 }
@@ -108,8 +108,19 @@ function requirePassword(req, res, next) {
     });
 }
 
+function loadMiddleware() {
+    var middleware = { };
+    fs.readdirSync(__dirname + '/middleware').forEach(function (filename) {
+        if (!/\.js$/.test(filename)) return;
+        var name = path.basename(filename, '.js');
+        function load() { return require('./middleware/' + name); }
+        middleware.__defineGetter__(name, load);
+    });
+    return middleware;
+}
 
 function initialize(config, callback) {
+    var middleware = loadMiddleware();
     var app = express();
 
     app.configure(function () {
@@ -129,6 +140,7 @@ function initialize(config, callback) {
            .use(express.cookieParser())
            .use(express.favicon(__dirname + "/assets/favicon.ico"))
            // API calls that do not require authorization
+           .use(middleware.contentType('application/json'))
            .use('/api/v1/version', getVersion)
            .use('/api/v1/firsttime', routes.user.firstTime)
            .use('/api/v1/createadmin', routes.user.createAdmin) // ## FIXME: allow this before auth for now
