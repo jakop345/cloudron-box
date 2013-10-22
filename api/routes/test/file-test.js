@@ -138,10 +138,11 @@ describe('Server File API', function () {
         });
     });
 
-    it('delta', function (done) {
+    it('delta - virgin client', function (done) {
         request.post(SERVER_URL + '/api/v1/sync/' + TESTVOLUME + '/delta')
                .auth(USERNAME, PASSWORD)
-               .send({ clientRevision: '' }) // virgin client
+               .query({ clientRevision: '' }) // virgin client
+               .send() // for POST, send calls query to get query params
                .end(function (err, res) {
             expect(res.body.serverRevision).to.equal(serverRevision);
             expect(res.body.changes.length).to.equal(2);
@@ -153,7 +154,7 @@ describe('Server File API', function () {
         });
     });
 
-    it('delta', function (done) {
+    it('delta - uptodate client', function (done) {
         request.post(SERVER_URL + '/api/v1/sync/' + TESTVOLUME + '/delta')
                .auth(USERNAME, PASSWORD)
                .query({ clientRevision: serverRevision }) // uptodate client
@@ -161,6 +162,17 @@ describe('Server File API', function () {
                .end(function (err, res) {
             expect(res.body.serverRevision).to.equal(serverRevision);
             expect(res.body.changes.length).to.equal(0);
+            done(err);
+        });
+    });
+
+    it('delta - invalid cursor', function (done) {
+        request.post(SERVER_URL + '/api/v1/sync/' + TESTVOLUME + '/delta')
+               .auth(USERNAME, PASSWORD)
+               .query({ clientRevision: 'cottoneyedjoe' })
+               .send() // for POST, send calls query to get query params
+               .end(function (err, res) {
+            expect(res.status).to.equal(422);
             done(err);
         });
     });

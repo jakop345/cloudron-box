@@ -61,7 +61,7 @@ function delta(req, res, next) {
     repo.getCommit('HEAD', function (err, headCommit) {
         if (err) return next(new HttpError(500, 'HEAD commit invalid'));
         repo.diffTree(clientRevision, headCommit.sha1, function (err, changes) {
-            if (err) return next(new HttpError(400, 'invalid cursor'));
+            if (err) return next(new HttpError(422, 'invalid cursor'));
             res.send(200, { changes: changes, serverRevision: headCommit.sha1 });
         });
     });
