@@ -759,12 +759,17 @@ Repo.prototype.putFile = function (filePath, newFile, options, callback) {
             return;
         }
 
+        // TODO: Code below implies that if you uploade the same file again with parentRev
+        // set, we will not detect it as 'Unchanged'. This should be fixed by making the
+        // upload parser automatically compute sha1 as the blob comes in.
         if (entry.sha1 === parentRev || overwrite) {
             that.updateFile(filePath, { file: newFile }, callback);
             return;
         }
 
-        // check if the file is different
+        // check if the file is different before reporting a conflict
+        // we need this check because the file can be the same which might happen
+        // when a client starts out fresh (parentRev is null)
         that.hashObject(newFile, function (err, hash) {
             if (err) return callback(err);
             if (entry.sha1 === hash) { // file is unchanged
