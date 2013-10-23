@@ -26,7 +26,8 @@ function remove(req, res, next) {
 
     repo.removeFile(filePath, { recursive: true, rev: rev }, function (err, fileEntry, commit) {
         if (err) {
-            if (err.code == 'ENOENT' || err.code == 'ENOTDIR') return next(new HttpError(404, 'Not found'));
+            // Removing a non-existent path is considered success. This is inline with idempotency of remove operation
+            if (err.code == 'ENOENT' || err.code == 'ENOTDIR') return res.send(204, null);
             if (err.code == 'EOUTOFDATE') return next(new HttpError(409, 'Out of date'));
             return next(new HttpError(500, err.message));
         }

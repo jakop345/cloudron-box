@@ -299,7 +299,7 @@ describe('Server File API', function () {
         });
     });
 
-    it('del - non-wildcard revision', function (done) {
+    it('delete - non-wildcard revision', function (done) {
         request.post(SERVER_URL + '/api/v1/fileops/' + TESTVOLUME + '/delete')
                .auth(USERNAME, PASSWORD)
                .send({ path: 'NEWFILE', rev: newFileRev })
@@ -307,6 +307,17 @@ describe('Server File API', function () {
             expect(res.statusCode).to.equal(200);
             expect(res.body.serverRevision.length).to.not.equal(0);
             serverRevision = res.body.serverRevision;
+            done(err);
+        });
+    });
+
+    it('delete - non-existent path', function (done) {
+        request.post(SERVER_URL + '/api/v1/fileops/' + TESTVOLUME + '/delete')
+               .auth(USERNAME, PASSWORD)
+               .send({ path: '/this/doesnt/exist', rev: '*' })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(204);
+            expect(res.body).to.be.empty();
             done(err);
         });
     });
