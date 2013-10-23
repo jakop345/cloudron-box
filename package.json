@@ -24,7 +24,6 @@
     "rimraf": "*",
     "debug": "*",
     "mime": "*",
-    "aes-helper": "*",
     "polo": "*",
     "encfs": "*",
     "safetydance": "*"
