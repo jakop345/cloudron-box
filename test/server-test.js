@@ -111,6 +111,19 @@ describe('Server', function () {
             });
         });
 
+        it('firsttime route is GET', function (done) {
+            request.post(SERVER_URL + '/api/v1/firsttime')
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(405);
+
+                request.get(SERVER_URL + '/api/v1/firsttime')
+                       .end(function (err, res) {
+                    expect(res.statusCode).to.equal(200);
+                    done(err);
+                });
+            });
+        });
+
         after(function (done) {
             server.stop(serverApp, function () {
                 done();

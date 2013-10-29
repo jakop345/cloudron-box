@@ -64,6 +64,14 @@ describe('Server User API', function () {
         });
     });
 
+    it('create admin fails because only POST is allowed', function (done) {
+        request.get(SERVER_URL + '/api/v1/createadmin')
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(405);
+            done(err);
+        });
+    });
+
     it('create admin', function (done) {
         request.post(SERVER_URL + '/api/v1/createadmin')
                .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
@@ -98,6 +106,26 @@ describe('Server User API', function () {
                .end(function (err, res) {
             expect(err).to.not.be.ok();
             expect(res.statusCode).to.equal(401);
+            done(err);
+        });
+    });
+
+    it('create token fails due to non basic auth header', function (done) {
+        request.post(SERVER_URL + '/api/v1/token')
+               .set('Authorization', USERNAME + ':wrong' + PASSWORD)
+               .end(function (err, res) {
+            expect(err).to.not.be.ok();
+            expect(res.statusCode).to.equal(400);
+            done(err);
+        });
+    });
+
+    it('create token fails due to broken basic auth header', function (done) {
+        request.post(SERVER_URL + '/api/v1/token')
+               .set('Authorization', 'Basic ' + USERNAME + ':wrong' + PASSWORD)
+               .end(function (err, res) {
+            expect(err).to.not.be.ok();
+            expect(res.statusCode).to.equal(400);
             done(err);
         });
     });
@@ -138,9 +166,18 @@ describe('Server User API', function () {
         });
     });
 
-    it('cannot get userInfo with invalid token', function (done) {
+    it('cannot get userInfo with invalid token (token length)', function (done) {
         request.get(SERVER_URL + '/api/v1/user/info')
                .query({ auth_token: 'x' + token })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(401);
+            done(err);
+        });
+    });
+
+    it('cannot get userInfo with invalid token (unknown token)', function (done) {
+        request.get(SERVER_URL + '/api/v1/user/info')
+               .query({ auth_token: token.toUpperCase() })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(401);
             done(err);
@@ -249,6 +286,47 @@ describe('Server User API', function () {
                .send({ username: USERNAME_3 })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
+            done(err);
+        });
+    });
+
+    it('cannot logout with invalid token', function (done) {
+        request.get(SERVER_URL + '/api/v1/logout')
+               .query({ auth_token: token.toUpperCase() })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(401);
+            done(err);
+        });
+    });
+
+    it('can logout', function (done) {
+        request.get(SERVER_URL + '/api/v1/logout')
+               .query({ auth_token: token })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            done(err);
+        });
+    });
+
+    it('cannot get userInfo with old token (previous logout)', function (done) {
+        request.get(SERVER_URL + '/api/v1/user/info')
+               .query({ auth_token: token })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(401);
+            done(err);
+        });
+    });
+
+    it('can login again', function (done) {
+        request.post(SERVER_URL + '/api/v1/token')
+               .auth(USERNAME, PASSWORD)
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            expect(res.body.token).to.be.a('string');
+            token = res.body.token;
+            expect(res.body.expires).to.be.a('string');
+            expect(res.body.username).to.not.be.ok();
+            expect(res.body.email).to.not.be.ok();
             done(err);
         });
     });

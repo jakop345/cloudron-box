@@ -163,11 +163,13 @@ function authenticate(req, res, next) {
         var req_token = req.query.auth_token ? req.query.auth_token : req.cookies.token;
 
         if (req_token.length != 64 * 2) {
+            debug('Received a token with invalid length', req_token.length, req_token);
             return next(new HttpError(401, 'Bad token'));
         }
 
         db.TOKENS_TABLE.get(req_token, function (err, result) {
             if (err) {
+                debug('Received unknown token', req_token);
                 return next(err.reason === DatabaseError.NOT_FOUND
                     ? new HttpError(401, 'Invalid token')
                     : err);
@@ -227,10 +229,7 @@ function logout(req, res, next) {
 
     // Invalidate token so the cookie cannot be reused after logout
     db.TOKENS_TABLE.remove(req_token, function (error, result) {
-        if (error) {
-            return next(error.reason === DatabaseError.NOT_FOUND ? new HttpError(401, 'Invalid token') : error);
-        }
-
+        if (error) return next(error);
         res.send(200);
     });
 }
