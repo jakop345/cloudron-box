@@ -32,31 +32,32 @@ function getUserHomeDir() {
 var baseDir = path.join(getUserHomeDir(), '.yellowtent');
 
 var argv = optimist.usage('Usage: $0 --dataRoot <directory>')
-    .alias('h', 'help')
-    .describe('h', 'Show this help.')
+    .alias('c', 'configRoot')
+    .default('c', path.join(baseDir, 'config'))
+    .describe('c', 'Server config root directory for storing user db and meta data.')
+    .string('c')
 
     .alias('d', 'dataRoot')
     .default('d', path.join(baseDir, 'data'))
     .describe('d', 'Volume data storage directory.')
     .string('d')
 
+    .alias('h', 'help')
+    .describe('h', 'Show this help.')
+
     .alias('m', 'mountRoot')
     .default('m', path.join(baseDir, 'mount'))
     .describe('m', 'Volume mount point directory.')
     .string('m')
+
+    .alias('p', 'port')
+    .describe('p', 'Server port')
 
     .alias('s', 'silent')
     .default('s', false)
     .describe('s', 'Suppress console output for non errors.')
     .boolean('s')
 
-    .alias('c', 'configRoot')
-    .default('c', path.join(baseDir, 'config'))
-    .describe('c', 'Server config root directory for storing user db and meta data.')
-    .string('c')
-
-    .alias('p', 'port')
-    .describe('p', 'Server port')
     .argv;
 
 // print help and die if requested
@@ -124,7 +125,7 @@ function initialize(config, callback) {
     var app = express();
 
     app.configure(function () {
-        var REQUEST_LIMIT='10mb';
+        var REQUEST_LIMIT = '10mb';
 
         var json = express.json({ strict: true, limit: REQUEST_LIMIT }), // application/json
             urlencoded = express.urlencoded({ limit: REQUEST_LIMIT }); // application/x-www-form-urlencoded
