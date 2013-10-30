@@ -129,64 +129,64 @@ function extractCredentialsFromHeaders (req) {
     };
 }
 
+function loginAuthenticator(req, res, next) {
+    var auth = extractCredentialsFromHeaders(req);
+
+    if (!auth) {
+        debug('Could not extract credentials.');
+        return next(new HttpError(400, 'Bad username or password'), false);
+    }
+
+    user.verify(auth.username, auth.password, function (error, result) {
+        if (error) {
+            debug('User ' + auth.username  + ' could not be verified.');
+            if (error.reason === UserError.ARGUMENTS) {
+                return next(new HttpError(400, error.message));
+            } else if (error.reason === UserError.NOT_FOUND || error.reason === UserError.WRONG_USER_OR_PASSWORD) {
+                return next(new HttpError(401, 'Username or password do not match'));
+            } else {
+                return next(new HttpError(500, error.message));
+            }
+        }
+
+        debug('User ' + auth.username + ' was successfully verified.');
+
+        req.user = result;
+        req.user.password = auth.password;
+
+        next();
+    });
+}
+
+function tokenAuthenticator(req, res, next) {
+    var req_token = req.query.auth_token ? req.query.auth_token : req.cookies.token;
+
+    if (req_token.length != 64 * 2) {
+        debug('Received a token with invalid length', req_token.length, req_token);
+        return next(new HttpError(401, 'Bad token'));
+    }
+
+    db.TOKENS_TABLE.get(req_token, function (err, result) {
+        if (err) {
+            debug('Received unknown token', req_token);
+            return next(err.reason === DatabaseError.NOT_FOUND
+                ? new HttpError(401, 'Invalid token')
+                : err);
+        }
+
+        var now = Date(), expires = Date(result.expires);
+        if (now > expires) return next(new HttpError(401, 'Token expired'));
+
+        req.user = {
+            username: result.username,
+            email: result.email
+        };
+
+        next();
+    });
+}
+
 function authenticate(req, res, next) {
-    function loginAuthenticator(req, res, next) {
-        var auth = extractCredentialsFromHeaders(req);
-
-        if (!auth) {
-            debug('Could not extract credentials.');
-            return next(new HttpError(400, 'Bad username or password'), false);
-        }
-
-        user.verify(auth.username, auth.password, function (error, result) {
-            if (error) {
-                debug('User ' + auth.username  + ' could not be verified.');
-                if (error.reason === UserError.ARGUMENTS) {
-                    return next(new HttpError(400, error.message));
-                } else if (error.reason === UserError.NOT_FOUND || error.reason === UserError.WRONG_USER_OR_PASSWORD) {
-                    return next(new HttpError(401, 'Username or password do not match'));
-                } else {
-                    return next(new HttpError(500, error.message));
-                }
-            }
-
-            debug('User ' + auth.username + ' was successfully verified.');
-
-            req.user = result;
-            req.user.password = auth.password;
-
-            next();
-        });
-    }
-
-    function tokenAuthenticator(req, res, next) {
-        var req_token = req.query.auth_token ? req.query.auth_token : req.cookies.token;
-
-        if (req_token.length != 64 * 2) {
-            debug('Received a token with invalid length', req_token.length, req_token);
-            return next(new HttpError(401, 'Bad token'));
-        }
-
-        db.TOKENS_TABLE.get(req_token, function (err, result) {
-            if (err) {
-                debug('Received unknown token', req_token);
-                return next(err.reason === DatabaseError.NOT_FOUND
-                    ? new HttpError(401, 'Invalid token')
-                    : err);
-            }
-
-            var now = Date(), expires = Date(result.expires);
-            if (now > expires) return next(new HttpError(401, 'Token expired'));
-
-            req.user = {
-                username: result.username,
-                email: result.email
-            };
-
-            next();
-        });
-    }
-
     if (req.headers.authorization) {
         debug('using login authentication');
         loginAuthenticator(req, res, next);
