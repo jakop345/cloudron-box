@@ -188,7 +188,7 @@ function initialize(config, callback) {
     app.set('port', config.port);
 
     if (!config.silent) {
-        console.log('Server listening on port ' + app.get('port'));
+        console.log('Server listening on port ' + app.get('port') + (config.testMode ? ' (test)' : ''));
         console.log('Using data root:', config.dataRoot);
         console.log('Using config root:', config.configRoot);
         console.log('Using mount root:', config.mountRoot);

@@ -201,13 +201,14 @@ function authenticate(req, res, next) {
 }
 
 function testModeAuthenticate(req, res, next) {
-    if (req.headers['X-YT-AUTHORIZATION']) { // TODO: make this more robust?
-        var user = req.headers['X-YT-AUTHORIZATION'].split(':');
-        req.user = { username: user[0], email: user[1] };
-        next();
-    } else { // fallback to usual authentication
-        authenticate(req, res, next);
+    // if any auth info set, just use normal authentication
+    if (req.headers.authorization || req.query.auth_token || req.cookies.token) {
+        return authenticate(req, res, next);
     }
+
+    // set fake admin user in testMode
+    req.user = { username: 'testadmin', email: 'testadmin@yellowtent', admin: true };
+    next();
 }
 
 function createToken(req, res, next) {
