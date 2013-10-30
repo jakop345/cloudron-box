@@ -7,12 +7,14 @@ var db = require('../database'),
     crypto = require('crypto'),
     debug = require('debug')('server:routes/user'),
     HttpError = require('../httperror'),
-    express = require('express');
+    express = require('express'),
+    assert = require('assert');
 
 exports = module.exports = {
     firstTime: firstTime,
     createAdmin: createAdmin,
     authenticate: authenticate,
+    testModeAuthenticate: testModeAuthenticate,
     createToken: createToken,
     logout: logout,
     info: info,
@@ -195,6 +197,16 @@ function authenticate(req, res, next) {
         tokenAuthenticator(req, res, next);
     } else {
         next(new HttpError(401, 'No credentials'));
+    }
+}
+
+function testModeAuthenticate(req, res, next) {
+    if (req.headers['X-YT-AUTHORIZATION']) { // TODO: make this more robust?
+        var user = req.headers['X-YT-AUTHORIZATION'].split(':');
+        req.user = { username: user[0], email: user[1] };
+        next();
+    } else { // fallback to usual authentication
+        authenticate(req, res, next);
     }
 }
 
