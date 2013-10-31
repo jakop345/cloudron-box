@@ -5,7 +5,7 @@
 /* global before:false */
 /* global after:false */
 
-var server = require('../../../server.js'),
+var Server = require('../../server.js'),
     request = require('superagent'),
     expect = require('expect.js'),
     database = require('../../database.js'),
@@ -28,8 +28,10 @@ var CONFIG = {
 var USERNAME = 'admin', PASSWORD = 'admin', EMAIL ='silly@me.com';
 var TESTVOLUME = 'testvolume';
 
+var server;
 function setup(done) {
-    server.start(CONFIG, function (err, app) {
+    server = new Server(CONFIG);
+    server.start(function (err) {
         database.USERS_TABLE.removeAll(function () {
             request.post(SERVER_URL + '/api/v1/createadmin')
                  .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
@@ -42,8 +44,10 @@ function setup(done) {
 
 // remove all temporary folders
 function cleanup(done) {
-    rimraf(BASE_DIR, function (error) {
-        done();
+    server.stop(function (err) {
+        rimraf(BASE_DIR, function (error) {
+            done();
+        });
     });
 }
 

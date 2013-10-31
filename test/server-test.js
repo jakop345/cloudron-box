@@ -5,7 +5,7 @@
 /* global before:false */
 /* global after:false */
 
-var server = require('../server.js'),
+var Server = require('../api/server.js'),
     request = require('superagent'),
     path = require('path'),
     crypto = require('crypto'),
@@ -36,27 +36,31 @@ describe('Server', function () {
     after(cleanup);
 
     describe('startup', function () {
-        var serverApp;
+        var server;
 
-        it('fails due to wrong arguments', function (done) {
-            expect(function () { server.start(); }).to.throwException();
-            expect(function () { server.start(function () {}); }).to.throwException();
-            expect(function () { server.start('foobar', function () {}); }).to.throwException();
-            expect(function () { server.start(1337, function () {}); }).to.throwException();
-            expect(function () { server.start(CONFIG); }).to.throwException();
-            expect(function () { server.start(CONFIG, 'not a function'); }).to.throwException();
-            expect(function () { server.start(CONFIG, 1337); }).to.throwException();
+        it('constructor fails due to wrong arguments', function (done) {
+            expect(function () { var s = new Server(function () {}); }).to.throwException();
+            expect(function () { var s = new Server('foobar'); }).to.throwException();
+            expect(function () { var s = new Server(1337); }).to.throwException();
+
+            done();
+        });
+
+        it('start fails due to wrong arguments', function (done) {
+            var s = new Server(CONFIG);
+
+            expect(function () { s.start(); }).to.throwException();
+            expect(function () { s.start('foobar', function () {}); }).to.throwException();
+            expect(function () { s.start(1337, function () {}); }).to.throwException();
 
             done();
         });
 
         it('succeeds', function (done) {
-            server.start(CONFIG, function (error, app) {
+            server = new Server(CONFIG);
+
+            server.start(function (error) {
                 expect(error).to.not.be.ok();
-                expect(app).to.be.ok();
-
-                serverApp = app;
-
                 done();
             });
         });
@@ -69,27 +73,25 @@ describe('Server', function () {
         });
 
         it('should fail because already running', function (done) {
-            server.start(CONFIG, function (error, app) {
+            server.start(function (error) {
                 expect(error).to.be.ok();
-                expect(app).to.not.be.ok();
-
                 done();
             });
         });
 
         after(function (done) {
-            server.stop(serverApp, function () {
+            server.stop(function () {
                 done();
             });
         });
     });
 
     describe('runtime', function () {
-        var serverApp;
+        var server;
 
         before(function (done) {
-            server.start(CONFIG, function (err, app) {
-                serverApp = app;
+            server = new Server(CONFIG);
+            server.start(function (err, app) {
                 done();
             });
         });
@@ -125,36 +127,34 @@ describe('Server', function () {
         });
 
         after(function (done) {
-            server.stop(serverApp, function () {
+            server.stop(function () {
                 done();
             });
         });
     });
 
     describe('shutdown', function () {
-        var serverApp;
+        var server;
 
         before(function (done) {
-            server.start(CONFIG, function (err, app) {
-                serverApp = app;
+            server = new Server(CONFIG);
+            server.start(function (err) {
                 done();
             });
         });
 
         it('fails due to wrong arguments', function (done) {
             expect(function () { server.stop(); }).to.throwException();
-            expect(function () { server.stop(function () {}); }).to.throwException();
-            expect(function () { server.stop('foobar', function () {}); }).to.throwException();
-            expect(function () { server.stop(1337, function () {}); }).to.throwException();
-            expect(function () { server.stop({}, function () {}); }).to.throwException();
-            expect(function () { server.stop({ httpServer: {} }, 'something else'); }).to.throwException();
-            expect(function () { server.stop({ httpServer: {} }, {}); }).to.throwException();
+            expect(function () { server.stop('foobar'); }).to.throwException();
+            expect(function () { server.stop(1337); }).to.throwException();
+            expect(function () { server.stop({}); }).to.throwException();
+            expect(function () { server.stop({ httpServer: {} }); }).to.throwException();
 
             done();
         });
 
         it('succeeds', function (done) {
-            server.stop(serverApp, function () {
+            server.stop(function () {
                 done();
             });
         });

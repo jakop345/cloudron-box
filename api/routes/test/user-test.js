@@ -5,7 +5,7 @@
 /* global before:false */
 /* global after:false */
 
-var server = require('../../../server.js'),
+var Server = require('../../server.js'),
     request = require('superagent'),
     expect = require('expect.js'),
     database = require('../../database.js'),
@@ -28,16 +28,20 @@ var USERNAME = 'admin', PASSWORD = 'admin', EMAIL ='silly@me.com';
 var USERNAME_2 = 'user', PASSWORD_2 = 'userpassword', EMAIL_2 = 'user@foo.bar';
 var USERNAME_3 = 'userTheThird', PASSWORD_3 = 'userpassword333', EMAIL_3 = 'user3@foo.bar';
 
+var server;
 function setup(done) {
-    server.start(CONFIG, function (err, app) {
+    server = new Server(CONFIG);
+    server.start(function (err) {
         database.USERS_TABLE.removeAll(done);
     });
 }
 
 // remove all temporary folders
 function cleanup(done) {
-    rimraf(BASE_DIR, function (error) {
-        done();
+    server.stop(function (err) {
+        rimraf(BASE_DIR, function (error) {
+            done();
+        });
     });
 }
 
