@@ -22,7 +22,7 @@ function Server(config) {
     assert(typeof config === 'object');
 
     this.config = config;
-    this.app = undefined;
+    this.app = null;
 }
 
 // Error handlers. These are called until one of them sends headers
@@ -173,7 +173,7 @@ Server.prototype._listen = function (callback) {
     function callbackWrapper(error) {
         if (callback) {
             callback(error);
-            callback = undefined;
+            callback = null;
         } else {
             console.error('Try to call back twice', error);
         }
@@ -242,7 +242,7 @@ Server.prototype.stop = function (callback) {
     this.app.httpServer.close(function () {
         that.app.httpServer.unref();
         // TODO should delete the app variable
-        that.app = undefined;
+        that.app = null;
 
         callback();
     });
