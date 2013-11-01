@@ -106,7 +106,7 @@ Server.prototype._initialize = function (callback) {
            .use('/api/v1/version', that._getVersion.bind(that))
            .use('/api/v1/firsttime', routes.user.firstTime)
            .use('/api/v1/createadmin', routes.user.createAdmin) // ## FIXME: allow this before auth for now
-           .use(that.config.testMode ? routes.user.testModeAuthenticate : routes.user.authenticate)
+           .use(routes.user.authenticate)
            .use(that.app.router)
            .use(that._clientErrorHandler.bind(that))
            .use(that._serverErrorHandler.bind(that));
@@ -145,7 +145,7 @@ Server.prototype._initialize = function (callback) {
     this.app.set('port', that.config.port);
 
     if (!that.config.silent) {
-        console.log('Server listening on port ' + this.app.get('port') + (that.config.testMode ? ' (test)' : ''));
+        console.log('Server listening on port ' + this.app.get('port'));
         console.log('Using data root:', that.config.dataRoot);
         console.log('Using config root:', that.config.configRoot);
         console.log('Using mount root:', that.config.mountRoot);

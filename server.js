@@ -53,10 +53,6 @@ var argv = optimist.usage('Usage: $0 --dataRoot <directory>')
     .describe('s', 'Suppress console output for non errors.')
     .boolean('s')
 
-    .alias('t', 'test')
-    .default('t', process.env.NODE_ENV === 'test') // used by express
-    .describe('t', 'Test mode.')
-
     .argv;
 
 // print help and die if requested
@@ -72,8 +68,7 @@ var config = {
     dataRoot: path.resolve(argv.d),
     configRoot: path.resolve(argv.c),
     mountRoot: path.resolve(argv.m),
-    silent: argv.s,
-    testMode: argv.test
+    silent: argv.s
 };
 
 var server = new Server(config);
