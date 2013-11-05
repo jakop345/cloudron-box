@@ -3,22 +3,8 @@
 'use strict';
 
 var optimist = require('optimist'),
-    express = require('express'),
-    http = require('http'),
-    HttpError = require('./api/httperror'),
     Server = require('./api/server.js'),
-    path = require('path'),
-    fs = require('fs'),
-    mkdirp = require('mkdirp'),
-    db = require('./api/database.js'),
-    routes = require('./api/routes'),
-    debug = require('debug')('server:server'),
-    crypto = require('crypto'),
-    os = require('os'),
-    polo = require('polo'),
-    assert = require('assert'),
-    user = require('./api/user.js'),
-    pkg = require('./package.json');
+    path = require('path');
 
 function getUserHomeDir() {
     return process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
