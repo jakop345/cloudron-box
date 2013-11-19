@@ -40,19 +40,26 @@ function diff(req, res, next) {
     });
 }
 
-/*
+ /**
+ * @api {post} /api/v1/sync/:volume/delta delta
+ * @apiName delta
+ * @apiGroup volume
+ * @apiDescription
  * Outputs the delta operations required to sync with the server.
- * @queryparam {string} clientRevision The revision of the client
- * @return {delta} 
- *
- * The delta object contains:
- *   { changes: [change], serverRevision }
  *
  * The change object contains:
- *   oldRev, rev, oldMode, mode, status, oldPath, path
+ *   <code>oldRev, rev, oldMode, mode, status, oldPath, path</code>
  *
  * status is a character which is one of
- *   A (added), C (copied), D (deleted), M (modified), R (renamed), T (mode changed)
+ *   <code>A (added), C (copied), D (deleted), M (modified), R (renamed), T (mode changed)</code>
+ *
+ * @apiParam {string} clientRevision The current volume revision on the client.
+ *
+ * @apiSuccess {Object[]} changes Array of changes needed to be performed by the syncer client.
+ * @apiSuccess {String} serverRevision The current revision of this volume on the server.
+ *
+ * @apiError 422 Invalid Cursor
+ * @apiError 500 HEAD commit invalid
  */
 function delta(req, res, next) {
     var repo = req.volume.repo;

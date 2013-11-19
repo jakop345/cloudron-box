@@ -22,6 +22,11 @@ exports = module.exports = {
 };
 
 /**
+* @apiDefinePermission admin Admin access rights needed.
+* This can only be called in the context of the box owner/administrator
+*/
+
+/**
  * @api {get} /api/v1/firsttime firstTime
  * @apiName firstTime
  * @apiGroup generic
@@ -29,8 +34,8 @@ exports = module.exports = {
  * Ask the device if it is already activated. The device only
  * leaves the activation mode when a device administrator is created.
  *
- * @apiSuccess (200 Ok) none Device was not yet set up.
- * @apiError (410 Gone) none Device is activated and ready to use.
+ * @apiSuccess Device was not yet set up.
+ * @apiError 410 Device is activated and ready to use.
  */
 function firstTime(req, res, next) {
     if (req.method !== 'GET') {
@@ -58,7 +63,7 @@ function firstTime(req, res, next) {
  * @apiParam {string} email The administrator's email address
  *
  * @apiSuccess (201 Created) none Admin user successfully created.
- * @apiError (403 Forbidden) none Admin user already exists
+ * @apiError 403 Admin user already exists. There can only be one per box at all time.
  */
 function createAdmin(req, res, next) {
     if (req.method !== 'POST') {
@@ -76,6 +81,7 @@ function createAdmin(req, res, next) {
  * @api {post} /api/v1/user/create createUser
  * @apiName createUser
  * @apiGroup user
+ * @apiPermission admin
  * @apiDescription
  * Only the administrator is allowed to create a new user.
  * A normal user can create its own volumes and is able to share those
@@ -85,10 +91,10 @@ function createAdmin(req, res, next) {
  * @apiParam {string} password The new users's password
  * @apiParam {string} email The new users's email address
  *
- * @apiSuccess (201 Created) none User successfully created
- * @apiError (400 Bad Request) none Required body parameters missing
- * @apiError (409 Conflict) none User with username already exists
- * @apiError (500 InternalServer Error) none Unable to create user
+ * @apiSuccess (Created 201) none User successfully created
+ * @apiError 400 Required body parameters missing
+ * @apiError 409 User with username already exists
+ * @apiError 500 Unable to create user
  */
 function createUser(req, res, next) {
     // TODO: I guess only the admin should be allowed to do so? - Johannes

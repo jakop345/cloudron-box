@@ -51,7 +51,7 @@ Server.prototype._serverErrorHandler = function (err, req, res, next) {
  * @apiDescription
  *  Get the device's software version. Same string as in the <code>package.json</code>
  *
- * @apiSuccess (200 Ok) {String} version Version number.
+ * @apiSuccess {String} version Version number.
  */
 Server.prototype._getVersion = function (req, res, next) {
     if (req.method !== 'GET') return next(new HttpError(405, 'Only GET supported'));
