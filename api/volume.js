@@ -24,6 +24,8 @@ exports = module.exports = {
 };
 
 var REPO_SUBFOLDER = 'repo';
+var VOLUME_META_FILENAME = '.meta';
+var CRYPTO_SALT_SIZE = 64; // 512-bit salt
 
 // http://dustinsenos.com/articles/customErrorsInNode
 // http://code.google.com/p/v8/wiki/JavaScriptStackTraceApi
@@ -77,7 +79,7 @@ Volume.prototype._resolveVolumeMountPoint = function() {
 };
 
 Volume.prototype._initMetaDatabase = function () {
-    this.meta = new db.Table(this.dataPath + '/.meta', {
+    this.meta = new db.Table(path.join(this.dataPath, VOLUME_META_FILENAME), {
         username: { type: 'String', hashKey: true },
         passwordCypher: { type: 'String', priv: true }
     });
@@ -122,7 +124,8 @@ Volume.prototype.open = function (username, password, callback) {
                 return callback(error);
             }
 
-            var volPassword = aes.decrypt(record.passwordCypher, password);
+            var saltBuffer = new Buffer(record.salt, 'hex');
+            var volPassword = aes.decrypt(record.passwordCypher, password, saltBuffer);
 
             that.encfs.mount(volPassword, function (error, result) {
                 if (error) {
@@ -263,24 +266,32 @@ Volume.prototype.listFiles = function (directory, callback) {
 };
 
 Volume.prototype.addUser = function (user, password, callback) {
+    var that = this;
+
     if (!this.meta) {
         debug('Invalid volume "' + this.name + '". Misses the meta database.');
         return callback(new VolumeError(null, VolumeError.META_MISSING));
     }
 
-    // TODO salt is currently fixed in aes-helper module - Johannes
-    var record = {
-        username: user.username,
-        passwordCypher: aes.encrypt(password, user.password)
-    };
-
-    this.meta.put(record, function (error) {
+    crypto.randomBytes(CRYPTO_SALT_SIZE, function (error, salt) {
         if (error) {
-            debug('Unable to add user to meta db. ' + safe.JSON.stringify(error));
-            return callback(error);
+            return callback(new VolumeError('Failed to generate random bytes', VolumeError.INTERNAL_ERROR));
         }
 
-        return callback(null, record);
+        var record = {
+            username: user.username,
+            salt: salt.toString('hex'),
+            passwordCypher: aes.encrypt(password, user.password, salt),
+        };
+
+        that.meta.put(record, function (error) {
+            if (error) {
+                debug('Unable to add user to meta db. ' + safe.JSON.stringify(error));
+                return callback(error);
+            }
+
+            return callback(null, record);
+        });
     });
 };
 
@@ -404,6 +415,12 @@ function getVolume(name, username, config) {
     var vol = new Volume(name, config);
     if (!safe.fs.existsSync(vol.dataPath)) {
         debug('No volume "' + name + '" for user "' + username + '". ' + safe.JSON.stringify(safe.error));
+        return null;
+    }
+
+    // Check if that volume has a meta information file, if not it is not created properly or broken
+    if (!safe.fs.existsSync(path.join(vol.dataPath, VOLUME_META_FILENAME))) {
+        debug('Volume "' + name + '" for user "' + username + '" does not have meta information, it is possibly broken.');
         return null;
     }
 

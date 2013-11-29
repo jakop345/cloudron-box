@@ -64,6 +64,9 @@ Server.prototype._requirePassword = function (req, res, next) {
             return next(new HttpError(401, 'Wrong password entered'));
         }
 
+        // add password to the request's user object for further use
+        req.user.password = req.body.password;
+
         next();
     });
 };
