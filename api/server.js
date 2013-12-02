@@ -45,13 +45,31 @@ Server.prototype._serverErrorHandler = function (err, req, res, next) {
 };
 
 /**
+ * @api {get} /api/v1/firsttime firstTime
+ * @apiName firstTime
+ * @apiGroup generic
+ * @apiDescription
+ * Ask the device if it is already activated. The device only leaves the activation mode when a device administrator is created.
+ *
+ * @apiSuccess {Boolean} activated True if the device was already activated otherwise false.
+ * @apiSuccess {String} version The current version string of the device.
+ */
+Server.prototype._firstTime = function (req, res, next) {
+    if (req.method !== 'GET') {
+        return next(new HttpError(405, 'Only GET allowed'));
+    }
+
+    return res.send(200, { activated: !db.firstTime(), version: pkg.version });
+};
+
+/**
  * @api {get} /api/v1/version version
  * @apiName version
  * @apiGroup generic
  * @apiDescription
  *  Get the device's software version. Same string as in the <code>package.json</code>
  *
- * @apiSuccess {String} version Version number.
+ * @apiSuccess {String} version The current version string of the device.
  */
 Server.prototype._getVersion = function (req, res, next) {
     if (req.method !== 'GET') return next(new HttpError(405, 'Only GET supported'));
@@ -116,7 +134,7 @@ Server.prototype._initialize = function (callback) {
            // API calls that do not require authorization
            .use(middleware.contentType('application/json'))
            .use('/api/v1/version', that._getVersion.bind(that))
-           .use('/api/v1/firsttime', routes.user.firstTime)
+           .use('/api/v1/firsttime', that._firstTime.bind(that))
            .use('/api/v1/createadmin', routes.user.createAdmin) // ## FIXME: allow this before auth for now
            .use(routes.user.authenticate)
            .use(that.app.router)
@@ -124,8 +142,10 @@ Server.prototype._initialize = function (callback) {
            .use(that._serverErrorHandler.bind(that));
 
         // routes controlled by app.router
-        that.app.post('/api/v1/token', routes.user.createToken);
-        that.app.get('/api/v1/logout', routes.user.logout);
+        that.app.post('/api/v1/token', routes.user.createToken);        // TODO remove that route
+        that.app.get('/api/v1/user/token', routes.user.createToken);
+        that.app.get('/api/v1/logout', routes.user.logout);             // TODO remove that route
+        that.app.get('/api/v1/user/logout', routes.user.logout);
         that.app.post('/api/v1/user/create', routes.user.create);
         that.app.post('/api/v1/user/remove', routes.user.remove);
         that.app.get('/api/v1/user/info', routes.user.info);

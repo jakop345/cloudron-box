@@ -11,7 +11,6 @@ var db = require('../database'),
     assert = require('assert');
 
 exports = module.exports = {
-    firstTime: firstTime,
     createAdmin: createAdmin,
     authenticate: authenticate,
     createToken: createToken,
@@ -27,29 +26,6 @@ exports = module.exports = {
 */
 
 /**
- * @api {get} /api/v1/firsttime firstTime
- * @apiName firstTime
- * @apiGroup generic
- * @apiDescription
- * Ask the device if it is already activated. The device only
- * leaves the activation mode when a device administrator is created.
- *
- * @apiSuccess Device was not yet set up.
- * @apiError 410 Device is activated and ready to use.
- */
-function firstTime(req, res, next) {
-    if (req.method !== 'GET') {
-        return next(new HttpError(405, 'Only GET allowed'));
-    }
-
-    if (!db.firstTime()) {
-        return next(new HttpError(410, 'Box is already setup.'));
-    }
-
-    return res.send(200);
-}
-
-/**
  * @api {post} /api/v1/createadmin createAdmin
  * @apiName createAdmin
  * @apiGroup generic
@@ -62,7 +38,7 @@ function firstTime(req, res, next) {
  * @apiParam {string} password The administrator's password
  * @apiParam {string} email The administrator's email address
  *
- * @apiSuccess (201 Created) none Admin user successfully created.
+ * @apiSuccess (Created 201) {string} token A valid access token
  * @apiError 403 Admin user already exists. There can only be one per box at all time.
  */
 function createAdmin(req, res, next) {
@@ -78,23 +54,23 @@ function createAdmin(req, res, next) {
 }
 
 /**
- * @api {post} /api/v1/user/create createUser
- * @apiName createUser
+ * @api {post} /api/v1/user/create create
+ * @apiName create
  * @apiGroup user
  * @apiPermission admin
  * @apiDescription
  * Only the administrator is allowed to create a new user.
- * A normal user can create its own volumes and is able to share those
- * with other users.
+ * A normal user can create its own volumes and is able to share those with other users.
  *
  * @apiParam {string} username The new user's login name
  * @apiParam {string} password The new users's password
  * @apiParam {string} email The new users's email address
  *
  * @apiSuccess (Created 201) none User successfully created
- * @apiError 400 Required body parameters missing
- * @apiError 409 User with username already exists
- * @apiError 500 Unable to create user
+ * @apiError (Bad request 400) {Number} status Http status code
+ * @apiError (Bad request 400) {String} message Error details
+ * @apiError (User already exists 409) {Number} status Http status code
+ * @apiError (User already exists 409) {String} message Error details
  */
 function createUser(req, res, next) {
     // TODO: I guess only the admin should be allowed to do so? - Johannes
@@ -216,6 +192,19 @@ function authenticate(req, res, next) {
     }
 }
 
+/**
+ * @api {get} /api/v1/token token
+ * @apiName token
+ * @apiGroup user
+ * @apiDescription
+ * This route may be used to verify a user and retrieve an access token for further API access.
+ * As any other route, the authentication is using the auth header.
+ *
+ * @apiSuccess {String} token Access token to be used for further API calls
+ * @apiSuccess {Date} expires Expiration date for the access token
+ * @apiSuccess {String} username Username associated with the access token
+ * @apiSuccess {String} email Email associated with the access token
+ */
 function createToken(req, res, next) {
     crypto.randomBytes(64 /* 512-bit */, function (err, tok) {
         if (err) return next(new HttpError(500, 'Failed to generate random bytes'));
@@ -237,11 +226,30 @@ function createToken(req, res, next) {
     });
 }
 
+/**
+ * @api {get} /api/v1/user/info info
+ * @apiName info
+ * @apiGroup user
+ * @apiDescription
+ * Get user information.
+ *
+ * @apiSuccess {String} username Username
+ * @apiSuccess {String} email User's email address
+ */
 function info(req, res, next) {
     // req.user is filled by the authentication step
     res.send(req.user);
 }
 
+/**
+ * @api {get} /api/v1/logout logout
+ * @apiName logout
+ * @apiGroup user
+ * @apiDescription
+ * Invalidates all access tokens associated with this user.
+ *
+ * @apiSuccess none User successfully logged out
+ */
 function logout(req, res, next) {
     var req_token = req.query.auth_token ? req.query.auth_token : req.cookies.token;
 
@@ -252,6 +260,19 @@ function logout(req, res, next) {
     });
 }
 
+/**
+ * @api {post} /api/v1/user/remove remove
+ * @apiName remove
+ * @apiGroup user
+ * @apiDescription
+ * The administrator can remove any user and each user can only remove himself.
+ *
+ * @apiParam {string} username The username of the user to be removed
+ *
+ * @apiSuccess none User successfully removed
+ * @apiError (Forbidden 403) {Number} status Http status code
+ * @apiError (Forbidden 403) {String} message Error details
+ */
 function removeUser(req, res, next) {
     var username = req.body.username || '';
 
@@ -271,5 +292,5 @@ function removeUser(req, res, next) {
         return;
     }
 
-    return next(new HttpError(400, 'Not allowed to remove this user.'));
+    return next(new HttpError(403, 'Not allowed to remove this user.'));
 }

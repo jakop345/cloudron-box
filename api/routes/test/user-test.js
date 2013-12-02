@@ -55,6 +55,7 @@ describe('Server User API', function () {
         request.get(SERVER_URL + '/api/v1/firsttime')
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
+            expect(res.body.activated).to.not.be.ok();
             done(err);
         });
     });
@@ -88,7 +89,8 @@ describe('Server User API', function () {
     it('device left first time mode', function (done) {
         request.get(SERVER_URL + '/api/v1/firsttime')
                .end(function (err, res) {
-            expect(res.statusCode).to.equal(410);
+            expect(res.statusCode).to.equal(200);
+            expect(res.body.activated).to.be.ok();
             done(err);
         });
     });
@@ -269,7 +271,7 @@ describe('Server User API', function () {
                .auth(USERNAME_2, PASSWORD_2)
                .send({ username: USERNAME })
                .end(function (err, res) {
-            expect(res.statusCode).to.equal(400);
+            expect(res.statusCode).to.equal(403);
             done(err);
         });
     });
