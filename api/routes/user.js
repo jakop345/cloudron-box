@@ -21,11 +21,21 @@ exports = module.exports = {
     remove: removeUser
 };
 
- /*
- * Ask the device if it is in first time activation mode.
+/**
+* @apiDefinePermission admin Admin access rights needed.
+* This can only be called in the context of the box owner/administrator
+*/
+
+/**
+ * @api {get} /api/v1/firsttime firstTime
+ * @apiName firstTime
+ * @apiGroup generic
+ * @apiDescription
+ * Ask the device if it is already activated. The device only
+ * leaves the activation mode when a device administrator is created.
  *
- * @statuscode {200} Ok - Device is not yet initialized
- * @statuscode {410} Gone - Device was already initialized
+ * @apiSuccess Device was not yet set up.
+ * @apiError 410 Device is activated and ready to use.
  */
 function firstTime(req, res, next) {
     if (req.method !== 'GET') {
@@ -39,18 +49,21 @@ function firstTime(req, res, next) {
     return res.send(200);
 }
 
-/*
- * Create an admin user.
- *
- * @bodyparam {string} username (required)
- * @bodyparam {string} password (required)
- * @bodyparam {string} email (required)
- * @statuscode {201} Created - Admin user successfully created
- * @statuscode {403} Forbidden - Admin user already exists
- *
+/**
+ * @api {post} /api/v1/createadmin createAdmin
+ * @apiName createAdmin
+ * @apiGroup generic
+ * @apiDescription
  * This method can only be called when the device is in first time activation mode.
  * Currently there is only one admin user allowed per device.
  * Creating an admin user also puts the device out of first time activation mode.
+ *
+ * @apiParam {string} username The administrator's user name
+ * @apiParam {string} password The administrator's password
+ * @apiParam {string} email The administrator's email address
+ *
+ * @apiSuccess (201 Created) none Admin user successfully created.
+ * @apiError 403 Admin user already exists. There can only be one per box at all time.
  */
 function createAdmin(req, res, next) {
     if (req.method !== 'POST') {
@@ -64,20 +77,24 @@ function createAdmin(req, res, next) {
     createUser(req, res, next);
 }
 
-/*
- * Create an normal user.
- *
- * @bodyparam {string} username (required)
- * @bodyparam {string} password (required)
- * @bodyparam {string} email (required)
- * @statuscode {201} Created - User successfully created
- * @statuscode {400} Bad Request - Required body parameters missing
- * @statuscode {409} Conflict - User with username already exists
- * @statuscode {500} Internal Server Error - Unable to create user
- *
+/**
+ * @api {post} /api/v1/user/create createUser
+ * @apiName createUser
+ * @apiGroup user
+ * @apiPermission admin
+ * @apiDescription
  * Only the administrator is allowed to create a new user.
  * A normal user can create its own volumes and is able to share those
  * with other users.
+ *
+ * @apiParam {string} username The new user's login name
+ * @apiParam {string} password The new users's password
+ * @apiParam {string} email The new users's email address
+ *
+ * @apiSuccess (Created 201) none User successfully created
+ * @apiError 400 Required body parameters missing
+ * @apiError 409 User with username already exists
+ * @apiError 500 Unable to create user
  */
 function createUser(req, res, next) {
     // TODO: I guess only the admin should be allowed to do so? - Johannes

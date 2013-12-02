@@ -17,10 +17,21 @@ exports = module.exports = {
     putFile: putFile
 };
 
-/*
+/**
+ * @api {get} /api/v1/file/:volume/:filepath?rev=:revision getFile
+ * @apiName getFile
+ * @apiGroup file
+ * @apiDescription
  * Outputs file with Content-Type set based on the file's extension.
- * @uriparam {string} path The path of the file
- * @queryparam {string} rev The revision of the file
+ *
+ * @apiParam {string} volume Volume ID
+ * @apiParam {string} filepath Volume relative file path
+ * @apiParam {string} revision Get the specific revision of the specified file
+ *
+ * @apiSuccess {Stream} content File content
+ *
+ * @apiError 404 File not available with this revision
+ * @apiError 500 Stream error
  */
 function read(req, res, next) {
     var filePath = req.params[0], rev = req.query.rev;
@@ -121,7 +132,7 @@ function _getConflictFilenameSync(renamePattern, file, checkoutDir) {
  * @urlparam {string} path The path of the file
  * @bodyparam {string} parentRev The parent revision of the file (default: latest)
  * @bodyparam {bool} overwrite Overwrite file (default: true)
- * @bodyparam {file} file contents 
+ * @bodyparam {file} file contents
  *
  * The file can already exist, in which case it's renamed after uploaded.
  *
