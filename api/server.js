@@ -132,6 +132,7 @@ Server.prototype._initialize = function (callback) {
            .use(express.cookieParser())
            .use(express.favicon(__dirname + "/assets/favicon.ico"))
            // API calls that do not require authorization
+           .use(middleware.cors({ origins: [ '*' ], allowCredentials: true }))
            .use(middleware.contentType('application/json'))
            .use('/api/v1/version', that._getVersion.bind(that))
            .use('/api/v1/firsttime', that._firstTime.bind(that))

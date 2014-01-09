@@ -1,5 +1,4 @@
-var _ = require('underscore'),
-    url = require('url');
+var url = require('url');
 
 /*
  * CORS middleware
@@ -19,8 +18,10 @@ module.exports = function cors(options) {
         requestOrigin = url.parse(requestOrigin);
 
         var hostname = requestOrigin.host.split(':')[0]; // remove any port
-        var matchedOrigin = _.find(origins, function (o) { return o === '*' || o === hostname });
-        if (_.isUndefined(matchedOrigin)) { return res.send(405, 'CORS not allowed from this domain'); }
+        var originAllowed = origins.some(function (o) { return o === '*' || o === hostname });
+        if (!originAllowed) {
+            return res.send(405, 'CORS not allowed from this domain');
+        }
 
         // respond back with req.headers.origin which might contain the scheme
         res.header('Access-Control-Allow-Origin', req.headers.origin);
