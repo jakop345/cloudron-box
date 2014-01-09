@@ -515,10 +515,8 @@ Repo.prototype.createReadStream = function (file, options) {
     options = options || { };
 
     var absoluteFilePath = this._absoluteFilePath(file);
-    var ee = new EventEmitter();
     if (absoluteFilePath === null) {
-        process.nextTick(function () { ee.emit('error', new RepoError('ENOENT', 'Invalid file path')); });
-        return ee;
+        return new fs.createReadStream('');
     }
 
     var proc = this.spawn(['cat-file', '-p', options.rev ? options.rev : 'HEAD:' + file]);
