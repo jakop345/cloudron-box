@@ -516,7 +516,7 @@ Repo.prototype.createReadStream = function (file, options) {
 
     var absoluteFilePath = this._absoluteFilePath(file);
     if (absoluteFilePath === null) {
-        return new fs.createReadStream('');
+        return fs.createReadStream(''); // this will trigger an ENOENT error
     }
 
     var proc = this.spawn(['cat-file', '-p', options.rev ? options.rev : 'HEAD:' + file]);

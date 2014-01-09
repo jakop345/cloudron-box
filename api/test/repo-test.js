@@ -132,12 +132,12 @@ describe('Repo', function () {
         });
     });
 
-    it('createReadStream - invalid file', function (done) {
+    it('createReadStream - invalid file inside repo', function (done) {
         var readme = repo.createReadStream('RANDOM');
         readme.on('error', function () { done(); });
     });
 
-    it('createReadStream - invalid path', function (done) {
+    it('createReadStream - invalid path outside repo', function (done) {
         var readme = repo.createReadStream('../README');
         readme.on('error', function (err) {
             expect(err.code).to.equal('ENOENT');
