@@ -165,4 +165,35 @@ describe('Server', function () {
             });
         });
     });
+
+    describe('cors', function () {
+        var server;
+
+        before(function (done) {
+            server = new Server(CONFIG);
+            server.start(function (err) {
+                done();
+            });
+        });
+
+        it('responds to OPTIONS', function (done) {
+            request('OPTIONS', SERVER_URL + '/api/v1/version')
+                .set('Access-Control-Request-Method', 'GET')
+                .set('Access-Control-Request-Headers', 'accept, origin, x-requested-with')
+                .set('Origin', 'http://localhost')
+                .end(function (res) {
+                expect(res.headers['access-control-allow-methods']).to.be('GET, PUT, DELETE, POST, OPTIONS');
+                expect(res.headers['access-control-allow-credentials']).to.be('true');
+                expect(res.headers['access-control-allow-headers']).to.be('accept, origin, x-requested-with'); // mirrored from request
+                expect(res.headers['access-control-allow-origin']).to.be('http://localhost'); // mirrors from request
+                done();
+            });
+        });
+
+        after(function (done) {
+            server.stop(function () {
+                done();
+            });
+        });
+    });
 });
