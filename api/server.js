@@ -126,11 +126,11 @@ Server.prototype._initialize = function (callback) {
         }
 
         that.app.use(express.timeout(10000))
-           .use('/', express.static(__dirname + '/webadmin')) // use '/' for now so cookie is not restricted to '/webadmin'
+           .use('/', express.static(__dirname + '/../webadmin')) // use '/' for now so cookie is not restricted to '/webadmin'
            .use(json)
            .use(urlencoded)
            .use(express.cookieParser())
-           .use(express.favicon(__dirname + "/assets/favicon.ico"))
+           .use(express.favicon(__dirname + "/../assets/favicon.ico"))
            // API calls that do not require authorization
            .use(middleware.cors({ origins: [ '*' ], allowCredentials: true }))
            .use(middleware.contentType('application/json'))
