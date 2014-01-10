@@ -25,6 +25,7 @@ module.exports = function cors(options) {
 
         // respond back with req.headers.origin which might contain the scheme
         res.header('Access-Control-Allow-Origin', req.headers.origin);
+        res.header('Access-Control-Allow-Credentials', allowCredentials);
 
         // handle preflighted requests
         if (req.method === 'OPTIONS') {
@@ -36,7 +37,6 @@ module.exports = function cors(options) {
                 res.header('Access-Control-Allow-Headers', req.headers['access-control-request-headers']);
             }
 
-            res.header('Access-Control-Allow-Credentials', allowCredentials);
             res.header('Access-Control-Max-Age', maxAge);
 
             return res.send(200);
