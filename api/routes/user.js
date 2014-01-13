@@ -256,7 +256,7 @@ function logout(req, res, next) {
     // Invalidate token so the cookie cannot be reused after logout
     db.TOKENS_TABLE.remove(req_token, function (error, result) {
         if (error) return next(error);
-        res.send(200);
+        res.send(200, {});
     });
 }
 
@@ -286,7 +286,7 @@ function removeUser(req, res, next) {
                 return next(new HttpError(500, error.message));
             }
 
-            return res.send(200);
+            return res.send(200, {});
         });
 
         return;

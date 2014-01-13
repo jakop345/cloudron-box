@@ -30,7 +30,7 @@ function deleteVolume(req, res, next) {
         }
 
         delete req.volume;
-        res.send(200) ;
+        res.send(200, {}) ;
     });
 }
 
@@ -58,7 +58,7 @@ function createVolume(req, res, next) {
             return next(new HttpError(500, 'Volume creation failed: ' + error));
         }
 
-        res.send(201);
+        res.send(201, {});
     });
 }
 
@@ -85,7 +85,7 @@ function mount(req, res, next) {
             return next(new HttpError(402, 'Unable to open volume'));
         }
 
-        res.send(200);
+        res.send(200, {});
     });
 }
 
@@ -95,7 +95,7 @@ function unmount(req, res, next) {
             return next(new HttpError(500, 'Unable to close volume'));
         }
 
-        res.send(200);
+        res.send(200, {});
     });
 }
 
