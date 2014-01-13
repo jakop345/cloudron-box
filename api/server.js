@@ -11,7 +11,7 @@ var express = require('express'),
     debug = require('debug')('server:server'),
     crypto = require('crypto'),
     os = require('os'),
-    polo = require('polo'),
+    Ssdp = require('upnp-ssdp'),
     assert = require('assert'),
     pkg = require('./../package.json'),
     user = require('./user.js');
@@ -223,16 +223,19 @@ Server.prototype._listen = function (callback) {
 };
 
 Server.prototype._announce = function (callback) {
-    var that = this;
-    var services = polo();
+    var ssdp = new Ssdp();
 
-    services.put({
-        name: 'yellowtent',
-        port: that.app.get('port')
+    ssdp.announce({
+        name: 'yellowtent:server',
+        port: this.app.get('port')
     });
 
-    services.on('error', function (error) {
+    ssdp.on('error', function (error) {
         console.error('Unable to announce the device.', error);
+    });
+
+    ssdp.on('reply', function (rinfo) {
+        debug('Sent SSDP response to ' + rinfo.address + ':' + rinfo.port);
     });
 
     callback();

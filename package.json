@@ -24,9 +24,9 @@
     "rimraf": "*",
     "debug": "*",
     "mime": "*",
-    "polo": "*",
     "encfs": "*",
-    "safetydance": "*"
+    "safetydance": "*",
+    "upnp-ssdp": "*"
   },
   "devDependencies": {
     "mocha": "*",
