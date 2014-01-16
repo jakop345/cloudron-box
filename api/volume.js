@@ -216,7 +216,7 @@ Volume.prototype.listFiles = function (directory, callback) {
             return callback(new VolumeError(null, VolumeError.NOT_MOUNTED));
         }
 
-        that.repo.getTree('HEAD', { path: directory, listSubtrees: false }, function (error, tree) {
+        that.repo.listFiles({ path: directory, listSubtrees: false }, function (error, tree) {
             if (error) {
                 debug('Unable to read directory "' + directory + '" for volume "' + that.name + '".');
                 return callback(new VolumeError(error, VolumeError.READ_ERROR));

@@ -190,7 +190,7 @@ describe('Repo', function () {
         });
     });
 
-    it('getTree - valid tree', function (done) {
+    it('getTree - valid tree non-recursive', function (done) {
         repo.getTree('HEAD', function (err, tree) {
             expect(tree.entries.length).to.greaterThan(3);
             var paths = tree.entries.map(function (entry) { return entry.path; });
@@ -208,7 +208,7 @@ describe('Repo', function () {
         });
     });
 
-    it('getTree - root tree', function (done) {
+    it('getTree - root tree recursive', function (done) {
         repo.getTree('HEAD', { listSubtrees: true }, function (err, tree) {
             expect(tree.entries.length).to.greaterThan(3);
             var paths = tree.entries.map(function (entry) { return entry.path; });
@@ -228,7 +228,7 @@ describe('Repo', function () {
         });
     });
 
-    it('getTree - subdir', function (done) {
+    it('getTree - subdir recursive', function (done) {
         repo.getTree('HEAD', { path: 'dir', listSubtrees: true }, function (err, tree) {
             var paths = tree.entries.map(function (entry) { return entry.path; });
             expect(paths).to.contain('dir/subdir');
@@ -266,6 +266,30 @@ describe('Repo', function () {
     it('getTree - null tree', function (done) {
         repo.getTree('', function (err, tree) {
             expect(tree.entries.length).to.equal(0);
+            done();
+        });
+    });
+
+    it('listFiles - root tree', function (done) {
+        repo.listFiles({ listSubtrees: true }, function (err, tree) {
+            expect(tree.entries.length).to.greaterThan(3);
+
+            var paths = tree.entries.map(function (entry) { return entry.path; });
+            var names = tree.entries.map(function (entry) { return entry.name; });
+            expect(paths).to.contain('README');
+            expect(paths).to.contain(SPECIAL_FILE);
+            // all dirs must be listed
+            expect(paths).to.contain('dir');
+            expect(names).to.contain('dir');
+
+            expect(paths).to.contain('dir/subdir');
+            expect(names).to.contain('subdir');
+
+            expect(paths).to.contain('dir/subdir/DEEP');
+            expect(names).to.contain('DEEP');
+
+            tree.entries.forEach(function (entry) { expect(entry.mtime).to.be.a('number'); });
+
             done();
         });
     });

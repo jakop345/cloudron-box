@@ -183,6 +183,29 @@ Repo.prototype.getTree = function (treeish, options, callback) {
     });
 };
 
+Repo.prototype.listFiles = function (options, callback) {
+    assert(typeof options === 'object' || typeof options === 'function');
+
+    if (typeof options === 'function') {
+        callback = options;
+        options = { };
+    }
+
+    var that = this;
+
+    this.getTree('HEAD', options, function (err, tree) {
+        if (err) return callback(err);
+
+        tree.entries.forEach(function (entry) {
+            var stat = safe.fs.statSync(path.join(that.checkoutDir, entry.path)); // FIXME: make async
+            if (!stat) return;
+            entry.mtime = stat.mtime.getTime();
+        });
+
+        callback(null, tree);
+    });
+};
+
 Repo.prototype.isTracked = function (file, callback) {
     assert(typeof file === 'string');
     assert(typeof callback === 'function');
