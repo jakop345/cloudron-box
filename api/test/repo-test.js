@@ -68,6 +68,18 @@ describe('Repo', function () {
         });
     });
 
+    it('addFile - subdirs', function (done) {
+        var tmpfile = path.join(os.tmpdir(), 'DEEP');
+        fs.writeFileSync(tmpfile, 'DEEP CONTENTS');
+        repo.addFile('dir/subdir/DEEP', { file: tmpfile }, function (err, fileInfo, commit) {
+            expect(commit.subject).to.equal('Add DEEP');
+            expect(fileInfo.sha1).to.equal('652e9b552d21dcbfa5f8f7c7e053da8fbade3498');
+            expect(commit.author.name).to.equal(USERNAME);
+            expect(commit.author.email).to.equal(EMAIL);
+            done();
+        });
+    });
+
     it('addFile - special chars', function (done) {
         var tmpfile = path.join(os.tmpdir(), 'README');
         fs.writeFileSync(tmpfile, 'SPECIAL');
@@ -182,8 +194,71 @@ describe('Repo', function () {
         repo.getTree('HEAD', function (err, tree) {
             expect(tree.entries.length).to.greaterThan(3);
             var paths = tree.entries.map(function (entry) { return entry.path; });
+            var names = tree.entries.map(function (entry) { return entry.name; });
+
+            expect(paths).to.contain('README');
+            expect(names).to.contain('README');
+
+            expect(paths).to.contain(SPECIAL_FILE);
+            expect(names).to.contain(SPECIAL_FILE);
+
+            expect(paths).to.contain('dir'); // when not listing subtrees, we only get dir name
+            expect(names).to.contain('dir');
+            done();
+        });
+    });
+
+    it('getTree - root tree', function (done) {
+        repo.getTree('HEAD', { listSubtrees: true }, function (err, tree) {
+            expect(tree.entries.length).to.greaterThan(3);
+            var paths = tree.entries.map(function (entry) { return entry.path; });
+            var names = tree.entries.map(function (entry) { return entry.name; });
             expect(paths).to.contain('README');
             expect(paths).to.contain(SPECIAL_FILE);
+            // all dirs must be listed
+            expect(paths).to.contain('dir');
+            expect(names).to.contain('dir');
+
+            expect(paths).to.contain('dir/subdir');
+            expect(names).to.contain('subdir');
+
+            expect(paths).to.contain('dir/subdir/DEEP');
+            expect(names).to.contain('DEEP');
+            done();
+        });
+    });
+
+    it('getTree - subdir', function (done) {
+        repo.getTree('HEAD', { path: 'dir', listSubtrees: true }, function (err, tree) {
+            var paths = tree.entries.map(function (entry) { return entry.path; });
+            expect(paths).to.contain('dir/subdir');
+            expect(paths).to.contain('dir/subdir/DEEP');
+            done();
+        });
+    });
+
+    it('getTree - subdir/', function (done) {
+        repo.getTree('HEAD', { path: 'dir/', listSubtrees: true }, function (err, tree) {
+            var paths = tree.entries.map(function (entry) { return entry.path; });
+            expect(paths).to.contain('dir/subdir');
+            expect(paths).to.contain('dir/subdir/DEEP');
+            done();
+        });
+    });
+
+    it('getTree - invalid path', function (done) {
+        // this is the current behavior but it can be changed to error
+        repo.getTree('HEAD', { path: 'dirx' }, function (err, tree) {
+            expect(err).to.be(null);
+            expect(tree.entries).to.be.empty();
+            done();
+        });
+    });
+
+    it('getTree - invalid revision', function (done) {
+        // this is the current behavior but it can be changed to error
+        repo.getTree('235789', function (err, tree) {
+            expect(err).to.be.ok();
             done();
         });
     });

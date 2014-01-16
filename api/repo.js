@@ -150,12 +150,14 @@ function parseTreeLine(line) {
     // sample line : 100644 blob e69de29bb2d1d6434b8b29ae775ad8c2e48c5391     43\tREADME
     var parts = line.split(/[\t ]+/, 4);
     var endPos = parts[0].length + 1 + parts[1].length + 1 + parts[2].length + 1 + Math.max(7, parts[3].length) + 1;
+    var relPath = line.substr(endPos);
 
     return {
         mode: parseInt(parts[0], 8),
         size: parseInt(parts[3], 10) || 0, // for dirs, size field is '-' and parseInt will return NaN
         sha1: parts[2],
-        path: line.substr(endPos)
+        path: relPath,
+        name: path.basename(relPath)
     };
 }
 
@@ -274,7 +276,7 @@ Repo.prototype._addFileAndCommit = function (file, options, callback) {
         that.git(['ls-files', '-z', '-s', '--', file], function (err, out) {
             if (err) return callback(err);
             var fileInfo = parseIndexLine(out.slice(0, -1));
-            var message = options.message || (options._operation + ' ' + file);
+            var message = options.message || (options._operation + ' ' + path.basename(file));
             that._createCommit(message, function (err, commit) {
                 if (err) return callback(err);
                 callback(null, fileInfo, commit);
