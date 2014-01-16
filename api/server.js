@@ -165,7 +165,7 @@ Server.prototype._initialize = function (callback) {
         that.app.post('/api/v1/fileops/:volume/move', routes.volume.requireMountedVolume, express.json({ strict: true }), routes.fileops.move);
         that.app.post('/api/v1/fileops/:volume/delete', routes.volume.requireMountedVolume, express.json({ strict: true }), routes.fileops.remove);
 
-        that.app.get('/api/v1/volume/:volume/list/', routes.volume.requireMountedVolume, routes.volume.listFiles);
+        that.app.get('/api/v1/volume/:volume/list', routes.volume.requireMountedVolume, routes.volume.listFiles);
         that.app.get('/api/v1/volume/:volume/list/*', routes.volume.requireMountedVolume, routes.volume.listFiles);
         that.app.get('/api/v1/volume/list', routes.volume.listVolumes);
         that.app.post('/api/v1/volume/create', that._requirePassword.bind(that), routes.volume.createVolume);

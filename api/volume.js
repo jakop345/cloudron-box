@@ -203,12 +203,7 @@ Volume.prototype.listFiles = function (directory, callback) {
     assert(typeof directory === 'string');
     assert(typeof callback === 'function');
 
-    if (directory.length === 0) {
-        directory = '.';
-    }
-
     var that = this;
-    var folder = path.join(this.mountPoint, REPO_SUBFOLDER, directory);
 
     this.encfs.isMounted(function (error, mounted) {
         if (error) {
@@ -221,46 +216,13 @@ Volume.prototype.listFiles = function (directory, callback) {
             return callback(new VolumeError(null, VolumeError.NOT_MOUNTED));
         }
 
-        fs.readdir(folder, function (error, files) {
+        that.repo.getTree('HEAD', { path: directory, listSubtrees: false }, function (error, tree) {
             if (error) {
-                debug('Unable to read directory "' + folder + '" for volume "' + that.name + '".');
+                debug('Unable to read directory "' + directory + '" for volume "' + that.name + '".');
                 return callback(new VolumeError(error, VolumeError.READ_ERROR));
             }
 
-            var ret = [];
-
-            if (folder !== that.mountPoint) {
-                var dirUp = {};
-                dirUp.filename = '..';
-                dirUp.path = path.join(directory, '..');
-                dirUp.isDirectory = true;
-                dirUp.isFile = false;
-                dirUp.stat = { size: 0 };
-                ret.push(dirUp);
-            }
-
-            files.forEach(function (file) {
-                // filter .git
-                if (file === '.git') {
-                    return;
-                }
-
-                var tmp = {};
-                tmp.filename = file;
-                tmp.path = path.join(directory, file);
-
-                tmp.stat = safe.fs.statSync(path.join(folder, file));
-                if (tmp.stat) {
-                    tmp.isFile = tmp.stat.isFile();
-                    tmp.isDirectory = tmp.stat.isDirectory();
-                } else {
-                    debug('Error getting file information:' + safe.error.message);
-                }
-
-                ret.push(tmp);
-            });
-
-            callback(null, ret);
+            callback(null, tree);
         });
     });
 };

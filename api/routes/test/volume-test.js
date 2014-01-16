@@ -98,16 +98,17 @@ describe('Server Volume API', function () {
     });
 
     it('listFiles', function (done) {
-        request.get(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/list/')
+        request.get(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/list')
                .auth(USERNAME, PASSWORD)
                .end(function (err, res) {
             var foundReadme = false;
-            res.body.forEach(function (entry) {
-                expect(entry.filename).to.be.a("string");
-                expect(entry.stat).to.be.an("object");
-                expect(entry.stat.size).to.be.a("number");
+            res.body.entries.forEach(function (entry) {
+                expect(entry.path).to.be.a("string");
+                expect(entry.mode).to.be.an("number");
+                expect(entry.size).to.be.a("number");
+                expect(entry.sha1).to.be.a("string");
 
-                if (entry.filename === 'README.md') foundReadme = true;
+                if (entry.path === 'README.md') foundReadme = true;
             });
             expect(foundReadme).to.be(true);
             done(err);
