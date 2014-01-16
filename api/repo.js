@@ -172,8 +172,8 @@ Repo.prototype.getTree = function (treeish, options, callback) {
 
     if (treeish === '') return callback(null, tree);
 
-    var path = options.path || '', listSubtrees = options.listSubtrees ? '-t' : '';
-    this.git(['ls-tree', '-z', '-r', '-l', listSubtrees, treeish, '--', path], function (err, out) {
+    var path = options.path || '', listSubtrees = options.listSubtrees ? '-rt' : '';
+    this.git(['ls-tree', '-z', '-l', listSubtrees, treeish, '--', path], function (err, out) {
         if (err) return callback(err);
         var lines = out.split('\0');
         lines.forEach(function (line) { if (line.length !== 0) tree.entries.push(parseTreeLine(line)); });
