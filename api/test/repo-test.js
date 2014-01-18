@@ -238,7 +238,7 @@ describe('Repo', function () {
     });
 
     it('getTree - subdir/', function (done) {
-        repo.getTree('HEAD', { path: 'dir/', listSubtrees: true }, function (err, tree) {
+        repo.getTree('HEAD', { path: 'dir/subdir/', listSubtrees: true }, function (err, tree) {
             var paths = tree.entries.map(function (entry) { return entry.path; });
             expect(paths).to.contain('dir/subdir');
             expect(paths).to.contain('dir/subdir/DEEP');
