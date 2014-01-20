@@ -50,7 +50,7 @@ function move(req, res, next) {
     var rev = req.body.rev;
 
     if (!fromPath) return next(new HttpError(400, 'from_path not specified'));
-    if (!toPath) return next(new HttpError(400, 'to_path not specified'));
+    if (typeof toPath === 'undefined') return next(new HttpError(400, 'to_path not specified')); // to_path can be ""
     if (!rev) return next(new HttpError(400, 'No revision specified'));
 
     repo.moveFile(fromPath, toPath, { rev: rev }, function (err, newEntry, commit) {
@@ -78,7 +78,7 @@ function copy(req, res, next) {
     var rev = req.body.rev;
 
     if (!fromPath) return next(new HttpError(400, 'from_path not specified'));
-    if (!toPath) return next(new HttpError(400, 'to_path not specified'));
+    if (typeof toPath === 'undefined') return next(new HttpError(400, 'to_path not specified'));
     if (!rev) return next(new HttpError(400, 'No revision specified'));
 
     repo.copyFile(fromPath, toPath, { rev: rev }, function (err, newEntry, commit) {
