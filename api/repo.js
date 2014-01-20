@@ -484,6 +484,8 @@ Repo.prototype.moveFile = function (from, to, options, callback) {
         options = { };
     }
 
+    to = to === '' ? '.': to;
+
     var that = this;
     this.fileEntry(from, 'HEAD', function (err, entry) {
         if (err) return callback(err);
@@ -495,6 +497,7 @@ Repo.prototype.moveFile = function (from, to, options, callback) {
             if (err) return callback(new RepoError('ENOENT', 'File does not exist'));
 
             var message = 'Move from ' + from + ' to ' + to;
+            // FIXME: When to is '.' this does a add and ls-files of '.'
             that._addFileAndCommit(to, { message: message }, callback);
         });
     });
