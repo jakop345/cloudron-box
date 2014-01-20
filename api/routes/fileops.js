@@ -11,17 +11,17 @@ exports = module.exports = {
 
 /*
  * Removes a file or directory
- * @urlparam {string} path The path of the file (for 'DELETE' requests)
  * @bodyparam {string} path The path of the file (for 'POST' requests)
  * @bodyparam {string} rev The last known revision of the file
  *
- * The delete succeeds only if rev is the latest revision.
+ * The delete succeeds only if rev is set to the latest revision or '*'.
  */
 function remove(req, res, next) {
     var filePath = req.body.path;
     var repo = req.volume.repo;
     var rev = req.body.rev;
 
+    if (!filePath) return next(new HttpError(400, 'No path specified'));
     if (!rev) return next(new HttpError(400, 'No revision specified'));
 
     repo.removeFile(filePath, { recursive: true, rev: rev }, function (err, fileEntry, commit) {
