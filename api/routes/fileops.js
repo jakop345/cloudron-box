@@ -42,7 +42,7 @@ function remove(req, res, next) {
  * @bodyparam {string} to_path The destination path
  * @bodyparam {string} rev The last known revision of the file
  *
- * The move succeeds only if rev is the latest revision.
+ * The move succeeds only if rev is set to the latest revision or '*'.
  */
 function move(req, res, next) {
     var fromPath = req.body.from_path, toPath = req.body.to_path;
@@ -70,7 +70,7 @@ function move(req, res, next) {
  * @bodyparam {string} to_path The destination path
  * @bodyparam {string} rev The last known revision of the file
  *
- * The copy succeeds only if rev is the latest revision.
+ * The copy succeeds only if rev is set to the latest revision or '*'.
  */
 function copy(req, res, next) {
     var fromPath = req.body.from_path, toPath = req.body.to_path;
