@@ -89,7 +89,7 @@ function createUser(req, res, next) {
             }
         }
 
-        res.send(201);
+        res.send(201, {});
     });
 }
 

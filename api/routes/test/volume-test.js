@@ -58,6 +58,29 @@ function tempFile(contents) {
     return file;
 }
 
+// function checks if obj has all but only the specified properties
+function checkObjectHasOnly(obj, properties) {
+    var prop;
+    var found = {};
+
+    for (prop in obj) {
+        if (obj.hasOwnProperty(prop)) {
+            if (properties.hasOwnProperty(prop)) {
+                expect(obj[prop]).to.be.a(properties[prop]);
+                found[prop] = true;
+            } else {
+                throw('Expect result to not have property ' + prop);
+            }
+        }
+    }
+
+    for (prop in properties) {
+        if (properties.hasOwnProperty(prop) && !found.hasOwnProperty(prop)) {
+            throw('Expect result to have property ' + prop);
+        }
+    }
+}
+
 describe('Server Volume API', function () {
     this.timeout(5000);
 
@@ -93,6 +116,10 @@ describe('Server Volume API', function () {
             expect(res.body.length).to.equal(1);
             expect(res.body[0].name).to.equal(TESTVOLUME);
             expect(res.statusCode).to.equal(200);
+
+            // check for result object sanity
+            checkObjectHasOnly(res.body[0], {name: 'string'});
+
             done(err);
         });
     });
@@ -103,11 +130,14 @@ describe('Server Volume API', function () {
                .end(function (err, res) {
             var foundReadme = false;
             res.body.entries.forEach(function (entry) {
-                expect(entry.path).to.be.a("string");
-                expect(entry.mode).to.be.an("number");
-                expect(entry.size).to.be.a("number");
-                expect(entry.sha1).to.be.a("string");
-
+                checkObjectHasOnly(entry, {
+                    path: 'string',
+                    mode : 'number',
+                    size: 'number',
+                    sha1: 'string',
+                    name: 'string',
+                    mtime: 'number'
+                });
                 if (entry.path === 'README.md') foundReadme = true;
             });
             expect(foundReadme).to.be(true);

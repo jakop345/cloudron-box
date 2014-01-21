@@ -40,7 +40,15 @@ function listVolumes(req, res, next) {
             return next(new HttpError(500, 'Unable to list volumes: ' + error));
         }
 
-        res.send(200, result);
+        var ret = [];
+
+        result.forEach(function (volume) {
+            ret.push({
+                name: volume.name
+            });
+        });
+
+        res.send(200, ret);
     });
 }
 
