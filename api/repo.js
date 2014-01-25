@@ -161,6 +161,14 @@ function parseTreeLine(line) {
     };
 }
 
+/*
+ * Each tree entry contains:
+ * name - name of the file
+ * path - full path relative to the volume
+ * mode - integer
+ * size - integer
+ * sha1 - string
+ */
 Repo.prototype.getTree = function (treeish, options, callback) {
     assert(typeof treeish === 'string');
     assert(typeof options === 'object' || typeof options === 'function');
@@ -183,6 +191,15 @@ Repo.prototype.getTree = function (treeish, options, callback) {
     });
 };
 
+/*
+ * Return an arry of entries that contain:
+ * name - name of the file
+ * path - full path relative to the volume
+ * mode - integer
+ * size - integer
+ * sha1 - string
+ * mtime - integer
+ */
 Repo.prototype.listFiles = function (options, callback) {
     assert(typeof options === 'object' || typeof options === 'function');
 
@@ -215,6 +232,15 @@ Repo.prototype.isTracked = function (file, callback) {
     });
 };
 
+/*
+ * Each file entry contains:
+ * name - name of the file
+ * path - full path relative to the volume
+ * mode - integer
+ * size - integer
+ * sha1 - string
+ * mtime - integer
+ */
 Repo.prototype.fileEntry = function (file, commitish, callback) {
     assert(typeof file === 'string');
     assert(typeof commitish === 'string');
