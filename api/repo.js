@@ -54,7 +54,11 @@ Repo.prototype._exec = function (command, callback) {
     exec(command, options, callback);
 };
 
-// run arbitrary git command on this repo
+/*
+ * Run git commands on this repo. This function waits for the git command to
+ * complete and captures the complete stderr and stdout in two separate buffers.
+ * If you want to process the output as a stream, use spawn() instead.
+ */
 Repo.prototype.git = function (args, callback) {
     assert(util.isArray(args));
 
@@ -69,6 +73,10 @@ Repo.prototype.git = function (args, callback) {
     return proc;
 };
 
+/*
+ * Run git commands on this repo. Unlike git(), this function returns the process
+ * object. process.stderr and process.stdout are the error and output streams.
+ */
 Repo.prototype.spawn = function (args) {
     assert(util.isArray(args));
 
@@ -87,6 +95,20 @@ Repo.prototype.spawn = function (args) {
     });
     proc.stderr.on('data', function (data) { debug(data); });
     return proc;
+};
+
+/*
+ * Returns the absolute file path of \arg filePath if it's part of this
+ * repo. Returns null otherwise.
+ */
+Repo.prototype._absoluteFilePath = function (filePath) {
+    var relativeFilePath = path.relative(this.gitDir, filePath);
+    if (relativeFilePath.slice(0, 3) !== '../') return null; // inside .git
+
+    var absoluteFilePath = path.resolve(this.checkoutDir, filePath);
+    return absoluteFilePath.slice(0, this.checkoutDir.length) == this.checkoutDir
+            ? absoluteFilePath
+            : null; // the path is outside the repo
 };
 
 var LOG_LINE_FORMAT = '%T%x00%ct%x00%P%x00%B%x00%H%x00%an%x00%ae%x00';
@@ -114,6 +136,10 @@ function parseLogLine(line, startPos) {
     return { commit: commit, pos: pos[7] };
 }
 
+/*
+ * Returns a commit object with the following fields:
+ *   treeSha1, commitDate, parentSha1, subject, sha1, author.name, author.email
+ */
 Repo.prototype.getCommit = function (commitish, callback) {
     assert(typeof commitish === 'string');
     assert(typeof callback === 'function');
@@ -124,6 +150,9 @@ Repo.prototype.getCommit = function (commitish, callback) {
     });
 };
 
+/*
+ * Creates a git repository associated with the given username and email.
+ */
 Repo.prototype.create = function (username, email, callback) {
     assert(typeof username === 'string' && username.length !== 0);
     assert(typeof email === 'string' && email.length !== 0);
@@ -163,11 +192,15 @@ function parseTreeLine(line) {
 
 /*
  * Each tree entry contains:
- * name - name of the file
- * path - full path relative to the volume
- * mode - integer
- * size - integer
- * sha1 - string
+ *   name - name of the file
+ *   path - full path relative to the volume
+ *   mode - integer
+ *   size - integer
+ *   sha1 - string
+ * options can contain:
+ *   path - filter by path
+ *   listSubtrees - recursive list all files below path. When true,
+ *     directories are not listed.
  */
 Repo.prototype.getTree = function (treeish, options, callback) {
     assert(typeof treeish === 'string');
@@ -193,12 +226,16 @@ Repo.prototype.getTree = function (treeish, options, callback) {
 
 /*
  * Return an arry of entries that contain:
- * name - name of the file
- * path - full path relative to the volume
- * mode - integer
- * size - integer
- * sha1 - string
- * mtime - integer
+ *   name - name of the file
+ *   path - full path relative to the volume
+ *   mode - integer
+ *   size - integer
+ *   sha1 - string
+ *   mtime - integer
+ * options can contain:
+ *   path - filter by path
+ *   listSubtrees - recursive list all files below path. When true,
+ *     directories are not listed.
  */
 Repo.prototype.listFiles = function (options, callback) {
     assert(typeof options === 'object' || typeof options === 'function');
@@ -223,6 +260,9 @@ Repo.prototype.listFiles = function (options, callback) {
     });
 };
 
+/*
+ * Returns true if the file is part of the repo.
+ */
 Repo.prototype.isTracked = function (file, callback) {
     assert(typeof file === 'string');
     assert(typeof callback === 'function');
@@ -234,12 +274,12 @@ Repo.prototype.isTracked = function (file, callback) {
 
 /*
  * Each file entry contains:
- * name - name of the file
- * path - full path relative to the volume
- * mode - integer
- * size - integer
- * sha1 - string
- * mtime - integer
+ *   name - name of the file
+ *   path - full path relative to the volume
+ *   mode - integer
+ *   size - integer
+ *   sha1 - string
+ *   mtime - integer
  */
 Repo.prototype.fileEntry = function (file, commitish, callback) {
     assert(typeof file === 'string');
@@ -341,6 +381,7 @@ Repo.prototype._renameFileAndCommit = function (file, options, callback) {
     var that = this;
     var absoluteFilePath = path.join(this.checkoutDir, file);
 
+    // FIXME: make options.file come as function arg since it's mandatory param
     fs.rename(options.file, absoluteFilePath, function (err) {
         if (err) return callback(err);
         that._addFileAndCommit(file, options, callback);
@@ -394,21 +435,11 @@ Repo.prototype.indexEntries = function (options, callback) {
         options = { };
     }
 
-    var path = options.path || '';
+    var path = options.path || ''; // FIXME: make this non-optional
     this.git(['ls-files', '-z', '-s', '--debug', '--', path], function (err, out) {
         if (err) return callback(err);
         callback(null, parseIndexLines(out));
     });
-};
-
-Repo.prototype._absoluteFilePath = function (filePath) {
-    var relativeFilePath = path.relative(this.gitDir, filePath);
-    if (relativeFilePath.slice(0, 3) !== '../') return null; // inside .git
-
-    var absoluteFilePath = path.resolve(this.checkoutDir, filePath);
-    return absoluteFilePath.slice(0, this.checkoutDir.length) == this.checkoutDir
-            ? absoluteFilePath
-            : null; // the path is outside the repo
 };
 
 // FIXME: needs checkout lock
@@ -426,6 +457,11 @@ Repo.prototype.addFileWithData = function (file, data, options, callback) {
     this.addFile(file, options, callback);
 };
 
+/*
+ * Adds a file to the repo. Fails if a file already exists in the repo
+ * Options can contain:
+ *    message - commit message. default: 'Add <filename>'
+ */
 Repo.prototype.addFile = function (file, options, callback) {
     assert(typeof file === 'string');
     assert(typeof options === 'object' || typeof options === 'function');
@@ -452,6 +488,11 @@ Repo.prototype.addFile = function (file, options, callback) {
     });
 };
 
+/*
+ * Updates an existing file in the repo.
+ * Options can contain:
+ *    message - commit message. default: 'Update <filename>'
+ */
 Repo.prototype.updateFile = function (file, options, callback) {
     assert(typeof file === 'string');
     assert(typeof options === 'object' || typeof options === 'function');
@@ -476,6 +517,12 @@ Repo.prototype.updateFile = function (file, options, callback) {
     this._renameFileAndCommit(file, options, callback);
 };
 
+/*
+ * Removes an existing file in the repo. Fails if path doesn't exist.
+ * Options can contain:
+ *    message - commit message. default: 'Remove <filename>'
+ *    recursive - for directories, removes them recursively
+ */
 Repo.prototype.removeFile = function (file, options, callback) {
     assert(typeof file === 'string');
     assert(typeof options === 'object' || typeof options === 'function');
@@ -506,6 +553,10 @@ Repo.prototype.removeFile = function (file, options, callback) {
     });
 };
 
+/*
+ * Move (rename) a file from \arg from to \arg to. Options can contain:
+ *    rev - revision of the from file that the client expects to be moved. default: latest
+ */
 Repo.prototype.moveFile = function (from, to, options, callback) {
     assert(typeof from === 'string');
     assert(typeof to === 'string');
@@ -535,6 +586,11 @@ Repo.prototype.moveFile = function (from, to, options, callback) {
     });
 };
 
+/*
+ * FIXME: this doesn't behave as documented below
+ * Add a copy of a file from \arg from to \arg to. Options can contain:
+ *    rev - revision of the from file to copy from. default: latest
+ */
 Repo.prototype.copyFile = function (from, to, options, callback) {
     assert(typeof from === 'string');
     assert(typeof to === 'string');
@@ -570,6 +626,11 @@ Repo.prototype.copyFile = function (from, to, options, callback) {
     });
 };
 
+/*
+ * Access contents of a file in the repo as a stream.
+ * Options can contain:
+ *    rev - the revision of the file (git-sha1). default: latest
+ */
 Repo.prototype.createReadStream = function (file, options) {
     assert(typeof file === 'string');
     options = options || { };
@@ -597,10 +658,13 @@ Repo.prototype.createReadStream = function (file, options) {
     return proc.stdout;
 };
 
+/*
+ * Helper function parse a single diff line. A diff line is of the following format: 
+ * :100644 100644 78681069871a08110373201344e5016e218604ea 8b58e26f01a1af730e727b0eb0f1ff3b33a79de2 M\0package.json\0[newpath\0]
+ */
 function parseRawDiffLine(line, startPos) {
     assert(typeof line === 'string' && line.length !== 0);
 
-    // :100644 100644 78681069871a08110373201344e5016e218604ea 8b58e26f01a1af730e727b0eb0f1ff3b33a79de2 M\0package.json\0[newpath\0]
     // pos records the position of each parts
     var oldModePos = startPos + 1; // skip colon
     var modePos = line.indexOf(' ', oldModePos) + 1;
@@ -643,6 +707,9 @@ function parseRawDiffLine(line, startPos) {
     }
 }
 
+/*
+ * Helper function parse multiple diff lines
+ */
 function parseRawDiffLines(out) {
     var pos = 0;
     var changes = [ ];
@@ -676,6 +743,19 @@ Repo.prototype._getFileSizes = function (sha1s, callback) {
     proc.stdin.end('\n');
 };
 
+/*
+ * Gets the revision history of a file. Options can contain:
+ *   limit - max number of revisions to return. default: 10
+ *
+ * Each revision object contains:
+ *   sha1: rev of the file (git-sha1 of the file)
+ *   mode: mode of file at that revision
+ *   path: path of the file. this could change if the file was a rename
+ *   date: modification date
+ *   author: modification author
+ *   subject: modification subject,
+ *   size: size of file
+ */
 Repo.prototype.getRevisions = function (file, options, callback) {
     assert(typeof file === 'string');
     assert(typeof options === 'object' || typeof options === 'function');
@@ -729,6 +809,10 @@ Repo.prototype.getRevisions = function (file, options, callback) {
     });
 };
 
+/*
+ * Returns the changes between two revisions. Each change contains:
+ *     oldRev, rev, oldMode, mode, status, oldPath, path
+ */
 Repo.prototype.diffTree = function (treeish1 /* from */, treeish2 /* to */, callback) {
     assert(typeof treeish1 === 'string');
     assert(typeof treeish2 === 'string');
@@ -746,6 +830,14 @@ Repo.prototype.diffTree = function (treeish1 /* from */, treeish2 /* to */, call
     });
 };
 
+/*
+ * Returns the metadata of a file or directory. Options can contain:
+ *    rev: the revision of the file/directory
+ *    hash: the hash (FIXME: explain better)
+ * The returned metadata contains:
+ *    name, path, mode, size, sha1, mtime (only for HEAD)
+ * FIXME: check how files/dirs are listed in output
+ */
 Repo.prototype.metadata = function (filePath, options, callback) {
     assert(typeof filePath === 'string');
     assert(typeof options === 'object' || typeof options === 'function');
@@ -778,6 +870,11 @@ Repo.prototype.metadata = function (filePath, options, callback) {
     }
 };
 
+/*
+ * Hashes the file at \arg filePath. The sha1 sum of a file is different
+ * from the git hash of a file since git prepends file size and type
+ * to the file contents.
+ */
 Repo.prototype.hashObject = function (filePath, callback) {
     assert(typeof filePath === 'string');
 
@@ -787,7 +884,15 @@ Repo.prototype.hashObject = function (filePath, callback) {
     });
 };
 
-// can add or update a file
+/*
+ * Add or update file at \arg filePath with \arg newFile.
+ * \arg options can contain
+ *    overwrite - Overwrite filePath if it already exists. default: false
+ *    parentRev - Update file only if this is filePath's current revision.
+ *    getConflictFilenameSync - Function called to provide alternate file name
+ *      when there is a conflict. conflict can happen when parentRev is not
+ *      specified and overwrite is false.
+ */
 Repo.prototype.putFile = function (filePath, newFile, options, callback) {
     assert(typeof filePath === 'string');
     assert(typeof newFile === 'string');
