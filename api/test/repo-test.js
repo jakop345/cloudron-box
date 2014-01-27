@@ -517,4 +517,23 @@ describe('Repo', function () {
             done();
         });
     });
+
+    it('_absoluteFilePath', function (done) {
+        expect(repo._absoluteFilePath('foo')).to.equal(path.join(repo.checkoutDir, 'foo'));
+        expect(repo._absoluteFilePath('foo/bar')).to.equal(path.join(repo.checkoutDir, 'foo/bar'));
+        expect(repo._absoluteFilePath('foo/../bar')).to.equal(path.join(repo.checkoutDir, 'bar'));
+        expect(repo._absoluteFilePath('./foo')).to.equal(path.join(repo.checkoutDir, 'foo'));
+        expect(repo._absoluteFilePath('.')).to.equal(repo.checkoutDir);
+        expect(repo._absoluteFilePath('')).to.equal(repo.checkoutDir);
+        expect(repo._absoluteFilePath('.gitx')).to.equal(path.join(repo.checkoutDir, '.gitx'));
+
+        expect(repo._absoluteFilePath('.git/foo')).to.equal(null);
+        expect(repo._absoluteFilePath(repo.checkoutDir)).to.equal(null);
+        expect(repo._absoluteFilePath('..')).to.be(null);
+        expect(repo._absoluteFilePath('../..')).to.be(null);
+        expect(repo._absoluteFilePath('/')).to.be(null);
+        expect(repo._absoluteFilePath('/tmp')).to.be(null);
+
+        done();
+    });
 });

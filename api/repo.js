@@ -38,7 +38,7 @@ function isFile(mode) {
 // creates a repo. before you do anything
 function Repo(rootDir, tmpDir) {
     this.gitDir = path.join(rootDir, '.git'); // must not contain trailing slash
-    this.checkoutDir = rootDir;
+    this.checkoutDir = rootDir; // must not contain trailing slash
     this.tmpDir = tmpDir;
 }
 
@@ -102,13 +102,16 @@ Repo.prototype.spawn = function (args) {
  * repo. Returns null otherwise.
  */
 Repo.prototype._absoluteFilePath = function (filePath) {
-    var relativeFilePath = path.relative(this.gitDir, filePath);
-    if (relativeFilePath.slice(0, 3) !== '../') return null; // inside .git
+    if (filePath[0] === '/') return null; // filePath must always be relative
 
     var absoluteFilePath = path.resolve(this.checkoutDir, filePath);
-    return absoluteFilePath.slice(0, this.checkoutDir.length) == this.checkoutDir
-            ? absoluteFilePath
-            : null; // the path is outside the repo
+    var relPath = path.relative(this.checkoutDir, absoluteFilePath);
+
+    if (relPath === '..' || relPath.substr(0, 3) === '../' || relPath.substr(0, 5) === '.git/') {
+        return null;
+    }
+
+    return absoluteFilePath;
 };
 
 var LOG_LINE_FORMAT = '%T%x00%ct%x00%P%x00%B%x00%H%x00%an%x00%ae%x00';
