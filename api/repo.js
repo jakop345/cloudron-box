@@ -380,6 +380,10 @@ function parseIndexLines(out) {
     return entries;
 }
 
+/*
+ * Returns an array of index entries. Each index entry contains:
+ *     mode, sha1, path, mtime, size
+ */
 Repo.prototype.indexEntries = function (options, callback) {
     assert(typeof options === 'object' || typeof options === 'function');
 
