@@ -310,11 +310,13 @@ function parseIndexLine(line) {
     // sample line : 100644 294c76dd833e77480ba85bdff83b4ef44fa4c08f 0\trepo-test.js
     var parts = line.split(/[\t ]+/, 3);
     var endPos = parts[0].length + 1 + parts[1].length + 1 + parts[2].length  + 1;
+    var relPath = line.substr(endPos);
 
     return {
         mode: parseInt(parts[0], 8),
         sha1: parts[1],
-        path: line.substr(endPos)
+        path: relPath,
+        name: path.basename(relPath)
     };
 }
 
@@ -382,7 +384,7 @@ function parseIndexLines(out) {
 
 /*
  * Returns an array of index entries. Each index entry contains:
- *     mode, sha1, path, mtime, size
+ *     mode, sha1, path, mtime, size, name
  */
 Repo.prototype.indexEntries = function (options, callback) {
     assert(typeof options === 'object' || typeof options === 'function');

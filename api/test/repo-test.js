@@ -391,6 +391,9 @@ describe('Repo', function () {
             var paths = entries.map(function (entry) { return entry.path; });
             expect(paths).to.contain(SPECIAL_FILE);
 
+            var names = entries.map(function (entry) { return entry.name; });
+            expect(names).to.contain(SPECIAL_FILE);
+
             done(err);
         });
     });
