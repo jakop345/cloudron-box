@@ -29,8 +29,7 @@
     "mime": "*",
     "encfs": "*",
     "safetydance": "*",
-    "upnp-ssdp": "*",
-    "asyncjs": "0.0.9"
+    "upnp-ssdp": "*"
   },
   "devDependencies": {
     "mocha": "*",
