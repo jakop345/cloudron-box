@@ -1,6 +1,7 @@
 'use strict';
 
 var HttpError = require('../httperror'),
+    async = require('async'),
     volume = require('../volume.js'),
     VolumeError = volume.VolumeError;
 
@@ -42,13 +43,23 @@ function listVolumes(req, res, next) {
 
         var ret = [];
 
-        result.forEach(function (volume) {
-            ret.push({
-                name: volume.name
-            });
-        });
+        async.map(result, function (volume, callback) {
+            var ret = {};
+            ret.name = volume.name;
 
-        res.send(200, ret);
+            volume.isMounted(function (error, result) {
+                if (error) return callback(error);
+                ret.isMounted = result;
+
+                callback(null, ret);
+            });
+        }, function (error, results) {
+            if (error) {
+                return next(new HttpError(500, 'Unable to list volumes'));
+            }
+
+            res.send(200, results);
+        });
     });
 }
 

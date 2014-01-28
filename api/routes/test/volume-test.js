@@ -118,7 +118,7 @@ describe('Server Volume API', function () {
             expect(res.statusCode).to.equal(200);
 
             // check for result object sanity
-            checkObjectHasOnly(res.body[0], {name: 'string'});
+            checkObjectHasOnly(res.body[0], {name: 'string', isMounted: 'boolean'});
 
             done(err);
         });
