@@ -111,6 +111,19 @@ Table.prototype.removeAll = function (callback) {
     return callback(null);
 };
 
+Table.prototype.getAll = function (callback) {
+    var result = [];
+
+    for (var item in this.cache) {
+        if (this.cache.hasOwnProperty(item)) {
+            result.push(item);
+        }
+    }
+
+    return callback(null, result);
+};
+
+
 Table.prototype.removePrivates = function (obj) {
     var res = { };
 
