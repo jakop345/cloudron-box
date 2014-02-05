@@ -111,12 +111,17 @@ Table.prototype.removeAll = function (callback) {
     return callback(null);
 };
 
-Table.prototype.getAll = function (callback) {
+Table.prototype.getAll = function (privates, callback) {
     var result = [];
 
     for (var item in this.cache) {
         if (this.cache.hasOwnProperty(item)) {
-            result.push(item);
+            // TODO make deep copies?
+            if (!privates) {
+                result.push(this.removePrivates(this.cache[item]));
+            } else {
+                result.push(this.cache[item]);
+            }
         }
     }
 

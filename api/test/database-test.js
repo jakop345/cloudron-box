@@ -275,7 +275,7 @@ describe('Database', function () {
 
     describe('getAll', function () {
         it('returns empty array', function (done) {
-            db.USERS_TABLE.getAll(function (error, result) {
+            db.USERS_TABLE.getAll(true, function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
 
@@ -291,11 +291,13 @@ describe('Database', function () {
                 db.USERS_TABLE.put(USER_1, function (error) {
                     expect(error).to.not.be.ok();
 
-                    db.USERS_TABLE.getAll(function (error, result) {
+                    db.USERS_TABLE.getAll(true, function (error, result) {
                         expect(error).to.not.be.ok();
                         expect(result).to.be.ok();
 
                         expect(result.length).to.be(2);
+                        expect(result[0]).to.be.an('object');
+                        expect(result[0].username).to.be.equal(USER_0.username);
 
                         db.USERS_TABLE.removeAll(function (error) {
                             expect(error).to.not.be.ok();
@@ -307,12 +309,11 @@ describe('Database', function () {
             });
         });
 
-
         it('returns a copy of its internal cache', function (done) {
             db.USERS_TABLE.put(USER_0, function (error) {
                 expect(error).to.not.be.ok();
 
-                db.USERS_TABLE.getAll(function (error, result) {
+                db.USERS_TABLE.getAll(true, function (error, result) {
                     expect(error).to.not.be.ok();
                     expect(result).to.be.ok();
 
@@ -321,6 +322,17 @@ describe('Database', function () {
 
                     done();
                 });
+            });
+        });
+
+        it('does purge private fields', function (done) {
+            db.USERS_TABLE.getAll(false, function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result).to.be.ok();
+
+                expect(result[0].username).to.be.equal(USER_0.username);
+
+                done();
             });
         });
     });
