@@ -11,6 +11,7 @@ var db = require('./database.js'),
 exports = module.exports = {
     UserError: UserError,
 
+    list: listUsers,
     create: createUser,
     verify: verifyUser,
     remove: removeUser,
@@ -49,6 +50,19 @@ function ensureArgs(args, expected) {
             assert(typeof args[i] === expected[i]);
         }
     }
+}
+
+function listUsers(callback) {
+    ensureArgs(arguments, ['function']);
+
+    db.USERS_TABLE.getAll(false, function (error, result) {
+        if (error) {
+            debug('Unable to get all users.', error);
+            return callback(new UserError('Unable to list users', UserError.DATABASE_ERROR));
+        }
+
+        return callback(null, result);
+    });
 }
 
 function createUser(username, password, email, options, callback) {

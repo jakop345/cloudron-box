@@ -16,6 +16,7 @@ exports = module.exports = {
     createToken: createToken,
     logout: logout,
     info: info,
+    list: listUser,
     create: createUser,
     remove: removeUser
 };
@@ -90,6 +91,14 @@ function createUser(req, res, next) {
         }
 
         res.send(201, {});
+    });
+}
+
+function listUser(req, res, next) {
+    user.list(function (error, result) {
+        if (error) return next(new HttpError(500, error.message));
+
+        res.send(200, { users: result });
     });
 }
 

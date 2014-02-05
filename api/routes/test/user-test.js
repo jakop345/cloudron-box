@@ -266,6 +266,18 @@ describe('Server User API', function () {
         });
     });
 
+    it('list users', function (done) {
+        request.get(SERVER_URL + '/api/v1/user/list')
+               .auth(USERNAME_2, PASSWORD_2)
+               .end(function (er, res) {
+            expect(res.statusCode).to.equal(200);
+            expect(res.body.users).to.be.an('array');
+            expect(res.body.users.length).to.equal(3);
+            expect(res.body.users[0]).to.be.an('object');
+            done();
+        });
+    });
+
     it('remove admin user by normal user should fail', function (done) {
         request.post(SERVER_URL + '/api/v1/user/remove')
                .auth(USERNAME_2, PASSWORD_2)

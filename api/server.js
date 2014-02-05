@@ -150,6 +150,7 @@ Server.prototype._initialize = function (callback) {
         that.app.post('/api/v1/user/create', routes.user.create);
         that.app.post('/api/v1/user/remove', routes.user.remove);
         that.app.get('/api/v1/user/info', routes.user.info);
+        that.app.get('/api/v1/user/list', routes.user.list);
 
         that.app.param('volume', routes.volume.attachVolume);
 
