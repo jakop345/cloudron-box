@@ -8,7 +8,8 @@ var fs = require('fs'),
     path = require('path'),
     assert = require('assert'),
     crypto = require('crypto'),
-    aes = require("./aes-helper"),
+    aes = require('./aes-helper'),
+    async = require('async'),
     util = require('util'),
     HttpError = require('./httperror.js'),
     Repo = require('./repo.js'),
@@ -50,7 +51,7 @@ VolumeError.NO_SUCH_VOLUME = 5;
 function generateNewVolumePassword() {
     var chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()_+?{}[]|:;'~`<>,.-=";
     var charsLength = chars.length;
-    var password = "";
+    var password = '';
 
     for (var i = 0; i < 64; ++i) {
         password += chars.charAt(Math.floor(Math.random() * charsLength));
@@ -66,8 +67,10 @@ function Volume(name, config) {
     this.mountPoint = this._resolveVolumeMountPoint();
     this.tmpPath = path.join(this.mountPoint, 'tmp');
     this.encfs = new encfs.Root(this.dataPath, this.mountPoint);
-    this.repo = undefined;
-    this.meta = undefined;
+    this.repo = null;
+    this.meta = null;
+
+    this._initMetaDatabase();
 }
 
 Volume.prototype._resolveVolumeRootPath = function() {
@@ -106,8 +109,6 @@ Volume.prototype.open = function (username, password, callback) {
     assert(typeof callback === 'function');
 
     var that = this;
-
-    this._initMetaDatabase();
 
     this.encfs.isMounted(function (error, mounted) {
         if (error) {
@@ -266,6 +267,18 @@ Volume.prototype.removeUser = function (user, callback) {
     this.meta.remove(user.username, callback);
 };
 
+Volume.prototype.hasUserByName = function (username, callback) {
+    if (!this.meta) {
+        debug('Invalid volume "' + this.name + '". Misses the meta database.');
+        return callback(new VolumeError(null, VolumeError.META_MISSING));
+    }
+
+    this.meta.get(username, function (error, result) {
+        // TODO maybe more error checking?
+        callback(null, !!result);
+    });
+};
+
 function listVolumes(username, config, callback) {
     assert(typeof username === 'string');
     assert(username.length !== 0);
@@ -282,28 +295,31 @@ function listVolumes(username, config, callback) {
 
         var ret = [];
 
-        files.forEach(function (file) {
-            var stat = safe.fs.statSync(path.join(config.dataRoot, file));
-            if (!stat) {
-                debug('Unable to stat "' + file + '".');
-                return;
-            }
+        async.each(files, function (file, callback) {
+            fs.stat(path.join(config.dataRoot, file), function (error, stat) {
+                if (error) {
+                    debug('Unable to stat "' + file + '".', error);
+                    return callback(null);
+                }
 
-            // ignore everythin else than directories
-            if (!stat.isDirectory()) {
-                return;
-            }
+                // ignore everythin else than directories
+                if (!stat.isDirectory()) {
+                    return callback(null);
+                }
 
-            var vol = getVolume(file, username, config);
-            if (!vol) {
-                return;
-            }
+                getVolume(file, username, config, function (error, result) {
+                    if (!error) {
+                        debug('Detected volume with repo: "' + file + '".');
+                        ret.push(result);
+                    }
 
-            ret.push(vol);
-            debug('Detected volume with repo: "' + file + '".');
+                    callback(null);
+                });
+            });
+        }, function (error) {
+            if (error) debug('This should never happen.');
+            callback(null, ret);
         });
-
-        callback(null, ret);
     });
 }
 
@@ -358,35 +374,41 @@ function destroyVolume(name, username, config, callback) {
     assert(username.length !== 0);
     assert(typeof callback === 'function');
 
-    var vol = getVolume(name, username, config);
-    if (!vol) {
-        return callback(new VolumeError(null, VolumeError.NO_SUCH_VOLUME));
-    }
-
-    vol.destroy(callback);
+    getVolume(name, username, config, function (error, result) {
+        if (error) return callback(new VolumeError(null, VolumeError.NO_SUCH_VOLUME));
+        result.destroy(callback);
+    });
 }
 
-function getVolume(name, username, config) {
+function getVolume(name, username, config, callback) {
     assert(typeof name === 'string');
     assert(name.length !== 0);
     assert(typeof username === 'string');
     assert(username.length !== 0);
     assert(typeof config === 'object');
+    assert(typeof callback === 'function');
 
     // TODO check if username has access and if it exists
     var vol = new Volume(name, config);
     if (!safe.fs.existsSync(vol.dataPath)) {
         debug('No volume "' + name + '" for user "' + username + '". ' + safe.JSON.stringify(safe.error));
-        return null;
+        return callback(new VolumeError());
     }
 
     // Check if that volume has a meta information file, if not it is not created properly or broken
     if (!safe.fs.existsSync(path.join(vol.dataPath, VOLUME_META_FILENAME))) {
         debug('Volume "' + name + '" for user "' + username + '" does not have meta information, it is possibly broken.');
-        return null;
+        return callback(new VolumeError());
     }
 
-    vol.repo = new Repo(path.join(vol.mountPoint, REPO_SUBFOLDER), vol.tmpPath);
+    vol.hasUserByName(username, function (error, result) {
+        if (error || !result) {
+            debug('User "' + username + '" has no access to volume "' + name + '".');
+            return callback(new VolumeError());
+        }
 
-    return vol;
+        vol.repo = new Repo(path.join(vol.mountPoint, REPO_SUBFOLDER), vol.tmpPath);
+
+        callback(null, vol);
+    });
 }

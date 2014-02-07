@@ -85,15 +85,20 @@ describe('Volume', function () {
     });
 
     describe('get', function () {
-        it('succeeds', function () {
-            var vol = volume.get(VOLUME, USERNAME, config);
-            expect(vol).to.be.ok();
-            expect(vol).to.be.an(volume.Volume);
+        it('succeeds', function (done) {
+            volume.get(VOLUME, USERNAME, config, function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result).to.be.ok();
+                expect(result).to.be.an(volume.Volume);
+                done();
+            });
         });
 
         it('fails, no such volume', function () {
-            var vol = volume.get(VOLUME_3, USERNAME, config);
-            expect(vol).to.not.be.ok();
+            volume.get(VOLUME_3, USERNAME, config, function (error, result) {
+                expect(error).to.be.ok();
+                expect(result).to.not.be.ok();
+            });
         });
 
         it('list', function (done) {

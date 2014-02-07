@@ -41,8 +41,6 @@ function listVolumes(req, res, next) {
             return next(new HttpError(500, 'Unable to list volumes: ' + error));
         }
 
-        var ret = [];
-
         async.map(result, function (volume, callback) {
             var ret = {};
             ret.name = volume.name;
@@ -68,16 +66,16 @@ function createVolume(req, res, next) {
         return next(new HttpError(400, 'New volume name not specified'));
     }
 
-    if (volume.get(req.body.name, req.user.username, config)) {
-        return next(new HttpError(409, 'Volume already exists'));
-    }
+    volume.get(req.body.name, req.user.username, config, function (error, result) {
+        if (result) next(new HttpError(409, 'Volume already exists'));
 
-    volume.create(req.body.name, req.user, config, function (error, result) {
-        if (error) {
-            return next(new HttpError(500, 'Volume creation failed: ' + error));
-        }
+        volume.create(req.body.name, req.user, config, function (error, result) {
+            if (error) {
+                return next(new HttpError(500, 'Volume creation failed: ' + error));
+            }
 
-        res.send(201, {});
+            res.send(201, {});
+        });
     });
 }
 
@@ -131,11 +129,11 @@ function isMounted(req, res, next) {
 function attachVolume(req, res, next, volumeId) {
     if (!volumeId) return next(new HttpError(400, 'Volume not specified'));
 
-    req.volume = volume.get(volumeId, req.user.username, config);
-
-    if (!req.volume) return next(new HttpError(404, 'No such volume'));
-
-    next();
+    volume.get(volumeId, req.user.username, config, function (error, result) {
+        if (error) return next(new HttpError(404, 'No such volume'));
+        req.volume = result;
+        next();
+    });
 }
 
 function requireMountedVolume(req, res, next) {

@@ -32,6 +32,8 @@ var server;
 function setup(done) {
     server = new Server(CONFIG);
     server.start(function (err) {
+        expect(err).to.not.be.ok();
+
         SERVER_URL = 'http://localhost:' + CONFIG.port;
         database.USERS_TABLE.removeAll(function () {
             request.post(SERVER_URL + '/api/v1/createadmin')
