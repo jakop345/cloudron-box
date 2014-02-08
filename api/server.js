@@ -9,8 +9,6 @@ var express = require('express'),
     db = require('./database.js'),
     routes = require('./routes'),
     debug = require('debug')('server:server'),
-    crypto = require('crypto'),
-    os = require('os'),
     Ssdp = require('upnp-ssdp'),
     assert = require('assert'),
     pkg = require('./../package.json'),
@@ -130,7 +128,7 @@ Server.prototype._initialize = function (callback) {
            .use(json)
            .use(urlencoded)
            .use(express.cookieParser())
-           .use(express.favicon(__dirname + "/../assets/favicon.ico"))
+           .use(express.favicon(__dirname + '/../assets/favicon.ico'))
            // API calls that do not require authorization
            .use(middleware.cors({ origins: [ '*' ], allowCredentials: true }))
            .use(middleware.contentType('application/json'))

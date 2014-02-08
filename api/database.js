@@ -151,7 +151,8 @@ function initialize(config) {
         password: { type: 'String', priv: true },
         salt: { type: 'String', priv: true },
         created_at: { type: 'String' },
-        modified_at: { type: 'String' }
+        modified_at: { type: 'String' },
+        admin: { type: 'Boolean' }
     });
 
     exports.TOKENS_TABLE = new Table(rootDir + '/tokens', {

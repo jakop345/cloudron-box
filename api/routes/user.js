@@ -180,12 +180,18 @@ function tokenAuthenticator(req, res, next) {
         var now = Date(), expires = Date(result.expires);
         if (now > expires) return next(new HttpError(401, 'Token expired'));
 
-        req.user = {
-            username: result.username,
-            email: result.email
-        };
+        db.USERS_TABLE.get(result.username, function (error, result) {
+            if (error) return next(new HttpError(500, ''));
+            if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(404, 'User not found'));
 
-        next();
+            req.user = {
+                username: result.username,
+                email: result.email,
+                admin: result.admin
+            };
+
+            next();
+        });
     });
 }
 
@@ -230,7 +236,16 @@ function createToken(req, res, next) {
 
         db.TOKENS_TABLE.put(token, function (err) {
             if (err) return next(err);
-            res.send(200, db.TOKENS_TABLE.removePrivates(token));
+
+            res.send(200, {
+                token: hexToken,
+                expires: expires,
+                userInfo: {
+                    username: req.user.username,
+                    email: req.user.email,
+                    admin: req.user.admin
+                }
+            });
         });
     });
 }
@@ -247,7 +262,11 @@ function createToken(req, res, next) {
  */
 function info(req, res, next) {
     // req.user is filled by the authentication step
-    res.send(req.user);
+    res.send({
+        username: req.user.username,
+        email: req.user.email,
+        admin: req.user.admin
+    });
 }
 
 /**

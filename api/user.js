@@ -16,7 +16,7 @@ exports = module.exports = {
     verify: verifyUser,
     remove: removeUser,
     changePassword: changePassword,
-    update: updateUser,
+    update: updateUser
 };
 
 var CRYPTO_SALT_SIZE = 64; // 512-bit salt

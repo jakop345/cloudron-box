@@ -102,6 +102,7 @@ describe('Server User API', function () {
             expect(res.statusCode).to.equal(200);
             expect(res.body.username).to.equal(USERNAME);
             expect(res.body.email).to.equal(EMAIL);
+            expect(res.body.admin).to.be(true);
             done(err);
         });
     });
@@ -153,10 +154,16 @@ describe('Server User API', function () {
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
             expect(res.body.token).to.be.a('string');
-            token = res.body.token;
             expect(res.body.expires).to.be.a('string');
             expect(res.body.username).to.not.be.ok();
             expect(res.body.email).to.not.be.ok();
+            expect(res.body.userInfo).to.be.ok();
+            expect(res.body.userInfo.username).to.be.ok();
+            expect(res.body.userInfo.admin).to.be(true);
+
+            // safe token for further calls
+            token = res.body.token;
+
             done(err);
         });
     });
@@ -168,6 +175,7 @@ describe('Server User API', function () {
             expect(res.statusCode).to.equal(200);
             expect(res.body.username).to.equal(USERNAME);
             expect(res.body.email).to.equal(EMAIL);
+            expect(res.body.admin).to.be(true);
             done(err);
         });
     });
@@ -198,6 +206,7 @@ describe('Server User API', function () {
             expect(res.statusCode).to.equal(200);
             expect(res.body.username).to.equal(USERNAME);
             expect(res.body.email).to.equal(EMAIL);
+            expect(res.body.admin).to.be(true);
             done(err);
         });
     });
@@ -262,6 +271,7 @@ describe('Server User API', function () {
             expect(res.statusCode).to.equal(200);
             expect(res.body.username).to.equal(USERNAME_2);
             expect(res.body.email).to.equal(EMAIL_2);
+            expect(res.body.admin).to.be(false);
             done(err);
         });
     });
