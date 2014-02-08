@@ -726,6 +726,10 @@ function parseRawDiffLines(out) {
     return changes;
 }
 
+/*
+ * Returns the sizes of objects represented by sha1s. sha1s can also be symbolic -
+ * like HEAD:foo.c
+ */
 Repo.prototype._getFileSizes = function (sha1s, callback) {
     var proc = this.spawn(['cat-file', '--batch-check']), data = '';
     proc.stdout.setEncoding('utf8');
