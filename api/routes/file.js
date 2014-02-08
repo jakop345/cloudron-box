@@ -36,14 +36,25 @@ exports = module.exports = {
 function read(req, res, next) {
     var filePath = req.params[0], rev = req.query.rev;
 
-    var file = req.volume.repo.createReadStream(filePath, { rev: rev });
-    // not setting the Content-Length explicitly sends the data using chunked encoding
-    res.writeHead(200, { 'Content-Type' : mime.lookup(filePath) });
-    file.pipe(res);
+    req.volume.repo.metadata(filePath, { rev: rev }, function (err, entries, hash) {
+        if (err) {
+            if (err.code == 'ENOENT' || err.code == 'ENOTDIR') return next(new HttpError(404, 'Not found'));
+            return next(new HttpError(500, 'Error getting HEAD'));
+        }
 
-    file.on('error', function (err) {
-        if (err.code == 'ENOENT' || err.code == 'ENOTDIR') return next(new HttpError(404, 'Not found'));
-        return next(new HttpError(500, 'Stream error:' + err));
+        var headers = {
+            'Content-Type' : mime.lookup(filePath),
+            'Content-Length': entries[0].size // not setting the Content-Length explicitly sends the data using chunked encoding
+        };
+
+        var file = req.volume.repo.createReadStream(filePath, { rev: rev });
+        file.on('error', function (err) {
+            if (err.code == 'ENOENT' || err.code == 'ENOTDIR') return next(new HttpError(404, 'Not found'));
+            return next(new HttpError(500, 'Stream error:' + err));
+        });
+
+        res.writeHead(200, headers);
+        file.pipe(res);
     });
 }
 
