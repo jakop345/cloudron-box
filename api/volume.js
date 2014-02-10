@@ -28,6 +28,16 @@ var REPO_SUBFOLDER = 'repo';
 var VOLUME_META_FILENAME = '.meta';
 var CRYPTO_SALT_SIZE = 64; // 512-bit salt
 
+function ensureArgs(args, expected) {
+    assert(args.length === expected.length);
+
+    for (var i = 0; i < args.length; ++i) {
+        if (expected[i]) {
+            assert(typeof args[i] === expected[i]);
+        }
+    }
+}
+
 // http://dustinsenos.com/articles/customErrorsInNode
 // http://code.google.com/p/v8/wiki/JavaScriptStackTraceApi
 function VolumeError(err, reason) {
@@ -61,6 +71,8 @@ function generateNewVolumePassword() {
 }
 
 function Volume(name, config) {
+    ensureArgs(arguments, ['string', 'object']);
+
     this.name = name;
     this.config = config;
     this.dataPath = this._resolveVolumeRootPath();
@@ -89,7 +101,7 @@ Volume.prototype._initMetaDatabase = function () {
 };
 
 Volume.prototype.isMounted = function (callback) {
-    assert(typeof callback === 'function');
+    ensureArgs(arguments, ['function']);
 
     this.encfs.isMounted(function (error, mounted) {
         if (error) {
@@ -102,11 +114,7 @@ Volume.prototype.isMounted = function (callback) {
 };
 
 Volume.prototype.open = function (username, password, callback) {
-    assert(typeof username === 'string');
-    assert(username.length !== 0);
-    assert(typeof password === 'string');
-    assert(password.length !== 0);
-    assert(typeof callback === 'function');
+    ensureArgs(arguments, ['string', 'string', 'function']);
 
     var that = this;
 
@@ -140,7 +148,8 @@ Volume.prototype.open = function (username, password, callback) {
 };
 
 Volume.prototype.close = function(callback) {
-    assert(typeof callback === 'function');
+    ensureArgs(arguments, ['function']);
+
     var that = this;
 
     this.encfs.isMounted(function (error, mounted) {
@@ -164,7 +173,7 @@ Volume.prototype.close = function(callback) {
 
 // TODO this does not have error reporting yet - Johannes
 Volume.prototype.destroy = function (callback) {
-    assert(typeof callback === 'function');
+    ensureArgs(arguments, ['function']);
 
     var that = this;
 
@@ -201,8 +210,7 @@ Volume.prototype.destroy = function (callback) {
 };
 
 Volume.prototype.listFiles = function (directory, callback) {
-    assert(typeof directory === 'string');
-    assert(typeof callback === 'function');
+    ensureArgs(arguments, ['string', 'function']);
 
     var that = this;
 
@@ -229,6 +237,8 @@ Volume.prototype.listFiles = function (directory, callback) {
 };
 
 Volume.prototype.addUser = function (user, password, callback) {
+    ensureArgs(arguments, ['object', 'string', 'function']);
+
     var that = this;
 
     if (!this.meta) {
@@ -259,6 +269,8 @@ Volume.prototype.addUser = function (user, password, callback) {
 };
 
 Volume.prototype.removeUser = function (user, callback) {
+    ensureArgs(arguments, ['object', 'function']);
+
     if (!this.meta) {
         debug('Invalid volume "' + this.name + '". Misses the meta database.');
         return callback(new VolumeError(null, VolumeError.META_MISSING));
@@ -268,6 +280,8 @@ Volume.prototype.removeUser = function (user, callback) {
 };
 
 Volume.prototype.hasUserByName = function (username, callback) {
+    ensureArgs(arguments, ['string', 'function']);
+
     if (!this.meta) {
         debug('Invalid volume "' + this.name + '". Misses the meta database.');
         return callback(new VolumeError(null, VolumeError.META_MISSING));
@@ -280,10 +294,7 @@ Volume.prototype.hasUserByName = function (username, callback) {
 };
 
 function listVolumes(username, config, callback) {
-    assert(typeof username === 'string');
-    assert(username.length !== 0);
-    assert(typeof callback === 'function');
-    assert(typeof config === 'object');
+    ensureArgs(arguments, ['string', 'object', 'function']);
     assert(config.dataRoot);
     assert(config.mountRoot);
 
@@ -324,8 +335,7 @@ function listVolumes(username, config, callback) {
 }
 
 function createVolume(name, user, config, callback) {
-    assert(typeof name === 'string');
-    assert(typeof callback === 'function');
+    ensureArgs(arguments, ['string', 'object', 'object', 'function']);
 
     // TODO check if the sequence of creating things is fine - Johannes
     var vol = new Volume(name, config);
@@ -368,11 +378,7 @@ function createVolume(name, user, config, callback) {
 }
 
 function destroyVolume(name, username, config, callback) {
-    assert(typeof name === 'string');
-    assert(name.length !== 0);
-    assert(typeof username === 'string');
-    assert(username.length !== 0);
-    assert(typeof callback === 'function');
+    ensureArgs(arguments, ['string', 'string', 'object', 'function']);
 
     getVolume(name, username, config, function (error, result) {
         if (error) return callback(new VolumeError(null, VolumeError.NO_SUCH_VOLUME));
@@ -381,12 +387,7 @@ function destroyVolume(name, username, config, callback) {
 }
 
 function getVolume(name, username, config, callback) {
-    assert(typeof name === 'string');
-    assert(name.length !== 0);
-    assert(typeof username === 'string');
-    assert(username.length !== 0);
-    assert(typeof config === 'object');
-    assert(typeof callback === 'function');
+    ensureArgs(arguments, ['string', 'string', 'object', 'function']);
 
     // TODO check if username has access and if it exists
     var vol = new Volume(name, config);
