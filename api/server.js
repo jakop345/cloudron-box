@@ -83,17 +83,7 @@ Server.prototype._requirePassword = function (req, res, next) {
         return next(new HttpError(400, 'API call requires the users password.'));
     }
 
-    // req.user.username is either set via the auth user/pw tuple or the auth token
-    user.verify(req.user.username, req.body.password, function (error, result) {
-        if (error) {
-            return next(new HttpError(401, 'Wrong password entered'));
-        }
-
-        // add password to the request's user object for further use
-        req.user.password = req.body.password;
-
-        next();
-    });
+    next();
 };
 
 Server.prototype._loadMiddleware = function () {
@@ -171,7 +161,7 @@ Server.prototype._initialize = function (callback) {
         that.app.post('/api/v1/volume/create', that._requirePassword.bind(that), routes.volume.createVolume);
         that.app.post('/api/v1/volume/:volume/delete', that._requirePassword.bind(that), routes.volume.deleteVolume);
         that.app.post('/api/v1/volume/:volume/mount', that._requirePassword.bind(that), routes.volume.mount);
-        that.app.post('/api/v1/volume/:volume/unmount', that._requirePassword.bind(that), routes.volume.unmount);
+        that.app.post('/api/v1/volume/:volume/unmount', routes.volume.unmount);
         that.app.get('/api/v1/volume/:volume/ismounted', routes.volume.isMounted);
     });
 

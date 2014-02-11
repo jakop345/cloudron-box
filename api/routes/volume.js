@@ -25,13 +25,13 @@ function initialize(cfg) {
 }
 
 function deleteVolume(req, res, next) {
-    req.volume.destroy(function (error) {
+    req.volume.destroy(req.body.password, function (error) {
         if (error) {
             return next(new HttpError(500, 'Unable to destroy volume: ' + error));
         }
 
         delete req.volume;
-        res.send(200, {}) ;
+        res.send(200, {});
     });
 }
 
@@ -69,7 +69,7 @@ function createVolume(req, res, next) {
     volume.get(req.body.name, req.user.username, config, function (error, result) {
         if (result) next(new HttpError(409, 'Volume already exists'));
 
-        volume.create(req.body.name, req.user, config, function (error, result) {
+        volume.create(req.body.name, req.user, req.body.password, config, function (error, result) {
             if (error) {
                 return next(new HttpError(500, 'Volume creation failed: ' + error));
             }

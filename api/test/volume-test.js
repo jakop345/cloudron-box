@@ -60,7 +60,7 @@ describe('Volume', function () {
 
     describe('create', function () {
         it('succeeds', function (done) {
-            volume.create(VOLUME, USER, config, function (error, result) {
+            volume.create(VOLUME, USER, USER.password, config, function (error, result) {
                 expect(error).not.to.be.ok();
                 expect(result).to.be.ok();
                 done();
@@ -68,7 +68,7 @@ describe('Volume', function () {
         });
 
         it('fails because it already exists', function (done) {
-            volume.create(VOLUME, USER, config, function (error, result) {
+            volume.create(VOLUME, USER, USER.password, config, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
                 done();
@@ -76,7 +76,7 @@ describe('Volume', function () {
         });
 
         it('second', function (done) {
-            volume.create(VOLUME_2, USER, config, function (error, result) {
+            volume.create(VOLUME_2, USER, USER.password, config, function (error, result) {
                 expect(error).not.to.be.ok();
                 expect(result).to.be.ok();
                 done();
@@ -117,21 +117,21 @@ describe('Volume', function () {
 
     describe('destroy', function () {
         it('first volume', function (done) {
-            volume.destroy(VOLUME, USER, config, function (error) {
+            volume.destroy(VOLUME, USER, USER.password, config, function (error) {
                 expect(error).not.to.be.ok();
                 done();
             });
         });
 
         it('fails, no such volume', function (done) {
-            volume.destroy(VOLUME, USER, config, function (error) {
+            volume.destroy(VOLUME, USER, USER.password, config, function (error) {
                 expect(error).to.be.ok();
                 done();
             });
         });
 
         it('second volume', function (done) {
-            volume.destroy(VOLUME_2, USER, config, function (error) {
+            volume.destroy(VOLUME_2, USER, USER.password, config, function (error) {
                 expect(error).not.to.be.ok();
                 done();
             });
@@ -142,7 +142,7 @@ describe('Volume', function () {
         var vol;
 
         before(function (done) {
-            volume.create(VOLUME_3, USER, config, function (error, result) {
+            volume.create(VOLUME_3, USER, USER.password, config, function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
                 expect(result).to.be.an(volume.Volume);
@@ -154,7 +154,7 @@ describe('Volume', function () {
         });
 
         after(function (done) {
-            volume.destroy(VOLUME_3, USER, config, function (error) {
+            volume.destroy(VOLUME_3, USER, USER.password, config, function (error) {
                 expect(error).not.to.be.ok();
                 done();
             });
@@ -215,7 +215,7 @@ describe('Volume', function () {
         var vol = null;
 
         before(function (done) {
-            volume.create(TEST_VOLUME, TEST_USER_0, config, function (error, result) {
+            volume.create(TEST_VOLUME, TEST_USER_0, TEST_USER_0.password, config, function (error, result) {
                 expect(error).not.to.be.ok();
                 expect(result).to.be.ok();
 
@@ -348,7 +348,7 @@ describe('Volume', function () {
         });
 
         after(function (done) {
-            volume.destroy(TEST_VOLUME, TEST_USER_0, config, function (error) {
+            volume.destroy(TEST_VOLUME, TEST_USER_0, TEST_USER_0.password, config, function (error) {
                 expect(error).not.to.be.ok();
                 done();
             });

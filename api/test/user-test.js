@@ -13,12 +13,12 @@ var user = require('../user.js'),
     crypto = require('crypto'),
     rimraf = require('rimraf'),
     db = require('../database.js'),
-    assert = require('assert'),
     expect = require('expect.js');
 
 var USERNAME = 'nobody';
 var EMAIL = 'nobody@no.body';
 var PASSWORD = 'foobar';
+var NEW_PASSWORD = 'somenewpassword';
 
 var tmpdirname = 'volume-test-' + crypto.randomBytes(4).readUInt32LE(0);
 var tmpdir = path.resolve(os.tmpdir(), tmpdirname);
@@ -37,6 +37,8 @@ function cleanupUser(done) {
 
 function createUser(done) {
     user.create(USERNAME, PASSWORD, EMAIL, {}, function (error, result) {
+        expect(error).to.not.be.ok();
+        expect(result).to.be.ok();
         done();
     });
 }
@@ -54,6 +56,7 @@ function setup(done) {
 
 function cleanup(done) {
     rimraf(tmpdir, function (error) {
+        expect(error).to.not.be.ok();
         done();
     });
 }
@@ -118,7 +121,7 @@ describe('User', function () {
         });
     });
 
-    describe("verify", function () {
+    describe('verify', function () {
         before(createUser);
         after(cleanupUser);
 
@@ -161,5 +164,71 @@ describe('User', function () {
             });
         });
     });
-});
 
+    describe('password change', function () {
+        before(createUser);
+        after(cleanupUser);
+
+        it('fails due to wrong arumgent count', function () {
+            expect(function () { user.changePassword(); }).to.throwError();
+            expect(function () { user.changePassword(USERNAME); }).to.throwError();
+            expect(function () { user.changePassword(USERNAME, PASSWORD, NEW_PASSWORD); }).to.throwError();
+        });
+
+        it('fails due to wrong arumgents', function () {
+            expect(function () { user.changePassword(USERNAME, {}, NEW_PASSWORD, function () {}); }).to.throwError();
+            expect(function () { user.changePassword(1337, PASSWORD, NEW_PASSWORD, function () {}); }).to.throwError();
+            expect(function () { user.changePassword(USERNAME, PASSWORD, 1337, function () {}); }).to.throwError();
+            expect(function () { user.changePassword(USERNAME, PASSWORD, NEW_PASSWORD, 'some string'); }).to.throwError();
+        });
+
+        it('fails due to wrong password', function (done) {
+            user.changePassword(USERNAME, 'wrongpassword', NEW_PASSWORD, function (error, result) {
+                expect(error).to.be.ok();
+                expect(result).to.not.be.ok();
+                done();
+            });
+        });
+
+        it('fails due to empty new password', function (done) {
+            user.changePassword(USERNAME, PASSWORD, '', function (error, result) {
+                expect(error).to.be.ok();
+                expect(result).to.not.be.ok();
+                done();
+            });
+        });
+
+        it('fails due to unknown user', function (done) {
+            user.changePassword('somerandomuser', PASSWORD, NEW_PASSWORD, function (error, result) {
+                expect(error).to.be.ok();
+                expect(result).to.not.be.ok();
+                done();
+            });
+        });
+
+        it('succeeds', function (done) {
+            user.changePassword(USERNAME, PASSWORD, NEW_PASSWORD, function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result).to.be.ok();
+                done();
+            });
+        });
+
+        it('actually changed the password (unable to login with old pasword)', function (done) {
+            user.verify(USERNAME, PASSWORD, function (error, result) {
+                expect(error).to.be.ok();
+                expect(result).to.not.be.ok();
+                expect(error.reason).to.equal(UserError.WRONG_USER_OR_PASSWORD);
+                done();
+            });
+        });
+
+        it('actually changed the password (login with new password)', function (done) {
+            user.verify(USERNAME, NEW_PASSWORD, function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result).to.be.ok();
+                done();
+            });
+        });
+    });
+});

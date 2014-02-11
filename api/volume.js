@@ -175,8 +175,8 @@ Volume.prototype.close = function(callback) {
 };
 
 // TODO this does not have error reporting yet - Johannes
-Volume.prototype.destroy = function (callback) {
-    ensureArgs(arguments, ['function']);
+Volume.prototype.destroy = function (password, callback) {
+    ensureArgs(arguments, ['string', 'function']);
 
     var that = this;
 
@@ -418,8 +418,8 @@ function listVolumes(username, config, callback) {
     });
 }
 
-function createVolume(name, user, config, callback) {
-    ensureArgs(arguments, ['string', 'object', 'object', 'function']);
+function createVolume(name, user, password, config, callback) {
+    ensureArgs(arguments, ['string', 'object', 'string', 'object', 'function']);
 
     // TODO check if the sequence of creating things is fine - Johannes
     var vol = new Volume(name, config);
@@ -441,7 +441,7 @@ function createVolume(name, user, config, callback) {
             var record = {
                 username: user.username,
                 salt: salt.toString('hex'),
-                passwordCypher: aes.encrypt(volPassword, user.password, salt),
+                passwordCypher: aes.encrypt(volPassword, password, salt),
             };
 
             vol.meta.put(record, function (error) {
@@ -474,12 +474,12 @@ function createVolume(name, user, config, callback) {
     });
 }
 
-function destroyVolume(name, user, config, callback) {
-    ensureArgs(arguments, ['string', 'object', 'object', 'function']);
+function destroyVolume(name, user, password, config, callback) {
+    ensureArgs(arguments, ['string', 'object', 'string', 'object', 'function']);
 
     getVolume(name, user.username, config, function (error, result) {
         if (error) return callback(new VolumeError(null, VolumeError.NO_SUCH_VOLUME));
-        result.destroy(callback);
+        result.destroy(password, callback);
     });
 }
 

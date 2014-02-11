@@ -6,6 +6,8 @@ var db = require('./database.js'),
     util = require('util'),
     debug = require('debug')('server:user'),
     assert = require('assert'),
+    Volume = require('./volume'),
+    async = require('async'),
     safe = require('safetydance');
 
 exports = module.exports = {
@@ -110,7 +112,7 @@ function createUser(username, password, email, options, callback) {
                     return callback(error);
                 }
 
-                callback(null, {username: username, email: email, admin: admin});
+                callback(null, user);
             });
         });
     });
@@ -144,10 +146,10 @@ function verifyUser(username, password, callback) {
 
             var derivedKeyHex = new Buffer(derivedKey, 'binary').toString('hex');
             if (derivedKeyHex != user.password)  {
-                return callback(new UserError('Username and password does not match', UserError.WRONG_USER_OR_PASSWORD));
+                return callback(new UserError('Username and password do not match', UserError.WRONG_USER_OR_PASSWORD));
             }
 
-            callback(null, { username: user.username, email: user.email, admin: user.admin });
+            callback(null, user);
         });
     });
 }
@@ -174,21 +176,35 @@ function updateUser(username, options, callback) {
 function changePassword(username, oldPassword, newPassword, callback) {
     ensureArgs(arguments, ['string', 'string', 'string', 'function']);
 
-    verifyUser(username, oldPassword, function (error, result) {
+    if (newPassword.length === 0) {
+        debug('Empty passwords are not allowed.');
+        return callback(new UserError('No empty passwords allowed', UserError.INTERNAL_ERROR));
+    }
+
+    verifyUser(username, oldPassword, function (error, user) {
         if (error) {
             return callback(error);
         }
 
-        // update password for all volumes this user has access to
-        volumes.list(username, function (error, volumes) {
+        var saltBinary = new Buffer(user.salt, 'hex');
+        crypto.pbkdf2(newPassword, saltBinary, CRYPTO_ITERATIONS, CRYPTO_KEY_LENGTH, function (error, derivedKey) {
             if (error) {
-                debug('Failed to get volume list', error);
-                return callback(new Error('Failed to get volume list.'));
+                return callback(new UserError('Failed to hash password', UserError.INTERNAL_ERROR));
             }
 
-            async.each()
-        });
+            user.updated_at = (new Date()).toUTCString();
+            user.password = new Buffer(derivedKey, 'binary').toString('hex');
 
-        callback(new UserError('not implemented', UserError.INTERNAL_ERROR));
+            db.USERS_TABLE.update(user, function (error) {
+                if (error) {
+                    if (error.reason === DatabaseError.NOT_FOUND) {
+                        return callback(new UserError('User does not exist', UserError.NOT_FOUND));
+                    }
+                    return callback(error);
+                }
+
+                callback(null, user);
+            });
+        });
     });
 }

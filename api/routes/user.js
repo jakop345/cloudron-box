@@ -2,9 +2,11 @@
 
 var db = require('../database'),
     DatabaseError = db.DatabaseError,
-    user = require('../user.js'),
+    user = require('../user'),
+    Volume = require('../volume'),
     UserError = user.UserError,
     crypto = require('crypto'),
+    async = require('async'),
     debug = require('debug')('server:routes/user'),
     HttpError = require('../httperror');
 
@@ -94,16 +96,34 @@ function createUser(req, res, next) {
 }
 
 function changePassword(req, res, next) {
-    if (!req.body.oldPassword) return next(new HttpError(400, 'API call requires the users old password.'));
+    if (!req.body.password) return next(new HttpError(400, 'API call requires the users old password.'));
     if (!req.body.newPassword) return next(new HttpError(400, 'API call requires the users new password.'));
 
-    user.changePassword(req.user.username, req.body.oldPassword, req.body.newPassword, function (error, result) {
+    // update password for all volumes this user has access to
+    Volume.list(req.user.username, function (error, volumes) {
         if (error) {
-            debug('Failed to change password for user', req.user.username);
-            return next(new HttpError(500, 'Unable to change password'));
+            debug('Failed to get volume list', error);
+            return next(new HttpError(500, 'Failed to get volume list.'));
         }
 
-        res.send(200, {});
+        // TODO how to rollback from here in case of an error?
+        async.each(volumes, function (volume, callback) {
+            volume.changeUserPassword(user, req.body.password, req.body.newPassword, callback);
+        }, function (error) {
+            if (error) {
+                debug('Unable to change password on volumes.', error);
+                return next(new HttpError(500, 'Cannot change volume password'));
+            }
+
+            user.changePassword(req.user.username, req.body.password, req.body.newPassword, function (error, result) {
+                if (error) {
+                    debug('Failed to change password for user', req.user.username);
+                    return next(new HttpError(500, 'Unable to change password'));
+                }
+
+                res.send(200, {});
+            });
+        });
     });
 }
 
@@ -153,7 +173,7 @@ function loginAuthenticator(req, res, next) {
         return next(new HttpError(400, 'Bad username or password'), false);
     }
 
-    user.verify(auth.username, auth.password, function (error, result) {
+    user.verify(auth.username, auth.password, function (error, user) {
         if (error) {
             debug('User ' + auth.username  + ' could not be verified.');
             if (error.reason === UserError.ARGUMENTS) {
@@ -167,9 +187,7 @@ function loginAuthenticator(req, res, next) {
 
         debug('User ' + auth.username + ' was successfully verified.');
 
-        req.user = result;
-        req.user.password = auth.password;
-
+        req.user = user;
         next();
     });
 }
@@ -193,16 +211,13 @@ function tokenAuthenticator(req, res, next) {
         var now = Date(), expires = Date(result.expires);
         if (now > expires) return next(new HttpError(401, 'Token expired'));
 
-        db.USERS_TABLE.get(result.username, function (error, result) {
+        db.USERS_TABLE.get(result.username, function (error, user) {
             if (error) return next(new HttpError(500, ''));
             if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(404, 'User not found'));
 
-            req.user = {
-                username: result.username,
-                email: result.email,
-                admin: result.admin
-            };
+            debug('User ' + user.username + ' was successfully verified.');
 
+            req.user = user;
             next();
         });
     });
