@@ -56,6 +56,9 @@ VolumeError.NOT_MOUNTED = 2;
 VolumeError.READ_ERROR = 3;
 VolumeError.META_MISSING = 4;
 VolumeError.NO_SUCH_VOLUME = 5;
+VolumeError.NO_SUCH_USER = 6;
+VolumeError.WRONG_USER_PASSWORD = 7;
+VolumeError.EMPTY_PASSWORD = 8;
 
 // TODO is this even a good password generator? - Johannes
 function generateNewVolumePassword() {
@@ -236,8 +239,8 @@ Volume.prototype.listFiles = function (directory, callback) {
     });
 };
 
-Volume.prototype.addUser = function (user, password, callback) {
-    ensureArgs(arguments, ['object', 'string', 'function']);
+Volume.prototype.addUser = function (user, authorizedUser, callback) {
+    ensureArgs(arguments, ['object', 'object', 'function']);
 
     var that = this;
 
@@ -246,24 +249,39 @@ Volume.prototype.addUser = function (user, password, callback) {
         return callback(new VolumeError(null, VolumeError.META_MISSING));
     }
 
-    crypto.randomBytes(CRYPTO_SALT_SIZE, function (error, salt) {
+    this.meta.get(authorizedUser.username, function (error, record) {
         if (error) {
-            return callback(new VolumeError('Failed to generate random bytes', VolumeError.INTERNAL_ERROR));
+            debug('Unable to get authorized user from meta db. ' + safe.JSON.stringify(error));
+            return callback(new VolumeError(null, VolumeError.NO_SUCH_USER));
         }
 
-        var record = {
-            username: user.username,
-            salt: salt.toString('hex'),
-            passwordCypher: aes.encrypt(password, user.password, salt),
-        };
+        var saltBuffer = new Buffer(record.salt, 'hex');
+        var volumePassword = aes.decrypt(record.passwordCypher, authorizedUser.password, saltBuffer);
 
-        that.meta.put(record, function (error) {
+        if (!volumePassword) {
+            debug('Unable to decrypt volume master password');
+            return callback(new VolumeError(null, VolumeError.WRONG_USER_PASSWORD));
+        }
+
+        crypto.randomBytes(CRYPTO_SALT_SIZE, function (error, salt) {
             if (error) {
-                debug('Unable to add user to meta db. ' + safe.JSON.stringify(error));
-                return callback(error);
+                return callback(new VolumeError('Failed to generate random bytes', VolumeError.INTERNAL_ERROR));
             }
 
-            return callback(null, record);
+            var record = {
+                username: user.username,
+                salt: salt.toString('hex'),
+                passwordCypher: aes.encrypt(volumePassword, user.password, salt),
+            };
+
+            that.meta.put(record, function (error) {
+                if (error) {
+                    debug('Unable to add user to meta db. ' + safe.JSON.stringify(error));
+                    return callback(error);
+                }
+
+                return callback(null, record);
+            });
         });
     });
 };
@@ -277,6 +295,72 @@ Volume.prototype.removeUser = function (user, callback) {
     }
 
     this.meta.remove(user.username, callback);
+};
+
+Volume.prototype.verifyUser = function (user, password, callback) {
+    ensureArgs(arguments, ['object', 'string', 'function']);
+
+    this.meta.get(user.username, function (error, record) {
+        if (error) {
+            debug('Unable to get user from meta db. ' + safe.JSON.stringify(error));
+            return callback(new VolumeError(null, VolumeError.NO_SUCH_USER));
+        }
+
+        var saltBuffer = new Buffer(record.salt, 'hex');
+        var volumePassword = aes.decrypt(record.passwordCypher, password, saltBuffer);
+
+        if (!volumePassword) {
+            debug('Unable to decrypt volume master password');
+            return callback(new VolumeError(null, VolumeError.WRONG_USER_PASSWORD));
+        }
+
+        callback(null, true);
+    });
+};
+
+Volume.prototype.changeUserPassword = function (user, oldPassword, newPassword, callback) {
+    ensureArgs(arguments, ['object', 'string', 'string', 'function']);
+
+    var that = this;
+
+    if (newPassword.length === 0) {
+        debug('Empty passwords are not allowed');
+        return callback(new VolumeError(null, VolumeError.EMPTY_PASSWORD));
+    }
+
+    this.meta.get(user.username, function (error, record) {
+        if (error) {
+            debug('Unable to get user from meta db. ' + safe.JSON.stringify(error));
+            return callback(new VolumeError(null, VolumeError.NO_SUCH_USER));
+        }
+
+        var saltBuffer = new Buffer(record.salt, 'hex');
+        var volumePassword = aes.decrypt(record.passwordCypher, oldPassword, saltBuffer);
+
+        if (!volumePassword) {
+            debug('Unable to decrypt volume master password');
+            return callback(new VolumeError(null, VolumeError.WRONG_USER_PASSWORD));
+        }
+
+        crypto.randomBytes(CRYPTO_SALT_SIZE, function (error, salt) {
+            if (error) return callback(new VolumeError('Failed to generate random bytes', VolumeError.INTERNAL_ERROR));
+
+            var record = {
+                username: user.username,
+                salt: salt.toString('hex'),
+                passwordCypher: aes.encrypt(volumePassword, newPassword, salt),
+            };
+
+            that.meta.update(record, function (error) {
+                if (error) {
+                    debug('Unable to add user to meta db. ' + safe.JSON.stringify(error));
+                    return callback(error);
+                }
+
+                return callback(null, record);
+            });
+        });
+    });
 };
 
 Volume.prototype.hasUserByName = function (username, callback) {
@@ -349,38 +433,51 @@ function createVolume(name, user, config, callback) {
             return callback(new VolumeError(error, VolumeError.INTERNAL_ERROR));
         }
 
-        vol.addUser(user, volPassword, function (error, result) {
+        crypto.randomBytes(CRYPTO_SALT_SIZE, function (error, salt) {
             if (error) {
-                return callback(error);
+                return callback(new VolumeError('Failed to generate random bytes', VolumeError.INTERNAL_ERROR));
             }
 
-            var tmpDir = path.join(vol.mountPoint, 'tmp');
-            if (!safe.fs.mkdirSync(tmpDir)) {
-                return callback(new VolumeError(safe.error, VolumeError.INTERNAL_ERROR));
-            }
+            var record = {
+                username: user.username,
+                salt: salt.toString('hex'),
+                passwordCypher: aes.encrypt(volPassword, user.password, salt),
+            };
 
-            vol.repo = new Repo(path.join(vol.mountPoint, REPO_SUBFOLDER), tmpDir);
-            vol.repo.create(user.username, user.email, function (error) {
+            vol.meta.put(record, function (error) {
                 if (error) {
-                    return callback(new VolumeError(error, VolumeError.INTERNAL_ERROR));
+                    debug('Unable to add user to meta db. ' + safe.JSON.stringify(error));
+                    return callback(error);
                 }
 
-                vol.repo.addFileWithData('README.md', 'README', function (error, commit) {
+                var tmpDir = path.join(vol.mountPoint, 'tmp');
+                if (!safe.fs.mkdirSync(tmpDir)) {
+                    return callback(new VolumeError(safe.error, VolumeError.INTERNAL_ERROR));
+                }
+
+                vol.repo = new Repo(path.join(vol.mountPoint, REPO_SUBFOLDER), tmpDir);
+                vol.repo.create(user.username, user.email, function (error) {
                     if (error) {
                         return callback(new VolumeError(error, VolumeError.INTERNAL_ERROR));
                     }
 
-                    callback(null, vol);
+                    vol.repo.addFileWithData('README.md', 'README', function (error, commit) {
+                        if (error) {
+                            return callback(new VolumeError(error, VolumeError.INTERNAL_ERROR));
+                        }
+
+                        callback(null, vol);
+                    });
                 });
             });
         });
     });
 }
 
-function destroyVolume(name, username, config, callback) {
-    ensureArgs(arguments, ['string', 'string', 'object', 'function']);
+function destroyVolume(name, user, config, callback) {
+    ensureArgs(arguments, ['string', 'object', 'object', 'function']);
 
-    getVolume(name, username, config, function (error, result) {
+    getVolume(name, user.username, config, function (error, result) {
         if (error) return callback(new VolumeError(null, VolumeError.NO_SUCH_VOLUME));
         result.destroy(callback);
     });

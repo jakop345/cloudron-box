@@ -147,6 +147,7 @@ Server.prototype._initialize = function (callback) {
         that.app.get('/api/v1/user/logout', routes.user.logout);
         that.app.post('/api/v1/user/create', routes.user.create);
         that.app.post('/api/v1/user/remove', routes.user.remove);
+        that.app.post('/api/v1/user/password', that._requirePassword.bind(that), routes.user.changePassword);
         that.app.get('/api/v1/user/info', routes.user.info);
         that.app.get('/api/v1/user/list', routes.user.list);
 

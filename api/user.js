@@ -179,6 +179,16 @@ function changePassword(username, oldPassword, newPassword, callback) {
             return callback(error);
         }
 
+        // update password for all volumes this user has access to
+        volumes.list(username, function (error, volumes) {
+            if (error) {
+                debug('Failed to get volume list', error);
+                return callback(new Error('Failed to get volume list.'));
+            }
+
+            async.each()
+        });
+
         callback(new UserError('not implemented', UserError.INTERNAL_ERROR));
     });
 }

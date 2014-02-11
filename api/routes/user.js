@@ -6,9 +6,7 @@ var db = require('../database'),
     UserError = user.UserError,
     crypto = require('crypto'),
     debug = require('debug')('server:routes/user'),
-    HttpError = require('../httperror'),
-    express = require('express'),
-    assert = require('assert');
+    HttpError = require('../httperror');
 
 exports = module.exports = {
     createAdmin: createAdmin,
@@ -18,6 +16,7 @@ exports = module.exports = {
     info: info,
     list: listUser,
     create: createUser,
+    changePassword: changePassword,
     remove: removeUser
 };
 
@@ -91,6 +90,20 @@ function createUser(req, res, next) {
         }
 
         res.send(201, {});
+    });
+}
+
+function changePassword(req, res, next) {
+    if (!req.body.oldPassword) return next(new HttpError(400, 'API call requires the users old password.'));
+    if (!req.body.newPassword) return next(new HttpError(400, 'API call requires the users new password.'));
+
+    user.changePassword(req.user.username, req.body.oldPassword, req.body.newPassword, function (error, result) {
+        if (error) {
+            debug('Failed to change password for user', req.user.username);
+            return next(new HttpError(500, 'Unable to change password'));
+        }
+
+        res.send(200, {});
     });
 }
 
