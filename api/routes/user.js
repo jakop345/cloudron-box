@@ -75,7 +75,6 @@ function createAdmin(req, res, next) {
  * @apiError (User already exists 409) {String} message Error details
  */
 function createUser(req, res, next) {
-    // TODO: I guess only the admin should be allowed to do so? - Johannes
     var username = req.body.username || '';
     var password = req.body.password || '';
     var email = req.body.email || '';
@@ -334,19 +333,18 @@ function removeUser(req, res, next) {
 
     // rules:
     // - admin can remove any user
-    // - user can only remove himself
-    // - TODO should the admin user be able to remove himself? - Johannes
-    if (req.user.admin || req.user.username === username) {
-        user.remove(username, function (error, result) {
-            if (error) {
-                return next(new HttpError(500, error.message));
-            }
+    // - admin cannot remove admin
 
-            return res.send(200, {});
-        });
-
-        return;
+    // req.user is ensured to be the admin via requireAdmin middleware
+    if (req.user.username === username) {
+        return next(new HttpError(403, 'Not allowed to remove this user.'));
     }
 
-    return next(new HttpError(403, 'Not allowed to remove this user.'));
+    user.remove(username, function (error, result) {
+        if (error) {
+            return next(new HttpError(500, error.message));
+        }
+
+        return res.send(200, {});
+    });
 }

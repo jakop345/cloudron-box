@@ -75,14 +75,19 @@ Server.prototype._getVersion = function (req, res, next) {
 };
 
 /*
-    Step which makes the route require a password in the body besides a token.
-    Needed for mounting/deletion/creation of volumes.
+    Middleware which makes the route require a password in the body besides a token.
 */
 Server.prototype._requirePassword = function (req, res, next) {
-    if (!req.body.password) {
-        return next(new HttpError(400, 'API call requires the users password.'));
-    }
+    if (!req.body.password) return next(new HttpError(400, 'API call requires the users password.'));
+    next();
+};
 
+
+/*
+    Middleware which makes the route only accessable for the admin user.
+*/
+Server.prototype._requireAdmin = function (req, res, next) {
+    if (!req.user.admin) return next(new HttpError(403, 'API call requires the admin rights.'));
     next();
 };
 
@@ -135,8 +140,8 @@ Server.prototype._initialize = function (callback) {
         that.app.get('/api/v1/user/token', routes.user.createToken);
         that.app.get('/api/v1/logout', routes.user.logout);             // TODO remove that route
         that.app.get('/api/v1/user/logout', routes.user.logout);
-        that.app.post('/api/v1/user/create', routes.user.create);
-        that.app.post('/api/v1/user/remove', routes.user.remove);
+        that.app.post('/api/v1/user/create', that._requireAdmin.bind(that), routes.user.create);
+        that.app.post('/api/v1/user/remove', that._requireAdmin.bind(that), routes.user.remove);
         that.app.post('/api/v1/user/password', that._requirePassword.bind(that), routes.user.changePassword);
         that.app.get('/api/v1/user/info', routes.user.info);
         that.app.get('/api/v1/user/list', routes.user.list);

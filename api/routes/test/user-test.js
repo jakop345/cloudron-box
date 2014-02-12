@@ -298,12 +298,12 @@ describe('Server User API', function () {
         });
     });
 
-    it('removes itself', function (done) {
+    it('user removes himself is not allowed', function (done) {
         request.post(SERVER_URL + '/api/v1/user/remove')
                .auth(USERNAME_2, PASSWORD_2)
                .send({ username: USERNAME_2 })
                .end(function (err, res) {
-            expect(res.statusCode).to.equal(200);
+            expect(res.statusCode).to.equal(403);
             done(err);
         });
     });
@@ -359,12 +359,12 @@ describe('Server User API', function () {
         });
     });
 
-    it('admin removes himself', function (done) {
+    it('admin removes himself should not be allowed', function (done) {
         request.post(SERVER_URL + '/api/v1/user/remove')
                .auth(USERNAME, PASSWORD)
                .send({ username: USERNAME })
                .end(function (err, res) {
-            expect(res.statusCode).to.equal(200);
+            expect(res.statusCode).to.equal(403);
             done(err);
         });
     });
