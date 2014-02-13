@@ -2,7 +2,8 @@
 
 var HttpError = require('../httperror'),
     async = require('async'),
-    volume = require('../volume.js'),
+    volume = require('../volume'),
+    User = require('../user'),
     VolumeError = volume.VolumeError;
 
 exports = module.exports = {
@@ -69,12 +70,21 @@ function createVolume(req, res, next) {
     volume.get(req.body.name, req.user.username, config, function (error, result) {
         if (result) next(new HttpError(409, 'Volume already exists'));
 
-        volume.create(req.body.name, req.user, req.body.password, config, function (error, result) {
+        User.verify(req.user.username, req.body.password, function (error, result) {
             if (error) {
-                return next(new HttpError(500, 'Volume creation failed: ' + error));
+                if (error.reason === User.UserError.WRONG_USER_OR_PASSWORD) {
+                    return next(new HttpError(403, 'Wrong password'));
+                }
+                return next(new HttpError(500, 'Internal server error'));
             }
 
-            res.send(201, {});
+            volume.create(req.body.name, req.user, req.body.password, config, function (error, result) {
+                if (error) {
+                    return next(new HttpError(500, 'Volume creation failed: ' + error));
+                }
+
+                res.send(201, {});
+            });
         });
     });
 }

@@ -88,12 +88,21 @@ describe('Server Volume API', function () {
     after(cleanup);
 
     it('create fails due to missing password', function (done) {
-        this.timeout(5000); // on the Mac, creating volumes takes a lot of time on low battery
         request.post(SERVER_URL + '/api/v1/volume/create')
                .auth(USERNAME, PASSWORD)
                .send({ name: TESTVOLUME })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
+            done(err);
+        });
+    });
+
+    it('create fails due to wrong password', function (done) {
+        request.post(SERVER_URL + '/api/v1/volume/create')
+               .auth(USERNAME, PASSWORD)
+               .send({ password: PASSWORD+PASSWORD, name: TESTVOLUME })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(403);
             done(err);
         });
     });
