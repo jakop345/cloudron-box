@@ -8,7 +8,8 @@ var db = require('../database'),
     crypto = require('crypto'),
     async = require('async'),
     debug = require('debug')('server:routes/user'),
-    HttpError = require('../httperror');
+    HttpError = require('../httperror'),
+    HttpSuccess = require('../httpsuccess');
 
 exports = module.exports = {
     createAdmin: createAdmin,
@@ -52,7 +53,25 @@ function createAdmin(req, res, next) {
         return next(new HttpError(403, 'Only one admin allowed'));
     }
 
-    createUser(req, res, next);
+    var username = req.body.username || '';
+    var password = req.body.password || '';
+    var email = req.body.email || '';
+
+    user.create(username, password, email, {}, function (error, result) {
+        if (error) {
+            if (error.reason === UserError.ARGUMENTS) {
+                return next(new HttpError(400, error.message));
+            } else if (error.reason === UserError.ALREADY_EXISTS) {
+                return next(new HttpError(409, 'Already exists'));
+            } else {
+                return next(new HttpError(500, error.message));
+            }
+        }
+
+        // TODO no next(), as we do not want to fall through to authentication
+        // the whole createAdmin should be handled differently
+        res.send(201, {});
+    });
 }
 
 /**
@@ -90,7 +109,7 @@ function createUser(req, res, next) {
             }
         }
 
-        res.send(201, {});
+        next(new HttpSuccess(201, {}));
     });
 }
 
@@ -120,7 +139,7 @@ function changePassword(req, res, next) {
                     return next(new HttpError(500, 'Unable to change password'));
                 }
 
-                res.send(200, {});
+                next(new HttpSuccess(200, {}));
             });
         });
     });
@@ -129,32 +148,31 @@ function changePassword(req, res, next) {
 function listUser(req, res, next) {
     user.list(function (error, result) {
         if (error) return next(new HttpError(500, error.message));
-
-        res.send(200, { users: result });
+        next(new HttpSuccess(200, { users: result }));
     });
 }
 
 function extractCredentialsFromHeaders (req) {
     if (!req.headers || !req.headers.authorization) {
-        debug("No authorization header.");
+        debug('No authorization header.');
         return null;
     }
 
     if (req.headers.authorization.substr(0, 6) !== 'Basic ') {
-        debug("Only basic authorization supported.");
+        debug('Only basic authorization supported.');
         return null;
     }
 
     var b = new Buffer(req.headers.authorization.substr(6), 'base64');
     var s = b.toString('utf8');
     if (!s) {
-        debug("Authorization header does not contain a valid string.");
+        debug('Authorization header does not contain a valid string.');
         return null;
     }
 
     var a = s.split(':');
     if (a.length != 2) {
-        debug("Authorization header does not contain a valid username:password tuple.");
+        debug('Authorization header does not contain a valid username:password tuple.');
         return null;
     }
 
@@ -263,8 +281,7 @@ function createToken(req, res, next) {
 
         db.TOKENS_TABLE.put(token, function (err) {
             if (err) return next(err);
-
-            res.send(200, {
+            next(new HttpSuccess(200, {
                 token: hexToken,
                 expires: expires,
                 userInfo: {
@@ -272,7 +289,7 @@ function createToken(req, res, next) {
                     email: req.user.email,
                     admin: req.user.admin
                 }
-            });
+            }));
         });
     });
 }
@@ -289,11 +306,11 @@ function createToken(req, res, next) {
  */
 function info(req, res, next) {
     // req.user is filled by the authentication step
-    res.send({
+    next(new HttpSuccess(200, {
         username: req.user.username,
         email: req.user.email,
         admin: req.user.admin
-    });
+    }));
 }
 
 /**
@@ -311,7 +328,7 @@ function logout(req, res, next) {
     // Invalidate token so the cookie cannot be reused after logout
     db.TOKENS_TABLE.remove(req_token, function (error, result) {
         if (error) return next(error);
-        res.send(200, {});
+        next(new HttpSuccess(200, {}));
     });
 }
 
@@ -342,9 +359,11 @@ function removeUser(req, res, next) {
 
     user.remove(username, function (error, result) {
         if (error) {
-            return next(new HttpError(500, error.message));
+            if (error.reason === DatabaseError.NOT_FOUND) {
+                return next(new HttpError(404, 'User not found'));
+            }
+            return next(new HttpError(500, 'Failed to remove user'));
         }
-
-        return res.send(200, {});
+        next(new HttpSuccess(200, {}));
     });
 }

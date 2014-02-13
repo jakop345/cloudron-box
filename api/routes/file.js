@@ -2,6 +2,7 @@
 
 var fs = require('fs'),
     HttpError = require('../httperror'),
+    HttpSuccess = require('../httpsuccess'),
     mime = require('mime'),
     debug = require('debug')('server:routes/file'),
     express = require('express'),
@@ -76,7 +77,7 @@ function revisions(req, res, next) {
             return next(new HttpError(500, 'Revision error:' + err));
         }
 
-        res.send(200, { revisions: revisions });
+        next(new HttpSuccess(200, { revisions: revisions }));
     });
 }
 
@@ -104,8 +105,11 @@ function metadata(req, res, next) {
             return next(new HttpError(500, 'Error getting HEAD'));
         }
 
-        if (!entries) return res.send(304, 'Not modified');
-        res.send(200, { entries: entries, hash: hash });
+        if (!entries) {
+            next(new HttpSuccess(304, {}));
+        } else {
+            next(new HttpSuccess(200, { entries: entries, hash: hash }));
+        }
     });
 }
 
@@ -169,6 +173,6 @@ function putFile(req, res, next) {
             return next(new HttpError(500, 'Error putting file : ' + err.message));
         }
         fileInfo.serverRevision = commit.sha1;
-        res.send(201, fileInfo);
+        next(new HttpSuccess(201, fileInfo));
     });
 }

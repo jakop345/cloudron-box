@@ -1,8 +1,9 @@
 'use strict';
 
 var debug = require('debug')('server:routes/sync'),
-    syncer = require('../syncer.js'),
-    HttpError = require('../httperror.js'),
+    syncer = require('../syncer'),
+    HttpError = require('../httperror'),
+    HttpSuccess = require('../httpsuccess'),
     util = require('util');
 
 exports = module.exports = {
@@ -34,7 +35,7 @@ function diff(req, res, next) {
 
                 var changes = syncer.diffEntries(clientIndex, baseTree.entries, serverIndex);
                 debug(util.inspect(changes));
-                res.send(200, { serverRevision: headCommit.sha1, changes: changes });
+                next(new HttpSuccess(200, { serverRevision: headCommit.sha1, changes: changes }));
             });
         });
     });
@@ -69,7 +70,7 @@ function delta(req, res, next) {
         if (err) return next(new HttpError(500, 'HEAD commit invalid'));
         repo.diffTree(clientRevision, headCommit.sha1, function (err, changes) {
             if (err) return next(new HttpError(422, 'invalid cursor'));
-            res.send(200, { changes: changes, serverRevision: headCommit.sha1 });
+            next(new HttpSuccess(200, { changes: changes, serverRevision: headCommit.sha1 }));
         });
     });
 }

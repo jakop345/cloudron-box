@@ -1,6 +1,7 @@
 'use strict';
 
 var HttpError = require('../httperror'),
+    HttpSuccess = require('../httpsuccess'),
     async = require('async'),
     volume = require('../volume'),
     User = require('../user'),
@@ -32,7 +33,7 @@ function deleteVolume(req, res, next) {
         }
 
         delete req.volume;
-        res.send(200, {});
+        next(new HttpSuccess(200, {}));
     });
 }
 
@@ -53,11 +54,8 @@ function listVolumes(req, res, next) {
                 callback(null, ret);
             });
         }, function (error, results) {
-            if (error) {
-                return next(new HttpError(500, 'Unable to list volumes'));
-            }
-
-            res.send(200, { volumes: results });
+            if (error) return next(new HttpError(500, 'Unable to list volumes'));
+            next(new HttpSuccess(200, { volumes: results }));
         });
     });
 }
@@ -79,11 +77,8 @@ function createVolume(req, res, next) {
             }
 
             volume.create(req.body.name, req.user, req.body.password, config, function (error, result) {
-                if (error) {
-                    return next(new HttpError(500, 'Volume creation failed: ' + error));
-                }
-
-                res.send(201, {});
+                if (error) return next(new HttpError(500, 'Volume creation failed: ' + error));
+                next(new HttpSuccess(201, {}));
             });
         });
     });
@@ -102,37 +97,28 @@ function listFiles(req, res, next) {
             return next(new HttpError(500, 'Internal server error'));
         }
 
-        res.send(200, files);
+        next(new HttpSuccess(200, files));
     });
 }
 
 function mount(req, res, next) {
     req.volume.open(req.user.username, req.body.password, function (error) {
-        if (error) {
-            return next(new HttpError(402, 'Unable to open volume'));
-        }
-
-        res.send(200, {});
+        if (error) return next(new HttpError(402, 'Unable to open volume'));
+        next(new HttpSuccess(200, {}));
     });
 }
 
 function unmount(req, res, next) {
     req.volume.close(function (error) {
-        if (error) {
-            return next(new HttpError(500, 'Unable to close volume'));
-        }
-
-        res.send(200, {});
+        if (error) return next(new HttpError(500, 'Unable to close volume'));
+        next(new HttpSuccess(200, {}));
     });
 }
 
 function isMounted(req, res, next) {
     req.volume.isMounted(function (error, mounted) {
-        if (error) {
-            return next(new HttpError(500, 'Unable to check if volume is mounted'));
-        }
-
-        res.send(200, { mounted: mounted });
+        if (error) return next(new HttpError(500, 'Unable to check if volume is mounted'));
+        next(new HttpSuccess(200, { mounted: mounted }));
     });
 }
 

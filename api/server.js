@@ -3,6 +3,7 @@
 var express = require('express'),
     http = require('http'),
     HttpError = require('./httperror'),
+    HttpSuccess = require('./httpsuccess'),
     path = require('path'),
     fs = require('fs'),
     mkdirp = require('mkdirp'),
@@ -11,8 +12,8 @@ var express = require('express'),
     debug = require('debug')('server:server'),
     Ssdp = require('upnp-ssdp'),
     assert = require('assert'),
-    pkg = require('./../package.json'),
-    user = require('./user.js');
+    util = require('util'),
+    pkg = require('./../package.json');
 
 exports = module.exports = Server;
 
@@ -22,6 +23,18 @@ function Server(config) {
     this.config = config;
     this.app = null;
 }
+
+
+// Success handler
+Server.prototype._successHandler = function (success, req, res, next) {
+    if (success instanceof HttpSuccess) {
+        debug('Send response with status', success.statusCode, 'and body', success.body);
+        res.send(success.statusCode, success.body);
+    } else {
+        next(success);
+    }
+};
+
 
 // Error handlers. These are called until one of them sends headers
 Server.prototype._clientErrorHandler = function (err, req, res, next) {
@@ -71,7 +84,7 @@ Server.prototype._firstTime = function (req, res, next) {
  */
 Server.prototype._getVersion = function (req, res, next) {
     if (req.method !== 'GET') return next(new HttpError(405, 'Only GET supported'));
-    res.send({ version: pkg.version });
+    res.send(200, { version: pkg.version });
 };
 
 /*
@@ -132,6 +145,7 @@ Server.prototype._initialize = function (callback) {
            .use('/api/v1/createadmin', routes.user.createAdmin) // ## FIXME: allow this before auth for now
            .use(routes.user.authenticate)
            .use(that.app.router)
+           .use(that._successHandler.bind(that))
            .use(that._clientErrorHandler.bind(that))
            .use(that._serverErrorHandler.bind(that));
 

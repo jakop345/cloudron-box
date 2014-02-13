@@ -1,7 +1,7 @@
 'use strict';
 
-var fs = require('fs'),
-    HttpError = require('../httperror');
+var HttpError = require('../httperror'),
+    HttpSuccess = require('../httpsuccess');
 
 exports = module.exports = {
     remove: remove,
@@ -27,12 +27,14 @@ function remove(req, res, next) {
     repo.removeFile(filePath, { recursive: true, rev: rev }, function (err, fileEntry, commit) {
         if (err) {
             // Removing a non-existent path is considered success. This is inline with idempotency of remove operation
-            if (err.code == 'ENOENT' || err.code == 'ENOTDIR') return res.send(204, null);
+            if (err.code == 'ENOENT' || err.code == 'ENOTDIR') {
+                return next(new HttpSuccess(204, {}));
+            }
             if (err.code == 'EOUTOFDATE') return next(new HttpError(409, 'Out of date'));
             return next(new HttpError(500, err.message));
         }
         fileEntry.serverRevision = commit.sha1;
-        res.send(200, fileEntry);
+        next(new HttpSuccess(200, fileEntry));
     });
 }
 
@@ -60,7 +62,7 @@ function move(req, res, next) {
             return next(new HttpError(500, err.message));
         }
         newEntry.serverRevision = commit.sha1;
-        res.send(200, newEntry);
+        next(new HttpSuccess(200, newEntry));
     });
 }
 
@@ -88,6 +90,6 @@ function copy(req, res, next) {
             return next(new HttpError(500, err.message));
         }
         newEntry.serverRevision = commit.sha1;
-        res.send(200, newEntry);
+        next(new HttpSuccess(200, newEntry));
     });
 }
