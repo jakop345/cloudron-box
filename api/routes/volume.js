@@ -57,7 +57,7 @@ function listVolumes(req, res, next) {
                 return next(new HttpError(500, 'Unable to list volumes'));
             }
 
-            res.send(200, results);
+            res.send(200, { volumes: results });
         });
     });
 }

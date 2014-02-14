@@ -122,12 +122,13 @@ describe('Server Volume API', function () {
         request.get(SERVER_URL + '/api/v1/volume/list')
                .auth(USERNAME, PASSWORD)
                .end(function (err, res) {
-            expect(res.body.length).to.equal(1);
-            expect(res.body[0].name).to.equal(TESTVOLUME);
+            expect(res.body.volumes).to.be.an(Object);
+            expect(res.body.volumes.length).to.equal(1);
+            expect(res.body.volumes[0].name).to.equal(TESTVOLUME);
             expect(res.statusCode).to.equal(200);
 
             // check for result object sanity
-            checkObjectHasOnly(res.body[0], {name: 'string', isMounted: 'boolean'});
+            checkObjectHasOnly(res.body.volumes[0], {name: 'string', isMounted: 'boolean'});
 
             done(err);
         });
