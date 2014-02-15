@@ -107,7 +107,13 @@ function listFiles(req, res, next) {
 
 function mount(req, res, next) {
     req.volume.open(req.user.username, req.body.password, function (error) {
-        if (error) return next(new HttpError(402, 'Unable to open volume'));
+        if (error) {
+            if (error.reason === VolumeError.WRONG_USER_PASSWORD) {
+                return next(new HttpError(403, 'Wrong password'));
+            }
+
+            return next(new HttpError(402, 'Unable to open volume'));
+        }
         next(new HttpSuccess(200, {}));
     });
 }

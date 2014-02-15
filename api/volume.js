@@ -121,9 +121,7 @@ Volume.prototype.open = function (username, password, callback) {
     var that = this;
 
     this.encfs.isMounted(function (error, mounted) {
-        if (error) {
-            return callback(error);
-        }
+        if (error) return callback(new VolumeError(error, VolumeError.INTERNAL_ERROR));
 
         if (mounted && that.repo) {
             return callback();
@@ -132,17 +130,18 @@ Volume.prototype.open = function (username, password, callback) {
         that.meta.get(username, function (error, record) {
             if (error) {
                 debug('Unable to get user from meta db. ' + safe.JSON.stringify(error));
-                return callback(error);
+                return callback(new VolumeError(error, VolumeError.NO_SUCH_USER));
             }
 
             var saltBuffer = new Buffer(record.salt, 'hex');
             var volPassword = aes.decrypt(record.passwordCypher, password, saltBuffer);
 
-            that.encfs.mount(volPassword, function (error, result) {
-                if (error) {
-                    return callback(error);
-                }
+            if (!volPassword) {
+                return callback(new VolumeError(error, VolumeError.WRONG_USER_PASSWORD));
+            }
 
+            that.encfs.mount(volPassword, function (error, result) {
+                if (error) return callback(new VolumeError(error, VolumeError.INTERNAL_ERROR));
                 callback();
             });
         });

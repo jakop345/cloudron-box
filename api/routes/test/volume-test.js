@@ -175,6 +175,16 @@ describe('Server Volume API', function () {
         });
     });
 
+    it('mount volume should fail due to wrong password', function (done) {
+        request.post(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/mount')
+               .auth(USERNAME, PASSWORD)
+               .send({ password: 'some random password' })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(403);
+            done(err);
+        });
+    });
+
     it('mount volume', function (done) {
         request.post(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/mount')
                .auth(USERNAME, PASSWORD)
