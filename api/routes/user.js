@@ -201,7 +201,7 @@ function loginAuthenticator(req, res, next) {
 
     if (!auth) {
         debug('Could not extract credentials.');
-        return next(new HttpError(400, 'Bad username or password'), false);
+        return next(new HttpError(400, 'No credentials'), false);
     }
 
     user.verify(auth.username, auth.password, function (error, user) {
@@ -209,7 +209,9 @@ function loginAuthenticator(req, res, next) {
             debug('User ' + auth.username  + ' could not be verified.');
             if (error.reason === UserError.ARGUMENTS) {
                 return next(new HttpError(400, error.message));
-            } else if (error.reason === UserError.NOT_FOUND || error.reason === UserError.WRONG_USER_OR_PASSWORD) {
+            } else if (error.reason === UserError.NOT_FOUND) {
+                return next(new HttpError(401, 'No such user'));
+            } else if (error.reason === UserError.WRONG_USER_OR_PASSWORD) {
                 return next(new HttpError(401, 'Username or password do not match'));
             } else {
                 return next(new HttpError(500, error.message));
