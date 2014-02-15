@@ -204,6 +204,7 @@ Server.prototype._initialize = function (callback) {
 
     routes.sync.initialize(that.config);
     routes.volume.initialize(that.config);
+    routes.user.initialize(that.config);
 
     callback(null);
 };

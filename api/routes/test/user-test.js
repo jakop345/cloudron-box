@@ -368,4 +368,44 @@ describe('Server User API', function () {
             done(err);
         });
     });
+
+    it('change password fails due to missing current password', function (done) {
+        request.post(SERVER_URL + '/api/v1/user/password')
+               .auth(USERNAME, PASSWORD)
+               .send({ newPassword: 'some wrong password' })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(400);
+            done(err);
+        });
+    });
+
+    it('change password fails due to missing new password', function (done) {
+        request.post(SERVER_URL + '/api/v1/user/password')
+               .auth(USERNAME, PASSWORD)
+               .send({ password: PASSWORD })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(400);
+            done(err);
+        });
+    });
+
+    it('change password fails due to wrong password', function (done) {
+        request.post(SERVER_URL + '/api/v1/user/password')
+               .auth(USERNAME, PASSWORD)
+               .send({ password: 'some wrong password', newPassword: 'new_password' })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(403);
+            done(err);
+        });
+    });
+
+      it('change password succeeds', function (done) {
+        request.post(SERVER_URL + '/api/v1/user/password')
+               .auth(USERNAME, PASSWORD)
+               .send({ password: PASSWORD, newPassword: 'new_password' })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            done(err);
+        });
+    });
 });

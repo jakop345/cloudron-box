@@ -4,6 +4,7 @@ var db = require('../database'),
     DatabaseError = db.DatabaseError,
     user = require('../user'),
     Volume = require('../volume'),
+    VolumeError = Volume.VolumeError,
     UserError = user.UserError,
     crypto = require('crypto'),
     async = require('async'),
@@ -12,6 +13,7 @@ var db = require('../database'),
     HttpSuccess = require('../httpsuccess');
 
 exports = module.exports = {
+    initialize: initialize,
     createAdmin: createAdmin,
     authenticate: authenticate,
     createToken: createToken,
@@ -22,6 +24,12 @@ exports = module.exports = {
     changePassword: changePassword,
     remove: removeUser
 };
+
+var config;
+
+function initialize(cfg) {
+    config = cfg;
+}
 
 /**
 * @apiDefinePermission admin Admin access rights needed.
@@ -118,7 +126,7 @@ function changePassword(req, res, next) {
     if (!req.body.newPassword) return next(new HttpError(400, 'API call requires the users new password.'));
 
     // update password for all volumes this user has access to
-    Volume.list(req.user.username, function (error, volumes) {
+    Volume.list(req.user.username, config, function (error, volumes) {
         if (error) {
             debug('Failed to get volume list', error);
             return next(new HttpError(500, 'Failed to get volume list.'));
@@ -126,16 +134,22 @@ function changePassword(req, res, next) {
 
         // TODO how to rollback from here in case of an error?
         async.each(volumes, function (volume, callback) {
-            volume.changeUserPassword(user, req.body.password, req.body.newPassword, callback);
+            volume.changeUserPassword(req.user, req.body.password, req.body.newPassword, callback);
         }, function (error) {
             if (error) {
                 debug('Unable to change password on volumes.', error);
+                if (error.reason === VolumeError.WRONG_USER_PASSWORD) {
+                    return next(new HttpError(403, 'Wrong password'));
+                }
                 return next(new HttpError(500, 'Cannot change volume password'));
             }
 
             user.changePassword(req.user.username, req.body.password, req.body.newPassword, function (error, result) {
                 if (error) {
                     debug('Failed to change password for user', req.user.username);
+                    if (error.reason === UserError.WRONG_USER_OR_PASSWORD) {
+                        return next(new HttpError(403, 'Wrong password'));
+                    }
                     return next(new HttpError(500, 'Unable to change password'));
                 }
 

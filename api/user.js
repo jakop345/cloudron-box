@@ -182,9 +182,7 @@ function changePassword(username, oldPassword, newPassword, callback) {
     }
 
     verifyUser(username, oldPassword, function (error, user) {
-        if (error) {
-            return callback(error);
-        }
+        if (error) return callback(error);
 
         var saltBinary = new Buffer(user.salt, 'hex');
         crypto.pbkdf2(newPassword, saltBinary, CRYPTO_ITERATIONS, CRYPTO_KEY_LENGTH, function (error, derivedKey) {
