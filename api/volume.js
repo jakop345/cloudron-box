@@ -1,7 +1,7 @@
 'use strict';
 
 var fs = require('fs'),
-    db = require('./database.js'),
+    db = require('./database'),
     debug = require('debug')('server:volume'),
     encfs = require('encfs'),
     rimraf = require('rimraf'),
@@ -11,8 +11,7 @@ var fs = require('fs'),
     aes = require('./aes-helper'),
     async = require('async'),
     util = require('util'),
-    HttpError = require('./httperror.js'),
-    Repo = require('./repo.js'),
+    Repo = require('./repo'),
     safe = require('safetydance');
 
 exports = module.exports = {
@@ -20,7 +19,6 @@ exports = module.exports = {
     VolumeError: VolumeError,
     list: listVolumes,
     create: createVolume,
-    destroy: destroyVolume,
     get: getVolume
 };
 
@@ -59,10 +57,11 @@ VolumeError.NO_SUCH_VOLUME = 5;
 VolumeError.NO_SUCH_USER = 6;
 VolumeError.WRONG_USER_PASSWORD = 7;
 VolumeError.EMPTY_PASSWORD = 8;
+VolumeError.MOUNTED = 9;
 
 // TODO is this even a good password generator? - Johannes
 function generateNewVolumePassword() {
-    var chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()_+?{}[]|:;'~`<>,.-=";
+    var chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()_+?{}[]|:;"~`<>,.-=';
     var charsLength = chars.length;
     var password = '';
 
@@ -150,7 +149,7 @@ Volume.prototype.open = function (username, password, callback) {
     });
 };
 
-Volume.prototype.close = function(callback) {
+Volume.prototype.close = function (callback) {
     ensureArgs(arguments, ['function']);
 
     var that = this;
@@ -174,40 +173,47 @@ Volume.prototype.close = function(callback) {
     });
 };
 
-// TODO this does not have error reporting yet - Johannes
-Volume.prototype.destroy = function (password, callback) {
-    ensureArgs(arguments, ['string', 'function']);
+Volume.prototype.destroy = function (user, password, callback) {
+    ensureArgs(arguments, ['object', 'string', 'function']);
 
     var that = this;
 
     function cleanupFolders() {
         rimraf(that.dataPath, function (error) {
             if (error) {
-                console.log('Failed to delete volume root path.', error);
+                debug('Failed to delete volume root path.', error);
+                return callback(new VolumeError(error, VolumeError.INTERNAL_ERROR));
             }
 
             rimraf(that.mountPoint, function (error) {
                 if (error) {
-                    console.log('Failed to delete volume mount point.', error);
+                    debug('Failed to delete volume mount point.', error);
+                    return callback(new VolumeError(error, VolumeError.INTERNAL_ERROR));
                 }
 
+                debug('Volume ' + that.name + ' successfully deleted.');
                 callback();
             });
         });
     }
 
-    this.encfs.isMounted(function (error, mounted) {
-        if (!mounted) {
-            cleanupFolders();
-            return;
-        }
+    this.verifyUser(user, password, function (error) {
+        if (error) return callback(error);
 
-        that.encfs.unmount(function (error) {
-            if (error) {
-                console.log('Error unmounting the volume.', error);
+        that.encfs.isMounted(function (error, mounted) {
+            if (!mounted) {
+                cleanupFolders();
+                return;
             }
 
-            cleanupFolders();
+            that.encfs.unmount(function (error) {
+                if (error) {
+                    debug('Error unmounting the volume. Non fatal.', error);
+                    return callback(new VolumeError(error, VolumeError.MOUNTED));
+                }
+
+                cleanupFolders();
+            });
         });
     });
 };
@@ -314,7 +320,7 @@ Volume.prototype.verifyUser = function (user, password, callback) {
             return callback(new VolumeError(null, VolumeError.WRONG_USER_PASSWORD));
         }
 
-        callback(null, true);
+        callback(null);
     });
 };
 
@@ -471,15 +477,6 @@ function createVolume(name, user, password, config, callback) {
                 });
             });
         });
-    });
-}
-
-function destroyVolume(name, user, password, config, callback) {
-    ensureArgs(arguments, ['string', 'object', 'string', 'object', 'function']);
-
-    getVolume(name, user.username, config, function (error, result) {
-        if (error) return callback(new VolumeError(null, VolumeError.NO_SUCH_VOLUME));
-        result.destroy(password, callback);
     });
 }
 

@@ -27,8 +27,12 @@ function initialize(cfg) {
 }
 
 function deleteVolume(req, res, next) {
-    req.volume.destroy(req.body.password, function (error) {
+    req.volume.destroy(req.user, req.body.password, function (error) {
         if (error) {
+            if (error.reason === VolumeError.WRONG_USER_PASSWORD) {
+                return next(new HttpError(403, 'Wrong password'));
+            }
+
             return next(new HttpError(500, 'Unable to destroy volume: ' + error));
         }
 

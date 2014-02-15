@@ -6,13 +6,11 @@
 /* global after:false */
 
 var volume = require('../volume.js'),
-    fs = require('fs'),
+    VolumeError = volume.VolumeError,
     path = require('path'),
-    exec = require('child_process').exec,
     mkdirp = require('mkdirp'),
     rimraf = require('rimraf'),
     crypto = require('crypto'),
-    assert = require('assert'),
     expect = require('expect.js'),
     os = require('os');
 
@@ -47,22 +45,34 @@ function setup(done) {
     done();
 }
 
-// remove all temporary folders
-function cleanup(done) {
-    rimraf(tmpdir, function (error) {
-        done();
-    });
-}
-
 describe('Volume', function () {
+    var vol1, vol2;
+
     before(setup);
-    after(cleanup);
+
+    after(function (done) {
+        vol1.destroy(USER, USER.password, function (error) {
+            expect(error).to.not.be.ok();
+
+            vol2.destroy(USER, USER.password, function (error) {
+                expect(error).to.not.be.ok();
+
+                rimraf.sync(tmpdir);
+                done();
+            });
+        });
+    });
 
     describe('create', function () {
+
         it('succeeds', function (done) {
             volume.create(VOLUME, USER, USER.password, config, function (error, result) {
                 expect(error).not.to.be.ok();
                 expect(result).to.be.ok();
+
+                // will be cleaned up in after();
+                vol1 = result;
+
                 done();
             });
         });
@@ -79,6 +89,10 @@ describe('Volume', function () {
             volume.create(VOLUME_2, USER, USER.password, config, function (error, result) {
                 expect(error).not.to.be.ok();
                 expect(result).to.be.ok();
+
+                // will be cleaned up in after();
+                vol2 = result;
+
                 done();
             });
         });
@@ -115,29 +129,6 @@ describe('Volume', function () {
         });
     });
 
-    describe('destroy', function () {
-        it('first volume', function (done) {
-            volume.destroy(VOLUME, USER, USER.password, config, function (error) {
-                expect(error).not.to.be.ok();
-                done();
-            });
-        });
-
-        it('fails, no such volume', function (done) {
-            volume.destroy(VOLUME, USER, USER.password, config, function (error) {
-                expect(error).to.be.ok();
-                done();
-            });
-        });
-
-        it('second volume', function (done) {
-            volume.destroy(VOLUME_2, USER, USER.password, config, function (error) {
-                expect(error).not.to.be.ok();
-                done();
-            });
-        });
-    });
-
     describe('object', function () {
         var vol;
 
@@ -149,13 +140,6 @@ describe('Volume', function () {
 
                 vol = result;
 
-                done();
-            });
-        });
-
-        after(function (done) {
-            volume.destroy(VOLUME_3, USER, USER.password, config, function (error) {
-                expect(error).not.to.be.ok();
                 done();
             });
         });
@@ -200,6 +184,20 @@ describe('Volume', function () {
             vol.isMounted(function (error, isMounted) {
                 expect(error).to.not.be.ok();
                 expect(isMounted).to.not.be.ok();
+                done();
+            });
+        });
+
+        it('fails to destroy, due to wrong password', function (done) {
+            vol.destroy(USER, 'some wrong password', function (error) {
+                expect(error).to.be.a(VolumeError);
+                done();
+            });
+        });
+
+        it('can be destroyed', function (done) {
+            vol.destroy(USER, USER.password, function (error) {
+                expect(error).not.to.be.ok();
                 done();
             });
         });
@@ -295,9 +293,8 @@ describe('Volume', function () {
         });
 
         it('changing password only changed target user\'s password', function (done) {
-            vol.verifyUser(TEST_USER_0, TEST_PASSWORD_0, function (error, result) {
+            vol.verifyUser(TEST_USER_0, TEST_PASSWORD_0, function (error) {
                 expect(error).to.not.be.ok();
-                expect(result).to.be.ok();
                 done();
             });
         });
@@ -348,7 +345,7 @@ describe('Volume', function () {
         });
 
         after(function (done) {
-            volume.destroy(TEST_VOLUME, TEST_USER_0, TEST_USER_0.password, config, function (error) {
+            vol.destroy(TEST_USER_0, TEST_USER_0.password, function (error) {
                 expect(error).not.to.be.ok();
                 done();
             });
