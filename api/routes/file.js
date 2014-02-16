@@ -154,13 +154,12 @@ function _getConflictFilenameSync(renamePattern, file, checkoutDir) {
  */
 function putFile(req, res, next) {
     var data = safe.JSON.parse(req.body.data);
-    if (!data) {
-        return next(new HttpError(400, 'Cannot parse data field:' + safe.error.message));
-    }
-
-    if (!req.files.file) return next(new HttpError(400, 'file not provided'));
-
     var filePath = req.params[0];
+
+    if (!data) return next(new HttpError(400, 'Cannot parse data field:' + safe.error.message));
+    if (!req.files.file) return next(new HttpError(400, 'file not provided'));
+    if (filePath == '') return next(new HttpError(400, 'file path not provided in url'));
+
     var options = {
         parentRev: data.parentRev,
         overwrite: data.overwrite,
