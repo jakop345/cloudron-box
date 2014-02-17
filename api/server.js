@@ -213,7 +213,7 @@ Server.prototype._initialize = function (callback) {
 
 // TODO maybe we can get rid of that function and inline it - Johannes
 Server.prototype._listen = function (callback) {
-    if (this.config.certificateDir !== null) {
+    if (typeof this.config.certificateDir === 'string') {
         var options = {
             cert: fs.readFileSync(path.join(this.config.certificateDir, 'cert.pem')),
             key: fs.readFileSync(path.join(this.config.certificateDir, 'key.pem'))
