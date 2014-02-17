@@ -26,6 +26,11 @@ var argv = optimist.usage('Usage: $0 --dataRoot <directory>')
     .alias('h', 'help')
     .describe('h', 'Show this help.')
 
+    .alias('k', 'cert')
+    .default('k', null)
+    .describe('k', 'Directory where cert.pem and cert.key are located')
+    .string('k')
+
     .alias('m', 'mountRoot')
     .default('m', path.join(baseDir, 'mount'))
     .describe('m', 'Volume mount point directory.')
@@ -54,7 +59,8 @@ var config = {
     dataRoot: path.resolve(argv.d),
     configRoot: path.resolve(argv.c),
     mountRoot: path.resolve(argv.m),
-    silent: argv.s
+    silent: argv.s,
+    certificateDir: argv.k
 };
 
 var server = new Server(config);
