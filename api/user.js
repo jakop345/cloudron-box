@@ -3,11 +3,11 @@
 var db = require('./database.js'),
     DatabaseError = db.DatabaseError,
     crypto = require('crypto'),
+    aes = require('./aes-helper'),
     util = require('util'),
     debug = require('debug')('server:user'),
     assert = require('assert'),
-    Volume = require('./volume'),
-    async = require('async'),
+    ursa = require('ursa'),
     safe = require('safetydance');
 
 exports = module.exports = {
@@ -92,12 +92,17 @@ function createUser(username, password, email, options, callback) {
                 return callback(new UserError('Failed to hash password', UserError.INTERNAL_ERROR));
             }
 
+            // now generate the pub/priv keypairs for volume header
+            var keyPair = ursa.generatePrivateKey();
+
             var now = (new Date()).toUTCString();
             var admin = !(db.USERS_TABLE.count()); // currently the first user is the admin
             var user = {
                 username: username,
                 email: email,
                 password: new Buffer(derivedKey, 'binary').toString('hex'),
+                privatePemCipher: aes.encrypt(keyPair.toPrivatePem(), password, salt),
+                publicPem: keyPair.toPublicPem(),
                 admin: admin,
                 salt: salt.toString('hex'),
                 created_at: now,
@@ -145,7 +150,7 @@ function verifyUser(username, password, callback) {
             }
 
             var derivedKeyHex = new Buffer(derivedKey, 'binary').toString('hex');
-            if (derivedKeyHex != user.password)  {
+            if (derivedKeyHex !== user.password)  {
                 return callback(new UserError('Username and password do not match', UserError.WRONG_USER_OR_PASSWORD));
             }
 
@@ -184,14 +189,18 @@ function changePassword(username, oldPassword, newPassword, callback) {
     verifyUser(username, oldPassword, function (error, user) {
         if (error) return callback(error);
 
-        var saltBinary = new Buffer(user.salt, 'hex');
-        crypto.pbkdf2(newPassword, saltBinary, CRYPTO_ITERATIONS, CRYPTO_KEY_LENGTH, function (error, derivedKey) {
+        var saltBuffer = new Buffer(user.salt, 'hex');
+        crypto.pbkdf2(newPassword, saltBuffer, CRYPTO_ITERATIONS, CRYPTO_KEY_LENGTH, function (error, derivedKey) {
             if (error) {
                 return callback(new UserError('Failed to hash password', UserError.INTERNAL_ERROR));
             }
 
+            var privateKeyPem = aes.decrypt(user.privatePemCipher, oldPassword, saltBuffer);
+            var keyPair = ursa.createPrivateKey(privateKeyPem, oldPassword, 'utf8');
+
             user.updated_at = (new Date()).toUTCString();
             user.password = new Buffer(derivedKey, 'binary').toString('hex');
+            user.privatePemCipher = aes.encrypt(keyPair.toPrivatePem(), newPassword, saltBuffer);
 
             db.USERS_TABLE.update(user, function (error) {
                 if (error) {

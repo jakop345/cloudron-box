@@ -6,6 +6,8 @@
 /* global after:false */
 
 var volume = require('../volume.js'),
+    db = require('../database.js'),
+    User = require('../user'),
     VolumeError = volume.VolumeError,
     path = require('path'),
     mkdirp = require('mkdirp'),
@@ -14,18 +16,13 @@ var volume = require('../volume.js'),
     expect = require('expect.js'),
     os = require('os');
 
+var USER;
 var USERNAME = 'nobody';
 var EMAIL = 'nobody@no.body';
 var PASSWORD = 'foobar';
 var VOLUME = 'test_volume';
 var VOLUME_2 = 'second_volume';
 var VOLUME_3 = 'third_volume';
-
-var USER = {
-    username: USERNAME,
-    password: PASSWORD,
-    email: EMAIL
-};
 
 var tmpdirname = 'volume-test-' + crypto.randomBytes(4).readUInt32LE(0);
 var tmpdir = path.resolve(os.tmpdir(), tmpdirname);
@@ -42,7 +39,16 @@ function setup(done) {
     mkdirp.sync(config.configRoot);
     mkdirp.sync(config.mountRoot);
 
-    done();
+    db.initialize(config);
+
+    User.create(USERNAME, PASSWORD, EMAIL, {}, function (error, result) {
+        expect(error).to.not.be.ok();
+        expect(result).to.be.ok();
+
+        USER = result;
+
+        done();
+    });
 }
 
 describe('Volume', function () {
@@ -51,10 +57,10 @@ describe('Volume', function () {
     before(setup);
 
     after(function (done) {
-        vol1.destroy(USER, USER.password, function (error) {
+        vol1.destroy(USER, PASSWORD, function (error) {
             expect(error).to.not.be.ok();
 
-            vol2.destroy(USER, USER.password, function (error) {
+            vol2.destroy(USER, PASSWORD, function (error) {
                 expect(error).to.not.be.ok();
 
                 rimraf.sync(tmpdir);
@@ -66,7 +72,7 @@ describe('Volume', function () {
     describe('create', function () {
 
         it('succeeds', function (done) {
-            volume.create(VOLUME, USER, USER.password, config, function (error, result) {
+            volume.create(VOLUME, USER, PASSWORD, config, function (error, result) {
                 expect(error).not.to.be.ok();
                 expect(result).to.be.ok();
 
@@ -78,7 +84,7 @@ describe('Volume', function () {
         });
 
         it('fails because it already exists', function (done) {
-            volume.create(VOLUME, USER, USER.password, config, function (error, result) {
+            volume.create(VOLUME, USER, PASSWORD, config, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
                 done();
@@ -196,7 +202,7 @@ describe('Volume', function () {
         });
 
         it('can be destroyed', function (done) {
-            vol.destroy(USER, USER.password, function (error) {
+            vol.destroy(USER, PASSWORD, function (error) {
                 expect(error).not.to.be.ok();
                 done();
             });
@@ -206,37 +212,55 @@ describe('Volume', function () {
 
     describe('user management', function () {
         var TEST_VOLUME = 'user-management-test-volume';
+        var TEST_USERNAME_0 = 'user0';
+        var TEST_USERNAME_1 = 'user1';
         var TEST_PASSWORD_0 = 'password0';
         var TEST_PASSWORD_1 = 'password1';
-        var TEST_USER_0 = { username: 'user0', email: 'xx@xx.xx', password: TEST_PASSWORD_0 };
-        var TEST_USER_1 = { username: 'user1', email: 'xx@xx.xx', password: TEST_PASSWORD_1 };
-        var vol = null;
+        var TEST_USER_0;
+        var TEST_USER_1;
+        var vol;
 
         before(function (done) {
-            volume.create(TEST_VOLUME, TEST_USER_0, TEST_USER_0.password, config, function (error, result) {
-                expect(error).not.to.be.ok();
+            User.create(TEST_USERNAME_0, TEST_PASSWORD_0, 'xx@xx.xx', {}, function (error, result) {
+                expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
 
-                vol = result;
+                TEST_USER_0 = result;
 
-                done();
+                User.create(TEST_USERNAME_1, TEST_PASSWORD_1, 'xx@xx.xx', {}, function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result).to.be.ok();
+
+                    TEST_USER_1 = result;
+
+                    volume.create(TEST_VOLUME, TEST_USER_0, TEST_PASSWORD_0, config, function (error, result) {
+                        expect(error).not.to.be.ok();
+                        expect(result).to.be.ok();
+
+                        vol = result;
+
+                        done();
+                    });
+                });
             });
+
         });
 
         it('fails to add user due to wrong arumgent count', function () {
             expect(function () { vol.addUser(); }).to.throwError();
             expect(function () { vol.addUser(TEST_USER_0); }).to.throwError();
             expect(function () { vol.addUser(TEST_USER_0, TEST_PASSWORD_0); }).to.throwError();
+            expect(function () { vol.addUser(TEST_USER_0, TEST_USER_1, TEST_PASSWORD_0); }).to.throwError();
         });
 
         it('fails to add user due to wrong arumgents', function () {
-            expect(function () { vol.addUser('some string', TEST_PASSWORD_0, function () {}); }).to.throwError();
-            expect(function () { vol.addUser(TEST_USER_0, 1337, function () {}); }).to.throwError();
-            expect(function () { vol.addUser(TEST_USER_0, TEST_PASSWORD_0, 'some string'); }).to.throwError();
+            expect(function () { vol.addUser('some string', TEST_PASSWORD_0, function () {}, 1337); }).to.throwError();
+            expect(function () { vol.addUser(TEST_USER_0, 1337, 'foobar', function () {}); }).to.throwError();
+            expect(function () { vol.addUser(TEST_USER_0, TEST_PASSWORD_0, 'some string', []); }).to.throwError();
         });
 
         it('fails to add user with the same user', function (done) {
-            vol.addUser(TEST_USER_0, TEST_USER_0, function (error, result) {
+            vol.addUser(TEST_USER_0, TEST_USER_0, TEST_PASSWORD_0, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
                 done();
@@ -244,7 +268,7 @@ describe('Volume', function () {
         });
 
         it('can add user', function (done) {
-            vol.addUser(TEST_USER_1, TEST_USER_0, function (error, result) {
+            vol.addUser(TEST_USER_1, TEST_USER_0, TEST_PASSWORD_0, function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
                 done();
@@ -252,49 +276,9 @@ describe('Volume', function () {
         });
 
         it('fails to add user due to user already has access', function (done) {
-            vol.addUser(TEST_USER_1, TEST_USER_0, function (error, result) {
+            vol.addUser(TEST_USER_1, TEST_USER_0, TEST_PASSWORD_0, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
-                done();
-            });
-        });
-
-        it('fails to change password due to wrong current password', function (done) {
-            vol.changeUserPassword(TEST_USER_1, TEST_PASSWORD_0, 'newpassword', function (error, result) {
-                expect(error).to.be.ok();
-                expect(result).to.not.be.ok();
-                done();
-            });
-        });
-
-        it('fails to change password due to empty new password', function (done) {
-            vol.changeUserPassword(TEST_USER_1, TEST_PASSWORD_1, '', function (error, result) {
-                expect(error).to.be.ok();
-                expect(result).to.not.be.ok();
-                done();
-            });
-        });
-
-        it('fails to change password due to user not known by volume', function (done) {
-            var unknownUser = { username: 'someuser', email: 'xx@xx.xx' };
-            vol.changeUserPassword(unknownUser, TEST_PASSWORD_1, 'newpassword', function (error, result) {
-                expect(error).to.be.ok();
-                expect(result).to.not.be.ok();
-                done();
-            });
-        });
-
-        it('changing password succeeds', function (done) {
-            vol.changeUserPassword(TEST_USER_1, TEST_PASSWORD_1, 'newpassword', function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result).to.be.ok();
-                done();
-            });
-        });
-
-        it('changing password only changed target user\'s password', function (done) {
-            vol.verifyUser(TEST_USER_0, TEST_PASSWORD_0, function (error) {
-                expect(error).to.not.be.ok();
                 done();
             });
         });
@@ -345,7 +329,7 @@ describe('Volume', function () {
         });
 
         after(function (done) {
-            vol.destroy(TEST_USER_0, TEST_USER_0.password, function (error) {
+            vol.destroy(TEST_USER_0, TEST_PASSWORD_0, function (error) {
                 expect(error).not.to.be.ok();
                 done();
             });

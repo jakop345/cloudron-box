@@ -125,37 +125,16 @@ function changePassword(req, res, next) {
     if (!req.body.password) return next(new HttpError(400, 'API call requires the users old password.'));
     if (!req.body.newPassword) return next(new HttpError(400, 'API call requires the users new password.'));
 
-    // update password for all volumes this user has access to
-    Volume.list(req.user.username, config, function (error, volumes) {
+    user.changePassword(req.user.username, req.body.password, req.body.newPassword, function (error, result) {
         if (error) {
-            debug('Failed to get volume list', error);
-            return next(new HttpError(500, 'Failed to get volume list.'));
+            debug('Failed to change password for user', req.user.username);
+            if (error.reason === UserError.WRONG_USER_OR_PASSWORD) {
+                return next(new HttpError(403, 'Wrong password'));
+            }
+            return next(new HttpError(500, 'Unable to change password'));
         }
 
-        // TODO how to rollback from here in case of an error?
-        async.each(volumes, function (volume, callback) {
-            volume.changeUserPassword(req.user, req.body.password, req.body.newPassword, callback);
-        }, function (error) {
-            if (error) {
-                debug('Unable to change password on volumes.', error);
-                if (error.reason === VolumeError.WRONG_USER_PASSWORD) {
-                    return next(new HttpError(403, 'Wrong password'));
-                }
-                return next(new HttpError(500, 'Cannot change volume password'));
-            }
-
-            user.changePassword(req.user.username, req.body.password, req.body.newPassword, function (error, result) {
-                if (error) {
-                    debug('Failed to change password for user', req.user.username);
-                    if (error.reason === UserError.WRONG_USER_OR_PASSWORD) {
-                        return next(new HttpError(403, 'Wrong password'));
-                    }
-                    return next(new HttpError(500, 'Unable to change password'));
-                }
-
-                next(new HttpSuccess(200, {}));
-            });
-        });
+        next(new HttpSuccess(200, {}));
     });
 }
 

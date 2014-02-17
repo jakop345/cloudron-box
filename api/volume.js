@@ -2,6 +2,7 @@
 
 var fs = require('fs'),
     db = require('./database'),
+    User = require('./user'),
     debug = require('debug')('server:volume'),
     encfs = require('encfs'),
     rimraf = require('rimraf'),
@@ -9,6 +10,7 @@ var fs = require('fs'),
     assert = require('assert'),
     crypto = require('crypto'),
     aes = require('./aes-helper'),
+    ursa = require('ursa'),
     async = require('async'),
     util = require('util'),
     Repo = require('./repo'),
@@ -133,16 +135,25 @@ Volume.prototype.open = function (username, password, callback) {
                 return callback(new VolumeError(error, VolumeError.NO_SUCH_USER));
             }
 
-            var saltBuffer = new Buffer(record.salt, 'hex');
-            var volPassword = aes.decrypt(record.passwordCypher, password, saltBuffer);
+            User.verify(username, password, function (error, user) {
+                if (error) {
+                    debug('Unable to get user from meta db. ' + safe.JSON.stringify(error));
+                    return callback(new VolumeError(error, VolumeError.WRONG_USER_PASSWORD));
+                }
 
-            if (!volPassword) {
-                return callback(new VolumeError(error, VolumeError.WRONG_USER_PASSWORD));
-            }
+                var saltBuffer = new Buffer(user.salt, 'hex');
+                var privateKeyPem = aes.decrypt(user.privatePemCipher, password, saltBuffer);
+                var keyPair = ursa.createPrivateKey(privateKeyPem, password, 'utf8');
+                var volPassword = keyPair.decrypt(record.passwordCipher, 'hex', 'utf8');
 
-            that.encfs.mount(volPassword, function (error, result) {
-                if (error) return callback(new VolumeError(error, VolumeError.INTERNAL_ERROR));
-                callback();
+                if (!volPassword) {
+                    return callback(new VolumeError(error, VolumeError.WRONG_USER_PASSWORD));
+                }
+
+                that.encfs.mount(volPassword, function (error, result) {
+                    if (error) return callback(new VolumeError(error, VolumeError.INTERNAL_ERROR));
+                    callback();
+                });
             });
         });
     });
@@ -244,8 +255,8 @@ Volume.prototype.listFiles = function (directory, callback) {
     });
 };
 
-Volume.prototype.addUser = function (user, authorizedUser, callback) {
-    ensureArgs(arguments, ['object', 'object', 'function']);
+Volume.prototype.addUser = function (newUser, oldUser, password, callback) {
+    ensureArgs(arguments, ['object', 'object', 'string', 'function']);
 
     var that = this;
 
@@ -254,39 +265,38 @@ Volume.prototype.addUser = function (user, authorizedUser, callback) {
         return callback(new VolumeError(null, VolumeError.META_MISSING));
     }
 
-    this.meta.get(authorizedUser.username, function (error, record) {
+    this.meta.get(oldUser.username, function (error, userRecord) {
         if (error) {
-            debug('Unable to get authorized user from meta db. ' + safe.JSON.stringify(error));
-            return callback(new VolumeError(null, VolumeError.NO_SUCH_USER));
+            debug('Unable to get user from meta db. ' + safe.JSON.stringify(error));
+            return callback(new VolumeError(error, VolumeError.NO_SUCH_USER));
         }
 
-        var saltBuffer = new Buffer(record.salt, 'hex');
-        var volumePassword = aes.decrypt(record.passwordCypher, authorizedUser.password, saltBuffer);
+        // retrieve the keypair from the authorized user
+        var saltBuffer = new Buffer(oldUser.salt, 'hex');
+        var privateKeyPem = aes.decrypt(oldUser.privatePemCipher, password, saltBuffer);
+        var keyPair = ursa.createPrivateKey(privateKeyPem, password, 'utf8');
+
+        // retrieve the volume password from the authorized user
+        var volumePassword = keyPair.decrypt(userRecord.passwordCipher, 'hex', 'utf8');
 
         if (!volumePassword) {
             debug('Unable to decrypt volume master password');
             return callback(new VolumeError(null, VolumeError.WRONG_USER_PASSWORD));
         }
 
-        crypto.randomBytes(CRYPTO_SALT_SIZE, function (error, salt) {
+        var publicKey = ursa.createPublicKey(newUser.publicPem);
+        var record = {
+            username: newUser.username,
+            passwordCipher: publicKey.encrypt(volumePassword, 'utf8', 'hex')
+        };
+
+        that.meta.put(record, function (error) {
             if (error) {
-                return callback(new VolumeError('Failed to generate random bytes', VolumeError.INTERNAL_ERROR));
+                debug('Unable to add user to meta db. ' + safe.JSON.stringify(error));
+                return callback(error);
             }
 
-            var record = {
-                username: user.username,
-                salt: salt.toString('hex'),
-                passwordCypher: aes.encrypt(volumePassword, user.password, salt),
-            };
-
-            that.meta.put(record, function (error) {
-                if (error) {
-                    debug('Unable to add user to meta db. ' + safe.JSON.stringify(error));
-                    return callback(error);
-                }
-
-                return callback(null, record);
-            });
+            return callback(null, record);
         });
     });
 };
@@ -305,65 +315,29 @@ Volume.prototype.removeUser = function (user, callback) {
 Volume.prototype.verifyUser = function (user, password, callback) {
     ensureArgs(arguments, ['object', 'string', 'function']);
 
-    this.meta.get(user.username, function (error, record) {
+    this.meta.get(user.username, function (error, volumeRecord) {
         if (error) {
             debug('Unable to get user from meta db. ' + safe.JSON.stringify(error));
             return callback(new VolumeError(null, VolumeError.NO_SUCH_USER));
         }
 
-        var saltBuffer = new Buffer(record.salt, 'hex');
-        var volumePassword = aes.decrypt(record.passwordCypher, password, saltBuffer);
+        User.verify(user.username, password, function (error, userRecord) {
+            if (error) {
+                debug('Unable to get user from meta db. ' + safe.JSON.stringify(error));
+                return callback(new VolumeError(error, VolumeError.NO_SUCH_USER));
+            }
 
-        if (!volumePassword) {
-            debug('Unable to decrypt volume master password');
-            return callback(new VolumeError(null, VolumeError.WRONG_USER_PASSWORD));
-        }
+            var saltBuffer = new Buffer(userRecord.salt, 'hex');
+            var privateKeyPem = aes.decrypt(userRecord.privatePemCipher, password, saltBuffer);
+            var keyPair = ursa.createPrivateKey(privateKeyPem, password, 'utf8');
+            var volumePassword = keyPair.decrypt(volumeRecord.passwordCipher, 'hex', 'utf8');
 
-        callback(null);
-    });
-};
+            if (!volumePassword) {
+                debug('Unable to decrypt volume master password');
+                return callback(new VolumeError(null, VolumeError.WRONG_USER_PASSWORD));
+            }
 
-Volume.prototype.changeUserPassword = function (user, oldPassword, newPassword, callback) {
-    ensureArgs(arguments, ['object', 'string', 'string', 'function']);
-
-    var that = this;
-
-    if (newPassword.length === 0) {
-        debug('Empty passwords are not allowed');
-        return callback(new VolumeError(null, VolumeError.EMPTY_PASSWORD));
-    }
-
-    this.meta.get(user.username, function (error, record) {
-        if (error) {
-            debug('Unable to get user from meta db. ' + safe.JSON.stringify(error));
-            return callback(new VolumeError(null, VolumeError.NO_SUCH_USER));
-        }
-
-        var saltBuffer = new Buffer(record.salt, 'hex');
-        var volumePassword = aes.decrypt(record.passwordCypher, oldPassword, saltBuffer);
-
-        if (!volumePassword) {
-            debug('Unable to decrypt volume master password');
-            return callback(new VolumeError(null, VolumeError.WRONG_USER_PASSWORD));
-        }
-
-        crypto.randomBytes(CRYPTO_SALT_SIZE, function (error, salt) {
-            if (error) return callback(new VolumeError('Failed to generate random bytes', VolumeError.INTERNAL_ERROR));
-
-            var record = {
-                username: user.username,
-                salt: salt.toString('hex'),
-                passwordCypher: aes.encrypt(volumePassword, newPassword, salt),
-            };
-
-            that.meta.update(record, function (error) {
-                if (error) {
-                    debug('Unable to add user to meta db. ' + safe.JSON.stringify(error));
-                    return callback(error);
-                }
-
-                return callback(null, record);
-            });
+            callback(null);
         });
     });
 };
@@ -438,15 +412,15 @@ function createVolume(name, user, password, config, callback) {
             return callback(new VolumeError(error, VolumeError.INTERNAL_ERROR));
         }
 
-        crypto.randomBytes(CRYPTO_SALT_SIZE, function (error, salt) {
-            if (error) {
-                return callback(new VolumeError('Failed to generate random bytes', VolumeError.INTERNAL_ERROR));
-            }
+        // crypto.randomBytes(CRYPTO_SALT_SIZE, function (error, salt) {
+        //     if (error) {
+        //         return callback(new VolumeError('Failed to generate random bytes', VolumeError.INTERNAL_ERROR));
+        //     }
 
+            var publicKey = ursa.createPublicKey(user.publicPem);
             var record = {
                 username: user.username,
-                salt: salt.toString('hex'),
-                passwordCypher: aes.encrypt(volPassword, password, salt),
+                passwordCipher: publicKey.encrypt(volPassword, 'utf8', 'hex')
             };
 
             vol.meta.put(record, function (error) {
@@ -475,7 +449,7 @@ function createVolume(name, user, password, config, callback) {
                     });
                 });
             });
-        });
+        // });
     });
 }
 

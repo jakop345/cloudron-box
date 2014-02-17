@@ -10,7 +10,6 @@ var Server = require('../../server.js'),
     expect = require('expect.js'),
     database = require('../../database.js'),
     crypto = require('crypto'),
-    fs = require('fs'),
     rimraf = require('rimraf'),
     path = require('path'),
     os = require('os');
@@ -31,11 +30,14 @@ var TESTVOLUME = 'testvolume';
 var server;
 function setup(done) {
     server = new Server(CONFIG);
-    server.start(function (err) {
+    server.start(function (error) {
+        expect(error).to.not.be.ok();
+
         database.USERS_TABLE.removeAll(function () {
             request.post(SERVER_URL + '/api/v1/createadmin')
                  .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
-                 .end(function (err, res) {
+                 .end(function (error, res) {
+                expect(error).to.not.be.ok();
                 done();
             });
         });
@@ -44,18 +46,11 @@ function setup(done) {
 
 // remove all temporary folders
 function cleanup(done) {
-    server.stop(function (err) {
+    server.stop(function (error) {
         rimraf(BASE_DIR, function (error) {
             done();
         });
     });
-}
-
-function now() { return (new Date()).getTime(); }
-function tempFile(contents) {
-    var file = path.join(os.tmpdir(), '' + crypto.randomBytes(4).readUInt32LE(0));
-    fs.writeFileSync(file, contents);
-    return file;
 }
 
 // function checks if obj has all but only the specified properties
@@ -230,6 +225,33 @@ describe('Server Volume API', function () {
                .end(function (err, res) {
             expect(res.statusCode).to.equal(404);
             done(err);
+        });
+    });
+
+    xdescribe('multiple users', function () {
+        var TEST_VOLUME = 'user-management-test-volume';
+        var TEST_PASSWORD_0 = 'password0';
+        var TEST_PASSWORD_1 = 'password1';
+        var TEST_USER_0 = { username: 'user0', email: 'xx@xx.xx', password: TEST_PASSWORD_0 };
+        var TEST_USER_1 = { username: 'user1', email: 'xx@xx.xx', password: TEST_PASSWORD_1 };
+
+        before(function (done) {
+            this.timeout(5000); // on the Mac, creating volumes takes a lot of time on low battery
+            request.post(SERVER_URL + '/api/v1/volume/create')
+                   .auth(TEST_USER_0.username, TEST_USER_0.password)
+                   .send({ password: TEST_USER_0.password, name: TEST_VOLUME })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(201);
+                done(err);
+            });
+        });
+
+        it('cannot add user due to wrong creator password', function (done) {
+
+        });
+
+        xit('removing one user from volume does not delete it', function (done) {
+
         });
     });
 });

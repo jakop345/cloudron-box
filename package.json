@@ -29,7 +29,9 @@
     "mime": "*",
     "encfs": "*",
     "safetydance": "*",
-    "upnp-ssdp": "*"
+    "upnp-ssdp": "*",
+    "ursa": "~0.8.0",
+    "simple-crypt": "0.0.2"
   },
   "devDependencies": {
     "mocha": "*",

@@ -80,7 +80,7 @@ function createVolume(req, res, next) {
                 return next(new HttpError(500, 'Internal server error'));
             }
 
-            volume.create(req.body.name, req.user, req.body.password, config, function (error, result) {
+            volume.create(req.body.name, result, req.body.password, config, function (error, result) {
                 if (error) return next(new HttpError(500, 'Volume creation failed: ' + error));
                 next(new HttpSuccess(201, {}));
             });
