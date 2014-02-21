@@ -128,6 +128,9 @@ Server.prototype._initialize = function (callback) {
             FILE_SIZE_LIMIT = '521mb', // max file size that can be uploaded
             UPLOAD_LIMIT = '521mb'; // catch all max size for any type of request
 
+        var REQUEST_TIMEOUT = 10000, // timeout for all requests
+            FILE_TIMEOUT = 3 * 60 * 1000; // increased timeout for file uploads (3 mins)
+
         var json = express.json({ strict: true, limit: QUERY_LIMIT }), // application/json
             urlencoded = express.urlencoded({ limit: QUERY_LIMIT }); // application/x-www-form-urlencoded
 
@@ -136,7 +139,7 @@ Server.prototype._initialize = function (callback) {
         }
 
         that.app
-           .use(express.timeout(10000))
+           .use(express.timeout(REQUEST_TIMEOUT))
            .use(express.limit(UPLOAD_LIMIT))
            .use('/', express.static(__dirname + '/../webadmin')) // use '/' for now so cookie is not restricted to '/webadmin'
            .use(json)
@@ -175,7 +178,7 @@ Server.prototype._initialize = function (callback) {
         that.app.get('/api/v1/file/:volume/*', routes.volume.requireMountedVolume, routes.file.read);
         that.app.get('/api/v1/metadata/:volume/*', routes.volume.requireMountedVolume, routes.file.metadata);
         that.app.put('/api/v1/file/:volume/*', routes.volume.requireMountedVolume,
-                                               routes.file.multipart({ maxFieldsSize: FIELD_LIMIT, limit: FILE_SIZE_LIMIT }),
+                                               routes.file.multipart({ maxFieldsSize: FIELD_LIMIT, limit: FILE_SIZE_LIMIT, timeout: FILE_TIMEOUT }),
                                                routes.file.putFile);
 
         that.app.post('/api/v1/fileops/:volume/copy', routes.volume.requireMountedVolume, express.json({ strict: true }), routes.fileops.copy);

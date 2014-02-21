@@ -126,9 +126,9 @@ function multipart(options) {
             limit: options.limit || '500mb' // file sizes
         }); // multipart/form-data
 
-        // increase timeout of file uploads to 3 mins
-        if (req.clearTimeout) req.clearTimeout();
-        express.timeout(3 * 60 * 1000)(req, res, function () { parser(req, res, next); });
+        // increase timeout of file uploads by default to 3 mins
+        if (req.clearTimeout) req.clearTimeout(); // clear any previous installed timeout middleware
+        express.timeout(options.timeout || (3 * 60 * 1000))(req, res, function () { parser(req, res, next); });
     };
 }
 
