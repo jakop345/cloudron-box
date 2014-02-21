@@ -117,17 +117,19 @@ function metadata(req, res, next) {
  * Add this to the route to allow multipart file uploads to be extracted to the repo's tmp dir.
  * This is required because rename() works only within the same file system.
  */
-function multipart(req, res, next) {
-    var parser = express.multipart({
-        uploadDir: req.volume.tmpPath, // this makes rename() possible
-        keepExtensions: true,
-        maxFieldsSize: 2 * 1024, // only field size, not files
-        limit: '521mb' // file sizes
-    }); // multipart/form-data
+function multipart(options) {
+    return function (req, res, next) {
+        var parser = express.multipart({
+            uploadDir: req.volume.tmpPath, // this makes rename() possible
+            keepExtensions: true,
+            maxFieldsSize: options.maxFieldsSize || (2 * 1024), // only field size, not files
+            limit: options.limit || '500mb' // file sizes
+        }); // multipart/form-data
 
-    // increase timeout of file uploads to 3 mins
-    if (req.clearTimeout) req.clearTimeout();
-    express.timeout(3 * 60 * 1000)(req, res, function () { parser(req, res, next); });
+        // increase timeout of file uploads to 3 mins
+        if (req.clearTimeout) req.clearTimeout();
+        express.timeout(3 * 60 * 1000)(req, res, function () { parser(req, res, next); });
+    };
 }
 
 function _getConflictFilenameSync(renamePattern, file, checkoutDir) {

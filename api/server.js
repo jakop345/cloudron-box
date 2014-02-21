@@ -169,7 +169,9 @@ Server.prototype._initialize = function (callback) {
         that.app.get('/api/v1/revisions/:volume/*', routes.volume.requireMountedVolume, routes.file.revisions);
         that.app.get('/api/v1/file/:volume/*', routes.volume.requireMountedVolume, routes.file.read);
         that.app.get('/api/v1/metadata/:volume/*', routes.volume.requireMountedVolume, routes.file.metadata);
-        that.app.put('/api/v1/file/:volume/*', routes.volume.requireMountedVolume, routes.file.multipart, routes.file.putFile);
+        that.app.put('/api/v1/file/:volume/*', routes.volume.requireMountedVolume,
+                                               routes.file.multipart({ maxFieldsSize: 2 * 1024, limit: '521mb' }),
+                                               routes.file.putFile);
 
         that.app.post('/api/v1/fileops/:volume/copy', routes.volume.requireMountedVolume, express.json({ strict: true }), routes.fileops.copy);
         that.app.post('/api/v1/fileops/:volume/move', routes.volume.requireMountedVolume, express.json({ strict: true }), routes.fileops.move);
