@@ -40,6 +40,12 @@ Server.prototype._successHandler = function (success, req, res, next) {
 // Error handlers. These are called until one of them sends headers
 Server.prototype._clientErrorHandler = function (err, req, res, next) {
     var status = err.status || err.statusCode; // connect/express or our app
+
+    // if the request took too long, assume it's a problem on the client
+    if (err.timeout && err.status == 503) { // timeout() middleware
+        status = 408;
+    }
+
     if (status >= 400 && status <= 499) {
         res.send(status, { status: http.STATUS_CODES[status], message: err.message });
         debug(http.STATUS_CODES[status] + ' : ' + err.message);
