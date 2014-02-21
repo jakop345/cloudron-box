@@ -123,16 +123,21 @@ Server.prototype._initialize = function (callback) {
     this.app = express();
 
     this.app.configure(function () {
-        var REQUEST_LIMIT = '10mb';
+        var QUERY_LIMIT = '10mb', // max size for json and urlencoded queries
+            FIELD_LIMIT = 2 * 1024, // max fields that can appear in multipart
+            FILE_SIZE_LIMIT = '521mb', // max file size that can be uploaded
+            UPLOAD_LIMIT = '521mb'; // catch all max size for any type of request
 
-        var json = express.json({ strict: true, limit: REQUEST_LIMIT }), // application/json
-            urlencoded = express.urlencoded({ limit: REQUEST_LIMIT }); // application/x-www-form-urlencoded
+        var json = express.json({ strict: true, limit: QUERY_LIMIT }), // application/json
+            urlencoded = express.urlencoded({ limit: QUERY_LIMIT }); // application/x-www-form-urlencoded
 
         if (!that.config.silent) {
             that.app.use(express.logger({ format: 'dev', immediate: false }));
         }
 
-        that.app.use(express.timeout(10000))
+        that.app
+           .use(express.timeout(10000))
+           .use(express.limit(UPLOAD_LIMIT))
            .use('/', express.static(__dirname + '/../webadmin')) // use '/' for now so cookie is not restricted to '/webadmin'
            .use(json)
            .use(urlencoded)
@@ -170,7 +175,7 @@ Server.prototype._initialize = function (callback) {
         that.app.get('/api/v1/file/:volume/*', routes.volume.requireMountedVolume, routes.file.read);
         that.app.get('/api/v1/metadata/:volume/*', routes.volume.requireMountedVolume, routes.file.metadata);
         that.app.put('/api/v1/file/:volume/*', routes.volume.requireMountedVolume,
-                                               routes.file.multipart({ maxFieldsSize: 2 * 1024, limit: '521mb' }),
+                                               routes.file.multipart({ maxFieldsSize: FIELD_LIMIT, limit: FILE_SIZE_LIMIT }),
                                                routes.file.putFile);
 
         that.app.post('/api/v1/fileops/:volume/copy', routes.volume.requireMountedVolume, express.json({ strict: true }), routes.fileops.copy);
