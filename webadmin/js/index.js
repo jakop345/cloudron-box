@@ -13,9 +13,6 @@ app.config(function ($routeProvider) {
     }).when('/login', {
         controller: 'LoginController',
         templateUrl: 'partials/login.html'
-    }).when('/advancedconnection', {
-        controller: 'AdvancedConnectionController',
-        templateUrl: 'partials/advancedconnection.html'
     }).when('/usercreate', {
         controller: 'UserCreateController',
         templateUrl: 'partials/usercreate.html'
