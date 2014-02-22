@@ -17,7 +17,7 @@ function VolumeDeleteController ($scope, $routeParams, Client) {
     $scope.error = {};
 
     $scope.submit = function () {
-        console.debug('Try to delete volume', $scope.volume.name, 'on', Client.getServer());
+        console.debug('Try to delete volume %s.', $scope.volume.name);
 
         $scope.error.name = null;
         $scope.error.password = null;

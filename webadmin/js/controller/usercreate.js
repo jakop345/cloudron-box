@@ -16,7 +16,7 @@ function UserCreateController ($scope, $routeParams, Client) {
     var createAdmin = !!($routeParams.admin);
 
     $scope.submit = function () {
-        console.debug('Try to create user %s on %s.', $scope.username, Client.getServer());
+        console.debug('Try to create user %s.', $scope.username);
 
         $scope.error.name = null;
         $scope.error.password = null;

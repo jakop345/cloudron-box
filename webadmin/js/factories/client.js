@@ -19,36 +19,12 @@ angular.module('clientFactory', [])
     function Client() {
         console.debug('Create new client.');
 
-        this._server = null;
         this._username = null;
         this._userInfo = null;
         this._token = null;
 
-        this.setServer(localStorage.server);
         this.setToken(localStorage.token);
     }
-
-    Client.prototype.setServer = function (server) {
-        if (!server) {
-            this._server = null;
-        } else {
-            while (server[server.length-1] === '/') {
-                server = server.slice(0, server.length-1);
-            }
-
-            if (server.indexOf('http://') !== 0 && server.indexOf('https://') !== 0) {
-                server = 'http://' + server;
-            }
-
-            this._server = server;
-        }
-
-        console.debug('Set client server ', this._server);
-    };
-
-    Client.prototype.getServer = function () {
-        return this._server;
-    };
 
     Client.prototype.isAdmin = function () {
         return this._userInfo ? this._userInfo.admin : false;
@@ -74,7 +50,7 @@ angular.module('clientFactory', [])
      */
     Client.prototype.createVolume = function (name, password, callback) {
         var data = { password: password, name: name };
-        $http.post(this._server + '/api/v1/volume/create', data)
+        $http.post('/api/v1/volume/create', data)
         .success(function(data, status, headers, config) {
             if (status !== 201) return callback(new ClientError(status, data));
             callback(null, data);
@@ -86,7 +62,7 @@ angular.module('clientFactory', [])
 
     Client.prototype.deleteVolume = function (name, password, callback) {
         var data = { password: password };
-        $http.post(this._server + '/api/v1/volume/' + name + '/delete', data)
+        $http.post('/api/v1/volume/' + name + '/delete', data)
         .success(function(data, status, headers, config) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
@@ -98,7 +74,7 @@ angular.module('clientFactory', [])
 
     Client.prototype.mount = function (name, password, callback) {
         var data = { password: password };
-        $http.post(this._server + '/api/v1/volume/' + name + '/mount', data)
+        $http.post('/api/v1/volume/' + name + '/mount', data)
         .success(function(data, status, headers, config) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
@@ -110,7 +86,7 @@ angular.module('clientFactory', [])
 
     Client.prototype.unmount = function (name, password, callback) {
         var data = { password: password };
-        $http.post(this._server + '/api/v1/volume/' + name + '/unmount', data)
+        $http.post('/api/v1/volume/' + name + '/unmount', data)
         .success(function(data, status, headers, config) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
@@ -121,7 +97,7 @@ angular.module('clientFactory', [])
     };
 
     Client.prototype.isMounted = function (name, callback) {
-        $http.get(this._server + '/api/v1/volume/' + name + '/ismounted')
+        $http.get('/api/v1/volume/' + name + '/ismounted')
         .success(function(data, status, headers, config) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data.mounted);
@@ -132,7 +108,7 @@ angular.module('clientFactory', [])
     };
 
     Client.prototype.listVolumes = function (callback) {
-        $http.get(this._server + '/api/v1/volume/list')
+        $http.get('/api/v1/volume/list')
         .success(function(data, status, headers, config) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data.volumes);
@@ -143,7 +119,7 @@ angular.module('clientFactory', [])
     };
 
     Client.prototype.isServerAvailable = function (callback) {
-        $http.get(this._server + '/api/v1/version')
+        $http.get('/api/v1/version')
         .success(function(data, status, headers, config) {
             callback(null, (status === 200));
         })
@@ -153,7 +129,7 @@ angular.module('clientFactory', [])
     };
 
     Client.prototype.isServerFirstTime = function (callback) {
-        $http.get(this._server + '/api/v1/firsttime')
+        $http.get('/api/v1/firsttime')
         .success(function(data, status, headers, config) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, !data.activated);
@@ -170,7 +146,7 @@ angular.module('clientFactory', [])
             email: email
         };
 
-        $http.post(this._server + '/api/v1/createadmin', payload)
+        $http.post('/api/v1/createadmin', payload)
         .success(function(data, status, headers, config) {
             if (status !== 201) return callback(new ClientError(status, data));
             callback(null, data.activated);
@@ -181,7 +157,7 @@ angular.module('clientFactory', [])
     };
 
     Client.prototype.listUsers = function (callback) {
-        $http.get(this._server + '/api/v1/user/list')
+        $http.get('/api/v1/user/list')
         .success(function(data, status, headers, config) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
@@ -198,7 +174,7 @@ angular.module('clientFactory', [])
             email: email
         };
 
-        $http.post(this._server + '/api/v1/user/create', data)
+        $http.post('/api/v1/user/create', data)
         .success(function(data, status, headers, config) {
             if (status !== 201) return callback(new ClientError(status, data));
             callback(null, data);
@@ -214,7 +190,7 @@ angular.module('clientFactory', [])
             password: password
         };
 
-        $http.post(this._server + '/api/v1/user/remove', data)
+        $http.post('/api/v1/user/remove', data)
         .success(function(data, status, headers, config) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
@@ -230,7 +206,7 @@ angular.module('clientFactory', [])
             newPassword: newPassword
         };
 
-        $http.post(this._server + '/api/v1/user/password', data)
+        $http.post('/api/v1/user/password', data)
         .success(function(data, status, headers, config) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
@@ -257,7 +233,7 @@ angular.module('clientFactory', [])
     Client.prototype._login = function  (callback) {
         var that = this;
 
-        $http.get(this._server + '/api/v1/user/token')
+        $http.get('/api/v1/user/token')
         .success(function(data, status, headers, config) {
             if (status !== 200) {
                 that.setToken(null);

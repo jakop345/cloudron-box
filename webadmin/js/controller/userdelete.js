@@ -13,14 +13,28 @@ function UserDeleteController ($scope, $routeParams, Client) {
     $scope.form = {};
     $scope.form.username = '';
     $scope.form.password = '';
+    $scope.error = {};
 
     $scope.submit = function () {
-        console.debug('Try to delete user', $scope.form.username, 'on', Client.getServer());
+        console.debug('Try to delete user %s.', $routeParams.username);
+
+        $scope.error.username = null;
+        $scope.error.password = null;
+
+        if ($routeParams.username !== $scope.form.username) {
+            $scope.error.username = 'Username does not match';
+            return;
+        }
 
         $scope.disabled = true;
-        Client.removeUser($scope.form.username, $scope.form.password, function (error, result) {
+        Client.removeUser($routeParams.username, $scope.form.password, function (error, result) {
             if (error) {
                 console.error('Unable to delete user.', error);
+
+                if (error.statusCode === 401) {
+                    $scope.error.password = 'Wrong password';
+                }
+
                 $scope.disabled = false;
                 return;
             }

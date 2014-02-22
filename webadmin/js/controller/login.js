@@ -10,7 +10,7 @@ function LoginController ($scope, Client) {
     $scope.error ={};
 
     $scope.submit = function () {
-        console.debug('Try to login on', Client.getServer(), 'with user', $scope.username);
+        console.debug('Try to login with user', $scope.username);
 
         $scope.error.username = null;
         $scope.disabled = true;

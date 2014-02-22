@@ -13,6 +13,7 @@
     </div>
     <div class="row">
         <div class="col-sm-12">
+            <span ng-show="error.username" class="error show-animate">{{error.username}}</span>
             <input type="text" class="form-control" ng-model="form.username" placeholder="Username" required autofocus>
         </div>
     </div>
@@ -23,6 +24,7 @@
     </div>
     <div class="row">
         <div class="col-sm-12">
+            <span ng-show="error.password" class="error show-animate">{{error.password}}</span>
             <input type="password" class="form-control" ng-model="form.password" placeholder="Password" required>
         </div>
     </div>

@@ -384,6 +384,11 @@ function logout(req, res, next) {
  */
 function removeUser(req, res, next) {
     var username = req.body.username || '';
+    var password = req.body.password || '';
+
+    if (!password || !username) {
+        return next(new HttpError(400, 'Missing username or password'));
+    }
 
     // rules:
     // - admin can remove any user
@@ -394,13 +399,18 @@ function removeUser(req, res, next) {
         return next(new HttpError(403, 'Not allowed to remove this user.'));
     }
 
-    user.remove(username, function (error, result) {
-        if (error) {
-            if (error.reason === DatabaseError.NOT_FOUND) {
-                return next(new HttpError(404, 'User not found'));
+    // verify the admin via the provided password
+    user.verify(req.user.username, password, function (error, result) {
+        if (error) return next(new HttpError(401, 'Username or password do not match'));
+
+        user.remove(username, function (error, result) {
+            if (error) {
+                if (error.reason === DatabaseError.NOT_FOUND) {
+                    return next(new HttpError(404, 'User not found'));
+                }
+                return next(new HttpError(500, 'Failed to remove user'));
             }
-            return next(new HttpError(500, 'Failed to remove user'));
-        }
-        next(new HttpSuccess(200, {}));
+            next(new HttpSuccess(200, {}));
+        });
     });
 }

@@ -15,7 +15,7 @@ function VolumeMountController ($scope, $routeParams, Client) {
     $scope.error = {};
 
     $scope.submit = function () {
-        console.debug('Try to mount volume', $scope.volume.name, 'on', Client.getServer());
+        console.debug('Try to mount volume %s.', $scope.volume.name);
 
         $scope.error.password = null;
         $scope.disabled = true;

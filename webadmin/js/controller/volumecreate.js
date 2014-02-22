@@ -10,7 +10,7 @@ function VolumeCreateController ($scope, $routeParams, Client) {
     $scope.error = {};
 
     $scope.submit = function () {
-        console.debug('Try to create volume', $scope.volume.name, 'on', Client.getServer());
+        console.debug('Try to create volume %s.', $scope.volume.name);
 
         $scope.error.name = null;
         $scope.error.password = null;

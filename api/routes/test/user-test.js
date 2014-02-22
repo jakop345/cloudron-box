@@ -321,7 +321,7 @@ describe('Server User API', function () {
     it('remove admin user by normal user should fail', function (done) {
         request.post(SERVER_URL + '/api/v1/user/remove')
                .auth(USERNAME_2, PASSWORD_2)
-               .send({ username: USERNAME })
+               .send({ username: USERNAME, password: PASSWORD_2 })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(403);
             done(err);
@@ -331,9 +331,29 @@ describe('Server User API', function () {
     it('user removes himself is not allowed', function (done) {
         request.post(SERVER_URL + '/api/v1/user/remove')
                .auth(USERNAME_2, PASSWORD_2)
-               .send({ username: USERNAME_2 })
+               .send({ username: USERNAME_2, password: PASSWORD_2 })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(403);
+            done(err);
+        });
+    });
+
+    it('admin cannot remove normal user without giving a password', function (done) {
+        request.post(SERVER_URL + '/api/v1/user/remove')
+               .auth(USERNAME, PASSWORD)
+               .send({ username: USERNAME_3 })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(400);
+            done(err);
+        });
+    });
+
+    it('admin cannot remove normal user with giving wrong password', function (done) {
+        request.post(SERVER_URL + '/api/v1/user/remove')
+               .auth(USERNAME, PASSWORD)
+               .send({ username: USERNAME_3, password: PASSWORD_3 })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(401);
             done(err);
         });
     });
@@ -341,7 +361,7 @@ describe('Server User API', function () {
     it('admin removes normal user', function (done) {
         request.post(SERVER_URL + '/api/v1/user/remove')
                .auth(USERNAME, PASSWORD)
-               .send({ username: USERNAME_3 })
+               .send({ username: USERNAME_3, password: PASSWORD })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
             done(err);
@@ -392,7 +412,7 @@ describe('Server User API', function () {
     it('admin removes himself should not be allowed', function (done) {
         request.post(SERVER_URL + '/api/v1/user/remove')
                .auth(USERNAME, PASSWORD)
-               .send({ username: USERNAME })
+               .send({ username: USERNAME, password: PASSWORD })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(403);
             done(err);

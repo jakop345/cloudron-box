@@ -14,7 +14,7 @@ function VolumeUnmountController ($scope, $routeParams, Client) {
     $scope.disabled = false;
 
     $scope.submit = function () {
-        console.debug('Try to unmount volume', $scope.volume.name, 'on', Client.getServer());
+        console.debug('Try to unmount volume %s.', $scope.volume.name);
 
         $scope.disabled = true;
         Client.unmount($scope.volume.name, $scope.volume.password, function (error, result) {
