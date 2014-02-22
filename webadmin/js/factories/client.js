@@ -74,7 +74,7 @@ angular.module('clientFactory', [])
      */
     Client.prototype.createVolume = function (name, password, callback) {
         var data = { password: password, name: name };
-        $http.post(this._server + '/api/v1/volume/' + name + '/unmount', data)
+        $http.post(this._server + '/api/v1/volume/create', data)
         .success(function(data, status, headers, config) {
             if (status !== 201) return callback(new ClientError(status, data));
             callback(null, data);
@@ -86,7 +86,7 @@ angular.module('clientFactory', [])
 
     Client.prototype.deleteVolume = function (name, password, callback) {
         var data = { password: password };
-        $http.post(this._server + '/api/v1/volume/' + name + '/unmount', data)
+        $http.post(this._server + '/api/v1/volume/' + name + '/delete', data)
         .success(function(data, status, headers, config) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);

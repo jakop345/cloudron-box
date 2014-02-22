@@ -1,6 +1,6 @@
 'use strict';
 
-function VolumeMountController ($scope, $routeParams, client, gui) {
+function VolumeMountController ($scope, $routeParams, Client) {
     console.debug('VolumeMountController');
 
     if (!$routeParams.volume) {
@@ -15,19 +15,17 @@ function VolumeMountController ($scope, $routeParams, client, gui) {
     $scope.error = {};
 
     $scope.submit = function () {
-        console.debug('Try to mount volume', $scope.volume.name, 'on', client.server);
+        console.debug('Try to mount volume', $scope.volume.name, 'on', Client.getServer());
 
         $scope.error.password = null;
         $scope.disabled = true;
 
-        client.mount($scope.volume.name, $scope.volume.password, function (error, result) {
+        Client.mount($scope.volume.name, $scope.volume.password, function (error, result) {
             if (error) {
                 if (error.statusCode === 403) {
-                    $scope.$apply(function () {
-                        $scope.error.password = 'Password is wrong';
-                        $scope.volume.password = '';
-                        $scope.disabled = false;
-                    });
+                    $scope.error.password = 'Password is wrong';
+                    $scope.volume.password = '';
+                    $scope.disabled = false;
                 }
 
                 console.error('Unable to mount volume.', error);

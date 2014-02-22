@@ -1,6 +1,6 @@
 'use strict';
 
-function VolumeCreateController ($scope, $routeParams, client) {
+function VolumeCreateController ($scope, $routeParams, Client) {
     console.debug('VolumeCreateController');
 
     $scope.volume = {};
@@ -10,7 +10,7 @@ function VolumeCreateController ($scope, $routeParams, client) {
     $scope.error = {};
 
     $scope.submit = function () {
-        console.debug('Try to create volume', $scope.volume.name, 'on', client.server);
+        console.debug('Try to create volume', $scope.volume.name, 'on', Client.getServer());
 
         $scope.error.name = null;
         $scope.error.password = null;
@@ -21,20 +21,18 @@ function VolumeCreateController ($scope, $routeParams, client) {
         }
 
         $scope.disabled = true;
-        client.createVolume($scope.volume.name, $scope.volume.password, function (error, result) {
+        Client.createVolume($scope.volume.name, $scope.volume.password, function (error, result) {
             if (error) {
                 console.error('Unable to create volume.', error);
-                $scope.$apply(function () {
-                    if (error.statusCode === 409) {
-                        $scope.error.name = 'Volume with the name ' + $scope.volume.name + ' already exists.';
-                    } else if (error.statusCode === 403) {
-                        $scope.error.password = 'Wrong password provided.';
-                        $scope.volume.password = '';
-                    } else {
-                        $scope.error.name = 'Volume with the name ' + $scope.volume.name + ' cannot be created.';
-                    }
-                    $scope.disabled = false;
-                });
+                if (error.statusCode === 409) {
+                    $scope.error.name = 'Volume with the name ' + $scope.volume.name + ' already exists.';
+                } else if (error.statusCode === 403) {
+                    $scope.error.password = 'Wrong password provided.';
+                    $scope.volume.password = '';
+                } else {
+                    $scope.error.name = 'Volume with the name ' + $scope.volume.name + ' cannot be created.';
+                }
+                $scope.disabled = false;
                 return;
             }
 

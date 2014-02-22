@@ -1,33 +1,6 @@
 
 
 <div ng-controller="VolumeListController" class="flex-column flex-dynamic">
-
-    <script type="text/ng-template" id="volumeSyncFolderTemplate.html">
-        <div class="modal-header">
-            <h3>Confirm local sync folder</h3>
-        </div>
-        <div class="modal-body">
-            <p>Really want to sync {{volume}} locally with folder {{folder}}?</p>
-        </div>
-        <div class="modal-footer">
-            <button class="btn" ng-click="cancel()">No</button>
-            <button class="btn btn-green" ng-click="ok()">Yes</button>
-        </div>
-    </script>
-
-    <script type="text/ng-template" id="volumeUnbindTemplate.html">
-        <div class="modal-header">
-            <h3>Confirm unbinding local sync folder</h3>
-        </div>
-        <div class="modal-body">
-            <p>Really want to unbind {{volume}} locally from folder {{folder}}?</p>
-        </div>
-        <div class="modal-footer">
-            <button class="btn" ng-click="cancel()">No</button>
-            <button class="btn btn-green" ng-click="ok()">Yes</button>
-        </div>
-    </script>
-
     <div class="flex-row flex-static flex-margin">
         <button class="btn btn-primary btn-sm" style="margin-right: 0px;" ng-click="createVolume()">New Volume</button>
     </div>
@@ -49,23 +22,6 @@
                     <div class="col-xs-3">
                         <button class="btn btn-sm btn-block pull-right" ng-click="mountVolume(volume.name)" ng-hide="volume.isMounted">Mount</span></button>
                         <button class="btn btn-sm btn-block pull-right" ng-click="unmountVolume(volume.name)" ng-show="volume.isMounted">Unmount</span></button>
-                    </div>
-                </div>
-                <div class="row" ng-show="volume.syncDir">
-                    <div class="col-xs-9">
-                        <span>Volume synchronizes with directory {{volume.syncDir}}.</span>
-                    </div>
-                    <div class="col-xs-3">
-                        <button class="btn btn-sm btn-block pull-right" ng-click="unbindSyncDirectory(volume)">Unbind Folder</button>
-                    </div>
-                </div>
-                <div class="row" ng-hide="volume.syncDir">
-                    <div class="col-xs-9">
-                        <span>Synchronize this volume with a local folder.</span>
-                    </div>
-                    <div class="col-xs-3">
-                        <input style="display: none;" id="{{volume.name}}FileDialog" type="file" nwdirectory />
-                        <button class="btn btn-sm btn-block pull-right" ng-click="bindSyncDirectory(volume.name)">Bind Folder</button>
                     </div>
                 </div>
                 <div class="row">

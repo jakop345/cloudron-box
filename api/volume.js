@@ -412,44 +412,38 @@ function createVolume(name, user, password, config, callback) {
             return callback(new VolumeError(error, VolumeError.INTERNAL_ERROR));
         }
 
-        // crypto.randomBytes(CRYPTO_SALT_SIZE, function (error, salt) {
-        //     if (error) {
-        //         return callback(new VolumeError('Failed to generate random bytes', VolumeError.INTERNAL_ERROR));
-        //     }
+        var publicKey = ursa.createPublicKey(user.publicPem);
+        var record = {
+            username: user.username,
+            passwordCipher: publicKey.encrypt(volPassword, 'utf8', 'hex')
+        };
 
-            var publicKey = ursa.createPublicKey(user.publicPem);
-            var record = {
-                username: user.username,
-                passwordCipher: publicKey.encrypt(volPassword, 'utf8', 'hex')
-            };
+        vol.meta.put(record, function (error) {
+            if (error) {
+                debug('Unable to add user to meta db. ' + safe.JSON.stringify(error));
+                return callback(error);
+            }
 
-            vol.meta.put(record, function (error) {
+            var tmpDir = path.join(vol.mountPoint, 'tmp');
+            if (!safe.fs.mkdirSync(tmpDir)) {
+                return callback(new VolumeError(safe.error, VolumeError.INTERNAL_ERROR));
+            }
+
+            vol.repo = new Repo(path.join(vol.mountPoint, REPO_SUBFOLDER), tmpDir);
+            vol.repo.create(user.username, user.email, function (error) {
                 if (error) {
-                    debug('Unable to add user to meta db. ' + safe.JSON.stringify(error));
-                    return callback(error);
+                    return callback(new VolumeError(error, VolumeError.INTERNAL_ERROR));
                 }
 
-                var tmpDir = path.join(vol.mountPoint, 'tmp');
-                if (!safe.fs.mkdirSync(tmpDir)) {
-                    return callback(new VolumeError(safe.error, VolumeError.INTERNAL_ERROR));
-                }
-
-                vol.repo = new Repo(path.join(vol.mountPoint, REPO_SUBFOLDER), tmpDir);
-                vol.repo.create(user.username, user.email, function (error) {
+                vol.repo.addFileWithData('README.md', 'README', function (error, commit) {
                     if (error) {
                         return callback(new VolumeError(error, VolumeError.INTERNAL_ERROR));
                     }
 
-                    vol.repo.addFileWithData('README.md', 'README', function (error, commit) {
-                        if (error) {
-                            return callback(new VolumeError(error, VolumeError.INTERNAL_ERROR));
-                        }
-
-                        callback(null, vol);
-                    });
+                    callback(null, vol);
                 });
             });
-        // });
+        });
     });
 }
 

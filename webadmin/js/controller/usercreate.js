@@ -22,8 +22,17 @@ function UserCreateController ($scope, $routeParams, Client) {
         $scope.error.password = null;
         $scope.error.passwordRepeat = null;
 
+        if (!$scope.username) {
+            console.error('Username must not be empty');
+            $scope.error.name = 'Username must not be empty';
+            $scope.error.password = '';
+            $scope.error.passwordRepeat = '';
+            return;
+        }
+
         if ($scope.password !== $scope.passwordRepeat) {
             console.error('Passwords dont match.');
+            $scope.error.name = '';
             $scope.error.passwordRepeat = 'Passwords do not match';
             $scope.passwordRepeat = '';
             return;
@@ -41,10 +50,8 @@ function UserCreateController ($scope, $routeParams, Client) {
             if (error) {
                 console.error('Unable to create user.', error);
                 if (error.statusCode === 409) {
-                    $scope.$apply(function () {
-                        $scope.error.name = 'Username already exists';
-                        $scope.disabled = false;
-                    });
+                    $scope.error.name = 'Username already exists';
+                    $scope.disabled = false;
                 }
                 return;
             }

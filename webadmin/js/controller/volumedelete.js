@@ -1,6 +1,6 @@
 'use strict';
 
-function VolumeDeleteController ($scope, $routeParams, client, gui, syncerManager) {
+function VolumeDeleteController ($scope, $routeParams, Client) {
     console.debug('VolumeDeleteController');
 
     if (!$routeParams.volume) {
@@ -17,7 +17,7 @@ function VolumeDeleteController ($scope, $routeParams, client, gui, syncerManage
     $scope.error = {};
 
     $scope.submit = function () {
-        console.debug('Try to delete volume', $scope.volume.name, 'on', client.server);
+        console.debug('Try to delete volume', $scope.volume.name, 'on', Client.getServer());
 
         $scope.error.name = null;
         $scope.error.password = null;
@@ -28,28 +28,23 @@ function VolumeDeleteController ($scope, $routeParams, client, gui, syncerManage
         }
 
         $scope.disabled = true;
-        client.unmount($scope.volume.name, $scope.volume.password, function (error, result) {
+        Client.unmount($scope.volume.name, $scope.volume.password, function (error, result) {
             if (error) {
                 console.warn('Error unmounting the volume', error);
                 // in this case we still try to delete the volume
             }
 
-            client.deleteVolume($scope.volume.name, $scope.volume.password, function (error, result) {
+            Client.deleteVolume($scope.volume.name, $scope.volume.password, function (error, result) {
                 if (error) {
                     if (error.statusCode === 403) {
-                        $scope.$apply(function () {
-                            $scope.error.password = 'Password is wrong';
-                            $scope.volume.password = '';
-                            $scope.disabled = false;
-                        });
+                        $scope.error.password = 'Password is wrong';
+                        $scope.volume.password = '';
+                        $scope.disabled = false;
                     }
 
                     console.error('Unable to delete volume.', error);
                     return;
                 }
-
-                // TODO is this the correct place?
-                syncerManager.deleteSyncer($scope.volume.name);
 
                 console.debug('Successfully deleted volume', $scope.volume.name);
                 window.location.replace('#/maintabview');
