@@ -146,33 +146,48 @@ function listUser(req, res, next) {
 }
 
 function extractCredentialsFromHeaders (req) {
+    var a, b, s;
+
     if (!req.headers || !req.headers.authorization) {
         debug('No authorization header.');
         return null;
     }
 
-    if (req.headers.authorization.substr(0, 6) !== 'Basic ') {
-        debug('Only basic authorization supported.');
-        return null;
+    if (req.headers.authorization.substr(0, 6) === 'Basic ') {
+        b = new Buffer(req.headers.authorization.substr(6), 'base64');
+        s = b.toString('utf8');
+        if (!s) {
+            debug('Authorization header does not contain a valid string.');
+            return null;
+        }
+
+        a = s.split(':');
+        if (a.length != 2) {
+            debug('Authorization header does not contain a valid username:password tuple.');
+            return null;
+        }
+
+        return {
+            username: a[0],
+            password: a[1],
+            token: null
+        };
+    } else if (req.headers.authorization.substr(0, 6) === 'Token ') {
+        s = req.headers.authorization.substr(6);
+        if (!s) {
+            debug('Authorization header does not contain a valid string.');
+            return null;
+        }
+
+        return {
+            username: null,
+            password: null,
+            token: s
+        };
     }
 
-    var b = new Buffer(req.headers.authorization.substr(6), 'base64');
-    var s = b.toString('utf8');
-    if (!s) {
-        debug('Authorization header does not contain a valid string.');
-        return null;
-    }
-
-    var a = s.split(':');
-    if (a.length != 2) {
-        debug('Authorization header does not contain a valid username:password tuple.');
-        return null;
-    }
-
-    return {
-        username: a[0],
-        password: a[1]
-    };
+    debug('Only basic authorization supported.');
+    return null;
 }
 
 function loginAuthenticator(req, res, next) {
@@ -183,25 +198,54 @@ function loginAuthenticator(req, res, next) {
         return next(new HttpError(400, 'No credentials'), false);
     }
 
-    user.verify(auth.username, auth.password, function (error, user) {
-        if (error) {
-            debug('User ' + auth.username  + ' could not be verified.');
-            if (error.reason === UserError.ARGUMENTS) {
-                return next(new HttpError(400, error.message));
-            } else if (error.reason === UserError.NOT_FOUND) {
-                return next(new HttpError(401, 'No such user'));
-            } else if (error.reason === UserError.WRONG_USER_OR_PASSWORD) {
-                return next(new HttpError(401, 'Username or password do not match'));
-            } else {
-                return next(new HttpError(500, error.message));
-            }
+    if (auth.token) {
+        if (auth.token.length != 64 * 2) {
+            debug('Received a token with invalid length', auth.token.length, auth.token);
+            return next(new HttpError(401, 'Bad token'));
         }
 
-        debug('User ' + auth.username + ' was successfully verified.');
+        db.TOKENS_TABLE.get(auth.token, function (err, result) {
+            if (err) {
+                debug('Received unknown token', auth.token);
+                return next(err.reason === DatabaseError.NOT_FOUND ? new HttpError(401, 'Invalid token') : err);
+            }
 
-        req.user = user;
-        next();
-    });
+            var now = Date(), expires = Date(result.expires);
+            if (now > expires) return next(new HttpError(401, 'Token expired'));
+
+            db.USERS_TABLE.get(result.username, function (error, user) {
+                if (error) return next(new HttpError(500, ''));
+                if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(404, 'User not found'));
+
+                debug('User ' + user.username + ' was successfully verified.');
+
+                req.user = user;
+                next();
+            });
+        });
+    } else if (auth.username && auth.password) {
+        user.verify(auth.username, auth.password, function (error, user) {
+            if (error) {
+                debug('User ' + auth.username  + ' could not be verified.');
+                if (error.reason === UserError.ARGUMENTS) {
+                    return next(new HttpError(400, error.message));
+                } else if (error.reason === UserError.NOT_FOUND) {
+                    return next(new HttpError(401, 'No such user'));
+                } else if (error.reason === UserError.WRONG_USER_OR_PASSWORD) {
+                    return next(new HttpError(401, 'Username or password do not match'));
+                } else {
+                    return next(new HttpError(500, error.message));
+                }
+            }
+
+            debug('User ' + auth.username + ' was successfully verified.');
+
+            req.user = user;
+            next();
+        });
+    } else {
+        next(new HttpError(400, 'Invalid auth header'));
+    }
 }
 
 function tokenAuthenticator(req, res, next) {
@@ -215,9 +259,7 @@ function tokenAuthenticator(req, res, next) {
     db.TOKENS_TABLE.get(req_token, function (err, result) {
         if (err) {
             debug('Received unknown token', req_token);
-            return next(err.reason === DatabaseError.NOT_FOUND
-                ? new HttpError(401, 'Invalid token')
-                : err);
+            return next(err.reason === DatabaseError.NOT_FOUND ? new HttpError(401, 'Invalid token') : err);
         }
 
         var now = Date(), expires = Date(result.expires);
