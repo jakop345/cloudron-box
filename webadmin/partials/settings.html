@@ -1,0 +1,36 @@
+
+<div ng-controller="SettingsController" class="flex-column flex-dynamic">
+
+    <div class="row">
+        <div class="col-sm-12"><h2>Account</h2></div>
+    </div>
+    <div class="row">
+        <div class="col-sm-9">Username</div>
+        <div class="col-sm-3" style="text-align: center;">{{user.username}}</div>
+    </div>
+    <div class="row">
+        <div class="col-sm-9">Email</div>
+        <div class="col-sm-3" style="text-align: center;">{{user.email}}</div>
+    </div>
+    <div class="row">
+        <div class="col-sm-9">Password</div>
+        <div class="col-sm-3"><button class="btn btn-sm btn-block" ng-click="changePassword()">Change</button></div>
+    </div>
+    <div class="row">
+        <div class="col-sm-9" style="height: 100%; vertical-align: middle">Unlink this Computer temporarily</div>
+        <div class="col-sm-3"><button class="btn btn-sm btn-block" ng-click="logout()">Logout</button></div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12"><h2>Developer Options</h2></div>
+    </div>
+    <div class="row">
+        <div class="col-sm-9" style="height: 100%; vertical-align: middle">Show window on startup</div>
+        <div class="col-sm-3" style="text-align: center"><input type="checkbox" ng-model="showWindowOnStartup" ng-change="onShowWindowCheckbox()"></div>
+    </div>
+    <div class="row">
+        <div class="col-sm-9" style="height: 100%; vertical-align: middle">Show dev tools on startup</div>
+        <div class="col-sm-3" style="text-align: center"><input type="checkbox" ng-model="showDevToolsOnStartup" ng-change="onShowDevToolsCheckbox()"></div>
+    </div>
+
+</div>

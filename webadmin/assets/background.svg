@@ -1,0 +1,398 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="800"
+   height="600"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.4 r9939"
+   sodipodi:docname="background.svg"
+   inkscape:export-filename="/home/jzellner/projects/yellowtent/nw-client/assets/background.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
+  <defs
+     id="defs4">
+    <linearGradient
+       id="linearGradient3909">
+      <stop
+         style="stop-color:#554400;stop-opacity:1;"
+         offset="0"
+         id="stop3911" />
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="1"
+         id="stop3913" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient3898">
+      <stop
+         style="stop-color:#e7b800;stop-opacity:1;"
+         offset="0"
+         id="stop3900" />
+      <stop
+         style="stop-color:#b69100;stop-opacity:1;"
+         offset="1"
+         id="stop3902" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient3886">
+      <stop
+         style="stop-color:#d9ad00;stop-opacity:1;"
+         offset="0"
+         id="stop3888" />
+      <stop
+         id="stop3896"
+         offset="0.37505201"
+         style="stop-color:#9c7c00;stop-opacity:1;" />
+      <stop
+         id="stop3894"
+         offset="0.69129741"
+         style="stop-color:#e5b600;stop-opacity:1;" />
+      <stop
+         style="stop-color:#755d00;stop-opacity:1;"
+         offset="1"
+         id="stop3890" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient3777">
+      <stop
+         style="stop-color:#535d6c;stop-opacity:1;"
+         offset="0"
+         id="stop3779" />
+      <stop
+         style="stop-color:#181b20;stop-opacity:0.83898306;"
+         offset="1"
+         id="stop3781" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3886"
+       id="linearGradient3892"
+       x1="300.5773"
+       y1="582.3866"
+       x2="205.95534"
+       y2="538.69275"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3898"
+       id="linearGradient3904"
+       x1="316.51187"
+       y1="547.98846"
+       x2="345.21487"
+       y2="541.65118"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3909"
+       id="linearGradient3915"
+       x1="309.19244"
+       y1="640.10553"
+       x2="306.52414"
+       y2="494.6817"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(-0.75161093,0,0,0.75161093,336.60883,444.40503)" />
+    <filter
+       inkscape:collect="always"
+       id="filter3939"
+       color-interpolation-filters="sRGB">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="0.10366808"
+         id="feGaussianBlur3941" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter3943"
+       color-interpolation-filters="sRGB">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="0.15530662"
+         id="feGaussianBlur3945" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter3873"
+       x="-0.63893622"
+       width="2.2778726"
+       y="-0.091099881"
+       height="1.1821998"
+       color-interpolation-filters="sRGB">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="0.10362611"
+         id="feGaussianBlur3875" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter3877"
+       x="-0.34979427"
+       width="1.6995885"
+       y="-0.092050731"
+       height="1.1841015"
+       color-interpolation-filters="sRGB">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="0.10362611"
+         id="feGaussianBlur3879" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter3881"
+       x="-0.44435155"
+       width="1.8887031"
+       y="-0.083583489"
+       height="1.1671669"
+       color-interpolation-filters="sRGB">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="0.10362611"
+         id="feGaussianBlur3883" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter3885"
+       x="-0.13767786"
+       width="1.2753557"
+       y="-0.070579976"
+       height="1.14116"
+       color-interpolation-filters="sRGB">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="0.10362611"
+         id="feGaussianBlur3887" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter3889"
+       x="-0.27098259"
+       width="1.5419652"
+       y="-0.081496432"
+       height="1.162993"
+       color-interpolation-filters="sRGB">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="0.10362611"
+         id="feGaussianBlur3891" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter3893"
+       color-interpolation-filters="sRGB">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="0.094389542"
+         id="feGaussianBlur3895" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter3897"
+       x="-0.73199999"
+       width="2.464"
+       y="-0.0122"
+       height="1.0244"
+       color-interpolation-filters="sRGB">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="0.40691996"
+         id="feGaussianBlur3899" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter3905"
+       color-interpolation-filters="sRGB">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="0.085466777"
+         id="feGaussianBlur3907" />
+    </filter>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.74953319"
+     inkscape:cx="92.265615"
+     inkscape:cy="263.78981"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     showguides="false"
+     inkscape:guide-bbox="true"
+     inkscape:window-width="1469"
+     inkscape:window-height="960"
+     inkscape:window-x="67"
+     inkscape:window-y="35"
+     inkscape:window-maximized="0"
+     width="12800px" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-452.3622)">
+    <path
+       style="opacity:0.98999999000000005;fill:#008000;fill-opacity:1;stroke:none"
+       d="M 274.8965,610.15255 603.48635,399.11863 1005.0211,748.936 152.16134,765.74098 z"
+       id="rect3145-7"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccc"
+       inkscape:export-filename="/home/jzellner/projects/yellowtent/nw-client/assets/background.png"
+       inkscape:export-xdpi="91.399315"
+       inkscape:export-ydpi="91.399315" />
+    <path
+       style="opacity:0.98999999000000005;fill:#009c00;fill-opacity:1;stroke:none"
+       d="m 105.83936,588.18815 406.2851,47.61905 298.5854,228.28292 -999.58927,37.026 z"
+       id="rect3147"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccc"
+       inkscape:export-filename="/home/jzellner/projects/yellowtent/nw-client/assets/background.png"
+       inkscape:export-xdpi="91.399315"
+       inkscape:export-ydpi="91.399315" />
+    <path
+       style="opacity:0.98999999000000005;fill:#00b300;fill-opacity:1;stroke:none"
+       d="M -25.301319,680.02055 834.39179,638.94936 937.6594,1070.1117 -115.79534,1074.5622 z"
+       id="rect3145"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccc"
+       inkscape:export-filename="/home/jzellner/projects/yellowtent/nw-client/assets/background.png"
+       inkscape:export-xdpi="91.399315"
+       inkscape:export-ydpi="91.399315" />
+    <path
+       style="opacity:0.98999999;fill:url(#linearGradient3915);fill-opacity:1;stroke:none;filter:url(#filter3905)"
+       d="m 105.15248,811.30899 c -11.536175,33.38469 -13.363765,37.16056 -19.988735,59.05393 l 54.901775,-11.2813 z"
+       id="rect3906"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccc"
+       inkscape:export-filename="/home/jzellner/projects/yellowtent/nw-client/assets/background.png"
+       inkscape:export-xdpi="91.399315"
+       inkscape:export-ydpi="91.399315"
+       transform="matrix(1.5013157,0,0,1.5013157,467.29242,-636.72604)" />
+    <path
+       style="opacity:0.98999999;fill:#090808;fill-opacity:1;stroke:none;filter:url(#filter3893)"
+       d="m 127.73723,860.61372 -49.924385,10.1289 59.745735,5.637 z"
+       id="rect3883"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccc"
+       inkscape:export-filename="/home/jzellner/projects/yellowtent/nw-client/assets/background.png"
+       inkscape:export-xdpi="91.399315"
+       inkscape:export-ydpi="91.399315"
+       transform="matrix(1.5013157,0,0,1.5013157,467.29242,-636.72604)" />
+    <rect
+       style="opacity:0.98999999;fill:#000000;fill-opacity:1;stroke:none;filter:url(#filter3897)"
+       id="rect3917"
+       width="1.3341638"
+       height="80.049828"
+       x="306.52411"
+       y="490.34573"
+       transform="matrix(-1.1284053,0,0,1.1284053,972.64853,30.466184)"
+       inkscape:export-filename="/home/jzellner/projects/yellowtent/nw-client/assets/background.png"
+       inkscape:export-xdpi="91.399315"
+       inkscape:export-ydpi="91.399315" />
+    <path
+       style="opacity:0.98999999;fill:url(#linearGradient3892);fill-opacity:1;stroke:none;filter:url(#filter3943)"
+       d="m 236.79245,489.62632 c 45.69511,15.00934 71.22642,-1.74812 71.22642,-1.74812 -15.56604,53.53774 -28.77359,79.81416 -45.28302,90.42737 0,0 -17.68868,-7.07547 -35.61321,-7.54717 -16.03774,-10.84906 -35.61321,-7.54717 -35.61321,-7.54717 0,0 41.28053,-37.22895 45.28302,-73.58491 z"
+       id="rect3818"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccccc"
+       transform="matrix(-1.1284053,0,0,1.1284053,972.64853,30.466184)"
+       inkscape:export-filename="/home/jzellner/projects/yellowtent/nw-client/assets/background.png"
+       inkscape:export-xdpi="91.399315"
+       inkscape:export-ydpi="91.399315" />
+    <path
+       style="opacity:0.98999999;fill:url(#linearGradient3904);fill-opacity:1;stroke:none;filter:url(#filter3939)"
+       d="m 307.9298,487.68333 c 0,0 16.17271,43.8083 47.95839,83.71281 -18.89445,1.89245 -29.3516,6.67082 -29.3516,6.67082 -3.33541,-16.34351 -18.60679,-90.38363 -18.60679,-90.38363 z"
+       id="rect3880"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccc"
+       transform="matrix(-1.1284053,0,0,1.1284053,972.64853,30.466184)"
+       inkscape:export-filename="/home/jzellner/projects/yellowtent/nw-client/assets/background.png"
+       inkscape:export-xdpi="91.399315"
+       inkscape:export-ydpi="91.399315" />
+    <path
+       style="opacity:0.98999999;fill:#502d16;fill-opacity:1;stroke:none;filter:url(#filter3885)"
+       d="m 192.1295,863.55672 0.46571,0.1828 -1.69157,3.3409 -0.11484,-0.1084 z"
+       id="rect3010"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccc"
+       inkscape:export-filename="/home/jzellner/projects/yellowtent/nw-client/assets/background.png"
+       inkscape:export-xdpi="91.399315"
+       inkscape:export-ydpi="91.399315"
+       transform="matrix(1.5013157,0,0,1.5013157,467.29242,-636.72604)" />
+    <path
+       style="opacity:0.98999999;fill:#502d16;fill-opacity:1;stroke:none;filter:url(#filter3889)"
+       d="m 166.35833,870.23582 0.37988,0.089 -0.81522,2.9627 -0.10256,-0.074 z"
+       id="rect3010-1"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccc"
+       inkscape:export-filename="/home/jzellner/projects/yellowtent/nw-client/assets/background.png"
+       inkscape:export-xdpi="91.399315"
+       inkscape:export-ydpi="91.399315"
+       transform="matrix(1.5013157,0,0,1.5013157,467.29242,-636.72604)" />
+    <path
+       style="opacity:0.98999999;fill:#502d16;fill-opacity:1;stroke:none;filter:url(#filter3881)"
+       d="m 138.65685,875.66182 0.32104,0.019 0.23866,2.9565 -0.10128,-0.052 z"
+       id="rect3010-1-1"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccc"
+       inkscape:export-filename="/home/jzellner/projects/yellowtent/nw-client/assets/background.png"
+       inkscape:export-xdpi="91.399315"
+       inkscape:export-ydpi="91.399315"
+       transform="matrix(1.5013157,0,0,1.5013157,467.29242,-636.72604)" />
+    <path
+       style="opacity:0.98999999;fill:#502d16;fill-opacity:1;stroke:none;filter:url(#filter3877)"
+       d="m 90.111435,875.82582 0.38611,-0.05 0.32489,2.7018 -0.12252,-0.027 z"
+       id="rect3010-1-9"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccc"
+       inkscape:export-filename="/home/jzellner/projects/yellowtent/nw-client/assets/background.png"
+       inkscape:export-xdpi="91.399315"
+       inkscape:export-ydpi="91.399315"
+       transform="matrix(1.5013157,0,0,1.5013157,467.29242,-636.72604)" />
+    <path
+       style="opacity:0.98999999;fill:#502d16;fill-opacity:1;stroke:none;filter:url(#filter3873)"
+       d="m 69.507665,870.98902 0.38924,0.01 -0.0833,2.72 -0.11709,-0.045 z"
+       id="rect3010-1-9-8"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccc"
+       inkscape:export-filename="/home/jzellner/projects/yellowtent/nw-client/assets/background.png"
+       inkscape:export-xdpi="91.399315"
+       inkscape:export-ydpi="91.399315"
+       transform="matrix(1.5013157,0,0,1.5013157,467.29242,-636.72604)" />
+    <path
+       style="opacity:0.98999999;fill:#2a7fff;fill-opacity:1;stroke:none"
+       d="M 82.718148,469.33266 304.18933,490.67928 229.47616,564.05827 24.014948,550.71664 z"
+       id="rect3958"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccc" />
+    <path
+       style="opacity:0.98999999;fill:#5599ff;fill-opacity:1;stroke:none"
+       d="M 39.937423,502.01965 244.54565,506.02214 212.13202,552.71787 18.678292,532.70541 z"
+       id="rect3958-0"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccc" />
+  </g>
+</svg>

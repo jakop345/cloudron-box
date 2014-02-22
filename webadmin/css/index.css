@@ -1,0 +1,224 @@
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.progress {
+  margin-bottom: 0;
+}
+
+.modal {
+  overflow: hidden;
+}
+
+.selectable {
+  -webkit-touch-callout: auto;
+  -webkit-user-select: auto;
+  -khtml-user-select: auto;
+  -moz-user-select: auto;
+  -ms-user-select: auto;
+  user-select: auto;
+}
+
+.main-container {
+  width: 100%;
+  max-width: 800px;
+  height: 100%;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-view {
+  margin: 10px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative
+}
+
+.show-animate {
+  -webkit-transition: 0.2s linear all;
+  transition: 0.2s linear all;
+  overflow: hidden
+}
+.show-animate.ng-hide-add,
+.show-animate.ng-hide-remove {
+  display: block !important;
+  height: 0;
+  opacity: 0;
+}
+
+.show-animate.ng-hide-remove.ng-hide-remove-active {
+  height: 20px;
+  opacity: 1;
+}
+.show-animate.ng-hide-add{
+  height: 20px;
+  opacity: 1;
+}
+.show-animate.ng-hide-add.ng-hide-add-active {
+  height: 0;
+  opacity: 0;
+}
+
+.slide-animation.ng-enter, .slide-animation.ng-leave {
+  -webkit-transition: all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.25s;
+  -moz-transition: all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.25s;
+  -o-transition: all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.25s;
+  transition: all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.25s;
+
+  top: 0;
+  left: 0;
+  right: 0;
+  min-height: 1000px;
+}
+
+.slide-animation.ng-enter {
+  opacity: 0;
+  left: 300px;
+}
+
+.slide-animation.ng-enter.ng-enter-active {
+  left: 0;
+  opacity: 1;
+}
+
+.slide-animation.ng-leave {
+  left: 0;
+  opacity: 1;
+}
+
+.slide-animation.ng-leave.ng-leave-active {
+  left: -300px;
+  opacity: 0;
+}
+
+.tab-pane {
+  padding: 15px 15px;
+  background-color: white;
+  border-width: 0 1px 1px 1px;
+  border-style: solid;
+  border-color: #DDD;
+}
+
+.container {
+  width: 100%;
+}
+
+.row {
+  padding: 10px;
+}
+
+a {
+  cursor: default;
+}
+
+
+.nav-tabs {
+  flex: none;
+}
+
+.tabbable {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.tab-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.tab-content .active {
+  display: flex;
+}
+
+
+.tab-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.tabbar-template-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.flex-static {
+  flex: none;
+}
+
+.flex-dynamic {
+  flex: 1;
+}
+
+.flex-margin {
+  margin: 5px;
+}
+
+.list-group {
+  margin: 0;
+  flex: 1;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+.list-group-item {
+  border: 0;
+}
+
+.list-group-item-heading {
+  background: #ddd;
+  padding-left: 5px;
+}
+
+.log-viewer {
+  overflow: scroll;
+  margin: 0;
+  padding: 5px;
+}
+
+.list-group-item {
+  padding: 0;
+}
+
+.user-list-item {
+  padding: 10px;
+  margin: 0;
+}
+
+.user-list-item.odd {
+  background-color: #eee;
+}
+
+.user-list-item.even {
+}
+
+.error {
+  color: red;
+}

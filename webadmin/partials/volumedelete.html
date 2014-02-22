@@ -1,0 +1,30 @@
+
+<div class="container">
+  <form class="form-signin" role="form" ng-submit="submit()">
+    <div class="row">
+        <div class="col-sm-12">
+            <h2 class="form-signin-heading">Delete Volume {{volumeName}}</h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <span ng-show="error.name" class="error show-animate">{{error.name}}</span>
+            <input type="text" class="form-control" ng-model="volume.name" placeholder="Volume Name" required autofocus>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <span ng-show="error.password" class="error show-animate">{{error.password}}</span>
+            <input type="password" class="form-control" ng-model="volume.password" placeholder="Password" required>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <input class="btn btn-block" ng-click="cancel()" type="button" value="Cancel"/>
+        </div>
+        <div class="col-sm-6">
+            <input class="btn btn-green btn-block" type="submit" ng-disabled="{{disabled}}" value="Delete Volume"/>
+        </div>
+    </div>
+  </form>
+</div>

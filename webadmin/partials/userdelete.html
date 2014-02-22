@@ -1,0 +1,38 @@
+
+<div class="container">
+  <form class="form-signin" role="form" ng-submit="submit()">
+    <div class="row">
+        <div class="col-sm-12">
+            <h2 class="form-signin-heading">Delete User {{username}}</h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            Just to be sure you really want to delete this user, please type the user's name.
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <input type="text" class="form-control" ng-model="form.username" placeholder="Username" required autofocus>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            Give your password to verify that you are performing that action.
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <input type="password" class="form-control" ng-model="form.password" placeholder="Password" required>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <input class="btn btn-block" ng-click="cancel()" type="button" value="Cancel"/>
+        </div>
+        <div class="col-sm-6">
+            <input class="btn btn-green btn-block" type="submit" ng-disabled="{{disabled}}" value="Delete User"/>
+        </div>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />
+
+    <title> YellowTent </title>
+
+    <!-- angularjs scripts -->
+    <script src="3rdparty/js/angular.js"></script>
+    <script src="3rdparty/js/angular-loader.min.js"></script>
+    <script src="3rdparty/js/angular-route.min.js"></script>
+    <script src="3rdparty/js/angular-animate.min.js"></script>
+
+    <!-- bootstrap -->
+    <script src="3rdparty/js/ui-bootstrap-tpls-0.10.0.js"></script>
+    <link href="3rdparty/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="3rdparty/css/bootstrap-theme.min.css" rel="stylesheet" media="screen">
+
+    <!-- application scripts -->
+    <script src="js/factories/client.js"></script>
+
+    <script src="js/controller/main.js"></script>
+    <script src="js/controller/splash.js"></script>
+    <script src="js/controller/login.js"></script>
+    <script src="js/controller/advancedconnection.js"></script>
+    <script src="js/controller/maintabview.js"></script>
+    <script src="js/controller/volumelist.js"></script>
+    <script src="js/controller/volumecreate.js"></script>
+    <script src="js/controller/volumedelete.js"></script>
+    <script src="js/controller/volumemount.js"></script>
+    <script src="js/controller/volumeunmount.js"></script>
+    <script src="js/controller/userlist.js"></script>
+    <script src="js/controller/logs.js"></script>
+    <script src="js/controller/usercreate.js"></script>
+    <script src="js/controller/userdelete.js"></script>
+    <script src="js/controller/userpassword.js"></script>
+    <script src="js/controller/settings.js"></script>
+    <script src="js/index.js"></script>
+
+    <!-- application stylesheets -->
+    <link href="css/theme.css" rel="stylesheet" media="screen">
+    <link href="css/index.css" rel="stylesheet" media="screen">
+
+  </head>
+
+<body ng-app="YellowTent">
+
+    <div class="main-container" ng-controller="MainController">
+        <div ng-view id="ng-view" class="main-view"></div>
+    </div>
+
+</body>
+</html>

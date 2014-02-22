@@ -1,0 +1,23 @@
+
+<div class="container">
+  <form class="form-signin" role="form" ng-submit="submit()">
+    <div class="row">
+        <div class="col-sm-12">
+            <h2 class="form-signin-heading">Close Volume {{volume.name}}</h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <input type="password" class="form-control" ng-model="volume.password" placeholder="Password" required autofocus>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <input class="btn btn-block" ng-click="cancel()" type="button" value="Cancel"/>
+        </div>
+        <div class="col-sm-6">
+            <input class="btn btn-green btn-block" type="submit" ng-disabled="{{disabled}}" value="Close Volume"/>
+        </div>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,22 @@
+
+
+<div ng-controller="UserListController" class="flex-column flex-dynamic">
+
+    <div class="flex-row flex-static flex-margin">
+        <button class="btn btn-primary btn-sm" style="margin-right: 0px;" ng-click="createUser()">New User</button>
+    </div>
+    <div class="flex-dynamic flex-row flex-margin">
+        <ul class="list-group">
+            <li href="#" class="list-group-item" ng-repeat="user in users">
+                <div class="user-list-item row" ng-class-odd="'odd'" ng-class-even="'even'">
+                    <div class="col-xs-11">
+                        {{user.username}}
+                    </div>
+                    <div class="col-xs-1">
+                        <a href="" class="pull-right" ng-hide="user.admin" ng-click="deleteUser(user.username)"><span class="glyphicon glyphicon glyphicon-trash"></span></a>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
