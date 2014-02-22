@@ -324,7 +324,7 @@ Volume.prototype.verifyUser = function (user, password, callback) {
         User.verify(user.username, password, function (error, userRecord) {
             if (error) {
                 debug('Unable to get user from meta db. ' + safe.JSON.stringify(error));
-                return callback(new VolumeError(error, VolumeError.NO_SUCH_USER));
+                return callback(new VolumeError(error, VolumeError.WRONG_USER_PASSWORD));
             }
 
             var saltBuffer = new Buffer(userRecord.salt, 'hex');
