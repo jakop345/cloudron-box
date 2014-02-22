@@ -3,7 +3,7 @@
 /* global angular:false */
 
 angular.module('clientFactory', [])
-.service('Client', function ($http) {
+.service('Client', function ($http, $base64) {
 
     function ClientError(statusCode, message) {
         Error.call(this);
@@ -65,49 +65,6 @@ angular.module('clientFactory', [])
 
     Client.prototype.getToken = function () {
         return this._token;
-    };
-
-    Client.prototype._attachAuthInfo = function (req) {
-        if (this._token) {
-            req.query({ auth_token: this._token });
-        } else if (this._username) {
-            req.auth(this._username, this._cachedPassword);
-        }
-    };
-
-    Client.prototype.get = function (path) {
-        if (path[0] !== '/') path = '/' + path;
-
-        console.debug('GET ' + this._server + path);
-        var req = $http.get(this._server + path)
-            .success(function(data, status, headers, config) {
-                // this callback will be called asynchronously
-                // when the response is available
-            })
-            .error(function(data, status, headers, config) {
-                // called asynchronously if an error occurs
-                // or server returns response with an error status.
-            });
-        this._attachAuthInfo(req);
-        return req;
-    };
-
-    Client.prototype.put = function (path) {
-        if (path[0] !== '/') path = '/' + path;
-
-        console.debug('PUT ' + this._server + path);
-        var req = request.put(this._server + path);
-        this._attachAuthInfo(req);
-        return req;
-    };
-
-    Client.prototype.post = function (path) {
-        if (path[0] !== '/') path = '/' + path;
-
-        console.debug('POST ' + this._server + '====' + path);
-        var req = request.post(this._server + path);
-        this._attachAuthInfo(req);
-        return req;
     };
 
     Client.prototype.createVolume = function (name, password, callback) {
@@ -281,7 +238,7 @@ angular.module('clientFactory', [])
     Client.prototype.login = function (username, password, callback) {
         var that = this;
 
-        $http.defaults.headers.common['Authorization'] = 'Basic ' + btoa(username + ':' + password);
+        $http.defaults.headers.common.Authorization = 'Basic ' + $base64.encode(username + ':' + password);
 
         $http.get(this._server + '/api/v1/user/token')
         .success(function(data, status, headers, config) {

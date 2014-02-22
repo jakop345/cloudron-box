@@ -3,7 +3,7 @@
 /* global angular:false */
 
 // create main application module
-var app = angular.module('YellowTent', ['ngRoute', 'ngAnimate', 'ui.bootstrap', 'clientFactory']);
+var app = angular.module('YellowTent', ['ngRoute', 'ngAnimate', 'ui.bootstrap', 'base64', 'clientFactory']);
 
 // setup all major application routes
 app.config(function ($routeProvider) {
