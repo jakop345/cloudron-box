@@ -1,6 +1,6 @@
 'use strict';
 
-function UserListController ($scope, client) {
+function UserListController ($scope, Client) {
     console.debug('UserListController');
 
     $scope.users = [];
@@ -8,17 +8,14 @@ function UserListController ($scope, client) {
     function refresh() {
         console.debug('refresh user list');
 
-        client.listUsers(function (error, result) {
+        Client.listUsers(function (error, result) {
             if (error) {
                 console.error('Unable to get user listing.', error);
                 return;
             }
 
             console.debug('Got userlist', result.users);
-
-            $scope.$apply(function () {
-                $scope.users = result.users;
-            });
+            $scope.users = result.users;
         });
     }
 

@@ -1,27 +1,18 @@
 'use strict';
 
-var SettingsController = function ($scope, client) {
+var SettingsController = function ($scope, Client) {
     console.debug('SettingsController');
 
-    $scope.user = client.getUserInfo();
-    $scope.showWindowOnStartup = localStorage.showWindowOnStartup === 'true';
-    $scope.showDevToolsOnStartup = localStorage.showDevToolsOnStartup === 'true';
+    $scope.user = Client.getUserInfo();
 
     $scope.logout = function () {
+        // TODO actually perform logout on the server
         localStorage.removeItem('token');
-        client.setToken(null);
+        Client.setToken(null);
         window.location.href = '#/';
     };
 
     $scope.changePassword = function () {
         window.location.href = '#/userpassword';
-    };
-
-    $scope.onShowWindowCheckbox = function () {
-        localStorage.showWindowOnStartup = $scope.showWindowOnStartup;
-    };
-
-    $scope.onShowDevToolsCheckbox = function () {
-        localStorage.showDevToolsOnStartup = $scope.showDevToolsOnStartup;
     };
 };

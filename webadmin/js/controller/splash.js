@@ -8,7 +8,7 @@ var SplashController = function ($scope, Client) {
             Client.tokenLogin(localStorage.token, function (error, token) {
                 if (error) {
                     console.error('Unable to login', error);
-                    window.location.href = '#/discovery';
+                    window.location.href = '#/advancedconnection';
                     return;
                 }
 

@@ -23,9 +23,9 @@ angular.module('clientFactory', [])
         this._username = null;
         this._userInfo = null;
         this._token = null;
-        this._cachedPassword = null;
 
-        this.setServer(sessionStorage.server);
+        this.setServer(localStorage.server);
+        this.setToken(localStorage.token);
     }
 
     Client.prototype.setServer = function (server) {
@@ -60,6 +60,7 @@ angular.module('clientFactory', [])
 
     Client.prototype.setToken = function (token) {
         console.debug('Set client token to ', token);
+        $http.defaults.headers.common.Authorization = 'Token ' + token;
         this._token = token;
     };
 
@@ -67,77 +68,87 @@ angular.module('clientFactory', [])
         return this._token;
     };
 
-    Client.prototype.createVolume = function (name, password, callback) {
-        var req = this.post('/api/v1/volume/create');
-        req.send({ password: password, name: name });
-        req.end(function (error, result) {
-            if (error) return callback(new ClientError(error.code, error.message));
-            if (result.statusCode !== 201) return callback(new ClientError(result.statusCode, result.text));
 
-            callback(null, result);
+    /*
+     * Rest API wrappers
+     */
+    Client.prototype.createVolume = function (name, password, callback) {
+        var data = { password: password, name: name };
+        $http.post(this._server + '/api/v1/volume/' + name + '/unmount', data)
+        .success(function(data, status, headers, config) {
+            if (status !== 201) return callback(new ClientError(status, data));
+            callback(null, data);
+        })
+        .error(function(data, status, headers, config) {
+            callback(new ClientError(status, data));
         });
     };
 
     Client.prototype.deleteVolume = function (name, password, callback) {
-        var req = this.post('/api/v1/volume/' + name + '/delete');
-        req.send({ password: password });
-        req.end(function (error, result) {
-            if (error) return callback(new ClientError(error.code, error.message));
-            if (result.statusCode !== 200) return callback(new ClientError(result.statusCode, result.text));
-
-            callback(null, result);
+        var data = { password: password };
+        $http.post(this._server + '/api/v1/volume/' + name + '/unmount', data)
+        .success(function(data, status, headers, config) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null, data);
+        })
+        .error(function(data, status, headers, config) {
+            callback(new ClientError(status, data));
         });
     };
 
     Client.prototype.mount = function (name, password, callback) {
-        var req = this.post('/api/v1/volume/' + name + '/mount');
-        req.send({ password: password });
-        req.end(function (err, res) {
-            if (err) return callback(new ClientError(err.code, err.message));
-            if (res.statusCode !== 200) return callback(new ClientError(res.statusCode, res.text));
-
-            callback(null, res);
+        var data = { password: password };
+        $http.post(this._server + '/api/v1/volume/' + name + '/mount', data)
+        .success(function(data, status, headers, config) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null, data);
+        })
+        .error(function(data, status, headers, config) {
+            callback(new ClientError(status, data));
         });
     };
 
     Client.prototype.unmount = function (name, password, callback) {
-        var req = this.post('/api/v1/volume/' + name + '/unmount');
-        req.send({ password: password });
-        req.end(function (err, res) {
-            if (err) return callback(new ClientError(err.code, err.message));
-            if (res.statusCode !== 200) return callback(new ClientError(res.statusCode, res.text));
-
-            callback(null, res);
+        var data = { password: password };
+        $http.post(this._server + '/api/v1/volume/' + name + '/unmount', data)
+        .success(function(data, status, headers, config) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null, data);
+        })
+        .error(function(data, status, headers, config) {
+            callback(new ClientError(status, data));
         });
     };
 
-    // FIXME: this breaks node.js convention of first arg having the err always
     Client.prototype.isMounted = function (name, callback) {
-        this.get('/api/v1/volume/' + name + '/ismounted').end(function (err, res) {
-            if (err || res.statusCode !== 200) {
-                return callback(false);
-            }
-
-            return callback(res.body.mounted);
+        $http.get(this._server + '/api/v1/volume/' + name + '/ismounted')
+        .success(function(data, status, headers, config) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null, data.mounted);
+        })
+        .error(function(data, status, headers, config) {
+            callback(new ClientError(status, data));
         });
     };
 
     Client.prototype.listVolumes = function (callback) {
-        var that = this;
-
-        this.get('/api/v1/volume/list').end(function (error, result) {
-            if (error) return callback(new ClientError(error.code, error.message));
-
-            that.emit('volumes', result.body.volumes);
-            callback(null, result.body.volumes);
+        $http.get(this._server + '/api/v1/volume/list')
+        .success(function(data, status, headers, config) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null, data.volumes);
+        })
+        .error(function(data, status, headers, config) {
+            callback(new ClientError(status, data));
         });
     };
 
     Client.prototype.isServerAvailable = function (callback) {
-        this.get('/api/v1/version').end(function (error, result) {
-            if (error) return callback(error);
-
-            return callback(null, (result.statusCode === 200));
+        $http.get(this._server + '/api/v1/version')
+        .success(function(data, status, headers, config) {
+            callback(null, (status === 200));
+        })
+        .error(function(data, status, headers, config) {
+            callback(null, false);
         });
     };
 
@@ -170,88 +181,98 @@ angular.module('clientFactory', [])
     };
 
     Client.prototype.listUsers = function (callback) {
-        this.get('/api/v1/user/list').end(function (error, result) {
-            if (error) return callback(new ClientError(error.code, error.message));
-            callback(null, result.body);
+        $http.get(this._server + '/api/v1/user/list')
+        .success(function(data, status, headers, config) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null, data);
+        })
+        .error(function(data, status, headers, config) {
+            callback(new ClientError(status, data));
         });
     };
 
     Client.prototype.createUser = function (username, password, email, callback) {
-        var payload = {
+        var data = {
             username: username,
             password: password,
             email: email
         };
 
-        this.post('/api/v1/user/create').send(payload).end(function (error, result) {
-            if (error) return callback(new ClientError(error.code, error.message));
-            if (result.statusCode !== 201) return callback(new ClientError(result.statusCode, result.text));
-
-            callback();
+        $http.post(this._server + '/api/v1/user/create', data)
+        .success(function(data, status, headers, config) {
+            if (status !== 201) return callback(new ClientError(status, data));
+            callback(null, data);
+        })
+        .error(function(data, status, headers, config) {
+            callback(new ClientError(status, data));
         });
     };
 
     Client.prototype.removeUser = function (username, password, callback) {
-        this.post('/api/v1/user/remove').send({ username: username, password: password }).end(function (error, result) {
-            if (error) return callback(new ClientError(error.code, error.message));
-            if (result.statusCode !== 200) return callback(new ClientError(result.statusCode, result.text));
+        var data = {
+            username: username,
+            password: password
+        };
 
-            callback();
+        $http.post(this._server + '/api/v1/user/remove', data)
+        .success(function(data, status, headers, config) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null, data);
+        })
+        .error(function(data, status, headers, config) {
+            callback(new ClientError(status, data));
         });
     };
 
     Client.prototype.changePassword = function (currentPassword, newPassword, callback) {
-        this.post('/api/v1/user/password').send({ password: currentPassword, newPassword: newPassword}).end(function (error, result) {
-            if (error) return callback(new ClientError(error.code, error.message));
-            if (result.statusCode !== 200) return callback(new ClientError(result.statusCode, result.text));
+        var data = {
+            password: currentPassword,
+            newPassword: newPassword
+        };
 
-            callback();
+        $http.post(this._server + '/api/v1/user/password', data)
+        .success(function(data, status, headers, config) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null, data);
+        })
+        .error(function(data, status, headers, config) {
+            callback(new ClientError(status, data));
         });
     };
 
     Client.prototype.tokenLogin = function (oldToken, callback) {
-        var that = this;
-
-        request.get(this._server + '/api/v1/user/token')
-            .query({ auth_token: oldToken })
-            .end(function (error, result) {
-            if (error) {
-                that.emit('offline');
-                return callback(new ClientError(error.code, error.message));
-            }
-
-            if (result.statusCode !== 200) {
-                that.emit('offline');
-                return callback(new ClientError(result.statusCode, result.text));
-            }
-
-            // cache the user credentials and server address
-            that._token = result.body.token;
-            that._userInfo = result.body.userInfo;
-
-            that.emit('online');
-
-            callback(null, that._token);
-        });
+        $http.defaults.headers.common.Authorization = 'Token ' + oldToken;
+        this._login(callback);
     };
 
     Client.prototype.login = function (username, password, callback) {
-        var that = this;
-
         $http.defaults.headers.common.Authorization = 'Basic ' + $base64.encode(username + ':' + password);
+        this._login(callback);
+    };
+
+    /*
+     * Internal login which is wrapped by login() and tokenLogin()
+     * The wrappers setup the auth header
+     */
+    Client.prototype._login = function  (callback) {
+        var that = this;
 
         $http.get(this._server + '/api/v1/user/token')
         .success(function(data, status, headers, config) {
-            if (status !== 200) return callback(new ClientError(status, data));
-            // cache the user credentials and server address
-            that._username = username;
-            that._cachedPassword = password;
-            that._token = data.token;
-            that._userInfo = data.userInfo;
+            if (status !== 200) {
+                that.setToken(null);
+                return callback(new ClientError(status, data));
+            }
 
-            callback(null, that._token);
+            // cache the user credentials and server address
+            that._username = data.userInfo.username;
+            that._userInfo = data.userInfo;
+            that.setToken(data.token);
+
+            callback(null, data.token);
         })
         .error(function(data, status, headers, config) {
+            that.setToken(null);
             callback(new ClientError(status, data));
         });
     };

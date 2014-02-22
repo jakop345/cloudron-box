@@ -1,6 +1,6 @@
 'use strict';
 
-function UserDeleteController ($scope, $routeParams, client) {
+function UserDeleteController ($scope, $routeParams, Client) {
     console.debug('UserDeleteController');
 
     if (!$routeParams.username) {
@@ -15,10 +15,10 @@ function UserDeleteController ($scope, $routeParams, client) {
     $scope.form.password = '';
 
     $scope.submit = function () {
-        console.debug('Try to delete user', $scope.form.username, 'on', client.server);
+        console.debug('Try to delete user', $scope.form.username, 'on', Client.getServer());
 
         $scope.disabled = true;
-        client.removeUser($scope.form.username, $scope.form.password, function (error, result) {
+        Client.removeUser($scope.form.username, $scope.form.password, function (error, result) {
             if (error) {
                 console.error('Unable to delete user.', error);
                 $scope.disabled = false;
