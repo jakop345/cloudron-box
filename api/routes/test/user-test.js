@@ -189,9 +189,39 @@ describe('Server User API', function () {
         });
     });
 
-    it('cannot get userInfo with invalid token (unknown token)', function (done) {
+    it('cannot get userInfo with invalid token (wrong token)', function (done) {
         request.get(SERVER_URL + '/api/v1/user/info')
                .query({ auth_token: token.toUpperCase() })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(401);
+            done(err);
+        });
+    });
+
+    it('can get userInfo with token in auth header', function (done) {
+        request.get(SERVER_URL + '/api/v1/user/info')
+               .set('Authorization', 'Token ' + token)
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            expect(res.body.username).to.equal(USERNAME);
+            expect(res.body.email).to.equal(EMAIL);
+            expect(res.body.admin).to.be(true);
+            done(err);
+        });
+    });
+
+    it('cannot get userInfo with invalid token in auth header', function (done) {
+        request.get(SERVER_URL + '/api/v1/user/info')
+               .set('Authorization', 'Token ' + 'x' + token)
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(401);
+            done(err);
+        });
+    });
+
+    it('cannot get userInfo with invalid token (wrong token)', function (done) {
+        request.get(SERVER_URL + '/api/v1/user/info')
+               .set('Authorization', 'Token ' + 'x' + token.toUpperCase())
                .end(function (err, res) {
             expect(res.statusCode).to.equal(401);
             done(err);
