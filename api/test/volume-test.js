@@ -221,6 +221,7 @@ describe('Volume', function () {
         var vol;
 
         before(function (done) {
+            this.timeout(5000);
             User.create(TEST_USERNAME_0, TEST_PASSWORD_0, 'xx@xx.xx', {}, function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
@@ -329,6 +330,7 @@ describe('Volume', function () {
         });
 
         after(function (done) {
+            this.timeout(5000);
             vol.destroy(TEST_USER_0, TEST_PASSWORD_0, function (error) {
                 expect(error).not.to.be.ok();
                 done();
