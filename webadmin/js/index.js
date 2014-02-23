@@ -3,13 +3,13 @@
 /* global angular:false */
 
 // create main application module
-var app = angular.module('YellowTent', ['ngRoute', 'ngAnimate', 'ui.bootstrap', 'base64', 'clientFactory']);
+var app = angular.module('YellowTent', ['ngRoute', 'ngAnimate', 'ui.bootstrap', 'base64', 'clientService', 'spinnerFactory']);
 
 // setup all major application routes
 app.config(function ($routeProvider) {
     $routeProvider.when('/', {
-        controller: 'LoginController',
-        templateUrl: 'partials/login.html'
+        controller: 'SplashController',
+        templateUrl: 'partials/splash.html'
     }).when('/login', {
         controller: 'LoginController',
         templateUrl: 'partials/login.html'

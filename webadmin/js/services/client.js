@@ -2,7 +2,7 @@
 
 /* global angular:false */
 
-angular.module('clientFactory', [])
+angular.module('clientService', [])
 .service('Client', function ($http, $base64) {
 
     function ClientError(statusCode, message) {

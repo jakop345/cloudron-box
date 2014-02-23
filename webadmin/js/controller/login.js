@@ -7,7 +7,20 @@ function LoginController ($scope, Client) {
     $scope.password = '';
     $scope.remember = true;
     $scope.disabled = false;
-    $scope.error ={};
+    $scope.error = {};
+
+    // basically perform passive auth
+    if (Client.getToken()) {
+        Client.tokenLogin(Client.getToken(), function (error, token) {
+            if (error) {
+                console.error('Unable to login using previous token.', error);
+                return;
+            }
+
+            console.debug('Successfully logged in. New token', token);
+            window.location.href = '#/maintabview';
+        });
+    }
 
     $scope.submit = function () {
         console.debug('Try to login with user', $scope.username);
