@@ -13,10 +13,10 @@ var Server = require('../api/server.js'),
     os = require('os'),
     expect = require('expect.js');
 
-var SERVER_URL = 'http://localhost:3000';
+var SERVER_URL = 'http://localhost:3456';
 var BASE_DIR = path.resolve(os.tmpdir(), 'volume-test-' + crypto.randomBytes(4).readUInt32LE(0));
 var CONFIG = {
-    port: 3000,
+    port: 3456,
     dataRoot: path.resolve(BASE_DIR, 'data'),
     configRoot: path.resolve(BASE_DIR, 'config'),
     mountRoot: path.resolve(BASE_DIR, 'mount'),
