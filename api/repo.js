@@ -26,6 +26,7 @@ function RepoError(code, msg) {
 util.inherits(RepoError, Error);
 
 var NULL_SHA1 = '0000000000000000000000000000000000000000';
+var EMPTY_DIR_PLACEHOLDER = '____unlikely_filename_is_unlikely____';
 
 function isDir(mode) {
     return (mode & constants.S_IFMT) === constants.S_IFDIR;
@@ -39,7 +40,7 @@ function isFile(mode) {
 function Repo(rootDir, tmpDir) {
     this.gitDir = path.join(rootDir, '.git'); // must not contain trailing slash
     this.checkoutDir = rootDir; // must not contain trailing slash
-    this.tmpDir = tmpDir;
+    this.tmpDir = tmpDir; // must not contain trailing slash
 }
 
 // run arbitrary commands on this repo
@@ -222,7 +223,12 @@ Repo.prototype.getTree = function (treeish, options, callback) {
     this.git(['ls-tree', '-z', '-l', listSubtrees, treeish, '--', path], function (err, out) {
         if (err) return callback(err);
         var lines = out.split('\0');
-        lines.forEach(function (line) { if (line.length !== 0) tree.entries.push(parseTreeLine(line)); });
+        lines.forEach(function (line) {
+            if (line.length === 0) return;
+            var entry = parseTreeLine(line);
+            if (entry.name === EMPTY_DIR_PLACEHOLDER) return;
+            tree.entries.push(entry);
+        });
         callback(null, tree);
     });
 };
@@ -236,7 +242,8 @@ Repo.prototype.getTree = function (treeish, options, callback) {
  *   sha1 - string
  *   mtime - integer
  * options can contain:
- *   path - filter by path
+ *   path - filter by path. directories must have a trailing slash to have their
+ *     entries listed. otherwise, it just returns info about the dir itself.
  *   listSubtrees - recursive list all files below path. When true,
  *     directories are not listed.
  */
@@ -342,7 +349,7 @@ Repo.prototype._createCommit = function (message, callback) {
 function createTempFileSync(dir, contents) {
     // dir is required because renames won't work across file systems
     var filename = path.join(dir, '___addFile___' + crypto.randomBytes(4).readUInt32LE(0));
-    fs.writeFileSync(filename, contents);
+    safe.fs.writeFileSync(filename, contents);
     return filename;
 }
 
@@ -415,10 +422,12 @@ function parseIndexLines(out) {
         var sizePos = out.indexOf(':', line5StartPos) + 1;
 
         var entry = parseIndexLine(out.slice(startPos, fileNameEndPos));
-        entry.mtime = parseInt(out.substr(mtimePos, 15), 10);
-        entry.size = parseInt(out.substr(sizePos, 15), 10);
+        if (entry.name !== EMPTY_DIR_PLACEHOLDER) {
+            entry.mtime = parseInt(out.substr(mtimePos, 15), 10);
+            entry.size = parseInt(out.substr(sizePos, 15), 10);
 
-        entries.push(entry);
+            entries.push(entry);
+        }
 
         startPos = out.indexOf('\n', line5StartPos) + 1;
     }
@@ -463,6 +472,7 @@ Repo.prototype.addFileWithData = function (file, data, options, callback) {
 /*
  * Adds a file to the repo. Fails if a file already exists in the repo
  * Options can contain:
+ *    file - path to a file that will be moved to the repo
  *    message - commit message. default: 'Add <filename>'
  */
 Repo.prototype.addFile = function (file, options, callback) {
@@ -839,7 +849,7 @@ Repo.prototype.diffTree = function (treeish1 /* from */, treeish2 /* to */, call
 
 /*
  * Returns the metadata of a file or directory. Options can contain:
- *    rev: the revision of the file/directory
+ *    rev: the revision of the file/directory (default: HEAD)
  *    hash: the hash (FIXME: explain better)
  * The returned metadata contains:
  *    name, path, mode, size, sha1, mtime (only for HEAD)
@@ -951,3 +961,19 @@ Repo.prototype.putFile = function (filePath, newFile, options, callback) {
         });
     });
 };
+
+/*
+ * Creates an empty directory at \arg dir.
+ */
+Repo.prototype.createDirectory = function (dir, callback) {
+    assert(typeof dir === 'string');
+
+    var options = {
+        message: 'Add empty directory ' + dir,
+    };
+
+    this.addFileWithData(path.join(dir, EMPTY_DIR_PLACEHOLDER), 'placeholder', options, function (err, ignoredEntry) {
+        callback(err, null /* ignore entry since it is the file entry and not dir entry */);
+    });
+};
+

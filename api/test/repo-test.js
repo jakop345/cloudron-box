@@ -13,18 +13,23 @@ var Repo = require('../repo'),
     rimraf = require('rimraf'),
     assert = require('assert'),
     expect = require('expect.js'),
-    constants = require('constants');
+    constants = require('constants'),
+    mkdirp = require('mkdirp');
 
 var EMAIL = 'no@bo.dy';
 var USERNAME = 'nobody';
 // \u00A3 - pound, \u20AC - euro
 var SPECIAL_FILE = 'SPECIAL \t\n~`!@#$%^&*()_+-=[]{}|,.<>?\u00A3\u20AC ';
 
-var tmpdirname = 'repo-test-' + crypto.randomBytes(4).readUInt32LE(0);
+var tmpdirname = 'repo-tmp-' + crypto.randomBytes(4).readUInt32LE(0);
 var tmpdir = path.join(os.tmpdir(), tmpdirname);
 var rootdirname = 'repo-test-' + crypto.randomBytes(4).readUInt32LE(0);
 var rootdir = path.join(os.tmpdir(), rootdirname);
 var repo = new Repo(rootdir, tmpdir);
+
+function setup(done) {
+    mkdirp(tmpdir, done);
+}
 
 function cleanup(done) {
     rimraf(tmpdir, function (error) {
@@ -35,6 +40,7 @@ function cleanup(done) {
 }
 
 describe('Repo', function () {
+    before(setup);
     after(cleanup);
 
     it('create', function (done) {
@@ -517,6 +523,61 @@ describe('Repo', function () {
             done();
         });
     });
+
+    it('createDirectory - valid directory', function (done) {
+        repo.createDirectory('dummy_dir', function (err, entry) {
+            expect(err).to.be(null);
+            expect(entry).to.be(null); // no dir entry provided yet
+            done();
+        });
+    });
+
+    it('createDirectory - overwrite file', function (done) {
+        repo.createDirectory('NEWFILE', function (err, entry) {
+            expect(err.code).to.be('ENOTDIR');
+            done();
+        });
+    });
+
+    it('createDirectory - list empty directory', function (done) {
+        repo.listFiles({ path: 'dummy_dir/', listSubtrees: false }, function (err, tree) {
+            expect(err).to.be(null);
+            expect(tree.entries).to.be.empty();
+            done();
+        });
+    });
+
+    it('createDirectory - metadata of empty directory', function (done) {
+        repo.metadata('dummy_dir', function (err, metadata, hash) {
+            expect(err).to.be(null);
+            expect(metadata.length).to.be(0);
+            done();
+        });
+    });
+
+    it('createDirectory - add file to empty directory', function (done) {
+        repo.addFileWithData('dummy_dir/dummy_file', 'data', function (err, entry) {
+            expect(err).to.be(null);
+            done();
+        });
+    });
+
+    it('createDirectory - listFiles must exclude magic file', function (done) {
+        repo.listFiles({ path: 'dummy_dir/', listSubtrees: false }, function (err, tree) {
+            expect(tree.entries.length).to.be(1);
+            expect(tree.entries[0].name).to.be('dummy_file');
+            done();
+        });
+    });
+
+    it('createDirectory - metadata must exclude magic file', function (done) {
+        repo.metadata('dummy_dir/', function (err, metadata, hash) {
+            expect(metadata.length).to.be(1);
+            expect(metadata[0].name).to.be('dummy_file');
+            done();
+        });
+    });
+
 
     it('_absoluteFilePath', function (done) {
         expect(repo._absoluteFilePath('foo')).to.equal(path.join(repo.checkoutDir, 'foo'));

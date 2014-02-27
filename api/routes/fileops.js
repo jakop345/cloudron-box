@@ -6,7 +6,8 @@ var HttpError = require('../httperror'),
 exports = module.exports = {
     remove: remove,
     move: move,
-    copy: copy
+    copy: copy,
+    createDirectory: createDirectory
 };
 
 /*
@@ -93,3 +94,25 @@ function copy(req, res, next) {
         next(new HttpSuccess(200, newEntry));
     });
 }
+
+/*
+ * Creates an empty directory
+ * @bodyparam {string} path The path to create
+ *
+ * The create succeeds if there is no file or dir already in that location
+ */
+function createDirectory(req, res, next) {
+    var path = req.body.path;
+    var repo = req.volume.repo;
+
+    if (!path) return next(new HttpError(400, 'path not specified'));
+    repo.createDirectory(path, function (err, newEntry) {
+        if (err) {
+            if (err.code === 'EEXIST') return next(new HttpError(409, 'Already exists'));
+            if (err.code === 'ENOTDIR') return next(new HttpError(409, 'path conflicts with existing file'));
+            return next(new HttpError(500, err.message));
+        }
+        next(new HttpSuccess(200, newEntry));
+    });
+}
+
