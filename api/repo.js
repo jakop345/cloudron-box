@@ -968,12 +968,15 @@ Repo.prototype.putFile = function (filePath, newFile, options, callback) {
 Repo.prototype.createDirectory = function (dir, callback) {
     assert(typeof dir === 'string');
 
+    var that = this;
     var options = {
         message: 'Add empty directory ' + dir,
     };
 
     this.addFileWithData(path.join(dir, EMPTY_DIR_PLACEHOLDER), 'placeholder', options, function (err, ignoredEntry) {
-        callback(err, null /* ignore entry since it is the file entry and not dir entry */);
+        if (err) return callback(err);
+        /* get the dir entry as ignoredEntry is the placeholder file entry */
+        that.fileEntry(dir, 'HEAD', callback);
     });
 };
 

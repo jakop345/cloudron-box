@@ -527,7 +527,8 @@ describe('Repo', function () {
     it('createDirectory - valid directory', function (done) {
         repo.createDirectory('dummy_dir', function (err, entry) {
             expect(err).to.be(null);
-            expect(entry).to.be(null); // no dir entry provided yet
+            expect(entry).to.not.be(null);
+            expect(entry.name).to.be('dummy_dir');
             done();
         });
     });
