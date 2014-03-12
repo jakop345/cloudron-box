@@ -27,7 +27,7 @@ var argv = optimist.usage('Usage: $0 --dataRoot <directory>')
     .describe('h', 'Show this help.')
 
     .alias('k', 'cert')
-    .default('k', null)
+    .default('k', 'test/cert')
     .describe('k', 'Directory where cert.pem and cert.key are located')
     .string('k')
 
