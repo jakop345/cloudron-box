@@ -77,6 +77,8 @@ function checkObjectHasOnly(obj, properties) {
 }
 
 describe('Server Volume API', function () {
+    var volume;
+
     this.timeout(5000);
 
     before(setup);
@@ -109,6 +111,10 @@ describe('Server Volume API', function () {
                .send({ password: PASSWORD, name: TESTVOLUME })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(201);
+
+            // cache it for later use
+            volume = res.body;
+
             done(err);
         });
     });
@@ -123,14 +129,14 @@ describe('Server Volume API', function () {
             expect(res.statusCode).to.equal(200);
 
             // check for result object sanity
-            checkObjectHasOnly(res.body.volumes[0], {name: 'string', isMounted: 'boolean'});
+            checkObjectHasOnly(res.body.volumes[0], {name: 'string', isMounted: 'boolean', id: 'string'});
 
             done(err);
         });
     });
 
     it('listFiles', function (done) {
-        request.get(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/list')
+        request.get(SERVER_URL + '/api/v1/volume/' + volume.id + '/list')
                .auth(USERNAME, PASSWORD)
                .end(function (err, res) {
             var foundReadme = false;
@@ -151,7 +157,7 @@ describe('Server Volume API', function () {
     });
 
     it('unmount volume', function (done) {
-        request.post(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/unmount')
+        request.post(SERVER_URL + '/api/v1/volume/' + volume.id + '/unmount')
                .auth(USERNAME, PASSWORD)
                .send({ password: PASSWORD })
                .end(function (err, res) {
@@ -161,7 +167,7 @@ describe('Server Volume API', function () {
     });
 
     it('volume should not be mounted', function (done) {
-        request.get(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/ismounted')
+        request.get(SERVER_URL + '/api/v1/volume/' + volume.id + '/ismounted')
                .auth(USERNAME, PASSWORD)
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
@@ -171,7 +177,7 @@ describe('Server Volume API', function () {
     });
 
     it('mount volume should fail due to wrong password', function (done) {
-        request.post(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/mount')
+        request.post(SERVER_URL + '/api/v1/volume/' + volume.id + '/mount')
                .auth(USERNAME, PASSWORD)
                .send({ password: 'some random password' })
                .end(function (err, res) {
@@ -181,7 +187,7 @@ describe('Server Volume API', function () {
     });
 
     it('mount volume', function (done) {
-        request.post(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/mount')
+        request.post(SERVER_URL + '/api/v1/volume/' + volume.id + '/mount')
                .auth(USERNAME, PASSWORD)
                .send({ password: PASSWORD })
                .end(function (err, res) {
@@ -191,7 +197,7 @@ describe('Server Volume API', function () {
     });
 
     it('volume should be mounted', function (done) {
-        request.get(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/ismounted')
+        request.get(SERVER_URL + '/api/v1/volume/' + volume.id + '/ismounted')
                .auth(USERNAME, PASSWORD)
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
@@ -201,7 +207,7 @@ describe('Server Volume API', function () {
     });
 
     it('destroy fails due to missing password', function(done) {
-        request.post(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/delete')
+        request.post(SERVER_URL + '/api/v1/volume/' + volume.id + '/delete')
                .auth(USERNAME, PASSWORD)
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
@@ -210,7 +216,7 @@ describe('Server Volume API', function () {
     });
 
     it('destroy', function(done) {
-        request.post(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/delete')
+        request.post(SERVER_URL + '/api/v1/volume/' + volume.id + '/delete')
                .auth(USERNAME, PASSWORD)
                .send({ password: PASSWORD })
                .end(function (err, res) {
