@@ -24,15 +24,18 @@ function VolumeListController ($scope, $modal, Client) {
     };
 
     $scope.deleteVolume = function (volume) {
-        window.location.href = '#/volumedelete?volume=' + volume.id + '&volumeName=' + encodeURIComponent(volume.name);
+        // TODO urlencode?
+        window.location.href = '#/volumedelete?volume=' + volume;
     };
 
     $scope.mountVolume = function (volume) {
-        window.location.href = '#/volumemount?volume=' + volume.id + '&volumeName=' + encodeURIComponent(volume.name);
+        // TODO urlencode?
+        window.location.href = '#/volumemount?volume=' + volume;
     };
 
     $scope.unmountVolume = function (volume) {
-        window.location.href = '#/volumeunmount?volume=' + volume.id + '&volumeName=' + encodeURIComponent(volume.name);
+        // TODO urlencode?
+        window.location.href = '#/volumeunmount?volume=' + volume;
     };
 
     refresh();

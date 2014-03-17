@@ -20,8 +20,8 @@
                         The volume is <span ng-hide="volume.isMounted">not</span> mounted.
                     </div>
                     <div class="col-xs-3">
-                        <button class="btn btn-sm btn-block pull-right" ng-click="mountVolume(volume)" ng-hide="volume.isMounted">Mount</span></button>
-                        <button class="btn btn-sm btn-block pull-right" ng-click="unmountVolume(volume)" ng-show="volume.isMounted">Unmount</span></button>
+                        <button class="btn btn-sm btn-block pull-right" ng-click="mountVolume(volume.name)" ng-hide="volume.isMounted">Mount</span></button>
+                        <button class="btn btn-sm btn-block pull-right" ng-click="unmountVolume(volume.name)" ng-show="volume.isMounted">Unmount</span></button>
                     </div>
                 </div>
                 <div class="row">
@@ -29,7 +29,7 @@
                         Remove access to this volume
                     </div>
                     <div class="col-xs-3">
-                        <button class="btn btn-sm btn-block pull-right" ng-click="deleteVolume(volume)"><span class="glyphicon glyphicon glyphicon-trash"></span></button>
+                        <button class="btn btn-sm btn-block pull-right" ng-click="deleteVolume(volume.name)"><span class="glyphicon glyphicon glyphicon-trash"></span></button>
                     </div>
                 </div>
                 <form role="form" ng-submit="shareWithUser()">
