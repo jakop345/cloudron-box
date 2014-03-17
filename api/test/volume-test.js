@@ -83,7 +83,7 @@ describe('Volume', function () {
             });
         });
 
-        xit('fails because it already exists', function (done) {
+        it('fails because it already exists', function (done) {
             volume.create(VOLUME, USER, PASSWORD, config, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
@@ -104,7 +104,7 @@ describe('Volume', function () {
         });
     });
 
-    describe('get', function () {
+    describe('get by id', function () {
         it('succeeds', function (done) {
             volume.get(vol1.id, USERNAME, config, function (error, result) {
                 expect(error).to.not.be.ok();
@@ -130,6 +130,24 @@ describe('Volume', function () {
                 expect(result[0]).to.be.an(volume.Volume);
                 expect(result[1]).to.be.an(volume.Volume);
 
+                done();
+            });
+        });
+    });
+
+    describe('get by name', function () {
+        it('fails, no such volume', function () {
+            volume.getByName('some string', USERNAME, config, function (error, result) {
+                expect(error).to.be.ok();
+                expect(result).to.not.be.ok();
+            });
+        });
+
+        it('succeeds', function (done) {
+            volume.getByName(VOLUME, USERNAME, config, function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result).to.be.ok();
+                expect(result).to.be.an(volume.Volume);
                 done();
             });
         });
@@ -247,14 +265,14 @@ describe('Volume', function () {
 
         });
 
-        it('fails to add user due to wrong arumgent count', function () {
+        it('fails to add user due to wrong argument count', function () {
             expect(function () { vol.addUser(); }).to.throwError();
             expect(function () { vol.addUser(TEST_USER_0); }).to.throwError();
             expect(function () { vol.addUser(TEST_USER_0, TEST_PASSWORD_0); }).to.throwError();
             expect(function () { vol.addUser(TEST_USER_0, TEST_USER_1, TEST_PASSWORD_0); }).to.throwError();
         });
 
-        it('fails to add user due to wrong arumgents', function () {
+        it('fails to add user due to wrong arguments', function () {
             expect(function () { vol.addUser('some string', TEST_PASSWORD_0, function () {}, 1337); }).to.throwError();
             expect(function () { vol.addUser(TEST_USER_0, 1337, 'foobar', function () {}); }).to.throwError();
             expect(function () { vol.addUser(TEST_USER_0, TEST_PASSWORD_0, 'some string', []); }).to.throwError();
@@ -284,12 +302,12 @@ describe('Volume', function () {
             });
         });
 
-        it('fails to remove user due to wrong arumgent count', function () {
+        it('fails to remove user due to wrong argument count', function () {
             expect(function () { vol.removeUser(); }).to.throwError();
             expect(function () { vol.removeUser(TEST_USER_1); }).to.throwError();
         });
 
-        it('fails to remove user due to wrong arumgents', function () {
+        it('fails to remove user due to wrong arguments', function () {
             expect(function () { vol.removeUser('some string', function () {}); }).to.throwError();
             expect(function () { vol.removeUser(1337, function () {}); }).to.throwError();
             expect(function () { vol.removeUser(TEST_USER_0, 1337); }).to.throwError();
@@ -299,17 +317,15 @@ describe('Volume', function () {
         it('fails to remove user due to unknown user', function (done) {
             var unknownUser = { username: 'someuser', email: 'xx@xx.xx' };
 
-            vol.removeUser(unknownUser, function (error, result) {
+            vol.removeUser(unknownUser, function (error) {
                 expect(error).to.be.ok();
-                expect(result).to.not.be.ok();
                 done();
             });
         });
 
         it('succeeds to remove user', function (done) {
-            vol.removeUser(TEST_USER_1, function (error, result) {
+            vol.removeUser(TEST_USER_1, function (error) {
                 expect(error).to.not.be.ok();
-                expect(result).to.be.ok();
                 done();
             });
         });
