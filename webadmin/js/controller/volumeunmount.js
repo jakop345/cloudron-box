@@ -3,13 +3,14 @@
 function VolumeUnmountController ($scope, $routeParams, Client) {
     console.debug('VolumeUnmountController');
 
-    if (!$routeParams.volume) {
+    if (!$routeParams.volume || !$routeParams.volumeName) {
         console.error('No volume provided.');
         return window.location.replace('#/maintabview');
     }
 
     $scope.volume = {};
-    $scope.volume.name = $routeParams.volume;
+    $scope.volume.id = $routeParams.volume;
+    $scope.volume.name = $routeParams.volumeName;
     $scope.volume.password = '';
     $scope.disabled = false;
 
@@ -17,7 +18,7 @@ function VolumeUnmountController ($scope, $routeParams, Client) {
         console.debug('Try to unmount volume %s.', $scope.volume.name);
 
         $scope.disabled = true;
-        Client.unmount($scope.volume.name, $scope.volume.password, function (error, result) {
+        Client.unmount($scope.volume.id, $scope.volume.password, function (error, result) {
             if (error) {
                 console.error('Unable to unmount volume.', error);
                 $scope.disabled = false;

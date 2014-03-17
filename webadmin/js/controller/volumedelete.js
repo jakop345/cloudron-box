@@ -3,12 +3,13 @@
 function VolumeDeleteController ($scope, $routeParams, Client) {
     console.debug('VolumeDeleteController');
 
-    if (!$routeParams.volume) {
+    if (!$routeParams.volume || !$routeParams.volumeName) {
         console.error('No volume provided.');
         return window.location.replace('#/maintabview');
     }
 
-    $scope.volumeName = $routeParams.volume;
+    $scope.volumeId = $routeParams.volume;
+    $scope.volumeName = $routeParams.volumeName;
 
     $scope.volume = {};
     $scope.volume.name = '';
@@ -28,13 +29,13 @@ function VolumeDeleteController ($scope, $routeParams, Client) {
         }
 
         $scope.disabled = true;
-        Client.unmount($scope.volume.name, $scope.volume.password, function (error, result) {
+        Client.unmount($scope.volumeId, $scope.volume.password, function (error, result) {
             if (error) {
                 console.warn('Error unmounting the volume', error);
                 // in this case we still try to delete the volume
             }
 
-            Client.deleteVolume($scope.volume.name, $scope.volume.password, function (error, result) {
+            Client.deleteVolume($scope.volumeId, $scope.volume.password, function (error, result) {
                 if (error) {
                     if (error.statusCode === 403) {
                         $scope.error.password = 'Password is wrong';
