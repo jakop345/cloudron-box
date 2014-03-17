@@ -27,7 +27,6 @@ var CONFIG = {
 
 var USERNAME = 'admin', PASSWORD = 'admin', EMAIL ='silly@me.com';
 var TESTVOLUME = 'testvolume';
-var volume;
 var server;
 
 function setup(done) {
@@ -44,9 +43,7 @@ function setup(done) {
                        .auth(USERNAME, PASSWORD)
                        .send({ password: PASSWORD, name: TESTVOLUME })
                        .end(function (err, res) {
-                    if (err) done(err);
-                    volume = res.body;
-                    done();
+                    done(err);
                 });
             });
         });
@@ -55,7 +52,7 @@ function setup(done) {
 
 // remove all temporary folders
 function cleanup(done) {
-    request.post(SERVER_URL + '/api/v1/volume/' + volume.id + '/delete')
+    request.post(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/delete')
          .auth(USERNAME, PASSWORD)
          .send({ password: PASSWORD })
          .end(function (err, res) {
@@ -81,7 +78,7 @@ describe('Server File API', function () {
     after(cleanup);
 
     it('read', function (done) {
-        request.get(SERVER_URL + '/api/v1/file/' + volume.id + '/README.md')
+        request.get(SERVER_URL + '/api/v1/file/' + TESTVOLUME + '/README.md')
                .auth(USERNAME, PASSWORD)
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
@@ -93,7 +90,7 @@ describe('Server File API', function () {
     var serverRevision = '', newFileRev = '';
 
     it('put - add', function (done) {
-        request.put(SERVER_URL + '/api/v1/file/' + volume.id + '/NEWFILE')
+        request.put(SERVER_URL + '/api/v1/file/' + TESTVOLUME + '/NEWFILE')
                .auth(USERNAME, PASSWORD)
                .field('data', JSON.stringify({ parentRev: '' }))
                .attach('file', tempFile('BLAH BLAH'))
@@ -112,7 +109,7 @@ describe('Server File API', function () {
             { path: 'NEWFILE', sha1: '', mtime: now()+10, size: 20 } // file changed, so no sha1
         ];
 
-        request.post(SERVER_URL + '/api/v1/sync/' + volume.id + '/diff')
+        request.post(SERVER_URL + '/api/v1/sync/' + TESTVOLUME + '/diff')
                .auth(USERNAME, PASSWORD)
                .send({ index: index, lastSyncRevision: serverRevision })
                .end(function (err, res) {
@@ -132,7 +129,7 @@ describe('Server File API', function () {
     });
 
     it('put - update', function (done) {
-        request.put(SERVER_URL + '/api/v1/file/' + volume.id + '/NEWFILE')
+        request.put(SERVER_URL + '/api/v1/file/' + TESTVOLUME + '/NEWFILE')
                .auth(USERNAME, PASSWORD)
                .field('data', JSON.stringify({ parentRev: newFileRev }))
                .attach('file', tempFile('BLAH BLAH2'))
@@ -148,7 +145,7 @@ describe('Server File API', function () {
     });
 
     it('delta - virgin client', function (done) {
-        request.post(SERVER_URL + '/api/v1/sync/' + volume.id + '/delta')
+        request.post(SERVER_URL + '/api/v1/sync/' + TESTVOLUME + '/delta')
                .auth(USERNAME, PASSWORD)
                .query({ clientRevision: '' }) // virgin client
                .end(function (err, res) {
@@ -163,7 +160,7 @@ describe('Server File API', function () {
     });
 
     it('delta - uptodate client', function (done) {
-        request.post(SERVER_URL + '/api/v1/sync/' + volume.id + '/delta')
+        request.post(SERVER_URL + '/api/v1/sync/' + TESTVOLUME + '/delta')
                .auth(USERNAME, PASSWORD)
                .query({ clientRevision: serverRevision }) // uptodate client
                .end(function (err, res) {
@@ -174,7 +171,7 @@ describe('Server File API', function () {
     });
 
     it('delta - invalid cursor', function (done) {
-        request.post(SERVER_URL + '/api/v1/sync/' + volume.id + '/delta')
+        request.post(SERVER_URL + '/api/v1/sync/' + TESTVOLUME + '/delta')
                .auth(USERNAME, PASSWORD)
                .query({ clientRevision: 'cottoneyedjoe' })
                .end(function (err, res) {
@@ -184,7 +181,7 @@ describe('Server File API', function () {
     });
 
     it('revisions', function (done) {
-        request.get(SERVER_URL + '/api/v1/revisions/' + volume.id + '/NEWFILE')
+        request.get(SERVER_URL + '/api/v1/revisions/' + TESTVOLUME + '/NEWFILE')
                .auth(USERNAME, PASSWORD)
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
@@ -204,7 +201,7 @@ describe('Server File API', function () {
     var treeHash;
 
     it('metadata - root, no rev', function (done) {
-        request.get(SERVER_URL + '/api/v1/metadata/' + volume.id + '/')
+        request.get(SERVER_URL + '/api/v1/metadata/' + TESTVOLUME + '/')
                .auth(USERNAME, PASSWORD)
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
@@ -222,7 +219,7 @@ describe('Server File API', function () {
     });
 
     it('metadata - root, no rev, hash', function (done) {
-        request.get(SERVER_URL + '/api/v1/metadata/' + volume.id + '/')
+        request.get(SERVER_URL + '/api/v1/metadata/' + TESTVOLUME + '/')
                .auth(USERNAME, PASSWORD)
                .query({ hash: treeHash })
                .end(function (err, res) {
@@ -233,7 +230,7 @@ describe('Server File API', function () {
     });
 
     it('metadata - file, no rev', function (done) {
-        request.get(SERVER_URL + '/api/v1/metadata/' + volume.id + '/NEWFILE')
+        request.get(SERVER_URL + '/api/v1/metadata/' + TESTVOLUME + '/NEWFILE')
                .auth(USERNAME, PASSWORD)
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
@@ -248,7 +245,7 @@ describe('Server File API', function () {
     });
 
     it('metadata - file, rev', function (done) {
-        request.get(SERVER_URL + '/api/v1/metadata/' + volume.id + '/NEWFILE')
+        request.get(SERVER_URL + '/api/v1/metadata/' + TESTVOLUME + '/NEWFILE')
                .auth(USERNAME, PASSWORD)
                .query({ rev: 'HEAD'})
                .end(function (err, res) {
@@ -264,7 +261,7 @@ describe('Server File API', function () {
     });
 
     it('copy', function (done) {
-        request.post(SERVER_URL + '/api/v1/fileops/' + volume.id + '/copy')
+        request.post(SERVER_URL + '/api/v1/fileops/' + TESTVOLUME + '/copy')
                .auth(USERNAME, PASSWORD)
                .send({ from_path: 'README.md', to_path: 'README.md.copy', rev: '*' })
                .end(function (err, res) {
@@ -276,7 +273,7 @@ describe('Server File API', function () {
     });
 
     it('move', function (done) {
-        request.post(SERVER_URL + '/api/v1/fileops/' + volume.id + '/move')
+        request.post(SERVER_URL + '/api/v1/fileops/' + TESTVOLUME + '/move')
                .auth(USERNAME, PASSWORD)
                .send({ from_path: 'README.md.copy', to_path: 'README.md.move', rev: '100b93820ade4c16225673b4ca62bb3ade63c313' })
                .end(function (err, res) {
@@ -288,7 +285,7 @@ describe('Server File API', function () {
     });
 
     it('delete - no revision', function (done) {
-        request.post(SERVER_URL + '/api/v1/fileops/' + volume.id + '/delete')
+        request.post(SERVER_URL + '/api/v1/fileops/' + TESTVOLUME + '/delete')
                .auth(USERNAME, PASSWORD)
                .send({ path: 'README.md' })
                .end(function (err, res) {
@@ -298,7 +295,7 @@ describe('Server File API', function () {
     });
 
     it('delete - wildcard revision', function (done) {
-        request.post(SERVER_URL + '/api/v1/fileops/' + volume.id + '/delete')
+        request.post(SERVER_URL + '/api/v1/fileops/' + TESTVOLUME + '/delete')
                .auth(USERNAME, PASSWORD)
                .send({ path: 'README.md', rev: '*' })
                .end(function (err, res) {
@@ -309,7 +306,7 @@ describe('Server File API', function () {
     });
 
     it('delete - non-wildcard revision', function (done) {
-        request.post(SERVER_URL + '/api/v1/fileops/' + volume.id + '/delete')
+        request.post(SERVER_URL + '/api/v1/fileops/' + TESTVOLUME + '/delete')
                .auth(USERNAME, PASSWORD)
                .send({ path: 'NEWFILE', rev: newFileRev })
                .end(function (err, res) {
@@ -321,7 +318,7 @@ describe('Server File API', function () {
     });
 
     it('delete - non-existent path', function (done) {
-        request.post(SERVER_URL + '/api/v1/fileops/' + volume.id + '/delete')
+        request.post(SERVER_URL + '/api/v1/fileops/' + TESTVOLUME + '/delete')
                .auth(USERNAME, PASSWORD)
                .send({ path: '/this/doesnt/exist', rev: '*' })
                .end(function (err, res) {
@@ -333,7 +330,7 @@ describe('Server File API', function () {
 
     var fileRevision;
     it('put - file initial revision', function (done) {
-        request.put(SERVER_URL + '/api/v1/file/' + volume.id + '/newt')
+        request.put(SERVER_URL + '/api/v1/file/' + TESTVOLUME + '/newt')
                .auth(USERNAME, PASSWORD)
                .field('data', JSON.stringify({ }))
                .attach('file', tempFile('BLAH BLAH'))
@@ -348,7 +345,7 @@ describe('Server File API', function () {
     });
 
     it('put - file new revision', function (done) {
-        request.put(SERVER_URL + '/api/v1/file/' + volume.id + '/newt')
+        request.put(SERVER_URL + '/api/v1/file/' + TESTVOLUME + '/newt')
                .auth(USERNAME, PASSWORD)
                .field('data', JSON.stringify({ parentRev: fileRevision, overwrite: false}))
                .attach('file', tempFile('BLAH BLAH2'))
@@ -362,7 +359,7 @@ describe('Server File API', function () {
     });
 
     it('put - file conflict', function (done) {
-        request.put(SERVER_URL + '/api/v1/file/' + volume.id + '/newt')
+        request.put(SERVER_URL + '/api/v1/file/' + TESTVOLUME + '/newt')
                .auth(USERNAME, PASSWORD)
                .field('data', JSON.stringify({ parentRev: fileRevision, overwrite: false })) // old revision, so conflict
                .attach('file', tempFile('BLAH BLAH3'))

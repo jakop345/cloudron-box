@@ -49,8 +49,7 @@ function listVolumes(req, res, next) {
 
         async.map(result, function (volume, callback) {
             var ret = {};
-            ret.name = volume.name();
-            ret.id = volume.id;
+            ret.name = volume.name;
 
             volume.isMounted(function (error, result) {
                 if (error) return callback(error);
@@ -83,12 +82,7 @@ function createVolume(req, res, next) {
 
             volume.create(req.body.name, result, req.body.password, config, function (error, result) {
                 if (error) return next(new HttpError(500, 'Volume creation failed: ' + error));
-
-                var ret = {};
-                ret.name = result.name();
-                ret.id = result.id;
-
-                next(new HttpSuccess(201, ret));
+                next(new HttpSuccess(201, {}));
             });
         });
     });

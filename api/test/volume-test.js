@@ -83,7 +83,7 @@ describe('Volume', function () {
             });
         });
 
-        xit('fails because it already exists', function (done) {
+        it('fails because it already exists', function (done) {
             volume.create(VOLUME, USER, PASSWORD, config, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
@@ -106,7 +106,7 @@ describe('Volume', function () {
 
     describe('get', function () {
         it('succeeds', function (done) {
-            volume.get(vol1.id, USERNAME, config, function (error, result) {
+            volume.get(VOLUME, USERNAME, config, function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
                 expect(result).to.be.an(volume.Volume);
@@ -115,7 +115,7 @@ describe('Volume', function () {
         });
 
         it('fails, no such volume', function () {
-            volume.get('some string', USERNAME, config, function (error, result) {
+            volume.get(VOLUME_3, USERNAME, config, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
             });
