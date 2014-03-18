@@ -373,34 +373,6 @@ function parseIndexLine(line) {
     };
 }
 
-Repo.prototype._addFileAndCommit = function (file, options, callback) {
-    var that = this;
-    this.git(['add', file], function (err) {
-        if (err) return callback(err);
-        that.git(['ls-files', '-z', '-s', '--', file], function (err, out) {
-            if (err) return callback(err);
-            var fileInfo = parseIndexLine(out.slice(0, -1));
-            var message = options.message || (options._operation + ' ' + path.basename(file));
-            that._createCommit(message, function (err, commit) {
-                if (err) return callback(err);
-                callback(null, fileInfo, commit);
-            });
-        });
-    });
-};
-
-// FIXME: make stream API
-Repo.prototype._renameFileAndCommit = function (file, options, callback) {
-    var that = this;
-    var absoluteFilePath = path.join(this.checkoutDir, file);
-
-    // FIXME: make options.file come as function arg since it's mandatory param
-    fs.rename(options.file, absoluteFilePath, function (err) {
-        if (err) return callback(err);
-        that._addFileAndCommit(file, options, callback);
-    });
-};
-
 function parseIndexLines(out) {
     /*
         100644 81cc9ef1205995550f8faea11180a1ff7806ed81 0\twebadmin/volume-client.js\0ctime: 1376890412:0
@@ -437,6 +409,38 @@ function parseIndexLines(out) {
 
     return entries;
 }
+
+function parseIndexEntry(out) {
+    return parseIndexLines(out)[0];
+}
+
+Repo.prototype._addFileAndCommit = function (file, options, callback) {
+    var that = this;
+    this.git(['add', file], function (err) {
+        if (err) return callback(err);
+        that.git(['ls-files', '-z', '-s', '--debug', '--', file], function (err, out) {
+            if (err) return callback(err);
+            var fileInfo = parseIndexEntry(out);
+            var message = options.message || (options._operation + ' ' + path.basename(file));
+            that._createCommit(message, function (err, commit) {
+                if (err) return callback(err);
+                callback(null, fileInfo, commit);
+            });
+        });
+    });
+};
+
+// FIXME: make stream API
+Repo.prototype._renameFileAndCommit = function (file, options, callback) {
+    var that = this;
+    var absoluteFilePath = path.join(this.checkoutDir, file);
+
+    // FIXME: make options.file come as function arg since it's mandatory param
+    fs.rename(options.file, absoluteFilePath, function (err) {
+        if (err) return callback(err);
+        that._addFileAndCommit(file, options, callback);
+    });
+};
 
 /*
  * Returns an array of index entries. Each index entry contains:
