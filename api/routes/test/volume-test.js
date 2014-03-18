@@ -216,11 +216,11 @@ describe('Server Volume API', function () {
     });
 
     it('destroy fails due to wrong password', function(done) {
-        request.post(SERVER_URL + '/api/v1/volume/' + TESTVOLUME + '/delete')
+        request.post(SERVER_URL + '/api/v1/volume/' + volume.id + '/delete')
                .auth(USERNAME, PASSWORD)
                .send({ password: PASSWORD + PASSWORD })
                .end(function (err, res) {
-            expect(res.statusCode).to.equal(400);
+            expect(res.statusCode).to.equal(403);
             done(err);
         });
     });
