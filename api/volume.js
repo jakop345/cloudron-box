@@ -347,6 +347,22 @@ Volume.prototype.hasUserByName = function (username, callback) {
     return callback(null, (record !== null));
 };
 
+Volume.prototype.users = function (callback) {
+    ensureArgs(arguments, ['function']);
+
+    var users = this.config.get('users', null);
+    if (users === null) return callback(new VolumeError(VolumeError.INTERNAL_ERROR));
+
+    var usersArray = [];
+    for (var user in users) {
+        if (users.hasOwnProperty(user)) {
+            usersArray.push(user);
+        }
+    }
+
+    return callback(null, usersArray);
+};
+
 function listVolumes(username, config, callback) {
     ensureArgs(arguments, ['string', 'object', 'function']);
     assert(config.dataRoot);

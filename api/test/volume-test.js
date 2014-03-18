@@ -302,6 +302,17 @@ describe('Volume', function () {
             });
         });
 
+        it('can list users', function (done) {
+            vol.users(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result).to.be.an('object');
+                expect(result.length).to.be(2);
+                expect(result[0]).to.equal(TEST_USERNAME_0);
+                expect(result[1]).to.equal(TEST_USERNAME_1);
+                done();
+            });
+        });
+
         it('fails to remove user due to wrong argument count', function () {
             expect(function () { vol.removeUser(); }).to.throwError();
             expect(function () { vol.removeUser(TEST_USER_1); }).to.throwError();
