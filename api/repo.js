@@ -320,7 +320,10 @@ Repo.prototype.fileEntry = function (file, commitish, callback) {
         var entry = parseTreeLine(out.slice(0, -1));
 
         // dirs don't have mtime information
-        if (isDir(entry.mode)) return callback(null, entry);
+        if (isDir(entry.mode)) {
+            entry.mtime = 0;
+            return callback(null, entry);
+        }
 
         // TODO: This is expensive potentially. One option for HEAD is to stat the checkout
         // dir (would that work after we recreated the repo from recovery?)
