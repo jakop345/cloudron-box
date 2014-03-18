@@ -17,7 +17,10 @@ exports = module.exports = {
     unmount: unmount,
     isMounted: isMounted,
     attachVolume: attachVolume,
-    requireMountedVolume: requireMountedVolume
+    requireMountedVolume: requireMountedVolume,
+    listUsers: listUsers,
+    addUser: addUser,
+    removeUser: removeUser
 };
 
 var config;
@@ -159,5 +162,39 @@ function requireMountedVolume(req, res, next) {
         }
 
         next();
+    });
+}
+
+function listUsers(req, res, next) {
+    req.volume.users(function (error, result) {
+        if (error) return next(new HttpError(500, 'Unable to list volume users'));
+        next(new HttpSuccess(200, { users: result }));
+    });
+}
+
+function addUser(req, res, next) {
+    if (!req.body.username) return next(new HttpError(400, 'New volume username not provided'));
+
+    User.get(req.body.username, function (error, result) {
+        if (error) return next(new HttpError(404, 'User not found'));
+
+        req.volume.addUser(result, req.user, req.body.password, function (error) {
+            if (error && error.reason === VolumeError.WRONG_USER_PASSWORD) return next(new HttpError(401, 'Wrong password'));
+            if (error) return next(new HttpError(500));
+            next(new HttpSuccess(200, {}));
+        });
+    });
+}
+
+function removeUser(req, res, next) {
+    if (!req.body.password) return next(new HttpError(400, 'User password not provided'));
+
+    User.verify(req.user.username, req.body.password, function (error, result) {
+        if (error) return next(new HttpError(401, 'Wrong password'));
+
+        req.volume.removeUser(req.user, function (error, result) {
+            if (error) return next(new HttpError(401, 'User does not have access to volume'));
+            next(new HttpSuccess(200, {}));
+        });
     });
 }

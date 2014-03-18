@@ -244,30 +244,109 @@ describe('Server Volume API', function () {
         });
     });
 
-    xdescribe('multiple users', function () {
+    describe('multiple users', function () {
         var TEST_VOLUME = 'user-management-test-volume';
-        var TEST_PASSWORD_0 = 'password0';
-        var TEST_PASSWORD_1 = 'password1';
-        var TEST_USER_0 = { username: 'user0', email: 'xx@xx.xx', password: TEST_PASSWORD_0 };
-        var TEST_USER_1 = { username: 'user1', email: 'xx@xx.xx', password: TEST_PASSWORD_1 };
+        var USERNAME_2 = 'usertwo';
+        var PASSWORD_2 = 'passwordtwo';
+        var EMAIL_2 = 'email@two.com';
+
+        var volume;
 
         before(function (done) {
             this.timeout(5000); // on the Mac, creating volumes takes a lot of time on low battery
             request.post(SERVER_URL + '/api/v1/volume/create')
-                   .auth(TEST_USER_0.username, TEST_USER_0.password)
-                   .send({ password: TEST_USER_0.password, name: TEST_VOLUME })
-                   .end(function (err, res) {
-                expect(res.statusCode).to.equal(201);
-                done(err);
+            .auth(USERNAME, PASSWORD)
+            .send({ password: PASSWORD, name: TEST_VOLUME })
+            .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(201);
+
+                // cache for further use
+                volume = result.body;
+
+                request.post(SERVER_URL + '/api/v1/user/create')
+                .auth(USERNAME, PASSWORD)
+                .send({ username: USERNAME_2, password: PASSWORD_2, email: EMAIL_2 })
+                .end(function (error, result) {
+                    expect(result.statusCode).to.equal(201);
+
+                    done(error);
+                });
             });
         });
 
-        it('cannot add user due to wrong creator password', function (done) {
+        it('can list volume users', function (done) {
+            request.get(SERVER_URL + '/api/v1/volume/' + volume.id + '/users')
+            .auth(USERNAME, PASSWORD)
+            .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(200);
+                expect(result.body.users).to.be.an(Array);
+                expect(result.body.users.length).to.be(1);
 
+                done();
+            });
         });
 
-        xit('removing one user from volume does not delete it', function (done) {
+        it('cannot add user due to wrong owner password', function (done) {
+            request.post(SERVER_URL + '/api/v1/volume/' + volume.id + '/users')
+            .auth(USERNAME, PASSWORD)
+            .send({ username: USERNAME_2, password: PASSWORD + PASSWORD })
+            .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(401);
 
+                done();
+            });
+        });
+
+        it('adding second user succeeds', function (done) {
+            request.post(SERVER_URL + '/api/v1/volume/' + volume.id + '/users')
+            .auth(USERNAME, PASSWORD)
+            .send({ username: USERNAME_2, password: PASSWORD })
+            .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(200);
+
+                done();
+            });
+        });
+
+        it('can list volume updated users', function (done) {
+            request.get(SERVER_URL + '/api/v1/volume/' + volume.id + '/users')
+            .auth(USERNAME, PASSWORD)
+            .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(200);
+                expect(result.body.users).to.be.an(Array);
+                expect(result.body.users.length).to.be(2);
+
+                done();
+            });
+        });
+
+        it('removing one user fails due to wrong password', function (done) {
+            request.del(SERVER_URL + '/api/v1/volume/' + volume.id + '/users')
+            .auth(USERNAME_2, PASSWORD_2)
+            .send({ password: PASSWORD_2 + PASSWORD_2 })
+            .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(401);
+
+                done();
+            });
+        });
+
+        it('removing one user from volume succeeds', function (done) {
+            request.del(SERVER_URL + '/api/v1/volume/' + volume.id + '/users')
+            .auth(USERNAME_2, PASSWORD_2)
+            .send({ password: PASSWORD_2 })
+            .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(200);
+
+                done();
+            });
         });
     });
 });

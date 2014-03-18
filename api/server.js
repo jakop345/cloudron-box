@@ -200,6 +200,9 @@ Server.prototype._initialize = function (callback) {
         that.app.post('/api/v1/volume/:volume/mount', that._requirePassword.bind(that), routes.volume.mount);
         that.app.post('/api/v1/volume/:volume/unmount', routes.volume.unmount);
         that.app.get('/api/v1/volume/:volume/ismounted', routes.volume.isMounted);
+        that.app.get('/api/v1/volume/:volume/users', routes.volume.listUsers);
+        that.app.post('/api/v1/volume/:volume/users', routes.volume.addUser);
+        that.app.del('/api/v1/volume/:volume/users', routes.volume.removeUser);
     });
 
     this.app.set('port', that.config.port);

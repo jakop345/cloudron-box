@@ -275,8 +275,14 @@ Volume.prototype.addUser = function (newUser, owner, password, callback) {
 
     // retrieve the keypair from the authorized user
     var saltBuffer = new Buffer(owner.salt, 'hex');
-    var privateKeyPem = aes.decrypt(owner.privatePemCipher, password, saltBuffer);
-    var keyPair = ursa.createPrivateKey(privateKeyPem, password, 'utf8');
+    var keyPair = null;
+    try {
+        var privateKeyPem = aes.decrypt(owner.privatePemCipher, password, saltBuffer);
+        keyPair = ursa.createPrivateKey(privateKeyPem, password, 'utf8');
+    } catch (e) {
+        debug('Error decrypting key pair.', e);
+        return callback(new VolumeError(null, VolumeError.WRONG_USER_PASSWORD));
+    }
 
     // retrieve the volume password from the authorized user
     var volumePassword = keyPair.decrypt(ownerRecord.passwordCipher, 'hex', 'utf8');
