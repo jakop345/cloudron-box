@@ -165,6 +165,29 @@ describe('User', function () {
         });
     });
 
+    describe('retrieving', function () {
+        before(createUser);
+        after(cleanupUser);
+
+        it('fails due to non existing user', function (done) {
+            user.get('some non existing username', function (error, result) {
+                expect(error).to.be.ok();
+                expect(result).to.not.be.ok();
+
+                done();
+            });
+        });
+
+        it('succeeds', function (done) {
+            user.get(USERNAME, function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result).to.be.ok();
+
+                done();
+            });
+        });
+    });
+
     describe('password change', function () {
         before(createUser);
         after(cleanupUser);

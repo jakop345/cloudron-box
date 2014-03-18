@@ -17,6 +17,7 @@ exports = module.exports = {
     create: createUser,
     verify: verifyUser,
     remove: removeUser,
+    get: getUser,
     changePassword: changePassword,
     update: updateUser
 };
@@ -164,11 +165,17 @@ function removeUser(username, callback) {
 
     // TODO we might want to cleanup volumes assigned to this user as well - Johannes
     db.USERS_TABLE.remove(username, function (error, user) {
-        if (error) {
-            return callback(error);
-        }
-
+        if (error) return callback(error);
         callback(null, user);
+    });
+}
+
+function getUser(username, callback) {
+    ensureArgs(arguments, ['string', 'function']);
+
+    db.USERS_TABLE.get(username, function (error, result) {
+        if (error) return callback(error);
+        return callback(null, result);
     });
 }
 
