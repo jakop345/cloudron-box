@@ -54,21 +54,21 @@
 <div class="container-fluid">
   <div class="row">
     <div class="col-md-2">
-      <ul class="nav nav-pills nav-stacked">
-        <li><a href="#/volumelist">Volumes</a></li>
-        <li><a href="#/userlist">Users</a></li>
-        <li><a href="#/settings">Settings</a></li>
+      <ul class="nav nav-pills nav-stacked" ng-show="showSideBar">
+        <li><a href="#/volumelist"><span class="glyphicon glyphicon glyphicon-hdd"></span> Volumes</a></li>
+        <li><a href="#/userlist"><span class="glyphicon glyphicon-user"></span> Users</a></li>
+        <li><a href="#/settings"><span class="glyphicon glyphicon-cog"></span> Settings</a></li>
+        <li><a href="#" ng-click="logout()"><span class="glyphicon glyphicon-log-out"></span> Log Out</a></li>
       </ul>
     </div>
-    <div class="col-md-10">
+    <div class="col-md-8">
       <div ng-view id="ng-view" class="main-view"></div>
+    </div>
+    <div class="col-md-2">
+      <!-- placeholder -->
     </div>
   </div>
 </div>
-
-
-    <!-- <div class="main-container"> -->
-    <!-- </div> -->
 
 </body>
 </html>

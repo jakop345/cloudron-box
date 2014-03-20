@@ -221,6 +221,13 @@ angular.module('clientService', [])
         this._login(callback);
     };
 
+    Client.prototype.logout = function () {
+        localStorage.removeItem('token');
+        this.setToken(null);
+        this._username = '';
+        this._userInfo = null;
+    };
+
     Client.prototype.login = function (username, password, callback) {
         $http.defaults.headers.common.Authorization = 'Basic ' + $base64.encode(username + ':' + password);
         this._login(callback);

@@ -3,16 +3,20 @@
 var MainController = function ($scope, Client) {
     console.debug('MainController');
 
-    $scope.showVolumeList = function () {
-        window.location.href = '#/volumelist';
-    };
-
-    $scope.showUserList = function () {
-        window.location.href = '#/userlist';
-    };
+    $scope.$watch(function () {
+        var userInfo = Client.getUserInfo();
+        $scope.showSideBar = !!userInfo;
+        $scope.username = userInfo.username;
+    });
 
     $scope.showSettings = function () {
         window.location.href = '#/settings';
+    };
+
+    $scope.logout = function () {
+        // TODO actually perform logout on the server
+        Client.logout();
+        window.location.href = '#/';
     };
 
     Client.tokenLogin(localStorage.token, function (error, result) {
@@ -20,6 +24,8 @@ var MainController = function ($scope, Client) {
             window.location.href = '#/';
             return;
         }
+
+        $scope.showSideBar = !!Client._userInfo;
 
         // $scope.tabs.push({ title: 'Volumes', templateUrl: './partials/volumelist.html' });
         // if (Client.isAdmin()) {
