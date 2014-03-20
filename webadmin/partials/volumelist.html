@@ -1,51 +1,55 @@
 
 
-<div ng-controller="VolumeListController" class="flex-column flex-dynamic">
-    <div class="flex-row flex-static flex-margin">
-        <button class="btn btn-primary btn-sm" style="margin-right: 0px;" ng-click="createVolume()">New Volume</button>
+<div ng-controller="VolumeListController" class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <button class="btn btn-primary btn-sm" style="margin-right: 0px;" ng-click="createVolume()">New Volume</button>
+        </div>
     </div>
-    <div class="flex-dynamic flex-row flex-margin">
-        <ul class="list-group">
-            <li href="#" class="list-group-item" ng-repeat="volume in volumes">
-                <div class="list-group-item-heading row">
-                    <div class="col-xs-8">
-                        {{volume.name}}
-                    </div>
-                    <div class="col-xs-4">
-                        <progressbar class="progress-striped active" ng-show="volume.active" animate="false" value="100"><i>synchronizing...</i></progressbar>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-xs-9">
-                        The volume is <span ng-hide="volume.isMounted">not</span> mounted.
-                    </div>
-                    <div class="col-xs-3">
-                        <button class="btn btn-sm btn-block pull-right" ng-click="mountVolume(volume)" ng-hide="volume.isMounted">Mount</span></button>
-                        <button class="btn btn-sm btn-block pull-right" ng-click="unmountVolume(volume)" ng-show="volume.isMounted">Unmount</span></button>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-xs-9">
-                        Remove access to this volume
-                    </div>
-                    <div class="col-xs-3">
-                        <button class="btn btn-sm btn-block pull-right" ng-click="deleteVolume(volume)"><span class="glyphicon glyphicon glyphicon-trash"></span></button>
-                    </div>
-                </div>
-                <form role="form" ng-submit="shareWithUser()">
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="list-group">
+                <li href="#" class="list-group-item" ng-repeat="volume in volumes">
                     <div class="row">
-                        <div class="col-xs-6">
-                            Share volume with user
+                        <div class="col-xs-8">
+                            <h1>{{volume.name}}</h1>
                         </div>
-                        <div class="col-xs-5">
-                            <input type="text" class="form-control" ng-model="username" placeholder="Username" required autofocus>
-                        </div>
-                        <div class="col-xs-1">
-                            <button class="btn btn-sm pull-right" type="submit"><span class="glyphicon glyphicon glyphicon glyphicon-share"></span></button>
+                        <div class="col-xs-4">
+                            <progressbar class="progress-striped active" ng-show="volume.active" animate="false" value="100"><i>synchronizing...</i></progressbar>
                         </div>
                     </div>
-                </form>
-            </li>
-        </ul>
+                    <div class="row">
+                        <div class="col-xs-9">
+                            The volume is <span ng-hide="volume.isMounted">not</span> mounted.
+                        </div>
+                        <div class="col-xs-3">
+                            <button class="btn btn-sm btn-block pull-right" ng-click="mountVolume(volume)" ng-hide="volume.isMounted">Mount</span></button>
+                            <button class="btn btn-sm btn-block pull-right" ng-click="unmountVolume(volume)" ng-show="volume.isMounted">Unmount</span></button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-9">
+                            Remove access to this volume
+                        </div>
+                        <div class="col-xs-3">
+                            <button class="btn btn-sm btn-block pull-right" ng-click="deleteVolume(volume)"><span class="glyphicon glyphicon glyphicon-trash"></span></button>
+                        </div>
+                    </div>
+                    <form role="form" ng-submit="shareWithUser()">
+                        <div class="row">
+                            <div class="col-xs-6">
+                                Share volume with user
+                            </div>
+                            <div class="col-xs-5">
+                                <input type="text" class="form-control" ng-model="username" placeholder="Username" required autofocus>
+                            </div>
+                            <div class="col-xs-1">
+                                <button class="btn btn-sm pull-right" type="submit"><span class="glyphicon glyphicon glyphicon glyphicon-share"></span></button>
+                            </div>
+                        </div>
+                    </form>
+                </li>
+            </ul>
+        </div>
     </div>
 </div>

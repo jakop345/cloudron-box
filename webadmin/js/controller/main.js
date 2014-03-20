@@ -1,7 +1,11 @@
 'use strict';
 
-var MainController = function ($scope, Client) {
+var MainController = function ($scope, $route, Client) {
     console.debug('MainController');
+
+    $scope.isActive = function (url) {
+        return $route.current.$$route.originalPath === url;
+    };
 
     $scope.$watch(function () {
         var userInfo = Client.getUserInfo();
