@@ -5,7 +5,7 @@ function VolumeMountController ($scope, $routeParams, Client) {
 
     if (!$routeParams.volume || !$routeParams.volumeName) {
         console.error('No volume provided.');
-        return window.location.replace('#/maintabview');
+        return window.location.replace('#/volumelist');
     }
 
     $scope.volume = {};
@@ -34,7 +34,7 @@ function VolumeMountController ($scope, $routeParams, Client) {
             }
 
             console.debug('Successfully mounted volume', $scope.volume.name);
-            window.location.replace('#/maintabview');
+            window.location.replace('#/volumelist');
         });
     };
 

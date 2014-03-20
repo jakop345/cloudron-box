@@ -34,7 +34,7 @@ var SplashController = function ($scope, Client, Spinner) {
 
                 // update token
                 localStorage.token = token;
-                window.location.href = '#/maintabview';
+                window.location.href = '#/volumelist';
             });
             return;
         }

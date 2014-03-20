@@ -5,7 +5,7 @@ function UserDeleteController ($scope, $routeParams, Client) {
 
     if (!$routeParams.username) {
         console.error('No user provided.');
-        return window.location.replace('#/maintabview');
+        return window.location.replace('#/volumelist');
     }
 
     $scope.disabled = false;
@@ -40,7 +40,7 @@ function UserDeleteController ($scope, $routeParams, Client) {
             }
 
             console.debug('Successfully deleted user', $scope.form.username);
-            window.location.replace('#/maintabview');
+            window.location.replace('#/volumelist');
         });
     };
 

@@ -37,7 +37,7 @@ function VolumeCreateController ($scope, $routeParams, Client) {
             }
 
             console.debug('Successfully created volume', $scope.volume.name);
-            window.location.replace('#/maintabview');
+            window.location.replace('#/volumelist');
         });
     };
 

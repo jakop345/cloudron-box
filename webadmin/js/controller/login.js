@@ -18,7 +18,7 @@ function LoginController ($scope, Client) {
             }
 
             console.debug('Successfully logged in. New token', token);
-            window.location.href = '#/maintabview';
+            window.location.href = '#/volumelist';
         });
     }
 
@@ -44,7 +44,7 @@ function LoginController ($scope, Client) {
                 localStorage.token = token;
             }
 
-            window.location.href = '#/maintabview';
+            window.location.href = '#/volumelist';
         });
     };
 }

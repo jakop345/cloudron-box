@@ -22,6 +22,9 @@ app.config(function ($routeProvider) {
     }).when('/userpassword', {
         controller: 'UserPasswordController',
         templateUrl: 'partials/userpassword.html'
+    }).when('/userlist', {
+        controller: 'UserListController',
+        templateUrl: 'partials/userlist.html'
     }).when('/volumecreate', {
         controller: 'VolumeCreateController',
         templateUrl: 'partials/volumecreate.html'
@@ -31,11 +34,14 @@ app.config(function ($routeProvider) {
     }).when('/volumemount', {
         controller: 'VolumeMountController',
         templateUrl: 'partials/volumemount.html'
+    }).when('/volumelist', {
+        controller: 'VolumeListController',
+        templateUrl: 'partials/volumelist.html'
     }).when('/volumeunmount', {
         controller: 'VolumeUnmountController',
         templateUrl: 'partials/volumeunmount.html'
-    }).when('/maintabview', {
-        controller: 'MainTabViewController',
-        templateUrl: 'partials/maintabview.html'
+    }).when('/settings', {
+        controller: 'SettingsController',
+        templateUrl: 'partials/settings.html'
     }).otherwise({ redirectTo: '/'});
 });

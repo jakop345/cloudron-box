@@ -30,7 +30,6 @@
     <script src="js/controller/main.js"></script>
     <script src="js/controller/splash.js"></script>
     <script src="js/controller/login.js"></script>
-    <script src="js/controller/maintabview.js"></script>
     <script src="js/controller/volumelist.js"></script>
     <script src="js/controller/volumecreate.js"></script>
     <script src="js/controller/volumedelete.js"></script>
@@ -50,9 +49,13 @@
 
   </head>
 
-<body ng-app="YellowTent">
+<body ng-app="YellowTent" ng-controller="MainController">
 
-    <div class="main-container" ng-controller="MainController">
+    <button class="btn btn-sm" ng-click="showVolumeList()">Volumes</button>
+    <button class="btn btn-sm" ng-click="showUserList()">Usermanagement</button>
+    <button class="btn btn-sm" ng-click="showSettings()">Settings</button>
+
+    <div class="main-container">
         <div ng-view id="ng-view" class="main-view"></div>
     </div>
 
