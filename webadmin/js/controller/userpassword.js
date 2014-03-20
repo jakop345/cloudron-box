@@ -1,10 +1,10 @@
 'use strict';
 
-function UserPasswordController ($scope, $routeParams, client) {
+function UserPasswordController ($scope, $routeParams, Client) {
     console.debug('UserPasswordController');
 
     $scope.disabled = false;
-    $scope.user = client.getUserInfo();
+    $scope.user = Client.getUserInfo();
     $scope.currentPassword = '';
     $scope.newPassword = '';
     $scope.repeatPassword = '';
@@ -12,7 +12,7 @@ function UserPasswordController ($scope, $routeParams, client) {
     $scope.error = {};
 
     $scope.submit = function () {
-        console.debug('Try to change password for user %s on %s.', $scope.user.username, client.server);
+        console.debug('Try to change password for user %s on %s.', $scope.user.username, Client.server);
 
         $scope.error.currentPassword = null;
         $scope.error.newPassword = null;
@@ -25,7 +25,7 @@ function UserPasswordController ($scope, $routeParams, client) {
         }
 
         $scope.disabled = true;
-        client.changePassword($scope.currentPassword, $scope.newPassword, function (error, result) {
+        Client.changePassword($scope.currentPassword, $scope.newPassword, function (error, result) {
             if (error) {
                 console.error('Unable to change password.', error);
 
