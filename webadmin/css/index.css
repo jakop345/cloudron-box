@@ -245,6 +245,8 @@ li.active > a:hover, .nav-pills > li.active > a:focus {
 
 .nav > li > a:hover, .nav > li > a:focus {
   background-color: rgba(0, 0, 0, 0.48)
+  transition-property: color, background-color;
+  transition-duration: 0.5s;
 }
 
 h1 {
