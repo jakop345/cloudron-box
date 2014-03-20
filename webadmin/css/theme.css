@@ -125,7 +125,7 @@ input[type="color"],
 }
 .btn,
 .btn-blue {
-  background: #2980B9;
+  background: rgba(56, 129, 177, 0.36) ;
 }
 .btn:hover,
 .btn-blue:hover {

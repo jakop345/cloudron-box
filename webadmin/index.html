@@ -51,13 +51,24 @@
 
 <body ng-app="YellowTent" ng-controller="MainController">
 
-    <button class="btn btn-sm" ng-click="showVolumeList()">Volumes</button>
-    <button class="btn btn-sm" ng-click="showUserList()">Usermanagement</button>
-    <button class="btn btn-sm" ng-click="showSettings()">Settings</button>
-
-    <div class="main-container">
-        <div ng-view id="ng-view" class="main-view"></div>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-2">
+      <ul class="nav nav-pills nav-stacked">
+        <li><a href="#/volumelist">Volumes</a></li>
+        <li><a href="#/userlist">Users</a></li>
+        <li><a href="#/settings">Settings</a></li>
+      </ul>
     </div>
+    <div class="col-md-10">
+      <div ng-view id="ng-view" class="main-view"></div>
+    </div>
+  </div>
+</div>
+
+
+    <!-- <div class="main-container"> -->
+    <!-- </div> -->
 
 </body>
 </html>

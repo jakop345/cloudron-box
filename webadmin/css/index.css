@@ -12,6 +12,14 @@ html, body {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+
+}
+
+body {
+  background-size: cover;
+  background-image: url('../assets/background_00.jpg');
+
+  color: black;
 }
 
 .progress {
@@ -186,14 +194,16 @@ a {
   flex: 1;
   overflow-y: scroll;
   overflow-x: hidden;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .list-group-item {
   border: 0;
+  background: transparent;
 }
 
 .list-group-item-heading {
-  background: #ddd;
+  background: rgba(255, 255, 255, 0.53);
   padding-left: 5px;
 }
 
@@ -221,4 +231,21 @@ a {
 
 .error {
   color: red;
+}
+
+.nav-pills > li > a:hover {
+  background-color: rgba(56, 129, 177, 0.36);
+  color: white;
+}
+
+.nav-pills > li.active > a {
+  background-color: rgba(56, 129, 177, 0.36);
+}
+
+li.active > a:hover, .nav-pills > li.active > a:focus {
+  background-color: rgba(0, 0, 0, 0.48)
+}
+
+.nav > li > a:hover, .nav > li > a:focus {
+  background-color: rgba(0, 0, 0, 0.48)
 }
