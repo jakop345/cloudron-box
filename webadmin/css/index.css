@@ -1,5 +1,8 @@
-
 body {
+  font-size: 16px;
+  font-family: 'Open Sans', Arial, sans-serif;
+  background: #eee;
+  line-height: 22px;
   background-size: cover;
   background-repeat: no-repeat;
   background-attachment: fixed;
@@ -7,8 +10,68 @@ body {
   color: black;
 }
 
+h1, h2, h3, h4, h5, h6 {
+  color: white;
+  font-family: 'Open Sans', Arial, sans-serif;
+  margin-top: 0;
+}
+
+h1 small, h2 small, h3 small, h4 small, h5 small, h6 small {
+  font-size: 12px;
+  margin: 0 0 0 5px;
+}
+
 h1 {
   color: #6096D6;
+  font-size: 28px;
+  line-height: 32px;
+}
+
+h2 {
+  font-size: 24px;
+  line-height: 28px;
+}
+
+h3 {
+  font-size: 18px;
+  line-height: 22px;
+}
+
+h4 {
+  font-size: 16px;
+  line-height: 20px;
+}
+
+h5 {
+  font-size: 14px;
+  line-height: 20px;
+}
+
+h6 {
+  font-size: 11px;
+  line-height: 15px;
+}
+
+strong, b {
+  color: #555;
+}
+
+a {
+  cursor: default;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+a:hover, a:focus {
+  color: #6096d6;
+  outline: none;
+}
+
+small, .small {
+  font-size: 90%;
+}
+
+.text-center {
+  text-align: center;
 }
 
 .progress {
@@ -21,11 +84,6 @@ h1 {
 
 .row {
   padding: 10px;
-}
-
-a {
-  cursor: default;
-  color: rgba(0, 0, 0, 0.5);
 }
 
 .list-group {
@@ -82,4 +140,58 @@ li.active > a:hover, .nav-pills > li.active > a:focus {
   background-color: rgba(0, 0, 0, 0.48)
   transition-property: color, background-color;
   transition-duration: 0.5s;
+}
+
+select, textarea, input, .uneditable-input {
+  font-family: 'Open Sans', Arial, sans-serif;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+}
+
+.btn {
+  font-family: 'Open Sans', Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+  border: 1px solid transparent;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+  color: #fff !important;
+  padding: 10px;
+  text-shadow: none;
+}
+
+.btn.btn-sm {
+  padding: 5px;
+}
+
+.btn.btn-large {
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+  font-size: 16px;
+  padding: 19px 12px;
+}
+
+.btn, .btn-blue {
+  background: rgba(56, 129, 177, 0.36);
+}
+
+.btn:hover, .btn-blue:hover {
+  background: #3498DB !important;
+}
+
+.btn-green {
+  background: #27AE60;
+}
+
+.btn-green:hover {
+  background: #2ECC71 !important;
 }
