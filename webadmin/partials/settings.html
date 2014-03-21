@@ -1,22 +1,39 @@
 
-<div ng-controller="SettingsController" class="container-fluid list-group">
-    <div class="row">
-        <div class="col-sm-12"><h2>Account</h2></div>
+<div ng-controller="SettingsController" class="container-fluid">
+  <div class="row">
+    <div class="col-md-12">
+      <ul class="list-group">
+        <li href="#" class="list-group-item">
+          <div class="row">
+              <div class="col-sm-12"><h1>Account</h1></div>
+          </div>
+          <div class="row">
+              <div class="col-sm-9">Username</div>
+              <div class="col-sm-3" style="text-align: center;">{{user.username}}</div>
+          </div>
+          <div class="row">
+              <div class="col-sm-9">Email</div>
+              <div class="col-sm-3" style="text-align: center;">{{user.email}}</div>
+          </div>
+          <div class="row">
+              <div class="col-sm-9">Password</div>
+              <div class="col-sm-3"><button class="btn btn-sm btn-block" ng-click="changePassword()">Change</button></div>
+          </div>
+        </li>
+        <li href="#" class="list-group-item">
+          <div class="row">
+              <div class="col-sm-12"><h1>Server</h1></div>
+          </div>
+          <div class="row">
+              <div class="col-sm-9">Storage</div>
+              <div class="col-sm-3" style="text-align: center;">50%</div>
+          </div>
+          <div class="row">
+              <div class="col-sm-9">Reboot</div>
+              <div class="col-sm-3"><button class="btn btn-sm btn-block" ng-click="">Reboot</button></div>
+          </div>
+        </li>
+      </ul>
     </div>
-    <div class="row">
-        <div class="col-sm-9">Username</div>
-        <div class="col-sm-3" style="text-align: center;">{{user.username}}</div>
-    </div>
-    <div class="row">
-        <div class="col-sm-9">Email</div>
-        <div class="col-sm-3" style="text-align: center;">{{user.email}}</div>
-    </div>
-    <div class="row">
-        <div class="col-sm-9">Password</div>
-        <div class="col-sm-3"><button class="btn btn-sm btn-block" ng-click="changePassword()">Change</button></div>
-    </div>
-    <div class="row">
-        <div class="col-sm-9" style="height: 100%; vertical-align: middle">Unlink this Computer temporarily</div>
-        <div class="col-sm-3"><button class="btn btn-sm btn-block" ng-click="logout()">Logout</button></div>
-    </div>
+  </div>
 </div>
