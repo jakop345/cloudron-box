@@ -10,7 +10,7 @@
             <li href="#" class="list-group-item" ng-repeat="user in users">
                 <div class="user-list-item row" ng-class-odd="'odd'" ng-class-even="'even'">
                     <div class="col-xs-11">
-                        {{user.username}}
+                        {{user.username}} <span ng-show="isMe(user)" class="small pull-right">This is you!</span>
                     </div>
                     <div class="col-xs-1">
                         <a href="" class="pull-right" ng-hide="user.admin" ng-click="deleteUser(user.username)"><span class="glyphicon glyphicon glyphicon-trash"></span></a>

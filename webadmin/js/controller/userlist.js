@@ -5,6 +5,10 @@ function UserListController ($scope, Client) {
 
     $scope.users = [];
 
+    $scope.isMe = function (user) {
+        return user.username === Client.getUserInfo().username;
+    };
+
     function refresh() {
         console.debug('refresh user list');
 
