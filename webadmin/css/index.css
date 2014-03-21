@@ -123,6 +123,11 @@ small, .small {
   color: red;
 }
 
+.nav {
+  position: fixed;
+  width: 15%;
+}
+
 .nav-pills > li > a:hover {
   background-color: rgba(56, 129, 177, 0.36);
   color: white;
