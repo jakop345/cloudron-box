@@ -5,7 +5,12 @@ var MainController = function ($scope, $route, Client) {
 
     $scope.isActive = function (url) {
         if (!$route.current) return false;
-        return $route.current.$$route.originalPath === url;
+        return $route.current.$$route.originalPath.indexOf(url) === 0;
+    };
+
+    $scope.href = function ($event, url) {
+        $event.preventDefault();
+        window.location.href = url;
     };
 
     $scope.$watch(function () {
@@ -13,10 +18,6 @@ var MainController = function ($scope, $route, Client) {
         $scope.showSideBar = !!userInfo;
         $scope.username = userInfo ? userInfo.username : null;
     });
-
-    $scope.showSettings = function () {
-        window.location.href = '#/settings';
-    };
 
     $scope.logout = function () {
         // TODO actually perform logout on the server
@@ -31,12 +32,5 @@ var MainController = function ($scope, $route, Client) {
         }
 
         $scope.showSideBar = !!Client._userInfo;
-
-        // $scope.tabs.push({ title: 'Volumes', templateUrl: './partials/volumelist.html' });
-        // if (Client.isAdmin()) {
-        //     $scope.tabs.push({ title: 'Users', templateUrl: './partials/userlist.html' });
-        //     // $scope.tabs.push({ title: 'Logs', templateUrl: './partials/logs.html' });
-        // }
-        // $scope.tabs.push({ title: 'Settings', templateUrl: './partials/settings.html' });
     });
 };

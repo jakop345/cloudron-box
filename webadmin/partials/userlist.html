@@ -1,22 +1,20 @@
 
 
 <div ng-controller="UserListController" class="container-fluid">
-
-    <div class="">
-        <button class="btn btn-primary btn-sm" style="margin-right: 0px;" ng-click="createUser()">New User</button>
-    </div>
-    <div class="">
-        <ul class="list-group">
-            <li href="#" class="list-group-item" ng-repeat="user in users">
-                <div class="user-list-item row" ng-class-odd="'odd'" ng-class-even="'even'">
-                    <div class="col-xs-11">
-                        {{user.username}} <span ng-show="isMe(user)" class="small pull-right">This is you!</span>
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="list-group">
+                <li href="#" class="list-group-item" ng-repeat="user in users">
+                    <div class="row" ng-class-odd="'odd'" ng-class-even="'even'">
+                        <div class="col-xs-11">
+                            {{user.username}} <span ng-show="isMe(user)" class="small pull-right">This is you!</span>
+                        </div>
+                        <div class="col-xs-1">
+                            <a href="" class="pull-right" ng-hide="user.admin" ng-click="deleteUser(user.username)"><span class="glyphicon glyphicon glyphicon-trash"></span></a>
+                        </div>
                     </div>
-                    <div class="col-xs-1">
-                        <a href="" class="pull-right" ng-hide="user.admin" ng-click="deleteUser(user.username)"><span class="glyphicon glyphicon glyphicon-trash"></span></a>
-                    </div>
-                </div>
-            </li>
-        </ul>
+                </li>
+            </ul>
+        </div>
     </div>
 </div>
