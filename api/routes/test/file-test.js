@@ -15,15 +15,15 @@ var Server = require('../../server.js'),
     path = require('path'),
     os = require('os');
 
-var SERVER_URL = 'http://localhost:3000';
 var BASE_DIR = path.resolve(os.tmpdir(), 'volume-test-' + crypto.randomBytes(4).readUInt32LE(0));
 var CONFIG = {
-    port: 3000,
+    port: 3333,
     dataRoot: path.resolve(BASE_DIR, 'data'),
     configRoot: path.resolve(BASE_DIR, 'config'),
     mountRoot: path.resolve(BASE_DIR, 'mount'),
     silent: true
 };
+var SERVER_URL = 'http://localhost:' + CONFIG.port;
 
 var USERNAME = 'admin', PASSWORD = 'admin', EMAIL ='silly@me.com';
 var TESTVOLUME = 'testvolume';
