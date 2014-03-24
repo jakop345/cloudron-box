@@ -59,7 +59,12 @@ function listVolumes(req, res, next) {
                 if (error) return callback(error);
                 ret.isMounted = result;
 
-                callback(null, ret);
+                volume.users(function (error, result) {
+                    if (error) return callback(error);
+                    ret.users = result;
+
+                    callback(null, ret);
+                });
             });
         }, function (error, results) {
             if (error) return next(new HttpError(500, 'Unable to list volumes'));
@@ -176,7 +181,7 @@ function addUser(req, res, next) {
     if (!req.body.username) return next(new HttpError(400, 'New volume username not provided'));
 
     User.get(req.body.username, function (error, result) {
-        if (error) return next(new HttpError(404, 'User not found'));
+        if (error) return next(new HttpError(405, 'User not found'));
 
         req.volume.addUser(result, req.user, req.body.password, function (error) {
             if (error && error.reason === VolumeError.WRONG_USER_PASSWORD) return next(new HttpError(401, 'Wrong password'));

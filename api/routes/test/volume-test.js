@@ -129,7 +129,7 @@ describe('Server Volume API', function () {
             expect(res.statusCode).to.equal(200);
 
             // check for result object sanity
-            checkObjectHasOnly(res.body.volumes[0], {name: 'string', isMounted: 'boolean', id: 'string'});
+            checkObjectHasOnly(res.body.volumes[0], {name: 'string', isMounted: 'boolean', id: 'string', users: 'object'});
 
             done(err);
         });
@@ -295,6 +295,18 @@ describe('Server Volume API', function () {
             .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
+
+                done();
+            });
+        });
+
+        it('cannot add user due to unknown user', function (done) {
+            request.post(SERVER_URL + '/api/v1/volume/' + volume.id + '/users')
+            .auth(USERNAME, PASSWORD)
+            .send({ username: USERNAME_2 + USERNAME_2, password: PASSWORD + PASSWORD })
+            .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(405);
 
                 done();
             });
