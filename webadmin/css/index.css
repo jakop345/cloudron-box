@@ -104,6 +104,10 @@ small, .small {
   background: rgba(255, 255, 255, 0.53);
 }
 
+.list-group-item.seamless {
+  margin-bottom: 3px;
+}
+
 .list-group-item-heading {
   background: rgba(255, 255, 255, 0.53);
 }
@@ -121,6 +125,12 @@ small, .small {
 
 .error {
   color: red;
+}
+
+.form-control.form-sm {
+  padding-top: 0;
+  padding-bottom: 0;
+  height: 25px;
 }
 
 @media (min-width: 800px) {
@@ -169,7 +179,7 @@ select, textarea, input, .uneditable-input {
 }
 
 .btn.btn-sm {
-  padding: 5px;
+  padding: 1px;
 }
 
 .btn.btn-large {

@@ -30,19 +30,35 @@
                             <button class="btn btn-sm btn-block pull-right" ng-click="deleteVolume(volume)"><span class="glyphicon glyphicon glyphicon-trash"></span></button>
                         </div>
                     </div>
-                    <form role="form" ng-submit="shareWithUser()">
-                        <div class="row">
-                            <div class="col-xs-6">
-                                Share volume with user
-                            </div>
-                            <div class="col-xs-5">
-                                <input type="text" class="form-control" ng-model="username" placeholder="Username" required autofocus>
-                            </div>
-                            <div class="col-xs-1">
-                                <button class="btn btn-sm pull-right" type="submit"><span class="glyphicon glyphicon glyphicon glyphicon-share"></span></button>
-                            </div>
+                    <div class="row">
+                        <div class="col-xs-12">
+                            Users
+
+                            <ul class="list-group">
+                              <li href="#" class="list-group-item seamless" ng-repeat="user in volume.users">
+                                <div class="container-fluid">
+                                  <div class="row">
+                                    <div class="col-sm-10">{{user}}</div>
+                                    <div class="col-sm-2">
+                                      <button class="btn btn-sm btn-block pull-right" ng-click="deleteUser(user)"><span class="glyphicon glyphicon glyphicon-trash"></span></button>
+                                  </div>
+                                </div>
+                              </li>
+                              <li href="#" class="list-group-item">
+                                <form class="form-signin" role="form" ng-submit="addUser(volume, passwordInput, usernameInput)">
+                                <div class="container-fluid">
+                                  <div class="row">
+                                    <div class="col-sm-5"><input type="text" class="form-control form-sm" ng-model="usernameInput" placeholder="Username" required></div>
+                                    <div class="col-sm-5"><input type="password" class="form-control form-sm" ng-model="passwordInput" placeholder="Your Password" required></div>
+                                    <div class="col-sm-2">
+                                      <button class="btn btn-sm btn-block pull-right" type="submit"><span class="glyphicon glyphicon glyphicon-plus-sign"></span></button>
+                                  </div>
+                                </div>
+                              </form>
+                              </li>
+                            </ul>
                         </div>
-                    </form>
+                    </div>
                 </li>
             </ul>
         </div>

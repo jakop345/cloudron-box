@@ -118,6 +118,17 @@ angular.module('clientService', [])
         });
     };
 
+    Client.prototype.addUserToVolume = function (username, volumeId, password, callback) {
+        $http.post('/api/v1/volume/' + volumeId + '/users', { username: username, password: password })
+        .success(function (data, status, headers, config) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null);
+        })
+        .error(function (data, status, headers, config) {
+            callback(new ClientError(status, data));
+        });
+    };
+
     Client.prototype.isServerAvailable = function (callback) {
         $http.get('/api/v1/version')
         .success(function(data, status, headers, config) {

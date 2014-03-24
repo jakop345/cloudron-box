@@ -35,5 +35,25 @@ function VolumeListController ($scope, $modal, Client) {
         window.location.href = '#/volumeunmount?volume=' + volume.id + '&volumeName=' + encodeURIComponent(volume.name);
     };
 
+    $scope.addUser = function (volume, password, username) {
+        if (!username) {
+            return;
+        }
+
+        Client.addUserToVolume(username, volume.id, password, function (error) {
+            if (error) {
+                // TODO nice error reporting
+                if (error.statusCode === 405) alert('Unknown user');
+                if (error.statusCode === 401) alert('wrong password');
+
+                console.error(error);
+
+                return;
+            }
+
+            window.location.reload();
+        });
+    };
+
     refresh();
 }
