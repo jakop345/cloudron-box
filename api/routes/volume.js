@@ -197,9 +197,13 @@ function removeUser(req, res, next) {
     User.verify(req.user.username, req.headers.password, function (error, result) {
         if (error) return next(new HttpError(401, 'Wrong password'));
 
-        req.volume.removeUser(req.user, function (error, result) {
-            if (error) return next(new HttpError(401, 'User does not have access to volume'));
-            next(new HttpSuccess(200, {}));
+        User.get(req.params.username, function (error, result) {
+            if (error) return next(new HttpError(405, 'User not found'));
+
+            req.volume.removeUser(result, function (error, result) {
+                if (error) return next(new HttpError(401, 'User does not have access to volume'));
+                next(new HttpSuccess(200, {}));
+            });
         });
     });
 }

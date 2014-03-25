@@ -202,7 +202,7 @@ Server.prototype._initialize = function (callback) {
         that.app.get('/api/v1/volume/:volume/ismounted', routes.volume.isMounted);
         that.app.get('/api/v1/volume/:volume/users', routes.volume.listUsers);
         that.app.post('/api/v1/volume/:volume/users', routes.volume.addUser);
-        that.app.del('/api/v1/volume/:volume/users', routes.volume.removeUser);
+        that.app.del('/api/v1/volume/:volume/users/:username', routes.volume.removeUser);
     });
 
     this.app.set('port', that.config.port);

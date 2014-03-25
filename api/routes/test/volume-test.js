@@ -337,8 +337,32 @@ describe('Server Volume API', function () {
             });
         });
 
-        it('removing one user fails due to wrong password', function (done) {
-            request.del(SERVER_URL + '/api/v1/volume/' + volume.id + '/users')
+        it('removing one user fails due to missing username', function (done) {
+            request.del(SERVER_URL + '/api/v1/volume/' + volume.id + '/users/')
+            .auth(USERNAME_2, PASSWORD_2)
+            .set({ password: PASSWORD_2 + PASSWORD_2 })
+            .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(404);
+
+                done();
+            });
+        });
+
+        it('removing one user fails due to unknown username', function (done) {
+            request.del(SERVER_URL + '/api/v1/volume/' + volume.id + '/users/unknownuser')
+            .auth(USERNAME_2, PASSWORD_2)
+            .set({ password: PASSWORD_2 })
+            .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(405);
+
+                done();
+            });
+        });
+
+        it('removing second user fails due to wrong password', function (done) {
+            request.del(SERVER_URL + '/api/v1/volume/' + volume.id + '/users/' + USERNAME_2)
             .auth(USERNAME_2, PASSWORD_2)
             .set({ password: PASSWORD_2 + PASSWORD_2 })
             .end(function (error, result) {
@@ -349,13 +373,25 @@ describe('Server Volume API', function () {
             });
         });
 
-        it('removing one user from volume succeeds', function (done) {
-            request.del(SERVER_URL + '/api/v1/volume/' + volume.id + '/users')
+        it('removing second user from volume succeeds', function (done) {
+            request.del(SERVER_URL + '/api/v1/volume/' + volume.id + '/users/' + USERNAME_2)
             .auth(USERNAME_2, PASSWORD_2)
             .set({ password: PASSWORD_2 })
             .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(200);
+
+                done();
+            });
+        });
+
+        it('removing second user fails due to user does not have access anymore', function (done) {
+            request.del(SERVER_URL + '/api/v1/volume/' + volume.id + '/users/' + USERNAME_2)
+            .auth(USERNAME, PASSWORD)
+            .set({ password: PASSWORD })
+            .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(401);
 
                 done();
             });
