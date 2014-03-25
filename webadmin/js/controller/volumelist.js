@@ -51,8 +51,12 @@ function VolumeListController ($scope, $modal, Client) {
                 return;
             }
 
-            window.location.reload();
+            refresh();
         });
+    };
+
+    $scope.removeUser = function (volume, username) {
+        window.location.href = '#/volumeremoveuser?volume=' + volume.id + '&volumeName=' + encodeURIComponent(volume.name) + '&userName=' + encodeURIComponent(username);
     };
 
     refresh();

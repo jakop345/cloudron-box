@@ -192,9 +192,9 @@ function addUser(req, res, next) {
 }
 
 function removeUser(req, res, next) {
-    if (!req.body.password) return next(new HttpError(400, 'User password not provided'));
+    if (!req.headers.password) return next(new HttpError(400, 'User password not provided'));
 
-    User.verify(req.user.username, req.body.password, function (error, result) {
+    User.verify(req.user.username, req.headers.password, function (error, result) {
         if (error) return next(new HttpError(401, 'Wrong password'));
 
         req.volume.removeUser(req.user, function (error, result) {

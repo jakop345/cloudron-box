@@ -31,6 +31,9 @@ app.config(function ($routeProvider) {
     }).when('/volumedelete', {
         controller: 'VolumeDeleteController',
         templateUrl: 'partials/volumedelete.html'
+    }).when('/volumeremoveuser', {
+        controller: 'VolumeRemoveUserController',
+        templateUrl: 'partials/volumeremoveuser.html'
     }).when('/volumemount', {
         controller: 'VolumeMountController',
         templateUrl: 'partials/volumemount.html'

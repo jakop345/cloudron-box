@@ -340,7 +340,7 @@ describe('Server Volume API', function () {
         it('removing one user fails due to wrong password', function (done) {
             request.del(SERVER_URL + '/api/v1/volume/' + volume.id + '/users')
             .auth(USERNAME_2, PASSWORD_2)
-            .send({ password: PASSWORD_2 + PASSWORD_2 })
+            .set({ password: PASSWORD_2 + PASSWORD_2 })
             .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
@@ -352,7 +352,7 @@ describe('Server Volume API', function () {
         it('removing one user from volume succeeds', function (done) {
             request.del(SERVER_URL + '/api/v1/volume/' + volume.id + '/users')
             .auth(USERNAME_2, PASSWORD_2)
-            .send({ password: PASSWORD_2 })
+            .set({ password: PASSWORD_2 })
             .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(200);

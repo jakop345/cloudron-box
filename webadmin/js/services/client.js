@@ -129,6 +129,17 @@ angular.module('clientService', [])
         });
     };
 
+    Client.prototype.removeUserFromVolume = function (username, volumeId, password, callback) {
+        $http.delete('/api/v1/volume/' + volumeId + '/users', { headers: {password: password}})
+        .success(function (data, status, headers, config) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null);
+        })
+        .error(function (data, status, headers, config) {
+            callback(new ClientError(status, data));
+        });
+    };
+
     Client.prototype.isServerAvailable = function (callback) {
         $http.get('/api/v1/version')
         .success(function(data, status, headers, config) {
