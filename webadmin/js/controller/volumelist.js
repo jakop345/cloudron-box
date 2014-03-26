@@ -5,6 +5,18 @@ function VolumeListController ($scope, $modal, Client) {
 
     $scope.volumes = [];
 
+    $scope.getUsers = function (callback) {
+        Client.listUsers(function (error, result) {
+            if (error) {
+                console.error('Unable to get user listing.', error);
+                return;
+            }
+
+            console.debug('Got new user list', result.users);
+            callback(result.users);
+        });
+    };
+
     function refresh() {
         console.debug('refresh volume list');
 
@@ -35,12 +47,12 @@ function VolumeListController ($scope, $modal, Client) {
         window.location.href = '#/volumeunmount?volume=' + volume.id + '&volumeName=' + encodeURIComponent(volume.name);
     };
 
-    $scope.addUser = function (volume, password, username) {
-        if (!username) {
+    $scope.addUser = function (volume, password, user) {
+        if (!user || !user.username) {
             return;
         }
 
-        Client.addUserToVolume(username, volume.id, password, function (error) {
+        Client.addUserToVolume(user.username, volume.id, password, function (error) {
             if (error) {
                 // TODO nice error reporting
                 if (error.statusCode === 405) alert('Unknown user');

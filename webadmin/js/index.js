@@ -3,7 +3,7 @@
 /* global angular:false */
 
 // create main application module
-var app = angular.module('YellowTent', ['ngRoute', 'ngAnimate', 'ui.bootstrap', 'base64', 'clientService', 'spinnerFactory']);
+var app = angular.module('YellowTent', ['acute.select', 'ngRoute', 'ngAnimate', 'ui.bootstrap', 'base64', 'clientService', 'spinnerFactory']);
 
 // setup all major application routes
 app.config(function ($routeProvider) {
@@ -47,4 +47,9 @@ app.config(function ($routeProvider) {
         controller: 'SettingsController',
         templateUrl: 'partials/settings.html'
     }).otherwise({ redirectTo: '/'});
+});
+
+app.run(function (acuteSelectService) {
+    // Set the template path for all instances
+    acuteSelectService.updateSetting('templatePath', '/3rdparty/templates');
 });
