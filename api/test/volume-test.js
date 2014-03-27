@@ -57,10 +57,10 @@ describe('Volume', function () {
     before(setup);
 
     after(function (done) {
-        vol1.destroy(USER, PASSWORD, function (error) {
+        vol1.destroy(function (error) {
             expect(error).to.not.be.ok();
 
-            vol2.destroy(USER, PASSWORD, function (error) {
+            vol2.destroy(function (error) {
                 expect(error).to.not.be.ok();
 
                 rimraf.sync(tmpdir);
@@ -212,15 +212,8 @@ describe('Volume', function () {
             });
         });
 
-        it('fails to destroy, due to wrong password', function (done) {
-            vol.destroy(USER, 'some wrong password', function (error) {
-                expect(error).to.be.a(VolumeError);
-                done();
-            });
-        });
-
         it('can be destroyed', function (done) {
-            vol.destroy(USER, PASSWORD, function (error) {
+            vol.destroy(function (error) {
                 expect(error).not.to.be.ok();
                 done();
             });
@@ -358,7 +351,7 @@ describe('Volume', function () {
 
         after(function (done) {
             this.timeout(5000);
-            vol.destroy(TEST_USER_0, TEST_PASSWORD_0, function (error) {
+            vol.destroy(function (error) {
                 expect(error).not.to.be.ok();
                 done();
             });

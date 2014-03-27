@@ -187,8 +187,8 @@ Volume.prototype.close = function (callback) {
     });
 };
 
-Volume.prototype.destroy = function (user, password, callback) {
-    ensureArgs(arguments, ['object', 'string', 'function']);
+Volume.prototype.destroy = function (callback) {
+    ensureArgs(arguments, ['function']);
 
     var that = this;
 
@@ -211,23 +211,19 @@ Volume.prototype.destroy = function (user, password, callback) {
         });
     }
 
-    this.verifyUser(user, password, function (error) {
-        if (error) return callback(error);
+    that.encfs.isMounted(function (error, mounted) {
+        if (!mounted) {
+            cleanupFolders();
+            return;
+        }
 
-        that.encfs.isMounted(function (error, mounted) {
-            if (!mounted) {
-                cleanupFolders();
-                return;
+        that.encfs.unmount(function (error) {
+            if (error) {
+                debug('Error unmounting the volume. Non fatal.', error);
+                return callback(new VolumeError(error, VolumeError.MOUNTED));
             }
 
-            that.encfs.unmount(function (error) {
-                if (error) {
-                    debug('Error unmounting the volume. Non fatal.', error);
-                    return callback(new VolumeError(error, VolumeError.MOUNTED));
-                }
-
-                cleanupFolders();
-            });
+            cleanupFolders();
         });
     });
 };

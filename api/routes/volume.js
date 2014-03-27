@@ -30,17 +30,17 @@ function initialize(cfg) {
 }
 
 function deleteVolume(req, res, next) {
-    req.volume.destroy(req.user, req.body.password, function (error) {
-        if (error) {
-            if (error.reason === VolumeError.WRONG_USER_PASSWORD) {
-                return next(new HttpError(403, 'Wrong password'));
-            }
+    req.volume.verifyUser(req.user, req.body.password, function (error) {
+        if (error && error.reason === VolumeError.WRONG_USER_PASSWORD) return next(new HttpError(403, 'Wrong password'));
+        if (error && error.reason === VolumeError.NO_SUCH_USER) return next(new HttpError(403, 'User has no access to volume'));
+        if (error) return next(new HttpError(500));
 
-            return next(new HttpError(500, 'Unable to destroy volume: ' + error));
-        }
+        req.volume.destroy(function (error) {
+            if (error) return next(new HttpError(500, 'Unable to destroy volume: ' + error));
 
-        delete req.volume;
-        next(new HttpSuccess(200, {}));
+            delete req.volume;
+            next(new HttpSuccess(200, {}));
+        });
     });
 }
 
@@ -179,6 +179,7 @@ function listUsers(req, res, next) {
 
 function addUser(req, res, next) {
     if (!req.body.username) return next(new HttpError(400, 'New volume username not provided'));
+    if (!req.body.password) return next(new HttpError(400, 'User password not provided'));
 
     User.get(req.body.username, function (error, result) {
         if (error) return next(new HttpError(405, 'User not found'));
@@ -191,18 +192,47 @@ function addUser(req, res, next) {
     });
 }
 
+/*
+ removeUser()
+
+ Removes the provided user from the volume if the user has access to the volume
+ It also deletes the volume if the last user gets removed!
+
+ Requires
+   - password of current user for confirmation
+   - username of user to delete
+*/
 function removeUser(req, res, next) {
     if (!req.headers.password) return next(new HttpError(400, 'User password not provided'));
 
-    User.verify(req.user.username, req.headers.password, function (error, result) {
+    User.verify(req.user.username, req.headers.password, function (error) {
         if (error) return next(new HttpError(401, 'Wrong password'));
 
         User.get(req.params.username, function (error, result) {
             if (error) return next(new HttpError(405, 'User not found'));
 
-            req.volume.removeUser(result, function (error, result) {
+            req.volume.removeUser(result, function (error) {
                 if (error) return next(new HttpError(401, 'User does not have access to volume'));
-                next(new HttpSuccess(200, {}));
+
+                req.volume.users(function (error, result) {
+                    if (error) return next(new HttpError(500));
+
+                    // remove the volume only if we removed the last user of this volume
+                    if (result.length >= 1) return next(new HttpSuccess(200, {}));
+
+                    req.volume.destroy(function (error) {
+                        if (error) {
+                            if (error.reason === VolumeError.WRONG_USER_PASSWORD) {
+                                return next(new HttpError(403, 'Wrong password'));
+                            }
+
+                            return next(new HttpError(500, 'Unable to destroy volume: ' + error));
+                        }
+
+                        delete req.volume;
+                        next(new HttpSuccess(200, {}));
+                    });
+                });
             });
         });
     });

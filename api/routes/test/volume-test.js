@@ -288,6 +288,18 @@ describe('Server Volume API', function () {
             });
         });
 
+        it('cannot add user due to missing owner password', function (done) {
+            request.post(SERVER_URL + '/api/v1/volume/' + volume.id + '/users')
+            .auth(USERNAME, PASSWORD)
+            .send({ username: USERNAME_2 })
+            .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(400);
+
+                done();
+            });
+        });
+
         it('cannot add user due to wrong owner password', function (done) {
             request.post(SERVER_URL + '/api/v1/volume/' + volume.id + '/users')
             .auth(USERNAME, PASSWORD)
@@ -394,6 +406,29 @@ describe('Server Volume API', function () {
                 expect(result.statusCode).to.equal(401);
 
                 done();
+            });
+        });
+
+        it('removing last user for this volume succeeds', function (done) {
+            request.del(SERVER_URL + '/api/v1/volume/' + volume.id + '/users/' + USERNAME)
+            .auth(USERNAME, PASSWORD)
+            .set({ password: PASSWORD })
+            .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(200);
+
+                done();
+            });
+        });
+
+        it('all users removed, volume should be gone', function (done) {
+            request.get(SERVER_URL + '/api/v1/volume/list')
+               .auth(USERNAME, PASSWORD)
+               .end(function (err, res) {
+                expect(res.body.volumes).to.be.an(Object);
+                expect(res.body.volumes.length).to.equal(0);
+
+                done(err);
             });
         });
     });
