@@ -8,7 +8,8 @@ var passport = require('passport'),
     login = require('connect-ensure-login');
 
 exports.index = function(req, res) {
-    res.send('OAuth 2.0 Server');
+    // probably some redirect to the main server
+    res.send('Yellowtent Auth Server');
 };
 
 exports.loginForm = function(req, res) {

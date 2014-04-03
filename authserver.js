@@ -36,8 +36,8 @@ console.log('==========================================');
 console.log();
 
 var server = new Server(parseInt(app.port, 10),
-    app.configDir,
-    app.silent
+    app.configDirectory,
+    !!app.silent
 );
 
 server.start(function (error) {

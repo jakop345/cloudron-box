@@ -3,6 +3,7 @@
 var express = require('express'),
     http = require('http'),
     once = require('once'),
+    path = require('path'),
     passport = require('passport'),
     oauth2 = require('./oauth2'),
     site = require('./site'),
@@ -63,6 +64,7 @@ function serverErrorHandler(err, req, res, next) {
 function Server(port, configDir, silent) {
     assert(typeof port === 'number');
     assert(typeof configDir === 'string');
+    assert(typeof silent === 'boolean');
 
     this._port = port;
     this._routePrefix = '/api/v1';
@@ -84,7 +86,9 @@ Server.prototype._initialize = function (callback) {
         var UPLOAD_LIMIT = '1mb'; // catch all max size for any type of request
 
         that.app.disable('x-powered-by');
+        that.app.set('views', path.join(__dirname, './views'));
         that.app.set('view engine', 'ejs');
+        that.app.set('view options', { layout: false });
 
         var json = express.json({ strict: true, limit: QUERY_LIMIT }); // application/json
 
@@ -92,7 +96,7 @@ Server.prototype._initialize = function (callback) {
         that.app.use(express.cookieParser());
         that.app.use(express.limit(UPLOAD_LIMIT));
         that.app.use(middleware.cors({ origins: [ '*' ], allowCredentials: true }));
-        that.app.use(middleware.contentType('application/json; charset=utf-8'));
+        // that.app.use(middleware.contentType('application/json; charset=utf-8'));
         that.app.use(express.session({ secret: 'yellow is blue' }));
         that.app.use(passport.initialize());
         that.app.use(passport.session());
@@ -102,8 +106,6 @@ Server.prototype._initialize = function (callback) {
         that.app.use(serverErrorHandler);
 
         // routes controlled by app.router
-        require('./auth');
-
         that.app.get('/', site.index);
         that.app.get('/login', site.loginForm);
         that.app.post('/login', site.login);
