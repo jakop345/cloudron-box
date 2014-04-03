@@ -31,17 +31,22 @@ function get(accessToken, callback) {
     assert(typeof callback === 'function');
 
     if (!db[accessToken]) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
-    callback(null, { accessToken: accessToken, userId: db[accessToken]});
+    callback(null, db[accessToken]);
 }
 
-function add(accessToken, userId, callback) {
+function add(accessToken, userId, clientId, callback) {
     assert(db !== null);
     assert(typeof accessToken === 'string');
     assert(typeof userId === 'string');
+    assert(typeof clientId === 'string');
     assert(typeof callback === 'function');
 
     if (db[accessToken]) return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
-    db[accessToken] = userId;
+    db[accessToken] = {
+        accessToken: accessToken,
+        userId: userId,
+        clientId: clientId
+    };
 
     callback(null);
 }

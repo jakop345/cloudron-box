@@ -7,8 +7,12 @@
 var oauth2orize = require('oauth2orize'),
     passport = require('passport'),
     login = require('connect-ensure-login'),
-    db = require('./db'),
-    utils = require('./utils');
+    authcodedb = require('./authcodedb'),
+    tokendb = require('./tokendb'),
+    DatabaseError = require('./databaseerror'),
+    userdb = require('./userdb'),
+    clientdb = require('./clientdb'),
+    uuid = require('node-uuid');
 
 // create OAuth 2.0 server
 var server = oauth2orize.createServer();
@@ -26,18 +30,18 @@ var server = oauth2orize.createServer();
 // simple matter of serializing the client's ID, and deserializing by finding
 // the client by ID from the database.
 
-server.serializeClient(function(client, done) {
+server.serializeClient(function(client, callback) {
     console.log('server serialize', client, client.id);
 
-    return done(null, client.id);
+    return callback(null, client.id);
 });
 
-server.deserializeClient(function(id, done) {
+server.deserializeClient(function(id, callback) {
     console.log('server deserialize', id);
 
-    db.clients.find(id, function(err, client) {
-        if (err) { return done(err); }
-        return done(null, client);
+    clientdb.get(id, function (error, client) {
+        if (error) { return callback(error); }
+        return callback(null, client);
     });
 });
 
@@ -55,14 +59,14 @@ server.deserializeClient(function(id, done) {
 // the application.  The application issues a code, which is bound to these
 // values, and will be exchanged for an access token.
 
-server.grant(oauth2orize.grant.code(function(client, redirectURI, user, ares, done) {
+server.grant(oauth2orize.grant.code(function (client, redirectURI, user, ares, callback) {
     console.log('grant code', arguments);
 
-    var code = utils.uid(16);
+    var code = uuid.v4();
 
-    db.authorizationCodes.save(code, client.id, redirectURI, user.id, function(err) {
-        if (err) { return done(err); }
-        done(null, code);
+    authcodedb.add(code, client.id, redirectURI, user.id, function (error) {
+        if (error) return callback(error);
+        callback(null, code);
     });
 }));
 
@@ -72,20 +76,23 @@ server.grant(oauth2orize.grant.code(function(client, redirectURI, user, ares, do
 // application issues an access token on behalf of the user who authorized the
 // code.
 
-server.exchange(oauth2orize.exchange.code(function(client, code, redirectURI, done) {
+server.exchange(oauth2orize.exchange.code(function (client, code, redirectURI, callback) {
     console.log('oauth2. server.exchange', client, code, redirectURI);
-    db.authorizationCodes.find(code, function(err, authCode) {
-        if (err) { return done(err); }
-        if (authCode === undefined) { return done(null, false); }
-        if (client.id !== authCode.clientID) { return done(null, false); }
-        if (redirectURI !== authCode.redirectURI) { return done(null, false); }
 
-        db.authorizationCodes.delete(code, function(err) {
-            if(err) { return done(err); }
-            var token = utils.uid(256);
-            db.accessTokens.save(token, authCode.userID, authCode.clientID, function(err) {
-                if (err) { return done(err); }
-                done(null, token);
+    authcodedb.get(code, function (error, authCode) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
+        if (error) return callback(error);
+        if (client.id !== authCode.clientId) return callback(null, false);
+        if (redirectURI !== authCode.redirectURI) return callback(null, false);
+
+        authcodedb.del(code, function (error) {
+            if(error) return callback(error);
+
+            var token = uuid.v4();
+
+            tokendb.add(token, authCode.userId, authCode.clientId, function (error) {
+                if (error) return callback(error);
+                callback(null, token);
             });
         });
     });
@@ -99,7 +106,7 @@ server.exchange(oauth2orize.exchange.code(function(client, code, redirectURI, do
 // responsible for validating the client making the authorization request.  In
 // doing so, is recommended that the `redirectURI` be checked against a
 // registered value, although security requirements may vary accross
-// implementations.  Once validated, the `done` callback must be invoked with
+// implementations.  Once validated, the `callback` callback must be invoked with
 // a `client` instance, as well as the `redirectURI` to which the user will be
 // redirected after an authorization decision is obtained.
 //
@@ -111,16 +118,16 @@ server.exchange(oauth2orize.exchange.code(function(client, code, redirectURI, do
 
 exports.authorization = [
     login.ensureLoggedIn(),
-    server.authorization(function(clientID, redirectURI, done) {
+    server.authorization(function(clientID, redirectURI, callback) {
         console.log('server authorization validation for ', clientID, redirectURI);
 
-        db.clients.findByClientId(clientID, function(err, client) {
-          if (err) { return done(err); }
+        db.clients.findByClientId(clientID, function(error, client) {
+          if (error) { return callback(error); }
           // WARNING: For security purposes, it is highly advisable to check that
           //          redirectURI provided by the client matches one registered with
           //          the server.  For simplicity, this example does not.  You have
           //          been warned.
-          return done(null, client, redirectURI);
+          return callback(null, client, redirectURI);
         });
     }),
     function(req, res){

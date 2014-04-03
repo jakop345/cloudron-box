@@ -7,9 +7,8 @@ var express = require('express'),
     oauth2 = require('./oauth2'),
     site = require('./site'),
     user = require('./user'),
-    compress = require('compression'),
-    HttpError = require('./httperror'),
-    HttpSuccess = require('./httpsuccess'),
+    HttpError = require('../api/httperror'),
+    HttpSuccess = require('../api/httpsuccess'),
     middleware = require('../middleware/'),
     debug = require('debug')('main'),
     tokendb = require('./tokendb'),
@@ -83,7 +82,6 @@ Server.prototype._initialize = function (callback) {
     this.app.configure(function () {
         var QUERY_LIMIT = '1mb'; // max size for json and urlencoded queries
         var UPLOAD_LIMIT = '1mb'; // catch all max size for any type of request
-        var COMPRESSION_THRESHOLD = 0; // compress everything
 
         that.app.disable('x-powered-by');
         that.app.set('view engine', 'ejs');
@@ -95,7 +93,6 @@ Server.prototype._initialize = function (callback) {
         that.app.use(express.limit(UPLOAD_LIMIT));
         that.app.use(middleware.cors({ origins: [ '*' ], allowCredentials: true }));
         that.app.use(middleware.contentType('application/json; charset=utf-8'));
-        that.app.use(compress({ threshold: COMPRESSION_THRESHOLD }));
         that.app.use(express.session({ secret: 'yellow is blue' }));
         that.app.use(passport.initialize());
         that.app.use(passport.session());
