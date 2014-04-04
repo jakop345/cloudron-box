@@ -35,7 +35,7 @@ function get(id, callback) {
 
 function getByClientId(clientId, callback) {
     assert(db !== null);
-    assert(typeof id === 'string');
+    assert(typeof clientId === 'string');
     assert(typeof callback === 'function');
 
     for (var record in db) {

@@ -2,18 +2,20 @@
 
 var express = require('express'),
     http = require('http'),
+    https = require('https'),
+    fs = require('fs'),
     once = require('once'),
     path = require('path'),
     passport = require('passport'),
     oauth2 = require('./oauth2'),
-    site = require('./site'),
-    user = require('./user'),
+    session = require('./session'),
     routes = require('./routes/'),
     HttpError = require('../api/httperror'),
     HttpSuccess = require('../api/httpsuccess'),
     middleware = require('../middleware/'),
     debug = require('debug')('main'),
     tokendb = require('./tokendb'),
+    clientdb = require('./clientdb'),
     userdb = require('./userdb'),
     assert = require('assert');
 
@@ -62,15 +64,17 @@ function serverErrorHandler(err, req, res, next) {
     console.error(err.stack);
 }
 
-function Server(port, configDir, silent) {
+function Server(port, configDir, certificateDir, silent) {
     assert(typeof port === 'number');
     assert(typeof configDir === 'string');
+    assert(typeof certificateDir === 'string');
     assert(typeof silent === 'boolean');
 
     this._port = port;
     this._routePrefix = '/api/v1';
     this._silent = !!silent;
     this._configDir = configDir;
+    this._certificateDir = certificateDir;
 
     this.app = null;
 }
@@ -92,12 +96,14 @@ Server.prototype._initialize = function (callback) {
         that.app.set('view options', { layout: false });
 
         var json = express.json({ strict: true, limit: QUERY_LIMIT }); // application/json
+        var urlencoded = express.urlencoded({ limit: QUERY_LIMIT }); // application/x-www-form-urlencoded
 
         if (!that._silent) that.app.use(express.logger({ format: 'dev', immediate: false }));
         that.app.use(express.cookieParser());
         that.app.use(express.limit(UPLOAD_LIMIT));
         that.app.use(middleware.cors({ origins: [ '*' ], allowCredentials: true }));
-        // that.app.use(middleware.contentType('application/json; charset=utf-8'));
+        that.app.use(json);
+        that.app.use(urlencoded);
         that.app.use(express.session({ secret: 'yellow is blue' }));
         that.app.use(passport.initialize());
         that.app.use(passport.session());
@@ -106,27 +112,28 @@ Server.prototype._initialize = function (callback) {
         that.app.use(clientErrorHandler);
         that.app.use(serverErrorHandler);
 
+        // Passport configuration
+        require('./auth');
+
         // routes controlled by app.router
-        that.app.get('/', site.index);
+        that.app.get('/', session.account);
 
         // form based login routes
-        that.app.get('/api/v1/session/login', site.loginForm);
-        that.app.post('/api/v1/session/login', site.login);
-        that.app.get('/api/v1/session/logout', site.logout);
+        that.app.get('/api/v1/session/login', session.loginForm);
+        that.app.post('/api/v1/session/login', session.login);
+        that.app.get('/api/v1/session/logout', session.logout);
+        that.app.get('/api/v1/session/account', session.account);
 
         // user resource routes
-        that.app.post('/api/v1/users', routes.users.add);
-        that.app.get('/api/v1/users', routes.users.get);
-        that.app.put('/api/v1/users', routes.users.update);
-        that.app.del('/api/v1/users', routes.users.remove);
+        that.app.post('/api/v1/users', routes.user.add);
+        that.app.get('/api/v1/users', routes.user.get);
+        // that.app.put('/api/v1/users', routes.user.update);
+        that.app.del('/api/v1/users', routes.user.remove);
 
         // oauth2 routes
         that.app.get('/api/v1/oauth/dialog/authorize', oauth2.authorization);
         that.app.post('/api/v1/oauth/dialog/authorize/decision', oauth2.decision);
         that.app.post('/api/v1/oauth/token', oauth2.token);
-
-        // Passport configuration
-        require('./auth');
     });
 
     this.app.set('port', that._port);
@@ -135,7 +142,15 @@ Server.prototype._initialize = function (callback) {
 };
 
 Server.prototype._listen = function (callback) {
-    this.app.httpServer = http.createServer(this.app);
+    if (this._certificateDir) {
+        var options = {
+            cert: fs.readFileSync(path.join(this._certificateDir, 'cert.pem')),
+            key: fs.readFileSync(path.join(this._certificateDir, 'key.pem'))
+        };
+        this.app.httpServer = https.createServer(options, this.app);
+    } else {
+        this.app.httpServer = http.createServer(this.app);
+    }
 
     callback = once(callback);
 
@@ -162,13 +177,22 @@ Server.prototype.start = function (callback) {
     userdb.init(that._configDir, function (error) {
         if (error) return callback(error);
 
+        // TODO add initial user only until the user creation works
+        userdb.add('test', 'test', 'foo', 'test@foo.com', function (error) {
+            console.log('+++ user added');
+        });
+
         tokendb.init(that._configDir, function (error) {
             if (error) return callback(error);
 
-            that._initialize(function (error) {
+            clientdb.init(that._configDir, function (error) {
                 if (error) return callback(error);
 
-                that._listen(callback);
+                that._initialize(function (error) {
+                    if (error) return callback(error);
+
+                    that._listen(callback);
+                });
             });
         });
     });

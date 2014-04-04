@@ -68,6 +68,8 @@ function add(userId, username, password, email, callback) {
         password: password,
         email: email
     };
+
+    callback(null);
 }
 
 function del(userId, callback) {
@@ -91,7 +93,7 @@ function getByAccessToken(accessToken, callback) {
 
         get(result.userId, function (error, result) {
             if (error) return callback(error);
-            return callback(null, result);
+            callback(null, result);
         });
     });
 }

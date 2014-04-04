@@ -1,0 +1,148 @@
+<html>
+<head>
+    <title> Accounts </title>
+
+    <style>
+
+    body {
+        background-color: lightgray;
+    }
+
+    iframe {
+        background-color: lightsteelblue;
+        border: 0;
+        width: 300px;
+        height: 300px;
+    }
+
+    </style>
+
+    <script src="javascripts/superagent.js"></script>
+
+<script>
+
+var frame, loginForm, btn, tokenBtn, logoutBtn, authCode, oauthResult, infoButton, userInfo, accessToken;
+var accountsServer = 'https://localhost:4000';
+var redirectServer = 'https://localhost:3000';
+
+function setAuthCode(code) {
+    frame.style.display = 'none';
+
+    if (code) {
+        tokenBtn.style.display = 'block';
+        authCode = code;
+        oauthResult.innerText = 'Auth Code ' + authCode;
+    } else {
+        oauthResult.innerText = 'Access Denied';
+    }
+}
+
+function init() {
+    btn = document.getElementById('startButton');
+    tokenBtn = document.getElementById('tokenButton');
+    logoutBtn = document.getElementById('logoutButton');
+    frame = document.getElementById('frame');
+    // loginForm = document.getElementById('loginForm');
+    oauthResult = document.getElementById('oauthResult');
+    infoButton = document.getElementById('infoButton');
+    userInfo = document.getElementById('userInfo');
+
+    // loginForm.onsubmit = function (event) {
+    //     event.preventDefault();
+
+    //     superagent.post(accountsServer + '/api/v1/session/login')
+    //     .send({
+    //         username: loginForm.elements.namedItem('username').value,
+    //         password: loginForm.elements.namedItem('password').value
+    //     })
+    //     .end(function (error, result) {
+    //         if (error) {
+    //             alert('Login failed, see console.');
+    //             console.error(error);
+    //             return;
+    //         }
+
+    //         alert('Login successfull');
+    //         console.log(result.body);
+    //     });
+
+    //     return false;
+    // }
+
+    btn.onclick = function () {
+        frame.src = accountsServer + '/api/v1/oauth/dialog/authorize?response_type=code&client_id=abc123&redirect_uri=' + redirectServer + '/oauth2/oauth_callback.html';
+        frame.style.display = 'block';
+    };
+
+    tokenBtn.onclick = function () {
+        superagent.post(accountsServer + '/api/v1/oauth/token?response_type=token&client_id=abc123')
+        .send({
+            grant_type: 'authorization_code',
+            code: authCode,
+            redirect_uri: redirectServer + '/oauth2/oauth_callback.html',
+            client_id: 'abc123',
+            client_secret: 'ssh-secret'
+        })
+        .end(function (error, result) {
+            if (error) {
+                alert('Exchange failed, see console.');
+                console.error(error);
+                return;
+            }
+
+            tokenBtn.style.display = 'none';
+            accessToken = result.body.access_token
+            oauthResult.innerText = 'Access Token ' + accessToken;
+            console.log(result.body);
+        });
+    };
+
+    // logoutBtn.onclick = function () {
+    //     superagent.get(accountsServer + '/api/v1/session/logout')
+    //     .end(function (error, result) {
+    //         if (error) {
+    //             alert('Logout failed, see console.');
+    //             console.error(error);
+    //             return;
+    //         }
+
+    //         alert('Logout successfull');
+    //         console.log(result.body);
+    //     });
+    // };
+
+    infoButton.onclick = function () {
+        superagent.get(accountsServer + '/users')
+        .set('Authorization', 'Bearer ' + accessToken)
+        .end(function (error, result) {
+            if (error) {
+                alert('User info failed, see console.');
+                console.error(error);
+                return;
+            }
+
+            userInfo.innerText = JSON.stringify(result.body);
+            console.log(result.body);
+        });
+    };
+}
+
+</script>
+
+</head>
+
+<body onload="init()">
+
+<hr/>
+<button id="infoButton">Get User Info</button>
+<div id="userInfo"></div>
+<hr/>
+OAuth based login: <button id="startButton">Go for it</button>
+
+
+<div id="oauthResult"></div>
+<button id="tokenButton" style="display: none"/>Exchange code for token</button>
+<iframe id="frame" style="display: none"></iframe>
+
+</body>
+</html>

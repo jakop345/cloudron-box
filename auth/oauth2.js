@@ -117,12 +117,12 @@ server.exchange(oauth2orize.exchange.code(function (client, code, redirectURI, c
 // first, and rendering the `dialog` view.
 
 exports.authorization = [
-    login.ensureLoggedIn(),
+    login.ensureLoggedIn('/api/v1/session/login'),
     server.authorization(function(clientID, redirectURI, callback) {
         console.log('server authorization validation for ', clientID, redirectURI);
 
-        db.clients.findByClientId(clientID, function(error, client) {
-          if (error) { return callback(error); }
+        clientdb.getByClientId(clientID, function(error, client) {
+          if (error) return callback(error);
           // WARNING: For security purposes, it is highly advisable to check that
           //          redirectURI provided by the client matches one registered with
           //          the server.  For simplicity, this example does not.  You have
@@ -143,7 +143,7 @@ exports.authorization = [
 // a response.
 
 exports.decision = [
-    login.ensureLoggedIn(),
+    login.ensureLoggedIn('/api/v1/session/login'),
     server.decision()
 ];
 

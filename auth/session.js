@@ -7,16 +7,11 @@
 var passport = require('passport'),
     login = require('connect-ensure-login');
 
-exports.index = function(req, res) {
-    // probably some redirect to the main server
-    res.send('Yellowtent Auth Server');
-};
-
 exports.loginForm = function(req, res) {
     res.render('login');
 };
 
-exports.login = passport.authenticate('local', { successReturnToOrRedirect: '/', failureRedirect: '/login' });
+exports.login = passport.authenticate('local', { successReturnToOrRedirect: '/api/v1/session/account', failureRedirect: '/api/v1/session/login' });
 
 exports.logout = function(req, res) {
     req.logout();
@@ -24,7 +19,7 @@ exports.logout = function(req, res) {
 };
 
 exports.account = [
-    login.ensureLoggedIn(),
+    login.ensureLoggedIn('/api/v1/session/login'),
     function(req, res) {
         res.render('account', { user: req.user });
     }

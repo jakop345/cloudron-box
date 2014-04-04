@@ -5,22 +5,27 @@
  */
 
 var passport = require('passport'),
-  LocalStrategy = require('passport-local').Strategy,
-  BasicStrategy = require('passport-http').BasicStrategy,
-  ClientPasswordStrategy = require('passport-oauth2-client-password').Strategy,
-  BearerStrategy = require('passport-http-bearer').Strategy,
-  DatabaseError = require('./databaseerror'),
-  clientdb = require('./clientdb'),
-  tokendb = require('./tokendb'),
-  userdb = require('./userdb');
+    LocalStrategy = require('passport-local').Strategy,
+    BasicStrategy = require('passport-http').BasicStrategy,
+    ClientPasswordStrategy = require('passport-oauth2-client-password').Strategy,
+    BearerStrategy = require('passport-http-bearer').Strategy,
+    debug = require('debug')('auth:auth'),
+    DatabaseError = require('./databaseerror'),
+    clientdb = require('./clientdb'),
+    tokendb = require('./tokendb'),
+    userdb = require('./userdb');
 
 
 // helpers for session de/serializing
 passport.serializeUser(function (user, callback) {
+    debug('serializeUser: ' + JSON.stringify(user));
+
     callback(null, user.id);
 });
 
 passport.deserializeUser(function(id, callback) {
+    debug('deserializeUser: ' + id);
+
     userdb.get(id, function (error, user) {
       callback(error, user);
     });
@@ -35,11 +40,13 @@ passport.deserializeUser(function(id, callback) {
  * a user is logged in before asking them to approve the request.
  */
 passport.use(new LocalStrategy(function (username, password, callback) {
+    debug('LocalStrategy: ' + username + ' ' + password);
+
     userdb.getByUsername(username, function (error, user) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
         if (error) return callback(error);
         if (user.password !== password) return callback(null, false);
-        return callback(null, user);
+        callback(null, user);
     });
 }));
 
@@ -56,6 +63,8 @@ passport.use(new LocalStrategy(function (username, password, callback) {
  * the specification, in practice it is quite common.
  */
 passport.use(new BasicStrategy(function (username, password, callback) {
+    debug('BasicStrategy: ' + username + ' ' + password);
+
     // username is actually client id here
     // password is client secret
     clientdb.get(username, function (error, client) {
@@ -67,6 +76,8 @@ passport.use(new BasicStrategy(function (username, password, callback) {
 }));
 
 passport.use(new ClientPasswordStrategy(function (clientId, clientSecret, callback) {
+    debug('ClientPasswordStrategy: ' + clientId + ' ' + clientSecret);
+
     clientdb.get(clientId, function(error, client) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
         if (error) { return callback(error); }
@@ -84,6 +95,8 @@ passport.use(new ClientPasswordStrategy(function (clientId, clientSecret, callba
  * the authorizing user.
  */
 passport.use(new BearerStrategy(function (accessToken, callback) {
+    debug('BearerStrategy: ' + accessToken);
+
     tokendb.get(accessToken, function (error, token) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
         if (error) return callback(error);
