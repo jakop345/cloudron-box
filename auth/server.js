@@ -8,6 +8,7 @@ var express = require('express'),
     oauth2 = require('./oauth2'),
     site = require('./site'),
     user = require('./user'),
+    routes = require('./routes/'),
     HttpError = require('../api/httperror'),
     HttpSuccess = require('../api/httpsuccess'),
     middleware = require('../middleware/'),
@@ -107,16 +108,25 @@ Server.prototype._initialize = function (callback) {
 
         // routes controlled by app.router
         that.app.get('/', site.index);
-        that.app.get('/login', site.loginForm);
-        that.app.post('/login', site.login);
-        that.app.get('/logout', site.logout);
-        that.app.get('/account', site.account);
 
-        that.app.get('/dialog/authorize', oauth2.authorization);
-        that.app.post('/dialog/authorize/decision', oauth2.decision);
-        that.app.post('/oauth/token', oauth2.token);
+        // form based login routes
+        that.app.get('/api/v1/session/login', site.loginForm);
+        that.app.post('/api/v1/session/login', site.login);
+        that.app.get('/api/v1/session/logout', site.logout);
 
-        that.app.get('/api/userinfo', user.info);
+        // user resource routes
+        that.app.post('/api/v1/users', routes.users.add);
+        that.app.get('/api/v1/users', routes.users.get);
+        that.app.put('/api/v1/users', routes.users.update);
+        that.app.del('/api/v1/users', routes.users.remove);
+
+        // oauth2 routes
+        that.app.get('/api/v1/oauth/dialog/authorize', oauth2.authorization);
+        that.app.post('/api/v1/oauth/dialog/authorize/decision', oauth2.decision);
+        that.app.post('/api/v1/oauth/token', oauth2.token);
+
+        // Passport configuration
+        require('./auth');
     });
 
     this.app.set('port', that._port);

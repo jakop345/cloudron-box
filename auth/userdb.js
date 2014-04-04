@@ -12,6 +12,7 @@ exports = module.exports = {
     init: init,
     getResponseObject: getResponseObject,
     get: get,
+    getByUsername: getByUsername,
     getByAccessToken: getByAccessToken,
     add: add,
     del: del
@@ -43,14 +44,30 @@ function get(userId, callback) {
     callback(null, db[userId]);
 }
 
-function add(userId, user, callback) {
+function getByUsername(username, callback) {
+    assert(db !== null);
+    assert(typeof username === 'string');
+    assert(typeof callback === 'function');
+
+    // currently username is also our id
+    get(username, callback);
+}
+
+function add(userId, username, password, email, callback) {
     assert(db !== null);
     assert(typeof userId === 'string');
-    assert(typeof user === 'object');
+    assert(typeof username === 'string');
+    assert(typeof password === 'string');
+    assert(typeof email === 'string');
     assert(typeof callback === 'function');
 
     if (db[userId]) return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
-    db[userId] = user;
+    db[userId] = {
+        id: userId,
+        username: username,
+        password: password,
+        email: email
+    };
 }
 
 function del(userId, callback) {

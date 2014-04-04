@@ -10,6 +10,7 @@ var db = null;
 exports = module.exports = {
     init: init,
     get: get,
+    getByClientId: getByClientId,
     add: add,
     del: del
 };
@@ -30,6 +31,22 @@ function get(id, callback) {
 
     if (!db[id]) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
     callback(null, db[id]);
+}
+
+function getByClientId(clientId, callback) {
+    assert(db !== null);
+    assert(typeof id === 'string');
+    assert(typeof callback === 'function');
+
+    for (var record in db) {
+        if (db.hasOwnProperty(record)) {
+            if (db[record].clientId === clientId) {
+                return callback(null, db[record]);
+            }
+        }
+    }
+
+    return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 }
 
 function add(id, data, callback) {
