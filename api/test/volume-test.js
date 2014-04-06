@@ -52,6 +52,8 @@ function setup(done) {
 }
 
 describe('Volume', function () {
+    this.timeout(5000);
+
     var vol1, vol2;
 
     before(setup);
@@ -230,6 +232,8 @@ describe('Volume', function () {
         var TEST_USER_0;
         var TEST_USER_1;
         var vol;
+
+        this.timeout(5000);
 
         before(function (done) {
             this.timeout(5000);

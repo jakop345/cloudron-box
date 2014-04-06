@@ -29,6 +29,7 @@ var TESTVOLUME = 'testvolume';
 
 var server;
 function setup(done) {
+    this.timeout(10000);
     server = new Server(CONFIG);
     server.start(function (error) {
         expect(error).to.not.be.ok();
@@ -79,7 +80,7 @@ function checkObjectHasOnly(obj, properties) {
 describe('Server Volume API', function () {
     var volume;
 
-    this.timeout(5000);
+    this.timeout(10000);
 
     before(setup);
     after(cleanup);
@@ -105,7 +106,7 @@ describe('Server Volume API', function () {
     });
 
     it('create', function (done) {
-        this.timeout(5000); // on the Mac, creating volumes takes a lot of time on low battery
+        this.timeout(10000); // on the Mac, creating volumes takes a lot of time on low battery
         request.post(SERVER_URL + '/api/v1/volume/create')
                .auth(USERNAME, PASSWORD)
                .send({ password: PASSWORD, name: TESTVOLUME })
@@ -253,7 +254,7 @@ describe('Server Volume API', function () {
         var volume;
 
         before(function (done) {
-            this.timeout(5000); // on the Mac, creating volumes takes a lot of time on low battery
+            this.timeout(10000); // on the Mac, creating volumes takes a lot of time on low battery
             request.post(SERVER_URL + '/api/v1/volume/create')
             .auth(USERNAME, PASSWORD)
             .send({ password: PASSWORD, name: TEST_VOLUME })
