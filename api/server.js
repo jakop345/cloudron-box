@@ -146,7 +146,6 @@ Server.prototype._initialize = function (callback) {
         that.app
            .use(express.timeout(REQUEST_TIMEOUT))
            .use(express.limit(UPLOAD_LIMIT))
-           .use('/', express.static(__dirname + '/../webadmin')) // use '/' for now so cookie is not restricted to '/webadmin'
            .use(json)
            .use(urlencoded)
            .use(express.cookieParser())
