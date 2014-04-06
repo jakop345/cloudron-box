@@ -2,7 +2,6 @@
 
 var express = require('express'),
     http = require('http'),
-    https = require('https'),
     HttpError = require('./httperror'),
     HttpSuccess = require('./httpsuccess'),
     path = require('path'),
@@ -208,8 +207,7 @@ Server.prototype._initialize = function (callback) {
     this.app.set('port', that.config.port);
 
     if (!that.config.silent) {
-        var scheme = this.config.certificateDir ? 'HTTPS' : 'HTTP';
-        console.log(scheme + ' Server listening on port ' + this.app.get('port'));
+        console.log('Server listening on port ' + this.app.get('port'));
         console.log('Using data root:', that.config.dataRoot);
         console.log('Using config root:', that.config.configRoot);
         console.log('Using mount root:', that.config.mountRoot);
@@ -233,15 +231,7 @@ Server.prototype._initialize = function (callback) {
 
 // TODO maybe we can get rid of that function and inline it - Johannes
 Server.prototype._listen = function (callback) {
-    if (typeof this.config.certificateDir === 'string') {
-        var options = {
-            cert: fs.readFileSync(path.join(this.config.certificateDir, 'cert.pem')),
-            key: fs.readFileSync(path.join(this.config.certificateDir, 'key.pem'))
-        };
-        this.app.httpServer = https.createServer(options, this.app);
-    } else {
-        this.app.httpServer = http.createServer(this.app);
-    }
+    this.app.httpServer = http.createServer(this.app);
 
     function callbackWrapper(error) {
         if (callback) {
