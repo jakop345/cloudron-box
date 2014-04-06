@@ -10,7 +10,6 @@ var express = require('express'),
     db = require('./database.js'),
     routes = require('./routes'),
     debug = require('debug')('server:server'),
-    Ssdp = require('upnp-ssdp'),
     assert = require('assert'),
     util = require('util'),
     pkg = require('./../package.json');
@@ -251,25 +250,6 @@ Server.prototype._listen = function (callback) {
     });
 };
 
-Server.prototype._announce = function (callback) {
-    var ssdp = new Ssdp();
-
-    ssdp.announce({
-        name: 'yellowtent:server',
-        port: this.app.get('port')
-    });
-
-    ssdp.on('error', function (error) {
-        console.error('Unable to announce the device.', error);
-    });
-
-    ssdp.on('reply', function (rinfo) {
-        debug('Sent SSDP response to ' + rinfo.address + ':' + rinfo.port);
-    });
-
-    callback();
-};
-
 Server.prototype.start = function (callback) {
     assert(typeof callback === 'function');
 
@@ -285,11 +265,7 @@ Server.prototype.start = function (callback) {
         that._listen(function (err) {
             if (err) return callback(err);
 
-            that._announce(function (err) {
-                if (err) return callback(err);
-
-                callback(null);
-            });
+            callback(null);
         });
     });
 };
