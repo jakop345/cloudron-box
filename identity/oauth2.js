@@ -176,7 +176,7 @@ module.exports.decision = [
 // the token endpoint exchanges an authcode for an access token
 // it still requires basic or oauth2-client-password authentication
 module.exports.token = [
-    passport.authenticate(['basic', 'oauth2-client-password'], { session: false }),
+    passport.authenticate(['oauth2-client-password'], { session: false }),
     server.token(),
     server.errorHandler()
 ];

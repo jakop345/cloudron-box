@@ -4,7 +4,7 @@
 
 var app = require('commander'),
     path = require('path'),
-    Server = require('./auth/server');
+    Server = require('./identity/server');
 
 function getUserHomeDir() {
     return process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
