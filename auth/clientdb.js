@@ -1,6 +1,8 @@
 'use strict';
 
 var DatabaseError = require('./databaseerror'),
+    DatabaseTable = require('./databasetable'),
+    path = require('path'),
     debug = require('debug')('authserver:clientdb'),
     assert = require('assert');
 
@@ -19,7 +21,11 @@ function init(configDir, callback) {
     assert(typeof configDir === 'string');
     assert(typeof callback === 'function');
 
-    db = {};
+    db = new DatabaseTable(path.join(configDir, 'db/client'), {
+        id: { type: 'String', hashKey: true },
+        clientId: { type: 'String' },
+        redirectURI: { type: 'String' }
+    });
 
     callback(null);
 }
@@ -31,8 +37,9 @@ function get(id, callback) {
 
     debug('get: ' + id);
 
-    if (!db[id]) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
-    callback(null, db[id]);
+    db.get(id, function (error, result) {
+        callback(error, result);
+    });
 }
 
 function getByClientId(clientId, callback) {
@@ -42,31 +49,40 @@ function getByClientId(clientId, callback) {
 
     debug('getByClientId: ' + clientId);
 
-    for (var record in db) {
-        if (db.hasOwnProperty(record)) {
-            if (db[record].clientId === clientId) {
-                return callback(null, db[record]);
+    db.getAll(true, function (error, result) {
+        if (error) callback(error);
+
+        for (var record in result) {
+            if (result.hasOwnProperty(record)) {
+                if (result[record].clientId === clientId) {
+                    return callback(null, result[record]);
+                }
             }
         }
-    }
 
-    return callback(new DatabaseError(DatabaseError.NOT_FOUND));
+        callback(new DatabaseError(DatabaseError.NOT_FOUND));
+    });
 }
 
-function add(id, redirectURI, callback) {
+function add(id, clientId, redirectURI, callback) {
     assert(db !== null);
     assert(typeof id === 'string');
+    assert(typeof clientId === 'string');
     assert(typeof redirectURI === 'string');
     assert(typeof callback === 'function');
 
-    debug('add: ' + id + ' redirectURI "' + redirectURI + '"');
+    debug('add: ' + id + ' clientId "' + clientId + '" redirectURI "' + redirectURI + '"');
 
-    if (db[id]) return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
-
-    db[id] = {
+    var data = {
         id: id,
+        clientId: clientId,
         redirectURI: redirectURI
     };
+
+    db.put(data, function (error) {
+        callback(error);
+    });
+
 
     callback(null);
 }
@@ -76,8 +92,7 @@ function del(id, callback) {
     assert(typeof id === 'string');
     assert(typeof callback === 'function');
 
-    if (!db[id]) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
-    delete db[id];
-
-    callback(null);
+    db.remove(id, function (error) {
+        callback(error);
+    });
 }

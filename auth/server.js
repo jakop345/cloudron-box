@@ -113,24 +113,24 @@ Server.prototype._initialize = function (callback) {
 
 
         // TODO this route needs to be replaced by a better strategy
-        that.app.post('/api/v1/owner', user.owner);
+        that.app.post('/auth/api/v1/owner', user.owner);
 
         // user resource routes
-        that.app.post('/api/v1/users', user.add);
-        that.app.get('/api/v1/users', user.get);
-        that.app.del('/api/v1/users', user.remove);
+        that.app.post('/auth/api/v1/users', user.add);
+        that.app.get('/auth/api/v1/users', user.get);
+        that.app.del('/auth/api/v1/users', user.remove);
 
         // form based login routes used by oauth2 frame
-        that.app.get('/api/v1/session/login', oauth2.loginForm);
-        that.app.post('/api/v1/session/login', oauth2.login);
-        that.app.get('/api/v1/session/logout', oauth2.logout);
+        that.app.get('/auth/api/v1/session/login', oauth2.loginForm);
+        that.app.post('/auth/api/v1/session/login', oauth2.login);
+        that.app.get('/auth/api/v1/session/logout', oauth2.logout);
         // TODO this is only temporary
-        that.app.get('/api/v1/session/account', oauth2.account);
+        that.app.get('/auth/api/v1/session/account', oauth2.account);
 
         // oauth2 routes
-        that.app.get('/api/v1/oauth/dialog/authorize', oauth2.authorization);
-        that.app.post('/api/v1/oauth/dialog/authorize/decision', oauth2.decision);
-        that.app.post('/api/v1/oauth/token', oauth2.token);
+        that.app.get('/auth/api/v1/oauth/dialog/authorize', oauth2.authorization);
+        that.app.post('/auth/api/v1/oauth/dialog/authorize/decision', oauth2.decision);
+        that.app.post('/auth/api/v1/oauth/token', oauth2.token);
     });
 
     this.app.set('port', that._port);
@@ -173,7 +173,7 @@ Server.prototype.start = function (callback) {
                 if (error) return callback(error);
 
                 // TODO this is temporary, add webadmin client id
-                clientdb.add('abc123', 'https://localhost:3000/oauth2/oauth_callback.html', function (error) {
+                clientdb.add('someTemporaryClient', 'abc123', 'https://localhost:3000/oauth2/oauth_callback.html', function (error) {
                     console.log('+++ webadmin client added');
                 });
 

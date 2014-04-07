@@ -1,6 +1,8 @@
 'use strict';
 
 var DatabaseError = require('./databaseerror'),
+    DatabaseTable = require('./databasetable'),
+    path = require('path'),
     tokendb = require('./tokendb'),
     debug = require('debug')('authserver:userdb'),
     assert = require('assert');
@@ -10,7 +12,6 @@ var db;
 
 exports = module.exports = {
     init: init,
-    getResponseObject: getResponseObject,
     get: get,
     getByUsername: getByUsername,
     getByAccessToken: getByAccessToken,
@@ -22,17 +23,20 @@ function init(configDir, callback) {
     assert(typeof configDir === 'string');
     assert(typeof callback === 'function');
 
-    db = {};
+    db = new DatabaseTable(path.join(configDir, 'db/users'), {
+        id: { type: 'String', hashKey: true },
+        username: { type: 'String' },
+        email: { type: 'String' },
+        password: { type: 'String', priv: true },
+        publicPem: { type: 'String' },
+        privatePemCipher: { type: 'String', priv: true },
+        salt: { type: 'String', priv: true },
+        created_at: { type: 'String' },
+        modified_at: { type: 'String' },
+        admin: { type: 'Boolean' }
+    });
 
     callback(null);
-}
-
-// creates a new object to send over the network. This helps to prevent data leak
-function getResponseObject(user) {
-    assert(typeof user === 'object');
-
-    var ret = user;
-    return ret;
 }
 
 function get(userId, callback) {
@@ -40,8 +44,9 @@ function get(userId, callback) {
     assert(typeof userId === 'string');
     assert(typeof callback === 'function');
 
-    if (!db[userId]) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
-    callback(null, db[userId]);
+    db.get(userId, function (error, result) {
+        callback(error, result);
+    });
 }
 
 function getByUsername(username, callback) {
@@ -61,15 +66,16 @@ function add(userId, username, password, email, callback) {
     assert(typeof email === 'string');
     assert(typeof callback === 'function');
 
-    if (db[userId]) return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
-    db[userId] = {
+    var data = {
         id: userId,
         username: username,
         password: password,
         email: email
     };
 
-    callback(null);
+    db.put(data, function (error) {
+        callback(error);
+    });
 }
 
 function del(userId, callback) {
@@ -77,10 +83,9 @@ function del(userId, callback) {
     assert(typeof userId === 'string');
     assert(typeof callback === 'function');
 
-    if (!db[userId]) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
-    delete db[userId];
-
-    callback(null);
+    db.remove(userId, function (error) {
+        callback(error);
+    });
 }
 
 function getByAccessToken(accessToken, callback) {

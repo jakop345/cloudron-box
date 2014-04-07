@@ -105,8 +105,8 @@ module.exports.loginForm = function (req, res) {
 
 // performs the login POST from the above form
 module.exports.login = passport.authenticate('local', {
-    successReturnToOrRedirect: '/api/v1/session/account',
-    failureRedirect: '/api/v1/session/login'
+    successReturnToOrRedirect: '/auth/api/v1/session/account',
+    failureRedirect: '/auth/api/v1/session/login'
 });
 
 // ends the current session
@@ -117,7 +117,7 @@ module.exports.logout = function (req, res) {
 
 // Temporary helper functions to see a login session
 module.exports.account = [
-    session.ensureLoggedIn('/api/v1/session/login'),
+    session.ensureLoggedIn('/auth/api/v1/session/login'),
     function(req, res) {
         res.render('account', { user: req.user });
     }
@@ -141,7 +141,7 @@ module.exports.account = [
 // first, and rendering the `dialog` view.
 
 module.exports.authorization = [
-    session.ensureLoggedIn('/api/v1/session/login'),
+    session.ensureLoggedIn('/auth/api/v1/session/login'),
     server.authorization(function (clientID, redirectURI, callback) {
         console.log('server authorization validation for ', clientID, redirectURI);
 
@@ -158,7 +158,7 @@ module.exports.authorization = [
 
 // this triggers the above grant middleware and handles the user's decision if he accepts the access
 module.exports.decision = [
-    session.ensureLoggedIn('/api/v1/session/login'),
+    session.ensureLoggedIn('/auth/api/v1/session/login'),
     server.decision()
 ];
 

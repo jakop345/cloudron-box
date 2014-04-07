@@ -1,7 +1,9 @@
 'use strict';
 
 var DatabaseError = require('./databaseerror'),
-    debug = require('debug')('authcodedb'),
+    DatabaseTable = require('./databasetable'),
+    path = require('path'),
+    debug = require('debug')('authserver:authcodedb'),
     assert = require('assert');
 
 // database
@@ -18,7 +20,12 @@ function init(configDir, callback) {
     assert(typeof configDir === 'string');
     assert(typeof callback === 'function');
 
-    db = {};
+    db = new DatabaseTable(path.join(configDir, 'db/authcode'), {
+        authCode: { type: 'String', hashKey: true },
+        redirectURI: { type: 'String' },
+        userId: { type: 'String' },
+        clientId: { type: 'String' }
+    });
 
     callback(null);
 }
@@ -28,8 +35,9 @@ function get(authCode, callback) {
     assert(typeof authCode === 'string');
     assert(typeof callback === 'function');
 
-    if (!db[authCode]) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
-    callback(null, { authCode: authCode, userId: db[authCode]});
+    db.get(authCode, function (error, result) {
+        callback(error, result);
+    });
 }
 
 function add(authCode, clientId, redirectURI, userId, callback) {
@@ -40,15 +48,16 @@ function add(authCode, clientId, redirectURI, userId, callback) {
     assert(typeof userId === 'string');
     assert(typeof callback === 'function');
 
-    if (db[authCode]) return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
-
-    db[authCode] = {
+    var data = {
+        authCode: authCode,
         clientId: clientId,
         redirectURI: redirectURI,
         userId: userId
     };
 
-    callback(null);
+    db.put(data, function (error) {
+        callback(error);
+    });
 }
 
 function del(authCode, callback) {
@@ -56,9 +65,8 @@ function del(authCode, callback) {
     assert(typeof authCode === 'string');
     assert(typeof callback === 'function');
 
-    if (!db[authCode]) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
-    delete db[authCode];
-
-    callback(null);
+    db.remove(authCode, function (error) {
+        callback(error);
+    });
 }
 

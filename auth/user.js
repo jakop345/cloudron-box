@@ -45,8 +45,6 @@ function add(req, res, next) {
 
 function get(req, res, next) {
     debug('get');
-
-    console.log('---', req.user);
 }
 
 function getAll(req, res, next) {

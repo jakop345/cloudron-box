@@ -1,7 +1,9 @@
 'use strict';
 
 var DatabaseError = require('./databaseerror'),
-    debug = require('debug')('tokendb'),
+    DatabaseTable = require('./databasetable'),
+    path = require('path'),
+    debug = require('debug')('authserver:tokendb'),
     assert = require('assert');
 
 // database
@@ -20,7 +22,11 @@ function init(configDir, callback) {
     assert(typeof configDir === 'string');
     assert(typeof callback === 'function');
 
-    db = {};
+    db = new DatabaseTable(path.join(configDir, 'db/token'), {
+        accessToken: { type: 'String', hashKey: true },
+        userId: { type: 'String' },
+        clientId: { type: 'String' }
+    });
 
     callback(null);
 }
@@ -30,8 +36,9 @@ function get(accessToken, callback) {
     assert(typeof accessToken === 'string');
     assert(typeof callback === 'function');
 
-    if (!db[accessToken]) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
-    callback(null, db[accessToken]);
+    db.get(accessToken, function (error, result) {
+        callback(error, result);
+    });
 }
 
 function add(accessToken, userId, clientId, callback) {
@@ -41,14 +48,15 @@ function add(accessToken, userId, clientId, callback) {
     assert(typeof clientId === 'string');
     assert(typeof callback === 'function');
 
-    if (db[accessToken]) return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
-    db[accessToken] = {
+    var data = {
         accessToken: accessToken,
         userId: userId,
         clientId: clientId
     };
 
-    callback(null);
+    db.put(data, function (error) {
+        callback(error);
+    });
 }
 
 function del(accessToken, callback) {
@@ -56,10 +64,9 @@ function del(accessToken, callback) {
     assert(typeof accessToken === 'string');
     assert(typeof callback === 'function');
 
-    if (!db[accessToken]) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
-    delete db[accessToken];
-
-    callback(null);
+    db.remove(accessToken, function (error) {
+        callback(error);
+    });
 }
 
 function getByUserId(userId, callback) {
@@ -67,15 +74,19 @@ function getByUserId(userId, callback) {
     assert(typeof userId === 'string');
     assert(typeof callback === 'function');
 
-    for (var i in db) {
-        if (db.hasOwnProperty(i)) {
-            if (db[i] === userId) {
-                return callback(null, i);
+    db.getAll(true, function (error, result) {
+        if (error) return callback(error);
+
+        for (var i in result) {
+            if (result.hasOwnProperty(i)) {
+                if (result[i] === userId) {
+                    return callback(null, i);
+                }
             }
         }
-    }
 
-    callback(new DatabaseError(DatabaseError.NOT_FOUND));
+        callback(new DatabaseError(DatabaseError.NOT_FOUND));
+    });
 }
 
 function delByUserId(userId, callback) {
@@ -83,16 +94,11 @@ function delByUserId(userId, callback) {
     assert(typeof userId === 'string');
     assert(typeof callback === 'function');
 
-    var found = false;
+    getByUserId(userId, function (error, result) {
+        if (error) return callback(error);
 
-    for (var i in db) {
-        if (db.hasOwnProperty(i)) {
-            if (db[i] === userId) {
-                delete db[i];
-            }
-        }
-    }
-
-    if (!found) callback(new DatabaseError(DatabaseError.NOT_FOUND));
-    callback(null);
+        db.remove(result.accessToken, function (error) {
+            callback(error);
+        });
+    });
 }
