@@ -4,6 +4,10 @@ location /api {
     client_max_body_size 0;
 }
 
+location /auth {
+    proxy_pass   http://127.0.0.1:4000;
+}
+
 location / {
     root   ../webadmin/;
     index  index.html index.htm;
