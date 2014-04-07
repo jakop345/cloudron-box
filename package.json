@@ -30,7 +30,17 @@
     "encfs": "*",
     "safetydance": "*",
     "ursa": "*",
-    "node-uuid": "^1.4.1"
+    "node-uuid": "^1.4.1",
+    "commander": "^2.2.0",
+    "once": "^1.3.0",
+    "passport": "^0.2.0",
+    "oauth2orize": "^1.0.1",
+    "connect-ensure-login": "^0.1.1",
+    "ejs": "^1.0.0",
+    "passport-local": "^1.0.0",
+    "passport-http": "^0.2.2",
+    "passport-oauth2-client-password": "^0.1.1",
+    "passport-http-bearer": "^1.0.1"
   },
   "devDependencies": {
     "mocha": "*",
