@@ -14,15 +14,16 @@ var os = require('os'),
     superagent = require('superagent'),
     Server = require('../server');
 
-var USERNAME = 'nobody';
-var EMAIL = 'nobody@no.body';
-var PASSWORD = 'foobar';
-var NEW_PASSWORD = 'somenewpassword';
-
 var OWNER = {
     username: 'admin1',
     password: 'test',
     email: 'admin@test.com'
+};
+
+var USER_0 = {
+    username: 'jzellner',
+    password: 'randomness',
+    email: 'j@z.com'
 };
 
 var PORT = 3001;
@@ -111,13 +112,60 @@ describe('Server', function () {
             server.stop(done);
         });
 
-        it('creation succeeds', function (done) {
-            superagent.post(SERVER + '/owner').send(OWNER).end(function (error, result) {
-                expect(error).to.be(null);
-                expect(result).to.be.an('object');
-                expect(result.statusCode).to.equal(201);
+        describe('creation', function () {
+            it('succeeds', function (done) {
+                superagent.post(SERVER + '/owner').send(OWNER).end(function (error, result) {
+                    expect(error).to.be(null);
+                    expect(result).to.be.an('object');
+                    expect(result.statusCode).to.equal(201);
 
-                done();
+                    done();
+                });
+            });
+
+            it('fails, owner already exists', function (done) {
+                superagent.post(SERVER + '/owner').send(OWNER).end(function (error, result) {
+                    expect(error).to.be(null);
+                    expect(result).to.be.an('object');
+                    expect(result.statusCode).to.equal(409);
+
+                    done();
+                });
+            });
+        });
+    });
+
+    describe('user', function () {
+        var server = null;
+
+        before(function (done) {
+            server = new Server(PORT, tmpdir, true);
+            server.start(done);
+        });
+
+        after(function (done) {
+            server.stop(done);
+        });
+
+        describe('creation', function () {
+            it('succeeds', function (done) {
+                superagent.post(SERVER + '/users').send(USER_0).end(function (error, result) {
+                    expect(error).to.be(null);
+                    expect(result).to.be.an('object');
+                    expect(result.statusCode).to.equal(201);
+
+                    done();
+                });
+            });
+
+            it('fails, user already exists', function (done) {
+                superagent.post(SERVER + '/users').send(USER_0).end(function (error, result) {
+                    expect(error).to.be(null);
+                    expect(result).to.be.an('object');
+                    expect(result.statusCode).to.equal(409);
+
+                    done();
+                });
             });
         });
     });
