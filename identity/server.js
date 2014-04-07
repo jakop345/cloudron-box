@@ -165,21 +165,11 @@ Server.prototype.start = function (callback) {
     userdb.init(that._configDir, function (error) {
         if (error) return callback(error);
 
-        // TODO this is temporary
-        userdb.add('admin', 'admin', 'test', 'admin@test.com', function (error) {
-            console.log('+++ owner added');
-        });
-
         tokendb.init(that._configDir, function (error) {
             if (error) return callback(error);
 
             clientdb.init(that._configDir, function (error) {
                 if (error) return callback(error);
-
-                // TODO this is temporary, add webadmin client id
-                clientdb.add('1234', 'abc123', 'testClientSecret', 'WebAdmin', 'https://localhost/oauth2/oauth_callback.html', function (error) {
-                    console.log('+++ webadmin client added');
-                });
 
                 authcodedb.init(that._configDir, function (error) {
                     if (error) return callback(error);
@@ -209,5 +199,14 @@ Server.prototype.stop = function (callback) {
         that.app = null;
 
         callback(null);
+    });
+};
+
+// TODO this is temporary
+Server.prototype.temporaryDevMode = function (callback) {
+    userdb.add('admin', 'admin', 'test', 'admin@test.com', function () {
+        clientdb.add('1234', 'abc123', 'testClientSecret', 'WebAdmin', 'https://localhost/oauth2/oauth_callback.html', function () {
+            callback();
+        });
     });
 };

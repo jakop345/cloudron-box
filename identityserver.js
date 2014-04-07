@@ -46,5 +46,7 @@ server.start(function (error) {
         process.exit(2);
     }
 
-    console.log('Server up and running on port %d.', port);
+    server.temporaryDevMode(function () {
+        console.log('Server up and running on port %d.', port);
+    });
 });
