@@ -2,7 +2,7 @@
 
 var DatabaseError = require('./databaseerror'),
     tokendb = require('./tokendb'),
-    debug = require('debug')('userdb'),
+    debug = require('debug')('authserver:userdb'),
     assert = require('assert');
 
 // database

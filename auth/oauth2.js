@@ -6,11 +6,10 @@
 
 var oauth2orize = require('oauth2orize'),
     passport = require('passport'),
-    login = require('connect-ensure-login'),
+    session = require('connect-ensure-login'),
     authcodedb = require('./authcodedb'),
     tokendb = require('./tokendb'),
     DatabaseError = require('./databaseerror'),
-    userdb = require('./userdb'),
     clientdb = require('./clientdb'),
     uuid = require('node-uuid');
 
@@ -30,13 +29,13 @@ var server = oauth2orize.createServer();
 // simple matter of serializing the client's ID, and deserializing by finding
 // the client by ID from the database.
 
-server.serializeClient(function(client, callback) {
+server.serializeClient(function (client, callback) {
     console.log('server serialize', client, client.id);
 
     return callback(null, client.id);
 });
 
-server.deserializeClient(function(id, callback) {
+server.deserializeClient(function (id, callback) {
     console.log('server deserialize', id);
 
     clientdb.get(id, function (error, client) {
@@ -99,6 +98,31 @@ server.exchange(oauth2orize.exchange.code(function (client, code, redirectURI, c
 }));
 
 
+// Main login form username and password
+module.exports.loginForm = function (req, res) {
+    res.render('login');
+};
+
+// performs the login POST from the above form
+module.exports.login = passport.authenticate('local', {
+    successReturnToOrRedirect: '/api/v1/session/account',
+    failureRedirect: '/api/v1/session/login'
+});
+
+// ends the current session
+module.exports.logout = function (req, res) {
+    req.logout();
+    res.redirect('/');
+};
+
+// Temporary helper functions to see a login session
+module.exports.account = [
+    session.ensureLoggedIn('/api/v1/session/login'),
+    function(req, res) {
+        res.render('account', { user: req.user });
+    }
+];
+
 
 // user authorization endpoint
 //
@@ -116,46 +140,31 @@ server.exchange(oauth2orize.exchange.code(function (client, code, redirectURI, c
 // authorization).  We accomplish that here by routing through `ensureLoggedIn()`
 // first, and rendering the `dialog` view.
 
-exports.authorization = [
-    login.ensureLoggedIn('/api/v1/session/login'),
-    server.authorization(function(clientID, redirectURI, callback) {
+module.exports.authorization = [
+    session.ensureLoggedIn('/api/v1/session/login'),
+    server.authorization(function (clientID, redirectURI, callback) {
         console.log('server authorization validation for ', clientID, redirectURI);
 
-        clientdb.getByClientId(clientID, function(error, client) {
-          if (error) return callback(error);
-          // WARNING: For security purposes, it is highly advisable to check that
-          //          redirectURI provided by the client matches one registered with
-          //          the server.  For simplicity, this example does not.  You have
-          //          been warned.
-          return callback(null, client, redirectURI);
+        clientdb.getByClientId(clientID, function (error, client) {
+            // TODO actually check redirectURI
+            if (error) return callback(error);
+            callback(null, client, redirectURI);
         });
     }),
-    function(req, res){
+    function (req, res) {
         res.render('dialog', { transactionID: req.oauth2.transactionID, user: req.user, client: req.oauth2.client });
     }
 ];
 
-// user decision endpoint
-//
-// `decision` middleware processes a user's decision to allow or deny access
-// requested by a client application.  Based on the grant type requested by the
-// client, the above grant middleware configured above will be invoked to send
-// a response.
-
-exports.decision = [
-    login.ensureLoggedIn('/api/v1/session/login'),
+// this triggers the above grant middleware and handles the user's decision if he accepts the access
+module.exports.decision = [
+    session.ensureLoggedIn('/api/v1/session/login'),
     server.decision()
 ];
 
-
-// token endpoint
-//
-// `token` middleware handles client requests to exchange authorization grants
-// for access tokens.  Based on the grant type being exchanged, the above
-// exchange middleware will be invoked to handle the request.  Clients must
-// authenticate when making requests to this endpoint.
-
-exports.token = [
+// the token endpoint exchanges an authcode for an access token
+// it still requires basic or oauth2-client-password authentication
+module.exports.token = [
     passport.authenticate(['basic', 'oauth2-client-password'], { session: false }),
     server.token(),
     server.errorHandler()

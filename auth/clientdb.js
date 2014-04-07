@@ -1,7 +1,7 @@
 'use strict';
 
 var DatabaseError = require('./databaseerror'),
-    debug = require('debug')('clientdb'),
+    debug = require('debug')('authserver:clientdb'),
     assert = require('assert');
 
 // database
@@ -29,6 +29,8 @@ function get(id, callback) {
     assert(typeof id === 'string');
     assert(typeof callback === 'function');
 
+    debug('get: ' + id);
+
     if (!db[id]) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
     callback(null, db[id]);
 }
@@ -37,6 +39,8 @@ function getByClientId(clientId, callback) {
     assert(db !== null);
     assert(typeof clientId === 'string');
     assert(typeof callback === 'function');
+
+    debug('getByClientId: ' + clientId);
 
     for (var record in db) {
         if (db.hasOwnProperty(record)) {
@@ -49,16 +53,20 @@ function getByClientId(clientId, callback) {
     return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 }
 
-function add(id, data, callback) {
+function add(id, redirectURI, callback) {
     assert(db !== null);
     assert(typeof id === 'string');
-    assert(typeof data === 'object');
+    assert(typeof redirectURI === 'string');
     assert(typeof callback === 'function');
 
-    data.id = id;
+    debug('add: ' + id + ' redirectURI "' + redirectURI + '"');
 
     if (db[id]) return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
-    db[id] = data;
+
+    db[id] = {
+        id: id,
+        redirectURI: redirectURI
+    };
 
     callback(null);
 }

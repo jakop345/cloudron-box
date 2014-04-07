@@ -7,15 +7,14 @@ var express = require('express'),
     path = require('path'),
     passport = require('passport'),
     oauth2 = require('./oauth2'),
-    session = require('./session'),
-    routes = require('./routes/'),
     HttpError = require('../api/httperror'),
     HttpSuccess = require('../api/httpsuccess'),
     middleware = require('../middleware/'),
-    debug = require('debug')('main'),
+    debug = require('debug')('authserver:server'),
     tokendb = require('./tokendb'),
     clientdb = require('./clientdb'),
     userdb = require('./userdb'),
+    user = require('./user'),
     assert = require('assert');
 
 module.exports = Server;
@@ -112,20 +111,21 @@ Server.prototype._initialize = function (callback) {
         // Passport configuration
         require('./auth');
 
-        // routes controlled by app.router
-        that.app.get('/', session.account);
 
-        // form based login routes
-        that.app.get('/api/v1/session/login', session.loginForm);
-        that.app.post('/api/v1/session/login', session.login);
-        that.app.get('/api/v1/session/logout', session.logout);
-        that.app.get('/api/v1/session/account', session.account);
+        // TODO this route needs to be replaced by a better strategy
+        that.app.post('/api/v1/owner', user.owner);
 
         // user resource routes
-        that.app.post('/api/v1/users', routes.user.add);
-        that.app.get('/api/v1/users', routes.user.get);
-        // that.app.put('/api/v1/users', routes.user.update);
-        that.app.del('/api/v1/users', routes.user.remove);
+        that.app.post('/api/v1/users', user.add);
+        that.app.get('/api/v1/users', user.get);
+        that.app.del('/api/v1/users', user.remove);
+
+        // form based login routes used by oauth2 frame
+        that.app.get('/api/v1/session/login', oauth2.loginForm);
+        that.app.post('/api/v1/session/login', oauth2.login);
+        that.app.get('/api/v1/session/logout', oauth2.logout);
+        // TODO this is only temporary
+        that.app.get('/api/v1/session/account', oauth2.account);
 
         // oauth2 routes
         that.app.get('/api/v1/oauth/dialog/authorize', oauth2.authorization);
@@ -166,16 +166,16 @@ Server.prototype.start = function (callback) {
     userdb.init(that._configDir, function (error) {
         if (error) return callback(error);
 
-        // TODO add initial user only until the user creation works
-        userdb.add('test', 'test', 'foo', 'test@foo.com', function (error) {
-            console.log('+++ user added');
-        });
-
         tokendb.init(that._configDir, function (error) {
             if (error) return callback(error);
 
             clientdb.init(that._configDir, function (error) {
                 if (error) return callback(error);
+
+                // TODO this is temporary, add webadmin client id
+                clientdb.add('abc123', 'https://localhost:3000/oauth2/oauth_callback.html', function (error) {
+                    console.log('+++ webadmin client added');
+                });
 
                 that._initialize(function (error) {
                     if (error) return callback(error);
