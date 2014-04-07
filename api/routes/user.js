@@ -3,14 +3,14 @@
 var db = require('../database'),
     DatabaseError = db.DatabaseError,
     user = require('../user'),
-    Volume = require('../volume'),
+    Volume = require('../../volume/volume.js'),
     VolumeError = Volume.VolumeError,
     UserError = user.UserError,
     crypto = require('crypto'),
     async = require('async'),
     debug = require('debug')('server:routes/user'),
-    HttpError = require('../httperror'),
-    HttpSuccess = require('../httpsuccess');
+    HttpError = require('../../common/httperror.js'),
+    HttpSuccess = require('../../common/httpsuccess.js');
 
 exports = module.exports = {
     initialize: initialize,

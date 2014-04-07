@@ -1,20 +1,19 @@
 'use strict';
 
 var fs = require('fs'),
-    db = require('./database'),
-    User = require('./user'),
+    User = require('../api/user.js'),
     debug = require('debug')('server:volume'),
     encfs = require('encfs'),
     rimraf = require('rimraf'),
     path = require('path'),
     assert = require('assert'),
     uuid = require('node-uuid'),
-    aes = require('./aes-helper'),
+    aes = require('../common/aes-helper.js'),
     ursa = require('ursa'),
     async = require('async'),
     util = require('util'),
-    Repo = require('./repo'),
-    Config = require('./config'),
+    Repo = require('../api/repo'),
+    Config = require('./config.js'),
     safe = require('safetydance');
 
 exports = module.exports = {

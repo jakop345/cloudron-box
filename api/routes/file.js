@@ -1,8 +1,8 @@
 'use strict';
 
 var fs = require('fs'),
-    HttpError = require('../httperror'),
-    HttpSuccess = require('../httpsuccess'),
+    HttpError = require('../../common/httperror.js'),
+    HttpSuccess = require('../../common/httpsuccess.js'),
     mime = require('mime'),
     debug = require('debug')('server:routes/file'),
     express = require('express'),

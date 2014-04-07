@@ -3,7 +3,7 @@
 var db = require('./database.js'),
     DatabaseError = db.DatabaseError,
     crypto = require('crypto'),
-    aes = require('./aes-helper'),
+    aes = require('../common/aes-helper.js'),
     util = require('util'),
     debug = require('debug')('server:user'),
     assert = require('assert'),

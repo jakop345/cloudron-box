@@ -1,7 +1,7 @@
 'use strict';
 
-var HttpError = require('../httperror'),
-    HttpSuccess = require('../httpsuccess');
+var HttpError = require('../../common/httperror.js'),
+    HttpSuccess = require('../../common/httpsuccess.js');
 
 exports = module.exports = {
     remove: remove,

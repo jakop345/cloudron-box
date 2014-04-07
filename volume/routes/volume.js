@@ -1,10 +1,10 @@
 'use strict';
 
-var HttpError = require('../httperror'),
-    HttpSuccess = require('../httpsuccess'),
+var HttpError = require('../../common/httperror.js'),
+    HttpSuccess = require('../../common/httpsuccess.js'),
     async = require('async'),
-    volume = require('../volume'),
-    User = require('../user'),
+    volume = require('../volume.js'),
+    User = require('../../api/user'),
     VolumeError = volume.VolumeError;
 
 exports = module.exports = {
