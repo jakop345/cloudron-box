@@ -21,9 +21,9 @@
 
 <script>
 
-var frame, loginForm, btn, tokenBtn, logoutBtn, authCode, oauthResult, infoButton, userInfo, accessToken;
-var accountsServer = 'https://localhost:4000';
-var redirectServer = 'https://localhost:3000';
+var frame, startBtn, tokenBtn, authCode, oauthResult, accessToken;
+var accountsServer = 'https://localhost/auth';
+var redirectServer = 'https://localhost';
 
 function setAuthCode(code) {
     frame.style.display = 'none';
@@ -42,28 +42,6 @@ function init() {
     tokenBtn = document.getElementById('tokenButton');
     frame = document.getElementById('frame');
     oauthResult = document.getElementById('oauthResult');
-
-    loginForm.onsubmit = function (event) {
-        event.preventDefault();
-
-        superagent.post(accountsServer + '/api/v1/session/login')
-        .send({
-            username: loginForm.elements.namedItem('username').value,
-            password: loginForm.elements.namedItem('password').value
-        })
-        .end(function (error, result) {
-            if (error) {
-                alert('Login failed, see console.');
-                console.error(error);
-                return;
-            }
-
-            alert('Login successfull');
-            console.log(result.body);
-        });
-
-        return false;
-    }
 
     startBtn.onclick = function () {
         frame.src = accountsServer + '/api/v1/oauth/dialog/authorize?response_type=code&client_id=abc123&redirect_uri=' + redirectServer + '/oauth2/oauth_callback.html';
