@@ -82,9 +82,6 @@ function add(id, clientId, redirectURI, callback) {
     db.put(data, function (error) {
         callback(error);
     });
-
-
-    callback(null);
 }
 
 function del(id, callback) {
