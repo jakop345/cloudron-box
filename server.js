@@ -3,7 +3,7 @@
 'use strict';
 
 var optimist = require('optimist'),
-    Server = require('./api/server.js'),
+    Server = require('./sync/server.js'),
     path = require('path');
 
 function getUserHomeDir() {

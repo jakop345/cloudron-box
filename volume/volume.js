@@ -12,7 +12,7 @@ var fs = require('fs'),
     ursa = require('ursa'),
     async = require('async'),
     util = require('util'),
-    Repo = require('../api/repo'),
+    Repo = require('../sync/repo.js'),
     Config = require('./config.js'),
     safe = require('safetydance');
 
