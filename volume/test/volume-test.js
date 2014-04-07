@@ -6,8 +6,8 @@
 /* global after:false */
 
 var volume = require('../volume.js'),
-    db = require('../../api/database.js'),
-    User = require('../../api/user.js'),
+    db = require('../../auth/database.js'),
+    User = require('../../auth/user.js'),
     VolumeError = volume.VolumeError,
     path = require('path'),
     mkdirp = require('mkdirp'),

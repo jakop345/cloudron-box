@@ -8,7 +8,7 @@
 var Server = require('../../../api/server.js'),
     request = require('superagent'),
     expect = require('expect.js'),
-    database = require('../../../api/database.js'),
+    database = require('../../../auth/database.js'),
     crypto = require('crypto'),
     rimraf = require('rimraf'),
     path = require('path'),

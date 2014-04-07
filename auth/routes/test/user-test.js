@@ -5,7 +5,7 @@
 /* global before:false */
 /* global after:false */
 
-var Server = require('../../server.js'),
+var Server = require('../../../api/server.js'),
     request = require('superagent'),
     expect = require('expect.js'),
     database = require('../../database.js'),
