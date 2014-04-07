@@ -2,10 +2,9 @@
 
 var userdb = require('./userdb'),
     DatabaseError = require('./databaseerror'),
-    crypto = require('crypto'),
     debug = require('debug')('authserver:user'),
-    HttpError = require('../api/httperror'),
-    HttpSuccess = require('../api/httpsuccess');
+    HttpError = require('../common/httperror'),
+    HttpSuccess = require('../common/httpsuccess');
 
 exports = module.exports = {
     owner: owner,
@@ -45,6 +44,8 @@ function add(req, res, next) {
 
 function get(req, res, next) {
     debug('get');
+
+    console.log('---', req.user);
 }
 
 function getAll(req, res, next) {

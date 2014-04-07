@@ -2,13 +2,11 @@
 
 var express = require('express'),
     http = require('http'),
-    fs = require('fs'),
     once = require('once'),
     path = require('path'),
     passport = require('passport'),
     oauth2 = require('./oauth2'),
-    HttpError = require('../api/httperror'),
-    HttpSuccess = require('../api/httpsuccess'),
+    HttpSuccess = require('../common/httpsuccess'),
     middleware = require('../middleware/'),
     debug = require('debug')('authserver:server'),
     tokendb = require('./tokendb'),
@@ -146,7 +144,7 @@ Server.prototype._listen = function (callback) {
 
     this.app.httpServer.listen(this.app.get('port'), function (error) {
         if (error) return callback(error);
-        callback();
+        callback(null);
     });
 
     this.app.httpServer.on('error', function (error) {
@@ -203,13 +201,13 @@ Server.prototype.stop = function (callback) {
     var that = this;
 
     if (!this.app.httpServer) {
-        return callback();
+        return callback(null);
     }
 
     this.app.httpServer.close(function () {
         that.app.httpServer.unref();
         that.app = null;
 
-        callback();
+        callback(null);
     });
 };
