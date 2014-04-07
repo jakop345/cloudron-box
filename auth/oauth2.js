@@ -69,6 +69,17 @@ server.grant(oauth2orize.grant.code(function (client, redirectURI, user, ares, c
     });
 }));
 
+server.grant(oauth2orize.grant.token(function (client, user, ares, callback) {
+    console.log('grant token', arguments);
+
+    var token = uuid.v4();
+
+    tokendb.add(token, user.id, client.clientId, function (error) {
+        if (error) return callback(error);
+        callback(null, token);
+    });
+}));
+
 // Exchange authorization codes for access tokens.  The callback accepts the
 // `client`, which is exchanging `code` and any `redirectURI` from the
 // authorization request for verification.  If these values are validated, the

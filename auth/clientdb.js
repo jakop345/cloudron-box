@@ -24,6 +24,8 @@ function init(configDir, callback) {
     db = new DatabaseTable(path.join(configDir, 'db/client'), {
         id: { type: 'String', hashKey: true },
         clientId: { type: 'String' },
+        clientSecret: { type: 'String' },
+        name: { type: 'String' },
         redirectURI: { type: 'String' }
     });
 
@@ -64,18 +66,22 @@ function getByClientId(clientId, callback) {
     });
 }
 
-function add(id, clientId, redirectURI, callback) {
+function add(id, clientId, clientSecret, name, redirectURI, callback) {
     assert(db !== null);
     assert(typeof id === 'string');
     assert(typeof clientId === 'string');
+    assert(typeof clientSecret === 'string');
+    assert(typeof name === 'string');
     assert(typeof redirectURI === 'string');
     assert(typeof callback === 'function');
 
-    debug('add: ' + id + ' clientId "' + clientId + '" redirectURI "' + redirectURI + '"');
+    debug('add: ' + id + ' clientId "' + clientId + ' clientSecret "' + clientSecret + ' name "' + name + '" redirectURI "' + redirectURI + '"');
 
     var data = {
         id: id,
         clientId: clientId,
+        clientSecret: clientSecret,
+        name: name,
         redirectURI: redirectURI
     };
 

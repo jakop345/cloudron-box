@@ -14,6 +14,7 @@ var express = require('express'),
     tokendb = require('./tokendb'),
     clientdb = require('./clientdb'),
     userdb = require('./userdb'),
+    authcodedb = require('./authcodedb'),
     user = require('./user'),
     assert = require('assert');
 
@@ -68,7 +69,7 @@ function Server(port, configDir, silent) {
     assert(typeof silent === 'boolean');
 
     this._port = port;
-    this._routePrefix = '/api/v1';
+    this._prefix = '/auth/api/v1';
     this._silent = !!silent;
     this._configDir = configDir;
 
@@ -89,7 +90,7 @@ Server.prototype._initialize = function (callback) {
         that.app.disable('x-powered-by');
         that.app.set('views', path.join(__dirname, './views'));
         that.app.set('view engine', 'ejs');
-        that.app.set('view options', { layout: false });
+        that.app.set('view options', { layout: true });
 
         var json = express.json({ strict: true, limit: QUERY_LIMIT }); // application/json
         var urlencoded = express.urlencoded({ limit: QUERY_LIMIT }); // application/x-www-form-urlencoded
@@ -113,24 +114,24 @@ Server.prototype._initialize = function (callback) {
 
 
         // TODO this route needs to be replaced by a better strategy
-        that.app.post('/auth/api/v1/owner', user.owner);
+        that.app.post(that._prefix + '/owner', user.owner);
 
         // user resource routes
-        that.app.post('/auth/api/v1/users', user.add);
-        that.app.get('/auth/api/v1/users', user.get);
-        that.app.del('/auth/api/v1/users', user.remove);
+        that.app.post(that._prefix + '/users', user.add);
+        that.app.get(that._prefix + '/users', user.get);
+        that.app.del(that._prefix + '/users', user.remove);
 
         // form based login routes used by oauth2 frame
-        that.app.get('/auth/api/v1/session/login', oauth2.loginForm);
-        that.app.post('/auth/api/v1/session/login', oauth2.login);
-        that.app.get('/auth/api/v1/session/logout', oauth2.logout);
+        that.app.get(that._prefix + '/session/login', oauth2.loginForm);
+        that.app.post(that._prefix + '/session/login', oauth2.login);
+        that.app.get(that._prefix + '/session/logout', oauth2.logout);
         // TODO this is only temporary
-        that.app.get('/auth/api/v1/session/account', oauth2.account);
+        that.app.get(that._prefix + '/session/account', oauth2.account);
 
         // oauth2 routes
-        that.app.get('/auth/api/v1/oauth/dialog/authorize', oauth2.authorization);
-        that.app.post('/auth/api/v1/oauth/dialog/authorize/decision', oauth2.decision);
-        that.app.post('/auth/api/v1/oauth/token', oauth2.token);
+        that.app.get(that._prefix + '/oauth/dialog/authorize', oauth2.authorization);
+        that.app.post(that._prefix + '/oauth/dialog/authorize/decision', oauth2.decision);
+        that.app.post(that._prefix + '/oauth/token', oauth2.token);
     });
 
     this.app.set('port', that._port);
@@ -166,6 +167,11 @@ Server.prototype.start = function (callback) {
     userdb.init(that._configDir, function (error) {
         if (error) return callback(error);
 
+        // TODO this is temporary
+        userdb.add('admin', 'admin', 'test', 'admin@test.com', function (error) {
+            console.log('+++ owner added');
+        });
+
         tokendb.init(that._configDir, function (error) {
             if (error) return callback(error);
 
@@ -173,14 +179,18 @@ Server.prototype.start = function (callback) {
                 if (error) return callback(error);
 
                 // TODO this is temporary, add webadmin client id
-                clientdb.add('someTemporaryClient', 'abc123', 'https://localhost:3000/oauth2/oauth_callback.html', function (error) {
+                clientdb.add('1234', 'abc123', 'testClientSecret', 'WebAdmin', 'https://localhost/oauth2/oauth_callback.html', function (error) {
                     console.log('+++ webadmin client added');
                 });
 
-                that._initialize(function (error) {
+                authcodedb.init(that._configDir, function (error) {
                     if (error) return callback(error);
 
-                    that._listen(callback);
+                    that._initialize(function (error) {
+                        if (error) return callback(error);
+
+                        that._listen(callback);
+                    });
                 });
             });
         });

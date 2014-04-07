@@ -22,18 +22,21 @@
 <script>
 
 var frame, startBtn, tokenBtn, authCode, oauthResult, accessToken;
+var isReady = false;
 var accountsServer = 'https://localhost/auth';
 var redirectServer = 'https://localhost';
 
 function setAuthCode(code) {
-    frame.style.display = 'none';
+    if (!isReady) return;
+
+    console.log('---- setAuthCode()', code);
 
     if (code) {
         tokenBtn.style.display = 'block';
         authCode = code;
-        oauthResult.innerText = 'Auth Code ' + authCode;
+        oauthResult.innerHTML = 'Auth Code ' + authCode;
     } else {
-        oauthResult.innerText = 'Access Denied';
+        oauthResult.innerHTML = 'Access Denied';
     }
 }
 
@@ -48,6 +51,12 @@ function init() {
         frame.style.display = 'block';
     };
 
+    // Rough example OAuth flow initiation for only client side bearer token (aka accessToken)
+    // startBtn.onclick = function () {
+    //     frame.src = accountsServer + '/api/v1/oauth/dialog/authorize?response_type=token&client_id=abc123&redirect_uri=' + redirectServer + '/oauth2/oauth_callback.html';
+    //     frame.style.display = 'block';
+    // };
+
     tokenBtn.onclick = function () {
         superagent.post(accountsServer + '/api/v1/oauth/token?response_type=token&client_id=abc123')
         .send({
@@ -55,7 +64,7 @@ function init() {
             code: authCode,
             redirect_uri: redirectServer + '/oauth2/oauth_callback.html',
             client_id: 'abc123',
-            client_secret: 'not used for in browser app'
+            client_secret: 'testClientSecret'
         })
         .end(function (error, result) {
             if (error) {
@@ -66,10 +75,12 @@ function init() {
 
             tokenBtn.style.display = 'none';
             accessToken = result.body.access_token
-            oauthResult.innerText = 'Access Token ' + accessToken;
+            oauthResult.innerHTML = 'Access Token ' + accessToken;
             console.log(result.body);
         });
     };
+
+    isReady = true;
 }
 
 </script>
@@ -80,6 +91,7 @@ function init() {
 
 <hr/>
 OAuth based login: <button id="startButton">Go for it</button>
+<small>Development owner credentials: admin:test</small>
 
 <div id="oauthResult"></div>
 <button id="tokenButton" style="display: none"/>Exchange code for token</button>
