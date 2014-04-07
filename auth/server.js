@@ -2,7 +2,6 @@
 
 var express = require('express'),
     http = require('http'),
-    https = require('https'),
     fs = require('fs'),
     once = require('once'),
     path = require('path'),
@@ -64,17 +63,15 @@ function serverErrorHandler(err, req, res, next) {
     console.error(err.stack);
 }
 
-function Server(port, configDir, certificateDir, silent) {
+function Server(port, configDir, silent) {
     assert(typeof port === 'number');
     assert(typeof configDir === 'string');
-    assert(typeof certificateDir === 'string');
     assert(typeof silent === 'boolean');
 
     this._port = port;
     this._routePrefix = '/api/v1';
     this._silent = !!silent;
     this._configDir = configDir;
-    this._certificateDir = certificateDir;
 
     this.app = null;
 }
@@ -142,15 +139,7 @@ Server.prototype._initialize = function (callback) {
 };
 
 Server.prototype._listen = function (callback) {
-    if (this._certificateDir) {
-        var options = {
-            cert: fs.readFileSync(path.join(this._certificateDir, 'cert.pem')),
-            key: fs.readFileSync(path.join(this._certificateDir, 'key.pem'))
-        };
-        this.app.httpServer = https.createServer(options, this.app);
-    } else {
-        this.app.httpServer = http.createServer(this.app);
-    }
+    this.app.httpServer = http.createServer(this.app);
 
     callback = once(callback);
 
