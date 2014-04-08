@@ -11,6 +11,7 @@ var passport = require('passport'),
     BearerStrategy = require('passport-http-bearer').Strategy,
     debug = require('debug')('authserver:auth'),
     DatabaseError = require('./databaseerror'),
+    user = require('./user'),
     clientdb = require('./clientdb'),
     tokendb = require('./tokendb'),
     userdb = require('./userdb');
@@ -42,11 +43,11 @@ passport.deserializeUser(function(id, callback) {
 passport.use(new LocalStrategy(function (username, password, callback) {
     debug('LocalStrategy: ' + username + ' ' + password);
 
-    userdb.getByUsername(username, function (error, user) {
+    user.verify(username, password, function (error, result) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
         if (error) return callback(error);
-        if (user.password !== password) return callback(null, false);
-        callback(null, userdb.removePrivates(user));
+        if (!result) return callback(null, false);
+        callback(null, userdb.removePrivates(result));
     });
 }));
 

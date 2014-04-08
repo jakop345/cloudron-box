@@ -45,6 +45,8 @@ function removePrivates(obj) {
     assert(db !== null);
     assert(typeof obj === 'object');
 
+    debug('removePrivates: ' + JSON.stringify(obj));
+
     return db.removePrivates(obj);
 }
 
@@ -52,6 +54,8 @@ function get(userId, callback) {
     assert(db !== null);
     assert(typeof userId === 'string');
     assert(typeof callback === 'function');
+
+    debug('get: ' + userId);
 
     db.get(userId, function (error, result) {
         callback(error, result);
@@ -63,6 +67,8 @@ function getByUsername(username, callback) {
     assert(typeof username === 'string');
     assert(typeof callback === 'function');
 
+    debug('getByUsername: ' + username);
+
     // currently username is also our id
     get(username, callback);
 }
@@ -70,27 +76,30 @@ function getByUsername(username, callback) {
 function getAll(callback) {
     assert(db !== null);
 
+    debug('getAll');
+
     db.getAll(false, function (error, result) {
         callback(error, result);
     });
 }
 
-function add(userId, username, password, email, callback) {
+function add(userId, user, callback) {
     assert(db !== null);
     assert(typeof userId === 'string');
-    assert(typeof username === 'string');
-    assert(typeof password === 'string');
-    assert(typeof email === 'string');
+    assert(typeof user.username === 'string');
+    assert(typeof user.password === 'string');
+    assert(typeof user.email === 'string');
+    assert(typeof user.privatePemCipher === 'string');
+    assert(typeof user.publicPem === 'object');
+    assert(typeof user.admin === 'boolean');
+    assert(typeof user.salt === 'string');
     assert(typeof callback === 'function');
 
-    var data = {
-        id: userId,
-        username: username,
-        password: password,
-        email: email
-    };
+    user.id = userId;
 
-    db.put(data, function (error) {
+    debug('add: ' + JSON.stringify(user));
+
+    db.put(user, function (error) {
         callback(error);
     });
 }
@@ -99,6 +108,8 @@ function del(userId, callback) {
     assert(db !== null);
     assert(typeof userId === 'string');
     assert(typeof callback === 'function');
+
+    debug('del: ' + userId);
 
     db.remove(userId, function (error) {
         callback(error);
@@ -109,6 +120,8 @@ function getByAccessToken(accessToken, callback) {
     assert(db !== null);
     assert(typeof accessToken === 'string');
     assert(typeof callback === 'function');
+
+    debug('getByAccessToken: ' +  accessToken);
 
     tokendb.get(accessToken, function (error, result) {
         if (error) return callback(error);
