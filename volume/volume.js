@@ -12,7 +12,6 @@ var fs = require('fs'),
     ursa = require('ursa'),
     async = require('async'),
     util = require('util'),
-    Repo = require('../sync/repo.js'),
     Config = require('./config.js'),
     safe = require('safetydance');
 
@@ -25,7 +24,6 @@ exports = module.exports = {
     getByName: getVolumeByName
 };
 
-var REPO_SUBFOLDER = 'repo';
 var VOLUME_META_FILENAME = '.meta';
 
 function ensureArgs(args, expected) {
@@ -87,7 +85,6 @@ function Volume(id, options) {
     this.mountPoint = this._resolveVolumeMountPoint();
     this.tmpPath = path.join(this.mountPoint, 'tmp');
     this.encfs = new encfs.Root(this.dataPath, this.mountPoint);
-    this.repo = null;
     this.config = new Config(VOLUME_META_FILENAME, this.dataPath);
 }
 
@@ -129,7 +126,7 @@ Volume.prototype.open = function (username, password, callback) {
     this.encfs.isMounted(function (error, mounted) {
         if (error) return callback(new VolumeError(error, VolumeError.INTERNAL_ERROR));
 
-        if (mounted && that.repo) {
+        if (mounted) {
             return callback();
         }
 
@@ -227,7 +224,7 @@ Volume.prototype.destroy = function (callback) {
     });
 };
 
-Volume.prototype.listFiles = function (directory, callback) {
+Volume.prototype.listFiles = function (dir, callback) {
     ensureArgs(arguments, ['string', 'function']);
 
     var that = this;
@@ -243,13 +240,36 @@ Volume.prototype.listFiles = function (directory, callback) {
             return callback(new VolumeError(null, VolumeError.NOT_MOUNTED));
         }
 
-        that.repo.listFiles({ path: directory, listSubtrees: false }, function (error, tree) {
+        var absoluteDirPath = path.join(that.mountPoint, dir);
+        fs.readdir(absoluteDirPath, function (error, filenames) {
             if (error) {
                 debug('Unable to read directory "' + directory + '" for volume "' + that.id + '".');
                 return callback(new VolumeError(error, VolumeError.READ_ERROR));
             }
 
-            callback(null, tree);
+            var fileInfos = [ ];
+
+            for (var i = 0; i < filenames.length; i++) {
+                var filename = filenames[i];
+
+                var fileInfo = {
+                    name: filename,
+                    path: path.join(dir, filename)
+                };
+
+                var stat = safe.fs.statSync(path.join(absoluteDirPath, filename));
+                if (stat !== null) {
+                    fileInfo.mtime = stat.mtime.getTime();
+                    fileInfo.size = stat.size;
+                    fileInfo.mode = stat.mode;
+                } else {
+                    debug('Error getting file information:' + safe.error.message);
+                }
+
+                fileInfos.push(fileInfo);
+            }
+
+            callback(null, { entries: fileInfos });
         });
     });
 };
@@ -435,25 +455,7 @@ function createVolume(name, user, password, config, callback) {
                 return callback(new VolumeError(null, VolumeError.INTERNAL_ERROR));
             }
 
-            var tmpDir = path.join(vol.mountPoint, 'tmp');
-            if (!safe.fs.mkdirSync(tmpDir)) {
-                return callback(new VolumeError(safe.error, VolumeError.INTERNAL_ERROR));
-            }
-
-            vol.repo = new Repo(path.join(vol.mountPoint, REPO_SUBFOLDER), tmpDir);
-            vol.repo.create(user.username, user.email, function (error) {
-                if (error) {
-                    return callback(new VolumeError(error, VolumeError.INTERNAL_ERROR));
-                }
-
-                vol.repo.addFileWithData('README.md', 'README', function (error, commit) {
-                    if (error) {
-                        return callback(new VolumeError(error, VolumeError.INTERNAL_ERROR));
-                    }
-
-                    callback(null, vol);
-                });
-            });
+            callback(null, vol);
         });
     });
 }
@@ -496,8 +498,6 @@ function getVolume(id, username, config, callback) {
             debug('User "' + username + '" has no access to volume "' + id + '".');
             return callback(new VolumeError(error, VolumeError.NO_SUCH_USER));
         }
-
-        vol.repo = new Repo(path.join(vol.mountPoint, REPO_SUBFOLDER), vol.tmpPath);
 
         callback(null, vol);
     });

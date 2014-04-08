@@ -12,7 +12,8 @@ var Server = require('../../server.js'),
     crypto = require('crypto'),
     rimraf = require('rimraf'),
     path = require('path'),
-    os = require('os');
+    os = require('os'),
+    fs = require('fs');
 
 var BASE_DIR = path.resolve(os.tmpdir(), 'volume-test-' + crypto.randomBytes(4).readUInt32LE(0));
 var CONFIG = {
@@ -137,6 +138,8 @@ describe('Server Volume API', function () {
     });
 
     it('listFiles', function (done) {
+        fs.writeFileSync(path.join(CONFIG.mountRoot, volume.id + '/README.md'), 'test data');
+
         request.get(SERVER_URL + '/api/v1/volume/' + volume.id + '/list')
                .auth(USERNAME, PASSWORD)
                .end(function (err, res) {
@@ -146,7 +149,6 @@ describe('Server Volume API', function () {
                     path: 'string',
                     mode : 'number',
                     size: 'number',
-                    sha1: 'string',
                     name: 'string',
                     mtime: 'number'
                 });
