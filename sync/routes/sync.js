@@ -4,15 +4,50 @@ var debug = require('debug')('server:routes/sync'),
     syncer = require('../syncer'),
     HttpError = require('../../common/httperror.js'),
     HttpSuccess = require('../../common/httpsuccess.js'),
-    util = require('util');
+    util = require('util'),
+    path = require('path'),
+    fs = require('fs'),
+    safe = require('safetydance'),
+    Repo = require('../repo.js');
 
 exports = module.exports = {
     initialize: initialize,
+    attachVolume: attachVolume,
+    requireMountedVolume: requireMountedVolume,
     diff: diff,
     delta: delta
 };
 
-function initialize(config) {
+var config;
+var REPO_DIRNAME = 'repo';
+var TMP_DIRNAME = 'tmp';
+
+function initialize(cfg) {
+    config = cfg;
+}
+
+function attachVolume(req, res, next, volumeId) {
+    if (!volumeId) return next(new HttpError(400, 'Volume not specified'));
+
+    var mountDir = path.join(config.mountRoot, volumeId);
+
+    if (!safe.fs.existsSync(mountDir)) {
+        return next(new HttpError(404, 'No such volume'));
+    }
+
+    var tmpPath = path.join(mountDir, TMP_DIRNAME);
+    var repo = new Repo(path.join(mountDir, REPO_DIRNAME), tmpPath);
+
+    req.volume = {
+        tmpPath: tmpPath,
+        repo: repo
+    };
+
+    next();
+}
+
+function requireMountedVolume(req, res, next) {
+    next();
 }
 
 function diff(req, res, next) {

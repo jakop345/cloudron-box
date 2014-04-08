@@ -13,15 +13,19 @@ var Server = require('../../server.js'),
     fs = require('fs'),
     rimraf = require('rimraf'),
     path = require('path'),
-    os = require('os');
+    os = require('os'),
+    mkdirp = require('mkdirp'),
+    uuid = require('node-uuid'),
+    Repo = require('../../repo.js');
 
-var BASE_DIR = path.resolve(os.tmpdir(), 'volume-test-' + crypto.randomBytes(4).readUInt32LE(0));
+var BASE_DIR = path.resolve(os.tmpdir(), 'file-test-' + crypto.randomBytes(4).readUInt32LE(0));
 var CONFIG = {
     port: 3333,
     dataRoot: path.resolve(BASE_DIR, 'data'),
     configRoot: path.resolve(BASE_DIR, 'config'),
     mountRoot: path.resolve(BASE_DIR, 'mount'),
-    silent: true
+    silent: true,
+    testing: true
 };
 var SERVER_URL = 'http://localhost:' + CONFIG.port;
 
@@ -30,44 +34,39 @@ var TESTVOLUME = 'testvolume';
 var volume;
 var server;
 
+function now() {
+    return (new Date()).getTime();
+}
+
 function setup(done) {
     server = new Server(CONFIG);
     server.start(function (err) {
         expect(err).to.not.be.ok();
 
         SERVER_URL = 'http://localhost:' + CONFIG.port;
-        database.USERS_TABLE.removeAll(function () {
-            request.post(SERVER_URL + '/api/v1/createadmin')
-                   .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
-                   .end(function (err, res) {
-                request.post(SERVER_URL + '/api/v1/volume/create')
-                       .auth(USERNAME, PASSWORD)
-                       .send({ password: PASSWORD, name: TESTVOLUME })
-                       .end(function (err, res) {
-                    if (err) done(err);
-                    volume = res.body;
-                    done();
-                });
-            });
+        volume = { id: uuid.v4(), repo: null };
+
+        var mountPoint = path.join(CONFIG.mountRoot, volume.id);
+        mkdirp.sync(mountPoint);
+        var tmpDir = path.join(mountPoint, 'tmp')
+        mkdirp.sync(tmpDir);
+
+        volume.repo = new Repo(path.join(mountPoint, 'repo'), tmpDir);
+        volume.repo.create(USERNAME, EMAIL, function (error) {
+            if (error) return done(error);
+
+            volume.repo.addFileWithData('README.md', 'README', done);
         });
     });
 }
 
 // remove all temporary folders
 function cleanup(done) {
-    request.post(SERVER_URL + '/api/v1/volume/' + volume.id + '/delete')
-         .auth(USERNAME, PASSWORD)
-         .send({ password: PASSWORD })
-         .end(function (err, res) {
-        server.stop(function (error) {
-            rimraf(BASE_DIR, function (error) {
-                done();
-            });
-        });
+    server.stop(function (error) {
+        rimraf(BASE_DIR, done);
     });
 }
 
-function now() { return (new Date()).getTime(); }
 function tempFile(contents) {
     var file = path.join(os.tmpdir(), '' + crypto.randomBytes(4).readUInt32LE(0));
     fs.writeFileSync(file, contents);
