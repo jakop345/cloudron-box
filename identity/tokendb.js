@@ -3,6 +3,7 @@
 var DatabaseError = require('./databaseerror'),
     DatabaseTable = require('./databasetable'),
     path = require('path'),
+    uuid = require('node-uuid'),
     debug = require('debug')('authserver:tokendb'),
     assert = require('assert');
 
@@ -11,6 +12,7 @@ var db = null;
 
 exports = module.exports = {
     init: init,
+    generateToken: generateToken,
     get: get,
     getByUserId: getByUserId,
     add: add,
@@ -31,6 +33,10 @@ function init(configDir, callback) {
     callback(null);
 }
 
+function generateToken() {
+    return uuid.v4();
+}
+
 function get(accessToken, callback) {
     assert(db !== null);
     assert(typeof accessToken === 'string');
@@ -45,7 +51,7 @@ function add(accessToken, userId, clientId, callback) {
     assert(db !== null);
     assert(typeof accessToken === 'string');
     assert(typeof userId === 'string');
-    assert(typeof clientId === 'string');
+    assert(typeof clientId === 'string' || clientId === null);
     assert(typeof callback === 'function');
 
     var data = {

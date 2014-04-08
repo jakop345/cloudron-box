@@ -137,6 +137,7 @@ describe('Server', function () {
 
     describe('user', function () {
         var server = null;
+        var ownerToken = null;
 
         before(function (done) {
             server = new Server(PORT, tmpdir, true);
@@ -147,9 +148,53 @@ describe('Server', function () {
             server.stop(done);
         });
 
+        describe('token', function () {
+            it('can be obtained with basic auth', function (done) {
+                superagent.post(SERVER + '/users/token').send({ username: OWNER.username, password: OWNER.password}).end(function (error, result) {
+                    expect(error).to.be(null);
+                    expect(result).to.be.an('object');
+                    expect(result.statusCode).to.equal(200);
+                    expect(result.body.accessToken).to.be.a('string');
+
+                    // cache for further use
+                    ownerToken = result.body.accessToken;
+
+                    done();
+                });
+            });
+        });
+
         describe('creation', function () {
+            it('fails, due to missing access token', function (done) {
+                superagent.post(SERVER + '/users')
+                .send(USER_0)
+                .end(function (error, result) {
+                    expect(error).to.be(null);
+                    expect(result).to.be.an('object');
+                    expect(result.statusCode).to.equal(401);
+
+                    done();
+                });
+            });
+
+            it('fails, due to wrong access token', function (done) {
+                superagent.post(SERVER + '/users')
+                .send(USER_0)
+                .query({ access_token: ownerToken+ownerToken })
+                .end(function (error, result) {
+                    expect(error).to.be(null);
+                    expect(result).to.be.an('object');
+                    expect(result.statusCode).to.equal(401);
+
+                    done();
+                });
+            });
+
             it('succeeds', function (done) {
-                superagent.post(SERVER + '/users').send(USER_0).end(function (error, result) {
+                superagent.post(SERVER + '/users')
+                .send(USER_0)
+                .query({ access_token: ownerToken })
+                .end(function (error, result) {
                     expect(error).to.be(null);
                     expect(result).to.be.an('object');
                     expect(result.statusCode).to.equal(201);
@@ -159,10 +204,167 @@ describe('Server', function () {
             });
 
             it('fails, user already exists', function (done) {
-                superagent.post(SERVER + '/users').send(USER_0).end(function (error, result) {
+                superagent.post(SERVER + '/users')
+                .send(USER_0)
+                .query({ access_token: ownerToken })
+                .end(function (error, result) {
                     expect(error).to.be(null);
                     expect(result).to.be.an('object');
                     expect(result.statusCode).to.equal(409);
+
+                    done();
+                });
+            });
+        });
+
+        describe('retrieval', function () {
+            it('fails, due to missing access token', function (done) {
+                superagent.get(SERVER + '/users/' + USER_0.username)
+                .end(function (error, result) {
+                    expect(error).to.be(null);
+                    expect(result).to.be.an('object');
+                    expect(result.statusCode).to.equal(401);
+
+                    done();
+                });
+            });
+
+            it('fails, due to wrong access token', function (done) {
+                superagent.get(SERVER + '/users/' + USER_0.username)
+                .query({ access_token: ownerToken+ownerToken })
+                .end(function (error, result) {
+                    expect(error).to.be(null);
+                    expect(result).to.be.an('object');
+                    expect(result.statusCode).to.equal(401);
+
+                    done();
+                });
+            });
+
+            it('succeeds', function (done) {
+                superagent.get(SERVER + '/users/' + USER_0.username)
+                .query({ access_token: ownerToken })
+                .end(function (error, result) {
+                    expect(error).to.be(null);
+                    expect(result).to.be.an('object');
+                    expect(result.statusCode).to.equal(200);
+                    expect(result.body.id).to.equal(USER_0.username);
+                    expect(result.body.username).to.equal(USER_0.username);
+                    expect(result.body.email).to.equal(USER_0.email);
+
+                    done();
+                });
+            });
+
+            it('fails, due to wrong unknown user id', function (done) {
+                superagent.get(SERVER + '/users/' + 'someUnknownUserId')
+                .query({ access_token: ownerToken })
+                .end(function (error, result) {
+                    expect(error).to.be(null);
+                    expect(result).to.be.an('object');
+                    expect(result.statusCode).to.equal(404);
+
+                    done();
+                });
+            });
+        });
+
+        describe('list', function () {
+            it('fails, due to missing access token', function (done) {
+                superagent.get(SERVER + '/users')
+                .end(function (error, result) {
+                    expect(error).to.be(null);
+                    expect(result).to.be.an('object');
+                    expect(result.statusCode).to.equal(401);
+
+                    done();
+                });
+            });
+
+            it('fails, due to wrong access token', function (done) {
+                superagent.get(SERVER + '/users')
+                .query({ access_token: ownerToken+ownerToken })
+                .end(function (error, result) {
+                    expect(error).to.be(null);
+                    expect(result).to.be.an('object');
+                    expect(result.statusCode).to.equal(401);
+
+                    done();
+                });
+            });
+
+            it('succeeds', function (done) {
+                superagent.get(SERVER + '/users')
+                .query({ access_token: ownerToken })
+                .end(function (error, result) {
+                    expect(error).to.be(null);
+                    expect(result).to.be.an('object');
+                    expect(result.statusCode).to.equal(200);
+                    expect(result.body.users).to.be.an(Array);
+                    expect(result.body.users.length).to.equal(2);
+                    expect(result.body.users[0].username).to.be.a('string');
+                    expect(result.body.users[1].username).to.be.a('string');
+
+                    done();
+                });
+            });
+        });
+
+        describe('removal', function () {
+            it('fails, due to missing access token', function (done) {
+                superagent.del(SERVER + '/users/' + USER_0.username)
+                .end(function (error, result) {
+                    expect(error).to.be(null);
+                    expect(result).to.be.an('object');
+                    expect(result.statusCode).to.equal(401);
+
+                    done();
+                });
+            });
+
+            it('fails, due to wrong access token', function (done) {
+                superagent.del(SERVER + '/users/' + USER_0.username)
+                .query({ access_token: ownerToken+ownerToken })
+                .end(function (error, result) {
+                    expect(error).to.be(null);
+                    expect(result).to.be.an('object');
+                    expect(result.statusCode).to.equal(401);
+
+                    done();
+                });
+            });
+
+            it('succeeds', function (done) {
+                superagent.del(SERVER + '/users/' + USER_0.username)
+                .query({ access_token: ownerToken })
+                .end(function (error, result) {
+                    expect(error).to.be(null);
+                    expect(result).to.be.an('object');
+                    expect(result.statusCode).to.equal(200);
+
+                    done();
+                });
+            });
+
+            it('fails, due to previously removed user', function (done) {
+                superagent.get(SERVER + '/users/' + USER_0.username)
+                .query({ access_token: ownerToken })
+                .end(function (error, result) {
+                    expect(error).to.be(null);
+                    expect(result).to.be.an('object');
+                    expect(result.statusCode).to.equal(404);
+
+                    done();
+                });
+            });
+
+            it('fails, due to previously removed user', function (done) {
+                superagent.get(SERVER + '/users/' + USER_0.username)
+                .query({ access_token: ownerToken })
+                .end(function (error, result) {
+                    expect(error).to.be(null);
+                    expect(result).to.be.an('object');
+                    expect(result.statusCode).to.equal(404);
 
                     done();
                 });

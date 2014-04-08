@@ -46,7 +46,7 @@ passport.use(new LocalStrategy(function (username, password, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
         if (error) return callback(error);
         if (user.password !== password) return callback(null, false);
-        callback(null, user);
+        callback(null, userdb.removePrivates(user));
     });
 }));
 
@@ -107,7 +107,7 @@ passport.use(new BearerStrategy(function (accessToken, callback) {
 
             // scopes here can define what capabilities that token carries
             var info = { scope: '*' };
-            callback(null, user, info);
+            callback(null, userdb.removePrivates(user), info);
         });
     });
 }));

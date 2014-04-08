@@ -1,6 +1,7 @@
 'use strict';
 
 var userdb = require('./userdb'),
+    tokendb = require('./tokendb'),
     DatabaseError = require('./databaseerror'),
     debug = require('debug')('authserver:user'),
     HttpError = require('../common/httperror'),
@@ -11,7 +12,8 @@ exports = module.exports = {
     add: add,
     get: get,
     getAll: getAll,
-    remove: remove
+    remove: remove,
+    token: token
 };
 
 function owner(req, res, next) {
@@ -43,9 +45,15 @@ function add(req, res, next) {
 }
 
 function get(req, res, next) {
-    debug('get');
+    debug('get: ' + req.params.userId);
 
-    console.log('---', req.user);
+    if (!req.params.userId) return next(new HttpError(400, 'No userId provided'));
+
+    userdb.get(req.params.userId, function (error, user) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(404, 'No such user'));
+        if (error) return next(new HttpError(500));
+        next(new HttpSuccess(200, userdb.removePrivates(user)));
+    });
 }
 
 function getAll(req, res, next) {
@@ -58,15 +66,25 @@ function getAll(req, res, next) {
 }
 
 function remove(req, res, next) {
-    debug('remove: ' + req.body.userId + ' ' + req.body.password);
+    debug('remove: ' + req.params.userId + ' ' + req.body.password);
 
-    if (!req.body.userId) return next(new HttpError(400, 'No username provided'));
-    if (!req.body.password) return next(new HttpError(400, 'No password provided'));
+    if (!req.params.userId) return next(new HttpError(400, 'No username provided'));
+    // if (!req.body.password) return next(new HttpError(400, 'No password provided'));
 
     // TODO check password
-    userdb.del(req.body.userId, function (error) {
+    userdb.del(req.params.userId, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(404, 'No such user'));
         if (error) return next(new HttpError(500));
         next(new HttpSuccess(200, {}));
+    });
+}
+
+function token(req, res, next) {
+    debug('token: ' + JSON.stringify(req.user));
+
+    var accessToken = tokendb.generateToken();
+    tokendb.add(accessToken, req.user.id, null, function (error) {
+        if (error) return next(new HttpError(500));
+        next(new HttpSuccess(200, { accessToken: accessToken }));
     });
 }

@@ -15,8 +15,10 @@ exports = module.exports = {
     get: get,
     getByUsername: getByUsername,
     getByAccessToken: getByAccessToken,
+    getAll: getAll,
     add: add,
-    del: del
+    del: del,
+    removePrivates: removePrivates
 };
 
 function init(configDir, callback) {
@@ -39,6 +41,13 @@ function init(configDir, callback) {
     callback(null);
 }
 
+function removePrivates(obj) {
+    assert(db !== null);
+    assert(typeof obj === 'object');
+
+    return db.removePrivates(obj);
+}
+
 function get(userId, callback) {
     assert(db !== null);
     assert(typeof userId === 'string');
@@ -56,6 +65,14 @@ function getByUsername(username, callback) {
 
     // currently username is also our id
     get(username, callback);
+}
+
+function getAll(callback) {
+    assert(db !== null);
+
+    db.getAll(false, function (error, result) {
+        callback(error, result);
+    });
 }
 
 function add(userId, username, password, email, callback) {

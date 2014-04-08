@@ -20,6 +20,7 @@ module.exports = Server;
 
 // this is not a middleware
 function finishRequest(req, res, status, body, modified) {
+    res.setHeader('Content-Type', 'application/json');
     if (modified) res.set('last-modified', modified.toString());
     if (req.query.pretty !== 'true') res.send(status, JSON.stringify(body));
     else res.send(status, JSON.stringify(body, null, 4) + '\n');
@@ -110,14 +111,21 @@ Server.prototype._initialize = function (callback) {
         // Passport configuration
         require('./auth');
 
+        // some auth middleware shortcuts
+        var tokenAuth = passport.authenticate('bearer', { session: false });
+        var localAuth = passport.authenticate('local', { session: false });
 
         // TODO this route needs to be replaced by a better strategy
         that.app.post(that._prefix + '/owner', user.owner);
 
         // user resource routes
-        that.app.post(that._prefix + '/users', user.add);
-        that.app.get(that._prefix + '/users', user.get);
-        that.app.del(that._prefix + '/users', user.remove);
+        that.app.post(that._prefix + '/users', tokenAuth, user.add);
+        that.app.get(that._prefix + '/users', tokenAuth, user.getAll);
+        that.app.get(that._prefix + '/users/:userId', tokenAuth, user.get);
+        that.app.del(that._prefix + '/users/:userId', tokenAuth, user.remove);
+
+        // simple basic auth route to obtain an accessToken
+        that.app.post(that._prefix + '/users/token', localAuth, user.token);
 
         // form based login routes used by oauth2 frame
         that.app.get(that._prefix + '/session/login', oauth2.loginForm);
