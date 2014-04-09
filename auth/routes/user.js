@@ -7,8 +7,8 @@ var db = require('../database'),
     crypto = require('crypto'),
     async = require('async'),
     debug = require('debug')('server:routes/user'),
-    HttpError = require('../../common/httperror.js'),
-    HttpSuccess = require('../../common/httpsuccess.js');
+    HttpError = require('../../src/httperror.js'),
+    HttpSuccess = require('../../src/httpsuccess.js');
 
 exports = module.exports = {
     initialize: initialize,

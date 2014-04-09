@@ -2,8 +2,8 @@
 
 var express = require('express'),
     http = require('http'),
-    HttpError = require('../common/httperror'),
-    HttpSuccess = require('../common/httpsuccess'),
+    HttpError = require('./httperror.js'),
+    HttpSuccess = require('./httpsuccess.js'),
     path = require('path'),
     fs = require('fs'),
     mkdirp = require('mkdirp'),

@@ -4,12 +4,12 @@ var userdb = require('./userdb'),
     ursa = require('ursa'),
     assert = require('assert'),
     crypto = require('crypto'),
-    aes = require('../common/aes-helper.js'),
+    aes = require('../src/aes-helper.js'),
     tokendb = require('./tokendb'),
     DatabaseError = require('./databaseerror'),
     debug = require('debug')('authserver:user'),
-    HttpError = require('../common/httperror'),
-    HttpSuccess = require('../common/httpsuccess');
+    HttpError = require('../src/httperror.js'),
+    HttpSuccess = require('../src/httpsuccess.js');
 
 exports = module.exports = {
     owner: owner,

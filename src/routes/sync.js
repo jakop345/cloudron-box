@@ -2,8 +2,8 @@
 
 var debug = require('debug')('server:routes/sync'),
     syncer = require('../syncer'),
-    HttpError = require('../../common/httperror.js'),
-    HttpSuccess = require('../../common/httpsuccess.js'),
+    HttpError = require('../httperror.js'),
+    HttpSuccess = require('../httpsuccess.js'),
     util = require('util'),
     path = require('path'),
     fs = require('fs'),
