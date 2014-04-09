@@ -5,7 +5,7 @@
 /* global before:false */
 /* global after:false */
 
-var Server = require('../sync/server.js'),
+var Server = require('../src/server.js'),
     request = require('superagent'),
     path = require('path'),
     crypto = require('crypto'),
