@@ -3,8 +3,6 @@
 var db = require('../database'),
     DatabaseError = db.DatabaseError,
     user = require('../user'),
-    Volume = require('../../volume/volume.js'),
-    VolumeError = Volume.VolumeError,
     UserError = user.UserError,
     crypto = require('crypto'),
     async = require('async'),

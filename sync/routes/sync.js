@@ -12,7 +12,7 @@ var debug = require('debug')('server:routes/sync'),
 
 exports = module.exports = {
     initialize: initialize,
-    attachVolume: attachVolume,
+    attachRepo: attachRepo,
     requireMountedVolume: requireMountedVolume,
     diff: diff,
     delta: delta
@@ -26,7 +26,7 @@ function initialize(cfg) {
     config = cfg;
 }
 
-function attachVolume(req, res, next, volumeId) {
+function attachRepo(req, res, next, volumeId) {
     if (!volumeId) return next(new HttpError(400, 'Volume not specified'));
 
     var mountDir = path.join(config.mountRoot, volumeId);

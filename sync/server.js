@@ -179,22 +179,37 @@ Server.prototype._initialize = function (callback) {
         that.app.get('/api/v1/user/info', routes.user.info);
         that.app.get('/api/v1/user/list', routes.user.list);
 
-        that.app.param('volume', routes.sync.attachVolume);
+        that.app.param('syncerVolume', routes.sync.attachRepo);
 
-        that.app.post('/api/v1/sync/:volume/diff', routes.sync.requireMountedVolume, routes.sync.diff);
-        that.app.post('/api/v1/sync/:volume/delta', routes.sync.requireMountedVolume, routes.sync.delta);
+        that.app.post('/api/v1/sync/:syncerVolume/diff', routes.sync.requireMountedVolume, routes.sync.diff);
+        that.app.post('/api/v1/sync/:syncerVolume/delta', routes.sync.requireMountedVolume, routes.sync.delta);
 
-        that.app.get('/api/v1/revisions/:volume/*', routes.sync.requireMountedVolume, routes.file.revisions);
-        that.app.get('/api/v1/file/:volume/*', routes.sync.requireMountedVolume, routes.file.read);
-        that.app.get('/api/v1/metadata/:volume/*', routes.sync.requireMountedVolume, routes.file.metadata);
-        that.app.put('/api/v1/file/:volume/*', routes.sync.requireMountedVolume,
+        that.app.get('/api/v1/revisions/:syncerVolume/*', routes.sync.requireMountedVolume, routes.file.revisions);
+        that.app.get('/api/v1/file/:syncerVolume/*', routes.sync.requireMountedVolume, routes.file.read);
+        that.app.get('/api/v1/metadata/:syncerVolume/*', routes.sync.requireMountedVolume, routes.file.metadata);
+        that.app.put('/api/v1/file/:syncerVolume/*', routes.sync.requireMountedVolume,
                                                routes.file.multipart({ maxFieldsSize: FIELD_LIMIT, limit: FILE_SIZE_LIMIT, timeout: FILE_TIMEOUT }),
                                                routes.file.putFile);
 
-        that.app.post('/api/v1/fileops/:volume/copy', routes.sync.requireMountedVolume, express.json({ strict: true }), routes.fileops.copy);
-        that.app.post('/api/v1/fileops/:volume/move', routes.sync.requireMountedVolume, express.json({ strict: true }), routes.fileops.move);
-        that.app.post('/api/v1/fileops/:volume/delete', routes.sync.requireMountedVolume, express.json({ strict: true }), routes.fileops.remove);
-        that.app.post('/api/v1/fileops/:volume/create_dir', routes.sync.requireMountedVolume, express.json({ strict: true }), routes.fileops.createDirectory);
+        that.app.post('/api/v1/fileops/:syncerVolume/copy', routes.sync.requireMountedVolume, express.json({ strict: true }), routes.fileops.copy);
+        that.app.post('/api/v1/fileops/:syncerVolume/move', routes.sync.requireMountedVolume, express.json({ strict: true }), routes.fileops.move);
+        that.app.post('/api/v1/fileops/:syncerVolume/delete', routes.sync.requireMountedVolume, express.json({ strict: true }), routes.fileops.remove);
+        that.app.post('/api/v1/fileops/:syncerVolume/create_dir', routes.sync.requireMountedVolume, express.json({ strict: true }), routes.fileops.createDirectory);
+
+        // volume related routes
+        that.app.param('volume', routes.volume.attachVolume);
+
+        that.app.get('/api/v1/volume/:volume/list', routes.volume.requireMountedVolume, routes.volume.listFiles);
+        that.app.get('/api/v1/volume/:volume/list/*', routes.volume.requireMountedVolume, routes.volume.listFiles);
+        that.app.get('/api/v1/volume/list', routes.volume.listVolumes);
+        that.app.post('/api/v1/volume/create', that._requirePassword.bind(that), routes.volume.createVolume);
+        that.app.post('/api/v1/volume/:volume/delete', that._requirePassword.bind(that), routes.volume.deleteVolume);
+        that.app.post('/api/v1/volume/:volume/mount', that._requirePassword.bind(that), routes.volume.mount);
+        that.app.post('/api/v1/volume/:volume/unmount', routes.volume.unmount);
+        that.app.get('/api/v1/volume/:volume/ismounted', routes.volume.isMounted);
+        that.app.get('/api/v1/volume/:volume/users', routes.volume.listUsers);
+        that.app.post('/api/v1/volume/:volume/users', routes.volume.addUser);
+        that.app.del('/api/v1/volume/:volume/users/:username', routes.volume.removeUser);
     });
 
     this.app.set('port', that.config.port);
@@ -215,6 +230,7 @@ Server.prototype._initialize = function (callback) {
         return callback(new Error('Error initializing database'));
     }
 
+    routes.volume.initialize(that.config);
     routes.sync.initialize(that.config);
     routes.user.initialize(that.config);
 

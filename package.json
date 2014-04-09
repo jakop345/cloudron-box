@@ -49,6 +49,6 @@
     "expect.js": "*"
   },
   "scripts": {
-    "test": "./node_modules/istanbul/lib/cli.js test $1 ./node_modules/mocha/bin/_mocha -- -R spec ./test ./sync/test ./sync/routes/test ./volume/test ./volume/routes/test ./auth/test ./auth/routes/test ./identity/test"
+    "test": "./node_modules/istanbul/lib/cli.js test $1 ./node_modules/mocha/bin/_mocha -- -R spec ./test ./sync/test ./sync/routes/test ./auth/test ./auth/routes/test ./identity/test"
   }
 }
