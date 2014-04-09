@@ -5,7 +5,7 @@
 /* global before:false */
 /* global after:false */
 
-var Server = require('../src/server.js'),
+var Server = require('../server.js'),
     request = require('superagent'),
     path = require('path'),
     crypto = require('crypto'),
@@ -108,7 +108,7 @@ describe('Server', function () {
             request.get(SERVER_URL + '/api/v1/version', function (err, res) {
                 expect(err).to.not.be.ok();
                 expect(res.statusCode).to.equal(200);
-                expect(res.body.version).to.equal(require('../package.json').version);
+                expect(res.body.version).to.equal(require('../../package.json').version);
                 done(err);
             });
         });
