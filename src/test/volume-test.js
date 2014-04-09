@@ -6,8 +6,9 @@
 /* global after:false */
 
 var volume = require('../volume.js'),
-    db = require('../../auth/database.js'),
-    User = require('../../auth/user.js'),
+    userdb = require('../userdb.js'),
+    tokendb = require('../tokendb.js'),
+    User = require('../user.js'),
     VolumeError = volume.VolumeError,
     path = require('path'),
     mkdirp = require('mkdirp'),
@@ -39,15 +40,21 @@ function setup(done) {
     mkdirp.sync(config.configRoot);
     mkdirp.sync(config.mountRoot);
 
-    db.initialize(config);
+    userdb.init(config.configRoot, function (error) {
+        expect(error).to.be(null);
 
-    User.create(USERNAME, PASSWORD, EMAIL, {}, function (error, result) {
-        expect(error).to.not.be.ok();
-        expect(result).to.be.ok();
+        tokendb.init(config.configRoot, function (error) {
+            expect(error).to.be(null);
 
-        USER = result;
+            User.create(USERNAME, PASSWORD, EMAIL, {}, function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result).to.be.ok();
 
-        done();
+                USER = result;
+
+                done();
+            });
+        });
     });
 }
 

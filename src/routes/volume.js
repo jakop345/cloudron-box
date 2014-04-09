@@ -4,7 +4,7 @@ var HttpError = require('../httperror.js'),
     HttpSuccess = require('../httpsuccess.js'),
     async = require('async'),
     volume = require('../volume.js'),
-    User = require('../../auth/user.js'),
+    User = require('../user.js'),
     VolumeError = volume.VolumeError;
 
 exports = module.exports = {

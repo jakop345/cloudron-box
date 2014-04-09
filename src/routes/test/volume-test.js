@@ -8,7 +8,7 @@
 var Server = require('../../server.js'),
     request = require('superagent'),
     expect = require('expect.js'),
-    database = require('../../../auth/database.js'),
+    userdb = require('../../userdb.js'),
     crypto = require('crypto'),
     rimraf = require('rimraf'),
     path = require('path'),
@@ -30,12 +30,11 @@ var TESTVOLUME = 'testvolume';
 
 var server;
 function setup(done) {
-    this.timeout(10000);
     server = new Server(CONFIG);
     server.start(function (error) {
         expect(error).to.not.be.ok();
 
-        database.USERS_TABLE.removeAll(function () {
+        userdb.clear(function () {
             request.post(SERVER_URL + '/api/v1/createadmin')
                  .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
                  .end(function (error, res) {

@@ -114,3 +114,15 @@ Table.prototype.removePrivates = function (obj) {
 
     return res;
 };
+
+Table.prototype.count = function () {
+    var i = 0;
+
+    for (var e in this.cache) {
+        if (this.cache.hasOwnProperty(e)) {
+            ++i;
+        }
+    }
+
+    return i;
+};

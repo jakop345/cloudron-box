@@ -12,7 +12,8 @@ var user = require('../user.js'),
     mkdirp = require('mkdirp'),
     crypto = require('crypto'),
     rimraf = require('rimraf'),
-    db = require('../database.js'),
+    userdb = require('../userdb.js'),
+    tokendb = require('../tokendb.js'),
     expect = require('expect.js');
 
 var USERNAME = 'nobody';
@@ -49,9 +50,14 @@ function setup(done) {
     mkdirp.sync(config.configRoot);
     mkdirp.sync(config.mountRoot);
 
-    db.initialize(config);
+    userdb.init(config.configRoot, function (error) {
+        expect(error).to.be(null);
 
-    done();
+        tokendb.init(config.configRoot, function (error) {
+            expect(error).to.be(null);
+            done();
+        });
+    });
 }
 
 function cleanup(done) {

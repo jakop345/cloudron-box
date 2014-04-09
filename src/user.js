@@ -1,7 +1,7 @@
 'use strict';
 
-var db = require('./database.js'),
-    DatabaseError = db.DatabaseError,
+var userdb = require('./userdb.js'),
+    DatabaseError = require('./databaseerror.js'),
     crypto = require('crypto'),
     aes = require('../src/aes-helper.js'),
     util = require('util'),
@@ -58,7 +58,7 @@ function ensureArgs(args, expected) {
 function listUsers(callback) {
     ensureArgs(arguments, ['function']);
 
-    db.USERS_TABLE.getAll(false, function (error, result) {
+    userdb.getAll(false, function (error, result) {
         if (error) {
             debug('Unable to get all users.', error);
             return callback(new UserError('Unable to list users', UserError.DATABASE_ERROR));
@@ -97,7 +97,7 @@ function createUser(username, password, email, options, callback) {
             var keyPair = ursa.generatePrivateKey();
 
             var now = (new Date()).toUTCString();
-            var admin = !(db.USERS_TABLE.count()); // currently the first user is the admin
+            var admin = !(userdb.count()); // currently the first user is the admin
             var user = {
                 username: username,
                 email: email,
@@ -110,7 +110,7 @@ function createUser(username, password, email, options, callback) {
                 updated_at: now
             };
 
-            db.USERS_TABLE.put(user, function (error) {
+            userdb.add(username, user, function (error) {
                 if (error) {
                     if (error.reason === DatabaseError.ALREADY_EXISTS) {
                         return callback(new UserError('Already exists', UserError.ALREADY_EXISTS));
@@ -135,7 +135,7 @@ function verifyUser(username, password, callback) {
         return callback(new UserError('password empty', UserError.ARGUMENTS));
     }
 
-    db.USERS_TABLE.get(username, function (error, user) {
+    userdb.get(username, function (error, user) {
         if (error) {
             if (error.reason === DatabaseError.NOT_FOUND) {
                 return callback(new UserError('Username not found', UserError.NOT_FOUND));
@@ -164,7 +164,7 @@ function removeUser(username, callback) {
     ensureArgs(arguments, ['string', 'function']);
 
     // TODO we might want to cleanup volumes assigned to this user as well - Johannes
-    db.USERS_TABLE.remove(username, function (error, user) {
+    userdb.del(username, function (error, user) {
         if (error) return callback(error);
         callback(null, user);
     });
@@ -173,7 +173,7 @@ function removeUser(username, callback) {
 function getUser(username, callback) {
     ensureArgs(arguments, ['string', 'function']);
 
-    db.USERS_TABLE.get(username, function (error, result) {
+    userdb.get(username, function (error, result) {
         if (error) return callback(error);
         return callback(null, result);
     });
@@ -209,13 +209,9 @@ function changePassword(username, oldPassword, newPassword, callback) {
             user.password = new Buffer(derivedKey, 'binary').toString('hex');
             user.privatePemCipher = aes.encrypt(keyPair.toPrivatePem(), newPassword, saltBuffer);
 
-            db.USERS_TABLE.update(user, function (error) {
-                if (error) {
-                    if (error.reason === DatabaseError.NOT_FOUND) {
-                        return callback(new UserError('User does not exist', UserError.NOT_FOUND));
-                    }
-                    return callback(error);
-                }
+            userdb.update(username, user, function (error) {
+                if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError('User does not exist', UserError.NOT_FOUND));
+                if (error) return callback(error);
 
                 callback(null, user);
             });

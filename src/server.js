@@ -7,11 +7,11 @@ var express = require('express'),
     path = require('path'),
     fs = require('fs'),
     mkdirp = require('mkdirp'),
-    db = require('../auth/database.js'),
+    userdb = require('./userdb.js'),
+    tokendb = require('./tokendb.js'),
     routes = require('./routes/index.js'),
     debug = require('debug')('server:server'),
     assert = require('assert'),
-    util = require('util'),
     pkg = require('./../package.json');
 
 exports = module.exports = Server;
@@ -55,7 +55,7 @@ Server.prototype._clientErrorHandler = function (err, req, res, next) {
 
 Server.prototype._serverErrorHandler = function (err, req, res, next) {
     var status = err.status || err.statusCode || 500;
-    res.send(status, { status: http.STATUS_CODES[status], message: err.message });
+    res.send(status, { status: http.STATUS_CODES[status], message: err.message ? err.message : 'Internal Server Error' });
     console.error(http.STATUS_CODES[status] + ' : ' + err.message);
     console.error(err.stack);
 };
@@ -75,7 +75,7 @@ Server.prototype._firstTime = function (req, res, next) {
         return next(new HttpError(405, 'Only GET allowed'));
     }
 
-    return res.send(200, { activated: !db.firstTime(), version: pkg.version });
+    return res.send(200, { activated: userdb.count() !== 0, version: pkg.version });
 };
 
 /**
@@ -226,15 +226,19 @@ Server.prototype._initialize = function (callback) {
     mkdirp.sync(that.config.configRoot);
     mkdirp.sync(that.config.mountRoot);
 
-    if (!db.initialize(that.config)) {
-        return callback(new Error('Error initializing database'));
-    }
+    userdb.init(that.config.configRoot, function (error) {
+        if (error) callback (new Error('Error initializing user database'));
 
-    routes.volume.initialize(that.config);
-    routes.sync.initialize(that.config);
-    routes.user.initialize(that.config);
+        tokendb.init(that.config.configRoot, function (error) {
+            if (error) callback (new Error('Error initializing token database'));
 
-    callback(null);
+            routes.volume.initialize(that.config);
+            routes.sync.initialize(that.config);
+            routes.user.initialize(that.config);
+
+            callback(null);
+        });
+    });
 };
 
 // TODO maybe we can get rid of that function and inline it - Johannes

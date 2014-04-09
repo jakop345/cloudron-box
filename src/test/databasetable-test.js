@@ -5,8 +5,8 @@
 /* global before:false */
 /* global after:false */
 
-var db = require('../database.js'),
-    DatabaseError = db.DatabaseError,
+var DatabaseTable = require('../databasetable.js'),
+    DatabaseError = require('../databaseerror.js'),
     os = require('os'),
     path = require('path'),
     mkdirp = require('mkdirp'),
@@ -29,19 +29,11 @@ var USER_1 = {
 
 var tmpdirname = 'volume-test-' + crypto.randomBytes(4).readUInt32LE(0);
 var tmpdir = path.resolve(os.tmpdir(), tmpdirname);
-var config = {
-    port: 3000,
-    dataRoot: path.resolve(tmpdir, 'data'),
-    configRoot: path.resolve(tmpdir, 'config'),
-    mountRoot: path.resolve(tmpdir, 'mount')
-};
+var configDir = path.resolve(tmpdir, 'config');
 
 // ensure data/config/mount paths
 function setup(done) {
-    mkdirp.sync(config.dataRoot);
-    mkdirp.sync(config.configRoot);
-    mkdirp.sync(config.mountRoot);
-
+    mkdirp.sync(configDir);
     done();
 }
 
@@ -53,40 +45,34 @@ function cleanup(done) {
 }
 
 describe('Database', function () {
+    var db = null;
+
     before(setup);
     after(cleanup);
 
     describe('initialize', function() {
-        it('succeeds', function (done) {
-            db.initialize(config);
+        it('succeeds', function () {
+            db = new DatabaseTable(path.join(configDir, 'db/users'), {
+                username: { type: 'String', hashKey: true },
+                email: { type: 'String' },
+                password: { type: 'String', priv: true }
+            });
 
-            done();
-        });
-
-        it('creates table exports', function (done) {
-            expect(db.USERS_TABLE).to.be.an(db.Table);
-            expect(db.TOKENS_TABLE).to.be.an(db.Table);
-
-            done();
-        });
-
-        it('firstTime', function (done) {
-            expect(db.firstTime()).to.be.ok();
-            done();
+            expect(db).to.be.a(DatabaseTable);
         });
     });
 
-    describe('CRUD on USERS_TABLE', function () {
+    describe('CRUD', function () {
         describe('put', function () {
             it('succeeds', function (done) {
-                db.USERS_TABLE.put(USER_0, function (error) {
+                db.put(USER_0, function (error) {
                     expect(error).to.not.be.ok();
                     done();
                 });
             });
 
             it('fails of duplicate', function (done) {
-                db.USERS_TABLE.put(USER_0, function (error) {
+                db.put(USER_0, function (error) {
                     expect(error).to.be.ok();
                     expect(error.reason).to.equal(DatabaseError.ALREADY_EXISTS);
                     done();
@@ -94,7 +80,7 @@ describe('Database', function () {
             });
 
             it('fails of wrong record structure', function (done) {
-                db.USERS_TABLE.put({}, function (error) {
+                db.put({}, function (error) {
                     expect(error).to.be.ok();
                     expect(error.reason).to.equal(DatabaseError.RECORD_SCHEMA);
                     done();
@@ -104,7 +90,7 @@ describe('Database', function () {
 
         describe('get', function () {
             it('succeeds', function (done) {
-                db.USERS_TABLE.get(USER_0.username, function (error, result) {
+                db.get(USER_0.username, function (error, result) {
                     expect(error).to.not.be.ok();
                     expect(result).to.be.ok();
                     expect(result).to.equal(USER_0);
@@ -113,7 +99,7 @@ describe('Database', function () {
             });
 
             it('fails because of no such key', function (done) {
-                db.USERS_TABLE.get('randomkey', function (error) {
+                db.get('randomkey', function (error) {
                     expect(error).to.be.ok();
                     expect(error.reason).to.equal(DatabaseError.NOT_FOUND);
                     done();
@@ -121,7 +107,7 @@ describe('Database', function () {
             });
 
             it('fails because of null key', function (done) {
-                db.USERS_TABLE.get(null, function (error) {
+                db.get(null, function (error) {
                     expect(error).to.be.ok();
                     expect(error.reason).to.equal(DatabaseError.NOT_FOUND);
                     done();
@@ -129,7 +115,7 @@ describe('Database', function () {
             });
 
             it('fails because of undefined key', function (done) {
-                db.USERS_TABLE.get(undefined, function (error) {
+                db.get(undefined, function (error) {
                     expect(error).to.be.ok();
                     expect(error.reason).to.equal(DatabaseError.NOT_FOUND);
                     done();
@@ -142,10 +128,10 @@ describe('Database', function () {
                 var tmp = USER_0;
                 tmp.email = 'something@el.se';
 
-                db.USERS_TABLE.update(tmp, function (error) {
+                db.update(tmp, function (error) {
                     expect(error).to.not.be.ok();
 
-                    db.USERS_TABLE.get(tmp.username, function (error, result) {
+                    db.get(tmp.username, function (error, result) {
                         expect(error).to.not.be.ok();
                         expect(result).to.be.ok();
                         expect(result).to.equal(tmp);
@@ -155,7 +141,7 @@ describe('Database', function () {
             });
 
             it('fails of no such key', function (done) {
-                db.USERS_TABLE.update(USER_1, function (error) {
+                db.update(USER_1, function (error) {
                     expect(error).to.be.ok();
                     expect(error.reason).to.equal(DatabaseError.NOT_FOUND);
                     done();
@@ -163,7 +149,7 @@ describe('Database', function () {
             });
 
             it('fails of wrong record schema', function (done) {
-                db.USERS_TABLE.update({}, function (error) {
+                db.update({}, function (error) {
                     expect(error).to.be.ok();
                     expect(error.reason).to.equal(DatabaseError.RECORD_SCHEMA);
                     done();
@@ -172,10 +158,10 @@ describe('Database', function () {
 
             it('fails because of wrong arguments', function (done) {
                 expect(function () {
-                    db.USERS_TABLE.update(null, function () {});
+                    db.update(null, function () {});
                 }).to.throwException();
                 expect(function () {
-                    db.USERS_TABLE.update(undefined, function () {});
+                    db.update(undefined, function () {});
                 }).to.throwException();
                 done();
             });
@@ -183,10 +169,10 @@ describe('Database', function () {
 
         describe('remove', function () {
             it('succeeds', function (done) {
-                db.USERS_TABLE.remove(USER_0.username, function (error) {
+                db.remove(USER_0.username, function (error) {
                     expect(error).to.not.be.ok();
 
-                    db.USERS_TABLE.get(USER_0.username, function (error, result) {
+                    db.get(USER_0.username, function (error, result) {
                         expect(error).to.be.ok();
                         expect(error.reason).to.equal(DatabaseError.NOT_FOUND);
                         expect(result).to.not.be.ok();
@@ -196,7 +182,7 @@ describe('Database', function () {
             });
 
             it('fails of no such key', function (done) {
-                db.USERS_TABLE.remove(USER_1, function (error) {
+                db.remove(USER_1, function (error) {
                     expect(error).to.be.ok();
                     expect(error.reason).to.equal(DatabaseError.NOT_FOUND);
                     done();
@@ -204,7 +190,7 @@ describe('Database', function () {
             });
 
             it('fails because of null key', function (done) {
-                db.USERS_TABLE.remove(null, function (error) {
+                db.remove(null, function (error) {
                     expect(error).to.be.ok();
                     expect(error.reason).to.equal(DatabaseError.NOT_FOUND);
                     done();
@@ -212,7 +198,7 @@ describe('Database', function () {
             });
 
             it('fails because of undefined key', function (done) {
-                db.USERS_TABLE.remove(undefined, function (error) {
+                db.remove(undefined, function (error) {
                     expect(error).to.be.ok();
                     expect(error.reason).to.equal(DatabaseError.NOT_FOUND);
                     done();
@@ -224,30 +210,30 @@ describe('Database', function () {
 
     describe('count', function () {
         it('increment', function (done) {
-            expect(db.USERS_TABLE.count()).to.equal(0);
+            expect(db.count()).to.equal(0);
 
-            db.USERS_TABLE.put(USER_0, function (error) {
+            db.put(USER_0, function (error) {
                 expect(error).to.not.be.ok();
-                expect(db.USERS_TABLE.count()).to.equal(1);
+                expect(db.count()).to.equal(1);
 
-                db.USERS_TABLE.put(USER_1, function (error) {
+                db.put(USER_1, function (error) {
                     expect(error).to.not.be.ok();
-                    expect(db.USERS_TABLE.count()).to.equal(2);
+                    expect(db.count()).to.equal(2);
                     done();
                 });
             });
         });
 
         it('decrement', function (done) {
-            expect(db.USERS_TABLE.count()).to.equal(2);
+            expect(db.count()).to.equal(2);
 
-            db.USERS_TABLE.remove(USER_0.username, function (error) {
+            db.remove(USER_0.username, function (error) {
                 expect(error).to.not.be.ok();
-                expect(db.USERS_TABLE.count()).to.equal(1);
+                expect(db.count()).to.equal(1);
 
-                db.USERS_TABLE.remove(USER_1.username, function (error) {
+                db.remove(USER_1.username, function (error) {
                     expect(error).to.not.be.ok();
-                    expect(db.USERS_TABLE.count()).to.equal(0);
+                    expect(db.count()).to.equal(0);
                     done();
                 });
             });
@@ -256,16 +242,16 @@ describe('Database', function () {
 
     describe('removeAll', function () {
         it('succeeds', function (done) {
-            db.USERS_TABLE.put(USER_0, function (error) {
+            db.put(USER_0, function (error) {
                 expect(error).to.not.be.ok();
 
-                db.USERS_TABLE.put(USER_1, function (error) {
+                db.put(USER_1, function (error) {
                     expect(error).to.not.be.ok();
-                    expect(db.USERS_TABLE.count()).to.equal(2);
+                    expect(db.count()).to.equal(2);
 
-                    db.USERS_TABLE.removeAll(function (error) {
+                    db.removeAll(function (error) {
                         expect(error).to.not.be.ok();
-                        expect(db.USERS_TABLE.count()).to.equal(0);
+                        expect(db.count()).to.equal(0);
                         done();
                     });
                 });
@@ -275,7 +261,7 @@ describe('Database', function () {
 
     describe('getAll', function () {
         it('returns empty array', function (done) {
-            db.USERS_TABLE.getAll(true, function (error, result) {
+            db.getAll(true, function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
 
@@ -285,13 +271,13 @@ describe('Database', function () {
         });
 
         it('succeeds', function (done) {
-            db.USERS_TABLE.put(USER_0, function (error) {
+            db.put(USER_0, function (error) {
                 expect(error).to.not.be.ok();
 
-                db.USERS_TABLE.put(USER_1, function (error) {
+                db.put(USER_1, function (error) {
                     expect(error).to.not.be.ok();
 
-                    db.USERS_TABLE.getAll(true, function (error, result) {
+                    db.getAll(true, function (error, result) {
                         expect(error).to.not.be.ok();
                         expect(result).to.be.ok();
 
@@ -299,9 +285,9 @@ describe('Database', function () {
                         expect(result[0]).to.be.an('object');
                         expect(result[0].username).to.be.equal(USER_0.username);
 
-                        db.USERS_TABLE.removeAll(function (error) {
+                        db.removeAll(function (error) {
                             expect(error).to.not.be.ok();
-                            expect(db.USERS_TABLE.count()).to.equal(0);
+                            expect(db.count()).to.equal(0);
                             done();
                         });
                     });
@@ -310,15 +296,15 @@ describe('Database', function () {
         });
 
         it('returns a copy of its internal cache', function (done) {
-            db.USERS_TABLE.put(USER_0, function (error) {
+            db.put(USER_0, function (error) {
                 expect(error).to.not.be.ok();
 
-                db.USERS_TABLE.getAll(true, function (error, result) {
+                db.getAll(true, function (error, result) {
                     expect(error).to.not.be.ok();
                     expect(result).to.be.ok();
 
                     // using internal .cache!!!!
-                    expect(result[0]).to.not.equal(db.USERS_TABLE.cache[0]);
+                    expect(result[0]).to.not.equal(db.cache[0]);
 
                     done();
                 });
@@ -326,7 +312,7 @@ describe('Database', function () {
         });
 
         it('does purge private fields', function (done) {
-            db.USERS_TABLE.getAll(false, function (error, result) {
+            db.getAll(false, function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
 
@@ -339,7 +325,7 @@ describe('Database', function () {
 
     describe('remove privates', function () {
         it('succeeds', function (done) {
-            var tmp = db.USERS_TABLE.removePrivates(USER_0);
+            var tmp = db.removePrivates(USER_0);
             expect(tmp.password).to.not.be.ok();
             expect(tmp.username).to.be.ok();
             expect(tmp.username).to.equal(USER_0.username);

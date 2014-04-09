@@ -18,6 +18,9 @@ exports = module.exports = {
     getAll: getAll,
     add: add,
     del: del,
+    clear: clear,
+    update: update,
+    count: count,
     removePrivates: removePrivates
 };
 
@@ -73,12 +76,14 @@ function getByUsername(username, callback) {
     get(username, callback);
 }
 
-function getAll(callback) {
+function getAll(privates, callback) {
     assert(db !== null);
+    assert(typeof privates === 'boolean');
+    assert(typeof callback === 'function');
 
-    debug('getAll');
+    debug('getAll: include privates ' + privates);
 
-    db.getAll(false, function (error, result) {
+    db.getAll(privates, function (error, result) {
         callback(error, result);
     });
 }
@@ -131,4 +136,37 @@ function getByAccessToken(accessToken, callback) {
             callback(null, result);
         });
     });
+}
+
+function clear(callback) {
+    assert(db !== null);
+
+    db.removeAll(callback);
+}
+
+function update(userId, user, callback) {
+    assert(db !== null);
+    assert(typeof userId === 'string');
+    assert(typeof user.username === 'string');
+    assert(typeof user.password === 'string');
+    assert(typeof user.email === 'string');
+    assert(typeof user.privatePemCipher === 'string');
+    assert(typeof user.publicPem === 'object');
+    assert(typeof user.admin === 'boolean');
+    assert(typeof user.salt === 'string');
+    assert(typeof callback === 'function');
+
+    user.id = userId;
+
+    debug('update: ' + JSON.stringify(user));
+
+    db.update(user, function (error) {
+        callback(error);
+    });
+}
+
+function count() {
+    assert(db !== null);
+
+    return db.count();
 }

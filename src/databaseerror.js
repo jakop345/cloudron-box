@@ -19,3 +19,4 @@ util.inherits(DatabaseError, Error);
 DatabaseError.INTERNAL_ERROR = 'Internal error';
 DatabaseError.ALREADY_EXISTS = 'Entry already exist';
 DatabaseError.NOT_FOUND = 'Record not found';
+DatabaseError.RECORD_SCHEMA = 'Record does not match the schema';

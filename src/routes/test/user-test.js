@@ -8,7 +8,7 @@
 var Server = require('../../../src/server.js'),
     request = require('superagent'),
     expect = require('expect.js'),
-    database = require('../../database.js'),
+    userdb = require('../../userdb.js'),
     crypto = require('crypto'),
     rimraf = require('rimraf'),
     path = require('path'),
@@ -32,7 +32,7 @@ var server;
 function setup(done) {
     server = new Server(CONFIG);
     server.start(function (err) {
-        database.USERS_TABLE.removeAll(done);
+        userdb.clear(done);
     });
 }
 

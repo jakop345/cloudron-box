@@ -1,7 +1,7 @@
 'use strict';
 
 var fs = require('fs'),
-    User = require('../auth/user.js'),
+    User = require('./user.js'),
     debug = require('debug')('server:volume'),
     encfs = require('encfs'),
     rimraf = require('rimraf'),

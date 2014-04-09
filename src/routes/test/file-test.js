@@ -8,7 +8,6 @@
 var Server = require('../../server.js'),
     request = require('superagent'),
     expect = require('expect.js'),
-    database = require('../../../auth/database.js'),
     crypto = require('crypto'),
     fs = require('fs'),
     rimraf = require('rimraf'),

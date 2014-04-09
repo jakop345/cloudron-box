@@ -1,11 +1,11 @@
 'use strict';
 
-var db = require('../database'),
-    DatabaseError = db.DatabaseError,
+var userdb = require('../userdb.js'),
+    tokendb = require('../tokendb.js'),
+    DatabaseError = require('../databaseerror.js'),
     user = require('../user'),
     UserError = user.UserError,
     crypto = require('crypto'),
-    async = require('async'),
     debug = require('debug')('server:routes/user'),
     HttpError = require('../../src/httperror.js'),
     HttpSuccess = require('../../src/httpsuccess.js');
@@ -55,7 +55,7 @@ function createAdmin(req, res, next) {
         return next(new HttpError(405, 'Only POST allowed'));
     }
 
-    if (db.USERS_TABLE.count() > 0) {
+    if (userdb.count() > 0) {
         return next(new HttpError(403, 'Only one admin allowed'));
     }
 
@@ -197,21 +197,18 @@ function loginAuthenticator(req, res, next) {
     }
 
     if (auth.token) {
-        if (auth.token.length != 64 * 2) {
-            debug('Received a token with invalid length', auth.token.length, auth.token);
-            return next(new HttpError(401, 'Bad token'));
-        }
-
-        db.TOKENS_TABLE.get(auth.token, function (err, result) {
+        tokendb.get(auth.token, function (err, result) {
             if (err) {
                 debug('Received unknown token', auth.token);
                 return next(err.reason === DatabaseError.NOT_FOUND ? new HttpError(401, 'Invalid token') : err);
             }
 
+            debug('User entry for token ' + auth.token + ' found. ' + JSON.stringify(result));
+
             var now = Date(), expires = Date(result.expires);
             if (now > expires) return next(new HttpError(401, 'Token expired'));
 
-            db.USERS_TABLE.get(result.username, function (error, user) {
+            userdb.get(result.userId, function (error, user) {
                 if (error) return next(new HttpError(500, ''));
                 if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(404, 'User not found'));
 
@@ -249,22 +246,19 @@ function loginAuthenticator(req, res, next) {
 function tokenAuthenticator(req, res, next) {
     var req_token = req.query.auth_token ? req.query.auth_token : req.cookies.token;
 
-    if (req_token.length != 64 * 2) {
-        debug('Received a token with invalid length', req_token.length, req_token);
-        return next(new HttpError(401, 'Bad token'));
-    }
-
-    db.TOKENS_TABLE.get(req_token, function (err, result) {
+    tokendb.get(req_token, function (err, result) {
         if (err) {
             debug('Received unknown token', req_token);
             return next(err.reason === DatabaseError.NOT_FOUND ? new HttpError(401, 'Invalid token') : err);
         }
 
+        debug('User entry for token ' + req_token + ' found. ' + JSON.stringify(result));
+
         var now = Date(), expires = Date(result.expires);
         if (now > expires) return next(new HttpError(401, 'Token expired'));
 
-        db.USERS_TABLE.get(result.username, function (error, user) {
-            if (error) return next(new HttpError(500, ''));
+        userdb.get(result.userId, function (error, user) {
+            if (error) return next(new HttpError(500));
             if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(404, 'User not found'));
 
             debug('User ' + user.username + ' was successfully verified.');
@@ -301,31 +295,20 @@ function authenticate(req, res, next) {
  * @apiSuccess {String} email Email associated with the access token
  */
 function createToken(req, res, next) {
-    crypto.randomBytes(64 /* 512-bit */, function (err, tok) {
-        if (err) return next(new HttpError(500, 'Failed to generate random bytes'));
-        var expires = new Date((new Date()).getTime() + 60 * 60000).toUTCString(); // 1 hour
+    var token = tokendb.generateToken();
+    var expires = new Date((new Date()).getTime() + 60 * 60000).toUTCString(); // 1 hour
 
-        var hexToken = tok.toString('hex');
-
-        var token = {
-            token: hexToken,
-            username: req.user.username,
-            email: req.user.email,
-            expires: expires
-        };
-
-        db.TOKENS_TABLE.put(token, function (err) {
-            if (err) return next(err);
-            next(new HttpSuccess(200, {
-                token: hexToken,
-                expires: expires,
-                userInfo: {
-                    username: req.user.username,
-                    email: req.user.email,
-                    admin: req.user.admin
-                }
-            }));
-        });
+    tokendb.add(token, req.user.username, null, expires, function (err) {
+        if (err) return next(err);
+        next(new HttpSuccess(200, {
+            token: token,
+            expires: expires,
+            userInfo: {
+                username: req.user.username,
+                email: req.user.email,
+                admin: req.user.admin
+            }
+        }));
     });
 }
 
@@ -361,7 +344,7 @@ function logout(req, res, next) {
     var req_token = req.query.auth_token ? req.query.auth_token : req.cookies.token;
 
     // Invalidate token so the cookie cannot be reused after logout
-    db.TOKENS_TABLE.remove(req_token, function (error, result) {
+    tokendb.del(req_token, function (error, result) {
         if (error) return next(error);
         next(new HttpSuccess(200, {}));
     });
