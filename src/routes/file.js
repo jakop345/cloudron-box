@@ -1,7 +1,6 @@
 'use strict';
 
-var fs = require('fs'),
-    HttpError = require('../httperror.js'),
+var HttpError = require('../httperror.js'),
     HttpSuccess = require('../httpsuccess.js'),
     mime = require('mime'),
     debug = require('debug')('server:routes/file'),
@@ -138,7 +137,7 @@ function _getConflictFilenameSync(renamePattern, file, checkoutDir) {
     var ext = idx == -1 ? '' : file.substr(idx); // includes '.' if any
 
     for (var i = 0; true; i++) {
-        file = util.format("%s-%s%s%s", baseName, renamePattern, i ? ' ' + i : '', ext);
+        file = util.format('%s-%s%s%s', baseName, renamePattern, i ? ' ' + i : '', ext);
         if (!safe.fs.existsSync(path.join(checkoutDir, file))) break;
     }
     return file;
@@ -160,7 +159,7 @@ function putFile(req, res, next) {
 
     if (!data) return next(new HttpError(400, 'Cannot parse data field:' + safe.error.message));
     if (!req.files.file) return next(new HttpError(400, 'file not provided'));
-    if (filePath == '') return next(new HttpError(400, 'file path not provided in url'));
+    if (filePath === '') return next(new HttpError(400, 'file path not provided in url'));
 
     var options = {
         parentRev: data.parentRev,

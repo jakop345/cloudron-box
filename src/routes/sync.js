@@ -6,7 +6,6 @@ var debug = require('debug')('server:routes/sync'),
     HttpSuccess = require('../httpsuccess.js'),
     util = require('util'),
     path = require('path'),
-    fs = require('fs'),
     safe = require('safetydance'),
     Repo = require('../repo.js');
 

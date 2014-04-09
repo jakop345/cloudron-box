@@ -29,7 +29,6 @@ var CONFIG = {
 var SERVER_URL = 'http://localhost:' + CONFIG.port;
 
 var USERNAME = 'admin', PASSWORD = 'admin', EMAIL ='silly@me.com';
-var TESTVOLUME = 'testvolume';
 var volume;
 var server;
 
@@ -47,7 +46,7 @@ function setup(done) {
 
         var mountPoint = path.join(CONFIG.mountRoot, volume.id);
         mkdirp.sync(mountPoint);
-        var tmpDir = path.join(mountPoint, 'tmp')
+        var tmpDir = path.join(mountPoint, 'tmp');
         mkdirp.sync(tmpDir);
 
         volume.repo = new Repo(path.join(mountPoint, 'repo'), tmpDir);
@@ -62,6 +61,7 @@ function setup(done) {
 // remove all temporary folders
 function cleanup(done) {
     server.stop(function (error) {
+        expect(error).to.be(null);
         rimraf(BASE_DIR, done);
     });
 }

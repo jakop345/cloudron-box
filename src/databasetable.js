@@ -1,7 +1,6 @@
 'use strict';
 
 var fs = require('fs'),
-    util = require('util'),
     safe = require('safetydance'),
     path = require('path'),
     DatabaseError = require('./databaseerror'),

@@ -8,7 +8,6 @@ var exec = require('child_process').exec,
     crypto = require('crypto'),
     debug = require('debug')('server:repo'),
     util = require('util'),
-    EventEmitter = require('events').EventEmitter,
     spawn = require('child_process').spawn,
     constants = require('constants'), // internal module? same as process.binding('constants')
     safe = require('safetydance');
@@ -177,7 +176,6 @@ Repo.prototype.create = function (username, email, callback) {
 function parseTreeLine(line) {
     assert(typeof line === 'string' && line.length !== 0);
 
-    var id, mode, name, type, _ref;
     // long line format: <mode> SP <type> SP <object> SP+ <object size> TAB <file>
     // object size is right justified to a min of 7
     // sample line : 100644 blob e69de29bb2d1d6434b8b29ae775ad8c2e48c5391     43\tREADME
@@ -359,7 +357,6 @@ function createTempFileSync(dir, contents) {
 function parseIndexLine(line) {
     assert(typeof line === 'string' && line.length !== 0);
 
-    var mode, sha1, stage, name;
     // sample line : 100644 294c76dd833e77480ba85bdff83b4ef44fa4c08f 0\trepo-test.js
     var parts = line.split(/[\t ]+/, 3);
     var endPos = parts[0].length + 1 + parts[1].length + 1 + parts[2].length  + 1;
@@ -522,7 +519,6 @@ Repo.prototype.updateFile = function (file, options, callback) {
         options = { };
     }
 
-    var that = this;
     var absoluteFilePath = this._absoluteFilePath(file);
     if (absoluteFilePath === null) {
         return callback(new RepoError('ENOENT', 'Invalid file path'));
@@ -679,7 +675,7 @@ Repo.prototype.createReadStream = function (file, options) {
 };
 
 /*
- * Helper function parse a single diff line. A diff line is of the following format: 
+ * Helper function parse a single diff line. A diff line is of the following format:
  * :100644 100644 78681069871a08110373201344e5016e218604ea 8b58e26f01a1af730e727b0eb0f1ff3b33a79de2 M\0package.json\0[newpath\0]
  */
 function parseRawDiffLine(line, startPos) {
@@ -735,7 +731,7 @@ function parseRawDiffLines(out) {
     var changes = [ ];
     while (pos < out.length) {
         var result = parseRawDiffLine(out, pos);
-        if (result == null) break;
+        if (result === null) break;
         changes.push(result.change);
         pos = result.pos;
     }
@@ -805,7 +801,7 @@ Repo.prototype.getRevisions = function (file, options, callback) {
             pos += 2; // skip over a \0 and a \n
 
             var diffResult = parseRawDiffLine(out, pos);
-            if (diffResult == null) break;
+            if (diffResult === null) break;
 
             var diff = diffResult.change;
             pos = diffResult.pos;
@@ -960,7 +956,7 @@ Repo.prototype.putFile = function (filePath, newFile, options, callback) {
         that.hashObject(newFile, function (err, hash) {
             if (err) return callback(err);
             if (entry.sha1 === hash) { // file is unchanged
-                that._addFileAndCommit(filePath, { _operation: "Unchanged" }, callback);
+                that._addFileAndCommit(filePath, { _operation: 'Unchanged' }, callback);
             } else {
                 var newName = getConflictFilenameSync(filePath, that.checkoutDir);
                 that.addFile(newName, { file: newFile }, callback);

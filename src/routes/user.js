@@ -5,7 +5,6 @@ var userdb = require('../userdb.js'),
     DatabaseError = require('../databaseerror.js'),
     user = require('../user'),
     UserError = user.UserError,
-    crypto = require('crypto'),
     debug = require('debug')('server:routes/user'),
     HttpError = require('../../src/httperror.js'),
     HttpSuccess = require('../../src/httpsuccess.js');
@@ -63,7 +62,7 @@ function createAdmin(req, res, next) {
     var password = req.body.password || '';
     var email = req.body.email || '';
 
-    user.create(username, password, email, {}, function (error, result) {
+    user.create(username, password, email, {}, function (error) {
         if (error) {
             if (error.reason === UserError.ARGUMENTS) {
                 return next(new HttpError(400, error.message));
@@ -104,7 +103,7 @@ function createUser(req, res, next) {
     var password = req.body.password || '';
     var email = req.body.email || '';
 
-    user.create(username, password, email, {}, function (error, result) {
+    user.create(username, password, email, {}, function (error) {
         if (error) {
             if (error.reason === UserError.ARGUMENTS) {
                 return next(new HttpError(400, error.message));
@@ -123,7 +122,7 @@ function changePassword(req, res, next) {
     if (!req.body.password) return next(new HttpError(400, 'API call requires the users old password.'));
     if (!req.body.newPassword) return next(new HttpError(400, 'API call requires the users new password.'));
 
-    user.changePassword(req.user.username, req.body.password, req.body.newPassword, function (error, result) {
+    user.changePassword(req.user.username, req.body.password, req.body.newPassword, function (error) {
         if (error) {
             debug('Failed to change password for user', req.user.username);
             if (error.reason === UserError.WRONG_USER_OR_PASSWORD) {
@@ -344,7 +343,7 @@ function logout(req, res, next) {
     var req_token = req.query.auth_token ? req.query.auth_token : req.cookies.token;
 
     // Invalidate token so the cookie cannot be reused after logout
-    tokendb.del(req_token, function (error, result) {
+    tokendb.del(req_token, function (error) {
         if (error) return next(error);
         next(new HttpSuccess(200, {}));
     });
@@ -381,10 +380,10 @@ function removeUser(req, res, next) {
     }
 
     // verify the admin via the provided password
-    user.verify(req.user.username, password, function (error, result) {
+    user.verify(req.user.username, password, function (error) {
         if (error) return next(new HttpError(401, 'Username or password do not match'));
 
-        user.remove(username, function (error, result) {
+        user.remove(username, function (error) {
             if (error) {
                 if (error.reason === DatabaseError.NOT_FOUND) {
                     return next(new HttpError(404, 'User not found'));

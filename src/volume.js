@@ -243,7 +243,7 @@ Volume.prototype.listFiles = function (dir, callback) {
         var absoluteDirPath = path.join(that.mountPoint, dir);
         fs.readdir(absoluteDirPath, function (error, filenames) {
             if (error) {
-                debug('Unable to read directory "' + directory + '" for volume "' + that.id + '".');
+                debug('Unable to read directory "' + absoluteDirPath + '" for volume "' + that.id + '".');
                 return callback(new VolumeError(error, VolumeError.READ_ERROR));
             }
 

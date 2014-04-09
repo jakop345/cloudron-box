@@ -31,17 +31,17 @@ var USERNAME_3 = 'userTheThird', PASSWORD_3 = 'userpassword333', EMAIL_3 = 'user
 var server;
 function setup(done) {
     server = new Server(CONFIG);
-    server.start(function (err) {
+    server.start(function (error) {
+        expect(error).to.be(null);
         userdb.clear(done);
     });
 }
 
 // remove all temporary folders
 function cleanup(done) {
-    server.stop(function (err) {
-        rimraf(BASE_DIR, function (error) {
-            done();
-        });
+    server.stop(function (error) {
+        expect(error).to.be(null);
+        rimraf(BASE_DIR, done);
     });
 }
 

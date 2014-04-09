@@ -157,7 +157,7 @@ Server.prototype._initialize = function (callback) {
            .use('/api/v1/createadmin', routes.user.createAdmin); // ## FIXME: allow this before auth for now
 
         if (that.config.testing !== true) {
-           that.app.use(routes.user.authenticate)
+           that.app.use(routes.user.authenticate);
         } else {
             console.warn('Authentication disabled in testing mode');
         }
@@ -291,7 +291,7 @@ Server.prototype.stop = function (callback) {
     var that = this;
 
     if (!this.app.httpServer) {
-        return callback();
+        return callback(null);
     }
 
     this.app.httpServer.close(function () {
@@ -299,6 +299,6 @@ Server.prototype.stop = function (callback) {
         // TODO should delete the app variable
         that.app = null;
 
-        callback();
+        callback(null);
     });
 };

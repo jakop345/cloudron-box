@@ -37,8 +37,9 @@ function setup(done) {
         userdb.clear(function () {
             request.post(SERVER_URL + '/api/v1/createadmin')
                  .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
-                 .end(function (error, res) {
+                 .end(function (error, result) {
                 expect(error).to.not.be.ok();
+                expect(result).to.be.ok();
                 done();
             });
         });
@@ -48,9 +49,8 @@ function setup(done) {
 // remove all temporary folders
 function cleanup(done) {
     server.stop(function (error) {
-        rimraf(BASE_DIR, function (error) {
-            done();
-        });
+        expect(error).to.be(null);
+        rimraf(BASE_DIR, done);
     });
 }
 

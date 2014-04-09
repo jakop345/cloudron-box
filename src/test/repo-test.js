@@ -11,7 +11,6 @@ var Repo = require('../repo'),
     path = require('path'),
     os = require('os'),
     rimraf = require('rimraf'),
-    assert = require('assert'),
     expect = require('expect.js'),
     constants = require('constants'),
     mkdirp = require('mkdirp');
@@ -33,9 +32,8 @@ function setup(done) {
 
 function cleanup(done) {
     rimraf(tmpdir, function (error) {
-        rimraf(tmpdir, function (error) {
-            done();
-        });
+        expect(error).to.be(null);
+        rimraf(tmpdir, done);
     });
 }
 
@@ -265,6 +263,7 @@ describe('Repo', function () {
         // this is the current behavior but it can be changed to error
         repo.getTree('235789', function (err, tree) {
             expect(err).to.be.ok();
+            expect(tree).to.not.be.ok();
             done();
         });
     });
@@ -414,6 +413,7 @@ describe('Repo', function () {
     it('removeFile - invalid path', function (done) {
         repo.removeFile('../README', function (err, commit) {
             expect(err.code).to.equal('ENOENT');
+            expect(commit).to.not.be.ok();
             done();
         });
     });
@@ -450,6 +450,8 @@ describe('Repo', function () {
         fs.writeFileSync(tmpfile, 'NEWFILE_CONTENTS');
         repo.putFile('NEWFILE', tmpfile, { parentRev: 'doesnt exist' }, function (err, fileInfo, commit) {
             expect(err.code).to.equal('EINVAL');
+            expect(fileInfo).to.not.be.ok();
+            expect(commit).to.not.be.ok();
             done();
         });
     });
@@ -536,6 +538,7 @@ describe('Repo', function () {
     it('createDirectory - overwrite file', function (done) {
         repo.createDirectory('NEWFILE', function (err, entry) {
             expect(err.code).to.be('ENOTDIR');
+            expect(entry).to.not.be.ok();
             done();
         });
     });
@@ -552,6 +555,7 @@ describe('Repo', function () {
         repo.metadata('dummy_dir', function (err, metadata, hash) {
             expect(err).to.be(null);
             expect(metadata.length).to.be(0);
+            expect(hash).to.be.a('string');
             done();
         });
     });
@@ -559,12 +563,14 @@ describe('Repo', function () {
     it('createDirectory - add file to empty directory', function (done) {
         repo.addFileWithData('dummy_dir/dummy_file', 'data', function (err, entry) {
             expect(err).to.be(null);
+            expect(entry).to.be.an('object');
             done();
         });
     });
 
     it('createDirectory - listFiles must exclude magic file', function (done) {
         repo.listFiles({ path: 'dummy_dir/', listSubtrees: false }, function (err, tree) {
+            expect(err).to.be(null);
             expect(tree.entries.length).to.be(1);
             expect(tree.entries[0].name).to.be('dummy_file');
             done();
@@ -573,8 +579,10 @@ describe('Repo', function () {
 
     it('createDirectory - metadata must exclude magic file', function (done) {
         repo.metadata('dummy_dir/', function (err, metadata, hash) {
+            expect(err).to.be(null);
             expect(metadata.length).to.be(1);
             expect(metadata[0].name).to.be('dummy_file');
+            expect(hash).to.be.a('string');
             done();
         });
     });

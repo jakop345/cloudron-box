@@ -11,7 +11,6 @@ var DatabaseTable = require('../databasetable.js'),
     path = require('path'),
     mkdirp = require('mkdirp'),
     rimraf = require('rimraf'),
-    assert = require('assert'),
     crypto = require('crypto'),
     expect = require('expect.js');
 
@@ -39,9 +38,7 @@ function setup(done) {
 
 // remove all temporary folders
 function cleanup(done) {
-    rimraf(tmpdir, function (error) {
-        done();
-    });
+    rimraf(tmpdir, done);
 }
 
 describe('Database', function () {
