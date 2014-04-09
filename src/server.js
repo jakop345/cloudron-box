@@ -112,10 +112,10 @@ Server.prototype._requireAdmin = function (req, res, next) {
 Server.prototype._loadMiddleware = function () {
     var middleware = { };
     // TODO that folder lookup is a bit silly maybe with the '../' - Johannes
-    fs.readdirSync(__dirname + '/../middleware').forEach(function (filename) {
+    fs.readdirSync(__dirname + '/middleware').forEach(function (filename) {
         if (!/\.js$/.test(filename)) return;
         var name = path.basename(filename, '.js');
-        function load() { return require('./../middleware/' + name); }
+        function load() { return require('./middleware/' + name); }
         middleware.__defineGetter__(name, load);
     });
     return middleware;
