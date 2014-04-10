@@ -295,7 +295,7 @@ function authenticate(req, res, next) {
  */
 function createToken(req, res, next) {
     var token = tokendb.generateToken();
-    var expires = new Date((new Date()).getTime() + 60 * 60000).toUTCString(); // 1 hour
+    var expires = new Date(Date.now() + 60 * 60000).toUTCString(); // 1 hour
 
     tokendb.add(token, req.user.username, null, expires, function (err) {
         if (err) return next(err);

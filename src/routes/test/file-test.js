@@ -32,10 +32,6 @@ var USERNAME = 'admin', PASSWORD = 'admin', EMAIL ='silly@me.com';
 var volume;
 var server;
 
-function now() {
-    return (new Date()).getTime();
-}
-
 function setup(done) {
     server = new Server(CONFIG);
     server.start(function (err) {
@@ -116,7 +112,7 @@ describe('Server File API', function () {
 
     it('diff', function (done) {
         var index = [
-            { path: 'NEWFILE', sha1: '', mtime: now()+10, size: 20 } // file changed, so no sha1
+            { path: 'NEWFILE', sha1: '', mtime: Date.now()+10, size: 20 } // file changed, so no sha1
         ];
 
         request.post(SERVER_URL + '/api/v1/sync/' + volume.id + '/diff')
