@@ -15,6 +15,7 @@ var Server = require('../../server.js'),
     os = require('os'),
     mkdirp = require('mkdirp'),
     uuid = require('node-uuid'),
+    userdb = require('../../userdb.js'),
     Repo = require('../../repo.js');
 
 var BASE_DIR = path.resolve(os.tmpdir(), 'file-test-' + crypto.randomBytes(4).readUInt32LE(0));
@@ -23,8 +24,7 @@ var CONFIG = {
     dataRoot: path.resolve(BASE_DIR, 'data'),
     configRoot: path.resolve(BASE_DIR, 'config'),
     mountRoot: path.resolve(BASE_DIR, 'mount'),
-    silent: true,
-    testing: true
+    silent: true
 };
 var SERVER_URL = 'http://localhost:' + CONFIG.port;
 
@@ -49,11 +49,20 @@ function setup(done) {
         var tmpDir = path.join(mountPoint, 'tmp');
         mkdirp.sync(tmpDir);
 
-        volume.repo = new Repo(path.join(mountPoint, 'repo'), tmpDir);
-        volume.repo.create(USERNAME, EMAIL, function (error) {
-            if (error) return done(error);
+        userdb.clear(function () {
+            request.post(SERVER_URL + '/api/v1/createadmin')
+              .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
+              .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result).to.be.ok();
 
-            volume.repo.addFileWithData('README.md', 'README', done);
+                volume.repo = new Repo(path.join(mountPoint, 'repo'), tmpDir);
+                volume.repo.create(USERNAME, EMAIL, function (error) {
+                    if (error) return done(error);
+
+                    volume.repo.addFileWithData('README.md', 'README', done);
+                });
+            });
         });
     });
 }

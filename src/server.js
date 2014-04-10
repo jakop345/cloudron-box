@@ -158,15 +158,8 @@ Server.prototype._initialize = function (callback) {
            .use(middleware.contentType('application/json'))
            .use('/api/v1/version', that._getVersion.bind(that))
            .use('/api/v1/firsttime', that._firstTime.bind(that))
-           .use('/api/v1/createadmin', routes.user.createAdmin); // ## FIXME: allow this before auth for now
-
-        if (that.config.testing !== true) {
-           that.app.use(routes.user.authenticate);
-        } else {
-            console.warn('Authentication disabled in testing mode');
-        }
-
-        that.app
+           .use('/api/v1/createadmin', routes.user.createAdmin) // ## FIXME: allow this before auth for now
+           .use(routes.user.authenticate)
            .use(that.app.router)
            .use(that._successHandler.bind(that))
            .use(that._clientErrorHandler.bind(that))
