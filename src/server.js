@@ -5,6 +5,7 @@ var express = require('express'),
     HttpError = require('./httperror.js'),
     HttpSuccess = require('./httpsuccess.js'),
     path = require('path'),
+    passport = require('passport'),
     fs = require('fs'),
     mkdirp = require('mkdirp'),
     userdb = require('./userdb.js'),
@@ -151,6 +152,9 @@ Server.prototype._initialize = function (callback) {
            .use(express.favicon(__dirname + '/../assets/favicon.ico'))
            // API calls that do not require authorization
            .use(middleware.cors({ origins: [ '*' ], allowCredentials: true }))
+           .use(express.session({ secret: 'yellow is blue' }))
+           .use(passport.initialize())
+           .use(passport.session())
            .use(middleware.contentType('application/json'))
            .use('/api/v1/version', that._getVersion.bind(that))
            .use('/api/v1/firsttime', that._firstTime.bind(that))
@@ -167,6 +171,9 @@ Server.prototype._initialize = function (callback) {
            .use(that._successHandler.bind(that))
            .use(that._clientErrorHandler.bind(that))
            .use(that._serverErrorHandler.bind(that));
+
+        // Passport configuration
+        require('./auth');
 
         // routes controlled by app.router
         that.app.post('/api/v1/token', routes.user.createToken);        // TODO remove that route
