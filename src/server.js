@@ -72,10 +72,6 @@ Server.prototype._serverErrorHandler = function (err, req, res, next) {
  * @apiSuccess {String} version The current version string of the device.
  */
 Server.prototype._firstTime = function (req, res, next) {
-    if (req.method !== 'GET') {
-        return next(new HttpError(405, 'Only GET allowed'));
-    }
-
     return res.send(200, { activated: userdb.count() !== 0, version: pkg.version });
 };
 
@@ -89,7 +85,6 @@ Server.prototype._firstTime = function (req, res, next) {
  * @apiSuccess {String} version The current version string of the device.
  */
 Server.prototype._getVersion = function (req, res, next) {
-    if (req.method !== 'GET') return next(new HttpError(405, 'Only GET supported'));
     res.send(200, { version: pkg.version });
 };
 
@@ -159,9 +154,6 @@ Server.prototype._initialize = function (callback) {
            .use(passport.initialize())
            .use(passport.session())
            .use(middleware.contentType('application/json'))
-           .use('/api/v1/version', that._getVersion.bind(that))
-           .use('/api/v1/firsttime', that._firstTime.bind(that))
-           .use('/api/v1/createadmin', routes.user.createAdmin) // ## FIXME: allow this before auth for now
 
            // FIXME
            // temporarily accept both
@@ -177,54 +169,62 @@ Server.prototype._initialize = function (callback) {
                 next();
            })
 
-           .use(passport.authenticate(['bearer', 'basic'], { session: false }))
            .use(that.app.router)
            .use(that._successHandler.bind(that))
            .use(that._clientErrorHandler.bind(that))
            .use(that._serverErrorHandler.bind(that));
 
+        var bearer = passport.authenticate(['bearer'], { session: false });
+        var basic = passport.authenticate(['basic'], { session: false });
+        var both = passport.authenticate(['basic', 'bearer'], { session: false });
+
+        // public routes
+        that.app.get('/api/v1/version', that._getVersion.bind(that));
+        that.app.get('/api/v1/firsttime', that._firstTime.bind(that));
+        that.app.post('/api/v1/createadmin', routes.user.createAdmin);
+
         // routes controlled by app.router
-        that.app.post('/api/v1/token', routes.user.createToken);        // TODO remove that route
-        that.app.get('/api/v1/user/token', routes.user.createToken);
-        that.app.get('/api/v1/logout', routes.user.logout);             // TODO remove that route
-        that.app.get('/api/v1/user/logout', routes.user.logout);
-        that.app.post('/api/v1/user/create', that._requireAdmin.bind(that), routes.user.create);
-        that.app.post('/api/v1/user/remove', that._requireAdmin.bind(that), routes.user.remove);
-        that.app.post('/api/v1/user/password', that._requirePassword.bind(that), routes.user.changePassword);
-        that.app.get('/api/v1/user/info', routes.user.info);
-        that.app.get('/api/v1/user/list', routes.user.list);
+        that.app.post('/api/v1/token', basic, routes.user.createToken);        // TODO remove that route
+        that.app.get('/api/v1/user/token', basic, routes.user.createToken);
+        that.app.get('/api/v1/logout', bearer, routes.user.logout);             // TODO remove that route
+        that.app.get('/api/v1/user/logout', bearer, routes.user.logout);
+        that.app.post('/api/v1/user/create', both, that._requireAdmin.bind(that), routes.user.create);
+        that.app.post('/api/v1/user/remove', both, that._requireAdmin.bind(that), routes.user.remove);
+        that.app.post('/api/v1/user/password', both, that._requirePassword.bind(that), routes.user.changePassword);
+        that.app.get('/api/v1/user/info', both, routes.user.info);
+        that.app.get('/api/v1/user/list', both, routes.user.list);
 
-        that.app.param('syncerVolume', routes.sync.attachRepo);
+        that.app.param('syncerVolume', both, routes.sync.attachRepo);
 
-        that.app.post('/api/v1/sync/:syncerVolume/diff', routes.sync.requireMountedVolume, routes.sync.diff);
-        that.app.post('/api/v1/sync/:syncerVolume/delta', routes.sync.requireMountedVolume, routes.sync.delta);
+        that.app.post('/api/v1/sync/:syncerVolume/diff', both, routes.sync.requireMountedVolume, routes.sync.diff);
+        that.app.post('/api/v1/sync/:syncerVolume/delta', both, routes.sync.requireMountedVolume, routes.sync.delta);
 
-        that.app.get('/api/v1/revisions/:syncerVolume/*', routes.sync.requireMountedVolume, routes.file.revisions);
-        that.app.get('/api/v1/file/:syncerVolume/*', routes.sync.requireMountedVolume, routes.file.read);
-        that.app.get('/api/v1/metadata/:syncerVolume/*', routes.sync.requireMountedVolume, routes.file.metadata);
-        that.app.put('/api/v1/file/:syncerVolume/*', routes.sync.requireMountedVolume,
+        that.app.get('/api/v1/revisions/:syncerVolume/*', both, routes.sync.requireMountedVolume, routes.file.revisions);
+        that.app.get('/api/v1/file/:syncerVolume/*', both, routes.sync.requireMountedVolume, routes.file.read);
+        that.app.get('/api/v1/metadata/:syncerVolume/*', both, routes.sync.requireMountedVolume, routes.file.metadata);
+        that.app.put('/api/v1/file/:syncerVolume/*', both, routes.sync.requireMountedVolume,
                                                routes.file.multipart({ maxFieldsSize: FIELD_LIMIT, limit: FILE_SIZE_LIMIT, timeout: FILE_TIMEOUT }),
                                                routes.file.putFile);
 
-        that.app.post('/api/v1/fileops/:syncerVolume/copy', routes.sync.requireMountedVolume, express.json({ strict: true }), routes.fileops.copy);
-        that.app.post('/api/v1/fileops/:syncerVolume/move', routes.sync.requireMountedVolume, express.json({ strict: true }), routes.fileops.move);
-        that.app.post('/api/v1/fileops/:syncerVolume/delete', routes.sync.requireMountedVolume, express.json({ strict: true }), routes.fileops.remove);
-        that.app.post('/api/v1/fileops/:syncerVolume/create_dir', routes.sync.requireMountedVolume, express.json({ strict: true }), routes.fileops.createDirectory);
+        that.app.post('/api/v1/fileops/:syncerVolume/copy', both, routes.sync.requireMountedVolume, express.json({ strict: true }), routes.fileops.copy);
+        that.app.post('/api/v1/fileops/:syncerVolume/move', both, routes.sync.requireMountedVolume, express.json({ strict: true }), routes.fileops.move);
+        that.app.post('/api/v1/fileops/:syncerVolume/delete', both, routes.sync.requireMountedVolume, express.json({ strict: true }), routes.fileops.remove);
+        that.app.post('/api/v1/fileops/:syncerVolume/create_dir', both, routes.sync.requireMountedVolume, express.json({ strict: true }), routes.fileops.createDirectory);
 
         // volume related routes
-        that.app.param('volume', routes.volume.attachVolume);
+        that.app.param('volume', both, routes.volume.attachVolume);
 
-        that.app.get('/api/v1/volume/:volume/list', routes.volume.requireMountedVolume, routes.volume.listFiles);
-        that.app.get('/api/v1/volume/:volume/list/*', routes.volume.requireMountedVolume, routes.volume.listFiles);
-        that.app.get('/api/v1/volume/list', routes.volume.listVolumes);
-        that.app.post('/api/v1/volume/create', that._requirePassword.bind(that), routes.volume.createVolume);
-        that.app.post('/api/v1/volume/:volume/delete', that._requirePassword.bind(that), routes.volume.deleteVolume);
-        that.app.post('/api/v1/volume/:volume/mount', that._requirePassword.bind(that), routes.volume.mount);
-        that.app.post('/api/v1/volume/:volume/unmount', routes.volume.unmount);
-        that.app.get('/api/v1/volume/:volume/ismounted', routes.volume.isMounted);
-        that.app.get('/api/v1/volume/:volume/users', routes.volume.listUsers);
-        that.app.post('/api/v1/volume/:volume/users', routes.volume.addUser);
-        that.app.del('/api/v1/volume/:volume/users/:username', routes.volume.removeUser);
+        that.app.get('/api/v1/volume/:volume/list', both, routes.volume.requireMountedVolume, routes.volume.listFiles);
+        that.app.get('/api/v1/volume/:volume/list/*', both, routes.volume.requireMountedVolume, routes.volume.listFiles);
+        that.app.get('/api/v1/volume/list', both, routes.volume.listVolumes);
+        that.app.post('/api/v1/volume/create', both, that._requirePassword.bind(that), routes.volume.createVolume);
+        that.app.post('/api/v1/volume/:volume/delete', both, that._requirePassword.bind(that), routes.volume.deleteVolume);
+        that.app.post('/api/v1/volume/:volume/mount', both, that._requirePassword.bind(that), routes.volume.mount);
+        that.app.post('/api/v1/volume/:volume/unmount', both, routes.volume.unmount);
+        that.app.get('/api/v1/volume/:volume/ismounted', both, routes.volume.isMounted);
+        that.app.get('/api/v1/volume/:volume/users', both, routes.volume.listUsers);
+        that.app.post('/api/v1/volume/:volume/users', both, routes.volume.addUser);
+        that.app.del('/api/v1/volume/:volume/users/:username', both, routes.volume.removeUser);
     });
 
     this.app.set('port', that.config.port);

@@ -72,7 +72,7 @@ describe('Server User API', function () {
     it('create admin fails because only POST is allowed', function (done) {
         request.get(SERVER_URL + '/api/v1/createadmin')
                .end(function (err, res) {
-            expect(res.statusCode).to.equal(405);
+            expect(res.statusCode).to.equal(404);
             done(err);
         });
     });

@@ -49,10 +49,6 @@ function initialize(cfg) {
  * @apiError 403 Admin user already exists. There can only be one per box at all time.
  */
 function createAdmin(req, res, next) {
-    if (req.method !== 'POST') {
-        return next(new HttpError(405, 'Only POST allowed'));
-    }
-
     if (userdb.count() > 0) {
         return next(new HttpError(403, 'Only one admin allowed'));
     }

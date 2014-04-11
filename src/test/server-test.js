@@ -25,9 +25,7 @@ var CONFIG = {
 
 // remove all temporary folders
 function cleanup(done) {
-    rimraf(BASE_DIR, function (error) {
-        done();
-    });
+    rimraf(BASE_DIR, done);
 }
 
 describe('Server', function () {
@@ -39,9 +37,9 @@ describe('Server', function () {
         var server;
 
         it('constructor fails due to wrong arguments', function (done) {
-            expect(function () { var s = new Server(function () {}); }).to.throwException();
-            expect(function () { var s = new Server('foobar'); }).to.throwException();
-            expect(function () { var s = new Server(1337); }).to.throwException();
+            expect(function () { new Server(function () {}); }).to.throwException();
+            expect(function () { new Server('foobar'); }).to.throwException();
+            expect(function () { new Server(1337); }).to.throwException();
 
             done();
         });
@@ -91,15 +89,13 @@ describe('Server', function () {
 
         before(function (done) {
             server = new Server(CONFIG);
-            server.start(function (err, app) {
-                done();
-            });
+            server.start(done);
         });
 
         it('random bad requests', function (done) {
             request.get(SERVER_URL + '/random', function (err, res) {
                 expect(err).to.not.be.ok();
-                expect(res.statusCode).to.equal(401);
+                expect(res.statusCode).to.equal(404);
                 done(err);
             });
         });
@@ -116,7 +112,7 @@ describe('Server', function () {
         it('firsttime route is GET', function (done) {
             request.post(SERVER_URL + '/api/v1/firsttime')
                    .end(function (err, res) {
-                expect(res.statusCode).to.equal(405);
+                expect(res.statusCode).to.equal(404);
 
                 request.get(SERVER_URL + '/api/v1/firsttime')
                        .end(function (err, res) {
@@ -138,9 +134,7 @@ describe('Server', function () {
 
         before(function (done) {
             server = new Server(CONFIG);
-            server.start(function (err) {
-                done();
-            });
+            server.start(done);
         });
 
         it('fails due to wrong arguments', function (done) {
@@ -160,7 +154,8 @@ describe('Server', function () {
         });
 
         it('is not reachable anymore', function (done) {
-            request.get(SERVER_URL + '/api/v1/version', function (err, res) {
+            request.get(SERVER_URL + '/api/v1/version', function (error, result) {
+                expect(error).to.not.be(null);
                 done();
             });
         });
@@ -171,8 +166,8 @@ describe('Server', function () {
 
         before(function (done) {
             server = new Server(CONFIG);
-            server.start(function (err) {
-                done();
+            server.start(function (error) {
+                done(error);
             });
         });
 
