@@ -139,6 +139,9 @@ Server.prototype._initialize = function (callback) {
         var json = express.json({ strict: true, limit: QUERY_LIMIT }), // application/json
             urlencoded = express.urlencoded({ limit: QUERY_LIMIT }); // application/x-www-form-urlencoded
 
+        // Passport configuration
+        require('./auth');
+
         if (!that.config.silent) {
             that.app.use(express.logger({ format: 'dev', immediate: false }));
         }
@@ -159,14 +162,26 @@ Server.prototype._initialize = function (callback) {
            .use('/api/v1/version', that._getVersion.bind(that))
            .use('/api/v1/firsttime', that._firstTime.bind(that))
            .use('/api/v1/createadmin', routes.user.createAdmin) // ## FIXME: allow this before auth for now
-           .use(routes.user.authenticate)
+
+           // FIXME
+           // temporarily accept both
+           //  - [query] auth_token and access_token
+           //  - [header] 'Token <tok>' and 'Bearer <tok>'
+           // see http://tools.ietf.org/html/rfc6750
+           .use(function (req, res, next) {
+                if (req.query.auth_token) req.query.access_token = req.query.auth_token;
+                var auth = req.headers.authorization;
+                if (auth && auth.indexOf('Token ') === 0) {
+                    req.headers.authorization = 'Bearer ' + auth.slice('Token '.length);
+                }
+                next();
+           })
+
+           .use(passport.authenticate(['bearer', 'basic'], { session: false }))
            .use(that.app.router)
            .use(that._successHandler.bind(that))
            .use(that._clientErrorHandler.bind(that))
            .use(that._serverErrorHandler.bind(that));
-
-        // Passport configuration
-        require('./auth');
 
         // routes controlled by app.router
         that.app.post('/api/v1/token', routes.user.createToken);        // TODO remove that route

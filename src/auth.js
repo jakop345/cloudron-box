@@ -9,9 +9,10 @@ var passport = require('passport'),
     BasicStrategy = require('passport-http').BasicStrategy,
     ClientPasswordStrategy = require('passport-oauth2-client-password').Strategy,
     BearerStrategy = require('passport-http-bearer').Strategy,
-    debug = require('debug')('authserver:auth'),
+    debug = require('debug')('server:auth'),
     DatabaseError = require('./databaseerror'),
     user = require('./user'),
+    UserError = user.UserError,
     clientdb = require('./clientdb'),
     tokendb = require('./tokendb'),
     userdb = require('./userdb');
@@ -66,14 +67,25 @@ passport.use(new LocalStrategy(function (username, password, callback) {
 passport.use(new BasicStrategy(function (username, password, callback) {
     debug('BasicStrategy: ' + username + ' ' + password);
 
-    // username is actually client id here
-    // password is client secret
-    clientdb.get(username, function (error, client) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
-        if (error) return callback(error);
-        if (client.clientSecret != password) return callback(null, false);
-        return callback(null, client);
-    });
+    if (username.indexOf('cid-') === 0) {
+        debug('BasicStrategy: detected clientId instead of username:password.' + username);
+        // username is actually client id here
+        // password is client secret
+        clientdb.get(username, function (error, client) {
+            if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
+            if (error) return callback(error);
+            if (client.clientSecret != password) return callback(null, false);
+            return callback(null, client);
+        });
+    } else {
+        user.verify(username, password, function (error, result) {
+            if (error && error.reason === UserError.NOT_FOUND) return callback(null, false);
+            if (error && error.reason === UserError.WRONG_USER_OR_PASSWORD) return callback(null, false);
+            if (error) return callback(error);
+            if (!result) return callback(null, false);
+            callback(null, result);
+        });
+    }
 }));
 
 passport.use(new ClientPasswordStrategy(function (clientId, clientSecret, callback) {
@@ -108,7 +120,7 @@ passport.use(new BearerStrategy(function (accessToken, callback) {
 
             // scopes here can define what capabilities that token carries
             var info = { scope: '*' };
-            callback(null, userdb.removePrivates(user), info);
+            callback(null, user, info);
         });
     });
 }));
