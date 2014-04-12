@@ -2,17 +2,13 @@
 <head>
     <title> Accounts </title>
 
+    <link href="../css/index.css" rel="stylesheet" media="screen">
+
     <style>
 
-    body {
-        background-color: lightgray;
-    }
-
     iframe {
-        background-color: lightsteelblue;
-        border: 0;
-        width: 300px;
-        height: 300px;
+        width: 400px;
+        height: 600px;
     }
 
     </style>
@@ -23,8 +19,9 @@
 
 var frame, startBtn, tokenBtn, authCode, oauthResult, accessToken;
 var isReady = false;
-var accountsServer = 'https://localhost/auth';
-var redirectServer = 'https://localhost';
+var server = 'https://localhost';
+var clientId = 'cid-webadmin';
+var clientSecret = 'unused';
 
 function setAuthCode(code) {
     if (!isReady) return;
@@ -47,24 +44,24 @@ function init() {
     oauthResult = document.getElementById('oauthResult');
 
     startBtn.onclick = function () {
-        frame.src = accountsServer + '/api/v1/oauth/dialog/authorize?response_type=code&client_id=abc123&redirect_uri=' + redirectServer + '/oauth2/oauth_callback.html';
+        frame.src = server + '/api/v1/oauth/dialog/authorize?response_type=code&client_id=' + clientId + '&redirect_uri=' + server + '/oauth2/oauth_callback.html';
         frame.style.display = 'block';
     };
 
     // Rough example OAuth flow initiation for only client side bearer token (aka accessToken)
     // startBtn.onclick = function () {
-    //     frame.src = accountsServer + '/api/v1/oauth/dialog/authorize?response_type=token&client_id=abc123&redirect_uri=' + redirectServer + '/oauth2/oauth_callback.html';
+    //     frame.src = server + '/api/v1/oauth/dialog/authorize?response_type=token&client_id=' + clientId + '&redirect_uri=' + server + '/oauth2/oauth_callback.html';
     //     frame.style.display = 'block';
     // };
 
     tokenBtn.onclick = function () {
-        superagent.post(accountsServer + '/api/v1/oauth/token?response_type=token&client_id=abc123')
+        superagent.post(server + '/api/v1/oauth/token?response_type=token&client_id=' + clientId)
         .send({
             grant_type: 'authorization_code',
             code: authCode,
-            redirect_uri: redirectServer + '/oauth2/oauth_callback.html',
-            client_id: 'abc123',
-            client_secret: 'testClientSecret'
+            redirect_uri: server + '/oauth2/oauth_callback.html',
+            client_id: clientId,
+            client_secret: clientSecret
         })
         .end(function (error, result) {
             if (error) {
@@ -89,13 +86,12 @@ function init() {
 
 <body onload="init()">
 
-<hr/>
 OAuth based login: <button id="startButton">Go for it</button>
 <small>Development owner credentials: admin:test</small>
 
 <div id="oauthResult"></div>
 <button id="tokenButton" style="display: none"/>Exchange code for token</button>
-<iframe id="frame" style="display: none"></iframe>
+<iframe id="frame" style="display: none" src="about:blank"></iframe>
 
 </body>
 </html>

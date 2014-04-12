@@ -7,10 +7,11 @@
 var oauth2orize = require('oauth2orize'),
     passport = require('passport'),
     session = require('connect-ensure-login'),
-    authcodedb = require('./authcodedb'),
-    tokendb = require('./tokendb'),
-    DatabaseError = require('./databaseerror'),
-    clientdb = require('./clientdb'),
+    authcodedb = require('../authcodedb'),
+    tokendb = require('../tokendb'),
+    DatabaseError = require('../databaseerror'),
+    clientdb = require('../clientdb'),
+    debug = require('debug')('server:oauth2'),
     uuid = require('node-uuid');
 
 // create OAuth 2.0 server
@@ -30,13 +31,13 @@ var server = oauth2orize.createServer();
 // the client by ID from the database.
 
 server.serializeClient(function (client, callback) {
-    console.log('server serialize', client, client.id);
+    debug('server serialize ' + JSON.stringify(client));
 
     return callback(null, client.id);
 });
 
 server.deserializeClient(function (id, callback) {
-    console.log('server deserialize', id);
+    debug('server deserialize ' + id);
 
     clientdb.get(id, function (error, client) {
         if (error) { return callback(error); }
@@ -59,22 +60,22 @@ server.deserializeClient(function (id, callback) {
 // values, and will be exchanged for an access token.
 
 server.grant(oauth2orize.grant.code(function (client, redirectURI, user, ares, callback) {
-    console.log('grant code', arguments);
+    debug('grant code ' + JSON.stringify(client) + ' ' + redirectURI + ' ' + user + ' ' + ares);
 
     var code = uuid.v4();
 
-    authcodedb.add(code, client.id, redirectURI, user.id, function (error) {
+    authcodedb.add(code, client.id, redirectURI, user.username, function (error) {
         if (error) return callback(error);
         callback(null, code);
     });
 }));
 
 server.grant(oauth2orize.grant.token(function (client, user, ares, callback) {
-    console.log('grant token', arguments);
+    debug('grant token ' + JSON.stringify(client) + ' ' + user + ' ' + ares);
 
     var token = uuid.v4();
 
-    tokendb.add(token, user.id, client.clientId, function (error) {
+    tokendb.add(token, user.username, client.clientId, function (error) {
         if (error) return callback(error);
         callback(null, token);
     });
@@ -87,7 +88,7 @@ server.grant(oauth2orize.grant.token(function (client, user, ares, callback) {
 // code.
 
 server.exchange(oauth2orize.exchange.code(function (client, code, redirectURI, callback) {
-    console.log('oauth2. server.exchange', client, code, redirectURI);
+    debug('exchange ' + JSON.stringify(client) + ' ' + code + ' ' + redirectURI);
 
     authcodedb.get(code, function (error, authCode) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
@@ -98,10 +99,14 @@ server.exchange(oauth2orize.exchange.code(function (client, code, redirectURI, c
         authcodedb.del(code, function (error) {
             if(error) return callback(error);
 
-            var token = uuid.v4();
+            var token = tokendb.generateToken();
+            var expires = new Date(Date.now() + 60 * 60000).toUTCString(); // 1 hour
 
-            tokendb.add(token, authCode.userId, authCode.clientId, function (error) {
+            tokendb.add(token, authCode.userId, authCode.clientId, expires, function (error) {
                 if (error) return callback(error);
+
+                debug('new access token for client ' + client.id + ' token ' + token);
+
                 callback(null, token);
             });
         });
@@ -116,8 +121,8 @@ module.exports.loginForm = function (req, res) {
 
 // performs the login POST from the above form
 module.exports.login = passport.authenticate('local', {
-    successReturnToOrRedirect: '/auth/api/v1/session/account',
-    failureRedirect: '/auth/api/v1/session/login'
+    successReturnToOrRedirect: '/api/v1/session/account',
+    failureRedirect: '/api/v1/session/login'
 });
 
 // ends the current session
@@ -128,7 +133,7 @@ module.exports.logout = function (req, res) {
 
 // Temporary helper functions to see a login session
 module.exports.account = [
-    session.ensureLoggedIn('/auth/api/v1/session/login'),
+    session.ensureLoggedIn('/api/v1/session/login'),
     function(req, res) {
         res.render('account', { user: req.user });
     }
@@ -152,9 +157,9 @@ module.exports.account = [
 // first, and rendering the `dialog` view.
 
 module.exports.authorization = [
-    session.ensureLoggedIn('/auth/api/v1/session/login'),
+    session.ensureLoggedIn('/api/v1/session/login'),
     server.authorization(function (clientID, redirectURI, callback) {
-        console.log('server authorization validation for ', clientID, redirectURI);
+        debug('server authorization validation for ' + clientID + ' ' + redirectURI);
 
         clientdb.getByClientId(clientID, function (error, client) {
             // TODO actually check redirectURI
@@ -169,7 +174,7 @@ module.exports.authorization = [
 
 // this triggers the above grant middleware and handles the user's decision if he accepts the access
 module.exports.decision = [
-    session.ensureLoggedIn('/auth/api/v1/session/login'),
+    session.ensureLoggedIn('/api/v1/session/login'),
     server.decision()
 ];
 

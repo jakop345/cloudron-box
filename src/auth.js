@@ -22,13 +22,13 @@ var passport = require('passport'),
 passport.serializeUser(function (user, callback) {
     debug('serializeUser: ' + JSON.stringify(user));
 
-    callback(null, user.id);
+    callback(null, user.username);
 });
 
-passport.deserializeUser(function(id, callback) {
-    debug('deserializeUser: ' + id);
+passport.deserializeUser(function(username, callback) {
+    debug('deserializeUser: ' + username);
 
-    userdb.get(id, function (error, user) {
+    userdb.get(username, function (error, user) {
       callback(error, user);
     });
 });

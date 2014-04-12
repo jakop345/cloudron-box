@@ -8,8 +8,11 @@ var express = require('express'),
     passport = require('passport'),
     fs = require('fs'),
     mkdirp = require('mkdirp'),
+    DatabaseError = require('./databaseerror.js'),
     userdb = require('./userdb.js'),
     tokendb = require('./tokendb.js'),
+    clientdb = require('./clientdb.js'),
+    authcodedb = require('./authcodedb.js'),
     routes = require('./routes/index.js'),
     debug = require('debug')('server:server'),
     assert = require('assert'),
@@ -27,6 +30,9 @@ function Server(config) {
 
 // Success handler
 Server.prototype._successHandler = function (success, req, res, next) {
+    // for now when we hit here, we always send json back
+    res.setHeader('Content-Type', 'application/json');
+
     if (success instanceof HttpSuccess) {
         debug('Send response with status', success.statusCode, 'and body', success.body);
         res.send(success.statusCode, success.body);
@@ -137,6 +143,10 @@ Server.prototype._initialize = function (callback) {
         // Passport configuration
         require('./auth');
 
+        that.app.set('views', path.join(__dirname, '../oauth2views'));
+        that.app.set('view engine', 'ejs');
+        that.app.set('view options', { layout: true });
+
         if (!that.config.silent) {
             that.app.use(express.logger({ format: 'dev', immediate: false }));
         }
@@ -153,7 +163,6 @@ Server.prototype._initialize = function (callback) {
            .use(express.session({ secret: 'yellow is blue' }))
            .use(passport.initialize())
            .use(passport.session())
-           .use(middleware.contentType('application/json'))
 
            // FIXME
            // temporarily accept both
@@ -225,6 +234,17 @@ Server.prototype._initialize = function (callback) {
         that.app.get('/api/v1/volume/:volume/users', both, routes.volume.listUsers);
         that.app.post('/api/v1/volume/:volume/users', both, routes.volume.addUser);
         that.app.del('/api/v1/volume/:volume/users/:username', both, routes.volume.removeUser);
+
+        // form based login routes used by oauth2 frame
+        that.app.get('/api/v1/session/login', routes.oauth2.loginForm);
+        that.app.post('/api/v1/session/login', routes.oauth2.login);
+        that.app.get('/api/v1/session/logout', routes.oauth2.logout);
+        that.app.get('/api/v1/session/account', routes.oauth2.account); // TODO this is only temporary
+
+        // oauth2 routes
+        that.app.get('/api/v1/oauth/dialog/authorize', routes.oauth2.authorization);
+        that.app.post('/api/v1/oauth/dialog/authorize/decision', routes.oauth2.decision);
+        that.app.post('/api/v1/oauth/token', routes.oauth2.token);
     });
 
     this.app.set('port', that.config.port);
@@ -247,11 +267,24 @@ Server.prototype._initialize = function (callback) {
         tokendb.init(that.config.configRoot, function (error) {
             if (error) callback (new Error('Error initializing token database'));
 
-            routes.volume.initialize(that.config);
-            routes.sync.initialize(that.config);
-            routes.user.initialize(that.config);
+            clientdb.init(that.config.configRoot, function (error) {
+                if (error) callback (new Error('Error initializing client database'));
 
-            callback(null);
+                // TODO this should happen somewhere else..no clue where - Johannes
+                clientdb.add('cid-webadmin', 'cid-webadmin', 'unused', 'WebAdmin', 'https://localhost/', function (error) {
+                    if (error && error.reason !== DatabaseError.ALREADY_EXISTS) return callback(new Error('Error initializing client database with webadmin'));
+
+                    authcodedb.init(that.config.configRoot, function (error) {
+                        if (error) callback (new Error('Error initializing auth code database'));
+
+                        routes.volume.initialize(that.config);
+                        routes.sync.initialize(that.config);
+                        routes.user.initialize(that.config);
+
+                        callback(null);
+                    });
+                });
+            });
         });
     });
 };
