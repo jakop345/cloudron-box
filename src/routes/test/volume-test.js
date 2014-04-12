@@ -27,6 +27,7 @@ var SERVER_URL = 'http://localhost:' + CONFIG.port;
 
 var USERNAME = 'admin', PASSWORD = 'admin', EMAIL ='silly@me.com';
 var TESTVOLUME = 'testvolume';
+var token = null;
 
 var server;
 function setup(done) {
@@ -40,7 +41,19 @@ function setup(done) {
                  .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
-                done();
+
+                request.post(SERVER_URL + '/api/v1/token')
+                .auth(USERNAME, PASSWORD)
+                .end(function (error, result) {
+                    expect(error).to.be(null);
+                    expect(result.statusCode).to.equal(200);
+                    expect(result.body.token).to.be.a('string');
+
+                    // safe token for further calls
+                    token = result.body.token;
+
+                    done();
+                });
             });
         });
     });
@@ -87,7 +100,7 @@ describe('Server Volume API', function () {
 
     it('create fails due to missing password', function (done) {
         request.post(SERVER_URL + '/api/v1/volume/create')
-               .auth(USERNAME, PASSWORD)
+               .query({ access_token: token })
                .send({ name: TESTVOLUME })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
@@ -97,7 +110,7 @@ describe('Server Volume API', function () {
 
     it('create fails due to wrong password', function (done) {
         request.post(SERVER_URL + '/api/v1/volume/create')
-               .auth(USERNAME, PASSWORD)
+               .query({ access_token: token })
                .send({ password: PASSWORD+PASSWORD, name: TESTVOLUME })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(403);
@@ -108,7 +121,7 @@ describe('Server Volume API', function () {
     it('create', function (done) {
         this.timeout(10000); // on the Mac, creating volumes takes a lot of time on low battery
         request.post(SERVER_URL + '/api/v1/volume/create')
-               .auth(USERNAME, PASSWORD)
+               .query({ access_token: token })
                .send({ password: PASSWORD, name: TESTVOLUME })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(201);
@@ -122,7 +135,7 @@ describe('Server Volume API', function () {
 
     it('list', function (done) {
         request.get(SERVER_URL + '/api/v1/volume/list')
-               .auth(USERNAME, PASSWORD)
+               .query({ access_token: token })
                .end(function (err, res) {
             expect(res.body.volumes).to.be.an(Object);
             expect(res.body.volumes.length).to.equal(1);
@@ -140,7 +153,7 @@ describe('Server Volume API', function () {
         fs.writeFileSync(path.join(CONFIG.mountRoot, volume.id + '/README.md'), 'test data');
 
         request.get(SERVER_URL + '/api/v1/volume/' + volume.id + '/list')
-               .auth(USERNAME, PASSWORD)
+               .query({ access_token: token })
                .end(function (err, res) {
             var foundReadme = false;
             res.body.entries.forEach(function (entry) {
@@ -160,7 +173,7 @@ describe('Server Volume API', function () {
 
     it('unmount volume', function (done) {
         request.post(SERVER_URL + '/api/v1/volume/' + volume.id + '/unmount')
-               .auth(USERNAME, PASSWORD)
+               .query({ access_token: token })
                .send({ password: PASSWORD })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
@@ -170,7 +183,7 @@ describe('Server Volume API', function () {
 
     it('volume should not be mounted', function (done) {
         request.get(SERVER_URL + '/api/v1/volume/' + volume.id + '/ismounted')
-               .auth(USERNAME, PASSWORD)
+               .query({ access_token: token })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
             expect(res.body.mounted).to.not.be.ok();
@@ -180,7 +193,7 @@ describe('Server Volume API', function () {
 
     it('mount volume should fail due to wrong password', function (done) {
         request.post(SERVER_URL + '/api/v1/volume/' + volume.id + '/mount')
-               .auth(USERNAME, PASSWORD)
+               .query({ access_token: token })
                .send({ password: 'some random password' })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(403);
@@ -190,7 +203,7 @@ describe('Server Volume API', function () {
 
     it('mount volume', function (done) {
         request.post(SERVER_URL + '/api/v1/volume/' + volume.id + '/mount')
-               .auth(USERNAME, PASSWORD)
+               .query({ access_token: token })
                .send({ password: PASSWORD })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
@@ -200,7 +213,7 @@ describe('Server Volume API', function () {
 
     it('volume should be mounted', function (done) {
         request.get(SERVER_URL + '/api/v1/volume/' + volume.id + '/ismounted')
-               .auth(USERNAME, PASSWORD)
+               .query({ access_token: token })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
             expect(res.body.mounted).to.be.ok();
@@ -210,7 +223,7 @@ describe('Server Volume API', function () {
 
     it('destroy fails due to missing password', function(done) {
         request.post(SERVER_URL + '/api/v1/volume/' + volume.id + '/delete')
-               .auth(USERNAME, PASSWORD)
+               .query({ access_token: token })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             done(err);
@@ -219,7 +232,7 @@ describe('Server Volume API', function () {
 
     it('destroy fails due to wrong password', function(done) {
         request.post(SERVER_URL + '/api/v1/volume/' + volume.id + '/delete')
-               .auth(USERNAME, PASSWORD)
+               .query({ access_token: token })
                .send({ password: PASSWORD + PASSWORD })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(403);
@@ -229,7 +242,7 @@ describe('Server Volume API', function () {
 
     it('destroy', function(done) {
         request.post(SERVER_URL + '/api/v1/volume/' + volume.id + '/delete')
-               .auth(USERNAME, PASSWORD)
+               .query({ access_token: token })
                .send({ password: PASSWORD })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
@@ -239,7 +252,7 @@ describe('Server Volume API', function () {
 
     it('bad volume', function (done) {
         request.get(SERVER_URL + '/api/v1/file/whatever/volume')
-               .auth(USERNAME, PASSWORD)
+               .query({ access_token: token })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(404);
             done(err);
@@ -256,8 +269,9 @@ describe('Server Volume API', function () {
 
         before(function (done) {
             this.timeout(10000); // on the Mac, creating volumes takes a lot of time on low battery
+
             request.post(SERVER_URL + '/api/v1/volume/create')
-            .auth(USERNAME, PASSWORD)
+            .query({ access_token: token })
             .send({ password: PASSWORD, name: TEST_VOLUME })
             .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -267,7 +281,7 @@ describe('Server Volume API', function () {
                 volume = result.body;
 
                 request.post(SERVER_URL + '/api/v1/user/create')
-                .auth(USERNAME, PASSWORD)
+                .query({ access_token: token })
                 .send({ username: USERNAME_2, password: PASSWORD_2, email: EMAIL_2 })
                 .end(function (error, result) {
                     expect(result.statusCode).to.equal(201);
@@ -279,7 +293,7 @@ describe('Server Volume API', function () {
 
         it('can list volume users', function (done) {
             request.get(SERVER_URL + '/api/v1/volume/' + volume.id + '/users')
-            .auth(USERNAME, PASSWORD)
+            .query({ access_token: token })
             .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(200);
@@ -292,7 +306,7 @@ describe('Server Volume API', function () {
 
         it('cannot add user due to missing owner password', function (done) {
             request.post(SERVER_URL + '/api/v1/volume/' + volume.id + '/users')
-            .auth(USERNAME, PASSWORD)
+            .query({ access_token: token })
             .send({ username: USERNAME_2 })
             .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -304,7 +318,7 @@ describe('Server Volume API', function () {
 
         it('cannot add user due to wrong owner password', function (done) {
             request.post(SERVER_URL + '/api/v1/volume/' + volume.id + '/users')
-            .auth(USERNAME, PASSWORD)
+            .query({ access_token: token })
             .send({ username: USERNAME_2, password: PASSWORD + PASSWORD })
             .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -316,7 +330,7 @@ describe('Server Volume API', function () {
 
         it('cannot add user due to unknown user', function (done) {
             request.post(SERVER_URL + '/api/v1/volume/' + volume.id + '/users')
-            .auth(USERNAME, PASSWORD)
+            .query({ access_token: token })
             .send({ username: USERNAME_2 + USERNAME_2, password: PASSWORD + PASSWORD })
             .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -328,7 +342,7 @@ describe('Server Volume API', function () {
 
         it('adding second user succeeds', function (done) {
             request.post(SERVER_URL + '/api/v1/volume/' + volume.id + '/users')
-            .auth(USERNAME, PASSWORD)
+            .query({ access_token: token })
             .send({ username: USERNAME_2, password: PASSWORD })
             .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -340,7 +354,7 @@ describe('Server Volume API', function () {
 
         it('can list volume updated users', function (done) {
             request.get(SERVER_URL + '/api/v1/volume/' + volume.id + '/users')
-            .auth(USERNAME, PASSWORD)
+            .query({ access_token: token })
             .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(200);
@@ -401,7 +415,7 @@ describe('Server Volume API', function () {
 
         it('removing second user fails due to user does not have access anymore', function (done) {
             request.del(SERVER_URL + '/api/v1/volume/' + volume.id + '/users/' + USERNAME_2)
-            .auth(USERNAME, PASSWORD)
+            .query({ access_token: token })
             .set({ password: PASSWORD })
             .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -413,7 +427,7 @@ describe('Server Volume API', function () {
 
         it('removing last user for this volume succeeds', function (done) {
             request.del(SERVER_URL + '/api/v1/volume/' + volume.id + '/users/' + USERNAME)
-            .auth(USERNAME, PASSWORD)
+            .query({ access_token: token })
             .set({ password: PASSWORD })
             .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -425,7 +439,7 @@ describe('Server Volume API', function () {
 
         it('all users removed, volume should be gone', function (done) {
             request.get(SERVER_URL + '/api/v1/volume/list')
-               .auth(USERNAME, PASSWORD)
+               .query({ access_token: token })
                .end(function (err, res) {
                 expect(res.body.volumes).to.be.an(Object);
                 expect(res.body.volumes.length).to.equal(0);

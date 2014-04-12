@@ -48,6 +48,9 @@ function cleanup(done) {
 describe('Server User API', function () {
     this.timeout(5000);
 
+    var token = null;
+    var token_2 = null;
+
     before(setup);
     after(cleanup);
 
@@ -95,18 +98,6 @@ describe('Server User API', function () {
         });
     });
 
-    it('admin userInfo', function (done) {
-        request.get(SERVER_URL + '/api/v1/user/info')
-               .auth(USERNAME, PASSWORD)
-               .end(function (err, res) {
-            expect(res.statusCode).to.equal(200);
-            expect(res.body.username).to.equal(USERNAME);
-            expect(res.body.email).to.equal(EMAIL);
-            expect(res.body.admin).to.be(true);
-            done(err);
-        });
-    });
-
     it('create token fails due to wrong credentials', function (done) {
         request.post(SERVER_URL + '/api/v1/token')
                .auth(USERNAME, 'wrong' + PASSWORD)
@@ -147,7 +138,6 @@ describe('Server User API', function () {
         });
     });
 
-    var token;
     it('create token', function (done) {
         request.post(SERVER_URL + '/api/v1/token')
                .auth(USERNAME, PASSWORD)
@@ -176,6 +166,15 @@ describe('Server User API', function () {
             expect(res.body.username).to.equal(USERNAME);
             expect(res.body.email).to.equal(EMAIL);
             expect(res.body.admin).to.be(true);
+            done(err);
+        });
+    });
+
+    it('cannot get userInfo only with basic auth', function (done) {
+        request.get(SERVER_URL + '/api/v1/user/info')
+               .auth(USERNAME, PASSWORD)
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(401);
             done(err);
         });
     });
@@ -228,19 +227,6 @@ describe('Server User API', function () {
         });
     });
 
-    it('can get userInfo with valid password but invalid token', function (done) {
-        request.get(SERVER_URL + '/api/v1/user/info')
-               .auth(USERNAME, PASSWORD)
-               .query({ auth_token: 'somerandomstuff' })
-               .end(function (err, res) {
-            expect(res.statusCode).to.equal(200);
-            expect(res.body.username).to.equal(USERNAME);
-            expect(res.body.email).to.equal(EMAIL);
-            expect(res.body.admin).to.be(true);
-            done(err);
-        });
-    });
-
     it('create second admin should fail', function (done) {
         request.post(SERVER_URL + '/api/v1/createadmin')
                .send({ username: USERNAME_2, password: PASSWORD, email: EMAIL })
@@ -252,13 +238,13 @@ describe('Server User API', function () {
 
     it('create user missing arguments should fail', function (done) {
         request.post(SERVER_URL + '/api/v1/user/create')
-               .auth(USERNAME, PASSWORD)
+               .query({ auth_token: token })
                .send({ username: USERNAME_2, email: EMAIL })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
 
             request.post(SERVER_URL + '/api/v1/user/create')
-                   .auth(USERNAME, PASSWORD)
+                   .query({ auth_token: token })
                    .send({ username: USERNAME_2, password: PASSWORD })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(400);
@@ -269,13 +255,13 @@ describe('Server User API', function () {
 
     it('create second and third user as admin', function (done) {
         request.post(SERVER_URL + '/api/v1/user/create')
-               .auth(USERNAME, PASSWORD)
+               .query({ auth_token: token })
                .send({ username: USERNAME_2, password: PASSWORD_2, email: EMAIL_2 })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(201);
 
             request.post(SERVER_URL + '/api/v1/user/create')
-                   .auth(USERNAME, PASSWORD)
+                   .query({ auth_token: token })
                    .send({ username: USERNAME_3, password: PASSWORD_3, email: EMAIL_3 })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(201);
@@ -286,7 +272,7 @@ describe('Server User API', function () {
 
     it('create user with same username should fail', function (done) {
         request.post(SERVER_URL + '/api/v1/user/create')
-               .auth(USERNAME, PASSWORD)
+               .query({ auth_token: token })
                .send({ username: USERNAME_2, password: PASSWORD, email: EMAIL })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(409);
@@ -295,34 +281,48 @@ describe('Server User API', function () {
     });
 
     it('second user userInfo', function (done) {
-        request.get(SERVER_URL + '/api/v1/user/info')
-               .auth(USERNAME_2, PASSWORD_2)
-               .end(function (err, res) {
-            expect(res.statusCode).to.equal(200);
-            expect(res.body.username).to.equal(USERNAME_2);
-            expect(res.body.email).to.equal(EMAIL_2);
-            expect(res.body.admin).to.be(false);
-            done(err);
+        request.post(SERVER_URL + '/api/v1/token')
+        .auth(USERNAME_2, PASSWORD_2)
+        .end(function (error, result) {
+            expect(error).to.be(null);
+            expect(result.body.token).to.be.a('string');
+
+            // safe token for further calls
+            token_2 = result.body.token;
+
+            request.get(SERVER_URL + '/api/v1/user/info')
+            .query({ access_token: token_2 })
+            .end(function (error, result) {
+                expect(error).to.be(null);
+                expect(result.statusCode).to.equal(200);
+                expect(result.body.username).to.equal(USERNAME_2);
+                expect(result.body.email).to.equal(EMAIL_2);
+                expect(result.body.admin).to.be(false);
+
+                done();
+            });
         });
     });
 
     it('list users', function (done) {
         request.get(SERVER_URL + '/api/v1/user/list')
-               .auth(USERNAME_2, PASSWORD_2)
-               .end(function (er, res) {
+        .query({ access_token: token_2 })
+        .end(function (error, res) {
+            expect(error).to.be(null);
             expect(res.statusCode).to.equal(200);
             expect(res.body.users).to.be.an('array');
             expect(res.body.users.length).to.equal(3);
             expect(res.body.users[0]).to.be.an('object');
+
             done();
         });
     });
 
     it('remove admin user by normal user should fail', function (done) {
         request.post(SERVER_URL + '/api/v1/user/remove')
-               .auth(USERNAME_2, PASSWORD_2)
-               .send({ username: USERNAME, password: PASSWORD_2 })
-               .end(function (err, res) {
+        .query({ access_token: token_2 })
+        .send({ username: USERNAME, password: PASSWORD_2 })
+        .end(function (err, res) {
             expect(res.statusCode).to.equal(403);
             done(err);
         });
@@ -330,9 +330,9 @@ describe('Server User API', function () {
 
     it('user removes himself is not allowed', function (done) {
         request.post(SERVER_URL + '/api/v1/user/remove')
-               .auth(USERNAME_2, PASSWORD_2)
-               .send({ username: USERNAME_2, password: PASSWORD_2 })
-               .end(function (err, res) {
+        .query({ access_token: token_2 })
+        .send({ username: USERNAME_2, password: PASSWORD_2 })
+        .end(function (err, res) {
             expect(res.statusCode).to.equal(403);
             done(err);
         });
@@ -340,9 +340,9 @@ describe('Server User API', function () {
 
     it('admin cannot remove normal user without giving a password', function (done) {
         request.post(SERVER_URL + '/api/v1/user/remove')
-               .auth(USERNAME, PASSWORD)
-               .send({ username: USERNAME_3 })
-               .end(function (err, res) {
+        .query({ access_token: token })
+        .send({ username: USERNAME_3 })
+        .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             done(err);
         });
@@ -350,9 +350,9 @@ describe('Server User API', function () {
 
     it('admin cannot remove normal user with giving wrong password', function (done) {
         request.post(SERVER_URL + '/api/v1/user/remove')
-               .auth(USERNAME, PASSWORD)
-               .send({ username: USERNAME_3, password: PASSWORD_3 })
-               .end(function (err, res) {
+        .query({ access_token: token })
+        .send({ username: USERNAME_3, password: PASSWORD_3 })
+        .end(function (err, res) {
             expect(res.statusCode).to.equal(401);
             done(err);
         });
@@ -360,9 +360,9 @@ describe('Server User API', function () {
 
     it('admin removes normal user', function (done) {
         request.post(SERVER_URL + '/api/v1/user/remove')
-               .auth(USERNAME, PASSWORD)
-               .send({ username: USERNAME_3, password: PASSWORD })
-               .end(function (err, res) {
+        .query({ access_token: token })
+        .send({ username: USERNAME_3, password: PASSWORD })
+        .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
             done(err);
         });
@@ -397,23 +397,26 @@ describe('Server User API', function () {
 
     it('can login again', function (done) {
         request.post(SERVER_URL + '/api/v1/token')
-               .auth(USERNAME, PASSWORD)
-               .end(function (err, res) {
+        .auth(USERNAME, PASSWORD)
+        .end(function (error, res) {
+            expect(error).to.be(null);
             expect(res.statusCode).to.equal(200);
             expect(res.body.token).to.be.a('string');
             token = res.body.token;
+
             expect(res.body.expires).to.be.a('string');
             expect(res.body.username).to.not.be.ok();
             expect(res.body.email).to.not.be.ok();
-            done(err);
+
+            done();
         });
     });
 
     it('admin removes himself should not be allowed', function (done) {
         request.post(SERVER_URL + '/api/v1/user/remove')
-               .auth(USERNAME, PASSWORD)
-               .send({ username: USERNAME, password: PASSWORD })
-               .end(function (err, res) {
+        .query({ access_token: token })
+        .send({ username: USERNAME, password: PASSWORD })
+        .end(function (err, res) {
             expect(res.statusCode).to.equal(403);
             done(err);
         });
@@ -421,9 +424,9 @@ describe('Server User API', function () {
 
     it('change password fails due to missing current password', function (done) {
         request.post(SERVER_URL + '/api/v1/user/password')
-               .auth(USERNAME, PASSWORD)
-               .send({ newPassword: 'some wrong password' })
-               .end(function (err, res) {
+        .query({ access_token: token })
+        .send({ newPassword: 'some wrong password' })
+        .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             done(err);
         });
@@ -431,9 +434,9 @@ describe('Server User API', function () {
 
     it('change password fails due to missing new password', function (done) {
         request.post(SERVER_URL + '/api/v1/user/password')
-               .auth(USERNAME, PASSWORD)
-               .send({ password: PASSWORD })
-               .end(function (err, res) {
+        .query({ access_token: token })
+        .send({ password: PASSWORD })
+        .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             done(err);
         });
@@ -441,9 +444,9 @@ describe('Server User API', function () {
 
     it('change password fails due to wrong password', function (done) {
         request.post(SERVER_URL + '/api/v1/user/password')
-               .auth(USERNAME, PASSWORD)
-               .send({ password: 'some wrong password', newPassword: 'new_password' })
-               .end(function (err, res) {
+        .query({ access_token: token })
+        .send({ password: 'some wrong password', newPassword: 'new_password' })
+        .end(function (err, res) {
             expect(res.statusCode).to.equal(403);
             done(err);
         });
@@ -451,9 +454,9 @@ describe('Server User API', function () {
 
       it('change password succeeds', function (done) {
         request.post(SERVER_URL + '/api/v1/user/password')
-               .auth(USERNAME, PASSWORD)
-               .send({ password: PASSWORD, newPassword: 'new_password' })
-               .end(function (err, res) {
+        .query({ access_token: token })
+        .send({ password: PASSWORD, newPassword: 'new_password' })
+        .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
             done(err);
         });

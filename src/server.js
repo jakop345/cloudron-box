@@ -188,11 +188,11 @@ Server.prototype._initialize = function (callback) {
         that.app.get('/api/v1/user/token', basic, routes.user.createToken);
         that.app.get('/api/v1/logout', bearer, routes.user.logout);             // TODO remove that route
         that.app.get('/api/v1/user/logout', bearer, routes.user.logout);
-        that.app.post('/api/v1/user/create', both, that._requireAdmin.bind(that), routes.user.create);
-        that.app.post('/api/v1/user/remove', both, that._requireAdmin.bind(that), routes.user.remove);
-        that.app.post('/api/v1/user/password', both, that._requirePassword.bind(that), routes.user.changePassword);
-        that.app.get('/api/v1/user/info', both, routes.user.info);
-        that.app.get('/api/v1/user/list', both, routes.user.list);
+        that.app.post('/api/v1/user/create', bearer, that._requireAdmin.bind(that), routes.user.create);
+        that.app.post('/api/v1/user/remove', bearer, that._requireAdmin.bind(that), routes.user.remove);
+        that.app.post('/api/v1/user/password', bearer, that._requirePassword.bind(that), routes.user.changePassword);
+        that.app.get('/api/v1/user/info', bearer, routes.user.info);
+        that.app.get('/api/v1/user/list', bearer, routes.user.list);
 
         that.app.param('syncerVolume', both, routes.sync.attachRepo);
 
