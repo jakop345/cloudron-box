@@ -1,0 +1,23 @@
+<% include header %>
+
+<script>
+
+if (!window.opener) {
+  document.write('No window opener.');
+}
+
+if (!window.opener.yellowtent) {
+  document.write('No yellowtent client present in window opener.');
+}
+
+if (!window.opener.yellowtent.endOAuth) {
+  document.write('No OAuth flow active in window opener.');
+}
+
+var code = window.location.search.slice('?code='.length);
+window.opener.yellowtent.endOAuth({ authCode: code });
+window.close();
+
+</script>
+
+<% include footer %>

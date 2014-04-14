@@ -14,10 +14,11 @@
     </style>
 
     <script src="javascripts/superagent.js"></script>
+    <script src="javascripts/yellowtent.js"></script>
 
 <script>
 
-var frame, startBtn, tokenBtn, authCode, oauthResult, accessToken;
+var tokenBtn, authCode, oauthResult, accessToken;
 var isReady = false;
 var server = 'https://localhost';
 var clientId = 'cid-webadmin';
@@ -38,21 +39,8 @@ function setAuthCode(code) {
 }
 
 function init() {
-    startBtn = document.getElementById('startButton');
     tokenBtn = document.getElementById('tokenButton');
-    frame = document.getElementById('frame');
     oauthResult = document.getElementById('oauthResult');
-
-    startBtn.onclick = function () {
-        frame.src = server + '/api/v1/oauth/dialog/authorize?response_type=code&client_id=' + clientId + '&redirect_uri=' + server + '/oauth2/oauth_callback.html';
-        frame.style.display = 'block';
-    };
-
-    // Rough example OAuth flow initiation for only client side bearer token (aka accessToken)
-    // startBtn.onclick = function () {
-    //     frame.src = server + '/api/v1/oauth/dialog/authorize?response_type=token&client_id=' + clientId + '&redirect_uri=' + server + '/oauth2/oauth_callback.html';
-    //     frame.style.display = 'block';
-    // };
 
     tokenBtn.onclick = function () {
         superagent.post(server + '/api/v1/oauth/token?response_type=token&client_id=' + clientId)
@@ -86,12 +74,10 @@ function init() {
 
 <body onload="init()">
 
-OAuth based login: <button id="startButton">Go for it</button>
-<small>Development owner credentials: admin:test</small>
+OAuth based login: <div class="yellowtent-signin" data-callback="setAuthCode" data-clientid="cid-webadmin" data-requestscopes="*"></div>
 
 <div id="oauthResult"></div>
 <button id="tokenButton" style="display: none"/>Exchange code for token</button>
-<iframe id="frame" style="display: none" src="about:blank"></iframe>
 
 </body>
 </html>

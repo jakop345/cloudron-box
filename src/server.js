@@ -239,6 +239,7 @@ Server.prototype._initialize = function (callback) {
         that.app.get('/api/v1/session/login', routes.oauth2.loginForm);
         that.app.post('/api/v1/session/login', routes.oauth2.login);
         that.app.get('/api/v1/session/logout', routes.oauth2.logout);
+        that.app.get('/api/v1/session/callback', routes.oauth2.callback);
         that.app.get('/api/v1/session/account', routes.oauth2.account); // TODO this is only temporary
 
         // oauth2 routes
