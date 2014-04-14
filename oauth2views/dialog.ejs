@@ -1,11 +1,37 @@
-<p>Hi <%= user.username %>!</p>
-<p><b><%= client.name %></b> is requesting access to your account.</p>
-<p>Do you approve?</p>
+<% include header %>
 
 <form action="/api/v1/oauth/dialog/authorize/decision" method="post">
   <input name="transaction_id" type="hidden" value="<%= transactionID %>">
-  <div>
-  <input type="submit" value="Allow" id="allow">
-  <input type="submit" value="Deny" name="cancel" id="deny">
+
+  <div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-6">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-sm-12">
+            Hi <%= user.username %>!
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-12">
+            <b><%= client.name %></b> is requesting access to your account.
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-12">
+            Do you approve?
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-12">
+            <input class="btn btn-red btn-block" type="submit" value="Deny" name="cancel" id="deny"/>
+            <input class="btn btn-green btn-block" type="submit" value="Allow"/>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3"></div>
   </div>
 </form>
+
+<% include footer %>

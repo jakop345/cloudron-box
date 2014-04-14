@@ -144,8 +144,8 @@ Server.prototype._initialize = function (callback) {
         require('./auth');
 
         that.app.set('views', path.join(__dirname, '../oauth2views'));
+        that.app.set('view options', { layout: true, debug: true });
         that.app.set('view engine', 'ejs');
-        that.app.set('view options', { layout: true });
 
         if (!that.config.silent) {
             that.app.use(express.logger({ format: 'dev', immediate: false }));
