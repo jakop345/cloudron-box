@@ -190,3 +190,7 @@ module.exports.token = [
     server.token(),
     server.errorHandler()
 ];
+
+module.exports.library = function (req, res, next) {
+    res.render('yellowtent', { domain: 'localhost', protocol: 'https' });
+};

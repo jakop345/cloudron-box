@@ -6,7 +6,7 @@ if (!window.yellowtent) {
 }
 
 var yellowtent = window.yellowtent;
-var server = 'https://localhost';
+var server = '<%= protocol %>://<%= domain %>';
 
 // handle the oauth flow
 yellowtent.oauth = {};
