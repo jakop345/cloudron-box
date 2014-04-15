@@ -13,7 +13,5 @@ echo
 # fi
 
 cd nginx
-sudo nginx -c yellowtent.conf -p $PWD &
+sudo nginx -c yellowtent.conf -p $PWD
 cd ..
-./app.js
-
