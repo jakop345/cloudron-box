@@ -1,5 +1,15 @@
 <% include header %>
 
+<script>
+
+window.addEventListener("message", function (event) {
+  console.log('---', event);
+  alert('foo');
+  alert(JSON.stringify(event));
+}, false);
+
+</script>
+
 <form action="/api/v1/session/login" method="post">
   <div class="row">
     <div class="col-md-3"></div>

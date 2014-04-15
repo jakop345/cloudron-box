@@ -131,9 +131,13 @@ module.exports.logout = function (req, res) {
     res.redirect('/');
 };
 
-module.exports.callback = function (req, res) {
-    res.render('callback');
-};
+module.exports.callback = [
+    session.ensureLoggedIn('/api/v1/session/login'),
+    function (req, res) {
+        debug('callback');
+        res.render('callback', { callbackServer: req.query.redirectURI });
+    }
+];
 
 // Temporary helper functions to see a login session
 module.exports.account = [
@@ -168,7 +172,7 @@ module.exports.authorization = [
         clientdb.getByClientId(clientID, function (error, client) {
             // TODO actually check redirectURI
             if (error) return callback(error);
-            callback(null, client, '/api/v1/session/callback');
+            callback(null, client, '/api/v1/session/callback?redirectURI=' + client.redirectURI);
             // callback(null, client, redirectURI);
         });
     }),

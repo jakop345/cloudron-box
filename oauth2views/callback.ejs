@@ -3,20 +3,30 @@
 <script>
 
 if (!window.opener) {
-  document.write('No window opener.');
+    document.write('No window opener.');
 }
 
-if (!window.opener.yellowtent) {
-  document.write('No yellowtent client present in window opener.');
-}
+var args = window.location.search.slice(1).split('&');
+var code = null;
+var redirectURI = null;
 
-if (!window.opener.yellowtent.endOAuth) {
-  document.write('No OAuth flow active in window opener.');
-}
+args.forEach(function (arg) {
+    'use strict';
 
-var code = window.location.search.slice('?code='.length);
-window.opener.yellowtent.endOAuth({ authCode: code });
-window.close();
+    var tmp = arg.split('=');
+    if (tmp[0] === 'redirectURI') {
+        redirectURI = window.decodeURIComponent(tmp[1]);
+    } else if (tmp[0] === 'code') {
+        code = window.decodeURIComponent(tmp[1]);
+    }
+});
+
+if (code && redirectURI) {
+    window.opener.postMessage(JSON.stringify({ authCode: code}), redirectURI);
+    window.close();
+} else {
+    document.write('Missing query arguments.');
+}
 
 </script>
 

@@ -22,7 +22,7 @@ function startOAuth(event) {
     yellowtent.oauth.clientId = clientId;
     yellowtent.oauth.callback = callback;
 
-    console.log('Staring OAuth for client ' + clientId + ' and callback ' + callback);
+    console.debug('Staring OAuth for client ' + clientId + ' and callback ' + callback);
 
     var width = 400;
     var height = 600;
@@ -38,7 +38,7 @@ function endOAuth(result) {
         return;
     }
 
-    if (!result.authCode) {
+    if (!result || !result.authCode) {
         console.error('OAuth result does not contain an authCode.');
         return;
     }
@@ -48,7 +48,7 @@ function endOAuth(result) {
 }
 
 window.addEventListener('load', function () {
-    console.log('Yellowtent init');
+    console.debug('Yellowtent init');
 
     var signIns = window.document.getElementsByClassName('yellowtent-signin');
     for (var i = 0; i < signIns.length; ++i) {
@@ -58,6 +58,26 @@ window.addEventListener('load', function () {
         button.onclick = startOAuth;
     }
 
+}, false );
+
+window.addEventListener('message', function (event) {
+    console.debug('Yellowtent message received.', event.data);
+
+    if (event.origin !== server) {
+        console.log('Ignore message from unknown source.');
+        return;
+    }
+
+    var result = null;
+
+    try {
+        result = JSON.parse(event.data);
+    } catch (e) {
+        console.error('Unable to parse message payload.', e);
+        return;
+    }
+
+    endOAuth(result);
 }, false );
 
 })();

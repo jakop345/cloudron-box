@@ -273,17 +273,19 @@ Server.prototype._initialize = function (callback) {
                 if (error) callback (new Error('Error initializing client database'));
 
                 // TODO this should happen somewhere else..no clue where - Johannes
-                clientdb.add('cid-webadmin', 'cid-webadmin', 'unused', 'WebAdmin', 'https://localhost/', function (error) {
-                    if (error && error.reason !== DatabaseError.ALREADY_EXISTS) return callback(new Error('Error initializing client database with webadmin'));
+                clientdb.del('cid-webadmin', function () {
+                    clientdb.add('cid-webadmin', 'cid-webadmin', 'unused', 'WebAdmin', 'https://localhost', function (error) {
+                        if (error && error.reason !== DatabaseError.ALREADY_EXISTS) return callback(new Error('Error initializing client database with webadmin'));
 
-                    authcodedb.init(that.config.configRoot, function (error) {
-                        if (error) callback (new Error('Error initializing auth code database'));
+                        authcodedb.init(that.config.configRoot, function (error) {
+                            if (error) callback (new Error('Error initializing auth code database'));
 
-                        routes.volume.initialize(that.config);
-                        routes.sync.initialize(that.config);
-                        routes.user.initialize(that.config);
+                            routes.volume.initialize(that.config);
+                            routes.sync.initialize(that.config);
+                            routes.user.initialize(that.config);
 
-                        callback(null);
+                            callback(null);
+                        });
                     });
                 });
             });
