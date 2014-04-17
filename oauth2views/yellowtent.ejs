@@ -11,24 +11,25 @@ var server = '<%= protocol %>://<%= domain %>';
 // handle the oauth flow
 yellowtent.oauth = {};
 yellowtent.endOAuth = endOAuth;
+yellowtent.setupButton = setupButton;
 
-function startOAuth(event) {
-    var button = event.target.parentElement;
+function startOAuth(button, resultCallback) {
     var clientId = button.getAttribute('data-clientid');
     var callback = button.getAttribute('data-callback');
 
     yellowtent.oauth = {};
     yellowtent.oauth.button = button;
     yellowtent.oauth.clientId = clientId;
-    yellowtent.oauth.callback = callback;
+    yellowtent.oauth.callback = resultCallback || window[callback];
+    yellowtent.oauth.redirectURI = button.getAttribute('data-redirect-uri') || '';
 
-    console.debug('Staring OAuth for client ' + clientId + ' and callback ' + callback);
+    console.log('Staring OAuth for client ' + clientId + ' and callback ' + callback + ' with redirectURI ' + yellowtent.oauth.redirectURI);
 
     var width = 400;
     var height = 600;
     var left = screen.width / 2.0 - width / 2.0;
     var top = screen.height / 2.0 - height / 2.0;
-    var oauthURI = server + '/api/v1/oauth/dialog/authorize?response_type=code&client_id=' + clientId + '&redirect_uri=' + server + '/oauth2/oauth_callback.html';
+    var oauthURI = server + '/api/v1/oauth/dialog/authorize?response_type=code&client_id=' + clientId + '&redirect_uri=' + server + yellowtent.oauth.redirectURI;
 
     window.open(oauthURI, 'Yellowtent', 'width=400, height=600, left=' + left + ', top=' + top);
 }
@@ -43,25 +44,35 @@ function endOAuth(result) {
         return;
     }
 
-    yellowtent.oauth.button.style.display = 'none';
-    window[yellowtent.oauth.callback].apply(null, [result.authCode]);
+    yellowtent.oauth.callback.apply(null, [result.authCode]);
+}
+
+function setupButton(button, resultCallback) {
+    button.innerHTML = '<input class="btn btn-green btn-block" type="button" value="Sign in with Yellowtent"/>';
+    button.onclick = function () {
+        startOAuth(button, resultCallback);
+    };
 }
 
 window.addEventListener('load', function () {
-    console.debug('Yellowtent init');
+    console.log('Yellowtent init');
+
+    function clickEventHandler(event) {
+        startOAuth(event.target.parentElement);
+    }
 
     var signIns = window.document.getElementsByClassName('yellowtent-signin');
     for (var i = 0; i < signIns.length; ++i) {
         var button = signIns[0];
 
         button.innerHTML = '<input class="btn btn-green btn-block" type="button" value="Sign in with Yellowtent"/>';
-        button.onclick = startOAuth;
+        button.onclick = clickEventHandler;
     }
 
 }, false );
 
 window.addEventListener('message', function (event) {
-    console.debug('Yellowtent message received.', event.data);
+    console.log('Yellowtent message received.', event.data);
 
     if (event.origin !== server) {
         console.log('Ignore message from unknown source.');

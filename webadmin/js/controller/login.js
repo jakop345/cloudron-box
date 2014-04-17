@@ -3,48 +3,23 @@
 function LoginController ($scope, Client) {
     console.debug('LoginController');
 
-    $scope.username = '';
-    $scope.password = '';
-    $scope.remember = true;
-    $scope.disabled = false;
-    $scope.error = {};
+    // manually tell yellowtent to manage the signInButton
+    window.yellowtent.setupButton(document.getElementById('signInButton'), function (authCode) {
+        if (!authCode) {
+            console.error('User did not finish the OAuth flow.');
+            return;
+        }
 
-    // basically perform passive auth
-    if (Client.getToken()) {
-        Client.tokenLogin(Client.getToken(), function (error, token) {
+        console.debug('Got authCode as result of OAuth flow.', authCode);
+
+        Client.exchangeCodeForToken(authCode, function (error, accessToken) {
             if (error) {
-                console.error('Unable to login using previous token.', error);
+                console.error('Unable to exchange code for an access token.', error);
                 return;
             }
 
-            console.debug('Successfully logged in. New token', token);
+            localStorage.token = accessToken;
             window.location.href = '#/volumelist';
         });
-    }
-
-    $scope.submit = function () {
-        console.debug('Try to login with user', $scope.username);
-
-        $scope.error.username = null;
-        $scope.disabled = true;
-
-        Client.login($scope.username, $scope.password, function (error, token) {
-            if (error) {
-                console.error('Unable to login', error);
-                if (error.statusCode === 401) {
-                    $scope.error.username = 'Invalid credentials';
-                    $scope.disabled = false;
-                }
-                return;
-            }
-
-            console.debug('Successfully logged in got token', token);
-
-            if ($scope.remember) {
-                localStorage.token = token;
-            }
-
-            window.location.href = '#/volumelist';
-        });
-    };
+    });
 }

@@ -193,8 +193,8 @@ Server.prototype._initialize = function (callback) {
         that.app.post('/api/v1/createadmin', routes.user.createAdmin);
 
         // routes controlled by app.router
-        that.app.post('/api/v1/token', basic, routes.user.createToken);        // TODO remove that route
-        that.app.get('/api/v1/user/token', basic, routes.user.createToken);
+        that.app.post('/api/v1/token', both, routes.user.createToken);        // TODO remove that route
+        that.app.get('/api/v1/user/token', both, routes.user.createToken);
         that.app.get('/api/v1/logout', bearer, routes.user.logout);             // TODO remove that route
         that.app.get('/api/v1/user/logout', bearer, routes.user.logout);
         that.app.post('/api/v1/user/create', bearer, that._requireAdmin.bind(that), routes.user.create);

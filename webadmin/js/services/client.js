@@ -22,6 +22,8 @@ angular.module('clientService', [])
         this._username = null;
         this._userInfo = null;
         this._token = null;
+        this._clientId = null;
+        this._clientSecret = null;
 
         this.setToken(localStorage.token);
     }
@@ -40,8 +42,13 @@ angular.module('clientService', [])
         this._token = token;
     };
 
-    Client.prototype.getToken = function () {
+    Client.prototype.token = function () {
         return this._token;
+    };
+
+    Client.prototype.setClientCredentials = function (id, secret) {
+        this._clientId = id;
+        this._clientSecret = secret;
     };
 
 
@@ -238,29 +245,10 @@ angular.module('clientService', [])
         });
     };
 
-    Client.prototype.tokenLogin = function (oldToken, callback) {
-        $http.defaults.headers.common.Authorization = 'Token ' + oldToken;
-        this._login(callback);
-    };
-
-    Client.prototype.logout = function () {
-        localStorage.removeItem('token');
-        this.setToken(null);
-        this._username = '';
-        this._userInfo = null;
-    };
-
-    Client.prototype.login = function (username, password, callback) {
-        $http.defaults.headers.common.Authorization = 'Basic ' + $base64.encode(username + ':' + password);
-        this._login(callback);
-    };
-
-    /*
-     * Internal login which is wrapped by login() and tokenLogin()
-     * The wrappers setup the auth header
-     */
-    Client.prototype._login = function  (callback) {
+    Client.prototype.login = function (token, callback) {
         var that = this;
+
+        $http.defaults.headers.common.Authorization = 'Token ' + token;
 
         $http.get('/api/v1/user/token')
         .success(function(data, status, headers, config) {
@@ -278,6 +266,36 @@ angular.module('clientService', [])
         })
         .error(function(data, status, headers, config) {
             that.setToken(null);
+            callback(new ClientError(status, data));
+        });
+    };
+
+    Client.prototype.logout = function () {
+        localStorage.removeItem('token');
+        this.setToken(null);
+        this._username = '';
+        this._userInfo = null;
+    };
+
+    Client.prototype.exchangeCodeForToken = function (authCode, callback) {
+        var that = this;
+        var data = {
+            grant_type: 'authorization_code',
+            code: authCode,
+            redirect_uri: 'https://localhost',
+            client_id: this._clientId,
+            client_secret: this._clientSecret
+        };
+
+        $http.post('/api/v1/oauth/token?response_type=token&client_id=' + this._clientId, data)
+        .success(function(data, status, headers, config) {
+            if (status !== 200) return callback(new ClientError(status, data));
+
+            that.login(data.access_token, function (error, result) {
+                callback(null, data.access_token);
+            });
+        })
+        .error(function(data, status, headers, config) {
             callback(new ClientError(status, data));
         });
     };

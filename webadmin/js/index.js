@@ -8,8 +8,8 @@ var app = angular.module('YellowTent', ['acute.select', 'ngRoute', 'ngAnimate', 
 // setup all major application routes
 app.config(function ($routeProvider) {
     $routeProvider.when('/', {
-        controller: 'SplashController',
-        templateUrl: 'partials/splash.html'
+        controller: 'LoginController',
+        templateUrl: 'partials/login.html'
     }).when('/login', {
         controller: 'LoginController',
         templateUrl: 'partials/login.html'
