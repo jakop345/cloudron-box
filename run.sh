@@ -1,7 +1,7 @@
 #!/bin/sh
 
 echo
-echo "Starting YellowTent router..."
+echo "Starting YellowTent server at port 443..."
 echo
 
 #### When using it as a future start suite
