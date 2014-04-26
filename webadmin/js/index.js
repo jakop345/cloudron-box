@@ -43,6 +43,9 @@ app.config(function ($routeProvider) {
     }).when('/volumeunmount', {
         controller: 'VolumeUnmountController',
         templateUrl: 'partials/volumeunmount.html'
+    }).when('/apps', {
+        controller: 'AppsController',
+        templateUrl: 'partials/apps.html'
     }).when('/settings', {
         controller: 'SettingsController',
         templateUrl: 'partials/settings.html'
@@ -53,3 +56,4 @@ app.run(function (acuteSelectService) {
     // Set the template path for all instances
     acuteSelectService.updateSetting('templatePath', '/3rdparty/templates');
 });
+

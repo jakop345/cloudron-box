@@ -47,6 +47,7 @@
     <script src="js/controller/usercreate.js"></script>
     <script src="js/controller/userdelete.js"></script>
     <script src="js/controller/userpassword.js"></script>
+    <script src="js/controller/apps.js"></script>
     <script src="js/controller/settings.js"></script>
     <script src="js/index.js"></script>
 
@@ -70,6 +71,9 @@
           <a href="#/userlist">
             <span class="glyphicon glyphicon-user"></span> Users <div ng-show="isActive('/user')" ng-click="href($event, '#/usercreate')" class="glyphicon glyphicon-plus pull-right toolicon"></div>
           </a>
+        </li>
+        <li ng-class="{ active: isActive('/apps')}">
+          <a href="#/apps"><span class="glyphicon glyphicon-cloud"></span> Apps </a>
         </li>
         <li ng-class="{ active: isActive('/settings')}"><a href="#/settings"><span class="glyphicon glyphicon-cog"></span> Settings</a></li>
         <li><a href="#" ng-click="logout()"><span class="glyphicon glyphicon-log-out"></span> Log Out</a></li>

@@ -1,0 +1,12 @@
+
+<div ng-controller="AppsController" class="container-fluid">
+  <div class="row">
+    <div class="col-lg-3 list-group-item" ng-repeat="app in apps">
+        <div>{{ app.title }}</div>
+        <div>{{ app.author }}</div>
+        <img ng-src="{{ app.icon }}"/>
+        <button ng-click="installApp(app.id)">Install</button>
+    </div>
+  </div>
+
+</div>
