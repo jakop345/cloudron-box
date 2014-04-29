@@ -1,12 +1,10 @@
 'use strict';
 
-var AppsController = function ($scope, $http) {
-    var APPSTORE_URL = "http://localhost:5050";
-
+var AppsController = function ($scope, $http, config) {
     console.debug('AppsController');
 
     $scope.refresh = function () {
-        $http.get(APPSTORE_URL + '/api/v1/apps')
+        $http.get(config.APPSTORE_URL + '/api/v1/apps')
             .success(function (data, status, headers, config) {
                 console.log(data);
                 $scope.apps = data.apps;
