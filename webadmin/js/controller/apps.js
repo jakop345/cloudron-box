@@ -5,25 +5,18 @@ var AppsController = function ($scope, $http, config) {
 
     $scope.refresh = function () {
         $http.get(config.APPSTORE_URL + '/api/v1/apps')
-            .success(function (data, status, headers, config) {
+            .success(function (data, status, headers) {
                 console.log(data);
+                data.apps.forEach(function (app) { app.iconUrl = config.APPSTORE_URL + "/api/v1/app/" + app.id + "/icon"; });
                 $scope.apps = data.apps;
-            }).error(function (data, status, headers, config) {
+            }).error(function (data, status, headers) {
                 console.log('error in getting app list');
             });
     };
 
-    $scope.installAll = function (appId) {
+    $scope.installApp = function (appId) {
         console.log('Will install ', appId);
     };
 
     $scope.refresh();
-/*
-    $scope.apps = [
-        { id: 1, title: 'Title', author: 'Author', icon: 'http://lorempixel.com/100/100/' },
-        { id: 2, title: 'Title', author: 'Author', icon: 'http://lorempixel.com/100/100/' },
-        { id: 3, title: 'Title', author: 'Author', icon: 'http://lorempixel.com/100/100/' },
-        { id: 4, title: 'Title', author: 'Author', icon: 'http://lorempixel.com/100/100/' }
-    ];
-*/
 };
