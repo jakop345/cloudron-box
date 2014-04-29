@@ -247,6 +247,9 @@ Server.prototype._initialize = function (callback) {
         that.app.post('/api/v1/oauth/dialog/authorize/decision', routes.oauth2.decision);
         that.app.post('/api/v1/oauth/token', routes.oauth2.token);
         that.app.get('/api/v1/oauth/yellowtent.js', routes.oauth2.library);
+
+        // app routes
+        that.app.post('/api/v1/app/install', routes.app.installApp);
     });
 
     this.app.set('port', that.config.port);
