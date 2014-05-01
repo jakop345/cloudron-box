@@ -16,7 +16,8 @@ var express = require('express'),
     routes = require('./routes/index.js'),
     debug = require('debug')('server:server'),
     assert = require('assert'),
-    pkg = require('./../package.json');
+    pkg = require('./../package.json'),
+    async = require('async');
 
 exports = module.exports = Server;
 
@@ -266,35 +267,28 @@ Server.prototype._initialize = function (callback) {
     mkdirp.sync(that.config.configRoot);
     mkdirp.sync(that.config.mountRoot);
 
-    userdb.init(that.config.configRoot, function (error) {
-        if (error) callback (new Error('Error initializing user database'));
-
-        tokendb.init(that.config.configRoot, function (error) {
-            if (error) callback (new Error('Error initializing token database'));
-
-            clientdb.init(that.config.configRoot, function (error) {
-                if (error) callback (new Error('Error initializing client database'));
-
-                // TODO this should happen somewhere else..no clue where - Johannes
-                clientdb.del('cid-webadmin', function () {
-                    clientdb.add('cid-webadmin', 'cid-webadmin', 'unused', 'WebAdmin', 'https://localhost', function (error) {
-                        if (error && error.reason !== DatabaseError.ALREADY_EXISTS) return callback(new Error('Error initializing client database with webadmin'));
-
-                        authcodedb.init(that.config.configRoot, function (error) {
-                            if (error) callback (new Error('Error initializing auth code database'));
-
-                            routes.volume.initialize(that.config);
-                            routes.sync.initialize(that.config);
-                            routes.user.initialize(that.config);
-                            routes.app.initialize(that.config);
-
-                            callback(null);
-                        });
-                    });
+    async.series([
+        userdb.init.bind(null, that.config.configRoot),
+        tokendb.init.bind(null, that.config.configRoot),
+        clientdb.init.bind(null, that.config.configRoot),
+        function (callback) {
+            // TODO this should happen somewhere else..no clue where - Johannes
+            clientdb.del('cid-webadmin', function () {
+                clientdb.add('cid-webadmin', 'cid-webadmin', 'unused', 'WebAdmin', 'https://localhost', function (error) {
+                    if (error && error.reason !== DatabaseError.ALREADY_EXISTS) return callback(new Error('Error initializing client database with webadmin'));
+                    return callback(null);
                 });
             });
-        });
-    });
+        },
+        authcodedb.init.bind(null, that.config.configRoot),
+        function initializeRoutes(callback) {
+            routes.volume.initialize(that.config);
+            routes.sync.initialize(that.config);
+            routes.user.initialize(that.config);
+            routes.app.initialize(that.config);
+            callback(null);
+        }
+    ], callback);
 };
 
 // TODO maybe we can get rid of that function and inline it - Johannes
