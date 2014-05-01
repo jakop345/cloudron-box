@@ -22,7 +22,7 @@
     "mkdirp": "*",
     "async": "*",
     "optimist": "*",
-    "express": "*",
+    "express": "<4",
     "superagent": "*",
     "rimraf": "*",
     "debug": "*",
