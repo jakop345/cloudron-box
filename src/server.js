@@ -286,6 +286,7 @@ Server.prototype._initialize = function (callback) {
                             routes.volume.initialize(that.config);
                             routes.sync.initialize(that.config);
                             routes.user.initialize(that.config);
+                            routes.app.initialize(that.config);
 
                             callback(null);
                         });

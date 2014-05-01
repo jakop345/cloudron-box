@@ -5,8 +5,15 @@ var HttpError = require('../httperror.js'),
     debug = require('debug')('server:routes/app');
 
 exports = module.exports = {
+    initialize: initialize,
     installApp: installApp
 };
+
+var appServerUrl = null;
+
+function initialize(config) {
+    appServerUrl = config.appServerUrl;
+}
 
 function installApp(req, res, next) {
     var data = req.body;

@@ -54,7 +54,8 @@ var config = {
     dataRoot: path.resolve(argv.d),
     configRoot: path.resolve(argv.c),
     mountRoot: path.resolve(argv.m),
-    silent: argv.s
+    silent: argv.s,
+    appServerUrl: 'http://localhost:5050'
 };
 
 var server = new Server(config);
