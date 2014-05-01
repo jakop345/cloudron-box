@@ -13,6 +13,7 @@ var express = require('express'),
     tokendb = require('./tokendb.js'),
     clientdb = require('./clientdb.js'),
     authcodedb = require('./authcodedb.js'),
+    appdb = require('./appdb.js'),
     routes = require('./routes/index.js'),
     debug = require('debug')('server:server'),
     assert = require('assert'),
@@ -281,6 +282,7 @@ Server.prototype._initialize = function (callback) {
             });
         },
         authcodedb.init.bind(null, that.config.configRoot),
+        appdb.init.bind(null, that.config.configRoot),
         function initializeRoutes(callback) {
             routes.volume.initialize(that.config);
             routes.sync.initialize(that.config);
