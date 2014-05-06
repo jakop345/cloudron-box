@@ -251,7 +251,7 @@ Server.prototype._initialize = function (callback) {
         that.app.get('/api/v1/oauth/yellowtent.js', routes.oauth2.library);
 
         // app routes
-        that.app.post('/api/v1/app/install', routes.app.installApp);
+        that.app.post('/api/v1/app/install', routes.apps.installApp);
     });
 
     this.app.set('port', that.config.port);
@@ -287,7 +287,7 @@ Server.prototype._initialize = function (callback) {
             routes.volume.initialize(that.config);
             routes.sync.initialize(that.config);
             routes.user.initialize(that.config);
-            routes.app.initialize(that.config);
+            routes.apps.initialize(that.config);
             callback(null);
         }
     ], callback);

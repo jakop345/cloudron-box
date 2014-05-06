@@ -1,7 +1,7 @@
 'use strict';
 
 exports = module.exports = {
-    app: require('./app.js'),
+    apps: require('./apps.js'),
     user: require('./user.js'),
     file: require('./file.js'),
     sync: require('./sync.js'),
