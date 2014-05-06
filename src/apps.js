@@ -9,10 +9,34 @@ var DatabaseError = require('./databaseerror.js'),
     superagent = require('superagent');
 
 exports = module.exports = {
+    AppsError: AppsError,
+
+    initialize: initialize,
     install: install
 };
 
+// http://dustinsenos.com/articles/customErrorsInNode
+// http://code.google.com/p/v8/wiki/JavaScriptStackTraceApi
+function AppsError(err, reason) {
+    Error.call(this);
+    Error.captureStackTrace(this, this.constructor);
+
+    this.name = this.constructor.name;
+    this.message = safe.JSON.stringify(err);
+    this.code = err ? err.code : null;
+    this.reason = reason || AppsError.INTERNAL_ERROR;
+}
+util.inherits(AppsError, Error);
+AppsError.INTERNAL_ERROR = 1;
+AppsError.ALREADY_EXISTS = 2;
+
 var STATUS_PENDING = 'pending';
+
+var appServerUrl = null;
+
+function initialize(config) {
+    appServerUrl = config.appServerUrl;
+}
 
 function installTask() {
     appdb.getAll(function (error, apps) {
@@ -40,12 +64,12 @@ function installTask() {
 
 function install(appId, callback) {
     appdb.add(appId, { status: STATUS_PENDING }, function (error) {
-        if (error && error.reason === DatabaseError.ALREADY_EXISTS) return next(new HttpError(400, 'Already installed or installing'));
-        if (error) return next(new HttpError(500, 'Internal error:' + error.message));
+        if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new AppsError('Already installed or installing', AppsError.ALREADY_EXISTS));
+        if (error) return callback(new AppsError('Internal error:' + error.message, AppsError.INTERNAL_ERROR));
 
         process.nextTick(installTask);
 
-        next(new HttpSuccess(200, { status: 'Downloading' }));
+        callback(null);
     });
 }
 

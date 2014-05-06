@@ -3,17 +3,15 @@
 var HttpError = require('../httperror.js'),
     HttpSuccess = require('../httpsuccess.js'),
     debug = require('debug')('server:routes/apps'),
-    apps = require('../apps.js');
+    apps = require('../apps.js'),
+    AppsError = apps.AppsError;
 
 exports = module.exports = {
     initialize: initialize,
     installApp: installApp
 };
 
-var appServerUrl = null;
-
 function initialize(config) {
-    appServerUrl = config.appServerUrl;
 }
 
 function installApp(req, res, next) {
@@ -25,8 +23,10 @@ function installApp(req, res, next) {
     console.log('will install app with id ' + data.app_id);
 
     apps.install(data.app_id, function (error) {
-        if (error) return next(new HttpError(400, 'Error installing app: ' + error));
-        next(new HttpSuccess(200));
+        if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(400, 'Error installing app: ' + error));
+        if (error) return next(new HttpError(500, 'Internal error:' + error));
+
+        next(new HttpSuccess(200, { status: 'ok' } ));
     });
 }
 

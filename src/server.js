@@ -18,7 +18,8 @@ var express = require('express'),
     debug = require('debug')('server:server'),
     assert = require('assert'),
     pkg = require('./../package.json'),
-    async = require('async');
+    async = require('async'),
+    apps = require('./apps');
 
 exports = module.exports = Server;
 
@@ -288,6 +289,10 @@ Server.prototype._initialize = function (callback) {
             routes.sync.initialize(that.config);
             routes.user.initialize(that.config);
             routes.apps.initialize(that.config);
+            callback(null);
+        },
+        function initializeModules(callback) {
+            apps.initialize(that.config);
             callback(null);
         }
     ], callback);
