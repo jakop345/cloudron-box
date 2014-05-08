@@ -1,7 +1,7 @@
 'use strict';
 
-var AppsController = function ($scope, $http, config) {
-    console.debug('AppsController');
+var AppListController = function ($scope, $http, config) {
+    console.debug('AppListController');
 
     $scope.refresh = function () {
         $http.get(config.APPSTORE_URL + '/api/v1/apps')

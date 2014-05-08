@@ -43,9 +43,9 @@ app.config(function ($routeProvider) {
     }).when('/volumeunmount', {
         controller: 'VolumeUnmountController',
         templateUrl: 'partials/volumeunmount.html'
-    }).when('/apps', {
-        controller: 'AppsController',
-        templateUrl: 'partials/apps.html'
+    }).when('/applist', {
+        controller: 'AppListController',
+        templateUrl: 'partials/applist.html'
     }).when('/settings', {
         controller: 'SettingsController',
         templateUrl: 'partials/settings.html'
