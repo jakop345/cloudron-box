@@ -45,8 +45,11 @@ function initialize(config) {
     task = new Task();
 }
 
-function install(appId, callback) {
-    appdb.add(appId, { status: STATUS_PENDING }, function (error) {
+function install(appId, config, callback) {
+    assert(typeof appId === 'string');
+    assert(typeof config === 'object');
+
+    appdb.add(appId, { status: STATUS_PENDING, config: JSON.stringify(config) }, function (error) {
 //        if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new AppsError('Already installed or installing', AppsError.ALREADY_EXISTS));
  //       if (error) return callback(new AppsError('Internal error:' + error.message, AppsError.INTERNAL_ERROR));
 
@@ -116,7 +119,7 @@ Task.prototype.downloadApp = function (manifest, callback) {
     });
 };
 
-Task.prototype.runApp = function (manifest, callback) {
+Task.prototype.runApp = function (manifest, config, callback) {
     var outputStream = Writable(),
         docker = this._docker;
 
@@ -125,9 +128,13 @@ Task.prototype.runApp = function (manifest, callback) {
         callback();
     };
 
+    var options = {
+        Hostname: config.hostname || ''
+    };
+
     debug('Running ' + manifest.docker_image);
 
-    docker.run(manifest.docker_image, null /* command */, outputStream, function (err, data, container) {
+    docker.run(manifest.docker_image, null /* command */, outputStream, options, function (err, data, container) {
         if (err) {
             debug('Error creating the container');
             return callback(err);
@@ -186,9 +193,12 @@ Task.prototype.refresh = function () {
                         }
 
                        that.downloadApp(manifest, function (error) {
-                            if (error) return console.log('Error downloading application', err);
+                            if (error) {
+                                console.error('Error downloading application', error);
+                                return callback(null);
+                            }
                             console.log('Download app successful');
-                            that.runApp(manifest, callback);
+                            that.runApp(manifest, app.config, callback);
                         });
                     });
             });

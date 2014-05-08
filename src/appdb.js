@@ -26,7 +26,8 @@ function init(configDir, callback) {
 
     db = new DatabaseTable(path.join(configDir, 'db/apps'), {
         id: { type: 'String', hashKey: true },
-        status: { type: 'String' }
+        status: { type: 'String' },
+        config: { type: 'String' }
     });
 
     callback(null);

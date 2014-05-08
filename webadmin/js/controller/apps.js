@@ -16,7 +16,7 @@ var AppsController = function ($scope, $http, config) {
 
     $scope.installApp = function (appId) {
         console.log('Will install ', appId);
-        $http.post("/api/v1/app/install", { app_id: appId })
+        $http.post("/api/v1/app/install", { app_id: appId, config: { hostname: appId } })
             .success(function (data, status, headers) {
                 console.log('success installing app');
             }).error(function (data, status, headers) {
