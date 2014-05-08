@@ -40,7 +40,9 @@
     "passport-local": "^1.0.0",
     "passport-http": "^0.2.2",
     "passport-oauth2-client-password": "^0.1.1",
-    "passport-http-bearer": "^1.0.1"
+    "passport-http-bearer": "^1.0.1",
+    "js-yaml": "*",
+    "dockerode": "*"
   },
   "devDependencies": {
     "mocha": "*",
