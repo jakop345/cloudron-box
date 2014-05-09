@@ -46,6 +46,9 @@ app.config(function ($routeProvider) {
     }).when('/applist', {
         controller: 'AppListController',
         templateUrl: 'partials/applist.html'
+    }).when('/app/:id/configure', {
+        controller: 'AppConfigureController',
+        templateUrl: 'partials/appconfigure.html'
     }).when('/settings', {
         controller: 'SettingsController',
         templateUrl: 'partials/settings.html'

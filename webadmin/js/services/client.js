@@ -147,6 +147,17 @@ angular.module('clientService', [])
         });
     };
 
+    Client.prototype.installApp = function (id, password, config, callback) {
+        $http.post("/api/v1/app/install", { app_id: id, password: password, config: config })
+        .success(function (data, status, headers) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null);
+        })
+        .error(function (data, status, headers) {
+            callback(new ClientError(status, data));
+        });
+    };
+
     Client.prototype.isServerAvailable = function (callback) {
         $http.get('/api/v1/version')
         .success(function(data, status, headers, config) {

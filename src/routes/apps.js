@@ -19,12 +19,13 @@ function installApp(req, res, next) {
 
     if (!data) return next(new HttpError(400, 'Cannot parse data field:' + safe.error.message));
     if (!data.app_id) return next(new HttpError(400, 'app_id is required'));
+    if (!data.password) return next(new HttpError(400, 'password is required'));
     if (!data.config) return next(new HttpError(400, 'config is required'));
 
     console.log('will install app with id ' + data.app_id);
 
-    apps.install(data.app_id, data.config, function (error) {
-        if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(400, 'Error installing app: ' + error));
+    apps.install(data.app_id, req.user.username, data.password, data.config, function (error) {
+        if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, 'Error installing app: ' + error));
         if (error) return next(new HttpError(500, 'Internal error:' + error));
 
         next(new HttpSuccess(200, { status: 'ok' } ));

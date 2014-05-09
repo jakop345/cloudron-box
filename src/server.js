@@ -252,7 +252,7 @@ Server.prototype._initialize = function (callback) {
         that.app.get('/api/v1/oauth/yellowtent.js', routes.oauth2.library);
 
         // app routes
-        that.app.post('/api/v1/app/install', routes.apps.installApp);
+        that.app.post('/api/v1/app/install', both, that._requirePassword.bind(that), routes.apps.installApp);
     });
 
     this.app.set('port', that.config.port);

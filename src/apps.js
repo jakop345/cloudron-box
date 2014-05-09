@@ -45,8 +45,10 @@ function initialize(config) {
     task = new Task();
 }
 
-function install(appId, config, callback) {
+function install(appId, username, password, config, callback) {
     assert(typeof appId === 'string');
+    assert(typeof username === 'string');
+    assert(typeof password === 'string');
     assert(typeof config === 'object');
 
     appdb.add(appId, { status: STATUS_PENDING, config: JSON.stringify(config) }, function (error) {
@@ -129,7 +131,7 @@ Task.prototype.runApp = function (manifest, config, callback) {
     };
 
     var options = {
-        Hostname: config.hostname || ''
+        Hostname: config.location || ''
     };
 
     debug('Running ' + manifest.docker_image);
@@ -197,7 +199,7 @@ Task.prototype.refresh = function () {
                                 console.error('Error downloading application', error);
                                 return callback(null);
                             }
-                            console.log('Download app successful');
+                            console.log('Download app successful. running with configuration: ' + app.config);
                             that.runApp(manifest, app.config, callback);
                         });
                     });

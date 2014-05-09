@@ -1,6 +1,6 @@
 'use strict';
 
-var AppListController = function ($scope, $http, config) {
+var AppListController = function ($scope, $http, $location, config) {
     console.debug('AppListController');
 
     $scope.refresh = function () {
@@ -16,12 +16,7 @@ var AppListController = function ($scope, $http, config) {
 
     $scope.installApp = function (appId) {
         console.log('Will install ', appId);
-        $http.post("/api/v1/app/install", { app_id: appId, config: { hostname: appId } })
-            .success(function (data, status, headers) {
-                console.log('success installing app');
-            }).error(function (data, status, headers) {
-                console.log('error installing app');
-            });
+        $location.path('/app/' + appId + '/configure');
     };
 
     $scope.refresh();
