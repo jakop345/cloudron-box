@@ -131,148 +131,146 @@ Server.prototype._initialize = function (callback) {
     var middleware = this._loadMiddleware();
     this.app = express();
 
-    this.app.configure(function () {
-        var QUERY_LIMIT = '10mb', // max size for json and urlencoded queries
-            FIELD_LIMIT = 2 * 1024, // max fields that can appear in multipart
-            FILE_SIZE_LIMIT = '521mb', // max file size that can be uploaded
-            UPLOAD_LIMIT = '521mb'; // catch all max size for any type of request
+    var QUERY_LIMIT = '10mb', // max size for json and urlencoded queries
+        FIELD_LIMIT = 2 * 1024, // max fields that can appear in multipart
+        FILE_SIZE_LIMIT = '521mb', // max file size that can be uploaded
+        UPLOAD_LIMIT = '521mb'; // catch all max size for any type of request
 
-        var REQUEST_TIMEOUT = 10000, // timeout for all requests
-            FILE_TIMEOUT = 3 * 60 * 1000; // increased timeout for file uploads (3 mins)
+    var REQUEST_TIMEOUT = 10000, // timeout for all requests
+        FILE_TIMEOUT = 3 * 60 * 1000; // increased timeout for file uploads (3 mins)
 
-        var json = express.json({ strict: true, limit: QUERY_LIMIT }), // application/json
-            urlencoded = express.urlencoded({ limit: QUERY_LIMIT }); // application/x-www-form-urlencoded
+    var json = express.json({ strict: true, limit: QUERY_LIMIT }), // application/json
+        urlencoded = express.urlencoded({ limit: QUERY_LIMIT }); // application/x-www-form-urlencoded
 
-        // Passport configuration
-        require('./auth');
+    // Passport configuration
+    require('./auth');
 
-        that.app.set('views', path.join(__dirname, '../oauth2views'));
-        that.app.set('view options', { layout: true, debug: true });
-        that.app.set('view engine', 'ejs');
+    this.app.set('views', path.join(__dirname, '../oauth2views'));
+    this.app.set('view options', { layout: true, debug: true });
+    this.app.set('view engine', 'ejs');
 
-        if (!that.config.silent) {
-            that.app.use(express.logger({ format: 'dev', immediate: false }));
-        }
+    if (!this.config.silent) {
+        this.app.use(express.logger({ format: 'dev', immediate: false }));
+    }
 
-        that.app
-           .use(express.timeout(REQUEST_TIMEOUT))
-           .use(express.limit(UPLOAD_LIMIT))
-           .use(json)
-           .use(urlencoded)
-           .use(express.cookieParser())
-           .use(express.favicon(__dirname + '/../assets/favicon.ico'))
-           // API calls that do not require authorization
-           .use(middleware.cors({ origins: [ '*' ], allowCredentials: true }))
-           .use(express.session({ secret: 'yellow is blue' }))
-           .use(passport.initialize())
-           .use(passport.session())
+    this.app
+       .use(express.timeout(REQUEST_TIMEOUT))
+       .use(express.limit(UPLOAD_LIMIT))
+       .use(json)
+       .use(urlencoded)
+       .use(express.cookieParser())
+       .use(express.favicon(__dirname + '/../assets/favicon.ico'))
+       // API calls that do not require authorization
+       .use(middleware.cors({ origins: [ '*' ], allowCredentials: true }))
+       .use(express.session({ secret: 'yellow is blue' }))
+       .use(passport.initialize())
+       .use(passport.session())
 
-           // FIXME
-           // temporarily accept both
-           //  - [query] auth_token and access_token
-           //  - [header] 'Token <tok>' and 'Bearer <tok>'
-           // see http://tools.ietf.org/html/rfc6750
-           .use(function (req, res, next) {
-                if (req.query.auth_token) req.query.access_token = req.query.auth_token;
-                var auth = req.headers.authorization;
-                if (auth && auth.indexOf('Token ') === 0) {
-                    req.headers.authorization = 'Bearer ' + auth.slice('Token '.length);
-                }
-                next();
-           })
+       // FIXME
+       // temporarily accept both
+       //  - [query] auth_token and access_token
+       //  - [header] 'Token <tok>' and 'Bearer <tok>'
+       // see http://tools.ietf.org/html/rfc6750
+       .use(function (req, res, next) {
+            if (req.query.auth_token) req.query.access_token = req.query.auth_token;
+            var auth = req.headers.authorization;
+            if (auth && auth.indexOf('Token ') === 0) {
+                req.headers.authorization = 'Bearer ' + auth.slice('Token '.length);
+            }
+            next();
+       })
 
-           .use(that.app.router)
-           .use(that._successHandler.bind(that))
-           .use(that._clientErrorHandler.bind(that))
-           .use(that._serverErrorHandler.bind(that));
+       .use(this.app.router)
+       .use(this._successHandler.bind(this))
+       .use(this._clientErrorHandler.bind(this))
+       .use(this._serverErrorHandler.bind(this));
 
-        var bearer = passport.authenticate(['bearer'], { session: false });
-        var basic = passport.authenticate(['basic'], { session: false });
-        var both = passport.authenticate(['basic', 'bearer'], { session: false });
+    var bearer = passport.authenticate(['bearer'], { session: false });
+    var basic = passport.authenticate(['basic'], { session: false });
+    var both = passport.authenticate(['basic', 'bearer'], { session: false });
 
-        // public routes
-        that.app.get('/api/v1/version', that._getVersion.bind(that));
-        that.app.get('/api/v1/firsttime', that._firstTime.bind(that));
-        that.app.post('/api/v1/createadmin', routes.user.createAdmin);
+    // public routes
+    this.app.get('/api/v1/version', this._getVersion.bind(this));
+    this.app.get('/api/v1/firsttime', this._firstTime.bind(this));
+    this.app.post('/api/v1/createadmin', routes.user.createAdmin);
 
-        // routes controlled by app.router
-        that.app.post('/api/v1/token', both, routes.user.createToken);        // TODO remove that route
-        that.app.get('/api/v1/user/token', both, routes.user.createToken);
-        that.app.get('/api/v1/logout', bearer, routes.user.logout);             // TODO remove that route
-        that.app.get('/api/v1/user/logout', bearer, routes.user.logout);
-        that.app.post('/api/v1/user/create', bearer, that._requireAdmin.bind(that), routes.user.create);
-        that.app.post('/api/v1/user/remove', bearer, that._requireAdmin.bind(that), routes.user.remove);
-        that.app.post('/api/v1/user/password', bearer, that._requirePassword.bind(that), routes.user.changePassword);
-        that.app.get('/api/v1/user/info', bearer, routes.user.info);
-        that.app.get('/api/v1/user/list', bearer, routes.user.list);
+    // routes controlled by app.router
+    this.app.post('/api/v1/token', both, routes.user.createToken);        // TODO remove that route
+    this.app.get('/api/v1/user/token', both, routes.user.createToken);
+    this.app.get('/api/v1/logout', bearer, routes.user.logout);             // TODO remove that route
+    this.app.get('/api/v1/user/logout', bearer, routes.user.logout);
+    this.app.post('/api/v1/user/create', bearer, this._requireAdmin.bind(this), routes.user.create);
+    this.app.post('/api/v1/user/remove', bearer, this._requireAdmin.bind(this), routes.user.remove);
+    this.app.post('/api/v1/user/password', bearer, this._requirePassword.bind(this), routes.user.changePassword);
+    this.app.get('/api/v1/user/info', bearer, routes.user.info);
+    this.app.get('/api/v1/user/list', bearer, routes.user.list);
 
-        that.app.param('syncerVolume', both, routes.sync.attachRepo);
+    this.app.param('syncerVolume', both, routes.sync.attachRepo);
 
-        that.app.post('/api/v1/sync/:syncerVolume/diff', both, routes.sync.requireMountedVolume, routes.sync.diff);
-        that.app.post('/api/v1/sync/:syncerVolume/delta', both, routes.sync.requireMountedVolume, routes.sync.delta);
+    this.app.post('/api/v1/sync/:syncerVolume/diff', both, routes.sync.requireMountedVolume, routes.sync.diff);
+    this.app.post('/api/v1/sync/:syncerVolume/delta', both, routes.sync.requireMountedVolume, routes.sync.delta);
 
-        that.app.get('/api/v1/revisions/:syncerVolume/*', both, routes.sync.requireMountedVolume, routes.file.revisions);
-        that.app.get('/api/v1/file/:syncerVolume/*', both, routes.sync.requireMountedVolume, routes.file.read);
-        that.app.get('/api/v1/metadata/:syncerVolume/*', both, routes.sync.requireMountedVolume, routes.file.metadata);
-        that.app.put('/api/v1/file/:syncerVolume/*', both, routes.sync.requireMountedVolume,
-                                               routes.file.multipart({ maxFieldsSize: FIELD_LIMIT, limit: FILE_SIZE_LIMIT, timeout: FILE_TIMEOUT }),
-                                               routes.file.putFile);
+    this.app.get('/api/v1/revisions/:syncerVolume/*', both, routes.sync.requireMountedVolume, routes.file.revisions);
+    this.app.get('/api/v1/file/:syncerVolume/*', both, routes.sync.requireMountedVolume, routes.file.read);
+    this.app.get('/api/v1/metadata/:syncerVolume/*', both, routes.sync.requireMountedVolume, routes.file.metadata);
+    this.app.put('/api/v1/file/:syncerVolume/*', both, routes.sync.requireMountedVolume,
+                                           routes.file.multipart({ maxFieldsSize: FIELD_LIMIT, limit: FILE_SIZE_LIMIT, timeout: FILE_TIMEOUT }),
+                                           routes.file.putFile);
 
-        that.app.post('/api/v1/fileops/:syncerVolume/copy', both, routes.sync.requireMountedVolume, express.json({ strict: true }), routes.fileops.copy);
-        that.app.post('/api/v1/fileops/:syncerVolume/move', both, routes.sync.requireMountedVolume, express.json({ strict: true }), routes.fileops.move);
-        that.app.post('/api/v1/fileops/:syncerVolume/delete', both, routes.sync.requireMountedVolume, express.json({ strict: true }), routes.fileops.remove);
-        that.app.post('/api/v1/fileops/:syncerVolume/create_dir', both, routes.sync.requireMountedVolume, express.json({ strict: true }), routes.fileops.createDirectory);
+    this.app.post('/api/v1/fileops/:syncerVolume/copy', both, routes.sync.requireMountedVolume, express.json({ strict: true }), routes.fileops.copy);
+    this.app.post('/api/v1/fileops/:syncerVolume/move', both, routes.sync.requireMountedVolume, express.json({ strict: true }), routes.fileops.move);
+    this.app.post('/api/v1/fileops/:syncerVolume/delete', both, routes.sync.requireMountedVolume, express.json({ strict: true }), routes.fileops.remove);
+    this.app.post('/api/v1/fileops/:syncerVolume/create_dir', both, routes.sync.requireMountedVolume, express.json({ strict: true }), routes.fileops.createDirectory);
 
-        // volume related routes
-        that.app.param('volume', both, routes.volume.attachVolume);
+    // volume related routes
+    this.app.param('volume', both, routes.volume.attachVolume);
 
-        that.app.get('/api/v1/volume/:volume/list', both, routes.volume.requireMountedVolume, routes.volume.listFiles);
-        that.app.get('/api/v1/volume/:volume/list/*', both, routes.volume.requireMountedVolume, routes.volume.listFiles);
-        that.app.get('/api/v1/volume/list', both, routes.volume.listVolumes);
-        that.app.post('/api/v1/volume/create', both, that._requirePassword.bind(that), routes.volume.createVolume);
-        that.app.post('/api/v1/volume/:volume/delete', both, that._requirePassword.bind(that), routes.volume.deleteVolume);
-        that.app.post('/api/v1/volume/:volume/mount', both, that._requirePassword.bind(that), routes.volume.mount);
-        that.app.post('/api/v1/volume/:volume/unmount', both, routes.volume.unmount);
-        that.app.get('/api/v1/volume/:volume/ismounted', both, routes.volume.isMounted);
-        that.app.get('/api/v1/volume/:volume/users', both, routes.volume.listUsers);
-        that.app.post('/api/v1/volume/:volume/users', both, routes.volume.addUser);
-        that.app.del('/api/v1/volume/:volume/users/:username', both, routes.volume.removeUser);
+    this.app.get('/api/v1/volume/:volume/list', both, routes.volume.requireMountedVolume, routes.volume.listFiles);
+    this.app.get('/api/v1/volume/:volume/list/*', both, routes.volume.requireMountedVolume, routes.volume.listFiles);
+    this.app.get('/api/v1/volume/list', both, routes.volume.listVolumes);
+    this.app.post('/api/v1/volume/create', both, this._requirePassword.bind(this), routes.volume.createVolume);
+    this.app.post('/api/v1/volume/:volume/delete', both, this._requirePassword.bind(this), routes.volume.deleteVolume);
+    this.app.post('/api/v1/volume/:volume/mount', both, this._requirePassword.bind(this), routes.volume.mount);
+    this.app.post('/api/v1/volume/:volume/unmount', both, routes.volume.unmount);
+    this.app.get('/api/v1/volume/:volume/ismounted', both, routes.volume.isMounted);
+    this.app.get('/api/v1/volume/:volume/users', both, routes.volume.listUsers);
+    this.app.post('/api/v1/volume/:volume/users', both, routes.volume.addUser);
+    this.app.del('/api/v1/volume/:volume/users/:username', both, routes.volume.removeUser);
 
-        // form based login routes used by oauth2 frame
-        that.app.get('/api/v1/session/login', routes.oauth2.loginForm);
-        that.app.post('/api/v1/session/login', routes.oauth2.login);
-        that.app.get('/api/v1/session/logout', routes.oauth2.logout);
-        that.app.get('/api/v1/session/callback', routes.oauth2.callback);
-        that.app.get('/api/v1/session/account', routes.oauth2.account); // TODO this is only temporary
+    // form based login routes used by oauth2 frame
+    this.app.get('/api/v1/session/login', routes.oauth2.loginForm);
+    this.app.post('/api/v1/session/login', routes.oauth2.login);
+    this.app.get('/api/v1/session/logout', routes.oauth2.logout);
+    this.app.get('/api/v1/session/callback', routes.oauth2.callback);
+    this.app.get('/api/v1/session/account', routes.oauth2.account); // TODO this is only temporary
 
-        // oauth2 routes
-        that.app.get('/api/v1/oauth/dialog/authorize', routes.oauth2.authorization);
-        that.app.post('/api/v1/oauth/dialog/authorize/decision', routes.oauth2.decision);
-        that.app.post('/api/v1/oauth/token', routes.oauth2.token);
-        that.app.get('/api/v1/oauth/yellowtent.js', routes.oauth2.library);
+    // oauth2 routes
+    this.app.get('/api/v1/oauth/dialog/authorize', routes.oauth2.authorization);
+    this.app.post('/api/v1/oauth/dialog/authorize/decision', routes.oauth2.decision);
+    this.app.post('/api/v1/oauth/token', routes.oauth2.token);
+    this.app.get('/api/v1/oauth/yellowtent.js', routes.oauth2.library);
 
-        // app routes
-        that.app.post('/api/v1/app/install', both, that._requirePassword.bind(that), routes.apps.installApp);
-    });
+    // app routes
+    this.app.post('/api/v1/app/install', both, this._requirePassword.bind(this), routes.apps.installApp);
 
-    this.app.set('port', that.config.port);
+    this.app.set('port', this.config.port);
 
-    if (!that.config.silent) {
+    if (!this.config.silent) {
         console.log('Server listening on port ' + this.app.get('port'));
-        console.log('Using data root:', that.config.dataRoot);
-        console.log('Using config root:', that.config.configRoot);
-        console.log('Using mount root:', that.config.mountRoot);
+        console.log('Using data root:', this.config.dataRoot);
+        console.log('Using config root:', this.config.configRoot);
+        console.log('Using mount root:', this.config.mountRoot);
     }
 
     // ensure data/config/mount paths
-    mkdirp.sync(that.config.dataRoot);
-    mkdirp.sync(that.config.configRoot);
-    mkdirp.sync(that.config.mountRoot);
+    mkdirp.sync(this.config.dataRoot);
+    mkdirp.sync(this.config.configRoot);
+    mkdirp.sync(this.config.mountRoot);
 
     async.series([
-        userdb.init.bind(null, that.config.configRoot),
-        tokendb.init.bind(null, that.config.configRoot),
-        clientdb.init.bind(null, that.config.configRoot),
+        userdb.init.bind(null, this.config.configRoot),
+        tokendb.init.bind(null, this.config.configRoot),
+        clientdb.init.bind(null, this.config.configRoot),
         function (callback) {
             // TODO this should happen somewhere else..no clue where - Johannes
             clientdb.del('cid-webadmin', function () {
@@ -282,8 +280,8 @@ Server.prototype._initialize = function (callback) {
                 });
             });
         },
-        authcodedb.init.bind(null, that.config.configRoot),
-        appdb.init.bind(null, that.config.configRoot),
+        authcodedb.init.bind(null, this.config.configRoot),
+        appdb.init.bind(null, this.config.configRoot),
         function initializeRoutes(callback) {
             routes.volume.initialize(that.config);
             routes.sync.initialize(that.config);
