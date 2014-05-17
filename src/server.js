@@ -164,7 +164,7 @@ Server.prototype._initialize = function (callback) {
 
     this.app
        .use(middleware.timeout(REQUEST_TIMEOUT))
-       .use(express.limit(UPLOAD_LIMIT))
+//       .use(express.limit(UPLOAD_LIMIT))
        .use(json)
        .use(urlencoded)
        .use(middleware.cookieParser())
