@@ -104,7 +104,7 @@ function createVolume(req, res, next) {
 
 function listFiles(req, res, next) {
     // TODO this is unsafe params index might change - Johannes
-    var directory = req.params.length !== 0 ? req.params[0] : '';
+    var directory = req.params[0] || '';
 
     req.volume.listFiles(directory, function (error, files) {
         if (error && error.reason === VolumeError.READ_ERROR) {
