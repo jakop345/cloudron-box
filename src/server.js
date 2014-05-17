@@ -31,7 +31,6 @@ function Server(config) {
     this.app = null;
 }
 
-
 // Success handler
 Server.prototype._successHandler = function (success, req, res, next) {
     // for now when we hit here, we always send json back
@@ -115,8 +114,7 @@ Server.prototype._requireAdmin = function (req, res, next) {
     next();
 };
 
-Server.prototype._initialize = function (callback) {
-    var that = this;
+Server.prototype._initializeExpressSync = function (callback) {
     this.app = express();
 
     var QUERY_LIMIT = '10mb', // max size for json and urlencoded queries
@@ -252,13 +250,10 @@ Server.prototype._initialize = function (callback) {
 
     // app routes
     router.post('/api/v1/app/install', both, this._requirePassword.bind(this), routes.apps.installApp);
+};
 
-    if (!this.config.silent) {
-        console.log('Server listening on port ' + this.config.port);
-        console.log('Using data root:', this.config.dataRoot);
-        console.log('Using config root:', this.config.configRoot);
-        console.log('Using mount root:', this.config.mountRoot);
-    }
+Server.prototype._initialize2 = function (callback) {
+    var that = this;
 
     // ensure data/config/mount paths
     mkdirp.sync(this.config.dataRoot);
@@ -319,14 +314,20 @@ Server.prototype._listen = function (callback) {
 
 Server.prototype.start = function (callback) {
     assert(typeof callback === 'function');
+    assert(this.app === null, 'Server is already up and running.');
 
     var that = this;
 
-    if (this.app) {
-        return callback(new Error('Server is already up and running.'));
+    this._initializeExpressSync();
+
+    if (!this.config.silent) {
+        console.log('Server listening on port ' + this.config.port);
+        console.log('Using data root:', this.config.dataRoot);
+        console.log('Using config root:', this.config.configRoot);
+        console.log('Using mount root:', this.config.mountRoot);
     }
 
-    this._initialize(function (err) {
+    this._initialize2(function (err) {
         if (err) return callback(err);
 
         that._listen(function (err) {
@@ -338,7 +339,6 @@ Server.prototype.start = function (callback) {
 };
 
 Server.prototype.stop = function (callback) {
-    // Any other way to check if app is an object we expect?
     assert(typeof callback === 'function');
 
     var that = this;
@@ -349,7 +349,6 @@ Server.prototype.stop = function (callback) {
 
     this.app.httpServer.close(function () {
         that.app.httpServer.unref();
-        // TODO should delete the app variable
         that.app = null;
 
         callback(null);

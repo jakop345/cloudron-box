@@ -71,8 +71,7 @@ describe('Server', function () {
         });
 
         it('should fail because already running', function (done) {
-            server.start(function (error) {
-                expect(error).to.be.ok();
+            expect(server.start).to.throwException(function (e) {
                 done();
             });
         });
