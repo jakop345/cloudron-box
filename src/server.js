@@ -28,7 +28,8 @@ function Server(config) {
     assert(typeof config === 'object');
 
     this.config = config;
-    this.app = null;
+    this.httpServer = null; // http server
+    this.app = null; // express
 }
 
 // Success handler
@@ -291,7 +292,7 @@ Server.prototype._initialize2 = function (callback) {
 
 // TODO maybe we can get rid of that function and inline it - Johannes
 Server.prototype._listen = function (callback) {
-    this.app.httpServer = http.createServer(this.app);
+    this.httpServer = http.createServer(this.app);
 
     function callbackWrapper(error) {
         if (callback) {
@@ -302,12 +303,12 @@ Server.prototype._listen = function (callback) {
         }
     }
 
-    this.app.httpServer.listen(this.config.port, function (err) {
+    this.httpServer.listen(this.config.port, function (err) {
         if (err) return callbackWrapper(err);
         callbackWrapper();
     });
 
-    this.app.httpServer.on('error', function (err) {
+    this.httpServer.on('error', function (err) {
         callbackWrapper(err);
     });
 };
@@ -343,12 +344,12 @@ Server.prototype.stop = function (callback) {
 
     var that = this;
 
-    if (!this.app.httpServer) {
+    if (!this.httpServer) {
         return callback(null);
     }
 
-    this.app.httpServer.close(function () {
-        that.app.httpServer.unref();
+    this.httpServer.close(function () {
+        that.httpServer.unref();
         that.app = null;
 
         callback(null);
