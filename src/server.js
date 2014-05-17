@@ -124,6 +124,7 @@ Server.prototype._loadMiddleware = function () {
         middleware.__defineGetter__(name, load);
     });
     middleware.morgan = require('morgan');
+    middleware.timeout = require('connect-timeout');
     return middleware;
 };
 
@@ -157,7 +158,7 @@ Server.prototype._initialize = function (callback) {
     var router = new express.Router();
 
     this.app
-       .use(express.timeout(REQUEST_TIMEOUT))
+       .use(middleware.timeout(REQUEST_TIMEOUT))
        .use(express.limit(UPLOAD_LIMIT))
        .use(json)
        .use(urlencoded)
