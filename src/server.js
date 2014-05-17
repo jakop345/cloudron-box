@@ -225,7 +225,7 @@ Server.prototype._initialize = function (callback) {
     router.get('/api/v1/volume/:volume/ismounted', both, routes.volume.isMounted);
     router.get('/api/v1/volume/:volume/users', both, routes.volume.listUsers);
     router.post('/api/v1/volume/:volume/users', both, routes.volume.addUser);
-    router.del('/api/v1/volume/:volume/users/:username', both, routes.volume.removeUser);
+    router.delete('/api/v1/volume/:volume/users/:username', both, routes.volume.removeUser);
 
     // form based login routes used by oauth2 frame
     router.get('/api/v1/session/login', routes.oauth2.loginForm);
