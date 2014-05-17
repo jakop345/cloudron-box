@@ -128,6 +128,8 @@ Server.prototype._loadMiddleware = function () {
     middleware.session = require('express-session');
     middleware.favicon = require('serve-favicon');
     middleware.cookieParser = require('cookie-parser');
+    middleware.json = require('body-parser').json;
+    middleware.urlencoded = require('body-parser').urlencoded;
     return middleware;
 };
 
@@ -144,8 +146,8 @@ Server.prototype._initialize = function (callback) {
     var REQUEST_TIMEOUT = 10000, // timeout for all requests
         FILE_TIMEOUT = 3 * 60 * 1000; // increased timeout for file uploads (3 mins)
 
-    var json = express.json({ strict: true, limit: QUERY_LIMIT }), // application/json
-        urlencoded = express.urlencoded({ limit: QUERY_LIMIT }); // application/x-www-form-urlencoded
+    var json = middleware.json({ strict: true, limit: QUERY_LIMIT }), // application/json
+        urlencoded = middleware.urlencoded({ limit: QUERY_LIMIT }); // application/x-www-form-urlencoded
 
     // Passport configuration
     require('./auth');
@@ -224,10 +226,10 @@ Server.prototype._initialize = function (callback) {
                                            routes.file.multipart({ maxFieldsSize: FIELD_LIMIT, limit: FILE_SIZE_LIMIT, timeout: FILE_TIMEOUT }),
                                            routes.file.putFile);
 
-    router.post('/api/v1/fileops/:syncerVolume/copy', both, routes.sync.requireMountedVolume, express.json({ strict: true }), routes.fileops.copy);
-    router.post('/api/v1/fileops/:syncerVolume/move', both, routes.sync.requireMountedVolume, express.json({ strict: true }), routes.fileops.move);
-    router.post('/api/v1/fileops/:syncerVolume/delete', both, routes.sync.requireMountedVolume, express.json({ strict: true }), routes.fileops.remove);
-    router.post('/api/v1/fileops/:syncerVolume/create_dir', both, routes.sync.requireMountedVolume, express.json({ strict: true }), routes.fileops.createDirectory);
+    router.post('/api/v1/fileops/:syncerVolume/copy', both, routes.sync.requireMountedVolume, routes.fileops.copy);
+    router.post('/api/v1/fileops/:syncerVolume/move', both, routes.sync.requireMountedVolume, routes.fileops.move);
+    router.post('/api/v1/fileops/:syncerVolume/delete', both, routes.sync.requireMountedVolume, routes.fileops.remove);
+    router.post('/api/v1/fileops/:syncerVolume/create_dir', both, routes.sync.requireMountedVolume, routes.fileops.createDirectory);
 
     // volume related routes
     router.param('volume', both, routes.volume.attachVolume);
