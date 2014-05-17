@@ -125,6 +125,7 @@ Server.prototype._loadMiddleware = function () {
     });
     middleware.morgan = require('morgan');
     middleware.timeout = require('connect-timeout');
+    middleware.session = require('express-session');
     return middleware;
 };
 
@@ -166,7 +167,7 @@ Server.prototype._initialize = function (callback) {
        .use(express.favicon(__dirname + '/../assets/favicon.ico'))
        // API calls that do not require authorization
        .use(middleware.cors({ origins: [ '*' ], allowCredentials: true }))
-       .use(express.session({ secret: 'yellow is blue' }))
+       .use(middleware.session({ secret: 'yellow is blue' }))
        .use(passport.initialize())
        .use(passport.session())
 
