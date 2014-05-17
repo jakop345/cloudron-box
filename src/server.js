@@ -254,17 +254,17 @@ Server.prototype._initializeExpressSync = function (callback) {
 };
 
 Server.prototype._initialize2 = function (callback) {
-    var that = this;
+    var config = this.config;
 
     // ensure data/config/mount paths
-    mkdirp.sync(this.config.dataRoot);
-    mkdirp.sync(this.config.configRoot);
-    mkdirp.sync(this.config.mountRoot);
+    mkdirp.sync(config.dataRoot);
+    mkdirp.sync(config.configRoot);
+    mkdirp.sync(config.mountRoot);
 
     async.series([
-        userdb.init.bind(null, this.config.configRoot),
-        tokendb.init.bind(null, this.config.configRoot),
-        clientdb.init.bind(null, this.config.configRoot),
+        userdb.init.bind(null, config.configRoot),
+        tokendb.init.bind(null, config.configRoot),
+        clientdb.init.bind(null, config.configRoot),
         function (callback) {
             // TODO this should happen somewhere else..no clue where - Johannes
             clientdb.del('cid-webadmin', function () {
@@ -277,14 +277,14 @@ Server.prototype._initialize2 = function (callback) {
         authcodedb.init.bind(null, this.config.configRoot),
         appdb.init.bind(null, this.config.configRoot),
         function initializeRoutes(callback) {
-            routes.volume.initialize(that.config);
-            routes.sync.initialize(that.config);
-            routes.user.initialize(that.config);
-            routes.apps.initialize(that.config);
+            routes.volume.initialize(config);
+            routes.sync.initialize(config);
+            routes.user.initialize(config);
+            routes.apps.initialize(config);
             callback(null);
         },
         function initializeModules(callback) {
-            apps.initialize(that.config);
+            apps.initialize(config);
             callback(null);
         }
     ], callback);
