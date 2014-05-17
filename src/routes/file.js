@@ -7,7 +7,9 @@ var HttpError = require('../httperror.js'),
     express = require('express'),
     util = require('util'),
     path = require('path'),
-    safe = require('safetydance');
+    safe = require('safetydance'),
+    multiparty = require('multiparty'),
+    middleware = require('../middleware/index.js');
 
 exports = module.exports = {
     read: read,
@@ -112,22 +114,46 @@ function metadata(req, res, next) {
     });
 }
 
+function _mime(req) {
+  var str = req.headers['content-type'] || '';
+  return str.split(';')[0];
+};
+
 /*
  * Add this to the route to allow multipart file uploads to be extracted to the repo's tmp dir.
  * This is required because rename() works only within the same file system.
  */
 function multipart(options) {
     return function (req, res, next) {
-        var parser = express.multipart({
+        if (_mime(req) !== 'multipart/form-data') return next(new HttpError(400, 'Invalid content-type. Expecting multipart'));
+
+        var form = new multiparty.Form({
             uploadDir: req.volume.tmpPath, // this makes rename() possible
             keepExtensions: true,
             maxFieldsSize: options.maxFieldsSize || (2 * 1024), // only field size, not files
-            limit: options.limit || '500mb' // file sizes
-        }); // multipart/form-data
+            limit: options.limit || '500mb', // file sizes
+            autoFiles: true
+        });
 
         // increase timeout of file uploads by default to 3 mins
         if (req.clearTimeout) req.clearTimeout(); // clear any previous installed timeout middleware
-        express.timeout(options.timeout || (3 * 60 * 1000))(req, res, function () { parser(req, res, next); });
+
+        middleware.timeout(options.timeout || (3 * 60 * 1000))(req, res, function () {
+            req.fields = { };
+            req.files = { };
+            form.parse(req, function (err, fields, files) {
+                if (err) return next(new HttpError(404, 'Error parsing request'));
+                next(null);
+            });
+
+            form.on('file', function (name, file) {
+                req.files[name] = file;
+            });
+
+            form.on('field', function (name, value) {
+                req.fields[name] = value; // otherwise fields.name is an array
+            });
+        });
     };
 }
 
@@ -154,7 +180,7 @@ function _getConflictFilenameSync(renamePattern, file, checkoutDir) {
  *
  */
 function putFile(req, res, next) {
-    var data = safe.JSON.parse(req.body.data);
+    var data = safe.JSON.parse(req.fields.data);
     var filePath = req.params[0];
 
     if (!data) return next(new HttpError(400, 'Cannot parse data field:' + safe.error.message));
