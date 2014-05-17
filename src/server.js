@@ -201,40 +201,40 @@ Server.prototype._initializeExpressSync = function (callback) {
         });
     });
 
-    router.post('/api/v1/sync/:syncerVolume/diff', both, routes.sync.requireMountedVolume, routes.sync.diff);
-    router.post('/api/v1/sync/:syncerVolume/delta', both, routes.sync.requireMountedVolume, routes.sync.delta);
+    router.post('/api/v1/sync/:syncerVolume/diff', routes.sync.requireMountedVolume, routes.sync.diff);
+    router.post('/api/v1/sync/:syncerVolume/delta', routes.sync.requireMountedVolume, routes.sync.delta);
 
-    router.get('/api/v1/revisions/:syncerVolume/*', both, routes.sync.requireMountedVolume, routes.file.revisions);
-    router.get('/api/v1/file/:syncerVolume/*', both, routes.sync.requireMountedVolume, routes.file.read);
-    router.get('/api/v1/metadata/:syncerVolume/*', both, routes.sync.requireMountedVolume, routes.file.metadata);
-    router.put('/api/v1/file/:syncerVolume/*', both, routes.sync.requireMountedVolume,
+    router.get('/api/v1/revisions/:syncerVolume/*', routes.sync.requireMountedVolume, routes.file.revisions);
+    router.get('/api/v1/file/:syncerVolume/*', routes.sync.requireMountedVolume, routes.file.read);
+    router.get('/api/v1/metadata/:syncerVolume/*', routes.sync.requireMountedVolume, routes.file.metadata);
+    router.put('/api/v1/file/:syncerVolume/*', routes.sync.requireMountedVolume,
                                            routes.file.multipart({ maxFieldsSize: FIELD_LIMIT, limit: FILE_SIZE_LIMIT, timeout: FILE_TIMEOUT }),
                                            routes.file.putFile);
 
-    router.post('/api/v1/fileops/:syncerVolume/copy', both, routes.sync.requireMountedVolume, routes.fileops.copy);
-    router.post('/api/v1/fileops/:syncerVolume/move', both, routes.sync.requireMountedVolume, routes.fileops.move);
-    router.post('/api/v1/fileops/:syncerVolume/delete', both, routes.sync.requireMountedVolume, routes.fileops.remove);
-    router.post('/api/v1/fileops/:syncerVolume/create_dir', both, routes.sync.requireMountedVolume, routes.fileops.createDirectory);
+    router.post('/api/v1/fileops/:syncerVolume/copy', routes.sync.requireMountedVolume, routes.fileops.copy);
+    router.post('/api/v1/fileops/:syncerVolume/move', routes.sync.requireMountedVolume, routes.fileops.move);
+    router.post('/api/v1/fileops/:syncerVolume/delete', routes.sync.requireMountedVolume, routes.fileops.remove);
+    router.post('/api/v1/fileops/:syncerVolume/create_dir', routes.sync.requireMountedVolume, routes.fileops.createDirectory);
 
-    // volume related routes
+    router.get('/api/v1/volume/list', both, routes.volume.listVolumes);
+    router.post('/api/v1/volume/create', both, this._requirePassword.bind(this), routes.volume.createVolume);
+
+    // volume resource related routes
     router.param('volume', function (req, res, next, id) {
         both(req, res, function (err) {
             if (err) return next(err);
             routes.volume.attachVolume(req, res, next, id);
         });
     });
-
-    router.get('/api/v1/volume/:volume/list', both, routes.volume.requireMountedVolume, routes.volume.listFiles);
-    router.get('/api/v1/volume/:volume/list/*', both, routes.volume.requireMountedVolume, routes.volume.listFiles);
-    router.get('/api/v1/volume/list', both, routes.volume.listVolumes);
-    router.post('/api/v1/volume/create', both, this._requirePassword.bind(this), routes.volume.createVolume);
-    router.post('/api/v1/volume/:volume/delete', both, this._requirePassword.bind(this), routes.volume.deleteVolume);
-    router.post('/api/v1/volume/:volume/mount', both, this._requirePassword.bind(this), routes.volume.mount);
-    router.post('/api/v1/volume/:volume/unmount', both, routes.volume.unmount);
-    router.get('/api/v1/volume/:volume/ismounted', both, routes.volume.isMounted);
-    router.get('/api/v1/volume/:volume/users', both, routes.volume.listUsers);
-    router.post('/api/v1/volume/:volume/users', both, routes.volume.addUser);
-    router.delete('/api/v1/volume/:volume/users/:username', both, routes.volume.removeUser);
+    router.get('/api/v1/volume/:volume/list', routes.volume.requireMountedVolume, routes.volume.listFiles);
+    router.get('/api/v1/volume/:volume/list/*', routes.volume.requireMountedVolume, routes.volume.listFiles);
+    router.post('/api/v1/volume/:volume/delete', this._requirePassword.bind(this), routes.volume.deleteVolume);
+    router.post('/api/v1/volume/:volume/mount', this._requirePassword.bind(this), routes.volume.mount);
+    router.post('/api/v1/volume/:volume/unmount', routes.volume.unmount);
+    router.get('/api/v1/volume/:volume/ismounted', routes.volume.isMounted);
+    router.get('/api/v1/volume/:volume/users', routes.volume.listUsers);
+    router.post('/api/v1/volume/:volume/users', routes.volume.addUser);
+    router.delete('/api/v1/volume/:volume/users/:username', routes.volume.removeUser);
 
     // form based login routes used by oauth2 frame
     router.get('/api/v1/session/login', routes.oauth2.loginForm);
