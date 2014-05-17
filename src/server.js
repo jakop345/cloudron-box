@@ -195,7 +195,12 @@ Server.prototype._initialize = function (callback) {
     router.get('/api/v1/user/info', bearer, routes.user.info);
     router.get('/api/v1/user/list', bearer, routes.user.list);
 
-    router.param('syncerVolume', both, routes.sync.attachRepo);
+    router.param('syncerVolume', function (req, res, next, id) {
+        both(req, res, function (err) {
+            if (err) return next(err);
+            routes.sync.attachRepo(req, res, next, id);
+        });
+    });
 
     router.post('/api/v1/sync/:syncerVolume/diff', both, routes.sync.requireMountedVolume, routes.sync.diff);
     router.post('/api/v1/sync/:syncerVolume/delta', both, routes.sync.requireMountedVolume, routes.sync.delta);
@@ -213,7 +218,12 @@ Server.prototype._initialize = function (callback) {
     router.post('/api/v1/fileops/:syncerVolume/create_dir', both, routes.sync.requireMountedVolume, routes.fileops.createDirectory);
 
     // volume related routes
-    router.param('volume', both, routes.volume.attachVolume);
+    router.param('volume', function (req, res, next, id) {
+        both(req, res, function (err) {
+            if (err) return next(err);
+            routes.volume.attachVolume(req, res, next, id);
+        });
+    });
 
     router.get('/api/v1/volume/:volume/list', both, routes.volume.requireMountedVolume, routes.volume.listFiles);
     router.get('/api/v1/volume/:volume/list/*', both, routes.volume.requireMountedVolume, routes.volume.listFiles);
