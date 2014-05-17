@@ -127,6 +127,7 @@ Server.prototype._loadMiddleware = function () {
     middleware.timeout = require('connect-timeout');
     middleware.session = require('express-session');
     middleware.favicon = require('serve-favicon');
+    middleware.cookieParser = require('cookie-parser');
     return middleware;
 };
 
@@ -164,7 +165,7 @@ Server.prototype._initialize = function (callback) {
        .use(express.limit(UPLOAD_LIMIT))
        .use(json)
        .use(urlencoded)
-       .use(express.cookieParser())
+       .use(middleware.cookieParser())
        .use(middleware.favicon(__dirname + '/../assets/favicon.ico'))
        // API calls that do not require authorization
        .use(middleware.cors({ origins: [ '*' ], allowCredentials: true }))
