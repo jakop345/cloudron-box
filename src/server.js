@@ -123,6 +123,7 @@ Server.prototype._loadMiddleware = function () {
         function load() { return require('./middleware/' + name); }
         middleware.__defineGetter__(name, load);
     });
+    middleware.morgan = require('morgan');
     return middleware;
 };
 
@@ -150,7 +151,7 @@ Server.prototype._initialize = function (callback) {
     this.app.set('view engine', 'ejs');
 
     if (!this.config.silent) {
-        this.app.use(express.logger({ format: 'dev', immediate: false }));
+        this.app.use(middleware.morgan({ format: 'dev', immediate: false }));
     }
 
     var router = new express.Router();

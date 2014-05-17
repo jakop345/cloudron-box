@@ -221,6 +221,16 @@
       "from": "https://registry.npmjs.org/mkdirp/-/mkdirp-0.3.5.tgz",
       "resolved": "https://registry.npmjs.org/mkdirp/-/mkdirp-0.3.5.tgz"
     },
+    "morgan": {
+      "version": "1.0.1",
+      "from": "morgan@",
+      "dependencies": {
+        "bytes": {
+          "version": "0.3.0",
+          "from": "bytes@0.3.0"
+        }
+      }
+    },
     "node-uuid": {
       "version": "1.4.1",
       "from": "https://registry.npmjs.org/node-uuid/-/node-uuid-1.4.1.tgz",
