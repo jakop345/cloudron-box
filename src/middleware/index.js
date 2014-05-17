@@ -2,5 +2,12 @@
 
 exports = module.exports = {
     contentType: require('./contentType'),
-    cors: require('./cors')
+    cookieParser: require('cookie-parser'),
+    cors: require('./cors'),
+    favicon: require('serve-favicon'),
+    json: require('body-parser').json,
+    morgan: require('morgan'),
+    session: require('express-session'),
+    timeout: require('connect-timeout'),
+    urlencoded: require('body-parser').urlencoded
 };

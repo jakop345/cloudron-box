@@ -19,7 +19,8 @@ var express = require('express'),
     assert = require('assert'),
     pkg = require('./../package.json'),
     async = require('async'),
-    apps = require('./apps');
+    apps = require('./apps'),
+    middleware = require('./middleware');
 
 exports = module.exports = Server;
 
@@ -114,28 +115,8 @@ Server.prototype._requireAdmin = function (req, res, next) {
     next();
 };
 
-Server.prototype._loadMiddleware = function () {
-    var middleware = { };
-    // TODO that folder lookup is a bit silly maybe with the '../' - Johannes
-    fs.readdirSync(__dirname + '/middleware').forEach(function (filename) {
-        if (!/\.js$/.test(filename)) return;
-        var name = path.basename(filename, '.js');
-        function load() { return require('./middleware/' + name); }
-        middleware.__defineGetter__(name, load);
-    });
-    middleware.morgan = require('morgan');
-    middleware.timeout = require('connect-timeout');
-    middleware.session = require('express-session');
-    middleware.favicon = require('serve-favicon');
-    middleware.cookieParser = require('cookie-parser');
-    middleware.json = require('body-parser').json;
-    middleware.urlencoded = require('body-parser').urlencoded;
-    return middleware;
-};
-
 Server.prototype._initialize = function (callback) {
     var that = this;
-    var middleware = this._loadMiddleware();
     this.app = express();
 
     var QUERY_LIMIT = '10mb', // max size for json and urlencoded queries
