@@ -253,10 +253,8 @@ Server.prototype._initialize = function (callback) {
     // app routes
     router.post('/api/v1/app/install', both, this._requirePassword.bind(this), routes.apps.installApp);
 
-    this.app.set('port', this.config.port);
-
     if (!this.config.silent) {
-        console.log('Server listening on port ' + this.app.get('port'));
+        console.log('Server listening on port ' + this.config.port);
         console.log('Using data root:', this.config.dataRoot);
         console.log('Using config root:', this.config.configRoot);
         console.log('Using mount root:', this.config.mountRoot);
@@ -309,7 +307,7 @@ Server.prototype._listen = function (callback) {
         }
     }
 
-    this.app.httpServer.listen(this.app.get('port'), function (err) {
+    this.app.httpServer.listen(this.config.port, function (err) {
         if (err) return callbackWrapper(err);
         callbackWrapper();
     });
