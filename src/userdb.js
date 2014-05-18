@@ -24,9 +24,8 @@ exports = module.exports = {
     removePrivates: removePrivates
 };
 
-function init(configDir, callback) {
+function init(configDir) {
     assert(typeof configDir === 'string');
-    assert(typeof callback === 'function');
 
     db = new DatabaseTable(path.join(configDir, 'db/users'), {
         id: { type: 'String', hashKey: true },
@@ -40,8 +39,6 @@ function init(configDir, callback) {
         modified_at: { type: 'String' },
         admin: { type: 'Boolean' }
     });
-
-    callback(null);
 }
 
 function removePrivates(obj) {

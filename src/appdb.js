@@ -20,17 +20,14 @@ exports = module.exports = {
     getAll: getAll
 };
 
-function init(configDir, callback) {
+function init(configDir) {
     assert(typeof configDir === 'string');
-    assert(typeof callback === 'function');
 
     db = new DatabaseTable(path.join(configDir, 'db/apps'), {
         id: { type: 'String', hashKey: true },
         status: { type: 'String' },
         config: { type: 'String' }
     });
-
-    callback(null);
 }
 
 function get(appId, callback) {

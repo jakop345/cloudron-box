@@ -39,21 +39,16 @@ function setup(done) {
     mkdirp.sync(config.configRoot);
     mkdirp.sync(config.mountRoot);
 
-    userdb.init(config.configRoot, function (error) {
-        expect(error).to.be(null);
+    userdb.init(config.configRoot);
+    tokendb.init(config.configRoot);
 
-        tokendb.init(config.configRoot, function (error) {
-            expect(error).to.be(null);
+    User.create(USERNAME, PASSWORD, EMAIL, {}, function (error, result) {
+        expect(error).to.not.be.ok();
+        expect(result).to.be.ok();
 
-            User.create(USERNAME, PASSWORD, EMAIL, {}, function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result).to.be.ok();
+        USER = result;
 
-                USER = result;
-
-                done();
-            });
-        });
+        done();
     });
 }
 

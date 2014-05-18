@@ -20,9 +20,8 @@ exports = module.exports = {
     delByUserId: delByUserId
 };
 
-function init(configDir, callback) {
+function init(configDir) {
     assert(typeof configDir === 'string');
-    assert(typeof callback === 'function');
 
     db = new DatabaseTable(path.join(configDir, 'db/token'), {
         accessToken: { type: 'String', hashKey: true },
@@ -32,8 +31,6 @@ function init(configDir, callback) {
     });
 
     debug('init: ' + path.join(configDir, 'db/token'));
-
-    callback(null);
 }
 
 function generateToken() {

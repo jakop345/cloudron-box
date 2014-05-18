@@ -9,18 +9,15 @@ var express = require('express'),
     fs = require('fs'),
     mkdirp = require('mkdirp'),
     DatabaseError = require('./databaseerror.js'),
-    userdb = require('./userdb.js'),
-    tokendb = require('./tokendb.js'),
-    clientdb = require('./clientdb.js'),
-    authcodedb = require('./authcodedb.js'),
-    appdb = require('./appdb.js'),
     routes = require('./routes/index.js'),
     debug = require('debug')('server:server'),
     assert = require('assert'),
     pkg = require('./../package.json'),
     async = require('async'),
     apps = require('./apps'),
-    middleware = require('./middleware');
+    middleware = require('./middleware'),
+    database = require('./database.js'),
+    userdb = require('./userdb');
 
 exports = module.exports = Server;
 
@@ -262,20 +259,7 @@ Server.prototype._initialize2 = function (callback) {
     mkdirp.sync(config.mountRoot);
 
     async.series([
-        userdb.init.bind(null, config.configRoot),
-        tokendb.init.bind(null, config.configRoot),
-        clientdb.init.bind(null, config.configRoot),
-        function (callback) {
-            // TODO this should happen somewhere else..no clue where - Johannes
-            clientdb.del('cid-webadmin', function () {
-                clientdb.add('cid-webadmin', 'cid-webadmin', 'unused', 'WebAdmin', 'https://localhost', function (error) {
-                    if (error && error.reason !== DatabaseError.ALREADY_EXISTS) return callback(new Error('Error initializing client database with webadmin'));
-                    return callback(null);
-                });
-            });
-        },
-        authcodedb.init.bind(null, this.config.configRoot),
-        appdb.init.bind(null, this.config.configRoot),
+        database.initialize.bind(null, config),
         function initializeRoutes(callback) {
             routes.volume.initialize(config);
             routes.sync.initialize(config);

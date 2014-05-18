@@ -50,14 +50,10 @@ function setup(done) {
     mkdirp.sync(config.configRoot);
     mkdirp.sync(config.mountRoot);
 
-    userdb.init(config.configRoot, function (error) {
-        expect(error).to.be(null);
+    userdb.init(config.configRoot);
+    tokendb.init(config.configRoot);
 
-        tokendb.init(config.configRoot, function (error) {
-            expect(error).to.be(null);
-            done();
-        });
-    });
+    done();
 }
 
 function cleanup(done) {

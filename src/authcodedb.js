@@ -16,9 +16,8 @@ exports = module.exports = {
     del: del
 };
 
-function init(configDir, callback) {
+function init(configDir) {
     assert(typeof configDir === 'string');
-    assert(typeof callback === 'function');
 
     db = new DatabaseTable(path.join(configDir, 'db/authcode'), {
         authCode: { type: 'String', hashKey: true },
@@ -26,8 +25,6 @@ function init(configDir, callback) {
         userId: { type: 'String' },
         clientId: { type: 'String' }
     });
-
-    callback(null);
 }
 
 function get(authCode, callback) {

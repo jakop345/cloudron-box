@@ -17,9 +17,8 @@ exports = module.exports = {
     del: del
 };
 
-function init(configDir, callback) {
+function init(configDir) {
     assert(typeof configDir === 'string');
-    assert(typeof callback === 'function');
 
     db = new DatabaseTable(path.join(configDir, 'db/client'), {
         id: { type: 'String', hashKey: true },
@@ -28,8 +27,6 @@ function init(configDir, callback) {
         name: { type: 'String' },
         redirectURI: { type: 'String' }
     });
-
-    callback(null);
 }
 
 function get(id, callback) {
