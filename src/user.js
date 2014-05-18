@@ -106,8 +106,8 @@ function createUser(username, password, email, options, callback) {
                 publicPem: keyPair.toPublicPem(),
                 admin: admin,
                 salt: salt.toString('hex'),
-                created_at: now,
-                updated_at: now
+                createdAt: now,
+                modifiedAt: now
             };
 
             userdb.add(username, user, function (error) {
@@ -205,7 +205,7 @@ function changePassword(username, oldPassword, newPassword, callback) {
             var privateKeyPem = aes.decrypt(user.privatePemCipher, oldPassword, saltBuffer);
             var keyPair = ursa.createPrivateKey(privateKeyPem, oldPassword, 'utf8');
 
-            user.updated_at = (new Date()).toUTCString();
+            user.modifiedAt = (new Date()).toUTCString();
             user.password = new Buffer(derivedKey, 'binary').toString('hex');
             user.privatePemCipher = aes.encrypt(keyPair.toPrivatePem(), newPassword, saltBuffer);
 

@@ -64,8 +64,8 @@ function add(req, res, next) {
                 publicPem: keyPair.toPublicPem(),
                 admin: !!req.temporaryAdminFlag,
                 salt: salt.toString('hex'),
-                created_at: now,
-                updated_at: now
+                createdAt: now,
+                modifiedAt: now
             };
 
             userdb.add(req.body.username, user, function (error) {

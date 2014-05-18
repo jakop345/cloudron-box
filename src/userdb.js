@@ -35,8 +35,8 @@ function init(configDir) {
         publicPem: { type: 'String' },
         privatePemCipher: { type: 'String', priv: true },
         salt: { type: 'String', priv: true },
-        created_at: { type: 'String' },
-        modified_at: { type: 'String' },
+        createdAt: { type: 'String' },
+        modifiedAt: { type: 'String' },
         admin: { type: 'Boolean' }
     });
 }
