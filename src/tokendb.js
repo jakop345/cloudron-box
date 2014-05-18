@@ -4,7 +4,7 @@ var DatabaseError = require('./databaseerror'),
     DatabaseTable = require('./databasetable'),
     path = require('path'),
     uuid = require('node-uuid'),
-    debug = require('debug')('authserver:tokendb'),
+    debug = require('debug')('tokendb'),
     assert = require('assert');
 
 // database
@@ -20,17 +20,9 @@ exports = module.exports = {
     delByUserId: delByUserId
 };
 
-function init(configDir) {
-    assert(typeof configDir === 'string');
-
-    db = new DatabaseTable(path.join(configDir, 'db/token'), {
-        accessToken: { type: 'String', hashKey: true },
-        userId: { type: 'String' },
-        clientId: { type: 'String' },
-        expires: { type: 'String' }
-    });
-
-    debug('init: ' + path.join(configDir, 'db/token'));
+function init(_db) {
+    assert(typeof _db === 'object');
+    db = _db;
 }
 
 function generateToken() {
@@ -42,10 +34,12 @@ function get(accessToken, callback) {
     assert(typeof accessToken === 'string');
     assert(typeof callback === 'function');
 
-    debug('get: ' + accessToken);
+    db.get('SELECT * FROM tokens WHERE accessToken = ?', [ accessToken ], function (error, result) {
+        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
 
-    db.get(accessToken, function (error, result) {
-        callback(error, result);
+        if (typeof result === 'undefined') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
+
+        callback(null, result);
     });
 }
 
@@ -58,16 +52,19 @@ function add(accessToken, userId, clientId, expires, callback) {
     assert(typeof callback === 'function');
 
     var data = {
-        accessToken: accessToken,
-        userId: userId,
-        clientId: clientId,
-        expires: expires
+        $accessToken: accessToken,
+        $userId: userId,
+        $clientId: clientId,
+        $expires: expires
     };
 
-    debug('add: ' + JSON.stringify(data));
+    db.run('INSERT INTO tokens (accessToken, userId, clientId, expires) '
+           + 'VALUES ($accessToken, $userId, $clientId, $expires)',
+           data, function (error) {
+        if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(error, DatabaseError.ALREADY_EXISTS));
+        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
 
-    db.put(data, function (error) {
-        callback(error);
+        callback(null);
     });
 }
 
@@ -76,9 +73,10 @@ function del(accessToken, callback) {
     assert(typeof accessToken === 'string');
     assert(typeof callback === 'function');
 
-    debug('del: ' + accessToken);
+    db.run('DELETE FROM tokens WHERE accessToken = ?', [ accessToken ], function (error) {
+        if (error && error.code === 'SQLITE_NOTFOUND') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
+        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
 
-    db.remove(accessToken, function (error) {
         callback(error);
     });
 }
@@ -88,20 +86,12 @@ function getByUserId(userId, callback) {
     assert(typeof userId === 'string');
     assert(typeof callback === 'function');
 
-    debug('getByUserId: ' + userId);
+    db.get('SELECT * FROM tokens WHERE userId = ? LIMIT 1', [ userId ], function (error, result) {
+        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
 
-    db.getAll(true, function (error, result) {
-        if (error) return callback(error);
+        if (typeof result === 'undefined') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
 
-        for (var i in result) {
-            if (result.hasOwnProperty(i)) {
-                if (result[i] === userId) {
-                    return callback(null, i);
-                }
-            }
-        }
-
-        callback(new DatabaseError(DatabaseError.NOT_FOUND));
+        return callback(null, result);
     });
 }
 
@@ -110,13 +100,10 @@ function delByUserId(userId, callback) {
     assert(typeof userId === 'string');
     assert(typeof callback === 'function');
 
-    debug('delByUserId: ' + userId);
+    db.run('DELETE FROM tokens WHERE userId = ?', [ userId ], function (error, result) {
+        if (error && error.code === 'SQLITE_NOTFOUND') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
+        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
 
-    getByUserId(userId, function (error, result) {
-        if (error) return callback(error);
-
-        db.remove(result.accessToken, function (error) {
-            callback(error);
-        });
+        return callback(null, result);
     });
 }
