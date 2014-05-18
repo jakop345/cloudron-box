@@ -290,29 +290,6 @@ Server.prototype._initialize2 = function (callback) {
     ], callback);
 };
 
-// TODO maybe we can get rid of that function and inline it - Johannes
-Server.prototype._listen = function (callback) {
-    this.httpServer = http.createServer(this.app);
-
-    function callbackWrapper(error) {
-        if (callback) {
-            callback(error);
-            callback = null;
-        } else {
-            console.error('Try to call back twice', error);
-        }
-    }
-
-    this.httpServer.listen(this.config.port, function (err) {
-        if (err) return callbackWrapper(err);
-        callbackWrapper();
-    });
-
-    this.httpServer.on('error', function (err) {
-        callbackWrapper(err);
-    });
-};
-
 Server.prototype.start = function (callback) {
     assert(typeof callback === 'function');
     assert(this.app === null, 'Server is already up and running.');
@@ -331,11 +308,9 @@ Server.prototype.start = function (callback) {
     this._initialize2(function (err) {
         if (err) return callback(err);
 
-        that._listen(function (err) {
-            if (err) return callback(err);
+        that.httpServer = http.createServer(that.app);
 
-            callback(null);
-        });
+        that.httpServer.listen(that.config.port, callback);
     });
 };
 

@@ -32,7 +32,7 @@ var server;
 function setup(done) {
     server = new Server(CONFIG);
     server.start(function (error) {
-        expect(error).to.be(null);
+        expect(!error).to.be.ok();
         userdb.clear(done);
     });
 }
