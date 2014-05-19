@@ -59,11 +59,11 @@ function add(req, res, next) {
             var user = {
                 username: req.body.username,
                 email: req.body.email,
-                password: new Buffer(derivedKey, 'binary').toString('hex'),
-                privatePemCipher: aes.encrypt(keyPair.toPrivatePem(), req.body.password, salt),
+                _password: new Buffer(derivedKey, 'binary').toString('hex'),
+                _privatePemCipher: aes.encrypt(keyPair.toPrivatePem(), req.body.password, salt),
                 publicPem: keyPair.toPublicPem(),
                 admin: !!req.temporaryAdminFlag,
-                salt: salt.toString('hex'),
+                _salt: salt.toString('hex'),
                 createdAt: now,
                 modifiedAt: now
             };
@@ -130,12 +130,12 @@ function verify(username, password, callback) {
     userdb.get(username, function (error, user) {
         if (error) return callback(error);
 
-        var saltBinary = new Buffer(user.salt, 'hex');
+        var saltBinary = new Buffer(user._salt, 'hex');
         crypto.pbkdf2(password, saltBinary, CRYPTO_ITERATIONS, CRYPTO_KEY_LENGTH, function (error, derivedKey) {
             if (error) return callback(error);
 
             var derivedKeyHex = new Buffer(derivedKey, 'binary').toString('hex');
-            if (derivedKeyHex !== user.password)  {
+            if (derivedKeyHex !== user._password)  {
                 return callback(null, false);
             }
 

@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS users(
     email VARCHAR(512) NOT NULL,
     password VARCHAR(512) NOT NULL,
     publicPem VARCHAR(512) NOT NULL,
-    privateCemCipher VARCHAR(512) NULL,
+    privatePemCipher VARCHAR(512) NULL,
     salt VARCHAR(512) NOT NULL,
     createdAt VARCHAR(512) NOT NULL,
     modifiedAt VARCHAR(512) NOT NULL,

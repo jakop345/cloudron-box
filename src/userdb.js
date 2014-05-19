@@ -31,10 +31,10 @@ function init(configDir) {
         id: { type: 'String', hashKey: true },
         username: { type: 'String' },
         email: { type: 'String' },
-        password: { type: 'String', priv: true },
+        _password: { type: 'String' },
         publicPem: { type: 'String' },
-        privatePemCipher: { type: 'String', priv: true },
-        salt: { type: 'String', priv: true },
+        _privatePemCipher: { type: 'String' },
+        _salt: { type: 'String' },
         createdAt: { type: 'String' },
         modifiedAt: { type: 'String' },
         admin: { type: 'Boolean' }
@@ -89,12 +89,12 @@ function add(userId, user, callback) {
     assert(db !== null);
     assert(typeof userId === 'string');
     assert(typeof user.username === 'string');
-    assert(typeof user.password === 'string');
+    assert(typeof user._password === 'string');
     assert(typeof user.email === 'string');
-    assert(typeof user.privatePemCipher === 'string');
+    assert(typeof user._privatePemCipher === 'string');
     assert(typeof user.publicPem === 'object');
     assert(typeof user.admin === 'boolean');
-    assert(typeof user.salt === 'string');
+    assert(typeof user._salt === 'string');
     assert(typeof callback === 'function');
 
     user.id = userId;
@@ -145,12 +145,12 @@ function update(userId, user, callback) {
     assert(db !== null);
     assert(typeof userId === 'string');
     assert(typeof user.username === 'string');
-    assert(typeof user.password === 'string');
+    assert(typeof user._password === 'string');
     assert(typeof user.email === 'string');
-    assert(typeof user.privatePemCipher === 'string');
+    assert(typeof user._privatePemCipher === 'string');
     assert(typeof user.publicPem === 'object');
     assert(typeof user.admin === 'boolean');
-    assert(typeof user.salt === 'string');
+    assert(typeof user._salt === 'string');
     assert(typeof callback === 'function');
 
     user.id = userId;

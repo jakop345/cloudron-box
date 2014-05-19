@@ -103,12 +103,10 @@ Table.prototype.getAll = function (privates, callback) {
 Table.prototype.removePrivates = function (obj) {
     var res = { };
 
-    for (var p in this.schema) {
-        if (this.schema.hasOwnProperty(p)) {
-            if (this.schema[p].priv || !(p in obj))
-                continue;
-            res[p] = obj[p]; // ## make deep copy?
-        }
+    for (var p in obj) {
+        if (!obj.hasOwnProperty(p)) continue;
+        if (p.substring(0, 1) === '_') continue;
+        res[p] = obj[p]; // ## make deep copy?
     }
 
     return res;

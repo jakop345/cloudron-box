@@ -17,13 +17,13 @@ var DatabaseTable = require('../databasetable.js'),
 var USER_0 = {
     username: 'girish',
     email: 'mail@g.irish',
-    password: 'hsirig'
+    _password: 'hsirig'
 };
 
 var USER_1 = {
     username: 'johannes',
     email: 'mail@j.ohannes',
-    password: 'sennahoj'
+    _password: 'sennahoj'
 };
 
 var tmpdirname = 'volume-test-' + crypto.randomBytes(4).readUInt32LE(0);
@@ -52,7 +52,7 @@ describe('Database', function () {
             db = new DatabaseTable(path.join(configDir, 'db/users'), {
                 username: { type: 'String', hashKey: true },
                 email: { type: 'String' },
-                password: { type: 'String', priv: true }
+                _password: { type: 'String' }
             });
 
             expect(db).to.be.a(DatabaseTable);
@@ -323,7 +323,7 @@ describe('Database', function () {
     describe('remove privates', function () {
         it('succeeds', function (done) {
             var tmp = db.removePrivates(USER_0);
-            expect(tmp.password).to.not.be.ok();
+            expect(tmp._password).to.not.be.ok();
             expect(tmp.username).to.be.ok();
             expect(tmp.username).to.equal(USER_0.username);
             done();

@@ -97,7 +97,7 @@ describe('Volume', function () {
         });
 
         it('second', function (done) {
-            volume.create(VOLUME_2, USER, USER.password, config, function (error, result) {
+            volume.create(VOLUME_2, USER, USER._password, config, function (error, result) {
                 expect(error).not.to.be.ok();
                 expect(result).to.be.ok();
 
@@ -162,7 +162,7 @@ describe('Volume', function () {
         var vol;
 
         before(function (done) {
-            volume.create(VOLUME_3, USER, USER.password, config, function (error, result) {
+            volume.create(VOLUME_3, USER, USER._password, config, function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
                 expect(result).to.be.an(volume.Volume);
