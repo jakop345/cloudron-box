@@ -28,7 +28,7 @@ function initialize(config, callback) {
         tokendb.init(db);
         clientdb.init(db);
         authcodedb.init(db),
-        appdb.init(config.configRoot),
+        appdb.init(db),
 
         // TODO this should happen somewhere else..no clue where - Johannes
         clientdb.del('cid-webadmin', function () {

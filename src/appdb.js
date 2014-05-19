@@ -3,31 +3,25 @@
 var DatabaseError = require('./databaseerror'),
     DatabaseTable = require('./databasetable'),
     path = require('path'),
-    debug = require('debug')('authserver:appdb'),
+    debug = require('debug')('appdb'),
     assert = require('assert');
 
 // database
-var db;
+var db = null;
 
 exports = module.exports = {
     init: init,
     get: get,
     add: add,
     del: del,
-    clear: clear,
     update: update,
-    count: count,
     getAll: getAll
 };
 
-function init(configDir) {
-    assert(typeof configDir === 'string');
+function init(_db) {
+    assert(typeof _db === 'object');
 
-    db = new DatabaseTable(path.join(configDir, 'db/apps'), {
-        id: { type: 'String', hashKey: true },
-        status: { type: 'String' },
-        config: { type: 'String' }
-    });
+    db = _db;
 }
 
 function get(appId, callback) {
@@ -35,68 +29,76 @@ function get(appId, callback) {
     assert(typeof appId === 'string');
     assert(typeof callback === 'function');
 
-    debug('get: ' + appId);
+    db.get('SELECT * FROM apps WHERE appId = ?', [ appId ], function (error, result) {
+        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
 
-    db.get(appId, function (error, result) {
-        callback(error, result);
+        if (typeof result === 'undefined') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
+
+        callback(null, result);
     });
 }
 
 function getAll(callback) {
     assert(db !== null);
 
-    db.getAll(false /* privates */, callback);
-}
+    db.all('SELECT * FROM apps', function (error, result) {
+        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
 
-function add(appId, app, callback) {
-    assert(db !== null);
-    assert(typeof appId === 'string');
-    assert(typeof app.status === 'string');
-    assert(typeof callback === 'function');
+        if (typeof result === 'undefined') result = [ ];
 
-    app.id = appId;
-
-    debug('add: ' + JSON.stringify(app));
-
-    db.put(app, function (error) {
-        callback(error);
+        callback(null, result);
     });
 }
 
-function del(appId, callback) {
+function add(id, status, config, callback) {
     assert(db !== null);
-    assert(typeof appId === 'string');
+    assert(typeof id === 'string');
+    assert(typeof status === 'string');
+    assert(typeof config === 'string' || config === null);
     assert(typeof callback === 'function');
 
-    debug('del: ' + appId);
+    var data = {
+        $id: id,
+        $status: app.status,
+        $config: $app.config
+    };
 
-    db.remove(appId, function (error) {
-        callback(error);
+    db.run('INSERT INTO apps (id, status, config) '
+           + 'VALUES ($id, $status, $config)',
+           data, function (error) {
+        if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(error, DatabaseError.ALREADY_EXISTS));
+
+        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
+
+        callback(null);
     });
 }
 
-function clear(callback) {
+function del(id, callback) {
     assert(db !== null);
-
-    db.removeAll(callback);
-}
-
-function update(appId, app, callback) {
-    assert(db !== null);
-    assert(typeof appId === 'string');
+    assert(typeof id === 'string');
     assert(typeof callback === 'function');
 
-    app.id = appId;
+    db.run('DELETE FROM apps WHERE id = ?', [ id ], function (error) {
+        if (error && error.code === 'SQLITE_NOTFOUND') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
+        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
 
-    debug('update: ' + JSON.stringify(app));
-
-    db.update(app, function (error) {
-        callback(error);
+        callback(null);
     });
 }
 
-function count() {
+function update(id, app, status, config, callback) {
     assert(db !== null);
+    assert(typeof id === 'string');
+    assert(typeof status === 'string');
+    assert(typeof config === 'string' || config === null);
+    assert(typeof callback === 'function');
 
-    return db.count();
+    db.run('UPDATE apps SET status = ?, config = ?config WHERE id = ?', [ status, config, id ], function (error) {
+        if (error && error.code === 'SQLITE_NOTFOUND') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
+        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
+
+        callback(null);
+    });
 }
+

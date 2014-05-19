@@ -51,7 +51,7 @@ function install(appId, username, password, config, callback) {
     assert(typeof password === 'string');
     assert(typeof config === 'object');
 
-    appdb.add(appId, { status: STATUS_PENDING, config: JSON.stringify(config) }, function (error) {
+    appdb.add(appId, STATUS_PENDING, JSON.stringify(config), function (error) {
 //        if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new AppsError('Already installed or installing', AppsError.ALREADY_EXISTS));
  //       if (error) return callback(new AppsError('Internal error:' + error.message, AppsError.INTERNAL_ERROR));
 

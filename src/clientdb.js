@@ -3,7 +3,7 @@
 var DatabaseError = require('./databaseerror'),
     DatabaseTable = require('./databasetable'),
     path = require('path'),
-    debug = require('debug')('authserver:clientdb'),
+    debug = require('debug')('clientdb'),
     assert = require('assert');
 
 // database
@@ -88,6 +88,6 @@ function del(id, callback) {
         if (error && error.code === 'SQLITE_NOTFOUND') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
         if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
 
-        callback(error);
+        callback(null);
     });
 }
