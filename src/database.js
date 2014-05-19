@@ -8,7 +8,8 @@ var userdb = require('./userdb.js'),
     sqlite3 = require('sqlite3'),
     fs = require('fs'),
     path = require('path'),
-    debug = require('debug')('database');
+    debug = require('debug')('database'),
+    DatabaseError = require('./databaseerror');
 
 exports = module.exports = {
     initialize: initialize
@@ -25,8 +26,8 @@ function initialize(config, callback) {
 
         userdb.init(config.configRoot);
         tokendb.init(db);
-        clientdb.init(config.configRoot);
-        authcodedb.init(config.configRoot),
+        clientdb.init(db);
+        authcodedb.init(db),
         appdb.init(config.configRoot),
 
         // TODO this should happen somewhere else..no clue where - Johannes

@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS clients(
     clientId VARCHAR(512) NOT NULL,
     clientSecret VARCHAR(512) NOT NULL,
     name VARCHAR(512) NOT NULL,
-    redirectURL VARCHAR(512) NOT NULL,
+    redirectURI VARCHAR(512) NOT NULL,
     PRIMARY KEY (id) );
 
 CREATE TABLE IF NOT EXISTS apps(

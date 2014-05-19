@@ -16,15 +16,10 @@ exports = module.exports = {
     del: del
 };
 
-function init(configDir) {
-    assert(typeof configDir === 'string');
+function init(_db) {
+    assert(typeof _db === 'object');
 
-    db = new DatabaseTable(path.join(configDir, 'db/authcode'), {
-        authCode: { type: 'String', hashKey: true },
-        redirectURI: { type: 'String' },
-        userId: { type: 'String' },
-        clientId: { type: 'String' }
-    });
+    db = _db;
 }
 
 function get(authCode, callback) {
@@ -32,8 +27,12 @@ function get(authCode, callback) {
     assert(typeof authCode === 'string');
     assert(typeof callback === 'function');
 
-    db.get(authCode, function (error, result) {
-        callback(error, result);
+    db.get('SELECT * FROM authcodes WHERE authCode = ?', [ authCode ], function (error, result) {
+        if (error) return callback(new DatabaseError(error.message, DatabaseError.INTERNAL_ERROR));
+
+        if (typeof result === 'undefined') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
+
+        callback(null, result);
     });
 }
 
@@ -46,14 +45,17 @@ function add(authCode, clientId, redirectURI, userId, callback) {
     assert(typeof callback === 'function');
 
     var data = {
-        authCode: authCode,
-        clientId: clientId,
-        redirectURI: redirectURI,
-        userId: userId
+        $authCode: authCode,
+        $clientId: clientId,
+        $redirectURI: redirectURI,
+        $userId: userId
     };
 
-    db.put(data, function (error) {
-        callback(error);
+    db.run('INSERT INTO authcodes (authCode, clientId, redirectURI, userId) '
+           + ' VALUES ($authCode, $clientId, $redirectURI, $userId)', data, function (error) {
+        if (error) return callback(new DatabaseError(error.message, DatabaseError.INTERNAL_ERROR));
+
+        callback(null);
     });
 }
 
@@ -62,8 +64,11 @@ function del(authCode, callback) {
     assert(typeof authCode === 'string');
     assert(typeof callback === 'function');
 
-    db.remove(authCode, function (error) {
-        callback(error);
+    db.run('DELETE FROM authocodes WHERE authCode = ?', [ authCode ], function (error) {
+        if (error && error.code === 'SQLITE_NOTFOUND') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
+        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
+
+        callback(null);
     });
 }
 

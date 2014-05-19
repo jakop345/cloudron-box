@@ -17,16 +17,10 @@ exports = module.exports = {
     del: del
 };
 
-function init(configDir) {
-    assert(typeof configDir === 'string');
+function init(_db) {
+    assert(typeof _db === 'object');
 
-    db = new DatabaseTable(path.join(configDir, 'db/client'), {
-        id: { type: 'String', hashKey: true },
-        clientId: { type: 'String' },
-        clientSecret: { type: 'String' },
-        name: { type: 'String' },
-        redirectURI: { type: 'String' }
-    });
+    db = _db;
 }
 
 function get(id, callback) {
@@ -34,10 +28,13 @@ function get(id, callback) {
     assert(typeof id === 'string');
     assert(typeof callback === 'function');
 
-    debug('get: ' + id);
 
-    db.get(id, function (error, result) {
-        callback(error, result);
+    db.get('SELECT * FROM clients WHERE id = ?', [ id ], function (error, result) {
+        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
+
+        if (typeof result === 'undefined') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
+
+        callback(null, result);
     });
 }
 
@@ -46,20 +43,12 @@ function getByClientId(clientId, callback) {
     assert(typeof clientId === 'string');
     assert(typeof callback === 'function');
 
-    debug('getByClientId: ' + clientId);
+    db.get('SELECT * FROM clients WHERE clientId = ? LIMIT 1', [ clientId ], function (error, result) {
+        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
 
-    db.getAll(true, function (error, result) {
-        if (error) callback(error);
+        if (typeof result === 'undefined') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
 
-        for (var record in result) {
-            if (result.hasOwnProperty(record)) {
-                if (result[record].clientId === clientId) {
-                    return callback(null, result[record]);
-                }
-            }
-        }
-
-        callback(new DatabaseError(DatabaseError.NOT_FOUND));
+        return callback(null, result);
     });
 }
 
@@ -72,18 +61,21 @@ function add(id, clientId, clientSecret, name, redirectURI, callback) {
     assert(typeof redirectURI === 'string');
     assert(typeof callback === 'function');
 
-    debug('add: ' + id + ' clientId "' + clientId + ' clientSecret "' + clientSecret + ' name "' + name + '" redirectURI "' + redirectURI + '"');
-
     var data = {
-        id: id,
-        clientId: clientId,
-        clientSecret: clientSecret,
-        name: name,
-        redirectURI: redirectURI
+        $id: id,
+        $clientId: clientId,
+        $clientSecret: clientSecret,
+        $name: name,
+        $redirectURI: redirectURI
     };
 
-    db.put(data, function (error) {
-        callback(error);
+    db.run('INSERT INTO clients (id, clientId, clientSecret, name, redirectURI) '
+           + 'VALUES ($id, $clientId, $clientSecret, $name, $redirectURI)',
+           data, function (error) {
+        if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(error, DatabaseError.ALREADY_EXISTS));
+        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
+
+        callback(null);
     });
 }
 
@@ -92,7 +84,10 @@ function del(id, callback) {
     assert(typeof id === 'string');
     assert(typeof callback === 'function');
 
-    db.remove(id, function (error) {
+    db.run('DELETE FROM clients WHERE id = ?', [ id ], function (error) {
+        if (error && error.code === 'SQLITE_NOTFOUND') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
+        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
+
         callback(error);
     });
 }

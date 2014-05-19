@@ -100,10 +100,10 @@ function delByUserId(userId, callback) {
     assert(typeof userId === 'string');
     assert(typeof callback === 'function');
 
-    db.run('DELETE FROM tokens WHERE userId = ?', [ userId ], function (error, result) {
+    db.run('DELETE FROM tokens WHERE userId = ?', [ userId ], function (error) {
         if (error && error.code === 'SQLITE_NOTFOUND') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
         if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
 
-        return callback(null, result);
+        return callback(null);
     });
 }
