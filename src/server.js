@@ -178,7 +178,7 @@ Server.prototype._initializeExpressSync = function (callback) {
     // public routes
     router.get('/api/v1/version', this._getVersion.bind(this));
     router.get('/api/v1/firsttime', this._firstTime.bind(this));
-    router.post('/api/v1/createadmin', routes.user.createAdmin);
+    router.post('/api/v1/createadmin', routes.user.createAdmin);    // FIXME any number of admins can be created without auth!
 
     // routes controlled by app.router
     router.post('/api/v1/token', both, routes.user.createToken);        // TODO remove that route

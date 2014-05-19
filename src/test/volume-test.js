@@ -21,6 +21,7 @@ var USER;
 var USERNAME = 'nobody';
 var EMAIL = 'nobody@no.body';
 var PASSWORD = 'foobar';
+var IS_ADMIN = true;
 var VOLUME = 'test_volume';
 var VOLUME_2 = 'second_volume';
 var VOLUME_3 = 'third_volume';
@@ -43,7 +44,7 @@ function setup(done) {
     database.initialize(config, function (error) {
         if (error) return done(error);
 
-        User.create(USERNAME, PASSWORD, EMAIL, function (error, result) {
+        User.create(USERNAME, PASSWORD, EMAIL, IS_ADMIN, function (error, result) {
             expect(error).to.not.be.ok();
             expect(result).to.be.ok();
 
@@ -229,9 +230,13 @@ describe('Volume', function () {
     describe('user management', function () {
         var TEST_VOLUME = 'user-management-test-volume';
         var TEST_USERNAME_0 = 'user0';
-        var TEST_USERNAME_1 = 'user1';
         var TEST_PASSWORD_0 = 'password0';
+        var TEST_IS_ADMIN_0 = false;
+
+        var TEST_USERNAME_1 = 'user1';
         var TEST_PASSWORD_1 = 'password1';
+        var TEST_IS_ADMIN_1 = false;
+
         var TEST_USER_0;
         var TEST_USER_1;
         var vol;
@@ -240,13 +245,13 @@ describe('Volume', function () {
 
         before(function (done) {
             this.timeout(5000);
-            User.create(TEST_USERNAME_0, TEST_PASSWORD_0, 'xx@xx.xx', function (error, result) {
+            User.create(TEST_USERNAME_0, TEST_PASSWORD_0, 'xx@xx.xx', TEST_IS_ADMIN_0, function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
 
                 TEST_USER_0 = result;
 
-                User.create(TEST_USERNAME_1, TEST_PASSWORD_1, 'xx@xx.xx', function (error, result) {
+                User.create(TEST_USERNAME_1, TEST_PASSWORD_1, 'xx@xx.xx', TEST_IS_ADMIN_1, function (error, result) {
                     expect(error).to.not.be.ok();
                     expect(result).to.be.ok();
 

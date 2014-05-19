@@ -25,8 +25,9 @@ var CONFIG = {
 var SERVER_URL = 'http://localhost:' + CONFIG.port;
 
 var ADMIN = 'admin', PASSWORD = 'admin', EMAIL ='silly@me.com';
-var USERNAME_2 = 'user', PASSWORD_2 = 'userpassword', EMAIL_2 = 'user@foo.bar';
-var USERNAME_3 = 'userTheThird', PASSWORD_3 = 'userpassword333', EMAIL_3 = 'user3@foo.bar';
+var USERNAME_1 = 'userTheFirst', PASSWORD_1 = 'chocolatecookie', EMAIL_1 = 'tao@zen.mac', IS_ADMIN_1 = true;
+var USERNAME_2 = 'userTheSecond', PASSWORD_2 = 'userpassword', EMAIL_2 = 'user@foo.bar', IS_ADMIN_2 = false;
+var USERNAME_3 = 'userTheThird', PASSWORD_3 = 'userpassword333', EMAIL_3 = 'user3@foo.bar', IS_ADMIN_2 = false;
 
 var server;
 function setup(done) {
@@ -151,7 +152,7 @@ describe('Server User API', function () {
             expect(res.body.userInfo.username).to.be.ok();
             expect(res.body.userInfo.admin).to.be(true);
 
-            // safe token for further calls
+            // save token for further calls
             token = res.body.token;
 
             done(err);
@@ -227,11 +228,12 @@ describe('Server User API', function () {
         });
     });
 
-    it('create second admin should fail', function (done) {
+    it('create second admin should succeed with first admin credentials', function (done) {
         request.post(SERVER_URL + '/api/v1/createadmin')
-               .send({ username: USERNAME_2, password: PASSWORD, email: EMAIL })
+               .query({ auth_token: token })
+               .send({ username: USERNAME_1, password: PASSWORD_1, email: EMAIL_1 })
                .end(function (err, res) {
-            expect(res.statusCode).to.equal(403);
+            expect(res.statusCode).to.equal(201);
             done(err);
         });
     });
@@ -253,7 +255,7 @@ describe('Server User API', function () {
         });
     });
 
-    it('create second and third user as admin', function (done) {
+    it('create second and third user', function (done) {
         request.post(SERVER_URL + '/api/v1/user/create')
                .query({ auth_token: token })
                .send({ username: USERNAME_2, password: PASSWORD_2, email: EMAIL_2 })
@@ -311,7 +313,7 @@ describe('Server User API', function () {
             expect(error).to.be(null);
             expect(res.statusCode).to.equal(200);
             expect(res.body.users).to.be.an('array');
-            expect(res.body.users.length).to.equal(3);
+            expect(res.body.users.length).to.equal(4);
             expect(res.body.users[0]).to.be.an('object');
 
             done();

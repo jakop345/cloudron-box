@@ -68,8 +68,8 @@ function listUsers(callback) {
     });
 }
 
-function createUser(username, password, email, callback) {
-    ensureArgs(arguments, ['string', 'string', 'string', 'function']);
+function createUser(username, password, email, admin, callback) {
+    ensureArgs(arguments, ['string', 'string', 'string', 'boolean', 'function']);
 
     if (username.length === 0) {
         return callback(new UserError('username empty', UserError.ARGUMENTS));
@@ -97,7 +97,6 @@ function createUser(username, password, email, callback) {
             var keyPair = ursa.generatePrivateKey();
 
             var now = (new Date()).toUTCString();
-            var admin = !(userdb.count()); // currently the first user is the admin
             var user = {
                 username: username,
                 email: email,

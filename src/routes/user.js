@@ -37,8 +37,7 @@ function initialize(cfg) {
  * @apiName createAdmin
  * @apiGroup generic
  * @apiDescription
- * This method can only be called when the device is in first time activation mode.
- * Currently there is only one admin user allowed per device.
+ *
  * Creating an admin user also puts the device out of first time activation mode.
  *
  * @apiParam {string} username The administrator's user name
@@ -46,18 +45,13 @@ function initialize(cfg) {
  * @apiParam {string} email The administrator's email address
  *
  * @apiSuccess (Created 201) {string} token A valid access token
- * @apiError 403 Admin user already exists. There can only be one per box at all time.
  */
 function createAdmin(req, res, next) {
-    if (userdb.count() > 0) {
-        return next(new HttpError(403, 'Only one admin allowed'));
-    }
-
     var username = req.body.username || '';
     var password = req.body.password || '';
     var email = req.body.email || '';
 
-    user.create(username, password, email, function (error) {
+    user.create(username, password, email, true /* admin */, function (error) {
         if (error) {
             if (error.reason === UserError.ARGUMENTS) {
                 return next(new HttpError(400, error.message));
@@ -98,7 +92,7 @@ function createUser(req, res, next) {
     var password = req.body.password || '';
     var email = req.body.email || '';
 
-    user.create(username, password, email, function (error) {
+    user.create(username, password, email, false /* admin */, function (error) {
         if (error) {
             if (error.reason === UserError.ARGUMENTS) {
                 return next(new HttpError(400, error.message));

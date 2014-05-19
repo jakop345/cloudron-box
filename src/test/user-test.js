@@ -21,6 +21,7 @@ var USERNAME = 'nobody';
 var EMAIL = 'nobody@no.body';
 var PASSWORD = 'foobar';
 var NEW_PASSWORD = 'somenewpassword';
+var IS_ADMIN = false;
 
 var tmpdirname = 'volume-test-' + crypto.randomBytes(4).readUInt32LE(0);
 var tmpdir = path.resolve(os.tmpdir(), tmpdirname);
@@ -38,7 +39,7 @@ function cleanupUser(done) {
 }
 
 function createUser(done) {
-    user.create(USERNAME, PASSWORD, EMAIL, function (error, result) {
+    user.create(USERNAME, PASSWORD, EMAIL, IS_ADMIN, function (error, result) {
         expect(error).to.not.be.ok();
         expect(result).to.be.ok();
         done();
@@ -70,7 +71,7 @@ describe('User', function () {
         after(cleanupUser);
 
         it('succeeds', function (done) {
-            user.create(USERNAME, PASSWORD, EMAIL, function (error, result) {
+            user.create(USERNAME, PASSWORD, EMAIL, IS_ADMIN, function (error, result) {
                 expect(error).not.to.be.ok();
                 expect(result).to.be.ok();
                 expect(result.username).to.equal(USERNAME);
@@ -101,7 +102,7 @@ describe('User', function () {
         });
 
         it('fails because user exists', function (done) {
-            user.create(USERNAME, PASSWORD, EMAIL, function (error, result) {
+            user.create(USERNAME, PASSWORD, EMAIL, IS_ADMIN, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).not.to.be.ok();
                 expect(error.reason).to.equal(UserError.ALREADY_EXISTS);
@@ -111,7 +112,7 @@ describe('User', function () {
         });
 
         it('fails because password is empty', function (done) {
-            user.create(USERNAME, '', EMAIL, function (error, result) {
+            user.create(USERNAME, '', EMAIL, IS_ADMIN, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).not.to.be.ok();
                 expect(error.reason).to.equal(UserError.ARGUMENTS);
