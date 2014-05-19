@@ -24,7 +24,7 @@ var CONFIG = {
 };
 var SERVER_URL = 'http://localhost:' + CONFIG.port;
 
-var USERNAME = 'admin', PASSWORD = 'admin', EMAIL ='silly@me.com';
+var ADMIN = 'admin', PASSWORD = 'admin', EMAIL ='silly@me.com';
 var USERNAME_2 = 'user', PASSWORD_2 = 'userpassword', EMAIL_2 = 'user@foo.bar';
 var USERNAME_3 = 'userTheThird', PASSWORD_3 = 'userpassword333', EMAIL_3 = 'user3@foo.bar';
 
@@ -65,7 +65,7 @@ describe('Server User API', function () {
 
     it('create admin fails due to missing parameters', function (done) {
         request.post(SERVER_URL + '/api/v1/createadmin')
-               .send({ username: USERNAME })
+               .send({ username: ADMIN })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             done(err);
@@ -82,7 +82,7 @@ describe('Server User API', function () {
 
     it('create admin', function (done) {
         request.post(SERVER_URL + '/api/v1/createadmin')
-               .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
+               .send({ username: ADMIN, password: PASSWORD, email: EMAIL })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(201);
             done(err);
@@ -100,7 +100,7 @@ describe('Server User API', function () {
 
     it('create token fails due to wrong credentials', function (done) {
         request.post(SERVER_URL + '/api/v1/token')
-               .auth(USERNAME, 'wrong' + PASSWORD)
+               .auth(ADMIN, 'wrong' + PASSWORD)
                .end(function (err, res) {
             expect(err).to.not.be.ok();
             expect(res.statusCode).to.equal(401);
@@ -110,7 +110,7 @@ describe('Server User API', function () {
 
     it('create token fails due to non basic auth header', function (done) {
         request.post(SERVER_URL + '/api/v1/token')
-               .set('Authorization', USERNAME + ':wrong' + PASSWORD)
+               .set('Authorization', ADMIN + ':wrong' + PASSWORD)
                .end(function (err, res) {
             expect(err).to.not.be.ok();
             expect(res.statusCode).to.equal(400);
@@ -120,7 +120,7 @@ describe('Server User API', function () {
 
     it('create token fails due to broken basic auth header', function (done) {
         request.post(SERVER_URL + '/api/v1/token')
-               .set('Authorization', 'Basic ' + USERNAME + ':wrong' + PASSWORD)
+               .set('Authorization', 'Basic ' + ADMIN + ':wrong' + PASSWORD)
                .end(function (err, res) {
             expect(err).to.not.be.ok();
             expect(res.statusCode).to.equal(400);
@@ -130,7 +130,7 @@ describe('Server User API', function () {
 
     it('create token fails due to wrong arguments', function (done) {
         request.post(SERVER_URL + '/api/v1/token')
-               .auth(USERNAME, '')
+               .auth(ADMIN, '')
                .end(function (err, res) {
             expect(err).to.not.be.ok();
             expect(res.statusCode).to.equal(400);
@@ -140,7 +140,7 @@ describe('Server User API', function () {
 
     it('create token', function (done) {
         request.post(SERVER_URL + '/api/v1/token')
-               .auth(USERNAME, PASSWORD)
+               .auth(ADMIN, PASSWORD)
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
             expect(res.body.token).to.be.a('string');
@@ -163,7 +163,7 @@ describe('Server User API', function () {
                .query({ auth_token: token })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
-            expect(res.body.username).to.equal(USERNAME);
+            expect(res.body.username).to.equal(ADMIN);
             expect(res.body.email).to.equal(EMAIL);
             expect(res.body.admin).to.be(true);
             done(err);
@@ -172,7 +172,7 @@ describe('Server User API', function () {
 
     it('cannot get userInfo only with basic auth', function (done) {
         request.get(SERVER_URL + '/api/v1/user/info')
-               .auth(USERNAME, PASSWORD)
+               .auth(ADMIN, PASSWORD)
                .end(function (err, res) {
             expect(res.statusCode).to.equal(401);
             done(err);
@@ -202,7 +202,7 @@ describe('Server User API', function () {
                .set('Authorization', 'Token ' + token)
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
-            expect(res.body.username).to.equal(USERNAME);
+            expect(res.body.username).to.equal(ADMIN);
             expect(res.body.email).to.equal(EMAIL);
             expect(res.body.admin).to.be(true);
             done(err);
@@ -321,7 +321,7 @@ describe('Server User API', function () {
     it('remove admin user by normal user should fail', function (done) {
         request.post(SERVER_URL + '/api/v1/user/remove')
         .query({ access_token: token_2 })
-        .send({ username: USERNAME, password: PASSWORD_2 })
+        .send({ username: ADMIN, password: PASSWORD_2 })
         .end(function (err, res) {
             expect(res.statusCode).to.equal(403);
             done(err);
@@ -397,7 +397,7 @@ describe('Server User API', function () {
 
     it('can login again', function (done) {
         request.post(SERVER_URL + '/api/v1/token')
-        .auth(USERNAME, PASSWORD)
+        .auth(ADMIN, PASSWORD)
         .end(function (error, res) {
             expect(error).to.be(null);
             expect(res.statusCode).to.equal(200);
@@ -415,7 +415,7 @@ describe('Server User API', function () {
     it('admin removes himself should not be allowed', function (done) {
         request.post(SERVER_URL + '/api/v1/user/remove')
         .query({ access_token: token })
-        .send({ username: USERNAME, password: PASSWORD })
+        .send({ username: ADMIN, password: PASSWORD })
         .end(function (err, res) {
             expect(res.statusCode).to.equal(403);
             done(err);
