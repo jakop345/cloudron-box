@@ -43,7 +43,7 @@ function setup(done) {
     database.initialize(config, function (error) {
         if (error) return done(error);
 
-        User.create(USERNAME, PASSWORD, EMAIL, {}, function (error, result) {
+        User.create(USERNAME, PASSWORD, EMAIL, function (error, result) {
             expect(error).to.not.be.ok();
             expect(result).to.be.ok();
 
@@ -240,13 +240,13 @@ describe('Volume', function () {
 
         before(function (done) {
             this.timeout(5000);
-            User.create(TEST_USERNAME_0, TEST_PASSWORD_0, 'xx@xx.xx', {}, function (error, result) {
+            User.create(TEST_USERNAME_0, TEST_PASSWORD_0, 'xx@xx.xx', function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
 
                 TEST_USER_0 = result;
 
-                User.create(TEST_USERNAME_1, TEST_PASSWORD_1, 'xx@xx.xx', {}, function (error, result) {
+                User.create(TEST_USERNAME_1, TEST_PASSWORD_1, 'xx@xx.xx', function (error, result) {
                     expect(error).to.not.be.ok();
                     expect(result).to.be.ok();
 

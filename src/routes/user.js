@@ -57,7 +57,7 @@ function createAdmin(req, res, next) {
     var password = req.body.password || '';
     var email = req.body.email || '';
 
-    user.create(username, password, email, {}, function (error) {
+    user.create(username, password, email, function (error) {
         if (error) {
             if (error.reason === UserError.ARGUMENTS) {
                 return next(new HttpError(400, error.message));
@@ -98,7 +98,7 @@ function createUser(req, res, next) {
     var password = req.body.password || '';
     var email = req.body.email || '';
 
-    user.create(username, password, email, {}, function (error) {
+    user.create(username, password, email, function (error) {
         if (error) {
             if (error.reason === UserError.ARGUMENTS) {
                 return next(new HttpError(400, error.message));

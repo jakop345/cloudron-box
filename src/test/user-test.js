@@ -38,7 +38,7 @@ function cleanupUser(done) {
 }
 
 function createUser(done) {
-    user.create(USERNAME, PASSWORD, EMAIL, {}, function (error, result) {
+    user.create(USERNAME, PASSWORD, EMAIL, function (error, result) {
         expect(error).to.not.be.ok();
         expect(result).to.be.ok();
         done();
@@ -70,7 +70,7 @@ describe('User', function () {
         after(cleanupUser);
 
         it('succeeds', function (done) {
-            user.create(USERNAME, PASSWORD, EMAIL, {}, function (error, result) {
+            user.create(USERNAME, PASSWORD, EMAIL, function (error, result) {
                 expect(error).not.to.be.ok();
                 expect(result).to.be.ok();
                 expect(result.username).to.equal(USERNAME);
@@ -85,23 +85,23 @@ describe('User', function () {
                 user.create(EMAIL, {}, function () {});
             }).to.throwException();
             expect(function () {
-                user.create(12345, PASSWORD, EMAIL, {}, function () {});
+                user.create(12345, PASSWORD, EMAIL, function () {});
             }).to.throwException();
             expect(function () {
                 user.create(USERNAME, PASSWORD, EMAIL, {});
             }).to.throwException();
             expect(function () {
-                user.create(USERNAME, PASSWORD, EMAIL, function () {});
+                user.create(USERNAME, PASSWORD, EMAIL, {}, function () {});
             }).to.throwException();
             expect(function () {
-                user.create(USERNAME, PASSWORD, EMAIL, {}, {});
+                user.create(USERNAME, PASSWORD, EMAIL, {});
             }).to.throwException();
 
             done();
         });
 
         it('fails because user exists', function (done) {
-            user.create(USERNAME, PASSWORD, EMAIL, {}, function (error, result) {
+            user.create(USERNAME, PASSWORD, EMAIL, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).not.to.be.ok();
                 expect(error.reason).to.equal(UserError.ALREADY_EXISTS);
@@ -111,7 +111,7 @@ describe('User', function () {
         });
 
         it('fails because password is empty', function (done) {
-            user.create(USERNAME, '', EMAIL, {}, function (error, result) {
+            user.create(USERNAME, '', EMAIL, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).not.to.be.ok();
                 expect(error.reason).to.equal(UserError.ARGUMENTS);

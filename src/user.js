@@ -68,8 +68,8 @@ function listUsers(callback) {
     });
 }
 
-function createUser(username, password, email, options, callback) {
-    ensureArgs(arguments, ['string', 'string', 'string', 'object', 'function']);
+function createUser(username, password, email, callback) {
+    ensureArgs(arguments, ['string', 'string', 'string', 'function']);
 
     if (username.length === 0) {
         return callback(new UserError('username empty', UserError.ARGUMENTS));
@@ -179,7 +179,7 @@ function getUser(username, callback) {
     });
 }
 
-function updateUser(username, options, callback) {
+function updateUser(username, callback) {
     ensureArgs(arguments, ['string', 'object', 'function']);
 
     callback(new UserError('not implemented', UserError.INTERNAL_ERROR));
