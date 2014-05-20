@@ -79,7 +79,11 @@ Server.prototype._serverErrorHandler = function (err, req, res, next) {
  * @apiSuccess {String} version The current version string of the device.
  */
 Server.prototype._firstTime = function (req, res, next) {
-    return res.send(200, { activated: userdb.count() !== 0, version: pkg.version });
+    userdb.count(function (error, count) {
+        if (error) return res.send(500, { status: http.STATUS_CODES[500], message: error.message || 'Internal Server error' });
+
+        return res.send(200, { activated: count !== 0, version: pkg.version });
+    });
 };
 
 /**

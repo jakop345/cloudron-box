@@ -150,7 +150,7 @@ describe('Server User API', function () {
             expect(res.body.email).to.not.be.ok();
             expect(res.body.userInfo).to.be.ok();
             expect(res.body.userInfo.username).to.be.ok();
-            expect(res.body.userInfo.admin).to.be(true);
+            expect(res.body.userInfo.admin).to.be.ok();
 
             // save token for further calls
             token = res.body.token;
@@ -166,7 +166,7 @@ describe('Server User API', function () {
             expect(res.statusCode).to.equal(200);
             expect(res.body.username).to.equal(ADMIN);
             expect(res.body.email).to.equal(EMAIL);
-            expect(res.body.admin).to.be(true);
+            expect(res.body.admin).to.be.ok();
             done(err);
         });
     });
@@ -205,7 +205,7 @@ describe('Server User API', function () {
             expect(res.statusCode).to.equal(200);
             expect(res.body.username).to.equal(ADMIN);
             expect(res.body.email).to.equal(EMAIL);
-            expect(res.body.admin).to.be(true);
+            expect(res.body.admin).to.be.ok();
             done(err);
         });
     });
@@ -299,7 +299,7 @@ describe('Server User API', function () {
                 expect(result.statusCode).to.equal(200);
                 expect(result.body.username).to.equal(USERNAME_2);
                 expect(result.body.email).to.equal(EMAIL_2);
-                expect(result.body.admin).to.be(false);
+                expect(result.body.admin).to.not.be.ok();
 
                 done();
             });

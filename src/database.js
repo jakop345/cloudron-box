@@ -25,7 +25,7 @@ function initialize(config, callback) {
     db.exec(schema, function (err) {
         if (err) return callback(err);
 
-        userdb.init(config.configRoot);
+        userdb.init(db);
         tokendb.init(db);
         clientdb.init(db);
         authcodedb.init(db),

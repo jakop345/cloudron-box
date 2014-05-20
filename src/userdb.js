@@ -1,7 +1,6 @@
 'use strict';
 
 var DatabaseError = require('./databaseerror'),
-    DatabaseTable = require('./databasetable'),
     path = require('path'),
     tokendb = require('./tokendb'),
     debug = require('debug')('userdb'),
@@ -23,21 +22,9 @@ exports = module.exports = {
     count: count
 };
 
-function init(configDir) {
-    assert(typeof configDir === 'string');
-
-    db = new DatabaseTable(path.join(configDir, 'db/users'), {
-        id: { type: 'String', hashKey: true },
-        username: { type: 'String' },
-        email: { type: 'String' },
-        _password: { type: 'String' },
-        publicPem: { type: 'String' },
-        _privatePemCipher: { type: 'String' },
-        _salt: { type: 'String' },
-        createdAt: { type: 'String' },
-        modifiedAt: { type: 'String' },
-        admin: { type: 'Boolean' }
-    });
+function init(_db) {
+    assert(typeof _db === 'object');
+    db = _db;
 }
 
 function get(userId, callback) {
@@ -45,10 +32,12 @@ function get(userId, callback) {
     assert(typeof userId === 'string');
     assert(typeof callback === 'function');
 
-    debug('get: ' + userId);
+    db.get('SELECT * FROM users WHERE id = ?', [ userId ], function (error, result) {
+        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
 
-    db.get(userId, function (error, result) {
-        callback(error, result);
+        if (typeof result === 'undefined') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
+
+        callback(null, result);
     });
 }
 
@@ -56,8 +45,6 @@ function getByUsername(username, callback) {
     assert(db !== null);
     assert(typeof username === 'string');
     assert(typeof callback === 'function');
-
-    debug('getByUsername: ' + username);
 
     // currently username is also our id
     get(username, callback);
@@ -67,10 +54,10 @@ function getAll(callback) {
     assert(db !== null);
     assert(typeof callback === 'function');
 
-    debug('getAll');
+    db.all('SELECT * FROM users', function (error, result) {
+        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
 
-    db.getAll(function (error, result) {
-        callback(error, result);
+        callback(null, result);
     });
 }
 
@@ -84,14 +71,30 @@ function add(userId, user, callback) {
     assert(typeof user.publicPem === 'object');
     assert(typeof user.admin === 'boolean');
     assert(typeof user._salt === 'string');
+    assert(typeof user.createdAt === 'string');
+    assert(typeof user.modifiedAt === 'string');
     assert(typeof callback === 'function');
 
-    user.id = userId;
+    var data = {
+        $id: userId,
+        $username: user.username,
+        $_password: user._password,
+        $email: user.email,
+        $_privatePemCipher: user._privatePemCipher,
+        $publicPem: user.publicPem,
+        $admin: user.admin,
+        $_salt: user._salt,
+        $createdAt: user.createdAt,
+        $modifiedAt: user.modifiedAt
+    };
 
-    debug('add: ' + JSON.stringify(user));
+    db.run('INSERT INTO users (id, username, _password, email, _privatePemCipher, publicPem, admin, _salt, createdAt, modifiedAt) '
+           + 'VALUES ($id, $username, $_password, $email, $_privatePemCipher, $publicPem, $admin, $_salt, $createdAt, $modifiedAt)',
+           data, function (error) {
+        if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(error, DatabaseError.ALREADY_EXISTS));
+        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
 
-    db.put(user, function (error) {
-        callback(error);
+        callback(null);
     });
 }
 
@@ -100,9 +103,10 @@ function del(userId, callback) {
     assert(typeof userId === 'string');
     assert(typeof callback === 'function');
 
-    debug('del: ' + userId);
+    db.run('DELETE FROM users WHERE id = ?', [ userId ], function (error) {
+        if (error && error.code === 'SQLITE_NOTFOUND') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
+        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
 
-    db.remove(userId, function (error) {
         callback(error);
     });
 }
@@ -114,45 +118,53 @@ function getByAccessToken(accessToken, callback) {
 
     debug('getByAccessToken: ' +  accessToken);
 
-    tokendb.get(accessToken, function (error, result) {
-        if (error) return callback(error);
+    db.get('SELECT * FROM users, tokens WHERE tokens.accessToken = ?', [ accessToken ], function (error, result) {
+        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
 
-        get(result.userId, function (error, result) {
-            if (error) return callback(error);
-            callback(null, result);
-        });
+        if (typeof result === 'undefined') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
+
+        callback(null, result);
     });
 }
 
 function clear(callback) {
     assert(db !== null);
 
-    db.removeAll(callback);
+    db.run('DELETE FROM users', function (error) {
+        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
+
+        callback(error);
+    });
 }
 
 function update(userId, user, callback) {
     assert(db !== null);
     assert(typeof userId === 'string');
-    assert(typeof user.username === 'string');
-    assert(typeof user._password === 'string');
-    assert(typeof user.email === 'string');
-    assert(typeof user._privatePemCipher === 'string');
-    assert(typeof user.publicPem === 'object');
-    assert(typeof user.admin === 'boolean');
-    assert(typeof user._salt === 'string');
+    assert(typeof user === 'object');
     assert(typeof callback === 'function');
 
-    user.id = userId;
+    var data = { $id: userId };
+    var values = [ ];
+    for (var k in user) {
+        data['$' + k] = user[k];
+        values.push(k + ' = $' + k);
+    }
 
-    debug('update: ' + JSON.stringify(user));
+    db.run('UPDATE users SET ' + values.join(', ') + ' WHERE id = $id', data, function (error, result) {
+        if (error && error.code === 'SQLITE_NOTFOUND') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
+        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
 
-    db.update(user, function (error) {
-        callback(error);
+        return callback(null);
     });
 }
 
-function count() {
+function count(callback) {
     assert(db !== null);
+    assert(typeof callback === 'function');
 
-    return db.count();
+    db.get('SELECT COUNT(*) AS total FROM users', function (error, result) {
+        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
+
+        return callback(null, result.total);
+    });
 }

@@ -1,7 +1,6 @@
 'use strict';
 
 var DatabaseError = require('./databaseerror'),
-    DatabaseTable = require('./databasetable'),
     path = require('path'),
     debug = require('debug')('clientdb'),
     assert = require('assert');
