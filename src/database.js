@@ -12,7 +12,8 @@ var userdb = require('./userdb.js'),
     DatabaseError = require('./databaseerror');
 
 exports = module.exports = {
-    initialize: initialize
+    initialize: initialize,
+    removePrivates: removePrivates
 };
 
 function initialize(config, callback) {
@@ -39,4 +40,16 @@ function initialize(config, callback) {
         });
     });
 }
+
+function removePrivates(obj) {
+    var res = { };
+
+    for (var p in obj) {
+        if (!obj.hasOwnProperty(p)) continue;
+        if (p.substring(0, 1) === '_') continue;
+        res[p] = obj[p]; // ## make deep copy?
+    }
+
+    return res;
+};
 
