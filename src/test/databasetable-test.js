@@ -258,7 +258,7 @@ describe('Database', function () {
 
     describe('getAll', function () {
         it('returns empty array', function (done) {
-            db.getAll(true, function (error, result) {
+            db.getAll(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
 
@@ -274,7 +274,7 @@ describe('Database', function () {
                 db.put(USER_1, function (error) {
                     expect(error).to.not.be.ok();
 
-                    db.getAll(true, function (error, result) {
+                    db.getAll(function (error, result) {
                         expect(error).to.not.be.ok();
                         expect(result).to.be.ok();
 
@@ -296,7 +296,7 @@ describe('Database', function () {
             db.put(USER_0, function (error) {
                 expect(error).to.not.be.ok();
 
-                db.getAll(true, function (error, result) {
+                db.getAll(function (error, result) {
                     expect(error).to.not.be.ok();
                     expect(result).to.be.ok();
 
@@ -305,17 +305,6 @@ describe('Database', function () {
 
                     done();
                 });
-            });
-        });
-
-        it('does purge private fields', function (done) {
-            db.getAll(false, function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result).to.be.ok();
-
-                expect(result[0].username).to.be.equal(USER_0.username);
-
-                done();
             });
         });
     });

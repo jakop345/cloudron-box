@@ -15,8 +15,8 @@ var passport = require('passport'),
     UserError = user.UserError,
     clientdb = require('./clientdb'),
     tokendb = require('./tokendb'),
-    userdb = require('./userdb');
-
+    userdb = require('./userdb'),
+    database = require('./database');
 
 // helpers for session de/serializing
 passport.serializeUser(function (user, callback) {
@@ -48,7 +48,7 @@ passport.use(new LocalStrategy(function (username, password, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
         if (error) return callback(error);
         if (!result) return callback(null, false);
-        callback(null, userdb.removePrivates(result));
+        callback(null, database.removePrivates(result));
     });
 }));
 

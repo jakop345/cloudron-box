@@ -20,8 +20,7 @@ exports = module.exports = {
     del: del,
     clear: clear,
     update: update,
-    count: count,
-    removePrivates: removePrivates
+    count: count
 };
 
 function init(configDir) {
@@ -39,15 +38,6 @@ function init(configDir) {
         modifiedAt: { type: 'String' },
         admin: { type: 'Boolean' }
     });
-}
-
-function removePrivates(obj) {
-    assert(db !== null);
-    assert(typeof obj === 'object');
-
-    debug('removePrivates: ' + JSON.stringify(obj));
-
-    return db.removePrivates(obj);
 }
 
 function get(userId, callback) {
@@ -73,14 +63,13 @@ function getByUsername(username, callback) {
     get(username, callback);
 }
 
-function getAll(privates, callback) {
+function getAll(callback) {
     assert(db !== null);
-    assert(typeof privates === 'boolean');
     assert(typeof callback === 'function');
 
-    debug('getAll: include privates ' + privates);
+    debug('getAll');
 
-    db.getAll(privates, function (error, result) {
+    db.getAll(function (error, result) {
         callback(error, result);
     });
 }

@@ -8,7 +8,8 @@ var userdb = require('./userdb.js'),
     debug = require('debug')('server:user'),
     assert = require('assert'),
     ursa = require('ursa'),
-    safe = require('safetydance');
+    safe = require('safetydance'),
+    database = require('./database');
 
 exports = module.exports = {
     UserError: UserError,
@@ -58,13 +59,13 @@ function ensureArgs(args, expected) {
 function listUsers(callback) {
     ensureArgs(arguments, ['function']);
 
-    userdb.getAll(false, function (error, result) {
+    userdb.getAll(function (error, result) {
         if (error) {
             debug('Unable to get all users.', error);
             return callback(new UserError('Unable to list users', UserError.DATABASE_ERROR));
         }
 
-        return callback(null, result);
+        return callback(null, result.map(database.removePrivates));
     });
 }
 
