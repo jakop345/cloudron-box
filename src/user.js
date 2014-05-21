@@ -95,7 +95,7 @@ function createUser(username, password, email, admin, callback) {
             }
 
             // now generate the pub/priv keypairs for volume header
-            var keyPair = ursa.generatePrivateKey();
+            var keyPair = ursa.generatePrivateKey(2048 /* modulusBits */, 65537 /* exponent */);
 
             var now = (new Date()).toUTCString();
             var user = {
