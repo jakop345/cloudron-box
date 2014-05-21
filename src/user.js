@@ -103,7 +103,7 @@ function createUser(username, password, email, admin, callback) {
                 email: email,
                 _password: new Buffer(derivedKey, 'binary').toString('hex'),
                 _privatePemCipher: aes.encrypt(keyPair.toPrivatePem(), password, salt),
-                publicPem: keyPair.toPublicPem(),
+                publicPem: keyPair.toPublicPem().toString('hex'),
                 admin: admin,
                 _salt: salt.toString('hex'),
                 createdAt: now,

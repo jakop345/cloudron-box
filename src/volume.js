@@ -307,7 +307,7 @@ Volume.prototype.addUser = function (newUser, owner, password, callback) {
         return callback(new VolumeError(null, VolumeError.WRONG_USER_PASSWORD));
     }
 
-    var publicKey = ursa.createPublicKey(newUser.publicPem);
+    var publicKey = ursa.createPublicKey(new Buffer(newUser.publicPem, 'hex'));
     var record = {
         username: newUser.username,
         passwordCipher: publicKey.encrypt(volumePassword, 'utf8', 'hex')
@@ -444,7 +444,7 @@ function createVolume(name, user, password, config, callback) {
                 return callback(new VolumeError(error, VolumeError.INTERNAL_ERROR));
             }
 
-            var publicKey = ursa.createPublicKey(user.publicPem);
+            var publicKey = ursa.createPublicKey(new Buffer(user.publicPem, 'hex'));
             var record = {
                 username: user.username,
                 passwordCipher: publicKey.encrypt(volPassword, 'utf8', 'hex')

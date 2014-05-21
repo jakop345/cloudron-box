@@ -68,7 +68,7 @@ function add(userId, user, callback) {
     assert(typeof user._password === 'string');
     assert(typeof user.email === 'string');
     assert(typeof user._privatePemCipher === 'string');
-    assert(typeof user.publicPem === 'object');
+    assert(typeof user.publicPem === 'string');
     assert(typeof user.admin === 'boolean');
     assert(typeof user._salt === 'string');
     assert(typeof user.createdAt === 'string');
