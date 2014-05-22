@@ -63,7 +63,7 @@ function del(authCode, callback) {
     assert(typeof authCode === 'string');
     assert(typeof callback === 'function');
 
-    db.run('DELETE FROM authocodes WHERE authCode = ?', [ authCode ], function (error) {
+    db.run('DELETE FROM authcodes WHERE authCode = ?', [ authCode ], function (error) {
         if (error && error.code === 'SQLITE_NOTFOUND') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
         if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
 
