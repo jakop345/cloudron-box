@@ -1,8 +1,9 @@
+/* jslint node:true */
+
 'use strict';
 
 var DatabaseError = require('./databaseerror'),
-    path = require('path'),
-    debug = require('debug')('authserver:authcodedb'),
+    debug = require('debug')('server:authcodedb'),
     assert = require('assert');
 
 // database
@@ -50,8 +51,9 @@ function add(authCode, clientId, redirectURI, userId, callback) {
         $userId: userId
     };
 
-    db.run('INSERT INTO authcodes (authCode, clientId, redirectURI, userId) '
-           + ' VALUES ($authCode, $clientId, $redirectURI, $userId)', data, function (error) {
+    db.run('INSERT INTO authcodes (authCode, clientId, redirectURI, userId) ' +
+           ' VALUES ($authCode, $clientId, $redirectURI, $userId)', data, function (error) {
+        if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(error.code, DatabaseError.ALREADY_EXISTS));
         if (error) return callback(new DatabaseError(error.message, DatabaseError.INTERNAL_ERROR));
 
         callback(null);

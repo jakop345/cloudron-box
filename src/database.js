@@ -9,8 +9,9 @@ var userdb = require('./userdb.js'),
     appdb = require('./appdb.js'),
     sqlite3 = require('sqlite3'),
     fs = require('fs'),
+    mkdirp = require('mkdirp'),
     path = require('path'),
-    debug = require('debug')('database'),
+    debug = require('debug')('server:database'),
     DatabaseError = require('./databaseerror');
 
 exports = module.exports = {
@@ -21,23 +22,30 @@ exports = module.exports = {
 function initialize(config, callback) {
     var schema = fs.readFileSync(path.join(__dirname, 'schema.sql')).toString('utf8');
 
-    var db = new sqlite3.Database(config.configRoot + '/config.sqlite.db');
-    debug('Database created at ' + config.configRoot + '/config.sqlite.db');
+    mkdirp(config.configRoot, function (error) {
+        if (error) {
+            debug('Unable to ensure the config root directory. ', error);
+            return callback(error);
+        }
 
-    db.exec(schema, function (err) {
-        if (err) return callback(err);
+        var db = new sqlite3.Database(config.configRoot + '/config.sqlite.db');
+        debug('Database created at ' + config.configRoot + '/config.sqlite.db');
 
-        userdb.init(db);
-        tokendb.init(db);
-        clientdb.init(db);
-        authcodedb.init(db);
-        appdb.init(db);
+        db.exec(schema, function (err) {
+            if (err) return callback(err);
 
-        // TODO this should happen somewhere else..no clue where - Johannes
-        clientdb.del('cid-webadmin', function () {
-            clientdb.add('cid-webadmin', 'cid-webadmin', 'unused', 'WebAdmin', 'https://localhost', function (error) {
-                if (error && error.reason !== DatabaseError.ALREADY_EXISTS) return callback(new Error('Error initializing client database with webadmin'));
-                return callback(null);
+            userdb.init(db);
+            tokendb.init(db);
+            clientdb.init(db);
+            authcodedb.init(db);
+            appdb.init(db);
+
+            // TODO this should happen somewhere else..no clue where - Johannes
+            clientdb.del('cid-webadmin', function () {
+                clientdb.add('cid-webadmin', 'cid-webadmin', 'unused', 'WebAdmin', 'https://localhost', function (error) {
+                    if (error && error.reason !== DatabaseError.ALREADY_EXISTS) return callback(new Error('Error initializing client database with webadmin'));
+                    return callback(null);
+                });
             });
         });
     });
