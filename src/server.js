@@ -133,7 +133,7 @@ Server.prototype._initializeExpressSync = function (callback) {
     // Passport configuration
     require('./auth');
 
-    this.app.set('views', path.join(__dirname, '../oauth2views'));
+    this.app.set('views', path.join(__dirname, 'oauth2views'));
     this.app.set('view options', { layout: true, debug: true });
     this.app.set('view engine', 'ejs');
 
