@@ -9,6 +9,9 @@
   </div>
 
   <div ng-show="loadStatus == LOADED" class="row">
+    <div ng-show="!apps.length" class="text-center">
+        <h2>No apps</h2>
+    </div>
     <div class="col-lg-3 list-group-item" ng-repeat="app in apps">
         <div>{{ app.title }}</div>
         <div>{{ app.author }}</div>
