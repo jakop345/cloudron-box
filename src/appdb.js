@@ -1,8 +1,9 @@
+/* jslint node:true */
+
 'use strict';
 
 var DatabaseError = require('./databaseerror'),
-    path = require('path'),
-    debug = require('debug')('appdb'),
+    debug = require('debug')('server:appdb'),
     assert = require('assert');
 
 // database
@@ -62,8 +63,8 @@ function add(id, status, config, callback) {
         $config: config
     };
 
-    db.run('INSERT INTO apps (id, status, config) '
-           + 'VALUES ($id, $status, $config)',
+    db.run('INSERT INTO apps (id, status, config) ' +
+           'VALUES ($id, $status, $config)',
            data, function (error) {
         if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(error, DatabaseError.ALREADY_EXISTS));
 
@@ -86,14 +87,14 @@ function del(id, callback) {
     });
 }
 
-function update(id, app, status, config, callback) {
+function update(id, status, config, callback) {
     assert(db !== null);
     assert(typeof id === 'string');
     assert(typeof status === 'string');
     assert(typeof config === 'string' || config === null);
     assert(typeof callback === 'function');
 
-    db.run('UPDATE apps SET status = ?, config = ?config WHERE id = ?', [ status, config, id ], function (error) {
+    db.run('UPDATE apps SET status = ?, config = ? config WHERE id = ?', [ status, config, id ], function (error) {
         if (error && error.code === 'SQLITE_NOTFOUND') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
         if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
 

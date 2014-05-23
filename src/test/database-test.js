@@ -276,6 +276,30 @@ describe('database', function () {
             });
         });
 
+        xit('update succeeds', function (done) {
+            APP_0.status = 'some-other-status';
+            APP_0.config = 'some-other-config';
+
+            appdb.update(APP_0.id, APP_0.status, APP_0.config, function (error) {
+                expect(error).to.be(null);
+
+                appdb.get(APP_0.id, function (error, result) {
+                    expect(error).to.be(null);
+                    expect(result).to.be.an('object');
+                    expect(result).to.be.eql(APP_0);
+                    done();
+                });
+            });
+        });
+
+        xit('update of nonexisting app fails', function (done) {
+            appdb.update(APP_1.id, APP_1.status, APP_1.config, function (error) {
+                expect(error).to.be.a(DatabaseError);
+                expect(error.reason).to.be(DatabaseError.NOT_FOUND);
+                done();
+            });
+        });
+
         it('add second app succeeds', function (done) {
             appdb.add(APP_1.id, APP_1.status, APP_1.config, function (error) {
                 expect(error).to.be(null);
