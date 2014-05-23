@@ -57,18 +57,35 @@ describe('database', function () {
     });
 
     describe('authcode', function () {
-        var AUTHCODE_0 = 'authcode-0';
-        var AUTHCODE_1 = 'authcode-1';
+        var AUTHCODE_0 = {
+            authCode: 'authcode-0',
+            clientId: 'clientid-0',
+            redirectURI: 'http://localhost',
+            userId: 'userid-0'
+        };
+        var AUTHCODE_1 = {
+            authCode: 'authcode-1',
+            clientId: 'clientid-1',
+            redirectURI: 'http://localhost',
+            userId: 'userid-1'
+        };
+
+        it('add fails due to missing arguments', function () {
+            expect(function () { authcodedb.add(AUTHCODE_0.authCode, AUTHCODE_0.clientId, AUTHCODE_0.redirectURI, AUTHCODE_0.userId); }).to.throwError();
+            expect(function () { authcodedb.add(AUTHCODE_0.authCode, AUTHCODE_0.clientId, AUTHCODE_0.redirectURI, function () {}); }).to.throwError();
+            expect(function () { authcodedb.add(AUTHCODE_0.authCode, AUTHCODE_0.clientId, function () {}); }).to.throwError();
+            expect(function () { authcodedb.add(AUTHCODE_0.authCode, function () {}); }).to.throwError();
+        });
 
         it('add succeeds', function (done) {
-            authcodedb.add(AUTHCODE_0, 'clientid-0', 'http://localhost', 'userid-0', function (error) {
+            authcodedb.add(AUTHCODE_0.authCode, AUTHCODE_0.clientId, AUTHCODE_0.redirectURI, AUTHCODE_0.userId, function (error) {
                 expect(error).to.be(null);
                 done();
             });
         });
 
         it('add of same authcode fails', function (done) {
-            authcodedb.add(AUTHCODE_0, 'clientid-0', 'http://localhost', 'userid-0', function (error) {
+            authcodedb.add(AUTHCODE_0.authCode, AUTHCODE_0.clientId, AUTHCODE_0.redirectURI, AUTHCODE_0.userId, function (error) {
                 expect(error).to.be.a(DatabaseError);
                 expect(error.reason).to.be(DatabaseError.ALREADY_EXISTS);
                 done();
@@ -76,15 +93,16 @@ describe('database', function () {
         });
 
         it('get succeeds', function (done) {
-            authcodedb.get(AUTHCODE_0, function (error, result) {
+            authcodedb.get(AUTHCODE_0.authCode, function (error, result) {
                 expect(error).to.be(null);
                 expect(result).to.be.an('object');
+                expect(result).to.be.eql(AUTHCODE_0);
                 done();
             });
         });
 
         it('get of nonexisting code fails', function (done) {
-            authcodedb.get(AUTHCODE_1, function (error, result) {
+            authcodedb.get(AUTHCODE_1.authCode, function (error, result) {
                 expect(error).to.be.a(DatabaseError);
                 expect(error.reason).to.be(DatabaseError.NOT_FOUND);
                 expect(result).to.not.be.ok();
@@ -93,8 +111,17 @@ describe('database', function () {
         });
 
         it('delete succeeds', function (done) {
-            authcodedb.del(AUTHCODE_0, function (error) {
+            authcodedb.del(AUTHCODE_0.authCode, function (error) {
                 expect(error).to.be(null);
+                done();
+            });
+        });
+
+        // Is this not supported by sqlite??
+        xit('cannot delete previously delete record', function (done) {
+            authcodedb.del(AUTHCODE_0.authCode, function (error) {
+                expect(error).to.be.a(DatabaseError);
+                expect(error.reason).to.be(DatabaseError.NOT_FOUND);
                 done();
             });
         });
