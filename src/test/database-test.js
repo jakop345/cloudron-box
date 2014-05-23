@@ -126,5 +126,104 @@ describe('database', function () {
             });
         });
     });
+
+    describe('token', function () {
+        var TOKEN_0 = {
+            accessToken: tokendb.generateToken(),
+            userId: 'userid-0',
+            clientId: 'clientid-0',
+            expires: Date.now().toString()
+        };
+        var TOKEN_1 = {
+            accessToken: tokendb.generateToken(),
+            userId: 'userid-1',
+            clientId: 'clientid-1',
+            expires: Date.now().toString()
+        };
+
+        it('add fails due to missing arguments', function () {
+            expect(function () { tokendb.add(TOKEN_0.accessToken, TOKEN_0.userId, TOKEN_0.clientId); }).to.throwError();
+            expect(function () { tokendb.add(TOKEN_0.accessToken, TOKEN_0.userId, function () {}); }).to.throwError();
+            expect(function () { tokendb.add(TOKEN_0.accessToken, function () {}); }).to.throwError();
+        });
+
+        it('add succeeds', function (done) {
+            tokendb.add(TOKEN_0.accessToken, TOKEN_0.userId, TOKEN_0.clientId, TOKEN_0.expires, function (error) {
+                expect(error).to.be(null);
+                done();
+            });
+        });
+
+        it('add of same token fails', function (done) {
+            tokendb.add(TOKEN_0.accessToken, TOKEN_0.userId, TOKEN_0.clientId, TOKEN_0.expires, function (error) {
+                expect(error).to.be.a(DatabaseError);
+                expect(error.reason).to.be(DatabaseError.ALREADY_EXISTS);
+                done();
+            });
+        });
+
+        it('get succeeds', function (done) {
+            tokendb.get(TOKEN_0.accessToken, function (error, result) {
+                expect(error).to.be(null);
+                expect(result).to.be.an('object');
+                expect(result).to.be.eql(TOKEN_0);
+                done();
+            });
+        });
+
+        it('get of nonexisting code fails', function (done) {
+            tokendb.get(TOKEN_1.accessToken, function (error, result) {
+                expect(error).to.be.a(DatabaseError);
+                expect(error.reason).to.be(DatabaseError.NOT_FOUND);
+                expect(result).to.not.be.ok();
+                done();
+            });
+        });
+
+        it('getByUserId succeeds', function (done) {
+            tokendb.getByUserId(TOKEN_0.userId, function (error, result) {
+                expect(error).to.be(null);
+                expect(result).to.be.an('object');
+                expect(result).to.be.eql(TOKEN_0);
+                done();
+            });
+        });
+
+        it('getByUserId of nonexisting user fails', function (done) {
+            tokendb.getByUserId(TOKEN_1.userId, function (error, result) {
+                expect(error).to.be.a(DatabaseError);
+                expect(error.reason).to.be(DatabaseError.NOT_FOUND);
+                expect(result).to.not.be.ok();
+                done();
+            });
+        });
+
+        it('delete succeeds', function (done) {
+            tokendb.del(TOKEN_0.accessToken, function (error) {
+                expect(error).to.be(null);
+                done();
+            });
+        });
+
+        it('delByUserId succeeds', function (done) {
+            tokendb.add(TOKEN_1.accessToken, TOKEN_1.userId, TOKEN_1.clientId, TOKEN_1.expires, function (error) {
+                expect(error).to.be(null);
+
+                tokendb.delByUserId(TOKEN_1.userId, function (error) {
+                    expect(error).to.be(null);
+                    done();
+                });
+            });
+        });
+
+        // Is this not supported by sqlite??
+        xit('cannot delete previously delete record', function (done) {
+            tokendb.del(TOKEN_0.accessToken, function (error) {
+                expect(error).to.be.a(DatabaseError);
+                expect(error.reason).to.be(DatabaseError.NOT_FOUND);
+                done();
+            });
+        });
+    });
 });
 
