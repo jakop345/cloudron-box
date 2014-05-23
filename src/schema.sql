@@ -28,7 +28,9 @@ CREATE TABLE IF NOT EXISTS clients(
 
 CREATE TABLE IF NOT EXISTS apps(
     id VARCHAR(512) NOT NULL UNIQUE,
-    status VARCHAR(512) NOT NULL,
+    statusCode VARCHAR(512) NOT NULL,
+    statusMessage VARCHAR(2048),
+    manifest VARCHAR,
     config VARCHAR(512),
     PRIMARY KEY (id) );
 

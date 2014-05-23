@@ -1,0 +1,24 @@
+
+<div class="container-fluid">
+  <div ng-show="loadStatus == LOADING" class="text-center">
+    <h2>Loading...</h2>
+  </div>
+
+  <div ng-show="loadStatus == ERROR" class="text-center">
+    <h2>Load error : {{ loadError }}</h2>
+  </div>
+
+  <div ng-show="loadStatus == LOADED" class="row">
+    <div ng-show="!apps.length" class="text-center">
+        <h2>No apps</h2>
+    </div>
+    <div class="col-lg-3 list-group-item" ng-repeat="app in apps">
+        <div>{{ app.id }}</div>
+        <img width="48" height="48" ng-src="{{ app.iconUrl }}"/>
+        <div>{{ app.status }}</div>
+        <br />
+        <button ng-click="removeApp(app.id)">Remove</button>
+    </div>
+  </div>
+
+</div>

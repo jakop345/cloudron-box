@@ -251,6 +251,9 @@ Server.prototype._initializeExpressSync = function (callback) {
     router.get('/api/v1/oauth/yellowtent.js', routes.oauth2.library);
 
     // app routes
+    router.get('/api/v1/apps', both, routes.apps.getApps);
+    router.get('/api/v1/app/:id', both, routes.apps.getApp);
+    router.post('/api/v1/app/:id/uninstall', both, this._requirePassword.bind(this), routes.apps.uninstallApp); // TODO does this verify password?
     router.post('/api/v1/app/install', both, this._requirePassword.bind(this), routes.apps.installApp);
 };
 

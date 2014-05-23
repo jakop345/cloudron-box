@@ -15,7 +15,23 @@ exports = module.exports = {
     add: add,
     del: del,
     update: update,
-    getAll: getAll
+    getAll: getAll,
+
+    // status codes
+    STATUS_PENDING_INSTALL: 'pending_install',
+    STATUS_PENDING_UNINSTALL: 'pending_uninstall',
+    STATUS_INSTALLED: 'installed',
+    STATUS_DOWNLOADING_MANIFEST: 'downloading_manifest',
+    STATUS_DOWNLOADED_MANIFEST: 'downloaded_manifest',
+    STATUS_DOWNLOADING_IMAGE: 'downloading_image',
+    STATUS_DOWNLOADED_IMAGE: 'downloaded_image',
+    STATUS_MANIFEST_ERROR: 'manifest_error',
+    STATUS_DOWNLOAD_ERROR: 'download_error',
+    STATUS_IMAGE_ERROR: 'image_error',
+    STATUS_STARTING_UP: 'starting_up',
+    STATUS_STARTED: 'started',
+    STATUS_RUNNING: 'running',
+    STATUS_EXITED: 'exited'
 };
 
 function init(_db) {
@@ -50,21 +66,20 @@ function getAll(callback) {
     });
 }
 
-function add(id, status, config, callback) {
+function add(id, statusCode, config, callback) {
     assert(db !== null);
     assert(typeof id === 'string');
-    assert(typeof status === 'string');
+    assert(typeof statusCode === 'string');
     assert(typeof config === 'string' || config === null);
     assert(typeof callback === 'function');
 
     var data = {
         $id: id,
-        $status: status,
+        $statusCode: statusCode,
         $config: config
     };
 
-    db.run('INSERT INTO apps (id, status, config) ' +
-           'VALUES ($id, $status, $config)',
+    db.run('INSERT INTO apps (id, statusCode, config) VALUES ($id, $statusCode, $config)',
            data, function (error) {
         if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(error, DatabaseError.ALREADY_EXISTS));
 
@@ -87,14 +102,22 @@ function del(id, callback) {
     });
 }
 
-function update(id, status, config, callback) {
+function update(id, app, callback) {
     assert(db !== null);
     assert(typeof id === 'string');
-    assert(typeof status === 'string');
-    assert(typeof config === 'string' || config === null);
+    assert(typeof app === 'object');
     assert(typeof callback === 'function');
 
-    db.run('UPDATE apps SET status = ?, config = ? WHERE id = ?', [ status, config, id ], function (error) {
+    var args = [ ], values = [ ];
+    for (var p in app) {
+        if (app.hasOwnProperty(p)) {
+            args.push(p + ' = ?');
+            values.push(app[p]);
+        }
+    }
+    values.push(id);
+
+    db.run('UPDATE apps SET ' + args.join(', ') + ' WHERE id = ?', values, function (error) {
         if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
         if (this.changes !== 1) return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
 

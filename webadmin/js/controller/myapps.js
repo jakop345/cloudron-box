@@ -1,0 +1,35 @@
+'use strict';
+
+var MyAppsController = function ($scope, $http, $location, config) {
+    console.debug('MyAppsController');
+
+    $scope.LOADING = 1;
+    $scope.ERROR = 2;
+    $scope.LOADED = 3;
+
+    $scope.loadStatus = $scope.LOADED;
+    $scope.loadError = '';
+
+    $scope.refresh = function () {
+        $scope.loadStatus = $scope.LOADING;
+
+        $http.get('/api/v1/apps')
+            .success(function (data, status, headers) {
+                console.log(data);
+                data.apps.forEach(function (app) { app.iconUrl = config.APPSTORE_URL + "/api/v1/app/" + app.id + "/icon"; });
+                $scope.apps = data.apps;
+                $scope.loadStatus = $scope.LOADED;
+            }).error(function (data, status, headers) {
+                $scope.loadStatus = $scope.ERROR;
+                $scope.loadError = status + '';
+                console.log('error in getting app list', data, status);
+            });
+    };
+
+    $scope.removeApp = function (appId) {
+        console.log('Will remove ', appId);
+        $location.path('/app/' + appId + '/uninstall');
+    };
+
+    $scope.refresh();
+};

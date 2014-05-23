@@ -48,6 +48,7 @@
     <script src="js/controller/userdelete.js"></script>
     <script src="js/controller/userpassword.js"></script>
     <script src="js/controller/applist.js"></script>
+    <script src="js/controller/myapps.js"></script>
     <script src="js/controller/appconfigure.js"></script>
     <script src="js/controller/settings.js"></script>
     <script src="js/index.js"></script>
@@ -73,8 +74,11 @@
             <span class="glyphicon glyphicon-user"></span> Users <div ng-show="isActive('/user')" ng-click="href($event, '#/usercreate')" class="glyphicon glyphicon-plus pull-right toolicon"></div>
           </a>
         </li>
+        <li ng-class="{ active: isActive('/myapps')}">
+          <a href="#/myapps"><span class="glyphicon glyphicon-cloud"></span> My Apps </a>
+        </li>
         <li ng-class="{ active: isActive('/applist')}">
-          <a href="#/applist"><span class="glyphicon glyphicon-cloud"></span> Apps </a>
+          <a href="#/applist"><span class="glyphicon glyphicon-cloud"></span> App Store </a>
         </li>
         <li ng-class="{ active: isActive('/settings')}"><a href="#/settings"><span class="glyphicon glyphicon-cog"></span> Settings</a></li>
         <li><a href="#" ng-click="logout()"><span class="glyphicon glyphicon-log-out"></span> Log Out</a></li>
