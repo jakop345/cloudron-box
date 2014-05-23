@@ -225,5 +225,90 @@ describe('database', function () {
             });
         });
     });
+
+    describe('app', function () {
+        var APP_0 = {
+            id: 'appid-0',
+            status: 'some-status-0',
+            config: 'some-config-0'
+        };
+        var APP_1 = {
+            id: 'appid-1',
+            status: 'some-status-1',
+            config: 'some-config-1'
+        };
+
+        it('add fails due to missing arguments', function () {
+            expect(function () { appdb.add(APP_0.id, APP_0.status, function () {}); }).to.throwError();
+            expect(function () { appdb.add(APP_0.id, function () {}); }).to.throwError();
+        });
+
+        it('add succeeds', function (done) {
+            appdb.add(APP_0.id, APP_0.status, APP_0.config, function (error) {
+                expect(error).to.be(null);
+                done();
+            });
+        });
+
+        it('add of same app fails', function (done) {
+            appdb.add(APP_0.id, APP_0.status, APP_0.config, function (error) {
+                expect(error).to.be.a(DatabaseError);
+                expect(error.reason).to.be(DatabaseError.ALREADY_EXISTS);
+                done();
+            });
+        });
+
+        it('get succeeds', function (done) {
+            appdb.get(APP_0.id, function (error, result) {
+                expect(error).to.be(null);
+                expect(result).to.be.an('object');
+                expect(result).to.be.eql(APP_0);
+                done();
+            });
+        });
+
+        it('get of nonexisting code fails', function (done) {
+            appdb.get(APP_1.id, function (error, result) {
+                expect(error).to.be.a(DatabaseError);
+                expect(error.reason).to.be(DatabaseError.NOT_FOUND);
+                expect(result).to.not.be.ok();
+                done();
+            });
+        });
+
+        it('add second app succeeds', function (done) {
+            appdb.add(APP_1.id, APP_1.status, APP_1.config, function (error) {
+                expect(error).to.be(null);
+                done();
+            });
+        });
+
+        it('getAll succeeds', function (done) {
+            appdb.getAll(function (error, result) {
+                expect(error).to.be(null);
+                expect(result).to.be.an(Array);
+                expect(result.length).to.be(2);
+                expect(result[0]).to.be.eql(APP_0);
+                expect(result[1]).to.be.eql(APP_1);
+                done();
+            });
+        });
+
+        it('delete succeeds', function (done) {
+            appdb.del(APP_0.id, function (error) {
+                expect(error).to.be(null);
+                done();
+            });
+        });
+
+        // Is this not supported by sqlite??
+        xit('cannot delete previously delete record', function (done) {
+            appdb.del(APP_0.id, function (error) {
+                expect(error).to.be.a(DatabaseError);
+                expect(error.reason).to.be(DatabaseError.NOT_FOUND);
+                done();
+            });
+        });
+    });
 });
 

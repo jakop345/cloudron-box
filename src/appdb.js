@@ -23,12 +23,12 @@ function init(_db) {
     db = _db;
 }
 
-function get(appId, callback) {
+function get(id, callback) {
     assert(db !== null);
-    assert(typeof appId === 'string');
+    assert(typeof id === 'string');
     assert(typeof callback === 'function');
 
-    db.get('SELECT * FROM apps WHERE appId = ?', [ appId ], function (error, result) {
+    db.get('SELECT * FROM apps WHERE id = ?', [ id ], function (error, result) {
         if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
 
         if (typeof result === 'undefined') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
@@ -58,8 +58,8 @@ function add(id, status, config, callback) {
 
     var data = {
         $id: id,
-        $status: app.status,
-        $config: $app.config
+        $status: status,
+        $config: config
     };
 
     db.run('INSERT INTO apps (id, status, config) '
