@@ -1,3 +1,5 @@
+/* jslint node:true */
+
 'use strict';
 
 var HttpError = require('../httperror.js'),
@@ -17,7 +19,7 @@ function initialize(config) {
 function installApp(req, res, next) {
     var data = req.body;
 
-    if (!data) return next(new HttpError(400, 'Cannot parse data field:' + safe.error.message));
+    if (!data) return next(new HttpError(400, 'Cannot parse data field'));
     if (!data.app_id) return next(new HttpError(400, 'app_id is required'));
     if (!data.password) return next(new HttpError(400, 'password is required'));
     if (!data.config) return next(new HttpError(400, 'config is required'));

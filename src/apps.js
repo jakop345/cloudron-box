@@ -1,3 +1,5 @@
+/* jslint node:true */
+
 'use strict';
 
 var DatabaseError = require('./databaseerror.js'),
@@ -122,7 +124,7 @@ Task.prototype.downloadApp = function (manifest, callback) {
 };
 
 Task.prototype.runApp = function (manifest, config, callback) {
-    var outputStream = Writable(),
+    var outputStream = new Writable(),
         docker = this._docker;
 
     outputStream._write = function (chunk, enc, callback) {
@@ -189,12 +191,12 @@ Task.prototype.refresh = function () {
                     res.on('end', function () {
                         var rawManifest = Buffer.concat(bufs);
                         var manifest = safe(function () { return yaml.safeLoad(rawManifest.toString('utf8')); });
-                        if (manifest == null) {
+                        if (manifest === null) {
                             debug('Error parsing manifest: ' + safe.error);
                             return callback(null);
                         }
 
-                       that.downloadApp(manifest, function (error) {
+                        that.downloadApp(manifest, function (error) {
                             if (error) {
                                 console.error('Error downloading application', error);
                                 return callback(null);
@@ -203,10 +205,10 @@ Task.prototype.refresh = function () {
                             that.runApp(manifest, app.config, callback);
                         });
                     });
-            });
+                });
         }, function callback(err) {
             that._refreshing = false;
-            if (that._pendingRefresh) process.nextTick(refresh.bind(that));
+            if (that._pendingRefresh) process.nextTick(that.refresh.bind(that));
             that._pendingRefresh = false;
         });
 
