@@ -13,5 +13,5 @@ echo
 # fi
 
 cd nginx
-sudo nginx -c yellowtent.conf -p $PWD
+sudo nginx -c nginx.conf -p $PWD
 cd ..
