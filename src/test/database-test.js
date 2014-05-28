@@ -118,7 +118,7 @@ describe('database', function () {
         });
 
         // Is this not supported by sqlite??
-        xit('cannot delete previously delete record', function (done) {
+        it('cannot delete previously delete record', function (done) {
             authcodedb.del(AUTHCODE_0.authCode, function (error) {
                 expect(error).to.be.a(DatabaseError);
                 expect(error.reason).to.be(DatabaseError.NOT_FOUND);
@@ -217,7 +217,7 @@ describe('database', function () {
         });
 
         // Is this not supported by sqlite??
-        xit('cannot delete previously delete record', function (done) {
+        it('cannot delete previously delete record', function (done) {
             tokendb.del(TOKEN_0.accessToken, function (error) {
                 expect(error).to.be.a(DatabaseError);
                 expect(error.reason).to.be(DatabaseError.NOT_FOUND);
@@ -276,7 +276,7 @@ describe('database', function () {
             });
         });
 
-        xit('update succeeds', function (done) {
+        it('update succeeds', function (done) {
             APP_0.status = 'some-other-status';
             APP_0.config = 'some-other-config';
 
@@ -292,7 +292,7 @@ describe('database', function () {
             });
         });
 
-        xit('update of nonexisting app fails', function (done) {
+        it('update of nonexisting app fails', function (done) {
             appdb.update(APP_1.id, APP_1.status, APP_1.config, function (error) {
                 expect(error).to.be.a(DatabaseError);
                 expect(error.reason).to.be(DatabaseError.NOT_FOUND);
@@ -326,7 +326,7 @@ describe('database', function () {
         });
 
         // Is this not supported by sqlite??
-        xit('cannot delete previously delete record', function (done) {
+        it('cannot delete previously delete record', function (done) {
             appdb.del(APP_0.id, function (error) {
                 expect(error).to.be.a(DatabaseError);
                 expect(error.reason).to.be(DatabaseError.NOT_FOUND);

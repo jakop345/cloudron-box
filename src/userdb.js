@@ -92,7 +92,7 @@ function add(userId, user, callback) {
            + 'VALUES ($id, $username, $_password, $email, $_privatePemCipher, $publicPem, $admin, $_salt, $createdAt, $modifiedAt)',
            data, function (error) {
         if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(error, DatabaseError.ALREADY_EXISTS));
-        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
+        if (error || !this.lastID) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
 
         callback(null);
     });
@@ -104,8 +104,8 @@ function del(userId, callback) {
     assert(typeof callback === 'function');
 
     db.run('DELETE FROM users WHERE id = ?', [ userId ], function (error) {
-        if (error && error.code === 'SQLITE_NOTFOUND') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
         if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
+        if (this.changes !== 1) return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
 
         callback(error);
     });
@@ -151,8 +151,8 @@ function update(userId, user, callback) {
     }
 
     db.run('UPDATE users SET ' + values.join(', ') + ' WHERE id = $id', data, function (error, result) {
-        if (error && error.code === 'SQLITE_NOTFOUND') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
         if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
+        if (this.changes !== 1) return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
 
         return callback(null);
     });

@@ -72,7 +72,7 @@ function add(id, clientId, clientSecret, name, redirectURI, callback) {
            + 'VALUES ($id, $clientId, $clientSecret, $name, $redirectURI)',
            data, function (error) {
         if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(error, DatabaseError.ALREADY_EXISTS));
-        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
+        if (error || !this.lastID) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
 
         callback(null);
     });
@@ -84,8 +84,8 @@ function del(id, callback) {
     assert(typeof callback === 'function');
 
     db.run('DELETE FROM clients WHERE id = ?', [ id ], function (error) {
-        if (error && error.code === 'SQLITE_NOTFOUND') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
         if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
+        if (this.changes !== 1) return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
 
         callback(null);
     });

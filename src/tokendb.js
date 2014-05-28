@@ -61,7 +61,7 @@ function add(accessToken, userId, clientId, expires, callback) {
            + 'VALUES ($accessToken, $userId, $clientId, $expires)',
            data, function (error) {
         if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(error, DatabaseError.ALREADY_EXISTS));
-        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
+        if (error || !this.lastID) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
 
         callback(null);
     });
@@ -73,8 +73,8 @@ function del(accessToken, callback) {
     assert(typeof callback === 'function');
 
     db.run('DELETE FROM tokens WHERE accessToken = ?', [ accessToken ], function (error) {
-        if (error && error.code === 'SQLITE_NOTFOUND') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
         if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
+        if (this.changes !== 1) return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
 
         callback(error);
     });
@@ -100,9 +100,8 @@ function delByUserId(userId, callback) {
     assert(typeof callback === 'function');
 
     db.run('DELETE FROM tokens WHERE userId = ?', [ userId ], function (error) {
-        if (error && error.code === 'SQLITE_NOTFOUND') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
-        if (error && error.code === 'SQLITE_NOTFOUND') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
         if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
+        if (this.changes !== 1) return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
 
         return callback(null);
     });

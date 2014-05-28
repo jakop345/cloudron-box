@@ -54,7 +54,7 @@ function add(authCode, clientId, redirectURI, userId, callback) {
     db.run('INSERT INTO authcodes (authCode, clientId, redirectURI, userId) ' +
            ' VALUES ($authCode, $clientId, $redirectURI, $userId)', data, function (error) {
         if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(error.code, DatabaseError.ALREADY_EXISTS));
-        if (error) return callback(new DatabaseError(error.message, DatabaseError.INTERNAL_ERROR));
+        if (error || !this.lastID) return callback(new DatabaseError(error.message, DatabaseError.INTERNAL_ERROR));
 
         callback(null);
     });
@@ -66,8 +66,8 @@ function del(authCode, callback) {
     assert(typeof callback === 'function');
 
     db.run('DELETE FROM authcodes WHERE authCode = ?', [ authCode ], function (error) {
-        if (error && error.code === 'SQLITE_NOTFOUND') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
         if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
+        if (this.changes !== 1) return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
 
         callback(null);
     });
