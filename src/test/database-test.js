@@ -229,29 +229,33 @@ describe('database', function () {
     describe('app', function () {
         var APP_0 = {
             id: 'appid-0',
-            status: 'some-status-0',
-            config: 'some-config-0'
+            statusCode: 'some-status-0',
+            config: 'some-config-0',
+            manifest: null,
+            statusMessage: null
         };
         var APP_1 = {
             id: 'appid-1',
-            status: 'some-status-1',
-            config: 'some-config-1'
+            statusCode: 'some-status-1',
+            config: 'some-config-1',
+            manifest: null,
+            statusMessage: null
         };
 
         it('add fails due to missing arguments', function () {
-            expect(function () { appdb.add(APP_0.id, APP_0.status, function () {}); }).to.throwError();
+            expect(function () { appdb.add(APP_0.id, APP_0.statusCode, function () {}); }).to.throwError();
             expect(function () { appdb.add(APP_0.id, function () {}); }).to.throwError();
         });
 
         it('add succeeds', function (done) {
-            appdb.add(APP_0.id, APP_0.status, APP_0.config, function (error) {
+            appdb.add(APP_0.id, APP_0.statusCode, APP_0.config, function (error) {
                 expect(error).to.be(null);
                 done();
             });
         });
 
         it('add of same app fails', function (done) {
-            appdb.add(APP_0.id, APP_0.status, APP_0.config, function (error) {
+            appdb.add(APP_0.id, APP_0.statusCode, APP_0.config, function (error) {
                 expect(error).to.be.a(DatabaseError);
                 expect(error.reason).to.be(DatabaseError.ALREADY_EXISTS);
                 done();
@@ -277,10 +281,10 @@ describe('database', function () {
         });
 
         it('update succeeds', function (done) {
-            APP_0.status = 'some-other-status';
+            APP_0.statusCode = 'some-other-status';
             APP_0.config = 'some-other-config';
 
-            appdb.update(APP_0.id, APP_0.status, APP_0.config, function (error) {
+            appdb.update(APP_0.id, { statusCode: APP_0.statusCode, config: APP_0.config }, function (error) {
                 expect(error).to.be(null);
 
                 appdb.get(APP_0.id, function (error, result) {
@@ -293,7 +297,7 @@ describe('database', function () {
         });
 
         it('update of nonexisting app fails', function (done) {
-            appdb.update(APP_1.id, APP_1.status, APP_1.config, function (error) {
+            appdb.update(APP_1.id, { statusCode: APP_1.statusCode, config: APP_1.config }, function (error) {
                 expect(error).to.be.a(DatabaseError);
                 expect(error.reason).to.be(DatabaseError.NOT_FOUND);
                 done();
@@ -301,7 +305,7 @@ describe('database', function () {
         });
 
         it('add second app succeeds', function (done) {
-            appdb.add(APP_1.id, APP_1.status, APP_1.config, function (error) {
+            appdb.add(APP_1.id, APP_1.statusCode, APP_1.config, function (error) {
                 expect(error).to.be(null);
                 done();
             });
