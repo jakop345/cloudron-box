@@ -20,7 +20,8 @@ var CONFIG = {
     dataRoot: path.resolve(BASE_DIR, 'data'),
     configRoot: path.resolve(BASE_DIR, 'config'),
     mountRoot: path.resolve(BASE_DIR, 'mount'),
-    silent: true
+    silent: true,
+    appServerUrl: 'invalid_url'
 };
 
 // remove all temporary folders
