@@ -28,7 +28,13 @@ var MyAppsController = function ($scope, $http, $location, config) {
 
     $scope.removeApp = function (appId) {
         console.log('Will remove ', appId);
-        $location.path('/app/' + appId + '/uninstall');
+        $http.post('/api/v1/app/' + appId + '/uninstall')
+            .success(function (data, status, headers) {
+                console.log(data);
+                $scope.refresh();
+            }).error(function (data, status, headers) {
+                console.log('Could not uninstall!', data, status);
+            });
     };
 
     $scope.refresh();

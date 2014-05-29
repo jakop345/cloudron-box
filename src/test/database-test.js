@@ -232,14 +232,16 @@ describe('database', function () {
             statusCode: 'some-status-0',
             config: 'some-config-0',
             manifest: null,
-            statusMessage: null
+            statusMessage: null,
+            containerId: null
         };
         var APP_1 = {
             id: 'appid-1',
             statusCode: 'some-status-1',
             config: 'some-config-1',
             manifest: null,
-            statusMessage: null
+            statusMessage: null,
+            containerId: null
         };
 
         it('add fails due to missing arguments', function () {

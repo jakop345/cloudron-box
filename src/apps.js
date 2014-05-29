@@ -80,7 +80,7 @@ function uninstall(appId, callback) {
     assert(typeof appId === 'string');
 
     // TODO there is a race here with the task manager updating status
-    appdb.update(appId, { statusCode: appdb.STATUS_PENDING_UNINSTALL }, function (error) {
+    appdb.update(appId, { statusCode: appdb.STATUS_PENDING_UNINSTALL, statusMessage: '' }, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError('No such app', AppsError.NOT_FOUND));
         if (error) return callback(new AppsError('Internal error:' + error.message, AppsError.INTERNAL_ERROR));
 

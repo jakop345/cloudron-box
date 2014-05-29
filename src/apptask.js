@@ -21,6 +21,47 @@ exports = module.exports = {
 var appServerUrl = null, docker = null,
     refreshing = false, pendingRefresh = false;
 
+var appHealth = (function () {
+    var data = { };
+    var MAX_HEALTH = 5;
+
+    return {
+        ensure: function (appId) {
+            // FIXME: this function must be removed when we have proper restart support
+            if (!data.hasOwnProperty(appId)) data[appId] = MAX_HEALTH;
+        },
+
+        get: function (appId) {
+            return data[appId] || 0;
+        },
+
+        register: function (appId) {
+            assert(!data.hasOwnProperty(appId));
+            assert(typeof appId === 'string');
+
+            data[appId] = MAX_HEALTH;
+        },
+        unregister: function (appId) {
+            assert(typeof appId === 'string');
+
+            delete data[appId];
+        },
+        increment: function (appId) {
+            assert(typeof appId === 'string');
+
+            this.ensure(appId);
+            data[appId] = Math.max(data[appId] + 1, MAX_HEALTH);
+            return data[appId];
+        },
+        decrement: function (appId) {
+            assert(typeof appId === 'string');
+
+            this.ensure(appId);
+            return --data[appId];
+        }
+    };
+})();
+
 var NOOP_CALLBACK = function (error) { };
 
 function initialize(_appServerUrl) {
@@ -46,6 +87,11 @@ function downloadImage(app, callback) {
     if (manifest === null) {
         debug('Error parsing manifest: ' + safe.error);
         appdb.update(app.id, { statusCode: appdb.STATUS_MANIFEST_ERROR, statusMessage: 'Parse error:' + safe.error }, NOOP_CALLBACK);
+        return callback(null);
+    }
+    if (!manifest.health_check_url || !manifest.docker_image || !manifest.http_port) {
+        debug('Manifest missing mandatory parameters');
+        appdb.update(app.id, { statusCode: appdb.STATUS_MANIFEST_ERROR, statusMessage: 'Missing parameters' }, NOOP_CALLBACK);
         return callback(null);
     }
 
@@ -105,30 +151,51 @@ function startApp(app, callback) {
         callback();
     };
 
-    var options = {
-        Hostname: config.location || ''
+    var containerOptions = {
+        Hostname: config.location || '',
+        Tty: true,
+        Image: manifest.docker_image,
+        Cmd: null,
+        Volumes: { },
+        VolumesFrom: ''
     };
 
     debug('Running ' + manifest.docker_image);
 
     appdb.update(app.id, { statusCode: appdb.STATUS_STARTING_UP, statusMessage: '' }, NOOP_CALLBACK);
 
-    var hub = docker.run(manifest.docker_image, null /* command */, outputStream, options, function (err, data, container) {
-        // NOTE: this callback is called when the image finished running
+    docker.createContainer(containerOptions, function (err, container) {
         if (err) {
-            debug('Error creating the container');
+            debug('Error creating container');
             appdb.update(app.id, { statusCode: appdb.STATUS_IMAGE_ERROR, statusMessage: 'Error creating container' }, NOOP_CALLBACK);
             return callback(err);
         }
 
-        console.dir(data);
-        appdb.update(app.id, { statusCode: appdb.STATUS_EXITED, statusMessage: '' }, callback);
-    });
+        // TODO: should wait for update to complete
+        appdb.update(app.id, { containerId: container.id }, NOOP_CALLBACK);
 
-    hub.on('container', function (container) {
-        console.dir(container);
-        // container.defaultOptions.start.Binds = ["/tmp:/tmp:rw"];
-        container.defaultOptions.start.PublishAllPorts = true;
+        var portBindings = { };
+        portBindings[manifest.http_port + '/tcp'] = [ { HostPort: manifest.http_port + '' } ];
+
+        var startOptions = {
+            // Binds: [ '/tmp:/tmp:rw' ],
+            PortBindings: portBindings,
+            PublishAllPorts: false
+        };
+
+        debug('Starting container with options: ' + JSON.stringify(startOptions));
+
+        container.start(startOptions, function (err, data) {
+            if (err) {
+                debug('Error starting container');
+                appdb.update(app.id, { statusCode: appdb.STATUS_IMAGE_ERROR, statusMessage: 'Error starting container' }, NOOP_CALLBACK);
+                return callback(err);
+            }
+
+            appHealth.register(app.id);
+
+            appdb.update(app.id, { statusCode: appdb.STATUS_STARTED, statusMessage: '' }, callback);
+        });
     });
 };
 
@@ -164,11 +231,60 @@ function downloadManifest(app, callback) {
 };
 
 function uninstall(app, callback) {
-    // TODO remove from docker as well
-    appdb.del(app.id, function (error) {
-        callback(null);
+    var container = docker.getContainer(app.containerId);
+
+    var removeOptions = {
+        force: true, // kill container if it's running
+        v: true // removes volumes associated with the container
+    };
+
+    container.remove(removeOptions, function (error) {
+        if (error) {
+            debug('Error removing container:' + JSON.stringify(error));
+            // TODO: now what?
+        }
+
+        appHealth.unregister(app.id);
+
+        appdb.del(app.id, callback);
     });
 };
+
+function checkAppHealth(app, callback) {
+    var container = docker.getContainer(app.containerId),
+        manifest = yaml.safeLoad(app.manifest); // this is guaranteed not to throw since it's already been verified in downloadManifest()
+
+    container.inspect(function (err, data) {
+        if (err || !data || !data.State) {
+            debug('Error inspecting container');
+            appdb.update(app.id, { statusCode: appdb.STATUS_IMAGE_ERROR, statusMessage: 'Error inspecting image' }, NOOP_CALLBACK);
+            return callback(err);
+        }
+
+        if (data.State.Running !== true) {
+            appHealth[app.id].health = 0;
+            appdb.update(app.id, { statusCode: appdb.STATUS_EXITED, statusMessage: 'Not running' }, callback);
+            return;
+        }
+
+        superagent
+            .get('http://127.0.0.1:' + manifest.http_port + manifest.health_check_url)
+            .end(function (error, res) {
+
+            if (error || res.status !== 200) {
+                if (appHealth.decrement(app.id) < 0) {
+                    debug('Marking application as dead: ' + app.id);
+                    appdb.update(app.id, { statusCode: appdb.STATUS_DEAD, statusMessage: 'Health check failed' }, NOOP_CALLBACK);
+                }
+                debug('unhealthy app:' + app.id + ' ' + appHealth.get(app.id));
+                callback(null);
+            } else {
+                appHealth.increment(app.id);
+                callback(null);
+            }
+        });
+    });
+}
 
 function refresh() {
     if (refreshing) {
@@ -214,15 +330,14 @@ function refresh() {
                 break;
 
             case appdb.STATUS_STARTING_UP:
-                 // TODO: kill any existing instance of container. startApp()
+                 // TODO: kill any existing container
 
             case appdb.STATUS_STARTED:
-                 // TODO: poll for homepage.
-                appdb.update(app.id, { statusCode: appdb.STATUS_RUNNING, statusMessage: '' }, callback);
+                checkAppHealth(app, callback);
                 break;
 
-            case appdb.STATUS_RUNNING:
-                callback();
+            case appdb.STATUS_DEAD: // TODO: restart DEAD apps with threshold
+                callback(null);
                 break;
             }
         }, function callback(err) {
