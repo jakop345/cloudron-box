@@ -30,6 +30,7 @@ exports = module.exports = {
     STATUS_IMAGE_ERROR: 'image_error',
     STATUS_STARTING_UP: 'starting_up',
     STATUS_STARTED: 'started',
+    STATUS_RUNNING: 'running',
     STATUS_EXITED: 'exited',
     STATUS_DEAD: 'dead'
 };

@@ -267,8 +267,9 @@ function checkAppHealth(app, callback) {
             return;
         }
 
+        var healthCheckUrl = 'http://127.0.0.1:' + manifest.http_port + manifest.health_check_url;
         superagent
-            .get('http://127.0.0.1:' + manifest.http_port + manifest.health_check_url)
+            .get(healthCheckUrl)
             .end(function (error, res) {
 
             if (error || res.status !== 200) {
@@ -280,6 +281,7 @@ function checkAppHealth(app, callback) {
                 callback(null);
             } else {
                 appHealth.increment(app.id);
+                appdb.update(app.id, { statusCode: appdb.STATUS_RUNNING, statusMessage: healthCheckUrl }, NOOP_CALLBACK);
                 callback(null);
             }
         });
@@ -333,6 +335,7 @@ function refresh() {
                  // TODO: kill any existing container
 
             case appdb.STATUS_STARTED:
+            case appdb.STATUS_RUNNING:
                 checkAppHealth(app, callback);
                 break;
 
