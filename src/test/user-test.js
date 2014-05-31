@@ -25,7 +25,7 @@ var IS_ADMIN = false;
 
 var tmpdirname = 'volume-test-' + crypto.randomBytes(4).readUInt32LE(0);
 var tmpdir = path.resolve(os.tmpdir(), tmpdirname);
-var config = {
+var CONFIG = {
     port: 3000,
     dataRoot: path.resolve(tmpdir, 'data'),
     configRoot: path.resolve(tmpdir, 'config'),
@@ -48,11 +48,11 @@ function createUser(done) {
 
 function setup(done) {
     // ensure data/config/mount paths
-    mkdirp.sync(config.dataRoot);
-    mkdirp.sync(config.configRoot);
-    mkdirp.sync(config.mountRoot);
+    mkdirp.sync(CONFIG.dataRoot);
+    mkdirp.sync(CONFIG.configRoot);
+    mkdirp.sync(CONFIG.mountRoot);
 
-    database.initialize(config, done);
+    database.initialize(CONFIG, done);
 }
 
 function cleanup(done) {

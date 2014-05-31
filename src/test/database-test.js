@@ -22,7 +22,7 @@ var database = require('../database'),
 
 describe('database', function () {
     var BASE_DIR = path.resolve(os.tmpdir(), 'database-test-' + crypto.randomBytes(4).readUInt32LE(0));
-    var config = {
+    var CONFIG = {
         port: 3456,
         dataRoot: path.resolve(BASE_DIR, 'data'),
         configRoot: path.resolve(BASE_DIR, 'config'),
@@ -31,7 +31,7 @@ describe('database', function () {
     };
 
     before(function (done) {
-        database.initialize(config, function (error) {
+        database.initialize(CONFIG, function (error) {
             expect(error).to.be(null);
             done();
         });
