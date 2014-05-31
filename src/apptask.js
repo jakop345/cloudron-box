@@ -11,7 +11,10 @@ var assert = require('assert'),
     safe = require('safetydance'),
     appdb = require('./appdb.js'),
     Writable = require('stream').Writable,
-    debug = require('debug')('apptask');
+    debug = require('debug')('apptask'),
+    fs = require('fs'),
+    child_process = require('child_process'),
+    path = require('path');
 
 exports = module.exports = {
     initialize: initialize,
@@ -19,7 +22,8 @@ exports = module.exports = {
 };
 
 var appServerUrl = null, docker = null,
-    refreshing = false, pendingRefresh = false;
+    refreshing = false, pendingRefresh = false,
+    nginxAppConfigDir = null;
 
 var appHealth = (function () {
     var data = { };
@@ -64,10 +68,12 @@ var appHealth = (function () {
 
 var NOOP_CALLBACK = function (error) { };
 
-function initialize(_appServerUrl) {
+function initialize(_appServerUrl, _nginxAppConfigDir) {
     assert(typeof _appServerUrl === 'string');
+    assert(typeof _nginxAppConfigDir === 'string');
 
     appServerUrl = _appServerUrl;
+    nginxAppConfigDir = _nginxAppConfigDir;
 
     if (os.platform() === 'linux') {
         docker = new Docker({socketPath: '/var/run/docker.sock'});
@@ -76,6 +82,53 @@ function initialize(_appServerUrl) {
     }
 
     setInterval(refresh, 3000);
+}
+
+function getFreePort() {
+    return '4020';
+}
+
+function configureNginx(app, callback) {
+    var NGINX_APPCONFIG_TEMPLATE =
+        "server {\n"
+        + "    listen 80;\n"
+        + "    server_name #SERVER_NAME#;\n"
+        + "    # proxy_intercept_errors on;\n"
+        + "    # error_page 500 502 503 504 = @install_progress;\n"
+        + "    location / {\n"
+        + "        proxy_pass http://127.0.0.1:#PORT#;\n"
+        + "    }\n"
+        + "}\n";
+
+    var config = JSON.parse(app.config);
+
+    config.http_port = getFreePort();
+
+    var nginxConf =
+        NGINX_APPCONFIG_TEMPLATE.replace('#SERVER_NAME#', config.location)
+        .replace('#PORT#', config.http_port);
+
+    var nginxConfigFilename = path.join(nginxAppConfigDir, config.location + '.conf');
+    debug('writing config to ' + nginxConfigFilename);
+
+    fs.writeFile(nginxConfigFilename, nginxConf, function (error) {
+        if (error) {
+            debug('Error writing nginx config : ' + error);
+            appdb.update(app.id, { statusCode: appdb.STATUS_NGINX_ERROR, statusMessage: error }, NOOP_CALLBACK);
+            return callback(null);
+        }
+
+        child_process.exec("nginx -s reload", function (error, stdout, stderr) {
+            if (error) {
+                // TODO: cannot reload nginx because we are not root
+                debug('Error configuring nginx. Reload nginx manually for now', error);
+                // appdb.update(app.id, { statusCode: appdb.STATUS_NGINX_ERROR, statusMessage: error }, NOOP_CALLBACK);
+                // return callback(null);
+            }
+
+            appdb.update(app.id, { statusCode: appdb.STATUS_NGINX_CONFIGURED, statusMessage: '', config: JSON.stringify(config) }, callback);
+        });
+    });
 }
 
 function downloadImage(app, callback) {
@@ -175,7 +228,7 @@ function startApp(app, callback) {
         appdb.update(app.id, { containerId: container.id }, NOOP_CALLBACK);
 
         var portBindings = { };
-        portBindings[manifest.http_port + '/tcp'] = [ { HostPort: manifest.http_port + '' } ];
+        portBindings[manifest.http_port + '/tcp'] = [ { HostPort: config.http_port } ];
 
         var startOptions = {
             // Binds: [ '/tmp:/tmp:rw' ],
@@ -222,10 +275,9 @@ function downloadManifest(app, callback) {
             var bufs = [ ];
             res.on('data', function (d) { bufs.push(d); });
             res.on('end', function () {
-                var rawManifest = Buffer.concat(bufs);
-                app.manifest = rawManifest.toString('utf8');
-                debug('Downloaded application manifest: ' + app.manifest);
-                appdb.update(app.id, { statusCode: appdb.STATUS_DOWNLOADED_MANIFEST, statusMessage: '', manifest: app.manifest }, callback);
+                var manifest = Buffer.concat(bufs).toString('utf8');
+                debug('Downloaded application manifest: ' + manifest);
+                appdb.update(app.id, { statusCode: appdb.STATUS_DOWNLOADED_MANIFEST, statusMessage: '', manifest: manifest }, callback);
             });
         });
 };
@@ -252,6 +304,7 @@ function uninstall(app, callback) {
 
 function checkAppHealth(app, callback) {
     var container = docker.getContainer(app.containerId),
+        config = JSON.parse(app.config),
         manifest = yaml.safeLoad(app.manifest); // this is guaranteed not to throw since it's already been verified in downloadManifest()
 
     container.inspect(function (err, data) {
@@ -267,7 +320,7 @@ function checkAppHealth(app, callback) {
             return;
         }
 
-        var healthCheckUrl = 'http://127.0.0.1:' + manifest.http_port + manifest.health_check_url;
+        var healthCheckUrl = 'http://127.0.0.1:' + config.http_port + manifest.health_check_url;
         superagent
             .get(healthCheckUrl)
             .end(function (error, res) {
@@ -307,10 +360,12 @@ function refresh() {
 
         async.eachSeries(apps, function iterator(app, callback) {
             switch (app.statusCode) {
-            case appdb.STATUS_INSTALLED:
-                return;
-
             case appdb.STATUS_PENDING_INSTALL:
+            case appdb.STATUS_NGINX_ERROR:
+                configureNginx(app, callback);
+                break;
+
+            case appdb.STATUS_NGINX_CONFIGURED:
             case appdb.STATUS_MANIFEST_ERROR:
             case appdb.STATUS_DOWNLOAD_ERROR:
             case appdb.STATUS_DOWNLOADING_MANIFEST:

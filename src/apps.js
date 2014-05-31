@@ -37,7 +37,10 @@ AppsError.ALREADY_EXISTS = 2;
 AppsError.NOT_FOUND = 3;
 
 function initialize(config) {
-    task.initialize(config.appServerUrl);
+    assert(typeof config.appServerUrl === 'string');
+    assert(typeof config.nginxAppConfigDir === 'string');
+
+    task.initialize(config.appServerUrl, config.nginxAppConfigDir);
 }
 
 function get(appId, callback) {

@@ -21,7 +21,8 @@ var CONFIG = {
     configRoot: path.resolve(BASE_DIR, 'config'),
     mountRoot: path.resolve(BASE_DIR, 'mount'),
     silent: true,
-    appServerUrl: 'invalid_url'
+    appServerUrl: 'invalid_url',
+    nginxAppConfigDir: '/tmp'
 };
 var SERVER_URL = 'http://localhost:' + CONFIG.port;
 

@@ -18,9 +18,10 @@ exports = module.exports = {
     getAll: getAll,
 
     // status codes
+    STATUS_NGINX_ERROR: 'nginx_error',
+    STATUS_NGINX_CONFIGURED: 'nginx_configured',
     STATUS_PENDING_INSTALL: 'pending_install',
     STATUS_PENDING_UNINSTALL: 'pending_uninstall',
-    STATUS_INSTALLED: 'installed',
     STATUS_DOWNLOADING_MANIFEST: 'downloading_manifest',
     STATUS_DOWNLOADED_MANIFEST: 'downloaded_manifest',
     STATUS_DOWNLOADING_IMAGE: 'downloading_image',

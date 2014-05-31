@@ -55,7 +55,8 @@ var config = {
     configRoot: path.resolve(argv.c),
     mountRoot: path.resolve(argv.m),
     silent: argv.s,
-    appServerUrl: 'http://localhost:5050'
+    appServerUrl: 'http://localhost:5050',
+    nginxAppConfigDir: path.join(__dirname, 'nginx/applications/')
 };
 
 var server = new Server(config);
