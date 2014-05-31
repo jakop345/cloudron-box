@@ -14,7 +14,8 @@ var assert = require('assert'),
     debug = require('debug')('apptask'),
     fs = require('fs'),
     child_process = require('child_process'),
-    path = require('path');
+    path = require('path'),
+    net = require('net');
 
 exports = module.exports = {
     initialize: initialize,
@@ -85,11 +86,17 @@ function initialize(_appServerUrl, _nginxAppConfigDir) {
     setInterval(refresh, 3000);
 }
 
-function getFreePort() {
-    return '4020';
+function getFreePort(callback) {
+    var server = net.createServer();
+    server.listen(0, function () {
+        var port = server.address().port;
+        server.close(function () {
+            return callback(null, port);
+        });
+    });
 }
 
-function configureNginx(app, callback) {
+function configureNginx(app, freePort, callback) {
     var NGINX_APPCONFIG_TEMPLATE =
         "server {\n"
         + "    listen 80;\n"
@@ -103,7 +110,7 @@ function configureNginx(app, callback) {
 
     var config = JSON.parse(app.config);
 
-    config.http_port = getFreePort();
+    config.http_port = freePort;
 
     var nginxConf =
         NGINX_APPCONFIG_TEMPLATE.replace('#APP_SUBDOMAIN#', config.location + '.' + HOSTNAME)
@@ -229,7 +236,7 @@ function startApp(app, callback) {
         appdb.update(app.id, { containerId: container.id }, NOOP_CALLBACK);
 
         var portBindings = { };
-        portBindings[manifest.http_port + '/tcp'] = [ { HostPort: config.http_port } ];
+        portBindings[manifest.http_port + '/tcp'] = [ { HostPort: config.http_port + '' } ];
 
         var startOptions = {
             // Binds: [ '/tmp:/tmp:rw' ],
@@ -363,7 +370,10 @@ function refresh() {
             switch (app.statusCode) {
             case appdb.STATUS_PENDING_INSTALL:
             case appdb.STATUS_NGINX_ERROR:
-                configureNginx(app, callback);
+                getFreePort(function (error, freePort) {
+                    if (error) return callback(null);
+                    configureNginx(app, freePort, callback);
+                });
                 break;
 
             case appdb.STATUS_NGINX_CONFIGURED:
