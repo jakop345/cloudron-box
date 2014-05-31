@@ -23,7 +23,8 @@ exports = module.exports = {
 
 var appServerUrl = null, docker = null,
     refreshing = false, pendingRefresh = false,
-    nginxAppConfigDir = null;
+    nginxAppConfigDir = null,
+    HOSTNAME = process.env.HOSTNAME || os.hostname();
 
 var appHealth = (function () {
     var data = { };
@@ -92,7 +93,7 @@ function configureNginx(app, callback) {
     var NGINX_APPCONFIG_TEMPLATE =
         "server {\n"
         + "    listen 80;\n"
-        + "    server_name #SERVER_NAME#;\n"
+        + "    server_name #APP_SUBDOMAIN#;\n"
         + "    # proxy_intercept_errors on;\n"
         + "    # error_page 500 502 503 504 = @install_progress;\n"
         + "    location / {\n"
@@ -105,7 +106,7 @@ function configureNginx(app, callback) {
     config.http_port = getFreePort();
 
     var nginxConf =
-        NGINX_APPCONFIG_TEMPLATE.replace('#SERVER_NAME#', config.location)
+        NGINX_APPCONFIG_TEMPLATE.replace('#APP_SUBDOMAIN#', config.location + '.' + HOSTNAME)
         .replace('#PORT#', config.http_port);
 
     var nginxConfigFilename = path.join(nginxAppConfigDir, config.location + '.conf');
@@ -205,7 +206,7 @@ function startApp(app, callback) {
     };
 
     var containerOptions = {
-        Hostname: config.location || '',
+        Hostname: config.location + '.' + HOSTNAME,
         Tty: true,
         Image: manifest.docker_image,
         Cmd: null,
