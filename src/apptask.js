@@ -6,7 +6,6 @@ var assert = require('assert'),
     Docker = require('dockerode'),
     superagent = require('superagent'),
     async = require('async'),
-    yaml = require('js-yaml'),
     os = require('os'),
     safe = require('safetydance'),
     appdb = require('./appdb.js'),
@@ -144,7 +143,7 @@ function downloadImage(app, callback) {
 
     appdb.update(app.id, { statusCode: appdb.STATUS_DOWNLOADING_IMAGE, statusMessage: '' }, NOOP_CALLBACK);
 
-    var manifest = safe(function () { return yaml.safeLoad(app.manifest); });
+    var manifest = safe.JSON.parse(app.manifestJson);
     if (manifest === null) {
         debug('Error parsing manifest: ' + safe.error);
         appdb.update(app.id, { statusCode: appdb.STATUS_MANIFEST_ERROR, statusMessage: 'Parse error:' + safe.error }, NOOP_CALLBACK);
@@ -205,7 +204,7 @@ function downloadImage(app, callback) {
 function startApp(app, callback) {
     var outputStream = new Writable(),
         config = JSON.parse(app.config),
-        manifest = yaml.safeLoad(app.manifest); // this is guaranteed not to throw since it's already been verified in downloadManifest()
+        manifest = JSON.parse(app.manifestJson); // this is guaranteed not to throw since it's already been verified in downloadManifest()
 
     outputStream._write = function (chunk, enc, callback) {
         console.log('CHUNK: ' + chunk);
@@ -267,7 +266,7 @@ function downloadManifest(app, callback) {
 
     superagent
         .get(appServerUrl + '/api/v1/app/' + app.id + '/manifest')
-        .set('Accept', 'application/x-yaml')
+        .set('Accept', 'application/json')
         .end(function (error, res) {
             if (error) {
                 debug('Error making request: ' + error.message);
@@ -280,13 +279,8 @@ function downloadManifest(app, callback) {
                 return callback(null);
             }
 
-            var bufs = [ ];
-            res.on('data', function (d) { bufs.push(d); });
-            res.on('end', function () {
-                var manifest = Buffer.concat(bufs).toString('utf8');
-                debug('Downloaded application manifest: ' + manifest);
-                appdb.update(app.id, { statusCode: appdb.STATUS_DOWNLOADED_MANIFEST, statusMessage: '', manifest: manifest }, callback);
-            });
+            debug('Downloaded application manifest: ' + res.text);
+            appdb.update(app.id, { statusCode: appdb.STATUS_DOWNLOADED_MANIFEST, statusMessage: '', manifestJson: res.text }, callback);
         });
 };
 
@@ -313,7 +307,7 @@ function uninstall(app, callback) {
 function checkAppHealth(app, callback) {
     var container = docker.getContainer(app.containerId),
         config = JSON.parse(app.config),
-        manifest = yaml.safeLoad(app.manifest); // this is guaranteed not to throw since it's already been verified in downloadManifest()
+        manifest = JSON.parse(app.manifestJson); // this is guaranteed not to throw since it's already been verified in downloadManifest()
 
     container.inspect(function (err, data) {
         if (err || !data || !data.State) {

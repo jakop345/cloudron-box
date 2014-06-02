@@ -231,7 +231,7 @@ describe('database', function () {
             id: 'appid-0',
             statusCode: 'some-status-0',
             config: 'some-config-0',
-            manifest: null,
+            manifestJson: null,
             statusMessage: null,
             containerId: null
         };
@@ -239,7 +239,7 @@ describe('database', function () {
             id: 'appid-1',
             statusCode: 'some-status-1',
             config: 'some-config-1',
-            manifest: null,
+            manifestJson: null,
             statusMessage: null,
             containerId: null
         };

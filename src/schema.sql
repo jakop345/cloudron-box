@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS apps(
     statusCode VARCHAR(512) NOT NULL,
     statusMessage VARCHAR(2048),
     containerId VARCHAR(128),
-    manifest VARCHAR,
+    manifestJson VARCHAR,
     config VARCHAR(512),
     PRIMARY KEY (id) );
 
