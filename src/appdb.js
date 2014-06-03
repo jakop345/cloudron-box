@@ -68,20 +68,20 @@ function getAll(callback) {
     });
 }
 
-function add(id, statusCode, config, callback) {
+function add(id, statusCode, location, callback) {
     assert(db !== null);
     assert(typeof id === 'string');
     assert(typeof statusCode === 'string');
-    assert(typeof config === 'string' || config === null);
+    assert(typeof location === 'string');
     assert(typeof callback === 'function');
 
     var data = {
         $id: id,
         $statusCode: statusCode,
-        $config: config
+        $location: location
     };
 
-    db.run('INSERT INTO apps (id, statusCode, config) VALUES ($id, $statusCode, $config)',
+    db.run('INSERT INTO apps (id, statusCode, location) VALUES ($id, $statusCode, $location)',
            data, function (error) {
         if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(error, DatabaseError.ALREADY_EXISTS));
 

@@ -107,15 +107,11 @@ function configureNginx(app, freePort, callback) {
         + "    }\n"
         + "}\n";
 
-    var config = JSON.parse(app.config);
-
-    config.http_port = freePort;
-
     var nginxConf =
-        NGINX_APPCONFIG_TEMPLATE.replace('#APP_SUBDOMAIN#', config.location + '.' + HOSTNAME)
-        .replace('#PORT#', config.http_port);
+        NGINX_APPCONFIG_TEMPLATE.replace('#APP_SUBDOMAIN#', app.location + '.' + HOSTNAME)
+        .replace('#PORT#', freePort);
 
-    var nginxConfigFilename = path.join(nginxAppConfigDir, config.location + '.conf');
+    var nginxConfigFilename = path.join(nginxAppConfigDir, app.location + '.conf');
     debug('writing config to ' + nginxConfigFilename);
 
     fs.writeFile(nginxConfigFilename, nginxConf, function (error) {
@@ -133,7 +129,7 @@ function configureNginx(app, freePort, callback) {
                 // return callback(null);
             }
 
-            appdb.update(app.id, { statusCode: appdb.STATUS_NGINX_CONFIGURED, statusMessage: '', config: JSON.stringify(config) }, callback);
+            appdb.update(app.id, { statusCode: appdb.STATUS_NGINX_CONFIGURED, statusMessage: '', httpPort: freePort }, callback);
         });
 
         if (os.platform() === 'darwin') {
@@ -210,7 +206,6 @@ function downloadImage(app, callback) {
 
 function startApp(app, callback) {
     var outputStream = new Writable(),
-        config = JSON.parse(app.config),
         manifest = JSON.parse(app.manifestJson); // this is guaranteed not to throw since it's already been verified in downloadManifest()
 
     outputStream._write = function (chunk, enc, callback) {
@@ -219,7 +214,7 @@ function startApp(app, callback) {
     };
 
     var containerOptions = {
-        Hostname: config.location + '.' + HOSTNAME,
+        Hostname: app.location + '.' + HOSTNAME,
         Tty: true,
         Image: manifest.docker_image,
         Cmd: null,
@@ -242,7 +237,7 @@ function startApp(app, callback) {
         appdb.update(app.id, { containerId: container.id }, NOOP_CALLBACK);
 
         var portBindings = { };
-        portBindings[manifest.http_port + '/tcp'] = [ { HostPort: config.http_port + '' } ];
+        portBindings[manifest.http_port + '/tcp'] = [ { HostPort: app.httpPort + '' } ];
 
         var startOptions = {
             // Binds: [ '/tmp:/tmp:rw' ],
@@ -313,7 +308,6 @@ function uninstall(app, callback) {
 
 function checkAppHealth(app, callback) {
     var container = docker.getContainer(app.containerId),
-        config = JSON.parse(app.config),
         manifest = JSON.parse(app.manifestJson); // this is guaranteed not to throw since it's already been verified in downloadManifest()
 
     container.inspect(function (err, data) {
@@ -329,7 +323,7 @@ function checkAppHealth(app, callback) {
             return;
         }
 
-        var healthCheckUrl = 'http://127.0.0.1:' + config.http_port + manifest.health_check_url;
+        var healthCheckUrl = 'http://127.0.0.1:' + app.httpPort + manifest.health_check_url;
         superagent
             .get(healthCheckUrl)
             .end(function (error, res) {
@@ -385,6 +379,7 @@ function refresh() {
                 downloadManifest(app, callback);
                 break;
 
+            case appdb.STATUS_DOWNLOADING_IMAGE:
             case appdb.STATUS_DOWNLOADED_MANIFEST:
                 downloadImage(app, callback);
                 break;

@@ -148,7 +148,7 @@ angular.module('clientService', [])
     };
 
     Client.prototype.installApp = function (id, password, config, callback) {
-        $http.post("/api/v1/app/install", { app_id: id, password: password, config: config })
+        $http.post('/api/v1/app/install', { app_id: id, password: password, location: config.location })
         .success(function (data, status, headers) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null);

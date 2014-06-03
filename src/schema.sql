@@ -32,7 +32,8 @@ CREATE TABLE IF NOT EXISTS apps(
     statusMessage VARCHAR(2048),
     containerId VARCHAR(128),
     manifestJson VARCHAR,
-    config VARCHAR(512),
+    httpPort INTEGER,
+    location VARCHAR(512) NOT NULL UNIQUE,
     PRIMARY KEY (id) );
 
 CREATE TABLE IF NOT EXISTS authcodes(

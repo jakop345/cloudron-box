@@ -61,13 +61,13 @@ function getAll(callback) {
     });
 }
 
-function install(appId, username, password, config, callback) {
+function install(appId, username, password, location, callback) {
     assert(typeof appId === 'string');
     assert(typeof username === 'string');
     assert(typeof password === 'string');
-    assert(typeof config === 'object');
+    assert(typeof location === 'string');
 
-    appdb.add(appId, appdb.STATUS_PENDING_INSTALL, JSON.stringify(config), function (error) {
+    appdb.add(appId, appdb.STATUS_PENDING_INSTALL, location, function (error) {
         if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new AppsError('Already installed or installing', AppsError.ALREADY_EXISTS));
         if (error) return callback(new AppsError('Internal error:' + error.message, AppsError.INTERNAL_ERROR));
 
