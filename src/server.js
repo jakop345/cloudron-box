@@ -273,6 +273,7 @@ Server.prototype._initialize2 = function (callback) {
             routes.sync.initialize(config);
             routes.user.initialize(config);
             routes.apps.initialize(config);
+            routes.oauth2.initialize(config);
             callback(null);
         },
         function initializeModules(callback) {

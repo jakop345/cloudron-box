@@ -47,6 +47,19 @@ if (argv.h) {
     process.exit(0);
 }
 
+// load provisioned config file if there
+var configFile;
+try {
+    configFile = require('/etc/yellowtent.json');
+} catch (e) {
+    console.log('Unable to load provisioned config file. Using defaults.');
+    configFile = {
+        token: null,
+        appstoreOrigin: 'http://localhost:5050',
+        origin: 'https://localhost'
+    };
+}
+
 // main entry point when running standalone
 // TODO Maybe this should go into a new 'executeable' file - Johannes
 var config = {
@@ -55,7 +68,9 @@ var config = {
     configRoot: path.resolve(argv.c),
     mountRoot: path.resolve(argv.m),
     silent: argv.s,
-    appServerUrl: 'http://localhost:5050',
+    token: configFile.token,
+    appServerUrl: configFile.appstoreOrigin,
+    origin: configFile.origin,
     nginxAppConfigDir: path.join(__dirname, 'nginx/applications/')
 };
 

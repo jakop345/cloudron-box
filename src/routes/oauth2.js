@@ -1,3 +1,5 @@
+/* jslint  node:true */
+
 'use strict';
 
 /*
@@ -113,6 +115,10 @@ server.exchange(oauth2orize.exchange.code(function (client, code, redirectURI, c
     });
 }));
 
+var config = null;
+module.exports.initialize = function (_config) {
+    config = _config;
+};
 
 // Main login form username and password
 module.exports.loginForm = function (req, res) {
@@ -196,5 +202,5 @@ module.exports.token = [
 ];
 
 module.exports.library = function (req, res, next) {
-    res.render('yellowtent', { domain: 'localhost', protocol: 'https' });
+    res.render('yellowtent', { origin: config.origin });
 };
