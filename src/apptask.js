@@ -21,6 +21,8 @@ exports = module.exports = {
     refresh: refresh
 };
 
+var NOOP_CALLBACK = function (error) { if (error) console.error(error); }
+
 var appServerUrl = null, docker = null,
     refreshing = false, pendingRefresh = false,
     nginxAppConfigDir = null,
@@ -66,8 +68,6 @@ var appHealth = (function () {
         }
     };
 })();
-
-var NOOP_CALLBACK = function (error) { };
 
 function initialize(_appServerUrl, _nginxAppConfigDir) {
     assert(typeof _appServerUrl === 'string');
