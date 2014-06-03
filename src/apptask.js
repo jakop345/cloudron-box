@@ -135,6 +135,13 @@ function configureNginx(app, freePort, callback) {
 
             appdb.update(app.id, { statusCode: appdb.STATUS_NGINX_CONFIGURED, statusMessage: '', config: JSON.stringify(config) }, callback);
         });
+
+        if (os.platform() === 'darwin') {
+            debug('Setting up VirtualBox port forwarding for '+ app.id + ' at ' + freePort);
+            child_process.exec(
+                'VBoxManage controlvm boot2docker-vm natpf1 delete ' + app.id + ';'
+                + 'VBoxManage controlvm boot2docker-vm natpf1 ' + app.id + ',tcp,127.0.0.1,' + freePort + ',,' + freePort, NOOP_CALLBACK);
+        }
     });
 }
 
