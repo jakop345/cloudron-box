@@ -15,5 +15,5 @@ BASEDIR=$(dirname $0)
 # fi
 
 sudo mkdir -p /var/log/supervisord
-sudo supervisord -c supervisor/supervisord.conf
+sudo supervisord -n -c supervisor/supervisord.conf
 
