@@ -121,15 +121,15 @@ function configureNginx(app, freePort, callback) {
             return callback(null);
         }
 
-        child_process.exec("nginx -s reload", function (error, stdout, stderr) {
+        child_process.exec("supervisorctl restart nginx", { timeout: 10000 }, function (error, stdout, stderr) {
             if (error) {
-                // TODO: cannot reload nginx because we are not root
                 debug('Error configuring nginx. Reload nginx manually for now', error);
-                // appdb.update(app.id, { statusCode: appdb.STATUS_NGINX_ERROR, statusMessage: error }, NOOP_CALLBACK);
-                // return callback(null);
+                appdb.update(app.id, { statusCode: appdb.STATUS_NGINX_ERROR, statusMessage: error }, NOOP_CALLBACK);
+                return callback(null);
             }
 
             appdb.update(app.id, { statusCode: appdb.STATUS_NGINX_CONFIGURED, statusMessage: '', httpPort: freePort }, callback);
+            // missing 'return' is intentional
         });
 
         if (os.platform() === 'darwin') {

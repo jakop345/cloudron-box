@@ -4,6 +4,8 @@ echo
 echo "Starting YellowTent server at port 443..."
 echo
 
+BASEDIR=$(dirname $0)
+
 #### When using it as a future start suite
 # if [[ `whoami` == root ]]; then
 #     echo "Do not run the script as root!"
@@ -12,6 +14,6 @@ echo
 #     exit 1;
 # fi
 
-cd nginx
-sudo nginx -c nginx.conf -p $PWD
-cd ..
+sudo mkdir -p /var/log/supervisord
+sudo supervisord -c supervisor/supervisord.conf
+
