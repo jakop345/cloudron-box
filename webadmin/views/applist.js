@@ -1,6 +1,6 @@
 'use strict';
 
-var AppListController = function ($scope, $http, $location, Config) {
+var AppListController = function ($scope, $location, AppStore) {
     console.debug('AppListController');
 
     $scope.LOADING = 1;
@@ -13,17 +13,17 @@ var AppListController = function ($scope, $http, $location, Config) {
     $scope.refresh = function () {
         $scope.loadStatus = $scope.LOADING;
 
-        $http.get(Config.APPSTORE_URL + '/api/v1/apps')
-            .success(function (data, status, headers) {
-                console.log(data);
-                data.apps.forEach(function (app) { app.iconUrl = Config.APPSTORE_URL + "/api/v1/app/" + app.id + "/icon"; });
-                $scope.apps = data.apps;
-                $scope.loadStatus = $scope.LOADED;
-            }).error(function (data, status, headers) {
+        AppStore.getApps(function (error, apps) {
+            if (error) {
                 $scope.loadStatus = $scope.ERROR;
-                $scope.loadError = status + '';
-                console.log('error in getting app list', data, status);
-            });
+                $scope.loadError = error.message;
+                console.log(error);
+                return;
+            }
+
+            $scope.apps = apps;
+            $scope.loadStatus = $scope.LOADED;
+        });
     };
 
     $scope.installApp = function (appId) {
