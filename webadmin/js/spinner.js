@@ -2,7 +2,7 @@
 
 /* global angular:false */
 
-angular.module('spinnerFactory', [])
+angular.module('YellowTent')
 .factory('Spinner', function () {
     var spinner = function () {};
 

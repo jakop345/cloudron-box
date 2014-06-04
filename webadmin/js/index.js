@@ -3,7 +3,7 @@
 /* global angular:false */
 
 // create main application module
-var app = angular.module('YellowTent', ['acute.select', 'ngRoute', 'ngAnimate', 'ui.bootstrap', 'base64', 'clientService', 'spinnerFactory']);
+var app = angular.module('YellowTent', ['acute.select', 'ngRoute', 'ngAnimate', 'ui.bootstrap', 'base64']);
 
 // setup all major application routes
 app.config(function ($routeProvider) {
