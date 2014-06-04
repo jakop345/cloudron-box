@@ -1,6 +1,6 @@
 'use strict';
 
-var AppConfigureController = function ($scope, $http, $routeParams, Client) {
+var AppConfigureController = function ($scope, $routeParams, Client) {
     $scope.app = { };
     $scope.disabled = false;
     $scope.error = { };
