@@ -1,8 +1,6 @@
 'use strict';
 
 function UserDeleteController ($scope, $routeParams, Client) {
-    console.debug('UserDeleteController');
-
     if (!$routeParams.username) {
         console.error('No user provided.');
         return window.location.replace('#/volumelist');
@@ -16,8 +14,6 @@ function UserDeleteController ($scope, $routeParams, Client) {
     $scope.error = {};
 
     $scope.submit = function () {
-        console.debug('Try to delete user %s.', $routeParams.username);
-
         $scope.error.username = null;
         $scope.error.password = null;
 

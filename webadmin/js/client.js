@@ -17,8 +17,6 @@ angular.module('YellowTent')
     }
 
     function Client() {
-        console.debug('Create new client.');
-
         this._username = null;
         this._userInfo = null;
         this._token = null;

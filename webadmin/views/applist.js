@@ -1,8 +1,6 @@
 'use strict';
 
 var AppListController = function ($scope, $location, AppStore) {
-    console.debug('AppListController');
-
     $scope.LOADING = 1;
     $scope.ERROR = 2;
     $scope.LOADED = 3;
@@ -17,7 +15,7 @@ var AppListController = function ($scope, $location, AppStore) {
             if (error) {
                 $scope.loadStatus = $scope.ERROR;
                 $scope.loadError = error.message;
-                console.log(error);
+                console.error(error);
                 return;
             }
 
@@ -27,7 +25,6 @@ var AppListController = function ($scope, $location, AppStore) {
     };
 
     $scope.installApp = function (appId) {
-        console.log('Will install ', appId);
         $location.path('/app/' + appId + '/configure');
     };
 

@@ -1,15 +1,11 @@
 'use strict';
 
 var AppConfigureController = function ($scope, $http, $routeParams, Client) {
-    console.debug('AppConfigureController for' + $routeParams.id);
-
     $scope.app = { };
     $scope.disabled = false;
     $scope.error = { };
 
     $scope.installApp = function () {
-        console.log('installing application');
-
         $scope.error.name = null;
         $scope.error.password = null;
 
@@ -29,7 +25,6 @@ var AppConfigureController = function ($scope, $http, $routeParams, Client) {
                 return;
             }
 
-            console.debug('Successfully created app', $scope.volume.name);
             window.location.replace('#/applist');
         });
     };

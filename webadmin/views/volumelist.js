@@ -1,8 +1,6 @@
 'use strict';
 
 function VolumeListController ($scope, $modal, Client) {
-    console.debug('VolumeListController');
-
     $scope.volumes = [];
 
     $scope.getUsers = function (callback) {
@@ -18,15 +16,12 @@ function VolumeListController ($scope, $modal, Client) {
     };
 
     function refresh() {
-        console.debug('refresh volume list');
-
         Client.listVolumes(function (error, result) {
             if (error) {
                 console.error('Unable to get volume listing.', error);
                 return;
             }
 
-            console.debug('Got new volume list', result);
             $scope.volumes = result;
         });
     }

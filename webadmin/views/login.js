@@ -1,8 +1,6 @@
 'use strict';
 
 function LoginController ($scope, Client) {
-    console.debug('LoginController');
-
     // manually tell yellowtent to manage the signInButton
     window.yellowtent.setupButton(document.getElementById('signInButton'), function (authCode) {
         if (!authCode) {

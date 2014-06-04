@@ -1,8 +1,6 @@
 'use strict';
 
 function UserCreateController ($scope, $routeParams, Client) {
-    console.debug('UserCreateController');
-
     $scope.disabled = false;
 
     $scope.username = '';

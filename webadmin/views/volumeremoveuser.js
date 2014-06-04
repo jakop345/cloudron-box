@@ -1,8 +1,6 @@
 'use strict';
 
 function VolumeRemoveUserController ($scope, $routeParams, Client) {
-    console.debug('VolumeRemoveUserController');
-
     if (!$routeParams.volume || !$routeParams.volumeName) {
         console.error('No volume provided.');
         return window.location.replace('#/volumelist');

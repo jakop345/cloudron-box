@@ -1,8 +1,6 @@
 'use strict';
 
 function UserPasswordController ($scope, $routeParams, Client) {
-    console.debug('UserPasswordController');
-
     $scope.disabled = false;
     $scope.user = Client.getUserInfo();
     $scope.currentPassword = '';

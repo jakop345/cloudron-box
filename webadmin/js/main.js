@@ -1,8 +1,6 @@
 'use strict';
 
 var MainController = function ($scope, $route, Client) {
-    console.debug('MainController');
-
     $scope.isActive = function (url) {
         if (!$route.current) return false;
         return $route.current.$$route.originalPath.indexOf(url) === 0;
@@ -32,8 +30,6 @@ var MainController = function ($scope, $route, Client) {
             console.error('Unable to connect.', error);
             return;
         }
-
-        console.debug('Successfully connect to server. Server first time', isFirstTime);
 
         if (isFirstTime) {
             window.location.href = '#/usercreate?admin=1';

@@ -1,8 +1,6 @@
 'use strict';
 
 function VolumeCreateController ($scope, $routeParams, Client) {
-    console.debug('VolumeCreateController');
-
     $scope.volume = {};
     $scope.volume.name = '';
     $scope.volume.password = '';

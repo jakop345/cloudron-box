@@ -1,8 +1,6 @@
 'use strict';
 
 function VolumeMountController ($scope, $routeParams, Client) {
-    console.debug('VolumeMountController');
-
     if (!$routeParams.volume || !$routeParams.volumeName) {
         console.error('No volume provided.');
         return window.location.replace('#/volumelist');
@@ -16,8 +14,6 @@ function VolumeMountController ($scope, $routeParams, Client) {
     $scope.error = {};
 
     $scope.submit = function () {
-        console.debug('Try to mount volume %s.', $scope.volume.name);
-
         $scope.error.password = null;
         $scope.disabled = true;
 
@@ -33,7 +29,6 @@ function VolumeMountController ($scope, $routeParams, Client) {
                 return;
             }
 
-            console.debug('Successfully mounted volume', $scope.volume.name);
             window.location.replace('#/volumelist');
         });
     };
