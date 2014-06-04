@@ -17,15 +17,20 @@ angular.module('YellowTent')
     }
 
     function AppStore() {
+        this._appsCache = null;
     }
 
     AppStore.prototype.getApps = function (callback) {
+        if (this._appsCache !== null) return callback(null, this._appsCache);
+
+        var that = this;
         $http.get(Config.APPSTORE_URL + '/api/v1/apps')
         .success(function (data, status, headers) {
             if (status !== 200) return callback(new AppStoreError(status, data));
 
             var apps = data.apps;
             apps.forEach(function (app) { app.iconUrl = Config.APPSTORE_URL + "/api/v1/app/" + app.id + "/icon"; });
+            that._appsCache = apps;
             return callback(null, apps);
         }).error(function (data, status, headers) {
             return callback(new AppStoreError(status, data));
