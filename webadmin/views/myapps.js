@@ -1,6 +1,6 @@
 'use strict';
 
-var MyAppsController = function ($scope, $http, $location, config) {
+var MyAppsController = function ($scope, $http, $location, Config) {
     console.debug('MyAppsController');
 
     $scope.LOADING = 1;
@@ -16,7 +16,7 @@ var MyAppsController = function ($scope, $http, $location, config) {
         $http.get('/api/v1/apps')
             .success(function (data, status, headers) {
                 console.log(data);
-                data.apps.forEach(function (app) { app.iconUrl = config.APPSTORE_URL + "/api/v1/app/" + app.id + "/icon"; });
+                data.apps.forEach(function (app) { app.iconUrl = Config.APPSTORE_URL + "/api/v1/app/" + app.id + "/icon"; });
                 $scope.apps = data.apps;
                 $scope.loadStatus = $scope.LOADED;
             }).error(function (data, status, headers) {

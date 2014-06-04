@@ -1,6 +1,6 @@
 'use strict';
 
-var AppConfigureController = function ($scope, $http, $routeParams, config, Client) {
+var AppConfigureController = function ($scope, $http, $routeParams, Client) {
     console.debug('AppConfigureController for' + $routeParams.id);
 
     $scope.app = { };

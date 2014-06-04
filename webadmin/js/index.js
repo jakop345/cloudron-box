@@ -63,7 +63,7 @@ app.run(function (acuteSelectService) {
     acuteSelectService.updateSetting('templatePath', '/3rdparty/templates');
 });
 
-app.service('config', function () {
+app.service('Config', function () {
     this.APPSTORE_URL = 'http://localhost:5050';
 });
 
