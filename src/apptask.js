@@ -180,10 +180,8 @@ function downloadImage(app, callback) {
 
         stream.on('end', function () {
             debug('pulled successfully');
-            debug(docker.modem);
 
             var image = docker.getImage(manifest.docker_image);
-            debug(image.modem);
 
             image.inspect(function (err, data) {
                 if (err || !data || !data.config) {
@@ -191,7 +189,7 @@ function downloadImage(app, callback) {
                     appdb.update(app.id, { statusCode: appdb.STATUS_IMAGE_ERROR, statusMessage: 'Error inspecting image' }, NOOP_CALLBACK);
                     return callback(err);
                 }
-                if (!data.config.Entrypoint) {
+                if (!data.config.Entrypoint && !data.config.Cmd) {
                     debug('Only images with entry point are allowed');
                     appdb.update(app.id, { statusCode: appdb.STATUS_IMAGE_ERROR, statusMessage: 'No entrypoint in image' }, NOOP_CALLBACK);
                     return callback(err);
@@ -375,7 +373,6 @@ function refresh() {
             case appdb.STATUS_MANIFEST_ERROR:
             case appdb.STATUS_DOWNLOAD_ERROR:
             case appdb.STATUS_DOWNLOADING_MANIFEST:
-            case appdb.STATUS_IMAGE_ERROR:
                 downloadManifest(app, callback);
                 break;
 
@@ -402,6 +399,11 @@ function refresh() {
                 break;
 
             case appdb.STATUS_DEAD: // TODO: restart DEAD apps with threshold
+                callback(null);
+                break;
+
+            case appdb.STATUS_IMAGE_ERROR:
+                 // do nothing: let user retry again
                 callback(null);
                 break;
             }
