@@ -9,52 +9,52 @@ var app = angular.module('YellowTent', ['acute.select', 'ngRoute', 'ngAnimate', 
 app.config(function ($routeProvider) {
     $routeProvider.when('/', {
         controller: 'LoginController',
-        templateUrl: 'partials/login.html'
+        templateUrl: 'views/login.html'
     }).when('/login', {
         controller: 'LoginController',
-        templateUrl: 'partials/login.html'
+        templateUrl: 'views/login.html'
     }).when('/usercreate', {
         controller: 'UserCreateController',
-        templateUrl: 'partials/usercreate.html'
+        templateUrl: 'views/usercreate.html'
     }).when('/userdelete', {
         controller: 'UserDeleteController',
-        templateUrl: 'partials/userdelete.html'
+        templateUrl: 'views/userdelete.html'
     }).when('/userpassword', {
         controller: 'UserPasswordController',
-        templateUrl: 'partials/userpassword.html'
+        templateUrl: 'views/userpassword.html'
     }).when('/userlist', {
         controller: 'UserListController',
-        templateUrl: 'partials/userlist.html'
+        templateUrl: 'views/userlist.html'
     }).when('/volumecreate', {
         controller: 'VolumeCreateController',
-        templateUrl: 'partials/volumecreate.html'
+        templateUrl: 'views/volumecreate.html'
     }).when('/volumedelete', {
         controller: 'VolumeDeleteController',
-        templateUrl: 'partials/volumedelete.html'
+        templateUrl: 'views/volumedelete.html'
     }).when('/volumeremoveuser', {
         controller: 'VolumeRemoveUserController',
-        templateUrl: 'partials/volumeremoveuser.html'
+        templateUrl: 'views/volumeremoveuser.html'
     }).when('/volumemount', {
         controller: 'VolumeMountController',
-        templateUrl: 'partials/volumemount.html'
+        templateUrl: 'views/volumemount.html'
     }).when('/volumelist', {
         controller: 'VolumeListController',
-        templateUrl: 'partials/volumelist.html'
+        templateUrl: 'views/volumelist.html'
     }).when('/volumeunmount', {
         controller: 'VolumeUnmountController',
-        templateUrl: 'partials/volumeunmount.html'
+        templateUrl: 'views/volumeunmount.html'
     }).when('/applist', {
         controller: 'AppListController',
-        templateUrl: 'partials/applist.html'
+        templateUrl: 'views/applist.html'
     }).when('/myapps', {
         controller: 'MyAppsController',
-        templateUrl: 'partials/myapps.html'
+        templateUrl: 'views/myapps.html'
     }).when('/app/:id/configure', {
         controller: 'AppConfigureController',
-        templateUrl: 'partials/appconfigure.html'
+        templateUrl: 'views/appconfigure.html'
     }).when('/settings', {
         controller: 'SettingsController',
-        templateUrl: 'partials/settings.html'
+        templateUrl: 'views/settings.html'
     }).otherwise({ redirectTo: '/'});
 });
 
