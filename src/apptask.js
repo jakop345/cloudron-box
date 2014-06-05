@@ -95,6 +95,15 @@ function getFreePort(callback) {
     });
 }
 
+function forwardFromHostToVirtualBox(rulename, port) {
+    if (os.platform() === 'darwin') {
+        debug('Setting up VirtualBox port forwarding for '+ rulename + ' at ' + port);
+        child_process.exec(
+            'VBoxManage controlvm boot2docker-vm natpf1 delete ' + rulename + ';'
+            + 'VBoxManage controlvm boot2docker-vm natpf1 ' + rulename + ',tcp,127.0.0.1,' + port + ',,' + port, NOOP_CALLBACK);
+    }
+}
+
 function configureNginx(app, freePort, callback) {
     var NGINX_APPCONFIG_TEMPLATE =
         "server {\n"
@@ -132,12 +141,7 @@ function configureNginx(app, freePort, callback) {
             // missing 'return' is intentional
         });
 
-        if (os.platform() === 'darwin') {
-            debug('Setting up VirtualBox port forwarding for '+ app.id + ' at ' + freePort);
-            child_process.exec(
-                'VBoxManage controlvm boot2docker-vm natpf1 delete ' + app.id + ';'
-                + 'VBoxManage controlvm boot2docker-vm natpf1 ' + app.id + ',tcp,127.0.0.1,' + freePort + ',,' + freePort, NOOP_CALLBACK);
-        }
+        forwardFromHostToVirtualBox(app.id + '-http', freePort);
     });
 }
 
@@ -217,6 +221,7 @@ function startApp(app, callback) {
     if (typeof manifest.tcp_ports === 'object' && app.internalPort in manifest.tcp_ports) {
         portBindings[app.internalPort + '/tcp'] = [ { HostPort: app.externalPort + '' } ];
         env.push(manifest.tcp_ports[app.internalPort].environment_variable + '=' + app.externalPort);
+        forwardFromHostToVirtualBox(app.id + '-tcp' + app.internalPort, app.externalPort);
     }
 
     var containerOptions = {
