@@ -146,7 +146,7 @@ angular.module('YellowTent')
     };
 
     Client.prototype.installApp = function (id, password, config, callback) {
-        $http.post('/api/v1/app/install', { app_id: id, password: password, location: config.location })
+        $http.post('/api/v1/app/install', { app_id: id, password: password, location: config.location, portBindings: config.portBindings })
         .success(function (data, status, headers) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null);

@@ -234,20 +234,26 @@ function startApp(app, callback) {
         // TODO: should wait for update to complete
         appdb.update(app.id, { containerId: container.id }, NOOP_CALLBACK);
 
+        var env = [ ];
         var portBindings = { };
         portBindings[manifest.http_port + '/tcp'] = [ { HostPort: app.httpPort + '' } ];
+        if (app.internalPort in manifest.tcp_ports) {
+            portBindings[app.internalPort + '/tcp'] = [ { HostPort: app.externalPort + '' } ];
+            env.push(manifest.tcp_ports[app.internalPort].environment_variable + '=' + app.externalPort);
+        }
 
         var startOptions = {
             // Binds: [ '/tmp:/tmp:rw' ],
             PortBindings: portBindings,
-            PublishAllPorts: false
+            PublishAllPorts: false,
+            Env: env
         };
 
         debug('Starting container with options: ' + JSON.stringify(startOptions));
 
         container.start(startOptions, function (err, data) {
             if (err) {
-                debug('Error starting container');
+                debug('Error starting container', err);
                 appdb.update(app.id, { statusCode: appdb.STATUS_IMAGE_ERROR, statusMessage: 'Error starting container' }, NOOP_CALLBACK);
                 return callback(err);
             }

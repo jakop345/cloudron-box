@@ -68,21 +68,34 @@ function getAll(callback) {
     });
 }
 
-function add(id, statusCode, location, callback) {
+function add(id, statusCode, location, portBindings, callback) {
     assert(db !== null);
     assert(typeof id === 'string');
     assert(typeof statusCode === 'string');
     assert(typeof location === 'string');
+    assert(typeof portBindings === 'object');
     assert(typeof callback === 'function');
 
-    var data = {
+    var appsData = {
         $id: id,
         $statusCode: statusCode,
         $location: location
     };
 
-    db.run('INSERT INTO apps (id, statusCode, location) VALUES ($id, $statusCode, $location)',
-           data, function (error) {
+    var keys = [ 'id', 'statusCode', 'location' ];
+    var values = [ '$id', '$statusCode', '$location' ];
+
+    if (portBindings !== null) {
+        appsData.$internalPort = Object.keys(portBindings)[0];
+        keys.push('internalPort');
+        values.push('$internalPort');
+        appsData.$externalPort = portBindings[appsData.$internalPort];
+        keys.push('externalPort');
+        values.push('$externalPort');
+    }
+
+    db.run('INSERT INTO apps (' + keys.join(', ') + ') VALUES (' + values.join(', ') + ')',
+           appsData, function (error) {
         if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(error, DatabaseError.ALREADY_EXISTS));
 
         if (error || !this.lastID) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));

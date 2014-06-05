@@ -37,5 +37,15 @@ angular.module('YellowTent')
         });
     };
 
+    // TODO currently assumes that getApps was called at some point
+    AppStore.prototype.getAppById = function (appId, callback) {
+        if (this._appsCache !== null) {
+            for (var i = 0; i < this._appsCache.length; i++) {
+                if (this._appsCache[i].id === appId) return callback(null, this._appsCache[i]);
+            }
+        }
+        return callback(new AppStoreError(404, 'Not found'));
+    };
+
     return new AppStore();
 });

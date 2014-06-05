@@ -234,7 +234,9 @@ describe('database', function () {
             manifestJson: null,
             statusMessage: null,
             httpPort: null,
-            containerId: null
+            containerId: null,
+            internalPort: 1234,
+            externalPort: 5678
         };
         var APP_1 = {
             id: 'appid-1',
@@ -243,7 +245,9 @@ describe('database', function () {
             manifestJson: null,
             statusMessage: null,
             httpPort: null,
-            containerId: null
+            containerId: null,
+            internalPort: null,
+            externalPort: null
         };
 
         it('add fails due to missing arguments', function () {
@@ -251,15 +255,24 @@ describe('database', function () {
             expect(function () { appdb.add(APP_0.id, function () {}); }).to.throwError();
         });
 
+        // This needs to be tested in the api layer?
+        xit('add fails due to bad arguments', function () {
+            expect(function () { appdb.add(APP_0.id, APP_0.statusCode, 'loc', { "5555": "10" }, function () {}); }).to.throwError();
+            expect(function () { appdb.add(APP_0.id, APP_0.statusCode, 'loc', { 5555: 10 }, function () {}); }).to.throwError();
+            expect(function () { appdb.add(APP_0.id, APP_0.statusCode, 'loc', { "mango": 4000 }, function () {}); }).to.throwError();
+            expect(function () { appdb.add(APP_0.id, APP_0.statusCode, 'loc', { "1000": "grape" }, function () {}); }).to.throwError();
+        });
+
+
         it('add succeeds', function (done) {
-            appdb.add(APP_0.id, APP_0.statusCode, APP_0.location, function (error) {
+            appdb.add(APP_0.id, APP_0.statusCode, APP_0.location, { "1234": "5678" }, function (error) {
                 expect(error).to.be(null);
                 done();
             });
         });
 
         it('add of same app fails', function (done) {
-            appdb.add(APP_0.id, APP_0.statusCode, APP_0.location, function (error) {
+            appdb.add(APP_0.id, APP_0.statusCode, APP_0.location, null, function (error) {
                 expect(error).to.be.a(DatabaseError);
                 expect(error.reason).to.be(DatabaseError.ALREADY_EXISTS);
                 done();
@@ -309,7 +322,7 @@ describe('database', function () {
         });
 
         it('add second app succeeds', function (done) {
-            appdb.add(APP_1.id, APP_1.statusCode, APP_1.location, function (error) {
+            appdb.add(APP_1.id, APP_1.statusCode, APP_1.location, null, function (error) {
                 expect(error).to.be(null);
                 done();
             });

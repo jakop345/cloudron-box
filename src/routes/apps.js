@@ -44,10 +44,20 @@ function installApp(req, res, next) {
     if (!data.app_id) return next(new HttpError(400, 'app_id is required'));
     if (!data.password) return next(new HttpError(400, 'password is required'));
     if (!data.location) return next(new HttpError(400, 'location is required'));
+    if (data.portBindings !== null && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
 
-    debug('will install app with id ' + data.app_id);
+    // validate the port bindings
+    for (var internalPort in data.portBindings) {
+        var port = parseInt(internalPort, 10);
+        if (isNaN(port) || port <= 0 || port > 65535) return next(new HttpError(400, internalPort + ' is not a valid port'));
+        var externalPort = data.portBindings[internalPort];
+        port = parseInt(externalPort, 10);
+        if (isNaN(port) || port <= 1024 || port > 65535) return next(new HttpError(400, externalPort + ' is not a valid port'));
+    }
 
-    apps.install(data.app_id, req.user.username, data.password, data.location, function (error) {
+    debug('will install app with id ' + data.app_id + ' @ ' + data.location + ' with ' + JSON.stringify(data.portBindings));
+
+    apps.install(data.app_id, req.user.username, data.password, data.location, data.portBindings, function (error) {
         if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, 'Error installing app: ' + error));
         if (error) return next(new HttpError(500, 'Internal error:' + error));
 

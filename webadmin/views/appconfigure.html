@@ -9,13 +9,19 @@
       <form class="form-horizontal" role="form" novalidate class="app-form" method="post" ng-submit="installApp()">
 
         <div class="form-group">
-          <input class="form-control" type="text" ng-model="app.config.location" name="location" id="locationText" placeholder="Location" required autofocus/>
+          <input class="form-control" type="text" ng-model="location" name="location" id="locationText" placeholder="Location" required autofocus/>
         </div>
 
         <div class="form-group">
-          <input class="form-control" type="password" ng-model="app.password" name="password" placeholder="Password" id="idPassword" required/>
+          <input class="form-control" type="password" ng-model="password" name="password" placeholder="Password" id="idPassword" required/>
         </div>
 
+        <div ng-repeat="(port, portInfo) in portBindings">
+            <div class="form-group">
+                <span>{{ portInfo.description }}</span>
+                <input class="form-control" type="text" ng-model="portBindings[port].exposeAs" placeholder="port" required/>
+            </div>
+        </div>
 
         <div class="row">
           <div class="col-sm-6">

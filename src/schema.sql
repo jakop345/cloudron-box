@@ -33,6 +33,8 @@ CREATE TABLE IF NOT EXISTS apps(
     containerId VARCHAR(128),
     manifestJson VARCHAR,
     httpPort INTEGER,
+    externalPort INTEGER,
+    internalPort INTEGER,
     location VARCHAR(512) NOT NULL UNIQUE,
     PRIMARY KEY (id) );
 
