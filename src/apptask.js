@@ -211,13 +211,22 @@ function startApp(app, callback) {
         callback();
     };
 
+    var env = [ ];
+    var portBindings = { };
+    portBindings[manifest.http_port + '/tcp'] = [ { HostPort: app.httpPort + '' } ];
+    if (typeof manifest.tcp_ports === 'object' && app.internalPort in manifest.tcp_ports) {
+        portBindings[app.internalPort + '/tcp'] = [ { HostPort: app.externalPort + '' } ];
+        env.push(manifest.tcp_ports[app.internalPort].environment_variable + '=' + app.externalPort);
+    }
+
     var containerOptions = {
         Hostname: app.location + '.' + HOSTNAME,
         Tty: true,
         Image: manifest.docker_image,
         Cmd: null,
         Volumes: { },
-        VolumesFrom: ''
+        VolumesFrom: '',
+        Env: env
     };
 
     debug('Running ' + manifest.docker_image);
@@ -233,14 +242,6 @@ function startApp(app, callback) {
 
         // TODO: should wait for update to complete
         appdb.update(app.id, { containerId: container.id }, NOOP_CALLBACK);
-
-        var env = [ ];
-        var portBindings = { };
-        portBindings[manifest.http_port + '/tcp'] = [ { HostPort: app.httpPort + '' } ];
-        if (typeof manifest.tcp_ports === 'object' && app.internalPort in manifest.tcp_ports) {
-            portBindings[app.internalPort + '/tcp'] = [ { HostPort: app.externalPort + '' } ];
-            env.push(manifest.tcp_ports[app.internalPort].environment_variable + '=' + app.externalPort);
-        }
 
         var startOptions = {
             // Binds: [ '/tmp:/tmp:rw' ],
