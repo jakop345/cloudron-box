@@ -250,7 +250,7 @@ function startApp(app, callback) {
             Env: env
         };
 
-        debug('Starting container with options: ' + JSON.stringify(startOptions));
+        debug('Starting container ' + container.id + ' with options: ' + JSON.stringify(startOptions));
 
         container.start(startOptions, function (err, data) {
             if (err) {
