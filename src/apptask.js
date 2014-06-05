@@ -237,7 +237,7 @@ function startApp(app, callback) {
         var env = [ ];
         var portBindings = { };
         portBindings[manifest.http_port + '/tcp'] = [ { HostPort: app.httpPort + '' } ];
-        if (app.internalPort in manifest.tcp_ports) {
+        if (typeof manifest.tcp_ports === 'object' && app.internalPort in manifest.tcp_ports) {
             portBindings[app.internalPort + '/tcp'] = [ { HostPort: app.externalPort + '' } ];
             env.push(manifest.tcp_ports[app.internalPort].environment_variable + '=' + app.externalPort);
         }
