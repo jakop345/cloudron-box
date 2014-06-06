@@ -356,7 +356,12 @@ function uninstall(app, callback) {
         v: true // removes volumes associated with the container
     };
 
-    console.dir('Removing container of ' + app.id);
+    console.log('uninstalling ' + app.id);
+
+    var nginxConfigFilename = path.join(nginxAppConfigDir, app.location + '.conf'); // TODO: check if app.location is safe
+    if (!safe.fs.unlinkSync(nginxConfigFilename)) {
+        debug('Error removing nginx configuration ' + safe.error);
+    }
 
     container.remove(removeOptions, function (error) {
         if (error) debug('Error removing container:' + JSON.stringify(error)); // TODO: now what?
