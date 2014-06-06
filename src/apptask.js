@@ -251,7 +251,7 @@ function setupAppData(app, callback) {
     appdb.update(app.id, { statusCode: appdb.STATUS_CREATING_VOLUME, statusMessage: '' }, NOOP_CALLBACK);
 
     if (!safe.fs.mkdirSync(appDataDir)) {
-        debug('Error creating app data directory : ' + safe.error);
+        debug('Error creating app data directory ' + appDataDir + ' ' + safe.error);
         appdb.update(app.id, { statusCode: appdb.STATUS_VOLUME_ERROR, statusMessage: 'Error creating data directory' }, NOOP_CALLBACK);
         return callback(safe.error);
     }
@@ -355,6 +355,8 @@ function uninstall(app, callback) {
         force: true, // kill container if it's running
         v: true // removes volumes associated with the container
     };
+
+    console.dir('Removing container of ' + app.id);
 
     container.remove(removeOptions, function (error) {
         if (error) debug('Error removing container:' + JSON.stringify(error)); // TODO: now what?
