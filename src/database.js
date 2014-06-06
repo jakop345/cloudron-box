@@ -2,6 +2,16 @@
 
 'use strict';
 
+// this code is intentionally placed before the requires because of circular
+// dependancy between database and the *db.js files
+exports = module.exports = {
+    initialize: initialize,
+    removePrivates: removePrivates,
+    newTransaction: newTransaction,
+    rollback: rollback,
+    commit: commit
+};
+
 var userdb = require('./userdb.js'),
     tokendb = require('./tokendb.js'),
     clientdb = require('./clientdb.js'),
@@ -14,13 +24,15 @@ var userdb = require('./userdb.js'),
     debug = require('debug')('server:database'),
     DatabaseError = require('./databaseerror');
 
-exports = module.exports = {
-    initialize: initialize,
-    removePrivates: removePrivates
-};
+var connectionPool = [ ],
+    databaseFileName = null;
+
+var NOOP_CALLBACK = function (error) { if (error) console.error(error); }
 
 function initialize(config, callback) {
     var schema = fs.readFileSync(path.join(__dirname, 'schema.sql')).toString('utf8');
+
+    databaseFileName = config.configRoot + '/config.sqlite.db';
 
     mkdirp(config.configRoot, function (error) {
         if (error) {
@@ -28,8 +40,8 @@ function initialize(config, callback) {
             return callback(error);
         }
 
-        var db = new sqlite3.Database(config.configRoot + '/config.sqlite.db');
-        debug('Database created at ' + config.configRoot + '/config.sqlite.db');
+        var db = new sqlite3.Database(databaseFileName);
+        debug('Database created at ' + databaseFileName);
 
         db.exec(schema, function (err) {
             if (err) return callback(err);
@@ -49,6 +61,23 @@ function initialize(config, callback) {
             });
         });
     });
+}
+
+function newTransaction() {
+    var conn = connectionPool.length !== 0 ? connectionPool.pop() : new sqlite3.Database(databaseFileName);
+    conn.serialize();
+    conn.run('BEGIN TRANSACTION', NOOP_CALLBACK);
+    return conn;
+}
+
+function rollback(conn, callback) {
+    conn.run('ROLLBACK', callback);
+    connectionPool.push(conn);
+}
+
+function commit(conn, callback) {
+    conn.run('COMMIT', callback);
+    connectionPool.push(conn);
 }
 
 function removePrivates(obj) {

@@ -2,13 +2,8 @@
 
 'use strict';
 
-var DatabaseError = require('./databaseerror'),
-    debug = require('debug')('server:appdb'),
-    assert = require('assert');
-
-// database
-var db = null;
-
+// this code is intentionally placed before the requires because of circular
+// dependancy between database and the *db.js files
 exports = module.exports = {
     init: init,
     get: get,
@@ -35,6 +30,16 @@ exports = module.exports = {
     STATUS_EXITED: 'exited',
     STATUS_DEAD: 'dead'
 };
+
+var DatabaseError = require('./databaseerror'),
+    debug = require('debug')('server:appdb'),
+    assert = require('assert'),
+    database = require('./database.js'),
+    async = require('async'),
+    util = require('util');
+
+// database
+var db = null;
 
 function init(_db) {
     assert(typeof _db === 'object');
