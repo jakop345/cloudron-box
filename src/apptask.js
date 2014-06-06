@@ -15,14 +15,15 @@ var assert = require('assert'),
     child_process = require('child_process'),
     path = require('path'),
     net = require('net'),
-    rimraf = require('rimraf');
+    rimraf = require('rimraf'),
+    tar = require('tar');
 
 exports = module.exports = {
     initialize: initialize,
     refresh: refresh
 };
 
-var NOOP_CALLBACK = function (error) { if (error) console.error(error); }
+var NOOP_CALLBACK = function (error) { if (error) console.error(error); };
 
 var appServerUrl = null, docker = null, appDataRoot = null,
     refreshing = false, pendingRefresh = false,
@@ -84,7 +85,7 @@ function initialize(_appServerUrl, _nginxAppConfigDir, _appDataRoot) {
         apps.forEach(function (app) { appHealth.register(app.id); });
     });
 
-    setInterval(refresh, 3000);
+    setInterval(refresh, 6000);
 }
 
 function getFreePort(callback) {
@@ -206,26 +207,18 @@ function downloadImage(app, callback) {
             });
         });
     });
-};
+}
 
-function startApp(app, portConfigs, callback) {
-    var outputStream = new Writable(),
-        manifest = JSON.parse(app.manifestJson); // this is guaranteed not to throw since it's already been verified in downloadManifest()
+function createContainer(app, portConfigs, callback) {
+    var manifest = JSON.parse(app.manifestJson); // this is guaranteed not to throw since it's already been verified in downloadManifest()
 
-    outputStream._write = function (chunk, enc, callback) {
-        console.log('CHUNK: ' + chunk);
-        callback();
-    };
+    appdb.update(app.id, { statusCode: appdb.STATUS_CREATING_CONTAINER, statusMessage: '' }, NOOP_CALLBACK);
 
     var env = [ ];
-    var portBindings = { };
-    portBindings[manifest.http_port + '/tcp'] = [ { HostPort: app.httpPort + '' } ];
     if (typeof manifest.tcp_ports === 'object') {
         portConfigs.forEach(function (portConfig) {
             if (!(portConfig.containerPort in manifest.tcp_ports)) return;
-            portBindings[portConfig.containerPort + '/tcp'] = [ { HostPort: portConfig.hostPort + '' } ];
             env.push(manifest.tcp_ports[portConfig.containerPort].environment_variable + '=' + portConfig.hostPort);
-            forwardFromHostToVirtualBox(app.id + '-tcp' + portConfig.containerPort, portConfig.hostPort);
         });
     }
 
@@ -239,9 +232,7 @@ function startApp(app, portConfigs, callback) {
         Env: env
     };
 
-    debug('Running ' + manifest.docker_image);
-
-    appdb.update(app.id, { statusCode: appdb.STATUS_STARTING_UP, statusMessage: '' }, NOOP_CALLBACK);
+    debug('Creating container for ' + manifest.docker_image);
 
     docker.createContainer(containerOptions, function (err, container) {
         if (err) {
@@ -250,38 +241,87 @@ function startApp(app, portConfigs, callback) {
             return callback(err);
         }
 
-        // TODO: should wait for update to complete
-        appdb.update(app.id, { containerId: container.id }, NOOP_CALLBACK);
+        appdb.update(app.id, { containerId: container.id, statusCode: appdb.STATUS_CREATED_CONTAINER, statusMessage: '' }, callback);
+    });
+}
 
-        var appDataDir = path.join(appDataRoot, app.id); // TODO: check if app.id is safe path
-        if (!safe.fs.mkdirSync(appDataDir)) {
-            debug('Error creating app data directory : ' + safe.error);
-            appdb.update(app.id, { statusCode: appdb.STATUS_SETUP_ERROR, statusMessage: 'Error creating data directory' }, NOOP_CALLBACK);
+function setupAppData(app, callback) {
+    var appDataDir = path.join(appDataRoot, app.id); // TODO: check if app.id is safe path
+
+    appdb.update(app.id, { statusCode: appdb.STATUS_CREATING_VOLUME, statusMessage: '' }, NOOP_CALLBACK);
+
+    if (!safe.fs.mkdirSync(appDataDir)) {
+        debug('Error creating app data directory : ' + safe.error);
+        appdb.update(app.id, { statusCode: appdb.STATUS_VOLUME_ERROR, statusMessage: 'Error creating data directory' }, NOOP_CALLBACK);
+        return callback(safe.error);
+    }
+
+    var container = docker.getContainer(app.containerId);
+    var outputDirStream = tar.Extract({ path: appDataDir, strip: 1 /* remove data/ from path */ });
+
+    debug('Copying container data to ' + appDataDir);
+
+    container.copy({ Resource: '/app/data' }, function (error, tarStream) {
+        function volumeError(error) {
+            appdb.update(app.id, { statusCode: appdb.STATUS_VOLUME_ERROR, statusMessage: 'Error copying data directory' + error }, NOOP_CALLBACK);
+            callback(error);
+        }
+
+        if (error) {
+            debug('Error copying container appdata : ' + error);
+            return volumeError();
+        }
+
+        tarStream.on('error', volumeError);
+        outputDirStream.on('error', volumeError);
+        tarStream.pipe(outputDirStream);
+
+        outputDirStream.on('end', function () {
+            debug('Copied container data');
+            appdb.update(app.id, { statusCode: appdb.STATUS_CREATED_VOLUME, statusMessage: '' }, NOOP_CALLBACK);
+
+            return callback(null);
+        });
+    });
+}
+
+function startContainer(app, portConfigs, callback) {
+    var manifest = JSON.parse(app.manifestJson); // this is guaranteed not to throw since it's already been verified in downloadManifest()
+    var appDataDir = path.join(appDataRoot, app.id); // TODO: check if app.id is safe path
+
+    appdb.update(app.id, { statusCode: appdb.STATUS_STARTING_CONTAINER, statusMessage: '' }, NOOP_CALLBACK);
+
+    var portBindings = { };
+    portBindings[manifest.http_port + '/tcp'] = [ { HostPort: app.httpPort + '' } ];
+    if (typeof manifest.tcp_ports === 'object') {
+        portConfigs.forEach(function (portConfig) {
+            if (!(portConfig.containerPort in manifest.tcp_ports)) return;
+            portBindings[portConfig.containerPort + '/tcp'] = [ { HostPort: portConfig.hostPort + '' } ];
+            forwardFromHostToVirtualBox(app.id + '-tcp' + portConfig.containerPort, portConfig.hostPort);
+        });
+    }
+
+    var startOptions = {
+        Binds: [ appDataDir + ':/app/data:rw' ],
+        PortBindings: portBindings,
+        PublishAllPorts: false
+    };
+
+    var container = docker.getContainer(app.containerId);
+    debug('Starting container ' + container.id + ' with options: ' + JSON.stringify(startOptions));
+
+    container.start(startOptions, function (err, data) {
+        if (err) {
+            debug('Error starting container', err);
+            appdb.update(app.id, { statusCode: appdb.STATUS_CONTAINER_ERROR, statusMessage: 'Error starting container' }, NOOP_CALLBACK);
             return callback(err);
         }
 
-        var startOptions = {
-            Binds: [ appDataDir + ':/app/data:rw' ],
-            PortBindings: portBindings,
-            PublishAllPorts: false,
-            Env: env
-        };
+        appHealth.register(app.id);
 
-        debug('Starting container ' + container.id + ' with options: ' + JSON.stringify(startOptions));
-
-        container.start(startOptions, function (err, data) {
-            if (err) {
-                debug('Error starting container', err);
-                appdb.update(app.id, { statusCode: appdb.STATUS_IMAGE_ERROR, statusMessage: 'Error starting container' }, NOOP_CALLBACK);
-                return callback(err);
-            }
-
-            appHealth.register(app.id);
-
-            appdb.update(app.id, { statusCode: appdb.STATUS_STARTED, statusMessage: '' }, callback);
-        });
+        appdb.update(app.id, { statusCode: appdb.STATUS_STARTED_CONTAINER, statusMessage: '' }, callback);
     });
-};
+}
 
 function downloadManifest(app, callback) {
     debug('Downloading manifest for :', app.id);
@@ -306,7 +346,7 @@ function downloadManifest(app, callback) {
             debug('Downloaded application manifest: ' + res.text);
             appdb.update(app.id, { statusCode: appdb.STATUS_DOWNLOADED_MANIFEST, statusMessage: '', manifestJson: res.text }, callback);
         });
-};
+}
 
 function uninstall(app, callback) {
     var container = docker.getContainer(app.containerId);
@@ -328,7 +368,7 @@ function uninstall(app, callback) {
 
         appdb.del(app.id, callback);
     });
-};
+}
 
 function checkAppHealth(app, callback) {
     var container = docker.getContainer(app.containerId),
@@ -407,10 +447,24 @@ function refresh() {
                 break;
 
             case appdb.STATUS_DOWNLOADED_IMAGE:
+            case appdb.STATUS_CREATING_CONTAINER:
             case appdb.STATUS_EXITED:
                 appdb.getPortBindings(app.id, function (error, portBindings) {
                     if (error) portBindings = [ ]; // TODO: this is probably not good
-                    startApp(app, portBindings, callback);
+                    createContainer(app, portBindings, callback);
+                });
+                break;
+
+            case appdb.STATUS_CREATED_CONTAINER:
+            case appdb.STATUS_CREATING_VOLUME:
+                setupAppData(app, callback);
+                break;
+
+            case appdb.STATUS_CREATED_VOLUME:
+            case appdb.STATUS_STARTING_CONTAINER:
+                appdb.getPortBindings(app.id, function (error, portBindings) {
+                    if (error) portBindings = [ ]; // TODO: this is probably not good
+                    startContainer(app, portBindings, callback);
                 });
                 break;
 
@@ -418,21 +472,16 @@ function refresh() {
                 uninstall(app, callback);
                 break;
 
-            case appdb.STATUS_STARTING_UP:
-                 // TODO: kill any existing container
-
-            case appdb.STATUS_STARTED:
+            case appdb.STATUS_STARTED_CONTAINER:
             case appdb.STATUS_RUNNING:
                 checkAppHealth(app, callback);
                 break;
 
-            case appdb.STATUS_SETUP_ERROR:
-            case appdb.STATUS_DEAD: // TODO: restart DEAD apps with threshold
-                callback(null);
-                break;
-
+            // do nothing: let user retry again
+            case appdb.STATUS_CONTAINER_ERROR:
+            case appdb.STATUS_VOLUME_ERROR:
             case appdb.STATUS_IMAGE_ERROR:
-                 // do nothing: let user retry again
+            case appdb.STATUS_DEAD: // TODO: restart DEAD apps with threshold?
                 callback(null);
                 break;
             }
@@ -443,4 +492,4 @@ function refresh() {
         });
 
     });
-};
+}

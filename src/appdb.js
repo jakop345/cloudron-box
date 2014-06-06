@@ -25,12 +25,16 @@ exports = module.exports = {
     STATUS_MANIFEST_ERROR: 'manifest_error',
     STATUS_DOWNLOAD_ERROR: 'download_error',
     STATUS_IMAGE_ERROR: 'image_error',
-    STATUS_STARTING_UP: 'starting_up',
-    STATUS_STARTED: 'started',
+    STATUS_CREATING_CONTAINER: 'creating_container',
+    STATUS_CREATED_CONTAINER: 'created_container',
+    STATUS_STARTING_CONTAINER: 'starting_container',
+    STATUS_STARTED_CONTAINER: 'started_container',
+    STATUS_CREATING_VOLUME: 'creating_volume',
+    STATUS_CREATED_VOLUME: 'created_volume',
+    STATUS_VOLUME_ERROR: 'volume_error',
     STATUS_RUNNING: 'running',
     STATUS_EXITED: 'exited',
-    STATUS_DEAD: 'dead',
-    STATUS_SETUP_ERROR: 'setup_error'
+    STATUS_DEAD: 'dead'
 };
 
 var DatabaseError = require('./databaseerror'),

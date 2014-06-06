@@ -44,13 +44,14 @@
     "superagent": "^0.17.0",
     "ursa": "^0.8.0",
     "morgan": "1.0.1",
-    "connect-timeout":  "1.1.0",
+    "connect-timeout": "1.1.0",
     "express-session": "1.1.0",
     "serve-favicon": "2.0.0",
     "cookie-parser": "1.1.0",
     "body-parser": "1.2.0",
     "multiparty": "3.2.6",
-    "sqlite3": "2.2.3"
+    "sqlite3": "2.2.3",
+    "tar": "^0.1.19"
   },
   "devDependencies": {
     "mocha": "*",
