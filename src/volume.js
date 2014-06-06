@@ -425,16 +425,16 @@ function listVolumes(username, config, callback) {
     });
 }
 
-function createVolume(name, user, password, config, callback) {
+function createVolume(name, user, password, options, callback) {
     ensureArgs(arguments, ['string', 'object', 'string', 'object', 'function']);
 
-    getVolumeByName(name, user.username, config, function (error, result) {
+    getVolumeByName(name, user.username, options, function (error, result) {
         if (!error) {
             debug('Volume by name ' + name + ' already exists.');
             return callback(new VolumeError(null, VolumeError.ALREADY_EXISTS));
         }
 
-        var vol = new Volume(uuid.v4(), config);
+        var vol = new Volume(uuid.v4(), options);
         vol.setName(name);
         var volPassword = generateNewVolumePassword();
 
@@ -460,12 +460,12 @@ function createVolume(name, user, password, config, callback) {
     });
 }
 
-function getVolumeByName(name, username, config, callback) {
+function getVolumeByName(name, username, options, callback) {
     ensureArgs(arguments, ['string', 'string', 'object', 'function']);
-    assert(config.dataRoot);
-    assert(config.mountRoot);
+    assert(options.dataRoot);
+    assert(options.mountRoot);
 
-    listVolumes(username, config, function (error, volumes) {
+    listVolumes(username, options, function (error, volumes) {
         if (error) {
             debug('Unable to list volumes. ' + JSON.stringify(error));
             return callback(new VolumeError(null, VolumeError.INTERNAL_ERROR));
@@ -484,10 +484,10 @@ function getVolumeByName(name, username, config, callback) {
     });
 }
 
-function getVolume(id, username, config, callback) {
+function getVolume(id, username, options, callback) {
     ensureArgs(arguments, ['string', 'string', 'object', 'function']);
 
-    var vol = new Volume(id, config);
+    var vol = new Volume(id, options);
     if (!safe.fs.existsSync(vol.dataPath)) {
         debug('No volume "' + id + '" for user "' + username + '". ' + safe.JSON.stringify(safe.error));
         return callback(new VolumeError({}, VolumeError.INTERNAL_ERROR));
