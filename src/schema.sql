@@ -9,14 +9,14 @@ CREATE TABLE IF NOT EXISTS users(
     createdAt VARCHAR(512) NOT NULL,
     modifiedAt VARCHAR(512) NOT NULL,
     admin INTEGER NOT NULL,
-    PRIMARY KEY (id) );
+    PRIMARY KEY(id));
 
 CREATE TABLE IF NOT EXISTS tokens(
     accessToken VARCHAR(512) NOT NULL UNIQUE,
     userId VARCHAR(512) NOT NULL,
     clientId VARCHAR(512),
     expires VARCHAR(512) NOT NULL,
-    PRIMARY KEY (accessToken) );
+    PRIMARY KEY(accessToken));
 
 CREATE TABLE IF NOT EXISTS clients(
     id VARCHAR(512) NOT NULL UNIQUE,
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS clients(
     clientSecret VARCHAR(512) NOT NULL,
     name VARCHAR(512) NOT NULL,
     redirectURI VARCHAR(512) NOT NULL,
-    PRIMARY KEY (id) );
+    PRIMARY KEY(id));
 
 CREATE TABLE IF NOT EXISTS apps(
     id VARCHAR(512) NOT NULL UNIQUE,
@@ -33,15 +33,20 @@ CREATE TABLE IF NOT EXISTS apps(
     containerId VARCHAR(128),
     manifestJson VARCHAR,
     httpPort INTEGER,
-    externalPort INTEGER,
-    internalPort INTEGER,
     location VARCHAR(512) NOT NULL UNIQUE,
-    PRIMARY KEY (id) );
+    PRIMARY KEY(id));
+
+CREATE TABLE IF NOT EXISTS appPortBindings(
+    hostPort INTEGER NOT NULL UNIQUE,
+    containerPort INTEGER NOT NULL,
+    appId VARCHAR(512) NOT NULL,
+    FOREIGN KEY(appId) REFERENCES apps(id),
+    PRIMARY KEY(hostPort));
 
 CREATE TABLE IF NOT EXISTS authcodes(
     authCode VARCHAR(512) NOT NULL UNIQUE,
     redirectURI VARCHAR(512) NOT NULL,
     userId VARCHAR(512) NOT NULL,
     clientId VARCHAR(512) NOT NULL,
-    PRIMARY KEY (authCode) );
+    PRIMARY KEY(authCode));
 

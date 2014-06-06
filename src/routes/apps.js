@@ -46,18 +46,22 @@ function installApp(req, res, next) {
     if (!data.location) return next(new HttpError(400, 'location is required'));
     if (data.portBindings !== null && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
 
+    var portBindings = [ ];
+
     // validate the port bindings
-    for (var internalPort in data.portBindings) {
-        var port = parseInt(internalPort, 10);
-        if (isNaN(port) || port <= 0 || port > 65535) return next(new HttpError(400, internalPort + ' is not a valid port'));
-        var externalPort = data.portBindings[internalPort];
-        port = parseInt(externalPort, 10);
-        if (isNaN(port) || port <= 1024 || port > 65535) return next(new HttpError(400, externalPort + ' is not a valid port'));
+    for (var key in data.portBindings) {
+        var containerPort = parseInt(key, 10);
+        if (isNaN(containerPort) || containerPort <= 0 || containerPort > 65535) return next(new HttpError(400, key + ' is not a valid port'));
+
+        var hostPort = parseInt(data.portBindings[containerPort], 10);
+        if (isNaN(hostPort) || hostPort <= 1024 || hostPort > 65535) return next(new HttpError(400, data.portBindings[containerPort] + ' is not a valid port'));
+
+        portBindings.push({ containerPort: containerPort, hostPort: hostPort });
     }
 
-    debug('will install app with id ' + data.app_id + ' @ ' + data.location + ' with ' + JSON.stringify(data.portBindings));
+    debug('will install app with id ' + data.app_id + ' @ ' + data.location + ' with ' + JSON.stringify(portBindings));
 
-    apps.install(data.app_id, req.user.username, data.password, data.location, data.portBindings, function (error) {
+    apps.install(data.app_id, req.user.username, data.password, data.location, portBindings, function (error) {
         if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, 'Error installing app: ' + error));
         if (error) return next(new HttpError(500, 'Internal error:' + error));
 

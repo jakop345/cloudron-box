@@ -206,7 +206,7 @@ function downloadImage(app, callback) {
     });
 };
 
-function startApp(app, callback) {
+function startApp(app, portConfigs, callback) {
     var outputStream = new Writable(),
         manifest = JSON.parse(app.manifestJson); // this is guaranteed not to throw since it's already been verified in downloadManifest()
 
@@ -218,10 +218,13 @@ function startApp(app, callback) {
     var env = [ ];
     var portBindings = { };
     portBindings[manifest.http_port + '/tcp'] = [ { HostPort: app.httpPort + '' } ];
-    if (typeof manifest.tcp_ports === 'object' && app.internalPort in manifest.tcp_ports) {
-        portBindings[app.internalPort + '/tcp'] = [ { HostPort: app.externalPort + '' } ];
-        env.push(manifest.tcp_ports[app.internalPort].environment_variable + '=' + app.externalPort);
-        forwardFromHostToVirtualBox(app.id + '-tcp' + app.internalPort, app.externalPort);
+    if (typeof manifest.tcp_ports === 'object') {
+        portConfigs.forEach(function (portConfig) {
+            if (!(portConfig.containerPort in manifest.tcp_ports)) return;
+            portBindings[portConfig.containerPort + '/tcp'] = [ { HostPort: portConfig.hostPort + '' } ];
+            env.push(manifest.tcp_ports[portConfig.containerPort].environment_variable + '=' + portConfig.hostPort);
+            forwardFromHostToVirtualBox(app.id + '-tcp' + portConfig.containerPort, portConfig.hostPort);
+        });
     }
 
     var containerOptions = {
@@ -395,7 +398,10 @@ function refresh() {
 
             case appdb.STATUS_DOWNLOADED_IMAGE:
             case appdb.STATUS_EXITED:
-                startApp(app, callback);
+                appdb.getPortBindings(app.id, function (error, portBindings) {
+                    if (error) portBindings = [ ]; // TODO: this is probably not good
+                    startApp(app, portBindings, callback);
+                });
                 break;
 
             case appdb.STATUS_PENDING_UNINSTALL:

@@ -234,9 +234,7 @@ describe('database', function () {
             manifestJson: null,
             statusMessage: null,
             httpPort: null,
-            containerId: null,
-            internalPort: 1234,
-            externalPort: 5678
+            containerId: null
         };
         var APP_1 = {
             id: 'appid-1',
@@ -245,9 +243,7 @@ describe('database', function () {
             manifestJson: null,
             statusMessage: null,
             httpPort: null,
-            containerId: null,
-            internalPort: null,
-            externalPort: null
+            containerId: null
         };
 
         it('add fails due to missing arguments', function () {
@@ -265,14 +261,23 @@ describe('database', function () {
 
 
         it('add succeeds', function (done) {
-            appdb.add(APP_0.id, APP_0.statusCode, APP_0.location, { "1234": "5678" }, function (error) {
+            appdb.add(APP_0.id, APP_0.statusCode, APP_0.location, [ { containerPort: 1234, hostPort: 5678 } ], function (error) {
                 expect(error).to.be(null);
                 done();
             });
         });
 
+        it('getPortBindings succeeds', function (done) {
+            appdb.getPortBindings(APP_0.id, function (error, bindings) {
+                expect(error).to.be(null);
+                expect(bindings).to.be.an(Array);
+                expect(bindings).to.be.eql([ { containerPort: 1234, hostPort: 5678, appId: APP_0.id } ]);
+                done();
+            });
+        });
+
         it('add of same app fails', function (done) {
-            appdb.add(APP_0.id, APP_0.statusCode, APP_0.location, null, function (error) {
+            appdb.add(APP_0.id, APP_0.statusCode, APP_0.location, [ ], function (error) {
                 expect(error).to.be.a(DatabaseError);
                 expect(error.reason).to.be(DatabaseError.ALREADY_EXISTS);
                 done();
@@ -322,7 +327,7 @@ describe('database', function () {
         });
 
         it('add second app succeeds', function (done) {
-            appdb.add(APP_1.id, APP_1.statusCode, APP_1.location, null, function (error) {
+            appdb.add(APP_1.id, APP_1.statusCode, APP_1.location, [ ], function (error) {
                 expect(error).to.be(null);
                 done();
             });
@@ -342,6 +347,15 @@ describe('database', function () {
         it('delete succeeds', function (done) {
             appdb.del(APP_0.id, function (error) {
                 expect(error).to.be(null);
+                done();
+            });
+        });
+
+        it('getPortBindings should be empty', function (done) {
+            appdb.getPortBindings(APP_0.id, function (error, bindings) {
+                expect(error).to.be(null);
+                expect(bindings).to.be.an(Array);
+                expect(bindings).to.be.eql([ ]);
                 done();
             });
         });

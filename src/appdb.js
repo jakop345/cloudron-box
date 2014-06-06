@@ -11,6 +11,7 @@ exports = module.exports = {
     del: del,
     update: update,
     getAll: getAll,
+    getPortBindings: getPortBindings,
 
     // status codes
     STATUS_NGINX_ERROR: 'nginx_error',
@@ -78,34 +79,54 @@ function add(id, statusCode, location, portBindings, callback) {
     assert(typeof id === 'string');
     assert(typeof statusCode === 'string');
     assert(typeof location === 'string');
-    assert(typeof portBindings === 'object');
+    assert(util.isArray(portBindings));
     assert(typeof callback === 'function');
 
-    var appsData = {
+    portBindings = portBindings || { };
+
+    var appData = {
         $id: id,
         $statusCode: statusCode,
         $location: location
     };
 
-    var keys = [ 'id', 'statusCode', 'location' ];
-    var values = [ '$id', '$statusCode', '$location' ];
+    var conn = database.newTransaction();
 
-    if (portBindings !== null) {
-        appsData.$internalPort = Object.keys(portBindings)[0];
-        keys.push('internalPort');
-        values.push('$internalPort');
-        appsData.$externalPort = portBindings[appsData.$internalPort];
-        keys.push('externalPort');
-        values.push('$externalPort');
-    }
+    conn.run('INSERT INTO apps (id, statusCode, location) VALUES ($id, $statusCode, $location)',
+           appData, function (error) {
+        if (error) database.rollback(conn);
 
-    db.run('INSERT INTO apps (' + keys.join(', ') + ') VALUES (' + values.join(', ') + ')',
-           appsData, function (error) {
         if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(error, DatabaseError.ALREADY_EXISTS));
 
         if (error || !this.lastID) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
 
-        callback(null);
+        async.eachSeries(portBindings, function iterator(binding, callback) {
+            var portData = {
+                $appId: id,
+                $containerPort: binding.containerPort,
+                $hostPort: binding.hostPort
+            };
+
+            conn.run('INSERT INTO appPortBindings (hostPort, containerPort, appId) VALUES ($hostPort, $containerPort, $appId)', portData, callback);
+        }, function done(error) {
+            if (error) database.rollback(conn);
+
+            if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(error, DatabaseError.ALREADY_EXISTS));
+
+            if (error /* || !this.lastID*/) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
+
+            database.commit(conn, callback); // FIXME: can this fail?
+        });
+    });
+}
+
+function getPortBindings(id, callback) {
+    db.all('SELECT * FROM appPortBindings WHERE appId = ?', [ id ], function (error, result) {
+        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
+
+        if (typeof result === 'undefined') result = [ ];
+
+        callback(null, result);
     });
 }
 
@@ -114,11 +135,16 @@ function del(id, callback) {
     assert(typeof id === 'string');
     assert(typeof callback === 'function');
 
-    db.run('DELETE FROM apps WHERE id = ?', [ id ], function (error) {
-        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
-        if (this.changes !== 1) return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
+    var conn = database.newTransaction();
+    conn.run('DELETE FROM appPortBindings WHERE appId = ?', [ id ], function (error) {
+        conn.run('DELETE FROM apps WHERE id = ?', [ id ], function (error) {
+            if (error || this.changes !== 1) database.rollback(conn);
 
-        callback(null);
+            if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
+            if (this.changes !== 1) return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
+
+            database.commit(conn, callback); // FIXME: can this fail?
+        });
     });
 }
 
