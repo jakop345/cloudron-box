@@ -33,17 +33,11 @@ var appHealth = (function () {
     var MAX_HEALTH = 5;
 
     return {
-        ensure: function (appId) {
-            // FIXME: this function must be removed when we have proper restart support
-            if (!data.hasOwnProperty(appId)) data[appId] = MAX_HEALTH;
-        },
-
         get: function (appId) {
             return data[appId] || 0;
         },
 
         register: function (appId) {
-            assert(!data.hasOwnProperty(appId));
             assert(typeof appId === 'string');
 
             data[appId] = MAX_HEALTH;
@@ -55,15 +49,15 @@ var appHealth = (function () {
         },
         increment: function (appId) {
             assert(typeof appId === 'string');
+            assert(data.hasOwnProperty(appId));
 
-            this.ensure(appId);
             data[appId] = Math.max(data[appId] + 1, MAX_HEALTH);
             return data[appId];
         },
         decrement: function (appId) {
             assert(typeof appId === 'string');
+            assert(data.hasOwnProperty(appId));
 
-            this.ensure(appId);
             return --data[appId];
         }
     };
@@ -81,6 +75,11 @@ function initialize(_appServerUrl, _nginxAppConfigDir) {
     } else {
         docker = new Docker({ host: 'http://localhost', port: 4243 });
     }
+
+    appdb.getAll(function (error, apps) {
+        if (error) return;
+        apps.forEach(function (app) { appHealth.register(app.id); });
+    });
 
     setInterval(refresh, 3000);
 }
@@ -331,7 +330,6 @@ function checkAppHealth(app, callback) {
         }
 
         if (data.State.Running !== true) {
-            appHealth[app.id].health = 0;
             appdb.update(app.id, { statusCode: appdb.STATUS_EXITED, statusMessage: 'Not running' }, callback);
             return;
         }
