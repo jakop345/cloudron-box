@@ -291,7 +291,7 @@ angular.module('YellowTent')
         var data = {
             grant_type: 'authorization_code',
             code: authCode,
-            redirect_uri: 'https://localhost',
+            redirect_uri: window.location.origin,
             client_id: this._clientId,
             client_secret: this._clientSecret
         };

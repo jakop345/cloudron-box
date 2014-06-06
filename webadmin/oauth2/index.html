@@ -20,7 +20,6 @@
 
 var tokenBtn, authCode, oauthResult, accessToken;
 var isReady = false;
-var server = 'https://localhost';
 var clientId = 'cid-webadmin';
 var clientSecret = 'unused';
 
@@ -43,11 +42,11 @@ function init() {
     oauthResult = document.getElementById('oauthResult');
 
     tokenBtn.onclick = function () {
-        superagent.post(server + '/api/v1/oauth/token?response_type=token&client_id=' + clientId)
+        superagent.post(window.location.origin + '/api/v1/oauth/token?response_type=token&client_id=' + clientId)
         .send({
             grant_type: 'authorization_code',
             code: authCode,
-            redirect_uri: server + '/oauth2/oauth_callback.html',
+            redirect_uri: window.location.origin + '/oauth2/oauth_callback.html',
             client_id: clientId,
             client_secret: clientSecret
         })
