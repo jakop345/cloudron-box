@@ -20,6 +20,7 @@ var CONFIG = {
     dataRoot: path.resolve(BASE_DIR, 'data'),
     configRoot: path.resolve(BASE_DIR, 'config'),
     mountRoot: path.resolve(BASE_DIR, 'mount'),
+    appDataRoot: path.resolve(BASE_DIR, 'appdata'),
     silent: true,
     appServerUrl: 'invalid_url',
     nginxAppConfigDir: '/tmp'

@@ -13,6 +13,11 @@ function getUserHomeDir() {
 var baseDir = path.join(getUserHomeDir(), '.yellowtent');
 
 var argv = optimist.usage('Usage: $0 --dataRoot <directory>')
+    .alias('a', 'appDataRoot')
+    .default('a', path.join(baseDir, 'appdata'))
+    .describe('a', 'Application Data Root.')
+    .string('a')
+
     .alias('c', 'configRoot')
     .default('c', path.join(baseDir, 'config'))
     .describe('c', 'Server config root directory for storing user db and meta data.')
@@ -71,7 +76,8 @@ var config = {
     token: configFile.token,
     appServerUrl: configFile.appstoreOrigin,
     origin: configFile.origin,
-    nginxAppConfigDir: path.join(__dirname, 'nginx/applications/')
+    nginxAppConfigDir: path.join(__dirname, 'nginx/applications/'),
+    appDataRoot: path.resolve(argv.a)
 };
 
 var server = new Server(config);

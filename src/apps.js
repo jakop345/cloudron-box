@@ -39,8 +39,9 @@ AppsError.NOT_FOUND = 3;
 function initialize(config) {
     assert(typeof config.appServerUrl === 'string');
     assert(typeof config.nginxAppConfigDir === 'string');
+    assert(typeof config.appDataRoot === 'string');
 
-    task.initialize(config.appServerUrl, config.nginxAppConfigDir);
+    task.initialize(config.appServerUrl, config.nginxAppConfigDir, config.appDataRoot);
 }
 
 function get(appId, callback) {

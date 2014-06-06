@@ -14,7 +14,8 @@ var assert = require('assert'),
     fs = require('fs'),
     child_process = require('child_process'),
     path = require('path'),
-    net = require('net');
+    net = require('net'),
+    rimraf = require('rimraf');
 
 exports = module.exports = {
     initialize: initialize,
@@ -23,7 +24,7 @@ exports = module.exports = {
 
 var NOOP_CALLBACK = function (error) { if (error) console.error(error); }
 
-var appServerUrl = null, docker = null,
+var appServerUrl = null, docker = null, appDataRoot = null,
     refreshing = false, pendingRefresh = false,
     nginxAppConfigDir = null,
     HOSTNAME = process.env.HOSTNAME || os.hostname();
@@ -63,12 +64,14 @@ var appHealth = (function () {
     };
 })();
 
-function initialize(_appServerUrl, _nginxAppConfigDir) {
+function initialize(_appServerUrl, _nginxAppConfigDir, _appDataRoot) {
     assert(typeof _appServerUrl === 'string');
     assert(typeof _nginxAppConfigDir === 'string');
+    assert(typeof _appDataRoot === 'string');
 
     appServerUrl = _appServerUrl;
     nginxAppConfigDir = _nginxAppConfigDir;
+    appDataRoot = _appDataRoot;
 
     if (os.platform() === 'linux') {
         docker = new Docker({socketPath: '/var/run/docker.sock'});
@@ -119,7 +122,7 @@ function configureNginx(app, freePort, callback) {
         NGINX_APPCONFIG_TEMPLATE.replace('#APP_SUBDOMAIN#', app.location + '.' + HOSTNAME)
         .replace('#PORT#', freePort);
 
-    var nginxConfigFilename = path.join(nginxAppConfigDir, app.location + '.conf');
+    var nginxConfigFilename = path.join(nginxAppConfigDir, app.location + '.conf'); // TODO: check if app.location is safe
     debug('writing config to ' + nginxConfigFilename);
 
     fs.writeFile(nginxConfigFilename, nginxConf, function (error) {
@@ -250,8 +253,15 @@ function startApp(app, portConfigs, callback) {
         // TODO: should wait for update to complete
         appdb.update(app.id, { containerId: container.id }, NOOP_CALLBACK);
 
+        var appDataDir = path.join(appDataRoot, app.id); // TODO: check if app.id is safe path
+        if (!safe.fs.mkdirSync(appDataDir)) {
+            debug('Error creating app data directory : ' + safe.error);
+            appdb.update(app.id, { statusCode: appdb.STATUS_SETUP_ERROR, statusMessage: 'Error creating data directory' }, NOOP_CALLBACK);
+            return callback(err);
+        }
+
         var startOptions = {
-            // Binds: [ '/tmp:/tmp:rw' ],
+            Binds: [ appDataDir + ':/app/data:rw' ],
             PortBindings: portBindings,
             PublishAllPorts: false,
             Env: env
@@ -307,10 +317,12 @@ function uninstall(app, callback) {
     };
 
     container.remove(removeOptions, function (error) {
-        if (error) {
-            debug('Error removing container:' + JSON.stringify(error));
-            // TODO: now what?
-        }
+        if (error) debug('Error removing container:' + JSON.stringify(error)); // TODO: now what?
+
+        var appDataDir = path.join(appDataRoot, app.id); // TODO: check if app.id is safe path
+        rimraf(appDataDir, function (error) {
+            if (error) debug('Error removing app directory:' + appDataDir); // TODO: now what?
+        });
 
         appHealth.unregister(app.id);
 
@@ -414,6 +426,7 @@ function refresh() {
                 checkAppHealth(app, callback);
                 break;
 
+            case appdb.STATUS_SETUP_ERROR:
             case appdb.STATUS_DEAD: // TODO: restart DEAD apps with threshold
                 callback(null);
                 break;

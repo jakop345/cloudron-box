@@ -267,6 +267,7 @@ Server.prototype._initialize2 = function (callback) {
     mkdirp.sync(config.configRoot);
     mkdirp.sync(config.mountRoot);
     mkdirp.sync(config.nginxAppConfigDir);
+    mkdirp.sync(config.appDataRoot);
 
     async.series([
         database.initialize.bind(null, config),

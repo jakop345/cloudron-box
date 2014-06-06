@@ -29,7 +29,8 @@ exports = module.exports = {
     STATUS_STARTED: 'started',
     STATUS_RUNNING: 'running',
     STATUS_EXITED: 'exited',
-    STATUS_DEAD: 'dead'
+    STATUS_DEAD: 'dead',
+    STATUS_SETUP_ERROR: 'setup_error'
 };
 
 var DatabaseError = require('./databaseerror'),
