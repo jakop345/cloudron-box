@@ -6,7 +6,7 @@ var express = require('express'),
     HttpSuccess = require('./httpsuccess.js'),
     path = require('path'),
     passport = require('passport'),
-    fs = require('fs'),
+    superagent = require('superagent'),
     mkdirp = require('mkdirp'),
     DatabaseError = require('./databaseerror.js'),
     routes = require('./routes/index.js'),
@@ -20,6 +20,8 @@ var express = require('express'),
     userdb = require('./userdb');
 
 exports = module.exports = Server;
+
+var HEARTBEAT_INTERVAL = 10000;
 
 function Server(config) {
     assert(typeof config === 'object');
@@ -283,6 +285,31 @@ Server.prototype._initialize2 = function (callback) {
     ], callback);
 };
 
+Server.prototype._sendHeartBeat = function () {
+    if (!this.config.appServerUrl) {
+        debug('No appstore server url set. Not sending heartbeat.');
+        return;
+    }
+
+    if (!this.config.token) {
+        debug('No appstore server token set. Not sending heartbeat.');
+        return;
+    }
+
+    var that = this;
+
+    var url = this.config.appServerUrl + '/api/v1/boxes/heartbeat/' + this.config.token;
+    debug('Sending heartbeat ' + url);
+
+    superagent.get(url).end(function (error, result) {
+        if (error) debug('Error sending heartbeat.', error);
+        else if (result.statusCode !== 200) debug('Server responded to heartbeat with ' + result.statusCode);
+        else debug('Heartbeat successfull');
+
+        setTimeout(that._sendHeartBeat.bind(that), HEARTBEAT_INTERVAL);
+    });
+};
+
 Server.prototype.start = function (callback) {
     assert(typeof callback === 'function');
     assert(this.app === null, 'Server is already up and running.');
@@ -290,6 +317,7 @@ Server.prototype.start = function (callback) {
     var that = this;
 
     this._initializeExpressSync();
+    this._sendHeartBeat();
 
     if (!this.config.silent) {
         console.log('Server listening on port ' + this.config.port);
