@@ -366,6 +366,7 @@ function uninstall(app, callback) {
     container.remove(removeOptions, function (error) {
         if (error) debug('Error removing container:' + JSON.stringify(error)); // TODO: now what?
 
+        // FIXME: this won't work because docker creates files in the volume with container user permissions
         var appDataDir = path.join(appDataRoot, app.id); // TODO: check if app.id is safe path
         rimraf(appDataDir, function (error) {
             if (error) debug('Error removing app directory:' + appDataDir); // TODO: now what?
