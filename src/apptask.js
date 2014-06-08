@@ -191,18 +191,18 @@ function downloadImage(app, callback) {
             var image = docker.getImage(manifest.docker_image);
 
             image.inspect(function (err, data) {
-                if (err || !data || !data.config) {
+                if (err || !data || !data.Config) {
                     debug('Error inspecting image');
                     appdb.update(app.id, { statusCode: appdb.STATUS_IMAGE_ERROR, statusMessage: 'Error inspecting image' }, NOOP_CALLBACK);
                     return callback(err);
                 }
-                if (!data.config.Entrypoint && !data.config.Cmd) {
+                if (!data.Config.Entrypoint && !data.Config.Cmd) {
                     debug('Only images with entry point are allowed');
                     appdb.update(app.id, { statusCode: appdb.STATUS_IMAGE_ERROR, statusMessage: 'No entrypoint in image' }, NOOP_CALLBACK);
                     return callback(err);
                 }
 
-                debug('This image exposes ports: ' + JSON.stringify(data.config.ExposedPorts));
+                debug('This image exposes ports: ' + JSON.stringify(data.Config.ExposedPorts));
                 appdb.update(app.id, { statusCode: appdb.STATUS_DOWNLOADED_IMAGE, statusMessage: '' }, callback);
             });
         });
