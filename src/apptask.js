@@ -77,7 +77,7 @@ function initialize(_appServerUrl, _nginxAppConfigDir, _appDataRoot) {
     if (os.platform() === 'linux') {
         docker = new Docker({socketPath: '/var/run/docker.sock'});
     } else {
-        docker = new Docker({ host: 'http://localhost', port: 4243 });
+        docker = new Docker({ host: 'http://localhost', port: 2375 });
     }
 
     appdb.getAll(function (error, apps) {
