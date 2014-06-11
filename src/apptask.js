@@ -15,8 +15,7 @@ var assert = require('assert'),
     child_process = require('child_process'),
     path = require('path'),
     net = require('net'),
-    rimraf = require('rimraf'),
-    tar = require('tar');
+    rimraf = require('rimraf');
 
 exports = module.exports = {
     initialize: initialize,
@@ -245,7 +244,7 @@ function createContainer(app, portConfigs, callback) {
     });
 }
 
-function setupAppData(app, callback) {
+function createVolume(app, callback) {
     var appDataDir = path.join(appDataRoot, app.id); // TODO: check if app.id is safe path
 
     appdb.update(app.id, { statusCode: appdb.STATUS_CREATING_VOLUME, statusMessage: '' }, NOOP_CALLBACK);
@@ -256,33 +255,7 @@ function setupAppData(app, callback) {
         return callback(safe.error);
     }
 
-    var container = docker.getContainer(app.containerId);
-    var outputDirStream = tar.Extract({ path: appDataDir, strip: 1 /* remove data/ from path */ });
-
-    debug('Copying container data to ' + appDataDir);
-
-    container.copy({ Resource: '/app/data' }, function (error, tarStream) {
-        function volumeError(error) {
-            appdb.update(app.id, { statusCode: appdb.STATUS_VOLUME_ERROR, statusMessage: 'Error copying data directory' + error }, NOOP_CALLBACK);
-            callback(error);
-        }
-
-        if (error) {
-            debug('Error copying container appdata : ' + error);
-            return volumeError();
-        }
-
-        tarStream.on('error', volumeError);
-        outputDirStream.on('error', volumeError);
-        tarStream.pipe(outputDirStream);
-
-        outputDirStream.on('end', function () {
-            debug('Copied container data');
-            appdb.update(app.id, { statusCode: appdb.STATUS_CREATED_VOLUME, statusMessage: '' }, NOOP_CALLBACK);
-
-            return callback(null);
-        });
-    });
+    appdb.update(app.id, { statusCode: appdb.STATUS_CREATED_VOLUME, statusMessage: '' }, callback);
 }
 
 function startContainer(app, portConfigs, callback) {
@@ -465,7 +438,7 @@ function refresh() {
 
             case appdb.STATUS_CREATED_CONTAINER:
             case appdb.STATUS_CREATING_VOLUME:
-                setupAppData(app, callback);
+                createVolume(app, callback);
                 break;
 
             case appdb.STATUS_CREATED_VOLUME:
