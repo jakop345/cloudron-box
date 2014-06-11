@@ -351,6 +351,7 @@ function uninstall(app, callback) {
     });
 }
 
+// # TODO should probably poll from the outside network instead of the docker network?
 function checkAppHealth(app, callback) {
     var container = docker.getContainer(app.containerId),
         manifest = JSON.parse(app.manifestJson); // this is guaranteed not to throw since it's already been verified in downloadManifest()
@@ -386,6 +387,29 @@ function checkAppHealth(app, callback) {
             }
         });
     });
+}
+
+function registerSubdomain(app, callback) {
+    appdb.update(app.id, { statusCode: appdb.STATUS_REGISTERING_SUBDOMAIN, statusMessage: '' }, NOOP_CALLBACK);
+
+    superagent
+        .post(appServerUrl + '/api/v1/subdomains')
+        .set('Accept', 'application/json')
+        .send({ subdomain: app.location, domain: HOSTNAME }) // TODO: the HOSTNAME should not be required
+        .end(function (error, res) {
+            if (error) {
+                debug('Error making request: ' + error.message);
+                appdb.update(app.id, { statusCode: appdb.STATUS_SUBDOMAIN_ERROR, statusMessage: error.message }, NOOP_CALLBACK);
+                return callback(null);
+            }
+            if (res.status !== 200) {
+                debug('Error registering subdomain:' + res.body.status + ' ' + res.body.message);
+                appdb.update(app.id, { statusCode: appdb.STATUS_SUBDOMAIN_ERROR, statusMessage: res.body.status + ' ' + res.body.message }, NOOP_CALLBACK);
+                return callback(null);
+            }
+
+            appdb.update(app.id, { statusCode: appdb.STATUS_REGISTERED_SUBDOMAIN, statusMessage: '' }, callback);
+        });
 }
 
 function refresh() {
@@ -454,11 +478,17 @@ function refresh() {
                 break;
 
             case appdb.STATUS_STARTED_CONTAINER:
+            case appdb.STATUS_REGISTERING_SUBDOMAIN:
+                registerSubdomain(app, callback);
+                break;
+
+            case appdb.STATUS_REGISTERED_SUBDOMAIN:
             case appdb.STATUS_RUNNING:
                 checkAppHealth(app, callback);
                 break;
 
             // do nothing: let user retry again
+            case appdb.STATUS_SUBDOMAIN_ERROR: // TODO: register with threshold
             case appdb.STATUS_CONTAINER_ERROR:
             case appdb.STATUS_VOLUME_ERROR:
             case appdb.STATUS_IMAGE_ERROR:

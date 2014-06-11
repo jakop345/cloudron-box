@@ -32,6 +32,9 @@ exports = module.exports = {
     STATUS_CREATING_VOLUME: 'creating_volume',
     STATUS_CREATED_VOLUME: 'created_volume',
     STATUS_VOLUME_ERROR: 'volume_error',
+    STATUS_REGISTERING_SUBDOMAIN: 'registering_subdomain',
+    STATUS_REGISTERED_SUBDOMAIN: 'registered_subdomain',
+    STATUS_SUBDOMAIN_ERROR: 'subdomain_error',
     STATUS_RUNNING: 'running',
     STATUS_EXITED: 'exited',
     STATUS_DEAD: 'dead'
