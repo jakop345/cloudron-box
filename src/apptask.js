@@ -109,8 +109,16 @@ function forwardFromHostToVirtualBox(rulename, port) {
 function configureNginx(app, freePort, callback) {
     var NGINX_APPCONFIG_TEMPLATE =
         "server {\n"
-        + "    listen 80;\n"
-        + "    server_name #APP_SUBDOMAIN#;\n"
+        + "    listen 443;\n"
+        + "    server_name #APP_VHOST_NAME#;\n"
+        + "    ssl on;\n"
+        + "    ssl_certificate cert/cert.pem;\n"
+        + "    ssl_certificate_key cert/key.pem;\n"
+        + "    ssl_session_timeout 5m;\n"
+        + "    ssl_protocols  SSLv2 SSLv3 TLSv1;\n"
+        + "    ssl_ciphers  HIGH:!aNULL:!MD5;\n"
+        + "    ssl_prefer_server_ciphers   on;\n"
+        + "    proxy_http_version 1.1;\n"
         + "    # proxy_intercept_errors on;\n"
         + "    # error_page 500 502 503 504 = @install_progress;\n"
         + "    location / {\n"
@@ -119,7 +127,7 @@ function configureNginx(app, freePort, callback) {
         + "}\n";
 
     var nginxConf =
-        NGINX_APPCONFIG_TEMPLATE.replace('#APP_SUBDOMAIN#', app.location + '.' + HOSTNAME)
+        NGINX_APPCONFIG_TEMPLATE.replace('#APP_VHOST_NAME#', app.location + '.' + HOSTNAME)
         .replace('#PORT#', freePort);
 
     var nginxConfigFilename = path.join(nginxAppConfigDir, app.location + '.conf'); // TODO: check if app.location is safe
