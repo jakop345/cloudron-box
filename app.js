@@ -4,7 +4,8 @@
 
 var optimist = require('optimist'),
     Server = require('./src/server.js'),
-    path = require('path');
+    path = require('path'),
+    os = require('os');
 
 function getUserHomeDir() {
     return process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
@@ -61,7 +62,7 @@ try {
     configFile = {
         token: null,
         appstoreOrigin: 'http://localhost:5050',
-        origin: 'https://localhost'
+        origin: 'https://' + os.hostname()
     };
 }
 
