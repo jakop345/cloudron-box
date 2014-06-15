@@ -13,7 +13,10 @@ var MyAppsController = function ($scope, $http, $location, Config) {
 
         $http.get('/api/v1/apps')
             .success(function (data, status, headers) {
-                data.apps.forEach(function (app) { app.iconUrl = Config.APPSTORE_URL + "/api/v1/app/" + app.id + "/icon"; });
+                data.apps.forEach(function (app) {
+                    app.iconUrl = Config.APPSTORE_URL + "/api/v1/app/" + app.id + "/icon";
+                    app.url = 'https://' + app.location + '.' + window.location.hostname;
+                });
                 $scope.apps = data.apps;
                 $scope.loadStatus = $scope.LOADED;
             }).error(function (data, status, headers) {
