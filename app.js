@@ -61,7 +61,7 @@ try {
     console.log('Unable to load provisioned config file. Using defaults.');
     configFile = {
         token: null,
-        appstoreOrigin: 'http://localhost:5050',
+        appstoreOrigin: 'https://selfhost.io:5050',
         origin: 'https://' + os.hostname()
     };
 }

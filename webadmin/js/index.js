@@ -64,6 +64,6 @@ app.run(function (acuteSelectService) {
 });
 
 app.service('Config', function () {
-    this.APPSTORE_URL = 'http://localhost:5050';
+    this.APPSTORE_URL = 'https://selfhost.io:5050';
 });
 
