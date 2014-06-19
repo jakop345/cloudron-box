@@ -8,7 +8,8 @@ Development setup
 
 * rmdirapp.sh should be callable without a password
 ** Add a file called /etc/sudoers.d/yellowtent with the following contents:
-   girish host = (root) NOPASSWD: /home/girish/yellowtent/box/src/rmappdir.sh
+   Defaults!/home/girish/yellowtent/box/src/rmappdir.sh env_keep=HOME
+   girish ALL = (ALL) NOPASSWD: /home/girish/yellowtent/box/src/rmappdir.sh
 
    (replace the username and path to rmappdir.sh to match your environment)
 
