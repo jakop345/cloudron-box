@@ -13,13 +13,13 @@ Development setup
 
    (replace the username and path to rmappdir.sh to match your environment)
 
-** Verify using rmdirapp.sh --check . This should print 'OK'
+** Verify using `sudo rmdirapp.sh --check`. This should print 'OK'
 
 Running
 -------
 * ./run.sh - this starts up nginx to serve up the webadmin
 ** https://HOSTNAME should now be accessible
-** https://localhost will also work but will break oauth redirection
+** Do not use https://localhost. It will appear to work work but will break oauth redirection
 
 * DEBUG=box:* ./app.js - this the main box code
 ** NODE_ENV is set to production by default
