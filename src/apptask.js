@@ -75,9 +75,9 @@ function initialize(_appServerUrl, _nginxAppConfigDir, _appDataRoot) {
     assert(typeof _appDataRoot === 'string');
 
     // ensure rmappdir is in sudoers config
-    assert(fs.existsSync('/etc/sudoers.d/rmappdir.sh'), 
-           '\n\nInstall rmappdir.sh at /etc/sudoers.d/rmappdir.sh.\n'
-           + 'For example: ' + process.env.USER + ' host = (root) NOPASSWD: ' + __dirname + '/rmappdir.sh\n\n');
+    // assert(fs.existsSync('/etc/sudoers.d/yellowtent'),
+    //        '\n\nInstall rmappdir.sh at /etc/sudoers.d/yellowtent.\n'
+    //        + 'For example: ' + process.env.USER + ' host = (root) NOPASSWD: ' + __dirname + '/rmappdir.sh\n\n');
 
     appServerUrl = _appServerUrl;
     nginxAppConfigDir = _nginxAppConfigDir;
