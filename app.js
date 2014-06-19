@@ -2,6 +2,11 @@
 
 'use strict';
 
+// Put express and various other middleware in production mode
+if (typeof process.env.NODE_ENV === 'undefined') {
+    process.env.NODE_ENV = 'production';
+}
+
 var optimist = require('optimist'),
     Server = require('./src/server.js'),
     path = require('path'),

@@ -327,6 +327,10 @@ Server.prototype.start = function (callback) {
         console.log('Using mount root:', this.config.mountRoot);
     }
 
+    if (process.env.NODE_ENV !== 'production') {
+        console.warn('WARNING: Express is running in ' + process.env.NODE_ENV + ' mode');
+    }
+
     this._initialize2(function (err) {
         if (err) return callback(err);
 
