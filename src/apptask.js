@@ -57,7 +57,7 @@ var appHealth = (function () {
             assert(typeof appId === 'string');
             assert(data.hasOwnProperty(appId));
 
-            data[appId] = Math.max(data[appId] + 1, MAX_HEALTH);
+            data[appId] = Math.min(data[appId] + 1, MAX_HEALTH);
             return data[appId];
         },
         decrement: function (appId) {
