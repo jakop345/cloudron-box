@@ -150,7 +150,7 @@ function configureNginx(app, freePort, callback) {
             return callback(null);
         }
 
-        child_process.exec("supervisorctl restart nginx", { timeout: 10000 }, function (error, stdout, stderr) {
+        child_process.exec("supervisorctl -c supervisor/supervisord.conf restart nginx", { timeout: 10000 }, function (error, stdout, stderr) {
             if (error) {
                 debug('Error configuring nginx. Reload nginx manually for now', error);
                 appdb.update(app.id, { statusCode: appdb.STATUS_NGINX_ERROR, statusMessage: error }, NOOP_CALLBACK);
