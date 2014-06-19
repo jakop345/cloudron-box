@@ -9,6 +9,8 @@ Development setup
 Running
 -------
 * ./run.sh - this starts up nginx to serve up the webadmin
-** https://localhost should not be accessible
+** https://HOSTNAME should now be accessible
+** https://localhost will also work but will break oauth redirection
+
 * DEBUG=box:* ./app.js - this the main box code
 ** NODE_ENV is set to production by default
