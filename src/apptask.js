@@ -397,6 +397,7 @@ function checkAppHealth(app, callback) {
                 debug('unhealthy app:' + app.id + ' ' + appHealth.get(app.id));
                 callback(null);
             } else {
+                debug('healthy app:' + app.id + ' ' + appHealth.get(app.id));
                 appHealth.increment(app.id);
                 appdb.update(app.id, { statusCode: appdb.STATUS_RUNNING, statusMessage: healthCheckUrl }, NOOP_CALLBACK);
                 callback(null);
