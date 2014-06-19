@@ -10,6 +10,12 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
+if [ "$1" == "--check" ]; then
+    echo "Configured to remove apps from $HOME"
+    echo "OK"
+    exit 0
+fi
+
 APPDATA=$HOME/.yellowtent/appdata
 
 rm -rf "$APPDATA/$1"

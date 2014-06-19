@@ -6,6 +6,14 @@ Development setup
 * sudo adduser yellowtent
 ** This dummy user is required for supervisor 'box' configs
 
+* rmdirapp.sh should be callable without a password
+** Add a file called /etc/sudoers.d/yellowtent with the following contents:
+   girish host = (root) NOPASSWD: /home/girish/yellowtent/box/src/rmappdir.sh
+
+   (replace the username and path to rmappdir.sh to match your environment)
+
+** Verify using rmdirapp.sh --check . This should print 'OK'
+
 Running
 -------
 * ./run.sh - this starts up nginx to serve up the webadmin
