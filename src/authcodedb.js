@@ -3,7 +3,7 @@
 'use strict';
 
 var DatabaseError = require('./databaseerror'),
-    debug = require('debug')('server:authcodedb'),
+    debug = require('debug')('box:authcodedb'),
     assert = require('assert');
 
 // database

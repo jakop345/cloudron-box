@@ -2,7 +2,7 @@
 
 var DatabaseError = require('./databaseerror'),
     path = require('path'),
-    debug = require('debug')('clientdb'),
+    debug = require('debug')('box:clientdb'),
     assert = require('assert');
 
 // database

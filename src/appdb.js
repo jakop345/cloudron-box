@@ -41,7 +41,7 @@ exports = module.exports = {
 };
 
 var DatabaseError = require('./databaseerror'),
-    debug = require('debug')('server:appdb'),
+    debug = require('debug')('box:appdb'),
     assert = require('assert'),
     database = require('./database.js'),
     async = require('async'),

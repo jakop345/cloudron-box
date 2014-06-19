@@ -4,7 +4,7 @@
 
 var DatabaseError = require('./databaseerror.js'),
     util = require('util'),
-    debug = require('debug')('server:apps'),
+    debug = require('debug')('box:apps'),
     assert = require('assert'),
     safe = require('safetydance'),
     appdb = require('./appdb.js'),

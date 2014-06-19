@@ -21,7 +21,7 @@ var userdb = require('./userdb.js'),
     fs = require('fs'),
     mkdirp = require('mkdirp'),
     path = require('path'),
-    debug = require('debug')('server:database'),
+    debug = require('debug')('box:database'),
     DatabaseError = require('./databaseerror');
 
 var connectionPool = [ ],

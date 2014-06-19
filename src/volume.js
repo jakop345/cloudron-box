@@ -2,7 +2,7 @@
 
 var fs = require('fs'),
     User = require('./user.js'),
-    debug = require('debug')('server:volume'),
+    debug = require('debug')('box:volume'),
     encfs = require('encfs'),
     rimraf = require('rimraf'),
     path = require('path'),

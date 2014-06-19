@@ -3,7 +3,7 @@
 var DatabaseError = require('./databaseerror'),
     path = require('path'),
     tokendb = require('./tokendb'),
-    debug = require('debug')('userdb'),
+    debug = require('debug')('box:userdb'),
     assert = require('assert');
 
 // database

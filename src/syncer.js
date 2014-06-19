@@ -1,7 +1,7 @@
 'use strict';
 
 var assert = require('assert'),
-    debug = require('debug')('server:syncer'),
+    debug = require('debug')('box:syncer'),
     util = require('util');
 
 exports = module.exports = {

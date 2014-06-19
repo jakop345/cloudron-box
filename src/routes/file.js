@@ -3,7 +3,7 @@
 var HttpError = require('../httperror.js'),
     HttpSuccess = require('../httpsuccess.js'),
     mime = require('mime'),
-    debug = require('debug')('server:routes/file'),
+    debug = require('debug')('box:routes/file'),
     express = require('express'),
     util = require('util'),
     path = require('path'),

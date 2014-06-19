@@ -13,7 +13,7 @@ var oauth2orize = require('oauth2orize'),
     tokendb = require('../tokendb'),
     DatabaseError = require('../databaseerror'),
     clientdb = require('../clientdb'),
-    debug = require('debug')('server:oauth2'),
+    debug = require('debug')('box:routes/oauth2'),
     uuid = require('node-uuid');
 
 // create OAuth 2.0 server

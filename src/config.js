@@ -2,7 +2,7 @@
 
 var mkdirp = require('mkdirp'),
     assert = require('assert'),
-    debug = require('debug')('server:config'),
+    debug = require('debug')('box:config'),
     path = require('path'),
     safe = require('safetydance');
 

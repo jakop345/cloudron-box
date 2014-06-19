@@ -4,7 +4,7 @@
 
 var HttpError = require('../httperror.js'),
     HttpSuccess = require('../httpsuccess.js'),
-    debug = require('debug')('routes/apps'),
+    debug = require('debug')('box:routes/apps'),
     apps = require('../apps.js'),
     AppsError = apps.AppsError;
 

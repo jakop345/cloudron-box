@@ -5,7 +5,7 @@ var userdb = require('../userdb.js'),
     DatabaseError = require('../databaseerror.js'),
     user = require('../user'),
     UserError = user.UserError,
-    debug = require('debug')('server:routes/user'),
+    debug = require('debug')('box:routes/user'),
     HttpError = require('../../src/httperror.js'),
     HttpSuccess = require('../../src/httpsuccess.js');
 
