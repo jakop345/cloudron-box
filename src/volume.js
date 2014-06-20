@@ -12,7 +12,7 @@ var fs = require('fs'),
     ursa = require('ursa'),
     async = require('async'),
     util = require('util'),
-    Config = require('./config.js'),
+    VolumeConfig = require('./volumeconfig.js'),
     safe = require('safetydance');
 
 exports = module.exports = {
@@ -85,7 +85,7 @@ function Volume(id, options) {
     this.mountPoint = this._resolveVolumeMountPoint();
     this.tmpPath = path.join(this.mountPoint, 'tmp');
     this.encfs = new encfs.Root(this.dataPath, this.mountPoint);
-    this.config = new Config(VOLUME_META_FILENAME, this.dataPath);
+    this.config = new VolumeConfig(VOLUME_META_FILENAME, this.dataPath);
 }
 
 Volume.prototype._resolveVolumeRootPath = function () {
