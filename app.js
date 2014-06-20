@@ -19,3 +19,9 @@ server.start(function (err) {
         process.exit(1);
     }
 });
+
+var NOOP_CALLBACK = function () { };
+
+process.on('SIGINT', function () { server.stop(NOOP_CALLBACK); });
+process.on('SIGTERM', function () { server.stop(NOOP_CALLBACK); });
+

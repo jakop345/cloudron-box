@@ -7,8 +7,7 @@ var DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:apps'),
     assert = require('assert'),
     safe = require('safetydance'),
-    appdb = require('./appdb.js'),
-    task = require('./apptask.js');
+    appdb = require('./appdb.js');
 
 exports = module.exports = {
     AppsError: AppsError,
@@ -19,6 +18,8 @@ exports = module.exports = {
     install: install,
     uninstall: uninstall
 };
+
+var task = null;
 
 // http://dustinsenos.com/articles/customErrorsInNode
 // http://code.google.com/p/v8/wiki/JavaScriptStackTraceApi
@@ -36,12 +37,13 @@ AppsError.INTERNAL_ERROR = 1;
 AppsError.ALREADY_EXISTS = 2;
 AppsError.NOT_FOUND = 3;
 
-function initialize(config) {
+function initialize(appTask, config) {
     assert(typeof config.appServerUrl === 'string');
     assert(typeof config.nginxAppConfigDir === 'string');
     assert(typeof config.appDataRoot === 'string');
+    assert(typeof appTask === 'object'); // ChildProcess
 
-    task.initialize(config.appServerUrl, config.nginxAppConfigDir, config.appDataRoot);
+    task = appTask;
 }
 
 function get(appId, callback) {
@@ -74,7 +76,7 @@ function install(appId, username, password, location, portBindings, callback) {
 
         debug('Will install app with id : ' + appId);
 
-        task.refresh();
+        task.send({ cmd: 'refresh' });
 
         callback(null);
     });
@@ -88,7 +90,7 @@ function uninstall(appId, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError('No such app', AppsError.NOT_FOUND));
         if (error) return callback(new AppsError('Internal error:' + error.message, AppsError.INTERNAL_ERROR));
 
-        task.refresh();
+        task.send({ cmd: 'refresh' });
 
         callback(null);
     });

@@ -17,7 +17,9 @@ var assert = require('assert'),
     child_process = require('child_process'),
     path = require('path'),
     net = require('net'),
-    rimraf = require('rimraf');
+    rimraf = require('rimraf'),
+    config = require('../config.js'),
+    database = require('./database.js');
 
 exports = module.exports = {
     initialize: initialize,
@@ -31,9 +33,9 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
 
 var NOOP_CALLBACK = function (error) { if (error) console.error(error); };
 
-var appServerUrl = null, docker = null, appDataRoot = null,
+var appServerUrl = config.appServerUrl, docker = null, appDataRoot = config.appDataRoot,
     refreshing = false, pendingRefresh = false,
-    nginxAppConfigDir = null,
+    nginxAppConfigDir = config.nginxAppConfigDir,
     HOSTNAME = process.env.HOSTNAME || os.hostname();
 
 var appHealth = (function () {
@@ -71,27 +73,23 @@ var appHealth = (function () {
     };
 })();
 
-function initialize(_appServerUrl, _nginxAppConfigDir, _appDataRoot) {
-    assert(typeof _appServerUrl === 'string');
-    assert(typeof _nginxAppConfigDir === 'string');
-    assert(typeof _appDataRoot === 'string');
-
-    appServerUrl = _appServerUrl;
-    nginxAppConfigDir = _nginxAppConfigDir;
-    appDataRoot = _appDataRoot;
-
+function initialize() {
     if (os.platform() === 'linux') {
         docker = new Docker({socketPath: '/var/run/docker.sock'});
     } else {
         docker = new Docker({ host: 'http://localhost', port: 2375 });
     }
 
-    appdb.getAll(function (error, apps) {
-        if (error) return;
-        apps.forEach(function (app) { appHealth.register(app.id); });
-    });
+    database.initialize(config, function (error) {
+        assert(!error);
 
-    setInterval(refresh, 6000);
+        appdb.getAll(function (error, apps) {
+            if (error) return;
+            apps.forEach(function (app) { appHealth.register(app.id); });
+        });
+
+        setInterval(refresh, 6000);
+    });
 }
 
 function getFreePort(callback) {
@@ -518,3 +516,12 @@ function refresh() {
 
     });
 }
+
+if (require.main === module) {
+    initialize();
+
+    process.on('message', function (message) {
+        if (message.cmd === 'refresh') refresh();
+    });
+}
+

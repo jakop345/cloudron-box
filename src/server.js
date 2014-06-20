@@ -17,7 +17,8 @@ var express = require('express'),
     apps = require('./apps'),
     middleware = require('./middleware'),
     database = require('./database.js'),
-    userdb = require('./userdb');
+    userdb = require('./userdb'),
+    child_process = require('child_process');
 
 exports = module.exports = Server;
 
@@ -29,6 +30,7 @@ function Server(config) {
     this.config = config;
     this.httpServer = null; // http server
     this.app = null; // express
+    this._appTask = null;
 }
 
 // Success handler
@@ -262,6 +264,8 @@ Server.prototype._initializeExpressSync = function (callback) {
 Server.prototype._initialize2 = function (callback) {
     var config = this.config;
 
+    var that = this;
+
     // ensure data/config/mount paths
     mkdirp.sync(config.dataRoot);
     mkdirp.sync(config.configRoot);
@@ -280,7 +284,7 @@ Server.prototype._initialize2 = function (callback) {
             callback(null);
         },
         function initializeModules(callback) {
-            apps.initialize(config);
+            apps.initialize(that._appTask, config);
             callback(null);
         }
     ], callback);
@@ -311,6 +315,11 @@ Server.prototype._sendHeartBeat = function () {
     });
 };
 
+Server.prototype._killAppTask = function () {
+    if (this._appTask !== null) this._appTask.kill();
+    this._appTask = null;
+};
+
 Server.prototype.start = function (callback) {
     assert(typeof callback === 'function');
     assert(this.app === null, 'Server is already up and running.');
@@ -331,6 +340,9 @@ Server.prototype.start = function (callback) {
         console.warn('WARNING: Express is running in ' + process.env.NODE_ENV + ' mode');
     }
 
+
+    this._appTask = child_process.fork(__dirname + '/apptask.js');
+
     this._initialize2(function (err) {
         if (err) return callback(err);
 
@@ -348,6 +360,8 @@ Server.prototype.stop = function (callback) {
     if (!this.httpServer) {
         return callback(null);
     }
+
+    this._killAppTask();
 
     this.httpServer.close(function () {
         that.httpServer.unref();
