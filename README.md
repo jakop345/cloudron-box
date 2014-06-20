@@ -13,6 +13,8 @@ Development setup
 
    (replace the username and path to rmappdir.sh to match your environment)
 
+   You might have to clear the sudo cache using sudo -k.
+
 ** Verify using `sudo rmdirapp.sh --check`. This should print 'OK'
 
 Running
