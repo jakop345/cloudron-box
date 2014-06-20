@@ -7,8 +7,7 @@ if (typeof process.env.NODE_ENV === 'undefined') {
     process.env.NODE_ENV = 'production';
 }
 
-var optimist = require('optimist'),
-    Server = require('./src/server.js'),
+var Server = require('./src/server.js'),
     path = require('path'),
     os = require('os');
 
@@ -18,45 +17,13 @@ function getUserHomeDir() {
 
 var baseDir = path.join(getUserHomeDir(), '.yellowtent');
 
-var argv = optimist.usage('Usage: $0 --dataRoot <directory>')
-    .alias('a', 'appDataRoot')
-    .default('a', path.join(baseDir, 'appdata'))
-    .describe('a', 'Application Data Root.')
-    .string('a')
-
-    .alias('c', 'configRoot')
-    .default('c', path.join(baseDir, 'config'))
-    .describe('c', 'Server config root directory for storing user db and meta data.')
-    .string('c')
-
-    .alias('d', 'dataRoot')
-    .default('d', path.join(baseDir, 'data'))
-    .describe('d', 'Volume data storage directory.')
-    .string('d')
-
-    .alias('h', 'help')
-    .describe('h', 'Show this help.')
-
-    .alias('m', 'mountRoot')
-    .default('m', path.join(baseDir, 'mount'))
-    .describe('m', 'Volume mount point directory.')
-    .string('m')
-
-    .alias('p', 'port')
-    .describe('p', 'Server port')
-
-    .alias('s', 'silent')
-    .default('s', false)
-    .describe('s', 'Suppress console output for non errors.')
-    .boolean('s')
-
-    .argv;
-
-// print help and die if requested
-if (argv.h) {
-    optimist.showHelp();
-    process.exit(0);
-}
+var appDataRoot = path.join(baseDir, 'appdata');
+var configRoot = path.join(baseDir, 'config');
+var dataRoot = path.join(baseDir, 'data');
+var mountRoot = path.join(baseDir, 'mount');
+var port = 3000;
+var silent = false;
+var nginxAppConfigDir = path.join(__dirname, 'nginx/applications/');
 
 // load provisioned config file if there
 var configFile;
@@ -74,16 +41,16 @@ try {
 // main entry point when running standalone
 // TODO Maybe this should go into a new 'executeable' file - Johannes
 var config = {
-    port: argv.p || 3000,
-    dataRoot: path.resolve(argv.d),
-    configRoot: path.resolve(argv.c),
-    mountRoot: path.resolve(argv.m),
-    silent: argv.s,
+    port: port,
+    dataRoot: dataRoot,
+    configRoot: configRoot,
+    mountRoot: mountRoot,
+    silent: silent,
     token: configFile.token,
     appServerUrl: configFile.appstoreOrigin,
     origin: configFile.origin,
-    nginxAppConfigDir: path.join(__dirname, 'nginx/applications/'),
-    appDataRoot: path.resolve(argv.a)
+    nginxAppConfigDir: nginxAppConfigDir,
+    appDataRoot: appDataRoot
 };
 
 var server = new Server(config);
