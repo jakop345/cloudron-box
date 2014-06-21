@@ -424,6 +424,75 @@ function registerSubdomain(app, callback) {
         });
 }
 
+function processAppState(app, callback) {
+    switch (app.statusCode) {
+    case appdb.STATUS_PENDING_INSTALL:
+    case appdb.STATUS_NGINX_ERROR:
+        getFreePort(function (error, freePort) {
+            if (error) return callback(null);
+            configureNginx(app, freePort, callback);
+        });
+        break;
+
+    case appdb.STATUS_NGINX_CONFIGURED:
+    case appdb.STATUS_MANIFEST_ERROR:
+    case appdb.STATUS_DOWNLOAD_ERROR:
+    case appdb.STATUS_DOWNLOADING_MANIFEST:
+        downloadManifest(app, callback);
+        break;
+
+    case appdb.STATUS_DOWNLOADING_IMAGE:
+    case appdb.STATUS_DOWNLOADED_MANIFEST:
+        downloadImage(app, callback);
+        break;
+
+    case appdb.STATUS_DOWNLOADED_IMAGE:
+    case appdb.STATUS_CREATING_CONTAINER:
+    case appdb.STATUS_EXITED:
+        appdb.getPortBindings(app.id, function (error, portBindings) {
+            if (error) portBindings = [ ]; // TODO: this is probably not good
+            createContainer(app, portBindings, callback);
+        });
+        break;
+
+    case appdb.STATUS_CREATED_CONTAINER:
+    case appdb.STATUS_CREATING_VOLUME:
+        createVolume(app, callback);
+        break;
+
+    case appdb.STATUS_CREATED_VOLUME:
+    case appdb.STATUS_STARTING_CONTAINER:
+        appdb.getPortBindings(app.id, function (error, portBindings) {
+            if (error) portBindings = [ ]; // TODO: this is probably not good
+            startContainer(app, portBindings, callback);
+        });
+        break;
+
+    case appdb.STATUS_PENDING_UNINSTALL:
+        uninstall(app, callback);
+        break;
+
+    case appdb.STATUS_STARTED_CONTAINER:
+    case appdb.STATUS_REGISTERING_SUBDOMAIN:
+        registerSubdomain(app, callback);
+        break;
+
+    case appdb.STATUS_REGISTERED_SUBDOMAIN:
+    case appdb.STATUS_RUNNING:
+        checkAppHealth(app, callback);
+        break;
+
+    // do nothing: let user retry again
+    case appdb.STATUS_SUBDOMAIN_ERROR: // TODO: register with threshold
+    case appdb.STATUS_CONTAINER_ERROR:
+    case appdb.STATUS_VOLUME_ERROR:
+    case appdb.STATUS_IMAGE_ERROR:
+    case appdb.STATUS_DEAD: // TODO: restart DEAD apps with threshold?
+        callback(null);
+        break;
+    }
+}
+
 function refresh() {
     if (refreshing) {
         debug('Already refreshing, marked as pending');
@@ -442,72 +511,7 @@ function refresh() {
         }
 
         async.eachSeries(apps, function iterator(app, callback) {
-            switch (app.statusCode) {
-            case appdb.STATUS_PENDING_INSTALL:
-            case appdb.STATUS_NGINX_ERROR:
-                getFreePort(function (error, freePort) {
-                    if (error) return callback(null);
-                    configureNginx(app, freePort, callback);
-                });
-                break;
-
-            case appdb.STATUS_NGINX_CONFIGURED:
-            case appdb.STATUS_MANIFEST_ERROR:
-            case appdb.STATUS_DOWNLOAD_ERROR:
-            case appdb.STATUS_DOWNLOADING_MANIFEST:
-                downloadManifest(app, callback);
-                break;
-
-            case appdb.STATUS_DOWNLOADING_IMAGE:
-            case appdb.STATUS_DOWNLOADED_MANIFEST:
-                downloadImage(app, callback);
-                break;
-
-            case appdb.STATUS_DOWNLOADED_IMAGE:
-            case appdb.STATUS_CREATING_CONTAINER:
-            case appdb.STATUS_EXITED:
-                appdb.getPortBindings(app.id, function (error, portBindings) {
-                    if (error) portBindings = [ ]; // TODO: this is probably not good
-                    createContainer(app, portBindings, callback);
-                });
-                break;
-
-            case appdb.STATUS_CREATED_CONTAINER:
-            case appdb.STATUS_CREATING_VOLUME:
-                createVolume(app, callback);
-                break;
-
-            case appdb.STATUS_CREATED_VOLUME:
-            case appdb.STATUS_STARTING_CONTAINER:
-                appdb.getPortBindings(app.id, function (error, portBindings) {
-                    if (error) portBindings = [ ]; // TODO: this is probably not good
-                    startContainer(app, portBindings, callback);
-                });
-                break;
-
-            case appdb.STATUS_PENDING_UNINSTALL:
-                uninstall(app, callback);
-                break;
-
-            case appdb.STATUS_STARTED_CONTAINER:
-            case appdb.STATUS_REGISTERING_SUBDOMAIN:
-                registerSubdomain(app, callback);
-                break;
-
-            case appdb.STATUS_REGISTERED_SUBDOMAIN:
-            case appdb.STATUS_RUNNING:
-                checkAppHealth(app, callback);
-                break;
-
-            // do nothing: let user retry again
-            case appdb.STATUS_SUBDOMAIN_ERROR: // TODO: register with threshold
-            case appdb.STATUS_CONTAINER_ERROR:
-            case appdb.STATUS_VOLUME_ERROR:
-            case appdb.STATUS_IMAGE_ERROR:
-            case appdb.STATUS_DEAD: // TODO: restart DEAD apps with threshold?
-                callback(null);
-                break;
-            }
+            processAppState(app, callback);
         }, function callback(err) {
             refreshing = false;
             if (pendingRefresh) process.nextTick(refresh);
