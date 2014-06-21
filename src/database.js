@@ -6,6 +6,7 @@
 // dependancy between database and the *db.js files
 exports = module.exports = {
     initialize: initialize,
+    create: create,
     removePrivates: removePrivates,
     newTransaction: newTransaction,
     rollback: rollback,
@@ -22,29 +23,41 @@ var userdb = require('./userdb.js'),
     mkdirp = require('mkdirp'),
     path = require('path'),
     debug = require('debug')('box:database'),
-    DatabaseError = require('./databaseerror');
+    DatabaseError = require('./databaseerror'),
+    assert = require('assert');
 
 var connectionPool = [ ],
     databaseFileName = null;
 
-var NOOP_CALLBACK = function (error) { if (error) console.error(error); }
+var NOOP_CALLBACK = function (error) { if (error) console.error(error); assert(!error); }
 
 function initialize(config, callback) {
+    databaseFileName = config.configRoot + '/config.sqlite.db';
+
+    var db = new sqlite3.Database(databaseFileName);
+
+    userdb.init(db);
+    tokendb.init(db);
+    clientdb.init(db);
+    authcodedb.init(db);
+    appdb.init(db);
+
+    return callback(null);
+}
+
+function create(config, callback) {
     var schema = fs.readFileSync(path.join(__dirname, 'schema.sql')).toString('utf8');
 
     databaseFileName = config.configRoot + '/config.sqlite.db';
 
     var db = new sqlite3.Database(databaseFileName);
+
     debug('Database created at ' + databaseFileName);
 
     db.exec(schema, function (err) {
         if (err) return callback(err);
 
-        userdb.init(db);
-        tokendb.init(db);
         clientdb.init(db);
-        authcodedb.init(db);
-        appdb.init(db);
 
         // TODO this should happen somewhere else..no clue where - Johannes
         clientdb.del('cid-webadmin', function () {
@@ -64,13 +77,13 @@ function newTransaction() {
 }
 
 function rollback(conn, callback) {
-    conn.run('ROLLBACK', callback);
     connectionPool.push(conn);
+    conn.run('ROLLBACK', callback);
 }
 
 function commit(conn, callback) {
-    conn.run('COMMIT', callback);
     connectionPool.push(conn);
+    conn.run('COMMIT', callback);
 }
 
 function removePrivates(obj) {

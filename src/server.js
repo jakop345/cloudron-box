@@ -274,6 +274,7 @@ Server.prototype._initialize2 = function (callback) {
     mkdirp.sync(config.appDataRoot);
 
     async.series([
+        database.create.bind(null, config),
         database.initialize.bind(null, config),
         function initializeRoutes(callback) {
             routes.volume.initialize(config);

@@ -41,16 +41,18 @@ function setup(done) {
     mkdirp.sync(CONFIG.configRoot);
     mkdirp.sync(CONFIG.mountRoot);
 
-    database.initialize(CONFIG, function (error) {
-        if (error) return done(error);
+    database.create(CONFIG, function (error) {
+        database.initialize(CONFIG, function (error) {
+            if (error) return done(error);
 
-        User.create(USERNAME, PASSWORD, EMAIL, IS_ADMIN, function (error, result) {
-            expect(error).to.not.be.ok();
-            expect(result).to.be.ok();
+            User.create(USERNAME, PASSWORD, EMAIL, IS_ADMIN, function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result).to.be.ok();
 
-            USER = result;
+                USER = result;
 
-            done();
+                done();
+            });
         });
     });
 }

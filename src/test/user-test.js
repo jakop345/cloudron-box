@@ -52,7 +52,10 @@ function setup(done) {
     mkdirp.sync(CONFIG.configRoot);
     mkdirp.sync(CONFIG.mountRoot);
 
-    database.initialize(CONFIG, done);
+    database.create(CONFIG, function (error) {
+        expect(error).to.be(null);
+        database.initialize(CONFIG, done);
+    });
 }
 
 function cleanup(done) {

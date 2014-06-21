@@ -34,9 +34,12 @@ describe('database', function () {
     before(function (done) {
         mkdirp.sync(CONFIG.configRoot);
 
-        database.initialize(CONFIG, function (error) {
+        database.create(CONFIG, function (error) {
             expect(error).to.be(null);
-            done();
+            database.initialize(CONFIG, function (error) {
+                expect(error).to.be(null);
+                done();
+            });
         });
     });
 
