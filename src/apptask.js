@@ -33,10 +33,14 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
 
 var NOOP_CALLBACK = function (error) { if (error) console.error(error); };
 
-var appServerUrl = config.appServerUrl, docker = null, appDataRoot = config.appDataRoot,
-    refreshing = false, pendingRefresh = false,
+var appServerUrl = config.appServerUrl,
+    docker = null,
+    appDataRoot = config.appDataRoot,
+    refreshing = false,
+    pendingRefresh = false,
     nginxAppConfigDir = config.nginxAppConfigDir,
-    HOSTNAME = process.env.HOSTNAME || os.hostname();
+    HOSTNAME = process.env.HOSTNAME || os.hostname(),
+    pendingUninstall = { };
 
 var appHealth = (function () {
     var data = { };
@@ -197,6 +201,11 @@ function downloadImage(app, callback) {
         stream.on('data', function (chunk) {
             var data = safe.JSON.parse(chunk) || { };
             debug(JSON.stringify(data));
+            if (uninstallPending[app.id]) { // user cancelled
+                stream.destroy(); // closes the stream as well
+                return callback(null);
+            }
+
             if (data.status) {
                 debug('Progress: ' + data.status); // progressDetail { current, total }
                 updateApp(app, { statusCode: appdb.STATUS_DOWNLOADING_IMAGE, statusMessage: data.status }, NOOP_CALLBACK);
@@ -433,6 +442,11 @@ function registerSubdomain(app, callback) {
 }
 
 function processAppState(app, callback) {
+    if (uninstallPending[app.id]) {
+        updateApp(app, { statusCode: appdb.STATUS_PENDING_UNINSTALL, statusMessage: '' }, NOOP_CALLBACK);
+        delete uninstallPending[app.id];
+    }
+
     switch (app.statusCode) {
     case appdb.STATUS_PENDING_INSTALL:
     case appdb.STATUS_NGINX_ERROR:
@@ -510,10 +524,14 @@ function processApp(app, callback) {
         if (app.statusCode.indexOf('_error', app.statusCode.length - 6) !== -1) return callback(error);
 
         // move on
-        if (app.statusCode === appdb.STATUS_RUNNING || app.statusCode === appdb.STATUS_DEAD) return callback(null);
+        if (app.statusCode === appdb.STATUS_RUNNING || app.statusCode === appdb.STATUS_REGISTERED_SUBDOMAIN || app.statusCode === appdb.STATUS_DEAD) return callback(null);
 
         processApp(app, callback);
     });
+}
+
+function markForUninstall(appId) {
+    uninstallPending[appId] = true;
 }
 
 function refresh() {
@@ -548,7 +566,14 @@ if (require.main === module) {
     initialize();
 
     process.on('message', function (message) {
-        if (message.cmd === 'refresh') refresh();
+        switch (message.cmd) {
+        case 'refresh':
+            refresh();
+            break;
+        case 'uninstall':
+            markForUninstall(message.appId);
+            break;
+        }
     });
 }
 
