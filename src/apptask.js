@@ -37,9 +37,9 @@ var appServerUrl = config.appServerUrl,
     docker = null,
     appDataRoot = config.appDataRoot,
     isRefreshing = false,
-    isRefreshPending = false,
     nginxAppConfigDir = config.nginxAppConfigDir,
     HOSTNAME = process.env.HOSTNAME || os.hostname(),
+    REFRESH_INTERVAL = 5000,
     uninstallPending = { };
 
 var appHealth = (function () {
@@ -92,7 +92,7 @@ function initialize() {
             apps.forEach(function (app) { appHealth.register(app.id); });
         });
 
-        setInterval(refresh, 6000);
+        setImmediate(refresh);
     });
 }
 
@@ -537,7 +537,6 @@ function markForUninstall(appId) {
 function refresh() {
     if (isRefreshing) {
         debug('Already refreshing, marked as pending');
-        isRefreshPending = true;
         return;
     }
 
@@ -555,8 +554,7 @@ function refresh() {
             processApp(app, callback);
         }, function callback(err) {
             isRefreshing = false;
-            if (isRefreshPending) process.nextTick(refresh);
-            isRefreshPending = false;
+            setTimeout(refresh, REFRESH_INTERVAL);
         });
 
     });
