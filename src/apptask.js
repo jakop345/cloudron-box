@@ -111,6 +111,14 @@ function forwardFromHostToVirtualBox(rulename, port) {
     }
 }
 
+function updateApp(app, values, callback) {
+    for (var value in values) {
+        app[value] = values[value];
+    }
+
+    appdb.update(app.id, values, callback);
+}
+
 function configureNginx(app, freePort, callback) {
     var NGINX_APPCONFIG_TEMPLATE =
         "server {\n"
@@ -141,18 +149,18 @@ function configureNginx(app, freePort, callback) {
     fs.writeFile(nginxConfigFilename, nginxConf, function (error) {
         if (error) {
             debug('Error writing nginx config : ' + error);
-            appdb.update(app.id, { statusCode: appdb.STATUS_NGINX_ERROR, statusMessage: error }, NOOP_CALLBACK);
+            updateApp(app, { statusCode: appdb.STATUS_NGINX_ERROR, statusMessage: error }, NOOP_CALLBACK);
             return callback(null);
         }
 
         child_process.exec("supervisorctl -c supervisor/supervisord.conf restart nginx", { timeout: 10000 }, function (error, stdout, stderr) {
             if (error) {
                 debug('Error configuring nginx. Reload nginx manually for now', error);
-                appdb.update(app.id, { statusCode: appdb.STATUS_NGINX_ERROR, statusMessage: error }, NOOP_CALLBACK);
+                updateApp(app, { statusCode: appdb.STATUS_NGINX_ERROR, statusMessage: error }, NOOP_CALLBACK);
                 return callback(null);
             }
 
-            appdb.update(app.id, { statusCode: appdb.STATUS_NGINX_CONFIGURED, statusMessage: '', httpPort: freePort }, callback);
+            updateApp(app, { statusCode: appdb.STATUS_NGINX_CONFIGURED, statusMessage: '', httpPort: freePort }, callback);
             // missing 'return' is intentional
         });
 
@@ -163,24 +171,24 @@ function configureNginx(app, freePort, callback) {
 function downloadImage(app, callback) {
     debug('Will download app now');
 
-    appdb.update(app.id, { statusCode: appdb.STATUS_DOWNLOADING_IMAGE, statusMessage: '' }, NOOP_CALLBACK);
+    updateApp(app, { statusCode: appdb.STATUS_DOWNLOADING_IMAGE, statusMessage: '' }, NOOP_CALLBACK);
 
     var manifest = safe.JSON.parse(app.manifestJson);
     if (manifest === null) {
         debug('Error parsing manifest: ' + safe.error);
-        appdb.update(app.id, { statusCode: appdb.STATUS_MANIFEST_ERROR, statusMessage: 'Parse error:' + safe.error }, NOOP_CALLBACK);
+        updateApp(app, { statusCode: appdb.STATUS_MANIFEST_ERROR, statusMessage: 'Parse error:' + safe.error }, NOOP_CALLBACK);
         return callback(null);
     }
     if (!manifest.health_check_url || !manifest.docker_image || !manifest.http_port) {
         debug('Manifest missing mandatory parameters');
-        appdb.update(app.id, { statusCode: appdb.STATUS_MANIFEST_ERROR, statusMessage: 'Missing parameters' }, NOOP_CALLBACK);
+        updateApp(app, { statusCode: appdb.STATUS_MANIFEST_ERROR, statusMessage: 'Missing parameters' }, NOOP_CALLBACK);
         return callback(null);
     }
 
     docker.pull(manifest.docker_image, function (err, stream) {
         if (err) {
             debug('Error connecting to docker', err);
-            appdb.update(app.id, { statusCode: appdb.STATUS_DOWNLOAD_ERROR, statusMessage: 'Error connecting to docker' }, NOOP_CALLBACK);
+            updateApp(app, { statusCode: appdb.STATUS_DOWNLOAD_ERROR, statusMessage: 'Error connecting to docker' }, NOOP_CALLBACK);
             return callback(err);
         }
 
@@ -191,7 +199,7 @@ function downloadImage(app, callback) {
             debug(JSON.stringify(data));
             if (data.status) {
                 debug('Progress: ' + data.status); // progressDetail { current, total }
-                appdb.update(app.id, { statusCode: appdb.STATUS_DOWNLOADING_IMAGE, statusMessage: data.status }, NOOP_CALLBACK);
+                updateApp(app, { statusCode: appdb.STATUS_DOWNLOADING_IMAGE, statusMessage: data.status }, NOOP_CALLBACK);
             } else if (data.error) {
                 debug('Error detail:' + data.errorDetail.message);
             }
@@ -205,17 +213,17 @@ function downloadImage(app, callback) {
             image.inspect(function (err, data) {
                 if (err || !data || !data.Config) {
                     debug('Error inspecting image');
-                    appdb.update(app.id, { statusCode: appdb.STATUS_IMAGE_ERROR, statusMessage: 'Error inspecting image' }, NOOP_CALLBACK);
+                    updateApp(app, { statusCode: appdb.STATUS_IMAGE_ERROR, statusMessage: 'Error inspecting image' }, NOOP_CALLBACK);
                     return callback(err);
                 }
                 if (!data.Config.Entrypoint && !data.Config.Cmd) {
                     debug('Only images with entry point are allowed');
-                    appdb.update(app.id, { statusCode: appdb.STATUS_IMAGE_ERROR, statusMessage: 'No entrypoint in image' }, NOOP_CALLBACK);
+                    updateApp(app, { statusCode: appdb.STATUS_IMAGE_ERROR, statusMessage: 'No entrypoint in image' }, NOOP_CALLBACK);
                     return callback(err);
                 }
 
                 debug('This image exposes ports: ' + JSON.stringify(data.Config.ExposedPorts));
-                appdb.update(app.id, { statusCode: appdb.STATUS_DOWNLOADED_IMAGE, statusMessage: '' }, callback);
+                updateApp(app, { statusCode: appdb.STATUS_DOWNLOADED_IMAGE, statusMessage: '' }, callback);
             });
         });
     });
@@ -224,7 +232,7 @@ function downloadImage(app, callback) {
 function createContainer(app, portConfigs, callback) {
     var manifest = JSON.parse(app.manifestJson); // this is guaranteed not to throw since it's already been verified in downloadManifest()
 
-    appdb.update(app.id, { statusCode: appdb.STATUS_CREATING_CONTAINER, statusMessage: '' }, NOOP_CALLBACK);
+    updateApp(app, { statusCode: appdb.STATUS_CREATING_CONTAINER, statusMessage: '' }, NOOP_CALLBACK);
 
     var env = [ ];
     if (typeof manifest.tcp_ports === 'object') {
@@ -249,33 +257,33 @@ function createContainer(app, portConfigs, callback) {
     docker.createContainer(containerOptions, function (err, container) {
         if (err) {
             debug('Error creating container');
-            appdb.update(app.id, { statusCode: appdb.STATUS_IMAGE_ERROR, statusMessage: 'Error creating container' }, NOOP_CALLBACK);
+            updateApp(app, { statusCode: appdb.STATUS_IMAGE_ERROR, statusMessage: 'Error creating container' }, NOOP_CALLBACK);
             return callback(err);
         }
 
-        appdb.update(app.id, { containerId: container.id, statusCode: appdb.STATUS_CREATED_CONTAINER, statusMessage: '' }, callback);
+        updateApp(app, { containerId: container.id, statusCode: appdb.STATUS_CREATED_CONTAINER, statusMessage: '' }, callback);
     });
 }
 
 function createVolume(app, callback) {
     var appDataDir = path.join(appDataRoot, app.id); // TODO: check if app.id is safe path
 
-    appdb.update(app.id, { statusCode: appdb.STATUS_CREATING_VOLUME, statusMessage: '' }, NOOP_CALLBACK);
+    updateApp(app, { statusCode: appdb.STATUS_CREATING_VOLUME, statusMessage: '' }, NOOP_CALLBACK);
 
     if (!safe.fs.mkdirSync(appDataDir)) {
         debug('Error creating app data directory ' + appDataDir + ' ' + safe.error);
-        appdb.update(app.id, { statusCode: appdb.STATUS_VOLUME_ERROR, statusMessage: 'Error creating data directory' }, NOOP_CALLBACK);
+        updateApp(app, { statusCode: appdb.STATUS_VOLUME_ERROR, statusMessage: 'Error creating data directory' }, NOOP_CALLBACK);
         return callback(safe.error);
     }
 
-    appdb.update(app.id, { statusCode: appdb.STATUS_CREATED_VOLUME, statusMessage: '' }, callback);
+    updateApp(app, { statusCode: appdb.STATUS_CREATED_VOLUME, statusMessage: '' }, callback);
 }
 
 function startContainer(app, portConfigs, callback) {
     var manifest = JSON.parse(app.manifestJson); // this is guaranteed not to throw since it's already been verified in downloadManifest()
     var appDataDir = path.join(appDataRoot, app.id); // TODO: check if app.id is safe path
 
-    appdb.update(app.id, { statusCode: appdb.STATUS_STARTING_CONTAINER, statusMessage: '' }, NOOP_CALLBACK);
+    updateApp(app, { statusCode: appdb.STATUS_STARTING_CONTAINER, statusMessage: '' }, NOOP_CALLBACK);
 
     var portBindings = { };
     portBindings[manifest.http_port + '/tcp'] = [ { HostPort: app.httpPort + '' } ];
@@ -299,20 +307,20 @@ function startContainer(app, portConfigs, callback) {
     container.start(startOptions, function (err, data) {
         if (err) {
             debug('Error starting container', err);
-            appdb.update(app.id, { statusCode: appdb.STATUS_CONTAINER_ERROR, statusMessage: 'Error starting container' }, NOOP_CALLBACK);
+            updateApp(app, { statusCode: appdb.STATUS_CONTAINER_ERROR, statusMessage: 'Error starting container' }, NOOP_CALLBACK);
             return callback(err);
         }
 
         appHealth.register(app.id);
 
-        appdb.update(app.id, { statusCode: appdb.STATUS_STARTED_CONTAINER, statusMessage: '' }, callback);
+        updateApp(app, { statusCode: appdb.STATUS_STARTED_CONTAINER, statusMessage: '' }, callback);
     });
 }
 
 function downloadManifest(app, callback) {
     debug('Downloading manifest for :', app.id);
 
-    appdb.update(app.id, { statusCode: appdb.STATUS_DOWNLOADING_MANIFEST, statusMessage: '' }, NOOP_CALLBACK);
+    updateApp(app, { statusCode: appdb.STATUS_DOWNLOADING_MANIFEST, statusMessage: '' }, NOOP_CALLBACK);
 
     superagent
         .get(appServerUrl + '/api/v1/app/' + app.id + '/manifest')
@@ -320,17 +328,17 @@ function downloadManifest(app, callback) {
         .end(function (error, res) {
             if (error) {
                 debug('Error making request: ' + error.message);
-                appdb.update(app.id, { statusCode: appdb.STATUS_DOWNLOAD_ERROR, statusMessage: error.message }, NOOP_CALLBACK);
+                updateApp(app, { statusCode: appdb.STATUS_DOWNLOAD_ERROR, statusMessage: error.message }, NOOP_CALLBACK);
                 return callback(null);
             }
             if (res.status !== 200) {
                 debug('Error downloading manifest:' + res.body.status + ' ' + res.body.message);
-                appdb.update(app.id, { statusCode: appdb.STATUS_DOWNLOAD_ERROR, statusMessage: res.body.status + ' ' + res.body.message }, NOOP_CALLBACK);
+                updateApp(app, { statusCode: appdb.STATUS_DOWNLOAD_ERROR, statusMessage: res.body.status + ' ' + res.body.message }, NOOP_CALLBACK);
                 return callback(null);
             }
 
             debug('Downloaded application manifest: ' + res.text);
-            appdb.update(app.id, { statusCode: appdb.STATUS_DOWNLOADED_MANIFEST, statusMessage: '', manifestJson: res.text }, callback);
+            updateApp(app, { statusCode: appdb.STATUS_DOWNLOADED_MANIFEST, statusMessage: '', manifestJson: res.text }, callback);
         });
 }
 
@@ -370,12 +378,12 @@ function checkAppHealth(app, callback) {
     container.inspect(function (err, data) {
         if (err || !data || !data.State) {
             debug('Error inspecting container');
-            appdb.update(app.id, { statusCode: appdb.STATUS_IMAGE_ERROR, statusMessage: 'Error inspecting image' }, NOOP_CALLBACK);
+            updateApp(app, { statusCode: appdb.STATUS_IMAGE_ERROR, statusMessage: 'Error inspecting image' }, NOOP_CALLBACK);
             return callback(err);
         }
 
         if (data.State.Running !== true) {
-            appdb.update(app.id, { statusCode: appdb.STATUS_EXITED, statusMessage: 'Not running' }, callback);
+            updateApp(app, { statusCode: appdb.STATUS_EXITED, statusMessage: 'Not running' }, callback);
             return;
         }
 
@@ -387,14 +395,14 @@ function checkAppHealth(app, callback) {
             if (error || res.status !== 200) {
                 if (appHealth.decrement(app.id) < 0) {
                     debug('Marking application as dead: ' + app.id);
-                    appdb.update(app.id, { statusCode: appdb.STATUS_DEAD, statusMessage: 'Health check failed' }, NOOP_CALLBACK);
+                    updateApp(app, { statusCode: appdb.STATUS_DEAD, statusMessage: 'Health check failed' }, NOOP_CALLBACK);
                 }
                 debug('unhealthy app:' + app.id + ' ' + appHealth.get(app.id));
                 callback(null);
             } else {
                 debug('healthy app:' + app.id + ' ' + appHealth.get(app.id));
                 appHealth.increment(app.id);
-                appdb.update(app.id, { statusCode: appdb.STATUS_RUNNING, statusMessage: healthCheckUrl }, NOOP_CALLBACK);
+                updateApp(app, { statusCode: appdb.STATUS_RUNNING, statusMessage: healthCheckUrl }, NOOP_CALLBACK);
                 callback(null);
             }
         });
@@ -402,7 +410,7 @@ function checkAppHealth(app, callback) {
 }
 
 function registerSubdomain(app, callback) {
-    appdb.update(app.id, { statusCode: appdb.STATUS_REGISTERING_SUBDOMAIN, statusMessage: '' }, NOOP_CALLBACK);
+    updateApp(app, { statusCode: appdb.STATUS_REGISTERING_SUBDOMAIN, statusMessage: '' }, NOOP_CALLBACK);
 
     superagent
         .post(appServerUrl + '/api/v1/subdomains')
@@ -411,16 +419,16 @@ function registerSubdomain(app, callback) {
         .end(function (error, res) {
             if (error) {
                 debug('Error making request: ' + error.message);
-                appdb.update(app.id, { statusCode: appdb.STATUS_SUBDOMAIN_ERROR, statusMessage: error.message }, NOOP_CALLBACK);
+                updateApp(app, { statusCode: appdb.STATUS_SUBDOMAIN_ERROR, statusMessage: error.message }, NOOP_CALLBACK);
                 return callback(null);
             }
             if (res.status !== 200) {
                 debug('Error registering subdomain:' + res.body.status + ' ' + res.body.message);
-                appdb.update(app.id, { statusCode: appdb.STATUS_SUBDOMAIN_ERROR, statusMessage: res.body.status + ' ' + res.body.message }, NOOP_CALLBACK);
+                updateApp(app, { statusCode: appdb.STATUS_SUBDOMAIN_ERROR, statusMessage: res.body.status + ' ' + res.body.message }, NOOP_CALLBACK);
                 return callback(null);
             }
 
-            appdb.update(app.id, { statusCode: appdb.STATUS_REGISTERED_SUBDOMAIN, statusMessage: '' }, callback);
+            updateApp(app, { statusCode: appdb.STATUS_REGISTERED_SUBDOMAIN, statusMessage: '' }, callback);
         });
 }
 
@@ -493,6 +501,21 @@ function processAppState(app, callback) {
     }
 }
 
+function processApp(app, callback) {
+    // keep processing this app until we hit an error
+    processAppState(app, function (error) {
+        if (error) return callback(error);
+
+        // give up on error state
+        if (app.statusCode.indexOf('_error', app.statusCode.length - 6) !== -1) return callback(error);
+
+        // move on
+        if (app.statusCode === appdb.STATUS_RUNNING || app.statusCode === appdb.STATUS_DEAD) return callback(null);
+
+        processApp(app, callback);
+    });
+}
+
 function refresh() {
     if (refreshing) {
         debug('Already refreshing, marked as pending');
@@ -511,7 +534,7 @@ function refresh() {
         }
 
         async.eachSeries(apps, function iterator(app, callback) {
-            processAppState(app, callback);
+            processApp(app, callback);
         }, function callback(err) {
             refreshing = false;
             if (pendingRefresh) process.nextTick(refresh);

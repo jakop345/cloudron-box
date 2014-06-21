@@ -14,6 +14,7 @@ exports = module.exports = {
     getPortBindings: getPortBindings,
 
     // status codes
+    // all error codes need to end with _error (see apptask.js)
     STATUS_NGINX_ERROR: 'nginx_error',
     STATUS_NGINX_CONFIGURED: 'nginx_configured',
     STATUS_PENDING_INSTALL: 'pending_install',
