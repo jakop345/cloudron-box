@@ -36,11 +36,11 @@ var NOOP_CALLBACK = function (error) { if (error) console.error(error); };
 var appServerUrl = config.appServerUrl,
     docker = null,
     appDataRoot = config.appDataRoot,
-    refreshing = false,
-    pendingRefresh = false,
+    isRefreshing = false,
+    isRefreshPending = false,
     nginxAppConfigDir = config.nginxAppConfigDir,
     HOSTNAME = process.env.HOSTNAME || os.hostname(),
-    pendingUninstall = { };
+    uninstallPending = { };
 
 var appHealth = (function () {
     var data = { };
@@ -535,15 +535,15 @@ function markForUninstall(appId) {
 }
 
 function refresh() {
-    if (refreshing) {
+    if (isRefreshing) {
         debug('Already refreshing, marked as pending');
-        pendingRefresh = true;
+        isRefreshPending = true;
         return;
     }
 
-    refreshing = true;
+    isRefreshing = true;
 
-    debug('Refreshing');
+    debug('refreshing');
 
     appdb.getAll(function (error, apps) {
         if (error) {
@@ -554,9 +554,9 @@ function refresh() {
         async.eachSeries(apps, function iterator(app, callback) {
             processApp(app, callback);
         }, function callback(err) {
-            refreshing = false;
-            if (pendingRefresh) process.nextTick(refresh);
-            pendingRefresh = false;
+            isRefreshing = false;
+            if (isRefreshPending) process.nextTick(refresh);
+            isRefreshPending = false;
         });
 
     });
