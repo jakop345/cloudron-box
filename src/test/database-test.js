@@ -18,7 +18,8 @@ var database = require('../database'),
     clientdb = require('../clientdb.js'),
     authcodedb = require('../authcodedb.js'),
     appdb = require('../appdb.js'),
-    expect = require('expect.js');
+    expect = require('expect.js'),
+    mkdirp = require('mkdirp');
 
 describe('database', function () {
     var BASE_DIR = path.resolve(os.tmpdir(), 'database-test-' + crypto.randomBytes(4).readUInt32LE(0));
@@ -31,6 +32,8 @@ describe('database', function () {
     };
 
     before(function (done) {
+        mkdirp.sync(CONFIG.configRoot);
+
         database.initialize(CONFIG, function (error) {
             expect(error).to.be(null);
             done();

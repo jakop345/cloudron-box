@@ -34,30 +34,23 @@ function initialize(config, callback) {
 
     databaseFileName = config.configRoot + '/config.sqlite.db';
 
-    mkdirp(config.configRoot, function (error) {
-        if (error) {
-            debug('Unable to ensure the config root directory. ', error);
-            return callback(error);
-        }
+    var db = new sqlite3.Database(databaseFileName);
+    debug('Database created at ' + databaseFileName);
 
-        var db = new sqlite3.Database(databaseFileName);
-        debug('Database created at ' + databaseFileName);
+    db.exec(schema, function (err) {
+        if (err) return callback(err);
 
-        db.exec(schema, function (err) {
-            if (err) return callback(err);
+        userdb.init(db);
+        tokendb.init(db);
+        clientdb.init(db);
+        authcodedb.init(db);
+        appdb.init(db);
 
-            userdb.init(db);
-            tokendb.init(db);
-            clientdb.init(db);
-            authcodedb.init(db);
-            appdb.init(db);
-
-            // TODO this should happen somewhere else..no clue where - Johannes
-            clientdb.del('cid-webadmin', function () {
-                clientdb.add('cid-webadmin', 'cid-webadmin', 'unused', 'WebAdmin', config.origin || 'https://localhost', function (error) {
-                    if (error && error.reason !== DatabaseError.ALREADY_EXISTS) return callback(new Error('Error initializing client database with webadmin'));
-                    return callback(null);
-                });
+        // TODO this should happen somewhere else..no clue where - Johannes
+        clientdb.del('cid-webadmin', function () {
+            clientdb.add('cid-webadmin', 'cid-webadmin', 'unused', 'WebAdmin', config.origin || 'https://localhost', function (error) {
+                if (error && error.reason !== DatabaseError.ALREADY_EXISTS) return callback(new Error('Error initializing client database with webadmin'));
+                return callback(null);
             });
         });
     });
