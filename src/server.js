@@ -1,3 +1,5 @@
+/* jslint node: true */
+
 'use strict';
 
 var express = require('express'),
@@ -8,7 +10,6 @@ var express = require('express'),
     passport = require('passport'),
     superagent = require('superagent'),
     mkdirp = require('mkdirp'),
-    DatabaseError = require('./databaseerror.js'),
     routes = require('./routes/index.js'),
     debug = require('debug')('box:server'),
     assert = require('assert'),
@@ -120,7 +121,7 @@ Server.prototype._requireAdmin = function (req, res, next) {
     next();
 };
 
-Server.prototype._initializeExpressSync = function (callback) {
+Server.prototype._initializeExpressSync = function () {
     this.app = express();
 
     var QUERY_LIMIT = '10mb', // max size for json and urlencoded queries
@@ -330,17 +331,9 @@ Server.prototype.start = function (callback) {
     this._initializeExpressSync();
     this._sendHeartBeat();
 
-    if (!this.config.silent) {
-        console.log('Server listening on port ' + this.config.port);
-        console.log('Using data root:', this.config.dataRoot);
-        console.log('Using config root:', this.config.configRoot);
-        console.log('Using mount root:', this.config.mountRoot);
-    }
-
     if (process.env.NODE_ENV !== 'production') {
         console.warn('WARNING: Express is running in ' + process.env.NODE_ENV + ' mode');
     }
-
 
     this._appTask = child_process.fork(__dirname + '/apptask.js');
 
