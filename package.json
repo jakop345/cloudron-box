@@ -19,16 +19,22 @@
   },
   "dependencies": {
     "async": "^0.6.2",
+    "body-parser": "1.2.0",
     "commander": "^2.2.0",
     "connect-ensure-login": "^0.1.1",
+    "connect-timeout": "1.1.0",
+    "cookie-parser": "1.1.0",
     "debug": "^0.8.0",
     "dockerode": "^1.3.0",
     "ejs": "^1.0.0",
     "encfs": "^0.1.1",
     "express": "4.2.0",
+    "express-session": "1.1.0",
     "js-yaml": "^3.0.2",
     "mime": "^1.2.11",
     "mkdirp": "^0.3.5",
+    "morgan": "1.0.1",
+    "multiparty": "3.2.6",
     "node-uuid": "^1.4.1",
     "oauth2orize": "^1.0.1",
     "once": "^1.3.0",
@@ -40,22 +46,16 @@
     "readdirp": "^1.0.1",
     "rimraf": "^2.2.6",
     "safetydance": "0.0.11",
-    "superagent": "^0.17.0",
-    "ursa": "^0.8.0",
-    "morgan": "1.0.1",
-    "connect-timeout": "1.1.0",
-    "express-session": "1.1.0",
     "serve-favicon": "2.0.0",
-    "cookie-parser": "1.1.0",
-    "body-parser": "1.2.0",
-    "multiparty": "3.2.6",
-    "sqlite3": "2.2.3"
+    "sqlite3": "2.2.3",
+    "superagent": "^0.17.0",
+    "ursa": "^0.8.0"
   },
   "devDependencies": {
-    "mocha": "*",
-    "istanbul": "*",
     "apidoc": "*",
-    "expect.js": "*"
+    "expect.js": "*",
+    "istanbul": "*",
+    "mocha": "*"
   },
   "scripts": {
     "test": "./node_modules/istanbul/lib/cli.js test $1 ./node_modules/mocha/bin/_mocha -- -R spec ./src/test ./src/routes/test"
