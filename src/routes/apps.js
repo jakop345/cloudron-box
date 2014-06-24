@@ -72,7 +72,7 @@ function installApp(req, res, next) {
 function uninstallApp(req, res, next) {
     if (typeof req.params.id !== 'string') return next(new HttpError(400, 'appid is required'));
 
-    debug('will uninstall app with id ' + req.param.id);
+    debug('will uninstall app with id ' + req.params.id);
 
     apps.uninstall(req.params.id, function (error) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'Error uninstalling app' + error));

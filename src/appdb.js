@@ -17,28 +17,37 @@ exports = module.exports = {
     // all error codes need to end with _error (see apptask.js)
     STATUS_NGINX_ERROR: 'nginx_error',
     STATUS_NGINX_CONFIGURED: 'nginx_configured',
+
     STATUS_PENDING_INSTALL: 'pending_install',
     STATUS_PENDING_UNINSTALL: 'pending_uninstall',
+    STATUS_DOWNLOAD_ERROR: 'download_error',
+    STATUS_UNINSTALLED: 'uninstalled', // this state does not appear in database
+
     STATUS_DOWNLOADING_MANIFEST: 'downloading_manifest',
     STATUS_DOWNLOADED_MANIFEST: 'downloaded_manifest',
+    STATUS_MANIFEST_ERROR: 'manifest_error',
+
     STATUS_DOWNLOADING_IMAGE: 'downloading_image',
     STATUS_DOWNLOADED_IMAGE: 'downloaded_image',
-    STATUS_MANIFEST_ERROR: 'manifest_error',
-    STATUS_DOWNLOAD_ERROR: 'download_error',
     STATUS_IMAGE_ERROR: 'image_error',
     STATUS_CREATING_CONTAINER: 'creating_container',
     STATUS_CREATED_CONTAINER: 'created_container',
+
     STATUS_STARTING_CONTAINER: 'starting_container',
     STATUS_STARTED_CONTAINER: 'started_container',
+    STATUS_CONTAINER_ERROR: 'container_error',
+
     STATUS_CREATING_VOLUME: 'creating_volume',
     STATUS_CREATED_VOLUME: 'created_volume',
     STATUS_VOLUME_ERROR: 'volume_error',
+
     STATUS_REGISTERING_SUBDOMAIN: 'registering_subdomain',
     STATUS_REGISTERED_SUBDOMAIN: 'registered_subdomain',
     STATUS_SUBDOMAIN_ERROR: 'subdomain_error',
+
     STATUS_RUNNING: 'running',
     STATUS_EXITED: 'exited',
-    STATUS_DEAD: 'dead'
+    STATUS_NOT_RESPONDING: 'not_responding'
 };
 
 var DatabaseError = require('./databaseerror'),

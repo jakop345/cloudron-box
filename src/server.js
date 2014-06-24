@@ -31,7 +31,6 @@ function Server(config) {
     this.config = config;
     this.httpServer = null; // http server
     this.app = null; // express
-    this._appTask = null;
 }
 
 // Success handler
@@ -295,9 +294,9 @@ Server.prototype._initialize2 = function (callback) {
             callback(null);
         },
         function initializeModules(callback) {
-            apps.initialize(that._appTask);
+            apps.initialize();
             callback(null);
-        }
+        },
     ], callback);
 };
 
@@ -326,11 +325,6 @@ Server.prototype._sendHeartBeat = function () {
     });
 };
 
-Server.prototype._killAppTask = function () {
-    if (this._appTask !== null) this._appTask.kill();
-    this._appTask = null;
-};
-
 Server.prototype.start = function (callback) {
     assert(typeof callback === 'function');
     assert(this.app === null, 'Server is already up and running.');
@@ -343,8 +337,6 @@ Server.prototype.start = function (callback) {
     if (process.env.NODE_ENV !== 'production') {
         console.warn('WARNING: Express is running in ' + process.env.NODE_ENV + ' mode');
     }
-
-    this._appTask = child_process.fork(__dirname + '/apptask.js');
 
     this._initialize2(function (err) {
         if (err) return callback(err);
@@ -364,7 +356,7 @@ Server.prototype.stop = function (callback) {
         return callback(null);
     }
 
-    this._killAppTask();
+    apps.uninitialize();
 
     this.httpServer.close(function () {
         that.httpServer.unref();
