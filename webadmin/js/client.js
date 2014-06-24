@@ -22,6 +22,7 @@ angular.module('YellowTent')
         this._token = null;
         this._clientId = null;
         this._clientSecret = null;
+        this._config = null;
 
         this.setToken(localStorage.token);
     }
@@ -32,6 +33,10 @@ angular.module('YellowTent')
 
     Client.prototype.getUserInfo = function () {
         return this._userInfo;
+    };
+
+    Client.prototype.getConfig = function () {
+        return this._config;
     };
 
     Client.prototype.setToken = function (token) {
@@ -53,6 +58,17 @@ angular.module('YellowTent')
     /*
      * Rest API wrappers
      */
+    Client.prototype.config = function (callback) {
+        $http.get('/api/v1/config')
+        .success(function(data, status, headers, config) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null, data);
+        })
+        .error(function(data, status, headers, config) {
+            callback(new ClientError(status, data));
+        });
+    };
+
     Client.prototype.createVolume = function (name, password, callback) {
         var data = { password: password, name: name };
         $http.post('/api/v1/volume/create', data)
@@ -271,7 +287,13 @@ angular.module('YellowTent')
             that._userInfo = data.userInfo;
             that.setToken(data.token);
 
-            callback(null, data.token);
+            that.config(function (error, result) {
+                if (error) callback(error);
+
+                that._config = result;
+
+                callback(null, data.token);
+            });
         })
         .error(function(data, status, headers, config) {
             that.setToken(null);

@@ -104,6 +104,12 @@ Server.prototype._getVersion = function (req, res, next) {
     res.send(200, { version: pkg.version });
 };
 
+Server.prototype._getConfig = function (req, res, next) {
+    res.send(200, {
+        appstoreOrigin: this.config.appServerUrl
+    });
+};
+
 /*
     Middleware which makes the route require a password in the body besides a token.
 */
@@ -188,6 +194,9 @@ Server.prototype._initializeExpressSync = function () {
     router.get('/api/v1/version', this._getVersion.bind(this));
     router.get('/api/v1/firsttime', this._firstTime.bind(this));
     router.post('/api/v1/createadmin', routes.user.createAdmin);    // FIXME any number of admins can be created without auth!
+
+    // config.json
+    router.get('/api/v1/config', bearer, this._getConfig.bind(this));
 
     // routes controlled by app.router
     router.post('/api/v1/token', both, routes.user.createToken);        // TODO remove that route
