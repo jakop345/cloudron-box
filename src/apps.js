@@ -37,10 +37,7 @@ AppsError.INTERNAL_ERROR = 1;
 AppsError.ALREADY_EXISTS = 2;
 AppsError.NOT_FOUND = 3;
 
-function initialize(appTask, config) {
-    assert(typeof config.appServerUrl === 'string');
-    assert(typeof config.nginxAppConfigDir === 'string');
-    assert(typeof config.appDataRoot === 'string');
+function initialize(appTask) {
     assert(typeof appTask === 'object'); // ChildProcess
 
     task = appTask;

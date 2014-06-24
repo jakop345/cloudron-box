@@ -295,7 +295,7 @@ Server.prototype._initialize2 = function (callback) {
             callback(null);
         },
         function initializeModules(callback) {
-            apps.initialize(that._appTask, config);
+            apps.initialize(that._appTask);
             callback(null);
         }
     ], callback);
