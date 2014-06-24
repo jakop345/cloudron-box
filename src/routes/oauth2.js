@@ -182,9 +182,17 @@ module.exports.authorization = [
             // callback(null, client, redirectURI);
         });
     }),
-    function (req, res) {
-        res.render('dialog', { transactionID: req.oauth2.transactionID, user: req.user, client: req.oauth2.client });
-    }
+// Until we have OAuth scopes, skip decision dialog
+// OAuth sopes skip START
+    function (req, res, next) {
+        req.body.transaction_id = req.oauth2.transactionID;
+        next();
+    },
+    server.decision()
+// OAuth sopes skip END
+    // function (req, res) {
+    //     res.render('dialog', { transactionID: req.oauth2.transactionID, user: req.user, client: req.oauth2.client });
+    // }
 ];
 
 // this triggers the above grant middleware and handles the user's decision if he accepts the access
