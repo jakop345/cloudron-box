@@ -43,7 +43,7 @@ function resume() {
 
 function uninitialize() {
     appHealthTask.kill();
-    for (var appid in tasks) {
+    for (var appId in tasks) {
         tasks[appId].kill();
     }
 }
