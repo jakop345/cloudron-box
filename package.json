@@ -54,10 +54,12 @@
   "devDependencies": {
     "apidoc": "*",
     "expect.js": "*",
+    "husky": "^0.4.3",
     "istanbul": "*",
     "mocha": "*"
   },
   "scripts": {
-    "test": "./node_modules/istanbul/lib/cli.js test $1 ./node_modules/mocha/bin/_mocha -- -R spec ./src/test ./src/routes/test"
+    "test": "./node_modules/istanbul/lib/cli.js test $1 ./node_modules/mocha/bin/_mocha -- -R spec ./src/test ./src/routes/test",
+    "prepush": "npm test"
   }
 }
