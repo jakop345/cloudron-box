@@ -65,6 +65,7 @@ function checkAppHealth(app, callback) {
         var healthCheckUrl = 'http://127.0.0.1:' + app.httpPort + manifest.health_check_url;
         superagent
             .get(healthCheckUrl)
+            .timeout(HEALTHCHECK_INTERVAL)
             .end(function (error, res) {
 
             if (error || res.status !== 200) {
@@ -103,6 +104,7 @@ if (require.main === module) {
     initialize();
 
     run(function (error) {
+        debug('apphealth task exiting with error:' + error);
         process.exit(error ? 1 : 0);
     });
 }
