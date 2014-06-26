@@ -11,6 +11,7 @@ var HttpError = require('../httperror.js'),
 exports = module.exports = {
     initialize: initialize,
     getApp: getApp,
+    getAppBySubdomain: getAppBySubdomain,
     getApps: getApps,
     installApp: installApp,
     uninstallApp: uninstallApp
@@ -20,10 +21,21 @@ function initialize(config) {
 }
 
 function getApp(req, res, next) {
-    if (typeof req.param.id !== 'string') return next(new HttpError(400, 'appid is required'));
+    if (typeof req.params.id !== 'string') return next(new HttpError(400, 'appid is required'));
 
     apps.get(req.params.id, function (error, app) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
+        if (error) return next(new HttpError(500, 'Internal error:' + error));
+
+        next(new HttpSuccess(200, app));
+    });
+}
+
+function getAppBySubdomain(req, res, next) {
+    if (typeof req.params.subdomain !== 'string') return next(new HttpError(400, 'subdomain is required'));
+
+    apps.getBySubdomain(req.params.subdomain, function (error, app) {
+        if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such subdomain'));
         if (error) return next(new HttpError(500, 'Internal error:' + error));
 
         next(new HttpSuccess(200, app));

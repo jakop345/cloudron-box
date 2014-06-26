@@ -16,6 +16,7 @@ exports = module.exports = {
     initialize: initialize,
     uninitialize: uninitialize,
     get: get,
+    getBySubdomain: getBySubdomain,
     getAll: getAll,
     install: install,
     uninstall: uninstall
@@ -68,6 +69,17 @@ function get(appId, callback) {
     assert(typeof appId === 'string');
 
     appdb.get(appId, function (error, app) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError('No such app', AppsError.NOT_FOUND));
+        if (error) return callback(new AppsError('Internal error:' + error.message, AppsError.INTERNAL_ERROR));
+
+        callback(null, app);
+    });
+}
+
+function getBySubdomain(subdomain, callback) {
+    assert(typeof subdomain === 'string');
+
+    appdb.getBySubdomain(subdomain, function (error, app) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError('No such app', AppsError.NOT_FOUND));
         if (error) return callback(new AppsError('Internal error:' + error.message, AppsError.INTERNAL_ERROR));
 

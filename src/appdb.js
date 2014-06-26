@@ -7,6 +7,7 @@
 exports = module.exports = {
     init: init,
     get: get,
+    getBySubdomain: getBySubdomain,
     add: add,
     del: del,
     update: update,
@@ -72,6 +73,20 @@ function get(id, callback) {
     assert(typeof callback === 'function');
 
     db.get('SELECT * FROM apps WHERE id = ?', [ id ], function (error, result) {
+        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
+
+        if (typeof result === 'undefined') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
+
+        callback(null, result);
+    });
+}
+
+function getBySubdomain(subdomain, callback) {
+    assert(db !== null);
+    assert(typeof subdomain === 'string');
+    assert(typeof callback === 'function');
+
+    db.get('SELECT * FROM apps WHERE location = ?', [ subdomain ], function (error, result) {
         if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
 
         if (typeof result === 'undefined') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));

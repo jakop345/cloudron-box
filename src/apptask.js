@@ -96,16 +96,21 @@ function configureNginx(app, freePort, callback) {
         + "    ssl_ciphers  HIGH:!aNULL:!MD5;\n"
         + "    ssl_prefer_server_ciphers   on;\n"
         + "    proxy_http_version 1.1;\n"
-        + "    # proxy_intercept_errors on;\n"
-        + "    # error_page 500 502 503 504 = @install_progress;\n"
+        + "    proxy_intercept_errors on;\n"
+        + "    error_page 500 502 503 504 =302 @appstatus;\n"
+        + "    location @appstatus {\n"
+        + "        root ../webadmin;\n"
+        + "        try_files /appstatus.html =404;\n"
+        + "    }\n"
         + "    location / {\n"
         + "        proxy_pass http://127.0.0.1:#PORT#;\n"
         + "    }\n"
         + "}\n";
 
     var nginxConf =
-        NGINX_APPCONFIG_TEMPLATE.replace('#APP_VHOST_NAME#', app.location + '.' + HOSTNAME)
-        .replace('#PORT#', freePort);
+        NGINX_APPCONFIG_TEMPLATE.replace(/#APP_VHOST_NAME#/g, app.location + '.' + HOSTNAME)
+            .replace(/#PORT#/g, freePort)
+            .replace(/#APPID#/g, app.id);
 
     var nginxConfigFilename = path.join(nginxAppConfigDir, app.location + '.conf'); // TODO: check if app.location is safe
     debug('writing config to ' + nginxConfigFilename);

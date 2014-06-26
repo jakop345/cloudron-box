@@ -268,6 +268,9 @@ Server.prototype._initializeExpressSync = function () {
     router.get('/api/v1/app/:id', both, routes.apps.getApp);
     router.post('/api/v1/app/:id/uninstall', both, routes.apps.uninstallApp); // TODO does this require password?
     router.post('/api/v1/app/install', both, this._requirePassword.bind(this), routes.apps.installApp);
+
+    // subdomain routes
+    router.get('/api/v1/subdomain/:subdomain', routes.apps.getAppBySubdomain); // TODO: allow non-authenticated for the appstatus page
 };
 
 Server.prototype._initialize2 = function (callback) {
