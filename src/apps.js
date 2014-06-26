@@ -82,17 +82,29 @@ function getAll(callback) {
     });
 }
 
+function startTask(appId) {
+    tasks[appId] = child_process.fork(__dirname + '/apptask.js', [ appId ]);
+    tasks[appId].once('exit', function (code, signal) {
+        debug('Task completed :' + appId);
+        delete tasks[appId];
+    });
+}
+
+function stopTask(appId) {
+    if (tasks[appId]) {
+        debug('Killing existing task : ' + tasks[appId].pid);
+        tasks[appId].kill();
+        delete tasks[appId];
+    }
+}
+
 function install(appId, username, password, location, portBindings, callback) {
     assert(typeof appId === 'string');
     assert(typeof username === 'string');
     assert(typeof password === 'string');
     assert(typeof location === 'string');
 
-    if (tasks[appId]) {
-        debug('Killing existing task : ' + tasks[appId].pid);
-        tasks[appId].kill();
-        delete tasks[appId];
-    }
+    stopTask(appId);
 
     appdb.add(appId, appdb.STATUS_PENDING_INSTALL, location, portBindings, function (error) {
         if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new AppsError('Already installed or installing', AppsError.ALREADY_EXISTS));
@@ -100,7 +112,7 @@ function install(appId, username, password, location, portBindings, callback) {
 
         debug('Will install app with id : ' + appId);
 
-        tasks[appId] = child_process.fork(__dirname + '/apptask.js', [ appId ]);
+        startTask(appId);
 
         callback(null);
     });
@@ -109,11 +121,7 @@ function install(appId, username, password, location, portBindings, callback) {
 function uninstall(appId, callback) {
     assert(typeof appId === 'string');
 
-    if (tasks[appId]) {
-        debug('Killing existing task : ' + tasks[appId].pid);
-        tasks[appId].kill();
-        delete tasks[appId];
-    }
+    stopTask(appId);
 
     appdb.update(appId, { statusCode: appdb.STATUS_PENDING_UNINSTALL, statusMessage: '' }, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError('No such app', AppsError.NOT_FOUND));
@@ -121,7 +129,7 @@ function uninstall(appId, callback) {
 
         debug('Will uninstall app with id : ' + appId);
 
-        tasks[appId] = child_process.fork(__dirname + '/apptask.js', [ appId ]);
+        startTask(appId);
 
         callback(null);
     });
