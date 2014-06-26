@@ -19,7 +19,8 @@ var assert = require('assert'),
     net = require('net'),
     rimraf = require('rimraf'),
     config = require('../config.js'),
-    database = require('./database.js');
+    database = require('./database.js'),
+    HttpError = require('./httperror.js');
 
 exports = module.exports = {
     initialize: initialize,
@@ -326,15 +327,19 @@ function uninstall(app, callback) {
         child_process.exec('sudo ' + __dirname + '/rmappdir.sh ' + [ app.id ], function (error, stdout, stderr) {
             if (error) debug('Error removing app directory:' + app.id); // TODO: now what?
 
-            app.statusCode = appdb.STATUS_UNINSTALLED;
+            unregisterSubdomain(app, function (error) {
+                if (error) return callback(error);
 
-            appdb.del(app.id, callback);
+                app.statusCode = appdb.STATUS_UNINSTALLED;
+
+                appdb.del(app.id, callback);
+            });
         });
     });
 }
 
 function registerSubdomain(app, callback) {
-    debug('Registering subdomain for ' + app.id + ' at ' + app.location + '/' + HOSTNAME);
+    debug('Registering subdomain for ' + app.id + ' at ' + app.location + '.' + HOSTNAME);
 
     updateApp(app, { statusCode: appdb.STATUS_REGISTERING_SUBDOMAIN, statusMessage: '' }, FATAL_CALLBACK);
 
@@ -357,6 +362,24 @@ function registerSubdomain(app, callback) {
             debug('Registered subdomain for ' + app.id);
 
             updateApp(app, { statusCode: appdb.STATUS_REGISTERED_SUBDOMAIN, statusMessage: '' }, callback);
+        });
+}
+
+function unregisterSubdomain(app, callback) {
+    debug('Unregistering subdomain for ' + app.id + ' at ' + app.location + '.' + HOSTNAME);
+    superagent
+        .del(appServerUrl + '/api/v1/subdomain/' + app.location)
+        .end(function (error, res) {
+            if (error) {
+                debug('Error making request: ' + error.message);
+                return callback(error);
+            }
+            if (res.status !== 201) {
+                debug('Error unregistering subdomain:' + res.body.status + ' ' + res.body.message);
+                return callback(new HttpError(res.status));
+            }
+
+            callback(null);
         });
 }
 
