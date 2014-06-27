@@ -399,6 +399,12 @@ function processAppState(app, callback) {
         break;
 
     case appdb.STATUS_NGINX_CONFIGURED:
+    case appdb.STATUS_REGISTERING_SUBDOMAIN:
+    case appdb.STATUS_SUBDOMAIN_ERROR:
+        registerSubdomain(app, callback);
+        break;
+
+    case appdb.STATUS_REGISTERED_SUBDOMAIN:
     case appdb.STATUS_MANIFEST_ERROR:
     case appdb.STATUS_IMAGE_ERROR:
     case appdb.STATUS_DOWNLOAD_ERROR:
@@ -435,18 +441,12 @@ function processAppState(app, callback) {
         });
         break;
 
+    case appdb.STATUS_STARTED_CONTAINER:
+        updateApp(app, { statusCode: appdb.STATUS_RUNNING, statusMessage: '' }, callback);
+        break;
+
     case appdb.STATUS_PENDING_UNINSTALL:
         uninstall(app, callback);
-        break;
-
-    case appdb.STATUS_STARTED_CONTAINER:
-    case appdb.STATUS_REGISTERING_SUBDOMAIN:
-    case appdb.STATUS_SUBDOMAIN_ERROR:
-        registerSubdomain(app, callback);
-        break;
-
-    case appdb.STATUS_REGISTERED_SUBDOMAIN:
-        updateApp(app, { statusCode: appdb.STATUS_RUNNING, statusMessage: '' }, callback);
         break;
 
     case appdb.STATUS_RUNNING:
