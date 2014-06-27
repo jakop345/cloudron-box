@@ -86,10 +86,17 @@ function processApps(callback) {
     appdb.getAll(function (error, apps) {
         if (error) return callback(error);
 
-        async.each(apps, function (app, callback) {
-            if (app.statusCode !== appdb.STATUS_RUNNING && app.statusCode !== appdb.STATUS_NOT_RESPONDING) return callback();
-
-            checkAppHealth(app, callback);
+        async.each(apps, function (app, done) {
+            switch (app.statusCode) {
+            case appdb.STATUS_RUNNING:
+            case appdb.STATUS_NOT_RESPONDING:
+            case appdb.STATUS_EXITED:
+                checkAppHealth(app, done);
+                break;
+            default:
+                done();
+                break;
+            }
         }, callback);
     });
 }

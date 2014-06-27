@@ -419,7 +419,6 @@ function processAppState(app, callback) {
 
     case appdb.STATUS_DOWNLOADED_IMAGE:
     case appdb.STATUS_CREATING_CONTAINER:
-    case appdb.STATUS_EXITED:
         appdb.getPortBindings(app.id, function (error, portBindings) {
             if (error) portBindings = [ ]; // TODO: this is probably not good
             createContainer(app, portBindings, callback);
@@ -432,6 +431,7 @@ function processAppState(app, callback) {
         createVolume(app, callback);
         break;
 
+    case appdb.STATUS_EXITED:
     case appdb.STATUS_CREATED_VOLUME:
     case appdb.STATUS_STARTING_CONTAINER:
     case appdb.STATUS_CONTAINER_ERROR:
