@@ -32,12 +32,6 @@ exports = module.exports = {
 // Important to remove this before we release
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
 
-var FATAL_CALLBACK = function (error) {
-    if (!error) return;
-    console.error(error);
-    process.exit(2);
-};
-
 var appServerUrl = config.appServerUrl,
     docker = null,
     appDataRoot = config.appDataRoot,
@@ -75,14 +69,6 @@ function forwardFromHostToVirtualBox(rulename, port) {
     }
 }
 
-function updateApp(app, values, callback) {
-    for (var value in values) {
-        app[value] = values[value];
-    }
-
-    appdb.update(app.id, values, callback);
-}
-
 function configureNginx(app, freePort, callback) {
     var NGINX_APPCONFIG_TEMPLATE =
         "server {\n"
@@ -116,20 +102,12 @@ function configureNginx(app, freePort, callback) {
     debug('writing config to ' + nginxConfigFilename);
 
     fs.writeFile(nginxConfigFilename, nginxConf, function (error) {
-        if (error) {
-            debug('Error writing nginx config : ' + error);
-            updateApp(app, { statusCode: appdb.STATUS_NGINX_ERROR, statusMessage: error }, FATAL_CALLBACK);
-            return callback(null);
-        }
+        if (error) return callback(error);
 
         child_process.exec("supervisorctl -c supervisor/supervisord.conf restart nginx", { timeout: 10000 }, function (error, stdout, stderr) {
-            if (error) {
-                debug('Error configuring nginx. Reload nginx manually for now', error);
-                updateApp(app, { statusCode: appdb.STATUS_NGINX_ERROR, statusMessage: error }, FATAL_CALLBACK);
-                return callback(null);
-            }
+            if (error) return callback(error);
 
-            updateApp(app, { statusCode: appdb.STATUS_NGINX_CONFIGURED, statusMessage: '', httpPort: freePort }, callback);
+            return callback(null);
             // missing 'return' is intentional
         });
 
@@ -140,26 +118,15 @@ function configureNginx(app, freePort, callback) {
 function downloadImage(app, callback) {
     debug('Will download app now');
 
-    updateApp(app, { statusCode: appdb.STATUS_DOWNLOADING_IMAGE, statusMessage: '' }, FATAL_CALLBACK);
-
     var manifest = safe.JSON.parse(app.manifestJson);
-    if (manifest === null) {
-        debug('Error parsing manifest: ' + safe.error);
-        updateApp(app, { statusCode: appdb.STATUS_MANIFEST_ERROR, statusMessage: 'Parse error:' + safe.error }, FATAL_CALLBACK);
-        return callback(null);
-    }
+    if (manifest === null) return callback(new Error('Parse error:' + safe.error));
+
     if (!manifest.health_check_url || !manifest.docker_image || !manifest.http_port) {
-        debug('Manifest missing mandatory parameters');
-        updateApp(app, { statusCode: appdb.STATUS_MANIFEST_ERROR, statusMessage: 'Missing parameters' }, FATAL_CALLBACK);
-        return callback(null);
+        return callback(new Error('Manifest missing mandatory parameters'));
     }
 
     docker.pull(manifest.docker_image, function (err, stream) {
-        if (err) {
-            debug('Error connecting to docker', err);
-            updateApp(app, { statusCode: appdb.STATUS_DOWNLOAD_ERROR, statusMessage: 'Error connecting to docker' }, FATAL_CALLBACK);
-            return callback(err);
-        }
+        if (err) return callback(new Error('Error connecting to docker'));
 
         // https://github.com/dotcloud/docker/issues/1074 says each status message
         // is emitted as a chunk
@@ -167,9 +134,9 @@ function downloadImage(app, callback) {
             var data = safe.JSON.parse(chunk) || { };
             debug(JSON.stringify(data));
 
+            // The information here is useless because this is per layer as opposed to per image
             if (data.status) {
                 debug('Progress: ' + data.status); // progressDetail { current, total }
-                updateApp(app, { statusCode: appdb.STATUS_DOWNLOADING_IMAGE, statusMessage: data.status }, FATAL_CALLBACK);
             } else if (data.error) {
                 debug('Error detail:' + data.errorDetail.message);
             }
@@ -182,27 +149,22 @@ function downloadImage(app, callback) {
 
             image.inspect(function (err, data) {
                 if (err || !data || !data.Config) {
-                    debug('Error inspecting image');
-                    updateApp(app, { statusCode: appdb.STATUS_IMAGE_ERROR, statusMessage: 'Error inspecting image' }, FATAL_CALLBACK);
-                    return callback(err);
+                    return callback(new Error('Error inspecting image'));
                 }
+
                 if (!data.Config.Entrypoint && !data.Config.Cmd) {
-                    debug('Only images with entry point are allowed');
-                    updateApp(app, { statusCode: appdb.STATUS_IMAGE_ERROR, statusMessage: 'No entrypoint in image' }, FATAL_CALLBACK);
-                    return callback(err);
+                    return callback(new Error('Only images with entry point are allowed'));
                 }
 
                 debug('This image exposes ports: ' + JSON.stringify(data.Config.ExposedPorts));
-                updateApp(app, { statusCode: appdb.STATUS_DOWNLOADED_IMAGE, statusMessage: '' }, callback);
+                return callback(null);
             });
         });
     });
 }
 
 function createContainer(app, portConfigs, callback) {
-    var manifest = JSON.parse(app.manifestJson); // this is guaranteed not to throw since it's already been verified in downloadManifest()
-
-    updateApp(app, { statusCode: appdb.STATUS_CREATING_CONTAINER, statusMessage: '' }, FATAL_CALLBACK);
+    var manifest = JSON.parse(app.manifestJson); // this is guaranteed not to throw since it's already been verified in downloadImage()
 
     var env = [ ];
     if (typeof manifest.tcp_ports === 'object') {
@@ -224,36 +186,26 @@ function createContainer(app, portConfigs, callback) {
 
     debug('Creating container for ' + manifest.docker_image);
 
-    docker.createContainer(containerOptions, function (err, container) {
-        if (err) {
-            debug('Error creating container');
-            updateApp(app, { statusCode: appdb.STATUS_IMAGE_ERROR, statusMessage: 'Error creating container' }, FATAL_CALLBACK);
-            return callback(err);
-        }
+    docker.createContainer(containerOptions, function (error, container) {
+        if (error) return callback(new Error('Error creating container:' + error));
 
-        updateApp(app, { containerId: container.id, statusCode: appdb.STATUS_CREATED_CONTAINER, statusMessage: '' }, callback);
+        return callback(null, container.id);
     });
 }
 
 function createVolume(app, callback) {
     var appDataDir = path.join(appDataRoot, app.id); // TODO: check if app.id is safe path
 
-    updateApp(app, { statusCode: appdb.STATUS_CREATING_VOLUME, statusMessage: '' }, FATAL_CALLBACK);
-
     if (!safe.fs.mkdirSync(appDataDir)) {
-        debug('Error creating app data directory ' + appDataDir + ' ' + safe.error);
-        updateApp(app, { statusCode: appdb.STATUS_VOLUME_ERROR, statusMessage: 'Error creating data directory' }, FATAL_CALLBACK);
-        return callback(safe.error);
+        return callback(new Error('Error creating app data directory ' + appDataDir + ' ' + safe.error));
     }
 
-    updateApp(app, { statusCode: appdb.STATUS_CREATED_VOLUME, statusMessage: '' }, callback);
+    return callback(null);
 }
 
 function startContainer(app, portConfigs, callback) {
     var manifest = JSON.parse(app.manifestJson); // this is guaranteed not to throw since it's already been verified in downloadManifest()
     var appDataDir = path.join(appDataRoot, app.id); // TODO: check if app.id is safe path
-
-    updateApp(app, { statusCode: appdb.STATUS_STARTING_CONTAINER, statusMessage: '' }, FATAL_CALLBACK);
 
     var portBindings = { };
     portBindings[manifest.http_port + '/tcp'] = [ { HostPort: app.httpPort + '' } ];
@@ -274,14 +226,9 @@ function startContainer(app, portConfigs, callback) {
     var container = docker.getContainer(app.containerId);
     debug('Starting container ' + container.id + ' with options: ' + JSON.stringify(startOptions));
 
-    container.start(startOptions, function (err, data) {
-        if (err) {
-            debug('Error starting container', err);
-            updateApp(app, { statusCode: appdb.STATUS_CONTAINER_ERROR, statusMessage: 'Error starting container' }, FATAL_CALLBACK);
-            return callback(err);
-        }
+    container.start(startOptions, function (error, data) {
+        if (error) return callback(new Error('Error starting container:' + error));
 
-        updateApp(app, { statusCode: appdb.STATUS_STARTED_CONTAINER, statusMessage: '' }, FATAL_CALLBACK);
         return callback(null);
     });
 }
@@ -289,25 +236,16 @@ function startContainer(app, portConfigs, callback) {
 function downloadManifest(app, callback) {
     debug('Downloading manifest for :', app.id);
 
-    updateApp(app, { statusCode: appdb.STATUS_DOWNLOADING_MANIFEST, statusMessage: '' }, FATAL_CALLBACK);
-
     superagent
         .get(appServerUrl + '/api/v1/app/' + app.id + '/manifest')
         .set('Accept', 'application/json')
         .end(function (error, res) {
-            if (error) {
-                debug('Error making request: ' + error.message);
-                updateApp(app, { statusCode: appdb.STATUS_DOWNLOAD_ERROR, statusMessage: error.message }, FATAL_CALLBACK);
-                return callback(null);
-            }
-            if (res.status !== 200) {
-                debug('Error downloading manifest:' + res.body.status + ' ' + res.body.message);
-                updateApp(app, { statusCode: appdb.STATUS_DOWNLOAD_ERROR, statusMessage: res.body.status + ' ' + res.body.message }, FATAL_CALLBACK);
-                return callback(null);
-            }
+            if (error) return callback(error);
+
+            if (res.status !== 200) return callback(new Error('Error downloading manifest.' + res.body.status + ' ' + res.body.message));
 
             debug('Downloaded application manifest: ' + res.text);
-            updateApp(app, { statusCode: appdb.STATUS_DOWNLOADED_MANIFEST, statusMessage: '', manifestJson: res.text }, callback);
+            return callback(null, res.text);
         });
 }
 
@@ -335,8 +273,6 @@ function uninstall(app, callback) {
             unregisterSubdomain(app, function (error) {
                 if (error) return callback(error);
 
-                app.statusCode = appdb.STATUS_UNINSTALLED;
-
                 appdb.del(app.id, callback);
             });
         });
@@ -346,27 +282,18 @@ function uninstall(app, callback) {
 function registerSubdomain(app, callback) {
     debug('Registering subdomain for ' + app.id + ' at ' + app.location + '.' + HOSTNAME);
 
-    updateApp(app, { statusCode: appdb.STATUS_REGISTERING_SUBDOMAIN, statusMessage: '' }, FATAL_CALLBACK);
-
     superagent
         .post(appServerUrl + '/api/v1/subdomains')
         .set('Accept', 'application/json')
         .send({ subdomain: app.location, domain: HOSTNAME }) // TODO: the HOSTNAME should not be required
         .end(function (error, res) {
-            if (error) {
-                debug('Error making request: ' + error.message);
-                updateApp(app, { statusCode: appdb.STATUS_SUBDOMAIN_ERROR, statusMessage: error.message }, FATAL_CALLBACK);
-                return callback(null);
-            }
-            if (res.status !== 200) {
-                debug('Error registering subdomain:' + res.body.status + ' ' + res.body.message);
-                updateApp(app, { statusCode: appdb.STATUS_SUBDOMAIN_ERROR, statusMessage: res.body.status + ' ' + res.body.message }, FATAL_CALLBACK);
-                return callback(null);
-            }
+            if (error) return callback(error);
+
+            if (res.status !== 200) return callback(new Error('Subdomain Registration failed.' + res.body.status + ' ' + res.body.message));
 
             debug('Registered subdomain for ' + app.id);
 
-            updateApp(app, { statusCode: appdb.STATUS_REGISTERED_SUBDOMAIN, statusMessage: '' }, callback);
+            return callback(null);
         });
 }
 
@@ -388,20 +315,45 @@ function unregisterSubdomain(app, callback) {
         });
 }
 
+// callback is called with error when something fatal happenned (and not when some error state is reached)
 function processAppState(app, callback) {
+
+    // updates the app object and the database
+    function updateApp(app, values, callback) {
+        for (var value in values) {
+            app[value] = values[value];
+        }
+
+        debug(app.id + ' code:' + app.statusCode + ' message:' + app.statusMessage);
+
+        appdb.update(app.id, values, callback);
+    }
+
     switch (app.statusCode) {
     case appdb.STATUS_PENDING_INSTALL:
     case appdb.STATUS_NGINX_ERROR:
         getFreePort(function (error, freePort) {
-            if (error) return callback(null);
-            configureNginx(app, freePort, callback);
+            if (error) return callback(error);
+            configureNginx(app, freePort, function (error) {
+                if (error) return updateApp(app, { statusCode: appdb.STATUS_NGINX_ERROR, statusMessage: error }, callback);
+
+                updateApp(app, { statusCode: appdb.STATUS_NGINX_CONFIGURED, statusMessage: '', httpPort: freePort }, callback);
+            });
         });
         break;
 
     case appdb.STATUS_NGINX_CONFIGURED:
     case appdb.STATUS_REGISTERING_SUBDOMAIN:
     case appdb.STATUS_SUBDOMAIN_ERROR:
-        registerSubdomain(app, callback);
+        updateApp(app, { statusCode: appdb.STATUS_REGISTERING_SUBDOMAIN, statusMessage: '' }, function (error) {
+            if (error) return callback(error);
+
+            registerSubdomain(app, function (error) {
+                if (error) return updateApp(app, { statusCode: appdb.STATUS_SUBDOMAIN_ERROR, statusMessage: error }, callback);
+
+                updateApp(app, { statusCode: appdb.STATUS_REGISTERED_SUBDOMAIN, statusMessage: '' }, callback);
+            });
+        });
         break;
 
     case appdb.STATUS_REGISTERED_SUBDOMAIN:
@@ -409,26 +361,59 @@ function processAppState(app, callback) {
     case appdb.STATUS_IMAGE_ERROR:
     case appdb.STATUS_DOWNLOAD_ERROR:
     case appdb.STATUS_DOWNLOADING_MANIFEST:
-        downloadManifest(app, callback);
+        updateApp(app, { statusCode: appdb.STATUS_DOWNLOADING_MANIFEST, statusMessage: '' }, function (error) {
+            if (error) return callback(error);
+
+            downloadManifest(app, function (error, manifestJson) {
+                if (error) return updateApp(app, { statusCode: appdb.STATUS_MANIFEST_ERROR, statusMessage: error }, callback);
+
+                updateApp(app, { statusCode: appdb.STATUS_DOWNLOADED_MANIFEST, statusMessage: '', manifestJson: manifestJson }, callback);
+            });
+        });
         break;
 
     case appdb.STATUS_DOWNLOADING_IMAGE:
     case appdb.STATUS_DOWNLOADED_MANIFEST:
-        downloadImage(app, callback);
+        updateApp(app, { statusCode: appdb.STATUS_DOWNLOADING_IMAGE, statusMessage: '' }, function (error) {
+            if (error) return callback(error);
+
+            downloadImage(app, function (error) {
+                if (error) return updateApp(app, { statusCode: appdb.STATUS_MANIFEST_ERROR, statusMessage: error }, callback);
+
+                updateApp(app, { statusCode: appdb.STATUS_DOWNLOADED_IMAGE, statusMessage: '' }, callback);
+            });
+        });
         break;
 
     case appdb.STATUS_DOWNLOADED_IMAGE:
     case appdb.STATUS_CREATING_CONTAINER:
         appdb.getPortBindings(app.id, function (error, portBindings) {
-            if (error) portBindings = [ ]; // TODO: this is probably not good
-            createContainer(app, portBindings, callback);
+            if (error) return callback(error);
+
+            updateApp(app, { statusCode: appdb.STATUS_CREATING_CONTAINER, statusMessage: '' }, function (error) {
+                if (error) return callback(error);
+
+                createContainer(app, portBindings, function (error, containerId) {
+                    if (error) return callback(error);
+
+                    updateApp(app, { containerId: containerId, statusCode: appdb.STATUS_CREATED_CONTAINER, statusMessage: '' }, callback);
+                });
+            });
         });
         break;
 
     case appdb.STATUS_CREATED_CONTAINER:
     case appdb.STATUS_CREATING_VOLUME:
     case appdb.STATUS_VOLUME_ERROR:
-        createVolume(app, callback);
+        updateApp(app, { statusCode: appdb.STATUS_CREATING_VOLUME, statusMessage: '' }, function (error) {
+            if (error) return callback(error);
+
+            createVolume(app, function (error) {
+                if (error) return callback(error);
+
+                updateApp(app, { statusCode: appdb.STATUS_CREATED_VOLUME, statusMessage: '' }, callback);
+            });
+        });
         break;
 
     case appdb.STATUS_EXITED:
@@ -436,8 +421,17 @@ function processAppState(app, callback) {
     case appdb.STATUS_STARTING_CONTAINER:
     case appdb.STATUS_CONTAINER_ERROR:
         appdb.getPortBindings(app.id, function (error, portBindings) {
-            if (error) portBindings = [ ]; // TODO: this is probably not good
-            startContainer(app, portBindings, callback);
+            if (error) return callback(error);
+
+            updateApp(app, { statusCode: appdb.STATUS_STARTING_CONTAINER, statusMessage: '' }, function (error) {
+                if (error) return callback(error);
+
+                startContainer(app, portBindings, function (error) {
+                    if (error) return callback(error);
+
+                    updateApp(app, { statusCode: appdb.STATUS_STARTED_CONTAINER, statusMessage: '' }, callback);
+                });
+            });
         });
         break;
 
@@ -447,6 +441,7 @@ function processAppState(app, callback) {
 
     case appdb.STATUS_PENDING_UNINSTALL:
         uninstall(app, callback);
+        app.statusCode = appdb.STATUS_UNINSTALLED;
         break;
 
     case appdb.STATUS_RUNNING:
@@ -460,7 +455,7 @@ function processAppState(app, callback) {
 function processApp(app, callback) {
     // keep processing this app until we hit an error or running/dead
     processAppState(app, function (error) {
-        if (error) return callback(error);
+        if (error) return callback(error); // fatal error (not install error)
 
         if (app.statusCode === appdb.STATUS_UNINSTALLED) {
             debug('app uninstalled, stopping');
