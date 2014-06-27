@@ -440,8 +440,12 @@ function processAppState(app, callback) {
         break;
 
     case appdb.STATUS_PENDING_UNINSTALL:
-        uninstall(app, callback);
-        app.statusCode = appdb.STATUS_UNINSTALLED;
+        uninstall(app, function (error) {
+            if (error) return callback(error);
+
+            app.statusCode = appdb.STATUS_UNINSTALLED;
+            callback(null);
+        });
         break;
 
     case appdb.STATUS_RUNNING:
