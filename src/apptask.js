@@ -304,11 +304,10 @@ function unregisterSubdomain(app, callback) {
         .end(function (error, res) {
             if (error) {
                 debug('Error making request: ' + error.message);
-                return callback(error);
             }
-            if (res.status !== 201) {
+
+            if (res.status !== 200) {
                 debug('Error unregistering subdomain:' + res.body.status + ' ' + res.body.message);
-                return callback(new HttpError(res.status));
             }
 
             callback(null);
