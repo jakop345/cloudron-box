@@ -314,20 +314,19 @@ function unregisterSubdomain(app, callback) {
         });
 }
 
-// callback is called with error when something fatal happenned (and not when some error state is reached)
-function processInstallState(app, callback) {
-
-    // updates the app object and the database
-    function updateApp(app, values, callback) {
-        for (var value in values) {
-            app[value] = values[value];
-        }
-
-        debug(app.id + ' code:' + app.installationState);
-
-        appdb.update(app.id, values, callback);
+// updates the app object and the database
+function updateApp(app, values, callback) {
+    for (var value in values) {
+        app[value] = values[value];
     }
 
+    debug(app.id + ' code:' + app.installationState);
+
+    appdb.update(app.id, values, callback);
+}
+
+// callback is called with error when something fatal happenned (and not when some error state is reached)
+function processInstallState(app, callback) {
     switch (app.installationState) {
     case appdb.ISTATE_PENDING_INSTALL:
     case appdb.ISTATE_NGINX_ERROR:
@@ -433,30 +432,8 @@ function processInstallState(app, callback) {
         });
         break;
 
-    case appdb.ISTATE_EXITED:
     case appdb.ISTATE_CREATED_VOLUME:
-    case appdb.ISTATE_STARTING_CONTAINER:
-    case appdb.ISTATE_CONTAINER_ERROR:
-        appdb.getPortBindings(app.id, function (error, portBindings) {
-            if (error) return callback(error);
-
-            updateApp(app, { installationState: appdb.ISTATE_STARTING_CONTAINER }, function (error) {
-                if (error) return callback(error);
-
-                startContainer(app, portBindings, function (error) {
-                    if (error) {
-                        debug('Error creating container:' + error);
-                        return updateApp(app, { installationState: appdb.ISTATE_CONTAINER_ERROR }, callback);
-                    }
-
-                    updateApp(app, { installationState: appdb.ISTATE_STARTED_CONTAINER }, callback);
-                });
-            });
-        });
-        break;
-
-    case appdb.ISTATE_STARTED_CONTAINER:
-        updateApp(app, { installationState: appdb.ISTATE_RUNNING }, callback);
+        updateApp(app, { installationState: appdb.ISTATE_INSTALLED }, callback);
         break;
 
     case appdb.ISTATE_PENDING_UNINSTALL:
@@ -468,11 +445,8 @@ function processInstallState(app, callback) {
         });
         break;
 
-    case appdb.ISTATE_RUNNING:
-    case appdb.ISTATE_NOT_RESPONDING:
-    case appdb.ISTATE_EXITED:
+    default:
         assert(true, 'Should not reach this state: ' + app.installationState);
-        break;
     }
 }
 
@@ -481,8 +455,9 @@ function installApp(app, callback) {
     processInstallState(app, function (error) {
         if (error) return callback(error); // fatal error (not install error)
 
-        if (app.installationState === appdb.ISTATE_UNINSTALLED) {
-            debug('app uninstalled, stopping');
+        if (app.installationState === appdb.ISTATE_UNINSTALLED
+            || app.installationState === appdb.ISTATE_INSTALLED) {
+            debug('app ' + app.installationState + ', stopping');
             return callback(null);
         }
 
@@ -491,20 +466,33 @@ function installApp(app, callback) {
             return callback(null);
         }
 
-        // move on
-        if (app.installationState === appdb.ISTATE_RUNNING || app.installationState === appdb.ISTATE_NOT_RESPONDING || app.installationState === appdb.ISTATE_EXITED) {
-            debug('app installed, stopping');
-            return callback(null);
-        }
-
         installApp(app, callback);
+    });
+}
+
+function runApp(app, callback) {
+    appdb.getPortBindings(app.id, function (error, portBindings) {
+        if (error) return callback(error);
+
+        startContainer(app, portBindings, function (error) {
+            if (error) {
+                debug('Error creating container:' + error);
+                return updateApp(app, { runState: appdb.RSTATE_ERROR }, callback);
+            }
+
+            updateApp(app, { runState: appdb.RSTATE_RUNNING }, callback);
+        });
     });
 }
 
 function run(appId, callback) {
     appdb.get(appId, function (error, app) {
         if (error) return callback(error);
-        installApp(app, callback);
+        installApp(app, function (error) {
+            if (error) return callback(error);
+
+            runApp(app, callback);
+        });
     });
 }
 

@@ -31,12 +31,9 @@ exports = module.exports = {
     ISTATE_DOWNLOADING_IMAGE: 'downloading_image',
     ISTATE_DOWNLOADED_IMAGE: 'downloaded_image',
     ISTATE_IMAGE_ERROR: 'image_error',
+
     ISTATE_CREATING_CONTAINER: 'creating_container',
     ISTATE_CREATED_CONTAINER: 'created_container',
-
-    ISTATE_STARTING_CONTAINER: 'starting_container',
-    ISTATE_STARTED_CONTAINER: 'started_container',
-    ISTATE_CONTAINER_ERROR: 'container_error',
 
     ISTATE_CREATING_VOLUME: 'creating_volume',
     ISTATE_CREATED_VOLUME: 'created_volume',
@@ -46,9 +43,12 @@ exports = module.exports = {
     ISTATE_REGISTERED_SUBDOMAIN: 'registered_subdomain',
     ISTATE_SUBDOMAIN_ERROR: 'subdomain_error',
 
-    ISTATE_RUNNING: 'running',
-    ISTATE_EXITED: 'exited',
-    ISTATE_NOT_RESPONDING: 'not_responding'
+    ISTATE_INSTALLED: 'installed',
+
+    RSTATE_RUNNING: 'running',
+    RSTATE_ERROR: 'error',
+    RSTATE_EXITED: 'exited',
+    RSTATE_NOT_RESPONDING: 'not_responding'
 };
 
 var DatabaseError = require('./databaseerror'),

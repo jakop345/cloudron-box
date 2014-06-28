@@ -5,6 +5,7 @@
 var assert = require('assert'),
     config = require('../config.js'),
     database = require('./database.js'),
+    DatabaseError = require('./databaseerror'),
     appdb = require('./appdb.js'),
     async = require('async'),
     Docker = require('dockerode'),
@@ -38,29 +39,36 @@ function initialize() {
     });
 }
 
-function updateApp(app, values, callback) {
-    for (var value in values) {
-        app[value] = values[value];
-    }
-    appdb.update(app.id, values, callback);
- }
-
 // # TODO should probably poll from the outside network instead of the docker network?
+// callback is called with error for fatal errors and not if health check failed
 function checkAppHealth(app, callback) {
+    if (app.installationState !== appdb.ISTATE_INSTALLED) return callback(null);
+
     var container = docker.getContainer(app.containerId),
         manifest = JSON.parse(app.manifestJson); // this is guaranteed not to throw since it's already been verified in downloadManifest()
+
+    function updateApp(app, values, callback) {
+        for (var value in values) {
+            app[value] = values[value];
+        }
+        appdb.update(app.id, values, function (error) {
+            if (error && error.reason === DatabaseError.NOT_FOUND) { // app got uninstalled
+                return callback(null);
+            }
+
+            callback(error);
+        });
+     }
 
     container.inspect(function (err, data) {
         if (err || !data || !data.State) {
             debug('Error inspecting container');
-            updateApp(app, { installationState: appdb.ISTATE_IMAGE_ERROR }, FATAL_CALLBACK);
-            return callback(err);
+            return updateApp(app, { runState: appdb.RSTATE_ERROR }, callback);
         }
 
         if (data.State.Running !== true) {
             debug(app.id + ' has exited');
-            updateApp(app, { installationState: appdb.ISTATE_EXITED }, FATAL_CALLBACK);
-            return callback(null);
+            return updateApp(app, { runState: appdb.RSTATE_EXITED }, callback);
         }
 
         var healthCheckUrl = 'http://127.0.0.1:' + app.httpPort + manifest.health_check_url;
@@ -71,12 +79,10 @@ function checkAppHealth(app, callback) {
 
             if (error || res.status !== 200) {
                 debug('Marking application as dead: ' + app.id);
-                updateApp(app, { installationState: appdb.ISTATE_NOT_RESPONDING }, FATAL_CALLBACK);
-                callback(null);
+                updateApp(app, { runState: appdb.RSTATE_NOT_RESPONDING }, callback);
             } else {
                 debug('healthy app:' + app.id);
-                updateApp(app, { installationState: appdb.ISTATE_RUNNING }, FATAL_CALLBACK);
-                callback(null);
+                updateApp(app, { runState: appdb.RSTATE_RUNNING }, callback);
             }
         });
     });
@@ -86,18 +92,7 @@ function processApps(callback) {
     appdb.getAll(function (error, apps) {
         if (error) return callback(error);
 
-        async.each(apps, function (app, done) {
-            switch (app.installationState) {
-            case appdb.ISTATE_RUNNING:
-            case appdb.ISTATE_NOT_RESPONDING:
-            case appdb.ISTATE_EXITED:
-                checkAppHealth(app, done);
-                break;
-            default:
-                done();
-                break;
-            }
-        }, callback);
+        async.each(apps, checkAppHealth, callback);
     });
 }
 

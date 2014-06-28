@@ -236,6 +236,7 @@ describe('database', function () {
         var APP_0 = {
             id: 'appid-0',
             installationState: 'some-status-0',
+            runState: null,
             location: 'some-location-0',
             manifestJson: null,
             httpPort: null,
@@ -244,6 +245,7 @@ describe('database', function () {
         var APP_1 = {
             id: 'appid-1',
             installationState: 'some-status-1',
+            runState: null,
             location: 'some-location-1',
             manifestJson: null,
             httpPort: null,
