@@ -65,7 +65,7 @@ function forwardFromHostToVirtualBox(rulename, port) {
         debug('Setting up VirtualBox port forwarding for '+ rulename + ' at ' + port);
         child_process.exec(
             'VBoxManage controlvm boot2docker-vm natpf1 delete ' + rulename + ';'
-            + 'VBoxManage controlvm boot2docker-vm natpf1 ' + rulename + ',tcp,127.0.0.1,' + port + ',,' + port, FATAL_CALLBACK);
+            + 'VBoxManage controlvm boot2docker-vm natpf1 ' + rulename + ',tcp,127.0.0.1,' + port + ',,' + port);
     }
 }
 
