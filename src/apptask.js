@@ -315,7 +315,7 @@ function unregisterSubdomain(app, callback) {
 }
 
 // callback is called with error when something fatal happenned (and not when some error state is reached)
-function processAppState(app, callback) {
+function processInstallState(app, callback) {
 
     // updates the app object and the database
     function updateApp(app, values, callback) {
@@ -476,9 +476,9 @@ function processAppState(app, callback) {
     }
 }
 
-function processApp(app, callback) {
+function installApp(app, callback) {
     // keep processing this app until we hit an error or running/dead
-    processAppState(app, function (error) {
+    processInstallState(app, function (error) {
         if (error) return callback(error); // fatal error (not install error)
 
         if (app.installationState === appdb.ISTATE_UNINSTALLED) {
@@ -497,14 +497,14 @@ function processApp(app, callback) {
             return callback(null);
         }
 
-        processApp(app, callback);
+        installApp(app, callback);
     });
 }
 
 function run(appId, callback) {
     appdb.get(appId, function (error, app) {
         if (error) return callback(error);
-        processApp(app, callback);
+        installApp(app, callback);
     });
 }
 
