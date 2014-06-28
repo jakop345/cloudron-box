@@ -35,7 +35,7 @@ function resume() {
     appdb.getAll(function (error, apps) {
         if (error) throw error;
         apps.forEach(function (app) {
-            if (app.installationState === appdb.ISTATE_RUNNING || app.installationState === appdb.ISTATE_DEAD || app.installationState === appdb.ISTATE_NOT_RESPONDING) return;
+            if (app.installationState === appdb.ISTATE_INSTALLED) return;
             debug('Creating process for ' + app.id + ' with state ' + app.installationState);
             tasks[app.id] = child_process.fork(__dirname + '/apptask.js', [ app.id ]);
         });
