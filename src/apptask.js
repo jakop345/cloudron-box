@@ -393,7 +393,7 @@ function processAppState(app, callback) {
                 if (error) return callback(error);
 
                 createContainer(app, portBindings, function (error, containerId) {
-                    if (error) return callback(error);
+                    if (error) return updateApp(app, { statusCode: appdb.STATUS_CONTAINER_ERROR, statusMessage: error }, callback);
 
                     updateApp(app, { containerId: containerId, statusCode: appdb.STATUS_CREATED_CONTAINER, statusMessage: '' }, callback);
                 });
@@ -408,7 +408,7 @@ function processAppState(app, callback) {
             if (error) return callback(error);
 
             createVolume(app, function (error) {
-                if (error) return callback(error);
+                if (error) return updateApp(app, { statusCode: appdb.STATUS_VOLUME_ERROR, statusMessage: error }, callback);
 
                 updateApp(app, { statusCode: appdb.STATUS_CREATED_VOLUME, statusMessage: '' }, callback);
             });
@@ -426,7 +426,7 @@ function processAppState(app, callback) {
                 if (error) return callback(error);
 
                 startContainer(app, portBindings, function (error) {
-                    if (error) return callback(error);
+                    if (error) return updateApp(app, { statusCode: appdb.STATUS_CONTAINER_ERROR, statusMessage: error }, callback);
 
                     updateApp(app, { statusCode: appdb.STATUS_STARTED_CONTAINER, statusMessage: '' }, callback);
                 });
