@@ -19,7 +19,8 @@ var express = require('express'),
     middleware = require('./middleware'),
     database = require('./database.js'),
     userdb = require('./userdb'),
-    child_process = require('child_process');
+    child_process = require('child_process'),
+    os = require('os');
 
 exports = module.exports = Server;
 
@@ -105,7 +106,8 @@ Server.prototype._getVersion = function (req, res, next) {
 
 Server.prototype._getConfig = function (req, res, next) {
     res.send(200, {
-        appstoreOrigin: this.config.appServerUrl
+        appstoreOrigin: this.config.appServerUrl,
+        hostname: os.hostname()
     });
 };
 

@@ -56,6 +56,7 @@ function installApp(req, res, next) {
     if (!data.app_id) return next(new HttpError(400, 'app_id is required'));
     if (!data.password) return next(new HttpError(400, 'password is required'));
     if (!data.location) return next(new HttpError(400, 'location is required'));
+    if (data.location === 'admin') return next(new HttpError(400, 'admin location is reserved')); // TODO: maybe this should be reserved in db?
     if (data.portBindings !== null && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
 
     var portBindings = [ ];

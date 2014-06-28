@@ -1,0 +1,26 @@
+server {
+    listen       443;
+    server_name  ##ADMIN_HOSTNAME##;
+
+    ssl                  on;
+
+    include certificates.conf;
+
+    ssl_session_timeout  5m;
+
+    ssl_protocols  SSLv2 SSLv3 TLSv1;
+    ssl_ciphers  HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers   on;
+
+    location /api/ {
+        proxy_pass   http://127.0.0.1:3000;
+        # allow unlimited uploads. api server takes care of limit
+        client_max_body_size 0;
+    }
+
+    location / {
+        root   ../webadmin/;
+        index  index.html index.htm;
+    }
+}
+

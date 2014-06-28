@@ -1,0 +1,17 @@
+server {
+    listen       443;
+    server_name  ##HOSTNAME##;
+
+    ssl                  on;
+
+    include certificates.conf;
+
+    ssl_session_timeout  5m;
+
+    ssl_protocols  SSLv2 SSLv3 TLSv1;
+    ssl_ciphers  HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers   on;
+
+    return 301 https://admin.##HOSTNAME##$request_uri;
+}
+
