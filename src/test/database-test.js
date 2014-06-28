@@ -238,7 +238,6 @@ describe('database', function () {
             statusCode: 'some-status-0',
             location: 'some-location-0',
             manifestJson: null,
-            statusMessage: null,
             httpPort: null,
             containerId: null
         };
@@ -247,7 +246,6 @@ describe('database', function () {
             statusCode: 'some-status-1',
             location: 'some-location-1',
             manifestJson: null,
-            statusMessage: null,
             httpPort: null,
             containerId: null
         };

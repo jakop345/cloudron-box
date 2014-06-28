@@ -135,7 +135,7 @@ function uninstall(appId, callback) {
 
     stopTask(appId);
 
-    appdb.update(appId, { statusCode: appdb.STATUS_PENDING_UNINSTALL, statusMessage: '' }, function (error) {
+    appdb.update(appId, { statusCode: appdb.STATUS_PENDING_UNINSTALL }, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError('No such app', AppsError.NOT_FOUND));
         if (error) return callback(new AppsError('Internal error:' + error.message, AppsError.INTERNAL_ERROR));
 

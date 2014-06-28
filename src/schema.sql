@@ -29,7 +29,6 @@ CREATE TABLE IF NOT EXISTS clients(
 CREATE TABLE IF NOT EXISTS apps(
     id VARCHAR(512) NOT NULL UNIQUE,
     statusCode VARCHAR(512) NOT NULL,
-    statusMessage VARCHAR(2048),
     containerId VARCHAR(128),
     manifestJson VARCHAR,
     httpPort INTEGER,

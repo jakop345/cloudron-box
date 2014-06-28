@@ -323,7 +323,7 @@ function processAppState(app, callback) {
             app[value] = values[value];
         }
 
-        debug(app.id + ' code:' + app.statusCode + ' message:' + app.statusMessage);
+        debug(app.id + ' code:' + app.statusCode);
 
         appdb.update(app.id, values, callback);
     }
@@ -334,9 +334,12 @@ function processAppState(app, callback) {
         getFreePort(function (error, freePort) {
             if (error) return callback(error);
             configureNginx(app, freePort, function (error) {
-                if (error) return updateApp(app, { statusCode: appdb.STATUS_NGINX_ERROR, statusMessage: error }, callback);
+                if (error) {
+                    debug('Error configuring nginx: ' + error);
+                    return updateApp(app, { statusCode: appdb.STATUS_NGINX_ERROR }, callback);
+                }
 
-                updateApp(app, { statusCode: appdb.STATUS_NGINX_CONFIGURED, statusMessage: '', httpPort: freePort }, callback);
+                updateApp(app, { statusCode: appdb.STATUS_NGINX_CONFIGURED, httpPort: freePort }, callback);
             });
         });
         break;
@@ -344,13 +347,16 @@ function processAppState(app, callback) {
     case appdb.STATUS_NGINX_CONFIGURED:
     case appdb.STATUS_REGISTERING_SUBDOMAIN:
     case appdb.STATUS_SUBDOMAIN_ERROR:
-        updateApp(app, { statusCode: appdb.STATUS_REGISTERING_SUBDOMAIN, statusMessage: '' }, function (error) {
+        updateApp(app, { statusCode: appdb.STATUS_REGISTERING_SUBDOMAIN }, function (error) {
             if (error) return callback(error);
 
             registerSubdomain(app, function (error) {
-                if (error) return updateApp(app, { statusCode: appdb.STATUS_SUBDOMAIN_ERROR, statusMessage: error }, callback);
+                if (error) {
+                    debug('Error registering subdomain: ' + error);
+                    return updateApp(app, { statusCode: appdb.STATUS_SUBDOMAIN_ERROR }, callback);
+                }
 
-                updateApp(app, { statusCode: appdb.STATUS_REGISTERED_SUBDOMAIN, statusMessage: '' }, callback);
+                updateApp(app, { statusCode: appdb.STATUS_REGISTERED_SUBDOMAIN }, callback);
             });
         });
         break;
@@ -360,26 +366,32 @@ function processAppState(app, callback) {
     case appdb.STATUS_IMAGE_ERROR:
     case appdb.STATUS_DOWNLOAD_ERROR:
     case appdb.STATUS_DOWNLOADING_MANIFEST:
-        updateApp(app, { statusCode: appdb.STATUS_DOWNLOADING_MANIFEST, statusMessage: '' }, function (error) {
+        updateApp(app, { statusCode: appdb.STATUS_DOWNLOADING_MANIFEST }, function (error) {
             if (error) return callback(error);
 
             downloadManifest(app, function (error, manifestJson) {
-                if (error) return updateApp(app, { statusCode: appdb.STATUS_MANIFEST_ERROR, statusMessage: error }, callback);
+                if (error) {
+                    debug('Error downloading manifest:' + error);
+                    return updateApp(app, { statusCode: appdb.STATUS_MANIFEST_ERROR }, callback);
+                }
 
-                updateApp(app, { statusCode: appdb.STATUS_DOWNLOADED_MANIFEST, statusMessage: '', manifestJson: manifestJson }, callback);
+                updateApp(app, { statusCode: appdb.STATUS_DOWNLOADED_MANIFEST, manifestJson: manifestJson }, callback);
             });
         });
         break;
 
     case appdb.STATUS_DOWNLOADING_IMAGE:
     case appdb.STATUS_DOWNLOADED_MANIFEST:
-        updateApp(app, { statusCode: appdb.STATUS_DOWNLOADING_IMAGE, statusMessage: '' }, function (error) {
+        updateApp(app, { statusCode: appdb.STATUS_DOWNLOADING_IMAGE }, function (error) {
             if (error) return callback(error);
 
             downloadImage(app, function (error) {
-                if (error) return updateApp(app, { statusCode: appdb.STATUS_MANIFEST_ERROR, statusMessage: error }, callback);
+                if (error) {
+                    debug('Error downloading image:' + error);
+                    return updateApp(app, { statusCode: appdb.STATUS_MANIFEST_ERROR}, callback);
+                }
 
-                updateApp(app, { statusCode: appdb.STATUS_DOWNLOADED_IMAGE, statusMessage: '' }, callback);
+                updateApp(app, { statusCode: appdb.STATUS_DOWNLOADED_IMAGE }, callback);
             });
         });
         break;
@@ -389,13 +401,16 @@ function processAppState(app, callback) {
         appdb.getPortBindings(app.id, function (error, portBindings) {
             if (error) return callback(error);
 
-            updateApp(app, { statusCode: appdb.STATUS_CREATING_CONTAINER, statusMessage: '' }, function (error) {
+            updateApp(app, { statusCode: appdb.STATUS_CREATING_CONTAINER }, function (error) {
                 if (error) return callback(error);
 
                 createContainer(app, portBindings, function (error, containerId) {
-                    if (error) return updateApp(app, { statusCode: appdb.STATUS_CONTAINER_ERROR, statusMessage: error }, callback);
+                    if (error) {
+                        debug('Error creating container:' + error);
+                        return updateApp(app, { statusCode: appdb.STATUS_CONTAINER_ERROR }, callback);
+                    }
 
-                    updateApp(app, { containerId: containerId, statusCode: appdb.STATUS_CREATED_CONTAINER, statusMessage: '' }, callback);
+                    updateApp(app, { containerId: containerId, statusCode: appdb.STATUS_CREATED_CONTAINER }, callback);
                 });
             });
         });
@@ -404,13 +419,16 @@ function processAppState(app, callback) {
     case appdb.STATUS_CREATED_CONTAINER:
     case appdb.STATUS_CREATING_VOLUME:
     case appdb.STATUS_VOLUME_ERROR:
-        updateApp(app, { statusCode: appdb.STATUS_CREATING_VOLUME, statusMessage: '' }, function (error) {
+        updateApp(app, { statusCode: appdb.STATUS_CREATING_VOLUME }, function (error) {
             if (error) return callback(error);
 
             createVolume(app, function (error) {
-                if (error) return updateApp(app, { statusCode: appdb.STATUS_VOLUME_ERROR, statusMessage: error }, callback);
+                if (error) {
+                    debug('Error creating volume: ' + error);
+                    return updateApp(app, { statusCode: appdb.STATUS_VOLUME_ERROR }, callback);
+                }
 
-                updateApp(app, { statusCode: appdb.STATUS_CREATED_VOLUME, statusMessage: '' }, callback);
+                updateApp(app, { statusCode: appdb.STATUS_CREATED_VOLUME }, callback);
             });
         });
         break;
@@ -422,20 +440,23 @@ function processAppState(app, callback) {
         appdb.getPortBindings(app.id, function (error, portBindings) {
             if (error) return callback(error);
 
-            updateApp(app, { statusCode: appdb.STATUS_STARTING_CONTAINER, statusMessage: '' }, function (error) {
+            updateApp(app, { statusCode: appdb.STATUS_STARTING_CONTAINER }, function (error) {
                 if (error) return callback(error);
 
                 startContainer(app, portBindings, function (error) {
-                    if (error) return updateApp(app, { statusCode: appdb.STATUS_CONTAINER_ERROR, statusMessage: error }, callback);
+                    if (error) {
+                        debug('Error creating container:' + error);
+                        return updateApp(app, { statusCode: appdb.STATUS_CONTAINER_ERROR }, callback);
+                    }
 
-                    updateApp(app, { statusCode: appdb.STATUS_STARTED_CONTAINER, statusMessage: '' }, callback);
+                    updateApp(app, { statusCode: appdb.STATUS_STARTED_CONTAINER }, callback);
                 });
             });
         });
         break;
 
     case appdb.STATUS_STARTED_CONTAINER:
-        updateApp(app, { statusCode: appdb.STATUS_RUNNING, statusMessage: '' }, callback);
+        updateApp(app, { statusCode: appdb.STATUS_RUNNING }, callback);
         break;
 
     case appdb.STATUS_PENDING_UNINSTALL:
