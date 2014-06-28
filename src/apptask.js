@@ -20,7 +20,8 @@ var assert = require('assert'),
     rimraf = require('rimraf'),
     config = require('../config.js'),
     database = require('./database.js'),
-    HttpError = require('./httperror.js');
+    HttpError = require('./httperror.js'),
+    ejs = require('ejs');
 
 exports = module.exports = {
     initialize: initialize,
@@ -36,7 +37,8 @@ var appServerUrl = config.appServerUrl,
     docker = null,
     appDataRoot = config.appDataRoot,
     nginxAppConfigDir = config.nginxAppConfigDir,
-    HOSTNAME = process.env.HOSTNAME || os.hostname();
+    HOSTNAME = process.env.HOSTNAME || os.hostname(),
+    NGINX_APPCONFIG_EJS = fs.readFileSync(__dirname + '/nginx_appconfig.ejs', { encoding: 'utf8' });
 
 function initialize() {
     if (os.platform() === 'linux') {
@@ -70,33 +72,7 @@ function forwardFromHostToVirtualBox(rulename, port) {
 }
 
 function configureNginx(app, freePort, callback) {
-    var NGINX_APPCONFIG_TEMPLATE =
-        "server {\n"
-        + "    listen 443;\n"
-        + "    server_name #APP_VHOST_NAME#;\n"
-        + "    ssl on;\n"
-        + "    ssl_certificate cert/cert.pem;\n"
-        + "    ssl_certificate_key cert/key.pem;\n"
-        + "    ssl_session_timeout 5m;\n"
-        + "    ssl_protocols  SSLv2 SSLv3 TLSv1;\n"
-        + "    ssl_ciphers  HIGH:!aNULL:!MD5;\n"
-        + "    ssl_prefer_server_ciphers   on;\n"
-        + "    proxy_http_version 1.1;\n"
-        + "    proxy_intercept_errors on;\n"
-        + "    error_page 500 502 503 504 =302 @appstatus;\n"
-        + "    location @appstatus {\n"
-        + "        root ../webadmin;\n"
-        + "        try_files /appstatus.html =404;\n"
-        + "    }\n"
-        + "    location / {\n"
-        + "        proxy_pass http://127.0.0.1:#PORT#;\n"
-        + "    }\n"
-        + "}\n";
-
-    var nginxConf =
-        NGINX_APPCONFIG_TEMPLATE.replace(/#APP_VHOST_NAME#/g, app.location + '.' + HOSTNAME)
-            .replace(/#PORT#/g, freePort)
-            .replace(/#APPID#/g, app.id);
+    var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { vhost: app.location + '.' + HOSTNAME, port: freePort });
 
     var nginxConfigFilename = path.join(nginxAppConfigDir, app.location + '.conf'); // TODO: check if app.location is safe
     debug('writing config to ' + nginxConfigFilename);
