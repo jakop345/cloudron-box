@@ -54,7 +54,7 @@
   "devDependencies": {
     "apidoc": "*",
     "expect.js": "*",
-    "husky": "^0.4.3",
+    "husky": "^0.5.1",
     "istanbul": "*",
     "mocha": "*"
   },
