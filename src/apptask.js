@@ -285,6 +285,7 @@ function registerSubdomain(app, callback) {
     superagent
         .post(appServerUrl + '/api/v1/subdomains')
         .set('Accept', 'application/json')
+        .query({ token: config.token })
         .send({ subdomain: app.location, domain: HOSTNAME }) // TODO: the HOSTNAME should not be required
         .end(function (error, res) {
             if (error) return callback(error);
@@ -301,6 +302,7 @@ function unregisterSubdomain(app, callback) {
     debug('Unregistering subdomain for ' + app.id + ' at ' + app.location + '.' + HOSTNAME);
     superagent
         .del(appServerUrl + '/api/v1/subdomain/' + app.location)
+        .query({ token: config.token })
         .end(function (error, res) {
             if (error) {
                 debug('Error making request: ' + error.message);

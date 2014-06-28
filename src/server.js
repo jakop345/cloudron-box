@@ -316,10 +316,10 @@ Server.prototype._sendHeartBeat = function () {
 
     var that = this;
 
-    var url = this.config.appServerUrl + '/api/v1/boxes/heartbeat/' + this.config.token;
+    var url = this.config.appServerUrl + '/api/v1/boxes/heartbeat';
     debug('Sending heartbeat ' + url);
 
-    superagent.get(url).end(function (error, result) {
+    superagent.get(url).query({ token: this.config.token }).end(function (error, result) {
         if (error) debug('Error sending heartbeat.', error);
         else if (result.statusCode !== 200) debug('Server responded to heartbeat with ' + result.statusCode);
         else debug('Heartbeat successfull');
