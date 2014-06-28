@@ -38,7 +38,7 @@ var appServerUrl = config.appServerUrl,
     appDataRoot = config.appDataRoot,
     nginxAppConfigDir = config.nginxAppConfigDir,
     HOSTNAME = process.env.HOSTNAME || os.hostname(),
-    NGINX_APPCONFIG_EJS = fs.readFileSync(__dirname + '/nginx_appconfig.ejs', { encoding: 'utf8' });
+    NGINX_APPCONFIG_EJS = fs.readFileSync(__dirname + '/../nginx/appconfig.ejs', { encoding: 'utf8' });
 
 function initialize() {
     if (os.platform() === 'linux') {
