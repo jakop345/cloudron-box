@@ -25,8 +25,8 @@
                 if (ajax.readyState == 4) {
                     if (ajax.status == 200) {
                         var response = JSON.parse(ajax.responseText);
-                        statusDiv.innerHTML = response.statusCode;
-                        if (response.statusCode === 'running') {
+                        statusDiv.innerHTML = response.installationState;
+                        if (response.runState === 'running') {
                             window.location.reload();
                         }
                     } else {
