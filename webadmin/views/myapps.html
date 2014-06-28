@@ -15,8 +15,7 @@
     <div class="col-lg-3 list-group-item" ng-repeat="app in apps">
         <div> <a target="_blank" ng-href="{{ app.url }}"> {{ app.id }}</a> </div>
         <img width="48" height="48" ng-src="{{ app.iconUrl }}"/>
-        <div>{{ app.statusCode }}</div>
-        <div>{{ app.statusMessage }}</div>
+        <div>{{ app.installationState }}</div>
         <br />
         <button ng-click="removeApp(app.id)">Remove</button>
     </div>

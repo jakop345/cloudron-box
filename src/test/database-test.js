@@ -235,7 +235,7 @@ describe('database', function () {
     describe('app', function () {
         var APP_0 = {
             id: 'appid-0',
-            statusCode: 'some-status-0',
+            installationState: 'some-status-0',
             location: 'some-location-0',
             manifestJson: null,
             httpPort: null,
@@ -243,7 +243,7 @@ describe('database', function () {
         };
         var APP_1 = {
             id: 'appid-1',
-            statusCode: 'some-status-1',
+            installationState: 'some-status-1',
             location: 'some-location-1',
             manifestJson: null,
             httpPort: null,
@@ -251,21 +251,21 @@ describe('database', function () {
         };
 
         it('add fails due to missing arguments', function () {
-            expect(function () { appdb.add(APP_0.id, APP_0.statusCode, function () {}); }).to.throwError();
+            expect(function () { appdb.add(APP_0.id, APP_0.installationState, function () {}); }).to.throwError();
             expect(function () { appdb.add(APP_0.id, function () {}); }).to.throwError();
         });
 
         // This needs to be tested in the api layer?
         xit('add fails due to bad arguments', function () {
-            expect(function () { appdb.add(APP_0.id, APP_0.statusCode, 'loc', { "5555": "10" }, function () {}); }).to.throwError();
-            expect(function () { appdb.add(APP_0.id, APP_0.statusCode, 'loc', { 5555: 10 }, function () {}); }).to.throwError();
-            expect(function () { appdb.add(APP_0.id, APP_0.statusCode, 'loc', { "mango": 4000 }, function () {}); }).to.throwError();
-            expect(function () { appdb.add(APP_0.id, APP_0.statusCode, 'loc', { "1000": "grape" }, function () {}); }).to.throwError();
+            expect(function () { appdb.add(APP_0.id, APP_0.installationState, 'loc', { "5555": "10" }, function () {}); }).to.throwError();
+            expect(function () { appdb.add(APP_0.id, APP_0.installationState, 'loc', { 5555: 10 }, function () {}); }).to.throwError();
+            expect(function () { appdb.add(APP_0.id, APP_0.installationState, 'loc', { "mango": 4000 }, function () {}); }).to.throwError();
+            expect(function () { appdb.add(APP_0.id, APP_0.installationState, 'loc', { "1000": "grape" }, function () {}); }).to.throwError();
         });
 
 
         it('add succeeds', function (done) {
-            appdb.add(APP_0.id, APP_0.statusCode, APP_0.location, [ { containerPort: 1234, hostPort: 5678 } ], function (error) {
+            appdb.add(APP_0.id, APP_0.installationState, APP_0.location, [ { containerPort: 1234, hostPort: 5678 } ], function (error) {
                 expect(error).to.be(null);
                 done();
             });
@@ -281,7 +281,7 @@ describe('database', function () {
         });
 
         it('add of same app fails', function (done) {
-            appdb.add(APP_0.id, APP_0.statusCode, APP_0.location, [ ], function (error) {
+            appdb.add(APP_0.id, APP_0.installationState, APP_0.location, [ ], function (error) {
                 expect(error).to.be.a(DatabaseError);
                 expect(error.reason).to.be(DatabaseError.ALREADY_EXISTS);
                 done();
@@ -307,10 +307,10 @@ describe('database', function () {
         });
 
         it('update succeeds', function (done) {
-            APP_0.statusCode = 'some-other-status';
+            APP_0.installationState = 'some-other-status';
             APP_0.location = 'some-other-location';
 
-            appdb.update(APP_0.id, { statusCode: APP_0.statusCode, location: APP_0.location }, function (error) {
+            appdb.update(APP_0.id, { installationState: APP_0.installationState, location: APP_0.location }, function (error) {
                 expect(error).to.be(null);
 
                 appdb.get(APP_0.id, function (error, result) {
@@ -323,7 +323,7 @@ describe('database', function () {
         });
 
         it('update of nonexisting app fails', function (done) {
-            appdb.update(APP_1.id, { statusCode: APP_1.statusCode, location: APP_1.location }, function (error) {
+            appdb.update(APP_1.id, { installationState: APP_1.installationState, location: APP_1.location }, function (error) {
                 expect(error).to.be.a(DatabaseError);
                 expect(error.reason).to.be(DatabaseError.NOT_FOUND);
                 done();
@@ -331,7 +331,7 @@ describe('database', function () {
         });
 
         it('add second app succeeds', function (done) {
-            appdb.add(APP_1.id, APP_1.statusCode, APP_1.location, [ ], function (error) {
+            appdb.add(APP_1.id, APP_1.installationState, APP_1.location, [ ], function (error) {
                 expect(error).to.be(null);
                 done();
             });

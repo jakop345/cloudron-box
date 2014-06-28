@@ -35,8 +35,8 @@ function resume() {
     appdb.getAll(function (error, apps) {
         if (error) throw error;
         apps.forEach(function (app) {
-            if (app.statusCode === appdb.STATUS_RUNNING || app.statusCode === appdb.STATUS_DEAD || app.statusCode === appdb.STATUS_NOT_RESPONDING) return;
-            debug('Creating process for ' + app.id + ' with state ' + app.statusCode);
+            if (app.installationState === appdb.STATUS_RUNNING || app.installationState === appdb.STATUS_DEAD || app.installationState === appdb.STATUS_NOT_RESPONDING) return;
+            debug('Creating process for ' + app.id + ' with state ' + app.installationState);
             tasks[app.id] = child_process.fork(__dirname + '/apptask.js', [ app.id ]);
         });
     });
@@ -135,7 +135,7 @@ function uninstall(appId, callback) {
 
     stopTask(appId);
 
-    appdb.update(appId, { statusCode: appdb.STATUS_PENDING_UNINSTALL }, function (error) {
+    appdb.update(appId, { installationState: appdb.STATUS_PENDING_UNINSTALL }, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError('No such app', AppsError.NOT_FOUND));
         if (error) return callback(new AppsError('Internal error:' + error.message, AppsError.INTERNAL_ERROR));
 

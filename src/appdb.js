@@ -107,10 +107,10 @@ function getAll(callback) {
     });
 }
 
-function add(id, statusCode, location, portBindings, callback) {
+function add(id, installationState, location, portBindings, callback) {
     assert(db !== null);
     assert(typeof id === 'string');
-    assert(typeof statusCode === 'string');
+    assert(typeof installationState === 'string');
     assert(typeof location === 'string');
     assert(util.isArray(portBindings));
     assert(typeof callback === 'function');
@@ -119,13 +119,13 @@ function add(id, statusCode, location, portBindings, callback) {
 
     var appData = {
         $id: id,
-        $statusCode: statusCode,
+        $installationState: installationState,
         $location: location
     };
 
     var conn = database.newTransaction();
 
-    conn.run('INSERT INTO apps (id, statusCode, location) VALUES ($id, $statusCode, $location)',
+    conn.run('INSERT INTO apps (id, installationState, location) VALUES ($id, $installationState, $location)',
            appData, function (error) {
         if (error) database.rollback(conn);
 
