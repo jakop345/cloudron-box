@@ -24,7 +24,7 @@ var assert = require('assert'),
 
 exports = module.exports = {
     initialize: initialize,
-    run: run
+    start: start
 };
 
 // FIXME: For some reason our selfhost.io certificate doesn't work with
@@ -325,148 +325,101 @@ function updateApp(app, values, callback) {
     appdb.update(app.id, values, callback);
 }
 
-// callback is called with error when something fatal happenned (and not when some error state is reached)
-function processInstallState(app, callback) {
-    switch (app.installationState) {
-    case appdb.ISTATE_PENDING_INSTALL:
-    case appdb.ISTATE_NGINX_ERROR:
-        getFreePort(function (error, freePort) {
-            if (error) return callback(error);
-            configureNginx(app, freePort, function (error) {
-                if (error) {
-                    debug('Error configuring nginx: ' + error);
-                    return updateApp(app, { installationState: appdb.ISTATE_NGINX_ERROR }, callback);
-                }
-
-                updateApp(app, { installationState: appdb.ISTATE_NGINX_CONFIGURED, httpPort: freePort }, callback);
-            });
-        });
-        break;
-
-    case appdb.ISTATE_NGINX_CONFIGURED:
-    case appdb.ISTATE_REGISTERING_SUBDOMAIN:
-    case appdb.ISTATE_SUBDOMAIN_ERROR:
-        updateApp(app, { installationState: appdb.ISTATE_REGISTERING_SUBDOMAIN }, function (error) {
-            if (error) return callback(error);
-
-            registerSubdomain(app, function (error) {
-                if (error) {
-                    debug('Error registering subdomain: ' + error);
-                    return updateApp(app, { installationState: appdb.ISTATE_SUBDOMAIN_ERROR }, callback);
-                }
-
-                updateApp(app, { installationState: appdb.ISTATE_REGISTERED_SUBDOMAIN }, callback);
-            });
-        });
-        break;
-
-    case appdb.ISTATE_REGISTERED_SUBDOMAIN:
-    case appdb.ISTATE_MANIFEST_ERROR:
-    case appdb.ISTATE_IMAGE_ERROR:
-    case appdb.ISTATE_DOWNLOAD_ERROR:
-    case appdb.ISTATE_DOWNLOADING_MANIFEST:
-        updateApp(app, { installationState: appdb.ISTATE_DOWNLOADING_MANIFEST }, function (error) {
-            if (error) return callback(error);
-
-            downloadManifest(app, function (error, manifestJson) {
-                if (error) {
-                    debug('Error downloading manifest:' + error);
-                    return updateApp(app, { installationState: appdb.ISTATE_MANIFEST_ERROR }, callback);
-                }
-
-                updateApp(app, { installationState: appdb.ISTATE_DOWNLOADED_MANIFEST, manifestJson: manifestJson }, callback);
-            });
-        });
-        break;
-
-    case appdb.ISTATE_DOWNLOADING_IMAGE:
-    case appdb.ISTATE_DOWNLOADED_MANIFEST:
-        updateApp(app, { installationState: appdb.ISTATE_DOWNLOADING_IMAGE }, function (error) {
-            if (error) return callback(error);
-
-            downloadImage(app, function (error) {
-                if (error) {
-                    debug('Error downloading image:' + error);
-                    return updateApp(app, { installationState: appdb.ISTATE_MANIFEST_ERROR}, callback);
-                }
-
-                updateApp(app, { installationState: appdb.ISTATE_DOWNLOADED_IMAGE }, callback);
-            });
-        });
-        break;
-
-    case appdb.ISTATE_DOWNLOADED_IMAGE:
-    case appdb.ISTATE_CREATING_CONTAINER:
-        appdb.getPortBindings(app.id, function (error, portBindings) {
-            if (error) return callback(error);
-
-            updateApp(app, { installationState: appdb.ISTATE_CREATING_CONTAINER }, function (error) {
+// callback is called with error for fatal errors (and not for install errors)
+function install(app, callback) {
+    async.series([
+        // configure nginx
+        function (callback) {
+            getFreePort(function (error, freePort) {
                 if (error) return callback(error);
+                configureNginx(app, freePort, function (error) {
+                    if (error) return callback(new Error('Error configuring nginx: ' + error));
 
-                createContainer(app, portBindings, function (error, containerId) {
-                    if (error) {
-                        debug('Error creating container:' + error);
-                        return updateApp(app, { installationState: appdb.ISTATE_CONTAINER_ERROR }, callback);
-                    }
-
-                    updateApp(app, { containerId: containerId, installationState: appdb.ISTATE_CREATED_CONTAINER }, callback);
+                    updateApp(app, { httpPort: freePort }, callback);
                 });
             });
-        });
-        break;
+        },
 
-    case appdb.ISTATE_CREATED_CONTAINER:
-    case appdb.ISTATE_CREATING_VOLUME:
-    case appdb.ISTATE_VOLUME_ERROR:
-        updateApp(app, { installationState: appdb.ISTATE_CREATING_VOLUME }, function (error) {
-            if (error) return callback(error);
+        // register subdomain
+        function (callback) {
+            updateApp(app, { installationState: appdb.ISTATE_REGISTERING_SUBDOMAIN }, function (error) {
+                if (error) return callback(error);
 
-            createVolume(app, function (error) {
-                if (error) {
-                    debug('Error creating volume: ' + error);
-                    return updateApp(app, { installationState: appdb.ISTATE_VOLUME_ERROR }, callback);
-                }
+                registerSubdomain(app, function (error) {
+                    if (error) return callback('Error registering subdomain: ' + error);
 
-                updateApp(app, { installationState: appdb.ISTATE_CREATED_VOLUME }, callback);
+                    callback(null);
+                });
             });
-        });
-        break;
+        },
 
-    case appdb.ISTATE_CREATED_VOLUME:
-        updateApp(app, { installationState: appdb.ISTATE_INSTALLED }, callback);
-        break;
+        // download manifest
+        function (callback) {
+            updateApp(app, { installationState: appdb.ISTATE_DOWNLOADING_MANIFEST }, function (error) {
+                if (error) return callback(error);
 
-    case appdb.ISTATE_PENDING_UNINSTALL:
-        uninstall(app, function (error) {
-            if (error) return callback(error);
+                downloadManifest(app, function (error, manifestJson) {
+                    if (error) return callback('Error downloading manifest:' + error);
 
-            app.installationState = appdb.ISTATE_UNINSTALLED;
-            callback(null);
-        });
-        break;
+                    updateApp(app, { manifestJson: manifestJson }, callback);
+                });
+            });
+        },
 
-    default:
-        assert(true, 'Should not reach this state: ' + app.installationState);
-    }
-}
+        // download the image
+        function (callback) {
+            updateApp(app, { installationState: appdb.ISTATE_DOWNLOADING_IMAGE }, function (error) {
+                if (error) return callback(error);
 
-function installApp(app, callback) {
-    // keep processing this app until we hit an error or running/dead
-    processInstallState(app, function (error) {
-        if (error) return callback(error); // fatal error (not install error)
+                downloadImage(app, function (error) {
+                    if (error) return callback('Error downloading image:' + error);
 
-        if (app.installationState === appdb.ISTATE_UNINSTALLED
-            || app.installationState === appdb.ISTATE_INSTALLED) {
-            debug('app ' + app.installationState + ', stopping');
-            return callback(null);
+                    callback(null);
+                });
+            });
+        },
+
+        // create container
+        function (callback) {
+            appdb.getPortBindings(app.id, function (error, portBindings) {
+                if (error) return callback(error);
+
+                updateApp(app, { installationState: appdb.ISTATE_CREATING_CONTAINER }, function (error) {
+                    if (error) return callback(error);
+
+                    createContainer(app, portBindings, function (error, containerId) {
+                        if (error) return callback('Error creating container:' + error);
+
+                        updateApp(app, { containerId: containerId }, callback);
+                    });
+                });
+            });
+        },
+
+        // create data volume
+        function (callback) {
+            updateApp(app, { installationState: appdb.ISTATE_CREATING_VOLUME }, function (error) {
+                if (error) return callback(error);
+
+                createVolume(app, function (error) {
+                    if (error) return callback('Error creating volume: ' + error);
+
+                    callback(null);
+                });
+            });
+        },
+
+        // done!
+        function (callback) {
+            updateApp(app, { installationState: appdb.ISTATE_INSTALLED }, callback);
+        }
+    ], function (error) {
+        if (error) {
+            debug(error.message);
+            return updateApp(app, { installationState: appdb.ISTATE_ERROR }, callback);
         }
 
-        if (app.installationState.indexOf('_error', app.installationState.length - 6) !== -1) {
-            debug('app is in error state, stopping');
-            return callback(null);
-        }
-
-        installApp(app, callback);
+        callback(null);
     });
 }
 
@@ -485,10 +438,15 @@ function runApp(app, callback) {
     });
 }
 
-function run(appId, callback) {
+function start(appId, callback) {
     appdb.get(appId, function (error, app) {
         if (error) return callback(error);
-        installApp(app, function (error) {
+        if (app.installationState === 'pending_uninstall') {
+            uninstall(app, callback);
+            return;
+        }
+
+        install(app, function (error) {
             if (error) return callback(error);
 
             runApp(app, callback);
@@ -503,7 +461,7 @@ if (require.main === module) {
 
     initialize();
 
-    run(process.argv[2], function (error) {
+    start(process.argv[2], function (error) {
         debug('Apptask completed for ' + process.argv[2] + ' ' + error);
         process.exit(error ? 1 : 0);
     });

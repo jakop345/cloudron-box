@@ -15,34 +15,15 @@ exports = module.exports = {
     getPortBindings: getPortBindings,
 
     // status codes
-    // all error codes need to end with _error (see apptask.js)
-    ISTATE_NGINX_ERROR: 'nginx_error',
-    ISTATE_NGINX_CONFIGURED: 'nginx_configured',
-
     ISTATE_PENDING_INSTALL: 'pending_install',
     ISTATE_PENDING_UNINSTALL: 'pending_uninstall',
-    ISTATE_DOWNLOAD_ERROR: 'download_error',
-    ISTATE_UNINSTALLED: 'uninstalled', // this state does not appear in database
-
+    ISTATE_ERROR: 'error',
     ISTATE_DOWNLOADING_MANIFEST: 'downloading_manifest',
-    ISTATE_DOWNLOADED_MANIFEST: 'downloaded_manifest',
-    ISTATE_MANIFEST_ERROR: 'manifest_error',
-
     ISTATE_DOWNLOADING_IMAGE: 'downloading_image',
-    ISTATE_DOWNLOADED_IMAGE: 'downloaded_image',
-    ISTATE_IMAGE_ERROR: 'image_error',
-
     ISTATE_CREATING_CONTAINER: 'creating_container',
-    ISTATE_CREATED_CONTAINER: 'created_container',
-
     ISTATE_CREATING_VOLUME: 'creating_volume',
-    ISTATE_CREATED_VOLUME: 'created_volume',
-    ISTATE_VOLUME_ERROR: 'volume_error',
-
     ISTATE_REGISTERING_SUBDOMAIN: 'registering_subdomain',
-    ISTATE_REGISTERED_SUBDOMAIN: 'registered_subdomain',
     ISTATE_SUBDOMAIN_ERROR: 'subdomain_error',
-
     ISTATE_INSTALLED: 'installed',
 
     RSTATE_RUNNING: 'running',
