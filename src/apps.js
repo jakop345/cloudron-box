@@ -35,7 +35,7 @@ function resume() {
     appdb.getAll(function (error, apps) {
         if (error) throw error;
         apps.forEach(function (app) {
-            if (app.installationState === appdb.STATUS_RUNNING || app.installationState === appdb.STATUS_DEAD || app.installationState === appdb.STATUS_NOT_RESPONDING) return;
+            if (app.installationState === appdb.ISTATE_RUNNING || app.installationState === appdb.ISTATE_DEAD || app.installationState === appdb.ISTATE_NOT_RESPONDING) return;
             debug('Creating process for ' + app.id + ' with state ' + app.installationState);
             tasks[app.id] = child_process.fork(__dirname + '/apptask.js', [ app.id ]);
         });
@@ -118,7 +118,7 @@ function install(appId, username, password, location, portBindings, callback) {
 
     stopTask(appId);
 
-    appdb.add(appId, appdb.STATUS_PENDING_INSTALL, location, portBindings, function (error) {
+    appdb.add(appId, appdb.ISTATE_PENDING_INSTALL, location, portBindings, function (error) {
         if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new AppsError('Already installed or installing', AppsError.ALREADY_EXISTS));
         if (error) return callback(new AppsError('Internal error:' + error.message, AppsError.INTERNAL_ERROR));
 
@@ -135,7 +135,7 @@ function uninstall(appId, callback) {
 
     stopTask(appId);
 
-    appdb.update(appId, { installationState: appdb.STATUS_PENDING_UNINSTALL }, function (error) {
+    appdb.update(appId, { installationState: appdb.ISTATE_PENDING_UNINSTALL }, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError('No such app', AppsError.NOT_FOUND));
         if (error) return callback(new AppsError('Internal error:' + error.message, AppsError.INTERNAL_ERROR));
 

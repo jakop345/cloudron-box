@@ -16,39 +16,39 @@ exports = module.exports = {
 
     // status codes
     // all error codes need to end with _error (see apptask.js)
-    STATUS_NGINX_ERROR: 'nginx_error',
-    STATUS_NGINX_CONFIGURED: 'nginx_configured',
+    ISTATE_NGINX_ERROR: 'nginx_error',
+    ISTATE_NGINX_CONFIGURED: 'nginx_configured',
 
-    STATUS_PENDING_INSTALL: 'pending_install',
-    STATUS_PENDING_UNINSTALL: 'pending_uninstall',
-    STATUS_DOWNLOAD_ERROR: 'download_error',
-    STATUS_UNINSTALLED: 'uninstalled', // this state does not appear in database
+    ISTATE_PENDING_INSTALL: 'pending_install',
+    ISTATE_PENDING_UNINSTALL: 'pending_uninstall',
+    ISTATE_DOWNLOAD_ERROR: 'download_error',
+    ISTATE_UNINSTALLED: 'uninstalled', // this state does not appear in database
 
-    STATUS_DOWNLOADING_MANIFEST: 'downloading_manifest',
-    STATUS_DOWNLOADED_MANIFEST: 'downloaded_manifest',
-    STATUS_MANIFEST_ERROR: 'manifest_error',
+    ISTATE_DOWNLOADING_MANIFEST: 'downloading_manifest',
+    ISTATE_DOWNLOADED_MANIFEST: 'downloaded_manifest',
+    ISTATE_MANIFEST_ERROR: 'manifest_error',
 
-    STATUS_DOWNLOADING_IMAGE: 'downloading_image',
-    STATUS_DOWNLOADED_IMAGE: 'downloaded_image',
-    STATUS_IMAGE_ERROR: 'image_error',
-    STATUS_CREATING_CONTAINER: 'creating_container',
-    STATUS_CREATED_CONTAINER: 'created_container',
+    ISTATE_DOWNLOADING_IMAGE: 'downloading_image',
+    ISTATE_DOWNLOADED_IMAGE: 'downloaded_image',
+    ISTATE_IMAGE_ERROR: 'image_error',
+    ISTATE_CREATING_CONTAINER: 'creating_container',
+    ISTATE_CREATED_CONTAINER: 'created_container',
 
-    STATUS_STARTING_CONTAINER: 'starting_container',
-    STATUS_STARTED_CONTAINER: 'started_container',
-    STATUS_CONTAINER_ERROR: 'container_error',
+    ISTATE_STARTING_CONTAINER: 'starting_container',
+    ISTATE_STARTED_CONTAINER: 'started_container',
+    ISTATE_CONTAINER_ERROR: 'container_error',
 
-    STATUS_CREATING_VOLUME: 'creating_volume',
-    STATUS_CREATED_VOLUME: 'created_volume',
-    STATUS_VOLUME_ERROR: 'volume_error',
+    ISTATE_CREATING_VOLUME: 'creating_volume',
+    ISTATE_CREATED_VOLUME: 'created_volume',
+    ISTATE_VOLUME_ERROR: 'volume_error',
 
-    STATUS_REGISTERING_SUBDOMAIN: 'registering_subdomain',
-    STATUS_REGISTERED_SUBDOMAIN: 'registered_subdomain',
-    STATUS_SUBDOMAIN_ERROR: 'subdomain_error',
+    ISTATE_REGISTERING_SUBDOMAIN: 'registering_subdomain',
+    ISTATE_REGISTERED_SUBDOMAIN: 'registered_subdomain',
+    ISTATE_SUBDOMAIN_ERROR: 'subdomain_error',
 
-    STATUS_RUNNING: 'running',
-    STATUS_EXITED: 'exited',
-    STATUS_NOT_RESPONDING: 'not_responding'
+    ISTATE_RUNNING: 'running',
+    ISTATE_EXITED: 'exited',
+    ISTATE_NOT_RESPONDING: 'not_responding'
 };
 
 var DatabaseError = require('./databaseerror'),

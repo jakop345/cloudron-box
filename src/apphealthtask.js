@@ -53,13 +53,13 @@ function checkAppHealth(app, callback) {
     container.inspect(function (err, data) {
         if (err || !data || !data.State) {
             debug('Error inspecting container');
-            updateApp(app, { installationState: appdb.STATUS_IMAGE_ERROR }, FATAL_CALLBACK);
+            updateApp(app, { installationState: appdb.ISTATE_IMAGE_ERROR }, FATAL_CALLBACK);
             return callback(err);
         }
 
         if (data.State.Running !== true) {
             debug(app.id + ' has exited');
-            updateApp(app, { installationState: appdb.STATUS_EXITED }, FATAL_CALLBACK);
+            updateApp(app, { installationState: appdb.ISTATE_EXITED }, FATAL_CALLBACK);
             return callback(null);
         }
 
@@ -71,11 +71,11 @@ function checkAppHealth(app, callback) {
 
             if (error || res.status !== 200) {
                 debug('Marking application as dead: ' + app.id);
-                updateApp(app, { installationState: appdb.STATUS_NOT_RESPONDING }, FATAL_CALLBACK);
+                updateApp(app, { installationState: appdb.ISTATE_NOT_RESPONDING }, FATAL_CALLBACK);
                 callback(null);
             } else {
                 debug('healthy app:' + app.id);
-                updateApp(app, { installationState: appdb.STATUS_RUNNING }, FATAL_CALLBACK);
+                updateApp(app, { installationState: appdb.ISTATE_RUNNING }, FATAL_CALLBACK);
                 callback(null);
             }
         });
@@ -88,9 +88,9 @@ function processApps(callback) {
 
         async.each(apps, function (app, done) {
             switch (app.installationState) {
-            case appdb.STATUS_RUNNING:
-            case appdb.STATUS_NOT_RESPONDING:
-            case appdb.STATUS_EXITED:
+            case appdb.ISTATE_RUNNING:
+            case appdb.ISTATE_NOT_RESPONDING:
+            case appdb.ISTATE_EXITED:
                 checkAppHealth(app, done);
                 break;
             default:
