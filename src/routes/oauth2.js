@@ -140,7 +140,7 @@ module.exports.logout = function (req, res) {
 module.exports.callback = [
     session.ensureLoggedIn('/api/v1/session/login'),
     function (req, res) {
-        debug('callback');
+        debug('callback: with callback server ' + req.query.redirectURI);
         res.render('callback', { callbackServer: req.query.redirectURI });
     }
 ];
@@ -178,7 +178,9 @@ module.exports.authorization = [
         clientdb.getByClientId(clientID, function (error, client) {
             // TODO actually check redirectURI
             if (error) return callback(error);
-            callback(null, client, '/api/v1/session/callback?redirectURI=' + client.redirectURI);
+
+            // we currently pass the redirectURI from the callback through, instead of the one in the db
+            callback(null, client, '/api/v1/session/callback?redirectURI=' + redirectURI);
             // callback(null, client, redirectURI);
         });
     }),

@@ -36,26 +36,9 @@ var MainController = function ($scope, $route, Client) {
             return;
         }
 
-        var authCode = window.location.search.slice('?authCode='.length);
-        if (authCode) {
-            console.debug('Got authCode as result of OAuth flow.', authCode);
-
-            Client.exchangeCodeForToken(authCode, function (error, accessToken) {
-                if (error) {
-                    console.error('Unable to exchange code for an access token.', error);
-                    window.location.href = window.location.origin;
-                    return;
-                }
-
-                localStorage.token = accessToken;
-                window.location.href = '#/volumelist';
-            });
-            return;
-        }
-
         // Server already initializied, try to perform login based on token
+        var callbackURL = window.location.origin + '/login_callback.html';
         if (localStorage.token) {
-            var callbackURL = window.location.origin;
             Client.login(localStorage.token, function (error, token) {
                 if (error) {
                     console.error('Unable to login', error);

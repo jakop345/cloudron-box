@@ -2,14 +2,13 @@
 
 <script>
 
+'use strict';
 
-var args = window.location.search.slice(1).split('&');
 var code = null;
 var redirectURI = null;
 
+var args = window.location.search.slice(1).split('&');
 args.forEach(function (arg) {
-    'use strict';
-
     var tmp = arg.split('=');
     if (tmp[0] === 'redirectURI') {
         redirectURI = window.decodeURIComponent(tmp[1]);
@@ -18,18 +17,20 @@ args.forEach(function (arg) {
     }
 });
 
-
 if (code && redirectURI) {
-    if (!window.opener) {
-        window.location.href = redirectURI + '?authCode=' + code;
-    } else {
-        window.opener.postMessage(JSON.stringify({ authCode: code}), redirectURI);
-        window.close();
-    }
+    // TODO for now we only support redirection
+    window.location.href = redirectURI + '?authCode=' + code;
+
+    // if (!window.opener) {
+    //     window.location.href = redirectURI + '?authCode=' + code;
+    // } else {
+    //     window.opener.postMessage(JSON.stringify({ authCode: code}), redirectURI);
+    //     window.close();
+    // }
 } else {
-    document.write('Missing query arguments.');
+    window.location.href = '/api/v1/session/login';
 }
 
 </script>
 
-<% include footer %>
+<% include footer %>;

@@ -45,7 +45,8 @@ passport.use(new LocalStrategy(function (username, password, callback) {
     debug('LocalStrategy: ' + username + ' ' + password);
 
     user.verify(username, password, function (error, result) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
+        if (error && error.reason === UserError.NOT_FOUND) return callback(null, false);
+        if (error && error.reason === UserError.WRONG_USER_OR_PASSWORD) return callback(null, false);
         if (error) return callback(error);
         if (!result) return callback(null, false);
         callback(null, database.removePrivates(result));

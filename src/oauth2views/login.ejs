@@ -1,15 +1,5 @@
 <% include header %>
 
-<script>
-
-window.addEventListener("message", function (event) {
-  console.log('---', event);
-  alert('foo');
-  alert(JSON.stringify(event));
-}, false);
-
-</script>
-
 <form action="/api/v1/session/login" method="post">
   <div class="row">
     <div class="col-md-3"></div>
@@ -17,7 +7,7 @@ window.addEventListener("message", function (event) {
       <div class="container-fluid">
         <div class="row">
           <div class="col-sm-12">
-            <h2 class="form-signin-heading pull-right">Please sing in</h2>
+            <h2 class="form-signin-heading pull-right">Welcome</h2>
           </div>
         </div>
         <div class="row">

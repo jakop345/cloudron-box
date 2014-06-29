@@ -1,0 +1,47 @@
+<html>
+<head>
+    <title> OAuth Callback </title>
+
+    <script src="3rdparty/js/angular.js"></script>
+
+    <script>
+
+    var app = angular.module('YellowTent', []);
+    function MainController($scope, $http) {
+        var authCode = window.location.search.slice('?authCode='.length);
+
+        if (!authCode) {
+            console.error('No authCode found.');
+            window.location.href = '/';
+        } else {
+            console.debug('Got authCode as result of OAuth flow.', authCode);
+        }
+
+        var data = {
+            grant_type: 'authorization_code',
+            code: authCode,
+            redirect_uri: window.location.origin,
+            client_id: 'cid-webadmin',
+            client_secret: 'unused'
+        };
+
+        $http.post('/api/v1/oauth/token?response_type=token&client_id=' + data.client_id, data)
+        .success(function(data, status, headers, config) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            localStorage.token = data.access_token;
+            window.location.href = '/';
+        })
+        .error(function(data, status, headers, config) {
+            console.error('Unable to exchange code for an access token.', error);
+            window.location.href = '/';
+        });
+    }
+
+    </script>
+
+</head>
+
+<body ng-app="YellowTent" ng-controller="MainController">
+
+</body>
+</html>
