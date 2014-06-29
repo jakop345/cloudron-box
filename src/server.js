@@ -232,8 +232,8 @@ Server.prototype._initializeExpressSync = function () {
     router.post('/api/v1/fileops/:syncerVolume/delete', routes.sync.requireMountedVolume, routes.fileops.remove);
     router.post('/api/v1/fileops/:syncerVolume/create_dir', routes.sync.requireMountedVolume, routes.fileops.createDirectory);
 
-    router.get('/api/v1/volume/list', both, routes.volume.listVolumes);
-    router.post('/api/v1/volume/create', both, this._requirePassword.bind(this), routes.volume.createVolume);
+    router.get('/api/v1/volume/list', bearer, routes.volume.listVolumes);
+    router.post('/api/v1/volume/create', bearer, this._requirePassword.bind(this), routes.volume.createVolume);
 
     // volume resource related routes
     router.param('volume', function (req, res, next, id) {
@@ -266,17 +266,17 @@ Server.prototype._initializeExpressSync = function () {
     router.get('/api/v1/oauth/yellowtent.js', routes.oauth2.library);
 
     // app routes
-    router.get('/api/v1/apps', both, routes.apps.getApps);
-    router.get('/api/v1/app/:id', both, routes.apps.getApp);
-    router.post('/api/v1/app/:id/uninstall', both, routes.apps.uninstallApp); // TODO does this require password?
-    router.post('/api/v1/app/install', both, this._requirePassword.bind(this), routes.apps.installApp);
+    router.get('/api/v1/apps', bearer, routes.apps.getApps);
+    router.get('/api/v1/app/:id', bearer, routes.apps.getApp);
+    router.post('/api/v1/app/:id/uninstall', bearer, routes.apps.uninstallApp); // TODO does this require password?
+    router.post('/api/v1/app/install', bearer, this._requirePassword.bind(this), routes.apps.installApp);
 
     // subdomain routes
     router.get('/api/v1/subdomain/:subdomain', routes.apps.getAppBySubdomain); // TODO: allow non-authenticated for the appstatus page
 
     // settings routes
-    router.get('/api/v1/settings/naked_domain', both, routes.settings.getNakedDomain);
-    router.post('/api/v1/settings/naked_domain', both, routes.settings.setNakedDomain);
+    router.get('/api/v1/settings/naked_domain', bearer, routes.settings.getNakedDomain);
+    router.post('/api/v1/settings/naked_domain', bearer, routes.settings.setNakedDomain);
 };
 
 Server.prototype._initialize2 = function (callback) {
