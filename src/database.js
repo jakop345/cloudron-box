@@ -61,7 +61,7 @@ function create(config, callback) {
 
         // TODO this should happen somewhere else..no clue where - Johannes
         clientdb.del('cid-webadmin', function () {
-            clientdb.add('cid-webadmin', 'cid-webadmin', 'unused', 'WebAdmin', config.origin || 'https://localhost', function (error) {
+            clientdb.add('cid-webadmin', 'cid-webadmin', 'unused', 'WebAdmin', config.adminOrigin || 'https://localhost', function (error) {
                 if (error && error.reason !== DatabaseError.ALREADY_EXISTS) return callback(new Error('Error initializing client database with webadmin'));
                 return callback(null);
             });

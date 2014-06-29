@@ -210,5 +210,5 @@ module.exports.token = [
 ];
 
 module.exports.library = function (req, res, next) {
-    res.render('yellowtent', { origin: config.origin });
+    res.render('yellowtent', { origin: config.adminOrigin });
 };

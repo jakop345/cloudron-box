@@ -18,7 +18,7 @@ console.log(' Cloudron will use the following settings ');
 console.log('==========================================');
 console.log();
 console.log(' Port:                           ', config.port);
-console.log(' Origin:                         ', config.origin);
+console.log(' Admin Origin:                   ', config.adminOrigin);
 console.log(' Volume data root dir:           ', config.dataRoot);
 console.log(' Volume config root dir:         ', config.configRoot);
 console.log(' Volume mount root dir:          ', config.mountRoot);

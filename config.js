@@ -28,7 +28,7 @@ try {
     configFile = {
         token: null,
         appstoreOrigin: 'https://selfhost.io:5050',
-        origin: 'https://admin.' + os.hostname()
+        adminOrigin: 'https://admin.' + os.hostname()
     };
 }
 
