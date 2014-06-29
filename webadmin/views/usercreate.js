@@ -5,6 +5,7 @@ function UserCreateController ($scope, $routeParams, Client) {
 
     $scope.username = '';
     $scope.password = '';
+    $scope.isAdmin = !!($routeParams.admin);
     $scope.passwordRepeat = '';
     // TODO do we really need this?
     $scope.email = 'xx@xx.xx';
@@ -55,7 +56,7 @@ function UserCreateController ($scope, $routeParams, Client) {
             }
 
             console.debug('Successfully create user', $scope.username);
-            window.history.back();
+            window.location.href = '/';
         });
     };
 

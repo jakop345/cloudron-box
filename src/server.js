@@ -201,7 +201,7 @@ Server.prototype._initializeExpressSync = function () {
 
     // routes controlled by app.router
     router.post('/api/v1/token', both, routes.user.createToken);        // TODO remove that route
-    router.get('/api/v1/user/token', both, routes.user.createToken);
+    router.get('/api/v1/user/token', bearer, routes.user.createToken);
     router.get('/api/v1/logout', bearer, routes.user.logout);             // TODO remove that route
     router.get('/api/v1/user/logout', bearer, routes.user.logout);
     router.post('/api/v1/user/create', bearer, this._requireAdmin.bind(this), routes.user.create);
