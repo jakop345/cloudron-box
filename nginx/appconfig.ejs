@@ -11,8 +11,9 @@ server {
     proxy_intercept_errors on;
     error_page 500 502 503 504 =302 @appstatus;
     location @appstatus {
+        internal;
         root ../webadmin;
-        try_files /appstatus.html =404;
+        rewrite ^/$ /appstatus.html break;
     }
     location / {
         proxy_pass http://127.0.0.1:<%= port %>;
