@@ -8,7 +8,7 @@ var app = angular.module('YellowTent', ['acute.select', 'ngRoute', 'ngAnimate', 
 // setup all major application routes
 app.config(function ($routeProvider) {
     $routeProvider.when('/', {
-        redirectTo: '/applist'
+        redirectTo: '/myapps'
     }).when('/usercreate', {
         controller: 'UserCreateController',
         templateUrl: 'views/usercreate.html'
