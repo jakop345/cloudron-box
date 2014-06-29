@@ -7,6 +7,7 @@ exports = module.exports = {
     sync: require('./sync.js'),
     fileops: require('./fileops.js'),
     oauth2: require('./oauth2.js'),
+    settings: require('./settings.js'),
     volume: require('./volume.js')
 };
 

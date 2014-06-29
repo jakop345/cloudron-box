@@ -8,7 +8,9 @@ exports = module.exports = {
     init: init,
     get: get,
     getAll: getAll,
-    set: set
+    set: set,
+
+    NAKED_DOMAIN_KEY: 'naked_domain'
 };
 
 var DatabaseError = require('./databaseerror'),

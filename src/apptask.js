@@ -25,7 +25,8 @@ var assert = require('assert'),
 
 exports = module.exports = {
     initialize: initialize,
-    start: start
+    start: start,
+    setNakedDomain: setNakedDomain
 };
 
 // FIXME: For some reason our selfhost.io certificate doesn't work with
@@ -71,8 +72,8 @@ function forwardFromHostToVirtualBox(rulename, port) {
     }
 }
 
-function configureNginx(app, freePort, callback) {
-    var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { vhost: app.location + '.' + HOSTNAME, port: freePort });
+function configureNginx(app, httpPort, callback) {
+    var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { vhost: app.location + '.' + HOSTNAME, port: httpPort });
 
     var nginxConfigFilename = path.join(nginxAppConfigDir, app.location + '.conf'); // TODO: check if app.location is safe
     debug('writing config to ' + nginxConfigFilename);
@@ -84,10 +85,26 @@ function configureNginx(app, freePort, callback) {
             if (error) return callback(error);
 
             return callback(null);
-            // missing 'return' is intentional
         });
 
-        forwardFromHostToVirtualBox(app.id + '-http', freePort);
+        forwardFromHostToVirtualBox(app.id + '-http', httpPort);
+    });
+}
+
+function setNakedDomain(app, callback) {
+    var nginxConf = app ? ejs.render(NGINX_APPCONFIG_EJS, { vhost: HOSTNAME, port: app.httpPort }) : '';
+
+    var nginxNakedDomainFilename = path.join(nginxAppConfigDir, '../naked_domain.conf'); // TODO: check if app.location is safe
+    debug('writing naked domain config to ' + nginxNakedDomainFilename);
+
+    fs.writeFile(nginxNakedDomainFilename, nginxConf, function (error) {
+        if (error) return callback(error);
+
+        child_process.exec("supervisorctl -c supervisor/supervisord.conf restart nginx", { timeout: 10000 }, function (error, stdout, stderr) {
+            if (error) return callback(error);
+
+            return callback(null);
+        });
     });
 }
 

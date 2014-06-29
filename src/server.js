@@ -273,6 +273,10 @@ Server.prototype._initializeExpressSync = function () {
 
     // subdomain routes
     router.get('/api/v1/subdomain/:subdomain', routes.apps.getAppBySubdomain); // TODO: allow non-authenticated for the appstatus page
+
+    // settings routes
+    router.get('/api/v1/settings/naked_domain', both, routes.settings.getNakedDomain);
+    router.post('/api/v1/settings/naked_domain', both, routes.settings.setNakedDomain);
 };
 
 Server.prototype._initialize2 = function (callback) {

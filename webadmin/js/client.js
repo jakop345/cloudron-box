@@ -193,6 +193,28 @@ angular.module('YellowTent')
         });
     };
 
+    Client.prototype.getNakedDomain = function (callback) {
+        $http.get('/api/v1/settings/naked_domain')
+        .success(function (data, status, headers, config) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null, data.appid);
+        })
+        .error(function (data, status, headers, config) {
+            callback(new ClientError(status, data));
+        });
+    };
+
+    Client.prototype.setNakedDomain = function (appid, callback) {
+        $http.post('/api/v1/settings/naked_domain', { appid: appid })
+        .success(function (data, status, headers, config) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null);
+        })
+        .error(function (data, status, headers, config) {
+            callback(new ClientError(status, data));
+        });
+    };
+
     Client.prototype.createAdmin = function (username, password, email, callback) {
         var payload = {
             username: username,
