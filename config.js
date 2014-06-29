@@ -40,7 +40,7 @@ exports = module.exports = {
     silent: silent,
     token: configFile.token,
     appServerUrl: configFile.appstoreOrigin,
-    origin: configFile.origin,
+    adminOrigin: configFile.adminOrigin,
     nginxAppConfigDir: nginxAppConfigDir,
     appDataRoot: appDataRoot
 };
