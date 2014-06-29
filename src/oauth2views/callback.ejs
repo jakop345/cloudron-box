@@ -2,9 +2,6 @@
 
 <script>
 
-if (!window.opener) {
-    document.write('No window opener.');
-}
 
 var args = window.location.search.slice(1).split('&');
 var code = null;
@@ -21,9 +18,14 @@ args.forEach(function (arg) {
     }
 });
 
+
 if (code && redirectURI) {
-    window.opener.postMessage(JSON.stringify({ authCode: code}), redirectURI);
-    window.close();
+    if (!window.opener) {
+        window.location.href = redirectURI + '?authCode=' + code;
+    } else {
+        window.opener.postMessage(JSON.stringify({ authCode: code}), redirectURI);
+        window.close();
+    }
 } else {
     document.write('Missing query arguments.');
 }

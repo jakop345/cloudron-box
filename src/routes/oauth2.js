@@ -96,7 +96,7 @@ server.exchange(oauth2orize.exchange.code(function (client, code, redirectURI, c
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
         if (error) return callback(error);
         if (client.id !== authCode.clientId) return callback(null, false);
-        if (redirectURI !== authCode.redirectURI) return callback(null, false);
+        // if (redirectURI !== authCode.redirectURI) return callback(null, false);
 
         authcodedb.del(code, function (error) {
             if(error) return callback(error);

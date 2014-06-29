@@ -36,12 +36,30 @@ var MainController = function ($scope, $route, Client) {
             return;
         }
 
+        var authCode = window.location.search.slice('?authCode='.length);
+        if (authCode) {
+            console.debug('Got authCode as result of OAuth flow.', authCode);
+
+            Client.exchangeCodeForToken(authCode, function (error, accessToken) {
+                if (error) {
+                    console.error('Unable to exchange code for an access token.', error);
+                    window.location.href = window.location.origin;
+                    return;
+                }
+
+                localStorage.token = accessToken;
+                window.location.href = '#/volumelist';
+            });
+            return;
+        }
+
         // Server already initializied, try to perform login based on token
         if (localStorage.token) {
+            var callbackURL = window.location.origin;
             Client.login(localStorage.token, function (error, token) {
                 if (error) {
                     console.error('Unable to login', error);
-                    window.location.href = '#/login';
+                    window.location.href = '/api/v1/oauth/dialog/authorize?response_type=code&client_id=' + Client._clientId + '&redirect_uri=' + callbackURL;
                     return;
                 }
 
@@ -53,9 +71,8 @@ var MainController = function ($scope, $route, Client) {
                 window.location.href = '#/volumelist';
             });
             return;
+        } else {
+            window.location.href = '/api/v1/oauth/dialog/authorize?response_type=code&client_id=' + Client._clientId + '&redirect_uri=' + callbackURL;
         }
-
-        // No token plain login
-        window.location.href = '#/login';
     });
 };
