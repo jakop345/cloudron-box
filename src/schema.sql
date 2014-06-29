@@ -50,3 +50,8 @@ CREATE TABLE IF NOT EXISTS authcodes(
     clientId VARCHAR(512) NOT NULL,
     PRIMARY KEY(authCode));
 
+CREATE TABLE IF NOT EXISTS settings(
+    key VARCHAR(512) NOT NULL UNIQUE,
+    value VARCHAR(512),
+    PRIMARY KEY(key));
+

@@ -24,7 +24,8 @@ var userdb = require('./userdb.js'),
     path = require('path'),
     debug = require('debug')('box:database'),
     DatabaseError = require('./databaseerror'),
-    assert = require('assert');
+    assert = require('assert'),
+    settingsdb = require('./settingsdb.js');
 
 var connectionPool = [ ],
     databaseFileName = null;
@@ -41,6 +42,7 @@ function initialize(config, callback) {
     clientdb.init(db);
     authcodedb.init(db);
     appdb.init(db);
+    settingsdb.init(db);
 
     return callback(null);
 }
