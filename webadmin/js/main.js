@@ -68,7 +68,6 @@ var MainController = function ($scope, $route, Client) {
                 // update token
                 localStorage.token = token;
                 $scope.showSideBar = !!Client._userInfo;
-                window.location.href = '#/volumelist';
             });
             return;
         } else {
