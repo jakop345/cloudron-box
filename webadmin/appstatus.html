@@ -6,11 +6,24 @@
 
     <title> App Status </title>
 
+    <!-- bootstrap -->
+    <script src="3rdparty/js/ui-bootstrap-tpls-0.10.0.js"></script>
+    <link href="3rdparty/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="3rdparty/css/bootstrap-theme.min.css" rel="stylesheet" media="screen">
+
+    <!-- application stylesheets -->
+    <link href="css/index.css" rel="stylesheet" media="screen">
+
   </head>
 
 <body>
 
-    <div id="appstatus"> Getting application status ... </div>
+<div class="container-fluid">
+  <div class="row">
+    <div class="span12 text-center">
+        <h2><span id="appstatus"> Getting application status ... </span></h2>
+    </div>
+</div>
 
     <script>
         var subdomain = window.location.host.substr(0, window.location.host.indexOf('.'));
