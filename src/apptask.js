@@ -299,9 +299,7 @@ function unregisterSubdomain(app, callback) {
         .end(function (error, res) {
             if (error) {
                 debug('Error making request: ' + error.message);
-            }
-
-            if (res.status !== 200) {
+            } else if (res.status !== 200) {
                 debug('Error unregistering subdomain:' + res.body.status + ' ' + res.body.message);
             }
 
