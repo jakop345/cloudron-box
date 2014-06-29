@@ -11,29 +11,28 @@ var MyAppsController = function ($scope, $http, $location, Client) {
     $scope.refresh = function () {
         $scope.loadStatus = $scope.LOADING;
 
-        $http.get('/api/v1/apps')
-            .success(function (data, status, headers) {
-                data.apps.forEach(function (app) {
+        Client.getApps(function (error, apps) {
+            if (error) {
+                console.log(error);
+                $scope.loadStatus = $scope.ERROR;
+                $scope.loadError = status + '';
+            } else {
+                apps.forEach(function (app) {
                     app.iconUrl = Client.getConfig().appstoreOrigin + '/api/v1/app/' + app.id + '/icon';
                     app.url = 'https://' + app.location + '.' + Client.getConfig().hostname;
                 });
-                $scope.apps = data.apps;
+                $scope.apps = apps;
                 $scope.loadStatus = $scope.LOADED;
-            }).error(function (data, status, headers) {
-                $scope.loadStatus = $scope.ERROR;
-                $scope.loadError = status + '';
-                console.error('error in getting app list', data, status);
-            });
+            }
+        });
     };
 
     $scope.removeApp = function (appId) {
-        $http.post('/api/v1/app/' + appId + '/uninstall')
-            .success(function (data, status, headers) {
-                $scope.refresh();
-            }).error(function (data, status, headers) {
-                console.error('Could not uninstall', data, status);
-            });
-    };
+        Client.removeApp(appId, function (error) {
+            if (error) console.log(error);
+            $scope.refresh();
+        });
+     };
 
     $scope.refresh();
 };

@@ -215,6 +215,27 @@ angular.module('YellowTent')
         });
     };
 
+    Client.prototype.getApps = function (callback) {
+        $http.get('/api/v1/apps')
+        .success(function (data, status, headers) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null, data.apps);
+        })
+        .error(function (data, status, headers) {
+            callback(new ClientError(status, data));
+        });
+    };
+
+    Client.prototype.removeApp = function (appId, callback) {
+        $http.post('/api/v1/app/' + appId + '/uninstall')
+        .success(function (data, status, headers) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null);
+        }).error(function (data, status, headers) {
+            callback(new ClientError(status, data));
+        });
+    };
+
     Client.prototype.createAdmin = function (username, password, email, callback) {
         var payload = {
             username: username,
