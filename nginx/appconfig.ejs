@@ -1,6 +1,6 @@
 server {
     listen 443;
-    server_name <%= vhost %>
+    server_name <%= vhost %>;
     ssl on;
     include certificates.conf;
     ssl_session_timeout 5m;
