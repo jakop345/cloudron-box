@@ -21,7 +21,7 @@ var MainController = function ($scope, $route, Client) {
         // TODO actually perform logout on the server
         localStorage.removeItem('token');
         Client.logout();
-        window.location.href = '#/login';
+        window.location.href = '/';
     };
 
     Client.setClientCredentials('cid-webadmin', 'unused');
