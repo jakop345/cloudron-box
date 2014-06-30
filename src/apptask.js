@@ -273,6 +273,11 @@ function uninstall(app, callback) {
 }
 
 function registerSubdomain(app, callback) {
+    if (!config.token) {
+        debug('Skipping subdomain registration for development');
+        return callback(null);
+    }
+
     debug('Registering subdomain for ' + app.id + ' at ' + app.location + '.' + HOSTNAME);
 
     superagent
