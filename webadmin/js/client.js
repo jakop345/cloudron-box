@@ -31,6 +31,10 @@ angular.module('YellowTent')
         return this._userInfo ? this._userInfo.admin : false;
     };
 
+    Client.prototype.setUserInfo = function (userInfo) {
+        this._userInfo = userInfo;
+    };
+
     Client.prototype.getUserInfo = function () {
         return this._userInfo;
     };
@@ -42,6 +46,7 @@ angular.module('YellowTent')
     Client.prototype.setToken = function (token) {
         console.debug('Set client token to ', token);
         $http.defaults.headers.common.Authorization = 'Token ' + token;
+        localStorage.token = token;
         this._token = token;
     };
 
@@ -243,9 +248,15 @@ angular.module('YellowTent')
             email: email
         };
 
+        var that = this;
+
         $http.post('/api/v1/createadmin', payload)
         .success(function(data, status, headers, config) {
             if (status !== 201) return callback(new ClientError(status, data));
+
+            that.setToken(data.token);
+            that.setUserInfo(data.userInfo);
+
             callback(null, data.activated);
         })
         .error(function(data, status, headers, config) {

@@ -51,6 +51,8 @@ function createAdmin(req, res, next) {
     var password = req.body.password || '';
     var email = req.body.email || '';
 
+    debug('createAdmin: ' + username);
+
     user.create(username, password, email, true /* admin */, function (error) {
         if (error) {
             if (error.reason === UserError.ARGUMENTS) {
@@ -62,9 +64,29 @@ function createAdmin(req, res, next) {
             }
         }
 
-        // TODO no next(), as we do not want to fall through to authentication
-        // the whole createAdmin should be handled differently
-        res.send(201, {});
+        // Also generate a token so the admin creation can also act as a login
+        var token = tokendb.generateToken();
+        var expires = new Date(Date.now() + 60 * 60000).toUTCString(); // 1 hour
+
+        debug('createAdmin: now create token for ' + username);
+
+        tokendb.add(token, username, null, expires, function (error) {
+            if (error) return next(500, error.message);
+
+            debug('createAdmin: successful with token ' + token);
+
+            // TODO no next(), as we do not want to fall through to authentication
+            // the whole createAdmin should be handled differently
+            res.send(201, {
+                token: token,
+                expires: expires,
+                userInfo: {
+                    username: username,
+                    email: email,
+                    admin: true
+                }
+            });
+        });
     });
 }
 
