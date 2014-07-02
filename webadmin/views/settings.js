@@ -12,7 +12,7 @@ var SettingsController = function ($scope, Client) {
 
     $scope.setNakedDomain = function () {
         Client.setNakedDomain($scope.nakedDomain, function (error) {
-            if (error) return console.error(error);
+            if (error) return console.error('Error setting naked domain', error);
 
             console.log('Updated naked domain');
         });
