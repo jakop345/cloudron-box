@@ -19,7 +19,7 @@ var MyAppsController = function ($scope, $http, $location, Client) {
             } else {
                 apps.forEach(function (app) {
                     app.iconUrl = Client.getConfig().appstoreOrigin + '/api/v1/app/' + app.id + '/icon';
-                    app.url = 'https://' + app.location + '.' + Client.getConfig().hostname;
+                    app.url = 'https://' + app.location + '.' + Client.getConfig().fqdn;
                 });
                 $scope.apps = apps;
                 $scope.loadStatus = $scope.LOADED;

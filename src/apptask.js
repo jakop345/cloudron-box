@@ -38,7 +38,6 @@ var appServerUrl = config.appServerUrl,
     docker = null,
     appDataRoot = config.appDataRoot,
     nginxAppConfigDir = config.nginxAppConfigDir,
-    HOSTNAME = process.env.HOSTNAME || os.hostname(),
     NGINX_APPCONFIG_EJS = fs.readFileSync(__dirname + '/../nginx/appconfig.ejs', { encoding: 'utf8' });
 
 function initialize() {
@@ -73,7 +72,7 @@ function forwardFromHostToVirtualBox(rulename, port) {
 }
 
 function configureNginx(app, httpPort, callback) {
-    var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { vhost: app.location + '.' + HOSTNAME, port: httpPort });
+    var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { vhost: app.location + '.' + config.fqdn, port: httpPort });
 
     var nginxConfigFilename = path.join(nginxAppConfigDir, app.location + '.conf'); // TODO: check if app.location is safe
     debug('writing config to ' + nginxConfigFilename);
@@ -92,7 +91,7 @@ function configureNginx(app, httpPort, callback) {
 }
 
 function setNakedDomain(app, callback) {
-    var nginxConf = app ? ejs.render(NGINX_APPCONFIG_EJS, { vhost: HOSTNAME, port: app.httpPort }) : '';
+    var nginxConf = app ? ejs.render(NGINX_APPCONFIG_EJS, { vhost: config.fqdn, port: app.httpPort }) : '';
 
     var nginxNakedDomainFilename = path.join(nginxAppConfigDir, '../naked_domain.conf'); // TODO: check if app.location is safe
     debug('writing naked domain config to ' + nginxNakedDomainFilename);
@@ -168,7 +167,7 @@ function createContainer(app, portConfigs, callback) {
     }
 
     var containerOptions = {
-        Hostname: app.location + '.' + HOSTNAME,
+        Hostname: app.location + '.' + config.fqdn,
         Tty: true,
         Image: manifest.docker_image,
         Cmd: null,
@@ -278,13 +277,13 @@ function registerSubdomain(app, callback) {
         return callback(null);
     }
 
-    debug('Registering subdomain for ' + app.id + ' at ' + app.location + '.' + HOSTNAME);
+    debug('Registering subdomain for ' + app.id + ' at ' + app.location + '.' + config.fqdn);
 
     superagent
         .post(appServerUrl + '/api/v1/subdomains')
         .set('Accept', 'application/json')
         .query({ token: config.token })
-        .send({ subdomain: app.location, domain: HOSTNAME }) // TODO: the HOSTNAME should not be required
+        .send({ subdomain: app.location, domain: config.fqdn }) // TODO: the domain should not be required
         .end(function (error, res) {
             if (error) return callback(error);
 
@@ -297,7 +296,7 @@ function registerSubdomain(app, callback) {
 }
 
 function unregisterSubdomain(app, callback) {
-    debug('Unregistering subdomain for ' + app.id + ' at ' + app.location + '.' + HOSTNAME);
+    debug('Unregistering subdomain for ' + app.id + ' at ' + app.location + '.' + config.fqdn);
     superagent
         .del(appServerUrl + '/api/v1/subdomain/' + app.location)
         .query({ token: config.token })

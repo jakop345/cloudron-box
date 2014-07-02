@@ -107,7 +107,7 @@ Server.prototype._getVersion = function (req, res, next) {
 Server.prototype._getConfig = function (req, res, next) {
     res.send(200, {
         appstoreOrigin: this.config.appServerUrl,
-        hostname: os.hostname()
+        fqdn: this.config.fqdn
     });
 };
 

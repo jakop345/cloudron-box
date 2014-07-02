@@ -3,7 +3,8 @@
 'use strict';
 
 var path = require('path'),
-    os = require('os');
+    os = require('os'),
+    assert = require('assert');
 
 function getUserHomeDir() {
     return process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
@@ -24,11 +25,15 @@ var configFile;
 try {
     configFile = require('/etc/yellowtent.json');
 } catch (e) {
+    // TODO: instead of requiring env variable, use the output of hostname -f
+    assert(typeof process.env.FQDN !== 'undefined', 'Set FQDN to the box domain name');
+
     console.log('Unable to load provisioned config file. Using defaults.');
     configFile = {
         token: null,
         appstoreOrigin: 'https://selfhost.io:5050',
-        adminOrigin: 'https://admin.' + os.hostname()
+        adminOrigin: 'https://admin.' + process.env.FQDN,
+        fqdn: process.env.FQDN
     };
 }
 
@@ -42,6 +47,7 @@ exports = module.exports = {
     appServerUrl: configFile.appstoreOrigin,
     adminOrigin: configFile.adminOrigin,
     nginxAppConfigDir: nginxAppConfigDir,
-    appDataRoot: appDataRoot
+    appDataRoot: appDataRoot,
+    fqdn: configFile.fqdn
 };
 

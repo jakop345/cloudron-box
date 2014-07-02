@@ -17,6 +17,10 @@ Development setup
 
 ** Verify using `sudo rmappdir.sh --check`. This should print 'OK'
 
+* export FQDN='mybox.cloudron.us'
+** Add the above domain to your /etc/hosts
+** All apps will be installed as subdomains of the above FQDN
+
 Running
 -------
 * ./run.sh - this starts up nginx to serve up the webadmin
