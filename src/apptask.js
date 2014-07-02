@@ -77,9 +77,6 @@ function configureNginx(app, httpPort, callback) {
         if (error) return callback(error);
 
         child_process.exec(RELOAD_NGINX_CMD, { timeout: 10000 }, function (error, stdout, stderr) {
-console.log(stdout);
-console.log(stderr);
-console.dir(error);
             if (error) return callback(error);
 
             return callback(null);
@@ -87,6 +84,16 @@ console.dir(error);
 
         forwardFromHostToVirtualBox(app.id + '-http', httpPort);
     });
+}
+
+function unconfigureNginx(app, callback) {
+    var nginxConfigFilename = path.join(nginxAppConfigDir, app.location + '.conf'); // TODO: check if app.location is safe
+    if (!safe.fs.unlinkSync(nginxConfigFilename)) {
+        debug('Error removing nginx configuration ' + safe.error);
+        return callback(safe.error);
+    }
+
+    child_process.exec(RELOAD_NGINX_CMD, { timeout: 10000 }, callback);
 }
 
 function setNakedDomain(app, callback) {
@@ -184,6 +191,20 @@ function createContainer(app, portConfigs, callback) {
     });
 }
 
+function deleteContainer(app, callback) {
+    var container = docker.getContainer(app.containerId);
+
+    var removeOptions = {
+        force: true, // kill container if it's running
+        v: true // removes volumes associated with the container
+    };
+
+    container.remove(removeOptions, function (error) {
+        if (error) debug('Error removing container', error);
+        callback(error);
+    });
+}
+
 function createVolume(app, callback) {
     var appDataDir = path.join(appDataRoot, app.id); // TODO: check if app.id is safe path
 
@@ -192,6 +213,13 @@ function createVolume(app, callback) {
     }
 
     return callback(null);
+}
+
+function deleteVolume(app, callback) {
+    child_process.exec('sudo ' + __dirname + '/rmappdir.sh ' + app.id, function (error, stdout, stderr) {
+        if (error) debug('Error removing volume', error);
+        return callback(error);
+    });
 }
 
 function startContainer(app, portConfigs, callback) {
@@ -238,36 +266,6 @@ function downloadManifest(app, callback) {
             debug('Downloaded application manifest: ' + res.text);
             return callback(null, res.text);
         });
-}
-
-function uninstall(app, callback) {
-    var container = docker.getContainer(app.containerId);
-
-    var removeOptions = {
-        force: true, // kill container if it's running
-        v: true // removes volumes associated with the container
-    };
-
-    debug('uninstalling ' + app.id);
-
-    var nginxConfigFilename = path.join(nginxAppConfigDir, app.location + '.conf'); // TODO: check if app.location is safe
-    if (!safe.fs.unlinkSync(nginxConfigFilename)) {
-        debug('Error removing nginx configuration ' + safe.error);
-    }
-
-    container.remove(removeOptions, function (error) {
-        if (error) debug('Error removing container:' + JSON.stringify(error)); // TODO: now what?
-
-        child_process.exec('sudo ' + __dirname + '/rmappdir.sh ' + app.id, function (error, stdout, stderr) {
-            if (error) debug('Error removing app directory:' + app.id); // TODO: now what?
-
-            unregisterSubdomain(app, function (error) {
-                if (error) return callback(error);
-
-                appdb.del(app.id, callback);
-            });
-        });
-    });
 }
 
 function registerSubdomain(app, callback) {
@@ -415,6 +413,40 @@ function install(app, callback) {
         }
     ], callback);
 }
+
+function uninstall(app, callback) {
+   debug('uninstalling ' + app.id);
+
+    // TODO: figure what happens if one of the steps fail
+
+    async.series([
+        // unconfigure nginx
+        function (callback) {
+            unconfigureNginx(app, function (error) { callback(null); });
+        },
+
+        // delete the container
+        function (callback) {
+            deleteContainer(app, function (error) { callback(null); });
+        },
+
+        // delete volume
+        function (callback) {
+            deleteVolume(app, function (error) { callback(null); });
+        },
+
+        // unregister subdomain
+        function (callback) {
+            unregisterSubdomain(app, function (error) { callback(null); });
+        },
+
+        // delete app from db
+        function (callback) {
+            appdb.del(app.id, callback);
+        },
+    ], callback);
+}
+
 
 function runApp(app, callback) {
     appdb.getPortBindings(app.id, function (error, portBindings) {
