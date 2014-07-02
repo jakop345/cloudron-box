@@ -10,12 +10,15 @@ Development setup
 ** Add a file called /etc/sudoers.d/yellowtent with the following contents:
    Defaults!/home/girish/yellowtent/box/src/rmappdir.sh env_keep=HOME
    girish ALL = (ALL) NOPASSWD: /home/girish/yellowtent/box/src/rmappdir.sh
+   Defaults!/home/girish/yellowtent/box/src/reloadnginx.sh env_keep=HOME
+   girish ALL = (ALL) NOPASSWD: /home/girish/yellowtent/box/src/reloadnginx.sh
 
    (replace the username and path to rmappdir.sh to match your environment)
 
    You might have to clear the sudo cache using sudo -k.
 
 ** Verify using `sudo rmappdir.sh --check`. This should print 'OK'
+** Verify using `sudo reloadnginx.sh --check`. This should print 'OK'
 
 * export FQDN='mybox.cloudron.us'
 ** Add the above domain to your /etc/hosts

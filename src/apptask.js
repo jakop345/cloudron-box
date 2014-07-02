@@ -33,7 +33,8 @@ var appServerUrl = config.appServerUrl,
     docker = null,
     appDataRoot = config.appDataRoot,
     nginxAppConfigDir = config.nginxAppConfigDir,
-    NGINX_APPCONFIG_EJS = fs.readFileSync(__dirname + '/../nginx/appconfig.ejs', { encoding: 'utf8' });
+    NGINX_APPCONFIG_EJS = fs.readFileSync(__dirname + '/../nginx/appconfig.ejs', { encoding: 'utf8' }),
+    RELOAD_NGINX_CMD = 'sudo ' + __dirname + '/reloadnginx.sh';
 
 function initialize() {
     if (os.platform() === 'linux') {
@@ -75,7 +76,10 @@ function configureNginx(app, httpPort, callback) {
     fs.writeFile(nginxConfigFilename, nginxConf, function (error) {
         if (error) return callback(error);
 
-        child_process.exec("supervisorctl -c supervisor/supervisord.conf restart nginx", { timeout: 10000 }, function (error, stdout, stderr) {
+        child_process.exec(RELOAD_NGINX_CMD, { timeout: 10000 }, function (error, stdout, stderr) {
+console.log(stdout);
+console.log(stderr);
+console.dir(error);
             if (error) return callback(error);
 
             return callback(null);
@@ -94,7 +98,7 @@ function setNakedDomain(app, callback) {
     fs.writeFile(nginxNakedDomainFilename, nginxConf, function (error) {
         if (error) return callback(error);
 
-        child_process.exec("supervisorctl -c supervisor/supervisord.conf restart nginx", { timeout: 10000 }, function (error, stdout, stderr) {
+        child_process.exec(RELOAD_NGINX_CMD, { timeout: 10000 }, function (error, stdout, stderr) {
             if (error) return callback(error);
 
             return callback(null);
@@ -254,7 +258,7 @@ function uninstall(app, callback) {
     container.remove(removeOptions, function (error) {
         if (error) debug('Error removing container:' + JSON.stringify(error)); // TODO: now what?
 
-        child_process.exec('sudo ' + __dirname + '/rmappdir.sh ' + [ app.id ], function (error, stdout, stderr) {
+        child_process.exec('sudo ' + __dirname + '/rmappdir.sh ' + app.id, function (error, stdout, stderr) {
             if (error) debug('Error removing app directory:' + app.id); // TODO: now what?
 
             unregisterSubdomain(app, function (error) {
