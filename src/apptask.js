@@ -130,7 +130,7 @@ function downloadImage(app, callback) {
         // is emitted as a chunk
         stream.on('data', function (chunk) {
             var data = safe.JSON.parse(chunk) || { };
-            debug(JSON.stringify(data));
+            debug('downloadImage:', JSON.stringify(data));
 
             // The information here is useless because this is per layer as opposed to per image
             if (data.status) {
@@ -409,6 +409,7 @@ function install(app, callback) {
 
         // done!
         function (callback) {
+            debug('App ' + app.id + ' installed');
             updateApp(app, { installationState: appdb.ISTATE_INSTALLED }, callback);
         }
     ], callback);
@@ -475,7 +476,7 @@ function start(appId, callback) {
 
         install(app, function (error) {
             if (error) {
-                debug(error.message);
+                debug('Error installing app:', error);
                 return updateApp(app, { installationState: appdb.ISTATE_ERROR }, callback);
             }
 
