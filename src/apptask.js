@@ -317,7 +317,6 @@ function updateApp(app, values, callback) {
     appdb.update(app.id, values, callback);
 }
 
-// callback is called with error for fatal errors (and not for install errors)
 function install(app, callback) {
     async.series([
         // configure nginx
@@ -405,14 +404,7 @@ function install(app, callback) {
         function (callback) {
             updateApp(app, { installationState: appdb.ISTATE_INSTALLED }, callback);
         }
-    ], function (error) {
-        if (error) {
-            debug(error.message);
-            return updateApp(app, { installationState: appdb.ISTATE_ERROR }, callback);
-        }
-
-        callback(null);
-    });
+    ], callback);
 }
 
 function runApp(app, callback) {
@@ -430,16 +422,21 @@ function runApp(app, callback) {
     });
 }
 
+// callback is called with error for fatal errors (and not for install errors)
 function start(appId, callback) {
     appdb.get(appId, function (error, app) {
         if (error) return callback(error);
-        if (app.installationState === 'pending_uninstall') {
+
+        if (app.installationState === appdb.ISTATE_PENDING_UNINSTALL) {
             uninstall(app, callback);
             return;
         }
 
         install(app, function (error) {
-            if (error) return callback(error);
+            if (error) {
+                debug(error.message);
+                return updateApp(app, { installationState: appdb.ISTATE_ERROR }, callback);
+            }
 
             runApp(app, callback);
         });
