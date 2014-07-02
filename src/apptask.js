@@ -295,6 +295,11 @@ function registerSubdomain(app, callback) {
 }
 
 function unregisterSubdomain(app, callback) {
+    if (!config.token) {
+        debug('Skipping subdomain unregistration for development');
+        return callback(null);
+    }
+
     debug('Unregistering subdomain for ' + app.id + ' at ' + app.location + '.' + config.fqdn);
     superagent
         .del(appServerUrl + '/api/v1/subdomain/' + app.location)
