@@ -1,7 +1,16 @@
 node_modules/
 coverage/
 docs/
-nginx/*.log
-nginx/*.pid
+
+# vim swam files
+*.swp
+
+# supervisor
+supervisord.pid
 supervisord.log
 
+# nginx
+nginx/*.log
+nginx/*.pid
+nginx/naked_domain.conf
+nginx/applications/
