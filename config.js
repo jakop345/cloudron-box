@@ -3,8 +3,7 @@
 'use strict';
 
 var path = require('path'),
-    os = require('os'),
-    assert = require('assert');
+    os = require('os');
 
 function getUserHomeDir() {
     return process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
@@ -19,6 +18,7 @@ var mountRoot = path.join(baseDir, 'mount');
 var port = 3000;
 var silent = false;
 var nginxAppConfigDir = path.join(__dirname, 'nginx/applications/');
+var fqdn = os.hostname();
 
 // load provisioned config file if there
 var configFile;
@@ -26,14 +26,15 @@ try {
     configFile = require('/etc/yellowtent.json');
 } catch (e) {
     // TODO: instead of requiring env variable, use the output of hostname -f
-    assert(typeof process.env.FQDN !== 'undefined', 'Set FQDN to the box domain name');
+    if (typeof process.env.FQDN !== 'undefined') fqdn = process.env.FQDN;
 
     console.log('Unable to load provisioned config file. Using defaults.');
+
     configFile = {
         token: null,
         appstoreOrigin: 'https://selfhost.io:5050',
-        adminOrigin: 'https://admin.' + process.env.FQDN,
-        fqdn: process.env.FQDN
+        adminOrigin: 'https://admin.' + fqdn,
+        fqdn: fqdn
     };
 }
 
