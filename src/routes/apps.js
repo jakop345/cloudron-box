@@ -17,7 +17,10 @@ exports = module.exports = {
     uninstallApp: uninstallApp
 };
 
-function initialize(config) {
+var config = null;
+
+function initialize(_config) {
+    config = _config;
 }
 
 function getApp(req, res, next) {
@@ -49,14 +52,29 @@ function getApps(req, res, next) {
     });
 }
 
+// http://stackoverflow.com/questions/7930751/regexp-for-subdomain
+function checkDomainName(subdomain, fqdn) {
+    if (subdomain.length > 63) return new Error('Subdomain length cannot be greater than 63');
+    if (subdomain.match(/^[A-Za-z0-9-]+$/) === null) return new Error('Subdomain can only contain alphanumerics and hyphen');
+    if (subdomain[0] === '-' || subdomain[subdomain.length-1] === '-') return new Error('Subdomain cannot start or end with hyphen');
+
+    if (subdomain.length + 1 /* dot */ + fqdn.length > 255) return new Error('Domain length exceeds 255 characters');
+
+    return null;
+}
+
 function installApp(req, res, next) {
     var data = req.body;
 
     if (!data) return next(new HttpError(400, 'Cannot parse data field'));
     if (!data.app_id) return next(new HttpError(400, 'app_id is required'));
     if (!data.password) return next(new HttpError(400, 'password is required'));
+
     if (!data.location) return next(new HttpError(400, 'location is required'));
     if (data.location === 'admin') return next(new HttpError(400, 'admin location is reserved')); // TODO: maybe this should be reserved in db?
+    var error = checkDomainName(data.location, config.fqdn);
+    if (error) return next(new HttpError(400, error.message));
+
     if (data.portBindings !== null && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
 
     var portBindings = [ ];

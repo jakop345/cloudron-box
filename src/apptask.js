@@ -70,7 +70,7 @@ function forwardFromHostToVirtualBox(rulename, port) {
 function configureNginx(app, httpPort, callback) {
     var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { vhost: app.location + '.' + config.fqdn, port: httpPort });
 
-    var nginxConfigFilename = path.join(nginxAppConfigDir, app.location + '.conf'); // TODO: check if app.location is safe
+    var nginxConfigFilename = path.join(nginxAppConfigDir, app.location + '.conf');
     debug('writing config to ' + nginxConfigFilename);
 
     fs.writeFile(nginxConfigFilename, nginxConf, function (error) {
@@ -87,7 +87,7 @@ function configureNginx(app, httpPort, callback) {
 }
 
 function unconfigureNginx(app, callback) {
-    var nginxConfigFilename = path.join(nginxAppConfigDir, app.location + '.conf'); // TODO: check if app.location is safe
+    var nginxConfigFilename = path.join(nginxAppConfigDir, app.location + '.conf');
     if (!safe.fs.unlinkSync(nginxConfigFilename)) {
         debug('Error removing nginx configuration ' + safe.error);
         return callback(safe.error);
@@ -99,7 +99,7 @@ function unconfigureNginx(app, callback) {
 function setNakedDomain(app, callback) {
     var nginxConf = app ? ejs.render(NGINX_APPCONFIG_EJS, { vhost: config.fqdn, port: app.httpPort }) : '';
 
-    var nginxNakedDomainFilename = path.join(nginxAppConfigDir, '../naked_domain.conf'); // TODO: check if app.location is safe
+    var nginxNakedDomainFilename = path.join(nginxAppConfigDir, '../naked_domain.conf');
     debug('writing naked domain config to ' + nginxNakedDomainFilename);
 
     fs.writeFile(nginxNakedDomainFilename, nginxConf, function (error) {
@@ -206,7 +206,7 @@ function deleteContainer(app, callback) {
 }
 
 function createVolume(app, callback) {
-    var appDataDir = path.join(appDataRoot, app.id); // TODO: check if app.id is safe path
+    var appDataDir = path.join(appDataRoot, app.id);
 
     if (!safe.fs.mkdirSync(appDataDir)) {
         return callback(new Error('Error creating app data directory ' + appDataDir + ' ' + safe.error));
@@ -224,7 +224,7 @@ function deleteVolume(app, callback) {
 
 function startContainer(app, portConfigs, callback) {
     var manifest = JSON.parse(app.manifestJson); // this is guaranteed not to throw since it's already been verified in downloadManifest()
-    var appDataDir = path.join(appDataRoot, app.id); // TODO: check if app.id is safe path
+    var appDataDir = path.join(appDataRoot, app.id);
 
     var portBindings = { };
     portBindings[manifest.http_port + '/tcp'] = [ { HostPort: app.httpPort + '' } ];
