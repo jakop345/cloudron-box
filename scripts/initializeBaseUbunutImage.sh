@@ -1,5 +1,17 @@
-#!/bin/sh
+#!/bin/bash
 
+BASEDIR=/home/yellowtent/box
+USER=yellowtent
+
+echo "==== Create User $USER ===="
+id $USER
+if [[ $? -ne 0 ]]; then
+    rm -rf /home/$USER
+    useradd $USER -m
+fi
+usermod $USER -a -G docker
+
+# now exit on failure
 set -e
 
 echo "== Yellowtent base image preparation =="
@@ -12,7 +24,7 @@ apt-get update
 
 echo "==== Setup nodejs ===="
 apt-get -y install nodejs npm
-ln -s /usr/bin/nodejs /usr/bin/node
+ln -sf /usr/bin/nodejs /usr/bin/node
 
 
 echo "==== Setup git ===="
@@ -45,27 +57,21 @@ echo "==== Setup supervisor ===="
 apt-get -y install supervisor
 
 
-echo "==== Create User $USER ===="
-id $USER
-if [[ $? -ne 0 ]]; then
-    useradd $USER -m
-fi
-usermod $USER -a -G docker
-
-
-
 echo "== Box bootstrapping =="
-
-BASEDIR=/home/yellowtent/box
-USER=yellowtent
 
 
 echo "==== Cloning box repo ===="
 mkdir -p $BASEDIR
 cd $BASEDIR
-cd ..
-git clone http://bootstrap:not4long@yellowtent.girish.in/yellowtent/box.git
-cd box
+if [ -d "$BASEDIR" ]; then
+    git fetch
+    git reset --hard origin/master
+else
+    cd ..
+    git clone http://bootstrap:not4long@yellowtent.girish.in/yellowtent/box.git
+    git checkout origin/master -b master
+    cd box
+fi
 npm install --production
 
 
@@ -79,26 +85,17 @@ $USER ALL=(root) NOPASSWD: $BASEDIR/src/reloadnginx.sh
 EOF
 
 
-echo "==== Setup nginx ===="
-killall nginx
-mkdir -p /home/$USER/.yellowtent/applications
-ln -s /home/$USER/.yellowtent/applications $BASEDIR/nginx/applications
-touch /home/$USER/.yellowtent/naked_domain.conf
-ln -sf /home/$USER/.yellowtent/naked_domain.conf $BASEDIR/nginx/naked_domain.conf
-# TODO until I find a way to have a more dynamic nginx config
-# this will break if we ever do an update
-cp nginx/certificates.conf_deployed nginx/certificates.conf
-
-
 echo "==== Make the user own his home ===="
-chown $USER:$USER -R /home/$USER/.yellowtent/
+chown $USER:$USER -R /home/$USER
 
 
 echo "==== Install init script ===="
 cat > /etc/init.d/bootstrap <<EOF
 #!/bin/sh
 
-curl -v https://appstore-dev.herokuapp.com/api/v1/boxes/announce >> /tmp/yellowtent
+curl -v https://appstore-dev.herokuapp.com/api/v1/boxes/announce?name=$HOSTNAME >> /tmp/yellowtent
 
 echo "box announced itself to appstore" >> /tmp/yellowtent
 EOF
+chmod +x /etc/init.d/bootstrap
+update-rc.d bootstrap defaults
