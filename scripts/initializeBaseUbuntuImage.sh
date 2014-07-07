@@ -65,17 +65,18 @@ echo "== Box bootstrapping =="
 
 echo "==== Cloning box repo ===="
 if [ -d "$BASEDIR/.git" ]; then
+    echo "Updating the box repo"
     cd $BASEDIR
     git fetch
     git reset --hard origin/master
 else
+    echo "Cloning the box repo"
     rm -rf $BASEDIR
     mkdir -p $USER_HOME
     cd $USER_HOME
-    cd ..
     git clone http://bootstrap:not4long@yellowtent.girish.in/yellowtent/box.git
-    git checkout origin/master -b master
     cd box
+    git checkout origin/master
 fi
 npm install --production
 
@@ -98,7 +99,8 @@ echo "==== Install init script ===="
 cat > /etc/init.d/bootstrap <<EOF
 #!/bin/sh
 
-curl -v https://appstore-dev.herokuapp.com/api/v1/boxes/announce?name=$HOSTNAME >> /tmp/yellowtent
+curl -v https://appstore-dev.herokuapp.com/api/v1/boxes/announce?name=\`hostname -f\` >> /tmp/yellowtent
+# curl -v https://nebulon.fwd.wf/api/v1/boxes/announce?name=\`hostname -f\` >> /tmp/yellowtent
 
 echo "box announced itself to appstore" >> /tmp/yellowtent
 EOF
