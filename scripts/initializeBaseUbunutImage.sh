@@ -1,6 +1,9 @@
 #!/bin/bash
 
-BASEDIR=/home/yellowtent/box
+set -v
+
+USER_HOME=/home/yellowtent
+BASEDIR=$USER_HOME/box
 USER=yellowtent
 
 echo "==== Create User $USER ===="
@@ -61,12 +64,14 @@ echo "== Box bootstrapping =="
 
 
 echo "==== Cloning box repo ===="
-mkdir -p $BASEDIR
-cd $BASEDIR
-if [ -d "$BASEDIR" ]; then
+if [ -d "$BASEDIR/.git" ]; then
+    cd $BASEDIR
     git fetch
     git reset --hard origin/master
 else
+    rm -rf $BASEDIR
+    mkdir -p $USER_HOME
+    cd $USER_HOME
     cd ..
     git clone http://bootstrap:not4long@yellowtent.girish.in/yellowtent/box.git
     git checkout origin/master -b master
