@@ -99,10 +99,22 @@ echo "==== Install init script ===="
 cat > /etc/init.d/bootstrap <<EOF
 #!/bin/sh
 
-curl -v https://appstore-dev.herokuapp.com/api/v1/boxes/announce?name=\`hostname -f\` >> /tmp/yellowtent
-# curl -v https://nebulon.fwd.wf/api/v1/boxes/announce?name=\`hostname -f\` >> /tmp/yellowtent
+OUT="/tmp/bootstrap"
+STDOUT="$OUT.log"
 
-echo "box announced itself to appstore" >> /tmp/yellowtent
+ANNOUNCE="curl -fv https://appstore-dev.herokuapp.com/api/v1/boxes/announce?name=`hostname -f` &>> $STDOUT"
+#ANNOUNCE="curl -fv https://nebulon.fwd.wf/api/v1/boxes/announce?name=`hostname -f` &>> $STDOUT"
+
+eval $ANNOUNCE
+RET=$?
+while [[ $RET -ne 0 ]]; do
+        echo "[EE] Failed to announce itself with error code $RET, try again in a second" >> $OUT
+        sleep 1
+        eval $ANNOUNCE
+        RET=$?
+done
+
+echo "[II] Successfully announced itself to appstore" >> $OUT
 EOF
 chmod +x /etc/init.d/bootstrap
 update-rc.d bootstrap defaults
