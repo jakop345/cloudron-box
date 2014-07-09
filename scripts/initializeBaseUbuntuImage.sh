@@ -99,22 +99,22 @@ echo "==== Install init script ===="
 cat > /etc/init.d/bootstrap <<EOF
 #!/bin/sh
 
-OUT="/tmp/bootstrap"
-STDOUT="$OUT.log"
+LOGOUT="/tmp/bootstrap"
+STDOUT="\$LOGOUT.log"
 
-ANNOUNCE="curl -fv https://appstore-dev.herokuapp.com/api/v1/boxes/announce?name=`hostname -f` &>> $STDOUT"
-#ANNOUNCE="curl -fv https://nebulon.fwd.wf/api/v1/boxes/announce?name=`hostname -f` &>> $STDOUT"
+ANNOUNCE="curl -fv https://appstore-dev.herokuapp.com/api/v1/boxes/announce?name=`hostname -f` &>> \$STDOUT"
+#ANNOUNCE="curl -fv https://nebulon.fwd.wf/api/v1/boxes/announce?name=`hostname -f` &>> \$STDOUT"
 
-eval $ANNOUNCE
-RET=$?
+eval \$ANNOUNCE
+RET=\$?
 while [[ $RET -ne 0 ]]; do
-        echo "[EE] Failed to announce itself with error code $RET, try again in a second" >> $OUT
+        echo "[EE] Failed to announce itself with error code $RET, try again in a second" >> \$LOGOUT
         sleep 1
-        eval $ANNOUNCE
-        RET=$?
+        eval \$ANNOUNCE
+        RET=\$?
 done
 
-echo "[II] Successfully announced itself to appstore" >> $OUT
+echo "[II] Successfully announced itself to appstore" >> \$LOGOUT
 EOF
 chmod +x /etc/init.d/bootstrap
 update-rc.d bootstrap defaults
