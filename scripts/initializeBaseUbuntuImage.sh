@@ -102,8 +102,8 @@ cat > /etc/init.d/bootstrap <<EOF
 LOGOUT="/tmp/bootstrap"
 STDOUT="\$LOGOUT.log"
 
-ANNOUNCE="curl -fv https://appstore-dev.herokuapp.com/api/v1/boxes/announce?name=`hostname -f` &>> \$STDOUT"
-#ANNOUNCE="curl -fv https://nebulon.fwd.wf/api/v1/boxes/announce?name=`hostname -f` &>> \$STDOUT"
+ANNOUNCE="curl -fv https://appstore-dev.herokuapp.com/api/v1/boxes/announce?name=\`hostname -f\` &>> \$STDOUT"
+#ANNOUNCE="curl -fv https://nebulon.fwd.wf/api/v1/boxes/announce?name=\`hostname -f\` &>> \$STDOUT"
 
 eval \$ANNOUNCE
 RET=\$?
