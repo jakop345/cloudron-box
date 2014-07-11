@@ -24,7 +24,7 @@ var express = require('express'),
 
 exports = module.exports = Server;
 
-var HEARTBEAT_INTERVAL = 10000;
+var HEARTBEAT_INTERVAL = 1000 * 60 * 60;
 
 function Server(config) {
     assert(typeof config === 'object');
