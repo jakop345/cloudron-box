@@ -46,7 +46,7 @@ ln -sf /usr/bin/docker.io /usr/local/bin/docker
 echo "==== Setup nginx ===="
 apt-get -y install nginx-full
 service nginx stop
-
+update-rc.d -f nginx remove
 
 echo "==== Setup build-essential ===="
 apt-get -y install build-essential
@@ -103,7 +103,7 @@ LOGOUT="/tmp/bootstrap"
 STDOUT="\$LOGOUT.log"
 
 ANNOUNCE="curl -fv https://appstore-dev.herokuapp.com/api/v1/boxes/announce?name=\`hostname -f\` &>> \$STDOUT"
-#ANNOUNCE="curl -fv https://nebulon.fwd.wf/api/v1/boxes/announce?name=\`hostname -f\` &>> \$STDOUT"
+# ANNOUNCE="curl -fv https://nebulon.fwd.wf/api/v1/boxes/announce?name=\`hostname -f\` &>> \$STDOUT"
 
 eval \$ANNOUNCE
 RET=\$?
