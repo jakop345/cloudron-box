@@ -21,7 +21,8 @@ var assert = require('assert'),
     config = require('../config.js'),
     database = require('./database.js'),
     HttpError = require('./httperror.js'),
-    ejs = require('ejs');
+    ejs = require('ejs'),
+    appFqdn = require('./apps').appFqdn;
 
 exports = module.exports = {
     initialize: initialize,
@@ -68,7 +69,7 @@ function forwardFromHostToVirtualBox(rulename, port) {
 }
 
 function configureNginx(app, httpPort, callback) {
-    var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { vhost: app.location + '.' + config.fqdn, port: httpPort });
+    var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { vhost: appFqdn(app.location), port: httpPort });
 
     var nginxConfigFilename = path.join(nginxAppConfigDir, app.location + '.conf');
     debug('writing config to ' + nginxConfigFilename);
@@ -173,7 +174,7 @@ function createContainer(app, portConfigs, callback) {
     }
 
     var containerOptions = {
-        Hostname: app.location + '.' + config.fqdn,
+        Hostname: appFqdn(app.location),
         Tty: true,
         Image: manifest.docker_image,
         Cmd: null,
@@ -274,7 +275,7 @@ function registerSubdomain(app, callback) {
         return callback(null);
     }
 
-    debug('Registering subdomain for ' + app.id + ' at ' + app.location + '.' + config.fqdn);
+    debug('Registering subdomain for ' + app.id + ' at ' + app.location);
 
     superagent
         .post(appServerUrl + '/api/v1/subdomains')
@@ -298,7 +299,7 @@ function unregisterSubdomain(app, callback) {
         return callback(null);
     }
 
-    debug('Unregistering subdomain for ' + app.id + ' at ' + app.location + '.' + config.fqdn);
+    debug('Unregistering subdomain for ' + app.id + ' at ' + app.location);
     superagent
         .del(appServerUrl + '/api/v1/subdomain/' + app.location)
         .query({ token: config.token })

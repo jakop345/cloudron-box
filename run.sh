@@ -8,7 +8,7 @@ BASEDIR=$(dirname $0)
 
 # Fix the hostname for the admin application
 FQDN=`hostname -f`
-sed -e "s/##ADMIN_FQDN##/admin.$FQDN/" nginx/admin.conf_template > nginx/applications/admin.conf
+sed -e "s/##ADMIN_FQDN##/admin-$FQDN/" nginx/admin.conf_template > nginx/applications/admin.conf
 touch nginx/naked_domain.conf
 
 sudo mkdir -p /var/log/supervisord

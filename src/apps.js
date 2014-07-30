@@ -8,7 +8,8 @@ var DatabaseError = require('./databaseerror.js'),
     assert = require('assert'),
     safe = require('safetydance'),
     appdb = require('./appdb.js'),
-    child_process = require('child_process');
+    child_process = require('child_process'),
+    config = require('../config.js');
 
 exports = module.exports = {
     AppsError: AppsError,
@@ -19,7 +20,9 @@ exports = module.exports = {
     getBySubdomain: getBySubdomain,
     getAll: getAll,
     install: install,
-    uninstall: uninstall
+    uninstall: uninstall,
+
+    appFqdn: appFqdn
 };
 
 var tasks = { }, appHealthTask = null;
@@ -65,6 +68,10 @@ AppsError.INTERNAL_ERROR = 1;
 AppsError.ALREADY_EXISTS = 2;
 AppsError.NOT_FOUND = 3;
 
+function appFqdn(location) {
+    return location + '-' + config.fqdn;
+}
+
 function get(appId, callback) {
     assert(typeof appId === 'string');
 
@@ -90,6 +97,12 @@ function getBySubdomain(subdomain, callback) {
 function getAll(callback) {
     appdb.getAll(function (error, apps) {
         if (error) return callback(new AppsError('Internal error:' + error.message, AppsError.INTERNAL_ERROR));
+
+        apps.forEach(function (app) {
+            app.iconUrl = config.appServerUrl + '/api/v1/app/' + app.id + '/icon';
+            app.url = 'https://' + appFqdn(app.location);
+        });
+
         callback(null, apps);
     });
 }
