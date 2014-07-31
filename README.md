@@ -21,9 +21,13 @@ Development setup
 ** Verify using `sudo reloadnginx.sh --check`. This should print 'OK'
 
 * Set your hostname to 'mybox.cloudron.us'
-* export FQDN='mybox.cloudron.us'
+** On Mac, settings the hostname through command line resets the name periodically.
+   Using the network control panel, always appends a .local suffix.
+   Workaround: sudo scutil --set HostName mybox.cloudron.us
+
+* export FQDN='mybox.cloudron.us' (add this to your .bashrc)
 ** Add the above domain to your /etc/hosts
-** All apps will be installed as subdomains of the above FQDN
+** All apps will be installed as hypened-subdomains of the above FQDN
 
 Running
 -------
