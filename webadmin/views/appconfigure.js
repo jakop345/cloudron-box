@@ -48,7 +48,7 @@ var AppConfigureController = function ($scope, $routeParams, Client, AppStore) {
                 return;
             }
 
-            window.location.replace('#/applist');
+            window.location.replace('#/myapps');
         });
     };
 
