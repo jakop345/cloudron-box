@@ -424,7 +424,6 @@ function uninstall(app, callback) {
    debug('uninstalling ' + app.id);
 
     // TODO: figure what happens if one of the steps fail
-
     async.series([
         // unset naked domain
         function (callback) {
@@ -432,9 +431,10 @@ function uninstall(app, callback) {
                 if (error) return callback(null);
                 if (value !== app.id) return callback(null);
 
-                // TODO: this need to be locked
-                settingsdb.set(settingsdb.NAKED_DOMAIN_KEY, null);
-                setNakedDomain(null, callback);
+                // TODO: this needs to be test-and-set and also atomic with nginx config removal
+                settingsdb.set(settingsdb.NAKED_DOMAIN_KEY, null, function (error) {
+                    setNakedDomain(null, function (error) { callback(null); });
+                });
             });
         },
 

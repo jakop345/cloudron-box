@@ -56,7 +56,7 @@ function getAll(callback) {
 function set(key, value, callback) {
     assert(db !== null);
     assert(typeof key === 'string');
-    assert(typeof value === 'string');
+    assert(value === null || typeof value === 'string');
     assert(typeof callback === 'function');
 
     // sqlite does not have upsert
