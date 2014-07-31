@@ -218,7 +218,7 @@ Server.prototype._initializeExpressSync = function () {
     // public routes
     router.get('/api/v1/version', this._getVersion.bind(this));
     router.get('/api/v1/firsttime', this._firstTime.bind(this));
-    router.post('/api/v1/provision', routes._provision.bind(this));    // FIXME any number of admins can be created without auth!
+    router.post('/api/v1/provision', this._provision.bind(this));    // FIXME any number of admins can be created without auth!
     router.post('/api/v1/createadmin', routes.user.createAdmin);    // FIXME any number of admins can be created without auth!
 
     // config.json

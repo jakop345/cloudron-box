@@ -100,22 +100,20 @@ echo "==== Install init script ===="
 cat > /etc/init.d/bootstrap <<EOF
 #!/bin/sh
 
-LOGOUT="/tmp/bootstrap"
-STDOUT="\$LOGOUT.log"
+LOG="/tmp/bootstrap"
 
-ANNOUNCE="curl -fv https://appstore-dev.herokuapp.com/api/v1/boxes/announce?name=\`hostname -f\` &>> \$STDOUT"
-# ANNOUNCE="curl -fv https://nebulon.fwd.wf/api/v1/boxes/announce?name=\`hostname -f\` &>> \$STDOUT"
+echo "[II] Update to latest git revision..." >> \$LOG
+cd $BASEDIR
+git fetch
+git reset --hard origin/master
+echo "[II] Done" >> \$LOG
 
-eval \$ANNOUNCE
-RET=\$?
-while [[ $RET -ne 0 ]]; do
-        echo "[EE] Failed to announce itself with error code $RET, try again in a second" >> \$LOGOUT
-        sleep 1
-        eval \$ANNOUNCE
-        RET=\$?
-done
+echo "[II] Run bootstrap script..." >> \$LOG
+/bin/bash $BASEDIR/scripts/bootstrap.sh https://appstore-dev.herokuapp.com
+# /bin/bash $BASEDIR/scripts/bootstrap.sh https://nebulon.fwd.wf
+echo "[II] Done" >> \$LOG
 
-echo "[II] Successfully announced itself to appstore" >> \$LOGOUT
+update-rc.d boostrap remove
 EOF
 chmod +x /etc/init.d/bootstrap
 update-rc.d bootstrap defaults
