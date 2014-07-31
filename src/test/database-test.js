@@ -239,7 +239,7 @@ describe('database', function () {
             installationState: 'some-status-0',
             runState: null,
             location: 'some-location-0',
-            manifestJson: null,
+            manifest: null,
             httpPort: null,
             containerId: null
         };
@@ -248,7 +248,7 @@ describe('database', function () {
             installationState: 'some-status-1',
             runState: null,
             location: 'some-location-1',
-            manifestJson: null,
+            manifest: null,
             httpPort: null,
             containerId: null
         };

@@ -45,7 +45,7 @@ function checkAppHealth(app, callback) {
     if (app.installationState !== appdb.ISTATE_INSTALLED) return callback(null);
 
     var container = docker.getContainer(app.containerId),
-        manifest = JSON.parse(app.manifestJson); // this is guaranteed not to throw since it's already been verified in downloadManifest()
+        manifest = app.manifest;
 
     function updateApp(app, values, callback) {
         for (var value in values) {

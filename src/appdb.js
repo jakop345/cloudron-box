@@ -37,7 +37,8 @@ var DatabaseError = require('./databaseerror'),
     assert = require('assert'),
     database = require('./database.js'),
     async = require('async'),
-    util = require('util');
+    util = require('util'),
+    safe = require('safetydance');
 
 // database
 var db = null;
@@ -58,6 +59,9 @@ function get(id, callback) {
 
         if (typeof result === 'undefined') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
 
+        result.manifest = safe.JSON.parse(result.manifestJson);
+        delete result.manifestJson;
+
         callback(null, result);
     });
 }
@@ -72,6 +76,9 @@ function getBySubdomain(subdomain, callback) {
 
         if (typeof result === 'undefined') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
 
+        result.manifest = safe.JSON.parse(result.manifestJson);
+        delete result.manifestJson;
+
         callback(null, result);
     });
 }
@@ -79,12 +86,17 @@ function getBySubdomain(subdomain, callback) {
 function getAll(callback) {
     assert(db !== null);
 
-    db.all('SELECT * FROM apps', function (error, result) {
+    db.all('SELECT * FROM apps', function (error, results) {
         if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
 
-        if (typeof result === 'undefined') result = [ ];
+        if (typeof results === 'undefined') results = [ ];
 
-        callback(null, result);
+        results.forEach(function (result) {
+            result.manifest = safe.JSON.parse(result.manifestJson);
+            delete result.manifestJson;
+        });
+
+        callback(null, results);
     });
 }
 
@@ -170,7 +182,12 @@ function update(id, app, callback) {
 
     var args = [ ], values = [ ];
     for (var p in app) {
-        if (app.hasOwnProperty(p)) {
+        if (!app.hasOwnProperty(p)) continue;
+
+        if (p === 'manifest') {
+            args.push('manifestJson = ?');
+            values.push(JSON.stringify(app[p]));
+        } else {
             args.push(p + ' = ?');
             values.push(app[p]);
         }

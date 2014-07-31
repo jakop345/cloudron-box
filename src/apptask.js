@@ -117,7 +117,7 @@ function setNakedDomain(app, callback) {
 function downloadImage(app, callback) {
     debug('Will download app now');
 
-    var manifest = safe.JSON.parse(app.manifestJson);
+    var manifest = app.manifest;
     if (manifest === null) return callback(new Error('Parse error:' + safe.error));
 
     if (!manifest.health_check_url || !manifest.docker_image || !manifest.http_port) {
@@ -163,7 +163,7 @@ function downloadImage(app, callback) {
 }
 
 function createContainer(app, portConfigs, callback) {
-    var manifest = JSON.parse(app.manifestJson); // this is guaranteed not to throw since it's already been verified in downloadImage()
+    var manifest = app.manifest;
 
     var env = [ ];
     if (typeof manifest.tcp_ports === 'object') {
@@ -224,7 +224,7 @@ function deleteVolume(app, callback) {
 }
 
 function startContainer(app, portConfigs, callback) {
-    var manifest = JSON.parse(app.manifestJson); // this is guaranteed not to throw since it's already been verified in downloadManifest()
+    var manifest = app.manifest;
     var appDataDir = path.join(appDataRoot, app.id);
 
     var portBindings = { };
@@ -360,7 +360,10 @@ function install(app, callback) {
                 downloadManifest(app, function (error, manifestJson) {
                     if (error) return callback('Error downloading manifest:' + error);
 
-                    updateApp(app, { manifestJson: manifestJson }, callback);
+                    var manifest = safe.JSON.parse(manifestJson);
+                    if (!manifest) return callback('Error parsing manifest:' + safe.error);
+
+                    updateApp(app, { manifest: manifest }, callback);
                 });
             });
         },
