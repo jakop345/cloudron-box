@@ -22,12 +22,12 @@ cat > /etc/yellowtent.json <<EOF
 EOF
 
 
-echo "==== Setup ssl certs ===="
-CERTIFICATE_DIR=/etc/yellowtent/cert
-mkdir -p $CERTIFICATE_DIR
-cd $CERTIFICATE_DIR
-curl -o cert.tar $APPSTORE_ORIGIN/api/v1/boxes/certificate?token=<%= token %>
-tar xf cert.tar
+# echo "==== Setup ssl certs ===="
+# CERTIFICATE_DIR=/etc/yellowtent/cert
+# mkdir -p $CERTIFICATE_DIR
+# cd $CERTIFICATE_DIR
+# curl -o cert.tar $APPSTORE_ORIGIN/api/v1/boxes/certificate?token=<%= token %>
+# tar xf cert.tar
 
 
 echo "==== Sudoers file for app removal ===="
