@@ -1,16 +1,14 @@
 'use strict';
 
-var MyAppsController = function ($scope, $http, $location, Client) {
+var MyAppsController = function ($scope, $http, $location, $interval, Client) {
     $scope.LOADING = 1;
     $scope.ERROR = 2;
     $scope.LOADED = 3;
 
-    $scope.loadStatus = $scope.LOADED;
+    $scope.loadStatus = $scope.LOADING;
     $scope.loadError = '';
 
     $scope.refresh = function () {
-        $scope.loadStatus = $scope.LOADING;
-
         Client.getApps(function (error, apps) {
             if (error) {
                 console.log(error);
@@ -29,6 +27,11 @@ var MyAppsController = function ($scope, $http, $location, Client) {
             $scope.refresh();
         });
      };
+
+    var refreshTimer = $interval($scope.refresh, 2000);
+    $scope.$on('$destroy', function () {
+        $interval.cancel(refreshTimer);
+    });
 
     $scope.refresh();
 };
