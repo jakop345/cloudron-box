@@ -22,7 +22,8 @@ var assert = require('assert'),
     database = require('./database.js'),
     HttpError = require('./httperror.js'),
     ejs = require('ejs'),
-    appFqdn = require('./apps').appFqdn;
+    appFqdn = require('./apps').appFqdn,
+    settingsdb = require('./settingsdb.js');
 
 exports = module.exports = {
     initialize: initialize,
@@ -425,6 +426,18 @@ function uninstall(app, callback) {
     // TODO: figure what happens if one of the steps fail
 
     async.series([
+        // unset naked domain
+        function (callback) {
+            settingsdb.get(settingsdb.NAKED_DOMAIN_KEY, function (error, value) {
+                if (error) return callback(null);
+                if (value !== app.id) return callback(null);
+
+                // TODO: this need to be locked
+                settingsdb.set(settingsdb.NAKED_DOMAIN_KEY, null);
+                setNakedDomain(null, callback);
+            });
+        },
+
         // unconfigure nginx
         function (callback) {
             unconfigureNginx(app, function (error) { callback(null); });
