@@ -20,6 +20,7 @@ Development setup
 ** Verify using `sudo rmappdir.sh --check`. This should print 'OK'
 ** Verify using `sudo reloadnginx.sh --check`. This should print 'OK'
 
+* Set your hostname to 'mybox.cloudron.us'
 * export FQDN='mybox.cloudron.us'
 ** Add the above domain to your /etc/hosts
 ** All apps will be installed as subdomains of the above FQDN
