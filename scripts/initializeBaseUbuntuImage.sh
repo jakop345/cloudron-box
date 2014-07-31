@@ -12,7 +12,6 @@ if [[ $? -ne 0 ]]; then
     rm -rf /home/$USER
     useradd $USER -m
 fi
-usermod $USER -a -G docker
 
 # now exit on failure
 set -e
@@ -41,6 +40,8 @@ apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8
 apt-get update
 apt-get -y install lxc-docker
 ln -sf /usr/bin/docker.io /usr/local/bin/docker
+# now add the user to the docker group
+usermod $USER -a -G docker
 
 
 echo "==== Setup nginx ===="
