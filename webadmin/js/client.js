@@ -210,7 +210,7 @@ angular.module('YellowTent')
     };
 
     Client.prototype.setNakedDomain = function (appid, callback) {
-        $http.post('/api/v1/settings/naked_domain', { appid: appid })
+        $http.post('/api/v1/settings/naked_domain', { appid: appid || '' })
         .success(function (data, status, headers, config) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null);
