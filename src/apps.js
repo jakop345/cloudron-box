@@ -100,7 +100,7 @@ function getAll(callback) {
 
         apps.forEach(function (app) {
             app.iconUrl = config.appServerUrl + '/api/v1/app/' + app.id + '/icon';
-            app.url = 'https://' + appFqdn(app.location);
+            app.fqdn = appFqdn(app.location);
         });
 
         callback(null, apps);
