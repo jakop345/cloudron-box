@@ -7,9 +7,9 @@ if (typeof process.env.NODE_ENV === 'undefined') {
     process.env.NODE_ENV = 'production';
 }
 
+require('supererror');
+
 var Server = require('./src/server.js'),
-    path = require('path'),
-    os = require('os'),
     config = require('./config.js');
 
 console.log();
