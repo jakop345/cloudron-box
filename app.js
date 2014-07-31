@@ -38,6 +38,11 @@ server.start(function (err) {
     }
 
     console.log('Server listening on port ' + config.port);
+
+    server.announce(function (error) {
+        if (error) console.error('Unable to announce box with appstore.', error);
+        else console.log('Successfully announce box with appstore');
+    });
 });
 
 var NOOP_CALLBACK = function () { };

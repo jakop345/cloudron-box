@@ -14,6 +14,14 @@ echo "==== Setup /etc/yellowtent ===="
 mkdir -p  /etc/yellowtent
 
 
+echo "==== Provision box with credentials ===="
+cat > /etc/yellowtent.json <<EOF
+{
+    "appstoreOrigin": "$APPSTORE_ORIGIN"
+}
+EOF
+
+
 echo "==== Setup ssl certs ===="
 CERTIFICATE_DIR=/etc/yellowtent/cert
 mkdir -p $CERTIFICATE_DIR

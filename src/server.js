@@ -359,6 +359,31 @@ Server.prototype._sendHeartBeat = function () {
     });
 };
 
+Server.prototype.announce = function (callback) {
+    assert(typeof callback === 'function');
+
+    var that = this;
+
+    settingsdb.get('token', function (error, result) {
+        if (error && error.reason !== DatabaseError.NOT_FOUND) return callback(error);
+        if (result) return callback(null);
+
+        debug('announce: first run, try to provision the box by announcing with appstore.');
+
+        var url = that.config.appServerUrl + '/api/v1/boxes/announce';
+        debug('announce: ' + url + ' with box name ' + that.config.fqdn);
+
+        superagent.get(url).query({ name: that.config.fqdn }).end(function (error, result) {
+            if (error) return callback(error);
+            if (result.statusCode !== 200) return callback(new Error('Unable to announce box with appstore'));
+
+            debug('announce: success');
+
+            callback(null);
+        });
+    });
+};
+
 Server.prototype.start = function (callback) {
     assert(typeof callback === 'function');
     assert(this.app === null, 'Server is already up and running.');
@@ -375,9 +400,22 @@ Server.prototype.start = function (callback) {
     this._initialize2(function (err) {
         if (err) return callback(err);
 
-        that.httpServer = http.createServer(that.app);
+        settingsdb.getAll(function (error, result) {
+            if (error) return callback(error);
 
-        that.httpServer.listen(that.config.port, callback);
+            debug('start: settings', result);
+
+            result.forEach(function (item) {
+                if (item.key === 'token') that.config.token = item.value;
+                if (item.key === 'fqdn') that.config.fqdn = item.value;
+                if (item.key === 'appstoreOrigin') that.config.appstoreOrigin = item.value;
+                if (item.key === 'adminOrigin') that.config.adminOrigin = item.value;
+            });
+
+            that.httpServer = http.createServer(that.app);
+
+            that.httpServer.listen(that.config.port, callback);
+        });
     });
 };
 

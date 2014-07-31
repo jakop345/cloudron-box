@@ -19,23 +19,19 @@ var port = 3000;
 var silent = false;
 var nginxAppConfigDir = path.join(__dirname, 'nginx/applications/');
 var fqdn = os.hostname();
+var appstoreOrigin = 'https://selfhost.io:5050';
 
 // load provisioned config file if there
 var configFile;
 try {
     configFile = require('/etc/yellowtent.json');
+    if (!configFile.appstoreOrigin) throw('No appstoreOrigin found in yellowtent.json');
+    appstoreOrigin = configFile.appstoreOrigin;
 } catch (e) {
     // TODO: instead of requiring env variable, use the output of hostname -f
     if (typeof process.env.FQDN !== 'undefined') fqdn = process.env.FQDN;
 
-    console.log('Unable to load provisioned config file. Using defaults.');
-
-    configFile = {
-        token: null,
-        appstoreOrigin: 'https://selfhost.io:5050',
-        adminOrigin: 'https://admin.' + fqdn,
-        fqdn: fqdn
-    };
+    console.error('Unable to load provisioned config file. Using defaults.', e);
 }
 
 exports = module.exports = {
@@ -44,11 +40,11 @@ exports = module.exports = {
     configRoot: configRoot,
     mountRoot: mountRoot,
     silent: silent,
-    token: configFile.token,
-    appServerUrl: configFile.appstoreOrigin,
-    adminOrigin: configFile.adminOrigin,
+    token: null,
+    appServerUrl: appstoreOrigin,
+    adminOrigin: 'https://admin-' + fqdn,
     nginxAppConfigDir: nginxAppConfigDir,
     appDataRoot: appDataRoot,
-    fqdn: configFile.fqdn
+    fqdn: fqdn
 };
 
