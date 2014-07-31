@@ -281,7 +281,7 @@ function registerSubdomain(app, callback) {
         .post(appServerUrl + '/api/v1/subdomains')
         .set('Accept', 'application/json')
         .query({ token: config.token })
-        .send({ subdomain: app.location, domain: config.fqdn }) // TODO: the domain should not be required
+        .send({ subdomain: app.location })
         .end(function (error, res) {
             if (error) return callback(error);
 
