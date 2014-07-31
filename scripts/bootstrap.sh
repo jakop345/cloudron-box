@@ -25,9 +25,7 @@ echo "==== Setup ssl certs ===="
 CERTIFICATE_DIR=/etc/yellowtent/cert
 mkdir -p $CERTIFICATE_DIR
 cd $CERTIFICATE_DIR
-./$BASEDIR/scripts/generate_certificate.sh
-curl -o cert.tar $APPSTORE_ORIGIN/api/v1/boxes/certificateUS California San Francisco Selfhost Cloudron `hostname -f` cert@selfhost.io cert.tar
-# curl -o cert.tar $APPSTORE_ORIGIN/api/v1/boxes/certificate?token=<%= token %>
+$BASEDIR/scripts/generate_certificate.sh US California 'San Francisco' Selfhost Cloudron `hostname -f` cert@selfhost.io .
 tar xf cert.tar
 
 
