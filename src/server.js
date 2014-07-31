@@ -18,9 +18,9 @@ var express = require('express'),
     apps = require('./apps'),
     middleware = require('./middleware'),
     database = require('./database.js'),
+    DatabaseError = require('./databaseerror.js'),
     userdb = require('./userdb'),
-    child_process = require('child_process'),
-    os = require('os');
+    settingsdb = require('./settingsdb.js');
 
 exports = module.exports = Server;
 
@@ -111,6 +111,30 @@ Server.prototype._getConfig = function (req, res, next) {
     });
 };
 
+Server.prototype._provision = function (req, res, next) {
+    if (!req.body.token) return next(new HttpError(400, 'No token provided'));
+    if (!req.body.appstoreOrigin) return next(new HttpError(400, 'No appstoreOrigin provided'));
+    if (!req.body.adminOrigin) return next(new HttpError(400, 'No adminOrigin provided'));
+    if (!req.body.fqdn) return next(new HttpError(400, 'No fqdn provided'));
+
+    debug('_provision: received from appstore ' + req.body.appstoreOrigin);
+
+    settingsdb.get('token', function (error, result) {
+        if (error && error.reason !== DatabaseError.NOT_FOUND) return next(new HttpError(500));
+        if (result) return next(new HttpError(409, 'Already provisioned'));
+
+        async.each(['token', 'appstoreOrigin', 'adminOrigin', 'fqdn'], function (item, callback) {
+            settingsdb.set(item, req.body[item], callback);
+        }, function (error) {
+            if (error) return next(new HttpError(500, error));
+
+            debug('_provision: success');
+
+            next(new HttpSuccess(201, {}));
+        });
+    });
+};
+
 /*
     Middleware which makes the route require a password in the body besides a token.
 */
@@ -194,6 +218,7 @@ Server.prototype._initializeExpressSync = function () {
     // public routes
     router.get('/api/v1/version', this._getVersion.bind(this));
     router.get('/api/v1/firsttime', this._firstTime.bind(this));
+    router.post('/api/v1/provision', routes._provision.bind(this));    // FIXME any number of admins can be created without auth!
     router.post('/api/v1/createadmin', routes.user.createAdmin);    // FIXME any number of admins can be created without auth!
 
     // config.json
