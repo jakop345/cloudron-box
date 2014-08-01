@@ -41,7 +41,15 @@ EOF
 
 echo "==== Setup yellowtent ===="
 cd $BASEDIR
-npm install --production
+NPM_INSTALL="npm install --production"
+eval $NPM_INSTALL
+RET=$?
+while [[ $RET -ne 0 ]]; do
+    echo "[EE] npm install failed, try again"
+    rm -rf ./node_modules
+    eval $NPM_INSTALL
+    RET=$?
+done
 
 
 echo "==== Setup nginx ===="

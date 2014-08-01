@@ -79,7 +79,17 @@ else
     cd box
     git checkout origin/master
 fi
-npm install --production
+
+NPM_INSTALL="npm install --production"
+rm -rf ./node_modules
+eval $NPM_INSTALL
+RET=$?
+while [[ $RET -ne 0 ]]; do
+    echo "[EE] npm install failed, try again"
+    rm -rf ./node_modules
+    eval $NPM_INSTALL
+    RET=$?
+done
 
 
 echo "==== Sudoers file for app removal ===="
