@@ -126,8 +126,8 @@ Server.prototype._provision = function (req, res, next) {
         if (result) return next(new HttpError(409, 'Already provisioned'));
 
         async.each(['token', 'appstoreOrigin', 'adminOrigin', 'fqdn'], function (item, callback) {
-            settingsdb.set(item, req.body[item], callback);
             that.config[item] = req.body[item];
+            settingsdb.set(item, req.body[item], callback);
         }, function (error) {
             if (error) return next(new HttpError(500, error));
 
