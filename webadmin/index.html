@@ -6,6 +6,92 @@
 
     <title> YellowTent </title>
 
+    <!-- Bootstrap Core CSS -->
+    <link href="3rdparty/sb-admin-2/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- MetisMenu CSS -->
+    <link href="3rdparty/sb-admin-2/css/plugins/metisMenu/metisMenu.min.css" rel="stylesheet">
+
+    <!-- Timeline CSS -->
+    <link href="3rdparty/sb-admin-2/css/plugins/timeline.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="3rdparty/sb-admin-2/css/sb-admin-2.css" rel="stylesheet">
+
+    <!-- Morris Charts CSS -->
+    <link href="3rdparty/sb-admin-2/css/plugins/morris.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="3rdparty/sb-admin-2/font-awesome-4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+
+    <!-- application stylesheets -->
+    <!-- <link href="css/index.css" rel="stylesheet" media="screen"> -->
+
+  </head>
+
+<body ng-app="YellowTent" ng-controller="MainController">
+
+    <div id="wrapper">
+
+        <!-- Navigation -->
+        <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="index.html">Yellowtent</a>
+            </div>
+            <!-- /.navbar-header -->
+
+            <ul class="nav navbar-top-links navbar-right">
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                        <i class="fa fa-user fa-fw"></i>  <i class="fa fa-caret-down"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-user">
+                        <li><a href="#"><i class="fa fa-user fa-fw"></i> User Profile</a>
+                        </li>
+                        <li><a href="#"><i class="fa fa-gear fa-fw"></i> Settings</a>
+                        </li>
+                        <li class="divider"></li>
+                        <li><a href="#" ng-click="logout()"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
+                        </li>
+                    </ul>
+                    <!-- /.dropdown-user -->
+                </li>
+                <!-- /.dropdown -->
+            </ul>
+            <!-- /.navbar-top-links -->
+
+            <div class="navbar-default sidebar" role="navigation">
+                <div class="sidebar-nav navbar-collapse">
+                    <ul class="nav" id="side-menu">
+                        <li>
+                            <a ng-class="{ active: isActive('/myapps')}" href="#/myapps"><i class="fa fa-cloud-download fa-fw"></i> My Apps</a>
+                        </li>
+                        <li>
+                            <a ng-class="{ active: isActive('/applist')}" href="#/applist"><i class="fa fa-cloud fa-fw"></i> App Store</a>
+                        </li>
+                        <li>
+                            <a ng-class="{ active: isActive('/settings')}" href="#/settings"><i class="fa fa-wrench fa-fw"></i> Settings</a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- /.sidebar-collapse -->
+            </div>
+            <!-- /.navbar-static-side -->
+        </nav>
+
+        <div id="page-wrapper">
+            <div ng-view id="ng-view"></div>
+        </div>
+    </div>
+
     <!-- angularjs scripts -->
     <script src="3rdparty/js/angular.js"></script>
     <script src="3rdparty/js/angular-loader.min.js"></script>
@@ -14,10 +100,23 @@
     <script src="3rdparty/js/angular-base64.min.js"></script>
     <script src="3rdparty/js/autofill-event.js"></script>
 
-    <!-- bootstrap -->
+    <!-- jQuery Version 1.11.0 -->
+    <script src="3rdparty/sb-admin-2/js/jquery-1.11.0.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="3rdparty/sb-admin-2/js/bootstrap.min.js"></script>
+
+    <!-- Metis Menu Plugin JavaScript -->
+    <script src="3rdparty/sb-admin-2/js/plugins/metisMenu/metisMenu.min.js"></script>
+
+    <!-- Custom Theme JavaScript -->
+    <script src="3rdparty/sb-admin-2/js/sb-admin-2.js"></script>
+
+    <!-- yellowtent -->
+    <script src="/api/v1/oauth/yellowtent.js"></script>
+
+    <!-- angular bootstrap -->
     <script src="3rdparty/js/ui-bootstrap-tpls-0.10.0.js"></script>
-    <link href="3rdparty/css/bootstrap.min.css" rel="stylesheet" media="screen">
-    <link href="3rdparty/css/bootstrap-theme.min.css" rel="stylesheet" media="screen">
 
     <!-- spinner -->
     <script src="3rdparty/js/spin.min.js"></script>
@@ -54,46 +153,6 @@
     <script src="views/myapps.js"></script>
     <script src="views/appconfigure.js"></script>
     <script src="views/settings.js"></script>
-
-    <!-- application stylesheets -->
-    <link href="css/index.css" rel="stylesheet" media="screen">
-
-  </head>
-
-<body ng-app="YellowTent" ng-controller="MainController">
-
-<div class="container-fluid">
-  <div class="row">
-    <div class="col-sm-3 col-md-2">
-      <ul class="nav nav-pills nav-stacked" ng-show="showSideBar">
-<!--         <li ng-class="{ active: isActive('/volume')}">
-          <a href="#/volumelist">
-            <span class="glyphicon glyphicon glyphicon-hdd"></span> Volumes <div ng-show="isActive('/volume')" ng-click="href($event, '#/volumecreate')" class="glyphicon glyphicon-plus pull-right toolicon"></div>
-          </a>
-        </li>
-        <li ng-class="{ active: isActive('/user')}">
-          <a href="#/userlist">
-            <span class="glyphicon glyphicon-user"></span> Users <div ng-show="isActive('/user')" ng-click="href($event, '#/usercreate')" class="glyphicon glyphicon-plus pull-right toolicon"></div>
-          </a>
-        </li> -->
-        <li ng-class="{ active: isActive('/myapps')}">
-          <a href="#/myapps"><span class="glyphicon glyphicon-cloud"></span> My Apps </a>
-        </li>
-        <li ng-class="{ active: isActive('/applist')}">
-          <a href="#/applist"><span class="glyphicon glyphicon-cloud"></span> App Store </a>
-        </li>
-        <li ng-class="{ active: isActive('/settings')}"><a href="#/settings"><span class="glyphicon glyphicon-cog"></span> Settings</a></li>
-        <li><a href="#" ng-click="logout()"><span class="glyphicon glyphicon-log-out"></span> Log Out</a></li>
-      </ul>
-    </div>
-    <div class="col-sm-8 col-md-8">
-      <div ng-view id="ng-view"></div>
-    </div>
-    <div class="col-sm-1 col-md-2">
-      <!-- placeholder -->
-    </div>
-  </div>
-</div>
 
 </body>
 </html>
