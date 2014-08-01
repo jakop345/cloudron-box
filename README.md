@@ -17,8 +17,8 @@ Development setup
 
    You might have to clear the sudo cache using sudo -k.
 
-** Verify using `sudo rmappdir.sh --check`. This should print 'OK'
-** Verify using `sudo reloadnginx.sh --check`. This should print 'OK'
+** Verify using `sudo src/rmappdir.sh --check`. This should print 'OK'
+** Verify using `sudo src/reloadnginx.sh --check`. This should print 'OK'
 
 * Set your hostname to 'mybox.cloudron.us'
 ** On Mac, settings the hostname through command line resets the name periodically.
