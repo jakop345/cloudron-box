@@ -119,12 +119,15 @@ Server.prototype._provision = function (req, res, next) {
 
     debug('_provision: received from appstore ' + req.body.appstoreOrigin);
 
+    var that = this;
+
     settingsdb.get('token', function (error, result) {
         if (error && error.reason !== DatabaseError.NOT_FOUND) return next(new HttpError(500));
         if (result) return next(new HttpError(409, 'Already provisioned'));
 
         async.each(['token', 'appstoreOrigin', 'adminOrigin', 'fqdn'], function (item, callback) {
             settingsdb.set(item, req.body[item], callback);
+            that.config[item] = req.body[item];
         }, function (error) {
             if (error) return next(new HttpError(500, error));
 
@@ -406,10 +409,7 @@ Server.prototype.start = function (callback) {
             debug('start: settings', result);
 
             result.forEach(function (item) {
-                if (item.key === 'token') that.config.token = item.value;
-                if (item.key === 'fqdn') that.config.fqdn = item.value;
-                if (item.key === 'appstoreOrigin') that.config.appstoreOrigin = item.value;
-                if (item.key === 'adminOrigin') that.config.adminOrigin = item.value;
+                that.config[item] = item.value;
             });
 
             that.httpServer = http.createServer(that.app);
