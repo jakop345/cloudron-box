@@ -28,11 +28,12 @@ Development setup
 * export FQDN='mybox.cloudron.us' (add this to your .bashrc)
 ** Add the above domain to your /etc/hosts
 ** All apps will be installed as hypened-subdomains of the above FQDN
+** You should add hyphened-subdomains of your apps into /etc/hosts
 
 Running
 -------
 * ./run.sh - this starts up nginx to serve up the webadmin
-** https://HOSTNAME should now be accessible
+** https://mybox.cloudron.us should now be accessible
 ** Do not use https://localhost. It will appear to work work but will break oauth redirection
 
 * DEBUG=box:* ./app.js - this the main box code
