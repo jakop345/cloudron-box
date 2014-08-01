@@ -28,26 +28,24 @@ var assert = require('assert'),
 exports = module.exports = {
     initialize: initialize,
     start: start,
-    setNakedDomain: setNakedDomain
+    setNakedDomain: setNakedDomain,
+
+    // exported for testing
+    _getFreePort: getFreePort
 };
 
-var appServerUrl = config.appServerUrl,
-    docker = null,
-    appDataRoot = config.appDataRoot,
-    nginxAppConfigDir = config.nginxAppConfigDir,
+var docker = null,
     NGINX_APPCONFIG_EJS = fs.readFileSync(__dirname + '/../nginx/appconfig.ejs', { encoding: 'utf8' }),
     RELOAD_NGINX_CMD = 'sudo ' + __dirname + '/reloadnginx.sh';
 
-function initialize() {
+function initialize(callback) {
     if (os.platform() === 'linux') {
         docker = new Docker({socketPath: '/var/run/docker.sock'});
     } else {
         docker = new Docker({ host: 'http://localhost', port: 2375 });
     }
 
-    database.initialize(config, function (error) {
-        if (error) throw error;
-    });
+    database.initialize(config, callback);
 }
 
 function getFreePort(callback) {
@@ -72,7 +70,7 @@ function forwardFromHostToVirtualBox(rulename, port) {
 function configureNginx(app, httpPort, callback) {
     var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { vhost: appFqdn(app.location), port: httpPort });
 
-    var nginxConfigFilename = path.join(nginxAppConfigDir, app.location + '.conf');
+    var nginxConfigFilename = path.join(config.nginxAppConfigDir, app.location + '.conf');
     debug('writing config to ' + nginxConfigFilename);
 
     fs.writeFile(nginxConfigFilename, nginxConf, function (error) {
@@ -89,7 +87,7 @@ function configureNginx(app, httpPort, callback) {
 }
 
 function unconfigureNginx(app, callback) {
-    var nginxConfigFilename = path.join(nginxAppConfigDir, app.location + '.conf');
+    var nginxConfigFilename = path.join(config.nginxAppConfigDir, app.location + '.conf');
     if (!safe.fs.unlinkSync(nginxConfigFilename)) {
         debug('Error removing nginx configuration ' + safe.error);
         return callback(safe.error);
@@ -101,7 +99,7 @@ function unconfigureNginx(app, callback) {
 function setNakedDomain(app, callback) {
     var nginxConf = app ? ejs.render(NGINX_APPCONFIG_EJS, { vhost: config.fqdn, port: app.httpPort }) : '';
 
-    var nginxNakedDomainFilename = path.join(nginxAppConfigDir, '../naked_domain.conf');
+    var nginxNakedDomainFilename = path.join(config.nginxAppConfigDir, '../naked_domain.conf');
     debug('writing naked domain config to ' + nginxNakedDomainFilename);
 
     fs.writeFile(nginxNakedDomainFilename, nginxConf, function (error) {
@@ -208,7 +206,7 @@ function deleteContainer(app, callback) {
 }
 
 function createVolume(app, callback) {
-    var appDataDir = path.join(appDataRoot, app.id);
+    var appDataDir = path.join(config.appDataRoot, app.id);
 
     if (!safe.fs.mkdirSync(appDataDir)) {
         return callback(new Error('Error creating app data directory ' + appDataDir + ' ' + safe.error));
@@ -226,7 +224,7 @@ function deleteVolume(app, callback) {
 
 function startContainer(app, portConfigs, callback) {
     var manifest = app.manifest;
-    var appDataDir = path.join(appDataRoot, app.id);
+    var appDataDir = path.join(config.appDataRoot, app.id);
 
     var portBindings = { };
     portBindings[manifest.http_port + '/tcp'] = [ { HostPort: app.httpPort + '' } ];
@@ -258,7 +256,7 @@ function downloadManifest(app, callback) {
     debug('Downloading manifest for :', app.id);
 
     superagent
-        .get(appServerUrl + '/api/v1/app/' + app.id + '/manifest')
+        .get(config.appServerUrl + '/api/v1/app/' + app.id + '/manifest')
         .set('Accept', 'application/json')
         .end(function (error, res) {
             if (error) return callback(error);
@@ -279,7 +277,7 @@ function registerSubdomain(app, callback) {
     debug('Registering subdomain for ' + app.id + ' at ' + app.location);
 
     superagent
-        .post(appServerUrl + '/api/v1/subdomains')
+        .post(config.appServerUrl + '/api/v1/subdomains')
         .set('Accept', 'application/json')
         .query({ token: config.token })
         .send({ subdomain: app.location })
@@ -302,7 +300,7 @@ function unregisterSubdomain(app, callback) {
 
     debug('Unregistering subdomain for ' + app.id + ' at ' + app.location);
     superagent
-        .del(appServerUrl + '/api/v1/subdomain/' + app.location)
+        .del(config.appServerUrl + '/api/v1/subdomain/' + app.location)
         .query({ token: config.token })
         .end(function (error, res) {
             if (error) {
@@ -513,11 +511,13 @@ if (require.main === module) {
 
     debug('Apptask for ' + process.argv[2]);
 
-    initialize();
+    initialize(function (error) {
+        if (error) throw error;
 
-    start(process.argv[2], function (error) {
-        debug('Apptask completed for ' + process.argv[2] + ' ' + error);
-        process.exit(error ? 1 : 0);
+        start(process.argv[2], function (error) {
+            debug('Apptask completed for ' + process.argv[2] + ' ' + error);
+            process.exit(error ? 1 : 0);
+        });
     });
 }
 
