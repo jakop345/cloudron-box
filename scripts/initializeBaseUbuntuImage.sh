@@ -112,18 +112,22 @@ cat > /etc/init.d/bootstrap <<EOF
 
 LOG="/tmp/bootstrap"
 
-echo "[II] Update to latest git revision..." >> \$LOG
+exec 2>&1 1> \$LOG
+
+echo "[II] Update to latest git revision..."
 cd $BASEDIR
 git fetch
 git reset --hard origin/master
-echo "[II] Done" >> \$LOG
+echo "[II] Done"
 
-echo "[II] Run bootstrap script..." >> \$LOG
+echo "[II] Run bootstrap script..."
 /bin/bash $BASEDIR/scripts/bootstrap.sh https://appstore-dev.herokuapp.com
 # /bin/bash $BASEDIR/scripts/bootstrap.sh https://nebulon.fwd.wf
-echo "[II] Done" >> \$LOG
+echo "[II] Done"
 
+echo "[II] Disable bootstrap init script"
 update-rc.d boostrap remove
+echo "[II] Done"
 EOF
 chmod +x /etc/init.d/bootstrap
 update-rc.d bootstrap defaults
