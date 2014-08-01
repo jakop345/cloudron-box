@@ -42,7 +42,6 @@ EOF
 echo "==== Setup yellowtent ===="
 cd $BASEDIR
 NPM_INSTALL="npm install --production"
-rm -rf ./node_modules
 eval $NPM_INSTALL
 RET=$?
 while [[ $RET -ne 0 ]]; do
