@@ -57,7 +57,8 @@
     "expect.js": "*",
     "husky": "^0.5.1",
     "istanbul": "*",
-    "mocha": "*"
+    "mocha": "*",
+    "nock": "~0.43.0"
   },
   "scripts": {
     "test": "./node_modules/istanbul/lib/cli.js test $1 ./node_modules/mocha/bin/_mocha -- -R spec ./src/test ./src/routes/test",

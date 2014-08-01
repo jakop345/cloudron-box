@@ -17,7 +17,8 @@ var dataRoot = path.join(baseDir, 'data');
 var mountRoot = path.join(baseDir, 'mount');
 var port = 3000;
 var silent = false;
-var nginxAppConfigDir = path.join(__dirname, 'nginx/applications/');
+var nginxConfigDir = path.join(__dirname, 'nginx');
+var nginxAppConfigDir = path.join(nginxConfigDir, 'applications');
 var fqdn = os.hostname();
 var appstoreOrigin = 'https://selfhost.io:5050';
 
@@ -43,6 +44,7 @@ exports = module.exports = {
     token: null,
     appServerUrl: appstoreOrigin,
     adminOrigin: 'https://admin-' + fqdn,
+    nginxConfigDir: nginxConfigDir,
     nginxAppConfigDir: nginxAppConfigDir,
     appDataRoot: appDataRoot,
     fqdn: fqdn

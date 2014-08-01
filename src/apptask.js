@@ -31,7 +31,15 @@ exports = module.exports = {
     setNakedDomain: setNakedDomain,
 
     // exported for testing
-    _getFreePort: getFreePort
+    _getFreePort: getFreePort,
+    _configureNginx: configureNginx,
+    _unconfigureNginx: unconfigureNginx,
+    _setNakedDomain: setNakedDomain,
+    _createVolume: createVolume,
+    _deleteVolume: deleteVolume,
+    _downloadManifest: downloadManifest,
+    _registerSubdomain: registerSubdomain,
+    _unregisterSubdomain: unregisterSubdomain
 };
 
 var docker = null,
@@ -99,7 +107,7 @@ function unconfigureNginx(app, callback) {
 function setNakedDomain(app, callback) {
     var nginxConf = app ? ejs.render(NGINX_APPCONFIG_EJS, { vhost: config.fqdn, port: app.httpPort }) : '';
 
-    var nginxNakedDomainFilename = path.join(config.nginxAppConfigDir, '../naked_domain.conf');
+    var nginxNakedDomainFilename = path.join(config.nginxConfigDir, 'naked_domain.conf');
     debug('writing naked domain config to ' + nginxNakedDomainFilename);
 
     fs.writeFile(nginxNakedDomainFilename, nginxConf, function (error) {
