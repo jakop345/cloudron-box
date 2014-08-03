@@ -17,6 +17,9 @@ exports = module.exports = {
     uninstallApp: uninstallApp
 };
 
+/*
+ * Get installed (or scheduled to be installed) app
+ */
 function getApp(req, res, next) {
     if (typeof req.params.id !== 'string') return next(new HttpError(400, 'appid is required'));
 
@@ -28,6 +31,9 @@ function getApp(req, res, next) {
     });
 }
 
+/*
+ * Get the app installed in the subdomain
+ */
 function getAppBySubdomain(req, res, next) {
     if (typeof req.params.subdomain !== 'string') return next(new HttpError(400, 'subdomain is required'));
 
@@ -39,6 +45,9 @@ function getAppBySubdomain(req, res, next) {
     });
 }
 
+/*
+ * Get installed (or scheduled to be installed) apps
+ */
 function getApps(req, res, next) {
     apps.getAll(function (error, allApps) {
         if (error) return next(new HttpError(500, 'Internal error:' + error));
@@ -57,6 +66,13 @@ function checkDomainName(subdomain, fqdn) {
     return null;
 }
 
+/*
+ * Installs an app
+ * @bodyparam {string} app_id The id of the app to be installed
+ * @bodyparam {string} password The user's password
+ * @bodyparam {string} location The subdomain where the app is to be installed
+ * @bodyparam {object} portBindings map from container port to (public) host port. can be null.
+ */
 function installApp(req, res, next) {
     var data = req.body;
 
@@ -94,6 +110,10 @@ function installApp(req, res, next) {
     });
 }
 
+/*
+ * Uninstalls an app
+ * @bodyparam {string} id The id of the app to be uninstalled
+ */
 function uninstallApp(req, res, next) {
     if (typeof req.params.id !== 'string') return next(new HttpError(400, 'appid is required'));
 
