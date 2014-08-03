@@ -14,6 +14,7 @@ var Server = require('../../server.js'),
     path = require('path'),
     os = require('os'),
     config = require('../../../config.js'),
+    async = require('async'),
     fs = require('fs');
 
 var SERVER_URL = 'http://localhost:' + config.port;
@@ -25,31 +26,26 @@ var token = null;
 var server;
 function setup(done) {
     server = new Server();
-    server.start(function (error) {
-        expect(error).to.not.be.ok();
+    async.series([
+        server.start.bind(server),
 
-        userdb.clear(function () {
+        userdb.clear,
+
+        function (callback) {
             request.post(SERVER_URL + '/api/v1/createadmin')
                  .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
-                 .end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result).to.be.ok();
+                 .end(function (error, result) { callback(); });
+        },
 
-                request.post(SERVER_URL + '/api/v1/token')
+        function (callback) {
+            request.post(SERVER_URL + '/api/v1/token')
                 .auth(USERNAME, PASSWORD)
                 .end(function (error, result) {
-                    expect(error).to.be(null);
-                    expect(result.statusCode).to.equal(200);
-                    expect(result.body.token).to.be.a('string');
-
-                    // safe token for further calls
                     token = result.body.token;
-
-                    done();
+                    callback();
                 });
-            });
-        });
-    });
+        }
+    ], done);
 }
 
 // remove all temporary folders
