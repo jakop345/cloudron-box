@@ -4,6 +4,7 @@
 
 // Put express and various other middleware in production mode
 if (typeof process.env.NODE_ENV === 'undefined') {
+    console.log('NODE_ENV set to production');
     process.env.NODE_ENV = 'production';
 }
 
