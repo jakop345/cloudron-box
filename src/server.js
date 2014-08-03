@@ -140,7 +140,7 @@ Server.prototype._provision = function (req, res, next) {
     Middleware which makes the route require a password in the body besides a token.
 */
 Server.prototype._requirePassword = function (req, res, next) {
-    if (!req.body.password) return next(new HttpError(400, 'API call requires the users password.'));
+    if (!req.body.password) return next(new HttpError(400, 'API call requires user password.'));
     next();
 };
 
