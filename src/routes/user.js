@@ -10,7 +10,6 @@ var userdb = require('../userdb.js'),
     HttpSuccess = require('../../src/httpsuccess.js');
 
 exports = module.exports = {
-    initialize: initialize,
     createAdmin: createAdmin,
     createToken: createToken,
     logout: logout,
@@ -20,12 +19,6 @@ exports = module.exports = {
     changePassword: changePassword,
     remove: removeUser
 };
-
-var config;
-
-function initialize(cfg) {
-    config = cfg;
-}
 
 /**
 * @apiDefinePermission admin Admin access rights needed.

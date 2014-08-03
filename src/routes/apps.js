@@ -6,22 +6,16 @@ var HttpError = require('../httperror.js'),
     HttpSuccess = require('../httpsuccess.js'),
     debug = require('debug')('box:routes/apps'),
     apps = require('../apps.js'),
+    config = require('../../config.js'),
     AppsError = apps.AppsError;
 
 exports = module.exports = {
-    initialize: initialize,
     getApp: getApp,
     getAppBySubdomain: getAppBySubdomain,
     getApps: getApps,
     installApp: installApp,
     uninstallApp: uninstallApp
 };
-
-var config = null;
-
-function initialize(_config) {
-    config = _config;
-}
 
 function getApp(req, res, next) {
     if (typeof req.params.id !== 'string') return next(new HttpError(400, 'appid is required'));

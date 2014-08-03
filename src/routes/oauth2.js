@@ -14,6 +14,7 @@ var oauth2orize = require('oauth2orize'),
     DatabaseError = require('../databaseerror'),
     clientdb = require('../clientdb'),
     debug = require('debug')('box:routes/oauth2'),
+    config = require('../../config.js'),
     uuid = require('node-uuid');
 
 // create OAuth 2.0 server
@@ -114,11 +115,6 @@ server.exchange(oauth2orize.exchange.code(function (client, code, redirectURI, c
         });
     });
 }));
-
-var config = null;
-module.exports.initialize = function (_config) {
-    config = _config;
-};
 
 // Main login form username and password
 module.exports.loginForm = function (req, res) {
