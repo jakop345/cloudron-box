@@ -12,20 +12,10 @@ var Server = require('../../../src/server.js'),
     crypto = require('crypto'),
     rimraf = require('rimraf'),
     path = require('path'),
+    config = require('../../../config.js'),
     os = require('os');
 
-var BASE_DIR = path.resolve(os.tmpdir(), 'volume-test-' + crypto.randomBytes(4).readUInt32LE(0));
-var CONFIG = {
-    port: 3333,
-    dataRoot: path.resolve(BASE_DIR, 'data'),
-    configRoot: path.resolve(BASE_DIR, 'config'),
-    mountRoot: path.resolve(BASE_DIR, 'mount'),
-    appDataRoot: path.resolve(BASE_DIR, 'appdata'),
-    silent: true,
-    appServerUrl: 'invalid_url',
-    nginxAppConfigDir: '/tmp'
-};
-var SERVER_URL = 'http://localhost:' + CONFIG.port;
+var SERVER_URL = 'http://localhost:' + config.port;
 
 var ADMIN = 'admin', PASSWORD = 'admin', EMAIL ='silly@me.com';
 var USERNAME_1 = 'userTheFirst', PASSWORD_1 = 'chocolatecookie', EMAIL_1 = 'tao@zen.mac', IS_ADMIN_1 = true;
@@ -34,7 +24,7 @@ var USERNAME_3 = 'userTheThird', PASSWORD_3 = 'userpassword333', EMAIL_3 = 'user
 
 var server;
 function setup(done) {
-    server = new Server(CONFIG);
+    server = new Server();
     server.start(function (error) {
         expect(!error).to.be.ok();
         userdb.clear(done);
@@ -45,7 +35,7 @@ function setup(done) {
 function cleanup(done) {
     server.stop(function (error) {
         expect(error).to.be(null);
-        rimraf(BASE_DIR, done);
+        rimraf(config.baseDir, done);
     });
 }
 

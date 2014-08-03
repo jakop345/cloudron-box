@@ -13,20 +13,10 @@ var Server = require('../../server.js'),
     rimraf = require('rimraf'),
     path = require('path'),
     os = require('os'),
+    config = require('../../../config.js'),
     fs = require('fs');
 
-var BASE_DIR = path.resolve(os.tmpdir(), 'volume-test-' + crypto.randomBytes(4).readUInt32LE(0));
-var CONFIG = {
-    port: 3333,
-    dataRoot: path.resolve(BASE_DIR, 'data'),
-    configRoot: path.resolve(BASE_DIR, 'config'),
-    mountRoot: path.resolve(BASE_DIR, 'mount'),
-    appDataRoot: path.resolve(BASE_DIR, 'appdata'),
-    silent: true,
-    appServerUrl: 'invalid_url',
-    nginxAppConfigDir: '/tmp'
-};
-var SERVER_URL = 'http://localhost:' + CONFIG.port;
+var SERVER_URL = 'http://localhost:' + config.port;
 
 var USERNAME = 'admin', PASSWORD = 'admin', EMAIL ='silly@me.com';
 var TESTVOLUME = 'testvolume';
@@ -34,7 +24,7 @@ var token = null;
 
 var server;
 function setup(done) {
-    server = new Server(CONFIG);
+    server = new Server();
     server.start(function (error) {
         expect(error).to.not.be.ok();
 
@@ -66,7 +56,7 @@ function setup(done) {
 function cleanup(done) {
     server.stop(function (error) {
         expect(error).to.be(null);
-        rimraf(BASE_DIR, done);
+        rimraf(config.baseDir, done);
     });
 }
 
@@ -153,7 +143,7 @@ describe('Server Volume API', function () {
     });
 
     it('listFiles', function (done) {
-        fs.writeFileSync(path.join(CONFIG.mountRoot, volume.id + '/README.md'), 'test data');
+        fs.writeFileSync(path.join(config.mountRoot, volume.id + '/README.md'), 'test data');
 
         request.get(SERVER_URL + '/api/v1/volume/' + volume.id + '/list')
                .query({ access_token: token })

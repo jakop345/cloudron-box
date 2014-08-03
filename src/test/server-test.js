@@ -11,24 +11,14 @@ var Server = require('../server.js'),
     crypto = require('crypto'),
     rimraf = require('rimraf'),
     os = require('os'),
-    expect = require('expect.js');
+    expect = require('expect.js'),
+    config = require('../../config.js');
 
-var SERVER_URL = 'http://localhost:3456';
-var BASE_DIR = path.resolve(os.tmpdir(), 'volume-test-' + crypto.randomBytes(4).readUInt32LE(0));
-var CONFIG = {
-    port: 3456,
-    dataRoot: path.resolve(BASE_DIR, 'data'),
-    configRoot: path.resolve(BASE_DIR, 'config'),
-    mountRoot: path.resolve(BASE_DIR, 'mount'),
-    appDataRoot: path.resolve(BASE_DIR, 'appdata'),
-    silent: true,
-    appServerUrl: 'invalid_url',
-    nginxAppConfigDir: '/tmp'
-};
+var SERVER_URL = 'http://localhost:' + config.port;
 
 // remove all temporary folders
 function cleanup(done) {
-    rimraf(BASE_DIR, done);
+    rimraf(config.baseDir, done);
 }
 
 describe('Server', function () {
@@ -39,16 +29,8 @@ describe('Server', function () {
     describe('startup', function () {
         var server;
 
-        it('constructor fails due to wrong arguments', function (done) {
-            expect(function () { new Server(function () {}); }).to.throwException();
-            expect(function () { new Server('foobar'); }).to.throwException();
-            expect(function () { new Server(1337); }).to.throwException();
-
-            done();
-        });
-
         it('start fails due to wrong arguments', function (done) {
-            var s = new Server(CONFIG);
+            var s = new Server();
 
             expect(function () { s.start(); }).to.throwException();
             expect(function () { s.start('foobar', function () {}); }).to.throwException();
@@ -58,7 +40,7 @@ describe('Server', function () {
         });
 
         it('succeeds', function (done) {
-            server = new Server(CONFIG);
+            server = new Server();
 
             server.start(function (error) {
                 expect(error).to.not.be.ok();
@@ -90,7 +72,7 @@ describe('Server', function () {
         var server;
 
         before(function (done) {
-            server = new Server(CONFIG);
+            server = new Server();
             server.start(done);
         });
 
@@ -135,7 +117,7 @@ describe('Server', function () {
         var server;
 
         before(function (done) {
-            server = new Server(CONFIG);
+            server = new Server();
             server.start(done);
         });
 
@@ -167,7 +149,7 @@ describe('Server', function () {
         var server;
 
         before(function (done) {
-            server = new Server(CONFIG);
+            server = new Server();
             server.start(function (error) {
                 done(error);
             });

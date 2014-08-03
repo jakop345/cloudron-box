@@ -28,21 +28,15 @@ var APP = {
     httpPort: 4567
 };
 
-var tmpdir = path.join(os.tmpdir(), uuid.v4());
-config.appDataRoot = path.join(tmpdir, 'appdata');
-config.appServerUrl = 'http://appserver';
-config.nginxConfigDir = path.join(tmpdir, 'nginx');
-config.nginxAppConfigDir = path.join(config.nginxConfigDir, 'applications');
-config.token = 'magic';
-
 before(function (done) {
     mkdirp.sync(config.appDataRoot);
+    mkdirp.sync(config.configRoot);
     mkdirp.sync(config.nginxAppConfigDir);
     done();
 });
 
 after(function (done) {
-    rimraf(config.nginxAppConfigDir, done);
+    rimraf(config.baseDir, done);
 });
 
 describe('apptask', function () {

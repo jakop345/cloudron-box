@@ -30,7 +30,7 @@ console.log();
 console.log('==========================================');
 console.log();
 
-var server = new Server(config);
+var server = new Server();
 server.start(function (err) {
     if (err) {
         console.error('Error starting server', err);

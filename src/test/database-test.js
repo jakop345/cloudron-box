@@ -6,7 +6,6 @@
 
 'use strict';
 
-
 var database = require('../database'),
     path = require('path'),
     os = require('os'),
@@ -20,24 +19,16 @@ var database = require('../database'),
     appdb = require('../appdb.js'),
     expect = require('expect.js'),
     mkdirp = require('mkdirp'),
-    settingsdb = require('../settingsdb.js');
+    settingsdb = require('../settingsdb.js'),
+    config = require('../../config.js');
 
 describe('database', function () {
-    var BASE_DIR = path.resolve(os.tmpdir(), 'database-test-' + crypto.randomBytes(4).readUInt32LE(0));
-    var CONFIG = {
-        port: 3456,
-        dataRoot: path.resolve(BASE_DIR, 'data'),
-        configRoot: path.resolve(BASE_DIR, 'config'),
-        mountRoot: path.resolve(BASE_DIR, 'mount'),
-        silent: true
-    };
-
     before(function (done) {
-        mkdirp.sync(CONFIG.configRoot);
+        mkdirp.sync(config.configRoot);
 
-        database.create(CONFIG, function (error) {
+        database.create(function (error) {
             expect(error).to.be(null);
-            database.initialize(CONFIG, function (error) {
+            database.initialize(function (error) {
                 expect(error).to.be(null);
                 done();
             });
@@ -45,7 +36,7 @@ describe('database', function () {
     });
 
     after(function (done) {
-        rimraf.sync(BASE_DIR);
+        rimraf.sync(config.baseDir);
         done();
     });
 

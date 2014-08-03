@@ -15,22 +15,14 @@ var user = require('../user.js'),
     userdb = require('../userdb.js'),
     tokendb = require('../tokendb.js'),
     expect = require('expect.js'),
-    database = require('../database.js');
+    database = require('../database.js'),
+    config = require('../../config.js');
 
 var USERNAME = 'nobody';
 var EMAIL = 'nobody@no.body';
 var PASSWORD = 'foobar';
 var NEW_PASSWORD = 'somenewpassword';
 var IS_ADMIN = false;
-
-var tmpdirname = 'volume-test-' + crypto.randomBytes(4).readUInt32LE(0);
-var tmpdir = path.resolve(os.tmpdir(), tmpdirname);
-var CONFIG = {
-    port: 3000,
-    dataRoot: path.resolve(tmpdir, 'data'),
-    configRoot: path.resolve(tmpdir, 'config'),
-    mountRoot: path.resolve(tmpdir, 'mount')
-};
 
 function cleanupUser(done) {
     user.remove(USERNAME, function () {
@@ -48,18 +40,18 @@ function createUser(done) {
 
 function setup(done) {
     // ensure data/config/mount paths
-    mkdirp.sync(CONFIG.dataRoot);
-    mkdirp.sync(CONFIG.configRoot);
-    mkdirp.sync(CONFIG.mountRoot);
+    mkdirp.sync(config.dataRoot);
+    mkdirp.sync(config.configRoot);
+    mkdirp.sync(config.mountRoot);
 
-    database.create(CONFIG, function (error) {
+    database.create(function (error) {
         expect(error).to.be(null);
-        database.initialize(CONFIG, done);
+        database.initialize(done);
     });
 }
 
 function cleanup(done) {
-    rimraf(tmpdir, function (error) {
+    rimraf(config.baseDir, function (error) {
         expect(error).to.not.be.ok();
         done();
     });

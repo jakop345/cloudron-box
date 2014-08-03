@@ -15,7 +15,8 @@ var volume = require('../volume.js'),
     rimraf = require('rimraf'),
     crypto = require('crypto'),
     expect = require('expect.js'),
-    os = require('os');
+    os = require('os'),
+    config = require('../../config.js');
 
 var USER;
 var USERNAME = 'nobody';
@@ -26,23 +27,14 @@ var VOLUME = 'test_volume';
 var VOLUME_2 = 'second_volume';
 var VOLUME_3 = 'third_volume';
 
-var tmpdirname = 'volume-test-' + crypto.randomBytes(4).readUInt32LE(0);
-var tmpdir = path.resolve(os.tmpdir(), tmpdirname);
-var CONFIG = {
-    port: 3000,
-    dataRoot: path.resolve(tmpdir, 'data'),
-    configRoot: path.resolve(tmpdir, 'config'),
-    mountRoot: path.resolve(tmpdir, 'mount')
-};
-
 // ensure data/config/mount paths
 function setup(done) {
-    mkdirp.sync(CONFIG.dataRoot);
-    mkdirp.sync(CONFIG.configRoot);
-    mkdirp.sync(CONFIG.mountRoot);
+    mkdirp.sync(config.dataRoot);
+    mkdirp.sync(config.configRoot);
+    mkdirp.sync(config.mountRoot);
 
-    database.create(CONFIG, function (error) {
-        database.initialize(CONFIG, function (error) {
+    database.create(function (error) {
+        database.initialize(function (error) {
             if (error) return done(error);
 
             User.create(USERNAME, PASSWORD, EMAIL, IS_ADMIN, function (error, result) {
@@ -71,7 +63,7 @@ describe('Volume', function () {
             vol2.destroy(function (error) {
                 expect(error).to.not.be.ok();
 
-                rimraf.sync(tmpdir);
+                rimraf.sync(config.baseDir);
                 done();
             });
         });
@@ -80,7 +72,7 @@ describe('Volume', function () {
     describe('create', function () {
 
         it('succeeds', function (done) {
-            volume.create(VOLUME, USER, PASSWORD, CONFIG, function (error, result) {
+            volume.create(VOLUME, USER, PASSWORD, config, function (error, result) {
                 expect(error).not.to.be.ok();
                 expect(result).to.be.ok();
 
@@ -92,7 +84,7 @@ describe('Volume', function () {
         });
 
         it('fails because it already exists', function (done) {
-            volume.create(VOLUME, USER, PASSWORD, CONFIG, function (error, result) {
+            volume.create(VOLUME, USER, PASSWORD, config, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
                 done();
@@ -100,7 +92,7 @@ describe('Volume', function () {
         });
 
         it('second', function (done) {
-            volume.create(VOLUME_2, USER, USER._password, CONFIG, function (error, result) {
+            volume.create(VOLUME_2, USER, USER._password, config, function (error, result) {
                 expect(error).not.to.be.ok();
                 expect(result).to.be.ok();
 
@@ -114,7 +106,7 @@ describe('Volume', function () {
 
     describe('get by id', function () {
         it('succeeds', function (done) {
-            volume.get(vol1.id, USERNAME, CONFIG, function (error, result) {
+            volume.get(vol1.id, USERNAME, config, function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
                 expect(result).to.be.an(volume.Volume);
@@ -123,14 +115,14 @@ describe('Volume', function () {
         });
 
         it('fails, no such volume', function () {
-            volume.get('some string', USERNAME, CONFIG, function (error, result) {
+            volume.get('some string', USERNAME, config, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
             });
         });
 
         it('list', function (done) {
-            volume.list(USERNAME, CONFIG, function (error, result) {
+            volume.list(USERNAME, config, function (error, result) {
                 expect(error).not.to.be.ok();
                 expect(result).to.be.ok();
                 expect(result).to.be.an(Array);
@@ -145,14 +137,14 @@ describe('Volume', function () {
 
     describe('get by name', function () {
         it('fails, no such volume', function () {
-            volume.getByName('some string', USERNAME, CONFIG, function (error, result) {
+            volume.getByName('some string', USERNAME, config, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
             });
         });
 
         it('succeeds', function (done) {
-            volume.getByName(VOLUME, USERNAME, CONFIG, function (error, result) {
+            volume.getByName(VOLUME, USERNAME, config, function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
                 expect(result).to.be.an(volume.Volume);
@@ -165,7 +157,7 @@ describe('Volume', function () {
         var vol;
 
         before(function (done) {
-            volume.create(VOLUME_3, USER, USER._password, CONFIG, function (error, result) {
+            volume.create(VOLUME_3, USER, USER._password, config, function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
                 expect(result).to.be.an(volume.Volume);
@@ -259,7 +251,7 @@ describe('Volume', function () {
 
                     TEST_USER_1 = result;
 
-                    volume.create(TEST_VOLUME, TEST_USER_0, TEST_PASSWORD_0, CONFIG, function (error, result) {
+                    volume.create(TEST_VOLUME, TEST_USER_0, TEST_PASSWORD_0, config, function (error, result) {
                         expect(error).not.to.be.ok();
                         expect(result).to.be.ok();
 

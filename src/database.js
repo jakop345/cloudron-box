@@ -25,14 +25,15 @@ var userdb = require('./userdb.js'),
     debug = require('debug')('box:database'),
     DatabaseError = require('./databaseerror'),
     assert = require('assert'),
-    settingsdb = require('./settingsdb.js');
+    settingsdb = require('./settingsdb.js'),
+    config = require('../config.js');
 
 var connectionPool = [ ],
     databaseFileName = null;
 
 var NOOP_CALLBACK = function (error) { if (error) console.error(error); assert(!error); }
 
-function initialize(config, callback) {
+function initialize(callback) {
     databaseFileName = config.configRoot + '/config.sqlite.db';
 
     var db = new sqlite3.Database(databaseFileName);
@@ -47,7 +48,7 @@ function initialize(config, callback) {
     return callback(null);
 }
 
-function create(config, callback) {
+function create(callback) {
     var schema = fs.readFileSync(path.join(__dirname, 'schema.sql')).toString('utf8');
 
     databaseFileName = config.configRoot + '/config.sqlite.db';

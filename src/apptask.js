@@ -53,7 +53,7 @@ function initialize(callback) {
         docker = new Docker({ host: 'http://localhost', port: 2375 });
     }
 
-    database.initialize(config, callback);
+    database.initialize(callback);
 }
 
 function getFreePort(callback) {

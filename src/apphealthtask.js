@@ -3,7 +3,6 @@
 'use strict';
 
 var assert = require('assert'),
-    config = require('../config.js'),
     database = require('./database.js'),
     DatabaseError = require('./databaseerror'),
     appdb = require('./appdb.js'),
@@ -34,7 +33,7 @@ function initialize() {
         docker = new Docker({ host: 'http://localhost', port: 2375 });
     }
 
-    database.initialize(config, function (error) {
+    database.initialize(function (error) {
         if (error) throw error;
     });
 }

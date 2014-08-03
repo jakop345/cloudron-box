@@ -20,16 +20,14 @@ var express = require('express'),
     database = require('./database.js'),
     DatabaseError = require('./databaseerror.js'),
     userdb = require('./userdb'),
-    settingsdb = require('./settingsdb.js');
+    settingsdb = require('./settingsdb.js'),
+    config = require('../config.js');
 
 exports = module.exports = Server;
 
 var HEARTBEAT_INTERVAL = 1000 * 60 * 60;
 
-function Server(config) {
-    assert(typeof config === 'object');
-
-    this.config = config;
+function Server() {
     this.httpServer = null; // http server
     this.app = null; // express
 }
@@ -106,8 +104,8 @@ Server.prototype._getVersion = function (req, res, next) {
 
 Server.prototype._getConfig = function (req, res, next) {
     res.send(200, {
-        appstoreOrigin: this.config.appServerUrl,
-        fqdn: this.config.fqdn
+        appstoreOrigin: config.appServerUrl,
+        fqdn: config.fqdn
     });
 };
 
@@ -126,7 +124,7 @@ Server.prototype._provision = function (req, res, next) {
         if (result) return next(new HttpError(409, 'Already provisioned'));
 
         async.each(['token', 'appstoreOrigin', 'adminOrigin', 'fqdn'], function (item, callback) {
-            that.config[item] = req.body[item];
+            config[item] = req.body[item];
             settingsdb.set(item, req.body[item], callback);
         }, function (error) {
             if (error) return next(new HttpError(500, error));
@@ -176,7 +174,7 @@ Server.prototype._initializeExpressSync = function () {
     this.app.set('view options', { layout: true, debug: true });
     this.app.set('view engine', 'ejs');
 
-    if (!this.config.silent) {
+    if (!config.silent) {
         this.app.use(middleware.morgan({ format: 'dev', immediate: false }));
     }
 
@@ -308,8 +306,6 @@ Server.prototype._initializeExpressSync = function () {
 };
 
 Server.prototype._initialize2 = function (callback) {
-    var config = this.config;
-
     var that = this;
 
     // ensure data/config/mount paths
@@ -320,8 +316,8 @@ Server.prototype._initialize2 = function (callback) {
     mkdirp.sync(config.appDataRoot);
 
     async.series([
-        database.create.bind(null, config),
-        database.initialize.bind(null, config),
+        database.create,
+        database.initialize,
         function initializeRoutes(callback) {
             routes.volume.initialize(config);
             routes.sync.initialize(config);
@@ -335,22 +331,22 @@ Server.prototype._initialize2 = function (callback) {
 };
 
 Server.prototype._sendHeartBeat = function () {
-    if (!this.config.appServerUrl) {
+    if (!config.appServerUrl) {
         debug('No appstore server url set. Not sending heartbeat.');
         return;
     }
 
-    if (!this.config.token) {
+    if (!config.token) {
         debug('No appstore server token set. Not sending heartbeat.');
         return;
     }
 
     var that = this;
 
-    var url = this.config.appServerUrl + '/api/v1/boxes/heartbeat';
+    var url = config.appServerUrl + '/api/v1/boxes/heartbeat';
     debug('Sending heartbeat ' + url);
 
-    superagent.get(url).query({ token: this.config.token }).end(function (error, result) {
+    superagent.get(url).query({ token: config.token }).end(function (error, result) {
         if (error) debug('Error sending heartbeat.', error);
         else if (result.statusCode !== 200) debug('Server responded to heartbeat with ' + result.statusCode);
         else debug('Heartbeat successfull');
@@ -370,10 +366,10 @@ Server.prototype.announce = function (callback) {
 
         debug('announce: first run, try to provision the box by announcing with appstore.');
 
-        var url = that.config.appServerUrl + '/api/v1/boxes/announce';
-        debug('announce: ' + url + ' with box name ' + that.config.fqdn);
+        var url = config.appServerUrl + '/api/v1/boxes/announce';
+        debug('announce: ' + url + ' with box name ' + config.fqdn);
 
-        superagent.get(url).query({ name: that.config.fqdn }).end(function (error, result) {
+        superagent.get(url).query({ name: config.fqdn }).end(function (error, result) {
             if (error) return callback(error);
             if (result.statusCode !== 200) return callback(new Error('Unable to announce box with appstore'));
 
@@ -406,12 +402,12 @@ Server.prototype.start = function (callback) {
             debug('start: settings', result);
 
             result.forEach(function (item) {
-                that.config[item] = item.value;
+                config[item] = item.value;
             });
 
             that.httpServer = http.createServer(that.app);
 
-            that.httpServer.listen(that.config.port, callback);
+            that.httpServer.listen(config.port, callback);
         });
     });
 };

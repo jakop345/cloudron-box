@@ -5,46 +5,51 @@
 var path = require('path'),
     os = require('os'),
     safe = require('safetydance'),
-    assert = require('assert');
+    assert = require('assert'),
+    crypto = require('crypto');
 
 function getUserHomeDir() {
     return process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
 }
 
-var baseDir = path.join(getUserHomeDir(), '.yellowtent');
+var config = { };
 
-var appDataRoot = path.join(baseDir, 'appdata');
-var configRoot = path.join(baseDir, 'config');
-var dataRoot = path.join(baseDir, 'data');
-var mountRoot = path.join(baseDir, 'mount');
-var port = 3000;
-var silent = false;
-var nginxConfigDir = path.join(__dirname, 'nginx');
-var nginxAppConfigDir = path.join(nginxConfigDir, 'applications');
-var fqdn = process.env.FQDN || os.hostname();
-var appstoreOrigin = 'https://selfhost.io:5050';
+var production = process.env.NODE_ENV === 'production';
+
+if (production) {
+    config.baseDir =  path.join(getUserHomeDir(), '.yellowtent');
+    config.nginxConfigDir = path.join(__dirname, 'nginx'); // FIXME: this should be based off baseDir as well
+    config.port = 3000;
+    config.silent = false;
+} else {
+    config.baseDir = process.env.BASE_DIR || path.resolve(os.tmpdir(), 'test-' + crypto.randomBytes(4).readUInt32LE(0));
+    process.env.BASE_DIR = config.baseDir;
+    config.nginxConfigDir = path.join(config.baseDir, 'nginx');
+    config.port = 5454;
+    config.silent = true;
+}
+
+config.appDataRoot = path.join(config.baseDir, 'appdata');
+config.configRoot = path.join(config.baseDir, 'config');
+config.dataRoot = path.join(config.baseDir, 'data');
+config.mountRoot = path.join(config.baseDir, 'mount');
+config.token = null;
+
+config.nginxAppConfigDir = path.join(config.nginxConfigDir, 'applications');
+
+config.fqdn = process.env.FQDN || os.hostname();
+config.adminOrigin = 'https://admin-' + config.fqdn;
+config.appServerUrl = 'https://selfhost.io:5050';
+
 
 // load provisioned config file if there
 var configFile = safe.JSON.parse(safe.fs.readFileSync('/etc/yellowtent.json'));
 if (configFile !== null) {
     assert(configFile.appstoreOrigin, 'No appstoreOrigin found in yellowtent.json');
-    appstoreOrigin = configFile.appstoreOrigin;
+    config.appServerUrl = configFile.appstoreOrigin;
 } else {
     console.error('Unable to load provisioned config file. Using defaults.');
 }
 
-exports = module.exports = {
-    port: port,
-    dataRoot: dataRoot,
-    configRoot: configRoot,
-    mountRoot: mountRoot,
-    silent: silent,
-    token: null,
-    appServerUrl: appstoreOrigin,
-    adminOrigin: 'https://admin-' + fqdn,
-    nginxConfigDir: nginxConfigDir,
-    nginxAppConfigDir: nginxAppConfigDir,
-    appDataRoot: appDataRoot,
-    fqdn: fqdn
-};
+exports = module.exports = config;
 
