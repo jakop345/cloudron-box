@@ -174,7 +174,7 @@ Server.prototype._initializeExpressSync = function () {
     this.app.set('view options', { layout: true, debug: true });
     this.app.set('view engine', 'ejs');
 
-    if (!config.silent) {
+    if (config.logApiRequests) {
         this.app.use(middleware.morgan({ format: 'dev', immediate: false }));
     }
 

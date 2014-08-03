@@ -20,13 +20,13 @@ if (production) {
     config.baseDir =  path.join(getUserHomeDir(), '.yellowtent');
     config.nginxConfigDir = path.join(__dirname, 'nginx'); // FIXME: this should be based off baseDir as well
     config.port = 3000;
-    config.silent = false;
+    config.logApiRequests = true;
 } else {
     config.baseDir = process.env.BASE_DIR || path.resolve(os.tmpdir(), 'test-' + crypto.randomBytes(4).readUInt32LE(0));
     process.env.BASE_DIR = config.baseDir;
     config.nginxConfigDir = path.join(config.baseDir, 'nginx');
     config.port = 5454;
-    config.silent = true;
+    config.logApiRequests = false;
 }
 
 config.appDataRoot = path.join(config.baseDir, 'appdata');
