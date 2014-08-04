@@ -3,31 +3,21 @@
 'use strict';
 
 var DatabaseError = require('./databaseerror'),
+    database = require('./database.js'),
     debug = require('debug')('box:authcodedb'),
     assert = require('assert');
 
-// database
-var db = null;
-
 exports = module.exports = {
-    init: init,
     get: get,
     add: add,
     del: del
 };
 
-function init(_db) {
-    assert(typeof _db === 'object');
-
-    db = _db;
-}
-
 function get(authCode, callback) {
-    assert(db !== null);
     assert(typeof authCode === 'string');
     assert(typeof callback === 'function');
 
-    db.get('SELECT * FROM authcodes WHERE authCode = ?', [ authCode ], function (error, result) {
+    database.get('SELECT * FROM authcodes WHERE authCode = ?', [ authCode ], function (error, result) {
         if (error) return callback(new DatabaseError(error.message, DatabaseError.INTERNAL_ERROR));
 
         if (typeof result === 'undefined') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
@@ -37,7 +27,6 @@ function get(authCode, callback) {
 }
 
 function add(authCode, clientId, redirectURI, userId, callback) {
-    assert(db !== null);
     assert(typeof authCode === 'string');
     assert(typeof clientId === 'string');
     assert(typeof redirectURI === 'string');
@@ -51,7 +40,7 @@ function add(authCode, clientId, redirectURI, userId, callback) {
         $userId: userId
     };
 
-    db.run('INSERT INTO authcodes (authCode, clientId, redirectURI, userId) ' +
+    database.run('INSERT INTO authcodes (authCode, clientId, redirectURI, userId) ' +
            ' VALUES ($authCode, $clientId, $redirectURI, $userId)', data, function (error) {
         if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(error.code, DatabaseError.ALREADY_EXISTS));
         if (error || !this.lastID) return callback(new DatabaseError(error.message, DatabaseError.INTERNAL_ERROR));
@@ -61,11 +50,10 @@ function add(authCode, clientId, redirectURI, userId, callback) {
 }
 
 function del(authCode, callback) {
-    assert(db !== null);
     assert(typeof authCode === 'string');
     assert(typeof callback === 'function');
 
-    db.run('DELETE FROM authcodes WHERE authCode = ?', [ authCode ], function (error) {
+    database.run('DELETE FROM authcodes WHERE authCode = ?', [ authCode ], function (error) {
         if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
         if (this.changes !== 1) return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
 

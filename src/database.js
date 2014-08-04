@@ -10,14 +10,14 @@ exports = module.exports = {
     removePrivates: removePrivates,
     newTransaction: newTransaction,
     rollback: rollback,
-    commit: commit
+    commit: commit,
+
+    get: get,
+    all: all,
+    run: run
 };
 
-var userdb = require('./userdb.js'),
-    tokendb = require('./tokendb.js'),
-    clientdb = require('./clientdb.js'),
-    authcodedb = require('./authcodedb.js'),
-    appdb = require('./appdb.js'),
+var clientdb = require('./clientdb.js'),
     sqlite3 = require('sqlite3'),
     fs = require('fs'),
     mkdirp = require('mkdirp'),
@@ -25,25 +25,18 @@ var userdb = require('./userdb.js'),
     debug = require('debug')('box:database'),
     DatabaseError = require('./databaseerror'),
     assert = require('assert'),
-    settingsdb = require('./settingsdb.js'),
     config = require('../config.js');
 
 var connectionPool = [ ],
-    databaseFileName = null;
+    databaseFileName = null,
+    db = null;
 
 var NOOP_CALLBACK = function (error) { if (error) console.error(error); assert(!error); }
 
 function initialize(callback) {
     databaseFileName = config.configRoot + '/config.sqlite.db';
 
-    var db = new sqlite3.Database(databaseFileName);
-
-    userdb.init(db);
-    tokendb.init(db);
-    clientdb.init(db);
-    authcodedb.init(db);
-    appdb.init(db);
-    settingsdb.init(db);
+    db = new sqlite3.Database(databaseFileName);
 
     return callback(null);
 }
@@ -59,8 +52,6 @@ function create(callback) {
 
     db.exec(schema, function (err) {
         if (err) return callback(err);
-
-        clientdb.init(db);
 
         // TODO this should happen somewhere else..no clue where - Johannes
         clientdb.del('cid-webadmin', function () {
@@ -99,5 +90,17 @@ function removePrivates(obj) {
     }
 
     return res;
+}
+
+function get() {
+    return db.get.apply(db, arguments);
+}
+
+function all() {
+    return db.all.apply(db, arguments);
+}
+
+function run() {
+    return db.run.apply(db, arguments);
 }
 

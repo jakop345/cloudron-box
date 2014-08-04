@@ -2,10 +2,15 @@
 
 'use strict';
 
-// this code is intentionally placed before the requires because of circular
-// dependancy between database and the *db.js files
+var DatabaseError = require('./databaseerror'),
+    debug = require('debug')('box:appdb'),
+    assert = require('assert'),
+    database = require('./database.js'),
+    async = require('async'),
+    util = require('util'),
+    safe = require('safetydance');
+
 exports = module.exports = {
-    init: init,
     get: get,
     getBySubdomain: getBySubdomain,
     add: add,
@@ -32,29 +37,11 @@ exports = module.exports = {
     RSTATE_NOT_RESPONDING: 'not_responding'
 };
 
-var DatabaseError = require('./databaseerror'),
-    debug = require('debug')('box:appdb'),
-    assert = require('assert'),
-    database = require('./database.js'),
-    async = require('async'),
-    util = require('util'),
-    safe = require('safetydance');
-
-// database
-var db = null;
-
-function init(_db) {
-    assert(typeof _db === 'object');
-
-    db = _db;
-}
-
 function get(id, callback) {
-    assert(db !== null);
     assert(typeof id === 'string');
     assert(typeof callback === 'function');
 
-    db.get('SELECT * FROM apps WHERE id = ?', [ id ], function (error, result) {
+    database.get('SELECT * FROM apps WHERE id = ?', [ id ], function (error, result) {
         if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
 
         if (typeof result === 'undefined') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
@@ -67,11 +54,10 @@ function get(id, callback) {
 }
 
 function getBySubdomain(subdomain, callback) {
-    assert(db !== null);
     assert(typeof subdomain === 'string');
     assert(typeof callback === 'function');
 
-    db.get('SELECT * FROM apps WHERE location = ?', [ subdomain ], function (error, result) {
+    database.get('SELECT * FROM apps WHERE location = ?', [ subdomain ], function (error, result) {
         if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
 
         if (typeof result === 'undefined') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
@@ -84,9 +70,7 @@ function getBySubdomain(subdomain, callback) {
 }
 
 function getAll(callback) {
-    assert(db !== null);
-
-    db.all('SELECT * FROM apps', function (error, results) {
+    database.all('SELECT * FROM apps', function (error, results) {
         if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
 
         if (typeof results === 'undefined') results = [ ];
@@ -101,7 +85,6 @@ function getAll(callback) {
 }
 
 function add(id, installationState, location, portBindings, callback) {
-    assert(db !== null);
     assert(typeof id === 'string');
     assert(typeof installationState === 'string');
     assert(typeof location === 'string');
@@ -147,7 +130,7 @@ function add(id, installationState, location, portBindings, callback) {
 }
 
 function getPortBindings(id, callback) {
-    db.all('SELECT * FROM appPortBindings WHERE appId = ?', [ id ], function (error, result) {
+    database.all('SELECT * FROM appPortBindings WHERE appId = ?', [ id ], function (error, result) {
         if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
 
         if (typeof result === 'undefined') result = [ ];
@@ -157,7 +140,6 @@ function getPortBindings(id, callback) {
 }
 
 function del(id, callback) {
-    assert(db !== null);
     assert(typeof id === 'string');
     assert(typeof callback === 'function');
 
@@ -175,7 +157,6 @@ function del(id, callback) {
 }
 
 function update(id, app, callback) {
-    assert(db !== null);
     assert(typeof id === 'string');
     assert(typeof app === 'object');
     assert(typeof callback === 'function');
@@ -194,7 +175,7 @@ function update(id, app, callback) {
     }
     values.push(id);
 
-    db.run('UPDATE apps SET ' + args.join(', ') + ' WHERE id = ?', values, function (error) {
+    database.run('UPDATE apps SET ' + args.join(', ') + ' WHERE id = ?', values, function (error) {
         if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
         if (this.changes !== 1) return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
 

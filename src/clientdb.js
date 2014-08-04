@@ -3,32 +3,21 @@
 var DatabaseError = require('./databaseerror'),
     path = require('path'),
     debug = require('debug')('box:clientdb'),
+    database = require('./database.js'),
     assert = require('assert');
 
-// database
-var db = null;
-
 exports = module.exports = {
-    init: init,
     get: get,
     getByClientId: getByClientId,
     add: add,
     del: del
 };
 
-function init(_db) {
-    assert(typeof _db === 'object');
-
-    db = _db;
-}
-
 function get(id, callback) {
-    assert(db !== null);
     assert(typeof id === 'string');
     assert(typeof callback === 'function');
 
-
-    db.get('SELECT * FROM clients WHERE id = ?', [ id ], function (error, result) {
+    database.get('SELECT * FROM clients WHERE id = ?', [ id ], function (error, result) {
         if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
 
         if (typeof result === 'undefined') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
@@ -38,11 +27,10 @@ function get(id, callback) {
 }
 
 function getByClientId(clientId, callback) {
-    assert(db !== null);
     assert(typeof clientId === 'string');
     assert(typeof callback === 'function');
 
-    db.get('SELECT * FROM clients WHERE clientId = ? LIMIT 1', [ clientId ], function (error, result) {
+    database.get('SELECT * FROM clients WHERE clientId = ? LIMIT 1', [ clientId ], function (error, result) {
         if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
 
         if (typeof result === 'undefined') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
@@ -52,7 +40,6 @@ function getByClientId(clientId, callback) {
 }
 
 function add(id, clientId, clientSecret, name, redirectURI, callback) {
-    assert(db !== null);
     assert(typeof id === 'string');
     assert(typeof clientId === 'string');
     assert(typeof clientSecret === 'string');
@@ -68,7 +55,7 @@ function add(id, clientId, clientSecret, name, redirectURI, callback) {
         $redirectURI: redirectURI
     };
 
-    db.run('INSERT INTO clients (id, clientId, clientSecret, name, redirectURI) '
+    database.run('INSERT INTO clients (id, clientId, clientSecret, name, redirectURI) '
            + 'VALUES ($id, $clientId, $clientSecret, $name, $redirectURI)',
            data, function (error) {
         if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(error, DatabaseError.ALREADY_EXISTS));
@@ -79,11 +66,10 @@ function add(id, clientId, clientSecret, name, redirectURI, callback) {
 }
 
 function del(id, callback) {
-    assert(db !== null);
     assert(typeof id === 'string');
     assert(typeof callback === 'function');
 
-    db.run('DELETE FROM clients WHERE id = ?', [ id ], function (error) {
+    database.run('DELETE FROM clients WHERE id = ?', [ id ], function (error) {
         if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
         if (this.changes !== 1) return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
 

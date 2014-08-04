@@ -4,13 +4,10 @@ var DatabaseError = require('./databaseerror'),
     path = require('path'),
     uuid = require('node-uuid'),
     debug = require('debug')('box:tokendb'),
+    database = require('./database.js'),
     assert = require('assert');
 
-// database
-var db = null;
-
 exports = module.exports = {
-    init: init,
     generateToken: generateToken,
     get: get,
     getByUserId: getByUserId,
@@ -19,21 +16,15 @@ exports = module.exports = {
     delByUserId: delByUserId
 };
 
-function init(_db) {
-    assert(typeof _db === 'object');
-    db = _db;
-}
-
 function generateToken() {
     return uuid.v4();
 }
 
 function get(accessToken, callback) {
-    assert(db !== null);
     assert(typeof accessToken === 'string');
     assert(typeof callback === 'function');
 
-    db.get('SELECT * FROM tokens WHERE accessToken = ?', [ accessToken ], function (error, result) {
+    database.get('SELECT * FROM tokens WHERE accessToken = ?', [ accessToken ], function (error, result) {
         if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
 
         if (typeof result === 'undefined') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
@@ -43,7 +34,6 @@ function get(accessToken, callback) {
 }
 
 function add(accessToken, userId, clientId, expires, callback) {
-    assert(db !== null);
     assert(typeof accessToken === 'string');
     assert(typeof userId === 'string');
     assert(typeof clientId === 'string' || clientId === null);
@@ -57,7 +47,7 @@ function add(accessToken, userId, clientId, expires, callback) {
         $expires: expires
     };
 
-    db.run('INSERT INTO tokens (accessToken, userId, clientId, expires) '
+    database.run('INSERT INTO tokens (accessToken, userId, clientId, expires) '
            + 'VALUES ($accessToken, $userId, $clientId, $expires)',
            data, function (error) {
         if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(error, DatabaseError.ALREADY_EXISTS));
@@ -68,11 +58,10 @@ function add(accessToken, userId, clientId, expires, callback) {
 }
 
 function del(accessToken, callback) {
-    assert(db !== null);
     assert(typeof accessToken === 'string');
     assert(typeof callback === 'function');
 
-    db.run('DELETE FROM tokens WHERE accessToken = ?', [ accessToken ], function (error) {
+    database.run('DELETE FROM tokens WHERE accessToken = ?', [ accessToken ], function (error) {
         if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
         if (this.changes !== 1) return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
 
@@ -81,11 +70,10 @@ function del(accessToken, callback) {
 }
 
 function getByUserId(userId, callback) {
-    assert(db !== null);
     assert(typeof userId === 'string');
     assert(typeof callback === 'function');
 
-    db.get('SELECT * FROM tokens WHERE userId = ? LIMIT 1', [ userId ], function (error, result) {
+    database.get('SELECT * FROM tokens WHERE userId = ? LIMIT 1', [ userId ], function (error, result) {
         if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
 
         if (typeof result === 'undefined') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
@@ -95,11 +83,10 @@ function getByUserId(userId, callback) {
 }
 
 function delByUserId(userId, callback) {
-    assert(db !== null);
     assert(typeof userId === 'string');
     assert(typeof callback === 'function');
 
-    db.run('DELETE FROM tokens WHERE userId = ?', [ userId ], function (error) {
+    database.run('DELETE FROM tokens WHERE userId = ?', [ userId ], function (error) {
         if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
         if (this.changes !== 1) return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
 
