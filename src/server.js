@@ -317,11 +317,6 @@ Server.prototype._initialize2 = function (callback) {
 
     async.series([
         database.create,
-        function initializeRoutes(callback) {
-            routes.volume.initialize(config);
-            routes.sync.initialize(config);
-            callback(null);
-        },
         function initializeModules(callback) {
             apps.initialize();
             callback(null);

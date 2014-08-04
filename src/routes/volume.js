@@ -5,10 +5,10 @@ var HttpError = require('../httperror.js'),
     async = require('async'),
     volume = require('../volume.js'),
     User = require('../user.js'),
-    VolumeError = volume.VolumeError;
+    VolumeError = volume.VolumeError,
+    config = require('../../config.js');
 
 exports = module.exports = {
-    initialize: initialize,
     listFiles: listFiles,
     listVolumes: listVolumes,
     createVolume: createVolume,
@@ -22,12 +22,6 @@ exports = module.exports = {
     addUser: addUser,
     removeUser: removeUser
 };
-
-var config;
-
-function initialize(cfg) {
-    config = cfg;
-}
 
 function deleteVolume(req, res, next) {
     req.volume.verifyUser(req.user, req.body.password, function (error) {

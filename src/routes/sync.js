@@ -7,23 +7,18 @@ var debug = require('debug')('server:routes/sync'),
     util = require('util'),
     path = require('path'),
     safe = require('safetydance'),
+    config = require('../../config.js'),
     Repo = require('../repo.js');
 
 exports = module.exports = {
-    initialize: initialize,
     attachRepo: attachRepo,
     requireMountedVolume: requireMountedVolume,
     diff: diff,
     delta: delta
 };
 
-var config;
 var REPO_DIRNAME = 'repo';
 var TMP_DIRNAME = 'tmp';
-
-function initialize(cfg) {
-    config = cfg;
-}
 
 function attachRepo(req, res, next, volumeId) {
     if (!volumeId) return next(new HttpError(400, 'Volume not specified'));
