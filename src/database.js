@@ -2,10 +2,18 @@
 
 'use strict';
 
-// this code is intentionally placed before the requires because of circular
-// dependancy between database and the *db.js files
+var sqlite3 = require('sqlite3'),
+    fs = require('fs'),
+    mkdirp = require('mkdirp'),
+    path = require('path'),
+    debug = require('debug')('box:database'),
+    DatabaseError = require('./databaseerror'),
+    assert = require('assert'),
+    config = require('../config.js');
+
 exports = module.exports = {
     initialize: initialize,
+    uninitialize: uninitialize,
     create: create,
     removePrivates: removePrivates,
     newTransaction: newTransaction,
@@ -16,15 +24,6 @@ exports = module.exports = {
     all: all,
     run: run
 };
-
-var sqlite3 = require('sqlite3'),
-    fs = require('fs'),
-    mkdirp = require('mkdirp'),
-    path = require('path'),
-    debug = require('debug')('box:database'),
-    DatabaseError = require('./databaseerror'),
-    assert = require('assert'),
-    config = require('../config.js');
 
 var connectionPool = [ ],
     databaseFileName = null,
@@ -37,6 +36,12 @@ function initialize(callback) {
     db = new sqlite3.Database(databaseFileName);
 
     return callback(null);
+}
+
+function uninitialize() {
+    debug('Closing database');
+    db.close();
+    db = null;
 }
 
 // create also initializes

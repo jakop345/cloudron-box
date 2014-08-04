@@ -417,6 +417,7 @@ Server.prototype.stop = function (callback) {
     }
 
     apps.uninitialize();
+    database.uninitialize();
 
     this.httpServer.close(function () {
         that.httpServer.unref();
