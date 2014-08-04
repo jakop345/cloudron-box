@@ -23,7 +23,7 @@ if (production) {
     config.logApiRequests = true;
 } else {
     config.baseDir = process.env.BASE_DIR || path.resolve(os.tmpdir(), 'test-' + crypto.randomBytes(4).readUInt32LE(0));
-    process.env.BASE_DIR = config.baseDir;
+    process.env.BASE_DIR = config.baseDir; // BASE_DIR is set for use in child processes (apptask, apphealthtask)
     config.nginxConfigDir = path.join(config.baseDir, 'nginx');
     config.port = 5454;
     config.logApiRequests = false;
