@@ -305,25 +305,6 @@ Server.prototype._initializeExpressSync = function () {
     router.post('/api/v1/settings/naked_domain', bearer, routes.settings.setNakedDomain);
 };
 
-Server.prototype._initialize2 = function (callback) {
-    var that = this;
-
-    // ensure data/config/mount paths
-    mkdirp.sync(config.dataRoot);
-    mkdirp.sync(config.configRoot);
-    mkdirp.sync(config.mountRoot);
-    mkdirp.sync(config.nginxAppConfigDir);
-    mkdirp.sync(config.appDataRoot);
-
-    async.series([
-        database.create,
-        function initializeModules(callback) {
-            apps.initialize();
-            callback(null);
-        },
-    ], callback);
-};
-
 Server.prototype._sendHeartBeat = function () {
     if (!config.appServerUrl) {
         debug('No appstore server url set. Not sending heartbeat.');
@@ -378,14 +359,21 @@ Server.prototype.start = function (callback) {
     assert(typeof callback === 'function');
     assert(this.app === null, 'Server is already up and running.');
 
+    mkdirp.sync(config.dataRoot);
+    mkdirp.sync(config.configRoot);
+    mkdirp.sync(config.mountRoot);
+    mkdirp.sync(config.nginxAppConfigDir);
+    mkdirp.sync(config.appDataRoot);
+
     var that = this;
 
     this._initializeExpressSync();
     this._sendHeartBeat();
 
-    this._initialize2(function (err) {
+    database.create(function (err) {
         if (err) return callback(err);
 
+        apps.initialize();
         settingsdb.getAll(function (error, result) {
             if (error) return callback(error);
 
