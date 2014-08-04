@@ -56,10 +56,10 @@ function create(callback) {
     db.exec(schema, function (err) {
         if (err) return callback(err);
 
-        // TODO this should happen somewhere else..no clue where - Johannes
+        // add webadmin as an OAuth client
         var clientdb = require('./clientdb.js');
         clientdb.del('cid-webadmin', function () {
-            clientdb.add('cid-webadmin', 'cid-webadmin', 'unused', 'WebAdmin', config.adminOrigin || 'https://localhost', function (error) {
+            clientdb.add('cid-webadmin', 'cid-webadmin', 'unused', 'WebAdmin', config.adminOrigin, function (error) {
                 if (error && error.reason !== DatabaseError.ALREADY_EXISTS) return callback(new Error('Error initializing client database with webadmin'));
                 return callback(null);
             });
