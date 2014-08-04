@@ -39,7 +39,8 @@ exports = module.exports = {
     _deleteVolume: deleteVolume,
     _downloadManifest: downloadManifest,
     _registerSubdomain: registerSubdomain,
-    _unregisterSubdomain: unregisterSubdomain
+    _unregisterSubdomain: unregisterSubdomain,
+    _reloadNginx: reloadNginx
 };
 
 var docker = null,
@@ -75,6 +76,10 @@ function forwardFromHostToVirtualBox(rulename, port) {
     }
 }
 
+function reloadNginx(callback) {
+    child_process.exec(RELOAD_NGINX_CMD, { timeout: 10000 }, callback);
+}
+
 function configureNginx(app, httpPort, callback) {
     var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { vhost: appFqdn(app.location), port: httpPort });
 
@@ -84,11 +89,7 @@ function configureNginx(app, httpPort, callback) {
     fs.writeFile(nginxConfigFilename, nginxConf, function (error) {
         if (error) return callback(error);
 
-        child_process.exec(RELOAD_NGINX_CMD, { timeout: 10000 }, function (error, stdout, stderr) {
-            if (error) return callback(error);
-
-            return callback(null);
-        });
+        exports._reloadNginx(callback);
 
         forwardFromHostToVirtualBox(app.id + '-http', httpPort);
     });
@@ -101,7 +102,7 @@ function unconfigureNginx(app, callback) {
         return callback(safe.error);
     }
 
-    child_process.exec(RELOAD_NGINX_CMD, { timeout: 10000 }, callback);
+    exports._reloadNginx(callback);
 }
 
 function setNakedDomain(app, callback) {
@@ -113,11 +114,7 @@ function setNakedDomain(app, callback) {
     fs.writeFile(nginxNakedDomainFilename, nginxConf, function (error) {
         if (error) return callback(error);
 
-        child_process.exec(RELOAD_NGINX_CMD, { timeout: 10000 }, function (error, stdout, stderr) {
-            if (error) return callback(error);
-
-            return callback(null);
-        });
+        exports._reloadNginx(callback);
     });
 }
 

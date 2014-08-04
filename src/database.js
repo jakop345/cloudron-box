@@ -41,7 +41,11 @@ function initialize(callback) {
 function uninitialize() {
     debug('Closing database');
     db.close();
+    databaseFileName = null;
     db = null;
+
+    connectionPool.forEach(function (conn) { conn.close(); });
+    connectionPool = [ ];
 }
 
 // create also initializes

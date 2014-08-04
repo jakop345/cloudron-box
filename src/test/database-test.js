@@ -33,6 +33,7 @@ describe('database', function () {
     });
 
     after(function (done) {
+        database.uninitialize();
         rimraf.sync(config.baseDir);
         done();
     });

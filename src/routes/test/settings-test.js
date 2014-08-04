@@ -16,6 +16,8 @@ var Server = require('../../server.js'),
     fs = require('fs'),
     appdb = require('../../appdb.js'),
     config = require('../../../config.js'),
+    sinon = require('sinon'),
+    apptask = require('../../apptask.js'),
     async = require('async');
 
 var SERVER_URL = 'http://localhost:' + config.port;
@@ -76,7 +78,7 @@ describe('Settings API', function () {
     before(setup);
     after(cleanup);
 
-    it('can get domain domain (not set)', function (done) {
+    it('can get naked domain (not set)', function (done) {
         request.get(SERVER_URL + '/api/v1/settings/naked_domain')
                .query({ access_token: token })
                .end(function (err, res) {
@@ -102,6 +104,56 @@ describe('Settings API', function () {
                .end(function (err, res) {
             expect(res.statusCode).to.equal(404);
             done();
+        });
+    });
+
+    it('can set naked domain to valid app', function (done) {
+        var reloadNginxStub = sinon.stub(apptask, '_reloadNginx').callsArgWith(0, null);
+
+        request.post(SERVER_URL + '/api/v1/settings/naked_domain')
+               .query({ access_token: token })
+               .send({ appid: 'appid' })
+               .end(function (err, res) {
+            reloadNginxStub.restore();
+            expect(res.statusCode).to.equal(200);
+            expect(fs.readFileSync(config.nginxConfigDir + '/naked_domain.conf').length > 10).to.be.ok();
+            expect(reloadNginxStub.callCount).to.be(1);
+            done();
+        });
+    });
+
+    it('can get naked domain (set)', function (done) {
+        request.get(SERVER_URL + '/api/v1/settings/naked_domain')
+               .query({ access_token: token })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            expect(res.body).to.eql({ appid: 'appid' });
+            done(err);
+        });
+    });
+
+    it('can unset naked domain', function (done) {
+        var reloadNginxStub = sinon.stub(apptask, '_reloadNginx').callsArgWith(0, null);
+
+        request.post(SERVER_URL + '/api/v1/settings/naked_domain')
+               .query({ access_token: token })
+               .send({ appid: '' })
+               .end(function (err, res) {
+            reloadNginxStub.restore();
+            expect(res.statusCode).to.equal(200);
+            expect(fs.readFileSync(config.nginxConfigDir + '/naked_domain.conf').length == 0).to.be.ok();
+            expect(reloadNginxStub.callCount).to.be(1);
+            done();
+        });
+    });
+
+    it('must have no naked domain', function (done) {
+        request.get(SERVER_URL + '/api/v1/settings/naked_domain')
+               .query({ access_token: token })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            expect(res.body).to.eql({ appid: '' });
+            done(err);
         });
     });
 });
