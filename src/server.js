@@ -124,6 +124,7 @@ Server.prototype._provision = function (req, res, next) {
         if (result) return next(new HttpError(409, 'Already provisioned'));
 
         async.each(['token', 'appstoreOrigin', 'adminOrigin', 'fqdn'], function (item, callback) {
+            assert(item in config);
             config[item] = req.body[item];
             settingsdb.set(item, req.body[item], callback);
         }, function (error) {
@@ -380,6 +381,7 @@ Server.prototype.start = function (callback) {
             debug('start: settings', result);
 
             result.forEach(function (item) {
+                assert(item in config);
                 config[item] = item.value;
             });
 
