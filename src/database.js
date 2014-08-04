@@ -17,8 +17,7 @@ exports = module.exports = {
     run: run
 };
 
-var clientdb = require('./clientdb.js'),
-    sqlite3 = require('sqlite3'),
+var sqlite3 = require('sqlite3'),
     fs = require('fs'),
     mkdirp = require('mkdirp'),
     path = require('path'),
@@ -35,18 +34,17 @@ var NOOP_CALLBACK = function (error) { if (error) console.error(error); assert(!
 
 function initialize(callback) {
     databaseFileName = config.configRoot + '/config.sqlite.db';
-
     db = new sqlite3.Database(databaseFileName);
 
     return callback(null);
 }
 
+// create also initializes
 function create(callback) {
     var schema = fs.readFileSync(path.join(__dirname, 'schema.sql')).toString('utf8');
 
     databaseFileName = config.configRoot + '/config.sqlite.db';
-
-    var db = new sqlite3.Database(databaseFileName);
+    db = new sqlite3.Database(databaseFileName);
 
     debug('Database created at ' + databaseFileName);
 
@@ -54,6 +52,7 @@ function create(callback) {
         if (err) return callback(err);
 
         // TODO this should happen somewhere else..no clue where - Johannes
+        var clientdb = require('./clientdb.js');
         clientdb.del('cid-webadmin', function () {
             clientdb.add('cid-webadmin', 'cid-webadmin', 'unused', 'WebAdmin', config.adminOrigin || 'https://localhost', function (error) {
                 if (error && error.reason !== DatabaseError.ALREADY_EXISTS) return callback(new Error('Error initializing client database with webadmin'));

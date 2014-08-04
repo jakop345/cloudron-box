@@ -28,10 +28,7 @@ describe('database', function () {
 
         database.create(function (error) {
             expect(error).to.be(null);
-            database.initialize(function (error) {
-                expect(error).to.be(null);
-                done();
-            });
+            done();
         });
     });
 

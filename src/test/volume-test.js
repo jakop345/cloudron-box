@@ -34,17 +34,15 @@ function setup(done) {
     mkdirp.sync(config.mountRoot);
 
     database.create(function (error) {
-        database.initialize(function (error) {
-            if (error) return done(error);
+        if (error) return done(error);
 
-            User.create(USERNAME, PASSWORD, EMAIL, IS_ADMIN, function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result).to.be.ok();
+        User.create(USERNAME, PASSWORD, EMAIL, IS_ADMIN, function (error, result) {
+            expect(error).to.not.be.ok();
+            expect(result).to.be.ok();
 
-                USER = result;
+            USER = result;
 
-                done();
-            });
+            done();
         });
     });
 }

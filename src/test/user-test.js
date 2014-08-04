@@ -46,7 +46,7 @@ function setup(done) {
 
     database.create(function (error) {
         expect(error).to.be(null);
-        database.initialize(done);
+        done();
     });
 }
 
