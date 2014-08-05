@@ -81,7 +81,7 @@ Server.prototype._serverErrorHandler = function (err, req, res, next) {
  * @apiSuccess {Boolean} activated True if the device was already activated otherwise false.
  * @apiSuccess {String} version The current version string of the device.
  */
-Server.prototype._firstTime = function (req, res, next) {
+Server.prototype._firstTime = function (req, res) {
     userdb.count(function (error, count) {
         if (error) return res.send(500, { status: http.STATUS_CODES[500], message: error.message || 'Internal Server error' });
 
@@ -98,11 +98,11 @@ Server.prototype._firstTime = function (req, res, next) {
  *
  * @apiSuccess {String} version The current version string of the device.
  */
-Server.prototype._getVersion = function (req, res, next) {
+Server.prototype._getVersion = function (req, res) {
     res.send(200, { version: pkg.version });
 };
 
-Server.prototype._getConfig = function (req, res, next) {
+Server.prototype._getConfig = function (req, res) {
     res.send(200, {
         appServerUrl: config.appServerUrl,
         fqdn: config.fqdn
@@ -116,8 +116,6 @@ Server.prototype._provision = function (req, res, next) {
     if (!req.body.fqdn) return next(new HttpError(400, 'No fqdn provided'));
 
     debug('_provision: received from appstore ' + req.body.appServerUrl);
-
-    var that = this;
 
     settingsdb.get('token', function (error, result) {
         if (error && error.reason !== DatabaseError.NOT_FOUND) return next(new HttpError(500));
@@ -333,8 +331,6 @@ Server.prototype._sendHeartBeat = function () {
 
 Server.prototype.announce = function (callback) {
     assert(typeof callback === 'function');
-
-    var that = this;
 
     settingsdb.get('token', function (error, result) {
         if (error && error.reason !== DatabaseError.NOT_FOUND) return callback(error);
