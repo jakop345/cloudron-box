@@ -74,6 +74,7 @@ cat > /etc/supervisor/conf.d/box.conf <<EOF
 command=node app.js
 autostart=true
 autorestart=true
+redirect_stderr=true
 directory=$BASEDIR
 user=yellowtent
 environment=HOME="/home/yellowtent",USER="yellowtent",DEBUG="*",APP_SERVER_URL=$APP_SERVER_URL
