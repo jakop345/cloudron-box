@@ -338,10 +338,10 @@ Server.prototype.announce = function (callback) {
 
         debug('announce: first run, try to provision the box by announcing with appstore.');
 
-        var url = config.appServerUrl + '/api/v1/boxes/announce';
+        var url = config.appServerUrl + '/api/v1/boxes/' + config.fqdn + '/announce';
         debug('announce: ' + url + ' with box name ' + config.fqdn);
 
-        superagent.get(url).query({ name: config.fqdn }).end(function (error, result) {
+        superagent.get(url).end(function (error, result) {
             if (error) return callback(error);
             if (result.statusCode !== 200) return callback(new Error('Unable to announce box with appstore'));
 
