@@ -381,8 +381,8 @@ Server.prototype.start = function (callback) {
             debug('start: settings', result);
 
             result.forEach(function (item) {
-                assert(item in config);
-                config[item] = item.value;
+                assert(item.key in config);
+                config[item.key] = item.value;
             });
 
             that.httpServer = http.createServer(that.app);
