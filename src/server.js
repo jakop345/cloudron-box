@@ -122,7 +122,7 @@ Server.prototype._provision = function (req, res, next) {
         if (result) return next(new HttpError(409, 'Already provisioned'));
 
         async.each(['token', 'appServerUrl', 'adminOrigin', 'fqdn'], function (item, callback) {
-            assert(item in config);
+            assert(item in config, 'Config.js is missing key "' + item.key + '"');
             config[item] = req.body[item];
             settingsdb.set(item, req.body[item], callback);
         }, function (error) {
@@ -377,7 +377,7 @@ Server.prototype.start = function (callback) {
             debug('start: settings', result);
 
             result.forEach(function (item) {
-                assert(item.key in config);
+                assert(item.key in config, 'Config.js is missing key "' + item.key + '"');
                 config[item.key] = item.value;
             });
 
