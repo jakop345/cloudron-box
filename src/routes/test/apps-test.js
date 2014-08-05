@@ -221,6 +221,8 @@ describe('App installation', function () {
         });
     });
 
+    var appInfo = null;
+
     it('can install test app', function (done) {
         var count = 0;
         function checkInstallStatus() {
@@ -228,9 +230,9 @@ describe('App installation', function () {
                .query({ access_token: token })
                .end(function (err, res) {
                 expect(res.statusCode).to.equal(200);
-                if (res.body.installationState === appdb.ISTATE_INSTALLED) return done(null);
+                if (res.body.installationState === appdb.ISTATE_INSTALLED) { appInfo = res.body; return done(null); }
                 if (res.body.installationState === appdb.ISTATE_ERROR) return done(new Error('Install error'));
-                if (++count > 5) return done(new Error('Timedout'));
+                if (++count > 20) return done(new Error('Timedout'));
                 setTimeout(checkInstallStatus, 400);
             });
         }
@@ -244,6 +246,17 @@ describe('App installation', function () {
         });
     });
 
+    it('is up and running', function (done) {
+        setTimeout(function () {
+            request.get('http://localhost:' + appInfo.httpPort + appInfo.manifest.health_check_url)
+                .end(function (err, res) {
+                expect(!err).to.be.ok();
+                expect(res.statusCode).to.equal(200);
+                done();
+            });
+        }, 2000); // give some time for docker to settle
+    });
+
     it('can uninstall app', function (done) {
         var count = 0;
         function checkUninstallStatus() {
@@ -251,7 +264,7 @@ describe('App installation', function () {
                .query({ access_token: token })
                .end(function (err, res) {
                 if (res.statusCode === 404) return done(null);
-                if (++count > 5) return done(new Error('Timedout'));
+                if (++count > 20) return done(new Error('Timedout'));
                 setTimeout(checkInstallStatus, 400);
             });
         }
