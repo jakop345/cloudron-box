@@ -40,6 +40,7 @@ config.nginxAppConfigDir = path.join(config.nginxConfigDir, 'applications');
 
 config.fqdn = process.env.FQDN || os.hostname();
 config.adminOrigin = 'https://admin-' + config.fqdn;
+config.naked_domain = null;
 
 exports = module.exports = config;
 
