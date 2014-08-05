@@ -54,7 +54,7 @@ chown $USER:$USER -R /home/$USER/.yellowtent/
 
 echo "==== Setup supervisord ===="
 supervisorctl shutdown || echo "supervisord not running"
-mv /etc/supervisor/ /etc/supervisor_save || echo "/etc/supervisor already moved"
+rm -rf /etc/supervisor
 mkdir -p /etc/supervisor
 mkdir -p /etc/supervisor/conf.d
 cp $BASEDIR/supervisor/supervisord.conf /etc/supervisor/
