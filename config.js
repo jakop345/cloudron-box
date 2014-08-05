@@ -41,15 +41,7 @@ config.nginxAppConfigDir = path.join(config.nginxConfigDir, 'applications');
 
 config.fqdn = process.env.FQDN || os.hostname();
 config.adminOrigin = 'https://admin-' + config.fqdn;
-
-// load provisioned config file if there
-var configFile = safe.JSON.parse(safe.fs.readFileSync('/etc/yellowtent.json'));
-if (configFile !== null) {
-    assert(configFile.appstoreOrigin, 'No appstoreOrigin found in yellowtent.json');
-    config.appServerUrl = configFile.appstoreOrigin;
-} else {
-    console.error('Unable to load provisioned config file. Using defaults.');
-}
+if (process.env.APP_SERVER_URL) config.appServerUrl = process.env.APP_SERVER_URL
 
 exports = module.exports = config;
 

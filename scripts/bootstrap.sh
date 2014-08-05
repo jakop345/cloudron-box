@@ -8,18 +8,11 @@ BASEDIR=/home/yellowtent/box
 USER=yellowtent
 
 # we get the appstore origin from the caller which is baked into the image
-APPSTORE_ORIGIN=$1
+APP_SERVER_URL=$1
 
 echo "==== Setup /etc/yellowtent ===="
 mkdir -p  /etc/yellowtent
 
-
-echo "==== Provision box with credentials ===="
-cat > /etc/yellowtent.json <<EOF
-{
-    "appstoreOrigin": "$APPSTORE_ORIGIN"
-}
-EOF
 
 echo "==== Setup ssl certs ===="
 CERTIFICATE_DIR=/etc/yellowtent/cert
@@ -62,7 +55,29 @@ chown $USER:$USER -R /home/$USER/.yellowtent/
 echo "==== Setup supervisord ===="
 supervisorctl shutdown || echo "supervisord not running"
 mv /etc/supervisor/ /etc/supervisor_save || echo "/etc/supervisor already moved"
-ln -sf $BASEDIR/supervisor /etc/supervisor
-echo "export NGINX_ROOT=$BASEDIR" >> /etc/default/supervisor
-sed -i -e "s/autostart=false/autostart=true/" /etc/supervisor/conf.d/box.conf
+mkdir -p /etc/supervisor
+mkdir -p /etc/supervisor/conf.d
+cp $BASEDIR/supervisor/supervisord.conf /etc/supervisor/
+
+echo "Writing box supervisor config..."
+cat > /etc/supervisor/conf.d/box.conf <<EOF
+[program:nginx]
+command=nginx -c nginx.conf -p $BASEDIR/nginx/
+autostart=true
+autorestart=true
+EOF
+echo "Done"
+
+echo "Writing nginx supervisor config..."
+cat > /etc/supervisor/conf.d/nginx.conf <<EOF
+[program:box]
+command=node app.js
+autostart=true
+autorestart=true
+directory=$BASEDIR
+user=yellowtent
+environment=HOME="/home/yellowtent",USER="yellowtent",DEBUG="*",APP_SERVER_URL=$APP_SERVER_URL
+EOF
+echo "Done"
+
 /etc/init.d/supervisor start
