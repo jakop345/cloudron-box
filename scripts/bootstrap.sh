@@ -60,7 +60,7 @@ mkdir -p /etc/supervisor/conf.d
 cp $BASEDIR/supervisor/supervisord.conf /etc/supervisor/
 
 echo "Writing box supervisor config..."
-cat > /etc/supervisor/conf.d/box.conf <<EOF
+cat > /etc/supervisor/conf.d/nginx.conf <<EOF
 [program:nginx]
 command=nginx -c nginx.conf -p $BASEDIR/nginx/
 autostart=true
@@ -69,7 +69,7 @@ EOF
 echo "Done"
 
 echo "Writing nginx supervisor config..."
-cat > /etc/supervisor/conf.d/nginx.conf <<EOF
+cat > /etc/supervisor/conf.d/box.conf <<EOF
 [program:box]
 command=node app.js
 autostart=true
