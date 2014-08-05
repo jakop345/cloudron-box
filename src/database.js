@@ -34,6 +34,9 @@ var NOOP_CALLBACK = function (error) { if (error) console.error(error); assert(!
 function initialize(callback) {
     databaseFileName = config.configRoot + '/config.sqlite.db';
     db = new sqlite3.Database(databaseFileName);
+    db.on('error', function (error) {
+        console.log('Database error in ' + databaseFileName + ':' + JSON.stringify(error));
+    });
 
     return callback(null);
 }
@@ -53,7 +56,11 @@ function create(callback) {
     var schema = fs.readFileSync(path.join(__dirname, 'schema.sql')).toString('utf8');
 
     databaseFileName = config.configRoot + '/config.sqlite.db';
+
     db = new sqlite3.Database(databaseFileName);
+    db.on('error', function (error) {
+        console.log('Database error in ' + databaseFileName + ':' + JSON.stringify(error));
+    });
 
     debug('Database created at ' + databaseFileName);
 
