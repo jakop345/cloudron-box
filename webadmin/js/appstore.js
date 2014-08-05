@@ -26,12 +26,12 @@ angular.module('YellowTent')
 
         var that = this;
 
-        $http.get(Client.getConfig().appstoreOrigin + '/api/v1/apps')
+        $http.get(Client.getConfig().appServerUrl + '/api/v1/apps')
         .success(function (data, status, headers) {
             if (status !== 200) return callback(new AppStoreError(status, data));
 
             var apps = data.apps;
-            apps.forEach(function (app) { app.iconUrl = Client.getConfig().appstoreOrigin + '/api/v1/app/' + app.id + '/icon'; });
+            apps.forEach(function (app) { app.iconUrl = Client.getConfig().appServerUrl + '/api/v1/app/' + app.id + '/icon'; });
             that._appsCache = apps;
             return callback(null, apps);
         }).error(function (data, status, headers) {

@@ -104,18 +104,18 @@ Server.prototype._getVersion = function (req, res, next) {
 
 Server.prototype._getConfig = function (req, res, next) {
     res.send(200, {
-        appstoreOrigin: config.appServerUrl,
+        appServerUrl: config.appServerUrl,
         fqdn: config.fqdn
     });
 };
 
 Server.prototype._provision = function (req, res, next) {
     if (!req.body.token) return next(new HttpError(400, 'No token provided'));
-    if (!req.body.appstoreOrigin) return next(new HttpError(400, 'No appstoreOrigin provided'));
+    if (!req.body.appServerUrl) return next(new HttpError(400, 'No appServerUrl provided'));
     if (!req.body.adminOrigin) return next(new HttpError(400, 'No adminOrigin provided'));
     if (!req.body.fqdn) return next(new HttpError(400, 'No fqdn provided'));
 
-    debug('_provision: received from appstore ' + req.body.appstoreOrigin);
+    debug('_provision: received from appstore ' + req.body.appServerUrl);
 
     var that = this;
 
@@ -123,7 +123,7 @@ Server.prototype._provision = function (req, res, next) {
         if (error && error.reason !== DatabaseError.NOT_FOUND) return next(new HttpError(500));
         if (result) return next(new HttpError(409, 'Already provisioned'));
 
-        async.each(['token', 'appstoreOrigin', 'adminOrigin', 'fqdn'], function (item, callback) {
+        async.each(['token', 'appServerUrl', 'adminOrigin', 'fqdn'], function (item, callback) {
             assert(item in config);
             config[item] = req.body[item];
             settingsdb.set(item, req.body[item], callback);
