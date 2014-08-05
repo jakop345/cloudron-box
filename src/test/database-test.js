@@ -247,15 +247,6 @@ describe('database', function () {
             expect(function () { appdb.add(APP_0.id, function () {}); }).to.throwError();
         });
 
-        // This needs to be tested in the api layer?
-        xit('add fails due to bad arguments', function () {
-            expect(function () { appdb.add(APP_0.id, APP_0.installationState, 'loc', { "5555": "10" }, function () {}); }).to.throwError();
-            expect(function () { appdb.add(APP_0.id, APP_0.installationState, 'loc', { 5555: 10 }, function () {}); }).to.throwError();
-            expect(function () { appdb.add(APP_0.id, APP_0.installationState, 'loc', { "mango": 4000 }, function () {}); }).to.throwError();
-            expect(function () { appdb.add(APP_0.id, APP_0.installationState, 'loc', { "1000": "grape" }, function () {}); }).to.throwError();
-        });
-
-
         it('add succeeds', function (done) {
             appdb.add(APP_0.id, APP_0.installationState, APP_0.location, [ { containerPort: 1234, hostPort: 5678 } ], function (error) {
                 expect(error).to.be(null);
