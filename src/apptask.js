@@ -22,8 +22,7 @@ var assert = require('assert'),
     database = require('./database.js'),
     HttpError = require('./httperror.js'),
     ejs = require('ejs'),
-    appFqdn = require('./apps').appFqdn,
-    settingsdb = require('./settingsdb.js');
+    appFqdn = require('./apps').appFqdn;
 
 exports = module.exports = {
     initialize: initialize,
@@ -430,15 +429,10 @@ function uninstall(app, callback) {
     async.series([
         // unset naked domain
         function (callback) {
-            settingsdb.get(settingsdb.NAKED_DOMAIN_KEY, function (error, value) {
-                if (error) return callback(null);
-                if (value !== app.id) return callback(null);
+            if (config.naked_domain !== app.id) return callback(null);
 
-                // TODO: this needs to be test-and-set and also atomic with nginx config removal
-                settingsdb.set(settingsdb.NAKED_DOMAIN_KEY, null, function (error) {
-                    setNakedDomain(null, function (error) { callback(null); });
-                });
-            });
+            config.set('naked_domain', null);
+            callback(null);
         },
 
         // unconfigure nginx

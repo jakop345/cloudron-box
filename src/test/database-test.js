@@ -19,7 +19,6 @@ var database = require('../database'),
     appdb = require('../appdb.js'),
     expect = require('expect.js'),
     mkdirp = require('mkdirp'),
-    settingsdb = require('../settingsdb.js'),
     config = require('../../config.js');
 
 describe('database', function () {
@@ -355,44 +354,6 @@ describe('database', function () {
                 done();
             });
         });
-    });
-
-    describe('settings', function () {
-        it('can set value', function (done) {
-            settingsdb.set('somekey', 'somevalue', function (error) {
-                expect(error).to.be(null);
-                done();
-            });
-        });
-        it('can get the set value', function (done) {
-            settingsdb.get('somekey', function (error, value) {
-                expect(error).to.be(null);
-                expect(value).to.be('somevalue');
-                done();
-            });
-        });
-        it('can get all values', function (done) {
-            settingsdb.getAll(function (error, result) {
-                expect(error).to.be(null);
-                expect(result).to.be.an(Array);
-                expect(result[0]).to.eql({ key: 'somekey', value: 'somevalue' });
-                done();
-            });
-        });
-        it('can update a value', function (done) {
-            settingsdb.set('somekey', 'someothervalue', function (error) {
-                expect(error).to.be(null);
-                done();
-            });
-        });
-        it('can get updated value', function (done) {
-            settingsdb.get('somekey', function (error, value) {
-                expect(error).to.be(null);
-                expect(value).to.be('someothervalue');
-                done();
-            });
-        });
-
     });
 });
 

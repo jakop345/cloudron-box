@@ -5,9 +5,9 @@
 var HttpError = require('../httperror.js'),
     HttpSuccess = require('../httpsuccess.js'),
     debug = require('debug')('box:routes/settings'),
-    settingsdb = require('../settingsdb.js'),
     DatabaseError = require('../databaseerror.js'),
     apptask = require('../apptask.js'),
+    config = require('../../config.js'),
     appdb = require('../appdb.js');
 
 exports = module.exports = {
@@ -16,12 +16,9 @@ exports = module.exports = {
 };
 
 function getNakedDomain(req, res, next) {
-    settingsdb.get(settingsdb.NAKED_DOMAIN_KEY, function (error, value) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpSuccess(200, { appid: '' }));
-        if (error) return next(new HttpError(500, 'Internal error: ' + error));
+    if (config.naked_domain === null) return next(new HttpSuccess(200, { appid: '' }));
 
-        next(new HttpSuccess(200, { appid: value }));
-    });
+    next(new HttpSuccess(200, { appid: config.naked_domain }));
 }
 
 function setNakedDomain(req, res, next) {
@@ -36,11 +33,8 @@ function setNakedDomain(req, res, next) {
         apptask.setNakedDomain(app, function (error) {
             if (error) return next(new HttpError(500, 'Error setting naked domain: ' + error));
 
-            settingsdb.set(settingsdb.NAKED_DOMAIN_KEY, data.appid, function (error) {
-                if (error) return next(new HttpError(500, 'Internal error: ' + error));
-
-                next(new HttpSuccess(200, { }));
-            });
+            config.set('naked_domain', data.appid);
+            next(new HttpSuccess(200, { }));
         });
     });
 }

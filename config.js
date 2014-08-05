@@ -59,6 +59,7 @@ config.save = function () {
     config.adminOrigin = 'https://admin-' + config.fqdn;
 
     config.token = null;
+    config.naked_domain = null;
 
     config.save();
 })();

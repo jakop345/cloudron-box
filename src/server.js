@@ -20,7 +20,6 @@ var express = require('express'),
     database = require('./database.js'),
     DatabaseError = require('./databaseerror.js'),
     userdb = require('./userdb'),
-    settingsdb = require('./settingsdb.js'),
     safe = require('safetydance'),
     config = require('../config.js');
 
@@ -324,23 +323,20 @@ Server.prototype._sendHeartBeat = function () {
 Server.prototype.announce = function (callback) {
     assert(typeof callback === 'function');
 
-    settingsdb.get('token', function (error, result) {
-        if (error && error.reason !== DatabaseError.NOT_FOUND) return callback(error);
-        if (result) return callback(null);
+    if (config.token) return callback(null); // already provisioned
 
-        debug('announce: first run, try to provision the box by announcing with appstore.');
+    debug('announce: first run, try to provision the box by announcing with appstore.');
 
-        var url = config.appServerUrl + '/api/v1/boxes/' + config.fqdn + '/announce';
-        debug('announce: ' + url + ' with box name ' + config.fqdn);
+    var url = config.appServerUrl + '/api/v1/boxes/' + config.fqdn + '/announce';
+    debug('announce: ' + url + ' with box name ' + config.fqdn);
 
-        superagent.get(url).end(function (error, result) {
-            if (error) return callback(error);
-            if (result.statusCode !== 200) return callback(new Error('Unable to announce box with appstore'));
+    superagent.get(url).end(function (error, result) {
+        if (error) return callback(error);
+        if (result.statusCode !== 200) return callback(new Error('Unable to announce box with appstore'));
 
-            debug('announce: success');
+        debug('announce: success');
 
-            callback(null);
-        });
+        callback(null);
     });
 };
 
