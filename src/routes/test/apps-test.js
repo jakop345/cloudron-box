@@ -208,25 +208,33 @@ describe('App API', function () {
 describe('App installation', function () {
     this.timeout(10000);
 
-    before(setup);
-    after(cleanup);
-
     var hockServer;
 
-    it('start the hock server', function (done) {
-        hock.createHock(parseInt(url.parse(config.appServerUrl).port, 10), function (error, server) {
+    before(function (done) {
+        setup(function (error) {
             if (error) return done(error);
-            var manifest = JSON.parse(fs.readFileSync(__dirname + '/test.app', 'utf8'));
-            hockServer = server;
 
-            hockServer
-                .get('/api/v1/app/' + APP_ID + '/manifest')
-                .reply(200, manifest, { 'Content-Type': 'application/json' })
-                .post('/api/v1/subdomains?token=' + config.token, { subdomain: APP_LOCATION })
-                .reply(200, { }, { 'Content-Type': 'application/json' })
-                .delete('/api/v1/subdomain/' + APP_LOCATION + '?token=' + config.token)
-                .reply(200, { }, { 'Content-Type': 'application/json' });
-            done();
+            hock(parseInt(url.parse(config.appServerUrl).port, 10), function (error, server) {
+                if (error) return done(error);
+                var manifest = JSON.parse(fs.readFileSync(__dirname + '/test.app', 'utf8'));
+                hockServer = server;
+
+                hockServer
+                    .get('/api/v1/app/' + APP_ID + '/manifest')
+                    .reply(200, manifest, { 'Content-Type': 'application/json' })
+                    .post('/api/v1/subdomains?token=' + config.token, { subdomain: APP_LOCATION })
+                    .reply(200, { }, { 'Content-Type': 'application/json' })
+                    .delete('/api/v1/subdomain/' + APP_LOCATION + '?token=' + config.token)
+                    .reply(200, { }, { 'Content-Type': 'application/json' });
+                done();
+            });
+        });
+    });
+
+    after(function (done) {
+        cleanup(function (error) {
+            if (error) return done(error);
+            hockServer.close(done);
         });
     });
 
