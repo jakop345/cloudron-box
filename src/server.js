@@ -21,6 +21,7 @@ var express = require('express'),
     DatabaseError = require('./databaseerror.js'),
     userdb = require('./userdb'),
     settingsdb = require('./settingsdb.js'),
+    safe = require('safetydance'),
     config = require('../config.js');
 
 exports = module.exports = Server;
@@ -117,22 +118,13 @@ Server.prototype._provision = function (req, res, next) {
 
     debug('_provision: received from appstore ' + req.body.appServerUrl);
 
-    settingsdb.get('token', function (error, result) {
-        if (error && error.reason !== DatabaseError.NOT_FOUND) return next(new HttpError(500));
-        if (result) return next(new HttpError(409, 'Already provisioned'));
+    if (safe.fs.existsFileSync(config.cloudronConfigFile)) return next(new HttpError(409, 'Already provisioned'));
 
-        async.each(['token', 'appServerUrl', 'adminOrigin', 'fqdn'], function (item, callback) {
-            assert(item in config, 'Config.js is missing key "' + item.key + '"');
-            config[item] = req.body[item];
-            settingsdb.set(item, req.body[item], callback);
-        }, function (error) {
-            if (error) return next(new HttpError(500, error));
+    if (!safe.fs.writeFileSync(config.cloudronConfigFile, req.text)) return next(new HttpError(500, safe.error));
 
-            debug('_provision: success');
+    config.set(req.body);
 
-            next(new HttpSuccess(201, {}));
-        });
-    });
+    next(new HttpSuccess(201, {}));
 };
 
 /*
@@ -371,20 +363,10 @@ Server.prototype.start = function (callback) {
         if (err) return callback(err);
 
         apps.initialize();
-        settingsdb.getAll(function (error, result) {
-            if (error) return callback(error);
 
-            debug('start: settings', result);
+        that.httpServer = http.createServer(that.app);
 
-            result.forEach(function (item) {
-                assert(item.key in config, 'Config.js is missing key "' + item.key + '"');
-                config[item.key] = item.value;
-            });
-
-            that.httpServer = http.createServer(that.app);
-
-            that.httpServer.listen(config.port, callback);
-        });
+        that.httpServer.listen(config.port, callback);
     });
 };
 

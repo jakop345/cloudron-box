@@ -34,8 +34,6 @@ var USERNAME = 'admin', PASSWORD = 'admin', EMAIL ='silly@me.com';
 var server;
 var docker = os.platform() === 'linux' ? new Docker({socketPath: '/var/run/docker.sock'}) : new Docker({ host: 'http://localhost', port: 2375 });
 var token = null; // authentication token
-config.token = 'APPSTORE_TOKEN';
-process.env.APPSTORE_TOKEN = config.token;
 
 function setup(done) {
     server = new Server();
@@ -55,6 +53,7 @@ function setup(done) {
                 .auth(USERNAME, PASSWORD)
                 .end(function (error, result) {
                     token = result.body.token;
+                    config.set('token', 'APPSTORE_TOKEN');
                     callback();
                 });
         }
@@ -65,6 +64,7 @@ function setup(done) {
 function cleanup(done) {
     server.stop(function (error) {
         expect(error).to.be(null);
+        config.set('token', null);
         rimraf(config.baseDir, done);
     });
 }
@@ -207,7 +207,7 @@ describe('App API', function () {
 });
 
 describe('App installation', function () {
-    this.timeout(10000);
+    this.timeout(20000);
 
     var hockServer;
 
@@ -346,7 +346,7 @@ describe('App installation', function () {
 });
 
 describe('App installation - port bindings', function () {
-    this.timeout(10000);
+    this.timeout(20000);
 
     var hockServer;
 
