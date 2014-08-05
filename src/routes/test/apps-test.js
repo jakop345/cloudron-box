@@ -34,6 +34,7 @@ var server;
 var docker = os.platform() === 'linux' ? new Docker({socketPath: '/var/run/docker.sock'}) : new Docker({ host: 'http://localhost', port: 2375 });
 var token = null; // authentication token
 config.token = 'APPSTORE_TOKEN';
+process.env.APPSTORE_TOKEN = config.token;
 
 function setup(done) {
     server = new Server();
@@ -210,15 +211,20 @@ describe('App installation', function () {
     before(setup);
     after(cleanup);
 
+    var hockServer;
+
     it('start the hock server', function (done) {
-        hock.createHock(parseInt(url.parse(config.appServerUrl).port, 10), function (error, hockServer) {
+        hock.createHock(parseInt(url.parse(config.appServerUrl).port, 10), function (error, server) {
             if (error) return done(error);
             var manifest = JSON.parse(fs.readFileSync(__dirname + '/test.app', 'utf8'));
+            hockServer = server;
 
             hockServer
                 .get('/api/v1/app/' + APP_ID + '/manifest')
                 .reply(200, manifest, { 'Content-Type': 'application/json' })
-                .post('/api/v1/subdomains?token=' + config.token, { subdomain: 'test' })
+                .post('/api/v1/subdomains?token=' + config.token, { subdomain: APP_LOCATION })
+                .reply(200, { }, { 'Content-Type': 'application/json' })
+                .delete('/api/v1/subdomain/' + APP_LOCATION + '?token=' + config.token)
                 .reply(200, { }, { 'Content-Type': 'application/json' });
             done();
         });
@@ -265,6 +271,7 @@ describe('App installation', function () {
     });
 
     it('installation - registered subdomain', function (done) {
+        // this is checked in unregister subdomain testcase
         done();
     });
 
@@ -317,7 +324,10 @@ describe('App installation', function () {
     });
 
     it('uninstalled - unregistered subdomain', function (done) {
-        done();
+        hockServer.done(function (error) { // checks if all the hockServer APIs were called
+            expect(!error).to.be.ok();
+            done();
+        });
     });
 
     it('uninstalled - removed nginx', function (done) {

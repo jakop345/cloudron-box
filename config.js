@@ -22,6 +22,7 @@ if (production) {
     config.port = 3000;
     config.logApiRequests = true;
     config.appServerUrl = 'https://selfhost.io:5050';
+    config.token = null; // initialized through settingsdb on server start
 } else {
     config.baseDir = process.env.BASE_DIR || path.resolve(os.tmpdir(), 'test-' + crypto.randomBytes(4).readUInt32LE(0));
     process.env.BASE_DIR = config.baseDir; // BASE_DIR is set for use in child processes (apptask, apphealthtask)
@@ -29,13 +30,13 @@ if (production) {
     config.port = 5454;
     config.logApiRequests = false;
     config.appServerUrl = 'http://localhost:6060'; // hock doesn't support https
+    config.token = process.env.APPSTORE_TOKEN || null;
 }
 
 config.appDataRoot = path.join(config.baseDir, 'appdata');
 config.configRoot = path.join(config.baseDir, 'config');
 config.dataRoot = path.join(config.baseDir, 'data');
 config.mountRoot = path.join(config.baseDir, 'mount');
-config.token = null;
 
 config.nginxAppConfigDir = path.join(config.nginxConfigDir, 'applications');
 
