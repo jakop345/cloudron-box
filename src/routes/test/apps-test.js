@@ -21,6 +21,7 @@ var Server = require('../../server.js'),
     hock = require('hock'),
     appdb = require('../../appdb.js'),
     url = require('url'),
+    Docker = require('dockerode'),
     config = require('../../../config.js');
 
 var SERVER_URL = 'http://localhost:' + config.port;
@@ -30,7 +31,9 @@ var APP_LOCATION = 'location';
 
 var USERNAME = 'admin', PASSWORD = 'admin', EMAIL ='silly@me.com';
 var server;
+var docker = os.platform() === 'linux' ? new Docker({socketPath: '/var/run/docker.sock'}) : new Docker({ host: 'http://localhost', port: 2375 });
 var token = null; // authentication token
+config.token = 'APPSTORE_TOKEN';
 
 function setup(done) {
     server = new Server();
@@ -216,7 +219,7 @@ describe('App installation', function () {
                 .get('/api/v1/app/' + APP_ID + '/manifest')
                 .reply(200, manifest, { 'Content-Type': 'application/json' })
                 .post('/api/v1/subdomains?token=' + config.token, { subdomain: 'test' })
-                .reply(200, { });
+                .reply(200, { }, { 'Content-Type': 'application/json' });
             done();
         });
     });
@@ -246,7 +249,31 @@ describe('App installation', function () {
         });
     });
 
-    it('is up and running', function (done) {
+    it('installation - container created', function (done) {
+        expect(appInfo.containerId).to.be.ok();
+        docker.getContainer(appInfo.containerId).inspect(function (error, data) {
+            expect(error).to.not.be.ok();
+            expect(data.Config.ExposedPorts['7777/tcp']).to.eql({ });
+            expect(data.Volumes['/app/data']).to.eql(config.appDataRoot + '/' + APP_ID);
+            done();
+        });
+    });
+
+    it('installation - nginx config', function (done) {
+        expect(fs.existsSync(config.nginxAppConfigDir + '/' + APP_LOCATION + '.conf'));
+        done();
+    });
+
+    it('installation - registered subdomain', function (done) {
+        done();
+    });
+
+    it('installation - volume created', function (done) {
+        expect(fs.existsSync(config.appDataRoot + '/' + APP_ID));
+        done();
+    });
+
+    it('installation - is up and running', function (done) {
         setTimeout(function () {
             request.get('http://localhost:' + appInfo.httpPort + appInfo.manifest.health_check_url)
                 .end(function (err, res) {
@@ -265,7 +292,7 @@ describe('App installation', function () {
                .end(function (err, res) {
                 if (res.statusCode === 404) return done(null);
                 if (++count > 20) return done(new Error('Timedout'));
-                setTimeout(checkInstallStatus, 400);
+                setTimeout(checkUninstallStatus, 400);
             });
         }
 
@@ -273,8 +300,29 @@ describe('App installation', function () {
             .query({ access_token: token })
             .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
-            done(err);
+            checkUninstallStatus();
         });
+    });
+
+    it('uninstalled - container destroyed', function (done) {
+        docker.getContainer(appInfo.containerId).inspect(function (error, data) {
+            expect(error).to.be.ok();
+            done();
+        });
+    });
+
+    it('uninstalled - volume destroyed', function (done) {
+        expect(!fs.existsSync(config.appDataRoot + '/' + APP_ID));
+        done();
+    });
+
+    it('uninstalled - unregistered subdomain', function (done) {
+        done();
+    });
+
+    it('uninstalled - removed nginx', function (done) {
+        expect(!fs.existsSync(config.nginxAppConfigDir + '/' + APP_LOCATION + '.conf'));
+        done();
     });
 });
 
