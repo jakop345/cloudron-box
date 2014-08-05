@@ -21,12 +21,14 @@ if (production) {
     config.nginxConfigDir = path.join(__dirname, 'nginx'); // FIXME: this should be based off baseDir as well
     config.port = 3000;
     config.logApiRequests = true;
+    config.appServerUrl = 'https://selfhost.io:5050';
 } else {
     config.baseDir = process.env.BASE_DIR || path.resolve(os.tmpdir(), 'test-' + crypto.randomBytes(4).readUInt32LE(0));
     process.env.BASE_DIR = config.baseDir; // BASE_DIR is set for use in child processes (apptask, apphealthtask)
     config.nginxConfigDir = path.join(config.baseDir, 'nginx');
     config.port = 5454;
     config.logApiRequests = false;
+    config.appServerUrl = 'http://localhost:6060'; // hock doesn't support https
 }
 
 config.appDataRoot = path.join(config.baseDir, 'appdata');
@@ -39,8 +41,6 @@ config.nginxAppConfigDir = path.join(config.nginxConfigDir, 'applications');
 
 config.fqdn = process.env.FQDN || os.hostname();
 config.adminOrigin = 'https://admin-' + config.fqdn;
-config.appServerUrl = 'https://selfhost.io:5050';
-
 
 // load provisioned config file if there
 var configFile = safe.JSON.parse(safe.fs.readFileSync('/etc/yellowtent.json'));

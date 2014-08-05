@@ -18,13 +18,14 @@ var Server = require('../../server.js'),
     userdb = require('../../userdb.js'),
     Repo = require('../../repo.js'),
     async = require('async'),
-    nock = require('nock'),
+    hock = require('hock'),
     appdb = require('../../appdb.js'),
+    url = require('url'),
     config = require('../../../config.js');
 
 var SERVER_URL = 'http://localhost:' + config.port;
 
-var APP_ID = 'appid';
+var APP_ID = 'test';
 var APP_LOCATION = 'location';
 
 var USERNAME = 'admin', PASSWORD = 'admin', EMAIL ='silly@me.com';
@@ -63,9 +64,7 @@ function cleanup(done) {
     });
 }
 
-describe('app installation', function () {
-    this.timeout(10000);
-
+describe('App API', function () {
     before(setup);
     after(cleanup);
 
@@ -193,6 +192,70 @@ describe('app installation', function () {
     });
 
     it('can uninstall app', function (done) {
+        request.post(SERVER_URL + '/api/v1/app/' + APP_ID + '/uninstall')
+            .query({ access_token: token })
+            .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            done(err);
+        });
+    });
+});
+
+describe('App installation', function () {
+    this.timeout(10000);
+
+    before(setup);
+    after(cleanup);
+
+    it('start the hock server', function (done) {
+        hock.createHock(parseInt(url.parse(config.appServerUrl).port, 10), function (error, hockServer) {
+            if (error) return done(error);
+            var manifest = JSON.parse(fs.readFileSync(__dirname + '/test.app', 'utf8'));
+
+            hockServer
+                .get('/api/v1/app/' + APP_ID + '/manifest')
+                .reply(200, manifest, { 'Content-Type': 'application/json' })
+                .post('/api/v1/subdomains?token=' + config.token, { subdomain: 'test' })
+                .reply(200, { });
+            done();
+        });
+    });
+
+    it('can install test app', function (done) {
+        var count = 0;
+        function checkInstallStatus() {
+            request.get(SERVER_URL + '/api/v1/app/' + APP_ID)
+               .query({ access_token: token })
+               .end(function (err, res) {
+                expect(res.statusCode).to.equal(200);
+                if (res.body.installationState === appdb.ISTATE_INSTALLED) return done(null);
+                if (res.body.installationState === appdb.ISTATE_ERROR) return done(new Error('Install error'));
+                if (++count > 5) return done(new Error('Timedout'));
+                setTimeout(checkInstallStatus, 400);
+            });
+        }
+
+        request.post(SERVER_URL + '/api/v1/app/install')
+              .query({ access_token: token })
+              .send({ app_id: APP_ID, password: PASSWORD, location: APP_LOCATION, portBindings: null })
+              .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            checkInstallStatus();
+        });
+    });
+
+    it('can uninstall app', function (done) {
+        var count = 0;
+        function checkUninstallStatus() {
+            request.get(SERVER_URL + '/api/v1/app/' + APP_ID)
+               .query({ access_token: token })
+               .end(function (err, res) {
+                if (res.statusCode === 404) return done(null);
+                if (++count > 5) return done(new Error('Timedout'));
+                setTimeout(checkInstallStatus, 400);
+            });
+        }
+
         request.post(SERVER_URL + '/api/v1/app/' + APP_ID + '/uninstall')
             .query({ access_token: token })
             .end(function (err, res) {

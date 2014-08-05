@@ -59,7 +59,8 @@
     "istanbul": "*",
     "mocha": "*",
     "nock": "~0.43.0",
-    "sinon": "~1.10.3"
+    "sinon": "~1.10.3",
+    "hock": "~0.2.5"
   },
   "scripts": {
     "test": "NODE_ENV=test ./node_modules/istanbul/lib/cli.js test $1 ./node_modules/mocha/bin/_mocha -- -R spec ./src/test ./src/routes/test",
