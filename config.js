@@ -4,8 +4,6 @@
 
 var path = require('path'),
     os = require('os'),
-    safe = require('safetydance'),
-    assert = require('assert'),
     crypto = require('crypto');
 
 function getUserHomeDir() {
@@ -21,7 +19,7 @@ if (production) {
     config.nginxConfigDir = path.join(__dirname, 'nginx'); // FIXME: this should be based off baseDir as well
     config.port = 3000;
     config.logApiRequests = true;
-    config.appServerUrl = 'https://selfhost.io:5050';
+    config.appServerUrl = process.env.APP_SERVER_URL || 'https://selfhost.io:5050'; // APP_SERVER_URL is set during bootstrap in the box's supervisor manifest
     config.token = null; // initialized through settingsdb on server start
 } else {
     config.baseDir = process.env.BASE_DIR || path.resolve(os.tmpdir(), 'test-' + crypto.randomBytes(4).readUInt32LE(0));
@@ -42,7 +40,6 @@ config.nginxAppConfigDir = path.join(config.nginxConfigDir, 'applications');
 
 config.fqdn = process.env.FQDN || os.hostname();
 config.adminOrigin = 'https://admin-' + config.fqdn;
-if (process.env.APP_SERVER_URL) config.appServerUrl = process.env.APP_SERVER_URL
 
 exports = module.exports = config;
 
