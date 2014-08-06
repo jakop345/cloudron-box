@@ -30,6 +30,7 @@ var HEARTBEAT_INTERVAL = 1000 * 60 * 60;
 function Server() {
     this.httpServer = null; // http server
     this.app = null; // express
+    this._announceTimerId = null;
 }
 
 // Success handler
@@ -44,7 +45,6 @@ Server.prototype._successHandler = function (success, req, res, next) {
         next(success);
     }
 };
-
 
 // Error handlers. These are called until one of them sends headers
 Server.prototype._clientErrorHandler = function (err, req, res, next) {
@@ -318,23 +318,25 @@ Server.prototype._sendHeartBeat = function () {
     });
 };
 
-Server.prototype.announce = function (callback) {
-    assert(typeof callback === 'function');
-
-    if (config.token) return callback(null); // already provisioned
+Server.prototype._announce = function () {
+    if (config.token) return; // already provisioned
+    var ANNOUNCE_INTERVAL = parseInt(process.env.ANNOUNCE_INTERVAL, 10) || 5000; // exported for testing
 
     debug('announce: first run, try to provision the box by announcing with appstore.');
 
+    var that = this;
     var url = config.appServerUrl + '/api/v1/boxes/' + config.fqdn + '/announce';
     debug('announce: ' + url + ' with box name ' + config.fqdn);
 
     superagent.get(url).end(function (error, result) {
-        if (error) return callback(error);
-        if (result.statusCode !== 200) return callback(new Error('Unable to announce box with appstore'));
+        if (error || result.statusCode !== 200) {
+            debug('unable to announce to app server', error);
+            that._announceTimerId = setTimeout(that._announce.bind(that), ANNOUNCE_INTERVAL); // try in 5 seconds
+            return;
+        }
 
+        that._announceTimerId = setTimeout(that._announce.bind(that), ANNOUNCE_INTERVAL * 20); // check again if we got token
         debug('announce: success');
-
-        callback(null);
     });
 };
 
@@ -352,6 +354,8 @@ Server.prototype.start = function (callback) {
 
     this._initializeExpressSync();
     this._sendHeartBeat();
+
+    this._announce();
 
     database.create(function (err) {
         if (err) return callback(err);
@@ -372,6 +376,9 @@ Server.prototype.stop = function (callback) {
     if (!this.httpServer) {
         return callback(null);
     }
+
+    clearTimeout(this._announceTimerId);
+    this._announceTimerId = null;
 
     apps.uninitialize();
     database.uninitialize();
