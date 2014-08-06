@@ -207,7 +207,7 @@ describe('App API', function () {
 });
 
 describe('App installation', function () {
-    this.timeout(20000);
+    this.timeout(50000);
 
     var hockServer;
 
@@ -250,8 +250,8 @@ describe('App installation', function () {
                 expect(res.statusCode).to.equal(200);
                 if (res.body.installationState === appdb.ISTATE_INSTALLED) { appInfo = res.body; return done(null); }
                 if (res.body.installationState === appdb.ISTATE_ERROR) return done(new Error('Install error'));
-                if (++count > 20) return done(new Error('Timedout'));
-                setTimeout(checkInstallStatus, 400);
+                if (++count > 50) return done(new Error('Timedout'));
+                setTimeout(checkInstallStatus, 1000);
             });
         }
 
@@ -269,7 +269,6 @@ describe('App installation', function () {
         docker.getContainer(appInfo.containerId).inspect(function (error, data) {
             expect(error).to.not.be.ok();
             expect(data.Config.ExposedPorts['7777/tcp']).to.eql({ });
-            expect(data.Volumes['/app/data']).to.eql(config.appDataRoot + '/' + APP_ID);
             done();
         });
     });
@@ -300,6 +299,14 @@ describe('App installation', function () {
         }, 2000); // give some time for docker to settle
     });
 
+    it('installation - running container has volume mounted', function (done) {
+        docker.getContainer(appInfo.containerId).inspect(function (error, data) {
+            expect(error).to.not.be.ok();
+            expect(data.Volumes['/app/data']).to.eql(config.appDataRoot + '/' + APP_ID);
+            done();
+        });
+    });
+
     it('can uninstall app', function (done) {
         var count = 0;
         function checkUninstallStatus() {
@@ -307,8 +314,8 @@ describe('App installation', function () {
                .query({ access_token: token })
                .end(function (err, res) {
                 if (res.statusCode === 404) return done(null);
-                if (++count > 20) return done(new Error('Timedout'));
-                setTimeout(checkUninstallStatus, 400);
+                if (++count > 50) return done(new Error('Timedout'));
+                setTimeout(checkUninstallStatus, 1000);
             });
         }
 
@@ -322,6 +329,9 @@ describe('App installation', function () {
 
     it('uninstalled - container destroyed', function (done) {
         docker.getContainer(appInfo.containerId).inspect(function (error, data) {
+            if (data) {
+                console.log('Container is still alive', data);
+            }
             expect(error).to.be.ok();
             done();
         });
@@ -346,7 +356,7 @@ describe('App installation', function () {
 });
 
 describe('App installation - port bindings', function () {
-    this.timeout(20000);
+    this.timeout(50000);
 
     var hockServer;
 
@@ -389,8 +399,8 @@ describe('App installation - port bindings', function () {
                 expect(res.statusCode).to.equal(200);
                 if (res.body.installationState === appdb.ISTATE_INSTALLED) { appInfo = res.body; return done(null); }
                 if (res.body.installationState === appdb.ISTATE_ERROR) return done(new Error('Install error'));
-                if (++count > 20) return done(new Error('Timedout'));
-                setTimeout(checkInstallStatus, 400);
+                if (++count > 50) return done(new Error('Timedout'));
+                setTimeout(checkInstallStatus, 1000);
             });
         }
 
@@ -410,7 +420,6 @@ describe('App installation - port bindings', function () {
             expect(data.Config.ExposedPorts['7777/tcp']).to.eql({ });
             expect(data.Config.Env).to.contain('ECHO_SERVER_PORT=7171');
             expect(data.HostConfig.PortBindings['7778/tcp'][0].HostPort).to.eql('7171');
-            expect(data.Volumes['/app/data']).to.eql(config.appDataRoot + '/' + APP_ID);
             done();
         });
     });
@@ -431,14 +440,20 @@ describe('App installation - port bindings', function () {
     });
 
     it('installation - http is up and running', function (done) {
-        setTimeout(function () {
+        var tryCount = 20;
+        (function healthCheck() {
             request.get('http://localhost:' + appInfo.httpPort + appInfo.manifest.health_check_url)
                 .end(function (err, res) {
+                if (err || res.statusCode !== 200) {
+                    if (--tryCount === 0) return done(new Error('Timedout'));
+                    return setTimeout(healthCheck, 2000);
+                }
+
                 expect(!err).to.be.ok();
                 expect(res.statusCode).to.equal(200);
                 done();
             });
-        }, 2000); // give some time for docker to settle
+        })();
     });
 
     it('installation - tcp port mapping works', function (done) {
@@ -448,6 +463,14 @@ describe('App installation - port bindings', function () {
             done();
         });
         client.on('error', done);
+    });
+
+    it('installation - running container has volume mounted', function (done) {
+        docker.getContainer(appInfo.containerId).inspect(function (error, data) {
+            expect(error).to.not.be.ok();
+            expect(data.Volumes['/app/data']).to.eql(config.appDataRoot + '/' + APP_ID);
+            done();
+        });
     });
 
     it('can uninstall app', function (done) {
