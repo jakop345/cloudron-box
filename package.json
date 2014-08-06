@@ -49,7 +49,7 @@
     "serve-favicon": "2.0.0",
     "sqlite3": "2.2.3",
     "superagent": "^0.17.0",
-    "supererror": "^0.1.5",
+    "supererror": "^0.2.0",
     "ursa": "^0.8.0"
   },
   "devDependencies": {
