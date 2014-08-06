@@ -6,7 +6,8 @@ var path = require('path'),
     os = require('os'),
     safe = require('safetydance'),
     crypto = require('crypto'),
-    assert = require('assert');
+    assert = require('assert'),
+    mkdirp = require('mkdirp');
 
 function getUserHomeDir() {
     return process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
@@ -61,6 +62,7 @@ config.save = function () {
     config.token = null;
     config.naked_domain = null;
 
+    mkdirp.sync(config.baseDir);
     config.save();
 })();
 
