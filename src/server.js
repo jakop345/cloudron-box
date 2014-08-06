@@ -117,9 +117,7 @@ Server.prototype._provision = function (req, res, next) {
 
     debug('_provision: received from appstore ' + req.body.appServerUrl);
 
-    if (safe.fs.existsFileSync(config.cloudronConfigFile)) return next(new HttpError(409, 'Already provisioned'));
-
-    if (!safe.fs.writeFileSync(config.cloudronConfigFile, req.text)) return next(new HttpError(500, safe.error));
+    if (config.token) return next(new HttpError(409, 'Already provisioned'));
 
     config.set(req.body);
 
