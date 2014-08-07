@@ -50,7 +50,7 @@ service nginx stop
 update-rc.d -f nginx remove
 
 echo "==== Setup build-essential ===="
-apt-get -y install build-essential
+apt-get -y install build-essential rcconf
 
 
 echo "==== Setup sqlite3 ===="
