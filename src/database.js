@@ -34,7 +34,7 @@ function initialize(callback) {
     databaseFileName = config.configRoot + '/config.sqlite.db';
     db = new sqlite3.Database(databaseFileName);
     db.on('error', function (error) {
-        console.error('Database error in ' + databaseFileName + ':' + JSON.stringify(error));
+        console.error('Database error in ' + databaseFileName + ':', error);
     });
 
     return callback(null);
@@ -58,7 +58,7 @@ function create(callback) {
 
     db = new sqlite3.Database(databaseFileName);
     db.on('error', function (error) {
-        console.error('Database error in ' + databaseFileName + ':' + JSON.stringify(error));
+        console.error('Database error in ' + databaseFileName + ':', error);
     });
 
     debug('Database created at ' + databaseFileName);
