@@ -11,6 +11,6 @@ FQDN=`hostname -f`
 sed -e "s/##ADMIN_FQDN##/admin-$FQDN/" nginx/admin.conf_template > nginx/applications/admin.conf
 touch nginx/naked_domain.conf
 
-sudo mkdir -p /var/log/supervisord
+sudo mkdir -p /var/log/supervisor
 sudo NGINX_ROOT=$BASEDIR supervisord -n -c supervisor/supervisord.conf
 
