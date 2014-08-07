@@ -126,7 +126,7 @@ echo "[II] Run bootstrap script..."
 echo "[II] Done"
 
 echo "[II] Disable bootstrap init script"
-update-rc.d boostrap remove
+update-rc.d bootstrap remove
 echo "[II] Done"
 EOF
 chmod +x /etc/init.d/bootstrap
