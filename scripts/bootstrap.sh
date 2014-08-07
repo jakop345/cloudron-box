@@ -65,6 +65,7 @@ cat > /etc/supervisor/conf.d/nginx.conf <<EOF
 command=nginx -c nginx.conf -p $BASEDIR/nginx/
 autostart=true
 autorestart=true
+redirect_stderr=true
 EOF
 echo "Done"
 
