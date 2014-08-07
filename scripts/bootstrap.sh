@@ -78,7 +78,7 @@ autorestart=true
 redirect_stderr=true
 directory=$BASEDIR
 user=yellowtent
-environment=HOME="/home/yellowtent",USER="yellowtent",DEBUG="*",APP_SERVER_URL=$APP_SERVER_URL
+environment=HOME="/home/yellowtent",USER="yellowtent",DEBUG="box*",APP_SERVER_URL=$APP_SERVER_URL
 EOF
 echo "Done"
 
