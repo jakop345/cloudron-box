@@ -3,7 +3,7 @@
 set -v
 
 USER_HOME=/home/yellowtent
-BASEDIR=$USER_HOME/box
+SRCDIR=$USER_HOME/box
 USER=yellowtent
 
 echo "==== Create User $USER ===="
@@ -65,14 +65,14 @@ echo "== Box bootstrapping =="
 
 
 echo "==== Cloning box repo ===="
-if [ -d "$BASEDIR/.git" ]; then
+if [ -d "$SRCDIR/.git" ]; then
     echo "Updating the box repo"
-    cd $BASEDIR
+    cd $SRCDIR
     git fetch
     git reset --hard origin/master
 else
     echo "Cloning the box repo"
-    rm -rf $BASEDIR
+    rm -rf $SRCDIR
     mkdir -p $USER_HOME
     cd $USER_HOME
     git clone http://bootstrap:not4long@yellowtent.girish.in/yellowtent/box.git
@@ -94,11 +94,11 @@ done
 
 echo "==== Sudoers file for app removal ===="
 cat > /etc/sudoers.d/yellowtent <<EOF
-Defaults!$BASEDIR/src/rmappdir.sh env_keep=HOME
-$USER ALL=(root) NOPASSWD: $BASEDIR/src/rmappdir.sh
+Defaults!$SRCDIR/src/rmappdir.sh env_keep=HOME
+$USER ALL=(root) NOPASSWD: $SRCDIR/src/rmappdir.sh
 
-Defaults!$BASEDIR/src/reloadnginx.sh env_keep=HOME
-$USER ALL=(root) NOPASSWD: $BASEDIR/src/reloadnginx.sh
+Defaults!$SRCDIR/src/reloadnginx.sh env_keep=HOME
+$USER ALL=(root) NOPASSWD: $SRCDIR/src/reloadnginx.sh
 EOF
 
 
@@ -115,14 +115,14 @@ LOG="/tmp/bootstrap"
 exec 2>&1 1> \$LOG
 
 echo "[II] Update to latest git revision..."
-cd $BASEDIR
+cd $SRCDIR
 git fetch
 git reset --hard origin/master
 echo "[II] Done"
 
 echo "[II] Run bootstrap script..."
-/bin/bash $BASEDIR/scripts/bootstrap.sh https://appstore-dev.herokuapp.com
-# /bin/bash $BASEDIR/scripts/bootstrap.sh https://nebulon.fwd.wf
+/bin/bash $SRCDIR/scripts/bootstrap.sh https://appstore-dev.herokuapp.com
+# /bin/bash $SRCDIR/scripts/bootstrap.sh https://nebulon.fwd.wf
 echo "[II] Done"
 
 echo "[II] Disable bootstrap init script"

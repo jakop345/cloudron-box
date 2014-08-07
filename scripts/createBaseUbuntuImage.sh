@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BASEDIR=$(dirname $0)
+SCRIPT_DIR=$(dirname $0)
 
 if [[ $# -ne 1 ]]; then
     echo "Missing droplet IP from which a base image should be produced."
@@ -9,7 +9,7 @@ fi
 
 echo "Creating base image using droplet with IP $1";
 
-cd $BASEDIR/..
+cd $SCRIPT_DIR/..
 
 scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ../appstore/ssh/id_rsa_yellowtent ./scripts/initializeBaseUbuntuImage.sh root@$1:.
 
