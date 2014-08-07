@@ -106,8 +106,10 @@ exec 2>&1 1> \$LOG
 
 echo "[II] Update to latest git revision..."
 cd $SRCDIR
+sudo -u $USER bash <<EOS
 git fetch
 git reset --hard origin/master
+EOS
 echo "[II] Done"
 
 echo "[II] Run bootstrap script..."
