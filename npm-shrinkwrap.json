@@ -90,7 +90,7 @@
           "dependencies": {
             "debug": {
               "version": "0.7.4",
-              "from": "debug@~0.7.4",
+              "from": "debug@~0.7.2",
               "resolved": "https://registry.npmjs.org/debug/-/debug-0.7.4.tgz"
             },
             "follow-redirects": {
@@ -151,7 +151,7 @@
       "dependencies": {
         "debug": {
           "version": "0.7.4",
-          "from": "debug@~0.7.2",
+          "from": "debug@0.7.x",
           "resolved": "https://registry.npmjs.org/debug/-/debug-0.7.4.tgz"
         }
       }
@@ -335,7 +335,7 @@
       "dependencies": {
         "bytes": {
           "version": "0.3.0",
-          "from": "bytes@~0.3.0",
+          "from": "bytes@0.3.0",
           "resolved": "https://registry.npmjs.org/bytes/-/bytes-0.3.0.tgz"
         }
       }
@@ -401,7 +401,7 @@
         },
         "debug": {
           "version": "0.7.4",
-          "from": "debug@~0.7.2",
+          "from": "debug@0.7.x",
           "resolved": "https://registry.npmjs.org/debug/-/debug-0.7.4.tgz"
         }
       }
@@ -529,7 +529,7 @@
         },
         "readable-stream": {
           "version": "1.0.27-1",
-          "from": "readable-stream@~1.0.26-2",
+          "from": "readable-stream@~1.0.26-4",
           "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-1.0.27-1.tgz",
           "dependencies": {
             "core-util-is": {
@@ -908,9 +908,9 @@
       }
     },
     "supererror": {
-      "version": "0.2.1",
-      "from": "supererror@^0.2.0",
-      "resolved": "https://registry.npmjs.org/supererror/-/supererror-0.2.1.tgz",
+      "version": "0.3.1",
+      "from": "supererror@^0.3.0",
+      "resolved": "https://registry.npmjs.org/supererror/-/supererror-0.3.1.tgz",
       "dependencies": {
         "colors": {
           "version": "0.6.2",
