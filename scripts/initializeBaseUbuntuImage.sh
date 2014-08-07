@@ -1,7 +1,6 @@
 #!/bin/bash
 
 set -v
-set -e
 
 USER_HOME=/home/yellowtent
 SRCDIR=$USER_HOME/box
@@ -79,7 +78,6 @@ else
     cd $USER_HOME
     git clone http://bootstrap:not4long@yellowtent.girish.in/yellowtent/box.git
     cd box
-    git checkout -b master origin/master
 fi
 
 NPM_INSTALL="npm install --production"
