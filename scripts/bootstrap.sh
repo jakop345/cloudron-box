@@ -34,8 +34,10 @@ EOF
 
 
 echo "==== Setup yellowtent ===="
+sudo -u $USER bash <<EOF
 cd $SRCDIR
 npm install --production
+EOF
 
 
 echo "==== Setup nginx ===="
