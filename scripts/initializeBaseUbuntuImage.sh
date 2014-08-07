@@ -98,9 +98,11 @@ chown $USER:$USER -R /home/$USER
 
 echo "==== Install init script ===="
 cat > /etc/init.d/bootstrap <<EOF
-#!/bin/sh
+#!/bin/bash
 
-LOG="/tmp/bootstrap"
+set -v
+
+LOG="/var/log/bootstrap"
 
 exec 2>&1 1> \$LOG
 
