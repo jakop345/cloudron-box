@@ -178,22 +178,18 @@ describe('Server', function () {
     });
 
     describe('announce', function () {
-        var server;
-
-        var failingGet, succeedingGet;
+        var server, failingGet;
 
         before(function (done) {
             process.env.ANNOUNCE_INTERVAL = 20;
 
+            config.token = null;
+            server = new Server();
+            server.start(done);
+
             var scope = nock(config.appServerUrl);
             failingGet = scope.get('/api/v1/boxes/' + config.fqdn + '/announce');
             failingGet.times(5).reply(502);
-
-            succeedingGet = scope.get('/api/v1/boxes/' + config.fqdn + '/announce');
-            succeedingGet.times(5).reply(200, { });
-
-            server = new Server();
-            server.start(done);
         });
 
         after(function (done) {
@@ -201,15 +197,18 @@ describe('Server', function () {
             nock.cleanAll();
         });
 
-        it('sends announce request repeatedly until success', function (done) {
-            setTimeout(function () { config.set('token', 'provision'); }, 150); // enough time for 5 failures
-
+        it('sends announce request repeatedly until token is set', function (done) {
             setTimeout(function () {
-                expect(failingGet.counter).to.be(1); // mock seems to not decrement to 0 and just removes the interceptor
-                expect(succeedingGet.counter).to.be(4); // server should have stopped after one 'success'
+                expect(server._announceTimerId).to.be.ok();
+                expect(failingGet.counter).to.be.below(5); // counter is nock internal
 
-                done();
-            }, 400);
+                config.set('token', 'provision');
+
+                setTimeout(function () {
+                    expect(server._announceTimerId).to.be(null);
+                    done();
+                }, 100);
+            }, 100);
         });
     });
 });

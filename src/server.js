@@ -319,7 +319,11 @@ Server.prototype._sendHeartBeat = function () {
 };
 
 Server.prototype._announce = function () {
-    if (config.token) return; // already provisioned
+    if (config.token) {
+        this._announceTimerId = null;
+        return; // already provisioned
+    }
+
     var ANNOUNCE_INTERVAL = parseInt(process.env.ANNOUNCE_INTERVAL, 10) || 5000; // exported for testing
 
     debug('announce: first run, try to provision the box by announcing with appstore.');
