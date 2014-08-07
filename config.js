@@ -60,7 +60,7 @@ config.save = function () {
     config.adminOrigin = 'https://admin-' + config.fqdn;
 
     config.token = null;
-    config.naked_domain = null;
+    config.nakedDomain = null;
 
     mkdirp.sync(config.baseDir);
     config.save();

@@ -428,9 +428,9 @@ function uninstall(app, callback) {
     async.series([
         // unset naked domain
         function (callback) {
-            if (config.naked_domain !== app.id) return callback(null);
+            if (config.nakedDomain !== app.id) return callback(null);
 
-            config.set('naked_domain', null);
+            config.set('nakedDomain', null);
             callback(null);
         },
 

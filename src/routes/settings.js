@@ -16,9 +16,9 @@ exports = module.exports = {
 };
 
 function getNakedDomain(req, res, next) {
-    if (config.naked_domain === null) return next(new HttpSuccess(200, { appid: '' }));
+    if (config.nakedDomain === null) return next(new HttpSuccess(200, { appid: '' }));
 
-    next(new HttpSuccess(200, { appid: config.naked_domain }));
+    next(new HttpSuccess(200, { appid: config.nakedDomain }));
 }
 
 function setNakedDomain(req, res, next) {
@@ -33,7 +33,7 @@ function setNakedDomain(req, res, next) {
         apptask.setNakedDomain(app, function (error) {
             if (error) return next(new HttpError(500, 'Error setting naked domain: ' + error));
 
-            config.set('naked_domain', data.appid);
+            config.set('nakedDomain', data.appid);
             next(new HttpSuccess(200, { }));
         });
     });
