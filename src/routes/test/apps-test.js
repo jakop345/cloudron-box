@@ -1,5 +1,6 @@
 'use strict';
 
+/* jslint node:true */
 /* global it:false */
 /* global describe:false */
 /* global before:false */
@@ -8,15 +9,10 @@
 var Server = require('../../server.js'),
     request = require('superagent'),
     expect = require('expect.js'),
-    crypto = require('crypto'),
     fs = require('fs'),
     rimraf = require('rimraf'),
-    path = require('path'),
     os = require('os'),
-    mkdirp = require('mkdirp'),
-    uuid = require('node-uuid'),
     userdb = require('../../userdb.js'),
-    Repo = require('../../repo.js'),
     async = require('async'),
     hock = require('hock'),
     appdb = require('../../appdb.js'),
@@ -45,7 +41,11 @@ function setup(done) {
         function (callback) {
             request.post(SERVER_URL + '/api/v1/createadmin')
                  .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
-                 .end(function (error, result) { callback(); });
+                 .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result).to.be.ok();
+                    callback();
+                });
         },
 
         function (callback) {
@@ -406,7 +406,7 @@ describe('App installation - port bindings', function () {
 
         request.post(SERVER_URL + '/api/v1/app/install')
               .query({ access_token: token })
-              .send({ app_id: APP_ID, password: PASSWORD, location: APP_LOCATION, portBindings: { "7778" : "7171" } })
+              .send({ app_id: APP_ID, password: PASSWORD, location: APP_LOCATION, portBindings: { '7778' : '7171' } })
               .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
             checkInstallStatus();
@@ -496,6 +496,7 @@ describe('App installation - port bindings', function () {
     it('uninstalled - container destroyed', function (done) {
         docker.getContainer(appInfo.containerId).inspect(function (error, data) {
             expect(error).to.be.ok();
+            expect(data).to.not.be.ok();
             done();
         });
     });
