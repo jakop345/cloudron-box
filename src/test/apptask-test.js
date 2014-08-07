@@ -128,7 +128,7 @@ describe('apptask', function () {
     });
 
     it('unregisters subdomain', function (done) {
-        var scope = nock(config.appServerUrl).delete('/api/v1/subdomain/' + APP.location).reply(200, { });
+        var scope = nock(config.appServerUrl).delete('/api/v1/subdomains/' + APP.location).reply(200, { });
 
         apptask._unregisterSubdomain(APP, function (error) {
             expect(error).to.be(null);
@@ -137,4 +137,4 @@ describe('apptask', function () {
         });
     });
 });
- 
+

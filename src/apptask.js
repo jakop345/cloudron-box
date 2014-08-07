@@ -304,7 +304,7 @@ function unregisterSubdomain(app, callback) {
 
     debug('Unregistering subdomain for ' + app.id + ' at ' + app.location);
     superagent
-        .del(config.appServerUrl + '/api/v1/subdomain/' + app.location)
+        .del(config.appServerUrl + '/api/v1/subdomains/' + app.location)
         .query({ token: config.token })
         .end(function (error, res) {
             if (error) {

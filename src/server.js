@@ -286,7 +286,7 @@ Server.prototype._initializeExpressSync = function () {
     router.post('/api/v1/app/install', bearer, this._requirePassword.bind(this), routes.apps.installApp);
 
     // subdomain routes
-    router.get('/api/v1/subdomain/:subdomain', routes.apps.getAppBySubdomain); // TODO: allow non-authenticated for the appstatus page
+    router.get('/api/v1/subdomains/:subdomain', routes.apps.getAppBySubdomain); // TODO: allow non-authenticated for the appstatus page
 
     // settings routes
     router.get('/api/v1/settings/naked_domain', bearer, routes.settings.getNakedDomain);

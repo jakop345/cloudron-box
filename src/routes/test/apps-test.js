@@ -170,7 +170,7 @@ describe('App API', function () {
     });
 
     it('can get appBySubdomain', function (done) {
-        request.get(SERVER_URL + '/api/v1/subdomain/' + APP_LOCATION)
+        request.get(SERVER_URL + '/api/v1/subdomains/' + APP_LOCATION)
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
             expect(res.body.id).to.eql(APP_ID);
@@ -180,7 +180,7 @@ describe('App API', function () {
     });
 
     it('cannot get invalid app by Subdomain', function (done) {
-        request.get(SERVER_URL + '/api/v1/subdomain/tikaloma')
+        request.get(SERVER_URL + '/api/v1/subdomains/tikaloma')
                .end(function (err, res) {
             expect(res.statusCode).to.equal(404);
             done(err);
@@ -225,7 +225,7 @@ describe('App installation', function () {
                     .reply(200, manifest, { 'Content-Type': 'application/json' })
                     .post('/api/v1/subdomains?token=' + config.token, { subdomain: APP_LOCATION })
                     .reply(200, { }, { 'Content-Type': 'application/json' })
-                    .delete('/api/v1/subdomain/' + APP_LOCATION + '?token=' + config.token)
+                    .delete('/api/v1/subdomains/' + APP_LOCATION + '?token=' + config.token)
                     .reply(200, { }, { 'Content-Type': 'application/json' });
                 done();
             });
@@ -374,7 +374,7 @@ describe('App installation - port bindings', function () {
                     .reply(200, manifest, { 'Content-Type': 'application/json' })
                     .post('/api/v1/subdomains?token=' + config.token, { subdomain: APP_LOCATION })
                     .reply(200, { }, { 'Content-Type': 'application/json' })
-                    .delete('/api/v1/subdomain/' + APP_LOCATION + '?token=' + config.token)
+                    .delete('/api/v1/subdomains/' + APP_LOCATION + '?token=' + config.token)
                     .reply(200, { }, { 'Content-Type': 'application/json' });
                 done();
             });
