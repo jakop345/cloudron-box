@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -v
+set -e
 
 USER_HOME=/home/yellowtent
 SRCDIR=$USER_HOME/box
