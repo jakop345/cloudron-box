@@ -6,6 +6,7 @@ echo "Box bootstrapping"
 
 USER=yellowtent
 SRCDIR=/home/$USER/box
+BACKUP_DIR=/home/$USER/.yellowtent
 
 # we get the appstore origin from the caller which is baked into the image
 APP_SERVER_URL=$1
@@ -40,16 +41,16 @@ npm install --production
 echo "==== Setup nginx ===="
 cd $SRCDIR
 killall nginx || echo "nginx not running"   # condition makes killall not fatal to set -e
-mkdir -p /home/$USER/.yellowtent/applications
-ln -sf /home/$USER/.yellowtent/applications $SRCDIR/nginx/applications
-touch /home/$USER/.yellowtent/naked_domain.conf
-ln -sf /home/$USER/.yellowtent/naked_domain.conf $SRCDIR/nginx/naked_domain.conf
+mkdir -p $BACKUP_DIR/applications
+ln -sf $BACKUP_DIR/applications $SRCDIR/nginx/applications
+touch $BACKUP_DIR/naked_domain.conf
+ln -sf $BACKUP_DIR/naked_domain.conf $SRCDIR/nginx/naked_domain.conf
 FQDN=`hostname -f`
 sed -e "s/##ADMIN_FQDN##/admin-$FQDN/" nginx/admin.conf_template > nginx/applications/admin.conf
 # TODO until I find a way to have a more dynamic nginx config
 # this will break if we ever do an update
 cp nginx/certificates.conf_deployed nginx/certificates.conf
-chown $USER:$USER -R /home/$USER/.yellowtent/
+chown $USER:$USER -R $BACKUP_DIR
 
 
 echo "==== Setup supervisord ===="
