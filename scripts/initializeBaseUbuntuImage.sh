@@ -92,16 +92,6 @@ while [[ $RET -ne 0 ]]; do
 done
 
 
-echo "==== Sudoers file for app removal ===="
-cat > /etc/sudoers.d/yellowtent <<EOF
-Defaults!$SRCDIR/src/rmappdir.sh env_keep=HOME
-$USER ALL=(root) NOPASSWD: $SRCDIR/src/rmappdir.sh
-
-Defaults!$SRCDIR/src/reloadnginx.sh env_keep=HOME
-$USER ALL=(root) NOPASSWD: $SRCDIR/src/reloadnginx.sh
-EOF
-
-
 echo "==== Make the user own his home ===="
 chown $USER:$USER -R /home/$USER
 
