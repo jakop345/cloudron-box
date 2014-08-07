@@ -4,6 +4,8 @@
 
 'use strict';
 
+require('supererror');
+
 var assert = require('assert'),
     Docker = require('dockerode'),
     superagent = require('superagent'),
@@ -11,16 +13,13 @@ var assert = require('assert'),
     os = require('os'),
     safe = require('safetydance'),
     appdb = require('./appdb.js'),
-    Writable = require('stream').Writable,
     debug = require('debug')('box:apptask'),
     fs = require('fs'),
     child_process = require('child_process'),
     path = require('path'),
     net = require('net'),
-    rimraf = require('rimraf'),
     config = require('../config.js'),
     database = require('./database.js'),
-    HttpError = require('./httperror.js'),
     ejs = require('ejs'),
     appFqdn = require('./apps').appFqdn;
 
@@ -97,7 +96,7 @@ function configureNginx(app, httpPort, callback) {
 function unconfigureNginx(app, callback) {
     var nginxConfigFilename = path.join(config.nginxAppConfigDir, app.location + '.conf');
     if (!safe.fs.unlinkSync(nginxConfigFilename)) {
-        debug('Error removing nginx configuration ' + safe.error);
+        console.error('Error removing nginx configuration ' + safe.error);
         return callback(safe.error);
     }
 
@@ -140,7 +139,7 @@ function downloadImage(app, callback) {
             if (data.status) {
                 debug('Progress: ' + data.status); // progressDetail { current, total }
             } else if (data.error) {
-                debug('Error detail:' + data.errorDetail.message);
+                console.error('Error detail:' + data.errorDetail.message);
             }
         });
 
@@ -221,7 +220,7 @@ function createVolume(app, callback) {
 
 function deleteVolume(app, callback) {
     child_process.exec('sudo ' + __dirname + '/rmappdir.sh ' + app.id, function (error, stdout, stderr) {
-        if (error) debug('Error removing volume', error);
+        if (error) console.error('Error removing volume', error);
         return callback(error);
     });
 }
@@ -308,9 +307,9 @@ function unregisterSubdomain(app, callback) {
         .query({ token: config.token })
         .end(function (error, res) {
             if (error) {
-                debug('Error making request: ' + error.message);
+                console.error('Error making request: ' + error.message);
             } else if (res.status !== 200) {
-                debug('Error unregistering subdomain:' + res.body.status + ' ' + res.body.message);
+                console.error('Error unregistering subdomain:' + res.body.status + ' ' + res.body.message);
             }
 
             callback(null);
@@ -469,7 +468,7 @@ function runApp(app, callback) {
 
         startContainer(app, portBindings, function (error) {
             if (error) {
-                debug('Error creating container:' + error);
+                console.error('Error creating container:' + error);
                 return updateApp(app, { runState: appdb.RSTATE_ERROR }, callback);
             }
 
@@ -490,7 +489,7 @@ function start(appId, callback) {
 
         install(app, function (error) {
             if (error) {
-                debug('Error installing app:', error);
+                console.error('Error installing app:', error);
                 return updateApp(app, { installationState: appdb.ISTATE_ERROR }, callback);
             }
 

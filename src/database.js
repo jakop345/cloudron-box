@@ -4,7 +4,6 @@
 
 var sqlite3 = require('sqlite3'),
     fs = require('fs'),
-    mkdirp = require('mkdirp'),
     path = require('path'),
     debug = require('debug')('box:database'),
     DatabaseError = require('./databaseerror'),
@@ -29,13 +28,13 @@ var connectionPool = [ ],
     databaseFileName = null,
     db = null;
 
-var NOOP_CALLBACK = function (error) { if (error) console.error(error); assert(!error); }
+var NOOP_CALLBACK = function (error) { if (error) console.error(error); assert(!error); };
 
 function initialize(callback) {
     databaseFileName = config.configRoot + '/config.sqlite.db';
     db = new sqlite3.Database(databaseFileName);
     db.on('error', function (error) {
-        console.log('Database error in ' + databaseFileName + ':' + JSON.stringify(error));
+        console.error('Database error in ' + databaseFileName + ':' + JSON.stringify(error));
     });
 
     return callback(null);
@@ -59,7 +58,7 @@ function create(callback) {
 
     db = new sqlite3.Database(databaseFileName);
     db.on('error', function (error) {
-        console.log('Database error in ' + databaseFileName + ':' + JSON.stringify(error));
+        console.error('Database error in ' + databaseFileName + ':' + JSON.stringify(error));
     });
 
     debug('Database created at ' + databaseFileName);
