@@ -224,7 +224,7 @@ describe('App installation', function () {
                     .get('/api/v1/app/' + APP_ID + '/manifest')
                     .reply(200, manifest, { 'Content-Type': 'application/json' })
                     .post('/api/v1/subdomains?token=' + config.token, { subdomain: APP_LOCATION })
-                    .reply(200, { }, { 'Content-Type': 'application/json' })
+                    .reply(201, { }, { 'Content-Type': 'application/json' })
                     .delete('/api/v1/subdomains/' + APP_LOCATION + '?token=' + config.token)
                     .reply(200, { }, { 'Content-Type': 'application/json' });
                 done();
@@ -373,7 +373,7 @@ describe('App installation - port bindings', function () {
                     .get('/api/v1/app/' + APP_ID + '/manifest')
                     .reply(200, manifest, { 'Content-Type': 'application/json' })
                     .post('/api/v1/subdomains?token=' + config.token, { subdomain: APP_LOCATION })
-                    .reply(200, { }, { 'Content-Type': 'application/json' })
+                    .reply(201, { }, { 'Content-Type': 'application/json' })
                     .delete('/api/v1/subdomains/' + APP_LOCATION + '?token=' + config.token)
                     .reply(200, { }, { 'Content-Type': 'application/json' });
                 done();

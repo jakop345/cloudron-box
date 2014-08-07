@@ -118,7 +118,7 @@ describe('apptask', function () {
         var scope =
             nock(config.appServerUrl)
                 .post('/api/v1/subdomains?token=' + config.token, { subdomain: APP.location })
-                .reply(200, { });
+                .reply(201, { });
 
         apptask._registerSubdomain(APP, function (error) {
             expect(error).to.be(null);
