@@ -38,17 +38,16 @@ config.save = function () {
 
     // setup defaults
     if (production) {
-        config.nginxConfigDir = path.join(__dirname, 'nginx'); // FIXME: this should be based off baseDir as well
         config.port = 3000;
         config.logApiRequests = true;
         config.appServerUrl = process.env.APP_SERVER_URL || 'https://selfhost.io:5050'; // APP_SERVER_URL is set during bootstrap in the box's supervisor manifest
     } else {
-        config.nginxConfigDir = path.join(config.baseDir, 'nginx');
         config.port = 5454;
         config.logApiRequests = false;
         config.appServerUrl = 'http://localhost:6060'; // hock doesn't support https
     }
 
+    config.nginxConfigDir = path.join(config.baseDir, 'nginx');
     config.appDataRoot = path.join(config.baseDir, 'appdata');
     config.configRoot = path.join(config.baseDir, 'config');
     config.dataRoot = path.join(config.baseDir, 'data');

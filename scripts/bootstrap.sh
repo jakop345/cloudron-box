@@ -41,15 +41,12 @@ npm install --production
 echo "==== Setup nginx ===="
 cd $SRCDIR
 killall nginx || echo "nginx not running"   # condition makes killall not fatal to set -e
-mkdir -p $BACKUP_DIR/applications
-ln -sf $BACKUP_DIR/applications $SRCDIR/nginx/applications
-touch $BACKUP_DIR/naked_domain.conf
-ln -sf $BACKUP_DIR/naked_domain.conf $SRCDIR/nginx/naked_domain.conf
+mkdir -p $BACKUP_DIR/nginx/applications
+cp nginx/nginx.conf $BACKUP_DIR/nginx/nginx.conf
+touch $BACKUP_DIR/nginx/naked_domain.conf
 FQDN=`hostname -f`
-sed -e "s/##ADMIN_FQDN##/admin-$FQDN/" nginx/admin.conf_template > nginx/applications/admin.conf
-# TODO until I find a way to have a more dynamic nginx config
-# this will break if we ever do an update
-cp nginx/certificates.conf_deployed nginx/certificates.conf
+sed -e "s/##ADMIN_FQDN##/admin-$FQDN/" nginx/admin.conf_template > $BACKUP_DIR/nginx/applications/admin.conf
+cp nginx/certificates.conf_deployed $BACKUP_DIR/nginx/certificates.conf
 chown $USER:$USER -R $BACKUP_DIR
 
 
@@ -63,7 +60,7 @@ cp $SRCDIR/supervisor/supervisord.conf /etc/supervisor/
 echo "Writing box supervisor config..."
 cat > /etc/supervisor/conf.d/nginx.conf <<EOF
 [program:nginx]
-command=nginx -c nginx.conf -p $SRCDIR/nginx/
+command=nginx -c $BACKUP_DIR/nginx/nginx.conf -p $SRCDIR/nginx/
 autostart=true
 autorestart=true
 redirect_stderr=true
