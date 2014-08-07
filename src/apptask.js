@@ -120,7 +120,7 @@ function downloadImage(app, callback) {
     debug('Will download app now');
 
     var manifest = app.manifest;
-    if (manifest === null) return callback(new Error('Parse error:' + safe.error));
+    if (manifest === null) return callback(new Error('Manifest parse error:' + safe.error));
 
     if (!manifest.health_check_url || !manifest.docker_image || !manifest.http_port) {
         return callback(new Error('Manifest missing mandatory parameters'));
@@ -264,7 +264,7 @@ function downloadManifest(app, callback) {
         .end(function (error, res) {
             if (error) return callback(error);
 
-            if (res.status !== 200) return callback(new Error('Error downloading manifest.' + res.body.status + ' ' + res.body.message));
+            if (res.status !== 200) return callback(new Error('Error downloading manifest. Status' + res.status + '. ' + JSON.stringify(res.body)));
 
             debug('Downloaded application manifest: ' + res.text);
             return callback(null, res.text);
@@ -287,7 +287,7 @@ function registerSubdomain(app, callback) {
         .end(function (error, res) {
             if (error) return callback(error);
 
-            if (res.status !== 200) return callback(new Error('Subdomain Registration failed.' + res.body.status + ' ' + res.body.message));
+            if (res.status !== 201) return callback(new Error('Subdomain Registration failed. Status:' + res.status + '. ' + JSON.stringify(res.body)));
 
             debug('Registered subdomain for ' + app.id);
 
@@ -307,9 +307,9 @@ function unregisterSubdomain(app, callback) {
         .query({ token: config.token })
         .end(function (error, res) {
             if (error) {
-                console.error('Error making request: ' + error.message);
+                console.error('Error making request: ', error);
             } else if (res.status !== 200) {
-                console.error('Error unregistering subdomain:' + res.body.status + ' ' + res.body.message);
+                console.error('Error unregistering subdomain:', res.status, res.body);
             }
 
             callback(null);
@@ -334,7 +334,7 @@ function install(app, callback) {
             getFreePort(function (error, freePort) {
                 if (error) return callback(error);
                 configureNginx(app, freePort, function (error) {
-                    if (error) return callback(new Error('Error configuring nginx: ' + error));
+                    if (error) return callback(error);
 
                     updateApp(app, { httpPort: freePort }, callback);
                 });
@@ -347,7 +347,7 @@ function install(app, callback) {
                 if (error) return callback(error);
 
                 registerSubdomain(app, function (error) {
-                    if (error) return callback('Error registering subdomain: ' + error);
+                    if (error) return callback(error);
 
                     callback(null);
                 });
@@ -360,10 +360,10 @@ function install(app, callback) {
                 if (error) return callback(error);
 
                 downloadManifest(app, function (error, manifestJson) {
-                    if (error) return callback('Error downloading manifest:' + error);
+                    if (error) return callback(error);
 
                     var manifest = safe.JSON.parse(manifestJson);
-                    if (!manifest) return callback('Error parsing manifest:' + safe.error);
+                    if (!manifest) return callback(new Error('Error parsing manifest:' + safe.error));
 
                     updateApp(app, { manifest: manifest }, callback);
                 });
@@ -376,7 +376,7 @@ function install(app, callback) {
                 if (error) return callback(error);
 
                 downloadImage(app, function (error) {
-                    if (error) return callback('Error downloading image:' + error);
+                    if (error) return callback(error);
 
                     callback(null);
                 });
@@ -392,7 +392,7 @@ function install(app, callback) {
                     if (error) return callback(error);
 
                     createContainer(app, portBindings, function (error, containerId) {
-                        if (error) return callback('Error creating container:' + error);
+                        if (error) return callback(error);
 
                         updateApp(app, { containerId: containerId }, callback);
                     });
@@ -406,7 +406,7 @@ function install(app, callback) {
                 if (error) return callback(error);
 
                 createVolume(app, function (error) {
-                    if (error) return callback('Error creating volume: ' + error);
+                    if (error) return callback(error);
 
                     callback(null);
                 });
