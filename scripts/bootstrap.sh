@@ -82,4 +82,5 @@ environment=HOME="/home/yellowtent",USER="yellowtent",DEBUG="box*",APP_SERVER_UR
 EOF
 echo "Done"
 
+update-rc.d supervisor defaults
 /etc/init.d/supervisor start
