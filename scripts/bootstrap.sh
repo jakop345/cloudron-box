@@ -63,7 +63,7 @@ cp $SRCDIR/supervisor/supervisord.conf /etc/supervisor/
 echo "Writing box supervisor config..."
 cat > /etc/supervisor/conf.d/nginx.conf <<EOF
 [program:nginx]
-command=nginx -c $BACKUP_DIR/nginx/nginx.conf -p $SRCDIR/nginx/
+command=nginx -c $BACKUP_DIR/nginx/nginx.conf -p /var/log/nginx/
 autostart=true
 autorestart=true
 redirect_stderr=true
