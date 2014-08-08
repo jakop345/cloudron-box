@@ -12,7 +12,7 @@ server {
     error_page 500 502 503 504 =302 @appstatus;
     location @appstatus {
         internal;
-        root ../webadmin;
+        root <%= sourceDir %>/webadmin;
         rewrite ^/$ /appstatus.html break;
     }
     location / {

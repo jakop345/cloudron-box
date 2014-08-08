@@ -19,7 +19,7 @@ server {
     }
 
     location / {
-        root   ../webadmin/;
+        root   ##SRCDIR##/webadmin/;
         index  index.html index.htm;
     }
 }
