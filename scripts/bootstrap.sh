@@ -34,7 +34,7 @@ EOF
 
 
 echo "==== Setup yellowtent ===="
-sudo -u $USER bash <<EOF
+sudo -u $USER -H bash <<EOF
 cd $SRCDIR
 npm install --production
 EOF
