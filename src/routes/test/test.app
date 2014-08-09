@@ -1,7 +1,7 @@
 {
   "name": "test",
-  "version": "0.2",
-  "docker_image": "girish/test:0.2",
+  "version": "0.3",
+  "docker_image": "girish/test:0.3",
   "home_url": "/",
   "health_check_url": "/",
   "http_port": 7777,
