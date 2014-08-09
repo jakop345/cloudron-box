@@ -15,15 +15,11 @@ var express = require('express'),
     assert = require('assert'),
     child_process = require('child_process'),
     pkg = require('./../package.json'),
-    os = require('os'),
     fs = require('fs'),
-    async = require('async'),
     apps = require('./apps'),
     middleware = require('./middleware'),
     database = require('./database.js'),
-    DatabaseError = require('./databaseerror.js'),
     userdb = require('./userdb'),
-    safe = require('safetydance'),
     config = require('../config.js');
 
 exports = module.exports = Server;
