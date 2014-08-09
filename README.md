@@ -46,5 +46,5 @@ Creating a box image involves the following steps:
 * scripts/createBaseUbuntuImage.sh <DROPLET_IP>
 * Snapshot the image in DO
 * Change heroku config to that image id above
-  * curl "https://api.digitalocean.com/v1/images/?client_id=f18dbe3b7090fa0a3f6878709dd555aa&api_key=ee47d2d5b2f2a4281508e3a962c488fc" | python -m json.too
+  * curl "https://api.digitalocean.com/v1/images/?client_id=f18dbe3b7090fa0a3f6878709dd555aa&api_key=ee47d2d5b2f2a4281508e3a962c488fc" | python -m json.tool
   * heroku config:set DIGITAL_OCEAN_IMAGE=5561068
