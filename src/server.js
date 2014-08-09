@@ -343,7 +343,7 @@ Server.prototype._getCertificate = function (callback) {
         return callback(new Error('Not provisioned yet'));
     }
 
-    var url = config.appServerUrl + '/boxes/' + config.fqdn + '/certificate?token=' + config.token;
+    var url = config.appServerUrl + '/api/v1/boxes/' + config.fqdn + '/certificate?token=' + config.token;
 
     var request = http;
     if (config.appServerUrl.indexOf('https://') === 0) request = https;
