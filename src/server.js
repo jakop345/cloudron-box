@@ -4,6 +4,7 @@
 
 var express = require('express'),
     http = require('http'),
+    https = require('https'),
     HttpError = require('./httperror.js'),
     HttpSuccess = require('./httpsuccess.js'),
     path = require('path'),
@@ -343,7 +344,11 @@ Server.prototype._getCertificate = function (callback) {
     }
 
     var url = config.appServerUrl + '/boxes/' + config.fqdn + '/certificate?token=' + config.token;
-    http.get(url, function (result) {
+
+    var request = http;
+    if (config.appServerUrl.indexOf('https://') === 0) request = https;
+
+    request.get(url, function (result) {
         if (result.statusCode !== 200) return callback(new Error('Failed to get certificate. Status: ' + result.statusCode));
 
         var certDirPath = '/etc/yellowtent/cert';
