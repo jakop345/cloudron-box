@@ -13,7 +13,10 @@ var express = require('express'),
     routes = require('./routes/index.js'),
     debug = require('debug')('box:server'),
     assert = require('assert'),
+    child_process = require('child_process'),
     pkg = require('./../package.json'),
+    os = require('os'),
+    fs = require('fs'),
     async = require('async'),
     apps = require('./apps'),
     middleware = require('./middleware'),
@@ -26,6 +29,7 @@ var express = require('express'),
 exports = module.exports = Server;
 
 var HEARTBEAT_INTERVAL = 1000 * 60 * 60;
+var RELOAD_NGINX_CMD = 'sudo ' + __dirname + '/reloadnginx.sh';
 
 function Server() {
     this.httpServer = null; // http server
@@ -117,11 +121,25 @@ Server.prototype._provision = function (req, res, next) {
 
     debug('_provision: received from appstore ' + req.body.appServerUrl);
 
+    var that = this;
+
     if (config.token) return next(new HttpError(409, 'Already provisioned'));
 
     config.set(req.body);
 
     next(new HttpSuccess(201, {}));
+
+    // now try to get the real certificate
+    function getCertificateCallback(error) {
+        if (error) {
+            console.error(error);
+            return setTimeout(that._getCertificate.bind(that, getCertificateCallback), 5000);
+        }
+
+        debug('_provision: success');
+    }
+
+    this._getCertificate(getCertificateCallback);
 };
 
 /*
@@ -315,6 +333,53 @@ Server.prototype._sendHeartBeat = function () {
         else debug('Heartbeat successfull');
 
         setTimeout(that._sendHeartBeat.bind(that), HEARTBEAT_INTERVAL);
+    });
+};
+
+Server.prototype._getCertificate = function (callback) {
+    assert(typeof callback === 'function');
+
+    debug('_getCertificate');
+
+    if (!config.appServerUrl || !config.token || !config.fqdn) {
+        debug('_getCertificate: not provisioned, yet.');
+        return callback(new Error('Not provisioned yet'));
+    }
+
+    var url = config.appServerUrl + '/boxes/' + config.fqdn + '/certificate?token=' + config.token;
+    http.get(url, function (result) {
+        if (result.statusCode !== 200) return callback(new Error('Failed to get certificate. Status: ' + result.statusCode));
+
+        var certDirPath = '/etc/yellowtent/cert';
+        var certFilePath = path.join(certDirPath, 'cert.tar');
+        var file = fs.createWriteStream(certFilePath);
+
+        result.on('data', function (chunk) {
+            file.write(chunk);
+        });
+        result.on('end', function () {
+            require('child_process').exec('tar -xf ' + certFilePath, { cwd: certDirPath }, function(error) {
+                if (error) return callback(error);
+
+                if (!fs.existsSync(path.join(certDirPath, 'host.cert'))) return callback(new Error('Certificate bundle does not contain a host.cert file'));
+                if (!fs.existsSync(path.join(certDirPath, 'host.info'))) return callback(new Error('Certificate bundle does not contain a host.info file'));
+                if (!fs.existsSync(path.join(certDirPath, 'host.key'))) return callback(new Error('Certificate bundle does not contain a host.key file'));
+                if (!fs.existsSync(path.join(certDirPath, 'host.pem'))) return callback(new Error('Certificate bundle does not contain a host.pem file'));
+
+                // cleanup the cert bundle
+                fs.unlinkSync(certFilePath);
+
+                child_process.exec(RELOAD_NGINX_CMD, { timeout: 10000 }, function (error) {
+                    if (error) return callback(error);
+
+                    debug('_getCertificate: success');
+
+                    callback(null);
+                });
+            });
+        });
+    }).on('error', function (error) {
+        callback(error);
     });
 };
 
