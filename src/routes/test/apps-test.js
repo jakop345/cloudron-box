@@ -337,6 +337,16 @@ describe('App installation', function () {
         });
     });
 
+    it('uninstalled - image destroyed', function (done) {
+        docker.getImage(appInfo.manifest.docker_image).inspect(function (error, data) {
+            if (data) {
+                console.log('image is still alive', data);
+            }
+            expect(error).to.be.ok();
+            done();
+        });
+    });
+
     it('uninstalled - volume destroyed', function (done) {
         expect(!fs.existsSync(config.appDataRoot + '/' + APP_ID));
         done();
@@ -497,6 +507,16 @@ describe('App installation - port bindings', function () {
         docker.getContainer(appInfo.containerId).inspect(function (error, data) {
             expect(error).to.be.ok();
             expect(data).to.not.be.ok();
+            done();
+        });
+    });
+
+    it('uninstalled - image destroyed', function (done) {
+        docker.getImage(appInfo.manifest.docker_image).inspect(function (error, data) {
+            if (data) {
+                console.log('image is still alive', data);
+            }
+            expect(error).to.be.ok();
             done();
         });
     });

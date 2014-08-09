@@ -210,6 +210,20 @@ function deleteContainer(app, callback) {
     });
 }
 
+function deleteImage(app, callback) {
+    var image = docker.getImage(app.manifest.docker_image);
+
+    var removeOptions = {
+        force: true,
+        noprune: false
+    };
+
+    image.remove(removeOptions, function (error) {
+        if (error) debug('Error removing image', error);
+        callback(error);
+    });
+}
+
 function createVolume(app, callback) {
     var appDataDir = path.join(config.appDataRoot, app.id);
 
@@ -444,6 +458,11 @@ function uninstall(app, callback) {
         // delete the container
         function (callback) {
             deleteContainer(app, function (error) { callback(null); });
+        },
+
+        // delete the image
+        function (callback) {
+            deleteImage(app, function (error) { callback(null); });
         },
 
         // delete volume
