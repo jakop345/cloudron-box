@@ -2,6 +2,7 @@
 
 var SettingsController = function ($scope, Client) {
     $scope.user = Client.getUserInfo();
+    $scope.config = Client.getConfig();
     $scope.nakedDomainApp = null;
 
     $scope.setNakedDomain = function () {
@@ -9,8 +10,7 @@ var SettingsController = function ($scope, Client) {
 
         Client.setNakedDomain(appid, function (error) {
             if (error) return console.error('Error setting naked domain', error);
-
-            console.log('Updated naked domain');
+            console.debug('Updated naked domain');
         });
     };
 
@@ -19,10 +19,10 @@ var SettingsController = function ($scope, Client) {
     };
 
     Client.getApps(function (error, apps) {
-        if (error) console.log('Error loading app list');
+        if (error) console.error('Error loading app list');
         $scope.apps = apps;
 
-        console.dir($scope.apps);
+        console.debug('Apps:', $scope.apps);
 
         Client.getNakedDomain(function (error, appid) {
             if (error) return console.error(error);

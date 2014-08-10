@@ -106,7 +106,8 @@ Server.prototype._getVersion = function (req, res) {
 Server.prototype._getConfig = function (req, res) {
     res.send(200, {
         appServerUrl: config.appServerUrl,
-        fqdn: config.fqdn
+        fqdn: config.fqdn,
+        version: pkg.version
     });
 };
 

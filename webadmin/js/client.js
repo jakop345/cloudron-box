@@ -2,8 +2,7 @@
 
 /* global angular:false */
 
-angular.module('YellowTent')
-.service('Client', function ($http, $base64) {
+angular.module('YellowTent').service('Client', function ($http) {
 
     function ClientError(statusCode, message) {
         Error.call(this);
@@ -18,21 +17,30 @@ angular.module('YellowTent')
 
     function Client() {
         this._username = null;
-        this._userInfo = null;
+        this._userInfo = {
+            username: null,
+            email: null,
+            admin: false
+        };
         this._token = null;
         this._clientId = null;
         this._clientSecret = null;
-        this._config = null;
+        this._config = {
+            appServerUrl: null,
+            fqdn: null
+        };
 
         this.setToken(localStorage.token);
     }
 
     Client.prototype.isAdmin = function () {
-        return this._userInfo ? this._userInfo.admin : false;
+        return !!this._userInfo.admin;
     };
 
     Client.prototype.setUserInfo = function (userInfo) {
-        this._userInfo = userInfo;
+        this._userInfo.username = userInfo.username;
+        this._userInfo.email = userInfo.email;
+        this._userInfo.admin = !!userInfo.admin;
     };
 
     Client.prototype.getUserInfo = function () {
@@ -44,7 +52,6 @@ angular.module('YellowTent')
     };
 
     Client.prototype.setToken = function (token) {
-        console.debug('Set client token to ', token);
         $http.defaults.headers.common.Authorization = 'Token ' + token;
         localStorage.token = token;
         this._token = token;
@@ -64,179 +71,154 @@ angular.module('YellowTent')
      * Rest API wrappers
      */
     Client.prototype.config = function (callback) {
-        $http.get('/api/v1/config')
-        .success(function(data, status, headers, config) {
+        $http.get('/api/v1/config').success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
-        })
-        .error(function(data, status, headers, config) {
+        }).error(function(data, status) {
             callback(new ClientError(status, data));
         });
     };
 
     Client.prototype.createVolume = function (name, password, callback) {
         var data = { password: password, name: name };
-        $http.post('/api/v1/volume/create', data)
-        .success(function(data, status, headers, config) {
+        $http.post('/api/v1/volume/create', data).success(function(data, status) {
             if (status !== 201) return callback(new ClientError(status, data));
             callback(null, data);
-        })
-        .error(function(data, status, headers, config) {
+        }).error(function(data, status) {
             callback(new ClientError(status, data));
         });
     };
 
     Client.prototype.deleteVolume = function (name, password, callback) {
         var data = { password: password };
-        $http.post('/api/v1/volume/' + name + '/delete', data)
-        .success(function(data, status, headers, config) {
+        $http.post('/api/v1/volume/' + name + '/delete', data).success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
-        })
-        .error(function(data, status, headers, config) {
+        }).error(function(data, status) {
             callback(new ClientError(status, data));
         });
     };
 
     Client.prototype.mount = function (name, password, callback) {
         var data = { password: password };
-        $http.post('/api/v1/volume/' + name + '/mount', data)
-        .success(function(data, status, headers, config) {
+        $http.post('/api/v1/volume/' + name + '/mount', data).success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
-        })
-        .error(function(data, status, headers, config) {
+        }).error(function(data, status) {
             callback(new ClientError(status, data));
         });
     };
 
     Client.prototype.unmount = function (name, password, callback) {
         var data = { password: password };
-        $http.post('/api/v1/volume/' + name + '/unmount', data)
-        .success(function(data, status, headers, config) {
+        $http.post('/api/v1/volume/' + name + '/unmount', data).success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
-        })
-        .error(function(data, status, headers, config) {
+        }).error(function(data, status) {
             callback(new ClientError(status, data));
         });
     };
 
     Client.prototype.isMounted = function (name, callback) {
-        $http.get('/api/v1/volume/' + name + '/ismounted')
-        .success(function(data, status, headers, config) {
+        $http.get('/api/v1/volume/' + name + '/ismounted').success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data.mounted);
-        })
-        .error(function(data, status, headers, config) {
+        }).error(function(data, status) {
             callback(new ClientError(status, data));
         });
     };
 
     Client.prototype.listVolumes = function (callback) {
-        $http.get('/api/v1/volume/list')
-        .success(function(data, status, headers, config) {
+        $http.get('/api/v1/volume/list').success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data.volumes);
-        })
-        .error(function(data, status, headers, config) {
+        }).error(function(data, status) {
             callback(new ClientError(status, data));
         });
     };
 
     Client.prototype.addUserToVolume = function (username, volumeId, password, callback) {
-        $http.post('/api/v1/volume/' + volumeId + '/users', { username: username, password: password })
-        .success(function (data, status, headers, config) {
+        var data = { username: username, password: password };
+        $http.post('/api/v1/volume/' + volumeId + '/users', data).success(function (data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null);
-        })
-        .error(function (data, status, headers, config) {
+        }).error(function (data, status) {
             callback(new ClientError(status, data));
         });
     };
 
     Client.prototype.removeUserFromVolume = function (username, volumeId, password, callback) {
-        $http.delete('/api/v1/volume/' + volumeId + '/users/' + username, { headers: {password: password}})
-        .success(function (data, status, headers, config) {
+        var data = { headers: {password: password} };
+        $http.delete('/api/v1/volume/' + volumeId + '/users/' + username, data).success(function (data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null);
-        })
-        .error(function (data, status, headers, config) {
+        }).error(function (data, status) {
             callback(new ClientError(status, data));
         });
     };
 
     Client.prototype.installApp = function (id, password, config, callback) {
-        $http.post('/api/v1/app/install', { app_id: id, password: password, location: config.location, portBindings: config.portBindings })
-        .success(function (data, status, headers) {
+        var data = { app_id: id, password: password, location: config.location, portBindings: config.portBindings };
+        $http.post('/api/v1/app/install', data).success(function (data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null);
-        })
-        .error(function (data, status, headers) {
+        }).error(function (data, status) {
             callback(new ClientError(status, data));
         });
     };
 
-    Client.prototype.isServerAvailable = function (callback) {
-        $http.get('/api/v1/version')
-        .success(function(data, status, headers, config) {
-            callback(null, (status === 200));
-        })
-        .error(function(data, status, headers, config) {
-            callback(null, false);
+    Client.prototype.version = function (callback) {
+        $http.get('/api/v1/version').success(function(data, status) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null, data);
+        }).error(function(data, status) {
+            callback(new ClientError(status, data));
         });
     };
 
     Client.prototype.isServerFirstTime = function (callback) {
-        $http.get('/api/v1/firsttime')
-        .success(function(data, status, headers, config) {
+        $http.get('/api/v1/firsttime').success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, !data.activated);
-        })
-        .error(function(data, status, headers, config) {
+        }).error(function(data, status) {
             callback(new ClientError(status, data));
         });
     };
 
     Client.prototype.getNakedDomain = function (callback) {
         $http.get('/api/v1/settings/naked_domain')
-        .success(function (data, status, headers, config) {
+        .success(function (data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data.appid);
         })
-        .error(function (data, status, headers, config) {
+        .error(function (data, status) {
             callback(new ClientError(status, data));
         });
     };
 
     Client.prototype.setNakedDomain = function (appid, callback) {
-        $http.post('/api/v1/settings/naked_domain', { appid: appid || '' })
-        .success(function (data, status, headers, config) {
+        $http.post('/api/v1/settings/naked_domain', { appid: appid || '' }).success(function (data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null);
-        })
-        .error(function (data, status, headers, config) {
+        }).error(function (data, status) {
             callback(new ClientError(status, data));
         });
     };
 
     Client.prototype.getApps = function (callback) {
-        $http.get('/api/v1/apps')
-        .success(function (data, status, headers) {
+        $http.get('/api/v1/apps').success(function (data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data.apps);
-        })
-        .error(function (data, status, headers) {
+        }).error(function (data, status) {
             callback(new ClientError(status, data));
         });
     };
 
     Client.prototype.removeApp = function (appId, callback) {
-        $http.post('/api/v1/app/' + appId + '/uninstall')
-        .success(function (data, status, headers) {
+        $http.post('/api/v1/app/' + appId + '/uninstall').success(function (data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null);
-        }).error(function (data, status, headers) {
+        }).error(function (data, status) {
             callback(new ClientError(status, data));
         });
     };
@@ -250,27 +232,23 @@ angular.module('YellowTent')
 
         var that = this;
 
-        $http.post('/api/v1/createadmin', payload)
-        .success(function(data, status, headers, config) {
+        $http.post('/api/v1/createadmin', payload).success(function(data, status) {
             if (status !== 201) return callback(new ClientError(status, data));
 
             that.setToken(data.token);
             that.setUserInfo(data.userInfo);
 
             callback(null, data.activated);
-        })
-        .error(function(data, status, headers, config) {
+        }).error(function(data, status) {
             callback(new ClientError(status, data));
         });
     };
 
     Client.prototype.listUsers = function (callback) {
-        $http.get('/api/v1/user/list')
-        .success(function(data, status, headers, config) {
+        $http.get('/api/v1/user/list').success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
-        })
-        .error(function(data, status, headers, config) {
+        }).error(function(data, status) {
             callback(new ClientError(status, data));
         });
     };
@@ -282,12 +260,10 @@ angular.module('YellowTent')
             email: email
         };
 
-        $http.post('/api/v1/user/create', data)
-        .success(function(data, status, headers, config) {
+        $http.post('/api/v1/user/create', data).success(function(data, status) {
             if (status !== 201) return callback(new ClientError(status, data));
             callback(null, data);
-        })
-        .error(function(data, status, headers, config) {
+        }).error(function(data, status) {
             callback(new ClientError(status, data));
         });
     };
@@ -298,12 +274,10 @@ angular.module('YellowTent')
             password: password
         };
 
-        $http.post('/api/v1/user/remove', data)
-        .success(function(data, status, headers, config) {
+        $http.post('/api/v1/user/remove', data).success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
-        })
-        .error(function(data, status, headers, config) {
+        }).error(function(data, status) {
             callback(new ClientError(status, data));
         });
     };
@@ -314,12 +288,10 @@ angular.module('YellowTent')
             newPassword: newPassword
         };
 
-        $http.post('/api/v1/user/password', data)
-        .success(function(data, status, headers, config) {
+        $http.post('/api/v1/user/password', data).success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
-        })
-        .error(function(data, status, headers, config) {
+        }).error(function(data, status) {
             callback(new ClientError(status, data));
         });
     };
@@ -329,27 +301,28 @@ angular.module('YellowTent')
 
         $http.defaults.headers.common.Authorization = 'Token ' + token;
 
-        $http.get('/api/v1/user/token')
-        .success(function(data, status, headers, config) {
+        $http.get('/api/v1/user/token').success(function(data, status) {
             if (status !== 200) {
                 that.setToken(null);
                 return callback(new ClientError(status, data));
             }
 
             // cache the user credentials and server address
-            that._username = data.userInfo.username;
-            that._userInfo = data.userInfo;
+            that._username = data.userInfo.username;    // TODO check if _username is needed
+            that.setUserInfo(data.userInfo);
+
             that.setToken(data.token);
 
             that.config(function (error, result) {
                 if (error) callback(error);
 
-                that._config = result;
+                that._config.appServerUrl = result.appServerUrl;
+                that._config.version = result.version;
+                that._config.fqdn = result.fqdn;
 
                 callback(null, data.token);
             });
-        })
-        .error(function(data, status, headers, config) {
+        }).error(function(data, status) {
             that.setToken(null);
             callback(new ClientError(status, data));
         });
@@ -372,15 +345,13 @@ angular.module('YellowTent')
             client_secret: this._clientSecret
         };
 
-        $http.post('/api/v1/oauth/token?response_type=token&client_id=' + this._clientId, data)
-        .success(function(data, status, headers, config) {
+        $http.post('/api/v1/oauth/token?response_type=token&client_id=' + this._clientId, data).success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
 
             that.login(data.access_token, function (error, result) {
                 callback(null, data.access_token);
             });
-        })
-        .error(function(data, status, headers, config) {
+        }).error(function(data, status) {
             callback(new ClientError(status, data));
         });
     };

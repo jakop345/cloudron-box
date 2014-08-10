@@ -6,34 +6,50 @@
 </div>
 
 <div class="row">
-    <div class="col-md-12">
-        <ul class="list-group">
-            <li href="#" class="list-group-item">
-                <div class="row">
-                    <div class="col-sm-12"><h1>Account</h1></div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-9">Username</div>
-                    <div class="col-sm-3" style="text-align: center;">{{user.username}}</div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-9">Password</div>
-                    <div class="col-sm-3"><button class="btn btn-sm btn-block" ng-click="changePassword()">Change</button></div>
-                </div>
-            </li>
-            <li href="#" class="list-group-item">
-                <div class="row">
-                    <div class="col-sm-12"><h1>Server</h1></div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-9">Set naked domain app</div>
-                    <div class="col-sm-3">
+    <div class="col-lg-6">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                Account
+            </div>
+            <div class="panel-body">
+                <ul class="list-group">
+                    <li class="list-group-item">Username <span class="pull-right">{{user.username}}</span></li>
+                </ul>
+                <button class="btn btn-outline btn-danger pull-right" ng-click="changePassword()">Change Password</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                Server
+            </div>
+            <div class="panel-body">
+                <ul class="list-group">
+                    <li class="list-group-item">Domain <span class="pull-right">{{config.fqdn}}</span></li>
+                    <li class="list-group-item"><p>Naked Domain App: </p>
                         <select class="form-control" ng-model="nakedDomainApp" ng-options="app.manifest.name for app in apps" ng-change="setNakedDomain()">
                             <option value="">(Unset)</option>
                         </select>
-                    </div>
-                </div>
-            </li>
-        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                Software
+            </div>
+            <div class="panel-body">
+                <ul class="list-group">
+                    <li class="list-group-item">Appstore <span class="pull-right">{{config.appServerUrl}}</span></li>
+                    <li class="list-group-item">Version <span class="pull-right">{{config.version}}</span></li>
+                </ul>
+            </div>
+        </div>
     </div>
 </div>
