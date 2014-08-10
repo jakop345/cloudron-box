@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />
+
+    <title> YellowTent </title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="3rdparty/sb-admin-2/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- MetisMenu CSS -->
+    <link href="3rdparty/sb-admin-2/css/plugins/metisMenu/metisMenu.min.css" rel="stylesheet">
+
+    <!-- Timeline CSS -->
+    <link href="3rdparty/sb-admin-2/css/plugins/timeline.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="3rdparty/sb-admin-2/css/sb-admin-2.css" rel="stylesheet">
+
+    <!-- Morris Charts CSS -->
+    <link href="3rdparty/sb-admin-2/css/plugins/morris.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="3rdparty/sb-admin-2/font-awesome-4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+
+    <!-- application stylesheets -->
+    <!-- <link href="css/index.css" rel="stylesheet" media="screen"> -->
+
+  </head>
+
+<body ng-app="YellowTent" ng-controller="SetupController">
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3"></div>
+            <div class="col-md-6">
+
+            <h1>Create Owner</h1>
+            <form class="form-signin" role="form" ng-submit="submit()">
+                <div class="form-group">
+                    <label class="control-label" for="inputUsername">Username</label>
+                    <input type="text" class="form-control" ng-model="username" id="inputUsername" required autofocus>
+                </div>
+                <div class="form-group">
+                    <label class="control-label" for="inputPassword">Password</label>
+                    <input type="password" class="form-control" ng-model="password" id="inputPassword" required>
+                </div>
+                <div class="form-group">
+                    <label class="control-label" for="inputPasswordRepeat">Password Repeat</label>
+                    <input type="password" class="form-control" ng-model="passwordRepeat" id="inputPasswordRepeat" required>
+                </div>
+                <input class="btn btn-primary btn-outline pull-right" type="submit" ng-disabled="{{disabled}}" value="Create User"/>
+            </form>
+
+            </div>
+            <div class="col-md-3"></div>
+        </div>
+    </div>
+
+    <!-- angularjs scripts -->
+    <script src="3rdparty/js/angular.js"></script>
+    <script src="3rdparty/js/angular-loader.min.js"></script>
+    <script src="3rdparty/js/angular-route.min.js"></script>
+    <script src="3rdparty/js/angular-animate.min.js"></script>
+    <script src="3rdparty/js/angular-base64.min.js"></script>
+    <script src="3rdparty/js/autofill-event.js"></script>
+
+    <!-- jQuery Version 1.11.0 -->
+    <script src="3rdparty/sb-admin-2/js/jquery-1.11.0.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="3rdparty/sb-admin-2/js/bootstrap.min.js"></script>
+
+    <!-- Metis Menu Plugin JavaScript -->
+    <script src="3rdparty/sb-admin-2/js/plugins/metisMenu/metisMenu.min.js"></script>
+
+    <!-- Custom Theme JavaScript -->
+    <script src="3rdparty/sb-admin-2/js/sb-admin-2.js"></script>
+
+    <!-- yellowtent -->
+    <script src="/api/v1/oauth/yellowtent.js"></script>
+
+    <!-- angular bootstrap -->
+    <script src="3rdparty/js/ui-bootstrap-tpls-0.10.0.js"></script>
+
+    <!-- spinner -->
+    <script src="3rdparty/js/spin.min.js"></script>
+
+    <!-- actute comboboxes -->
+    <script src="3rdparty/js/acute.select.js"></script>
+    <link href="3rdparty/css/acute.select.css" rel="stylesheet" media="screen"/>
+
+    <!-- application routes -->
+    <script src="js/index.js"></script>
+
+    <!-- yellowtent -->
+    <script src="/api/v1/oauth/yellowtent.js"></script>
+
+    <!-- services and factories -->
+    <script src="js/client.js"></script>
+
+    <!-- views -->
+    <script src="js/setup.js"></script>
+
+</body>
+</html>

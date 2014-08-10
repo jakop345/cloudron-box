@@ -32,7 +32,7 @@ var MainController = function ($scope, $route, Client) {
         }
 
         if (isFirstTime) {
-            window.location.href = '#/usercreate?admin=1';
+            window.location.href = '/setup.html';
             return;
         }
 
