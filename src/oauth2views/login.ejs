@@ -1,34 +1,26 @@
 <% include header %>
 
-<form action="/api/v1/session/login" method="post">
-  <div class="row">
-    <div class="col-md-3"></div>
-    <div class="col-md-6">
-      <div class="container-fluid">
+<div class="container">
+    <form action="/api/v1/session/login" method="post">
         <div class="row">
-          <div class="col-sm-12">
-            <h2 class="form-signin-heading pull-right">Welcome</h2>
-          </div>
+            <div class="col-md-3"></div>
+            <div class="col-md-6">
+            <h1>Welcome</h1>
+                <form role="form">
+                    <div class="form-group">
+                        <label class="control-label" for="inputUsername">Username</label>
+                        <input type="text" class="form-control" id="inputUsername" name="username" autofocus required>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="inputPassword">Password</label>
+                        <input type="password" class="form-control" name="password" id="inputPassword" required>
+                    </div>
+                    <input class="btn btn-default btn-outline" type="submit" value="Sign in"/>
+                </form>
+            </div>
+            <div class="col-md-3"></div>
         </div>
-        <div class="row">
-          <div class="col-sm-12">
-            <input type="text" class="form-control" placeholder="Username" name="username" required autofocus>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-sm-12">
-            <input type="password" class="form-control has-error" placeholder="Password" name="password" required>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-sm-12">
-            <input class="btn btn-green btn-block" type="submit" value="Sign in"/>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3"></div>
-  </div>
-</form>
+    </form>
+</div>
 
 <% include footer %>

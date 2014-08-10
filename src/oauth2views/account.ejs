@@ -1,5 +1,17 @@
-<p>User id: <%= user.id %></p>
-<p>Username: <%= user.username %></p>
-<p>Email: <%= user.email %></p>
+<% include header %>
 
-<a href="/api/v1/session/logout">Logout</a>
+<div class="container">
+    <form action="/api/v1/session/login" method="post">
+        <div class="row">
+            <div class="col-md-2"></div>
+            <div class="col-md-8">
+                <div class="alert alert-danger">
+                    Invalid OAuth Client
+                </div>
+            </div>
+            <div class="col-md-2"></div>
+        </div>
+    </form>
+</div>
+
+<% include footer %>
