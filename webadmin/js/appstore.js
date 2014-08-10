@@ -2,8 +2,7 @@
 
 /* global angular:false */
 
-angular.module('YellowTent')
-.service('AppStore', function ($http, Client) {
+angular.module('YellowTent').service('AppStore', function ($http, Client) {
 
     function AppStoreError(statusCode, message) {
         Error.call(this);
@@ -17,24 +16,26 @@ angular.module('YellowTent')
     }
 
     function AppStore() {
-        this._appsCache = null;
+        this._appsCache = {};
     }
 
     AppStore.prototype.getApps = function (callback) {
-        if (this._appsCache !== null) return callback(null, this._appsCache);
-        if (Client.getConfig() === null) return callback(new AppStoreError(500, 'Not yet initialized'));
+        if (Client.getConfig().appServerUrl === null) return callback(new AppStoreError(500, 'Not yet initialized'));
 
         var that = this;
 
-        $http.get(Client.getConfig().appServerUrl + '/api/v1/apps')
-        .success(function (data, status, headers) {
+        $http.get(Client.getConfig().appServerUrl + '/api/v1/apps').success(function (data, status) {
             if (status !== 200) return callback(new AppStoreError(status, data));
 
-            var apps = data.apps;
-            apps.forEach(function (app) { app.iconUrl = Client.getConfig().appServerUrl + '/api/v1/app/' + app.id + '/icon'; });
-            that._appsCache = apps;
-            return callback(null, apps);
-        }).error(function (data, status, headers) {
+            data.apps.forEach(function (app) {
+                if (that._appsCache[app.id]) return;
+
+                app.iconUrl = Client.getConfig().appServerUrl + '/api/v1/app/' + app.id + '/icon';
+                that._appsCache[app.id] = app;
+            });
+
+            return callback(null, that._appsCache);
+        }).error(function (data, status) {
             return callback(new AppStoreError(status, data));
         });
     };

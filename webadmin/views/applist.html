@@ -1,20 +1,44 @@
-
-<div class="container-fluid">
-  <div ng-show="loadStatus == LOADING" class="text-center">
-    <h2>Loading...</h2>
-  </div>
-
-  <div ng-show="loadStatus == LOADED" class="row">
-    <div ng-show="!apps.length" class="text-center">
-        <h2>No apps</h2>
+<div class="row">
+    <div class="col-lg-12">
+        <br/>
     </div>
-    <div class="col-lg-3 list-group-item" ng-repeat="app in apps">
-        <div>{{ app.title }}</div>
-        <div>{{ app.author }}</div>
-        <img width="48" height="48" ng-src="{{ app.iconUrl }}"/>
-        <br />
-        <button ng-click="installApp(app.id)">Install</button>
-    </div>
-  </div>
-
 </div>
+
+<div class="row" ng-show="loadStatus == LOADING">
+    <div class="col-lg-12" class="text-center">
+        <h2>Loading...</h2>
+    </div>
+</div>
+
+<div class="row" ng-show="!apps.length">
+    <div class="col-lg-12" class="text-center">
+        <h2>No Apps available</h2>
+    </div>
+</div>
+
+<div class="row" ng-show="loadStatus == LOADED">
+    <div class="col-lg-4 col-md-6" ng-repeat="app in apps">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-xs-3">
+                        <img width="48" height="48" ng-src="{{ app.iconUrl }}"/>
+                        <!-- <i class="fa fa-comments fa-5x"></i> -->
+                    </div>
+                    <div class="col-xs-9 text-right">
+                        <div class="huge">{{ app.title }}</div>
+                        <div>{{ app.userId }}</div>
+                        <div>{{ app.description || "No description" }}</div>
+                    </div>
+                </div>
+            </div>
+            <a href="" ng-click="installApp(app.id)">
+                <div class="panel-footer">
+                    <span class="pull-left">Install</span>
+                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                    <div class="clearfix"></div>
+                </div>
+            </a>
+        </div>
+    </div>
+</row>

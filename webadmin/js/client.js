@@ -16,6 +16,7 @@ angular.module('YellowTent').service('Client', function ($http) {
     }
 
     function Client() {
+        this._configListener = [];
         this._userInfo = {
             username: null,
             email: null,
@@ -32,11 +33,29 @@ angular.module('YellowTent').service('Client', function ($http) {
         this.setToken(localStorage.token);
     }
 
+    Client.prototype.onConfig = function (callback) {
+        this._configListener.push(callback);
+        callback(this._config);
+    };
+
     Client.prototype.setUserInfo = function (userInfo) {
         // In order to keep the angular bindings alive, set each property individually
         this._userInfo.username = userInfo.username;
         this._userInfo.email = userInfo.email;
         this._userInfo.admin = !!userInfo.admin;
+    };
+
+    Client.prototype.setConfig = function (config) {
+        // In order to keep the angular bindings alive, set each property individually
+        this._config.appServerUrl = config.appServerUrl;
+        this._config.version = config.version;
+        this._config.fqdn = config.fqdn;
+
+        var that = this;
+
+        this._configListener.forEach(function (callback) {
+            callback(that._config);
+        });
     };
 
     Client.prototype.getUserInfo = function () {
@@ -300,9 +319,7 @@ angular.module('YellowTent').service('Client', function ($http) {
             that.config(function (error, result) {
                 if (error) callback(error);
 
-                that._config.appServerUrl = result.appServerUrl;
-                that._config.version = result.version;
-                that._config.fqdn = result.fqdn;
+                that.setConfig(result);
 
                 callback(null, data.token);
             });

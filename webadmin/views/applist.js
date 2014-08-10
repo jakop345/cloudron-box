@@ -1,12 +1,14 @@
 'use strict';
 
-var AppListController = function ($scope, $location, AppStore) {
+var AppListController = function ($scope, $location, Client, AppStore) {
     $scope.LOADING = 1;
     $scope.ERROR = 2;
     $scope.LOADED = 3;
 
     $scope.loadStatus = $scope.LOADED;
     $scope.loadError = '';
+
+    $scope.apps = [];
 
     $scope.refresh = function () {
         $scope.loadStatus = $scope.LOADING;
@@ -19,7 +21,10 @@ var AppListController = function ($scope, $location, AppStore) {
                 return;
             }
 
-            $scope.apps = apps;
+            // make an Array out of the apps Object
+            while ($scope.apps.length > 0) $scope.apps.pop();
+            for (var app in apps) $scope.apps.push(apps[app]);
+
             $scope.loadStatus = $scope.LOADED;
         });
     };
@@ -28,5 +33,8 @@ var AppListController = function ($scope, $location, AppStore) {
         $location.path('/app/' + appId + '/configure');
     };
 
-    $scope.refresh();
+    Client.onConfig(function (config) {
+        if (!config.appServerUrl) return;
+        $scope.refresh();
+    });
 };
