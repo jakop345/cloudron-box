@@ -25,15 +25,29 @@
     <link href="3rdparty/sb-admin-2/font-awesome-4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
 
 
+    <style>
 
-    <!-- application stylesheets -->
-    <!-- <link href="css/index.css" rel="stylesheet" media="screen"> -->
+    .animateMe {
+        opacity: 1;
+        transform: scale(1, 1);
+        -webkit-transition: 0.25s linear all;
+        transition: 0.25s linear all;
+    }
+
+    .animateMe.ng-hide-add,
+    .animateMe.ng-hide-remove {
+        display: block !important;
+        transform: scale(0.9, 0.9);
+        opacity: 0;
+    }
+
+    </style>
 
   </head>
 
 <body ng-app="YellowTent" ng-controller="MainController">
 
-    <div id="wrapper" ng-show="initialized">
+    <div id="wrapper" class="animateMe ng-hide" ng-show="initialized">
 
         <!-- Navigation -->
         <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
