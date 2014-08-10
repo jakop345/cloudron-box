@@ -5,14 +5,11 @@ function UserCreateController ($scope, $routeParams, Client) {
 
     $scope.username = '';
     $scope.password = '';
-    $scope.isAdmin = !!($routeParams.admin);
     $scope.passwordRepeat = '';
     // TODO do we really need this?
     $scope.email = 'xx@xx.xx';
 
     $scope.error = {};
-
-    var createAdmin = !!($routeParams.admin);
 
     $scope.submit = function () {
         console.debug('Try to create user %s.', $scope.username);
@@ -37,15 +34,8 @@ function UserCreateController ($scope, $routeParams, Client) {
             return;
         }
 
-        var func;
-        if (createAdmin) {
-            func = Client.createAdmin.bind(Client);
-        } else {
-            func = Client.createUser.bind(Client);
-        }
-
         $scope.disabled = true;
-        func($scope.username, $scope.password, $scope.email, function (error, result) {
+        Client.createUser($scope.username, $scope.password, $scope.email, function (error, result) {
             if (error) {
                 console.error('Unable to create user.', error);
                 if (error.statusCode === 409) {

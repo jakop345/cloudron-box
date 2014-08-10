@@ -16,15 +16,14 @@ angular.module('YellowTent').service('Client', function ($http) {
     }
 
     function Client() {
-        this._username = null;
         this._userInfo = {
             username: null,
             email: null,
             admin: false
         };
         this._token = null;
-        this._clientId = null;
-        this._clientSecret = null;
+        this._clientId = 'cid-webadmin';
+        this._clientSecret = 'unused';
         this._config = {
             appServerUrl: null,
             fqdn: null
@@ -33,11 +32,8 @@ angular.module('YellowTent').service('Client', function ($http) {
         this.setToken(localStorage.token);
     }
 
-    Client.prototype.isAdmin = function () {
-        return !!this._userInfo.admin;
-    };
-
     Client.prototype.setUserInfo = function (userInfo) {
+        // In order to keep the angular bindings alive, set each property individually
         this._userInfo.username = userInfo.username;
         this._userInfo.email = userInfo.email;
         this._userInfo.admin = !!userInfo.admin;
@@ -53,19 +49,10 @@ angular.module('YellowTent').service('Client', function ($http) {
 
     Client.prototype.setToken = function (token) {
         $http.defaults.headers.common.Authorization = 'Token ' + token;
-        localStorage.token = token;
+        if (!token) localStorage.removeItem('token');
+        else localStorage.token = token;
         this._token = token;
     };
-
-    Client.prototype.token = function () {
-        return this._token;
-    };
-
-    Client.prototype.setClientCredentials = function (id, secret) {
-        this._clientId = id;
-        this._clientSecret = secret;
-    };
-
 
     /*
      * Rest API wrappers
@@ -307,10 +294,7 @@ angular.module('YellowTent').service('Client', function ($http) {
                 return callback(new ClientError(status, data));
             }
 
-            // cache the user credentials and server address
-            that._username = data.userInfo.username;    // TODO check if _username is needed
             that.setUserInfo(data.userInfo);
-
             that.setToken(data.token);
 
             that.config(function (error, result) {
@@ -329,10 +313,8 @@ angular.module('YellowTent').service('Client', function ($http) {
     };
 
     Client.prototype.logout = function () {
-        localStorage.removeItem('token');
         this.setToken(null);
-        this._username = '';
-        this._userInfo = null;
+        this._userInfo = {};
     };
 
     Client.prototype.exchangeCodeForToken = function (authCode, callback) {

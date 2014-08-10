@@ -30,7 +30,6 @@ var MainController = function ($scope, $route, Client) {
         console.error(error);
     };
 
-    Client.setClientCredentials('cid-webadmin', 'unused');
     Client.isServerFirstTime(function (error, isFirstTime) {
         if (error) return $scope.error(error);
         if (isFirstTime) return $scope.setup();

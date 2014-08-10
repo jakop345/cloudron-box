@@ -45,7 +45,6 @@ var SetupController = function ($scope, Client) {
         });
     };
 
-    Client.setClientCredentials('cid-webadmin', 'unused');
     Client.isServerFirstTime(function (error, isFirstTime) {
         if (error) return;
 
