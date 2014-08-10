@@ -1,21 +1,13 @@
 'use strict';
 
 var MainController = function ($scope, $route, Client) {
+    $scope.initialized = false;
+    $scope.userInfo = Client.getUserInfo();
+
     $scope.isActive = function (url) {
         if (!$route.current) return false;
         return $route.current.$$route.originalPath.indexOf(url) === 0;
     };
-
-    $scope.href = function ($event, url) {
-        $event.preventDefault();
-        window.location.href = url;
-    };
-
-    $scope.$watch(function () {
-        var userInfo = Client.getUserInfo();
-        $scope.showSideBar = !!userInfo;
-        $scope.username = userInfo ? userInfo.username : null;
-    });
 
     $scope.logout = function () {
         // TODO actually perform logout on the server
@@ -24,37 +16,38 @@ var MainController = function ($scope, $route, Client) {
         window.location.href = '/api/v1/session/logout';
     };
 
+    $scope.login = function () {
+        var callbackURL = window.location.origin + '/login_callback.html';
+        window.location.href = '/api/v1/oauth/dialog/authorize?response_type=code&client_id=' + Client._clientId + '&redirect_uri=' + callbackURL;
+    };
+
+    $scope.setup = function () {
+        window.location.href = '/setup.html';
+    };
+
+    $scope.error = function (error) {
+        // TODO show some error UI
+        console.error(error);
+    };
+
     Client.setClientCredentials('cid-webadmin', 'unused');
     Client.isServerFirstTime(function (error, isFirstTime) {
-        if (error) {
-            console.error('Unable to connect.', error);
-            return;
-        }
+        if (error) return $scope.error(error);
+        if (isFirstTime) return $scope.setup();
 
-        if (isFirstTime) {
-            window.location.href = '/setup.html';
-            return;
-        }
-
-        // Server already initializied, try to perform login based on token
-        var callbackURL = window.location.origin + '/login_callback.html';
+        // Server already initialized, try to perform login based on token
         if (localStorage.token) {
             Client.login(localStorage.token, function (error, token) {
-                if (error) {
-                    console.error('Unable to login', error);
-                    window.location.href = '/api/v1/oauth/dialog/authorize?response_type=code&client_id=' + Client._clientId + '&redirect_uri=' + callbackURL;
-                    return;
-                }
-
-                console.debug('Successfully logged in got token', token);
+                if (error) return $scope.login();
 
                 // update token
                 localStorage.token = token;
-                $scope.showSideBar = !!Client._userInfo;
+
+                // now show UI
+                $scope.initialized = true;
             });
-            return;
         } else {
-            window.location.href = '/api/v1/oauth/dialog/authorize?response_type=code&client_id=' + Client._clientId + '&redirect_uri=' + callbackURL;
+            $scope.login();
         }
     });
 };
