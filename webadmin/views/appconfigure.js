@@ -8,18 +8,13 @@ var AppConfigureController = function ($scope, $routeParams, Client, AppStore) {
     $scope.error = { };
     $scope.portBindings = { };
 
-    AppStore.getAppById($routeParams.id, function (error, app) {
-        try {
-            var manifest = JSON.parse(app.manifestJson);
-            $scope.error = error || { };
-            if (error) return;
-            $scope.portBindings = manifest.tcp_ports;
-            // default setting is to map ports as they are in manifest
-            for (var port in $scope.portBindings) {
-                $scope.portBindings[port].exposeAs = port;
-            }
-        }
-        catch (e) {
+    AppStore.getManifest($routeParams.id, function (error, manifest) {
+        $scope.error = error || { };
+        if (error) return;
+        $scope.portBindings = manifest.tcp_ports;
+        // default setting is to map ports as they are in manifest
+        for (var port in $scope.portBindings) {
+            $scope.portBindings[port].exposeAs = port;
         }
     });
 

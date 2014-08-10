@@ -50,5 +50,16 @@ angular.module('YellowTent').service('AppStore', function ($http, Client) {
         return callback(new AppStoreError(404, 'Not found'));
     };
 
+    AppStore.prototype.getManifest = function (appId, callback) {
+        if (Client.getConfig().appServerUrl === null) return callback(new AppStoreError(500, 'Not yet initialized'));
+
+        var manifestUrl = Client.getConfig().appServerUrl + '/api/v1/app/' + appId + '/manifest';
+        console.log('Getting the manifest of ', appId, manifestUrl);
+        $http.get(manifestUrl).success(function (data, status) {
+            return callback(null, data);
+        }).error(function (data, status) {
+            return callback(new AppStoreError(status, data));
+        });
+    };
     return new AppStore();
 });
