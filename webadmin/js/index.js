@@ -72,3 +72,13 @@ app.filter('installationActive', function() {
         return true;
     };
 });
+
+app.filter('installationStateLabel', function() {
+    return function(input) {
+        if (input === 'error') return 'Error';
+        if (input === 'installed') return 'Installed';
+        if (input === 'downloading_image') return 'Downloading';
+        if (input === 'pending_uninstall') return 'Uninstalling';
+        return input;
+    };
+});
