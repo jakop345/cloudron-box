@@ -1,10 +1,14 @@
 'use strict';
 
+/* global $:true */
+
 var AppDetailsController = function ($scope, $http, $routeParams, $interval, Client) {
     $scope.app = {};
     $scope.initialized = false;
 
     $scope.deleteApp = function () {
+        $('#deleteAppModal').modal('hide');
+
         Client.removeApp($routeParams.id, function (error) {
             if (error) console.error(error);
             window.location.href = '#/';
