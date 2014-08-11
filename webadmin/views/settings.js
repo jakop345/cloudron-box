@@ -4,6 +4,7 @@ var SettingsController = function ($scope, Client) {
     $scope.user = Client.getUserInfo();
     $scope.config = Client.getConfig();
     $scope.nakedDomainApp = null;
+    $scope.drives = [];
 
     $scope.setNakedDomain = function () {
         var appid = $scope.nakedDomainApp ? $scope.nakedDomainApp.id : null;
@@ -33,6 +34,11 @@ var SettingsController = function ($scope, Client) {
                     break;
                 }
             }
+        });
+
+        Client.stats(function (error, stats) {
+            if (error) return console.error(error);
+            $scope.drives = stats.drives;
         });
     });
 };

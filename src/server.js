@@ -17,6 +17,7 @@ var express = require('express'),
     child_process = require('child_process'),
     pkg = require('./../package.json'),
     fs = require('fs'),
+    df = require('nodejs-disks'),
     apps = require('./apps'),
     middleware = require('./middleware'),
     database = require('./database.js'),
@@ -108,6 +109,18 @@ Server.prototype._getConfig = function (req, res) {
         appServerUrl: config.appServerUrl,
         fqdn: config.fqdn,
         version: pkg.version
+    });
+};
+
+Server.prototype._getCloudronStats = function (req, res, next) {
+    df.drives(function (error, drives) {
+        if (error) return next(new HttpError(500, error));
+
+        df.drivesDetail(drives, function (err, data) {
+            if (error) return next(new HttpError(500, error));
+
+            next(new HttpSuccess(200, { drives: data }));
+        });
     });
 };
 
@@ -307,6 +320,9 @@ Server.prototype._initializeExpressSync = function () {
     // settings routes
     router.get('/api/v1/settings/naked_domain', bearer, routes.settings.getNakedDomain);
     router.post('/api/v1/settings/naked_domain', bearer, routes.settings.setNakedDomain);
+
+    // server stats
+    router.get('/api/v1/stats', bearer, this._getCloudronStats.bind(this));
 };
 
 Server.prototype._sendHeartBeat = function () {
