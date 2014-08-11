@@ -22,7 +22,6 @@ server {
         proxy_connect_timeout    3250;
 
         proxy_set_header   Host               $host;
-        proxy_set_header   X-Originating-IP   $remote_addr;
         proxy_set_header   X-Forwarded-For    $remote_addr;
         proxy_set_header   X-Forwarded-Host   $host;
 
