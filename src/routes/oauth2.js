@@ -208,5 +208,6 @@ module.exports.token = [
 ];
 
 module.exports.library = function (req, res, next) {
+    res.setHeader('Content-Type', 'application/javascript');
     res.render('yellowtent', { adminOrigin: config.adminOrigin });
 };
