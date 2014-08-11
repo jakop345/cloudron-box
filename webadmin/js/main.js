@@ -1,8 +1,9 @@
 'use strict';
 
-var MainController = function ($scope, $route, Client) {
+var MainController = function ($scope, $route, $interval, Client) {
     $scope.initialized = false;
     $scope.userInfo = Client.getUserInfo();
+    $scope.installedApps = Client.getInstalledApps();
 
     $scope.isActive = function (url) {
         if (!$route.current) return false;
@@ -41,6 +42,12 @@ var MainController = function ($scope, $route, Client) {
 
                 // update token
                 localStorage.token = token;
+
+                // kick off installed apps polling
+                var refreshTimer = $interval(Client.refreshInstalledApps.bind(Client), 2000);
+                $scope.$on('$destroy', function () {
+                    $interval.cancel(refreshTimer);
+                });
 
                 // now show UI
                 $scope.initialized = true;

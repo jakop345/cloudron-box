@@ -82,7 +82,12 @@
                 <div class="sidebar-nav navbar-collapse">
                     <ul class="nav" id="side-menu">
                         <li>
-                            <a ng-class="{ active: isActive('/myapps')}" href="#/myapps"><i class="fa fa-cloud-download fa-fw"></i> My Apps</a>
+                            <a ng-class="{ active: isActive('/myapps')}" href="#/myapp"><i class="fa fa-cloud-download fa-fw"></i> My Apps<span class="fa arrow"></span></a>
+                            <ul class="nav nav-second-level">
+                                <li ng-repeat="app in installedApps">
+                                    <a href="#/app/{{ app.id }}/details">{{ app.manifest.name }} <span class="pull-right text-muted small"><em>{{ app.installationState }}</em></span></a>
+                                </li>
+                            </ul>
                         </li>
                         <li>
                             <a ng-class="{ active: isActive('/applist')}" href="#/applist"><i class="fa fa-cloud fa-fw"></i> App Store</a>
@@ -160,6 +165,7 @@
     <script src="views/userdelete.js"></script>
     <script src="views/userpassword.js"></script>
     <script src="views/applist.js"></script>
+    <script src="views/appdetails.js"></script>
     <script src="views/myapps.js"></script>
     <script src="views/appconfigure.js"></script>
     <script src="views/settings.js"></script>

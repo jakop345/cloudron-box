@@ -29,6 +29,7 @@ angular.module('YellowTent').service('Client', function ($http) {
             appServerUrl: null,
             fqdn: null
         };
+        this._installedApps = [];
 
         this.setToken(localStorage.token);
     }
@@ -56,6 +57,10 @@ angular.module('YellowTent').service('Client', function ($http) {
         this._configListener.forEach(function (callback) {
             callback(that._config);
         });
+    };
+
+    Client.prototype.getInstalledApps = function () {
+        return this._installedApps;
     };
 
     Client.prototype.getUserInfo = function () {
@@ -220,6 +225,21 @@ angular.module('YellowTent').service('Client', function ($http) {
         });
     };
 
+    Client.prototype.getApp = function (appId, callback) {
+        var appFound = null;
+        this._installedApps.some(function (app) {
+            if (app.id === appId) {
+                appFound = app;
+                return true;
+            } else {
+                return false;
+            }
+        });
+
+        if (appFound) return callback(null, appFound);
+        else return callback(new Error('App not found'));
+    };
+
     Client.prototype.removeApp = function (appId, callback) {
         $http.post('/api/v1/app/' + appId + '/uninstall').success(function (data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
@@ -299,6 +319,37 @@ angular.module('YellowTent').service('Client', function ($http) {
             callback(null, data);
         }).error(function(data, status) {
             callback(new ClientError(status, data));
+        });
+    };
+
+    Client.prototype.refreshInstalledApps = function (callback) {
+        var that = this;
+
+        callback = typeof callback === 'function' ? callback : function () {};
+
+        this.getApps(function (error, apps) {
+            if (error) {
+                console.error(error);
+                return callback(error);
+            }
+
+            apps.forEach(function (app, i) {
+                if (that._installedApps.some(function (elem) { return elem.id === app.id; })) {
+                    angular.copy(app, that._installedApps[i]);
+                    return;
+                } else {
+                    that._installedApps.push(app);
+                }
+            });
+
+            that._installedApps.forEach(function (app, i) {
+                if (!apps.some(function (elem) { return elem.id === app.id; })) {
+                    that._installedApps.splice(i, 1);
+                    return;
+                }
+            });
+
+            callback(null);
         });
     };
 
