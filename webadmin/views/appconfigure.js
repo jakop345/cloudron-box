@@ -43,7 +43,7 @@ var AppConfigureController = function ($scope, $routeParams, Client, AppStore) {
                 return;
             }
 
-            window.location.replace('#/myapps');
+            window.location.replace('#/app/' + $routeParams.id + '/details');
         });
     };
 
