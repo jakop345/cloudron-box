@@ -8,7 +8,10 @@ var app = angular.module('YellowTent', ['acute.select', 'ngRoute', 'ngAnimate', 
 // setup all major application routes
 app.config(function ($routeProvider) {
     $routeProvider.when('/', {
-        redirectTo: '/myapps'
+        redirectTo: '/dashboard'
+    }).when('/dashboard', {
+        controller: 'DashboardController',
+        templateUrl: 'views/dashboard.html'
     }).when('/usercreate', {
         controller: 'UserCreateController',
         templateUrl: 'views/usercreate.html'
@@ -62,3 +65,10 @@ app.run(function (acuteSelectService) {
     acuteSelectService.updateSetting('templatePath', '/3rdparty/templates');
 });
 
+app.filter('installationActive', function() {
+    return function(input) {
+        if (input === 'error') return false;
+        if (input === 'installed') return false;
+        return true;
+    };
+});
