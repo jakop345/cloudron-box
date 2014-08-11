@@ -1,21 +1,25 @@
-<div class="row">
-    <div class="col-lg-12">
-        <h1 class="page-header"><a target="_blank" ng-href="https://{{ app.fqdn + app.manifest.home_url }}">{{ app.manifest.name }}</a></h1>
+<div class="animateMeOpacity ng-hide" ng-show="initialized">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="page-header"><a target="_blank" ng-href="https://{{ app.fqdn + app.manifest.home_url }}">{{ app.manifest.name }}</a></h1>
+        </div>
     </div>
-</div>
 
-<div class="row">
-    <div class="col-lg-12">
-        <div class="panel panel-primary">
-            <div class="panel-heading">
-                Configuration
-            </div>
-            <div class="panel-body">
-                <ul class="list-group">
-                    <li class="list-group-item">Location <span class="pull-right"><a target="_blank" ng-href="https://{{ app.fqdn + app.manifest.home_url }}">{{ app.fqdn + app.manifest.home_url }}</a></span></li>
-                    <li class="list-group-item">Status <span class="pull-right">{{ app.installationState }}</span></li>
-                </ul>
-                <button class="btn btn-outline btn-danger pull-right" ng-click="deleteApp()">Delete</button>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    Configuration
+                </div>
+                <div class="panel-body">
+                    <ul class="list-group">
+                        <li class="list-group-item">Location <span class="pull-right"><a target="_blank" ng-href="https://{{ app.fqdn + app.manifest.home_url }}">{{ app.fqdn + app.manifest.home_url }}</a></span></li>
+                        <li class="list-group-item">Health <i ng-show="app.runState === 'running'" class="fa fa-smile-o fa-fw pull-right text-success"></i><i ng-show="app.runState !== 'running'" class="fa fa-frown-o fa-fw pull-right text-danger"></i></li>
+                        <li class="list-group-item">Status <span class="pull-right">{{ app.installationState }}</span></li>
+                        <li class="list-group-item">Version <span class="pull-right">{{ app.manifest.version }}</span></li>
+                    </ul>
+                    <button class="btn btn-outline btn-danger pull-right" ng-click="deleteApp()">Delete</button>
+                </div>
             </div>
         </div>
     </div>

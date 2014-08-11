@@ -2,6 +2,7 @@
 
 var AppDetailsController = function ($scope, $http, $routeParams, $interval, Client) {
     $scope.app = {};
+    $scope.initialized = false;
 
     $scope.deleteApp = function () {
         Client.removeApp($routeParams.id, function (error) {
@@ -20,6 +21,7 @@ var AppDetailsController = function ($scope, $http, $routeParams, $interval, Cli
             }
 
             $scope.app = app;
+            $scope.initialized = true;
         });
     });
 

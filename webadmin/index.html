@@ -30,14 +30,26 @@
     .animateMe {
         opacity: 1;
         transform: scale(1, 1);
-        -webkit-transition: 0.25s linear all;
-        transition: 0.25s linear all;
+        -webkit-transition: 0.25s ease all;
+        transition: 0.25s ease all;
     }
 
     .animateMe.ng-hide-add,
     .animateMe.ng-hide-remove {
         display: block !important;
         transform: scale(0.9, 0.9);
+        opacity: 0;
+    }
+
+    .animateMeOpacity {
+        opacity: 1;
+        -webkit-transition: 0.25s ease all;
+        transition: 0.25s ease all;
+    }
+
+    .animateMeOpacity.ng-hide-add,
+    .animateMeOpacity.ng-hide-remove {
+        display: block !important;
         opacity: 0;
     }
 
