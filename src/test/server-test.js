@@ -107,6 +107,33 @@ describe('Server', function () {
             });
         });
 
+        it('stats fails due missing token', function (done) {
+            request.get(SERVER_URL + '/api/v1/stats', function (err, res) {
+                expect(err).to.not.be.ok();
+                expect(res.statusCode).to.equal(401);
+                done(err);
+            });
+        });
+
+        it('stats', function (done) {
+            var data = { username: 'admin', password: 'password', email: 'xx@xx.xx' };
+            request.post(SERVER_URL + '/api/v1/createadmin').send(data).end(function (err, res) {
+                expect(res.statusCode).to.equal(201);
+
+                var token = res.body.token;
+
+                request.get(SERVER_URL + '/api/v1/stats').query({ auth_token: token }).end(function (err, res) {
+                    expect(err).to.not.be.ok();
+                    expect(res.statusCode).to.equal(200);
+                    expect(res.body).to.be.an(Object);
+                    expect(res.body.drives).to.be.an(Array);
+                    expect(res.body.drives[0]).to.be.an(Object);
+                    expect(res.body.drives[0].mountpoint).to.be.a('string');
+                    done(err);
+                });
+            });
+        });
+
         after(function (done) {
             server.stop(function () {
                 done();
