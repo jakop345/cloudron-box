@@ -76,9 +76,16 @@ app.filter('installationActive', function() {
 app.filter('installationStateLabel', function() {
     return function(input) {
         if (input === 'error') return 'Error';
+        if (input === 'subdomain_error') return 'Error';
         if (input === 'installed') return 'Installed';
         if (input === 'downloading_image') return 'Downloading';
+        if (input === 'pending_install') return 'Installing';
         if (input === 'pending_uninstall') return 'Uninstalling';
+        if (input === 'creating_container') return 'Container';
+        if (input === 'downloading_manifest') return 'Manifest';
+        if (input === 'creating_volume') return 'Volume';
+        if (input === 'registering_subdomain') return 'Subdomain';
+
         return input;
     };
 });
