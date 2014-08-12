@@ -9,7 +9,7 @@ CURL="curl -s"
 UBUNTU_IMAGE_SLUG="ubuntu-14-04-x64" # ID=5141286
 REGION_SLUG="sfo1"
 SIZE_SLUG="1gb"
-DATE=`date +%Y-%m-%d-%H-%M-%S`
+DATE=`date +%Y-%m-%d-%H%M%S`
 SNAPSHOT_NAME="yellowtent-base-image-$DATE"
 
 function yellowtent_ssh_key() {
@@ -39,7 +39,7 @@ function power_off_droplet() {
             break
         fi
         echo "Waiting for droplet to power off"
-        sleep 2
+        sleep 10
     done
 }
 
@@ -54,7 +54,7 @@ function snapshot_droplet() {
             break
         fi
         echo "Waiting for snapshot to complete"
-        sleep 2
+        sleep 10
     done
 }
 
@@ -68,12 +68,14 @@ function destroy_droplet() {
             break
         fi
         echo "Waiting for droplet to destroy"
-        sleep 2
+        sleep 10
     done
 }
 
 function get_image_id() {
-    $CURL "https://api.digitalocean.com/v1/images/$SNAPSHOT_NAME/?client_id=$CLIENT_ID&api_key=$API_KEY" | $JSON image.id
+    $CURL "https://api.digitalocean.com/v1/images/?client_id=$CLIENT_ID&api_key=$API_KEY&filter=my_images" \
+        | $JSON images \
+        | $JSON -c 'this.name === "$SNAPSHOT_NAME"' 0.id
 }
 
 # SCRIPT BEGIN
@@ -105,6 +107,7 @@ echo "Droplet IP : $DROPLET_IP";
 echo "Waiting 120 seconds for droplet creation"
 sleep 120
 
+chmod o-rw,g-rw,u-w ssh/*
 while true; do
     echo "Trying to copy init script to droplet"
     scp -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ssh/id_rsa_yellowtent ./initializeBaseUbuntuImage.sh root@$DROPLET_IP:.
