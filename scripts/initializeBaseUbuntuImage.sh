@@ -48,6 +48,7 @@ docker pull girish/base
 # https://jpetazzo.github.io/2014/06/23/docker-ssh-considered-evil/
 echo "=== Setup nsenter ==="
 docker run --rm jpetazzo/nsenter cat /nsenter > /usr/bin/nsenter
+chmod +x /usr/bin/nsenter
 
 echo "==== Setup nginx ===="
 apt-get -y install nginx-full
