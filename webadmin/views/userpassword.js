@@ -47,4 +47,6 @@ function UserPasswordController ($scope, $routeParams, Client) {
     $scope.cancel = function () {
         window.history.back();
     };
+
+    document.getElementById('inputCurrentPassword').focus();
 }

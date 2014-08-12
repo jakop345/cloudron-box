@@ -50,4 +50,6 @@ var AppConfigureController = function ($scope, $routeParams, Client, AppStore) {
     $scope.cancel = function () {
         window.history.back();
     };
+
+    document.getElementById('inputLocation').focus();
 };
