@@ -8,6 +8,7 @@ JSON="$SCRIPT_DIR/../node_modules/.bin/json"
 CURL="curl -s"
 UBUNTU_IMAGE_SLUG="ubuntu-14-04-x64" # ID=5141286
 DATE=`date +%Y-%m-%d-%H%M%S`
+BOX_NAME="box-$DATE"
 SNAPSHOT_NAME="box-base-image-$DATE"
 
 function get_ssh_key_id() {
@@ -21,8 +22,9 @@ function create_droplet() {
     local REGION_SLUG="sfo1"
     local SIZE_SLUG="1gb"
     local SSH_KEY_ID="$1"
+    local BOX_NAME="$2"
 
-    $CURL "https://api.digitalocean.com/v1/droplets/new?client_id=$CLIENT_ID&api_key=$API_KEY&name=base&size_slug=$SIZE_SLUG&image_slug=$UBUNTU_IMAGE_SLUG&region_slug=$REGION_SLUG&ssh_key_ids=$SSH_KEY_ID" | $JSON droplet.id
+    $CURL "https://api.digitalocean.com/v1/droplets/new?client_id=$CLIENT_ID&api_key=$API_KEY&name=$BOX_NAME&size_slug=$SIZE_SLUG&image_slug=$UBUNTU_IMAGE_SLUG&region_slug=$REGION_SLUG&ssh_key_ids=$SSH_KEY_ID" | $JSON droplet.id
 }
 
 function get_droplet_ip() {
@@ -94,8 +96,8 @@ if [ -z "$YELLOWTENT_SSH_KEY_ID" ]; then
 fi
 echo "Detected yellowtent ssh key id: $YELLOWTENT_SSH_KEY_ID" # 124654 for yellowtent key
 
-echo "Creating Droplet"
-DROPLET_ID=$(create_droplet $YELLOWTENT_SSH_KEY_ID)
+echo "Creating Droplet with name [$BOX_NAME]"
+DROPLET_ID=$(create_droplet $YELLOWTENT_SSH_KEY_ID $BOX_NAME)
 if [ -z "$DROPLET_ID" ]; then
     echo "Failed to create droplet"
     exit 1
