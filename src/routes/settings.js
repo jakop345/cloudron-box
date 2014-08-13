@@ -8,7 +8,8 @@ var HttpError = require('../httperror.js'),
     DatabaseError = require('../databaseerror.js'),
     apptask = require('../apptask.js'),
     config = require('../../config.js'),
-    appdb = require('../appdb.js');
+    apps = require('../apps.js'),
+    AppsError = apps.AppsError;
 
 exports = module.exports = {
     getNakedDomain: getNakedDomain,
@@ -25,10 +26,10 @@ function setNakedDomain(req, res, next) {
     var data = req.body;
     if (!data || typeof data.appid !== 'string') return next(new HttpError(400, 'appid is required'));
 
-    function getApp(appid, callback) { return appid !== '' ? appdb.get(appid, callback): callback(null); }
+    function getApp(appid, callback) { return appid !== '' ? apps.get(appid, callback): callback(null); }
 
     getApp(data.appid, function (error, app) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
+        if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
 
         apptask.setNakedDomain(app, function (error) {
             if (error) return next(new HttpError(500, 'Error setting naked domain: ' + error));
