@@ -108,7 +108,7 @@ if [ -z "$DROPLET_IP" ]; then
     exit 1
 fi
 
-echo "Droplet IP : $DROPLET_IP";
+echo "Droplet IP : [$DROPLET_IP]";
 
 # If we run scripts overenthusiastically without the wait, setup script randomly fails
 echo "Waiting 120 seconds for droplet creation"
@@ -117,7 +117,7 @@ sleep 120
 chmod o-rw,g-rw,u-w $SCRIPT_DIR/ssh/*
 while true; do
     echo "Trying to copy init script to droplet"
-    scp -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i $SCRIPT_DIR/ssh/id_rsa_yellowtent ./initializeBaseUbuntuImage.sh root@$DROPLET_IP:.
+    scp -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i $SCRIPT_DIR/ssh/id_rsa_yellowtent $SCRIPT_DIR/initializeBaseUbuntuImage.sh root@$DROPLET_IP:.
     if [ $? -eq 0 ]; then
         break
     fi
