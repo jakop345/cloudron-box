@@ -54,30 +54,45 @@ function uninitialize() {
 
 // http://dustinsenos.com/articles/customErrorsInNode
 // http://code.google.com/p/v8/wiki/JavaScriptStackTraceApi
-function AppsError(err, reason) {
+function AppsError(reason, info) {
     Error.call(this);
     Error.captureStackTrace(this, this.constructor);
 
     this.name = this.constructor.name;
-    this.message = safe.JSON.stringify(err);
-    this.code = err ? err.code : null;
-    this.reason = reason || AppsError.INTERNAL_ERROR;
+    this.reason = reason;
+    this.message = !info ? reason : (typeof info === 'object' ? JSON.stringify(info) : info);
 }
 util.inherits(AppsError, Error);
 AppsError.INTERNAL_ERROR = 1;
 AppsError.ALREADY_EXISTS = 2;
 AppsError.NOT_FOUND = 3;
+AppsError.BAD_FIELD = 4;
 
 function appFqdn(location) {
     return location + '-' + config.fqdn;
+}
+
+// http://stackoverflow.com/questions/7930751/regexp-for-subdomain
+function validateSubdomain(subdomain, fqdn) {
+    var RESERVED_SUBDOMAINS = [ 'admin' ];
+
+    if (RESERVED_SUBDOMAINS.indexOf(subdomain) !== -1) return new Error(subdomain + ' location is reserved');
+
+    if (subdomain.length > 63) return new Error('Subdomain length cannot be greater than 63');
+    if (subdomain.match(/^[A-Za-z0-9-]+$/) === null) return new Error('Subdomain can only contain alphanumerics and hyphen');
+    if (subdomain[0] === '-' || subdomain[subdomain.length-1] === '-') return new Error('Subdomain cannot start or end with hyphen');
+
+    if (subdomain.length + 1 /* dot */ + fqdn.length > 255) return new Error('Domain length exceeds 255 characters');
+
+    return null;
 }
 
 function get(appId, callback) {
     assert(typeof appId === 'string');
 
     appdb.get(appId, function (error, app) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError('No such app', AppsError.NOT_FOUND));
-        if (error) return callback(new AppsError('Internal error:' + error.message, AppsError.INTERNAL_ERROR));
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
+        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
         callback(null, app);
     });
@@ -87,8 +102,8 @@ function getBySubdomain(subdomain, callback) {
     assert(typeof subdomain === 'string');
 
     appdb.getBySubdomain(subdomain, function (error, app) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError('No such app', AppsError.NOT_FOUND));
-        if (error) return callback(new AppsError('Internal error:' + error.message, AppsError.INTERNAL_ERROR));
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
+        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
         callback(null, app);
     });
@@ -96,7 +111,7 @@ function getBySubdomain(subdomain, callback) {
 
 function getAll(callback) {
     appdb.getAll(function (error, apps) {
-        if (error) return callback(new AppsError('Internal error:' + error.message, AppsError.INTERNAL_ERROR));
+        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
         apps.forEach(function (app) {
             app.iconUrl = config.appServerUrl + '/api/v1/app/' + app.id + '/icon';
@@ -123,17 +138,39 @@ function stopTask(appId) {
     }
 }
 
-function install(appId, username, password, location, portBindings, callback) {
+function install(appId, username, password, location, portBindingsMap, callback) {
     assert(typeof appId === 'string');
     assert(typeof username === 'string');
     assert(typeof password === 'string');
     assert(typeof location === 'string');
+    assert(!portBindings || typeof portBindingsMap === 'object');
+    assert(typeof callback === 'function');
+
+    var error = validateSubdomain(location, config.fqdn);
+    if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
+
+    var portBindings = [ ];
+
+    // validate the port bindings
+    for (var key in portBindingsMap) {
+        var containerPort = parseInt(key, 10);
+        if (isNaN(containerPort) || containerPort <= 0 || containerPort > 65535) {
+            return callback(new AppsError(AppsError.BAD_FIELD, key + ' is not a valid port'));
+        }
+
+        var hostPort = parseInt(portBindingsMap[containerPort], 10);
+        if (isNaN(hostPort) || hostPort <= 1024 || hostPort > 65535) {
+            return callback(new AppsError(AppsError.BAD_FIELD, portBindingsMap[containerPort] + ' is not a valid port'));
+        }
+
+        portBindings.push({ containerPort: containerPort, hostPort: hostPort });
+    }
 
     stopTask(appId);
 
     appdb.add(appId, appdb.ISTATE_PENDING_INSTALL, location, portBindings, function (error) {
-        if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new AppsError('Already installed or installing', AppsError.ALREADY_EXISTS));
-        if (error) return callback(new AppsError('Internal error:' + error.message, AppsError.INTERNAL_ERROR));
+        if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new AppsError(AppsError.ALREADY_EXISTS));
+        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
         debug('Will install app with id : ' + appId);
 
@@ -149,8 +186,8 @@ function uninstall(appId, callback) {
     stopTask(appId);
 
     appdb.update(appId, { installationState: appdb.ISTATE_PENDING_UNINSTALL }, function (error) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError('No such app', AppsError.NOT_FOUND));
-        if (error) return callback(new AppsError('Internal error:' + error.message, AppsError.INTERNAL_ERROR));
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
+        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
         debug('Will uninstall app with id : ' + appId);
 
