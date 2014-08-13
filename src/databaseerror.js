@@ -5,14 +5,13 @@ var util = require('util'),
 
 exports = module.exports = DatabaseError;
 
-function DatabaseError(err, reason) {
+function DatabaseError(reason, info) {
     Error.call(this);
     Error.captureStackTrace(this, this.constructor);
 
     this.name = this.constructor.name;
-    this.message = safe.JSON.stringify(err);
-    this.code = err ? err.code : null;
-    this.reason = reason || DatabaseError.INTERNAL_ERROR;
+    this.reason = reason;
+    this.message = !info ? reason : (typeof info === 'object' ? JSON.stringify(info) : info);
 }
 util.inherits(DatabaseError, Error);
 

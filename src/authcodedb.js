@@ -18,9 +18,9 @@ function get(authCode, callback) {
     assert(typeof callback === 'function');
 
     database.get('SELECT * FROM authcodes WHERE authCode = ?', [ authCode ], function (error, result) {
-        if (error) return callback(new DatabaseError(error.message, DatabaseError.INTERNAL_ERROR));
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
-        if (typeof result === 'undefined') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
+        if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         callback(null, result);
     });
@@ -42,8 +42,8 @@ function add(authCode, clientId, redirectURI, userId, callback) {
 
     database.run('INSERT INTO authcodes (authCode, clientId, redirectURI, userId) ' +
            ' VALUES ($authCode, $clientId, $redirectURI, $userId)', data, function (error) {
-        if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(error.code, DatabaseError.ALREADY_EXISTS));
-        if (error || !this.lastID) return callback(new DatabaseError(error.message, DatabaseError.INTERNAL_ERROR));
+        if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
+        if (error || !this.lastID) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         callback(null);
     });
@@ -54,8 +54,8 @@ function del(authCode, callback) {
     assert(typeof callback === 'function');
 
     database.run('DELETE FROM authcodes WHERE authCode = ?', [ authCode ], function (error) {
-        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
-        if (this.changes !== 1) return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        if (this.changes !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         callback(null);
     });

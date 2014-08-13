@@ -18,9 +18,9 @@ function get(id, callback) {
     assert(typeof callback === 'function');
 
     database.get('SELECT * FROM clients WHERE id = ?', [ id ], function (error, result) {
-        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
-        if (typeof result === 'undefined') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
+        if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         callback(null, result);
     });
@@ -31,9 +31,9 @@ function getByClientId(clientId, callback) {
     assert(typeof callback === 'function');
 
     database.get('SELECT * FROM clients WHERE clientId = ? LIMIT 1', [ clientId ], function (error, result) {
-        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
-        if (typeof result === 'undefined') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
+        if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         return callback(null, result);
     });
@@ -58,8 +58,8 @@ function add(id, clientId, clientSecret, name, redirectURI, callback) {
     database.run('INSERT INTO clients (id, clientId, clientSecret, name, redirectURI) '
            + 'VALUES ($id, $clientId, $clientSecret, $name, $redirectURI)',
            data, function (error) {
-        if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(error, DatabaseError.ALREADY_EXISTS));
-        if (error || !this.lastID) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
+        if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
+        if (error || !this.lastID) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         callback(null);
     });
@@ -70,8 +70,8 @@ function del(id, callback) {
     assert(typeof callback === 'function');
 
     database.run('DELETE FROM clients WHERE id = ?', [ id ], function (error) {
-        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
-        if (this.changes !== 1) return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        if (this.changes !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         callback(null);
     });

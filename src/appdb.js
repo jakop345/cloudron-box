@@ -42,9 +42,9 @@ function get(id, callback) {
     assert(typeof callback === 'function');
 
     database.get('SELECT * FROM apps WHERE id = ?', [ id ], function (error, result) {
-        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
-        if (typeof result === 'undefined') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
+        if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         result.manifest = safe.JSON.parse(result.manifestJson);
         delete result.manifestJson;
@@ -58,9 +58,9 @@ function getBySubdomain(subdomain, callback) {
     assert(typeof callback === 'function');
 
     database.get('SELECT * FROM apps WHERE location = ?', [ subdomain ], function (error, result) {
-        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
-        if (typeof result === 'undefined') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
+        if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         result.manifest = safe.JSON.parse(result.manifestJson);
         delete result.manifestJson;
@@ -71,7 +71,7 @@ function getBySubdomain(subdomain, callback) {
 
 function getAll(callback) {
     database.all('SELECT * FROM apps', function (error, results) {
-        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         if (typeof results === 'undefined') results = [ ];
 
@@ -105,9 +105,9 @@ function add(id, installationState, location, portBindings, callback) {
            appData, function (error) {
         if (error) database.rollback(conn);
 
-        if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(error, DatabaseError.ALREADY_EXISTS));
+        if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
 
-        if (error || !this.lastID) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
+        if (error || !this.lastID) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         async.eachSeries(portBindings, function iterator(binding, callback) {
             var portData = {
@@ -120,9 +120,9 @@ function add(id, installationState, location, portBindings, callback) {
         }, function done(error) {
             if (error) database.rollback(conn);
 
-            if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(error, DatabaseError.ALREADY_EXISTS));
+            if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
 
-            if (error /* || !this.lastID*/) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
+            if (error /* || !this.lastID*/) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
             database.commit(conn, callback); // FIXME: can this fail?
         });
@@ -131,7 +131,7 @@ function add(id, installationState, location, portBindings, callback) {
 
 function getPortBindings(id, callback) {
     database.all('SELECT * FROM appPortBindings WHERE appId = ?', [ id ], function (error, result) {
-        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         if (typeof result === 'undefined') result = [ ];
 
@@ -148,8 +148,8 @@ function del(id, callback) {
         conn.run('DELETE FROM apps WHERE id = ?', [ id ], function (error) {
             if (error || this.changes !== 1) database.rollback(conn);
 
-            if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
-            if (this.changes !== 1) return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
+            if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+            if (this.changes !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
             database.commit(conn, callback); // FIXME: can this fail?
         });
@@ -176,8 +176,8 @@ function update(id, app, callback) {
     values.push(id);
 
     database.run('UPDATE apps SET ' + args.join(', ') + ' WHERE id = ?', values, function (error) {
-        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
-        if (this.changes !== 1) return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        if (this.changes !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         callback(null);
     });
