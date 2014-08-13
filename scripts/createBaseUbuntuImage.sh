@@ -114,10 +114,10 @@ echo "Droplet IP : $DROPLET_IP";
 echo "Waiting 120 seconds for droplet creation"
 sleep 120
 
-chmod o-rw,g-rw,u-w ssh/*
+chmod o-rw,g-rw,u-w $SCRIPT_DIR/ssh/*
 while true; do
     echo "Trying to copy init script to droplet"
-    scp -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ssh/id_rsa_yellowtent ./initializeBaseUbuntuImage.sh root@$DROPLET_IP:.
+    scp -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i $SCRIPT_DIR/ssh/id_rsa_yellowtent ./initializeBaseUbuntuImage.sh root@$DROPLET_IP:.
     if [ $? -eq 0 ]; then
         break
     fi
@@ -126,14 +126,14 @@ while true; do
 done
 
 echo "Executing init script"
-ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ssh/id_rsa_yellowtent root@$DROPLET_IP "/bin/bash /root/initializeBaseUbuntuImage.sh"
+ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i $SCRIPT_DIR/ssh/id_rsa_yellowtent root@$DROPLET_IP "/bin/bash /root/initializeBaseUbuntuImage.sh"
 if [ $? -ne 0 ]; then
     echo "Init script failed"
     exit 1
 fi
 
 echo "Shutting down droplet with id : $DROPLET_ID"
-ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ssh/id_rsa_yellowtent root@$DROPLET_IP "shutdown -f now"
+ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i $SCRIPT_DIR/ssh/id_rsa_yellowtent root@$DROPLET_IP "shutdown -f now"
 
 # wait 10 secs for actual shutdown
 echo "Waiting for 10 seconds for droplet to shutdown"
