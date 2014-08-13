@@ -7,34 +7,37 @@ API_KEY="ee47d2d5b2f2a4281508e3a962c488fc"
 JSON="$SCRIPT_DIR/../node_modules/.bin/json"
 CURL="curl -s"
 UBUNTU_IMAGE_SLUG="ubuntu-14-04-x64" # ID=5141286
-REGION_SLUG="sfo1"
-SIZE_SLUG="1gb"
 DATE=`date +%Y-%m-%d-%H%M%S`
-SNAPSHOT_NAME="yellowtent-base-image-$DATE"
+SNAPSHOT_NAME="box-base-image-$DATE"
 
-function yellowtent_ssh_key() {
-    # 124654 for yellowtent key
+function get_ssh_key_id() {
     $CURL "https://api.digitalocean.com/v1/ssh_keys/?client_id=$CLIENT_ID&api_key=$API_KEY" \
         | $JSON ssh_keys \
-        | $JSON -c "this.name === \"yellowtent\"" \
+        | $JSON -c "this.name === \"$1\"" \
         | $JSON 0.id
 }
 
 function create_droplet() {
+    local REGION_SLUG="sfo1"
+    local SIZE_SLUG="1gb"
+    local SSH_KEY_ID="$1"
+
     $CURL "https://api.digitalocean.com/v1/droplets/new?client_id=$CLIENT_ID&api_key=$API_KEY&name=base&size_slug=$SIZE_SLUG&image_slug=$UBUNTU_IMAGE_SLUG&region_slug=$REGION_SLUG&ssh_key_ids=$SSH_KEY_ID" | $JSON droplet.id
 }
 
 function get_droplet_ip() {
+    local DROPLET_ID="$1"
     $CURL "https://api.digitalocean.com/v1/droplets/$DROPLET_ID?client_id=$CLIENT_ID&api_key=$API_KEY" | $JSON droplet.ip_address
 }
 
 function power_off_droplet() {
-    EVENT_ID=`$CURL "https://api.digitalocean.com/v1/droplets/$DROPLET_ID/power_off/?client_id=$CLIENT_ID&api_key=$API_KEY" | $JSON event_id`
+    local DROPLET_ID="$1"
+    local EVENT_ID=`$CURL "https://api.digitalocean.com/v1/droplets/$DROPLET_ID/power_off/?client_id=$CLIENT_ID&api_key=$API_KEY" | $JSON event_id`
 
     echo "Powered off droplet. Event id: $EVENT_ID"
 
     while true; do
-        EVENT_STATUS=`$CURL "https://api.digitalocean.com/v1/events/$EVENT_ID/?client_id=$CLIENT_ID&api_key=$API_KEY" | $JSON event.action_status`
+        local EVENT_STATUS=`$CURL "https://api.digitalocean.com/v1/events/$EVENT_ID/?client_id=$CLIENT_ID&api_key=$API_KEY" | $JSON event.action_status`
         if [ "$EVENT_STATUS" == "done" ]; then
             break
         fi
@@ -44,12 +47,14 @@ function power_off_droplet() {
 }
 
 function snapshot_droplet() {
-    EVENT_ID=`$CURL "https://api.digitalocean.com/v1/droplets/$DROPLET_ID/snapshot/?name=$SNAPSHOT_NAME&client_id=$CLIENT_ID&api_key=$API_KEY" | $JSON event_id`
+    local DROPLET_ID="$1"
+    local SNAPSHOT_NAME="$2"
+    local EVENT_ID=`$CURL "https://api.digitalocean.com/v1/droplets/$DROPLET_ID/snapshot/?name=$SNAPSHOT_NAME&client_id=$CLIENT_ID&api_key=$API_KEY" | $JSON event_id`
 
     echo "Droplet snapshotted as $SNAPSHOT_NAME. Event id: $EVENT_ID"
 
     while true; do
-        EVENT_STATUS=`$CURL "https://api.digitalocean.com/v1/events/$EVENT_ID/?client_id=$CLIENT_ID&api_key=$API_KEY" | $JSON event.action_status`
+        local EVENT_STATUS=`$CURL "https://api.digitalocean.com/v1/events/$EVENT_ID/?client_id=$CLIENT_ID&api_key=$API_KEY" | $JSON event.action_status`
         if [ "$EVENT_STATUS" == "done" ]; then
             break
         fi
@@ -59,11 +64,12 @@ function snapshot_droplet() {
 }
 
 function destroy_droplet() {
-    EVENT_ID=`$CURL "https://api.digitalocean.com/v1/droplets/$DROPLET_ID/destroy/?client_id=$CLIENT_ID&api_key=$API_KEY" | $JSON event_id`
+    local DROPLET_ID="$1"
+    local EVENT_ID=`$CURL "https://api.digitalocean.com/v1/droplets/$DROPLET_ID/destroy/?client_id=$CLIENT_ID&api_key=$API_KEY" | $JSON event_id`
     echo "Droplet destroyed. Event id: $EVENT_ID"
 
     while true; do
-        EVENT_STATUS=`$CURL "https://api.digitalocean.com/v1/events/$EVENT_ID/?client_id=$CLIENT_ID&api_key=$API_KEY" | $JSON event.action_status`
+        local EVENT_STATUS=`$CURL "https://api.digitalocean.com/v1/events/$EVENT_ID/?client_id=$CLIENT_ID&api_key=$API_KEY" | $JSON event.action_status`
         if [ "$EVENT_STATUS" == "done" ]; then
             break
         fi
@@ -73,22 +79,23 @@ function destroy_droplet() {
 }
 
 function get_image_id() {
+    local SNAPSHOT_NAME="$1"
     $CURL "https://api.digitalocean.com/v1/images/?client_id=$CLIENT_ID&api_key=$API_KEY&filter=my_images" \
         | $JSON images \
-        | $JSON -c 'this.name === "$SNAPSHOT_NAME"' 0.id
+        | $JSON -c "this.name === \"$SNAPSHOT_NAME\"" 0.id
 }
 
 # SCRIPT BEGIN
 
-SSH_KEY_ID=$(yellowtent_ssh_key)
-if [ -z "$SSH_KEY_ID" ]; then
+YELLOWTENT_SSH_KEY_ID=$(get_ssh_key_id "yellowtent")
+if [ -z "$YELLOWTENT_SSH_KEY_ID" ]; then
     echo "Could not query yellowtent ssh key"
     exit 1
 fi
-echo "Detected yellowtent ssh key id: $SSH_KEY_ID"
+echo "Detected yellowtent ssh key id: $YELLOWTENT_SSH_KEY_ID" # 124654 for yellowtent key
 
 echo "Creating Droplet"
-DROPLET_ID=$(create_droplet)
+DROPLET_ID=$(create_droplet $YELLOWTENT_SSH_KEY_ID)
 if [ -z "$DROPLET_ID" ]; then
     echo "Failed to create droplet"
     exit 1
@@ -133,14 +140,14 @@ echo "Waiting for 10 seconds for droplet to shutdown"
 sleep 10
 
 echo "Powering off droplet"
-power_off_droplet $DROPLET_ID
+(power_off_droplet $DROPLET_ID)
 
-echo "Snapshotting"
-snapshot_droplet $DROPLET_ID
+echo "Snapshotting as $SNAPSHOT_NAME"
+(snapshot_droplet $DROPLET_ID $SNAPSHOT_NAME)
 
 echo "Destroying droplet"
-destroy_droplet $DROPLET_ID
+(destroy_droplet $DROPLET_ID)
 
-IMAGE_ID=$(get_image_id)
+IMAGE_ID=$(get_image_id $SNAPSHOT_NAME)
 echo "Image id is $IMAGE_ID"
 
