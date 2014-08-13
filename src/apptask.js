@@ -275,7 +275,7 @@ function downloadManifest(app, callback) {
     debug('Downloading manifest for :', app.id);
 
     superagent
-        .get(config.appServerUrl + '/api/v1/app/' + app.id + '/manifest')
+        .get(config.appServerUrl + '/api/v1/appstore/apps/' + app.id + '/manifest')
         .set('Accept', 'application/json')
         .end(function (error, res) {
             if (error) return callback(error);

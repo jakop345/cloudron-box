@@ -105,7 +105,7 @@ describe('apptask', function () {
     });
 
     it('downloads manifest', function (done) {
-        var scope = nock(config.appServerUrl).get('/api/v1/app/' + APP.id + '/manifest').reply(200, 'manifest_json_string');
+        var scope = nock(config.appServerUrl).get('/api/v1/appstore/apps/' + APP.id + '/manifest').reply(200, 'manifest_json_string');
 
         apptask._downloadManifest(APP, function (error) {
             expect(error).to.be(null);

@@ -221,7 +221,7 @@ describe('App installation', function () {
                 hockServer = server;
 
                 hockServer
-                    .get('/api/v1/app/' + APP_ID + '/manifest')
+                    .get('/api/v1/appstore/apps/' + APP_ID + '/manifest')
                     .reply(200, manifest, { 'Content-Type': 'application/json' })
                     .post('/api/v1/subdomains?token=' + config.token, { subdomain: APP_LOCATION })
                     .reply(201, { }, { 'Content-Type': 'application/json' })
@@ -380,7 +380,7 @@ describe('App installation - port bindings', function () {
                 hockServer = server;
 
                 hockServer
-                    .get('/api/v1/app/' + APP_ID + '/manifest')
+                    .get('/api/v1/appstore/apps/' + APP_ID + '/manifest')
                     .reply(200, manifest, { 'Content-Type': 'application/json' })
                     .post('/api/v1/subdomains?token=' + config.token, { subdomain: APP_LOCATION })
                     .reply(201, { }, { 'Content-Type': 'application/json' })

@@ -114,7 +114,7 @@ function getAll(callback) {
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
         apps.forEach(function (app) {
-            app.iconUrl = config.appServerUrl + '/api/v1/app/' + app.id + '/icon';
+            app.iconUrl = config.appServerUrl + '/api/v1/appstore/apps/' + app.id + '/icon';
             app.fqdn = appFqdn(app.location);
         });
 

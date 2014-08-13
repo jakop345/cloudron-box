@@ -24,13 +24,13 @@ angular.module('YellowTent').service('AppStore', function ($http, Client) {
 
         var that = this;
 
-        $http.get(Client.getConfig().appServerUrl + '/api/v1/apps').success(function (data, status) {
+        $http.get(Client.getConfig().appServerUrl + '/api/v1/appstore/apps').success(function (data, status) {
             if (status !== 200) return callback(new AppStoreError(status, data));
 
             data.apps.forEach(function (app) {
                 if (that._appsCache[app.id]) return;
 
-                app.iconUrl = Client.getConfig().appServerUrl + '/api/v1/app/' + app.id + '/icon';
+                app.iconUrl = Client.getConfig().appServerUrl + '/api/v1/appstore/apps/' + app.id + '/icon';
                 that._appsCache[app.id] = app;
             });
 
@@ -53,7 +53,7 @@ angular.module('YellowTent').service('AppStore', function ($http, Client) {
     AppStore.prototype.getManifest = function (appId, callback) {
         if (Client.getConfig().appServerUrl === null) return callback(new AppStoreError(500, 'Not yet initialized'));
 
-        var manifestUrl = Client.getConfig().appServerUrl + '/api/v1/app/' + appId + '/manifest';
+        var manifestUrl = Client.getConfig().appServerUrl + '/api/v1/appstore/apps/' + appId + '/manifest';
         console.log('Getting the manifest of ', appId, manifestUrl);
         $http.get(manifestUrl).success(function (data, status) {
             return callback(null, data);
