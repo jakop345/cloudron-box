@@ -343,7 +343,7 @@ angular.module('YellowTent').service('Client', function ($http) {
             }
 
             apps.forEach(function (app, i) {
-                app.iconUrl = that._config.appServerUrl + '/api/v1/app/' + app.id + '/icon';
+                app.iconUrl = that._config.appServerUrl + '/api/v1/appstore/apps/' + app.id + '/icon';
                 if (that._installedApps.some(function (elem) { return elem.id === app.id; })) {
                     angular.copy(app, that._installedApps[i]);
                     return;
