@@ -1,5 +1,7 @@
 'use strict';
 
+/* global $:true */
+
 var SettingsController = function ($scope, Client) {
     $scope.user = Client.getUserInfo();
     $scope.config = Client.getConfig();
@@ -17,6 +19,14 @@ var SettingsController = function ($scope, Client) {
 
     $scope.changePassword = function () {
         window.location.href = '#/userpassword';
+    };
+
+    $scope.update = function () {
+        $('#updateModal').modal('hide');
+
+        Client.update(function (error) {
+            if (error) console.error(error);
+        });
     };
 
     Client.getApps(function (error, apps) {

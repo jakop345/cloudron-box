@@ -17,6 +17,7 @@ var express = require('express'),
     child_process = require('child_process'),
     pkg = require('./../package.json'),
     fs = require('fs'),
+    exec = require('child_process').exec,
     df = require('nodejs-disks'),
     apps = require('./apps'),
     middleware = require('./middleware'),
@@ -120,6 +121,34 @@ Server.prototype._getCloudronStats = function (req, res, next) {
             if (error) return next(new HttpError(500, error));
 
             next(new HttpSuccess(200, { drives: data }));
+        });
+    });
+};
+
+// TODO this is only for convenience so far, will be replaced by an update framework
+Server.prototype._update = function (req, res) {
+    var options = {
+        cwd: path.join(__dirname, '..')
+    };
+
+    debug('_update');
+
+    exec('git fetch', options, function (error, stdout, stderr) {
+        if (error) return res.send(500, error);
+
+        debug('_update: git fetch', stdout, stderr);
+
+        exec('git reset --hard origin/basicupdate', options, function (error, stdout, stderr) {
+            if (error) return res.send(500, error);
+
+            debug('_update: git reset', stdout, stderr);
+
+            res.send(200, {});
+
+            exec('supervisorctl restart box', options, function (error, stdout, stderr) {
+                if (error) return console.error(error);
+                debug('_update: success.', stdout, stderr);
+            });
         });
     });
 };
@@ -241,6 +270,9 @@ Server.prototype._initializeExpressSync = function () {
 
     // config.json
     router.get('/api/v1/config', bearer, this._getConfig.bind(this));
+
+    // basic repo update
+    router.get('/api/v1/update', bearer, this._update.bind(this));
 
     // routes controlled by app.router
     router.post('/api/v1/token', both, routes.user.createToken);        // TODO remove that route

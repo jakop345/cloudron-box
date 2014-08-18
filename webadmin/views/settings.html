@@ -29,6 +29,28 @@
                     <li class="list-group-item">Appstore <span class="pull-right">{{config.appServerUrl}}</span></li>
                     <li class="list-group-item">Version <span class="pull-right">{{config.version}}</span></li>
                 </ul>
+                <button class="btn btn-outline btn-success pull-right" data-toggle="modal" data-target="#updateModal">Update</button>
+
+                <!-- Modal -->
+                <div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title" id="updateModalLabel">Really update the box software?</h4>
+                            </div>
+                            <div class="modal-body">
+                                !!TODO_TEXT This is potentially risky
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-danger" ng-click="update()">Update</button>
+                            </div>
+                        </div>
+                        <!-- /.modal-content -->
+                    </div>
+                    <!-- /.modal-dialog -->
+                </div>
             </div>
         </div>
     </div>
