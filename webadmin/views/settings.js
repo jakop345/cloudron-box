@@ -23,7 +23,7 @@ var SettingsController = function ($scope, Client) {
 
     $scope.update = function () {
         $('#updateModal').modal('hide');
-        $('#updateProgessModal').modal('show');
+        $('#updateProgressModal').modal('show');
 
         Client.update(function (error) {
             if (error) console.error(error);
@@ -32,11 +32,11 @@ var SettingsController = function ($scope, Client) {
             function checkIfDone() {
                 Client.version(function (error) {
                     if (error) return window.setTimeout(checkIfDone, 1000);
-                    $('#updateProgessModal').modal('hide');
+                    $('#updateProgressModal').modal('hide');
                 });
             }
 
-            window.setTimeout(checkIfDone, 2000);
+            window.setTimeout(checkIfDone, 5000);
         });
     };
 
