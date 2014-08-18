@@ -109,6 +109,7 @@ Server.prototype._getConfig = function (req, res) {
     res.send(200, {
         appServerUrl: config.appServerUrl,
         fqdn: config.fqdn,
+        ip: '127.0.0.1',
         version: pkg.version
     });
 };

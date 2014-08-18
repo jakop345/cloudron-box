@@ -27,7 +27,8 @@ angular.module('YellowTent').service('Client', function ($http) {
         this._clientSecret = 'unused';
         this._config = {
             appServerUrl: null,
-            fqdn: null
+            fqdn: null,
+            ip: null
         };
         this._installedApps = [];
 
@@ -51,6 +52,7 @@ angular.module('YellowTent').service('Client', function ($http) {
         this._config.appServerUrl = config.appServerUrl;
         this._config.version = config.version;
         this._config.fqdn = config.fqdn;
+        this._config.ip = config.ip;
 
         var that = this;
 
