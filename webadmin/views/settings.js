@@ -23,9 +23,20 @@ var SettingsController = function ($scope, Client) {
 
     $scope.update = function () {
         $('#updateModal').modal('hide');
+        $('#updateProgessModal').modal('show');
 
         Client.update(function (error) {
             if (error) console.error(error);
+
+            // now start query
+            function checkIfDone() {
+                Client.version(function (error) {
+                    if (error) return window.setTimeout(checkIfDone, 1000);
+                    $('#updateProgessModal').modal('hide');
+                });
+            }
+
+            window.setTimeout(checkIfDone, 2000);
         });
     };
 

@@ -138,7 +138,7 @@ Server.prototype._update = function (req, res) {
 
         debug('_update: git fetch', stdout, stderr);
 
-        exec('git reset --hard origin/basicupdate', options, function (error, stdout, stderr) {
+        exec('git reset --hard origin/master', options, function (error, stdout, stderr) {
             if (error) return res.send(500, error);
 
             debug('_update: git reset', stdout, stderr);
