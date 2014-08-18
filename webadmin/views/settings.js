@@ -32,7 +32,10 @@ var SettingsController = function ($scope, Client) {
             function checkIfDone() {
                 Client.version(function (error) {
                     if (error) return window.setTimeout(checkIfDone, 1000);
+
                     $('#updateProgressModal').modal('hide');
+
+                    window.setTimeout(window.location.reload.bind(window.location), 1000);
                 });
             }
 
