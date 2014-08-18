@@ -126,7 +126,7 @@ Server.prototype._getCloudronStats = function (req, res, next) {
 };
 
 // TODO this is only for convenience so far, will be replaced by an update framework
-Server.prototype._update = function (req, res) {
+Server.prototype._update = function (req, res, next) {
     var options = {
         cwd: path.join(__dirname, '..')
     };
@@ -134,12 +134,12 @@ Server.prototype._update = function (req, res) {
     debug('_update');
 
     exec('git fetch', options, function (error, stdout, stderr) {
-        if (error) return res.send(500, error);
+        if (error) return next(new HttpError(500, error));
 
         debug('_update: git fetch', stdout, stderr);
 
         exec('git reset --hard origin/master', options, function (error, stdout, stderr) {
-            if (error) return res.send(500, error);
+            if (error) return next(new HttpError(500, error));
 
             debug('_update: git reset', stdout, stderr);
 
