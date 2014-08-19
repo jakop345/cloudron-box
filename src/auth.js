@@ -92,7 +92,7 @@ passport.use(new BasicStrategy(function (username, password, callback) {
 passport.use(new ClientPasswordStrategy(function (clientId, clientSecret, callback) {
     debug('ClientPasswordStrategy: ' + clientId + ' ' + clientSecret);
 
-    clientdb.get(clientId, function(error, client) {
+    clientdb.getByClientId(clientId, function(error, client) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
         if (error) { return callback(error); }
         if (client.clientSecret != clientSecret) { return callback(null, false); }

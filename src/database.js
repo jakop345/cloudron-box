@@ -68,8 +68,8 @@ function create(callback) {
 
         // add webadmin as an OAuth client
         var clientdb = require('./clientdb.js');
-        clientdb.del('cid-webadmin', function () {
-            clientdb.add('cid-webadmin', 'cid-webadmin', 'unused', 'WebAdmin', config.adminOrigin, function (error) {
+        clientdb.del('webadmin', function () {
+            clientdb.add('webadmin', 'cid-webadmin', 'unused', 'WebAdmin', config.adminOrigin, function (error) {
                 if (error && error.reason !== DatabaseError.ALREADY_EXISTS) return callback(new Error('Error initializing client database with webadmin'));
                 return callback(null);
             });
