@@ -13,13 +13,15 @@ var Server = require('../../server.js'),
     rimraf = require('rimraf'),
     os = require('os'),
     userdb = require('../../userdb.js'),
+    clientdb = require('../../clientdb.js'),
     async = require('async'),
     hock = require('hock'),
     appdb = require('../../appdb.js'),
     url = require('url'),
     Docker = require('dockerode'),
     net = require('net'),
-    config = require('../../../config.js');
+    config = require('../../../config.js'),
+    appFqdn = require('../../apps').appFqdn;
 
 var SERVER_URL = 'http://localhost:' + config.port;
 
@@ -269,7 +271,16 @@ describe('App installation', function () {
         docker.getContainer(appInfo.containerId).inspect(function (error, data) {
             expect(error).to.not.be.ok();
             expect(data.Config.ExposedPorts['7777/tcp']).to.eql({ });
-            done();
+            expect(data.Config.Env).to.contain('APP_ORIGIN=https://' + appFqdn(appInfo.location));
+            expect(data.Config.Env).to.contain('ADMIN_ORIGIN=' + config.adminOrigin);
+            clientdb.get(appInfo.id, function (error, client) {
+                expect(error).to.not.be.ok();
+                expect(client.clientId.length).to.be(40); // cid- + 32 hex chars (128 bits) + 4 hyphens
+                expect(client.clientSecret.length).to.be(36); // 32 hex chars (128 bits) + 4 hyphens
+                expect(data.Config.Env).to.contain('OAUTH_CLIENT_ID=' + client.clientId);
+                expect(data.Config.Env).to.contain('OAUTH_CLIENT_SECRET=' + client.clientSecret);
+                done();
+            });
         });
     });
 

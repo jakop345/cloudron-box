@@ -181,22 +181,33 @@ function createContainer(app, portConfigs, callback) {
         });
     }
 
-    var containerOptions = {
-        Hostname: appFqdn(app.location),
-        Tty: true,
-        Image: manifest.docker_image,
-        Cmd: null,
-        Volumes: { },
-        VolumesFrom: '',
-        Env: env
-    };
+    env.push('APP_ORIGIN' + '=' + 'https://' + appFqdn(app.location));
+    env.push('ADMIN_ORIGIN' + '=' + config.adminOrigin);
 
-    debug('Creating container for ' + manifest.docker_image);
+    // add oauth variables
+    clientdb.get(app.id, function (error, client) {
+        if (error) return callback(new Error('Error getting oauth info:', + error));
 
-    docker.createContainer(containerOptions, function (error, container) {
-        if (error) return callback(new Error('Error creating container:' + error));
+        env.push('OAUTH_CLIENT_ID' + '=' + client.clientId);
+        env.push('OAUTH_CLIENT_SECRET' + '=' + client.clientSecret);
 
-        return callback(null, container.id);
+        var containerOptions = {
+            Hostname: appFqdn(app.location),
+            Tty: true,
+            Image: manifest.docker_image,
+            Cmd: null,
+            Volumes: { },
+            VolumesFrom: '',
+            Env: env
+        };
+
+        debug('Creating container for ' + manifest.docker_image);
+
+        docker.createContainer(containerOptions, function (error, container) {
+            if (error) return callback(new Error('Error creating container:' + error));
+
+            return callback(null, container.id);
+        });
     });
 }
 
@@ -253,11 +264,11 @@ function allocateOAuthCredentials(app, callback) {
     var clientId = 'cid-' + uuid.v4();
     var clientSecret = uuid.v4();
     var name = app.manifest.name;
-    var appOrigin = 'https://' + appFqdn(app.location);
+    var redirectURI = 'https://' + appFqdn(app.location);
 
     debug('allocateOAuthCredentials:', id, clientId, clientSecret, name);
 
-    clientdb.add(id, clientId, clientSecret, name, appOrigin, callback);
+    clientdb.add(id, clientId, clientSecret, name, redirectURI, callback);
 }
 
 function removeOAuthCredentials(app, callback) {
@@ -427,6 +438,19 @@ function install(app, callback) {
             });
         },
 
+        // allocate OAuth credentials
+        function (callback) {
+            updateApp(app, { installationState: appdb.ISTATE_ALLOCATE_OAUTH_CREDENTIALS }, function (error) {
+                if (error) return callback(error);
+
+                allocateOAuthCredentials(app, function (error) {
+                    if (error) return callback(error);
+
+                    callback(null);
+                });
+            });
+        },
+
         // create container
         function (callback) {
             appdb.getPortBindings(app.id, function (error, portBindings) {
@@ -450,19 +474,6 @@ function install(app, callback) {
                 if (error) return callback(error);
 
                 createVolume(app, function (error) {
-                    if (error) return callback(error);
-
-                    callback(null);
-                });
-            });
-        },
-
-        // allocate OAuth credentials
-        function (callback) {
-            updateApp(app, { installationState: appdb.ISTATE_ALLOCATE_OAUTH_CREDENTIALS }, function (error) {
-                if (error) return callback(error);
-
-                allocateOAuthCredentials(app, function (error) {
                     if (error) return callback(error);
 
                     callback(null);
