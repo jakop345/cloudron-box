@@ -1,9 +1,10 @@
-'use strict';
-
+/* jslint node:true */
 /* global it:false */
 /* global describe:false */
 /* global before:false */
 /* global after:false */
+
+'use strict';
 
 var Repo = require('../repo'),
     crypto = require('crypto'),

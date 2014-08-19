@@ -7,14 +7,9 @@
 'use strict';
 
 var database = require('../database'),
-    path = require('path'),
-    os = require('os'),
     rimraf = require('rimraf'),
-    crypto = require('crypto'),
     DatabaseError = require('../databaseerror.js'),
-    userdb = require('../userdb.js'),
     tokendb = require('../tokendb.js'),
-    clientdb = require('../clientdb.js'),
     authcodedb = require('../authcodedb.js'),
     appdb = require('../appdb.js'),
     expect = require('expect.js'),

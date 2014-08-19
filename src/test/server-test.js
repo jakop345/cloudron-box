@@ -1,16 +1,14 @@
-'use strict';
-
+/* jslint node:true */
 /* global it:false */
 /* global describe:false */
 /* global before:false */
 /* global after:false */
 
+'use strict';
+
 var Server = require('../server.js'),
     request = require('superagent'),
-    path = require('path'),
-    crypto = require('crypto'),
     rimraf = require('rimraf'),
-    os = require('os'),
     expect = require('expect.js'),
     nock = require('nock'),
     config = require('../../config.js');

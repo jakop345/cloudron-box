@@ -12,12 +12,9 @@ var apptask = require('../apptask.js'),
     config = require('../../config.js'),
     database = require('../database.js'),
     DatabaseError = require('../databaseerror.js'),
-    uuid = require('node-uuid'),
     mkdirp = require('mkdirp'),
     rimraf = require('rimraf'),
     fs = require('fs'),
-    path = require('path'),
-    os = require('os'),
     nock = require('nock');
 
 var APP = {

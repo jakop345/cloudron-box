@@ -1,19 +1,15 @@
-'use strict';
-
+/* jslint node:true */
 /* global it:false */
 /* global describe:false */
 /* global before:false */
 /* global after:false */
 
+'use strict';
+
 var user = require('../user.js'),
     UserError = user.UserError,
-    os = require('os'),
-    path = require('path'),
     mkdirp = require('mkdirp'),
-    crypto = require('crypto'),
     rimraf = require('rimraf'),
-    userdb = require('../userdb.js'),
-    tokendb = require('../tokendb.js'),
     expect = require('expect.js'),
     database = require('../database.js'),
     config = require('../../config.js');

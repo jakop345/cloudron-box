@@ -1,8 +1,6 @@
 /* jslint node:true */
 /* global it:false */
 /* global describe:false */
-/* global before:false */
-/* global after:false */
 
 'use strict';
 
@@ -41,7 +39,7 @@ describe('config', function () {
     });
 
     it('throws with bad key', function (done) {
-        safe(function () { config.set('random', 'value') });
+        safe(function () { config.set('random', 'value'); });
         expect(safe.error).to.be.ok();
         safe(function () { config.set({ random: 'value' }); });
         expect(safe.error).to.be.ok();

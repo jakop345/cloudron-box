@@ -1,15 +1,11 @@
-'use strict';
-
+/* jslint node:true */
 /* global it:false */
 /* global describe:false */
 
+'use strict';
+
 var syncer = require('../syncer'),
-    crypto = require('crypto'),
-    fs = require('fs'),
-    path = require('path'),
-    assert = require('assert'),
-    expect = require('expect.js'),
-    os = require('os');
+    expect = require('expect.js');
 
 describe('Diff', function () {
     var leftTree, baseTree, rightTree;
