@@ -1,18 +1,16 @@
-'use strict';
-
+/* jslint node:true */
 /* global it:false */
 /* global describe:false */
 /* global before:false */
 /* global after:false */
 
+'use strict';
+
 var Server = require('../../server.js'),
     request = require('superagent'),
     expect = require('expect.js'),
     userdb = require('../../userdb.js'),
-    crypto = require('crypto'),
     rimraf = require('rimraf'),
-    path = require('path'),
-    os = require('os'),
     fs = require('fs'),
     appdb = require('../../appdb.js'),
     config = require('../../../config.js'),
@@ -23,7 +21,6 @@ var Server = require('../../server.js'),
 var SERVER_URL = 'http://localhost:' + config.port;
 
 var USERNAME = 'admin', PASSWORD = 'admin', EMAIL ='silly@me.com';
-var TESTVOLUME = 'testvolume';
 var token = null;
 
 var server;
@@ -71,8 +68,6 @@ function cleanup(done) {
 }
 
 describe('Settings API', function () {
-    var volume;
-
     this.timeout(10000);
 
     before(setup);
@@ -141,7 +136,7 @@ describe('Settings API', function () {
                .end(function (err, res) {
             reloadNginxStub.restore();
             expect(res.statusCode).to.equal(200);
-            expect(fs.readFileSync(config.nginxConfigDir + '/naked_domain.conf').length == 0).to.be.ok();
+            expect(fs.readFileSync(config.nginxConfigDir + '/naked_domain.conf').length === 0).to.be.ok();
             expect(reloadNginxStub.callCount).to.be(1);
             done();
         });

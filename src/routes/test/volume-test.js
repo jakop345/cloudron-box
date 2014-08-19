@@ -1,18 +1,17 @@
-'use strict';
-
+/* jslint node:true */
 /* global it:false */
 /* global describe:false */
 /* global before:false */
 /* global after:false */
 
+'use strict';
+
 var Server = require('../../server.js'),
     request = require('superagent'),
     expect = require('expect.js'),
     userdb = require('../../userdb.js'),
-    crypto = require('crypto'),
     rimraf = require('rimraf'),
     path = require('path'),
-    os = require('os'),
     config = require('../../../config.js'),
     async = require('async'),
     fs = require('fs');
@@ -34,7 +33,11 @@ function setup(done) {
         function (callback) {
             request.post(SERVER_URL + '/api/v1/createadmin')
                  .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
-                 .end(function (error, result) { callback(); });
+                 .end(function (error, result) {
+                    expect(error).to.be(null);
+                    expect(result).to.be.ok();
+                    callback();
+                });
         },
 
         function (callback) {

@@ -1,26 +1,24 @@
-'use strict';
-
+/* jslint node:true */
 /* global it:false */
 /* global describe:false */
 /* global before:false */
 /* global after:false */
 
+'use strict';
+
 var Server = require('../../../src/server.js'),
     request = require('superagent'),
     expect = require('expect.js'),
     userdb = require('../../userdb.js'),
-    crypto = require('crypto'),
     rimraf = require('rimraf'),
-    path = require('path'),
-    config = require('../../../config.js'),
-    os = require('os');
+    config = require('../../../config.js');
 
 var SERVER_URL = 'http://localhost:' + config.port;
 
 var ADMIN = 'admin', PASSWORD = 'admin', EMAIL ='silly@me.com';
-var USERNAME_1 = 'userTheFirst', PASSWORD_1 = 'chocolatecookie', EMAIL_1 = 'tao@zen.mac', IS_ADMIN_1 = true;
-var USERNAME_2 = 'userTheSecond', PASSWORD_2 = 'userpassword', EMAIL_2 = 'user@foo.bar', IS_ADMIN_2 = false;
-var USERNAME_3 = 'userTheThird', PASSWORD_3 = 'userpassword333', EMAIL_3 = 'user3@foo.bar', IS_ADMIN_2 = false;
+var USERNAME_1 = 'userTheFirst', PASSWORD_1 = 'chocolatecookie', EMAIL_1 = 'tao@zen.mac';
+var USERNAME_2 = 'userTheSecond', PASSWORD_2 = 'userpassword', EMAIL_2 = 'user@foo.bar';
+var USERNAME_3 = 'userTheThird', PASSWORD_3 = 'userpassword333', EMAIL_3 = 'user3@foo.bar';
 
 var server;
 function setup(done) {
