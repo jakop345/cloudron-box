@@ -1,3 +1,5 @@
+/* jslint node:true */
+
 'use strict';
 
 var DatabaseError = require('./databaseerror'),
@@ -55,8 +57,7 @@ function add(id, clientId, clientSecret, name, redirectURI, callback) {
         $redirectURI: redirectURI
     };
 
-    database.run('INSERT INTO clients (id, clientId, clientSecret, name, redirectURI) '
-           + 'VALUES ($id, $clientId, $clientSecret, $name, $redirectURI)',
+    database.run('INSERT INTO clients (id, clientId, clientSecret, name, redirectURI) VALUES ($id, $clientId, $clientSecret, $name, $redirectURI)',
            data, function (error) {
         if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
         if (error || !this.lastID) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));

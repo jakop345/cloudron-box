@@ -10,6 +10,8 @@ var apptask = require('../apptask.js'),
     expect = require('expect.js'),
     net = require('net'),
     config = require('../../config.js'),
+    database = require('../database.js'),
+    DatabaseError = require('../databaseerror.js'),
     uuid = require('node-uuid'),
     mkdirp = require('mkdirp'),
     rimraf = require('rimraf'),
@@ -23,7 +25,9 @@ var APP = {
     installationState: 'some-status-0',
     runState: null,
     location: 'applocation',
-    manifest: null,
+    manifest: {
+        name: 'testapplication'
+    },
     containerId: null,
     httpPort: 4567
 };
@@ -32,7 +36,11 @@ before(function (done) {
     mkdirp.sync(config.appDataRoot);
     mkdirp.sync(config.configRoot);
     mkdirp.sync(config.nginxAppConfigDir);
-    done();
+
+    database.create(function (error) {
+        expect(error).to.be(null);
+        done();
+    });
 });
 
 after(function (done) {
@@ -100,6 +108,36 @@ describe('apptask', function () {
         apptask._deleteVolume(APP, function (error) {
             expect(!fs.existsSync(config.appDataRoot + '/' + APP.id));
             expect(error).to.be(null);
+            done();
+        });
+    });
+
+    it('allocate OAuth credentials', function (done) {
+        apptask._allocateOAuthCredentials(APP, function (error) {
+            expect(error).to.be(null);
+            done();
+        });
+    });
+
+    it('allocate OAuth credentials twice fails', function (done) {
+        apptask._allocateOAuthCredentials(APP, function (error) {
+            expect(error).to.be.a(DatabaseError);
+            expect(error.reason).to.equal(DatabaseError.ALREADY_EXISTS);
+            done();
+        });
+    });
+
+    it('remove OAuth credentials', function (done) {
+        apptask._removeOAuthCredentials(APP, function (error) {
+            expect(error).to.be(null);
+            done();
+        });
+    });
+
+    it('remove OAuth credentials twice fails', function (done) {
+        apptask._removeOAuthCredentials(APP, function (error) {
+            expect(error).to.be.a(DatabaseError);
+            expect(error.reason).to.equal(DatabaseError.NOT_FOUND);
             done();
         });
     });

@@ -10,9 +10,11 @@ var assert = require('assert'),
     Docker = require('dockerode'),
     superagent = require('superagent'),
     async = require('async'),
+    uuid = require('node-uuid'),
     os = require('os'),
     safe = require('safetydance'),
     appdb = require('./appdb.js'),
+    clientdb = require('./clientdb.js'),
     debug = require('debug')('box:apptask'),
     fs = require('fs'),
     child_process = require('child_process'),
@@ -35,6 +37,8 @@ exports = module.exports = {
     _setNakedDomain: setNakedDomain,
     _createVolume: createVolume,
     _deleteVolume: deleteVolume,
+    _allocateOAuthCredentials: allocateOAuthCredentials,
+    _removeOAuthCredentials: removeOAuthCredentials,
     _downloadManifest: downloadManifest,
     _registerSubdomain: registerSubdomain,
     _unregisterSubdomain: unregisterSubdomain,
@@ -241,6 +245,30 @@ function deleteVolume(app, callback) {
     });
 }
 
+function allocateOAuthCredentials(app, callback) {
+    assert(typeof app === 'object');
+    assert(typeof callback === 'function');
+
+    var id = app.id;
+    var clientId = 'cid-' + uuid.v4();
+    var clientSecret = uuid.v4();
+    var name = app.manifest.name;
+    var appOrigin = 'https://' + appFqdn(app.location);
+
+    debug('allocateOAuthCredentials:', id, clientId, clientSecret, name);
+
+    clientdb.add(id, clientId, clientSecret, name, appOrigin, callback);
+}
+
+function removeOAuthCredentials(app, callback) {
+    assert(typeof app === 'object');
+    assert(typeof callback === 'function');
+
+    debug('removeOAuthCredentials:', app.id);
+
+    clientdb.del(app.id, callback);
+}
+
 function startContainer(app, portConfigs, callback) {
     var manifest = app.manifest;
     var appDataDir = path.join(config.appDataRoot, app.id);
@@ -429,6 +457,19 @@ function install(app, callback) {
             });
         },
 
+        // allocate OAuth credentials
+        function (callback) {
+            updateApp(app, { installationState: appdb.ISTATE_ALLOCATE_OAUTH_CREDENTIALS }, function (error) {
+                if (error) return callback(error);
+
+                allocateOAuthCredentials(app, function (error) {
+                    if (error) return callback(error);
+
+                    callback(null);
+                });
+            });
+        },
+
         // done!
         function (callback) {
             debug('App ' + app.id + ' installed');
@@ -463,6 +504,11 @@ function uninstall(app, callback) {
         // delete the image
         function (callback) {
             deleteImage(app, function (error) { callback(null); });
+        },
+
+        // remove OAuth credentials
+        function (callback) {
+            removeOAuthCredentials(app, function (error) { callback(null); });
         },
 
         // delete volume

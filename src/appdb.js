@@ -27,6 +27,7 @@ exports = module.exports = {
     ISTATE_DOWNLOADING_IMAGE: 'downloading_image',
     ISTATE_CREATING_CONTAINER: 'creating_container',
     ISTATE_CREATING_VOLUME: 'creating_volume',
+    ISTATE_ALLOCATE_OAUTH_CREDENTIALS: 'allocated_oauth_credentials',
     ISTATE_REGISTERING_SUBDOMAIN: 'registering_subdomain',
     ISTATE_SUBDOMAIN_ERROR: 'subdomain_error',
     ISTATE_INSTALLED: 'installed',

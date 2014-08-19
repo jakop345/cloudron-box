@@ -85,6 +85,7 @@ app.filter('installationStateLabel', function() {
         if (input === 'downloading_manifest') return 'Manifest';
         if (input === 'creating_volume') return 'Volume';
         if (input === 'registering_subdomain') return 'Subdomain';
+        if (input === 'allocated_oauth_credentials') return 'OAuth';
 
         return input;
     };
