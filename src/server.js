@@ -22,6 +22,7 @@ var express = require('express'),
     apps = require('./apps'),
     middleware = require('./middleware'),
     database = require('./database.js'),
+    clientdb = require('./clientdb.js'),
     userdb = require('./userdb'),
     config = require('../config.js'),
     _ = require('underscore');
@@ -169,19 +170,26 @@ Server.prototype._provision = function (req, res, next) {
 
     config.set(_.pick(req.body, 'token', 'appServerUrl', 'adminOrigin', 'fqdn'));
 
-    next(new HttpSuccess(201, {}));
+    // override the default webadmin OAuth client record
+    clientdb.del('webadmin', function () {
+        clientdb.add('webadmin', 'cid-webadmin', 'unused', 'WebAdmin', config.adminOrigin, function (error) {
+            if (error) return next(new HttpError(500, error));
 
-    // now try to get the real certificate
-    function getCertificateCallback(error) {
-        if (error) {
-            console.error(error);
-            return setTimeout(that._getCertificate.bind(that, getCertificateCallback), 5000);
-        }
+            next(new HttpSuccess(201, {}));
 
-        debug('_provision: success');
-    }
+            // now try to get the real certificate
+            function getCertificateCallback(error) {
+                if (error) {
+                    console.error(error);
+                    return setTimeout(that._getCertificate.bind(that, getCertificateCallback), 5000);
+                }
 
-    this._getCertificate(getCertificateCallback);
+                debug('_provision: success');
+            }
+
+            this._getCertificate(getCertificateCallback);
+        });
+    });
 };
 
 /*

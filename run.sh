@@ -5,12 +5,14 @@ echo "Starting YellowTent server at port 443..."
 echo
 
 SRCDIR="$(cd $(dirname "$0"); pwd)"
+NGINX_ROOT=~/.yellowtent/nginx
 
-# Fix the hostname for the admin application
-FQDN=`hostname -f`
-sed -e "s/##ADMIN_FQDN##/admin-$FQDN/" -e "s|##SRCDIR##|$SRCDIR|" nginx/admin.conf_template > nginx/applications/admin.conf
+mkdir -p $NGINX_ROOT
+
 touch nginx/naked_domain.conf
 
+cp -rf $SRCDIR/nginx/* $NGINX_ROOT/
+
 sudo mkdir -p /var/log/supervisor
-sudo NGINX_ROOT=$SRCDIR supervisord -n -c supervisor/supervisord.conf
+sudo NGINX_ROOT=$NGINX_ROOT supervisord -n -c supervisor/supervisord.conf
 

@@ -55,7 +55,7 @@ config.save = function () {
 
     config.nginxAppConfigDir = path.join(config.nginxConfigDir, 'applications');
 
-    config.fqdn = process.env.FQDN || os.hostname();
+    config.fqdn = 'localhost';
     config.adminOrigin = 'https://admin-' + config.fqdn;
 
     config.token = null;
