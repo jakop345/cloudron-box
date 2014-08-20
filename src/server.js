@@ -188,7 +188,7 @@ Server.prototype._provision = function (req, res, next) {
                 debug('_provision: success');
             }
 
-            this._getCertificate(getCertificateCallback);
+            that._getCertificate(getCertificateCallback);
         });
     });
 };
