@@ -23,7 +23,8 @@ var express = require('express'),
     middleware = require('./middleware'),
     database = require('./database.js'),
     userdb = require('./userdb'),
-    config = require('../config.js');
+    config = require('../config.js'),
+    _ = require('underscore');
 
 exports = module.exports = Server;
 
@@ -166,7 +167,7 @@ Server.prototype._provision = function (req, res, next) {
 
     if (config.token) return next(new HttpError(409, 'Already provisioned'));
 
-    config.set(req.body);
+    config.set(_.pick(req.body, 'token', 'appServerUrl', 'adminOrigin', 'fqdn'));
 
     next(new HttpSuccess(201, {}));
 
