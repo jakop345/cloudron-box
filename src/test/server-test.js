@@ -225,7 +225,7 @@ describe('Server', function () {
         it('sends announce request repeatedly until token is set', function (done) {
             setTimeout(function () {
                 expect(server._announceTimerId).to.be.ok();
-                expect(failingGet.counter).to.be.below(5); // counter is nock internal
+                expect(failingGet.counter).to.be.below(6); // counter is nock internal
 
                 config.set('token', 'provision');
 
