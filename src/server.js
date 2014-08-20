@@ -440,9 +440,7 @@ Server.prototype._announce = function () {
         return; // already provisioned
     }
 
-    var ANNOUNCE_INTERVAL = parseInt(process.env.ANNOUNCE_INTERVAL, 10) || 5000; // exported for testing
-
-    debug('announce: first run, try to provision the box by announcing with appstore.');
+    var ANNOUNCE_INTERVAL = parseInt(process.env.ANNOUNCE_INTERVAL, 10) || 60000; // exported for testing
 
     var that = this;
     var url = config.appServerUrl + '/api/v1/boxes/' + config.fqdn + '/announce';
@@ -451,11 +449,11 @@ Server.prototype._announce = function () {
     superagent.get(url).end(function (error, result) {
         if (error || result.statusCode !== 200) {
             debug('unable to announce to app server', error);
-            that._announceTimerId = setTimeout(that._announce.bind(that), ANNOUNCE_INTERVAL); // try in 5 seconds
+            that._announceTimerId = setTimeout(that._announce.bind(that), ANNOUNCE_INTERVAL); // try again
             return;
         }
 
-        that._announceTimerId = setTimeout(that._announce.bind(that), ANNOUNCE_INTERVAL * 20); // check again if we got token
+        that._announceTimerId = setTimeout(that._announce.bind(that), ANNOUNCE_INTERVAL * 2); // check again if we got token
         debug('announce: success');
     });
 };
