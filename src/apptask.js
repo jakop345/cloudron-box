@@ -579,12 +579,6 @@ function start(appId, callback) {
 if (require.main === module) {
     assert(process.argv.length === 3, 'Pass the appid as argument');
 
-    // FIXME: For some reason our selfhost.io certificate doesn't work with
-    // superagent and fails with UNABLE_TO_VERIFY_LEAF_SIGNATURE
-    // Important to remove this before we release
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
-
-
     debug('Apptask for ' + process.argv[2]);
 
     initialize(function (error) {
