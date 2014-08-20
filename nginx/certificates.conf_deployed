@@ -1,2 +1,0 @@
-ssl_certificate      /etc/yellowtent/cert/host.cert;
-ssl_certificate_key  /etc/yellowtent/cert/host.pem;

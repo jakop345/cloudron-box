@@ -54,6 +54,7 @@ config.save = function () {
     config.mountRoot = path.join(config.baseDir, 'mount');
 
     config.nginxAppConfigDir = path.join(config.nginxConfigDir, 'applications');
+    config.nginxCertDir = path.join(config.nginxConfigDir, 'cert');
 
     config.fqdn = 'localhost';
     config.adminOrigin = 'https://admin-' + config.fqdn;

@@ -411,7 +411,7 @@ Server.prototype._getCertificate = function (callback) {
     request.get(url, function (result) {
         if (result.statusCode !== 200) return callback(new Error('Failed to get certificate. Status: ' + result.statusCode));
 
-        var certDirPath = '/etc/yellowtent/cert';
+        var certDirPath = config.nginxCertDir;
         var certFilePath = path.join(certDirPath, 'cert.tar');
         var file = fs.createWriteStream(certFilePath);
 
