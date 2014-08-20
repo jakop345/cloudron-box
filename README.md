@@ -20,21 +20,14 @@ Development setup
 ** Verify using `sudo src/rmappdir.sh --check`. This should print 'OK'
 ** Verify using `sudo src/reloadnginx.sh --check`. This should print 'OK'
 
-* Set your hostname to 'mybox.cloudron.us'
-** On Mac, settings the hostname through command line resets the name periodically.
-   Using the network control panel, always appends a .local suffix.
-   Workaround: sudo scutil --set HostName mybox.cloudron.us
-
-* export FQDN='mybox.cloudron.us' (add this to your .bashrc)
-** Add the above domain to your /etc/hosts
-** All apps will be installed as hypened-subdomains of the above FQDN
-** You should add hyphened-subdomains of your apps into /etc/hosts
+** Add admin-localhost as 127.0.0.1 in /etc/hosts
+** All apps will be installed as hypened-subdomains of localhost. You should add
+   hyphened-subdomains of your apps into /etc/hosts
 
 Running
 -------
 * ./run.sh - this starts up nginx to serve up the webadmin
-** https://mybox.cloudron.us should now be accessible
-** Do not use https://localhost. It will appear to work work but will break oauth redirection
+** Navigate to https://localhost
 
 * DEBUG=box:* ./app.js - this the main box code
 ** NODE_ENV is set to production by default
