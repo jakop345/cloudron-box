@@ -226,7 +226,8 @@ function deleteContainer(app, callback) {
 }
 
 function deleteImage(app, callback) {
-    var image = docker.getImage(app.manifest.docker_image);
+    var docker_image = app.manifest ? app.manifest.docker_image : '';
+    var image = docker.getImage(docker_image);
 
     var removeOptions = {
         force: true,
