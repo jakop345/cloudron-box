@@ -8,6 +8,7 @@ var express = require('express'),
     HttpError = require('./httperror.js'),
     HttpSuccess = require('./httpsuccess.js'),
     path = require('path'),
+    os = require('os'),
     passport = require('passport'),
     superagent = require('superagent'),
     mkdirp = require('mkdirp'),
@@ -449,11 +450,17 @@ Server.prototype._announce = function () {
         return; // already provisioned
     }
 
+    var that = this;
+
     var ANNOUNCE_INTERVAL = parseInt(process.env.ANNOUNCE_INTERVAL, 10) || 60000; // exported for testing
 
-    var that = this;
-    var url = config.appServerUrl + '/api/v1/boxes/' + config.fqdn + '/announce';
-    debug('announce: ' + url + ' with box name ' + config.fqdn);
+    // On Digital Ocean, the only value which we can give a new droplet is the hostname.
+    // We use that value to identify the droplet by the appstore server when the droplet
+    // announce itself. This identifier can look different for other box providers.
+
+    var hostname = os.hostname();
+    var url = config.appServerUrl + '/api/v1/boxes/' + hostname + '/announce';
+    debug('announce: ' + url + ' with box name ' + hostname);
 
     superagent.get(url).end(function (error, result) {
         if (error || result.statusCode !== 200) {
