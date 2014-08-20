@@ -243,11 +243,13 @@ function deleteImage(app, callback) {
 function createVolume(app, callback) {
     var appDataDir = path.join(config.appDataRoot, app.id);
 
-    if (!safe.fs.mkdirSync(appDataDir)) {
-        return callback(new Error('Error creating app data directory ' + appDataDir + ' ' + safe.error));
-    }
+    deleteVolume(app, function () {
+        if (!safe.fs.mkdirSync(appDataDir)) {
+            return callback(new Error('Error creating app data directory ' + appDataDir + ' ' + safe.error));
+        }
 
-    return callback(null);
+        return callback(null);
+    });
 }
 
 function deleteVolume(app, callback) {
