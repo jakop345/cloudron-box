@@ -1,6 +1,7 @@
 'use strict';
 
 function UserListController ($scope, Client) {
+    $scope.ready = false;
     $scope.users = [];
 
     $scope.isMe = function (user) {
@@ -9,12 +10,10 @@ function UserListController ($scope, Client) {
 
     function refresh() {
         Client.listUsers(function (error, result) {
-            if (error) {
-                console.error('Unable to get user listing.', error);
-                return;
-            }
+            if (error) return console.error('Unable to get user listing.', error);
 
             $scope.users = result.users;
+            $scope.ready = true;
         });
     }
 

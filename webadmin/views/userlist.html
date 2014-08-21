@@ -1,20 +1,35 @@
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Users</h1>
+    </div>
+</div>
 
+<div class="row" ng-show="!ready">
+    <div class="col-lg-12" class="text-center">
+        <center>
+            <h2>Loading</h2>
+            <i class="fa fa-circle-o-notch fa-spin fa-5x"></i>
+        </center>
+    </div>
+</div>
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-12">
-            <ul class="list-group">
-                <li href="#" class="list-group-item" ng-repeat="user in users">
-                    <div class="row" ng-class-odd="'odd'" ng-class-even="'even'">
-                        <div class="col-xs-11">
-                            {{user.username}} <span ng-show="isMe(user)" class="small pull-right">This is you!</span>
-                        </div>
-                        <div class="col-xs-1">
-                            <a href="" class="pull-right" ng-hide="user.admin" ng-click="deleteUser(user.username)"><span class="glyphicon glyphicon glyphicon-trash"></span></a>
-                        </div>
-                    </div>
-                </li>
-            </ul>
-        </div>
+<div class="row" ng-show="ready">
+    <div class="col-lg-12">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th style="text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="user in users">
+                    <td>{{ user.username }} <span ng-show="isMe(user)" class="badge" style="margin-left: 20px;">This is you!</span></td>
+                    <td style="text-align: right;">
+                        <button ng-show="!isMe(user)" ng-click="deleteUser(user.username)" class="btn btn-xs btn-danger"><i class="fa fa-trash-o"></i> Delete</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
