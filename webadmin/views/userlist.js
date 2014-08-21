@@ -35,7 +35,7 @@ function UserListController ($scope, Client) {
         });
     }
 
-    $scope.createUser = function () {
+    $scope.addUser = function () {
         window.location.href = '#/usercreate';
     };
 
