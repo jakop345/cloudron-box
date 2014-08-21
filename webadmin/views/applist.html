@@ -4,22 +4,26 @@
     </div>
 </div>
 
-<div class="row" ng-show="loadStatus == LOADING">
-    <div class="col-lg-12" class="text-center">
-        <center>
-            <h2>Loading</h2>
-            <i class="fa fa-circle-o-notch fa-spin fa-5x"></i>
-        </center>
+<div class="row animateMeOpacity ng-hide" ng-show="loadStatus == LOADING">
+    <div class="col-lg-12" style="text-align: center;">
+        <h2>Loading</h2>
+        <i class="fa fa-circle-o-notch fa-spin fa-5x"></i>
     </div>
 </div>
 
-<div class="row" ng-show="loadStatus == LOADED && !apps.length">
-    <div class="col-lg-12" class="text-center">
+<div class="row animateMeOpacity ng-hide" ng-show="loadStatus == ERROR">
+    <div class="col-lg-12" style="text-align: center;">
+        <h2>Error reaching the Store</h2>
+    </div>
+</div>
+
+<div class="row animateMeOpacity ng-hide" ng-show="loadStatus == LOADED && !apps.length">
+    <div class="col-lg-12" style="text-align: center;">
         <h2>No Apps available</h2>
     </div>
 </div>
 
-<div class="row" ng-show="loadStatus == LOADED">
+<div class="row animateMeOpacity ng-hide" ng-show="loadStatus == LOADED">
     <div class="col-lg-4 col-md-6" ng-repeat="app in apps">
         <div class="panel panel-primary">
             <div class="panel-heading">
