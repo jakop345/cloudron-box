@@ -12,8 +12,6 @@ function UserCreateController ($scope, $routeParams, Client) {
     $scope.error = {};
 
     $scope.submit = function () {
-        console.debug('Try to create user %s.', $scope.username);
-
         $scope.error.name = null;
         $scope.error.password = null;
         $scope.error.passwordRepeat = null;
@@ -35,18 +33,11 @@ function UserCreateController ($scope, $routeParams, Client) {
         }
 
         $scope.disabled = true;
-        Client.createUser($scope.username, $scope.password, $scope.email, function (error, result) {
-            if (error) {
-                console.error('Unable to create user.', error);
-                if (error.statusCode === 409) {
-                    $scope.error.name = 'Username already exists';
-                    $scope.disabled = false;
-                }
-                return;
-            }
+        Client.createUser($scope.username, $scope.password, $scope.email, function (error) {
+            if (error && error.statusCode === 409) return console.error('Username already exists');
+            if (error) console.error('Unable to create user.', error);
 
-            console.debug('Successfully create user', $scope.username);
-            window.location.href = '/';
+            window.location.href = '#/userlist';
         });
     };
 
