@@ -15,9 +15,6 @@ app.config(function ($routeProvider) {
     }).when('/usercreate', {
         controller: 'UserCreateController',
         templateUrl: 'views/usercreate.html'
-    }).when('/userdelete', {
-        controller: 'UserDeleteController',
-        templateUrl: 'views/userdelete.html'
     }).when('/userpassword', {
         controller: 'UserPasswordController',
         templateUrl: 'views/userpassword.html'

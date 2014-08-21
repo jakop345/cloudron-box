@@ -26,7 +26,36 @@
                 <tr ng-repeat="user in users">
                     <td>{{ user.username }} <span ng-show="isMe(user)" class="badge" style="margin-left: 20px;">This is you!</span></td>
                     <td style="text-align: right;">
-                        <button ng-show="!isMe(user)" ng-click="deleteUser(user.username)" class="btn btn-xs btn-danger"><i class="fa fa-trash-o"></i> Delete</button>
+                        <button ng-show="!isMe(user)" data-toggle="modal" data-target="#userDeleteModal-{{user.username}}" class="btn btn-xs btn-danger"><i class="fa fa-trash-o"></i> Delete</button>
+
+                        <!-- Modal really delete -->
+                        <div class="modal fade" id="userDeleteModal-{{user.username}}" tabindex="-1" role="dialog" aria-labelledby="userDeleteModalLabel-{{user.username}}" aria-hidden="true" style="text-align: left;">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                        <h4 class="modal-title" id="userDeleteModalLabel-{{user.username}}">Delete user {{ user.username }}</h4>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form class="form-user-delete" role="form" ng-submit="deleteUser(user)">
+                                            <div class="form-group">
+                                                <label class="control-label" for="inputUsername">Just to be sure you really want to delete this user, please type the user's name</label>
+                                                <input type="text" class="form-control" ng-model="userDeleteForm.username" id="inputUsername" placeholder="Username" required autofocus>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label" for="inputPassword">Give your password to verify that you are performing that action</label>
+                                                <input type="password" class="form-control" ng-model="userDeleteForm.password" id="inputPassword" placeholder="Password" required>
+                                            </div>
+                                            <input class="hide" type="submit"/>
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                        <button type="button" class="btn btn-danger" ng-click="deleteUser(user)">Delete</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </td>
                 </tr>
             </tbody>
