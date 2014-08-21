@@ -10,10 +10,15 @@ var MainController = function ($scope, $route, $interval, Client) {
         return $route.current.$$route.originalPath.indexOf(url) === 0;
     };
 
-    $scope.logout = function () {
+    $scope.logout = function (event) {
+        event.stopPropagation();
+
+        $scope.initialized = false;
+
         // TODO actually perform logout on the server
         localStorage.removeItem('token');
         Client.logout();
+
         window.location.href = '/api/v1/session/logout';
     };
 
