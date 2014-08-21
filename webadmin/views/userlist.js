@@ -23,6 +23,8 @@ function UserListController ($scope, Client) {
             if (error) return console.error('Unable to delete user.', error);
 
             $('#userDeleteModal-' + user.username).modal('hide');
+
+            refresh();
         });
     };
 
