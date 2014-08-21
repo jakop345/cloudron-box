@@ -1,6 +1,6 @@
 'use strict';
 
-function VolumeListController ($scope, $modal, Client) {
+function VolumeListController ($scope, Client) {
     $scope.volumes = [];
 
     $scope.getUsers = function (callback) {
