@@ -16,7 +16,7 @@ angular.module('YellowTent').service('AppStore', function ($http, Client) {
     }
 
     function AppStore() {
-        this._appsCache = {};
+        this._appsCache = { };
     }
 
     AppStore.prototype.getApps = function (callback) {
@@ -42,11 +42,7 @@ angular.module('YellowTent').service('AppStore', function ($http, Client) {
 
     // TODO currently assumes that getApps was called at some point
     AppStore.prototype.getAppById = function (appId, callback) {
-        if (this._appsCache !== null) {
-            for (var i = 0; i < this._appsCache.length; i++) {
-                if (this._appsCache[i].id === appId) return callback(null, this._appsCache[i]);
-            }
-        }
+        if (appId in this._appsCache) return callback(null, this._appsCache[appId]);
         return callback(new AppStoreError(404, 'Not found'));
     };
 

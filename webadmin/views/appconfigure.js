@@ -1,12 +1,18 @@
 'use strict';
 
 var AppConfigureController = function ($scope, $routeParams, Client, AppStore) {
-    $scope.app = { };
+    $scope.app = null;
     $scope.password = '';
     $scope.location = '';
     $scope.disabled = false;
     $scope.error = { };
     $scope.portBindings = { };
+
+    AppStore.getAppById($routeParams.id, function (error, app) {
+        $scope.error = error || { };
+        if (error) return;
+        $scope.app = app;
+    });
 
     AppStore.getManifest($routeParams.id, function (error, manifest) {
         $scope.error = error || { };
