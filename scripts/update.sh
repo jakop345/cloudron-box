@@ -1,0 +1,65 @@
+#!/bin/sh
+
+cyan='\e[0;36m'
+green='\e[0;32m'
+red='\e[0;31m'
+clear='\e[0m'
+bold='\e[0;1m'
+
+function info() {
+    echo -e "${bold}[II] $1${clear}"
+}
+
+function error() {
+    echo -e "${red}[EE] $1${clear}"
+}
+
+function check() {
+    if [[ $? != 0 ]]; then
+        error "Failed!"
+        exit 1
+    fi
+
+    info $1
+}
+
+echo ""
+echo "============================="
+echo "       Cloudron Update       "
+echo "============================="
+echo ""
+
+BASEDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+
+info "Perform update in $BASEDIR"
+cd $BASEDIR;
+
+info "Fetch latest code..."
+git fetch
+check "Done"
+
+info "Reset repo to latest code..."
+git reset --hard origin/master
+check "Done"
+
+info "Run release update script..."
+# TODO run custom update script for this release
+check "Done"
+
+info "Get new node modules..."
+npm install --production
+check "Done"
+
+info "Restart the box code..."
+OUT=`supervisorctl restart box`
+RESULT=`echo $OUT | grep ERROR`
+if [[ $RESULT != "" ]]; then
+    error "Failed to restart box"
+    error "$OUT"
+    exit 1;
+fi
+info "Done"
+
+echo ""
+echo "Update successful."
+echo ""

@@ -131,29 +131,22 @@ Server.prototype._getCloudronStats = function (req, res, next) {
 
 // TODO this is only for convenience so far, will be replaced by an update framework
 Server.prototype._update = function (req, res, next) {
+    var updateScript = path.join(__dirname, '../scripts/update.sh');
     var options = {
         cwd: path.join(__dirname, '..')
     };
 
-    debug('_update');
+    debug('_update: use script %s.', updateScript);
 
-    exec('git fetch', options, function (error, stdout, stderr) {
-        if (error) return next(new HttpError(500, error));
+    exec(updateScript, options, function (error, stdout, stderr) {
+        if (error) {
+            console.error('Error running update script.', stdout, stderr);
+            return next(new HttpError(500, error));
+        }
 
-        debug('_update: git fetch', stdout, stderr);
+        debug('_update: success.', stdout, stderr);
 
-        exec('git reset --hard origin/master', options, function (error, stdout, stderr) {
-            if (error) return next(new HttpError(500, error));
-
-            debug('_update: git reset', stdout, stderr);
-
-            res.send(200, {});
-
-            exec('supervisorctl restart box', options, function (error, stdout, stderr) {
-                if (error) return console.error(error);
-                debug('_update: success.', stdout, stderr);
-            });
-        });
+        res.send(200, {});
     });
 };
 
