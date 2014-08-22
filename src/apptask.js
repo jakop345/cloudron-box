@@ -489,7 +489,13 @@ function install(app, callback) {
             debug('App ' + app.id + ' installed');
             updateApp(app, { installationState: appdb.ISTATE_INSTALLED }, callback);
         }
-    ], callback);
+    ], function seriesDone(error) {
+        if (error) {
+            console.error('Error installing app:', error);
+            return updateApp(app, { installationState: appdb.ISTATE_ERROR }, callback.bind(null, error));
+        }
+        callback(null);
+    });
 }
 
 function uninstall(app, callback) {
@@ -569,10 +575,7 @@ function start(appId, callback) {
         }
 
         install(app, function (error) {
-            if (error) {
-                console.error('Error installing app:', error);
-                return updateApp(app, { installationState: appdb.ISTATE_ERROR }, callback);
-            }
+            if (error) return callback(error);
 
             runApp(app, callback);
         });
