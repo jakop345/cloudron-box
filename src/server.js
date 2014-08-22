@@ -112,7 +112,7 @@ Server.prototype._getConfig = function (req, res) {
     res.send(200, {
         appServerUrl: config.appServerUrl,
         fqdn: config.fqdn,
-        ip: '127.0.0.1',
+        ip: config.ip,
         version: pkg.version
     });
 };
@@ -155,6 +155,7 @@ Server.prototype._provision = function (req, res, next) {
     if (!req.body.appServerUrl) return next(new HttpError(400, 'No appServerUrl provided'));
     if (!req.body.adminOrigin) return next(new HttpError(400, 'No adminOrigin provided'));
     if (!req.body.fqdn) return next(new HttpError(400, 'No fqdn provided'));
+    if (!req.body.ip) return next(new HttpError(400, 'No ip provided'));
 
     debug('_provision: received from appstore ' + req.body.appServerUrl);
 
@@ -162,7 +163,7 @@ Server.prototype._provision = function (req, res, next) {
 
     if (config.token) return next(new HttpError(409, 'Already provisioned'));
 
-    config.set(_.pick(req.body, 'token', 'appServerUrl', 'adminOrigin', 'fqdn'));
+    config.set(_.pick(req.body, 'token', 'appServerUrl', 'adminOrigin', 'fqdn', 'ip'));
 
     // override the default webadmin OAuth client record
     clientdb.del('webadmin', function () {
