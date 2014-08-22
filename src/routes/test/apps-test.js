@@ -433,8 +433,15 @@ describe('App installation - port bindings', function () {
                 hockServer
                     .get('/api/v1/appstore/apps/' + APP_ID + '/manifest')
                     .reply(200, manifest, { 'Content-Type': 'application/json' })
+                    // app install
                     .post('/api/v1/subdomains?token=' + config.token, { subdomain: APP_LOCATION })
                     .reply(201, { }, { 'Content-Type': 'application/json' })
+                    // app configure
+                    .delete('/api/v1/subdomains/' + APP_LOCATION + '?token=' + config.token)
+                    .reply(200, { }, { 'Content-Type': 'application/json' })
+                    .post('/api/v1/subdomains?token=' + config.token, { subdomain: APP_LOCATION })
+                    .reply(201, { }, { 'Content-Type': 'application/json' })
+                    // app remove
                     .delete('/api/v1/subdomains/' + APP_LOCATION + '?token=' + config.token)
                     .reply(200, { }, { 'Content-Type': 'application/json' });
                 done();
@@ -532,6 +539,40 @@ describe('App installation - port bindings', function () {
             expect(data.Volumes['/app/data']).to.eql(config.appDataRoot + '/' + APP_ID);
             done();
         });
+    });
+
+    it('can reconfigure app', function (done) {
+        var count = 0;
+        function checkConfigureStatus() {
+            request.get(SERVER_URL + '/api/v1/app/' + APP_ID)
+               .query({ access_token: token })
+               .end(function (err, res) {
+                expect(res.statusCode).to.equal(200);
+                if (res.body.installationState === appdb.ISTATE_INSTALLED) { appInfo = res.body; return done(null); }
+                if (res.body.installationState === appdb.ISTATE_ERROR) return done(new Error('Install error'));
+                if (++count > 50) return done(new Error('Timedout'));
+                setTimeout(checkConfigureStatus, 1000);
+            });
+        }
+
+        request.post(SERVER_URL + '/api/v1/app/' + APP_ID + '/configure')
+              .query({ access_token: token })
+              .send({ app_id: APP_ID, password: PASSWORD, portBindings: { '7778' : '7172' } })
+              .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            checkConfigureStatus();
+        });
+    });
+
+    it('port mapping works after reconfiguration', function (done) {
+        setTimeout(function () {
+            var client = net.connect(7172);
+            client.on('data', function (data) {
+                expect(data.toString()).to.eql('ECHO_SERVER_PORT=7172');
+                done();
+            });
+            client.on('error', done);
+        }, 2000);
     });
 
     it('can stop app', function (done) {

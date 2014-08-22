@@ -48,6 +48,9 @@ app.config(function ($routeProvider) {
     }).when('/app/:id/install', {
         controller: 'AppInstallController',
         templateUrl: 'views/appinstall.html'
+    }).when('/app/:id/configure', {
+        controller: 'AppConfigureController',
+        templateUrl: 'views/appconfigure.html'
     }).when('/app/:id/details', {
         controller: 'AppDetailsController',
         templateUrl: 'views/appdetails.html'

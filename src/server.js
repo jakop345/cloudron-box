@@ -364,6 +364,7 @@ Server.prototype._initializeExpressSync = function () {
     router.get('/api/v1/app/:id', bearer, routes.apps.getApp);
     router.post('/api/v1/app/:id/uninstall', bearer, routes.apps.uninstallApp); // TODO does this require password?
     router.post('/api/v1/app/install', bearer, this._requirePassword.bind(this), routes.apps.installApp);
+    router.post('/api/v1/app/:id/configure', bearer, this._requirePassword.bind(this), routes.apps.configureApp);
     router.post('/api/v1/app/:id/stop', bearer, routes.apps.stopApp); // TODO does this require password?
     router.post('/api/v1/app/:id/start', bearer, routes.apps.startApp); // TODO does this require password
 

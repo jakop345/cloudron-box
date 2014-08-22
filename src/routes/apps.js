@@ -14,6 +14,7 @@ exports = module.exports = {
     getAppBySubdomain: getAppBySubdomain,
     getApps: getApps,
     installApp: installApp,
+    configureApp: configureApp,
     uninstallApp: uninstallApp,
 
     stopApp: stopApp,
@@ -78,6 +79,32 @@ function installApp(req, res, next) {
 
     apps.install(data.app_id, req.user.username, data.password, data.location, data.portBindings, function (error) {
         if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, 'App already exists: ' + error));
+        if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));
+        if (error) return next(new HttpError(500, 'Internal error:' + error));
+
+        next(new HttpSuccess(200, { } ));
+    });
+}
+
+/*
+ * Configure an app
+ * @bodyparam {string} app_id The id of the app to be installed
+ * @bodyparam {string} password The user's password
+ * @bodyparam {string} location The subdomain where the app is to be installed
+ * @bodyparam {object} portBindings map from container port to (public) host port. can be null.
+ */
+function configureApp(req, res, next) {
+    var data = req.body;
+
+    if (!data) return next(new HttpError(400, 'Cannot parse data field'));
+    if (!data.app_id) return next(new HttpError(400, 'app_id is required'));
+    if (!data.password) return next(new HttpError(400, 'password is required'));
+    if (('portBindings' in data) && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
+
+    debug('will configure app with id ' + data.app_id + ' @ ' + data.location + ' with ' + JSON.stringify(data.portBindings));
+
+    apps.configure(data.app_id, req.user.username, data.password, data.location, data.portBindings, function (error) {
+        if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app:' + error));
         if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error) return next(new HttpError(500, 'Internal error:' + error));
 

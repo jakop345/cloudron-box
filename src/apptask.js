@@ -412,7 +412,7 @@ function updateApp(app, values, callback) {
         app[value] = values[value];
     }
 
-    debug(app.id + ' code:' + app.installationState);
+    debug(app.id + ' installationState:' + app.installationState);
 
     appdb.update(app.id, values, callback);
 }
@@ -454,6 +454,43 @@ function install(app, callback) {
     ], function seriesDone(error) {
         if (error) {
             console.error('Error installing app:', error);
+            return updateApp(app, { installationState: appdb.ISTATE_ERROR }, callback.bind(null, error));
+        }
+        callback(null);
+    });
+}
+
+// TODO: optimize by checking if location actually changed
+function configure(app, callback) {
+    async.series([
+        stopApp.bind(null, app),
+
+      //  unconfigureNginx.bind(null, app),
+
+        deleteContainer.bind(null, app),
+
+        removeOAuthCredentials.bind(null, app),
+
+        unregisterSubdomain.bind(null, app),
+
+        configureNginx.bind(null, app),
+
+        registerSubdomain.bind(null, app),
+
+        allocateOAuthCredentials.bind(null, app),
+
+        createContainer.bind(null, app),
+
+        runApp.bind(null, app),
+
+        // done!
+        function (callback) {
+            debug('App ' + app.id + ' installed');
+            updateApp(app, { installationState: appdb.ISTATE_INSTALLED }, callback);
+        }
+    ], function seriesDone(error) {
+        if (error) {
+            console.error('Error reconfiguring app:', error);
             return updateApp(app, { installationState: appdb.ISTATE_ERROR }, callback.bind(null, error));
         }
         callback(null);
@@ -510,7 +547,6 @@ function uninstall(app, callback) {
     ], callback);
 }
 
-
 function runApp(app, callback) {
     startContainer(app, function (error) {
         if (error) {
@@ -539,6 +575,11 @@ function startTask(appId, callback) {
 
         if (app.installationState === appdb.ISTATE_PENDING_UNINSTALL) {
             uninstall(app, callback);
+            return;
+        }
+
+        if (app.installationState === appdb.ISTATE_PENDING_CONFIGURE) {
+            configure(app, callback);
             return;
         }
 

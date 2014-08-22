@@ -20,6 +20,7 @@ exports = module.exports = {
     getBySubdomain: getBySubdomain,
     getAll: getAll,
     install: install,
+    configure: configure,
     uninstall: uninstall,
 
     start: start,
@@ -90,6 +91,21 @@ function validateSubdomain(subdomain, fqdn) {
     return null;
 }
 
+function validatePortBindings(portBindings) {
+    // validate the port bindings
+    for (var containerPort in portBindings) {
+        var containerPortInt = parseInt(containerPort, 10);
+        if (isNaN(containerPortInt) || containerPortInt <= 0 || containerPortInt > 65535) {
+            return callback(new AppsError(AppsError.BAD_FIELD, containerPort + ' is not a valid port'));
+        }
+
+        var hostPortInt = parseInt(portBindings[containerPort], 10);
+        if (isNaN(hostPortInt) || hostPortInt <= 1024 || hostPortInt > 65535) {
+            return callback(new AppsError(AppsError.BAD_FIELD, portBindings[containerPort] + ' is not a valid port'));
+        }
+    }
+}
+
 function get(appId, callback) {
     assert(typeof appId === 'string');
 
@@ -152,18 +168,8 @@ function install(appId, username, password, location, portBindings, callback) {
     var error = validateSubdomain(location, config.fqdn);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
-    // validate the port bindings
-    for (var containerPort in portBindings) {
-        var containerPortInt = parseInt(containerPort, 10);
-        if (isNaN(containerPortInt) || containerPortInt <= 0 || containerPortInt > 65535) {
-            return callback(new AppsError(AppsError.BAD_FIELD, containerPort + ' is not a valid port'));
-        }
-
-        var hostPortInt = parseInt(portBindings[containerPort], 10);
-        if (isNaN(hostPortInt) || hostPortInt <= 1024 || hostPortInt > 65535) {
-            return callback(new AppsError(AppsError.BAD_FIELD, portBindings[containerPort] + ' is not a valid port'));
-        }
-    }
+    error = validatePortBindings(portBindings);
+    if (error) return callback(error);
 
     stopTask(appId);
 
@@ -172,6 +178,36 @@ function install(appId, username, password, location, portBindings, callback) {
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
         debug('Will install app with id : ' + appId);
+
+        startTask(appId);
+
+        callback(null);
+    });
+}
+
+function configure(appId, username, password, location, portBindings, callback) {
+    assert(typeof appId === 'string');
+    assert(typeof username === 'string');
+    assert(typeof password === 'string');
+    assert(!portBindings || typeof portBindings === 'object');
+    assert(typeof callback === 'function');
+
+    var error = location ? validateSubdomain(location, config.fqdn) : null;
+    if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
+
+    error = portBindings ? validatePortBindings(portBindings) : null;
+    if (error) return callback(error);
+
+    stopTask(appId);
+
+    var values = { installationState: appdb.ISTATE_PENDING_CONFIGURE };
+    if (location) values.location = location;
+
+    appdb.update(appId, values, portBindings, function (error) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND));
+        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+        debug('Will configure app with id : ' + appId);
 
         startTask(appId);
 

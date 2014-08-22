@@ -21,6 +21,7 @@ exports = module.exports = {
 
     // status codes
     ISTATE_PENDING_INSTALL: 'pending_install',
+    ISTATE_PENDING_CONFIGURE: 'pending_configure',
     ISTATE_PENDING_UNINSTALL: 'pending_uninstall',
     ISTATE_ERROR: 'error',
     ISTATE_DOWNLOADING_MANIFEST: 'downloading_manifest',
@@ -123,7 +124,7 @@ function add(id, installationState, location, portBindings, callback) {
 
     conn.run('INSERT INTO apps (id, installationState, location) VALUES ($id, $installationState, $location)',
            appData, function (error) {
-        if (error) database.rollback(conn);
+        if (error || !this.lastID) database.rollback(conn);
 
         if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
 
@@ -180,30 +181,49 @@ function del(id, callback) {
     });
 }
 
-function update(id, app, callback) {
+function update(id, app, portBindings, callback) {
     assert(typeof id === 'string');
     assert(typeof app === 'object');
+    if (typeof portBindings === 'function') { callback = portBindings; portBindings = { }; }
     assert(typeof callback === 'function');
 
-    var args = [ ], values = [ ];
-    for (var p in app) {
-        if (!app.hasOwnProperty(p)) continue;
+    var conn = database.newTransaction();
+    async.eachSeries(Object.keys(portBindings), function iterator(containerPort, callback) {
+        var portData = {
+            $appId: id,
+            $containerPort: containerPort,
+            $hostPort: portBindings[containerPort]
+        };
 
-        if (p === 'manifest') {
-            args.push('manifestJson = ?');
-            values.push(JSON.stringify(app[p]));
-        } else {
-            args.push(p + ' = ?');
-            values.push(app[p]);
+        var values = [ portBindings[containerPort], containerPort, id ];
+        conn.run('UPDATE appPortBindings SET hostPort = ? WHERE containerPort = ? AND appId = ?', values, callback);
+    }, function seriesDone(error) {
+        if (error) {
+            database.rollback(conn);
+            return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         }
-    }
-    values.push(id);
 
-    database.run('UPDATE apps SET ' + args.join(', ') + ' WHERE id = ?', values, function (error) {
-        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
-        if (this.changes !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
+        var args = [ ], values = [ ];
+        for (var p in app) {
+            if (!app.hasOwnProperty(p)) continue;
 
-        callback(null);
+            if (p === 'manifest') {
+                args.push('manifestJson = ?');
+                values.push(JSON.stringify(app[p]));
+            } else {
+                args.push(p + ' = ?');
+                values.push(app[p]);
+            }
+        }
+        values.push(id);
+
+        conn.run('UPDATE apps SET ' + args.join(', ') + ' WHERE id = ?', values, function (error) {
+            if (error || this.changes !== 1) database.rollback(conn);
+            if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+            if (this.changes !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
+
+            database.commit(conn, callback);
+        });
     });
 }
 
