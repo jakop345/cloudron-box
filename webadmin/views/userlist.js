@@ -5,6 +5,7 @@
 function UserListController ($scope, Client) {
     $scope.ready = false;
     $scope.users = [];
+    $scope.userInfo = Client.getUserInfo();
     $scope.userDeleteForm = {
         username: '',
         password: ''
@@ -12,6 +13,10 @@ function UserListController ($scope, Client) {
 
     $scope.isMe = function (user) {
         return user.username === Client.getUserInfo().username;
+    };
+
+    $scope.isAdmin = function (user) {
+        return !!user.admin;
     };
 
     $scope.deleteUser = function (user) {
