@@ -321,7 +321,6 @@ describe('App installation', function () {
     it('can stop app', function (done) {
         request.post(SERVER_URL + '/api/v1/app/' + APP_ID + '/stop')
             .query({ access_token: token })
-            .send({ password: PASSWORD })
             .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
             done();
@@ -342,7 +341,6 @@ describe('App installation', function () {
     it('can start app', function (done) {
         request.post(SERVER_URL + '/api/v1/app/' + APP_ID + '/start')
             .query({ access_token: token })
-            .send({ password: PASSWORD })
             .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
             done();
@@ -539,7 +537,6 @@ describe('App installation - port bindings', function () {
     it('can stop app', function (done) {
         request.post(SERVER_URL + '/api/v1/app/' + APP_ID + '/stop')
             .query({ access_token: token })
-            .send({ password: PASSWORD })
             .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
             done();
