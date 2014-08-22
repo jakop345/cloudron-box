@@ -1,6 +1,6 @@
 'use strict';
 
-var AppConfigureController = function ($scope, $routeParams, Client, AppStore) {
+var AppInstallController = function ($scope, $routeParams, Client, AppStore) {
     $scope.app = null;
     $scope.password = '';
     $scope.location = '';

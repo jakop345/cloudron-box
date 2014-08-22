@@ -30,7 +30,7 @@ var AppListController = function ($scope, $location, Client, AppStore) {
     };
 
     $scope.installApp = function (appId) {
-        $location.path('/app/' + appId + '/configure');
+        $location.path('/app/' + appId + '/install');
     };
 
     Client.onConfig(function (config) {
