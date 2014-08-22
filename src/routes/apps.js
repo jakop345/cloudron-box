@@ -14,7 +14,10 @@ exports = module.exports = {
     getAppBySubdomain: getAppBySubdomain,
     getApps: getApps,
     installApp: installApp,
-    uninstallApp: uninstallApp
+    uninstallApp: uninstallApp,
+
+    stopApp: stopApp,
+    startApp: startApp
 };
 
 /*
@@ -74,7 +77,7 @@ function installApp(req, res, next) {
     debug('will install app with id ' + data.app_id + ' @ ' + data.location + ' with ' + JSON.stringify(data.portBindings));
 
     apps.install(data.app_id, req.user.username, data.password, data.location, data.portBindings, function (error) {
-        if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, 'Error installing app: ' + error));
+        if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, 'App already exists: ' + error));
         if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error) return next(new HttpError(500, 'Internal error:' + error));
 
@@ -92,9 +95,38 @@ function uninstallApp(req, res, next) {
     debug('will uninstall app with id ' + req.params.id);
 
     apps.uninstall(req.params.id, function (error) {
-        if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'Error uninstalling app' + error));
+        if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app:' + error));
         if (error) return next(new HttpError(500, 'Internal error: ' + error));
 
         next(new HttpSuccess(200, { }));
     });
 }
+
+function startApp(req, res, next) {
+    if (typeof req.params.id !== 'string') return next(new HttpError(400, 'appid is required'));
+
+    debug('will start app with id ' + req.params.id);
+
+    apps.start(req.params.id, function (error) {
+        if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app:' + error));
+        if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error));
+        if (error) return next(new HttpError(500, 'Internal error: ' + error));
+
+        next(new HttpSuccess(200, { }));
+    });
+}
+
+function stopApp(req, res, next) {
+    if (typeof req.params.id !== 'string') return next(new HttpError(400, 'appid is required'));
+
+    debug('will stop app with id ' + req.params.id);
+
+    apps.stop(req.params.id, function (error) {
+        if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app:' + error));
+        if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error));
+        if (error) return next(new HttpError(500, 'Internal error: ' + error));
+
+        next(new HttpSuccess(200, { }));
+    });
+}
+

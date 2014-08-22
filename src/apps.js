@@ -22,6 +22,9 @@ exports = module.exports = {
     install: install,
     uninstall: uninstall,
 
+    start: start,
+    stop: stop,
+
     appFqdn: appFqdn
 };
 
@@ -194,6 +197,48 @@ function uninstall(appId, callback) {
         startTask(appId);
 
         callback(null);
+    });
+}
+
+function start(appId, callback) {
+    assert(typeof appId === 'string');
+
+    appdb.get(appId, function (error, app) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
+        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+        debug('Will start app with id : ' + appId);
+        debug('ISTATE:' + app.installationState + ' RSTATE:' + app.runState);
+
+        if (app.installationState !== appdb.ISTATE_INSTALLED) return callback(new AppsError(AppsError.BAD_FIELD, 'App not installed'));
+        if (app.runState !== appdb.RSTATE_STOPPED && app.runState !== appdb.RSTATE_ERROR) return callback(new AppsError(AppsError.BAD_FIELD, 'Invalid state'));
+
+        stopTask(appId);
+        startTask(appId);
+
+        callback(null);
+    });
+}
+
+function stop(appId, callback) {
+    assert(typeof appId === 'string');
+
+    appdb.get(appId, function (error, app) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
+        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+        debug('Will stop app with id : ' + appId);
+        debug('ISTATE:' + app.installationState + ' RSTATE:' + app.runState);
+
+        if (app.installationState !== appdb.ISTATE_INSTALLED) return callback(new AppsError(AppsError.BAD_FIELD, 'App not installed'));
+        if (app.runState !== appdb.RSTATE_RUNNING) return callback(new AppsError(AppsError.BAD_FIELD, 'App not running'));
+
+        appdb.update(appId, { runState: appdb.RSTATE_PENDING_STOP }, function (error) {
+            stopTask(appId);
+            startTask(appId);
+
+            callback(null);
+        });
     });
 }
 

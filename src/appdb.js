@@ -33,8 +33,9 @@ exports = module.exports = {
     ISTATE_INSTALLED: 'installed',
 
     RSTATE_RUNNING: 'running',
+    RSTATE_PENDING_STOP: 'pending_stop',
+    RSTATE_STOPPED: 'stopped',
     RSTATE_ERROR: 'error',
-    RSTATE_EXITED: 'exited',
     RSTATE_NOT_RESPONDING: 'not_responding'
 };
 

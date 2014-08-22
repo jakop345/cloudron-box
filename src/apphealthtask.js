@@ -67,7 +67,7 @@ function checkAppHealth(app, callback) {
 
         if (data.State.Running !== true) {
             debug(app.id + ' has exited');
-            return updateApp(app, { runState: appdb.RSTATE_EXITED }, callback);
+            return updateApp(app, { runState: appdb.RSTATE_STOPPED }, callback);
         }
 
         var healthCheckUrl = 'http://127.0.0.1:' + app.httpPort + manifest.health_check_url;

@@ -27,7 +27,7 @@ var assert = require('assert'),
 
 exports = module.exports = {
     initialize: initialize,
-    start: start,
+    startTask: startTask,
     setNakedDomain: setNakedDomain,
 
     // exported for testing
@@ -313,6 +313,22 @@ function startContainer(app, portConfigs, callback) {
     });
 }
 
+function stopContainer(app, callback) {
+     var container = docker.getContainer(app.containerId);
+    debug('Stopping container ' + container.id);
+
+    var options = {
+        t: 10 // wait for 10 seconds before killing it
+    };
+
+    container.stop(options, function (error) {
+        if (error) return callback(new Error('Error starting container:' + error));
+
+        return callback(null);
+    });
+   
+}
+
 function downloadManifest(app, callback) {
     debug('Downloading manifest for :', app.id);
 
@@ -564,13 +580,33 @@ function runApp(app, callback) {
     });
 }
 
-// callback is called with error for fatal errors (and not for install errors)
-function start(appId, callback) {
+function stopApp(app, callback) {
+    stopContainer(app, function (error) {
+        if (error) return callback(error);
+
+        updateApp(app, { runState: appdb.RSTATE_STOPPED }, callback);
+    });
+}
+
+function startTask(appId, callback) {
+    // determine what to do
     appdb.get(appId, function (error, app) {
         if (error) return callback(error);
 
+        debug('ISTATE:' + app.installationState + ' RSTATE:' + app.runState);
+
         if (app.installationState === appdb.ISTATE_PENDING_UNINSTALL) {
             uninstall(app, callback);
+            return;
+        }
+
+        if (app.installationState === appdb.ISTATE_INSTALLED) {
+            if (app.runState === appdb.RSTATE_PENDING_STOP) {
+                stopApp(app, callback);
+            } else {
+                runApp(app, callback);
+            }
+
             return;
         }
 
@@ -590,7 +626,7 @@ if (require.main === module) {
     initialize(function (error) {
         if (error) throw error;
 
-        start(process.argv[2], function (error) {
+        startTask(process.argv[2], function (error) {
             debug('Apptask completed for ' + process.argv[2] + ' ' + error);
             process.exit(error ? 1 : 0);
         });

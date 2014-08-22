@@ -318,6 +318,48 @@ describe('App installation', function () {
         });
     });
 
+    it('can stop app', function (done) {
+        request.post(SERVER_URL + '/api/v1/app/' + APP_ID + '/stop')
+            .query({ access_token: token })
+            .send({ password: PASSWORD })
+            .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            done();
+        });
+    });
+
+    it('did stop the app', function (done) {
+        // give the app a couple of seconds to die
+        setTimeout(function () {
+            request.get('http://localhost:' + appInfo.httpPort + appInfo.manifest.health_check_url)
+                .end(function (err, res) {
+                expect(err).to.be.ok();
+                done();
+            });
+        }, 2000);
+    });
+
+    it('can start app', function (done) {
+        request.post(SERVER_URL + '/api/v1/app/' + APP_ID + '/start')
+            .query({ access_token: token })
+            .send({ password: PASSWORD })
+            .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            done();
+        });
+    });
+
+    it('did start the app', function (done) {
+        setTimeout(function () {
+            request.get('http://localhost:' + appInfo.httpPort + appInfo.manifest.health_check_url)
+                .end(function (err, res) {
+                expect(!err).to.be.ok();
+                expect(res.statusCode).to.equal(200);
+                done();
+            });
+        }, 2000); // give some time for docker to settle
+    });
+
     it('can uninstall app', function (done) {
         var count = 0;
         function checkUninstallStatus() {
@@ -492,6 +534,29 @@ describe('App installation - port bindings', function () {
             expect(data.Volumes['/app/data']).to.eql(config.appDataRoot + '/' + APP_ID);
             done();
         });
+    });
+
+    it('can stop app', function (done) {
+        request.post(SERVER_URL + '/api/v1/app/' + APP_ID + '/stop')
+            .query({ access_token: token })
+            .send({ password: PASSWORD })
+            .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            done();
+        });
+    });
+
+    xit('did stop the app', function (done) {
+        setTimeout(function () {
+            var client = net.connect(7171);
+            client.setTimeout(2000);
+            client.on('connect', function () { done(new Error('Got connected')); });
+            client.on('timeout', function () { done(); });
+            client.on('error', function (error) { console.log('got error'); done(); });
+            client.on('data', function (data) {
+                done(new Error('Expected connection to fail!'));
+            });
+        }, 3000); // give the app some time to die
     });
 
     it('can uninstall app', function (done) {
