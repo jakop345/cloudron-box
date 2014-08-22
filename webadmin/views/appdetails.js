@@ -6,6 +6,18 @@ var AppDetailsController = function ($scope, $http, $routeParams, $interval, Cli
     $scope.app = {};
     $scope.initialized = false;
 
+    $scope.startApp = function () {
+        Client.startApp($routeParams.id, function (error) {
+            if (error) console.error(error);
+        });
+    };
+
+    $scope.stopApp = function () {
+        Client.stopApp($routeParams.id, function (error) {
+            if (error) console.error(error);
+        });
+    };
+
     $scope.deleteApp = function () {
         $('#deleteAppModal').modal('hide');
 

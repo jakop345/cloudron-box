@@ -180,6 +180,26 @@ angular.module('YellowTent').service('Client', function ($http) {
         });
     };
 
+    Client.prototype.startApp = function (id, callback) {
+        var data = { };
+        $http.post('/api/v1/app/' + id + '/start', data).success(function (data, status) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null);
+        }).error(function (data, status) {
+            callback(new ClientError(status, data));
+        });
+    };
+
+    Client.prototype.stopApp = function (id, callback) {
+        var data = { };
+        $http.post('/api/v1/app/' + id + '/stop', data).success(function (data, status) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null);
+        }).error(function (data, status) {
+            callback(new ClientError(status, data));
+        });
+    };
+
     Client.prototype.version = function (callback) {
         $http.get('/api/v1/version').success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
