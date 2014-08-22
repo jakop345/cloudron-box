@@ -108,12 +108,21 @@ Server.prototype._getVersion = function (req, res) {
     res.send(200, { version: pkg.version });
 };
 
-Server.prototype._getConfig = function (req, res) {
-    res.send(200, {
-        appServerUrl: config.appServerUrl,
-        fqdn: config.fqdn,
-        ip: config.ip,
-        version: pkg.version
+Server.prototype._getConfig = function (req, res, next) {
+    var gitRevisionCommand = 'git log -1 --pretty=format:%h';
+    exec(gitRevisionCommand, {}, function (error, stdout, stderr) {
+        if (error) {
+            console.error('Failed to get git revision.', error, stdout, stderr);
+            stdout = null;
+        }
+
+        next(new HttpSuccess(200, {
+            appServerUrl: config.appServerUrl,
+            fqdn: config.fqdn,
+            ip: config.ip,
+            version: pkg.version,
+            revision: stdout
+        }));
     });
 };
 

@@ -53,6 +53,7 @@ angular.module('YellowTent').service('Client', function ($http) {
         this._config.version = config.version;
         this._config.fqdn = config.fqdn;
         this._config.ip = config.ip;
+        this._config.revision = config.revision;
 
         var that = this;
 
