@@ -98,9 +98,8 @@ function getAll(callback) {
     });
 }
 
-function add(id, installationState, location, portBindings, callback) {
+function add(id, location, portBindings, callback) {
     assert(typeof id === 'string');
-    assert(typeof installationState === 'string');
     assert(typeof location === 'string');
     assert(typeof portBindings === 'object');
     assert(typeof callback === 'function');
@@ -109,7 +108,7 @@ function add(id, installationState, location, portBindings, callback) {
 
     var appData = {
         $id: id,
-        $installationState: installationState,
+        $installationState: exports.ISTATE_PENDING_INSTALL,
         $location: location
     };
 

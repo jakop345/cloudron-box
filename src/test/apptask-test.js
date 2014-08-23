@@ -20,7 +20,7 @@ var apptask = require('../apptask.js'),
 
 var APP = {
     id: 'appid',
-    installationState: 'some-status-0',
+    installationState: appdb.ISTATE_PENDING_INSTALL,
     runState: null,
     location: 'applocation',
     manifest: {
@@ -38,7 +38,7 @@ before(function (done) {
 
     database.create(function (error) {
         expect(error).to.be(null);
-        appdb.add(APP.id, APP.installationState, APP.location, APP.portBindings, done);
+        appdb.add(APP.id, APP.location, APP.portBindings, done);
     });
 });
 
