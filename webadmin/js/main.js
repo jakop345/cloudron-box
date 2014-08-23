@@ -48,10 +48,13 @@ var MainController = function ($scope, $route, $interval, Client) {
                 // update token
                 localStorage.token = token;
 
-                // kick off installed apps polling
-                var refreshTimer = $interval(Client.refreshInstalledApps.bind(Client), 2000);
+                // kick off installed apps and config polling
+                var refreshAppsTimer = $interval(Client.refreshInstalledApps.bind(Client), 2000);
+                var refreshConfigTimer = $interval(Client.refreshConfig.bind(Client), 5000);
+
                 $scope.$on('$destroy', function () {
-                    $interval.cancel(refreshTimer);
+                    $interval.cancel(refreshAppsTimer);
+                    $interval.cancel(refreshConfigTimer);
                 });
 
                 // now show UI

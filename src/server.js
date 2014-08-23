@@ -111,6 +111,8 @@ Server.prototype._getVersion = function (req, res) {
 };
 
 Server.prototype._getConfig = function (req, res, next) {
+    var that = this;
+
     var gitRevisionCommand = 'git log -1 --pretty=format:%h';
     exec(gitRevisionCommand, {}, function (error, stdout, stderr) {
         if (error) {
@@ -123,7 +125,8 @@ Server.prototype._getConfig = function (req, res, next) {
             fqdn: config.fqdn,
             ip: config.ip,
             version: pkg.version,
-            revision: stdout
+            revision: stdout,
+            update: that._updater.availableUpdate()
         }));
     });
 };
@@ -494,9 +497,6 @@ Server.prototype.start = function (callback) {
     var that = this;
 
     this._updater = new Updater();
-    this._updater.on('new_version', function (revision) {
-        console.log('New version available:', revision);
-    });
 
     this._initializeExpressSync();
     this._sendHeartBeat();

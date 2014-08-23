@@ -4,17 +4,18 @@
 
 var debug = require('debug')('box:updater'),
     superagent = require('superagent'),
-    config = require('../config.js'),
-    EventEmitter = require('events').EventEmitter,
-    util = require('util');
+    config = require('../config.js');
 
 module.exports = exports = Updater;
 
 function Updater() {
-    EventEmitter.call(this);
     this.checkInterval = null;
+    this.updateInfo = null;
 }
-util.inherits(Updater, EventEmitter);
+
+Updater.prototype.availableUpdate = function () {
+    return this.updateInfo;
+};
 
 Updater.prototype.check = function () {
     debug('check: for updates. box is on version ' + config.version);
@@ -29,9 +30,13 @@ Updater.prototype.check = function () {
 
         if (result.body.available) {
             debug('check: update to version ' + result.body.version + ' available.');
-            that.emit('new_version', result.body);
+            that.updateInfo = {
+                version: result.body.version,
+                revision: result.body.revision
+            };
         } else {
             debug('check: no update available.');
+            that.updateInfo = null;
         }
     });
 };

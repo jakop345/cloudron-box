@@ -28,7 +28,10 @@ angular.module('YellowTent').service('Client', function ($http) {
         this._config = {
             appServerUrl: null,
             fqdn: null,
-            ip: null
+            ip: null,
+            revision: null,
+            update: null,
+            isDev: false
         };
         this._installedApps = [];
 
@@ -54,6 +57,8 @@ angular.module('YellowTent').service('Client', function ($http) {
         this._config.fqdn = config.fqdn;
         this._config.ip = config.ip;
         this._config.revision = config.revision;
+        this._config.update = config.update;
+        this._config.isDev = config.appServerUrl === 'https://appstore-dev.herokuapps.com' || config.appServerUrl === 'https://selfhost.io:5050';
 
         var that = this;
 
@@ -360,6 +365,23 @@ angular.module('YellowTent').service('Client', function ($http) {
             callback(null, data);
         }).error(function(data, status) {
             callback(new ClientError(status, data));
+        });
+    };
+
+    Client.prototype.refreshConfig = function (callback) {
+        var that = this;
+
+        callback = typeof callback === 'function' ? callback : function () {};
+
+        this.config(function (error, result) {
+            if (error) {
+                console.error(error);
+                callback(error);
+            }
+
+            that.setConfig(result);
+
+            callback(null);
         });
     };
 

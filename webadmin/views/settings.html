@@ -30,7 +30,8 @@
                     <li class="list-group-item">Version <span class="pull-right">{{config.version}}</span></li>
                     <li class="list-group-item" ng-show="config.revision">Revision <span class="pull-right">{{config.revision}}</span></li>
                 </ul>
-                <button class="btn btn-outline btn-success pull-right" data-toggle="modal" data-target="#updateModal">Update</button>
+                <button class="btn btn-outline btn-success pull-right" data-toggle="modal" data-target="#updateModal" ng-show="config.update">New Update Available</button>
+                <button class="btn btn-outline btn-success pull-right" data-toggle="modal" data-target="#updateModal" ng-show="config.isDev && !config.update">Update to Master</button>
 
                 <!-- Modal really update-->
                 <div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true">
