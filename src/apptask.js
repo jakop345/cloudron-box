@@ -89,7 +89,7 @@ function configureNginx(app, callback) {
         var sourceDir = path.resolve(__dirname, '..');
         var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: appFqdn(app.location), port: freePort });
 
-        var nginxConfigFilename = path.join(config.nginxAppConfigDir, app.location + '.conf');
+        var nginxConfigFilename = path.join(config.nginxAppConfigDir, app.id + '.conf');
         debug('writing config to ' + nginxConfigFilename);
 
         fs.writeFile(nginxConfigFilename, nginxConf, function (error) {
@@ -106,7 +106,7 @@ function configureNginx(app, callback) {
 }
 
 function unconfigureNginx(app, callback) {
-    var nginxConfigFilename = path.join(config.nginxAppConfigDir, app.location + '.conf');
+    var nginxConfigFilename = path.join(config.nginxAppConfigDir, app.id + '.conf');
     if (!safe.fs.unlinkSync(nginxConfigFilename)) {
         console.error('Error removing nginx configuration ' + safe.error);
         return callback(safe.error);

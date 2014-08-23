@@ -63,7 +63,7 @@ describe('apptask', function () {
 
     it('configure nginx correctly', function (done) {
         apptask._configureNginx(APP, function (error) {
-            expect(fs.existsSync(config.nginxAppConfigDir + '/' + APP.location + '.conf'));
+            expect(fs.existsSync(config.nginxAppConfigDir + '/' + APP.id + '.conf'));
             // expect(error).to.be(null); // this fails because nginx cannot be restarted
             done();
         });
@@ -71,7 +71,7 @@ describe('apptask', function () {
 
     it('unconfigure nginx', function (done) {
         apptask._unconfigureNginx(APP, function (error) {
-            expect(!fs.existsSync(config.nginxAppConfigDir + '/' + APP.location + '.conf'));
+            expect(!fs.existsSync(config.nginxAppConfigDir + '/' + APP.id + '.conf'));
             // expect(error).to.be(null); // this fails because nginx cannot be restarted
             done();
         });
