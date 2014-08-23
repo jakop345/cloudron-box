@@ -423,38 +423,38 @@ function install(app, callback) {
         configureNginx.bind(null, app),
 
         // register subdomain
-        updateApp.bind(null, app, { installationState: appdb.ISTATE_REGISTERING_SUBDOMAIN }),
+        updateApp.bind(null, app, { installationProgress: 'Registering subdomain' }),
         registerSubdomain.bind(null, app),
 
         // download manifest
-        updateApp.bind(null, app, { installationState: appdb.ISTATE_DOWNLOADING_MANIFEST }),
+        updateApp.bind(null, app, { installationProgress: 'Downloading manifest' }),
         downloadManifest.bind(null, app),
 
         // download the image
-        updateApp.bind(null, app, { installationState: appdb.ISTATE_DOWNLOADING_IMAGE }),
+        updateApp.bind(null, app, { installationProgress: 'Downloading image' }),
         downloadImage.bind(null, app),
 
         // allocate OAuth credentials
-        updateApp.bind(null, app, { installationState: appdb.ISTATE_ALLOCATE_OAUTH_CREDENTIALS }),
+        updateApp.bind(null, app, { installationProgress: 'Setting up OAuth' }),
         allocateOAuthCredentials.bind(null, app),
 
         // create container
-        updateApp.bind(null, app, { installationState: appdb.ISTATE_CREATING_CONTAINER }),
+        updateApp.bind(null, app, { installationProgress: 'Creating container' }),
         createContainer.bind(null, app),
 
         // create data volume
-        updateApp.bind(null, app, { installationState: appdb.ISTATE_CREATING_VOLUME }),
+        updateApp.bind(null, app, { installationProgress: 'Creating volume' }),
         createVolume.bind(null, app),
 
         // done!
         function (callback) {
             debug('App ' + app.id + ' installed');
-            updateApp(app, { installationState: appdb.ISTATE_INSTALLED }, callback);
+            updateApp(app, { installationState: appdb.ISTATE_INSTALLED, installationProgress: '' }, callback);
         }
     ], function seriesDone(error) {
         if (error) {
             console.error('Error installing app:', error);
-            return updateApp(app, { installationState: appdb.ISTATE_ERROR }, callback.bind(null, error));
+            return updateApp(app, { installationState: appdb.ISTATE_ERROR, installationProgress: error.message }, callback.bind(null, error));
         }
         callback(null);
     });
@@ -463,22 +463,31 @@ function install(app, callback) {
 // TODO: optimize by checking if location actually changed
 function configure(app, callback) {
     async.series([
+        updateApp.bind(null, app, { installationProgress: 'Stopping app' }),
         stopApp.bind(null, app),
 
+        updateApp.bind(null, app, { installationProgress: 'Unconfiguring nginx' }),
       //  unconfigureNginx.bind(null, app),
 
+        updateApp.bind(null, app, { installationProgress: 'Deleting container' }),
         deleteContainer.bind(null, app),
 
+        updateApp.bind(null, app, { installationProgress: 'Remove old oauth credentials' }),
         removeOAuthCredentials.bind(null, app),
 
+        updateApp.bind(null, app, { installationProgress: 'Unregistering subdomain' }),
         unregisterSubdomain.bind(null, app),
 
+        updateApp.bind(null, app, { installationProgress: 'Configuring Nginx' }),
         configureNginx.bind(null, app),
 
+        updateApp.bind(null, app, { installationProgress: 'Registering subdomain' }),
         registerSubdomain.bind(null, app),
 
+        updateApp.bind(null, app, { installationProgress: 'Setting up OAuth' }),
         allocateOAuthCredentials.bind(null, app),
 
+        updateApp.bind(null, app, { installationProgress: 'Creating container' }),
         createContainer.bind(null, app),
 
         runApp.bind(null, app),
@@ -486,12 +495,12 @@ function configure(app, callback) {
         // done!
         function (callback) {
             debug('App ' + app.id + ' installed');
-            updateApp(app, { installationState: appdb.ISTATE_INSTALLED }, callback);
+            updateApp(app, { installationState: appdb.ISTATE_INSTALLED, installationProgress: '' }, callback);
         }
     ], function seriesDone(error) {
         if (error) {
             console.error('Error reconfiguring app:', error);
-            return updateApp(app, { installationState: appdb.ISTATE_ERROR }, callback.bind(null, error));
+            return updateApp(app, { installationState: appdb.ISTATE_ERROR, installationProgress: error.message }, callback.bind(null, error));
         }
         callback(null);
     });

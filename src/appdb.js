@@ -24,13 +24,6 @@ exports = module.exports = {
     ISTATE_PENDING_CONFIGURE: 'pending_configure',
     ISTATE_PENDING_UNINSTALL: 'pending_uninstall',
     ISTATE_ERROR: 'error',
-    ISTATE_DOWNLOADING_MANIFEST: 'downloading_manifest',
-    ISTATE_DOWNLOADING_IMAGE: 'downloading_image',
-    ISTATE_CREATING_CONTAINER: 'creating_container',
-    ISTATE_CREATING_VOLUME: 'creating_volume',
-    ISTATE_ALLOCATE_OAUTH_CREDENTIALS: 'allocated_oauth_credentials',
-    ISTATE_REGISTERING_SUBDOMAIN: 'registering_subdomain',
-    ISTATE_SUBDOMAIN_ERROR: 'subdomain_error',
     ISTATE_INSTALLED: 'installed',
 
     RSTATE_RUNNING: 'running',
