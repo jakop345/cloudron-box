@@ -537,7 +537,7 @@ function uninstall(app, callback) {
         updateApp.bind(null, app, { installationProgress: 'Unregistering subdomain' }),
         unregisterSubdomain.bind(null, app),
 
-        appdb.del(null, app.id)
+        appdb.del.bind(null, app.id)
     ], callback);
 }
 
