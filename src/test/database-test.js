@@ -225,7 +225,7 @@ describe('database', function () {
             manifest: null,
             httpPort: null,
             containerId: null,
-            portBindings: [ { containerPort: 1234, hostPort: 5678 } ],
+            portBindings: { "1234": "5678" },
             healthy: null
         };
         var APP_1 = {
@@ -236,7 +236,7 @@ describe('database', function () {
             manifest: null,
             httpPort: null,
             containerId: null,
-            portBindings: [ ],
+            portBindings: { },
             healthy: null
         };
 
@@ -255,8 +255,8 @@ describe('database', function () {
         it('getPortBindings succeeds', function (done) {
             appdb.getPortBindings(APP_0.id, function (error, bindings) {
                 expect(error).to.be(null);
-                expect(bindings).to.be.an(Array);
-                expect(bindings).to.be.eql([ { containerPort: 1234, hostPort: 5678, appId: APP_0.id } ]);
+                expect(bindings).to.be.an(Object);
+                expect(bindings).to.be.eql({ '1234' : '5678' });
                 done();
             });
         });
@@ -339,8 +339,8 @@ describe('database', function () {
         it('getPortBindings should be empty', function (done) {
             appdb.getPortBindings(APP_0.id, function (error, bindings) {
                 expect(error).to.be(null);
-                expect(bindings).to.be.an(Array);
-                expect(bindings).to.be.eql([ ]);
+                expect(bindings).to.be.an(Object);
+                expect(bindings).to.be.eql({ });
                 done();
             });
         });

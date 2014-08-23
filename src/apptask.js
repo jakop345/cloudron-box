@@ -174,11 +174,9 @@ function createContainer(app, portConfigs, callback) {
     var manifest = app.manifest;
 
     var env = [ ];
-    if (typeof manifest.tcp_ports === 'object') {
-        portConfigs.forEach(function (portConfig) {
-            if (!(portConfig.containerPort in manifest.tcp_ports)) return;
-            env.push(manifest.tcp_ports[portConfig.containerPort].environment_variable + '=' + portConfig.hostPort);
-        });
+    for (var containerPort in manifest.tcp_ports) {
+        if (!(containerPort in portConfigs)) continue;
+        env.push(manifest.tcp_ports[containerPort].environment_variable + '=' + portConfigs[containerPort]);
     }
 
     env.push('APP_ORIGIN' + '=' + 'https://' + appFqdn(app.location));
@@ -289,12 +287,11 @@ function startContainer(app, portConfigs, callback) {
 
     var portBindings = { };
     portBindings[manifest.http_port + '/tcp'] = [ { HostPort: app.httpPort + '' } ];
-    if (typeof manifest.tcp_ports === 'object') {
-        portConfigs.forEach(function (portConfig) {
-            if (!(portConfig.containerPort in manifest.tcp_ports)) return;
-            portBindings[portConfig.containerPort + '/tcp'] = [ { HostPort: portConfig.hostPort + '' } ];
-            forwardFromHostToVirtualBox(app.id + '-tcp' + portConfig.containerPort, portConfig.hostPort);
-        });
+
+    for (var containerPort in manifest.tcp_ports) {
+        if (!(containerPort in portConfigs)) continue;
+        portBindings[containerPort + '/tcp'] = [ { HostPort: portConfigs[containerPort] } ];
+        forwardFromHostToVirtualBox(app.id + '-tcp' + containerPort, portConfigs[containerPort]);
     }
 
     var startOptions = {

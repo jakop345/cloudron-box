@@ -47,7 +47,7 @@ function postProcess(result) {
     assert(result.hostPorts === null || typeof result.hostPorts === 'string');
     assert(result.containerPorts === null || typeof result.containerPorts === 'string');
 
-    result.portBindings = [ ];
+    result.portBindings = { };
     var hostPorts = result.hostPorts === null ? [ ] : result.hostPorts.split(',');
     var containerPorts = result.containerPorts === null ? [ ] : result.containerPorts.split(',');
 
@@ -55,7 +55,7 @@ function postProcess(result) {
     delete result.containerPorts;
 
     for (var i = 0; i < hostPorts.length; i++) {
-        result.portBindings.push({ hostPort: hostPorts[i], containerPort: containerPorts[i] });
+        result.portBindings[containerPorts[i]] = hostPorts[i];
     }
 }
 
@@ -108,7 +108,7 @@ function add(id, installationState, location, portBindings, callback) {
     assert(typeof id === 'string');
     assert(typeof installationState === 'string');
     assert(typeof location === 'string');
-    assert(util.isArray(portBindings));
+    assert(typeof portBindings === 'object');
     assert(typeof callback === 'function');
 
     portBindings = portBindings || { };
@@ -129,11 +129,11 @@ function add(id, installationState, location, portBindings, callback) {
 
         if (error || !this.lastID) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
-        async.eachSeries(portBindings, function iterator(binding, callback) {
+        async.eachSeries(Object.keys(portBindings), function iterator(containerPort, callback) {
             var portData = {
                 $appId: id,
-                $containerPort: binding.containerPort,
-                $hostPort: binding.hostPort
+                $containerPort: containerPort,
+                $hostPort: portBindings[containerPort]
             };
 
             conn.run('INSERT INTO appPortBindings (hostPort, containerPort, appId) VALUES ($hostPort, $containerPort, $appId)', portData, callback);
@@ -150,12 +150,16 @@ function add(id, installationState, location, portBindings, callback) {
 }
 
 function getPortBindings(id, callback) {
-    database.all('SELECT * FROM appPortBindings WHERE appId = ?', [ id ], function (error, result) {
+    database.all('SELECT * FROM appPortBindings WHERE appId = ?', [ id ], function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
-        if (typeof result === 'undefined') result = [ ];
+        results = results || [ ];
+        var portBindings = { };
+        for (var i = 0; i < results.length; i++) {
+            portBindings[results[i].containerPort] = results[i].hostPort;
+        }
 
-        callback(null, result);
+        callback(null, portBindings);
     });
 }
 

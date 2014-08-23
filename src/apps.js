@@ -141,32 +141,28 @@ function stopTask(appId) {
     }
 }
 
-function install(appId, username, password, location, portBindingsMap, callback) {
+function install(appId, username, password, location, portBindings, callback) {
     assert(typeof appId === 'string');
     assert(typeof username === 'string');
     assert(typeof password === 'string');
     assert(typeof location === 'string');
-    assert(!portBindings || typeof portBindingsMap === 'object');
+    assert(!portBindings || typeof portBindings === 'object');
     assert(typeof callback === 'function');
 
     var error = validateSubdomain(location, config.fqdn);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
-    var portBindings = [ ];
-
     // validate the port bindings
-    for (var key in portBindingsMap) {
-        var containerPort = parseInt(key, 10);
-        if (isNaN(containerPort) || containerPort <= 0 || containerPort > 65535) {
-            return callback(new AppsError(AppsError.BAD_FIELD, key + ' is not a valid port'));
+    for (var containerPort in portBindings) {
+        var containerPortInt = parseInt(containerPort, 10);
+        if (isNaN(containerPortInt) || containerPortInt <= 0 || containerPortInt > 65535) {
+            return callback(new AppsError(AppsError.BAD_FIELD, containerPort + ' is not a valid port'));
         }
 
-        var hostPort = parseInt(portBindingsMap[containerPort], 10);
-        if (isNaN(hostPort) || hostPort <= 1024 || hostPort > 65535) {
-            return callback(new AppsError(AppsError.BAD_FIELD, portBindingsMap[containerPort] + ' is not a valid port'));
+        var hostPortInt = parseInt(portBindings[containerPort], 10);
+        if (isNaN(hostPortInt) || hostPortInt <= 1024 || hostPortInt > 65535) {
+            return callback(new AppsError(AppsError.BAD_FIELD, portBindings[containerPort] + ' is not a valid port'));
         }
-
-        portBindings.push({ containerPort: containerPort, hostPort: hostPort });
     }
 
     stopTask(appId);
