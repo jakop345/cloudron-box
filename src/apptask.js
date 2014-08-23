@@ -326,7 +326,7 @@ function stopContainer(app, callback) {
 
         return callback(null);
     });
-   
+
 }
 
 function downloadManifest(app, callback) {
@@ -571,7 +571,7 @@ function runApp(app, callback) {
 
         startContainer(app, portBindings, function (error) {
             if (error) {
-                console.error('Error creating container:' + error);
+                console.error('Error creating container.', error);
                 return updateApp(app, { runState: appdb.RSTATE_ERROR }, callback);
             }
 
@@ -627,7 +627,7 @@ if (require.main === module) {
         if (error) throw error;
 
         startTask(process.argv[2], function (error) {
-            debug('Apptask completed for ' + process.argv[2] + ' ' + error);
+            debug('Apptask completed for ' + process.argv[2], error);
             process.exit(error ? 1 : 0);
         });
     });
