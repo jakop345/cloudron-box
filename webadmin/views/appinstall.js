@@ -20,7 +20,7 @@ var AppInstallController = function ($scope, $routeParams, Client, AppStore) {
         $scope.portBindings = manifest.tcp_ports;
         // default setting is to map ports as they are in manifest
         for (var port in $scope.portBindings) {
-            $scope.portBindings[port].exposeAs = port;
+            $scope.portBindings[port].hostPort = port;
         }
     });
 
@@ -30,7 +30,7 @@ var AppInstallController = function ($scope, $routeParams, Client, AppStore) {
 
         var portBindings = { };
         for (var port in $scope.portBindings) {
-            portBindings[port] = $scope.portBindings[port].exposeAs;
+            portBindings[port] = $scope.portBindings[port].hostPort;
         }
 
         Client.installApp($routeParams.id, $scope.password, { location: $scope.location, portBindings: portBindings }, function (error) {
