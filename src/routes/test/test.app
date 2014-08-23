@@ -12,7 +12,6 @@
     }
   },
   "suggested_locations": [
-    "ngircd",
-    "irc"
+    "test"
   ]
 }
