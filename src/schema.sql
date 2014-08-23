@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS clients(
 CREATE TABLE IF NOT EXISTS apps(
     id VARCHAR(512) NOT NULL UNIQUE,
     installationState VARCHAR(512) NOT NULL,
-    installationProgress VARCHAR(512) NOT NULL,
+    installationProgress VARCHAR(512),
     runState VARCHAR(512),
     healthy INTEGER,
     containerId VARCHAR(128),
