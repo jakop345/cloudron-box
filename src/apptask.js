@@ -373,7 +373,7 @@ function registerSubdomain(app, callback) {
         .post(config.appServerUrl + '/api/v1/subdomains')
         .set('Accept', 'application/json')
         .query({ token: config.token })
-        .send({ subdomain: app.location })
+        .send({ subdomain: app.location, id: app.id })
         .end(function (error, res) {
             if (error) return callback(error);
 
@@ -393,7 +393,7 @@ function unregisterSubdomain(app, callback) {
 
     debug('Unregistering subdomain for ' + app.id + ' at ' + app.location);
     superagent
-        .del(config.appServerUrl + '/api/v1/subdomains/' + app.location)
+        .del(config.appServerUrl + '/api/v1/subdomains/' + app.id)
         .query({ token: config.token })
         .end(function (error, res) {
             if (error) {

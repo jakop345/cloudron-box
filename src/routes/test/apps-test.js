@@ -225,9 +225,9 @@ describe('App installation', function () {
                 hockServer
                     .get('/api/v1/appstore/apps/' + APP_ID + '/manifest')
                     .reply(200, manifest, { 'Content-Type': 'application/json' })
-                    .post('/api/v1/subdomains?token=' + config.token, { subdomain: APP_LOCATION })
+                    .post('/api/v1/subdomains?token=' + config.token, { subdomain: APP_LOCATION, id: APP_ID })
                     .reply(201, { }, { 'Content-Type': 'application/json' })
-                    .delete('/api/v1/subdomains/' + APP_LOCATION + '?token=' + config.token)
+                    .delete('/api/v1/subdomains/' + APP_ID + '?token=' + config.token)
                     .reply(200, { }, { 'Content-Type': 'application/json' });
                 done();
             });
@@ -434,15 +434,15 @@ describe('App installation - port bindings', function () {
                     .get('/api/v1/appstore/apps/' + APP_ID + '/manifest')
                     .reply(200, manifest, { 'Content-Type': 'application/json' })
                     // app install
-                    .post('/api/v1/subdomains?token=' + config.token, { subdomain: APP_LOCATION })
+                    .post('/api/v1/subdomains?token=' + config.token, { subdomain: APP_LOCATION, id: APP_ID })
                     .reply(201, { }, { 'Content-Type': 'application/json' })
                     // app configure
-                    .delete('/api/v1/subdomains/' + APP_LOCATION + '?token=' + config.token)
+                    .delete('/api/v1/subdomains/' + APP_ID + '?token=' + config.token)
                     .reply(200, { }, { 'Content-Type': 'application/json' })
-                    .post('/api/v1/subdomains?token=' + config.token, { subdomain: APP_LOCATION })
+                    .post('/api/v1/subdomains?token=' + config.token, { subdomain: APP_LOCATION, id: APP_ID })
                     .reply(201, { }, { 'Content-Type': 'application/json' })
                     // app remove
-                    .delete('/api/v1/subdomains/' + APP_LOCATION + '?token=' + config.token)
+                    .delete('/api/v1/subdomains/' + APP_ID + '?token=' + config.token)
                     .reply(200, { }, { 'Content-Type': 'application/json' });
                 done();
             });
