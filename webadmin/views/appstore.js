@@ -1,6 +1,6 @@
 'use strict';
 
-var AppListController = function ($scope, $location, Client, AppStore) {
+var AppStoreController = function ($scope, $location, Client, AppStore) {
     $scope.LOADING = 1;
     $scope.ERROR = 2;
     $scope.LOADED = 3;

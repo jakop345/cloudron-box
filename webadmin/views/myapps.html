@@ -7,7 +7,7 @@
   <div ng-show="loadStatus == LOADED" class="row">
     <div ng-show="!apps.length" class="text-center">
         <h2>No apps installed</h2>
-        <a href="#/applist">Get apps</a>
+        <a href="#/appstore">Get apps</a>
     </div>
     <div class="col-lg-3 list-group-item" ng-repeat="app in apps">
         <div> <a target="_blank" ng-href="https://{{ app.fqdn + app.manifest.home_url }}"> {{ app.manifest.name }}</a> </div>
