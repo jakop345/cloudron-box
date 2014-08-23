@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS apps(
     id VARCHAR(512) NOT NULL UNIQUE,
     installationState VARCHAR(512) NOT NULL,
     runState VARCHAR(512),
+    healthy INTEGER,
     containerId VARCHAR(128),
     manifestJson VARCHAR,
     httpPort INTEGER,

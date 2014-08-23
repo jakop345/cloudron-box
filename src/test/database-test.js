@@ -225,7 +225,8 @@ describe('database', function () {
             manifest: null,
             httpPort: null,
             containerId: null,
-            portBindings: [ { containerPort: 1234, hostPort: 5678 } ]
+            portBindings: [ { containerPort: 1234, hostPort: 5678 } ],
+            healthy: null
         };
         var APP_1 = {
             id: 'appid-1',
@@ -235,7 +236,8 @@ describe('database', function () {
             manifest: null,
             httpPort: null,
             containerId: null,
-            portBindings: [ ]
+            portBindings: [ ],
+            healthy: null
         };
 
         it('add fails due to missing arguments', function () {

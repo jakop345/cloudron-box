@@ -78,10 +78,10 @@ function checkAppHealth(app, callback) {
 
             if (error || res.status !== 200) {
                 debug('Marking application as dead: ' + app.id);
-                updateApp(app, { runState: appdb.RSTATE_NOT_RESPONDING }, callback);
+                updateApp(app, { healthy: 0 }, callback);
             } else {
                 debug('healthy app:' + app.id);
-                updateApp(app, { runState: appdb.RSTATE_RUNNING }, callback);
+                updateApp(app, { healthy: 1 }, callback);
             }
         });
     });

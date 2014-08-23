@@ -35,8 +35,7 @@ exports = module.exports = {
     RSTATE_RUNNING: 'running',
     RSTATE_PENDING_STOP: 'pending_stop',
     RSTATE_STOPPED: 'stopped',
-    RSTATE_ERROR: 'error',
-    RSTATE_NOT_RESPONDING: 'not_responding'
+    RSTATE_ERROR: 'error'
 };
 
 function postProcess(result) {
