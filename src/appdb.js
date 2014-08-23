@@ -181,11 +181,13 @@ function del(id, callback) {
     });
 }
 
-function update(id, app, portBindings, callback) {
+function update(id, app, callback) {
     assert(typeof id === 'string');
     assert(typeof app === 'object');
-    if (typeof portBindings === 'function') { callback = portBindings; portBindings = { }; }
+    assert(!('portBindings' in app) || typeof app.portBindings === 'object');
     assert(typeof callback === 'function');
+
+    var portBindings = app.portBindings || { };
 
     var conn = database.newTransaction();
     async.eachSeries(Object.keys(portBindings), function iterator(containerPort, callback) {

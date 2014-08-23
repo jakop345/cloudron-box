@@ -91,8 +91,8 @@ function validateSubdomain(subdomain, fqdn) {
     return null;
 }
 
+// validate the port bindings
 function validatePortBindings(portBindings) {
-    // validate the port bindings
     for (var containerPort in portBindings) {
         var containerPortInt = parseInt(containerPort, 10);
         if (isNaN(containerPortInt) || containerPortInt <= 0 || containerPortInt > 65535) {
@@ -202,8 +202,9 @@ function configure(appId, username, password, location, portBindings, callback) 
 
     var values = { installationState: appdb.ISTATE_PENDING_CONFIGURE };
     if (location) values.location = location;
+    values.portBindings = portBindings;
 
-    appdb.update(appId, values, portBindings, function (error) {
+    appdb.update(appId, values, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
