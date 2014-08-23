@@ -205,11 +205,14 @@ function update(id, app, callback) {
             if (p === 'manifest') {
                 args.push('manifestJson = ?');
                 values.push(JSON.stringify(app[p]));
-            } else {
+            } else if (p !== 'portBindings') {
                 args.push(p + ' = ?');
                 values.push(app[p]);
             }
         }
+
+        if (values.length === 0) return database.commit(conn, callback);
+
         values.push(id);
 
         conn.run('UPDATE apps SET ' + args.join(', ') + ' WHERE id = ?', values, function (error) {
