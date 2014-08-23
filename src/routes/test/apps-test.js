@@ -365,7 +365,7 @@ describe('App installation', function () {
 
     it('installation - is up and running', function (done) {
         setTimeout(function () {
-            request.get('http://localhost:' + appInfo.httpPort + appInfo.manifest.health_check_url)
+            request.get('http://localhost:' + appInfo.httpPort + appInfo.manifest.healthCheckPath)
                 .end(function (err, res) {
                 expect(!err).to.be.ok();
                 expect(res.statusCode).to.equal(200);
@@ -394,7 +394,7 @@ describe('App installation', function () {
     it('did stop the app', function (done) {
         // give the app a couple of seconds to die
         setTimeout(function () {
-            request.get('http://localhost:' + appInfo.httpPort + appInfo.manifest.health_check_url)
+            request.get('http://localhost:' + appInfo.httpPort + appInfo.manifest.healthCheckPath)
                 .end(function (err, res) {
                 expect(err).to.be.ok();
                 done();
@@ -413,7 +413,7 @@ describe('App installation', function () {
 
     it('did start the app', function (done) {
         setTimeout(function () {
-            request.get('http://localhost:' + appInfo.httpPort + appInfo.manifest.health_check_url)
+            request.get('http://localhost:' + appInfo.httpPort + appInfo.manifest.healthCheckPath)
                 .end(function (err, res) {
                 expect(!err).to.be.ok();
                 expect(res.statusCode).to.equal(200);
@@ -597,7 +597,7 @@ describe('App installation - port bindings', function () {
     it('installation - http is up and running', function (done) {
         var tryCount = 20;
         (function healthCheck() {
-            request.get('http://localhost:' + appInfo.httpPort + appInfo.manifest.health_check_url)
+            request.get('http://localhost:' + appInfo.httpPort + appInfo.manifest.healthCheckPath)
                 .end(function (err, res) {
                 if (err || res.statusCode !== 200) {
                     if (--tryCount === 0) return done(new Error('Timedout'));

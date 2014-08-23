@@ -70,7 +70,7 @@ function checkAppHealth(app, callback) {
             return updateApp(app, { runState: appdb.RSTATE_STOPPED }, callback);
         }
 
-        var healthCheckUrl = 'http://127.0.0.1:' + app.httpPort + manifest.health_check_url;
+        var healthCheckUrl = 'http://127.0.0.1:' + app.httpPort + manifest.healthCheckPath;
         superagent
             .get(healthCheckUrl)
             .timeout(HEALTHCHECK_INTERVAL)

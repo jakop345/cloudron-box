@@ -24,7 +24,7 @@ var APP = {
     runState: null,
     location: 'applocation',
     manifest: {
-        name: 'testapplication'
+        title: 'testapplication'
     },
     containerId: null,
     httpPort: 4567,

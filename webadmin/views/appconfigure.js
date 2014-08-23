@@ -14,7 +14,7 @@ var AppConfigureController = function ($scope, $routeParams, Client, AppStore) {
 
         $scope.app = app;
         $scope.location = app.location;
-        $scope.portBindings = app.manifest.tcp_ports;
+        $scope.portBindings = app.manifest.tcpPorts;
         for (var containerPort in $scope.portBindings) {
             $scope.portBindings[containerPort].hostPort = app.portBindings[containerPort];
         }

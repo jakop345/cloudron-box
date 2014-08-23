@@ -132,17 +132,32 @@ function setNakedDomain(app, callback) {
     });
 }
 
+// NOTE: keep this in sync with appstore's apps.js
+function validateManifest(manifest) {
+     if (manifest === null) return new Error('Unable to parse manifest');
+
+     var fields = [ 'version', 'dockerImage', 'healthCheckPath', 'httpPort', 'title' ];
+
+     for (var i = 0; i < fields.length; i++) {
+         var field = fields[i];
+         if (!(field in manifest)) return new Error('Missing ' + field + ' in manifest');
+
+         if (typeof manifest[field] !== 'string') return new Error(field + ' must be a string');
+
+         if (manifest[field].length === 0) return new Error(field + ' cannot be empty');
+     }
+
+    return null;
+}
+
 function downloadImage(app, callback) {
     debug('Will download app now');
 
     var manifest = app.manifest;
-    if (manifest === null) return callback(new Error('Manifest parse error:' + safe.error));
+    var error = validateManifest(manifest);
+    if (error) return callback(new Error('Manifest error:' + error.message));
 
-    if (!manifest.health_check_url || !manifest.docker_image || !manifest.http_port) {
-        return callback(new Error('Manifest missing mandatory parameters'));
-    }
-
-    docker.pull(manifest.docker_image, function (err, stream) {
+    docker.pull(manifest.dockerImage, function (err, stream) {
         if (err) return callback(new Error('Error connecting to docker'));
 
         // https://github.com/dotcloud/docker/issues/1074 says each status message
@@ -162,7 +177,7 @@ function downloadImage(app, callback) {
         stream.on('end', function () {
             debug('pulled successfully');
 
-            var image = docker.getImage(manifest.docker_image);
+            var image = docker.getImage(manifest.dockerImage);
 
             image.inspect(function (err, data) {
                 if (err || !data || !data.Config) {
@@ -187,9 +202,9 @@ function createContainer(app, callback) {
         if (error) return callback(error);
 
         var env = [ ];
-        for (var containerPort in manifest.tcp_ports) {
+        for (var containerPort in manifest.tcpPorts) {
             if (!(containerPort in portBindings)) continue;
-            env.push(manifest.tcp_ports[containerPort].environment_variable + '=' + portBindings[containerPort]);
+            env.push(manifest.tcpPorts[containerPort].environmentVariable + '=' + portBindings[containerPort]);
         }
 
         env.push('APP_ORIGIN' + '=' + 'https://' + appFqdn(app.location));
@@ -205,14 +220,14 @@ function createContainer(app, callback) {
             var containerOptions = {
                 Hostname: appFqdn(app.location),
                 Tty: true,
-                Image: manifest.docker_image,
+                Image: manifest.dockerImage,
                 Cmd: null,
                 Volumes: { },
                 VolumesFrom: '',
                 Env: env
             };
 
-            debug('Creating container for ' + manifest.docker_image);
+            debug('Creating container for ' + manifest.dockerImage);
 
             docker.createContainer(containerOptions, function (error, container) {
                 if (error) return callback(new Error('Error creating container:' + error));
@@ -238,7 +253,7 @@ function deleteContainer(app, callback) {
 }
 
 function deleteImage(app, callback) {
-    var docker_image = app.manifest ? app.manifest.docker_image : '';
+    var docker_image = app.manifest ? app.manifest.dockerImage : '';
     var image = docker.getImage(docker_image);
 
     var removeOptions = {
@@ -278,7 +293,7 @@ function allocateOAuthCredentials(app, callback) {
     var id = app.id;
     var clientId = 'cid-' + uuid.v4();
     var clientSecret = uuid.v4();
-    var name = app.manifest.name;
+    var name = app.manifest.title;
     var redirectURI = 'https://' + appFqdn(app.location);
 
     debug('allocateOAuthCredentials:', id, clientId, clientSecret, name);
@@ -303,9 +318,9 @@ function startContainer(app, callback) {
         var appDataDir = path.join(config.appDataRoot, app.id);
 
         var portBindings = { };
-        portBindings[manifest.http_port + '/tcp'] = [ { HostPort: app.httpPort + '' } ];
+        portBindings[manifest.httpPort + '/tcp'] = [ { HostPort: app.httpPort + '' } ];
 
-        for (var containerPort in manifest.tcp_ports) {
+        for (var containerPort in manifest.tcpPorts) {
             if (!(containerPort in portConfigs)) continue;
             portBindings[containerPort + '/tcp'] = [ { HostPort: portConfigs[containerPort] } ];
             forwardFromHostToVirtualBox(app.id + '-tcp' + containerPort, portConfigs[containerPort]);

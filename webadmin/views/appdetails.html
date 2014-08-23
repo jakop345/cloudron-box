@@ -1,7 +1,7 @@
 <div class="animateMeOpacity ng-hide" ng-show="initialized">
     <div class="row">
         <div class="col-lg-12">
-            <h1 class="page-header"><img width="48" height="48" ng-src="{{ app.iconUrl }}"/>&nbsp; <a target="_blank" ng-href="https://{{ app.fqdn + app.manifest.home_url }}">{{ app.manifest.name }}</a></h1>
+            <h1 class="page-header"><img width="48" height="48" ng-src="{{ app.iconUrl }}"/>&nbsp; <a target="_blank" ng-href="https://{{ app.fqdn + app.manifest.home_url }}">{{ app.manifest.title }}</a></h1>
         </div>
     </div>
 
@@ -31,7 +31,7 @@
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                                    <h4 class="modal-title" id="deleteAppModalLabel">Really delete {{ app.manifest.name }}?</h4>
+                                    <h4 class="modal-title" id="deleteAppModalLabel">Really delete {{ app.manifest.title }}?</h4>
                                 </div>
                                 <div class="modal-body">
                                     Deleting the app will also remove all content generated within this app.

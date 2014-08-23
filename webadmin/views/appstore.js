@@ -51,7 +51,7 @@ var AppStoreController = function ($scope, $location, Client, AppStore) {
     };
 
     $scope.openApp = function (app) {
-        window.open('https://' + app.fqdn + app.manifest.home_url);
+        window.open('https://' + app.fqdn);
     };
 
     Client.onConfig(function (config) {
