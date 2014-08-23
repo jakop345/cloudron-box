@@ -50,7 +50,10 @@ var docker = null,
     RELOAD_NGINX_CMD = 'sudo ' + __dirname + '/reloadnginx.sh';
 
 function initialize(callback) {
-    if (os.platform() === 'linux') {
+    if (process.env.NODE_ENV === 'test') {
+        console.log('Docker requests redirected to 5687 in test environment');
+        docker = new Docker({ host: 'http://localhost', port: 5687 });
+    } else if (os.platform() === 'linux') {
         docker = new Docker({socketPath: '/var/run/docker.sock'});
     } else {
         docker = new Docker({ host: 'http://localhost', port: 2375 });

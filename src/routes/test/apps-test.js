@@ -19,8 +19,10 @@ var Server = require('../../server.js'),
     appdb = require('../../appdb.js'),
     url = require('url'),
     Docker = require('dockerode'),
+    assert = require('assert'),
     net = require('net'),
     config = require('../../../config.js'),
+    _ = require('underscore'),
     appFqdn = require('../../apps').appFqdn;
 
 var SERVER_URL = 'http://localhost:' + config.port;
@@ -32,6 +34,31 @@ var USERNAME = 'admin', PASSWORD = 'admin', EMAIL ='silly@me.com';
 var server;
 var docker = os.platform() === 'linux' ? new Docker({socketPath: '/var/run/docker.sock'}) : new Docker({ host: 'http://localhost', port: 2375 });
 var token = null; // authentication token
+
+function startDockerProxy(interceptor, callback) {
+    assert(typeof interceptor === 'function');
+
+    var http = require('http');
+    var dockerOptions;
+    if (os.platform() === 'linux') {
+        dockerOptions = { socketPath: '/var/run/docker.sock'};
+    } else {
+        dockerOptions = { host: 'localhost', port: 2375 };
+    }
+
+    return http.createServer(function (req, res) {
+        if (interceptor(req, res)) return;
+
+        var options = _.extend({ }, dockerOptions, { method: req.method, path: req.url, headers: req.headers });
+        var dockerRequest = http.request(options, function (dockerResponse) {
+            res.writeHead(dockerResponse.statusCode, dockerResponse.headers);
+            dockerResponse.pipe(res, { end: true });
+        });
+
+        req.pipe(dockerRequest, { end: true });
+
+    }).listen(5687, callback);
+}
 
 function setup(done) {
     server = new Server();
@@ -72,8 +99,18 @@ function cleanup(done) {
 }
 
 describe('App API', function () {
-    before(setup);
-    after(cleanup);
+    var dockerProxy;
+
+    before(function (done) {
+        setup(function () {
+            dockerProxy = startDockerProxy(function interceptor() { return false; }, done);
+        });
+    });
+    after(function (done) {
+        cleanup(function () {
+            dockerProxy.close(done);
+        });
+    });
 
     it('app install fails - missing password', function (done) {
         request.post(SERVER_URL + '/api/v1/app/install')
@@ -211,33 +248,55 @@ describe('App API', function () {
 describe('App installation', function () {
     this.timeout(50000);
 
-    var hockServer;
+    var hockServer, dockerProxy;
+    var imageDeleted = false, imageCreated = false;
 
     before(function (done) {
-        setup(function (error) {
-            if (error) return done(error);
+        async.series([
+            setup,
 
-            hock(parseInt(url.parse(config.appServerUrl).port, 10), function (error, server) {
-                if (error) return done(error);
-                var manifest = JSON.parse(fs.readFileSync(__dirname + '/test.app', 'utf8'));
-                hockServer = server;
+            function (callback) {
+                hock(parseInt(url.parse(config.appServerUrl).port, 10), function (error, server) {
+                    if (error) return done(error);
+                    var manifest = JSON.parse(fs.readFileSync(__dirname + '/test.app', 'utf8'));
+                    hockServer = server;
 
-                hockServer
-                    .get('/api/v1/appstore/apps/' + APP_ID + '/manifest')
-                    .reply(200, manifest, { 'Content-Type': 'application/json' })
-                    .post('/api/v1/subdomains?token=' + config.token, { subdomain: APP_LOCATION, id: APP_ID })
-                    .reply(201, { }, { 'Content-Type': 'application/json' })
-                    .delete('/api/v1/subdomains/' + APP_ID + '?token=' + config.token)
-                    .reply(200, { }, { 'Content-Type': 'application/json' });
-                done();
-            });
-        });
+                    hockServer
+                        .get('/api/v1/appstore/apps/' + APP_ID + '/manifest')
+                        .reply(200, manifest, { 'Content-Type': 'application/json' })
+                        .post('/api/v1/subdomains?token=' + config.token, { subdomain: APP_LOCATION, id: APP_ID })
+                        .reply(201, { }, { 'Content-Type': 'application/json' })
+                        .delete('/api/v1/subdomains/' + APP_ID + '?token=' + config.token)
+                        .reply(200, { }, { 'Content-Type': 'application/json' });
+                    callback();
+                });
+            },
+
+            function (callback) {
+                dockerProxy = startDockerProxy(function interceptor(req, res) {
+                    if (req.method === 'POST' && req.url === '/images/create?fromImage=girish%2Ftest&tag=0.3') {
+                        imageCreated = true;
+                        res.writeHead(200);
+                        res.end();
+                        return true;
+                    } else if (req.method === 'DELETE' && req.url === '/images/girish/test:0.3?force=true&noprune=false') {
+                        imageDeleted = true;
+                        res.writeHead(200);
+                        res.end();
+                        return true;
+                    }
+                    return false;
+                }, callback);
+            }
+        ], done);
     });
 
     after(function (done) {
         cleanup(function (error) {
             if (error) return done(error);
-            hockServer.close(done);
+            hockServer.close(function () {
+                dockerProxy.close(done);
+            });
         });
     });
 
@@ -264,6 +323,11 @@ describe('App installation', function () {
             expect(res.statusCode).to.equal(200);
             checkInstallStatus();
         });
+    });
+
+    it('installation - image created', function (done) {
+        expect(imageCreated).to.be.ok();
+        done();
     });
 
     it('installation - container created', function (done) {
@@ -389,13 +453,8 @@ describe('App installation', function () {
     });
 
     it('uninstalled - image destroyed', function (done) {
-        docker.getImage(appInfo.manifest.docker_image).inspect(function (error, data) {
-            if (data) {
-                console.log('image is still alive', data);
-            }
-            expect(error).to.be.ok();
-            done();
-        });
+        expect(imageDeleted).to.be.ok();
+        done();
     });
 
     it('uninstalled - volume destroyed', function (done) {
@@ -419,16 +478,18 @@ describe('App installation', function () {
 describe('App installation - port bindings', function () {
     this.timeout(50000);
 
-    var hockServer;
+    var hockServer, dockerProxy;
+    var imageDeleted = false, imageCreated = false;
 
     before(function (done) {
-        setup(function (error) {
-            if (error) return done(error);
+        async.series([
+            setup,
 
-            hock(parseInt(url.parse(config.appServerUrl).port, 10), function (error, server) {
-                if (error) return done(error);
-                var manifest = JSON.parse(fs.readFileSync(__dirname + '/test.app', 'utf8'));
-                hockServer = server;
+            function (callback) {
+                hock(parseInt(url.parse(config.appServerUrl).port, 10), function (error, server) {
+                    if (error) return done(error);
+                    var manifest = JSON.parse(fs.readFileSync(__dirname + '/test.app', 'utf8'));
+                    hockServer = server;
 
                 hockServer
                     .get('/api/v1/appstore/apps/' + APP_ID + '/manifest')
@@ -444,15 +505,36 @@ describe('App installation - port bindings', function () {
                     // app remove
                     .delete('/api/v1/subdomains/' + APP_ID + '?token=' + config.token)
                     .reply(200, { }, { 'Content-Type': 'application/json' });
-                done();
-            });
-        });
+
+                    callback();
+                });
+            },
+
+            function (callback) {
+                dockerProxy = startDockerProxy(function interceptor(req, res) {
+                    if (req.method === 'POST' && req.url === '/images/create?fromImage=girish%2Ftest&tag=0.3') {
+                        imageCreated = true;
+                        res.writeHead(200);
+                        res.end();
+                        return true;
+                    } else if (req.method === 'DELETE' && req.url === '/images/girish/test:0.3?force=true&noprune=false') {
+                        imageDeleted = true;
+                        res.writeHead(200);
+                        res.end();
+                        return true;
+                    }
+                    return false;
+                }, callback);
+            }
+        ], done);
     });
 
     after(function (done) {
         cleanup(function (error) {
             if (error) return done(error);
-            hockServer.close(done);
+            hockServer.close(function () {
+                dockerProxy.close(done);
+            });
         });
     });
 
@@ -479,6 +561,11 @@ describe('App installation - port bindings', function () {
             expect(res.statusCode).to.equal(200);
             checkInstallStatus();
         });
+    });
+
+    it('installation - image created', function (done) {
+        expect(imageCreated).to.be.ok();
+        done();
     });
 
     it('installation - container created', function (done) {
@@ -626,13 +713,8 @@ describe('App installation - port bindings', function () {
     });
 
     it('uninstalled - image destroyed', function (done) {
-        docker.getImage(appInfo.manifest.docker_image).inspect(function (error, data) {
-            if (data) {
-                console.log('image is still alive', data);
-            }
-            expect(error).to.be.ok();
-            done();
-        });
+        expect(imageDeleted).to.be.ok();
+        done();
     });
 
     it('uninstalled - volume destroyed', function (done) {
