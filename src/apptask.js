@@ -82,19 +82,26 @@ function reloadNginx(callback) {
     child_process.exec(RELOAD_NGINX_CMD, { timeout: 10000 }, callback);
 }
 
-function configureNginx(app, httpPort, callback) {
-    var sourceDir = path.resolve(__dirname, '..');
-    var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: appFqdn(app.location), port: httpPort });
-
-    var nginxConfigFilename = path.join(config.nginxAppConfigDir, app.location + '.conf');
-    debug('writing config to ' + nginxConfigFilename);
-
-    fs.writeFile(nginxConfigFilename, nginxConf, function (error) {
+function configureNginx(app, callback) {
+    getFreePort(function (error, freePort) {
         if (error) return callback(error);
 
-        exports._reloadNginx(callback);
+        var sourceDir = path.resolve(__dirname, '..');
+        var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: appFqdn(app.location), port: freePort });
 
-        forwardFromHostToVirtualBox(app.id + '-http', httpPort);
+        var nginxConfigFilename = path.join(config.nginxAppConfigDir, app.location + '.conf');
+        debug('writing config to ' + nginxConfigFilename);
+
+        fs.writeFile(nginxConfigFilename, nginxConf, function (error) {
+            if (error) return callback(error);
+
+            exports._reloadNginx(function (error) {
+                if (error) return callback(error);
+                updateApp(app, { httpPort: freePort }, callback);
+            });
+
+            forwardFromHostToVirtualBox(app.id + '-http', freePort);
+        });
     });
 }
 
@@ -170,41 +177,45 @@ function downloadImage(app, callback) {
     });
 }
 
-function createContainer(app, portConfigs, callback) {
+function createContainer(app, callback) {
     var manifest = app.manifest;
 
-    var env = [ ];
-    for (var containerPort in manifest.tcp_ports) {
-        if (!(containerPort in portConfigs)) continue;
-        env.push(manifest.tcp_ports[containerPort].environment_variable + '=' + portConfigs[containerPort]);
-    }
+    appdb.getPortBindings(app.id, function (error, portBindings) {
+        if (error) return callback(error);
 
-    env.push('APP_ORIGIN' + '=' + 'https://' + appFqdn(app.location));
-    env.push('ADMIN_ORIGIN' + '=' + config.adminOrigin);
+        var env = [ ];
+        for (var containerPort in manifest.tcp_ports) {
+            if (!(containerPort in portBindings)) continue;
+            env.push(manifest.tcp_ports[containerPort].environment_variable + '=' + portBindings[containerPort]);
+        }
 
-    // add oauth variables
-    clientdb.get(app.id, function (error, client) {
-        if (error) return callback(new Error('Error getting oauth info:', + error));
+        env.push('APP_ORIGIN' + '=' + 'https://' + appFqdn(app.location));
+        env.push('ADMIN_ORIGIN' + '=' + config.adminOrigin);
 
-        env.push('OAUTH_CLIENT_ID' + '=' + client.clientId);
-        env.push('OAUTH_CLIENT_SECRET' + '=' + client.clientSecret);
+        // add oauth variables
+        clientdb.get(app.id, function (error, client) {
+            if (error) return callback(new Error('Error getting oauth info:', + error));
 
-        var containerOptions = {
-            Hostname: appFqdn(app.location),
-            Tty: true,
-            Image: manifest.docker_image,
-            Cmd: null,
-            Volumes: { },
-            VolumesFrom: '',
-            Env: env
-        };
+            env.push('OAUTH_CLIENT_ID' + '=' + client.clientId);
+            env.push('OAUTH_CLIENT_SECRET' + '=' + client.clientSecret);
 
-        debug('Creating container for ' + manifest.docker_image);
+            var containerOptions = {
+                Hostname: appFqdn(app.location),
+                Tty: true,
+                Image: manifest.docker_image,
+                Cmd: null,
+                Volumes: { },
+                VolumesFrom: '',
+                Env: env
+            };
 
-        docker.createContainer(containerOptions, function (error, container) {
-            if (error) return callback(new Error('Error creating container:' + error));
+            debug('Creating container for ' + manifest.docker_image);
 
-            return callback(null, container.id);
+            docker.createContainer(containerOptions, function (error, container) {
+                if (error) return callback(new Error('Error creating container:' + error));
+
+                updateApp(app, { containerId: container.id }, callback);
+            });
         });
     });
 }
@@ -281,32 +292,36 @@ function removeOAuthCredentials(app, callback) {
     clientdb.del(app.id, callback);
 }
 
-function startContainer(app, portConfigs, callback) {
-    var manifest = app.manifest;
-    var appDataDir = path.join(config.appDataRoot, app.id);
+function startContainer(app, callback) {
+    appdb.getPortBindings(app.id, function (error, portConfigs) {
+        if (error) return callback(error);
 
-    var portBindings = { };
-    portBindings[manifest.http_port + '/tcp'] = [ { HostPort: app.httpPort + '' } ];
+        var manifest = app.manifest;
+        var appDataDir = path.join(config.appDataRoot, app.id);
 
-    for (var containerPort in manifest.tcp_ports) {
-        if (!(containerPort in portConfigs)) continue;
-        portBindings[containerPort + '/tcp'] = [ { HostPort: portConfigs[containerPort] } ];
-        forwardFromHostToVirtualBox(app.id + '-tcp' + containerPort, portConfigs[containerPort]);
-    }
+        var portBindings = { };
+        portBindings[manifest.http_port + '/tcp'] = [ { HostPort: app.httpPort + '' } ];
 
-    var startOptions = {
-        Binds: [ appDataDir + ':/app/data:rw' ],
-        PortBindings: portBindings,
-        PublishAllPorts: false
-    };
+        for (var containerPort in manifest.tcp_ports) {
+            if (!(containerPort in portConfigs)) continue;
+            portBindings[containerPort + '/tcp'] = [ { HostPort: portConfigs[containerPort] } ];
+            forwardFromHostToVirtualBox(app.id + '-tcp' + containerPort, portConfigs[containerPort]);
+        }
 
-    var container = docker.getContainer(app.containerId);
-    debug('Starting container ' + container.id + ' with options: ' + JSON.stringify(startOptions));
+        var startOptions = {
+            Binds: [ appDataDir + ':/app/data:rw' ],
+            PortBindings: portBindings,
+            PublishAllPorts: false
+        };
 
-    container.start(startOptions, function (error, data) {
-        if (error) return callback(new Error('Error starting container:' + error));
+        var container = docker.getContainer(app.containerId);
+        debug('Starting container ' + container.id + ' with options: ' + JSON.stringify(startOptions));
 
-        return callback(null);
+        container.start(startOptions, function (error, data) {
+            if (error) return callback(new Error('Error starting container:' + error));
+
+            return callback(null);
+        });
     });
 }
 
@@ -338,7 +353,11 @@ function downloadManifest(app, callback) {
             if (res.status !== 200) return callback(new Error('Error downloading manifest. Status' + res.status + '. ' + JSON.stringify(res.body)));
 
             debug('Downloaded application manifest: ' + res.text);
-            return callback(null, res.text);
+
+            var manifest = safe.JSON.parse(res.text);
+            if (!manifest) return callback(new Error('Error parsing manifest:' + safe.error));
+
+            updateApp(app, { manifest: manifest }, callback);
         });
 }
 
@@ -401,101 +420,31 @@ function updateApp(app, values, callback) {
 function install(app, callback) {
     async.series([
         // configure nginx
-        function (callback) {
-            getFreePort(function (error, freePort) {
-                if (error) return callback(error);
-                configureNginx(app, freePort, function (error) {
-                    if (error) return callback(error);
-
-                    updateApp(app, { httpPort: freePort }, callback);
-                });
-            });
-        },
+        configureNginx.bind(null, app),
 
         // register subdomain
-        function (callback) {
-            updateApp(app, { installationState: appdb.ISTATE_REGISTERING_SUBDOMAIN }, function (error) {
-                if (error) return callback(error);
-
-                registerSubdomain(app, function (error) {
-                    if (error) return callback(error);
-
-                    callback(null);
-                });
-            });
-        },
+        updateApp.bind(null, app, { installationState: appdb.ISTATE_REGISTERING_SUBDOMAIN }),
+        registerSubdomain.bind(null, app),
 
         // download manifest
-        function (callback) {
-            updateApp(app, { installationState: appdb.ISTATE_DOWNLOADING_MANIFEST }, function (error) {
-                if (error) return callback(error);
-
-                downloadManifest(app, function (error, manifestJson) {
-                    if (error) return callback(error);
-
-                    var manifest = safe.JSON.parse(manifestJson);
-                    if (!manifest) return callback(new Error('Error parsing manifest:' + safe.error));
-
-                    updateApp(app, { manifest: manifest }, callback);
-                });
-            });
-        },
+        updateApp.bind(null, app, { installationState: appdb.ISTATE_DOWNLOADING_MANIFEST }),
+        downloadManifest.bind(null, app),
 
         // download the image
-        function (callback) {
-            updateApp(app, { installationState: appdb.ISTATE_DOWNLOADING_IMAGE }, function (error) {
-                if (error) return callback(error);
-
-                downloadImage(app, function (error) {
-                    if (error) return callback(error);
-
-                    callback(null);
-                });
-            });
-        },
+        updateApp.bind(null, app, { installationState: appdb.ISTATE_DOWNLOADING_IMAGE }),
+        downloadImage.bind(null, app),
 
         // allocate OAuth credentials
-        function (callback) {
-            updateApp(app, { installationState: appdb.ISTATE_ALLOCATE_OAUTH_CREDENTIALS }, function (error) {
-                if (error) return callback(error);
-
-                allocateOAuthCredentials(app, function (error) {
-                    if (error) return callback(error);
-
-                    callback(null);
-                });
-            });
-        },
+        updateApp.bind(null, app, { installationState: appdb.ISTATE_ALLOCATE_OAUTH_CREDENTIALS }),
+        allocateOAuthCredentials.bind(null, app),
 
         // create container
-        function (callback) {
-            appdb.getPortBindings(app.id, function (error, portBindings) {
-                if (error) return callback(error);
-
-                updateApp(app, { installationState: appdb.ISTATE_CREATING_CONTAINER }, function (error) {
-                    if (error) return callback(error);
-
-                    createContainer(app, portBindings, function (error, containerId) {
-                        if (error) return callback(error);
-
-                        updateApp(app, { containerId: containerId }, callback);
-                    });
-                });
-            });
-        },
+        updateApp.bind(null, app, { installationState: appdb.ISTATE_CREATING_CONTAINER }),
+        createContainer.bind(null, app),
 
         // create data volume
-        function (callback) {
-            updateApp(app, { installationState: appdb.ISTATE_CREATING_VOLUME }, function (error) {
-                if (error) return callback(error);
-
-                createVolume(app, function (error) {
-                    if (error) return callback(error);
-
-                    callback(null);
-                });
-            });
-        },
+        updateApp.bind(null, app, { installationState: appdb.ISTATE_CREATING_VOLUME }),
+        createVolume.bind(null, app),
 
         // done!
         function (callback) {
@@ -563,17 +512,13 @@ function uninstall(app, callback) {
 
 
 function runApp(app, callback) {
-    appdb.getPortBindings(app.id, function (error, portBindings) {
-        if (error) return callback(error);
+    startContainer(app, function (error) {
+        if (error) {
+            console.error('Error creating container.', error);
+            return updateApp(app, { runState: appdb.RSTATE_ERROR }, callback);
+        }
 
-        startContainer(app, portBindings, function (error) {
-            if (error) {
-                console.error('Error creating container.', error);
-                return updateApp(app, { runState: appdb.RSTATE_ERROR }, callback);
-            }
-
-            updateApp(app, { runState: appdb.RSTATE_RUNNING }, callback);
-        });
+        updateApp(app, { runState: appdb.RSTATE_RUNNING }, callback);
     });
 }
 

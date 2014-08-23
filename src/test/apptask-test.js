@@ -15,6 +15,7 @@ var apptask = require('../apptask.js'),
     mkdirp = require('mkdirp'),
     rimraf = require('rimraf'),
     fs = require('fs'),
+    appdb = require('../appdb.js'),
     nock = require('nock');
 
 var APP = {
@@ -26,7 +27,8 @@ var APP = {
         name: 'testapplication'
     },
     containerId: null,
-    httpPort: 4567
+    httpPort: 4567,
+    portBindings: null
 };
 
 before(function (done) {
@@ -36,7 +38,7 @@ before(function (done) {
 
     database.create(function (error) {
         expect(error).to.be(null);
-        done();
+        appdb.add(APP.id, APP.installationState, APP.location, APP.portBindings, done);
     });
 });
 
@@ -60,7 +62,7 @@ describe('apptask', function () {
     });
 
     it('configure nginx correctly', function (done) {
-        apptask._configureNginx(APP, 4545, function (error) {
+        apptask._configureNginx(APP, function (error) {
             expect(fs.existsSync(config.nginxAppConfigDir + '/' + APP.location + '.conf'));
             // expect(error).to.be(null); // this fails because nginx cannot be restarted
             done();
@@ -140,7 +142,7 @@ describe('apptask', function () {
     });
 
     it('downloads manifest', function (done) {
-        var scope = nock(config.appServerUrl).get('/api/v1/appstore/apps/' + APP.id + '/manifest').reply(200, 'manifest_json_string');
+        var scope = nock(config.appServerUrl).get('/api/v1/appstore/apps/' + APP.id + '/manifest').reply(200, { });
 
         apptask._downloadManifest(APP, function (error) {
             expect(error).to.be(null);
