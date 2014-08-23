@@ -467,7 +467,7 @@ function configure(app, callback) {
         stopApp.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: 'Unconfiguring nginx' }),
-      //  unconfigureNginx.bind(null, app),
+        unconfigureNginx.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: 'Deleting container' }),
         deleteContainer.bind(null, app),
