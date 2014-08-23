@@ -62,6 +62,7 @@ config.save = function () {
     config.token = null;
     config.nakedDomain = null;
     config.ip = null;
+    config.version = '0';
 
     mkdirp.sync(config.baseDir);
     config.save();

@@ -21,6 +21,7 @@ var express = require('express'),
     exec = require('child_process').exec,
     df = require('nodejs-disks'),
     apps = require('./apps'),
+    Updater = require('./updater.js'),
     middleware = require('./middleware'),
     database = require('./database.js'),
     clientdb = require('./clientdb.js'),
@@ -37,6 +38,7 @@ function Server() {
     this.httpServer = null; // http server
     this.app = null; // express
     this._announceTimerId = null;
+    this._updater = null;
 }
 
 // Success handler
@@ -491,6 +493,11 @@ Server.prototype.start = function (callback) {
 
     var that = this;
 
+    this._updater = new Updater();
+    this._updater.on('new_version', function (revision) {
+        console.log('New version available:', revision);
+    });
+
     this._initializeExpressSync();
     this._sendHeartBeat();
 
@@ -501,8 +508,9 @@ Server.prototype.start = function (callback) {
 
         apps.initialize();
 
-        that.httpServer = http.createServer(that.app);
+        that._updater.start();
 
+        that.httpServer = http.createServer(that.app);
         that.httpServer.listen(config.port, callback);
     });
 };
@@ -515,6 +523,8 @@ Server.prototype.stop = function (callback) {
     if (!this.httpServer) {
         return callback(null);
     }
+
+    that._updater.stop();
 
     clearTimeout(this._announceTimerId);
     this._announceTimerId = null;
