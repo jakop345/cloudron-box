@@ -519,40 +519,25 @@ function uninstall(app, callback) {
             callback(null);
         },
 
-        // unconfigure nginx
-        function (callback) {
-            unconfigureNginx(app, function (error) { callback(null); });
-        },
+        updateApp.bind(null, app, { installationProgress: 'Unconfiguring Nginx' }),
+        unconfigureNginx.bind(null, app),
 
-        // delete the container
-        function (callback) {
-            deleteContainer(app, function (error) { callback(null); });
-        },
+        updateApp.bind(null, app, { installationProgress: 'Deleting container' }),
+        deleteContainer.bind(null, app),
 
-        // delete the image
-        function (callback) {
-            deleteImage(app, function (error) { callback(null); });
-        },
+        updateApp.bind(null, app, { installationProgress: 'Deleting image' }),
+        deleteImage.bind(null, app),
 
-        // remove OAuth credentials
-        function (callback) {
-            removeOAuthCredentials(app, function (error) { callback(null); });
-        },
+        updateApp.bind(null, app, { installationProgress: 'Remove OAuth credentials' }),
+        removeOAuthCredentials.bind(null, app),
 
-        // delete volume
-        function (callback) {
-            deleteVolume(app, function (error) { callback(null); });
-        },
+        updateApp.bind(null, app, { installationProgress: 'Deleting volume' }),
+        deleteVolume.bind(null, app),
 
-        // unregister subdomain
-        function (callback) {
-            unregisterSubdomain(app, function (error) { callback(null); });
-        },
+        updateApp.bind(null, app, { installationProgress: 'Unregistering subdomain' }),
+        unregisterSubdomain.bind(null, app),
 
-        // delete app from db
-        function (callback) {
-            appdb.del(app.id, callback);
-        },
+        appdb.del(null, app.id)
     ], callback);
 }
 
