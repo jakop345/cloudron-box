@@ -499,7 +499,7 @@ function configure(app, callback) {
         }
     ], function seriesDone(error) {
         if (error) {
-            console.error('Error reconfiguring app:', error);
+            console.error('Error reconfiguring app:', app, error);
             return updateApp(app, { installationState: appdb.ISTATE_ERROR, installationProgress: error.message }, callback.bind(null, error));
         }
         callback(null);
