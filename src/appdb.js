@@ -39,17 +39,38 @@ exports = module.exports = {
     RSTATE_NOT_RESPONDING: 'not_responding'
 };
 
+function postProcess(result) {
+    assert(result.manifestJson === null || typeof result.manifestJson === 'string');
+
+    result.manifest = safe.JSON.parse(result.manifestJson);
+    delete result.manifestJson;
+
+    assert(result.hostPorts === null || typeof result.hostPorts === 'string');
+    assert(result.containerPorts === null || typeof result.containerPorts === 'string');
+
+    result.portBindings = [ ];
+    var hostPorts = result.hostPorts === null ? [ ] : result.hostPorts.split(',');
+    var containerPorts = result.containerPorts === null ? [ ] : result.containerPorts.split(',');
+
+    delete result.hostPorts;
+    delete result.containerPorts;
+
+    for (var i = 0; i < hostPorts.length; i++) {
+        result.portBindings.push({ hostPort: hostPorts[i], containerPort: containerPorts[i] });
+    }
+}
+
 function get(id, callback) {
     assert(typeof id === 'string');
     assert(typeof callback === 'function');
 
-    database.get('SELECT * FROM apps WHERE id = ?', [ id ], function (error, result) {
+    database.get('SELECT apps.*, GROUP_CONCAT(appPortBindings.hostPort) AS hostPorts, GROUP_CONCAT(appPortBindings.containerPort) AS containerPorts'
+                 + ' FROM apps LEFT OUTER JOIN appPortBindings WHERE apps.id = ? GROUP BY appPortBindings.appId', [ id ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
-        result.manifest = safe.JSON.parse(result.manifestJson);
-        delete result.manifestJson;
+        postProcess(result);
 
         callback(null, result);
     });
@@ -59,28 +80,26 @@ function getBySubdomain(subdomain, callback) {
     assert(typeof subdomain === 'string');
     assert(typeof callback === 'function');
 
-    database.get('SELECT * FROM apps WHERE location = ?', [ subdomain ], function (error, result) {
+    database.get('SELECT apps.*, GROUP_CONCAT(appPortBindings.hostPort) AS hostPorts, GROUP_CONCAT(appPortBindings.containerPort) AS containerPorts'
+                 + '  FROM apps LEFT OUTER JOIN appPortBindings WHERE location = ? GROUP BY appPortBindings.appId', [ subdomain ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
-        result.manifest = safe.JSON.parse(result.manifestJson);
-        delete result.manifestJson;
+        postProcess(result);
 
         callback(null, result);
     });
 }
 
 function getAll(callback) {
-    database.all('SELECT * FROM apps', function (error, results) {
+    database.all('SELECT apps.*, GROUP_CONCAT(appPortBindings.hostPort) AS hostPorts, GROUP_CONCAT(appPortBindings.containerPort) AS containerPorts'
+                 + ' FROM apps LEFT OUTER JOIN appPortBindings ON apps.id = appPortBindings.appId GROUP BY appPortBindings.appId', function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         if (typeof results === 'undefined') results = [ ];
 
-        results.forEach(function (result) {
-            result.manifest = safe.JSON.parse(result.manifestJson);
-            delete result.manifestJson;
-        });
+        results.forEach(postProcess);
 
         callback(null, results);
     });

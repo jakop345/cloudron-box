@@ -224,7 +224,8 @@ describe('database', function () {
             location: 'some-location-0',
             manifest: null,
             httpPort: null,
-            containerId: null
+            containerId: null,
+            portBindings: [ { containerPort: 1234, hostPort: 5678 } ]
         };
         var APP_1 = {
             id: 'appid-1',
@@ -233,7 +234,8 @@ describe('database', function () {
             location: 'some-location-1',
             manifest: null,
             httpPort: null,
-            containerId: null
+            containerId: null,
+            portBindings: [ ]
         };
 
         it('add fails due to missing arguments', function () {
@@ -242,7 +244,7 @@ describe('database', function () {
         });
 
         it('add succeeds', function (done) {
-            appdb.add(APP_0.id, APP_0.installationState, APP_0.location, [ { containerPort: 1234, hostPort: 5678 } ], function (error) {
+            appdb.add(APP_0.id, APP_0.installationState, APP_0.location, APP_0.portBindings, function (error) {
                 expect(error).to.be(null);
                 done();
             });
@@ -319,8 +321,8 @@ describe('database', function () {
                 expect(error).to.be(null);
                 expect(result).to.be.an(Array);
                 expect(result.length).to.be(2);
-                expect(result[0]).to.be.eql(APP_0);
-                expect(result[1]).to.be.eql(APP_1);
+                expect(result[1]).to.be.eql(APP_0);
+                expect(result[0]).to.be.eql(APP_1);
                 done();
             });
         });
