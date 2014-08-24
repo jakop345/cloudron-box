@@ -246,10 +246,13 @@ function start(appId, callback) {
         if (app.installationState !== appdb.ISTATE_INSTALLED) return callback(new AppsError(AppsError.BAD_STATE, 'App not in installed state'));
         if (app.runState !== appdb.RSTATE_STOPPED && app.runState !== appdb.RSTATE_ERROR) return callback(new AppsError(AppsError.BAD_STATE, 'Cannot start app with runState:' + app.runState));
 
-        stopTask(appId);
-        startTask(appId);
+        appdb.update(appId, { runState: appdb.RSTATE_PENDING_START }, function (error) {
+            stopTask(appId);
+            startTask(appId);
 
-        callback(null);
+            callback(null);
+        });
+
     });
 }
 

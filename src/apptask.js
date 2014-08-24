@@ -572,7 +572,7 @@ function uninstall(app, callback) {
 function runApp(app, callback) {
     startContainer(app, function (error) {
         if (error) {
-            console.error('Error creating container.', error);
+            console.error('Error starting container.', error);
             return updateApp(app, { runState: appdb.RSTATE_ERROR }, callback);
         }
 
@@ -596,21 +596,21 @@ function startTask(appId, callback) {
         debug('ISTATE:' + app.installationState + ' RSTATE:' + app.runState);
 
         if (app.installationState === appdb.ISTATE_PENDING_UNINSTALL) {
-            uninstall(app, callback);
-            return;
+            return uninstall(app, callback);
         }
 
         if (app.installationState === appdb.ISTATE_PENDING_CONFIGURE) {
-            configure(app, callback);
-            return;
+            return configure(app, callback);
         }
 
         if (app.installationState === appdb.ISTATE_INSTALLED) {
             if (app.runState === appdb.RSTATE_PENDING_STOP) {
                 stopApp(app, callback);
-            } else {
-                debug('Resuming app : %s', app.id);
+            } else if (app.runState === appdb.RSTATE_PENDING_START || app.runState === appdb.RSTART_RUNNING) {
+                console.log('Resuming app with state : %s %s', app.runState, app.id);
                 runApp(app, callback);
+            } else {
+                callback(null);
             }
 
             return;
