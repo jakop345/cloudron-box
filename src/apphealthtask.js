@@ -46,11 +46,11 @@ function checkAppHealth(app, callback) {
     var container = docker.getContainer(app.containerId),
         manifest = app.manifest;
 
-    function updateApp(app, values, callback) {
-        for (var value in values) {
-            app[value] = values[value];
-        }
-        appdb.update(app.id, values, function (error) {
+    function setHealth(app, healthy, runState, callback) {
+        app.healthy = healthy;
+        app.runState = runState;
+
+        appdb.setHealth(app.id, healthy, runState, function (error) {
             if (error && error.reason === DatabaseError.NOT_FOUND) { // app got uninstalled
                 return callback(null);
             }
@@ -62,12 +62,12 @@ function checkAppHealth(app, callback) {
     container.inspect(function (err, data) {
         if (err || !data || !data.State) {
             debug('Error inspecting container');
-            return updateApp(app, { healthy: 0, runState: appdb.RSTATE_ERROR }, callback);
+            return setHealth(app, false, appdb.RSTATE_ERROR, callback);
         }
 
         if (data.State.Running !== true) {
             debug(app.id + ' has exited');
-            return updateApp(app, { healthy: 0, runState: appdb.RSTATE_STOPPED }, callback);
+            return setHealth(app, false, appdb.RSTATE_STOPPED, callback);
         }
 
         var healthCheckUrl = 'http://127.0.0.1:' + app.httpPort + manifest.healthCheckPath;
@@ -78,10 +78,10 @@ function checkAppHealth(app, callback) {
 
             if (error || res.status !== 200) {
                 debug('Marking application as dead: ' + app.id);
-                updateApp(app, { healthy: 0, runState: appdb.RSTATE_RUNNING }, callback);
+                setHealth(app, false, appdb.RSTATE_RUNNING, callback);
             } else {
                 debug('healthy app:' + app.id);
-                updateApp(app, { healthy: 1, runState: appdb.RSTATE_RUNNING }, callback);
+                setHealth(app, true, appdb.RSTATE_RUNNING, callback);
             }
         });
     });

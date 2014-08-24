@@ -18,6 +18,7 @@ exports = module.exports = {
     update: update,
     getAll: getAll,
     getPortBindings: getPortBindings,
+    setHealth: setHealth,
 
     // status codes
     ISTATE_PENDING_INSTALL: 'pending_install',
@@ -222,6 +223,18 @@ function update(id, app, callback) {
 
             database.commit(conn, callback);
         });
+    });
+}
+
+// sets health as long as there is no pending command
+function setHealth(appId, healthy, rstate, callback) {
+    database.run('UPDATE app SET healthy = ?, runState = ? ' +
+                 'WHERE id = ? AND runState != "' + exports.RSTATE_PENDING_STOP + '" AND runState != "' + exports.RSTATE_PENDING_START + '"',
+                 [ healthy, rstate ], function (error) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        if (this.changes !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
+
+        return callback(null);
     });
 }
 
