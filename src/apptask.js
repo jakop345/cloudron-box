@@ -247,7 +247,7 @@ function deleteContainer(app, callback) {
     };
 
     container.remove(removeOptions, function (error) {
-        if (error) debug('Error removing container', error);
+        if (error) console.error('Error removing container', error);
         callback(error);
     });
 }
@@ -262,7 +262,7 @@ function deleteImage(app, callback) {
     };
 
     image.remove(removeOptions, function (error) {
-        if (error) debug('Error removing image', error);
+        if (error) console.error('Error removing image', error);
         callback(error);
     });
 }
