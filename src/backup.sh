@@ -15,12 +15,17 @@ fi
 
 NOW=$(date +%Y%m%dT%H%M%S)
 LOG=/var/log/backup-${NOW}.log
-exec 2>&1 1> $LOG
+# exec 2>&1 1> $LOG
 
-[ -z "$S3_KEY" ] && echo "S3_KEY environ not set" && exit 1;
-[ -z "$S3_SECRET" ] && echo "S3_SECRET environ not set" && exit 1;
-[ -z "$S3_PREFIX" ] && echo "S3_PREFIX environ not set" && exit 1;
-[ -z "$S3_BUCKET" ] && echo "S3_BUCKET environ not set" && exit 1;
+if [ $# -ne 4 ]; then
+    echo "No arguments supplied"
+    exit 1
+fi
+
+S3_KEY=$1
+S3_SECRET=$2
+S3_PREFIX=$3
+S3_BUCKET=$4
 
 # Stop the box
 echo "Stopping box"
