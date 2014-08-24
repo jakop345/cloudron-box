@@ -609,6 +609,7 @@ function startTask(appId, callback) {
             if (app.runState === appdb.RSTATE_PENDING_STOP) {
                 stopApp(app, callback);
             } else {
+                debug('Resuming app : %s', app.id);
                 runApp(app, callback);
             }
 
