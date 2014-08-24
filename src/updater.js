@@ -4,6 +4,9 @@
 
 var debug = require('debug')('box:updater'),
     superagent = require('superagent'),
+    path = require('path'),
+    assert = require('assert'),
+    exec = require('child_process').exec,
     config = require('../config.js');
 
 module.exports = exports = Updater;
@@ -51,4 +54,26 @@ Updater.prototype.stop = function () {
     debug('stop');
 
     clearInterval(this.checkInterval);
+};
+
+Updater.prototype.update = function (callback) {
+    assert(typeof callback === 'function');
+
+    var command = 'sudo ' + path.join(__dirname, '../scripts/update.sh');
+    var options = {
+        cwd: path.join(__dirname, '..')
+    };
+
+    debug('update: use command "%s".', command);
+
+    exec(command, options, function (error, stdout, stderr) {
+        if (error) {
+            console.error('Error running update script.', stdout, stderr);
+            return callback(error);
+        }
+
+        debug('update: success.', stdout, stderr);
+
+        callback(null);
+    });
 };

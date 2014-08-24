@@ -144,23 +144,9 @@ Server.prototype._getCloudronStats = function (req, res, next) {
     });
 };
 
-// TODO this is only for convenience so far, will be replaced by an update framework
 Server.prototype._update = function (req, res, next) {
-    var updateScript = path.join(__dirname, '../scripts/update.sh');
-    var options = {
-        cwd: path.join(__dirname, '..')
-    };
-
-    debug('_update: use script %s.', updateScript);
-
-    exec(updateScript, options, function (error, stdout, stderr) {
-        if (error) {
-            console.error('Error running update script.', stdout, stderr);
-            return next(new HttpError(500, error));
-        }
-
-        debug('_update: success.', stdout, stderr);
-
+    this._updater.update(function (error) {
+        if (error) return next(new HttpError(500, error));
         res.send(200, {});
     });
 };
