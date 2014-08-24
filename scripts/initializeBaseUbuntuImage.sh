@@ -108,9 +108,10 @@ cat > /etc/init.d/bootstrap <<EOF
 
 set -v
 
-LOG="/var/log/bootstrap"
+mkdir -p /var/log/cloudron
 
-exec 2>&1 1> \$LOG
+exec > >(tee /var/log/cloudron/bootstrap_init.log)
+exec 2>&1 1>
 
 echo "[II] Update to latest git revision..."
 cd $SRCDIR

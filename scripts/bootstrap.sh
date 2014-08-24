@@ -1,5 +1,8 @@
 #!/bin/sh
 
+exec > >(tee /var/log/cloudron/bootstrap.log)
+exec 2>&1 1>
+
 set -e
 
 echo "Box bootstrapping"
@@ -12,8 +15,10 @@ BACKUP_DIR=/home/$USER/.yellowtent
 APP_SERVER_URL=$1
 
 echo "==== Setup /etc/yellowtent ===="
-mkdir -p  /etc/yellowtent
+mkdir -p /etc/yellowtent
 
+echo "==== Setup /var/log/cloudron ===="
+mkdir -p /var/log/cloudron/
 
 echo "==== Sudoers file for app removal ===="
 cat > /etc/sudoers.d/yellowtent <<EOF

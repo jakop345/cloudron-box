@@ -31,6 +31,9 @@ echo ""
 
 BASEDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
 
+exec > >(tee /var/log/cloudron/update.log)
+exec 2>&1
+
 info "Perform update in $BASEDIR"
 cd $BASEDIR;
 
@@ -39,16 +42,19 @@ git fetch
 check "Done"
 
 info "Reset repo to latest code..."
-git reset --hard origin/master
+# git reset --hard origin/master
 check "Done"
 
 info "Run release update script..."
-# TODO run custom update script for this release
-check "Done"
-
-info "Get new node modules..."
-npm install --production
-check "Done"
+cd $BASEDIR/scripts/update
+UPDATE_FILE=`ls -1 -v -B *.sh | tail -n 1`
+info "Release update script is $UPDATE_FILE"
+/bin/bash $UPDATE_FILE 2>&1
+if [[ $? != 0 ]]; then
+    echo "Failed to run $UPDATE_FILE"
+else
+    echo "Successfully ran $UPDATE_FILE"
+fi
 
 info "Restart the box code..."
 OUT=`supervisorctl restart box`
