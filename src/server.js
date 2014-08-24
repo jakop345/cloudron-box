@@ -33,13 +33,15 @@ var express = require('express'),
 exports = module.exports = Server;
 
 var HEARTBEAT_INTERVAL = 1000 * 60 * 60;
-var RELOAD_NGINX_CMD = 'sudo ' + __dirname + '/reloadnginx.sh';
+var RELOAD_NGINX_CMD = 'sudo ' + path.join(__dirname, 'reloadnginx.sh');
 
 function Server() {
     this.httpServer = null; // http server
     this.app = null; // express
     this._announceTimerId = null;
     this._updater = null;
+
+    this.RESTORE_CMD = 'sudo ' + path.join(__dirname, '../scripts/restore.sh');
 }
 
 // Success handler
@@ -148,6 +150,40 @@ Server.prototype._update = function (req, res, next) {
     this._updater.update(function (error) {
         if (error) return next(new HttpError(500, error));
         res.send(200, {});
+    });
+};
+
+Server.prototype._restore = function (req, res, next) {
+    if (!req.body.token) return next(new HttpError(400, 'No token provided'));
+    if (!req.body.fileName) return next(new HttpError(400, 'No restore file name provided'));
+    if (!req.body.aws) return next(new HttpError(400, 'No aws credentials provided'));
+    if (!req.body.aws.prefix) return next(new HttpError(400, 'No aws prefix provided'));
+    if (!req.body.aws.bucket) return next(new HttpError(400, 'No aws bucket provided'));
+    if (!req.body.aws.accessKeyId) return next(new HttpError(400, 'No aws access key provided'));
+    if (!req.body.aws.secretAccessKey) return next(new HttpError(400, 'No aws secret provided'));
+
+    debug('_restore: received from appstore ' + req.body.appServerUrl);
+
+    var args = [
+        req.body.token,
+        req.body.fileName,
+        req.body.aws.prefix,
+        req.body.aws.bucket,
+        req.body.aws.accessKeyId,
+        req.body.aws.secretAccessKey
+    ];
+
+    var restoreCommandLine = this.RESTORE_CMD + ' ' + args.join(' ');
+    debug('_restore: execute "%s".', restoreCommandLine);
+    exec(restoreCommandLine, {}, function (error, stdout, stderr) {
+        if (error) {
+            console.error('Restore failed.', error, stdout, stderr);
+            return next(new HttpError(500, error));
+        }
+
+        debug('_restore: success');
+
+        next(new HttpSuccess(200, {}));
     });
 };
 
@@ -277,6 +313,7 @@ Server.prototype._initializeExpressSync = function () {
     router.get('/api/v1/version', this._getVersion.bind(this));
     router.get('/api/v1/firsttime', this._firstTime.bind(this));
     router.post('/api/v1/provision', this._provision.bind(this));    // FIXME any number of admins can be created without auth!
+    router.post('/api/v1/restore', this._restore.bind(this));    // FIXME any number of admins can be created without auth!
     router.post('/api/v1/createadmin', routes.user.createAdmin);    // FIXME any number of admins can be created without auth!
 
     // config.json

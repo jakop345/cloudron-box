@@ -171,6 +171,149 @@ describe('Server', function () {
         });
     });
 
+    describe('restore', function () {
+        var server;
+
+        before(function (done) {
+            server = new Server();
+            server.start(done);
+        });
+
+        after(function (done) {
+            server.stop(function () {
+                done();
+            });
+        });
+
+        it('fails due to missing token', function (done) {
+            var data = {
+                fileName: 'somes3filename',
+                aws: {
+                    prefix: 'somes3prefix',
+                    bucket: 'somes3bucket',
+                    accessKeyId: 'someawskey',
+                    secretAccessKey: 'someawssecret'
+                }
+            };
+            request.post(SERVER_URL + '/api/v1/restore').send(data).end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(400);
+                done();
+            });
+        });
+
+        it('fails due to missing fileName', function (done) {
+            var data = {
+                token: 'boxtoken',
+                aws: {
+                    prefix: 'somes3prefix',
+                    bucket: 'somes3bucket',
+                    accessKeyId: 'someawskey',
+                    secretAccessKey: 'someawssecret'
+                }
+            };
+            request.post(SERVER_URL + '/api/v1/restore').send(data).end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(400);
+                done();
+            });
+        });
+
+        it('fails due to missing aws prefix', function (done) {
+            var data = {
+                token: 'boxtoken',
+                fileName: 'somes3filename',
+                aws: {
+                    bucket: 'somes3bucket',
+                    accessKeyId: 'someawskey',
+                    secretAccessKey: 'someawssecret'
+                }
+            };
+            request.post(SERVER_URL + '/api/v1/restore').send(data).end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(400);
+                done();
+            });
+        });
+
+        it('fails due to missing aws bucket', function (done) {
+            var data = {
+                token: 'boxtoken',
+                fileName: 'somes3filename',
+                aws: {
+                    prefix: 'somes3prefix',
+                    accessKeyId: 'someawskey',
+                    secretAccessKey: 'someawssecret'
+                }
+            };
+            request.post(SERVER_URL + '/api/v1/restore').send(data).end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(400);
+                done();
+            });
+        });
+
+        it('fails due to missing aws secret', function (done) {
+            var data = {
+                token: 'boxtoken',
+                fileName: 'somes3filename',
+                aws: {
+                    prefix: 'somes3prefix',
+                    bucket: 'somes3bucket',
+                    accessKeyId: 'someawskey',
+                }
+            };
+            request.post(SERVER_URL + '/api/v1/restore').send(data).end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(400);
+                done();
+            });
+        });
+
+        it('fails due to missing aws key id', function (done) {
+            var data = {
+                token: 'boxtoken',
+                fileName: 'somes3filename',
+                aws: {
+                    prefix: 'somes3prefix',
+                    bucket: 'somes3bucket',
+                    secretAccessKey: 'someawssecret'
+                }
+            };
+            request.post(SERVER_URL + '/api/v1/restore').send(data).end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(400);
+                done();
+            });
+        });
+
+        it('fails due to missing restore.sh', function (done) {
+            // CAUTION!!! override console.error to reduce noise
+            var tmp = console.error;
+            console.error = function () {};
+
+            var data = {
+                token: 'boxtoken',
+                fileName: 'somes3filename',
+                aws: {
+                    prefix: 'somes3prefix',
+                    bucket: 'somes3bucket',
+                    accessKeyId: 'someawskey',
+                    secretAccessKey: 'someawssecret'
+                }
+            };
+            server.RESTORE_CMD = 'foobar';
+            request.post(SERVER_URL + '/api/v1/restore').send(data).end(function (error, result) {
+                expect(error).to.not.ok();
+                expect(result.statusCode).to.equal(500);
+
+                console.error = tmp;
+
+                done();
+            });
+        });
+    });
+
     describe('cors', function () {
         var server;
 
