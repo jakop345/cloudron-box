@@ -70,6 +70,7 @@ AppsError.INTERNAL_ERROR = 1;
 AppsError.ALREADY_EXISTS = 2;
 AppsError.NOT_FOUND = 3;
 AppsError.BAD_FIELD = 4;
+AppsError.BAD_STATE = 5;
 
 function appFqdn(location) {
     return location + '-' + config.fqdn;
@@ -242,8 +243,8 @@ function start(appId, callback) {
         debug('Will start app with id : ' + appId);
         debug('ISTATE:' + app.installationState + ' RSTATE:' + app.runState);
 
-        if (app.installationState !== appdb.ISTATE_INSTALLED) return callback(new AppsError(AppsError.BAD_FIELD, 'App not installed'));
-        if (app.runState !== appdb.RSTATE_STOPPED && app.runState !== appdb.RSTATE_ERROR) return callback(new AppsError(AppsError.BAD_FIELD, 'Invalid state'));
+        if (app.installationState !== appdb.ISTATE_INSTALLED) return callback(new AppsError(AppsError.BAD_STATE, 'App not in installed state'));
+        if (app.runState !== appdb.RSTATE_STOPPED && app.runState !== appdb.RSTATE_ERROR) return callback(new AppsError(AppsError.BAD_STATE, 'Cannot start app with runState:' + app.runState));
 
         stopTask(appId);
         startTask(appId);

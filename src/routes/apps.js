@@ -136,7 +136,7 @@ function startApp(req, res, next) {
 
     apps.start(req.params.id, function (error) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app:' + error));
-        if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error));
+        if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(400, error));
         if (error) return next(new HttpError(500, 'Internal error: ' + error));
 
         next(new HttpSuccess(200, { }));
