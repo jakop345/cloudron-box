@@ -45,12 +45,15 @@ STRING_TO_SIGN="PUT\n\n${CONTENT_TYPE}\n${DATE_HEADER}\n${RESOURCE}"
 SIGNATURE=`echo -en ${STRING_TO_SIGN} | openssl sha1 -hmac ${S3_SECRET} -binary | base64`
 
 echo "Uploading backup: $RESOURCE"
-(cd $HOME/.yellowtent/ && tar czf - .) | curl -X PUT -d "@-" \
+cd $HOME/.yellowtent && tar czf /tmp/$FILE *
+curl -X PUT -T "/tmp/${FILE}" \
     -H "Host: ${S3_BUCKET}.s3.amazonaws.com" \
     -H "Date: ${DATE_HEADER}" \
     -H "Content-Type: ${CONTENT_TYPE}" \
     -H "Authorization: AWS ${S3_KEY}:${SIGNATURE}" \
     https://${S3_BUCKET}.s3.amazonaws.com/${S3_PREFIX}/${FILE}
+
+rm /tmp/${FILE}
 
 echo "Starting box"
 supervisorctl start box
