@@ -15,7 +15,7 @@ fi
 
 NOW=$(date +%Y%m%dT%H%M%S)
 LOG=/var/log/backup-${NOW}.log
-# exec 2>&1 1> $LOG
+exec 2>&1 1> $LOG
 
 if [ $# -ne 4 ]; then
     echo "No arguments supplied"
