@@ -177,7 +177,7 @@ Server.prototype._provision = function (req, res, next) {
 
     if (config.token) return next(new HttpError(409, 'Already provisioned'));
 
-    config.set(_.pick(req.body, 'token', 'appServerUrl', 'adminOrigin', 'fqdn', 'ip'));
+    config.set(_.pick(req.body, 'token', 'appServerUrl', 'adminOrigin', 'fqdn', 'ip', 'aws'));
 
     // override the default webadmin OAuth client record
     clientdb.del('webadmin', function () {
@@ -377,6 +377,9 @@ Server.prototype._initializeExpressSync = function () {
 
     // server stats
     router.get('/api/v1/stats', bearer, this._getCloudronStats.bind(this));
+
+    // backup
+    router.post('/api/v1/backups', bearer, routes.backups.createBackup);
 };
 
 Server.prototype._sendHeartBeat = function () {

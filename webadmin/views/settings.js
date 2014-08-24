@@ -21,6 +21,12 @@ var SettingsController = function ($scope, Client) {
         window.location.href = '#/userpassword';
     };
 
+    $scope.backup = function () {
+        Client.backup(function (error) {
+            if (error) console.error(error);
+        });
+    };
+
     $scope.update = function () {
         $('#updateModal').modal('hide');
         $('#updateProgressModal').modal('show');

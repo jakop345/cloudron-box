@@ -63,6 +63,7 @@ config.save = function () {
     config.nakedDomain = null;
     config.ip = null;
     config.version = '0';
+    config.aws = null;
 
     mkdirp.sync(config.baseDir);
     config.save();

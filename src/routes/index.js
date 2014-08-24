@@ -2,6 +2,7 @@
 
 exports = module.exports = {
     apps: require('./apps.js'),
+    backups: require('./backups.js'),
     user: require('./user.js'),
     file: require('./file.js'),
     sync: require('./sync.js'),
