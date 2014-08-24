@@ -110,8 +110,7 @@ set -v
 
 mkdir -p /var/log/cloudron
 
-exec > >(tee /var/log/cloudron/bootstrap_init.log)
-exec 2>&1 1>
+exec 2>&1 1> /var/log/cloudron/bootstrap_init.log
 
 echo "[II] Update to latest git revision..."
 cd $SRCDIR

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 exec > >(tee /var/log/cloudron/bootstrap.log)
-exec 2>&1 1>
+exec 2>&1
 
 set -e
 
