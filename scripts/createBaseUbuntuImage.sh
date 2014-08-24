@@ -104,13 +104,17 @@ if [ -z "$DROPLET_ID" ]; then
 fi
 echo "Created droplet with id: $DROPLET_ID"
 
-DROPLET_IP=$(get_droplet_ip $DROPLET_ID)
-if [ -z "$DROPLET_IP" ]; then
-    echo "Failed to get droplet ip"
-    exit 1
-fi
-
-echo "Droplet IP : [$DROPLET_IP]";
+# Query DO until we get an IP
+while true; do
+    echo "Trying to get the droplet IP"
+    DROPLET_IP=$(get_droplet_ip $DROPLET_ID)
+    if [[ "$DROPLET_IP" != "null" ]]; then
+        echo "Droplet IP : [$DROPLET_IP]"
+        break
+    fi
+    echo "Timedout, trying again in 10 seconds"
+    sleep 10
+done
 
 # If we run scripts overenthusiastically without the wait, setup script randomly fails
 echo "Waiting 120 seconds for droplet creation"
