@@ -247,6 +247,8 @@ function deleteContainer(app, callback) {
     };
 
     container.remove(removeOptions, function (error) {
+        if (error && error.statusCode === 404) return callback(null);
+
         if (error) console.error('Error removing container', error);
         callback(error);
     });
@@ -262,6 +264,8 @@ function deleteImage(app, callback) {
     };
 
     image.remove(removeOptions, function (error) {
+        if (error && error.statusCode === 404) return callback(null);
+
         if (error) console.error('Error removing image', error);
         callback(error);
     });
