@@ -22,8 +22,14 @@ var SettingsController = function ($scope, Client) {
     };
 
     $scope.backup = function () {
+        $('#backupProgressModal').modal('show');
+        $scope.$parent.initialized = false;
+
         Client.backup(function (error) {
             if (error) console.error(error);
+
+            $scope.$parent.initialized = true;
+            $('#backupProgressModal').modal('hide');
         });
     };
 
