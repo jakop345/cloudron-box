@@ -42,7 +42,7 @@ git fetch
 check "Done"
 
 info "Reset repo to latest code..."
-# git reset --hard origin/master
+git reset --hard origin/master
 check "Done"
 
 info "Run release update script..."
