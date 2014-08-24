@@ -62,12 +62,12 @@ function checkAppHealth(app, callback) {
     container.inspect(function (err, data) {
         if (err || !data || !data.State) {
             debug('Error inspecting container');
-            return updateApp(app, { runState: appdb.RSTATE_ERROR }, callback);
+            return updateApp(app, { healthy: 0, runState: appdb.RSTATE_ERROR }, callback);
         }
 
         if (data.State.Running !== true) {
             debug(app.id + ' has exited');
-            return updateApp(app, { runState: appdb.RSTATE_STOPPED }, callback);
+            return updateApp(app, { healthy: 0, runState: appdb.RSTATE_STOPPED }, callback);
         }
 
         var healthCheckUrl = 'http://127.0.0.1:' + app.httpPort + manifest.healthCheckPath;
