@@ -22,6 +22,7 @@ var assert = require('assert'),
     net = require('net'),
     config = require('../config.js'),
     database = require('./database.js'),
+    DatabaseError = require('./databaseerror.js'),
     ejs = require('ejs'),
     appFqdn = require('./apps').appFqdn;
 
@@ -311,7 +312,12 @@ function removeOAuthCredentials(app, callback) {
 
     debug('removeOAuthCredentials:', app.id);
 
-    clientdb.del(app.id, callback);
+    clientdb.del(app.id, function (error) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null);
+
+        if (error) console.error(error);
+        callback(null);
+    });
 }
 
 function startContainer(app, callback) {

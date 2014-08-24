@@ -2,7 +2,7 @@
 
 'use strict';
 
-var DatabaseError = require('./databaseerror'),
+var DatabaseError = require('./databaseerror.js'),
     path = require('path'),
     debug = require('debug')('box:clientdb'),
     database = require('./database.js'),

@@ -133,10 +133,9 @@ describe('apptask', function () {
         });
     });
 
-    it('remove OAuth credentials twice fails', function (done) {
+    it('remove OAuth credentials twice succeeds', function (done) {
         apptask._removeOAuthCredentials(APP, function (error) {
-            expect(error).to.be.a(DatabaseError);
-            expect(error.reason).to.equal(DatabaseError.NOT_FOUND);
+            expect(!error).to.be.ok();
             done();
         });
     });
