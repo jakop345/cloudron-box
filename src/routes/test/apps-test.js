@@ -102,8 +102,8 @@ describe('App API', function () {
     var dockerProxy;
 
     before(function (done) {
-        setup(function () {
-            dockerProxy = startDockerProxy(function interceptor() { return false; }, done);
+        dockerProxy = startDockerProxy(function interceptor() { return false; }, function () {
+            setup(done);
         });
     });
     after(function (done) {
@@ -253,6 +253,23 @@ describe('App installation', function () {
 
     before(function (done) {
         async.series([
+            function (callback) {
+                dockerProxy = startDockerProxy(function interceptor(req, res) {
+                    if (req.method === 'POST' && req.url === '/images/create?fromImage=girish%2Ftest&tag=0.3') {
+                        imageCreated = true;
+                        res.writeHead(200);
+                        res.end();
+                        return true;
+                    } else if (req.method === 'DELETE' && req.url === '/images/girish/test:0.3?force=true&noprune=false') {
+                        imageDeleted = true;
+                        res.writeHead(200);
+                        res.end();
+                        return true;
+                    }
+                    return false;
+                }, callback);
+            },
+
             setup,
 
             function (callback) {
@@ -270,23 +287,6 @@ describe('App installation', function () {
                         .reply(200, { }, { 'Content-Type': 'application/json' });
                     callback();
                 });
-            },
-
-            function (callback) {
-                dockerProxy = startDockerProxy(function interceptor(req, res) {
-                    if (req.method === 'POST' && req.url === '/images/create?fromImage=girish%2Ftest&tag=0.3') {
-                        imageCreated = true;
-                        res.writeHead(200);
-                        res.end();
-                        return true;
-                    } else if (req.method === 'DELETE' && req.url === '/images/girish/test:0.3?force=true&noprune=false') {
-                        imageDeleted = true;
-                        res.writeHead(200);
-                        res.end();
-                        return true;
-                    }
-                    return false;
-                }, callback);
             }
         ], done);
     });
@@ -483,6 +483,23 @@ describe('App installation - port bindings', function () {
 
     before(function (done) {
         async.series([
+            function (callback) {
+                dockerProxy = startDockerProxy(function interceptor(req, res) {
+                    if (req.method === 'POST' && req.url === '/images/create?fromImage=girish%2Ftest&tag=0.3') {
+                        imageCreated = true;
+                        res.writeHead(200);
+                        res.end();
+                        return true;
+                    } else if (req.method === 'DELETE' && req.url === '/images/girish/test:0.3?force=true&noprune=false') {
+                        imageDeleted = true;
+                        res.writeHead(200);
+                        res.end();
+                        return true;
+                    }
+                    return false;
+                }, callback);
+            },
+
             setup,
 
             function (callback) {
@@ -508,23 +525,6 @@ describe('App installation - port bindings', function () {
 
                     callback();
                 });
-            },
-
-            function (callback) {
-                dockerProxy = startDockerProxy(function interceptor(req, res) {
-                    if (req.method === 'POST' && req.url === '/images/create?fromImage=girish%2Ftest&tag=0.3') {
-                        imageCreated = true;
-                        res.writeHead(200);
-                        res.end();
-                        return true;
-                    } else if (req.method === 'DELETE' && req.url === '/images/girish/test:0.3?force=true&noprune=false') {
-                        imageDeleted = true;
-                        res.writeHead(200);
-                        res.end();
-                        return true;
-                    }
-                    return false;
-                }, callback);
             }
         ], done);
     });
