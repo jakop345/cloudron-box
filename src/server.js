@@ -27,6 +27,7 @@ var express = require('express'),
     clientdb = require('./clientdb.js'),
     userdb = require('./userdb'),
     config = require('../config.js'),
+    backups = require('./backups.js'),
     _ = require('underscore');
 
 exports = module.exports = Server;
@@ -488,6 +489,19 @@ Server.prototype._announce = function () {
     });
 };
 
+Server.prototype._scheduleBackup = function () {
+    var now = new Date();
+    var night = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() + 1, // the next day, ...
+        0, 0, 0 // ...at 00:00:00 hours
+    );
+    var msTillMidnight = night.getTime() - now.getTime();
+
+    setTimeout(backups.createBackup, msTillMidnight);
+};
+
 Server.prototype.start = function (callback) {
     assert(typeof callback === 'function');
     assert(this.app === null, 'Server is already up and running.');
@@ -506,6 +520,8 @@ Server.prototype.start = function (callback) {
     this._sendHeartBeat();
 
     this._announce();
+
+    this._scheduleBackup();
 
     database.create(function (err) {
         if (err) return callback(err);
