@@ -27,6 +27,9 @@ $USER ALL=(root) NOPASSWD: $SRCDIR/src/rmappdir.sh
 
 Defaults!$SRCDIR/src/reloadnginx.sh env_keep=HOME
 $USER ALL=(root) NOPASSWD: $SRCDIR/src/reloadnginx.sh
+
+Defaults!$SRCDIR/scripts/update.sh env_keep=HOME
+$USER ALL=(root) NOPASSWD: $SRCDIR/scripts/update.sh
 EOF
 
 
