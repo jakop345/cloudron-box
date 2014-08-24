@@ -112,7 +112,7 @@ function unconfigureNginx(app, callback) {
     var nginxConfigFilename = path.join(config.nginxAppConfigDir, app.id + '.conf');
     if (!safe.fs.unlinkSync(nginxConfigFilename)) {
         console.error('Error removing nginx configuration ' + safe.error);
-        return callback(safe.error);
+        return callback(null);
     }
 
     exports._reloadNginx(callback);
