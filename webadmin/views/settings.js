@@ -28,8 +28,17 @@ var SettingsController = function ($scope, Client) {
         Client.backup(function (error) {
             if (error) console.error(error);
 
-            $scope.$parent.initialized = true;
-            $('#backupProgressModal').modal('hide');
+            // now start query
+            function checkIfDone() {
+                Client.version(function (error) {
+                    if (error) return window.setTimeout(checkIfDone, 1000);
+
+                    $('#backupProgressModal').modal('hide');
+                    $scope.$parent.initialized = true;
+                });
+            }
+
+            window.setTimeout(checkIfDone, 5000);
         });
     };
 
