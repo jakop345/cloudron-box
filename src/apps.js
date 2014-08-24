@@ -267,7 +267,7 @@ function stop(appId, callback) {
         debug('ISTATE:' + app.installationState + ' RSTATE:' + app.runState);
 
         if (app.installationState !== appdb.ISTATE_INSTALLED) return callback(new AppsError(AppsError.BAD_FIELD, 'App not installed'));
-        if (app.runState !== appdb.RSTATE_RUNNING) return callback(new AppsError(AppsError.BAD_FIELD, 'App not running'));
+        if (app.runState !== appdb.RSTATE_RUNNING) return callback(new AppsError(AppsError.BAD_STATE, 'Cannot start app with runState:' + app.runState));
 
         appdb.update(appId, { runState: appdb.RSTATE_PENDING_STOP }, function (error) {
             stopTask(appId);
