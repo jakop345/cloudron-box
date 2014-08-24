@@ -14,6 +14,6 @@ exports = module.exports = {
 function createBackup(req, res, next) {
     backups.createBackup();
 
-    next(new HttpSuccess(200));
+    next(new HttpSuccess(200, {}));
 }
 
