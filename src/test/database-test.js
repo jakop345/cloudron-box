@@ -325,8 +325,8 @@ describe('database', function () {
                 expect(error).to.be(null);
                 expect(result).to.be.an(Array);
                 expect(result.length).to.be(2);
-                expect(result[1]).to.be.eql(APP_0);
-                expect(result[0]).to.be.eql(APP_1);
+                expect(result[0]).to.be.eql(APP_0);
+                expect(result[1]).to.be.eql(APP_1);
                 done();
             });
         });

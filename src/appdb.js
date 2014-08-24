@@ -57,8 +57,8 @@ function get(id, callback) {
     assert(typeof id === 'string');
     assert(typeof callback === 'function');
 
-    database.get('SELECT apps.*, GROUP_CONCAT(appPortBindings.hostPort) AS hostPorts, GROUP_CONCAT(appPortBindings.containerPort) AS containerPorts'
-                 + ' FROM apps LEFT OUTER JOIN appPortBindings WHERE apps.id = ? GROUP BY appPortBindings.appId', [ id ], function (error, result) {
+    database.get('SELECT apps.*, GROUP_CONCAT(appPortBindings.hostPort) AS hostPorts, GROUP_CONCAT(appPortBindings.containerPort) AS containerPorts' +
+                 ' FROM apps LEFT OUTER JOIN appPortBindings WHERE apps.id = ? GROUP BY apps.id', [ id ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
@@ -73,8 +73,8 @@ function getBySubdomain(subdomain, callback) {
     assert(typeof subdomain === 'string');
     assert(typeof callback === 'function');
 
-    database.get('SELECT apps.*, GROUP_CONCAT(appPortBindings.hostPort) AS hostPorts, GROUP_CONCAT(appPortBindings.containerPort) AS containerPorts'
-                 + '  FROM apps LEFT OUTER JOIN appPortBindings WHERE location = ? GROUP BY appPortBindings.appId', [ subdomain ], function (error, result) {
+    database.get('SELECT apps.*, GROUP_CONCAT(appPortBindings.hostPort) AS hostPorts, GROUP_CONCAT(appPortBindings.containerPort) AS containerPorts' +
+                 '  FROM apps LEFT OUTER JOIN appPortBindings WHERE location = ? GROUP BY apps.id', [ subdomain ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
@@ -86,8 +86,8 @@ function getBySubdomain(subdomain, callback) {
 }
 
 function getAll(callback) {
-    database.all('SELECT apps.*, GROUP_CONCAT(appPortBindings.hostPort) AS hostPorts, GROUP_CONCAT(appPortBindings.containerPort) AS containerPorts'
-                 + ' FROM apps LEFT OUTER JOIN appPortBindings ON apps.id = appPortBindings.appId GROUP BY appPortBindings.appId', function (error, results) {
+    database.all('SELECT apps.*, GROUP_CONCAT(appPortBindings.hostPort) AS hostPorts, GROUP_CONCAT(appPortBindings.containerPort) AS containerPorts' +
+                 ' FROM apps LEFT OUTER JOIN appPortBindings ON apps.id = appPortBindings.appId GROUP BY apps.id ORDER BY apps.id', function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         if (typeof results === 'undefined') results = [ ];

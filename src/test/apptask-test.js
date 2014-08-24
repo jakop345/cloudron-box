@@ -31,22 +31,25 @@ var APP = {
     portBindings: null
 };
 
-before(function (done) {
-    mkdirp.sync(config.appDataRoot);
-    mkdirp.sync(config.configRoot);
-    mkdirp.sync(config.nginxAppConfigDir);
-
-    database.create(function (error) {
-        expect(error).to.be(null);
-        appdb.add(APP.id, APP.location, APP.portBindings, done);
-    });
-});
-
-after(function (done) {
-    rimraf(config.baseDir, done);
-});
-
 describe('apptask', function () {
+    before(function (done) {
+        mkdirp.sync(config.appDataRoot);
+        mkdirp.sync(config.configRoot);
+        mkdirp.sync(config.nginxAppConfigDir);
+
+        database.create(function (error) {
+            expect(error).to.be(null);
+            appdb.add(APP.id, APP.location, APP.portBindings, done);
+        });
+    });
+
+    after(function (done) {
+        appdb.del(APP.id, function () {
+            database.uninitialize();
+            rimraf(config.baseDir, done);
+        });
+    });
+
     it('initializes succesfully', function (done) {
         apptask.initialize(done);
     });

@@ -1,15 +1,29 @@
 /* jslint node:true */
 /* global it:false */
 /* global describe:false */
+/* global after:false */
+/* global before:false */
 
 'use strict';
 
-var config = require('../../config.js'),
-    expect = require('expect.js'),
+var expect = require('expect.js'),
     fs = require('fs'),
+    rimraf = require('rimraf'),
     safe = require('safetydance');
 
+var config = null;
+
 describe('config', function () {
+    before(function () {
+        delete require.cache[require.resolve('../../config.js')];
+        config = require('../../config.js');
+    });
+
+    after(function () {
+        rimraf.sync(config.baseDir);
+        delete require.cache[require.resolve('../../config.js')];
+    });
+
     it('baseDir is set', function (done) {
         expect(config.baseDir).to.be.ok();
         done();

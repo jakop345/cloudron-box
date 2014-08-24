@@ -4,6 +4,7 @@
 
 var path = require('path'),
     os = require('os'),
+    fs = require('fs'),
     safe = require('safetydance'),
     crypto = require('crypto'),
     assert = require('assert'),
@@ -26,7 +27,7 @@ if (production) {
 config.cloudronConfigFile = path.join(config.baseDir, 'cloudron.conf');
 
 config.save = function () {
-    safe.fs.writeFileSync(config.cloudronConfigFile, JSON.stringify(config)); // functions are ignored by JSON.stringify
+    fs.writeFileSync(config.cloudronConfigFile, JSON.stringify(config)); // functions are ignored by JSON.stringify
 };
 
 (function initConfig() {
