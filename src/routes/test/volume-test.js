@@ -309,12 +309,18 @@ describe('Server Volume API', function () {
         });
 
         it('cannot add user due to wrong owner password', function (done) {
+            // CAUTION!!! override console.error to reduce noise
+            var tmp = console.error;
+            console.error = function () {};
+
             request.post(SERVER_URL + '/api/v1/volume/' + volume.id + '/users')
             .query({ access_token: token })
             .send({ username: USERNAME_2, password: PASSWORD + PASSWORD })
             .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
+
+                console.error = tmp;
 
                 done();
             });
