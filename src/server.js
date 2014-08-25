@@ -174,6 +174,11 @@ Server.prototype._restore = function (req, res, next) {
 
     var restoreCommandLine = RESTORE_CMD + ' ' + args.join(' ');
     debug('_restore: execute "%s".', restoreCommandLine);
+
+    // Finish the request, to let the appstore know we triggered the restore it
+    // TODO is there a better way?
+    next(new HttpSuccess(200, {}));
+
     exec(restoreCommandLine, {}, function (error, stdout, stderr) {
         if (error) {
             console.error('Restore failed.', error, stdout, stderr);
@@ -182,7 +187,6 @@ Server.prototype._restore = function (req, res, next) {
 
         debug('_restore: success');
 
-        next(new HttpSuccess(200, {}));
     });
 };
 
