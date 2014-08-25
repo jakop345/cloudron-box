@@ -16,6 +16,7 @@ exports = module.exports = {
     installApp: installApp,
     configureApp: configureApp,
     uninstallApp: uninstallApp,
+    updateApp: updateApp,
 
     stopApp: stopApp,
     startApp: startApp
@@ -149,6 +150,20 @@ function stopApp(req, res, next) {
     debug('will stop app with id ' + req.params.id);
 
     apps.stop(req.params.id, function (error) {
+        if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app:' + error));
+        if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error));
+        if (error) return next(new HttpError(500, 'Internal error: ' + error));
+
+        next(new HttpSuccess(200, { }));
+    });
+}
+
+function updateApp(req, res, next) {
+    if (typeof req.params.id !== 'string') return next(new HttpError(400, 'appid is required'));
+
+    debug('with update app with id ' + req.params.id);
+
+    apps.update(req.params.id, function (error) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app:' + error));
         if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error));
         if (error) return next(new HttpError(500, 'Internal error: ' + error));

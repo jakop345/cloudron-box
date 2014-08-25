@@ -22,6 +22,7 @@ exports = module.exports = {
     install: install,
     configure: configure,
     uninstall: uninstall,
+    update: update,
 
     start: start,
     stop: stop,
@@ -213,6 +214,29 @@ function configure(appId, username, password, location, portBindings, callback) 
         startTask(appId);
 
         callback(null);
+    });
+}
+
+function update(appId, callback) {
+    appdb.get(appId, function (error, app) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
+        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+        debug('Will update with id : ' + appId);
+
+        if (app.installationState !== appdb.ISTATE_INSTALLED) return callback(new AppsError(AppsError.BAD_STATE, 'App not in installed state'));
+
+        appdb.update(appId, { installationState: appdb.ISTATE_PENDING_UPDATE }, function (error) {
+            if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND));
+            if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+            debug('Will configure app with id : ' + appId);
+
+            stopTask(appId);
+            startTask(appId);
+
+            callback(null);
+        });
     });
 }
 
