@@ -31,7 +31,7 @@ Updater.prototype.check = function () {
 
         debug('check: ', result.body);
 
-        if (result.body.available) {
+        if (result.body.version) {
             debug('check: update to version ' + result.body.version + ' available.');
             that.updateInfo = {
                 version: result.body.version,
