@@ -346,7 +346,7 @@ function startContainer(app, callback) {
         debug('Starting container ' + container.id + ' with options: ' + JSON.stringify(startOptions));
 
         container.start(startOptions, function (error, data) {
-            if (error) return callback(new Error('Error starting container:' + error));
+            if (error && error.statusCode !== 304) return callback(new Error('Error starting container:' + error));
 
             return callback(null);
         });
@@ -362,7 +362,7 @@ function stopContainer(app, callback) {
     };
 
     container.stop(options, function (error) {
-        if (error) return callback(new Error('Error starting container:' + error));
+        if (error && error.statusCode !== 304) return callback(new Error('Error starting container:' + error));
 
         return callback(null);
     });
