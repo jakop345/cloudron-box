@@ -45,12 +45,13 @@ curl -X GET \
     -H "Date: ${DATE_HEADER}" \
     -H "Authorization: AWS ${S3_KEY}:${SIGNATURE}" \
     -o /tmp/restore.tar.gz \
-    https://${S3_BUCKET}.s3.amazonaws.com/${S3_PREFIX}/${FILE} 
+    https://${S3_BUCKET}.s3.amazonaws.com/${S3_PREFIX}/${FILE}
 
 rm -rf $HOME/.yellowtent/*
 tar zxvf /tmp/restore.tar.gz -C $HOME/.yellowtent
 
-# FIXME: replace the token here
+# replace the token
+$HOME/box/node_modules/json/lib/json.js -I -f cloudron.conf -e 'this.token="$TOKEN"'
 
 echo "Starting box"
 supervisorctl start box
