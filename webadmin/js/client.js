@@ -196,6 +196,15 @@ angular.module('YellowTent').service('Client', function ($http) {
         });
     };
 
+    Client.prototype.updateApp = function (id, password, config, callback) {
+        $http.post('/api/v1/app/' + id + '/update', { }).success(function (data, status) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null);
+        }).error(function (data, status) {
+            callback(new ClientError(status, data));
+        });
+    };
+
     Client.prototype.startApp = function (id, callback) {
         var data = { };
         $http.post('/api/v1/app/' + id + '/start', data).success(function (data, status) {

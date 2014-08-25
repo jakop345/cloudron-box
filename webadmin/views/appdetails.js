@@ -18,6 +18,12 @@ var AppDetailsController = function ($scope, $http, $routeParams, $interval, Cli
         });
     };
 
+    $scope.updateApp = function () {
+        Client.updateApp($routeParams.id, function (error) {
+            if (error) console.error(error);
+        });
+    };
+
     $scope.deleteApp = function () {
         $('#deleteAppModal').modal('hide');
 
