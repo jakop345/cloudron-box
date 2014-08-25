@@ -8,9 +8,11 @@ var AppDetailsController = function ($scope, $http, $routeParams, $interval, Cli
 
     $scope.updateAvailable = false;
     Client.onConfig(function () {
+        if (!Client.getConfig().update) return;
+
         var appVersions = Client.getConfig().update.appVersions;
         $scope.updateAvailable = appVersions.some(function (x) {
-            return x.appId === $routeParam.id && x.version !== $scope.app.version;
+            return x.appId === $routeParams.id && x.version !== $scope.app.version;
         });
     });
 

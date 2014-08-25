@@ -196,7 +196,7 @@ angular.module('YellowTent').service('Client', function ($http) {
         });
     };
 
-    Client.prototype.updateApp = function (id, password, config, callback) {
+    Client.prototype.updateApp = function (id, callback) {
         $http.post('/api/v1/app/' + id + '/update', { }).success(function (data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null);
