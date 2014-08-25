@@ -14,7 +14,7 @@ fi
 # http://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html
 
 NOW=$(date +%Y-%m-%dT%H:%M:%S)
-LOG=/var/log/backup-${NOW}.log
+LOG=/var/log/cloudron/backup-${NOW}.log
 # exec 2>&1 1> $LOG
 
 if [ $# -ne 4 ]; then

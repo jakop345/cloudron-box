@@ -13,7 +13,7 @@ fi
 # http://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html
 
 NOW=$(date +%Y%m%dT%H%M%S)
-LOG=/var/log/restore-${NOW}.log
+LOG=/var/log/cloudron/restore-${NOW}.log
 exec 2>&1 1> $LOG
 
 if [ $# -ne 6 ]; then
