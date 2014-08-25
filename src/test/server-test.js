@@ -286,32 +286,6 @@ describe('Server', function () {
                 done();
             });
         });
-
-        it('fails due to missing restore.sh', function (done) {
-            // CAUTION!!! override console.error to reduce noise
-            var tmp = console.error;
-            console.error = function () {};
-
-            var data = {
-                token: 'boxtoken',
-                fileName: 'somes3filename',
-                aws: {
-                    prefix: 'somes3prefix',
-                    bucket: 'somes3bucket',
-                    accessKeyId: 'someawskey',
-                    secretAccessKey: 'someawssecret'
-                }
-            };
-            server.RESTORE_CMD = 'foobar';
-            request.post(SERVER_URL + '/api/v1/restore').send(data).end(function (error, result) {
-                expect(error).to.not.ok();
-                expect(result.statusCode).to.equal(500);
-
-                console.error = tmp;
-
-                done();
-            });
-        });
     });
 
     describe('cors', function () {

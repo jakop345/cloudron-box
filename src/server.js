@@ -34,14 +34,13 @@ exports = module.exports = Server;
 
 var HEARTBEAT_INTERVAL = 1000 * 60 * 60;
 var RELOAD_NGINX_CMD = 'sudo ' + path.join(__dirname, 'scripts/reloadnginx.sh');
+var RESTORE_CMD = 'sudo ' + path.join(__dirname, 'scripts/restore.sh');
 
 function Server() {
     this.httpServer = null; // http server
     this.app = null; // express
     this._announceTimerId = null;
     this._updater = null;
-
-    this.RESTORE_CMD = 'sudo ' + path.join(__dirname, '../scripts/restore.sh');
 }
 
 // Success handler
@@ -165,15 +164,15 @@ Server.prototype._restore = function (req, res, next) {
     debug('_restore: received from appstore ' + req.body.appServerUrl);
 
     var args = [
-        req.body.token,
-        req.body.fileName,
+        req.body.aws.accessKeyId,
+        req.body.aws.secretAccessKey,
         req.body.aws.prefix,
         req.body.aws.bucket,
-        req.body.aws.accessKeyId,
-        req.body.aws.secretAccessKey
+        req.body.fileName,
+        req.body.token
     ];
 
-    var restoreCommandLine = this.RESTORE_CMD + ' ' + args.join(' ');
+    var restoreCommandLine = RESTORE_CMD + ' ' + args.join(' ');
     debug('_restore: execute "%s".', restoreCommandLine);
     exec(restoreCommandLine, {}, function (error, stdout, stderr) {
         if (error) {
