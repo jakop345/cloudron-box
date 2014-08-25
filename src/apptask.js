@@ -240,6 +240,8 @@ function createContainer(app, callback) {
 }
 
 function deleteContainer(app, callback) {
+    if (app.containerId === null) return callback(null);
+
     var container = docker.getContainer(app.containerId);
 
     var removeOptions = {
@@ -248,7 +250,7 @@ function deleteContainer(app, callback) {
     };
 
     container.remove(removeOptions, function (error) {
-        if (error && error.statusCode === 404) return callback(null);
+        if (error && error.statusCode === 404) return updateApp(app, { containerId: null }, callback);
 
         if (error) console.error('Error removing container', error);
         callback(error);
