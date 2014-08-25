@@ -20,7 +20,7 @@
                         <li class="list-group-item">Version <span class="pull-right">{{ app.manifest.version }}</span></li>
                     </ul>
 
-                    <a class="btn btn-outline btn-primary pull-left" ng-show="app.installationState === 'error' || app.installationState === 'installed'" ng-href="#/app/{{app.id}}/configure">Configure</a>
+                    <a class="btn btn-outline btn-primary pull-left" ng-show="app.installationState === 'installed'" ng-href="#/app/{{app.id}}/configure">Configure</a>
                     <button class="btn btn-outline btn-primary pull-left" ng-show="app.installationState === 'installed' && (app.runState === 'stopped' || app.runState === 'error')" ng-click="startApp()">Start</button>
                     <button class="btn btn-outline btn-danger pull-left" ng-show="app.installationState === 'installed' && app.runState === 'running'" ng-click="stopApp()">Stop</button>
                     <button class="btn btn-outline btn-danger pull-right" data-toggle="modal" data-target="#deleteAppModal">Delete</button>
