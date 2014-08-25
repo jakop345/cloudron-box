@@ -91,7 +91,10 @@ function processApps(callback) {
     appdb.getAll(function (error, apps) {
         if (error) return callback(error);
 
-        async.each(apps, checkAppHealth, callback);
+        async.each(apps, checkAppHealth, function (error) {
+            if (error) console.error(error);
+            callback(null);
+        });
     });
 }
 
@@ -106,7 +109,7 @@ if (require.main === module) {
     initialize();
 
     run(function (error) {
-        debug('apphealth task exiting with error:' + error);
+        console.error('apphealth task exiting with error.', error);
         process.exit(error ? 1 : 0);
     });
 }
