@@ -37,7 +37,7 @@ Updater.prototype.check = function () {
 
             debug('check: ', result.body);
 
-            that.updateInfo = req.body;
+            that.updateInfo = result.body;
         });
     });
 };
