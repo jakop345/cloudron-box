@@ -51,8 +51,10 @@ rm -rf $HOME/.yellowtent/*
 tar zxvf /tmp/restore.tar.gz -C $HOME/.yellowtent
 
 # replace the token
-$HOME/box/node_modules/.bin/json -I -f $HOME/.yellowtent/cloudron.conf -e 'this.token="$TOKEN"'
+cat $HOME/.yellowtent/cloudron.conf
+$HOME/box/node_modules/.bin/json -I -f $HOME/.yellowtent/cloudron.conf -e "this.token=\"$TOKEN\""
 chown yellowtent:yellowtent $HOME/.yellowtent/cloudron.conf
+cat $HOME/.yellowtent/cloudron.conf
 
 echo "Starting box"
 supervisorctl start box
