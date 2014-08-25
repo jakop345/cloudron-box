@@ -55,6 +55,9 @@ FOO=`$HOME/box/node_modules/.bin/json -f $HOME/.yellowtent/cloudron.conf -e "thi
 echo $FOO > $HOME/.yellowtent/cloudron.conf
 chown yellowtent:yellowtent $HOME/.yellowtent/cloudron.conf
 
+echo "Restart nginx"
+supervisorctl restart nginx
+
 echo "Starting box"
 supervisorctl start box
 
