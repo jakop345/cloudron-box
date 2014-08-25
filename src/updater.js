@@ -25,7 +25,7 @@ Updater.prototype.check = function () {
 
     var that = this;
 
-    superagent.get(config.appServerUrl + '/api/v1/boxupdate').query({version: config.version }).end(function (error, result) {
+    superagent.post(config.appServerUrl + '/api/v1/boxupdate').send({ version: config.version }).end(function (error, result) {
         if (error) return console.error(error);
         if (result.statusCode !== 200) return console.error('Failed to check for updates.', result.statusCode, result.body.message);
 
