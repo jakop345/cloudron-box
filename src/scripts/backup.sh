@@ -13,7 +13,7 @@ fi
 # http://tmont.com/blargh/2014/1/uploading-to-s3-in-bash
 # http://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html
 
-NOW=$(date +%Y%m%dT%H%M%S)
+NOW=$(date +%Y-%m-%dT%H:%M:%S)
 LOG=/var/log/backup-${NOW}.log
 # exec 2>&1 1> $LOG
 
@@ -36,7 +36,7 @@ echo "Stopping all containers"
 docker stop $(docker ps -a -q)
 
 DATE_HEADER=$(date "+%a, %d %b %Y %T %z") # Tue, 27 Mar 2007 19:36:42 +0000
-FILE="backup-${NOW}.tar.gz"
+FILE="backup_${NOW}.tar.gz"
 
 RESOURCE="/${S3_BUCKET}/${S3_PREFIX}/${FILE}"
 CONTENT_TYPE="application/x-compressed-tar"
