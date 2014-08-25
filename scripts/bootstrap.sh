@@ -22,17 +22,17 @@ mkdir -p /var/log/cloudron/
 
 echo "==== Sudoers file for app removal ===="
 cat > /etc/sudoers.d/yellowtent <<EOF
-Defaults!$SRCDIR/src/rmappdir.sh env_keep=HOME
-$USER ALL=(root) NOPASSWD: $SRCDIR/src/rmappdir.sh
+Defaults!$SRCDIR/src/scripts/rmappdir.sh env_keep=HOME
+$USER ALL=(root) NOPASSWD: $SRCDIR/src/scripts/rmappdir.sh
 
-Defaults!$SRCDIR/src/reloadnginx.sh env_keep=HOME
-$USER ALL=(root) NOPASSWD: $SRCDIR/src/reloadnginx.sh
+Defaults!$SRCDIR/src/scripts/reloadnginx.sh env_keep=HOME
+$USER ALL=(root) NOPASSWD: $SRCDIR/src/scripts/reloadnginx.sh
 
 Defaults!$SRCDIR/scripts/update.sh env_keep=HOME
 $USER ALL=(root) NOPASSWD: $SRCDIR/scripts/update.sh
 
-Defaults!$SRCDIR/src/backup.sh env_keep=HOME
-$USER ALL=(root) NOPASSWD: $SRCDIR/src/backup.sh
+Defaults!$SRCDIR/src/scripts/backup.sh env_keep=HOME
+$USER ALL=(root) NOPASSWD: $SRCDIR/src/scripts/backup.sh
 
 EOF
 
