@@ -143,8 +143,40 @@ describe('apptask', function () {
         });
     });
 
-    it('downloads manifest', function (done) {
+    it('barfs on empty manifest', function (done) {
         var scope = nock(config.appServerUrl).get('/api/v1/appstore/apps/' + APP.id + '/manifest').reply(200, { });
+
+        apptask._downloadManifest(APP, function (error) {
+            expect(error).to.be.ok();
+            expect(scope.isDone());
+            done();
+        });
+    });
+
+    it('barfs on bad field in manifest', function (done) {
+        var manifest = { version: '0.1', dockerImage: 'foo', healthCheckPath: '/', httpPort: 3, title: 'ok' };
+        var scope = nock(config.appServerUrl).get('/api/v1/appstore/apps/' + APP.id + '/manifest').reply(200, manifest);
+
+        apptask._downloadManifest(APP, function (error) {
+            expect(error).to.be.ok();
+            expect(scope.isDone());
+            done();
+        });
+    });
+
+    it('barfs on malformed manifest', function (done) {
+        var scope = nock(config.appServerUrl).get('/api/v1/appstore/apps/' + APP.id + '/manifest').reply(200, 'you evil man');
+
+        apptask._downloadManifest(APP, function (error) {
+            expect(error).to.be.ok();
+            expect(scope.isDone());
+            done();
+        });
+    });
+
+    it('downloads manifest', function (done) {
+        var manifest = { version: '0.1', dockerImage: 'foo', healthCheckPath: '/', httpPort: '3', title: 'ok' };
+        var scope = nock(config.appServerUrl).get('/api/v1/appstore/apps/' + APP.id + '/manifest').reply(200, manifest);
 
         apptask._downloadManifest(APP, function (error) {
             expect(error).to.be(null);

@@ -133,30 +133,10 @@ function setNakedDomain(app, callback) {
     });
 }
 
-// NOTE: keep this in sync with appstore's apps.js
-function validateManifest(manifest) {
-     if (manifest === null) return new Error('Unable to parse manifest');
-
-     var fields = [ 'version', 'dockerImage', 'healthCheckPath', 'httpPort', 'title' ];
-
-     for (var i = 0; i < fields.length; i++) {
-         var field = fields[i];
-         if (!(field in manifest)) return new Error('Missing ' + field + ' in manifest');
-
-         if (typeof manifest[field] !== 'string') return new Error(field + ' must be a string');
-
-         if (manifest[field].length === 0) return new Error(field + ' cannot be empty');
-     }
-
-    return null;
-}
-
 function downloadImage(app, callback) {
     debug('Will download app now');
 
     var manifest = app.manifest;
-    var error = validateManifest(manifest);
-    if (error) return callback(new Error('Manifest error:' + error.message));
 
     docker.pull(manifest.dockerImage, function (err, stream) {
         if (err) return callback(new Error('Error connecting to docker'));
@@ -371,6 +351,24 @@ function stopContainer(app, callback) {
 
 }
 
+// NOTE: keep this in sync with appstore's apps.js
+function validateManifest(manifest) {
+     if (manifest === null) return new Error('Unable to parse manifest: ' + safe.error.message);
+
+     var fields = [ 'version', 'dockerImage', 'healthCheckPath', 'httpPort', 'title' ];
+
+     for (var i = 0; i < fields.length; i++) {
+         var field = fields[i];
+         if (!(field in manifest)) return new Error('Missing ' + field + ' in manifest');
+
+         if (typeof manifest[field] !== 'string') return new Error(field + ' must be a string');
+
+         if (manifest[field].length === 0) return new Error(field + ' cannot be empty');
+     }
+
+    return null;
+}
+
 function downloadManifest(app, callback) {
     debug('Downloading manifest for :', app.id);
 
@@ -385,9 +383,10 @@ function downloadManifest(app, callback) {
             debug('Downloaded application manifest: ' + res.text);
 
             var manifest = safe.JSON.parse(res.text);
-            if (!manifest) return callback(new Error('Error parsing manifest:' + safe.error));
+            var error = validateManifest(manifest);
+            if (error) return callback(new Error('Manifest error:' + error.message));
 
-            updateApp(app, { manifest: manifest }, callback);
+            updateApp(app, { manifest: manifest, version: manifest.version }, callback);
         });
 }
 

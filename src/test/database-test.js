@@ -219,6 +219,7 @@ describe('database', function () {
     describe('app', function () {
         var APP_0 = {
             id: 'appid-0',
+            version: null,
             installationState: appdb.ISTATE_PENDING_INSTALL,
             installationProgress: null,
             runState: null,
@@ -231,6 +232,7 @@ describe('database', function () {
         };
         var APP_1 = {
             id: 'appid-1',
+            version: null,
             installationState: appdb.ISTATE_PENDING_INSTALL,
             installationProgress: null,
             runState: null,
