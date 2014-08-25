@@ -6,6 +6,14 @@ var AppDetailsController = function ($scope, $http, $routeParams, $interval, Cli
     $scope.app = {};
     $scope.initialized = false;
 
+    $scope.updateAvailable = false;
+    Client.onConfig(function () {
+        var appVersions = Client.getConfig().update.appVersions;
+        $scope.updateAvailable = appVersions.some(function (x) {
+            return x.appId === $routeParam.id && x.version !== $scope.app.version;
+        });
+    });
+
     $scope.startApp = function () {
         Client.startApp($routeParams.id, function (error) {
             if (error) console.error(error);
