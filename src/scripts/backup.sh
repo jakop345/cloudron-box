@@ -35,7 +35,6 @@ supervisorctl stop box
 echo "Stopping all containers"
 docker stop $(docker ps -a -q)
 
-S3_BUCKET='yellowtent'
 DATE_HEADER=$(date "+%a, %d %b %Y %T %z") # Tue, 27 Mar 2007 19:36:42 +0000
 FILE="backup-${NOW}.tar.gz"
 
