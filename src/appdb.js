@@ -19,6 +19,7 @@ exports = module.exports = {
     getAll: getAll,
     getPortBindings: getPortBindings,
     setHealth: setHealth,
+    getAppVersions: getAppVersions,
 
     // status codes
     ISTATE_PENDING_INSTALL: 'pending_install',
@@ -235,6 +236,15 @@ function setHealth(appId, healthy, rstate, callback) {
         if (this.changes !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         return callback(null);
+    });
+}
+
+function getAppVersions(callback) {
+    database.all('SELECT id, version FROM apps', function (error, results) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+
+        results = results || [ ];
+        callback(null, results);
     });
 }
 

@@ -294,8 +294,9 @@ describe('database', function () {
         it('update succeeds', function (done) {
             APP_0.installationState = 'some-other-status';
             APP_0.location = 'some-other-location';
+            APP_0.version = '0.2'
 
-            appdb.update(APP_0.id, { installationState: APP_0.installationState, location: APP_0.location }, function (error) {
+            appdb.update(APP_0.id, { installationState: APP_0.installationState, location: APP_0.location, version: APP_0.version }, function (error) {
                 expect(error).to.be(null);
 
                 appdb.get(APP_0.id, function (error, result) {
@@ -329,6 +330,17 @@ describe('database', function () {
                 expect(result.length).to.be(2);
                 expect(result[0]).to.be.eql(APP_0);
                 expect(result[1]).to.be.eql(APP_1);
+                done();
+            });
+        });
+
+        it('getAppVersions succeeds', function (done) {
+            appdb.getAppVersions(function (error, results) {
+                expect(error).to.be(null);
+                expect(results).to.be.an(Array);
+                expect(results.length).to.be(2);
+                expect(results[0].version).to.equal(APP_0.version);
+                expect(results[1].version).to.equal(APP_1.version);
                 done();
             });
         });
