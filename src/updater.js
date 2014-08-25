@@ -7,6 +7,7 @@ var debug = require('debug')('box:updater'),
     path = require('path'),
     assert = require('assert'),
     exec = require('child_process').exec,
+    appdb = require('./appdb.js'),
     config = require('../config.js');
 
 module.exports = exports = Updater;
@@ -25,22 +26,19 @@ Updater.prototype.check = function () {
 
     var that = this;
 
-    superagent.post(config.appServerUrl + '/api/v1/boxupdate').send({ version: config.version }).end(function (error, result) {
+    appdb.getAppVersions(function (error, appVersions) {
         if (error) return console.error(error);
-        if (result.statusCode !== 200) return console.error('Failed to check for updates.', result.statusCode, result.body.message);
 
-        debug('check: ', result.body);
+        var appIds = appVersions.map(function (appVersion) { return appVersion.id; });
 
-        if (result.body.version) {
-            debug('check: update to version ' + result.body.version + ' available.');
-            that.updateInfo = {
-                version: result.body.version,
-                revision: result.body.revision
-            };
-        } else {
-            debug('check: no update available.');
-            that.updateInfo = null;
-        }
+        superagent.post(config.appServerUrl + '/api/v1/boxupdate').send({ appIds: appIds, version: config.version }).end(function (error, result) {
+            if (error) return console.error(error);
+            if (result.statusCode !== 200) return console.error('Failed to check for updates.', result.statusCode, result.body.message);
+
+            debug('check: ', result.body);
+
+            that.updateInfo = req.body;
+        });
     });
 };
 
