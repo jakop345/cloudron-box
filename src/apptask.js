@@ -48,7 +48,7 @@ exports = module.exports = {
 
 var docker = null,
     NGINX_APPCONFIG_EJS = fs.readFileSync(__dirname + '/../nginx/appconfig.ejs', { encoding: 'utf8' }),
-    RELOAD_NGINX_CMD = 'sudo ' + __dirname + '/reloadnginx.sh';
+    RELOAD_NGINX_CMD = 'sudo ' + __dirname + '/scripts/reloadnginx.sh';
 
 function initialize(callback) {
     if (process.env.NODE_ENV === 'test') {
@@ -285,7 +285,7 @@ function createVolume(app, callback) {
 }
 
 function deleteVolume(app, callback) {
-    child_process.exec('sudo ' + __dirname + '/rmappdir.sh ' + app.id, function (error, stdout, stderr) {
+    child_process.exec('sudo ' + __dirname + '/scripts/rmappdir.sh ' + app.id, function (error, stdout, stderr) {
         if (error) console.error('Error removing volume', error);
         return callback(error);
     });

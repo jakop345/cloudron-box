@@ -33,7 +33,7 @@ var express = require('express'),
 exports = module.exports = Server;
 
 var HEARTBEAT_INTERVAL = 1000 * 60 * 60;
-var RELOAD_NGINX_CMD = 'sudo ' + path.join(__dirname, 'reloadnginx.sh');
+var RELOAD_NGINX_CMD = 'sudo ' + path.join(__dirname, 'scripts/reloadnginx.sh');
 
 function Server() {
     this.httpServer = null; // http server

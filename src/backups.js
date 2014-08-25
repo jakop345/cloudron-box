@@ -10,7 +10,7 @@ exports = module.exports = {
     createBackup: createBackup
 };
 
-var BACKUP_CMD = 'sudo ' + __dirname + '/backup.sh';
+var BACKUP_CMD = 'sudo ' + __dirname + '/scripts/backup.sh';
 
 function createBackup() {
     debug('Starting backup script');
