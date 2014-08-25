@@ -24,6 +24,7 @@ exports = module.exports = {
     ISTATE_PENDING_INSTALL: 'pending_install',
     ISTATE_PENDING_CONFIGURE: 'pending_configure',
     ISTATE_PENDING_UNINSTALL: 'pending_uninstall',
+    ISTATE_PENDING_UPDATE: 'pending_update',
     ISTATE_ERROR: 'error',
     ISTATE_INSTALLED: 'installed',
 

@@ -535,6 +535,39 @@ function configure(app, callback) {
     });
 }
 
+function update(app, callback) {
+    async.series([
+        updateApp.bind(null, app, { installationProgress: 'Stopping app' }),
+        stopApp.bind(null, app),
+
+        updateApp.bind(null, app, { installationProgress: 'Deleting container' }),
+        deleteContainer.bind(null, app),
+
+        updateApp.bind(null, app, { installationProgress: 'Downloading manifest' }),
+        downloadManifest.bind(null, app),
+
+        updateApp.bind(null, app, { installationProgress: 'Downloading image' }),
+        downloadImage.bind(null, app),
+
+        updateApp.bind(null, app, { installationProgress: 'Creating container' }),
+        createContainer.bind(null, app),
+
+        runApp.bind(null, app),
+
+        // done!
+        function (callback) {
+            debug('App ' + app.id + ' updated');
+            updateApp(app, { installationState: appdb.ISTATE_INSTALLED, installationProgress: '' }, callback);
+        }
+    ], function seriesDone(error) {
+        if (error) {
+            console.error('Error updating app:', error);
+            return updateApp(app, { installationState: appdb.ISTATE_ERROR, installationProgress: error.message }, callback.bind(null, error));
+        }
+        callback(null);
+    });
+}
+
 function uninstall(app, callback) {
    debug('uninstalling ' + app.id);
 
@@ -602,6 +635,10 @@ function startTask(appId, callback) {
 
         if (app.installationState === appdb.ISTATE_PENDING_CONFIGURE) {
             return configure(app, callback);
+        }
+
+        if (app.installationState === appdb.ISTATE_PENDING_UPDATE) {
+            return update(app, callback);
         }
 
         if (app.installationState === appdb.ISTATE_INSTALLED) {
