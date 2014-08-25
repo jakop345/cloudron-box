@@ -645,7 +645,7 @@ function startTask(appId, callback) {
             if (app.runState === appdb.RSTATE_PENDING_STOP) {
                 stopApp(app, callback);
             } else if (app.runState === appdb.RSTATE_PENDING_START || app.runState === appdb.RSTART_RUNNING) {
-                console.log('Resuming app with state : %s %s', app.runState, app.id);
+                debug('Resuming app with state : %s %s', app.runState, app.id);
                 runApp(app, callback);
             } else {
                 callback(null);
@@ -654,11 +654,17 @@ function startTask(appId, callback) {
             return;
         }
 
-        install(app, function (error) {
-            if (error) return callback(error);
+        if (app.installationState === appdb.ISTATE_PENDING_INSTALL) {
+            install(app, function (error) {
+                if (error) return callback(error);
 
-            runApp(app, callback);
-        });
+                runApp(app, callback);
+            });
+            return;
+        }
+
+        console.error('Apptask launched but nothing to do.', app);
+        return callback(null);
     });
 }
 
