@@ -19,6 +19,10 @@ function UserListController ($scope, Client) {
         return !!user.admin;
     };
 
+    $scope.toggleAdmin = function (user) {
+        user.admin = !user.admin;
+    };
+
     $scope.deleteUser = function (user) {
         // TODO add busy indicator and block form
         if ($scope.userDeleteForm.username !== user.username) return console.error('Username does not match');
