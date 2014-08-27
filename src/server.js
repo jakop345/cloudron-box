@@ -40,6 +40,7 @@ function Server() {
     this.httpServer = null; // http server
     this.app = null; // express
     this._announceTimerId = null;
+    this._backupTimerId = null;
     this._updater = null;
 }
 
@@ -531,7 +532,7 @@ Server.prototype._scheduleBackup = function () {
     );
     var msTillMidnight = night.getTime() - now.getTime();
 
-    setTimeout(backups.createBackup, msTillMidnight);
+    this._backupTimerId = setTimeout(backups.createBackup, msTillMidnight);
 };
 
 Server.prototype.start = function (callback) {
@@ -580,6 +581,9 @@ Server.prototype.stop = function (callback) {
 
     clearTimeout(this._announceTimerId);
     this._announceTimerId = null;
+
+    clearTimeout(this._backupTimerId);
+    this._backupTimerId = null;
 
     apps.uninitialize();
     database.uninitialize();
