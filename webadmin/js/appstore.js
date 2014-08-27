@@ -27,6 +27,7 @@ angular.module('YellowTent').service('AppStore', function ($http, Client) {
         $http.get(Client.getConfig().appServerUrl + '/api/v1/appstore/apps').success(function (data, status) {
             if (status !== 200) return callback(new AppStoreError(status, data));
 
+            // TODO remove old apps
             data.apps.forEach(function (app) {
                 if (that._appsCache[app.id]) return;
 
