@@ -13,7 +13,7 @@ var debug = require('debug')('box:updater'),
 module.exports = exports = Updater;
 
 function Updater() {
-    this.checkInterval = null;
+    this._checkInterval = null;
     this.updateInfo = null;
 }
 
@@ -21,7 +21,7 @@ Updater.prototype.availableUpdate = function () {
     return this.updateInfo;
 };
 
-Updater.prototype.check = function () {
+Updater.prototype._check = function () {
     debug('check: for updates. box is on version ' + config.version);
 
     var that = this;
@@ -45,13 +45,13 @@ Updater.prototype.check = function () {
 Updater.prototype.start = function () {
     debug('start');
 
-    this.checkInterval = setInterval(this.check.bind(this), 60 * 1000);
+    this._checkInterval = setInterval(this._check.bind(this), 60 * 1000);
 };
 
 Updater.prototype.stop = function () {
     debug('stop');
 
-    clearInterval(this.checkInterval);
+    clearInterval(this._checkInterval);
 };
 
 Updater.prototype.update = function (callback) {
