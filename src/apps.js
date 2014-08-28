@@ -35,7 +35,25 @@ var tasks = { }, appHealthTask = null;
 function initialize() {
     appHealthTask = child_process.fork(__dirname + '/apphealthtask.js');
 
-    resume();
+    resume(); // FIXME: potential race here since resume is async
+}
+
+function startTask(appId) {
+    assert(!(appId in tasks));
+
+    tasks[appId] = child_process.fork(__dirname + '/apptask.js', [ appId ]);
+    tasks[appId].once('exit', function (code, signal) {
+        debug('Task completed :' + appId);
+        delete tasks[appId];
+    });
+}
+
+function stopTask(appId) {
+    if (tasks[appId]) {
+        debug('Killing existing task : ' + tasks[appId].pid);
+        tasks[appId].kill();
+        delete tasks[appId];
+    }
 }
 
 // resume install and uninstalls
@@ -44,15 +62,16 @@ function resume() {
         if (error) throw error;
         apps.forEach(function (app) {
             debug('Creating process for ' + app.id + ' with state ' + app.installationState);
-            tasks[app.id] = child_process.fork(__dirname + '/apptask.js', [ app.id ]);
+            startTask(app.id);
         });
     });
 }
 
 function uninitialize() {
     appHealthTask.kill();
+    appHealthTask = null;
     for (var appId in tasks) {
-        tasks[appId].kill();
+        stopTask(appId);
     }
 }
 
@@ -140,22 +159,6 @@ function getAll(callback) {
 
         callback(null, apps);
     });
-}
-
-function startTask(appId) {
-    tasks[appId] = child_process.fork(__dirname + '/apptask.js', [ appId ]);
-    tasks[appId].once('exit', function (code, signal) {
-        debug('Task completed :' + appId);
-        delete tasks[appId];
-    });
-}
-
-function stopTask(appId) {
-    if (tasks[appId]) {
-        debug('Killing existing task : ' + tasks[appId].pid);
-        tasks[appId].kill();
-        delete tasks[appId];
-    }
 }
 
 function install(appId, username, password, location, portBindings, callback) {
