@@ -118,7 +118,7 @@ Server.prototype._getIp = function (callback) {
     for (var dev in ifaces) {
         if (dev.match(/^(en|eth).*/) === null) continue;
 
-        for (var i = 0; i < ifaces[dev]; i++) {
+        for (var i = 0; i < ifaces[dev].length; i++) {
             if (ifaces[dev][i].family === 'IPv4') return ifaces[dev][i].address;
         }
     }
