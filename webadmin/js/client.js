@@ -177,7 +177,7 @@ angular.module('YellowTent').service('Client', function ($http) {
     };
 
     Client.prototype.installApp = function (id, password, config, callback) {
-        var data = { app_id: id, password: password, location: config.location, portBindings: config.portBindings };
+        var data = { appId: id, password: password, location: config.location, portBindings: config.portBindings };
         $http.post('/api/v1/app/install', data).success(function (data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null);
@@ -187,7 +187,7 @@ angular.module('YellowTent').service('Client', function ($http) {
     };
 
     Client.prototype.configureApp = function (id, password, config, callback) {
-        var data = { app_id: id, password: password, location: config.location, portBindings: config.portBindings };
+        var data = { appId: id, password: password, location: config.location, portBindings: config.portBindings };
         $http.post('/api/v1/app/' + id + '/configure', data).success(function (data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null);

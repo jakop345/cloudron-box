@@ -122,13 +122,13 @@ describe('App API', function () {
         });
     });
 
-    it('app install fails - missing app_id', function (done) {
+    it('app install fails - missing appId', function (done) {
         request.post(SERVER_URL + '/api/v1/app/install')
                .query({ access_token: token })
                .send({ password: PASSWORD })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
-            expect(res.body.message).to.eql('app_id is required');
+            expect(res.body.message).to.eql('appId is required');
             done(err);
         });
     });
@@ -136,7 +136,7 @@ describe('App API', function () {
     it('app install fails - invalid location', function (done) {
         request.post(SERVER_URL + '/api/v1/app/install')
                .query({ access_token: token })
-               .send({ app_id: APP_ID, password: PASSWORD, location: '!awesome' })
+               .send({ appId: APP_ID, password: PASSWORD, location: '!awesome' })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             expect(res.body.message).to.eql('Subdomain can only contain alphanumerics and hyphen');
@@ -147,7 +147,7 @@ describe('App API', function () {
     it('app install fails - reserved location', function (done) {
         request.post(SERVER_URL + '/api/v1/app/install')
                .query({ access_token: token })
-               .send({ app_id: APP_ID, password: PASSWORD, location: 'admin' })
+               .send({ appId: APP_ID, password: PASSWORD, location: 'admin' })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             expect(res.body.message).to.eql('admin location is reserved');
@@ -158,7 +158,7 @@ describe('App API', function () {
     it('app install fails - portBindings must be object', function (done) {
         request.post(SERVER_URL + '/api/v1/app/install')
                .query({ access_token: token })
-               .send({ app_id: APP_ID, password: PASSWORD, location: APP_LOCATION, portBindings: 23 })
+               .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION, portBindings: 23 })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             expect(res.body.message).to.eql('portBindings must be an object');
@@ -169,7 +169,7 @@ describe('App API', function () {
     it('app install succeeds', function (done) {
         request.post(SERVER_URL + '/api/v1/app/install')
                .query({ access_token: token })
-               .send({ app_id: APP_ID, password: PASSWORD, location: APP_LOCATION, portBindings: null })
+               .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION, portBindings: null })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
             done(err);
@@ -319,7 +319,7 @@ describe('App installation', function () {
 
         request.post(SERVER_URL + '/api/v1/app/install')
               .query({ access_token: token })
-              .send({ app_id: APP_ID, password: PASSWORD, location: APP_LOCATION, portBindings: null })
+              .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION, portBindings: null })
               .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
             checkInstallStatus();
@@ -558,7 +558,7 @@ describe('App installation - port bindings', function () {
 
         request.post(SERVER_URL + '/api/v1/app/install')
               .query({ access_token: token })
-              .send({ app_id: APP_ID, password: PASSWORD, location: APP_LOCATION, portBindings: { '7778' : '7171' } })
+              .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION, portBindings: { '7778' : '7171' } })
               .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
             checkInstallStatus();
@@ -646,7 +646,7 @@ describe('App installation - port bindings', function () {
 
         request.post(SERVER_URL + '/api/v1/app/' + APP_ID + '/configure')
               .query({ access_token: token })
-              .send({ app_id: APP_ID, password: PASSWORD, portBindings: { '7778' : '7172' } })
+              .send({ appId: APP_ID, password: PASSWORD, portBindings: { '7778' : '7172' } })
               .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
             checkConfigureStatus();
