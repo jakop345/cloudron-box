@@ -31,9 +31,11 @@ S3_BUCKET=$4
 echo "Stopping box"
 supervisorctl stop box
 
+CONTAINER_IDS=$(docker ps -q)
+
 # Stop all containers
-echo "Stopping all containers"
-docker stop $(docker ps -a -q)
+echo "Stopping all running containers"
+docker stop $CONTAINER_IDS
 
 DATE_HEADER=$(date "+%a, %d %b %Y %T %z") # Tue, 27 Mar 2007 19:36:42 +0000
 FILE="backup_${NOW}.tar.gz"
@@ -53,6 +55,9 @@ curl -X PUT -T "/tmp/${FILE}" \
     https://${S3_BUCKET}.s3.amazonaws.com/${S3_PREFIX}/${FILE}
 
 rm /tmp/${FILE}
+
+echo "Starting all containers"
+docker start $CONTAINER_IDS
 
 echo "Starting box"
 supervisorctl start box
