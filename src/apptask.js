@@ -48,7 +48,7 @@ exports = module.exports = {
 
 var docker = null,
     NGINX_APPCONFIG_EJS = fs.readFileSync(__dirname + '/../nginx/appconfig.ejs', { encoding: 'utf8' }),
-    RELOAD_NGINX_CMD = 'sudo ' + __dirname + '/scripts/reloadnginx.sh';
+    RELOAD_NGINX_CMD = 'sudo ' + path.join(__dirname, 'scripts/reloadnginx.sh');
 
 function initialize(callback) {
     if (process.env.NODE_ENV === 'test') {
