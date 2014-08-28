@@ -51,7 +51,12 @@ var AppStoreController = function ($scope, $location, Client, AppStore) {
     };
 
     $scope.openApp = function (app) {
-        window.open('https://' + app.fqdn);
+        for (var i = 0; i < Client._installedApps.length; i++) {
+            if (Client._installedApps[i].appStoreId === app.id) {
+                window.open('https://' + Client._installedApps[i].fqdn);
+                break;
+            }
+        }
     };
 
     Client.onConfig(function (config) {
