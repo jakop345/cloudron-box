@@ -14,7 +14,7 @@
                 <div class="panel-body">
                     <ul class="list-group">
                         <li class="list-group-item">Location <span class="pull-right"><a target="_blank" ng-href="https://{{ app.fqdn + app.manifest.home_url }}">{{ app.fqdn + app.manifest.home_url }}</a></span></li>
-                        <li class="list-group-item">Health <i ng-show="app.runState === 'running'" class="fa fa-smile-o fa-fw pull-right text-success"></i><i ng-show="app.runState !== 'running'" class="fa fa-frown-o fa-fw pull-right text-danger"></i></li>
+                        <li class="list-group-item">Health <i ng-show="app.healthy" class="fa fa-smile-o fa-fw pull-right text-success"></i><i ng-show="!app.healthy" class="fa fa-frown-o fa-fw pull-right text-danger"></i></li>
                         <li class="list-group-item" ng-show="app.installationState !== 'installed'">Installation Status <span class="pull-right">{{ app.installationProgress }}</span></li>
                         <li class="list-group-item" ng-show="app.installationState === 'installed'">Run Status <span class="pull-right">{{ app.runState }}</span></li>
                         <li class="list-group-item">Version <span class="pull-right">{{ app.manifest.version }}</span></li>
