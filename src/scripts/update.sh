@@ -55,6 +55,14 @@ info "Reset repo to latest code..."
 git reset --hard origin/master
 check "Done"
 
+info "Updating npm modules"
+npm install --production
+check "Done"
+
+# FIXME: should instead run above commands as user but I cannot figure
+# how to get log redirection to work
+chown -R yellowtent:yellowtent $BASEDIR
+
 info "Run release update script..."
 cd $BASEDIR/src/scripts/update
 UPDATE_FILE=`ls -1 -v -B *.sh | tail -n 1`
