@@ -404,9 +404,10 @@ function registerSubdomain(app, callback) {
         .end(function (error, res) {
             if (error) return callback(error);
 
-            if (res.status !== 201) return callback(new Error('Subdomain Registration failed. Status:' + res.status + '. ' + JSON.stringify(res.body)));
+            debug('Registered subdomain for ' + app.id + ' ' + res.status);
 
-            debug('Registered subdomain for ' + app.id);
+            if (res.status === 409) return callback(null); // already registered
+            if (res.status !== 201) return callback(new Error('Subdomain Registration failed. Status:' + res.status + '. ' + JSON.stringify(res.body)));
 
             return callback(null);
         });
