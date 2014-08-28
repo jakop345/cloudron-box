@@ -113,6 +113,19 @@ Server.prototype._getVersion = function (req, res) {
     res.send(200, { version: pkg.version });
 };
 
+Server.prototype._getIp = function (callback) {
+    var ifaces = os.networkInterfaces();
+    for (var dev in ifaces) {
+        if (dev.match(/^(en|eth).*/) === null) continue;
+
+        for (var i = 0; i < ifaces[dev]; i++) {
+            if (ifaces[dev][i].family === 'IPv4') return ifaces[dev][i].address;
+        }
+    }
+
+    return null;
+};
+
 Server.prototype._getConfig = function (req, res, next) {
     var that = this;
 
@@ -126,7 +139,7 @@ Server.prototype._getConfig = function (req, res, next) {
         next(new HttpSuccess(200, {
             appServerUrl: config.appServerUrl,
             fqdn: config.fqdn,
-            ip: config.ip,
+            ip: that._getIp(),
             version: pkg.version,
             revision: stdout,
             update: that._updater.availableUpdate()

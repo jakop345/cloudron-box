@@ -62,7 +62,6 @@ config.save = function () {
 
     config.token = null;
     config.nakedDomain = null;
-    config.ip = null;
     config.version = '0';
     config.aws = null;
 
