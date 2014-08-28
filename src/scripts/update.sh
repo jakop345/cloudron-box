@@ -1,5 +1,15 @@
 #!/bin/bash
 
+if [ $EUID -ne 0 ]; then
+    echo "This script should be run as root." > /dev/stderr
+    exit 1
+fi
+
+if [ "$1" == "--check" ]; then
+    echo "OK"
+    exit 0
+fi
+
 cyan='\e[0;36m'
 green='\e[0;32m'
 red='\e[0;31m'
@@ -29,7 +39,7 @@ echo "       Cloudron Update       "
 echo "============================="
 echo ""
 
-BASEDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+BASEDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 
 exec > >(tee /var/log/cloudron/update.log)
 exec 2>&1
@@ -46,7 +56,7 @@ git reset --hard origin/master
 check "Done"
 
 info "Run release update script..."
-cd $BASEDIR/scripts/update
+cd $BASEDIR/src/scripts/update
 UPDATE_FILE=`ls -1 -v -B *.sh | tail -n 1`
 info "Release update script is $UPDATE_FILE"
 /bin/bash $UPDATE_FILE 2>&1

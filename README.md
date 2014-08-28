@@ -8,12 +8,14 @@ Development setup
 
 * rmappdir.sh should be callable without a password
 ** Add a file called /etc/sudoers.d/yellowtent with the following contents:
-    Defaults!/home/girish/yellowtent/box/src/rmappdir.sh env_keep=HOME
-    girish ALL = (ALL) NOPASSWD: /home/girish/yellowtent/box/src/rmappdir.sh
-    Defaults!/home/girish/yellowtent/box/src/reloadnginx.sh env_keep=HOME
-    girish ALL = (ALL) NOPASSWD: /home/girish/yellowtent/box/src/reloadnginx.sh
-    Defaults!/Users/girishra/research/yellowtent/box/src/backup.sh env_keep=HOME
-    girishra ALL = (ALL) NOPASSWD: /Users/girishra/research/yellowtent/box/src/backup.sh
+    Defaults!/home/girish/yellowtent/box/src/scripts/rmappdir.sh env_keep=HOME
+    girish ALL = (ALL) NOPASSWD: /home/girish/yellowtent/box/src/scripts/rmappdir.sh
+    Defaults!/home/girish/yellowtent/box/src/scripts/reloadnginx.sh env_keep=HOME
+    girish ALL = (ALL) NOPASSWD: /home/girish/yellowtent/box/src/scripts/reloadnginx.sh
+    Defaults!/Users/girishra/research/yellowtent/box/src/scripts/backup.sh env_keep=HOME
+    girishra ALL = (ALL) NOPASSWD: /Users/girishra/research/yellowtent/box/src/scripts/backup.sh
+    Defaults!/Users/girishra/research/yellowtent/box/src/scripts/update.sh env_keep=HOME
+    girishra ALL = (ALL) NOPASSWD: /Users/girishra/research/yellowtent/box/src/scripts/update.sh
 
    (replace the username and path to rmappdir.sh to match your environment)
 
@@ -22,6 +24,7 @@ Development setup
 ** Verify using `sudo src/scripts/rmappdir.sh --check`. This should print 'OK'
 ** Verify using `sudo src/scripts/reloadnginx.sh --check`. This should print 'OK'
 ** Verify using `sudo src/scripts/backup.sh --check`. This should print 'OK'
+** Verify using `sudo src/scripts/update.sh --check`. This should print 'OK'
 
 ** Add admin-localhost as 127.0.0.1 in /etc/hosts
 ** All apps will be installed as hypened-subdomains of localhost. You should add

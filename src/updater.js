@@ -57,7 +57,7 @@ Updater.prototype.stop = function () {
 Updater.prototype.update = function (callback) {
     assert(typeof callback === 'function');
 
-    var command = 'sudo ' + path.join(__dirname, '../scripts/update.sh');
+    var command = 'sudo ' + path.join(__dirname, 'scripts/update.sh');
     var options = {
         cwd: path.join(__dirname, '..')
     };
