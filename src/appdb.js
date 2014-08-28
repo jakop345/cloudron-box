@@ -111,16 +111,10 @@ function add(id, location, portBindings, callback) {
 
     portBindings = portBindings || { };
 
-    var appData = {
-        $id: id,
-        $installationState: exports.ISTATE_PENDING_INSTALL,
-        $location: location
-    };
-
     var conn = database.newTransaction();
 
-    conn.run('INSERT INTO apps (id, installationState, location) VALUES ($id, $installationState, $location)',
-           appData, function (error) {
+    conn.run('INSERT INTO apps (id, installationState, location) VALUES (?, ?, ?)',
+           [ id, exports.ISTATE_PENDING_INSTALL, location ], function (error) {
         if (error || !this.lastID) database.rollback(conn);
 
         if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
@@ -128,13 +122,8 @@ function add(id, location, portBindings, callback) {
         if (error || !this.lastID) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         async.eachSeries(Object.keys(portBindings), function iterator(containerPort, callback) {
-            var portData = {
-                $appId: id,
-                $containerPort: containerPort,
-                $hostPort: portBindings[containerPort]
-            };
-
-            conn.run('INSERT INTO appPortBindings (hostPort, containerPort, appId) VALUES ($hostPort, $containerPort, $appId)', portData, callback);
+            conn.run('INSERT INTO appPortBindings (hostPort, containerPort, appId) VALUES (?, ?, ?)',
+                     [ portBindings[containerPort], containerPort, id ], callback);
         }, function done(error) {
             if (error) database.rollback(conn);
 
@@ -188,12 +177,6 @@ function update(id, app, callback) {
 
     var conn = database.newTransaction();
     async.eachSeries(Object.keys(portBindings), function iterator(containerPort, callback) {
-        var portData = {
-            $appId: id,
-            $containerPort: containerPort,
-            $hostPort: portBindings[containerPort]
-        };
-
         var values = [ portBindings[containerPort], containerPort, id ];
         conn.run('UPDATE appPortBindings SET hostPort = ? WHERE containerPort = ? AND appId = ?', values, callback);
     }, function seriesDone(error) {

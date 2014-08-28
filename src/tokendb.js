@@ -40,16 +40,8 @@ function add(accessToken, userId, clientId, expires, callback) {
     assert(typeof expires === 'string');
     assert(typeof callback === 'function');
 
-    var data = {
-        $accessToken: accessToken,
-        $userId: userId,
-        $clientId: clientId,
-        $expires: expires
-    };
-
-    database.run('INSERT INTO tokens (accessToken, userId, clientId, expires) '
-           + 'VALUES ($accessToken, $userId, $clientId, $expires)',
-           data, function (error) {
+    database.run('INSERT INTO tokens (accessToken, userId, clientId, expires) VALUES (?, ?, ?, ?)',
+           [ accessToken, userId, clientId, expires ], function (error) {
         if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
         if (error || !this.lastID) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 

@@ -33,15 +33,8 @@ function add(authCode, clientId, redirectURI, userId, callback) {
     assert(typeof userId === 'string');
     assert(typeof callback === 'function');
 
-    var data = {
-        $authCode: authCode,
-        $clientId: clientId,
-        $redirectURI: redirectURI,
-        $userId: userId
-    };
-
-    database.run('INSERT INTO authcodes (authCode, clientId, redirectURI, userId) ' +
-           ' VALUES ($authCode, $clientId, $redirectURI, $userId)', data, function (error) {
+    database.run('INSERT INTO authcodes (authCode, clientId, redirectURI, userId) VALUES (?, ?, ?, ?)',
+            [ authCode, clientId, redirectURI, userId ], function (error) {
         if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
         if (error || !this.lastID) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 

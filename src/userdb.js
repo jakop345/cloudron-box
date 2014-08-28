@@ -63,21 +63,10 @@ function add(userId, user, callback) {
     assert(typeof user.modifiedAt === 'string');
     assert(typeof callback === 'function');
 
-    var data = {
-        $id: userId,
-        $username: user.username,
-        $_password: user._password,
-        $email: user.email,
-        $_privatePemCipher: user._privatePemCipher,
-        $publicPem: user.publicPem,
-        $admin: user.admin,
-        $_salt: user._salt,
-        $createdAt: user.createdAt,
-        $modifiedAt: user.modifiedAt
-    };
-
+    var data = [ userId, user.username, user._password, user.email, user._privatePemCipher, user.publicPem,
+                 user.admin, user._salt, user.createdAt, user.modifiedAt ];
     database.run('INSERT INTO users (id, username, _password, email, _privatePemCipher, publicPem, admin, _salt, createdAt, modifiedAt) '
-           + 'VALUES ($id, $username, $_password, $email, $_privatePemCipher, $publicPem, $admin, $_salt, $createdAt, $modifiedAt)',
+           + 'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
            data, function (error) {
         if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
         if (error || !this.lastID) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
