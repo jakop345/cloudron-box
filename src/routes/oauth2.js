@@ -123,7 +123,7 @@ module.exports.loginForm = function (req, res) {
 
 // performs the login POST from the above form
 module.exports.login = passport.authenticate('local', {
-    successReturnToOrRedirect: '/api/v1/session/account',
+    successReturnToOrRedirect: '/api/v1/session/error',
     failureRedirect: '/api/v1/session/login'
 });
 
@@ -141,11 +141,11 @@ module.exports.callback = [
     }
 ];
 
-// Temporary helper functions to see a login session
-module.exports.account = [
+// This would indicate a missing OAuth client session or invalid client ID
+module.exports.error = [
     session.ensureLoggedIn('/api/v1/session/login'),
-    function(req, res) {
-        res.render('account', { user: req.user });
+    function (req, res) {
+        res.render('error', {});
     }
 ];
 

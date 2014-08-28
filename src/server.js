@@ -396,7 +396,7 @@ Server.prototype._initializeExpressSync = function () {
     router.post('/api/v1/session/login', routes.oauth2.login);
     router.get('/api/v1/session/logout', routes.oauth2.logout);
     router.get('/api/v1/session/callback', routes.oauth2.callback);
-    router.get('/api/v1/session/account', routes.oauth2.account); // TODO this is only temporary
+    router.get('/api/v1/session/error', routes.oauth2.error);
 
     // oauth2 routes
     router.get('/api/v1/oauth/dialog/authorize', routes.oauth2.authorization);
