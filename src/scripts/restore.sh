@@ -52,10 +52,13 @@ rm -rf $HOME/box $HOME/.yellowtent
 # FIXME userid should be constants across restores
 tar zxvf /tmp/restore.tar.gz -C $HOME
 
+sudo -u yellowtent -H bash <<EOF
 # replace the token
 FOO=`$HOME/box/node_modules/.bin/json -f $HOME/.yellowtent/cloudron.conf -e "this.token=\"$TOKEN\""`
 echo $FOO > $HOME/.yellowtent/cloudron.conf
-chown yellowtent:yellowtent $HOME/.yellowtent/cloudron.conf
+
+sqlite3 $HOME/.yellowtent/config/config.sqlite.db 'UPDATE apps SET installationState = "pending_restore"'
+EOF
 
 echo "Restart nginx"
 supervisorctl restart nginx

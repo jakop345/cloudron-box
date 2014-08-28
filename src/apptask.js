@@ -488,6 +488,55 @@ function install(app, callback) {
     });
 }
 
+function restore(app, callback) {
+    async.series([
+        // unconfigure nginx in case of FQDN change
+        updateApp.bind(null, app, { installationProgress: 'Unconfiguring nginx' }),
+        unconfigureNginx.bind(null, app),
+
+        // configure nginx
+        updateApp.bind(null, app, { installationProgress: 'Configuring nginx' }),
+        configureNginx.bind(null, app),
+
+        // register subdomain
+        updateApp.bind(null, app, { installationProgress: 'Registering subdomain' }),
+        registerSubdomain.bind(null, app),
+
+        // download manifest FIXME: should we restore to app.version ?
+        updateApp.bind(null, app, { installationProgress: 'Downloading manifest' }),
+        downloadManifest.bind(null, app),
+
+        // download the image
+        updateApp.bind(null, app, { installationProgress: 'Downloading image' }),
+        downloadImage.bind(null, app),
+
+        // remove OAuth credentials in case of FQDN change
+        updateApp.bind(null, app, { installationProgress: 'Remove old oauth credentials' }),
+        removeOAuthCredentials.bind(null, app),
+
+        // add OAuth credentials
+        updateApp.bind(null, app, { installationProgress: 'Setting up OAuth' }),
+        allocateOAuthCredentials.bind(null, app),
+
+        // create container
+        updateApp.bind(null, app, { installationProgress: 'Creating container' }),
+        createContainer.bind(null, app),
+
+        // done!
+        function (callback) {
+            debug('App ' + app.id + ' installed');
+            updateApp(app, { installationState: appdb.ISTATE_INSTALLED, installationProgress: '' }, callback);
+        }
+    ], function seriesDone(error) {
+        if (error) {
+            console.error('Error installing app:', error);
+            return updateApp(app, { installationState: appdb.ISTATE_ERROR, installationProgress: error.message }, callback.bind(null, error));
+        }
+
+        postInstall(app, callback);
+    });
+}
+
 // TODO: optimize by checking if location actually changed
 function configure(app, callback) {
     async.series([
@@ -621,6 +670,20 @@ function stopApp(app, callback) {
     });
 }
 
+function postInstall(app, callback) {
+    if (app.runState === appdb.RSTATE_PENDING_STOP) {
+        return stopApp(app, callback);
+    }
+
+    if (app.runState === appdb.RSTATE_PENDING_START || app.runState === appdb.RSTART_RUNNING) {
+        debug('Resuming app with state : %s %s', app.runState, app.id);
+        return runApp(app, callback);
+    }
+
+    return callback(null);
+}
+
+
 function startTask(appId, callback) {
     // determine what to do
     appdb.get(appId, function (error, app) {
@@ -640,17 +703,12 @@ function startTask(appId, callback) {
             return update(app, callback);
         }
 
-        if (app.installationState === appdb.ISTATE_INSTALLED) {
-            if (app.runState === appdb.RSTATE_PENDING_STOP) {
-                stopApp(app, callback);
-            } else if (app.runState === appdb.RSTATE_PENDING_START || app.runState === appdb.RSTART_RUNNING) {
-                debug('Resuming app with state : %s %s', app.runState, app.id);
-                runApp(app, callback);
-            } else {
-                callback(null);
-            }
+        if (app.installationState === appdb.ISTATE_PENDING_RESTORE) {
+            return restore(app, callback);
+        }
 
-            return;
+        if (app.installationState === appdb.ISTATE_INSTALLED) {
+            return postInstall(app, callback);
         }
 
         if (app.installationState === appdb.ISTATE_PENDING_INSTALL) {
