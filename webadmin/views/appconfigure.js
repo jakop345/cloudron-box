@@ -8,7 +8,7 @@ var AppConfigureController = function ($scope, $routeParams, Client, AppStore) {
     $scope.error = { };
     $scope.portBindings = { };
 
-    Client.getApp($routeParams.id, function (error, app) {
+    Client.getApp($routeParams.appId, function (error, app) {
         $scope.error = error || { };
         if (error) return;
 
@@ -31,7 +31,7 @@ var AppConfigureController = function ($scope, $routeParams, Client, AppStore) {
 
         console.log('Configure app for ', location, portBindings);
 
-        Client.configureApp($routeParams.id, $scope.password, { location: $scope.location, portBindings: portBindings }, function (error) {
+        Client.configureApp($routeParams.appId, $scope.password, { location: $scope.location, portBindings: portBindings }, function (error) {
             if (error) {
                 console.error('Unable to configure app.', error);
                 if (error.statusCode === 403) {
@@ -45,7 +45,7 @@ var AppConfigureController = function ($scope, $routeParams, Client, AppStore) {
                 return;
             }
 
-            window.location.replace('#/app/' + $routeParams.id + '/details');
+            window.location.replace('#/app/' + $routeParams.appId + '/details');
         });
     };
 

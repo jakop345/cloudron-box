@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS clients(
 
 CREATE TABLE IF NOT EXISTS apps(
     id VARCHAR(512) NOT NULL UNIQUE,
+    appStoreId VARCHAR(512) NOT NULL UNIQUE,
     version VARCHAR(32),
     installationState VARCHAR(512) NOT NULL,
     installationProgress VARCHAR(512),

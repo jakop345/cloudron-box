@@ -219,6 +219,7 @@ describe('database', function () {
     describe('app', function () {
         var APP_0 = {
             id: 'appid-0',
+            appStoreId: 'appStoreId-0',
             version: null,
             installationState: appdb.ISTATE_PENDING_INSTALL,
             installationProgress: null,
@@ -232,6 +233,7 @@ describe('database', function () {
         };
         var APP_1 = {
             id: 'appid-1',
+            appStoreId: 'appStoreId-1',
             version: null,
             installationState: appdb.ISTATE_PENDING_INSTALL, // app health tests rely on this initial state
             installationProgress: null,
@@ -250,7 +252,7 @@ describe('database', function () {
         });
 
         it('add succeeds', function (done) {
-            appdb.add(APP_0.id, APP_0.location, APP_0.portBindings, function (error) {
+            appdb.add(APP_0.id, APP_0.appStoreId, APP_0.location, APP_0.portBindings, function (error) {
                 expect(error).to.be(null);
                 done();
             });
@@ -266,7 +268,7 @@ describe('database', function () {
         });
 
         it('add of same app fails', function (done) {
-            appdb.add(APP_0.id, APP_0.location, [ ], function (error) {
+            appdb.add(APP_0.id, APP_0.appStoreId, APP_0.location, [ ], function (error) {
                 expect(error).to.be.a(DatabaseError);
                 expect(error.reason).to.be(DatabaseError.ALREADY_EXISTS);
                 done();
@@ -317,7 +319,7 @@ describe('database', function () {
         });
 
         it('add second app succeeds', function (done) {
-            appdb.add(APP_1.id, APP_1.location, [ ], function (error) {
+            appdb.add(APP_1.id, APP_1.appStoreId, APP_1.location, [ ], function (error) {
                 expect(error).to.be(null);
                 done();
             });

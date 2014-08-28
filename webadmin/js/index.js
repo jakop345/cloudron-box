@@ -45,13 +45,13 @@ app.config(function ($routeProvider) {
     }).when('/myapps', {
         controller: 'MyAppsController',
         templateUrl: 'views/myapps.html'
-    }).when('/app/:id/install', {
+    }).when('/app/:appStoreId/install', {
         controller: 'AppInstallController',
         templateUrl: 'views/appinstall.html'
-    }).when('/app/:id/configure', {
+    }).when('/app/:appId/configure', {
         controller: 'AppConfigureController',
         templateUrl: 'views/appconfigure.html'
-    }).when('/app/:id/details', {
+    }).when('/app/:appId/details', {
         controller: 'AppDetailsController',
         templateUrl: 'views/appdetails.html'
     }).when('/settings', {

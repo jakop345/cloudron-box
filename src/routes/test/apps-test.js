@@ -22,12 +22,13 @@ var Server = require('../../server.js'),
     assert = require('assert'),
     net = require('net'),
     config = require('../../../config.js'),
+    uuid = require('node-uuid'),
     _ = require('underscore'),
     appFqdn = require('../../apps').appFqdn;
 
 var SERVER_URL = 'http://localhost:' + config.port;
 
-var APP_ID = 'test';
+var APP_STORE_ID = 'test', APP_ID;
 var APP_LOCATION = 'location';
 
 var USERNAME = 'admin', PASSWORD = 'admin', EMAIL ='silly@me.com';
@@ -107,6 +108,7 @@ describe('App API', function () {
         });
     });
     after(function (done) {
+        APP_ID = null;
         cleanup(function () {
             dockerProxy.close(done);
         });
@@ -128,7 +130,7 @@ describe('App API', function () {
                .send({ password: PASSWORD })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
-            expect(res.body.message).to.eql('appId is required');
+            expect(res.body.message).to.eql('appStoreId is required');
             done(err);
         });
     });
@@ -136,7 +138,7 @@ describe('App API', function () {
     it('app install fails - invalid location', function (done) {
         request.post(SERVER_URL + '/api/v1/app/install')
                .query({ access_token: token })
-               .send({ appId: APP_ID, password: PASSWORD, location: '!awesome' })
+               .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: '!awesome' })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             expect(res.body.message).to.eql('Subdomain can only contain alphanumerics and hyphen');
@@ -147,7 +149,7 @@ describe('App API', function () {
     it('app install fails - reserved location', function (done) {
         request.post(SERVER_URL + '/api/v1/app/install')
                .query({ access_token: token })
-               .send({ appId: APP_ID, password: PASSWORD, location: 'admin' })
+               .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: 'admin' })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             expect(res.body.message).to.eql('admin location is reserved');
@@ -158,7 +160,7 @@ describe('App API', function () {
     it('app install fails - portBindings must be object', function (done) {
         request.post(SERVER_URL + '/api/v1/app/install')
                .query({ access_token: token })
-               .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION, portBindings: 23 })
+               .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: 23 })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             expect(res.body.message).to.eql('portBindings must be an object');
@@ -169,9 +171,11 @@ describe('App API', function () {
     it('app install succeeds', function (done) {
         request.post(SERVER_URL + '/api/v1/app/install')
                .query({ access_token: token })
-               .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION, portBindings: null })
+               .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: null })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
+            expect(res.body.appId).to.be.a('string');
+            APP_ID = res.body.appId;
             done(err);
         });
     });
@@ -252,6 +256,8 @@ describe('App installation', function () {
     var imageDeleted = false, imageCreated = false;
 
     before(function (done) {
+        APP_ID = uuid.v4();
+
         async.series([
             function (callback) {
                 dockerProxy = startDockerProxy(function interceptor(req, res) {
@@ -280,7 +286,7 @@ describe('App installation', function () {
                     hockServer = server;
 
                     hockServer
-                        .get('/api/v1/appstore/apps/' + APP_ID + '/manifest')
+                        .get('/api/v1/appstore/apps/' + APP_STORE_ID + '/manifest')
                         .reply(200, manifest, { 'Content-Type': 'application/json' })
                         .post('/api/v1/subdomains?token=' + config.token, { subdomain: APP_LOCATION, appId: APP_ID })
                         .reply(201, { }, { 'Content-Type': 'application/json' })
@@ -293,6 +299,7 @@ describe('App installation', function () {
     });
 
     after(function (done) {
+        APP_ID = null;
         cleanup(function (error) {
             if (error) return done(error);
             hockServer.close(function () {
@@ -319,9 +326,11 @@ describe('App installation', function () {
 
         request.post(SERVER_URL + '/api/v1/app/install')
               .query({ access_token: token })
-              .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION, portBindings: null })
+              .send({ appId: APP_ID, appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: null })
               .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
+            expect(res.body.appId).to.be.a('string');
+            expect(res.body.appId).to.be.eql(APP_ID);
             checkInstallStatus();
         });
     });
@@ -483,6 +492,7 @@ describe('App installation - port bindings', function () {
     var imageDeleted = false, imageCreated = false;
 
     before(function (done) {
+        APP_ID = uuid.v4();
         async.series([
             function (callback) {
                 dockerProxy = startDockerProxy(function interceptor(req, res) {
@@ -511,7 +521,7 @@ describe('App installation - port bindings', function () {
                     hockServer = server;
 
                 hockServer
-                    .get('/api/v1/appstore/apps/' + APP_ID + '/manifest')
+                    .get('/api/v1/appstore/apps/' + APP_STORE_ID + '/manifest')
                     .reply(200, manifest, { 'Content-Type': 'application/json' })
                     // app install
                     .post('/api/v1/subdomains?token=' + config.token, { subdomain: APP_LOCATION, appId: APP_ID })
@@ -532,6 +542,7 @@ describe('App installation - port bindings', function () {
     });
 
     after(function (done) {
+        APP_ID = null;
         cleanup(function (error) {
             if (error) return done(error);
             hockServer.close(function () {
@@ -558,9 +569,10 @@ describe('App installation - port bindings', function () {
 
         request.post(SERVER_URL + '/api/v1/app/install')
               .query({ access_token: token })
-              .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION, portBindings: { '7778' : '7171' } })
+              .send({ appId: APP_ID, appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: { '7778' : '7171' } })
               .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
+            expect(res.body.appId).to.equal(APP_ID);
             checkInstallStatus();
         });
     });

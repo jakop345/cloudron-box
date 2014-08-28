@@ -20,6 +20,7 @@ var apptask = require('../apptask.js'),
 
 var APP = {
     id: 'appid',
+    appStoreId: 'appStoreId',
     installationState: appdb.ISTATE_PENDING_INSTALL,
     runState: null,
     location: 'applocation',
@@ -39,7 +40,7 @@ describe('apptask', function () {
 
         database.create(function (error) {
             expect(error).to.be(null);
-            appdb.add(APP.id, APP.location, APP.portBindings, done);
+            appdb.add(APP.id, APP.appStoreId, APP.location, APP.portBindings, done);
         });
     });
 
@@ -144,7 +145,7 @@ describe('apptask', function () {
     });
 
     it('barfs on empty manifest', function (done) {
-        var scope = nock(config.appServerUrl).get('/api/v1/appstore/apps/' + APP.id + '/manifest').reply(200, { });
+        var scope = nock(config.appServerUrl).get('/api/v1/appstore/apps/' + APP.appStoreId + '/manifest').reply(200, { });
 
         apptask._downloadManifest(APP, function (error) {
             expect(error).to.be.ok();
@@ -155,7 +156,7 @@ describe('apptask', function () {
 
     it('barfs on bad field in manifest', function (done) {
         var manifest = { version: '0.1', dockerImage: 'foo', healthCheckPath: '/', httpPort: 3, title: 'ok' };
-        var scope = nock(config.appServerUrl).get('/api/v1/appstore/apps/' + APP.id + '/manifest').reply(200, manifest);
+        var scope = nock(config.appServerUrl).get('/api/v1/appstore/apps/' + APP.appStoreId + '/manifest').reply(200, manifest);
 
         apptask._downloadManifest(APP, function (error) {
             expect(error).to.be.ok();
@@ -165,7 +166,7 @@ describe('apptask', function () {
     });
 
     it('barfs on malformed manifest', function (done) {
-        var scope = nock(config.appServerUrl).get('/api/v1/appstore/apps/' + APP.id + '/manifest').reply(200, 'you evil man');
+        var scope = nock(config.appServerUrl).get('/api/v1/appstore/apps/' + APP.appStoreId + '/manifest').reply(200, 'you evil man');
 
         apptask._downloadManifest(APP, function (error) {
             expect(error).to.be.ok();
@@ -176,7 +177,7 @@ describe('apptask', function () {
 
     it('downloads manifest', function (done) {
         var manifest = { version: '0.1', dockerImage: 'foo', healthCheckPath: '/', httpPort: '3', title: 'ok' };
-        var scope = nock(config.appServerUrl).get('/api/v1/appstore/apps/' + APP.id + '/manifest').reply(200, manifest);
+        var scope = nock(config.appServerUrl).get('/api/v1/appstore/apps/' + APP.appStoreId + '/manifest').reply(200, manifest);
 
         apptask._downloadManifest(APP, function (error) {
             expect(error).to.be(null);

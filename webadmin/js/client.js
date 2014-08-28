@@ -177,10 +177,10 @@ angular.module('YellowTent').service('Client', function ($http) {
     };
 
     Client.prototype.installApp = function (id, password, config, callback) {
-        var data = { appId: id, password: password, location: config.location, portBindings: config.portBindings };
+        var data = { appStoreId: id, password: password, location: config.location, portBindings: config.portBindings };
         $http.post('/api/v1/app/install', data).success(function (data, status) {
-            if (status !== 200) return callback(new ClientError(status, data));
-            callback(null);
+            if (status !== 200 || !data.appId) return callback(new ClientError(status, data));
+            callback(null, data.appId);
         }).error(function (data, status) {
             callback(new ClientError(status, data));
         });
@@ -425,7 +425,7 @@ angular.module('YellowTent').service('Client', function ($http) {
             }
 
             apps.forEach(function (app, i) {
-                app.iconUrl = that._config.appServerUrl + '/api/v1/appstore/apps/' + app.id + '/icon';
+                app.iconUrl = that._config.appServerUrl + '/api/v1/appstore/apps/' + app.appStoreId + '/icon';
                 if (that._installedApps.some(function (elem) { return elem.id === app.id; })) {
                     angular.copy(app, that._installedApps[i]);
                     return;

@@ -7,6 +7,7 @@ var HttpError = require('../httperror.js'),
     debug = require('debug')('box:routes/apps'),
     apps = require('../apps.js'),
     config = require('../../config.js'),
+    uuid = require('node-uuid'),
     AppsError = apps.AppsError;
 
 exports = module.exports = {
@@ -62,7 +63,7 @@ function getApps(req, res, next) {
 
 /*
  * Installs an app
- * @bodyparam {string} appId The id of the app to be installed
+ * @bodyparam {string} appStoreId The id of the app to be installed
  * @bodyparam {string} password The user's password
  * @bodyparam {string} location The subdomain where the app is to be installed
  * @bodyparam {object} portBindings map from container port to (public) host port. can be null.
@@ -71,19 +72,23 @@ function installApp(req, res, next) {
     var data = req.body;
 
     if (!data) return next(new HttpError(400, 'Cannot parse data field'));
-    if (!data.appId) return next(new HttpError(400, 'appId is required'));
+    if (!data.appStoreId) return next(new HttpError(400, 'appStoreId is required'));
     if (!data.password) return next(new HttpError(400, 'password is required'));
     if (!data.location) return next(new HttpError(400, 'location is required'));
     if (('portBindings' in data) && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
 
-    debug('will install app with id ' + data.appId + ' @ ' + data.location + ' with ' + JSON.stringify(data.portBindings));
+    // allow tests to provide an appId for testing
+    var appId = (process.env.NODE_ENV === 'test' && typeof data.appId === 'string') ? data.appId : uuid.v4();
 
-    apps.install(data.appId, req.user.username, data.password, data.location, data.portBindings, function (error) {
+    debug('will install app with instance id ' + appId + ' storeId: ' + data.appStoreId +
+          ' @ ' + data.location + ' with ' + JSON.stringify(data.portBindings));
+
+    apps.install(appId, data.appStoreId, req.user.username, data.password, data.location, data.portBindings, function (error) {
         if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, 'App already exists: ' + error));
         if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error) return next(new HttpError(500, 'Internal error:' + error));
 
-        next(new HttpSuccess(200, { } ));
+        next(new HttpSuccess(200, { appId: appId } ));
     });
 }
 

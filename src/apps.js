@@ -161,7 +161,7 @@ function getAll(callback) {
     });
 }
 
-function install(appId, username, password, location, portBindings, callback) {
+function install(appId, appStoreId, username, password, location, portBindings, callback) {
     assert(typeof appId === 'string');
     assert(typeof username === 'string');
     assert(typeof password === 'string');
@@ -177,7 +177,7 @@ function install(appId, username, password, location, portBindings, callback) {
 
     stopTask(appId);
 
-    appdb.add(appId, location, portBindings, function (error) {
+    appdb.add(appId, appStoreId, location, portBindings, function (error) {
         if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new AppsError(AppsError.ALREADY_EXISTS));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 

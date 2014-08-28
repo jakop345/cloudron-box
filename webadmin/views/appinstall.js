@@ -8,13 +8,13 @@ var AppInstallController = function ($scope, $routeParams, Client, AppStore) {
     $scope.error = { };
     $scope.portBindings = { };
 
-    AppStore.getAppById($routeParams.id, function (error, app) {
+    AppStore.getAppById($routeParams.appStoreId, function (error, app) {
         $scope.error = error || { };
         if (error) return;
         $scope.app = app;
     });
 
-    AppStore.getManifest($routeParams.id, function (error, manifest) {
+    AppStore.getManifest($routeParams.appStoreId, function (error, manifest) {
         $scope.error = error || { };
         if (error) return;
         $scope.portBindings = manifest.tcp_ports;
@@ -33,7 +33,7 @@ var AppInstallController = function ($scope, $routeParams, Client, AppStore) {
             portBindings[port] = $scope.portBindings[port].hostPort;
         }
 
-        Client.installApp($routeParams.id, $scope.password, { location: $scope.location, portBindings: portBindings }, function (error) {
+        Client.installApp($routeParams.appStoreId, $scope.password, { location: $scope.location, portBindings: portBindings }, function (error, appId) {
             if (error) {
                 console.error('Unable to install app.', error);
                 if (error.statusCode === 409) {
@@ -49,7 +49,7 @@ var AppInstallController = function ($scope, $routeParams, Client, AppStore) {
                 return;
             }
 
-            window.location.replace('#/app/' + $routeParams.id + '/details');
+            window.location.replace('#/app/' + appId + '/details');
         });
     };
 
