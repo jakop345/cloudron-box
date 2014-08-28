@@ -83,6 +83,7 @@ else
     mkdir -p $USER_HOME
     cd $USER_HOME
     git clone http://bootstrap:not4long@yellowtent.girish.in/yellowtent/box.git
+    echo "git HEAD is `git rev-parse HEAD`"
     cd box
 fi
 
