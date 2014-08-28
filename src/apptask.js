@@ -676,14 +676,14 @@ function postInstall(app, callback) {
         return stopApp(app, callback);
     }
 
-    if (app.runState === appdb.RSTATE_PENDING_START || app.runState === appdb.RSTART_RUNNING) {
+    if (app.runState === null || app.runState === appdb.RSTATE_PENDING_START || app.runState === appdb.RSTART_RUNNING) {
         debug('Resuming app with state : %s %s', app.runState, app.id);
         return runApp(app, callback);
     }
 
+    debug('postInstall - doing nothing: %s %s', app.runState, app.id);
     return callback(null);
 }
-
 
 function startTask(appId, callback) {
     // determine what to do
