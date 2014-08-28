@@ -200,7 +200,6 @@ Server.prototype._restore = function (req, res, next) {
         }
 
         debug('_restore: success');
-
     });
 };
 
