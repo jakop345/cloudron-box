@@ -233,7 +233,7 @@ describe('database', function () {
         var APP_1 = {
             id: 'appid-1',
             version: null,
-            installationState: appdb.ISTATE_PENDING_INSTALL,
+            installationState: appdb.ISTATE_PENDING_INSTALL, // app health tests rely on this initial state
             installationProgress: null,
             runState: null,
             location: 'some-location-1',
@@ -366,6 +366,51 @@ describe('database', function () {
             appdb.del(APP_0.id, function (error) {
                 expect(error).to.be.a(DatabaseError);
                 expect(error.reason).to.be(DatabaseError.NOT_FOUND);
+                done();
+            });
+        });
+
+        it('cannot set app as healthy because app is not installed', function (done) {
+            appdb.setHealth(APP_1.id, true, appdb.RSTATE_RUNNING, function (error) {
+                expect(error).to.be.ok();
+                done();
+            });
+        });
+
+        it('cannot set app as healthy because app has pending run state', function (done) {
+            appdb.update(APP_1.id, { runState: appdb.RSTATE_PENDING_STOP, installationState: appdb.ISTATE_INSTALLED }, function (error) {
+                appdb.setHealth(APP_1.id, true, appdb.RSTATE_RUNNING, function (error) {
+                    expect(error).to.be.ok();
+                    done();
+                });
+            });
+        });
+
+        it('cannot set app as healthy because app has null run state', function (done) {
+            appdb.update(APP_1.id, { runState: null, installationState: appdb.ISTATE_INSTALLED }, function (error) {
+                appdb.setHealth(APP_1.id, true, appdb.RSTATE_RUNNING, function (error) {
+                    expect(error).to.be.ok();
+                    done();
+                });
+            });
+        });
+
+        it('can set app as health when installed and no pending runState', function (done) {
+            appdb.update(APP_1.id, { runState: appdb.RSTATE_RUNNING, installationState: appdb.ISTATE_INSTALLED }, function (error) {
+                appdb.setHealth(APP_1.id, true, appdb.RSTATE_RUNNING, function (error) {
+                    expect(error).to.be(null);
+                    appdb.get(APP_1.id, function (error, app) {
+                        expect(error).to.be(null);
+                        expect(app.healthy).to.be(1);
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('cannot set health of unknown app', function (done) {
+            appdb.setHealth('randomId', true, appdb.RSTATE_RUNNING, function (error) {
+                expect(error).to.be.ok();
                 done();
             });
         });

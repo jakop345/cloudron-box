@@ -228,10 +228,10 @@ function update(id, app, callback) {
     });
 }
 
-// sets health as long as there is no pending command
+// sets health on installed apps that have a runState which is not null or pending
 function setHealth(appId, healthy, rstate, callback) {
-    database.run('UPDATE app SET healthy = ?, runState = ? WHERE id = ? AND runState NOT GLOB pending_*',
-                 [ healthy, rstate ], function (error) {
+    database.run('UPDATE apps SET healthy = ?, runState = ? WHERE id = ? AND runState NOT GLOB "pending_*" AND installationState = "installed"',
+                 [ healthy, rstate, appId ], function (error) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (this.changes !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
