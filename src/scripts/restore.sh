@@ -64,7 +64,7 @@ EOF
 
 sudo -u yellowtent -H bash <<EOF
 node -e "$REPLACE_TOKEN_JS"
-sqlite3 $HOME/.yellowtent/config/config.sqlite.db 'UPDATE apps SET installationState = "pending_restore"'
+sqlite3 $HOME/.yellowtent/config/config.sqlite.db 'UPDATE apps SET installationState = "pending_restore", healthy = NULL, runState = NULL, containerId = NULL, httpPort = NULL, installationProgress = NULL'
 EOF
 
 echo "Restart nginx"
