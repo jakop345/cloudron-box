@@ -44,7 +44,7 @@ STRING_TO_SIGN="PUT\n\n${CONTENT_TYPE}\n${DATE_HEADER}\n${RESOURCE}"
 SIGNATURE=`echo -en ${STRING_TO_SIGN} | openssl sha1 -hmac ${S3_SECRET} -binary | base64`
 
 echo "Uploading backup: $RESOURCE"
-cd $HOME/.yellowtent && tar czf /tmp/$FILE *
+cd $HOME && tar czf /tmp/$FILE box .yellowtent
 curl -X PUT -T "/tmp/${FILE}" \
     -H "Host: ${S3_BUCKET}.s3.amazonaws.com" \
     -H "Date: ${DATE_HEADER}" \

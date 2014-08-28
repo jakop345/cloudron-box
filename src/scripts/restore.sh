@@ -47,8 +47,10 @@ curl -X GET \
     -o /tmp/restore.tar.gz \
     https://${S3_BUCKET}.s3.amazonaws.com/${S3_PREFIX}/${FILE}
 
-rm -rf $HOME/.yellowtent/*
-tar zxvf /tmp/restore.tar.gz -C $HOME/.yellowtent
+rm -rf $HOME/box $HOME/.yellowtent
+
+# FIXME userid should be constants across restores
+tar zxvf /tmp/restore.tar.gz -C $HOME
 
 # replace the token
 FOO=`$HOME/box/node_modules/.bin/json -f $HOME/.yellowtent/cloudron.conf -e "this.token=\"$TOKEN\""`
