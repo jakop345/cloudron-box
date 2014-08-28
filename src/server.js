@@ -222,7 +222,7 @@ Server.prototype._provision = function (req, res, next) {
 
     if (config.token) return next(new HttpError(409, 'Already provisioned'));
 
-    config.set(_.pick(req.body, 'token', 'appServerUrl', 'adminOrigin', 'fqdn', 'ip', 'aws'));
+    config.set(_.pick(req.body, 'token', 'appServerUrl', 'adminOrigin', 'fqdn', 'aws'));
 
     // override the default webadmin OAuth client record
     clientdb.del('webadmin', function () {
