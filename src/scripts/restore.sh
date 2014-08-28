@@ -60,8 +60,19 @@ tar zxvf /tmp/restore.tar.gz -C $HOME
 # really move somewhere else
 cd /
 
-sudo -E -u yellowtent -H bash <<EOF
-$HOME/box/node_modules/.bin/json -I -f $HOME/.yellowtent/cloudron.conf -e "this.token=\"$TOKEN\""
+# Do not use json node binary. Seems to have some bug resulting in empty cloudron.conf
+# in heredocs, single quotes preserves the quotes _and_ does variable expansion
+REPLACE_TOKEN_JS=$(cat <<EOF
+var fs = require('fs');
+var config = JSON.parse(fs.readFileSync('$HOME/.yellowtent/cloudron.conf', 'utf8'));
+config.token = '$TOKEN';
+fs.writeFileSync('$HOME/.yellowtent/cloudron.conf', JSON.stringify(config, null, 4));
+EOF
+)
+echo "token replacer script: $REPLACE_TOKEN_JS"
+
+sudo -u yellowtent -H bash <<EOF
+node -e "$REPLACE_TOKEN_JS"
 sqlite3 $HOME/.yellowtent/config/config.sqlite.db 'UPDATE apps SET installationState = "pending_restore", healthy = NULL, runState = NULL, containerId = NULL, httpPort = NULL, installationProgress = NULL'
 EOF
 
