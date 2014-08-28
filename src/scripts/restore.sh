@@ -61,7 +61,7 @@ tar zxvf /tmp/restore.tar.gz -C $HOME
 cd /
 
 sudo -E -u yellowtent -H bash <<EOF
-$HOME/box/node_modules/.bin/json -f $HOME/.yellowtent/cloudron.conf -e "this.token=\"$TOKEN\""
+$HOME/box/node_modules/.bin/json -I -f $HOME/.yellowtent/cloudron.conf -e "this.token=\"$TOKEN\""
 sqlite3 $HOME/.yellowtent/config/config.sqlite.db 'UPDATE apps SET installationState = "pending_restore", healthy = NULL, runState = NULL, containerId = NULL, httpPort = NULL, installationProgress = NULL'
 EOF
 
