@@ -273,7 +273,8 @@ describe('App installation', function () {
             setup,
 
             function (callback) {
-                hock(parseInt(url.parse(config.appServerUrl).port, 10), function (error, server) {
+                var port = parseInt(url.parse(config.appServerUrl).port, 10);
+                hock({ port: port, throwOnUnmatched: false }, function (error, server) {
                     if (error) return done(error);
                     var manifest = JSON.parse(fs.readFileSync(__dirname + '/test.app', 'utf8'));
                     hockServer = server;
@@ -503,7 +504,8 @@ describe('App installation - port bindings', function () {
             setup,
 
             function (callback) {
-                hock(parseInt(url.parse(config.appServerUrl).port, 10), function (error, server) {
+                var port = parseInt(url.parse(config.appServerUrl).port, 10);
+                hock({ port: port, throwOnUnmatched: false }, function (error, server) {
                     if (error) return done(error);
                     var manifest = JSON.parse(fs.readFileSync(__dirname + '/test.app', 'utf8'));
                     hockServer = server;
