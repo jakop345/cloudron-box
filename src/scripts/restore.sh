@@ -28,6 +28,8 @@ S3_BUCKET=$4
 FILE=$5
 TOKEN=$6
 
+echo "Arguments: $@"
+
 # Stop the box
 echo "Stopping box"
 supervisorctl stop box
