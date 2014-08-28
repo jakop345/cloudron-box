@@ -51,6 +51,9 @@ curl -X GET \
 
 rm -rf $HOME/box $HOME/.yellowtent
 
+# move somewhere else since we blow away the current dir
+cd /
+
 # FIXME userid should be constants across restores
 tar zxvf /tmp/restore.tar.gz -C $HOME
 
