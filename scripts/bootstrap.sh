@@ -1,4 +1,5 @@
 #!/bin/sh
+# This script is executed once on startup
 
 exec > >(tee /var/log/cloudron/bootstrap.log)
 exec 2>&1
