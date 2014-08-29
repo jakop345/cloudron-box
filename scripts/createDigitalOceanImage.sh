@@ -8,12 +8,13 @@ JSON="$SCRIPT_DIR/../node_modules/.bin/json"
 CURL="curl -s"
 UBUNTU_IMAGE_SLUG="ubuntu-14-04-x64" # ID=5141286
 DATE=`date +%Y-%m-%d-%H%M%S`
-SNAPSHOT_NAME="box-base-image-$DATE"
 BOX_REVISION=origin/master
 if [ ! -z "$1" ]; then
     BOX_REVISION=$1
 fi
-BOX_NAME="box-`echo $BOX_REVISION | sed -e 's/\//-/g'`-$DATE" # remove slashes
+CLEAN_REVISION=`echo $BOX_REVISION | sed -e 's/\//-/g'`
+BOX_NAME="box-$CLEAN_REVISION-$DATE" # remove slashes
+SNAPSHOT_NAME="box-$CLEAN_REVISION-$DATE"
 
 function get_ssh_key_id() {
     $CURL "https://api.digitalocean.com/v1/ssh_keys/?client_id=$CLIENT_ID&api_key=$API_KEY" \
