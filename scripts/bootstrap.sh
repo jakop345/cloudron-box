@@ -14,6 +14,7 @@ BACKUP_DIR=/home/$USER/.yellowtent
 
 # we get the appstore origin from the caller which is baked into the image
 APP_SERVER_URL=$1
+BOX_REVISION=$2
 
 echo "==== Setup /etc/yellowtent ===="
 mkdir -p /etc/yellowtent

@@ -5,6 +5,7 @@ set -v
 USER_HOME=/home/yellowtent
 SRCDIR=$USER_HOME/box
 USER=yellowtent
+BOX_REVISION=$1
 
 echo "==== Create User $USER ===="
 id $USER
@@ -16,7 +17,7 @@ fi
 # now exit on failure
 set -e
 
-echo "== Yellowtent base image preparation =="
+echo "== Yellowtent base image preparation ($BOX_REVISION) =="
 
 export DEBIAN_FRONTEND=noninteractive
 
@@ -76,16 +77,16 @@ if [ -d "$SRCDIR/.git" ]; then
     echo "Updating the box repo"
     cd $SRCDIR
     git fetch
-    git reset --hard origin/master
 else
     echo "Cloning the box repo"
     rm -rf $SRCDIR
     mkdir -p $USER_HOME
     cd $USER_HOME
     git clone http://bootstrap:not4long@yellowtent.girish.in/yellowtent/box.git
-    echo "git HEAD is `git rev-parse HEAD`"
-    cd box
+    cd $SRCDIR
 fi
+git reset --hard $BOX_REVISION
+echo "git HEAD is `git rev-parse HEAD`"
 
 NPM_INSTALL="npm install --production"
 rm -rf ./node_modules
@@ -117,13 +118,12 @@ echo "[II] Update to latest git revision..."
 cd $SRCDIR
 sudo -u $USER bash <<EOS
 git fetch
-git reset --hard origin/master
+git reset --hard $BOX_REVISION
 EOS
 echo "[II] Done"
 
 echo "[II] Run bootstrap script..."
-/bin/bash $SRCDIR/scripts/bootstrap.sh https://appstore-dev.herokuapp.com
-# /bin/bash $SRCDIR/scripts/bootstrap.sh https://nebulon.fwd.wf
+/bin/bash $SRCDIR/scripts/bootstrap.sh https://appstore-dev.herokuapp.com $BOX_REVISION
 echo "[II] Done"
 
 echo "[II] Disable bootstrap init script"

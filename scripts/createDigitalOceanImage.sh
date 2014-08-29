@@ -8,8 +8,12 @@ JSON="$SCRIPT_DIR/../node_modules/.bin/json"
 CURL="curl -s"
 UBUNTU_IMAGE_SLUG="ubuntu-14-04-x64" # ID=5141286
 DATE=`date +%Y-%m-%d-%H%M%S`
-BOX_NAME="box-$DATE"
 SNAPSHOT_NAME="box-base-image-$DATE"
+BOX_REVISION=origin/master
+if [ ! -z "$1" ]; then
+    BOX_REVISION=$1
+fi
+BOX_NAME="box-`echo $BOX_REVISION | sed -e 's/\//_/g'`-$DATE" # remove slashes
 
 function get_ssh_key_id() {
     $CURL "https://api.digitalocean.com/v1/ssh_keys/?client_id=$CLIENT_ID&api_key=$API_KEY" \
@@ -132,7 +136,7 @@ while true; do
 done
 
 echo "Executing init script"
-ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i $SCRIPT_DIR/ssh/id_rsa_yellowtent root@$DROPLET_IP "/bin/bash /root/initializeBaseUbuntuImage.sh"
+ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i $SCRIPT_DIR/ssh/id_rsa_yellowtent root@$DROPLET_IP "/bin/bash /root/initializeBaseUbuntuImage.sh $BOX_REVISION"
 if [ $? -ne 0 ]; then
     echo "Init script failed"
     exit 1
