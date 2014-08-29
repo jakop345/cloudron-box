@@ -13,7 +13,7 @@ BOX_REVISION=origin/master
 if [ ! -z "$1" ]; then
     BOX_REVISION=$1
 fi
-BOX_NAME="box-`echo $BOX_REVISION | sed -e 's/\//_/g'`-$DATE" # remove slashes
+BOX_NAME="box-`echo $BOX_REVISION | sed -e 's/\//-/g'`-$DATE" # remove slashes
 
 function get_ssh_key_id() {
     $CURL "https://api.digitalocean.com/v1/ssh_keys/?client_id=$CLIENT_ID&api_key=$API_KEY" \
