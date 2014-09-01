@@ -31,8 +31,8 @@
                     <li class="list-group-item" ng-show="config.revision">Revision <span class="pull-right">{{config.revision}}</span></li>
                 </ul>
                 <button class="btn btn-outline btn-success pull-left" ng-click="backup()" ng-show="config.isDev">Backup</button>
-                <button class="btn btn-outline btn-success pull-right" data-toggle="modal" data-target="#updateModal" ng-show="config.update.version">New Update Available</button>
-                <button class="btn btn-outline btn-success pull-right" data-toggle="modal" data-target="#updateModal" ng-show="config.isDev && !config.update.version">Update to Master</button>
+                <button class="btn btn-outline btn-success pull-right" data-toggle="modal" data-target="#updateModal" ng-show="config.update.box">New Update to Version {{config.update.box.version}} available</button>
+                <button class="btn btn-outline btn-success pull-right" data-toggle="modal" data-target="#updateModal" ng-show="config.isDev && !config.update.box">Update to Master</button>
 
                 <!-- Modal really update-->
                 <div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true">
@@ -42,8 +42,15 @@
                                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                                 <h4 class="modal-title" id="updateModalLabel">Really update the box software?</h4>
                             </div>
-                            <div class="modal-body">
-                                !!TODO_TEXT This is potentially risky
+                            <div class="modal-body" ng-show="config.update.box">
+                                <p>This update will install version <b>{{config.update.box.version}}</b> on your cloudron.</p>
+                                <p>Recent Changes:</p>
+                                <ul>
+                                    <li ng-repeat="change in config.update.box.changelog">{{change}}</li>
+                                </ul>
+                            </div>
+                            <div class="modal-body" ng-show="config.isDev && !config.update.box">
+                                You are running a development version. This will update the cloudron to HEAD of master.
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>

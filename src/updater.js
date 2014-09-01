@@ -58,7 +58,7 @@ Updater.prototype._check = function () {
             return;
         }
 
-        debug('_check: VERSIONS.json successfully fetched.', versions);
+        debug('_check: VERSIONS.json successfully fetched.', result.body);
 
         var versions = result.body;
 
@@ -72,6 +72,7 @@ Updater.prototype._check = function () {
         if (next && versions[next] && versions[next].revision) {
             debug('_check: new version %s available to revision %s.', next, versions[next].revision);
             that._boxUpdate = versions[next];
+            that._boxUpdate.version = next;
         } else {
             debug('_check: no new version available.');
             that._boxUpdate = null;

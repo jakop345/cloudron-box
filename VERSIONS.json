@@ -5,8 +5,8 @@
         "next": "0.0.2"
     },
     "0.0.2": {
-        "revision": "origin/master",
-        "changelog": [ "This tracks HEAD of master" ],
+        "revision": "03c3d1d71f03bfbe0f6be3a3b925822e247961a0",
+        "changelog": [ "Update improvements", "Bug fixes", "More changes", "..." ],
         "next": null
     }
 }
