@@ -16,14 +16,14 @@ function Updater() {
     this._checkInterval = null;
     this._boxUpdateManifestUrl = null;
     // this._boxUpdateManifestUrl = 'http://localhost:8000/VERSIONS.json';
-    this._versions = {};
+    this._boxUpdate = null;
     this.updateInfo = null;
 }
 
 Updater.prototype.availableUpdate = function () {
     return {
         apps: this.updateInfo,
-        box: this._versions[config.version]
+        box: this._boxUpdate
     };
 
 };
@@ -58,20 +58,23 @@ Updater.prototype._check = function () {
             return;
         }
 
-        that._versions = result.body;
+        debug('_check: VERSIONS.json successfully fetched.', versions);
 
-        debug('_check: VERSIONS.json successfully fetched.', result.body);
+        var versions = result.body;
 
-        if (!that._versions[config.version]) {
+        if (!versions[config.version]) {
             console.error('Cloudron runs on unknown version %s', config.version);
+            that._boxUpdate = null;
             return;
         }
 
-        var next = that._versions[config.version].next;
-        if (next && that._versions[next] && that._versions[next].revision) {
-            debug('_check: new version %s available to revision %s.', next, that._versions[next].revision);
+        var next = versions[config.version].next;
+        if (next && versions[next] && versions[next].revision) {
+            debug('_check: new version %s available to revision %s.', next, versions[next].revision);
+            that._boxUpdate = versions[next];
         } else {
             debug('_check: no new version available.');
+            that._boxUpdate = null;
         }
     });
 };
