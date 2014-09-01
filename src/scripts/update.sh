@@ -5,9 +5,14 @@ if [ $EUID -ne 0 ]; then
     exit 1
 fi
 
+if [[ "$#" != "1" ]]; then
+    echo "Usage: update.sh [revision/tag/branch] [--check]"
+    exit 1
+fi
+
 if [ "$1" == "--check" ]; then
     echo "OK"
-    exit 0
+    exit 2
 fi
 
 cyan='\e[0;36m'
@@ -52,7 +57,7 @@ git fetch
 check "Done"
 
 info "Reset repo to latest code..."
-git reset --hard origin/master
+git reset --hard $1
 check "Done"
 
 info "Updating npm modules"

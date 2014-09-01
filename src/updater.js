@@ -95,7 +95,14 @@ Updater.prototype.stop = function () {
 Updater.prototype.update = function (callback) {
     assert(typeof callback === 'function');
 
-    var command = 'sudo ' + path.join(__dirname, 'scripts/update.sh');
+    var that = this;
+
+    if (!this._boxUpdate) {
+        debug('update: no box update available');
+        return callback(new Error('No update available'));
+    }
+
+    var command = 'sudo ' + path.join(__dirname, 'scripts/update.sh') + ' ' + this._boxUpdate.revision;
     var options = {
         cwd: path.join(__dirname, '..')
     };
