@@ -117,6 +117,10 @@ Updater.prototype.update = function (callback) {
 
         debug('update: success.', stdout, stderr);
 
+        // save version change
+        config.version = that._boxUpdate.version;
+        config.save();
+
         callback(null);
     });
 };
