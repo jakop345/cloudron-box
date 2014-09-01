@@ -96,13 +96,14 @@ Updater.prototype.update = function (callback) {
     assert(typeof callback === 'function');
 
     var that = this;
+    var isDev = config.appServerUrl === 'https://appstore-dev.herokuapp.com' || config.appServerUrl === 'https://selfhost.io:5050';
 
-    if (!this._boxUpdate) {
+    if (!isDev && !this._boxUpdate) {
         debug('update: no box update available');
         return callback(new Error('No update available'));
     }
 
-    var command = 'sudo ' + path.join(__dirname, 'scripts/update.sh') + ' ' + this._boxUpdate.revision;
+    var command = 'sudo ' + path.join(__dirname, 'scripts/update.sh') + ' ' + (isDev ? 'origin/master' : this._boxUpdate.revision);
     var options = {
         cwd: path.join(__dirname, '..')
     };
