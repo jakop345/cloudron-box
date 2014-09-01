@@ -1,0 +1,12 @@
+{
+    "0.0.1": {
+        "revision": "3cfd2c5e26ebc1312981cc2865e3ae5647d93b89",
+        "changelog": [ "initial version" ],
+        "next": "0.0.2"
+    },
+    "0.0.2": {
+        "revision": "origin/master",
+        "changelog": [ "This tracks HEAD of master" ],
+        "next": null
+    }
+}
