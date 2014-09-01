@@ -21,7 +21,11 @@ function Updater() {
 }
 
 Updater.prototype.availableUpdate = function () {
-    return this.updateInfo;
+    return {
+        apps: this.updateInfo,
+        box: this._versions[config.version]
+    };
+
 };
 
 Updater.prototype._check = function () {
