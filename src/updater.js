@@ -17,12 +17,12 @@ function Updater() {
     this._boxUpdateManifestUrl = null;
     // this._boxUpdateManifestUrl = 'http://localhost:8000/VERSIONS.json';
     this._boxUpdate = null;
-    this.updateInfo = null;
+    this._appUpdateInfo = null;
 }
 
 Updater.prototype.availableUpdate = function () {
     return {
-        apps: this.updateInfo,
+        apps: this._appUpdateInfo,
         box: this._boxUpdate
     };
 
@@ -45,7 +45,7 @@ Updater.prototype._check = function () {
 
             debug('check: ', result.body);
 
-            that.updateInfo = result.body;
+            that._appUpdateInfo = result.body;
         });
     });
 
