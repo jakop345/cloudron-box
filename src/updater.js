@@ -15,15 +15,15 @@ module.exports = exports = Updater;
 function Updater() {
     this._checkInterval = null;
     this._boxUpdateManifestUrl = null;
-    // this._boxUpdateManifestUrl = 'http://localhost:8000/VERSIONS.json';
-    this._boxUpdate = null;
+    // this._boxUpdateInfoManifestUrl = 'http://localhost:8000/VERSIONS.json';
+    this._boxUpdateInfo = null;
     this._appUpdateInfo = null;
 }
 
 Updater.prototype.availableUpdate = function () {
     return {
         apps: this._appUpdateInfo,
-        box: this._boxUpdate
+        box: this._boxUpdateInfo
     };
 
 };
@@ -50,9 +50,9 @@ Updater.prototype._check = function () {
     });
 
     // box updates
-    if (!this._boxUpdateManifestUrl) return;
+    if (!this._boxUpdateInfoManifestUrl) return;
 
-    superagent.get(this._boxUpdateManifestUrl).end(function (error, result) {
+    superagent.get(this._boxUpdateInfoManifestUrl).end(function (error, result) {
         if (error) {
             console.error('Unable to fetch VERSIONS.json.', error);
             return;
@@ -64,18 +64,18 @@ Updater.prototype._check = function () {
 
         if (!versions[config.version]) {
             console.error('Cloudron runs on unknown version %s', config.version);
-            that._boxUpdate = null;
+            that._boxUpdateInfo = null;
             return;
         }
 
         var next = versions[config.version].next;
         if (next && versions[next] && versions[next].revision) {
             debug('_check: new version %s available to revision %s.', next, versions[next].revision);
-            that._boxUpdate = versions[next];
-            that._boxUpdate.version = next;
+            that._boxUpdateInfo = versions[next];
+            that._boxUpdateInfo.version = next;
         } else {
             debug('_check: no new version available.');
-            that._boxUpdate = null;
+            that._boxUpdateInfo = null;
         }
     });
 };
@@ -98,12 +98,12 @@ Updater.prototype.update = function (callback) {
     var that = this;
     var isDev = config.appServerUrl === 'https://appstore-dev.herokuapp.com' || config.appServerUrl === 'https://selfhost.io:5050';
 
-    if (!isDev && !this._boxUpdate) {
+    if (!isDev && !this._boxUpdateInfo) {
         debug('update: no box update available');
         return callback(new Error('No update available'));
     }
 
-    var command = 'sudo ' + path.join(__dirname, 'scripts/update.sh') + ' ' + (isDev ? 'origin/master' : this._boxUpdate.revision);
+    var command = 'sudo ' + path.join(__dirname, 'scripts/update.sh') + ' ' + (isDev ? 'origin/master' : this._boxUpdateInfo.revision);
     var options = {
         cwd: path.join(__dirname, '..')
     };
@@ -119,7 +119,7 @@ Updater.prototype.update = function (callback) {
         debug('update: success.', stdout, stderr);
 
         // save version change
-        config.version = that._boxUpdate.version;
+        config.version = that._boxUpdateInfo.version;
         config.save();
 
         callback(null);
