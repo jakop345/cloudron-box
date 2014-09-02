@@ -12,9 +12,28 @@ BOX_REVISION=origin/master
 if [ ! -z "$1" ]; then
     BOX_REVISION=$1
 fi
-CLEAN_REVISION=`echo $BOX_REVISION | sed -e 's/\//-/g'`
-BOX_NAME="box-$CLEAN_REVISION-$DATE" # remove slashes
-SNAPSHOT_NAME="box-$CLEAN_REVISION-$DATE"
+
+function get_pretty_revision() {
+    local GIT_REV="$1"
+    local SHA1=$(git rev-parse --short "$GIT_REV" 2>/dev/null)
+
+    local NAME=$(git name-rev --name-only --tags "$SHA1" 2>/dev/null)
+    if [[ -z "$NAME" ]]; then
+        echo "Unable to resolve $1"
+        exit 1
+    fi
+
+    # fallback to sha1 if we cannot find a tag
+    if [[ "$NAME" = "undefined" ]]; then
+        echo $SHA1
+    else
+        echo $NAME
+    fi
+}
+
+PRETTY_REVISION=$(get_pretty_revision $BOX_REVISION)
+BOX_NAME="box-$PRETTY_REVISION-$DATE" # remove slashes
+SNAPSHOT_NAME="box-$PRETTY_REVISION-$DATE"
 
 function get_ssh_key_id() {
     $CURL "https://api.digitalocean.com/v1/ssh_keys/?client_id=$CLIENT_ID&api_key=$API_KEY" \
