@@ -27,7 +27,11 @@ exports = module.exports = {
     start: start,
     stop: stop,
 
-    appFqdn: appFqdn
+    appFqdn: appFqdn,
+
+    // exported for testing
+    _validateSubdomain: validateSubdomain,
+    _validatePortBindings: validatePortBindings
 };
 
 var tasks = { }, appHealthTask = null;
@@ -116,14 +120,16 @@ function validatePortBindings(portBindings) {
     for (var containerPort in portBindings) {
         var containerPortInt = parseInt(containerPort, 10);
         if (isNaN(containerPortInt) || containerPortInt <= 0 || containerPortInt > 65535) {
-            return callback(new AppsError(AppsError.BAD_FIELD, containerPort + ' is not a valid port'));
+            return new Error(containerPort + ' is not a valid port');
         }
 
         var hostPortInt = parseInt(portBindings[containerPort], 10);
         if (isNaN(hostPortInt) || hostPortInt <= 1024 || hostPortInt > 65535) {
-            return callback(new AppsError(AppsError.BAD_FIELD, portBindings[containerPort] + ' is not a valid port'));
+            return new Error(portBindings[containerPort] + ' is not a valid port');
         }
     }
+
+    return null;
 }
 
 function get(appId, callback) {
@@ -173,7 +179,7 @@ function install(appId, appStoreId, username, password, location, portBindings, 
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
     error = validatePortBindings(portBindings);
-    if (error) return callback(error);
+    if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
     stopTask(appId);
 

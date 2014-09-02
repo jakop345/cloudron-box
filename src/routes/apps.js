@@ -111,6 +111,7 @@ function configureApp(req, res, next) {
 
     apps.configure(data.appId, req.user.username, data.password, data.location, data.portBindings, function (error) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app:' + error));
+        if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error));
         if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error) return next(new HttpError(500, 'Internal error:' + error));
 
