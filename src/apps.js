@@ -187,14 +187,13 @@ function install(appId, appStoreId, username, password, location, portBindings, 
     error = validatePortBindings(portBindings);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
-    stopTask(appId);
-
     appdb.add(appId, appStoreId, location, portBindings, function (error) {
         if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new AppsError(AppsError.ALREADY_EXISTS));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
         debug('Will install app with id : ' + appId);
 
+        stopTask(appId);
         startTask(appId);
 
         callback(null);
@@ -258,14 +257,13 @@ function update(appId, callback) {
 function uninstall(appId, callback) {
     assert(typeof appId === 'string');
 
-    stopTask(appId);
-
     appdb.update(appId, { installationState: appdb.ISTATE_PENDING_UNINSTALL }, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
         debug('Will uninstall app with id : ' + appId);
 
+        stopTask(appId);
         startTask(appId);
 
         callback(null);
