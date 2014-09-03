@@ -1,12 +1,7 @@
 {
-    "0.0.1": {
-        "revision": "3cfd2c5e26ebc1312981cc2865e3ae5647d93b89",
+    "0.1.0": {
+        "revision": "8352a6618cba594d1ec02fd96ef28543adc714a0",
         "changelog": [ "initial version" ],
-        "next": "0.0.2"
-    },
-    "0.0.2": {
-        "revision": "03c3d1d71f03bfbe0f6be3a3b925822e247961a0",
-        "changelog": [ "Update improvements", "Bug fixes", "More changes", "..." ],
         "next": null
     }
 }

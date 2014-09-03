@@ -15,6 +15,9 @@ if [[ "$#" != "2" ]]; then
     exit 1
 fi
 
+VERSION="$1"
+REVISION="$2"
+
 cyan='\e[0;36m'
 green='\e[0;32m'
 red='\e[0;31m'
@@ -58,7 +61,7 @@ git fetch
 check "Done"
 
 info "Reset repo to latest code..."
-git reset --hard $2
+git reset --hard $REVISION
 check "Done"
 
 info "Updating npm modules"
@@ -80,8 +83,7 @@ fi
 info "Done"
 
 info "Run release update script..."
-cd $BASEDIR/src/scripts/update
-UPDATE_FILE=`ls -1 -v -B *.sh | tail -n 1`
+UPDATE_FILE="$BASEDIR/src/scripts/update/${VERSION}.sh"
 info "Release update script is $UPDATE_FILE"
 /bin/bash $UPDATE_FILE 2>&1
 if [[ $? != 0 ]]; then
