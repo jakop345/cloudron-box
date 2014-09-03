@@ -92,6 +92,8 @@ function getBySubdomain(subdomain, callback) {
 }
 
 function getAll(callback) {
+    assert(typeof callback === 'function');
+
     database.all('SELECT apps.*, GROUP_CONCAT(appPortBindings.hostPort) AS hostPorts, GROUP_CONCAT(appPortBindings.containerPort) AS containerPorts' +
                  ' FROM apps LEFT OUTER JOIN appPortBindings ON apps.id = appPortBindings.appId GROUP BY apps.id ORDER BY apps.id', function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
@@ -230,6 +232,11 @@ function update(id, app, callback) {
 
 // sets health on installed apps that have a runState which is not null or pending
 function setHealth(appId, healthy, rstate, callback) {
+    assert(typeof appId === 'string');
+    assert(typeof healthy === 'boolean');
+    assert(typeof rstate === 'string');
+    assert(typeof callback === 'function');
+
     database.run('UPDATE apps SET healthy = ?, runState = ? WHERE id = ? AND runState NOT GLOB "pending_*" AND installationState = "installed"',
                  [ healthy, rstate, appId ], function (error) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
@@ -240,6 +247,8 @@ function setHealth(appId, healthy, rstate, callback) {
 }
 
 function getAppVersions(callback) {
+    assert(typeof callback === 'function');
+
     database.all('SELECT id, version FROM apps', function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
