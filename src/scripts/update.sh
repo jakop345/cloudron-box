@@ -5,14 +5,14 @@ if [ $EUID -ne 0 ]; then
     exit 1
 fi
 
-if [[ "$#" != "1" ]]; then
-    echo "Usage: update.sh [revision/tag/branch] [--check]"
-    exit 1
-fi
-
 if [ "$1" == "--check" ]; then
     echo "OK"
     exit 2
+fi
+
+if [[ "$#" != "2" ]]; then
+    echo "Usage: update.sh <version> <revision/tag/branch>"
+    exit 1
 fi
 
 cyan='\e[0;36m'
@@ -45,6 +45,7 @@ echo "============================="
 echo ""
 
 BASEDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
+JSON="$BASEDIR/node_modules/.bin/json"
 
 exec > >(tee /var/log/cloudron/update.log)
 exec 2>&1
@@ -57,7 +58,7 @@ git fetch
 check "Done"
 
 info "Reset repo to latest code..."
-git reset --hard $1
+git reset --hard $2
 check "Done"
 
 info "Updating npm modules"
@@ -88,6 +89,9 @@ if [[ $? != 0 ]]; then
 else
     echo "Successfully ran $UPDATE_FILE"
 fi
+
+info "Updating box version to $VERSION"
+JSON -I -f /home/yellowtent/.yellowtent/cloudron.conf -c "this.version = \"$VERSION\""
 
 info "Start the box code..."
 OUT=`supervisorctl start box`

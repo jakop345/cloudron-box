@@ -106,7 +106,10 @@ Updater.prototype.update = function (callback) {
         return callback(new Error('No update available'));
     }
 
-    var command = 'sudo ' + path.join(__dirname, 'scripts/update.sh') + ' ' + (isDev ? 'origin/master' : this._boxUpdateInfo.revision);
+    var command = 'sudo ' + path.join(__dirname, 'scripts/update.sh');
+    command += ' ' + this._boxUpdateInfo.version;
+    command += ' ' + (isDev ? 'origin/master' : this._boxUpdateInfo.revision);
+
     var options = {
         cwd: path.join(__dirname, '..')
     };
@@ -121,9 +124,7 @@ Updater.prototype.update = function (callback) {
 
         debug('update: success.', stdout, stderr);
 
-        // save version change
-        config.version = that._boxUpdateInfo.version;
-        config.save();
+        // Do not add any code here. The update script will stop the box code any instant
 
         callback(null);
     });
