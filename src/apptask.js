@@ -464,6 +464,7 @@ function install(app, callback) {
 
         // allocate OAuth credentials
         updateApp.bind(null, app, { installationProgress: 'Setting up OAuth' }),
+        removeOAuthCredentials.bind(null, app),
         allocateOAuthCredentials.bind(null, app),
 
         // create container
