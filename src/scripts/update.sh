@@ -103,6 +103,16 @@ if [[ $RESULT != "" ]]; then
 fi
 info "Done"
 
+info "Restart nginx..."
+OUT=`supervisorctl restart nginx`
+RESULT=`echo $OUT | grep ERROR`
+if [[ $RESULT != "" ]]; then
+    error "Failed to restart nginx"
+    error "$OUT"
+    exit 1;
+fi
+info "Done"
+
 echo ""
 echo "Update successful."
 echo ""
