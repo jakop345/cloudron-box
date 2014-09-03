@@ -45,7 +45,7 @@ ln -sf /usr/bin/docker.io /usr/local/bin/docker
 # now add the user to the docker group
 usermod $USER -a -G docker
 echo "=== Pulling base docker images ==="
-docker pull girish/base
+docker pull girish/base:0.3
 
 # https://jpetazzo.github.io/2014/06/23/docker-ssh-considered-evil/
 echo "=== Setup nsenter ==="
