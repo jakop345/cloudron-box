@@ -68,6 +68,16 @@ check "Done"
 # how to get log redirection to work
 chown -R yellowtent:yellowtent $BASEDIR
 
+info "Stop the box code..."
+OUT=`supervisorctl stop box`
+RESULT=`echo $OUT | grep ERROR`
+if [[ $RESULT != "" ]]; then
+    error "Failed to stop box"
+    error "$OUT"
+    exit 1;
+fi
+info "Done"
+
 info "Run release update script..."
 cd $BASEDIR/src/scripts/update
 UPDATE_FILE=`ls -1 -v -B *.sh | tail -n 1`
@@ -79,11 +89,11 @@ else
     echo "Successfully ran $UPDATE_FILE"
 fi
 
-info "Restart the box code..."
-OUT=`supervisorctl restart box`
+info "Start the box code..."
+OUT=`supervisorctl start box`
 RESULT=`echo $OUT | grep ERROR`
 if [[ $RESULT != "" ]]; then
-    error "Failed to restart box"
+    error "Failed to start box"
     error "$OUT"
     exit 1;
 fi
