@@ -139,6 +139,9 @@ function get(appId, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
+        app.iconUrl = config.appServerUrl + '/api/v1/appstore/apps/' + app.id + '/icon';
+        app.fqdn = appFqdn(app.location);
+
         callback(null, app);
     });
 }
@@ -149,6 +152,9 @@ function getBySubdomain(subdomain, callback) {
     appdb.getBySubdomain(subdomain, function (error, app) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+        app.iconUrl = config.appServerUrl + '/api/v1/appstore/apps/' + app.id + '/icon';
+        app.fqdn = appFqdn(app.location);
 
         callback(null, app);
     });

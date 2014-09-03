@@ -7,9 +7,45 @@
 'use strict';
 
 var apps = require('../apps.js'),
-    expect = require('expect.js');
+    appdb = require('../appdb.js'),
+    expect = require('expect.js'),
+    database = require('../database.js'),
+    mkdirp = require('mkdirp'),
+    rimraf = require('rimraf'),
+    config = require('../../config.js'),
+    AppsError = apps.AppsError;
 
 describe('Apps', function () {
+    var APP_0 = {
+        id: 'appid-0',
+        appStoreId: 'appStoreId-0',
+        version: null,
+        installationState: appdb.ISTATE_PENDING_INSTALL,
+        installationProgress: null,
+        runState: null,
+        location: 'some-location-0',
+        manifest: null,
+        httpPort: null,
+        containerId: null,
+        portBindings: { "1234": "5678" },
+        healthy: null
+    };
+
+    before(function (done) {
+        mkdirp.sync(config.configRoot);
+
+        database.create(function (error) {
+            expect(error).to.be(null);
+            appdb.add(APP_0.id, APP_0.appStoreId, APP_0.location, APP_0.portBindings, done);
+        });
+    });
+
+    after(function (done) {
+        database.uninitialize();
+        rimraf.sync(config.baseDir);
+        done();
+    });
+
     describe('validateSubdomain', function () {
         it('does not allow admin subdomain', function () {
             expect(apps._validateSubdomain('admin', 'cloudron.us')).to.be.an(Error);
@@ -63,6 +99,55 @@ describe('Apps', function () {
         it('allows valid bindings', function () {
             expect(apps._validatePortBindings({ '3000': '1025' })).to.be(null);
             expect(apps._validatePortBindings({ '100': '4033', '25': '3242', '553': '1234' })).to.be(null);
+        });
+    });
+
+    describe('getters', function () {
+        it('cannot get invalid app', function (done) {
+            apps.get('nope', function (error, app) {
+                expect(error).to.be.ok();
+                expect(error.reason).to.be(AppsError.NOT_FOUND);
+                done();
+            });
+        });
+
+        it('can get valid app', function (done) {
+            apps.get(APP_0.id, function (error, app) {
+                expect(error).to.be(null);
+                expect(app).to.be.ok();
+                expect(app.iconUrl).to.eql(config.appServerUrl + '/api/v1/appstore/apps/' + APP_0.id + '/icon');
+                expect(app.fqdn).to.eql(APP_0.location + '-' + config.fqdn);
+                done();
+            });
+        });
+
+        it('cannot getBySubdomain', function (done) {
+            apps.getBySubdomain('moang', function (error, app) {
+                expect(error).to.be.ok();
+                expect(error.reason).to.be(AppsError.NOT_FOUND);
+                done();
+            });
+        });
+
+        it('can getBySubdomain', function (done) {
+            apps.getBySubdomain(APP_0.location, function (error, app) {
+                expect(error).to.be(null);
+                expect(app).to.be.ok();
+                expect(app.iconUrl).to.eql(config.appServerUrl + '/api/v1/appstore/apps/' + APP_0.id + '/icon');
+                expect(app.fqdn).to.eql(APP_0.location + '-' + config.fqdn);
+                done();
+            });
+        });
+
+        it('can getAll', function (done) {
+            apps.getAll(function (error, apps) {
+                expect(error).to.be(null);
+                expect(apps).to.be.an(Array);
+                expect(apps[0].id).to.be(APP_0.id);
+                expect(apps[0].iconUrl).to.eql(config.appServerUrl + '/api/v1/appstore/apps/' + APP_0.id + '/icon');
+                expect(apps[0].fqdn).to.eql(APP_0.location + '-' + config.fqdn);
+                done();
+            });
         });
     });
 });
