@@ -213,8 +213,6 @@ function configure(appId, username, password, location, portBindings, callback) 
     error = portBindings ? validatePortBindings(portBindings) : null;
     if (error) return callback(error);
 
-    stopTask(appId);
-
     var values = { installationState: appdb.ISTATE_PENDING_CONFIGURE };
     if (location) values.location = location;
     values.portBindings = portBindings;
@@ -225,6 +223,7 @@ function configure(appId, username, password, location, portBindings, callback) 
 
         debug('Will configure app with id : ' + appId);
 
+        stopTask(appId);
         startTask(appId);
 
         callback(null);
