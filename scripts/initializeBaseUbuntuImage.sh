@@ -5,7 +5,8 @@ set -v
 USER_HOME=/home/yellowtent
 SRCDIR=$USER_HOME/box
 USER=yellowtent
-BOX_REVISION=$1
+APPSTORE_URL=$1
+BOX_REVISION=$2
 
 echo "==== Create User $USER ===="
 id $USER
@@ -17,7 +18,7 @@ fi
 # now exit on failure
 set -e
 
-echo "== Yellowtent base image preparation ($BOX_REVISION) =="
+echo "== Yellowtent base image preparation ($APPSTORE_URL, $BOX_REVISION) =="
 
 export DEBIAN_FRONTEND=noninteractive
 
@@ -123,7 +124,7 @@ EOS
 echo "[II] Done"
 
 echo "[II] Run bootstrap script..."
-/bin/bash $SRCDIR/scripts/bootstrap.sh https://appstore-dev.herokuapp.com $BOX_REVISION
+/bin/bash $SRCDIR/scripts/bootstrap.sh $APPSTORE_URL $BOX_REVISION
 echo "[II] Done"
 
 echo "[II] Disable bootstrap init script"
