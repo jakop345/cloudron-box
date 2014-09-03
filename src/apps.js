@@ -134,6 +134,7 @@ function validatePortBindings(portBindings) {
 
 function get(appId, callback) {
     assert(typeof appId === 'string');
+    assert(typeof callback === 'function');
 
     appdb.get(appId, function (error, app) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
@@ -148,6 +149,7 @@ function get(appId, callback) {
 
 function getBySubdomain(subdomain, callback) {
     assert(typeof subdomain === 'string');
+    assert(typeof callback === 'function');
 
     appdb.getBySubdomain(subdomain, function (error, app) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
@@ -161,6 +163,8 @@ function getBySubdomain(subdomain, callback) {
 }
 
 function getAll(callback) {
+    assert(typeof callback === 'function');
+
     appdb.getAll(function (error, apps) {
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
@@ -187,11 +191,11 @@ function install(appId, appStoreId, username, password, location, portBindings, 
     error = validatePortBindings(portBindings);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
+    debug('Will install app with id : ' + appId);
+
     appdb.add(appId, appStoreId, location, portBindings, function (error) {
         if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new AppsError(AppsError.ALREADY_EXISTS));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
-
-        debug('Will install app with id : ' + appId);
 
         stopTask(appId);
         startTask(appId);
@@ -213,15 +217,15 @@ function configure(appId, username, password, location, portBindings, callback) 
     error = portBindings ? validatePortBindings(portBindings) : null;
     if (error) return callback(error);
 
-    var values = { installationState: appdb.ISTATE_PENDING_CONFIGURE };
+    var values = { };
     if (location) values.location = location;
     values.portBindings = portBindings;
 
-    appdb.update(appId, values, function (error) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND));
-        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+    debug('Will install app with id:%s', appId);
 
-        debug('Will configure app with id : ' + appId);
+    appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_CONFIGURE, values, function (error) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE));
+        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
         stopTask(appId);
         startTask(appId);
@@ -231,36 +235,31 @@ function configure(appId, username, password, location, portBindings, callback) 
 }
 
 function update(appId, callback) {
-    appdb.get(appId, function (error, app) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
+    assert(typeof appId === 'string');
+    assert(typeof callback === 'function');
+
+    debug('Will update app with id:%s', appId);
+
+    appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_UPDATE, function (error) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE)); // might be a bad guess
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        debug('Will update with id : ' + appId);
+        stopTask(appId);
+        startTask(appId);
 
-        if (app.installationState !== appdb.ISTATE_INSTALLED) return callback(new AppsError(AppsError.BAD_STATE, 'App not in installed state'));
-
-        appdb.update(appId, { installationState: appdb.ISTATE_PENDING_UPDATE }, function (error) {
-            if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND));
-            if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
-
-            debug('Will configure app with id : ' + appId);
-
-            stopTask(appId);
-            startTask(appId);
-
-            callback(null);
-        });
+        callback(null);
     });
 }
 
 function uninstall(appId, callback) {
     assert(typeof appId === 'string');
+    assert(typeof callback === 'function');
 
-    appdb.update(appId, { installationState: appdb.ISTATE_PENDING_UNINSTALL }, function (error) {
+    debug('Will uninstall app with id:%s', appId);
+
+    appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_UNINSTALL, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
-
-        debug('Will uninstall app with id : ' + appId);
 
         stopTask(appId);
         startTask(appId);
@@ -271,46 +270,35 @@ function uninstall(appId, callback) {
 
 function start(appId, callback) {
     assert(typeof appId === 'string');
+    assert(typeof callback === 'function');
 
-    appdb.get(appId, function (error, app) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
+    debug('Will start app with id:%s', appId);
+
+    appdb.setRunCommand(appId, appdb.RSTATE_PENDING_START, function (error) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE)); // might be a bad guess
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        debug('Will start app with id : ' + appId);
-        debug('ISTATE:' + app.installationState + ' RSTATE:' + app.runState);
+        stopTask(appId);
+        startTask(appId);
 
-        if (app.installationState !== appdb.ISTATE_INSTALLED) return callback(new AppsError(AppsError.BAD_STATE, 'App not in installed state'));
-        if (app.runState !== appdb.RSTATE_STOPPED && app.runState !== appdb.RSTATE_ERROR) return callback(new AppsError(AppsError.BAD_STATE, 'Cannot start app with runState:' + app.runState));
-
-        appdb.update(appId, { runState: appdb.RSTATE_PENDING_START }, function (error) {
-            stopTask(appId);
-            startTask(appId);
-
-            callback(null);
-        });
-
+        callback(null);
     });
 }
 
 function stop(appId, callback) {
     assert(typeof appId === 'string');
+    assert(typeof callback === 'function');
 
-    appdb.get(appId, function (error, app) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
+    debug('Will stop app with id:%s', appId);
+
+    appdb.setRunCommand(appId, appdb.RSTATE_PENDING_STOP, function (error) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE)); // might be a bad guess
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        debug('Will stop app with id : ' + appId);
-        debug('ISTATE:' + app.installationState + ' RSTATE:' + app.runState);
+        stopTask(appId);
+        startTask(appId);
 
-        if (app.installationState !== appdb.ISTATE_INSTALLED) return callback(new AppsError(AppsError.BAD_FIELD, 'App not installed'));
-        if (app.runState !== appdb.RSTATE_RUNNING) return callback(new AppsError(AppsError.BAD_STATE, 'Cannot start app with runState:' + app.runState));
-
-        appdb.update(appId, { runState: appdb.RSTATE_PENDING_STOP }, function (error) {
-            stopTask(appId);
-            startTask(appId);
-
-            callback(null);
-        });
+        callback(null);
     });
 }
 

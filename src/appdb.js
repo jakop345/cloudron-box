@@ -19,7 +19,10 @@ exports = module.exports = {
     update: update,
     getAll: getAll,
     getPortBindings: getPortBindings,
+
     setHealth: setHealth,
+    setInstallationCommand: setInstallationCommand,
+    setRunCommand: setRunCommand,
     getAppVersions: getAppVersions,
 
     // status codes
@@ -186,10 +189,21 @@ function del(id, callback) {
 }
 
 function update(id, app, callback) {
+    updateWithConstraints(id, app, callback);
+}
+
+function updateWithConstraints(id, app, constraints, callback) {
     assert(typeof id === 'string');
     assert(typeof app === 'object');
     assert(!('portBindings' in app) || typeof app.portBindings === 'object');
-    assert(typeof callback === 'function');
+
+    if (typeof constraints === 'function') {
+        callback = constraints;
+        constraints = '';
+    } else {
+        assert(typeof constraints === 'string');
+        assert(typeof callback === 'function');
+    }
 
     var portBindings = app.portBindings || { };
 
@@ -220,7 +234,7 @@ function update(id, app, callback) {
 
         values.push(id);
 
-        conn.run('UPDATE apps SET ' + args.join(', ') + ' WHERE id = ?', values, function (error) {
+        conn.run('UPDATE apps SET ' + args.join(', ') + ' WHERE id = ? ' + constraints, values, function (error) {
             if (error || this.changes !== 1) database.rollback(conn);
             if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
             if (this.changes !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
@@ -244,6 +258,36 @@ function setHealth(appId, healthy, rstate, callback) {
 
         return callback(null);
     });
+}
+
+function setInstallationCommand(appId, installationState, values, callback) {
+    assert(typeof appId === 'string');
+    assert(typeof installationState === 'string');
+
+    if (typeof values === 'function') {
+        callback = values;
+        values = { };
+    } else {
+        assert(typeof values === 'object');
+        assert(typeof callback === 'function');
+    }
+
+    values.installationState = installationState;
+
+    if (installationState === exports.ISTATE_PENDING_UNINSTALL) {
+        updateWithConstraints(appId, values, '', callback);
+    } else {
+        updateWithConstraints(appId, values, 'AND installationState NOT GLOB "pending_*"', callback);
+    }
+}
+
+function setRunCommand(appId, runState, callback) {
+    assert(typeof appId === 'string');
+    assert(typeof runState === 'string');
+    assert(typeof callback === 'function');
+
+    var values = { runState: runState };
+    updateWithConstraints(appId, values, 'AND runState NOT GLOB "pending_*" AND installationState = "installed"', callback);
 }
 
 function getAppVersions(callback) {
