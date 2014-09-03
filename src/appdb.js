@@ -14,6 +14,7 @@ exports = module.exports = {
     get: get,
     getBySubdomain: getBySubdomain,
     add: add,
+    exists: exists,
     del: del,
     update: update,
     getAll: getAll,
@@ -137,7 +138,21 @@ function add(id, appStoreId, location, portBindings, callback) {
     });
 }
 
+function exists(id, callback) {
+    assert(typeof id === 'string');
+    assert(typeof callback === 'function');
+
+    database.get('SELECT 1 FROM apps WHERE id=?', [ id ], function (error, result) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, err.message));
+
+        return callback(null, typeof result !== 'undefined');
+    });
+}
+
 function getPortBindings(id, callback) {
+    assert(typeof id === 'string');
+    assert(typeof callback === 'function');
+
     database.all('SELECT * FROM appPortBindings WHERE appId = ?', [ id ], function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 

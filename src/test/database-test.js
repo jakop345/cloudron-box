@@ -251,9 +251,25 @@ describe('database', function () {
             expect(function () { appdb.add(APP_0.id, function () {}); }).to.throwError();
         });
 
+        it('exists returns false', function (done) {
+            appdb.exists(APP_0.id, function (error, exists) {
+                expect(error).to.be(null);
+                expect(exists).to.be(false);
+                done();
+            });
+        });
+
         it('add succeeds', function (done) {
             appdb.add(APP_0.id, APP_0.appStoreId, APP_0.location, APP_0.portBindings, function (error) {
                 expect(error).to.be(null);
+                done();
+            });
+        });
+
+        it('exists succeeds', function (done) {
+            appdb.exists(APP_0.id, function (error, exists) {
+                expect(error).to.be(null);
+                expect(exists).to.be(true);
                 done();
             });
         });
