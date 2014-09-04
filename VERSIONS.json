@@ -2,7 +2,7 @@
     "0.1.0": {
         "revision": "8352a6618cba594d1ec02fd96ef28543adc714a0",
         "changelog": [ "initial version" ],
-        "next": "0.2"
+        "next": "0.2.0"
     },
     "0.2.0": {
         "revision": "548e23cbbe252f861f9248c1824f490cb3a9708c",
