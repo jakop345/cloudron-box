@@ -97,7 +97,7 @@ else
 fi
 
 info "Updating box version to $VERSION"
-JSON -I -f /home/yellowtent/.yellowtent/cloudron.conf -c "this.version = \"$VERSION\""
+$JSON -I -f /home/yellowtent/.yellowtent/cloudron.conf -c "this.version = \"$VERSION\""
 
 info "Start the box code..."
 OUT=`supervisorctl start box`
