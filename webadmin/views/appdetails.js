@@ -12,7 +12,7 @@ var AppDetailsController = function ($scope, $http, $routeParams, $interval, Cli
 
         var appVersions = Client.getConfig().update.apps.appVersions;
         $scope.updateAvailable = appVersions.some(function (x) {
-            return x.appId === $routeParams.appId && x.version !== $scope.app.version;
+            return x.appId === $scope.app.appStoreId && x.version !== $scope.app.version;
         });
     });
 
