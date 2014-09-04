@@ -534,16 +534,8 @@ Server.prototype._announce = function () {
 };
 
 Server.prototype._scheduleBackup = function () {
-    var now = new Date();
-    var night = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate() + 1, // the next day, ...
-        0, 0, 0 // ...at 00:00:00 hours
-    );
-    var msTillMidnight = night.getTime() - now.getTime();
-
-    this._backupTimerId = setTimeout(backups.createBackup, msTillMidnight);
+    // every backup restarts the box. the setInterval is only needed should that fail for some reason
+    this._backupTimerId = setInterval(backups.createBackup, 4 * 60 * 60 * 1000);
 };
 
 Server.prototype.start = function (callback) {
