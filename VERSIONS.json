@@ -2,12 +2,18 @@
     "0.1.0": {
         "revision": "8352a6618cba594d1ec02fd96ef28543adc714a0",
         "changelog": [ "initial version" ],
-        "next": null
+        "next": "0.2"
     },
     "0.2.0": {
-        "revision": "c2a3ceb22e7abe4076f6f469abceff4e212bff84",
+        "revision": "548e23cbbe252f861f9248c1824f490cb3a9708c",
         "changelog": [
             "Display version correctly"
+        ],
+        "next": null
+    },
+    "0.3.0": {
+        "revision": "TBD",
+        "changelog": [
         ],
         "next": null
     }

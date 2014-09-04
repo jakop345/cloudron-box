@@ -62,7 +62,7 @@ config.save = function () {
 
     config.token = null;
     config.nakedDomain = null;
-    config.version = '0.2.0';
+    config.version = '0.3.0';
     config.aws = null;
 
     mkdirp.sync(config.baseDir);
