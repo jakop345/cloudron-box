@@ -9,9 +9,17 @@
         "changelog": [
             "Display version correctly"
         ],
-        "next": null
+        "next": "0.2.0"
     },
     "0.3.0": {
+        "revision": "d6cc39dd010beccbde78db6043ab6d4f8d1adefb",
+        "changelog": [
+            "Box update and app update",
+            "Box backup and restore"
+        ],
+        "next": null
+    },
+    "0.4.0": {
         "revision": "TBD",
         "changelog": [
         ],
