@@ -48,7 +48,6 @@ echo "============================="
 echo ""
 
 BASEDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
-JSON="$BASEDIR/node_modules/.bin/json"
 
 exec > >(tee /var/log/cloudron/update.log)
 exec 2>&1
@@ -97,7 +96,18 @@ else
 fi
 
 info "Updating box version to $VERSION"
-$JSON -I -f /home/yellowtent/.yellowtent/cloudron.conf -c "this.version = \"$VERSION\""
+# Do not use json node binary. Seems to have some bug resulting in empty cloudron.conf
+# in heredocs, single quotes preserves the quotes _and_ does variable expansion
+REPLACE_TOKEN_JS=$(cat <<EOF
+var fs = require('fs');
+var config = JSON.parse(fs.readFileSync('$HOME/.yellowtent/cloudron.conf', 'utf8'));
+config.version = '$VERSION';
+fs.writeFileSync('$HOME/.yellowtent/cloudron.conf', JSON.stringify(config, null, 4));
+EOF
+)
+sudo -u yellowtent -H bash <<EOF
+node -e "$REPLACE_TOKEN_JS"
+EOF
 
 info "Start the box code..."
 OUT=`supervisorctl start box`
