@@ -85,11 +85,15 @@ info "Done"
 info "Run release update script..."
 UPDATE_FILE="$BASEDIR/src/scripts/update/${VERSION}.sh"
 info "Release update script is $UPDATE_FILE"
-/bin/bash $UPDATE_FILE 2>&1
-if [[ $? != 0 ]]; then
-    echo "Failed to run $UPDATE_FILE"
+if [ -x "$UPDATE_FILE" ]; then
+    /bin/bash $UPDATE_FILE 2>&1
+    if [[ $? != 0 ]]; then
+        info "Failed to run $UPDATE_FILE"
+    else
+        info "Successfully ran $UPDATE_FILE"
+    fi
 else
-    echo "Successfully ran $UPDATE_FILE"
+    info "No update script to run"
 fi
 
 info "Updating box version to $VERSION"
