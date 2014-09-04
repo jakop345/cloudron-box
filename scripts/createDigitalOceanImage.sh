@@ -12,13 +12,9 @@ DATE=`date +%Y-%m-%d-%H%M%S`
 APPSTORE_URL=https://appstore-dev.herokuapp.com
 PRETTY_APPSTORE=dev
 case "$1" in
-"dev" | "development")
-    APPSTORE_URL=https://appstore-dev.herokuapp.com
-    PRETTY_APPSTORE=dev
-    ;;
-"alpha" | "prod" | "production")
-    APPSTORE_URL=https://appstore-alpha.herokuapp.com
-    PRETTY_APPSTORE=alpha
+"dev" | "alpha")
+    APPSTORE_URL="https://appstore-$1.herokuapp.com"
+    PRETTY_APPSTORE="$1"
     ;;
 *)
     echo "Appstore url set to $APPSTORE_URL"
