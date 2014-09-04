@@ -17,7 +17,7 @@ var AppInstallController = function ($scope, $routeParams, Client, AppStore) {
     AppStore.getManifest($routeParams.appStoreId, function (error, manifest) {
         $scope.error = error || { };
         if (error) return;
-        $scope.portBindings = manifest.tcp_ports;
+        $scope.portBindings = manifest.tcpPorts;
         // default setting is to map ports as they are in manifest
         for (var port in $scope.portBindings) {
             $scope.portBindings[port].hostPort = port;
