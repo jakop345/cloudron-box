@@ -107,7 +107,7 @@ Updater.prototype.update = function (callback) {
     }
 
     var command = 'sudo ' + path.join(__dirname, 'scripts/update.sh');
-    command += ' ' + this._boxUpdateInfo.version;
+    command += ' ' + (isDev ? config.version : this._boxUpdateInfo.version);
     command += ' ' + (isDev ? 'origin/master' : this._boxUpdateInfo.revision);
 
     var options = {
