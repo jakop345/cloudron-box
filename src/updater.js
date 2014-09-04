@@ -37,9 +37,9 @@ Updater.prototype._check = function () {
     appdb.getAppVersions(function (error, appVersions) {
         if (error) return console.error(error);
 
-        var appIds = appVersions.map(function (appVersion) { return appVersion.id; });
+        var appStoreIds = appVersions.map(function (appVersion) { return appVersion.appStoreId; });
 
-        superagent.post(config.appServerUrl + '/api/v1/boxupdate').send({ appIds: appIds, version: config.version }).end(function (error, result) {
+        superagent.post(config.appServerUrl + '/api/v1/boxupdate').send({ appIds: appStoreIds }).end(function (error, result) {
             if (error) return console.error(error);
             if (result.statusCode !== 200) return console.error('Failed to check for updates.', result.statusCode, result.body.message);
 

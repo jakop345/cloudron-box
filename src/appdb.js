@@ -293,7 +293,7 @@ function setRunCommand(appId, runState, callback) {
 function getAppVersions(callback) {
     assert(typeof callback === 'function');
 
-    database.all('SELECT id, version FROM apps', function (error, results) {
+    database.all('SELECT id, appStoreId, version FROM apps', function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         results = results || [ ];
