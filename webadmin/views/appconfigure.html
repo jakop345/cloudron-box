@@ -16,7 +16,7 @@
         <div ng-repeat="(port, portInfo) in portBindings">
             <div class="form-group">
                 <label class="control-label" for="inputPortInfo{{portInfo.description}}">{{ portInfo.description }}</label>
-                <input type="text" class="form-control" ng-model="portBindings[port].exposeAs" id="inputPortInfo{{portInfo.description}}" required>
+                <input type="text" class="form-control" ng-model="portBindings[port].hostPort" id="inputPortInfo{{portInfo.description}}" required>
             </div>
         </div>
         <input class="btn btn-default btn-outline" ng-click="cancel()" type="button" value="Cancel"/>
