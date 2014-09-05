@@ -12,6 +12,7 @@ exports = module.exports = {
     getByUsername: getByUsername,
     getByAccessToken: getByAccessToken,
     getAll: getAll,
+    getAllAdmins: getAllAdmins,
     add: add,
     del: del,
     clear: clear,
@@ -44,6 +45,16 @@ function getAll(callback) {
     assert(typeof callback === 'function');
 
     database.all('SELECT * FROM users', function (error, result) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+
+        callback(null, result);
+    });
+}
+
+function getAllAdmins(callback) {
+    assert(typeof callback === 'function');
+
+    database.all('SELECT * FROM users WHERE admin=1', function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         callback(null, result);

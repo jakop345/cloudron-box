@@ -18,10 +18,10 @@ var USERNAME = 'nobody';
 var EMAIL = 'nobody@no.body';
 var PASSWORD = 'foobar';
 var NEW_PASSWORD = 'somenewpassword';
-var IS_ADMIN = false;
+var IS_ADMIN = true;
 
-function cleanupUser(done) {
-    user.remove(USERNAME, function () {
+function cleanupUsers(done) {
+    user.clear(function () {
         done();
     });
 }
@@ -58,8 +58,8 @@ describe('User', function () {
     after(cleanup);
 
     describe('create', function() {
-        before(cleanupUser);
-        after(cleanupUser);
+        before(cleanupUsers);
+        after(cleanupUsers);
 
         it('succeeds', function (done) {
             user.create(USERNAME, PASSWORD, EMAIL, IS_ADMIN, function (error, result) {
@@ -115,7 +115,7 @@ describe('User', function () {
 
     describe('verify', function () {
         before(createUser);
-        after(cleanupUser);
+        after(cleanupUsers);
 
         it('fails due to non existing username', function (done) {
             user.verify(USERNAME+USERNAME, PASSWORD, function (error, result) {
@@ -159,7 +159,7 @@ describe('User', function () {
 
     describe('retrieving', function () {
         before(createUser);
-        after(cleanupUser);
+        after(cleanupUsers);
 
         it('fails due to non existing user', function (done) {
             user.get('some non existing username', function (error, result) {
@@ -180,9 +180,46 @@ describe('User', function () {
         });
     });
 
+    describe('admin change', function () {
+        before(createUser);
+        after(cleanupUsers);
+
+        it('fails to remove admin flag of only admin', function (done) {
+            user.changeAdmin(USERNAME, false, function (error) {
+                expect(error).to.be.an('object');
+                done();
+            });
+        });
+
+        it('make second user admin succeeds', function (done) {
+            var user1 = {
+                username: 'seconduser',
+                password: 'foobar',
+                email: 'some@thi.ng'
+            };
+
+            user.create(user1.username, user1.password, user1.email, false, function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result).to.be.ok();
+
+                user.changeAdmin(user1.username, true, function (error) {
+                    expect(error).to.not.be.ok();
+                    done();
+                });
+            });
+        });
+
+        it('succeeds to remove admin flag of first user', function (done) {
+            user.changeAdmin(USERNAME, false, function (error) {
+                expect(error).to.not.be.ok();
+                done();
+            });
+        });
+    });
+
     describe('password change', function () {
         before(createUser);
-        after(cleanupUser);
+        after(cleanupUsers);
 
         it('fails due to wrong arumgent count', function () {
             expect(function () { user.changePassword(); }).to.throwError();

@@ -19,8 +19,10 @@ exports = module.exports = {
     verify: verifyUser,
     remove: removeUser,
     get: getUser,
+    changeAdmin: changeAdmin,
     changePassword: changePassword,
-    update: updateUser
+    update: updateUser,
+    clear: clear
 };
 
 var CRYPTO_SALT_SIZE = 64; // 512-bit salt
@@ -45,6 +47,7 @@ UserError.ALREADY_EXISTS = 3;
 UserError.NOT_FOUND = 4;
 UserError.WRONG_USER_OR_PASSWORD = 5;
 UserError.ARGUMENTS = 6;
+UserError.NOT_ALLOWED = 7;
 
 function ensureArgs(args, expected) {
     assert(args.length === expected.length);
@@ -185,6 +188,28 @@ function updateUser(username, callback) {
     callback(new UserError('not implemented', UserError.INTERNAL_ERROR));
 }
 
+function changeAdmin(username, admin, callback) {
+    ensureArgs(arguments, ['string', 'boolean', 'function']);
+
+    getUser(username, function (error, user) {
+        if (error) return callback(error);
+
+        userdb.getAllAdmins(function (error, result) {
+            if (error) return callback(error);
+
+            // protect from a system where there is no admin left
+            if (result.length <= 1 && !admin) return callback(new UserError(UserError.NOT_ALLOWED));
+
+            user.admin = admin;
+
+            userdb.update(username, user, function (error) {
+                if (error) return callback(error);
+                callback(null);
+            });
+        });
+    });
+}
+
 function changePassword(username, oldPassword, newPassword, callback) {
     ensureArgs(arguments, ['string', 'string', 'string', 'function']);
 
@@ -217,4 +242,10 @@ function changePassword(username, oldPassword, newPassword, callback) {
             });
         });
     });
+}
+
+function clear(callback) {
+    ensureArgs(arguments, ['function']);
+
+    userdb.clear(callback);
 }
