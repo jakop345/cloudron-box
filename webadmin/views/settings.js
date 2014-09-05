@@ -69,8 +69,6 @@ var SettingsController = function ($scope, Client) {
         if (error) console.error('Error loading app list');
         $scope.apps = apps;
 
-        console.debug('Apps:', $scope.apps);
-
         Client.getNakedDomain(function (error, appid) {
             if (error) return console.error(error);
 
