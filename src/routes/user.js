@@ -1,3 +1,5 @@
+/* jslint node:true */
+
 'use strict';
 
 var userdb = require('../userdb.js'),
@@ -17,6 +19,7 @@ exports = module.exports = {
     list: listUser,
     create: createUser,
     changePassword: changePassword,
+    changeAdmin: changeAdmin,
     remove: removeUser
 };
 
@@ -119,6 +122,18 @@ function createUser(req, res, next) {
         }
 
         next(new HttpSuccess(201, {}));
+    });
+}
+
+function changeAdmin(req, res, next) {
+    if (!req.body.username) return next(new HttpError(400, 'API call requires a username.'));
+    if (typeof req.body.admin !== 'boolean') return next(new HttpError(400, 'API call requires an admin setting.'));
+
+    user.changeAdmin(req.body.username, !!req.body.admin, function (error) {
+        if (error && error.reason === UserError.NOT_ALLOWED) return next(new HttpError(403, 'Last admin'));
+        if (error) return next(new HttpError(500, 'Unable to change admin flag'));
+
+        next(new HttpSuccess(200, {}));
     });
 }
 

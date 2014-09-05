@@ -41,6 +41,7 @@ describe('Server User API', function () {
     this.timeout(5000);
 
     var token = null;
+    var token_1 = null;
     var token_2 = null;
 
     before(setup);
@@ -229,6 +230,60 @@ describe('Server User API', function () {
         });
     });
 
+    it('get second admin token', function (done) {
+        request.post(SERVER_URL + '/api/v1/token')
+        .auth(USERNAME_1, PASSWORD_1)
+        .end(function (error, result) {
+            expect(error).to.be(null);
+            expect(result.body.token).to.be.a('string');
+
+            // safe token for further calls
+            token_1 = result.body.token;
+
+            done();
+        });
+    });
+
+    it('remove first user from admins succeeds', function (done) {
+        request.post(SERVER_URL + '/api/v1/user/admin')
+               .query({ auth_token: token_1 })
+               .send({ username: ADMIN, admin: false })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            done(err);
+        });
+    });
+
+    it('remove second user by first, now normal, user fails', function (done) {
+        request.post(SERVER_URL + '/api/v1/user/remove')
+        .query({ access_token: token_1 })
+        .send({ username: ADMIN, password: PASSWORD })
+        .end(function (err, res) {
+            expect(res.statusCode).to.equal(401);
+            done(err);
+        });
+    });
+
+    it('remove second user from admins and thus last admin fails', function (done) {
+        request.post(SERVER_URL + '/api/v1/user/admin')
+               .query({ auth_token: token_1 })
+               .send({ username: USERNAME_1, admin: false })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(403);
+            done(err);
+        });
+    });
+
+    it('reset first user as admin succeeds', function (done) {
+        request.post(SERVER_URL + '/api/v1/user/admin')
+               .query({ auth_token: token_1 })
+               .send({ username: ADMIN, admin: true })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            done(err);
+        });
+    });
+
     it('create user missing arguments should fail', function (done) {
         request.post(SERVER_URL + '/api/v1/user/create')
                .query({ auth_token: token })
@@ -263,16 +318,6 @@ describe('Server User API', function () {
         });
     });
 
-    it('create user with same username should fail', function (done) {
-        request.post(SERVER_URL + '/api/v1/user/create')
-               .query({ auth_token: token })
-               .send({ username: USERNAME_2, password: PASSWORD, email: EMAIL })
-               .end(function (err, res) {
-            expect(res.statusCode).to.equal(409);
-            done(err);
-        });
-    });
-
     it('second user userInfo', function (done) {
         request.post(SERVER_URL + '/api/v1/token')
         .auth(USERNAME_2, PASSWORD_2)
@@ -294,6 +339,16 @@ describe('Server User API', function () {
 
                 done();
             });
+        });
+    });
+
+    it('create user with same username should fail', function (done) {
+        request.post(SERVER_URL + '/api/v1/user/create')
+               .query({ auth_token: token })
+               .send({ username: USERNAME_2, password: PASSWORD, email: EMAIL })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(409);
+            done(err);
         });
     });
 

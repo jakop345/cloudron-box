@@ -198,12 +198,13 @@ function changeAdmin(username, admin, callback) {
             if (error) return callback(error);
 
             // protect from a system where there is no admin left
-            if (result.length <= 1 && !admin) return callback(new UserError(UserError.NOT_ALLOWED));
+            if (result.length <= 1 && !admin) return callback(new UserError('last admin', UserError.NOT_ALLOWED));
 
             user.admin = admin;
 
             userdb.update(username, user, function (error) {
                 if (error) return callback(error);
+
                 callback(null);
             });
         });

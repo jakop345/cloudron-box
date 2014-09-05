@@ -345,6 +345,7 @@ Server.prototype._initializeExpressSync = function () {
     router.post('/api/v1/user/create', bearer, this._requireAdmin.bind(this), routes.user.create);
     router.post('/api/v1/user/remove', bearer, this._requireAdmin.bind(this), routes.user.remove);
     router.post('/api/v1/user/password', bearer, this._requirePassword.bind(this), routes.user.changePassword);
+    router.post('/api/v1/user/admin', bearer, this._requireAdmin.bind(this), routes.user.changeAdmin);
     router.get('/api/v1/user/info', bearer, routes.user.info);
     router.get('/api/v1/user/list', bearer, routes.user.list);
 
