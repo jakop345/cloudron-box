@@ -29,8 +29,6 @@ var AppConfigureController = function ($scope, $routeParams, Client, AppStore) {
             portBindings[containerPort] = $scope.portBindings[containerPort].hostPort;
         }
 
-        console.log('Configure app for ', location, portBindings);
-
         Client.configureApp($routeParams.appId, $scope.password, { location: $scope.location, portBindings: portBindings }, function (error) {
             if (error) {
                 console.error('Unable to configure app.', error);
