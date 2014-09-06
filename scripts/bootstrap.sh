@@ -16,9 +16,6 @@ BACKUP_DIR=/home/$USER/.yellowtent
 APP_SERVER_URL=$1
 BOX_REVISION=$2
 
-echo "==== Setup /etc/yellowtent ===="
-mkdir -p /etc/yellowtent
-
 echo "==== Setup /var/log/cloudron ===="
 mkdir -p /var/log/cloudron/
 
