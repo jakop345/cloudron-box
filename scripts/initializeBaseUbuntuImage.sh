@@ -3,6 +3,7 @@
 set -v
 
 USER_HOME=/home/yellowtent
+APPDATA=$USER_HOME/.yellowtent/appdata
 SRCDIR=$USER_HOME/box
 USER=yellowtent
 APPSTORE_URL=$1
@@ -44,6 +45,24 @@ apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8
 apt-get update
 apt-get -y install lxc-docker
 ln -sf /usr/bin/docker.io /usr/local/bin/docker
+
+service docker stop
+umount -l $(grep 'aufs' /proc/mounts | awk '{print$2}' | sort -r)
+rm -rf /var/lib/docker
+mkdir /var/lib/docker
+
+# create a separate 12GB fs for docker images
+# dd if=/dev/zero of=/root/docker_data.img bs=1M count=12000
+truncate -s 12G /root/docker_data.img
+mkfs.ext4 -F /root/docker_data.img
+tune2fs -c0 -i0 /root/docker_data.img # disable automatic fs check
+echo "/root/docker_data.img /var/lib/docker ext4 loop,nosuid 0 0" >> /etc/fstab
+mount -a
+
+service docker start
+# give docker a couple of seconds to start up
+sleep 2
+
 # now add the user to the docker group
 usermod $USER -a -G docker
 echo "=== Pulling base docker images ==="
@@ -96,6 +115,16 @@ while [[ $RET -ne 0 ]]; do
     RET=$?
 done
 
+
+echo "==== Seting up appdata ==="
+# create a separate 12GB fs for appdata
+# dd if=/dev/zero of=/root/appdata.img bs=1M count=12000
+truncate -s 12G /root/appdata.img
+mkfs.ext4 -F /root/appdata.img
+tune2fs -c0 -i0 /root/appdata.img # disable automatic fs check
+mkdir -p $APPDATA
+echo "/root/appdata.img $APPDATA ext4 loop,nosuid 0 0" >> /etc/fstab
+mount -a
 
 echo "==== Make the user own his home ===="
 chown $USER:$USER -R /home/$USER
