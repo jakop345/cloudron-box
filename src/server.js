@@ -290,6 +290,7 @@ Server.prototype._initializeExpressSync = function () {
     var router = new express.Router();
 
     this.app
+//       .use(require('delay')(500))
        .use(middleware.timeout(REQUEST_TIMEOUT))
 //       .use(express.limit(UPLOAD_LIMIT))
        .use(json)
