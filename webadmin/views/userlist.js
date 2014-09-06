@@ -20,7 +20,11 @@ function UserListController ($scope, Client) {
     };
 
     $scope.toggleAdmin = function (user) {
-        user.admin = !user.admin;
+        Client.setAdmin(user.username, !user.admin, function (error) {
+            if (error) return console.error(error);
+
+            user.admin = !user.admin;
+        });
     };
 
     $scope.deleteUser = function (user) {

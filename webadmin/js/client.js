@@ -296,6 +296,20 @@ angular.module('YellowTent').service('Client', function ($http) {
         });
     };
 
+    Client.prototype.setAdmin = function (username, admin, callback) {
+        var payload = {
+            username: username,
+            admin: admin
+        };
+
+        $http.post('/api/v1/user/admin', payload).success(function (data, status) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null);
+        }).error(function (data, status) {
+            callback(new ClientError(status, data));
+        });
+    };
+
     Client.prototype.createAdmin = function (username, password, email, callback) {
         var payload = {
             username: username,
