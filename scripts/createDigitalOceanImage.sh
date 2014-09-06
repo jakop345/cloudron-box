@@ -103,7 +103,7 @@ function snapshot_droplet() {
 
 function destroy_droplet() {
     local DROPLET_ID="$1"
-    local EVENT_ID=`$CURL "https://api.digitalocean.com/v1/droplets/$DROPLET_ID/destroy/?client_id=$CLIENT_ID&api_key=$API_KEY" | $JSON event_id`
+    local EVENT_ID=`$CURL "https://api.digitalocean.com/v1/droplets/$DROPLET_ID/destroy/?scrub_data=true&client_id=$CLIENT_ID&api_key=$API_KEY" | $JSON event_id`
     echo "Droplet destroyed. Event id: $EVENT_ID"
 
     while true; do
