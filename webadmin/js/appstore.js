@@ -2,7 +2,7 @@
 
 /* global angular:false */
 
-angular.module('YellowTent').service('AppStore', function ($http, Client) {
+angular.module('Application').service('AppStore', function ($http, Client) {
 
     function AppStoreError(statusCode, message) {
         Error.call(this);

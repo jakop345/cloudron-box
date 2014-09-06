@@ -2,7 +2,7 @@
 
 /* global angular:false */
 
-angular.module('YellowTent').service('Client', function ($http) {
+angular.module('Application').service('Client', function ($http) {
 
     function ClientError(statusCode, message) {
         Error.call(this);

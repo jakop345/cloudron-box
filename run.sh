@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo
-echo "Starting YellowTent server at port 443..."
+echo "Starting Cloudron at port 443"
 echo
 
 SRCDIR="$(cd $(dirname "$0"); pwd)"

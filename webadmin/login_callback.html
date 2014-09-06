@@ -6,7 +6,7 @@
 
     <script>
 
-    var app = angular.module('YellowTent', []);
+    var app = angular.module('Application', []);
     function MainController($scope, $http) {
         var authCode = window.location.search.slice('?authCode='.length);
 
@@ -41,7 +41,7 @@
 
 </head>
 
-<body ng-app="YellowTent" ng-controller="MainController">
+<body ng-app="Application" ng-controller="MainController">
 
 </body>
 </html>
