@@ -1,46 +1,39 @@
 'use strict';
 
 function UserPasswordController ($scope, $routeParams, Client) {
-    $scope.disabled = false;
-    $scope.user = Client.getUserInfo();
+    $scope.active = false;
     $scope.currentPassword = '';
     $scope.newPassword = '';
     $scope.repeatPassword = '';
-
-    $scope.error = {};
+    $scope.validationClass = {};
 
     $scope.submit = function () {
-        console.debug('Try to change password for user %s on %s.', $scope.user.username, Client.server);
-
-        $scope.error.currentPassword = null;
-        $scope.error.newPassword = null;
-        $scope.error.repeatPassword = null;
+        $scope.validationClass.currentPassword = '';
+        $scope.validationClass.newPassword = '';
+        $scope.validationClass.repeatPassword = '';
 
         if ($scope.newPassword !== $scope.repeatPassword) {
-            $scope.error.repeatPassword = 'Passwords do not match';
+            document.getElementById('inputRepeatPassword').focus();
+            $scope.validationClass.repeatPassword = 'has-error';
             $scope.repeatPassword = '';
             return;
         }
 
-        $scope.disabled = true;
-        Client.changePassword($scope.currentPassword, $scope.newPassword, function (error, result) {
-            if (error) {
+        $scope.active = true;
+        Client.changePassword($scope.currentPassword, $scope.newPassword, function (error) {
+            if (error && error.statusCode === 403) {
+                document.getElementById('inputCurrentPassword').focus();
+                $scope.validationClass.currentPassword = 'has-error';
+                $scope.currentPassword = '';
+                $scope.newPassword = '';
+                $scope.repeatPassword = '';
+            } else if (error) {
                 console.error('Unable to change password.', error);
-
-                if (error.statusCode === 403) {
-                    $scope.$apply(function () {
-                        $scope.disabled = false;
-                        $scope.error.currentPassword = 'Provided password is wrong';
-                        $scope.currentPassword = '';
-                        $scope.newPassword = '';
-                        $scope.repeatPassword = '';
-                    });
-                }
-
-                return;
+            } else {
+                window.history.back();
             }
 
-            window.history.back();
+            $scope.active = false;
         });
     };
 
