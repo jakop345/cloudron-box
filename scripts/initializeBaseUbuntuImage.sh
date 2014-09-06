@@ -75,18 +75,11 @@ echo "== Box bootstrapping =="
 
 
 echo "==== Cloning box repo ===="
-if [ -d "$SRCDIR/.git" ]; then
-    echo "Updating the box repo"
-    cd $SRCDIR
-    git fetch
-else
-    echo "Cloning the box repo"
-    rm -rf $SRCDIR
-    mkdir -p $USER_HOME
-    cd $USER_HOME
-    git clone http://bootstrap:not4long@yellowtent.girish.in/yellowtent/box.git
-    cd $SRCDIR
-fi
+echo "Cloning the box repo"
+mkdir -p $USER_HOME
+cd $USER_HOME
+git clone http://bootstrap:not4long@yellowtent.girish.in/yellowtent/box.git
+cd $SRCDIR
 git reset --hard $BOX_REVISION
 echo "git HEAD is `git rev-parse HEAD`"
 
