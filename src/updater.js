@@ -45,7 +45,7 @@ Updater.prototype._check = function () {
 
             debug('check: ', result.body);
 
-            that._appUpdateInfo = result.body;
+            that._appUpdateInfo = result.body.appVersions;
         });
     });
 

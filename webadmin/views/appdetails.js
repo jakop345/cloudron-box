@@ -10,7 +10,9 @@ var AppDetailsController = function ($scope, $http, $routeParams, $interval, Cli
     Client.onConfig(function () {
         if (!Client.getConfig().update) return;
 
-        var appVersions = Client.getConfig().update.apps.appVersions;
+        var appVersions = Client.getConfig().update.apps;
+        if (!appVersions) return; // box doesn't have update information yet
+
         $scope.updateAvailable = appVersions.some(function (x) {
             return x.appId === $scope.app.appStoreId && x.version !== $scope.app.version;
         });
