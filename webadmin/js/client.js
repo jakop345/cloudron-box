@@ -416,13 +416,9 @@ angular.module('Application').service('Client', function ($http) {
         callback = typeof callback === 'function' ? callback : function () {};
 
         this.config(function (error, result) {
-            if (error) {
-                console.error(error);
-                callback(error);
-            }
+            if (error) return callback(error);
 
             that.setConfig(result);
-
             callback(null);
         });
     };
@@ -433,10 +429,7 @@ angular.module('Application').service('Client', function ($http) {
         callback = typeof callback === 'function' ? callback : function () {};
 
         this.getApps(function (error, apps) {
-            if (error) {
-                console.error(error);
-                return callback(error);
-            }
+            if (error) return callback(error);
 
             apps.forEach(function (app, i) {
                 app.iconUrl = that._config.appServerUrl + '/api/v1/appstore/apps/' + app.appStoreId + '/icon';
