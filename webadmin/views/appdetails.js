@@ -5,18 +5,7 @@
 var AppDetailsController = function ($scope, $http, $routeParams, $interval, Client) {
     $scope.app = {};
     $scope.initialized = false;
-
     $scope.updateAvailable = false;
-    Client.onConfig(function () {
-        if (!Client.getConfig().update) return;
-
-        var appVersions = Client.getConfig().update.apps;
-        if (!appVersions) return; // box doesn't have update information yet
-
-        $scope.updateAvailable = appVersions.some(function (x) {
-            return x.appId === $scope.app.appStoreId && x.version !== $scope.app.version;
-        });
-    });
 
     $scope.startApp = function () {
         Client.startApp($routeParams.appId, function (error) {
@@ -45,8 +34,7 @@ var AppDetailsController = function ($scope, $http, $routeParams, $interval, Cli
         });
     };
 
-    Client.refreshInstalledApps(function (error) {
-        if (error) return console.error(error);
+    Client.onReady(function () {
 
         Client.getApp($routeParams.appId, function (error, app) {
             if (error) {
@@ -55,8 +43,14 @@ var AppDetailsController = function ($scope, $http, $routeParams, $interval, Cli
             }
 
             $scope.app = app;
+
+            if (Client.getConfig().update && Client.getConfig().update.apps) {
+                $scope.updateAvailable = Client.getConfig().update.apps.some(function (x) {
+                    return x.appId === $scope.app.appStoreId && x.version !== $scope.app.version;
+                });
+            }
+
             $scope.initialized = true;
         });
     });
-
 };

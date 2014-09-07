@@ -1,6 +1,7 @@
 'use strict';
 
 /* global angular:false */
+/* global async:false */
 
 angular.module('Application').service('Client', function ($http) {
 
@@ -16,7 +17,9 @@ angular.module('Application').service('Client', function ($http) {
     }
 
     function Client() {
+        this._ready = false;
         this._configListener = [];
+        this._readyListener = [];
         this._userInfo = {
             username: null,
             email: null,
@@ -37,6 +40,20 @@ angular.module('Application').service('Client', function ($http) {
 
         this.setToken(localStorage.token);
     }
+
+    Client.prototype.setReady = function () {
+        if (this._ready) return;
+
+        this._ready = true;
+        this._readyListener.forEach(function (callback) {
+            callback();
+        });
+    };
+
+    Client.prototype.onReady = function (callback) {
+        if (this._ready) callback();
+        this._readyListener.push(callback);
+    };
 
     Client.prototype.onConfig = function (callback) {
         this._configListener.push(callback);
@@ -264,9 +281,24 @@ angular.module('Application').service('Client', function ($http) {
     };
 
     Client.prototype.getApps = function (callback) {
+        var that = this;
+
         $http.get('/api/v1/apps').success(function (data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
-            callback(null, data.apps);
+
+            // amend app.icon
+            async.each(data.apps, function (app, callback) {
+                $http.get(that._config.appServerUrl + '/api/v1/appstore/apps/' + app.appStoreId + '/icon').success(function () {
+                    app.icon = that._config.appServerUrl + '/api/v1/appstore/apps/' + app.appStoreId + '/icon';
+                    callback(null);
+                }).error(function () {
+                    app.icon = null;
+                    callback(null);
+                });
+            }, function (error) {
+                if (error) return callback(error);
+                callback(null, data.apps);
+            });
         }).error(function (data, status) {
             callback(new ClientError(status, data));
         });
@@ -432,7 +464,6 @@ angular.module('Application').service('Client', function ($http) {
             if (error) return callback(error);
 
             apps.forEach(function (app, i) {
-                app.iconUrl = that._config.appServerUrl + '/api/v1/appstore/apps/' + app.appStoreId + '/icon';
                 if (that._installedApps.some(function (elem) { return elem.id === app.id; })) {
                     angular.copy(app, that._installedApps[i]);
                     return;

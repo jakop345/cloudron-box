@@ -48,17 +48,29 @@ var MainController = function ($scope, $route, $interval, Client) {
                 // update token
                 localStorage.token = token;
 
-                // kick off installed apps and config polling
-                var refreshAppsTimer = $interval(Client.refreshInstalledApps.bind(Client), 2000);
-                var refreshConfigTimer = $interval(Client.refreshConfig.bind(Client), 5000);
+                Client.refreshConfig(function (error) {
+                    if (error) return console.error(error);
 
-                $scope.$on('$destroy', function () {
-                    $interval.cancel(refreshAppsTimer);
-                    $interval.cancel(refreshConfigTimer);
+                    Client.refreshInstalledApps(function (error) {
+                        if (error) return console.error(error);
+
+                        // kick off installed apps and config polling
+                        var refreshAppsTimer = $interval(Client.refreshInstalledApps.bind(Client), 2000);
+                        var refreshConfigTimer = $interval(Client.refreshConfig.bind(Client), 5000);
+
+                        $scope.$on('$destroy', function () {
+                            $interval.cancel(refreshAppsTimer);
+                            $interval.cancel(refreshConfigTimer);
+                        });
+
+                        // now mark the Client to be ready
+                        Client.setReady();
+
+                        // now show UI
+                        $scope.initialized = true;
+                    });
                 });
 
-                // now show UI
-                $scope.initialized = true;
             });
         } else {
             $scope.login();
