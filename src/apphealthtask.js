@@ -41,6 +41,7 @@ function initialize() {
 // # TODO should probably poll from the outside network instead of the docker network?
 // callback is called with error for fatal errors and not if health check failed
 function checkAppHealth(app, callback) {
+    // only check status of installed apps. we could possibly optimize more by checking runState as well
     if (app.installationState !== appdb.ISTATE_INSTALLED) return callback(null);
 
     var container = docker.getContainer(app.containerId),
@@ -67,7 +68,7 @@ function checkAppHealth(app, callback) {
 
         if (data.State.Running !== true) {
             debug(app.id + ' has exited');
-            return setHealth(app, false, appdb.RSTATE_STOPPED, callback);
+            return setHealth(app, false, appdb.RSTATE_DEAD, callback);
         }
 
         var healthCheckUrl = 'http://127.0.0.1:' + app.httpPort + manifest.healthCheckPath;

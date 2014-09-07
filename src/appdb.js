@@ -37,7 +37,8 @@ exports = module.exports = {
     RSTATE_RUNNING: 'running',
     RSTATE_PENDING_START: 'pending_start',
     RSTATE_PENDING_STOP: 'pending_stop',
-    RSTATE_STOPPED: 'stopped',
+    RSTATE_STOPPED: 'stopped', // app stopped by user
+    RSTATE_DEAD: 'dead', // app stopped on it's own
     RSTATE_ERROR: 'error'
 };
 
@@ -256,7 +257,12 @@ function setHealth(appId, healthy, runState, callback) {
         runState: runState
     };
 
-    updateWithConstraints(appId, values, 'AND runState NOT GLOB "pending_*" AND installationState = "installed"', callback);
+    var constraints = 'AND runState NOT GLOB "pending_*" AND installationState = "installed"';
+    if (runState === exports.RSTATE_DEAD) { // don't mark stopped apps as dead
+        constraints += ' runState != "stopped"';
+    }
+
+    updateWithConstraints(appId, values, constraints, callback);
 }
 
 function setInstallationCommand(appId, installationState, values, callback) {
