@@ -31,7 +31,9 @@ angular.module('Application').service('AppStore', function ($http, Client) {
             data.apps.forEach(function (app) {
                 if (that._appsCache[app.id]) return;
 
-                app.iconUrl = Client.getConfig().appServerUrl + '/api/v1/appstore/apps/' + app.id + '/icon';
+                // prefix the appstore server url to icons
+                if (app.icon) app.icon = Client.getConfig().appServerUrl + app.icon;
+
                 that._appsCache[app.id] = app;
             });
 
@@ -41,10 +43,17 @@ angular.module('Application').service('AppStore', function ($http, Client) {
         });
     };
 
-    // TODO currently assumes that getApps was called at some point
     AppStore.prototype.getAppById = function (appId, callback) {
         if (appId in this._appsCache) return callback(null, this._appsCache[appId]);
-        return callback(new AppStoreError(404, 'Not found'));
+
+        var that = this;
+
+        this.getApps(function (error) {
+            if (error) return callback(error);
+            if (appId in that._appsCache) return callback(null, that._appsCache[appId]);
+
+            callback(new AppStoreError(404, 'Not found'));
+        });
     };
 
     AppStore.prototype.getManifest = function (appId, callback) {

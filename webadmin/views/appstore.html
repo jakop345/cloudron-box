@@ -29,8 +29,8 @@
             <div class="panel-heading">
                 <div class="row">
                     <div class="col-xs-3">
-                        <img width="48" height="48" ng-src="{{ app.iconUrl }}"/>
-                        <!-- <i class="fa fa-comments fa-5x"></i> -->
+                        <img ng-show="app.icon" width="48" height="48" ng-src="{{app.icon}}"/>
+                        <span ng-show="!app.icon" class="fa fa-space-shuttle fa-4x"></span>
                     </div>
                     <div class="col-xs-9 text-right">
                         <div class="huge">{{ app.title }}</div>
