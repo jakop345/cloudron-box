@@ -463,17 +463,28 @@ angular.module('Application').service('Client', function ($http, $filter) {
         this.getApps(function (error, apps) {
             if (error) return callback(error);
 
-            apps.forEach(function (app, i) {
-                if (that._installedApps.some(function (elem) { return elem.id === app.id; })) {
-                    angular.copy(app, that._installedApps[i]);
+            // insert or update new apps
+            apps.forEach(function (app) {
+                var found = false;
+
+                for (var i = 0; i < that._installedApps.length; ++i) {
+                    if (that._installedApps[i].id === app.id) {
+                        found = i;
+                        break;
+                    }
+                }
+
+                if (found !== false) {
+                    angular.copy(app, that._installedApps[found]);
                 } else {
                     that._installedApps.push(app);
                 }
             });
 
-            that._installedApps = $filter('filter')(that._installedApps, function (value) {
+            // filter out old entries
+            angular.copy($filter('filter')(that._installedApps, function (value) {
                 return apps.some(function (elem) { return elem.id === value.id; });
-            });
+            }), that._installedApps);
 
             callback(null);
         });
