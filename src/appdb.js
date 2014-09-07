@@ -245,19 +245,18 @@ function updateWithConstraints(id, app, constraints, callback) {
 }
 
 // sets health on installed apps that have a runState which is not null or pending
-function setHealth(appId, healthy, rstate, callback) {
+function setHealth(appId, healthy, runState, callback) {
     assert(typeof appId === 'string');
     assert(typeof healthy === 'boolean');
-    assert(typeof rstate === 'string');
+    assert(typeof runState === 'string');
     assert(typeof callback === 'function');
 
-    database.run('UPDATE apps SET healthy = ?, runState = ? WHERE id = ? AND runState NOT GLOB "pending_*" AND installationState = "installed"',
-                 [ healthy, rstate, appId ], function (error) {
-        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
-        if (this.changes !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
+    var values = {
+        healthy: healthy,
+        runState: runState
+    };
 
-        return callback(null);
-    });
+    updateWithConstraints(appId, values, 'AND runState NOT GLOB "pending_*" AND installationState = "installed"', callback);
 }
 
 function setInstallationCommand(appId, installationState, values, callback) {
