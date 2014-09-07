@@ -47,15 +47,15 @@ function checkAppHealth(app, callback) {
         manifest = app.manifest;
 
     function setHealth(app, healthy, runState, callback) {
-        app.healthy = healthy;
-        app.runState = runState;
-
         appdb.setHealth(app.id, healthy, runState, function (error) {
             if (error && error.reason === DatabaseError.NOT_FOUND) { // app got uninstalled
                 return callback(null);
             }
+            if (error) return callback(error);
 
-            callback(error);
+            app.healthy = healthy;
+            app.runState = runState;
+            callback(null);
         });
      }
 
