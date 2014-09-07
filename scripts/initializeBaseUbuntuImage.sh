@@ -25,6 +25,8 @@ export DEBIAN_FRONTEND=noninteractive
 echo "==== Install project dependencies ===="
 apt-get update
 
+echo "=== Upgrade ==="
+apt-get upgrade -y
 
 echo "==== Setup nodejs ===="
 apt-get -y install nodejs npm
