@@ -3,7 +3,7 @@
 /* global angular:false */
 /* global async:false */
 
-angular.module('Application').service('Client', function ($http) {
+angular.module('Application').service('Client', function ($http, $filter) {
 
     function ClientError(statusCode, message) {
         Error.call(this);
@@ -466,17 +466,13 @@ angular.module('Application').service('Client', function ($http) {
             apps.forEach(function (app, i) {
                 if (that._installedApps.some(function (elem) { return elem.id === app.id; })) {
                     angular.copy(app, that._installedApps[i]);
-                    return;
                 } else {
                     that._installedApps.push(app);
                 }
             });
 
-            that._installedApps.forEach(function (app, i) {
-                if (!apps.some(function (elem) { return elem.id === app.id; })) {
-                    that._installedApps.splice(i, 1);
-                    return;
-                }
+            that._installedApps = $filter('filter')(that._installedApps, function (value) {
+                return apps.some(function (elem) { return elem.id === value.id; });
             });
 
             callback(null);
