@@ -355,5 +355,31 @@ describe('Server', function () {
             }, 100);
         });
     });
+
+    describe('heartbeat', function () {
+        var server, successfulHeartbeatGet;
+
+        before(function (done) {
+            config.token = 'forheartbeat';
+            server = new Server();
+            server.start(done);
+
+            var scope = nock(config.appServerUrl);
+            successfulHeartbeatGet = scope.get('/api/v1/boxes/' + config.fqdn + '/heartbeat');
+            successfulHeartbeatGet.reply(200);
+        });
+
+        after(function (done) {
+            server.stop(done);
+            nock.cleanAll();
+        });
+
+        it('sends heartbeat', function (done) {
+            setTimeout(function () {
+                expect(successfulHeartbeatGet.counter).to.equal(1);
+                done();
+            }, 100);
+        });
+    });
 });
 

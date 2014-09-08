@@ -459,7 +459,7 @@ Server.prototype._sendHeartBeat = function () {
 
     var that = this;
 
-    var url = config.appServerUrl + '/api/v1/boxes/heartbeat';
+    var url = config.appServerUrl + '/api/v1/boxes/' + os.hostname() + '/heartbeat';
     debug('Sending heartbeat ' + url);
 
     superagent.get(url).query({ token: config.token }).end(function (error, result) {
