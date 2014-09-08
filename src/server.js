@@ -32,7 +32,7 @@ var express = require('express'),
 
 exports = module.exports = Server;
 
-var HEARTBEAT_INTERVAL = 1000 * 60 * 60;
+var HEARTBEAT_INTERVAL = 1000 * 60;// * 60;
 var RELOAD_NGINX_CMD = 'sudo ' + path.join(__dirname, 'scripts/reloadnginx.sh');
 var RESTORE_CMD = 'sudo ' + path.join(__dirname, 'scripts/restore.sh');
 var REBOOT_CMD = 'sudo ' + path.join(__dirname, 'scripts/reboot.sh');
@@ -524,6 +524,13 @@ Server.prototype._getCertificate = function (callback) {
 };
 
 Server.prototype._announce = function () {
+    if (config.token) {
+        debug('_announce: we already have a token. Skip announcing.');
+        clearTimeout(this._announceTimerId);
+        this._announceTimerId = null;
+        return;
+    }
+
     var that = this;
 
     var ANNOUNCE_INTERVAL = parseInt(process.env.ANNOUNCE_INTERVAL, 10) || 60000; // exported for testing
@@ -531,30 +538,18 @@ Server.prototype._announce = function () {
     // On Digital Ocean, the only value which we can give a new droplet is the hostname.
     // We use that value to identify the droplet by the appstore server when the droplet
     // announce itself. This identifier can look different for other box providers.
-
-    var url = config.appServerUrl + '/api/v1/boxes/' + config.fqdn + '/announce';
+    var hostname = os.hostname();
+    var url = config.appServerUrl + '/api/v1/boxes/' + hostname + '/announce';
     debug('_announce: box with %s.', url);
 
     superagent.get(url).end(function (error, result) {
         if (error || result.statusCode !== 200) {
-            debug('_announce: unable to announce to app server', error);
-
-            // The restart case will have a config.token so it is ok to not have a 200 status code in that case
-            if (error || !config.token) {
-                debug('_announce: try again');
-                that._announceTimerId = setTimeout(that._announce.bind(that), ANNOUNCE_INTERVAL); // try again
-            } else {
-                debug('_announce: don\'t try again, this was a reboot');
-                that._announceTimerId = null;
-            }
+            debug('_announce: unable to announce to app server, try again.', error);
+            that._announceTimerId = setTimeout(that._announce.bind(that), ANNOUNCE_INTERVAL); // try again
             return;
         }
 
-        if (!config.token) {
-            that._announceTimerId = setTimeout(that._announce.bind(that), ANNOUNCE_INTERVAL * 2); // check again if we got token
-        } else {
-            that._announceTimerId = null;
-        }
+        that._announceTimerId = setTimeout(that._announce.bind(that), ANNOUNCE_INTERVAL * 2);
 
         debug('_announce: success');
     });

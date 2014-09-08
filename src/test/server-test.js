@@ -321,7 +321,7 @@ describe('Server', function () {
         });
     });
 
-    xdescribe('announce', function () {
+    describe('announce', function () {
         var server, failingGet;
 
         before(function (done) {
