@@ -35,6 +35,7 @@ exports = module.exports = Server;
 var HEARTBEAT_INTERVAL = 1000 * 60 * 60;
 var RELOAD_NGINX_CMD = 'sudo ' + path.join(__dirname, 'scripts/reloadnginx.sh');
 var RESTORE_CMD = 'sudo ' + path.join(__dirname, 'scripts/restore.sh');
+var REBOOT_CMD = 'sudo ' + path.join(__dirname, 'scripts/reboot.sh');
 
 function Server() {
     this.httpServer = null; // http server
@@ -163,6 +164,23 @@ Server.prototype._update = function (req, res, next) {
     this._updater.update(function (error) {
         if (error) return next(new HttpError(500, error));
         res.send(200, {});
+    });
+};
+
+Server.prototype._reboot = function (req, res, next) {
+    debug('_reboot: execute "%s".', REBOOT_CMD);
+
+    // Finish the request, to let the appstore know we triggered the restore it
+    // TODO is there a better way?
+    next(new HttpSuccess(200, {}));
+
+    exec(REBOOT_CMD, {}, function (error, stdout, stderr) {
+        if (error) {
+            console.error('Reboot failed.', error, stdout, stderr);
+            return next(new HttpError(500, error));
+        }
+
+        debug('_reboot: success');
     });
 };
 
@@ -335,8 +353,8 @@ Server.prototype._initializeExpressSync = function () {
 
     router.get('/api/v1/config', bearer, this._getConfig.bind(this));
 
-    // basic repo update
     router.get('/api/v1/update', bearer, this._update.bind(this));
+    router.get('/api/v1/reboot', bearer, this._reboot.bind(this));
 
     // routes controlled by app.router
     router.post('/api/v1/token', both, routes.user.createToken);        // TODO remove that route

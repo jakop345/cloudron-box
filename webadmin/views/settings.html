@@ -34,7 +34,7 @@
                 <button class="btn btn-outline btn-success pull-right" data-toggle="modal" data-target="#updateModal" ng-show="config.update.box">New Update to Version {{config.update.box.version}} available</button>
                 <button class="btn btn-outline btn-success pull-right" data-toggle="modal" data-target="#updateModal" ng-show="config.isDev && !config.update.box">Update to Master</button>
 
-                <!-- Modal really update-->
+                <!-- Modal really update -->
                 <div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
@@ -79,6 +79,28 @@
                         </select>
                     </li>
                 </ul>
+                <button class="btn btn-outline btn-success pull-right" data-toggle="modal" data-target="#rebootModal">Reboot</button>
+
+                <!-- Modal really reboot -->
+                <div class="modal fade" id="rebootModal" tabindex="-1" role="dialog" aria-labelledby="rebootModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title" id="rebootModalLabel">Really reboot the box software?</h4>
+                            </div>
+                            <div class="modal-body">
+                                Your cloudron will be unreachable during the reboot.
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-danger" ng-click="reboot()">Reboot</button>
+                            </div>
+                        </div>
+                        <!-- /.modal-content -->
+                    </div>
+                    <!-- /.modal-dialog -->
+                </div>
             </div>
         </div>
     </div>

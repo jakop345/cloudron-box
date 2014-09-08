@@ -36,6 +36,9 @@ $USER ALL=(root) NOPASSWD: $SRCDIR/src/scripts/backup.sh
 Defaults!$SRCDIR/src/scripts/restore.sh env_keep=HOME
 $USER ALL=(root) NOPASSWD: $SRCDIR/src/scripts/restore.sh
 
+Defaults!$SRCDIR/src/scripts/reboot.sh env_keep=HOME
+$USER ALL=(root) NOPASSWD: $SRCDIR/src/scripts/reboot.sh
+
 EOF
 
 
