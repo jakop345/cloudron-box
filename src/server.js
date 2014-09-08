@@ -524,11 +524,6 @@ Server.prototype._getCertificate = function (callback) {
 };
 
 Server.prototype._announce = function () {
-    if (config.token) {
-        this._announceTimerId = null;
-        return; // already provisioned
-    }
-
     var that = this;
 
     var ANNOUNCE_INTERVAL = parseInt(process.env.ANNOUNCE_INTERVAL, 10) || 60000; // exported for testing
@@ -548,7 +543,7 @@ Server.prototype._announce = function () {
             return;
         }
 
-        that._announceTimerId = setTimeout(that._announce.bind(that), ANNOUNCE_INTERVAL * 2); // check again if we got token
+        if (!config.token) that._announceTimerId = setTimeout(that._announce.bind(that), ANNOUNCE_INTERVAL * 2); // check again if we got token
         debug('announce: success');
     });
 };
