@@ -532,19 +532,30 @@ Server.prototype._announce = function () {
     // We use that value to identify the droplet by the appstore server when the droplet
     // announce itself. This identifier can look different for other box providers.
 
-    var hostname = os.hostname();
-    var url = config.appServerUrl + '/api/v1/boxes/' + hostname + '/announce';
-    debug('_announce: %s with box name %s.', url, hostname);
+    var url = config.appServerUrl + '/api/v1/boxes/' + config.fqdn + '/announce';
+    debug('_announce: box with %s.', url);
 
     superagent.get(url).end(function (error, result) {
         if (error || result.statusCode !== 200) {
             debug('_announce: unable to announce to app server', error);
+
             // The restart case will have a config.token so it is ok to not have a 200 status code in that case
-            if (error || !config.token) that._announceTimerId = setTimeout(that._announce.bind(that), ANNOUNCE_INTERVAL); // try again
+            if (error || !config.token) {
+                debug('_announce: try again');
+                that._announceTimerId = setTimeout(that._announce.bind(that), ANNOUNCE_INTERVAL); // try again
+            } else {
+                debug('_announce: don\'t try again, this was a reboot');
+                that._announceTimerId = null;
+            }
             return;
         }
 
-        if (!config.token) that._announceTimerId = setTimeout(that._announce.bind(that), ANNOUNCE_INTERVAL * 2); // check again if we got token
+        if (!config.token) {
+            that._announceTimerId = setTimeout(that._announce.bind(that), ANNOUNCE_INTERVAL * 2); // check again if we got token
+        } else {
+            that._announceTimerId = null;
+        }
+
         debug('_announce: success');
     });
 };
