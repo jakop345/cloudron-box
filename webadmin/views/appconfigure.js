@@ -6,19 +6,8 @@ var AppConfigureController = function ($scope, $routeParams, Client, AppStore) {
     $scope.location = '';
     $scope.disabled = false;
     $scope.error = { };
+    $scope.domain = '';
     $scope.portBindings = { };
-
-    Client.getApp($routeParams.appId, function (error, app) {
-        $scope.error = error || { };
-        if (error) return;
-
-        $scope.app = app;
-        $scope.location = app.location;
-        $scope.portBindings = app.manifest.tcpPorts;
-        for (var containerPort in $scope.portBindings) {
-            $scope.portBindings[containerPort].hostPort = app.portBindings[containerPort];
-        }
-    });
 
     $scope.configureApp = function () {
         $scope.error.name = null;
@@ -50,6 +39,22 @@ var AppConfigureController = function ($scope, $routeParams, Client, AppStore) {
     $scope.cancel = function () {
         window.history.back();
     };
+
+    Client.onReady(function () {
+        $scope.domain = Client.getConfig().fqdn;
+
+        Client.getApp($routeParams.appId, function (error, app) {
+            $scope.error = error || { };
+            if (error) return;
+
+            $scope.app = app;
+            $scope.location = app.location;
+            $scope.portBindings = app.manifest.tcpPorts;
+            for (var containerPort in $scope.portBindings) {
+                $scope.portBindings[containerPort].hostPort = app.portBindings[containerPort];
+            }
+        });
+    });
 
     document.getElementById('inputLocation').focus();
 };
