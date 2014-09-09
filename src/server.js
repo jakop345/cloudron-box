@@ -356,16 +356,17 @@ Server.prototype._initializeExpressSync = function () {
     router.get('/api/v1/reboot', bearer, this._reboot.bind(this));
 
     // routes controlled by app.router
-    router.post('/api/v1/token', both, routes.user.createToken);        // TODO remove that route
-    router.get('/api/v1/user/token', bearer, routes.user.createToken);
-    router.get('/api/v1/logout', bearer, routes.user.logout);             // TODO remove that route
-    router.get('/api/v1/user/logout', bearer, routes.user.logout);
-    router.post('/api/v1/user/create', bearer, this._requireAdmin.bind(this), routes.user.create);
-    router.post('/api/v1/user/remove', bearer, this._requireAdmin.bind(this), routes.user.remove);
-    router.post('/api/v1/user/password', bearer, this._requirePassword.bind(this), routes.user.changePassword);
-    router.post('/api/v1/user/admin', bearer, this._requireAdmin.bind(this), routes.user.changeAdmin);
-    router.get('/api/v1/user/info', bearer, routes.user.info);
-    router.get('/api/v1/user/list', bearer, routes.user.list);
+    // router.post   ('/api/v1/token', both, routes.user.createToken);        // TODO remove that route
+    // router.get    ('/api/v1/logout', bearer, routes.user.logout);             // TODO remove that route
+
+    router.get    ('/api/v1/users', bearer, routes.user.list);
+    router.get    ('/api/v1/users/:userName/login', basic, routes.user.createToken);
+    // router.get    ('/api/v1/users/:userName/logout', bearer, routes.user.logout);
+    router.post   ('/api/v1/users', bearer, this._requireAdmin.bind(this), routes.user.create);
+    router.get    ('/api/v1/users/:userName', bearer, routes.user.info);
+    router.delete ('/api/v1/users/:userName', bearer, this._requireAdmin.bind(this), routes.user.remove);
+    router.post   ('/api/v1/users/:userName/password', bearer, this._requirePassword.bind(this), routes.user.changePassword);
+    router.post   ('/api/v1/users/:userName/admin', bearer, this._requireAdmin.bind(this), routes.user.changeAdmin);
 
     router.param('syncerVolume', function (req, res, next, id) {
         both(req, res, function (err) {
