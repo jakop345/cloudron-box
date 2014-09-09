@@ -356,7 +356,7 @@ Server.prototype._initializeExpressSync = function () {
     router.get('/api/v1/reboot', bearer, this._reboot.bind(this));
 
     // routes controlled by app.router
-    // router.post   ('/api/v1/token', both, routes.user.createToken);        // TODO remove that route
+    router.post   ('/api/v1/token', both, routes.user.createToken);        // TODO remove that route
     // router.get    ('/api/v1/logout', bearer, routes.user.logout);             // TODO remove that route
 
     router.get    ('/api/v1/users', bearer, routes.user.list);

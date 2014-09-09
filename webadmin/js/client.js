@@ -334,7 +334,7 @@ angular.module('Application').service('Client', function ($http, $filter) {
             admin: admin
         };
 
-        $http.post('/api/v1/user/admin', payload).success(function (data, status) {
+        $http.post('/api/v1/users/' + username + '/admin', payload).success(function (data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null);
         }).error(function (data, status) {
@@ -364,7 +364,7 @@ angular.module('Application').service('Client', function ($http, $filter) {
     };
 
     Client.prototype.listUsers = function (callback) {
-        $http.get('/api/v1/user/list').success(function(data, status) {
+        $http.get('/api/v1/users').success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
         }).error(function(data, status) {
@@ -415,7 +415,7 @@ angular.module('Application').service('Client', function ($http, $filter) {
             email: email
         };
 
-        $http.post('/api/v1/user/create', data).success(function(data, status) {
+        $http.post('/api/v1/users', data).success(function(data, status) {
             if (status !== 201) return callback(new ClientError(status, data));
             callback(null, data);
         }).error(function(data, status) {
@@ -429,7 +429,7 @@ angular.module('Application').service('Client', function ($http, $filter) {
             password: password
         };
 
-        $http.post('/api/v1/user/remove', data).success(function(data, status) {
+        $http.delete('/api/v1/users/' + username, { data: data }).success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
         }).error(function(data, status) {
@@ -443,7 +443,7 @@ angular.module('Application').service('Client', function ($http, $filter) {
             newPassword: newPassword
         };
 
-        $http.post('/api/v1/user/password', data).success(function(data, status) {
+        $http.post('/api/v1/users/' + this._userInfo.username + '/password', data).success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
         }).error(function(data, status) {
@@ -504,7 +504,7 @@ angular.module('Application').service('Client', function ($http, $filter) {
 
         $http.defaults.headers.common.Authorization = 'Token ' + token;
 
-        $http.get('/api/v1/user/token').success(function(data, status) {
+        $http.post('/api/v1/token').success(function(data, status) {
             if (status !== 200) {
                 that.setToken(null);
                 return callback(new ClientError(status, data));
