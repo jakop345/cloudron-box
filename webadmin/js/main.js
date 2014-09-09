@@ -12,14 +12,8 @@ var MainController = function ($scope, $route, $interval, Client) {
 
     $scope.logout = function (event) {
         event.stopPropagation();
-
         $scope.initialized = false;
-
-        // TODO actually perform logout on the server
-        localStorage.removeItem('token');
         Client.logout();
-
-        window.location.href = '/api/v1/session/logout';
     };
 
     $scope.login = function () {

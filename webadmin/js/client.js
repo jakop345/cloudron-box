@@ -511,6 +511,9 @@ angular.module('Application').service('Client', function ($http, $filter) {
     Client.prototype.logout = function () {
         this.setToken(null);
         this._userInfo = {};
+
+        // logout from OAuth session
+        window.location.href = '/api/v1/session/logout';
     };
 
     Client.prototype.exchangeCodeForToken = function (authCode, callback) {
