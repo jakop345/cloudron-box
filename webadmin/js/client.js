@@ -185,7 +185,7 @@ angular.module('Application').service('Client', function ($http, $filter) {
 
     Client.prototype.removeUserFromVolume = function (username, volumeId, password, callback) {
         var data = { headers: {password: password} };
-        $http.delete('/api/v1/volume/' + volumeId + '/users/' + username, data).success(function (data, status) {
+        $http({ method: 'DELETE', url: '/api/v1/volume/' + volumeId + '/users/' + username, data: data, headers: { 'Content-Type': 'application/json' }}).success(function (data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null);
         }).error(function (data, status) {
@@ -429,7 +429,7 @@ angular.module('Application').service('Client', function ($http, $filter) {
             password: password
         };
 
-        $http.delete('/api/v1/users/' + username, { data: data }).success(function(data, status) {
+        $http({ method: 'DELETE', url: '/api/v1/users/' + username, data: data, headers: { 'Content-Type': 'application/json' }}).success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
         }).error(function(data, status) {
