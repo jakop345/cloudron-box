@@ -6,9 +6,12 @@ var AppInstallController = function ($scope, $routeParams, Client, AppStore) {
     $scope.location = '';
     $scope.disabled = false;
     $scope.error = { };
+    $scope.domain = '';
     $scope.portBindings = { };
 
     Client.onReady(function () {
+        $scope.domain = Client.getConfig().fqdn;
+
         AppStore.getAppById($routeParams.appStoreId, function (error, app) {
             $scope.error = error || { };
             if (error) return;
