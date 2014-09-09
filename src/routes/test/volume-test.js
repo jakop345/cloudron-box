@@ -32,21 +32,21 @@ function setup(done) {
 
         function (callback) {
             request.post(SERVER_URL + '/api/v1/createadmin')
-                 .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
-                 .end(function (error, result) {
-                    expect(error).to.be(null);
-                    expect(result).to.be.ok();
-                    callback();
-                });
+                   .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
+                   .end(function (error, result) {
+                expect(error).to.be(null);
+                expect(result).to.be.ok();
+                callback();
+            });
         },
 
         function (callback) {
-            request.post(SERVER_URL + '/api/v1/token')
-                .auth(USERNAME, PASSWORD)
-                .end(function (error, result) {
-                    token = result.body.token;
-                    callback();
-                });
+            request.get(SERVER_URL + '/api/v1/users/' + USERNAME + '/login')
+                   .auth(USERNAME, PASSWORD)
+                   .end(function (error, result) {
+                token = result.body.token;
+                callback();
+            });
         }
     ], done);
 }
@@ -263,19 +263,19 @@ describe('Server Volume API', function () {
             this.timeout(10000); // on the Mac, creating volumes takes a lot of time on low battery
 
             request.post(SERVER_URL + '/api/v1/volume/create')
-            .query({ access_token: token })
-            .send({ password: PASSWORD, name: TEST_VOLUME })
-            .end(function (error, result) {
+                   .query({ access_token: token })
+                   .send({ password: PASSWORD, name: TEST_VOLUME })
+                   .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(201);
 
                 // cache for further use
                 volume = result.body;
 
-                request.post(SERVER_URL + '/api/v1/user/create')
-                .query({ access_token: token })
-                .send({ username: USERNAME_2, password: PASSWORD_2, email: EMAIL_2 })
-                .end(function (error, result) {
+                request.post(SERVER_URL + '/api/v1/users')
+                       .query({ access_token: token })
+                       .send({ username: USERNAME_2, password: PASSWORD_2, email: EMAIL_2 })
+                       .end(function (error, result) {
                     expect(result.statusCode).to.equal(201);
 
                     done(error);
