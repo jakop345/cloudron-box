@@ -8,20 +8,22 @@ var AppInstallController = function ($scope, $routeParams, Client, AppStore) {
     $scope.error = { };
     $scope.portBindings = { };
 
-    AppStore.getAppById($routeParams.appStoreId, function (error, app) {
-        $scope.error = error || { };
-        if (error) return;
-        $scope.app = app;
-    });
+    Client.onReady(function () {
+        AppStore.getAppById($routeParams.appStoreId, function (error, app) {
+            $scope.error = error || { };
+            if (error) return;
+            $scope.app = app;
+        });
 
-    AppStore.getManifest($routeParams.appStoreId, function (error, manifest) {
-        $scope.error = error || { };
-        if (error) return;
-        $scope.portBindings = manifest.tcpPorts;
-        // default setting is to map ports as they are in manifest
-        for (var port in $scope.portBindings) {
-            $scope.portBindings[port].hostPort = port;
-        }
+        AppStore.getManifest($routeParams.appStoreId, function (error, manifest) {
+            $scope.error = error || { };
+            if (error) return;
+            $scope.portBindings = manifest.tcpPorts;
+            // default setting is to map ports as they are in manifest
+            for (var port in $scope.portBindings) {
+                $scope.portBindings[port].hostPort = port;
+            }
+        });
     });
 
     $scope.installApp = function () {
