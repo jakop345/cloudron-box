@@ -416,8 +416,8 @@ describe('Server User API', function () {
         });
     });
 
-    xit('cannot logout with invalid token', function (done) {
-        request.get(SERVER_URL + '/api/v1/logout')
+    it('cannot logout with invalid token', function (done) {
+        request.get(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/logout')
                .query({ auth_token: token.toUpperCase() })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(401);
@@ -425,8 +425,8 @@ describe('Server User API', function () {
         });
     });
 
-    xit('can logout', function (done) {
-        request.get(SERVER_URL + '/api/v1/logout')
+    it('can logout', function (done) {
+        request.get(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/logout')
                .query({ auth_token: token })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
@@ -434,8 +434,8 @@ describe('Server User API', function () {
         });
     });
 
-    xit('cannot get userInfo with old token (previous logout)', function (done) {
-        request.get(SERVER_URL + '/api/v1/user/info')
+    it('cannot get userInfo with old token (previous logout)', function (done) {
+        request.get(SERVER_URL + '/api/v1/users/' + USERNAME_0)
                .query({ auth_token: token })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(401);
@@ -443,10 +443,10 @@ describe('Server User API', function () {
         });
     });
 
-    xit('can login again', function (done) {
-        request.post(SERVER_URL + '/api/v1/token')
-        .auth(USERNAME_0, PASSWORD)
-        .end(function (error, res) {
+    it('can login again', function (done) {
+        request.get(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/login')
+               .auth(USERNAME_0, PASSWORD)
+               .end(function (error, res) {
             expect(error).to.be(null);
             expect(res.statusCode).to.equal(200);
             expect(res.body.token).to.be.a('string');

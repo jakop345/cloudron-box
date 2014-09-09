@@ -360,8 +360,8 @@ Server.prototype._initializeExpressSync = function () {
     // router.get    ('/api/v1/logout', bearer, routes.user.logout);             // TODO remove that route
 
     router.get    ('/api/v1/users', bearer, routes.user.list);
-    router.get    ('/api/v1/users/:userName/login', basic, routes.user.createToken);
-    // router.get    ('/api/v1/users/:userName/logout', bearer, routes.user.logout);
+    router.get    ('/api/v1/users/:userName/login', basic, routes.user.createToken);    // TODO this should not be needed with OAuth
+    router.get    ('/api/v1/users/:userName/logout', bearer, routes.user.logout);       // TODO this should not be needed with OAuth
     router.post   ('/api/v1/users', bearer, this._requireAdmin.bind(this), routes.user.create);
     router.get    ('/api/v1/users/:userName', bearer, routes.user.info);
     router.delete ('/api/v1/users/:userName', bearer, this._requireAdmin.bind(this), routes.user.remove);
