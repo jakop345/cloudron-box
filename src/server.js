@@ -355,9 +355,7 @@ Server.prototype._initializeExpressSync = function () {
     router.get('/api/v1/update', bearer, this._update.bind(this));
     router.get('/api/v1/reboot', bearer, this._reboot.bind(this));
 
-    // routes controlled by app.router
-    router.post   ('/api/v1/token', both, routes.user.createToken);        // TODO remove that route
-    // router.get    ('/api/v1/logout', bearer, routes.user.logout);             // TODO remove that route
+    router.get    ('/api/v1/user', bearer, routes.user.info);           // special route to get the userInfo only providing a token
 
     router.get    ('/api/v1/users', bearer, routes.user.list);
     router.get    ('/api/v1/users/:userName/login', basic, routes.user.createToken);    // TODO this should not be needed with OAuth

@@ -88,24 +88,26 @@ var SettingsController = function ($scope, Client) {
         });
     };
 
-    Client.getApps(function (error, apps) {
-        if (error) console.error('Error loading app list');
-        $scope.apps = apps;
+    Client.onConfig(function () {
+        Client.getApps(function (error, apps) {
+            if (error) console.error('Error loading app list');
+            $scope.apps = apps;
 
-        Client.getNakedDomain(function (error, appid) {
-            if (error) return console.error(error);
+            Client.getNakedDomain(function (error, appid) {
+                if (error) return console.error(error);
 
-            for (var i = 0; i < $scope.apps.length; i++) {
-                if ($scope.apps[i].id === appid) {
-                    $scope.nakedDomainApp = $scope.apps[i];
-                    break;
+                for (var i = 0; i < $scope.apps.length; i++) {
+                    if ($scope.apps[i].id === appid) {
+                        $scope.nakedDomainApp = $scope.apps[i];
+                        break;
+                    }
                 }
-            }
-        });
+            });
 
-        Client.stats(function (error, stats) {
-            if (error) return console.error(error);
-            $scope.drives = stats.drives;
+            Client.stats(function (error, stats) {
+                if (error) return console.error(error);
+                $scope.drives = stats.drives;
+            });
         });
     });
 };

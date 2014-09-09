@@ -115,6 +115,15 @@ angular.module('Application').service('Client', function ($http, $filter) {
         });
     };
 
+    Client.prototype.userInfo = function (callback) {
+        $http.get('/api/v1/user').success(function(data, status) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null, data);
+        }).error(function(data, status) {
+            callback(new ClientError(status, data));
+        });
+    };
+
     Client.prototype.createVolume = function (name, password, callback) {
         var data = { password: password, name: name };
         $http.post('/api/v1/volume/create', data).success(function(data, status) {
@@ -496,33 +505,6 @@ angular.module('Application').service('Client', function ($http, $filter) {
             }), that._installedApps);
 
             callback(null);
-        });
-    };
-
-    Client.prototype.login = function (token, callback) {
-        var that = this;
-
-        $http.defaults.headers.common.Authorization = 'Token ' + token;
-
-        $http.post('/api/v1/token').success(function(data, status) {
-            if (status !== 200) {
-                that.setToken(null);
-                return callback(new ClientError(status, data));
-            }
-
-            that.setUserInfo(data.userInfo);
-            that.setToken(data.token);
-
-            that.config(function (error, result) {
-                if (error) callback(error);
-
-                that.setConfig(result);
-
-                callback(null, data.token);
-            });
-        }).error(function(data, status) {
-            that.setToken(null);
-            callback(new ClientError(status, data));
         });
     };
 

@@ -40,19 +40,21 @@ var MainController = function ($scope, $route, $interval, Client) {
         if (error) return $scope.error(error);
         if (isFirstTime) return $scope.setup();
 
-        // Server already initialized, try to perform login based on token
+        // we use the config request as an indicator if the token is still valid
+        // TODO we should probably attach such a handler for each request, as the token can get invalid
+        // at any time!
         if (localStorage.token) {
-            Client.login(localStorage.token, function (error, token) {
-                if (error) return $scope.login();
+            Client.refreshConfig(function (error) {
+                if (error && error.statusCode === 401) return $scope.login();
+                if (error) return $scope.error(error);
 
-                // update token
-                localStorage.token = token;
+                Client.userInfo(function (error, result) {
+                    if (error) return $scope.error(error);
 
-                Client.refreshConfig(function (error) {
-                    if (error) return console.error(error);
+                    Client.setUserInfo(result);
 
                     Client.refreshInstalledApps(function (error) {
-                        if (error) return console.error(error);
+                        if (error) return $scope.error(error);
 
                         // kick off installed apps and config polling
                         var refreshAppsTimer = $interval(Client.refreshInstalledApps.bind(Client), 2000);
@@ -70,7 +72,6 @@ var MainController = function ($scope, $route, $interval, Client) {
                         $scope.initialized = true;
                     });
                 });
-
             });
         } else {
             $scope.login();
