@@ -75,6 +75,12 @@ describe('Server', function () {
             server.start(done);
         });
 
+        after(function (done) {
+            server.stop(function () {
+                done();
+            });
+        });
+
         it('random bad requests', function (done) {
             request.get(SERVER_URL + '/random', function (err, res) {
                 expect(err).to.not.be.ok();
@@ -108,7 +114,7 @@ describe('Server', function () {
         });
 
         it('stats fails due missing token', function (done) {
-            request.get(SERVER_URL + '/api/v1/stats', function (err, res) {
+            request.get(SERVER_URL + '/api/v1/stats').end(function (err, res) {
                 expect(err).to.not.be.ok();
                 expect(res.statusCode).to.equal(401);
                 done(err);
@@ -133,10 +139,35 @@ describe('Server', function () {
                 });
             });
         });
+    });
+
+    describe('config', function () {
+        var server;
+
+        before(function (done) {
+            server = new Server();
+            server.start(done);
+        });
 
         after(function (done) {
             server.stop(function () {
                 done();
+            });
+        });
+
+        it('config fails due missing token', function (done) {
+            request.get(SERVER_URL + '/api/v1/config', function (err, res) {
+                expect(err).to.not.be.ok();
+                expect(res.statusCode).to.equal(401);
+                done(err);
+            });
+        });
+
+        it('config fails due wrong token', function (done) {
+            request.get(SERVER_URL + '/api/v1/config').query({ auth_token: 'somewrongtoken' }).end(function (err, res) {
+                expect(err).to.not.be.ok();
+                expect(res.statusCode).to.equal(401);
+                done(err);
             });
         });
     });
