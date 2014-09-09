@@ -33,8 +33,8 @@ function setup(done) {
 
         function createAdmin(callback) {
             request.post(SERVER_URL + '/api/v1/createadmin')
-                 .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
-                 .end(function (error, result) {
+                   .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
+                   .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
                 callback();
@@ -42,14 +42,14 @@ function setup(done) {
         },
 
         function createToken(callback) {
-            request.post(SERVER_URL + '/api/v1/token')
-                .auth(USERNAME, PASSWORD)
-                .end(function (error, result) {
-                    expect(error).to.be(null);
-                    expect(result).to.be.ok();
+            request.get(SERVER_URL + '/api/v1/users/' + USERNAME + '/login')
+                   .auth(USERNAME, PASSWORD)
+                   .end(function (error, result) {
+                expect(error).to.be(null);
+                expect(result).to.be.ok();
 
-                    token = result.body.token;
-                    callback();
+                token = result.body.token;
+                callback();
             });
         },
 
