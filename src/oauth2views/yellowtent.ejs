@@ -23,8 +23,6 @@ function startOAuth(button, resultCallback) {
     yellowtent.oauth.callback = resultCallback || window[callback];
     yellowtent.oauth.redirectURI = button.getAttribute('data-redirect-uri') || '';
 
-    console.log('Staring OAuth for client ' + clientId + ' and callback ' + callback + ' with redirectURI ' + yellowtent.oauth.redirectURI);
-
     var width = 400;
     var height = 600;
     var left = screen.width / 2.0 - width / 2.0;
@@ -55,8 +53,6 @@ function setupButton(button, resultCallback) {
 }
 
 window.addEventListener('load', function () {
-    console.log('oauth2views - Yellowtent init');
-
     function clickEventHandler(event) {
         startOAuth(event.target.parentElement);
     }
@@ -72,12 +68,8 @@ window.addEventListener('load', function () {
 }, false );
 
 window.addEventListener('message', function (event) {
-    console.log('Yellowtent message received.', event.data);
-
-    if (event.origin !== server) {
-        console.log('Ignore message from unknown source.');
-        return;
-    }
+    // ignore messages from unknown origins
+    if (event.origin !== server) return;
 
     var result = null;
 
