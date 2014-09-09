@@ -70,22 +70,22 @@ function setup(done) {
 
         function (callback) {
             request.post(SERVER_URL + '/api/v1/createadmin')
-                 .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
-                 .end(function (error, result) {
-                    expect(error).to.not.be.ok();
-                    expect(result).to.be.ok();
-                    callback();
-                });
+                   .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result).to.be.ok();
+                callback();
+            });
         },
 
         function (callback) {
-            request.post(SERVER_URL + '/api/v1/token')
-                .auth(USERNAME, PASSWORD)
-                .end(function (error, result) {
-                    token = result.body.token;
-                    config.set('token', 'APPSTORE_TOKEN');
-                    callback();
-                });
+            request.get(SERVER_URL + '/api/v1/users/' + USERNAME + '/login')
+                   .auth(USERNAME, PASSWORD)
+                   .end(function (error, result) {
+                token = result.body.token;
+                config.set('token', 'APPSTORE_TOKEN');
+                callback();
+            });
         }
     ], done);
 }
