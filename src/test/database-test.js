@@ -231,7 +231,7 @@ describe('database', function () {
             manifest: null,
             httpPort: null,
             containerId: null,
-            portBindings: { "1234": "5678" },
+            portBindings: { '1234': '5678' },
             healthy: null
         };
         var APP_1 = {
@@ -315,7 +315,7 @@ describe('database', function () {
         it('update succeeds', function (done) {
             APP_0.installationState = 'some-other-status';
             APP_0.location = 'some-other-location';
-            APP_0.version = '0.2'
+            APP_0.version = '0.2';
 
             appdb.update(APP_0.id, { installationState: APP_0.installationState, location: APP_0.location, version: APP_0.version }, function (error) {
                 expect(error).to.be(null);
@@ -400,6 +400,8 @@ describe('database', function () {
 
         it('cannot set app as healthy because app has pending run state', function (done) {
             appdb.update(APP_1.id, { runState: appdb.RSTATE_PENDING_STOP, installationState: appdb.ISTATE_INSTALLED }, function (error) {
+                expect(error).to.be(null);
+
                 appdb.setHealth(APP_1.id, true, appdb.RSTATE_RUNNING, function (error) {
                     expect(error).to.be.ok();
                     done();
@@ -409,6 +411,8 @@ describe('database', function () {
 
         it('cannot set app as healthy because app has null run state', function (done) {
             appdb.update(APP_1.id, { runState: null, installationState: appdb.ISTATE_INSTALLED }, function (error) {
+                expect(error).to.be(null);
+
                 appdb.setHealth(APP_1.id, true, appdb.RSTATE_RUNNING, function (error) {
                     expect(error).to.be.ok();
                     done();
@@ -418,6 +422,8 @@ describe('database', function () {
 
         it('can set app as health when installed and no pending runState', function (done) {
             appdb.update(APP_1.id, { runState: appdb.RSTATE_RUNNING, installationState: appdb.ISTATE_INSTALLED }, function (error) {
+                expect(error).to.be(null);
+
                 appdb.setHealth(APP_1.id, true, appdb.RSTATE_RUNNING, function (error) {
                     expect(error).to.be(null);
                     appdb.get(APP_1.id, function (error, app) {
