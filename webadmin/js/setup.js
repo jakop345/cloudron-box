@@ -1,3 +1,5 @@
+/* exported SetupController */
+
 'use strict';
 
 var SetupController = function ($scope, Client) {

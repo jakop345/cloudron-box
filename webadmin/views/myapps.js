@@ -1,3 +1,5 @@
+/* exported MyAppsController */
+
 'use strict';
 
 var MyAppsController = function ($scope, $http, $location, $interval, Client) {
@@ -11,7 +13,6 @@ var MyAppsController = function ($scope, $http, $location, $interval, Client) {
     $scope.refresh = function () {
         Client.getApps(function (error, apps) {
             if (error) {
-                console.log(error);
                 $scope.loadStatus = $scope.ERROR;
                 $scope.loadError = status + '';
             } else {
@@ -23,7 +24,7 @@ var MyAppsController = function ($scope, $http, $location, $interval, Client) {
 
     $scope.removeApp = function (appId) {
         Client.removeApp(appId, function (error) {
-            if (error) console.log(error);
+            if (error) console.error(error);
             $scope.refresh();
         });
      };

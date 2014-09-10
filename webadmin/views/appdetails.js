@@ -1,6 +1,7 @@
-'use strict';
-
 /* global $:true */
+/* exported AppDetailsController */
+
+'use strict';
 
 var AppDetailsController = function ($scope, $http, $routeParams, $interval, Client) {
     $scope.app = {};

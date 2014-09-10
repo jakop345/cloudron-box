@@ -1,3 +1,5 @@
+/* exported UserCreateController */
+
 'use strict';
 
 function UserCreateController ($scope, $routeParams, Client) {
@@ -17,7 +19,6 @@ function UserCreateController ($scope, $routeParams, Client) {
         $scope.error.passwordRepeat = null;
 
         if (!$scope.username) {
-            console.error('Username must not be empty');
             $scope.error.name = 'Username must not be empty';
             $scope.error.password = '';
             $scope.error.passwordRepeat = '';
@@ -25,7 +26,6 @@ function UserCreateController ($scope, $routeParams, Client) {
         }
 
         if ($scope.password !== $scope.passwordRepeat) {
-            console.error('Passwords dont match.');
             $scope.error.name = '';
             $scope.error.passwordRepeat = 'Passwords do not match';
             $scope.passwordRepeat = '';

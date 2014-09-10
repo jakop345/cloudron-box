@@ -1,3 +1,5 @@
+/* exported UserPasswordController */
+
 'use strict';
 
 function UserPasswordController ($scope, $routeParams, Client) {

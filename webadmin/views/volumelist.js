@@ -1,3 +1,5 @@
+/* exported VolumeListController */
+
 'use strict';
 
 function VolumeListController ($scope, Client) {
@@ -5,23 +7,14 @@ function VolumeListController ($scope, Client) {
 
     $scope.getUsers = function (callback) {
         Client.listUsers(function (error, result) {
-            if (error) {
-                console.error('Unable to get user listing.', error);
-                return;
-            }
-
-            console.debug('Got new user list', result.users);
+            if (error) return console.error('Unable to get user listing.', error);
             callback(result.users);
         });
     };
 
     function refresh() {
         Client.listVolumes(function (error, result) {
-            if (error) {
-                console.error('Unable to get volume listing.', error);
-                return;
-            }
-
+            if (error) return console.error('Unable to get volume listing.', error);
             $scope.volumes = result;
         });
     }

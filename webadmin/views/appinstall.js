@@ -1,3 +1,5 @@
+/* exported AppInstallController */
+
 'use strict';
 
 var AppInstallController = function ($scope, $routeParams, Client, AppStore) {
@@ -40,7 +42,6 @@ var AppInstallController = function ($scope, $routeParams, Client, AppStore) {
 
         Client.installApp($routeParams.appStoreId, $scope.password, { location: $scope.location, portBindings: portBindings }, function (error, appId) {
             if (error) {
-                console.error('Unable to install app.', error);
                 if (error.statusCode === 409) {
                     $scope.error.name = 'Application already exists.';
                 } else if (error.statusCode === 403) {

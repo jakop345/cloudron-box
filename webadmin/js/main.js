@@ -1,3 +1,5 @@
+/* exported MainController */
+
 'use strict';
 
 var MainController = function ($scope, $route, $interval, Client) {

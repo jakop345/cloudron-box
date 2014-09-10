@@ -1,3 +1,5 @@
+/* exported VolumeUnmountController */
+
 'use strict';
 
 function VolumeUnmountController ($scope, $routeParams, Client) {

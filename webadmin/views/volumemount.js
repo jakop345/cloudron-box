@@ -1,10 +1,9 @@
+/* exported VolumeMountController */
+
 'use strict';
 
 function VolumeMountController ($scope, $routeParams, Client) {
-    if (!$routeParams.volume || !$routeParams.volumeName) {
-        console.error('No volume provided.');
-        return window.location.replace('#/volumelist');
-    }
+    if (!$routeParams.volume || !$routeParams.volumeName) return window.location.replace('#/volumelist');
 
     $scope.volume = {};
     $scope.volume.id = $routeParams.volume;
@@ -17,7 +16,7 @@ function VolumeMountController ($scope, $routeParams, Client) {
         $scope.error.password = null;
         $scope.disabled = true;
 
-        Client.mount($scope.volume.id, $scope.volume.password, function (error, result) {
+        Client.mount($scope.volume.id, $scope.volume.password, function (error) {
             if (error) {
                 if (error.statusCode === 403) {
                     $scope.error.password = 'Password is wrong';

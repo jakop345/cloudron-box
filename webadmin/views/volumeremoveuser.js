@@ -1,3 +1,5 @@
+/* exported VolumeRemoveUserController */
+
 'use strict';
 
 function VolumeRemoveUserController ($scope, $routeParams, Client) {

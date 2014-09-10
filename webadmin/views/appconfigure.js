@@ -1,6 +1,8 @@
+/* exported AppConfigureController */
+
 'use strict';
 
-var AppConfigureController = function ($scope, $routeParams, Client, AppStore) {
+var AppConfigureController = function ($scope, $routeParams, Client) {
     $scope.app = null;
     $scope.password = '';
     $scope.location = '';
@@ -20,7 +22,6 @@ var AppConfigureController = function ($scope, $routeParams, Client, AppStore) {
 
         Client.configureApp($routeParams.appId, $scope.password, { location: $scope.location, portBindings: portBindings }, function (error) {
             if (error) {
-                console.error('Unable to configure app.', error);
                 if (error.statusCode === 403) {
                     $scope.error.password = 'Wrong password provided.';
                     $scope.app.password = '';

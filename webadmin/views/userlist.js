@@ -1,3 +1,4 @@
+/* exported UserListController */
 /* global $:true */
 
 'use strict';

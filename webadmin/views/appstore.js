@@ -1,3 +1,5 @@
+/* exported AppStoreController */
+
 'use strict';
 
 var AppStoreController = function ($scope, $location, Client, AppStore) {
@@ -15,7 +17,6 @@ var AppStoreController = function ($scope, $location, Client, AppStore) {
             if (error) {
                 $scope.loadStatus = $scope.ERROR;
                 $scope.loadError = error.message;
-                console.error(error);
                 return;
             }
 
@@ -23,7 +24,6 @@ var AppStoreController = function ($scope, $location, Client, AppStore) {
                 if (error) {
                     $scope.loadStatus = $scope.ERROR;
                     $scope.loadError = error.message;
-                    console.error(error);
                     return;
                 }
 

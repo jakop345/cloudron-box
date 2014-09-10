@@ -1,6 +1,8 @@
+/* exported SettingsController */
+/* global $:true */
+
 'use strict';
 
-/* global $:true */
 
 var SettingsController = function ($scope, Client) {
     $scope.user = Client.getUserInfo();
@@ -13,7 +15,6 @@ var SettingsController = function ($scope, Client) {
 
         Client.setNakedDomain(appid, function (error) {
             if (error) return console.error('Error setting naked domain', error);
-            console.debug('Updated naked domain');
         });
     };
 

@@ -1,3 +1,5 @@
+/* exported VolumeCreateController */
+
 'use strict';
 
 function VolumeCreateController ($scope, $routeParams, Client) {
@@ -8,8 +10,6 @@ function VolumeCreateController ($scope, $routeParams, Client) {
     $scope.error = {};
 
     $scope.submit = function () {
-        console.debug('Try to create volume %s.', $scope.volume.name);
-
         $scope.error.name = null;
         $scope.error.password = null;
 
@@ -19,9 +19,8 @@ function VolumeCreateController ($scope, $routeParams, Client) {
         }
 
         $scope.disabled = true;
-        Client.createVolume($scope.volume.name, $scope.volume.password, function (error, result) {
+        Client.createVolume($scope.volume.name, $scope.volume.password, function (error) {
             if (error) {
-                console.error('Unable to create volume.', error);
                 if (error.statusCode === 409) {
                     $scope.error.name = 'Volume with the name ' + $scope.volume.name + ' already exists.';
                 } else if (error.statusCode === 403) {
@@ -34,7 +33,6 @@ function VolumeCreateController ($scope, $routeParams, Client) {
                 return;
             }
 
-            console.debug('Successfully created volume', $scope.volume.name);
             window.location.replace('#/volumelist');
         });
     };
