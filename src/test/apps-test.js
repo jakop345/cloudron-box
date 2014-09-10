@@ -27,7 +27,7 @@ describe('Apps', function () {
         manifest: null,
         httpPort: null,
         containerId: null,
-        portBindings: { "1234": "5678" },
+        portBindings: { '1234': '5678' },
         healthy: null
     };
 
@@ -115,7 +115,7 @@ describe('Apps', function () {
             apps.get(APP_0.id, function (error, app) {
                 expect(error).to.be(null);
                 expect(app).to.be.ok();
-                expect(app.iconUrl).to.eql(config.appServerUrl + '/api/v1/appstore/apps/' + APP_0.id + '/icon');
+                expect(app.icon).to.be(null);
                 expect(app.fqdn).to.eql(APP_0.location + '-' + config.fqdn);
                 done();
             });
@@ -133,7 +133,7 @@ describe('Apps', function () {
             apps.getBySubdomain(APP_0.location, function (error, app) {
                 expect(error).to.be(null);
                 expect(app).to.be.ok();
-                expect(app.iconUrl).to.eql(config.appServerUrl + '/api/v1/appstore/apps/' + APP_0.id + '/icon');
+                expect(app.icon).to.eql(null);
                 expect(app.fqdn).to.eql(APP_0.location + '-' + config.fqdn);
                 done();
             });
@@ -144,11 +144,11 @@ describe('Apps', function () {
                 expect(error).to.be(null);
                 expect(apps).to.be.an(Array);
                 expect(apps[0].id).to.be(APP_0.id);
-                expect(apps[0].iconUrl).to.eql(config.appServerUrl + '/api/v1/appstore/apps/' + APP_0.id + '/icon');
+                expect(apps[0].icon).to.be(null);
                 expect(apps[0].fqdn).to.eql(APP_0.location + '-' + config.fqdn);
                 done();
             });
         });
     });
 });
- 
+

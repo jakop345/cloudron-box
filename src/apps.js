@@ -6,7 +6,7 @@ var DatabaseError = require('./databaseerror.js'),
     util = require('util'),
     debug = require('debug')('box:apps'),
     assert = require('assert'),
-    safe = require('safetydance'),
+    fs = require('fs'),
     appdb = require('./appdb.js'),
     child_process = require('child_process'),
     config = require('../config.js');
@@ -132,6 +132,15 @@ function validatePortBindings(portBindings) {
     return null;
 }
 
+function getIconURLSync(app) {
+    var iconPath = config.dataRoot + '/icons/' + app.id + '.png';
+    if (fs.existsSync(iconPath)) {
+        return '/api/v1/app/' + app.id + '/icon';
+    } else {
+        return null;
+    }
+}
+
 function get(appId, callback) {
     assert(typeof appId === 'string');
     assert(typeof callback === 'function');
@@ -140,7 +149,7 @@ function get(appId, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        app.iconUrl = config.appServerUrl + '/api/v1/appstore/apps/' + app.id + '/icon';
+        app.icon = getIconURLSync(app);
         app.fqdn = appFqdn(app.location);
 
         callback(null, app);
@@ -155,7 +164,7 @@ function getBySubdomain(subdomain, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        app.iconUrl = config.appServerUrl + '/api/v1/appstore/apps/' + app.id + '/icon';
+        app.icon = getIconURLSync(app);
         app.fqdn = appFqdn(app.location);
 
         callback(null, app);
@@ -169,7 +178,7 @@ function getAll(callback) {
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
         apps.forEach(function (app) {
-            app.iconUrl = config.appServerUrl + '/api/v1/appstore/apps/' + app.id + '/icon';
+            app.icon = getIconURLSync(app);
             app.fqdn = appFqdn(app.location);
         });
 

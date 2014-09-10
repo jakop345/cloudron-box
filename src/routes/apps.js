@@ -8,12 +8,14 @@ var HttpError = require('../httperror.js'),
     apps = require('../apps.js'),
     config = require('../../config.js'),
     uuid = require('node-uuid'),
+    fs = require('fs'),
     AppsError = apps.AppsError;
 
 exports = module.exports = {
     getApp: getApp,
     getAppBySubdomain: getAppBySubdomain,
     getApps: getApps,
+    getAppIcon: getAppIcon,
     installApp: installApp,
     configureApp: configureApp,
     uninstallApp: uninstallApp,
@@ -58,6 +60,19 @@ function getApps(req, res, next) {
     apps.getAll(function (error, allApps) {
         if (error) return next(new HttpError(500, 'Internal error:' + error));
         next(new HttpSuccess(200, { apps: allApps }));
+    });
+}
+
+/*
+ * Get the app icon
+ */
+function getAppIcon(req, res, next) {
+    if (typeof req.params.id !== 'string') return next(new HttpError(400, 'appid is required'));
+
+    var iconPath = config.dataRoot + '/icons/' + req.params.id + '.png';
+    fs.exists(iconPath, function (exists) {
+        if (!exists) return next(new HttpError(404, 'No such icon'));
+        res.sendfile(iconPath);
     });
 }
 

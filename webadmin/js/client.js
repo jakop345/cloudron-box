@@ -290,26 +290,9 @@ angular.module('Application').service('Client', function ($http, $filter) {
     };
 
     Client.prototype.getApps = function (callback) {
-        var that = this;
-
         $http.get('/api/v1/apps').success(function (data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
-
-            // amend app.icon
-            async.each(data.apps, function (app, callback) {
-                $http.get(that._config.appServerUrl + '/api/v1/appstore/apps/' + app.appStoreId + '/icon').success(function () {
-                    app.icon = that._config.appServerUrl + '/api/v1/appstore/apps/' + app.appStoreId + '/icon';
-                    callback(null);
-                }).error(function () {
-                    app.icon = null;
-                    callback(null);
-                });
-            }, function (error) {
-                if (error) return callback(error);
-                callback(null, data.apps);
-            });
-        }).error(function (data, status) {
-            callback(new ClientError(status, data));
+            callback(null, data.apps);
         });
     };
 

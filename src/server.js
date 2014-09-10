@@ -422,14 +422,15 @@ Server.prototype._initializeExpressSync = function () {
     router.get('/api/v1/oauth/yellowtent.js', routes.oauth2.library);
 
     // app routes
-    router.get('/api/v1/apps', bearer, routes.apps.getApps);
-    router.get('/api/v1/app/:id', bearer, routes.apps.getApp);
+    router.get ('/api/v1/apps', bearer, routes.apps.getApps);
+    router.get ('/api/v1/app/:id', bearer, routes.apps.getApp);
     router.post('/api/v1/app/:id/uninstall', bearer, routes.apps.uninstallApp); // TODO does this require password?
     router.post('/api/v1/app/install', bearer, this._requirePassword.bind(this), routes.apps.installApp);
     router.post('/api/v1/app/:id/configure', bearer, this._requirePassword.bind(this), routes.apps.configureApp);
     router.post('/api/v1/app/:id/update', bearer, routes.apps.updateApp);
     router.post('/api/v1/app/:id/stop', bearer, routes.apps.stopApp); // TODO does this require password?
     router.post('/api/v1/app/:id/start', bearer, routes.apps.startApp); // TODO does this require password
+    router.get ('/api/v1/app/:id/icon', routes.apps.getAppIcon);
 
     // subdomain routes
     router.get('/api/v1/subdomains/:subdomain', routes.apps.getAppBySubdomain); // TODO: allow non-authenticated for the appstatus page
