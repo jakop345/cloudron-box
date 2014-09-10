@@ -443,6 +443,13 @@ function unregisterSubdomain(app, callback) {
         });
 }
 
+function cleanupManifest(app, callback) {
+    fs.unlink(config.dataRoot + '/icons/' + app.id + '.png', function (error) {
+        if (error) console.error(error);
+        callback(null);
+    });
+}
+
 // updates the app object and the database
 function updateApp(app, values, callback) {
     for (var value in values) {
@@ -657,6 +664,9 @@ function uninstall(app, callback) {
 
         updateApp.bind(null, app, { installationProgress: 'Unregistering subdomain' }),
         unregisterSubdomain.bind(null, app),
+
+        updateApp.bind(null, app, { installationProgress: 'Cleanup manifest' }),
+        cleanupManifest.bind(null, app),
 
         appdb.del.bind(null, app.id)
     ], callback);
