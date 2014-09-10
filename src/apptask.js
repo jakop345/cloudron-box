@@ -161,8 +161,12 @@ function downloadImage(app, callback) {
             var image = docker.getImage(manifest.dockerImage);
 
             image.inspect(function (err, data) {
-                if (err || !data || !data.Config) {
-                    return callback(new Error('Error inspecting image'));
+                if (err) {
+                    return callback(new Error('Error inspecting image:' + err.message));
+                }
+
+                if (!data || !data.Config) {
+                    return callback(new Error('Missing Config in image:' + JSON.stringify(data, null, 4)));
                 }
 
                 if (!data.Config.Entrypoint && !data.Config.Cmd) {
