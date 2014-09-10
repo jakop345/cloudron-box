@@ -77,8 +77,8 @@ function forwardFromHostToVirtualBox(rulename, port) {
     if (os.platform() === 'darwin') {
         debug('Setting up VirtualBox port forwarding for '+ rulename + ' at ' + port);
         child_process.exec(
-            'VBoxManage controlvm boot2docker-vm natpf1 delete ' + rulename + ';'
-            + 'VBoxManage controlvm boot2docker-vm natpf1 ' + rulename + ',tcp,127.0.0.1,' + port + ',,' + port);
+            'VBoxManage controlvm boot2docker-vm natpf1 delete ' + rulename + ';' +
+            'VBoxManage controlvm boot2docker-vm natpf1 ' + rulename + ',tcp,127.0.0.1,' + port + ',,' + port);
     }
 }
 
@@ -266,7 +266,7 @@ function createVolume(app, callback) {
 
 function deleteVolume(app, callback) {
     child_process.exec('sudo ' + __dirname + '/scripts/rmappdir.sh ' + app.id, function (error, stdout, stderr) {
-        if (error) console.error('Error removing volume', error);
+        if (error) console.error('Error removing volume', error, stdout, stderr);
         return callback(error);
     });
 }
@@ -373,8 +373,8 @@ function downloadManifest(app, callback) {
     superagent
         .get(config.appServerUrl + '/api/v1/appstore/apps/' + app.appStoreId + '/manifest')
         .set('Accept', 'application/json')
-        .end(function (error, res) {
-            if (error) return callback(error);
+        .end(function (err, res) {
+            if (err) return callback(err);
 
             if (res.status !== 200) return callback(new Error('Error downloading manifest. Status' + res.status + '. ' + JSON.stringify(res.body)));
 
