@@ -34,13 +34,13 @@ var server = oauth2orize.createServer();
 // the client by ID from the database.
 
 server.serializeClient(function (client, callback) {
-    debug('server serialize ' + JSON.stringify(client));
+    debug('server serialize:', client);
 
     return callback(null, client.id);
 });
 
 server.deserializeClient(function (id, callback) {
-    debug('server deserialize ' + id);
+    debug('server deserialize:', id);
 
     clientdb.get(id, function (error, client) {
         if (error) { return callback(error); }
@@ -63,7 +63,7 @@ server.deserializeClient(function (id, callback) {
 // values, and will be exchanged for an access token.
 
 server.grant(oauth2orize.grant.code(function (client, redirectURI, user, ares, callback) {
-    debug('grant code ' + JSON.stringify(client) + ' ' + redirectURI + ' ' + user + ' ' + ares);
+    debug('grant code:', client, redirectURI, user.id, ares);
 
     var code = uuid.v4();
 
@@ -74,7 +74,7 @@ server.grant(oauth2orize.grant.code(function (client, redirectURI, user, ares, c
 }));
 
 server.grant(oauth2orize.grant.token(function (client, user, ares, callback) {
-    debug('grant token ' + JSON.stringify(client) + ' ' + user + ' ' + ares);
+    debug('grant token:', client, user, ares);
 
     var token = uuid.v4();
 
@@ -91,7 +91,7 @@ server.grant(oauth2orize.grant.token(function (client, user, ares, callback) {
 // code.
 
 server.exchange(oauth2orize.exchange.code(function (client, code, redirectURI, callback) {
-    debug('exchange ' + JSON.stringify(client) + ' ' + code + ' ' + redirectURI);
+    debug('exchange:', client, code, redirectURI);
 
     authcodedb.get(code, function (error, authCode) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
