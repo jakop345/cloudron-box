@@ -122,30 +122,33 @@ describe('database', function () {
             accessToken: tokendb.generateToken(),
             userId: 'userid-0',
             clientId: 'clientid-0',
-            expires: Date.now().toString()
+            expires: Date.now().toString(),
+            scope: '*'
         };
         var TOKEN_1 = {
             accessToken: tokendb.generateToken(),
             userId: 'userid-1',
             clientId: 'clientid-1',
-            expires: Date.now().toString()
+            expires: Date.now().toString(),
+            scope: '*'
         };
 
         it('add fails due to missing arguments', function () {
-            expect(function () { tokendb.add(TOKEN_0.accessToken, TOKEN_0.userId, TOKEN_0.clientId); }).to.throwError();
+            expect(function () { tokendb.add(TOKEN_0.accessToken, TOKEN_0.userId, TOKEN_0.clientId, TOKEN_0.scope); }).to.throwError();
+            expect(function () { tokendb.add(TOKEN_0.accessToken, TOKEN_0.userId, TOKEN_0.clientId, function () {}); }).to.throwError();
             expect(function () { tokendb.add(TOKEN_0.accessToken, TOKEN_0.userId, function () {}); }).to.throwError();
             expect(function () { tokendb.add(TOKEN_0.accessToken, function () {}); }).to.throwError();
         });
 
         it('add succeeds', function (done) {
-            tokendb.add(TOKEN_0.accessToken, TOKEN_0.userId, TOKEN_0.clientId, TOKEN_0.expires, function (error) {
+            tokendb.add(TOKEN_0.accessToken, TOKEN_0.userId, TOKEN_0.clientId, TOKEN_0.expires, TOKEN_0.scope, function (error) {
                 expect(error).to.be(null);
                 done();
             });
         });
 
         it('add of same token fails', function (done) {
-            tokendb.add(TOKEN_0.accessToken, TOKEN_0.userId, TOKEN_0.clientId, TOKEN_0.expires, function (error) {
+            tokendb.add(TOKEN_0.accessToken, TOKEN_0.userId, TOKEN_0.clientId, TOKEN_0.expires, TOKEN_0.scope, function (error) {
                 expect(error).to.be.a(DatabaseError);
                 expect(error.reason).to.be(DatabaseError.ALREADY_EXISTS);
                 done();
@@ -196,7 +199,7 @@ describe('database', function () {
         });
 
         it('delByUserId succeeds', function (done) {
-            tokendb.add(TOKEN_1.accessToken, TOKEN_1.userId, TOKEN_1.clientId, TOKEN_1.expires, function (error) {
+            tokendb.add(TOKEN_1.accessToken, TOKEN_1.userId, TOKEN_1.clientId, TOKEN_1.expires, TOKEN_1.scope, function (error) {
                 expect(error).to.be(null);
 
                 tokendb.delByUserId(TOKEN_1.userId, function (error) {

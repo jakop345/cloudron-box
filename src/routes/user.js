@@ -66,7 +66,7 @@ function createAdmin(req, res, next) {
 
         debug('createAdmin: now create token for ' + username);
 
-        tokendb.add(token, username, null, expires, function (error) {
+        tokendb.add(token, username, null, expires, '*', function (error) {
             if (error) return next(500, error.message);
 
             debug('createAdmin: successful with token ' + token);
@@ -178,7 +178,7 @@ function createToken(req, res, next) {
     var token = tokendb.generateToken();
     var expires = new Date(Date.now() + 60 * 60000).toUTCString(); // 1 hour
 
-    tokendb.add(token, req.user.username, null, expires, function (err) {
+    tokendb.add(token, req.user.username, null, expires, '*', function (err) {
         if (err) return next(err);
         next(new HttpSuccess(200, {
             token: token,

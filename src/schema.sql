@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS tokens(
     accessToken VARCHAR(512) NOT NULL UNIQUE,
     userId VARCHAR(512) NOT NULL,
     clientId VARCHAR(512),
+    scope VARCHAR(512) NOT NULL,
     expires VARCHAR(512) NOT NULL,
     PRIMARY KEY(accessToken));
 

@@ -78,7 +78,7 @@ server.grant(oauth2orize.grant.token(function (client, user, ares, callback) {
 
     var token = uuid.v4();
 
-    tokendb.add(token, user.username, client.clientId, function (error) {
+    tokendb.add(token, user.username, client.clientId, '*', function (error) {
         if (error) return callback(error);
         callback(null, token);
     });
@@ -105,7 +105,7 @@ server.exchange(oauth2orize.exchange.code(function (client, code, redirectURI, c
             var token = tokendb.generateToken();
             var expires = new Date(Date.now() + 60 * 60000).toUTCString(); // 1 hour
 
-            tokendb.add(token, authCode.userId, authCode.clientId, expires, function (error) {
+            tokendb.add(token, authCode.userId, authCode.clientId, expires, '*', function (error) {
                 if (error) return callback(error);
 
                 debug('new access token for client ' + client.id + ' token ' + token);
