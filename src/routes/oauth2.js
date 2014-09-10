@@ -8,10 +8,12 @@
 
 var oauth2orize = require('oauth2orize'),
     passport = require('passport'),
+    assert = require('assert'),
     session = require('connect-ensure-login'),
     authcodedb = require('../authcodedb'),
     tokendb = require('../tokendb'),
     DatabaseError = require('../databaseerror'),
+    HttpError = require('../httperror.js'),
     clientdb = require('../clientdb'),
     debug = require('debug')('box:routes/oauth2'),
     config = require('../../config.js'),
@@ -117,23 +119,23 @@ server.exchange(oauth2orize.exchange.code(function (client, code, redirectURI, c
 }));
 
 // Main login form username and password
-module.exports.loginForm = function (req, res) {
+function loginForm(req, res) {
     res.render('login');
-};
+}
 
 // performs the login POST from the above form
-module.exports.login = passport.authenticate('local', {
+var login = passport.authenticate('local', {
     successReturnToOrRedirect: '/api/v1/session/error',
     failureRedirect: '/api/v1/session/login'
 });
 
 // ends the current session
-module.exports.logout = function (req, res) {
+function logout(req, res) {
     req.logout();
     res.redirect('/');
-};
+}
 
-module.exports.callback = [
+var callback = [
     session.ensureLoggedIn('/api/v1/session/login'),
     function (req, res) {
         debug('callback: with callback server ' + req.query.redirectURI);
@@ -142,7 +144,7 @@ module.exports.callback = [
 ];
 
 // This would indicate a missing OAuth client session or invalid client ID
-module.exports.error = [
+var error = [
     session.ensureLoggedIn('/api/v1/session/login'),
     function (req, res) {
         res.render('error', {});
@@ -166,7 +168,7 @@ module.exports.error = [
 // authorization).  We accomplish that here by routing through `ensureLoggedIn()`
 // first, and rendering the `dialog` view.
 
-module.exports.authorization = [
+var authorization = [
     session.ensureLoggedIn('/api/v1/session/login'),
     server.authorization(function (clientID, redirectURI, callback) {
         debug('server authorization validation for ' + clientID + ' ' + redirectURI);
@@ -194,20 +196,58 @@ module.exports.authorization = [
 ];
 
 // this triggers the above grant middleware and handles the user's decision if he accepts the access
-module.exports.decision = [
+var decision = [
     session.ensureLoggedIn('/api/v1/session/login'),
     server.decision()
 ];
 
 // the token endpoint exchanges an authcode for an access token
 // it still requires basic or oauth2-client-password authentication
-module.exports.token = [
+var token = [
     passport.authenticate(['oauth2-client-password'], { session: false }),
     server.token(),
     server.errorHandler()
 ];
 
-module.exports.library = function (req, res, next) {
+function library(req, res) {
     res.setHeader('Content-Type', 'application/javascript');
     res.render('yellowtent', { adminOrigin: config.adminOrigin });
+}
+
+function scope(requestedScope) {
+    assert(typeof requestedScope === 'string');
+
+    var requestedScopes = requestedScope.split(',');
+
+    debug('scope: requested scopes', requestedScopes);
+
+    return function (req, res, next) {
+        if (!req.authInfo || !req.authInfo.scope) return next(new HttpError(401, 'No scope found'));
+        if (req.authInfo.scope === '*') return next();
+
+        var scopes = req.authInfo.scope.split(',');
+        debug('scope: provided scopes', scopes);
+
+        for (var i = 0; i < requestedScopes.length; ++i) {
+            if (scopes.indexOf(requestedScopes[i]) === -1) {
+                debug('scope: missing scope "%s".', requestedScopes[i]);
+                return next(new HttpError(401, 'Missing required scope "' + requestedScopes[i] + '"'));
+            }
+        }
+
+        next();
+    };
+}
+
+exports = module.exports = {
+    loginForm: loginForm,
+    login: login,
+    logout: logout,
+    callback: callback,
+    error: error,
+    authorization: authorization,
+    decision: decision,
+    token: token,
+    library: library,
+    scope: scope
 };
