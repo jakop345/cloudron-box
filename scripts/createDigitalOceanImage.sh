@@ -9,15 +9,17 @@ CURL="curl -s"
 UBUNTU_IMAGE_SLUG="ubuntu-14-04-x64" # ID=5141286
 DATE=`date +%Y-%m-%d-%H%M%S`
 
-APPSTORE_URL=https://appstore-dev.herokuapp.com
-PRETTY_APPSTORE=dev
+APPSTORE_URL=""
+PRETTY_APPSTORE=""
 case "$1" in
 "dev" | "alpha")
     APPSTORE_URL="https://appstore-$1.herokuapp.com"
     PRETTY_APPSTORE="$1"
     ;;
 *)
-    echo "Appstore url set to $APPSTORE_URL"
+    echo "Invalid deployment environment as first argument specified!"
+    echo "Options are 'dev' or 'alpha'"
+    exit 1
 esac
 
 BOX_REVISION=origin/master
