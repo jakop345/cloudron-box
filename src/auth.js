@@ -120,7 +120,8 @@ passport.use(new BearerStrategy(function (accessToken, callback) {
             if (error) return callback(error);
 
             // scopes here can define what capabilities that token carries
-            var info = { scope: '*' };
+            // passport put the 'info' object into req.authInfo, where we can further validate the scopes
+            var info = { scope: token.scope };
             callback(null, user, info);
         });
     });
