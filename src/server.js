@@ -305,6 +305,7 @@ Server.prototype._initializeExpressSync = function () {
     }
 
     var router = new express.Router();
+    router.del = router.delete; // amend router.del for readability further on
 
     this.app
 //       .use(require('delay')(500))
@@ -344,82 +345,40 @@ Server.prototype._initializeExpressSync = function () {
     var both = passport.authenticate(['basic', 'bearer'], { session: false });
 
     // public routes
-    router.get('/api/v1/version', this._getVersion.bind(this));
-    router.get('/api/v1/firsttime', this._firstTime.bind(this));
-    router.post('/api/v1/provision', this._provision.bind(this));    // FIXME any number of admins can be created without auth!
-    router.post('/api/v1/restore', this._restore.bind(this));    // FIXME any number of admins can be created without auth!
+    router.get ('/api/v1/version', this._getVersion.bind(this));
+    router.get ('/api/v1/firsttime', this._firstTime.bind(this));
+    router.post('/api/v1/provision', this._provision.bind(this));
+    router.post('/api/v1/restore', this._restore.bind(this));
     router.post('/api/v1/createadmin', routes.user.createAdmin);    // FIXME any number of admins can be created without auth!
 
-    router.get('/api/v1/config', bearer, this._getConfig.bind(this));
+    router.get ('/api/v1/config', bearer, this._getConfig.bind(this));
+    router.get ('/api/v1/update', bearer, this._update.bind(this));
+    router.get ('/api/v1/reboot', bearer, this._reboot.bind(this));
+    router.get ('/api/v1/user', bearer, routes.user.info);           // special route to get the userInfo only providing a token
+    router.get ('/api/v1/stats', bearer, this._getCloudronStats.bind(this));
+    router.post('/api/v1/backups', bearer, routes.backups.createBackup);
 
-    router.get('/api/v1/update', bearer, this._update.bind(this));
-    router.get('/api/v1/reboot', bearer, this._reboot.bind(this));
-
-    router.get    ('/api/v1/user', bearer, routes.user.info);           // special route to get the userInfo only providing a token
-
-    router.get    ('/api/v1/users', bearer, routes.user.list);
-    router.get    ('/api/v1/users/:userName/login', basic, routes.user.createToken);    // TODO this should not be needed with OAuth
-    router.get    ('/api/v1/users/:userName/logout', bearer, routes.user.logout);       // TODO this should not be needed with OAuth
-    router.post   ('/api/v1/users', bearer, this._requireAdmin.bind(this), routes.user.create);
-    router.get    ('/api/v1/users/:userName', bearer, routes.user.info);
-    router.delete ('/api/v1/users/:userName', bearer, this._requireAdmin.bind(this), routes.user.remove);
-    router.post   ('/api/v1/users/:userName/password', bearer, this._requirePassword.bind(this), routes.user.changePassword);
-    router.post   ('/api/v1/users/:userName/admin', bearer, this._requireAdmin.bind(this), routes.user.changeAdmin);
-
-    router.param('syncerVolume', function (req, res, next, id) {
-        both(req, res, function (err) {
-            if (err) return next(err);
-            routes.sync.attachRepo(req, res, next, id);
-        });
-    });
-
-    router.post('/api/v1/sync/:syncerVolume/diff', routes.sync.requireMountedVolume, routes.sync.diff);
-    router.post('/api/v1/sync/:syncerVolume/delta', routes.sync.requireMountedVolume, routes.sync.delta);
-
-    router.get('/api/v1/revisions/:syncerVolume/*', routes.sync.requireMountedVolume, routes.file.revisions);
-    router.get('/api/v1/file/:syncerVolume/*', routes.sync.requireMountedVolume, routes.file.read);
-    router.get('/api/v1/metadata/:syncerVolume/*', routes.sync.requireMountedVolume, routes.file.metadata);
-    router.put('/api/v1/file/:syncerVolume/*', routes.sync.requireMountedVolume,
-                                           routes.file.multipart({ maxFieldsSize: FIELD_LIMIT, limit: FILE_SIZE_LIMIT, timeout: FILE_TIMEOUT }),
-                                           routes.file.putFile);
-
-    router.post('/api/v1/fileops/:syncerVolume/copy', routes.sync.requireMountedVolume, routes.fileops.copy);
-    router.post('/api/v1/fileops/:syncerVolume/move', routes.sync.requireMountedVolume, routes.fileops.move);
-    router.post('/api/v1/fileops/:syncerVolume/delete', routes.sync.requireMountedVolume, routes.fileops.remove);
-    router.post('/api/v1/fileops/:syncerVolume/create_dir', routes.sync.requireMountedVolume, routes.fileops.createDirectory);
-
-    router.get('/api/v1/volume/list', bearer, routes.volume.listVolumes);
-    router.post('/api/v1/volume/create', bearer, this._requirePassword.bind(this), routes.volume.createVolume);
-
-    // volume resource related routes
-    router.param('volume', function (req, res, next, id) {
-        both(req, res, function (err) {
-            if (err) return next(err);
-            routes.volume.attachVolume(req, res, next, id);
-        });
-    });
-    router.get('/api/v1/volume/:volume/list', routes.volume.requireMountedVolume, routes.volume.listFiles);
-    router.get('/api/v1/volume/:volume/list/*', routes.volume.requireMountedVolume, routes.volume.listFiles);
-    router.post('/api/v1/volume/:volume/delete', this._requirePassword.bind(this), routes.volume.deleteVolume);
-    router.post('/api/v1/volume/:volume/mount', this._requirePassword.bind(this), routes.volume.mount);
-    router.post('/api/v1/volume/:volume/unmount', routes.volume.unmount);
-    router.get('/api/v1/volume/:volume/ismounted', routes.volume.isMounted);
-    router.get('/api/v1/volume/:volume/users', routes.volume.listUsers);
-    router.post('/api/v1/volume/:volume/users', routes.volume.addUser);
-    router.delete('/api/v1/volume/:volume/users/:username', routes.volume.removeUser);
+    router.get ('/api/v1/users', bearer, routes.user.list);
+    router.post('/api/v1/users', bearer, this._requireAdmin.bind(this), routes.user.create);
+    router.get ('/api/v1/users/:userName', bearer, routes.user.info);
+    router.del ('/api/v1/users/:userName', bearer, this._requireAdmin.bind(this), routes.user.remove);
+    router.get ('/api/v1/users/:userName/login', basic, routes.user.createToken);    // TODO this should not be needed with OAuth
+    router.get ('/api/v1/users/:userName/logout', bearer, routes.user.logout);       // TODO this should not be needed with OAuth
+    router.post('/api/v1/users/:userName/password', bearer, this._requirePassword.bind(this), routes.user.changePassword);
+    router.post('/api/v1/users/:userName/admin', bearer, this._requireAdmin.bind(this), routes.user.changeAdmin);
 
     // form based login routes used by oauth2 frame
-    router.get('/api/v1/session/login', routes.oauth2.loginForm);
+    router.get ('/api/v1/session/login', routes.oauth2.loginForm);
     router.post('/api/v1/session/login', routes.oauth2.login);
-    router.get('/api/v1/session/logout', routes.oauth2.logout);
-    router.get('/api/v1/session/callback', routes.oauth2.callback);
-    router.get('/api/v1/session/error', routes.oauth2.error);
+    router.get ('/api/v1/session/logout', routes.oauth2.logout);
+    router.get ('/api/v1/session/callback', routes.oauth2.callback);
+    router.get ('/api/v1/session/error', routes.oauth2.error);
 
     // oauth2 routes
-    router.get('/api/v1/oauth/dialog/authorize', routes.oauth2.authorization);
+    router.get ('/api/v1/oauth/dialog/authorize', routes.oauth2.authorization);
     router.post('/api/v1/oauth/dialog/authorize/decision', routes.oauth2.decision);
     router.post('/api/v1/oauth/token', routes.oauth2.token);
-    router.get('/api/v1/oauth/yellowtent.js', routes.oauth2.library);
+    router.get ('/api/v1/oauth/yellowtent.js', routes.oauth2.library);
 
     // app routes
     router.get ('/api/v1/apps', bearer, routes.apps.getApps);
@@ -433,17 +392,55 @@ Server.prototype._initializeExpressSync = function () {
     router.get ('/api/v1/app/:id/icon', routes.apps.getAppIcon);
 
     // subdomain routes
-    router.get('/api/v1/subdomains/:subdomain', routes.apps.getAppBySubdomain); // TODO: allow non-authenticated for the appstatus page
+    router.get ('/api/v1/subdomains/:subdomain', routes.apps.getAppBySubdomain);
 
     // settings routes
-    router.get('/api/v1/settings/naked_domain', bearer, routes.settings.getNakedDomain);
+    router.get ('/api/v1/settings/naked_domain', bearer, routes.settings.getNakedDomain);
     router.post('/api/v1/settings/naked_domain', bearer, routes.settings.setNakedDomain);
 
-    // server stats
-    router.get('/api/v1/stats', bearer, this._getCloudronStats.bind(this));
 
-    // backup
-    router.post('/api/v1/backups', bearer, routes.backups.createBackup);
+    // old syncer and file APIs, we might want to remove them soonish
+    router.param('syncerVolume', function (req, res, next, id) {
+        both(req, res, function (err) {
+            if (err) return next(err);
+            routes.sync.attachRepo(req, res, next, id);
+        });
+    });
+
+    router.post('/api/v1/sync/:syncerVolume/diff', routes.sync.requireMountedVolume, routes.sync.diff);
+    router.post('/api/v1/sync/:syncerVolume/delta', routes.sync.requireMountedVolume, routes.sync.delta);
+
+    router.get ('/api/v1/revisions/:syncerVolume/*', routes.sync.requireMountedVolume, routes.file.revisions);
+    router.get ('/api/v1/file/:syncerVolume/*', routes.sync.requireMountedVolume, routes.file.read);
+    router.get ('/api/v1/metadata/:syncerVolume/*', routes.sync.requireMountedVolume, routes.file.metadata);
+    router.put ('/api/v1/file/:syncerVolume/*', routes.sync.requireMountedVolume,
+                                           routes.file.multipart({ maxFieldsSize: FIELD_LIMIT, limit: FILE_SIZE_LIMIT, timeout: FILE_TIMEOUT }),
+                                           routes.file.putFile);
+
+    router.post('/api/v1/fileops/:syncerVolume/copy', routes.sync.requireMountedVolume, routes.fileops.copy);
+    router.post('/api/v1/fileops/:syncerVolume/move', routes.sync.requireMountedVolume, routes.fileops.move);
+    router.post('/api/v1/fileops/:syncerVolume/delete', routes.sync.requireMountedVolume, routes.fileops.remove);
+    router.post('/api/v1/fileops/:syncerVolume/create_dir', routes.sync.requireMountedVolume, routes.fileops.createDirectory);
+
+    router.get ('/api/v1/volume/list', bearer, routes.volume.listVolumes);
+    router.post('/api/v1/volume/create', bearer, this._requirePassword.bind(this), routes.volume.createVolume);
+
+    // volume resource related routes
+    router.param('volume', function (req, res, next, id) {
+        both(req, res, function (err) {
+            if (err) return next(err);
+            routes.volume.attachVolume(req, res, next, id);
+        });
+    });
+    router.get ('/api/v1/volume/:volume/list', routes.volume.requireMountedVolume, routes.volume.listFiles);
+    router.get ('/api/v1/volume/:volume/list/*', routes.volume.requireMountedVolume, routes.volume.listFiles);
+    router.post('/api/v1/volume/:volume/delete', this._requirePassword.bind(this), routes.volume.deleteVolume);
+    router.post('/api/v1/volume/:volume/mount', this._requirePassword.bind(this), routes.volume.mount);
+    router.post('/api/v1/volume/:volume/unmount', routes.volume.unmount);
+    router.get ('/api/v1/volume/:volume/ismounted', routes.volume.isMounted);
+    router.get ('/api/v1/volume/:volume/users', routes.volume.listUsers);
+    router.post('/api/v1/volume/:volume/users', routes.volume.addUser);
+    router.del ('/api/v1/volume/:volume/users/:username', routes.volume.removeUser);
 };
 
 Server.prototype._sendHeartBeat = function () {
