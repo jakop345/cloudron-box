@@ -40,7 +40,7 @@ var AppInstallController = function ($scope, $routeParams, Client, AppStore) {
             portBindings[port] = $scope.portBindings[port].hostPort;
         }
 
-        Client.installApp($routeParams.appStoreId, $scope.password, { location: $scope.location, portBindings: portBindings }, function (error, appId) {
+        Client.installApp($routeParams.appStoreId, $scope.password, $scope.app.title, { location: $scope.location, portBindings: portBindings }, function (error, appId) {
             if (error) {
                 if (error.statusCode === 409) {
                     $scope.error.name = 'Application already exists.';
