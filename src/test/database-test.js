@@ -173,24 +173,6 @@ describe('database', function () {
             });
         });
 
-        it('getByUserId succeeds', function (done) {
-            tokendb.getByUserId(TOKEN_0.userId, function (error, result) {
-                expect(error).to.be(null);
-                expect(result).to.be.an('object');
-                expect(result).to.be.eql(TOKEN_0);
-                done();
-            });
-        });
-
-        it('getByUserId of nonexisting user fails', function (done) {
-            tokendb.getByUserId(TOKEN_1.userId, function (error, result) {
-                expect(error).to.be.a(DatabaseError);
-                expect(error.reason).to.be(DatabaseError.NOT_FOUND);
-                expect(result).to.not.be.ok();
-                done();
-            });
-        });
-
         it('delete succeeds', function (done) {
             tokendb.del(TOKEN_0.accessToken, function (error) {
                 expect(error).to.be(null);

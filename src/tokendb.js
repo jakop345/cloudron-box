@@ -10,7 +10,6 @@ var DatabaseError = require('./databaseerror'),
 exports = module.exports = {
     generateToken: generateToken,
     get: get,
-    getByUserId: getByUserId,
     add: add,
     del: del,
     delByUserId: delByUserId
@@ -59,19 +58,6 @@ function del(accessToken, callback) {
         if (this.changes !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         callback(error);
-    });
-}
-
-function getByUserId(userId, callback) {
-    assert(typeof userId === 'string');
-    assert(typeof callback === 'function');
-
-    database.get('SELECT * FROM tokens WHERE userId = ? LIMIT 1', [ userId ], function (error, result) {
-        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
-
-        if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
-
-        return callback(null, result);
     });
 }
 
