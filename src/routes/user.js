@@ -221,7 +221,7 @@ function info(req, res, next) {
  * @apiSuccess none User successfully logged out
  */
 function logout(req, res, next) {
-    var req_token = req.query.auth_token ? req.query.auth_token : req.cookies.token;
+    var req_token = req.query.access_token ? req.query.access_token : req.cookies.token;
 
     // Invalidate token so the cookie cannot be reused after logout
     tokendb.del(req_token, function (error) {

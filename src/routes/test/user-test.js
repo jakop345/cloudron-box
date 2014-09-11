@@ -153,7 +153,7 @@ describe('Server User API', function () {
 
     it('can get userInfo with token', function (done) {
         request.get(SERVER_URL + '/api/v1/users/' + USERNAME_0)
-               .query({ auth_token: token })
+               .query({ access_token: token })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
             expect(res.body.username).to.equal(USERNAME_0);
@@ -174,7 +174,7 @@ describe('Server User API', function () {
 
     it('cannot get userInfo with invalid token (token length)', function (done) {
         request.get(SERVER_URL + '/api/v1/users/' + USERNAME_0)
-               .query({ auth_token: 'x' + token })
+               .query({ access_token: 'x' + token })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(401);
             done(err);
@@ -183,7 +183,7 @@ describe('Server User API', function () {
 
     it('cannot get userInfo with invalid token (wrong token)', function (done) {
         request.get(SERVER_URL + '/api/v1/users/' + USERNAME_0)
-               .query({ auth_token: token.toUpperCase() })
+               .query({ access_token: token.toUpperCase() })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(401);
             done(err);
@@ -192,7 +192,7 @@ describe('Server User API', function () {
 
     it('can get userInfo with token in auth header', function (done) {
         request.get(SERVER_URL + '/api/v1/users/' + USERNAME_0)
-               .set('Authorization', 'Token ' + token)
+               .set('Authorization', 'Bearer ' + token)
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
             expect(res.body.username).to.equal(USERNAME_0);
@@ -204,7 +204,7 @@ describe('Server User API', function () {
 
     it('cannot get userInfo with invalid token in auth header', function (done) {
         request.get(SERVER_URL + '/api/v1/users/' + USERNAME_0)
-               .set('Authorization', 'Token ' + 'x' + token)
+               .set('Authorization', 'Bearer ' + 'x' + token)
                .end(function (err, res) {
             expect(res.statusCode).to.equal(401);
             done(err);
@@ -213,7 +213,7 @@ describe('Server User API', function () {
 
     it('cannot get userInfo with invalid token (wrong token)', function (done) {
         request.get(SERVER_URL + '/api/v1/users/' + USERNAME_0)
-               .set('Authorization', 'Token ' + 'x' + token.toUpperCase())
+               .set('Authorization', 'Bearer ' + 'x' + token.toUpperCase())
                .end(function (err, res) {
             expect(res.statusCode).to.equal(401);
             done(err);
@@ -222,7 +222,7 @@ describe('Server User API', function () {
 
     it('create second admin should succeed with first admin credentials', function (done) {
         request.post(SERVER_URL + '/api/v1/createadmin')
-               .query({ auth_token: token })
+               .query({ access_token: token })
                .send({ username: USERNAME_1, password: PASSWORD_1, email: EMAIL_1 })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(201);
@@ -246,7 +246,7 @@ describe('Server User API', function () {
 
     it('remove first user from admins succeeds', function (done) {
         request.post(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/admin')
-               .query({ auth_token: token_1 })
+               .query({ access_token: token_1 })
                .send({ username: USERNAME_0, admin: false })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
@@ -266,7 +266,7 @@ describe('Server User API', function () {
 
     it('remove second user from admins and thus last admin fails', function (done) {
         request.post(SERVER_URL + '/api/v1/users/' + USERNAME_1 + '/admin')
-               .query({ auth_token: token_1 })
+               .query({ access_token: token_1 })
                .send({ username: USERNAME_1, admin: false })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(403);
@@ -276,7 +276,7 @@ describe('Server User API', function () {
 
     it('reset first user as admin succeeds', function (done) {
         request.post(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/admin')
-               .query({ auth_token: token_1 })
+               .query({ access_token: token_1 })
                .send({ username: USERNAME_0, admin: true })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
@@ -286,13 +286,13 @@ describe('Server User API', function () {
 
     it('create user missing arguments should fail', function (done) {
         request.post(SERVER_URL + '/api/v1/users')
-               .query({ auth_token: token })
+               .query({ access_token: token })
                .send({ username: USERNAME_2, email: EMAIL })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
 
             request.post(SERVER_URL + '/api/v1/users')
-                   .query({ auth_token: token })
+                   .query({ access_token: token })
                    .send({ username: USERNAME_2, password: PASSWORD })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(400);
@@ -303,13 +303,13 @@ describe('Server User API', function () {
 
     it('create second and third user', function (done) {
         request.post(SERVER_URL + '/api/v1/users')
-               .query({ auth_token: token })
+               .query({ access_token: token })
                .send({ username: USERNAME_2, password: PASSWORD_2, email: EMAIL_2 })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(201);
 
             request.post(SERVER_URL + '/api/v1/users')
-                   .query({ auth_token: token })
+                   .query({ access_token: token })
                    .send({ username: USERNAME_3, password: PASSWORD_3, email: EMAIL_3 })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(201);
@@ -344,7 +344,7 @@ describe('Server User API', function () {
 
     it('create user with same username should fail', function (done) {
         request.post(SERVER_URL + '/api/v1/users')
-               .query({ auth_token: token })
+               .query({ access_token: token })
                .send({ username: USERNAME_2, password: PASSWORD, email: EMAIL })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(409);
@@ -418,7 +418,7 @@ describe('Server User API', function () {
 
     it('cannot logout with invalid token', function (done) {
         request.get(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/logout')
-               .query({ auth_token: token.toUpperCase() })
+               .query({ access_token: token.toUpperCase() })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(401);
             done(err);
@@ -427,7 +427,7 @@ describe('Server User API', function () {
 
     it('can logout', function (done) {
         request.get(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/logout')
-               .query({ auth_token: token })
+               .query({ access_token: token })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
             done(err);
@@ -436,7 +436,7 @@ describe('Server User API', function () {
 
     it('cannot get userInfo with old token (previous logout)', function (done) {
         request.get(SERVER_URL + '/api/v1/users/' + USERNAME_0)
-               .query({ auth_token: token })
+               .query({ access_token: token })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(401);
             done(err);

@@ -128,7 +128,7 @@ describe('Server', function () {
 
                 var token = res.body.token;
 
-                request.get(SERVER_URL + '/api/v1/stats').query({ auth_token: token }).end(function (err, res) {
+                request.get(SERVER_URL + '/api/v1/stats').query({ access_token: token }).end(function (err, res) {
                     expect(err).to.not.be.ok();
                     expect(res.statusCode).to.equal(200);
                     expect(res.body).to.be.an(Object);
@@ -164,7 +164,7 @@ describe('Server', function () {
         });
 
         it('config fails due wrong token', function (done) {
-            request.get(SERVER_URL + '/api/v1/config').query({ auth_token: 'somewrongtoken' }).end(function (err, res) {
+            request.get(SERVER_URL + '/api/v1/config').query({ access_token: 'somewrongtoken' }).end(function (err, res) {
                 expect(err).to.not.be.ok();
                 expect(res.statusCode).to.equal(401);
                 done(err);

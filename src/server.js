@@ -320,21 +320,6 @@ Server.prototype._initializeExpressSync = function () {
        .use(middleware.session({ secret: 'yellow is blue' }))
        .use(passport.initialize())
        .use(passport.session())
-
-       // FIXME
-       // temporarily accept both
-       //  - [query] auth_token and access_token
-       //  - [header] 'Token <tok>' and 'Bearer <tok>'
-       // see http://tools.ietf.org/html/rfc6750
-       .use(function (req, res, next) {
-            if (req.query.auth_token) req.query.access_token = req.query.auth_token;
-            var auth = req.headers.authorization;
-            if (auth && auth.indexOf('Token ') === 0) {
-                req.headers.authorization = 'Bearer ' + auth.slice('Token '.length);
-            }
-            next();
-       })
-
        .use(router)
        .use(this._successHandler.bind(this))
        .use(this._clientErrorHandler.bind(this))

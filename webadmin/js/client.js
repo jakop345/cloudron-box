@@ -97,7 +97,7 @@ angular.module('Application').service('Client', function ($http, $filter) {
     };
 
     Client.prototype.setToken = function (token) {
-        $http.defaults.headers.common.Authorization = 'Token ' + token;
+        $http.defaults.headers.common.Authorization = 'Bearer ' + token;
         if (!token) localStorage.removeItem('token');
         else localStorage.token = token;
         this._token = token;
@@ -502,7 +502,7 @@ angular.module('Application').service('Client', function ($http, $filter) {
         this._userInfo = {};
 
         // logout from OAuth session
-        window.location.href = '/api/v1/session/logout';
+        window.location.href = '\/api/v1/session/logout';
     };
 
     Client.prototype.exchangeCodeForToken = function (authCode, callback) {
