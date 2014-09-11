@@ -340,15 +340,20 @@ Server.prototype._initializeExpressSync = function () {
        .use(this._clientErrorHandler.bind(this))
        .use(this._serverErrorHandler.bind(this));
 
+    // middleware shortcuts for authentification
     var bearer = passport.authenticate(['bearer'], { session: false });
     var basic = passport.authenticate(['basic'], { session: false });
     var both = passport.authenticate(['basic', 'bearer'], { session: false });
 
+    // scope middleware implicitly also adds bearer token verification
     var rootScope = routes.oauth2.scope('root');
     var profileScope = routes.oauth2.scope('profile');
     var usersScope = routes.oauth2.scope('users');
     var appsScope = routes.oauth2.scope('apps');
     var settingsScope = routes.oauth2.scope('settings');
+
+    // middleware to ensure the calling user is admin
+    var admin = this._requireAdmin.bind(this);
 
     // public routes
     router.get ('/api/v1/version', this._getVersion.bind(this));
@@ -357,19 +362,19 @@ Server.prototype._initializeExpressSync = function () {
     router.post('/api/v1/restore', this._restore.bind(this));
     router.post('/api/v1/createadmin', routes.user.createAdmin);    // FIXME any number of admins can be created without auth!
 
-    router.get ('/api/v1/config', bearer, rootScope, this._getConfig.bind(this));
-    router.get ('/api/v1/update', bearer, rootScope, this._update.bind(this));
-    router.get ('/api/v1/reboot', bearer, rootScope, this._reboot.bind(this));
-    router.get ('/api/v1/stats', bearer, rootScope, this._getCloudronStats.bind(this));
-    router.post('/api/v1/backups', bearer, rootScope, routes.backups.createBackup);
-    router.get ('/api/v1/profile', bearer, profileScope, routes.user.info);
+    router.get ('/api/v1/config', rootScope, this._getConfig.bind(this));
+    router.get ('/api/v1/update', rootScope, this._update.bind(this));
+    router.get ('/api/v1/reboot', rootScope, this._reboot.bind(this));
+    router.get ('/api/v1/stats', rootScope, this._getCloudronStats.bind(this));
+    router.post('/api/v1/backups', rootScope, routes.backups.createBackup);
+    router.get ('/api/v1/profile', profileScope, routes.user.info);
 
-    router.get ('/api/v1/users', bearer, usersScope, routes.user.list);
-    router.post('/api/v1/users', bearer, usersScope, this._requireAdmin.bind(this), routes.user.create);
-    router.get ('/api/v1/users/:userName', bearer, usersScope, routes.user.info);
-    router.del ('/api/v1/users/:userName', bearer, usersScope, this._requireAdmin.bind(this), routes.user.remove);
-    router.post('/api/v1/users/:userName/password', bearer, usersScope, this._requirePassword.bind(this), routes.user.changePassword);
-    router.post('/api/v1/users/:userName/admin', bearer, usersScope, this._requireAdmin.bind(this), routes.user.changeAdmin);
+    router.get ('/api/v1/users', usersScope, routes.user.list);
+    router.post('/api/v1/users', usersScope, admin, routes.user.create);
+    router.get ('/api/v1/users/:userName', usersScope, routes.user.info);
+    router.del ('/api/v1/users/:userName', usersScope, admin, routes.user.remove);
+    router.post('/api/v1/users/:userName/password', usersScope, this._requirePassword.bind(this), routes.user.changePassword);
+    router.post('/api/v1/users/:userName/admin', usersScope, admin, routes.user.changeAdmin);
 
     router.get ('/api/v1/users/:userName/login', basic, routes.user.createToken);    // TODO this should not be needed with OAuth
     router.get ('/api/v1/users/:userName/logout', bearer, routes.user.logout);       // TODO this should not be needed with OAuth
@@ -388,22 +393,22 @@ Server.prototype._initializeExpressSync = function () {
     router.get ('/api/v1/oauth/yellowtent.js', routes.oauth2.library);
 
     // app routes
-    router.get ('/api/v1/apps', bearer, appsScope, routes.apps.getApps);
-    router.get ('/api/v1/app/:id', bearer, appsScope, routes.apps.getApp);
-    router.post('/api/v1/app/:id/uninstall', bearer, appsScope, routes.apps.uninstallApp); // TODO does this require password?
-    router.post('/api/v1/app/install', bearer, appsScope, this._requirePassword.bind(this), routes.apps.installApp);
-    router.post('/api/v1/app/:id/configure', bearer, appsScope, this._requirePassword.bind(this), routes.apps.configureApp);
-    router.post('/api/v1/app/:id/update', bearer, appsScope, routes.apps.updateApp);
-    router.post('/api/v1/app/:id/stop', bearer, appsScope, routes.apps.stopApp);
-    router.post('/api/v1/app/:id/start', bearer, appsScope, routes.apps.startApp);
+    router.get ('/api/v1/apps', appsScope, routes.apps.getApps);
+    router.get ('/api/v1/app/:id', appsScope, routes.apps.getApp);
+    router.post('/api/v1/app/:id/uninstall', appsScope, routes.apps.uninstallApp); // TODO does this require password?
+    router.post('/api/v1/app/install', appsScope, this._requirePassword.bind(this), routes.apps.installApp);
+    router.post('/api/v1/app/:id/configure', appsScope, this._requirePassword.bind(this), routes.apps.configureApp);
+    router.post('/api/v1/app/:id/update', appsScope, routes.apps.updateApp);
+    router.post('/api/v1/app/:id/stop', appsScope, routes.apps.stopApp);
+    router.post('/api/v1/app/:id/start', appsScope, routes.apps.startApp);
     router.get ('/api/v1/app/:id/icon', routes.apps.getAppIcon);
 
     // subdomain routes
     router.get ('/api/v1/subdomains/:subdomain', routes.apps.getAppBySubdomain);
 
     // settings routes
-    router.get ('/api/v1/settings/naked_domain', bearer, settingsScope, routes.settings.getNakedDomain);
-    router.post('/api/v1/settings/naked_domain', bearer, settingsScope, routes.settings.setNakedDomain);
+    router.get ('/api/v1/settings/naked_domain', settingsScope, routes.settings.getNakedDomain);
+    router.post('/api/v1/settings/naked_domain', settingsScope, routes.settings.setNakedDomain);
 
 
     // old syncer and file APIs, we might want to remove them soonish

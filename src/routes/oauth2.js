@@ -220,25 +220,27 @@ function scope(requestedScope) {
     assert(typeof requestedScope === 'string');
 
     var requestedScopes = requestedScope.split(',');
-
     debug('scope: requested scopes', requestedScopes);
 
-    return function (req, res, next) {
-        if (!req.authInfo || !req.authInfo.scope) return next(new HttpError(401, 'No scope found'));
-        if (req.authInfo.scope === '*') return next();
+    return [
+        passport.authenticate(['bearer'], { session: false }),
+        function (req, res, next) {
+            if (!req.authInfo || !req.authInfo.scope) return next(new HttpError(401, 'No scope found'));
+            if (req.authInfo.scope === '*') return next();
 
-        var scopes = req.authInfo.scope.split(',');
-        debug('scope: provided scopes', scopes);
+            var scopes = req.authInfo.scope.split(',');
+            debug('scope: provided scopes', scopes);
 
-        for (var i = 0; i < requestedScopes.length; ++i) {
-            if (scopes.indexOf(requestedScopes[i]) === -1) {
-                debug('scope: missing scope "%s".', requestedScopes[i]);
-                return next(new HttpError(401, 'Missing required scope "' + requestedScopes[i] + '"'));
+            for (var i = 0; i < requestedScopes.length; ++i) {
+                if (scopes.indexOf(requestedScopes[i]) === -1) {
+                    debug('scope: missing scope "%s".', requestedScopes[i]);
+                    return next(new HttpError(401, 'Missing required scope "' + requestedScopes[i] + '"'));
+                }
             }
-        }
 
-        next();
-    };
+            next();
+        }
+    ];
 }
 
 exports = module.exports = {
