@@ -132,7 +132,9 @@ var login = passport.authenticate('local', {
 // ends the current session
 function logout(req, res) {
     req.logout();
-    res.redirect('/');
+
+    if (req.query && req.query.redirect) res.redirect(req.query.redirect);
+    else res.redirect('/');
 }
 
 var callback = [
