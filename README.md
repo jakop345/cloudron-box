@@ -9,15 +9,15 @@ Development setup
 * rmappdir.sh should be callable without a password
 ** Add a file called /etc/sudoers.d/yellowtent with the following contents:
     Defaults!/home/girish/yellowtent/box/src/scripts/rmappdir.sh env_keep=HOME
-    girish ALL = (ALL) NOPASSWD: /home/girish/yellowtent/box/src/scripts/rmappdir.sh
+    girish ALL=(ALL) NOPASSWD: /home/girish/yellowtent/box/src/scripts/rmappdir.sh
     Defaults!/home/girish/yellowtent/box/src/scripts/reloadnginx.sh env_keep=HOME
-    girish ALL = (ALL) NOPASSWD: /home/girish/yellowtent/box/src/scripts/reloadnginx.sh
+    girish ALL=(ALL) NOPASSWD: /home/girish/yellowtent/box/src/scripts/reloadnginx.sh
     Defaults!/Users/girishra/research/yellowtent/box/src/scripts/backup.sh env_keep=HOME
-    girishra ALL = (ALL) NOPASSWD: /Users/girishra/research/yellowtent/box/src/scripts/backup.sh
+    girishra ALL=(ALL) NOPASSWD: /Users/girishra/research/yellowtent/box/src/scripts/backup.sh
     Defaults!/Users/girishra/research/yellowtent/box/src/scripts/update.sh env_keep=HOME
-    girishra ALL = (ALL) NOPASSWD: /Users/girishra/research/yellowtent/box/src/scripts/update.sh
+    girishra ALL=(ALL) NOPASSWD: /Users/girishra/research/yellowtent/box/src/scripts/update.sh
     Defaults!/Users/girishra/research/yellowtent/box/src/scripts/reboot.sh env_keep=HOME
-    girishra ALL = (ALL) NOPASSWD: /Users/girishra/research/yellowtent/box/src/scripts/reboot.sh
+    girishra ALL=(ALL) NOPASSWD: /Users/girishra/research/yellowtent/box/src/scripts/reboot.sh
 
 
    (replace the username and path to rmappdir.sh to match your environment)
