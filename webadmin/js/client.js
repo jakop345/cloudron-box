@@ -116,7 +116,7 @@ angular.module('Application').service('Client', function ($http, $filter) {
     };
 
     Client.prototype.userInfo = function (callback) {
-        $http.get('/api/v1/user').success(function(data, status) {
+        $http.get('/api/v1/profile').success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
         }).error(function(data, status) {
