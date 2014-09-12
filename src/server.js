@@ -304,6 +304,10 @@ Server.prototype._initializeExpressSync = function () {
         this.app.use(middleware.morgan({ format: 'dev', immediate: false }));
     }
 
+    if (process.env.NODE_ENV === 'test') {
+       this.app.use(express.static(path.join(__dirname, '/../webadmin')));
+    }
+
     var router = new express.Router();
     router.del = router.delete; // amend router.del for readability further on
 

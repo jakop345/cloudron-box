@@ -74,6 +74,9 @@ server.grant(oauth2orize.grant.code({ scopeSeparator: ',' }, function (client, r
     // var scope = ares.scope.join(',');
     var scope = '*';
 
+    // only give out wildcard scope to the webadmin all other clients are only allowed to request 'profile'
+    if (client.id !== 'webadmin' && ares.scope[0] !== 'profile') return callback(new Error('Requested scope is not allowed for this client'));
+
     authcodedb.add(code, client.id, redirectURI, user.username, scope, function (error) {
         if (error) return callback(error);
         callback(null, code);
@@ -183,7 +186,10 @@ var authorization = [
 
         clientdb.getByClientId(clientID, function (error, client) {
             // TODO actually check redirectURI
-            if (error) return callback(error);
+            if (error) {
+                console.error('Unkown client id %s.', clientID);
+                return callback(error);
+            }
 
             // we currently pass the redirectURI from the callback through, instead of the one in the db
             callback(null, client, '/api/v1/session/callback?redirectURI=' + redirectURI);
