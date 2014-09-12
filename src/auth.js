@@ -1,3 +1,5 @@
+/* jslint node:true */
+
 'use strict';
 
 /*
@@ -42,7 +44,7 @@ passport.deserializeUser(function(username, callback) {
  * a user is logged in before asking them to approve the request.
  */
 passport.use(new LocalStrategy(function (username, password, callback) {
-    debug('LocalStrategy: ' + username + ' ' + password);
+    debug('LocalStrategy: ' + username + ' ' + password.length);
 
     user.verify(username, password, function (error, result) {
         if (error && error.reason === UserError.NOT_FOUND) return callback(null, false);
@@ -66,7 +68,7 @@ passport.use(new LocalStrategy(function (username, password, callback) {
  * the specification, in practice it is quite common.
  */
 passport.use(new BasicStrategy(function (username, password, callback) {
-    debug('BasicStrategy: ' + username + ' ' + password);
+    debug('BasicStrategy: ' + username + ' ' + password.length);
 
     if (username.indexOf('cid-') === 0) {
         debug('BasicStrategy: detected clientId instead of username:password.' + username);
