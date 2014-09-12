@@ -17,32 +17,38 @@
 
         <script>
 
+            var oauthServer = 'http://localhost:5454';
+
             function adminOAuth() {
                 var clientId = 'cid-webadmin';
                 var callbackURL = window.location.origin + '/oauth_callback.html';
                 var scope = 'root,profile,apps';
-                window.location.href = 'http://localhost:5454/api/v1/oauth/dialog/authorize?response_type=code&client_id=' + clientId + '&redirect_uri=' + callbackURL + '&scope=' + scope;
+                window.location.href = oauthServer + '/api/v1/oauth/dialog/authorize?response_type=code&client_id=' + clientId + '&redirect_uri=' + callbackURL + '&scope=' + scope;
             }
 
             function unknownOAuth() {
                 var clientId = 'cid-unknown';
                 var callbackURL = window.location.origin + '/oauth_callback.html';
                 var scope = 'root,profile,apps';
-                window.location.href = 'http://localhost:5454/api/v1/oauth/dialog/authorize?response_type=code&client_id=' + clientId + '&redirect_uri=' + callbackURL + '&scope=' + scope;
+                window.location.href = oauthServer + '/api/v1/oauth/dialog/authorize?response_type=code&client_id=' + clientId + '&redirect_uri=' + callbackURL + '&scope=' + scope;
             }
 
             function nonPrivAppOAuth() {
                 var clientId = 'cid-app';
                 var callbackURL = window.location.origin + '/oauth_callback.html';
                 var scope = 'root,profile,apps';
-                window.location.href = 'http://localhost:5454/api/v1/oauth/dialog/authorize?response_type=code&client_id=' + clientId + '&redirect_uri=' + callbackURL + '&scope=' + scope;
+                window.location.href = oauthServer + '/api/v1/oauth/dialog/authorize?response_type=code&client_id=' + clientId + '&redirect_uri=' + callbackURL + '&scope=' + scope;
             }
 
             function privAppOAuth() {
                 var clientId = 'cid-app';
                 var callbackURL = window.location.origin + '/oauth_callback.html';
                 var scope = 'profile';
-                window.location.href = 'http://localhost:5454/api/v1/oauth/dialog/authorize?response_type=code&client_id=' + clientId + '&redirect_uri=' + callbackURL + '&scope=' + scope;
+                window.location.href = oauthServer + '/api/v1/oauth/dialog/authorize?response_type=code&client_id=' + clientId + '&redirect_uri=' + callbackURL + '&scope=' + scope;
+            }
+
+            function logout() {
+                window.location.href = oauthServer + '/api/v1/session/logout?redirect=' + window.location.origin;
             }
 
         </script>
@@ -62,6 +68,17 @@
         <h3> Credentials </h3>
         <b>Username:</b> test<br/>
         <b>Password:</b> test<br/>
+        </div>
+    </div>
+
+    <br/>
+
+    <div class="row">
+        <div class="col-md-12">
+            <h3> Terminate Session </h3>
+        </div>
+        <div class="col-md-12">
+            <button class="btn btn-default" onclick="logout();">Logout</button>
         </div>
     </div>
 
