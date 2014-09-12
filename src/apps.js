@@ -88,8 +88,11 @@ function resume() {
 }
 
 function uninitialize() {
-    appHealthTask.kill();
-    appHealthTask = null;
+    if (appHealthTask) {
+        appHealthTask.kill();
+        appHealthTask = null;
+    }
+
     for (var appId in tasks) {
         stopTask(appId);
     }
