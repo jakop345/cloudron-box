@@ -20,6 +20,7 @@ exports = module.exports = {
     configureApp: configureApp,
     uninstallApp: uninstallApp,
     updateApp: updateApp,
+    getLogs: getLogs,
 
     stopApp: stopApp,
     startApp: startApp
@@ -190,6 +191,22 @@ function updateApp(req, res, next) {
         if (error) return next(new HttpError(500, 'Internal error: ' + error));
 
         next(new HttpSuccess(200, { }));
+    });
+}
+
+function getLogs(req, res, next) {
+    debug('getting logs of ' + req.params.id);
+
+    var fromLine = parseInt(req.query.fromLine || 0, 10);
+    var follow = req.query.follow || false;
+
+    apps.getLogs(req.params.id, { fromLine: fromLine, follow: follow }, function (error, logStream) {
+        if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app:' + error));
+        if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error));
+        if (error) return next(new HttpError(500, 'Internal error: ' + error));
+
+        res.on('close', function (err) { if (logStream.req) logStream.req.end(); }); // response closed prematurely
+        logStream.pipe(res);
     });
 }
 

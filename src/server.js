@@ -50,7 +50,7 @@ Server.prototype._successHandler = function (success, req, res, next) {
     res.setHeader('Content-Type', 'application/json');
 
     if (success instanceof HttpSuccess) {
-        debug('Send response with status', success.statusCode, 'and body', success.body);
+        debug('Send response with status', success.statusCode); //, 'and body', success.body);
         res.send(success.statusCode, success.body);
     } else {
         next(success);
@@ -387,6 +387,7 @@ Server.prototype._initializeExpressSync = function () {
     router.post('/api/v1/app/:id/stop', appsScope, routes.apps.stopApp);
     router.post('/api/v1/app/:id/start', appsScope, routes.apps.startApp);
     router.get ('/api/v1/app/:id/icon', routes.apps.getAppIcon);
+    router.get ('/api/v1/app/:id/logs', routes.apps.getLogs);
 
     // subdomain routes
     router.get ('/api/v1/subdomains/:subdomain', routes.apps.getAppBySubdomain);

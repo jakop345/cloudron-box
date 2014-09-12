@@ -9,6 +9,9 @@ var DatabaseError = require('./databaseerror.js'),
     fs = require('fs'),
     appdb = require('./appdb.js'),
     child_process = require('child_process'),
+    Docker = require('dockerode'),
+    stream = require('stream'),
+    os = require('os'),
     config = require('../config.js');
 
 exports = module.exports = {
@@ -24,6 +27,8 @@ exports = module.exports = {
     uninstall: uninstall,
     update: update,
 
+    getLogs: getLogs,
+
     start: start,
     stop: stop,
 
@@ -34,9 +39,20 @@ exports = module.exports = {
     _validatePortBindings: validatePortBindings
 };
 
-var tasks = { }, appHealthTask = null;
+var tasks = { },
+    appHealthTask = null,
+    docker = null;
 
 function initialize() {
+    if (process.env.NODE_ENV === 'test') {
+        console.log('Docker requests redirected to 5687 in test environment');
+        docker = new Docker({ host: 'http://localhost', port: 5687 });
+    } else if (os.platform() === 'linux') {
+        docker = new Docker({socketPath: '/var/run/docker.sock'});
+    } else {
+        docker = new Docker({ host: 'http://localhost', port: 2375 });
+    }
+
     appHealthTask = child_process.fork(__dirname + '/apphealthtask.js');
 
     resume(); // FIXME: potential race here since resume is async
@@ -257,6 +273,40 @@ function update(appId, callback) {
         startTask(appId);
 
         callback(null);
+    });
+}
+
+function getLogs(appId, options, callback) {
+    assert(typeof appId === 'string');
+    assert(typeof options === 'object');
+    assert(typeof callback === 'function');
+
+    debug('Getting logs for %s', appId);
+    appdb.get(appId, function (error, app) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND));
+        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+        if (app.installationState !== appdb.ISTATE_INSTALLED) return callback(new AppsError(AppsError.BAD_STATE, 'App not installed'));
+
+        var container = docker.getContainer(app.containerId);
+        container.logs({ stdout: true, stderr: true, follow: options.follow, timestamps: true, tail: 'all' }, function (error, logStream) {
+            if (error && error.statusCode === 404) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
+            if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+            var transform = new stream.Transform({ encoding: 'utf8' });
+            transform.linesToSkip = options.fromLine;
+            transform._transform = function (chunk, encoding, callback) {
+                if (transform.linesToSkip === 0) {
+                    transform.push(chunk);
+                    return callback();
+                }
+                --transform.linesToSkip;
+            };
+            transform._flush = function (callback) { callback(); };
+
+            logStream.pipe(transform);
+            return callback(null, transform);
+        });
     });
 }
 

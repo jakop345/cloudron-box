@@ -326,6 +326,17 @@ angular.module('Application').service('Client', function ($http, $filter) {
         });
     };
 
+    Client.prototype.getAppLogs = function (appId, options, callback) {
+        $http.get('/api/v1/app/' + appId + '/logs', { params: options }).success(function (data, status) {
+console.dir(status);
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null, data);
+        }).error(function (data, status) {
+console.dir(data, status);
+            callback(new ClientError(status, data));
+        });
+    };
+
     Client.prototype.setAdmin = function (username, admin, callback) {
         var payload = {
             username: username,
