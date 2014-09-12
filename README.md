@@ -37,7 +37,7 @@ Development setup
 Running
 -------
 * ./run.sh - this starts up nginx to serve up the webadmin
-** Navigate to https://localhost
+** Navigate to https://admin-localhost
 
 * DEBUG=box:* ./app.js - this the main box code
 ** NODE_ENV is set to production by default
