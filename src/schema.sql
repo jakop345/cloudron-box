@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS authcodes(
     redirectURI VARCHAR(512) NOT NULL,
     userId VARCHAR(512) NOT NULL,
     clientId VARCHAR(512) NOT NULL,
+    scope VARCHAR(512) NOT NULL,
     PRIMARY KEY(authCode));
 
 CREATE TABLE IF NOT EXISTS settings(

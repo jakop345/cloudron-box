@@ -64,17 +64,23 @@ server.deserializeClient(function (id, callback) {
 // the application.  The application issues a code, which is bound to these
 // values, and will be exchanged for an access token.
 
-server.grant(oauth2orize.grant.code(function (client, redirectURI, user, ares, callback) {
+// we use , (comma) as scope separator
+server.grant(oauth2orize.grant.code({ scopeSeparator: ',' }, function (client, redirectURI, user, ares, callback) {
     debug('grant code:', client, redirectURI, user.id, ares);
 
     var code = uuid.v4();
 
-    authcodedb.add(code, client.id, redirectURI, user.username, function (error) {
+    // TODO until the oauth clients set the scope, override to '*'
+    // var scope = ares.scope.join(',');
+    var scope = '*';
+
+    authcodedb.add(code, client.id, redirectURI, user.username, scope, function (error) {
         if (error) return callback(error);
         callback(null, code);
     });
 }));
 
+// TODO verify this is needed...we should only hand out authcode grant to be exchanged with a token
 server.grant(oauth2orize.grant.token(function (client, user, ares, callback) {
     debug('grant token:', client, user, ares);
 
@@ -107,7 +113,7 @@ server.exchange(oauth2orize.exchange.code(function (client, code, redirectURI, c
             var token = tokendb.generateToken();
             var expires = new Date(Date.now() + 60 * 60000).toUTCString(); // 1 hour
 
-            tokendb.add(token, authCode.userId, authCode.clientId, expires, '*', function (error) {
+            tokendb.add(token, authCode.userId, authCode.clientId, expires, authCode.scope, function (error) {
                 if (error) return callback(error);
 
                 debug('new access token for client ' + client.id + ' token ' + token);
@@ -173,7 +179,7 @@ var error = [
 var authorization = [
     session.ensureLoggedIn('/api/v1/session/login'),
     server.authorization(function (clientID, redirectURI, callback) {
-        debug('server authorization validation for ' + clientID + ' ' + redirectURI);
+        debug('authorization: client %s with callback to %s.', clientID, redirectURI);
 
         clientdb.getByClientId(clientID, function (error, client) {
             // TODO actually check redirectURI
@@ -190,7 +196,10 @@ var authorization = [
         req.body.transaction_id = req.oauth2.transactionID;
         next();
     },
-    server.decision()
+    server.decision(function(req, done) {
+        debug('decision: with scope', req.oauth2.req.scope);
+        return done(null, { scope: req.oauth2.req.scope });
+    })
 // OAuth sopes skip END
     // function (req, res) {
     //     res.render('dialog', { transactionID: req.oauth2.transactionID, user: req.user, client: req.oauth2.client });
@@ -220,7 +229,7 @@ function scope(requestedScope) {
     assert(typeof requestedScope === 'string');
 
     var requestedScopes = requestedScope.split(',');
-    debug('scope: requested scopes', requestedScopes);
+    debug('scope: add routes with requested scopes', requestedScopes);
 
     return [
         passport.authenticate(['bearer'], { session: false }),

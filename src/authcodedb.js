@@ -26,15 +26,16 @@ function get(authCode, callback) {
     });
 }
 
-function add(authCode, clientId, redirectURI, userId, callback) {
+function add(authCode, clientId, redirectURI, userId, scope, callback) {
     assert(typeof authCode === 'string');
     assert(typeof clientId === 'string');
     assert(typeof redirectURI === 'string');
     assert(typeof userId === 'string');
+    assert(typeof scope === 'string');
     assert(typeof callback === 'function');
 
-    database.run('INSERT INTO authcodes (authCode, clientId, redirectURI, userId) VALUES (?, ?, ?, ?)',
-            [ authCode, clientId, redirectURI, userId ], function (error) {
+    database.run('INSERT INTO authcodes (authCode, clientId, redirectURI, userId, scope) VALUES (?, ?, ?, ?, ?)',
+            [ authCode, clientId, redirectURI, userId, scope ], function (error) {
         if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
         if (error || !this.lastID) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 

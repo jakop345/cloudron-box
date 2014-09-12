@@ -51,13 +51,15 @@ describe('database', function () {
             authCode: 'authcode-0',
             clientId: 'clientid-0',
             redirectURI: 'http://localhost',
-            userId: 'userid-0'
+            userId: 'userid-0',
+            scope: 'foo,bar'
         };
         var AUTHCODE_1 = {
             authCode: 'authcode-1',
             clientId: 'clientid-1',
             redirectURI: 'http://localhost',
-            userId: 'userid-1'
+            userId: 'userid-1',
+            scope: 'foobarbaz'
         };
 
         it('add fails due to missing arguments', function () {
@@ -68,14 +70,14 @@ describe('database', function () {
         });
 
         it('add succeeds', function (done) {
-            authcodedb.add(AUTHCODE_0.authCode, AUTHCODE_0.clientId, AUTHCODE_0.redirectURI, AUTHCODE_0.userId, function (error) {
+            authcodedb.add(AUTHCODE_0.authCode, AUTHCODE_0.clientId, AUTHCODE_0.redirectURI, AUTHCODE_0.userId, AUTHCODE_0.scope, function (error) {
                 expect(error).to.be(null);
                 done();
             });
         });
 
         it('add of same authcode fails', function (done) {
-            authcodedb.add(AUTHCODE_0.authCode, AUTHCODE_0.clientId, AUTHCODE_0.redirectURI, AUTHCODE_0.userId, function (error) {
+            authcodedb.add(AUTHCODE_0.authCode, AUTHCODE_0.clientId, AUTHCODE_0.redirectURI, AUTHCODE_0.userId, AUTHCODE_0.scope, function (error) {
                 expect(error).to.be.a(DatabaseError);
                 expect(error.reason).to.be(DatabaseError.ALREADY_EXISTS);
                 done();

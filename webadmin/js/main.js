@@ -20,7 +20,8 @@ var MainController = function ($scope, $route, $interval, Client) {
 
     $scope.login = function () {
         var callbackURL = window.location.origin + '/login_callback.html';
-        window.location.href = '/api/v1/oauth/dialog/authorize?response_type=code&client_id=' + Client._clientId + '&redirect_uri=' + callbackURL;
+        var scope = 'root,profile,apps';
+        window.location.href = '/api/v1/oauth/dialog/authorize?response_type=code&client_id=' + Client._clientId + '&redirect_uri=' + callbackURL + '&scope=' + scope;
     };
 
     $scope.setup = function () {
