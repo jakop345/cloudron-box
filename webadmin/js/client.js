@@ -513,7 +513,7 @@ console.dir(data, status);
         this._userInfo = {};
 
         // logout from OAuth session
-        window.location.href = '\/api/v1/session/logout';
+        window.location.href = '/api/v1/session/logout';
     };
 
     Client.prototype.exchangeCodeForToken = function (authCode, callback) {
