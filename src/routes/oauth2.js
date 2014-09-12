@@ -83,18 +83,6 @@ server.grant(oauth2orize.grant.code({ scopeSeparator: ',' }, function (client, r
     });
 }));
 
-// TODO verify this is needed...we should only hand out authcode grant to be exchanged with a token
-server.grant(oauth2orize.grant.token(function (client, user, ares, callback) {
-    debug('grant token:', client, user, ares);
-
-    var token = uuid.v4();
-
-    tokendb.add(token, user.username, client.clientId, '*', function (error) {
-        if (error) return callback(error);
-        callback(null, token);
-    });
-}));
-
 // Exchange authorization codes for access tokens.  The callback accepts the
 // `client`, which is exchanging `code` and any `redirectURI` from the
 // authorization request for verification.  If these values are validated, the
