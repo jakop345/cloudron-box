@@ -66,7 +66,7 @@ sleep 2
 # now add the user to the docker group
 usermod $USER -a -G docker
 echo "=== Pulling base docker images ==="
-docker pull girish/base:0.3
+docker pull girish/base:0.5
 docker pull girish/base:0.4
 
 # https://jpetazzo.github.io/2014/06/23/docker-ssh-considered-evil/
