@@ -152,7 +152,7 @@ function validatePortBindings(portBindings) {
 }
 
 function getIconURLSync(app) {
-    var iconPath = config.dataRoot + '/icons/' + app.id + '.png';
+    var iconPath = config.iconsRoot + '/' + app.id + '.png';
     if (fs.existsSync(iconPath)) {
         return '/api/v1/app/' + app.id + '/icon';
     } else {

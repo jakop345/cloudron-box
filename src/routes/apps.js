@@ -70,7 +70,7 @@ function getApps(req, res, next) {
 function getAppIcon(req, res, next) {
     if (typeof req.params.id !== 'string') return next(new HttpError(400, 'appid is required'));
 
-    var iconPath = config.dataRoot + '/icons/' + req.params.id + '.png';
+    var iconPath = config.iconsRoot + '/' + req.params.id + '.png';
     fs.exists(iconPath, function (exists) {
         if (!exists) return next(new HttpError(404, 'No such icon'));
         res.sendfile(iconPath);

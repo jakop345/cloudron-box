@@ -389,9 +389,7 @@ function downloadManifest(app, callback) {
             if (error) return callback(new Error('Manifest error:' + error.message));
 
             if (manifest.icon) {
-                var iconDir = path.join(config.dataRoot, 'icons');
-                safe.fs.mkdirSync(iconDir);
-                safe.fs.writeFileSync(iconDir + '/' + app.id + '.png', new Buffer(manifest.icon));
+                safe.fs.writeFileSync(config.iconsRoot + '/' + app.id + '.png', new Buffer(manifest.icon));
 
                 // delete icon buffer, so we don't store it in the db
                 delete manifest.icon;

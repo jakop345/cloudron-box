@@ -563,6 +563,7 @@ Server.prototype.start = function (callback) {
     assert(this.app === null, 'Server is already up and running.');
 
     mkdirp.sync(config.dataRoot);
+    mkdirp.sync(config.iconsRoot);
     mkdirp.sync(config.configRoot);
     mkdirp.sync(config.mountRoot);
     mkdirp.sync(config.nginxAppConfigDir);
