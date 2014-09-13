@@ -200,13 +200,32 @@ function getLogs(req, res, next) {
     var fromLine = parseInt(req.query.fromLine || 0, 10);
     var follow = req.query.follow || false;
 
-    apps.getLogs(req.params.id, { fromLine: fromLine, follow: follow }, function (error, logStream) {
+    function sse(id, data) { return 'id: ' + id + '\ndata: ' + data + '\n\n'; };
+
+    if (req.headers.accept !== 'text/event-stream') return next(new HttpError(400, 'This API call requires EventStream'));
+
+    var fromLine = (parseInt(req.headers['last-event-id'], 10) + 1) || 1;
+
+    apps.getLogs(req.params.id, { fromLine: fromLine }, function (error, logStream) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app:' + error));
         if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error));
         if (error) return next(new HttpError(500, 'Internal error: ' + error));
 
-        res.on('close', function (err) { if (logStream.req) logStream.req.end(); }); // response closed prematurely
-        logStream.pipe(res);
+        res.writeHead(200, {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+            'X-Accel-Buffering': 'no', // disable nginx buffering
+            'Access-Control-Allow-Origin': '*'
+        });
+        res.write('retry: 3000\n');
+        res.on('close', function (err) { logStream.emit('error', new Error('Response closed')); });
+        logStream.on('data', function (data) {
+            var obj = JSON.parse(data);
+            res.write(sse(obj.lineNumber, obj.log));
+        });
+        logStream.on('end', res.end.bind(res));
+        logStream.on('error', res.end.bind(res, null));
     });
 }
 

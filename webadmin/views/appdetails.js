@@ -1,4 +1,5 @@
-/* global $:true */
+
+            /* global $:true */
 /* exported AppDetailsController */
 
 'use strict';
@@ -38,19 +39,16 @@ var AppDetailsController = function ($scope, $http, $routeParams, $timeout, Clie
     var lineCount = 0;
     $scope.refreshLogs = function () {
         console.log('Refreshing logs for', $scope.app.id);
-        Client.getAppLogs($routeParams.appId, { follow: lineCount != 0, fromLine: lineCount }, function (error, logs) {
-            if (error) {
-                console.error(error);
-            } else {
-                var lines = logs.split('\r\n');
-                lines.forEach(function (line) { $('#logs').append(ansi_up.ansi_to_html(line) + '<br>'); });
-                lineCount += lines.length;
-                $("#logs").animate({ scrollTop: $("#logs").attr("scrollHeight") }, 1000);
-            }
 
-            console.log('Retrying');
-            $timeout($scope.refreshLogs, 0);
-        });
+        var eventSource = Client.getAppLogs($routeParams.appId);
+        eventSource.addEventListener('open', function (e) { console.log('event source open'); });
+        eventSource.addEventListener('error', function (e) { if (e.readyState === EventSource.CLOSED) console.log('event source closed'); });
+
+        eventSource.addEventListener('message', function (event) {
+            var line = event.data;
+            $('#logs').append(ansi_up.ansi_to_html(line) + '<br>');
+            $("#logs").scrollTop($('#logs')[0].scrollHeight);
+        }, false);
     };
 
     Client.onReady(function () {

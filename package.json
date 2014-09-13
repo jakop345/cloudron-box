@@ -55,7 +55,8 @@
     "underscore": "~1.7.0",
     "json": "~9.0.1",
     "apidoc": "~0.7.1",
-    "istanbul": "~0.3.2"
+    "istanbul": "~0.3.2",
+    "split": "^0.3.0"
   },
   "devDependencies": {
     "apidoc": "*",

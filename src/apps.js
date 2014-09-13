@@ -12,6 +12,7 @@ var DatabaseError = require('./databaseerror.js'),
     Docker = require('dockerode'),
     stream = require('stream'),
     os = require('os'),
+    split = require('split'),
     config = require('../config.js');
 
 exports = module.exports = {
@@ -292,23 +293,18 @@ function getLogs(appId, options, callback) {
         if (app.installationState !== appdb.ISTATE_INSTALLED) return callback(new AppsError(AppsError.BAD_STATE, 'App not installed'));
 
         var container = docker.getContainer(app.containerId);
-        container.logs({ stdout: true, stderr: true, follow: options.follow, timestamps: true, tail: 'all' }, function (error, logStream) {
+        // note: cannot access docker file directly because it needs root access
+        container.logs({ stdout: true, stderr: true, follow: true, timestamps: true, tail: 'all' }, function (error, logStream) {
             if (error && error.statusCode === 404) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-            var transform = new stream.Transform({ encoding: 'utf8' });
-            transform.linesToSkip = options.fromLine;
-            transform._transform = function (chunk, encoding, callback) {
-                if (transform.linesToSkip === 0) {
-                    transform.push(chunk);
-                    return callback();
-                }
-                --transform.linesToSkip;
-            };
-            transform._flush = function (callback) { callback(); };
-
-            logStream.pipe(transform);
-            return callback(null, transform);
+            var lineCount = 0;
+            var skipLinesStream = split(function mapper(line) {
+                if (++lineCount < options.fromLine) return undefined;
+                return JSON.stringify({ lineNumber: lineCount, log: line });
+            });
+            logStream.pipe(skipLinesStream);
+            return callback(null, skipLinesStream);
         });
     });
 }
