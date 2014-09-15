@@ -69,6 +69,9 @@ tar xf cert.tar
 
 chown $USER:$USER -R $BACKUP_DIR
 
+echo "=== Setup collectd and graphite ==="
+$SRCDIR/scripts/bootstrap/setup_collectd.sh
+
 echo "==== Setup supervisord ===="
 supervisorctl shutdown || echo "supervisord not running"
 rm -rf /etc/supervisor

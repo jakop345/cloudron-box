@@ -92,8 +92,12 @@ apt-get -y install supervisor
 service supervisor stop
 update-rc.d -f supervisor remove
 
-echo "== Box bootstrapping =="
 
+echo "==== Setup collectd and graphite ==="
+apt-get install -y collectd collectd-utils graphite-web graphite-carbon uwsgi-plugin-python uwsgi
+
+
+echo "== Box bootstrapping =="
 
 echo "==== Cloning box repo ===="
 echo "Cloning the box repo"

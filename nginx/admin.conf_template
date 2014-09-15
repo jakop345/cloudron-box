@@ -18,6 +18,31 @@ server {
         client_max_body_size 0;
     }
 
+    # Graphite
+    # FIXME: these are not authenticated!
+    location /graphite/ {
+        proxy_pass http://127.0.0.1:3031;
+     }
+    location /content {
+        proxy_pass http://127.0.0.1:3031;
+    }
+    location /metrics {
+        proxy_pass http://127.0.0.1:3031;
+    }
+    location /dashboard {
+        proxy_pass http://127.0.0.1:3031;
+    }
+    location /render {
+        proxy_pass http://127.0.0.1:3031;
+    }
+    location /browser {
+        proxy_pass http://127.0.0.1:3031;
+    }
+    location /composer {
+        proxy_pass http://127.0.0.1:3031;
+    }
+    # End Graphite
+
     location / {
         root   ##SRCDIR##/webadmin/;
         index  index.html index.htm;
