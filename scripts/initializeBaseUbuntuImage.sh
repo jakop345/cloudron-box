@@ -68,7 +68,6 @@ usermod $USER -a -G docker
 echo "=== Pulling base docker images ==="
 docker pull girish/base:0.6
 docker pull girish/base:0.5
-docker pull girish/base:0.4
 
 echo "=== Pulling graphite docker images ==="
 docker pull girish/graphite:0.1
