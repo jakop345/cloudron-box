@@ -66,8 +66,12 @@ sleep 2
 # now add the user to the docker group
 usermod $USER -a -G docker
 echo "=== Pulling base docker images ==="
+docker pull girish/base:0.6
 docker pull girish/base:0.5
 docker pull girish/base:0.4
+
+echo "=== Pulling graphite docker images ==="
+docker pull girish/graphite:0.1
 
 # https://jpetazzo.github.io/2014/06/23/docker-ssh-considered-evil/
 echo "=== Setup nsenter ==="
@@ -93,8 +97,8 @@ service supervisor stop
 update-rc.d -f supervisor remove
 
 
-echo "==== Setup collectd and graphite ==="
-apt-get install -y collectd collectd-utils graphite-web graphite-carbon uwsgi-plugin-python uwsgi
+echo "==== Setup collectd ==="
+apt-get install -y collectd collectd-utils
 
 
 echo "== Box bootstrapping =="

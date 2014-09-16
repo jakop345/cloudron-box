@@ -21,25 +21,25 @@ server {
     # Graphite
     # FIXME: these are not authenticated!
     location /graphite/ {
-        proxy_pass http://127.0.0.1:3031;
+        proxy_pass http://127.0.0.1:8000;
      }
     location /content {
-        proxy_pass http://127.0.0.1:3031;
+        proxy_pass http://127.0.0.1:8000;
     }
     location /metrics {
-        proxy_pass http://127.0.0.1:3031;
+        proxy_pass http://127.0.0.1:8000;
     }
     location /dashboard {
-        proxy_pass http://127.0.0.1:3031;
+        proxy_pass http://127.0.0.1:8000;
     }
     location /render {
-        proxy_pass http://127.0.0.1:3031;
+        proxy_pass http://127.0.0.1:8000;
     }
     location /browser {
-        proxy_pass http://127.0.0.1:3031;
+        proxy_pass http://127.0.0.1:8000;
     }
     location /composer {
-        proxy_pass http://127.0.0.1:3031;
+        proxy_pass http://127.0.0.1:8000;
     }
     # End Graphite
 
