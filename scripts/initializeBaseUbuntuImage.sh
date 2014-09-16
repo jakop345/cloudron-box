@@ -67,10 +67,9 @@ sleep 2
 usermod $USER -a -G docker
 echo "=== Pulling base docker images ==="
 docker pull girish/base:0.6
-docker pull girish/base:0.5
 
 echo "=== Pulling graphite docker images ==="
-docker pull girish/graphite:0.1
+docker pull girish/graphite:0.2
 
 # https://jpetazzo.github.io/2014/06/23/docker-ssh-considered-evil/
 echo "=== Setup nsenter ==="
