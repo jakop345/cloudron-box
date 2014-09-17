@@ -16,9 +16,6 @@ BACKUP_DIR=/home/$USER/.yellowtent
 APP_SERVER_URL=$1
 BOX_REVISION=$2
 
-echo "==== Setup /var/log/cloudron ===="
-mkdir -p /var/log/cloudron/
-
 echo "==== Sudoers file for app removal ===="
 cat > /etc/sudoers.d/yellowtent <<EOF
 Defaults!$SRCDIR/src/scripts/rmappdir.sh env_keep=HOME
