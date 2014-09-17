@@ -1,7 +1,7 @@
 #!/bin/sh
 # This script is executed once on startup
 
-exec > >(tee /var/log/cloudron/bootstrap.log)
+exec > >(tee -a "/var/log/cloudron/bootstrap.log-$$-$BASHPID")
 exec 2>&1
 
 set -e
