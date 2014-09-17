@@ -47,7 +47,10 @@ apt-get -y install lxc-docker
 ln -sf /usr/bin/docker.io /usr/local/bin/docker
 
 service docker stop
-umount -l $(grep 'aufs' /proc/mounts | awk '{print$2}' | sort -r)
+AUFS_MOUNTS=$(grep 'aufs' /proc/mounts | awk '{print$2}' | sort -r)
+if [ ! -z $AUFS_MOUNTS ]; then
+    umount -l $AUFS_MOUNTS
+fi
 rm -rf /var/lib/docker
 mkdir /var/lib/docker
 
