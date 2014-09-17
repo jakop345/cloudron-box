@@ -1,2 +1,34 @@
-<h3> Show fancy graphs here </h3>
+<div class="row">
+    <div class="col-lg-8">
+        <ul class="nav nav-tabs">
+            <li ng-class="{ active: activeTab === 'day' }">
+                <a ng-click="activeTab = 'day'">24 hours</a>
+            </li>
+
+            <li ng-class="{ active: activeTab === 'month' }">
+                <a ng-click="activeTab = 'month'">Month</a>
+            </li>
+
+            <li ng-class="{ active: activeTab === 'year' }">
+                <a ng-click="activeTab = 'year'">Year</a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <div ng-switch="activeTab">
+                <div ng-switch-when="day">
+                    This is the day tab
+                </div>
+
+                <div ng-switch-when="month">
+                    This is the month tab
+                </div>
+
+                <div ng-switch-when="year">
+                    This is the year tab
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 

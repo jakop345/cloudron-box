@@ -4,5 +4,6 @@
 'use strict';
 
 var GraphsController = function ($scope, Client) {
+    $scope.activeTab = 'day';
 };
 
