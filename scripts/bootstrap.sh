@@ -48,7 +48,6 @@ EOF
 
 echo "==== Setup nginx ===="
 cd $SRCDIR
-killall nginx || echo "nginx not running"   # condition makes killall not fatal to set -e
 mkdir -p $BACKUP_DIR/nginx/applications
 cp nginx/nginx.conf $BACKUP_DIR/nginx/nginx.conf
 cp nginx/mime.types $BACKUP_DIR/nginx/mime.types
@@ -70,7 +69,6 @@ echo "=== Setup collectd and graphite ==="
 $SRCDIR/scripts/bootstrap/setup_collectd.sh
 
 echo "==== Setup supervisord ===="
-supervisorctl shutdown || echo "supervisord not running"
 rm -rf /etc/supervisor
 mkdir -p /etc/supervisor
 mkdir -p /etc/supervisor/conf.d
