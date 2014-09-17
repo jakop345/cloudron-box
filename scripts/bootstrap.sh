@@ -1,7 +1,7 @@
 #!/bin/sh
 # This script is executed once on startup
 
-exec > >(tee -a "/var/log/cloudron/bootstrap.log-$$-$BASHPID")
+exec > >(tee "/var/log/cloudron/bootstrap.log-$$-$BASHPID")
 
 if [ -f "/home/yellowtent/.yellowtent/cloudron.conf" ]; then
     echo "Someone created the cloudron.conf file. How is this possible?"
