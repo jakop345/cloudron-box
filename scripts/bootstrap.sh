@@ -2,6 +2,17 @@
 # This script is executed once on startup
 
 exec > >(tee -a "/var/log/cloudron/bootstrap.log-$$-$BASHPID")
+
+if [ -f "/home/yellowtent/.yellowtent/cloudron.conf" ]; then
+    echo "Someone created the cloudron.conf file. How is this possible?"
+    exit 1
+fi
+
+if [ -d "/home/yellowtent/.yellowtent/graphite" ]; then
+    echo "Someone create graphite dir. This is not possible."
+    exit 1
+fi
+
 exec 2>&1
 
 set -e
@@ -45,6 +56,11 @@ cd $SRCDIR
 npm install --production
 EOF
 
+if [ -d "/home/yellowtent/.yellowtent/graphite" ]; then
+    echo "Someone create graphite dir. This is not possible 2."
+    exit 1
+fi
+
 
 echo "==== Setup nginx ===="
 cd $SRCDIR
@@ -64,6 +80,11 @@ cd $CERTIFICATE_DIR
 tar xf cert.tar
 
 chown $USER:$USER -R $BACKUP_DIR
+
+if [ -d "/home/yellowtent/.yellowtent/graphite" ]; then
+    echo "Someone create graphite dir. This is not possible 3."
+    exit 1
+fi
 
 echo "=== Setup collectd and graphite ==="
 $SRCDIR/scripts/bootstrap/setup_collectd.sh

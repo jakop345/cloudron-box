@@ -171,3 +171,13 @@ update-rc.d bootstrap defaults 99
 
 sync
 
+if [ -f "/home/yellowtent/.yellowtent/cloudron.conf" ]; then
+    echo "Someone created the cloudron.conf file. How is this possible?"
+    exit 1
+fi
+
+if [ -d "/home/yellowtent/.yellowtent/graphite" ]; then
+    echo "Someone create graphite dir. This is not possible."
+    exit 1
+fi
+
