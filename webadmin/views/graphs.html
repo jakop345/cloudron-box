@@ -17,15 +17,18 @@
         <div class="tab-content">
             <div ng-switch="activeTab">
                 <div ng-switch-when="day">
-                    This is the day tab
+                    <h3> Disk </h3>
+                    <img src="/render?target=sumSeries(collectd.*.df-*.df_complex-free)&target=sumSeries(collectd.*.df-*.df_complex-used)&from=-24hours"/>
                 </div>
 
                 <div ng-switch-when="month">
-                    This is the month tab
+                    <h3> Disk </h3>
+                    <img src="/render?target=sumSeries(collectd.*.df-*.df_complex-free)&target=sumSeries(collectd.*.df-*.df_complex-used)&from=-1month"/>
                 </div>
 
                 <div ng-switch-when="year">
-                    This is the year tab
+                    <h3> Disk </h3>
+                    <img src="/render?target=sumSeries(collectd.*.df-*.df_complex-free)&target=sumSeries(collectd.*.df-*.df_complex-used)&from=-1year"/>
                 </div>
             </div>
         </div>
