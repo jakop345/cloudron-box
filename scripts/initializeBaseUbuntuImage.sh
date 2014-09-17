@@ -167,7 +167,7 @@ update-rc.d bootstrap remove
 echo "[II] Done"
 EOF
 chmod +x /etc/init.d/bootstrap
-update-rc.d bootstrap defaults
+update-rc.d bootstrap defaults 99
 
 sync
 
