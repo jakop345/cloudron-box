@@ -97,6 +97,7 @@ update-rc.d -f supervisor remove
 
 echo "==== Install collectd ==="
 apt-get install -y collectd collectd-utils
+update-rc.d -f collectd remove
 
 
 echo "== Box bootstrapping =="

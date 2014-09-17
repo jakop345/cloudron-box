@@ -15,4 +15,5 @@ docker run -d --name="graphite" \
 
 # collectd
 cp $SCRIPT_DIR/collectd/collectd.conf /etc/collectd/collectd.conf
+update-rc.d -f collectd defaults
 service collectd restart
