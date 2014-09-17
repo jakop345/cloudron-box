@@ -29,16 +29,16 @@ apt-get update
 echo "=== Upgrade ==="
 apt-get upgrade -y
 
-echo "==== Setup nodejs ===="
+echo "==== Install nodejs ===="
 apt-get -y install nodejs npm
 ln -sf /usr/bin/nodejs /usr/bin/node
 
 
-echo "==== Setup git ===="
+echo "==== Install git ===="
 apt-get -y install git
 
 
-echo "==== Setup docker ===="
+echo "==== Install docker ===="
 # see http://idolstarastronomer.com/painless-docker.html
 echo deb https://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list
 apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9
@@ -72,30 +72,30 @@ echo "=== Pulling graphite docker images ==="
 docker pull girish/graphite:0.2
 
 # https://jpetazzo.github.io/2014/06/23/docker-ssh-considered-evil/
-echo "=== Setup nsenter ==="
+echo "=== Install nsenter ==="
 docker run --rm jpetazzo/nsenter cat /nsenter > /usr/bin/nsenter
 chmod +x /usr/bin/nsenter
 
-echo "==== Setup nginx ===="
+echo "==== Install nginx ===="
 apt-get -y install nginx-full
 service nginx stop
 update-rc.d -f nginx remove
 
-echo "==== Setup build-essential ===="
+echo "==== Install build-essential ===="
 apt-get -y install build-essential rcconf
 
 
-echo "==== Setup sqlite3 ===="
+echo "==== Install sqlite3 ===="
 apt-get -y install sqlite3
 
 
-echo "==== Setup supervisor ===="
+echo "==== Install supervisor ===="
 apt-get -y install supervisor
 service supervisor stop
 update-rc.d -f supervisor remove
 
 
-echo "==== Setup collectd ==="
+echo "==== Install collectd ==="
 apt-get install -y collectd collectd-utils
 
 
