@@ -176,9 +176,6 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-echo "Sync filesystems"
-ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i $SCRIPT_DIR/ssh/id_rsa_yellowtent root@$DROPLET_IP "sync"
-
 echo "Shutting down droplet with id : $DROPLET_ID"
 ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i $SCRIPT_DIR/ssh/id_rsa_yellowtent root@$DROPLET_IP "shutdown -f now"
 

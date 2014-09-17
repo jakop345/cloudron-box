@@ -168,3 +168,6 @@ echo "[II] Done"
 EOF
 chmod +x /etc/init.d/bootstrap
 update-rc.d bootstrap defaults
+
+sync
+
