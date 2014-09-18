@@ -144,27 +144,41 @@ echo "==== Install init script ===="
 cat > /etc/init.d/bootstrap <<EOF
 #!/bin/bash
 
-set -v
+do_start() {
+    mkdir -p /var/log/cloudron
 
-mkdir -p /var/log/cloudron
+    exec 2>&1 1> "/var/log/cloudron/bootstrap_init-\$\$-\$BASHPID.log"
 
-exec 2>&1 1> "/var/log/cloudron/bootstrap_init-\$\$-\$BASHPID.log"
+    echo "[II] Update to latest git revision..."
+    cd $SRCDIR
+    sudo -u $USER bash -c "git fetch && git reset --hard $BOX_REVISION"
+    echo "[II] Done"
 
-echo "[II] Update to latest git revision..."
-cd $SRCDIR
-sudo -u $USER bash <<EOS
-git fetch
-git reset --hard $BOX_REVISION
-EOS
-echo "[II] Done"
+    echo "[II] Run bootstrap script..."
+    /bin/bash $SRCDIR/scripts/bootstrap.sh $APPSTORE_URL $BOX_REVISION
+    echo "[II] Done"
 
-echo "[II] Run bootstrap script..."
-/bin/bash $SRCDIR/scripts/bootstrap.sh $APPSTORE_URL $BOX_REVISION
-echo "[II] Done"
+    echo "[II] Disable bootstrap init script"
+    update-rc.d bootstrap remove
+    echo "[II] Done"
+}
 
-echo "[II] Disable bootstrap init script"
-update-rc.d bootstrap remove
-echo "[II] Done"
+case "\$1" in
+    start)
+        do_start
+        ;;
+    restart|reload|force-reload)
+        echo "Error: argument '\$1' not supported" >&2
+        exit 3
+        ;;
+    stop)
+        ;;
+    *)
+        echo "Usage: \$0 start|stop" >&2
+        exit 3
+        ;;
+esac
+
 EOF
 chmod +x /etc/init.d/bootstrap
 update-rc.d bootstrap defaults 99
