@@ -750,7 +750,7 @@ describe('App installation - port bindings', function () {
             client.setTimeout(2000);
             client.on('connect', function () { done(new Error('Got connected')); });
             client.on('timeout', function () { done(); });
-            client.on('error', function (error) { console.log('got error'); done(); });
+            client.on('error', function (error) { done(); });
             client.on('data', function (data) {
                 done(new Error('Expected connection to fail!'));
             });
