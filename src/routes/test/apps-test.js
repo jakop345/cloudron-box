@@ -738,7 +738,7 @@ describe('App installation - port bindings', function () {
         });
     });
 
-    xit('did stop the app', function (done) {
+    it('did stop the app', function (done) {
         setTimeout(function () {
             var client = net.connect(7171);
             client.setTimeout(2000);
