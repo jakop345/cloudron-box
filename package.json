@@ -31,6 +31,7 @@
     "express": "4.2.0",
     "express-session": "1.1.0",
     "js-yaml": "~3.2.2",
+    "json": "~9.0.1",
     "mime": "^1.2.11",
     "mkdirp": "^0.3.5",
     "morgan": "1.0.1",
@@ -48,13 +49,12 @@
     "rimraf": "^2.2.6",
     "safetydance": "0.0.11",
     "serve-favicon": "2.0.0",
+    "split": "^0.3.0",
     "sqlite3": "2.2.3",
     "superagent": "^0.17.0",
     "supererror": "^0.3.0",
     "ursa": "^0.8.0",
-    "underscore": "~1.7.0",
-    "json": "~9.0.1",
-    "split": "^0.3.0"
+    "underscore": "~1.7.0"
   },
   "devDependencies": {
     "apidoc": "*",
