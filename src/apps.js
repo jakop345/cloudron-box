@@ -28,6 +28,7 @@ exports = module.exports = {
     uninstall: uninstall,
     update: update,
 
+    getLogStream: getLogStream,
     getLogs: getLogs,
 
     start: start,
@@ -280,7 +281,7 @@ function update(appId, callback) {
     });
 }
 
-function getLogs(appId, options, callback) {
+function getLogStream(appId, options, callback) {
     assert(typeof appId === 'string');
     assert(typeof options === 'object');
     assert(typeof callback === 'function');
@@ -305,6 +306,28 @@ function getLogs(appId, options, callback) {
             });
             logStream.pipe(skipLinesStream);
             return callback(null, skipLinesStream);
+        });
+    });
+}
+
+function getLogs(appId, callback) {
+    assert(typeof appId === 'string');
+    assert(typeof callback === 'function');
+
+    debug('Getting logs for %s', appId);
+    appdb.get(appId, function (error, app) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND));
+        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+        if (app.installationState !== appdb.ISTATE_INSTALLED) return callback(new AppsError(AppsError.BAD_STATE, 'App not installed'));
+
+        var container = docker.getContainer(app.containerId);
+        // note: cannot access docker file directly because it needs root access
+        container.logs({ stdout: true, stderr: true, follow: false, timestamps: true, tail: 'all' }, function (error, logStream) {
+            if (error && error.statusCode === 404) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
+            if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+            return callback(null, logStream);
         });
     });
 }

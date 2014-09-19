@@ -391,6 +391,7 @@ Server.prototype._initializeExpressSync = function () {
     router.post('/api/v1/app/:id/stop', appsScope, routes.apps.stopApp);
     router.post('/api/v1/app/:id/start', appsScope, routes.apps.startApp);
     router.get ('/api/v1/app/:id/icon', routes.apps.getAppIcon);
+    router.get ('/api/v1/app/:id/logstream', routes.apps.getLogStream);
     router.get ('/api/v1/app/:id/logs', routes.apps.getLogs);
 
     // subdomain routes

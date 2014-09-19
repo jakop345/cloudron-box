@@ -326,9 +326,13 @@ angular.module('Application').service('Client', function ($http, $filter) {
         });
     };
 
-    Client.prototype.getAppLogs = function (appId) {
-        var source = new EventSource('/api/v1/app/' + appId + '/logs');
+    Client.prototype.getAppLogStream = function (appId) {
+        var source = new EventSource('/api/v1/app/' + appId + '/logstream');
         return source;
+    };
+
+    Client.prototype.getAppLogUrl = function (appId) {
+        return '/api/v1/app/' + appId + '/logs?access_token=' + this._token;
     };
 
     Client.prototype.setAdmin = function (username, admin, callback) {

@@ -21,6 +21,7 @@ exports = module.exports = {
     uninstallApp: uninstallApp,
     updateApp: updateApp,
     getLogs: getLogs,
+    getLogStream: getLogStream,
 
     stopApp: stopApp,
     startApp: startApp
@@ -194,8 +195,8 @@ function updateApp(req, res, next) {
     });
 }
 
-function getLogs(req, res, next) {
-    debug('getting logs of ' + req.params.id);
+function getLogStream(req, res, next) {
+    debug('getting logstream of ' + req.params.id);
 
     var fromLine = parseInt(req.query.fromLine || 0, 10);
     var follow = req.query.follow || false;
@@ -206,7 +207,7 @@ function getLogs(req, res, next) {
 
     var fromLine = (parseInt(req.headers['last-event-id'], 10) + 1) || 1;
 
-    apps.getLogs(req.params.id, { fromLine: fromLine }, function (error, logStream) {
+    apps.getLogStream(req.params.id, { fromLine: fromLine }, function (error, logStream) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app:' + error));
         if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error));
         if (error) return next(new HttpError(500, 'Internal error: ' + error));
@@ -226,6 +227,24 @@ function getLogs(req, res, next) {
         });
         logStream.on('end', res.end.bind(res));
         logStream.on('error', res.end.bind(res, null));
+    });
+}
+
+function getLogs(req, res, next) {
+    debug('getting logs of ' + req.params.id);
+
+    apps.getLogs(req.params.id, function (error, logStream) {
+        if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app:' + error));
+        if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error));
+        if (error) return next(new HttpError(500, 'Internal error: ' + error));
+
+        res.writeHead(200, {
+            'Content-Type': 'application/x-logs',
+            'Content-Disposition': 'attachment; filename="log.txt"',
+            'Cache-Control': 'no-cache',
+            'X-Accel-Buffering': 'no' // disable nginx buffering
+        });
+        logStream.pipe(res);
     });
 }
 
