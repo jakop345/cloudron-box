@@ -52,7 +52,7 @@ Updater.prototype._check = function () {
     // box updates
     superagent.get(this._boxUpdateInfoManifestUrl).end(function (error, result) {
         if (error || result.status !== 200) {
-            console.error('Unable to fetch VERSIONS.json.', error, res);
+            console.error('Unable to fetch VERSIONS.json.', error, result);
             return;
         }
 
