@@ -53,10 +53,16 @@ function startDockerProxy(interceptor, callback) {
         var options = _.extend({ }, dockerOptions, { method: req.method, path: req.url, headers: req.headers });
         var dockerRequest = http.request(options, function (dockerResponse) {
             res.writeHead(dockerResponse.statusCode, dockerResponse.headers);
+            dockerResponse.on('error', console.error);
             dockerResponse.pipe(res, { end: true });
         });
 
-        req.pipe(dockerRequest, { end: true });
+        req.on('error', console.error);
+        if (!req.readable) {
+            dockerRequest.end();
+        } else {
+            req.pipe(dockerRequest, { end: true });
+        }
 
     }).listen(5687, callback);
 }
