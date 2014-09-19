@@ -29,6 +29,7 @@ var express = require('express'),
     backups = require('./backups.js'),
     proxy = require('proxy-middleware'),
     url = require('url'),
+    querystring = require('querystring'),
     _ = require('underscore');
 
 exports = module.exports = Server;
@@ -295,6 +296,15 @@ Server.prototype._initializeExpressSync = function () {
     var json = middleware.json({ strict: true, limit: QUERY_LIMIT }), // application/json
         urlencoded = middleware.urlencoded({ limit: QUERY_LIMIT }); // application/x-www-form-urlencoded
 
+    var graphiteProxy = proxy(url.parse('http://127.0.0.1:8000'));
+    var graphiteMiddleware = function (req, res, next) {
+        // remove access_token from the request url before passing to the proxy
+        var parsedUrl = url.parse(req.url, true /* parseQueryString */);
+        delete parsedUrl.query['access_token'];
+        req.url = url.format({ pathname: parsedUrl.pathname, query: parsedUrl.query });
+        graphiteProxy(req, res, next);
+    };
+
     // Passport configuration
     require('./auth');
 
@@ -359,6 +369,7 @@ Server.prototype._initializeExpressSync = function () {
     router.get ('/api/v1/stats', rootScope, this._getCloudronStats.bind(this));
     router.post('/api/v1/backups', rootScope, routes.backups.createBackup);
     router.get ('/api/v1/profile', profileScope, routes.user.info);
+    router.get ('/api/v1/graphs', rootScope, graphiteMiddleware);
 
     router.get ('/api/v1/users', usersScope, routes.user.list);
     router.post('/api/v1/users', usersScope, admin, routes.user.create);
@@ -431,9 +442,7 @@ Server.prototype._initializeExpressSync = function () {
     router.post('/api/v1/volume/create', bearer, this._requirePassword.bind(this), routes.volume.createVolume);
 
     // graphite calls
-    var graphiteUrl = url.parse('http://127.0.0.1:8000');
-    router.get([ '/graphite/*', '/content/*', '/metrics/*', '/dashboard/*', '/render/*', '/browser/*', '/composer/*' ],
-               rootScope, proxy(graphiteUrl));
+    router.get([ '/graphite/*', '/content/*', '/metrics/*', '/dashboard/*', '/render/*', '/browser/*', '/composer/*' ], rootScope, graphiteMiddleware);
 
     // volume resource related routes
     router.param('volume', function (req, res, next, id) {

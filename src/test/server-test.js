@@ -14,6 +14,7 @@ var Server = require('../server.js'),
     config = require('../../config.js');
 
 var SERVER_URL = 'http://localhost:' + config.port;
+var ACCESS_TOKEN = null;
 
 // remove all temporary folders
 function cleanup(done) {
@@ -126,9 +127,9 @@ describe('Server', function () {
             request.post(SERVER_URL + '/api/v1/createadmin').send(data).end(function (err, res) {
                 expect(res.statusCode).to.equal(201);
 
-                var token = res.body.token;
+                ACCESS_TOKEN = res.body.token;
 
-                request.get(SERVER_URL + '/api/v1/stats').query({ access_token: token }).end(function (err, res) {
+                request.get(SERVER_URL + '/api/v1/stats').query({ access_token: ACCESS_TOKEN }).end(function (err, res) {
                     expect(err).to.not.be.ok();
                     expect(res.statusCode).to.equal(200);
                     expect(res.body).to.be.an(Object);
@@ -411,6 +412,39 @@ describe('Server', function () {
                 done();
             }, 100);
         });
+    });
+
+    describe('graphite urls', function () {
+        var server, scope;
+
+        before(function (done) {
+            scope = nock('http://127.0.0.1:8000')
+            scope.get('/graphite/someurl').reply(200); // url must not have access_token
+
+            server = new Server();
+            server.start(done);
+        });
+
+        after(function (done) {
+            nock.cleanAll();
+            server.stop(done);
+        });
+
+        it('can access graphite url', function (done) {
+            request.get(SERVER_URL + '/graphite/someurl').query({ access_token: ACCESS_TOKEN }).end(function (error, res) {
+                expect(res.statusCode).to.be(200);
+                expect(scope.isDone()).to.be.ok();
+                done();
+            });
+        });
+
+        it('cannot access graphite url without token', function (done) {
+            request.get(SERVER_URL + '/graphite/someurl').end(function (error, res) {
+                expect(res.statusCode).to.be(401);
+                done();
+            });
+        });
+
     });
 });
 
