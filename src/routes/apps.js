@@ -199,10 +199,10 @@ function getLogStream(req, res, next) {
     debug('getting logstream of ' + req.params.id);
 
     var fromLine = parseInt(req.query.fromLine || 0, 10);
-    var follow = req.query.follow || false;
 
     function sse(id, data) { return 'id: ' + id + '\ndata: ' + data + '\n\n'; };
 
+    console.dir(req.headers);
     if (req.headers.accept !== 'text/event-stream') return next(new HttpError(400, 'This API call requires EventStream'));
 
     var fromLine = (parseInt(req.headers['last-event-id'], 10) + 1) || 1;
@@ -220,7 +220,7 @@ function getLogStream(req, res, next) {
             'Access-Control-Allow-Origin': '*'
         });
         res.write('retry: 3000\n');
-        res.on('close', function (err) { logStream.emit('error', new Error('Response closed')); });
+        res.on('close', logStream.close);
         logStream.on('data', function (data) {
             var obj = JSON.parse(data);
             res.write(sse(obj.lineNumber, obj.log));

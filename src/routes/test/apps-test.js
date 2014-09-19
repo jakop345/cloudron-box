@@ -24,6 +24,7 @@ var Server = require('../../server.js'),
     config = require('../../../config.js'),
     uuid = require('node-uuid'),
     _ = require('underscore'),
+    http = require('http'),
     appFqdn = require('../../apps').appFqdn;
 
 var SERVER_URL = 'http://localhost:' + config.port;
@@ -39,7 +40,6 @@ var token = null; // authentication token
 function startDockerProxy(interceptor, callback) {
     assert(typeof interceptor === 'function');
 
-    var http = require('http');
     var dockerOptions;
     if (os.platform() === 'linux') {
         dockerOptions = { socketPath: '/var/run/docker.sock'};
@@ -390,6 +390,59 @@ describe('App installation', function () {
             expect(data.Volumes['/app/data']).to.eql(config.appDataRoot + '/' + APP_ID);
             done();
         });
+    });
+
+    it('logs - stdout and stderr', function (done) {
+        request.get(SERVER_URL + '/api/v1/app/' + APP_ID + '/logs')
+            .query({ access_token: token })
+            .end(function (err, res) {
+            var data = '';
+            res.on('data', function (d) { data += d.toString('utf8'); });
+            res.on('end', function () {
+                expect(data.length).to.not.be(0);
+                done();
+            });
+            res.on('error', done);
+        });
+    });
+
+    it('logStream - requires event-stream accept header', function (done) {
+        var req = request.get(SERVER_URL + '/api/v1/app/' + APP_ID + '/logstream')
+            .query({ access_token: token, fromLine: 0 })
+            .end(function (err, res) {
+            expect(res.statusCode).to.be(400);
+            done();
+        });
+    });
+
+
+    it('logStream - stream logs', function (done) {
+        var options = {
+            port: config.port, host: 'localhost', path: '/api/v1/app/' + APP_ID + '/logstream?access_token=' + token,
+            headers: { 'Accept': 'text/event-stream', 'Connection': 'keep-alive' }
+        };
+
+        // superagent doesn't work. maybe https://github.com/visionmedia/superagent/issues/420
+        var req = http.get(options, function (res) {
+            var data = '';
+            res.on('data', function (d) { data += d.toString('utf8'); });
+            setTimeout(function checkData() {
+                expect(data.length).to.not.be(0);
+                var lineNumber = 1;
+                data.split('\n').forEach(function (line) {
+                    if (line.indexOf('id: ') !== 0) return;
+                    expect(parseInt(line.substr(4), 10)).to.be(lineNumber); // line number
+                    ++lineNumber;
+                });
+
+                req.abort();
+                expect(lineNumber).to.be.above(1);
+                done();
+            }, 1000);
+            res.on('error', done);
+        });
+
+        req.on('error', done);
     });
 
     it('can stop app', function (done) {

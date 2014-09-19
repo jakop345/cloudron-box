@@ -304,6 +304,7 @@ function getLogStream(appId, options, callback) {
                 if (++lineCount < options.fromLine) return undefined;
                 return JSON.stringify({ lineNumber: lineCount, log: line });
             });
+            skipLinesStream.close = logStream.req.abort;
             logStream.pipe(skipLinesStream);
             return callback(null, skipLinesStream);
         });
