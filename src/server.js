@@ -27,6 +27,8 @@ var express = require('express'),
     userdb = require('./userdb'),
     config = require('../config.js'),
     backups = require('./backups.js'),
+    proxy = require('proxy-middleware'),
+    url = require('url'),
     _ = require('underscore');
 
 exports = module.exports = Server;
@@ -427,6 +429,11 @@ Server.prototype._initializeExpressSync = function () {
 
     router.get ('/api/v1/volume/list', bearer, routes.volume.listVolumes);
     router.post('/api/v1/volume/create', bearer, this._requirePassword.bind(this), routes.volume.createVolume);
+
+    // graphite calls
+    var graphiteUrl = url.parse('http://127.0.0.1:8000');
+    router.get([ '/graphite/*', '/content/*', '/metrics/*', '/dashboard/*', '/render/*', '/browser/*', '/composer/*' ],
+               rootScope, proxy(graphiteUrl));
 
     // volume resource related routes
     router.param('volume', function (req, res, next, id) {
