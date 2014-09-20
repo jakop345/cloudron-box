@@ -3,7 +3,7 @@
 
 'use strict';
 
-var AppDetailsController = function ($scope, $http, $routeParams, $timeout, Client) {
+var AppDetailsController = function ($scope, $http, $routeParams, Client) {
     $scope.app = {};
     $scope.initialized = false;
     $scope.updateAvailable = false;
