@@ -870,6 +870,17 @@
     "underscore": {
       "version": "1.7.0",
       "from": "underscore@*"
+    },
+    "connect-modrewrite": {
+      "version": "0.7.9",
+      "from": "connect-modrewrite@",
+      "resolved": "http://registry.npmjs.org/connect-modrewrite/-/connect-modrewrite-0.7.9.tgz",
+      "dependencies": {
+        "qs": {
+          "version": "1.2.2",
+          "from": "qs@^1.2.2"
+        }
+      }
     }
   }
 }

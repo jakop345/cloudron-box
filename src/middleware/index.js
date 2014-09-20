@@ -8,7 +8,6 @@ exports = module.exports = {
     json: require('body-parser').json,
     morgan: require('morgan'),
     proxy: require('proxy-middleware'),
-    rewrite: require('connect-modrewrite'),
     session: require('express-session'),
     timeout: require('connect-timeout'),
     urlencoded: require('body-parser').urlencoded

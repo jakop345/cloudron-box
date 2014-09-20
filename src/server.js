@@ -369,7 +369,7 @@ Server.prototype._initializeExpressSync = function () {
     router.get ('/api/v1/stats', rootScope, this._getCloudronStats.bind(this));
     router.post('/api/v1/backups', rootScope, routes.backups.createBackup);
     router.get ('/api/v1/profile', profileScope, routes.user.info);
-    router.get ('/api/v1/graphs', rootScope, graphiteMiddleware);
+    router.get ('/api/v1/graphs', rootScope, function (req, res, next) { req.url = req.url.replace(/^\/api\/v1\/graphs(\?.*)/, '/render$1'); next(); }, graphiteMiddleware);
 
     router.get ('/api/v1/users', usersScope, routes.user.list);
     router.post('/api/v1/users', usersScope, admin, routes.user.create);

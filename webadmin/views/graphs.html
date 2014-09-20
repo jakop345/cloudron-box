@@ -20,12 +20,29 @@
         <div class="tab-content">
             <div ng-switch="activeTab">
                 <div ng-switch-when="day">
+                    <h3> CPU </h3>
+                       <div id="cpuChartContainer" style="position: relative">
+                           <div id="cpuYAxis" style="position: absolute; top: 0; bottom: 0; width: 40px"></div>
+                           <div id="cpuChart" style="position: relative; left: 40px"></div>
+                       </div>
                     <h3> Disk </h3>
-                    <img src="/render?target=sumSeries(collectd.*.df-*.df_complex-free)&target=sumSeries(collectd.*.df-*.df_complex-used)&from=-24hours"/>
+                       <div id="diskChartContainer" style="position: relative">
+                           <div id="diskYAxis" style="position: absolute; top: 0; bottom: 0; width: 40px"></div>
+                           <div id="diskChart" style="position: relative; left: 40px"></div>
+                       </div>
+                    <h3> Network </h3>
+                       <div id="networkChartContainer" style="position: relative">
+                           <div id="networkYAxis" style="position: absolute; top: 0; bottom: 0; width: 40px"></div>
+                           <div id="networkChart" style="position: relative; left: 40px"></div>
+                       </div>
                 </div>
 
                 <div ng-switch-when="month">
+                    <h3> CPU </h3>
+                    <img src="/render?target=sumSeries(collectd.*.df-*.df_complex-free)&target=sumSeries(collectd.*.df-*.df_complex-used)&from=-1month"/>
                     <h3> Disk </h3>
+                    <img src="/render?target=sumSeries(collectd.*.df-*.df_complex-free)&target=sumSeries(collectd.*.df-*.df_complex-used)&from=-1month"/>
+                    <h3> Memory </h3>
                     <img src="/render?target=sumSeries(collectd.*.df-*.df_complex-free)&target=sumSeries(collectd.*.df-*.df_complex-used)&from=-1month"/>
                 </div>
 

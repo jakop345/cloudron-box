@@ -415,6 +415,22 @@ angular.module('Application').service('Client', function ($http, $filter) {
         });
     };
 
+    Client.prototype.graphs = function (targets, from, callback) {
+        var config = {
+            params: {
+                target: targets,
+                format: 'json',
+                from: from
+            }
+        };
+        $http.get('/api/v1/graphs', config).success(function (data, status) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null, data);
+        }).error(function (data, status) {
+            callback(new ClientError(status, data));
+        });
+    };
+
     Client.prototype.createUser = function (username, password, email, callback) {
         var data = {
             username: username,
