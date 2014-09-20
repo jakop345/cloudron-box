@@ -39,6 +39,7 @@ var AppDetailsController = function ($scope, $http, $routeParams, $timeout, Clie
 
         Client.getApp($routeParams.appId, function (error, app) {
             if (error) {
+                console.error(error);
                 window.location.href = '#/';
                 return;
             }

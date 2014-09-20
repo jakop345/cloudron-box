@@ -206,13 +206,13 @@ angular.module('Application').service('Client', function ($http, $filter) {
         var that = this;
         var data = { appStoreId: id, password: password, location: config.location, portBindings: config.portBindings };
         $http.post('/api/v1/app/install', data).success(function (data, status) {
-            if (status !== 200 || !data.appId) return callback(new ClientError(status, data));
+            if (status !== 200 || !data.id) return callback(new ClientError(status, data));
 
             // put new app with amended title in cache
             data.manifest = { title: title };
             that._installedApps.push(data);
 
-            callback(null, data.appId);
+            callback(null, data.id);
         }).error(function (data, status) {
             callback(new ClientError(status, data));
         });

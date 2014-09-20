@@ -105,7 +105,7 @@ function installApp(req, res, next) {
         if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error) return next(new HttpError(500, 'Internal error:' + error));
 
-        next(new HttpSuccess(200, { appId: appId } ));
+        next(new HttpSuccess(200, { id: appId } ));
     });
 }
 

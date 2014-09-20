@@ -180,8 +180,8 @@ describe('App API', function () {
                .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: null })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
-            expect(res.body.appId).to.be.a('string');
-            APP_ID = res.body.appId;
+            expect(res.body.id).to.be.a('string');
+            APP_ID = res.body.id;
             done(err);
         });
     });
@@ -335,8 +335,8 @@ describe('App installation', function () {
               .send({ appId: APP_ID, appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: null })
               .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
-            expect(res.body.appId).to.be.a('string');
-            expect(res.body.appId).to.be.eql(APP_ID);
+            expect(res.body.id).to.be.a('string');
+            expect(res.body.id).to.be.eql(APP_ID);
             checkInstallStatus();
         });
     });
@@ -631,7 +631,7 @@ describe('App installation - port bindings', function () {
               .send({ appId: APP_ID, appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: { '7778' : '7171' } })
               .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
-            expect(res.body.appId).to.equal(APP_ID);
+            expect(res.body.id).to.equal(APP_ID);
             checkInstallStatus();
         });
     });
