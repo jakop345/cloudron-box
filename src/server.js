@@ -298,9 +298,10 @@ Server.prototype._initializeExpressSync = function () {
 
     var graphiteProxy = proxy(url.parse('http://127.0.0.1:8000'));
     var graphiteMiddleware = function (req, res, next) {
-        // remove access_token from the request url before passing to the proxy
+        // remove any senstive info
         var parsedUrl = url.parse(req.url, true /* parseQueryString */);
         delete parsedUrl.query['access_token'];
+        delete req.headers['authorization']
         req.url = url.format({ pathname: parsedUrl.pathname, query: parsedUrl.query });
         graphiteProxy(req, res, next);
     };
@@ -442,7 +443,7 @@ Server.prototype._initializeExpressSync = function () {
     router.post('/api/v1/volume/create', bearer, this._requirePassword.bind(this), routes.volume.createVolume);
 
     // graphite calls
-    router.get([ '/graphite/*', '/content/*', '/metrics/*', '/dashboard/*', '/render/*', '/browser/*', '/composer/*' ], rootScope, graphiteMiddleware);
+    router.get([ '/graphite/*', '/content/*', '/metrics/*', '/dashboard/*', '/render/*', '/browser/*', '/composer/*' ], graphiteMiddleware);
 
     // volume resource related routes
     router.param('volume', function (req, res, next, id) {

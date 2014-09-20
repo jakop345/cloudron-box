@@ -437,14 +437,6 @@ describe('Server', function () {
                 done();
             });
         });
-
-        it('cannot access graphite url without token', function (done) {
-            request.get(SERVER_URL + '/graphite/someurl').end(function (error, res) {
-                expect(res.statusCode).to.be(401);
-                done();
-            });
-        });
-
     });
 });
 
