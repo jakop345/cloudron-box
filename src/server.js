@@ -27,7 +27,6 @@ var express = require('express'),
     userdb = require('./userdb'),
     config = require('../config.js'),
     backups = require('./backups.js'),
-    proxy = require('proxy-middleware'),
     url = require('url'),
     querystring = require('querystring'),
     _ = require('underscore');
@@ -296,7 +295,7 @@ Server.prototype._initializeExpressSync = function () {
     var json = middleware.json({ strict: true, limit: QUERY_LIMIT }), // application/json
         urlencoded = middleware.urlencoded({ limit: QUERY_LIMIT }); // application/x-www-form-urlencoded
 
-    var graphiteProxy = proxy(url.parse('http://127.0.0.1:8000'));
+    var graphiteProxy = middleware.proxy(url.parse('http://127.0.0.1:8000'));
     var graphiteMiddleware = function (req, res, next) {
         // remove any senstive info
         var parsedUrl = url.parse(req.url, true /* parseQueryString */);
