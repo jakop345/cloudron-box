@@ -15,6 +15,8 @@ var BACKUP_CMD = 'sudo ' + __dirname + '/scripts/backup.sh';
 function createBackup() {
     debug('Starting backup script');
 
+    if (!config.aws) return console.error('No aws credentials provided, skip backup script');
+
     var args = config.aws.accessKeyId + ' ' + config.aws.secretAccessKey + ' ' + config.aws.prefix + ' ' + config.aws.bucket;
 
     exec(BACKUP_CMD + ' ' + args, function (error) {
