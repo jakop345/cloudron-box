@@ -497,10 +497,13 @@ angular.module('Application').service('Client', function ($http, $filter) {
                 }
             });
 
-            // filter out old entries
-            angular.copy($filter('filter')(that._installedApps, function (value) {
-                return apps.some(function (elem) { return elem.id === value.id; });
-            }), that._installedApps);
+            // filter out old entries, going backwards to allow splicing
+            for(var i = that._installedApps.length - 1; i >= 0; --i) {
+                if (!apps.some(function (elem) { return (elem.id === that._installedApps[i].id); })) {
+                    that._installedApps.splice(i, 1);
+                }
+
+            }
 
             callback(null);
         });
