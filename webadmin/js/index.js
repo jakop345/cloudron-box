@@ -42,9 +42,6 @@ app.config(function ($routeProvider) {
     }).when('/appstore', {
         controller: 'AppStoreController',
         templateUrl: 'views/appstore.html'
-    }).when('/myapps', {
-        controller: 'MyAppsController',
-        templateUrl: 'views/myapps.html'
     }).when('/app/:appStoreId/install', {
         controller: 'AppInstallController',
         templateUrl: 'views/appinstall.html'
