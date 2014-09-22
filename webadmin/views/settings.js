@@ -9,8 +9,6 @@ var SettingsController = function ($scope, Client) {
     $scope.config = Client.getConfig();
     $scope.nakedDomainApp = null;
     $scope.drives = [];
-    $scope.activeClients = [];
-    $scope.tokenInUse = null;
 
     $scope.setNakedDomain = function () {
         var appid = $scope.nakedDomainApp ? $scope.nakedDomainApp.id : null;
@@ -91,18 +89,6 @@ var SettingsController = function ($scope, Client) {
         });
     };
 
-    $scope.delTokensByClientId = function (client) {
-        Client.delTokensByClientId(client.clientId, function (error) {
-            if (error) return console.error(error);
-
-            Client.getActiveClients(function (error, activeClients) {
-                if (error) return console.error(error);
-
-                $scope.activeClients = activeClients;
-            });
-        });
-    };
-
     Client.onConfig(function () {
         $scope.tokenInUse = Client._token;
 
@@ -125,12 +111,6 @@ var SettingsController = function ($scope, Client) {
                 if (error) return console.error(error);
 
                 $scope.drives = stats.drives;
-
-                Client.getActiveClients(function (error, activeClients) {
-                    if (error) return console.error(error);
-
-                    $scope.activeClients = activeClients;
-                });
             });
         });
     });

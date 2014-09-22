@@ -1,0 +1,40 @@
+
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Security</h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6 col-md-6">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                Application Access
+            </div>
+            <div class="panel-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Application</th>
+                                <th>Permissions</th>
+                                <th>Tokens</th>
+                                <th style="text-align: right;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="client in activeClients">
+                                <td>{{ client.name }}</td>
+                                <td>{{ client.scope }}</td>
+                                <td>{{ client.tokens }}</td>
+                                <td style="text-align: right;">
+                                    <button class="btn btn-xs btn-danger" ng-click="delTokensByClientId(client)" ng-show="client.accessToken !== tokenInUse">Revoke</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
