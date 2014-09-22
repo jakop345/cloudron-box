@@ -5,15 +5,15 @@
     <div class="col-lg-12">
         <ul class="nav nav-tabs">
             <li ng-class="{ active: activeTab === 'day' }">
-                <a ng-click="activeTab = 'day'" href="">24 hours</a>
+                <a ng-click="activeTab = 'day'; updateGraphs()" href="">24 hours</a>
             </li>
 
             <li ng-class="{ active: activeTab === 'month' }">
-                <a ng-click="activeTab = 'month'" href="">Month</a>
+                <a ng-click="activeTab = 'month'; updateGraphs()" href="">Month</a>
             </li>
 
             <li ng-class="{ active: activeTab === 'year' }">
-                <a ng-click="activeTab = 'year'" href="">Year</a>
+                <a ng-click="activeTab = 'year'; updateGraphs()" href="">Year</a>
             </li>
         </ul>
 
@@ -25,13 +25,13 @@
                            <div id="dayCpuYAxis" style="position: absolute; top: 0; bottom: 0; width: 40px"></div>
                            <div id="dayCpuChart" style="position: relative; left: 40px"></div>
                        </div>
-                    <h3> dayDisk </h3>
+                    <h3> Disk </h3>
                        <div id="dayDiskChartContainer" style="position: relative">
                            <div id="dayDiskLegend" style="position: absolute; left: 540px"></div>
                            <div id="dayDiskYAxis" style="position: absolute; top: 0; bottom: 0; width: 40px"></div>
                            <div id="dayDiskChart" style="position: relative; left: 40px"></div>
                        </div>
-                    <h3> dayNetwork </h3>
+                    <h3> Network </h3>
                        <div id="dayNetworkChartContainer" style="position: relative">
                            <div id="dayNetworkYAxis" style="position: absolute; top: 0; bottom: 0; width: 40px"></div>
                            <div id="dayNetworkChart" style="position: relative; left: 40px"></div>
@@ -44,13 +44,13 @@
                            <div id="monthCpuYAxis" style="position: absolute; top: 0; bottom: 0; width: 40px"></div>
                            <div id="monthCpuChart" style="position: relative; left: 40px"></div>
                        </div>
-                    <h3> monthDisk </h3>
+                    <h3> Disk </h3>
                        <div id="monthDiskChartContainer" style="position: relative">
                            <div id="monthDiskLegend" style="position: absolute; left: 540px"></div>
                            <div id="monthDiskYAxis" style="position: absolute; top: 0; bottom: 0; width: 40px"></div>
                            <div id="monthDiskChart" style="position: relative; left: 40px"></div>
                        </div>
-                    <h3> monthNetwork </h3>
+                    <h3> Network </h3>
                        <div id="monthNetworkChartContainer" style="position: relative">
                            <div id="monthNetworkYAxis" style="position: absolute; top: 0; bottom: 0; width: 40px"></div>
                            <div id="monthNetworkChart" style="position: relative; left: 40px"></div>
@@ -63,13 +63,13 @@
                            <div id="yearCpuYAxis" style="position: absolute; top: 0; bottom: 0; width: 40px"></div>
                            <div id="yearCpuChart" style="position: relative; left: 40px"></div>
                        </div>
-                    <h3> yearDisk </h3>
+                    <h3> Disk </h3>
                        <div id="yearDiskChartContainer" style="position: relative">
                            <div id="yearDiskLegend" style="position: absolute; left: 540px"></div>
                            <div id="yearDiskYAxis" style="position: absolute; top: 0; bottom: 0; width: 40px"></div>
                            <div id="yearDiskChart" style="position: relative; left: 40px"></div>
                        </div>
-                    <h3> yearNetwork </h3>
+                    <h3> Network </h3>
                        <div id="yearNetworkChartContainer" style="position: relative">
                            <div id="yearNetworkYAxis" style="position: absolute; top: 0; bottom: 0; width: 40px"></div>
                            <div id="yearNetworkChart" style="position: relative; left: 40px"></div>

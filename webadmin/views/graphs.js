@@ -19,6 +19,7 @@ var GraphsController = function ($scope, Client) {
 
     $scope.updateGraphs = function () {
         var activeTab = $scope.activeTab;
+       var from = '-24hours';
         switch (activeTab) {
         case 'day': from = '-24hours'; break;
         case 'month': from = '-1month'; break;
@@ -30,7 +31,7 @@ var GraphsController = function ($scope, Client) {
             if (error) return console.log(error);
 
             // CPU
-            var transformed = data[0].datapoints.map(function (point) { return { y: point[0], x: point[1] } });
+            var transformedCpu = data[0].datapoints.map(function (point) { return { y: point[0], x: point[1] } });
 
             var cpuGraph = new Rickshaw.Graph({
                 element: document.querySelector('#' + activeTab + 'CpuChart'),
@@ -39,20 +40,19 @@ var GraphsController = function ($scope, Client) {
                 height: 250,
                 min: 0,
                 max: 100,
-                series: [ {
+                series: [{
                     color: 'steelblue',
-                    data: transformed,
+                    data: transformedCpu,
                     name: 'cpu'
-                } ]
+                }]
             });
 
             var cpuXAxis = new Rickshaw.Graph.Axis.Time({ graph: cpuGraph });
-
             var cpuYAxis = new Rickshaw.Graph.Axis.Y({
                 graph: cpuGraph,
                 orientation: 'left',
                 tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
-                element: document.getElementById(activeTab + 'cpuYAxis'),
+                element: document.getElementById(activeTab + 'CpuYAxis'),
             });
 
             var cpuHoverDetail = new Rickshaw.Graph.HoverDetail({
@@ -127,7 +127,7 @@ var GraphsController = function ($scope, Client) {
                 }]
             } );
 
-            var diskXAxis = new Rickshaw.Graph.Axis.Time({ graph: graph });
+            var diskXAxis = new Rickshaw.Graph.Axis.Time({ graph: diskGraph });
             var diskYAxis = new Rickshaw.Graph.Axis.Y({
                 graph: diskGraph,
                 orientation: 'left',
