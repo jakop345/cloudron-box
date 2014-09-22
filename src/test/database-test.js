@@ -532,6 +532,23 @@ describe('database', function () {
             });
         });
 
+        it('getByClientId succeeds', function (done) {
+            clientdb.getByClientId(CLIENT_0.clientId, function (error, result) {
+                expect(error).to.be(null);
+                expect(result).to.eql(CLIENT_0);
+                done();
+            });
+        });
+
+        it('getByClientId fails for unknown client id', function (done) {
+            clientdb.getByClientId(CLIENT_0.clientId + CLIENT_0.clientId, function (error, result) {
+                expect(error).to.be.a(DatabaseError);
+                expect(error.reason).to.equal(DatabaseError.NOT_FOUND);
+                expect(result).to.not.be.ok();
+                done();
+            });
+        });
+
         it('getActiveClientsByUserId succeeds', function (done) {
             tokendb.add(TOKEN_0.accessToken, TOKEN_0.userId, TOKEN_0.clientId, TOKEN_0.expires, TOKEN_0.scope, function (error) {
                 expect(error).to.be(null);
@@ -555,7 +572,6 @@ describe('database', function () {
                     });
                 });
             });
-
         });
     });
 });
