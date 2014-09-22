@@ -14,6 +14,7 @@ var oauth2orize = require('oauth2orize'),
     tokendb = require('../tokendb'),
     DatabaseError = require('../databaseerror'),
     HttpError = require('../httperror.js'),
+    HttpSuccess = require('../httpsuccess.js'),
     clientdb = require('../clientdb'),
     debug = require('debug')('box:routes/oauth2'),
     config = require('../../config.js'),
@@ -246,6 +247,35 @@ function scope(requestedScope) {
     ];
 }
 
+function getTokens(req, res, next) {
+    debug('getTokens');
+
+    tokendb.getByUserId(req.user.id, function (error, result) {
+        if (error && error.reason !== DatabaseError.NOT_FOUND) return next(new HttpError(500, error));
+
+        result = result || [];
+
+        debug('getTokens: success.', result);
+
+        next(new HttpSuccess(200, { tokens: result }));
+    });
+}
+
+function delToken(req, res, next) {
+    assert(typeof req.params.token === 'string');
+
+    debug('delToken');
+
+    tokendb.del(req.params.token, function (error) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(404, 'No such token'));
+        if (error)  return next(new HttpError(500, error));
+
+        debug('delToken: success.');
+
+        next(new HttpSuccess(200, {}));
+    });
+}
+
 exports = module.exports = {
     loginForm: loginForm,
     login: login,
@@ -256,5 +286,7 @@ exports = module.exports = {
     decision: decision,
     token: token,
     library: library,
-    scope: scope
+    scope: scope,
+    getTokens: getTokens,
+    delToken: delToken
 };

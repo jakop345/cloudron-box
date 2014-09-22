@@ -414,6 +414,10 @@ Server.prototype._initializeExpressSync = function () {
     router.get ('/api/v1/settings/naked_domain', settingsScope, routes.settings.getNakedDomain);
     router.post('/api/v1/settings/naked_domain', settingsScope, routes.settings.setNakedDomain);
 
+    // access tokens routes
+    router.get ('/api/v1/tokens', settingsScope, routes.oauth2.getTokens);
+    router.del ('/api/v1/tokens/:token', settingsScope, routes.oauth2.delToken);
+
 
     // old syncer and file APIs, we might want to remove them soonish
     router.param('syncerVolume', function (req, res, next, id) {
