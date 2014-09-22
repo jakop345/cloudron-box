@@ -418,6 +418,8 @@ Server.prototype._initializeExpressSync = function () {
     router.get ('/api/v1/tokens', settingsScope, routes.oauth2.getTokens);
     router.del ('/api/v1/tokens/:token', settingsScope, routes.oauth2.delToken);
 
+    // oauth clients routes
+    router.get ('/api/v1/activeclients', settingsScope, routes.oauth2.getActiveClients);
 
     // old syncer and file APIs, we might want to remove them soonish
     router.param('syncerVolume', function (req, res, next, id) {

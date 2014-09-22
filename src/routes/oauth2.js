@@ -250,6 +250,20 @@ function scope(requestedScope) {
     ];
 }
 
+function getActiveClients(req, res, next) {
+    debug('getActiveClients');
+
+    clientdb.getActiveClientsByUserId(req.user.id, function (error, result) {
+        if (error && error.reason !== DatabaseError.NOT_FOUND) return next(new HttpError(500, error));
+
+        result = result || [];
+
+        debug('getActiveClients: success.', result);
+
+        next(new HttpSuccess(200, { tokens: result }));
+    });
+}
+
 function getTokens(req, res, next) {
     debug('getTokens');
 
@@ -290,6 +304,7 @@ exports = module.exports = {
     token: token,
     library: library,
     scope: scope,
+    getActiveClients: getActiveClients,
     getTokens: getTokens,
     delToken: delToken
 };
