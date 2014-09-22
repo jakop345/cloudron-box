@@ -66,7 +66,7 @@ function createAdmin(req, res, next) {
 
         debug('createAdmin: now create token for ' + username);
 
-        tokendb.add(token, username, null, expires, '*', function (error) {
+        tokendb.add(token, username, 'WebAdmin', expires, '*', function (error) {
             if (error) return next(500, error.message);
 
             debug('createAdmin: successful with token ' + token);
