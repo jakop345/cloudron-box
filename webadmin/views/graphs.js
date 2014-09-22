@@ -25,7 +25,7 @@ var GraphsController = function ($scope, Client) {
 
             var graph = new Rickshaw.Graph({
                 element: document.querySelector("#cpuChart"),
-                renderer: 'line',
+                renderer: 'area',
                 width: 580,
                 height: 250,
                 min: 0,
@@ -63,7 +63,7 @@ var GraphsController = function ($scope, Client) {
 
             var graph = new Rickshaw.Graph( {
                 element: document.querySelector("#networkChart"),
-                renderer: 'line',
+                renderer: 'area',
                 width: 580,
                 height: 250,
                 series: [ {
@@ -103,7 +103,7 @@ var GraphsController = function ($scope, Client) {
 
             var graph = new Rickshaw.Graph( {
                 element: document.querySelector("#diskChart"),
-                renderer: 'line',
+                renderer: 'area',
                 width: 580,
                 height: 250,
                 min: 0,
@@ -136,7 +136,12 @@ var GraphsController = function ($scope, Client) {
                     var content = swatch + series.name + ": " + new Number(y/(1024 * 1024 * 1024)).toFixed(2) + 'GB<br>';
                     return content;
                 }
-            } );
+            });
+
+            var legend = new Rickshaw.Graph.Legend( {
+                graph: graph,
+                element: document.getElementById('diskLegend')
+            });
 
             graph.render();
         });
