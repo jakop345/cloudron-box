@@ -486,21 +486,21 @@ describe('database', function () {
         var TOKEN_0 = {
             accessToken: tokendb.generateToken(),
             userId: 'userid-0',
-            clientId: CLIENT_0.clientId,
+            clientId: CLIENT_0.id,
             expires: Date.now().toString(),
             scope: '*'
         };
         var TOKEN_1 = {
             accessToken: tokendb.generateToken(),
             userId: 'userid-0',
-            clientId: CLIENT_0.clientId,
+            clientId: CLIENT_0.id,
             expires: Date.now().toString(),
             scope: '*'
         };
         var TOKEN_2 = {
             accessToken: tokendb.generateToken(),
             userId: 'userid-0',
-            clientId: CLIENT_1.clientId,
+            clientId: CLIENT_1.id,
             expires: Date.now().toString(),
             scope: '*'
         };
@@ -563,10 +563,12 @@ describe('database', function () {
                             expect(error).to.be(null);
                             expect(result).to.be.an(Array);
                             expect(result.length).to.equal(2);
-                            expect(result[0].clientId).to.equal(CLIENT_0.clientId);
+                            expect(result[0].clientId).to.equal(CLIENT_0.id);
                             expect(result[0].tokens).to.equal(2);
-                            expect(result[1].clientId).to.equal(CLIENT_1.clientId);
+                            expect(result[0].scope).to.equal(TOKEN_1.scope);
+                            expect(result[1].clientId).to.equal(CLIENT_1.id);
                             expect(result[1].tokens).to.equal(1);
+                            expect(result[1].scope).to.equal(TOKEN_2.scope);
                             done();
                         });
                     });
