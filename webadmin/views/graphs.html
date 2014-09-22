@@ -21,35 +21,59 @@
             <div ng-switch="activeTab">
                 <div ng-switch-when="day">
                     <h3> CPU </h3>
-                       <div id="cpuChartContainer" style="position: relative">
-                           <div id="cpuYAxis" style="position: absolute; top: 0; bottom: 0; width: 40px"></div>
-                           <div id="cpuChart" style="position: relative; left: 40px"></div>
+                       <div id="dayCpuChartContainer" style="position: relative">
+                           <div id="dayCpuYAxis" style="position: absolute; top: 0; bottom: 0; width: 40px"></div>
+                           <div id="dayCpuChart" style="position: relative; left: 40px"></div>
                        </div>
-                    <h3> Disk </h3>
-                       <div id="diskChartContainer" style="position: relative">
-                           <div id="diskLegend" style="position: absolute; left: 540px"></div>
-                           <div id="diskYAxis" style="position: absolute; top: 0; bottom: 0; width: 40px"></div>
-                           <div id="diskChart" style="position: relative; left: 40px"></div>
+                    <h3> dayDisk </h3>
+                       <div id="dayDiskChartContainer" style="position: relative">
+                           <div id="dayDiskLegend" style="position: absolute; left: 540px"></div>
+                           <div id="dayDiskYAxis" style="position: absolute; top: 0; bottom: 0; width: 40px"></div>
+                           <div id="dayDiskChart" style="position: relative; left: 40px"></div>
                        </div>
-                    <h3> Network </h3>
-                       <div id="networkChartContainer" style="position: relative">
-                           <div id="networkYAxis" style="position: absolute; top: 0; bottom: 0; width: 40px"></div>
-                           <div id="networkChart" style="position: relative; left: 40px"></div>
+                    <h3> dayNetwork </h3>
+                       <div id="dayNetworkChartContainer" style="position: relative">
+                           <div id="dayNetworkYAxis" style="position: absolute; top: 0; bottom: 0; width: 40px"></div>
+                           <div id="dayNetworkChart" style="position: relative; left: 40px"></div>
                        </div>
                 </div>
 
                 <div ng-switch-when="month">
                     <h3> CPU </h3>
-                    <img src="/render?target=sumSeries(collectd.*.df-*.df_complex-free)&target=sumSeries(collectd.*.df-*.df_complex-used)&from=-1month"/>
-                    <h3> Disk </h3>
-                    <img src="/render?target=sumSeries(collectd.*.df-*.df_complex-free)&target=sumSeries(collectd.*.df-*.df_complex-used)&from=-1month"/>
-                    <h3> Memory </h3>
-                    <img src="/render?target=sumSeries(collectd.*.df-*.df_complex-free)&target=sumSeries(collectd.*.df-*.df_complex-used)&from=-1month"/>
+                       <div id="monthCpuChartContainer" style="position: relative">
+                           <div id="monthCpuYAxis" style="position: absolute; top: 0; bottom: 0; width: 40px"></div>
+                           <div id="monthCpuChart" style="position: relative; left: 40px"></div>
+                       </div>
+                    <h3> monthDisk </h3>
+                       <div id="monthDiskChartContainer" style="position: relative">
+                           <div id="monthDiskLegend" style="position: absolute; left: 540px"></div>
+                           <div id="monthDiskYAxis" style="position: absolute; top: 0; bottom: 0; width: 40px"></div>
+                           <div id="monthDiskChart" style="position: relative; left: 40px"></div>
+                       </div>
+                    <h3> monthNetwork </h3>
+                       <div id="monthNetworkChartContainer" style="position: relative">
+                           <div id="monthNetworkYAxis" style="position: absolute; top: 0; bottom: 0; width: 40px"></div>
+                           <div id="monthNetworkChart" style="position: relative; left: 40px"></div>
+                       </div>
                 </div>
 
                 <div ng-switch-when="year">
-                    <h3> Disk </h3>
-                    <img src="/render?target=sumSeries(collectd.*.df-*.df_complex-free)&target=sumSeries(collectd.*.df-*.df_complex-used)&from=-1year"/>
+                    <h3> CPU </h3>
+                       <div id="yearCpuChartContainer" style="position: relative">
+                           <div id="yearCpuYAxis" style="position: absolute; top: 0; bottom: 0; width: 40px"></div>
+                           <div id="yearCpuChart" style="position: relative; left: 40px"></div>
+                       </div>
+                    <h3> yearDisk </h3>
+                       <div id="yearDiskChartContainer" style="position: relative">
+                           <div id="yearDiskLegend" style="position: absolute; left: 540px"></div>
+                           <div id="yearDiskYAxis" style="position: absolute; top: 0; bottom: 0; width: 40px"></div>
+                           <div id="yearDiskChart" style="position: relative; left: 40px"></div>
+                       </div>
+                    <h3> yearNetwork </h3>
+                       <div id="yearNetworkChartContainer" style="position: relative">
+                           <div id="yearNetworkYAxis" style="position: absolute; top: 0; bottom: 0; width: 40px"></div>
+                           <div id="yearNetworkChart" style="position: relative; left: 40px"></div>
+                       </div>
                 </div>
             </div>
         </div>

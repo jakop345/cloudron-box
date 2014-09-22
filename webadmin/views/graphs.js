@@ -18,13 +18,22 @@ var GraphsController = function ($scope, Client) {
     var diskUsageDataUsedTarget = 'collectd.localhost.df-loop1.df_complex-used';
 
     $scope.updateGraphs = function () {
-        Client.graphs([ cpuUsageTarget, networkUsageTxTarget, networkUsageRxTarget, diskUsageAppsUsedTarget, diskUsageDataUsedTarget ], '-12hours', function (error, data) {
+        var activeTab = $scope.activeTab;
+        switch (activeTab) {
+        case 'day': from = '-24hours'; break;
+        case 'month': from = '-1month'; break;
+        case 'year': from = '-1year'; break;
+        default: console.log('internal errror');
+        }
+
+        Client.graphs([ cpuUsageTarget, networkUsageTxTarget, networkUsageRxTarget, diskUsageAppsUsedTarget, diskUsageDataUsedTarget ], from, function (error, data) {
             if (error) return console.log(error);
 
+            // CPU
             var transformed = data[0].datapoints.map(function (point) { return { y: point[0], x: point[1] } });
 
-            var graph = new Rickshaw.Graph({
-                element: document.querySelector("#cpuChart"),
+            var cpuGraph = new Rickshaw.Graph({
+                element: document.querySelector('#' + activeTab + 'CpuChart'),
                 renderer: 'area',
                 width: 580,
                 height: 250,
@@ -37,32 +46,32 @@ var GraphsController = function ($scope, Client) {
                 } ]
             });
 
-            var xAxis = new Rickshaw.Graph.Axis.Time({ graph: graph });
+            var cpuXAxis = new Rickshaw.Graph.Axis.Time({ graph: cpuGraph });
 
-            var yAxis = new Rickshaw.Graph.Axis.Y( {
-                graph: graph,
+            var cpuYAxis = new Rickshaw.Graph.Axis.Y({
+                graph: cpuGraph,
                 orientation: 'left',
                 tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
-                element: document.getElementById('cpuYAxis'),
+                element: document.getElementById(activeTab + 'cpuYAxis'),
             });
 
-            var hoverDetail = new Rickshaw.Graph.HoverDetail( {
-                graph: graph,
+            var cpuHoverDetail = new Rickshaw.Graph.HoverDetail({
+                graph: cpuGraph,
                 formatter: function(series, x, y) {
-                    // var date = '<span class="date">' + new Date(x * 1000).toUTCString() + '</span>';
                     var swatch = '<span class="detail_swatch" style="background-color: ' + series.color + '"></span>';
                     var content = swatch + series.name + ": " + new Number(y).toFixed(2) + '%<br>';
                     return content;
                 }
             });
 
-            graph.render();
+            cpuGraph.render();
 
+            // network
             var transformedTx = data[1].datapoints.map(function (point) { return { y: point[0], x: point[1] } });
             var transformedRx = data[2].datapoints.map(function (point) { return { y: point[0], x: point[1] } });
 
-            var graph = new Rickshaw.Graph( {
-                element: document.querySelector("#networkChart"),
+            var networkGraph = new Rickshaw.Graph({
+                element: document.querySelector('#' + activeTab + 'NetworkChart'),
                 renderer: 'area',
                 width: 580,
                 height: 250,
@@ -77,38 +86,37 @@ var GraphsController = function ($scope, Client) {
                 } ]
             } );
 
-            var xAxis = new Rickshaw.Graph.Axis.Time( { graph: graph } );
-
-            var yAxis = new Rickshaw.Graph.Axis.Y( {
-                graph: graph,
+            var networkXAxis = new Rickshaw.Graph.Axis.Time({ graph: networkGraph });
+            var networkYAxis = new Rickshaw.Graph.Axis.Y({
+                graph: networkGraph,
                 orientation: 'left',
                 tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
-                element: document.getElementById('networkYAxis'),
+                element: document.getElementById(activeTab + 'NetworkYAxis'),
             });
 
-            var hoverDetail = new Rickshaw.Graph.HoverDetail( {
-                graph: graph,
+            var networkHoverDetail = new Rickshaw.Graph.HoverDetail({
+                graph: networkGraph,
                 formatter: function(series, x, y) {
-                    // var date = '<span class="date">' + new Date(x * 1000).toUTCString() + '</span>';
                     var swatch = '<span class="detail_swatch" style="background-color: ' + series.color + '"></span>';
                     var content = swatch + series.name + ": " + new Number(y/1024).toFixed(2) + 'KB<br>';
                     return content;
                 }
             });
 
-            graph.render();
+            networkGraph.render();
 
+            // Disk
             var transformedAppsUsed = data[3].datapoints.map(function (point) { return { y: point[0], x: point[1] } });
             var transformedDataUsed = data[4].datapoints.map(function (point) { return { y: point[0], x: point[1] } });
 
-            var graph = new Rickshaw.Graph( {
-                element: document.querySelector("#diskChart"),
+            var diskGraph = new Rickshaw.Graph({
+                element: document.querySelector('#' + activeTab + 'DiskChart'),
                 renderer: 'area',
                 width: 580,
                 height: 250,
                 min: 0,
                 max: 30 * 1024 * 1024 * 1024, // 30gb
-                series: [ {
+                series: [{
                     color: 'steelblue',
                     data: transformedAppsUsed,
                     name: 'apps'
@@ -116,34 +124,32 @@ var GraphsController = function ($scope, Client) {
                     color: 'green',
                     data: transformedDataUsed,
                     name: 'data'
-                } ]
+                }]
             } );
 
-            var xAxis = new Rickshaw.Graph.Axis.Time( { graph: graph } );
-
-            var yAxis = new Rickshaw.Graph.Axis.Y( {
-                graph: graph,
+            var diskXAxis = new Rickshaw.Graph.Axis.Time({ graph: graph });
+            var diskYAxis = new Rickshaw.Graph.Axis.Y({
+                graph: diskGraph,
                 orientation: 'left',
                 tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
-                element: document.getElementById('diskYAxis'),
+                element: document.getElementById(activeTab + 'DiskYAxis'),
             });
 
-            var hoverDetail = new Rickshaw.Graph.HoverDetail( {
-                graph: graph,
+            var diskHoverDetail = new Rickshaw.Graph.HoverDetail({
+                graph: diskGraph,
                 formatter: function(series, x, y) {
-                    // var date = '<span class="date">' + new Date(x * 1000).toUTCString() + '</span>';
                     var swatch = '<span class="detail_swatch" style="background-color: ' + series.color + '"></span>';
                     var content = swatch + series.name + ": " + new Number(y/(1024 * 1024 * 1024)).toFixed(2) + 'GB<br>';
                     return content;
                 }
             });
 
-            var legend = new Rickshaw.Graph.Legend( {
-                graph: graph,
-                element: document.getElementById('diskLegend')
+            var diskLegend = new Rickshaw.Graph.Legend({
+                graph: diskGraph,
+                element: document.getElementById(activeTab + 'DiskLegend')
             });
 
-            graph.render();
+            diskGraph.render();
         });
     };
 
