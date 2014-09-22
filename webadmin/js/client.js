@@ -406,6 +406,24 @@ angular.module('Application').service('Client', function ($http, $filter) {
         });
     };
 
+    Client.prototype.getActiveClients = function (callback) {
+        $http.get('/api/v1/activeclients').success(function(data, status) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null, data.clients);
+        }).error(function(data, status) {
+            callback(new ClientError(status, data));
+        });
+    };
+
+    Client.prototype.delTokensByClientId = function (clientId, callback) {
+        $http.delete('/api/v1/activeclients/' + clientId).success(function(data, status) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null, data);
+        }).error(function(data, status) {
+            callback(new ClientError(status, data));
+        });
+    };
+
     Client.prototype.update = function (callback) {
         $http.get('/api/v1/update').success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));

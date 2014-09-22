@@ -147,15 +147,17 @@
                             <tr>
                                 <th>Application</th>
                                 <th>Permissions</th>
+                                <th>Tokens</th>
                                 <th style="text-align: right;">Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr ng-repeat="token in tokens">
-                                <td>{{ token.clientId }}</td>
-                                <td>{{ token.scope }}</td>
+                            <tr ng-repeat="client in activeClients">
+                                <td>{{ client.name }}</td>
+                                <td>{{ client.scope }}</td>
+                                <td>{{ client.tokens }}</td>
                                 <td style="text-align: right;">
-                                    <button class="btn btn-xs btn-danger" ng-click="delToken(token)" ng-show="token.accessToken !== tokenInUse">Revoke</button>
+                                    <button class="btn btn-xs btn-danger" ng-click="delTokensByClientId(client)" ng-show="client.accessToken !== tokenInUse">Revoke</button>
                                 </td>
                             </tr>
                         </tbody>

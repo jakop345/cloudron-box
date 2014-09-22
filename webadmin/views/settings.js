@@ -9,7 +9,7 @@ var SettingsController = function ($scope, Client) {
     $scope.config = Client.getConfig();
     $scope.nakedDomainApp = null;
     $scope.drives = [];
-    $scope.tokens = [];
+    $scope.activeClients = [];
     $scope.tokenInUse = null;
 
     $scope.setNakedDomain = function () {
@@ -91,14 +91,14 @@ var SettingsController = function ($scope, Client) {
         });
     };
 
-    $scope.delToken = function (token) {
-        Client.delToken(token.accessToken, function (error) {
+    $scope.delTokensByClientId = function (client) {
+        Client.delTokensByClientId(client.clientId, function (error) {
             if (error) return console.error(error);
 
-            Client.getTokens(function (error, tokens) {
+            Client.getActiveClients(function (error, activeClients) {
                 if (error) return console.error(error);
 
-                $scope.tokens = tokens;
+                $scope.activeClients = activeClients;
             });
         });
     };
@@ -126,10 +126,10 @@ var SettingsController = function ($scope, Client) {
 
                 $scope.drives = stats.drives;
 
-                Client.getTokens(function (error, tokens) {
+                Client.getActiveClients(function (error, activeClients) {
                     if (error) return console.error(error);
 
-                    $scope.tokens = tokens;
+                    $scope.activeClients = activeClients;
                 });
             });
         });

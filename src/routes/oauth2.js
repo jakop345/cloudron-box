@@ -260,7 +260,7 @@ function getActiveClients(req, res, next) {
 
         debug('getActiveClients: success.', result);
 
-        next(new HttpSuccess(200, { tokens: result }));
+        next(new HttpSuccess(200, { clients: result }));
     });
 }
 
