@@ -14,19 +14,22 @@ var GraphsController = function ($scope, Client) {
     var networkUsageTxTarget = 'collectd.localhost.interface-eth0.if_octets.tx';
     var networkUsageRxTarget = 'collectd.localhost.interface-eth0.if_octets.rx';
 
-    var diskUsageVdaUsedTarget = 'collectd.localhost.df-vda1.df_complex-used';
-    var diskUsageVdaFreeTarget = 'collectd.localhost.df-vda1.df_complex-free';
+    var diskUsageAppsUsedTarget = 'collectd.localhost.df-loop0.df_complex-used';
+    var diskUsageDataUsedTarget = 'collectd.localhost.df-loop1.df_complex-used';
 
     $scope.updateGraphs = function () {
-        Client.graphs([ cpuUsageTarget, networkUsageTxTarget, networkUsageRxTarget, diskUsageVdaUsedTarget, diskUsageVdaFreeTarget ], '-12hours', function (error, data) {
+        Client.graphs([ cpuUsageTarget, networkUsageTxTarget, networkUsageRxTarget, diskUsageAppsUsedTarget, diskUsageDataUsedTarget ], '-12hours', function (error, data) {
             if (error) return console.log(error);
 
             var transformed = data[0].datapoints.map(function (point) { return { y: point[0], x: point[1] } });
 
             var graph = new Rickshaw.Graph({
                 element: document.querySelector("#cpuChart"),
+                renderer: 'line',
                 width: 580,
                 height: 250,
+                min: 0,
+                max: 100,
                 series: [ {
                     color: 'steelblue',
                     data: transformed,
@@ -60,6 +63,7 @@ var GraphsController = function ($scope, Client) {
 
             var graph = new Rickshaw.Graph( {
                 element: document.querySelector("#networkChart"),
+                renderer: 'line',
                 width: 580,
                 height: 250,
                 series: [ {
@@ -94,21 +98,24 @@ var GraphsController = function ($scope, Client) {
 
             graph.render();
 
-            var transformedUsed = data[3].datapoints.map(function (point) { return { y: point[0], x: point[1] } });
-            var transformedFree = data[4].datapoints.map(function (point) { return { y: point[0], x: point[1] } });
+            var transformedAppsUsed = data[3].datapoints.map(function (point) { return { y: point[0], x: point[1] } });
+            var transformedDataUsed = data[4].datapoints.map(function (point) { return { y: point[0], x: point[1] } });
 
             var graph = new Rickshaw.Graph( {
                 element: document.querySelector("#diskChart"),
+                renderer: 'line',
                 width: 580,
                 height: 250,
+                min: 0,
+                max: 30 * 1024 * 1024 * 1024, // 30gb
                 series: [ {
                     color: 'steelblue',
-                    data: transformedUsed,
-                    name: 'used'
+                    data: transformedAppsUsed,
+                    name: 'apps'
                 }, {
                     color: 'green',
-                    data: transformedFree,
-                    name: 'free'
+                    data: transformedDataUsed,
+                    name: 'data'
                 } ]
             } );
 
