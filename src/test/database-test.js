@@ -167,7 +167,7 @@ describe('database', function () {
             });
         });
 
-        it('get of nonexisting code fails', function (done) {
+        it('get of nonexisting token fails', function (done) {
             tokendb.get(TOKEN_1.accessToken, function (error, result) {
                 expect(error).to.be.a(DatabaseError);
                 expect(error.reason).to.be(DatabaseError.NOT_FOUND);
@@ -219,6 +219,26 @@ describe('database', function () {
             tokendb.del(TOKEN_0.accessToken, function (error) {
                 expect(error).to.be.a(DatabaseError);
                 expect(error.reason).to.be(DatabaseError.NOT_FOUND);
+                done();
+            });
+        });
+
+        it('delByUserIdAndClientId succeeds', function (done) {
+            tokendb.add(TOKEN_0.accessToken, TOKEN_0.userId, TOKEN_0.clientId, TOKEN_0.expires, TOKEN_0.scope, function (error) {
+                expect(error).to.be(null);
+
+                tokendb.delByUserIdAndClientId(TOKEN_0.userId, TOKEN_0.clientId, function (error) {
+                    expect(error).to.be(null);
+                    done();
+                });
+            });
+        });
+
+        it('get of previously deleted token fails', function (done) {
+            tokendb.get(TOKEN_0.accessToken, function (error, result) {
+                expect(error).to.be.a(DatabaseError);
+                expect(error.reason).to.be(DatabaseError.NOT_FOUND);
+                expect(result).to.not.be.ok();
                 done();
             });
         });
@@ -448,7 +468,7 @@ describe('database', function () {
         });
     });
 
-    describe('clients', function () {
+    describe('client', function () {
         var CLIENT_0 = {
             id: 'someclientid_0',
             clientId: 'cid-0',

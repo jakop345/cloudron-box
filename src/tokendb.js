@@ -14,7 +14,8 @@ exports = module.exports = {
     add: add,
     del: del,
     getByUserId: getByUserId,
-    delByUserId: delByUserId
+    delByUserId: delByUserId,
+    delByUserIdAndClientId: delByUserIdAndClientId
 };
 
 function generateToken() {
@@ -80,6 +81,19 @@ function delByUserId(userId, callback) {
     assert(typeof callback === 'function');
 
     database.run('DELETE FROM tokens WHERE userId = ?', [ userId ], function (error) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        if (this.changes !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
+
+        return callback(null);
+    });
+}
+
+function delByUserIdAndClientId(userId, clientId, callback) {
+    assert(typeof userId === 'string');
+    assert(typeof clientId === 'string');
+    assert(typeof callback === 'function');
+
+    database.run('DELETE FROM tokens WHERE userId = ? AND clientId = ?', [ userId, clientId ], function (error) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (this.changes !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
