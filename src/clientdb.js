@@ -12,6 +12,8 @@ exports = module.exports = {
     getByClientId: getByClientId,
     add: add,
     del: del,
+    getByAppId: getByAppId,
+    delByAppId: delByAppId,
     getActiveClientsByUserId: getActiveClientsByUserId
 };
 
@@ -21,7 +23,6 @@ function get(id, callback) {
 
     database.get('SELECT * FROM clients WHERE id = ?', [ id ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
-
         if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         callback(null, result);
@@ -34,15 +35,27 @@ function getByClientId(clientId, callback) {
 
     database.get('SELECT * FROM clients WHERE clientId = ? LIMIT 1', [ clientId ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
-
         if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         return callback(null, result);
     });
 }
 
-function add(id, clientId, clientSecret, name, redirectURI, callback) {
+function getByAppId(appId, callback) {
+    assert(typeof appId === 'string');
+    assert(typeof callback === 'function');
+
+    database.get('SELECT * FROM clients WHERE appId = ? LIMIT 1', [ appId ], function (error, result) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
+
+        return callback(null, result);
+    });
+}
+
+function add(id, appId, clientId, clientSecret, name, redirectURI, callback) {
     assert(typeof id === 'string');
+    assert(typeof appId === 'string');
     assert(typeof clientId === 'string');
     assert(typeof clientSecret === 'string');
     assert(typeof name === 'string');
@@ -51,13 +64,14 @@ function add(id, clientId, clientSecret, name, redirectURI, callback) {
 
     var data = {
         $id: id,
+        $appId: appId,
         $clientId: clientId,
         $clientSecret: clientSecret,
         $name: name,
         $redirectURI: redirectURI
     };
 
-    database.run('INSERT INTO clients (id, clientId, clientSecret, name, redirectURI) VALUES ($id, $clientId, $clientSecret, $name, $redirectURI)', data, function (error) {
+    database.run('INSERT INTO clients (id, appId, clientId, clientSecret, name, redirectURI) VALUES ($id, $appId, $clientId, $clientSecret, $name, $redirectURI)', data, function (error) {
         if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
         if (error || !this.lastID) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
@@ -74,6 +88,18 @@ function del(id, callback) {
         if (this.changes !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         callback(null);
+    });
+}
+
+function delByAppId(appId, callback) {
+    assert(typeof appId === 'string');
+    assert(typeof callback === 'function');
+
+    database.run('DELETE FROM clients WHERE appId=?', [ appId ], function (error) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        if (this.changes !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
+
+        return callback(null);
     });
 }
 

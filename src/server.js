@@ -19,6 +19,7 @@ var express = require('express'),
     fs = require('fs'),
     exec = require('child_process').exec,
     df = require('nodejs-disks'),
+    uuid = require('node-uuid'),
     apps = require('./apps'),
     Updater = require('./updater.js'),
     middleware = require('./middleware'),
@@ -28,7 +29,6 @@ var express = require('express'),
     config = require('../config.js'),
     backups = require('./backups.js'),
     url = require('url'),
-    querystring = require('querystring'),
     _ = require('underscore');
 
 exports = module.exports = Server;
@@ -243,8 +243,8 @@ Server.prototype._provision = function (req, res, next) {
     config.set(_.pick(req.body, 'token', 'appServerUrl', 'adminOrigin', 'fqdn', 'aws'));
 
     // override the default webadmin OAuth client record
-    clientdb.del('webadmin', function () {
-        clientdb.add('webadmin', 'cid-webadmin', 'unused', 'WebAdmin', config.adminOrigin, function (error) {
+    clientdb.delByAppId('webadmin', function () {
+        clientdb.add(uuid.v4(), 'webadmin', 'cid-webadmin', 'unused', 'WebAdmin', config.adminOrigin, function (error) {
             if (error) return next(new HttpError(500, error));
 
             next(new HttpSuccess(201, {}));

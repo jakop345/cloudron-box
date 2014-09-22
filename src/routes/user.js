@@ -2,7 +2,7 @@
 
 'use strict';
 
-var userdb = require('../userdb.js'),
+var clientdb = require('../clientdb.js'),
     tokendb = require('../tokendb.js'),
     DatabaseError = require('../databaseerror.js'),
     user = require('../user'),
@@ -66,21 +66,25 @@ function createAdmin(req, res, next) {
 
         debug('createAdmin: now create token for ' + username);
 
-        tokendb.add(token, username, 'WebAdmin', expires, '*', function (error) {
-            if (error) return next(500, error.message);
+        clientdb.getByAppId('webadmin', function (error, result) {
+            if (error) return next(new HttpError(500, error));
 
-            debug('createAdmin: successful with token ' + token);
+            tokendb.add(token, username, result.id, expires, '*', function (error) {
+                if (error) return next(500, error.message);
 
-            // TODO no next(), as we do not want to fall through to authentication
-            // the whole createAdmin should be handled differently
-            res.send(201, {
-                token: token,
-                expires: expires,
-                userInfo: {
-                    username: username,
-                    email: email,
-                    admin: true
-                }
+                debug('createAdmin: successful with token ' + token);
+
+                // TODO no next(), as we do not want to fall through to authentication
+                // the whole createAdmin should be handled differently
+                res.send(201, {
+                    token: token,
+                    expires: expires,
+                    userInfo: {
+                        username: username,
+                        email: email,
+                        admin: true
+                    }
+                });
             });
         });
     });

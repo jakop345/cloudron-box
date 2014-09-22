@@ -353,7 +353,7 @@ describe('App installation', function () {
             expect(data.Config.ExposedPorts['7777/tcp']).to.eql({ });
             expect(data.Config.Env).to.contain('APP_ORIGIN=https://' + appFqdn(appInfo.location));
             expect(data.Config.Env).to.contain('ADMIN_ORIGIN=' + config.adminOrigin);
-            clientdb.get(appInfo.id, function (error, client) {
+            clientdb.getByAppId(appInfo.id, function (error, client) {
                 expect(error).to.not.be.ok();
                 expect(client.clientId.length).to.be(40); // cid- + 32 hex chars (128 bits) + 4 hyphens
                 expect(client.clientSecret.length).to.be(36); // 32 hex chars (128 bits) + 4 hyphens

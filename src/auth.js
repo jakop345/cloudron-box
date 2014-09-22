@@ -74,7 +74,7 @@ passport.use(new BasicStrategy(function (username, password, callback) {
         debug('BasicStrategy: detected clientId instead of username:password.' + username);
         // username is actually client id here
         // password is client secret
-        clientdb.get(username, function (error, client) {
+        clientdb.getByClientId(username, function (error, client) {
             if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
             if (error) return callback(error);
             if (client.clientSecret != password) return callback(null, false);

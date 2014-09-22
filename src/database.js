@@ -4,6 +4,7 @@
 
 var sqlite3 = require('sqlite3'),
     fs = require('fs'),
+    uuid = require('node-uuid'),
     path = require('path'),
     debug = require('debug')('box:database'),
     DatabaseError = require('./databaseerror'),
@@ -68,8 +69,8 @@ function create(callback) {
 
         // add webadmin as an OAuth client
         var clientdb = require('./clientdb.js');
-        clientdb.del('webadmin', function () {
-            clientdb.add('webadmin', 'cid-webadmin', 'unused', 'WebAdmin', config.adminOrigin, function (error) {
+        clientdb.delByAppId('webadmin', function () {
+            clientdb.add(uuid.v4(), 'webadmin', 'cid-webadmin', 'unused', 'WebAdmin', config.adminOrigin, function (error) {
                 if (error && error.reason !== DatabaseError.ALREADY_EXISTS) return callback(new Error('Error initializing client database with webadmin'));
                 return callback(null);
             });

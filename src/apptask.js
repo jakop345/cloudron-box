@@ -196,7 +196,7 @@ function createContainer(app, callback) {
         env.push('ADMIN_ORIGIN' + '=' + config.adminOrigin);
 
         // add oauth variables
-        clientdb.get(app.id, function (error, client) {
+        clientdb.getByAppId(app.id, function (error, client) {
             if (error) return callback(new Error('Error getting oauth info:', + error));
 
             env.push('OAUTH_CLIENT_ID' + '=' + client.clientId);
@@ -279,7 +279,8 @@ function allocateOAuthCredentials(app, callback) {
     assert(typeof app === 'object');
     assert(typeof callback === 'function');
 
-    var id = app.id;
+    var id = uuid.v4();
+    var appId = app.id;
     var clientId = 'cid-' + uuid.v4();
     var clientSecret = uuid.v4();
     var name = app.manifest.title;
@@ -287,7 +288,7 @@ function allocateOAuthCredentials(app, callback) {
 
     debug('allocateOAuthCredentials:', id, clientId, clientSecret, name);
 
-    clientdb.add(id, clientId, clientSecret, name, redirectURI, callback);
+    clientdb.add(id, appId, clientId, clientSecret, name, redirectURI, callback);
 }
 
 function removeOAuthCredentials(app, callback) {
@@ -296,7 +297,7 @@ function removeOAuthCredentials(app, callback) {
 
     debug('removeOAuthCredentials:', app.id);
 
-    clientdb.del(app.id, function (error) {
+    clientdb.delByAppId(app.id, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null);
 
         if (error) console.error(error);
