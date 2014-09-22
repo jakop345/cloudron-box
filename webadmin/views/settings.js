@@ -10,6 +10,7 @@ var SettingsController = function ($scope, Client) {
     $scope.nakedDomainApp = null;
     $scope.drives = [];
     $scope.tokens = [];
+    $scope.tokenInUse = null;
 
     $scope.setNakedDomain = function () {
         var appid = $scope.nakedDomainApp ? $scope.nakedDomainApp.id : null;
@@ -90,7 +91,21 @@ var SettingsController = function ($scope, Client) {
         });
     };
 
+    $scope.delToken = function (token) {
+        Client.delToken(token.accessToken, function (error) {
+            if (error) return console.error(error);
+
+            Client.getTokens(function (error, tokens) {
+                if (error) return console.error(error);
+
+                $scope.tokens = tokens;
+            });
+        });
+    };
+
     Client.onConfig(function () {
+        $scope.tokenInUse = Client._token;
+
         Client.getApps(function (error, apps) {
             if (error) console.error('Error loading app list');
             $scope.apps = apps;

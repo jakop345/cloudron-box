@@ -154,7 +154,9 @@
                             <tr ng-repeat="token in tokens">
                                 <td>{{ token.clientId }}</td>
                                 <td>{{ token.scope }}</td>
-                                <td style="text-align: right;"><button class="btn btn-xs btn-danger">Revoke</button></td>
+                                <td style="text-align: right;">
+                                    <button class="btn btn-xs btn-danger" ng-click="delToken(token)" ng-show="token.accessToken !== tokenInUse">Revoke</button>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
