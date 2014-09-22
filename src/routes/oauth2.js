@@ -76,7 +76,7 @@ server.grant(oauth2orize.grant.code({ scopeSeparator: ',' }, function (client, r
     var scope = '*';
 
     // only give out wildcard scope to the webadmin all other clients are only allowed to request 'profile'
-    if (client.id !== 'webadmin') {
+    if (client.appId !== 'webadmin') {
         if (ares.scope[0] !== 'profile') return callback(new Error('Requested scope is not allowed for this client'));
         scope = ares.scope.join(',');
     }
