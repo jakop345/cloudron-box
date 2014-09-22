@@ -1,7 +1,8 @@
+/* jslint node: true */
+
 'use strict';
 
 var DatabaseError = require('./databaseerror'),
-    path = require('path'),
     uuid = require('node-uuid'),
     debug = require('debug')('box:tokendb'),
     database = require('./database.js'),
