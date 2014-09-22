@@ -11,11 +11,11 @@ var GraphsController = function ($scope, Client) {
         'sumSeries(collectd.localhost.cpu-0.cpu-system,collectd.localhost.cpu-0.cpu-nice,collectd.localhost.cpu-0.cpu-user),' +
         'sumSeries(collectd.localhost.cpu-0.cpu-idle,collectd.localhost.cpu-0.cpu-system,collectd.localhost.cpu-0.cpu-nice,collectd.localhost.cpu-0.cpu-user,collectd.localhost.cpu-0.cpu-wait)), 100), 0)';
 
-    var networkUsageTxTarget = 'collectd.localhost.interface-eth0.if_octets.tx';
-    var networkUsageRxTarget = 'collectd.localhost.interface-eth0.if_octets.rx';
+    var networkUsageTxTarget = 'transformNull(collectd.localhost.interface-eth0.if_octets.tx, 0)';
+    var networkUsageRxTarget = 'transformNull(collectd.localhost.interface-eth0.if_octets.rx, 0)';
 
-    var diskUsageAppsUsedTarget = 'collectd.localhost.df-loop0.df_complex-used';
-    var diskUsageDataUsedTarget = 'collectd.localhost.df-loop1.df_complex-used';
+    var diskUsageAppsUsedTarget = 'transformNull(collectd.localhost.df-loop0.df_complex-used, 0)';
+    var diskUsageDataUsedTarget = 'transformNull(collectd.localhost.df-loop1.df_complex-used, 0)';
 
     $scope.updateGraphs = function () {
         var activeTab = $scope.activeTab;
