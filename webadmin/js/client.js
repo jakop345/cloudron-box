@@ -388,6 +388,24 @@ angular.module('Application').service('Client', function ($http, $filter) {
         });
     };
 
+    Client.prototype.getTokens = function (callback) {
+        $http.get('/api/v1/tokens').success(function(data, status) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null, data.tokens);
+        }).error(function(data, status) {
+            callback(new ClientError(status, data));
+        });
+    };
+
+    Client.prototype.delToken = function (token, callback) {
+        $http.delete('/api/v1/tokens/' + token).success(function(data, status) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null, data);
+        }).error(function(data, status) {
+            callback(new ClientError(status, data));
+        });
+    };
+
     Client.prototype.update = function (callback) {
         $http.get('/api/v1/update').success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));

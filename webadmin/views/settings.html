@@ -135,4 +135,31 @@
             </div>
         </div>
     </div>
+    <div class="col-lg-6 col-md-6">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                Application Access
+            </div>
+            <div class="panel-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Application</th>
+                                <th>Permissions</th>
+                                <th style="text-align: right;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="token in tokens">
+                                <td>{{ token.clientId }}</td>
+                                <td>{{ token.scope }}</td>
+                                <td style="text-align: right;"><button class="btn btn-xs btn-danger">Revoke</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
