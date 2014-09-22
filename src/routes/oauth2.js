@@ -264,6 +264,20 @@ function getActiveClients(req, res, next) {
     });
 }
 
+function delActiveClient(req, res, next) {
+    assert(typeof req.params.clientId === 'string');
+
+    debug('delActiveClient: %s.', req.params.clientId);
+
+    tokendb.delByUserIdAndClientId(req.user.id, req.params.clientId, function (error) {
+        if (error && error.reason !== DatabaseError.NOT_FOUND) return next(new HttpError(500, error));
+
+        debug('delActiveClient: success.');
+
+        next(new HttpSuccess(200, {}));
+    });
+}
+
 function getTokens(req, res, next) {
     debug('getTokens');
 
@@ -305,6 +319,7 @@ exports = module.exports = {
     library: library,
     scope: scope,
     getActiveClients: getActiveClients,
+    delActiveClient: delActiveClient,
     getTokens: getTokens,
     delToken: delToken
 };
