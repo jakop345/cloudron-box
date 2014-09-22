@@ -13,6 +13,7 @@ exports = module.exports = {
     get: get,
     add: add,
     del: del,
+    getByUserId: getByUserId,
     delByUserId: delByUserId
 };
 
@@ -59,6 +60,18 @@ function del(accessToken, callback) {
         if (this.changes !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         callback(error);
+    });
+}
+
+function getByUserId(userId, callback) {
+    assert(typeof userId === 'string');
+    assert(typeof callback === 'function');
+
+    database.all('SELECT * FROM tokens WHERE userId = ?', [ userId ], function (error, results) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        if (typeof results === 'undefined') results = [];
+
+        callback(null, results);
     });
 }
 

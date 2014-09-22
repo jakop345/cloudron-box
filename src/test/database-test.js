@@ -175,9 +175,29 @@ describe('database', function () {
             });
         });
 
+        it('getByUserId succeeds', function (done) {
+            tokendb.getByUserId(TOKEN_0.userId, function (error, result) {
+                expect(error).to.be(null);
+                expect(result).to.be.an(Array);
+                expect(result.length).to.equal(1);
+                expect(result[0]).to.be.an('object');
+                expect(result[0]).to.be.eql(TOKEN_0);
+                done();
+            });
+        });
+
         it('delete succeeds', function (done) {
             tokendb.del(TOKEN_0.accessToken, function (error) {
                 expect(error).to.be(null);
+                done();
+            });
+        });
+
+        it('getByUserId succeeds after token deletion', function (done) {
+            tokendb.getByUserId(TOKEN_0.userId, function (error, result) {
+                expect(error).to.be(null);
+                expect(result).to.be.an(Array);
+                expect(result.length).to.equal(0);
                 done();
             });
         });
