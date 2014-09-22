@@ -10,6 +10,7 @@ var database = require('../database'),
     rimraf = require('rimraf'),
     DatabaseError = require('../databaseerror.js'),
     tokendb = require('../tokendb.js'),
+    clientdb = require('../clientdb.js'),
     authcodedb = require('../authcodedb.js'),
     appdb = require('../appdb.js'),
     expect = require('expect.js'),
@@ -444,6 +445,97 @@ describe('database', function () {
                 expect(error).to.be.ok();
                 done();
             });
+        });
+    });
+
+    describe('clients', function () {
+        var CLIENT_0 = {
+            id: 'someclientid_0',
+            clientId: 'cid-0',
+            clientSecret: 'secret-0',
+            name: 'Test client 0',
+            redirectURI: 'http://foo.bar'
+        };
+        var CLIENT_1 = {
+            id: 'someclientid_1',
+            clientId: 'cid-1',
+            clientSecret: 'secret-',
+            name: 'Test client 1',
+            redirectURI: 'http://foo.bar'
+        };
+        var TOKEN_0 = {
+            accessToken: tokendb.generateToken(),
+            userId: 'userid-0',
+            clientId: CLIENT_0.clientId,
+            expires: Date.now().toString(),
+            scope: '*'
+        };
+        var TOKEN_1 = {
+            accessToken: tokendb.generateToken(),
+            userId: 'userid-0',
+            clientId: CLIENT_0.clientId,
+            expires: Date.now().toString(),
+            scope: '*'
+        };
+        var TOKEN_2 = {
+            accessToken: tokendb.generateToken(),
+            userId: 'userid-0',
+            clientId: CLIENT_1.clientId,
+            expires: Date.now().toString(),
+            scope: '*'
+        };
+
+        it('add succeeds', function (done) {
+            clientdb.add(CLIENT_0.id, CLIENT_0.clientId, CLIENT_0.clientSecret, CLIENT_0.name, CLIENT_0.redirectURI, function (error) {
+                expect(error).to.be(null);
+
+                clientdb.add(CLIENT_1.id, CLIENT_1.clientId, CLIENT_1.clientSecret, CLIENT_1.name, CLIENT_1.redirectURI, function (error) {
+                    expect(error).to.be(null);
+                    done();
+                });
+            });
+        });
+
+        it('add same client id fails', function (done) {
+            clientdb.add(CLIENT_0.id, CLIENT_0.clientId, CLIENT_0.clientSecret, CLIENT_0.name, CLIENT_0.redirectURI, function (error) {
+                expect(error).to.be.a(DatabaseError);
+                expect(error.reason).to.equal(DatabaseError.ALREADY_EXISTS);
+                done();
+            });
+        });
+
+        it('get succeeds', function (done) {
+            clientdb.get(CLIENT_0.id, function (error, result) {
+                expect(error).to.be(null);
+                expect(result).to.eql(CLIENT_0);
+                done();
+            });
+        });
+
+        it('getActiveClientsByUserId succeeds', function (done) {
+            tokendb.add(TOKEN_0.accessToken, TOKEN_0.userId, TOKEN_0.clientId, TOKEN_0.expires, TOKEN_0.scope, function (error) {
+                expect(error).to.be(null);
+
+                tokendb.add(TOKEN_1.accessToken, TOKEN_1.userId, TOKEN_1.clientId, TOKEN_1.expires, TOKEN_1.scope, function (error) {
+                    expect(error).to.be(null);
+
+                    tokendb.add(TOKEN_2.accessToken, TOKEN_2.userId, TOKEN_2.clientId, TOKEN_2.expires, TOKEN_2.scope, function (error) {
+                        expect(error).to.be(null);
+
+                        clientdb.getActiveClientsByUserId(TOKEN_0.userId, function (error, result) {
+                            expect(error).to.be(null);
+                            expect(result).to.be.an(Array);
+                            expect(result.length).to.equal(2);
+                            expect(result[0].clientId).to.equal(CLIENT_0.clientId);
+                            expect(result[0].tokens).to.equal(2);
+                            expect(result[1].clientId).to.equal(CLIENT_1.clientId);
+                            expect(result[1].tokens).to.equal(1);
+                            done();
+                        });
+                    });
+                });
+            });
+
         });
     });
 });

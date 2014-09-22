@@ -11,7 +11,8 @@ exports = module.exports = {
     get: get,
     getByClientId: getByClientId,
     add: add,
-    del: del
+    del: del,
+    getActiveClientsByUserId: getActiveClientsByUserId
 };
 
 function get(id, callback) {
@@ -56,8 +57,7 @@ function add(id, clientId, clientSecret, name, redirectURI, callback) {
         $redirectURI: redirectURI
     };
 
-    database.run('INSERT INTO clients (id, clientId, clientSecret, name, redirectURI) VALUES ($id, $clientId, $clientSecret, $name, $redirectURI)',
-           data, function (error) {
+    database.run('INSERT INTO clients (id, clientId, clientSecret, name, redirectURI) VALUES ($id, $clientId, $clientSecret, $name, $redirectURI)', data, function (error) {
         if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
         if (error || !this.lastID) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
@@ -74,5 +74,17 @@ function del(id, callback) {
         if (this.changes !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         callback(null);
+    });
+}
+
+function getActiveClientsByUserId(userId, callback) {
+    assert(typeof userId === 'string');
+    assert(typeof callback === 'function');
+
+    database.all('SELECT tokens.accessToken,tokens.clientId,clients.name,COUNT(*) AS tokens FROM tokens,clients WHERE tokens.clientId=clients.clientId AND userId=? GROUP BY tokens.clientId', [ userId ], function (error, results) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        if (typeof results === 'undefined') results = [];
+
+        callback(null, results);
     });
 }
