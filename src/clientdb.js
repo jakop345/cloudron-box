@@ -107,7 +107,7 @@ function getActiveClientsByUserId(userId, callback) {
     assert(typeof userId === 'string');
     assert(typeof callback === 'function');
 
-    database.all('SELECT tokens.accessToken,tokens.clientId,clients.name,scope,COUNT(*) AS tokens FROM tokens,clients WHERE tokens.clientId=clients.id AND userId=? GROUP BY tokens.clientId', [ userId ], function (error, results) {
+    database.all('SELECT tokens.accessToken,clients.clientId,clients.clientSecret,clients.name,scope,COUNT(*) AS tokens FROM tokens,clients WHERE tokens.clientId=clients.id AND userId=? GROUP BY tokens.clientId', [ userId ], function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (typeof results === 'undefined') results = [];
 

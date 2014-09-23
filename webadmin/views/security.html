@@ -10,14 +10,20 @@
         <div class="panel-group" id="accordion">
             <div class="panel panel-default" ng-repeat="client in activeClients">
                 <div class="panel-heading">
-                    <h4 class="panel-title">
-                        <a data-toggle="collapse" data-parent="#accordion" data-target="#collapse{{client.clientId}}" href="">{{client.name}}</a>
+                    <h4 class="panel-title" data-toggle="collapse" data-parent="#accordion" data-target="#collapse{{client.clientId}}" style="cursor: pointer;">
+                        {{client.name}}
                     </h4>
                 </div>
                 <div id="collapse{{client.clientId}}" class="panel-collapse collapse in">
                     <div class="panel-body">
+                        <h4>Details</h4>
                         <p>Permissions: <b>{{ client.scope }}</b></p>
                         <p>Provided Tokens: <b>{{ client.tokens }}</b></p>
+                        <br/>
+                        <h4>Credentials</h4>
+                        <p>Client ID: <b>{{ client.clientId }}</b></p>
+                        <p>Client Secret: <b>{{ client.clientSecret }}</b></p>
+                        <br/>
                         <button class="btn btn-xs btn-danger" ng-click="delTokensByClientId(client)">Revoke access</button>
                     </div>
                 </div>
