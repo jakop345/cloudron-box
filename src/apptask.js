@@ -305,7 +305,12 @@ function allocateOAuthCredentials(app, callback) {
 
     debug('allocateOAuthCredentials:', id, clientId, clientSecret, name);
 
-    clientdb.add(id, appId, clientId, clientSecret, name, redirectURI, callback);
+    clientdb.getByAppId(appId, function (error, result) {
+        if (error && error.reason !== DatabaseError.NOT_FOUND) return callback(error);
+        if (result) return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
+
+        clientdb.add(id, appId, clientId, clientSecret, name, redirectURI, callback);
+    });
 }
 
 function removeOAuthCredentials(app, callback) {
@@ -316,8 +321,8 @@ function removeOAuthCredentials(app, callback) {
 
     clientdb.delByAppId(app.id, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null);
-
         if (error) console.error(error);
+
         callback(null);
     });
 }
