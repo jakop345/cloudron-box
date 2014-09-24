@@ -9,9 +9,17 @@ LoadPlugin "table"
       ValuesFrom 1
     </Result>
   </Table>
-</Plugin>
 
-<Plugin table>
+  <Table "/sys/fs/cgroup/memory/docker/<%= containerId %>/memory.max_usage_in_bytes">
+    Instance "<%= appId %>-memory"
+    Separator "\\n"
+    <Result>
+      Type gauge
+      InstancePrefix "max_usage_in_bytes"
+      ValuesFrom 0
+    </Result>
+  </Table>
+
   <Table "/sys/fs/cgroup/cpuacct/docker/<%= containerId %>/cpuacct.stat">
     Instance "<%= appId %>-cpu"
     Separator " \\n"
