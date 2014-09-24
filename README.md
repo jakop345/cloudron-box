@@ -18,6 +18,8 @@ Development setup
     girishra ALL=(ALL) NOPASSWD: /Users/girishra/research/yellowtent/box/src/scripts/update.sh
     Defaults!/Users/girishra/research/yellowtent/box/src/scripts/reboot.sh env_keep=HOME
     girishra ALL=(ALL) NOPASSWD: /Users/girishra/research/yellowtent/box/src/scripts/reboot.sh
+    Defaults!/Users/girishra/research/yellowtent/box/src/scripts/reloadcollectd.sh env_keep=HOME
+    girishra ALL=(root) NOPASSWD: /Users/girishra/research/box/src/scripts/reloadcollectd.sh
 
 
    (replace the username and path to rmappdir.sh to match your environment)
@@ -29,6 +31,7 @@ Development setup
 ** Verify using `sudo src/scripts/backup.sh --check`. This should print 'OK'
 ** Verify using `sudo src/scripts/update.sh --check`. This should print 'OK'
 ** Verify using `sudo src/scripts/reboot.sh --check`. This should print 'OK'
+** Verify using `sudo src/scripts/reloadcollectd.sh --check`. This should print 'OK'
 
 ** Add admin-localhost as 127.0.0.1 in /etc/hosts
 ** All apps will be installed as hypened-subdomains of localhost. You should add

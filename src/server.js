@@ -587,6 +587,7 @@ Server.prototype.start = function (callback) {
     mkdirp.sync(config.mountRoot);
     mkdirp.sync(config.nginxAppConfigDir);
     mkdirp.sync(config.appDataRoot);
+    mkdirp.sync(config.collectdAppConfigDir);
 
     var that = this;
 

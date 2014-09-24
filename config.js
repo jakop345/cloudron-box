@@ -54,6 +54,7 @@ config.save = function () {
     config.dataRoot = path.join(config.baseDir, 'data'); // TODO: rename to volumesRoot
     config.iconsRoot = path.join(config.baseDir, 'icons');
     config.mountRoot = path.join(config.baseDir, 'mount');
+    config.collectdAppConfigDir = path.join(config.baseDir, 'collectd/collectd.conf.d');
 
     config.nginxAppConfigDir = path.join(config.nginxConfigDir, 'applications');
     config.nginxCertDir = path.join(config.nginxConfigDir, 'cert');

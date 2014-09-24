@@ -48,7 +48,9 @@ exports = module.exports = {
 
 var docker = null,
     NGINX_APPCONFIG_EJS = fs.readFileSync(__dirname + '/../nginx/appconfig.ejs', { encoding: 'utf8' }),
-    RELOAD_NGINX_CMD = 'sudo ' + path.join(__dirname, 'scripts/reloadnginx.sh');
+    COLLECTD_CONFIG_EJS = fs.readFileSync(__dirname + '/collectd.config.ejs', { encoding: 'utf8' }),
+    RELOAD_NGINX_CMD = 'sudo ' + path.join(__dirname, 'scripts/reloadnginx.sh'),
+    RELOAD_COLLECTD_CMD = 'sudo ' + path.join(__dirname, 'scripts/reloadcollectd.sh');
 
 function initialize(callback) {
     if (process.env.NODE_ENV === 'test') {
@@ -275,6 +277,21 @@ function deleteVolume(app, callback) {
     });
 }
 
+function addCollectdProfile(app, callback) {
+    var collectdConf = ejs.render(COLLECTD_CONFIG_EJS, { appId: app.id, containerId: app.containerId });
+    fs.writeFile(path.join(config.collectdAppConfigDir, app.id + '.conf'), collectdConf, function (error) {
+        if (error) return callback(error);
+        child_process.exec(RELOAD_COLLECTD_CMD, { timeout: 10000 }, callback);
+    });
+}
+
+function removeCollectdProfile(app, callback) {
+    fs.unlink(path.join(config.collectdAppConfigDir, app.id + '.conf'), function (error, stdout, stderr) {
+        if (error) console.error('Error removing collectd profile', error, stdout, stderr);
+        child_process.exec(RELOAD_COLLECTD_CMD, { timeout: 10000 }, callback);
+    });
+}
+
 function allocateOAuthCredentials(app, callback) {
     assert(typeof app === 'object');
     assert(typeof callback === 'function');
@@ -495,6 +512,10 @@ function install(app, callback) {
         deleteVolume.bind(null, app),
         createVolume.bind(null, app),
 
+        // add collectd profile
+        updateApp.bind(null, app, { installationProgress: 'Setting up collectd profile' }),
+        addCollectdProfile.bind(null, app),
+
         // done!
         function (callback) {
             debug('App ' + app.id + ' installed');
@@ -543,6 +564,10 @@ function restore(app, callback) {
         updateApp.bind(null, app, { installationProgress: 'Creating container' }),
         createContainer.bind(null, app),
 
+        // add collectd profile
+        updateApp.bind(null, app, { installationProgress: 'Add collectd profile' }),
+        addCollectdProfile.bind(null, app),
+
         // done!
         function (callback) {
             debug('App ' + app.id + ' installed');
@@ -588,6 +613,9 @@ function configure(app, callback) {
         updateApp.bind(null, app, { installationProgress: 'Creating container' }),
         createContainer.bind(null, app),
 
+        updateApp.bind(null, app, { installationProgress: 'Add collectd profile' }),
+        addCollectdProfile.bind(null, app),
+
         runApp.bind(null, app),
 
         // done!
@@ -620,6 +648,9 @@ function update(app, callback) {
 
         updateApp.bind(null, app, { installationProgress: 'Creating container' }),
         createContainer.bind(null, app),
+
+        updateApp.bind(null, app, { installationProgress: 'Add collectd profile' }),
+        addCollectdProfile.bind(null, app),
 
         runApp.bind(null, app),
 
@@ -655,6 +686,9 @@ function uninstall(app, callback) {
 
         updateApp.bind(null, app, { installationProgress: 'Deleting container' }),
         deleteContainer.bind(null, app),
+
+        updateApp.bind(null, app, { installationProgress: 'Add collectd profile' }),
+        removeCollectdProfile.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: 'Deleting image' }),
         deleteImage.bind(null, app),
