@@ -23,3 +23,12 @@ LoadPlugin "table"
   </Table>
 </Plugin>
 
+LoadPlugin "filecount"
+<Plugin "filecount">
+  <Directory "/home/yellowtent/.yellowtent/appdata/<%= appId %>">
+    Instance "<%= appId %>-appdata"
+    IncludeHidden true
+    Recursive true
+  </Directory>
+</Plugin>
+
