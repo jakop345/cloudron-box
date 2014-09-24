@@ -388,26 +388,8 @@ angular.module('Application').service('Client', function ($http, $filter) {
         });
     };
 
-    Client.prototype.getTokens = function (callback) {
-        $http.get('/api/v1/tokens').success(function(data, status) {
-            if (status !== 200) return callback(new ClientError(status, data));
-            callback(null, data.tokens);
-        }).error(function(data, status) {
-            callback(new ClientError(status, data));
-        });
-    };
-
-    Client.prototype.delToken = function (token, callback) {
-        $http.delete('/api/v1/tokens/' + token).success(function(data, status) {
-            if (status !== 200) return callback(new ClientError(status, data));
-            callback(null, data);
-        }).error(function(data, status) {
-            callback(new ClientError(status, data));
-        });
-    };
-
-    Client.prototype.getActiveClients = function (callback) {
-        $http.get('/api/v1/activeclients').success(function(data, status) {
+    Client.prototype.getOAuthClients = function (callback) {
+        $http.get('/api/v1/oauth/clients').success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data.clients);
         }).error(function(data, status) {
@@ -415,8 +397,8 @@ angular.module('Application').service('Client', function ($http, $filter) {
         });
     };
 
-    Client.prototype.delTokensByClientId = function (clientId, callback) {
-        $http.delete('/api/v1/activeclients/' + clientId).success(function(data, status) {
+    Client.prototype.delTokensByClientId = function (id, callback) {
+        $http.delete('/api/v1/oauth/clients/' + id + '/tokens').success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
         }).error(function(data, status) {

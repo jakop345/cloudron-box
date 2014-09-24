@@ -1,4 +1,5 @@
 /* exported SecurityController */
+/* global $ */
 
 'use strict';
 
@@ -6,22 +7,20 @@ var SecurityController = function ($scope, Client) {
     $scope.activeClients = [];
     $scope.tokenInUse = null;
 
-    $scope.delTokensByClientId = function (client) {
-        Client.delTokensByClientId(client.clientId, function (error) {
+    $scope.removeAccessTokens = function (client, event) {
+        client._busy = true;
+
+        Client.delTokensByClientId(client.id, function (error) {
             if (error) return console.error(error);
-
-            Client.getActiveClients(function (error, activeClients) {
-                if (error) return console.error(error);
-
-                $scope.activeClients = activeClients;
-            });
+            $(event.target).addClass('disabled');
+            client._busy = false;
         });
     };
 
     Client.onReady(function () {
         $scope.tokenInUse = Client._token;
 
-        Client.getActiveClients(function (error, activeClients) {
+        Client.getOAuthClients(function (error, activeClients) {
             if (error) return console.error(error);
 
             $scope.activeClients = activeClients;

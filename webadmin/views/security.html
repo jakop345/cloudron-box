@@ -14,17 +14,17 @@
                         {{client.name}}
                     </h4>
                 </div>
-                <div id="collapse{{client.clientId}}" class="panel-collapse collapse in">
+                <div id="collapse{{client.clientId}}" class="panel-collapse collapse">
                     <div class="panel-body">
                         <h4>Details</h4>
                         <p>Permissions: <b>{{ client.scope }}</b></p>
                         <p>Provided Tokens: <b>{{ client.tokens }}</b></p>
+                        <button class="btn btn-xs btn-danger" ng-click="removeAccessTokens(client, $event)"><i ng-hide="!client._busy" class="fa fa-circle-o-notch fa-spin"></i> Remove access tokens</button>
+                        <br/>
                         <br/>
                         <h4>Credentials</h4>
                         <p>Client ID: <b>{{ client.clientId }}</b></p>
                         <p>Client Secret: <b>{{ client.clientSecret }}</b></p>
-                        <br/>
-                        <button class="btn btn-xs btn-danger" ng-click="delTokensByClientId(client)">Revoke access</button>
                     </div>
                 </div>
             </div>
