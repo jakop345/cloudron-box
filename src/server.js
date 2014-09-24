@@ -324,7 +324,7 @@ Server.prototype._initializeExpressSync = function () {
     router.del = router.delete; // amend router.del for readability further on
 
     this.app
-//       .use(require('delay')(500))
+      // .use(require('delay')(500))
        .use(middleware.timeout(REQUEST_TIMEOUT))
 //       .use(express.limit(UPLOAD_LIMIT))
        .use(json)
@@ -393,6 +393,9 @@ Server.prototype._initializeExpressSync = function () {
     router.post('/api/v1/oauth/dialog/authorize/decision', routes.oauth2.decision);
     router.post('/api/v1/oauth/token', routes.oauth2.token);
     router.get ('/api/v1/oauth/yellowtent.js', routes.oauth2.library);
+    router.get ('/api/v1/oauth/clients', settingsScope, routes.oauth2.getClients);
+    router.get ('/api/v1/oauth/clients/:clientId/tokens', settingsScope, routes.oauth2.getClientTokens);
+    router.del ('/api/v1/oauth/clients/:clientId/tokens', settingsScope, routes.oauth2.delClientTokens);
 
     // app routes
     router.get ('/api/v1/apps', appsScope, routes.apps.getApps);
@@ -413,14 +416,6 @@ Server.prototype._initializeExpressSync = function () {
     // settings routes
     router.get ('/api/v1/settings/naked_domain', settingsScope, routes.settings.getNakedDomain);
     router.post('/api/v1/settings/naked_domain', settingsScope, routes.settings.setNakedDomain);
-
-    // access tokens routes
-    router.get ('/api/v1/tokens', settingsScope, routes.oauth2.getTokens);
-    router.del ('/api/v1/tokens/:token', settingsScope, routes.oauth2.delToken);
-
-    // oauth clients routes
-    router.get ('/api/v1/activeclients', settingsScope, routes.oauth2.getActiveClients);
-    router.del ('/api/v1/activeclients/:clientId', settingsScope, routes.oauth2.delActiveClient);
 
     // old syncer and file APIs, we might want to remove them soonish
     router.param('syncerVolume', function (req, res, next, id) {
