@@ -45,8 +45,7 @@ function getAllWithDetails(callback) {
     assert(typeof callback === 'function');
 
     // TODO should this be per user?
-    // TODO this does not fetch clients where no tokens were handed out
-    database.all('SELECT clients.*,tokens.scope,COUNT(*) AS tokens FROM clients LEFT OUTER JOIN tokens WHERE tokens.clientId=clients.id', [], function (error, results) {
+    database.all('SELECT clients.*,tokens.scope,COUNT(tokens.clientId) AS tokenCount FROM clients LEFT OUTER JOIN tokens ON clients.id=tokens.clientId GROUP BY clients.id', [], function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (typeof results === 'undefined') results = [];
 
