@@ -223,14 +223,24 @@ describe('database', function () {
             });
         });
 
-        it('delByUserIdAndClientId succeeds', function (done) {
-            tokendb.add(TOKEN_0.accessToken, TOKEN_0.userId, TOKEN_0.clientId, TOKEN_0.expires, TOKEN_0.scope, function (error) {
+        it('getByUserIdAndClientId succeeds', function (done) {
+             tokendb.add(TOKEN_0.accessToken, TOKEN_0.userId, TOKEN_0.clientId, TOKEN_0.expires, TOKEN_0.scope, function (error) {
                 expect(error).to.be(null);
 
-                tokendb.delByUserIdAndClientId(TOKEN_0.userId, TOKEN_0.clientId, function (error) {
+                tokendb.getByUserIdAndClientId(TOKEN_0.userId, TOKEN_0.clientId, function (error, result) {
                     expect(error).to.be(null);
+                    expect(result).to.be.an(Array);
+                    expect(result.length).to.equal(1);
+                    expect(result[0]).to.eql(TOKEN_0);
                     done();
                 });
+            });
+        });
+
+        it('delByUserIdAndClientId succeeds', function (done) {
+            tokendb.delByUserIdAndClientId(TOKEN_0.userId, TOKEN_0.clientId, function (error) {
+                expect(error).to.be(null);
+                done();
             });
         });
 
@@ -568,6 +578,18 @@ describe('database', function () {
             });
         });
 
+        it('getAll succeeds', function (done) {
+            clientdb.getAll(function (error, result) {
+                expect(error).to.be(null);
+                expect(result).to.be.an(Array);
+                expect(result.length).to.equal(3);  // we only added 2 but webadmin is added in database.js
+                expect(result[0].appId).to.equal('webadmin');
+                expect(result[1]).to.eql(CLIENT_0);
+                expect(result[2]).to.eql(CLIENT_1);
+                done();
+            });
+        });
+
         it('delByAppId succeeds', function (done) {
             clientdb.delByAppId(CLIENT_0.appId, function (error) {
                 expect(error).to.be(null);
@@ -577,30 +599,6 @@ describe('database', function () {
                     expect(error.reason).to.equal(DatabaseError.NOT_FOUND);
                     expect(result).to.not.be.ok();
                     done();
-                });
-            });
-        });
-
-        it('getActiveClientsByUserId succeeds', function (done) {
-            tokendb.add(TOKEN_0.accessToken, TOKEN_0.userId, TOKEN_0.clientId, TOKEN_0.expires, TOKEN_0.scope, function (error) {
-                expect(error).to.be(null);
-
-                tokendb.add(TOKEN_1.accessToken, TOKEN_1.userId, TOKEN_1.clientId, TOKEN_1.expires, TOKEN_1.scope, function (error) {
-                    expect(error).to.be(null);
-
-                    tokendb.add(TOKEN_2.accessToken, TOKEN_2.userId, TOKEN_2.clientId, TOKEN_2.expires, TOKEN_2.scope, function (error) {
-                        expect(error).to.be(null);
-
-                        clientdb.getActiveClientsByUserId(TOKEN_0.userId, function (error, result) {
-                            expect(error).to.be(null);
-                            expect(result).to.be.an(Array);
-                            expect(result.length).to.equal(1);
-                            expect(result[0].clientId).to.equal(CLIENT_1.id);
-                            expect(result[0].tokens).to.equal(1);
-                            expect(result[0].scope).to.equal(TOKEN_2.scope);
-                            done();
-                        });
-                    });
                 });
             });
         });
