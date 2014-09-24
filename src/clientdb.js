@@ -9,12 +9,13 @@ var DatabaseError = require('./databaseerror.js'),
 
 exports = module.exports = {
     get: get,
+    getAll: getAll,
+    getAllWithDetails: getAllWithDetails,
     getByClientId: getByClientId,
     add: add,
     del: del,
     getByAppId: getByAppId,
-    delByAppId: delByAppId,
-    getActiveClientsByUserId: getActiveClientsByUserId
+    delByAppId: delByAppId
 };
 
 function get(id, callback) {
@@ -26,6 +27,30 @@ function get(id, callback) {
         if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         callback(null, result);
+    });
+}
+
+function getAll(callback) {
+    assert(typeof callback === 'function');
+
+    database.all('SELECT * FROM clients', [ ], function (error, results) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        if (typeof results === 'undefined') results = [];
+
+        callback(null, results);
+    });
+}
+
+function getAllWithDetails(callback) {
+    assert(typeof callback === 'function');
+
+    // TODO should this be per user?
+    // TODO this does not fetch clients where no tokens were handed out
+    database.all('SELECT clients.*,tokens.scope,COUNT(*) AS tokens FROM clients LEFT OUTER JOIN tokens WHERE tokens.clientId=clients.id', [], function (error, results) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        if (typeof results === 'undefined') results = [];
+
+        callback(null, results);
     });
 }
 
@@ -100,17 +125,5 @@ function delByAppId(appId, callback) {
         if (this.changes !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         return callback(null);
-    });
-}
-
-function getActiveClientsByUserId(userId, callback) {
-    assert(typeof userId === 'string');
-    assert(typeof callback === 'function');
-
-    database.all('SELECT tokens.accessToken,clients.clientId,clients.clientSecret,clients.name,scope,COUNT(*) AS tokens FROM tokens,clients WHERE tokens.clientId=clients.id AND userId=? GROUP BY tokens.clientId', [ userId ], function (error, results) {
-        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
-        if (typeof results === 'undefined') results = [];
-
-        callback(null, results);
     });
 }
