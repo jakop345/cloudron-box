@@ -70,6 +70,7 @@ sleep 2
 usermod $USER -a -G docker
 echo "=== Pulling base docker images ==="
 docker pull girish/base:0.6
+docker pull girish/base:0.7
 
 echo "=== Pulling graphite docker images ==="
 docker pull girish/graphite:0.2
