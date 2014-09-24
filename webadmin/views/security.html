@@ -18,8 +18,8 @@
                     <div class="panel-body">
                         <h4>Details</h4>
                         <p>Permissions: <b>{{ client.scope }}</b></p>
-                        <p>Provided Tokens: <b>{{ client.tokens }}</b></p>
-                        <button class="btn btn-xs btn-danger" ng-click="removeAccessTokens(client, $event)"><i ng-hide="!client._busy" class="fa fa-circle-o-notch fa-spin"></i> Remove access tokens</button>
+                        <p>Provided Tokens: <b>{{ client.tokenCount }}</b></p>
+                        <button class="btn btn-xs btn-danger" ng-click="removeAccessTokens(client, $event)" ng-disabled="!client.tokenCount"><i ng-hide="!client._busy" class="fa fa-circle-o-notch fa-spin"></i> Remove access tokens</button>
                         <br/>
                         <br/>
                         <h4>Credentials</h4>
