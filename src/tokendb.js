@@ -15,6 +15,7 @@ exports = module.exports = {
     del: del,
     getByUserId: getByUserId,
     delByUserId: delByUserId,
+    getByUserIdAndClientId: getByUserIdAndClientId,
     delByUserIdAndClientId: delByUserIdAndClientId
 };
 
@@ -85,6 +86,19 @@ function delByUserId(userId, callback) {
         if (this.changes !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         return callback(null);
+    });
+}
+
+function getByUserIdAndClientId(userId, clientId, callback) {
+    assert(typeof userId === 'string');
+    assert(typeof clientId === 'string');
+    assert(typeof callback === 'function');
+
+    database.all('SELECT * FROM tokens WHERE userId=? AND clientId=?', [ userId, clientId ], function (error, results) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        if (typeof results === 'undefined') results = [];
+
+        callback(null, results);
     });
 }
 

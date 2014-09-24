@@ -1,0 +1,33 @@
+
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Account Permissions for Apps and Websites</h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="panel-group" id="accordion">
+            <div class="panel panel-default" ng-repeat="client in activeClients">
+                <div class="panel-heading">
+                    <h4 class="panel-title" data-toggle="collapse" data-parent="#accordion" data-target="#collapse{{client.clientId}}" style="cursor: pointer;">
+                        {{client.name}}
+                    </h4>
+                </div>
+                <div id="collapse{{client.clientId}}" class="panel-collapse collapse">
+                    <div class="panel-body">
+                        <h4>Details</h4>
+                        <p>Permissions: <b>{{ client.scope }}</b></p>
+                        <p>Provided Tokens: <b>{{ client.tokenCount }}</b></p>
+                        <button class="btn btn-xs btn-danger" ng-click="removeAccessTokens(client, $event)" ng-disabled="!client.tokenCount"><i ng-hide="!client._busy" class="fa fa-circle-o-notch fa-spin"></i> Remove access tokens</button>
+                        <br/>
+                        <br/>
+                        <h4>Credentials</h4>
+                        <p>Client ID: <b>{{ client.clientId }}</b></p>
+                        <p>Client Secret: <b>{{ client.clientSecret }}</b></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

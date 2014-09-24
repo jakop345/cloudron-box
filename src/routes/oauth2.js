@@ -76,7 +76,7 @@ server.grant(oauth2orize.grant.code({ scopeSeparator: ',' }, function (client, r
     var scope = '*';
 
     // only give out wildcard scope to the webadmin all other clients are only allowed to request 'profile'
-    if (client.id !== 'webadmin') {
+    if (client.appId !== 'webadmin') {
         if (ares.scope[0] !== 'profile') return callback(new Error('Requested scope is not allowed for this client'));
         scope = ares.scope.join(',');
     }
@@ -250,58 +250,45 @@ function scope(requestedScope) {
     ];
 }
 
-function getActiveClients(req, res, next) {
-    debug('getActiveClients');
+function getClients(req, res, next) {
+    debug('getClients');
 
-    clientdb.getActiveClientsByUserId(req.user.id, function (error, result) {
+    clientdb.getAllWithDetails(function (error, result) {
         if (error && error.reason !== DatabaseError.NOT_FOUND) return next(new HttpError(500, error));
 
         result = result || [];
 
-        debug('getActiveClients: success.', result);
+        debug('getClients: success.', result);
 
         next(new HttpSuccess(200, { clients: result }));
     });
 }
 
-function delActiveClient(req, res, next) {
+function getClientTokens(req, res, next) {
     assert(typeof req.params.clientId === 'string');
 
-    debug('delActiveClient: %s.', req.params.clientId);
+    debug('getClientTokens');
 
-    tokendb.delByUserIdAndClientId(req.user.id, req.params.clientId, function (error) {
-        if (error && error.reason !== DatabaseError.NOT_FOUND) return next(new HttpError(500, error));
-
-        debug('delActiveClient: success.');
-
-        next(new HttpSuccess(200, {}));
-    });
-}
-
-function getTokens(req, res, next) {
-    debug('getTokens');
-
-    tokendb.getByUserId(req.user.id, function (error, result) {
+    tokendb.getByUserIdAndClientId(req.user.id, req.params.clientId, function (error, result) {
         if (error && error.reason !== DatabaseError.NOT_FOUND) return next(new HttpError(500, error));
 
         result = result || [];
 
-        debug('getTokens: success.', result);
+        debug('getClientTokens: success.', result);
 
         next(new HttpSuccess(200, { tokens: result }));
     });
 }
 
-function delToken(req, res, next) {
-    assert(typeof req.params.token === 'string');
+function delClientTokens(req, res, next) {
+    assert(typeof req.params.clientId === 'string');
 
-    debug('delToken');
+    debug('delClientTokens: user %s and client %s.', req.user.id, req.params.clientId);
 
-    tokendb.del(req.params.token, function (error) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(404, 'No such token'));
-        if (error)  return next(new HttpError(500, error));
+    tokendb.delByUserIdAndClientId(req.user.id, req.params.clientId, function (error) {
+        if (error && error.reason !== DatabaseError.NOT_FOUND) return next(new HttpError(500, error));
 
-        debug('delToken: success.');
+        debug('delClientTokens: success.');
 
         next(new HttpSuccess(200, {}));
     });
@@ -318,8 +305,7 @@ exports = module.exports = {
     token: token,
     library: library,
     scope: scope,
-    getActiveClients: getActiveClients,
-    delActiveClient: delActiveClient,
-    getTokens: getTokens,
-    delToken: delToken
+    getClients: getClients,
+    getClientTokens: getClientTokens,
+    delClientTokens: delClientTokens
 };

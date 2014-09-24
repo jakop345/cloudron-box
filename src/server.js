@@ -19,6 +19,7 @@ var express = require('express'),
     fs = require('fs'),
     exec = require('child_process').exec,
     df = require('nodejs-disks'),
+    uuid = require('node-uuid'),
     apps = require('./apps'),
     Updater = require('./updater.js'),
     middleware = require('./middleware'),
@@ -28,7 +29,6 @@ var express = require('express'),
     config = require('../config.js'),
     backups = require('./backups.js'),
     url = require('url'),
-    querystring = require('querystring'),
     _ = require('underscore');
 
 exports = module.exports = Server;
@@ -243,8 +243,8 @@ Server.prototype._provision = function (req, res, next) {
     config.set(_.pick(req.body, 'token', 'appServerUrl', 'adminOrigin', 'fqdn', 'aws'));
 
     // override the default webadmin OAuth client record
-    clientdb.del('webadmin', function () {
-        clientdb.add('webadmin', 'cid-webadmin', 'unused', 'WebAdmin', config.adminOrigin, function (error) {
+    clientdb.delByAppId('webadmin', function () {
+        clientdb.add(uuid.v4(), 'webadmin', 'cid-webadmin', 'unused', 'WebAdmin', config.adminOrigin, function (error) {
             if (error) return next(new HttpError(500, error));
 
             next(new HttpSuccess(201, {}));
@@ -324,7 +324,7 @@ Server.prototype._initializeExpressSync = function () {
     router.del = router.delete; // amend router.del for readability further on
 
     this.app
-//       .use(require('delay')(500))
+      // .use(require('delay')(500))
        .use(middleware.timeout(REQUEST_TIMEOUT))
 //       .use(express.limit(UPLOAD_LIMIT))
        .use(json)
@@ -393,6 +393,9 @@ Server.prototype._initializeExpressSync = function () {
     router.post('/api/v1/oauth/dialog/authorize/decision', routes.oauth2.decision);
     router.post('/api/v1/oauth/token', routes.oauth2.token);
     router.get ('/api/v1/oauth/yellowtent.js', routes.oauth2.library);
+    router.get ('/api/v1/oauth/clients', settingsScope, routes.oauth2.getClients);
+    router.get ('/api/v1/oauth/clients/:clientId/tokens', settingsScope, routes.oauth2.getClientTokens);
+    router.del ('/api/v1/oauth/clients/:clientId/tokens', settingsScope, routes.oauth2.delClientTokens);
 
     // app routes
     router.get ('/api/v1/apps', appsScope, routes.apps.getApps);
@@ -413,14 +416,6 @@ Server.prototype._initializeExpressSync = function () {
     // settings routes
     router.get ('/api/v1/settings/naked_domain', settingsScope, routes.settings.getNakedDomain);
     router.post('/api/v1/settings/naked_domain', settingsScope, routes.settings.setNakedDomain);
-
-    // access tokens routes
-    router.get ('/api/v1/tokens', settingsScope, routes.oauth2.getTokens);
-    router.del ('/api/v1/tokens/:token', settingsScope, routes.oauth2.delToken);
-
-    // oauth clients routes
-    router.get ('/api/v1/activeclients', settingsScope, routes.oauth2.getActiveClients);
-    router.del ('/api/v1/activeclients/:clientId', settingsScope, routes.oauth2.delActiveClient);
 
     // old syncer and file APIs, we might want to remove them soonish
     router.param('syncerVolume', function (req, res, next, id) {

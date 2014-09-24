@@ -223,14 +223,24 @@ describe('database', function () {
             });
         });
 
-        it('delByUserIdAndClientId succeeds', function (done) {
-            tokendb.add(TOKEN_0.accessToken, TOKEN_0.userId, TOKEN_0.clientId, TOKEN_0.expires, TOKEN_0.scope, function (error) {
+        it('getByUserIdAndClientId succeeds', function (done) {
+             tokendb.add(TOKEN_0.accessToken, TOKEN_0.userId, TOKEN_0.clientId, TOKEN_0.expires, TOKEN_0.scope, function (error) {
                 expect(error).to.be(null);
 
-                tokendb.delByUserIdAndClientId(TOKEN_0.userId, TOKEN_0.clientId, function (error) {
+                tokendb.getByUserIdAndClientId(TOKEN_0.userId, TOKEN_0.clientId, function (error, result) {
                     expect(error).to.be(null);
+                    expect(result).to.be.an(Array);
+                    expect(result.length).to.equal(1);
+                    expect(result[0]).to.eql(TOKEN_0);
                     done();
                 });
+            });
+        });
+
+        it('delByUserIdAndClientId succeeds', function (done) {
+            tokendb.delByUserIdAndClientId(TOKEN_0.userId, TOKEN_0.clientId, function (error) {
+                expect(error).to.be(null);
+                done();
             });
         });
 
@@ -471,6 +481,7 @@ describe('database', function () {
     describe('client', function () {
         var CLIENT_0 = {
             id: 'someclientid_0',
+            appId: 'someappid_0',
             clientId: 'cid-0',
             clientSecret: 'secret-0',
             name: 'Test client 0',
@@ -478,6 +489,7 @@ describe('database', function () {
         };
         var CLIENT_1 = {
             id: 'someclientid_1',
+            appId: 'someappid_1',
             clientId: 'cid-1',
             clientSecret: 'secret-',
             name: 'Test client 1',
@@ -506,10 +518,10 @@ describe('database', function () {
         };
 
         it('add succeeds', function (done) {
-            clientdb.add(CLIENT_0.id, CLIENT_0.clientId, CLIENT_0.clientSecret, CLIENT_0.name, CLIENT_0.redirectURI, function (error) {
+            clientdb.add(CLIENT_0.id, CLIENT_0.appId, CLIENT_0.clientId, CLIENT_0.clientSecret, CLIENT_0.name, CLIENT_0.redirectURI, function (error) {
                 expect(error).to.be(null);
 
-                clientdb.add(CLIENT_1.id, CLIENT_1.clientId, CLIENT_1.clientSecret, CLIENT_1.name, CLIENT_1.redirectURI, function (error) {
+                clientdb.add(CLIENT_1.id, CLIENT_1.appId, CLIENT_1.clientId, CLIENT_1.clientSecret, CLIENT_1.name, CLIENT_1.redirectURI, function (error) {
                     expect(error).to.be(null);
                     done();
                 });
@@ -517,7 +529,7 @@ describe('database', function () {
         });
 
         it('add same client id fails', function (done) {
-            clientdb.add(CLIENT_0.id, CLIENT_0.clientId, CLIENT_0.clientSecret, CLIENT_0.name, CLIENT_0.redirectURI, function (error) {
+            clientdb.add(CLIENT_0.id, CLIENT_0.appId, CLIENT_0.clientId, CLIENT_0.clientSecret, CLIENT_0.name, CLIENT_0.redirectURI, function (error) {
                 expect(error).to.be.a(DatabaseError);
                 expect(error.reason).to.equal(DatabaseError.ALREADY_EXISTS);
                 done();
@@ -549,29 +561,44 @@ describe('database', function () {
             });
         });
 
-        it('getActiveClientsByUserId succeeds', function (done) {
-            tokendb.add(TOKEN_0.accessToken, TOKEN_0.userId, TOKEN_0.clientId, TOKEN_0.expires, TOKEN_0.scope, function (error) {
+        it('getByAppId succeeds', function (done) {
+            clientdb.getByAppId(CLIENT_0.appId, function (error, result) {
+                expect(error).to.be(null);
+                expect(result).to.eql(CLIENT_0);
+                done();
+            });
+        });
+
+        it('getByAppId fails for unknown client id', function (done) {
+            clientdb.getByAppId(CLIENT_0.appId + CLIENT_0.appId, function (error, result) {
+                expect(error).to.be.a(DatabaseError);
+                expect(error.reason).to.equal(DatabaseError.NOT_FOUND);
+                expect(result).to.not.be.ok();
+                done();
+            });
+        });
+
+        it('getAll succeeds', function (done) {
+            clientdb.getAll(function (error, result) {
+                expect(error).to.be(null);
+                expect(result).to.be.an(Array);
+                expect(result.length).to.equal(3);  // we only added 2 but webadmin is added in database.js
+                expect(result[0].appId).to.equal('webadmin');
+                expect(result[1]).to.eql(CLIENT_0);
+                expect(result[2]).to.eql(CLIENT_1);
+                done();
+            });
+        });
+
+        it('delByAppId succeeds', function (done) {
+            clientdb.delByAppId(CLIENT_0.appId, function (error) {
                 expect(error).to.be(null);
 
-                tokendb.add(TOKEN_1.accessToken, TOKEN_1.userId, TOKEN_1.clientId, TOKEN_1.expires, TOKEN_1.scope, function (error) {
-                    expect(error).to.be(null);
-
-                    tokendb.add(TOKEN_2.accessToken, TOKEN_2.userId, TOKEN_2.clientId, TOKEN_2.expires, TOKEN_2.scope, function (error) {
-                        expect(error).to.be(null);
-
-                        clientdb.getActiveClientsByUserId(TOKEN_0.userId, function (error, result) {
-                            expect(error).to.be(null);
-                            expect(result).to.be.an(Array);
-                            expect(result.length).to.equal(2);
-                            expect(result[0].clientId).to.equal(CLIENT_0.id);
-                            expect(result[0].tokens).to.equal(2);
-                            expect(result[0].scope).to.equal(TOKEN_1.scope);
-                            expect(result[1].clientId).to.equal(CLIENT_1.id);
-                            expect(result[1].tokens).to.equal(1);
-                            expect(result[1].scope).to.equal(TOKEN_2.scope);
-                            done();
-                        });
-                    });
+                clientdb.getByAppId(CLIENT_0.appId, function (error, result) {
+                    expect(error).to.be.a(DatabaseError);
+                    expect(error.reason).to.equal(DatabaseError.NOT_FOUND);
+                    expect(result).to.not.be.ok();
+                    done();
                 });
             });
         });

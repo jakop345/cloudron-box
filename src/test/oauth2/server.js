@@ -10,6 +10,7 @@ var Server = require('../../server.js'),
     user = require('../../user.js'),
     config = require('../../../config.js'),
     clientdb = require('../../clientdb.js'),
+    uuid = require('node-uuid'),
     express = require('express');
 
 console.log();
@@ -43,7 +44,7 @@ server.start(function (err) {
     user.create('test', 'test', 'test@test.com', true /* admin */, function (error) {
         if (error) return console.error(error);
 
-        clientdb.add('app', 'cid-app', 'unused', 'TestApp', 'http://localhost:5454', function (error) {
+        clientdb.add(uuid.v4(),'app', 'cid-app', 'unused', 'TestApp', 'http://localhost:5454', function (error) {
             if (error) return console.error(error);
         });
     });
