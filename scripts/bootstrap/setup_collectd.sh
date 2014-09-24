@@ -19,6 +19,7 @@ mkdir -p $COLLECTD_DIR/collectd.conf.d
 cp -r $SCRIPT_DIR/collectd/collectd.conf $COLLECTD_DIR/collectd.conf
 rm -rf /etc/collectd
 ln -sfF $COLLECTD_DIR /etc/collectd
+chown -R yellowtent.yellowtent $COLLECTD_DIR
 
 update-rc.d -f collectd defaults
 /etc/init.d/collectd restart
