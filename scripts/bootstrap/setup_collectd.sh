@@ -14,6 +14,11 @@ docker run -d --name="graphite" \
     -v $GRAPHITE_DIR:/app/data girish/graphite:0.2
 
 # collectd
-cp $SCRIPT_DIR/collectd/collectd.conf /etc/collectd/collectd.conf
+COLLECTD_DIR="/home/yellowtent/.yellowtent/collectd/"
+mkdir -p $COLLECTD_DIR/collectd.conf.d
+cp -r $SCRIPT_DIR/collectd/collectd.conf $COLLECTD_DIR/collectd.conf
+rm -rf /etc/collectd
+ln -sfF $COLLECTD_DIR /etc/collectd
+
 update-rc.d -f collectd defaults
 /etc/init.d/collectd restart
