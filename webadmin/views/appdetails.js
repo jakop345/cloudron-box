@@ -37,16 +37,14 @@ var AppDetailsController = function ($scope, $http, $routeParams, Client) {
     };
 
     $scope.updateGraphs = function () {
-        var cpuUsageTarget = 'transformNull(' +
-        'scale(divideSeries(' +
-            'sumSeries(collectd.localhost.cpu-0.cpu-system,collectd.localhost.cpu-0.cpu-nice,collectd.localhost.cpu-0.cpu-user),' +
-            'sumSeries(collectd.localhost.cpu-0.cpu-idle,collectd.localhost.cpu-0.cpu-system,collectd.localhost.cpu-0.cpu-nice,collectd.localhost.cpu-0.cpu-user,collectd.localhost.cpu-0.cpu-wait)), 100), 0)';
+        var cpuUsageTarget =
+            'nonNegativeDerivative(' +
+                'sumSeries(collectd.localhost.table-' + $scope.app.id + '-cpu.gauge-user,' +
+                          'collectd.localhost.table-' + $scope.app.id + '-cpu.gauge-system))';
 
-        var memoryUsageTxTarget = 'transformNull(collectd.localhost.interface-eth0.if_octets.tx, 0)';
-        var memoryUsageRxTarget = 'transformNull(collectd.localhost.interface-eth0.if_octets.rx, 0)';
+        var memoryUsageTarget = 'collectd.localhost.table-' + $scope.app.id + '-memory.gauge-max_usage_in_bytes';
 
-        var diskUsageAppsUsedTarget = 'transformNull(collectd.localhost.df-loop0.df_complex-used, 0)';
-        var diskUsageDataUsedTarget = 'transformNull(collectd.localhost.df-loop1.df_complex-used, 0)';
+        var diskUsageTarget = 'collectd.localhost.filecount-' + $scope.app.id + '-appdata.bytes';
 
         var activeTab = $scope.activeTab;
         var from = '-24hours';
@@ -57,7 +55,7 @@ var AppDetailsController = function ($scope, $http, $routeParams, Client) {
         default: console.log('internal errror');
         }
 
-        Client.graphs([ cpuUsageTarget, memoryUsageTxTarget, memoryUsageRxTarget, diskUsageAppsUsedTarget, diskUsageDataUsedTarget ], from, function (error, data) {
+        Client.graphs([ cpuUsageTarget, memoryUsageTarget, diskUsageTarget ], from, function (error, data) {
             if (error) return console.log(error);
 
             // CPU
@@ -97,22 +95,19 @@ var AppDetailsController = function ($scope, $http, $routeParams, Client) {
             cpuGraph.render();
 
             // memory
-            var transformedTx = data[1].datapoints.map(function (point) { return { y: point[0], x: point[1] } });
-            var transformedRx = data[2].datapoints.map(function (point) { return { y: point[0], x: point[1] } });
+            var transformedMemory = data[1].datapoints.map(function (point) { return { y: point[0], x: point[1] } });
 
             var memoryGraph = new Rickshaw.Graph({
-                element: document.querySelector('#' + activeTab + 'memoryChart'),
+                element: document.querySelector('#' + activeTab + 'MemoryChart'),
                 renderer: 'area',
                 width: 580,
                 height: 250,
+                min: 0,
+                max: 2 * 1024 * 1024 * 1024, // 2gb
                 series: [ {
                     color: 'steelblue',
-                    data: transformedTx,
-                    name: 'tx'
-                }, {
-                    color: 'green',
-                    data: transformedRx,
-                    name: 'rx'
+                    data: transformedMemory,
+                    name: 'memory'
                 } ]
             } );
 
@@ -121,14 +116,14 @@ var AppDetailsController = function ($scope, $http, $routeParams, Client) {
                 graph: memoryGraph,
                 orientation: 'left',
                 tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
-                element: document.getElementById(activeTab + 'memoryYAxis'),
+                element: document.getElementById(activeTab + 'MemoryYAxis'),
             });
 
             var memoryHoverDetail = new Rickshaw.Graph.HoverDetail({
                 graph: memoryGraph,
                 formatter: function(series, x, y) {
                     var swatch = '<span class="detail_swatch" style="background-color: ' + series.color + '"></span>';
-                    var content = swatch + series.name + ": " + new Number(y/1024).toFixed(2) + 'KB<br>';
+                    var content = swatch + series.name + ": " + new Number(y/(1024*1024)).toFixed(2) + 'MB<br>';
                     return content;
                 }
             });
@@ -136,8 +131,7 @@ var AppDetailsController = function ($scope, $http, $routeParams, Client) {
             memoryGraph.render();
 
             // Disk
-            var transformedAppsUsed = data[3].datapoints.map(function (point) { return { y: point[0], x: point[1] } });
-            var transformedDataUsed = data[4].datapoints.map(function (point) { return { y: point[0], x: point[1] } });
+            var transformedDisk = data[2].datapoints.map(function (point) { return { y: point[0], x: point[1] } });
 
             var diskGraph = new Rickshaw.Graph({
                 element: document.querySelector('#' + activeTab + 'DiskChart'),
@@ -148,12 +142,8 @@ var AppDetailsController = function ($scope, $http, $routeParams, Client) {
                 max: 30 * 1024 * 1024 * 1024, // 30gb
                 series: [{
                     color: 'steelblue',
-                    data: transformedAppsUsed,
+                    data: transformedDisk,
                     name: 'apps'
-                }, {
-                    color: 'green',
-                    data: transformedDataUsed,
-                    name: 'data'
                 }]
             } );
 
@@ -169,7 +159,7 @@ var AppDetailsController = function ($scope, $http, $routeParams, Client) {
                 graph: diskGraph,
                 formatter: function(series, x, y) {
                     var swatch = '<span class="detail_swatch" style="background-color: ' + series.color + '"></span>';
-                    var content = swatch + series.name + ": " + new Number(y/(1024 * 1024 * 1024)).toFixed(2) + 'GB<br>';
+                    var content = swatch + series.name + ": " + new Number(y/(1024 * 1024)).toFixed(2) + 'MB<br>';
                     return content;
                 }
             });
