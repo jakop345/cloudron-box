@@ -40,7 +40,7 @@ var AppDetailsController = function ($scope, $http, $routeParams, Client) {
         var cpuUsageTarget =
             'nonNegativeDerivative(' +
                 'sumSeries(collectd.localhost.table-' + $scope.app.id + '-cpu.gauge-user,' +
-                          'collectd.localhost.table-' + $scope.app.id + '-cpu.gauge-system))';
+                          'collectd.localhost.table-' + $scope.app.id + '-cpu.gauge-system))'; // assumes 100 jiffies per sec (USER_HZ)
 
         var memoryUsageTarget = 'collectd.localhost.table-' + $scope.app.id + '-memory.gauge-max_usage_in_bytes';
 
