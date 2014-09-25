@@ -51,14 +51,14 @@
                                         <h4 class="modal-title" id="userDeleteModalLabel-{{user.username}}">Delete user {{ user.username }}</h4>
                                     </div>
                                     <div class="modal-body">
-                                        <form class="form-user-delete" role="form" ng-submit="deleteUser(user)">
+                                        <form class="form-user-delete" role="form" ng-submit="deleteUser(user)" name="userDeleteConfirm">
                                             <div class="form-group">
-                                                <label class="control-label" for="inputUsername">Just to be sure you really want to delete this user, please type the user's name</label>
-                                                <input type="text" class="form-control" ng-model="userDeleteForm.username" id="inputUsername" placeholder="Username" required autofocus>
+                                                <label class="control-label" for="userDeleteConfirmUsername">Just to be sure you really want to delete this user, please type the user's name</label>
+                                                <input type="text" class="form-control" ng-model="userDeleteForm.username" id="userDeleteConfirmUsername" name="userDeleteConfirm" placeholder="Username" autocomplete="off" required autofocus>
                                             </div>
                                             <div class="form-group">
-                                                <label class="control-label" for="inputPassword">Give your password to verify that you are performing that action</label>
-                                                <input type="password" class="form-control" ng-model="userDeleteForm.password" id="inputPassword" placeholder="Password" required>
+                                                <label class="control-label" for="userDeleteConfirmPassword">Give your password to verify that you are performing that action</label>
+                                                <input type="password" class="form-control" ng-model="userDeleteForm.password" id="userDeleteConfirmPassword" name="userDeleteConfirmPassword" placeholder="Password" autocomplete="off" required>
                                             </div>
                                             <input class="hide" type="submit"/>
                                         </form>
