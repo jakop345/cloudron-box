@@ -39,7 +39,6 @@ var RELOAD_NGINX_CMD = 'sudo ' + path.join(__dirname, 'scripts/reloadnginx.sh');
 function Server() {
     this.httpServer = null; // http server
     this.app = null; // express
-    this._announceTimerId = null;
     this._updater = null;
 }
 
@@ -471,38 +470,6 @@ Server.prototype._getCertificate = function (callback) {
     });
 };
 
-Server.prototype._announce = function () {
-    if (config.token) {
-        debug('_announce: we already have a token. Skip announcing.');
-        clearTimeout(this._announceTimerId);
-        this._announceTimerId = null;
-        return;
-    }
-
-    var that = this;
-
-    var ANNOUNCE_INTERVAL = parseInt(process.env.ANNOUNCE_INTERVAL, 10) || 60000; // exported for testing
-
-    // On Digital Ocean, the only value which we can give a new droplet is the hostname.
-    // We use that value to identify the droplet by the appstore server when the droplet
-    // announce itself. This identifier can look different for other box providers.
-    var hostname = os.hostname();
-    var url = config.appServerUrl + '/api/v1/boxes/' + hostname + '/announce';
-    debug('_announce: box with %s.', url);
-
-    superagent.get(url).end(function (error, result) {
-        if (error || result.statusCode !== 200) {
-            debug('_announce: unable to announce to app server, try again.', error);
-            that._announceTimerId = setTimeout(that._announce.bind(that), ANNOUNCE_INTERVAL); // try again
-            return;
-        }
-
-        that._announceTimerId = setTimeout(that._announce.bind(that), ANNOUNCE_INTERVAL * 2);
-
-        debug('_announce: success');
-    });
-};
-
 Server.prototype.start = function (callback) {
     assert(typeof callback === 'function');
     assert(this.app === null, 'Server is already up and running.');
@@ -521,8 +488,6 @@ Server.prototype.start = function (callback) {
 
     this._initializeExpressSync();
     this._sendHeartBeat();
-
-    this._announce();
 
     cloudron.initialize();
 
@@ -548,9 +513,6 @@ Server.prototype.stop = function (callback) {
     }
 
     that._updater.stop();
-
-    clearTimeout(this._announceTimerId);
-    this._announceTimerId = null;
 
     cloudron.uninitialize();
     apps.uninitialize();

@@ -11,6 +11,7 @@ var Server = require('../server.js'),
     rimraf = require('rimraf'),
     expect = require('expect.js'),
     nock = require('nock'),
+    cloudron = require('../cloudron.js'),
     config = require('../../config.js');
 
 var SERVER_URL = 'http://localhost:' + config.port;
@@ -369,19 +370,20 @@ describe('Server', function () {
         });
 
         after(function (done) {
+            process.env.ANNOUNCE_INTERVAL = 60000;
             server.stop(done);
             nock.cleanAll();
         });
 
         it('sends announce request repeatedly until token is set', function (done) {
             setTimeout(function () {
-                expect(server._announceTimerId).to.be.ok();
+                expect(cloudron._getAnnounceTimerId()).to.be.ok();
                 expect(failingGet.counter).to.be.below(6); // counter is nock internal
 
                 config.set('token', 'provision');
 
                 setTimeout(function () {
-                    expect(server._announceTimerId).to.be(null);
+                    expect(cloudron._getAnnounceTimerId()).to.be(null);
                     done();
                 }, 100);
             }, 100);
