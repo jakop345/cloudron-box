@@ -23,6 +23,7 @@ function initialize() {
     // every backup restarts the box. the setInterval is only needed should that fail for some reason
     backupTimerId = setInterval(backups.createBackup, 4 * 60 * 60 * 1000);
 
+    sendHeartBeat();
     announce();
 }
 
@@ -37,6 +38,31 @@ function uninitialize() {
 function getAnnounceTimerId() {
     return announceTimerId;
 }
+
+function sendHeartBeat() {
+    var HEARTBEAT_INTERVAL = 1000 * 60;
+
+    if (!config.appServerUrl) {
+        debug('No appstore server url set. Not sending heartbeat.');
+        return;
+    }
+
+    if (!config.token) {
+        debug('No appstore server token set. Not sending heartbeat.');
+        return;
+    }
+
+    var url = config.appServerUrl + '/api/v1/boxes/' + os.hostname() + '/heartbeat';
+    debug('Sending heartbeat ' + url);
+
+    superagent.get(url).query({ token: config.token }).end(function (error, result) {
+        if (error) debug('Error sending heartbeat.', error);
+        else if (result.statusCode !== 200) debug('Server responded to heartbeat with ' + result.statusCode);
+        else debug('Heartbeat successfull');
+
+        setTimeout(sendHeartBeat, HEARTBEAT_INTERVAL);
+    });
+};
 
 function announce() {
     if (config.token) {

@@ -33,7 +33,6 @@ var express = require('express'),
 
 exports = module.exports = Server;
 
-var HEARTBEAT_INTERVAL = 1000 * 60;// * 60;
 var RELOAD_NGINX_CMD = 'sudo ' + path.join(__dirname, 'scripts/reloadnginx.sh');
 
 function Server() {
@@ -394,31 +393,6 @@ Server.prototype._initializeExpressSync = function () {
     router.del ('/api/v1/volume/:volume/users/:username', routes.volume.removeUser);
 };
 
-Server.prototype._sendHeartBeat = function () {
-    if (!config.appServerUrl) {
-        debug('No appstore server url set. Not sending heartbeat.');
-        return;
-    }
-
-    if (!config.token) {
-        debug('No appstore server token set. Not sending heartbeat.');
-        return;
-    }
-
-    var that = this;
-
-    var url = config.appServerUrl + '/api/v1/boxes/' + os.hostname() + '/heartbeat';
-    debug('Sending heartbeat ' + url);
-
-    superagent.get(url).query({ token: config.token }).end(function (error, result) {
-        if (error) debug('Error sending heartbeat.', error);
-        else if (result.statusCode !== 200) debug('Server responded to heartbeat with ' + result.statusCode);
-        else debug('Heartbeat successfull');
-
-        setTimeout(that._sendHeartBeat.bind(that), HEARTBEAT_INTERVAL);
-    });
-};
-
 Server.prototype._getCertificate = function (callback) {
     assert(typeof callback === 'function');
 
@@ -487,7 +461,6 @@ Server.prototype.start = function (callback) {
     this._updater = new Updater();
 
     this._initializeExpressSync();
-    this._sendHeartBeat();
 
     cloudron.initialize();
 
