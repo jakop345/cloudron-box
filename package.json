@@ -70,7 +70,7 @@
     "sinon": "~1.10.3"
   },
   "scripts": {
-    "test": "NODE_ENV=test ./node_modules/istanbul/lib/cli.js test $1 ./node_modules/mocha/bin/_mocha -- -R spec ./src/test ./src/routes/test",
+    "test": "scripts/checkInstall.sh && NODE_ENV=test ./node_modules/istanbul/lib/cli.js test $1 ./node_modules/mocha/bin/_mocha -- -R spec ./src/test ./src/routes/test",
     "prepush": "npm test"
   }
 }

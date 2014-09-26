@@ -12,8 +12,11 @@ scripts=($SRCDIR/src/scripts/rmappdir.sh \
 
 for script in "${scripts[@]}"; do
     OUTPUT=$(sudo -n "$script" --check 2>/dev/null)
-    echo "$script: $OUTPUT"
+    # echo "$script: $OUTPUT"
     if [ "$OUTPUT" != "OK" ]; then
         echo "$script does not have sudo access"
+        exit 1
     fi
 done
+
+exit 0
