@@ -11,6 +11,7 @@ var HttpError = require('../httperror.js'),
     cloudron = require('../cloudron.js'),
     config = require('../../config.js'),
     exec = require('child_process').exec,
+    _ = require('underscore'),
     backups = require('../backups.js');
 
 var REBOOT_CMD = 'sudo ' + path.join(__dirname, '../scripts/reboot.sh');
@@ -21,7 +22,8 @@ exports = module.exports = {
     createBackup: createBackup,
     restore: restore,
     getConfig: getConfig,
-    update: update
+    update: update,
+    provision: provision
 };
 
 function getStats(req, res, next) {
@@ -90,6 +92,28 @@ function update(req, res, next) {
         if (error) return next(new HttpError(500, error));
 
         res.send(200, { });
+    });
+};
+
+function provision(req, res, next) {
+    if (!req.body.token) return next(new HttpError(400, 'No token provided'));
+    if (!req.body.appServerUrl) return next(new HttpError(400, 'No appServerUrl provided'));
+    if (!req.body.adminOrigin) return next(new HttpError(400, 'No adminOrigin provided'));
+    if (!req.body.fqdn) return next(new HttpError(400, 'No fqdn provided'));
+    if (!req.body.ip) return next(new HttpError(400, 'No ip provided'));
+    if (!req.body.aws) return next(new HttpError(400, 'No aws credentials provided'));
+    if (!req.body.aws.prefix) return next(new HttpError(400, 'No aws prefix provided'));
+    if (!req.body.aws.bucket) return next(new HttpError(400, 'No aws bucket provided'));
+    if (!req.body.aws.accessKeyId) return next(new HttpError(400, 'No aws access key provided'));
+    if (!req.body.aws.secretAccessKey) return next(new HttpError(400, 'No aws secret provided'));
+
+    debug('_provision: received from appstore ' + req.body.appServerUrl);
+
+    cloudron.provision(req.body, function (error) {
+        if (error && error.reason === CloudronError.ALREADY_PROVISIONED) return next(new HttpError(409, 'Already provisioned'));
+        if (error) return next(new HttpError(500, error));
+
+        return next(new HttpSuccess(201, { }));
     });
 };
 

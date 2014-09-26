@@ -19,11 +19,9 @@ var express = require('express'),
     child_process = require('child_process'),
     fs = require('fs'),
     exec = require('child_process').exec,
-    uuid = require('node-uuid'),
     apps = require('./apps'),
     middleware = require('./middleware'),
     database = require('./database.js'),
-    clientdb = require('./clientdb.js'),
     userdb = require('./userdb'),
     config = require('../config.js'),
     cloudron = require('./cloudron.js'),
@@ -31,8 +29,6 @@ var express = require('express'),
     _ = require('underscore');
 
 exports = module.exports = Server;
-
-var RELOAD_NGINX_CMD = 'sudo ' + path.join(__dirname, 'scripts/reloadnginx.sh');
 
 function Server() {
     this.httpServer = null; // http server
@@ -106,48 +102,6 @@ Server.prototype._firstTime = function (req, res) {
  */
 Server.prototype._getVersion = function (req, res) {
     res.send(200, { version: config.version });
-};
-
-Server.prototype._provision = function (req, res, next) {
-    if (!req.body.token) return next(new HttpError(400, 'No token provided'));
-    if (!req.body.appServerUrl) return next(new HttpError(400, 'No appServerUrl provided'));
-    if (!req.body.adminOrigin) return next(new HttpError(400, 'No adminOrigin provided'));
-    if (!req.body.fqdn) return next(new HttpError(400, 'No fqdn provided'));
-    if (!req.body.ip) return next(new HttpError(400, 'No ip provided'));
-    if (!req.body.aws) return next(new HttpError(400, 'No aws credentials provided'));
-    if (!req.body.aws.prefix) return next(new HttpError(400, 'No aws prefix provided'));
-    if (!req.body.aws.bucket) return next(new HttpError(400, 'No aws bucket provided'));
-    if (!req.body.aws.accessKeyId) return next(new HttpError(400, 'No aws access key provided'));
-    if (!req.body.aws.secretAccessKey) return next(new HttpError(400, 'No aws secret provided'));
-
-    debug('_provision: received from appstore ' + req.body.appServerUrl);
-
-    var that = this;
-
-    if (config.token) return next(new HttpError(409, 'Already provisioned'));
-
-    config.set(_.pick(req.body, 'token', 'appServerUrl', 'adminOrigin', 'fqdn', 'aws'));
-
-    // override the default webadmin OAuth client record
-    clientdb.delByAppId('webadmin', function () {
-        clientdb.add(uuid.v4(), 'webadmin', 'cid-webadmin', 'unused', 'WebAdmin', config.adminOrigin, function (error) {
-            if (error) return next(new HttpError(500, error));
-
-            next(new HttpSuccess(201, {}));
-
-            // now try to get the real certificate
-            function getCertificateCallback(error) {
-                if (error) {
-                    console.error(error);
-                    return setTimeout(that._getCertificate.bind(that, getCertificateCallback), 5000);
-                }
-
-                debug('_provision: success');
-            }
-
-            that._getCertificate(getCertificateCallback);
-        });
-    });
 };
 
 /*
@@ -245,7 +199,7 @@ Server.prototype._initializeExpressSync = function () {
     // public routes
     router.get ('/api/v1/version', this._getVersion.bind(this));
     router.get ('/api/v1/firsttime', this._firstTime.bind(this));
-    router.post('/api/v1/provision', this._provision.bind(this));
+    router.post('/api/v1/provision', routes.cloudron.provision);
     router.post('/api/v1/restore', routes.cloudron.restore);
     router.post('/api/v1/createadmin', routes.user.createAdmin);    // FIXME any number of admins can be created without auth!
 
@@ -348,57 +302,6 @@ Server.prototype._initializeExpressSync = function () {
     router.get ('/api/v1/volume/:volume/users', routes.volume.listUsers);
     router.post('/api/v1/volume/:volume/users', routes.volume.addUser);
     router.del ('/api/v1/volume/:volume/users/:username', routes.volume.removeUser);
-};
-
-Server.prototype._getCertificate = function (callback) {
-    assert(typeof callback === 'function');
-
-    debug('_getCertificate');
-
-    if (!config.appServerUrl || !config.token || !config.fqdn) {
-        debug('_getCertificate: not provisioned, yet.');
-        return callback(new Error('Not provisioned yet'));
-    }
-
-    var url = config.appServerUrl + '/api/v1/boxes/' + config.fqdn + '/certificate?token=' + config.token;
-
-    var request = http;
-    if (config.appServerUrl.indexOf('https://') === 0) request = https;
-
-    request.get(url, function (result) {
-        if (result.statusCode !== 200) return callback(new Error('Failed to get certificate. Status: ' + result.statusCode));
-
-        var certDirPath = config.nginxCertDir;
-        var certFilePath = path.join(certDirPath, 'cert.tar');
-        var file = fs.createWriteStream(certFilePath);
-
-        result.on('data', function (chunk) {
-            file.write(chunk);
-        });
-        result.on('end', function () {
-            exec('tar -xf ' + certFilePath, { cwd: certDirPath }, function(error) {
-                if (error) return callback(error);
-
-                if (!fs.existsSync(path.join(certDirPath, 'host.cert'))) return callback(new Error('Certificate bundle does not contain a host.cert file'));
-                if (!fs.existsSync(path.join(certDirPath, 'host.info'))) return callback(new Error('Certificate bundle does not contain a host.info file'));
-                if (!fs.existsSync(path.join(certDirPath, 'host.key'))) return callback(new Error('Certificate bundle does not contain a host.key file'));
-                if (!fs.existsSync(path.join(certDirPath, 'host.pem'))) return callback(new Error('Certificate bundle does not contain a host.pem file'));
-
-                // cleanup the cert bundle
-                fs.unlinkSync(certFilePath);
-
-                exec(RELOAD_NGINX_CMD, { timeout: 10000 }, function (error) {
-                    if (error) return callback(error);
-
-                    debug('_getCertificate: success');
-
-                    callback(null);
-                });
-            });
-        });
-    }).on('error', function (error) {
-        callback(error);
-    });
 };
 
 Server.prototype.start = function (callback) {

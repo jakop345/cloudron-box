@@ -11,6 +11,10 @@ var backups = require('./backups.js'),
     exec = require('child_process').exec,
     util = require('util'),
     path = require('path'),
+    fs = require('fs'),
+    clientdb = require('./clientdb.js'),
+    uuid = require('node-uuid'),
+    _ = require('underscore'),
     superagent = require('superagent');
 
 exports = module.exports = {
@@ -21,12 +25,14 @@ exports = module.exports = {
     getConfig: getConfig,
     update: update,
     restore: restore,
+    provision: provision,
 
     // exported for testing
     _getAnnounceTimerId: getAnnounceTimerId
 };
 
-var RESTORE_CMD = 'sudo ' + path.join(__dirname, 'scripts/restore.sh');
+var RESTORE_CMD = 'sudo ' + path.join(__dirname, 'scripts/restore.sh'),
+    RELOAD_NGINX_CMD = 'sudo ' + path.join(__dirname, 'scripts/reloadnginx.sh');
 
 var backupTimerId = null,
     announceTimerId = null,
@@ -42,7 +48,7 @@ function CloudronError(reason, info) {
 }
 util.inherits(CloudronError, Error);
 CloudronError.INTERNAL_ERROR = 1;
-
+CloudronError.ALREADY_PROVISIONED = 2;
 
 function initialize() {
     // every backup restarts the box. the setInterval is only needed should that fail for some reason
@@ -194,4 +200,84 @@ function announce() {
         debug('_announce: success');
     });
 };
+
+function getCertificate(callback) {
+    assert(typeof callback === 'function');
+
+    debug('_getCertificate');
+
+    if (!config.appServerUrl || !config.token || !config.fqdn) {
+        debug('_getCertificate: not provisioned, yet.');
+        return callback(new Error('Not provisioned yet'));
+    }
+
+    var url = config.appServerUrl + '/api/v1/boxes/' + config.fqdn + '/certificate?token=' + config.token;
+
+    var request = require('http');
+    if (config.appServerUrl.indexOf('https://') === 0) request = https;
+
+    request.get(url, function (result) {
+        if (result.statusCode !== 200) return callback(new Error('Failed to get certificate. Status: ' + result.statusCode));
+
+        var certDirPath = config.nginxCertDir;
+        var certFilePath = path.join(certDirPath, 'cert.tar');
+        var file = fs.createWriteStream(certFilePath);
+
+        result.on('data', function (chunk) {
+            file.write(chunk);
+        });
+        result.on('end', function () {
+            exec('tar -xf ' + certFilePath, { cwd: certDirPath }, function(error) {
+                if (error) return callback(error);
+
+                if (!fs.existsSync(path.join(certDirPath, 'host.cert'))) return callback(new Error('Certificate bundle does not contain a host.cert file'));
+                if (!fs.existsSync(path.join(certDirPath, 'host.info'))) return callback(new Error('Certificate bundle does not contain a host.info file'));
+                if (!fs.existsSync(path.join(certDirPath, 'host.key'))) return callback(new Error('Certificate bundle does not contain a host.key file'));
+                if (!fs.existsSync(path.join(certDirPath, 'host.pem'))) return callback(new Error('Certificate bundle does not contain a host.pem file'));
+
+                // cleanup the cert bundle
+                fs.unlinkSync(certFilePath);
+
+                exec(RELOAD_NGINX_CMD, { timeout: 10000 }, function (error) {
+                    if (error) return callback(error);
+
+                    debug('_getCertificate: success');
+
+                    callback(null);
+                });
+            });
+        });
+    }).on('error', function (error) {
+        callback(error);
+    });
+}
+
+function provision(args, callback) {
+    assert(typeof callback === 'function');
+
+    if (config.token) return next(new CloudronError(CloudronError.ALREADY_PROVISIONED));
+
+    config.set(_.pick(args, 'token', 'appServerUrl', 'adminOrigin', 'fqdn', 'aws'));
+
+    // override the default webadmin OAuth client record
+    clientdb.delByAppId('webadmin', function () {
+        clientdb.add(uuid.v4(), 'webadmin', 'cid-webadmin', 'unused', 'WebAdmin', config.adminOrigin, function (error) {
+            if (error) return next(new CloudronError(CloudronError.INTERNAL_ERROR, error));
+
+            callback(null);
+
+            // now try to get the real certificate
+            function getCertificateCallback(error) {
+                if (error) {
+                    console.error(error);
+                    return setTimeout(getCertificate.bind(null, getCertificateCallback), 5000);
+                }
+
+                debug('_provision: success');
+            }
+
+            getCertificate(getCertificateCallback);
+        });
+    });
+}
 
