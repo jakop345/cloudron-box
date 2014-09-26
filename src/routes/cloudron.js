@@ -8,6 +8,9 @@ var HttpError = require('../httperror.js'),
     exec = require('child_process').exec,
     df = require('nodejs-disks'),
     path = require('path'),
+    cloudron = require('../cloudron.js'),
+    config = require('../../config.js'),
+    exec = require('child_process').exec,
     backups = require('../backups.js');
 
 var REBOOT_CMD = 'sudo ' + path.join(__dirname, '../scripts/reboot.sh');
@@ -17,7 +20,9 @@ exports = module.exports = {
     getStats: getStats,
     reboot: reboot,
     createBackup: createBackup,
-    restore: restore
+    restore: restore,
+    getConfig: getConfig,
+    update: update
 };
 
 function getStats(req, res, next) {
@@ -92,4 +97,29 @@ function restore(req, res, next) {
     });
 };
 
+function getConfig(req, res, next) {
+    var gitRevisionCommand = 'git log -1 --pretty=format:%h';
+    exec(gitRevisionCommand, {}, function (error, stdout, stderr) {
+        if (error) {
+            console.error('Failed to get git revision.', error, stdout, stderr);
+            stdout = null;
+        }
+
+        next(new HttpSuccess(200, {
+            appServerUrl: config.appServerUrl,
+            fqdn: config.fqdn,
+            ip: cloudron.getIp(),
+            version: config.version,
+            revision: stdout,
+            update: cloudron.getUpdater().availableUpdate()
+        }));
+    });
+};
+
+function update(req, res, next) {
+    cloudron.getUpdater().update(function (error) {
+        if (error) return next(new HttpError(500, error));
+        res.send(200, {});
+    });
+};
 

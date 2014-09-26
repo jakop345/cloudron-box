@@ -6,18 +6,22 @@ var backups = require('./backups.js'),
     debug = require('debug')('box:cloudron'),
     config = require('../config.js'),
     os = require('os'),
+    Updater = require('./updater.js'),
     superagent = require('superagent');
 
 exports = module.exports = {
     initialize: initialize,
     uninitialize: uninitialize,
+    getIp: getIp,
+    getUpdater: getUpdater, // FIXME: remove this
 
     // testing
     _getAnnounceTimerId: getAnnounceTimerId
 };
 
 var backupTimerId = null,
-    announceTimerId = null;
+    announceTimerId = null,
+    updater = new Updater(); // TODO: make this not an object
 
 function initialize() {
     // every backup restarts the box. the setInterval is only needed should that fail for some reason
@@ -25,6 +29,8 @@ function initialize() {
 
     sendHeartBeat();
     announce();
+
+    updater.start();
 }
 
 function uninitialize() {
@@ -33,11 +39,30 @@ function uninitialize() {
 
     clearTimeout(announceTimerId);
     announceTimerId = null;
+
+    updater.stop();
 }
 
 function getAnnounceTimerId() {
     return announceTimerId;
 }
+
+function getUpdater() {
+    return updater;
+}
+
+function getIp() {
+    var ifaces = os.networkInterfaces();
+    for (var dev in ifaces) {
+        if (dev.match(/^(en|eth).*/) === null) continue;
+
+        for (var i = 0; i < ifaces[dev].length; i++) {
+            if (ifaces[dev][i].family === 'IPv4') return ifaces[dev][i].address;
+        }
+    }
+
+    return null;
+};
 
 function sendHeartBeat() {
     var HEARTBEAT_INTERVAL = 1000 * 60;

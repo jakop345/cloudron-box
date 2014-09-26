@@ -21,7 +21,6 @@ var express = require('express'),
     exec = require('child_process').exec,
     uuid = require('node-uuid'),
     apps = require('./apps'),
-    Updater = require('./updater.js'),
     middleware = require('./middleware'),
     database = require('./database.js'),
     clientdb = require('./clientdb.js'),
@@ -38,7 +37,6 @@ var RELOAD_NGINX_CMD = 'sudo ' + path.join(__dirname, 'scripts/reloadnginx.sh');
 function Server() {
     this.httpServer = null; // http server
     this.app = null; // express
-    this._updater = null;
 }
 
 // Success handler
@@ -108,47 +106,6 @@ Server.prototype._firstTime = function (req, res) {
  */
 Server.prototype._getVersion = function (req, res) {
     res.send(200, { version: config.version });
-};
-
-Server.prototype._getIp = function (callback) {
-    var ifaces = os.networkInterfaces();
-    for (var dev in ifaces) {
-        if (dev.match(/^(en|eth).*/) === null) continue;
-
-        for (var i = 0; i < ifaces[dev].length; i++) {
-            if (ifaces[dev][i].family === 'IPv4') return ifaces[dev][i].address;
-        }
-    }
-
-    return null;
-};
-
-Server.prototype._getConfig = function (req, res, next) {
-    var that = this;
-
-    var gitRevisionCommand = 'git log -1 --pretty=format:%h';
-    exec(gitRevisionCommand, {}, function (error, stdout, stderr) {
-        if (error) {
-            console.error('Failed to get git revision.', error, stdout, stderr);
-            stdout = null;
-        }
-
-        next(new HttpSuccess(200, {
-            appServerUrl: config.appServerUrl,
-            fqdn: config.fqdn,
-            ip: that._getIp(),
-            version: config.version,
-            revision: stdout,
-            update: that._updater.availableUpdate()
-        }));
-    });
-};
-
-Server.prototype._update = function (req, res, next) {
-    this._updater.update(function (error) {
-        if (error) return next(new HttpError(500, error));
-        res.send(200, {});
-    });
 };
 
 Server.prototype._provision = function (req, res, next) {
@@ -292,8 +249,8 @@ Server.prototype._initializeExpressSync = function () {
     router.post('/api/v1/restore', routes.cloudron.restore);
     router.post('/api/v1/createadmin', routes.user.createAdmin);    // FIXME any number of admins can be created without auth!
 
-    router.get ('/api/v1/config', rootScope, this._getConfig.bind(this));
-    router.get ('/api/v1/update', rootScope, this._update.bind(this));
+    router.get ('/api/v1/config', rootScope, routes.cloudron.getConfig);
+    router.get ('/api/v1/update', rootScope, routes.cloudron.update);
     router.get ('/api/v1/reboot', rootScope, routes.cloudron.reboot);
     router.get ('/api/v1/stats', rootScope, routes.cloudron.getStats);
     router.post('/api/v1/backups', rootScope, routes.cloudron.createBackup);
@@ -419,7 +376,7 @@ Server.prototype._getCertificate = function (callback) {
             file.write(chunk);
         });
         result.on('end', function () {
-            require('child_process').exec('tar -xf ' + certFilePath, { cwd: certDirPath }, function(error) {
+            exec('tar -xf ' + certFilePath, { cwd: certDirPath }, function(error) {
                 if (error) return callback(error);
 
                 if (!fs.existsSync(path.join(certDirPath, 'host.cert'))) return callback(new Error('Certificate bundle does not contain a host.cert file'));
@@ -430,7 +387,7 @@ Server.prototype._getCertificate = function (callback) {
                 // cleanup the cert bundle
                 fs.unlinkSync(certFilePath);
 
-                child_process.exec(RELOAD_NGINX_CMD, { timeout: 10000 }, function (error) {
+                exec(RELOAD_NGINX_CMD, { timeout: 10000 }, function (error) {
                     if (error) return callback(error);
 
                     debug('_getCertificate: success');
@@ -458,18 +415,13 @@ Server.prototype.start = function (callback) {
 
     var that = this;
 
-    this._updater = new Updater();
-
     this._initializeExpressSync();
-
-    cloudron.initialize();
 
     database.create(function (err) {
         if (err) return callback(err);
 
         apps.initialize();
-
-        that._updater.start();
+        cloudron.initialize();
 
         that.httpServer = http.createServer(that.app);
         that.httpServer.listen(config.port, callback);
@@ -484,8 +436,6 @@ Server.prototype.stop = function (callback) {
     if (!this.httpServer) {
         return callback(null);
     }
-
-    that._updater.stop();
 
     cloudron.uninitialize();
     apps.uninitialize();
