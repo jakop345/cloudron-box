@@ -7,21 +7,42 @@ var backups = require('./backups.js'),
     config = require('../config.js'),
     os = require('os'),
     Updater = require('./updater.js'),
+    assert = require('assert'),
+    exec = require('child_process').exec,
+    util = require('util'),
+    path = require('path'),
     superagent = require('superagent');
 
 exports = module.exports = {
+    CloudronError: CloudronError,
+
     initialize: initialize,
     uninitialize: uninitialize,
-    getIp: getIp,
-    getUpdater: getUpdater, // FIXME: remove this
+    getConfig: getConfig,
+    update: update,
+    restore: restore,
 
-    // testing
+    // exported for testing
     _getAnnounceTimerId: getAnnounceTimerId
 };
+
+var RESTORE_CMD = 'sudo ' + path.join(__dirname, 'scripts/restore.sh');
 
 var backupTimerId = null,
     announceTimerId = null,
     updater = new Updater(); // TODO: make this not an object
+
+function CloudronError(reason, info) {
+    Error.call(this);
+    Error.captureStackTrace(this, this.constructor);
+
+    this.name = this.constructor.name;
+    this.reason = reason;
+    this.message = !info ? reason : (typeof info === 'object' ? JSON.stringify(info) : info);
+}
+util.inherits(CloudronError, Error);
+CloudronError.INTERNAL_ERROR = 1;
+
 
 function initialize() {
     // every backup restarts the box. the setInterval is only needed should that fail for some reason
@@ -47,8 +68,42 @@ function getAnnounceTimerId() {
     return announceTimerId;
 }
 
-function getUpdater() {
-    return updater;
+function update(callback) {
+    assert(typeof callback === 'function');
+
+    updater.update(function (error) {
+        if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error.message));
+        return callback(null);
+    });
+}
+
+function restore(body, callback) {
+    assert(typeof body === 'object');
+    assert(typeof callback === 'function');
+
+    var args = [
+        body.aws.accessKeyId,
+        body.aws.secretAccessKey,
+        body.aws.prefix,
+        body.aws.bucket,
+        body.fileName,
+        body.token
+    ];
+
+    var restoreCommandLine = RESTORE_CMD + ' ' + args.join(' ');
+    debug('_restore: execute "%s".', restoreCommandLine);
+
+    // Finish the request, to let the appstore know we triggered the restore it
+    // TODO is there a better way?
+    callback(null);
+
+    exec(restoreCommandLine, {}, function (error, stdout, stderr) {
+        if (error) {
+            console.error('Restore failed.', error, stdout, stderr);
+        }
+
+        debug('_restore: success');
+    });
 }
 
 function getIp() {
@@ -63,6 +118,27 @@ function getIp() {
 
     return null;
 };
+
+function getConfig(callback) {
+    assert(typeof callback === 'function');
+
+    var gitRevisionCommand = 'git log -1 --pretty=format:%h';
+    exec(gitRevisionCommand, {}, function (error, stdout, stderr) {
+        if (error) {
+            console.error('Failed to get git revision.', error, stdout, stderr);
+            stdout = null;
+        }
+
+        callback(null, {
+            appServerUrl: config.appServerUrl,
+            fqdn: config.fqdn,
+            ip: getIp(),
+            version: config.version,
+            revision: stdout,
+            update: updater.availableUpdate()
+        })
+    });
+}
 
 function sendHeartBeat() {
     var HEARTBEAT_INTERVAL = 1000 * 60;

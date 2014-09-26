@@ -14,7 +14,6 @@ var HttpError = require('../httperror.js'),
     backups = require('../backups.js');
 
 var REBOOT_CMD = 'sudo ' + path.join(__dirname, '../scripts/reboot.sh');
-var RESTORE_CMD = 'sudo ' + path.join(__dirname, '../scripts/restore.sh');
 
 exports = module.exports = {
     getStats: getStats,
@@ -71,55 +70,26 @@ function restore(req, res, next) {
 
     debug('_restore: received from appstore ' + req.body.appServerUrl);
 
-    var args = [
-        req.body.aws.accessKeyId,
-        req.body.aws.secretAccessKey,
-        req.body.aws.prefix,
-        req.body.aws.bucket,
-        req.body.fileName,
-        req.body.token
-    ];
+    cloudron.restore(req.body, function (error) {
+        if (error) return next(new HttpError(500, error));
 
-    var restoreCommandLine = RESTORE_CMD + ' ' + args.join(' ');
-    debug('_restore: execute "%s".', restoreCommandLine);
-
-    // Finish the request, to let the appstore know we triggered the restore it
-    // TODO is there a better way?
-    next(new HttpSuccess(200, {}));
-
-    exec(restoreCommandLine, {}, function (error, stdout, stderr) {
-        if (error) {
-            console.error('Restore failed.', error, stdout, stderr);
-            return next(new HttpError(500, error));
-        }
-
-        debug('_restore: success');
+        next(new HttpSuccess(200, { }));
     });
 };
 
 function getConfig(req, res, next) {
-    var gitRevisionCommand = 'git log -1 --pretty=format:%h';
-    exec(gitRevisionCommand, {}, function (error, stdout, stderr) {
-        if (error) {
-            console.error('Failed to get git revision.', error, stdout, stderr);
-            stdout = null;
-        }
+    cloudron.getConfig(function (error, cloudronConfig) {
+        if (error) return next(new HttpError(500, error));
 
-        next(new HttpSuccess(200, {
-            appServerUrl: config.appServerUrl,
-            fqdn: config.fqdn,
-            ip: cloudron.getIp(),
-            version: config.version,
-            revision: stdout,
-            update: cloudron.getUpdater().availableUpdate()
-        }));
+        next(new HttpSuccess(200, cloudronConfig));
     });
 };
 
 function update(req, res, next) {
-    cloudron.getUpdater().update(function (error) {
+    cloudron.update(function (error) {
         if (error) return next(new HttpError(500, error));
-        res.send(200, {});
+
+        res.send(200, { });
     });
 };
 
