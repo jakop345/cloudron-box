@@ -121,7 +121,7 @@ server.exchange(oauth2orize.exchange.code(function (client, code, redirectURI, c
 
 // Main login form username and password
 function loginForm(req, res) {
-    res.render('login');
+    res.render('login', { csrf: req.csrfToken() });
 }
 
 // performs the login POST from the above form
@@ -200,7 +200,7 @@ var authorization = [
     })
 // OAuth sopes skip END
     // function (req, res) {
-    //     res.render('dialog', { transactionID: req.oauth2.transactionID, user: req.user, client: req.oauth2.client });
+    //     res.render('dialog', { transactionID: req.oauth2.transactionID, user: req.user, client: req.oauth2.client, csrf: req.csrfToken() });
     // }
 ];
 

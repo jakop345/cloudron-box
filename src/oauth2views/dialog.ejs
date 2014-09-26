@@ -2,6 +2,7 @@
 
 <form action="/api/v1/oauth/dialog/authorize/decision" method="post">
   <input name="transaction_id" type="hidden" value="<%= transactionID %>">
+  <input type="hidden" name="_csrf" value="<%= csrf %>"/>
 
   <div class="row">
     <div class="col-md-3"></div>

@@ -73,6 +73,64 @@
         }
       }
     },
+    "csurf": {
+      "version": "1.6.1",
+      "from": "csurf@>=1.6.1 <2.0.0",
+      "resolved": "https://registry.npmjs.org/csurf/-/csurf-1.6.1.tgz",
+      "dependencies": {
+        "cookie": {
+          "version": "0.1.2",
+          "from": "cookie@0.1.2",
+          "resolved": "https://registry.npmjs.org/cookie/-/cookie-0.1.2.tgz"
+        },
+        "cookie-signature": {
+          "version": "1.0.5",
+          "from": "cookie-signature@1.0.5",
+          "resolved": "https://registry.npmjs.org/cookie-signature/-/cookie-signature-1.0.5.tgz"
+        },
+        "csrf": {
+          "version": "2.0.1",
+          "from": "csrf@>=2.0.1 <2.1.0",
+          "resolved": "https://registry.npmjs.org/csrf/-/csrf-2.0.1.tgz",
+          "dependencies": {
+            "rndm": {
+              "version": "1.0.0",
+              "from": "rndm@>=1.0.0 <1.1.0",
+              "resolved": "https://registry.npmjs.org/rndm/-/rndm-1.0.0.tgz"
+            },
+            "scmp": {
+              "version": "0.0.3",
+              "from": "scmp@0.0.3",
+              "resolved": "https://registry.npmjs.org/scmp/-/scmp-0.0.3.tgz"
+            },
+            "uid-safe": {
+              "version": "1.0.1",
+              "from": "uid-safe@>=1.0.1 <1.1.0",
+              "resolved": "https://registry.npmjs.org/uid-safe/-/uid-safe-1.0.1.tgz",
+              "dependencies": {
+                "mz": {
+                  "version": "1.0.1",
+                  "from": "mz@>=1.0.0 <2.0.0",
+                  "resolved": "https://registry.npmjs.org/mz/-/mz-1.0.1.tgz",
+                  "dependencies": {
+                    "native-or-bluebird": {
+                      "version": "1.1.1",
+                      "from": "native-or-bluebird@>=1.0.0 <2.0.0",
+                      "resolved": "https://registry.npmjs.org/native-or-bluebird/-/native-or-bluebird-1.1.1.tgz"
+                    }
+                  }
+                }
+              }
+            },
+            "base64-url": {
+              "version": "1.0.0",
+              "from": "base64-url@1.0.0",
+              "resolved": "https://registry.npmjs.org/base64-url/-/base64-url-1.0.0.tgz"
+            }
+          }
+        }
+      }
+    },
     "debug": {
       "version": "0.8.1",
       "from": "debug@>=0.8.0 <0.9.0",

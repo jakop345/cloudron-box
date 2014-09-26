@@ -7,6 +7,7 @@
             <div class="col-md-6">
             <h1>Welcome</h1>
                 <form role="form">
+                    <input type="hidden" name="_csrf" value="<%= csrf %>"/>
                     <div class="form-group">
                         <label class="control-label" for="inputUsername">Username</label>
                         <input type="text" class="form-control" id="inputUsername" name="username" autofocus required>

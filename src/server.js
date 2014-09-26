@@ -7,6 +7,7 @@ var express = require('express'),
     https = require('https'),
     HttpError = require('./httperror.js'),
     HttpSuccess = require('./httpsuccess.js'),
+    csrf = require('csurf'),
     path = require('path'),
     os = require('os'),
     passport = require('passport'),
@@ -293,7 +294,8 @@ Server.prototype._initializeExpressSync = function () {
         FILE_TIMEOUT = 3 * 60 * 1000; // increased timeout for file uploads (3 mins)
 
     var json = middleware.json({ strict: true, limit: QUERY_LIMIT }), // application/json
-        urlencoded = middleware.urlencoded({ limit: QUERY_LIMIT }); // application/x-www-form-urlencoded
+        urlencoded = middleware.urlencoded({ limit: QUERY_LIMIT }), // application/x-www-form-urlencoded
+        csurf = csrf(); // Cross-site request forgery protection middleware for login form
 
     var graphiteProxy = middleware.proxy(url.parse('http://127.0.0.1:8000'));
     var graphiteMiddleware = function (req, res, next) {
@@ -331,7 +333,6 @@ Server.prototype._initializeExpressSync = function () {
        .use(urlencoded)
        .use(middleware.cookieParser())
        .use(middleware.favicon(__dirname + '/../assets/favicon.ico'))
-       // API calls that do not require authorization
        .use(middleware.cors({ origins: [ '*' ], allowCredentials: true }))
        .use(middleware.session({ secret: 'yellow is blue' }))
        .use(passport.initialize())
@@ -382,15 +383,15 @@ Server.prototype._initializeExpressSync = function () {
     router.get ('/api/v1/users/:userName/logout', bearer, routes.user.logout);       // TODO this should not be needed with OAuth
 
     // form based login routes used by oauth2 frame
-    router.get ('/api/v1/session/login', routes.oauth2.loginForm);
-    router.post('/api/v1/session/login', routes.oauth2.login);
+    router.get ('/api/v1/session/login', csurf, routes.oauth2.loginForm);
+    router.post('/api/v1/session/login', csurf, routes.oauth2.login);
     router.get ('/api/v1/session/logout', routes.oauth2.logout);
     router.get ('/api/v1/session/callback', routes.oauth2.callback);
     router.get ('/api/v1/session/error', routes.oauth2.error);
 
     // oauth2 routes
     router.get ('/api/v1/oauth/dialog/authorize', routes.oauth2.authorization);
-    router.post('/api/v1/oauth/dialog/authorize/decision', routes.oauth2.decision);
+    router.post('/api/v1/oauth/dialog/authorize/decision', csurf, routes.oauth2.decision);
     router.post('/api/v1/oauth/token', routes.oauth2.token);
     router.get ('/api/v1/oauth/yellowtent.js', routes.oauth2.library);
     router.get ('/api/v1/oauth/clients', settingsScope, routes.oauth2.getClients);
