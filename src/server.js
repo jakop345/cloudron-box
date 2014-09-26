@@ -19,7 +19,6 @@ var express = require('express'),
     child_process = require('child_process'),
     fs = require('fs'),
     exec = require('child_process').exec,
-    df = require('nodejs-disks'),
     uuid = require('node-uuid'),
     apps = require('./apps'),
     Updater = require('./updater.js'),
@@ -36,8 +35,6 @@ exports = module.exports = Server;
 
 var HEARTBEAT_INTERVAL = 1000 * 60;// * 60;
 var RELOAD_NGINX_CMD = 'sudo ' + path.join(__dirname, 'scripts/reloadnginx.sh');
-var RESTORE_CMD = 'sudo ' + path.join(__dirname, 'scripts/restore.sh');
-var REBOOT_CMD = 'sudo ' + path.join(__dirname, 'scripts/reboot.sh');
 
 function Server() {
     this.httpServer = null; // http server
@@ -150,76 +147,10 @@ Server.prototype._getConfig = function (req, res, next) {
     });
 };
 
-Server.prototype._getCloudronStats = function (req, res, next) {
-    df.drives(function (error, drives) {
-        if (error) return next(new HttpError(500, error));
-
-        df.drivesDetail(drives, function (err, data) {
-            if (error) return next(new HttpError(500, error));
-
-            next(new HttpSuccess(200, { drives: data }));
-        });
-    });
-};
-
 Server.prototype._update = function (req, res, next) {
     this._updater.update(function (error) {
         if (error) return next(new HttpError(500, error));
         res.send(200, {});
-    });
-};
-
-Server.prototype._reboot = function (req, res, next) {
-    debug('_reboot: execute "%s".', REBOOT_CMD);
-
-    // Finish the request, to let the appstore know we triggered the restore it
-    // TODO is there a better way?
-    next(new HttpSuccess(200, {}));
-
-    exec(REBOOT_CMD, {}, function (error, stdout, stderr) {
-        if (error) {
-            console.error('Reboot failed.', error, stdout, stderr);
-            return next(new HttpError(500, error));
-        }
-
-        debug('_reboot: success');
-    });
-};
-
-Server.prototype._restore = function (req, res, next) {
-    if (!req.body.token) return next(new HttpError(400, 'No token provided'));
-    if (!req.body.fileName) return next(new HttpError(400, 'No restore file name provided'));
-    if (!req.body.aws) return next(new HttpError(400, 'No aws credentials provided'));
-    if (!req.body.aws.prefix) return next(new HttpError(400, 'No aws prefix provided'));
-    if (!req.body.aws.bucket) return next(new HttpError(400, 'No aws bucket provided'));
-    if (!req.body.aws.accessKeyId) return next(new HttpError(400, 'No aws access key provided'));
-    if (!req.body.aws.secretAccessKey) return next(new HttpError(400, 'No aws secret provided'));
-
-    debug('_restore: received from appstore ' + req.body.appServerUrl);
-
-    var args = [
-        req.body.aws.accessKeyId,
-        req.body.aws.secretAccessKey,
-        req.body.aws.prefix,
-        req.body.aws.bucket,
-        req.body.fileName,
-        req.body.token
-    ];
-
-    var restoreCommandLine = RESTORE_CMD + ' ' + args.join(' ');
-    debug('_restore: execute "%s".', restoreCommandLine);
-
-    // Finish the request, to let the appstore know we triggered the restore it
-    // TODO is there a better way?
-    next(new HttpSuccess(200, {}));
-
-    exec(restoreCommandLine, {}, function (error, stdout, stderr) {
-        if (error) {
-            console.error('Restore failed.', error, stdout, stderr);
-            return next(new HttpError(500, error));
-        }
-
-        debug('_restore: success');
     });
 };
 
@@ -361,14 +292,14 @@ Server.prototype._initializeExpressSync = function () {
     router.get ('/api/v1/version', this._getVersion.bind(this));
     router.get ('/api/v1/firsttime', this._firstTime.bind(this));
     router.post('/api/v1/provision', this._provision.bind(this));
-    router.post('/api/v1/restore', this._restore.bind(this));
+    router.post('/api/v1/restore', routes.cloudron.restore);
     router.post('/api/v1/createadmin', routes.user.createAdmin);    // FIXME any number of admins can be created without auth!
 
     router.get ('/api/v1/config', rootScope, this._getConfig.bind(this));
     router.get ('/api/v1/update', rootScope, this._update.bind(this));
-    router.get ('/api/v1/reboot', rootScope, this._reboot.bind(this));
-    router.get ('/api/v1/stats', rootScope, this._getCloudronStats.bind(this));
-    router.post('/api/v1/backups', rootScope, routes.backups.createBackup);
+    router.get ('/api/v1/reboot', rootScope, routes.cloudron.reboot);
+    router.get ('/api/v1/stats', rootScope, routes.cloudron.getStats);
+    router.post('/api/v1/backups', rootScope, routes.cloudron.createBackup);
     router.get ('/api/v1/profile', profileScope, routes.user.info);
     router.get ('/api/v1/graphs', rootScope, function (req, res, next) { req.url = req.url.replace(/^\/api\/v1\/graphs(\?.*)/, '/render$1'); next(); }, graphiteMiddleware);
 
