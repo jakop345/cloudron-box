@@ -26,12 +26,7 @@ Development setup
 
    You might have to clear the sudo cache using sudo -k.
 
-** Verify using `sudo src/scripts/rmappdir.sh --check`. This should print 'OK'
-** Verify using `sudo src/scripts/reloadnginx.sh --check`. This should print 'OK'
-** Verify using `sudo src/scripts/backup.sh --check`. This should print 'OK'
-** Verify using `sudo src/scripts/update.sh --check`. This should print 'OK'
-** Verify using `sudo src/scripts/reboot.sh --check`. This should print 'OK'
-** Verify using `sudo src/scripts/reloadcollectd.sh --check`. This should print 'OK'
+** scripts/checkInstall.sh
 
 ** Add admin-localhost as 127.0.0.1 in /etc/hosts
 ** All apps will be installed as hypened-subdomains of localhost. You should add

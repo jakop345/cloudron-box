@@ -13,7 +13,6 @@ fi
 APPDATA=$HOME/.yellowtent/appdata
 
 if [ "$1" == "--check" ]; then
-    echo "Configured to remove apps from $APPDATA"
     echo "OK"
     exit 0
 fi
