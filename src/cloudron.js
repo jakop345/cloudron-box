@@ -255,14 +255,14 @@ function getCertificate(callback) {
 function provision(args, callback) {
     assert(typeof callback === 'function');
 
-    if (config.token) return next(new CloudronError(CloudronError.ALREADY_PROVISIONED));
+    if (config.token) return callback(new CloudronError(CloudronError.ALREADY_PROVISIONED));
 
     config.set(_.pick(args, 'token', 'appServerUrl', 'adminOrigin', 'fqdn', 'aws'));
 
     // override the default webadmin OAuth client record
     clientdb.delByAppId('webadmin', function () {
         clientdb.add(uuid.v4(), 'webadmin', 'cid-webadmin', 'unused', 'WebAdmin', config.adminOrigin, function (error) {
-            if (error) return next(new CloudronError(CloudronError.INTERNAL_ERROR, error));
+            if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
             callback(null);
 
