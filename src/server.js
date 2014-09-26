@@ -27,7 +27,7 @@ var express = require('express'),
     clientdb = require('./clientdb.js'),
     userdb = require('./userdb'),
     config = require('../config.js'),
-    backups = require('./backups.js'),
+    cloudron = require('./cloudron.js'),
     url = require('url'),
     _ = require('underscore');
 
@@ -40,7 +40,6 @@ function Server() {
     this.httpServer = null; // http server
     this.app = null; // express
     this._announceTimerId = null;
-    this._backupTimerId = null;
     this._updater = null;
 }
 
@@ -504,11 +503,6 @@ Server.prototype._announce = function () {
     });
 };
 
-Server.prototype._scheduleBackup = function () {
-    // every backup restarts the box. the setInterval is only needed should that fail for some reason
-    this._backupTimerId = setInterval(backups.createBackup, 4 * 60 * 60 * 1000);
-};
-
 Server.prototype.start = function (callback) {
     assert(typeof callback === 'function');
     assert(this.app === null, 'Server is already up and running.');
@@ -530,7 +524,7 @@ Server.prototype.start = function (callback) {
 
     this._announce();
 
-    this._scheduleBackup();
+    cloudron.initialize();
 
     database.create(function (err) {
         if (err) return callback(err);
@@ -558,9 +552,7 @@ Server.prototype.stop = function (callback) {
     clearTimeout(this._announceTimerId);
     this._announceTimerId = null;
 
-    clearTimeout(this._backupTimerId);
-    this._backupTimerId = null;
-
+    cloudron.uninitialize();
     apps.uninitialize();
     database.uninitialize();
 
