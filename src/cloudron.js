@@ -213,8 +213,7 @@ function getCertificate(callback) {
 
     var url = config.appServerUrl + '/api/v1/boxes/' + config.fqdn + '/certificate?token=' + config.token;
 
-    var request = require('http');
-    if (config.appServerUrl.indexOf('https://') === 0) request = https;
+    var request = require(config.appServerUrl.indexOf('https://') === 0 ? 'https' : 'http');
 
     request.get(url, function (result) {
         if (result.statusCode !== 200) return callback(new Error('Failed to get certificate. Status: ' + result.statusCode));
