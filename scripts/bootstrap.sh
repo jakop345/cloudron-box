@@ -92,6 +92,9 @@ fi
 echo "=== Setup collectd and graphite ==="
 $SRCDIR/scripts/bootstrap/setup_collectd.sh
 
+echo "=== Setup haraka mail relay ==="
+$SRCDIR/scripts/bootstrap/setup_haraka.sh
+
 echo "==== Setup supervisord ===="
 rm -rf /etc/supervisor
 mkdir -p /etc/supervisor
