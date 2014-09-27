@@ -165,7 +165,7 @@ function sendHeartBeat() {
     superagent.get(url).query({ token: config.token }).end(function (error, result) {
         if (error) debug('Error sending heartbeat.', error);
         else if (result.statusCode !== 200) debug('Server responded to heartbeat with ' + result.statusCode);
-        else debug('Heartbeat successfull');
+        else debug('Heartbeat successful');
 
         setTimeout(sendHeartBeat, HEARTBEAT_INTERVAL);
     });
