@@ -61,6 +61,7 @@ config.save = function () {
     config.nakedDomain = null;
     config.version = '0.4.0';
     config.aws = null;
+    config.mailServer = null;
 
     if (safe.fs.existsSync(config.cloudronConfigFile)) {
         var data = safe.JSON.parse(safe.fs.readFileSync(config.cloudronConfigFile, 'utf8'));
