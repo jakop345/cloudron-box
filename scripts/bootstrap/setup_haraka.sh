@@ -23,6 +23,6 @@ data.mailServer = "$MAIL_SERVER";
 fs.writeFileSync("$CLOUDRON_CONF", JSON.stringify(data));
 EOF
 
-node /tmp/script.js
+sudo -u yellowtent node /tmp/script.js
 rm /tmp/script.js
 
