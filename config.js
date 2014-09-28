@@ -8,6 +8,7 @@ var path = require('path'),
     safe = require('safetydance'),
     crypto = require('crypto'),
     assert = require('assert'),
+    _ = require('underscore'),
     mkdirp = require('mkdirp');
 
 function getUserHomeDir() {
@@ -31,12 +32,6 @@ config.save = function () {
 };
 
 (function initConfig() {
-    if (safe.fs.existsSync(config.cloudronConfigFile)) {
-        var data = safe.JSON.parse(safe.fs.readFileSync(config.cloudronConfigFile, 'utf8'));
-        for (var key in data) config[key] = data[key];
-        return;
-    }
-
     // setup defaults
     if (production) {
         config.port = 3000;
@@ -66,6 +61,12 @@ config.save = function () {
     config.nakedDomain = null;
     config.version = '0.4.0';
     config.aws = null;
+
+    if (safe.fs.existsSync(config.cloudronConfigFile)) {
+        var data = safe.JSON.parse(safe.fs.readFileSync(config.cloudronConfigFile, 'utf8'));
+        _.extend(config, data); // overwrite defaults with saved config
+        return;
+    }
 
     mkdirp.sync(config.baseDir);
     config.save();
