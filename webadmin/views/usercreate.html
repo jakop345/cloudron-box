@@ -10,11 +10,15 @@
             <input type="text" class="form-control" ng-model="username" id="inputUsername" required autofocus>
         </div>
         <div class="form-group">
+            <label class="control-label" for="inputEmail">Email</label>
+            <input type="email" class="form-control" ng-model="email" id="inputEmail" required>
+        </div>
+        <div class="form-group">
             <label class="control-label" for="inputPassword">Password</label>
             <input type="password" class="form-control" ng-model="password" id="inputPassword" required>
         </div>
         <div class="form-group">
-            <label class="control-label" for="inputPasswordRepeat">Password Repeat</label>
+            <label class="control-label" for="inputPasswordRepeat">Repeat Password</label>
             <input type="password" class="form-control" ng-model="passwordRepeat" id="inputPasswordRepeat" required>
         </div>
         <input class="btn btn-default btn-outline" ng-click="cancel()" type="button" value="Cancel"/>
