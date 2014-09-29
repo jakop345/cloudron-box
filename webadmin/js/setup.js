@@ -7,27 +7,29 @@ var SetupController = function ($scope, Client) {
     $scope.disabled = false;
 
     $scope.username = '';
+    $scope.email = '';
     $scope.password = '';
     $scope.passwordRepeat = '';
-    // TODO do we really need this?
-    $scope.email = 'xx@xx.xx';
 
     $scope.error = {};
 
     $scope.submit = function () {
-        $scope.error.name = null;
+        $scope.error.username = null;
+        $scope.error.email = null;
         $scope.error.password = null;
         $scope.error.passwordRepeat = null;
 
         if (!$scope.username) {
-            $scope.error.name = 'Username must not be empty';
-            $scope.error.password = '';
-            $scope.error.passwordRepeat = '';
+            $scope.error.username = 'Username must not be empty';
+            return;
+        }
+
+        if (!$scope.email) {
+            $scope.error.email = 'Email must not be empty';
             return;
         }
 
         if ($scope.password !== $scope.passwordRepeat) {
-            $scope.error.name = '';
             $scope.error.passwordRepeat = 'Passwords do not match';
             $scope.passwordRepeat = '';
             return;
@@ -37,7 +39,7 @@ var SetupController = function ($scope, Client) {
         Client.createAdmin($scope.username, $scope.password, $scope.email, function (error) {
             if (error) {
                 if (error.statusCode === 409) {
-                    $scope.error.name = 'Username already exists';
+                    $scope.error.username = 'Username already exists';
                     $scope.disabled = false;
                 }
                 return;
