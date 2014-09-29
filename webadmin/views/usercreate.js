@@ -28,6 +28,11 @@ function UserCreateController ($scope, $routeParams, Client) {
             return;
         }
 
+        if (!$scope.password) {
+            $scope.error.password = 'Password must not be empty';
+            return;
+        }
+
         if ($scope.password !== $scope.passwordRepeat) {
             $scope.error.passwordRepeat = 'Passwords do not match';
             $scope.passwordRepeat = '';

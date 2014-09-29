@@ -8,18 +8,22 @@
         <div class="form-group" ng-class="{ 'has-error': error.username }">
             <label class="control-label" for="inputUsername">Username</label>
             <input type="text" class="form-control" ng-model="username" id="inputUsername" autofocus>
+            <label class="control-label" ng-show="error.username">{{error.username}}</label>
         </div>
         <div class="form-group" ng-class="{ 'has-error': error.email }">
             <label class="control-label" for="inputEmail">Email</label>
             <input type="email" class="form-control" ng-model="email" id="inputEmail">
+            <label class="control-label" ng-show="error.email">{{error.email}}</label>
         </div>
         <div class="form-group" ng-class="{ 'has-error': error.password }">
             <label class="control-label" for="inputPassword">Password</label>
             <input type="password" class="form-control" ng-model="password" id="inputPassword">
+            <label class="control-label" ng-show="error.password">{{error.password}}</label>
         </div>
         <div class="form-group" ng-class="{ 'has-error': error.passwordRepeat }">
             <label class="control-label" for="inputPasswordRepeat">Repeat Password</label>
             <input type="password" class="form-control" ng-model="passwordRepeat" id="inputPasswordRepeat">
+            <label class="control-label" ng-show="error.passwordRepeat">{{error.passwordRepeat}}</label>
         </div>
         <input class="btn btn-default btn-outline" ng-click="cancel()" type="button" value="Cancel"/>
         <input class="btn btn-primary btn-outline pull-right" type="submit" ng-disabled="{{disabled}}" value="Create User"/>
