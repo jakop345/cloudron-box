@@ -9,40 +9,15 @@ function UserCreateController ($scope, $routeParams, Client) {
     $scope.password = '';
     $scope.passwordRepeat = '';
     $scope.email = 'xx@xx.xx';
-
-    $scope.error = {};
+    $scope.alreadyTaken = '';
 
     $scope.submit = function () {
-        $scope.error.username = null;
-        $scope.error.email = null;
-        $scope.error.password = null;
-        $scope.error.passwordRepeat = null;
-
-        if (!$scope.username) {
-            $scope.error.username = 'Username must not be empty';
-            return;
-        }
-
-        if (!$scope.email) {
-            $scope.error.email = 'Email must not be empty';
-            return;
-        }
-
-        if (!$scope.password) {
-            $scope.error.password = 'Password must not be empty';
-            return;
-        }
-
-        if ($scope.password !== $scope.passwordRepeat) {
-            $scope.error.passwordRepeat = 'Passwords do not match';
-            $scope.passwordRepeat = '';
-            return;
-        }
+        $scope.alreadyTaken = '';
 
         $scope.disabled = true;
         Client.createUser($scope.username, $scope.password, $scope.email, function (error) {
             if (error && error.statusCode === 409) {
-                $scope.error.username = 'Username already taken';
+                $scope.alreadyTaken = $scope.username;
                 return console.error('Username already taken');
             }
             if (error) console.error('Unable to create user.', error);
