@@ -294,7 +294,7 @@ describe('App installation', function () {
                     hockServer
                         .get('/api/v1/appstore/apps/' + APP_STORE_ID + '/manifest')
                         .reply(200, manifest, { 'Content-Type': 'application/json' })
-                        .post('/api/v1/subdomains?token=' + config.token, { subdomain: APP_LOCATION, appId: APP_ID })
+                        .post('/api/v1/subdomains?token=' + config.token, { records: [ { subdomain: APP_LOCATION, appId: APP_ID, type: 'A' } ] })
                         .reply(201, { }, { 'Content-Type': 'application/json' })
                         .delete('/api/v1/subdomains/' + APP_ID + '?token=' + config.token)
                         .reply(200, { }, { 'Content-Type': 'application/json' });
@@ -583,12 +583,12 @@ describe('App installation - port bindings', function () {
                     .get('/api/v1/appstore/apps/' + APP_STORE_ID + '/manifest')
                     .reply(200, manifest, { 'Content-Type': 'application/json' })
                     // app install
-                    .post('/api/v1/subdomains?token=' + config.token, { subdomain: APP_LOCATION, appId: APP_ID })
+                    .post('/api/v1/subdomains?token=' + config.token, { records: [ { subdomain: APP_LOCATION, appId: APP_ID, type: 'A' } ] })
                     .reply(201, { }, { 'Content-Type': 'application/json' })
                     // app configure
                     .delete('/api/v1/subdomains/' + APP_ID + '?token=' + config.token)
                     .reply(200, { }, { 'Content-Type': 'application/json' })
-                    .post('/api/v1/subdomains?token=' + config.token, { subdomain: APP_LOCATION, appId: APP_ID })
+                    .post('/api/v1/subdomains?token=' + config.token, { records: [ { subdomain: APP_LOCATION, appId: APP_ID, type: 'A' } ] })
                     .reply(201, { }, { 'Content-Type': 'application/json' })
                     // app remove
                     .delete('/api/v1/subdomains/' + APP_ID + '?token=' + config.token)

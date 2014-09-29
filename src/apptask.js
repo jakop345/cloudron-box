@@ -432,11 +432,13 @@ function registerSubdomain(app, callback) {
 
     debug('Registering subdomain for ' + app.id + ' at ' + app.location);
 
+    var record = { subdomain: app.location, appId: app.id, type: 'A' };
+
     superagent
         .post(config.appServerUrl + '/api/v1/subdomains')
         .set('Accept', 'application/json')
         .query({ token: config.token })
-        .send({ subdomain: app.location, appId: app.id, type: 'A' })
+        .send({ records: [ record ] })
         .end(function (error, res) {
             if (error) return callback(error);
 

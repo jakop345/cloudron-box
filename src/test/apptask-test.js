@@ -189,7 +189,7 @@ describe('apptask', function () {
     it('registers subdomain', function (done) {
         var scope =
             nock(config.appServerUrl)
-                .post('/api/v1/subdomains?token=' + config.token, { subdomain: APP.location })
+                .post('/api/v1/subdomains?token=' + config.token, { records: [ { subdomain: APP.location, type: 'A' } ] })
                 .reply(201, { });
 
         apptask._registerSubdomain(APP, function (error) {
