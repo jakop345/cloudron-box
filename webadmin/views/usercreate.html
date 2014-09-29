@@ -5,21 +5,21 @@
 
     <h1>Create User</h1>
     <form class="form-signin" role="form" ng-submit="submit()">
-        <div class="form-group">
+        <div class="form-group" ng-class="{ 'has-error': error.username }">
             <label class="control-label" for="inputUsername">Username</label>
-            <input type="text" class="form-control" ng-model="username" id="inputUsername" required autofocus>
+            <input type="text" class="form-control" ng-model="username" id="inputUsername" autofocus>
         </div>
-        <div class="form-group">
+        <div class="form-group" ng-class="{ 'has-error': error.email }">
             <label class="control-label" for="inputEmail">Email</label>
-            <input type="email" class="form-control" ng-model="email" id="inputEmail" required>
+            <input type="email" class="form-control" ng-model="email" id="inputEmail">
         </div>
-        <div class="form-group">
+        <div class="form-group" ng-class="{ 'has-error': error.password }">
             <label class="control-label" for="inputPassword">Password</label>
-            <input type="password" class="form-control" ng-model="password" id="inputPassword" required>
+            <input type="password" class="form-control" ng-model="password" id="inputPassword">
         </div>
-        <div class="form-group">
+        <div class="form-group" ng-class="{ 'has-error': error.passwordRepeat }">
             <label class="control-label" for="inputPasswordRepeat">Repeat Password</label>
-            <input type="password" class="form-control" ng-model="passwordRepeat" id="inputPasswordRepeat" required>
+            <input type="password" class="form-control" ng-model="passwordRepeat" id="inputPasswordRepeat">
         </div>
         <input class="btn btn-default btn-outline" ng-click="cancel()" type="button" value="Cancel"/>
         <input class="btn btn-primary btn-outline pull-right" type="submit" ng-disabled="{{disabled}}" value="Create User"/>
