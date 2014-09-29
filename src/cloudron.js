@@ -38,6 +38,7 @@ var RESTORE_CMD = 'sudo ' + path.join(__dirname, 'scripts/restore.sh'),
 var backupTimerId = null,
     announceTimerId = null,
     addMailDnsRecordsTimerId = null,
+    getCertificateTimerId = null,
     updater = new Updater(); // TODO: make this not an object
 
 function CloudronError(reason, info) {
@@ -71,6 +72,9 @@ function uninitialize() {
 
     clearTimeout(addMailDnsRecordsTimerId);
     addMailDnsRecordsTimerId = null;
+
+    clearTimeout(getCertificateTimerId);
+    getCertificateTimerId = null;
 
     updater.stop();
 }
@@ -206,7 +210,7 @@ function announce() {
     });
 };
 
-function getCertificate(callback) {
+function sendGetCertificateRequest(callback) {
     assert(typeof callback === 'function');
 
     debug('_getCertificate');
@@ -311,6 +315,17 @@ function addMailDnsRecords() {
     });
 }
 
+function getCertificate() {
+    sendGetCertificateRequest(function (error) {
+        if (error) {
+            console.error(error);
+            getCertificateTimerId = setTimeout(getCertificate, 5000);
+            return;
+        }
+        debug('getCertificate: success');
+    });
+}
+
 function provision(args, callback) {
     assert(typeof callback === 'function');
 
@@ -326,18 +341,7 @@ function provision(args, callback) {
             callback(null);
 
             addMailDnsRecords();
-
-            // now try to get the real certificate
-            function getCertificateCallback(error) {
-                if (error) {
-                    console.error(error);
-                    return setTimeout(getCertificate.bind(null, getCertificateCallback), 5000);
-                }
-
-                debug('_provision: success');
-            }
-
-            getCertificate(getCertificateCallback);
+            getCertificate();
         });
     });
 }
