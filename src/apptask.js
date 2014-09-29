@@ -436,7 +436,7 @@ function registerSubdomain(app, callback) {
         .post(config.appServerUrl + '/api/v1/subdomains')
         .set('Accept', 'application/json')
         .query({ token: config.token })
-        .send({ subdomain: app.location, appId: app.id })
+        .send({ subdomain: app.location, appId: app.id, type: 'A' })
         .end(function (error, res) {
             if (error) return callback(error);
 
