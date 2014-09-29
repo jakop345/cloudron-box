@@ -44,6 +44,7 @@ config.save = function () {
     }
 
     config.nginxConfigDir = path.join(config.baseDir, 'nginx');
+    config.harakaConfigDir = path.join(config.baseDir, 'haraka');
     config.appDataRoot = path.join(config.baseDir, 'appdata');
     config.configRoot = path.join(config.baseDir, 'config');
     config.dataRoot = path.join(config.baseDir, 'data'); // TODO: rename to volumesRoot

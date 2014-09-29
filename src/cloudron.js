@@ -14,6 +14,7 @@ var backups = require('./backups.js'),
     fs = require('fs'),
     clientdb = require('./clientdb.js'),
     uuid = require('node-uuid'),
+    safe = require('safetydance'),
     _ = require('underscore'),
     superagent = require('superagent');
 
@@ -36,6 +37,7 @@ var RESTORE_CMD = 'sudo ' + path.join(__dirname, 'scripts/restore.sh'),
 
 var backupTimerId = null,
     announceTimerId = null,
+    addMailDnsRecordsTimerId = null,
     updater = new Updater(); // TODO: make this not an object
 
 function CloudronError(reason, info) {
@@ -66,6 +68,9 @@ function uninitialize() {
 
     clearTimeout(announceTimerId);
     announceTimerId = null;
+
+    clearTimeout(addMailDnsRecordsTimerId);
+    addMailDnsRecordsTimerId = null;
 
     updater.stop();
 }
@@ -251,6 +256,61 @@ function getCertificate(callback) {
     });
 }
 
+function sendMailDnsRecordsRequest(callback) {
+    var DKIM_SELECTOR = 'mail';
+    var DMARC_REPORT_EMAIL = 'girish@forwardbias.in';
+
+    var dkimPublicKeyFile = path.join(config.harakaConfigDir, 'dkim/' + config.fqdn + '/public');
+    var publicKey = safe.fs.readFileSync(dkimPublicKeyFile);
+
+    if (publicKey === null) return console.error('Error reading dkim public key');
+
+    // remove header, footer and new lines
+    publicKey = publicKey.split('\n').slice(1, -1).join('');
+
+    // note that dmarc requires special DNS records for external RUF and RUA
+    var records = [
+        // softfail all mails not from our IP. Note that this uses IP instead of 'a' should we use a load balancer in the future
+        { subdomain: '', type: 'SPF', value: 'v=spf1 ip4:' + getIp() + ' ~all' },
+        // t=s limits the domainkey to this domain and not it's subdomains
+        // o=- (outbound signing policy) means all are signed
+        { subdomain: DKIM_SELECTOR + '._domainkey', type: 'TXT', value: 'v=DKIM1; o=-; t=s; p=' + publicKey },
+        // DMARC requires special setup if report email id is in different domain
+        { subdomain: '_dmarc', type: 'TXT', value: 'v=DMARC1; p=none; pct=100; rua=mailto:' + DMARC_REPORT_EMAIL + '; ruf=' + DMARC_REPORT_EMAIL }
+    ];
+
+    debug('sendMailDnsRecords request:%s', JSON.stringify(records));
+
+    superagent
+        .post(config.appServerUrl + '/api/v1/subdomains')
+        .set('Accept', 'application/json')
+        .query({ token: config.token })
+        .send({ records: records })
+        .end(function (error, res) {
+            if (error) return callback(error);
+
+            debug('sendMailDnsRecords status:' + res.status);
+
+            if (res.status === 409) return callback(null); // already registered
+
+            if (res.status !== 201) return callback(new Error('Failed to add Mail DNS records: ' + res.status));
+
+            return callback(null);
+        });
+}
+
+function addMailDnsRecords() {
+    sendMailDnsRecordsRequest(function (error) {
+        if (error) {
+            console.error('Mail DNS record addition failed', error);
+            addMailDnsRecordsTimerId = setTimeout(addMailDnsRecords, 30000);
+            return;
+        }
+
+        debug('Added Mail DNS records successfully');
+    });
+}
+
 function provision(args, callback) {
     assert(typeof callback === 'function');
 
@@ -264,6 +324,8 @@ function provision(args, callback) {
             if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
             callback(null);
+
+            addMailDnsRecords();
 
             // now try to get the real certificate
             function getCertificateCallback(error) {
