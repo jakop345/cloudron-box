@@ -265,7 +265,7 @@ function sendMailDnsRecordsRequest(callback) {
     var DMARC_REPORT_EMAIL = 'girish@forwardbias.in';
 
     var dkimPublicKeyFile = path.join(config.harakaConfigDir, 'dkim/' + config.fqdn + '/public');
-    var publicKey = safe.fs.readFileSync(dkimPublicKeyFile);
+    var publicKey = safe.fs.readFileSync(dkimPublicKeyFile, 'utf8');
 
     if (publicKey === null) return console.error('Error reading dkim public key');
 
