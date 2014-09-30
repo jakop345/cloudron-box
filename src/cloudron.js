@@ -270,7 +270,7 @@ function sendMailDnsRecordsRequest(callback) {
     if (publicKey === null) return console.error('Error reading dkim public key');
 
     // remove header, footer and new lines
-    publicKey = publicKey.split('\n').slice(1, -1).join('');
+    publicKey = publicKey.split('\n').slice(1, -2).join('');
 
     // note that dmarc requires special DNS records for external RUF and RUA
     var records = [
