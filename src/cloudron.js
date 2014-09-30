@@ -275,12 +275,12 @@ function sendMailDnsRecordsRequest(callback) {
     // note that dmarc requires special DNS records for external RUF and RUA
     var records = [
         // softfail all mails not from our IP. Note that this uses IP instead of 'a' should we use a load balancer in the future
-        { subdomain: '', type: 'TXT', value: 'v=spf1 ip4:' + getIp() + ' ~all' },
+        { subdomain: '', type: 'TXT', value: '"v=spf1 ip4:' + getIp() + ' ~all"' },
         // t=s limits the domainkey to this domain and not it's subdomains
         // o=- (outbound signing policy) means all are signed
-        { subdomain: DKIM_SELECTOR + '._domainkey', type: 'TXT', value: 'v=DKIM1; o=-; t=s; p=' + publicKey },
+        { subdomain: DKIM_SELECTOR + '._domainkey', type: 'TXT', value: '"v=DKIM1; o=-; t=s; p=' + publicKey + '"' },
         // DMARC requires special setup if report email id is in different domain
-        { subdomain: '_dmarc', type: 'TXT', value: 'v=DMARC1; p=none; pct=100; rua=mailto:' + DMARC_REPORT_EMAIL + '; ruf=' + DMARC_REPORT_EMAIL }
+        { subdomain: '_dmarc', type: 'TXT', value: '"v=DMARC1; p=none; pct=100; rua=mailto:' + DMARC_REPORT_EMAIL + '; ruf=' + DMARC_REPORT_EMAIL + '"' }
     ];
 
     debug('sendMailDnsRecords request:%s', JSON.stringify(records));
