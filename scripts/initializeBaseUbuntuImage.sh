@@ -118,7 +118,7 @@ cd $SRCDIR
 git reset --hard $BOX_REVISION
 echo "git HEAD is `git rev-parse HEAD`"
 
-NPM_INSTALL="npm install --production"
+NPM_INSTALL="npm install --production --loglevel verbose"
 rm -rf ./node_modules
 eval $NPM_INSTALL
 RET=$?

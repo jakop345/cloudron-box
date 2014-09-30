@@ -56,7 +56,7 @@ EOF
 echo "==== Setup yellowtent ===="
 sudo -u $USER -H bash <<EOF
 cd $SRCDIR
-npm install --production
+npm install --production --loglevel verbose
 EOF
 
 if [ -d "/home/yellowtent/.yellowtent/graphite" ]; then
