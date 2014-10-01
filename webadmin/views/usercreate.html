@@ -4,7 +4,7 @@
     <div class="col-md-6">
 
     <h1>Create User</h1>
-    <form name="createuser_form" class="form-signin" role="form" novalidate ng-submit="submit()">
+    <form name="createuser_form" class="form-signin" role="form" novalidate ng-submit="submit()" autocomplete="off">
         <fieldset>
             <div class="form-group" ng-class="{ 'has-error': (createuser_form.username.$dirty && createuser_form.username.$invalid) || alreadyTaken }">
                 <label class="control-label" for="inputUsername">Username</label>

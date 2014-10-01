@@ -51,14 +51,14 @@
                                         <h4 class="modal-title" id="userDeleteModalLabel-{{user.username}}">Delete user {{ user.username }}</h4>
                                     </div>
                                     <div class="modal-body">
-                                        <form class="form-user-delete" role="form" ng-submit="deleteUser(user)" name="userDeleteConfirm">
+                                        <form class="form-user-delete" role="form" ng-submit="deleteUser(user)" name="userDeleteConfirm" autocomplete="off">
                                             <div class="form-group">
                                                 <label class="control-label" for="userDeleteConfirmUsername">Just to be sure you really want to delete this user, please type the user's name</label>
-                                                <input type="text" class="form-control" ng-model="userDeleteForm.username" id="userDeleteConfirmUsername" name="userDeleteConfirm" placeholder="Username" autocomplete="off" required autofocus>
+                                                <input type="text" class="form-control" ng-model="userDeleteForm.username" id="userDeleteConfirmUsername" name="userDeleteConfirm" placeholder="Username" required autofocus>
                                             </div>
                                             <div class="form-group">
                                                 <label class="control-label" for="userDeleteConfirmPassword">Give your password to verify that you are performing that action</label>
-                                                <input type="password" class="form-control" ng-model="userDeleteForm.password" id="userDeleteConfirmPassword" name="userDeleteConfirmPassword" placeholder="Password" autocomplete="off" required>
+                                                <input type="password" class="form-control" ng-model="userDeleteForm.password" id="userDeleteConfirmPassword" name="userDeleteConfirmPassword" placeholder="Password" required>
                                             </div>
                                             <input class="hide" type="submit"/>
                                         </form>
