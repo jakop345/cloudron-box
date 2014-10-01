@@ -123,7 +123,8 @@ function appFqdn(location) {
 
 // http://stackoverflow.com/questions/7930751/regexp-for-subdomain
 function validateSubdomain(subdomain, fqdn) {
-    var RESERVED_SUBDOMAINS = [ 'admin' ];
+    // TODO: convert to lowerCase
+    var RESERVED_SUBDOMAINS = [ 'admin', '_dmarc', '_domainkey' ];
 
     if (RESERVED_SUBDOMAINS.indexOf(subdomain) !== -1) return new Error(subdomain + ' location is reserved');
 
