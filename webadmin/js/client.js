@@ -4,6 +4,7 @@
 /* global EventSource */
 
 angular.module('Application').service('Client', function ($http) {
+    var client = null;
 
     function ClientError(statusCode, message) {
         Error.call(this);
@@ -14,6 +15,13 @@ angular.module('Application').service('Client', function ($http) {
         } else {
             this.message = JSON.stringify(message);
         }
+    }
+
+    function defaultErrorHandler(callback) {
+        return function (data, status) {
+            if (status === 401) return client.logout();
+            callback(new ClientError(status, data));
+        };
     }
 
     function Client() {
@@ -110,18 +118,14 @@ angular.module('Application').service('Client', function ($http) {
         $http.get('/api/v1/config').success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
-        }).error(function(data, status) {
-            callback(new ClientError(status, data));
-        });
+        }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.userInfo = function (callback) {
         $http.get('/api/v1/profile').success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
-        }).error(function(data, status) {
-            callback(new ClientError(status, data));
-        });
+        }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.createVolume = function (name, password, callback) {
@@ -129,9 +133,7 @@ angular.module('Application').service('Client', function ($http) {
         $http.post('/api/v1/volume/create', data).success(function(data, status) {
             if (status !== 201) return callback(new ClientError(status, data));
             callback(null, data);
-        }).error(function(data, status) {
-            callback(new ClientError(status, data));
-        });
+        }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.deleteVolume = function (name, password, callback) {
@@ -139,9 +141,7 @@ angular.module('Application').service('Client', function ($http) {
         $http.post('/api/v1/volume/' + name + '/delete', data).success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
-        }).error(function(data, status) {
-            callback(new ClientError(status, data));
-        });
+        }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.mount = function (name, password, callback) {
@@ -149,9 +149,7 @@ angular.module('Application').service('Client', function ($http) {
         $http.post('/api/v1/volume/' + name + '/mount', data).success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
-        }).error(function(data, status) {
-            callback(new ClientError(status, data));
-        });
+        }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.unmount = function (name, password, callback) {
@@ -159,27 +157,21 @@ angular.module('Application').service('Client', function ($http) {
         $http.post('/api/v1/volume/' + name + '/unmount', data).success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
-        }).error(function(data, status) {
-            callback(new ClientError(status, data));
-        });
+        }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.isMounted = function (name, callback) {
         $http.get('/api/v1/volume/' + name + '/ismounted').success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data.mounted);
-        }).error(function(data, status) {
-            callback(new ClientError(status, data));
-        });
+        }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.listVolumes = function (callback) {
         $http.get('/api/v1/volume/list').success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data.volumes);
-        }).error(function(data, status) {
-            callback(new ClientError(status, data));
-        });
+        }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.addUserToVolume = function (username, volumeId, password, callback) {
@@ -187,9 +179,7 @@ angular.module('Application').service('Client', function ($http) {
         $http.post('/api/v1/volume/' + volumeId + '/users', data).success(function (data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null);
-        }).error(function (data, status) {
-            callback(new ClientError(status, data));
-        });
+        }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.removeUserFromVolume = function (username, volumeId, password, callback) {
@@ -197,9 +187,7 @@ angular.module('Application').service('Client', function ($http) {
         $http({ method: 'DELETE', url: '/api/v1/volume/' + volumeId + '/users/' + username, data: data, headers: { 'Content-Type': 'application/json' }}).success(function (data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null);
-        }).error(function (data, status) {
-            callback(new ClientError(status, data));
-        });
+        }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.installApp = function (id, password, title, config, callback) {
@@ -213,9 +201,7 @@ angular.module('Application').service('Client', function ($http) {
             that._installedApps.push(data);
 
             callback(null, data.id);
-        }).error(function (data, status) {
-            callback(new ClientError(status, data));
-        });
+        }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.configureApp = function (id, password, config, callback) {
@@ -223,18 +209,14 @@ angular.module('Application').service('Client', function ($http) {
         $http.post('/api/v1/app/' + id + '/configure', data).success(function (data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null);
-        }).error(function (data, status) {
-            callback(new ClientError(status, data));
-        });
+        }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.updateApp = function (id, callback) {
         $http.post('/api/v1/app/' + id + '/update', { }).success(function (data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null);
-        }).error(function (data, status) {
-            callback(new ClientError(status, data));
-        });
+        }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.startApp = function (id, callback) {
@@ -242,9 +224,7 @@ angular.module('Application').service('Client', function ($http) {
         $http.post('/api/v1/app/' + id + '/start', data).success(function (data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null);
-        }).error(function (data, status) {
-            callback(new ClientError(status, data));
-        });
+        }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.stopApp = function (id, callback) {
@@ -252,27 +232,21 @@ angular.module('Application').service('Client', function ($http) {
         $http.post('/api/v1/app/' + id + '/stop', data).success(function (data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null);
-        }).error(function (data, status) {
-            callback(new ClientError(status, data));
-        });
+        }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.version = function (callback) {
         $http.get('/api/v1/version').success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
-        }).error(function(data, status) {
-            callback(new ClientError(status, data));
-        });
+        }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.isServerFirstTime = function (callback) {
         $http.get('/api/v1/firsttime').success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, !data.activated);
-        }).error(function(data, status) {
-            callback(new ClientError(status, data));
-        });
+        }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.getNakedDomain = function (callback) {
@@ -280,19 +254,14 @@ angular.module('Application').service('Client', function ($http) {
         .success(function (data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data.appid);
-        })
-        .error(function (data, status) {
-            callback(new ClientError(status, data));
-        });
+        }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.setNakedDomain = function (appid, callback) {
         $http.post('/api/v1/settings/naked_domain', { appid: appid || '' }).success(function (data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null);
-        }).error(function (data, status) {
-            callback(new ClientError(status, data));
-        });
+        }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.getApps = function (callback) {
@@ -321,9 +290,7 @@ angular.module('Application').service('Client', function ($http) {
         $http.post('/api/v1/app/' + appId + '/uninstall').success(function (data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null);
-        }).error(function (data, status) {
-            callback(new ClientError(status, data));
-        });
+        }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.getAppLogStream = function (appId) {
@@ -344,9 +311,7 @@ angular.module('Application').service('Client', function ($http) {
         $http.post('/api/v1/users/' + username + '/admin', payload).success(function (data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null);
-        }).error(function (data, status) {
-            callback(new ClientError(status, data));
-        });
+        }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.createAdmin = function (username, password, email, callback) {
@@ -365,72 +330,56 @@ angular.module('Application').service('Client', function ($http) {
             that.setUserInfo(data.userInfo);
 
             callback(null, data.activated);
-        }).error(function(data, status) {
-            callback(new ClientError(status, data));
-        });
+        }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.listUsers = function (callback) {
         $http.get('/api/v1/users').success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
-        }).error(function(data, status) {
-            callback(new ClientError(status, data));
-        });
+        }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.stats = function (callback) {
         $http.get('/api/v1/stats').success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
-        }).error(function(data, status) {
-            callback(new ClientError(status, data));
-        });
+        }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.getOAuthClients = function (callback) {
         $http.get('/api/v1/oauth/clients').success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data.clients);
-        }).error(function(data, status) {
-            callback(new ClientError(status, data));
-        });
+        }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.delTokensByClientId = function (id, callback) {
         $http.delete('/api/v1/oauth/clients/' + id + '/tokens').success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
-        }).error(function(data, status) {
-            callback(new ClientError(status, data));
-        });
+        }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.update = function (callback) {
         $http.get('/api/v1/update').success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
-        }).error(function(data, status) {
-            callback(new ClientError(status, data));
-        });
+        }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.reboot = function (callback) {
         $http.get('/api/v1/reboot').success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
-        }).error(function(data, status) {
-            callback(new ClientError(status, data));
-        });
+        }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.backup = function (callback) {
         $http.post('/api/v1/backups').success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
-        }).error(function (data, status) {
-            callback(new ClientError(status, data));
-        });
+        }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.graphs = function (targets, from, callback) {
@@ -441,12 +390,11 @@ angular.module('Application').service('Client', function ($http) {
                 from: from
             }
         };
+
         $http.get('/api/v1/graphs', config).success(function (data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
-        }).error(function (data, status) {
-            callback(new ClientError(status, data));
-        });
+        }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.createUser = function (username, password, email, callback) {
@@ -459,9 +407,7 @@ angular.module('Application').service('Client', function ($http) {
         $http.post('/api/v1/users', data).success(function(data, status) {
             if (status !== 201) return callback(new ClientError(status, data));
             callback(null, data);
-        }).error(function(data, status) {
-            callback(new ClientError(status, data));
-        });
+        }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.removeUser = function (username, password, callback) {
@@ -473,9 +419,7 @@ angular.module('Application').service('Client', function ($http) {
         $http({ method: 'DELETE', url: '/api/v1/users/' + username, data: data, headers: { 'Content-Type': 'application/json' }}).success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
-        }).error(function(data, status) {
-            callback(new ClientError(status, data));
-        });
+        }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.changePassword = function (currentPassword, newPassword, callback) {
@@ -487,9 +431,7 @@ angular.module('Application').service('Client', function ($http) {
         $http.post('/api/v1/users/' + this._userInfo.username + '/password', data).success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
-        }).error(function(data, status) {
-            callback(new ClientError(status, data));
-        });
+        }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.refreshConfig = function (callback) {
@@ -564,10 +506,9 @@ angular.module('Application').service('Client', function ($http) {
             if (status !== 200) return callback(new ClientError(status, data));
 
             callback(null, data.access_token);
-        }).error(function(data, status) {
-            callback(new ClientError(status, data));
-        });
+        }).error(defaultErrorHandler(callback));
     };
 
-    return new Client();
+    client = new Client();
+    return client;
 });
