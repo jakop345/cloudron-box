@@ -4,7 +4,7 @@
 
 var nodemailer = require('nodemailer'),
     smtpTransport = require('nodemailer-smtp-transport'),
-    debug = require('debug')('mailer'),
+    debug = require('debug')('box:mailer'),
     config = require('../config.js');
 
 exports = module.exports = {
