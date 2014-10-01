@@ -339,6 +339,7 @@ function provision(args, callback) {
 
             callback(null);
 
+            // TODO: this needs to work across reboots
             addMailDnsRecords();
             getCertificate();
         });

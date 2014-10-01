@@ -19,7 +19,8 @@ var express = require('express'),
     userdb = require('./userdb'),
     config = require('../config.js'),
     cloudron = require('./cloudron.js'),
-    url = require('url');
+    url = require('url'),
+    mailer = require('./mailer.js');
 
 exports = module.exports = Server;
 
@@ -318,6 +319,7 @@ Server.prototype.start = function (callback) {
 
         apps.initialize();
         cloudron.initialize();
+        mailer.initialize();
 
         that.httpServer = http.createServer(that.app);
         that.httpServer.listen(config.port, callback);
@@ -335,6 +337,7 @@ Server.prototype.stop = function (callback) {
 
     cloudron.uninitialize();
     apps.uninitialize();
+    mailer.uninitialize();
     database.uninitialize();
 
     this.httpServer.close(function () {
