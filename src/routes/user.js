@@ -5,7 +5,8 @@
 var clientdb = require('../clientdb.js'),
     tokendb = require('../tokendb.js'),
     DatabaseError = require('../databaseerror.js'),
-    user = require('../user'),
+    mailer = require('../mailer.js'),
+    user = require('../user.js'),
     UserError = user.UserError,
     debug = require('debug')('box:routes/user'),
     HttpError = require('../../src/httperror.js'),
@@ -74,17 +75,21 @@ function createAdmin(req, res, next) {
 
                 debug('createAdmin: successful with token ' + token);
 
+                var userInfo = {
+                    username: username,
+                    email: email,
+                    admin: true
+                };
+
                 // TODO no next(), as we do not want to fall through to authentication
                 // the whole createAdmin should be handled differently
                 res.send(201, {
                     token: token,
                     expires: expires,
-                    userInfo: {
-                        username: username,
-                        email: email,
-                        admin: true
-                    }
+                    userInfo: userInfo
                 });
+
+                mailer.sendWelcome(userInfo);
             });
         });
     });
@@ -125,7 +130,15 @@ function createUser(req, res, next) {
             }
         }
 
-        next(new HttpSuccess(201, {}));
+        var userInfo = {
+            username: username,
+            email: email,
+            admin: false
+        };
+
+        next(new HttpSuccess(201, { userInfo: userInfo }));
+
+        mailer.sendWelcome(userInfo);
     });
 }
 

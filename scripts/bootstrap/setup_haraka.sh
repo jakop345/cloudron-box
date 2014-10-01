@@ -20,6 +20,7 @@ var data = fs.existsSync("$CLOUDRON_CONF")
     ? JSON.parse(fs.readFileSync("$CLOUDRON_CONF", 'utf8'))
     : { };
 data.mailServer = "$MAIL_SERVER";
+data.mailUsername = "admin@$DOMAIN_NAME";
 fs.writeFileSync("$CLOUDRON_CONF", JSON.stringify(data));
 EOF
 
