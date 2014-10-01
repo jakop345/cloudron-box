@@ -258,6 +258,7 @@ describe('database', function () {
         var APP_0 = {
             id: 'appid-0',
             appStoreId: 'appStoreId-0',
+            dnsRecordId: null,
             version: null,
             installationState: appdb.ISTATE_PENDING_INSTALL,
             installationProgress: null,
@@ -272,6 +273,7 @@ describe('database', function () {
         var APP_1 = {
             id: 'appid-1',
             appStoreId: 'appStoreId-1',
+            dnsRecordId: null,
             version: null,
             installationState: appdb.ISTATE_PENDING_INSTALL, // app health tests rely on this initial state
             installationProgress: null,

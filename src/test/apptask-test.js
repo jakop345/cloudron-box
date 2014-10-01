@@ -190,7 +190,7 @@ describe('apptask', function () {
         var scope =
             nock(config.appServerUrl)
                 .post('/api/v1/subdomains?token=' + config.token, { records: [ { subdomain: APP.location, type: 'A' } ] })
-                .reply(201, { });
+                .reply(201, { ids: [ 'someid' ] });
 
         apptask._registerSubdomain(APP, function (error) {
             expect(error).to.be(null);
@@ -200,7 +200,7 @@ describe('apptask', function () {
     });
 
     it('unregisters subdomain', function (done) {
-        var scope = nock(config.appServerUrl).delete('/api/v1/subdomains/' + APP.location).reply(200, { });
+        var scope = nock(config.appServerUrl).delete('/api/v1/subdomains/someid').reply(200, { });
 
         apptask._unregisterSubdomain(APP, function (error) {
             expect(error).to.be(null);

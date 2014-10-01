@@ -447,7 +447,7 @@ function registerSubdomain(app, callback) {
             if (res.status === 409) return callback(null); // already registered
             if (res.status !== 201) return callback(new Error('Subdomain Registration failed. Status:' + res.status + '. ' + JSON.stringify(res.body)));
 
-            return callback(null);
+            updateApp(app, { dnsRecordId: res.body.ids[0] }, callback);
         });
 }
 
@@ -459,7 +459,7 @@ function unregisterSubdomain(app, callback) {
 
     debug('Unregistering subdomain for ' + app.id + ' at ' + app.location);
     superagent
-        .del(config.appServerUrl + '/api/v1/subdomains/' + app.id)
+        .del(config.appServerUrl + '/api/v1/subdomains/' + app.dnsRecordId)
         .query({ token: config.token })
         .end(function (error, res) {
             if (error) {
@@ -468,7 +468,10 @@ function unregisterSubdomain(app, callback) {
                 console.error('Error unregistering subdomain:', res.status, res.body);
             }
 
-            callback(null);
+            updateApp(app, { dnsRecordId: null }, function (error) {
+                if (error) console.error(error);
+                callback(null);
+            });
         });
 }
 

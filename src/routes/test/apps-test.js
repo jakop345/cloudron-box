@@ -295,8 +295,8 @@ describe('App installation', function () {
                         .get('/api/v1/appstore/apps/' + APP_STORE_ID + '/manifest')
                         .reply(200, manifest, { 'Content-Type': 'application/json' })
                         .post('/api/v1/subdomains?token=' + config.token, { records: [ { subdomain: APP_LOCATION, appId: APP_ID, type: 'A' } ] })
-                        .reply(201, { }, { 'Content-Type': 'application/json' })
-                        .delete('/api/v1/subdomains/' + APP_ID + '?token=' + config.token)
+                        .reply(201, { ids: [ 'dnsrecordid' ] }, { 'Content-Type': 'application/json' })
+                        .delete('/api/v1/subdomains/dnsrecordid?token=' + config.token)
                         .reply(200, { }, { 'Content-Type': 'application/json' });
                     callback();
                 });
@@ -584,14 +584,14 @@ describe('App installation - port bindings', function () {
                     .reply(200, manifest, { 'Content-Type': 'application/json' })
                     // app install
                     .post('/api/v1/subdomains?token=' + config.token, { records: [ { subdomain: APP_LOCATION, appId: APP_ID, type: 'A' } ] })
-                    .reply(201, { }, { 'Content-Type': 'application/json' })
+                    .reply(201, { ids: [ 'dnsrecordid' ] }, { 'Content-Type': 'application/json' })
                     // app configure
-                    .delete('/api/v1/subdomains/' + APP_ID + '?token=' + config.token)
+                    .delete('/api/v1/subdomains/dnsrecordid?token=' + config.token)
                     .reply(200, { }, { 'Content-Type': 'application/json' })
                     .post('/api/v1/subdomains?token=' + config.token, { records: [ { subdomain: APP_LOCATION, appId: APP_ID, type: 'A' } ] })
-                    .reply(201, { }, { 'Content-Type': 'application/json' })
+                    .reply(201, { ids: [ 'anotherdnsid' ] }, { 'Content-Type': 'application/json' })
                     // app remove
-                    .delete('/api/v1/subdomains/' + APP_ID + '?token=' + config.token)
+                    .delete('/api/v1/subdomains/anotherdnsid?token=' + config.token)
                     .reply(200, { }, { 'Content-Type': 'application/json' });
 
                     callback();
