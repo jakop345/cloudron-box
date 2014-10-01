@@ -89,7 +89,7 @@ function createAdmin(req, res, next) {
                     userInfo: userInfo
                 });
 
-                mailer.sendWelcome(userInfo);
+                mailer.adminAdded(userInfo);
             });
         });
     });
@@ -138,7 +138,7 @@ function createUser(req, res, next) {
 
         next(new HttpSuccess(201, { userInfo: userInfo }));
 
-        mailer.sendWelcome(userInfo);
+        mailer.userAdded(userInfo);
     });
 }
 
@@ -151,6 +151,8 @@ function changeAdmin(req, res, next) {
         if (error) return next(new HttpError(500, 'Unable to change admin flag'));
 
         next(new HttpSuccess(200, {}));
+
+        mailer.adminChanged(req.user);
     });
 }
 
@@ -288,7 +290,10 @@ function removeUser(req, res, next) {
                 }
                 return next(new HttpError(500, 'Failed to remove user'));
             }
+
             next(new HttpSuccess(200, {}));
+
+            mailer.userRemoved(req.user);
         });
     });
 }

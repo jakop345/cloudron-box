@@ -8,7 +8,10 @@ var nodemailer = require('nodemailer'),
     config = require('../config.js');
 
 exports = module.exports = {
-    sendWelcome: sendWelcome
+    adminAdded: adminAdded,
+    userAdded: userAdded,
+    userRemoved: userRemoved,
+    adminChanged: adminChanged
 };
 
 var transport = nodemailer.createTransport(smtpTransport({
@@ -16,7 +19,9 @@ var transport = nodemailer.createTransport(smtpTransport({
     port: 25
 }));
 
-function sendWelcome(user) {
+function adminAdded(user) {
+    debug('Sending mail for adminAdded');
+
     var mailOptions = {
         from: config.mailUsername,
         to: user.email,
@@ -30,5 +35,17 @@ function sendWelcome(user) {
 
         debug('Email sent to ' + user.email);
     });
+}
+
+function userAdded(user) {
+    debug('Sending mail for userAdded');
+}
+
+function userRemoved(user) {
+    debug('Sending mail for userRemoved');
+}
+
+function adminChanged(user) {
+    debug('Sending mail for adminChanged');
 }
 
