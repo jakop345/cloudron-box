@@ -1,9 +1,9 @@
 'use strict';
 
-/* global angular:false */
-/* global async:false */
+/* global angular */
+/* global EventSource */
 
-angular.module('Application').service('Client', function ($http, $filter) {
+angular.module('Application').service('Client', function ($http) {
 
     function ClientError(statusCode, message) {
         Error.call(this);
@@ -552,7 +552,6 @@ angular.module('Application').service('Client', function ($http, $filter) {
     };
 
     Client.prototype.exchangeCodeForToken = function (authCode, callback) {
-        var that = this;
         var data = {
             grant_type: 'authorization_code',
             code: authCode,
@@ -564,9 +563,7 @@ angular.module('Application').service('Client', function ($http, $filter) {
         $http.post('/api/v1/oauth/token?response_type=token&client_id=' + this._clientId, data).success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
 
-            that.login(data.access_token, function (error, result) {
-                callback(null, data.access_token);
-            });
+            callback(null, data.access_token);
         }).error(function(data, status) {
             callback(new ClientError(status, data));
         });
