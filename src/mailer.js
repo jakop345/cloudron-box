@@ -9,7 +9,10 @@ var nodemailer = require('nodemailer'),
     aync = require('async'),
     digitalocean = require('./digitalocean.js'),
     cloudron = require('./cloudron.js'),
-    config = require('../config.js');
+    ejs = require('ejs'),
+    safe = require('safetydance'),
+    config = require('../config.js'),
+    path = require('path');
 
 exports = module.exports = {
     initialize: initialize,
@@ -20,6 +23,8 @@ exports = module.exports = {
     userRemoved: userRemoved,
     adminChanged: adminChanged
 };
+
+var MAIL_TEMPLATES_DIR = path.join(__dirname, 'mail_templates');
 
 var transport = nodemailer.createTransport(smtpTransport({
     host: config.mailServer,
@@ -82,6 +87,10 @@ function enqueue(mailOptions) {
     mailQueue.push(mailOptions);
 }
 
+function render(templateFile, params) {
+    return ejs.render(safe.fs.readFileSync(path.join(MAIL_TEMPLATES_DIR, templateFile), params));
+}
+
 function adminAdded(user) {
     debug('Sending mail for adminAdded');
 
@@ -89,8 +98,8 @@ function adminAdded(user) {
         from: config.mailUsername,
         to: user.email,
         subject: 'Welcome to Cloudron',
-        text: 'You can check out anytime you like, but you can never leave',
-        html: 'You can check out <i>anytime</i> you like, but you can <i>never</i> leave'
+        text: render('welcome_text.ejs', { }),
+        html: render('welcome_html.ejs', { })
     };
 
     enqueue(mailOptions);
