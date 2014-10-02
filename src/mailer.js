@@ -12,6 +12,7 @@ var nodemailer = require('nodemailer'),
     ejs = require('ejs'),
     safe = require('safetydance'),
     config = require('../config.js'),
+    userdb = require('./userdb.js'),
     path = require('path');
 
 exports = module.exports = {
