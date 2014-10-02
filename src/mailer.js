@@ -42,7 +42,7 @@ function uninitialize() {
     clearTimeout(checkDnsTimerId);
     checkDnsTimerId = null;
 
-    console.log(mailQueue.length + ' mail items dropped');
+    debug(mailQueue.length + ' mail items dropped');
     mailQueue = [ ];
 }
 
