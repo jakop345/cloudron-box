@@ -70,7 +70,7 @@ function processQueue() {
 
     debug('Processing mail queue of size %d', mailQueueCopy.length);
 
-    async.series(mailQueueCopy, function iterator(mailOptions, callback) {
+    async.mapSeries(mailQueueCopy, function iterator(mailOptions, callback) {
         transport.sendMail(mailOptions, function (error, info) {
             if (error) return console.error(error);
 
