@@ -4,29 +4,22 @@
 
 var express = require('express'),
     http = require('http'),
-    https = require('https'),
     HttpError = require('./httperror.js'),
     HttpSuccess = require('./httpsuccess.js'),
     csrf = require('csurf'),
     path = require('path'),
-    os = require('os'),
     passport = require('passport'),
-    superagent = require('superagent'),
     mkdirp = require('mkdirp'),
     routes = require('./routes/index.js'),
     debug = require('debug')('box:server'),
     assert = require('assert'),
-    child_process = require('child_process'),
-    fs = require('fs'),
-    exec = require('child_process').exec,
     apps = require('./apps'),
     middleware = require('./middleware'),
     database = require('./database.js'),
     userdb = require('./userdb'),
     config = require('../config.js'),
     cloudron = require('./cloudron.js'),
-    url = require('url'),
-    _ = require('underscore');
+    url = require('url');
 
 exports = module.exports = Server;
 
