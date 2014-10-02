@@ -107,6 +107,33 @@ function adminAdded(user) {
 
 function userAdded(user) {
     debug('Sending mail for userAdded');
+
+    var mailOptions = {
+        from: config.mailUsername,
+        to: user.email,
+        subject: 'Welcome to Cloudron',
+        text: render('welcome_text.ejs', { }),
+        html: render('welcome_html.ejs', { })
+    };
+
+    enqueue(mailOptions);
+
+    userdb.getAllAdmins(function (error, admins) {
+        if (error) return console.log('Error getting admins', error);
+
+        var adminEmails = [ ];
+        admins.forEach(function (admin) { adminEmails.push(admin.email); });
+
+        mailOptions = {
+            from: config.mailUsername,
+            to: adminEmails.join(', '),
+            subject: 'User added',
+            text: render('user_text.ejs', { event: 'added' }),
+            html: render('user_html.ejs', { event: 'added' })
+        };
+
+        enqueue(mailOptions);
+    });
 }
 
 function userRemoved(user) {
