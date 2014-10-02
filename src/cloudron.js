@@ -28,6 +28,8 @@ exports = module.exports = {
     restore: restore,
     provision: provision,
 
+    getIp: getIp,
+
     // exported for testing
     _getAnnounceTimerId: getAnnounceTimerId
 };

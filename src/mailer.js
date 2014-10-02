@@ -7,6 +7,8 @@ var nodemailer = require('nodemailer'),
     debug = require('debug')('box:mailer'),
     assert = require('assert'),
     aync = require('async'),
+    digitalocean = require('./digitalocean.js'),
+    cloudron = require('./cloudron.js'),
     config = require('../config.js');
 
 exports = module.exports = {
@@ -25,10 +27,11 @@ var transport = nodemailer.createTransport(smtpTransport({
 }));
 
 var mailQueue = [ ],
-    mailQueueTimerId = null;
+    mailQueueTimerId = null,
+    checkDnsTimerId = null;
 
 function initialize() {
-    mailQueueTimerId = setTimeout(processQueue, 60000);
+    checkDns();
 }
 
 function uninitialize() {
@@ -36,13 +39,30 @@ function uninitialize() {
     clearTimeout(mailQueueTimerId);
     mailQueueTimerId = null;
 
+    clearTimeout(checkDnsTimerId);
+    checkDnsTimerId = null;
+
     console.log(mailQueue.length + ' mail items dropped');
     mailQueue = [ ];
+}
+
+function checkDns() {
+    digitalocean.checkPtrRecord(cloudron.getIp(), config.fqdn, function (error, ok) {
+        if (error || !ok) {
+            debug('PTR record not setup yet');
+            checkDnsTimerId = setTimeout(checkDns, 10000);
+            return;
+        }
+
+        processQueue();
+    });
 }
 
 function processQueue() {
     var mailQueueCopy = mailQueue;
     mailQueue = [ ];
+
+    debug('Processing mail queue of size %d', mailQueueCopy.length);
 
     async.series(mailQueueCopy, function iterator(mailOptions, callback) {
         transport.sendMail(mailOptions, function (error, info) {

@@ -1174,6 +1174,48 @@
           }
         }
       }
+    },
+    "native-dns": {
+      "version": "0.6.1",
+      "from": "native-dns@",
+      "dependencies": {
+        "ipaddr.js": {
+          "version": "0.1.3",
+          "from": "ipaddr.js@>= 0.1.1"
+        },
+        "native-dns-cache": {
+          "version": "0.0.2",
+          "from": "native-dns-cache@>= 0.0.1",
+          "dependencies": {
+            "binaryheap": {
+              "version": "0.0.3",
+              "from": "binaryheap@>= 0.0.3"
+            }
+          }
+        },
+        "native-dns-packet": {
+          "version": "0.0.4",
+          "from": "native-dns-packet@>= 0.0.4",
+          "dependencies": {
+            "buffercursor": {
+              "version": "0.0.12",
+              "from": "buffercursor@>= 0.0.5",
+              "dependencies": {
+                "verror": {
+                  "version": "1.4.0",
+                  "from": "verror@^1.4.0",
+                  "dependencies": {
+                    "extsprintf": {
+                      "version": "1.0.3",
+                      "from": "extsprintf@1.0.3"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }
