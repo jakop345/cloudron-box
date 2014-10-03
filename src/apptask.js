@@ -196,7 +196,8 @@ function createContainer(app, callback) {
         env.push('APP_ORIGIN' + '=' + 'https://' + appFqdn(app.location));
         env.push('ADMIN_ORIGIN' + '=' + config.adminOrigin);
         env.push('MAIL_SERVER' + '=' + config.mailServer);
-        env.push('MAIL_USERNAME' + '=' + app.location + '@' + config.fqdn);
+        env.push('MAIL_USERNAME' + '=' + app.location);
+        env.push('MAIL_DOMAIN' + '=' + config.fqdn);
 
         // add oauth variables
         clientdb.getByAppId(app.id, function (error, client) {
