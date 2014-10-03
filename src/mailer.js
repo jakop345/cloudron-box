@@ -98,7 +98,7 @@ function mailAdmins(user, event) {
         var adminEmails = [ ];
         admins.forEach(function (admin) { if (user.email !== admin.email) adminEmails.push(admin.email); });
 
-        mailOptions = {
+        var mailOptions = {
             from: config.mailUsername,
             to: adminEmails.join(', '),
             subject: 'User ' + event,
