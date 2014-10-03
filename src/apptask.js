@@ -54,7 +54,6 @@ var docker = null,
 
 function initialize(callback) {
     if (process.env.NODE_ENV === 'test') {
-        console.log('Docker requests redirected to 5687 in test environment');
         docker = new Docker({ host: 'http://localhost', port: 5687 });
     } else if (os.platform() === 'linux') {
         docker = new Docker({socketPath: '/var/run/docker.sock'});
@@ -475,9 +474,9 @@ function unregisterSubdomain(app, callback) {
         });
 }
 
-function cleanupManifest(app, callback) {
+function removeIcon(app, callback) {
     fs.unlink(config.dataRoot + '/icons/' + app.id + '.png', function (error) {
-        if (error) console.error(error);
+        if (error && error.code !== 'ENOENT') console.error(error);
         callback(null);
     });
 }
@@ -715,7 +714,7 @@ function uninstall(app, callback) {
         unregisterSubdomain.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: 'Cleanup manifest' }),
-        cleanupManifest.bind(null, app),
+        removeIcon.bind(null, app),
 
         appdb.del.bind(null, app.id)
     ], callback);
