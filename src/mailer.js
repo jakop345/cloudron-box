@@ -32,7 +32,7 @@ var transport = nodemailer.createTransport(smtpTransport({
 }));
 
 var mailQueue = [ ],
-    mailQueueTimerId = null,
+    dnsReady = false,
     checkDnsTimerId = null;
 
 function initialize() {
@@ -41,9 +41,6 @@ function initialize() {
 
 function uninitialize() {
     // TODO: interrupt processQueue as well
-    clearTimeout(mailQueueTimerId);
-    mailQueueTimerId = null;
-
     clearTimeout(checkDnsTimerId);
     checkDnsTimerId = null;
 
@@ -59,6 +56,7 @@ function checkDns() {
             return;
         }
 
+        dnsReady = true;
         processQueue();
     });
 }
@@ -77,7 +75,7 @@ function processQueue() {
         });
         callback(null);
     }, function done() {
-        mailQueueTimerId = setTimeout(processQueue, 60000);
+        debug('Done processing mail queue');
     });
 }
 
@@ -85,6 +83,8 @@ function enqueue(mailOptions) {
     assert(typeof mailOptions === 'object');
     debug('Queued mail for ' + mailOptions.from + ' to ' + mailOptions.to);
     mailQueue.push(mailOptions);
+
+    if (dnsReady) processQueue();
 }
 
 function render(templateFile, params) {
