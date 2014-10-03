@@ -10,6 +10,8 @@ if [ "$1" == "--check" ]; then
     exit 0
 fi
 
+set -e
+
 # http://tmont.com/blargh/2014/1/uploading-to-s3-in-bash
 # http://docs.aws.amazon.com/AmazonS3/latest/dev/RESTAuthentication.html
 
@@ -17,8 +19,8 @@ NOW=$(date +%Y-%m-%dT%H:%M:%S)
 LOG=/var/log/cloudron/backup-${NOW}.log
 # exec 2>&1 1> $LOG
 
-if [ $# -ne 4 ]; then
-    echo "No arguments supplied"
+if [ $# -lt 4 ]; then
+    echo "Usage: backup.sh <S3 Key> <S3 Secret> <S3 Prefix> <S3 Bucket> [restart_box_code_flag]"
     exit 1
 fi
 
@@ -59,8 +61,11 @@ rm /tmp/${FILE}
 echo "Starting all containers"
 docker start $CONTAINER_IDS
 
-echo "Starting box"
-supervisorctl start box
+# skip restarting the box code if a 5th argument is provided, this is for the update case
+if [[ ! $5 ]]; then
+    echo "Starting box"
+    supervisorctl start box
+fi
 
 echo "Backup over"
 

@@ -60,7 +60,11 @@ info "Perform update in $BASEDIR"
 cd $BASEDIR;
 
 info "Perform backup first"
-./src/scripts/backup.sh $S3_KEY $S3_SECRET $S3_PREFIX $S3_BUCKET
+./src/scripts/backup.sh $S3_KEY $S3_SECRET $S3_PREFIX $S3_BUCKET "do_not_restart_box_flag"
+if [[ $? != 0 ]]; then
+    error "Backup failed.";
+    exit 1;
+fi
 
 info "Fetch latest code..."
 git fetch
