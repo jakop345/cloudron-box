@@ -259,7 +259,7 @@ function setHealth(appId, healthy, runState, callback) {
 
     var constraints = 'AND runState NOT GLOB "pending_*" AND installationState = "installed"';
     if (runState === exports.RSTATE_DEAD) { // don't mark stopped apps as dead
-        constraints += ' runState != "stopped"';
+        constraints += ' AND runState != "stopped"';
     }
 
     updateWithConstraints(appId, values, constraints, callback);
