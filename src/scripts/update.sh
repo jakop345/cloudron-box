@@ -60,7 +60,7 @@ info "Perform update in $BASEDIR"
 cd $BASEDIR;
 
 info "Perform backup first"
-./src/scripts/backup.sh S3_KEY S3_SECRET S3_PREFIX S3_BUCKET
+./src/scripts/backup.sh $S3_KEY $S3_SECRET $S3_PREFIX $S3_BUCKET
 
 info "Fetch latest code..."
 git fetch
