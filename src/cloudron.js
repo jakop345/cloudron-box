@@ -126,7 +126,7 @@ function restore(body, callback) {
 function getIp() {
     var ifaces = os.networkInterfaces();
     for (var dev in ifaces) {
-        if (dev.match(/^(en|eth).*/) === null) continue;
+        if (dev.match(/^(en|eth|wlp).*/) === null) continue;
 
         for (var i = 0; i < ifaces[dev].length; i++) {
             if (ifaces[dev][i].family === 'IPv4') return ifaces[dev][i].address;
