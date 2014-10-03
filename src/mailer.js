@@ -92,6 +92,9 @@ function render(templateFile, params) {
 }
 
 function mailAdmins(user, event) {
+    assert(typeof user === 'object');
+    assert(typeof event === 'string');
+
     userdb.getAllAdmins(function (error, admins) {
         if (error) return console.log('Error getting admins', error);
 
@@ -126,10 +129,10 @@ function userAdded(user) {
     mailAdmins(user, 'added');
 }
 
-function userRemoved(user) {
+function userRemoved(username) {
     debug('Sending mail for userRemoved');
 
-    mailAdmins(user, 'removed');
+    mailAdmins({ username: username }, 'removed');
 }
 
 function adminChanged(user, isAdmin) {
