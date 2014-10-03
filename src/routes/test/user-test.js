@@ -255,11 +255,11 @@ describe('Server User API', function () {
     });
 
     it('remove second user by first, now normal, user fails', function (done) {
-        request.del(SERVER_URL + '/api/v1/users/' + USERNAME_0)
-               .query({ access_token: token_1 })
-               .send({ username: USERNAME_0, password: PASSWORD })
+        request.del(SERVER_URL + '/api/v1/users/' + USERNAME_1)
+               .query({ access_token: token })
+               .send({ username: USERNAME_1, password: PASSWORD })
                .end(function (err, res) {
-            expect(res.statusCode).to.equal(401);
+            expect(res.statusCode).to.equal(403);
             done(err);
         });
     });
@@ -401,7 +401,7 @@ describe('Server User API', function () {
                .query({ access_token: token })
                .send({ username: USERNAME_3, password: PASSWORD_3 })
                .end(function (err, res) {
-            expect(res.statusCode).to.equal(401);
+            expect(res.statusCode).to.equal(403);
             done(err);
         });
     });

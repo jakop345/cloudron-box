@@ -281,7 +281,7 @@ function removeUser(req, res, next) {
 
     // verify the admin via the provided password
     user.verify(req.user.username, password, function (error) {
-        if (error) return next(new HttpError(401, 'Username or password do not match'));
+        if (error) return next(new HttpError(403, 'Password incorrect'));
 
         user.remove(username, function (error) {
             if (error) {
