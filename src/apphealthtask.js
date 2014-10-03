@@ -2,6 +2,8 @@
 
 'use strict';
 
+require('supererror');
+
 var assert = require('assert'),
     database = require('./database.js'),
     DatabaseError = require('./databaseerror'),
