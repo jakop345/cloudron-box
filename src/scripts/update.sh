@@ -82,16 +82,6 @@ check "Done"
 # how to get log redirection to work
 chown -R yellowtent:yellowtent $BASEDIR
 
-info "Stop the box code..."
-OUT=`supervisorctl stop box`
-RESULT=`echo $OUT | grep ERROR`
-if [[ $RESULT != "" ]]; then
-    error "Failed to stop box"
-    error "$OUT"
-    exit 1;
-fi
-info "Done"
-
 info "Run release update script..."
 UPDATE_FILE="$BASEDIR/src/scripts/update/${VERSION}.sh"
 info "Release update script is $UPDATE_FILE"
