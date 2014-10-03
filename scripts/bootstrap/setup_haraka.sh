@@ -21,7 +21,7 @@ var config = fs.existsSync("$CLOUDRON_CONF")
     : { };
 config.mailServer = "$MAIL_SERVER";
 config.mailUsername = "admin@$DOMAIN_NAME";
-fs.writeFileSync("$CLOUDRON_CONF", JSON.stringify(data));
+fs.writeFileSync("$CLOUDRON_CONF", JSON.stringify(config));
 EOF
 
 sudo -u yellowtent node /tmp/script.js
