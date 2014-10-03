@@ -9,6 +9,7 @@ var userdb = require('./userdb.js'),
     assert = require('assert'),
     ursa = require('ursa'),
     safe = require('safetydance'),
+    mailer = require('./mailer.js'),
     database = require('./database');
 
 exports = module.exports = {
@@ -122,6 +123,8 @@ function createUser(username, password, email, admin, callback) {
                 }
 
                 callback(null, user);
+
+                mailer.userAdded(user);
             });
         });
     });
@@ -170,6 +173,8 @@ function removeUser(username, callback) {
     userdb.del(username, function (error, user) {
         if (error) return callback(error);
         callback(null, user);
+
+        mailer.userRemoved(user);
     });
 }
 
@@ -206,6 +211,8 @@ function changeAdmin(username, admin, callback) {
                 if (error) return callback(error);
 
                 callback(null);
+
+                mailer.adminChanged(user);
             });
         });
     });

@@ -5,7 +5,6 @@
 var clientdb = require('../clientdb.js'),
     tokendb = require('../tokendb.js'),
     DatabaseError = require('../databaseerror.js'),
-    mailer = require('../mailer.js'),
     user = require('../user.js'),
     UserError = user.UserError,
     debug = require('debug')('box:routes/user'),
@@ -88,8 +87,6 @@ function createAdmin(req, res, next) {
                     expires: expires,
                     userInfo: userInfo
                 });
-
-                mailer.adminAdded(userInfo);
             });
         });
     });
@@ -137,8 +134,6 @@ function createUser(req, res, next) {
         };
 
         next(new HttpSuccess(201, { userInfo: userInfo }));
-
-        mailer.userAdded(userInfo);
     });
 }
 
@@ -151,8 +146,6 @@ function changeAdmin(req, res, next) {
         if (error) return next(new HttpError(500, 'Unable to change admin flag'));
 
         next(new HttpSuccess(200, {}));
-
-        mailer.adminChanged(req.user, !!req.body.admin);
     });
 }
 
@@ -292,8 +285,6 @@ function removeUser(req, res, next) {
             }
 
             next(new HttpSuccess(200, {}));
-
-            mailer.userRemoved(req.user);
         });
     });
 }

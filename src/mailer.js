@@ -19,7 +19,6 @@ exports = module.exports = {
     initialize: initialize,
     uninitialize: uninitialize,
 
-    adminAdded: adminAdded,
     userAdded: userAdded,
     userRemoved: userRemoved,
     adminChanged: adminChanged
@@ -92,33 +91,19 @@ function render(templateFile, params) {
     return ejs.render(safe.fs.readFileSync(path.join(MAIL_TEMPLATES_DIR, templateFile), 'utf8'), params);
 }
 
-function adminAdded(user) {
-    debug('Sending mail for adminAdded');
-
-    var mailOptions = {
-        from: config.mailUsername,
-        to: user.email,
-        subject: 'Welcome to Cloudron',
-        text: render('welcome_text.ejs', user),
-        html: render('welcome_html.ejs', user)
-    };
-
-    enqueue(mailOptions);
-}
-
 function mailAdmins(user, event) {
     userdb.getAllAdmins(function (error, admins) {
         if (error) return console.log('Error getting admins', error);
 
         var adminEmails = [ ];
-        admins.forEach(function (admin) { adminEmails.push(admin.email); });
+        admins.forEach(function (admin) { if (user.email !== admin.email) adminEmails.push(admin.email); });
 
         mailOptions = {
             from: config.mailUsername,
             to: adminEmails.join(', '),
             subject: 'User ' + event,
             text: render('user_text.ejs', { username: user.username, event: event }),
-            html: render('user_html.ejs', { username: user.username,, event: event })
+            html: render('user_html.ejs', { username: user.username, event: event })
         };
 
         enqueue(mailOptions);
@@ -150,6 +135,6 @@ function userRemoved(user) {
 function adminChanged(user, isAdmin) {
     debug('Sending mail for adminChanged');
 
-    mailAdmins(user, isAdmin ? 'made an admin' : 'removed as admin';);
+    mailAdmins(user, user.admin ? 'made an admin' : 'removed as admin');
 }
 
