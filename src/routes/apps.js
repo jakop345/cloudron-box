@@ -202,7 +202,6 @@ function getLogStream(req, res, next) {
 
     function sse(id, data) { return 'id: ' + id + '\ndata: ' + data + '\n\n'; };
 
-    console.dir(req.headers);
     if (req.headers.accept !== 'text/event-stream') return next(new HttpError(400, 'This API call requires EventStream'));
 
     var fromLine = (parseInt(req.headers['last-event-id'], 10) + 1) || 1;
