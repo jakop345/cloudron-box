@@ -74,7 +74,7 @@ function processQueue() {
         transport.sendMail(mailOptions, function (error, info) {
             if (error) return console.error(error);
 
-            debug('Email sent to ' + user.email);
+            debug('Email sent to ' + mailOptions.to);
         });
         callback(null);
     }, function done() {
@@ -89,7 +89,7 @@ function enqueue(mailOptions) {
 }
 
 function render(templateFile, params) {
-    return ejs.render(safe.fs.readFileSync(path.join(MAIL_TEMPLATES_DIR, templateFile), params));
+    return ejs.render(safe.fs.readFileSync(path.join(MAIL_TEMPLATES_DIR, templateFile), 'utf8'), params);
 }
 
 function adminAdded(user) {
