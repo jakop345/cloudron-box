@@ -99,26 +99,14 @@ function adminAdded(user) {
         from: config.mailUsername,
         to: user.email,
         subject: 'Welcome to Cloudron',
-        text: render('welcome_text.ejs', { }),
-        html: render('welcome_html.ejs', { })
+        text: render('welcome_text.ejs', user),
+        html: render('welcome_html.ejs', user)
     };
 
     enqueue(mailOptions);
 }
 
-function userAdded(user) {
-    debug('Sending mail for userAdded');
-
-    var mailOptions = {
-        from: config.mailUsername,
-        to: user.email,
-        subject: 'Welcome to Cloudron',
-        text: render('welcome_text.ejs', { }),
-        html: render('welcome_html.ejs', { })
-    };
-
-    enqueue(mailOptions);
-
+function mailAdmins(user, event) {
     userdb.getAllAdmins(function (error, admins) {
         if (error) return console.log('Error getting admins', error);
 
@@ -128,20 +116,40 @@ function userAdded(user) {
         mailOptions = {
             from: config.mailUsername,
             to: adminEmails.join(', '),
-            subject: 'User added',
-            text: render('user_text.ejs', { event: 'added' }),
-            html: render('user_html.ejs', { event: 'added' })
+            subject: 'User ' + event,
+            text: render('user_text.ejs', { username: user.username, event: event }),
+            html: render('user_html.ejs', { username: user.username,, event: event })
         };
 
         enqueue(mailOptions);
     });
 }
 
-function userRemoved(user) {
-    debug('Sending mail for userRemoved');
+function userAdded(user) {
+    debug('Sending mail for userAdded');
+
+    var mailOptions = {
+        from: config.mailUsername,
+        to: user.email,
+        subject: 'Welcome to Cloudron',
+        text: render('welcome_text.ejs', user),
+        html: render('welcome_html.ejs', user)
+    };
+
+    enqueue(mailOptions);
+
+    mailAdmins(user, 'added');
 }
 
-function adminChanged(user) {
+function userRemoved(user) {
+    debug('Sending mail for userRemoved');
+
+    mailAdmins(user, 'removed');
+}
+
+function adminChanged(user, isAdmin) {
     debug('Sending mail for adminChanged');
+
+    mailAdmins(user, isAdmin ? 'made an admin' : 'removed as admin';);
 }
 

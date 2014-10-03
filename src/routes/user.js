@@ -152,7 +152,7 @@ function changeAdmin(req, res, next) {
 
         next(new HttpSuccess(200, {}));
 
-        mailer.adminChanged(req.user);
+        mailer.adminChanged(req.user, !!req.body.admin);
     });
 }
 

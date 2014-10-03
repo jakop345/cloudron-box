@@ -16,11 +16,11 @@ MAIL_SERVER=$(docker inspect --format="{{ .NetworkSettings.IPAddress }}" $CONTAI
 
 cat > /tmp/script.js <<EOF
 var fs = require('fs');
-var data = fs.existsSync("$CLOUDRON_CONF")
+var config = fs.existsSync("$CLOUDRON_CONF")
     ? JSON.parse(fs.readFileSync("$CLOUDRON_CONF", 'utf8'))
     : { };
-data.mailServer = "$MAIL_SERVER";
-data.mailUsername = "admin@$DOMAIN_NAME";
+config.mailServer = "$MAIL_SERVER";
+config.mailUsername = "admin@$DOMAIN_NAME";
 fs.writeFileSync("$CLOUDRON_CONF", JSON.stringify(data));
 EOF
 
