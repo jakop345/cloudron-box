@@ -10,6 +10,7 @@ var DatabaseError = require('./databaseerror'),
 exports = module.exports = {
     get: get,
     getByUsername: getByUsername,
+    getByEmail: getByEmail,
     getByAccessToken: getByAccessToken,
     getAll: getAll,
     getAllAdmins: getAllAdmins,
@@ -39,6 +40,18 @@ function getByUsername(username, callback) {
 
     // currently username is also our id
     get(username, callback);
+}
+
+function getByEmail(email, callback) {
+    assert(typeof email === 'string');
+    assert(typeof callback === 'function');
+
+    database.get('SELECT * FROM users WHERE email = ?', [ email ], function (error, result) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
+
+        callback(null, result);
+    });
 }
 
 function getAll(callback) {

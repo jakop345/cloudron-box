@@ -12,10 +12,12 @@ var oauth2orize = require('oauth2orize'),
     session = require('connect-ensure-login'),
     authcodedb = require('../authcodedb'),
     tokendb = require('../tokendb'),
+    userdb = require('../userdb'),
     DatabaseError = require('../databaseerror'),
     HttpError = require('../httperror.js'),
     HttpSuccess = require('../httpsuccess.js'),
     clientdb = require('../clientdb'),
+    mailer = require('../mailer.js'),
     debug = require('debug')('box:routes/oauth2'),
     config = require('../../config.js'),
     uuid = require('node-uuid');
@@ -124,8 +126,33 @@ function loginForm(req, res) {
     res.render('login', { csrf: req.csrfToken() });
 }
 
-function resetPasswordForm(req, res) {
+// Form to enter email address to send a password reset request mail
+function passwordResetSite(req, res) {
     res.render('resetpassword', { csrf: req.csrfToken() });
+}
+
+function passwordSentSite(req, res) {
+    res.render('resetpasswordsent', {})
+}
+
+// This route is used for above form submission
+function passwordResetRequest(req, res) {
+    if (!req.body || !req.body.email) return next(new HttpError(400, 'Missing email'));
+
+    debug('passwordResetRequest: email %s.', req.body.email);
+
+    userdb.getByEmail(req.body.email, function (error, result) {
+        if (!error) {
+            debug('passwordResetRequest: found user %s.', result.username);
+            mailer.passwordReset(result, token);
+        }
+
+        res.redirect('/api/v1/session/password/sent.html');
+    });
+}
+
+function passwordReset(req, res) {
+
 }
 
 // performs the login POST from the above form
@@ -304,7 +331,10 @@ exports = module.exports = {
     logout: logout,
     callback: callback,
     error: error,
-    resetPasswordForm: resetPasswordForm,
+    passwordResetSite: passwordResetSite,
+    passwordResetRequest: passwordResetRequest,
+    passwordReset: passwordReset,
+    passwordSentSite: passwordSentSite,
     authorization: authorization,
     decision: decision,
     token: token,

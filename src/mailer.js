@@ -21,7 +21,8 @@ exports = module.exports = {
 
     userAdded: userAdded,
     userRemoved: userRemoved,
-    adminChanged: adminChanged
+    adminChanged: adminChanged,
+    passwordReset: passwordReset
 };
 
 var MAIL_TEMPLATES_DIR = path.join(__dirname, 'mail_templates');
@@ -141,3 +142,18 @@ function adminChanged(user, isAdmin) {
     mailAdmins(user, user.admin ? 'made an admin' : 'removed as admin');
 }
 
+function passwordReset(user, token) {
+    debug('Sending mail for password reset for user %s.', user.username);
+
+    var resetLink = config.adminOrigin + '/api/v1/session/password/reset?reset_token='+token;
+
+    var mailOptions = {
+        from: config.mailUsername,
+        to: user.email,
+        subject: 'Password Reset Request',
+        text: render('password_reset_text.ejs', { username: user.username, resetLink: resetLink }),
+        html: render('password_reset_html.ejs', { username: user.username, resetLink: resetLink })
+    };
+
+    enqueue(mailOptions);
+}
