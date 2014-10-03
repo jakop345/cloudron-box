@@ -124,6 +124,10 @@ function loginForm(req, res) {
     res.render('login', { csrf: req.csrfToken() });
 }
 
+function resetPasswordForm(req, res) {
+    res.render('resetpassword', { csrf: req.csrfToken() });
+}
+
 // performs the login POST from the above form
 var login = passport.authenticate('local', {
     successReturnToOrRedirect: '/api/v1/session/error',
@@ -300,6 +304,7 @@ exports = module.exports = {
     logout: logout,
     callback: callback,
     error: error,
+    resetPasswordForm: resetPasswordForm,
     authorization: authorization,
     decision: decision,
     token: token,

@@ -1,11 +1,10 @@
 <% include header %>
 
 <div class="container">
-    <form action="/api/v1/session/login" method="post">
-        <div class="row">
-            <div class="col-md-3"></div>
-            <div class="col-md-6">
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
             <h1>Welcome to your Cloudron</h1>
+            <form action="/api/v1/session/login" method="post">
                 <input type="hidden" name="_csrf" value="<%= csrf %>"/>
                 <div class="form-group">
                     <label class="control-label" for="inputUsername">Username</label>
@@ -16,10 +15,10 @@
                     <input type="password" class="form-control" name="password" id="inputPassword" required>
                 </div>
                 <input class="btn btn-primary btn-outline pull-right" type="submit" value="Sign in"/>
-            </div>
-            <div class="col-md-3"></div>
+            </form>
+            <a href="/api/v1/session/resetpassword">Reset your password</a>
         </div>
-    </form>
+    </div>
 </div>
 
 <% include footer %>

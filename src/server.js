@@ -221,6 +221,7 @@ Server.prototype._initializeExpressSync = function () {
     router.get ('/api/v1/session/logout', routes.oauth2.logout);
     router.get ('/api/v1/session/callback', routes.oauth2.callback);
     router.get ('/api/v1/session/error', routes.oauth2.error);
+    router.get ('/api/v1/session/resetpassword', csurf, routes.oauth2.resetPasswordForm);
 
     // oauth2 routes
     router.get ('/api/v1/oauth/dialog/authorize', routes.oauth2.authorization);
