@@ -109,6 +109,7 @@ Updater.prototype.update = function (callback) {
     var command = 'sudo ' + path.join(__dirname, 'scripts/update.sh');
     command += ' ' + (isDev ? config.version : this._boxUpdateInfo.version);
     command += ' ' + (isDev ? 'origin/master' : this._boxUpdateInfo.revision);
+    command += ' ' + config.aws.accessKeyId + ' ' + config.aws.secretAccessKey + ' ' + config.aws.prefix + ' ' + config.aws.bucket;
 
     var options = {
         cwd: path.join(__dirname, '..')

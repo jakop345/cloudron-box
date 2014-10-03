@@ -10,13 +10,17 @@ if [ "$1" == "--check" ]; then
     exit 2
 fi
 
-if [[ "$#" != "2" ]]; then
-    echo "Usage: update.sh <version> <revision/tag/branch>"
+if [[ "$#" != "6" ]]; then
+    echo "Usage: update.sh <version> <revision/tag/branch> <S3 Key> <S3 Secret> <S3 Prefix> <S3 Bucket>"
     exit 1
 fi
 
 VERSION="$1"
 REVISION="$2"
+S3_KEY="$3"
+S3_SECRET="$4"
+S3_PREFIX="$5"
+S3_BUCKET="$6"
 
 cyan='\e[0;36m'
 green='\e[0;32m'
@@ -54,6 +58,9 @@ exec 2>&1
 
 info "Perform update in $BASEDIR"
 cd $BASEDIR;
+
+info "Perform backup first"
+./src/scripts/backup.sh S3_KEY S3_SECRET S3_PREFIX S3_BUCKET
 
 info "Fetch latest code..."
 git fetch
