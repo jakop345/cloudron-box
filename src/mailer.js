@@ -145,7 +145,7 @@ function adminChanged(user, isAdmin) {
 function passwordReset(user, token) {
     debug('Sending mail for password reset for user %s.', user.username);
 
-    var resetLink = config.adminOrigin + '/api/v1/session/password/reset?reset_token='+token;
+    var resetLink = config.adminOrigin + '/api/v1/session/password/reset.html?reset_token='+token;
 
     var mailOptions = {
         from: config.mailUsername,

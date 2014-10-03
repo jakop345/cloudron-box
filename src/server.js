@@ -221,10 +221,11 @@ Server.prototype._initializeExpressSync = function () {
     router.get ('/api/v1/session/logout', routes.oauth2.logout);
     router.get ('/api/v1/session/callback', routes.oauth2.callback);
     router.get ('/api/v1/session/error', routes.oauth2.error);
-    router.get ('/api/v1/session/password/reset.html', csurf, routes.oauth2.passwordResetSite);
-    router.get ('/api/v1/session/password/sent.html', routes.oauth2.passwordSentSite);
+    router.get ('/api/v1/session/password/resetRequest.html', csurf, routes.oauth2.passwordResetRequestSite);
     router.post('/api/v1/session/password/resetRequest', csurf, routes.oauth2.passwordResetRequest);
-    router.get ('/api/v1/session/password/reset', routes.oauth2.passwordReset);
+    router.get ('/api/v1/session/password/sent.html', routes.oauth2.passwordSentSite);
+    router.get ('/api/v1/session/password/reset.html', csurf, routes.oauth2.passwordResetSite);
+    router.post('/api/v1/session/password/reset', csurf, routes.oauth2.passwordReset);
 
     // oauth2 routes
     router.get ('/api/v1/oauth/dialog/authorize', routes.oauth2.authorization);

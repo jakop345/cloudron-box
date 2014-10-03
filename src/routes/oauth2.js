@@ -126,27 +126,24 @@ function loginForm(req, res) {
     res.render('login', { csrf: req.csrfToken() });
 }
 
-// Form to enter email address to send a password reset request mail
-function passwordResetSite(req, res) {
-    res.render('resetpassword', { csrf: req.csrfToken() });
-}
-
-function passwordSentSite(req, res) {
-    res.render('resetpasswordsent', {})
-}
-
+// In memory password reset token store
 var resetTokens = {};
 
+// Form to enter email address to send a password reset request mail
+function passwordResetRequestSite(req, res) {
+    res.render('password_reset_request', { csrf: req.csrfToken() });
+}
+
 // This route is used for above form submission
-function passwordResetRequest(req, res) {
+function passwordResetRequest(req, res, next) {
     if (!req.body || !req.body.email) return next(new HttpError(400, 'Missing email'));
 
     debug('passwordResetRequest: email %s.', req.body.email);
 
     userdb.getByEmail(req.body.email, function (error, result) {
         if (!error) {
-            debug('passwordResetRequest: found user %s.', result.username);
             resetTokens[result.id] = uuid.v4();
+            debug('passwordResetRequest: found user %s send reset token %s', result.username, resetTokens[result.id]);
             mailer.passwordReset(result, resetTokens[result.id]);
         }
 
@@ -154,7 +151,37 @@ function passwordResetRequest(req, res) {
     });
 }
 
-function passwordReset(req, res) {
+function passwordSentSite(req, res) {
+    debug('passwordSentSite');
+
+    res.render('password_reset_sent', {});
+}
+
+function passwordResetSite(req, res, next) {
+    if (!req.query.reset_token) return next(new HttpError(400, 'Missing reset_token'));
+
+    debug('passwordResetSite: with token %s.', req.query.reset_token);
+
+    function finish(key) {
+        userdb.get(key, function (error, result) {
+            if (error) return next(new HttpError(400, 'Unknown reset token'));
+
+            res.render('password_reset', { user: result, csrf: req.csrfToken() });
+        });
+    }
+
+    for (var key in resetTokens) {
+        if (resetTokens[key] === req.query.reset_token) return finish(key);
+    }
+
+    next(new HttpError(400, 'Unkown reset token'));
+}
+
+function passwordReset(req, res, next) {
+    if (!req.body.reset_token) return next(new HttpError(400, 'Missing reset_token'));
+
+    debug('passwordReset: with token %s.', req.query.reset_token);
+
 
 }
 
@@ -334,10 +361,11 @@ exports = module.exports = {
     logout: logout,
     callback: callback,
     error: error,
-    passwordResetSite: passwordResetSite,
+    passwordResetRequestSite: passwordResetRequestSite,
     passwordResetRequest: passwordResetRequest,
-    passwordReset: passwordReset,
     passwordSentSite: passwordSentSite,
+    passwordResetSite: passwordResetSite,
+    passwordReset: passwordReset,
     authorization: authorization,
     decision: decision,
     token: token,
