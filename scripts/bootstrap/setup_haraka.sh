@@ -12,7 +12,12 @@ CONTAINER_ID=$(docker run -d --name="haraka" \
     -e DOMAIN_NAME=$DOMAIN_NAME \
     -v $HARAKA_DIR:/app/data girish/haraka:0.1)
 
-MAIL_SERVER=$(docker inspect --format="{{ .NetworkSettings.IPAddress }}" $CONTAINER_ID)
+# Every docker restart results in a new IP. Give our mail server a
+# static IP. Alternately, we need to link the mail container with
+# all our apps
+MAIL_SERVER="172.17.120.120"
+HARAKA_PID=(docker inspect --format="{{ .State.Pid }}" $CONTAINER_ID)
+nsenter -t $HARAKA_PID -n ip addr add $MAIL_SERVER/16 dev eth0
 
 cat > /tmp/script.js <<EOF
 var fs = require('fs');
