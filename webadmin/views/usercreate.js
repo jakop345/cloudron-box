@@ -8,7 +8,7 @@ function UserCreateController ($scope, $routeParams, Client) {
     $scope.username = '';
     $scope.password = '';
     $scope.passwordRepeat = '';
-    $scope.email = 'xx@xx.xx';
+    $scope.email = '';
     $scope.alreadyTaken = '';
 
     $scope.submit = function () {
