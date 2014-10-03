@@ -12,8 +12,7 @@ var HttpError = require('../httperror.js'),
     CloudronError = cloudron.CloudronError,
     config = require('../../config.js'),
     exec = require('child_process').exec,
-    _ = require('underscore'),
-    backups = require('../backups.js');
+    _ = require('underscore');
 
 var REBOOT_CMD = 'sudo ' + path.join(__dirname, '../scripts/reboot.sh');
 
@@ -57,7 +56,7 @@ function reboot(req, res, next) {
 };
 
 function createBackup(req, res, next) {
-    backups.createBackup();
+    cloudron.backup();
 
     next(new HttpSuccess(200, {}));
 }

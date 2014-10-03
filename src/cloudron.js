@@ -2,8 +2,7 @@
 
 'use strict';
 
-var backups = require('./backups.js'),
-    debug = require('debug')('box:cloudron'),
+var debug = require('debug')('box:cloudron'),
     config = require('../config.js'),
     os = require('os'),
     Updater = require('./updater.js'),
@@ -25,6 +24,7 @@ exports = module.exports = {
     uninitialize: uninitialize,
     getConfig: getConfig,
     update: update,
+    backup: backup,
     restore: restore,
     provision: provision,
 
@@ -35,7 +35,8 @@ exports = module.exports = {
 };
 
 var RESTORE_CMD = 'sudo ' + path.join(__dirname, 'scripts/restore.sh'),
-    RELOAD_NGINX_CMD = 'sudo ' + path.join(__dirname, 'scripts/reloadnginx.sh');
+    RELOAD_NGINX_CMD = 'sudo ' + path.join(__dirname, 'scripts/reloadnginx.sh'),
+    BACKUP_CMD = 'sudo ' + __dirname + '/scripts/backup.sh';
 
 var backupTimerId = null,
     announceTimerId = null,
@@ -57,7 +58,7 @@ CloudronError.ALREADY_PROVISIONED = 2;
 
 function initialize() {
     // every backup restarts the box. the setInterval is only needed should that fail for some reason
-    backupTimerId = setInterval(backups.createBackup, 4 * 60 * 60 * 1000);
+    backupTimerId = setInterval(backup, 4 * 60 * 60 * 1000);
 
     sendHeartBeat();
     announce();
@@ -91,6 +92,18 @@ function update(callback) {
     updater.update(function (error) {
         if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error.message));
         return callback(null);
+    });
+}
+
+function backup() {
+    debug('Starting backup script');
+
+    if (!config.aws) return console.error('No aws credentials provided, skip backup script');
+
+    var args = config.aws.accessKeyId + ' ' + config.aws.secretAccessKey + ' ' + config.aws.prefix + ' ' + config.aws.bucket;
+
+    exec(BACKUP_CMD + ' ' + args, function (error) {
+        if (error) console.error('Error starting backup command', error);
     });
 }
 
