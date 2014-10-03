@@ -135,6 +135,8 @@ function passwordSentSite(req, res) {
     res.render('resetpasswordsent', {})
 }
 
+var resetTokens = {};
+
 // This route is used for above form submission
 function passwordResetRequest(req, res) {
     if (!req.body || !req.body.email) return next(new HttpError(400, 'Missing email'));
@@ -144,7 +146,8 @@ function passwordResetRequest(req, res) {
     userdb.getByEmail(req.body.email, function (error, result) {
         if (!error) {
             debug('passwordResetRequest: found user %s.', result.username);
-            mailer.passwordReset(result, token);
+            resetTokens[result.id] = uuid.v4();
+            mailer.passwordReset(result, resetTokens[result.id]);
         }
 
         res.redirect('/api/v1/session/password/sent.html');
