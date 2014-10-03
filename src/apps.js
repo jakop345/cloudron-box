@@ -47,7 +47,6 @@ var tasks = { },
 
 function initialize() {
     if (process.env.NODE_ENV === 'test') {
-        console.log('Docker requests redirected to 5687 in test environment');
         docker = new Docker({ host: 'http://localhost', port: 5687 });
     } else if (os.platform() === 'linux') {
         docker = new Docker({socketPath: '/var/run/docker.sock'});
