@@ -30,7 +30,10 @@ var AppStoreController = function ($scope, $location, Client, AppStore) {
                 for (var app in apps) {
                     var found = false;
                     for (var i = 0; i < $scope.apps.length; ++i) {
-                        if (apps[app].id === $scope.apps[i].id) found = true;
+                        if (apps[app].id === $scope.apps[i].id) {
+                            found = true;
+                            break;
+                        }
                     }
 
                     if (!found) $scope.apps.push(apps[app]);
