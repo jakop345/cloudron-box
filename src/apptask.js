@@ -256,6 +256,7 @@ function deleteImage(app, callback) {
 
     image.remove(removeOptions, function (error) {
         if (error && error.statusCode === 404) return callback(null);
+        if (error && error.statusCode === 409) return callback(null); // another container using the image
 
         if (error) console.error('Error removing image', error);
         callback(error);
