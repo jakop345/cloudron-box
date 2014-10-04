@@ -191,7 +191,7 @@ function passwordReset(req, res, next) {
         user.resetPassword(userId, req.body.password, function (error) {
             if (error) return next(new HttpError(400, 'Unknown reset token'));
 
-            res.redirect('/api/v1/session/login');
+            res.redirect(config.adminOrigin);
         });
     }
 
