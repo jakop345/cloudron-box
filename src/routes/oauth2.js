@@ -13,6 +13,7 @@ var oauth2orize = require('oauth2orize'),
     authcodedb = require('../authcodedb'),
     tokendb = require('../tokendb'),
     userdb = require('../userdb'),
+    user = require('../user.js'),
     DatabaseError = require('../databaseerror'),
     HttpError = require('../httperror.js'),
     HttpSuccess = require('../httpsuccess.js'),
@@ -166,7 +167,7 @@ function passwordResetSite(req, res, next) {
         userdb.get(key, function (error, result) {
             if (error) return next(new HttpError(400, 'Unknown reset token'));
 
-            res.render('password_reset', { user: result, csrf: req.csrfToken() });
+            res.render('password_reset', { user: result, csrf: req.csrfToken(), resetToken: req.query.reset_token });
         });
     }
 
@@ -174,15 +175,31 @@ function passwordResetSite(req, res, next) {
         if (resetTokens[key] === req.query.reset_token) return finish(key);
     }
 
-    next(new HttpError(400, 'Unkown reset token'));
+    next(new HttpError(400, 'Unkown reset_token'));
 }
 
 function passwordReset(req, res, next) {
-    if (!req.body.reset_token) return next(new HttpError(400, 'Missing reset_token'));
+    if (!req.body.resetToken) return next(new HttpError(400, 'Missing resetToken'));
+    if (!req.body.password) return next(new HttpError(400, 'Missing password'));
+    if (!req.body.passwordRepeat) return next(new HttpError(400, 'Missing passwordRepeat'));
 
-    debug('passwordReset: with token %s.', req.query.reset_token);
+    debug('passwordReset: with token %s.', req.body.resetToken);
 
+    if (req.body.password !== req.body.passwordRepeat) return next(new HttpError(400, 'Passwords don\'t match'));
 
+    function finish(userId) {
+        user.resetPassword(userId, req.body.password, function (error) {
+            if (error) return next(new HttpError(400, 'Unknown reset token'));
+
+            res.redirect('/api/v1/session/login');
+        });
+    }
+
+    for (var userId in resetTokens) {
+        if (resetTokens[userId] === req.body.resetToken) return finish(userId);
+    }
+
+    next(new HttpError(400, 'Unkown resetToken'));
 }
 
 // performs the login POST from the above form

@@ -1,3 +1,5 @@
+/* jshint node:true */
+
 'use strict';
 
 var userdb = require('./userdb.js'),
@@ -21,6 +23,7 @@ exports = module.exports = {
     remove: removeUser,
     get: getUser,
     changeAdmin: changeAdmin,
+    resetPassword: resetPassword,
     changePassword: changePassword,
     update: updateUser,
     clear: clear
@@ -213,6 +216,42 @@ function changeAdmin(username, admin, callback) {
                 callback(null);
 
                 mailer.adminChanged(user);
+            });
+        });
+    });
+}
+
+// TODO this will break all encrypted volumes!!
+function resetPassword(userId, newPassword, callback) {
+    ensureArgs(arguments, ['string', 'string', 'function']);
+
+    if (newPassword.length === 0) {
+        debug('Empty passwords are not allowed.');
+        return callback(new UserError('No empty passwords allowed', UserError.INTERNAL_ERROR));
+    }
+
+    userdb.get(userId, function (error, user) {
+        if (error) return callback(error);
+
+        var saltBuffer = new Buffer(user._salt, 'hex');
+        crypto.pbkdf2(newPassword, saltBuffer, CRYPTO_ITERATIONS, CRYPTO_KEY_LENGTH, function (error, derivedKey) {
+            if (error) {
+                return callback(new UserError('Failed to hash password', UserError.INTERNAL_ERROR));
+            }
+
+            // var privateKeyPem = aes.decrypt(user._privatePemCipher, oldPassword, saltBuffer);
+            // var keyPair = ursa.createPrivateKey(privateKeyPem, oldPassword, 'utf8');
+            var keyPair = ursa.generatePrivateKey(2048 /* modulusBits */, 65537 /* exponent */);
+
+            user.modifiedAt = (new Date()).toUTCString();
+            user._password = new Buffer(derivedKey, 'binary').toString('hex');
+            user._privatePemCipher = aes.encrypt(keyPair.toPrivatePem(), newPassword, saltBuffer);
+
+            userdb.update(userId, user, function (error) {
+                if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError('User does not exist', UserError.NOT_FOUND));
+                if (error) return callback(error);
+
+                callback(null);
             });
         });
     });
