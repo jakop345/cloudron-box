@@ -17,7 +17,7 @@ set -e
 
 NOW=$(date +%Y-%m-%dT%H:%M:%S)
 LOG=/var/log/cloudron/backup-${NOW}.log
-# exec 2>&1 1> $LOG
+exec 2>&1 1> $LOG
 
 if [ $# -lt 4 ]; then
     echo "Usage: backup.sh <S3 Key> <S3 Secret> <S3 Prefix> <S3 Bucket> [restart_box_code_flag]"
