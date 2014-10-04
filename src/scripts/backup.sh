@@ -59,6 +59,8 @@ curl -X PUT -T "/tmp/${FILE}" \
 rm /tmp/${FILE}
 
 echo "Starting all containers"
+MAIL_SERVER="172.17.120.120"
+arp -d $MAIL_SERVER
 docker start $CONTAINER_IDS
 
 # skip restarting the box code if a 5th argument is provided, this is for the update case
