@@ -120,7 +120,7 @@ function userAdded(user, password) {
     var templateData = {
         user: user,
         password: password,
-        loginUrl: config.adminOrigin + '/api/v1/session/login'
+        webadminUrl: config.adminOrigin
     };
 
     var mailOptions = {
@@ -142,7 +142,7 @@ function userRemoved(username) {
     mailAdmins({ username: username }, 'removed');
 }
 
-function adminChanged(user, isAdmin) {
+function adminChanged(user) {
     debug('Sending mail for adminChanged');
 
     mailAdmins(user, user.admin ? 'made an admin' : 'removed as admin');
