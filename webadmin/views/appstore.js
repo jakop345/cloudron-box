@@ -41,7 +41,7 @@ var AppStoreController = function ($scope, $location, Client, AppStore) {
 
                 $scope.apps.forEach(function (app, index) {
                     if (Client._installedApps) app.installed = Client._installedApps.some(function (a) { return a.appStoreId === app.id; });
-                    if (!apps[app.id]) $scope.splice(index, 1);
+                    if (!apps[app.id]) $scope.apps.splice(index, 1);
                 });
 
                 $scope.loadStatus = $scope.LOADED;
