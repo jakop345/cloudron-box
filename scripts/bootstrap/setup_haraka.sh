@@ -6,7 +6,7 @@ CLOUDRON_CONF="/home/yellowtent/.yellowtent/cloudron.conf"
 DOMAIN_NAME=`hostname -f`
 HARAKA_DIR="/home/yellowtent/.yellowtent/haraka"
 
-CONTAINER_ID=$(docker run -d --name="haraka" \
+CONTAINER_ID=$(docker run -d --name="haraka" --cap-add="NET_ADMIN"\
     -p 127.0.0.1:25:25 \
     -h $DOMAIN_NAME \
     -e DOMAIN_NAME=$DOMAIN_NAME \
