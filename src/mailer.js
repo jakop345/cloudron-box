@@ -114,15 +114,15 @@ function mailAdmins(user, event) {
     });
 }
 
-function userAdded(user) {
+function userAdded(user, password) {
     debug('Sending mail for userAdded');
 
     var mailOptions = {
         from: config.mailUsername,
         to: user.email,
         subject: 'Welcome to Cloudron',
-        text: render('welcome_text.ejs', user),
-        html: render('welcome_html.ejs', user)
+        text: render('welcome_text.ejs', { user: user, password: password }),
+        html: render('welcome_html.ejs', { user: user, password: password })
     };
 
     enqueue(mailOptions);

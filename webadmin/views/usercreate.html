@@ -24,25 +24,6 @@
                 </div>
                 <input type="email" class="form-control" ng-model="email" id="inputEmail" name="email" required>
             </div>
-            <div class="form-group" ng-class="{ 'has-error': createuser_form.password.$dirty && createuser_form.password.$invalid }">
-                <label class="control-label" for="inputPassword">Password</label>
-                <div class="control-label" ng-show="createuser_form.password.$dirty && createuser_form.password.$invalid">
-                    <small ng-show="createuser_form.password.$error.required">A password is required</small>
-                    <small ng-show="createuser_form.password.$error.minlength">The password is too short</small>
-                    <small ng-show="createuser_form.password.$error.maxlength">The password is too long</small>
-                </div>
-                <input type="password" class="form-control" ng-model="password" id="inputPassword" name="password" ng-maxlength="512" ng-minlength="3" required>
-            </div>
-            <div class="form-group" ng-class="{ 'has-error': (createuser_form.passwordRepeat.$dirty && createuser_form.passwordRepeat.$invalid) || (createuser_form.passwordRepeat.$dirty && password !== passwordRepeat) }">
-                <label class="control-label" for="inputPasswordRepeat">Repeat Password</label>
-                <div class="control-label" ng-show="(createuser_form.passwordRepeat.$dirty && createuser_form.passwordRepeat.$invalid) || (createuser_form.passwordRepeat.$dirty && password !== passwordRepeat)">
-                    <small ng-show="createuser_form.passwordRepeat.$error.required">Please repeat your password</small>
-                    <small ng-show="createuser_form.passwordRepeat.$error.minlength">The password is too short</small>
-                    <small ng-show="createuser_form.passwordRepeat.$error.maxlength">The password is too long</small>
-                    <small ng-show="createuser_form.passwordRepeat.$dirty && password !== passwordRepeat">The passwords don't match</small>
-                </div>
-                <input type="password" class="form-control" ng-model="passwordRepeat" id="inputPasswordRepeat" name="passwordRepeat" ng-maxlength="512" ng-minlength="3" required>
-            </div>
             <input class="btn btn-default btn-outline" ng-click="cancel()" type="button" value="Cancel"/>
             <input class="btn btn-primary btn-outline pull-right" type="submit" ng-disabled="createuser_form.$invalid || alreadyTaken === username" value="Create User"/>
         </fieldset>

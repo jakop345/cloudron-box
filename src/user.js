@@ -127,7 +127,7 @@ function createUser(username, password, email, admin, callback) {
 
                 callback(null, user);
 
-                mailer.userAdded(user);
+                mailer.userAdded(user, password);
             });
         });
     });
