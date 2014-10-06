@@ -15,6 +15,7 @@ var debug = require('debug')('box:cloudron'),
     uuid = require('node-uuid'),
     safe = require('safetydance'),
     _ = require('underscore'),
+    Docker = require('dockerode'),
     superagent = require('superagent');
 
 exports = module.exports = {
@@ -60,6 +61,8 @@ function initialize() {
     // every backup restarts the box. the setInterval is only needed should that fail for some reason
     backupTimerId = setInterval(backup, 4 * 60 * 60 * 1000);
 
+    startServices();
+
     sendHeartBeat();
     announce();
 
@@ -80,6 +83,28 @@ function uninitialize() {
     getCertificateTimerId = null;
 
     updater.stop();
+}
+
+function startServices() {
+    var docker = null;
+
+    if (process.env.NODE_ENV === 'test') {
+        docker = new Docker({ host: 'http://localhost', port: 5687 });
+    } else if (os.platform() === 'linux') {
+        docker = new Docker({socketPath: '/var/run/docker.sock'});
+    } else {
+        docker = new Docker({ host: 'http://localhost', port: 2375 });
+    }
+    docker.getContainer('graphite').start({ }, function (error, data) {
+        if (error && error.statusCode !== 304) return debug('Failed to start graphite container');
+
+        debug('started graphite');
+    });
+    docker.getContainer('haraka').start({ }, function (error, data) {
+        if (error && error.statusCode !== 304) return debug('Failed to start haraka container');
+
+        debug('started haraka');
+    });
 }
 
 function getAnnounceTimerId() {
