@@ -43,6 +43,7 @@ var backupTimerId = null,
     announceTimerId = null,
     addMailDnsRecordsTimerId = null,
     getCertificateTimerId = null,
+    cachedIp = null,
     updater = new Updater(); // TODO: make this not an object
 
 function CloudronError(reason, info) {
@@ -81,6 +82,8 @@ function uninitialize() {
 
     clearTimeout(getCertificateTimerId);
     getCertificateTimerId = null;
+
+    cachedIp = null;
 
     updater.stop();
 }
@@ -162,12 +165,17 @@ function restore(body, callback) {
 }
 
 function getIp() {
+    if (cachedIp) return cachedIp;
+
     var ifaces = os.networkInterfaces();
     for (var dev in ifaces) {
         if (dev.match(/^(en|eth|wlp).*/) === null) continue;
 
         for (var i = 0; i < ifaces[dev].length; i++) {
-            if (ifaces[dev][i].family === 'IPv4') return ifaces[dev][i].address;
+            if (ifaces[dev][i].family === 'IPv4') {
+                cachedIp = ifaces[dev][i].address;
+                return cachedIp;
+            }
         }
     }
 
