@@ -17,9 +17,10 @@ var GraphsController = function ($scope, Client) {
     var diskUsageAppsUsedTarget = 'transformNull(collectd.localhost.df-loop0.df_complex-used, 0)';
     var diskUsageDataUsedTarget = 'transformNull(collectd.localhost.df-loop1.df_complex-used, 0)';
 
-    function renderCpu(datapoints) {
-        if (!datapoints) return;
-        var transformedCpu = datapoints.map(function (point) { return { y: point[0], x: point[1] } });
+    function renderCpu(activeTab, cpuData) {
+        if (!cpuData || !cpuData.datapoints) return;
+
+        var transformedCpu = cpuData.datapoints.map(function (point) { return { y: point[0], x: point[1] } });
 
         var cpuGraph = new Rickshaw.Graph({
             element: document.querySelector('#' + activeTab + 'CpuChart'),
@@ -55,11 +56,11 @@ var GraphsController = function ($scope, Client) {
         cpuGraph.render();
     }
 
-    function renderNetwork(txDatapoints, rxDatapoints) {
+    function renderNetwork(activeTab, txData, rxData) {
         var transformedTx = null, transformedRx = null;
 
-        if (txDatapoints) transformedTx = txDatapoints.map(function (point) { return { y: point[0], x: point[1] } });
-        if (rxDatapoints) transformedRx = rxDatapoints.map(function (point) { return { y: point[0], x: point[1] } });
+        if (txData && txData.datapoints) transformedTx = txData.datapoints.map(function (point) { return { y: point[0], x: point[1] } });
+        if (rxData && rxData.datapoints) transformedRx = rxData.datapoints.map(function (point) { return { y: point[0], x: point[1] } });
 
         var networkGraph = new Rickshaw.Graph({
             element: document.querySelector('#' + activeTab + 'NetworkChart'),
@@ -97,11 +98,16 @@ var GraphsController = function ($scope, Client) {
         networkGraph.render();
     }
 
-    function renderDisk(appsUsedDatapoints, dataUsedDatapoints) {
+    function renderDisk(activeTab, appsUsedData, dataUsedData) {
         var transformedAppsUsed = null, transformedDataUsed = null;
 
-        if (appsUsedDataPoints) transformedAppsUsed = appsUsedDatapoints.map(function (point) { return { y: point[0], x: point[1] } });
-        if (dataUsedDataPoints) transformedDataUsed = dataUsedDatapoints.map(function (point) { return { y: point[0], x: point[1] } });
+        if (appsUsedData && appsUsedData.datapoints) {
+            transformedAppsUsed = appsUsedData.datapoints.map(function (point) { return { y: point[0], x: point[1] }; });
+        }
+
+        if (dataUsedData && dataUsedData.datapoints) {
+            transformedDataUsed = dataUsedData.datapoints.map(function (point) { return { y: point[0], x: point[1] }; });
+        }
  
         var diskGraph = new Rickshaw.Graph({
             element: document.querySelector('#' + activeTab + 'DiskChart'),
@@ -159,11 +165,11 @@ var GraphsController = function ($scope, Client) {
         Client.graphs([ cpuUsageTarget, networkUsageTxTarget, networkUsageRxTarget, diskUsageAppsUsedTarget, diskUsageDataUsedTarget ], from, function (error, data) {
             if (error) return console.log(error);
 
-            if (data[0]) renderCpu(data[0].datapoints);
+            renderCpu(activeTab, data[0]);
 
-            if (data[1] || data[2]) renderNetwork(data[1] ? data[1].datapoints : null, data[2] ? data[2].datapoints : null);
+            renderNetwork(activeTab, data[1], data[2]);
 
-            if (data[3] || data[4]) renderDisk(data[3] ? data[3].datapoints : null, data[4] ? data[4].datapoints : null);
+            renderDisk(activeTab, data[3], data[4]);
         });
     };
 
