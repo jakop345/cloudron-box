@@ -11,11 +11,13 @@ exports = module.exports = {
 };
 
 function checkPtrRecord(ip, fqdn, callback) {
-    assert(typeof ip === 'string');
+    assert(ip === null || typeof ip === 'string');
     assert(typeof fqdn === 'string');
     assert(typeof callback === 'function');
 
     debug('checkPtrRecord: ' + ip);
+
+    if (!ip) return callback(new Error('Network down'));
 
     dns.resolve4('ns1.digitalocean.com', function (error, rdnsIps) {
         if (error || rdnsIps.length === 0) return callback(new Error('Failed to query DO DNS'));
