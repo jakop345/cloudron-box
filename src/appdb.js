@@ -48,6 +48,8 @@ var APPS_FIELDS = [ 'id', 'appStoreId', 'version', 'installationState', 'install
 var APPS_FIELDS_PREFIXED = [ 'apps.id', 'apps.appStoreId', 'apps.version', 'apps.installationState', 'apps.installationProgress', 'apps.runState',
     'apps.healthy', 'apps.containerId', 'apps.manifestJson', 'apps.httpPort', 'apps.location', 'apps.dnsRecordId' ].join(',');
 
+var PORT_BINDINGS_FIELDS = [ 'hostPort', 'containerPort', 'appId' ].join(',');
+
 function postProcess(result) {
     assert(result.manifestJson === null || typeof result.manifestJson === 'string');
 
@@ -169,7 +171,7 @@ function getPortBindings(id, callback) {
     assert(typeof id === 'string');
     assert(typeof callback === 'function');
 
-    database.all('SELECT * FROM appPortBindings WHERE appId = ?', [ id ], function (error, results) {
+    database.all('SELECT ' + PORT_BINDINGS_FIELDS + ' FROM appPortBindings WHERE appId = ?', [ id ], function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         results = results || [ ];
