@@ -18,9 +18,9 @@ var GraphsController = function ($scope, Client) {
     var diskUsageDataUsedTarget = 'transformNull(collectd.localhost.df-loop1.df_complex-used, 0)';
 
     function renderCpu(activeTab, cpuData) {
-        if (!cpuData || !cpuData.datapoints) return;
+        var transformedCpu = null;
 
-        var transformedCpu = cpuData.datapoints.map(function (point) { return { y: point[0], x: point[1] } });
+        if (cpuData && cpuData.datapoints) transformedCpu = cpuData.datapoints.map(function (point) { return { y: point[0], x: point[1] } });
 
         var cpuGraph = new Rickshaw.Graph({
             element: document.querySelector('#' + activeTab + 'CpuChart'),
