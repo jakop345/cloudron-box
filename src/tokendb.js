@@ -19,6 +19,8 @@ exports = module.exports = {
     delByUserIdAndClientId: delByUserIdAndClientId
 };
 
+var TOKENS_FIELDS = [ 'accessToken', 'userId', 'clientId', 'scope', 'expires' ].join(',');
+
 function generateToken() {
     return uuid.v4();
 }
@@ -27,7 +29,7 @@ function get(accessToken, callback) {
     assert(typeof accessToken === 'string');
     assert(typeof callback === 'function');
 
-    database.get('SELECT * FROM tokens WHERE accessToken = ?', [ accessToken ], function (error, result) {
+    database.get('SELECT ' + TOKENS_FIELDS + ' FROM tokens WHERE accessToken = ?', [ accessToken ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
@@ -69,7 +71,7 @@ function getByUserId(userId, callback) {
     assert(typeof userId === 'string');
     assert(typeof callback === 'function');
 
-    database.all('SELECT * FROM tokens WHERE userId = ?', [ userId ], function (error, results) {
+    database.all('SELECT ' + TOKENS_FIELDS + ' FROM tokens WHERE userId = ?', [ userId ], function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (typeof results === 'undefined') results = [];
 
@@ -94,7 +96,7 @@ function getByUserIdAndClientId(userId, clientId, callback) {
     assert(typeof clientId === 'string');
     assert(typeof callback === 'function');
 
-    database.all('SELECT * FROM tokens WHERE userId=? AND clientId=?', [ userId, clientId ], function (error, results) {
+    database.all('SELECT ' + TOKENS_FIELDS + ' FROM tokens WHERE userId=? AND clientId=?', [ userId, clientId ], function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (typeof results === 'undefined') results = [];
 

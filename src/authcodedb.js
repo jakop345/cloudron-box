@@ -13,11 +13,13 @@ exports = module.exports = {
     del: del
 };
 
+var AUTHCODES_FIELDS = [ 'authCode', 'redirectURI', 'userId', 'clientId', 'scope' ].join(',');
+
 function get(authCode, callback) {
     assert(typeof authCode === 'string');
     assert(typeof callback === 'function');
 
-    database.get('SELECT * FROM authcodes WHERE authCode = ?', [ authCode ], function (error, result) {
+    database.get('SELECT ' + AUTHCODES_FIELDS + ' FROM authcodes WHERE authCode = ?', [ authCode ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));

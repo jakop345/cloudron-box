@@ -21,11 +21,13 @@ exports = module.exports = {
     count: count
 };
 
+var USERS_FIELDS = [ 'id', 'username', 'email', '_password', 'publicPem', '_privatePemCipher', '_salt', 'createdAt', 'modifiedAt', 'admin' ].join(',');
+
 function get(userId, callback) {
     assert(typeof userId === 'string');
     assert(typeof callback === 'function');
 
-    database.get('SELECT * FROM users WHERE id = ?', [ userId ], function (error, result) {
+    database.get('SELECT ' + USERS_FIELDS + ' FROM users WHERE id = ?', [ userId ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
@@ -46,7 +48,7 @@ function getByEmail(email, callback) {
     assert(typeof email === 'string');
     assert(typeof callback === 'function');
 
-    database.get('SELECT * FROM users WHERE email = ?', [ email ], function (error, result) {
+    database.get('SELECT ' + USERS_FIELDS + ' FROM users WHERE email = ?', [ email ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
@@ -57,7 +59,7 @@ function getByEmail(email, callback) {
 function getAll(callback) {
     assert(typeof callback === 'function');
 
-    database.all('SELECT * FROM users', function (error, result) {
+    database.all('SELECT ' + USERS_FIELDS + ' FROM users', function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         callback(null, result);
@@ -67,7 +69,7 @@ function getAll(callback) {
 function getAllAdmins(callback) {
     assert(typeof callback === 'function');
 
-    database.all('SELECT * FROM users WHERE admin=1', function (error, result) {
+    database.all('SELECT ' + USERS_FIELDS + ' FROM users WHERE admin=1', function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         callback(null, result);
@@ -117,7 +119,7 @@ function getByAccessToken(accessToken, callback) {
 
     debug('getByAccessToken: ' +  accessToken);
 
-    database.get('SELECT * FROM users, tokens WHERE tokens.accessToken = ?', [ accessToken ], function (error, result) {
+    database.get('SELECT ' + USERS_FIELDS + ' FROM users, tokens WHERE tokens.accessToken = ?', [ accessToken ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));

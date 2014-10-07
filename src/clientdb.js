@@ -18,11 +18,14 @@ exports = module.exports = {
     delByAppId: delByAppId
 };
 
+var CLIENTS_FIELDS = [ 'id', 'appId', 'clientId', 'clientSecret', 'name', 'redirectURI' ].join(',');
+var CLIENTS_FIELDS_PREFIXED = [ 'clients.id', 'clients.appId', 'clients.clientId', 'clients.clientSecret', 'clients.name', 'clients.redirectURI' ].join(',');
+
 function get(id, callback) {
     assert(typeof id === 'string');
     assert(typeof callback === 'function');
 
-    database.get('SELECT * FROM clients WHERE id = ?', [ id ], function (error, result) {
+    database.get('SELECT ' + CLIENTS_FIELDS + ' FROM clients WHERE id = ?', [ id ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
@@ -33,7 +36,7 @@ function get(id, callback) {
 function getAll(callback) {
     assert(typeof callback === 'function');
 
-    database.all('SELECT * FROM clients', [ ], function (error, results) {
+    database.all('SELECT ' + CLIENTS_FIELDS + ' FROM clients', [ ], function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (typeof results === 'undefined') results = [];
 
@@ -45,7 +48,7 @@ function getAllWithDetails(callback) {
     assert(typeof callback === 'function');
 
     // TODO should this be per user?
-    database.all('SELECT clients.*,tokens.scope,COUNT(tokens.clientId) AS tokenCount FROM clients LEFT OUTER JOIN tokens ON clients.id=tokens.clientId GROUP BY clients.id', [], function (error, results) {
+    database.all('SELECT ' + CLIENTS_FIELDS_PREFIXED + ',tokens.scope,COUNT(tokens.clientId) AS tokenCount FROM clients LEFT OUTER JOIN tokens ON clients.id=tokens.clientId GROUP BY clients.id', [], function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (typeof results === 'undefined') results = [];
 
@@ -57,7 +60,7 @@ function getByClientId(clientId, callback) {
     assert(typeof clientId === 'string');
     assert(typeof callback === 'function');
 
-    database.get('SELECT * FROM clients WHERE clientId = ? LIMIT 1', [ clientId ], function (error, result) {
+    database.get('SELECT ' + CLIENTS_FIELDS + ' FROM clients WHERE clientId = ? LIMIT 1', [ clientId ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
@@ -69,7 +72,7 @@ function getByAppId(appId, callback) {
     assert(typeof appId === 'string');
     assert(typeof callback === 'function');
 
-    database.get('SELECT * FROM clients WHERE appId = ? LIMIT 1', [ appId ], function (error, result) {
+    database.get('SELECT ' + CLIENTS_FIELDS + ' FROM clients WHERE appId = ? LIMIT 1', [ appId ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
