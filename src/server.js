@@ -327,7 +327,7 @@ Server.prototype.start = function (callback) {
         mailer.initialize();
 
         that.httpServer = http.createServer(that.app);
-        that.httpServer.listen(config.port, callback);
+        that.httpServer.listen(config.port, '127.0.0.1', callback);
     });
 };
 
