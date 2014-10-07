@@ -18,7 +18,7 @@ var GraphsController = function ($scope, Client) {
     var diskUsageDataUsedTarget = 'transformNull(collectd.localhost.df-loop1.df_complex-used, 0)';
 
     function renderCpu(activeTab, cpuData) {
-        var transformedCpu = null;
+        var transformedCpu = [ ];
 
         if (cpuData && cpuData.datapoints) transformedCpu = cpuData.datapoints.map(function (point) { return { y: point[0], x: point[1] } });
 
@@ -57,7 +57,7 @@ var GraphsController = function ($scope, Client) {
     }
 
     function renderNetwork(activeTab, txData, rxData) {
-        var transformedTx = null, transformedRx = null;
+        var transformedTx = [ ], transformedRx = [ ];
 
         if (txData && txData.datapoints) transformedTx = txData.datapoints.map(function (point) { return { y: point[0], x: point[1] } });
         if (rxData && rxData.datapoints) transformedRx = rxData.datapoints.map(function (point) { return { y: point[0], x: point[1] } });
@@ -99,7 +99,7 @@ var GraphsController = function ($scope, Client) {
     }
 
     function renderDisk(activeTab, appsUsedData, dataUsedData) {
-        var transformedAppsUsed = null, transformedDataUsed = null;
+        var transformedAppsUsed = [ ], transformedDataUsed = [ ];
 
         if (appsUsedData && appsUsedData.datapoints) {
             transformedAppsUsed = appsUsedData.datapoints.map(function (point) { return { y: point[0], x: point[1] }; });

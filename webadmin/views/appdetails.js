@@ -37,7 +37,7 @@ var AppDetailsController = function ($scope, $http, $routeParams, Client) {
     };
 
     function renderCpu(activeTab, cpuData) {
-        var transformedCpu = null;
+        var transformedCpu = [ ];
 
         if (cpuData && cpuData.datapoints) transformedCpu = cpuData.datapoints.map(function (point) { return { y: point[0], x: point[1] } });
 
@@ -50,7 +50,7 @@ var AppDetailsController = function ($scope, $http, $routeParams, Client) {
             max: 100,
             series: [{
                 color: 'steelblue',
-                data: transformedCpu,
+                data: transformedCpu || [ ],
                 name: 'cpu'
             }]
         });
@@ -76,7 +76,7 @@ var AppDetailsController = function ($scope, $http, $routeParams, Client) {
     }
 
     function renderMemory(activeTab, memoryData) {
-        var transformedMemory = null;
+        var transformedMemory = [ ];
 
         if (memoryData && memoryData.datapoints) transformedMemory = memoryData.datapoints.map(function (point) { return { y: point[0], x: point[1] } });
 
@@ -89,7 +89,7 @@ var AppDetailsController = function ($scope, $http, $routeParams, Client) {
             max: 2 * 1024 * 1024 * 1024, // 2gb
             series: [ {
                 color: 'steelblue',
-                data: transformedMemory,
+                data: transformedMemory || [ ],
                 name: 'memory'
             } ]
         } );
@@ -115,7 +115,7 @@ var AppDetailsController = function ($scope, $http, $routeParams, Client) {
     }
 
     function renderDisk(activeTab, diskData) {
-        var transformedDisk = null;
+        var transformedDisk = [ ];
 
         if (diskData && diskData.datapoints) transformedDisk = diskData.datapoints.map(function (point) { return { y: point[0], x: point[1] } });
 
@@ -128,7 +128,7 @@ var AppDetailsController = function ($scope, $http, $routeParams, Client) {
             max: 30 * 1024 * 1024 * 1024, // 30gb
             series: [{
                 color: 'steelblue',
-                data: transformedDisk,
+                data: transformedDisk || [ ],
                 name: 'apps'
             }]
         } );
