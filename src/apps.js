@@ -138,6 +138,15 @@ function validateSubdomain(subdomain, fqdn) {
 
 // validate the port bindings
 function validatePortBindings(portBindings) {
+    var RESERVED_PORTS = [
+        22, /* ssh */
+        25, /* smtp */,
+        2003, /* graphite */
+        2004, /* graphite */
+        3000 /* app server */,
+        8000 /* graphite */
+    ];
+
     for (var containerPort in portBindings) {
         var containerPortInt = parseInt(containerPort, 10);
         if (isNaN(containerPortInt) || containerPortInt <= 0 || containerPortInt > 65535) {
@@ -148,6 +157,8 @@ function validatePortBindings(portBindings) {
         if (isNaN(hostPortInt) || hostPortInt <= 1024 || hostPortInt > 65535) {
             return new Error(portBindings[containerPort] + ' is not a valid port');
         }
+
+        if (RESERVED_PORTS.indexOf(hostPortInt) !== -1) return new Error(hostPortInt + ' is reserved');
     }
 
     return null;
