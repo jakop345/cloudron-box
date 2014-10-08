@@ -140,10 +140,12 @@ function validateSubdomain(subdomain, fqdn) {
 function validatePortBindings(portBindings) {
     var RESERVED_PORTS = [
         22, /* ssh */
-        25, /* smtp */,
+        25, /* smtp */
+        80, /* http */
+        443, /* https */
         2003, /* graphite */
         2004, /* graphite */
-        3000 /* app server */,
+        3000, /* app server */
         8000 /* graphite */
     ];
 
