@@ -15,7 +15,8 @@ CONTAINER_ID=$(docker run -d --name="haraka" --cap-add="NET_ADMIN"\
 # Every docker restart results in a new IP. Give our mail server a
 # static IP. Alternately, we need to link the mail container with
 # all our apps
-# This IP is set by the haraka container on every start
+# This IP is set by the haraka container on every start and the firewall
+# allows connect to port 25
 MAIL_SERVER="172.17.120.120"
 
 cat > /tmp/script.js <<EOF

@@ -144,6 +144,35 @@ echo "==== Make the user own his home ===="
 chown $USER:$USER -R /home/$USER
 
 
+echo "=== Setting up firewall ==="
+# clear tables and set default policy
+apt-get install -y iptables-persistent
+iptables -F
+# default policy for filter table
+iptables -P INPUT DROP
+iptables -P FORWARD ACCEPT # TODO: disable icc and make this as reject
+iptables -P OUTPUT ACCEPT
+
+# NOTE: keep these in sync with src/apps.js validatePortBindings
+# allow ssh, http, https, ping, dns
+iptables -I INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+iptables -A INPUT -p tcp -m tcp -m multiport --dports 80,443 -j ACCEPT
+iptables -A INPUT -p icmp --icmp-type echo-request -j ACCEPT
+iptables -A INPUT -p icmp --icmp-type echo-reply -j ACCEPT
+iptables -A INPUT -p udp --sport 53 -j ACCEPT
+
+# loopback
+iptables -A INPUT -i lo -j ACCEPT
+iptables -A OUTPUT -o lo -j ACCEPT
+
+# prevent DoS
+# iptables -A INPUT -p tcp --dport 80 -m limit --limit 25/minute --limit-burst 100 -j ACCEPT
+
+# ubuntu will restore iptables from this file automatically
+iptables-save > /etc/iptables/rules.v4
+
+
 echo "==== Install init script ===="
 cat > /etc/init.d/bootstrap <<EOF
 #!/bin/bash
