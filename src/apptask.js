@@ -701,6 +701,9 @@ function uninstall(app, callback) {
         updateApp.bind(null, app, { installationProgress: 'Unconfiguring Nginx' }),
         unconfigureNginx.bind(null, app),
 
+        updateApp.bind(null, app, { installationProgress: 'Stopping app' }),
+        stopApp.bind(null, app),
+
         updateApp.bind(null, app, { installationProgress: 'Deleting container' }),
         deleteContainer.bind(null, app),
 
