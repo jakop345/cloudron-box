@@ -23,6 +23,13 @@ echo "== Yellowtent base image preparation ($APPSTORE_URL, $BOX_REVISION) =="
 
 export DEBIAN_FRONTEND=noninteractive
 
+echo "=== Setup swap file ==="
+fallocate -l 2048m /2048MiB.swap
+chmod 600 /2048MiB.swap
+mkswap /2048MiB.swap
+swapon /2048MiB.swap
+echo "/2048MiB.swap  none  swap  sw  0 0" >> /etc/fstab
+
 echo "==== Install project dependencies ===="
 apt-get update
 
