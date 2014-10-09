@@ -74,6 +74,9 @@ server.grant(oauth2orize.grant.code({ scopeSeparator: ',' }, function (client, r
 
     var code = uuid.v4();
 
+    // TODO we agreed on ignoring the requested scopes but only use the ones when the client was registered, this requires the clientdb to change
+    if (ares.scope.indexOf('roleAdmin') !== -1 && !user.admin) return callback(new Error('Admin capabilities required'));
+
     // TODO until the oauth clients set the scope, override to '*'
     // var scope = ares.scope.join(',');
     var scope = '*';
