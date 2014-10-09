@@ -58,7 +58,7 @@ function get_ssh_key_id() {
 
 function create_droplet() {
     local REGION_SLUG="sfo1"
-    local SIZE_SLUG="1gb"
+    local SIZE_SLUG="512mb"
     local SSH_KEY_ID="$1"
     local BOX_NAME="$2"
 
