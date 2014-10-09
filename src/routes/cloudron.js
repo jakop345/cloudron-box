@@ -63,12 +63,7 @@ function createBackup(req, res, next) {
 
 function restore(req, res, next) {
     if (!req.body.token) return next(new HttpError(400, 'No token provided'));
-    if (!req.body.fileName) return next(new HttpError(400, 'No restore file name provided'));
-    if (!req.body.aws) return next(new HttpError(400, 'No aws credentials provided'));
-    if (!req.body.aws.prefix) return next(new HttpError(400, 'No aws prefix provided'));
-    if (!req.body.aws.bucket) return next(new HttpError(400, 'No aws bucket provided'));
-    if (!req.body.aws.accessKeyId) return next(new HttpError(400, 'No aws access key provided'));
-    if (!req.body.aws.secretAccessKey) return next(new HttpError(400, 'No aws secret provided'));
+    if (!req.body.restoreUrl) return next(new HttpError(400, 'No restore url provided'));
 
     debug('_restore: received from appstore ' + req.body.appServerUrl);
 
@@ -101,11 +96,6 @@ function provision(req, res, next) {
     if (!req.body.adminOrigin) return next(new HttpError(400, 'No adminOrigin provided'));
     if (!req.body.fqdn) return next(new HttpError(400, 'No fqdn provided'));
     if (!req.body.ip) return next(new HttpError(400, 'No ip provided'));
-    if (!req.body.aws) return next(new HttpError(400, 'No aws credentials provided'));
-    if (!req.body.aws.prefix) return next(new HttpError(400, 'No aws prefix provided'));
-    if (!req.body.aws.bucket) return next(new HttpError(400, 'No aws bucket provided'));
-    if (!req.body.aws.accessKeyId) return next(new HttpError(400, 'No aws access key provided'));
-    if (!req.body.aws.secretAccessKey) return next(new HttpError(400, 'No aws secret provided'));
 
     debug('_provision: received from appstore ' + req.body.appServerUrl);
 

@@ -29,6 +29,8 @@ exports = module.exports = {
     restore: restore,
     provision: provision,
 
+    getBackupUrl: getBackupUrl,
+
     getIp: getIp,
 
     // exported for testing
@@ -123,15 +125,30 @@ function update(callback) {
     });
 }
 
+function getBackupUrl(callback) {
+    if (!config.appServerUrl) return new Error('No appstore server url set');
+    if (!config.token) return new Error('No appstore server token set');
+
+    var url = config.appServerUrl + '/api/v1/boxes/' + config.fqdn + '/backupurl';
+
+    superagent.put(url).query({ token: config.token }).end(function (error, result) {
+        if (error) return new Error('Error getting presigned backup url: ' + error.message);
+
+        if (result.statusCode !== 200 || !result.body || !result.body.url) return new Error('Error getting presigned backup url : ' + result.statusCode);
+
+        return callback(null, result.body.url);
+    });
+}
+
 function backup() {
     debug('Starting backup script');
 
-    if (!config.aws) return console.error('No aws credentials provided, skip backup script');
+    getBackupUrl(function (error, url) {
+        if (error) return console.error('Error getting backup url', error);
 
-    var args = config.aws.accessKeyId + ' ' + config.aws.secretAccessKey + ' ' + config.aws.prefix + ' ' + config.aws.bucket;
-
-    exec(BACKUP_CMD + ' ' + args, function (error) {
-        if (error) console.error('Error starting backup command', error);
+        exec(BACKUP_CMD + ' ' + url, function (error) {
+            if (error) console.error('Error starting backup command', error);
+        });
     });
 }
 
@@ -139,16 +156,7 @@ function restore(body, callback) {
     assert(typeof body === 'object');
     assert(typeof callback === 'function');
 
-    var args = [
-        body.aws.accessKeyId,
-        body.aws.secretAccessKey,
-        body.aws.prefix,
-        body.aws.bucket,
-        body.fileName,
-        body.token
-    ];
-
-    var restoreCommandLine = RESTORE_CMD + ' ' + args.join(' ');
+    var restoreCommandLine = RESTORE_CMD + ' ' + body.restoreUrl;
     debug('_restore: execute "%s".', restoreCommandLine);
 
     // Finish the request, to let the appstore know we triggered the restore it
@@ -378,7 +386,7 @@ function provision(args, callback) {
 
     if (config.token) return callback(new CloudronError(CloudronError.ALREADY_PROVISIONED));
 
-    config.set(_.pick(args, 'token', 'appServerUrl', 'adminOrigin', 'fqdn', 'aws'));
+    config.set(_.pick(args, 'token', 'appServerUrl', 'adminOrigin', 'fqdn'));
 
     // override the default webadmin OAuth client record
     clientdb.delByAppId('webadmin', function () {

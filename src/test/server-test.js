@@ -222,13 +222,7 @@ describe('Server', function () {
 
         it('fails due to missing token', function (done) {
             var data = {
-                fileName: 'somes3filename',
-                aws: {
-                    prefix: 'somes3prefix',
-                    bucket: 'somes3bucket',
-                    accessKeyId: 'someawskey',
-                    secretAccessKey: 'someawssecret'
-                }
+                restoreUrl: 'somes3url',
             };
             request.post(SERVER_URL + '/api/v1/restore').send(data).end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -237,83 +231,9 @@ describe('Server', function () {
             });
         });
 
-        it('fails due to missing fileName', function (done) {
+        it('fails due to missing restoreUrl', function (done) {
             var data = {
-                token: 'boxtoken',
-                aws: {
-                    prefix: 'somes3prefix',
-                    bucket: 'somes3bucket',
-                    accessKeyId: 'someawskey',
-                    secretAccessKey: 'someawssecret'
-                }
-            };
-            request.post(SERVER_URL + '/api/v1/restore').send(data).end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(400);
-                done();
-            });
-        });
-
-        it('fails due to missing aws prefix', function (done) {
-            var data = {
-                token: 'boxtoken',
-                fileName: 'somes3filename',
-                aws: {
-                    bucket: 'somes3bucket',
-                    accessKeyId: 'someawskey',
-                    secretAccessKey: 'someawssecret'
-                }
-            };
-            request.post(SERVER_URL + '/api/v1/restore').send(data).end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(400);
-                done();
-            });
-        });
-
-        it('fails due to missing aws bucket', function (done) {
-            var data = {
-                token: 'boxtoken',
-                fileName: 'somes3filename',
-                aws: {
-                    prefix: 'somes3prefix',
-                    accessKeyId: 'someawskey',
-                    secretAccessKey: 'someawssecret'
-                }
-            };
-            request.post(SERVER_URL + '/api/v1/restore').send(data).end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(400);
-                done();
-            });
-        });
-
-        it('fails due to missing aws secret', function (done) {
-            var data = {
-                token: 'boxtoken',
-                fileName: 'somes3filename',
-                aws: {
-                    prefix: 'somes3prefix',
-                    bucket: 'somes3bucket',
-                    accessKeyId: 'someawskey',
-                }
-            };
-            request.post(SERVER_URL + '/api/v1/restore').send(data).end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(400);
-                done();
-            });
-        });
-
-        it('fails due to missing aws key id', function (done) {
-            var data = {
-                token: 'boxtoken',
-                fileName: 'somes3filename',
-                aws: {
-                    prefix: 'somes3prefix',
-                    bucket: 'somes3bucket',
-                    secretAccessKey: 'someawssecret'
-                }
+                token: 'boxtoken'
             };
             request.post(SERVER_URL + '/api/v1/restore').send(data).end(function (error, result) {
                 expect(error).to.not.be.ok();

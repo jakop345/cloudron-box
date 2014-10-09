@@ -10,17 +10,14 @@ if [ "$1" == "--check" ]; then
     exit 2
 fi
 
-if [[ "$#" != "6" ]]; then
-    echo "Usage: update.sh <version> <revision/tag/branch> <S3 Key> <S3 Secret> <S3 Prefix> <S3 Bucket>"
+if [[ "$#" != "3" ]]; then
+    echo "Usage: update.sh <version> <revision/tag/branch> <backup url>"
     exit 1
 fi
 
 VERSION="$1"
 REVISION="$2"
-S3_KEY="$3"
-S3_SECRET="$4"
-S3_PREFIX="$5"
-S3_BUCKET="$6"
+BACKUP_URL="$3"
 
 cyan='\e[0;36m'
 green='\e[0;32m'
@@ -60,7 +57,7 @@ info "Perform update in $BASEDIR"
 cd $BASEDIR;
 
 info "Perform backup first"
-./src/scripts/backup.sh $S3_KEY $S3_SECRET $S3_PREFIX $S3_BUCKET "do_not_restart_box_flag"
+./src/scripts/backup.sh $BACKUP_URL "do_not_restart_box_flag"
 if [[ $? != 0 ]]; then
     error "Backup failed.";
     exit 1;

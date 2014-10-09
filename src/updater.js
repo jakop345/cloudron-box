@@ -106,27 +106,34 @@ Updater.prototype.update = function (callback) {
         return callback(new Error('No update available'));
     }
 
-    var command = 'sudo ' + path.join(__dirname, 'scripts/update.sh');
-    command += ' ' + (isDev ? config.version : this._boxUpdateInfo.version);
-    command += ' ' + (isDev ? 'origin/master' : this._boxUpdateInfo.revision);
-    command += ' ' + config.aws.accessKeyId + ' ' + config.aws.secretAccessKey + ' ' + config.aws.prefix + ' ' + config.aws.bucket;
+    debug('Creating backup for update');
 
-    var options = {
-        cwd: path.join(__dirname, '..')
-    };
+    cloudron.getBackupUrl(function (error, backupUrl) {
+        if (error) return console.error('Error getting backup url', error);
 
-    debug('update: use command "%s".', command);
+        var command = 'sudo ' + path.join(__dirname, 'scripts/update.sh');
+        command += ' ' + (isDev ? config.version : this._boxUpdateInfo.version);
+        command += ' ' + (isDev ? 'origin/master' : this._boxUpdateInfo.revision);
+        command += ' ' + backupUrl;
 
-    exec(command, options, function (error, stdout, stderr) {
-        if (error) {
-            console.error('Error running update script.', stdout, stderr);
-            return callback(error);
-        }
+        var options = {
+            cwd: path.join(__dirname, '..')
+        };
 
-        debug('update: success.', stdout, stderr);
+        debug('update: use command "%s".', command);
 
-        // Do not add any code here. The update script will stop the box code any instant
+        exec(command, options, function (error, stdout, stderr) {
+            if (error) {
+                console.error('Error running update script.', stdout, stderr);
+                return callback(error);
+            }
 
-        callback(null);
+            debug('update: success.', stdout, stderr);
+
+            // Do not add any code here. The update script will stop the box code any instant
+
+            callback(null);
+        });
     });
 };
+

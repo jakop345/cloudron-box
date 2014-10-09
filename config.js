@@ -61,7 +61,6 @@ config.save = function () {
     config.token = null;
     config.nakedDomain = null;
     config.version = '0.4.0';
-    config.aws = null;
     config.mailServer = null;
     config.mailUsername = null;
 
