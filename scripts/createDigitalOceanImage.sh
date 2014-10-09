@@ -75,15 +75,17 @@ function power_off_droplet() {
     local EVENT_ID=`$CURL "https://api.digitalocean.com/v1/droplets/$DROPLET_ID/power_off/?client_id=$CLIENT_ID&api_key=$API_KEY" | $JSON event_id`
 
     echo "Powered off droplet. Event id: $EVENT_ID"
+    echo -n "Waiting for droplet to power off"
 
     while true; do
         local EVENT_STATUS=`$CURL "https://api.digitalocean.com/v1/events/$EVENT_ID/?client_id=$CLIENT_ID&api_key=$API_KEY" | $JSON event.action_status`
         if [ "$EVENT_STATUS" == "done" ]; then
             break
         fi
-        echo "Waiting for droplet to power off"
+        echo -n "."
         sleep 10
     done
+    echo ""
 }
 
 function snapshot_droplet() {
@@ -92,30 +94,34 @@ function snapshot_droplet() {
     local EVENT_ID=`$CURL "https://api.digitalocean.com/v1/droplets/$DROPLET_ID/snapshot/?name=$SNAPSHOT_NAME&client_id=$CLIENT_ID&api_key=$API_KEY" | $JSON event_id`
 
     echo "Droplet snapshotted as $SNAPSHOT_NAME. Event id: $EVENT_ID"
+    echo -n "Waiting for snapshot to complete"
 
     while true; do
         local EVENT_STATUS=`$CURL "https://api.digitalocean.com/v1/events/$EVENT_ID/?client_id=$CLIENT_ID&api_key=$API_KEY" | $JSON event.action_status`
         if [ "$EVENT_STATUS" == "done" ]; then
             break
         fi
-        echo "Waiting for snapshot to complete"
+        echo -n "."
         sleep 10
     done
+    echo ""
 }
 
 function destroy_droplet() {
     local DROPLET_ID="$1"
     local EVENT_ID=`$CURL "https://api.digitalocean.com/v1/droplets/$DROPLET_ID/destroy/?scrub_data=true&client_id=$CLIENT_ID&api_key=$API_KEY" | $JSON event_id`
     echo "Droplet destroyed. Event id: $EVENT_ID"
+    echo -n "Waiting for droplet to destroy"
 
     while true; do
         local EVENT_STATUS=`$CURL "https://api.digitalocean.com/v1/events/$EVENT_ID/?client_id=$CLIENT_ID&api_key=$API_KEY" | $JSON event.action_status`
         if [ "$EVENT_STATUS" == "done" ]; then
             break
         fi
-        echo "Waiting for droplet to destroy"
+        echo -n "."
         sleep 10
     done
+    echo ""
 }
 
 function get_image_id() {
