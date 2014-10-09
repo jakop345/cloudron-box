@@ -234,7 +234,7 @@ function deleteContainer(app, callback) {
 
     var removeOptions = {
         force: true, // kill container if it's running
-        v: true // removes volumes associated with the container
+        v: false // removes volumes associated with the container
     };
 
     container.remove(removeOptions, function (error) {
