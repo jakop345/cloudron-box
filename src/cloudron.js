@@ -216,7 +216,7 @@ function sendHeartBeat() {
         return;
     }
 
-    var url = config.appServerUrl + '/api/v1/boxes/' + os.hostname() + '/heartbeat';
+    var url = config.appServerUrl + '/api/v1/boxes/' + config.fqdn + '/heartbeat';
     debug('Sending heartbeat ' + url);
 
     superagent.get(url).query({ token: config.token }).end(function (error, result) {
