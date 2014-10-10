@@ -21,7 +21,7 @@ if [ $# -lt 1 ]; then
     exit 1
 fi
 
-BACKUP_URL=$1
+BACKUP_URL="$1"
 
 # Stop the box
 echo "Stopping box"
