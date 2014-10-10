@@ -5,7 +5,7 @@
 var HttpError = require('../httperror.js'),
     HttpSuccess = require('../httpsuccess.js'),
     debug = require('debug')('box:routes/cloudron'),
-    exec = require('child_process').exec,
+    execFile = require('child_process').execFile,
     df = require('nodejs-disks'),
     path = require('path'),
     cloudron = require('../cloudron.js'),
@@ -14,7 +14,8 @@ var HttpError = require('../httperror.js'),
     exec = require('child_process').exec,
     _ = require('underscore');
 
-var REBOOT_CMD = 'sudo ' + path.join(__dirname, '../scripts/reboot.sh');
+var SUDO = '/usr/bin/sudo',
+    REBOOT_CMD = path.join(__dirname, '../scripts/reboot.sh');
 
 exports = module.exports = {
     getStats: getStats,
@@ -45,7 +46,7 @@ function reboot(req, res, next) {
     // TODO is there a better way?
     next(new HttpSuccess(200, {}));
 
-    exec(REBOOT_CMD, {}, function (error, stdout, stderr) {
+    execFile(SUDO, [ REBOOT_CMD ], {}, function (error, stdout, stderr) {
         if (error) {
             console.error('Reboot failed.', error, stdout, stderr);
             return next(new HttpError(500, error));

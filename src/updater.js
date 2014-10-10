@@ -6,7 +6,7 @@ var debug = require('debug')('box:updater'),
     superagent = require('superagent'),
     path = require('path'),
     assert = require('assert'),
-    exec = require('child_process').exec,
+    execFile = require('child_process').execFile,
     appdb = require('./appdb.js'),
     safe = require('safetydance'),
     config = require('../config.js');
@@ -111,10 +111,12 @@ Updater.prototype.update = function (callback) {
     cloudron.getBackupUrl(function (error, backupUrl) {
         if (error) return console.error('Error getting backup url', error);
 
-        var command = 'sudo ' + path.join(__dirname, 'scripts/update.sh');
-        command += ' ' + (isDev ? config.version : this._boxUpdateInfo.version);
-        command += ' ' + (isDev ? 'origin/master' : this._boxUpdateInfo.revision);
-        command += ' ' + backupUrl;
+        var args = [
+            path.join(__dirname, 'scripts/update.sh'),
+            isDev ? config.version : this._boxUpdateInfo.version,
+            isDev ? 'origin/master' : this._boxUpdateInfo.revision,
+            backupUrl
+        ];
 
         var options = {
             cwd: path.join(__dirname, '..')
@@ -122,7 +124,7 @@ Updater.prototype.update = function (callback) {
 
         debug('update: use command "%s".', command);
 
-        exec(command, options, function (error, stdout, stderr) {
+        execFile('/usr/bin/sudo', args, options, function (error, stdout, stderr) {
             if (error) {
                 console.error('Error running update script.', stdout, stderr);
                 return callback(error);

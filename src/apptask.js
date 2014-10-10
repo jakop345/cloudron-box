@@ -18,6 +18,7 @@ var assert = require('assert'),
     debug = require('debug')('box:apptask'),
     fs = require('fs'),
     child_process = require('child_process'),
+    execFile = child_process.execFile,
     path = require('path'),
     net = require('net'),
     config = require('../config.js'),
@@ -49,8 +50,10 @@ exports = module.exports = {
 var docker = null,
     NGINX_APPCONFIG_EJS = fs.readFileSync(__dirname + '/../nginx/appconfig.ejs', { encoding: 'utf8' }),
     COLLECTD_CONFIG_EJS = fs.readFileSync(__dirname + '/collectd.config.ejs', { encoding: 'utf8' }),
-    RELOAD_NGINX_CMD = 'sudo ' + path.join(__dirname, 'scripts/reloadnginx.sh'),
-    RELOAD_COLLECTD_CMD = 'sudo ' + path.join(__dirname, 'scripts/reloadcollectd.sh');
+    SUDO = '/usr/bin/sudo',
+    RELOAD_NGINX_CMD = path.join(__dirname, 'scripts/reloadnginx.sh'),
+    RELOAD_COLLECTD_CMD = path.join(__dirname, 'scripts/reloadcollectd.sh'),
+    RMAPPDIR_CMD = path.join(__dirname, 'scripts/rmappdir.sh');
 
 function initialize(callback) {
     if (process.env.NODE_ENV === 'test') {
@@ -84,7 +87,7 @@ function forwardFromHostToVirtualBox(rulename, port) {
 }
 
 function reloadNginx(callback) {
-    child_process.exec(RELOAD_NGINX_CMD, { timeout: 10000 }, callback);
+    execFile(SUDO, [ RELOAD_NGINX_CMD ], { timeout: 10000 }, callback);
 }
 
 function configureNginx(app, callback) {
@@ -274,7 +277,7 @@ function createVolume(app, callback) {
 }
 
 function deleteVolume(app, callback) {
-    child_process.exec('sudo ' + __dirname + '/scripts/rmappdir.sh ' + app.id, function (error, stdout, stderr) {
+    execFile(SUDO, [ RMAPPDIR_CMD, app.id ], { }, function (error, stdout, stderr) {
         if (error) console.error('Error removing volume', error, stdout, stderr);
         return callback(error);
     });
@@ -284,14 +287,14 @@ function addCollectdProfile(app, callback) {
     var collectdConf = ejs.render(COLLECTD_CONFIG_EJS, { appId: app.id, containerId: app.containerId });
     fs.writeFile(path.join(config.collectdAppConfigDir, app.id + '.conf'), collectdConf, function (error) {
         if (error) return callback(error);
-        child_process.exec(RELOAD_COLLECTD_CMD, { timeout: 10000 }, callback);
+        execFile(SUDO, [ RELOAD_COLLECTD_CMD ], { timeout: 10000 }, callback);
     });
 }
 
 function removeCollectdProfile(app, callback) {
     fs.unlink(path.join(config.collectdAppConfigDir, app.id + '.conf'), function (error, stdout, stderr) {
         if (error) console.error('Error removing collectd profile', error, stdout, stderr);
-        child_process.exec(RELOAD_COLLECTD_CMD, { timeout: 10000 }, callback);
+        execFile(SUDO, [ RELOAD_COLLECTD_CMD ], { timeout: 10000 }, callback);
     });
 }
 

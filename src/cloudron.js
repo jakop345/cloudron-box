@@ -7,7 +7,7 @@ var debug = require('debug')('box:cloudron'),
     os = require('os'),
     Updater = require('./updater.js'),
     assert = require('assert'),
-    exec = require('child_process').exec,
+    execFile = require('child_process').execFile,
     util = require('util'),
     path = require('path'),
     fs = require('fs'),
@@ -37,9 +37,11 @@ exports = module.exports = {
     _getAnnounceTimerId: getAnnounceTimerId
 };
 
-var RESTORE_CMD = 'sudo ' + path.join(__dirname, 'scripts/restore.sh'),
-    RELOAD_NGINX_CMD = 'sudo ' + path.join(__dirname, 'scripts/reloadnginx.sh'),
-    BACKUP_CMD = 'sudo ' + __dirname + '/scripts/backup.sh';
+var SUDO = '/usr/bin/sudo',
+    RESTORE_CMD = path.join(__dirname, 'scripts/restore.sh'),
+    RELOAD_NGINX_CMD = path.join(__dirname, 'scripts/reloadnginx.sh'),
+    BACKUP_CMD = path.join(__dirname, 'scripts/backup.sh'),
+    GIT = '/usr/bin/git';
 
 var backupTimerId = null,
     announceTimerId = null,
@@ -148,7 +150,7 @@ function backup() {
 
         debug('backup: url %s', url);
 
-        exec(BACKUP_CMD + ' ' + url, function (error) {
+        execFile(SUDO, [ BACKUP_CMD,  url ], { }, function (error) {
             if (error) console.error('Error starting backup command', error);
         });
     });
@@ -158,14 +160,13 @@ function restore(body, callback) {
     assert(typeof body === 'object');
     assert(typeof callback === 'function');
 
-    var restoreCommandLine = RESTORE_CMD + ' ' + body.restoreUrl;
-    debug('restore: execute "%s".', restoreCommandLine);
+    debug('restore: execute "%s".', body.restoreUrl);
 
     // Finish the request, to let the appstore know we triggered the restore it
     // TODO is there a better way?
     callback(null);
 
-    exec(restoreCommandLine, {}, function (error, stdout, stderr) {
+    execFile(SUDO, [ RESTORE_CMD, body.restoreUrl ], { }, function (error, stdout, stderr) {
         if (error) {
             console.error('Restore failed.', error, stdout, stderr);
         }
@@ -195,8 +196,7 @@ function getIp() {
 function getConfig(callback) {
     assert(typeof callback === 'function');
 
-    var gitRevisionCommand = 'git log -1 --pretty=format:%h';
-    exec(gitRevisionCommand, {}, function (error, stdout, stderr) {
+    execFile(GIT, [ 'log', '-1', '--pretty=format:%h' ], {}, function (error, stdout, stderr) {
         if (error) {
             console.error('Failed to get git revision.', error, stdout, stderr);
             stdout = null;
@@ -293,7 +293,7 @@ function sendGetCertificateRequest(callback) {
             file.write(chunk);
         });
         result.on('end', function () {
-            exec('tar -xf ' + certFilePath, { cwd: certDirPath }, function(error) {
+            execFile('/usr/bin/tar', [ '-xf', certFilePath ], { cwd: certDirPath }, function(error) {
                 if (error) return callback(error);
 
                 if (!fs.existsSync(path.join(certDirPath, 'host.cert'))) return callback(new Error('Certificate bundle does not contain a host.cert file'));
@@ -304,7 +304,7 @@ function sendGetCertificateRequest(callback) {
                 // cleanup the cert bundle
                 fs.unlinkSync(certFilePath);
 
-                exec(RELOAD_NGINX_CMD, { timeout: 10000 }, function (error) {
+                execFile(SUDO, [ RELOAD_NGINX_CMD ], { timeout: 10000 }, function (error) {
                     if (error) return callback(error);
 
                     debug('_getCertificate: success');
