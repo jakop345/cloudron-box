@@ -308,6 +308,7 @@ function allocateOAuthCredentials(app, callback) {
     var clientSecret = uuid.v4();
     var name = app.manifest.title;
     var redirectURI = 'https://' + appFqdn(app.location);
+    var scope = 'profile,roleUser';
 
     debug('allocateOAuthCredentials:', id, clientId, clientSecret, name);
 
@@ -315,7 +316,7 @@ function allocateOAuthCredentials(app, callback) {
         if (error && error.reason !== DatabaseError.NOT_FOUND) return callback(error);
         if (result) return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
 
-        clientdb.add(id, appId, clientId, clientSecret, name, redirectURI, callback);
+        clientdb.add(id, appId, clientId, clientSecret, name, redirectURI, scope, callback);
     });
 }
 

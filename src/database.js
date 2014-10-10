@@ -72,7 +72,9 @@ function create(callback) {
         clientdb.getByAppId('webadmin', function (error) {
             if (!error) return callback(null);
 
-            clientdb.add(uuid.v4(), 'webadmin', 'cid-webadmin', 'unused', 'WebAdmin', config.adminOrigin, function (error) {
+            // scopes are also in cloudron.js for production
+            var scopes = 'root,profile,users,apps,settings,roleAdmin';
+            clientdb.add(uuid.v4(), 'webadmin', 'cid-webadmin', 'unused', 'WebAdmin', config.adminOrigin, scopes, function (error) {
                 if (error && error.reason !== DatabaseError.ALREADY_EXISTS) return callback(new Error('Error initializing client database with webadmin'));
                 return callback(null);
             });

@@ -13,7 +13,7 @@ exports = module.exports = {
     del: del
 };
 
-var AUTHCODES_FIELDS = [ 'authCode', 'redirectURI', 'userId', 'clientId', 'scope' ].join(',');
+var AUTHCODES_FIELDS = [ 'authCode', 'userId', 'clientId' ].join(',');
 
 function get(authCode, callback) {
     assert(typeof authCode === 'string');
@@ -28,16 +28,14 @@ function get(authCode, callback) {
     });
 }
 
-function add(authCode, clientId, redirectURI, userId, scope, callback) {
+function add(authCode, clientId, userId, callback) {
     assert(typeof authCode === 'string');
     assert(typeof clientId === 'string');
-    assert(typeof redirectURI === 'string');
     assert(typeof userId === 'string');
-    assert(typeof scope === 'string');
     assert(typeof callback === 'function');
 
-    database.run('INSERT INTO authcodes (authCode, clientId, redirectURI, userId, scope) VALUES (?, ?, ?, ?, ?)',
-            [ authCode, clientId, redirectURI, userId, scope ], function (error) {
+    database.run('INSERT INTO authcodes (authCode, clientId, userId) VALUES (?, ?, ?)',
+            [ authCode, clientId, userId ], function (error) {
         if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
         if (error || !this.lastID) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 

@@ -18,8 +18,8 @@ exports = module.exports = {
     delByAppId: delByAppId
 };
 
-var CLIENTS_FIELDS = [ 'id', 'appId', 'clientId', 'clientSecret', 'name', 'redirectURI' ].join(',');
-var CLIENTS_FIELDS_PREFIXED = [ 'clients.id', 'clients.appId', 'clients.clientId', 'clients.clientSecret', 'clients.name', 'clients.redirectURI' ].join(',');
+var CLIENTS_FIELDS = [ 'id', 'appId', 'clientId', 'clientSecret', 'name', 'redirectURI', 'scope' ].join(',');
+var CLIENTS_FIELDS_PREFIXED = [ 'clients.id', 'clients.appId', 'clients.clientId', 'clients.clientSecret', 'clients.name', 'clients.redirectURI', 'clients.scope' ].join(',');
 
 function get(id, callback) {
     assert(typeof id === 'string');
@@ -48,7 +48,7 @@ function getAllWithDetails(callback) {
     assert(typeof callback === 'function');
 
     // TODO should this be per user?
-    database.all('SELECT ' + CLIENTS_FIELDS_PREFIXED + ',tokens.scope,COUNT(tokens.clientId) AS tokenCount FROM clients LEFT OUTER JOIN tokens ON clients.id=tokens.clientId GROUP BY clients.id', [], function (error, results) {
+    database.all('SELECT ' + CLIENTS_FIELDS_PREFIXED + ',COUNT(tokens.clientId) AS tokenCount FROM clients LEFT OUTER JOIN tokens ON clients.id=tokens.clientId GROUP BY clients.id', [], function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (typeof results === 'undefined') results = [];
 
@@ -80,13 +80,14 @@ function getByAppId(appId, callback) {
     });
 }
 
-function add(id, appId, clientId, clientSecret, name, redirectURI, callback) {
+function add(id, appId, clientId, clientSecret, name, redirectURI, scope, callback) {
     assert(typeof id === 'string');
     assert(typeof appId === 'string');
     assert(typeof clientId === 'string');
     assert(typeof clientSecret === 'string');
     assert(typeof name === 'string');
     assert(typeof redirectURI === 'string');
+    assert(typeof scope === 'string');
     assert(typeof callback === 'function');
 
     var data = {
@@ -95,10 +96,11 @@ function add(id, appId, clientId, clientSecret, name, redirectURI, callback) {
         $clientId: clientId,
         $clientSecret: clientSecret,
         $name: name,
-        $redirectURI: redirectURI
+        $redirectURI: redirectURI,
+        $scope: scope
     };
 
-    database.run('INSERT INTO clients (id, appId, clientId, clientSecret, name, redirectURI) VALUES ($id, $appId, $clientId, $clientSecret, $name, $redirectURI)', data, function (error) {
+    database.run('INSERT INTO clients (id, appId, clientId, clientSecret, name, redirectURI, scope) VALUES ($id, $appId, $clientId, $clientSecret, $name, $redirectURI, $scope)', data, function (error) {
         if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
         if (error || !this.lastID) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 

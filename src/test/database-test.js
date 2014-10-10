@@ -51,34 +51,29 @@ describe('database', function () {
         var AUTHCODE_0 = {
             authCode: 'authcode-0',
             clientId: 'clientid-0',
-            redirectURI: 'http://localhost',
-            userId: 'userid-0',
-            scope: 'foo,bar'
+            userId: 'userid-0'
         };
         var AUTHCODE_1 = {
             authCode: 'authcode-1',
             clientId: 'clientid-1',
-            redirectURI: 'http://localhost',
-            userId: 'userid-1',
-            scope: 'foobarbaz'
+            userId: 'userid-1'
         };
 
         it('add fails due to missing arguments', function () {
-            expect(function () { authcodedb.add(AUTHCODE_0.authCode, AUTHCODE_0.clientId, AUTHCODE_0.redirectURI, AUTHCODE_0.userId); }).to.throwError();
-            expect(function () { authcodedb.add(AUTHCODE_0.authCode, AUTHCODE_0.clientId, AUTHCODE_0.redirectURI, function () {}); }).to.throwError();
+            expect(function () { authcodedb.add(AUTHCODE_0.authCode, AUTHCODE_0.clientId, AUTHCODE_0.userId); }).to.throwError();
             expect(function () { authcodedb.add(AUTHCODE_0.authCode, AUTHCODE_0.clientId, function () {}); }).to.throwError();
             expect(function () { authcodedb.add(AUTHCODE_0.authCode, function () {}); }).to.throwError();
         });
 
         it('add succeeds', function (done) {
-            authcodedb.add(AUTHCODE_0.authCode, AUTHCODE_0.clientId, AUTHCODE_0.redirectURI, AUTHCODE_0.userId, AUTHCODE_0.scope, function (error) {
+            authcodedb.add(AUTHCODE_0.authCode, AUTHCODE_0.clientId, AUTHCODE_0.userId, function (error) {
                 expect(error).to.be(null);
                 done();
             });
         });
 
         it('add of same authcode fails', function (done) {
-            authcodedb.add(AUTHCODE_0.authCode, AUTHCODE_0.clientId, AUTHCODE_0.redirectURI, AUTHCODE_0.userId, AUTHCODE_0.scope, function (error) {
+            authcodedb.add(AUTHCODE_0.authCode, AUTHCODE_0.clientId, AUTHCODE_0.userId, function (error) {
                 expect(error).to.be.a(DatabaseError);
                 expect(error.reason).to.be(DatabaseError.ALREADY_EXISTS);
                 done();
@@ -487,7 +482,9 @@ describe('database', function () {
             clientId: 'cid-0',
             clientSecret: 'secret-0',
             name: 'Test client 0',
-            redirectURI: 'http://foo.bar'
+            redirectURI: 'http://foo.bar',
+            scope: '*'
+
         };
         var CLIENT_1 = {
             id: 'someclientid_1',
@@ -495,7 +492,8 @@ describe('database', function () {
             clientId: 'cid-1',
             clientSecret: 'secret-',
             name: 'Test client 1',
-            redirectURI: 'http://foo.bar'
+            redirectURI: 'http://foo.bar',
+            scope: '*'
         };
         var TOKEN_0 = {
             accessToken: tokendb.generateToken(),
@@ -520,10 +518,10 @@ describe('database', function () {
         };
 
         it('add succeeds', function (done) {
-            clientdb.add(CLIENT_0.id, CLIENT_0.appId, CLIENT_0.clientId, CLIENT_0.clientSecret, CLIENT_0.name, CLIENT_0.redirectURI, function (error) {
+            clientdb.add(CLIENT_0.id, CLIENT_0.appId, CLIENT_0.clientId, CLIENT_0.clientSecret, CLIENT_0.name, CLIENT_0.redirectURI, CLIENT_0.scope, function (error) {
                 expect(error).to.be(null);
 
-                clientdb.add(CLIENT_1.id, CLIENT_1.appId, CLIENT_1.clientId, CLIENT_1.clientSecret, CLIENT_1.name, CLIENT_1.redirectURI, function (error) {
+                clientdb.add(CLIENT_1.id, CLIENT_1.appId, CLIENT_1.clientId, CLIENT_1.clientSecret, CLIENT_1.name, CLIENT_1.redirectURI, CLIENT_1.scope, function (error) {
                     expect(error).to.be(null);
                     done();
                 });
@@ -531,7 +529,7 @@ describe('database', function () {
         });
 
         it('add same client id fails', function (done) {
-            clientdb.add(CLIENT_0.id, CLIENT_0.appId, CLIENT_0.clientId, CLIENT_0.clientSecret, CLIENT_0.name, CLIENT_0.redirectURI, function (error) {
+            clientdb.add(CLIENT_0.id, CLIENT_0.appId, CLIENT_0.clientId, CLIENT_0.clientSecret, CLIENT_0.name, CLIENT_0.redirectURI, CLIENT_0.scope, function (error) {
                 expect(error).to.be.a(DatabaseError);
                 expect(error.reason).to.equal(DatabaseError.ALREADY_EXISTS);
                 done();
