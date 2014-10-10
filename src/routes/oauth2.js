@@ -229,22 +229,21 @@ var error = [
 ];
 
 
-// user authorization endpoint
-//
-// `authorization` middleware accepts a `validate` callback which is
-// responsible for validating the client making the authorization request.  In
-// doing so, is recommended that the `redirectURI` be checked against a
-// registered value, although security requirements may vary accross
-// implementations.  Once validated, the `callback` callback must be invoked with
-// a `client` instance, as well as the `redirectURI` to which the user will be
-// redirected after an authorization decision is obtained.
-//
-// This middleware simply initializes a new authorization transaction.  It is
-// the application's responsibility to authenticate the user and render a dialog
-// to obtain their approval (displaying details about the client requesting
-// authorization).  We accomplish that here by routing through `ensureLoggedIn()`
-// first, and rendering the `dialog` view.
+/*
 
+  The authorization endpoint is the entry point for an OAuth login.
+
+  Each app would start OAuth by redirecting the user to:
+
+    /api/v1/oauth/dialog/authorize?response_type=code&client_id=<clientId>&redirect_uri=<callbackURL>&scope=<ignored>
+
+  - First, this will ensure the user is logged in.
+  - Then in normal OAuth it would ask the user for permissions to the scopes, which we will do on app installation
+  - Then it will redirect the browser to the given <callbackURL> containing the authcode in the query
+
+  Scopes are set by the app during installation, the ones given on OAuth transaction start are simply ignored.
+
+*/
 var authorization = [
     session.ensureLoggedIn('/api/v1/session/login'),
     server.authorization(function (clientID, redirectURI, callback) {
@@ -284,19 +283,46 @@ var decision = [
     server.decision()
 ];
 
-// the token endpoint exchanges an authcode for an access token
-// it still requires basic or oauth2-client-password authentication
+
+/*
+
+  The token endpoint allows an OAuth client to exchange an authcode with an accesstoken.
+
+  Authcodes are obtained using the authorization endpoint. The route is authenticated by
+  providing a Basic auth with clientID as username and clientSecret as password.
+  An authcode is only good for one such exchange to an accesstoken.
+
+*/
 var token = [
     passport.authenticate(['oauth2-client-password'], { session: false }),
     server.token(),
     server.errorHandler()
 ];
 
+
+/*
+
+  Route so serve up the OAuth client side helper library
+
+*/
 function library(req, res) {
     res.setHeader('Content-Type', 'application/javascript');
     res.render('yellowtent', { adminOrigin: config.adminOrigin });
 }
 
+
+/*
+
+  The scope middleware provides an auth middleware for routes.
+
+  It is used for API routes, which are authenticated using accesstokens.
+  Those accesstokens carry OAuth scopes and the middleware takes the required
+  scope as an argument and will verify the accesstoken against it.
+
+  See server.js:
+    var profileScope = routes.oauth2.scope('profile');
+
+*/
 function scope(requestedScope) {
     assert(typeof requestedScope === 'string');
 
