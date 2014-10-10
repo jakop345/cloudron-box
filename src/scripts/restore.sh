@@ -19,7 +19,7 @@ if [ $# -lt 1 ]; then
     exit 1
 fi
 
-RESTORE_URL=$1
+RESTORE_URL="$1"
 
 echo "Arguments: $@"
 
