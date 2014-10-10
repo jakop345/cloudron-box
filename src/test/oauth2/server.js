@@ -44,7 +44,7 @@ server.start(function (err) {
     user.create('test', 'test', 'test@test.com', true /* admin */, function (error) {
         if (error) return console.error(error);
 
-        clientdb.add(uuid.v4(),'app', 'cid-app', 'unused', 'TestApp', 'http://localhost:5454', function (error) {
+        clientdb.add(uuid.v4(),'app', 'cid-app', 'unused', 'TestApp', 'http://localhost:5454', 'profile,roleUser', function (error) {
             if (error) return console.error(error);
         });
     });

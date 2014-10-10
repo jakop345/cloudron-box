@@ -487,7 +487,9 @@ describe('database', function () {
             clientId: 'cid-0',
             clientSecret: 'secret-0',
             name: 'Test client 0',
-            redirectURI: 'http://foo.bar'
+            redirectURI: 'http://foo.bar',
+            scope: '*'
+
         };
         var CLIENT_1 = {
             id: 'someclientid_1',
@@ -495,7 +497,8 @@ describe('database', function () {
             clientId: 'cid-1',
             clientSecret: 'secret-',
             name: 'Test client 1',
-            redirectURI: 'http://foo.bar'
+            redirectURI: 'http://foo.bar',
+            scope: '*'
         };
         var TOKEN_0 = {
             accessToken: tokendb.generateToken(),
@@ -520,10 +523,10 @@ describe('database', function () {
         };
 
         it('add succeeds', function (done) {
-            clientdb.add(CLIENT_0.id, CLIENT_0.appId, CLIENT_0.clientId, CLIENT_0.clientSecret, CLIENT_0.name, CLIENT_0.redirectURI, function (error) {
+            clientdb.add(CLIENT_0.id, CLIENT_0.appId, CLIENT_0.clientId, CLIENT_0.clientSecret, CLIENT_0.name, CLIENT_0.redirectURI, CLIENT_0.scope, function (error) {
                 expect(error).to.be(null);
 
-                clientdb.add(CLIENT_1.id, CLIENT_1.appId, CLIENT_1.clientId, CLIENT_1.clientSecret, CLIENT_1.name, CLIENT_1.redirectURI, function (error) {
+                clientdb.add(CLIENT_1.id, CLIENT_1.appId, CLIENT_1.clientId, CLIENT_1.clientSecret, CLIENT_1.name, CLIENT_1.redirectURI, CLIENT_1.scope, function (error) {
                     expect(error).to.be(null);
                     done();
                 });
@@ -531,7 +534,7 @@ describe('database', function () {
         });
 
         it('add same client id fails', function (done) {
-            clientdb.add(CLIENT_0.id, CLIENT_0.appId, CLIENT_0.clientId, CLIENT_0.clientSecret, CLIENT_0.name, CLIENT_0.redirectURI, function (error) {
+            clientdb.add(CLIENT_0.id, CLIENT_0.appId, CLIENT_0.clientId, CLIENT_0.clientSecret, CLIENT_0.name, CLIENT_0.redirectURI, CLIENT_0.scope, function (error) {
                 expect(error).to.be.a(DatabaseError);
                 expect(error.reason).to.equal(DatabaseError.ALREADY_EXISTS);
                 done();

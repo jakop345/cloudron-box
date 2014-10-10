@@ -382,7 +382,7 @@ function provision(args, callback) {
 
     // override the default webadmin OAuth client record
     clientdb.delByAppId('webadmin', function () {
-        clientdb.add(uuid.v4(), 'webadmin', 'cid-webadmin', 'unused', 'WebAdmin', config.adminOrigin, function (error) {
+        clientdb.add(uuid.v4(), 'webadmin', 'cid-webadmin', 'unused', 'WebAdmin', config.adminOrigin, '*,roleAdmin', function (error) {
             if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
             callback(null);
