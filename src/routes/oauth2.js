@@ -73,21 +73,14 @@ server.grant(oauth2orize.grant.code({ scopeSeparator: ',' }, function (client, r
     debug('grant code:', client, redirectURI, user.id, ares);
 
     var code = uuid.v4();
+    var scopes = client.scope ? client.scope.split(',') : ['profile','roleUser'];
 
-    // TODO we agreed on ignoring the requested scopes but only use the ones when the client was registered, this requires the clientdb to change
-    if (ares.scope.indexOf('roleAdmin') !== -1 && !user.admin) return callback(new Error('Admin capabilities required'));
-
-    // TODO until the oauth clients set the scope, override to '*'
-    // var scope = ares.scope.join(',');
-    var scope = '*';
-
-    // only give out wildcard scope to the webadmin all other clients are only allowed to request 'profile'
-    if (client.appId !== 'webadmin') {
-        if (ares.scope[0] !== 'profile') return callback(new Error('Requested scope is not allowed for this client'));
-        scope = ares.scope.join(',');
+    if (scopes.indexOf('roleAdmin') !== -1 && !user.admin) {
+        debug('grant code: not allowed, you need to be admin');
+        return callback(new Error('Admin capabilities required'));
     }
 
-    authcodedb.add(code, client.id, redirectURI, user.username, scope, function (error) {
+    authcodedb.add(code, client.id, user.username, function (error) {
         if (error) return callback(error);
         callback(null, code);
     });
@@ -114,7 +107,7 @@ server.exchange(oauth2orize.exchange.code(function (client, code, redirectURI, c
             var token = tokendb.generateToken();
             var expires = new Date(Date.now() + 60 * 60000).toUTCString(); // 1 hour
 
-            tokendb.add(token, authCode.userId, authCode.clientId, expires, authCode.scope, function (error) {
+            tokendb.add(token, authCode.userId, authCode.clientId, expires, client.scope, function (error) {
                 if (error) return callback(error);
 
                 debug('new access token for client ' + client.id + ' token ' + token);
