@@ -1,6 +1,6 @@
 'use strict';
 
-var exec = require('child_process').exec,
+var execFile = require('child_process').execFile,
     path = require('path'),
     mkdirp = require('mkdirp'),
     fs = require('fs'),
@@ -43,7 +43,7 @@ function Repo(rootDir, tmpDir) {
 }
 
 // run arbitrary commands on this repo
-Repo.prototype._exec = function (command, callback) {
+Repo.prototype._exec = function (command, args, callback) {
     assert(typeof command === 'string');
 
     var options = {
@@ -51,7 +51,7 @@ Repo.prototype._exec = function (command, callback) {
         cwd: this.checkoutDir
     };
 
-    exec(command, options, callback);
+    execFile(command, args, options, callback);
 };
 
 /*
@@ -633,7 +633,7 @@ Repo.prototype.copyFile = function (from, to, options, callback) {
 
         if (entry.sha1 !== rev && rev !== '*') return callback(new RepoError('EOUTOFDATE', 'Out of date'));
 
-        that._exec('cp -r ' + fromAbsoluteFilePath + ' ' + toAbsoluteFilePath, function (err, out) {
+        that._exec('/bin/cp', [ '-r', fromAbsoluteFilePath, toAbsoluteFilePath ], function (err, out) {
             if (err) return callback(new RepoError('ENOENT', 'File does not exist'));
 
             var message = 'Copy from ' + from + ' to ' + to;
