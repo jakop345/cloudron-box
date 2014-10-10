@@ -14,12 +14,13 @@ NOW=$(date +%Y%m%dT%H%M%S)
 LOG="/var/log/cloudron/restore-${NOW}.log"
 exec 2>&1 1> "$LOG"
 
-if [ $# -lt 1 ]; then
-    echo "No arguments supplied"
+if [ $# -lt 2 ]; then
+    echo "restore.sh <restore_url> <token>"
     exit 1
 fi
 
 RESTORE_URL="$1"
+TOKEN="$2"
 
 echo "Arguments: $@"
 

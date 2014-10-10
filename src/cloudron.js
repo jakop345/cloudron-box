@@ -161,18 +161,19 @@ function backup() {
     });
 }
 
-function restore(body, callback) {
-    assert(typeof body === 'object');
+function restore(restoreUrl, token, callback) {
+    assert(typeof restoreUrl == 'string');
+    assert(typeof token === 'string');
     assert(typeof callback === 'function');
 
-    debug('restore: execute "%s".', body.restoreUrl);
+    debug('restore: sudo restore.sh %s %s', restoreUrl, token);
 
     // Finish the request, to let the appstore know we triggered the restore it
     // TODO is there a better way?
     callback(null);
 
     // TODO make sure you can restore only once ever
-    execFile(SUDO, [ RESTORE_CMD, body.restoreUrl ], { }, function (error, stdout, stderr) {
+    execFile(SUDO, [ RESTORE_CMD, restoreUrl, token ], { }, function (error, stdout, stderr) {
         if (error) {
             console.error('Restore failed.', error, stdout, stderr);
         }

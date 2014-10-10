@@ -68,7 +68,7 @@ function restore(req, res, next) {
 
     debug('_restore: received from appstore', req.body);
 
-    cloudron.restore(req.body, function (error) {
+    cloudron.restore(req.body.restoreUrl, req.body.token, function (error) {
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(200, { }));
