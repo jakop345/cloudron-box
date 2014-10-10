@@ -11,8 +11,8 @@ if [ "$1" == "--check" ]; then
 fi
 
 NOW=$(date +%Y%m%dT%H%M%S)
-LOG=/var/log/cloudron/restore-${NOW}.log
-exec 2>&1 1> $LOG
+LOG="/var/log/cloudron/restore-${NOW}.log"
+exec 2>&1 1> "$LOG"
 
 if [ $# -lt 1 ]; then
     echo "No arguments supplied"
@@ -27,21 +27,16 @@ echo "Arguments: $@"
 echo "Stopping box"
 supervisorctl stop box
 
-DATE_HEADER=$(date "+%a, %d %b %Y %T %z") # Tue, 27 Mar 2007 19:36:42 +0000
-
 echo "Downloading backup: $RESTORE_URL"
-curl -X GET \
-    -H "Date: ${DATE_HEADER}" \
-    -o /tmp/restore.tar.gz \
-    "$RESTORE_URL"
+curl -X GET -o /tmp/restore.tar.gz "$RESTORE_URL"
 
-rm -rf $HOME/box $HOME/.yellowtent
+rm -rf "$HOME/box" "$HOME/.yellowtent"
 
 # move somewhere else since we blow away the current dir
 cd /
 
 # FIXME userid should be constants across restores
-tar zxvf /tmp/restore.tar.gz -C $HOME
+tar zxvf /tmp/restore.tar.gz -C "$HOME"
 
 # really move somewhere else
 cd /

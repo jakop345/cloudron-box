@@ -10,7 +10,7 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
-APPDATA=$HOME/.yellowtent/appdata
+APPDATA="$HOME/.yellowtent/appdata"
 
 if [ "$1" == "--check" ]; then
     echo "OK"

@@ -54,10 +54,10 @@ exec > >(tee /var/log/cloudron/update.log)
 exec 2>&1
 
 info "Perform update in $BASEDIR"
-cd $BASEDIR;
+cd "$BASEDIR"
 
 info "Perform backup first"
-./src/scripts/backup.sh $BACKUP_URL "do_not_restart_box_flag"
+./src/scripts/backup.sh "$BACKUP_URL" "do_not_restart_box_flag"
 if [[ $? != 0 ]]; then
     error "Backup failed.";
     exit 1;
@@ -77,13 +77,13 @@ check "Done"
 
 # FIXME: should instead run above commands as user but I cannot figure
 # how to get log redirection to work
-chown -R yellowtent:yellowtent $BASEDIR
+chown -R yellowtent:yellowtent "$BASEDIR"
 
 info "Run release update script..."
 UPDATE_FILE="$BASEDIR/src/scripts/update/${VERSION}.sh"
 info "Release update script is $UPDATE_FILE"
 if [ -x "$UPDATE_FILE" ]; then
-    /bin/bash $UPDATE_FILE 2>&1
+    /bin/bash "$UPDATE_FILE" 2>&1
     if [[ $? != 0 ]]; then
         info "Failed to run $UPDATE_FILE"
     else
