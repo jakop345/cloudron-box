@@ -3,7 +3,7 @@
 /* global angular */
 /* global EventSource */
 
-angular.module('Application').service('Client', function ($http) {
+angular.module('Application').service('Client', function ($http, md5) {
     var client = null;
 
     function ClientError(statusCode, message) {
@@ -73,6 +73,7 @@ angular.module('Application').service('Client', function ($http) {
         this._userInfo.username = userInfo.username;
         this._userInfo.email = userInfo.email;
         this._userInfo.admin = !!userInfo.admin;
+        this._userInfo.gravatar = 'http://www.gravatar.com/avatar/' + md5.createHash(userInfo.email.toLowerCase()) + '.jpg?s=24';
     };
 
     Client.prototype.setConfig = function (config) {

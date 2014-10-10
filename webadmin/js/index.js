@@ -3,7 +3,7 @@
 /* global angular:false */
 
 // create main application module
-var app = angular.module('Application', ['ngRoute', 'ngAnimate', 'base64']);
+var app = angular.module('Application', ['ngRoute', 'ngAnimate', 'base64', 'angular-md5']);
 
 // setup all major application routes
 app.config(function ($routeProvider) {

@@ -65,6 +65,7 @@
     <script src="3rdparty/js/angular-route.min.js"></script>
     <script src="3rdparty/js/angular-animate.min.js"></script>
     <script src="3rdparty/js/angular-base64.min.js"></script>
+    <script src="3rdparty/js/angular-md5.js"></script>
     <script src="3rdparty/js/autofill-event.js"></script>
 
     <!-- jQuery Version 1.11.0 -->
@@ -194,7 +195,7 @@
 
             <ul class="nav navbar-top-links navbar-right">
                 <li><a href="" ng-click="logout($event)"><i class="fa fa-sign-out fa-fw"></i> Sign out</a></li>
-                <li class="navbar-text"><i class="fa fa-user fa-fw"></i> {{userInfo.username}}</li>
+                <li class="navbar-text"><img src="{{ userInfo.gravatar }}"/> {{userInfo.username}}</li>
             </ul>
             <!-- /.navbar-top-links -->
 
