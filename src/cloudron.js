@@ -171,6 +171,7 @@ function restore(body, callback) {
     // TODO is there a better way?
     callback(null);
 
+    // TODO make sure you can restore only once ever
     execFile(SUDO, [ RESTORE_CMD, body.restoreUrl ], { }, function (error, stdout, stderr) {
         if (error) {
             console.error('Restore failed.', error, stdout, stderr);
