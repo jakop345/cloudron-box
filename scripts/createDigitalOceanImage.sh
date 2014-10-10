@@ -161,8 +161,12 @@ while true; do
 done
 
 # If we run scripts overenthusiastically without the wait, setup script randomly fails
-echo "Waiting 120 seconds for droplet creation"
-sleep 120
+echo -n "Waiting 120 seconds for droplet creation"
+for i in $(seq 1 24); do
+    echo -n "."
+    sleep 5
+done
+echo ""
 
 chmod o-rw,g-rw,u-w $SCRIPT_DIR/ssh/*
 while true; do
