@@ -8,6 +8,7 @@ var debug = require('debug')('box:updater'),
     assert = require('assert'),
     execFile = require('child_process').execFile,
     appdb = require('./appdb.js'),
+    cloudron = require('./cloudron.js'),
     safe = require('safetydance'),
     config = require('../config.js');
 
