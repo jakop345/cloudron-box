@@ -376,7 +376,7 @@ function stopContainer(app, callback) {
     };
 
     container.stop(options, function (error) {
-        if (error && (error.statusCode !== 304 || error.statusCode !== 404)) return callback(new Error('Error stopping container:' + error));
+        if (error && (error.statusCode !== 304 && error.statusCode !== 404)) return callback(new Error('Error stopping container:' + error));
 
         return callback(null);
     });
