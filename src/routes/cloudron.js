@@ -66,7 +66,7 @@ function restore(req, res, next) {
     if (!req.body.token) return next(new HttpError(400, 'No token provided'));
     if (!req.body.restoreUrl) return next(new HttpError(400, 'No restore url provided'));
 
-    debug('_restore: received from appstore ' + req.body.appServerUrl);
+    debug('_restore: received from appstore', req.body);
 
     cloudron.restore(req.body, function (error) {
         if (error) return next(new HttpError(500, error));
