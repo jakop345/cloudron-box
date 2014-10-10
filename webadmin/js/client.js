@@ -73,7 +73,7 @@ angular.module('Application').service('Client', function ($http, md5) {
         this._userInfo.username = userInfo.username;
         this._userInfo.email = userInfo.email;
         this._userInfo.admin = !!userInfo.admin;
-        this._userInfo.gravatar = 'http://www.gravatar.com/avatar/' + md5.createHash(userInfo.email.toLowerCase()) + '.jpg?s=24&d=mm';
+        this._userInfo.gravatar = 'https://www.gravatar.com/avatar/' + md5.createHash(userInfo.email.toLowerCase()) + '.jpg?s=24&d=mm';
     };
 
     Client.prototype.setConfig = function (config) {
