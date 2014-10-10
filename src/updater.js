@@ -120,7 +120,7 @@ Updater.prototype.update = function (backupUrl, callback) {
         cwd: path.join(__dirname, '..')
     };
 
-    debug('update: use command "%s".', command);
+    debug('update: sudo %s', args.join(' '));
 
     execFile('/usr/bin/sudo', args, options, function (error, stdout, stderr) {
         if (error) {
