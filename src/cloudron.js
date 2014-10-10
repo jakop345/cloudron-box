@@ -121,9 +121,13 @@ function getAnnounceTimerId() {
 function update(callback) {
     assert(typeof callback === 'function');
 
-    updater.update(function (error) {
-        if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error.message));
-        return callback(null);
+    getBackupUrl(function (error, backupUrl) {
+        if (error) return callback(error);
+
+        updater.update(backupUrl, function (error) {
+            if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error.message));
+            return callback(null);
+        });
     });
 }
 

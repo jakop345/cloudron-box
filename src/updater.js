@@ -8,7 +8,6 @@ var debug = require('debug')('box:updater'),
     assert = require('assert'),
     execFile = require('child_process').execFile,
     appdb = require('./appdb.js'),
-    cloudron = require('./cloudron.js'),
     safe = require('safetydance'),
     config = require('../config.js');
 
@@ -96,7 +95,8 @@ Updater.prototype.stop = function () {
     clearInterval(this._checkInterval);
 };
 
-Updater.prototype.update = function (callback) {
+Updater.prototype.update = function (backupUrl, callback) {
+    assert(typeof backupUrl === 'string');
     assert(typeof callback === 'function');
 
     var that = this;
@@ -109,34 +109,30 @@ Updater.prototype.update = function (callback) {
 
     debug('Creating backup for update');
 
-    cloudron.getBackupUrl(function (error, backupUrl) {
-        if (error) return console.error('Error getting backup url', error);
+    var args = [
+        path.join(__dirname, 'scripts/update.sh'),
+        isDev ? config.version : this._boxUpdateInfo.version,
+        isDev ? 'origin/master' : this._boxUpdateInfo.revision,
+        backupUrl
+    ];
 
-        var args = [
-            path.join(__dirname, 'scripts/update.sh'),
-            isDev ? config.version : this._boxUpdateInfo.version,
-            isDev ? 'origin/master' : this._boxUpdateInfo.revision,
-            backupUrl
-        ];
+    var options = {
+        cwd: path.join(__dirname, '..')
+    };
 
-        var options = {
-            cwd: path.join(__dirname, '..')
-        };
+    debug('update: use command "%s".', command);
 
-        debug('update: use command "%s".', command);
+    execFile('/usr/bin/sudo', args, options, function (error, stdout, stderr) {
+        if (error) {
+            console.error('Error running update script.', stdout, stderr);
+            return callback(error);
+        }
 
-        execFile('/usr/bin/sudo', args, options, function (error, stdout, stderr) {
-            if (error) {
-                console.error('Error running update script.', stdout, stderr);
-                return callback(error);
-            }
+        debug('update: success.', stdout, stderr);
 
-            debug('update: success.', stdout, stderr);
+        // Do not add any code here. The update script will stop the box code any instant
 
-            // Do not add any code here. The update script will stop the box code any instant
-
-            callback(null);
-        });
+        callback(null);
     });
 };
 
