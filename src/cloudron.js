@@ -146,6 +146,8 @@ function backup() {
     getBackupUrl(function (error, url) {
         if (error) return console.error('Error getting backup url', error);
 
+        debug('backup: url %s', url);
+
         exec(BACKUP_CMD + ' ' + url, function (error) {
             if (error) console.error('Error starting backup command', error);
         });
@@ -157,7 +159,7 @@ function restore(body, callback) {
     assert(typeof callback === 'function');
 
     var restoreCommandLine = RESTORE_CMD + ' ' + body.restoreUrl;
-    debug('_restore: execute "%s".', restoreCommandLine);
+    debug('restore: execute "%s".', restoreCommandLine);
 
     // Finish the request, to let the appstore know we triggered the restore it
     // TODO is there a better way?
