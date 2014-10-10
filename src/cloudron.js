@@ -38,6 +38,7 @@ exports = module.exports = {
 };
 
 var SUDO = '/usr/bin/sudo',
+    TAR = os.platform() === 'darwin' ? '/usr/bin/tar' : '/bin/tar',
     RESTORE_CMD = path.join(__dirname, 'scripts/restore.sh'),
     RELOAD_NGINX_CMD = path.join(__dirname, 'scripts/reloadnginx.sh'),
     BACKUP_CMD = path.join(__dirname, 'scripts/backup.sh'),
@@ -297,7 +298,7 @@ function sendGetCertificateRequest(callback) {
             file.write(chunk);
         });
         result.on('end', function () {
-            execFile('/usr/bin/tar', [ '-xf', certFilePath ], { cwd: certDirPath }, function(error) {
+            execFile(TAR, [ '-xf', certFilePath ], { cwd: certDirPath }, function(error) {
                 if (error) return callback(error);
 
                 if (!fs.existsSync(path.join(certDirPath, 'host.cert'))) return callback(new Error('Certificate bundle does not contain a host.cert file'));
