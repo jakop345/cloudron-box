@@ -127,7 +127,8 @@ function createUser(username, password, email, admin, callback) {
 
                 callback(null, user);
 
-                mailer.userAdded(user, password);
+                // only send welcome mail if user is not an admin. This i only the case for the first user!
+                if (!user.admin) mailer.userAdded(user, password);
             });
         });
     });
