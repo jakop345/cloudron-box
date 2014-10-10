@@ -33,14 +33,11 @@ CONTAINER_IDS=$(docker ps -q)
 echo "Stopping all running containers"
 docker stop $CONTAINER_IDS
 
-DATE_HEADER=$(date "+%a, %d %b %Y %T %z") # Tue, 27 Mar 2007 19:36:42 +0000
 FILE="backup_${NOW}.tar.gz"
 
 cd $HOME && tar czf /tmp/$FILE box .yellowtent
 echo "Uploading backup to $BACKUP_URL"
 curl -X PUT -T "/tmp/${FILE}" \
-    -H "Date: ${DATE_HEADER}" \
-    -H "Content-Type: application/x-compressed-tar" \
     "$BACKUP_URL"
 
 rm "/tmp/${FILE}"
