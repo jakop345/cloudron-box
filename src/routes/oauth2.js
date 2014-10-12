@@ -7,6 +7,7 @@
  */
 
 var oauth2orize = require('oauth2orize'),
+    url = require('url'),
     passport = require('passport'),
     assert = require('assert'),
     session = require('connect-ensure-login'),
@@ -99,7 +100,6 @@ server.exchange(oauth2orize.exchange.code(function (client, code, redirectURI, c
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
         if (error) return callback(error);
         if (client.id !== authCode.clientId) return callback(null, false);
-        // if (redirectURI !== authCode.redirectURI) return callback(null, false);
 
         authcodedb.del(code, function (error) {
             if(error) return callback(error);
@@ -212,6 +212,12 @@ function logout(req, res) {
     else res.redirect('/');
 }
 
+
+/*
+
+  The callback page takes the redirectURI and the authCode and redirects the browser accordingly
+
+*/
 var callback = [
     session.ensureLoggedIn('/api/v1/session/login'),
     function (req, res) {
@@ -220,7 +226,12 @@ var callback = [
     }
 ];
 
-// This would indicate a missing OAuth client session or invalid client ID
+
+/*
+
+  This indicates a missing OAuth client session or invalid client ID
+
+*/
 var error = [
     session.ensureLoggedIn('/api/v1/session/login'),
     function (req, res) {
@@ -250,15 +261,16 @@ var authorization = [
         debug('authorization: client %s with callback to %s.', clientID, redirectURI);
 
         clientdb.getByClientId(clientID, function (error, client) {
-            // TODO actually check redirectURI
             if (error) {
                 console.error('Unkown client id %s.', clientID);
                 return callback(error);
             }
 
-            // we currently pass the redirectURI from the callback through, instead of the one in the db
-            callback(null, client, '/api/v1/session/callback?redirectURI=' + redirectURI);
-            // callback(null, client, redirectURI);
+            // ignore the origin passed into form the client, but use the one from the clientdb
+            var redirectPath = url.parse(redirectURI).path;
+            var redirectOrigin = client.redirectURI;
+
+            callback(null, client, '/api/v1/session/callback?redirectURI=' + url.resolve(redirectOrigin, redirectPath));
         });
     }),
 // Until we have OAuth scopes, skip decision dialog
