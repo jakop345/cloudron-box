@@ -41,11 +41,19 @@ server.start(function (err) {
 
     console.log('Server listening on port ' + config.port);
 
-    user.create('test', 'test', 'test@test.com', true /* admin */, function (error) {
+    user.create('admin', 'admin', 'test@test.com', true /* admin */, function (error) {
         if (error) return console.error(error);
 
-        clientdb.add(uuid.v4(),'app', 'cid-app', 'unused', 'TestApp', 'http://localhost:5454', 'profile,roleUser', function (error) {
+        user.create('user', 'user', 'test@test.com', false /* admin */, function (error) {
             if (error) return console.error(error);
+
+            clientdb.add(uuid.v4(),'adminapp', 'cid-admin-app', 'unused', 'TestAdminApp', 'http://localhost:8000', 'profile,roleAdmin', function (error) {
+                if (error) return console.error(error);
+
+                clientdb.add(uuid.v4(),'app', 'cid-app', 'unused', 'TestApp', 'http://localhost:8000', 'profile,roleUser', function (error) {
+                    if (error) return console.error(error);
+                });
+            });
         });
     });
 });

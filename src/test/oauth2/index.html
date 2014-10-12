@@ -20,29 +20,22 @@
             var oauthServer = 'http://localhost:5454';
 
             function adminOAuth() {
-                var clientId = 'cid-webadmin';
-                var callbackURL = window.location.origin + '/oauth_callback.html';
-                var scope = 'root,profile,apps';
+                var clientId = 'cid-admin-app';
+                var callbackURL = 'http://this_should_be_ignored:3000/oauth_callback.html';
+                var scope = 'app,specified,scopes,are,also,ignored';
                 window.location.href = oauthServer + '/api/v1/oauth/dialog/authorize?response_type=code&client_id=' + clientId + '&redirect_uri=' + callbackURL + '&scope=' + scope;
             }
 
             function unknownOAuth() {
                 var clientId = 'cid-unknown';
-                var callbackURL = window.location.origin + '/oauth_callback.html';
-                var scope = 'root,profile,apps';
-                window.location.href = oauthServer + '/api/v1/oauth/dialog/authorize?response_type=code&client_id=' + clientId + '&redirect_uri=' + callbackURL + '&scope=' + scope;
-            }
-
-            function nonPrivAppOAuth() {
-                var clientId = 'cid-app';
-                var callbackURL = window.location.origin + '/oauth_callback.html';
+                var callbackURL = 'http://localhost/oauth_callback.html';
                 var scope = 'root,profile,apps';
                 window.location.href = oauthServer + '/api/v1/oauth/dialog/authorize?response_type=code&client_id=' + clientId + '&redirect_uri=' + callbackURL + '&scope=' + scope;
             }
 
             function privAppOAuth() {
                 var clientId = 'cid-app';
-                var callbackURL = window.location.origin + '/oauth_callback.html';
+                var callbackURL = 'http://localhost/oauth_callback.html';
                 var scope = 'profile';
                 window.location.href = oauthServer + '/api/v1/oauth/dialog/authorize?response_type=code&client_id=' + clientId + '&redirect_uri=' + callbackURL + '&scope=' + scope;
             }
@@ -64,10 +57,15 @@
     </div>
 
     <div class="row">
-        <div class="col-md-12">
-        <h3> Credentials </h3>
-        <b>Username:</b> test<br/>
-        <b>Password:</b> test<br/>
+        <div class="col-md-6">
+            <h3> Admin Credentials </h3>
+            <b>Username:</b> admin<br/>
+            <b>Password:</b> admin<br/>
+        </div>
+        <div class="col-md-6">
+            <h3> User Credentials </h3>
+            <b>Username:</b> user<br/>
+            <b>Password:</b> user<br/>
         </div>
     </div>
 
@@ -89,16 +87,13 @@
             <h3> Test Cases </h3>
         </div>
         <div class="col-md-12">
-            <button class="btn btn-default" onclick="adminOAuth();">webadmin</button>
+            <button class="btn btn-default" onclick="adminOAuth();">Admin Test App</button>
         </div>
         <div class="col-md-12">
-            <button class="btn btn-default" onclick="unknownOAuth();">unknown client</button>
+            <button class="btn btn-default" onclick="unknownOAuth();">Unkown App</button>
         </div>
         <div class="col-md-12">
-            <button class="btn btn-default" onclick="nonPrivAppOAuth();">non privileged app requesting too much scope</button>
-        </div>
-        <div class="col-md-12">
-            <button class="btn btn-default" onclick="privAppOAuth();">non privileged app</button>
+            <button class="btn btn-default" onclick="privAppOAuth();">Test App</button>
         </div>
     </div>
 </div>
