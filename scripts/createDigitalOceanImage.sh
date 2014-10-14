@@ -12,8 +12,12 @@ DATE=`date +%Y-%m-%d-%H%M%S`
 APPSTORE_URL=""
 PRETTY_APPSTORE=""
 case "$1" in
-"dev" | "alpha")
-    APPSTORE_URL="https://appstore-$1.herokuapp.com"
+"dev")
+    APPSTORE_URL="https://dev.cloudron.us"
+    PRETTY_APPSTORE="$1"
+    ;;
+"stable")
+    APPSTORE_URL="https://www.cloudron.us"
     PRETTY_APPSTORE="$1"
     ;;
 *)
