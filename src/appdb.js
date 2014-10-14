@@ -43,10 +43,10 @@ exports = module.exports = {
 };
 
 var APPS_FIELDS = [ 'id', 'appStoreId', 'version', 'installationState', 'installationProgress', 'runState',
-    'healthy', 'containerId', 'manifestJson', 'httpPort', 'location', 'dnsRecordId' ].join(',');
+    'healthy', 'containerId', 'manifestJson', 'httpPort', 'location', 'dnsRecordId', 'isPrivate' ].join(',');
 
 var APPS_FIELDS_PREFIXED = [ 'apps.id', 'apps.appStoreId', 'apps.version', 'apps.installationState', 'apps.installationProgress', 'apps.runState',
-    'apps.healthy', 'apps.containerId', 'apps.manifestJson', 'apps.httpPort', 'apps.location', 'apps.dnsRecordId' ].join(',');
+    'apps.healthy', 'apps.containerId', 'apps.manifestJson', 'apps.httpPort', 'apps.location', 'apps.dnsRecordId', 'apps.isPrivate' ].join(',');
 
 var PORT_BINDINGS_FIELDS = [ 'hostPort', 'containerPort', 'appId' ].join(',');
 
@@ -122,19 +122,20 @@ function getAll(callback) {
     });
 }
 
-function add(id, appStoreId, location, portBindings, callback) {
+function add(id, appStoreId, location, portBindings, isPrivate, callback) {
     assert(typeof id === 'string');
     assert(typeof appStoreId === 'string');
     assert(typeof location === 'string');
     assert(typeof portBindings === 'object');
+    assert(typeof isPrivate === 'boolean');
     assert(typeof callback === 'function');
 
     portBindings = portBindings || { };
 
     var conn = database.newTransaction();
 
-    conn.run('INSERT INTO apps (id, appStoreId, installationState, location) VALUES (?, ?, ?, ?)',
-           [ id, appStoreId, exports.ISTATE_PENDING_INSTALL, location ], function (error) {
+    conn.run('INSERT INTO apps (id, appStoreId, installationState, location, isPrivate) VALUES (?, ?, ?, ?, ?)',
+           [ id, appStoreId, exports.ISTATE_PENDING_INSTALL, location, isPrivate ], function (error) {
         if (error || !this.lastID) database.rollback(conn);
 
         if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));

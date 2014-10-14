@@ -430,7 +430,7 @@ var proxy = [
     function (req, res, next) {
         var options = {
             host: '127.0.0.1',
-            port: req.headers['x-forwarded-port'],
+            port: req.headers['x-cloudron-proxy-port'],
             method: req.method,
             path: req.params[0],
             headers: req.headers

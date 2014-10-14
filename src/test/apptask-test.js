@@ -29,7 +29,8 @@ var APP = {
     },
     containerId: null,
     httpPort: 4567,
-    portBindings: null
+    portBindings: null,
+    isPrivate: false
 };
 
 describe('apptask', function () {
@@ -40,7 +41,7 @@ describe('apptask', function () {
 
         database.create(function (error) {
             expect(error).to.be(null);
-            appdb.add(APP.id, APP.appStoreId, APP.location, APP.portBindings, done);
+            appdb.add(APP.id, APP.appStoreId, APP.location, APP.portBindings, APP.isPrivate, done);
         });
     });
 

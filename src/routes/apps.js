@@ -100,7 +100,7 @@ function installApp(req, res, next) {
     debug('will install app with instance id ' + appId + ' storeId: ' + data.appStoreId +
           ' @ ' + data.location + ' with ' + JSON.stringify(data.portBindings));
 
-    apps.install(appId, data.appStoreId, req.user.username, data.password, data.location, data.portBindings, function (error) {
+    apps.install(appId, data.appStoreId, req.user.username, data.password, data.location, data.portBindings, false, function (error) {
         if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, 'App already exists: ' + error));
         if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error) return next(new HttpError(500, 'Internal error:' + error));
@@ -126,7 +126,7 @@ function configureApp(req, res, next) {
 
     debug('will configure app with id ' + data.appId + ' @ ' + data.location + ' with ' + JSON.stringify(data.portBindings));
 
-    apps.configure(data.appId, req.user.username, data.password, data.location, data.portBindings, function (error) {
+    apps.configure(data.appId, req.user.username, data.password, data.location, data.portBindings, false, function (error) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app:' + error));
         if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error));
         if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));

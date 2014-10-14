@@ -28,7 +28,8 @@ describe('Apps', function () {
         httpPort: null,
         containerId: null,
         portBindings: { '1234': '5678' },
-        healthy: null
+        healthy: null,
+        isPrivate: false
     };
 
     before(function (done) {
@@ -36,7 +37,7 @@ describe('Apps', function () {
 
         database.create(function (error) {
             expect(error).to.be(null);
-            appdb.add(APP_0.id, APP_0.appStoreId, APP_0.location, APP_0.portBindings, done);
+            appdb.add(APP_0.id, APP_0.appStoreId, APP_0.location, APP_0.portBindings, APP_0.isPrivate, done);
         });
     });
 
