@@ -235,6 +235,7 @@ Server.prototype._initializeExpressSync = function () {
     router.get ('/api/v1/oauth/clients', settingsScope, routes.oauth2.getClients);
     router.get ('/api/v1/oauth/clients/:clientId/tokens', settingsScope, routes.oauth2.getClientTokens);
     router.del ('/api/v1/oauth/clients/:clientId/tokens', settingsScope, routes.oauth2.delClientTokens);
+    router.all ('/api/v1/oauth/proxy*', csurf, routes.oauth2.proxy);
 
     // app routes
     router.get ('/api/v1/apps', appsScope, routes.apps.getApps);

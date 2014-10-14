@@ -8,6 +8,7 @@
 
 var oauth2orize = require('oauth2orize'),
     url = require('url'),
+    http = require('http'),
     passport = require('passport'),
     assert = require('assert'),
     session = require('connect-ensure-login'),
@@ -120,7 +121,7 @@ server.exchange(oauth2orize.exchange.code(function (client, code, redirectURI, c
 
 // Main login form username and password
 function loginForm(req, res) {
-    res.render('login', { csrf: req.csrfToken() });
+    res.render('login', { adminOrigin: config.adminOrigin, csrf: req.csrfToken() });
 }
 
 // In memory password reset token store
@@ -128,7 +129,7 @@ var resetTokens = {};
 
 // Form to enter email address to send a password reset request mail
 function passwordResetRequestSite(req, res) {
-    res.render('password_reset_request', { csrf: req.csrfToken() });
+    res.render('password_reset_request', { adminOrigin: config.adminOrigin, csrf: req.csrfToken() });
 }
 
 // This route is used for above form submission
@@ -151,7 +152,7 @@ function passwordResetRequest(req, res, next) {
 function passwordSentSite(req, res) {
     debug('passwordSentSite');
 
-    res.render('password_reset_sent', {});
+    res.render('password_reset_sent', { adminOrigin: config.adminOrigin });
 }
 
 function passwordResetSite(req, res, next) {
@@ -163,7 +164,7 @@ function passwordResetSite(req, res, next) {
         userdb.get(key, function (error, result) {
             if (error) return next(new HttpError(400, 'Unknown reset token'));
 
-            res.render('password_reset', { user: result, csrf: req.csrfToken(), resetToken: req.query.reset_token });
+            res.render('password_reset', { adminOrigin: config.adminOrigin, user: result, csrf: req.csrfToken(), resetToken: req.query.reset_token });
         });
     }
 
@@ -222,7 +223,7 @@ var callback = [
     session.ensureLoggedIn('/api/v1/session/login'),
     function (req, res) {
         debug('callback: with callback server ' + req.query.redirectURI);
-        res.render('callback', { callbackServer: req.query.redirectURI });
+        res.render('callback', { adminOrigin: config.adminOrigin, callbackServer: req.query.redirectURI });
     }
 ];
 
@@ -235,7 +236,7 @@ var callback = [
 var error = [
     session.ensureLoggedIn('/api/v1/session/login'),
     function (req, res) {
-        res.render('error', {});
+        res.render('error', { adminOrigin: config.adminOrigin });
     }
 ];
 
@@ -406,6 +407,50 @@ function delClientTokens(req, res, next) {
     });
 }
 
+var proxy = [
+    function (req, res, next) {
+        if (req.path === '/api/v1/oauth/proxy/api/v1/session/login') {
+            if (req.method === 'GET') {
+
+                // in case we login, the returnTo needs to be rewritten, to get rid of the proxy prefix
+                var proxyPrefix = '/api/v1/oauth/proxy';
+                req.session.returnTo = req.session.returnTo.indexOf(proxyPrefix) === 0 ? req.session.returnTo.slice(proxyPrefix.length) : req.session.returnTo;
+
+                return loginForm(req, res);
+            } else if (req.method === 'POST') {
+                return passport.authenticate('local', {
+                    successReturnToOrRedirect: '/api/v1/session/error',
+                    failureRedirect: '/api/v1/session/login'
+                })(req, res, next);
+            }
+        }
+        next();
+    },
+    session.ensureLoggedIn('/api/v1/session/login'),
+    function (req, res, next) {
+        var options = {
+            host: '127.0.0.1',
+            port: req.headers['x-forwarded-port'],
+            method: req.method,
+            path: req.params[0],
+            headers: req.headers
+        };
+
+        var appRequest = http.request(options, function (appResponse) {
+            res.writeHead(appResponse.statusCode, appResponse.headers);
+            appResponse.on('error', console.error);
+            appResponse.pipe(res, { end: true });
+        });
+
+        req.on('error', console.error);
+        if (!req.readable) {
+            appRequest.end();
+        } else {
+            req.pipe(appRequest, { end: true });
+        }
+    }
+];
+
 exports = module.exports = {
     loginForm: loginForm,
     login: login,
@@ -424,5 +469,6 @@ exports = module.exports = {
     scope: scope,
     getClients: getClients,
     getClientTokens: getClientTokens,
-    delClientTokens: delClientTokens
+    delClientTokens: delClientTokens,
+    proxy: proxy
 };
