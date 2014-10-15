@@ -43,10 +43,10 @@ exports = module.exports = {
 };
 
 var APPS_FIELDS = [ 'id', 'appStoreId', 'version', 'installationState', 'installationProgress', 'runState',
-    'healthy', 'containerId', 'manifestJson', 'httpPort', 'location', 'dnsRecordId', 'isPrivate' ].join(',');
+    'healthy', 'containerId', 'manifestJson', 'httpPort', 'location', 'dnsRecordId', 'restrictAccessTo' ].join(',');
 
 var APPS_FIELDS_PREFIXED = [ 'apps.id', 'apps.appStoreId', 'apps.version', 'apps.installationState', 'apps.installationProgress', 'apps.runState',
-    'apps.healthy', 'apps.containerId', 'apps.manifestJson', 'apps.httpPort', 'apps.location', 'apps.dnsRecordId', 'apps.isPrivate' ].join(',');
+    'apps.healthy', 'apps.containerId', 'apps.manifestJson', 'apps.httpPort', 'apps.location', 'apps.dnsRecordId', 'apps.restrictAccessTo' ].join(',');
 
 var PORT_BINDINGS_FIELDS = [ 'hostPort', 'containerPort', 'appId' ].join(',');
 
@@ -122,20 +122,20 @@ function getAll(callback) {
     });
 }
 
-function add(id, appStoreId, location, portBindings, isPrivate, callback) {
+function add(id, appStoreId, location, portBindings, restrictAccessTo, callback) {
     assert(typeof id === 'string');
     assert(typeof appStoreId === 'string');
     assert(typeof location === 'string');
     assert(typeof portBindings === 'object');
-    assert(typeof isPrivate === 'boolean');
+    assert(typeof restrictAccessTo === 'string');
     assert(typeof callback === 'function');
 
     portBindings = portBindings || { };
 
     var conn = database.newTransaction();
 
-    conn.run('INSERT INTO apps (id, appStoreId, installationState, location, isPrivate) VALUES (?, ?, ?, ?, ?)',
-           [ id, appStoreId, exports.ISTATE_PENDING_INSTALL, location, isPrivate ], function (error) {
+    conn.run('INSERT INTO apps (id, appStoreId, installationState, location, restrictAccessTo) VALUES (?, ?, ?, ?, ?)',
+           [ id, appStoreId, exports.ISTATE_PENDING_INSTALL, location, restrictAccessTo ], function (error) {
         if (error || !this.lastID) database.rollback(conn);
 
         if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));

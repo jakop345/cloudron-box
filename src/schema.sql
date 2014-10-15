@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS apps(
     httpPort INTEGER,
     location VARCHAR(512) NOT NULL UNIQUE,
     dnsRecordId VARCHAR(512),
-    isPrivate BOOLEAN,
+    restrictAccessTo VARCHAR(512),
     PRIMARY KEY(id));
 
 CREATE TABLE IF NOT EXISTS appPortBindings(

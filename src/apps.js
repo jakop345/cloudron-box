@@ -222,13 +222,13 @@ function getAll(callback) {
     });
 }
 
-function install(appId, appStoreId, username, password, location, portBindings, isPrivate, callback) {
+function install(appId, appStoreId, username, password, location, portBindings, restrictAccessTo, callback) {
     assert(typeof appId === 'string');
     assert(typeof username === 'string');
     assert(typeof password === 'string');
     assert(typeof location === 'string');
     assert(!portBindings || typeof portBindings === 'object');
-    assert(typeof isPrivate === 'boolean');
+    assert(typeof restrictAccessTo === 'string');
     assert(typeof callback === 'function');
 
     var error = validateSubdomain(location, config.fqdn);
@@ -239,7 +239,7 @@ function install(appId, appStoreId, username, password, location, portBindings, 
 
     debug('Will install app with id : ' + appId);
 
-    appdb.add(appId, appStoreId, location, portBindings, isPrivate, function (error) {
+    appdb.add(appId, appStoreId, location, portBindings, restrictAccessTo, function (error) {
         if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new AppsError(AppsError.ALREADY_EXISTS));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
@@ -250,12 +250,12 @@ function install(appId, appStoreId, username, password, location, portBindings, 
     });
 }
 
-function configure(appId, username, password, location, portBindings, isPrivate, callback) {
+function configure(appId, username, password, location, portBindings, restrictAccessTo, callback) {
     assert(typeof appId === 'string');
     assert(typeof username === 'string');
     assert(typeof password === 'string');
     assert(!portBindings || typeof portBindings === 'object');
-    assert(typeof isPrivate === 'boolean');
+    assert(typeof restrictAccessTo === 'string');
     assert(typeof callback === 'function');
 
     var error = location ? validateSubdomain(location, config.fqdn) : null;
@@ -267,7 +267,7 @@ function configure(appId, username, password, location, portBindings, isPrivate,
     var values = { };
     if (location) values.location = location;
     values.portBindings = portBindings;
-    values.isPrivate = isPrivate;
+    values.restrictAccessTo = restrictAccessTo;
 
     debug('Will install app with id:%s', appId);
 
