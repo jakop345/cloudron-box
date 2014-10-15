@@ -193,7 +193,7 @@ angular.module('Application').service('Client', function ($http, md5) {
 
     Client.prototype.installApp = function (id, password, title, config, callback) {
         var that = this;
-        var data = { appStoreId: id, password: password, location: config.location, portBindings: config.portBindings };
+        var data = { appStoreId: id, password: password, location: config.location, portBindings: config.portBindings, restrictAccessTo: config.restrictAccessTo };
         $http.post('/api/v1/app/install', data).success(function (data, status) {
             if (status !== 200 || !data.id) return callback(new ClientError(status, data));
 
@@ -206,7 +206,7 @@ angular.module('Application').service('Client', function ($http, md5) {
     };
 
     Client.prototype.configureApp = function (id, password, config, callback) {
-        var data = { appId: id, password: password, location: config.location, portBindings: config.portBindings };
+        var data = { appId: id, password: password, location: config.location, portBindings: config.portBindings, restrictAccessTo: config.restrictAccessTo };
         $http.post('/api/v1/app/' + id + '/configure', data).success(function (data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null);
