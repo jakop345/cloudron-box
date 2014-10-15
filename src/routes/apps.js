@@ -93,6 +93,7 @@ function installApp(req, res, next) {
     if (!data.password) return next(new HttpError(400, 'password is required'));
     if (!data.location) return next(new HttpError(400, 'location is required'));
     if (('portBindings' in data) && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
+    if (typeof data.restrictAccessTo !== 'string') return next(new HttpError(400, 'restrictAccessTo is required'));
 
     // allow tests to provide an appId for testing
     var appId = (process.env.NODE_ENV === 'test' && typeof data.appId === 'string') ? data.appId : uuid.v4();
@@ -100,7 +101,7 @@ function installApp(req, res, next) {
     debug('will install app with instance id ' + appId + ' storeId: ' + data.appStoreId +
           ' @ ' + data.location + ' with ' + JSON.stringify(data.portBindings));
 
-    apps.install(appId, data.appStoreId, req.user.username, data.password, data.location, data.portBindings, '' /* restrictAccessTo */, function (error) {
+    apps.install(appId, data.appStoreId, req.user.username, data.password, data.location, data.portBindings, data.restrictAccessTo, function (error) {
         if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, 'App already exists: ' + error));
         if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error) return next(new HttpError(500, 'Internal error:' + error));
@@ -123,10 +124,11 @@ function configureApp(req, res, next) {
     if (!data.appId) return next(new HttpError(400, 'appId is required'));
     if (!data.password) return next(new HttpError(400, 'password is required'));
     if (('portBindings' in data) && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
+    if (typeof data.restrictAccessTo !== 'string') return next(new HttpError(400, 'restrictAccessTo is required'));
 
     debug('will configure app with id ' + data.appId + ' @ ' + data.location + ' with ' + JSON.stringify(data.portBindings));
 
-    apps.configure(data.appId, req.user.username, data.password, data.location, data.portBindings, '' /* restrictAccessTo */, function (error) {
+    apps.configure(data.appId, req.user.username, data.password, data.location, data.portBindings, data.restrictAccessTo, function (error) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app:' + error));
         if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error));
         if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));
