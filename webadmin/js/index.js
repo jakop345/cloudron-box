@@ -88,3 +88,13 @@ app.filter('installationStateLabel', function() {
         return input;
     };
 });
+
+app.filter('restrictAccessToLabel', function() {
+    return function(input) {
+        if (input === '') return 'public';
+        if (input === 'roleUser') return 'private';
+        if (input === 'roleAdmin') return 'private (Admins only)';
+
+        return input;
+    };
+});
