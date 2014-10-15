@@ -6,6 +6,7 @@ var AppConfigureController = function ($scope, $routeParams, Client) {
     $scope.app = null;
     $scope.password = '';
     $scope.location = '';
+    $scope.restrictAccessTo = '';
     $scope.disabled = false;
     $scope.error = { };
     $scope.domain = '';
@@ -20,7 +21,7 @@ var AppConfigureController = function ($scope, $routeParams, Client) {
             portBindings[containerPort] = $scope.portBindings[containerPort].hostPort;
         }
 
-        Client.configureApp($routeParams.appId, $scope.password, { location: $scope.location, portBindings: portBindings }, function (error) {
+        Client.configureApp($routeParams.appId, $scope.password, { location: $scope.location, portBindings: portBindings, restrictAccessTo: $scope.restrictAccessTo }, function (error) {
             if (error) {
                 if (error.statusCode === 403) {
                     $scope.error.password = 'Wrong password provided.';
@@ -51,6 +52,7 @@ var AppConfigureController = function ($scope, $routeParams, Client) {
             $scope.app = app;
             $scope.location = app.location;
             $scope.portBindings = app.manifest.tcpPorts;
+            $scope.restrictAccessTo = app.restrictAccessTo;
             for (var containerPort in $scope.portBindings) {
                 $scope.portBindings[containerPort].hostPort = app.portBindings[containerPort];
             }

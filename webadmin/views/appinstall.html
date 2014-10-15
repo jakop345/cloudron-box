@@ -22,6 +22,14 @@
                 <input type="text" class="form-control" ng-model="portBindings[port].hostPort" id="inputPortInfo{{portInfo.description}}" required>
             </div>
         </div>
+        <div class="form-group">
+            <label class="control-label" for="restrictAccessTo">Access Restriction</label>
+            <select class="form-control" id="restrictAccessTo" ng-model="restrictAccessTo">
+                <option value="">Public</option>
+                <option value="roleUser">Private</option>
+                <option value="roleAdmin">Private (Admins only)</option>
+            </select>
+        </div>
         <input class="btn btn-default btn-outline" ng-click="cancel()" type="button" value="Cancel"/>
         <input class="btn btn-primary btn-outline pull-right" type="submit" ng-disabled="{{disabled}}" value="Install"/>
     </form>

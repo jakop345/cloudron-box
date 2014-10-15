@@ -6,6 +6,7 @@ var AppInstallController = function ($scope, $routeParams, Client, AppStore) {
     $scope.app = null;
     $scope.password = '';
     $scope.location = '';
+    $scope.restrictAccessTo = '';
     $scope.disabled = false;
     $scope.error = { };
     $scope.domain = '';
@@ -24,6 +25,7 @@ var AppInstallController = function ($scope, $routeParams, Client, AppStore) {
             $scope.error = error || { };
             if (error) return;
             $scope.portBindings = manifest.tcpPorts;
+            $scope.restrictAccessTo = manifest.restrictAccessTo || '';
             // default setting is to map ports as they are in manifest
             for (var port in $scope.portBindings) {
                 $scope.portBindings[port].hostPort = port;
@@ -40,7 +42,7 @@ var AppInstallController = function ($scope, $routeParams, Client, AppStore) {
             portBindings[port] = $scope.portBindings[port].hostPort;
         }
 
-        Client.installApp($routeParams.appStoreId, $scope.password, $scope.app.title, { location: $scope.location, portBindings: portBindings }, function (error, appId) {
+        Client.installApp($routeParams.appStoreId, $scope.password, $scope.app.title, { location: $scope.location, portBindings: portBindings, restrictAccessTo: $scope.restrictAccessTo }, function (error, appId) {
             if (error) {
                 if (error.statusCode === 409) {
                     $scope.error.name = 'Application already exists.';
