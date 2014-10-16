@@ -282,10 +282,10 @@ function installCertificate(cert, key, callback) {
 
     var certDirPath = config.nginxCertDir;
 
-    if (!cert || !key) return new Error('cert or key is null');
+    if (!cert || !key) return callback(new Error('cert or key is null'));
 
-    if (!safe.fs.writeFileSync(path.join(certDirPath, 'host.cert'), cert)) return new Error('Cannot write host.cert:' + safe.error);
-    if (!safe.fs.writeFileSync(path.join(certDirPath, 'host.key'), key)) return new Error('Cannot write host.key:' + safe.error);
+    if (!safe.fs.writeFileSync(path.join(certDirPath, 'host.cert'), cert)) return callback(new Error('Cannot write host.cert:' + safe.error));
+    if (!safe.fs.writeFileSync(path.join(certDirPath, 'host.key'), key)) return callback(new Error('Cannot write host.key:' + safe.error));
 
     execFile(SUDO, [ RELOAD_NGINX_CMD ], { timeout: 10000 }, function (error) {
         if (error) return callback(error);
