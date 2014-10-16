@@ -355,7 +355,7 @@ function provision(args, callback) {
 
     if (config.token) return callback(new CloudronError(CloudronError.ALREADY_PROVISIONED));
 
-    config.set(_.pick(args, 'token', 'appServerUrl', 'adminOrigin', 'fqdn'));
+    config.set(_.pick(args, 'token', 'appServerUrl', 'adminOrigin', 'fqdn', 'isDev'));
 
     // override the default webadmin OAuth client record
     clientdb.delByAppId('webadmin', function () {

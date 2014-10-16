@@ -84,7 +84,7 @@ angular.module('Application').service('Client', function ($http, md5) {
         this._config.ip = config.ip;
         this._config.revision = config.revision;
         this._config.update = config.update;
-        this._config.isDev = config.appServerUrl === 'https://dev.cloudron.io';
+        this._config.isDev = config.isDev;
 
         var that = this;
 

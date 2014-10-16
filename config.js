@@ -37,10 +37,12 @@ config.save = function () {
         config.port = 3000;
         config.logApiRequests = true;
         config.appServerUrl = process.env.APP_SERVER_URL || null; // APP_SERVER_URL is set during bootstrap in the box's supervisor manifest
+        config.isDev = false;
     } else {
         config.port = 5454;
         config.logApiRequests = false;
         config.appServerUrl = 'http://localhost:6060'; // hock doesn't support https
+        config.isDev = true;
     }
 
     config.nginxConfigDir = path.join(config.baseDir, 'nginx');
