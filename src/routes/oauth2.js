@@ -418,6 +418,7 @@ var proxy = [
 
                 return loginForm(req, res);
             } else if (req.method === 'POST') {
+                // TODO check for roleUser/roleAdmin
                 return passport.authenticate('local', {
                     successReturnToOrRedirect: '/api/v1/session/error',
                     failureRedirect: '/api/v1/session/login'
