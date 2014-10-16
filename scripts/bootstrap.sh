@@ -63,6 +63,7 @@ FQDN=`hostname -f`
 sed -e "s/##ADMIN_FQDN##/admin-$FQDN/" -e "s|##SRCDIR##|$SRCDIR|" nginx/admin.conf_template > $BACKUP_DIR/nginx/applications/admin.conf
 
 echo "==== Setup ssl certs ===="
+# The nginx cert dir is excluded from backup in backup.sh
 CERTIFICATE_DIR=$BACKUP_DIR/nginx/cert
 mkdir -p $CERTIFICATE_DIR
 cd $CERTIFICATE_DIR

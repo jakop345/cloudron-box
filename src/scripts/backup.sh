@@ -39,7 +39,8 @@ FILE="/tmp/backup_${NOW}.tar.gz"
 
 # Do not backup anything other than box (source) and .yellowtent (data)
 # Other directories might contain potentially sensitive information like certs
-cd "$HOME" && tar czf "$FILE" box .yellowtent
+# The nginx cert dir here needs to match bootstrap.sh
+cd "$HOME" && tar czf "$FILE" box .yellowtent --exclude='.yellowtent/nginx/cert'
 echo "Uploading backup to $BACKUP_URL"
 curl -X PUT -T "$FILE" \
     "$BACKUP_URL"
