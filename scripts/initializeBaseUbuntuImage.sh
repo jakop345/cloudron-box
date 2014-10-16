@@ -196,8 +196,14 @@ do_start() {
     exec 2>&1 1> "/var/log/cloudron/bootstrap_init-\$\$-\$BASHPID.log"
 
     echo "Updating to git revision $BOX_REVISION"
+
+    sudo -u $USER -H bash <<EOF2
     cd $SRCDIR
-    sudo -u $USER bash -c "git fetch && git reset --hard $BOX_REVISION"
+    while true; do
+        timeout 3m bash -c "git fetch && git reset --hard $BOX_REVISION" && break
+        echo "git fetch timedout, trying again"
+    done
+    EOF2
 
     echo "Running bootstrap script with args $APPSTORE_URL $BOX_REVISION"
     /bin/bash $SRCDIR/scripts/bootstrap.sh $APPSTORE_URL $BOX_REVISION
