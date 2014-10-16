@@ -97,6 +97,7 @@ function provision(req, res, next) {
     if (!req.body.adminOrigin) return next(new HttpError(400, 'No adminOrigin provided'));
     if (!req.body.fqdn) return next(new HttpError(400, 'No fqdn provided'));
     if (!req.body.ip) return next(new HttpError(400, 'No ip provided'));
+    if (!('tls' in req.body)) return next(new HttpError(400, 'tls cert must be provided or be null'));
 
     debug('_provision: received from appstore ' + req.body.appServerUrl);
 

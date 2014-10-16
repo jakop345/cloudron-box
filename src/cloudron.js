@@ -275,53 +275,24 @@ function announce() {
     });
 };
 
-function sendGetCertificateRequest(callback) {
+function installCertificate(cert, key, callback) {
+    assert(typeof cert === 'string' || !cert);
+    assert(typeof key === 'string' || !key);
     assert(typeof callback === 'function');
 
-    debug('_getCertificate');
+    var certDirPath = config.nginxCertDir;
 
-    if (!config.appServerUrl || !config.token || !config.fqdn) {
-        debug('_getCertificate: not provisioned, yet.');
-        return callback(new Error('Not provisioned yet'));
-    }
+    if (!cert || !key) return new Error('cert or key is null');
 
-    var url = config.appServerUrl + '/api/v1/boxes/' + config.fqdn + '/certificate?token=' + config.token;
+    if (!safe.fs.writeFileSync(path.join(certDirPath, 'host.cert'), cert)) return new Error('Cannot write host.cert:' + safe.error);
+    if (!safe.fs.writeFileSync(path.join(certDirPath, 'host.key'), key)) return new Error('Cannot write host.key:' + safe.error);
 
-    var request = require(config.appServerUrl.indexOf('https://') === 0 ? 'https' : 'http');
+    execFile(SUDO, [ RELOAD_NGINX_CMD ], { timeout: 10000 }, function (error) {
+        if (error) return callback(error);
 
-    request.get(url, function (result) {
-        if (result.statusCode !== 200) return callback(new Error('Failed to get certificate. Status: ' + result.statusCode));
+        debug('_getCertificate: success');
 
-        var certDirPath = config.nginxCertDir;
-        var certFilePath = path.join(certDirPath, 'cert.tar');
-        var file = fs.createWriteStream(certFilePath);
-
-        result.on('data', function (chunk) {
-            file.write(chunk);
-        });
-        result.on('end', function () {
-            execFile(TAR, [ '-xf', certFilePath ], { cwd: certDirPath }, function(error) {
-                if (error) return callback(error);
-
-                if (!fs.existsSync(path.join(certDirPath, 'host.cert'))) return callback(new Error('Certificate bundle does not contain a host.cert file'));
-                if (!fs.existsSync(path.join(certDirPath, 'host.info'))) return callback(new Error('Certificate bundle does not contain a host.info file'));
-                if (!fs.existsSync(path.join(certDirPath, 'host.key'))) return callback(new Error('Certificate bundle does not contain a host.key file'));
-                if (!fs.existsSync(path.join(certDirPath, 'host.pem'))) return callback(new Error('Certificate bundle does not contain a host.pem file'));
-
-                // cleanup the cert bundle
-                fs.unlinkSync(certFilePath);
-
-                execFile(SUDO, [ RELOAD_NGINX_CMD ], { timeout: 10000 }, function (error) {
-                    if (error) return callback(error);
-
-                    debug('_getCertificate: success');
-
-                    callback(null);
-                });
-            });
-        });
-    }).on('error', function (error) {
-        callback(error);
+        callback(null);
     });
 }
 
@@ -379,17 +350,6 @@ function addMailDnsRecords() {
     });
 }
 
-function getCertificate() {
-    sendGetCertificateRequest(function (error) {
-        if (error) {
-            console.error(error);
-            getCertificateTimerId = setTimeout(getCertificate, 5000);
-            return;
-        }
-        debug('getCertificate: success');
-    });
-}
-
 function provision(args, callback) {
     assert(typeof callback === 'function');
 
@@ -404,11 +364,10 @@ function provision(args, callback) {
         clientdb.add(uuid.v4(), 'webadmin', 'cid-webadmin', 'unused', 'WebAdmin', config.adminOrigin, scopes, function (error) {
             if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
-            callback(null);
+            installCertificate(args.tls.cert, args.tls.key, callback);
 
             // TODO: this needs to work across reboots
             addMailDnsRecords();
-            getCertificate();
         });
     });
 }
