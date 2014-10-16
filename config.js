@@ -62,7 +62,7 @@ config.save = function () {
 
     config.token = null;
     config.nakedDomain = null;
-    config.version = '0.4.0';
+    config.version = '0.5.0';
     config.mailServer = null;
     config.mailUsername = null;
 
