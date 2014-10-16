@@ -203,7 +203,7 @@ do_start() {
         timeout 3m bash -c "git fetch && git reset --hard $BOX_REVISION" && break
         echo "git fetch timedout, trying again"
     done
-    EOF2
+EOF2
 
     echo "Running bootstrap script with args $APPSTORE_URL $BOX_REVISION"
     /bin/bash $SRCDIR/scripts/bootstrap.sh $APPSTORE_URL $BOX_REVISION
