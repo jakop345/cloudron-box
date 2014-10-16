@@ -211,6 +211,7 @@ function getConfig(callback) {
 
         callback(null, {
             appServerUrl: config.appServerUrl,
+            isDev: config.isDev,
             fqdn: config.fqdn,
             ip: getIp(),
             version: config.version,
