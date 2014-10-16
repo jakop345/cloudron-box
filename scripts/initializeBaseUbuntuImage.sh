@@ -85,11 +85,6 @@ docker pull girish/graphite:0.2
 echo "=== Pulling haraka mail relay ==="
 docker pull girish/haraka:0.1
 
-# https://jpetazzo.github.io/2014/06/23/docker-ssh-considered-evil/
-echo "=== Install nsenter ==="
-docker run --rm jpetazzo/nsenter cat /nsenter > /usr/bin/nsenter
-chmod +x /usr/bin/nsenter
-
 echo "==== Install nginx ===="
 apt-get -y install nginx-full
 service nginx stop
