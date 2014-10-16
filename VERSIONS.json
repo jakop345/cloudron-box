@@ -17,9 +17,16 @@
             "Box update and app update",
             "Box backup and restore"
         ],
-        "next": null
+        "next": "0.4.0"
     },
     "0.4.0": {
+        "revision": "32cc2d2e2af692d44e0e8493179da0e1b72da0bc",
+        "changelog": [
+            "Multiple app instances"
+        ],
+        "next": null
+    },
+    "0.5.0": {
         "revision": "TBD",
         "changelog": [
         ],
