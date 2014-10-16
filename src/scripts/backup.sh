@@ -37,6 +37,8 @@ fi
 
 FILE="/tmp/backup_${NOW}.tar.gz"
 
+# Do not backup anything other than box (source) and .yellowtent (data)
+# Other directories might contain potentially sensitive information like certs
 cd "$HOME" && tar czf "$FILE" box .yellowtent
 echo "Uploading backup to $BACKUP_URL"
 curl -X PUT -T "$FILE" \
