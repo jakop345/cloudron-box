@@ -195,18 +195,15 @@ do_start() {
 
     exec 2>&1 1> "/var/log/cloudron/bootstrap_init-\$\$-\$BASHPID.log"
 
-    echo "[II] Update to latest git revision..."
+    echo "Updating to git revision $BOX_REVISION"
     cd $SRCDIR
     sudo -u $USER bash -c "git fetch && git reset --hard $BOX_REVISION"
-    echo "[II] Done"
 
-    echo "[II] Run bootstrap script..."
+    echo "Running bootstrap script with args $APPSTORE_URL $BOX_REVISION"
     /bin/bash $SRCDIR/scripts/bootstrap.sh $APPSTORE_URL $BOX_REVISION
-    echo "[II] Done"
 
-    echo "[II] Disable bootstrap init script"
+    echo "Disabling bootstrap init script"
     update-rc.d bootstrap remove
-    echo "[II] Done"
 }
 
 case "\$1" in
@@ -225,10 +222,11 @@ case "\$1" in
         ;;
 esac
 
+echo "End of bootstrap init script"
 EOF
+
 chmod +x /etc/init.d/bootstrap
 update-rc.d bootstrap defaults 99
 
 sync
-
 
