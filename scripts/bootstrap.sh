@@ -63,7 +63,7 @@ echo "==== Setup ssl certs ===="
 CERTIFICATE_DIR=$BACKUP_DIR/nginx/cert
 mkdir -p $CERTIFICATE_DIR
 cd $CERTIFICATE_DIR
-/bin/bash $SRCDIR/scripts/generate_certificate.sh US California 'San Francisco' Selfhost Cloudron `hostname -f` cert@selfhost.io .
+/bin/bash $SRCDIR/scripts/generate_certificate.sh US California 'San Francisco' CloudronInc Cloudron `hostname -f` cert@cloudron.io .
 tar xf cert.tar
 
 chown $USER:$USER -R $BACKUP_DIR

@@ -100,7 +100,7 @@ Updater.prototype.update = function (backupUrl, callback) {
     assert(typeof callback === 'function');
 
     var that = this;
-    var isDev = config.appServerUrl === 'https://dev.cloudron.us' || config.appServerUrl === 'https://selfhost.io:5050';
+    var isDev = config.appServerUrl === 'https://dev.cloudron.io';
 
     if (!isDev && !this._boxUpdateInfo) {
         debug('update: no box update available');

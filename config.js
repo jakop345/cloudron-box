@@ -36,7 +36,7 @@ config.save = function () {
     if (production) {
         config.port = 3000;
         config.logApiRequests = true;
-        config.appServerUrl = process.env.APP_SERVER_URL || 'https://selfhost.io:5050'; // APP_SERVER_URL is set during bootstrap in the box's supervisor manifest
+        config.appServerUrl = process.env.APP_SERVER_URL || null; // APP_SERVER_URL is set during bootstrap in the box's supervisor manifest
     } else {
         config.port = 5454;
         config.logApiRequests = false;

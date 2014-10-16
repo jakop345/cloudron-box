@@ -3,10 +3,10 @@
 # C                      = US
 # ST                     = California
 # L                      = San Francisco
-# O                      = Selfhost
+# O                      = CloudronInc
 # OU                     = Cloudron
 # CN                     = *.nebulon.cloudron.com
-# emailAddress           = cert@selfhost.io
+# emailAddress           = cert@cloudron.io
 
 if [[ $# < 7 ]]; then
     echo "Not enough arguments";

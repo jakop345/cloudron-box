@@ -13,11 +13,11 @@ APPSTORE_URL=""
 PRETTY_APPSTORE=""
 case "$1" in
 "dev")
-    APPSTORE_URL="https://dev.cloudron.us"
+    APPSTORE_URL="https://dev.cloudron.io"
     PRETTY_APPSTORE="$1"
     ;;
 "stable")
-    APPSTORE_URL="https://www.cloudron.us"
+    APPSTORE_URL="https://www.cloudron.io"
     PRETTY_APPSTORE="$1"
     ;;
 *)
