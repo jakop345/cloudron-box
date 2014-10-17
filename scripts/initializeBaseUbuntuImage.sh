@@ -64,10 +64,11 @@ mkdir /var/lib/docker
 
 # create a separate 12GB fs for docker images
 # dd if=/dev/zero of=/root/docker_data.img bs=1M count=12000
+apt-get -y install btrfs-tools
 truncate -s 12G /root/docker_data.img
-mkfs.ext4 -F /root/docker_data.img
-tune2fs -c0 -i0 /root/docker_data.img # disable automatic fs check
-echo "/root/docker_data.img /var/lib/docker ext4 loop,nosuid 0 0" >> /etc/fstab
+mkfs.btrfs -L DockerData /root/docker_data.img
+echo "/root/docker_data.img /var/lib/docker btrfs loop,nosuid 0 0" >> /etc/fstab
+echo 'DOCKER_OPTS="-s btrfs"' >> /etc/default/docker
 mount -a
 
 service docker start
@@ -112,6 +113,13 @@ update-rc.d -f collectd remove
 
 echo "== Box bootstrapping =="
 
+echo "==== Seting up data ==="
+# create a separate 12GB fs for data
+truncate -s 12G /root/user_home.img
+mkfs.btrfs -L UserHome /root/user_home.img
+echo "/root/user_home.img $USER_HOME btrfs loop,nosuid 0 0" >> /etc/fstab
+mount -a
+
 echo "==== Cloning box repo ===="
 echo "Cloning the box repo"
 mkdir -p $USER_HOME
@@ -132,16 +140,6 @@ while [[ $RET -ne 0 ]]; do
     RET=$?
 done
 
-
-echo "==== Seting up appdata ==="
-# create a separate 12GB fs for appdata
-# dd if=/dev/zero of=/root/appdata.img bs=1M count=12000
-truncate -s 12G /root/appdata.img
-mkfs.ext4 -F /root/appdata.img
-tune2fs -c0 -i0 /root/appdata.img # disable automatic fs check
-mkdir -p $APPDATA
-echo "/root/appdata.img $APPDATA ext4 loop,nosuid 0 0" >> /etc/fstab
-mount -a
 
 echo "==== Make the user own his home ===="
 chown $USER:$USER -R /home/$USER
