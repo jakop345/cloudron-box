@@ -18,14 +18,16 @@ var assert = require('assert'),
     debug = require('debug')('box:apptask'),
     fs = require('fs'),
     child_process = require('child_process'),
+    dns = require('native-dns'),
     execFile = child_process.execFile,
     path = require('path'),
+    cloudron = require('./cloudron.js'),
     net = require('net'),
     config = require('../config.js'),
     database = require('./database.js'),
     DatabaseError = require('./databaseerror.js'),
     ejs = require('ejs'),
-    appFqdn = require('./apps').appFqdn;
+    appFqdn = require('./apps.js').appFqdn;
 
 exports = module.exports = {
     initialize: initialize,
@@ -44,7 +46,8 @@ exports = module.exports = {
     _downloadManifest: downloadManifest,
     _registerSubdomain: registerSubdomain,
     _unregisterSubdomain: unregisterSubdomain,
-    _reloadNginx: reloadNginx
+    _reloadNginx: reloadNginx,
+    _waitForDnsPropagation: waitForDnsPropagation
 };
 
 var docker = null,
@@ -487,6 +490,52 @@ function removeIcon(app, callback) {
     });
 }
 
+function waitForDnsPropagation(app, callback) {
+    if (process.env.NODE_ENV === 'test') {
+        debug('Skipping dns propagation check for development');
+        return callback(null);
+    }
+
+    var ip = cloudron.getIp(),
+        zoneName = config.fqdn.substr(config.fqdn.indexOf('.') + 1), // TODO: send zone from appstore
+        fqdn = appFqdn(app.location);
+
+    function retry(error) {
+        console.error(error);
+        setTimeout(waitForDnsPropagation.bind(null, app, callback), 5000);
+    }
+
+    dns.resolveNs(zoneName, function (error, nameservers) {
+        if (error || nameservers.length === 0) return retry(new Error('Failed to get NS of ' + zoneName));
+
+        debug('checkARecord: %s should resolve to %s by %s', fqdn, ip, nameservers[0]);
+
+        dns.resolve4(namservers[0], function (error, dnsIps) {
+            if (error || dnsIps.length === 0) return retry(new Error('Failed to query DNS'));
+
+            var req = dns.Request({
+                question: dns.Question({ name: fqdn, type: 'A' }),
+                server: { address: dnsIps[0] },
+                timeout: 5000
+            });
+
+            req.on('timeout', function () { return retry(new Error('Timedout')); });
+
+            req.on('message', function (error, message) {
+                debug('checkARecord:', message.answer);
+
+                if (error || !message.answer || message.answer.length === 0) return retry(new Error('Malformed response'));
+
+                if (message.answer[0].address !== ip) return retry(new Error('DNS resolved to another IP'));
+
+                callback(null);
+            });
+
+            req.send();
+        });
+    });
+}
+
 // updates the app object and the database
 function updateApp(app, values, callback) {
     for (var value in values) {
@@ -532,6 +581,10 @@ function install(app, callback) {
         // add collectd profile
         updateApp.bind(null, app, { installationProgress: 'Setting up collectd profile' }),
         addCollectdProfile.bind(null, app),
+
+        // wait until dns propagated
+        updateApp.bind(null, app, { installationProgress: 'Waiting for DNS propagation' }),
+        exports._waitForDnsPropagation.bind(null, app),
 
         // done!
         function (callback) {
@@ -585,6 +638,10 @@ function restore(app, callback) {
         updateApp.bind(null, app, { installationProgress: 'Add collectd profile' }),
         addCollectdProfile.bind(null, app),
 
+        // wait until dns propagated
+        updateApp.bind(null, app, { installationProgress: 'Waiting for DNS propagation' }),
+        exports._waitForDnsPropagation.bind(null, app),
+
         // done!
         function (callback) {
             debug('App ' + app.id + ' installed');
@@ -634,6 +691,9 @@ function configure(app, callback) {
         addCollectdProfile.bind(null, app),
 
         runApp.bind(null, app),
+
+        updateApp.bind(null, app, { installationProgress: 'Waiting for DNS propagation' }),
+        exports._waitForDnsPropagation.bind(null, app),
 
         // done!
         function (callback) {
