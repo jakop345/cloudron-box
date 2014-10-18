@@ -505,12 +505,14 @@ function waitForDnsPropagation(app, callback) {
         setTimeout(waitForDnsPropagation.bind(null, app, callback), 5000);
     }
 
+    debug('Checking if DNS is setup for %s to resolve to %s (zone: %s)', fqdn, ip, zoneName);
+
     dns.resolveNs(zoneName, function (error, nameservers) {
         if (error || nameservers.length === 0) return retry(new Error('Failed to get NS of ' + zoneName));
 
         debug('checkARecord: %s should resolve to %s by %s', fqdn, ip, nameservers[0]);
 
-        dns.resolve4(namservers[0], function (error, dnsIps) {
+        dns.resolve4(nameservers[0], function (error, dnsIps) {
             if (error || dnsIps.length === 0) return retry(new Error('Failed to query DNS'));
 
             var req = dns.Request({
@@ -524,7 +526,7 @@ function waitForDnsPropagation(app, callback) {
             req.on('message', function (error, message) {
                 debug('checkARecord:', message.answer);
 
-                if (error || !message.answer || message.answer.length === 0) return retry(new Error('Malformed response'));
+                if (error || !message.answer || message.answer.length === 0) return retry(new Error('Nothing yet'));
 
                 if (message.answer[0].address !== ip) return retry(new Error('DNS resolved to another IP'));
 
