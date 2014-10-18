@@ -28,7 +28,7 @@ if (production) {
 config.cloudronConfigFile = path.join(config.baseDir, 'cloudron.conf');
 
 config.save = function () {
-    fs.writeFileSync(config.cloudronConfigFile, JSON.stringify(config)); // functions are ignored by JSON.stringify
+    fs.writeFileSync(config.cloudronConfigFile, JSON.stringify(config, null, 4)); // functions are ignored by JSON.stringify
 };
 
 (function initConfig() {
