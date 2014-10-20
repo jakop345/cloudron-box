@@ -10,7 +10,7 @@ echo "Box bootstrapping"
 
 USER=yellowtent
 SRCDIR=/home/$USER/box
-BACKUP_DIR=/home/$USER/.yellowtent
+BACKUP_DIR=/home/$USER/data
 
 # we get the appstore origin from the caller which is baked into the image
 APP_SERVER_URL=$1
@@ -103,7 +103,7 @@ autorestart=true
 redirect_stderr=true
 directory=$SRCDIR
 user=yellowtent
-environment=HOME="/home/yellowtent",USER="yellowtent",DEBUG="box*",APP_SERVER_URL=$APP_SERVER_URL
+environment=HOME="/home/yellowtent",CLOUDRON=1,USER="yellowtent",DEBUG="box*",APP_SERVER_URL=$APP_SERVER_URL
 EOF
 echo "Done"
 

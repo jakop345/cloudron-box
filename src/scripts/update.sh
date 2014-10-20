@@ -98,9 +98,9 @@ info "Updating box version to $VERSION"
 # in heredocs, single quotes preserves the quotes _and_ does variable expansion
 REPLACE_TOKEN_JS=$(cat <<EOF
 var fs = require('fs');
-var config = JSON.parse(fs.readFileSync('$HOME/.yellowtent/cloudron.conf', 'utf8'));
+var config = JSON.parse(fs.readFileSync('$HOME/data/cloudron.conf', 'utf8'));
 config.version = '$VERSION';
-fs.writeFileSync('$HOME/.yellowtent/cloudron.conf', JSON.stringify(config, null, 4));
+fs.writeFileSync('$HOME/data/cloudron.conf', JSON.stringify(config, null, 4));
 EOF
 )
 sudo -u yellowtent -H bash <<EOF

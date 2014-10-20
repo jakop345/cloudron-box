@@ -3,7 +3,7 @@
 set -v
 
 USER_HOME=/home/yellowtent
-APPDATA=$USER_HOME/.yellowtent/appdata
+APPDATA=$USER_HOME/data/appdata
 SRCDIR=$USER_HOME/box
 USER=yellowtent
 APPSTORE_URL=$1

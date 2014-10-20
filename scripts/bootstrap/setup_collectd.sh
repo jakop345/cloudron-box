@@ -4,7 +4,7 @@ set -e
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-GRAPHITE_DIR="/home/yellowtent/.yellowtent/graphite"
+GRAPHITE_DIR="/home/yellowtent/data/graphite"
 mkdir $GRAPHITE_DIR
 
 docker run -d --name="graphite" \
@@ -14,7 +14,7 @@ docker run -d --name="graphite" \
     -v $GRAPHITE_DIR:/app/data girish/graphite:0.2
 
 # collectd
-COLLECTD_DIR="/home/yellowtent/.yellowtent/collectd/"
+COLLECTD_DIR="/home/yellowtent/data/collectd/"
 mkdir -p $COLLECTD_DIR/collectd.conf.d
 cp -r $SCRIPT_DIR/collectd/collectd.conf $COLLECTD_DIR/collectd.conf
 rm -rf /etc/collectd
