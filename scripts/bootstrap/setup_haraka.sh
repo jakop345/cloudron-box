@@ -2,9 +2,13 @@
 
 set -e
 
-CLOUDRON_CONF="/home/yellowtent/data/cloudron.conf"
+USER=yellowtent
+SRCDIR=/home/$USER/box
+DATA_DIR=/home/$USER/data
+HARAKA_DIR="$DATA_DIR/haraka"
+CLOUDRON_CONF="$DATA_DIR/cloudron.conf"
+
 DOMAIN_NAME=`hostname -f`
-HARAKA_DIR="/home/yellowtent/data/haraka"
 
 CONTAINER_ID=$(docker run -d --name="haraka" --cap-add="NET_ADMIN"\
     -p 127.0.0.1:25:25 \

@@ -2,6 +2,11 @@
 
 set -e
 
+USER=yellowtent
+SRCDIR=/home/$USER/box
+DATA_DIR=/home/$USER/data
+COLLECTD_DIR="$DATA_DIR/collectd/"
+
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 GRAPHITE_DIR="/home/yellowtent/data/graphite"
@@ -14,7 +19,6 @@ docker run -d --name="graphite" \
     -v $GRAPHITE_DIR:/app/data girish/graphite:0.2
 
 # collectd
-COLLECTD_DIR="/home/yellowtent/data/collectd/"
 mkdir -p $COLLECTD_DIR/collectd.conf.d
 cp -r $SCRIPT_DIR/collectd/collectd.conf $COLLECTD_DIR/collectd.conf
 rm -rf /etc/collectd

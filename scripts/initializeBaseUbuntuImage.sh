@@ -2,10 +2,11 @@
 
 set -v
 
-USER_HOME=/home/yellowtent
-APPDATA=$USER_HOME/data/appdata
-SRCDIR=$USER_HOME/box
 USER=yellowtent
+USER_HOME="/home/$USER"
+DATA_DIR="$USER_HOME/data"
+APPDATA=$DATA_DIR/appdata
+SRCDIR=$USER_HOME/box
 APPSTORE_URL=$1
 BOX_REVISION=$2
 
