@@ -11,12 +11,12 @@ var Server = require('../../server.js'),
     expect = require('expect.js'),
     crypto = require('crypto'),
     fs = require('fs'),
-    rimraf = require('rimraf'),
     path = require('path'),
     os = require('os'),
     mkdirp = require('mkdirp'),
     uuid = require('node-uuid'),
     userdb = require('../../userdb.js'),
+    database = require('../../database.js'),
     Repo = require('../../repo.js'),
     config = require('../../../config.js');
 
@@ -56,11 +56,11 @@ function setup(done) {
     });
 }
 
-// remove all temporary folders
 function cleanup(done) {
-    server.stop(function (error) {
-        expect(error).to.be(null);
-        rimraf(config.baseDir, done);
+    database.clear(function (error) {
+        expect(!error).to.be.ok();
+
+        server.stop(done);
     });
 }
 

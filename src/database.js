@@ -15,7 +15,6 @@ var sqlite3 = require('sqlite3'),
 exports = module.exports = {
     initialize: initialize,
     uninitialize: uninitialize,
-    create: create,
     removePrivates: removePrivates,
     newTransaction: newTransaction,
     rollback: rollback,
@@ -61,37 +60,6 @@ function clear(callback) {
         require('./tokendb.js').clear,
         require('./userdb.js').clear
     ], callback);
-}
-
-// create also initializes
-function create(callback) {
-    var schema = fs.readFileSync(path.join(__dirname, 'schema.sql')).toString('utf8');
-
-    databaseFileName = config.configRoot + '/config.sqlite.db';
-
-    db = new sqlite3.Database(databaseFileName);
-    db.on('error', function (error) {
-        console.error('Database error in ' + databaseFileName + ':', error);
-    });
-
-    debug('Database created at ' + databaseFileName);
-
-    db.exec(schema, function (err) {
-        if (err) return callback(err);
-
-        // add webadmin as an OAuth client if not already there
-        var clientdb = require('./clientdb.js');
-        clientdb.getByAppId('webadmin', function (error) {
-            if (!error) return callback(null);
-
-            // scopes are also in cloudron.js for production
-            var scopes = 'root,profile,users,apps,settings,roleAdmin';
-            clientdb.add(uuid.v4(), 'webadmin', 'cid-webadmin', 'unused', 'WebAdmin', config.adminOrigin, scopes, function (error) {
-                if (error && error.reason !== DatabaseError.ALREADY_EXISTS) return callback(new Error('Error initializing client database with webadmin'));
-                return callback(null);
-            });
-        });
-    });
 }
 
 function newTransaction() {

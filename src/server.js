@@ -320,7 +320,7 @@ Server.prototype.start = function (callback) {
 
     this._initializeExpressSync();
 
-    database.create(function (err) {
+    database.initialize(function (err) {
         if (err) return callback(err);
 
         apps.initialize();

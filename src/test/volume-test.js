@@ -10,7 +10,6 @@ var volume = require('../volume.js'),
     database = require('../database.js'),
     User = require('../user.js'),
     mkdirp = require('mkdirp'),
-    rimraf = require('rimraf'),
     expect = require('expect.js'),
     config = require('../../config.js');
 
@@ -29,7 +28,7 @@ function setup(done) {
     mkdirp.sync(config.configRoot);
     mkdirp.sync(config.mountRoot);
 
-    database.create(function (error) {
+    database.initialize(function (error) {
         if (error) return done(error);
 
         User.create(USERNAME, PASSWORD, EMAIL, IS_ADMIN, function (error, result) {
@@ -57,8 +56,7 @@ describe('Volume', function () {
             vol2.destroy(function (error) {
                 expect(error).to.not.be.ok();
 
-                rimraf.sync(config.baseDir);
-                done();
+                database.clear(done);
             });
         });
     });

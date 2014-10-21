@@ -7,8 +7,8 @@
 'use strict';
 
 var Server = require('../server.js'),
+    database = require('../database.js'),
     request = require('superagent'),
-    rimraf = require('rimraf'),
     expect = require('expect.js'),
     nock = require('nock'),
     cloudron = require('../cloudron.js'),
@@ -17,9 +17,8 @@ var Server = require('../server.js'),
 var SERVER_URL = 'http://localhost:' + config.port;
 var ACCESS_TOKEN = null;
 
-// remove all temporary folders
 function cleanup(done) {
-    rimraf(config.baseDir, done);
+    done();
 }
 
 describe('Server', function () {
@@ -78,8 +77,11 @@ describe('Server', function () {
         });
 
         after(function (done) {
-            server.stop(function () {
-                done();
+            database.clear(function (error) {
+                expect(!error).to.be.ok();
+                server.stop(function () {
+                    done();
+                });
             });
         });
 

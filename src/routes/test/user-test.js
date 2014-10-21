@@ -10,7 +10,7 @@ var Server = require('../../../src/server.js'),
     request = require('superagent'),
     expect = require('expect.js'),
     userdb = require('../../userdb.js'),
-    rimraf = require('rimraf'),
+    database = require('../../database.js'),
     config = require('../../../config.js');
 
 var SERVER_URL = 'http://localhost:' + config.port;
@@ -29,11 +29,11 @@ function setup(done) {
     });
 }
 
-// remove all temporary folders
 function cleanup(done) {
-    server.stop(function (error) {
-        expect(error).to.be(null);
-        rimraf(config.baseDir, done);
+    database.clear(function (error) {
+        expect(!error).to.be.ok();
+
+        server.stop(done);
     });
 }
 

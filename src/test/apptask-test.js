@@ -13,7 +13,6 @@ var apptask = require('../apptask.js'),
     database = require('../database.js'),
     DatabaseError = require('../databaseerror.js'),
     mkdirp = require('mkdirp'),
-    rimraf = require('rimraf'),
     fs = require('fs'),
     appdb = require('../appdb.js'),
     nock = require('nock');
@@ -39,17 +38,14 @@ describe('apptask', function () {
         mkdirp.sync(config.configRoot);
         mkdirp.sync(config.nginxAppConfigDir);
 
-        database.create(function (error) {
+        database.initialize(function (error) {
             expect(error).to.be(null);
             appdb.add(APP.id, APP.appStoreId, APP.location, APP.portBindings, APP.restrictAccessTo, done);
         });
     });
 
     after(function (done) {
-        appdb.del(APP.id, function () {
-            database.uninitialize();
-            rimraf(config.baseDir, done);
-        });
+        database.clear(done);
     });
 
     it('initializes succesfully', function (done) {
@@ -102,7 +98,7 @@ describe('apptask', function () {
 
     it('create volume', function (done) {
         apptask._createVolume(APP, function (error) {
-            expect(fs.existsSync(config.appDataRoot + '/' + APP.id));
+            expect(fs.existsSync(config.appDataRoot + '/' + APP.id)).to.be(true);
             expect(error).to.be(null);
             done();
         });
@@ -110,7 +106,7 @@ describe('apptask', function () {
 
     it('delete volume', function (done) {
         apptask._deleteVolume(APP, function (error) {
-            expect(!fs.existsSync(config.appDataRoot + '/' + APP.id));
+            expect(!fs.existsSync(config.appDataRoot + '/' + APP.id)).to.be(true);
             expect(error).to.be(null);
             done();
         });

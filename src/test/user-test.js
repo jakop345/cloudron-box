@@ -9,7 +9,6 @@
 var user = require('../user.js'),
     UserError = user.UserError,
     mkdirp = require('mkdirp'),
-    rimraf = require('rimraf'),
     expect = require('expect.js'),
     database = require('../database.js'),
     config = require('../../config.js');
@@ -40,17 +39,14 @@ function setup(done) {
     mkdirp.sync(config.configRoot);
     mkdirp.sync(config.mountRoot);
 
-    database.create(function (error) {
+    database.initialize(function (error) {
         expect(error).to.be(null);
         done();
     });
 }
 
 function cleanup(done) {
-    rimraf(config.baseDir, function (error) {
-        expect(error).to.not.be.ok();
-        done();
-    });
+    database.clear(done);
 }
 
 describe('User', function () {

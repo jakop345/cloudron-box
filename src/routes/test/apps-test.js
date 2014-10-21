@@ -7,10 +7,10 @@
 /* global after:false */
 
 var Server = require('../../server.js'),
+    database = require('../../database.js'),
     request = require('superagent'),
     expect = require('expect.js'),
     fs = require('fs'),
-    rimraf = require('rimraf'),
     os = require('os'),
     userdb = require('../../userdb.js'),
     clientdb = require('../../clientdb.js'),
@@ -98,10 +98,14 @@ function setup(done) {
 
 // remove all temporary folders
 function cleanup(done) {
-    server.stop(function (error) {
-        expect(error).to.be(null);
-        config.set('token', null);
-        rimraf(config.baseDir, done);
+    database.clear(function (error) {
+        expect(!error).to.be.ok();
+
+        server.stop(function (error) {
+            expect(error).to.be(null);
+            config.set('token', null);
+            done();
+        });
     });
 }
 

@@ -21,8 +21,7 @@ var config = { };
 if (production) {
     config.baseDir =  path.join(getUserHomeDir(), process.env.CLOUDRON === '1' ? 'data' : '.yellowtent');
 } else {
-    config.baseDir = process.env.BASE_DIR || path.resolve(os.tmpdir(), 'test-' + crypto.randomBytes(4).readUInt32LE(0));
-    process.env.BASE_DIR = config.baseDir; // pass on base dir to child processes
+    config.baseDir = path.join(getUserHomeDir(), '.yellowtenttest');
 }
 
 config.cloudronConfigFile = path.join(config.baseDir, 'cloudron.conf');

@@ -7,7 +7,6 @@
 'use strict';
 
 var database = require('../database'),
-    rimraf = require('rimraf'),
     DatabaseError = require('../databaseerror.js'),
     tokendb = require('../tokendb.js'),
     clientdb = require('../clientdb.js'),
@@ -21,16 +20,11 @@ describe('database', function () {
     before(function (done) {
         mkdirp.sync(config.configRoot);
 
-        database.create(function (error) {
-            expect(error).to.be(null);
-            done();
-        });
+        database.initialize(done);
     });
 
     after(function (done) {
-        database.uninitialize();
-        rimraf.sync(config.baseDir);
-        done();
+        database.clear(done);
     });
 
     it('remove privates', function () {

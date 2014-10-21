@@ -7,10 +7,10 @@
 'use strict';
 
 var Server = require('../../server.js'),
+    database = require('../../database.js'),
     request = require('superagent'),
     expect = require('expect.js'),
     userdb = require('../../userdb.js'),
-    rimraf = require('rimraf'),
     fs = require('fs'),
     appdb = require('../../appdb.js'),
     config = require('../../../config.js'),
@@ -59,11 +59,11 @@ function setup(done) {
     ], done);
 }
 
-// remove all temporary folders
 function cleanup(done) {
-    server.stop(function (error) {
-        expect(error).to.be(null);
-        rimraf(config.baseDir, done);
+    database.clear(function (error) {
+        expect(!error).to.be.ok();
+
+        server.stop(done);
     });
 }
 

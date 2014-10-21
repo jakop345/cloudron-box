@@ -11,6 +11,7 @@ if [ $# -eq 0 ]; then
 fi
 
 APPDATA="$HOME/data/appdata"
+APPDATA_TEST="$HOME/.yellowtenttest/appdata"
 
 if [ "$1" == "--check" ]; then
     echo "OK"
@@ -18,3 +19,4 @@ if [ "$1" == "--check" ]; then
 fi
 
 rm -rf "$APPDATA/$1"
+rm -rf "$APPDATA_TEST/$1"

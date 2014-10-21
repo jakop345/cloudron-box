@@ -8,7 +8,6 @@
 
 var expect = require('expect.js'),
     fs = require('fs'),
-    rimraf = require('rimraf'),
     safe = require('safetydance');
 
 var config = null;
@@ -20,7 +19,6 @@ describe('config', function () {
     });
 
     after(function () {
-        rimraf.sync(config.baseDir);
         delete require.cache[require.resolve('../../config.js')];
     });
 

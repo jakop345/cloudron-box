@@ -11,7 +11,6 @@ var apps = require('../apps.js'),
     expect = require('expect.js'),
     database = require('../database.js'),
     mkdirp = require('mkdirp'),
-    rimraf = require('rimraf'),
     config = require('../../config.js'),
     AppsError = apps.AppsError;
 
@@ -33,18 +32,14 @@ describe('Apps', function () {
     };
 
     before(function (done) {
-        mkdirp.sync(config.configRoot);
-
-        database.create(function (error) {
+        database.initialize(function (error) {
             expect(error).to.be(null);
             appdb.add(APP_0.id, APP_0.appStoreId, APP_0.location, APP_0.portBindings, APP_0.restrictAccessTo, done);
         });
     });
 
     after(function (done) {
-        database.uninitialize();
-        rimraf.sync(config.baseDir);
-        done();
+        database.clear(done);
     });
 
     describe('validateSubdomain', function () {

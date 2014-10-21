@@ -75,7 +75,8 @@
   },
   "scripts": {
     "migrate": "DATABASE_URL=sqlite3:///$HOME/.yellowtent/config/config.sqlite.db node_modules/.bin/db-migrate up",
-    "test": "scripts/checkInstall.sh && NODE_ENV=test ./node_modules/istanbul/lib/cli.js test $1 ./node_modules/mocha/bin/_mocha -- -R spec ./src/test ./src/routes/test",
+    "migrate_test": "DATABASE_URL=sqlite3:///$HOME/.yellowtenttest/config/config.sqlite.db node_modules/.bin/db-migrate up",
+    "test": "scripts/checkInstall.sh && npm run-script migrate_test && NODE_ENV=test ./node_modules/istanbul/lib/cli.js test $1 ./node_modules/mocha/bin/_mocha -- -R spec ./src/test ./src/routes/test",
     "prepush": "npm test"
   }
 }

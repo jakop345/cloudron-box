@@ -10,7 +10,6 @@ var Server = require('../../server.js'),
     request = require('superagent'),
     expect = require('expect.js'),
     userdb = require('../../userdb.js'),
-    rimraf = require('rimraf'),
     path = require('path'),
     config = require('../../../config.js'),
     async = require('async'),
@@ -51,12 +50,8 @@ function setup(done) {
     ], done);
 }
 
-// remove all temporary folders
 function cleanup(done) {
-    server.stop(function (error) {
-        expect(error).to.be(null);
-        rimraf(config.baseDir, done);
-    });
+    server.stop(done);
 }
 
 // function checks if obj has all but only the specified properties
