@@ -87,7 +87,7 @@ cp $SRCDIR/supervisor/supervisord.conf /etc/supervisor/
 echo "Writing box supervisor config..."
 cat > /etc/supervisor/conf.d/nginx.conf <<EOF
 [program:nginx]
-command=nginx -c $DATA_DIR/nginx/nginx.conf -p /var/log/nginx/
+command=nginx -c "$DATA_DIR/nginx/nginx.conf" -p /var/log/nginx/
 autostart=true
 autorestart=true
 redirect_stderr=true
@@ -103,7 +103,7 @@ autorestart=true
 redirect_stderr=true
 directory=$SRCDIR
 user=yellowtent
-environment=HOME="/home/yellowtent",CLOUDRON=1,USER="yellowtent",DEBUG="box*",APP_SERVER_URL=$APP_SERVER_URL
+environment=HOME="/home/yellowtent",CLOUDRON="1",USER="yellowtent",DEBUG="box*",APP_SERVER_URL="$APP_SERVER_URL"
 EOF
 echo "Done"
 
