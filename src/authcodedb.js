@@ -59,7 +59,7 @@ function del(authCode, callback) {
 function clear(callback) {
     assert(typeof callback === 'function');
 
-    database.run('DELETE FROM authocodes', function (error) {
+    database.run('DELETE FROM authcodes', function (error) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         callback(null);
