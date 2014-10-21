@@ -19,6 +19,7 @@ exports = module.exports = {
     update: update,
     getAll: getAll,
     getPortBindings: getPortBindings,
+    clear: clear,
 
     setHealth: setHealth,
     setInstallationCommand: setInstallationCommand,
@@ -198,6 +199,19 @@ function del(id, callback) {
             if (this.changes !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
             database.commit(conn, callback); // FIXME: can this fail?
+        });
+    });
+}
+
+function clear(callback) {
+    assert(typeof callback === 'function');
+
+    database.run('DELETE FROM appPortBindings', function (error) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+
+        database.run('DELETE FROM apps', function (error) {
+            if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+            return callback(null);
         });
     });
 }

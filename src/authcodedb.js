@@ -10,7 +10,8 @@ var DatabaseError = require('./databaseerror'),
 exports = module.exports = {
     get: get,
     add: add,
-    del: del
+    del: del,
+    clear: clear
 };
 
 var AUTHCODES_FIELDS = [ 'authCode', 'userId', 'clientId' ].join(',');
@@ -50,6 +51,16 @@ function del(authCode, callback) {
     database.run('DELETE FROM authcodes WHERE authCode = ?', [ authCode ], function (error) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (this.changes !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
+
+        callback(null);
+    });
+}
+
+function clear(callback) {
+    assert(typeof callback === 'function');
+
+    database.run('DELETE FROM authocodes', function (error) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         callback(null);
     });

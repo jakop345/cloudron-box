@@ -13,6 +13,7 @@ exports = module.exports = {
     get: get,
     add: add,
     del: del,
+    clear: clear,
     getByUserId: getByUserId,
     delByUserId: delByUserId,
     getByUserIdAndClientId: getByUserIdAndClientId,
@@ -116,3 +117,14 @@ function delByUserIdAndClientId(userId, clientId, callback) {
         return callback(null);
     });
 }
+
+function clear(callback) {
+    assert(typeof callback === 'function');
+
+    database.run('DELETE FROM tokens', function (error) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+
+        return callback(null);
+    });
+}
+

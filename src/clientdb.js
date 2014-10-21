@@ -15,7 +15,8 @@ exports = module.exports = {
     add: add,
     del: del,
     getByAppId: getByAppId,
-    delByAppId: delByAppId
+    delByAppId: delByAppId,
+    clear: clear
 };
 
 var CLIENTS_FIELDS = [ 'id', 'appId', 'clientId', 'clientSecret', 'name', 'redirectURI', 'scope' ].join(',');
@@ -131,3 +132,14 @@ function delByAppId(appId, callback) {
         return callback(null);
     });
 }
+
+function clear(callback) {
+    assert(typeof callback === 'function');
+
+    database.run('DELETE FROM clients', function (error) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+
+        return callback(null);
+    });
+}
+
