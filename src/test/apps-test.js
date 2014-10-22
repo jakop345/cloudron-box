@@ -10,7 +10,6 @@ var apps = require('../apps.js'),
     appdb = require('../appdb.js'),
     expect = require('expect.js'),
     database = require('../database.js'),
-    mkdirp = require('mkdirp'),
     config = require('../../config.js'),
     AppsError = apps.AppsError;
 
