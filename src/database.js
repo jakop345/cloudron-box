@@ -7,6 +7,7 @@ var sqlite3 = require('sqlite3'),
     uuid = require('node-uuid'),
     path = require('path'),
     debug = require('debug')('box:database'),
+    async = require('async'),
     DatabaseError = require('./databaseerror'),
     assert = require('assert'),
     config = require('../config.js');
@@ -19,6 +20,7 @@ exports = module.exports = {
     newTransaction: newTransaction,
     rollback: rollback,
     commit: commit,
+    clear: clear,
 
     get: get,
     all: all,
@@ -49,6 +51,16 @@ function uninitialize() {
 
     connectionPool.forEach(function (conn) { conn.close(); });
     connectionPool = [ ];
+}
+
+function clear(callback) {
+    async.series([
+        require('./appdb.js').clear,
+        require('./authcodedb.js').clear,
+        require('./clientdb.js').clear,
+        require('./tokendb.js').clear,
+        require('./userdb.js').clear
+    ], callback);
 }
 
 // create also initializes
