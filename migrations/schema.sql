@@ -1,3 +1,6 @@
+#### WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
+#### This file is not used by any code and is here to document the latest schema
+
 CREATE TABLE IF NOT EXISTS users(
     id VARCHAR(128) NOT NULL UNIQUE,
     username VARCHAR(512) NOT NULL,
