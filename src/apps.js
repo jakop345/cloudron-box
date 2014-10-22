@@ -13,6 +13,7 @@ var DatabaseError = require('./databaseerror.js'),
     stream = require('stream'),
     os = require('os'),
     split = require('split'),
+    paths = require('./paths.js'),
     config = require('../config.js');
 
 exports = module.exports = {
@@ -169,7 +170,7 @@ function validatePortBindings(portBindings) {
 }
 
 function getIconURLSync(app) {
-    var iconPath = config.iconsRoot + '/' + app.id + '.png';
+    var iconPath = paths.APPICONS_DIR + '/' + app.id + '.png';
     if (fs.existsSync(iconPath)) {
         return '/api/v1/app/' + app.id + '/icon';
     } else {

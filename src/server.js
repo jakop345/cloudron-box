@@ -18,6 +18,7 @@ var express = require('express'),
     database = require('./database.js'),
     userdb = require('./userdb'),
     config = require('../config.js'),
+    paths = require('./paths.js'),
     cloudron = require('./cloudron.js'),
     url = require('url'),
     mailer = require('./mailer.js');
@@ -308,12 +309,13 @@ Server.prototype.start = function (callback) {
     assert(typeof callback === 'function');
     assert(this.app === null, 'Server is already up and running.');
 
-    mkdirp.sync(config.volumesDataRoot);
-    mkdirp.sync(config.volumesMountRoot);
-    mkdirp.sync(config.iconsRoot);
-    mkdirp.sync(config.nginxAppConfigDir);
-    mkdirp.sync(config.appDataRoot);
-    mkdirp.sync(config.collectdAppConfigDir);
+    mkdirp.sync(paths.VOLUMES_DATA_DIR);
+    mkdirp.sync(paths.VOLUMES_MOUNT_DIR);
+    mkdirp.sync(paths.APPICONS_DIR);
+    mkdirp.sync(paths.NGINX_APPCONFIG_DIR);
+    mkdirp.sync(paths.APPDATA_DIR);
+    mkdirp.sync(paths.COLLECTD_APPCONFIG_DIR);
+    mkdirp.sync(paths.HARAKA_CONFIG_DIR);
 
     var that = this;
 

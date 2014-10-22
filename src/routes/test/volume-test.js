@@ -12,6 +12,7 @@ var Server = require('../../server.js'),
     userdb = require('../../userdb.js'),
     path = require('path'),
     config = require('../../../config.js'),
+    paths = require('../../paths.js'),
     async = require('async'),
     fs = require('fs');
 
@@ -137,7 +138,7 @@ describe('Server Volume API', function () {
     });
 
     it('listFiles', function (done) {
-        fs.writeFileSync(path.join(config.volumesMountRoot, volume.id + '/README.md'), 'test data');
+        fs.writeFileSync(path.join(paths.VOLUMES_MOUNT_DIR, volume.id + '/README.md'), 'test data');
 
         request.get(SERVER_URL + '/api/v1/volume/' + volume.id + '/list')
                .query({ access_token: token })

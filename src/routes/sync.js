@@ -7,6 +7,7 @@ var debug = require('debug')('server:routes/sync'),
     util = require('util'),
     path = require('path'),
     safe = require('safetydance'),
+    paths = require('../paths.js'),
     config = require('../../config.js'),
     Repo = require('../repo.js');
 
@@ -23,7 +24,7 @@ var TMP_DIRNAME = 'tmp';
 function attachRepo(req, res, next, volumeId) {
     if (!volumeId) return next(new HttpError(400, 'Volume not specified'));
 
-    var mountDir = path.join(config.volumesMountRoot, volumeId);
+    var mountDir = path.join(paths.VOLUMES_MOUNT_DIR, volumeId);
 
     if (!safe.fs.existsSync(mountDir)) {
         return next(new HttpError(404, 'No such volume'));

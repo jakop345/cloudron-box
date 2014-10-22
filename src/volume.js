@@ -12,6 +12,7 @@ var fs = require('fs'),
     ursa = require('ursa'),
     async = require('async'),
     util = require('util'),
+    paths = require('./paths.js'),
     VolumeConfig = require('./volumeconfig.js'),
     safe = require('safetydance');
 
@@ -74,11 +75,9 @@ function generateNewVolumePassword() {
 
 function Volume(id, options) {
     ensureArgs(arguments, ['string', 'object']);
-    assert(options.volumesDataRoot);
-    assert(options.volumesMountRoot);
 
-    this._configDataRoot = options.volumesDataRoot;
-    this._configMountRoot = options.volumesMountRoot;
+    this._configDataRoot = paths.VOLUMES_DATA_DIR;
+    this._configMountRoot = paths.VOLUMES_MOUNT_DIR;
 
     this.id = id;
     this.dataPath = this._resolveVolumeRootPath();
@@ -386,10 +385,8 @@ Volume.prototype.users = function (callback) {
 
 function listVolumes(username, config, callback) {
     ensureArgs(arguments, ['string', 'object', 'function']);
-    assert(config.volumesDataRoot);
-    assert(config.volumesMountRoot);
 
-    fs.readdir(config.volumesDataRoot, function (error, files) {
+    fs.readdir(paths.VOLUMES_DATA_DIR, function (error, files) {
         if (error) {
             debug('Unable to list volumes.' + safe.JSON.stringify(error));
             return callback(new VolumeError(error, VolumeError.READ_ERROR));
@@ -398,7 +395,7 @@ function listVolumes(username, config, callback) {
         var ret = [];
 
         async.each(files, function (file, callback) {
-            fs.stat(path.join(config.volumesDataRoot, file), function (error, stat) {
+            fs.stat(path.join(paths.VOLUMES_DATA_DIR, file), function (error, stat) {
                 if (error) {
                     debug('Unable to stat "' + file + '".', error);
                     return callback(null);
@@ -462,8 +459,6 @@ function createVolume(name, user, password, options, callback) {
 
 function getVolumeByName(name, username, options, callback) {
     ensureArgs(arguments, ['string', 'string', 'object', 'function']);
-    assert(options.volumesDataRoot);
-    assert(options.volumesMountRoot);
 
     listVolumes(username, options, function (error, volumes) {
         if (error) {

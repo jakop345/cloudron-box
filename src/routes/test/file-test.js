@@ -17,6 +17,7 @@ var Server = require('../../server.js'),
     uuid = require('node-uuid'),
     userdb = require('../../userdb.js'),
     database = require('../../database.js'),
+    paths = require('../../paths.js'),
     Repo = require('../../repo.js'),
     config = require('../../../config.js');
 
@@ -33,7 +34,7 @@ function setup(done) {
 
         volume = { id: uuid.v4(), repo: null };
 
-        var mountPoint = path.join(config.volumesMountRoot, volume.id);
+        var mountPoint = path.join(paths.VOLUMES_MOUNT_DIR, volume.id);
         mkdirp.sync(mountPoint);
         var tmpDir = path.join(mountPoint, 'tmp');
         mkdirp.sync(tmpDir);

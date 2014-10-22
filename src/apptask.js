@@ -19,6 +19,7 @@ var assert = require('assert'),
     fs = require('fs'),
     child_process = require('child_process'),
     dns = require('native-dns'),
+    paths = require('./paths.js'),
     execFile = child_process.execFile,
     path = require('path'),
     cloudron = require('./cloudron.js'),
@@ -100,7 +101,7 @@ function configureNginx(app, callback) {
         var sourceDir = path.resolve(__dirname, '..');
         var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: appFqdn(app.location), port: freePort, restrictAccessTo: app.restrictAccessTo });
 
-        var nginxConfigFilename = path.join(config.nginxAppConfigDir, app.id + '.conf');
+        var nginxConfigFilename = path.join(paths.NGINX_APPCONFIG_DIR, app.id + '.conf');
         debug('writing config to ' + nginxConfigFilename);
 
         fs.writeFile(nginxConfigFilename, nginxConf, function (error) {
@@ -117,7 +118,7 @@ function configureNginx(app, callback) {
 }
 
 function unconfigureNginx(app, callback) {
-    var nginxConfigFilename = path.join(config.nginxAppConfigDir, app.id + '.conf');
+    var nginxConfigFilename = path.join(paths.NGINX_APPCONFIG_DIR, app.id + '.conf');
     if (!safe.fs.unlinkSync(nginxConfigFilename)) {
         console.error('Error removing nginx configuration ' + safe.error);
         return callback(null);
@@ -130,7 +131,7 @@ function setNakedDomain(app, callback) {
     var sourceDir = path.resolve(__dirname, '..');
     var nginxConf = app ? ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: config.fqdn, port: app.httpPort, restrictAccessTo: app.restrictAccessTo }) : '';
 
-    var nginxNakedDomainFilename = path.join(config.nginxConfigDir, 'naked_domain.conf');
+    var nginxNakedDomainFilename = path.join(paths.NGINX_CONFIG_DIR, 'naked_domain.conf');
     debug('writing naked domain config to ' + nginxNakedDomainFilename);
 
     fs.writeFile(nginxNakedDomainFilename, nginxConf, function (error) {
@@ -270,7 +271,7 @@ function deleteImage(app, callback) {
 }
 
 function createVolume(app, callback) {
-    var appDataDir = path.join(config.appDataRoot, app.id);
+    var appDataDir = path.join(paths.APPDATA_DIR, app.id);
 
     if (!safe.fs.mkdirSync(appDataDir)) {
         return callback(new Error('Error creating app data directory ' + appDataDir + ' ' + safe.error));
@@ -288,14 +289,14 @@ function deleteVolume(app, callback) {
 
 function addCollectdProfile(app, callback) {
     var collectdConf = ejs.render(COLLECTD_CONFIG_EJS, { appId: app.id, containerId: app.containerId });
-    fs.writeFile(path.join(config.collectdAppConfigDir, app.id + '.conf'), collectdConf, function (error) {
+    fs.writeFile(path.join(paths.COLLECTD_APPCONFIG_DIR, app.id + '.conf'), collectdConf, function (error) {
         if (error) return callback(error);
         execFile(SUDO, [ RELOAD_COLLECTD_CMD ], { timeout: 10000 }, callback);
     });
 }
 
 function removeCollectdProfile(app, callback) {
-    fs.unlink(path.join(config.collectdAppConfigDir, app.id + '.conf'), function (error, stdout, stderr) {
+    fs.unlink(path.join(paths.COLLECTD_APPCONFIG_DIR, app.id + '.conf'), function (error, stdout, stderr) {
         if (error) console.error('Error removing collectd profile', error, stdout, stderr);
         execFile(SUDO, [ RELOAD_COLLECTD_CMD ], { timeout: 10000 }, callback);
     });
@@ -342,7 +343,7 @@ function startContainer(app, callback) {
         if (error) return callback(error);
 
         var manifest = app.manifest;
-        var appDataDir = path.join(config.appDataRoot, app.id);
+        var appDataDir = path.join(paths.APPDATA_DIR, app.id);
 
         var portBindings = { };
         portBindings[manifest.httpPort + '/tcp'] = [ { HostPort: app.httpPort + '' } ];
@@ -422,7 +423,7 @@ function downloadManifest(app, callback) {
             if (error) return callback(new Error('Manifest error:' + error.message));
 
             if (manifest.icon) {
-                safe.fs.writeFileSync(path.join(config.iconsRoot, app.id + '.png'), new Buffer(manifest.icon));
+                safe.fs.writeFileSync(path.join(paths.APPICONS_DIR, app.id + '.png'), new Buffer(manifest.icon));
 
                 // delete icon buffer, so we don't store it in the db
                 delete manifest.icon;
@@ -484,7 +485,7 @@ function unregisterSubdomain(app, callback) {
 }
 
 function removeIcon(app, callback) {
-    fs.unlink(path.join(config.iconsRoot, app.id + '.png'), function (error) {
+    fs.unlink(path.join(paths.APPICONS_DIR, app.id + '.png'), function (error) {
         if (error && error.code !== 'ENOENT') console.error(error);
         callback(null);
     });

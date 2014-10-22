@@ -42,17 +42,6 @@ config.save = function () {
         config.isDev = true;
     }
 
-    config.nginxConfigDir = path.join(config.baseDir, 'nginx');
-    config.harakaConfigDir = path.join(config.baseDir, 'haraka');
-    config.appDataRoot = path.join(config.baseDir, 'data/appdata');
-    config.volumesDataRoot = path.join(config.baseDir, 'volumes/data');
-    config.volumesMountRoot = path.join(config.baseDir, 'volumes/mount');
-    config.iconsRoot = path.join(config.baseDir, 'icons');
-    config.collectdAppConfigDir = path.join(config.baseDir, 'collectd/collectd.conf.d');
-
-    config.nginxAppConfigDir = path.join(config.nginxConfigDir, 'applications');
-    config.nginxCertDir = path.join(config.nginxConfigDir, 'cert');
-
     config.fqdn = 'localhost';
     config.adminOrigin = 'https://admin-' + config.fqdn;
 

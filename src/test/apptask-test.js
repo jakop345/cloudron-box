@@ -11,6 +11,7 @@ var apptask = require('../apptask.js'),
     net = require('net'),
     config = require('../../config.js'),
     database = require('../database.js'),
+    paths = require('../paths.js'),
     DatabaseError = require('../databaseerror.js'),
     mkdirp = require('mkdirp'),
     fs = require('fs'),
@@ -34,8 +35,8 @@ var APP = {
 
 describe('apptask', function () {
     before(function (done) {
-        mkdirp.sync(config.appDataRoot);
-        mkdirp.sync(config.nginxAppConfigDir);
+        mkdirp.sync(paths.APPDATA_DIR);
+        mkdirp.sync(paths.NGINX_APPCONFIG_DIR);
 
         database.initialize(function (error) {
             expect(error).to.be(null);
@@ -63,7 +64,7 @@ describe('apptask', function () {
 
     it('configure nginx correctly', function (done) {
         apptask._configureNginx(APP, function (error) {
-            expect(fs.existsSync(config.nginxAppConfigDir + '/' + APP.id + '.conf'));
+            expect(fs.existsSync(paths.NGINX_APPCONFIG_DIR + '/' + APP.id + '.conf'));
             // expect(error).to.be(null); // this fails because nginx cannot be restarted
             done();
         });
@@ -71,7 +72,7 @@ describe('apptask', function () {
 
     it('unconfigure nginx', function (done) {
         apptask._unconfigureNginx(APP, function (error) {
-            expect(!fs.existsSync(config.nginxAppConfigDir + '/' + APP.id + '.conf'));
+            expect(!fs.existsSync(paths.NGINX_APPCONFIG_DIR + '/' + APP.id + '.conf'));
             // expect(error).to.be(null); // this fails because nginx cannot be restarted
             done();
         });
@@ -79,8 +80,8 @@ describe('apptask', function () {
 
     it('can set naked domain', function (done) {
         apptask._setNakedDomain(APP, function (error) {
-            expect(fs.existsSync(config.nginxConfigDir + '/naked_domain.conf'));
-            expect(fs.readFileSync(config.nginxConfigDir + '/naked_domain.conf', 'utf8').length > 10);
+            expect(fs.existsSync(paths.NGINX_CONFIG_DIR + '/naked_domain.conf'));
+            expect(fs.readFileSync(paths.NGINX_CONFIG_DIR + '/naked_domain.conf', 'utf8').length > 10);
             // expect(error).to.be(null); // this fails because nginx cannot be restarted
             done();
         });
@@ -88,8 +89,8 @@ describe('apptask', function () {
 
     it('can unset naked domain', function (done) {
         apptask._setNakedDomain(null, function (error) {
-            expect(fs.existsSync(config.nginxConfigDir + '/naked_domain.conf'));
-            expect(fs.readFileSync(config.nginxConfigDir + '/naked_domain.conf', 'utf8') === '');
+            expect(fs.existsSync(paths.NGINX_CONFIG_DIR + '/naked_domain.conf'));
+            expect(fs.readFileSync(paths.NGINX_CONFIG_DIR + '/naked_domain.conf', 'utf8') === '');
             // expect(error).to.be(null); // this fails because nginx cannot be restarted
             done();
         });
@@ -97,7 +98,7 @@ describe('apptask', function () {
 
     it('create volume', function (done) {
         apptask._createVolume(APP, function (error) {
-            expect(fs.existsSync(config.appDataRoot + '/' + APP.id)).to.be(true);
+            expect(fs.existsSync(paths.APPDATA_DIR + '/' + APP.id)).to.be(true);
             expect(error).to.be(null);
             done();
         });
@@ -105,7 +106,7 @@ describe('apptask', function () {
 
     it('delete volume', function (done) {
         apptask._deleteVolume(APP, function (error) {
-            expect(!fs.existsSync(config.appDataRoot + '/' + APP.id)).to.be(true);
+            expect(!fs.existsSync(paths.APPDATA_DIR + '/' + APP.id)).to.be(true);
             expect(error).to.be(null);
             done();
         });

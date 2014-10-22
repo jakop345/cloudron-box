@@ -11,6 +11,7 @@ var user = require('../user.js'),
     mkdirp = require('mkdirp'),
     expect = require('expect.js'),
     database = require('../database.js'),
+    paths = require('../paths.js'),
     config = require('../../config.js');
 
 var USERNAME = 'nobody';
@@ -35,8 +36,8 @@ function createUser(done) {
 
 function setup(done) {
     // ensure data/config/mount paths
-    mkdirp.sync(config.volumesDataRoot);
-    mkdirp.sync(config.volumesMountRoot);
+    mkdirp.sync(paths.VOLUMES_DATA_DIR);
+    mkdirp.sync(paths.VOLUMES_MOUNT_DIR);
 
     database.initialize(function (error) {
         expect(error).to.be(null);

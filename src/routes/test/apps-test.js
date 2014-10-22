@@ -17,6 +17,7 @@ var Server = require('../../server.js'),
     async = require('async'),
     hock = require('hock'),
     appdb = require('../../appdb.js'),
+    paths = require('../../paths.js'),
     url = require('url'),
     Docker = require('dockerode'),
     assert = require('assert'),
@@ -380,7 +381,7 @@ describe('App installation', function () {
     });
 
     it('installation - nginx config', function (done) {
-        expect(fs.existsSync(config.nginxAppConfigDir + '/' + APP_LOCATION + '.conf'));
+        expect(fs.existsSync(paths.NGINX_APPCONFIG_DIR + '/' + APP_LOCATION + '.conf'));
         done();
     });
 
@@ -390,7 +391,7 @@ describe('App installation', function () {
     });
 
     it('installation - volume created', function (done) {
-        expect(fs.existsSync(config.appDataRoot + '/' + APP_ID));
+        expect(fs.existsSync(paths.APPDATA_DIR + '/' + APP_ID));
         done();
     });
 
@@ -408,7 +409,7 @@ describe('App installation', function () {
     it('installation - running container has volume mounted', function (done) {
         docker.getContainer(appInfo.containerId).inspect(function (error, data) {
             expect(error).to.not.be.ok();
-            expect(data.Volumes['/app/data']).to.eql(config.appDataRoot + '/' + APP_ID);
+            expect(data.Volumes['/app/data']).to.eql(paths.APPDATA_DIR + '/' + APP_ID);
             done();
         });
     });
@@ -542,7 +543,7 @@ describe('App installation', function () {
     });
 
     it('uninstalled - volume destroyed', function (done) {
-        expect(!fs.existsSync(config.appDataRoot + '/' + APP_ID));
+        expect(!fs.existsSync(paths.APPDATA_DIR + '/' + APP_ID));
         done();
     });
 
@@ -554,7 +555,7 @@ describe('App installation', function () {
     });
 
     it('uninstalled - removed nginx', function (done) {
-        expect(!fs.existsSync(config.nginxAppConfigDir + '/' + APP_LOCATION + '.conf'));
+        expect(!fs.existsSync(paths.NGINX_APPCONFIG_DIR + '/' + APP_LOCATION + '.conf'));
         done();
     });
 });
@@ -668,7 +669,7 @@ describe('App installation - port bindings', function () {
     });
 
     it('installation - nginx config', function (done) {
-        expect(fs.existsSync(config.nginxAppConfigDir + '/' + APP_LOCATION + '.conf'));
+        expect(fs.existsSync(paths.NGINX_APPCONFIG_DIR + '/' + APP_LOCATION + '.conf'));
         done();
     });
 
@@ -678,7 +679,7 @@ describe('App installation - port bindings', function () {
     });
 
     it('installation - volume created', function (done) {
-        expect(fs.existsSync(config.appDataRoot + '/' + APP_ID));
+        expect(fs.existsSync(paths.APPDATA_DIR + '/' + APP_ID));
         done();
     });
 
@@ -711,7 +712,7 @@ describe('App installation - port bindings', function () {
     it('installation - running container has volume mounted', function (done) {
         docker.getContainer(appInfo.containerId).inspect(function (error, data) {
             expect(error).to.not.be.ok();
-            expect(data.Volumes['/app/data']).to.eql(config.appDataRoot + '/' + APP_ID);
+            expect(data.Volumes['/app/data']).to.eql(paths.APPDATA_DIR + '/' + APP_ID);
             done();
         });
     });
@@ -806,7 +807,7 @@ describe('App installation - port bindings', function () {
     });
 
     it('uninstalled - volume destroyed', function (done) {
-        expect(!fs.existsSync(config.appDataRoot + '/' + APP_ID));
+        expect(!fs.existsSync(paths.APPDATA_DIR + '/' + APP_ID));
         done();
     });
 
@@ -818,7 +819,7 @@ describe('App installation - port bindings', function () {
     });
 
     it('uninstalled - removed nginx', function (done) {
-        expect(!fs.existsSync(config.nginxAppConfigDir + '/' + APP_LOCATION + '.conf'));
+        expect(!fs.existsSync(paths.NGINX_APPCONFIG_DIR + '/' + APP_LOCATION + '.conf'));
         done();
     });
 });

@@ -11,6 +11,7 @@ var volume = require('../volume.js'),
     User = require('../user.js'),
     mkdirp = require('mkdirp'),
     expect = require('expect.js'),
+    paths = require('../paths.js'),
     config = require('../../config.js');
 
 var USER;
@@ -24,8 +25,8 @@ var VOLUME_3 = 'third_volume';
 
 // ensure data/config/mount paths
 function setup(done) {
-    mkdirp.sync(config.volumesDataRoot);
-    mkdirp.sync(config.volumesMountRoot);
+    mkdirp.sync(paths.VOLUMES_DATA_DIR);
+    mkdirp.sync(paths.VOLUMES_MOUNT_DIR);
 
     database.initialize(function (error) {
         if (error) return done(error);

@@ -16,6 +16,7 @@ var Server = require('../../server.js'),
     config = require('../../../config.js'),
     sinon = require('sinon'),
     apptask = require('../../apptask.js'),
+    paths = require('../../paths.js'),
     async = require('async');
 
 var SERVER_URL = 'http://localhost:' + config.port;
@@ -111,7 +112,7 @@ describe('Settings API', function () {
                .end(function (err, res) {
             reloadNginxStub.restore();
             expect(res.statusCode).to.equal(200);
-            expect(fs.readFileSync(config.nginxConfigDir + '/naked_domain.conf').length > 10).to.be.ok();
+            expect(fs.readFileSync(paths.NGINX_CONFIG_DIR + '/naked_domain.conf').length > 10).to.be.ok();
             expect(reloadNginxStub.callCount).to.be(1);
             done();
         });
@@ -136,7 +137,7 @@ describe('Settings API', function () {
                .end(function (err, res) {
             reloadNginxStub.restore();
             expect(res.statusCode).to.equal(200);
-            expect(fs.readFileSync(config.nginxConfigDir + '/naked_domain.conf').length === 0).to.be.ok();
+            expect(fs.readFileSync(paths.NGINX_CONFIG_DIR + '/naked_domain.conf').length === 0).to.be.ok();
             expect(reloadNginxStub.callCount).to.be(1);
             done();
         });
