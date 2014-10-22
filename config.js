@@ -44,9 +44,9 @@ config.save = function () {
     config.nginxConfigDir = path.join(config.baseDir, 'nginx');
     config.harakaConfigDir = path.join(config.baseDir, 'haraka');
     config.appDataRoot = path.join(config.baseDir, 'appdata');
-    config.dataRoot = path.join(config.baseDir, 'data'); // TODO: rename to volumesRoot
+    config.volumesDataRoot = path.join(config.baseDir, 'volumes/data');
+    config.volumesMountRoot = path.join(config.baseDir, 'volumes/mount');
     config.iconsRoot = path.join(config.baseDir, 'icons');
-    config.mountRoot = path.join(config.baseDir, 'mount');
     config.collectdAppConfigDir = path.join(config.baseDir, 'collectd/collectd.conf.d');
 
     config.nginxAppConfigDir = path.join(config.nginxConfigDir, 'applications');

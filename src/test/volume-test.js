@@ -24,8 +24,8 @@ var VOLUME_3 = 'third_volume';
 
 // ensure data/config/mount paths
 function setup(done) {
-    mkdirp.sync(config.dataRoot);
-    mkdirp.sync(config.mountRoot);
+    mkdirp.sync(config.volumesDataRoot);
+    mkdirp.sync(config.volumesMountRoot);
 
     database.initialize(function (error) {
         if (error) return done(error);

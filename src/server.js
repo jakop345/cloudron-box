@@ -308,9 +308,9 @@ Server.prototype.start = function (callback) {
     assert(typeof callback === 'function');
     assert(this.app === null, 'Server is already up and running.');
 
-    mkdirp.sync(config.dataRoot);
+    mkdirp.sync(config.volumesDataRoot);
+    mkdirp.sync(config.volumesMountRoot);
     mkdirp.sync(config.iconsRoot);
-    mkdirp.sync(config.mountRoot);
     mkdirp.sync(config.nginxAppConfigDir);
     mkdirp.sync(config.appDataRoot);
     mkdirp.sync(config.collectdAppConfigDir);

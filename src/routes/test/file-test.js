@@ -33,7 +33,7 @@ function setup(done) {
 
         volume = { id: uuid.v4(), repo: null };
 
-        var mountPoint = path.join(config.mountRoot, volume.id);
+        var mountPoint = path.join(config.volumesMountRoot, volume.id);
         mkdirp.sync(mountPoint);
         var tmpDir = path.join(mountPoint, 'tmp');
         mkdirp.sync(tmpDir);
