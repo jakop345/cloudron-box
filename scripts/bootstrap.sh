@@ -11,6 +11,8 @@ echo "Box bootstrapping"
 USER=yellowtent
 SRCDIR=/home/$USER/box
 DATA_DIR=/home/$USER/data
+NGINX_CONFIG_DIR=/home/$USER/nginx
+NGINX_APPCONFIG_DIR=/home/$USER/nginx/applications
 
 # we get the appstore origin from the caller which is baked into the image
 APP_SERVER_URL=$1
@@ -54,23 +56,23 @@ EOF
 
 echo "==== Setup nginx ===="
 cd $SRCDIR
-mkdir -p $DATA_DIR/nginx/applications
-cp nginx/nginx.conf $DATA_DIR/nginx/nginx.conf
-cp nginx/mime.types $DATA_DIR/nginx/mime.types
-cp nginx/certificates.conf $DATA_DIR/nginx/certificates.conf
-touch $DATA_DIR/nginx/naked_domain.conf
+mkdir -p $NGINX_APPCONFIG_DIR
+cp nginx/nginx.conf $NGINX_CONFIG_DIR/nginx.conf
+cp nginx/mime.types $NGINX_CONFIG_DIR/mime.types
+cp nginx/certificates.conf $NGINX_CONFIG_DIR/certificates.conf
+touch $NGINX_CONFIG_DIR/naked_domain.conf
 FQDN=`hostname -f`
-sed -e "s/##ADMIN_FQDN##/admin-$FQDN/" -e "s|##SRCDIR##|$SRCDIR|" nginx/admin.conf_template > $DATA_DIR/nginx/applications/admin.conf
+sed -e "s/##ADMIN_FQDN##/admin-$FQDN/" -e "s|##SRCDIR##|$SRCDIR|" nginx/admin.conf_template > $NGINX_APPCONFIG_DIR/admin.conf
 
 echo "==== Setup ssl certs ===="
 # The nginx cert dir is excluded from backup in backup.sh
-CERTIFICATE_DIR=$DATA_DIR/nginx/cert
+CERTIFICATE_DIR=$NGINX_CONFIG_DIR/cert
 mkdir -p $CERTIFICATE_DIR
 cd $CERTIFICATE_DIR
 /bin/bash $SRCDIR/scripts/generate_certificate.sh US California 'San Francisco' CloudronInc Cloudron `hostname -f` cert@cloudron.io .
 tar xf cert.tar
 
-chown $USER:$USER -R $DATA_DIR
+chown $USER:$USER -R /home/$USER
 
 echo "=== Setup collectd and graphite ==="
 $SRCDIR/scripts/bootstrap/setup_collectd.sh
@@ -87,7 +89,7 @@ cp $SRCDIR/supervisor/supervisord.conf /etc/supervisor/
 echo "Writing box supervisor config..."
 cat > /etc/supervisor/conf.d/nginx.conf <<EOF
 [program:nginx]
-command=nginx -c "$DATA_DIR/nginx/nginx.conf" -p /var/log/nginx/
+command=nginx -c "$NGINX_CONFIG_DIR/nginx.conf" -p /var/log/nginx/
 autostart=true
 autorestart=true
 redirect_stderr=true
