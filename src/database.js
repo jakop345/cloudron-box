@@ -3,12 +3,8 @@
 'use strict';
 
 var sqlite3 = require('sqlite3'),
-    fs = require('fs'),
-    uuid = require('node-uuid'),
-    path = require('path'),
     debug = require('debug')('box:database'),
     async = require('async'),
-    DatabaseError = require('./databaseerror'),
     assert = require('assert'),
     config = require('../config.js');
 
