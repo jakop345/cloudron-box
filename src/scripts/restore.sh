@@ -36,6 +36,10 @@ rm -rf "$HOME/data"
 # FIXME userid should be constants across restores
 tar zxvf /tmp/restore.tar.gz -C "$HOME/data"
 
+# only upgrades are supported
+echo "Migrating data"
+cd $HOME/box && $HOME/box/node_modules/.bin/db-migrate up
+
 # Do not use json node binary. Seems to have some bug resulting in empty cloudron.conf
 # in heredocs, single quotes preserves the quotes _and_ does variable expansion
 REPLACE_TOKEN_JS=$(cat <<EOF
@@ -45,7 +49,7 @@ config.token = '$TOKEN';
 fs.writeFileSync('$HOME/cloudron.conf', JSON.stringify(config, null, 4));
 EOF
 )
-echo "token replacer script: $REPLACE_TOKEN_JS"
+echo "Token replacer script: $REPLACE_TOKEN_JS"
 
 sudo -u yellowtent -H bash <<EOF
 node -e "$REPLACE_TOKEN_JS"
