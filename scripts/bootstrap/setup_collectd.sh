@@ -20,7 +20,7 @@ docker run -d --name="graphite" \
     -v $GRAPHITE_DIR:/app/data girish/graphite:0.2
 
 # collectd
-mkdir -p $COLLECT_APPCONFIG_DIR
+mkdir -p $COLLECTD_APPCONFIG_DIR
 cp -r $SCRIPT_DIR/collectd/collectd.conf $COLLECTD_DIR/collectd.conf
 rm -rf /etc/collectd
 ln -sfF $COLLECTD_DIR /etc/collectd
