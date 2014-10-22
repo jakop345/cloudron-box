@@ -31,16 +31,10 @@ supervisorctl stop box
 echo "Downloading backup: $RESTORE_URL"
 curl -X GET -o /tmp/restore.tar.gz "$RESTORE_URL"
 
-rm -rf "$HOME/box" "$HOME/data"
-
-# move somewhere else since we blow away the current dir
-cd /
+rm -rf "$HOME/data"
 
 # FIXME userid should be constants across restores
-tar zxvf /tmp/restore.tar.gz -C "$HOME"
-
-# really move somewhere else
-cd /
+tar zxvf /tmp/restore.tar.gz -C "$HOME/data"
 
 # Do not use json node binary. Seems to have some bug resulting in empty cloudron.conf
 # in heredocs, single quotes preserves the quotes _and_ does variable expansion
