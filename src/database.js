@@ -27,16 +27,14 @@ exports = module.exports = {
 };
 
 var connectionPool = [ ],
-    databaseFileName = null,
     db = null;
 
 var NOOP_CALLBACK = function (error) { if (error) console.error(error); assert(!error); };
 
 function initialize(callback) {
-    databaseFileName = path.join(config.baseDir, 'cloudron.sqlite');
-    db = new sqlite3.Database(databaseFileName);
+    db = new sqlite3.Database(config.databaseFileName);
     db.on('error', function (error) {
-        console.error('Database error in ' + databaseFileName + ':', error);
+        console.error('Database error in ' + config.databaseFileName + ':', error);
     });
 
     return callback(null);
@@ -45,7 +43,6 @@ function initialize(callback) {
 function uninitialize() {
     debug('Closing database');
     db.close();
-    databaseFileName = null;
     db = null;
 
     connectionPool.forEach(function (conn) { conn.close(); });
@@ -63,7 +60,7 @@ function clear(callback) {
 }
 
 function newTransaction() {
-    var conn = connectionPool.length !== 0 ? connectionPool.pop() : new sqlite3.Database(databaseFileName);
+    var conn = connectionPool.length !== 0 ? connectionPool.pop() : new sqlite3.Database(config.databaseFileName);
     conn.serialize();
     conn.run('BEGIN TRANSACTION', NOOP_CALLBACK);
     return conn;

@@ -16,12 +16,13 @@ var production = process.env.NODE_ENV === 'production';
 var config = { };
 
 if (production) {
-    config.baseDir =  path.join(homeDir, process.env.CLOUDRON === '1' ? 'data' : '.yellowtent');
+    config.baseDir =  path.join(homeDir, process.env.CLOUDRON === '1' ? '' : '.yellowtent');
 } else {
     config.baseDir = path.join(homeDir, '.yellowtenttest');
 }
 
 config.cloudronConfigFile = path.join(config.baseDir, 'cloudron.conf');
+config.databaseFileName = path.join(config.baseDir, 'data/cloudron.sqlite');
 
 config.save = function () {
     fs.writeFileSync(config.cloudronConfigFile, JSON.stringify(config, null, 4)); // functions are ignored by JSON.stringify
@@ -43,7 +44,7 @@ config.save = function () {
 
     config.nginxConfigDir = path.join(config.baseDir, 'nginx');
     config.harakaConfigDir = path.join(config.baseDir, 'haraka');
-    config.appDataRoot = path.join(config.baseDir, 'appdata');
+    config.appDataRoot = path.join(config.baseDir, 'data/appdata');
     config.volumesDataRoot = path.join(config.baseDir, 'volumes/data');
     config.volumesMountRoot = path.join(config.baseDir, 'volumes/mount');
     config.iconsRoot = path.join(config.baseDir, 'icons');

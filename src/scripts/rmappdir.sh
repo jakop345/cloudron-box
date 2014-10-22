@@ -11,7 +11,7 @@ if [ $# -eq 0 ]; then
 fi
 
 APPDATA="$HOME/data/appdata"
-APPDATA_TEST="$HOME/.yellowtenttest/appdata"
+APPDATA_TEST="$HOME/.yellowtenttest/data/appdata"
 
 if [ "$1" == "--check" ]; then
     echo "OK"
