@@ -3,10 +3,8 @@
 'use strict';
 
 var path = require('path'),
-    os = require('os'),
     fs = require('fs'),
     safe = require('safetydance'),
-    crypto = require('crypto'),
     assert = require('assert'),
     _ = require('underscore'),
     mkdirp = require('mkdirp');
