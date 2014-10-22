@@ -11,17 +11,14 @@ var path = require('path'),
     _ = require('underscore'),
     mkdirp = require('mkdirp');
 
-function getUserHomeDir() {
-    return process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
-}
-
+var homeDir = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
 var production = process.env.NODE_ENV === 'production';
 var config = { };
 
 if (production) {
-    config.baseDir =  path.join(getUserHomeDir(), process.env.CLOUDRON === '1' ? 'data' : '.yellowtent');
+    config.baseDir =  path.join(homeDir, process.env.CLOUDRON === '1' ? 'data' : '.yellowtent');
 } else {
-    config.baseDir = path.join(getUserHomeDir(), '.yellowtenttest');
+    config.baseDir = path.join(homeDir, '.yellowtenttest');
 }
 
 config.cloudronConfigFile = path.join(config.baseDir, 'cloudron.conf');
