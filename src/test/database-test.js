@@ -18,8 +18,6 @@ var database = require('../database'),
 
 describe('database', function () {
     before(function (done) {
-        mkdirp.sync(config.configRoot);
-
         database.initialize(done);
     });
 

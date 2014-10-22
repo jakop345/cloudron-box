@@ -36,7 +36,6 @@ function createUser(done) {
 function setup(done) {
     // ensure data/config/mount paths
     mkdirp.sync(config.dataRoot);
-    mkdirp.sync(config.configRoot);
     mkdirp.sync(config.mountRoot);
 
     database.initialize(function (error) {

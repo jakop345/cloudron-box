@@ -35,7 +35,6 @@ var APP = {
 describe('apptask', function () {
     before(function (done) {
         mkdirp.sync(config.appDataRoot);
-        mkdirp.sync(config.configRoot);
         mkdirp.sync(config.nginxAppConfigDir);
 
         database.initialize(function (error) {

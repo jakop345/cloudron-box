@@ -22,7 +22,6 @@ console.log(' Cloudron config:                ', config.cloudronConfigFile);
 console.log(' Port:                           ', config.port);
 console.log(' Admin Origin:                   ', config.adminOrigin);
 console.log(' Volume data root dir:           ', config.dataRoot);
-console.log(' Volume config root dir:         ', config.configRoot);
 console.log(' Volume mount root dir:          ', config.mountRoot);
 console.log(' Appstore token:                 ', config.token);
 console.log(' Appstore server origin:         ', config.appServerUrl);

@@ -310,7 +310,6 @@ Server.prototype.start = function (callback) {
 
     mkdirp.sync(config.dataRoot);
     mkdirp.sync(config.iconsRoot);
-    mkdirp.sync(config.configRoot);
     mkdirp.sync(config.mountRoot);
     mkdirp.sync(config.nginxAppConfigDir);
     mkdirp.sync(config.appDataRoot);
