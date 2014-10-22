@@ -49,8 +49,8 @@ while true; do
     timeout 3m npm install --production --loglevel verbose && break
     echo "npm install timedout, trying again"
 done
+PATH=$PATH:$SRCDIR/node_modules/.bin npm run-script postinstall
 EOF
-
 
 echo "==== Setup nginx ===="
 cd $SRCDIR
