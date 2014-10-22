@@ -38,7 +38,7 @@ fi
 FILE="/tmp/backup_${NOW}.tar.gz"
 
 # backup only data
-cd "$HOME" && tar czf "$FILE" data
+cd "$HOME/data" && tar czf "$FILE" .
 echo "Uploading backup to $BACKUP_URL"
 curl -X PUT -T "$FILE" "$BACKUP_URL"
 
