@@ -46,9 +46,9 @@ cd /
 # in heredocs, single quotes preserves the quotes _and_ does variable expansion
 REPLACE_TOKEN_JS=$(cat <<EOF
 var fs = require('fs');
-var config = JSON.parse(fs.readFileSync('$HOME/data/cloudron.conf', 'utf8'));
+var config = JSON.parse(fs.readFileSync('$HOME/cloudron.conf', 'utf8'));
 config.token = '$TOKEN';
-fs.writeFileSync('$HOME/data/cloudron.conf', JSON.stringify(config, null, 4));
+fs.writeFileSync('$HOME/cloudron.conf', JSON.stringify(config, null, 4));
 EOF
 )
 echo "token replacer script: $REPLACE_TOKEN_JS"

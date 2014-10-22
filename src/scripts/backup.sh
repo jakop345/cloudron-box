@@ -40,7 +40,7 @@ FILE="/tmp/backup_${NOW}.tar.gz"
 # Do not backup anything other than box (source) and data
 # Other directories might contain potentially sensitive information like certs
 # The nginx cert dir here needs to match bootstrap.sh
-cd "$HOME" && tar czf "$FILE" box data --exclude='data/nginx/cert'
+cd "$HOME" && tar czf "$FILE" box data
 echo "Uploading backup to $BACKUP_URL"
 curl -X PUT -T "$FILE" \
     "$BACKUP_URL"
