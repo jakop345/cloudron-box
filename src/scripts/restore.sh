@@ -56,7 +56,7 @@ echo "token replacer script: $REPLACE_TOKEN_JS"
 sudo -u yellowtent -H bash <<EOF
 node -e "$REPLACE_TOKEN_JS"
 # TODO: do not auto-start stopped containers (httpPort might need fixing to start them)
-sqlite3 $HOME/data/config/config.sqlite.db 'UPDATE apps SET installationState = "pending_restore", healthy = NULL, runState = NULL, containerId = NULL, httpPort = NULL, installationProgress = NULL'
+sqlite3 $HOME/data/cloudron.sqlite 'UPDATE apps SET installationState = "pending_restore", healthy = NULL, runState = NULL, containerId = NULL, httpPort = NULL, installationProgress = NULL'
 EOF
 
 echo "Restart nginx"

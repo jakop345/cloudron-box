@@ -33,7 +33,7 @@ var connectionPool = [ ],
 var NOOP_CALLBACK = function (error) { if (error) console.error(error); assert(!error); };
 
 function initialize(callback) {
-    databaseFileName = config.configRoot + '/config.sqlite.db';
+    databaseFileName = path.join(config.baseDir, 'cloudron.sqlite');
     db = new sqlite3.Database(databaseFileName);
     db.on('error', function (error) {
         console.error('Database error in ' + databaseFileName + ':', error);
