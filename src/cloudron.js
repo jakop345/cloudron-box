@@ -282,7 +282,7 @@ function installCertificate(cert, key, callback) {
     assert(typeof key === 'string' || !key);
     assert(typeof callback === 'function');
 
-    var certDirPath = config.nginxCertDir;
+    var certDirPath = paths.NGINX_CERT_DIR;
 
     if (!cert || !key) return callback(new Error('cert or key is null'));
 
