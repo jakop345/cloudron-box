@@ -422,7 +422,7 @@ function downloadManifest(app, callback) {
             if (error) return callback(new Error('Manifest error:' + error.message));
 
             if (manifest.icon) {
-                safe.fs.writeFileSync(config.iconsRoot + '/' + app.id + '.png', new Buffer(manifest.icon));
+                safe.fs.writeFileSync(path.join(config.iconsRoot, app.id + '.png'), new Buffer(manifest.icon));
 
                 // delete icon buffer, so we don't store it in the db
                 delete manifest.icon;
@@ -484,7 +484,7 @@ function unregisterSubdomain(app, callback) {
 }
 
 function removeIcon(app, callback) {
-    fs.unlink(config.dataRoot + '/icons/' + app.id + '.png', function (error) {
+    fs.unlink(path.join(config.iconsRoot, app.id + '.png'), function (error) {
         if (error && error.code !== 'ENOENT') console.error(error);
         callback(null);
     });
