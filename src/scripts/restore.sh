@@ -21,6 +21,7 @@ fi
 
 RESTORE_URL="$1"
 TOKEN="$2"
+SRCDIR="$HOME/box"
 
 echo "Arguments: $@"
 
@@ -38,7 +39,7 @@ tar zxvf /tmp/restore.tar.gz -C "$HOME/data"
 
 # only upgrades are supported
 echo "Migrating data"
-cd $HOME/box && $HOME/box/node_modules/.bin/db-migrate up
+PATH=$PATH:$SRCDIR/node_modules/.bin npm run-script postinstall
 
 # Do not use json node binary. Seems to have some bug resulting in empty cloudron.conf
 # in heredocs, single quotes preserves the quotes _and_ does variable expansion
