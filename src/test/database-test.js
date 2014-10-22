@@ -618,7 +618,7 @@ describe('database', function () {
             settingsdb.getAll(function (error, result) {
                 expect(error).to.be(null);
                 expect(result).to.be.an(Array);
-                expect(result[0]).to.eql({ key: 'somekey', value: 'somevalue' });
+                expect(result[1]).to.eql({ key: 'somekey', value: 'somevalue' });
                 done();
             });
         });

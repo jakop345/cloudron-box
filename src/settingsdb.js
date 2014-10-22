@@ -8,6 +8,10 @@ var DatabaseError = require('./databaseerror'),
     database = require('./database.js');
 
 exports = module.exports = {
+    getNakedDomain: getNakedDomain,
+    setNakedDomain: setNakedDomain,
+
+    // these are for internal use, exported for testing
     get: get,
     getAll: getAll,
     set: set,
@@ -49,5 +53,13 @@ function set(key, value, callback) {
 
         callback(null);
     });
+}
+
+function getNakedDomain(callback) {
+    return get(exports.NAKED_DOMAIN_KEY, callback);
+}
+
+function setNakedDomain(appid, callback) {
+    return set(exports.NAKED_DOMAIN_KEY, appid, callback);
 }
 

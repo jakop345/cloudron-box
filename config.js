@@ -48,7 +48,6 @@ config.save = function () {
     config.adminOrigin = 'https://admin-' + config.fqdn;
 
     config.token = null;
-    config.nakedDomain = null;
     config.version = '0.5.0';
     config.mailServer = null;
     config.mailUsername = null;

@@ -6,8 +6,8 @@ var HttpError = require('../httperror.js'),
     HttpSuccess = require('../httpsuccess.js'),
     debug = require('debug')('box:routes/settings'),
     DatabaseError = require('../databaseerror.js'),
+    settingsdb = require('../settingsdb.js'),
     apptask = require('../apptask.js'),
-    config = require('../../config.js'),
     apps = require('../apps.js'),
     AppsError = apps.AppsError;
 
@@ -17,9 +17,13 @@ exports = module.exports = {
 };
 
 function getNakedDomain(req, res, next) {
-    if (config.nakedDomain === null) return next(new HttpSuccess(200, { appid: '' }));
+    settingsdb.getNakedDomain(function (error, nakedDomain) {
+        if (error) return next(new HttpError(500, 'Internal error: ' + error));
 
-    next(new HttpSuccess(200, { appid: config.nakedDomain }));
+        if (nakedDomain === null) return next(new HttpSuccess(200, { appid: '' }));
+
+        next(new HttpSuccess(200, { appid: nakedDomain }));
+    });
 }
 
 function setNakedDomain(req, res, next) {
@@ -31,11 +35,15 @@ function setNakedDomain(req, res, next) {
     getApp(data.appid, function (error, app) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
 
+        // TODO: apptask and db update needs to be atomic
         apptask.setNakedDomain(app, function (error) {
             if (error) return next(new HttpError(500, 'Error setting naked domain: ' + error));
 
-            config.set('nakedDomain', data.appid);
-            next(new HttpSuccess(200, { }));
+            settingsdb.setNakedDomain(data.appid, function (error) {
+                if (error) return next(new HttpError(500, 'Error settings naked domain: ' + error));
+
+                next(new HttpSuccess(200, { }));
+            });
         });
     });
 }
