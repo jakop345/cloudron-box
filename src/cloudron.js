@@ -346,7 +346,7 @@ function restore(args, callback) {
 
         callback(null); // finish request to let appstore know
 
-        execFile(SUDO, [ RESTORE_CMD, app.restoreUrl, app.token ], { }, function (error, stdout, stderr) {
+        execFile(SUDO, [ RESTORE_CMD, args.restoreUrl ], { }, function (error, stdout, stderr) {
             if (error) {
                 console.error('Restore failed.', error, stdout, stderr);
             }
