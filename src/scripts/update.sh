@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 if [ $EUID -ne 0 ]; then
     echo "This script should be run as root." > /dev/stderr
     exit 1
@@ -24,9 +26,8 @@ SRCDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 exec > >(tee /var/log/cloudron/update.log)
 exec 2>&1
 
-echo "Updating Cloudron to Version:$1 to Revision:$REVISION from Backup:$BACKUP_URL\n"
+echo "Updating $SRCDIR to Version:$1 to Revision:$REVISION from Backup:$BACKUP_URL\n"
 
-echo "Perform update in $SRCDIR"
 cd "$SRCDIR"
 
 echo "Perform backup first"
