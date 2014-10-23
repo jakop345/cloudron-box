@@ -7,10 +7,23 @@ var path = require('path'),
     safe = require('safetydance'),
     assert = require('assert'),
     _ = require('underscore'),
+    path = require('path'),
     mkdirp = require('mkdirp');
 
 var homeDir = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
 var production = process.env.NODE_ENV === 'production';
+var currentVersion =  (function () {
+    var versions = JSON.parse(fs.readFileSync(path.join(__dirname, 'VERSIONS.json')));
+    var firstVersion = Object.keys(versions).reduce(function (prev, cur) { return prev < cur ? prev : cur; });
+
+    var cur = firstVersion;
+    while (versions[cur].next !== null) {
+        cur = versions[cur].next;
+    }
+
+    return cur;
+})();
+
 var config = { };
 
 if (production) {
@@ -45,7 +58,6 @@ config.save = function () {
     config.adminOrigin = 'https://admin-' + config.fqdn;
 
     config.token = null;
-    config.version = '0.5.0';
     config.mailServer = null;
     config.mailUsername = null;
     config.mailDnsRecordIds = [ ];
@@ -81,6 +93,10 @@ config.get = function (key) {
     assert(typeof key === 'string');
 
     return config[key];
+};
+
+config.version = function () {
+    return currentVersion;
 };
 
 exports = module.exports = config;

@@ -70,20 +70,6 @@ else
     echo "No update script to run"
 fi
 
-echo "Updating box version to $VERSION"
-# Do not use json node binary. Seems to have some bug resulting in empty cloudron.conf
-# in heredocs, single quotes preserves the quotes _and_ does variable expansion
-REPLACE_VERSION_JS=$(cat <<EOF
-var fs = require('fs');
-var config = JSON.parse(fs.readFileSync('$HOME/cloudron.conf', 'utf8'));
-config.version = '$VERSION';
-fs.writeFileSync('$HOME/cloudron.conf', JSON.stringify(config, null, 4));
-EOF
-)
-sudo -u yellowtent -H bash <<EOF
-node -e "$REPLACE_VERSION_JS"
-EOF
-
 echo "Starting box..."
 OUT=`supervisorctl start box`
 RESULT=`echo $OUT | grep echo`

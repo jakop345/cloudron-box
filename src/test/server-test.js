@@ -98,7 +98,7 @@ describe('Server', function () {
                 expect(err).to.not.be.ok();
                 expect(res.statusCode).to.equal(200);
                 var versions = require('../../VERSIONS.json');
-                var latestVersion = Object.keys(versions).sort().pop();
+                var latestVersion = Object.keys(versions).sort().slice(0, -1).pop();
                 expect(res.body.version).to.equal(latestVersion);
                 done(err);
             });

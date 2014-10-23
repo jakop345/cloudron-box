@@ -196,7 +196,7 @@ function getConfig(callback) {
             isDev: config.isDev,
             fqdn: config.fqdn,
             ip: getIp(),
-            version: config.version,
+            version: config.version(),
             revision: stdout,
             update: updater.availableUpdate()
         })

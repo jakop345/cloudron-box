@@ -82,7 +82,7 @@ Server.prototype._firstTime = function (req, res) {
     userdb.count(function (error, count) {
         if (error) return res.send(500, { status: http.STATUS_CODES[500], message: error.message || 'Internal Server error' });
 
-        return res.send(200, { activated: count !== 0, version: config.version });
+        return res.send(200, { activated: count !== 0, version: config.version() });
     });
 };
 
@@ -96,7 +96,7 @@ Server.prototype._firstTime = function (req, res) {
  * @apiSuccess {String} version The current version string of the device.
  */
 Server.prototype._getVersion = function (req, res) {
-    res.send(200, { version: config.version });
+    res.send(200, { version: config.version() });
 };
 
 /*

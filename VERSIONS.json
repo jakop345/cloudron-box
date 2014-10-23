@@ -9,7 +9,7 @@
         "changelog": [
             "Display version correctly"
         ],
-        "next": "0.2.0"
+        "next": "0.3.0"
     },
     "0.3.0": {
         "revision": "d6cc39dd010beccbde78db6043ab6d4f8d1adefb",

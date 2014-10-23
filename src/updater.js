@@ -29,7 +29,7 @@ Updater.prototype.availableUpdate = function () {
 };
 
 Updater.prototype._check = function () {
-    debug('check: for updates. box is on version ' + config.version);
+    debug('check: for updates. box is on version ' + config.version());
 
     var that = this;
 
@@ -65,13 +65,13 @@ Updater.prototype._check = function () {
             return;
         }
 
-        if (!versions[config.version]) {
-            console.error('Cloudron runs on unknown version %s', config.version);
+        if (!versions[config.version()]) {
+            console.error('Cloudron runs on unknown version %s', config.version());
             that._boxUpdateInfo = null;
             return;
         }
 
-        var next = versions[config.version].next;
+        var next = versions[config.version()].next;
         if (next && versions[next] && versions[next].revision) {
             debug('_check: new version %s available to revision %s.', next, versions[next].revision);
             that._boxUpdateInfo = versions[next];
@@ -109,7 +109,7 @@ Updater.prototype.update = function (backupUrl, callback) {
 
     var args = [
         path.join(__dirname, 'scripts/update.sh'),
-        isDev ? config.version : this._boxUpdateInfo.version,
+        isDev ? config.version() : this._boxUpdateInfo.version,
         isDev ? 'origin/master' : this._boxUpdateInfo.revision,
         backupUrl
     ];
