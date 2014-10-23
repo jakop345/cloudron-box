@@ -6,6 +6,7 @@ var sqlite3 = require('sqlite3'),
     debug = require('debug')('box:database'),
     async = require('async'),
     assert = require('assert'),
+    paths = require('./paths.js'),
     config = require('../config.js');
 
 exports = module.exports = {
@@ -28,9 +29,9 @@ var connectionPool = [ ],
 var NOOP_CALLBACK = function (error) { if (error) console.error(error); assert(!error); };
 
 function initialize(callback) {
-    db = new sqlite3.Database(config.databaseFileName);
+    db = new sqlite3.Database(paths.DATABASE_FILENAME);
     db.on('error', function (error) {
-        console.error('Database error in ' + config.databaseFileName + ':', error);
+        console.error('Database error in ' + paths.DATABASE_FILENAME + ':', error);
     });
 
     return callback(null);
@@ -56,7 +57,7 @@ function clear(callback) {
 }
 
 function newTransaction() {
-    var conn = connectionPool.length !== 0 ? connectionPool.pop() : new sqlite3.Database(config.databaseFileName);
+    var conn = connectionPool.length !== 0 ? connectionPool.pop() : new sqlite3.Database(paths.DATABASE_FILENAME);
     conn.serialize();
     conn.run('BEGIN TRANSACTION', NOOP_CALLBACK);
     return conn;

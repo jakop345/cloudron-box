@@ -22,7 +22,6 @@ if (production) {
 // cloudron.conf contains 'instance' config that applies to this cloudron instance. This doesn't need
 // to be backed up. cloudron.sqlite contains all data that will be backed up
 config.cloudronConfigFile = path.join(config.baseDir, 'cloudron.conf');
-config.databaseFileName = path.join(config.baseDir, 'data/cloudron.sqlite');
 
 config.save = function () {
     fs.writeFileSync(config.cloudronConfigFile, JSON.stringify(config, null, 4)); // functions are ignored by JSON.stringify
