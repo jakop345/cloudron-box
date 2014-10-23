@@ -30,13 +30,13 @@ echo "Perform update in $SRCDIR"
 cd "$SRCDIR"
 
 echo "Perform backup first"
-if [ ! ./src/scripts/backup.sh "$BACKUP_URL" "do_not_restart_box_flag" ]; then
+if ! ./src/scripts/backup.sh "$BACKUP_URL" "do_not_restart_box_flag" ; then
     echo "Backup failed."
     exit 1
 fi
 
 echo "Fetch latest code..."
-if [ ! git fetch ]; then
+if ! git fetch ; then
     echo "Fetch failed."
     exit 1
 fi
@@ -45,7 +45,7 @@ echo "Reset repo to latest code..."
 git reset --hard $REVISION
 
 echo "Updating npm modules"
-if [ ! npm install --production ]; then
+if ! npm install --production ; then
     echo "Failed to update npm modules."
     exit 1
 fi
