@@ -14,6 +14,7 @@ exports = module.exports = {
 
     COLLECTD_APPCONFIG_DIR: path.join(config.baseDir, 'collectd/collectd.conf.d'),
 
+    DATA_DIR: path.join(config.baseDir, 'data'),
     APPDATA_DIR: path.join(config.baseDir, 'data/appdata'),
 
     APPICONS_DIR: path.join(config.baseDir, 'appicons'),
