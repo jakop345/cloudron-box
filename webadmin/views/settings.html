@@ -27,7 +27,7 @@
             </div>
             <div class="panel-body">
                 <ul class="list-group">
-                    <li class="list-group-item">Appstore <span class="pull-right">{{config.appServerUrl}}</span></li>
+                    <li class="list-group-item">Appstore <a ng-href="{{config.appServerUrl}}" class="pull-right">{{config.appServerUrl}}</a></li>
                     <li class="list-group-item">Version <span class="pull-right">{{config.version}}</span></li>
                     <li class="list-group-item" ng-show="config.revision">Revision <span class="pull-right">{{config.revision}}</span></li>
                 </ul>
