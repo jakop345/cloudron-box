@@ -24,12 +24,14 @@
         "changelog": [
             "Multiple app instances"
         ],
-        "next": null
+        "next": "0.5.0"
     },
     "0.5.0": {
         "revision": "TBD",
         "changelog": [
+            "Basic upgrade"
         ],
+        "imageId": "7121067",
         "next": null
     }
 }
