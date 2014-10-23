@@ -48,6 +48,7 @@ config.save = function () {
     config.version = '0.5.0';
     config.mailServer = null;
     config.mailUsername = null;
+    config.mailDnsRecordIds = [ ];
 
     if (safe.fs.existsSync(config.cloudronConfigFile)) {
         var data = safe.JSON.parse(safe.fs.readFileSync(config.cloudronConfigFile, 'utf8'));
@@ -74,6 +75,12 @@ config.set = function (key, value) {
         config[key] = value;
     }
     config.save();
+};
+
+config.get = function (key) {
+    assert(typeof key === 'string');
+
+    return config[key];
 };
 
 exports = module.exports = config;

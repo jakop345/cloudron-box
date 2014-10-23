@@ -73,6 +73,8 @@ function initialize() {
     sendHeartBeat();
     announce();
 
+    addMailDnsRecords();
+
     updater.start();
 }
 
@@ -315,12 +317,16 @@ function sendMailDnsRecordsRequest(callback) {
 
             if (res.status !== 201) return callback(new Error('Failed to add Mail DNS records: ' + res.status));
 
-            return callback(null);
+            return callback(null, res.body.ids);
         });
 }
 
 function addMailDnsRecords() {
-    sendMailDnsRecordsRequest(function (error) {
+    if (!config.token) return;
+
+    if (config.get('mailDnsRecordIds').length !== 0) return; // already registered
+
+    sendMailDnsRecordsRequest(function (error, ids) {
         if (error) {
             console.error('Mail DNS record addition failed', error);
             addMailDnsRecordsTimerId = setTimeout(addMailDnsRecords, 30000);
@@ -328,6 +334,7 @@ function addMailDnsRecords() {
         }
 
         debug('Added Mail DNS records successfully');
+        config.set('mailDnsRecordIds', ids);
     });
 }
 
@@ -353,7 +360,8 @@ function restore(args, callback) {
 
             debug('_restore: success');
 
-            // FIXME: add dns mail records and oauth client record (required for fqdn changes)!
+            addMailDnsRecords();
+            // FIXME: oauth client record (required for fqdn changes)!
         });
     });
 }
@@ -375,7 +383,6 @@ function provision(args, callback) {
 
             installCertificate(args.tls.cert, args.tls.key, callback);
 
-            // TODO: this needs to work across reboots
             addMailDnsRecords();
         });
     });
