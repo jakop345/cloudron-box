@@ -107,10 +107,25 @@ Updater.prototype.update = function (backupUrl, callback) {
         return callback(new Error('No update available'));
     }
 
+    if (this._boxUpdateInfo && this._boxUpdateInfo.imageId) {
+        debug('update: box needs upgrade');
+        // TODO: cloudron.backup() here. currently, we cannot since backup requires a restart
+
+        superagent.post(config.appServerUrl + '/api/v1/boxes/' + config.fqdn + '/upgrade').query({ token: config.token }).end(function (error, result) {
+            if (error) return callback(new Error('Error making upgrade request: ' + error));
+            if (result.status !== 200) return callback(new Error('Server not ready to upgrade: ' + result.body));
+
+            callback(null);
+        });
+
+        // TODO: UI needs some indication that we are awaiting upgrade and nobody should do anything...
+        return;
+    }
+
     var args = [
         path.join(__dirname, 'scripts/update.sh'),
-        isDev ? config.version() : this._boxUpdateInfo.version,
-        isDev ? 'origin/master' : this._boxUpdateInfo.revision,
+        this._boxUpdateInfo ? this._boxUpdateInfo.version : config.version(),
+        this._boxUpdateInfo ? this._boxUpdateInfo.revision : 'origin/master',
         backupUrl
     ];
 
