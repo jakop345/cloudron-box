@@ -1,7 +1,7 @@
 'use strict';
 
-var util = require('util'),
-    assert = require('assert');
+var assert = require('assert'),
+    util = require('util');
 
 module.exports = HttpSuccess;
 

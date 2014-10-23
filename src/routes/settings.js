@@ -2,14 +2,14 @@
 
 'use strict';
 
-var HttpError = require('../httperror.js'),
-    HttpSuccess = require('../httpsuccess.js'),
-    debug = require('debug')('box:routes/settings'),
-    DatabaseError = require('../databaseerror.js'),
-    settingsdb = require('../settingsdb.js'),
+var apps = require('../apps.js'),
+    AppsError = apps.AppsError,
     apptask = require('../apptask.js'),
-    apps = require('../apps.js'),
-    AppsError = apps.AppsError;
+    DatabaseError = require('../databaseerror.js'),
+    debug = require('debug')('box:routes/settings'),
+    HttpError = require('../httperror.js'),
+    HttpSuccess = require('../httpsuccess.js'),
+    settingsdb = require('../settingsdb.js');
 
 exports = module.exports = {
     getNakedDomain: getNakedDomain,

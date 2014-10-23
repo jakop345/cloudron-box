@@ -2,10 +2,10 @@
 
 'use strict';
 
-var DatabaseError = require('./databaseerror'),
-    debug = require('debug')('box:settingsdb'),
-    assert = require('assert'),
-    database = require('./database.js');
+var assert = require('assert'),
+    database = require('./database.js'),
+    DatabaseError = require('./databaseerror'),
+    debug = require('debug')('box:settingsdb');
 
 exports = module.exports = {
     getNakedDomain: getNakedDomain,

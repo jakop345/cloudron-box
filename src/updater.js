@@ -2,14 +2,14 @@
 
 'use strict';
 
-var debug = require('debug')('box:updater'),
-    superagent = require('superagent'),
-    path = require('path'),
+var appdb = require('./appdb.js'),
     assert = require('assert'),
+    config = require('../config.js'),
+    debug = require('debug')('box:updater'),
     execFile = require('child_process').execFile,
-    appdb = require('./appdb.js'),
+    path = require('path'),
     safe = require('safetydance'),
-    config = require('../config.js');
+    superagent = require('superagent');
 
 module.exports = exports = Updater;
 

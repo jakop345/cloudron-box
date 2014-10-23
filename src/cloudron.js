@@ -2,22 +2,22 @@
 
 'use strict';
 
-var debug = require('debug')('box:cloudron'),
+var assert = require('assert'),
     config = require('../config.js'),
-    os = require('os'),
-    Updater = require('./updater.js'),
-    assert = require('assert'),
-    execFile = require('child_process').execFile,
-    util = require('util'),
-    path = require('path'),
-    fs = require('fs'),
-    paths = require('./paths.js'),
+    debug = require('debug')('box:cloudron'),
     clientdb = require('./clientdb.js'),
-    uuid = require('node-uuid'),
-    safe = require('safetydance'),
-    _ = require('underscore'),
     Docker = require('dockerode'),
-    superagent = require('superagent');
+    execFile = require('child_process').execFile,
+    fs = require('fs'),
+    os = require('os'),
+    path = require('path'),
+    paths = require('./paths.js'),
+    safe = require('safetydance'),
+    superagent = require('superagent'),
+    Updater = require('./updater.js'),
+    util = require('util'),
+    uuid = require('node-uuid'),
+    _ = require('underscore');
 
 exports = module.exports = {
     CloudronError: CloudronError,

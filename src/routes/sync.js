@@ -1,15 +1,15 @@
 'use strict';
 
-var debug = require('debug')('server:routes/sync'),
-    syncer = require('../syncer'),
+var config = require('../../config.js'),
+    debug = require('debug')('server:routes/sync'),
     HttpError = require('../httperror.js'),
     HttpSuccess = require('../httpsuccess.js'),
-    util = require('util'),
     path = require('path'),
-    safe = require('safetydance'),
     paths = require('../paths.js'),
-    config = require('../../config.js'),
-    Repo = require('../repo.js');
+    Repo = require('../repo.js'),
+    safe = require('safetydance'),
+    syncer = require('../syncer'),
+    util = require('util');
 
 exports = module.exports = {
     attachRepo: attachRepo,

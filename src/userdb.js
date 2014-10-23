@@ -1,11 +1,11 @@
 'use strict';
 
-var DatabaseError = require('./databaseerror'),
-    path = require('path'),
-    tokendb = require('./tokendb'),
-    debug = require('debug')('box:userdb'),
+var assert = require('assert'),
     database = require('./database.js'),
-    assert = require('assert');
+    debug = require('debug')('box:userdb'),
+    DatabaseError = require('./databaseerror'),
+    path = require('path'),
+    tokendb = require('./tokendb');
 
 exports = module.exports = {
     get: get,

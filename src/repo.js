@@ -1,16 +1,16 @@
 'use strict';
 
-var execFile = require('child_process').execFile,
-    path = require('path'),
-    mkdirp = require('mkdirp'),
-    fs = require('fs'),
-    assert = require('assert'),
+var assert = require('assert'),
+    constants = require('constants'), // internal module? same as process.binding('constants')
     crypto = require('crypto'),
     debug = require('debug')('box:repo'),
-    util = require('util'),
+    execFile = require('child_process').execFile,
+    fs = require('fs'),
+    mkdirp = require('mkdirp'),
+    path = require('path'),
+    safe = require('safetydance'),
     spawn = require('child_process').spawn,
-    constants = require('constants'), // internal module? same as process.binding('constants')
-    safe = require('safetydance');
+    util = require('util');
 
 exports = module.exports = Repo;
 

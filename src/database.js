@@ -2,12 +2,12 @@
 
 'use strict';
 
-var sqlite3 = require('sqlite3'),
-    debug = require('debug')('box:database'),
+var assert = require('assert'),
     async = require('async'),
-    assert = require('assert'),
+    config = require('../config.js'),
+    debug = require('debug')('box:database'),
     paths = require('./paths.js'),
-    config = require('../config.js');
+    sqlite3 = require('sqlite3');
 
 exports = module.exports = {
     initialize: initialize,

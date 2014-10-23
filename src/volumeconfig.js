@@ -1,8 +1,8 @@
 'use strict';
 
-var mkdirp = require('mkdirp'),
-    assert = require('assert'),
+var assert = require('assert'),
     debug = require('debug')('box:config'),
+    mkdirp = require('mkdirp'),
     path = require('path'),
     safe = require('safetydance');
 

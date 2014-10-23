@@ -2,26 +2,26 @@
 
 'use strict';
 
-var express = require('express'),
+var apps = require('./apps'),
+    assert = require('assert'),
+    cloudron = require('./cloudron.js'),
+    config = require('../config.js'),
+    csrf = require('csurf'),
+    database = require('./database.js'),
+    debug = require('debug')('box:server'),
+    express = require('express'),
     http = require('http'),
     HttpError = require('./httperror.js'),
     HttpSuccess = require('./httpsuccess.js'),
-    csrf = require('csurf'),
-    path = require('path'),
-    passport = require('passport'),
-    mkdirp = require('mkdirp'),
-    routes = require('./routes/index.js'),
-    debug = require('debug')('box:server'),
-    assert = require('assert'),
-    apps = require('./apps'),
+    mailer = require('./mailer.js'),
     middleware = require('./middleware'),
-    database = require('./database.js'),
-    userdb = require('./userdb'),
-    config = require('../config.js'),
+    mkdirp = require('mkdirp'),
+    passport = require('passport'),
+    path = require('path'),
     paths = require('./paths.js'),
-    cloudron = require('./cloudron.js'),
+    routes = require('./routes/index.js'),
     url = require('url'),
-    mailer = require('./mailer.js');
+    userdb = require('./userdb');
 
 exports = module.exports = Server;
 

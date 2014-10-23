@@ -1,20 +1,20 @@
 'use strict';
 
-var fs = require('fs'),
-    User = require('./user.js'),
+var aes = require('./aes-helper.js'),
+    assert = require('assert'),
+    async = require('async'),
     debug = require('debug')('box:volume'),
     encfs = require('encfs'),
-    rimraf = require('rimraf'),
+    fs = require('fs'),
     path = require('path'),
-    assert = require('assert'),
-    uuid = require('node-uuid'),
-    aes = require('./aes-helper.js'),
-    ursa = require('ursa'),
-    async = require('async'),
-    util = require('util'),
     paths = require('./paths.js'),
-    VolumeConfig = require('./volumeconfig.js'),
-    safe = require('safetydance');
+    rimraf = require('rimraf'),
+    safe = require('safetydance'),
+    ursa = require('ursa'),
+    User = require('./user.js'),
+    uuid = require('node-uuid'),
+    util = require('util'),
+    VolumeConfig = require('./volumeconfig.js');
 
 exports = module.exports = {
     Volume: Volume,

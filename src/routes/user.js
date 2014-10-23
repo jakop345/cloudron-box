@@ -3,13 +3,13 @@
 'use strict';
 
 var clientdb = require('../clientdb.js'),
-    tokendb = require('../tokendb.js'),
     DatabaseError = require('../databaseerror.js'),
-    user = require('../user.js'),
-    UserError = user.UserError,
     debug = require('debug')('box:routes/user'),
     HttpError = require('../../src/httperror.js'),
-    HttpSuccess = require('../../src/httpsuccess.js');
+    HttpSuccess = require('../../src/httpsuccess.js'),
+    tokendb = require('../tokendb.js'),
+    user = require('../user.js'),
+    UserError = user.UserError;
 
 exports = module.exports = {
     createAdmin: createAdmin,

@@ -2,10 +2,10 @@
 
 'use strict';
 
-var DatabaseError = require('./databaseerror.js'),
-    debug = require('debug')('box:clientdb'),
+var assert = require('assert'),
     database = require('./database.js'),
-    assert = require('assert');
+    DatabaseError = require('./databaseerror.js'),
+    debug = require('debug')('box:clientdb');
 
 exports = module.exports = {
     get: get,

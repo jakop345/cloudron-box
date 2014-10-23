@@ -2,9 +2,9 @@
 
 'use strict';
 
-var debug = require('debug')('box:digitalocean'),
-    dns = require('native-dns'),
-    assert = require('assert');
+var assert = require('assert'),
+    debug = require('debug')('box:digitalocean'),
+    dns = require('native-dns');
 
 exports = module.exports = {
     checkPtrRecord: checkPtrRecord

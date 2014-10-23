@@ -6,12 +6,12 @@
 
 'use strict';
 
-var apps = require('../apps.js'),
-    appdb = require('../appdb.js'),
-    expect = require('expect.js'),
-    database = require('../database.js'),
+var appdb = require('../appdb.js'),
+    apps = require('../apps.js'),
+    AppsError = apps.AppsError,
     config = require('../../config.js'),
-    AppsError = apps.AppsError;
+    database = require('../database.js'),
+    expect = require('expect.js');
 
 describe('Apps', function () {
     var APP_0 = {

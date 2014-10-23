@@ -2,10 +2,10 @@
 
 'use strict';
 
-var DatabaseError = require('./databaseerror'),
+var assert = require('assert'),
     database = require('./database.js'),
-    debug = require('debug')('box:authcodedb'),
-    assert = require('assert');
+    DatabaseError = require('./databaseerror'),
+    debug = require('debug')('box:authcodedb');
 
 exports = module.exports = {
     get: get,

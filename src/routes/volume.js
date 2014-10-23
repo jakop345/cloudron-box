@@ -1,12 +1,12 @@
 'use strict';
 
-var HttpError = require('../httperror.js'),
+var async = require('async'),
+    config = require('../../config.js'),
+    HttpError = require('../httperror.js'),
     HttpSuccess = require('../httpsuccess.js'),
-    async = require('async'),
-    volume = require('../volume.js'),
     User = require('../user.js'),
-    VolumeError = volume.VolumeError,
-    config = require('../../config.js');
+    volume = require('../volume.js'),
+    VolumeError = volume.VolumeError;
 
 exports = module.exports = {
     listFiles: listFiles,

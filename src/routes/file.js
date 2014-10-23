@@ -1,15 +1,15 @@
 'use strict';
 
-var HttpError = require('../httperror.js'),
-    HttpSuccess = require('../httpsuccess.js'),
-    mime = require('mime'),
-    debug = require('debug')('box:routes/file'),
+var debug = require('debug')('box:routes/file'),
     express = require('express'),
-    util = require('util'),
+    HttpError = require('../httperror.js'),
+    HttpSuccess = require('../httpsuccess.js'),
+    middleware = require('../middleware/index.js'),
+    mime = require('mime'),
+    multiparty = require('multiparty'),
     path = require('path'),
     safe = require('safetydance'),
-    multiparty = require('multiparty'),
-    middleware = require('../middleware/index.js');
+    util = require('util');
 
 exports = module.exports = {
     read: read,

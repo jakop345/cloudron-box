@@ -1,7 +1,7 @@
 'use strict';
 
-var util = require('util'),
-    safe = require('safetydance');
+var safe = require('safetydance'),
+    util = require('util');
 
 exports = module.exports = DatabaseError;
 

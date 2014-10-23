@@ -2,27 +2,23 @@
 
 'use strict';
 
-/*
- Contains the OAuth2 routes to get authcodes and exchange it for an access token
- */
-
-var oauth2orize = require('oauth2orize'),
-    url = require('url'),
-    http = require('http'),
-    passport = require('passport'),
-    assert = require('assert'),
-    session = require('connect-ensure-login'),
+var assert = require('assert'),
     authcodedb = require('../authcodedb'),
-    tokendb = require('../tokendb'),
-    userdb = require('../userdb'),
-    user = require('../user.js'),
+    clientdb = require('../clientdb'),
+    config = require('../../config.js'),
     DatabaseError = require('../databaseerror'),
+    debug = require('debug')('box:routes/oauth2'),
+    http = require('http'),
     HttpError = require('../httperror.js'),
     HttpSuccess = require('../httpsuccess.js'),
-    clientdb = require('../clientdb'),
     mailer = require('../mailer.js'),
-    debug = require('debug')('box:routes/oauth2'),
-    config = require('../../config.js'),
+    oauth2orize = require('oauth2orize'),
+    passport = require('passport'),
+    session = require('connect-ensure-login'),
+    tokendb = require('../tokendb'),
+    url = require('url'),
+    user = require('../user.js'),
+    userdb = require('../userdb'),
     uuid = require('node-uuid');
 
 // create OAuth 2.0 server

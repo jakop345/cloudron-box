@@ -2,18 +2,18 @@
 
 'use strict';
 
-var nodemailer = require('nodemailer'),
-    smtpTransport = require('nodemailer-smtp-transport'),
-    debug = require('debug')('box:mailer'),
-    assert = require('assert'),
+var assert = require('assert'),
     async = require('async'),
-    digitalocean = require('./digitalocean.js'),
     cloudron = require('./cloudron.js'),
-    ejs = require('ejs'),
-    safe = require('safetydance'),
     config = require('../config.js'),
-    userdb = require('./userdb.js'),
-    path = require('path');
+    debug = require('debug')('box:mailer'),
+    digitalocean = require('./digitalocean.js'),
+    ejs = require('ejs'),
+    nodemailer = require('nodemailer'),
+    path = require('path'),
+    safe = require('safetydance'),
+    smtpTransport = require('nodemailer-smtp-transport'),
+    userdb = require('./userdb.js');
 
 exports = module.exports = {
     initialize: initialize,

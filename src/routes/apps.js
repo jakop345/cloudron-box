@@ -2,15 +2,15 @@
 
 'use strict';
 
-var HttpError = require('../httperror.js'),
-    HttpSuccess = require('../httpsuccess.js'),
-    debug = require('debug')('box:routes/apps'),
-    apps = require('../apps.js'),
+var apps = require('../apps.js'),
+    AppsError = apps.AppsError,
     config = require('../../config.js'),
-    paths = require('../paths.js'),
-    uuid = require('node-uuid'),
+    debug = require('debug')('box:routes/apps'),
     fs = require('fs'),
-    AppsError = apps.AppsError;
+    HttpError = require('../httperror.js'),
+    HttpSuccess = require('../httpsuccess.js'),
+    paths = require('../paths.js'),
+    uuid = require('node-uuid');
 
 exports = module.exports = {
     getApp: getApp,

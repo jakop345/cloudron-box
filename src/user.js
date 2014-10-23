@@ -2,17 +2,17 @@
 
 'use strict';
 
-var userdb = require('./userdb.js'),
-    DatabaseError = require('./databaseerror.js'),
-    crypto = require('crypto'),
-    aes = require('../src/aes-helper.js'),
-    util = require('util'),
-    debug = require('debug')('box:user'),
+var aes = require('../src/aes-helper.js'),
     assert = require('assert'),
-    ursa = require('ursa'),
-    safe = require('safetydance'),
+    crypto = require('crypto'),
+    database = require('./database'),
+    DatabaseError = require('./databaseerror.js'),
+    debug = require('debug')('box:user'),
     mailer = require('./mailer.js'),
-    database = require('./database');
+    safe = require('safetydance'),
+    ursa = require('ursa'),
+    userdb = require('./userdb.js'),
+    util = require('util');
 
 exports = module.exports = {
     UserError: UserError,

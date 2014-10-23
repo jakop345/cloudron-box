@@ -2,14 +2,14 @@
 
 'use strict';
 
-var HttpError = require('../httperror.js'),
-    HttpSuccess = require('../httpsuccess.js'),
+var cloudron = require('../cloudron.js'),
+    CloudronError = cloudron.CloudronError,
     debug = require('debug')('box:routes/cloudron'),
-    execFile = require('child_process').execFile,
     df = require('nodejs-disks'),
-    path = require('path'),
-    cloudron = require('../cloudron.js'),
-    CloudronError = cloudron.CloudronError;
+    execFile = require('child_process').execFile,
+    HttpError = require('../httperror.js'),
+    HttpSuccess = require('../httpsuccess.js'),
+    path = require('path');
 
 var SUDO = '/usr/bin/sudo',
     REBOOT_CMD = path.join(__dirname, '../scripts/reboot.sh');

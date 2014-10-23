@@ -2,11 +2,11 @@
 
 'use strict';
 
-var DatabaseError = require('./databaseerror'),
-    uuid = require('node-uuid'),
-    debug = require('debug')('box:tokendb'),
+var assert = require('assert'),
     database = require('./database.js'),
-    assert = require('assert');
+    DatabaseError = require('./databaseerror'),
+    debug = require('debug')('box:tokendb'),
+    uuid = require('node-uuid');
 
 exports = module.exports = {
     generateToken: generateToken,
