@@ -353,7 +353,7 @@ function restore(args, callback) {
 
             debug('_restore: success');
 
-            // FIXME: add dns mail records (required for fqdn changes)!
+            // FIXME: add dns mail records and oauth client record (required for fqdn changes)!
         });
     });
 }
