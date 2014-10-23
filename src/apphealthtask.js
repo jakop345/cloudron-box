@@ -4,15 +4,15 @@
 
 require('supererror');
 
-var assert = require('assert'),
+var appdb = require('./appdb.js'),
+    assert = require('assert'),
+    async = require('async'),
     database = require('./database.js'),
     DatabaseError = require('./databaseerror'),
-    appdb = require('./appdb.js'),
-    async = require('async'),
+    debug = require('debug')('box:apphealthtask'),
     Docker = require('dockerode'),
-    superagent = require('superagent'),
     os = require('os'),
-    debug = require('debug')('box:apphealthtask');
+    superagent = require('superagent');
 
 exports = module.exports = {
     initialize: initialize,

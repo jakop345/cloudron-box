@@ -2,23 +2,19 @@
 
 'use strict';
 
-/*
- Contains the various login methods like basic and bearer tokens
- */
-
-var passport = require('passport'),
-    LocalStrategy = require('passport-local').Strategy,
-    BasicStrategy = require('passport-http').BasicStrategy,
-    ClientPasswordStrategy = require('passport-oauth2-client-password').Strategy,
+var BasicStrategy = require('passport-http').BasicStrategy,
     BearerStrategy = require('passport-http-bearer').Strategy,
-    debug = require('debug')('box:auth'),
-    DatabaseError = require('./databaseerror'),
-    user = require('./user'),
-    UserError = user.UserError,
     clientdb = require('./clientdb'),
+    ClientPasswordStrategy = require('passport-oauth2-client-password').Strategy,
+    database = require('./database'),
+    DatabaseError = require('./databaseerror'),
+    debug = require('debug')('box:auth'),
+    LocalStrategy = require('passport-local').Strategy,
+    passport = require('passport'),
     tokendb = require('./tokendb'),
+    user = require('./user'),
     userdb = require('./userdb'),
-    database = require('./database');
+    UserError = user.UserError;
 
 // helpers for session de/serializing
 passport.serializeUser(function (user, callback) {

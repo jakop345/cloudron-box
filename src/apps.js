@@ -2,19 +2,19 @@
 
 'use strict';
 
-var DatabaseError = require('./databaseerror.js'),
-    util = require('util'),
-    debug = require('debug')('box:apps'),
+var appdb = require('./appdb.js'),
     assert = require('assert'),
-    fs = require('fs'),
-    appdb = require('./appdb.js'),
     child_process = require('child_process'),
+    config = require('../config.js'),
+    DatabaseError = require('./databaseerror.js'),
+    debug = require('debug')('box:apps'),
     Docker = require('dockerode'),
-    stream = require('stream'),
+    fs = require('fs'),
     os = require('os'),
-    split = require('split'),
     paths = require('./paths.js'),
-    config = require('../config.js');
+    split = require('split'),
+    stream = require('stream'),
+    util = require('util');
 
 exports = module.exports = {
     AppsError: AppsError,

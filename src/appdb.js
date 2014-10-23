@@ -2,13 +2,13 @@
 
 'use strict';
 
-var DatabaseError = require('./databaseerror'),
-    debug = require('debug')('box:appdb'),
-    assert = require('assert'),
-    database = require('./database.js'),
+var assert = require('assert'),
     async = require('async'),
-    util = require('util'),
-    safe = require('safetydance');
+    database = require('./database.js'),
+    DatabaseError = require('./databaseerror'),
+    debug = require('debug')('box:appdb'),
+    safe = require('safetydance'),
+    util = require('util');
 
 exports = module.exports = {
     get: get,
