@@ -9,10 +9,7 @@ var HttpError = require('../httperror.js'),
     df = require('nodejs-disks'),
     path = require('path'),
     cloudron = require('../cloudron.js'),
-    CloudronError = cloudron.CloudronError,
-    config = require('../../config.js'),
-    exec = require('child_process').exec,
-    _ = require('underscore');
+    CloudronError = cloudron.CloudronError;
 
 var SUDO = '/usr/bin/sudo',
     REBOOT_CMD = path.join(__dirname, '../scripts/reboot.sh');
@@ -37,7 +34,7 @@ function getStats(req, res, next) {
             next(new HttpSuccess(200, { drives: data }));
         });
     });
-};
+}
 
 function reboot(req, res, next) {
     debug('_reboot: execute "%s".', REBOOT_CMD);
@@ -54,7 +51,7 @@ function reboot(req, res, next) {
 
         debug('_reboot: success');
     });
-};
+}
 
 function createBackup(req, res, next) {
     cloudron.backup();
@@ -68,7 +65,7 @@ function getConfig(req, res, next) {
 
         next(new HttpSuccess(200, cloudronConfig));
     });
-};
+}
 
 function update(req, res, next) {
     cloudron.update(function (error) {
@@ -95,7 +92,7 @@ function restore(req, res, next) {
 
         return next(new HttpSuccess(200, { }));
     });
-};
+}
 
 function provision(req, res, next) {
     if (!req.body.token) return next(new HttpError(400, 'No token provided'));
@@ -113,5 +110,5 @@ function provision(req, res, next) {
 
         return next(new HttpSuccess(201, { }));
     });
-};
+}
 
