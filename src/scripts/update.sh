@@ -58,8 +58,7 @@ PATH=$PATH:$SRCDIR/node_modules/.bin npm run-script postinstall
 chown -R yellowtent:yellowtent "$SRCDIR"
 
 echo "Run release update script..."
-UPDATE_FILE="$SRCDIR/src/scripts/update/${VERSION}.sh"
-echo "Release update script is $UPDATE_FILE"
+UPDATE_FILE="$SRCDIR/updates/${VERSION}.sh"
 if [ -x "$UPDATE_FILE" ]; then
     /bin/bash "$UPDATE_FILE" 2>&1
     if [[ $? != 0 ]]; then
