@@ -14,6 +14,7 @@ exports = module.exports = {
     getByClientId: getByClientId,
     add: add,
     del: del,
+    replaceByAppId: replaceByAppId,
     getByAppId: getByAppId,
     delByAppId: delByAppId,
     clear: clear
@@ -130,6 +131,34 @@ function delByAppId(appId, callback) {
         if (this.changes !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         return callback(null);
+    });
+}
+
+function replaceByAppId(id, appId, clientId, clientSecret, name, redirectURI, scope, callback) {
+    assert(typeof id === 'string');
+    assert(typeof appId === 'string');
+    assert(typeof clientId === 'string');
+    assert(typeof clientSecret === 'string');
+    assert(typeof name === 'string');
+    assert(typeof redirectURI === 'string');
+    assert(typeof scope === 'string');
+    assert(typeof callback === 'function');
+
+    var data = {
+        $id: id,
+        $appId: appId,
+        $clientId: clientId,
+        $clientSecret: clientSecret,
+        $name: name,
+        $redirectURI: redirectURI,
+        $scope: scope
+    };
+
+    database.run('INSERT OR REPLACE INTO clients (id, appId, clientId, clientSecret, name, redirectURI, scope) VALUES ($id, $appId, $clientId, $clientSecret, $name, $redirectURI, $scope)', data, function (error) {
+        if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
+        if (error || !this.lastID) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+
+        callback(null);
     });
 }
 

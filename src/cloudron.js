@@ -375,16 +375,13 @@ function provision(args, callback) {
     config.set(_.pick(args, 'token', 'appServerUrl', 'adminOrigin', 'fqdn', 'isDev'));
 
     // override the default webadmin OAuth client record
-    clientdb.delByAppId('webadmin', function () {
-        // scopes are also in database.js for development
-        var scopes = 'root,profile,users,apps,settings,roleAdmin';
-        clientdb.add(uuid.v4(), 'webadmin', 'cid-webadmin', 'unused', 'WebAdmin', config.adminOrigin, scopes, function (error) {
-            if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
+    var scopes = 'root,profile,users,apps,settings,roleAdmin';
+    clientdb.replaceByAppId(uuid.v4(), 'webadmin', 'cid-webadmin', 'unused', 'WebAdmin', config.adminOrigin, scopes, function (error) {
+        if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
-            installCertificate(args.tls.cert, args.tls.key, callback);
+        installCertificate(args.tls.cert, args.tls.key, callback);
 
-            addMailDnsRecords();
-        });
+        addMailDnsRecords();
     });
 }
 
