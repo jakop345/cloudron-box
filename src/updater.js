@@ -107,8 +107,6 @@ Updater.prototype.update = function (backupUrl, callback) {
         return callback(new Error('No update available'));
     }
 
-    debug('Creating backup for update');
-
     var args = [
         path.join(__dirname, 'scripts/update.sh'),
         isDev ? config.version : this._boxUpdateInfo.version,
