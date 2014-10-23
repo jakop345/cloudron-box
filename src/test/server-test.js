@@ -6,13 +6,13 @@
 
 'use strict';
 
-var Server = require('../server.js'),
+var cloudron = require('../cloudron.js'),
+    config = require('../../config.js'),
     database = require('../database.js'),
-    request = require('superagent'),
     expect = require('expect.js'),
     nock = require('nock'),
-    cloudron = require('../cloudron.js'),
-    config = require('../../config.js');
+    request = require('superagent'),
+    Server = require('../server.js');
 
 var SERVER_URL = 'http://localhost:' + config.port;
 var ACCESS_TOKEN = null;

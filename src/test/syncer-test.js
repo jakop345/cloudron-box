@@ -4,8 +4,8 @@
 
 'use strict';
 
-var syncer = require('../syncer'),
-    expect = require('expect.js');
+var expect = require('expect.js'),
+    syncer = require('../syncer');
 
 describe('Diff', function () {
     var leftTree, baseTree, rightTree;

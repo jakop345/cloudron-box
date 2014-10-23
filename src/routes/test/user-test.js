@@ -6,12 +6,12 @@
 
 'use strict';
 
-var Server = require('../../../src/server.js'),
-    request = require('superagent'),
-    expect = require('expect.js'),
-    userdb = require('../../userdb.js'),
+var config = require('../../../config.js'),
     database = require('../../database.js'),
-    config = require('../../../config.js');
+    expect = require('expect.js'),
+    request = require('superagent'),
+    Server = require('../../../src/server.js'),
+    userdb = require('../../userdb.js');
 
 var SERVER_URL = 'http://localhost:' + config.port;
 

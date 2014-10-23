@@ -6,20 +6,20 @@
 
 'use strict';
 
-var Server = require('../../server.js'),
-    request = require('superagent'),
-    expect = require('expect.js'),
+var config = require('../../../config.js'),
     crypto = require('crypto'),
-    fs = require('fs'),
-    path = require('path'),
-    os = require('os'),
-    mkdirp = require('mkdirp'),
-    uuid = require('node-uuid'),
-    userdb = require('../../userdb.js'),
     database = require('../../database.js'),
+    expect = require('expect.js'),
+    fs = require('fs'),
+    mkdirp = require('mkdirp'),
+    os = require('os'),
+    path = require('path'),
     paths = require('../../paths.js'),
     Repo = require('../../repo.js'),
-    config = require('../../../config.js');
+    request = require('superagent'),
+    Server = require('../../server.js'),
+    userdb = require('../../userdb.js'),
+    uuid = require('node-uuid');
 
 var SERVER_URL = 'http://localhost:' + config.port;
 

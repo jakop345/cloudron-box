@@ -6,13 +6,13 @@
 
 'use strict';
 
-var volume = require('../volume.js'),
+var config = require('../../config.js'),
     database = require('../database.js'),
-    User = require('../user.js'),
-    mkdirp = require('mkdirp'),
     expect = require('expect.js'),
+    mkdirp = require('mkdirp'),
     paths = require('../paths.js'),
-    config = require('../../config.js');
+    User = require('../user.js'),
+    volume = require('../volume.js');
 
 var USER;
 var USERNAME = 'nobody';

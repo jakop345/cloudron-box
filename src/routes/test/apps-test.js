@@ -6,27 +6,27 @@
 /* global before:false */
 /* global after:false */
 
-var Server = require('../../server.js'),
+var appdb = require('../../appdb.js'),
+    appFqdn = require('../../apps').appFqdn,
+    assert = require('assert'),
+    async = require('async'),
+    clientdb = require('../../clientdb.js'),
+    config = require('../../../config.js'),
     database = require('../../database.js'),
-    request = require('superagent'),
+    Docker = require('dockerode'),
     expect = require('expect.js'),
     fs = require('fs'),
-    os = require('os'),
-    userdb = require('../../userdb.js'),
-    clientdb = require('../../clientdb.js'),
-    async = require('async'),
     hock = require('hock'),
-    appdb = require('../../appdb.js'),
-    paths = require('../../paths.js'),
-    url = require('url'),
-    Docker = require('dockerode'),
-    assert = require('assert'),
-    net = require('net'),
-    config = require('../../../config.js'),
-    uuid = require('node-uuid'),
-    _ = require('underscore'),
     http = require('http'),
-    appFqdn = require('../../apps').appFqdn;
+    net = require('net'),
+    os = require('os'),
+    paths = require('../../paths.js'),
+    request = require('superagent'),
+    Server = require('../../server.js'),
+    url = require('url'),
+    userdb = require('../../userdb.js'),
+    uuid = require('node-uuid'),
+    _ = require('underscore');
 
 var SERVER_URL = 'http://localhost:' + config.port;
 

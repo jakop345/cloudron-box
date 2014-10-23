@@ -6,13 +6,13 @@
 
 'use strict';
 
-var user = require('../user.js'),
-    UserError = user.UserError,
-    mkdirp = require('mkdirp'),
-    expect = require('expect.js'),
+var config = require('../../config.js'),
     database = require('../database.js'),
+    expect = require('expect.js'),
+    mkdirp = require('mkdirp'),
     paths = require('../paths.js'),
-    config = require('../../config.js');
+    user = require('../user.js'),
+    UserError = user.UserError;
 
 var USERNAME = 'nobody';
 var EMAIL = 'nobody@no.body';

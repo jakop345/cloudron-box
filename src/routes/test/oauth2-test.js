@@ -8,8 +8,8 @@
 
 var expect = require('expect.js'),
     HttpError = require('../../httperror.js'),
-    passport = require('passport'),
-    oauth2 = require('../oauth2.js');
+    oauth2 = require('../oauth2.js'),
+    passport = require('passport');
 
 describe('OAuth2', function () {
     var passportAuthenticateSave = null;

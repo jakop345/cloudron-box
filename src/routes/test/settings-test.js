@@ -6,18 +6,18 @@
 
 'use strict';
 
-var Server = require('../../server.js'),
-    database = require('../../database.js'),
-    request = require('superagent'),
-    expect = require('expect.js'),
-    userdb = require('../../userdb.js'),
-    fs = require('fs'),
-    appdb = require('../../appdb.js'),
-    config = require('../../../config.js'),
-    sinon = require('sinon'),
+var appdb = require('../../appdb.js'),
     apptask = require('../../apptask.js'),
+    async = require('async'),
+    config = require('../../../config.js'),
+    database = require('../../database.js'),
+    expect = require('expect.js'),
+    fs = require('fs'),
     paths = require('../../paths.js'),
-    async = require('async');
+    request = require('superagent'),
+    Server = require('../../server.js'),
+    sinon = require('sinon'),
+    userdb = require('../../userdb.js');
 
 var SERVER_URL = 'http://localhost:' + config.port;
 

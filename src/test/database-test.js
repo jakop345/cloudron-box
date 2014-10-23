@@ -6,16 +6,16 @@
 
 'use strict';
 
-var database = require('../database'),
-    DatabaseError = require('../databaseerror.js'),
-    tokendb = require('../tokendb.js'),
-    clientdb = require('../clientdb.js'),
+var appdb = require('../appdb.js'),
     authcodedb = require('../authcodedb.js'),
-    settingsdb = require('../settingsdb.js'),
-    appdb = require('../appdb.js'),
+    clientdb = require('../clientdb.js'),
+    config = require('../../config.js'),
+    database = require('../database'),
+    DatabaseError = require('../databaseerror.js'),
     expect = require('expect.js'),
     mkdirp = require('mkdirp'),
-    config = require('../../config.js');
+    settingsdb = require('../settingsdb.js'),
+    tokendb = require('../tokendb.js');
 
 describe('database', function () {
     before(function (done) {

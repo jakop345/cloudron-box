@@ -6,15 +6,15 @@
 
 'use strict';
 
-var Server = require('../../server.js'),
-    request = require('superagent'),
-    expect = require('expect.js'),
-    userdb = require('../../userdb.js'),
-    path = require('path'),
+var async = require('async'),
     config = require('../../../config.js'),
+    expect = require('expect.js'),
+    fs = require('fs'),
+    path = require('path'),
     paths = require('../../paths.js'),
-    async = require('async'),
-    fs = require('fs');
+    request = require('superagent'),
+    Server = require('../../server.js'),
+    userdb = require('../../userdb.js');
 
 var SERVER_URL = 'http://localhost:' + config.port;
 

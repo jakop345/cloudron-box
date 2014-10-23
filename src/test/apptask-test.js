@@ -6,17 +6,17 @@
 
 'use strict';
 
-var apptask = require('../apptask.js'),
-    expect = require('expect.js'),
-    net = require('net'),
+var appdb = require('../appdb.js'),
+    apptask = require('../apptask.js'),
     config = require('../../config.js'),
     database = require('../database.js'),
-    paths = require('../paths.js'),
     DatabaseError = require('../databaseerror.js'),
-    mkdirp = require('mkdirp'),
+    expect = require('expect.js'),
     fs = require('fs'),
-    appdb = require('../appdb.js'),
-    nock = require('nock');
+    mkdirp = require('mkdirp'),
+    net = require('net'),
+    nock = require('nock'),
+    paths = require('../paths.js');
 
 var APP = {
     id: 'appid',

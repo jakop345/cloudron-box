@@ -6,15 +6,15 @@
 
 'use strict';
 
-var Repo = require('../repo'),
+var constants = require('constants'),
     crypto = require('crypto'),
-    fs = require('fs'),
-    path = require('path'),
-    os = require('os'),
-    rimraf = require('rimraf'),
     expect = require('expect.js'),
-    constants = require('constants'),
-    mkdirp = require('mkdirp');
+    fs = require('fs'),
+    mkdirp = require('mkdirp'),
+    os = require('os'),
+    path = require('path'),
+    Repo = require('../repo'),
+    rimraf = require('rimraf');
 
 var EMAIL = 'no@bo.dy';
 var USERNAME = 'nobody';
