@@ -14,13 +14,12 @@ NOW=$(date +%Y%m%dT%H%M%S)
 LOG="/var/log/cloudron/restore-${NOW}.log"
 exec 2>&1 1> "$LOG"
 
-if [ $# -lt 2 ]; then
-    echo "restore.sh <restore_url> <token>"
+if [ $# -lt 1 ]; then
+    echo "restore.sh <restore_url>"
     exit 1
 fi
 
 RESTORE_URL="$1"
-TOKEN="$2"
 SRCDIR="$HOME/box"
 
 echo "Arguments: $@"
@@ -41,19 +40,7 @@ tar zxvf /tmp/restore.tar.gz -C "$HOME/data"
 echo "Migrating data"
 PATH=$PATH:$SRCDIR/node_modules/.bin npm run-script postinstall
 
-# Do not use json node binary. Seems to have some bug resulting in empty cloudron.conf
-# in heredocs, single quotes preserves the quotes _and_ does variable expansion
-REPLACE_TOKEN_JS=$(cat <<EOF
-var fs = require('fs');
-var config = JSON.parse(fs.readFileSync('$HOME/cloudron.conf', 'utf8'));
-config.token = '$TOKEN';
-fs.writeFileSync('$HOME/cloudron.conf', JSON.stringify(config, null, 4));
-EOF
-)
-echo "Token replacer script: $REPLACE_TOKEN_JS"
-
 sudo -u yellowtent -H bash <<EOF
-node -e "$REPLACE_TOKEN_JS"
 # TODO: do not auto-start stopped containers (httpPort might need fixing to start them)
 sqlite3 $HOME/data/cloudron.sqlite 'UPDATE apps SET installationState = "pending_restore", healthy = NULL, runState = NULL, containerId = NULL, httpPort = NULL, installationProgress = NULL'
 EOF

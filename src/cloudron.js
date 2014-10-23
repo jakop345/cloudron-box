@@ -162,27 +162,6 @@ function backup() {
     });
 }
 
-function restore(restoreUrl, token, callback) {
-    assert(typeof restoreUrl == 'string');
-    assert(typeof token === 'string');
-    assert(typeof callback === 'function');
-
-    debug('restore: sudo restore.sh %s %s', restoreUrl, token);
-
-    // Finish the request, to let the appstore know we triggered the restore it
-    // TODO is there a better way?
-    callback(null);
-
-    // TODO make sure you can restore only once ever
-    execFile(SUDO, [ RESTORE_CMD, restoreUrl, token ], { }, function (error, stdout, stderr) {
-        if (error) {
-            console.error('Restore failed.', error, stdout, stderr);
-        }
-
-        debug('_restore: success');
-    });
-}
-
 function getIp() {
     if (cachedIp) return cachedIp;
 
@@ -352,7 +331,35 @@ function addMailDnsRecords() {
     });
 }
 
+function restore(args, callback) {
+    assert(typeof args === 'object');
+    assert(typeof callback === 'function');
+
+    if (config.token) return callback(new CloudronError(CloudronError.ALREADY_PROVISIONED));
+
+    config.set(_.pick(args, 'token', 'appServerUrl', 'adminOrigin', 'fqdn', 'isDev'));
+
+    debug('restore: sudo restore.sh %s %s', args.restoreUrl, args.token);
+
+    installCertificate(args.tls.cert, args.tls.key, function (error) {
+        if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
+
+        callback(null); // finish request to let appstore know
+
+        execFile(SUDO, [ RESTORE_CMD, app.restoreUrl, app.token ], { }, function (error, stdout, stderr) {
+            if (error) {
+                console.error('Restore failed.', error, stdout, stderr);
+            }
+
+            debug('_restore: success');
+
+            // FIXME: add dns mail records (required for fqdn changes)!
+        });
+    });
+}
+
 function provision(args, callback) {
+    assert(typeof args === 'object');
     assert(typeof callback === 'function');
 
     if (config.token) return callback(new CloudronError(CloudronError.ALREADY_PROVISIONED));
