@@ -348,20 +348,23 @@ function restore(args, callback) {
 
     debug('restore: sudo restore.sh %s %s', args.restoreUrl, args.token);
 
-    installCertificate(args.tls.cert, args.tls.key, function (error) {
+    // override the default webadmin OAuth client record
+    var scopes = 'root,profile,users,apps,settings,roleAdmin';
+    clientdb.replaceByAppId(uuid.v4(), 'webadmin', 'cid-webadmin', 'unused', 'WebAdmin', config.adminOrigin, scopes, function (error) {
         if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
-        callback(null); // finish request to let appstore know
-
-        execFile(SUDO, [ RESTORE_CMD, args.restoreUrl ], { }, function (error, stdout, stderr) {
-            if (error) {
-                console.error('Restore failed.', error, stdout, stderr);
-            }
-
-            debug('_restore: success');
+        installCertificate(args.tls.cert, args.tls.key, function (error) {
+            if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
             addMailDnsRecords();
-            // FIXME: oauth client record (required for fqdn changes)!
+
+            callback(null); // finish request to let appstore know
+
+            execFile(SUDO, [ RESTORE_CMD, args.restoreUrl ], { }, function (error, stdout, stderr) {
+                if (error) console.error('Restore failed.', error, stdout, stderr);
+
+                debug('_restore: success');
+            });
         });
     });
 }
