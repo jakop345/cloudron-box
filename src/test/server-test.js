@@ -97,9 +97,7 @@ describe('Server', function () {
             request.get(SERVER_URL + '/api/v1/version', function (err, res) {
                 expect(err).to.not.be.ok();
                 expect(res.statusCode).to.equal(200);
-                var versions = require('../../VERSIONS.json');
-                var latestVersion = Object.keys(versions).sort().slice(0, -1).pop();
-                expect(res.body.version).to.equal(latestVersion);
+                expect(res.body.version).to.equal(require('../../package.json').version);
                 done(err);
             });
         });

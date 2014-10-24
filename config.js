@@ -12,17 +12,6 @@ var path = require('path'),
 
 var homeDir = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
 var production = process.env.NODE_ENV === 'production';
-var currentVersion =  (function () {
-    var versions = JSON.parse(fs.readFileSync(path.join(__dirname, 'VERSIONS.json')));
-    var firstVersion = Object.keys(versions).reduce(function (prev, cur) { return prev < cur ? prev : cur; });
-
-    var cur = firstVersion;
-    while (versions[cur].next !== null) {
-        cur = versions[cur].next;
-    }
-
-    return cur;
-})();
 
 var config = { };
 
@@ -96,7 +85,7 @@ config.get = function (key) {
 };
 
 config.version = function () {
-    return currentVersion;
+    return require('./package.json').version;
 };
 
 exports = module.exports = config;
