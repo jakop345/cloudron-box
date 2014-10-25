@@ -15,13 +15,13 @@ var production = process.env.NODE_ENV === 'production';
 
 var config = { };
 
-if (production) {
-    config.baseDir =  path.join(homeDir, process.env.CLOUDRON === '1' ? '' : '.yellowtent');
-} else {
-    config.baseDir = path.join(homeDir, '.yellowtenttest');
-}
+config.baseDir = function () {
+   return production
+        ? path.join(homeDir, process.env.CLOUDRON === '1' ? '' : '.yellowtent')
+        : path.join(homeDir, '.yellowtenttest');
+};
 
-var cloudronConfigFileName = path.join(config.baseDir, 'configs/cloudron.conf');
+var cloudronConfigFileName = path.join(config.baseDir(), 'configs/cloudron.conf');
 
 config.save = function () {
     fs.writeFileSync(cloudronConfigFileName, JSON.stringify(config, null, 4)); // functions are ignored by JSON.stringify

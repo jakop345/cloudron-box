@@ -23,19 +23,19 @@ describe('config', function () {
         delete require.cache[require.resolve('../../config.js')];
     });
 
-    it('baseDir is set', function (done) {
-        expect(config.baseDir).to.be.ok();
+    it('baseDir() is set', function (done) {
+        expect(config.baseDir()).to.be.ok();
         done();
     });
 
     it('cloudron.conf generated automatically', function (done) {
-        expect(fs.existsSync(path.join(config.baseDir, 'configs/cloudron.conf'))).to.be.ok();
+        expect(fs.existsSync(path.join(config.baseDir(), 'configs/cloudron.conf'))).to.be.ok();
         done();
     });
 
     it('set saves value in file', function (done) {
         config.set('token', 'TOKEN');
-        expect(JSON.parse(fs.readFileSync(path.join(config.baseDir, 'configs/cloudron.conf'))).token).to.eql('TOKEN');
+        expect(JSON.parse(fs.readFileSync(path.join(config.baseDir(), 'configs/cloudron.conf'))).token).to.eql('TOKEN');
         done();
     });
 
