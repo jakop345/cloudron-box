@@ -5,7 +5,7 @@ set -e
 USER=yellowtent
 SRCDIR=/home/$USER/box
 DATA_DIR=/home/$USER/data
-COLLECTD_DIR="/home/$USER/collectd"
+COLLECTD_DIR="/home/$USER/configs/collectd"
 COLLECTD_APPCONFIG_DIR="$COLLECTD_DIR/collectd.conf.d"
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"

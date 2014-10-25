@@ -5,8 +5,8 @@ set -e
 USER=yellowtent
 SRCDIR=/home/$USER/box
 DATA_DIR=/home/$USER/data
-HARAKA_DIR="/home/$USER/haraka"
-CLOUDRON_CONF="/home/$USER/cloudron.conf"
+HARAKA_DIR="/home/$USER/configs/haraka"
+CLOUDRON_CONF="/home/$USER/configs/cloudron.conf"
 
 DOMAIN_NAME=`hostname -f`
 

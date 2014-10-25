@@ -11,8 +11,8 @@ echo "Box bootstrapping"
 USER=yellowtent
 SRCDIR=/home/$USER/box
 DATA_DIR=/home/$USER/data
-NGINX_CONFIG_DIR=/home/$USER/nginx
-NGINX_APPCONFIG_DIR=/home/$USER/nginx/applications
+NGINX_CONFIG_DIR=/home/$USER/configs/nginx
+NGINX_APPCONFIG_DIR=/home/$USER/configs/nginx/applications
 
 # we get the appstore origin from the caller which is baked into the image
 APP_SERVER_URL=$1

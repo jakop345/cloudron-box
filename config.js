@@ -21,12 +21,10 @@ if (production) {
     config.baseDir = path.join(homeDir, '.yellowtenttest');
 }
 
-// cloudron.conf contains 'instance' config that applies to this cloudron instance. This doesn't need
-// to be backed up. cloudron.sqlite contains all data that will be backed up
-config.cloudronConfigFile = path.join(config.baseDir, 'cloudron.conf');
+var cloudronConfigFileName = path.join(config.baseDir, 'configs/cloudron.conf');
 
 config.save = function () {
-    fs.writeFileSync(config.cloudronConfigFile, JSON.stringify(config, null, 4)); // functions are ignored by JSON.stringify
+    fs.writeFileSync(cloudronConfigFileName, JSON.stringify(config, null, 4)); // functions are ignored by JSON.stringify
 };
 
 (function initConfig() {
@@ -51,13 +49,13 @@ config.save = function () {
     config.mailUsername = null;
     config.mailDnsRecordIds = [ ];
 
-    if (safe.fs.existsSync(config.cloudronConfigFile)) {
-        var data = safe.JSON.parse(safe.fs.readFileSync(config.cloudronConfigFile, 'utf8'));
+    if (safe.fs.existsSync(cloudronConfigFileName)) {
+        var data = safe.JSON.parse(safe.fs.readFileSync(cloudronConfigFileName, 'utf8'));
         _.extend(config, data); // overwrite defaults with saved config
         return;
     }
 
-    mkdirp.sync(config.baseDir);
+    mkdirp.sync(path.dirname(cloudronConfigFileName));
     config.save();
 })();
 

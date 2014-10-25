@@ -8,6 +8,7 @@
 
 var expect = require('expect.js'),
     fs = require('fs'),
+    path = require('path'),
     safe = require('safetydance');
 
 var config = null;
@@ -28,13 +29,13 @@ describe('config', function () {
     });
 
     it('cloudron.conf generated automatically', function (done) {
-        expect(fs.existsSync(config.cloudronConfigFile)).to.be.ok();
+        expect(fs.existsSync(path.join(config.baseDir, 'configs/cloudron.conf'))).to.be.ok();
         done();
     });
 
     it('set saves value in file', function (done) {
         config.set('token', 'TOKEN');
-        expect(JSON.parse(fs.readFileSync(config.cloudronConfigFile)).token).to.eql('TOKEN');
+        expect(JSON.parse(fs.readFileSync(path.join(config.baseDir, 'configs/cloudron.conf'))).token).to.eql('TOKEN');
         done();
     });
 
