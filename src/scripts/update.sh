@@ -51,7 +51,7 @@ if ! npm install --production ; then
     exit 1
 fi
 
-PATH=$PATH:$SRCDIR/node_modules/.bin npm run-script postinstall
+PATH=$PATH:$SRCDIR/node_modules/.bin npm run-script migrate_data
 
 # FIXME: should instead run above commands as user but I cannot figure
 # how to get log redirection to work

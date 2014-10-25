@@ -38,7 +38,7 @@ tar zxvf /tmp/restore.tar.gz -C "$HOME/data"
 
 # only upgrades are supported
 echo "Migrating data"
-PATH=$PATH:$SRCDIR/node_modules/.bin npm run-script postinstall
+PATH=$PATH:$SRCDIR/node_modules/.bin npm run-script migrate_data
 
 sudo -u yellowtent -H bash <<EOF
 # TODO: do not auto-start stopped containers (httpPort might need fixing to start them)

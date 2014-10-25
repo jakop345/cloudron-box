@@ -52,7 +52,8 @@ while true; do
     echo "npm install timedout, trying again"
     sleep 2
 done
-PATH=$PATH:$SRCDIR/node_modules/.bin npm run-script postinstall
+mkdir -p $DATA_DIR
+PATH=$PATH:$SRCDIR/node_modules/.bin npm run-script migrate_data
 EOF
 
 echo "==== Setup nginx ===="
