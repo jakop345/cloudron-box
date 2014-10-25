@@ -205,9 +205,11 @@ echo "Powering off droplet"
 echo "Snapshotting as $SNAPSHOT_NAME"
 (snapshot_droplet $DROPLET_ID $SNAPSHOT_NAME)
 
+IMAGE_ID=$(get_image_id $SNAPSHOT_NAME)
+echo "Image id is $IMAGE_ID"
+
 echo "Destroying droplet"
 (destroy_droplet $DROPLET_ID)
 
-IMAGE_ID=$(get_image_id $SNAPSHOT_NAME)
 echo "Image id is $IMAGE_ID"
 
