@@ -31,7 +31,7 @@ echo "Updating $SRCDIR to Version:$1 to Revision:$REVISION from Backup:$BACKUP_U
 cd "$SRCDIR"
 
 echo "Perform backup first"
-if ! ./src/scripts/backup.sh "$BACKUP_URL" "do_not_restart_box_flag" ; then
+if ! ./src/scripts/backup.sh "$BACKUP_URL" ; then
     echo "Backup failed."
     exit 1
 fi
