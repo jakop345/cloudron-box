@@ -48,7 +48,7 @@ echo "==== Setup yellowtent ===="
 sudo -u $USER -H bash <<EOF
 cd $SRCDIR
 while true; do
-    timeout 3m npm install --production --loglevel verbose && break
+    timeout 3m npm install --production && break
     echo "npm install timedout, trying again"
     sleep 2
 done
