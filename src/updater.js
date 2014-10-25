@@ -15,7 +15,7 @@ module.exports = exports = Updater;
 
 function Updater() {
     this._checkInterval = null;
-    this._boxUpdateInfoManifestUrl = 'http://yellowtent.girish.in/api/v3/projects/2/repository/blobs/master?filepath=VERSIONS.json&private_token=wjukANrYgJ2NBXyewebS';
+    this._boxUpdateInfoManifestUrl = 'https://s3.amazonaws.com/cloudron-releases/versions.json';
     this._boxUpdateInfo = null;
     this._appUpdateInfo = null;
 }
@@ -52,16 +52,16 @@ Updater.prototype._check = function () {
     // box updates
     superagent.get(this._boxUpdateInfoManifestUrl).end(function (error, result) {
         if (error || result.status !== 200) {
-            console.error('Unable to fetch VERSIONS.json.', error, result);
+            console.error('Unable to fetch versions.json.', error, result);
             return;
         }
 
-        debug('_check: VERSIONS.json successfully fetched.', result.text);
+        debug('_check: versions.json successfully fetched.', result.text);
 
         var versions = safe.JSON.parse(result.text);
 
         if (!versions) {
-            console.error('VERSIONS.json is not valid json', safe.error);
+            console.error('versions.json is not valid json', safe.error);
             return;
         }
 
