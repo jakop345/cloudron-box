@@ -10,22 +10,33 @@ var path = require('path'),
     path = require('path'),
     mkdirp = require('mkdirp');
 
+exports = module.exports = {
+    baseDir: baseDir,
+    get: get,
+    set: set,
+
+    // convenience getters
+    version: version,
+    appServerUrl: appServerUrl,
+    fqdn: fqdn,
+    adminOrigin: adminOrigin,
+    token: token
+};
+
 var homeDir = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
 var production = process.env.NODE_ENV === 'production';
 
-var config = { };
-
 var data = { };
 
-config.baseDir = function () {
+function baseDir() {
    return production
         ? path.join(homeDir, process.env.CLOUDRON === '1' ? '' : '.yellowtent')
         : path.join(homeDir, '.yellowtenttest');
-};
+}
 
-var cloudronConfigFileName = path.join(config.baseDir(), 'configs/cloudron.conf');
+var cloudronConfigFileName = path.join(baseDir(), 'configs/cloudron.conf');
 
-config.saveSync = function () {
+function saveSync() {
     fs.writeFileSync(cloudronConfigFileName, JSON.stringify(data, null, 4)); // functions are ignored by JSON.stringify
 };
 
@@ -44,7 +55,7 @@ config.saveSync = function () {
     }
 
     data.fqdn = 'localhost';
-    data.adminOrigin = 'https://admin-' + config.fqdn;
+    data.adminOrigin = 'https://admin-' + data.fqdn;
 
     data.token = null;
     data.mailServer = null;
@@ -58,11 +69,11 @@ config.saveSync = function () {
     }
 
     mkdirp.sync(path.dirname(cloudronConfigFileName));
-    config.saveSync();
+    saveSync();
 })();
 
-// config.set(obj) or config.set(key, value)
-config.set = function (key, value) {
+// set(obj) or set(key, value)
+function set(key, value) {
     if (typeof key === 'object') {
         var obj = key;
         for (var k in obj) {
@@ -73,35 +84,33 @@ config.set = function (key, value) {
         assert(key in data, 'config.js is missing key "' + key + '"');
         data[key] = value;
     }
-    config.saveSync();
-};
+    saveSync();
+}
 
-config.get = function (key) {
+function get(key) {
     assert(typeof key === 'string');
     assert(key in data);
 
     return data[key];
-};
+}
 
-config.version = function () {
+function version() {
     return require('./package.json').version;
+}
+
+function appServerUrl() {
+    return get('appServerUrl');
+}
+
+function fqdn() {
+    return get('fqdn');
+}
+
+function adminOrigin() {
+    return get('adminOrigin');
 };
 
-config.appServerUrl = function () {
-    return config.get('appServerUrl');
-};
-
-config.fqdn = function () {
-    return config.get('fqdn');
-};
-
-config.adminOrigin = function () {
-    return config.get('adminOrigin');
-};
-
-config.token = function () {
-    return config.get('token');
-};
-
-exports = module.exports = config;
+function token() {
+    return get('token');
+}
 
