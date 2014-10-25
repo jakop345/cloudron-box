@@ -11,8 +11,8 @@ if [ "$1" == "--check" ]; then
 fi
 
 NOW=$(date +%Y%m%dT%H%M%S)
-LOG="/var/log/cloudron/restore-${NOW}.log"
-exec 2>&1 1> "$LOG"
+LOG="/var/log/cloudron/restore.log"
+exec 2>&1 1>> "$LOG"
 
 if [ $# -lt 1 ]; then
     echo "restore.sh <restore_url>"
@@ -22,7 +22,7 @@ fi
 RESTORE_URL="$1"
 SRCDIR="$HOME/box"
 
-echo "Arguments: $@"
+echo "Restore to $@"
 
 # Stop the box
 echo "Stopping box"
