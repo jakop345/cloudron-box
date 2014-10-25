@@ -13,8 +13,8 @@ fi
 set -e
 
 NOW=$(date +%Y-%m-%dT%H:%M:%S)
-LOG="/var/log/cloudron/backup-${NOW}.log"
-exec 2>&1 1> $LOG
+LOG="/var/log/cloudron/backup.log"
+exec 2>&1 1>> $LOG
 
 if [ $# -lt 1 ]; then
     echo "Usage: backup.sh <url>"
