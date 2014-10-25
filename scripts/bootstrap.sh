@@ -50,6 +50,7 @@ cd $SRCDIR
 while true; do
     timeout 3m npm install --production --loglevel verbose && break
     echo "npm install timedout, trying again"
+    sleep 2
 done
 PATH=$PATH:$SRCDIR/node_modules/.bin npm run-script postinstall
 EOF

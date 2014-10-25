@@ -198,6 +198,7 @@ do_start() {
     while true; do
         timeout 3m bash -c "git fetch && git reset --hard $BOX_REVISION" && break
         echo "git fetch timedout, trying again"
+        sleep 2
     done
 EOF2
 
