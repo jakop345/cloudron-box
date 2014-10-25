@@ -119,6 +119,7 @@ truncate -s 12G /root/user_home.img
 mkfs.btrfs -L UserHome /root/user_home.img
 echo "/root/user_home.img $USER_HOME btrfs loop,nosuid 0 0" >> /etc/fstab
 mount -a
+btrfs subvolume create $USER_HOME/data
 
 echo "==== Cloning box repo ===="
 echo "Cloning the box repo"

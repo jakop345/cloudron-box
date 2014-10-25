@@ -52,7 +52,6 @@ while true; do
     echo "npm install timedout, trying again"
     sleep 2
 done
-mkdir -p $DATA_DIR
 PATH=$PATH:$SRCDIR/node_modules/.bin npm run-script migrate_data
 EOF
 
