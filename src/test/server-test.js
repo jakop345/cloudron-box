@@ -14,7 +14,7 @@ var cloudron = require('../cloudron.js'),
     request = require('superagent'),
     Server = require('../server.js');
 
-var SERVER_URL = 'http://localhost:' + config.port;
+var SERVER_URL = 'http://localhost:' + config.get('port');
 var ACCESS_TOKEN = null;
 
 function cleanup(done) {
@@ -280,12 +280,12 @@ describe('Server', function () {
         before(function (done) {
             process.env.ANNOUNCE_INTERVAL = 20;
 
-            config.token = null;
+            config.set('token', null);
             server = new Server();
             server.start(done);
 
-            var scope = nock(config.appServerUrl);
-            failingGet = scope.get('/api/v1/boxes/' + config.fqdn + '/announce');
+            var scope = nock(config.appServerUrl());
+            failingGet = scope.get('/api/v1/boxes/' + config.fqdn() + '/announce');
             failingGet.times(5).reply(502);
         });
 
@@ -314,12 +314,12 @@ describe('Server', function () {
         var server, successfulHeartbeatGet;
 
         before(function (done) {
-            config.token = 'forheartbeat';
+            config.set('token', 'forheartbeat');
             server = new Server();
             server.start(done);
 
-            var scope = nock(config.appServerUrl);
-            successfulHeartbeatGet = scope.get('/api/v1/boxes/' + config.fqdn + '/heartbeat');
+            var scope = nock(config.appServerUrl());
+            successfulHeartbeatGet = scope.get('/api/v1/boxes/' + config.fqdn() + '/heartbeat');
             successfulHeartbeatGet.reply(200);
         });
 

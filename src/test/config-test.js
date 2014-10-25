@@ -41,13 +41,13 @@ describe('config', function () {
 
     it('set - simple key value', function (done) {
         config.set('token', 'TOKEN');
-        expect(config.token).to.eql('TOKEN');
+        expect(config.token()).to.eql('TOKEN');
         done();
     });
 
     it('set - object', function (done) {
         config.set( { fqdn: 'something.com' } );
-        expect(config.fqdn).to.eql('something.com');
+        expect(config.fqdn()).to.eql('something.com');
         done();
     });
 

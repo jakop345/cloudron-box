@@ -39,7 +39,7 @@ Updater.prototype._check = function () {
 
         var appStoreIds = appVersions.map(function (appVersion) { return appVersion.appStoreId; });
 
-        superagent.post(config.appServerUrl + '/api/v1/boxupdate').send({ appIds: appStoreIds }).end(function (error, result) {
+        superagent.post(config.appServerUrl() + '/api/v1/boxupdate').send({ appIds: appStoreIds }).end(function (error, result) {
             if (error) return console.error(error);
             if (result.statusCode !== 200) return console.error('Failed to check for updates.', result.statusCode, result.body.message);
 
@@ -100,7 +100,7 @@ Updater.prototype.update = function (backupUrl, callback) {
     assert(typeof callback === 'function');
 
     var that = this;
-    var isDev = config.isDev;
+    var isDev = config.get('isDev');
 
     if (!isDev && !this._boxUpdateInfo) {
         debug('update: no box update available');
@@ -111,7 +111,7 @@ Updater.prototype.update = function (backupUrl, callback) {
         debug('update: box needs upgrade');
         // TODO: cloudron.backup() here. currently, we cannot since backup requires a restart
 
-        superagent.post(config.appServerUrl + '/api/v1/boxes/' + config.fqdn + '/upgrade').query({ token: config.token }).end(function (error, result) {
+        superagent.post(config.appServerUrl() + '/api/v1/boxes/' + config.fqdn() + '/upgrade').query({ token: config.token() }).end(function (error, result) {
             if (error) return callback(new Error('Error making upgrade request: ' + error));
             if (result.status !== 200) return callback(new Error('Server not ready to upgrade: ' + result.body));
 

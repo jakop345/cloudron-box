@@ -21,7 +21,7 @@ var config = require('../../../config.js'),
     userdb = require('../../userdb.js'),
     uuid = require('node-uuid');
 
-var SERVER_URL = 'http://localhost:' + config.port;
+var SERVER_URL = 'http://localhost:' + config.get('port');
 
 var USERNAME = 'admin', PASSWORD = 'admin', EMAIL ='silly@me.com';
 var volume;

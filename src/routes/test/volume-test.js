@@ -16,7 +16,7 @@ var async = require('async'),
     Server = require('../../server.js'),
     userdb = require('../../userdb.js');
 
-var SERVER_URL = 'http://localhost:' + config.port;
+var SERVER_URL = 'http://localhost:' + config.get('port');
 
 var USERNAME = 'admin', PASSWORD = 'admin', EMAIL ='silly@me.com';
 var TESTVOLUME = 'testvolume';

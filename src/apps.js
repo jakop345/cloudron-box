@@ -118,7 +118,7 @@ AppsError.BAD_FIELD = 4;
 AppsError.BAD_STATE = 5;
 
 function appFqdn(location) {
-    return location + '-' + config.fqdn;
+    return location + '-' + config.fqdn();
 }
 
 // http://stackoverflow.com/questions/7930751/regexp-for-subdomain
@@ -232,7 +232,7 @@ function install(appId, appStoreId, username, password, location, portBindings, 
     assert(typeof restrictAccessTo === 'string');
     assert(typeof callback === 'function');
 
-    var error = validateSubdomain(location, config.fqdn);
+    var error = validateSubdomain(location, config.fqdn());
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
     error = validatePortBindings(portBindings);
@@ -259,7 +259,7 @@ function configure(appId, username, password, location, portBindings, restrictAc
     assert(typeof restrictAccessTo === 'string');
     assert(typeof callback === 'function');
 
-    var error = location ? validateSubdomain(location, config.fqdn) : null;
+    var error = location ? validateSubdomain(location, config.fqdn()) : null;
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
     error = portBindings ? validatePortBindings(portBindings) : null;

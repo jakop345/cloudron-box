@@ -28,7 +28,7 @@ var appdb = require('../../appdb.js'),
     uuid = require('node-uuid'),
     _ = require('underscore');
 
-var SERVER_URL = 'http://localhost:' + config.port;
+var SERVER_URL = 'http://localhost:' + config.get('port');
 
 var APP_STORE_ID = 'test', APP_ID;
 var APP_LOCATION = 'location';
@@ -301,7 +301,7 @@ describe('App installation', function () {
             setup,
 
             function (callback) {
-                var port = parseInt(url.parse(config.appServerUrl).port, 10);
+                var port = parseInt(url.parse(config.appServerUrl()).port, 10);
                 hock({ port: port, throwOnUnmatched: false }, function (error, server) {
                     if (error) return done(error);
                     var manifest = JSON.parse(fs.readFileSync(__dirname + '/test.app', 'utf8'));
@@ -310,9 +310,9 @@ describe('App installation', function () {
                     hockServer
                         .get('/api/v1/appstore/apps/' + APP_STORE_ID + '/manifest')
                         .reply(200, manifest, { 'Content-Type': 'application/json' })
-                        .post('/api/v1/subdomains?token=' + config.token, { records: [ { subdomain: APP_LOCATION, appId: APP_ID, type: 'A' } ] })
+                        .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP_LOCATION, appId: APP_ID, type: 'A' } ] })
                         .reply(201, { ids: [ 'dnsrecordid' ] }, { 'Content-Type': 'application/json' })
-                        .delete('/api/v1/subdomains/dnsrecordid?token=' + config.token)
+                        .delete('/api/v1/subdomains/dnsrecordid?token=' + config.token())
                         .reply(200, { }, { 'Content-Type': 'application/json' });
                     callback();
                 });
@@ -368,7 +368,7 @@ describe('App installation', function () {
             expect(error).to.not.be.ok();
             expect(data.Config.ExposedPorts['7777/tcp']).to.eql({ });
             expect(data.Config.Env).to.contain('APP_ORIGIN=https://' + appFqdn(appInfo.location));
-            expect(data.Config.Env).to.contain('ADMIN_ORIGIN=' + config.adminOrigin);
+            expect(data.Config.Env).to.contain('ADMIN_ORIGIN=' + config.adminOrigin());
             clientdb.getByAppId(appInfo.id, function (error, client) {
                 expect(error).to.not.be.ok();
                 expect(client.clientId.length).to.be(40); // cid- + 32 hex chars (128 bits) + 4 hyphens
@@ -440,7 +440,7 @@ describe('App installation', function () {
 
     it('logStream - stream logs', function (done) {
         var options = {
-            port: config.port, host: 'localhost', path: '/api/v1/app/' + APP_ID + '/logstream?access_token=' + token,
+            port: config.get('port'), host: 'localhost', path: '/api/v1/app/' + APP_ID + '/logstream?access_token=' + token,
             headers: { 'Accept': 'text/event-stream', 'Connection': 'keep-alive' }
         };
 
@@ -589,7 +589,7 @@ describe('App installation - port bindings', function () {
             setup,
 
             function (callback) {
-                var port = parseInt(url.parse(config.appServerUrl).port, 10);
+                var port = parseInt(url.parse(config.appServerUrl()).port, 10);
                 hock({ port: port, throwOnUnmatched: false }, function (error, server) {
                     if (error) return done(error);
                     var manifest = JSON.parse(fs.readFileSync(__dirname + '/test.app', 'utf8'));
@@ -599,15 +599,15 @@ describe('App installation - port bindings', function () {
                     .get('/api/v1/appstore/apps/' + APP_STORE_ID + '/manifest')
                     .reply(200, manifest, { 'Content-Type': 'application/json' })
                     // app install
-                    .post('/api/v1/subdomains?token=' + config.token, { records: [ { subdomain: APP_LOCATION, appId: APP_ID, type: 'A' } ] })
+                    .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP_LOCATION, appId: APP_ID, type: 'A' } ] })
                     .reply(201, { ids: [ 'dnsrecordid' ] }, { 'Content-Type': 'application/json' })
                     // app configure
-                    .delete('/api/v1/subdomains/dnsrecordid?token=' + config.token)
+                    .delete('/api/v1/subdomains/dnsrecordid?token=' + config.token())
                     .reply(200, { }, { 'Content-Type': 'application/json' })
-                    .post('/api/v1/subdomains?token=' + config.token, { records: [ { subdomain: APP_LOCATION, appId: APP_ID, type: 'A' } ] })
+                    .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP_LOCATION, appId: APP_ID, type: 'A' } ] })
                     .reply(201, { ids: [ 'anotherdnsid' ] }, { 'Content-Type': 'application/json' })
                     // app remove
-                    .delete('/api/v1/subdomains/anotherdnsid?token=' + config.token)
+                    .delete('/api/v1/subdomains/anotherdnsid?token=' + config.token())
                     .reply(200, { }, { 'Content-Type': 'application/json' });
 
                     callback();

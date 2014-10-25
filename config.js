@@ -15,6 +15,8 @@ var production = process.env.NODE_ENV === 'production';
 
 var config = { };
 
+var data = { };
+
 config.baseDir = function () {
    return production
         ? path.join(homeDir, process.env.CLOUDRON === '1' ? '' : '.yellowtent')
@@ -23,40 +25,40 @@ config.baseDir = function () {
 
 var cloudronConfigFileName = path.join(config.baseDir(), 'configs/cloudron.conf');
 
-config.save = function () {
-    fs.writeFileSync(cloudronConfigFileName, JSON.stringify(config, null, 4)); // functions are ignored by JSON.stringify
+config.saveSync = function () {
+    fs.writeFileSync(cloudronConfigFileName, JSON.stringify(data, null, 4)); // functions are ignored by JSON.stringify
 };
 
 (function initConfig() {
     // setup defaults
     if (production) {
-        config.port = 3000;
-        config.logApiRequests = true;
-        config.appServerUrl = process.env.APP_SERVER_URL || null; // APP_SERVER_URL is set during bootstrap in the box's supervisor manifest
-        config.isDev = false;
+        data.port = 3000;
+        data.logApiRequests = true;
+        data.appServerUrl = process.env.APP_SERVER_URL || null; // APP_SERVER_URL is set during bootstrap in the box's supervisor manifest
+        data.isDev = false;
     } else {
-        config.port = 5454;
-        config.logApiRequests = false;
-        config.appServerUrl = 'http://localhost:6060'; // hock doesn't support https
-        config.isDev = true;
+        data.port = 5454;
+        data.logApiRequests = false;
+        data.appServerUrl = 'http://localhost:6060'; // hock doesn't support https
+        data.isDev = true;
     }
 
-    config.fqdn = 'localhost';
-    config.adminOrigin = 'https://admin-' + config.fqdn;
+    data.fqdn = 'localhost';
+    data.adminOrigin = 'https://admin-' + config.fqdn;
 
-    config.token = null;
-    config.mailServer = null;
-    config.mailUsername = null;
-    config.mailDnsRecordIds = [ ];
+    data.token = null;
+    data.mailServer = null;
+    data.mailUsername = null;
+    data.mailDnsRecordIds = [ ];
 
     if (safe.fs.existsSync(cloudronConfigFileName)) {
-        var data = safe.JSON.parse(safe.fs.readFileSync(cloudronConfigFileName, 'utf8'));
-        _.extend(config, data); // overwrite defaults with saved config
+        var existingData = safe.JSON.parse(safe.fs.readFileSync(cloudronConfigFileName, 'utf8'));
+        _.extend(data, existingData); // overwrite defaults with saved config
         return;
     }
 
     mkdirp.sync(path.dirname(cloudronConfigFileName));
-    config.save();
+    config.saveSync();
 })();
 
 // config.set(obj) or config.set(key, value)
@@ -64,26 +66,41 @@ config.set = function (key, value) {
     if (typeof key === 'object') {
         var obj = key;
         for (var k in obj) {
-            assert(k in config, 'config.js is missing key "' + k + '"');
-            assert(k !== 'set' && k !== 'save', 'setting reserved key');
-            config[k] = obj[k];
+            assert(k in data, 'config.js is missing key "' + k + '"');
+            data[k] = obj[k];
         }
     } else {
-        assert(key in config, 'config.js is missing key "' + key + '"');
-        assert(key !== 'set' && key !== 'save', 'setting reserved key');
-        config[key] = value;
+        assert(key in data, 'config.js is missing key "' + key + '"');
+        data[key] = value;
     }
-    config.save();
+    config.saveSync();
 };
 
 config.get = function (key) {
     assert(typeof key === 'string');
+    assert(key in data);
 
-    return config[key];
+    return data[key];
 };
 
 config.version = function () {
     return require('./package.json').version;
+};
+
+config.appServerUrl = function () {
+    return config.get('appServerUrl');
+};
+
+config.fqdn = function () {
+    return config.get('fqdn');
+};
+
+config.adminOrigin = function () {
+    return config.get('adminOrigin');
+};
+
+config.token = function () {
+    return config.get('token');
 };
 
 exports = module.exports = config;

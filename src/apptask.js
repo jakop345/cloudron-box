@@ -129,7 +129,7 @@ function unconfigureNginx(app, callback) {
 
 function setNakedDomain(app, callback) {
     var sourceDir = path.resolve(__dirname, '..');
-    var nginxConf = app ? ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: config.fqdn, port: app.httpPort, restrictAccessTo: app.restrictAccessTo }) : '';
+    var nginxConf = app ? ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: config.fqdn(), port: app.httpPort, restrictAccessTo: app.restrictAccessTo }) : '';
 
     var nginxNakedDomainFilename = path.join(paths.NGINX_CONFIG_DIR, 'naked_domain.conf');
     debug('writing naked domain config to ' + nginxNakedDomainFilename);
@@ -201,10 +201,10 @@ function createContainer(app, callback) {
         }
 
         env.push('APP_ORIGIN' + '=' + 'https://' + appFqdn(app.location));
-        env.push('ADMIN_ORIGIN' + '=' + config.adminOrigin);
-        env.push('MAIL_SERVER' + '=' + config.mailServer);
+        env.push('ADMIN_ORIGIN' + '=' + config.adminOrigin());
+        env.push('MAIL_SERVER' + '=' + config.get('mailServer'));
         env.push('MAIL_USERNAME' + '=' + app.location);
-        env.push('MAIL_DOMAIN' + '=' + config.fqdn);
+        env.push('MAIL_DOMAIN' + '=' + config.fqdn());
 
         // add oauth variables
         clientdb.getByAppId(app.id, function (error, client) {
@@ -409,7 +409,7 @@ function downloadManifest(app, callback) {
     debug('Downloading manifest for :', app.id);
 
     superagent
-        .get(config.appServerUrl + '/api/v1/appstore/apps/' + app.appStoreId + '/manifest')
+        .get(config.appServerUrl() + '/api/v1/appstore/apps/' + app.appStoreId + '/manifest')
         .set('Accept', 'application/json')
         .end(function (err, res) {
             if (err) return callback(err);
@@ -434,7 +434,7 @@ function downloadManifest(app, callback) {
 }
 
 function registerSubdomain(app, callback) {
-    if (!config.token) {
+    if (!config.token()) {
         debug('Skipping subdomain registration for development');
         return callback(null);
     }
@@ -444,9 +444,9 @@ function registerSubdomain(app, callback) {
     var record = { subdomain: app.location, appId: app.id, type: 'A' };
 
     superagent
-        .post(config.appServerUrl + '/api/v1/subdomains')
+        .post(config.appServerUrl() + '/api/v1/subdomains')
         .set('Accept', 'application/json')
-        .query({ token: config.token })
+        .query({ token: config.token() })
         .send({ records: [ record ] })
         .end(function (error, res) {
             if (error) return callback(error);
@@ -461,15 +461,15 @@ function registerSubdomain(app, callback) {
 }
 
 function unregisterSubdomain(app, callback) {
-    if (!config.token) {
+    if (!config.token()) {
         debug('Skipping subdomain unregistration for development');
         return callback(null);
     }
 
     debug('Unregistering subdomain for ' + app.id + ' at ' + app.location);
     superagent
-        .del(config.appServerUrl + '/api/v1/subdomains/' + app.dnsRecordId)
-        .query({ token: config.token })
+        .del(config.appServerUrl() + '/api/v1/subdomains/' + app.dnsRecordId)
+        .query({ token: config.token() })
         .end(function (error, res) {
             if (error) {
                 console.error('Error making request: ', error);
@@ -498,7 +498,7 @@ function waitForDnsPropagation(app, callback) {
     }
 
     var ip = cloudron.getIp(),
-        zoneName = config.fqdn.substr(config.fqdn.indexOf('.') + 1), // TODO: send zone from appstore
+        zoneName = config.fqdn().substr(config.fqdn().indexOf('.') + 1), // TODO: send zone from appstore
         fqdn = appFqdn(app.location);
 
     function retry(error) {

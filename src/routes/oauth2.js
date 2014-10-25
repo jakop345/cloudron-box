@@ -117,7 +117,7 @@ server.exchange(oauth2orize.exchange.code(function (client, code, redirectURI, c
 
 // Main login form username and password
 function loginForm(req, res) {
-    res.render('login', { adminOrigin: config.adminOrigin, csrf: req.csrfToken() });
+    res.render('login', { adminOrigin: config.adminOrigin(), csrf: req.csrfToken() });
 }
 
 // In memory password reset token store
@@ -125,7 +125,7 @@ var resetTokens = {};
 
 // Form to enter email address to send a password reset request mail
 function passwordResetRequestSite(req, res) {
-    res.render('password_reset_request', { adminOrigin: config.adminOrigin, csrf: req.csrfToken() });
+    res.render('password_reset_request', { adminOrigin: config.adminOrigin(), csrf: req.csrfToken() });
 }
 
 // This route is used for above form submission
@@ -148,7 +148,7 @@ function passwordResetRequest(req, res, next) {
 function passwordSentSite(req, res) {
     debug('passwordSentSite');
 
-    res.render('password_reset_sent', { adminOrigin: config.adminOrigin });
+    res.render('password_reset_sent', { adminOrigin: config.adminOrigin() });
 }
 
 function passwordResetSite(req, res, next) {
@@ -160,7 +160,7 @@ function passwordResetSite(req, res, next) {
         userdb.get(key, function (error, result) {
             if (error) return next(new HttpError(400, 'Unknown reset token'));
 
-            res.render('password_reset', { adminOrigin: config.adminOrigin, user: result, csrf: req.csrfToken(), resetToken: req.query.reset_token });
+            res.render('password_reset', { adminOrigin: config.adminOrigin(), user: result, csrf: req.csrfToken(), resetToken: req.query.reset_token });
         });
     }
 
@@ -184,7 +184,7 @@ function passwordReset(req, res, next) {
         user.resetPassword(userId, req.body.password, function (error) {
             if (error) return next(new HttpError(400, 'Unknown reset token'));
 
-            res.redirect(config.adminOrigin);
+            res.redirect(config.adminOrigin());
         });
     }
 
@@ -219,7 +219,7 @@ var callback = [
     session.ensureLoggedIn('/api/v1/session/login'),
     function (req, res) {
         debug('callback: with callback server ' + req.query.redirectURI);
-        res.render('callback', { adminOrigin: config.adminOrigin, callbackServer: req.query.redirectURI });
+        res.render('callback', { adminOrigin: config.adminOrigin(), callbackServer: req.query.redirectURI });
     }
 ];
 
@@ -232,7 +232,7 @@ var callback = [
 var error = [
     session.ensureLoggedIn('/api/v1/session/login'),
     function (req, res) {
-        res.render('error', { adminOrigin: config.adminOrigin });
+        res.render('error', { adminOrigin: config.adminOrigin() });
     }
 ];
 
@@ -316,7 +316,7 @@ var token = [
 */
 function library(req, res) {
     res.setHeader('Content-Type', 'application/javascript');
-    res.render('yellowtent', { adminOrigin: config.adminOrigin });
+    res.render('yellowtent', { adminOrigin: config.adminOrigin() });
 }
 
 

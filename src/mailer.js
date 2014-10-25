@@ -28,7 +28,7 @@ exports = module.exports = {
 var MAIL_TEMPLATES_DIR = path.join(__dirname, 'mail_templates');
 
 var transport = nodemailer.createTransport(smtpTransport({
-    host: config.mailServer,
+    host: config.get('mailServer'),
     port: 25
 }));
 
@@ -50,7 +50,7 @@ function uninitialize() {
 }
 
 function checkDns() {
-    digitalocean.checkPtrRecord(cloudron.getIp(), config.fqdn, function (error, ok) {
+    digitalocean.checkPtrRecord(cloudron.getIp(), config.fqdn(), function (error, ok) {
         if (error || !ok) {
             debug('PTR record not setup yet');
             checkDnsTimerId = setTimeout(checkDns, 10000);
@@ -103,7 +103,7 @@ function mailAdmins(user, event) {
         admins.forEach(function (admin) { if (user.email !== admin.email) adminEmails.push(admin.email); });
 
         var mailOptions = {
-            from: config.mailUsername,
+            from: config.get('mailUsername'),
             to: adminEmails.join(', '),
             subject: 'User ' + event,
             text: render('user_text.ejs', { username: user.username, event: event }),
@@ -120,11 +120,11 @@ function userAdded(user, password) {
     var templateData = {
         user: user,
         password: password,
-        webadminUrl: config.adminOrigin
+        webadminUrl: config.adminOrigin()
     };
 
     var mailOptions = {
-        from: config.mailUsername,
+        from: config.get('mailUsername'),
         to: user.email,
         subject: 'Welcome to Cloudron',
         text: render('welcome_text.ejs', templateData),
@@ -151,10 +151,10 @@ function adminChanged(user) {
 function passwordReset(user, token) {
     debug('Sending mail for password reset for user %s.', user.username);
 
-    var resetLink = config.adminOrigin + '/api/v1/session/password/reset.html?reset_token='+token;
+    var resetLink = config.adminOrigin() + '/api/v1/session/password/reset.html?reset_token='+token;
 
     var mailOptions = {
-        from: config.mailUsername,
+        from: config.get('mailUsername'),
         to: user.email,
         subject: 'Password Reset Request',
         text: render('password_reset_text.ejs', { username: user.username, resetLink: resetLink }),

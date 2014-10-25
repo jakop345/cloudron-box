@@ -13,7 +13,7 @@ var config = require('../../../config.js'),
     Server = require('../../../src/server.js'),
     userdb = require('../../userdb.js');
 
-var SERVER_URL = 'http://localhost:' + config.port;
+var SERVER_URL = 'http://localhost:' + config.get('port');
 
 var USERNAME_0 = 'admin', PASSWORD = 'admin', EMAIL ='silly@me.com';
 var USERNAME_1 = 'userTheFirst', PASSWORD_1 = 'chocolatecookie', EMAIL_1 = 'tao@zen.mac';

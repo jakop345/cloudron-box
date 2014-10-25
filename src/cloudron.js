@@ -136,12 +136,12 @@ function update(callback) {
 }
 
 function getBackupUrl(callback) {
-    if (!config.appServerUrl) return new Error('No appstore server url set');
-    if (!config.token) return new Error('No appstore server token set');
+    if (!config.appServerUrl()) return new Error('No appstore server url set');
+    if (!config.token()) return new Error('No appstore server token set');
 
-    var url = config.appServerUrl + '/api/v1/boxes/' + config.fqdn + '/backupurl';
+    var url = config.appServerUrl() + '/api/v1/boxes/' + config.fqdn() + '/backupurl';
 
-    superagent.put(url).query({ token: config.token }).end(function (error, result) {
+    superagent.put(url).query({ token: config.token() }).end(function (error, result) {
         if (error) return new Error('Error getting presigned backup url: ' + error.message);
 
         if (result.statusCode !== 200 || !result.body || !result.body.url) return new Error('Error getting presigned backup url : ' + result.statusCode);
@@ -192,9 +192,9 @@ function getConfig(callback) {
         }
 
         callback(null, {
-            appServerUrl: config.appServerUrl,
-            isDev: config.isDev,
-            fqdn: config.fqdn,
+            appServerUrl: config.appServerUrl(),
+            isDev: config.get('isDev'),
+            fqdn: config.fqdn(),
             ip: getIp(),
             version: config.version(),
             revision: stdout,
@@ -206,20 +206,20 @@ function getConfig(callback) {
 function sendHeartBeat() {
     var HEARTBEAT_INTERVAL = 1000 * 60;
 
-    if (!config.appServerUrl) {
+    if (!config.appServerUrl()) {
         debug('No appstore server url set. Not sending heartbeat.');
         return;
     }
 
-    if (!config.token) {
+    if (!config.token()) {
         debug('No appstore server token set. Not sending heartbeat.');
         return;
     }
 
-    var url = config.appServerUrl + '/api/v1/boxes/' + config.fqdn + '/heartbeat';
+    var url = config.appServerUrl() + '/api/v1/boxes/' + config.fqdn() + '/heartbeat';
     debug('Sending heartbeat ' + url);
 
-    superagent.get(url).query({ token: config.token }).end(function (error, result) {
+    superagent.get(url).query({ token: config.token() }).end(function (error, result) {
         if (error) debug('Error sending heartbeat.', error);
         else if (result.statusCode !== 200) debug('Server responded to heartbeat with ' + result.statusCode);
         else debug('Heartbeat successful');
@@ -229,8 +229,8 @@ function sendHeartBeat() {
 };
 
 function announce() {
-    if (config.token) {
-        debug('_announce: we already have a token %s. Skip announcing.', config.token);
+    if (config.token()) {
+        debug('_announce: we already have a token %s. Skip announcing.', config.token());
         clearTimeout(announceTimerId);
         announceTimerId = null;
         return;
@@ -242,7 +242,7 @@ function announce() {
     // We use that value to identify the droplet by the appstore server when the droplet
     // announce itself. This identifier can look different for other box providers.
     var hostname = os.hostname();
-    var url = config.appServerUrl + '/api/v1/boxes/' + hostname + '/announce';
+    var url = config.appServerUrl() + '/api/v1/boxes/' + hostname + '/announce';
     debug('_announce: box with %s.', url);
 
     superagent.get(url).end(function (error, result) {
@@ -283,7 +283,7 @@ function sendMailDnsRecordsRequest(callback) {
     var DKIM_SELECTOR = 'mail';
     var DMARC_REPORT_EMAIL = 'girish@forwardbias.in';
 
-    var dkimPublicKeyFile = path.join(paths.HARAKA_CONFIG_DIR, 'dkim/' + config.fqdn + '/public');
+    var dkimPublicKeyFile = path.join(paths.HARAKA_CONFIG_DIR, 'dkim/' + config.fqdn() + '/public');
     var publicKey = safe.fs.readFileSync(dkimPublicKeyFile, 'utf8');
 
     if (publicKey === null) return console.error('Error reading dkim public key');
@@ -304,9 +304,9 @@ function sendMailDnsRecordsRequest(callback) {
     debug('sendMailDnsRecords request:%s', JSON.stringify(records));
 
     superagent
-        .post(config.appServerUrl + '/api/v1/subdomains')
+        .post(config.appServerUrl() + '/api/v1/subdomains')
         .set('Accept', 'application/json')
-        .query({ token: config.token })
+        .query({ token: config.token() })
         .send({ records: records })
         .end(function (error, res) {
             if (error) return callback(error);
@@ -322,7 +322,7 @@ function sendMailDnsRecordsRequest(callback) {
 }
 
 function addMailDnsRecords() {
-    if (!config.token) return;
+    if (!config.token()) return;
 
     if (config.get('mailDnsRecordIds').length !== 0) return; // already registered
 
@@ -342,7 +342,7 @@ function restore(args, callback) {
     assert(typeof args === 'object');
     assert(typeof callback === 'function');
 
-    if (config.token) return callback(new CloudronError(CloudronError.ALREADY_PROVISIONED));
+    if (config.token()) return callback(new CloudronError(CloudronError.ALREADY_PROVISIONED));
 
     config.set(_.pick(args, 'token', 'appServerUrl', 'adminOrigin', 'fqdn', 'isDev'));
 
@@ -350,7 +350,7 @@ function restore(args, callback) {
 
     // override the default webadmin OAuth client record
     var scopes = 'root,profile,users,apps,settings,roleAdmin';
-    clientdb.replaceByAppId(uuid.v4(), 'webadmin', 'cid-webadmin', 'unused', 'WebAdmin', config.adminOrigin, scopes, function (error) {
+    clientdb.replaceByAppId(uuid.v4(), 'webadmin', 'cid-webadmin', 'unused', 'WebAdmin', config.adminOrigin(), scopes, function (error) {
         if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
         installCertificate(args.tls.cert, args.tls.key, function (error) {
@@ -373,13 +373,13 @@ function provision(args, callback) {
     assert(typeof args === 'object');
     assert(typeof callback === 'function');
 
-    if (config.token) return callback(new CloudronError(CloudronError.ALREADY_PROVISIONED));
+    if (config.token()) return callback(new CloudronError(CloudronError.ALREADY_PROVISIONED));
 
     config.set(_.pick(args, 'token', 'appServerUrl', 'adminOrigin', 'fqdn', 'isDev'));
 
     // override the default webadmin OAuth client record
     var scopes = 'root,profile,users,apps,settings,roleAdmin';
-    clientdb.replaceByAppId(uuid.v4(), 'webadmin', 'cid-webadmin', 'unused', 'WebAdmin', config.adminOrigin, scopes, function (error) {
+    clientdb.replaceByAppId(uuid.v4(), 'webadmin', 'cid-webadmin', 'unused', 'WebAdmin', config.adminOrigin(), scopes, function (error) {
         if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
         installCertificate(args.tls.cert, args.tls.key, callback);

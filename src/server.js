@@ -148,7 +148,7 @@ Server.prototype._initializeExpressSync = function () {
     this.app.set('view options', { layout: true, debug: true });
     this.app.set('view engine', 'ejs');
 
-    if (config.logApiRequests) {
+    if (config.get('logApiRequests')) {
         this.app.use(middleware.morgan({ format: 'dev', immediate: false }));
     }
 
@@ -329,7 +329,7 @@ Server.prototype.start = function (callback) {
         mailer.initialize();
 
         that.httpServer = http.createServer(that.app);
-        that.httpServer.listen(config.port, '127.0.0.1', callback);
+        that.httpServer.listen(config.get('port'), '127.0.0.1', callback);
     });
 };
 
