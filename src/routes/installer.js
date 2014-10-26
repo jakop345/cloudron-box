@@ -5,7 +5,8 @@
 var debug = require('debug')('box:routes/installer'),
     HttpError = require('../httperror.js'),
     HttpSuccess = require('../httpsuccess.js'),
-    installer = require('../installer.js');
+    installer = require('../installer.js'),
+    InstallerError = require('../installer.js').InstallerError;
 
 exports = module.exports = {
     provision: provision,

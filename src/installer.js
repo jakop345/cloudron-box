@@ -12,9 +12,13 @@ var assert = require('assert'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
     superagent = require('superagent'),
-    util = require('util');
+    util = require('util'),
+    uuid = require('node-uuid'),
+    _ = require('underscore');
 
 exports = module.exports = {
+    InstallerError: InstallerError,
+
     initialize: initialize,
     uninitialize: uninitialize,
 
