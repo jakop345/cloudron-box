@@ -182,7 +182,7 @@ iptables-save > /etc/iptables/rules.v4
 
 
 echo "==== Install init script ===="
-cat > /etc/init.d/bootstrap <<EOF
+cat > /etc/init.d/cloudron-bootstrap <<EOF
 #!/bin/bash
 
 do_start() {
@@ -204,8 +204,8 @@ EOF2
     echo "Running bootstrap script with args $APPSTORE_URL $BOX_REVISION"
     /bin/bash $SRCDIR/scripts/bootstrap.sh $APPSTORE_URL $BOX_REVISION
 
-    echo "Disabling bootstrap init script"
-    update-rc.d bootstrap remove
+    echo "Disabling cloudron-bootstrap init script"
+    update-rc.d cloudron-bootstrap remove
 }
 
 case "\$1" in
@@ -224,11 +224,11 @@ case "\$1" in
         ;;
 esac
 
-echo "End of bootstrap init script"
+echo "End of cloudron-bootstrap init script"
 EOF
 
-chmod +x /etc/init.d/bootstrap
-update-rc.d bootstrap defaults 99
+chmod +x /etc/init.d/cloudron-bootstrap
+update-rc.d cloudron-bootstrap defaults 99
 
 sync
 
