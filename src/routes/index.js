@@ -5,6 +5,7 @@ exports = module.exports = {
     cloudron: require('./cloudron.js'),
     file: require('./file.js'),
     fileops: require('./fileops.js'),
+    installer: require('./installer.js'),
     oauth2: require('./oauth2.js'),
     settings: require('./settings.js'),
     sync: require('./sync.js'),

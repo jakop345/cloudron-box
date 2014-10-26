@@ -193,11 +193,13 @@ Server.prototype._initializeExpressSync = function () {
     // middleware to ensure the calling user is admin
     var admin = this._requireAdmin.bind(this);
 
+    // installation routes
+    router.post('/api/v1/provision', routes.installer.provision);
+    router.post('/api/v1/restore', routes.installer.restore);
+
     // public routes
     router.get ('/api/v1/version', this._getVersion.bind(this));
     router.get ('/api/v1/firsttime', this._firstTime.bind(this));
-    router.post('/api/v1/provision', routes.cloudron.provision);
-    router.post('/api/v1/restore', routes.cloudron.restore);
     router.post('/api/v1/createadmin', routes.user.createAdmin);    // FIXME any number of admins can be created without auth!
 
     router.get ('/api/v1/config', rootScope, routes.cloudron.getConfig);

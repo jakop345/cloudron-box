@@ -18,10 +18,8 @@ exports = module.exports = {
     getStats: getStats,
     reboot: reboot,
     createBackup: createBackup,
-    restore: restore,
     getConfig: getConfig,
-    update: update,
-    provision: provision
+    update: update
 };
 
 function getStats(req, res, next) {
@@ -74,41 +72,4 @@ function update(req, res, next) {
         res.send(200, { });
     });
 };
-
-function restore(req, res, next) {
-    if (!req.body.token) return next(new HttpError(400, 'No token provided'));
-    if (!req.body.appServerUrl) return next(new HttpError(400, 'No appServerUrl provided'));
-    if (!req.body.adminOrigin) return next(new HttpError(400, 'No adminOrigin provided'));
-    if (!req.body.fqdn) return next(new HttpError(400, 'No fqdn provided'));
-    if (!req.body.ip) return next(new HttpError(400, 'No ip provided'));
-    if (!('tls' in req.body)) return next(new HttpError(400, 'tls cert must be provided or be null'));
-    if (!req.body.restoreUrl) return next(new HttpError(400, 'No restoreUrl provided'));
-
-    debug('_restore: received from appstore ', req.body);
-
-    cloudron.restore(req.body, function (error) {
-        if (error && error.reason === CloudronError.ALREADY_PROVISIONED) return next(new HttpError(409, 'Already provisioned'));
-        if (error) return next(new HttpError(500, error));
-
-        return next(new HttpSuccess(200, { }));
-    });
-}
-
-function provision(req, res, next) {
-    if (!req.body.token) return next(new HttpError(400, 'No token provided'));
-    if (!req.body.appServerUrl) return next(new HttpError(400, 'No appServerUrl provided'));
-    if (!req.body.adminOrigin) return next(new HttpError(400, 'No adminOrigin provided'));
-    if (!req.body.fqdn) return next(new HttpError(400, 'No fqdn provided'));
-    if (!req.body.ip) return next(new HttpError(400, 'No ip provided'));
-    if (!('tls' in req.body)) return next(new HttpError(400, 'tls cert must be provided or be null'));
-
-    debug('_provision: received from appstore ' + req.body.appServerUrl);
-
-    cloudron.provision(req.body, function (error) {
-        if (error && error.reason === CloudronError.ALREADY_PROVISIONED) return next(new HttpError(409, 'Already provisioned'));
-        if (error) return next(new HttpError(500, error));
-
-        return next(new HttpSuccess(201, { }));
-    });
-}
 
