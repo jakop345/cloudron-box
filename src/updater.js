@@ -13,26 +13,27 @@ var appdb = require('./appdb.js'),
 
 var BOX_VERSIONS_URL = 'https://s3.amazonaws.com/cloudron-releases/versions.json';
 
-module.exports = exports = Updater;
+var checkUpdateIntervalId = null,
+    appsUpdateInfo = null,
+    boxUpdateInfo = null;
 
-function Updater() {
-    this._checkInterval = null;
-    this._boxUpdateInfo = null;
-    this._appUpdateInfo = null;
-}
+module.exports = exports = {
+    initialize: initialize,
+    uninitialize: uninitialize,
 
-Updater.prototype.availableUpdate = function () {
-    return {
-        apps: this._appUpdateInfo,
-        box: this._boxUpdateInfo
-    };
-
+    getUpdateInfo: getUpdateInfo,
+    update: update
 };
 
-Updater.prototype._check = function () {
-    debug('check: for updates. box is on version ' + config.version());
+function getUpdateInfo() {
+    return {
+        apps: appsUpdateInfo,
+        box: boxUpdateInfo
+    };
+};
 
-    var that = this;
+function checkUpdate() {
+    debug('check: for updates. box is on version ' + config.version());
 
     // app updates
     appdb.getAppVersions(function (error, appVersions) {
@@ -46,7 +47,7 @@ Updater.prototype._check = function () {
 
             debug('check: ', result.body);
 
-            that._appUpdateInfo = result.body.appVersions;
+            appsUpdateInfo = result.body.appVersions;
         });
     });
 
@@ -68,47 +69,47 @@ Updater.prototype._check = function () {
 
         if (!versions[config.version()]) {
             console.error('Cloudron runs on unknown version %s', config.version());
-            that._boxUpdateInfo = null;
+            boxUpdateInfo = null;
             return;
         }
 
         var next = versions[config.version()].next;
         if (next && versions[next] && versions[next].revision) {
             debug('_check: new version %s available to revision %s.', next, versions[next].revision);
-            that._boxUpdateInfo = versions[next];
-            that._boxUpdateInfo.version = next;
+            boxUpdateInfo = versions[next];
+            boxUpdateInfo.version = next;
         } else {
             debug('_check: no new version available.');
-            that._boxUpdateInfo = null;
+            boxUpdateInfo = null;
         }
     });
 };
 
-Updater.prototype.start = function () {
-    debug('start');
+function initialize() {
+    debug('initialize');
 
-    this._checkInterval = setInterval(this._check.bind(this), 60 * 1000);
+    checkUpdateIntervalId = setInterval(checkUpdate, 60 * 1000);
 };
 
-Updater.prototype.stop = function () {
-    debug('stop');
+function uninitialize() {
+    debug('uninitialize');
 
-    clearInterval(this._checkInterval);
+    clearInterval(checkUpdateIntervalId);
+    checkUpdateIntervalId = null;
 };
 
-Updater.prototype.update = function (backupUrl, callback) {
+function update(backupUrl, callback) {
     assert(typeof backupUrl === 'string');
     assert(typeof callback === 'function');
 
-    var that = this;
     var isDev = config.get('isDev');
 
-    if (!isDev && !this._boxUpdateInfo) {
+    if (!isDev && !boxUpdateInfo) {
         debug('update: no box update available');
         return callback(new Error('No update available'));
     }
 
-    if (this._boxUpdateInfo && this._boxUpdateInfo.imageId) {
+    if (boxUpdateInfo && boxUpdateInfo.imageId) {
         debug('update: box needs upgrade');
         // TODO: cloudron.backup() here. currently, we cannot since backup requires a restart
 
@@ -125,8 +126,8 @@ Updater.prototype.update = function (backupUrl, callback) {
 
     var args = [
         path.join(__dirname, 'scripts/update.sh'),
-        this._boxUpdateInfo ? this._boxUpdateInfo.version : config.version(),
-        this._boxUpdateInfo ? this._boxUpdateInfo.revision : 'origin/master',
+        boxUpdateInfo ? boxUpdateInfo.version : config.version(),
+        boxUpdateInfo ? boxUpdateInfo.revision : 'origin/master',
         backupUrl
     ];
 

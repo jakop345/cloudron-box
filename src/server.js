@@ -20,8 +20,9 @@ var apps = require('./apps'),
     path = require('path'),
     paths = require('./paths.js'),
     routes = require('./routes/index.js'),
+    updater = require('./updater.js'),
     url = require('url'),
-    userdb = require('./userdb');
+    userdb = require('./userdb.js');
 
 exports = module.exports = Server;
 
@@ -326,6 +327,7 @@ Server.prototype.start = function (callback) {
 
         apps.initialize();
         cloudron.initialize();
+        updater.initialize();
         mailer.initialize();
 
         that.httpServer = http.createServer(that.app);
@@ -343,6 +345,7 @@ Server.prototype.stop = function (callback) {
     }
 
     cloudron.uninitialize();
+    updater.uninitialize();
     apps.uninitialize();
     mailer.uninitialize();
     database.uninitialize();

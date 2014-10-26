@@ -14,7 +14,7 @@ var assert = require('assert'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
     superagent = require('superagent'),
-    Updater = require('./updater.js'),
+    updater = require('./updater.js'),
     util = require('util'),
     uuid = require('node-uuid'),
     _ = require('underscore');
@@ -49,8 +49,7 @@ var backupTimerId = null,
     announceTimerId = null,
     addMailDnsRecordsTimerId = null,
     getCertificateTimerId = null,
-    cachedIp = null,
-    updater = new Updater(); // TODO: make this not an object
+    cachedIp = null;
 
 function CloudronError(reason, info) {
     Error.call(this);
@@ -74,8 +73,6 @@ function initialize() {
     announce();
 
     addMailDnsRecords();
-
-    updater.start();
 }
 
 function uninitialize() {
@@ -92,8 +89,6 @@ function uninitialize() {
     getCertificateTimerId = null;
 
     cachedIp = null;
-
-    updater.stop();
 }
 
 function startServices() {
@@ -198,7 +193,7 @@ function getConfig(callback) {
             ip: getIp(),
             version: config.version(),
             revision: stdout,
-            update: updater.availableUpdate()
+            update: updater.getUpdateInfo()
         })
     });
 }
