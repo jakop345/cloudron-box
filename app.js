@@ -18,11 +18,9 @@ console.log('==========================================');
 console.log(' Cloudron will use the following settings ');
 console.log('==========================================');
 console.log();
-console.log(' Cloudron config:                ', config.cloudronConfigFile);
-console.log(' Port:                           ', config.port);
-console.log(' Admin Origin:                   ', config.adminOrigin);
-console.log(' Appstore token:                 ', config.token);
-console.log(' Appstore server origin:         ', config.appServerUrl);
+console.log(' Admin Origin:                   ', config.adminOrigin());
+console.log(' Appstore token:                 ', config.token());
+console.log(' Appstore server origin:         ', config.appServerUrl());
 console.log();
 console.log('==========================================');
 console.log();
@@ -34,7 +32,7 @@ server.start(function (err) {
         process.exit(1);
     }
 
-    console.log('Server listening on port ' + config.port);
+    console.log('Server listening on port ' + config.get('port'));
 });
 
 var NOOP_CALLBACK = function () { };
