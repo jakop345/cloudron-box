@@ -11,11 +11,12 @@ var appdb = require('./appdb.js'),
     safe = require('safetydance'),
     superagent = require('superagent');
 
+var BOX_VERSIONS_URL = 'https://s3.amazonaws.com/cloudron-releases/versions.json';
+
 module.exports = exports = Updater;
 
 function Updater() {
     this._checkInterval = null;
-    this._boxUpdateInfoManifestUrl = 'https://s3.amazonaws.com/cloudron-releases/versions.json';
     this._boxUpdateInfo = null;
     this._appUpdateInfo = null;
 }
@@ -50,7 +51,7 @@ Updater.prototype._check = function () {
     });
 
     // box updates
-    superagent.get(this._boxUpdateInfoManifestUrl).end(function (error, result) {
+    superagent.get(BOX_VERSIONS_URL).end(function (error, result) {
         if (error || result.status !== 200) {
             console.error('Unable to fetch versions.json.', error, result);
             return;
