@@ -10,6 +10,7 @@ var cloudron = require('../cloudron.js'),
     config = require('../../config.js'),
     database = require('../database.js'),
     expect = require('expect.js'),
+    installer = require('../installer.js'),
     nock = require('nock'),
     request = require('superagent'),
     Server = require('../server.js');
@@ -297,13 +298,13 @@ describe('Server', function () {
 
         it('sends announce request repeatedly until token is set', function (done) {
             setTimeout(function () {
-                expect(cloudron._getAnnounceTimerId()).to.be.ok();
+                expect(installer._getAnnounceTimerId()).to.be.ok();
                 expect(failingGet.counter).to.be.below(6); // counter is nock internal
 
                 config.set('token', 'provision');
 
                 setTimeout(function () {
-                    expect(cloudron._getAnnounceTimerId()).to.be(null);
+                    expect(installer._getAnnounceTimerId()).to.be(null);
                     done();
                 }, 100);
             }, 100);
