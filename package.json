@@ -71,7 +71,8 @@
     "istanbul": "*",
     "mocha": "*",
     "nock": "~0.43.0",
-    "sinon": "~1.10.3"
+    "sinon": "~1.10.3",
+    "aws-sdk": "~2.0.23"
   },
   "scripts": {
     "migrate": "DATABASE_URL=sqlite3:///$HOME/.yellowtent/data/cloudron.sqlite node_modules/.bin/db-migrate up",
