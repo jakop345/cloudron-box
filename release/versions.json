@@ -1,43 +1,12 @@
 {
-    "0.1.0": {
-        "revision": "8352a6618cba594d1ec02fd96ef28543adc714a0",
-        "changelog": [ "initial version" ],
-        "next": "0.2.0"
-    },
-    "0.2.0": {
-        "revision": "548e23cbbe252f861f9248c1824f490cb3a9708c",
-        "changelog": [
-            "Display version correctly"
-        ],
-        "next": "0.3.0"
-    },
-    "0.3.0": {
-        "revision": "d6cc39dd010beccbde78db6043ab6d4f8d1adefb",
-        "changelog": [
-            "Box update and app update",
-            "Box backup and restore"
-        ],
-        "next": "0.4.0"
-    },
-    "0.4.0": {
-        "revision": "32cc2d2e2af692d44e0e8493179da0e1b72da0bc",
-        "changelog": [
-            "Multiple app instances"
-        ],
-        "next": "0.5.0"
-    },
-    "0.5.0": {
-        "revision": "TBD",
-        "changelog": [
-            "Basic upgrade"
-        ],
-        "imageId": "7121067",
-        "next": "0.6.0"
-    },
     "0.6.0": {
         "revision": "c1e9707",
         "imageId": "7219320",
+        "next": "0.7.0"
+    },
+    "0.7.0": {
+        "revision": "84122b1acbc",
+        "imageId": "7253166",
         "next": null
     }
-
 }
