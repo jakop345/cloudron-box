@@ -37,9 +37,7 @@ var params = {
     Key: 'versions.json',
     ACL: 'public-read',
     Body: versionsFileStream,
-    Metadata: {
-        'Content-Type': 'application/json'
-    }
+    ContentType: 'application/json'
 };
 
 console.log('Uploading versions.json');
