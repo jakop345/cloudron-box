@@ -1,22 +1,32 @@
-#!/bin/sh
-# This script is executed once on startup
+#!/bin/bash
 
-exec > >(tee "/var/log/cloudron/bootstrap.log-$$-$BASHPID")
+exec > >(tee "/var/log/cloudron/postinstall-$$-$BASHPID.log")
 exec 2>&1
 
 set -e
+set -x
 
-echo "Box bootstrapping"
+echo "==== Cloudron post installation ===="
 
 USER=yellowtent
 SRCDIR=/home/$USER/box
 DATA_DIR=/home/$USER/data
+HARAKA_DIR="/home/$USER/configs/haraka"
 NGINX_CONFIG_DIR=/home/$USER/configs/nginx
 NGINX_APPCONFIG_DIR=/home/$USER/configs/nginx/applications
+CLOUDRON_CONF="/home/$USER/configs/cloudron.conf"
+CLOUDRON_SQLITE="$DATA_DIR/cloudron.sqlite"
+DOMAIN_NAME=`hostname -f`
 
-# we get the appstore origin from the caller which is baked into the image
-APP_SERVER_URL=$1
-BOX_REVISION=$2
+ADMIN_FQDN="admin-$PROVISION_FQDN"
+ADMIN_ORIGIN="https://$ADMIN_FQDN"
+
+# Every docker restart results in a new IP. Give our mail server a
+# static IP. Alternately, we need to link the mail container with
+# all our apps
+# This IP is set by the haraka container on every start and the firewall
+# allows connect to port 25
+MAIL_SERVER="172.17.120.120"
 
 echo "==== Sudoers file for app removal ===="
 cat > /etc/sudoers.d/yellowtent <<EOF
@@ -43,7 +53,6 @@ $USER ALL=(root) NOPASSWD: $SRCDIR/src/scripts/reloadcollectd.sh
 
 EOF
 
-
 echo "==== Setup yellowtent ===="
 sudo -u $USER -H bash <<EOF
 cd $SRCDIR
@@ -52,6 +61,7 @@ while true; do
     echo "npm install timedout, trying again"
     sleep 2
 done
+echo "Migrate data"
 PATH=$PATH:$SRCDIR/node_modules/.bin npm run-script migrate_data
 EOF
 
@@ -62,24 +72,29 @@ cp nginx/nginx.conf $NGINX_CONFIG_DIR/nginx.conf
 cp nginx/mime.types $NGINX_CONFIG_DIR/mime.types
 cp nginx/certificates.conf $NGINX_CONFIG_DIR/certificates.conf
 touch $NGINX_CONFIG_DIR/naked_domain.conf
-FQDN=`hostname -f`
-sed -e "s/##ADMIN_FQDN##/admin-$FQDN/" -e "s|##SRCDIR##|$SRCDIR|" nginx/admin.conf_template > $NGINX_APPCONFIG_DIR/admin.conf
+sed -e "s/##ADMIN_FQDN##/$ADMIN_FQDN/" -e "s|##SRCDIR##|$SRCDIR|" nginx/admin.conf_template > $NGINX_APPCONFIG_DIR/admin.conf
 
 echo "==== Setup ssl certs ===="
 # The nginx cert dir is excluded from backup in backup.sh
 CERTIFICATE_DIR=$NGINX_CONFIG_DIR/cert
 mkdir -p $CERTIFICATE_DIR
 cd $CERTIFICATE_DIR
-/bin/bash $SRCDIR/scripts/generate_certificate.sh US California 'San Francisco' CloudronInc Cloudron `hostname -f` cert@cloudron.io .
-tar xf cert.tar
+echo "$PROVISION_TLS_CERT" > host.cert
+echo "$PROVISION_TLS_KEY" > host.key
 
 chown $USER:$USER -R /home/$USER
 
 echo "=== Setup collectd and graphite ==="
-$SRCDIR/scripts/bootstrap/setup_collectd.sh
+$SRCDIR/src/scripts/postinstall/setup_collectd.sh
 
 echo "=== Setup haraka mail relay ==="
-$SRCDIR/scripts/bootstrap/setup_haraka.sh
+docker rm -f haraka || true
+HARAKA_CONTAINER_ID=$(docker run -d --name="haraka" --cap-add="NET_ADMIN"\
+    -p 127.0.0.1:25:25 \
+    -h $DOMAIN_NAME \
+    -e DOMAIN_NAME=$DOMAIN_NAME \
+    -v $HARAKA_DIR:/app/data girish/haraka:0.1)
+echo "Haraka container id: $HARAKA_CONTAINER_ID"
 
 echo "==== Setup supervisord ===="
 rm -rf /etc/supervisor
@@ -90,7 +105,7 @@ cp $SRCDIR/supervisor/supervisord.conf /etc/supervisor/
 echo "Writing box supervisor config..."
 cat > /etc/supervisor/conf.d/nginx.conf <<EOF
 [program:nginx]
-command=nginx -c "$NGINX_CONFIG_DIR/nginx.conf" -p /var/log/nginx/
+command=/usr/sbin/nginx -c "$NGINX_CONFIG_DIR/nginx.conf" -p /var/log/nginx/
 autostart=true
 autorestart=true
 redirect_stderr=true
@@ -100,15 +115,40 @@ echo "Done"
 echo "Writing nginx supervisor config..."
 cat > /etc/supervisor/conf.d/box.conf <<EOF
 [program:box]
-command=node app.js
+command=/usr/bin/node app.js
 autostart=true
 autorestart=true
 redirect_stderr=true
 directory=$SRCDIR
 user=yellowtent
-environment=HOME="/home/yellowtent",CLOUDRON="1",USER="yellowtent",DEBUG="box*",APP_SERVER_URL="$APP_SERVER_URL"
+environment=HOME="/home/yellowtent",CLOUDRON="1",USER="yellowtent",DEBUG="box*"
 EOF
-echo "Done"
 
+sudo -u yellowtent -H bash <<EOF
+echo "Creating cloudron.conf"
+cat > "$CLOUDRON_CONF" <<EOF2
+{
+    "token": "$PROVISION_TOKEN",
+    "appServerUrl": "$PROVISION_APP_SERVER_URL",
+    "fqdn": "$PROVISION_FQDN",
+    "adminOrigin": "$ADMIN_ORIGIN",
+    "isDev": "$PROVISION_IS_DEV",
+    "mailServer": "$MAIL_SERVER",
+    "mailUsername": "admin@$DOMAIN_NAME"
+}
+EOF2
+
+echo "Marking any existing apps for restore"
+# TODO: do not auto-start stopped containers (httpPort might need fixing to start them)
+sqlite3 "$CLOUDRON_SQLITE" 'UPDATE apps SET installationState = "pending_restore", healthy = NULL, runState = NULL, containerId = NULL, httpPort = NULL, installationProgress = NULL'
+
+# Add webadmin oauth client
+echo "Add webadmin oauth cient"
+ADMIN_SCOPES="root,profile,users,apps,settings,roleAdmin"
+ADMIN_ID=$(cat /proc/sys/kernel/random/uuid)
+sqlite3 "$CLOUDRON_SQLITE" 'INSERT OR REPLACE INTO clients (id, appId, clientId, clientSecret, name, redirectURI, scope) VALUES ("$ADMIN_ID", "webadmin", "cid-webadmin", "unusedsecret", "WebAdmin", "$ADMIN_ORIGIN", "$ADMIN_SCOPES")'
+EOF
+
+echo "Starting supervisor"
 update-rc.d supervisor defaults
 /etc/init.d/supervisor start

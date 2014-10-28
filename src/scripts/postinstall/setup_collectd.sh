@@ -11,8 +11,9 @@ COLLECTD_APPCONFIG_DIR="$COLLECTD_DIR/collectd.conf.d"
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 GRAPHITE_DIR="/home/yellowtent/data/graphite"
-mkdir $GRAPHITE_DIR
+mkdir -p $GRAPHITE_DIR
 
+docker rm -f graphite || true
 docker run -d --name="graphite" \
     -p 127.0.0.1:2003:2003 \
     -p 127.0.0.1:2004:2004 \

@@ -13,7 +13,7 @@ var apps = require('./apps'),
     http = require('http'),
     HttpError = require('./httperror.js'),
     HttpSuccess = require('./httpsuccess.js'),
-    installer = require('./installer.js'),
+    installer = require('../installer/installer.js'),
     mailer = require('./mailer.js'),
     middleware = require('../middleware'),
     mkdirp = require('mkdirp'),
@@ -192,10 +192,6 @@ Server.prototype._initializeExpressSync = function () {
 
     // middleware to ensure the calling user is admin
     var admin = this._requireAdmin.bind(this);
-
-    // installation routes
-    router.post('/api/v1/provision', routes.installer.provision);
-    router.post('/api/v1/restore', routes.installer.restore);
 
     // public routes
     router.get ('/api/v1/version', this._getVersion.bind(this));

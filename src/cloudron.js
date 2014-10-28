@@ -6,7 +6,6 @@ var assert = require('assert'),
     config = require('../config.js'),
     debug = require('debug')('box:cloudron'),
     clientdb = require('./clientdb.js'),
-    Docker = require('dockerode'),
     execFile = require('child_process').execFile,
     fs = require('fs'),
     os = require('os'),
@@ -59,8 +58,6 @@ function initialize() {
     // every backup restarts the box. the setInterval is only needed should that fail for some reason
     backupTimerId = setInterval(backup, 4 * 60 * 60 * 1000);
 
-    startServices();
-
     sendHeartBeat();
 
     addMailDnsRecords();
@@ -77,28 +74,6 @@ function uninitialize() {
     getCertificateTimerId = null;
 
     cachedIp = null;
-}
-
-function startServices() {
-    var docker = null;
-
-    if (process.env.NODE_ENV === 'test') {
-        docker = new Docker({ host: 'http://localhost', port: 5687 });
-    } else if (os.platform() === 'linux') {
-        docker = new Docker({socketPath: '/var/run/docker.sock'});
-    } else {
-        docker = new Docker({ host: 'http://localhost', port: 2375 });
-    }
-    docker.getContainer('graphite').start({ }, function (error, data) {
-        if (error && error.statusCode !== 304) return debug('Failed to start graphite container');
-
-        debug('started graphite');
-    });
-    docker.getContainer('haraka').start({ }, function (error, data) {
-        if (error && error.statusCode !== 304) return debug('Failed to start haraka container');
-
-        debug('started haraka');
-    });
 }
 
 function update(callback) {

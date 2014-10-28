@@ -188,21 +188,11 @@ cat > /etc/init.d/cloudron-bootstrap <<EOF
 do_start() {
     mkdir -p /var/log/cloudron
 
-    exec 2>&1 1> "/var/log/cloudron/bootstrap_init-\$\$-\$BASHPID.log"
+    exec 2>&1 1> "/var/log/cloudron/bootstrap-\$\$-\$BASHPID.log"
 
-    echo "Updating to git revision $BOX_REVISION"
-
-    sudo -u $USER -H bash <<EOF2
-    cd $SRCDIR
-    while true; do
-        timeout 3m bash -c "git fetch && git reset --hard $BOX_REVISION" && break
-        echo "git fetch timedout, trying again"
-        sleep 2
-    done
-EOF2
-
-    echo "Running bootstrap script with args $APPSTORE_URL $BOX_REVISION"
-    /bin/bash $SRCDIR/scripts/bootstrap.sh $APPSTORE_URL $BOX_REVISION
+    # TODO: Make APPSTORE_URL as droplet userdata instead
+    echo "Starting installer for $APPSTORE_URL"
+    DEBUG="box*" $SRCDIR/installer/server.js "$APPSTORE_URL" 2>&1 1> /var/log/cloudron/installserver.log &
 
     echo "Disabling cloudron-bootstrap init script"
     update-rc.d cloudron-bootstrap remove
