@@ -117,7 +117,7 @@ function restore(args, callback) {
 
     if (config.token()) return callback(new InstallerError(InstallerError.ALREADY_PROVISIONED));
 
-    config.set(_.pick(args, 'token', 'appServerUrl', 'adminOrigin', 'fqdn', 'isDev'));
+    config.set(_.pick(args, 'token', 'appServerUrl', 'fqdn', 'isDev'));
 
     debug('restore: sudo restore.sh %s %s', args.restoreUrl, args.token);
 
@@ -146,7 +146,7 @@ function provision(args, callback) {
 
     if (config.token()) return callback(new InstallerError(InstallerError.ALREADY_PROVISIONED));
 
-    config.set(_.pick(args, 'token', 'appServerUrl', 'adminOrigin', 'fqdn', 'isDev'));
+    config.set(_.pick(args, 'token', 'appServerUrl', 'fqdn', 'isDev'));
 
     // override the default webadmin OAuth client record
     var scopes = 'root,profile,users,apps,settings,roleAdmin';

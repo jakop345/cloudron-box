@@ -55,7 +55,6 @@ function saveSync() {
     }
 
     data.fqdn = 'localhost';
-    data.adminOrigin = 'https://admin-' + data.fqdn;
 
     data.token = null;
     data.mailServer = null;
@@ -107,8 +106,8 @@ function fqdn() {
 }
 
 function adminOrigin() {
-    return get('adminOrigin');
-};
+    return 'https://admin-' + fqdn();
+}
 
 function token() {
     return get('token');

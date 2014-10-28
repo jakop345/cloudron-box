@@ -16,7 +16,6 @@ exports = module.exports = {
 function restore(req, res, next) {
     if (!req.body.token) return next(new HttpError(400, 'No token provided'));
     if (!req.body.appServerUrl) return next(new HttpError(400, 'No appServerUrl provided'));
-    if (!req.body.adminOrigin) return next(new HttpError(400, 'No adminOrigin provided'));
     if (!req.body.fqdn) return next(new HttpError(400, 'No fqdn provided'));
     if (!req.body.ip) return next(new HttpError(400, 'No ip provided'));
     if (!('tls' in req.body)) return next(new HttpError(400, 'tls cert must be provided or be null'));
@@ -35,7 +34,6 @@ function restore(req, res, next) {
 function provision(req, res, next) {
     if (!req.body.token) return next(new HttpError(400, 'No token provided'));
     if (!req.body.appServerUrl) return next(new HttpError(400, 'No appServerUrl provided'));
-    if (!req.body.adminOrigin) return next(new HttpError(400, 'No adminOrigin provided'));
     if (!req.body.fqdn) return next(new HttpError(400, 'No fqdn provided'));
     if (!req.body.ip) return next(new HttpError(400, 'No ip provided'));
     if (!('tls' in req.body)) return next(new HttpError(400, 'tls cert must be provided or be null'));
