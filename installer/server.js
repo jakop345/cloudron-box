@@ -35,13 +35,13 @@ function restore(req, res, next) {
 
     debug('restore: received from appstore ', req.body);
 
-    // the appstore gives us 3m to respond
     installer.restore(req.body, function (error) {
         if (error) return res.status(500).send(error.message);
 
         res.status(200).send({ });
     });
 
+    stopAnnounce();
     onFinished(res, setTimeout.bind(null, 5000, process.exit.bind(null, 0)));
 }
 
@@ -55,13 +55,13 @@ function provision(req, res, next) {
 
     debug('provision: received from appstore ' + req.body.appServerUrl);
 
-    // the appstore gives us 3m to respond
     installer.provision(req.body, function (error) {
         if (error) return res.status(500).send(error.message);
 
         res.status(201).send({ });
     });
 
+    stopAnnounce();
     onFinished(res, setTimeout.bind(null, 5000, process.exit.bind(null, 0)));
 }
 
@@ -89,18 +89,18 @@ function start(appServerUrl, callback) {
     gHttpsServer.on('error', console.error);
     gHttpsServer.listen(process.env.NODE_ENV === 'test' ? 4443: 443, callback);
 
-    announce(appServerUrl);
+    startAnnounce(appServerUrl);
 }
 
 function stop(callback) {
     assert(!callback || typeof callback === 'function');
 
-    clearTimeout(gAnnounceTimerId);
+    stopAnnounce();
 
     gHttpsServer.close(callback);
 }
 
-function announce(appServerUrl) {
+function startAnnounce(appServerUrl) {
     var ANNOUNCE_INTERVAL = parseInt(process.env.ANNOUNCE_INTERVAL, 10) || 60000; // exported for testing
 
     // On Digital Ocean, the only value which we can give a new droplet is the hostname.
@@ -113,15 +113,20 @@ function announce(appServerUrl) {
     superagent.get(url).end(function (error, result) {
         if (error || result.statusCode !== 200) {
             debug('announce: unable to announce to app server, try again.', error);
-            gAnnounceTimerId = setTimeout(announce.bind(null, appServerUrl), ANNOUNCE_INTERVAL);
+            gAnnounceTimerId = setTimeout(startAnnounce.bind(null, appServerUrl), ANNOUNCE_INTERVAL);
             return;
         }
 
-        gAnnounceTimerId = setTimeout(announce.bind(null, appServerUrl), ANNOUNCE_INTERVAL * 2);
+        gAnnounceTimerId = setTimeout(startAnnounce.bind(null, appServerUrl), ANNOUNCE_INTERVAL * 2);
 
         debug('announce: success');
     });
 };
+
+function stopAnnounce() {
+    clearTimeout(gAnnounceTimerId);
+    gAnnounceTimerId = null;
+}
 
 if (require.main === module) {
     if (process.argv.length <= 2) {
