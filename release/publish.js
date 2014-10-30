@@ -23,6 +23,11 @@ Object.keys(versionsJson).forEach(function (version) {
     if (!versionsJson[version].revision) die('version ' + version + ' does not have revision');
 });
 
+// check that package.json version is in versions.json
+if (!(require('../package.json').version in versionsJson)) {
+    die('package.json version is not present in versions.json');
+}
+
 var config = {
     accessKeyId: 'AKIAJ3GNZ2C7W5XKAH7Q',
     secretAccessKey: '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'
