@@ -63,7 +63,12 @@ function provision(args, callback) {
     var cp = spawn(INSTALLER_CMD, [ ], { env: env, timeout: 0 });
     cp.stdout.on('data', function (data) { debug(data); });
     cp.stderr.on('data', function (data) { debug(data); });
-    cp.on('error', function (code, signal) { debug('child process errored', error); callback(error); });
+
+    cp.on('error', function (code, signal) {
+        debug('child process errored', error);
+        callback(error);
+    });
+
     cp.on('exit', function (code, signal) {
         debug('child process exited. code: %d signal: %d', code, signal);
         if (signal) return callback(new Error('Exited with signal ' + signal));

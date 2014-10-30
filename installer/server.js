@@ -37,6 +37,7 @@ function restore(req, res, next) {
     installer.restore(req.body, function (error) {
         if (error) console.error(error);
 
+        debug('Exiting');
         process.exit(error ? 1 : 0);
     });
 
@@ -58,6 +59,7 @@ function provision(req, res, next) {
     installer.provision(req.body, function (error) {
         if (error) console.error(error);
 
+        debug('Exiting');
         process.exit(error ? 1 : 0);
     });
 
