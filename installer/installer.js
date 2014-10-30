@@ -63,10 +63,9 @@ function provision(args, callback) {
     execFile(INSTALLER_CMD, [ ], { env: env, timeout: 0 }, function (error, stdout, stderr) {
         if (error) {
             debug('provision error: %j', error);
-            return callback(error);
         }
-
-        callback(null);
     });
+
+    callback(null);
 }
 
