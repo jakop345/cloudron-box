@@ -4,7 +4,7 @@
 
 var assert = require('assert'),
     debug = require('debug')('box/installer'),
-    execFile = require('child_process').execFile,
+    spawn = require('child_process').spawn,
     os = require('os'),
     path = require('path'),
     util = require('util');
@@ -60,12 +60,16 @@ function provision(args, callback) {
 
     debug('provision: calling %s with env %j', INSTALLER_CMD, env);
 
-    execFile(INSTALLER_CMD, [ ], { env: env, timeout: 0 }, function (error, stdout, stderr) {
-        if (error) {
-            debug('provision error: %j', error);
-        }
-    });
+    var cp = spawn(INSTALLER_CMD, [ ], { env: env, timeout: 0 });
+    cp.stdout.on('data', function (data) { debug(data); });
+    cp.stderr.on('data', function (data) { debug(data); });
+    cp.on('error', function (code, signal) { debug('child process errored', error); callback(error); });
+    cp.on('exit', function (code, signal) {
+        debug('child process exited. code: %d signal: %d', code, signal);
+        if (signal) return callback(new Error('Exited with signal ' + signal));
+        if (code !== 0) return callback(new Error('Exited with code ' + code));
 
-    callback(null);
+        callback(null);
+    });
 }
 

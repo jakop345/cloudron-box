@@ -11,7 +11,6 @@ var assert = require('assert'),
     https = require('https'),
     installer = require('./installer.js'),
     middleware = require('../middleware'),
-    onFinished = require('on-finished'),
     os = require('os'),
     path = require('path'),
     superagent = require('superagent');
@@ -36,13 +35,14 @@ function restore(req, res, next) {
     debug('restore: received from appstore ', req.body);
 
     installer.restore(req.body, function (error) {
-        if (error) return res.status(500).send(error.message);
+        if (error) console.error(error);
 
-        res.status(200).send({ });
+        process.exit(error ? 1 : 0);
     });
 
     stopAnnounce();
-    onFinished(res, setTimeout.bind(null, 5000, process.exit.bind(null, 0)));
+
+    res.status(200).send({ });
 }
 
 function provision(req, res, next) {
@@ -56,13 +56,14 @@ function provision(req, res, next) {
     debug('provision: received from appstore ' + req.body.appServerUrl);
 
     installer.provision(req.body, function (error) {
-        if (error) return res.status(500).send(error.message);
+        if (error) console.error(error);
 
-        res.status(201).send({ });
+        process.exit(error ? 1 : 0);
     });
 
     stopAnnounce();
-    onFinished(res, setTimeout.bind(null, 5000, process.exit.bind(null, 0)));
+
+    res.status(201).send({ });
 }
 
 function start(appServerUrl, callback) {

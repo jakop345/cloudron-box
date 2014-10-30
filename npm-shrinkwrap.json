@@ -1,6 +1,6 @@
 {
   "name": "yellowtent",
-  "version": "0.6.0",
+  "version": "0.0.1",
   "dependencies": {
     "async": {
       "version": "0.6.2",
@@ -1344,18 +1344,6 @@
           "version": "0.2.8",
           "from": "dotenv@0.2.8",
           "resolved": "http://registry.npmjs.org/dotenv/-/dotenv-0.2.8.tgz"
-        }
-      }
-    },
-    "on-finished": {
-      "version": "2.1.1",
-      "from": "on-finished@",
-      "resolved": "http://registry.npmjs.org/on-finished/-/on-finished-2.1.1.tgz",
-      "dependencies": {
-        "ee-first": {
-          "version": "1.1.0",
-          "from": "ee-first@1.1.0",
-          "resolved": "http://registry.npmjs.org/ee-first/-/ee-first-1.1.0.tgz"
         }
       }
     }
