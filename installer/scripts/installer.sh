@@ -32,7 +32,7 @@ done
 git reset --hard "$PROVISION_REVISION"
 
 # For the update case, remove any existing config
-rm -rf "$CONFIG_DIR"
+rm -rf "$CONFIG_DIR/*"
 
 $SRCDIR/src/scripts/postinstall.sh
 
