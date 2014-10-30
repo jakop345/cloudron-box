@@ -4,7 +4,8 @@
 
 'use strict';
 
-var debug = require('debug')('box:install/server'),
+var assert = require('assert'),
+    debug = require('debug')('box:install/server'),
     express = require('express'),
     fs = require('fs'),
     https = require('https'),
@@ -16,8 +17,12 @@ var debug = require('debug')('box:install/server'),
     superagent = require('superagent');
 
 exports = module.exports = {
-    start: start
+    start: start,
+    stop: stop
 };
+
+var gAnnounceTimerId = null,
+    gHttpsServer = null;
 
 function restore(req, res, next) {
     if (!req.body.token) return res.status(400).send('No token provided');
@@ -60,7 +65,10 @@ function provision(req, res, next) {
     onFinished(res, setTimeout.bind(null, 5000, process.exit.bind(null, 0)));
 }
 
-function start() {
+function start(appServerUrl, callback) {
+    assert(typeof appServerUrl === 'string');
+    assert(!callback || typeof callback === 'function');
+
     var app = express();
 
     var router = new express.Router();
@@ -77,9 +85,19 @@ function start() {
       cert: fs.readFileSync(path.join(__dirname, 'cert/host.cert'))
     };
 
-    var httpsServer = https.createServer(options, app);
-    httpsServer.on('error', console.error);
-    httpsServer.listen(443);
+    gHttpsServer = https.createServer(options, app);
+    gHttpsServer.on('error', console.error);
+    gHttpsServer.listen(process.env.NODE_ENV === 'test' ? 4443: 443, callback);
+
+    announce(appServerUrl);
+}
+
+function stop(callback) {
+    assert(!callback || typeof callback === 'function');
+
+    clearTimeout(gAnnounceTimerId);
+
+    gHttpsServer.close(callback);
 }
 
 function announce(appServerUrl) {
@@ -95,11 +113,11 @@ function announce(appServerUrl) {
     superagent.get(url).end(function (error, result) {
         if (error || result.statusCode !== 200) {
             debug('announce: unable to announce to app server, try again.', error);
-            setTimeout(announce.bind(null, appServerUrl), ANNOUNCE_INTERVAL);
+            gAnnounceTimerId = setTimeout(announce.bind(null, appServerUrl), ANNOUNCE_INTERVAL);
             return;
         }
 
-        setTimeout(announce.bind(null, appServerUrl), ANNOUNCE_INTERVAL * 2);
+        gAnnounceTimerId = setTimeout(announce.bind(null, appServerUrl), ANNOUNCE_INTERVAL * 2);
 
         debug('announce: success');
     });
@@ -111,8 +129,6 @@ if (require.main === module) {
         return;
     }
 
-    start();
-
-    announce(process.argv[2]);
+    start(process.argv[2]);
 }
 

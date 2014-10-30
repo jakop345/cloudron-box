@@ -6,66 +6,41 @@
 
 'use strict';
 
-function cleanup(done) {
-    done();
-}
+var expect = require('expect.js'),
+    nock = require('nock'),
+    os = require('os'),
+    request = require('superagent'),
+    server = require('../server.js'),
+    _ = require('underscore');
+
+var SERVER_URL = 'https://localhost:4443';
+var APPSERVER_URL = 'http://localhost';
+var FQDN = os.hostname();
 
 describe('Server', function () {
     this.timeout(5000);
 
-    after(cleanup);
-
-/*
-    describe('restore', function () {
-        var server;
-
-        before(function (done) {
-            server = new Server();
-            server.start(done);
+    describe('starts and stop', function () {
+        it('starts', function (done) {
+            server.start('http://fakeappserver', done);
         });
 
-        after(function (done) {
-            server.stop(function () {
-                done();
-            });
-        });
-
-        it('fails due to missing token', function (done) {
-            var data = {
-                restoreUrl: 'somes3url',
-            };
-            request.post(SERVER_URL + '/api/v1/restore').send(data).end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(400);
-                done();
-            });
-        });
-
-        it('fails due to missing restoreUrl', function (done) {
-            var data = {
-                token: 'boxtoken'
-            };
-            request.post(SERVER_URL + '/api/v1/restore').send(data).end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(400);
-                done();
-            });
+        it('stops', function (done) {
+            server.stop(done);
         });
     });
 
     describe('announce', function () {
-        var server, failingGet;
+        var failingGet;
 
         before(function (done) {
             process.env.ANNOUNCE_INTERVAL = 20;
 
-            config.set('token', null);
-            server = new Server();
-            server.start(done);
-
-            var scope = nock(config.appServerUrl());
-            failingGet = scope.get('/api/v1/boxes/' + config.fqdn() + '/announce');
+            var scope = nock(APPSERVER_URL);
+            failingGet = scope.get('/api/v1/boxes/' + FQDN + '/announce');
             failingGet.times(5).reply(502);
+
+            server.start(APPSERVER_URL, done);
         });
 
         after(function (done) {
@@ -74,22 +49,87 @@ describe('Server', function () {
             nock.cleanAll();
         });
 
-        it('sends announce request repeatedly until token is set', function (done) {
+        it('sends announce request repeatedly', function (done) {
             setTimeout(function () {
-                expect(cloudron._getAnnounceTimerId()).to.be.ok();
                 expect(failingGet.counter).to.be.below(6); // counter is nock internal
-
-                config.set('token', 'provision');
-
-                setTimeout(function () {
-                    expect(cloudron._getAnnounceTimerId()).to.be(null);
-                    done();
-                }, 100);
+                done();
             }, 100);
         });
     });
 
+    describe('restore', function () {
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
-*/
+        var data = {
+            token: 'sometoken',
+            appServerUrl: APPSERVER_URL,
+            isDev: true,
+            fqdn: 'www.something.com',
+            restoreUrl: 'https://restoreurl',
+            revision: 'somesha1',
+            tls: {
+                key: 'key',
+                cert: 'cert'
+            }
+        };
+
+        before(function (done) {
+            server.start(APPSERVER_URL, done);
+        });
+
+        after(function (done) {
+            server.stop(done);
+        });
+
+        Object.keys(data).forEach(function (key) {
+            it('fails due to missing ' + key, function (done) {
+                var dataCopy = _.extend({ }, data);
+                delete dataCopy[key];
+
+                request.post(SERVER_URL + '/api/v1/restore').send(dataCopy).end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.statusCode).to.equal(400);
+                    done();
+                });
+            });
+        });
+    });
+
+    describe('provision', function () {
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
+        var data = {
+            token: 'sometoken',
+            appServerUrl: APPSERVER_URL,
+            isDev: true,
+            fqdn: 'www.something.com',
+            revision: 'somesha1',
+            tls: {
+                key: 'key',
+                cert: 'cert'
+            }
+        };
+
+        before(function (done) {
+            server.start(APPSERVER_URL, done);
+        });
+
+        after(function (done) {
+            server.stop(done);
+        });
+
+        Object.keys(data).forEach(function (key) {
+            it('fails due to missing ' + key, function (done) {
+                var dataCopy = _.extend({ }, data);
+                delete dataCopy[key];
+
+                request.post(SERVER_URL + '/api/v1/provision').send(dataCopy).end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.statusCode).to.equal(400);
+                    done();
+                });
+            });
+        });
+    });
 });
 
