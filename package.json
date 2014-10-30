@@ -1,15 +1,14 @@
 {
   "name": "yellowtent",
   "description": "Yellow tent",
-  "version": "0.6.0",
+  "version": "0.0.1",
   "private": "true",
   "author": {
     "name": "Yellow tent authors",
-    "email": "doesntexist@gmail.com"
+    "email": "girish@forwardbias.in"
   },
   "repository": {
-    "type": "git",
-    "url": "https://github.com/gramakri/yellowtent.git"
+    "type": "git"
   },
   "engines": [
     "node >= 0.10.0"

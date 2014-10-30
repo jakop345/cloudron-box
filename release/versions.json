@@ -1,12 +1,7 @@
 {
-    "0.6.0": {
-        "revision": "c1e9707",
-        "imageId": "7219320",
-        "next": "0.7.0"
-    },
-    "0.7.0": {
-        "revision": "1a3705ba28a9bfaf38b6405ff30fd603d4db16f2",
-        "imageId": "7324072",
+    "0.0.1": {
+        "revision": "779c9c1392066a2dc312bdb3a447364a7ed0be33",
+        "imageId": "7327470",
         "next": null
     }
 }
