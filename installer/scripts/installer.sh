@@ -18,10 +18,8 @@ echo "Provisioning box with code: $PROVISION_REVISION and data: $PROVISION_DATA_
 
 if [ -n "$PROVISION_RESTORE_URL" ]; then
     echo "Downloading backup: $PROVISION_RESTORE_URL"
-    rm -rf "$DATA_DIR"
-    curl -X GET -o /tmp/restore.tar.gz "$PROVISION_RESTORE_URL"
-    tar zxvf /tmp/restore.tar.gz -C "$DATA_DIR" # FIXME userid should be constants across restores
-    rm -f /tmp/restore.tar.gz
+    rm -rf "$DATA_DIR/*" # DATA_DIR itself cannot be removed because it is mounted
+    curl -L "$PROVISION_RESTORE_URL" | tar -zxf - -C "$DATA_DIR"
 fi
 
 cd "$SRCDIR"
