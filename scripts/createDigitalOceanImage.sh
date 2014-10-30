@@ -9,28 +9,9 @@ CURL="curl -s"
 UBUNTU_IMAGE_SLUG="ubuntu-14-04-x64" # ID=5141286
 DATE=`date +%Y-%m-%d-%H%M%S`
 
-APPSTORE_URL=""
-PRETTY_APPSTORE=""
-case "$1" in
-"dev")
-    # APPSTORE_URL="https://dev.cloudron.io"
-    APPSTORE_URL="https://cloudron-dev.herokuapp.com"
-    PRETTY_APPSTORE="$1"
-    ;;
-"stable")
-    # APPSTORE_URL="https://www.cloudron.io"
-    APPSTORE_URL="https://cloudron-stable.herokuapp.com"
-    PRETTY_APPSTORE="$1"
-    ;;
-*)
-    echo "Invalid deployment environment as first argument specified!"
-    echo "Options are 'dev' or 'alpha'"
-    exit 1
-esac
-
 BOX_REVISION=origin/master
-if [ ! -z "$2" ]; then
-    BOX_REVISION=$2
+if [ ! -z "$1" ]; then
+    BOX_REVISION=$1
 fi
 
 function get_pretty_revision() {
@@ -186,7 +167,7 @@ while true; do
 done
 
 echo "Executing init script"
-ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i $SCRIPT_DIR/ssh/id_rsa_yellowtent root@$DROPLET_IP "/bin/bash /root/initializeBaseUbuntuImage.sh $APPSTORE_URL $BOX_REVISION"
+ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i $SCRIPT_DIR/ssh/id_rsa_yellowtent root@$DROPLET_IP "/bin/bash /root/initializeBaseUbuntuImage.sh $BOX_REVISION"
 if [ $? -ne 0 ]; then
     echo "Init script failed"
     exit 1

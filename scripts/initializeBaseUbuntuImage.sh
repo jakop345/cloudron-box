@@ -7,8 +7,7 @@ USER_HOME="/home/$USER"
 DATA_DIR="$USER_HOME/data"
 APPDATA=$DATA_DIR/appdata
 SRCDIR=$USER_HOME/box
-APPSTORE_URL=$1
-BOX_REVISION=$2
+BOX_REVISION=$1
 
 echo "==== Create User $USER ===="
 id $USER
@@ -20,7 +19,7 @@ fi
 # now exit on failure
 set -e
 
-echo "== Yellowtent base image preparation ($APPSTORE_URL, $BOX_REVISION) =="
+echo "== Yellowtent base image preparation ($BOX_REVISION) =="
 
 export DEBIAN_FRONTEND=noninteractive
 
@@ -190,9 +189,7 @@ do_start() {
 
     exec 2>&1 1> "/var/log/cloudron/bootstrap-\$\$-\$BASHPID.log"
 
-    # TODO: Make APPSTORE_URL as droplet userdata instead
-    echo "Starting installer for $APPSTORE_URL"
-    DEBUG="box*" $SRCDIR/installer/server.js "$APPSTORE_URL" 2>&1 1> /var/log/cloudron/installserver.log &
+    DEBUG="box*" $SRCDIR/installer/server.js 2>&1 1> /var/log/cloudron/installserver.log &
 
     echo "Disabling cloudron-bootstrap init script"
     update-rc.d cloudron-bootstrap remove
