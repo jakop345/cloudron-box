@@ -132,11 +132,20 @@ function stopAnnounce() {
 }
 
 if (require.main === module) {
-    if (process.argv.length <= 2) {
-        console.error('appstore url not provided as argument');
+    if (process.argv.length > 2) {
+        start(process.argv[2]);
         return;
     }
 
-    start(process.argv[2]);
+    superagent.get('http://169.254.169.254/metadata/v1.json').end(function (error, result) {
+        if (error || result.statusCode !== 200) {
+            console.error('Error getting metadata', error);
+            return;
+        }
+
+        var appServerUrl = JSON.parse(result.body.user_data).appServerUrl;
+        debug('Using appServerUrl from metadata: ', appServerUrl);
+        start(appServerUrl);
+    });
 }
 
