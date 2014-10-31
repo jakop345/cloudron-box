@@ -14,8 +14,6 @@ Development setup
     girish ALL=(ALL) NOPASSWD: /home/girish/yellowtent/box/src/scripts/reloadnginx.sh
     Defaults!/Users/girishra/research/yellowtent/box/src/scripts/backup.sh env_keep=HOME
     girishra ALL=(ALL) NOPASSWD: /Users/girishra/research/yellowtent/box/src/scripts/backup.sh
-    Defaults!/Users/girishra/research/yellowtent/box/src/scripts/update.sh env_keep=HOME
-    girishra ALL=(ALL) NOPASSWD: /Users/girishra/research/yellowtent/box/src/scripts/update.sh
     Defaults!/Users/girishra/research/yellowtent/box/src/scripts/reboot.sh env_keep=HOME
     girishra ALL=(ALL) NOPASSWD: /Users/girishra/research/yellowtent/box/src/scripts/reboot.sh
     Defaults!/Users/girishra/research/yellowtent/box/src/scripts/reloadcollectd.sh env_keep=HOME

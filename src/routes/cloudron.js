@@ -9,7 +9,8 @@ var cloudron = require('../cloudron.js'),
     execFile = require('child_process').execFile,
     HttpError = require('../httperror.js'),
     HttpSuccess = require('../httpsuccess.js'),
-    path = require('path');
+    path = require('path'),
+    updater = require('../updater.js');
 
 var SUDO = '/usr/bin/sudo',
     REBOOT_CMD = path.join(__dirname, '../scripts/reboot.sh');
@@ -69,7 +70,7 @@ function getConfig(req, res, next) {
 }
 
 function update(req, res, next) {
-    cloudron.update(function (error) {
+    updater.update(function (error) {
         if (error) return next(new HttpError(500, error));
 
         res.send(200, { });

@@ -6,7 +6,6 @@ SRCDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
 scripts=($SRCDIR/src/scripts/rmappdir.sh \
          $SRCDIR/src/scripts/reloadnginx.sh \
          $SRCDIR/src/scripts/backup.sh \
-         $SRCDIR/src/scripts/update.sh \
          $SRCDIR/src/scripts/reboot.sh \
          $SRCDIR/src/scripts/reloadcollectd.sh)
 

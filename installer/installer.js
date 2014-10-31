@@ -4,9 +4,10 @@
 
 var assert = require('assert'),
     debug = require('debug')('box/installer'),
-    spawn = require('child_process').spawn,
+    fs = require('fs'),
     os = require('os'),
     path = require('path'),
+    spawn = require('child_process').spawn,
     util = require('util');
 
 exports = module.exports = {
@@ -17,6 +18,7 @@ exports = module.exports = {
 
     provision: provision,
     restore: restore,
+    update: update
 };
 
 var INSTALLER_CMD = path.join(__dirname, 'scripts/installer.sh'),
@@ -38,6 +40,10 @@ function initialize() {
 }
 
 function uninitialize() {
+}
+
+function update(args, callback) {
+    provision(args, callback);
 }
 
 function restore(args, callback) {

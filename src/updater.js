@@ -4,10 +4,14 @@
 
 var appdb = require('./appdb.js'),
     assert = require('assert'),
+    cloudron = require('./cloudron.js'),
     config = require('../config.js'),
     debug = require('debug')('box:updater'),
     execFile = require('child_process').execFile,
+    fs = require('fs'),
+    installer = require('../installer/installer.js'),
     path = require('path'),
+    paths = require('./paths.js'),
     safe = require('safetydance'),
     superagent = require('superagent');
 
@@ -108,8 +112,7 @@ function uninitialize() {
     gCheckUpdatesTimeoutId = null;
 };
 
-function update(backupUrl, callback) {
-    assert(typeof backupUrl === 'string');
+function update(callback) {
     assert(typeof callback === 'function');
 
     var isDev = config.get('isDev');
@@ -119,45 +122,37 @@ function update(backupUrl, callback) {
         return callback(new Error('No update available'));
     }
 
-    if (gBoxUpdateInfo && gBoxUpdateInfo.imageId) {
-        debug('update: box needs upgrade');
-        // TODO: cloudron.backup() here. currently, we cannot since backup requires a restart
+    cloudron.backup(function (error) {
+        if (error) return callback(error);
 
-        superagent.post(config.appServerUrl() + '/api/v1/boxes/' + config.fqdn() + '/upgrade').query({ token: config.token() }).end(function (error, result) {
-            if (error) return callback(new Error('Error making upgrade request: ' + error));
-            if (result.status !== 200) return callback(new Error('Server not ready to upgrade: ' + result.body));
+        if (gBoxUpdateInfo && gBoxUpdateInfo.upgrade) {
+            debug('update: box needs upgrade');
 
-            callback(null);
-        });
+            superagent.post(config.appServerUrl() + '/api/v1/boxes/' + config.fqdn() + '/upgrade').query({ token: config.token() }).end(function (error, result) {
+                if (error) return callback(new Error('Error making upgrade request: ' + error));
+                if (result.status !== 200) return callback(new Error('Server not ready to upgrade: ' + result.body));
 
-        // TODO: UI needs some indication that we are awaiting upgrade and nobody should do anything...
-        return;
-    }
+                callback(null);
+            });
 
-    var args = [
-        path.join(__dirname, 'scripts/update.sh'),
-        gBoxUpdateInfo ? gBoxUpdateInfo.version : config.version(),
-        gBoxUpdateInfo ? gBoxUpdateInfo.revision : 'origin/master',
-        backupUrl
-    ];
-
-    var options = {
-        cwd: path.join(__dirname, '..')
-    };
-
-    debug('update: sudo %s', args.join(' '));
-
-    execFile('/usr/bin/sudo', args, options, function (error, stdout, stderr) {
-        if (error) {
-            console.error('Error running update script.', stdout, stderr);
-            return callback(error);
+            return;
         }
 
-        debug('update: success.', stdout, stderr);
+        var args = {
+            appServerUrl: config.appServerUrl(),
+            fqdn: config.fqdn(),
+            isDev: config.get('isDev'),
+            revision: isDev ? 'origin/master' : gBoxUpdateInfo.revision,
+            token: config.token(),
+            tls: {
+                cert: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert')),
+                key: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'))
+            }
+        };
 
-        // Do not add any code here. The update script will stop the box code any instant
+        installer.update(args, callback);
 
-        callback(null);
+        // Do not add any code here. The installer script will stop the box code any instant
     });
-};
+}
 

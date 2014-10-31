@@ -2,6 +2,19 @@
 
 'use strict';
 
+exports = module.exports = {
+    CloudronError: CloudronError,
+
+    initialize: initialize,
+    uninitialize: uninitialize,
+    getConfig: getConfig,
+    backup: backup,
+
+    getBackupUrl: getBackupUrl,
+
+    getIp: getIp
+};
+
 var assert = require('assert'),
     config = require('../config.js'),
     debug = require('debug')('box:cloudron'),
@@ -17,20 +30,6 @@ var assert = require('assert'),
     util = require('util'),
     uuid = require('node-uuid'),
     _ = require('underscore');
-
-exports = module.exports = {
-    CloudronError: CloudronError,
-
-    initialize: initialize,
-    uninitialize: uninitialize,
-    getConfig: getConfig,
-    update: update,
-    backup: backup,
-
-    getBackupUrl: getBackupUrl,
-
-    getIp: getIp
-};
 
 var SUDO = '/usr/bin/sudo',
     TAR = os.platform() === 'darwin' ? '/usr/bin/tar' : '/bin/tar',
@@ -75,19 +74,6 @@ function uninitialize() {
     gGetCertificateTimerId = null;
 
     gCachedIp = null;
-}
-
-function update(callback) {
-    assert(typeof callback === 'function');
-
-    getBackupUrl(function (error, backupUrl) {
-        if (error) return callback(error);
-
-        updater.update(backupUrl, function (error) {
-            if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error.message));
-            return callback(null);
-        });
-    });
 }
 
 function getBackupUrl(callback) {
