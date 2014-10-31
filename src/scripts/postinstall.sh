@@ -170,6 +170,8 @@ ADMIN_ID=$(cat /proc/sys/kernel/random/uuid)
 sqlite3 "$CLOUDRON_SQLITE" 'INSERT OR REPLACE INTO clients (id, appId, clientId, clientSecret, name, redirectURI, scope) VALUES ("$ADMIN_ID", "webadmin", "cid-webadmin", "unusedsecret", "WebAdmin", "$ADMIN_ORIGIN", "$ADMIN_SCOPES")'
 EOF
 
-echo "Starting supervisor"
-update-rc.d supervisor defaults
+# http://www.onurguzel.com/supervisord-restarting-and-reloading/
+echo "Restarting supervisor"
+/etc/init.d/supervisor stop
 /etc/init.d/supervisor start
+

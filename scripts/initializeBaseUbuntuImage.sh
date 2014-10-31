@@ -102,7 +102,6 @@ apt-get -y install sqlite3
 echo "==== Install supervisor ===="
 apt-get -y install supervisor
 service supervisor stop
-update-rc.d -f supervisor remove
 
 
 echo "==== Install collectd ==="
