@@ -13,8 +13,8 @@ var appdb = require('./appdb.js'),
 
 var BOX_VERSIONS_URL = 'https://s3.amazonaws.com/cloudron-releases/versions.json';
 
-var gCheckUpdateIntervalId = null,
-    gAppsUpdateInfo = null,
+var gCheckUpdatesTimeoutId = null,
+    gAppUpdateInfo = null,
     gBoxUpdateInfo = null;
 
 module.exports = exports = {
@@ -27,75 +27,85 @@ module.exports = exports = {
 
 function getUpdateInfo() {
     return {
-        apps: gAppsUpdateInfo,
+        apps: gAppUpdateInfo,
         box: gBoxUpdateInfo
     };
 };
 
-function checkUpdate() {
-    debug('check: for updates. box is on version ' + config.version());
-
-    // app updates
+function checkAppUpdates(callback) {
+    debug('Checking app updates');
     appdb.getAppVersions(function (error, appVersions) {
-        if (error) return console.error(error);
+        if (error) return callback(error);
 
         var appStoreIds = appVersions.map(function (appVersion) { return appVersion.appStoreId; });
 
         superagent.post(config.appServerUrl() + '/api/v1/boxupdate').send({ appIds: appStoreIds }).end(function (error, result) {
-            if (error) return console.error(error);
-            if (result.statusCode !== 200) return console.error('Failed to check for updates.', result.statusCode, result.body.message);
+            if (error) return callback(error);
+            if (result.statusCode !== 200) return callback(new Error('Error checking app update: ' + result.statusCode + ' ' + result.body.message));
 
-            debug('check: ', result.body);
+            debug('appupdate: %j', result.body);
 
-            gAppsUpdateInfo = result.body.appVersions;
+            callback(null, result.body.appVersions);
         });
     });
+}
 
-    // box updates
+function checkBoxUpdates(callback) {
+    debug('checking for box update');
+
     superagent.get(BOX_VERSIONS_URL).end(function (error, result) {
-        if (error || result.status !== 200) {
-            console.error('Unable to fetch versions.json.', error, result);
-            return;
-        }
+        if (error) return callback(error);
+        if (result.status !== 200) return callback(new Error('Bad status:', result.status));
 
-        debug('_check: versions.json successfully fetched.', result.text);
+        debug('versions.json : %j', result.text);
 
         var versions = safe.JSON.parse(result.text);
 
-        if (!versions) {
-            console.error('versions.json is not valid json', safe.error);
-            return;
-        }
+        if (!versions) return callback(new Error('versions.json is not valid json:' + safe.error));
 
-        if (!versions[config.version()]) {
-            console.error('Cloudron runs on unknown version %s', config.version());
-            gBoxUpdateInfo = null;
-            return;
-        }
+        var currentVersionInfo = versions[config.version()];
+        if (!currentVersionInfo) return callback(new Error('Cloudron runs on unknown version %s', config.version()));
 
-        var next = versions[config.version()].next;
-        if (next && versions[next] && versions[next].revision) {
-            debug('_check: new version %s available to revision %s.', next, versions[next].revision);
-            gBoxUpdateInfo = versions[next];
-            gBoxUpdateInfo.version = next;
+        var nextVersion = currentVersionInfo.next;
+        var nextVersionInfo = nextVersion ? versions[nextVersion] : null;
+
+        if (nextVersionInfo && nextVersionInfo.revision && nextVersionInfo.imageId) {
+            debug('boxupdate: new version %s available. revision: %s, imageId: %s', nextVersion, nextVersionInfo.revision, nextVersionInfo.imageId);
+            callback(null, { version: nextVersion, info: nextVersionInfo, upgrade: nextVersionInfo.imageId !== currentVersionInfo.imageId });
         } else {
-            debug('_check: no new version available.');
-            gBoxUpdateInfo = null;
+            debug('boxupdate: no new version available.');
+            callback(null, null);
         }
     });
 };
 
+function checkUpdates() {
+    checkAppUpdates(function (error, appUpdateInfo) {
+        if (error) debug('Error checkihg app updates: ', error);
+
+        if (appUpdateInfo) gAppUpdateInfo = appUpdateInfo;
+
+        checkBoxUpdates(function (error, result) {
+            if (error) debug('Error checkihg box updates: ', error);
+
+            if (result) gBoxUpdateInfo = result;
+
+            gCheckUpdatesTimeoutId = setTimeout(checkUpdates, 60 * 1000);
+        });
+    });
+}
+
 function initialize() {
     debug('initialize');
 
-    gCheckUpdateIntervalId = setInterval(checkUpdate, 60 * 1000);
+    gCheckUpdatesTimeoutId = setTimeout(checkUpdates, 60 * 1000);
 };
 
 function uninitialize() {
     debug('uninitialize');
 
-    clearInterval(gCheckUpdateIntervalId);
-    gCheckUpdateIntervalId = null;
+    clearTimeout(gCheckUpdatesTimeoutId);
+    gCheckUpdatesTimeoutId = null;
 };
 
 function update(backupUrl, callback) {
