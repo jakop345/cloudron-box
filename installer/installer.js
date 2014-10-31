@@ -52,7 +52,7 @@ function provision(args, callback) {
     pargs.push('--appserverurl', args.appServerUrl);
     pargs.push('--fqdn', args.fqdn);
     pargs.push('--isdev', args.isDev);
-    pargs.push('--restoreurl', args.restoreUrl);
+    pargs.push('--restoreurl', args.restoreUrl || '');
     pargs.push('--revision', args.revision);
     pargs.push('--tlscert', args.tls.cert);
     pargs.push('--tlskey', args.tls.key);
