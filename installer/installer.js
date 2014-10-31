@@ -48,21 +48,20 @@ function provision(args, callback) {
     assert(typeof args === 'object');
     assert(typeof callback === 'function');
 
-    var env = {
-        PROVISION_APP_SERVER_URL: args.appServerUrl,
-        PROVISION_FQDN: args.fqdn,
-        PROVISION_IS_DEV: args.isDev,
-        PROVISION_RESTORE_URL: args.restoreUrl || '',
-        PROVISION_REVISION: args.revision,
-        PROVISION_TLS_CERT: args.tls.cert,
-        PROVISION_TLS_KEY: args.tls.key,
-        PROVISION_TOKEN: args.token
-    };
+    var pargs = [ INSTALLER_CMD ];
+    pargs.push('--appserverurl', args.appServerUrl);
+    pargs.push('--fqdn', args.fqdn);
+    pargs.push('--isdev', args.isDev);
+    pargs.push('--restoreurl', args.restoreUrl);
+    pargs.push('--revision', args.revision);
+    pargs.push('--tlscert', args.tls.cert);
+    pargs.push('--tlskey', args.tls.key);
+    pargs.push('--token', args.token);
 
-    debug('provision: calling %s with env %j', INSTALLER_CMD, env);
+    debug('provision: calling with args %j', pargs);
 
     // sudo is required for update()
-    var cp = spawn(SUDO, [ INSTALLER_CMD ], { env: env, timeout: 0 });
+    var cp = spawn(SUDO, pargs, { env: env, timeout: 0 });
     cp.stdout.on('data', function (data) { debug(data); });
     cp.stderr.on('data', function (data) { debug(data); });
 
