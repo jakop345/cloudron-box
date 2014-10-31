@@ -19,8 +19,9 @@ exports = module.exports = {
     restore: restore,
 };
 
-var INSTALLER_CMD = path.join(__dirname, 'scripts/installer.sh');
- 
+var INSTALLER_CMD = path.join(__dirname, 'scripts/installer.sh'),
+    SUDO = '/usr/bin/sudo';
+
 function InstallerError(reason, info) {
     Error.call(this);
     Error.captureStackTrace(this, this.constructor);
@@ -60,7 +61,8 @@ function provision(args, callback) {
 
     debug('provision: calling %s with env %j', INSTALLER_CMD, env);
 
-    var cp = spawn(INSTALLER_CMD, [ ], { env: env, timeout: 0 });
+    // sudo is required for update()
+    var cp = spawn(SUDO, [ INSTALLER_CMD ], { env: env, timeout: 0 });
     cp.stdout.on('data', function (data) { debug(data); });
     cp.stderr.on('data', function (data) { debug(data); });
 
