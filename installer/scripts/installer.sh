@@ -12,7 +12,7 @@ CONFIG_DIR="$HOME_DIR/config"
 DATA_DIR="$HOME_DIR/data"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd )"
 
-echo "Provisioning box with code: $PROVISION_REVISION and data: $PROVISION_DATA_URL"
+echo "Provisioning box with code: $PROVISION_REVISION and data: $PROVISION_RESTORE_URL"
 
 # supervisorctl stop all
 
