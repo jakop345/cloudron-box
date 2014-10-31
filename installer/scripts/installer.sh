@@ -12,10 +12,11 @@ CONFIG_DIR="$HOME_DIR/config"
 DATA_DIR="$HOME_DIR/data"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd )"
 
-# if you change this, change the code in postinstall.sh as well
-ARGS=$(getopt -l "appserverurl:,fqdn:,isdev:,restoreurl:,revision:,tlscert:,tlskey:,token:" -n "$0" -- "$@");
-eval set -- "$ARGS";
+SAVED_ARGS=("$@")
+ARGS=$(getopt -o "" -l "appserverurl:,fqdn:,isdev:,restoreurl:,revision:,tlscert:,tlskey:,token:" -n "$0" -- "$@")
+eval set -- "$ARGS"
 
+# if you change this, change the code in postinstall.sh as well
 while true; do
     case "$1" in
     --appserverurl) PROVISION_APP_SERVER_URL="$2";;
@@ -26,6 +27,7 @@ while true; do
     --tlscert) PROVISION_TLS_CERT="$2";;
     --tlskey) PROVISION_TLS_KEY="$2";;
     --token) PROVISION_TOKEN="$2";;
+    --) break;;
     *) echo "Unknown option $1"; exit 1;;
     esac
 
@@ -54,5 +56,6 @@ git reset --hard "$PROVISION_REVISION"
 # For the update case, remove any existing config
 rm -rf "$CONFIG_DIR/*"
 
-$SRCDIR/src/scripts/postinstall.sh "$@"
+# https://stackoverflow.com/questions/3348443/a-confusion-about-array-versus-array-in-the-context-of-a-bash-comple
+$SRCDIR/src/scripts/postinstall.sh "${SAVED_ARGS[@]}"
 
