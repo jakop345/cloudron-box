@@ -61,7 +61,7 @@ function provision(args, callback) {
     debug('provision: calling with args %j', pargs);
 
     // sudo is required for update()
-    var cp = spawn(SUDO, pargs, { env: env, timeout: 0 });
+    var cp = spawn(SUDO, pargs, { timeout: 0 });
     cp.stdout.on('data', function (data) { debug(data); });
     cp.stderr.on('data', function (data) { debug(data); });
 
