@@ -53,6 +53,7 @@ function CloudronError(reason, info) {
 util.inherits(CloudronError, Error);
 CloudronError.INTERNAL_ERROR = 1;
 CloudronError.ALREADY_PROVISIONED = 2;
+CloudronError.APPSTORE_DOWN = 3;
 
 function initialize() {
     // every backup restarts the box. the setInterval is only needed should that fail for some reason
@@ -104,16 +105,18 @@ function getBackupUrl(callback) {
     });
 }
 
-function backup() {
-    debug('Starting backup script');
+function backup(callback) {
+    assert(typeof callback === 'function');
 
     getBackupUrl(function (error, url) {
-        if (error) return console.error('Error getting backup url', error);
+        if (error) return callback(new CloudronError(CloudronError.APPSTORE_DOWN, error.message));
 
         debug('backup: url %s', url);
 
         execFile(SUDO, [ BACKUP_CMD,  url ], { }, function (error) {
-            if (error) console.error('Error starting backup command', error);
+            if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, 'Error starting backup command: ' + error.message));
+
+            return callback(null);
         });
     });
 }

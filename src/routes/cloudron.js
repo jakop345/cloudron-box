@@ -52,9 +52,12 @@ function reboot(req, res, next) {
 }
 
 function createBackup(req, res, next) {
-    cloudron.backup();
+    cloudron.backup(function (error) {
+        if (error && error.reason === CloudronError.APPSTORE_DOWN) return next(new HttpError(503, error.message));
+        if (error) return next(new HttpError(500, error.message));
 
-    next(new HttpSuccess(200, {}));
+        next(new HttpSuccess(200, {}));
+    });
 }
 
 function getConfig(req, res, next) {
