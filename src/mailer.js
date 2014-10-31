@@ -27,14 +27,14 @@ exports = module.exports = {
 
 var MAIL_TEMPLATES_DIR = path.join(__dirname, 'mail_templates');
 
-var transport = nodemailer.createTransport(smtpTransport({
+var gTransport = nodemailer.createTransport(smtpTransport({
     host: config.get('mailServer'),
     port: 25
 }));
 
-var mailQueue = [ ],
-    dnsReady = false,
-    checkDnsTimerId = null;
+var gMailQueue = [ ],
+    gDnsReady = false,
+    gCheckDnsTimerId = null;
 
 function initialize() {
     checkDns();
@@ -42,34 +42,34 @@ function initialize() {
 
 function uninitialize() {
     // TODO: interrupt processQueue as well
-    clearTimeout(checkDnsTimerId);
-    checkDnsTimerId = null;
+    clearTimeout(gCheckDnsTimerId);
+    gCheckDnsTimerId = null;
 
-    debug(mailQueue.length + ' mail items dropped');
-    mailQueue = [ ];
+    debug(gMailQueue.length + ' mail items dropped');
+    gMailQueue = [ ];
 }
 
 function checkDns() {
     digitalocean.checkPtrRecord(cloudron.getIp(), config.fqdn(), function (error, ok) {
         if (error || !ok) {
             debug('PTR record not setup yet');
-            checkDnsTimerId = setTimeout(checkDns, 10000);
+            gCheckDnsTimerId = setTimeout(checkDns, 10000);
             return;
         }
 
-        dnsReady = true;
+        gDnsReady = true;
         processQueue();
     });
 }
 
 function processQueue() {
-    var mailQueueCopy = mailQueue;
-    mailQueue = [ ];
+    var mailQueueCopy = gMailQueue;
+    gMailQueue = [ ];
 
     debug('Processing mail queue of size %d', mailQueueCopy.length);
 
     async.mapSeries(mailQueueCopy, function iterator(mailOptions, callback) {
-        transport.sendMail(mailOptions, function (error, info) {
+        gTransport.sendMail(mailOptions, function (error, info) {
             if (error) return console.error(error);
 
             debug('Email sent to ' + mailOptions.to);
@@ -83,9 +83,9 @@ function processQueue() {
 function enqueue(mailOptions) {
     assert(typeof mailOptions === 'object');
     debug('Queued mail for ' + mailOptions.from + ' to ' + mailOptions.to);
-    mailQueue.push(mailOptions);
+    gMailQueue.push(mailOptions);
 
-    if (dnsReady) processQueue();
+    if (gDnsReady) processQueue();
 }
 
 function render(templateFile, params) {

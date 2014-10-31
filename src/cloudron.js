@@ -37,10 +37,10 @@ var SUDO = '/usr/bin/sudo',
     BACKUP_CMD = path.join(__dirname, 'scripts/backup.sh'),
     GIT = '/usr/bin/git';
 
-var backupTimerId = null,
-    addMailDnsRecordsTimerId = null,
-    getCertificateTimerId = null,
-    cachedIp = null;
+var gBackupTimerId = null,
+    gAddMailDnsRecordsTimerId = null,
+    gGetCertificateTimerId = null,
+    gCachedIp = null;
 
 function CloudronError(reason, info) {
     Error.call(this);
@@ -56,7 +56,7 @@ CloudronError.ALREADY_PROVISIONED = 2;
 
 function initialize() {
     // every backup restarts the box. the setInterval is only needed should that fail for some reason
-    backupTimerId = setInterval(backup, 4 * 60 * 60 * 1000);
+    gBackupTimerId = setInterval(backup, 4 * 60 * 60 * 1000);
 
     sendHeartBeat();
 
@@ -64,16 +64,16 @@ function initialize() {
 }
 
 function uninitialize() {
-    clearInterval(backupTimerId);
-    backupTimerId = null;
+    clearInterval(gBackupTimerId);
+    gBackupTimerId = null;
 
-    clearTimeout(addMailDnsRecordsTimerId);
-    addMailDnsRecordsTimerId = null;
+    clearTimeout(gAddMailDnsRecordsTimerId);
+    gAddMailDnsRecordsTimerId = null;
 
-    clearTimeout(getCertificateTimerId);
-    getCertificateTimerId = null;
+    clearTimeout(gGetCertificateTimerId);
+    gGetCertificateTimerId = null;
 
-    cachedIp = null;
+    gCachedIp = null;
 }
 
 function update(callback) {
@@ -119,7 +119,7 @@ function backup() {
 }
 
 function getIp() {
-    if (cachedIp) return cachedIp;
+    if (gCachedIp) return gCachedIp;
 
     var ifaces = os.networkInterfaces();
     for (var dev in ifaces) {
@@ -127,8 +127,8 @@ function getIp() {
 
         for (var i = 0; i < ifaces[dev].length; i++) {
             if (ifaces[dev][i].family === 'IPv4') {
-                cachedIp = ifaces[dev][i].address;
-                return cachedIp;
+                gCachedIp = ifaces[dev][i].address;
+                return gCachedIp;
             }
         }
     }
@@ -227,7 +227,7 @@ function sendMailDnsRecordsRequest(callback) {
 function addMailDnsRecords() {
     if (!config.token()) {
         // TODO: when we separate out the installer we should assert on token instead
-        addMailDnsRecordsTimerId = setTimeout(addMailDnsRecords, 30000);
+        gAddMailDnsRecordsTimerId = setTimeout(addMailDnsRecords, 30000);
         return;
     }
 
@@ -236,7 +236,7 @@ function addMailDnsRecords() {
     sendMailDnsRecordsRequest(function (error, ids) {
         if (error) {
             console.error('Mail DNS record addition failed', error);
-            addMailDnsRecordsTimerId = setTimeout(addMailDnsRecords, 30000);
+            gAddMailDnsRecordsTimerId = setTimeout(addMailDnsRecords, 30000);
             return;
         }
 

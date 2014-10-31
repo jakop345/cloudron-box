@@ -51,7 +51,7 @@ exports = module.exports = {
     _waitForDnsPropagation: waitForDnsPropagation
 };
 
-var docker = null,
+var gDocker = null,
     NGINX_APPCONFIG_EJS = fs.readFileSync(__dirname + '/../nginx/appconfig.ejs', { encoding: 'utf8' }),
     COLLECTD_CONFIG_EJS = fs.readFileSync(__dirname + '/collectd.config.ejs', { encoding: 'utf8' }),
     SUDO = '/usr/bin/sudo',
@@ -61,11 +61,11 @@ var docker = null,
 
 function initialize(callback) {
     if (process.env.NODE_ENV === 'test') {
-        docker = new Docker({ host: 'http://localhost', port: 5687 });
+        gDocker = new Docker({ host: 'http://localhost', port: 5687 });
     } else if (os.platform() === 'linux') {
-        docker = new Docker({socketPath: '/var/run/docker.sock'});
+        gDocker = new Docker({socketPath: '/var/run/docker.sock'});
     } else {
-        docker = new Docker({ host: 'http://localhost', port: 2375 });
+        gDocker = new Docker({ host: 'http://localhost', port: 2375 });
     }
 
     database.initialize(callback);
@@ -146,7 +146,7 @@ function downloadImage(app, callback) {
 
     var manifest = app.manifest;
 
-    docker.pull(manifest.dockerImage, function (err, stream) {
+    gDocker.pull(manifest.dockerImage, function (err, stream) {
         if (err) return callback(new Error('Error connecting to docker'));
 
         // https://github.com/dotcloud/docker/issues/1074 says each status message
@@ -166,7 +166,7 @@ function downloadImage(app, callback) {
         stream.on('end', function () {
             debug('pulled successfully');
 
-            var image = docker.getImage(manifest.dockerImage);
+            var image = gDocker.getImage(manifest.dockerImage);
 
             image.inspect(function (err, data) {
                 if (err) {
@@ -225,7 +225,7 @@ function createContainer(app, callback) {
 
             debug('Creating container for ' + manifest.dockerImage);
 
-            docker.createContainer(containerOptions, function (error, container) {
+            gDocker.createContainer(containerOptions, function (error, container) {
                 if (error) return callback(new Error('Error creating container:' + error));
 
                 updateApp(app, { containerId: container.id }, callback);
@@ -237,7 +237,7 @@ function createContainer(app, callback) {
 function deleteContainer(app, callback) {
     if (app.containerId === null) return callback(null);
 
-    var container = docker.getContainer(app.containerId);
+    var container = gDocker.getContainer(app.containerId);
 
     var removeOptions = {
         force: true, // kill container if it's running
@@ -254,7 +254,7 @@ function deleteContainer(app, callback) {
 
 function deleteImage(app, callback) {
     var docker_image = app.manifest ? app.manifest.dockerImage : '';
-    var image = docker.getImage(docker_image);
+    var image = gDocker.getImage(docker_image);
 
     var removeOptions = {
         force: true,
@@ -360,7 +360,7 @@ function startContainer(app, callback) {
             PublishAllPorts: false
         };
 
-        var container = docker.getContainer(app.containerId);
+        var container = gDocker.getContainer(app.containerId);
         debug('Starting container ' + container.id + ' with options: ' + JSON.stringify(startOptions));
 
         container.start(startOptions, function (error, data) {
@@ -372,7 +372,7 @@ function startContainer(app, callback) {
 }
 
 function stopContainer(app, callback) {
-     var container = docker.getContainer(app.containerId);
+     var container = gDocker.getContainer(app.containerId);
     debug('Stopping container ' + container.id);
 
     var options = {

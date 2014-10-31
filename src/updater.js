@@ -13,9 +13,9 @@ var appdb = require('./appdb.js'),
 
 var BOX_VERSIONS_URL = 'https://s3.amazonaws.com/cloudron-releases/versions.json';
 
-var checkUpdateIntervalId = null,
-    appsUpdateInfo = null,
-    boxUpdateInfo = null;
+var gCheckUpdateIntervalId = null,
+    gAppsUpdateInfo = null,
+    gBoxUpdateInfo = null;
 
 module.exports = exports = {
     initialize: initialize,
@@ -27,8 +27,8 @@ module.exports = exports = {
 
 function getUpdateInfo() {
     return {
-        apps: appsUpdateInfo,
-        box: boxUpdateInfo
+        apps: gAppsUpdateInfo,
+        box: gBoxUpdateInfo
     };
 };
 
@@ -47,7 +47,7 @@ function checkUpdate() {
 
             debug('check: ', result.body);
 
-            appsUpdateInfo = result.body.appVersions;
+            gAppsUpdateInfo = result.body.appVersions;
         });
     });
 
@@ -69,18 +69,18 @@ function checkUpdate() {
 
         if (!versions[config.version()]) {
             console.error('Cloudron runs on unknown version %s', config.version());
-            boxUpdateInfo = null;
+            gBoxUpdateInfo = null;
             return;
         }
 
         var next = versions[config.version()].next;
         if (next && versions[next] && versions[next].revision) {
             debug('_check: new version %s available to revision %s.', next, versions[next].revision);
-            boxUpdateInfo = versions[next];
-            boxUpdateInfo.version = next;
+            gBoxUpdateInfo = versions[next];
+            gBoxUpdateInfo.version = next;
         } else {
             debug('_check: no new version available.');
-            boxUpdateInfo = null;
+            gBoxUpdateInfo = null;
         }
     });
 };
@@ -88,14 +88,14 @@ function checkUpdate() {
 function initialize() {
     debug('initialize');
 
-    checkUpdateIntervalId = setInterval(checkUpdate, 60 * 1000);
+    gCheckUpdateIntervalId = setInterval(checkUpdate, 60 * 1000);
 };
 
 function uninitialize() {
     debug('uninitialize');
 
-    clearInterval(checkUpdateIntervalId);
-    checkUpdateIntervalId = null;
+    clearInterval(gCheckUpdateIntervalId);
+    gCheckUpdateIntervalId = null;
 };
 
 function update(backupUrl, callback) {
@@ -104,12 +104,12 @@ function update(backupUrl, callback) {
 
     var isDev = config.get('isDev');
 
-    if (!isDev && !boxUpdateInfo) {
+    if (!isDev && !gBoxUpdateInfo) {
         debug('update: no box update available');
         return callback(new Error('No update available'));
     }
 
-    if (boxUpdateInfo && boxUpdateInfo.imageId) {
+    if (gBoxUpdateInfo && gBoxUpdateInfo.imageId) {
         debug('update: box needs upgrade');
         // TODO: cloudron.backup() here. currently, we cannot since backup requires a restart
 
@@ -126,8 +126,8 @@ function update(backupUrl, callback) {
 
     var args = [
         path.join(__dirname, 'scripts/update.sh'),
-        boxUpdateInfo ? boxUpdateInfo.version : config.version(),
-        boxUpdateInfo ? boxUpdateInfo.revision : 'origin/master',
+        gBoxUpdateInfo ? gBoxUpdateInfo.version : config.version(),
+        gBoxUpdateInfo ? gBoxUpdateInfo.revision : 'origin/master',
         backupUrl
     ];
 

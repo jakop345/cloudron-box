@@ -23,14 +23,14 @@ exports = module.exports = {
     run: run
 };
 
-var connectionPool = [ ],
-    db = null;
+var gConnectionPool = [ ],
+    gDatabase = null;
 
 var NOOP_CALLBACK = function (error) { if (error) console.error(error); assert(!error); };
 
 function initialize(callback) {
-    db = new sqlite3.Database(paths.DATABASE_FILENAME);
-    db.on('error', function (error) {
+    gDatabase = new sqlite3.Database(paths.DATABASE_FILENAME);
+    gDatabase.on('error', function (error) {
         console.error('Database error in ' + paths.DATABASE_FILENAME + ':', error);
     });
 
@@ -39,11 +39,11 @@ function initialize(callback) {
 
 function uninitialize() {
     debug('Closing database');
-    db.close();
-    db = null;
+    gDatabase.close();
+    gDatabase = null;
 
-    connectionPool.forEach(function (conn) { conn.close(); });
-    connectionPool = [ ];
+    gConnectionPool.forEach(function (conn) { conn.close(); });
+    gConnectionPool = [ ];
 }
 
 function clear(callback) {
@@ -57,19 +57,19 @@ function clear(callback) {
 }
 
 function newTransaction() {
-    var conn = connectionPool.length !== 0 ? connectionPool.pop() : new sqlite3.Database(paths.DATABASE_FILENAME);
+    var conn = gConnectionPool.length !== 0 ? gConnectionPool.pop() : new sqlite3.Database(paths.DATABASE_FILENAME);
     conn.serialize();
     conn.run('BEGIN TRANSACTION', NOOP_CALLBACK);
     return conn;
 }
 
 function rollback(conn, callback) {
-    connectionPool.push(conn);
+    gConnectionPool.push(conn);
     conn.run('ROLLBACK', callback);
 }
 
 function commit(conn, callback) {
-    connectionPool.push(conn);
+    gConnectionPool.push(conn);
     conn.run('COMMIT', callback);
 }
 
@@ -86,14 +86,14 @@ function removePrivates(obj) {
 }
 
 function get() {
-    return db.get.apply(db, arguments);
+    return gDatabase.get.apply(gDatabase, arguments);
 }
 
 function all() {
-    return db.all.apply(db, arguments);
+    return gDatabase.all.apply(gDatabase, arguments);
 }
 
 function run() {
-    return db.run.apply(db, arguments);
+    return gDatabase.run.apply(gDatabase, arguments);
 }
 

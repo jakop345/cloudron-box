@@ -22,7 +22,7 @@ var assert = require('assert'),
     uuid = require('node-uuid');
 
 // create OAuth 2.0 server
-var server = oauth2orize.createServer();
+var gServer = oauth2orize.createServer();
 
 // Register serialialization and deserialization functions.
 //
@@ -37,13 +37,13 @@ var server = oauth2orize.createServer();
 // simple matter of serializing the client's ID, and deserializing by finding
 // the client by ID from the database.
 
-server.serializeClient(function (client, callback) {
+gServer.serializeClient(function (client, callback) {
     debug('server serialize:', client);
 
     return callback(null, client.id);
 });
 
-server.deserializeClient(function (id, callback) {
+gServer.deserializeClient(function (id, callback) {
     debug('server deserialize:', id);
 
     clientdb.get(id, function (error, client) {
@@ -67,7 +67,7 @@ server.deserializeClient(function (id, callback) {
 // values, and will be exchanged for an access token.
 
 // we use , (comma) as scope separator
-server.grant(oauth2orize.grant.code({ scopeSeparator: ',' }, function (client, redirectURI, user, ares, callback) {
+gServer.grant(oauth2orize.grant.code({ scopeSeparator: ',' }, function (client, redirectURI, user, ares, callback) {
     debug('grant code:', client, redirectURI, user.id, ares);
 
     var code = uuid.v4();
@@ -90,7 +90,7 @@ server.grant(oauth2orize.grant.code({ scopeSeparator: ',' }, function (client, r
 // application issues an access token on behalf of the user who authorized the
 // code.
 
-server.exchange(oauth2orize.exchange.code(function (client, code, redirectURI, callback) {
+gServer.exchange(oauth2orize.exchange.code(function (client, code, redirectURI, callback) {
     debug('exchange:', client, code, redirectURI);
 
     authcodedb.get(code, function (error, authCode) {
@@ -254,7 +254,7 @@ var error = [
 */
 var authorization = [
     session.ensureLoggedIn('/api/v1/session/login'),
-    server.authorization(function (clientID, redirectURI, callback) {
+    gServer.authorization(function (clientID, redirectURI, callback) {
         debug('authorization: client %s with callback to %s.', clientID, redirectURI);
 
         clientdb.getByClientId(clientID, function (error, client) {
@@ -276,7 +276,7 @@ var authorization = [
         req.body.transaction_id = req.oauth2.transactionID;
         next();
     },
-    server.decision(function(req, done) {
+    gServer.decision(function(req, done) {
         debug('decision: with scope', req.oauth2.req.scope);
         return done(null, { scope: req.oauth2.req.scope });
     })
@@ -289,7 +289,7 @@ var authorization = [
 // this triggers the above grant middleware and handles the user's decision if he accepts the access
 var decision = [
     session.ensureLoggedIn('/api/v1/session/login'),
-    server.decision()
+    gServer.decision()
 ];
 
 
@@ -304,8 +304,8 @@ var decision = [
 */
 var token = [
     passport.authenticate(['oauth2-client-password'], { session: false }),
-    server.token(),
-    server.errorHandler()
+    gServer.token(),
+    gServer.errorHandler()
 ];
 
 

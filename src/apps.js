@@ -42,39 +42,39 @@ exports = module.exports = {
     _validatePortBindings: validatePortBindings
 };
 
-var tasks = { },
-    appHealthTask = null,
-    docker = null;
+var gTasks = { },
+    gAppHealthTask = null,
+    gDocker = null;
 
 function initialize() {
     if (process.env.NODE_ENV === 'test') {
-        docker = new Docker({ host: 'http://localhost', port: 5687 });
+        gDocker = new Docker({ host: 'http://localhost', port: 5687 });
     } else if (os.platform() === 'linux') {
-        docker = new Docker({socketPath: '/var/run/docker.sock'});
+        gDocker = new Docker({socketPath: '/var/run/docker.sock'});
     } else {
-        docker = new Docker({ host: 'http://localhost', port: 2375 });
+        gDocker = new Docker({ host: 'http://localhost', port: 2375 });
     }
 
-    appHealthTask = child_process.fork(__dirname + '/apphealthtask.js');
+    gAppHealthTask = child_process.fork(__dirname + '/apphealthtask.js');
 
     resume(); // FIXME: potential race here since resume is async
 }
 
 function startTask(appId) {
-    assert(!(appId in tasks));
+    assert(!(appId in gTasks));
 
-    tasks[appId] = child_process.fork(__dirname + '/apptask.js', [ appId ]);
-    tasks[appId].once('exit', function (code, signal) {
+    gTasks[appId] = child_process.fork(__dirname + '/apptask.js', [ appId ]);
+    gTasks[appId].once('exit', function (code, signal) {
         debug('Task completed :' + appId);
-        delete tasks[appId];
+        delete gTasks[appId];
     });
 }
 
 function stopTask(appId) {
-    if (tasks[appId]) {
-        debug('Killing existing task : ' + tasks[appId].pid);
-        tasks[appId].kill();
-        delete tasks[appId];
+    if (gTasks[appId]) {
+        debug('Killing existing task : ' + gTasks[appId].pid);
+        gTasks[appId].kill();
+        delete gTasks[appId];
     }
 }
 
@@ -90,12 +90,12 @@ function resume() {
 }
 
 function uninitialize() {
-    if (appHealthTask) {
-        appHealthTask.kill();
-        appHealthTask = null;
+    if (gAppHealthTask) {
+        gAppHealthTask.kill();
+        gAppHealthTask = null;
     }
 
-    for (var appId in tasks) {
+    for (var appId in gTasks) {
         stopTask(appId);
     }
 }
@@ -312,7 +312,7 @@ function getLogStream(appId, options, callback) {
 
         if (app.installationState !== appdb.ISTATE_INSTALLED) return callback(new AppsError(AppsError.BAD_STATE, 'App not installed'));
 
-        var container = docker.getContainer(app.containerId);
+        var container = gDocker.getContainer(app.containerId);
         // note: cannot access docker file directly because it needs root access
         container.logs({ stdout: true, stderr: true, follow: true, timestamps: true, tail: 'all' }, function (error, logStream) {
             if (error && error.statusCode === 404) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
@@ -341,7 +341,7 @@ function getLogs(appId, callback) {
 
         if (app.installationState !== appdb.ISTATE_INSTALLED) return callback(new AppsError(AppsError.BAD_STATE, 'App not installed'));
 
-        var container = docker.getContainer(app.containerId);
+        var container = gDocker.getContainer(app.containerId);
         // note: cannot access docker file directly because it needs root access
         container.logs({ stdout: true, stderr: true, follow: false, timestamps: true, tail: 'all' }, function (error, logStream) {
             if (error && error.statusCode === 404) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
