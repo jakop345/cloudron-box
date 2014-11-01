@@ -26,7 +26,7 @@ var gAnnounceTimerId = null,
 function restore(req, res, next) {
     if (!req.body.token) return res.status(400).send('No token provided');
     if (!req.body.appServerUrl) return res.send(400).send('No appServerUrl provided');
-    if (!req.body.isDev) return res.status(400).send('No isDev provided');
+    if (!('isDev' in req.body)) return res.status(400).send('No isDev provided');
     if (!req.body.fqdn) return res.status(400).send('No fqdn provided');
     if (!req.body.restoreUrl) return res.status(400).send('No restoreUrl provided');
     if (!req.body.revision) return res.status(400).send('No revision provided');
@@ -49,7 +49,7 @@ function restore(req, res, next) {
 function provision(req, res, next) {
     if (!req.body.token) return res.status(400).send('No token provided');
     if (!req.body.appServerUrl) return res.status(400).send('No appServerUrl provided');
-    if (!req.body.isDev) return res.status(400).send('No isDev provided');
+    if (!('isDev' in req.body)) return res.status(400).send('No isDev provided');
     if (!req.body.fqdn) return res.status(400).send('No fqdn provided');
     if (!req.body.revision) return res.status(400).send('No revision provided');
     if (!('tls' in req.body)) return res.status(400).send('tls cert must be provided or be null');
