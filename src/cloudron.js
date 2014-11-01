@@ -2,6 +2,7 @@
 
 'use strict';
 
+// intentionally placed here because of circular dep with updater
 exports = module.exports = {
     CloudronError: CloudronError,
 
