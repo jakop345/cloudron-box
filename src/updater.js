@@ -102,7 +102,7 @@ function checkUpdates() {
 function initialize() {
     debug('initialize');
 
-    gCheckUpdatesTimeoutId = setTimeout(checkUpdates, 60 * 1000);
+    gCheckUpdatesTimeoutId = setTimeout(checkUpdates, 10 * 1000);
 };
 
 function uninitialize() {
