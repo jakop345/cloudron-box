@@ -170,5 +170,9 @@ EOF
 # http://www.onurguzel.com/supervisord-restarting-and-reloading/
 echo "Restarting supervisor"
 /etc/init.d/supervisor stop
+while test -e "/var/run/supervisord.pid" && kill -0 `cat /var/run/supervisord.pid`; do
+    echo "Waiting for supervisord to stop"
+    sleep 1
+done
 /etc/init.d/supervisor start
 
