@@ -17,10 +17,13 @@ if (!versionsJson) {
 }
 
 // check all the keys
-Object.keys(versionsJson).forEach(function (version) {
-    if (!versionsJson[version].imageId) die('version ' + version + ' does not have imageId');
-    if (!('next' in versionsJson[version])) die('version ' + version + ' does not have next');
-    if (!versionsJson[version].revision) die('version ' + version + ' does not have revision');
+Object.keys(versionsJson).sort().forEach(function (version, index) {
+    if (typeof versionsJson[version].imageId !== 'string') die('version ' + version + ' does not have proper imageId');
+    if (versionsJson[version].next !== null && typeof versionsJson[version].next !== 'string') die('version ' + version + ' does not have proper next');
+    if (typeof versionsJson[version].revision !== 'string') die('version ' + version + ' does not have proper revision');
+
+    var nextVersion = versionsJson[version].next;
+    if (nextVersion <= version) die('next version cannot be less than current @' + version);
 });
 
 // check that package.json version is in versions.json
