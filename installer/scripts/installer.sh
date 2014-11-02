@@ -42,7 +42,7 @@ supervisorctl stop all
 if [ -n "$PROVISION_RESTORE_URL" ]; then
     echo "Downloading backup: $PROVISION_RESTORE_URL"
     rm -rf "$DATA_DIR/*" # DATA_DIR itself cannot be removed because it is mounted
-    curl -L "$PROVISION_RESTORE_URL" | tar -zxf - -C "$DATA_DIR"
+    curl --retry 5 --retry-delay 5 --max-time 600 -L "$PROVISION_RESTORE_URL" | tar -zxf - -C "$DATA_DIR"
 fi
 
 cd "$SRCDIR"
