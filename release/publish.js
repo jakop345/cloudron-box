@@ -17,7 +17,8 @@ if (!versionsJson) {
 }
 
 // check all the keys
-Object.keys(versionsJson).sort().forEach(function (version, index) {
+var sortedVersions = Object.keys(versionsJson).sort();
+sortedVersions.forEach(function (version, index) {
     if (typeof versionsJson[version].imageId !== 'string') die('version ' + version + ' does not have proper imageId');
     if (versionsJson[version].next !== null && typeof versionsJson[version].next !== 'string') die('version ' + version + ' does not have proper next');
     if (typeof versionsJson[version].revision !== 'string') die('version ' + version + ' does not have proper revision');
@@ -27,8 +28,13 @@ Object.keys(versionsJson).sort().forEach(function (version, index) {
 });
 
 // check that package.json version is in versions.json
-if (!(require('../package.json').version in versionsJson)) {
+var currentVersion = require('../package.json').version;
+if (sortedVersions.indexOf(currentVersion) === -1) {
     die('package.json version is not present in versions.json');
+}
+
+if (sortedVersions.indexOf(currentVersion) !== sortedVersions.length - 1) {
+    die('package.json version is not the latest version in versions.json');
 }
 
 var config = {
