@@ -137,7 +137,7 @@ function getConfig(callback) {
 
         callback(null, {
             appServerUrl: config.appServerUrl(),
-            isDev: config.get('isDev'),
+            isDev: updater.isDev(),
             fqdn: config.fqdn(),
             ip: getIp(),
             version: config.version(),

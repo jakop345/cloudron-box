@@ -24,7 +24,8 @@ module.exports = exports = {
     uninitialize: uninitialize,
 
     getUpdateInfo: getUpdateInfo,
-    update: update
+    update: update,
+    isDev: isDev
 };
 
 function getUpdateInfo() {
@@ -110,12 +111,14 @@ function uninitialize() {
     gCheckUpdatesTimeoutId = null;
 };
 
+function isDev() {
+    return /dev/i.test(config.get('boxVersionsUrl'));
+}
+
 function update(callback) {
     assert(typeof callback === 'function');
 
-    var isDev = config.get('isDev');
-
-    if (!isDev && !gBoxUpdateInfo) {
+    if (!isDev() && !gBoxUpdateInfo) {
         debug('update: no box update available');
         return callback(new Error('No update available'));
     }
@@ -139,8 +142,7 @@ function update(callback) {
         var args = {
             appServerUrl: config.appServerUrl(),
             fqdn: config.fqdn(),
-            isDev: config.get('isDev'),
-            revision: isDev ? 'origin/master' : gBoxUpdateInfo.revision,
+            revision: isDev() ? 'origin/master' : gBoxUpdateInfo.revision,
             token: config.token(),
             tls: {
                 cert: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert')),

@@ -63,7 +63,6 @@ describe('Server', function () {
         var data = {
             token: 'sometoken',
             appServerUrl: APPSERVER_URL,
-            isDev: true,
             fqdn: 'www.something.com',
             restoreUrl: 'https://restoreurl',
             revision: 'somesha1',
@@ -101,7 +100,6 @@ describe('Server', function () {
         var data = {
             token: 'sometoken',
             appServerUrl: APPSERVER_URL,
-            isDev: true,
             fqdn: 'www.something.com',
             revision: 'somesha1',
             tls: {

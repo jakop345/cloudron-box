@@ -13,7 +13,7 @@ DATA_DIR="$HOME_DIR/data"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd )"
 
 SAVED_ARGS=("$@")
-ARGS=$(getopt -o "" -l "appserverurl:,fqdn:,isdev:,restoreurl:,revision:,tlscert:,tlskey:,token:,boxversionsurl:" -n "$0" -- "$@")
+ARGS=$(getopt -o "" -l "appserverurl:,fqdn:,restoreurl:,revision:,tlscert:,tlskey:,token:,boxversionsurl:" -n "$0" -- "$@")
 eval set -- "$ARGS"
 
 # if you change this, change the code in postinstall.sh as well
@@ -21,7 +21,6 @@ while true; do
     case "$1" in
     --appserverurl) PROVISION_APP_SERVER_URL="$2";;
     --fqdn) PROVISION_FQDN="$2";;
-    --isdev) PROVISION_IS_DEV="$2";;
     --restoreurl) PROVISION_RESTORE_URL="$2";;
     --revision) PROVISION_REVISION="$2";;
     --tlscert) PROVISION_TLS_CERT="$2";;
