@@ -19,7 +19,7 @@ CLOUDRON_SQLITE="$DATA_DIR/cloudron.sqlite"
 DOMAIN_NAME=`hostname -f`
 
 # if you change this, change the code in installer.sh as well
-ARGS=$(getopt -o "" -l "appserverurl:,fqdn:,isdev:,restoreurl:,revision:,tlscert:,tlskey:,token:" -n "$0" -- "$@")
+ARGS=$(getopt -o "" -l "appserverurl:,fqdn:,isdev:,restoreurl:,revision:,tlscert:,tlskey:,token:,boxversionsurl:" -n "$0" -- "$@")
 eval set -- "$ARGS"
 
 while true; do
@@ -32,6 +32,7 @@ while true; do
     --tlscert) PROVISION_TLS_CERT="$2";;
     --tlskey) PROVISION_TLS_KEY="$2";;
     --token) PROVISION_TOKEN="$2";;
+    --boxversionsurl) PROVISION_BOX_VERSIONS_URL="$2";;
     --) break;;
     *) echo "Unknown option $1"; exit 1;;
     esac
@@ -151,6 +152,7 @@ cat > "$CLOUDRON_CONF" <<EOF2
     "fqdn": "$PROVISION_FQDN",
     "adminOrigin": "$ADMIN_ORIGIN",
     "isDev": "$PROVISION_IS_DEV",
+    "boxVersionsUrl": "$PROVISION_BOX_VERSIONS_URL",
     "mailServer": "$MAIL_SERVER",
     "mailUsername": "admin@$DOMAIN_NAME"
 }

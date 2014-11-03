@@ -13,7 +13,7 @@ DATA_DIR="$HOME_DIR/data"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd )"
 
 SAVED_ARGS=("$@")
-ARGS=$(getopt -o "" -l "appserverurl:,fqdn:,isdev:,restoreurl:,revision:,tlscert:,tlskey:,token:" -n "$0" -- "$@")
+ARGS=$(getopt -o "" -l "appserverurl:,fqdn:,isdev:,restoreurl:,revision:,tlscert:,tlskey:,token:,boxversionsurl:" -n "$0" -- "$@")
 eval set -- "$ARGS"
 
 # if you change this, change the code in postinstall.sh as well
@@ -27,6 +27,7 @@ while true; do
     --tlscert) PROVISION_TLS_CERT="$2";;
     --tlskey) PROVISION_TLS_KEY="$2";;
     --token) PROVISION_TOKEN="$2";;
+    --boxversionsurl) PROVISION_BOX_VERSIONS_URL="$2";;
     --) break;;
     *) echo "Unknown option $1"; exit 1;;
     esac

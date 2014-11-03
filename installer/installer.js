@@ -63,6 +63,7 @@ function provision(args, callback) {
     pargs.push('--tlscert', args.tls.cert);
     pargs.push('--tlskey', args.tls.key);
     pargs.push('--token', args.token);
+    pargs.push('--boxversionsurl', args.boxVersionsUrl);
 
     debug('provision: calling with args %j', pargs);
 

@@ -60,6 +60,7 @@ function saveSync() {
     data.mailServer = null;
     data.mailUsername = null;
     data.mailDnsRecordIds = [ ];
+    data.boxVersionsUrl = null;
 
     if (safe.fs.existsSync(cloudronConfigFileName)) {
         var existingData = safe.JSON.parse(safe.fs.readFileSync(cloudronConfigFileName, 'utf8'));

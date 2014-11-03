@@ -15,8 +15,6 @@ var appdb = require('./appdb.js'),
     safe = require('safetydance'),
     superagent = require('superagent');
 
-var BOX_VERSIONS_URL = 'https://s3.amazonaws.com/cloudron-releases/versions.json';
-
 var gCheckUpdatesTimeoutId = null,
     gAppUpdateInfo = null,
     gBoxUpdateInfo = null;
@@ -57,15 +55,15 @@ function checkAppUpdates(callback) {
 function checkBoxUpdates(callback) {
     debug('checking for box update');
 
-    superagent.get(BOX_VERSIONS_URL).end(function (error, result) {
+    superagent.get(config.get('boxVersionsUrl')).end(function (error, result) {
         if (error) return callback(error);
         if (result.status !== 200) return callback(new Error('Bad status:', result.status));
 
-        debug('versions.json : %j', result.text);
+        debug('versions : %j', result.text);
 
         var versions = safe.JSON.parse(result.text);
 
-        if (!versions) return callback(new Error('versions.json is not valid json:' + safe.error));
+        if (!versions) return callback(new Error('versions is not valid json:' + safe.error));
 
         var currentVersionInfo = versions[config.version()];
         if (!currentVersionInfo) return callback(new Error('Cloudron runs on unknown version %s', config.version()));
