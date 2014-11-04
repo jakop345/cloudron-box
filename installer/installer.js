@@ -74,6 +74,8 @@ function provision(args, callback) {
 
     debug('provision: calling with args %j', pargs);
 
+    if (process.env.NODE_ENV === 'test') return callback(null);
+
     // sudo is required for update()
     var cp = spawn(SUDO, pargs, { timeout: 0 });
     cp.stdout.on('data', function (data) { debug(data); });
