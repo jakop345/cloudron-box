@@ -99,8 +99,7 @@ function installApp(req, res, next) {
     // allow tests to provide an appId for testing
     var appId = (process.env.NODE_ENV === 'test' && typeof data.appId === 'string') ? data.appId : uuid.v4();
 
-    debug('will install app with instance id ' + appId + ' storeId: ' + data.appStoreId +
-          ' @ ' + data.location + ' with ' + JSON.stringify(data.portBindings));
+    debug('Installing app id:%s storeid:%s loc:%s port:%j restrict:%s', appId, data.appStoreId, data.location, data.portBindings, data.restrictAccessTo);
 
     apps.install(appId, data.appStoreId, req.user.username, data.password, data.location, data.portBindings, data.restrictAccessTo, function (error) {
         if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, 'App already exists: ' + error));
@@ -127,7 +126,7 @@ function configureApp(req, res, next) {
     if (('portBindings' in data) && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
     if (typeof data.restrictAccessTo !== 'string') return next(new HttpError(400, 'restrictAccessTo is required'));
 
-    debug('will configure app with id ' + data.appId + ' @ ' + data.location + ' with ' + JSON.stringify(data.portBindings));
+    debug('Configuring app id:%s location:%s bindings:%j', data.appId, data.location, data.portBindings);
 
     apps.configure(data.appId, req.user.username, data.password, data.location, data.portBindings, data.restrictAccessTo, function (error) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app:' + error));
@@ -146,7 +145,7 @@ function configureApp(req, res, next) {
 function uninstallApp(req, res, next) {
     if (typeof req.params.id !== 'string') return next(new HttpError(400, 'appid is required'));
 
-    debug('will uninstall app with id ' + req.params.id);
+    debug('Uninstalling app id:%s', req.params.id);
 
     apps.uninstall(req.params.id, function (error) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app:' + error));
@@ -159,7 +158,7 @@ function uninstallApp(req, res, next) {
 function startApp(req, res, next) {
     if (typeof req.params.id !== 'string') return next(new HttpError(400, 'appid is required'));
 
-    debug('will start app with id ' + req.params.id);
+    debug('Start app id:%s', req.params.id);
 
     apps.start(req.params.id, function (error) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app:' + error));
@@ -173,7 +172,7 @@ function startApp(req, res, next) {
 function stopApp(req, res, next) {
     if (typeof req.params.id !== 'string') return next(new HttpError(400, 'appid is required'));
 
-    debug('will stop app with id ' + req.params.id);
+    debug('Stop app id:%s', req.params.id);
 
     apps.stop(req.params.id, function (error) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app:' + error));
@@ -187,7 +186,7 @@ function stopApp(req, res, next) {
 function updateApp(req, res, next) {
     if (typeof req.params.id !== 'string') return next(new HttpError(400, 'appid is required'));
 
-    debug('with update app with id ' + req.params.id);
+    debug('Update app id:%s', req.params.id);
 
     apps.update(req.params.id, function (error) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app:' + error));
@@ -199,7 +198,7 @@ function updateApp(req, res, next) {
 }
 
 function getLogStream(req, res, next) {
-    debug('getting logstream of ' + req.params.id);
+    debug('Getting logstream of app id:%s', req.params.id);
 
     var fromLine = parseInt(req.query.fromLine || 0, 10);
 
@@ -233,7 +232,7 @@ function getLogStream(req, res, next) {
 }
 
 function getLogs(req, res, next) {
-    debug('getting logs of ' + req.params.id);
+    debug('Getting logs of app id:%s', req.params.id);
 
     apps.getLogs(req.params.id, function (error, logStream) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app:' + error));
