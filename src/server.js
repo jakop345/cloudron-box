@@ -35,20 +35,19 @@ function Server() {
 
 // Success handler
 Server.prototype._successHandler = function (success, req, res, next) {
-    // for now when we hit here, we always send json back
-    res.setHeader('Content-Type', 'application/json');
+    if (!(success instanceof HttpSuccess)) return next(success);
 
-    if (success instanceof HttpSuccess) {
-        debug('Send response with status', success.statusCode); //, 'and body', success.body);
-        res.send(success.statusCode, success.body);
+    if (success.body) {
+        res.setHeader('Content-Type', 'application/json');
+        res.status(success.status).send(success.body);
     } else {
-        next(success);
+        res.status(success.status).end();
     }
 };
 
 // Error handlers. These are called until one of them sends headers
 Server.prototype._clientErrorHandler = function (err, req, res, next) {
-    var status = err.status || err.statusCode; // connect/express or our app
+    var status = err.status; // connect/express or our app
 
     // if the request took too long, assume it's a problem on the client
     if (err.timeout && err.status == 503) { // timeout() middleware
@@ -58,17 +57,15 @@ Server.prototype._clientErrorHandler = function (err, req, res, next) {
     if (status >= 400 && status <= 499) {
         res.send(status, { status: http.STATUS_CODES[status], message: err.message });
         debug(http.STATUS_CODES[status] + ' : ' + err.message);
-        debug(err.stack);
     } else {
         next(err);
     }
 };
 
 Server.prototype._serverErrorHandler = function (err, req, res, next) {
-    var status = err.status || err.statusCode || 500;
-    res.send(status, { status: http.STATUS_CODES[status], message: err.message ? err.message : 'Internal Server Error' });
-    console.error(http.STATUS_CODES[status] + ' : ' + err.message);
-    console.error(err.stack);
+    var status = err.status || 500;
+    res.status(status).send({ status: http.STATUS_CODES[status], message: err.message || 'Internal Server Error' });
+    console.error(status, err, err.internalError);
 };
 
 /**

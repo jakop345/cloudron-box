@@ -6,8 +6,8 @@ var assert = require('assert'),
 module.exports = HttpSuccess;
 
 function HttpSuccess(statusCode, body) {
-    assert(typeof body === 'object' && !util.isArray(body), 'We must always send objects in the response body');
+    assert(typeof body === 'undefined' || (typeof body === 'object' && !util.isArray(body), 'Body must be a non-array object'));
 
-    this.statusCode = statusCode;
-    this.body = body;
+    this.status = statusCode;
+    if (body) this.body = body;
 }

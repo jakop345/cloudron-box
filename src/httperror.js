@@ -1,20 +1,24 @@
 'use strict';
 
-var safe = require('safetydance'),
+var assert = require('assert'),
+    safe = require('safetydance'),
     util = require('util');
 
 module.exports = HttpError;
 
-function HttpError(statusCode, message) {
+function HttpError(statusCode, errorOrMessage) {
+    assert(util.isError(errorOrMessage) || typeof errorOrMessage === 'string');
+
     Error.call(this);
     Error.captureStackTrace(this, this.constructor);
 
     this.name = this.constructor.name;
-    this.statusCode = statusCode;
-    if (typeof message == 'string') {
-        this.message = message;
+    this.status = statusCode;
+    if (typeof errorOrMessage === 'string') {
+        this.message = errorOrMessage;
     } else {
-        this.message = safe.JSON.stringify(message);
+        this.message = 'Internal error';
+        this.internalError = error;
     }
 }
 util.inherits(HttpError, Error);
