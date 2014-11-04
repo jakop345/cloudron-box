@@ -4,6 +4,7 @@
 
 var apps = require('./apps'),
     assert = require('assert'),
+    auth = require('./auth.js'),
     cloudron = require('./cloudron.js'),
     config = require('../config.js'),
     csrf = require('csurf'),
@@ -144,7 +145,7 @@ Server.prototype._initializeExpressSync = function () {
     };
 
     // Passport configuration
-    require('./auth');
+    auth.initialize();
 
     this.app.set('views', path.join(__dirname, 'oauth2views'));
     this.app.set('view options', { layout: true, debug: true });
