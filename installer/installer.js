@@ -43,6 +43,14 @@ function uninitialize() {
 }
 
 function update(args, callback) {
+    assert(typeof args.appServerUrl === 'string');
+    assert(typeof args.fqdn === 'string');
+    assert(typeof args.revision === 'string');
+    assert(typeof args.token === 'string');
+    assert(typeof args.tls.cert === 'string');
+    assert(typeof args.tls.key === 'string');
+    assert(typeof args.boxVersionsUrl === 'string');
+
     provision(args, callback);
 }
 

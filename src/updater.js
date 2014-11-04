@@ -145,9 +145,10 @@ function update(callback) {
             revision: isDev() ? 'origin/master' : gBoxUpdateInfo.revision,
             token: config.token(),
             tls: {
-                cert: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert')),
-                key: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'))
-            }
+                cert: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), 'utf8'),
+                key: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'), 'utf8')
+            },
+            boxVersionsUrl: config.get('boxVersionsUrl')
         };
 
         installer.update(args, callback);
