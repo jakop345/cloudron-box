@@ -61,7 +61,9 @@ function initialize() {
 
     sendHeartBeat();
 
-    addMailDnsRecords();
+    if (process.env.NODE_ENV !== 'test') {
+        addMailDnsRecords();
+    }
 }
 
 function uninitialize() {
