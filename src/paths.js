@@ -18,9 +18,6 @@ exports = module.exports = {
     APPDATA_DIR: path.join(config.baseDir(), 'data/appdata'),
     DATABASE_FILENAME: path.join(config.baseDir(), 'data/cloudron.sqlite'),
 
-    APPICONS_DIR: path.join(config.baseDir(), 'data/appicons'),
-
-    VOLUMES_DATA_DIR: path.join(config.baseDir(), 'volumes/data'),
-    VOLUMES_MOUNT_DIR: path.join(config.baseDir(), 'volumes/mount')
+    APPICONS_DIR: path.join(config.baseDir(), 'data/appicons')
 };
 

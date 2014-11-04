@@ -258,59 +258,14 @@ Server.prototype._initializeExpressSync = function () {
     router.get ('/api/v1/settings/naked_domain', settingsScope, routes.settings.getNakedDomain);
     router.post('/api/v1/settings/naked_domain', settingsScope, routes.settings.setNakedDomain);
 
-    // old syncer and file APIs, we might want to remove them soonish
-    router.param('syncerVolume', function (req, res, next, id) {
-        both(req, res, function (err) {
-            if (err) return next(err);
-            routes.sync.attachRepo(req, res, next, id);
-        });
-    });
-
-    router.post('/api/v1/sync/:syncerVolume/diff', routes.sync.requireMountedVolume, routes.sync.diff);
-    router.post('/api/v1/sync/:syncerVolume/delta', routes.sync.requireMountedVolume, routes.sync.delta);
-
-    router.get ('/api/v1/revisions/:syncerVolume/*', routes.sync.requireMountedVolume, routes.file.revisions);
-    router.get ('/api/v1/file/:syncerVolume/*', routes.sync.requireMountedVolume, routes.file.read);
-    router.get ('/api/v1/metadata/:syncerVolume/*', routes.sync.requireMountedVolume, routes.file.metadata);
-    router.put ('/api/v1/file/:syncerVolume/*', routes.sync.requireMountedVolume,
-                                           routes.file.multipart({ maxFieldsSize: FIELD_LIMIT, limit: FILE_SIZE_LIMIT, timeout: FILE_TIMEOUT }),
-                                           routes.file.putFile);
-
-    router.post('/api/v1/fileops/:syncerVolume/copy', routes.sync.requireMountedVolume, routes.fileops.copy);
-    router.post('/api/v1/fileops/:syncerVolume/move', routes.sync.requireMountedVolume, routes.fileops.move);
-    router.post('/api/v1/fileops/:syncerVolume/delete', routes.sync.requireMountedVolume, routes.fileops.remove);
-    router.post('/api/v1/fileops/:syncerVolume/create_dir', routes.sync.requireMountedVolume, routes.fileops.createDirectory);
-
-    router.get ('/api/v1/volume/list', bearer, routes.volume.listVolumes);
-    router.post('/api/v1/volume/create', bearer, this._requirePassword.bind(this), routes.volume.createVolume);
-
     // graphite calls
     router.get([ '/graphite/*', '/content/*', '/metrics/*', '/dashboard/*', '/render/*', '/browser/*', '/composer/*' ], graphiteMiddleware);
-
-    // volume resource related routes
-    router.param('volume', function (req, res, next, id) {
-        both(req, res, function (err) {
-            if (err) return next(err);
-            routes.volume.attachVolume(req, res, next, id);
-        });
-    });
-    router.get ('/api/v1/volume/:volume/list', routes.volume.requireMountedVolume, routes.volume.listFiles);
-    router.get ('/api/v1/volume/:volume/list/*', routes.volume.requireMountedVolume, routes.volume.listFiles);
-    router.post('/api/v1/volume/:volume/delete', this._requirePassword.bind(this), routes.volume.deleteVolume);
-    router.post('/api/v1/volume/:volume/mount', this._requirePassword.bind(this), routes.volume.mount);
-    router.post('/api/v1/volume/:volume/unmount', routes.volume.unmount);
-    router.get ('/api/v1/volume/:volume/ismounted', routes.volume.isMounted);
-    router.get ('/api/v1/volume/:volume/users', routes.volume.listUsers);
-    router.post('/api/v1/volume/:volume/users', routes.volume.addUser);
-    router.del ('/api/v1/volume/:volume/users/:username', routes.volume.removeUser);
 };
 
 Server.prototype.start = function (callback) {
     assert(typeof callback === 'function');
     assert(this.app === null, 'Server is already up and running.');
 
-    mkdirp.sync(paths.VOLUMES_DATA_DIR);
-    mkdirp.sync(paths.VOLUMES_MOUNT_DIR);
     mkdirp.sync(paths.APPICONS_DIR);
     mkdirp.sync(paths.NGINX_APPCONFIG_DIR);
     mkdirp.sync(paths.APPDATA_DIR);

@@ -36,9 +36,6 @@ function createUser(done) {
 
 function setup(done) {
     // ensure data/config/mount paths
-    mkdirp.sync(paths.VOLUMES_DATA_DIR);
-    mkdirp.sync(paths.VOLUMES_MOUNT_DIR);
-
     database.initialize(function (error) {
         expect(error).to.be(null);
         done();
