@@ -215,11 +215,7 @@ function sendMailDnsRecordsRequest(callback) {
 }
 
 function addMailDnsRecords() {
-    if (!config.token()) {
-        // TODO: when we separate out the installer we should assert on token instead
-        gAddMailDnsRecordsTimerId = setTimeout(addMailDnsRecords, 30000);
-        return;
-    }
+    assert(typeof config.token() === 'string');
 
     if (config.get('mailDnsRecordIds').length !== 0) return; // already registered
 
