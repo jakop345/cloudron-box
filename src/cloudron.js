@@ -80,15 +80,15 @@ function uninitialize() {
 }
 
 function getBackupUrl(callback) {
-    if (!config.appServerUrl()) return new Error('No appstore server url set');
-    if (!config.token()) return new Error('No appstore server token set');
+    if (!config.appServerUrl()) return callback(new Error('No appstore server url set'));
+    if (!config.token()) return callback(new Error('No appstore server token set'));
 
     var url = config.appServerUrl() + '/api/v1/boxes/' + config.fqdn() + '/backupurl';
 
     superagent.put(url).query({ token: config.token(), boxVersion: config.version() }).end(function (error, result) {
-        if (error) return new Error('Error getting presigned backup url: ' + error.message);
+        if (error) return callback(new Error('Error getting presigned backup url: ' + error.message));
 
-        if (result.statusCode !== 200 || !result.body || !result.body.url) return new Error('Error getting presigned backup url : ' + result.statusCode);
+        if (result.statusCode !== 201 || !result.body || !result.body.url) return callback(new Error('Error getting presigned backup url : ' + result.statusCode));
 
         return callback(null, result.body.url);
     });
