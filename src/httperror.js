@@ -1,13 +1,13 @@
 'use strict';
 
 var assert = require('assert'),
-    safe = require('safetydance'),
     util = require('util');
 
 module.exports = HttpError;
 
 function HttpError(statusCode, errorOrMessage) {
-    assert(util.isError(errorOrMessage) || typeof errorOrMessage === 'string');
+    assert(typeof statusCode === 'number');
+    assert(errorOrMessage instanceof Error || typeof errorOrMessage === 'string');
 
     Error.call(this);
     Error.captureStackTrace(this, this.constructor);
@@ -18,7 +18,7 @@ function HttpError(statusCode, errorOrMessage) {
         this.message = errorOrMessage;
     } else {
         this.message = 'Internal error';
-        this.internalError = error;
+        this.internalError = errorOrMessage;
     }
 }
 util.inherits(HttpError, Error);
