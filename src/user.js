@@ -53,18 +53,8 @@ UserError.WRONG_USER_OR_PASSWORD = 5;
 UserError.ARGUMENTS = 6;
 UserError.NOT_ALLOWED = 7;
 
-function ensureArgs(args, expected) {
-    assert(args.length === expected.length);
-
-    for (var i = 0; i < args.length; ++i) {
-        if (expected[i]) {
-            assert(typeof args[i] === expected[i]);
-        }
-    }
-}
-
 function listUsers(callback) {
-    ensureArgs(arguments, ['function']);
+    assert(typeof callback === 'function');
 
     userdb.getAll(function (error, result) {
         if (error) {
@@ -77,7 +67,11 @@ function listUsers(callback) {
 }
 
 function createUser(username, password, email, admin, callback) {
-    ensureArgs(arguments, ['string', 'string', 'string', 'boolean', 'function']);
+    assert(typeof username === 'string');
+    assert(typeof password === 'string');
+    assert(typeof email === 'string');
+    assert(typeof admin === 'boolean');
+    assert(typeof callback === 'function');
 
     if (username.length === 0) {
         return callback(new UserError('username empty', UserError.ARGUMENTS));
@@ -135,7 +129,9 @@ function createUser(username, password, email, admin, callback) {
 }
 
 function verifyUser(username, password, callback) {
-    ensureArgs(arguments, ['string', 'string', 'function']);
+    assert(typeof username === 'string');
+    assert(typeof password === 'string');
+    assert(typeof callback === 'function');
 
     if (username.length === 0) {
         return callback(new UserError('username empty', UserError.ARGUMENTS));
@@ -171,7 +167,8 @@ function verifyUser(username, password, callback) {
 }
 
 function removeUser(username, callback) {
-    ensureArgs(arguments, ['string', 'function']);
+    assert(typeof username === 'string');
+    assert(typeof callback === 'function');
 
     userdb.del(username, function (error) {
         if (error) return callback(error);
@@ -182,7 +179,8 @@ function removeUser(username, callback) {
 }
 
 function getUser(username, callback) {
-    ensureArgs(arguments, ['string', 'function']);
+    assert(typeof username === 'string');
+    assert(typeof callback === 'function');
 
     userdb.get(username, function (error, result) {
         if (error) return callback(error);
@@ -191,13 +189,16 @@ function getUser(username, callback) {
 }
 
 function updateUser(username, callback) {
-    ensureArgs(arguments, ['string', 'object', 'function']);
+    assert(typeof username === 'string');
+    assert(typeof callback === 'function');
 
     callback(new UserError('not implemented', UserError.INTERNAL_ERROR));
 }
 
 function changeAdmin(username, admin, callback) {
-    ensureArgs(arguments, ['string', 'boolean', 'function']);
+    assert(typeof username === 'string');
+    assert(typeof admin === 'boolean');
+    assert(typeof callback === 'function');
 
     getUser(username, function (error, user) {
         if (error) return callback(error);
@@ -221,9 +222,10 @@ function changeAdmin(username, admin, callback) {
     });
 }
 
-// TODO this will break all encrypted volumes!!
 function resetPassword(userId, newPassword, callback) {
-    ensureArgs(arguments, ['string', 'string', 'function']);
+    assert(typeof userId === 'string');
+    assert(typeof newPassword === 'string');
+    assert(typeof callback === 'function');
 
     if (newPassword.length === 0) {
         debug('Empty passwords are not allowed.');
@@ -258,7 +260,10 @@ function resetPassword(userId, newPassword, callback) {
 }
 
 function changePassword(username, oldPassword, newPassword, callback) {
-    ensureArgs(arguments, ['string', 'string', 'string', 'function']);
+    assert(typeof username === 'string');
+    assert(typeof oldPassword === 'string');
+    assert(typeof newPassword === 'string');
+    assert(typeof callback === 'function');
 
     if (newPassword.length === 0) {
         debug('Empty passwords are not allowed.');
@@ -292,7 +297,7 @@ function changePassword(username, oldPassword, newPassword, callback) {
 }
 
 function clear(callback) {
-    ensureArgs(arguments, ['function']);
+    assert(typeof callback === 'function');
 
     userdb.clear(callback);
 }
