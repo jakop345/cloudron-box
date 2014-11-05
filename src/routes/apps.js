@@ -4,6 +4,7 @@
 
 var apps = require('../apps.js'),
     AppsError = apps.AppsError,
+    assert = require('assert'),
     config = require('../../config.js'),
     debug = require('debug')('box:routes/apps'),
     fs = require('fs'),
@@ -32,11 +33,11 @@ exports = module.exports = {
  * Get installed (or scheduled to be installed) app
  */
 function getApp(req, res, next) {
-    if (typeof req.params.id !== 'string') return next(new HttpError(400, 'appid is required'));
+    assert(typeof req.params.id === 'string');
 
     apps.get(req.params.id, function (error, app) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
-        if (error) return next(new HttpError(500, 'Internal error:' + error));
+        if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(200, app));
     });
@@ -46,11 +47,11 @@ function getApp(req, res, next) {
  * Get the app installed in the subdomain
  */
 function getAppBySubdomain(req, res, next) {
-    if (typeof req.params.subdomain !== 'string') return next(new HttpError(400, 'subdomain is required'));
+    assert(typeof req.params.subdomain === 'string');
 
     apps.getBySubdomain(req.params.subdomain, function (error, app) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such subdomain'));
-        if (error) return next(new HttpError(500, 'Internal error:' + error));
+        if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(200, app));
     });
@@ -61,7 +62,7 @@ function getAppBySubdomain(req, res, next) {
  */
 function getApps(req, res, next) {
     apps.getAll(function (error, allApps) {
-        if (error) return next(new HttpError(500, 'Internal error:' + error));
+        if (error) return next(new HttpError(500, error));
         next(new HttpSuccess(200, { apps: allApps }));
     });
 }
@@ -70,7 +71,7 @@ function getApps(req, res, next) {
  * Get the app icon
  */
 function getAppIcon(req, res, next) {
-    if (typeof req.params.id !== 'string') return next(new HttpError(400, 'appid is required'));
+    assert(typeof req.params.id === 'string');
 
     var iconPath = paths.APPICONS_DIR + '/' + req.params.id + '.png';
     fs.exists(iconPath, function (exists) {
@@ -87,6 +88,8 @@ function getAppIcon(req, res, next) {
  * @bodyparam {object} portBindings map from container port to (public) host port. can be null.
  */
 function installApp(req, res, next) {
+    assert(typeof req.body === 'object');
+
     var data = req.body;
 
     if (!data) return next(new HttpError(400, 'Cannot parse data field'));
@@ -102,9 +105,9 @@ function installApp(req, res, next) {
     debug('Installing app id:%s storeid:%s loc:%s port:%j restrict:%s', appId, data.appStoreId, data.location, data.portBindings, data.restrictAccessTo);
 
     apps.install(appId, data.appStoreId, req.user.username, data.password, data.location, data.portBindings, data.restrictAccessTo, function (error) {
-        if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, 'App already exists: ' + error));
+        if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, 'App already exists'));
         if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));
-        if (error) return next(new HttpError(500, 'Internal error:' + error));
+        if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(200, { id: appId } ));
     });
@@ -118,6 +121,8 @@ function installApp(req, res, next) {
  * @bodyparam {object} portBindings map from container port to (public) host port. can be null.
  */
 function configureApp(req, res, next) {
+    assert(typeof req.body === 'object');
+
     var data = req.body;
 
     if (!data) return next(new HttpError(400, 'Cannot parse data field'));
@@ -129,10 +134,10 @@ function configureApp(req, res, next) {
     debug('Configuring app id:%s location:%s bindings:%j', data.appId, data.location, data.portBindings);
 
     apps.configure(data.appId, req.user.username, data.password, data.location, data.portBindings, data.restrictAccessTo, function (error) {
-        if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app:' + error));
-        if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error));
+        if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
+        if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
         if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));
-        if (error) return next(new HttpError(500, 'Internal error:' + error));
+        if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(200, { } ));
     });
@@ -143,61 +148,63 @@ function configureApp(req, res, next) {
  * @bodyparam {string} id The id of the app to be uninstalled
  */
 function uninstallApp(req, res, next) {
-    if (typeof req.params.id !== 'string') return next(new HttpError(400, 'appid is required'));
+    assert(typeof req.params.id === 'string');
 
     debug('Uninstalling app id:%s', req.params.id);
 
     apps.uninstall(req.params.id, function (error) {
-        if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app:' + error));
-        if (error) return next(new HttpError(500, 'Internal error: ' + error));
+        if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
+        if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(200, { }));
     });
 }
 
 function startApp(req, res, next) {
-    if (typeof req.params.id !== 'string') return next(new HttpError(400, 'appid is required'));
+    assert(typeof req.params.id === 'string');
 
     debug('Start app id:%s', req.params.id);
 
     apps.start(req.params.id, function (error) {
-        if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app:' + error));
-        if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error));
-        if (error) return next(new HttpError(500, 'Internal error: ' + error));
+        if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
+        if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
+        if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(200, { }));
     });
 }
 
 function stopApp(req, res, next) {
-    if (typeof req.params.id !== 'string') return next(new HttpError(400, 'appid is required'));
+    assert(typeof req.params.id === 'string');
 
     debug('Stop app id:%s', req.params.id);
 
     apps.stop(req.params.id, function (error) {
-        if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app:' + error));
-        if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error));
-        if (error) return next(new HttpError(500, 'Internal error: ' + error));
+        if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
+        if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
+        if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(200, { }));
     });
 }
 
 function updateApp(req, res, next) {
-    if (typeof req.params.id !== 'string') return next(new HttpError(400, 'appid is required'));
+    assert(typeof req.params.id === 'string');
 
     debug('Update app id:%s', req.params.id);
 
     apps.update(req.params.id, function (error) {
-        if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app:' + error));
-        if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error));
-        if (error) return next(new HttpError(500, 'Internal error: ' + error));
+        if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
+        if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
+        if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(200, { }));
     });
 }
 
 function getLogStream(req, res, next) {
+    assert(typeof req.params.id === 'string');
+
     debug('Getting logstream of app id:%s', req.params.id);
 
     var fromLine = parseInt(req.query.fromLine || 0, 10);
@@ -209,9 +216,9 @@ function getLogStream(req, res, next) {
     var fromLine = (parseInt(req.headers['last-event-id'], 10) + 1) || 1;
 
     apps.getLogStream(req.params.id, { fromLine: fromLine }, function (error, logStream) {
-        if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app:' + error));
-        if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error));
-        if (error) return next(new HttpError(500, 'Internal error: ' + error));
+        if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
+        if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
+        if (error) return next(new HttpError(500, error));
 
         res.writeHead(200, {
             'Content-Type': 'text/event-stream',
@@ -232,12 +239,14 @@ function getLogStream(req, res, next) {
 }
 
 function getLogs(req, res, next) {
+    assert(typeof req.params.id === 'string');
+
     debug('Getting logs of app id:%s', req.params.id);
 
     apps.getLogs(req.params.id, function (error, logStream) {
-        if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app:' + error));
-        if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error));
-        if (error) return next(new HttpError(500, 'Internal error: ' + error));
+        if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
+        if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
+        if (error) return next(new HttpError(500, error));
 
         res.writeHead(200, {
             'Content-Type': 'application/x-logs',
