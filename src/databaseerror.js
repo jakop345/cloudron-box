@@ -1,17 +1,28 @@
+/* jslint node:true */
+
 'use strict';
 
-var safe = require('safetydance'),
+var assert = require('assert'),
     util = require('util');
 
-exports = module.exports = DatabaseError;
+module.exports = exports = DatabaseError;
 
-function DatabaseError(reason, info) {
+function DatabaseError(reason, errorOrMessage) {
+    assert(typeof reason === 'string');
+    assert(errorOrMessage instanceof Error || typeof errorOrMessage === 'string' || typeof errorOrMessage === 'undefined');
+
     Error.call(this);
     Error.captureStackTrace(this, this.constructor);
 
-    this.name = this.constructor.name;
     this.reason = reason;
-    this.message = !info ? reason : (typeof info === 'object' ? JSON.stringify(info) : info);
+    if (typeof errorOrMessage === 'undefined') {
+        this.message = reason;
+    } else if (typeof errorOrMessage === 'string') {
+        this.message = errorOrMessage;
+    } else {
+        this.message = 'Internal error';
+        this.internalError = errorOrMessage;
+    }
 }
 util.inherits(DatabaseError, Error);
 

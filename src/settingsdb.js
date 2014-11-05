@@ -24,9 +24,9 @@ function get(key, callback) {
     assert(typeof callback === 'function');
 
     database.get('SELECT * FROM settings WHERE key = ?', [ key ], function (error, result) {
-        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
-        if (typeof result === 'undefined') return callback(new DatabaseError(null, DatabaseError.NOT_FOUND));
+        if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         callback(null, result.value);
     });
@@ -34,7 +34,7 @@ function get(key, callback) {
 
 function getAll(callback) {
     database.all('SELECT * FROM settings', function (error, result) {
-        if (error) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         if (typeof result === 'undefined') result = [ ];
 
@@ -49,7 +49,7 @@ function set(key, value, callback) {
 
     // sqlite does not have upsert
     database.run('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)', [ key, value ], function (error) {
-        if (error || this.changes !== 1) return callback(new DatabaseError(error, DatabaseError.INTERNAL_ERROR));
+        if (error || this.changes !== 1) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         callback(null);
     });

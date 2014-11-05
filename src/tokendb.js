@@ -49,7 +49,7 @@ function add(accessToken, userId, clientId, expires, scope, callback) {
 
     database.run('INSERT INTO tokens (accessToken, userId, clientId, expires, scope) VALUES (?, ?, ?, ?, ?)',
            [ accessToken, userId, clientId, expires, scope ], function (error) {
-        if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
+        if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
         if (error || !this.lastID) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         callback(null);

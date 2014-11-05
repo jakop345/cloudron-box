@@ -139,7 +139,7 @@ function add(id, appStoreId, location, portBindings, restrictAccessTo, callback)
            [ id, appStoreId, exports.ISTATE_PENDING_INSTALL, location, restrictAccessTo ], function (error) {
         if (error || !this.lastID) database.rollback(conn);
 
-        if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
+        if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
 
         if (error || !this.lastID) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
@@ -149,7 +149,7 @@ function add(id, appStoreId, location, portBindings, restrictAccessTo, callback)
         }, function done(error) {
             if (error) database.rollback(conn);
 
-            if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
+            if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
 
             if (error /* || !this.lastID*/) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
@@ -163,7 +163,7 @@ function exists(id, callback) {
     assert(typeof callback === 'function');
 
     database.get('SELECT 1 FROM apps WHERE id=?', [ id ], function (error, result) {
-        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, err.message));
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         return callback(null, typeof result !== 'undefined');
     });

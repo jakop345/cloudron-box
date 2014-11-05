@@ -103,7 +103,7 @@ function add(id, appId, clientId, clientSecret, name, redirectURI, scope, callba
     };
 
     database.run('INSERT INTO clients (id, appId, clientId, clientSecret, name, redirectURI, scope) VALUES ($id, $appId, $clientId, $clientSecret, $name, $redirectURI, $scope)', data, function (error) {
-        if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
+        if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
         if (error || !this.lastID) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         callback(null);
@@ -155,7 +155,7 @@ function replaceByAppId(id, appId, clientId, clientSecret, name, redirectURI, sc
     };
 
     database.run('INSERT OR REPLACE INTO clients (id, appId, clientId, clientSecret, name, redirectURI, scope) VALUES ($id, $appId, $clientId, $clientSecret, $name, $redirectURI, $scope)', data, function (error) {
-        if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
+        if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
         if (error || !this.lastID) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         callback(null);

@@ -37,7 +37,7 @@ function add(authCode, clientId, userId, callback) {
 
     database.run('INSERT INTO authcodes (authCode, clientId, userId) VALUES (?, ?, ?)',
             [ authCode, clientId, userId ], function (error) {
-        if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
+        if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
         if (error || !this.lastID) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         callback(null);
