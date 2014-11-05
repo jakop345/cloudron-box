@@ -2,7 +2,8 @@
 
 'use strict';
 
-var clientdb = require('../clientdb.js'),
+var assert = require('assert'),
+    clientdb = require('../clientdb.js'),
     DatabaseError = require('../databaseerror.js'),
     debug = require('debug')('box:routes/user'),
     HttpError = require('../../src/httperror.js'),
@@ -43,9 +44,15 @@ exports = module.exports = {
  * @apiSuccess (Created 201) {string} token A valid access token
  */
 function createAdmin(req, res, next) {
-    var username = req.body.username || '';
-    var password = req.body.password || '';
-    var email = req.body.email || '';
+    assert(typeof req.body === 'object');
+
+    if (typeof req.body.username !== 'string') return next(new HttpError(400, 'username must be string'));
+    if (typeof req.body.password !== 'string') return next(new HttpError(400, 'password must be string'));
+    if (typeof req.body.email !== 'string') return next(new HttpError(400, 'email must be string'));
+
+    var username = req.body.username;
+    var password = req.body.password;
+    var email = req.body.email;
 
     debug('createAdmin: ' + username);
 
@@ -56,7 +63,7 @@ function createAdmin(req, res, next) {
             } else if (error.reason === UserError.ALREADY_EXISTS) {
                 return next(new HttpError(409, 'Already exists'));
             } else {
-                return next(new HttpError(500, error.message));
+                return next(new HttpError(500, error));
             }
         }
 
@@ -70,7 +77,7 @@ function createAdmin(req, res, next) {
             if (error) return next(new HttpError(500, error));
 
             tokendb.add(token, username, result.id, expires, '*', function (error) {
-                if (error) return next(500, error.message);
+                if (error) return next(500, error);
 
                 debug('createAdmin: successful with token ' + token);
 
@@ -112,9 +119,15 @@ function createAdmin(req, res, next) {
  * @apiError (User already exists 409) {String} message Error details
  */
 function createUser(req, res, next) {
-    var username = req.body.username || '';
-    var password = req.body.password || '';
-    var email = req.body.email || '';
+    assert(typeof req.body === 'object');
+
+    if (typeof req.body.username !== 'string') return next(new HttpError(400, 'username must be string'));
+    if (typeof req.body.password !== 'string') return next(new HttpError(400, 'password must be string'));
+    if (typeof req.body.email !== 'string') return next(new HttpError(400, 'email must be string'));
+
+    var username = req.body.username;
+    var password = req.body.password;
+    var email = req.body.email;
 
     user.create(username, password, email, false /* admin */, function (error) {
         if (error) {
@@ -138,20 +151,25 @@ function createUser(req, res, next) {
 }
 
 function changeAdmin(req, res, next) {
-    if (!req.body.username) return next(new HttpError(400, 'API call requires a username.'));
+    assert(typeof req.body === 'object');
+
+    if (typeof req.body.username !== 'string') return next(new HttpError(400, 'API call requires a username.'));
     if (typeof req.body.admin !== 'boolean') return next(new HttpError(400, 'API call requires an admin setting.'));
 
-    user.changeAdmin(req.body.username, !!req.body.admin, function (error) {
+    user.changeAdmin(req.body.username, req.body.admin, function (error) {
         if (error && error.reason === UserError.NOT_ALLOWED) return next(new HttpError(403, 'Last admin'));
-        if (error) return next(new HttpError(500, 'Unable to change admin flag'));
+        if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(200, {}));
     });
 }
 
 function changePassword(req, res, next) {
-    if (!req.body.password) return next(new HttpError(400, 'API call requires the users old password.'));
-    if (!req.body.newPassword) return next(new HttpError(400, 'API call requires the users new password.'));
+    assert(typeof req.body === 'object');
+    assert(typeof req.user === 'object');
+
+    if (typeof req.body.password !== 'string') return next(new HttpError(400, 'API call requires the users old password.'));
+    if (typeof req.body.newPassword !== 'string') return next(new HttpError(400, 'API call requires the users new password.'));
 
     user.changePassword(req.user.username, req.body.password, req.body.newPassword, function (error) {
         if (error) {
@@ -159,7 +177,7 @@ function changePassword(req, res, next) {
             if (error.reason === UserError.WRONG_USER_OR_PASSWORD) {
                 return next(new HttpError(403, 'Wrong password'));
             }
-            return next(new HttpError(500, 'Unable to change password'));
+            return next(new HttpError(500, error));
         }
 
         next(new HttpSuccess(200, {}));
@@ -168,7 +186,7 @@ function changePassword(req, res, next) {
 
 function listUser(req, res, next) {
     user.list(function (error, result) {
-        if (error) return next(new HttpError(500, error.message));
+        if (error) return next(new HttpError(500, error));
         next(new HttpSuccess(200, { users: result }));
     });
 }
@@ -187,11 +205,13 @@ function listUser(req, res, next) {
  * @apiSuccess {String} email Email associated with the access token
  */
 function createToken(req, res, next) {
+    assert(typeof req.user === 'object');
+
     var token = tokendb.generateToken();
     var expires = new Date(Date.now() + 60 * 60000).toUTCString(); // 1 hour
 
     tokendb.add(token, req.user.username, null, expires, '*', function (err) {
-        if (err) return next(err);
+        if (err) return next(new HttpError(500, err));
         next(new HttpSuccess(200, {
             token: token,
             expires: expires,
@@ -215,7 +235,8 @@ function createToken(req, res, next) {
  * @apiSuccess {String} email User's email address
  */
 function info(req, res, next) {
-    // req.user is filled by the authentication step
+    assert(typeof req.user === 'object');
+
     next(new HttpSuccess(200, {
         username: req.user.username,
         email: req.user.email,
@@ -237,7 +258,7 @@ function logout(req, res, next) {
 
     // Invalidate token so the cookie cannot be reused after logout
     tokendb.del(req_token, function (error) {
-        if (error) return next(error);
+        if (error) return next(new HttpError(500, error));
         next(new HttpSuccess(200, {}));
     });
 }
@@ -256,12 +277,13 @@ function logout(req, res, next) {
  * @apiError (Forbidden 403) {String} message Error details
  */
 function removeUser(req, res, next) {
-    var username = req.body.username || '';
-    var password = req.body.password || '';
+    assert(typeof req.body === 'object');
 
-    if (!password || !username) {
-        return next(new HttpError(400, 'Missing username or password'));
-    }
+    if (typeof req.body.username !== 'string') return next(new HttpError(400, 'username must be string'));
+    if (typeof req.body.password !== 'string') return next(new HttpError(400, 'password must be string'));
+
+    var username = req.body.username;
+    var password = req.body.password;
 
     // rules:
     // - admin can remove any user
@@ -281,7 +303,7 @@ function removeUser(req, res, next) {
                 if (error.reason === DatabaseError.NOT_FOUND) {
                     return next(new HttpError(404, 'User not found'));
                 }
-                return next(new HttpError(500, 'Failed to remove user'));
+                return next(new HttpError(500, error));
             }
 
             next(new HttpSuccess(200, {}));

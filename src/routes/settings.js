@@ -27,6 +27,8 @@ function getNakedDomain(req, res, next) {
 }
 
 function setNakedDomain(req, res, next) {
+    assert(typeof req.body === 'object');
+
     var data = req.body;
     if (!data || typeof data.appid !== 'string') return next(new HttpError(400, 'appid is required'));
 
@@ -37,10 +39,10 @@ function setNakedDomain(req, res, next) {
 
         // TODO: apptask and db update needs to be atomic
         apptask.setNakedDomain(app, function (error) {
-            if (error) return next(new HttpError(500, 'Error setting naked domain: ' + error));
+            if (error) return next(new HttpError(500, error));
 
             settingsdb.setNakedDomain(data.appid, function (error) {
-                if (error) return next(new HttpError(500, 'Error settings naked domain: ' + error));
+                if (error) return next(new HttpError(500, error));
 
                 next(new HttpSuccess(200, { }));
             });

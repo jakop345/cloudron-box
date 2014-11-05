@@ -2,7 +2,8 @@
 
 'use strict';
 
-var cloudron = require('../cloudron.js'),
+var assert = require('assert'),
+    cloudron = require('../cloudron.js'),
     CloudronError = cloudron.CloudronError,
     debug = require('debug')('box:routes/cloudron'),
     df = require('nodejs-disks'),
@@ -39,7 +40,6 @@ function reboot(req, res, next) {
     debug('_reboot: execute "%s".', REBOOT_CMD);
 
     // Finish the request, to let the appstore know we triggered the restore it
-    // TODO is there a better way?
     next(new HttpSuccess(200, {}));
 
     execFile(SUDO, [ REBOOT_CMD ], {}, function (error, stdout, stderr) {
@@ -54,8 +54,8 @@ function reboot(req, res, next) {
 
 function createBackup(req, res, next) {
     cloudron.backup(function (error) {
-        if (error && error.reason === CloudronError.APPSTORE_DOWN) return next(new HttpError(503, error.message));
-        if (error) return next(new HttpError(500, error.message));
+        if (error && error.reason === CloudronError.APPSTORE_DOWN) return next(new HttpError(503, error));
+        if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(200, {}));
     });

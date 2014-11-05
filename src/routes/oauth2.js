@@ -130,7 +130,9 @@ function passwordResetRequestSite(req, res) {
 
 // This route is used for above form submission
 function passwordResetRequest(req, res, next) {
-    if (!req.body || !req.body.email) return next(new HttpError(400, 'Missing email'));
+    assert(typeof req.body === 'object');
+
+    if (typeof req.body.email !== 'string') return next(new HttpError(400, 'Missing email'));
 
     debug('passwordResetRequest: email %s.', req.body.email);
 
@@ -172,9 +174,11 @@ function passwordResetSite(req, res, next) {
 }
 
 function passwordReset(req, res, next) {
-    if (!req.body.resetToken) return next(new HttpError(400, 'Missing resetToken'));
-    if (!req.body.password) return next(new HttpError(400, 'Missing password'));
-    if (!req.body.passwordRepeat) return next(new HttpError(400, 'Missing passwordRepeat'));
+    assert(typeof req.body === 'object');
+
+    if (typeof req.body.resetToken !== 'string') return next(new HttpError(400, 'Missing resetToken'));
+    if (typeof req.body.password !== 'string') return next(new HttpError(400, 'Missing password'));
+    if (typeof req.body.passwordRepeat !== 'string') return next(new HttpError(400, 'Missing passwordRepeat'));
 
     debug('passwordReset: with token %s.', req.body.resetToken);
 
@@ -270,9 +274,12 @@ var authorization = [
             callback(null, client, '/api/v1/session/callback?redirectURI=' + url.resolve(redirectOrigin, redirectPath));
         });
     }),
-// Until we have OAuth scopes, skip decision dialog
-// OAuth sopes skip START
+    // Until we have OAuth scopes, skip decision dialog
+    // OAuth sopes skip START
     function (req, res, next) {
+        assert(typeof req.body === 'object');
+        assert(typeof req.oauth2 === 'object');
+
         req.body.transaction_id = req.oauth2.transactionID;
         next();
     },
@@ -280,7 +287,7 @@ var authorization = [
         debug('decision: with scope', req.oauth2.req.scope);
         return done(null, { scope: req.oauth2.req.scope });
     })
-// OAuth sopes skip END
+    // OAuth sopes skip END
     // function (req, res) {
     //     res.render('dialog', { transactionID: req.oauth2.transactionID, user: req.user, client: req.oauth2.client, csrf: req.csrfToken() });
     // }
@@ -375,6 +382,7 @@ function getClients(req, res, next) {
 
 function getClientTokens(req, res, next) {
     assert(typeof req.params.clientId === 'string');
+    assert(typeof req.user === 'object');
 
     debug('getClientTokens');
 
@@ -391,6 +399,7 @@ function getClientTokens(req, res, next) {
 
 function delClientTokens(req, res, next) {
     assert(typeof req.params.clientId === 'string');
+    assert(typeof req.user === 'object');
 
     debug('delClientTokens: user %s and client %s.', req.user.id, req.params.clientId);
 
