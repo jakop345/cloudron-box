@@ -173,7 +173,6 @@ function verifyUser(username, password, callback) {
 function removeUser(username, callback) {
     ensureArgs(arguments, ['string', 'function']);
 
-    // TODO we might want to cleanup volumes assigned to this user as well - Johannes
     userdb.del(username, function (error) {
         if (error) return callback(error);
         callback(null);
