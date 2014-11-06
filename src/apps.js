@@ -102,13 +102,23 @@ function uninitialize() {
 
 // http://dustinsenos.com/articles/customErrorsInNode
 // http://code.google.com/p/v8/wiki/JavaScriptStackTraceApi
-function AppsError(reason, info) {
+function AppsError(reason, errorOrMessage) {
+    assert(typeof reason === 'string');
+    assert(errorOrMessage instanceof Error || typeof errorOrMessage === 'string' || typeof errorOrMessage === 'undefined');
+
     Error.call(this);
     Error.captureStackTrace(this, this.constructor);
 
     this.name = this.constructor.name;
     this.reason = reason;
-    this.message = !info ? reason : (typeof info === 'object' ? JSON.stringify(info) : info);
+    if (typeof errorOrMessage === 'undefined') {
+        this.message = reason;
+    } else if (typeof errorOrMessage === 'string') {
+        this.message = errorOrMessage;
+    } else {
+        this.message = 'Internal error';
+        this.internalError = errorOrMessage;
+    }
 }
 util.inherits(AppsError, Error);
 AppsError.INTERNAL_ERROR = 'Internal Error';

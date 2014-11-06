@@ -35,17 +35,25 @@ var CRYPTO_KEY_LENGTH = 512; // bits
 
 // http://dustinsenos.com/articles/customErrorsInNode
 // http://code.google.com/p/v8/wiki/JavaScriptStackTraceApi
-function UserError(err, reason) {
+function UserError(reason, errorOrMessage) {
+    assert(typeof reason === 'string');
+    assert(errorOrMessage instanceof Error || typeof errorOrMessage === 'string' || typeof errorOrMessage === 'undefined');
+
     Error.call(this);
     Error.captureStackTrace(this, this.constructor);
 
     this.name = this.constructor.name;
-    this.message = safe.JSON.stringify(err);
-    this.code = err ? err.code : null;
-    this.reason = reason || UserError.INTERNAL_ERROR;
+    this.reason = reason;
+    if (typeof errorOrMessage === 'undefined') {
+        this.message = reason;
+    } else if (typeof errorOrMessage === 'string') {
+        this.message = errorOrMessage;
+    } else {
+        this.message = 'Internal error';
+        this.internalError = errorOrMessage;
+    }
 }
 util.inherits(UserError, Error);
-UserError.DATABASE_ERROR = 'Database Error';
 UserError.INTERNAL_ERROR = 'Internal Error';
 UserError.ALREADY_EXISTS = 'Already Exists';
 UserError.NOT_FOUND = 'Not Found';
@@ -57,10 +65,7 @@ function listUsers(callback) {
     assert(typeof callback === 'function');
 
     userdb.getAll(function (error, result) {
-        if (error) {
-            debug('Unable to get all users.', error);
-            return callback(new UserError('Unable to list users', UserError.DATABASE_ERROR));
-        }
+        if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
         return callback(null, result.map(database.removePrivates));
     });
@@ -73,27 +78,15 @@ function createUser(username, password, email, admin, callback) {
     assert(typeof admin === 'boolean');
     assert(typeof callback === 'function');
 
-    if (username.length === 0) {
-        return callback(new UserError('username empty', UserError.ARGUMENTS));
-    }
-
-    if (password.length === 0) {
-        return callback(new UserError('password empty', UserError.ARGUMENTS));
-    }
-
-    if (email.length === 0) {
-        return callback(new UserError('email empty', UserError.ARGUMENTS));
-    }
+    if (username.length === 0) return callback(new UserError(UserError.ARGUMENTS, 'username empty'));
+    if (password.length === 0) return callback(new UserError(UserError.ARGUMENTS, 'password empty'));
+    if (email.length === 0) return callback(new UserError(UserError.ARGUMENTS, 'email empty'));
 
     crypto.randomBytes(CRYPTO_SALT_SIZE, function (error, salt) {
-        if (error) {
-            return callback(new UserError('Failed to generate random bytes', UserError.INTERNAL_ERROR));
-        }
+        if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
         crypto.pbkdf2(password, salt, CRYPTO_ITERATIONS, CRYPTO_KEY_LENGTH, function (error, derivedKey) {
-            if (error) {
-                return callback(new UserError('Failed to hash password', UserError.INTERNAL_ERROR));
-            }
+            if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
             // now generate the pub/priv keypairs for volume header
             var keyPair = ursa.generatePrivateKey(2048 /* modulusBits */, 65537 /* exponent */);
@@ -112,12 +105,8 @@ function createUser(username, password, email, admin, callback) {
             };
 
             userdb.add(username, user, function (error) {
-                if (error) {
-                    if (error.reason === DatabaseError.ALREADY_EXISTS) {
-                        return callback(new UserError('Already exists', UserError.ALREADY_EXISTS));
-                    }
-                    return callback(error);
-                }
+                if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new UserError(UserError.ALREADY_EXISTS));
+                if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
                 callback(null, user);
 
@@ -133,33 +122,19 @@ function verifyUser(username, password, callback) {
     assert(typeof password === 'string');
     assert(typeof callback === 'function');
 
-    if (username.length === 0) {
-        return callback(new UserError('username empty', UserError.ARGUMENTS));
-    }
-
-    if (password.length === 0) {
-        return callback(new UserError('password empty', UserError.ARGUMENTS));
-    }
+    if (username.length === 0) return callback(new UserError(UserError.ARGUMENTS, 'username empty'));
+    if (password.length === 0) return callback(new UserError(UserError.ARGUMENTS, 'password empty'));
 
     userdb.get(username, function (error, user) {
-        if (error) {
-            if (error.reason === DatabaseError.NOT_FOUND) {
-                return callback(new UserError('Username not found', UserError.NOT_FOUND));
-            }
-
-            return callback(error);
-        }
+        if (error && error.reason == DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
+        if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
         var saltBinary = new Buffer(user._salt, 'hex');
         crypto.pbkdf2(password, saltBinary, CRYPTO_ITERATIONS, CRYPTO_KEY_LENGTH, function (error, derivedKey) {
-            if (error) {
-                return callback(new UserError('Failed to hash password', UserError.INTERNAL_ERROR));
-            }
+            if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
             var derivedKeyHex = new Buffer(derivedKey, 'binary').toString('hex');
-            if (derivedKeyHex !== user._password)  {
-                return callback(new UserError('Username and password do not match', UserError.WRONG_USER_OR_PASSWORD));
-            }
+            if (derivedKeyHex !== user._password) return callback(new UserError(UserError.WRONG_USER_OR_PASSWORD));
 
             callback(null, user);
         });
@@ -171,7 +146,8 @@ function removeUser(username, callback) {
     assert(typeof callback === 'function');
 
     userdb.del(username, function (error) {
-        if (error) return callback(error);
+        if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+
         callback(null);
 
         mailer.userRemoved(username);
@@ -183,7 +159,8 @@ function getUser(username, callback) {
     assert(typeof callback === 'function');
 
     userdb.get(username, function (error, result) {
-        if (error) return callback(error);
+        if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+
         return callback(null, result);
     });
 }
@@ -192,7 +169,7 @@ function updateUser(username, callback) {
     assert(typeof username === 'string');
     assert(typeof callback === 'function');
 
-    callback(new UserError('not implemented', UserError.INTERNAL_ERROR));
+    callback(new UserError(UserError.INTERNAL_ERROR, 'Not implemented'));
 }
 
 function changeAdmin(username, admin, callback) {
@@ -204,15 +181,15 @@ function changeAdmin(username, admin, callback) {
         if (error) return callback(error);
 
         userdb.getAllAdmins(function (error, result) {
-            if (error) return callback(error);
+            if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
             // protect from a system where there is no admin left
-            if (result.length <= 1 && !admin) return callback(new UserError('last admin', UserError.NOT_ALLOWED));
+            if (result.length <= 1 && !admin) return callback(new UserError(UserError.NOT_ALLOWED, 'Only admin'));
 
             user.admin = admin;
 
             userdb.update(username, user, function (error) {
-                if (error) return callback(error);
+                if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
                 callback(null);
 
@@ -227,19 +204,14 @@ function resetPassword(userId, newPassword, callback) {
     assert(typeof newPassword === 'string');
     assert(typeof callback === 'function');
 
-    if (newPassword.length === 0) {
-        debug('Empty passwords are not allowed.');
-        return callback(new UserError('No empty passwords allowed', UserError.INTERNAL_ERROR));
-    }
+    if (newPassword.length === 0) return callback(new UserError(UserError.ARGUMENTS, 'No empty passwords allowed'));
 
     userdb.get(userId, function (error, user) {
         if (error) return callback(error);
 
         var saltBuffer = new Buffer(user._salt, 'hex');
         crypto.pbkdf2(newPassword, saltBuffer, CRYPTO_ITERATIONS, CRYPTO_KEY_LENGTH, function (error, derivedKey) {
-            if (error) {
-                return callback(new UserError('Failed to hash password', UserError.INTERNAL_ERROR));
-            }
+            if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
             // var privateKeyPem = aes.decrypt(user._privatePemCipher, oldPassword, saltBuffer);
             // var keyPair = ursa.createPrivateKey(privateKeyPem, oldPassword, 'utf8');
@@ -250,8 +222,8 @@ function resetPassword(userId, newPassword, callback) {
             user._privatePemCipher = aes.encrypt(keyPair.toPrivatePem(), newPassword, saltBuffer);
 
             userdb.update(userId, user, function (error) {
-                if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError('User does not exist', UserError.NOT_FOUND));
-                if (error) return callback(error);
+                if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
+                if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
                 callback(null);
             });
@@ -265,19 +237,14 @@ function changePassword(username, oldPassword, newPassword, callback) {
     assert(typeof newPassword === 'string');
     assert(typeof callback === 'function');
 
-    if (newPassword.length === 0) {
-        debug('Empty passwords are not allowed.');
-        return callback(new UserError('No empty passwords allowed', UserError.INTERNAL_ERROR));
-    }
+    if (newPassword.length === 0) return callback(new UserError(UserError.ARGUMENTS, 'Npm empty passwords allowed'));
 
     verifyUser(username, oldPassword, function (error, user) {
         if (error) return callback(error);
 
         var saltBuffer = new Buffer(user._salt, 'hex');
         crypto.pbkdf2(newPassword, saltBuffer, CRYPTO_ITERATIONS, CRYPTO_KEY_LENGTH, function (error, derivedKey) {
-            if (error) {
-                return callback(new UserError('Failed to hash password', UserError.INTERNAL_ERROR));
-            }
+            if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
             var privateKeyPem = aes.decrypt(user._privatePemCipher, oldPassword, saltBuffer);
             var keyPair = ursa.createPrivateKey(privateKeyPem, oldPassword, 'utf8');
@@ -287,8 +254,8 @@ function changePassword(username, oldPassword, newPassword, callback) {
             user._privatePemCipher = aes.encrypt(keyPair.toPrivatePem(), newPassword, saltBuffer);
 
             userdb.update(username, user, function (error) {
-                if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError('User does not exist', UserError.NOT_FOUND));
-                if (error) return callback(error);
+                if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
+                if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
                 callback(null, user);
             });
@@ -299,5 +266,10 @@ function changePassword(username, oldPassword, newPassword, callback) {
 function clear(callback) {
     assert(typeof callback === 'function');
 
-    userdb.clear(callback);
+    userdb.clear(function (error) {
+        if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+
+        return callback(null);
+    });
 }
+

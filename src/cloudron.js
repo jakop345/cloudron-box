@@ -42,13 +42,23 @@ var gBackupTimerId = null,
     gGetCertificateTimerId = null,
     gCachedIp = null;
 
-function CloudronError(reason, info) {
+function CloudronError(reason, errorOrMessage) {
+    assert(typeof reason === 'string');
+    assert(errorOrMessage instanceof Error || typeof errorOrMessage === 'string' || typeof errorOrMessage === 'undefined');
+
     Error.call(this);
     Error.captureStackTrace(this, this.constructor);
 
     this.name = this.constructor.name;
     this.reason = reason;
-    this.message = !info ? reason : (typeof info === 'object' ? JSON.stringify(info) : info);
+    if (typeof errorOrMessage === 'undefined') {
+        this.message = reason;
+    } else if (typeof errorOrMessage === 'string') {
+        this.message = errorOrMessage;
+    } else {
+        this.message = 'Internal error';
+        this.internalError = errorOrMessage;
+    }
 }
 util.inherits(CloudronError, Error);
 CloudronError.INTERNAL_ERROR = 'Internal Error';
@@ -103,7 +113,7 @@ function backup(callback) {
         debug('backup: url %s', url);
 
         execFile(SUDO, [ BACKUP_CMD,  url ], { }, function (error) {
-            if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, 'Error starting backup command: ' + error.message));
+            if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
             return callback(null);
         });
