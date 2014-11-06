@@ -90,6 +90,8 @@ function uninitialize() {
 }
 
 function getBackupUrl(callback) {
+    assert(typeof callback === 'function');
+
     if (!config.appServerUrl()) return callback(new Error('No appstore server url set'));
     if (!config.token()) return callback(new Error('No appstore server token set'));
 
@@ -185,6 +187,8 @@ function sendHeartBeat() {
 };
 
 function sendMailDnsRecordsRequest(callback) {
+    assert(typeof callback === 'function');
+
     var DKIM_SELECTOR = 'mail';
     var DMARC_REPORT_EMAIL = 'girish@forwardbias.in';
 
