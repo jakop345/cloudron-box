@@ -146,6 +146,16 @@ describe('App API', function () {
         });
     });
 
+    it('app install fails - invalid json', function (done) {
+        request.post(SERVER_URL + '/api/v1/app/install')
+               .query({ access_token: token })
+               .send('garbage')
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(400);
+            done(err);
+        });
+    });
+ 
     it('app install fails - invalid location', function (done) {
         request.post(SERVER_URL + '/api/v1/app/install')
                .query({ access_token: token })
