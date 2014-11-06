@@ -19,7 +19,7 @@ exports = module.exports = {
 
 function getNakedDomain(req, res, next) {
     settingsdb.getNakedDomain(function (error, nakedDomain) {
-        if (error) return next(new HttpError(500, 'Internal error: ' + error));
+        if (error) return next(new HttpError(500, error));
 
         if (nakedDomain === null) return next(new HttpSuccess(200, { appid: '' }));
 
@@ -31,7 +31,7 @@ function setNakedDomain(req, res, next) {
     assert(typeof req.body === 'object');
 
     var data = req.body;
-    if (!data || typeof data.appid !== 'string') return next(new HttpError(400, 'appid is required'));
+    if (typeof data.appid !== 'string') return next(new HttpError(400, 'appid is required'));
 
     function getApp(appid, callback) { return appid !== '' ? apps.get(appid, callback): callback(null); }
 
