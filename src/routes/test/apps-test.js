@@ -157,6 +157,28 @@ describe('App API', function () {
         });
     });
 
+    it('app install fails - invalid location type', function (done) {
+        request.post(SERVER_URL + '/api/v1/app/install')
+               .query({ access_token: token })
+               .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: 42, restrictAccessTo: '' })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(400);
+            expect(res.body.message).to.eql('location is required');
+            done(err);
+        });
+    });
+
+    it('app install fails - invalid password type', function (done) {
+        request.post(SERVER_URL + '/api/v1/app/install')
+               .query({ access_token: token })
+               .send({ appStoreId: APP_STORE_ID, password: 3.52, location: 'ninja', restrictAccessTo: '' })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(400);
+            expect(res.body.message).to.eql('password is required');
+            done(err);
+        });
+    });
+
     it('app install fails - reserved location', function (done) {
         request.post(SERVER_URL + '/api/v1/app/install')
                .query({ access_token: token })
