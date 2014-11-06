@@ -51,9 +51,9 @@ function CloudronError(reason, info) {
     this.message = !info ? reason : (typeof info === 'object' ? JSON.stringify(info) : info);
 }
 util.inherits(CloudronError, Error);
-CloudronError.INTERNAL_ERROR = 1;
-CloudronError.ALREADY_PROVISIONED = 2;
-CloudronError.APPSTORE_DOWN = 3;
+CloudronError.INTERNAL_ERROR = 'Internal Error';
+CloudronError.ALREADY_PROVISIONED = 'Already Provisioned';
+CloudronError.APPSTORE_DOWN = 'Appstore Down';
 
 function initialize() {
     // every backup restarts the box. the setInterval is only needed should that fail for some reason

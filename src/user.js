@@ -45,13 +45,13 @@ function UserError(err, reason) {
     this.reason = reason || UserError.INTERNAL_ERROR;
 }
 util.inherits(UserError, Error);
-UserError.DATABASE_ERROR = 1;
-UserError.INTERNAL_ERROR = 2;
-UserError.ALREADY_EXISTS = 3;
-UserError.NOT_FOUND = 4;
-UserError.WRONG_USER_OR_PASSWORD = 5;
-UserError.ARGUMENTS = 6;
-UserError.NOT_ALLOWED = 7;
+UserError.DATABASE_ERROR = 'Database Error';
+UserError.INTERNAL_ERROR = 'Internal Error';
+UserError.ALREADY_EXISTS = 'Already Exists';
+UserError.NOT_FOUND = 'Not Found';
+UserError.WRONG_USER_OR_PASSWORD = 'Wrong User or Password';
+UserError.ARGUMENTS = 'Bad Arguments';
+UserError.NOT_ALLOWED = 'Not Allowed';
 
 function listUsers(callback) {
     assert(typeof callback === 'function');

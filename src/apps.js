@@ -111,11 +111,11 @@ function AppsError(reason, info) {
     this.message = !info ? reason : (typeof info === 'object' ? JSON.stringify(info) : info);
 }
 util.inherits(AppsError, Error);
-AppsError.INTERNAL_ERROR = 1;
-AppsError.ALREADY_EXISTS = 2;
-AppsError.NOT_FOUND = 3;
-AppsError.BAD_FIELD = 4;
-AppsError.BAD_STATE = 5;
+AppsError.INTERNAL_ERROR = 'Internal Error';
+AppsError.ALREADY_EXISTS = 'Already Exists';
+AppsError.NOT_FOUND = 'Not Found';
+AppsError.BAD_FIELD = 'Bad Field';
+AppsError.BAD_STATE = 'Bad State';
 
 function appFqdn(location) {
     return location + '-' + config.fqdn();
