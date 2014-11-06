@@ -37,8 +37,7 @@ function restore(req, res, next) {
     installer.restore(req.body, function (error) {
         if (error) console.error(error);
 
-        debug('Exiting');
-        process.exit(error ? 1 : 0);
+        stop();
     });
 
     stopAnnounce();
@@ -59,8 +58,7 @@ function provision(req, res, next) {
     installer.provision(req.body, function (error) {
         if (error) console.error(error);
 
-        debug('Exiting');
-        process.exit(error ? 1 : 0);
+        stop();
     });
 
     stopAnnounce();
@@ -97,10 +95,16 @@ function start(appServerUrl, callback) {
 
 function stop(callback) {
     assert(!callback || typeof callback === 'function');
+    callback = callback || function () { };
+
+    if (!gHttpsServer) return callback(null);
+
+    debug('Stopping');
 
     stopAnnounce();
 
     gHttpsServer.close(callback);
+    gHttpsServer = null;
 }
 
 function startAnnounce(appServerUrl) {
