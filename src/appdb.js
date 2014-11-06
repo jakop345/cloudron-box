@@ -128,7 +128,7 @@ function add(id, appStoreId, location, portBindings, restrictAccessTo, callback)
     assert(typeof appStoreId === 'string');
     assert(typeof location === 'string');
     assert(typeof portBindings === 'object');
-    assert(typeof restrictAccessTo === 'string');
+    assert(typeof restrictAccessTo === 'string'); // TODO: rename to accessRestriction
     assert(typeof callback === 'function');
 
     portBindings = portBindings || { };

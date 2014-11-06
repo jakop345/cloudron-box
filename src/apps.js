@@ -61,6 +61,7 @@ function initialize() {
 }
 
 function startTask(appId) {
+    assert(typeof appId === 'string');
     assert(!(appId in gTasks));
 
     gTasks[appId] = child_process.fork(__dirname + '/apptask.js', [ appId ]);
@@ -71,6 +72,8 @@ function startTask(appId) {
 }
 
 function stopTask(appId) {
+    assert(typeof appId === 'string');
+
     if (gTasks[appId]) {
         debug('Killing existing task : ' + gTasks[appId].pid);
         gTasks[appId].kill();
@@ -233,6 +236,18 @@ function getAll(callback) {
     });
 }
 
+function validateRestrictAccessTo(restrictAccessTo) {
+    // TODO: make the values below enumerations in the oauth code
+    switch (restrictAccessTo) {
+    case '':
+    case 'roleUser':
+    case 'roleAdmin':
+        return null;
+    default:
+        return new Error('Invalid restrictAccessTo');
+    }
+}
+
 function install(appId, appStoreId, username, password, location, portBindings, restrictAccessTo, callback) {
     assert(typeof appId === 'string');
     assert(typeof username === 'string');
@@ -246,6 +261,9 @@ function install(appId, appStoreId, username, password, location, portBindings, 
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
     error = validatePortBindings(portBindings);
+    if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
+
+    error = validateRestrictAccessTo(restrictAccessTo);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
     debug('Will install app with id : ' + appId);
@@ -274,6 +292,9 @@ function configure(appId, username, password, location, portBindings, restrictAc
 
     error = portBindings ? validatePortBindings(portBindings) : null;
     if (error) return callback(error);
+
+    error = validateRestrictAccessTo(restrictAccessTo);
+    if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
     var values = { };
     if (location) values.location = location;
