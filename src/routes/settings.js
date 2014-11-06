@@ -5,6 +5,7 @@
 var apps = require('../apps.js'),
     AppsError = apps.AppsError,
     apptask = require('../apptask.js'),
+    assert = require('assert'),
     DatabaseError = require('../databaseerror.js'),
     debug = require('debug')('box:routes/settings'),
     HttpError = require('../httperror.js'),
