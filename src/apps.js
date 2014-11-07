@@ -137,7 +137,6 @@ function appFqdn(location) {
 
 // http://stackoverflow.com/questions/7930751/regexp-for-subdomain
 function validateSubdomain(subdomain, fqdn) {
-    // TODO: convert to lowerCase
     var RESERVED_SUBDOMAINS = [ 'admin', '_dmarc', '_domainkey' ];
 
     if (RESERVED_SUBDOMAINS.indexOf(subdomain) !== -1) return new Error(subdomain + ' location is reserved');
@@ -271,7 +270,7 @@ function install(appId, appStoreId, username, password, location, portBindings, 
 
     debug('Will install app with id : ' + appId);
 
-    appdb.add(appId, appStoreId, location, portBindings, restrictAccessTo, function (error) {
+    appdb.add(appId, appStoreId, location.toLowerCase(), portBindings, restrictAccessTo, function (error) {
         if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new AppsError(AppsError.ALREADY_EXISTS));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
@@ -300,7 +299,7 @@ function configure(appId, username, password, location, portBindings, restrictAc
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
     var values = { };
-    if (location) values.location = location;
+    if (location) values.location = location.toLowerCase();
     values.portBindings = portBindings;
     values.restrictAccessTo = restrictAccessTo;
 
