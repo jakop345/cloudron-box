@@ -234,6 +234,16 @@ describe('App API', function () {
         });
     });
 
+    it('app install fails because of conflicting location', function (done) {
+        request.post(SERVER_URL + '/api/v1/app/install')
+               .query({ access_token: token })
+               .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: null, restrictAccessTo: '' })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(409);
+            done();
+        });
+    });
+
     it('can get app status', function (done) {
         request.get(SERVER_URL + '/api/v1/app/' + APP_ID)
                .query({ access_token: token })
