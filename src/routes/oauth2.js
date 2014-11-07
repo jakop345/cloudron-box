@@ -408,7 +408,7 @@ function delClientTokens(req, res, next) {
 
         debug('delClientTokens: success.');
 
-        next(new HttpSuccess(200, {}));
+        next(new HttpSuccess(204));
     });
 }
 

@@ -133,7 +133,7 @@ angular.module('Application').service('Client', function ($http, md5) {
         var that = this;
         var data = { appStoreId: id, password: password, location: config.location, portBindings: config.portBindings, restrictAccessTo: config.restrictAccessTo };
         $http.post('/api/v1/app/install', data).success(function (data, status) {
-            if (status !== 200 || !data.id) return callback(new ClientError(status, data));
+            if (status !== 202 || !data.id) return callback(new ClientError(status, data));
 
             // put new app with amended title in cache
             data.manifest = { title: title };
@@ -146,14 +146,14 @@ angular.module('Application').service('Client', function ($http, md5) {
     Client.prototype.configureApp = function (id, password, config, callback) {
         var data = { appId: id, password: password, location: config.location, portBindings: config.portBindings, restrictAccessTo: config.restrictAccessTo };
         $http.post('/api/v1/app/' + id + '/configure', data).success(function (data, status) {
-            if (status !== 200) return callback(new ClientError(status, data));
+            if (status !== 202) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.updateApp = function (id, callback) {
         $http.post('/api/v1/app/' + id + '/update', { }).success(function (data, status) {
-            if (status !== 200) return callback(new ClientError(status, data));
+            if (status !== 202) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
     };
@@ -161,7 +161,7 @@ angular.module('Application').service('Client', function ($http, md5) {
     Client.prototype.startApp = function (id, callback) {
         var data = { };
         $http.post('/api/v1/app/' + id + '/start', data).success(function (data, status) {
-            if (status !== 200) return callback(new ClientError(status, data));
+            if (status !== 202) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
     };
@@ -169,7 +169,7 @@ angular.module('Application').service('Client', function ($http, md5) {
     Client.prototype.stopApp = function (id, callback) {
         var data = { };
         $http.post('/api/v1/app/' + id + '/stop', data).success(function (data, status) {
-            if (status !== 200) return callback(new ClientError(status, data));
+            if (status !== 202) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
     };
@@ -198,7 +198,7 @@ angular.module('Application').service('Client', function ($http, md5) {
 
     Client.prototype.setNakedDomain = function (appid, callback) {
         $http.post('/api/v1/settings/naked_domain', { appid: appid || '' }).success(function (data, status) {
-            if (status !== 200) return callback(new ClientError(status, data));
+            if (status !== 204) return callback(new ClientError(status));
             callback(null);
         }).error(defaultErrorHandler(callback));
     };
@@ -227,7 +227,7 @@ angular.module('Application').service('Client', function ($http, md5) {
 
     Client.prototype.removeApp = function (appId, callback) {
         $http.post('/api/v1/app/' + appId + '/uninstall').success(function (data, status) {
-            if (status !== 200) return callback(new ClientError(status, data));
+            if (status !== 202) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
     };
@@ -248,7 +248,7 @@ angular.module('Application').service('Client', function ($http, md5) {
         };
 
         $http.post('/api/v1/users/' + username + '/admin', payload).success(function (data, status) {
-            if (status !== 200) return callback(new ClientError(status, data));
+            if (status !== 204) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
     };
@@ -295,28 +295,28 @@ angular.module('Application').service('Client', function ($http, md5) {
 
     Client.prototype.delTokensByClientId = function (id, callback) {
         $http.delete('/api/v1/oauth/clients/' + id + '/tokens').success(function(data, status) {
-            if (status !== 200) return callback(new ClientError(status, data));
+            if (status !== 204) return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.update = function (callback) {
         $http.get('/api/v1/update').success(function(data, status) {
-            if (status !== 200) return callback(new ClientError(status, data));
+            if (status !== 202) return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.reboot = function (callback) {
         $http.get('/api/v1/reboot').success(function(data, status) {
-            if (status !== 200) return callback(new ClientError(status, data));
+            if (status !== 202) return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.backup = function (callback) {
         $http.post('/api/v1/backups').success(function(data, status) {
-            if (status !== 200) return callback(new ClientError(status, data));
+            if (status !== 202) return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));
     };
@@ -356,7 +356,7 @@ angular.module('Application').service('Client', function ($http, md5) {
         };
 
         $http({ method: 'DELETE', url: '/api/v1/users/' + username, data: data, headers: { 'Content-Type': 'application/json' }}).success(function(data, status) {
-            if (status !== 200) return callback(new ClientError(status, data));
+            if (status !== 204) return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));
     };
@@ -368,7 +368,7 @@ angular.module('Application').service('Client', function ($http, md5) {
         };
 
         $http.post('/api/v1/users/' + this._userInfo.username + '/password', data).success(function(data, status) {
-            if (status !== 200) return callback(new ClientError(status, data));
+            if (status !== 204) return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));
     };

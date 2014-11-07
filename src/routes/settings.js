@@ -45,7 +45,7 @@ function setNakedDomain(req, res, next) {
             settingsdb.setNakedDomain(data.appid, function (error) {
                 if (error) return next(new HttpError(500, error));
 
-                next(new HttpSuccess(200, { }));
+                next(new HttpSuccess(204));
             });
         });
     });

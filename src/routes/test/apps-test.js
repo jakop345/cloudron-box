@@ -227,7 +227,7 @@ describe('App API', function () {
                .query({ access_token: token })
                .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: null, restrictAccessTo: '' })
                .end(function (err, res) {
-            expect(res.statusCode).to.equal(200);
+            expect(res.statusCode).to.equal(202);
             expect(res.body.id).to.be.a('string');
             APP_ID = res.body.id;
             done(err);
@@ -297,7 +297,7 @@ describe('App API', function () {
         request.post(SERVER_URL + '/api/v1/app/' + APP_ID + '/uninstall')
             .query({ access_token: token })
             .end(function (err, res) {
-            expect(res.statusCode).to.equal(200);
+            expect(res.statusCode).to.equal(202);
             done(err);
         });
     });
@@ -345,7 +345,7 @@ describe('App installation', function () {
                         .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP_LOCATION, appId: APP_ID, type: 'A' } ] })
                         .reply(201, { ids: [ 'dnsrecordid' ] }, { 'Content-Type': 'application/json' })
                         .delete('/api/v1/subdomains/dnsrecordid?token=' + config.token())
-                        .reply(200, { }, { 'Content-Type': 'application/json' });
+                        .reply(204, { }, { 'Content-Type': 'application/json' });
                     callback();
                 });
             }
@@ -382,7 +382,7 @@ describe('App installation', function () {
               .query({ access_token: token })
               .send({ appId: APP_ID, appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: null, restrictAccessTo: '' })
               .end(function (err, res) {
-            expect(res.statusCode).to.equal(200);
+            expect(res.statusCode).to.equal(202);
             expect(res.body.id).to.be.a('string');
             expect(res.body.id).to.be.eql(APP_ID);
             checkInstallStatus();
@@ -503,7 +503,7 @@ describe('App installation', function () {
         request.post(SERVER_URL + '/api/v1/app/' + APP_ID + '/stop')
             .query({ access_token: token })
             .end(function (err, res) {
-            expect(res.statusCode).to.equal(200);
+            expect(res.statusCode).to.equal(202);
             done();
         });
     });
@@ -523,7 +523,7 @@ describe('App installation', function () {
         request.post(SERVER_URL + '/api/v1/app/' + APP_ID + '/start')
             .query({ access_token: token })
             .end(function (err, res) {
-            expect(res.statusCode).to.equal(200);
+            expect(res.statusCode).to.equal(202);
             done();
         });
     });
@@ -554,7 +554,7 @@ describe('App installation', function () {
         request.post(SERVER_URL + '/api/v1/app/' + APP_ID + '/uninstall')
             .query({ access_token: token })
             .end(function (err, res) {
-            expect(res.statusCode).to.equal(200);
+            expect(res.statusCode).to.equal(202);
             checkUninstallStatus();
         });
     });
@@ -635,12 +635,12 @@ describe('App installation - port bindings', function () {
                     .reply(201, { ids: [ 'dnsrecordid' ] }, { 'Content-Type': 'application/json' })
                     // app configure
                     .delete('/api/v1/subdomains/dnsrecordid?token=' + config.token())
-                    .reply(200, { }, { 'Content-Type': 'application/json' })
+                    .reply(204, { }, { 'Content-Type': 'application/json' })
                     .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP_LOCATION, appId: APP_ID, type: 'A' } ] })
                     .reply(201, { ids: [ 'anotherdnsid' ] }, { 'Content-Type': 'application/json' })
                     // app remove
                     .delete('/api/v1/subdomains/anotherdnsid?token=' + config.token())
-                    .reply(200, { }, { 'Content-Type': 'application/json' });
+                    .reply(204, { }, { 'Content-Type': 'application/json' });
 
                     callback();
                 });
@@ -678,7 +678,7 @@ describe('App installation - port bindings', function () {
               .query({ access_token: token })
               .send({ appId: APP_ID, appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: { '7778' : '7171' }, restrictAccessTo: '' })
               .end(function (err, res) {
-            expect(res.statusCode).to.equal(200);
+            expect(res.statusCode).to.equal(202);
             expect(res.body.id).to.equal(APP_ID);
             checkInstallStatus();
         });
@@ -767,7 +767,7 @@ describe('App installation - port bindings', function () {
               .query({ access_token: token })
               .send({ appId: APP_ID, password: PASSWORD, portBindings: { '7778' : '7172' }, restrictAccessTo: 'roleAdmin' })
               .end(function (err, res) {
-            expect(res.statusCode).to.equal(200);
+            expect(res.statusCode).to.equal(202);
             checkConfigureStatus();
         });
     });
@@ -787,7 +787,7 @@ describe('App installation - port bindings', function () {
         request.post(SERVER_URL + '/api/v1/app/' + APP_ID + '/stop')
             .query({ access_token: token })
             .end(function (err, res) {
-            expect(res.statusCode).to.equal(200);
+            expect(res.statusCode).to.equal(202);
             done();
         });
     });
@@ -820,7 +820,7 @@ describe('App installation - port bindings', function () {
         request.post(SERVER_URL + '/api/v1/app/' + APP_ID + '/uninstall')
             .query({ access_token: token })
             .end(function (err, res) {
-            expect(res.statusCode).to.equal(200);
+            expect(res.statusCode).to.equal(202);
             checkUninstallStatus();
         });
     });

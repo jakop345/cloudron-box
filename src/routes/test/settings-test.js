@@ -111,7 +111,7 @@ describe('Settings API', function () {
                .send({ appid: 'appid' })
                .end(function (err, res) {
             reloadNginxStub.restore();
-            expect(res.statusCode).to.equal(200);
+            expect(res.statusCode).to.equal(204);
             expect(fs.readFileSync(paths.NGINX_CONFIG_DIR + '/naked_domain.conf').length > 10).to.be.ok();
             expect(reloadNginxStub.callCount).to.be(1);
             done();
@@ -136,7 +136,7 @@ describe('Settings API', function () {
                .send({ appid: '' })
                .end(function (err, res) {
             reloadNginxStub.restore();
-            expect(res.statusCode).to.equal(200);
+            expect(res.statusCode).to.equal(204);
             expect(fs.readFileSync(paths.NGINX_CONFIG_DIR + '/naked_domain.conf').length === 0).to.be.ok();
             expect(reloadNginxStub.callCount).to.be(1);
             done();

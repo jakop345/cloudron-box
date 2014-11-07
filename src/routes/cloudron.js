@@ -40,7 +40,7 @@ function reboot(req, res, next) {
     debug('_reboot: execute "%s".', REBOOT_CMD);
 
     // Finish the request, to let the appstore know we triggered the restore it
-    next(new HttpSuccess(200, {}));
+    next(new HttpSuccess(202, {}));
 
     execFile(SUDO, [ REBOOT_CMD ], {}, function (error, stdout, stderr) {
         if (error) {
@@ -57,7 +57,7 @@ function createBackup(req, res, next) {
         if (error && error.reason === CloudronError.APPSTORE_DOWN) return next(new HttpError(503, error));
         if (error) return next(new HttpError(500, error));
 
-        next(new HttpSuccess(200, {}));
+        next(new HttpSuccess(202, {}));
     });
 }
 
@@ -73,7 +73,7 @@ function update(req, res, next) {
     updater.update(function (error) {
         if (error) return next(new HttpError(500, error));
 
-        res.send(200, { });
+        res.send(202, { });
     });
 };
 

@@ -249,7 +249,7 @@ describe('Server User API', function () {
                .query({ access_token: token_1 })
                .send({ username: USERNAME_0, admin: false })
                .end(function (err, res) {
-            expect(res.statusCode).to.equal(200);
+            expect(res.statusCode).to.equal(204);
             done(err);
         });
     });
@@ -279,7 +279,7 @@ describe('Server User API', function () {
                .query({ access_token: token_1 })
                .send({ username: USERNAME_0, admin: true })
                .end(function (err, res) {
-            expect(res.statusCode).to.equal(200);
+            expect(res.statusCode).to.equal(204);
             done(err);
         });
     });
@@ -411,7 +411,7 @@ describe('Server User API', function () {
                .query({ access_token: token })
                .send({ username: USERNAME_3, password: PASSWORD })
                .end(function (err, res) {
-            expect(res.statusCode).to.equal(200);
+            expect(res.statusCode).to.equal(204);
             done(err);
         });
     });
@@ -429,7 +429,7 @@ describe('Server User API', function () {
         request.get(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/logout')
                .query({ access_token: token })
                .end(function (err, res) {
-            expect(res.statusCode).to.equal(200);
+            expect(res.statusCode).to.equal(204);
             done(err);
         });
     });
@@ -505,7 +505,7 @@ describe('Server User API', function () {
                .query({ access_token: token })
                .send({ password: PASSWORD, newPassword: 'new_password' })
                .end(function (err, res) {
-            expect(res.statusCode).to.equal(200);
+            expect(res.statusCode).to.equal(204);
             done(err);
         });
     });

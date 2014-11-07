@@ -70,7 +70,7 @@ function createAdmin(req, res, next) {
             if (error) return next(new HttpError(500, error));
 
             tokendb.add(token, username, result.id, expires, '*', function (error) {
-                if (error) return next(500, error);
+                if (error) return next(new HttpError(500, error));
 
                 debug('createAdmin: successful with token ' + token);
 
@@ -147,7 +147,7 @@ function changeAdmin(req, res, next) {
         if (error && error.reason === UserError.NOT_ALLOWED) return next(new HttpError(403, 'Last admin'));
         if (error) return next(new HttpError(500, error));
 
-        next(new HttpSuccess(200, {}));
+        next(new HttpSuccess(204));
     });
 }
 
@@ -162,7 +162,7 @@ function changePassword(req, res, next) {
         if (error && error.reason === UserError.WRONG_USER_OR_PASSWORD) return next(new HttpError(403, 'Wrong password'));
         if (error) return next(new HttpError(500, error));
 
-        next(new HttpSuccess(200, {}));
+        next(new HttpSuccess(204));
     });
 }
 
@@ -241,7 +241,7 @@ function logout(req, res, next) {
     // Invalidate token so the cookie cannot be reused after logout
     tokendb.del(req_token, function (error) {
         if (error) return next(new HttpError(500, error));
-        next(new HttpSuccess(200, {}));
+        next(new HttpSuccess(204));
     });
 }
 
@@ -282,7 +282,7 @@ function removeUser(req, res, next) {
             if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'User not found'));
             if (error) return next(new HttpError(500, error));
 
-            next(new HttpSuccess(200, {}));
+            next(new HttpSuccess(204));
         });
     });
 }
