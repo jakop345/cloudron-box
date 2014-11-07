@@ -58,7 +58,7 @@ function initialize() {
 
     gAppHealthTask = child_process.fork(__dirname + '/apphealthtask.js');
 
-    resume(); // FIXME: potential race here since resume is async
+    resume(); // TODO: potential race here since resume is async
 }
 
 function startTask(appId) {
