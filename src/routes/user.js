@@ -4,7 +4,6 @@
 
 var assert = require('assert'),
     clientdb = require('../clientdb.js'),
-    DatabaseError = require('../databaseerror.js'),
     debug = require('debug')('box:routes/user'),
     HttpError = require('../../src/httperror.js'),
     HttpSuccess = require('../../src/httpsuccess.js'),
@@ -57,15 +56,9 @@ function createAdmin(req, res, next) {
     debug('createAdmin: ' + username);
 
     user.create(username, password, email, true /* admin */, function (error) {
-        if (error) {
-            if (error.reason === UserError.BAD_FIELD) {
-                return next(new HttpError(400, error.message));
-            } else if (error.reason === UserError.ALREADY_EXISTS) {
-                return next(new HttpError(409, 'Already exists'));
-            } else {
-                return next(new HttpError(500, error));
-            }
-        }
+        if (error && error.reason === UserError.BAD_FIELD) return next(new HttpError(400, error.message));
+        if (error && error.reason === UserError.ALREADY_EXISTS) return next(new HttpError(409, 'Already exists'));
+        if (error) return next(new HttpError(500, error));
 
         // Also generate a token so the admin creation can also act as a login
         var token = tokendb.generateToken();
@@ -130,15 +123,9 @@ function createUser(req, res, next) {
     var email = req.body.email;
 
     user.create(username, password, email, false /* admin */, function (error) {
-        if (error) {
-            if (error.reason === UserError.BAD_FIELD) {
-                return next(new HttpError(400, error.message));
-            } else if (error.reason === UserError.ALREADY_EXISTS) {
-                return next(new HttpError(409, 'Already exists'));
-            } else {
-                return next(new HttpError(500, error.message));
-            }
-        }
+        if (error && error.reason === UserError.BAD_FIELD) return next(new HttpError(400, error.message));
+        if (error && error.reason === UserError.ALREADY_EXISTS) return next(new HttpError(409, 'Already exists'));
+        if (error) return next(new HttpError(500, error));
 
         var userInfo = {
             username: username,
@@ -172,13 +159,8 @@ function changePassword(req, res, next) {
     if (typeof req.body.newPassword !== 'string') return next(new HttpError(400, 'API call requires the users new password.'));
 
     user.changePassword(req.user.username, req.body.password, req.body.newPassword, function (error) {
-        if (error) {
-            debug('Failed to change password for user', req.user.username);
-            if (error.reason === UserError.WRONG_USER_OR_PASSWORD) {
-                return next(new HttpError(403, 'Wrong password'));
-            }
-            return next(new HttpError(500, error));
-        }
+        if (error && error.reason === UserError.WRONG_USER_OR_PASSWORD) return next(new HttpError(403, 'Wrong password'));
+        if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(200, {}));
     });
@@ -290,21 +272,15 @@ function removeUser(req, res, next) {
     // - admin cannot remove admin
 
     // req.user is ensured to be the admin via requireAdmin middleware
-    if (req.user.username === username) {
-        return next(new HttpError(403, 'Not allowed to remove this user.'));
-    }
+    if (req.user.username === username) return next(new HttpError(403, 'Not allowed to remove this user.'));
 
     // verify the admin via the provided password
     user.verify(req.user.username, password, function (error) {
         if (error) return next(new HttpError(403, 'Password incorrect'));
 
         user.remove(username, function (error) {
-            if (error) {
-                if (error.reason === DatabaseError.NOT_FOUND) {
-                    return next(new HttpError(404, 'User not found'));
-                }
-                return next(new HttpError(500, error));
-            }
+            if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'User not found'));
+            if (error) return next(new HttpError(500, error));
 
             next(new HttpSuccess(200, {}));
         });
