@@ -103,6 +103,8 @@ Server.prototype._getVersion = function (req, res) {
     Middleware which makes the route require a password in the body besides a token.
 */
 Server.prototype._requirePassword = function (req, res, next) {
+    assert(typeof req.body === 'object');
+
     if (!req.body.password) return next(new HttpError(400, 'API call requires user password.'));
     next();
 };
@@ -112,6 +114,8 @@ Server.prototype._requirePassword = function (req, res, next) {
     Middleware which makes the route only accessable for the admin user.
 */
 Server.prototype._requireAdmin = function (req, res, next) {
+    assert(typeof req.user === 'object');
+
     if (!req.user.admin) return next(new HttpError(403, 'API call requires the admin rights.'));
     next();
 };
