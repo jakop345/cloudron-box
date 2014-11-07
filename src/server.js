@@ -211,8 +211,8 @@ Server.prototype._initializeExpressSync = function () {
     router.post('/api/v1/users/:userName/password', usersScope, this._requirePassword.bind(this), routes.user.changePassword);
     router.post('/api/v1/users/:userName/admin', usersScope, admin, routes.user.changeAdmin);
 
-    router.get ('/api/v1/users/:userName/login', basic, routes.user.createToken);    // TODO this should not be needed with OAuth
-    router.get ('/api/v1/users/:userName/logout', bearer, routes.user.logout);       // TODO this should not be needed with OAuth
+    router.get ('/api/v1/users/:userName/login', basic, routes.user.createToken);    // FIXME this should not be needed with OAuth
+    router.get ('/api/v1/users/:userName/logout', bearer, routes.user.logout);       // FIXME this should not be needed with OAuth
 
     // form based login routes used by oauth2 frame
     router.get ('/api/v1/session/login', csurf, routes.oauth2.loginForm);
@@ -239,7 +239,7 @@ Server.prototype._initializeExpressSync = function () {
     // app routes
     router.get ('/api/v1/apps', appsScope, routes.apps.getApps);
     router.get ('/api/v1/app/:id', appsScope, routes.apps.getApp);
-    router.post('/api/v1/app/:id/uninstall', appsScope, routes.apps.uninstallApp); // TODO does this require password?
+    router.post('/api/v1/app/:id/uninstall', appsScope, routes.apps.uninstallApp); // FIXME does this require password?
     router.post('/api/v1/app/install', appsScope, this._requirePassword.bind(this), routes.apps.installApp);
     router.post('/api/v1/app/:id/configure', appsScope, this._requirePassword.bind(this), routes.apps.configureApp);
     router.post('/api/v1/app/:id/update', appsScope, routes.apps.updateApp);
