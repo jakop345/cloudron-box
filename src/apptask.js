@@ -90,6 +90,13 @@ function forwardFromHostToVirtualBox(rulename, port) {
     }
 }
 
+function unforwardFromHostToVirtualBox(rulename) {
+    if (os.platform() === 'darwin') {
+        debug('Removing VirtualBox port forwarding for '+ rulename);
+        child_process.exec('VBoxManage controlvm boot2docker-vm natpf1 delete ' + rulename);
+    }
+}
+
 function reloadNginx(callback) {
     execFile(SUDO, [ RELOAD_NGINX_CMD ], { timeout: 10000 }, callback);
 }
@@ -125,6 +132,8 @@ function unconfigureNginx(app, callback) {
     }
 
     exports._reloadNginx(callback);
+
+    unforwardFromHostToVirtualBox(app.id + '-http');
 }
 
 function setNakedDomain(app, callback) {
