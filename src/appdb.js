@@ -153,7 +153,7 @@ function add(id, appStoreId, location, portBindings, restrictAccessTo, callback)
 
             if (error /* || !this.lastID*/) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
-            database.commit(conn, callback); // FIXME: can this fail?
+            database.commit(conn, callback);
         });
     });
 }
@@ -198,7 +198,7 @@ function del(id, callback) {
             if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
             if (this.changes !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
-            database.commit(conn, callback); // FIXME: can this fail?
+            database.commit(conn, callback);
         });
     });
 }

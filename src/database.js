@@ -5,6 +5,7 @@
 var assert = require('assert'),
     async = require('async'),
     config = require('../config.js'),
+    DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:database'),
     paths = require('./paths.js'),
     sqlite3 = require('sqlite3');
@@ -23,10 +24,10 @@ exports = module.exports = {
     run: run
 };
 
-var gConnectionPool = [ ],
+var gConnectionPool = [ ], // used to track active transactions
     gDatabase = null;
 
-var NOOP_CALLBACK = function (error) { if (error) console.error(error); assert(!error); };
+var NOOP_CALLBACK = function (error) { if (error) console.error(error); };
 
 function initialize(callback) {
     gDatabase = new sqlite3.Database(paths.DATABASE_FILENAME);
@@ -42,6 +43,7 @@ function uninitialize() {
     gDatabase.close();
     gDatabase = null;
 
+    debug('Closing %d active transactions', gConnectionPool.length);
     gConnectionPool.forEach(function (conn) { conn.close(); });
     gConnectionPool = [ ];
 }
@@ -57,20 +59,28 @@ function clear(callback) {
 }
 
 function newTransaction() {
-    var conn = gConnectionPool.length !== 0 ? gConnectionPool.pop() : new sqlite3.Database(paths.DATABASE_FILENAME);
+    var conn = new sqlite3.Database(paths.DATABASE_FILENAME);
+    gConnectionPool.push(conn);
     conn.serialize();
     conn.run('BEGIN TRANSACTION', NOOP_CALLBACK);
     return conn;
 }
 
 function rollback(conn, callback) {
-    gConnectionPool.push(conn);
-    conn.run('ROLLBACK', callback);
+    gConnectionPool.splice(gConnectionPool.indexOf(conn), 1);
+    conn.run('ROLLBACK', NOOP_CALLBACK);
+    conn.close(); // close waits for pending statements
+    if (callback) callback();
 }
 
 function commit(conn, callback) {
-    gConnectionPool.push(conn);
-    conn.run('COMMIT', callback);
+    gConnectionPool.splice(gConnectionPool.indexOf(conn), 1);
+    conn.run('COMMIT', function (error) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+
+        callback(null);
+    });
+    conn.close(); // close waits for pending statements
 }
 
 function removePrivates(obj) {
