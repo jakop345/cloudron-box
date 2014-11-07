@@ -58,7 +58,7 @@ function createAdmin(req, res, next) {
 
     user.create(username, password, email, true /* admin */, function (error) {
         if (error) {
-            if (error.reason === UserError.ARGUMENTS) {
+            if (error.reason === UserError.BAD_FIELD) {
                 return next(new HttpError(400, error.message));
             } else if (error.reason === UserError.ALREADY_EXISTS) {
                 return next(new HttpError(409, 'Already exists'));
@@ -131,7 +131,7 @@ function createUser(req, res, next) {
 
     user.create(username, password, email, false /* admin */, function (error) {
         if (error) {
-            if (error.reason === UserError.ARGUMENTS) {
+            if (error.reason === UserError.BAD_FIELD) {
                 return next(new HttpError(400, error.message));
             } else if (error.reason === UserError.ALREADY_EXISTS) {
                 return next(new HttpError(409, 'Already exists'));

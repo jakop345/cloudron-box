@@ -58,7 +58,7 @@ UserError.INTERNAL_ERROR = 'Internal Error';
 UserError.ALREADY_EXISTS = 'Already Exists';
 UserError.NOT_FOUND = 'Not Found';
 UserError.WRONG_USER_OR_PASSWORD = 'Wrong User or Password';
-UserError.ARGUMENTS = 'Bad Arguments';
+UserError.BAD_FIELD = 'Bad BAD_FIELD';
 UserError.NOT_ALLOWED = 'Not Allowed';
 
 function listUsers(callback) {
@@ -74,7 +74,7 @@ function listUsers(callback) {
 function validateUsername(username) {
     assert(typeof username === 'string');
 
-    if (username.length <= 2) return new UserError(UserError.ARGUMENTS, 'Username must be atleast 3 chars');
+    if (username.length <= 2) return new UserError(UserError.BAD_FIELD, 'Username must be atleast 3 chars');
 
     return null;
 
@@ -83,7 +83,7 @@ function validateUsername(username) {
 function validatePassword(password) {
     assert(typeof password === 'string');
 
-    if (password.length <= 5) return new UserError(UserError.ARGUMENTS, 'Password must be atleast 5 chars');
+    if (password.length <= 5) return new UserError(UserError.BAD_FIELD, 'Password must be atleast 5 chars');
 
     return null;
 }
@@ -91,7 +91,7 @@ function validatePassword(password) {
 function validateEmail(email) {
     assert(typeof email === 'string');
 
-    if (!/\S+@\S+/.test(email)) return new UserError(UserError.ARGUMENTS, 'Invalid email');
+    if (!/\S+@\S+/.test(email)) return new UserError(UserError.BAD_FIELD, 'Invalid email');
 
     return null;
 }
@@ -272,7 +272,7 @@ function changePassword(username, oldPassword, newPassword, callback) {
     assert(typeof newPassword === 'string');
     assert(typeof callback === 'function');
 
-    if (newPassword.length === 0) return callback(new UserError(UserError.ARGUMENTS, 'Npm empty passwords allowed'));
+    if (newPassword.length === 0) return callback(new UserError(UserError.BAD_FIELD, 'Npm empty passwords allowed'));
 
     verifyUser(username, oldPassword, function (error, user) {
         if (error) return callback(error);

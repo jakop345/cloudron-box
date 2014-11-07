@@ -65,7 +65,7 @@ describe('User', function () {
             });
         });
 
-        it('fails because of invalid arguments', function (done) {
+        it('fails because of invalid BAD_FIELD', function (done) {
             expect(function () {
                 user.create(EMAIL, {}, function () {});
             }).to.throwException();
@@ -99,7 +99,7 @@ describe('User', function () {
             user.create(USERNAME, '', EMAIL, IS_ADMIN, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).not.to.be.ok();
-                expect(error.reason).to.equal(UserError.ARGUMENTS);
+                expect(error.reason).to.equal(UserError.BAD_FIELD);
 
                 done();
             });
@@ -124,7 +124,7 @@ describe('User', function () {
             user.verify(USERNAME, '', function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
-                expect(error.reason).to.equal(UserError.ARGUMENTS);
+                expect(error.reason).to.equal(UserError.BAD_FIELD);
 
                 done();
             });
