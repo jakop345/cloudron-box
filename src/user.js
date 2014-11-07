@@ -274,7 +274,8 @@ function changePassword(username, oldPassword, newPassword, callback) {
     assert(typeof newPassword === 'string');
     assert(typeof callback === 'function');
 
-    if (newPassword.length === 0) return callback(new UserError(UserError.BAD_FIELD, 'Npm empty passwords allowed'));
+    var error = validatePassword(newPassword);
+    if (error) return callback(error);
 
     verifyUser(username, oldPassword, function (error, user) {
         if (error) return callback(error);
