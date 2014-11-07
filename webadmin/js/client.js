@@ -129,68 +129,6 @@ angular.module('Application').service('Client', function ($http, md5) {
         }).error(defaultErrorHandler(callback));
     };
 
-    Client.prototype.createVolume = function (name, password, callback) {
-        var data = { password: password, name: name };
-        $http.post('/api/v1/volume/create', data).success(function(data, status) {
-            if (status !== 201) return callback(new ClientError(status, data));
-            callback(null, data);
-        }).error(defaultErrorHandler(callback));
-    };
-
-    Client.prototype.deleteVolume = function (name, password, callback) {
-        var data = { password: password };
-        $http.post('/api/v1/volume/' + name + '/delete', data).success(function(data, status) {
-            if (status !== 200) return callback(new ClientError(status, data));
-            callback(null, data);
-        }).error(defaultErrorHandler(callback));
-    };
-
-    Client.prototype.mount = function (name, password, callback) {
-        var data = { password: password };
-        $http.post('/api/v1/volume/' + name + '/mount', data).success(function(data, status) {
-            if (status !== 200) return callback(new ClientError(status, data));
-            callback(null, data);
-        }).error(defaultErrorHandler(callback));
-    };
-
-    Client.prototype.unmount = function (name, password, callback) {
-        var data = { password: password };
-        $http.post('/api/v1/volume/' + name + '/unmount', data).success(function(data, status) {
-            if (status !== 200) return callback(new ClientError(status, data));
-            callback(null, data);
-        }).error(defaultErrorHandler(callback));
-    };
-
-    Client.prototype.isMounted = function (name, callback) {
-        $http.get('/api/v1/volume/' + name + '/ismounted').success(function(data, status) {
-            if (status !== 200) return callback(new ClientError(status, data));
-            callback(null, data.mounted);
-        }).error(defaultErrorHandler(callback));
-    };
-
-    Client.prototype.listVolumes = function (callback) {
-        $http.get('/api/v1/volume/list').success(function(data, status) {
-            if (status !== 200) return callback(new ClientError(status, data));
-            callback(null, data.volumes);
-        }).error(defaultErrorHandler(callback));
-    };
-
-    Client.prototype.addUserToVolume = function (username, volumeId, password, callback) {
-        var data = { username: username, password: password };
-        $http.post('/api/v1/volume/' + volumeId + '/users', data).success(function (data, status) {
-            if (status !== 200) return callback(new ClientError(status, data));
-            callback(null);
-        }).error(defaultErrorHandler(callback));
-    };
-
-    Client.prototype.removeUserFromVolume = function (username, volumeId, password, callback) {
-        var data = { headers: {password: password} };
-        $http({ method: 'DELETE', url: '/api/v1/volume/' + volumeId + '/users/' + username, data: data, headers: { 'Content-Type': 'application/json' }}).success(function (data, status) {
-            if (status !== 200) return callback(new ClientError(status, data));
-            callback(null);
-        }).error(defaultErrorHandler(callback));
-    };
-
     Client.prototype.installApp = function (id, password, title, config, callback) {
         var that = this;
         var data = { appStoreId: id, password: password, location: config.location, portBindings: config.portBindings, restrictAccessTo: config.restrictAccessTo };

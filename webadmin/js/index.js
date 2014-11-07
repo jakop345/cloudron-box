@@ -21,24 +21,6 @@ app.config(function ($routeProvider) {
     }).when('/userlist', {
         controller: 'UserListController',
         templateUrl: 'views/userlist.html'
-    }).when('/volumecreate', {
-        controller: 'VolumeCreateController',
-        templateUrl: 'views/volumecreate.html'
-    }).when('/volumedelete', {
-        controller: 'VolumeDeleteController',
-        templateUrl: 'views/volumedelete.html'
-    }).when('/volumeremoveuser', {
-        controller: 'VolumeRemoveUserController',
-        templateUrl: 'views/volumeremoveuser.html'
-    }).when('/volumemount', {
-        controller: 'VolumeMountController',
-        templateUrl: 'views/volumemount.html'
-    }).when('/volumelist', {
-        controller: 'VolumeListController',
-        templateUrl: 'views/volumelist.html'
-    }).when('/volumeunmount', {
-        controller: 'VolumeUnmountController',
-        templateUrl: 'views/volumeunmount.html'
     }).when('/appstore', {
         controller: 'AppStoreController',
         templateUrl: 'views/appstore.html'
