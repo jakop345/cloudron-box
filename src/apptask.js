@@ -391,9 +391,12 @@ function stopContainer(app, callback) {
     container.stop(options, function (error) {
         if (error && (error.statusCode !== 304 && error.statusCode !== 404)) return callback(new Error('Error stopping container:' + error));
 
+        for (var containerPort in app.manifest.tcpPorts) {
+            unforwardFromHostToVirtualBox(app.id + '-tcp' + containerPort);
+        }
+
         return callback(null);
     });
-
 }
 
 // NOTE: keep this in sync with appstore's apps.js
