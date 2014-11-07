@@ -14,7 +14,8 @@ var appdb = require('./appdb.js'),
     paths = require('./paths.js'),
     split = require('split'),
     stream = require('stream'),
-    util = require('util');
+    util = require('util'),
+    validator = require('validator');
 
 exports = module.exports = {
     AppsError: AppsError,
@@ -146,6 +147,8 @@ function validateSubdomain(subdomain, fqdn) {
     if (subdomain[0] === '-' || subdomain[subdomain.length-1] === '-') return new Error('Subdomain cannot start or end with hyphen');
 
     if (subdomain.length + 1 /* dot */ + fqdn.length > 255) return new Error('Domain length exceeds 255 characters');
+
+    if (!validator.isFQDN(subdomain + '.' + fqdn)) return new Error('Not a valid domain');
 
     return null;
 }

@@ -12,7 +12,8 @@ var aes = require('../src/aes-helper.js'),
     safe = require('safetydance'),
     ursa = require('ursa'),
     userdb = require('./userdb.js'),
-    util = require('util');
+    util = require('util'),
+    validator = require('validator');
 
 exports = module.exports = {
     UserError: UserError,
@@ -75,6 +76,7 @@ function validateUsername(username) {
     assert(typeof username === 'string');
 
     if (username.length <= 2) return new UserError(UserError.BAD_FIELD, 'Username must be atleast 3 chars');
+    if (username.length > 256) return new UserError(UserError.BAD_FIELD, 'Username too long');
 
     return null;
 
@@ -91,7 +93,7 @@ function validatePassword(password) {
 function validateEmail(email) {
     assert(typeof email === 'string');
 
-    if (!/\S+@\S+/.test(email)) return new UserError(UserError.BAD_FIELD, 'Invalid email');
+    if (!validator.isEmail(email)) return new UserError(UserError.BAD_FIELD, 'Invalid email');
 
     return null;
 }
