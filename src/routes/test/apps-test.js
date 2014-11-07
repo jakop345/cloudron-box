@@ -33,7 +33,7 @@ var SERVER_URL = 'http://localhost:' + config.get('port');
 var APP_STORE_ID = 'test', APP_ID;
 var APP_LOCATION = 'location';
 
-var USERNAME = 'admin', PASSWORD = 'admin', EMAIL ='silly@me.com';
+var USERNAME = 'admin', PASSWORD = 'password', EMAIL ='silly@me.com';
 var server;
 var docker = os.platform() === 'linux' ? new Docker({socketPath: '/var/run/docker.sock'}) : new Docker({ host: 'http://localhost', port: 2375 });
 var token = null; // authentication token

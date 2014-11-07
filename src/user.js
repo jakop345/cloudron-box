@@ -71,6 +71,31 @@ function listUsers(callback) {
     });
 }
 
+function validateUsername(username) {
+    assert(typeof username === 'string');
+
+    if (username.length <= 2) return new UserError(UserError.ARGUMENTS, 'Username must be atleast 3 chars');
+
+    return null;
+
+}
+
+function validatePassword(password) {
+    assert(typeof password === 'string');
+
+    if (password.length <= 5) return new UserError(UserError.ARGUMENTS, 'Password must be atleast 5 chars');
+
+    return null;
+}
+
+function validateEmail(email) {
+    assert(typeof email === 'string');
+
+    if (!/\S+@\S+/.test(email)) return new UserError(UserError.ARGUMENTS, 'Invalid email');
+
+    return null;
+}
+
 function createUser(username, password, email, admin, callback) {
     assert(typeof username === 'string');
     assert(typeof password === 'string');
@@ -78,9 +103,14 @@ function createUser(username, password, email, admin, callback) {
     assert(typeof admin === 'boolean');
     assert(typeof callback === 'function');
 
-    if (username.length === 0) return callback(new UserError(UserError.ARGUMENTS, 'username empty'));
-    if (password.length === 0) return callback(new UserError(UserError.ARGUMENTS, 'password empty'));
-    if (email.length === 0) return callback(new UserError(UserError.ARGUMENTS, 'email empty'));
+    var error = validateUsername(username);
+    if (error) return callback(error);
+
+    error = validatePassword(password);
+    if (error) return callback(error);
+
+    error = validateEmail(email);
+    if (error) return callback(error);
 
     crypto.randomBytes(CRYPTO_SALT_SIZE, function (error, salt) {
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
@@ -122,8 +152,11 @@ function verifyUser(username, password, callback) {
     assert(typeof password === 'string');
     assert(typeof callback === 'function');
 
-    if (username.length === 0) return callback(new UserError(UserError.ARGUMENTS, 'username empty'));
-    if (password.length === 0) return callback(new UserError(UserError.ARGUMENTS, 'password empty'));
+    var error = validateUsername(username);
+    if (error) return callback(error);
+
+    error = validatePassword(password);
+    if (error) return callback(error);
 
     userdb.get(username, function (error, user) {
         if (error && error.reason == DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
@@ -204,10 +237,12 @@ function resetPassword(userId, newPassword, callback) {
     assert(typeof newPassword === 'string');
     assert(typeof callback === 'function');
 
-    if (newPassword.length === 0) return callback(new UserError(UserError.ARGUMENTS, 'No empty passwords allowed'));
+    var error = validatePassword(newPassword);
+    if (error) return callback(error);
 
     userdb.get(userId, function (error, user) {
-        if (error) return callback(error);
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
+        if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
         var saltBuffer = new Buffer(user._salt, 'hex');
         crypto.pbkdf2(newPassword, saltBuffer, CRYPTO_ITERATIONS, CRYPTO_KEY_LENGTH, function (error, derivedKey) {
