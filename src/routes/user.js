@@ -20,7 +20,8 @@ exports = module.exports = {
     create: createUser,
     changePassword: changePassword,
     changeAdmin: changeAdmin,
-    remove: removeUser
+    remove: removeUser,
+    requirePassword: requirePassword
 };
 
 /**
@@ -286,3 +287,12 @@ function removeUser(req, res, next) {
         });
     });
 }
+
+function requirePassword(req, res, next) {
+    assert(typeof req.body === 'object');
+
+    if (!req.body.password) return next(new HttpError(400, 'API call requires user password.'));
+
+    next();
+};
+

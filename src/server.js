@@ -100,17 +100,6 @@ Server.prototype._getVersion = function (req, res) {
 };
 
 /*
-    Middleware which makes the route require a password in the body besides a token.
-*/
-Server.prototype._requirePassword = function (req, res, next) {
-    assert(typeof req.body === 'object');
-
-    if (!req.body.password) return next(new HttpError(400, 'API call requires user password.'));
-    next();
-};
-
-
-/*
     Middleware which makes the route only accessable for the admin user.
 */
 Server.prototype._requireAdmin = function (req, res, next) {
@@ -212,7 +201,7 @@ Server.prototype._initializeExpressSync = function () {
     router.post('/api/v1/users', usersScope, admin, routes.user.create);
     router.get ('/api/v1/users/:userName', usersScope, routes.user.info);
     router.del ('/api/v1/users/:userName', usersScope, admin, routes.user.remove);
-    router.post('/api/v1/users/:userName/password', usersScope, this._requirePassword.bind(this), routes.user.changePassword);
+    router.post('/api/v1/users/:userName/password', usersScope, routes.user.requirePassword, routes.user.changePassword);
     router.post('/api/v1/users/:userName/admin', usersScope, admin, routes.user.changeAdmin);
 
     router.get ('/api/v1/users/:userName/login', basic, routes.user.createToken);    // FIXME this should not be needed with OAuth
@@ -244,8 +233,8 @@ Server.prototype._initializeExpressSync = function () {
     router.get ('/api/v1/apps', appsScope, routes.apps.getApps);
     router.get ('/api/v1/app/:id', appsScope, routes.apps.getApp);
     router.post('/api/v1/app/:id/uninstall', appsScope, routes.apps.uninstallApp); // FIXME does this require password?
-    router.post('/api/v1/app/install', appsScope, this._requirePassword.bind(this), routes.apps.installApp);
-    router.post('/api/v1/app/:id/configure', appsScope, this._requirePassword.bind(this), routes.apps.configureApp);
+    router.post('/api/v1/app/install', appsScope, routes.user.requirePassword, routes.apps.installApp);
+    router.post('/api/v1/app/:id/configure', appsScope, routes.user.requirePassword, routes.apps.configureApp);
     router.post('/api/v1/app/:id/update', appsScope, routes.apps.updateApp);
     router.post('/api/v1/app/:id/stop', appsScope, routes.apps.stopApp);
     router.post('/api/v1/app/:id/start', appsScope, routes.apps.startApp);
