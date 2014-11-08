@@ -153,12 +153,6 @@ function verifyUser(username, password, callback) {
     assert(typeof password === 'string');
     assert(typeof callback === 'function');
 
-    var error = validateUsername(username);
-    if (error) return callback(error);
-
-    error = validatePassword(password);
-    if (error) return callback(error);
-
     userdb.get(username, function (error, user) {
         if (error && error.reason == DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));

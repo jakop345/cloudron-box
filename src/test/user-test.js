@@ -124,7 +124,7 @@ describe('User', function () {
             user.verify(USERNAME, '', function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
-                expect(error.reason).to.equal(UserError.BAD_FIELD);
+                expect(error.reason).to.equal(UserError.WRONG_USER_OR_PASSWORD);
 
                 done();
             });
