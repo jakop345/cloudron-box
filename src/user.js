@@ -79,7 +79,6 @@ function validateUsername(username) {
     if (username.length > 256) return new UserError(UserError.BAD_FIELD, 'Username too long');
 
     return null;
-
 }
 
 function validatePassword(password) {
@@ -181,6 +180,7 @@ function removeUser(username, callback) {
     assert(typeof callback === 'function');
 
     userdb.del(username, function (error) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
         callback(null);
@@ -194,6 +194,7 @@ function getUser(username, callback) {
     assert(typeof callback === 'function');
 
     userdb.get(username, function (error, result) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
         return callback(null, result);
