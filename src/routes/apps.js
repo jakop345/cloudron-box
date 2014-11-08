@@ -94,7 +94,6 @@ function installApp(req, res, next) {
 
     if (!data) return next(new HttpError(400, 'Cannot parse data field'));
     if (typeof data.appStoreId !== 'string') return next(new HttpError(400, 'appStoreId is required'));
-    if (typeof data.password !== 'string') return next(new HttpError(400, 'password is required'));
     if (typeof data.location !== 'string') return next(new HttpError(400, 'location is required'));
     if (('portBindings' in data) && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
     if (typeof data.restrictAccessTo !== 'string') return next(new HttpError(400, 'restrictAccessTo is required'));
@@ -127,7 +126,6 @@ function configureApp(req, res, next) {
 
     if (!data) return next(new HttpError(400, 'Cannot parse data field'));
     if (typeof data.appId !== 'string') return next(new HttpError(400, 'appId is required'));
-    if (typeof data.password !== 'string') return next(new HttpError(400, 'password is required'));
     if (('portBindings' in data) && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
     if (typeof data.restrictAccessTo !== 'string') return next(new HttpError(400, 'restrictAccessTo is required'));
 

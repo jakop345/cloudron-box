@@ -130,7 +130,7 @@ describe('App API', function () {
                .query({ access_token: token })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
-            expect(res.body.message).to.eql('API call requires user password.');
+            expect(res.body.message).to.eql('API call requires user password');
             done(err);
         });
     });
@@ -184,7 +184,18 @@ describe('App API', function () {
                .send({ appStoreId: APP_STORE_ID, password: 3.52, location: 'ninja', restrictAccessTo: '' })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
-            expect(res.body.message).to.eql('password is required');
+            expect(res.body.message).to.eql('API call requires user password');
+            done(err);
+        });
+    });
+
+    it('app install fails - invalid password', function (done) {
+        request.post(SERVER_URL + '/api/v1/app/install')
+               .query({ access_token: token })
+               .send({ appStoreId: APP_STORE_ID, password: PASSWORD + 'x', location: 'ninja', restrictAccessTo: '' })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(403);
+            expect(res.body.message).to.eql('Password incorrect');
             done(err);
         });
     });
