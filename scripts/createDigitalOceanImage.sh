@@ -2,10 +2,13 @@
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-CLIENT_ID="f18dbe3b7090fa0a3f6878709dd555aa"
-API_KEY="ee47d2d5b2f2a4281508e3a962c488fc"
+if [ -z "$DIGITAL_OCEAN_TOKEN" ]; then
+    echo "Script requires DIGITAL_OCEAN_TOKEN env to be set"
+    exit 1
+fi
+
 JSON="$SCRIPT_DIR/../node_modules/.bin/json"
-CURL="curl -s"
+CURL="curl -s -u $DIGITAL_OCEAN_TOKEN:"
 UBUNTU_IMAGE_SLUG="ubuntu-14-04-x64" # ID=5141286
 DATE=`date +%Y-%m-%d-%H%M%S`
 
@@ -37,7 +40,7 @@ BOX_NAME="box-$PRETTY_APPSTORE-$PRETTY_REVISION-$DATE" # remove slashes
 SNAPSHOT_NAME="box-$PRETTY_APPSTORE-$PRETTY_REVISION-$DATE"
 
 function get_ssh_key_id() {
-    $CURL "https://api.digitalocean.com/v1/ssh_keys/?client_id=$CLIENT_ID&api_key=$API_KEY" \
+    $CURL "https://api.digitalocean.com/v2/account/keys" \
         | $JSON ssh_keys \
         | $JSON -c "this.name === \"$1\"" \
         | $JSON 0.id
@@ -49,24 +52,27 @@ function create_droplet() {
     local SSH_KEY_ID="$1"
     local BOX_NAME="$2"
 
-    $CURL "https://api.digitalocean.com/v1/droplets/new?client_id=$CLIENT_ID&api_key=$API_KEY&name=$BOX_NAME&size_slug=$SIZE_SLUG&image_slug=$UBUNTU_IMAGE_SLUG&region_slug=$REGION_SLUG&ssh_key_ids=$SSH_KEY_ID" | $JSON droplet.id
+    local DATA="{\"name\":\"$BOX_NAME\",\"size\":\"$SIZE_SLUG\",\"region\":\"$REGION_SLUG\",\"image\":\"$UBUNTU_IMAGE_SLUG\",\"ssh_keys\":[ $SSH_KEY_ID ],\"backups\":false}"
+
+    $CURL -X POST -H 'Content-Type: application/json' -d "$DATA" "https://api.digitalocean.com/v2/droplets" | $JSON droplet.id
 }
 
 function get_droplet_ip() {
     local DROPLET_ID="$1"
-    $CURL "https://api.digitalocean.com/v1/droplets/$DROPLET_ID?client_id=$CLIENT_ID&api_key=$API_KEY" | $JSON droplet.ip_address
+    $CURL "https://api.digitalocean.com/v2/droplets/$DROPLET_ID" | $JSON "droplet.networks.v4[0].ip_address"
 }
 
 function power_off_droplet() {
     local DROPLET_ID="$1"
-    local EVENT_ID=`$CURL "https://api.digitalocean.com/v1/droplets/$DROPLET_ID/power_off/?client_id=$CLIENT_ID&api_key=$API_KEY" | $JSON event_id`
+    local DATA='{"type":"power_off"}'
+    local EVENT_ID=`$CURL -X POST -H 'Content-Type: application/json' -d "$DATA" "https://api.digitalocean.com/v2/droplets/$DROPLET_ID/actions" | $JSON action.id`
 
     echo "Powered off droplet. Event id: $EVENT_ID"
     echo -n "Waiting for droplet to power off"
 
     while true; do
-        local EVENT_STATUS=`$CURL "https://api.digitalocean.com/v1/events/$EVENT_ID/?client_id=$CLIENT_ID&api_key=$API_KEY" | $JSON event.action_status`
-        if [ "$EVENT_STATUS" == "done" ]; then
+        local EVENT_STATUS=`$CURL "https://api.digitalocean.com/v2/droplets/$DROPLET_ID/actions/$EVENT_ID" | $JSON action.status`
+        if [ "$EVENT_STATUS" == "completed" ]; then
             break
         fi
         echo -n "."
@@ -78,14 +84,15 @@ function power_off_droplet() {
 function snapshot_droplet() {
     local DROPLET_ID="$1"
     local SNAPSHOT_NAME="$2"
-    local EVENT_ID=`$CURL "https://api.digitalocean.com/v1/droplets/$DROPLET_ID/snapshot/?name=$SNAPSHOT_NAME&client_id=$CLIENT_ID&api_key=$API_KEY" | $JSON event_id`
+    local DATA="{\"type\":\"snapshot\",\"name\":\"$SNAPSHOT_NAME\"}"
+    local EVENT_ID=`$CURL -X POST -H 'Content-Type: application/json' -d "$DATA" "https://api.digitalocean.com/v2/droplets/$DROPLET_ID/actions" | $JSON action.id`
 
     echo "Droplet snapshotted as $SNAPSHOT_NAME. Event id: $EVENT_ID"
     echo -n "Waiting for snapshot to complete"
 
     while true; do
-        local EVENT_STATUS=`$CURL "https://api.digitalocean.com/v1/events/$EVENT_ID/?client_id=$CLIENT_ID&api_key=$API_KEY" | $JSON event.action_status`
-        if [ "$EVENT_STATUS" == "done" ]; then
+        local EVENT_STATUS=`$CURL "https://api.digitalocean.com/v2/droplets/$DROPLET_ID/actions/$EVENT_ID" | $JSON action.status`
+        if [ "$EVENT_STATUS" == "completed" ]; then
             break
         fi
         echo -n "."
@@ -96,24 +103,15 @@ function snapshot_droplet() {
 
 function destroy_droplet() {
     local DROPLET_ID="$1"
-    local EVENT_ID=`$CURL "https://api.digitalocean.com/v1/droplets/$DROPLET_ID/destroy/?scrub_data=true&client_id=$CLIENT_ID&api_key=$API_KEY" | $JSON event_id`
-    echo "Droplet destroyed. Event id: $EVENT_ID"
-    echo -n "Waiting for droplet to destroy"
-
-    while true; do
-        local EVENT_STATUS=`$CURL "https://api.digitalocean.com/v1/events/$EVENT_ID/?client_id=$CLIENT_ID&api_key=$API_KEY" | $JSON event.action_status`
-        if [ "$EVENT_STATUS" == "done" ]; then
-            break
-        fi
-        echo -n "."
-        sleep 10
-    done
+    # TODO: check for 204 status
+    $CURL -X DELETE "https://api.digitalocean.com/v2/droplets/$DROPLET_ID"
+    echo "Droplet destroyed"
     echo ""
 }
 
 function get_image_id() {
     local SNAPSHOT_NAME="$1"
-    $CURL "https://api.digitalocean.com/v1/images/?client_id=$CLIENT_ID&api_key=$API_KEY&filter=my_images" \
+    $CURL "https://api.digitalocean.com/v2/images" \
         | $JSON images \
         | $JSON -c "this.name === \"$SNAPSHOT_NAME\"" 0.id
 }
@@ -139,7 +137,7 @@ echo "Created droplet with id: $DROPLET_ID"
 while true; do
     echo "Trying to get the droplet IP"
     DROPLET_IP=$(get_droplet_ip $DROPLET_ID)
-    if [[ "$DROPLET_IP" != "null" ]]; then
+    if [[ "$DROPLET_IP" != "" ]]; then
         echo "Droplet IP : [$DROPLET_IP]"
         break
     fi
