@@ -36,8 +36,8 @@ function get_pretty_revision() {
 }
 
 PRETTY_REVISION=$(get_pretty_revision $BOX_REVISION)
-BOX_NAME="box-$PRETTY_APPSTORE-$PRETTY_REVISION-$DATE" # remove slashes
-SNAPSHOT_NAME="box-$PRETTY_APPSTORE-$PRETTY_REVISION-$DATE"
+BOX_NAME="box-$PRETTY_REVISION-$DATE" # remove slashes
+SNAPSHOT_NAME="box-$PRETTY_REVISION-$DATE"
 
 function get_ssh_key_id() {
     $CURL "https://api.digitalocean.com/v2/account/keys" \
