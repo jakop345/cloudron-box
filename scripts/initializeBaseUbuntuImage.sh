@@ -166,6 +166,10 @@ iptables -A INPUT -p udp --sport 53 -j ACCEPT
 iptables -A INPUT -i lo -j ACCEPT
 iptables -A OUTPUT -o lo -j ACCEPT
 
+# disable metadata access to non-root
+# modprobe ipt_owner
+iptables -A OUTPUT -m owner ! --uid-owner root -d 169.254.169.254 -j DROP
+
 # prevent DoS
 # iptables -A INPUT -p tcp --dport 80 -m limit --limit 25/minute --limit-burst 100 -j ACCEPT
 
