@@ -5,10 +5,13 @@
 'use strict';
 
 var assert = require('assert'),
+    connectLastMile = require('connect-lastmile'),
     debug = require('debug')('box:install/server'),
     express = require('express'),
     fs = require('fs'),
+    HttpError = connectLastMile.HttpError,
     https = require('https'),
+    HttpSuccess = connectLastMile.HttpSuccess,
     installer = require('./installer.js'),
     middleware = require('../middleware'),
     os = require('os'),
@@ -24,13 +27,13 @@ var gAnnounceTimerId = null,
     gHttpsServer = null;
 
 function restore(req, res, next) {
-    if (!req.body.token) return res.status(400).type('text').send('No token provided');
-    if (!req.body.appServerUrl) return res.type('text').send(400).type('text').send('No appServerUrl provided');
-    if (!req.body.fqdn) return res.status(400).type('text').send('No fqdn provided');
-    if (!req.body.restoreUrl) return res.status(400).type('text').send('No restoreUrl provided');
-    if (!req.body.revision) return res.status(400).type('text').send('No revision provided');
-    if (!req.body.boxVersionsUrl) return res.status(400).type('text').send('No boxVersionsUrl provided');
-    if (!('tls' in req.body)) return res.status(400).type('text').send('tls cert must be provided or be null');
+    if (!req.body.token) return next(new HttpError(400, 'No token provided'));
+    if (!req.body.appServerUrl) return next(new HttpError(400, 'No appServerUrl provided'));
+    if (!req.body.fqdn) return next(new HttpError(400, 'No fqdn provided'));
+    if (!req.body.restoreUrl) return next(new HttpError(400, 'No restoreUrl provided'));
+    if (!req.body.revision) return next(new HttpError(400, 'No revision provided'));
+    if (!req.body.boxVersionsUrl) return next(new HttpError(400, 'No boxVersionsUrl provided'));
+    if (!('tls' in req.body)) return next(new HttpError(400, 'tls cert must be provided or be null'));
 
     debug('restore: received from appstore ', req.body);
 
@@ -42,16 +45,16 @@ function restore(req, res, next) {
 
     stopAnnounce();
 
-    res.status(200).send({ });
+    next(new HttpSuccess(200, { }));
 }
 
 function provision(req, res, next) {
-    if (!req.body.token) return res.status(400).type('text').send('No token provided');
-    if (!req.body.appServerUrl) return res.status(400).type('text').send('No appServerUrl provided');
-    if (!req.body.fqdn) return res.status(400).type('text').send('No fqdn provided');
-    if (!req.body.revision) return res.status(400).type('text').send('No revision provided');
-    if (!req.body.boxVersionsUrl) return res.status(400).type('text').send('No boxVersionsUrl provided');
-    if (!('tls' in req.body)) return res.status(400).type('text').send('tls cert must be provided or be null');
+    if (!req.body.token) return next(new HttpError(400, 'No token provided'));
+    if (!req.body.appServerUrl) return next(new HttpError(400, 'No appServerUrl provided'));
+    if (!req.body.fqdn) return next(new HttpError(400, 'No fqdn provided'));
+    if (!req.body.revision) return next(new HttpError(400, 'No revision provided'));
+    if (!req.body.boxVersionsUrl) return next(new HttpError(400, 'No boxVersionsUrl provided'));
+    if (!('tls' in req.body)) return next(new HttpError(400, 'tls cert must be provided or be null'));
 
     debug('provision: received from appstore ' + req.body.appServerUrl);
 
@@ -63,7 +66,7 @@ function provision(req, res, next) {
 
     stopAnnounce();
 
-    res.status(201).send({ });
+    next(new HttpSuccess(201, { }));
 }
 
 function start(appServerUrl, callback) {
@@ -76,7 +79,10 @@ function start(appServerUrl, callback) {
 
     app.use(middleware.json({ strict: true }))
        .use(middleware.morgan({ format: 'dev', immediate: false }))
-       .use(router);
+       .use(router)
+       .use(connectLastMile.successHandler)
+       .use(connectLastMile.clientErrorHandler)
+       .use(connectLastMile.serverErrorHandler);
 
     router.post('/api/v1/provision', provision);
     router.post('/api/v1/restore', restore);

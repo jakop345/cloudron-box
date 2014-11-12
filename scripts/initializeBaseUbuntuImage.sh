@@ -192,7 +192,7 @@ do_start() {
 
     exec 2>&1 1> "/var/log/cloudron/bootstrap-\$\$-\$BASHPID.log"
 
-    DEBUG="box*" $SRCDIR/installer/server.js 2>&1 1> /var/log/cloudron/installserver.log &
+    DEBUG="box*,connect-lastmile" $SRCDIR/installer/server.js 2>&1 1> /var/log/cloudron/installserver.log &
 
     echo "Disabling cloudron-bootstrap init script"
     update-rc.d cloudron-bootstrap remove
