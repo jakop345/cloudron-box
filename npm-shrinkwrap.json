@@ -1350,6 +1350,22 @@
     "validator": {
       "version": "3.22.1",
       "from": "validator@"
+    },
+    "connect-lastmile": {
+      "version": "0.0.2",
+      "from": "connect-lastmile@",
+      "dependencies": {
+        "debug": {
+          "version": "2.1.0",
+          "from": "debug@~2.1.0",
+          "dependencies": {
+            "ms": {
+              "version": "0.6.2",
+              "from": "ms@0.6.2"
+            }
+          }
+        }
+      }
     }
   }
 }
