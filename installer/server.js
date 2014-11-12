@@ -24,13 +24,13 @@ var gAnnounceTimerId = null,
     gHttpsServer = null;
 
 function restore(req, res, next) {
-    if (!req.body.token) return res.status(400).send('No token provided');
-    if (!req.body.appServerUrl) return res.send(400).send('No appServerUrl provided');
-    if (!req.body.fqdn) return res.status(400).send('No fqdn provided');
-    if (!req.body.restoreUrl) return res.status(400).send('No restoreUrl provided');
-    if (!req.body.revision) return res.status(400).send('No revision provided');
-    if (!req.body.boxVersionsUrl) return res.status(400).send('No boxVersionsUrl provided');
-    if (!('tls' in req.body)) return res.status(400).send('tls cert must be provided or be null');
+    if (!req.body.token) return res.status(400).type('text').send('No token provided');
+    if (!req.body.appServerUrl) return res.type('text').send(400).type('text').send('No appServerUrl provided');
+    if (!req.body.fqdn) return res.status(400).type('text').send('No fqdn provided');
+    if (!req.body.restoreUrl) return res.status(400).type('text').send('No restoreUrl provided');
+    if (!req.body.revision) return res.status(400).type('text').send('No revision provided');
+    if (!req.body.boxVersionsUrl) return res.status(400).type('text').send('No boxVersionsUrl provided');
+    if (!('tls' in req.body)) return res.status(400).type('text').send('tls cert must be provided or be null');
 
     debug('restore: received from appstore ', req.body);
 
@@ -46,12 +46,12 @@ function restore(req, res, next) {
 }
 
 function provision(req, res, next) {
-    if (!req.body.token) return res.status(400).send('No token provided');
-    if (!req.body.appServerUrl) return res.status(400).send('No appServerUrl provided');
-    if (!req.body.fqdn) return res.status(400).send('No fqdn provided');
-    if (!req.body.revision) return res.status(400).send('No revision provided');
-    if (!req.body.boxVersionsUrl) return res.status(400).send('No boxVersionsUrl provided');
-    if (!('tls' in req.body)) return res.status(400).send('tls cert must be provided or be null');
+    if (!req.body.token) return res.status(400).type('text').send('No token provided');
+    if (!req.body.appServerUrl) return res.status(400).type('text').send('No appServerUrl provided');
+    if (!req.body.fqdn) return res.status(400).type('text').send('No fqdn provided');
+    if (!req.body.revision) return res.status(400).type('text').send('No revision provided');
+    if (!req.body.boxVersionsUrl) return res.status(400).type('text').send('No boxVersionsUrl provided');
+    if (!('tls' in req.body)) return res.status(400).type('text').send('tls cert must be provided or be null');
 
     debug('provision: received from appstore ' + req.body.appServerUrl);
 
