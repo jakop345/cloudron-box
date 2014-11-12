@@ -37,7 +37,7 @@ function cleanup(done) {
     });
 }
 
-describe('Server User API', function () {
+describe('User API', function () {
     this.timeout(5000);
 
     var token = null;
