@@ -27,12 +27,14 @@ var gAnnounceTimerId = null,
     gHttpsServer = null;
 
 function restore(req, res, next) {
-    if (!req.body.token) return next(new HttpError(400, 'No token provided'));
-    if (!req.body.appServerUrl) return next(new HttpError(400, 'No appServerUrl provided'));
-    if (!req.body.fqdn) return next(new HttpError(400, 'No fqdn provided'));
-    if (!req.body.restoreUrl) return next(new HttpError(400, 'No restoreUrl provided'));
-    if (!req.body.revision) return next(new HttpError(400, 'No revision provided'));
-    if (!req.body.boxVersionsUrl) return next(new HttpError(400, 'No boxVersionsUrl provided'));
+    assert(typeof req.body === 'object');
+
+    if (typeof req.body.token !== 'string') return next(new HttpError(400, 'No token provided'));
+    if (typeof req.body.appServerUrl !== 'string') return next(new HttpError(400, 'No appServerUrl provided'));
+    if (typeof req.body.fqdn !== 'string') return next(new HttpError(400, 'No fqdn provided'));
+    if (typeof req.body.restoreUrl !== 'string') return next(new HttpError(400, 'No restoreUrl provided'));
+    if (typeof req.body.revision !== 'string') return next(new HttpError(400, 'No revision provided'));
+    if (typeof req.body.boxVersionsUrl !== 'string') return next(new HttpError(400, 'No boxVersionsUrl provided'));
     if (!('tls' in req.body)) return next(new HttpError(400, 'tls cert must be provided or be null'));
 
     debug('restore: received from appstore ', req.body);
@@ -49,11 +51,13 @@ function restore(req, res, next) {
 }
 
 function provision(req, res, next) {
-    if (!req.body.token) return next(new HttpError(400, 'No token provided'));
-    if (!req.body.appServerUrl) return next(new HttpError(400, 'No appServerUrl provided'));
-    if (!req.body.fqdn) return next(new HttpError(400, 'No fqdn provided'));
-    if (!req.body.revision) return next(new HttpError(400, 'No revision provided'));
-    if (!req.body.boxVersionsUrl) return next(new HttpError(400, 'No boxVersionsUrl provided'));
+    assert(typeof req.body === 'object');
+
+    if (typeof req.body.token !== 'string') return next(new HttpError(400, 'No token provided'));
+    if (typeof req.body.appServerUrl !== 'string') return next(new HttpError(400, 'No appServerUrl provided'));
+    if (typeof req.body.fqdn !== 'string') return next(new HttpError(400, 'No fqdn provided'));
+    if (typeof req.body.revision !== 'string') return next(new HttpError(400, 'No revision provided'));
+    if (typeof req.body.boxVersionsUrl !== 'string') return next(new HttpError(400, 'No boxVersionsUrl provided'));
     if (!('tls' in req.body)) return next(new HttpError(400, 'tls cert must be provided or be null'));
 
     debug('provision: received from appstore ' + req.body.appServerUrl);
