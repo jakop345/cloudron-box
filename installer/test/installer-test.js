@@ -65,7 +65,7 @@ describe('Server', function () {
             appServerUrl: APPSERVER_URL,
             fqdn: 'www.something.com',
             restoreUrl: 'https://restoreurl',
-            revision: 'somesha1',
+            version: '0.1',
             tls: {
                 key: 'key',
                 cert: 'cert'
@@ -101,7 +101,7 @@ describe('Server', function () {
             token: 'sometoken',
             appServerUrl: APPSERVER_URL,
             fqdn: 'www.something.com',
-            revision: 'somesha1',
+            version: '0.1',
             tls: {
                 key: 'key',
                 cert: 'cert'

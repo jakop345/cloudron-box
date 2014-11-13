@@ -11,9 +11,10 @@ SRCDIR="$HOME_DIR/box"
 CONFIG_DIR="$HOME_DIR/config"
 DATA_DIR="$HOME_DIR/data"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd )"
+JSON="$SCRIPT_DIR/../../node_modules/.bin/json"
 
 SAVED_ARGS=("$@")
-ARGS=$(getopt -o "" -l "appserverurl:,fqdn:,restoreurl:,revision:,tlscert:,tlskey:,token:,boxversionsurl:" -n "$0" -- "$@")
+ARGS=$(getopt -o "" -l "appserverurl:,fqdn:,restoreurl:,version:,tlscert:,tlskey:,token:,boxversionsurl:" -n "$0" -- "$@")
 eval set -- "$ARGS"
 
 # if you change this, change the code in postinstall.sh as well
@@ -22,7 +23,7 @@ while true; do
     --appserverurl) PROVISION_APP_SERVER_URL="$2";;
     --fqdn) PROVISION_FQDN="$2";;
     --restoreurl) PROVISION_RESTORE_URL="$2";;
-    --revision) PROVISION_REVISION="$2";;
+    --version) PROVISION_VERSION="$2";;
     --tlscert) PROVISION_TLS_CERT="$2";;
     --tlskey) PROVISION_TLS_KEY="$2";;
     --token) PROVISION_TOKEN="$2";;
@@ -34,7 +35,7 @@ while true; do
     shift 2
 done
 
-echo "Provisioning box with code: $PROVISION_REVISION and data: $PROVISION_RESTORE_URL"
+echo "Provisioning box with version: $PROVISION_VERSION and data: $PROVISION_RESTORE_URL"
 
 # for update case, stop nginx and box code
 supervisorctl stop all
@@ -45,6 +46,9 @@ if [ -n "$PROVISION_RESTORE_URL" ]; then
     curl --retry 5 --retry-delay 5 --max-time 600 -L "$PROVISION_RESTORE_URL" | tar -zxf - -C "$DATA_DIR"
 fi
 
+echo "Downloading box versions"
+REVISION=$(curl --retry 5 --retry-delay 5 --max-time 600 -L "$PROVISION_BOX_VERSIONS_URL" | $JSON -D, "$PROVISION_VERSION,revision")
+
 cd "$SRCDIR"
 while true; do
     timeout 3m git fetch origin && break
@@ -52,7 +56,7 @@ while true; do
     sleep 2
 done
 
-git reset --hard "$PROVISION_REVISION"
+git reset --hard "$REVISION"
 
 # For the update case, remove any existing config
 rm -rf "$CONFIG_DIR/*"

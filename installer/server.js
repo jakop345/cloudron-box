@@ -33,7 +33,7 @@ function restore(req, res, next) {
     if (typeof req.body.appServerUrl !== 'string') return next(new HttpError(400, 'No appServerUrl provided'));
     if (typeof req.body.fqdn !== 'string') return next(new HttpError(400, 'No fqdn provided'));
     if (typeof req.body.restoreUrl !== 'string') return next(new HttpError(400, 'No restoreUrl provided'));
-    if (typeof req.body.revision !== 'string') return next(new HttpError(400, 'No revision provided'));
+    if (typeof req.body.version !== 'string') return next(new HttpError(400, 'No version provided'));
     if (typeof req.body.boxVersionsUrl !== 'string') return next(new HttpError(400, 'No boxVersionsUrl provided'));
     if (!('tls' in req.body)) return next(new HttpError(400, 'tls cert must be provided or be null'));
 
@@ -56,7 +56,7 @@ function provision(req, res, next) {
     if (typeof req.body.token !== 'string') return next(new HttpError(400, 'No token provided'));
     if (typeof req.body.appServerUrl !== 'string') return next(new HttpError(400, 'No appServerUrl provided'));
     if (typeof req.body.fqdn !== 'string') return next(new HttpError(400, 'No fqdn provided'));
-    if (typeof req.body.revision !== 'string') return next(new HttpError(400, 'No revision provided'));
+    if (typeof req.body.version !== 'string') return next(new HttpError(400, 'No version provided'));
     if (typeof req.body.boxVersionsUrl !== 'string') return next(new HttpError(400, 'No boxVersionsUrl provided'));
     if (!('tls' in req.body)) return next(new HttpError(400, 'tls cert must be provided or be null'));
 

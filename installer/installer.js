@@ -45,7 +45,7 @@ function uninitialize() {
 function update(args, callback) {
     assert(typeof args.appServerUrl === 'string');
     assert(typeof args.fqdn === 'string');
-    assert(typeof args.revision === 'string');
+    assert(typeof args.version === 'string');
     assert(typeof args.token === 'string');
     assert(typeof args.tls.cert === 'string');
     assert(typeof args.tls.key === 'string');
@@ -66,7 +66,7 @@ function provision(args, callback) {
     pargs.push('--appserverurl', args.appServerUrl);
     pargs.push('--fqdn', args.fqdn);
     pargs.push('--restoreurl', args.restoreUrl || '');
-    pargs.push('--revision', args.revision);
+    pargs.push('--version', args.version);
     pargs.push('--tlscert', args.tls.cert);
     pargs.push('--tlskey', args.tls.key);
     pargs.push('--token', args.token);
