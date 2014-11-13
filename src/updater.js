@@ -73,7 +73,7 @@ function checkBoxUpdates(callback) {
         var nextVersionInfo = nextVersion ? versions[nextVersion] : null;
 
         if (nextVersionInfo && nextVersionInfo.revision && nextVersionInfo.imageId) {
-            debug('boxupdate: new version %s available. revision: %s, imageId: %s', nextVersion, nextVersionInfo.revision, nextVersionInfo.imageId);
+            debug('boxupdate: new version %s available. revision: %s, imageId: %d', nextVersion, nextVersionInfo.revision, nextVersionInfo.imageId);
             callback(null, { version: nextVersion, info: nextVersionInfo, upgrade: nextVersionInfo.imageId !== currentVersionInfo.imageId });
         } else {
             debug('boxupdate: no new version available.');
@@ -129,7 +129,10 @@ function update(callback) {
         if (gBoxUpdateInfo && gBoxUpdateInfo.upgrade) {
             debug('update: box needs upgrade');
 
-            superagent.post(config.appServerUrl() + '/api/v1/boxes/' + config.fqdn() + '/upgrade').query({ token: config.token() }).end(function (error, result) {
+            superagent.post(config.appServerUrl() + '/api/v1/boxes/' + config.fqdn() + '/upgrade')
+                .query({ token: config.token() })
+                .send({ imageId: gBoxUpdateInfo.imageId })
+                .end(function (error, result) {
                 if (error) return callback(new Error('Error making upgrade request: ' + error));
                 if (result.status !== 200) return callback(new Error('Server not ready to upgrade: ' + result.body));
 

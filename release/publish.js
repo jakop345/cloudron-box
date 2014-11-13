@@ -20,7 +20,7 @@ function publish(versionsFileName) {
     // check all the keys
     var sortedVersions = Object.keys(versionsJson).sort();
     sortedVersions.forEach(function (version, index) {
-        if (typeof versionsJson[version].imageId !== 'string') die('version ' + version + ' does not have proper imageId');
+        if (typeof versionsJson[version].imageId !== 'number') die('version ' + version + ' does not have proper imageId');
         if (versionsJson[version].next !== null && typeof versionsJson[version].next !== 'string') die('version ' + version + ' does not have proper next');
         if (typeof versionsJson[version].revision !== 'string') die('version ' + version + ' does not have proper revision');
 
