@@ -52,6 +52,7 @@ if [ "$PROVISION_VERSION" = "latest" ]; then
 else
     REVISION=$(curl --retry 5 --retry-delay 5 --max-time 600 -L "$PROVISION_BOX_VERSIONS_URL" | $JSON -D, "$PROVISION_VERSION,revision")
 fi
+echo "Updating to revision : $REVISION"
 
 cd "$SRCDIR"
 while true; do
