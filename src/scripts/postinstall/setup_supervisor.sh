@@ -2,8 +2,10 @@
 
 set -e
 
+USER=yellowtent
 SRCDIR=/home/$USER/box
 DATA_DIR=/home/$USER/data
+NGINX_CONFIG_DIR=/home/$USER/configs/nginx
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
@@ -35,7 +37,7 @@ environment=HOME="/home/yellowtent",CLOUDRON="1",USER="yellowtent",DEBUG="box*"
 EOF
 
 echo "Writing updater supervisor config..."
-cat > /etc/supervisor/conf.d/box.conf <<EOF
+cat > /etc/supervisor/conf.d/updater.conf <<EOF
 [program:updater]
 command=/usr/bin/node server.js update-mode
 autostart=true
