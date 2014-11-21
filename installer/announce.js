@@ -20,6 +20,8 @@ function start(appServerUrl, callback) {
     assert(typeof appServerUrl === 'string');
     assert(typeof callback === 'function');
 
+    debug('announce: started');
+
     gAnnounceTimerId = setInterval(doAnnounce.bind(null, appServerUrl), ANNOUNCE_INTERVAL);
     callback(null);
 }
