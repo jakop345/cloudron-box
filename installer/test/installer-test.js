@@ -37,7 +37,7 @@ describe('Server', function () {
 
     describe('provision - starts and stop', function () {
         it('starts', function (done) {
-            server.start('provision', done);
+            server.start('provision-mode', done);
         });
 
         it('stops', function (done) {
@@ -47,7 +47,7 @@ describe('Server', function () {
 
     describe('update - starts and stop', function () {
         it('starts', function (done) {
-            server.start('update', done);
+            server.start('update-mode', done);
         });
 
         it('stops', function (done) {
@@ -57,7 +57,7 @@ describe('Server', function () {
 
     describe('update', function () {
         before(function (done) {
-            server.start('update', done);
+            server.start('update-mode', done);
         });
         after(function (done) {
             server.stop(done);
@@ -123,7 +123,7 @@ describe('Server', function () {
             failingGet = scope.get('/api/v1/boxes/' + FQDN + '/announce');
             failingGet.times(5).reply(502);
 
-            server.start('provision', done);
+            server.start('provision-mode', done);
         });
 
         after(function (done) {
@@ -157,7 +157,7 @@ describe('Server', function () {
         };
 
         before(function (done) {
-            server.start('provision', done);
+            server.start('provision-mode', done);
         });
 
         after(function (done) {
@@ -202,7 +202,7 @@ describe('Server', function () {
         };
 
         before(function (done) {
-            server.start('provision', done);
+            server.start('provision-mode', done);
         });
 
         after(function (done) {

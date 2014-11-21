@@ -171,10 +171,10 @@ function stopUpdateServer(callback) {
 }
 
 function start(mode, callback) {
-    assert(mode === 'update' || mode == 'provision', 'invalid mode');
+    assert(mode === 'update-mode' || mode == 'provision-mode', 'invalid mode');
     assert(typeof callback === 'function');
 
-    if (mode === 'update') {
+    if (mode === 'update-mode') {
         debug('starting in update mode');
         return startUpdateServer(callback);
     }
@@ -209,7 +209,7 @@ function stop(callback) {
 
 if (require.main === module) {
     if (process.argv.length !== 3) {
-        console.log('Usage: node server.js [update|provision]');
+        console.log('Usage: node server.js [update-mode|provision-mode]');
         return;
     }
 
