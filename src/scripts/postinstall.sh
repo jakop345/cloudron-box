@@ -114,9 +114,7 @@ HARAKA_CONTAINER_ID=$(docker run -d --name="haraka" --cap-add="NET_ADMIN"\
     -v $HARAKA_DIR:/app/data girish/haraka:0.1)
 echo "Haraka container id: $HARAKA_CONTAINER_ID"
 
-echo "==== Setup supervisord ===="
-$SRCDIR/src/scripts/postinstall/setup_supervisor.sh
-
+echo "==== Creating cloudron.conf ===="
 sudo -u yellowtent -H bash <<EOF
 echo "Creating cloudron.conf"
 cat > "$CLOUDRON_CONF" <<EOF2
@@ -142,12 +140,6 @@ ADMIN_ID=$(cat /proc/sys/kernel/random/uuid)
 sqlite3 "$CLOUDRON_SQLITE" 'INSERT OR REPLACE INTO clients (id, appId, clientId, clientSecret, name, redirectURI, scope) VALUES ("$ADMIN_ID", "webadmin", "cid-webadmin", "unusedsecret", "WebAdmin", "$ADMIN_ORIGIN", "$ADMIN_SCOPES")'
 EOF
 
-# http://www.onurguzel.com/supervisord-restarting-and-reloading/
-echo "Restarting supervisor"
-/etc/init.d/supervisor stop
-while test -e "/var/run/supervisord.pid" && kill -0 `cat /var/run/supervisord.pid`; do
-    echo "Waiting for supervisord to stop"
-    sleep 1
-done
-/etc/init.d/supervisor start
+echo "==== Setup supervisord ===="
+$SRCDIR/src/scripts/postinstall/setup_supervisor.sh
 
