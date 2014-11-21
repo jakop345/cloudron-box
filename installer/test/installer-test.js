@@ -119,7 +119,8 @@ describe('Server', function () {
             tls: {
                 key: 'key',
                 cert: 'cert'
-            }
+            },
+            boxVersionsUrl: 'https://versions.json'
         };
 
         before(function (done) {
@@ -140,6 +141,14 @@ describe('Server', function () {
                     expect(result.statusCode).to.equal(400);
                     done();
                 });
+            });
+        });
+
+        it('succeeds', function (done) {
+            request.post(EXTERNAL_SERVER_URL + '/api/v1/installer/restore').send(data).end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(202);
+                done();
             });
         });
     });
