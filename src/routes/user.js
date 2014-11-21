@@ -21,7 +21,8 @@ exports = module.exports = {
     changePassword: changePassword,
     changeAdmin: changeAdmin,
     remove: removeUser,
-    verifyPassword: verifyPassword
+    verifyPassword: verifyPassword,
+    requireAdmin: requireAdmin
 };
 
 /**
@@ -298,5 +299,16 @@ function verifyPassword(req, res, next) {
 
         next();
     });
+};
+
+/*
+    Middleware which makes the route only accessable for the admin user.
+*/
+function requireAdmin(req, res, next) {
+    assert(typeof req.user === 'object');
+
+    if (!req.user.admin) return next(new HttpError(403, 'API call requires the admin rights.'));
+
+    next();
 };
 

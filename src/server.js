@@ -12,7 +12,6 @@ var apps = require('./apps'),
     debug = require('debug')('box:server'),
     express = require('express'),
     http = require('http'),
-    HttpError = require('./httperror.js'),
     HttpSuccess = require('./httpsuccess.js'),
     installer = require('../installer/installer.js'),
     mailer = require('./mailer.js'),
@@ -99,16 +98,6 @@ Server.prototype._getVersion = function (req, res) {
     res.send(200, { version: config.version() });
 };
 
-/*
-    Middleware which makes the route only accessable for the admin user.
-*/
-Server.prototype._requireAdmin = function (req, res, next) {
-    assert(typeof req.user === 'object');
-
-    if (!req.user.admin) return next(new HttpError(403, 'API call requires the admin rights.'));
-    next();
-};
-
 Server.prototype._initializeExpressSync = function () {
     this.app = express();
 
@@ -181,9 +170,6 @@ Server.prototype._initializeExpressSync = function () {
     var appsScope = routes.oauth2.scope('apps');
     var settingsScope = routes.oauth2.scope('settings');
 
-    // middleware to ensure the calling user is admin
-    var admin = this._requireAdmin.bind(this);
-
     // public routes
     router.get ('/api/v1/version', this._getVersion.bind(this));
     router.get ('/api/v1/firsttime', this._firstTime.bind(this));
@@ -198,11 +184,11 @@ Server.prototype._initializeExpressSync = function () {
     router.get ('/api/v1/graphs', rootScope, function (req, res, next) { req.url = req.url.replace(/^\/api\/v1\/graphs(\?.*)/, '/render$1'); next(); }, graphiteMiddleware);
 
     router.get ('/api/v1/users', usersScope, routes.user.list);
-    router.post('/api/v1/users', usersScope, admin, routes.user.create);
+    router.post('/api/v1/users', usersScope, routes.user.requireAdmin, routes.user.create);
     router.get ('/api/v1/users/:userName', usersScope, routes.user.info);
-    router.del ('/api/v1/users/:userName', usersScope, admin, routes.user.remove);
+    router.del ('/api/v1/users/:userName', usersScope, routes.user.requireAdmin, routes.user.remove);
     router.post('/api/v1/users/:userName/password', usersScope, routes.user.changePassword); // changePassword verifies password
-    router.post('/api/v1/users/:userName/admin', usersScope, admin, routes.user.changeAdmin);
+    router.post('/api/v1/users/:userName/admin', usersScope, routes.user.requireAdmin, routes.user.changeAdmin);
 
     router.get ('/api/v1/users/:userName/login', basic, routes.user.createToken);    // FIXME this should not be needed with OAuth
     router.get ('/api/v1/users/:userName/logout', bearer, routes.user.logout);       // FIXME this should not be needed with OAuth
