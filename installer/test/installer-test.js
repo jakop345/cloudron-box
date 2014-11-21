@@ -78,6 +78,39 @@ describe('Server', function () {
                 done();
             });
         });
+
+        var data = {
+            token: 'sometoken',
+            appServerUrl: APPSERVER_URL,
+            fqdn: 'www.something.com',
+            version: '0.1',
+            tls: {
+                key: 'key',
+                cert: 'cert'
+            },
+            boxVersionsUrl: 'https://versions.json'
+        };
+
+        Object.keys(data).forEach(function (key) {
+            it('fails due to missing ' + key, function (done) {
+                var dataCopy = _.extend({ }, data);
+                delete dataCopy[key];
+
+                request.post(INTERNAL_SERVER_URL + '/api/v1/installer/update').send(dataCopy).end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.statusCode).to.equal(400);
+                    done();
+                });
+            });
+        });
+
+        it('succeeds', function (done) {
+            request.post(INTERNAL_SERVER_URL + '/api/v1/installer/update').send(data).end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(202);
+                done();
+            });
+        });
     });
 
     describe('external - announce', function () {
