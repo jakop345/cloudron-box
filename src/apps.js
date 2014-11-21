@@ -154,7 +154,7 @@ function validateSubdomain(subdomain, fqdn) {
 
 // validate the port bindings
 function validatePortBindings(portBindings) {
-    // keep the public ports in sync with firewall rules in sripts/initializeBaseUbuntuImage.sh
+    // keep the public ports in sync with firewall rules in scripts/initializeBaseUbuntuImage.sh
     var RESERVED_PORTS = [
         22, /* ssh */
         25, /* smtp */
@@ -163,6 +163,7 @@ function validatePortBindings(portBindings) {
         443, /* https */
         2003, /* graphite */
         2004, /* graphite */
+        2020, /* install server */
         3000, /* app server */
         8000 /* graphite */
     ];

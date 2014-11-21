@@ -5,10 +5,12 @@
 'use strict';
 
 var assert = require('assert'),
+    async = require('async'),
     connectLastMile = require('connect-lastmile'),
     debug = require('debug')('box:install/server'),
     express = require('express'),
     fs = require('fs'),
+    http = require('http'),
     HttpError = connectLastMile.HttpError,
     https = require('https'),
     HttpSuccess = connectLastMile.HttpSuccess,
@@ -24,7 +26,8 @@ exports = module.exports = {
 };
 
 var gAnnounceTimerId = null,
-    gHttpsServer = null;
+    gHttpsServer = null, // external server; used for install/restore
+    gHttpServer = null; // internal server; used for updates
 
 function restore(req, res, next) {
     assert(typeof req.body === 'object');
@@ -42,7 +45,7 @@ function restore(req, res, next) {
     installer.restore(req.body, function (error) {
         if (error) console.error(error);
 
-        stop();
+        stopExternalServer();
     });
 
     stopAnnounce();
@@ -65,7 +68,7 @@ function provision(req, res, next) {
     installer.provision(req.body, function (error) {
         if (error) console.error(error);
 
-        stop();
+        stopExternalServer();
     });
 
     stopAnnounce();
@@ -98,23 +101,47 @@ function start(appServerUrl, callback) {
 
     gHttpsServer = https.createServer(options, app);
     gHttpsServer.on('error', console.error);
-    gHttpsServer.listen(process.env.NODE_ENV === 'test' ? 4443: 443, callback);
+
+    gHttpServer = http.createServer(app);
+    gHttpServer.on('error', console.error);
 
     startAnnounce(appServerUrl);
+
+    async.series([
+        gHttpsServer.listen.bind(gHttpsServer, process.env.NODE_ENV === 'test' ? 4443 : 443, '0.0.0.0'),
+        gHttpServer.listen.bind(gHttpServer, 2020, '127.0.0.1')
+    ], callback);
+}
+
+function stopExternalServer(callback) {
+    assert(!callback || typeof callback === 'function');
+    callback = callback || function () { };
+
+    if (!gHttpsServer) return callback(null);
+
+    gHttpsServer.close(callback);
+    gHttpsServer = null;
+}
+
+function stopInternalServer(callback) {
+    assert(!callback || typeof callback === 'function');
+    callback = callback || function () { };
+
+    if (!gHttpServer) return callback(null);
+
+    gHttpServer.close(callback);
+    gHttpServer = null;
 }
 
 function stop(callback) {
     assert(!callback || typeof callback === 'function');
     callback = callback || function () { };
 
-    if (!gHttpsServer) return callback(null);
-
-    debug('Stopping');
-
-    stopAnnounce();
-
-    gHttpsServer.close(callback);
-    gHttpsServer = null;
+    async.series([
+        stopAnnounce,
+        stopExternalServer,
+        stopInternalServer
+    ], callback);
 }
 
 function startAnnounce(appServerUrl) {
@@ -140,13 +167,19 @@ function startAnnounce(appServerUrl) {
     });
 };
 
-function stopAnnounce() {
+function stopAnnounce(callback) {
+    assert(!callback || typeof callback === 'function');
+    callback = callback || function () { };
+
     clearTimeout(gAnnounceTimerId);
     gAnnounceTimerId = null;
+
+    callback(null);
 }
 
 if (require.main === module) {
     if (process.argv.length > 2) {
+        debug('Starting without args in testing mode');
         start(process.argv[2]);
         return;
     }
