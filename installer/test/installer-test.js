@@ -13,16 +13,30 @@ var expect = require('expect.js'),
     server = require('../server.js'),
     _ = require('underscore');
 
-var SERVER_URL = 'https://localhost:4443';
-var APPSERVER_URL = 'http://localhost';
+var EXTERNAL_SERVER_URL = 'https://localhost:4443';
+var APPSERVER_URL = 'http://appserver';
 var FQDN = os.hostname();
 
 describe('Server', function () {
     this.timeout(5000);
 
+    before(function (done) {
+        var user_data = JSON.stringify({ appServerUrl: APPSERVER_URL }); // user_data is a string
+        var scope = nock('http://169.254.169.254')
+            .persist()
+            .get('/metadata/v1.json')
+            .reply(200, JSON.stringify({ user_data: user_data }), { 'Content-Type': 'application/json' });
+        done();
+    });
+
+    after(function (done) {
+        nock.cleanAll();
+        done();
+    });
+
     describe('starts and stop', function () {
         it('starts', function (done) {
-            server.start('http://fakeappserver', done);
+            server.start('external', done);
         });
 
         it('stops', function (done) {
@@ -31,7 +45,7 @@ describe('Server', function () {
     });
 
     describe('announce', function () {
-        var failingGet;
+        var failingGet = null;
 
         before(function (done) {
             process.env.ANNOUNCE_INTERVAL = 20;
@@ -40,13 +54,13 @@ describe('Server', function () {
             failingGet = scope.get('/api/v1/boxes/' + FQDN + '/announce');
             failingGet.times(5).reply(502);
 
-            server.start(APPSERVER_URL, done);
+            server.start('external', done);
         });
 
         after(function (done) {
             process.env.ANNOUNCE_INTERVAL = 60000;
+            // failingGet.removeInterceptor({ hostname: 'appserver' });
             server.stop(done);
-            nock.cleanAll();
         });
 
         it('sends announce request repeatedly', function (done) {
@@ -73,7 +87,7 @@ describe('Server', function () {
         };
 
         before(function (done) {
-            server.start(APPSERVER_URL, done);
+            server.start('external', done);
         });
 
         after(function (done) {
@@ -85,7 +99,7 @@ describe('Server', function () {
                 var dataCopy = _.extend({ }, data);
                 delete dataCopy[key];
 
-                request.post(SERVER_URL + '/api/v1/installer/restore').send(dataCopy).end(function (error, result) {
+                request.post(EXTERNAL_SERVER_URL + '/api/v1/installer/restore').send(dataCopy).end(function (error, result) {
                     expect(error).to.not.be.ok();
                     expect(result.statusCode).to.equal(400);
                     done();
@@ -110,7 +124,7 @@ describe('Server', function () {
         };
 
         before(function (done) {
-            server.start(APPSERVER_URL, done);
+            server.start('external', done);
         });
 
         after(function (done) {
@@ -122,7 +136,7 @@ describe('Server', function () {
                 var dataCopy = _.extend({ }, data);
                 delete dataCopy[key];
 
-                request.post(SERVER_URL + '/api/v1/installer/provision').send(dataCopy).end(function (error, result) {
+                request.post(EXTERNAL_SERVER_URL + '/api/v1/installer/provision').send(dataCopy).end(function (error, result) {
                     expect(error).to.not.be.ok();
                     expect(result.statusCode).to.equal(400);
                     done();
@@ -131,9 +145,9 @@ describe('Server', function () {
         });
 
         it('succeeds', function (done) {
-            request.post(SERVER_URL + '/api/v1/installer/provision').send(data).end(function (error, result) {
+            request.post(EXTERNAL_SERVER_URL + '/api/v1/installer/provision').send(data).end(function (error, result) {
                 expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(201);
+                expect(result.statusCode).to.equal(202);
                 done();
             });
         });

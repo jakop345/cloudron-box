@@ -25,8 +25,7 @@ function start(appServerUrl, callback) {
 }
 
 function stop(callback) {
-    assert(!callback || typeof callback === 'function');
-    callback = callback || function () { };
+    assert(typeof callback === 'function');
 
     debug('Stopping announce');
 
@@ -52,5 +51,5 @@ function doAnnounce(appServerUrl) {
 
         debug('announce: success');
     });
-};
+}
 
