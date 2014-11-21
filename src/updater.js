@@ -154,6 +154,8 @@ function update(callback) {
             boxVersionsUrl: config.get('boxVersionsUrl')
         };
 
+        debug('updater: updating box %j', args);
+
         installer.update(args, callback);
 
         // Do not add any code here. The installer script will stop the box code any instant
