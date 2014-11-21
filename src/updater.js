@@ -145,7 +145,7 @@ function update(callback) {
         var args = {
             appServerUrl: config.appServerUrl(),
             fqdn: config.fqdn(),
-            revision: isDev() ? 'origin/master' : gBoxUpdateInfo.revision,
+            version: isDev() ? 'latest' : gBoxUpdateInfo.version,
             token: config.token(),
             tls: {
                 cert: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), 'utf8'),

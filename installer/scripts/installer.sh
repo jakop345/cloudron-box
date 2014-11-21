@@ -47,7 +47,11 @@ if [ -n "$PROVISION_RESTORE_URL" ]; then
 fi
 
 echo "Downloading box versions"
-REVISION=$(curl --retry 5 --retry-delay 5 --max-time 600 -L "$PROVISION_BOX_VERSIONS_URL" | $JSON -D, "$PROVISION_VERSION,revision")
+if [ "$PROVISION_VERSION" = "latest" ]; then
+    REVISION="origin/master"
+else
+    REVISION=$(curl --retry 5 --retry-delay 5 --max-time 600 -L "$PROVISION_BOX_VERSIONS_URL" | $JSON -D, "$PROVISION_VERSION,revision")
+fi
 
 cd "$SRCDIR"
 while true; do
