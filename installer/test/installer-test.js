@@ -14,6 +14,7 @@ var expect = require('expect.js'),
     _ = require('underscore');
 
 var EXTERNAL_SERVER_URL = 'https://localhost:4443';
+var INTERNAL_SERVER_URL = 'http://localhost:2020';
 var APPSERVER_URL = 'http://appserver';
 var FQDN = os.hostname();
 
@@ -34,7 +35,7 @@ describe('Server', function () {
         done();
     });
 
-    describe('starts and stop', function () {
+    describe('external - starts and stop', function () {
         it('starts', function (done) {
             server.start('external', done);
         });
@@ -44,7 +45,42 @@ describe('Server', function () {
         });
     });
 
-    describe('announce', function () {
+    describe('internal - starts and stop', function () {
+        it('starts', function (done) {
+            server.start('internal', done);
+        });
+
+        it('stops', function (done) {
+            server.stop(done);
+        });
+    });
+
+    describe('internal', function () {
+        before(function (done) {
+            server.start('internal', done);
+        });
+        after(function (done) {
+            server.stop(done);
+        });
+
+        it('does not respond to provision', function (done) {
+            request.post(INTERNAL_SERVER_URL + '/api/v1/installer/provision').send({ }).end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(404);
+                done();
+            });
+        });
+
+        it('does not respond to restore', function (done) {
+            request.post(INTERNAL_SERVER_URL + '/api/v1/installer/restore').send({ }).end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(404);
+                done();
+            });
+        });
+    });
+
+    describe('external - announce', function () {
         var failingGet = null;
 
         before(function (done) {
@@ -71,7 +107,7 @@ describe('Server', function () {
         });
     });
 
-    describe('restore', function () {
+    describe('external - restore', function () {
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
         var data = {
@@ -108,7 +144,7 @@ describe('Server', function () {
         });
     });
 
-    describe('provision', function () {
+    describe('external - provision', function () {
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
         var data = {
