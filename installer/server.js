@@ -213,6 +213,8 @@ if (require.main === module) {
         return;
     }
 
-    start(process.argv[2]);
+    start(process.argv[2], function (error) {
+        if (error) console.error(error);
+    });
 }
 
