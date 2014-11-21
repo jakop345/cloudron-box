@@ -43,7 +43,7 @@ function restore(req, res, next) {
     debug('restore: received from appstore ', req.body);
 
     installer.restore(req.body, function (error) {
-        if (error) console.error(error);
+        if (error) return next(new HttpError(500, error));
 
         stopExternalServer();
     });
@@ -66,7 +66,7 @@ function provision(req, res, next) {
     debug('provision: received from appstore ' + req.body.appServerUrl);
 
     installer.provision(req.body, function (error) {
-        if (error) console.error(error);
+        if (error) return next(new HttpError(500, error));
 
         stopExternalServer();
     });
@@ -74,6 +74,25 @@ function provision(req, res, next) {
     stopAnnounce();
 
     next(new HttpSuccess(201, { }));
+}
+
+function update(req, res, next) {
+    assert(typeof req.body === 'object');
+
+    if (typeof req.body.token !== 'string') return next(new HttpError(400, 'No token provided'));
+    if (typeof req.body.appServerUrl !== 'string') return next(new HttpError(400, 'No appServerUrl provided'));
+    if (typeof req.body.fqdn !== 'string') return next(new HttpError(400, 'No fqdn provided'));
+    if (typeof req.body.version !== 'string') return next(new HttpError(400, 'No version provided'));
+    if (typeof req.body.boxVersionsUrl !== 'string') return next(new HttpError(400, 'No boxVersionsUrl provided'));
+    if (!('tls' in req.body)) return next(new HttpError(400, 'tls cert must be provided or be null'));
+
+    debug('update: started');
+
+    installer.update(req.body, function (error) {
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(201, { }));
+    });
 }
 
 function createInternalServer() {
@@ -87,6 +106,8 @@ function createInternalServer() {
        .use(connectLastMile.successHandler)
        .use(connectLastMile.clientErrorHandler)
        .use(connectLastMile.serverErrorHandler);
+
+    router.post('/api/v1/installer/update', update);
 
     return http.createServer(app);
 }

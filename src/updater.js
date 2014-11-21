@@ -9,11 +9,12 @@ var appdb = require('./appdb.js'),
     debug = require('debug')('box:updater'),
     execFile = require('child_process').execFile,
     fs = require('fs'),
-    installer = require('../installer/installer.js'),
     path = require('path'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
     superagent = require('superagent');
+
+var UPDATE_URL = 'http://127.0.0.1:2020/api/v1/installer/update';
 
 var gCheckUpdatesTimeoutId = null,
     gAppUpdateInfo = null,
@@ -156,7 +157,14 @@ function update(callback) {
 
         debug('updater: updating box %j', args);
 
-        installer.update(args, callback);
+        superagent.post(UPDATE_URL)
+            .send(args)
+            .end(function (error, result) {
+                if (error) return callback(new Error('Error making upgrade request: ' + error));
+                if (result.status !== 200) return callback(new Error('Error initiating update: ' + result.body));
+
+                callback(null);
+        });
 
         // Do not add any code here. The installer script will stop the box code any instant
     });
