@@ -4,7 +4,8 @@
 
 'use strict';
 
-var assert = require('assert'),
+var announce = require('./announce.js'),
+    assert = require('assert'),
     async = require('async'),
     connectLastMile = require('connect-lastmile'),
     debug = require('debug')('box:install/server'),
@@ -16,7 +17,6 @@ var assert = require('assert'),
     HttpSuccess = connectLastMile.HttpSuccess,
     installer = require('./installer.js'),
     middleware = require('../middleware'),
-    os = require('os'),
     path = require('path'),
     superagent = require('superagent');
 
@@ -25,8 +25,7 @@ exports = module.exports = {
     stop: stop
 };
 
-var gAnnounceTimerId = null,
-    gHttpsServer = null, // external server; used for install/restore
+var gHttpsServer = null, // external server; used for install/restore
     gHttpServer = null; // internal server; used for updates
 
 function restore(req, res, next) {
@@ -48,7 +47,7 @@ function restore(req, res, next) {
         stopExternalServer();
     });
 
-    stopAnnounce();
+    announce.stop();
 
     next(new HttpSuccess(200, { }));
 }
@@ -71,7 +70,7 @@ function provision(req, res, next) {
         stopExternalServer();
     });
 
-    stopAnnounce();
+    announce.stop();
 
     next(new HttpSuccess(201, { }));
 }
@@ -145,9 +144,8 @@ function start(appServerUrl, callback) {
     gHttpServer = createInternalServer();
     gHttpServer.on('error', console.error);
 
-    startAnnounce(appServerUrl);
-
     async.series([
+        announce.start.bind(null, appServerUrl),
         gHttpsServer.listen.bind(gHttpsServer, process.env.NODE_ENV === 'test' ? 4443 : 443, '0.0.0.0'),
         gHttpServer.listen.bind(gHttpServer, 2020, '127.0.0.1')
     ], callback);
@@ -178,43 +176,10 @@ function stop(callback) {
     callback = callback || function () { };
 
     async.series([
-        stopAnnounce,
+        announce.stop,
         stopExternalServer,
         stopInternalServer
     ], callback);
-}
-
-function startAnnounce(appServerUrl) {
-    var ANNOUNCE_INTERVAL = parseInt(process.env.ANNOUNCE_INTERVAL, 10) || 60000; // exported for testing
-
-    // On Digital Ocean, the only value which we can give a new droplet is the hostname.
-    // We use that value to identify the droplet by the appstore server when the droplet
-    // announce itself. This identifier can look different for other box providers.
-    var hostname = os.hostname();
-    var url = appServerUrl + '/api/v1/boxes/' + hostname + '/announce';
-    debug('announce: box with %s.', url);
-
-    superagent.get(url).end(function (error, result) {
-        if (error || result.statusCode !== 200) {
-            debug('announce: unable to announce to app server, try again.', error);
-            gAnnounceTimerId = setTimeout(startAnnounce.bind(null, appServerUrl), ANNOUNCE_INTERVAL);
-            return;
-        }
-
-        gAnnounceTimerId = setTimeout(startAnnounce.bind(null, appServerUrl), ANNOUNCE_INTERVAL * 2);
-
-        debug('announce: success');
-    });
-};
-
-function stopAnnounce(callback) {
-    assert(!callback || typeof callback === 'function');
-    callback = callback || function () { };
-
-    clearTimeout(gAnnounceTimerId);
-    gAnnounceTimerId = null;
-
-    callback(null);
 }
 
 if (require.main === module) {
