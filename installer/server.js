@@ -76,10 +76,22 @@ function provision(req, res, next) {
     next(new HttpSuccess(201, { }));
 }
 
-function start(appServerUrl, callback) {
-    assert(typeof appServerUrl === 'string');
-    assert(!callback || typeof callback === 'function');
+function createInternalServer() {
+    var app = express();
 
+    var router = new express.Router();
+
+    app.use(middleware.json({ strict: true }))
+       .use(middleware.morgan({ format: 'dev', immediate: false }))
+       .use(router)
+       .use(connectLastMile.successHandler)
+       .use(connectLastMile.clientErrorHandler)
+       .use(connectLastMile.serverErrorHandler);
+
+    return http.createServer(app);
+}
+
+function createExternalServer() {
     var app = express();
 
     var router = new express.Router();
@@ -99,10 +111,17 @@ function start(appServerUrl, callback) {
       cert: fs.readFileSync(path.join(__dirname, 'cert/host.cert'))
     };
 
-    gHttpsServer = https.createServer(options, app);
+    return https.createServer(options, app);
+}
+
+function start(appServerUrl, callback) {
+    assert(typeof appServerUrl === 'string');
+    assert(!callback || typeof callback === 'function');
+
+    gHttpsServer = createExternalServer();
     gHttpsServer.on('error', console.error);
 
-    gHttpServer = http.createServer(app);
+    gHttpServer = createInternalServer();
     gHttpServer.on('error', console.error);
 
     startAnnounce(appServerUrl);
