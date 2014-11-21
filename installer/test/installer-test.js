@@ -85,7 +85,7 @@ describe('Server', function () {
                 var dataCopy = _.extend({ }, data);
                 delete dataCopy[key];
 
-                request.post(SERVER_URL + '/api/v1/restore').send(dataCopy).end(function (error, result) {
+                request.post(SERVER_URL + '/api/v1/installer/restore').send(dataCopy).end(function (error, result) {
                     expect(error).to.not.be.ok();
                     expect(result.statusCode).to.equal(400);
                     done();
@@ -122,7 +122,7 @@ describe('Server', function () {
                 var dataCopy = _.extend({ }, data);
                 delete dataCopy[key];
 
-                request.post(SERVER_URL + '/api/v1/provision').send(dataCopy).end(function (error, result) {
+                request.post(SERVER_URL + '/api/v1/installer/provision').send(dataCopy).end(function (error, result) {
                     expect(error).to.not.be.ok();
                     expect(result.statusCode).to.equal(400);
                     done();
@@ -131,7 +131,7 @@ describe('Server', function () {
         });
 
         it('succeeds', function (done) {
-            request.post(SERVER_URL + '/api/v1/provision').send(data).end(function (error, result) {
+            request.post(SERVER_URL + '/api/v1/installer/provision').send(data).end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(201);
                 done();

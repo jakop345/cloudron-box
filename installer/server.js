@@ -91,8 +91,8 @@ function start(appServerUrl, callback) {
        .use(connectLastMile.clientErrorHandler)
        .use(connectLastMile.serverErrorHandler);
 
-    router.post('/api/v1/provision', provision);
-    router.post('/api/v1/restore', restore);
+    router.post('/api/v1/installer/provision', provision);
+    router.post('/api/v1/installer/restore', restore);
 
     var options = {
       key: fs.readFileSync(path.join(__dirname, 'cert/host.key')),
