@@ -25,8 +25,8 @@ exports = module.exports = {
     stop: stop
 };
 
-var gHttpsServer = null, // external server; used for install/restore
-    gHttpServer = null; // internal server; used for updates
+var gHttpsServer = null, // provision server; used for install/restore
+    gHttpServer = null; // update server; used for updates
 
 function restore(req, res, next) {
     assert(typeof req.body === 'object');
@@ -44,7 +44,7 @@ function restore(req, res, next) {
     installer.restore(req.body, function (error) {
         if (error) console.error(error);
 
-        stopExternalServer(function () { });
+        stopProvisionServer(function () { });
     });
 
     announce.stop(function () { });
@@ -67,7 +67,7 @@ function provision(req, res, next) {
     installer.provision(req.body, function (error) {
         if (error) console.error(error);
 
-        stopExternalServer(function () { });
+        stopProvisionServer(function () { });
     });
 
     announce.stop(function () { });
@@ -94,10 +94,10 @@ function update(req, res, next) {
     next(new HttpSuccess(202, { }));
 }
 
-function startInternalServer(callback) {
+function startUpdateServer(callback) {
     assert(typeof callback === 'function');
 
-    debug('Starting internal server');
+    debug('Starting update server');
 
     var app = express();
 
@@ -118,10 +118,10 @@ function startInternalServer(callback) {
     gHttpServer.listen(2020, '127.0.0.1', callback);
 }
 
-function startExternalServer(callback) {
+function startProvisionServer(callback) {
     assert(typeof callback === 'function');
 
-    debug('Starting external server');
+    debug('Starting provision server');
 
     var app = express();
 
@@ -148,10 +148,10 @@ function startExternalServer(callback) {
     gHttpsServer.listen(process.env.NODE_ENV === 'test' ? 4443 : 443, '0.0.0.0', callback);
 }
 
-function stopExternalServer(callback) {
+function stopProvisionServer(callback) {
     assert(typeof callback === 'function');
 
-    debug('Stopping external server');
+    debug('Stopping provision server');
 
     if (!gHttpsServer) return callback(null);
 
@@ -159,10 +159,10 @@ function stopExternalServer(callback) {
     gHttpsServer = null;
 }
 
-function stopInternalServer(callback) {
+function stopUpdateServer(callback) {
     assert(typeof callback === 'function');
 
-    debug('Stopping internal server');
+    debug('Stopping update server');
 
     if (!gHttpServer) return callback(null);
 
@@ -171,15 +171,15 @@ function stopInternalServer(callback) {
 }
 
 function start(mode, callback) {
-    assert(mode === 'internal' || mode == 'external', 'invalid mode');
+    assert(mode === 'update' || mode == 'provision', 'invalid mode');
     assert(typeof callback === 'function');
 
-    if (mode === 'internal') {
-        debug('starting in internal mode');
-        return startInternalServer(callback);
+    if (mode === 'update') {
+        debug('starting in update mode');
+        return startUpdateServer(callback);
     }
 
-    debug('starting in external mode');
+    debug('starting in provision mode');
 
     superagent.get('http://169.254.169.254/metadata/v1.json').end(function (error, result) {
         if (error || result.statusCode !== 200) {
@@ -192,7 +192,7 @@ function start(mode, callback) {
 
         async.series([
             announce.start.bind(null, appServerUrl),
-            startExternalServer
+            startProvisionServer
         ], callback);
     });
 }
@@ -202,14 +202,14 @@ function stop(callback) {
 
     async.series([
         announce.stop,
-        stopInternalServer,
-        stopExternalServer
+        stopUpdateServer,
+        stopProvisionServer
     ], callback);
 }
 
 if (require.main === module) {
     if (process.argv.length !== 3) {
-        console.log('Usage: node server.js [internal|external]');
+        console.log('Usage: node server.js [update|provision]');
         return;
     }
 

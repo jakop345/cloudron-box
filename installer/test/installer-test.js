@@ -35,9 +35,9 @@ describe('Server', function () {
         done();
     });
 
-    describe('external - starts and stop', function () {
+    describe('provision - starts and stop', function () {
         it('starts', function (done) {
-            server.start('external', done);
+            server.start('provision', done);
         });
 
         it('stops', function (done) {
@@ -45,9 +45,9 @@ describe('Server', function () {
         });
     });
 
-    describe('internal - starts and stop', function () {
+    describe('update - starts and stop', function () {
         it('starts', function (done) {
-            server.start('internal', done);
+            server.start('update', done);
         });
 
         it('stops', function (done) {
@@ -55,9 +55,9 @@ describe('Server', function () {
         });
     });
 
-    describe('internal', function () {
+    describe('update', function () {
         before(function (done) {
-            server.start('internal', done);
+            server.start('update', done);
         });
         after(function (done) {
             server.stop(done);
@@ -113,7 +113,7 @@ describe('Server', function () {
         });
     });
 
-    describe('external - announce', function () {
+    describe('provision - announce', function () {
         var failingGet = null;
 
         before(function (done) {
@@ -123,7 +123,7 @@ describe('Server', function () {
             failingGet = scope.get('/api/v1/boxes/' + FQDN + '/announce');
             failingGet.times(5).reply(502);
 
-            server.start('external', done);
+            server.start('provision', done);
         });
 
         after(function (done) {
@@ -134,13 +134,13 @@ describe('Server', function () {
 
         it('sends announce request repeatedly', function (done) {
             setTimeout(function () {
-                expect(failingGet.counter).to.be.below(6); // counter is nock internal
+                expect(failingGet.counter).to.be.below(6); // counter is nock update
                 done();
             }, 100);
         });
     });
 
-    describe('external - restore', function () {
+    describe('provision - restore', function () {
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
         var data = {
@@ -157,7 +157,7 @@ describe('Server', function () {
         };
 
         before(function (done) {
-            server.start('external', done);
+            server.start('provision', done);
         });
 
         after(function (done) {
@@ -186,7 +186,7 @@ describe('Server', function () {
         });
     });
 
-    describe('external - provision', function () {
+    describe('provision - provision', function () {
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
         var data = {
@@ -202,7 +202,7 @@ describe('Server', function () {
         };
 
         before(function (done) {
-            server.start('external', done);
+            server.start('provision', done);
         });
 
         after(function (done) {
