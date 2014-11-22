@@ -14,8 +14,7 @@ var appdb = require('./appdb.js'),
     paths = require('./paths.js'),
     split = require('split'),
     stream = require('stream'),
-    util = require('util'),
-    validator = require('validator');
+    util = require('util');
 
 exports = module.exports = {
     AppsError: AppsError,
@@ -39,7 +38,7 @@ exports = module.exports = {
     appFqdn: appFqdn,
 
     // exported for testing
-    _validateSubdomain: validateSubdomain,
+    _validateHostname: validateHostname,
     _validatePortBindings: validatePortBindings
 };
 
@@ -135,19 +134,19 @@ function appFqdn(location) {
     return location + '-' + config.fqdn();
 }
 
-// http://stackoverflow.com/questions/7930751/regexp-for-subdomain
-function validateSubdomain(subdomain, fqdn) {
-    var RESERVED_SUBDOMAINS = [ 'admin', '_dmarc', '_domainkey' ];
+// Hostname validation comes from RFC 1123 (section 2.1)
+// Domain name validation comes from RFC 2181 (Name syntax)
+// https://en.wikipedia.org/wiki/Hostname#Restrictions_on_valid_host_names
+// We are validating the validity of the location-fqdn as host name
+function validateHostname(location, fqdn) {
+    var RESERVED_LOCATIONS = [ 'admin' ];
 
-    if (RESERVED_SUBDOMAINS.indexOf(subdomain) !== -1) return new Error(subdomain + ' location is reserved');
+    if (RESERVED_LOCATIONS.indexOf(location) !== -1) return new Error(location + ' is reserved');
 
-    if (subdomain.length > 63) return new Error('Subdomain length cannot be greater than 63');
-    if (subdomain.match(/^[A-Za-z0-9-]+$/) === null) return new Error('Subdomain can only contain alphanumerics and hyphen');
-    if (subdomain[0] === '-' || subdomain[subdomain.length-1] === '-') return new Error('Subdomain cannot start or end with hyphen');
-
-    if (subdomain.length + 1 /* dot */ + fqdn.length > 255) return new Error('Domain length exceeds 255 characters');
-
-    if (!validator.isFQDN(subdomain + '.' + fqdn)) return new Error('Not a valid domain');
+    if ((location.length + 1 + /* hyphen */ + fqdn.indexOf('.')) > 63) return new Error('Hostname length cannot be greater than 63');
+    if (location.match(/^[A-Za-z0-9-]+$/) === null) return new Error('Hostname can only contain alphanumerics and hyphen');
+    if (location[0] === '-' || location[location.length-1] === '-') return new Error('Hostname cannot start or end with hyphen');
+    if (location.length + 1 /* hyphen */ + fqdn.length > 253) return new Error('FQDN length exceeds 253 characters');
 
     return null;
 }
@@ -260,7 +259,7 @@ function install(appId, appStoreId, username, password, location, portBindings, 
     assert(typeof restrictAccessTo === 'string');
     assert(typeof callback === 'function');
 
-    var error = validateSubdomain(location, config.fqdn());
+    var error = validateHostname(location, config.fqdn());
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
     error = validatePortBindings(portBindings);
@@ -290,7 +289,7 @@ function configure(appId, username, password, location, portBindings, restrictAc
     assert(typeof restrictAccessTo === 'string');
     assert(typeof callback === 'function');
 
-    var error = location ? validateSubdomain(location, config.fqdn()) : null;
+    var error = location ? validateHostname(location, config.fqdn()) : null;
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
     error = portBindings ? validatePortBindings(portBindings) : null;

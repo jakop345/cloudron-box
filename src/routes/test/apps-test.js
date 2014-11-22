@@ -162,7 +162,7 @@ describe('App API', function () {
                .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: '!awesome', restrictAccessTo: '' })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
-            expect(res.body.message).to.eql('Subdomain can only contain alphanumerics and hyphen');
+            expect(res.body.message).to.eql('Hostname can only contain alphanumerics and hyphen');
             done(err);
         });
     });
@@ -206,7 +206,7 @@ describe('App API', function () {
                .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: 'admin', restrictAccessTo: '' })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
-            expect(res.body.message).to.eql('admin location is reserved');
+            expect(res.body.message).to.eql('admin is reserved');
             done(err);
         });
     });

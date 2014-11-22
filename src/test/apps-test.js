@@ -41,37 +41,37 @@ describe('Apps', function () {
         database.clear(done);
     });
 
-    describe('validateSubdomain', function () {
+    describe('validateHostname', function () {
         it('does not allow admin subdomain', function () {
-            expect(apps._validateSubdomain('admin', 'cloudron.us')).to.be.an(Error);
+            expect(apps._validateHostname('admin', 'cloudron.us')).to.be.an(Error);
         });
 
         it('cannot have >63 length subdomains', function () {
             var s = '';
             for (var i = 0; i < 64; i++) s += 's';
-            expect(apps._validateSubdomain(s, 'cloudron.us')).to.be.an(Error);
+            expect(apps._validateHostname(s, 'cloudron.us')).to.be.an(Error);
         });
 
         it('allows only alphanumerics and hypen', function () {
-            expect(apps._validateSubdomain('#2r', 'cloudron.us')).to.be.an(Error);
-            expect(apps._validateSubdomain('a%b', 'cloudron.us')).to.be.an(Error);
-            expect(apps._validateSubdomain('ab_', 'cloudron.us')).to.be.an(Error);
-            expect(apps._validateSubdomain('a.b', 'cloudron.us')).to.be.an(Error);
-            expect(apps._validateSubdomain('-ab', 'cloudron.us')).to.be.an(Error);
-            expect(apps._validateSubdomain('ab-', 'cloudron.us')).to.be.an(Error);
+            expect(apps._validateHostname('#2r', 'cloudron.us')).to.be.an(Error);
+            expect(apps._validateHostname('a%b', 'cloudron.us')).to.be.an(Error);
+            expect(apps._validateHostname('ab_', 'cloudron.us')).to.be.an(Error);
+            expect(apps._validateHostname('a.b', 'cloudron.us')).to.be.an(Error);
+            expect(apps._validateHostname('-ab', 'cloudron.us')).to.be.an(Error);
+            expect(apps._validateHostname('ab-', 'cloudron.us')).to.be.an(Error);
         });
 
         it('total length cannot exceed 255', function () {
             var s = '';
             for (var i = 0; i < (255 - 'cloudron.us'.length); i++) s += 's';
 
-            expect(apps._validateSubdomain(s, 'cloudron.us')).to.be.an(Error);
+            expect(apps._validateHostname(s, 'cloudron.us')).to.be.an(Error);
         });
 
         it('allow valid domains', function () {
-            expect(apps._validateSubdomain('a', 'cloudron.us')).to.be(null);
-            expect(apps._validateSubdomain('a0-x', 'cloudron.us')).to.be(null);
-            expect(apps._validateSubdomain('01', 'cloudron.us')).to.be(null);
+            expect(apps._validateHostname('a', 'cloudron.us')).to.be(null);
+            expect(apps._validateHostname('a0-x', 'cloudron.us')).to.be(null);
+            expect(apps._validateHostname('01', 'cloudron.us')).to.be(null);
         });
     });
 
