@@ -28,6 +28,7 @@ var appdb = require('./appdb.js'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
     superagent = require('superagent'),
+    util = require('util'),
     uuid = require('node-uuid');
 
 exports = module.exports = {
@@ -426,13 +427,13 @@ function downloadManifest(app, callback) {
         .end(function (err, res) {
             if (err) return callback(err);
 
-            if (res.status !== 200) return callback(new Error('Error downloading manifest. Status' + res.status + '. ' + JSON.stringify(res.body)));
+            if (res.status !== 200) return callback(new Error(util.format('Error downloading manifest %s %j', res.status, res.body)));
 
             debug('Downloaded application manifest: ' + res.text);
 
             var manifest = safe.JSON.parse(res.text);
             var error = validateManifest(manifest);
-            if (error) return callback(new Error('Manifest error:' + error.message));
+            if (error) return callback(new Error(util.format('Manifest error: %j', error)));
 
             if (manifest.icon) {
                 safe.fs.writeFileSync(path.join(paths.APPICONS_DIR, app.id + '.png'), new Buffer(manifest.icon));
@@ -466,7 +467,7 @@ function registerSubdomain(app, callback) {
             debug('Registered subdomain for ' + app.id + ' ' + res.status);
 
             if (res.status === 409) return callback(null); // already registered
-            if (res.status !== 201) return callback(new Error('Subdomain Registration failed. Status:' + res.status + '. ' + JSON.stringify(res.body)));
+            if (res.status !== 201) return callback(new Error(util.format('Subdomain Registration failed. %s %j', res.status, res.body)));
 
             updateApp(app, { dnsRecordId: res.body.ids[0] }, callback);
         });

@@ -220,7 +220,7 @@ function sendMailDnsRecordsRequest(callback) {
         .end(function (error, res) {
             if (error) return callback(error);
 
-            debug('sendMailDnsRecords status:' + res.status);
+            debug('sendMailDnsRecords status: %s', res.status);
 
             if (res.status === 409) return callback(null); // already registered
 
