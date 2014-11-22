@@ -15,7 +15,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     export PATH=$PATH:/usr/local/bin
 fi
 
-supervisorctl -c supervisor/supervisord.conf pid nginx | xargs kill -s HUP
+supervisorctl -c /etc/supervisor/supervisord.conf pid nginx | xargs kill -s HUP
 
 # always exit with status 0 regardless of whether the restart succeeded
 # this is required by tests (where neither supervisor nor nginx are running)
