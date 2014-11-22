@@ -224,7 +224,7 @@ function sendMailDnsRecordsRequest(callback) {
 
             if (res.status === 409) return callback(null); // already registered
 
-            if (res.status !== 201) return callback(new Error('Failed to add Mail DNS records: ' + res.status));
+            if (res.status !== 201) return callback(new Error(util.format('Failed to add Mail DNS records: %s %j', res.status, res.body)));
 
             return callback(null, res.body.ids);
         });
