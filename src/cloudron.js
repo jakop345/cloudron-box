@@ -143,7 +143,7 @@ function getIp() {
 function getConfig(callback) {
     assert(typeof callback === 'function');
 
-    execFile(GIT, [ 'log', '-1', '--pretty=format:%h' ], {}, function (error, stdout, stderr) {
+    execFile(GIT, [ 'log', '-1', '--pretty=format:%h' ], { cwd: __dirname }, function (error, stdout, stderr) {
         if (error) {
             console.error('Failed to get git revision.', error, stdout, stderr);
             stdout = null;
