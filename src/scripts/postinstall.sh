@@ -129,9 +129,11 @@ cat > "$CLOUDRON_CONF" <<EOF2
 }
 EOF2
 
-echo "Marking any existing apps for restore"
-# TODO: do not auto-start stopped containers (httpPort might need fixing to start them)
-sqlite3 "$CLOUDRON_SQLITE" 'UPDATE apps SET installationState = "pending_restore", healthy = NULL, runState = NULL, containerId = NULL, httpPort = NULL, installationProgress = NULL'
+if [ -n "$PROVISION_RESTORE_URL" ]; then
+    echo "Marking apps for restore"
+    # TODO: do not auto-start stopped containers (httpPort might need fixing to start them)
+    sqlite3 "$CLOUDRON_SQLITE" 'UPDATE apps SET installationState = "pending_restore", healthy = NULL, runState = NULL, containerId = NULL, httpPort = NULL, installationProgress = NULL'
+fi
 
 # Add webadmin oauth client
 echo "Add webadmin oauth cient"
