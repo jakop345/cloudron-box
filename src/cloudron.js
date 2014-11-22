@@ -195,7 +195,7 @@ function sendMailDnsRecordsRequest(callback) {
     var dkimPublicKeyFile = path.join(paths.HARAKA_CONFIG_DIR, 'dkim/' + config.fqdn() + '/public');
     var publicKey = safe.fs.readFileSync(dkimPublicKeyFile, 'utf8');
 
-    if (publicKey === null) return console.error('Error reading dkim public key');
+    if (publicKey === null) return callback(new Error('Error reading dkim public key'));
 
     // remove header, footer and new lines
     publicKey = publicKey.split('\n').slice(1, -2).join('');
