@@ -91,7 +91,7 @@ cp $SCRIPT_DIR/postinstall/nginx/nginx.conf $NGINX_CONFIG_DIR/nginx.conf
 cp $SCRIPT_DIR/postinstall/nginx/mime.types $NGINX_CONFIG_DIR/mime.types
 cp $SCRIPT_DIR/postinstall/nginx/certificates.conf $NGINX_CONFIG_DIR/certificates.conf
 touch $NGINX_CONFIG_DIR/naked_domain.conf
-sed -e "s/##ADMIN_FQDN##/$ADMIN_FQDN/" -e "s|##SRCDIR##|$SRCDIR|" nginx/admin.conf_template > $NGINX_APPCONFIG_DIR/admin.conf
+sed -e "s/##ADMIN_FQDN##/$ADMIN_FQDN/" -e "s|##SRCDIR##|$SRCDIR|" $SCRIPT_DIR/postinstall/nginx/admin.conf_template > $NGINX_APPCONFIG_DIR/admin.conf
 
 echo "==== Setup ssl certs ===="
 # The nginx cert dir is excluded from backup in backup.sh
