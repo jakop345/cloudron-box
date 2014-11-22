@@ -18,6 +18,8 @@ CLOUDRON_CONF="/home/$USER/configs/cloudron.conf"
 CLOUDRON_SQLITE="$DATA_DIR/cloudron.sqlite"
 DOMAIN_NAME=`hostname -f`
 
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 # if you change this, change the code in installer.sh as well
 ARGS=$(getopt -o "" -l "appserverurl:,fqdn:,restoreurl:,version:,tlscert:,tlskey:,token:,boxversionsurl:" -n "$0" -- "$@")
 eval set -- "$ARGS"
@@ -84,11 +86,10 @@ PATH=$PATH:$SRCDIR/node_modules/.bin npm run-script migrate_data
 EOF
 
 echo "==== Setup nginx ===="
-cd $SRCDIR
 mkdir -p $NGINX_APPCONFIG_DIR
-cp nginx/nginx.conf $NGINX_CONFIG_DIR/nginx.conf
-cp nginx/mime.types $NGINX_CONFIG_DIR/mime.types
-cp nginx/certificates.conf $NGINX_CONFIG_DIR/certificates.conf
+cp $SCRIPT_DIR/postinstall/nginx/nginx.conf $NGINX_CONFIG_DIR/nginx.conf
+cp $SCRIPT_DIR/postinstall/nginx/mime.types $NGINX_CONFIG_DIR/mime.types
+cp $SCRIPT_DIR/postinstall/nginx/certificates.conf $NGINX_CONFIG_DIR/certificates.conf
 touch $NGINX_CONFIG_DIR/naked_domain.conf
 sed -e "s/##ADMIN_FQDN##/$ADMIN_FQDN/" -e "s|##SRCDIR##|$SRCDIR|" nginx/admin.conf_template > $NGINX_APPCONFIG_DIR/admin.conf
 

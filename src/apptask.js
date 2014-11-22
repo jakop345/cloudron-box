@@ -52,7 +52,7 @@ exports = module.exports = {
 };
 
 var gDocker = null,
-    NGINX_APPCONFIG_EJS = fs.readFileSync(__dirname + '/../nginx/appconfig.ejs', { encoding: 'utf8' }),
+    NGINX_APPCONFIG_EJS = fs.readFileSync(__dirname + '/nginx.appconfig.ejs', { encoding: 'utf8' }),
     COLLECTD_CONFIG_EJS = fs.readFileSync(__dirname + '/collectd.config.ejs', { encoding: 'utf8' }),
     SUDO = '/usr/bin/sudo',
     RELOAD_NGINX_CMD = path.join(__dirname, 'scripts/reloadnginx.sh'),
