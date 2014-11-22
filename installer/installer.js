@@ -3,7 +3,7 @@
 'use strict';
 
 var assert = require('assert'),
-    debug = require('debug')('box/installer'),
+    debug = require('debug')('installer:installer'),
     fs = require('fs'),
     os = require('os'),
     path = require('path'),
