@@ -22,7 +22,5 @@ cp nginx/cert/* $NGINX_ROOT/cert/
 touch $NGINX_ROOT/naked_domain.conf
 sed -e "s/##ADMIN_FQDN##/admin-localhost/" -e "s|##SRCDIR##|$SRCDIR|" nginx/admin.conf_template > $NGINX_ROOT/applications/admin.conf
 
-
-sudo mkdir -p /var/log/supervisor
-sudo NGINX_ROOT=$NGINX_ROOT supervisord -n -c supervisor/supervisord.conf
+sudo nginx -c nginx.conf -p $NGINX_ROOT
 

@@ -10,9 +10,8 @@ NGINX_CONFIG_DIR=/home/$USER/configs/nginx
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 rm -rf /etc/supervisor
-mkdir -p /etc/supervisor
 mkdir -p /etc/supervisor/conf.d
-cp $SRCDIR/supervisor/supervisord.conf /etc/supervisor/
+cp $SCRIPT_DIR/supervisord/supervisord.conf /etc/supervisor/
 
 echo "Writing supervisor configs..."
 
