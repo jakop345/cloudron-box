@@ -45,7 +45,7 @@ autorestart=true
 redirect_stderr=true
 directory=$SRCDIR/installer
 user=yellowtent
-environment=HOME="/home/yellowtent",CLOUDRON="1",USER="yellowtent",DEBUG="installer*"
+environment=HOME="/home/yellowtent",CLOUDRON="1",USER="yellowtent",DEBUG="installer*,connect-lastmile"
 EOF
 
 # http://www.onurguzel.com/supervisord-restarting-and-reloading/
