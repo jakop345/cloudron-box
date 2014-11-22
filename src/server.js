@@ -233,7 +233,7 @@ Server.prototype._initializeExpressSync = function () {
     router.get ('/api/v1/settings/naked_domain', settingsScope, routes.settings.getNakedDomain);
     router.post('/api/v1/settings/naked_domain', settingsScope, routes.settings.setNakedDomain);
 
-    // graphite calls
+    // graphite calls (FIXME: remove before release)
     router.get([ '/graphite/*', '/content/*', '/metrics/*', '/dashboard/*', '/render/*', '/browser/*', '/composer/*' ], graphiteMiddleware);
 };
 
