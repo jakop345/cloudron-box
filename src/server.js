@@ -141,7 +141,6 @@ Server.prototype._initializeExpressSync = function () {
     router.del = router.delete; // amend router.del for readability further on
 
     this.app
-      // .use(require('delay')(500))
        .use(middleware.timeout(REQUEST_TIMEOUT))
 //       .use(express.limit(UPLOAD_LIMIT))
        .use(json)

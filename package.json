@@ -65,7 +65,6 @@
   },
   "devDependencies": {
     "apidoc": "*",
-    "delay": "0.0.1",
     "expect.js": "*",
     "hock": "~0.2.5",
     "husky": "^0.5.1",
