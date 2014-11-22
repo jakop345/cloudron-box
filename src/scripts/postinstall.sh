@@ -144,5 +144,5 @@ sqlite3 "$CLOUDRON_SQLITE" 'INSERT OR REPLACE INTO clients (id, appId, clientId,
 EOF
 
 echo "==== Setup supervisord ===="
-$SRCDIR/src/scripts/postinstall/setup_supervisor.sh
+$SCRIPT_DIR/postinstall/setup_supervisord.sh
 
