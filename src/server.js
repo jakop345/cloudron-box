@@ -13,7 +13,6 @@ var apps = require('./apps'),
     express = require('express'),
     http = require('http'),
     HttpSuccess = require('./httpsuccess.js'),
-    installer = require('../installer/installer.js'),
     mailer = require('./mailer.js'),
     middleware = require('../middleware'),
     mkdirp = require('mkdirp'),
@@ -258,7 +257,6 @@ Server.prototype.start = function (callback) {
 
         apps.initialize();
         cloudron.initialize();
-        installer.initialize();
         updater.initialize();
         mailer.initialize();
 
@@ -277,7 +275,6 @@ Server.prototype.stop = function (callback) {
     }
 
     cloudron.uninitialize();
-    installer.uninitialize();
     updater.uninitialize();
     apps.uninitialize();
     mailer.uninitialize();
