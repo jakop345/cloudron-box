@@ -848,12 +848,26 @@
       "resolved": "http://registry.npmjs.org/safetydance/-/safetydance-0.0.11.tgz"
     },
     "serve-favicon": {
-      "version": "2.0.0",
-      "from": "serve-favicon@2.0.0",
+      "version": "2.1.7",
+      "from": "serve-favicon@latest",
       "dependencies": {
+        "etag": {
+          "version": "1.5.1",
+          "from": "etag@~1.5.0",
+          "dependencies": {
+            "crc": {
+              "version": "3.2.1",
+              "from": "crc@3.2.1"
+            }
+          }
+        },
         "fresh": {
-          "version": "0.2.2",
-          "from": "fresh@0.2.2"
+          "version": "0.2.4",
+          "from": "fresh@0.2.4"
+        },
+        "ms": {
+          "version": "0.6.2",
+          "from": "ms@0.6.2"
         }
       }
     },
@@ -1352,7 +1366,7 @@
       "from": "validator@"
     },
     "connect-lastmile": {
-      "version": "0.0.7",
+      "version": "0.0.8",
       "from": "connect-lastmile@latest",
       "dependencies": {
         "debug": {
