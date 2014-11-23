@@ -1343,7 +1343,7 @@
     "supererror": {
       "version": "0.5.0",
       "from": "git+https://git@github.com/gramakri/supererror.git",
-      "resolved": "git+https://git@github.com/gramakri/supererror.git#67ff63d77860b7059171e836d432a26e6f88f383",
+      "resolved": "git+https://git@github.com/gramakri/supererror.git#49ae1ad2cec1938fa920cb6ade77199c6c4718cd",
       "dependencies": {
         "colors": {
           "version": "0.6.2",
