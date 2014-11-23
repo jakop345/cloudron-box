@@ -112,16 +112,6 @@ Server.prototype._initializeExpressSync = function () {
         urlencoded = middleware.urlencoded({ limit: QUERY_LIMIT }), // application/x-www-form-urlencoded
         csurf = csrf(); // Cross-site request forgery protection middleware for login form
 
-    var graphiteProxy = middleware.proxy(url.parse('http://127.0.0.1:8000'));
-    var graphiteMiddleware = function (req, res, next) {
-        // remove any senstive info
-        var parsedUrl = url.parse(req.url, true /* parseQueryString */);
-        delete parsedUrl.query['access_token'];
-        delete req.headers['authorization']
-        req.url = url.format({ pathname: parsedUrl.pathname, query: parsedUrl.query });
-        graphiteProxy(req, res, next);
-    };
-
     // Passport configuration
     auth.initialize();
 
@@ -179,7 +169,7 @@ Server.prototype._initializeExpressSync = function () {
     router.get ('/api/v1/stats', rootScope, routes.cloudron.getStats);
     router.post('/api/v1/backups', rootScope, routes.cloudron.createBackup);
     router.get ('/api/v1/profile', profileScope, routes.user.info);
-    router.get ('/api/v1/graphs', rootScope, function (req, res, next) { req.url = req.url.replace(/^\/api\/v1\/graphs(\?.*)/, '/render$1'); next(); }, graphiteMiddleware);
+    router.get ('/api/v1/graphs', rootScope, routes.graphs.getGraphs);
 
     router.get ('/api/v1/users', usersScope, routes.user.list);
     router.post('/api/v1/users', usersScope, routes.user.requireAdmin, routes.user.create);
@@ -234,7 +224,7 @@ Server.prototype._initializeExpressSync = function () {
     router.post('/api/v1/settings/naked_domain', settingsScope, routes.settings.setNakedDomain);
 
     // graphite calls (FIXME: remove before release)
-    router.get([ '/graphite/*', '/content/*', '/metrics/*', '/dashboard/*', '/render/*', '/browser/*', '/composer/*' ], graphiteMiddleware);
+    router.get([ '/graphite/*', '/content/*', '/metrics/*', '/dashboard/*', '/render/*', '/browser/*', '/composer/*' ], routes.graphs.forwardToGraphite);
 };
 
 Server.prototype.start = function (callback) {
