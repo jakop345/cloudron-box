@@ -12,8 +12,8 @@ var apps = require('./apps'),
     debug = require('debug')('box:server'),
     express = require('express'),
     http = require('http'),
-    HttpError = require('./httperror.js'),
-    HttpSuccess = require('./httpsuccess.js'),
+    HttpError = require('connect-lastmile').HttpError,
+    HttpSuccess = require('connect-lastmile').HttpSuccess,
     mailer = require('./mailer.js'),
     middleware = require('../middleware'),
     mkdirp = require('mkdirp'),
@@ -31,41 +31,6 @@ function Server() {
     this.httpServer = null; // http server
     this.app = null; // express
 }
-
-// Success handler
-Server.prototype._successHandler = function (success, req, res, next) {
-    if (!(success instanceof HttpSuccess)) return next(success);
-
-    if (success.body) {
-        res.setHeader('Content-Type', 'application/json');
-        res.status(success.status).send(success.body);
-    } else {
-        res.status(success.status).end();
-    }
-};
-
-// Error handlers. These are called until one of them sends headers
-Server.prototype._clientErrorHandler = function (err, req, res, next) {
-    var status = err.status; // connect/express or our app
-
-    // if the request took too long, assume it's a problem on the client
-    if (err.timeout && err.status == 503) { // timeout() middleware
-        status = 408;
-    }
-
-    if (status >= 400 && status <= 499) {
-        res.send(status, { status: http.STATUS_CODES[status], message: err.message });
-        debug(http.STATUS_CODES[status] + ' : ' + err.message);
-    } else {
-        next(err);
-    }
-};
-
-Server.prototype._serverErrorHandler = function (err, req, res, next) {
-    var status = err.status || 500;
-    res.status(status).send({ status: http.STATUS_CODES[status], message: err.message || 'Internal Server Error' });
-    console.error(status, err, err.internalError);
-};
 
 /**
  * @api {get} /api/v1/firsttime firstTime
@@ -143,9 +108,9 @@ Server.prototype._initializeExpressSync = function () {
        .use(passport.initialize())
        .use(passport.session())
        .use(router)
-       .use(this._successHandler.bind(this))
-       .use(this._clientErrorHandler.bind(this))
-       .use(this._serverErrorHandler.bind(this));
+       .use(middleware.successHandler)
+       .use(middleware.clientErrorHandler)
+       .use(middleware.serverErrorHandler);
 
     // middleware shortcuts for authentification
     var bearer = passport.authenticate(['bearer'], { session: false });

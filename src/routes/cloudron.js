@@ -8,8 +8,8 @@ var assert = require('assert'),
     debug = require('debug')('box:routes/cloudron'),
     df = require('nodejs-disks'),
     execFile = require('child_process').execFile,
-    HttpError = require('../httperror.js'),
-    HttpSuccess = require('../httpsuccess.js'),
+    HttpError = require('connect-lastmile').HttpError,
+    HttpSuccess = require('connect-lastmile').HttpSuccess,
     path = require('path'),
     updater = require('../updater.js');
 

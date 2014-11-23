@@ -8,8 +8,8 @@ var apps = require('../apps.js'),
     config = require('../../config.js'),
     debug = require('debug')('box:routes/apps'),
     fs = require('fs'),
-    HttpError = require('../httperror.js'),
-    HttpSuccess = require('../httpsuccess.js'),
+    HttpError = require('connect-lastmile').HttpError,
+    HttpSuccess = require('connect-lastmile').HttpSuccess,
     paths = require('../paths.js'),
     uuid = require('node-uuid');
 

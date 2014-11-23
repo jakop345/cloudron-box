@@ -5,8 +5,8 @@
 var assert = require('assert'),
     clientdb = require('../clientdb.js'),
     debug = require('debug')('box:routes/user'),
-    HttpError = require('../../src/httperror.js'),
-    HttpSuccess = require('../../src/httpsuccess.js'),
+    HttpError = require('connect-lastmile').HttpError,
+    HttpSuccess = require('connect-lastmile').HttpSuccess,
     tokendb = require('../tokendb.js'),
     user = require('../user.js'),
     UserError = user.UserError;

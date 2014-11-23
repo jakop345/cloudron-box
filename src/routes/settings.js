@@ -8,8 +8,8 @@ var apps = require('../apps.js'),
     assert = require('assert'),
     DatabaseError = require('../databaseerror.js'),
     debug = require('debug')('box:routes/settings'),
-    HttpError = require('../httperror.js'),
-    HttpSuccess = require('../httpsuccess.js'),
+    HttpError = require('connect-lastmile').HttpError,
+    HttpSuccess = require('connect-lastmile').HttpSuccess,
     settingsdb = require('../settingsdb.js');
 
 exports = module.exports = {

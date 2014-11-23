@@ -7,7 +7,8 @@
 'use strict';
 
 var expect = require('expect.js'),
-    HttpError = require('../../httperror.js'),
+    HttpError = require('connect-lastmile').HttpError,
+    HttpSuccess = require('connect-lastmile').HttpSuccess,
     oauth2 = require('../oauth2.js'),
     passport = require('passport');
 
