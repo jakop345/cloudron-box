@@ -12,6 +12,7 @@ var apps = require('./apps'),
     debug = require('debug')('box:server'),
     express = require('express'),
     http = require('http'),
+    HttpError = require('./httperror.js'),
     HttpSuccess = require('./httpsuccess.js'),
     mailer = require('./mailer.js'),
     middleware = require('../middleware'),
@@ -76,11 +77,11 @@ Server.prototype._serverErrorHandler = function (err, req, res, next) {
  * @apiSuccess {Boolean} activated True if the device was already activated otherwise false.
  * @apiSuccess {String} version The current version string of the device.
  */
-Server.prototype._firstTime = function (req, res) {
+Server.prototype._firstTime = function (req, res, next) {
     userdb.count(function (error, count) {
-        if (error) return res.send(500, { status: http.STATUS_CODES[500], message: error.message || 'Internal Server error' });
+        if (error) return next(new HttpError(500, error));
 
-        return res.send(200, { activated: count !== 0, version: config.version() });
+        next(new HttpSuccess(200, { activated: count !== 0, version: config.version() }));
     });
 };
 
@@ -93,8 +94,8 @@ Server.prototype._firstTime = function (req, res) {
  *
  * @apiSuccess {String} version The current version string of the device.
  */
-Server.prototype._getVersion = function (req, res) {
-    res.send(200, { version: config.version() });
+Server.prototype._getVersion = function (req, res, next) {
+    next(new HttpSuccess(200, { version: config.version() }));
 };
 
 Server.prototype._initializeExpressSync = function () {
