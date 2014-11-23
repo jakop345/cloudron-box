@@ -75,7 +75,7 @@ Server.prototype._initializeExpressSync = function () {
         FILE_TIMEOUT = 3 * 60 * 1000; // increased timeout for file uploads (3 mins)
 
     var json = middleware.json({ strict: true, limit: QUERY_LIMIT }), // application/json
-        urlencoded = middleware.urlencoded({ limit: QUERY_LIMIT }), // application/x-www-form-urlencoded
+        urlencoded = middleware.urlencoded({ extended: false, limit: QUERY_LIMIT }), // application/x-www-form-urlencoded
         csurf = csrf(); // Cross-site request forgery protection middleware for login form
 
     // Passport configuration
