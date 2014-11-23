@@ -7,14 +7,13 @@
 var announce = require('./announce.js'),
     assert = require('assert'),
     async = require('async'),
-    connectLastMile = require('connect-lastmile'),
     debug = require('debug')('installer:server'),
     express = require('express'),
     fs = require('fs'),
     http = require('http'),
-    HttpError = connectLastMile.HttpError,
+    HttpError = require('connect-lastmile').HttpError,
     https = require('https'),
-    HttpSuccess = connectLastMile.HttpSuccess,
+    HttpSuccess = require('connect-lastmile').HttpSuccess,
     installer = require('./installer.js'),
     middleware = require('../middleware'),
     path = require('path'),
@@ -106,9 +105,9 @@ function startUpdateServer(callback) {
     app.use(middleware.json({ strict: true }))
        .use(middleware.morgan({ format: 'dev', immediate: false }))
        .use(router)
-       .use(connectLastMile.successHandler)
-       .use(connectLastMile.clientErrorHandler)
-       .use(connectLastMile.serverErrorHandler);
+       .use(middleware.successHandler)
+       .use(middleware.clientErrorHandler)
+       .use(middleware.serverErrorHandler);
 
     router.post('/api/v1/installer/update', update);
 
@@ -130,9 +129,9 @@ function startProvisionServer(callback) {
     app.use(middleware.json({ strict: true }))
        .use(middleware.morgan({ format: 'dev', immediate: false }))
        .use(router)
-       .use(connectLastMile.successHandler)
-       .use(connectLastMile.clientErrorHandler)
-       .use(connectLastMile.serverErrorHandler);
+       .use(middleware.successHandler)
+       .use(middleware.clientErrorHandler)
+       .use(middleware.serverErrorHandler);
 
     router.post('/api/v1/installer/provision', provision);
     router.post('/api/v1/installer/restore', restore);
