@@ -257,7 +257,7 @@ describe('database', function () {
             containerId: null,
             portBindings: { '1234': '5678' },
             healthy: null,
-            restrictAccessTo: ''
+            accessRestriction: ''
         };
         var APP_1 = {
             id: 'appid-1',
@@ -273,7 +273,7 @@ describe('database', function () {
             containerId: null,
             portBindings: { },
             healthy: null,
-            restrictAccessTo: 'roleAdmin'
+            accessRestriction: 'roleAdmin'
         };
 
         it('add fails due to missing arguments', function () {
@@ -290,7 +290,7 @@ describe('database', function () {
         });
 
         it('add succeeds', function (done) {
-            appdb.add(APP_0.id, APP_0.appStoreId, APP_0.location, APP_0.portBindings, APP_0.restrictAccessTo, function (error) {
+            appdb.add(APP_0.id, APP_0.appStoreId, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, function (error) {
                 expect(error).to.be(null);
                 done();
             });
@@ -314,7 +314,7 @@ describe('database', function () {
         });
 
         it('add of same app fails', function (done) {
-            appdb.add(APP_0.id, APP_0.appStoreId, APP_0.location, [ ], APP_0.restrictAccessTo, function (error) {
+            appdb.add(APP_0.id, APP_0.appStoreId, APP_0.location, [ ], APP_0.accessRestriction, function (error) {
                 expect(error).to.be.a(DatabaseError);
                 expect(error.reason).to.be(DatabaseError.ALREADY_EXISTS);
                 done();
@@ -343,9 +343,9 @@ describe('database', function () {
             APP_0.installationState = 'some-other-status';
             APP_0.location = 'some-other-location';
             APP_0.version = '0.2';
-            APP_0.restrictAccessTo = true;
+            APP_0.accessRestriction = true;
 
-            appdb.update(APP_0.id, { installationState: APP_0.installationState, location: APP_0.location, version: APP_0.version, restrictAccessTo: APP_0.restrictAccessTo }, function (error) {
+            appdb.update(APP_0.id, { installationState: APP_0.installationState, location: APP_0.location, version: APP_0.version, accessRestriction: APP_0.accessRestriction }, function (error) {
                 expect(error).to.be(null);
 
                 appdb.get(APP_0.id, function (error, result) {
@@ -366,7 +366,7 @@ describe('database', function () {
         });
 
         it('add second app succeeds', function (done) {
-            appdb.add(APP_1.id, APP_1.appStoreId, APP_1.location, [ ], APP_1.restrictAccessTo, function (error) {
+            appdb.add(APP_1.id, APP_1.appStoreId, APP_1.location, [ ], APP_1.accessRestriction, function (error) {
                 expect(error).to.be(null);
                 done();
             });

@@ -55,7 +55,7 @@ function setup(done) {
         },
 
         function addApp(callback) {
-            appdb.add('appid', 'appStoreId', 'location', [ ] /* portBindings */, '' /* restrictAccessTo */, callback);
+            appdb.add('appid', 'appStoreId', 'location', [ ] /* portBindings */, '' /* accessRestriction */, callback);
         }
     ], done);
 }

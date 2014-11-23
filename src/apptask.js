@@ -107,7 +107,7 @@ function configureNginx(app, callback) {
         if (error) return callback(error);
 
         var sourceDir = path.resolve(__dirname, '..');
-        var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: appFqdn(app.location), port: freePort, restrictAccessTo: app.restrictAccessTo });
+        var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: appFqdn(app.location), port: freePort, accessRestriction: app.accessRestriction });
 
         var nginxConfigFilename = path.join(paths.NGINX_APPCONFIG_DIR, app.id + '.conf');
         debug('writing config to ' + nginxConfigFilename);
@@ -139,7 +139,7 @@ function unconfigureNginx(app, callback) {
 
 function setNakedDomain(app, callback) {
     var sourceDir = path.resolve(__dirname, '..');
-    var nginxConf = app ? ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: config.fqdn(), port: app.httpPort, restrictAccessTo: app.restrictAccessTo }) : '';
+    var nginxConf = app ? ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: config.fqdn(), port: app.httpPort, accessRestriction: app.accessRestriction }) : '';
 
     var nginxNakedDomainFilename = path.join(paths.NGINX_CONFIG_DIR, 'naked_domain.conf');
     debug('writing naked domain config to ' + nginxNakedDomainFilename);

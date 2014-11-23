@@ -71,7 +71,7 @@ app.filter('installationStateLabel', function() {
     };
 });
 
-app.filter('restrictAccessToLabel', function() {
+app.filter('accessRestrictionLabel', function() {
     return function(input) {
         if (input === '') return 'public';
         if (input === 'roleUser') return 'private';

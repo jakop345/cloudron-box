@@ -159,7 +159,7 @@ describe('App API', function () {
     it('app install fails - invalid location', function (done) {
         request.post(SERVER_URL + '/api/v1/app/install')
                .query({ access_token: token })
-               .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: '!awesome', restrictAccessTo: '' })
+               .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: '!awesome', accessRestriction: '' })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             expect(res.body.message).to.eql('Hostname can only contain alphanumerics and hyphen');
@@ -170,7 +170,7 @@ describe('App API', function () {
     it('app install fails - invalid location type', function (done) {
         request.post(SERVER_URL + '/api/v1/app/install')
                .query({ access_token: token })
-               .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: 42, restrictAccessTo: '' })
+               .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: 42, accessRestriction: '' })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             expect(res.body.message).to.eql('location is required');
@@ -181,7 +181,7 @@ describe('App API', function () {
     it('app install fails - invalid password type', function (done) {
         request.post(SERVER_URL + '/api/v1/app/install')
                .query({ access_token: token })
-               .send({ appStoreId: APP_STORE_ID, password: 3.52, location: 'ninja', restrictAccessTo: '' })
+               .send({ appStoreId: APP_STORE_ID, password: 3.52, location: 'ninja', accessRestriction: '' })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             expect(res.body.message).to.eql('API call requires user password');
@@ -192,7 +192,7 @@ describe('App API', function () {
     it('app install fails - invalid password', function (done) {
         request.post(SERVER_URL + '/api/v1/app/install')
                .query({ access_token: token })
-               .send({ appStoreId: APP_STORE_ID, password: PASSWORD + 'x', location: 'ninja', restrictAccessTo: '' })
+               .send({ appStoreId: APP_STORE_ID, password: PASSWORD + 'x', location: 'ninja', accessRestriction: '' })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(403);
             expect(res.body.message).to.eql('Password incorrect');
@@ -203,7 +203,7 @@ describe('App API', function () {
     it('app install fails - reserved location', function (done) {
         request.post(SERVER_URL + '/api/v1/app/install')
                .query({ access_token: token })
-               .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: 'admin', restrictAccessTo: '' })
+               .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: 'admin', accessRestriction: '' })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             expect(res.body.message).to.eql('admin is reserved');
@@ -214,7 +214,7 @@ describe('App API', function () {
     it('app install fails - portBindings must be object', function (done) {
         request.post(SERVER_URL + '/api/v1/app/install')
                .query({ access_token: token })
-               .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: 23, restrictAccessTo: '' })
+               .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: 23, accessRestriction: '' })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             expect(res.body.message).to.eql('portBindings must be an object');
@@ -222,13 +222,13 @@ describe('App API', function () {
         });
     });
 
-    it('app install fails - restrictAccessTo is required', function (done) {
+    it('app install fails - accessRestriction is required', function (done) {
         request.post(SERVER_URL + '/api/v1/app/install')
                .query({ access_token: token })
                .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: {} })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
-            expect(res.body.message).to.eql('restrictAccessTo is required');
+            expect(res.body.message).to.eql('accessRestriction is required');
             done(err);
         });
     });
@@ -236,7 +236,7 @@ describe('App API', function () {
     it('app install succeeds', function (done) {
         request.post(SERVER_URL + '/api/v1/app/install')
                .query({ access_token: token })
-               .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: null, restrictAccessTo: '' })
+               .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: '' })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(202);
             expect(res.body.id).to.be.a('string');
@@ -248,7 +248,7 @@ describe('App API', function () {
     it('app install fails because of conflicting location', function (done) {
         request.post(SERVER_URL + '/api/v1/app/install')
                .query({ access_token: token })
-               .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: null, restrictAccessTo: '' })
+               .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: '' })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(409);
             done();
@@ -401,7 +401,7 @@ describe('App installation', function () {
 
         request.post(SERVER_URL + '/api/v1/app/install')
               .query({ access_token: token })
-              .send({ appId: APP_ID, appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: null, restrictAccessTo: '' })
+              .send({ appId: APP_ID, appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: '' })
               .end(function (err, res) {
             expect(res.statusCode).to.equal(202);
             expect(res.body.id).to.be.a('string');
@@ -697,7 +697,7 @@ describe('App installation - port bindings', function () {
 
         request.post(SERVER_URL + '/api/v1/app/install')
               .query({ access_token: token })
-              .send({ appId: APP_ID, appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: { '7778' : '7171' }, restrictAccessTo: '' })
+              .send({ appId: APP_ID, appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: { '7778' : '7171' }, accessRestriction: '' })
               .end(function (err, res) {
             expect(res.statusCode).to.equal(202);
             expect(res.body.id).to.equal(APP_ID);
@@ -786,7 +786,7 @@ describe('App installation - port bindings', function () {
 
         request.post(SERVER_URL + '/api/v1/app/' + APP_ID + '/configure')
               .query({ access_token: token })
-              .send({ appId: APP_ID, password: PASSWORD, portBindings: { '7778' : '7172' }, restrictAccessTo: 'roleAdmin' })
+              .send({ appId: APP_ID, password: PASSWORD, portBindings: { '7778' : '7172' }, accessRestriction: 'roleAdmin' })
               .end(function (err, res) {
             expect(res.statusCode).to.equal(202);
             checkConfigureStatus();

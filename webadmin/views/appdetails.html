@@ -23,7 +23,7 @@
                         <li class="list-group-item" ng-show="app.installationState !== 'installed'">Installation Details <span class="pull-right">{{ app.installationProgress }}</span></li>
                         <li class="list-group-item" ng-show="app.installationState === 'installed'">Run Status <span class="pull-right">{{ app.runState }}</span></li>
                         <li class="list-group-item">Version <span class="pull-right">{{ app.manifest.version }}</span></li>
-                        <li class="list-group-item">Access Restriction<span class="pull-right">{{ app.restrictAccessTo | restrictAccessToLabel }}</span></li>
+                        <li class="list-group-item">Access Restriction<span class="pull-right">{{ app.accessRestriction | accessRestrictionLabel }}</span></li>
                     </ul>
 
                     <a class="btn btn-outline btn-primary pull-left" ng-show="app.installationState === 'installed'" ng-href="#/app/{{app.id}}/configure">Configure</a>

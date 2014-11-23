@@ -238,25 +238,25 @@ function getAll(callback) {
     });
 }
 
-function validateRestrictAccessTo(restrictAccessTo) {
+function validateAccessRestriction(accessRestriction) {
     // TODO: make the values below enumerations in the oauth code
-    switch (restrictAccessTo) {
+    switch (accessRestriction) {
     case '':
     case 'roleUser':
     case 'roleAdmin':
         return null;
     default:
-        return new Error('Invalid restrictAccessTo');
+        return new Error('Invalid accessRestriction');
     }
 }
 
-function install(appId, appStoreId, username, password, location, portBindings, restrictAccessTo, callback) {
+function install(appId, appStoreId, username, password, location, portBindings, accessRestriction, callback) {
     assert(typeof appId === 'string');
     assert(typeof username === 'string');
     assert(typeof password === 'string');
     assert(typeof location === 'string');
     assert(!portBindings || typeof portBindings === 'object');
-    assert(typeof restrictAccessTo === 'string');
+    assert(typeof accessRestriction === 'string');
     assert(typeof callback === 'function');
 
     var error = validateHostname(location, config.fqdn());
@@ -265,12 +265,12 @@ function install(appId, appStoreId, username, password, location, portBindings, 
     error = validatePortBindings(portBindings);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
-    error = validateRestrictAccessTo(restrictAccessTo);
+    error = validateAccessRestriction(accessRestriction);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
     debug('Will install app with id : ' + appId);
 
-    appdb.add(appId, appStoreId, location.toLowerCase(), portBindings, restrictAccessTo, function (error) {
+    appdb.add(appId, appStoreId, location.toLowerCase(), portBindings, accessRestriction, function (error) {
         if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new AppsError(AppsError.ALREADY_EXISTS));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
@@ -281,12 +281,12 @@ function install(appId, appStoreId, username, password, location, portBindings, 
     });
 }
 
-function configure(appId, username, password, location, portBindings, restrictAccessTo, callback) {
+function configure(appId, username, password, location, portBindings, accessRestriction, callback) {
     assert(typeof appId === 'string');
     assert(typeof username === 'string');
     assert(typeof password === 'string');
     assert(!portBindings || typeof portBindings === 'object');
-    assert(typeof restrictAccessTo === 'string');
+    assert(typeof accessRestriction === 'string');
     assert(typeof callback === 'function');
 
     var error = location ? validateHostname(location, config.fqdn()) : null;
@@ -295,13 +295,13 @@ function configure(appId, username, password, location, portBindings, restrictAc
     error = portBindings ? validatePortBindings(portBindings) : null;
     if (error) return callback(error);
 
-    error = validateRestrictAccessTo(restrictAccessTo);
+    error = validateAccessRestriction(accessRestriction);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
     var values = { };
     if (location) values.location = location.toLowerCase();
     values.portBindings = portBindings;
-    values.restrictAccessTo = restrictAccessTo;
+    values.accessRestriction = accessRestriction;
 
     debug('Will install app with id:%s', appId);
 

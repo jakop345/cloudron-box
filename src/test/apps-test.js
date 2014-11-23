@@ -27,13 +27,13 @@ describe('Apps', function () {
         containerId: null,
         portBindings: { '1234': '5678' },
         healthy: null,
-        restrictAccessTo: ''
+        accessRestriction: ''
     };
 
     before(function (done) {
         database.initialize(function (error) {
             expect(error).to.be(null);
-            appdb.add(APP_0.id, APP_0.appStoreId, APP_0.location, APP_0.portBindings, APP_0.restrictAccessTo, done);
+            appdb.add(APP_0.id, APP_0.appStoreId, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, done);
         });
     });
 

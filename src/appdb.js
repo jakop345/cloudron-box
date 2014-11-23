@@ -44,10 +44,10 @@ exports = module.exports = {
 };
 
 var APPS_FIELDS = [ 'id', 'appStoreId', 'version', 'installationState', 'installationProgress', 'runState',
-    'healthy', 'containerId', 'manifestJson', 'httpPort', 'location', 'dnsRecordId', 'restrictAccessTo' ].join(',');
+    'healthy', 'containerId', 'manifestJson', 'httpPort', 'location', 'dnsRecordId', 'accessRestriction' ].join(',');
 
 var APPS_FIELDS_PREFIXED = [ 'apps.id', 'apps.appStoreId', 'apps.version', 'apps.installationState', 'apps.installationProgress', 'apps.runState',
-    'apps.healthy', 'apps.containerId', 'apps.manifestJson', 'apps.httpPort', 'apps.location', 'apps.dnsRecordId', 'apps.restrictAccessTo' ].join(',');
+    'apps.healthy', 'apps.containerId', 'apps.manifestJson', 'apps.httpPort', 'apps.location', 'apps.dnsRecordId', 'apps.accessRestriction' ].join(',');
 
 var PORT_BINDINGS_FIELDS = [ 'hostPort', 'containerPort', 'appId' ].join(',');
 
@@ -123,20 +123,20 @@ function getAll(callback) {
     });
 }
 
-function add(id, appStoreId, location, portBindings, restrictAccessTo, callback) {
+function add(id, appStoreId, location, portBindings, accessRestriction, callback) {
     assert(typeof id === 'string');
     assert(typeof appStoreId === 'string');
     assert(typeof location === 'string');
     assert(typeof portBindings === 'object');
-    assert(typeof restrictAccessTo === 'string'); // TODO: rename to accessRestriction
+    assert(typeof accessRestriction === 'string');
     assert(typeof callback === 'function');
 
     portBindings = portBindings || { };
 
     var conn = database.newTransaction();
 
-    conn.run('INSERT INTO apps (id, appStoreId, installationState, location, restrictAccessTo) VALUES (?, ?, ?, ?, ?)',
-           [ id, appStoreId, exports.ISTATE_PENDING_INSTALL, location, restrictAccessTo ], function (error) {
+    conn.run('INSERT INTO apps (id, appStoreId, installationState, location, accessRestriction) VALUES (?, ?, ?, ?, ?)',
+           [ id, appStoreId, exports.ISTATE_PENDING_INSTALL, location, accessRestriction ], function (error) {
         if (error || !this.lastID) database.rollback(conn);
 
         if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
