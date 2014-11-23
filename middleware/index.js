@@ -1,7 +1,6 @@
 'use strict';
 
 exports = module.exports = {
-    clientErrorHandler: require('connect-lastmile').clientErrorHandler,
     contentType: require('./contentType'),
     cookieParser: require('cookie-parser'),
     cors: require('./cors'),
@@ -9,9 +8,8 @@ exports = module.exports = {
     json: require('body-parser').json,
     morgan: require('morgan'),
     proxy: require('proxy-middleware'),
-    serverErrorHandler: require('connect-lastmile').serverErrorHandler,
+    lastMile: require('connect-lastmile'),
     session: require('express-session'),
-    successHandler: require('connect-lastmile').successHandler,
     timeout: require('connect-timeout'),
     urlencoded: require('body-parser').urlencoded
 };

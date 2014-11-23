@@ -1352,8 +1352,8 @@
       "from": "validator@"
     },
     "connect-lastmile": {
-      "version": "0.0.3",
-      "from": "connect-lastmile@0.0.3",
+      "version": "0.0.7",
+      "from": "connect-lastmile@latest",
       "dependencies": {
         "debug": {
           "version": "2.1.0",

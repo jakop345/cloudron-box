@@ -108,9 +108,7 @@ Server.prototype._initializeExpressSync = function () {
        .use(passport.initialize())
        .use(passport.session())
        .use(router)
-       .use(middleware.successHandler)
-       .use(middleware.clientErrorHandler)
-       .use(middleware.serverErrorHandler);
+       .use(middleware.lastMile());
 
     // middleware shortcuts for authentification
     var bearer = passport.authenticate(['bearer'], { session: false });

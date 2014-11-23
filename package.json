@@ -65,7 +65,7 @@
     "hock": "~0.2.5",
     "nock": "~0.43.1",
     "sinon": "~1.10.3",
-    "connect-lastmile": "0.0.3"
+    "connect-lastmile": "0.0.8"
   },
   "devDependencies": {
     "apidoc": "*",

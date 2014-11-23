@@ -105,9 +105,7 @@ function startUpdateServer(callback) {
     app.use(middleware.json({ strict: true }))
        .use(middleware.morgan({ format: 'dev', immediate: false }))
        .use(router)
-       .use(middleware.successHandler)
-       .use(middleware.clientErrorHandler)
-       .use(middleware.serverErrorHandler);
+       .use(middleware.lastMile());
 
     router.post('/api/v1/installer/update', update);
 
@@ -129,9 +127,7 @@ function startProvisionServer(callback) {
     app.use(middleware.json({ strict: true }))
        .use(middleware.morgan({ format: 'dev', immediate: false }))
        .use(router)
-       .use(middleware.successHandler)
-       .use(middleware.clientErrorHandler)
-       .use(middleware.serverErrorHandler);
+       .use(middleware.lastMile());
 
     router.post('/api/v1/installer/provision', provision);
     router.post('/api/v1/installer/restore', restore);
