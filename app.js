@@ -8,7 +8,7 @@ if (typeof process.env.NODE_ENV === 'undefined') {
     process.env.NODE_ENV = 'production';
 }
 
-require('supererror');
+require('supererror')({ splatchError: true });
 
 var Server = require('./src/server.js'),
     config = require('./config.js');

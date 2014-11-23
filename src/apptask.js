@@ -4,7 +4,7 @@
 
 'use strict';
 
-require('supererror');
+require('supererror')({ splatchError: true });
 
 var appdb = require('./appdb.js'),
     appFqdn = require('./apps.js').appFqdn,

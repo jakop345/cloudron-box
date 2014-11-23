@@ -2,7 +2,7 @@
 
 'use strict';
 
-require('supererror');
+require('supererror')({ splatchError: true });
 
 var appdb = require('./appdb.js'),
     assert = require('assert'),
