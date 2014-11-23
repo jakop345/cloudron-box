@@ -60,8 +60,14 @@ function clear(callback) {
 
 function beginTransaction() {
     var conn = new sqlite3.Database(paths.DATABASE_FILENAME);
+    conn._started = Date.now();
+    conn._slowWarningIntervalId = setInterval((function () {
+        debug('Transaction running for %d msecs', Date.now() - this._started);
+    }).bind(conn), 2000);
+
     gConnectionPool.push(conn);
     conn.serialize();
+    conn.run('PRAGMA busy_timeout=5000', NOOP_CALLBACK);
     conn.run('BEGIN TRANSACTION', NOOP_CALLBACK);
     return conn;
 }
@@ -69,6 +75,8 @@ function beginTransaction() {
 function rollback(conn, callback) {
     gConnectionPool.splice(gConnectionPool.indexOf(conn), 1);
     conn.run('ROLLBACK', NOOP_CALLBACK);
+    clearInterval(conn._slowWarningIntervalId);
+    debug('Transaction took %d msecs', Date.now() - conn._started);
     conn.close(); // close waits for pending statements
     if (callback) callback();
 }
@@ -76,6 +84,8 @@ function rollback(conn, callback) {
 function commit(conn, callback) {
     gConnectionPool.splice(gConnectionPool.indexOf(conn), 1);
     conn.run('COMMIT', function (error) {
+        clearInterval(conn._slowWarningIntervalId);
+        debug('Transaction took %d msecs', Date.now() - conn._started);
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         callback(null);
