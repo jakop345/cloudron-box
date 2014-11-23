@@ -135,7 +135,7 @@ function update(callback) {
                 .send({ imageId: gBoxUpdateInfo.imageId })
                 .end(function (error, result) {
                 if (error) return callback(new Error('Error making upgrade request: ' + error));
-                if (result.status !== 200) return callback(new Error('Server not ready to upgrade: ' + result.body));
+                if (result.status !== 202) return callback(new Error('Server not ready to upgrade: ' + result.body));
 
                 callback(null);
             });
@@ -161,7 +161,7 @@ function update(callback) {
             .send(args)
             .end(function (error, result) {
                 if (error) return callback(new Error('Error making upgrade request: ' + error));
-                if (result.status !== 200) return callback(new Error('Error initiating update: ' + result.body));
+                if (result.status !== 202) return callback(new Error('Error initiating update: ' + result.body));
 
                 callback(null);
         });
