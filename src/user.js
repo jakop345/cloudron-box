@@ -51,7 +51,7 @@ function UserError(reason, errorOrMessage) {
         this.message = errorOrMessage;
     } else {
         this.message = 'Internal error';
-        this.internalError = errorOrMessage;
+        this.nestedError = errorOrMessage;
     }
 }
 util.inherits(UserError, Error);
