@@ -412,7 +412,7 @@ function delClientTokens(req, res, next) {
     });
 }
 
-var proxy = [
+var applicationProxy = [
     function (req, res, next) {
         if (req.path === '/api/v1/oauth/proxy/api/v1/session/login') {
             if (req.method === 'GET') {
@@ -476,5 +476,5 @@ exports = module.exports = {
     getClients: getClients,
     getClientTokens: getClientTokens,
     delClientTokens: delClientTokens,
-    proxy: proxy
+    applicationProxy: applicationProxy
 };
