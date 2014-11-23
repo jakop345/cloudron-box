@@ -36,7 +36,7 @@ stdout_logfile=/var/log/supervisor/box.log
 stdout_logfile_maxbytes=50MB
 stdout_logfile_backups=2
 user=yellowtent
-environment=HOME="/home/yellowtent",CLOUDRON="1",USER="yellowtent",DEBUG="box*"
+environment=HOME="/home/yellowtent",CLOUDRON="1",USER="yellowtent",DEBUG="box*,connect-lastmile"
 EOF
 
 cat > /etc/supervisor/conf.d/updater.conf <<EOF
