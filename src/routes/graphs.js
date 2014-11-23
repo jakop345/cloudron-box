@@ -11,11 +11,11 @@ exports = module.exports = {
 var graphiteProxy = middleware.proxy(url.parse('http://127.0.0.1:8000'));
 
 function forwardToGraphite(req, res, next) {
-    // remove any sensitive info
+    // if you fix the code below, code in routes/oauth.js:applicationProxy probably needs fixing
     var parsedUrl = url.parse(req.url, true /* parseQueryString */);
     delete parsedUrl.query['access_token'];
-    delete req.headers['authorization']
-    delete req.headers['cookie'];
+    delete req.headers['authorization'];
+    delete req.headers['cookies'];
     req.url = url.format({ pathname: parsedUrl.pathname, query: parsedUrl.query });
 
     graphiteProxy(req, res, next);

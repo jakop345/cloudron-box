@@ -12,6 +12,7 @@ var assert = require('assert'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
     mailer = require('../mailer.js'),
+    middleware = require('../../middleware/index.js'),
     oauth2orize = require('oauth2orize'),
     passport = require('passport'),
     session = require('connect-ensure-login'),
@@ -23,6 +24,9 @@ var assert = require('assert'),
 
 // create OAuth 2.0 server
 var gServer = oauth2orize.createServer();
+
+// Proxy cache stored by port
+var gProxyMiddlewareCache =  { };
 
 // Register serialialization and deserialization functions.
 //
@@ -433,27 +437,28 @@ var applicationProxy = [
         next();
     },
     session.ensureLoggedIn('/api/v1/session/login'),
-    function (req, res, next) {
-        var options = {
-            host: '127.0.0.1',
-            port: req.headers['x-cloudron-proxy-port'],
-            method: req.method,
-            path: req.params[0],
-            headers: req.headers
-        };
+    function proxyToApplication(req, res, next) {
+        var port = parseInt(req.headers['x-cloudron-proxy-port'], 10);
+        if (!Number.isFinite(port)) return next(new HttpError(500, 'Routing error'));
 
-        var appRequest = http.request(options, function (appResponse) {
-            res.writeHead(appResponse.statusCode, appResponse.headers);
-            appResponse.on('error', console.error);
-            appResponse.pipe(res, { end: true });
-        });
-
-        req.on('error', console.error);
-        if (!req.readable) {
-            appRequest.end();
-        } else {
-            req.pipe(appRequest, { end: true });
+        var proxyMiddleware = gProxyMiddlewareCache[port];
+        if (!proxyMiddleware) {
+            debug('Adding proxy middleware for port %d', port);
+            proxyMiddleware = middleware.proxy(url.parse('http://127.0.0.1:' + port));
+            gProxyMiddlewareCache[port] = proxyMiddleware;
         }
+
+        // if you fix the code below, code in routes/graphs.js:forwardToGraphite probably needs fixing
+        // TODO: is it safe to pass the cookie?
+        var parsedUrl = url.parse(req.url, true /* parseQueryString */);
+        delete parsedUrl.query['access_token'];
+        delete req.headers['authorization']
+
+        debug('proxying %s to port %d', req.params[0], port);
+
+        req.url = url.format({ pathname: req.params[0] /* parsedUrl.pathname */, query: parsedUrl.query });
+
+        proxyMiddleware(req, res, next);
     }
 ];
 
