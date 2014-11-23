@@ -35,7 +35,7 @@ function initialize(callback) {
         console.error('Database error in ' + paths.DATABASE_FILENAME + ':', error);
     });
 
-    return callback(null);
+    gDatabase.run('PRAGMA busy_timeout=5000', callback);
 }
 
 function uninitialize() {
