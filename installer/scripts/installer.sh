@@ -50,7 +50,11 @@ echo "Downloading box versions"
 if [ "$PROVISION_VERSION" = "latest" ]; then
     REVISION="origin/master"
 else
-    REVISION=$(curl --retry 5 --retry-delay 5 --max-time 600 -L "$PROVISION_BOX_VERSIONS_URL" | $JSON -D, "$PROVISION_VERSION,revision")
+    while true; do
+        REVISION=$(curl --retry 5 --retry-delay 5 --max-time 120 -L "$PROVISION_BOX_VERSIONS_URL" | $JSON -D, "$PROVISION_VERSION,revision")
+        [ -n "$REVISION" ] && break
+        echo "Failed to download box versions, trying again"
+    done
 fi
 echo "Updating to revision : $REVISION"
 
