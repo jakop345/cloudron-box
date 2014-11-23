@@ -14,7 +14,7 @@ exports = module.exports = {
     initialize: initialize,
     uninitialize: uninitialize,
     removePrivates: removePrivates,
-    newTransaction: newTransaction,
+    beginTransaction: beginTransaction,
     rollback: rollback,
     commit: commit,
     clear: clear,
@@ -58,7 +58,7 @@ function clear(callback) {
     ], callback);
 }
 
-function newTransaction() {
+function beginTransaction() {
     var conn = new sqlite3.Database(paths.DATABASE_FILENAME);
     gConnectionPool.push(conn);
     conn.serialize();

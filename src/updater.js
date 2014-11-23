@@ -160,7 +160,7 @@ function update(callback) {
         superagent.post(UPDATE_URL)
             .send(args)
             .end(function (error, result) {
-                if (error) return callback(new Error('Error making upgrade request: ' + error));
+                if (error) return callback(error);
                 if (result.status !== 202) return callback(new Error('Error initiating update: ' + result.body));
 
                 callback(null);

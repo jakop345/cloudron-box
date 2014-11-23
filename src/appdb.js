@@ -133,7 +133,7 @@ function add(id, appStoreId, location, portBindings, accessRestriction, callback
 
     portBindings = portBindings || { };
 
-    var conn = database.newTransaction();
+    var conn = database.beginTransaction();
 
     conn.run('INSERT INTO apps (id, appStoreId, installationState, location, accessRestriction) VALUES (?, ?, ?, ?, ?)',
            [ id, appStoreId, exports.ISTATE_PENDING_INSTALL, location, accessRestriction ], function (error) {
@@ -190,7 +190,7 @@ function del(id, callback) {
     assert(typeof id === 'string');
     assert(typeof callback === 'function');
 
-    var conn = database.newTransaction();
+    var conn = database.beginTransaction();
     conn.run('DELETE FROM appPortBindings WHERE appId = ?', [ id ], function (error) {
         conn.run('DELETE FROM apps WHERE id = ?', [ id ], function (error) {
             if (error || this.changes !== 1) database.rollback(conn);
@@ -235,7 +235,7 @@ function updateWithConstraints(id, app, constraints, callback) {
 
     var portBindings = app.portBindings || { };
 
-    var conn = database.newTransaction();
+    var conn = database.beginTransaction();
     async.eachSeries(Object.keys(portBindings), function iterator(containerPort, callback) {
         var values = [ portBindings[containerPort], containerPort, id ];
         conn.run('UPDATE appPortBindings SET hostPort = ? WHERE containerPort = ? AND appId = ?', values, callback);
