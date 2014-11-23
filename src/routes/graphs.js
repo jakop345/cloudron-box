@@ -15,6 +15,7 @@ function forwardToGraphite(req, res, next) {
     var parsedUrl = url.parse(req.url, true /* parseQueryString */);
     delete parsedUrl.query['access_token'];
     delete req.headers['authorization']
+    delete req.headers['cookie'];
     req.url = url.format({ pathname: parsedUrl.pathname, query: parsedUrl.query });
 
     graphiteProxy(req, res, next);
