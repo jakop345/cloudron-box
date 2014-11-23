@@ -67,12 +67,9 @@ Server.prototype._initializeExpressSync = function () {
     this.app = express();
 
     var QUERY_LIMIT = '10mb', // max size for json and urlencoded queries
-        FIELD_LIMIT = 2 * 1024, // max fields that can appear in multipart
-        FILE_SIZE_LIMIT = '521mb', // max file size that can be uploaded
-        UPLOAD_LIMIT = '521mb'; // catch all max size for any type of request
+        FIELD_LIMIT = 2 * 1024; // max fields that can appear in multipart
 
-    var REQUEST_TIMEOUT = 10000, // timeout for all requests
-        FILE_TIMEOUT = 3 * 60 * 1000; // increased timeout for file uploads (3 mins)
+    var REQUEST_TIMEOUT = 10000; // timeout for all requests
 
     var json = middleware.json({ strict: true, limit: QUERY_LIMIT }), // application/json
         urlencoded = middleware.urlencoded({ extended: false, limit: QUERY_LIMIT }), // application/x-www-form-urlencoded
@@ -98,7 +95,6 @@ Server.prototype._initializeExpressSync = function () {
 
     this.app
        .use(middleware.timeout(REQUEST_TIMEOUT))
-//       .use(express.limit(UPLOAD_LIMIT))
        .use(json)
        .use(urlencoded)
        .use(middleware.cookieParser())
