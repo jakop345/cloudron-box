@@ -46,7 +46,9 @@ var gTasks = { },
     gAppHealthTask = null,
     gDocker = null;
 
-function initialize() {
+function initialize(callback) {
+    assert(typeof callback === 'function');
+
     if (process.env.NODE_ENV === 'test') {
         gDocker = new Docker({ host: 'http://localhost', port: 5687 });
     } else if (os.platform() === 'linux') {
@@ -57,7 +59,7 @@ function initialize() {
 
     gAppHealthTask = child_process.fork(__dirname + '/apphealthtask.js');
 
-    resume(); // TODO: potential race here since resume is async
+    resume(callback); // TODO: potential race here since resume is async
 }
 
 function startTask(appId) {
@@ -82,13 +84,18 @@ function stopTask(appId) {
 }
 
 // resume install and uninstalls
-function resume() {
+function resume(callback) {
+    assert(typeof callback === 'function');
+
     appdb.getAll(function (error, apps) {
-        if (error) throw error;
+        if (error) return callback(error);
+
         apps.forEach(function (app) {
             debug('Creating process for ' + app.id + ' with state ' + app.installationState);
             startTask(app.id);
         });
+
+        callback(null);
     });
 }
 

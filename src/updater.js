@@ -99,15 +99,14 @@ function checkUpdates() {
     });
 }
 
-function initialize() {
-    debug('initialize');
+function initialize(callback) {
+    assert(typeof callback === 'function');
 
     gCheckUpdatesTimeoutId = setTimeout(checkUpdates, 10 * 1000);
+    callback(null);
 };
 
 function uninitialize() {
-    debug('uninitialize');
-
     clearTimeout(gCheckUpdatesTimeoutId);
     gCheckUpdatesTimeoutId = null;
 };

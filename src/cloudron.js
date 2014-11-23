@@ -65,7 +65,9 @@ CloudronError.INTERNAL_ERROR = 'Internal Error';
 CloudronError.ALREADY_PROVISIONED = 'Already Provisioned';
 CloudronError.APPSTORE_DOWN = 'Appstore Down';
 
-function initialize() {
+function initialize(callback) {
+    assert(typeof callback === 'function');
+
     // every backup restarts the box. the setInterval is only needed should that fail for some reason
     gBackupTimerId = setInterval(backup, 4 * 60 * 60 * 1000);
 
@@ -74,6 +76,8 @@ function initialize() {
     if (process.env.NODE_ENV !== 'test') {
         addMailDnsRecords();
     }
+
+    callback(null);
 }
 
 function uninitialize() {

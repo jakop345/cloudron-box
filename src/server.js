@@ -4,6 +4,7 @@
 
 var apps = require('./apps'),
     assert = require('assert'),
+    async = require('async'),
     auth = require('./auth.js'),
     cloudron = require('./cloudron.js'),
     config = require('../config.js'),
@@ -197,21 +198,18 @@ Server.prototype.start = function (callback) {
     mkdirp.sync(paths.COLLECTD_APPCONFIG_DIR);
     mkdirp.sync(paths.HARAKA_CONFIG_DIR);
 
-    var that = this;
-
     this._initializeExpressSync();
 
-    database.initialize(function (err) {
-        if (err) return callback(err);
+    this.httpServer = http.createServer(this.app);
 
-        apps.initialize();
-        cloudron.initialize();
-        updater.initialize();
-        mailer.initialize();
-
-        that.httpServer = http.createServer(that.app);
-        that.httpServer.listen(config.get('port'), '127.0.0.1', callback);
-    });
+    async.series([
+        database.initialize,
+        apps.initialize,
+        cloudron.initialize,
+        updater.initialize,
+        mailer.initialize,
+        this.httpServer.listen.bind(this.httpServer, config.get('port'), '127.0.0.1')
+    ], callback);
 };
 
 Server.prototype.stop = function (callback) {

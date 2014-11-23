@@ -36,8 +36,11 @@ var gMailQueue = [ ],
     gDnsReady = false,
     gCheckDnsTimerId = null;
 
-function initialize() {
+function initialize(callback) {
+    assert(typeof callback === 'function');
+
     checkDns();
+    callback(null);
 }
 
 function uninitialize() {
