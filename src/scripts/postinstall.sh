@@ -130,11 +130,13 @@ cat > "$CLOUDRON_CONF" <<EOF2
 }
 EOF2
 
-if [ -n "$PROVISION_RESTORE_URL" ]; then
-    echo "Marking apps for restore"
-    # TODO: do not auto-start stopped containers (httpPort might need fixing to start them)
-    sqlite3 "$CLOUDRON_SQLITE" 'UPDATE apps SET installationState = "pending_restore", healthy = NULL, runState = NULL, containerId = NULL, httpPort = NULL, installationProgress = NULL'
-fi
+# remove and restore containers to ensure nginx, docker config is updated
+echo "Kill existing apps"
+sqlite3 "$CLOUDRON_SQLITE" 'SELECT containerId FROM apps WHERE containerId IS NOT NULL AND containerId <> ""' | xargs docker rm -f
+
+echo "Marking apps for restore"
+# TODO: do not auto-start stopped containers (httpPort might need fixing to start them)
+sqlite3 "$CLOUDRON_SQLITE" 'UPDATE apps SET installationState = "pending_restore", healthy = NULL, runState = NULL, containerId = NULL, httpPort = NULL, installationProgress = NULL'
 
 # Add webadmin oauth client
 echo "Add webadmin oauth cient"
