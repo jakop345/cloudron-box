@@ -43,13 +43,17 @@ function initialize(callback) {
     callback(null);
 }
 
-function uninitialize() {
+function uninitialize(callback) {
+    assert(typeof callback === 'function');
+
     // TODO: interrupt processQueue as well
     clearTimeout(gCheckDnsTimerId);
     gCheckDnsTimerId = null;
 
     debug(gMailQueue.length + ' mail items dropped');
     gMailQueue = [ ];
+
+    callback(null);
 }
 
 function checkDns() {

@@ -99,7 +99,9 @@ function resume(callback) {
     });
 }
 
-function uninitialize() {
+function uninitialize(callback) {
+    assert(typeof callback === 'function');
+
     if (gAppHealthTask) {
         gAppHealthTask.kill();
         gAppHealthTask = null;
@@ -108,6 +110,8 @@ function uninitialize() {
     for (var appId in gTasks) {
         stopTask(appId);
     }
+
+    callback(null);
 }
 
 // http://dustinsenos.com/articles/customErrorsInNode

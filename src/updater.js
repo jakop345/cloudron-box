@@ -106,9 +106,13 @@ function initialize(callback) {
     callback(null);
 };
 
-function uninitialize() {
+function uninitialize(callback) {
+    assert(typeof callback === 'function');
+
     clearTimeout(gCheckUpdatesTimeoutId);
     gCheckUpdatesTimeoutId = null;
+
+    callback(null);
 };
 
 function isDev() {

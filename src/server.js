@@ -217,18 +217,18 @@ Server.prototype.stop = function (callback) {
 
     var that = this;
 
-    if (!this.httpServer) {
-        return callback(null);
-    }
+    if (!this.httpServer) return callback(null);
 
-    cloudron.uninitialize();
-    updater.uninitialize();
-    apps.uninitialize();
-    mailer.uninitialize();
-    database.uninitialize();
+    async.series([
+        cloudron.uninitialize,
+        updater.uninitialize,
+        apps.uninitialize,
+        mailer.uninitialize,
+        database.uninitialize,
+        this.httpServer.close.bind(this.httpServer)
+    ], function (error) {
+        if (error) console.error(error);
 
-    this.httpServer.close(function () {
-        that.httpServer.unref();
         that.app = null;
 
         callback(null);

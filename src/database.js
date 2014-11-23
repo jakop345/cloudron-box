@@ -38,7 +38,9 @@ function initialize(callback) {
     gDatabase.run('PRAGMA busy_timeout=5000', callback);
 }
 
-function uninitialize() {
+function uninitialize(callback) {
+    assert(typeof callback === 'function');
+
     debug('Closing database');
     gDatabase.close();
     gDatabase = null;
@@ -46,6 +48,8 @@ function uninitialize() {
     debug('Closing %d active transactions', gConnectionPool.length);
     gConnectionPool.forEach(function (conn) { conn.close(); });
     gConnectionPool = [ ];
+
+    callback(null);
 }
 
 function clear(callback) {

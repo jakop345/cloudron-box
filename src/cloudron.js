@@ -80,7 +80,9 @@ function initialize(callback) {
     callback(null);
 }
 
-function uninitialize() {
+function uninitialize(callback) {
+    assert(typeof callback === 'function');
+
     clearInterval(gBackupTimerId);
     gBackupTimerId = null;
 
@@ -91,6 +93,8 @@ function uninitialize() {
     gGetCertificateTimerId = null;
 
     gCachedIp = null;
+
+    callback(null);
 }
 
 function getBackupUrl(callback) {
