@@ -55,8 +55,28 @@ describe('database', function () {
             modifiedAt: 'now'
         };
 
+        var ADMIN_0 = {
+            id: 'uuid456',
+            username: 'uuid456',
+            _password: 'secret',
+            email: 'safe@me.com',
+            publicPem: 'pem',
+            _privatePemCipher: 'cipher',
+            admin: true,
+            _salt: 'tata',
+            createdAt: 'sometime back',
+            modifiedAt: 'now'
+        };
+
         it('can add user', function (done) {
             userdb.add(USER_0.id, USER_0, function (error) {
+                expect(!error).to.be.ok();
+                done();
+            });
+        });
+
+        it('can add admin user', function (done) {
+            userdb.add(ADMIN_0.id, ADMIN_0, function (error) {
                 expect(!error).to.be.ok();
                 done();
             });
@@ -97,8 +117,9 @@ describe('database', function () {
         it('can get all', function (done) {
             userdb.getAll(function (error, all) {
                 expect(error).to.not.be.ok();
-                expect(all.length).to.equal(1);
+                expect(all.length).to.equal(2);
                 expect(all[0]).to.eql(USER_0);
+                expect(all[1]).to.eql(ADMIN_0);
                 done();
             });
         });
@@ -106,7 +127,8 @@ describe('database', function () {
         it('can get all admins', function (done) {
             userdb.getAllAdmins(function (error, all) {
                 expect(error).to.not.be.ok();
-                expect(all.length).to.equal(0);
+                expect(all.length).to.equal(1);
+                expect(all[0]).to.eql(ADMIN_0);
                 done();
             });
         });
@@ -114,7 +136,7 @@ describe('database', function () {
         it('counts the users', function (done) {
             userdb.count(function (error, count) {
                 expect(error).to.not.be.ok();
-                expect(count).to.equal(1);
+                expect(count).to.equal(2);
                 done();
             });
         });
@@ -122,7 +144,7 @@ describe('database', function () {
         it('counts the admin users', function (done) {
             userdb.adminCount(function (error, count) {
                 expect(error).to.not.be.ok();
-                expect(count).to.equal(0);
+                expect(count).to.equal(1);
                 done();
             });
         });
@@ -162,7 +184,7 @@ describe('database', function () {
 
         it('did remove the user', function (done) {
             userdb.count(function (error, count) {
-                expect(count).to.equal(0);
+                expect(count).to.equal(1);
                 done();
             });
         });
@@ -170,7 +192,11 @@ describe('database', function () {
         it('can clear table', function (done) {
             userdb.clear(function (error) {
                 expect(error).to.not.be.ok();
-                done();
+                userdb.count(function (error, count) {
+                    expect(error).to.not.be.ok();
+                    expect(count).to.equal(0);
+                    done();
+                });
             });
         });
     });
