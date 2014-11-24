@@ -50,12 +50,10 @@ function initializeExpressSync() {
     gApp.set('view options', { layout: true, debug: true });
     gApp.set('view engine', 'ejs');
 
-    if (config.get('logApiRequests')) {
-        gApp.use(middleware.morgan({ format: 'dev', immediate: false }));
-    }
-
     if (process.env.NODE_ENV === 'test') {
        gApp.use(express.static(path.join(__dirname, '/../webadmin')));
+    } else {
+        gApp.use(middleware.morgan({ format: 'dev', immediate: false }));
     }
 
     var router = new express.Router();

@@ -44,11 +44,9 @@ function saveSync() {
     // setup defaults
     if (production) {
         data.port = 3000;
-        data.logApiRequests = true;
         data.appServerUrl = process.env.APP_SERVER_URL || null; // APP_SERVER_URL is set during bootstrap in the box's supervisor manifest
     } else {
         data.port = 5454;
-        data.logApiRequests = false;
         data.appServerUrl = 'http://localhost:6060'; // hock doesn't support https
     }
 
