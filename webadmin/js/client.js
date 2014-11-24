@@ -132,7 +132,7 @@ angular.module('Application').service('Client', function ($http, md5) {
     Client.prototype.installApp = function (id, password, title, config, callback) {
         var that = this;
         var data = { appStoreId: id, password: password, location: config.location, portBindings: config.portBindings, accessRestriction: config.accessRestriction };
-        $http.post('/api/v1/app/install', data).success(function (data, status) {
+        $http.post('/api/v1/apps/install', data).success(function (data, status) {
             if (status !== 202 || !data.id) return callback(new ClientError(status, data));
 
             // put new app with amended title in cache
@@ -145,14 +145,14 @@ angular.module('Application').service('Client', function ($http, md5) {
 
     Client.prototype.configureApp = function (id, password, config, callback) {
         var data = { appId: id, password: password, location: config.location, portBindings: config.portBindings, accessRestriction: config.accessRestriction };
-        $http.post('/api/v1/app/' + id + '/configure', data).success(function (data, status) {
+        $http.post('/api/v1/apps/' + id + '/configure', data).success(function (data, status) {
             if (status !== 202) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.updateApp = function (id, callback) {
-        $http.post('/api/v1/app/' + id + '/update', { }).success(function (data, status) {
+        $http.post('/api/v1/apps/' + id + '/update', { }).success(function (data, status) {
             if (status !== 202) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
@@ -160,7 +160,7 @@ angular.module('Application').service('Client', function ($http, md5) {
 
     Client.prototype.startApp = function (id, callback) {
         var data = { };
-        $http.post('/api/v1/app/' + id + '/start', data).success(function (data, status) {
+        $http.post('/api/v1/apps/' + id + '/start', data).success(function (data, status) {
             if (status !== 202) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
@@ -168,7 +168,7 @@ angular.module('Application').service('Client', function ($http, md5) {
 
     Client.prototype.stopApp = function (id, callback) {
         var data = { };
-        $http.post('/api/v1/app/' + id + '/stop', data).success(function (data, status) {
+        $http.post('/api/v1/apps/' + id + '/stop', data).success(function (data, status) {
             if (status !== 202) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
@@ -226,19 +226,19 @@ angular.module('Application').service('Client', function ($http, md5) {
     };
 
     Client.prototype.removeApp = function (appId, callback) {
-        $http.post('/api/v1/app/' + appId + '/uninstall').success(function (data, status) {
+        $http.post('/api/v1/apps/' + appId + '/uninstall').success(function (data, status) {
             if (status !== 202) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.getAppLogStream = function (appId) {
-        var source = new EventSource('/api/v1/app/' + appId + '/logstream');
+        var source = new EventSource('/api/v1/apps/' + appId + '/logstream');
         return source;
     };
 
     Client.prototype.getAppLogUrl = function (appId) {
-        return '/api/v1/app/' + appId + '/logs?access_token=' + this._token;
+        return '/api/v1/apps/' + appId + '/logs?access_token=' + this._token;
     };
 
     Client.prototype.setAdmin = function (username, admin, callback) {

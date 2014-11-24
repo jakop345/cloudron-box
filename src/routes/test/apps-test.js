@@ -126,7 +126,7 @@ describe('App API', function () {
     });
 
     it('app install fails - missing password', function (done) {
-        request.post(SERVER_URL + '/api/v1/app/install')
+        request.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
@@ -136,7 +136,7 @@ describe('App API', function () {
     });
 
     it('app install fails - missing appId', function (done) {
-        request.post(SERVER_URL + '/api/v1/app/install')
+        request.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
                .send({ password: PASSWORD })
                .end(function (err, res) {
@@ -147,7 +147,7 @@ describe('App API', function () {
     });
 
     it('app install fails - invalid json', function (done) {
-        request.post(SERVER_URL + '/api/v1/app/install')
+        request.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
                .send('garbage')
                .end(function (err, res) {
@@ -157,7 +157,7 @@ describe('App API', function () {
     });
  
     it('app install fails - invalid location', function (done) {
-        request.post(SERVER_URL + '/api/v1/app/install')
+        request.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
                .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: '!awesome', accessRestriction: '' })
                .end(function (err, res) {
@@ -168,7 +168,7 @@ describe('App API', function () {
     });
 
     it('app install fails - invalid location type', function (done) {
-        request.post(SERVER_URL + '/api/v1/app/install')
+        request.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
                .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: 42, accessRestriction: '' })
                .end(function (err, res) {
@@ -179,7 +179,7 @@ describe('App API', function () {
     });
 
     it('app install fails - invalid password type', function (done) {
-        request.post(SERVER_URL + '/api/v1/app/install')
+        request.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
                .send({ appStoreId: APP_STORE_ID, password: 3.52, location: 'ninja', accessRestriction: '' })
                .end(function (err, res) {
@@ -190,7 +190,7 @@ describe('App API', function () {
     });
 
     it('app install fails - invalid password', function (done) {
-        request.post(SERVER_URL + '/api/v1/app/install')
+        request.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
                .send({ appStoreId: APP_STORE_ID, password: PASSWORD + 'x', location: 'ninja', accessRestriction: '' })
                .end(function (err, res) {
@@ -201,7 +201,7 @@ describe('App API', function () {
     });
 
     it('app install fails - reserved location', function (done) {
-        request.post(SERVER_URL + '/api/v1/app/install')
+        request.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
                .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: 'admin', accessRestriction: '' })
                .end(function (err, res) {
@@ -212,7 +212,7 @@ describe('App API', function () {
     });
 
     it('app install fails - portBindings must be object', function (done) {
-        request.post(SERVER_URL + '/api/v1/app/install')
+        request.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
                .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: 23, accessRestriction: '' })
                .end(function (err, res) {
@@ -223,7 +223,7 @@ describe('App API', function () {
     });
 
     it('app install fails - accessRestriction is required', function (done) {
-        request.post(SERVER_URL + '/api/v1/app/install')
+        request.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
                .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: {} })
                .end(function (err, res) {
@@ -234,7 +234,7 @@ describe('App API', function () {
     });
 
     it('app install succeeds', function (done) {
-        request.post(SERVER_URL + '/api/v1/app/install')
+        request.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
                .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: '' })
                .end(function (err, res) {
@@ -246,7 +246,7 @@ describe('App API', function () {
     });
 
     it('app install fails because of conflicting location', function (done) {
-        request.post(SERVER_URL + '/api/v1/app/install')
+        request.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
                .send({ appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: '' })
                .end(function (err, res) {
@@ -256,7 +256,7 @@ describe('App API', function () {
     });
 
     it('can get app status', function (done) {
-        request.get(SERVER_URL + '/api/v1/app/' + APP_ID)
+        request.get(SERVER_URL + '/api/v1/apps/' + APP_ID)
                .query({ access_token: token })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
@@ -267,7 +267,7 @@ describe('App API', function () {
     });
 
     it('cannot get invalid app status', function (done) {
-        request.get(SERVER_URL + '/api/v1/app/kubachi')
+        request.get(SERVER_URL + '/api/v1/apps/kubachi')
                .query({ access_token: token })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(404);
@@ -306,7 +306,7 @@ describe('App API', function () {
     });
 
     it('cannot uninstall invalid app', function (done) {
-        request.post(SERVER_URL + '/api/v1/app/whatever/uninstall')
+        request.post(SERVER_URL + '/api/v1/apps/whatever/uninstall')
             .query({ access_token: token })
             .end(function (err, res) {
             expect(res.statusCode).to.equal(404);
@@ -315,7 +315,7 @@ describe('App API', function () {
     });
 
     it('can uninstall app', function (done) {
-        request.post(SERVER_URL + '/api/v1/app/' + APP_ID + '/uninstall')
+        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/uninstall')
             .query({ access_token: token })
             .end(function (err, res) {
             expect(res.statusCode).to.equal(202);
@@ -388,7 +388,7 @@ describe('App installation', function () {
     it('can install test app', function (done) {
         var count = 0;
         function checkInstallStatus() {
-            request.get(SERVER_URL + '/api/v1/app/' + APP_ID)
+            request.get(SERVER_URL + '/api/v1/apps/' + APP_ID)
                .query({ access_token: token })
                .end(function (err, res) {
                 expect(res.statusCode).to.equal(200);
@@ -399,7 +399,7 @@ describe('App installation', function () {
             });
         }
 
-        request.post(SERVER_URL + '/api/v1/app/install')
+        request.post(SERVER_URL + '/api/v1/apps/install')
               .query({ access_token: token })
               .send({ appId: APP_ID, appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: '' })
               .end(function (err, res) {
@@ -468,7 +468,7 @@ describe('App installation', function () {
     });
 
     it('logs - stdout and stderr', function (done) {
-        request.get(SERVER_URL + '/api/v1/app/' + APP_ID + '/logs')
+        request.get(SERVER_URL + '/api/v1/apps/' + APP_ID + '/logs')
             .query({ access_token: token })
             .end(function (err, res) {
             var data = '';
@@ -482,7 +482,7 @@ describe('App installation', function () {
     });
 
     it('logStream - requires event-stream accept header', function (done) {
-        var req = request.get(SERVER_URL + '/api/v1/app/' + APP_ID + '/logstream')
+        var req = request.get(SERVER_URL + '/api/v1/apps/' + APP_ID + '/logstream')
             .query({ access_token: token, fromLine: 0 })
             .end(function (err, res) {
             expect(res.statusCode).to.be(400);
@@ -493,7 +493,7 @@ describe('App installation', function () {
 
     it('logStream - stream logs', function (done) {
         var options = {
-            port: config.get('port'), host: 'localhost', path: '/api/v1/app/' + APP_ID + '/logstream?access_token=' + token,
+            port: config.get('port'), host: 'localhost', path: '/api/v1/apps/' + APP_ID + '/logstream?access_token=' + token,
             headers: { 'Accept': 'text/event-stream', 'Connection': 'keep-alive' }
         };
 
@@ -521,7 +521,7 @@ describe('App installation', function () {
     });
 
     it('can stop app', function (done) {
-        request.post(SERVER_URL + '/api/v1/app/' + APP_ID + '/stop')
+        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/stop')
             .query({ access_token: token })
             .end(function (err, res) {
             expect(res.statusCode).to.equal(202);
@@ -541,7 +541,7 @@ describe('App installation', function () {
     });
 
     it('can start app', function (done) {
-        request.post(SERVER_URL + '/api/v1/app/' + APP_ID + '/start')
+        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/start')
             .query({ access_token: token })
             .end(function (err, res) {
             expect(res.statusCode).to.equal(202);
@@ -563,7 +563,7 @@ describe('App installation', function () {
     it('can uninstall app', function (done) {
         var count = 0;
         function checkUninstallStatus() {
-            request.get(SERVER_URL + '/api/v1/app/' + APP_ID)
+            request.get(SERVER_URL + '/api/v1/apps/' + APP_ID)
                .query({ access_token: token })
                .end(function (err, res) {
                 if (res.statusCode === 404) return done(null);
@@ -572,7 +572,7 @@ describe('App installation', function () {
             });
         }
 
-        request.post(SERVER_URL + '/api/v1/app/' + APP_ID + '/uninstall')
+        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/uninstall')
             .query({ access_token: token })
             .end(function (err, res) {
             expect(res.statusCode).to.equal(202);
@@ -684,7 +684,7 @@ describe('App installation - port bindings', function () {
     it('can install test app', function (done) {
         var count = 0;
         function checkInstallStatus() {
-            request.get(SERVER_URL + '/api/v1/app/' + APP_ID)
+            request.get(SERVER_URL + '/api/v1/apps/' + APP_ID)
                .query({ access_token: token })
                .end(function (err, res) {
                 expect(res.statusCode).to.equal(200);
@@ -695,7 +695,7 @@ describe('App installation - port bindings', function () {
             });
         }
 
-        request.post(SERVER_URL + '/api/v1/app/install')
+        request.post(SERVER_URL + '/api/v1/apps/install')
               .query({ access_token: token })
               .send({ appId: APP_ID, appStoreId: APP_STORE_ID, password: PASSWORD, location: APP_LOCATION, portBindings: { '7778' : '7171' }, accessRestriction: '' })
               .end(function (err, res) {
@@ -773,7 +773,7 @@ describe('App installation - port bindings', function () {
     it('can reconfigure app', function (done) {
         var count = 0;
         function checkConfigureStatus() {
-            request.get(SERVER_URL + '/api/v1/app/' + APP_ID)
+            request.get(SERVER_URL + '/api/v1/apps/' + APP_ID)
                .query({ access_token: token })
                .end(function (err, res) {
                 expect(res.statusCode).to.equal(200);
@@ -784,7 +784,7 @@ describe('App installation - port bindings', function () {
             });
         }
 
-        request.post(SERVER_URL + '/api/v1/app/' + APP_ID + '/configure')
+        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
               .query({ access_token: token })
               .send({ appId: APP_ID, password: PASSWORD, portBindings: { '7778' : '7172' }, accessRestriction: 'roleAdmin' })
               .end(function (err, res) {
@@ -805,7 +805,7 @@ describe('App installation - port bindings', function () {
     });
 
     it('can stop app', function (done) {
-        request.post(SERVER_URL + '/api/v1/app/' + APP_ID + '/stop')
+        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/stop')
             .query({ access_token: token })
             .end(function (err, res) {
             expect(res.statusCode).to.equal(202);
@@ -829,7 +829,7 @@ describe('App installation - port bindings', function () {
     it('can uninstall app', function (done) {
         var count = 0;
         function checkUninstallStatus() {
-            request.get(SERVER_URL + '/api/v1/app/' + APP_ID)
+            request.get(SERVER_URL + '/api/v1/apps/' + APP_ID)
                .query({ access_token: token })
                .end(function (err, res) {
                 if (res.statusCode === 404) return done(null);
@@ -838,7 +838,7 @@ describe('App installation - port bindings', function () {
             });
         }
 
-        request.post(SERVER_URL + '/api/v1/app/' + APP_ID + '/uninstall')
+        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/uninstall')
             .query({ access_token: token })
             .end(function (err, res) {
             expect(res.statusCode).to.equal(202);

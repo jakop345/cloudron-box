@@ -163,16 +163,16 @@ Server.prototype._initializeExpressSync = function () {
 
     // app routes
     router.get ('/api/v1/apps', appsScope, routes.apps.getApps);
-    router.get ('/api/v1/app/:id', appsScope, routes.apps.getApp);
-    router.post('/api/v1/app/:id/uninstall', appsScope, routes.apps.uninstallApp); // FIXME does this require password?
-    router.post('/api/v1/app/install', appsScope, routes.user.verifyPassword, routes.apps.installApp);
-    router.post('/api/v1/app/:id/configure', appsScope, routes.user.verifyPassword, routes.apps.configureApp);
-    router.post('/api/v1/app/:id/update', appsScope, routes.apps.updateApp);
-    router.post('/api/v1/app/:id/stop', appsScope, routes.apps.stopApp);
-    router.post('/api/v1/app/:id/start', appsScope, routes.apps.startApp);
-    router.get ('/api/v1/app/:id/icon', routes.apps.getAppIcon);
-    router.get ('/api/v1/app/:id/logstream', appsScope, routes.apps.getLogStream);
-    router.get ('/api/v1/app/:id/logs', appsScope, routes.apps.getLogs);
+    router.get ('/api/v1/apps/:id', appsScope, routes.apps.getApp);
+    router.post('/api/v1/apps/:id/uninstall', appsScope, routes.apps.uninstallApp); // FIXME does this require password?
+    router.post('/api/v1/apps/install', appsScope, routes.user.verifyPassword, routes.apps.installApp);
+    router.post('/api/v1/apps/:id/configure', appsScope, routes.user.verifyPassword, routes.apps.configureApp);
+    router.post('/api/v1/apps/:id/update', appsScope, routes.apps.updateApp);
+    router.post('/api/v1/apps/:id/stop', appsScope, routes.apps.stopApp);
+    router.post('/api/v1/apps/:id/start', appsScope, routes.apps.startApp);
+    router.get ('/api/v1/apps/:id/icon', routes.apps.getAppIcon);
+    router.get ('/api/v1/apps/:id/logstream', appsScope, routes.apps.getLogStream);
+    router.get ('/api/v1/apps/:id/logs', appsScope, routes.apps.getLogs);
 
     // subdomain routes
     router.get ('/api/v1/subdomains/:subdomain', routes.apps.getAppBySubdomain);
