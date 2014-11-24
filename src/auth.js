@@ -25,7 +25,6 @@ exports = module.exports = {
 function initialize(callback) {
     assert(typeof callback === 'function');
 
-    // helpers for session de/serializing
     passport.serializeUser(function (user, callback) {
         debug('serializeUser: ' + JSON.stringify(user));
 
@@ -40,13 +39,6 @@ function initialize(callback) {
         });
     });
 
-    /**
-     * LocalStrategy
-     *
-     * This strategy is used to authenticate users based on a username and password.
-     * Anytime a request is made to authorize an application, we must ensure that
-     * a user is logged in before asking them to approve the request.
-     */
     passport.use(new LocalStrategy(function (username, password, callback) {
         debug('LocalStrategy: ' + username + ' ' + password.length);
 
@@ -59,18 +51,6 @@ function initialize(callback) {
         });
     }));
 
-
-    /**
-     * BasicStrategy & ClientPasswordStrategy
-     *
-     * These strategies are used to authenticate registered OAuth clients.  They are
-     * employed to protect the `token` endpoint, which consumers use to obtain
-     * access tokens.  The OAuth 2.0 specification suggests that clients use the
-     * HTTP Basic scheme to authenticate.  Use of the client password strategy
-     * allows clients to send the same credentials in the request body (as opposed
-     * to the `Authorization` header).  While this approach is not recommended by
-     * the specification, in practice it is quite common.
-     */
     passport.use(new BasicStrategy(function (username, password, callback) {
         debug('BasicStrategy: ' + username + ' ' + password.length);
 
@@ -106,14 +86,6 @@ function initialize(callback) {
         });
     }));
 
-    /**
-     * BearerStrategy
-     *
-     * This strategy is used to authenticate users based on an access token (aka a
-     * bearer token).  The user must have previously authorized a client
-     * application, which is issued an access token to make requests on behalf of
-     * the authorizing user.
-     */
     passport.use(new BearerStrategy(function (accessToken, callback) {
         debug('BearerStrategy: ' + accessToken);
 
