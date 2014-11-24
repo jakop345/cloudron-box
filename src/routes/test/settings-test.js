@@ -15,7 +15,7 @@ var appdb = require('../../appdb.js'),
     fs = require('fs'),
     paths = require('../../paths.js'),
     request = require('superagent'),
-    Server = require('../../server.js'),
+    server = require('../../server.js'),
     sinon = require('sinon'),
     userdb = require('../../userdb.js');
 
@@ -26,7 +26,6 @@ var token = null;
 
 var server;
 function setup(done) {
-    server = new Server();
     async.series([
         server.start.bind(server),
 

@@ -26,15 +26,16 @@ var apps = require('./apps'),
     url = require('url'),
     userdb = require('./userdb.js');
 
-exports = module.exports = Server;
+var gHttpServer = null,
+    gApp = null;
 
-function Server() {
-    this.httpServer = null; // http server
-    this.app = null; // express
-}
+exports = module.exports = {
+    start: start,
+    stop: stop
+};
 
-Server.prototype._initializeExpressSync = function () {
-    this.app = express();
+function initializeExpressSync() {
+    gApp = express();
 
     var QUERY_LIMIT = '10mb', // max size for json and urlencoded queries
         FIELD_LIMIT = 2 * 1024; // max fields that can appear in multipart
@@ -45,22 +46,22 @@ Server.prototype._initializeExpressSync = function () {
         urlencoded = middleware.urlencoded({ extended: false, limit: QUERY_LIMIT }), // application/x-www-form-urlencoded
         csurf = csrf(); // Cross-site request forgery protection middleware for login form
 
-    this.app.set('views', path.join(__dirname, 'oauth2views'));
-    this.app.set('view options', { layout: true, debug: true });
-    this.app.set('view engine', 'ejs');
+    gApp.set('views', path.join(__dirname, 'oauth2views'));
+    gApp.set('view options', { layout: true, debug: true });
+    gApp.set('view engine', 'ejs');
 
     if (config.get('logApiRequests')) {
-        this.app.use(middleware.morgan({ format: 'dev', immediate: false }));
+        gApp.use(middleware.morgan({ format: 'dev', immediate: false }));
     }
 
     if (process.env.NODE_ENV === 'test') {
-       this.app.use(express.static(path.join(__dirname, '/../webadmin')));
+       gApp.use(express.static(path.join(__dirname, '/../webadmin')));
     }
 
     var router = new express.Router();
     router.del = router.delete; // amend router.del for readability further on
 
-    this.app
+    gApp
        .use(middleware.timeout(REQUEST_TIMEOUT))
        .use(json)
        .use(urlencoded)
@@ -152,11 +153,11 @@ Server.prototype._initializeExpressSync = function () {
 
     // graphite calls (FIXME: remove before release)
     router.get([ '/graphite/*', '/content/*', '/metrics/*', '/dashboard/*', '/render/*', '/browser/*', '/composer/*' ], routes.graphs.forwardToGraphite);
-};
+}
 
-Server.prototype.start = function (callback) {
+function start(callback) {
     assert(typeof callback === 'function');
-    assert(this.app === null, 'Server is already up and running.');
+    assert(gApp === null, 'Server is already up and running.');
 
     mkdirp.sync(paths.APPICONS_DIR);
     mkdirp.sync(paths.NGINX_APPCONFIG_DIR);
@@ -164,9 +165,9 @@ Server.prototype.start = function (callback) {
     mkdirp.sync(paths.COLLECTD_APPCONFIG_DIR);
     mkdirp.sync(paths.HARAKA_CONFIG_DIR);
 
-    this._initializeExpressSync();
+    initializeExpressSync();
 
-    this.httpServer = http.createServer(this.app);
+    gHttpServer = http.createServer(gApp);
 
     async.series([
         auth.initialize,
@@ -175,16 +176,14 @@ Server.prototype.start = function (callback) {
         cloudron.initialize,
         updater.initialize,
         mailer.initialize,
-        this.httpServer.listen.bind(this.httpServer, config.get('port'), '127.0.0.1')
+        gHttpServer.listen.bind(gHttpServer, config.get('port'), '127.0.0.1')
     ], callback);
-};
+}
 
-Server.prototype.stop = function (callback) {
+function stop(callback) {
     assert(typeof callback === 'function');
 
-    var that = this;
-
-    if (!this.httpServer) return callback(null);
+    if (!gHttpServer) return callback(null);
 
     async.series([
         auth.uninitialize,
@@ -193,12 +192,12 @@ Server.prototype.stop = function (callback) {
         apps.uninitialize,
         mailer.uninitialize,
         database.uninitialize,
-        this.httpServer.close.bind(this.httpServer)
+        gHttpServer.close.bind(gHttpServer)
     ], function (error) {
         if (error) console.error(error);
 
-        that.app = null;
+        gApp = null;
 
         callback(null);
     });
-};
+}

@@ -12,7 +12,7 @@ var cloudron = require('../cloudron.js'),
     expect = require('expect.js'),
     nock = require('nock'),
     request = require('superagent'),
-    Server = require('../server.js');
+    server = require('../server.js');
 
 var SERVER_URL = 'http://localhost:' + config.get('port');
 var ACCESS_TOKEN = null;
@@ -27,21 +27,15 @@ describe('Server', function () {
     after(cleanup);
 
     describe('startup', function () {
-        var server;
-
         it('start fails due to wrong arguments', function (done) {
-            var s = new Server();
-
-            expect(function () { s.start(); }).to.throwException();
-            expect(function () { s.start('foobar', function () {}); }).to.throwException();
-            expect(function () { s.start(1337, function () {}); }).to.throwException();
+            expect(function () { server.start(); }).to.throwException();
+            expect(function () { server.start('foobar', function () {}); }).to.throwException();
+            expect(function () { server.start(1337, function () {}); }).to.throwException();
 
             done();
         });
 
         it('succeeds', function (done) {
-            server = new Server();
-
             server.start(function (error) {
                 expect(error).to.not.be.ok();
                 done();
@@ -69,10 +63,7 @@ describe('Server', function () {
     });
 
     describe('runtime', function () {
-        var server;
-
         before(function (done) {
-            server = new Server();
             server.start(done);
         });
 
@@ -144,10 +135,7 @@ describe('Server', function () {
     });
 
     describe('config', function () {
-        var server;
-
         before(function (done) {
-            server = new Server();
             server.start(done);
         });
 
@@ -175,10 +163,7 @@ describe('Server', function () {
     });
 
     describe('shutdown', function () {
-        var server;
-
         before(function (done) {
-            server = new Server();
             server.start(done);
         });
 
@@ -207,10 +192,7 @@ describe('Server', function () {
     });
 
     describe('cors', function () {
-        var server;
-
         before(function (done) {
-            server = new Server();
             server.start(function (error) {
                 done(error);
             });
@@ -238,11 +220,10 @@ describe('Server', function () {
     });
 
     describe('heartbeat', function () {
-        var server, successfulHeartbeatGet;
+        var successfulHeartbeatGet;
 
         before(function (done) {
             config.set('token', 'forheartbeat');
-            server = new Server();
             server.start(done);
 
             var scope = nock(config.appServerUrl());
@@ -264,13 +245,12 @@ describe('Server', function () {
     });
 
     describe('graphite urls', function () {
-        var server, scope;
+        var scope;
 
         before(function (done) {
             scope = nock('http://127.0.0.1:8000')
             scope.get('/graphite/someurl').reply(200); // url must not have access_token
 
-            server = new Server();
             server.start(done);
         });
 

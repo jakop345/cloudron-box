@@ -22,7 +22,7 @@ var appdb = require('../../appdb.js'),
     os = require('os'),
     paths = require('../../paths.js'),
     request = require('superagent'),
-    Server = require('../../server.js'),
+    server = require('../../server.js'),
     url = require('url'),
     userdb = require('../../userdb.js'),
     uuid = require('node-uuid'),
@@ -69,7 +69,6 @@ function startDockerProxy(interceptor, callback) {
 }
 
 function setup(done) {
-    server = new Server();
     async.series([
         server.start.bind(server),
 

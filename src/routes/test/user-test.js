@@ -10,7 +10,7 @@ var config = require('../../../config.js'),
     database = require('../../database.js'),
     expect = require('expect.js'),
     request = require('superagent'),
-    Server = require('../../../src/server.js'),
+    server = require('../../../src/server.js'),
     userdb = require('../../userdb.js');
 
 var SERVER_URL = 'http://localhost:' + config.get('port');
@@ -22,7 +22,6 @@ var USERNAME_3 = 'userTheThird', PASSWORD_3 = 'userpassword333', EMAIL_3 = 'user
 
 var server;
 function setup(done) {
-    server = new Server();
     server.start(function (error) {
         expect(!error).to.be.ok();
         userdb.clear(done);

@@ -10,7 +10,7 @@ if (typeof process.env.NODE_ENV === 'undefined') {
 
 require('supererror')({ splatchError: true });
 
-var Server = require('./src/server.js'),
+var server = require('./src/server.js'),
     config = require('./config.js');
 
 console.log();
@@ -25,7 +25,6 @@ console.log();
 console.log('==========================================');
 console.log();
 
-var server = new Server();
 server.start(function (err) {
     if (err) {
         console.error('Error starting server', err);

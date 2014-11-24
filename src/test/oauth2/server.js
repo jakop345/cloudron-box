@@ -6,7 +6,7 @@ process.env.NODE_ENV = 'test';
 
 require('supererror');
 
-var Server = require('../../server.js'),
+var server = require('../../server.js'),
     user = require('../../user.js'),
     config = require('../../../config.js'),
     clientdb = require('../../clientdb.js'),
@@ -27,7 +27,6 @@ console.log();
 console.log('==========================================');
 console.log();
 
-var server = new Server();
 server.start(function (err) {
     if (err) {
         console.error('Error starting server', err);
