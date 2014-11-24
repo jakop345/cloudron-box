@@ -116,7 +116,7 @@ describe('Server', function () {
         });
 
         it('stats fails due missing token', function (done) {
-            request.get(SERVER_URL + '/api/v1/stats').end(function (err, res) {
+            request.get(SERVER_URL + '/api/v1/cloudron/stats').end(function (err, res) {
                 expect(err).to.not.be.ok();
                 expect(res.statusCode).to.equal(401);
                 done(err);
@@ -130,7 +130,7 @@ describe('Server', function () {
 
                 ACCESS_TOKEN = res.body.token;
 
-                request.get(SERVER_URL + '/api/v1/stats').query({ access_token: ACCESS_TOKEN }).end(function (err, res) {
+                request.get(SERVER_URL + '/api/v1/cloudron/stats').query({ access_token: ACCESS_TOKEN }).end(function (err, res) {
                     expect(err).to.not.be.ok();
                     expect(res.statusCode).to.equal(200);
                     expect(res.body).to.be.an(Object);
@@ -158,7 +158,7 @@ describe('Server', function () {
         });
 
         it('config fails due missing token', function (done) {
-            request.get(SERVER_URL + '/api/v1/config', function (err, res) {
+            request.get(SERVER_URL + '/api/v1/cloudron/config', function (err, res) {
                 expect(err).to.not.be.ok();
                 expect(res.statusCode).to.equal(401);
                 done(err);
@@ -166,7 +166,7 @@ describe('Server', function () {
         });
 
         it('config fails due wrong token', function (done) {
-            request.get(SERVER_URL + '/api/v1/config').query({ access_token: 'somewrongtoken' }).end(function (err, res) {
+            request.get(SERVER_URL + '/api/v1/cloudron/config').query({ access_token: 'somewrongtoken' }).end(function (err, res) {
                 expect(err).to.not.be.ok();
                 expect(res.statusCode).to.equal(401);
                 done(err);

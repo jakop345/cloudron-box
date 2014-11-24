@@ -116,7 +116,7 @@ angular.module('Application').service('Client', function ($http, md5) {
      * Rest API wrappers
      */
     Client.prototype.config = function (callback) {
-        $http.get('/api/v1/config').success(function(data, status) {
+        $http.get('/api/v1/cloudron/config').success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));
@@ -280,7 +280,7 @@ angular.module('Application').service('Client', function ($http, md5) {
     };
 
     Client.prototype.stats = function (callback) {
-        $http.get('/api/v1/stats').success(function(data, status) {
+        $http.get('/api/v1/cloudron/stats').success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));
@@ -301,21 +301,21 @@ angular.module('Application').service('Client', function ($http, md5) {
     };
 
     Client.prototype.update = function (callback) {
-        $http.get('/api/v1/update').success(function(data, status) {
+        $http.get('/api/v1/cloudron/update').success(function(data, status) {
             if (status !== 202) return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.reboot = function (callback) {
-        $http.get('/api/v1/reboot').success(function(data, status) {
+        $http.get('/api/v1/cloudron/reboot').success(function(data, status) {
             if (status !== 202) return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.backup = function (callback) {
-        $http.post('/api/v1/backups').success(function(data, status) {
+        $http.post('/api/v1/cloudron/backups').success(function(data, status) {
             if (status !== 202) return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));
@@ -330,7 +330,7 @@ angular.module('Application').service('Client', function ($http, md5) {
             }
         };
 
-        $http.get('/api/v1/graphs', config).success(function (data, status) {
+        $http.get('/api/v1/cloudron/graphs', config).success(function (data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));

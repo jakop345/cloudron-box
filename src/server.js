@@ -121,12 +121,13 @@ Server.prototype._initializeExpressSync = function () {
     router.get ('/api/v1/firsttime', this._firstTime.bind(this));
     router.post('/api/v1/createadmin', routes.user.createAdmin);    // FIXME any number of admins can be created without auth!
 
-    router.get ('/api/v1/config', rootScope, routes.cloudron.getConfig);
-    router.get ('/api/v1/update', rootScope, routes.cloudron.update);
-    router.get ('/api/v1/reboot', rootScope, routes.cloudron.reboot);
-    router.get ('/api/v1/stats', rootScope, routes.cloudron.getStats);
-    router.post('/api/v1/backups', rootScope, routes.cloudron.createBackup);
-    router.get ('/api/v1/graphs', rootScope, routes.graphs.getGraphs);
+    router.get ('/api/v1/cloudron/config', rootScope, routes.cloudron.getConfig);
+    router.get ('/api/v1/cloudron/update', rootScope, routes.cloudron.update);
+    router.get ('/api/v1/cloudron/reboot', rootScope, routes.cloudron.reboot);
+    router.get ('/api/v1/cloudron/stats', rootScope, routes.cloudron.getStats);
+    router.post('/api/v1/cloudron/backups', rootScope, routes.cloudron.createBackup);
+    router.get ('/api/v1/cloudron/graphs', rootScope, routes.graphs.getGraphs);
+
     router.get ('/api/v1/profile', profileScope, routes.user.info); // FIXME how is this different from info route below?
 
     router.get ('/api/v1/users', usersScope, routes.user.list);
