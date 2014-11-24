@@ -197,11 +197,7 @@ function validatePortBindings(portBindings) {
 
 function getIconURLSync(app) {
     var iconPath = paths.APPICONS_DIR + '/' + app.id + '.png';
-    if (fs.existsSync(iconPath)) {
-        return '/api/v1/app/' + app.id + '/icon';
-    } else {
-        return null;
-    }
+    return fs.existsSync(iconPath) ? '/api/v1/apps/' + app.id + '/icon' : null;
 }
 
 function get(appId, callback) {
