@@ -18,7 +18,8 @@ exports = module.exports = {
     del: del,
     clear: clear,
     update: update,
-    count: count
+    count: count,
+    adminCount: adminCount
 };
 
 var USERS_FIELDS = [ 'id', 'username', 'email', '_password', 'publicPem', '_privatePemCipher', '_salt', 'createdAt', 'modifiedAt', 'admin' ].join(',');
@@ -165,3 +166,14 @@ function count(callback) {
         return callback(null, result.total);
     });
 }
+
+function adminCount(callback) {
+    assert(typeof callback === 'function');
+
+    database.get('SELECT COUNT(*) AS total FROM users WHERE admin=1', function (error, result) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+
+        return callback(null, result.total);
+    });
+}
+
