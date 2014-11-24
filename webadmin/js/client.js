@@ -175,7 +175,7 @@ angular.module('Application').service('Client', function ($http, md5) {
     };
 
     Client.prototype.version = function (callback) {
-        $http.get('/api/v1/version').success(function(data, status) {
+        $http.get('/api/v1/cloudron/version').success(function(data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));

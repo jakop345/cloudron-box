@@ -51,19 +51,6 @@ Server.prototype._firstTime = function (req, res, next) {
     });
 };
 
-/**
- * @api {get} /api/v1/version version
- * @apiName version
- * @apiGroup generic
- * @apiDescription
- *  Get the device's software version. Same string as in the <code>package.json</code>
- *
- * @apiSuccess {String} version The current version string of the device.
- */
-Server.prototype._getVersion = function (req, res, next) {
-    next(new HttpSuccess(200, { version: config.version() }));
-};
-
 Server.prototype._initializeExpressSync = function () {
     this.app = express();
 
@@ -117,10 +104,10 @@ Server.prototype._initializeExpressSync = function () {
     var settingsScope = routes.oauth2.scope('settings');
 
     // public routes
-    router.get ('/api/v1/version', this._getVersion.bind(this));
     router.get ('/api/v1/firsttime', this._firstTime.bind(this));
     router.post('/api/v1/createadmin', routes.user.createAdmin);    // FIXME any number of admins can be created without auth!
 
+    router.get ('/api/v1/cloudron/version', routes.cloudron.getVersion); // public route to check if we are 'alive'
     router.get ('/api/v1/cloudron/config', rootScope, routes.cloudron.getConfig);
     router.get ('/api/v1/cloudron/update', rootScope, routes.cloudron.update);
     router.get ('/api/v1/cloudron/reboot', rootScope, routes.cloudron.reboot);
