@@ -266,7 +266,7 @@ angular.module('Application').service('Client', function ($http, md5) {
             if (status !== 201) return callback(new ClientError(status, data));
 
             that.setToken(data.token);
-            that.setUserInfo(data.userInfo);
+            that.setUserInfo({ username: username, email: email, admin: true });
 
             callback(null, data.activated);
         }).error(defaultErrorHandler(callback));
