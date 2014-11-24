@@ -124,7 +124,7 @@ describe('User', function () {
             user.verify(USERNAME, '', function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
-                expect(error.reason).to.equal(UserError.WRONG_USER_OR_PASSWORD);
+                expect(error.reason).to.equal(UserError.WRONG_PASSWORD);
 
                 done();
             });
@@ -134,7 +134,7 @@ describe('User', function () {
             user.verify(USERNAME, PASSWORD+PASSWORD, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
-                expect(error.reason).to.equal(UserError.WRONG_USER_OR_PASSWORD);
+                expect(error.reason).to.equal(UserError.WRONG_PASSWORD);
 
                 done();
             });
@@ -263,7 +263,7 @@ describe('User', function () {
             user.verify(USERNAME, PASSWORD, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
-                expect(error.reason).to.equal(UserError.WRONG_USER_OR_PASSWORD);
+                expect(error.reason).to.equal(UserError.WRONG_PASSWORD);
                 done();
             });
         });

@@ -161,7 +161,8 @@ function changePassword(req, res, next) {
     if (typeof req.body.newPassword !== 'string') return next(new HttpError(400, 'API call requires the users new password.'));
 
     user.changePassword(req.user.username, req.body.password, req.body.newPassword, function (error) {
-        if (error && error.reason === UserError.WRONG_USER_OR_PASSWORD) return next(new HttpError(403, 'Wrong password'));
+        if (error && error.reason === UserError.WRONG_PASSWORD) return next(new HttpError(403, 'Wrong password'));
+        if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(403, 'Wrong password'));
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(204));
@@ -278,7 +279,9 @@ function removeUser(req, res, next) {
 
     // verify the admin via the provided password
     user.verify(req.user.username, password, function (error) {
-        if (error) return next(new HttpError(403, 'Password incorrect'));
+        if (error && error.reason === UserError.WRONG_PASSWORD) return next(new HttpError(403, 'Password incorrect'));
+        if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(403, 'Password incorrect'));
+        if (error) return next(new HttpError(500, error));
 
         user.remove(username, function (error) {
             if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'User not found'));
@@ -295,7 +298,9 @@ function verifyPassword(req, res, next) {
     if (typeof req.body.password !== 'string') return next(new HttpError(400, 'API call requires user password'));
 
     user.verify(req.user.username, req.body.password, function (error) {
-        if (error) return next(new HttpError(403, 'Password incorrect'));
+        if (error && error.reason === UserError.WRONG_PASSWORD) return next(new HttpError(403, 'Password incorrect'));
+        if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(403, 'Password incorrect'));
+        if (error) return next(new HttpError(500, error));
 
         next();
     });

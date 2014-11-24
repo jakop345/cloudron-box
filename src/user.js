@@ -58,7 +58,7 @@ util.inherits(UserError, Error);
 UserError.INTERNAL_ERROR = 'Internal Error';
 UserError.ALREADY_EXISTS = 'Already Exists';
 UserError.NOT_FOUND = 'Not Found';
-UserError.WRONG_USER_OR_PASSWORD = 'Wrong User or Password';
+UserError.WRONG_PASSWORD = 'Wrong User or Password';
 UserError.BAD_FIELD = 'Bad BAD_FIELD';
 UserError.NOT_ALLOWED = 'Not Allowed';
 
@@ -162,7 +162,7 @@ function verifyUser(username, password, callback) {
             if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
             var derivedKeyHex = new Buffer(derivedKey, 'binary').toString('hex');
-            if (derivedKeyHex !== user._password) return callback(new UserError(UserError.WRONG_USER_OR_PASSWORD));
+            if (derivedKeyHex !== user._password) return callback(new UserError(UserError.WRONG_PASSWORD));
 
             callback(null, user);
         });
