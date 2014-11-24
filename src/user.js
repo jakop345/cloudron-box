@@ -2,19 +2,6 @@
 
 'use strict';
 
-var aes = require('../src/aes-helper.js'),
-    assert = require('assert'),
-    crypto = require('crypto'),
-    database = require('./database'),
-    DatabaseError = require('./databaseerror.js'),
-    debug = require('debug')('box:user'),
-    mailer = require('./mailer.js'),
-    safe = require('safetydance'),
-    ursa = require('ursa'),
-    userdb = require('./userdb.js'),
-    util = require('util'),
-    validator = require('validator');
-
 exports = module.exports = {
     UserError: UserError,
 
@@ -29,6 +16,19 @@ exports = module.exports = {
     update: updateUser,
     clear: clear
 };
+
+var aes = require('../src/aes-helper.js'),
+    assert = require('assert'),
+    crypto = require('crypto'),
+    database = require('./database'),
+    DatabaseError = require('./databaseerror.js'),
+    debug = require('debug')('box:user'),
+    mailer = require('./mailer.js'),
+    safe = require('safetydance'),
+    ursa = require('ursa'),
+    userdb = require('./userdb.js'),
+    util = require('util'),
+    validator = require('validator');
 
 var CRYPTO_SALT_SIZE = 64; // 512-bit salt
 var CRYPTO_ITERATIONS = 10000; // iterations
