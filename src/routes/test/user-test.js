@@ -48,7 +48,7 @@ describe('User API', function () {
     after(cleanup);
 
     it('device is in first time mode', function (done) {
-        request.get(SERVER_URL + '/api/v1/firsttime')
+        request.get(SERVER_URL + '/api/v1/cloudron/status')
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
             expect(res.body.activated).to.not.be.ok();
@@ -83,7 +83,7 @@ describe('User API', function () {
     });
 
     it('device left first time mode', function (done) {
-        request.get(SERVER_URL + '/api/v1/firsttime')
+        request.get(SERVER_URL + '/api/v1/cloudron/status')
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
             expect(res.body.activated).to.be.ok();

@@ -9,6 +9,7 @@ exports = module.exports = {
     initialize: initialize,
     uninitialize: uninitialize,
     getConfig: getConfig,
+    getStatus: getStatus,
     backup: backup,
 
     getBackupUrl: getBackupUrl,
@@ -28,6 +29,7 @@ var assert = require('assert'),
     safe = require('safetydance'),
     superagent = require('superagent'),
     updater = require('./updater.js'),
+    userdb = require('./userdb.js'),
     util = require('util'),
     uuid = require('node-uuid'),
     _ = require('underscore');
@@ -147,6 +149,16 @@ function getIp() {
 
     return null;
 };
+
+function getStatus(callback) {
+    assert(typeof callback === 'function');
+
+    userdb.count(function (error, count) {
+        if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
+
+        callback(null, { activated: count !== 0, version: config.version() });
+    });
+}
 
 function getConfig(callback) {
     assert(typeof callback === 'function');

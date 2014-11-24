@@ -4,7 +4,6 @@
 
 var assert = require('assert'),
     cloudron = require('../cloudron.js'),
-    config = require('../../config.js'),
     CloudronError = cloudron.CloudronError,
     debug = require('debug')('box:routes/cloudron'),
     df = require('nodejs-disks'),
@@ -18,7 +17,7 @@ var SUDO = '/usr/bin/sudo',
     REBOOT_CMD = path.join(__dirname, '../scripts/reboot.sh');
 
 exports = module.exports = {
-    getVersion: getVersion,
+    getStatus: getStatus,
     getStats: getStats,
     reboot: reboot,
     createBackup: createBackup,
@@ -26,19 +25,12 @@ exports = module.exports = {
     update: update
 };
 
-/**
- * @api {get} /api/v1/cloudron/version version
- * @apiName version
- * @apiGroup generic
- * @apiDescription
- *  Get the device's software version. Same string as in the <code>package.json</code>
- *
- * This doesn't hit the database.
- *
- * @apiSuccess {String} version The current version string of the device.
- */
-function getVersion(req, res, next) {
-    next(new HttpSuccess(200, { version: config.version() }));
+function getStatus(req, res, next) {
+    cloudron.getStatus(function (error, status) {
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(200, status));
+    });
 }
 
 function getStats(req, res, next) {

@@ -49,7 +49,7 @@ describe('Server', function () {
         });
 
         it('is reachable', function (done) {
-            request.get(SERVER_URL + '/api/v1/cloudron/version', function (err, res) {
+            request.get(SERVER_URL + '/api/v1/cloudron/status', function (err, res) {
                 expect(res.statusCode).to.equal(200);
                 done(err);
             });
@@ -94,7 +94,7 @@ describe('Server', function () {
         });
 
         it('version', function (done) {
-            request.get(SERVER_URL + '/api/v1/cloudron/version', function (err, res) {
+            request.get(SERVER_URL + '/api/v1/cloudron/status', function (err, res) {
                 expect(err).to.not.be.ok();
                 expect(res.statusCode).to.equal(200);
                 expect(res.body.version).to.equal(require('../../package.json').version);
@@ -102,12 +102,12 @@ describe('Server', function () {
             });
         });
 
-        it('firsttime route is GET', function (done) {
-            request.post(SERVER_URL + '/api/v1/firsttime')
+        it('status route is GET', function (done) {
+            request.post(SERVER_URL + '/api/v1/cloudron/status')
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(404);
 
-                request.get(SERVER_URL + '/api/v1/firsttime')
+                request.get(SERVER_URL + '/api/v1/cloudron/status')
                        .end(function (err, res) {
                     expect(res.statusCode).to.equal(200);
                     done(err);
@@ -199,7 +199,7 @@ describe('Server', function () {
         });
 
         it('is not reachable anymore', function (done) {
-            request.get(SERVER_URL + '/api/v1/cloudron/version', function (error, result) {
+            request.get(SERVER_URL + '/api/v1/cloudron/status', function (error, result) {
                 expect(error).to.not.be(null);
                 done();
             });
@@ -217,7 +217,7 @@ describe('Server', function () {
         });
 
         it('responds to OPTIONS', function (done) {
-            request('OPTIONS', SERVER_URL + '/api/v1/cloudron/version')
+            request('OPTIONS', SERVER_URL + '/api/v1/cloudron/status')
                 .set('Access-Control-Request-Method', 'GET')
                 .set('Access-Control-Request-Headers', 'accept, origin, x-requested-with')
                 .set('Origin', 'http://localhost')

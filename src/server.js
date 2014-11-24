@@ -33,24 +33,6 @@ function Server() {
     this.app = null; // express
 }
 
-/**
- * @api {get} /api/v1/firsttime firstTime
- * @apiName firstTime
- * @apiGroup generic
- * @apiDescription
- * Ask the device if it is already activated. The device only leaves the activation mode when a device administrator is created.
- *
- * @apiSuccess {Boolean} activated True if the device was already activated otherwise false.
- * @apiSuccess {String} version The current version string of the device.
- */
-Server.prototype._firstTime = function (req, res, next) {
-    userdb.count(function (error, count) {
-        if (error) return next(new HttpError(500, error));
-
-        next(new HttpSuccess(200, { activated: count !== 0, version: config.version() }));
-    });
-};
-
 Server.prototype._initializeExpressSync = function () {
     this.app = express();
 
@@ -104,10 +86,9 @@ Server.prototype._initializeExpressSync = function () {
     var settingsScope = routes.oauth2.scope('settings');
 
     // public routes
-    router.get ('/api/v1/firsttime', this._firstTime.bind(this));
     router.post('/api/v1/createadmin', routes.user.createAdmin);    // FIXME any number of admins can be created without auth!
 
-    router.get ('/api/v1/cloudron/version', routes.cloudron.getVersion); // public route to check if we are 'alive'
+    router.get ('/api/v1/cloudron/status', routes.cloudron.getStatus); // public route
     router.get ('/api/v1/cloudron/config', rootScope, routes.cloudron.getConfig);
     router.get ('/api/v1/cloudron/update', rootScope, routes.cloudron.update);
     router.get ('/api/v1/cloudron/reboot', rootScope, routes.cloudron.reboot);
