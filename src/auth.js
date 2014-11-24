@@ -2,7 +2,8 @@
 
 'use strict';
 
-var BasicStrategy = require('passport-http').BasicStrategy,
+var assert = require('assert'),
+    BasicStrategy = require('passport-http').BasicStrategy,
     BearerStrategy = require('passport-http-bearer').Strategy,
     clientdb = require('./clientdb'),
     ClientPasswordStrategy = require('passport-oauth2-client-password').Strategy,
@@ -17,10 +18,13 @@ var BasicStrategy = require('passport-http').BasicStrategy,
     UserError = user.UserError;
 
 exports = module.exports = {
-    initialize: initialize
+    initialize: initialize,
+    uninitialize: uninitialize
 };
 
-function initialize() {
+function initialize(callback) {
+    assert(typeof callback === 'function');
+
     // helpers for session de/serializing
     passport.serializeUser(function (user, callback) {
         debug('serializeUser: ' + JSON.stringify(user));
@@ -35,7 +39,6 @@ function initialize() {
           callback(error, user);
         });
     });
-
 
     /**
      * LocalStrategy
@@ -129,5 +132,13 @@ function initialize() {
             });
         });
     }));
+
+    callback(null);
+}
+
+function uninitialize(callback) {
+    assert(typeof callback === 'function');
+
+    callback(null);
 }
 

@@ -76,9 +76,6 @@ Server.prototype._initializeExpressSync = function () {
         urlencoded = middleware.urlencoded({ extended: false, limit: QUERY_LIMIT }), // application/x-www-form-urlencoded
         csurf = csrf(); // Cross-site request forgery protection middleware for login form
 
-    // Passport configuration
-    auth.initialize();
-
     this.app.set('views', path.join(__dirname, 'oauth2views'));
     this.app.set('view options', { layout: true, debug: true });
     this.app.set('view engine', 'ejs');
@@ -203,6 +200,7 @@ Server.prototype.start = function (callback) {
     this.httpServer = http.createServer(this.app);
 
     async.series([
+        auth.initialize,
         database.initialize,
         apps.initialize,
         cloudron.initialize,
@@ -220,6 +218,7 @@ Server.prototype.stop = function (callback) {
     if (!this.httpServer) return callback(null);
 
     async.series([
+        auth.uninitialize,
         cloudron.uninitialize,
         updater.uninitialize,
         apps.uninitialize,
