@@ -126,8 +126,8 @@ Server.prototype._initializeExpressSync = function () {
     router.get ('/api/v1/reboot', rootScope, routes.cloudron.reboot);
     router.get ('/api/v1/stats', rootScope, routes.cloudron.getStats);
     router.post('/api/v1/backups', rootScope, routes.cloudron.createBackup);
-    router.get ('/api/v1/profile', profileScope, routes.user.info);
     router.get ('/api/v1/graphs', rootScope, routes.graphs.getGraphs);
+    router.get ('/api/v1/profile', profileScope, routes.user.info); // FIXME how is this different from info route below?
 
     router.get ('/api/v1/users', usersScope, routes.user.list);
     router.post('/api/v1/users', usersScope, routes.user.requireAdmin, routes.user.create);
