@@ -262,7 +262,7 @@ angular.module('Application').service('Client', function ($http, md5) {
 
         var that = this;
 
-        $http.post('/api/v1/createadmin', payload).success(function(data, status) {
+        $http.post('/api/v1/cloudron/activate', payload).success(function(data, status) {
             if (status !== 201) return callback(new ClientError(status, data));
 
             that.setToken(data.token);

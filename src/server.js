@@ -86,7 +86,7 @@ Server.prototype._initializeExpressSync = function () {
     var settingsScope = routes.oauth2.scope('settings');
 
     // public routes
-    router.post('/api/v1/createadmin', routes.user.createAdmin);    // FIXME any number of admins can be created without auth!
+    router.post('/api/v1/cloudron/activate', routes.cloudron.activate);    // FIXME any number of admins can be created without auth!
 
     router.get ('/api/v1/cloudron/status', routes.cloudron.getStatus); // public route
     router.get ('/api/v1/cloudron/config', rootScope, routes.cloudron.getConfig);

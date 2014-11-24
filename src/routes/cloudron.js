@@ -17,6 +17,7 @@ var SUDO = '/usr/bin/sudo',
     REBOOT_CMD = path.join(__dirname, '../scripts/reboot.sh');
 
 exports = module.exports = {
+    activate: activate,
     getStatus: getStatus,
     getStats: getStats,
     reboot: reboot,
@@ -24,6 +25,37 @@ exports = module.exports = {
     getConfig: getConfig,
     update: update
 };
+
+/**
+ * Creating an admin user and activate the cloudron.
+ *
+ * @apiParam {string} username The administrator's user name
+ * @apiParam {string} password The administrator's password
+ * @apiParam {string} email The administrator's email address
+ *
+ * @apiSuccess (Created 201) {string} token A valid access token
+ */
+function activate(req, res, next) {
+    assert(typeof req.body === 'object');
+
+    if (typeof req.body.username !== 'string') return next(new HttpError(400, 'username must be string'));
+    if (typeof req.body.password !== 'string') return next(new HttpError(400, 'password must be string'));
+    if (typeof req.body.email !== 'string') return next(new HttpError(400, 'email must be string'));
+
+    var username = req.body.username;
+    var password = req.body.password;
+    var email = req.body.email;
+
+    debug('activate: ' + username);
+
+    cloudron.activate(username, password, email, function (error, info) {
+        if (error && error.reason === CloudronError.BAD_FIELD) return next(new HttpError(400, error.message));
+        if (error && error.reason === CloudronError.ALREADY_PROVISIONED) return next(new HttpError(409, 'Already provisioned'));
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(201, info));
+    });
+}
 
 function getStatus(req, res, next) {
     cloudron.getStatus(function (error, status) {

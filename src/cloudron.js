@@ -8,6 +8,7 @@ exports = module.exports = {
 
     initialize: initialize,
     uninitialize: uninitialize,
+    activate: activate,
     getConfig: getConfig,
     getStatus: getStatus,
     backup: backup,
@@ -28,7 +29,9 @@ var assert = require('assert'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
     superagent = require('superagent'),
+    tokendb = require('./tokendb.js'),
     updater = require('./updater.js'),
+    user = require('./user.js'),
     userdb = require('./userdb.js'),
     util = require('util'),
     uuid = require('node-uuid'),
@@ -63,6 +66,7 @@ function CloudronError(reason, errorOrMessage) {
     }
 }
 util.inherits(CloudronError, Error);
+CloudronError.BAD_FIELD = 'Field error';
 CloudronError.INTERNAL_ERROR = 'Internal Error';
 CloudronError.ALREADY_PROVISIONED = 'Already Provisioned';
 CloudronError.APPSTORE_DOWN = 'Appstore Down';
@@ -97,6 +101,35 @@ function uninitialize(callback) {
     gCachedIp = null;
 
     callback(null);
+}
+
+function activate(username, password, email, callback) {
+    assert(typeof username === 'string');
+    assert(typeof password === 'string');
+    assert(typeof email === 'string');
+    assert(typeof callback === 'function');
+
+    debug('activating user:%s email:%s', username, email);
+
+    user.create(username, password, email, true /* admin */, function (error) {
+        if (error && error.reason === UserError.BAD_FIELD) return callback(new CloudronError(CloudronError.BAD_FIELD, error.message));
+        if (error && error.reason === UserError.ALREADY_EXISTS) return callback(new CloudronError(CloudronError.ALREADY_PROVISIONED));
+        if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
+
+        clientdb.getByAppId('webadmin', function (error, result) {
+            if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
+
+            // Also generate a token so the admin creation can also act as a login
+            var token = tokendb.generateToken();
+            var expires = new Date(Date.now() + 60 * 60000).toUTCString(); // 1 hour
+
+            tokendb.add(token, username, result.id, expires, '*', function (error) {
+                if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
+
+                callback(null, { token: token, expires: expires });
+            });
+        });
+    });
 }
 
 function getBackupUrl(callback) {

@@ -33,7 +33,7 @@ function setup(done) {
         userdb.clear,
 
         function createAdmin(callback) {
-            request.post(SERVER_URL + '/api/v1/createadmin')
+            request.post(SERVER_URL + '/api/v1/cloudron/activate')
                    .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();

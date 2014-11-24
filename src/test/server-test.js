@@ -125,7 +125,7 @@ describe('Server', function () {
 
         it('stats', function (done) {
             var data = { username: 'admin', password: 'password', email: 'xx@xx.xx' };
-            request.post(SERVER_URL + '/api/v1/createadmin').send(data).end(function (err, res) {
+            request.post(SERVER_URL + '/api/v1/cloudron/activate').send(data).end(function (err, res) {
                 expect(res.statusCode).to.equal(201);
 
                 ACCESS_TOKEN = res.body.token;

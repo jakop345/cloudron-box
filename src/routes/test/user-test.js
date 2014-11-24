@@ -57,7 +57,7 @@ describe('User API', function () {
     });
 
     it('create admin fails due to missing parameters', function (done) {
-        request.post(SERVER_URL + '/api/v1/createadmin')
+        request.post(SERVER_URL + '/api/v1/cloudron/activate')
                .send({ username: USERNAME_0 })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
@@ -66,7 +66,7 @@ describe('User API', function () {
     });
 
     it('create admin fails because only POST is allowed', function (done) {
-        request.get(SERVER_URL + '/api/v1/createadmin')
+        request.get(SERVER_URL + '/api/v1/cloudron/activate')
                .end(function (err, res) {
             expect(res.statusCode).to.equal(404);
             done(err);
@@ -74,7 +74,7 @@ describe('User API', function () {
     });
 
     it('create admin', function (done) {
-        request.post(SERVER_URL + '/api/v1/createadmin')
+        request.post(SERVER_URL + '/api/v1/cloudron/activate')
                .send({ username: USERNAME_0, password: PASSWORD, email: EMAIL })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(201);
@@ -221,7 +221,7 @@ describe('User API', function () {
     });
 
     it('create second admin should succeed with first admin credentials', function (done) {
-        request.post(SERVER_URL + '/api/v1/createadmin')
+        request.post(SERVER_URL + '/api/v1/cloudron/activate')
                .query({ access_token: token })
                .send({ username: USERNAME_1, password: PASSWORD_1, email: EMAIL_1 })
                .end(function (err, res) {

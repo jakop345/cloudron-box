@@ -3,7 +3,6 @@
 'use strict';
 
 var assert = require('assert'),
-    clientdb = require('../clientdb.js'),
     debug = require('debug')('box:routes/user'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
@@ -12,7 +11,6 @@ var assert = require('assert'),
     UserError = user.UserError;
 
 exports = module.exports = {
-    createAdmin: createAdmin,
     createToken: createToken,
     logout: logout,
     info: info,
@@ -24,75 +22,6 @@ exports = module.exports = {
     verifyPassword: verifyPassword,
     requireAdmin: requireAdmin
 };
-
-/**
-* @apiDefinePermission admin Admin access rights needed.
-* This can only be called in the context of the box owner/administrator
-*/
-
-/**
- * @api {post} /api/v1/createadmin createAdmin
- * @apiName createAdmin
- * @apiGroup generic
- * @apiDescription
- *
- * Creating an admin user also puts the device out of first time activation mode.
- *
- * @apiParam {string} username The administrator's user name
- * @apiParam {string} password The administrator's password
- * @apiParam {string} email The administrator's email address
- *
- * @apiSuccess (Created 201) {string} token A valid access token
- */
-function createAdmin(req, res, next) {
-    assert(typeof req.body === 'object');
-
-    if (typeof req.body.username !== 'string') return next(new HttpError(400, 'username must be string'));
-    if (typeof req.body.password !== 'string') return next(new HttpError(400, 'password must be string'));
-    if (typeof req.body.email !== 'string') return next(new HttpError(400, 'email must be string'));
-
-    var username = req.body.username;
-    var password = req.body.password;
-    var email = req.body.email;
-
-    debug('createAdmin: ' + username);
-
-    user.create(username, password, email, true /* admin */, function (error) {
-        if (error && error.reason === UserError.BAD_FIELD) return next(new HttpError(400, error.message));
-        if (error && error.reason === UserError.ALREADY_EXISTS) return next(new HttpError(409, 'Already exists'));
-        if (error) return next(new HttpError(500, error));
-
-        // Also generate a token so the admin creation can also act as a login
-        var token = tokendb.generateToken();
-        var expires = new Date(Date.now() + 60 * 60000).toUTCString(); // 1 hour
-
-        debug('createAdmin: now create token for ' + username);
-
-        clientdb.getByAppId('webadmin', function (error, result) {
-            if (error) return next(new HttpError(500, error));
-
-            tokendb.add(token, username, result.id, expires, '*', function (error) {
-                if (error) return next(new HttpError(500, error));
-
-                debug('createAdmin: successful with token ' + token);
-
-                var userInfo = {
-                    username: username,
-                    email: email,
-                    admin: true
-                };
-
-                // TODO no next(), as we do not want to fall through to authentication
-                // the whole createAdmin should be handled differently
-                res.send(201, {
-                    token: token,
-                    expires: expires,
-                    userInfo: userInfo
-                });
-            });
-        });
-    });
-}
 
 /**
  * @api {post} /api/v1/user/create create
