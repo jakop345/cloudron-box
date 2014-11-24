@@ -150,6 +150,7 @@ function update(userId, user, callback) {
     }
 
     database.run('UPDATE users SET ' + values.join(', ') + ' WHERE id = $id', data, function (error, result) {
+        if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.FIELD_ERROR, error));
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (this.changes !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 

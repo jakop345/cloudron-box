@@ -15,7 +15,8 @@ var appdb = require('../appdb.js'),
     expect = require('expect.js'),
     mkdirp = require('mkdirp'),
     settingsdb = require('../settingsdb.js'),
-    tokendb = require('../tokendb.js');
+    tokendb = require('../tokendb.js'),
+    userdb = require('../userdb.js');
 
 describe('database', function () {
     before(function (done) {
@@ -38,6 +39,140 @@ describe('database', function () {
         expect(result.email).to.equal('girs@foc.com');
         expect(result._password).to.not.be.ok();
         expect(result._salt).to.not.be.ok();
+    });
+
+    describe('userdb', function () {
+        var USER_0 = {
+            id: 'uuid213',
+            username: 'uuid213',
+            _password: 'secret',
+            email: 'safe@me.com',
+            publicPem: 'pem',
+            _privatePemCipher: 'cipher',
+            admin: false,
+            _salt: 'morton',
+            createdAt: 'sometime back',
+            modifiedAt: 'now'
+        };
+
+        it('can add user', function (done) {
+            userdb.add(USER_0.id, USER_0, function (error) {
+                expect(!error).to.be.ok();
+                done();
+            });
+        });
+
+        it('cannot add same user again', function (done) {
+            userdb.add(USER_0.id, USER_0, function (error) {
+                expect(error).to.be.ok();
+                expect(error.reason).to.be(DatabaseError.ALREADY_EXISTS);
+                done();
+            });
+        });
+
+        it('can get by user id', function (done) {
+            userdb.get(USER_0.id, function (error, user) {
+                expect(error).to.not.be.ok();
+                expect(user).to.eql(USER_0);
+                done();
+            });
+        });
+
+        it('can get by user name', function (done) {
+            userdb.getByUsername(USER_0.username, function (error, user) {
+                expect(error).to.not.be.ok();
+                expect(user).to.eql(USER_0);
+                done();
+            });
+        });
+
+        it('can get by email', function (done) {
+            userdb.getByEmail(USER_0.email, function (error, user) {
+                expect(error).to.not.be.ok();
+                expect(user).to.eql(USER_0);
+                done();
+            });
+        });
+
+        it('can get all', function (done) {
+            userdb.getAll(function (error, all) {
+                expect(error).to.not.be.ok();
+                expect(all.length).to.equal(1);
+                expect(all[0]).to.eql(USER_0);
+                done();
+            });
+        });
+
+        it('can get all admins', function (done) {
+            userdb.getAllAdmins(function (error, all) {
+                expect(error).to.not.be.ok();
+                expect(all.length).to.equal(0);
+                done();
+            });
+        });
+
+        it('counts the users', function (done) {
+            userdb.count(function (error, count) {
+                expect(error).to.not.be.ok();
+                expect(count).to.equal(1);
+                done();
+            });
+        });
+
+        it('counts the admin users', function (done) {
+            userdb.adminCount(function (error, count) {
+                expect(error).to.not.be.ok();
+                expect(count).to.equal(0);
+                done();
+            });
+        });
+
+        it('can update the user', function (done) {
+            userdb.update(USER_0.id, { email: 'some@thing.com' }, function (error) {
+                expect(error).to.not.be.ok();
+                userdb.get(USER_0.id, function (error, user) {
+                    expect(user.email).to.equal('some@thing.com');
+                    done();
+                });
+            });
+        });
+
+        it('cannot update with bad field', function (done) {
+            userdb.update(USER_0.id, { email: null }, function (error) {
+                expect(error).to.be.ok();
+                expect(error.reason).to.be(DatabaseError.FIELD_ERROR);
+                done();
+            });
+        });
+
+        it('cannot del non-existing user', function (done) {
+            userdb.del(USER_0.id + USER_0.id, function (error) {
+                expect(error).to.be.ok();
+                expect(error.reason).to.be(DatabaseError.NOT_FOUND);
+                done();
+            });
+        });
+
+        it('can del existing user', function (done) {
+            userdb.del(USER_0.id, function (error) {
+                expect(error).to.not.be.ok();
+                done();
+            });
+        });
+
+        it('did remove the user', function (done) {
+            userdb.count(function (error, count) {
+                expect(count).to.equal(0);
+                done();
+            });
+        });
+
+        it('can clear table', function (done) {
+            userdb.clear(function (error) {
+                expect(error).to.not.be.ok();
+                done();
+            });
+        });
     });
 
     describe('authcode', function () {
