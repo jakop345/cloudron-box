@@ -101,7 +101,7 @@ Server.prototype._initializeExpressSync = function () {
     router.get ('/api/v1/users', usersScope, routes.user.list);
     router.post('/api/v1/users', usersScope, routes.user.requireAdmin, routes.user.create);
     router.get ('/api/v1/users/:userName', usersScope, routes.user.info);
-    router.del ('/api/v1/users/:userName', usersScope, routes.user.requireAdmin, routes.user.remove);
+    router.del ('/api/v1/users/:userName', usersScope, routes.user.requireAdmin, routes.user.verifyPassword, routes.user.remove);
     router.post('/api/v1/users/:userName/password', usersScope, routes.user.changePassword); // changePassword verifies password
     router.post('/api/v1/users/:userName/admin', usersScope, routes.user.requireAdmin, routes.user.changeAdmin);
 

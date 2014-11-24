@@ -274,21 +274,13 @@ function removeUser(req, res, next) {
     // - admin can remove any user
     // - admin cannot remove admin
 
-    // req.user is ensured to be the admin via requireAdmin middleware
     if (req.user.username === username) return next(new HttpError(403, 'Not allowed to remove this user.'));
 
-    // verify the admin via the provided password
-    user.verify(req.user.username, password, function (error) {
-        if (error && error.reason === UserError.WRONG_PASSWORD) return next(new HttpError(403, 'Password incorrect'));
-        if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(403, 'Password incorrect'));
+    user.remove(username, function (error) {
+        if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'User not found'));
         if (error) return next(new HttpError(500, error));
 
-        user.remove(username, function (error) {
-            if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'User not found'));
-            if (error) return next(new HttpError(500, error));
-
-            next(new HttpSuccess(204));
-        });
+        next(new HttpSuccess(204));
     });
 }
 
