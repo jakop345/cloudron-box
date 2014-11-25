@@ -21,9 +21,7 @@ var apps = require('./apps'),
     path = require('path'),
     paths = require('./paths.js'),
     routes = require('./routes/index.js'),
-    updater = require('./updater.js'),
-    url = require('url'),
-    userdb = require('./userdb.js');
+    updater = require('./updater.js');
 
 var gHttpServer = null,
     gApp = null;
