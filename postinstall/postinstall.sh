@@ -87,11 +87,11 @@ EOF
 
 echo "==== Setup nginx ===="
 mkdir -p $NGINX_APPCONFIG_DIR
-cp $SCRIPT_DIR/postinstall/nginx/nginx.conf $NGINX_CONFIG_DIR/nginx.conf
-cp $SCRIPT_DIR/postinstall/nginx/mime.types $NGINX_CONFIG_DIR/mime.types
-cp $SCRIPT_DIR/postinstall/nginx/certificates.conf $NGINX_CONFIG_DIR/certificates.conf
+cp $SRCDIR/postinstall/nginx/nginx.conf $NGINX_CONFIG_DIR/nginx.conf
+cp $SRCDIR/postinstall/nginx/mime.types $NGINX_CONFIG_DIR/mime.types
+cp $SRCDIR/postinstall/nginx/certificates.conf $NGINX_CONFIG_DIR/certificates.conf
 touch $NGINX_CONFIG_DIR/naked_domain.conf
-sed -e "s/##ADMIN_FQDN##/$ADMIN_FQDN/" -e "s|##SRCDIR##|$SRCDIR|" $SCRIPT_DIR/postinstall/nginx/admin.conf_template > $NGINX_APPCONFIG_DIR/admin.conf
+sed -e "s/##ADMIN_FQDN##/$ADMIN_FQDN/" -e "s|##SRCDIR##|$SRCDIR|" $SRCDIR/postinstall/nginx/admin.conf_template > $NGINX_APPCONFIG_DIR/admin.conf
 
 echo "==== Setup ssl certs ===="
 # The nginx cert dir is excluded from backup in backup.sh
@@ -104,7 +104,7 @@ echo "$PROVISION_TLS_KEY" > host.key
 chown $USER:$USER -R /home/$USER
 
 echo "=== Setup collectd and graphite ==="
-$SRCDIR/src/scripts/postinstall/setup_collectd.sh
+$SRCDIR/postinstall/setup_collectd.sh
 
 echo "=== Setup haraka mail relay ==="
 docker rm -f haraka || true
@@ -146,5 +146,5 @@ sqlite3 "$CLOUDRON_SQLITE" 'INSERT OR REPLACE INTO clients (id, appId, clientId,
 EOF
 
 echo "==== Setup supervisord ===="
-$SCRIPT_DIR/postinstall/setup_supervisord.sh
+$SRCDIR/postinstall/setup_supervisord.sh
 

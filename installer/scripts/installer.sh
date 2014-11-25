@@ -72,5 +72,5 @@ rm -rf "$CONFIG_DIR/*"
 
 # https://stackoverflow.com/questions/3348443/a-confusion-about-array-versus-array-in-the-context-of-a-bash-comple
 # Note that this is the latest postinstall.sh
-$SRCDIR/src/scripts/postinstall.sh "${SAVED_ARGS[@]}"
+$SRCDIR/postinstall/postinstall.sh "${SAVED_ARGS[@]}"
 
