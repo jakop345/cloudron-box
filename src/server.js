@@ -8,7 +8,6 @@ var apps = require('./apps'),
     auth = require('./auth.js'),
     cloudron = require('./cloudron.js'),
     config = require('../config.js'),
-    csrf = require('csurf'),
     database = require('./database.js'),
     debug = require('debug')('box:server'),
     express = require('express'),
@@ -44,7 +43,7 @@ function initializeExpressSync() {
 
     var json = middleware.json({ strict: true, limit: QUERY_LIMIT }), // application/json
         urlencoded = middleware.urlencoded({ extended: false, limit: QUERY_LIMIT }), // application/x-www-form-urlencoded
-        csurf = csrf(); // Cross-site request forgery protection middleware for login form
+        csrf = middleware.csrf(); // Cross-site request forgery protection middleware for login form
 
     gApp.set('views', path.join(__dirname, 'oauth2views'));
     gApp.set('view options', { layout: true, debug: true });
@@ -108,26 +107,26 @@ function initializeExpressSync() {
     router.get ('/api/v1/users/:userName/logout', bearer, routes.user.logout);       // FIXME this should not be needed with OAuth
 
     // form based login routes used by oauth2 frame
-    router.get ('/api/v1/session/login', csurf, routes.oauth2.loginForm);
-    router.post('/api/v1/session/login', csurf, routes.oauth2.login);
+    router.get ('/api/v1/session/login', csrf, routes.oauth2.loginForm);
+    router.post('/api/v1/session/login', csrf, routes.oauth2.login);
     router.get ('/api/v1/session/logout', routes.oauth2.logout);
     router.get ('/api/v1/session/callback', routes.oauth2.callback);
     router.get ('/api/v1/session/error', routes.oauth2.error);
-    router.get ('/api/v1/session/password/resetRequest.html', csurf, routes.oauth2.passwordResetRequestSite);
-    router.post('/api/v1/session/password/resetRequest', csurf, routes.oauth2.passwordResetRequest);
+    router.get ('/api/v1/session/password/resetRequest.html', csrf, routes.oauth2.passwordResetRequestSite);
+    router.post('/api/v1/session/password/resetRequest', csrf, routes.oauth2.passwordResetRequest);
     router.get ('/api/v1/session/password/sent.html', routes.oauth2.passwordSentSite);
-    router.get ('/api/v1/session/password/reset.html', csurf, routes.oauth2.passwordResetSite);
-    router.post('/api/v1/session/password/reset', csurf, routes.oauth2.passwordReset);
+    router.get ('/api/v1/session/password/reset.html', csrf, routes.oauth2.passwordResetSite);
+    router.post('/api/v1/session/password/reset', csrf, routes.oauth2.passwordReset);
 
     // oauth2 routes
     router.get ('/api/v1/oauth/dialog/authorize', routes.oauth2.authorization);
-    router.post('/api/v1/oauth/dialog/authorize/decision', csurf, routes.oauth2.decision);
+    router.post('/api/v1/oauth/dialog/authorize/decision', csrf, routes.oauth2.decision);
     router.post('/api/v1/oauth/token', routes.oauth2.token);
     router.get ('/api/v1/oauth/yellowtent.js', routes.oauth2.library);
     router.get ('/api/v1/oauth/clients', settingsScope, routes.oauth2.getClients);
     router.get ('/api/v1/oauth/clients/:clientId/tokens', settingsScope, routes.oauth2.getClientTokens);
     router.del ('/api/v1/oauth/clients/:clientId/tokens', settingsScope, routes.oauth2.delClientTokens);
-    router.all ('/api/v1/oauth/proxy*', csurf, routes.oauth2.applicationProxy);
+    router.all ('/api/v1/oauth/proxy*', csrf, routes.oauth2.applicationProxy);
 
     // app routes
     router.get ('/api/v1/apps', appsScope, routes.apps.getApps);
