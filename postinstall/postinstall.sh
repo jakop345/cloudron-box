@@ -120,7 +120,7 @@ sudo -u yellowtent -H bash <<EOF
 set -e
 set -x
 echo "Creating cloudron.conf"
-cat > "$CLOUDRON_CONF" <<EOF2
+cat > "$CLOUDRON_CONF" <<CONF_END
 {
     "token": "$PROVISION_TOKEN",
     "appServerUrl": "$PROVISION_APP_SERVER_URL",
@@ -130,13 +130,13 @@ cat > "$CLOUDRON_CONF" <<EOF2
     "mailServer": "$MAIL_SERVER",
     "mailUsername": "admin@$DOMAIN_NAME"
 }
-EOF2
+CONF_END
 
 # remove and restore containers to ensure nginx, docker config is updated
 EXISTING_APPS=$(sqlite3 "$CLOUDRON_SQLITE" 'SELECT containerId FROM apps WHERE containerId IS NOT NULL AND containerId <> ""')
-echo "Kill existing apps: $EXISTING_APPS"
-if [ -n "$EXISTING_APPS" ]; then
-    xargs docker rm -f $EXISTING_APPS
+echo "Kill existing apps: \$EXISTING_APPS"
+if [ -n "\$EXISTING_APPS" ]; then
+    xargs docker rm -f \$EXISTING_APPS
 fi
 
 echo "Marking apps for restore"
@@ -147,11 +147,8 @@ sqlite3 "$CLOUDRON_SQLITE" 'UPDATE apps SET installationState = "pending_restore
 echo "Add webadmin oauth cient"
 ADMIN_SCOPES="root,profile,users,apps,settings,roleAdmin"
 ADMIN_ID=$(cat /proc/sys/kernel/random/uuid)
-QUERY=$(cat <<EOF
-    INSERT OR REPLACE INTO clients (id, appId, clientId, clientSecret, name, redirectURI, scope) VALUES ("$ADMIN_ID", "webadmin", "cid-webadmin", "unusedsecret", "WebAdmin", "$ADMIN_ORIGIN", "$ADMIN_SCOPES")
-EOF
-)
-sqlite3 "$CLOUDRON_SQLITE" "$QUERY"
+sqlite3 "$CLOUDRON_SQLITE" "INSERT OR REPLACE INTO clients (id, appId, clientId, clientSecret, name, redirectURI, scope) VALUES (\"\$ADMIN_ID\", \"webadmin\", \"cid-webadmin\", \"unusedsecret\", \"WebAdmin\", \"$ADMIN_ORIGIN\", \"\$ADMIN_SCOPES\")"
+
 EOF
 
 echo "==== Setup supervisord ===="
