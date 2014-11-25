@@ -133,8 +133,11 @@ cat > "$CLOUDRON_CONF" <<EOF2
 EOF2
 
 # remove and restore containers to ensure nginx, docker config is updated
-echo "Kill existing apps"
-sqlite3 "$CLOUDRON_SQLITE" 'SELECT containerId FROM apps WHERE containerId IS NOT NULL AND containerId <> ""' | xargs docker rm -f
+EXISTING_APPS=$(sqlite3 "$CLOUDRON_SQLITE" 'SELECT containerId FROM apps WHERE containerId IS NOT NULL AND containerId <> ""')
+echo "Kill existing apps: $EXISTING_APPS"
+if [ -n "$EXISTING_APPS" ]; then
+    xargs docker rm -f $EXISTING_APPS
+fi
 
 echo "Marking apps for restore"
 # TODO: do not auto-start stopped containers (httpPort might need fixing to start them)
