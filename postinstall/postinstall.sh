@@ -117,6 +117,8 @@ echo "Haraka container id: $HARAKA_CONTAINER_ID"
 
 echo "==== Creating cloudron.conf ===="
 sudo -u yellowtent -H bash <<EOF
+set -e
+set -x
 echo "Creating cloudron.conf"
 cat > "$CLOUDRON_CONF" <<EOF2
 {
