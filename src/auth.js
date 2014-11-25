@@ -26,17 +26,15 @@ function initialize(callback) {
     assert(typeof callback === 'function');
 
     passport.serializeUser(function (user, callback) {
-        debug('serializeUser: ' + JSON.stringify(user));
+        debug('serializeUser: %j', user);
 
         callback(null, user.username);
     });
 
     passport.deserializeUser(function(username, callback) {
-        debug('deserializeUser: ' + username);
+        debug('deserializeUser: %s', username);
 
-        userdb.get(username, function (error, user) {
-          callback(error, user);
-        });
+        userdb.get(username, callback);
     });
 
     passport.use(new LocalStrategy(function (username, password, callback) {
@@ -55,7 +53,7 @@ function initialize(callback) {
         debug('BasicStrategy: ' + username + ' ' + password.length);
 
         if (username.indexOf('cid-') === 0) {
-            debug('BasicStrategy: detected clientId instead of username:password.' + username);
+            debug('BasicStrategy: detected clientId %s instead of username:password', username);
             // username is actually client id here
             // password is client secret
             clientdb.getByClientId(username, function (error, client) {
@@ -76,7 +74,7 @@ function initialize(callback) {
     }));
 
     passport.use(new ClientPasswordStrategy(function (clientId, clientSecret, callback) {
-        debug('ClientPasswordStrategy: ' + clientId + ' ' + clientSecret);
+        debug('ClientPasswordStrategy: clientId:%s clientSecret:%s', clientId, clientSecret);
 
         clientdb.getByClientId(clientId, function(error, client) {
             if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
@@ -87,7 +85,7 @@ function initialize(callback) {
     }));
 
     passport.use(new BearerStrategy(function (accessToken, callback) {
-        debug('BearerStrategy: ' + accessToken);
+        debug('BearerStrategy: %s', accessToken);
 
         tokendb.get(accessToken, function (error, token) {
             if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
