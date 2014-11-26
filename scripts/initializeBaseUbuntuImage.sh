@@ -77,8 +77,10 @@ sleep 2
 # now add the user to the docker group
 usermod $USER -a -G docker
 echo "=== Pulling base docker images ==="
-docker pull girish/base:0.6
-docker pull girish/base:0.7
+docker pull girish/base:0.9
+
+echo "=== Pulling mysql addon image ==="
+docker pull girish/mysql:0.1
 
 echo "=== Pulling graphite docker images ==="
 docker pull girish/graphite:0.2
