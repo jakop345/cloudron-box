@@ -10,6 +10,7 @@ HOME_DIR="/home/yellowtent"
 SRCDIR="$HOME_DIR/box"
 CONFIG_DIR="$HOME_DIR/config"
 DATA_DIR="$HOME_DIR/data"
+CLOUDRON_SQLITE="$DATA_DIR/cloudron.sqlite"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd )"
 JSON="$SCRIPT_DIR/../../node_modules/.bin/json"
 
@@ -38,7 +39,16 @@ done
 echo "Provisioning box with version: $PROVISION_VERSION and data: $PROVISION_RESTORE_URL"
 
 # for update case, stop nginx and box code
-supervisorctl stop all
+if [ -f "$CLOUDRON_SQLITE" ]; then
+    supervisorctl stop all
+
+    # remove containers to ensure nginx, docker config is updated
+    EXISTING_APPS=$(sqlite3 "$CLOUDRON_SQLITE" 'SELECT containerId FROM apps WHERE containerId IS NOT NULL AND containerId <> ""')
+    echo "Stop all apps: $EXISTING_APPS"
+    if [ -n "$EXISTING_APPS" ]; then
+        xargs docker stop "$EXISTING_APPS"
+    fi
+fi
 
 if [ -n "$PROVISION_RESTORE_URL" ]; then
     echo "Downloading backup: $PROVISION_RESTORE_URL"

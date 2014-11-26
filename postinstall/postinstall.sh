@@ -16,6 +16,7 @@ NGINX_CONFIG_DIR=/home/$USER/configs/nginx
 NGINX_APPCONFIG_DIR=/home/$USER/configs/nginx/applications
 CLOUDRON_CONF="/home/$USER/configs/cloudron.conf"
 CLOUDRON_SQLITE="$DATA_DIR/cloudron.sqlite"
+MYSQL_DIR="$DATA_DIR/mysql"
 DOMAIN_NAME=`hostname -f`
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -103,6 +104,13 @@ echo "$PROVISION_TLS_KEY" > host.key
 
 chown $USER:$USER -R /home/$USER
 
+echo "=== Remove all containers ==="
+EXISTING_CONTAINERS=$(docker ps -qa)
+echo "Remove containers: $EXISTING_CONTAINERS"
+if [ -n "$EXISTING_CONTAINERS" ]; then
+    xargs docker rm -f "$EXISTING_CONTAINERS"
+fi  
+
 echo "=== Setup collectd and graphite ==="
 $SRCDIR/postinstall/setup_collectd.sh
 
@@ -114,6 +122,16 @@ HARAKA_CONTAINER_ID=$(docker run -d --name="haraka" --cap-add="NET_ADMIN"\
     -e DOMAIN_NAME=$DOMAIN_NAME \
     -v $HARAKA_DIR:/app/data girish/haraka:0.1)
 echo "Haraka container id: $HARAKA_CONTAINER_ID"
+
+echo "=== Setup MySQL addon ==="
+docker rm -f mysql || true
+MYSQL_ROOT_PASSWORD=$(pwgen -1 -s)
+MYSQL_CONTAINER_ID=$(docker run -d --name="mysql" \
+    -p 127.0.0.1:3306:3306 \
+    -h $DOMAIN_NAME \
+    -e MYSQL_ROOT_PASSWORD="$MYSQL_ROOT_PASSWORD"
+    -v $MYSQL_DIR:/var/lib/mysql girish/mysql:0.1)
+echo "MySQL container id: $HARAKA_CONTAINER_ID"
 
 echo "==== Creating cloudron.conf ===="
 sudo -u yellowtent -H bash <<EOF
@@ -128,16 +146,10 @@ cat > "$CLOUDRON_CONF" <<CONF_END
     "adminOrigin": "$ADMIN_ORIGIN",
     "boxVersionsUrl": "$PROVISION_BOX_VERSIONS_URL",
     "mailServer": "$MAIL_SERVER",
-    "mailUsername": "admin@$DOMAIN_NAME"
+    "mailUsername": "admin@$DOMAIN_NAME",
+    "mysqlRootPassword": "$MYSQL_ROOT_PASSWORD"
 }
 CONF_END
-
-# remove and restore containers to ensure nginx, docker config is updated
-EXISTING_APPS=$(sqlite3 "$CLOUDRON_SQLITE" 'SELECT containerId FROM apps WHERE containerId IS NOT NULL AND containerId <> ""')
-echo "Kill existing apps: \$EXISTING_APPS"
-if [ -n "\$EXISTING_APPS" ]; then
-    xargs docker rm -f \$EXISTING_APPS
-fi
 
 echo "Marking apps for restore"
 # TODO: do not auto-start stopped containers (httpPort might need fixing to start them)
