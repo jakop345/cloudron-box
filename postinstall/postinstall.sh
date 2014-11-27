@@ -129,7 +129,7 @@ MYSQL_ROOT_PASSWORD=$(pwgen -1 -s)
 MYSQL_CONTAINER_ID=$(docker run -d --name="mysql" \
     -p 127.0.0.1:3306:3306 \
     -h $DOMAIN_NAME \
-    -e MYSQL_ROOT_PASSWORD="$MYSQL_ROOT_PASSWORD"
+    -e MYSQL_ROOT_PASSWORD="$MYSQL_ROOT_PASSWORD" \
     -v $MYSQL_DIR:/var/lib/mysql girish/mysql:0.1)
 echo "MySQL container id: $HARAKA_CONTAINER_ID"
 
