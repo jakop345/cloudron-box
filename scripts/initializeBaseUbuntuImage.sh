@@ -192,7 +192,7 @@ cat > /etc/init.d/cloudron-bootstrap <<EOF
 do_start() {
     mkdir -p /var/log/cloudron
 
-    exec 2>&1 1> "/var/log/cloudron/bootstrap-\$\$-\$BASHPID.log"
+    exec 2>&1 1> "/var/log/cloudron/bootstrap.log"
 
     DEBUG="box*,connect-lastmile" $SRCDIR/installer/server.js provision-mode 2>&1 1> /var/log/cloudron/installserver.log &
 
