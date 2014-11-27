@@ -189,7 +189,21 @@ echo "==== Install init script ===="
 cat > /etc/init.d/cloudron-bootstrap <<EOF
 #!/bin/bash
 
+checkout_installer() {
+    cd "$SRCDIR"
+    while true; do
+        timeout 3m git fetch origin && break
+        echo "git fetch timedout, trying again"
+        sleep 2
+    done
+
+    git reset --hard "$1"
+}
+
 do_start() {
+    # this hack lets us work with refs instead of revisions
+    checkout_installer "$BOX_REVISION"
+
     mkdir -p /var/log/cloudron
 
     exec 2>&1 1> "/var/log/cloudron/bootstrap.log"
