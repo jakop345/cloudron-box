@@ -183,7 +183,7 @@ function start(mode, callback) {
         }
 
         var appServerUrl = JSON.parse(result.body.user_data).appServerUrl;
-        debug('Using appServerUrl from metadata: ', appServerUrl);
+        debug('Using appServerUrl from metadata: %s', appServerUrl);
 
         async.series([
             announce.start.bind(null, appServerUrl),
