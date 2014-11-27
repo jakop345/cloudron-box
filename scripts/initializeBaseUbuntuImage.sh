@@ -100,6 +100,8 @@ apt-get -y install build-essential rcconf
 echo "==== Install sqlite3 ===="
 apt-get -y install sqlite3
 
+echo "==== Install pwgen ===="
+apt-get -y install pwgen
 
 echo "==== Install supervisor ===="
 apt-get -y install supervisor
