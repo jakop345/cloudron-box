@@ -6,7 +6,8 @@
 
 'use strict';
 
-var appdb = require('../appdb.js'),
+var addons = require('../addons.js'),
+    appdb = require('../appdb.js'),
     apptask = require('../apptask.js'),
     config = require('../../config.js'),
     database = require('../database.js'),
@@ -113,14 +114,14 @@ describe('apptask', function () {
     });
 
     it('allocate OAuth credentials', function (done) {
-        apptask._allocateOAuthCredentials(APP, function (error) {
+        addons.allocateOAuthCredentials(APP, function (error) {
             expect(error).to.be(null);
             done();
         });
     });
 
     it('allocate OAuth credentials twice fails', function (done) {
-        apptask._allocateOAuthCredentials(APP, function (error) {
+        addons.allocateOAuthCredentials(APP, function (error) {
             expect(error).to.be.a(DatabaseError);
             expect(error.reason).to.equal(DatabaseError.ALREADY_EXISTS);
             done();
@@ -128,14 +129,14 @@ describe('apptask', function () {
     });
 
     it('remove OAuth credentials', function (done) {
-        apptask._removeOAuthCredentials(APP, function (error) {
+        addons.removeOAuthCredentials(APP, function (error) {
             expect(error).to.be(null);
             done();
         });
     });
 
     it('remove OAuth credentials twice succeeds', function (done) {
-        apptask._removeOAuthCredentials(APP, function (error) {
+        addons.removeOAuthCredentials(APP, function (error) {
             expect(!error).to.be.ok();
             done();
         });

@@ -6,7 +6,8 @@
 
 require('supererror')({ splatchError: true });
 
-var appdb = require('./appdb.js'),
+var addons = require('./addons.js'),
+    appdb = require('./appdb.js'),
     appFqdn = require('./apps.js').appFqdn,
     assert = require('assert'),
     async = require('async'),
@@ -43,8 +44,6 @@ exports = module.exports = {
     _setNakedDomain: setNakedDomain,
     _createVolume: createVolume,
     _deleteVolume: deleteVolume,
-    _allocateOAuthCredentials: allocateOAuthCredentials,
-    _removeOAuthCredentials: removeOAuthCredentials,
     _downloadManifest: downloadManifest,
     _registerSubdomain: registerSubdomain,
     _unregisterSubdomain: unregisterSubdomain,
@@ -303,42 +302,6 @@ function removeCollectdProfile(app, callback) {
     });
 }
 
-function allocateOAuthCredentials(app, callback) {
-    assert(typeof app === 'object');
-    assert(typeof callback === 'function');
-
-    var id = uuid.v4();
-    var appId = app.id;
-    var clientId = 'cid-' + uuid.v4();
-    var clientSecret = uuid.v4();
-    var name = app.manifest.title;
-    var redirectURI = 'https://' + appFqdn(app.location);
-    var scope = 'profile,roleUser';
-
-    debug('allocateOAuthCredentials:', id, clientId, clientSecret, name);
-
-    clientdb.getByAppId(appId, function (error, result) {
-        if (error && error.reason !== DatabaseError.NOT_FOUND) return callback(error);
-        if (result) return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
-
-        clientdb.add(id, appId, clientId, clientSecret, name, redirectURI, scope, callback);
-    });
-}
-
-function removeOAuthCredentials(app, callback) {
-    assert(typeof app === 'object');
-    assert(typeof callback === 'function');
-
-    debug('removeOAuthCredentials:', app.id);
-
-    clientdb.delByAppId(app.id, function (error) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null);
-        if (error) console.error(error);
-
-        callback(null);
-    });
-}
-
 function startContainer(app, callback) {
     appdb.getPortBindings(app.id, function (error, portConfigs) {
         if (error) return callback(error);
@@ -573,8 +536,8 @@ function install(app, callback) {
 
         // allocate OAuth credentials
         updateApp.bind(null, app, { installationProgress: 'Setting up OAuth' }),
-        removeOAuthCredentials.bind(null, app),
-        allocateOAuthCredentials.bind(null, app),
+        addons.removeOAuthCredentials.bind(null, app),
+        addons.allocateOAuthCredentials.bind(null, app),
 
         // create container
         updateApp.bind(null, app, { installationProgress: 'Creating container' }),
@@ -631,11 +594,11 @@ function restore(app, callback) {
 
         // remove OAuth credentials in case of FQDN change
         updateApp.bind(null, app, { installationProgress: 'Remove old oauth credentials' }),
-        removeOAuthCredentials.bind(null, app),
+        addons.removeOAuthCredentials.bind(null, app),
 
         // add OAuth credentials
         updateApp.bind(null, app, { installationProgress: 'Setting up OAuth' }),
-        allocateOAuthCredentials.bind(null, app),
+        addons.allocateOAuthCredentials.bind(null, app),
 
         // create container
         updateApp.bind(null, app, { installationProgress: 'Creating container' }),
@@ -677,7 +640,7 @@ function configure(app, callback) {
         deleteContainer.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: 'Remove old oauth credentials' }),
-        removeOAuthCredentials.bind(null, app),
+        addons.removeOAuthCredentials.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: 'Unregistering subdomain' }),
         unregisterSubdomain.bind(null, app),
@@ -689,7 +652,7 @@ function configure(app, callback) {
         registerSubdomain.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: 'Setting up OAuth' }),
-        allocateOAuthCredentials.bind(null, app),
+        addons.allocateOAuthCredentials.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: 'Creating container' }),
         createContainer.bind(null, app),
@@ -781,7 +744,7 @@ function uninstall(app, callback) {
         deleteImage.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: 'Remove OAuth credentials' }),
-        removeOAuthCredentials.bind(null, app),
+        addons.removeOAuthCredentials.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: 'Deleting volume' }),
         deleteVolume.bind(null, app),
