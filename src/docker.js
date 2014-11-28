@@ -4,7 +4,8 @@ var assert = require('assert'),
     Docker = require('dockerode'),
     fs = require('fs'),
     os = require('os'),
-    path = require('path');
+    path = require('path'),
+    url = require('url');
 
 exports = module.exports = (function () {
     var docker;
@@ -28,11 +29,12 @@ function connectOptions() {
 
     // boot2docker configuration
     var DOCKER_CERT_PATH = process.env.DOCKER_CERT_PATH || path.join(process.env.HOME, '.boot2docker/certs/boot2docker-vm');
+    var DOCKER_HOST = process.env.DOCKER_HOST || 'tcp://192.168.59.103:2376';
 
     return {
         protocol: 'https',
-        host: '192.168.59.103', // maybe parse from DOCKER_HOST?
-        port: 2376,
+        host: url.parse(DOCKER_HOST).hostname,
+        port: url.parse(DOCKER_HOST).port,
         ca: fs.readFileSync(path.join(DOCKER_CERT_PATH, 'ca.pem')),
         cert: fs.readFileSync(path.join(DOCKER_CERT_PATH, 'cert.pem')),
         key: fs.readFileSync(path.join(DOCKER_CERT_PATH, 'key.pem'))
