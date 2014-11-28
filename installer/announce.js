@@ -23,6 +23,8 @@ function start(appServerUrl, callback) {
     debug('announce: started');
 
     gAnnounceTimerId = setInterval(doAnnounce.bind(null, appServerUrl), ANNOUNCE_INTERVAL);
+    doAnnounce(appServerUrl);
+
     callback(null);
 }
 
