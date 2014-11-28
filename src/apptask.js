@@ -534,10 +534,10 @@ function install(app, callback) {
         updateApp.bind(null, app, { installationProgress: 'Downloading image' }),
         downloadImage.bind(null, app),
 
-        // allocate OAuth credentials
-        updateApp.bind(null, app, { installationProgress: 'Setting up OAuth' }),
-        addons.removeOAuthCredentials.bind(null, app),
-        addons.allocateOAuthCredentials.bind(null, app),
+        // setup addons
+        updateApp.bind(null, app, { installationProgress: 'Setting up addons' }),
+        addons.teardownAddons.bind(null, app),
+        addons.setupAddons.bind(null, app),
 
         // create container
         updateApp.bind(null, app, { installationProgress: 'Creating container' }),
@@ -592,13 +592,10 @@ function restore(app, callback) {
         updateApp.bind(null, app, { installationProgress: 'Downloading image' }),
         downloadImage.bind(null, app),
 
-        // remove OAuth credentials in case of FQDN change
-        updateApp.bind(null, app, { installationProgress: 'Remove old oauth credentials' }),
-        addons.removeOAuthCredentials.bind(null, app),
-
-        // add OAuth credentials
-        updateApp.bind(null, app, { installationProgress: 'Setting up OAuth' }),
-        addons.allocateOAuthCredentials.bind(null, app),
+        // setup addons
+        updateApp.bind(null, app, { installationProgress: 'Setting up addons' }),
+        addons.teardownAddons.bind(null, app),
+        addons.setupAddons.bind(null, app),
 
         // create container
         updateApp.bind(null, app, { installationProgress: 'Creating container' }),
@@ -639,9 +636,6 @@ function configure(app, callback) {
         updateApp.bind(null, app, { installationProgress: 'Deleting container' }),
         deleteContainer.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Remove old oauth credentials' }),
-        addons.removeOAuthCredentials.bind(null, app),
-
         updateApp.bind(null, app, { installationProgress: 'Unregistering subdomain' }),
         unregisterSubdomain.bind(null, app),
 
@@ -651,8 +645,9 @@ function configure(app, callback) {
         updateApp.bind(null, app, { installationProgress: 'Registering subdomain' }),
         registerSubdomain.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Setting up OAuth' }),
-        addons.allocateOAuthCredentials.bind(null, app),
+        updateApp.bind(null, app, { installationProgress: 'Setting up addons' }),
+        addons.teardownAddons.bind(null, app),
+        addons.setupAddons.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: 'Creating container' }),
         createContainer.bind(null, app),
@@ -743,8 +738,8 @@ function uninstall(app, callback) {
         updateApp.bind(null, app, { installationProgress: 'Deleting image' }),
         deleteImage.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Remove OAuth credentials' }),
-        addons.removeOAuthCredentials.bind(null, app),
+        updateApp.bind(null, app, { installationProgress: 'Teardown addons' }),
+        addons.teardownAddons.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: 'Deleting volume' }),
         deleteVolume.bind(null, app),

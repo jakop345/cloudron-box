@@ -114,14 +114,14 @@ describe('apptask', function () {
     });
 
     it('allocate OAuth credentials', function (done) {
-        addons.allocateOAuthCredentials(APP, function (error) {
+        addons._allocateOAuthCredentials(APP, function (error) {
             expect(error).to.be(null);
             done();
         });
     });
 
     it('allocate OAuth credentials twice fails', function (done) {
-        addons.allocateOAuthCredentials(APP, function (error) {
+        addons._allocateOAuthCredentials(APP, function (error) {
             expect(error).to.be.a(DatabaseError);
             expect(error.reason).to.equal(DatabaseError.ALREADY_EXISTS);
             done();
@@ -129,14 +129,14 @@ describe('apptask', function () {
     });
 
     it('remove OAuth credentials', function (done) {
-        addons.removeOAuthCredentials(APP, function (error) {
+        addons._removeOAuthCredentials(APP, function (error) {
             expect(error).to.be(null);
             done();
         });
     });
 
     it('remove OAuth credentials twice succeeds', function (done) {
-        addons.removeOAuthCredentials(APP, function (error) {
+        addons._removeOAuthCredentials(APP, function (error) {
             expect(!error).to.be.ok();
             done();
         });

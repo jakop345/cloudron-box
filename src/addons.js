@@ -5,12 +5,31 @@ var appFqdn = require('./apps').appFqdn,
     clientdb = require('./clientdb.js'),
     debug = require('debug')('box:addons'),
     DatabaseError = require('./databaseerror.js'),
+    util = require('util'),
     uuid = require('node-uuid');
 
 exports = module.exports = {
-    allocateOAuthCredentials: allocateOAuthCredentials,
-    removeOAuthCredentials: removeOAuthCredentials
+    setupAddons: setupAddons,
+    teardownAddons: teardownAddons,
+
+    // exported for testing
+    _allocateOAuthCredentials: allocateOAuthCredentials,
+    _removeOAuthCredentials: removeOAuthCredentials
 };
+
+function setupAddons(app, callback) {
+    assert(typeof app === 'object');
+    assert(typeof callback === 'function');
+
+    allocateOAuthCredentials(app, callback);
+}
+
+function teardownAddons(app, callback) {
+    assert(typeof app === 'object');
+    assert(typeof callback === 'function');
+
+    removeOAuthCredentials(app, callback);
+}
 
 function allocateOAuthCredentials(app, callback) {
     assert(typeof app === 'object');
