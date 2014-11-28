@@ -18,6 +18,7 @@ var appdb = require('../../appdb.js'),
     fs = require('fs'),
     hock = require('hock'),
     http = require('http'),
+    https = require('https'),
     net = require('net'),
     os = require('os'),
     paths = require('../../paths.js'),
@@ -43,8 +44,11 @@ function startDockerProxy(interceptor, callback) {
     return http.createServer(function (req, res) {
         if (interceptor(req, res)) return;
 
-        var options = _.extend({ }, docker.options, { method: req.method, path: req.url, headers: req.headers });
-        var dockerRequest = http.request(options, function (dockerResponse) {
+        // rejectUnauthorized should not be required but it doesn't work without it
+        var options = _.extend({ }, docker.options, { method: req.method, path: req.url, headers: req.headers, rejectUnauthorized: false });
+        delete options.protocol; // https module doesn't like this key
+        var proto = docker.options.protocol === 'https' ? https : http;
+        var dockerRequest = proto.request(options, function (dockerResponse) {
             res.writeHead(dockerResponse.statusCode, dockerResponse.headers);
             dockerResponse.on('error', console.error);
             dockerResponse.pipe(res, { end: true });
