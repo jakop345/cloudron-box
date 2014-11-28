@@ -8,7 +8,7 @@ var appdb = require('./appdb.js'),
     config = require('../config.js'),
     DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:apps'),
-    Docker = require('dockerode'),
+    docker = require('./docker.js'),
     fs = require('fs'),
     os = require('os'),
     paths = require('./paths.js'),
@@ -43,19 +43,10 @@ exports = module.exports = {
 };
 
 var gTasks = { },
-    gAppHealthTask = null,
-    gDocker = null;
+    gAppHealthTask = null;
 
 function initialize(callback) {
     assert(typeof callback === 'function');
-
-    if (process.env.NODE_ENV === 'test') {
-        gDocker = new Docker({ host: 'http://localhost', port: 5687 });
-    } else if (os.platform() === 'linux') {
-        gDocker = new Docker({socketPath: '/var/run/docker.sock'});
-    } else {
-        gDocker = new Docker({ host: 'http://localhost', port: 2375 });
-    }
 
     gAppHealthTask = child_process.fork(__dirname + '/apphealthtask.js');
 
@@ -352,7 +343,7 @@ function getLogStream(appId, options, callback) {
 
         if (app.installationState !== appdb.ISTATE_INSTALLED) return callback(new AppsError(AppsError.BAD_STATE, 'App not installed'));
 
-        var container = gDocker.getContainer(app.containerId);
+        var container = docker.getContainer(app.containerId);
         // note: cannot access docker file directly because it needs root access
         container.logs({ stdout: true, stderr: true, follow: true, timestamps: true, tail: 'all' }, function (error, logStream) {
             if (error && error.statusCode === 404) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
@@ -381,7 +372,7 @@ function getLogs(appId, callback) {
 
         if (app.installationState !== appdb.ISTATE_INSTALLED) return callback(new AppsError(AppsError.BAD_STATE, 'App not installed'));
 
-        var container = gDocker.getContainer(app.containerId);
+        var container = docker.getContainer(app.containerId);
         // note: cannot access docker file directly because it needs root access
         container.logs({ stdout: true, stderr: true, follow: false, timestamps: true, tail: 'all' }, function (error, logStream) {
             if (error && error.statusCode === 404) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));

@@ -10,7 +10,7 @@ var appdb = require('./appdb.js'),
     database = require('./database.js'),
     DatabaseError = require('./databaseerror'),
     debug = require('debug')('box:apphealthtask'),
-    Docker = require('dockerode'),
+    docker = require('./docker.js'),
     os = require('os'),
     superagent = require('superagent');
 
@@ -26,15 +26,8 @@ var FATAL_CALLBACK = function (error) {
 };
 
 var HEALTHCHECK_INTERVAL = 5000;
-var gDocker = null;
 
 function initialize() {
-    if (os.platform() === 'linux') {
-        gDocker = new Docker({socketPath: '/var/run/docker.sock'});
-    } else {
-        gDocker = new Docker({ host: 'http://localhost', port: 2375 });
-    }
-
     database.initialize(function (error) {
         if (error) throw error;
     });
@@ -46,7 +39,7 @@ function checkAppHealth(app, callback) {
     // only check status of installed apps. we could possibly optimize more by checking runState as well
     if (app.installationState !== appdb.ISTATE_INSTALLED) return callback(null);
 
-    var container = gDocker.getContainer(app.containerId),
+    var container = docker.getContainer(app.containerId),
         manifest = app.manifest;
 
     function setHealth(app, healthy, runState, callback) {

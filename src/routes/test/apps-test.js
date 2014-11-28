@@ -13,7 +13,7 @@ var appdb = require('../../appdb.js'),
     clientdb = require('../../clientdb.js'),
     config = require('../../../config.js'),
     database = require('../../database.js'),
-    Docker = require('dockerode'),
+    docker = require('../../docker.js'),
     expect = require('expect.js'),
     fs = require('fs'),
     hock = require('hock'),
@@ -35,7 +35,6 @@ var APP_LOCATION = 'location';
 
 var USERNAME = 'admin', PASSWORD = 'password', EMAIL ='silly@me.com';
 var server;
-var docker = os.platform() === 'linux' ? new Docker({socketPath: '/var/run/docker.sock'}) : new Docker({ host: 'http://localhost', port: 2375 });
 var token = null; // authentication token
 
 function startDockerProxy(interceptor, callback) {
