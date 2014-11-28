@@ -55,6 +55,12 @@ CREATE TABLE IF NOT EXISTS appPortBindings(
     FOREIGN KEY(appId) REFERENCES apps(id),
     PRIMARY KEY(hostPort));
 
+CREATE TABLE IF NOT EXISTS appAddonConfigs(
+    appId VARCHAR(512) NOT NULL,
+    addonId VARCHAR(32) NOT NULL,
+    value VARCHAR(512),
+    FOREIGN KEY(appId) REFERENCES apps(id));
+
 CREATE TABLE IF NOT EXISTS authcodes(
     authCode VARCHAR(512) NOT NULL UNIQUE,
     userId VARCHAR(512) NOT NULL,
