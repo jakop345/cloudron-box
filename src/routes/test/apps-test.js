@@ -40,17 +40,10 @@ var token = null; // authentication token
 function startDockerProxy(interceptor, callback) {
     assert(typeof interceptor === 'function');
 
-    var dockerOptions;
-    if (os.platform() === 'linux') {
-        dockerOptions = { socketPath: '/var/run/docker.sock'};
-    } else {
-        dockerOptions = { host: 'localhost', port: 2375 };
-    }
-
     return http.createServer(function (req, res) {
         if (interceptor(req, res)) return;
 
-        var options = _.extend({ }, dockerOptions, { method: req.method, path: req.url, headers: req.headers });
+        var options = _.extend({ }, docker.options, { method: req.method, path: req.url, headers: req.headers });
         var dockerRequest = http.request(options, function (dockerResponse) {
             res.writeHead(dockerResponse.statusCode, dockerResponse.headers);
             dockerResponse.on('error', console.error);
