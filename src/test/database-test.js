@@ -630,6 +630,74 @@ describe('database', function () {
                 done();
             });
         });
+
+        it('return empty addon config array for invalid app', function (done) {
+            appdb.getAddonConfigByAppId('randomid', function (error, results) {
+                expect(error).to.be(null);
+                expect(results).to.eql([ ]);
+                done();
+            });
+        });
+
+        it('setAddonConfig succeeds', function (done) {
+            appdb.setAddonConfig(APP_1.id, 'addonid1', [ 'ENV1=env', 'ENV2=env' ], function (error) {
+                expect(error).to.be(null);
+                done();
+            });
+        });
+
+        it('setAddonConfig succeeds', function (done) {
+            appdb.setAddonConfig(APP_1.id, 'addonid2', [ 'ENV3=env' ], function (error) {
+                expect(error).to.be(null);
+                done();
+            });
+        });
+
+        it('getAddonConfig succeeds', function (done) {
+            appdb.getAddonConfig(APP_1.id, 'addonid1', function (error, results) {
+                expect(error).to.be(null);
+                expect(results).to.eql([ 'ENV1=env', 'ENV2=env' ]);
+                done();
+            });
+        });
+
+        it('getAddonConfigByAppId succeeds', function (done) {
+            appdb.getAddonConfigByAppId(APP_1.id, function (error, results) {
+                expect(error).to.be(null);
+                expect(results).to.eql([ 'ENV1=env', 'ENV2=env', 'ENV3=env' ]);
+                done();
+            });
+        });
+
+        it('unsetAddonConfig succeeds', function (done) {
+            appdb.unsetAddonConfig(APP_1.id, 'addonid1', function (error) {
+                expect(error).to.be(null);
+                done();
+            });
+        });
+
+        it('unsetAddonConfig did remove configs', function (done) {
+            appdb.getAddonConfigByAppId(APP_1.id, function (error, results) {
+                expect(error).to.be(null);
+                expect(results).to.eql([ 'ENV3=env' ]);
+                done();
+            });
+        });
+
+        it('unsetAddonConfigByAppId succeeds', function (done) {
+            appdb.unsetAddonConfigByAppId(APP_1.id, function (error) {
+                expect(error).to.be(null);
+                done();
+            });
+        });
+
+        it('unsetAddonConfigByAppId did remove configs', function (done) {
+            appdb.getAddonConfigByAppId(APP_1.id, function (error, results) {
+                expect(error).to.be(null);
+                expect(results).to.eql([ ]);
+                done();
+            });
+        });
     });
 
     describe('client', function () {

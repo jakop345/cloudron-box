@@ -21,6 +21,12 @@ exports = module.exports = {
     getPortBindings: getPortBindings,
     clear: clear,
 
+    setAddonConfig: setAddonConfig,
+    getAddonConfig: getAddonConfig,
+    getAddonConfigByAppId: getAddonConfigByAppId,
+    unsetAddonConfig: unsetAddonConfig,
+    unsetAddonConfigByAppId: unsetAddonConfigByAppId,
+
     setHealth: setHealth,
     setInstallationCommand: setInstallationCommand,
     setRunCommand: setRunCommand,
@@ -206,13 +212,13 @@ function del(id, callback) {
 function clear(callback) {
     assert(typeof callback === 'function');
 
-    database.run('DELETE FROM appPortBindings', function (error) {
+    async.series([
+        database.run.bind(null, 'DELETE FROM appPortBindings'),
+        database.run.bind(null, 'DELETE FROM apps'),
+        database.run.bind(null, 'DELETE FROM appAddonConfigs')
+    ], function (error) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
-
-        database.run('DELETE FROM apps', function (error) {
-            if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
-            return callback(null);
-        });
+        return callback(null);
     });
 }
 
@@ -330,6 +336,80 @@ function getAppVersions(callback) {
 
         results = results || [ ];
         callback(null, results);
+    });
+}
+
+function setAddonConfig(appId, addonId, env, callback) {
+    assert(typeof appId === 'string');
+    assert(typeof addonId === 'string');
+    assert(util.isArray(env));
+    assert(typeof callback === 'function');
+
+    if (env.length === 0) return callback(null);
+
+    var query = 'INSERT INTO appAddonConfigs(appId, addonId, value) VALUES ';
+    var args = [ ], queryArgs = [ ];
+    for (var i = 0; i < env.length; i++) {
+        args.push(appId, addonId, env[i]);
+        queryArgs.push('(?, ?, ?)');
+    }
+
+    database.run(query + queryArgs.join(','), args, function (error) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+
+        return callback(null);
+    });
+}
+
+function unsetAddonConfig(appId, addonId, callback) {
+    assert(typeof appId === 'string');
+    assert(typeof addonId === 'string');
+    assert(typeof callback === 'function');
+
+    database.run('DELETE FROM appAddonConfigs WHERE appId = ? AND addonId = ?', [ appId, addonId ], function (error) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+
+        callback(null);
+    });
+}
+
+function unsetAddonConfigByAppId(appId, callback) {
+    assert(typeof appId === 'string');
+    assert(typeof callback === 'function');
+
+    database.run('DELETE FROM appAddonConfigs WHERE appId = ?', [ appId ], function (error) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+
+        callback(null);
+    });
+}
+
+function getAddonConfig(appId, addonId, callback) {
+    assert(typeof appId === 'string');
+    assert(typeof addonId === 'string');
+    assert(typeof callback === 'function');
+
+    database.all('SELECT value FROM appAddonConfigs WHERE appId = ? AND addonId = ?', [ appId, addonId ], function (error, result) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+
+        var config = [ ];
+        result.forEach(function (v) { config.push(v.value); });
+
+        callback(null, config);
+    });
+}
+
+function getAddonConfigByAppId(appId, callback) {
+    assert(typeof appId === 'string');
+    assert(typeof callback === 'function');
+
+    database.all('SELECT value FROM appAddonConfigs WHERE appId = ?', [ appId ], function (error, result) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+
+        var config = [ ];
+        result.forEach(function (v) { config.push(v.value); });
+
+        callback(null, config);
     });
 }
 
