@@ -43,13 +43,12 @@ function allocateOAuthCredentials(app, callback) {
     var redirectURI = 'https://' + appFqdn(app.location);
     var scope = 'profile,roleUser';
 
-    debug('allocateOAuthCredentials:', id, clientId, clientSecret, name);
+    debug('allocateOAuthCredentials: id', id, clientId, clientSecret, name);
 
-    clientdb.getByAppId(appId, function (error, result) {
-        if (error && error.reason !== DatabaseError.NOT_FOUND) return callback(error);
-        if (result) return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
+    clientdb.add(id, appId, clientId, clientSecret, name, redirectURI, scope, function (error) {
+        if (error) return callback(error);
 
-        clientdb.add(id, appId, clientId, clientSecret, name, redirectURI, scope, callback);
+        callback(null);
     });
 }
 
@@ -57,7 +56,7 @@ function removeOAuthCredentials(app, callback) {
     assert(typeof app === 'object');
     assert(typeof callback === 'function');
 
-    debug('removeOAuthCredentials:', app.id);
+    debug('removeOAuthCredentials: %s', app.id);
 
     clientdb.delByAppId(app.id, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null);

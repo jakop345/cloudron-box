@@ -120,14 +120,6 @@ describe('apptask', function () {
         });
     });
 
-    it('allocate OAuth credentials twice fails', function (done) {
-        addons._allocateOAuthCredentials(APP, function (error) {
-            expect(error).to.be.a(DatabaseError);
-            expect(error.reason).to.equal(DatabaseError.ALREADY_EXISTS);
-            done();
-        });
-    });
-
     it('remove OAuth credentials', function (done) {
         addons._removeOAuthCredentials(APP, function (error) {
             expect(error).to.be(null);
