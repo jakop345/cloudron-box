@@ -1,6 +1,7 @@
 'use strict';
 
 var appFqdn = require('./apps').appFqdn,
+    appdb = require('./appdb.js'),
     assert = require('assert'),
     clientdb = require('./clientdb.js'),
     debug = require('debug')('box:addons'),
@@ -11,6 +12,7 @@ var appFqdn = require('./apps').appFqdn,
 exports = module.exports = {
     setupAddons: setupAddons,
     teardownAddons: teardownAddons,
+    getEnvironment: getEnvironment,
 
     // exported for testing
     _allocateOAuthCredentials: allocateOAuthCredentials,
@@ -31,6 +33,13 @@ function teardownAddons(app, callback) {
     removeOAuthCredentials(app, callback);
 }
 
+function getEnvironment(appId, callback) {
+    assert(typeof appId === 'string');
+    assert(typeof callback === 'function');
+
+    appdb.getAddonConfigByAppId(appId, callback);
+}
+
 function allocateOAuthCredentials(app, callback) {
     assert(typeof app === 'object');
     assert(typeof callback === 'function');
@@ -48,7 +57,9 @@ function allocateOAuthCredentials(app, callback) {
     clientdb.add(id, appId, clientId, clientSecret, name, redirectURI, scope, function (error) {
         if (error) return callback(error);
 
-        callback(null);
+        var env = [ 'OAUTH_CLIENT_ID=' + clientId, 'OAUTH_CLIENT_SECRET=' + clientSecret ];
+
+        appdb.setAddonConfig(appId, 'oauth', env, callback);
     });
 }
 
@@ -62,6 +73,6 @@ function removeOAuthCredentials(app, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null);
         if (error) console.error(error);
 
-        callback(null);
+        appdb.unsetAddonConfig(app.id, 'oauth', callback);
     });
 }

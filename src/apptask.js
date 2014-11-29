@@ -12,7 +12,6 @@ var addons = require('./addons.js'),
     assert = require('assert'),
     async = require('async'),
     child_process = require('child_process'),
-    clientdb = require('./clientdb.js'),
     cloudron = require('./cloudron.js'),
     config = require('../config.js'),
     database = require('./database.js'),
@@ -206,12 +205,8 @@ function createContainer(app, callback) {
         env.push('MAIL_USERNAME' + '=' + app.location);
         env.push('MAIL_DOMAIN' + '=' + config.fqdn());
 
-        // add oauth variables
-        clientdb.getByAppId(app.id, function (error, client) {
-            if (error) return callback(new Error('Error getting oauth info:', + error));
-
-            env.push('OAUTH_CLIENT_ID' + '=' + client.clientId);
-            env.push('OAUTH_CLIENT_SECRET' + '=' + client.clientSecret);
+        addons.getEnvironment(app.id, function (error, addonEnv) {
+            if (error) return callback(new Error('Error getting addon env:', + error));
 
             var containerOptions = {
                 Hostname: appFqdn(app.location),
@@ -220,10 +215,10 @@ function createContainer(app, callback) {
                 Cmd: null,
                 Volumes: { },
                 VolumesFrom: '',
-                Env: env
+                Env: env.concat(addonEnv)
             };
 
-            debug('Creating container for ' + manifest.dockerImage);
+            debug('Creating container for %s', manifest.dockerImage);
 
             docker.createContainer(containerOptions, function (error, container) {
                 if (error) return callback(new Error('Error creating container:' + error));
