@@ -21,6 +21,17 @@ exports = module.exports = {
     _removeOAuthCredentials: removeOAuthCredentials
 };
 
+var KNOWN_ADDONS = {
+    oauth: {
+        setup: allocateOAuthCredentials,
+        teardown: removeOAuthCredentials
+    },
+    sendmail: {
+        setup: setupSendMail,
+        teardown: teardownSendMail
+    }
+};
+
 function setupAddons(app, callback) {
     assert(typeof app === 'object');
     assert(!app.manifest.addons || util.isArray(app.manifest.addons));
@@ -29,11 +40,9 @@ function setupAddons(app, callback) {
     if (!app.manifest.addons) return callback(null);
 
     async.eachSeries(app.manifest.addons, function iterator(addon, iteratorCallback) {
-        switch (addon) {
-        case 'oauth': return allocateOAuthCredentials(app, iteratorCallback);
-        case 'sendmail': return setupSendMail(app, iteratorCallback);
-        default: return iteratorCallback(new Error('No such addon:' + addon));
-        }
+        if (!(addon in KNOWN_ADDONS)) return iteratorCallback(new Error('No such addon:' + addon));
+
+        KNOWN_ADDONS[addon].setup(app, iteratorCallback);
     }, callback);
 }
 
@@ -45,11 +54,9 @@ function teardownAddons(app, callback) {
     if (!app.manifest.addons) return callback(null);
 
     async.eachSeries(app.manifest.addons, function iterator(addon, iteratorCallback) {
-        switch (addon) {
-        case 'oauth': return removeOAuthCredentials(app, iteratorCallback);
-        case 'sendmail': return teardownSendMail(app, iteratorCallback);
-        default: return iteratorCallback(new Error('No such addon:' + addon));
-        }
+        if (!(addon in KNOWN_ADDONS)) return iteratorCallback(new Error('No such addon:' + addon));
+
+        KNOWN_ADDONS[addon].teardown(app, iteratorCallback);
     }, callback);
 }
 
