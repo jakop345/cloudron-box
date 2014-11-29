@@ -52,7 +52,7 @@
     "proxy-middleware": "~0.5.1",
     "readdirp": "^1.0.1",
     "rimraf": "^2.2.6",
-    "safetydance": "0.0.11",
+    "safetydance": "0.0.12",
     "serve-favicon": "~2.1.7",
     "split": "^0.3.0",
     "sqlite3": "^3.0.0",
