@@ -118,7 +118,7 @@ $SRCDIR/postinstall/setup_collectd.sh
 
 echo "=== Setup haraka mail relay ==="
 docker rm -f haraka || true
-HARAKA_CONTAINER_ID=$(docker run -d --name="haraka" --cap-add="NET_ADMIN"\
+HARAKA_CONTAINER_ID=$(docker run --restart=always -d --name="haraka" --cap-add="NET_ADMIN"\
     -p 127.0.0.1:25:25 \
     -h $DOMAIN_NAME \
     -e DOMAIN_NAME=$DOMAIN_NAME \
@@ -129,7 +129,7 @@ echo "=== Setup MySQL addon ==="
 docker rm -f mysql || true
 MYSQL_ROOT_PASSWORD=$(pwgen -1 -s)
 DOCKER0_IP=$( /sbin/ifconfig docker0 | grep "inet addr" | awk -F: '{print $2}' | awk '{print $1}')
-MYSQL_CONTAINER_ID=$(docker run -d --name="mysql" \
+MYSQL_CONTAINER_ID=$(docker run --restart=always -d --name="mysql" \
     -p 127.0.0.1:3306:3306 \
     -h "$DOMAIN_NAME" \
     -e MYSQL_ROOT_PASSWORD="$MYSQL_ROOT_PASSWORD" \
