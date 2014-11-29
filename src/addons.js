@@ -72,7 +72,7 @@ function allocateOAuthCredentials(app, callback) {
     var redirectURI = 'https://' + appFqdn(app.location);
     var scope = 'profile,roleUser';
 
-    debug('allocateOAuthCredentials: id', id, clientId, clientSecret, name);
+    debug('allocateOAuthCredentials: id:%s clientId:%s clientSecret:%s name:%s', id, clientId, clientSecret, name);
 
     clientdb.add(id, appId, clientId, clientSecret, name, redirectURI, scope, function (error) {
         if (error) return callback(error);
@@ -110,12 +110,16 @@ function setupSendMail(app, callback) {
         'MAIL_DOMAIN=' + config.fqdn()
     ];
 
+    debug('Setting up sendmail for %s', app.id);
+
     appdb.setAddonConfig(app.id, 'sendmail', env, callback);
 }
 
 function teardownSendMail(app, callback) {
     assert(typeof app === 'object');
     assert(typeof callback === 'function');
+
+    debug('Tearing down sendmail for %s', app.id);
 
     appdb.unsetAddonConfig(app.id, 'sendmail', callback);
 }
