@@ -3,6 +3,7 @@
 var appFqdn = require('./apps').appFqdn,
     appdb = require('./appdb.js'),
     assert = require('assert'),
+    async = require('async'),
     clientdb = require('./clientdb.js'),
     debug = require('debug')('box:addons'),
     DatabaseError = require('./databaseerror.js'),
@@ -21,16 +22,32 @@ exports = module.exports = {
 
 function setupAddons(app, callback) {
     assert(typeof app === 'object');
+    assert(typeof app.manifest === 'object');
     assert(typeof callback === 'function');
 
-    allocateOAuthCredentials(app, callback);
+    if (!util.isArray(app.manifest.addons)) return callback(null);
+
+    async.eachSeries(app.manifest.addons, function iterator(addon, iteratorCallback) {
+        switch (addon) {
+        case 'oauth': return allocateOAuthCredentials(app, iteratorCallback);
+        default: return iteratorCallback(new Error('No such addon:' + addon));
+        }
+    }, callback);
 }
 
 function teardownAddons(app, callback) {
     assert(typeof app === 'object');
+    assert(typeof app.manifest === 'object');
     assert(typeof callback === 'function');
 
-    removeOAuthCredentials(app, callback);
+    if (!util.isArray(app.manifest.addons)) return callback(null);
+
+    async.eachSeries(app.manifest.addons, function iterator(addon, iteratorCallback) {
+        switch (addon) {
+        case 'oauth': return removeOAuthCredentials(app, iteratorCallback);
+        default: return iteratorCallback(new Error('No such addon:' + addon));
+        }
+    }, callback);
 }
 
 function getEnvironment(appId, callback) {

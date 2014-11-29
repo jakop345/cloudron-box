@@ -9,5 +9,8 @@
       "description": "Echo server",
       "environmentVariable": "ECHO_SERVER_PORT"
     }
-  }
+  },
+  "addons": [
+    "oauth"
+  ]
 }
