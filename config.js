@@ -85,9 +85,8 @@ function set(key, value) {
 
 function get(key) {
     assert(typeof key === 'string');
-    assert(key in data);
 
-    return data[key];
+    return safe.query(data, key);
 }
 
 function version() {
