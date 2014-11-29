@@ -105,10 +105,12 @@ echo "$PROVISION_TLS_KEY" > host.key
 chown $USER:$USER -R /home/$USER
 
 echo "=== Remove all containers ==="
+# removing containers ensures containers are launched with latest config updates
+# restore code in appatask does not delete old containers
 EXISTING_CONTAINERS=$(docker ps -qa)
 echo "Remove containers: $EXISTING_CONTAINERS"
 if [ -n "$EXISTING_CONTAINERS" ]; then
-    xargs docker rm -f "$EXISTING_CONTAINERS"
+    echo "$EXISTING_CONTAINERS" | xargs docker rm -f
 fi  
 
 echo "=== Setup collectd and graphite ==="

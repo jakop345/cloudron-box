@@ -598,7 +598,7 @@ function restore(app, callback) {
         addons.teardownAddons.bind(null, app),
         addons.setupAddons.bind(null, app),
 
-        // create container
+        // create container (old containers are deleted by update script)
         updateApp.bind(null, app, { installationProgress: 'Creating container' }),
         createContainer.bind(null, app),
 

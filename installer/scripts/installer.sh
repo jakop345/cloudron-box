@@ -41,13 +41,6 @@ echo "Provisioning box with version: $PROVISION_VERSION and data: $PROVISION_RES
 # for update case, stop nginx and box code
 if [ -f "$CLOUDRON_SQLITE" ]; then
     supervisorctl stop all
-
-    # remove containers to ensure nginx, docker config is updated
-    EXISTING_APPS=$(sqlite3 "$CLOUDRON_SQLITE" 'SELECT containerId FROM apps WHERE containerId IS NOT NULL AND containerId <> ""')
-    echo "Stop all apps: $EXISTING_APPS"
-    if [ -n "$EXISTING_APPS" ]; then
-        xargs docker stop "$EXISTING_APPS"
-    fi
 fi
 
 if [ -n "$PROVISION_RESTORE_URL" ]; then
