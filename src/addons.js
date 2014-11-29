@@ -22,10 +22,8 @@ exports = module.exports = {
 
 function setupAddons(app, callback) {
     assert(typeof app === 'object');
-    assert(typeof app.manifest === 'object');
+    assert(util.isArray(app.manifest.addons));
     assert(typeof callback === 'function');
-
-    if (!util.isArray(app.manifest.addons)) return callback(null);
 
     async.eachSeries(app.manifest.addons, function iterator(addon, iteratorCallback) {
         switch (addon) {
@@ -37,10 +35,8 @@ function setupAddons(app, callback) {
 
 function teardownAddons(app, callback) {
     assert(typeof app === 'object');
-    assert(typeof app.manifest === 'object');
+    assert(util.isArray(app.manifest.addons));
     assert(typeof callback === 'function');
-
-    if (!util.isArray(app.manifest.addons)) return callback(null);
 
     async.eachSeries(app.manifest.addons, function iterator(addon, iteratorCallback) {
         switch (addon) {

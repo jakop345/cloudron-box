@@ -364,6 +364,15 @@ function validateManifest(manifest) {
          if (manifest[field].length === 0) return new Error(field + ' cannot be empty');
      }
 
+    if ('addons' in manifest) {
+        // addons must be array of strings
+        if (!util.isArray(manifest.addons)) return new Error('addons must be an array');
+
+        for (var i = 0; i < manifest.addons.length; i++) {
+            if (typeof manifest.addons[i] !== 'string') return new Error('addons must be strings');
+        }
+    }
+
     return null;
 }
 
