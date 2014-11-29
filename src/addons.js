@@ -6,8 +6,9 @@ var appFqdn = require('./apps').appFqdn,
     async = require('async'),
     clientdb = require('./clientdb.js'),
     config = require('../config.js'),
-    debug = require('debug')('box:addons'),
     DatabaseError = require('./databaseerror.js'),
+    debug = require('debug')('box:addons'),
+    docker = require('./docker.js'),
     util = require('util'),
     uuid = require('node-uuid');
 
@@ -29,6 +30,10 @@ var KNOWN_ADDONS = {
     sendmail: {
         setup: setupSendMail,
         teardown: teardownSendMail
+    },
+    mysql: {
+        setup: setupMySql,
+        teardown: teardownMySql
     }
 };
 
@@ -129,5 +134,48 @@ function teardownSendMail(app, callback) {
     debug('Tearing down sendmail for %s', app.id);
 
     appdb.unsetAddonConfig(app.id, 'sendmail', callback);
+}
+
+function setupMySql(app, callback) {
+    assert(typeof app === 'object');
+    assert(typeof callback === 'function');
+
+    var container = docker.getContainer('mysql');
+    var cmd = [ '/addons/mysql/service.sh', 'add', app.id, config.get('addons.mysql.rootPassword') ];
+
+    container.exec({ Cmd: cmd }, function (error, execContainer) {
+        if (error) return callback(error);
+
+        execContainer.start(function (error, stream) {
+            if (error) return callback(error);
+
+            var data = '';
+            stream.on('error', callback);
+            stream.on('data', function (d) { data += d.toString('utf8'); });
+            stream.on('end', function () {
+                appdb.setAddonConfig(app.id, 'mysql', [ 'MYSQL_URL=' + data ], callback);
+            });
+        });
+    });
+}
+
+function teardownMySql(app, callback) {
+    var container = docker.getContainer('mysql');
+    var cmd = [ '/addons/mysql/service.sh', 'remove', app.id, config.get('addons.mysql.rootPassword') ];
+
+    container.exec({ Cmd: cmd }, function (error, execContainer) {
+        if (error) return callback(error);
+
+        execContainer.start({ stream: true, stdout: true, stderr: true }, function (error, stream) {
+            if (error) return callback(error);
+
+            var data = '';
+            stream.on('error', callback);
+            stream.on('data', function (d) { data += d.toString('utf8'); });
+            stream.on('end', function () {
+                appdb.unsetAddonConfig(app.id, 'mysql', callback);
+            });
+        });
+    });
 }
 
