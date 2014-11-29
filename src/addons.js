@@ -73,7 +73,10 @@ function allocateOAuthCredentials(app, callback) {
     clientdb.add(id, appId, clientId, clientSecret, name, redirectURI, scope, function (error) {
         if (error) return callback(error);
 
-        var env = [ 'OAUTH_CLIENT_ID=' + clientId, 'OAUTH_CLIENT_SECRET=' + clientSecret ];
+        var env = [
+            'OAUTH_CLIENT_ID=' + clientId,
+            'OAUTH_CLIENT_SECRET=' + clientSecret
+        ];
 
         appdb.setAddonConfig(appId, 'oauth', env, callback);
     });
@@ -98,9 +101,9 @@ function setupSendMail(app, callback) {
     assert(typeof callback === 'function');
 
     var env = [
-        'MAIL_SERVER' + '=' + config.get('mailServer'),
-        'MAIL_USERNAME' + '=' + app.location,
-        'MAIL_DOMAIN' + '=' + config.fqdn()
+        'MAIL_SERVER=' + config.get('mailServer'),
+        'MAIL_USERNAME=' + app.location,
+        'MAIL_DOMAIN=' + config.fqdn()
     ];
 
     appdb.setAddonConfig(app.id, 'sendmail', env, callback);
