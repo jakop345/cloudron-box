@@ -5,6 +5,7 @@ var appFqdn = require('./apps').appFqdn,
     assert = require('assert'),
     async = require('async'),
     clientdb = require('./clientdb.js'),
+    config = require('../config.js'),
     debug = require('debug')('box:addons'),
     DatabaseError = require('./databaseerror.js'),
     util = require('util'),
@@ -28,6 +29,7 @@ function setupAddons(app, callback) {
     async.eachSeries(app.manifest.addons, function iterator(addon, iteratorCallback) {
         switch (addon) {
         case 'oauth': return allocateOAuthCredentials(app, iteratorCallback);
+        case 'sendmail': return setupSendMail(app, iteratorCallback);
         default: return iteratorCallback(new Error('No such addon:' + addon));
         }
     }, callback);
@@ -41,6 +43,7 @@ function teardownAddons(app, callback) {
     async.eachSeries(app.manifest.addons, function iterator(addon, iteratorCallback) {
         switch (addon) {
         case 'oauth': return removeOAuthCredentials(app, iteratorCallback);
+        case 'sendmail': return teardownSendMail(app, iteratorCallback);
         default: return iteratorCallback(new Error('No such addon:' + addon));
         }
     }, callback);
@@ -89,3 +92,24 @@ function removeOAuthCredentials(app, callback) {
         appdb.unsetAddonConfig(app.id, 'oauth', callback);
     });
 }
+
+function setupSendMail(app, callback) {
+    assert(typeof app === 'object');
+    assert(typeof callback === 'function');
+
+    var env = [
+        'MAIL_SERVER' + '=' + config.get('mailServer'),
+        'MAIL_USERNAME' + '=' + app.location,
+        'MAIL_DOMAIN' + '=' + config.fqdn()
+    ];
+
+    appdb.setAddonConfig(app.id, 'sendmail', env, callback);
+}
+
+function teardownSendMail(app, callback) {
+    assert(typeof app === 'object');
+    assert(typeof callback === 'function');
+
+    appdb.unsetAddonConfig(app.id, 'sendmail', callback);
+}
+

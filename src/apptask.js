@@ -201,9 +201,6 @@ function createContainer(app, callback) {
 
         env.push('APP_ORIGIN' + '=' + 'https://' + appFqdn(app.location));
         env.push('ADMIN_ORIGIN' + '=' + config.adminOrigin());
-        env.push('MAIL_SERVER' + '=' + config.get('mailServer'));
-        env.push('MAIL_USERNAME' + '=' + app.location);
-        env.push('MAIL_DOMAIN' + '=' + config.fqdn());
 
         addons.getEnvironment(app.id, function (error, addonEnv) {
             if (error) return callback(new Error('Error getting addon env:', + error));
