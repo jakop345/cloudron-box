@@ -151,7 +151,11 @@ cat > "$CLOUDRON_CONF" <<CONF_END
     "boxVersionsUrl": "$PROVISION_BOX_VERSIONS_URL",
     "mailServer": "$MAIL_SERVER",
     "mailUsername": "admin@$DOMAIN_NAME",
-    "mysqlRootPassword": "$MYSQL_ROOT_PASSWORD"
+    "addons": {
+        "mysql": {
+            "rootPassword": "$MYSQL_ROOT_PASSWORD"
+        }
+    }
 }
 CONF_END
 
