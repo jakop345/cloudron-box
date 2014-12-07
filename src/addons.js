@@ -153,8 +153,9 @@ function setupMySql(app, callback) {
 
             var data = '';
             stream.on('error', callback);
-            stream.on('data', function (d) { data += d.toString('utf8'); });
+            stream.on('data', function (d) { data += d.toString('utf8'); console.log(data); });
             stream.on('end', function () {
+            console.log('FINAL:', data);
                 appdb.setAddonConfig(app.id, 'mysql', [ 'MYSQL_URL=' + data ], callback);
             });
         });
