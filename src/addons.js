@@ -145,7 +145,7 @@ function setupMySql(app, callback) {
     var container = docker.getContainer('mysql');
     var cmd = [ '/addons/mysql/service.sh', 'add', app.id, config.get('addons.mysql.rootPassword') ];
 
-    container.exec({ Cmd: cmd }, function (error, execContainer) {
+    container.exec({ Cmd: cmd, AttachStdout: true, AttachStderr: true }, function (error, execContainer) {
         if (error) return callback(error);
 
         execContainer.start(function (error, stream) {
