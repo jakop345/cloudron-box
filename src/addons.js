@@ -140,6 +140,8 @@ function setupMySql(app, callback) {
     assert(typeof app === 'object');
     assert(typeof callback === 'function');
 
+    debug('Setting up mysql for %s', app.id);
+
     var container = docker.getContainer('mysql');
     var cmd = [ '/addons/mysql/service.sh', 'add', app.id, config.get('addons.mysql.rootPassword') ];
 
@@ -162,6 +164,8 @@ function setupMySql(app, callback) {
 function teardownMySql(app, callback) {
     var container = docker.getContainer('mysql');
     var cmd = [ '/addons/mysql/service.sh', 'remove', app.id, config.get('addons.mysql.rootPassword') ];
+
+    debug('Tearing down mysql for %s', app.id);
 
     container.exec({ Cmd: cmd }, function (error, execContainer) {
         if (error) return callback(error);
