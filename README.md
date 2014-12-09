@@ -6,21 +6,20 @@ Development setup
 * sudo adduser yellowtent
 ** This dummy user is required for supervisor 'box' configs
 
-* rmappdir.sh should be callable without a password
 ** Add a file called /etc/sudoers.d/yellowtent with the following contents:
+
     Defaults!/home/girish/yellowtent/box/src/scripts/rmappdir.sh env_keep=HOME
     girish ALL=(ALL) NOPASSWD: /home/girish/yellowtent/box/src/scripts/rmappdir.sh
     Defaults!/home/girish/yellowtent/box/src/scripts/reloadnginx.sh env_keep=HOME
     girish ALL=(ALL) NOPASSWD: /home/girish/yellowtent/box/src/scripts/reloadnginx.sh
-    Defaults!/Users/girishra/research/yellowtent/box/src/scripts/backup.sh env_keep=HOME
-    girishra ALL=(ALL) NOPASSWD: /Users/girishra/research/yellowtent/box/src/scripts/backup.sh
-    Defaults!/Users/girishra/research/yellowtent/box/src/scripts/reboot.sh env_keep=HOME
-    girishra ALL=(ALL) NOPASSWD: /Users/girishra/research/yellowtent/box/src/scripts/reboot.sh
-    Defaults!/Users/girishra/research/yellowtent/box/src/scripts/reloadcollectd.sh env_keep=HOME
-    girishra ALL=(root) NOPASSWD: /Users/girishra/research/box/src/scripts/reloadcollectd.sh
+    Defaults!/home/girish/yellowtent/box/src/scripts/backup.sh env_keep=HOME
+    girish ALL=(ALL) NOPASSWD: /home/girish/yellowtent/box/src/scripts/backup.sh
+    Defaults!/home/girish/yellowtent/box/src/scripts/reboot.sh env_keep=HOME
+    girish ALL=(ALL) NOPASSWD: /home/girish/yellowtent/box/src/scripts/reboot.sh
+    Defaults!/home/girish/yellowtent/box/src/scripts/reloadcollectd.sh env_keep=HOME
+    girish ALL=(root) NOPASSWD: /home/girish/box/src/scripts/reloadcollectd.sh
 
-
-   (replace the username and path to rmappdir.sh to match your environment)
+   (replace the path to the scripts to match your environment)
 
    You might have to clear the sudo cache using sudo -k.
 
