@@ -1339,28 +1339,6 @@
         }
       }
     },
-    "supererror": {
-      "version": "0.5.0",
-      "from": "git+https://git@github.com/gramakri/supererror.git",
-      "resolved": "git+https://git@github.com/gramakri/supererror.git#49ae1ad2cec1938fa920cb6ade77199c6c4718cd",
-      "dependencies": {
-        "colors": {
-          "version": "0.6.2",
-          "from": "https://registry.npmjs.org/colors/-/colors-0.6.2.tgz",
-          "resolved": "https://registry.npmjs.org/colors/-/colors-0.6.2.tgz"
-        },
-        "prettyjson": {
-          "version": "1.0.0",
-          "from": "prettyjson@1.0.0",
-          "dependencies": {
-            "minimist": {
-              "version": "0.0.8",
-              "from": "minimist@0.0.8"
-            }
-          }
-        }
-      }
-    },
     "underscore": {
       "version": "1.7.0",
       "from": "underscore@1.7.0",
@@ -1386,6 +1364,29 @@
             "ms": {
               "version": "0.6.2",
               "from": "ms@0.6.2"
+            }
+          }
+        }
+      }
+    },
+    "supererror": {
+      "version": "0.6.0",
+      "from": "supererror@",
+      "dependencies": {
+        "colors": {
+          "version": "0.6.2",
+          "from": "https://registry.npmjs.org/colors/-/colors-0.6.2.tgz",
+          "resolved": "https://registry.npmjs.org/colors/-/colors-0.6.2.tgz"
+        },
+        "prettyjson": {
+          "version": "1.0.0",
+          "from": "https://registry.npmjs.org/prettyjson/-/prettyjson-1.0.0.tgz",
+          "resolved": "https://registry.npmjs.org/prettyjson/-/prettyjson-1.0.0.tgz",
+          "dependencies": {
+            "minimist": {
+              "version": "0.0.8",
+              "from": "https://registry.npmjs.org/minimist/-/minimist-0.0.8.tgz",
+              "resolved": "https://registry.npmjs.org/minimist/-/minimist-0.0.8.tgz"
             }
           }
         }

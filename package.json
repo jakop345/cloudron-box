@@ -57,7 +57,6 @@
     "split": "^0.3.0",
     "sqlite3": "^3.0.0",
     "superagent": "~0.17.0",
-    "supererror": "git+https://git@github.com/gramakri/supererror.git",
     "underscore": "~1.7.0",
     "ursa": "^0.8.0",
     "validator": "~3.22.1",
@@ -65,7 +64,8 @@
     "hock": "~0.2.5",
     "nock": "~0.43.1",
     "sinon": "~1.10.3",
-    "connect-lastmile": "0.0.8"
+    "connect-lastmile": "0.0.8",
+    "supererror": "~0.6.0"
   },
   "devDependencies": {
     "apidoc": "*",
