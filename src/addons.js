@@ -151,12 +151,16 @@ function setupMySql(app, callback) {
         execContainer.start(function (error, stream) {
             if (error) return callback(error);
 
-            var data = '';
+            var data = [ ];
+            stream.setEncoding('utf8');
             stream.on('error', callback);
-            stream.on('data', function (d) { data += d.toString('utf8'); console.log(data); });
+            stream.on('data', function (line) {
+                debug(line);
+                if (line[0] === '+') return; // stderr (set -e)
+                data.push(line);
+            });
             stream.on('end', function () {
-            console.log('FINAL:', data);
-                appdb.setAddonConfig(app.id, 'mysql', [ 'MYSQL_URL=' + data ], callback);
+                appdb.setAddonConfig(app.id, 'mysql', data, callback);
             });
         });
     });
