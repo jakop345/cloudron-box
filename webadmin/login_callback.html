@@ -32,7 +32,7 @@
             window.location.href = '/';
         })
         .error(function(data, status, headers, config) {
-            console.error('Unable to exchange code for an access token.', error);
+            console.error('Unable to exchange code for an access token.', status, data);
             window.location.href = '/';
         });
     }
