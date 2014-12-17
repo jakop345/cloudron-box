@@ -3,7 +3,7 @@ The Box
 
 Development setup
 -----------------
-* sudo adduser yellowtent
+* sudo useradd -m yellowtent
 ** This dummy user is required for supervisor 'box' configs
 
 ** Add a file called /etc/sudoers.d/yellowtent with the following contents:
@@ -31,6 +31,7 @@ Development setup
 
 Running
 -------
+* npm run-script migrate - this sets up the database
 * ./run.sh - this starts up nginx to serve up the webadmin
 ** Navigate to https://admin-localhost
 
