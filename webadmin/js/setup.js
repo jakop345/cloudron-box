@@ -58,5 +58,8 @@ var SetupController = function ($scope, Client) {
         }
 
         $scope.initialized = true;
+
+        // hack for autofocus with angular
+        setTimeout( function () { $('input[autofocus]:visible:first').focus() }, 0);
     });
 };
