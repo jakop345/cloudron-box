@@ -33,7 +33,8 @@
         })
         .error(function(data, status, headers, config) {
             console.error('Unable to exchange code for an access token.', status, data);
-            window.location.href = '/';
+            // TODO: display a real error page instead of simply forward to /
+            // window.location.href = '/';
         });
     }
 
