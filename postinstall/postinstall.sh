@@ -167,7 +167,7 @@ sqlite3 "$CLOUDRON_SQLITE" 'UPDATE apps SET installationState = "pending_restore
 echo "Add webadmin oauth cient"
 ADMIN_SCOPES="root,profile,users,apps,settings,roleAdmin"
 ADMIN_ID=$(cat /proc/sys/kernel/random/uuid)
-sqlite3 "$CLOUDRON_SQLITE" "INSERT OR REPLACE INTO clients (id, appId, clientId, clientSecret, name, redirectURI, scope) VALUES (\"\$ADMIN_ID\", \"webadmin\", \"cid-webadmin\", \"unusedsecret\", \"WebAdmin\", \"$ADMIN_ORIGIN\", \"\$ADMIN_SCOPES\")"
+sqlite3 "$CLOUDRON_SQLITE" "INSERT OR REPLACE INTO clients (id, appId, clientId, clientSecret, name, redirectURI, scope) VALUES (\"\$ADMIN_ID\", \"webadmin\", \"cid-webadmin\", \"secret-webadmin\", \"WebAdmin\", \"$ADMIN_ORIGIN\", \"\$ADMIN_SCOPES\")"
 
 EOF
 

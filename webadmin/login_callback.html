@@ -22,7 +22,7 @@
             code: authCode,
             redirect_uri: window.location.origin,
             client_id: 'cid-webadmin',
-            client_secret: 'unused'
+            client_secret: 'secret-webadmin'
         };
 
         $http.post('/api/v1/oauth/token?response_type=token&client_id=' + data.client_id, data)

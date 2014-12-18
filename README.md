@@ -38,7 +38,7 @@ Running
 export ADMIN_ID=$(cat /proc/sys/kernel/random/uuid)
 export ADMIN_ORIGIN=https://admin-localhost
 export ADMIN_SCOPES="root,profile,users,apps,settings,roleAdmin"
-sqlite3 ~/.yellowtent/data/cloudron.sqlite "INSERT OR REPLACE INTO clients (id, appId, clientId, clientSecret, name, redirectURI, scope) VALUES (\"\$ADMIN_ID\", \"webadmin\", \"cid-webadmin\", \"unusedsecret\", \"WebAdmin\", \"$ADMIN_ORIGIN\", \"\$ADMIN_SCOPES\")"
+sqlite3 ~/.yellowtent/data/cloudron.sqlite "INSERT OR REPLACE INTO clients (id, appId, clientId, clientSecret, name, redirectURI, scope) VALUES (\"\$ADMIN_ID\", \"webadmin\", \"cid-webadmin\", \"secret-webadmin\", \"WebAdmin\", \"$ADMIN_ORIGIN\", \"\$ADMIN_SCOPES\")"
 ```
 * `./run.sh` - this starts up nginx to serve up the webadmin
 * Navigate to https://admin-localhost
