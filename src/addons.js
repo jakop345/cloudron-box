@@ -9,6 +9,7 @@ var appFqdn = require('./apps').appFqdn,
     DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:addons'),
     docker = require('./docker.js'),
+    MemoryStream = require('memorystream'),
     util = require('util'),
     uuid = require('node-uuid');
 
@@ -151,13 +152,18 @@ function setupMySql(app, callback) {
         execContainer.start(function (error, stream) {
             if (error) return callback(error);
 
+            var stdout = new MemoryStream();
+            var stderr = new MemoryStream();
+
+            execContainer.modem.demuxStream(stream, stdout, stderr);
+            stderr.on('data', function (data) { debug(data); }); // set -e output
+
             var chunks = [ ];
+            stdout.on('data', function (chunk) { chunks.push(chunk); });
+
             stream.on('error', callback);
-            stream.on('data', function (chunk) { chunks.push(chunk); });
             stream.on('end', function () {
-                var data = Buffer.concat(chunks).toString('utf8');
-                debug(data);
-                var env = data.split('\n').filter(function (line) { return line[0] !== '+'; });  // stderr (set -e)
+                var env = Buffer.concat(chunks).toString('utf8').split('\n');
                 debug('Setting mysql addon config to %j', env);
                 appdb.setAddonConfig(app.id, 'mysql', env, callback);
             });
