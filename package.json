@@ -65,7 +65,8 @@
     "nock": "~0.43.1",
     "sinon": "~1.10.3",
     "connect-lastmile": "0.0.8",
-    "supererror": "~0.6.0"
+    "supererror": "~0.6.0",
+    "memorystream": "~0.2.0"
   },
   "devDependencies": {
     "apidoc": "*",

@@ -1462,6 +1462,11 @@
           }
         }
       }
+    },
+    "memorystream": {
+      "version": "0.2.0",
+      "from": "memorystream@",
+      "resolved": "http://registry.npmjs.org/memorystream/-/memorystream-0.2.0.tgz"
     }
   }
 }
