@@ -26,7 +26,7 @@
     "csurf": "^1.6.1",
     "db-migrate": "~0.7.1",
     "debug": "~0.8.1",
-    "dockerode": "~2.0.3",
+    "dockerode": "~2.0.5",
     "ejs": "^1.0.0",
     "encfs": "^0.1.1",
     "express": "~4.2.0",
