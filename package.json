@@ -60,24 +60,20 @@
     "underscore": "~1.7.0",
     "ursa": "^0.8.0",
     "validator": "~3.22.1",
-    "husky": "~0.6.2",
-    "hock": "~0.2.5",
-    "nock": "~0.43.1",
-    "sinon": "~1.10.3",
     "connect-lastmile": "0.0.8",
     "supererror": "~0.6.0",
     "memorystream": "~0.2.0"
   },
   "devDependencies": {
     "apidoc": "*",
+    "aws-sdk": "~2.0.23",
     "expect.js": "*",
     "hock": "~0.2.5",
-    "husky": "^0.5.1",
+    "husky": "~0.6.2",
     "istanbul": "*",
     "mocha": "*",
-    "nock": "~0.43.0",
-    "sinon": "~1.10.3",
-    "aws-sdk": "~2.0.23"
+    "nock": "~0.43.1",
+    "sinon": "~1.10.3"
   },
   "scripts": {
     "migrate": "DATABASE_URL=sqlite3:///$HOME/.yellowtent/data/cloudron.sqlite node_modules/.bin/db-migrate up",
