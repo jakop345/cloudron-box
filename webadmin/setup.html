@@ -17,7 +17,8 @@
 
         <!-- Custom CSS -->
         <link href="3rdparty/sb-admin-2/css/sb-admin-2.css" rel="stylesheet">
-
+ 
+ 
         <!-- Morris Charts CSS -->
         <link href="3rdparty/sb-admin-2/css/plugins/morris.css" rel="stylesheet">
 
@@ -66,23 +67,17 @@
         <!-- yellowtent -->
         <script src="/api/v1/oauth/yellowtent.js"></script>
 
-        <!-- application routes -->
-        <script src="js/index.js"></script>
-
-        <!-- yellowtent -->
-        <script src="/api/v1/oauth/yellowtent.js"></script>
+        <!-- setup application -->
+        <script src="js/setup.js"></script>
 
         <!-- services and factories -->
         <script src="js/client.js"></script>
-
-        <!-- views -->
-        <script src="js/setup.js"></script>
 
     </head>
 
 <body ng-app="Application" ng-controller="SetupController">
 
-    <div class="container animateMe ng-hide" ng-show="initialized">
+    <div class="container animateMe ng-hide" ng-show="initialized && !busy">
         <div class="row">
             <div class="col-md-12 text-center">
                 <h1>Welcome to your Cloudron</h1>
@@ -115,6 +110,13 @@
                     <input class="btn btn-primary btn-outline pull-right" type="submit" ng-disabled="{{disabled}}" value="Create User"/>
                 </form>
             </div>
+        </div>
+    </div>
+
+    <div class="container animateMe ng-hide" ng-show="busy">
+        <div class="col-lg-12" style="text-align: center;">
+            <h2>Your Cloudron is being initialized</h2>
+            <i class="fa fa-circle-o-notch fa-spin fa-5x"></i>
         </div>
     </div>
 
