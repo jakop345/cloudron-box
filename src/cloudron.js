@@ -285,7 +285,8 @@ function sendMailDnsRecordsRequest(callback) {
 }
 
 function addMailDnsRecords() {
-    assert(typeof config.token() === 'string');
+    // TODO assert replaced with a non fatal return, for local development
+    if (!config.token()) return;
 
     if (config.get('mailDnsRecordIds').length !== 0) return; // already registered
 
