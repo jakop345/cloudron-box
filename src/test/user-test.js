@@ -99,7 +99,7 @@ describe('User', function () {
             user.create(USERNAME, '', EMAIL, IS_ADMIN, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).not.to.be.ok();
-                expect(error.reason).to.equal(UserError.BAD_FIELD);
+                expect(error.reason).to.equal(UserError.BAD_PASSWORD);
 
                 done();
             });

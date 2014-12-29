@@ -113,8 +113,8 @@ function activate(username, password, email, callback) {
     debug('activating user:%s email:%s', username, email);
 
     user.create(username, password, email, true /* admin */, function (error) {
-        if (error && error.reason === UserError.BAD_FIELD) return callback(new CloudronError(CloudronError.BAD_FIELD, error.message));
         if (error && error.reason === UserError.ALREADY_EXISTS) return callback(new CloudronError(CloudronError.ALREADY_PROVISIONED));
+        if (error && error instanceof UserError) return callback(error);
         if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
         clientdb.getByAppId('webadmin', function (error, result) {

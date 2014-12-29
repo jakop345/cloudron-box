@@ -11,6 +11,7 @@ var assert = require('assert'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
     path = require('path'),
+    UserError = require('../user.js').UserError,
     updater = require('../updater.js');
 
 var SUDO = '/usr/bin/sudo',
@@ -49,7 +50,12 @@ function activate(req, res, next) {
     debug('activate: ' + username);
 
     cloudron.activate(username, password, email, function (error, info) {
-        if (error && error.reason === CloudronError.BAD_FIELD) return next(new HttpError(400, error.message));
+        if (error instanceof UserError) {
+            if (error.reason === UserError.BAD_PASSWORD) return next(new HttpError(400, 'Bad password'));
+            if (error.reason === UserError.BAD_EMAIL) return next(new HttpError(400, 'Bad email'));
+            if (error.reason === UserError.BAD_USERNAME) return next(new HttpError(400, 'Bad username'));
+            else return next(new HttpError(400, 'Invalid message'));
+        }
         if (error && error.reason === CloudronError.ALREADY_PROVISIONED) return next(new HttpError(409, 'Already provisioned'));
         if (error) return next(new HttpError(500, error));
 

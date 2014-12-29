@@ -59,7 +59,10 @@ UserError.INTERNAL_ERROR = 'Internal Error';
 UserError.ALREADY_EXISTS = 'Already Exists';
 UserError.NOT_FOUND = 'Not Found';
 UserError.WRONG_PASSWORD = 'Wrong User or Password';
-UserError.BAD_FIELD = 'Bad BAD_FIELD';
+UserError.BAD_FIELD = 'Bad field';
+UserError.BAD_USERNAME = 'Bad username';
+UserError.BAD_EMAIL = 'Bad email';
+UserError.BAD_PASSWORD = 'Bad password';
 UserError.NOT_ALLOWED = 'Not Allowed';
 
 function listUsers(callback) {
@@ -75,8 +78,8 @@ function listUsers(callback) {
 function validateUsername(username) {
     assert(typeof username === 'string');
 
-    if (username.length <= 2) return new UserError(UserError.BAD_FIELD, 'Username must be atleast 3 chars');
-    if (username.length > 256) return new UserError(UserError.BAD_FIELD, 'Username too long');
+    if (username.length <= 2) return new UserError(UserError.BAD_USERNAME, 'Username must be atleast 3 chars');
+    if (username.length > 256) return new UserError(UserError.BAD_USERNAME, 'Username too long');
 
     return null;
 }
@@ -84,7 +87,7 @@ function validateUsername(username) {
 function validatePassword(password) {
     assert(typeof password === 'string');
 
-    if (password.length <= 5) return new UserError(UserError.BAD_FIELD, 'Password must be atleast 5 chars');
+    if (password.length <= 5) return new UserError(UserError.BAD_PASSWORD, 'Password must be atleast 5 chars');
 
     return null;
 }
@@ -92,7 +95,7 @@ function validatePassword(password) {
 function validateEmail(email) {
     assert(typeof email === 'string');
 
-    if (!validator.isEmail(email)) return new UserError(UserError.BAD_FIELD, 'Invalid email');
+    if (!validator.isEmail(email)) return new UserError(UserError.BAD_EMAIL, 'Invalid email');
 
     return null;
 }
