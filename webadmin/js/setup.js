@@ -9,7 +9,6 @@ var app = angular.module('Application', ['ngAnimate', 'angular-md5']);
 var SetupController = function ($scope, Client) {
     $scope.initialized = false;
     $scope.busy = false;
-    $scope.disabled = false;
 
     $scope.username = '';
     $scope.email = '';
@@ -44,13 +43,33 @@ var SetupController = function ($scope, Client) {
             return;
         }
 
-        $scope.disabled = true;
         Client.createAdmin($scope.username, $scope.password, $scope.email, function (error) {
             if (error) {
                 if (error.statusCode === 409) {
                     $scope.error.username = 'Username already exists';
-                    $scope.disabled = false;
+                } else if (error.statusCode === 400) {
+                    // Probably not the best way to determine the issue...
+                    if (error.message.indexOf('password') > 0) {
+                        $scope.error.password = 'Password is too short.';
+                        $scope.password = '';
+                        $scope.passwordRepeat = '';
+                        $('#inputPassword').focus();
+                    } else if (error.message.indexOf('username') > 0) {
+                        $scope.error.password = 'Invalid username.';
+                        $scope.username = '';
+                        $scope.passwordRepeat = '';
+                        $('#inputUsername').focus();
+                    } else if (error.message.indexOf('email') > 0) {
+                        $scope.error.password = 'Invalid Email address.';
+                        $scope.email = '';
+                        $scope.passwordRepeat = '';
+                        $('#inputEmail').focus();
+                    } else {
+                        // TODO can this ever happen?
+                        console.error('Internal error', error);
+                    }
                 }
+
                 $scope.busy = false;
                 return;
             }
@@ -70,6 +89,6 @@ var SetupController = function ($scope, Client) {
         $scope.initialized = true;
 
         // hack for autofocus with angular
-        setTimeout( function () { $('input[autofocus]:visible:first').focus() }, 0);
+        setTimeout( function () { $('input[autofocus]:visible:first').focus(); }, 0);
     });
 };
