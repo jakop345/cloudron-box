@@ -1,6 +1,8 @@
 #!/bin/bash
 
-exec > >(tee "/var/log/cloudron/postinstall-$$-$BASHPID.log")
+# Count installer files so that we can correlate install and postinstall logs
+COUNT=$(find /var/log/cloudron -name "installer*" | wc -l)
+exec > >(tee "/var/log/cloudron/postinstall-$COUNT.log")
 exec 2>&1
 
 set -e

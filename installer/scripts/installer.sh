@@ -1,6 +1,7 @@
 #!/bin/bash
 
-exec > >(tee "/var/log/cloudron/installer-$$-$BASHPID.log")
+COUNT=$(expr `find /var/log/cloudron -name "installer*" | wc -l` + 1)
+exec > >(tee "/var/log/cloudron/installer-$COUNT.log")
 exec 2>&1
 
 set -e
