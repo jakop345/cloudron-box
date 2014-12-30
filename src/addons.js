@@ -163,7 +163,7 @@ function setupMySql(app, callback) {
 
             stream.on('error', callback);
             stream.on('end', function () {
-                var env = Buffer.concat(chunks).toString('utf8').split('\n');
+                var env = Buffer.concat(chunks).toString('utf8').split('\n').slice(0, -1); // remove trailing newline
                 debug('Setting mysql addon config to %j', env);
                 appdb.setAddonConfig(app.id, 'mysql', env, callback);
             });
