@@ -144,7 +144,7 @@ function setupMySql(app, callback) {
     debug('Setting up mysql for %s', app.id);
 
     var container = docker.getContainer('mysql');
-    var cmd = [ '/addons/mysql/service.sh', 'add', app.id, config.get('addons.mysql.rootPassword') ];
+    var cmd = [ '/addons/mysql/service.sh', 'add', config.get('addons.mysql.rootPassword'), app.id ];
 
     container.exec({ Cmd: cmd, AttachStdout: true, AttachStderr: true }, function (error, execContainer) {
         if (error) return callback(error);
@@ -173,7 +173,7 @@ function setupMySql(app, callback) {
 
 function teardownMySql(app, callback) {
     var container = docker.getContainer('mysql');
-    var cmd = [ '/addons/mysql/service.sh', 'remove', app.id, config.get('addons.mysql.rootPassword') ];
+    var cmd = [ '/addons/mysql/service.sh', 'remove', config.get('addons.mysql.rootPassword'), app.id ];
 
     debug('Tearing down mysql for %s', app.id);
 
