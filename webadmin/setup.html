@@ -69,25 +69,27 @@
         </div>
         <div class="row">
             <div class="col-md-6 col-md-offset-3">
-                <form class="form-signin" role="form" ng-submit="submit()">
-                    <div class="form-group" ng-class="{ 'has-error': error.username }">
-                        <label class="control-label" for="inputUsername">Username</label>
-                        <input type="text" class="form-control" ng-model="username" id="inputUsername" autofocus>
-                    </div>
-                    <div class="form-group" ng-class="{ 'has-error': error.email }">
-                        <label class="control-label" for="inputEmail">Email</label>
-                        <input type="email" class="form-control" ng-model="email" id="inputEmail">
-                    </div>
-                    <div class="form-group" ng-class="{ 'has-error': error.password }">
-                        <label class="control-label" for="inputPassword">Password</label>
-                        <input type="password" class="form-control" ng-model="password" id="inputPassword">
-                    </div>
-                    <div class="form-group" ng-class="{ 'has-error': error.passwordRepeat }">
-                        <label class="control-label" for="inputPasswordRepeat">Repeat Password</label>
-                        <input type="password" class="form-control" ng-model="passwordRepeat" id="inputPasswordRepeat">
-                    </div>
-                    <input class="btn btn-primary btn-outline pull-right" type="submit" ng-disabled="{{busy}}" value="Create User"/>
-                </form>
+                <fieldset>
+                    <form class="signin-form" role="form" name="setup_form" novalidate ng-submit="submit()">
+                        <div class="form-group" ng-class="{ 'has-error': setup_form.username.$dirty && setup_form.username.$invalid }">
+                            <label class="control-label" for="inputUsername">Username</label>
+                            <input type="text" class="form-control" ng-model="username" id="inputUsername" name="username" ng-maxlength="512" ng-minlength="3" autofocus required>
+                        </div>
+                        <div class="form-group" ng-class="{ 'has-error': setup_form.email.$dirty && setup_form.email.$invalid }">
+                            <label class="control-label" for="inputEmail">Email</label>
+                            <input type="email" class="form-control" ng-model="email" id="inputEmail" name="email" required>
+                        </div>
+                        <div class="form-group" ng-class="{ 'has-error': setup_form.password.$dirty && setup_form.password.$invalid }">
+                            <label class="control-label" for="inputPassword">Password</label>
+                            <input type="password" class="form-control" ng-model="password" id="inputPassword" name="password" ng-maxlength="512" ng-minlength="5" required>
+                        </div>
+                        <div class="form-group" ng-class="{ 'has-error': setup_form.repeatPassword.$dirty && (setup_form.repeatPassword.$invalid || password !== passwordRepeat) }">
+                            <label class="control-label" for="inputPasswordRepeat">Repeat Password</label>
+                            <input type="password" class="form-control" ng-model="passwordRepeat" id="inputPasswordRepeat" name="repeatPassword" required>
+                        </div>
+                        <input class="btn btn-primary btn-outline pull-right" type="submit" ng-disabled="setup_form.$invalid || password !== passwordRepeat || busy" value="Create User"/>
+                    </form>
+                </fieldset>
             </div>
         </div>
     </div>
