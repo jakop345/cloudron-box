@@ -1,0 +1,6 @@
+{
+	"node": true,
+	"browser": true,
+	"globalstrict": true,
+	"predef": [ "angular", "$" ]
+}
