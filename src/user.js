@@ -87,7 +87,7 @@ function validateUsername(username) {
 function validatePassword(password) {
     assert(typeof password === 'string');
 
-    if (password.length <= 5) return new UserError(UserError.BAD_PASSWORD, 'Password must be atleast 5 chars');
+    if (password.length < 5) return new UserError(UserError.BAD_PASSWORD, 'Password must be atleast 5 chars');
 
     return null;
 }
