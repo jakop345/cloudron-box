@@ -41,9 +41,9 @@ export ADMIN_SCOPES="root,profile,users,apps,settings,roleAdmin"
 sqlite3 ~/.yellowtent/data/cloudron.sqlite "INSERT OR REPLACE INTO clients (id, appId, clientId, clientSecret, name, redirectURI, scope) VALUES (\"\$ADMIN_ID\", \"webadmin\", \"cid-webadmin\", \"secret-webadmin\", \"WebAdmin\", \"$ADMIN_ORIGIN\", \"\$ADMIN_SCOPES\")"
 ```
 * `./run.sh` - this starts up nginx to serve up the webadmin
-* Navigate to https://admin-localhost
-
+* make sure at first run that the env variable `APP_SERVER_URL` is set to **https://cloudron-dev.herokuapp.com**
 * `DEBUG=box:* ./app.js` - this the main box code. `NODE_ENV` is set to `production` by default.
+* Navigate to https://admin-localhost
 
 Deployment setup
 ----------------
