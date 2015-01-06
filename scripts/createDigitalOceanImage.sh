@@ -11,11 +11,24 @@ JSON="$SCRIPT_DIR/../node_modules/.bin/json"
 CURL="curl -s -u $DIGITAL_OCEAN_TOKEN:"
 UBUNTU_IMAGE_SLUG="ubuntu-14-04-x64" # ID=5141286
 DATE=`date +%Y-%m-%d-%H%M%S`
-
 BOX_REVISION=origin/master
-if [ ! -z "$1" ]; then
-    BOX_REVISION=$1
-fi
+BOX_REGION="sfo1"
+BOX_SIZE="512mb"
+
+ARGS=$(getopt -o "" -l "revision:,region:,size:" -n "$0" -- "$@")
+eval set -- "$ARGS"
+
+while true; do
+    case "$1" in
+    --revision) BOX_REVISION="$2";;
+    --region) BOX_REGION="$2";;
+    --size) BOX_SIZE="$2";;
+    --) break;;
+    *) echo "Unknown option $1"; exit 1;;
+    esac
+
+    shift 2
+done
 
 function get_pretty_revision() {
     local GIT_REV="$1"
@@ -47,12 +60,10 @@ function get_ssh_key_id() {
 }
 
 function create_droplet() {
-    local REGION_SLUG="sfo1"
-    local SIZE_SLUG="512mb"
     local SSH_KEY_ID="$1"
     local BOX_NAME="$2"
 
-    local DATA="{\"name\":\"$BOX_NAME\",\"size\":\"$SIZE_SLUG\",\"region\":\"$REGION_SLUG\",\"image\":\"$UBUNTU_IMAGE_SLUG\",\"ssh_keys\":[ $SSH_KEY_ID ],\"backups\":false}"
+    local DATA="{\"name\":\"$BOX_NAME\",\"size\":\"$BOX_SIZE\",\"region\":\"$BOX_REGION\",\"image\":\"$UBUNTU_IMAGE_SLUG\",\"ssh_keys\":[ $SSH_KEY_ID ],\"backups\":false}"
 
     $CURL -X POST -H 'Content-Type: application/json' -d "$DATA" "https://api.digitalocean.com/v2/droplets" | $JSON droplet.id
 }
