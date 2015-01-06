@@ -82,6 +82,9 @@ docker pull girish/base:0.9
 echo "=== Pulling mysql addon image ==="
 docker pull girish/mysql:0.1
 
+echo "=== Pulling postgresql addon image ==="
+docker pull girish/postgresql:0.1
+
 echo "=== Pulling graphite docker images ==="
 docker pull girish/graphite:0.2
 
