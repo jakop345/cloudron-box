@@ -170,6 +170,9 @@ cat > "$CLOUDRON_CONF" <<CONF_END
     "addons": {
         "mysql": {
             "rootPassword": "$MYSQL_ROOT_PASSWORD"
+        },
+        "postgresql": {
+            "rootPassword": "$POSTGRESQL_ROOT_PASSWORD"
         }
     }
 }

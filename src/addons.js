@@ -198,10 +198,58 @@ function teardownMySql(app, callback) {
 }
 
 function setupPostgreSql(app, callback) {
-    return callback(null);
+    assert(typeof app === 'object');
+    assert(typeof callback === 'function');
+
+    debug('Setting up postgresql for %s', app.id);
+
+    var container = docker.getContainer('postgresql');
+    var cmd = [ '/addons/postgresql/service.sh', 'add', config.get('addons.postgresql.rootPassword'), app.id ];
+
+    container.exec({ Cmd: cmd, AttachStdout: true, AttachStderr: true }, function (error, execContainer) {
+        if (error) return callback(error);
+
+        execContainer.start(function (error, stream) {
+            if (error) return callback(error);
+
+            var stdout = new MemoryStream();
+            var stderr = new MemoryStream();
+
+            execContainer.modem.demuxStream(stream, stdout, stderr);
+            stderr.on('data', function (data) { debug(data); }); // set -e output
+
+            var chunks = [ ];
+            stdout.on('data', function (chunk) { chunks.push(chunk); });
+
+            stream.on('error', callback);
+            stream.on('end', function () {
+                var env = Buffer.concat(chunks).toString('utf8').split('\n').slice(0, -1); // remove trailing newline
+                debug('Setting postgresql addon config to %j', env);
+                appdb.setAddonConfig(app.id, 'postgresql', env, callback);
+            });
+        });
+    });
 }
 
 function teardownPostgreSql(app, callback) {
-    return callback(null);
+    var container = docker.getContainer('postgresql');
+    var cmd = [ '/addons/postgresql/service.sh', 'remove', config.get('addons.postgresql.rootPassword'), app.id ];
+
+    debug('Tearing down postgresql for %s', app.id);
+
+    container.exec({ Cmd: cmd }, function (error, execContainer) {
+        if (error) return callback(error);
+
+        execContainer.start({ stream: true, stdout: true, stderr: true }, function (error, stream) {
+            if (error) return callback(error);
+
+            var data = '';
+            stream.on('error', callback);
+            stream.on('data', function (d) { data += d.toString('utf8'); });
+            stream.on('end', function () {
+                appdb.unsetAddonConfig(app.id, 'postgresql', callback);
+            });
+        });
+    });
 }
 
