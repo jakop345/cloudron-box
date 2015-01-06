@@ -35,6 +35,10 @@ var KNOWN_ADDONS = {
     mysql: {
         setup: setupMySql,
         teardown: teardownMySql
+    },
+    postgresql: {
+        setup: setupPostgreSql,
+        teardown: teardownPostgreSql
     }
 };
 
@@ -191,5 +195,13 @@ function teardownMySql(app, callback) {
             });
         });
     });
+}
+
+function setupPostgreSql(app, callback) {
+    return callback(null);
+}
+
+function teardownPostgreSql(app, callback) {
+    return callback(null);
 }
 
