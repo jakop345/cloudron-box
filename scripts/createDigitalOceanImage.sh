@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 if [ -z "$DIGITAL_OCEAN_TOKEN" ]; then
@@ -20,7 +22,6 @@ BOX_SIZE="512mb"
 [ $(uname -s) == "Darwin" ] && GNU_GETOPT="/usr/local/opt/gnu-getopt/bin/getopt" || GNU_GETOPT="getopt"
 
 ARGS=$($GNU_GETOPT -o "" -l "revision:,region:,size:" -n "$0" -- "$@")
-echo "$ARGS"
 eval set -- "$ARGS"
 
 while true; do
