@@ -19,6 +19,7 @@ NGINX_APPCONFIG_DIR=/home/$USER/configs/nginx/applications
 CLOUDRON_CONF="/home/$USER/configs/cloudron.conf"
 CLOUDRON_SQLITE="$DATA_DIR/cloudron.sqlite"
 MYSQL_DIR="$DATA_DIR/mysql"
+POSTGRESQL_DIR="$DATA_DIR/postgresql"
 DOMAIN_NAME=`hostname -f`
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -140,6 +141,17 @@ MYSQL_CONTAINER_ID=$(docker run --restart=always -d --name="mysql" \
     -e MYSQL_ROOT_HOST="$DOCKER0_IP" \
     -v "$MYSQL_DIR:/var/lib/mysql" girish/mysql:0.1)
 echo "MySQL container id: $MYSQL_CONTAINER_ID"
+
+echo "=== Setup Postgres addon ==="
+docker rm -f postgresql || true
+POSTGRESQL_ROOT_PASSWORD=$(pwgen -1 -s)
+docker pull girish/postgresql:0.1
+POSTGRESQL_CONTAINER_ID=$(docker run --restart=always -d --name="postgresql" \
+    -p 127.0.0.1:5432:5432 \
+    -h "$DOMAIN_NAME" \
+    -e POSTGRESQL_ROOT_PASSWORD="$POSTGRESQL_ROOT_PASSWORD" \
+    -v "$POSTGRESQL_DIR:/var/lib/mysql" girish/postgresql:0.1)
+echo "PostgreSQL container id: $POSTGRESQL_CONTAINER_ID"
 
 echo "==== Creating cloudron.conf ===="
 sudo -u yellowtent -H bash <<EOF
