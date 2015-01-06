@@ -15,7 +15,12 @@ BOX_REVISION=origin/master
 BOX_REGION="sfo1"
 BOX_SIZE="512mb"
 
-ARGS=$(getopt -o "" -l "revision:,region:,size:" -n "$0" -- "$@")
+# Only GNU getopt supports long options. OS X comes bundled with the BSD getopt
+# brew install gnu-getopt to get the GNU getopt on OS X
+[ $(uname -s) == "Darwin" ] && GNU_GETOPT="/usr/local/opt/gnu-getopt/bin/getopt" || GNU_GETOPT="getopt"
+
+ARGS=$($GNU_GETOPT -o "" -l "revision:,region:,size:" -n "$0" -- "$@")
+echo "$ARGS"
 eval set -- "$ARGS"
 
 while true; do
@@ -136,7 +141,7 @@ if [ -z "$YELLOWTENT_SSH_KEY_ID" ]; then
 fi
 echo "Detected yellowtent ssh key id: $YELLOWTENT_SSH_KEY_ID" # 124654 for yellowtent key
 
-echo "Creating Droplet with name [$BOX_NAME]"
+echo "Creating Droplet with name [$BOX_NAME] at [$BOX_REGION] with size [$BOX_SIZE]"
 DROPLET_ID=$(create_droplet $YELLOWTENT_SSH_KEY_ID $BOX_NAME)
 if [ -z "$DROPLET_ID" ]; then
     echo "Failed to create droplet"
