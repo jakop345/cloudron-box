@@ -14,7 +14,7 @@ CURL="curl -s -u $DIGITAL_OCEAN_TOKEN:"
 UBUNTU_IMAGE_SLUG="ubuntu-14-04-x64" # ID=5141286
 DATE=`date +%Y-%m-%d-%H%M%S`
 BOX_REVISION=origin/master
-IMAGE_REGIONS=(ams2 sfo1 nyc2)
+IMAGE_REGIONS=(ams3 sfo1 nyc2)
 BOX_SIZE="512mb"
 
 # Only GNU getopt supports long options. OS X comes bundled with the BSD getopt
