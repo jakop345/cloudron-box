@@ -17,7 +17,7 @@ Development setup
     Defaults!/home/girish/yellowtent/box/src/scripts/reboot.sh env_keep=HOME
     girish ALL=(ALL) NOPASSWD: /home/girish/yellowtent/box/src/scripts/reboot.sh
     Defaults!/home/girish/yellowtent/box/src/scripts/reloadcollectd.sh env_keep=HOME
-    girish ALL=(root) NOPASSWD: /home/girish/box/src/scripts/reloadcollectd.sh
+    girish ALL=(root) NOPASSWD: /home/girish/yellowtent/box/src/scripts/reloadcollectd.sh
 
    (replace the path to the scripts to match your environment)
 
