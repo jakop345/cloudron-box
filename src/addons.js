@@ -39,6 +39,10 @@ var KNOWN_ADDONS = {
     postgresql: {
         setup: setupPostgreSql,
         teardown: teardownPostgreSql
+    },
+    redis: {
+        setup: setupRedis,
+        teardown: teardownRedis
     }
 };
 
@@ -251,5 +255,52 @@ function teardownPostgreSql(app, callback) {
             });
         });
     });
+}
+
+function setupRedis(app, callback) {
+    var redisOptions = {
+        name: 'redis-' + app.id,
+        Hostname: appFqdn(app.location),
+        Tty: true,
+        Image: 'girish/redis:0.1',
+        Cmd: null,
+        Volumes: { },
+        VolumesFrom: '',
+        Env: null
+    };
+
+    docker.createContainer(redisOptions, function (error, container) {
+        if (error) return callback(new Error('Error creating container:' + error));
+
+        debug('Created redis container for %s with id %s', app.id, container.id);
+
+        var startOptions = {
+            Binds: [ ],
+            PublishAllPorts: true
+        };
+
+        container.start(startOptions, function (error, data) {
+            if (error && error.statusCode !== 304) return callback(new Error('Error starting container:' + error));
+
+            var env = [ 'REDIS_URL=everything is awesome' ];
+            appdb.setAddonConfig(app.id, 'postgresql', env, callback);
+        });
+    });
+}
+
+function teardownRedis(app, callback) {
+   var container = docker.getContainer('redis-' + app.id);
+
+   var removeOptions = {
+       force: true, // kill container if it's running
+       v: false // removes volumes associated with the container
+   };
+
+   container.remove(removeOptions, function (error) {
+       if (error && error.statusCode === 404) return updateApp(app, { containerId: null }, callback);
+       if (error) console.error('Error removing container', error);
+
+       callback(error);
+   });
 }
 
