@@ -4,17 +4,17 @@
     <div class="col-md-6">
 
     <h1>Install {{ app.title }}</h1>
-    <form class="form-signin" role="form" ng-submit="installApp()" autocomplete="off">
-        <div class="form-group">
+    <form class="form-signin" role="form" name="install_form" ng-submit="installApp()" autocomplete="off">
+        <div class="form-group" ng-class="{ 'has-error': install_form.location.$dirty && install_form.location.$invalid }">
             <label class="control-label" for="inputLocation">Location</label>
             <div class="input-group form-inline">
-                <input type="text" class="form-control" ng-model="location" id="inputLocation" required autofocus>
+                <input type="text" class="form-control" ng-model="location" id="inputLocation" name="location" required autofocus>
                 <div class="input-group-addon">.{{domain}}</div>
             </div>
         </div>
-        <div class="form-group">
+        <div class="form-group" ng-class="{ 'has-error': install_form.password.$dirty && install_form.password.$invalid }">
             <label class="control-label" for="inputPassword">Password</label>
-            <input type="password" class="form-control" ng-model="password" id="inputPassword" required>
+            <input type="password" class="form-control" ng-model="password" id="inputPassword" name="password" ng-maxlength="512" ng-minlength="5" required>
         </div>
         <div ng-repeat="(port, portInfo) in portBindings">
             <div class="form-group">
@@ -31,7 +31,7 @@
             </select>
         </div>
         <input class="btn btn-default btn-outline" ng-click="cancel()" type="button" value="Cancel"/>
-        <input class="btn btn-primary btn-outline pull-right" type="submit" ng-disabled="{{disabled}}" value="Install"/>
+        <input class="btn btn-primary btn-outline pull-right" type="submit" ng-disabled="install_form.$invalid || busy" value="Install"/>
     </form>
 
     </div>

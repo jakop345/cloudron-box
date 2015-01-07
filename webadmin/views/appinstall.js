@@ -2,7 +2,7 @@
 
 'use strict';
 
-var AppInstallController = function ($scope, $routeParams, Client, AppStore) {
+var AppInstallController = function ($scope, $routeParams, Client, AppStore, $timeout) {
     $scope.app = null;
     $scope.password = '';
     $scope.location = '';
@@ -65,5 +65,8 @@ var AppInstallController = function ($scope, $routeParams, Client, AppStore) {
         window.history.back();
     };
 
-    document.getElementById('inputLocation').focus();
+    // hack for autofocus with angular
+    $scope.$on('$viewContentLoaded', function () {
+        $timeout(function () { $('input[autofocus]:visible:first').focus(); }, 1000);
+    });
 };
