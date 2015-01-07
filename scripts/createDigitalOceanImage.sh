@@ -150,7 +150,7 @@ if [ -z "$YELLOWTENT_SSH_KEY_ID" ]; then
 fi
 echo "Detected yellowtent ssh key id: $YELLOWTENT_SSH_KEY_ID" # 124654 for yellowtent key
 
-echo "Creating Droplet with name [$BOX_NAME] at [${IMAGE_REGIONs[0]}] with size [$BOX_SIZE]"
+echo "Creating Droplet with name [$BOX_NAME] at [${IMAGE_REGIONS[0]}] with size [$BOX_SIZE]"
 DROPLET_ID=$(create_droplet $YELLOWTENT_SSH_KEY_ID $BOX_NAME)
 if [ -z "$DROPLET_ID" ]; then
     echo "Failed to create droplet"
