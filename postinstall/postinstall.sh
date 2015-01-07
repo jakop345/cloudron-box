@@ -153,6 +153,9 @@ POSTGRESQL_CONTAINER_ID=$(docker run --restart=always -d --name="postgresql" \
     -v "$POSTGRESQL_DIR:/var/lib/mysql" girish/postgresql:0.1)
 echo "PostgreSQL container id: $POSTGRESQL_CONTAINER_ID"
 
+ehco "=== Pulling Redis addon ==="
+docker pull girish/redis:0.1
+
 echo "==== Creating cloudron.conf ===="
 sudo -u yellowtent -H bash <<EOF
 set -e
