@@ -80,3 +80,25 @@ app.filter('accessRestrictionLabel', function() {
         return input;
     };
 });
+
+// custom directive for dynamic names in forms
+// See http://stackoverflow.com/questions/23616578/issue-registering-form-control-with-interpolated-name#answer-23617401
+app.directive('laterName', function () {                   // (2)
+    return {
+        restrict: 'A',
+        require: ['?ngModel', '^?form'],                   // (3)
+        link: function postLink(scope, elem, attrs, ctrls) {
+            attrs.$set('name', attrs.laterName);
+
+            var modelCtrl = ctrls[0];                      // (3)
+            var formCtrl  = ctrls[1];                      // (3)
+            if (modelCtrl && formCtrl) {
+                modelCtrl.$name = attrs.name;              // (4)
+                formCtrl.$addControl(modelCtrl);           // (2)
+                scope.$on('$destroy', function () {
+                    formCtrl.$removeControl(modelCtrl);    // (5)
+                });
+            }
+        }
+    };
+});

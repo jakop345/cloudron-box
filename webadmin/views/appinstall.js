@@ -11,6 +11,8 @@ var AppInstallController = function ($scope, $routeParams, Client, AppStore, $ti
     $scope.error = { };
     $scope.domain = '';
     $scope.portBindings = { };
+    $scope.hostPortMin = 1025;
+    $scope.hostPortMax = 9999;
 
     Client.onReady(function () {
         $scope.domain = Client.getConfig().fqdn;
@@ -28,7 +30,7 @@ var AppInstallController = function ($scope, $routeParams, Client, AppStore, $ti
             $scope.accessRestriction = manifest.accessRestriction || '';
             // default setting is to map ports as they are in manifest
             for (var port in $scope.portBindings) {
-                $scope.portBindings[port].hostPort = port;
+                $scope.portBindings[port].hostPort = parseInt(port);
             }
         });
     });
@@ -67,6 +69,7 @@ var AppInstallController = function ($scope, $routeParams, Client, AppStore, $ti
 
     // hack for autofocus with angular
     $scope.$on('$viewContentLoaded', function () {
-        $timeout(function () { $('input[autofocus]:visible:first').focus(); }, 1000);
+        $timeout(function () { $('input[autofocus]:visible:first').focus();
+        console.log($scope.install_form) }, 1000);
     });
 };
