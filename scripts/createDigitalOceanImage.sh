@@ -14,20 +14,20 @@ CURL="curl -s -u $DIGITAL_OCEAN_TOKEN:"
 UBUNTU_IMAGE_SLUG="ubuntu-14-04-x64" # ID=5141286
 DATE=`date +%Y-%m-%d-%H%M%S`
 BOX_REVISION=origin/master
-BOX_REGION="sfo1"
+IMAGE_REGIONS=(ams2 sfo1 nyc2)
 BOX_SIZE="512mb"
 
 # Only GNU getopt supports long options. OS X comes bundled with the BSD getopt
 # brew install gnu-getopt to get the GNU getopt on OS X
 [ $(uname -s) == "Darwin" ] && GNU_GETOPT="/usr/local/opt/gnu-getopt/bin/getopt" || GNU_GETOPT="getopt"
 
-ARGS=$($GNU_GETOPT -o "" -l "revision:,region:,size:" -n "$0" -- "$@")
+ARGS=$($GNU_GETOPT -o "" -l "revision:,regions:,size:" -n "$0" -- "$@")
 eval set -- "$ARGS"
 
 while true; do
     case "$1" in
     --revision) BOX_REVISION="$2";;
-    --region) BOX_REGION="$2";;
+    --regions) IMAGE_REGIONS=($2);; # parse as whitespace separated array
     --size) BOX_SIZE="$2";;
     --) break;;
     *) echo "Unknown option $1"; exit 1;;
@@ -69,7 +69,7 @@ function create_droplet() {
     local SSH_KEY_ID="$1"
     local BOX_NAME="$2"
 
-    local DATA="{\"name\":\"$BOX_NAME\",\"size\":\"$BOX_SIZE\",\"region\":\"$BOX_REGION\",\"image\":\"$UBUNTU_IMAGE_SLUG\",\"ssh_keys\":[ $SSH_KEY_ID ],\"backups\":false}"
+    local DATA="{\"name\":\"$BOX_NAME\",\"size\":\"$BOX_SIZE\",\"region\":\"${IMAGE_REGIONS[0]}\",\"image\":\"$UBUNTU_IMAGE_SLUG\",\"ssh_keys\":[ $SSH_KEY_ID ],\"backups\":false}"
 
     $CURL -X POST -H 'Content-Type: application/json' -d "$DATA" "https://api.digitalocean.com/v2/droplets" | $JSON droplet.id
 }
@@ -126,6 +126,14 @@ function destroy_droplet() {
     echo ""
 }
 
+function transfer_image() {
+    local IMAGE_ID="$1"
+    local REGION_SLUG="$2"
+    local DATA="{\"type\":\"transfer\",\"region\":\"$REGION_SLUG\"}"
+    local EVENT_ID=`$CURL -X POST -H 'Content-Type: application/json' -d "$DATA" "https://api.digitalocean.com/v2/images/$IMAGE_ID/actions" | $JSON action.id`
+    echo "Image transfer to $REGION_SLUG initiated. Event id: $EVENT_ID"
+}
+
 function get_image_id() {
     local SNAPSHOT_NAME="$1"
     $CURL "https://api.digitalocean.com/v2/images" \
@@ -142,7 +150,7 @@ if [ -z "$YELLOWTENT_SSH_KEY_ID" ]; then
 fi
 echo "Detected yellowtent ssh key id: $YELLOWTENT_SSH_KEY_ID" # 124654 for yellowtent key
 
-echo "Creating Droplet with name [$BOX_NAME] at [$BOX_REGION] with size [$BOX_SIZE]"
+echo "Creating Droplet with name [$BOX_NAME] at [${IMAGE_REGIONs[0]}] with size [$BOX_SIZE]"
 DROPLET_ID=$(create_droplet $YELLOWTENT_SSH_KEY_ID $BOX_NAME)
 if [ -z "$DROPLET_ID" ]; then
     echo "Failed to create droplet"
@@ -209,3 +217,13 @@ echo "Destroying droplet"
 
 echo "Image id is $IMAGE_ID"
 
+echo "Transferring image to other regions"
+# skip the first region, as the image was created there
+for i in  ${IMAGE_REGIONS[@]:1}; do
+    (transfer_image $IMAGE_ID $i)
+    sleep 1
+done
+
+echo "Image transfer initiated, but they will take some time to get transferred..."
+
+echo "Done."
