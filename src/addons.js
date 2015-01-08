@@ -294,9 +294,9 @@ function setupRedis(app, callback) {
             container.inspect(function (error, data) {
                 if (error) return callback(new Error('Unable to inspect container:' + error));
 
-                var redisIp = safe.query(data, '[0].NetworkSettings.IPAddress');
+                var redisIp = safe.query(data, 'NetworkSettings.IPAddress');
                 if (!redisIp) return callback(new Error('Unable to get container ip'));
-                var redisPort = safe.query(data, '[0].NetworkSettings.Ports.6379/tcp[0].HostPort');
+                var redisPort = safe.query(data, 'NetworkSettings.Ports.6379/tcp[0].HostPort');
                 if (!redisPort) return callback(new Error('Unable to get container port mapping'));
 
                 var env = [ 'REDIS_URL=redis://redisuser:' + redisPassword + '@' + redisIp + ':' + redisPort ];
