@@ -18,4 +18,14 @@ for script in "${scripts[@]}"; do
     fi
 done
 
+if ! docker inspect girish/test:0.6 >/dev/null 2>/dev/null; then
+    echo "docker pull girish/test:0.6 for tests to run"
+    exit 1
+fi
+
+if ! docker inspect girish/redis:0.1 >/dev/null 2>/dev/null; then
+    echo "docker pull girish/redis:0.1 for tests to run"
+    exit 1
+fi
+
 exit 0
