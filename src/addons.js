@@ -9,7 +9,9 @@ var appFqdn = require('./apps').appFqdn,
     DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:addons'),
     docker = require('./docker.js'),
+    generatePassword = require('password-generator'),
     MemoryStream = require('memorystream'),
+    safe = require('safetydance'),
     util = require('util'),
     uuid = require('node-uuid');
 
@@ -258,7 +260,9 @@ function teardownPostgreSql(app, callback) {
 }
 
 function setupRedis(app, callback) {
-    var redisOptions = {
+    var redisPassword = generatePassword(64, false /* memorable */);
+
+    var createOptions = {
         name: 'redis-' + app.id,
         Hostname: appFqdn(app.location),
         Tty: true,
@@ -266,24 +270,38 @@ function setupRedis(app, callback) {
         Cmd: null,
         Volumes: { },
         VolumesFrom: '',
-        Env: null
+        Env: [ 'REDIS_PASSWORD=' + redisPassword ]
     };
 
-    docker.createContainer(redisOptions, function (error, container) {
+    var startOptions = {
+        Binds: [ ],
+        PortBindings: {
+            '6379/tcp': [{ HostPort: '0', HostIp: '127.0.0.1' }]
+        }
+    };
+
+    // docker.run does not return until the container ends :/
+    docker.createContainer(createOptions, function (error, container) {
         if (error) return callback(new Error('Error creating container:' + error));
 
         debug('Created redis container for %s with id %s', app.id, container.id);
 
-        var startOptions = {
-            Binds: [ ],
-            PublishAllPorts: true
-        };
+        container.start(startOptions, function (error) {
+            if (error) return callback(new Error('Error starting container:' + error));
 
-        container.start(startOptions, function (error, data) {
-            if (error && error.statusCode !== 304) return callback(new Error('Error starting container:' + error));
+            debug('Started redis container for %s with id %s', app.id, container.id);
 
-            var env = [ 'REDIS_URL=everything is awesome' ];
-            appdb.setAddonConfig(app.id, 'postgresql', env, callback);
+            container.inspect(function (error, data) {
+                if (error) return callback(new Error('Unable to inspect container:' + error));
+
+                var redisIp = safe.query(data, '[0].NetworkSettings.IPAddress');
+                if (!redisIp) return callback(new Error('Unable to get container ip'));
+                var redisPort = safe.query(data, '[0].NetworkSettings.Ports.6379/tcp[0].HostPort');
+                if (!redisPort) return callback(new Error('Unable to get container port mapping'));
+
+                var env = [ 'REDIS_URL=redis://redisuser:' + redisPassword + '@' + redisIp + ':' + redisPort ];
+                appdb.setAddonConfig(app.id, 'redis', env, callback);
+            });
         });
     });
 }
@@ -297,7 +315,6 @@ function teardownRedis(app, callback) {
    };
 
    container.remove(removeOptions, function (error) {
-       if (error && error.statusCode === 404) return updateApp(app, { containerId: null }, callback);
        if (error) console.error('Error removing container', error);
 
        callback(error);
