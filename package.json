@@ -74,7 +74,8 @@
     "istanbul": "*",
     "mocha": "*",
     "nock": "~0.43.1",
-    "sinon": "~1.10.3"
+    "sinon": "~1.10.3",
+    "redis": "~0.12.1"
   },
   "scripts": {
     "migrate": "mkdir -p $HOME/.yellowtent/data; DATABASE_URL=sqlite3:///$HOME/.yellowtent/data/cloudron.sqlite node_modules/.bin/db-migrate up",

@@ -22,6 +22,7 @@ var appdb = require('../../appdb.js'),
     net = require('net'),
     os = require('os'),
     paths = require('../../paths.js'),
+    redis = require('redis'),
     request = require('superagent'),
     server = require('../../server.js'),
     url = require('url'),
@@ -462,6 +463,34 @@ describe('App installation', function () {
         });
     });
 
+    it('installation - redis addon created', function (done) {
+        docker.getContainer('redis-' + APP_ID).inspect(function (error, data) {
+            expect(error).to.not.be.ok();
+            expect(data).to.be.ok();
+            done();
+        });
+    });
+
+    it('installation - redis addon config', function (done) {
+        docker.getContainer(appInfo.containerId).inspect(function (error, data) {
+            var redisUrl = null;
+            data.Config.Env.forEach(function (env) { if (env.indexOf('REDIS_URL=') === 0) redisUrl = env.split('=')[1]; });
+            expect(redisUrl).to.be.ok();
+
+            var urlp = url.parse(redisUrl);
+            var password = urlp.auth.split(':')[1];
+            var client = redis.createClient(parseInt(urlp.port, 10), urlp.hostname, { auth_pass: password });
+            client.on('error', done);
+            client.set('key', 'value');
+            client.get('key', function (err, reply) {
+                expect(err).to.not.be.ok();
+                expect(reply.toString()).to.be('value');
+                client.end();
+                done();
+            });
+        });
+    });
+
     it('logs - stdout and stderr', function (done) {
         request.get(SERVER_URL + '/api/v1/apps/' + APP_ID + '/logs')
             .query({ access_token: token })
@@ -605,6 +634,13 @@ describe('App installation', function () {
     it('uninstalled - removed nginx', function (done) {
         expect(!fs.existsSync(paths.NGINX_APPCONFIG_DIR + '/' + APP_LOCATION + '.conf'));
         done();
+    });
+
+    it('uninstalled - removed redis addon', function (done) {
+        docker.getContainer('redis-' + APP_ID).inspect(function (error, data) {
+            expect(error).to.be.ok();
+            done();
+        });
     });
 });
 
@@ -765,6 +801,38 @@ describe('App installation - port bindings', function () {
         });
     });
 
+    it('installation - redis addon created', function (done) {
+        docker.getContainer('redis-' + APP_ID).inspect(function (error, data) {
+            expect(error).to.not.be.ok();
+            expect(data).to.be.ok();
+            done();
+        });
+    });
+
+    it('installation - redis addon config', function (done) {
+        docker.getContainer(appInfo.containerId).inspect(function (error, data) {
+            var redisUrl = null;
+            data.Config.Env.forEach(function (env) { if (env.indexOf('REDIS_URL=') === 0) redisUrl = env.split('=')[1]; });
+            expect(redisUrl).to.be.ok();
+
+            function checkRedis() {
+                var urlp = url.parse(redisUrl);
+                var password = urlp.auth.split(':')[1];
+                var client = redis.createClient(parseInt(urlp.port, 10), urlp.hostname, { auth_pass: password });
+                client.on('error', done);
+                client.set('key', 'value');
+                client.get('key', function (err, reply) {
+                    expect(err).to.not.be.ok();
+                    expect(reply.toString()).to.be('value');
+                    client.end();
+                    done();
+                });
+            }
+
+            setTimeout(checkRedis, 1000); // the bridge network takes time to come up?
+        });
+    });
+
     it('can reconfigure app', function (done) {
         var count = 0;
         function checkConfigureStatus() {
@@ -772,7 +840,7 @@ describe('App installation - port bindings', function () {
                .query({ access_token: token })
                .end(function (err, res) {
                 expect(res.statusCode).to.equal(200);
-                if (res.body.installationState === appdb.ISTATE_INSTALLED) { appInfo = res.body; return done(null); }
+                if (res.body.installationState === appdb.ISTATE_INSTALLED) { appInfo = res.body; expect(appInfo).to.be.ok(); return done(null); }
                 if (res.body.installationState === appdb.ISTATE_ERROR) return done(new Error('Install error'));
                 if (++count > 50) return done(new Error('Timedout'));
                 setTimeout(checkConfigureStatus, 1000);
@@ -797,6 +865,26 @@ describe('App installation - port bindings', function () {
             });
             client.on('error', done);
         }, 2000);
+    });
+
+    it('redis addon works after reconfiguration', function (done) {
+        docker.getContainer(appInfo.containerId).inspect(function (error, data) {
+            var redisUrl = null;
+            data.Config.Env.forEach(function (env) { if (env.indexOf('REDIS_URL=') === 0) redisUrl = env.split('=')[1]; });
+            expect(redisUrl).to.be.ok();
+
+            var urlp = url.parse(redisUrl);
+            var password = urlp.auth.split(':')[1];
+            var client = redis.createClient(parseInt(urlp.port, 10), urlp.hostname, { auth_pass: password });
+            client.on('error', done);
+            client.set('key', 'value');
+            client.get('key', function (err, reply) {
+                expect(err).to.not.be.ok();
+                expect(reply.toString()).to.be('value');
+                client.end();
+                done();
+            });
+        });
     });
 
     it('can stop app', function (done) {
@@ -869,6 +957,13 @@ describe('App installation - port bindings', function () {
     it('uninstalled - removed nginx', function (done) {
         expect(!fs.existsSync(paths.NGINX_APPCONFIG_DIR + '/' + APP_LOCATION + '.conf'));
         done();
+    });
+
+    it('uninstalled - removed redis addon', function (done) {
+        docker.getContainer('redis-' + APP_ID).inspect(function (error, data) {
+            expect(error).to.be.ok();
+            done();
+        });
     });
 });
 

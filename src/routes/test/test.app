@@ -11,6 +11,7 @@
     }
   },
   "addons": [
-    "oauth"
+    "oauth",
+    "redis"
   ]
 }

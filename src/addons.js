@@ -276,7 +276,7 @@ function setupRedis(app, callback) {
     var startOptions = {
         Binds: [ ],
         PortBindings: {
-            '6379/tcp': [{ HostPort: '0', HostIp: '127.0.0.1' }]
+            '6379/tcp': [{ HostPort: '0', HostIp: '127.0.0.1' }] // export only for testing purposes and not for the app itself
         }
     };
 
@@ -296,10 +296,8 @@ function setupRedis(app, callback) {
 
                 var redisIp = safe.query(data, 'NetworkSettings.IPAddress');
                 if (!redisIp) return callback(new Error('Unable to get container ip'));
-                var redisPort = safe.query(data, 'NetworkSettings.Ports.6379/tcp[0].HostPort');
-                if (!redisPort) return callback(new Error('Unable to get container port mapping'));
-
-                var env = [ 'REDIS_URL=redis://redisuser:' + redisPassword + '@' + redisIp + ':' + redisPort ];
+ 
+                var env = [ 'REDIS_URL=redis://redisuser:' + redisPassword + '@' + redisIp + ':6379' ];
                 appdb.setAddonConfig(app.id, 'redis', env, callback);
             });
         });
