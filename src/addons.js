@@ -315,9 +315,10 @@ function teardownRedis(app, callback) {
    };
 
    container.remove(removeOptions, function (error) {
-       if (error) console.error('Error removing container', error);
+       if (error && error.statusCode === 404) return callback(null);
+       if (error) return callback(new Error('Error removing container:' + error));
 
-       callback(error);
+       callback(null);
    });
 }
 
