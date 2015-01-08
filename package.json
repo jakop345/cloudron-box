@@ -62,7 +62,8 @@
     "validator": "~3.22.1",
     "connect-lastmile": "0.0.8",
     "supererror": "~0.6.0",
-    "memorystream": "~0.2.0"
+    "memorystream": "~0.2.0",
+    "password-generator": "~0.2.3"
   },
   "devDependencies": {
     "apidoc": "*",
