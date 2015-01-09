@@ -181,8 +181,7 @@ echo ""
 chmod o-rw,g-rw,u-w $SCRIPT_DIR/ssh/*
 while true; do
     echo "Trying to copy init script to droplet"
-    scp -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i $SCRIPT_DIR/ssh/id_rsa_yellowtent $SCRIPT_DIR/initializeBaseUbuntuImage.sh root@$DROPLET_IP:.
-    if [ $? -eq 0 ]; then
+    if scp -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i $SCRIPT_DIR/ssh/id_rsa_yellowtent $SCRIPT_DIR/initializeBaseUbuntuImage.sh root@$DROPLET_IP:.; then
         break
     fi
     echo "Timedout, trying again in 30 seconds"
@@ -190,8 +189,7 @@ while true; do
 done
 
 echo "Executing init script"
-ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i $SCRIPT_DIR/ssh/id_rsa_yellowtent root@$DROPLET_IP "/bin/bash /root/initializeBaseUbuntuImage.sh $BOX_REVISION"
-if [ $? -ne 0 ]; then
+if ! ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i $SCRIPT_DIR/ssh/id_rsa_yellowtent root@$DROPLET_IP "/bin/bash /root/initializeBaseUbuntuImage.sh $BOX_REVISION"; then
     echo "Init script failed"
     exit 1
 fi
