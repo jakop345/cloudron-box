@@ -8,7 +8,7 @@ set -e
 set -x
 
 HOME_DIR="/home/yellowtent"
-SRCDIR="$HOME_DIR/box"
+BOX_SRCDIR="$HOME_DIR/box"
 CONFIG_DIR="$HOME_DIR/config"
 DATA_DIR="$HOME_DIR/data"
 CLOUDRON_SQLITE="$DATA_DIR/cloudron.sqlite"
@@ -51,30 +51,26 @@ if [ -n "$PROVISION_RESTORE_URL" ]; then
 fi
 
 echo "Downloading box versions"
-if [ "$PROVISION_VERSION" = "latest" ]; then
-    REVISION="origin/master"
-else
-    while true; do
-        REVISION=$(curl --retry 5 --retry-delay 5 --max-time 120 -L "$PROVISION_BOX_VERSIONS_URL" | $JSON -D, "$PROVISION_VERSION,revision")
-        [ -n "$REVISION" ] && break
-        echo "Failed to download box versions, trying again"
-    done
-fi
-echo "Updating to revision : $REVISION"
 
-cd "$SRCDIR"
 while true; do
-    timeout 3m git fetch origin && break
-    echo "git fetch timedout, trying again"
-    sleep 2
+    SOURCE_TARBALL_URL=$(curl --retry 5 --retry-delay 5 --max-time 120 -L "$PROVISION_BOX_VERSIONS_URL" | $JSON -D, "$PROVISION_VERSION,sourceTarballUrl")
+    [ -n "$SOURCE_TARBALL_URL" ] && break
+    echo "Failed to download box versions, trying again"
 done
 
-git reset --hard "$REVISION"
+sudo -u yellowtent -H bash <<EOF
+set -e
+set -x
+rm -rf "$BOX_SRCDIR" && mkdir -p "$BOX_SRCDIR"
+echo "Fetching source tarball from $SOURCE_TARBALL_URL"
+curl --retry 5 --retry-delay 5 --max-time 1200 -L "$SOURCE_TARBALL_URL" | tar -zxf - -C "$BOX_SRCDIR"
+cd "$BOX_SRCDIR" && npm rebuild
+EOF
 
 # For the update case, remove any existing config
 rm -rf "$CONFIG_DIR/*"
 
 # https://stackoverflow.com/questions/3348443/a-confusion-about-array-versus-array-in-the-context-of-a-bash-comple
 # Note that this is the latest postinstall.sh
-$SRCDIR/postinstall/postinstall.sh "${SAVED_ARGS[@]}"
+$BOX_SRCDIR/postinstall/postinstall.sh "${SAVED_ARGS[@]}"
 

@@ -22,7 +22,7 @@ function publish(versionsFileName) {
     sortedVersions.forEach(function (version, index) {
         if (typeof versionsJson[version].imageId !== 'number') die('version ' + version + ' does not have proper imageId');
         if (versionsJson[version].next !== null && typeof versionsJson[version].next !== 'string') die('version ' + version + ' does not have proper next');
-        if (typeof versionsJson[version].revision !== 'string') die('version ' + version + ' does not have proper revision');
+        if (typeof versionsJson[version].sourceTarballUrl !== 'string') die('version ' + version + ' does not have proper sourceTarballUrl');
 
         var nextVersion = versionsJson[version].next;
         if (nextVersion <= version) die('next version cannot be less than current @' + version);

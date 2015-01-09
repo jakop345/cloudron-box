@@ -3,6 +3,7 @@
 set -e
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+INSTALLER_SOURCE="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
 
 if [ -z "$DIGITAL_OCEAN_TOKEN" ]; then
     echo "Script requires DIGITAL_OCEAN_TOKEN env to be set"
@@ -13,7 +14,7 @@ JSON="$SCRIPT_DIR/../node_modules/.bin/json"
 CURL="curl -s -u $DIGITAL_OCEAN_TOKEN:"
 UBUNTU_IMAGE_SLUG="ubuntu-14-04-x64" # ID=5141286
 DATE=`date +%Y-%m-%d-%H%M%S`
-BOX_REVISION=origin/master
+INSTALLER_REVISION=$(git rev-parse HEAD)
 IMAGE_REGIONS=(ams3 sfo1 nyc2)
 BOX_SIZE="512mb"
 
@@ -26,7 +27,7 @@ eval set -- "$ARGS"
 
 while true; do
     case "$1" in
-    --revision) BOX_REVISION="$2";;
+    --revision) INSTALLER_REVISION="$2";;
     --regions) IMAGE_REGIONS=($2);; # parse as whitespace separated array
     --size) BOX_SIZE="$2";;
     --) break;;
@@ -54,7 +55,7 @@ function get_pretty_revision() {
     fi
 }
 
-PRETTY_REVISION=$(get_pretty_revision $BOX_REVISION)
+PRETTY_REVISION=$(get_pretty_revision $INSTALLER_REVISION)
 BOX_NAME="box-$PRETTY_REVISION-$DATE" # remove slashes
 SNAPSHOT_NAME="box-$PRETTY_REVISION-$DATE"
 
@@ -188,8 +189,11 @@ while true; do
     sleep 30
 done
 
+echo "Copying installer source"
+(cd "$INSTALLER_SOURCE_DIR" && git archive --format=tar HEAD) | ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i $SCRIPT_DIR/ssh/id_rsa_yellowtent root@$DROPLET_IP "cat - > /root/installer.tar"
+
 echo "Executing init script"
-if ! ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i $SCRIPT_DIR/ssh/id_rsa_yellowtent root@$DROPLET_IP "/bin/bash /root/initializeBaseUbuntuImage.sh $BOX_REVISION"; then
+if ! ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i $SCRIPT_DIR/ssh/id_rsa_yellowtent root@$DROPLET_IP "/bin/bash /root/initializeBaseUbuntuImage.sh $INSTALLER_REVISION"; then
     echo "Init script failed"
     exit 1
 fi

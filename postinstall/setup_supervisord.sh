@@ -3,7 +3,8 @@
 set -e
 
 USER=yellowtent
-SRCDIR=/home/$USER/box
+BOX_SRCDIR=/home/$USER/box
+INSTALLER_SRCDIR=/home/$USER/installer
 DATA_DIR=/home/$USER/data
 NGINX_CONFIG_DIR=/home/$USER/configs/nginx
 
@@ -28,7 +29,7 @@ EOF
 
 cat > /etc/supervisor/conf.d/box.conf <<EOF
 [program:box]
-command=/usr/bin/node $SRCDIR/app.js
+command=/usr/bin/node $BOX_SRCDIR/app.js
 autostart=true
 autorestart=true
 redirect_stderr=true
@@ -39,9 +40,10 @@ user=yellowtent
 environment=HOME="/home/yellowtent",CLOUDRON="1",USER="yellowtent",DEBUG="box*,connect-lastmile"
 EOF
 
+# FIXME: Run installer in a separate supervisor instead and let it never die
 cat > /etc/supervisor/conf.d/updater.conf <<EOF
 [program:updater]
-command=/usr/bin/node $SRCDIR/installer/server.js update-mode
+command=/usr/bin/node $INSTALLER_SRCDIR/installer/server.js update-mode
 autostart=true
 autorestart=true
 redirect_stderr=true

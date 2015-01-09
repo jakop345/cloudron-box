@@ -6,8 +6,8 @@ USER=yellowtent
 USER_HOME="/home/$USER"
 DATA_DIR="$USER_HOME/data"
 APPDATA=$DATA_DIR/appdata
-SRCDIR=$USER_HOME/box
-BOX_REVISION=$1
+INSTALLER_SOURCE_DIR=$USER_HOME/installer
+INSTALLER_REVISION=$1
 
 echo "==== Create User $USER ===="
 id $USER
@@ -19,7 +19,7 @@ fi
 # now exit on failure
 set -e
 
-echo "== Yellowtent base image preparation ($BOX_REVISION) =="
+echo "== Yellowtent base image preparation (installer revision - $INSTALLER_REVISION) =="
 
 export DEBIAN_FRONTEND=noninteractive
 
@@ -39,11 +39,6 @@ apt-get upgrade -y
 echo "==== Install nodejs ===="
 apt-get -y install nodejs npm
 ln -sf /usr/bin/nodejs /usr/bin/node
-
-
-echo "==== Install git ===="
-apt-get -y install git
-
 
 echo "==== Install docker ===="
 # see http://idolstarastronomer.com/painless-docker.html
@@ -129,26 +124,13 @@ echo "/root/user_home.img $USER_HOME btrfs loop,nosuid 0 0" >> /etc/fstab
 mount -a
 btrfs subvolume create $USER_HOME/data
 
-echo "==== Cloning box repo ===="
-echo "Cloning the box repo"
-mkdir -p $USER_HOME
-cd $USER_HOME
-git clone http://bootstrap:not4long@yellowtent.girish.in/yellowtent/box.git
-cd $SRCDIR
-git reset --hard $BOX_REVISION
-echo "git HEAD is `git rev-parse HEAD`"
+echo "==== Extracting installer source ===="
+mkdir -p "$INSTALLER_SOURCE_DIR"
+tar xvf /root/installer.tar -C "$INSTALLER_SOURCE_DIR" && rm /root/installer.tar
+echo "$INSTALLER_REVISION" > "$INSTALLER_SOURCE_DIR/REVISION"
 
-NPM_INSTALL="npm install --production"
-rm -rf ./node_modules
-eval $NPM_INSTALL
-RET=$?
-while [[ $RET -ne 0 ]]; do
-    echo "[EE] npm install failed, try again"
-    rm -rf ./node_modules
-    eval $NPM_INSTALL
-    RET=$?
-done
-
+echo "=== Rebuilding npm packages ==="
+cd "$INSTALLER_SOURCE_DIR" && npm install
 
 echo "==== Make the user own his home ===="
 chown $USER:$USER -R /home/$USER
@@ -197,26 +179,12 @@ echo "==== Install init script ===="
 cat > /etc/init.d/cloudron-bootstrap <<EOF
 #!/bin/bash
 
-checkout_installer() {
-    cd "$SRCDIR"
-    while true; do
-        timeout 3m git fetch origin && break
-        echo "git fetch timedout, trying again"
-        sleep 2
-    done
-
-    git reset --hard "$1"
-}
-
 do_start() {
-    # this hack lets us work with refs instead of revisions
-    checkout_installer "$BOX_REVISION"
-
     mkdir -p /var/log/cloudron
 
     exec 2>&1 1> "/var/log/cloudron/bootstrap.log"
 
-    DEBUG="box*,connect-lastmile" $SRCDIR/installer/server.js provision-mode 2>&1 1> /var/log/cloudron/installserver.log &
+    DEBUG="box*,connect-lastmile" $INSTALLER_SOURCE_DIR/installer/server.js provision-mode 2>&1 1> /var/log/cloudron/installserver.log &
 
     echo "Disabling cloudron-bootstrap init script"
     update-rc.d cloudron-bootstrap remove

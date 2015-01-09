@@ -1,7 +1,7 @@
 {
     "0.0.1": {
-        "revision": "origin/master",
-        "imageId": 9795675,
+        "sourceTarballUrl": "https://s3.amazonaws.com/cloudron-releases/box-367cb48889b604bdfae33d07693e2195c331c263.tar.gz",
+        "imageId": 9833946,
         "next": null
     }
 }

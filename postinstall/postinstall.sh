@@ -77,15 +77,11 @@ $USER ALL=(root) NOPASSWD: $SRCDIR/installer/scripts/installer.sh
 
 EOF
 
-echo "==== Setup yellowtent ===="
+echo "==== Migrate data ===="
 sudo -u $USER -H bash <<EOF
+set -e
+set -x
 cd $SRCDIR
-while true; do
-    timeout 3m npm install --production && break
-    echo "npm install timedout, trying again"
-    sleep 2
-done
-echo "Migrate data"
 PATH=$PATH:$SRCDIR/node_modules/.bin npm run-script migrate_data
 EOF
 
