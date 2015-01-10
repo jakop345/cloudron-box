@@ -14,7 +14,7 @@ var appdb = require('./appdb.js'),
     safe = require('safetydance'),
     superagent = require('superagent');
 
-var UPDATE_URL = 'http://127.0.0.1:2020/api/v1/installer/update';
+var INSTALLER_UPDATE_URL = 'http://127.0.0.1:2020/api/v1/installer/update';
 
 var gCheckUpdatesTimeoutId = null,
     gAppUpdateInfo = null,
@@ -160,7 +160,7 @@ function update(callback) {
 
         debug('updater: updating box %j', args);
 
-        superagent.post(UPDATE_URL)
+        superagent.post(INSTALLER_UPDATE_URL)
             .send(args)
             .end(function (error, result) {
                 if (error) return callback(error);
