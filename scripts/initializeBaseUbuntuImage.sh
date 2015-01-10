@@ -9,6 +9,9 @@ APPDATA=$DATA_DIR/appdata
 INSTALLER_SOURCE_DIR=$USER_HOME/installer
 INSTALLER_REVISION=$1
 
+# All logs go here
+mkdir -p /var/log/cloudron
+
 echo "==== Create User $USER ===="
 id $USER
 if [[ $? -ne 0 ]]; then
@@ -114,8 +117,6 @@ apt-get install -y collectd collectd-utils
 update-rc.d -f collectd remove
 
 
-echo "== Box bootstrapping =="
-
 echo "==== Seting up data ==="
 # create a separate 12GB fs for data
 truncate -s 12G /root/user_home.img
@@ -174,20 +175,12 @@ iptables -A LOGGING -j DROP
 # ubuntu will restore iptables from this file automatically
 iptables-save > /etc/iptables/rules.v4
 
-
 echo "==== Install init script ===="
 cat > /etc/init.d/cloudron-bootstrap <<EOF
 #!/bin/bash
 
 do_start() {
-    mkdir -p /var/log/cloudron
-
-    exec 2>&1 1> "/var/log/cloudron/bootstrap.log"
-
-    DEBUG="box*,connect-lastmile" $INSTALLER_SOURCE_DIR/installer/server.js provision-mode 2>&1 1> /var/log/cloudron/installserver.log &
-
-    echo "Disabling cloudron-bootstrap init script"
-    update-rc.d cloudron-bootstrap remove
+    DEBUG="installer*,connect-lastmile" $INSTALLER_SOURCE_DIR/installer/server.js 2>&1 1> /var/log/cloudron/installserver.log &
 }
 
 case "\$1" in

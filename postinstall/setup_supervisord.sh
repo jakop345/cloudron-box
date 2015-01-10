@@ -40,20 +40,6 @@ user=yellowtent
 environment=HOME="/home/yellowtent",CLOUDRON="1",USER="yellowtent",DEBUG="box*,connect-lastmile"
 EOF
 
-# FIXME: Run installer in a separate supervisor instead and let it never die
-cat > /etc/supervisor/conf.d/updater.conf <<EOF
-[program:updater]
-command=/usr/bin/node $INSTALLER_SRCDIR/installer/server.js update-mode
-autostart=true
-autorestart=true
-redirect_stderr=true
-stdout_logfile=/var/log/supervisor/updater.log
-stdout_logfile_maxbytes=50MB
-stdout_logfile_backups=2
-user=yellowtent
-environment=HOME="/home/yellowtent",CLOUDRON="1",USER="yellowtent",DEBUG="installer*,connect-lastmile"
-EOF
-
 # http://www.onurguzel.com/supervisord-restarting-and-reloading/
 echo "Restarting supervisor"
 /etc/init.d/supervisor stop

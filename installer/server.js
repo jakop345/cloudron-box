@@ -43,7 +43,9 @@ function restore(req, res, next) {
     installer.restore(req.body, function (error) {
         if (error) console.error(error);
 
-        stopProvisionServer(function () { });
+        // switch to update mode
+        stopProvisionServer(function () { console.log('Provision server stopped'); });
+        startUpdateServer(function () { console.log('Update server started'); });
     });
 
     announce.stop(function () { });
@@ -66,7 +68,9 @@ function provision(req, res, next) {
     installer.provision(req.body, function (error) {
         if (error) console.error(error);
 
-        stopProvisionServer(function () { });
+        // switch to update mode
+        stopProvisionServer(function () { console.log('Provision server stopped'); });
+        startUpdateServer(function () { console.log('Update server started'); });
     });
 
     announce.stop(function () { });
@@ -203,12 +207,11 @@ function stop(callback) {
 }
 
 if (require.main === module) {
-    if (process.argv.length !== 3) {
-        console.log('Usage: node server.js [update-mode|provision-mode]');
-        return;
-    }
+    var mode = process.argv[2];
 
-    start(process.argv[2], function (error) {
+    mode = fs.existsSync('/home/yellowtent/box') ? 'update-mode' : 'provision-mode';
+
+    start(mode, function (error) {
         if (error) console.error(error);
     });
 }
