@@ -3,14 +3,15 @@
 var AWS = require('aws-sdk'),
     fs = require('fs'),
     path = require('path'),
-    safe = require('safetydance');
+    safe = require('safetydance'),
+    semver = require('semver');
 
 function die(msg) {
     console.error(msg);
     process.exit(1);
 }
 
-function publish(versionsFileName) {
+function verify(versionsFileName) {
     // check if the json is valid
     var versionsJson = safe.JSON.parse(fs.readFileSync(versionsFileName));
     if (!versionsJson) {
@@ -25,7 +26,7 @@ function publish(versionsFileName) {
         if (typeof versionsJson[version].sourceTarballUrl !== 'string') die('version ' + version + ' does not have proper sourceTarballUrl');
 
         var nextVersion = versionsJson[version].next;
-        if (nextVersion <= version) die('next version cannot be less than current @' + version);
+        if (nextVersion && semver.gt(version, nextVersion)) die('next version cannot be less than current @' + version);
     });
 
     // check that package.json version is in versions.json
@@ -34,39 +35,16 @@ function publish(versionsFileName) {
         die('package.json version is not present in versions.json');
     }
 
-    if (sortedVersions.indexOf(currentVersion) !== sortedVersions.length - 1) {
-        die('package.json version is not the latest version in ' + versionsFileName);
-    }
-
-    var config = {
-        accessKeyId: 'AKIAJ3GNZ2C7W5XKAH7Q',
-        secretAccessKey: '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'
-    };
-
-    var s3 = new AWS.S3(config);
-
-    var versionsFileStream = fs.createReadStream(versionsFileName);
-
-    var params = {
-        Bucket: 'cloudron-releases',
-        Key: path.basename(versionsFileName),
-        ACL: 'public-read',
-        Body: versionsFileStream,
-        ContentType: 'application/json'
-    };
-
-    console.log('Uploading ' + path.basename(versionsFileName));
-    s3.putObject(params, function (error, data) {
-        if (error) return console.error(error);
-
-        console.log(data);
-    });
+    // if (sortedVersions.indexOf(currentVersion) !== sortedVersions.length - 1) {
+    //     die('package.json version is not the latest version in ' + versionsFileName);
+    // }
 }
 
 if (process.argv.length === 3) {
-    publish(path.join(__dirname, 'versions-' + process.argv[2] + '.json'));
+    verify(process.argv[2]);
+    process.exit(0);
 } else {
-    console.log('publish.sh <dev|stable>');
+    console.log('verify.js <versions_file>');
 }
 
 

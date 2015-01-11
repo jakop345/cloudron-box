@@ -76,7 +76,8 @@
     "nock": "~0.43.1",
     "sinon": "~1.10.3",
     "redis": "~0.12.1",
-    "s3-cli": "~0.11.1"
+    "s3-cli": "~0.11.1",
+    "semver": "~4.2.0"
   },
   "scripts": {
     "migrate": "mkdir -p $HOME/.yellowtent/data; DATABASE_URL=sqlite3:///$HOME/.yellowtent/data/cloudron.sqlite node_modules/.bin/db-migrate up",
