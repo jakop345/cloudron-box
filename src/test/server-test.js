@@ -88,7 +88,7 @@ describe('Server', function () {
             request.get(SERVER_URL + '/api/v1/cloudron/status', function (err, res) {
                 expect(err).to.not.be.ok();
                 expect(res.statusCode).to.equal(200);
-                expect(res.body.version).to.equal(require('../../package.json').version);
+                expect(res.body.version).to.be.ok();
                 done(err);
             });
         });

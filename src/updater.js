@@ -25,8 +25,7 @@ module.exports = exports = {
     uninitialize: uninitialize,
 
     getUpdateInfo: getUpdateInfo,
-    update: update,
-    isDev: isDev
+    update: update
 };
 
 function getUpdateInfo() {
@@ -57,6 +56,8 @@ function checkAppUpdates(callback) {
 function checkBoxUpdates(callback) {
     debug('checking for box update');
 
+    var currentVersion = require(paths.VERSION_FILENAME).version;
+
     superagent.get(config.get('boxVersionsUrl')).end(function (error, result) {
         if (error) return callback(error);
         if (result.status !== 200) return callback(new Error('Bad status:', result.status));
@@ -67,8 +68,8 @@ function checkBoxUpdates(callback) {
 
         if (!versions) return callback(new Error('versions is not valid json:' + safe.error));
 
-        var currentVersionInfo = versions[config.version()];
-        if (!currentVersionInfo) return callback(new Error('Cloudron runs on unknown version %s', config.version()));
+        var currentVersionInfo = versions[currentVersion];
+        if (!currentVersionInfo) return callback(new Error('Cloudron runs on unknown version %s', currentVersion));
 
         var nextVersion = currentVersionInfo.next;
         var nextVersionInfo = nextVersion ? versions[nextVersion] : null;
@@ -115,14 +116,10 @@ function uninitialize(callback) {
     callback(null);
 };
 
-function isDev() {
-    return /dev/i.test(config.get('boxVersionsUrl'));
-}
-
 function update(callback) {
     assert(typeof callback === 'function');
 
-    if (!isDev() && !gBoxUpdateInfo) {
+    if (!gBoxUpdateInfo) {
         debug('update: no box update available');
         return callback(new Error('No update available'));
     }
@@ -149,7 +146,7 @@ function update(callback) {
         var args = {
             appServerUrl: config.appServerUrl(),
             fqdn: config.fqdn(),
-            version: isDev() ? 'latest' : gBoxUpdateInfo.version,
+            version: gBoxUpdateInfo.version,
             token: config.token(),
             tls: {
                 cert: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), 'utf8'),

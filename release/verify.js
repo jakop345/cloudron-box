@@ -34,10 +34,6 @@ function verify(versionsFileName) {
     if (sortedVersions.indexOf(currentVersion) === -1) {
         die('package.json version is not present in versions.json');
     }
-
-    // if (sortedVersions.indexOf(currentVersion) !== sortedVersions.length - 1) {
-    //     die('package.json version is not the latest version in ' + versionsFileName);
-    // }
 }
 
 if (process.argv.length === 3) {

@@ -16,7 +16,6 @@ exports = module.exports = {
     set: set,
 
     // convenience getters
-    version: version,
     appServerUrl: appServerUrl,
     fqdn: fqdn,
     adminOrigin: adminOrigin,
@@ -87,10 +86,6 @@ function get(key) {
     assert(typeof key === 'string');
 
     return safe.query(data, key);
-}
-
-function version() {
-    return require('./package.json').version;
 }
 
 function appServerUrl() {
