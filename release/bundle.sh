@@ -3,6 +3,8 @@
 set -x
 set -e
 
+[ ! -f "$HOME/.s3cfg" ] && echo "~/.s3cfg missing" && exit 1
+
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd )"
 VERSION=$(cd "$SOURCE_DIR" && git rev-parse HEAD)
 
