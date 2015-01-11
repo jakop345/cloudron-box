@@ -11,23 +11,23 @@ VERSIONS_S3_URL="s3://cloudron-releases/versions-dev.json"
 
 SOURCE_TARBALL_URL=""
 IMAGE_ID=""
+FORCE="no"
 
 # --code and--image is provided for readability. The code below assumes number is an image id
 # and anything else is the source tarball url. So, one can just say "publish.sh 2345 https://foo.tar.gz"
-ARGS=$(getopt -o "" -l "dev,stable,code:,image:" -n "$0" -- "$@")
+ARGS=$(getopt -o "" -l "dev,stable,code:,image:,force" -n "$0" -- "$@")
 eval set -- "$ARGS"
 
 while true; do
     case "$1" in
-    --dev) VERSIONS_URL="https://s3.amazonaws.com/cloudron-releases/versions-dev.json";;
+    --dev) VERSIONS_URL="https://s3.amazonaws.com/cloudron-releases/versions-dev.json"; shift;;
     --stable) echo "Not implemented yet. Need to figure how to bump version"; exit 1;;
-    --code) SOURCE_TARBALL_URL="$2";;
-    --image) IMAGE_ID="$2";;
-    --) break;;
-    *) echo "Unknown option $1"; exit 1;;
+    --code) SOURCE_TARBALL_URL="$2"; shift 2;;
+    --image) IMAGE_ID="$2"; shift 2;;
+    --force) FORCE="yes"; shift;;
+    --) shift; break;;
+    *) echo "Unknown option $2"; exit;;
     esac
-
-    shift 2
 done
 
 shift $(expr $OPTIND - 1)
@@ -37,7 +37,7 @@ while test $# -gt 0; do
     shift
 done
 
-if [[ -z "$SOURCE_TARBALL_URL" && -z "$IMAGE_ID" ]]; then
+if [[ -z "$SOURCE_TARBALL_URL" && -z "$IMAGE_ID" && "$FORCE" == "no" ]]; then
     echo "--code or --image is required"
     exit 1
 fi
