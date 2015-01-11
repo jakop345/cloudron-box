@@ -209,7 +209,7 @@ function stop(callback) {
 if (require.main === module) {
     var mode = process.argv[2];
 
-    mode = fs.existsSync('/home/yellowtent/box') ? 'update-mode' : 'provision-mode';
+    if (!mode) mode = fs.existsSync('/home/yellowtent/box') ? 'update-mode' : 'provision-mode';
 
     start(mode, function (error) {
         if (error) console.error(error);
