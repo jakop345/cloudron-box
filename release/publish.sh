@@ -13,10 +13,11 @@ VERSIONS_S3_URL="s3://cloudron-releases/versions-dev.json"
 SOURCE_TARBALL_URL=""
 IMAGE_ID=""
 FORCE="no"
+RESET="no"
 
 # --code and--image is provided for readability. The code below assumes number is an image id
 # and anything else is the source tarball url. So, one can just say "publish.sh 2345 https://foo.tar.gz"
-ARGS=$($GNU_GETOPT -o "" -l "dev,stable,code:,image:,force" -n "$0" -- "$@")
+ARGS=$($GNU_GETOPT -o "" -l "dev,stable,code:,image:,force,reset" -n "$0" -- "$@")
 eval set -- "$ARGS"
 
 while true; do
@@ -26,6 +27,7 @@ while true; do
     --code) SOURCE_TARBALL_URL="$2"; shift 2;;
     --image) IMAGE_ID="$2"; shift 2;;
     --force) FORCE="yes"; shift;;
+    --reset) RESET="yes"; shift;;
     --) shift; break;;
     *) echo "Unknown option $2"; exit;;
     esac
@@ -59,12 +61,24 @@ if [ -z "$IMAGE_ID" ]; then
     echo "Using the previous image id : $IMAGE_ID"
 fi
 
-
-NEW_VERSION=$($SOURCE_DIR/node_modules/.bin/semver -i $LAST_VERSION)
+if [ "$RESET" == "no" ]; then
+    NEW_VERSION=$($SOURCE_DIR/node_modules/.bin/semver -i $LAST_VERSION)
+    $JSON -q -I -f "$NEW_VERSIONS_FILE" -e "this['$LAST_VERSION'].next = '$NEW_VERSION'"
+    $JSON -q -I -f "$NEW_VERSIONS_FILE" -e "this['$NEW_VERSION'] = { 'sourceTarballUrl': '$SOURCE_TARBALL_URL', 'imageId': $IMAGE_ID, 'next': null }"
+else
+    NEW_VERSION="0.0.1"
+    cat > "$NEW_VERSIONS_FILE" <<EOF
+    {
+        "0.0.1": {
+            "sourceTarballUrl": "$SOURCE_TARBALL_URL",
+            "imageId": $IMAGE_ID,
+            "next": null
+        }
+    }
+EOF
+fi
 
 echo "Releasing version $NEW_VERSION"
-$JSON -q -I -f "$NEW_VERSIONS_FILE" -e "this['$LAST_VERSION'].next = '$NEW_VERSION'"
-$JSON -q -I -f "$NEW_VERSIONS_FILE" -e "this['$NEW_VERSION'] = { 'sourceTarballUrl': '$SOURCE_TARBALL_URL', 'imageId': $IMAGE_ID, 'next': null }"
 
 echo "Verifying new versions file"
 $SOURCE_DIR/release/verify.js "$NEW_VERSIONS_FILE"
