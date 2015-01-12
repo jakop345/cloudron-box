@@ -79,4 +79,5 @@ rm -rf "$CONFIG_DIR/*"
 # Note that this is the latest postinstall.sh
 $SRCDIR/postinstall/postinstall.sh "${SAVED_ARGS[@]}"
 
-echo "{ \"version\": \"$PROVISION_VERSION\" }" > "$CONFIG_DIR/version.json"
+echo "{ \"version\": \"$PROVISION_VERSION\" }" > "$DATA_DIR/version.json"
+
