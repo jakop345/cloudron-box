@@ -13,7 +13,7 @@ echo "==== Cloudron post installation ===="
 USER=yellowtent
 SRCDIR=/home/$USER/box
 DATA_DIR=/home/$USER/data
-CONFIG_DIR=/home/$USER/config
+CONFIG_DIR=/home/$USER/configs
 HARAKA_DIR=$CONFIG_DIR/haraka
 NGINX_CONFIG_DIR=$CONFIG_DIR/nginx
 NGINX_APPCONFIG_DIR=$CONFIG_DIR/nginx/applications
