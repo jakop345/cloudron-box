@@ -7,11 +7,16 @@ exec 2>&1
 set -e
 set -x
 
-HOME_DIR="/home/yellowtent"
-BOX_SRCDIR="$HOME_DIR/box"
-CONFIG_DIR="$HOME_DIR/config"
-DATA_DIR="$HOME_DIR/data"
-CLOUDRON_SQLITE="$DATA_DIR/cloudron.sqlite"
+USER=yellowtent
+SRCDIR=/home/$USER/box
+DATA_DIR=/home/$USER/data
+CONFIG_DIR=/home/$USER/config
+HARAKA_DIR=$CONFIG_DIR/haraka
+NGINX_CONFIG_DIR=$CONFIG_DIR/nginx
+NGINX_APPCONFIG_DIR=$CONFIG_DIR/nginx/applications
+CLOUDRON_CONF=$CONFIG_DIR/cloudron.conf
+CLOUDRON_SQLITE=$DATA_DIR/cloudron.sqlite
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd )"
 JSON="$SCRIPT_DIR/../../node_modules/.bin/json"
 
@@ -61,10 +66,10 @@ done
 sudo -u yellowtent -H bash <<EOF
 set -e
 set -x
-rm -rf "$BOX_SRCDIR" && mkdir -p "$BOX_SRCDIR"
+rm -rf "$SRCDIR" && mkdir -p "$SRCDIR"
 echo "Fetching source tarball from $SOURCE_TARBALL_URL"
-curl --retry 5 --retry-delay 5 --max-time 1200 -L "$SOURCE_TARBALL_URL" | tar -zxf - -C "$BOX_SRCDIR"
-cd "$BOX_SRCDIR" && npm rebuild
+curl --retry 5 --retry-delay 5 --max-time 1200 -L "$SOURCE_TARBALL_URL" | tar -zxf - -C "$SRCDIR"
+cd "$SRCDIR" && npm rebuild
 EOF
 
 # For the update case, remove any existing config
@@ -72,6 +77,6 @@ rm -rf "$CONFIG_DIR/*"
 
 # https://stackoverflow.com/questions/3348443/a-confusion-about-array-versus-array-in-the-context-of-a-bash-comple
 # Note that this is the latest postinstall.sh
-$BOX_SRCDIR/postinstall/postinstall.sh "${SAVED_ARGS[@]}"
+$SRCDIR/postinstall/postinstall.sh "${SAVED_ARGS[@]}"
 
 echo "{ \"version\": \"$PROVISION_VERSION\"" > "$CONFIG_DIR/version.json"

@@ -13,11 +13,12 @@ echo "==== Cloudron post installation ===="
 USER=yellowtent
 SRCDIR=/home/$USER/box
 DATA_DIR=/home/$USER/data
-HARAKA_DIR="/home/$USER/configs/haraka"
-NGINX_CONFIG_DIR=/home/$USER/configs/nginx
-NGINX_APPCONFIG_DIR=/home/$USER/configs/nginx/applications
-CLOUDRON_CONF="/home/$USER/configs/cloudron.conf"
-CLOUDRON_SQLITE="$DATA_DIR/cloudron.sqlite"
+CONFIG_DIR=/home/$USER/config
+HARAKA_DIR=$CONFIG_DIR/haraka
+NGINX_CONFIG_DIR=$CONFIG_DIR/nginx
+NGINX_APPCONFIG_DIR=$CONFIG_DIR/nginx/applications
+CLOUDRON_CONF=$CONFIG_DIR/cloudron.conf
+CLOUDRON_SQLITE=$DATA_DIR/cloudron.sqlite
 MYSQL_DIR="$DATA_DIR/mysql"
 POSTGRESQL_DIR="$DATA_DIR/postgresql"
 DOMAIN_NAME=`hostname -f`
@@ -110,7 +111,7 @@ EXISTING_CONTAINERS=$(docker ps -qa)
 echo "Remove containers: $EXISTING_CONTAINERS"
 if [ -n "$EXISTING_CONTAINERS" ]; then
     echo "$EXISTING_CONTAINERS" | xargs docker rm -f
-fi  
+fi
 
 echo "=== Setup collectd and graphite ==="
 $SRCDIR/postinstall/setup_collectd.sh
