@@ -84,7 +84,7 @@ echo "Verifying new versions file"
 $SOURCE_DIR/release/verify.js "$NEW_VERSIONS_FILE"
 
 echo "Uploading new versions file"
-$SOURCE_DIR/node_modules/.bin/s3-cli put --acl-public "$NEW_VERSIONS_FILE" "$VERSIONS_S3_URL"
+$SOURCE_DIR/node_modules/.bin/s3-cli put --acl-public --default-mime-type "application/json" "$NEW_VERSIONS_FILE" "$VERSIONS_S3_URL"
 
 cat "$NEW_VERSIONS_FILE"
 rm "$NEW_VERSIONS_FILE"
