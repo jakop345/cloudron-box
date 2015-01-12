@@ -5,6 +5,7 @@ set -e
 
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd )"
 JSON="$SOURCE_DIR/node_modules/.bin/json"
+[ $(uname -s) == "Darwin" ] && GNU_GETOPT="/usr/local/opt/gnu-getopt/bin/getopt" || GNU_GETOPT="getopt"
 
 VERSIONS_URL="https://s3.amazonaws.com/cloudron-releases/versions-dev.json"
 VERSIONS_S3_URL="s3://cloudron-releases/versions-dev.json"
@@ -15,7 +16,7 @@ FORCE="no"
 
 # --code and--image is provided for readability. The code below assumes number is an image id
 # and anything else is the source tarball url. So, one can just say "publish.sh 2345 https://foo.tar.gz"
-ARGS=$(getopt -o "" -l "dev,stable,code:,image:,force" -n "$0" -- "$@")
+ARGS=$($GNU_GETOPT -o "" -l "dev,stable,code:,image:,force" -n "$0" -- "$@")
 eval set -- "$ARGS"
 
 while true; do
