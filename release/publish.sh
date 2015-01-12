@@ -42,7 +42,7 @@ if [[ -z "$SOURCE_TARBALL_URL" && -z "$IMAGE_ID" && "$FORCE" == "no" ]]; then
     exit 1
 fi
 
-NEW_VERSIONS_FILE=$(mktemp)
+NEW_VERSIONS_FILE=$(mktemp -t box-versions 2>/dev/null || mktemp)
 wget -q -O "$NEW_VERSIONS_FILE" "$VERSIONS_URL"
 LAST_VERSION=$(cat "$NEW_VERSIONS_FILE" | $JSON -ka | tail -n 1)
 if [ -z "$SOURCE_TARBALL_URL" ]; then
