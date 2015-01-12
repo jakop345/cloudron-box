@@ -43,7 +43,11 @@ if [[ -z "$SOURCE_TARBALL_URL" && -z "$IMAGE_ID" && "$FORCE" == "no" ]]; then
 fi
 
 NEW_VERSIONS_FILE=$(mktemp -t box-versions 2>/dev/null || mktemp)
-wget -q -O "$NEW_VERSIONS_FILE" "$VERSIONS_URL"
+if ! wget -q -O "$NEW_VERSIONS_FILE" "$VERSIONS_URL"; then
+    echo "Error downloading versions file"
+    exit 1
+fi
+
 LAST_VERSION=$(cat "$NEW_VERSIONS_FILE" | $JSON -ka | tail -n 1)
 if [ -z "$SOURCE_TARBALL_URL" ]; then
     SOURCE_TARBALL_URL=$($JSON -f "$NEW_VERSIONS_FILE" -D, "$LAST_VERSION,sourceTarballUrl")
