@@ -144,15 +144,19 @@ function update(callback) {
         }
 
         var args = {
-            appServerUrl: config.appServerUrl(),
-            fqdn: config.fqdn(),
             version: gBoxUpdateInfo.version,
-            token: config.token(),
-            tls: {
-                cert: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), 'utf8'),
-                key: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'), 'utf8')
-            },
             boxVersionsUrl: config.get('boxVersionsUrl')
+
+            // this data is opaque to the installer and will be passed to postinstall.sh
+            data: {
+                appServerUrl: config.appServerUrl(),
+                fqdn: config.fqdn(),
+                token: config.token(),
+                tls: {
+                    cert: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), 'utf8'),
+                    key: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'), 'utf8')
+                }
+            }
         };
 
         debug('updater: updating box %j', args);
