@@ -69,7 +69,7 @@ function checkBoxUpdates(callback) {
         if (!versions) return callback(new Error('versions is not valid json:' + safe.error));
 
         var currentVersionInfo = versions[currentVersion];
-        if (!currentVersionInfo) return callback(new Error('Cloudron runs on unknown version %s', currentVersion));
+        if (!currentVersionInfo) return callback(new Error('Cloudron runs on unknown version ' + currentVersion));
 
         var nextVersion = currentVersionInfo.next;
         var nextVersionInfo = nextVersion ? versions[nextVersion] : null;
