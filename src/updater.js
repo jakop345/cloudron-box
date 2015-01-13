@@ -145,7 +145,7 @@ function update(callback) {
 
         var args = {
             version: gBoxUpdateInfo.version,
-            boxVersionsUrl: config.get('boxVersionsUrl')
+            boxVersionsUrl: config.get('boxVersionsUrl'),
 
             // this data is opaque to the installer and will be passed to postinstall.sh
             data: {

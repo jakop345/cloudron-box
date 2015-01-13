@@ -41,8 +41,8 @@ while true; do
     shift 2
 done
 
-read -r PROVISION_APP_SERVER_URL PROVISION_FQDN PROVISION_TLS_CERT PROVISION_TLS_KEY PROVISION_TOKEN <<<EOF
-$(echo "$PROVISION_DATA" | $JSON appServerUrl fqdn tls.cert tls.key token)
+read -r PROVISION_APP_SERVER_URL PROVISION_FQDN PROVISION_TOKEN <<EOF
+$(echo "$PROVISION_DATA" | $JSON appServerUrl fqdn token | tr '\n' ' ')
 EOF
 
 ADMIN_FQDN="admin-$PROVISION_FQDN"
@@ -98,8 +98,8 @@ echo "==== Setup ssl certs ===="
 CERTIFICATE_DIR=$NGINX_CONFIG_DIR/cert
 mkdir -p $CERTIFICATE_DIR
 cd $CERTIFICATE_DIR
-echo "$PROVISION_TLS_CERT" > host.cert
-echo "$PROVISION_TLS_KEY" > host.key
+echo "$PROVISION_DATA" | $JSON tls.cert > host.cert
+echo "$PROVISION_DATA" | $JSON tls.key > host.key
 
 chown $USER:$USER -R /home/$USER
 
