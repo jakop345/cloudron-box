@@ -32,7 +32,7 @@
                     <li class="list-group-item" ng-show="config.revision">Revision <span class="pull-right">{{config.revision}}</span></li>
                 </ul>
                 <button class="btn btn-outline btn-success pull-left" ng-click="backup()" ng-show="config.isDev">Backup</button>
-                <button class="btn btn-outline btn-success pull-right" data-toggle="modal" data-target="#updateModal" ng-show="config.update.box">New {{config.update.box.upgrade ? 'Upgrade' : 'Update'}} to Version {{config.update.box.version}} available</button>
+                <button class="btn btn-outline btn-success pull-right" data-toggle="modal" data-target="#updateModal" ng-show="config.update.box">{{config.update.box.upgrade ? 'Upgrade' : 'Update'}} to Version {{config.update.box.version}}</button>
 
                 <!-- Modal really update -->
                 <div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true">
