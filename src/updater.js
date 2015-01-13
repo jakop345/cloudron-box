@@ -132,7 +132,7 @@ function update(callback) {
 
             superagent.post(config.appServerUrl() + '/api/v1/boxes/' + config.fqdn() + '/upgrade')
                 .query({ token: config.token() })
-                .send({ imageId: gBoxUpdateInfo.imageId })
+                .send({ version: gBoxUpdateInfo.version })
                 .end(function (error, result) {
                 if (error) return callback(new Error('Error making upgrade request: ' + error));
                 if (result.status !== 202) return callback(new Error('Server not ready to upgrade: ' + result.body));
