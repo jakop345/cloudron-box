@@ -4,7 +4,6 @@ set -e
 
 USER=yellowtent
 BOX_SRCDIR=/home/$USER/box
-INSTALLER_SRCDIR=/home/$USER/installer
 DATA_DIR=/home/$USER/data
 NGINX_CONFIG_DIR=/home/$USER/configs/nginx
 
