@@ -15,8 +15,11 @@ var announce = require('./announce.js'),
     https = require('https'),
     HttpSuccess = require('connect-lastmile').HttpSuccess,
     installer = require('./installer.js'),
-    middleware = require('../middleware'),
+    json = require('body-parser').json,
+    lastMile = require('connect-lastmile'),
+    morgan = require('morgan'),
     path = require('path'),
+    proxy = require('proxy-middleware'),
     superagent = require('superagent');
 
 exports = module.exports = {
@@ -106,10 +109,10 @@ function startUpdateServer(callback) {
 
     var router = new express.Router();
 
-    app.use(middleware.json({ strict: true }))
-       .use(middleware.morgan({ format: 'dev', immediate: false }))
+    app.use(json({ strict: true }))
+       .use(morgan({ format: 'dev', immediate: false }))
        .use(router)
-       .use(middleware.lastMile());
+       .use(lastMile());
 
     router.post('/api/v1/installer/update', update);
 
@@ -128,10 +131,10 @@ function startProvisionServer(callback) {
 
     var router = new express.Router();
 
-    app.use(middleware.json({ strict: true }))
-       .use(middleware.morgan({ format: 'dev', immediate: false }))
+    app.use(json({ strict: true }))
+       .use(morgan({ format: 'dev', immediate: false }))
        .use(router)
-       .use(middleware.lastMile());
+       .use(lastMile());
 
     router.post('/api/v1/installer/provision', provision);
     router.post('/api/v1/installer/restore', restore);

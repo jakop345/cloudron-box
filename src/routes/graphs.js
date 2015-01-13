@@ -1,6 +1,6 @@
 'use strict';
 
-var middleware = require('../../middleware/index.js'),
+var middleware = require('../middleware/index.js'),
     url = require('url');
 
 exports = module.exports = {
