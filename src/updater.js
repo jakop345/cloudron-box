@@ -74,8 +74,8 @@ function checkBoxUpdates(callback) {
         var nextVersion = currentVersionInfo.next;
         var nextVersionInfo = nextVersion ? versions[nextVersion] : null;
 
-        if (nextVersionInfo && nextVersionInfo.revision && nextVersionInfo.imageId) {
-            debug('boxupdate: new version %s available. revision: %s, imageId: %d', nextVersion, nextVersionInfo.revision, nextVersionInfo.imageId);
+        if (nextVersionInfo && typeof nextVersionInfo === 'object') {
+            debug('boxupdate: new version %s available. imageId: %d code: %s', nextVersion, nextVersionInfo.imageId, nextVersionInfo.sourceTarballUrl);
             callback(null, { version: nextVersion, info: nextVersionInfo, upgrade: nextVersionInfo.imageId !== currentVersionInfo.imageId });
         } else {
             debug('boxupdate: no new version available.');

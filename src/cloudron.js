@@ -40,8 +40,7 @@ var assert = require('assert'),
 
 var SUDO = '/usr/bin/sudo',
     TAR = os.platform() === 'darwin' ? '/usr/bin/tar' : '/bin/tar',
-    BACKUP_CMD = path.join(__dirname, 'scripts/backup.sh'),
-    GIT = '/usr/bin/git';
+    BACKUP_CMD = path.join(__dirname, 'scripts/backup.sh');
 
 var gBackupTimerId = null,
     gAddMailDnsRecordsTimerId = null,
@@ -198,22 +197,14 @@ function getStatus(callback) {
 function getConfig(callback) {
     assert(typeof callback === 'function');
 
-    execFile(GIT, [ 'log', '-1', '--pretty=format:%h' ], { cwd: __dirname }, function (error, stdout, stderr) {
-        if (error) {
-            console.error('Failed to get git revision.', error, stdout, stderr);
-            stdout = null;
-        }
-
-        callback(null, {
-            appServerUrl: config.appServerUrl(),
-            isDev: /dev/i.test(config.get('boxVersionsUrl')),
-            fqdn: config.fqdn(),
-            ip: getIp(),
-            version: gCurrentVersion,
-            revision: stdout,
-            update: updater.getUpdateInfo()
-        })
-    });
+    callback(null, {
+        appServerUrl: config.appServerUrl(),
+        isDev: /dev/i.test(config.get('boxVersionsUrl')),
+        fqdn: config.fqdn(),
+        ip: getIp(),
+        version: gCurrentVersion,
+        update: updater.getUpdateInfo()
+    })
 }
 
 function sendHeartBeat() {
