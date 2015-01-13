@@ -22,29 +22,28 @@ CLOUDRON_SQLITE=$DATA_DIR/cloudron.sqlite
 MYSQL_DIR="$DATA_DIR/mysql"
 POSTGRESQL_DIR="$DATA_DIR/postgresql"
 DOMAIN_NAME=`hostname -f`
+JSON="$SRCDIR/node_modules/.bin/json"
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# if you change this, change the code in installer.sh as well
-ARGS=$(getopt -o "" -l "appserverurl:,fqdn:,restoreurl:,version:,tlscert:,tlskey:,token:,boxversionsurl:" -n "$0" -- "$@")
+SAVED_ARGS=("$@")
+ARGS=$(getopt -o "" -l "boxversionsurl:,data:" -n "$0" -- "$@")
 eval set -- "$ARGS"
 
 while true; do
     case "$1" in
-    --appserverurl) PROVISION_APP_SERVER_URL="$2";;
-    --fqdn) PROVISION_FQDN="$2";;
-    --restoreurl) PROVISION_RESTORE_URL="$2";;
-    --version) PROVISION_VERSION="$2";;
-    --tlscert) PROVISION_TLS_CERT="$2";;
-    --tlskey) PROVISION_TLS_KEY="$2";;
-    --token) PROVISION_TOKEN="$2";;
     --boxversionsurl) PROVISION_BOX_VERSIONS_URL="$2";;
+    --data) PROVISION_DATA="$2";;
     --) break;;
     *) echo "Unknown option $1"; exit 1;;
     esac
 
     shift 2
 done
+
+read -r PROVISION_APP_SERVER_URL PROVISION_FQDN PROVISION_TLS_CERT PROVISION_TLS_KEY PROVISION_TOKEN <<<EOF
+$(echo "$PROVISION_DATA" | $JSON appServerUrl fqdn tls.cert tls.key token)
+EOF
 
 ADMIN_FQDN="admin-$PROVISION_FQDN"
 ADMIN_ORIGIN="https://$ADMIN_FQDN"
