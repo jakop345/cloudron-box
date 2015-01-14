@@ -4,6 +4,7 @@ var appFqdn = require('./apps').appFqdn,
     appdb = require('./appdb.js'),
     assert = require('assert'),
     async = require('async'),
+    child_process = require('child_process'),
     clientdb = require('./clientdb.js'),
     config = require('../config.js'),
     DatabaseError = require('./databaseerror.js'),
@@ -11,6 +12,7 @@ var appFqdn = require('./apps').appFqdn,
     docker = require('./docker.js'),
     generatePassword = require('password-generator'),
     MemoryStream = require('memorystream'),
+    os = require('os'),
     safe = require('safetydance'),
     util = require('util'),
     uuid = require('node-uuid');
@@ -47,6 +49,22 @@ var KNOWN_ADDONS = {
         teardown: teardownRedis
     }
 };
+
+function forwardFromHostToVirtualBox(rulename, port) {
+    if (os.platform() === 'darwin') {
+        debug('Setting up VirtualBox port forwarding for '+ rulename + ' at ' + port);
+        child_process.exec(
+            'VBoxManage controlvm boot2docker-vm natpf1 delete ' + rulename + ';' +
+            'VBoxManage controlvm boot2docker-vm natpf1 ' + rulename + ',tcp,127.0.0.1,' + port + ',,' + port);
+    }
+}
+
+function unforwardFromHostToVirtualBox(rulename) {
+    if (os.platform() === 'darwin') {
+        debug('Removing VirtualBox port forwarding for '+ rulename);
+        child_process.exec('VBoxManage controlvm boot2docker-vm natpf1 delete ' + rulename);
+    }
+}
 
 function setupAddons(app, callback) {
     assert(typeof app === 'object');
@@ -273,10 +291,14 @@ function setupRedis(app, callback) {
         Env: [ 'REDIS_PASSWORD=' + redisPassword ]
     };
 
+    var isMac = os.platform() === 'darwin';
+
     var startOptions = {
         Binds: [ ],
+        // On Mac (boot2docker), we have to export the port to external world for port forwarding from Mac to work
+        // On linux, export to localhost only for testing purposes and not for the app itself
         PortBindings: {
-            '6379/tcp': [{ HostPort: '0', HostIp: '127.0.0.1' }] // export only for testing purposes and not for the app itself
+            '6379/tcp': [{ HostPort: '0', HostIp: isMac ? '0.0.0.0' : '127.0.0.1' }]
         }
     };
 
@@ -297,7 +319,13 @@ function setupRedis(app, callback) {
                 var redisIp = safe.query(data, 'NetworkSettings.IPAddress');
                 if (!redisIp) return callback(new Error('Unable to get container ip'));
  
+                var redisPort = safe.query(data, 'NetworkSettings.Ports.6379/tcp[0].HostPort');
+                if (!redisPort) return callback(new Error('Unable to get container port mapping'));
+
+                forwardFromHostToVirtualBox('redis-' + app.id, redisPort);
+
                 var env = [ 'REDIS_URL=redis://redisuser:' + redisPassword + '@' + redisIp + ':6379' ];
+
                 appdb.setAddonConfig(app.id, 'redis', env, callback);
             });
         });
@@ -315,6 +343,8 @@ function teardownRedis(app, callback) {
    container.remove(removeOptions, function (error) {
        if (error && error.statusCode === 404) return callback(null);
        if (error) return callback(new Error('Error removing container:' + error));
+
+       unforwardFromHostToVirtualBox('redis-' + app.id);
 
        callback(null);
    });

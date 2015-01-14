@@ -24,6 +24,7 @@ var appdb = require('../../appdb.js'),
     paths = require('../../paths.js'),
     redis = require('redis'),
     request = require('superagent'),
+    safe = require('safetydance'),
     server = require('../../server.js'),
     url = require('url'),
     userdb = require('../../userdb.js'),
@@ -463,10 +464,16 @@ describe('App installation', function () {
         });
     });
 
+    var exportedRedisPort;
+
     it('installation - redis addon created', function (done) {
         docker.getContainer('redis-' + APP_ID).inspect(function (error, data) {
             expect(error).to.not.be.ok();
             expect(data).to.be.ok();
+
+            exportedRedisPort = safe.query(data, 'NetworkSettings.Ports.6379/tcp[0].HostPort');
+            expect(exportedRedisPort).to.be.ok();
+
             done();
         });
     });
@@ -479,7 +486,10 @@ describe('App installation', function () {
 
             var urlp = url.parse(redisUrl);
             var password = urlp.auth.split(':')[1];
-            var client = redis.createClient(parseInt(urlp.port, 10), urlp.hostname, { auth_pass: password });
+            var isMac = os.platform() === 'darwin';
+            var client =
+                isMac ? redis.createClient(parseInt(exportedRedisPort, 10), '127.0.0.1', { auth_pass: password })
+                      : redis.createClient(parseInt(urlp.port, 10), urlp.hostname, { auth_pass: password });
             client.on('error', done);
             client.set('key', 'value');
             client.get('key', function (err, reply) {
@@ -801,10 +811,16 @@ describe('App installation - port bindings', function () {
         });
     });
 
+    var exportedRedisPort;
+
     it('installation - redis addon created', function (done) {
         docker.getContainer('redis-' + APP_ID).inspect(function (error, data) {
             expect(error).to.not.be.ok();
             expect(data).to.be.ok();
+
+            exportedRedisPort = safe.query(data, 'NetworkSettings.Ports.6379/tcp[0].HostPort');
+            expect(exportedRedisPort).to.be.ok();
+
             done();
         });
     });
@@ -818,7 +834,10 @@ describe('App installation - port bindings', function () {
             function checkRedis() {
                 var urlp = url.parse(redisUrl);
                 var password = urlp.auth.split(':')[1];
-                var client = redis.createClient(parseInt(urlp.port, 10), urlp.hostname, { auth_pass: password });
+                var isMac = os.platform() === 'darwin';
+                var client =
+                    isMac ? redis.createClient(parseInt(exportedRedisPort, 10), '127.0.0.1', { auth_pass: password })
+                          : redis.createClient(parseInt(urlp.port, 10), urlp.hostname, { auth_pass: password });
                 client.on('error', done);
                 client.set('key', 'value');
                 client.get('key', function (err, reply) {
@@ -867,6 +886,20 @@ describe('App installation - port bindings', function () {
         }, 2000);
     });
 
+    var exportedRedisPort;
+
+    it('reconfiguration - redis addon recreated', function (done) {
+        docker.getContainer('redis-' + APP_ID).inspect(function (error, data) {
+            expect(error).to.not.be.ok();
+            expect(data).to.be.ok();
+
+            exportedRedisPort = safe.query(data, 'NetworkSettings.Ports.6379/tcp[0].HostPort');
+            expect(exportedRedisPort).to.be.ok();
+
+            done();
+        });
+    });
+
     it('redis addon works after reconfiguration', function (done) {
         docker.getContainer(appInfo.containerId).inspect(function (error, data) {
             var redisUrl = null;
@@ -875,7 +908,10 @@ describe('App installation - port bindings', function () {
 
             var urlp = url.parse(redisUrl);
             var password = urlp.auth.split(':')[1];
-            var client = redis.createClient(parseInt(urlp.port, 10), urlp.hostname, { auth_pass: password });
+            var isMac = os.platform() === 'darwin';
+            var client =
+                isMac ? redis.createClient(parseInt(exportedRedisPort, 10), '127.0.0.1', { auth_pass: password })
+                      : redis.createClient(parseInt(urlp.port, 10), urlp.hostname, { auth_pass: password });
             client.on('error', done);
             client.set('key', 'value');
             client.get('key', function (err, reply) {
