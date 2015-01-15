@@ -16,7 +16,7 @@ CMD=""
 
 # --code and--image is provided for readability. The code below assumes number is an image id
 # and anything else is the source tarball url. So, one can just say "publish.sh 2345 https://foo.tar.gz"
-ARGS=$($GNU_GETOPT -o "" -l "dev,stable,code:,image:,rerelease,new" -n "$0" -- "$@")
+ARGS=$($GNU_GETOPT -o "" -l "dev,stable,code:,image:,rerelease,new,list" -n "$0" -- "$@")
 eval set -- "$ARGS"
 
 while true; do
@@ -27,6 +27,7 @@ while true; do
     --image) IMAGE_ID="$2"; shift 2;;
     --rerelease) CMD="rerelease"; shift;;
     --new) CMD="new"; shift;;
+    --list) CMD="list"; shift;;
     --) shift; break;;
     *) echo "Unknown option $2"; exit;;
     esac
@@ -40,6 +41,16 @@ while test $# -gt 0; do
 done
 
 NEW_VERSIONS_FILE=$(mktemp -t box-versions 2>/dev/null || mktemp)
+cleanup() {
+    rm "$NEW_VERSIONS_FILE"
+}
+trap cleanup EXIT
+
+if [[ "$CMD" == "list" ]]; then
+    $SOURCE_DIR/node_modules/.bin/s3-cli get "$VERSIONS_S3_URL" "$NEW_VERSIONS_FILE"
+    cat "$NEW_VERSIONS_FILE"
+    exit 0
+fi
 
 if [[ "$CMD" == "new" ]]; then
     # generate a new versions.json
@@ -94,5 +105,4 @@ echo "Uploading new versions file"
 $SOURCE_DIR/node_modules/.bin/s3-cli put --acl-public --default-mime-type "application/json" "$NEW_VERSIONS_FILE" "$VERSIONS_S3_URL"
 
 cat "$NEW_VERSIONS_FILE"
-rm "$NEW_VERSIONS_FILE"
 
