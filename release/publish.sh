@@ -12,8 +12,7 @@ VERSIONS_S3_URL="s3://cloudron-releases/versions-dev.json"
 
 SOURCE_TARBALL_URL=""
 IMAGE_ID=""
-RERELEASE="no"
-NEW="no"
+CMD=""
 
 # --code and--image is provided for readability. The code below assumes number is an image id
 # and anything else is the source tarball url. So, one can just say "publish.sh 2345 https://foo.tar.gz"
@@ -26,8 +25,8 @@ while true; do
     --stable) echo "Not implemented yet. Need to figure how to bump version"; exit 1;;
     --code) SOURCE_TARBALL_URL="$2"; shift 2;;
     --image) IMAGE_ID="$2"; shift 2;;
-    --rerelease) RERELEASE="yes"; shift;;
-    --new) NEW="yes"; shift;;
+    --rerelease) CMD="rerelease"; shift;;
+    --new) CMD="new"; shift;;
     --) shift; break;;
     *) echo "Unknown option $2"; exit;;
     esac
@@ -42,7 +41,7 @@ done
 
 NEW_VERSIONS_FILE=$(mktemp -t box-versions 2>/dev/null || mktemp)
 
-if [[ "$NEW" == "yes" ]]; then
+if [[ "$CMD" == "new" ]]; then
     # generate a new versions.json
     if [[ -z "$SOURCE_TARBALL_URL" || -z "$IMAGE_ID" ]]; then
         echo "--code and --image is required"
@@ -61,7 +60,7 @@ if [[ "$NEW" == "yes" ]]; then
 EOF
 else
     # modify existing versions.json
-    if [[ -z "$SOURCE_TARBALL_URL" && -z "$IMAGE_ID" && "$RERELEASE" == "no" ]]; then
+    if [[ -z "$SOURCE_TARBALL_URL" && -z "$IMAGE_ID" && "$CMD" != "rerelease" ]]; then
         echo "--code or --image is required"
         exit 1
     fi
