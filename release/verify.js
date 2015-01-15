@@ -22,6 +22,7 @@ function verify(versionsFileName) {
     var sortedVersions = Object.keys(versionsJson).sort();
     sortedVersions.forEach(function (version, index) {
         if (typeof versionsJson[version].imageId !== 'number') die('version ' + version + ' does not have proper imageId');
+        if (typeof versionsJson[version].imageName !== 'string') die('version ' + version + ' does not have proper imageName');
         if (versionsJson[version].next !== null && typeof versionsJson[version].next !== 'string') die('version ' + version + ' does not have proper next');
         if (typeof versionsJson[version].sourceTarballUrl !== 'string') die('version ' + version + ' does not have proper sourceTarballUrl');
 

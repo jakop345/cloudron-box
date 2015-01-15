@@ -4,6 +4,14 @@
 set -e
 
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd )"
+
+if [ ! -f "$SOURCE_DIR/../installer/scripts/digitalOceanFunctions.sh" ]; then
+    echo "Could not locate digitalOceanFunctions.sh"
+    exit 1
+fi
+
+source "$SOURCE_DIR/../installer/scripts/digitalOceanFunctions.sh"
+
 JSON="$SOURCE_DIR/node_modules/.bin/json"
 [ $(uname -s) == "Darwin" ] && GNU_GETOPT="/usr/local/opt/gnu-getopt/bin/getopt" || GNU_GETOPT="getopt"
 
@@ -60,11 +68,14 @@ if [[ "$CMD" == "new" ]]; then
     fi
 
     NEW_VERSION="0.0.1"
+    IMAGE_NAME=$(get_image_name $IMAGE_ID)
+
     cat > "$NEW_VERSIONS_FILE" <<EOF
     {
         "0.0.1": {
             "sourceTarballUrl": "$SOURCE_TARBALL_URL",
             "imageId": $IMAGE_ID,
+            "imageName": "$IMAGE_NAME",
             "next": null
         }
     }
@@ -92,8 +103,10 @@ else
     fi
 
     NEW_VERSION=$($SOURCE_DIR/node_modules/.bin/semver -i $LAST_VERSION)
+    IMAGE_NAME=$(get_image_name $IMAGE_ID)
+
     $JSON -q -I -f "$NEW_VERSIONS_FILE" -e "this['$LAST_VERSION'].next = '$NEW_VERSION'"
-    $JSON -q -I -f "$NEW_VERSIONS_FILE" -e "this['$NEW_VERSION'] = { 'sourceTarballUrl': '$SOURCE_TARBALL_URL', 'imageId': $IMAGE_ID, 'next': null }"
+    $JSON -q -I -f "$NEW_VERSIONS_FILE" -e "this['$NEW_VERSION'] = { 'sourceTarballUrl': '$SOURCE_TARBALL_URL', 'imageId': $IMAGE_ID, 'imageName': '$IMAGE_NAME', 'next': null }"
 fi
 
 echo "Releasing version $NEW_VERSION"
