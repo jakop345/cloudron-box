@@ -1,7 +1,7 @@
 # Skip files when using git archive
 .gitattributes export-ignore
 .gitignore export-ignore
-release export-ignore
-scripts export-ignore
-src/test export-ignore
-src/routes/test export-ignore
+/release export-ignore
+/scripts export-ignore
+test export-ignore
+
