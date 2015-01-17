@@ -12,6 +12,7 @@ VERSION=$(cd "$SOURCE_DIR" && git rev-parse HEAD)
 TMPDIR=${TMPDIR:-/tmp}
 
 BUNDLE_DIR=$(mktemp -d -t box 2>/dev/null || mktemp -d box-XXXXXXXXXX --tmpdir=$TMPDIR)
+chmod "o+rx,g+rx" "$BUNDLE_DIR" # otherwise extracted tarball director won't be readable by others/group
 echo "Checking out code [$VERSION] into $BUNDLE_DIR"
 (cd "$SOURCE_DIR" && git archive --format=tar HEAD | (cd "$BUNDLE_DIR" && tar xf -))
 
