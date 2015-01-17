@@ -27,6 +27,7 @@ function verify(versionsFileName) {
         if (typeof versionsJson[version].sourceTarballUrl !== 'string') die('version ' + version + ' does not have proper sourceTarballUrl');
 
         var nextVersion = versionsJson[version].next;
+        // despite having the 'next' field, the appstore code currently relies on all versions being sorted based on semver.compare (see boxversions.js)
         if (nextVersion && semver.gt(version, nextVersion)) die('next version cannot be less than current @' + version);
     });
 
