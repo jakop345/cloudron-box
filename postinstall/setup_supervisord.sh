@@ -17,7 +17,7 @@ echo "Writing supervisor configs..."
 
 cat > /etc/supervisor/conf.d/nginx.conf <<EOF
 [program:nginx]
-command=/usr/sbin/nginx -c "$NGINX_CONFIG_DIR/nginx.conf" -p /var/log/nginx/
+command=/usr/sbin/nginx
 autostart=true
 autorestart=true
 redirect_stderr=true
