@@ -27,13 +27,15 @@ JSON="$SRCDIR/node_modules/.bin/json"
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 SAVED_ARGS=("$@")
-ARGS=$(getopt -o "" -l "boxversionsurl:,data:" -n "$0" -- "$@")
+ARGS=$(getopt -o "" -l "boxversionsurl:,data:,tlscert:,tlskey:" -n "$0" -- "$@")
 eval set -- "$ARGS"
 
 while true; do
     case "$1" in
     --boxversionsurl) PROVISION_BOX_VERSIONS_URL="$2";;
     --data) PROVISION_DATA="$2";;
+    --tlscert) PROVISION_TLS_CERT="$2";;
+    --tlskey) PROVISION_TLS_KEY="$2";;
     --) break;;
     *) echo "Unknown option $1"; exit 1;;
     esac
@@ -95,8 +97,8 @@ echo "==== Setup ssl certs ===="
 CERTIFICATE_DIR=$NGINX_CONFIG_DIR/cert
 mkdir -p $CERTIFICATE_DIR
 cd $CERTIFICATE_DIR
-echo "$PROVISION_DATA" | $JSON tls.cert > host.cert
-echo "$PROVISION_DATA" | $JSON tls.key > host.key
+echo "$PROVISION_TLS_CERT" > host.cert
+echo "$PROVISION_TLS_KEY" > host.key
 
 chown $USER:$USER -R /home/$USER
 
