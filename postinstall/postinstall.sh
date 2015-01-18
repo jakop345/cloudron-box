@@ -85,7 +85,6 @@ PATH=$PATH:$SRCDIR/node_modules/.bin npm run-script migrate_data
 EOF
 
 echo "==== Setup nginx ===="
-rm -rf /etc/nginx/* && echo "include $NGINX_CONFIG_DIR/nginx.conf;" > /etc/nginx/nginx.conf
 unlink /etc/nginx 2>/dev/null || rm -rf /etc/nginx
 ln -s $NGINX_CONFIG_DIR /etc/nginx
 mkdir -p $NGINX_APPCONFIG_DIR
