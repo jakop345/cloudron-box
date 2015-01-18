@@ -3,8 +3,10 @@ server {
     server_name  ##ADMIN_FQDN##;
 
     ssl                  on;
+    # paths are relative to prefix and not to this file
+    ssl_certificate      cert/host.cert;
+    ssl_certificate_key  cert/host.key;
 
-    include certificates.conf;
 
     ssl_session_timeout  5m;
 

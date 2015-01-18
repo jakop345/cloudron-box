@@ -12,7 +12,6 @@ mkdir -p $NGINX_ROOT/cert
 
 cp postinstall/nginx/nginx.conf $NGINX_ROOT/nginx.conf
 cp postinstall/nginx/mime.types $NGINX_ROOT/mime.types
-cp postinstall/nginx/certificates.conf $NGINX_ROOT/certificates.conf
 cp postinstall/nginx/cert/* $NGINX_ROOT/cert/
 
 touch $NGINX_ROOT/naked_domain.conf
