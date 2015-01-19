@@ -9,6 +9,8 @@ var express = require('express'),
     proxy = require('proxy-middleware'),
     session = require('cookie-session'),
     database = require('./src/database.js'),
+    appdb = require('./src/appdb.js'),
+    clientdb = require('./src/clientdb.js'),
     http = require('http');
 
 var gSessions = {};
@@ -49,16 +51,24 @@ function startServer(callback) {
             if (!forwardedHost) return res.send(500, 'Routing error. No forwarded host.');
             if (!Number.isFinite(port)) return res.send(500, 'Routing error. No forwarded port.');
 
-            req.session.port = port;
-            req.session.returnTo =  forwardedProto + '://' + forwardedHost + req.path;
+            appdb.getByHttpPort(port, function (error, result) {
+                if (error) return res.send(500, 'Unknown app.');
 
-            var callbackURL = forwardedProto + '://' + forwardedHost + CALLBACK_URI;
-            var scope = 'root,profile,apps,roleAdmin';
-            var clientId = 'cid-proxy';
-            var oauthLogin = 'https://admin-localhost/api/v1/oauth/dialog/authorize?response_type=code&client_id=' + clientId + '&redirect_uri=' + callbackURL + '&scope=' + scope;
+                clientdb.getByAppId(result.id, function (error, result) {
+                    if (error) return res.send(500, 'Unknown OAuth client.');
 
-            // begin the OAuth flow
-            res.redirect(oauthLogin);
+                    req.session.port = port;
+                    req.session.returnTo =  forwardedProto + '://' + forwardedHost + req.path;
+
+                    var callbackURL = forwardedProto + '://' + forwardedHost + CALLBACK_URI;
+                    var scope = 'root,profile,apps,roleAdmin';  // TODO verify scopes
+                    var clientId = result.clientId;
+                    var oauthLogin = 'https://admin-localhost/api/v1/oauth/dialog/authorize?response_type=code&client_id=' + clientId + '&redirect_uri=' + callbackURL + '&scope=' + scope;
+
+                    // begin the OAuth flow
+                    res.redirect(oauthLogin);
+                });
+            });
         }
     });
 
