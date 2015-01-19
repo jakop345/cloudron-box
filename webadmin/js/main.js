@@ -29,8 +29,7 @@ var MainController = function ($scope, $route, $interval, Client) {
     };
 
     $scope.error = function (error) {
-        // TODO show some error UI
-        console.error(error);
+        window.location.href = '/error.html';
     };
 
     Client.isServerFirstTime(function (error, isFirstTime) {

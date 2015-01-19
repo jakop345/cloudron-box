@@ -34,7 +34,10 @@ var SetupController = function ($scope, Client) {
     };
 
     Client.isServerFirstTime(function (error, isFirstTime) {
-        if (error) return;
+        if (error) {
+            window.location.href = '/error.html';
+            return;
+        }
 
         if (!isFirstTime) {
             window.location.href = '/';
