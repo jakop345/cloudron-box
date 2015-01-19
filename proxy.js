@@ -6,6 +6,7 @@ var express = require('express'),
     url = require('url'),
     async = require('async'),
     assert = require('assert'),
+    debug = require('debug')('box:proxy'),
     proxy = require('proxy-middleware'),
     session = require('cookie-session'),
     database = require('./src/database.js'),
@@ -41,12 +42,16 @@ function startServer(callback) {
             // this is a simple in memory auth store
             gSessions[req.session.sessid] = 'ok';
 
+            debug('user verified.');
+
             // now redirect to the actual initially requested URL
             res.redirect(req.session.returnTo);
         } else {
             var port = parseInt(req.headers['x-cloudron-proxy-port'], 10);
 
             if (!Number.isFinite(port)) return res.send(500, 'Routing error. No forwarded port.');
+
+            debug('begin verifying user...');
 
             appdb.getByHttpPort(port, function (error, result) {
                 if (error) return res.send(500, 'Unknown app.');
@@ -58,9 +63,11 @@ function startServer(callback) {
                     req.session.returnTo =  result.redirectURI + req.path;
 
                     var callbackURL = result.redirectURI + CALLBACK_URI;
-                    var scope = 'root,profile,apps,roleAdmin';  // TODO verify scopes
+                    var scope = 'profile,roleUser';
                     var clientId = result.clientId;
                     var oauthLogin = config.adminOrigin() + '/api/v1/oauth/dialog/authorize?response_type=code&client_id=' + clientId + '&redirect_uri=' + callbackURL + '&scope=' + scope;
+
+                    debug('begin OAuth flow for client %s.', result.name);
 
                     // begin the OAuth flow
                     res.redirect(oauthLogin);
@@ -71,6 +78,8 @@ function startServer(callback) {
 
     gApp.use(function (req, res, next) {
         var port = req.session.port;
+
+        debug('proxy request for port %s with path %s.', port, req.path);
 
         var proxyMiddleware = gProxyMiddlewareCache[port];
         if (!proxyMiddleware) {
