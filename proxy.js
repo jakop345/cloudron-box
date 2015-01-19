@@ -11,6 +11,7 @@ var express = require('express'),
     database = require('./src/database.js'),
     appdb = require('./src/appdb.js'),
     clientdb = require('./src/clientdb.js'),
+    config = require('./config.js'),
     http = require('http');
 
 var gSessions = {};
@@ -43,12 +44,8 @@ function startServer(callback) {
             // now redirect to the actual initially requested URL
             res.redirect(req.session.returnTo);
         } else {
-            var forwardedHost = req.headers['x-forwarded-host'];
-            var forwardedProto = req.headers['x-forwarded-proto'];
             var port = parseInt(req.headers['x-cloudron-proxy-port'], 10);
 
-            if (!forwardedProto) return res.send(500, 'Routing error. No forwarded protocol.');
-            if (!forwardedHost) return res.send(500, 'Routing error. No forwarded host.');
             if (!Number.isFinite(port)) return res.send(500, 'Routing error. No forwarded port.');
 
             appdb.getByHttpPort(port, function (error, result) {
@@ -58,12 +55,12 @@ function startServer(callback) {
                     if (error) return res.send(500, 'Unknown OAuth client.');
 
                     req.session.port = port;
-                    req.session.returnTo =  forwardedProto + '://' + forwardedHost + req.path;
+                    req.session.returnTo =  result.redirectURI + req.path;
 
-                    var callbackURL = forwardedProto + '://' + forwardedHost + CALLBACK_URI;
+                    var callbackURL = result.redirectURI + CALLBACK_URI;
                     var scope = 'root,profile,apps,roleAdmin';  // TODO verify scopes
                     var clientId = result.clientId;
-                    var oauthLogin = 'https://admin-localhost/api/v1/oauth/dialog/authorize?response_type=code&client_id=' + clientId + '&redirect_uri=' + callbackURL + '&scope=' + scope;
+                    var oauthLogin = config.adminOrigin() + '/api/v1/oauth/dialog/authorize?response_type=code&client_id=' + clientId + '&redirect_uri=' + callbackURL + '&scope=' + scope;
 
                     // begin the OAuth flow
                     res.redirect(oauthLogin);
