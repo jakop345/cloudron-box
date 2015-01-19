@@ -13,6 +13,7 @@ var assert = require('assert'),
 exports = module.exports = {
     get: get,
     getBySubdomain: getBySubdomain,
+    getByHttpPort: getByHttpPort,
     add: add,
     exists: exists,
     del: del,
@@ -102,6 +103,23 @@ function getBySubdomain(subdomain, callback) {
     database.get('SELECT ' + APPS_FIELDS_PREFIXED + ','
         + 'GROUP_CONCAT(appPortBindings.hostPort) AS hostPorts, GROUP_CONCAT(appPortBindings.containerPort) AS containerPorts'
         + '  FROM apps LEFT OUTER JOIN appPortBindings WHERE location = ? GROUP BY apps.id', [ subdomain ], function (error, result) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+
+        if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
+
+        postProcess(result);
+
+        callback(null, result);
+    });
+}
+
+function getByHttpPort(httpPort, callback) {
+    assert(typeof httpPort === 'number');
+    assert(typeof callback === 'function');
+
+    database.get('SELECT ' + APPS_FIELDS_PREFIXED + ','
+        + 'GROUP_CONCAT(appPortBindings.hostPort) AS hostPorts, GROUP_CONCAT(appPortBindings.containerPort) AS containerPorts'
+        + '  FROM apps LEFT OUTER JOIN appPortBindings WHERE httpPort = ? GROUP BY apps.id', [ httpPort ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));

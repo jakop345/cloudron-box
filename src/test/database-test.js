@@ -13,14 +13,17 @@ var appdb = require('../appdb.js'),
     database = require('../database'),
     DatabaseError = require('../databaseerror.js'),
     expect = require('expect.js'),
-    mkdirp = require('mkdirp'),
+    async = require('async'),
     settingsdb = require('../settingsdb.js'),
     tokendb = require('../tokendb.js'),
     userdb = require('../userdb.js');
 
 describe('database', function () {
     before(function (done) {
-        database.initialize(done);
+        async.series([
+            database.initialize,
+            database.clear
+        ], done);
     });
 
     after(function (done) {
@@ -505,8 +508,9 @@ describe('database', function () {
             APP_0.location = 'some-other-location';
             APP_0.version = '0.2';
             APP_0.accessRestriction = true;
+            APP_0.httpPort = 1337;
 
-            appdb.update(APP_0.id, { installationState: APP_0.installationState, location: APP_0.location, version: APP_0.version, accessRestriction: APP_0.accessRestriction }, function (error) {
+            appdb.update(APP_0.id, { installationState: APP_0.installationState, location: APP_0.location, version: APP_0.version, accessRestriction: APP_0.accessRestriction, httpPort: APP_0.httpPort }, function (error) {
                 expect(error).to.be(null);
 
                 appdb.get(APP_0.id, function (error, result) {
@@ -515,6 +519,15 @@ describe('database', function () {
                     expect(result).to.be.eql(APP_0);
                     done();
                 });
+            });
+        });
+
+        it('getByHttpPort succeeds', function (done) {
+            appdb.getByHttpPort(APP_0.httpPort, function (error, result) {
+                expect(error).to.be(null);
+                expect(result).to.be.an('object');
+                expect(result).to.be.eql(APP_0);
+                done();
             });
         });
 
