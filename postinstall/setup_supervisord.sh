@@ -24,6 +24,5 @@ stdout_logfile=/var/log/supervisor/box.log
 stdout_logfile_maxbytes=50MB
 stdout_logfile_backups=2
 user=yellowtent
-environment=HOME="/home/yellowtent",CLOUDRON="1",USER="yellowtent",DEBUG="box*,connect-lastmile"
+environment=HOME="/home/yellowtent",CLOUDRON="1",USER="yellowtent",DEBUG="box*,connect-lastmile",NODE_ENV="production"
 EOF
-
