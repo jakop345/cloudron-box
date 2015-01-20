@@ -44,8 +44,8 @@ exports = module.exports = {
     _setNakedDomain: setNakedDomain,
     _createVolume: createVolume,
     _deleteVolume: deleteVolume,
-    _allocateOAuthCredentials: allocateOAuthCredentials,
-    _removeOAuthCredentials: removeOAuthCredentials,
+    _allocateOAuthProxyCredentials: allocateOAuthProxyCredentials,
+    _removeOAuthProxyCredentials: removeOAuthProxyCredentials,
     _downloadManifest: downloadManifest,
     _registerSubdomain: registerSubdomain,
     _unregisterSubdomain: unregisterSubdomain,
@@ -282,7 +282,7 @@ function deleteVolume(app, callback) {
     });
 }
 
-function allocateOAuthCredentials(app, callback) {
+function allocateOAuthProxyCredentials(app, callback) {
     assert(typeof app === 'object');
     assert(typeof callback === 'function');
 
@@ -299,13 +299,12 @@ function allocateOAuthCredentials(app, callback) {
     clientdb.add(id, appId, clientId, clientSecret, name, redirectURI, scope, callback);
 }
 
-function removeOAuthCredentials(app, callback) {
+function removeOAuthProxyCredentials(app, callback) {
     assert(typeof app === 'object');
     assert(typeof callback === 'function');
 
     clientdb.delByAppId('proxy-' + app.id, function (error) {
-        if (error.reason === DatabaseError.NOT_FOUND) return callback(null);
-        if (error) {
+        if (error && error.reason !== DatabaseError.NOT_FOUND) {
             console.error('Error removing OAuth client id', error);
             return callback(error);
         }
@@ -564,7 +563,7 @@ function install(app, callback) {
 
         // create proxy OAuth credentials
         updateApp.bind(null, app, { installationProgress: 'Create OAuth credentials' }),
-        allocateOAuthCredentials.bind(null, app),
+        allocateOAuthProxyCredentials.bind(null, app),
 
         // download manifest
         updateApp.bind(null, app, { installationProgress: 'Downloading manifest' }),
@@ -625,10 +624,10 @@ function restore(app, callback) {
         registerSubdomain.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: 'Remove OAuth credentials' }),
-        removeOAuthCredentials.bind(null, app),
+        removeOAuthProxyCredentials.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: 'Create OAuth credentials' }),
-        allocateOAuthCredentials.bind(null, app),
+        allocateOAuthProxyCredentials.bind(null, app),
 
         // download manifest FIXME: should we restore to app.version ?
         updateApp.bind(null, app, { installationProgress: 'Downloading manifest' }),
@@ -686,7 +685,7 @@ function configure(app, callback) {
         unregisterSubdomain.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: 'Remove OAuth credentials' }),
-        removeOAuthCredentials.bind(null, app),
+        removeOAuthProxyCredentials.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: 'Configuring Nginx' }),
         configureNginx.bind(null, app),
@@ -695,7 +694,7 @@ function configure(app, callback) {
         registerSubdomain.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: 'Create OAuth credentials' }),
-        allocateOAuthCredentials.bind(null, app),
+        allocateOAuthProxyCredentials.bind(null, app),
 
         // addons like oauth might rely on the app's fqdn
         updateApp.bind(null, app, { installationProgress: 'Setting up addons' }),
@@ -807,7 +806,7 @@ function uninstall(app, callback) {
         unregisterSubdomain.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: 'Remove OAuth credentials' }),
-        removeOAuthCredentials.bind(null, app),
+        removeOAuthProxyCredentials.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: 'Cleanup manifest' }),
         removeIcon.bind(null, app),
