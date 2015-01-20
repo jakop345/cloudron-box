@@ -192,6 +192,3 @@ EOF
 echo "==== Setup supervisord ===="
 $SRCDIR/postinstall/setup_supervisord.sh
 
-echo "==== Reloading nginx ==="
-nginx -s reload
-
