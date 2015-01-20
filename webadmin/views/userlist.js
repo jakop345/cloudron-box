@@ -32,7 +32,7 @@ function UserListController ($scope, Client) {
         // TODO add busy indicator and block form
         if ($scope.userDeleteForm.username !== user.username) return console.error('Username does not match');
 
-        Client.removeUser(user.username, $scope.userDeleteForm.password, function (error, result) {
+        Client.removeUser(user.username, $scope.userDeleteForm.password, function (error) {
             if (error && error.statusCode === 401) return console.error('Wrong password');
             if (error) return console.error('Unable to delete user.', error);
 

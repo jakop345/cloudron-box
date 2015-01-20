@@ -295,8 +295,8 @@ angular.module('Application').service('Client', function ($http, md5) {
 
     Client.prototype.delTokensByClientId = function (id, callback) {
         $http.delete('/api/v1/oauth/clients/' + id + '/tokens').success(function(data, status) {
-            if (status !== 204 || typeof data !== 'object') return callback(new ClientError(status, data));
-            callback(null, data);
+            if (status !== 204) return callback(new ClientError(status, data));
+            callback(null);
         }).error(defaultErrorHandler(callback));
     };
 
@@ -356,8 +356,8 @@ angular.module('Application').service('Client', function ($http, md5) {
         };
 
         $http({ method: 'DELETE', url: '/api/v1/users/' + username, data: data, headers: { 'Content-Type': 'application/json' }}).success(function(data, status) {
-            if (status !== 204 || typeof data !== 'object') return callback(new ClientError(status, data));
-            callback(null, data);
+            if (status !== 204) return callback(new ClientError(status, data));
+            callback(null);
         }).error(defaultErrorHandler(callback));
     };
 
