@@ -1,6 +1,9 @@
 #!/bin/bash
 
+set -e
+
 echo "Starting box code"
+
 service supervisor start
 
 sleep 2 # give supervisor sometime to start the processes
