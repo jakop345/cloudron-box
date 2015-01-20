@@ -2,6 +2,8 @@
 
 'use strict';
 
+require('supererror')({ splatchError: true });
+
 var express = require('express'),
     url = require('url'),
     async = require('async'),
@@ -49,15 +51,24 @@ function startServer(callback) {
         } else {
             var port = parseInt(req.headers['x-cloudron-proxy-port'], 10);
 
-            if (!Number.isFinite(port)) return res.send(500, 'Routing error. No forwarded port.');
+            if (!Number.isFinite(port)) {
+                console.error('Failed to parse nginx proxy header to get app port.');
+                return res.send(500, 'Routing error. No forwarded port.');
+            }
 
-            debug('begin verifying user...');
+            debug('begin verifying user for app on port %s.', port);
 
             appdb.getByHttpPort(port, function (error, result) {
-                if (error) return res.send(500, 'Unknown app.');
+                if (error) {
+                    console.error('Unknown app.', error);
+                    return res.send(500, 'Unknown app.');
+                }
 
                 clientdb.getByAppId(result.id, function (error, result) {
-                    if (error) return res.send(500, 'Unknown OAuth client.');
+                    if (error) {
+                        console.error('Unkonwn OAuth client.', error);
+                        return res.send(500, 'Unknown OAuth client.');
+                    }
 
                     req.session.port = port;
                     req.session.returnTo =  result.redirectURI + req.path;
