@@ -42,13 +42,10 @@ exports = module.exports = {
     _validatePortBindings: validatePortBindings
 };
 
-var gTasks = { },
-    gAppHealthTask = null;
+var gTasks = { };
 
 function initialize(callback) {
     assert(typeof callback === 'function');
-
-    gAppHealthTask = child_process.fork(__dirname + '/apphealthtask.js');
 
     resume(callback); // TODO: potential race here since resume is async
 }
@@ -92,11 +89,6 @@ function resume(callback) {
 
 function uninitialize(callback) {
     assert(typeof callback === 'function');
-
-    if (gAppHealthTask) {
-        gAppHealthTask.kill();
-        gAppHealthTask = null;
-    }
 
     for (var appId in gTasks) {
         stopTask(appId);
