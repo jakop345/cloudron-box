@@ -1,16 +1,16 @@
-/* jslint node:true */
+#!/usr/bin/env node
 
 'use strict';
 
 require('supererror')({ splatchError: true });
 
-var appdb = require('./appdb.js'),
+var appdb = require('./src/appdb.js'),
     assert = require('assert'),
     async = require('async'),
-    database = require('./database.js'),
-    DatabaseError = require('./databaseerror'),
+    database = require('./src/database.js'),
+    DatabaseError = require('./src/databaseerror.js'),
     debug = require('debug')('box:apphealthtask'),
-    docker = require('./docker.js'),
+    docker = require('./src/docker.js'),
     os = require('os'),
     superagent = require('superagent');
 
