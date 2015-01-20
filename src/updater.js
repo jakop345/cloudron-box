@@ -12,6 +12,7 @@ var appdb = require('./appdb.js'),
     path = require('path'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
+    semver = require('semver'),
     superagent = require('superagent');
 
 var INSTALLER_UPDATE_URL = 'http://127.0.0.1:2020/api/v1/installer/update';
@@ -62,11 +63,11 @@ function checkBoxUpdates(callback) {
         if (error) return callback(error);
         if (result.status !== 200) return callback(new Error('Bad status:', result.status));
 
-        debug('versions : %j', result.text);
-
         var versions = safe.JSON.parse(result.text);
 
         if (!versions) return callback(new Error('versions is not valid json:' + safe.error));
+
+        debug('latest version is %s etag:%s', Object.keys(versions).sort(semver.compare).pop(), res.header['etag']);
 
         var currentVersionInfo = versions[currentVersion];
         if (!currentVersionInfo) return callback(new Error('Cloudron runs on unknown version ' + currentVersion));
