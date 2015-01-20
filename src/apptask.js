@@ -304,8 +304,13 @@ function removeOAuthCredentials(app, callback) {
     assert(typeof callback === 'function');
 
     clientdb.delByAppId('proxy-' + app.id, function (error) {
-        if (error) console.error('Error removing OAuth client id', error);
-        return callback(error);
+        if (error.reason === DatabaseError.NOT_FOUND) return callback(null);
+        if (error) {
+            console.error('Error removing OAuth client id', error);
+            return callback(error);
+        }
+
+        callback(null);
     });
 }
 
