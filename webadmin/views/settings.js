@@ -58,7 +58,7 @@ var SettingsController = function ($scope, Client) {
 
                     $('#rebootProgressModal').modal('hide');
 
-                    window.setTimeout(window.location.reload.bind(window.location), 1000);
+                    window.setTimeout(window.location.reload.bind(window.location, true), 1000);
                 });
             }
 
@@ -81,7 +81,7 @@ var SettingsController = function ($scope, Client) {
 
                     $('#updateProgressModal').modal('hide');
 
-                    window.setTimeout(window.location.reload.bind(window.location), 1000);
+                    window.setTimeout(window.location.reload.bind(window.location, true), 1000);
                 });
             }
 
