@@ -64,7 +64,7 @@ function startServer(callback) {
                     return res.send(500, 'Unknown app.');
                 }
 
-                clientdb.getByAppId(result.id, function (error, result) {
+                clientdb.getByAppId('proxy-' + result.id, function (error, result) {
                     if (error) {
                         console.error('Unkonwn OAuth client.', error);
                         return res.send(500, 'Unknown OAuth client.');
