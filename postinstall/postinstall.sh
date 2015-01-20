@@ -117,7 +117,7 @@ $SRCDIR/postinstall/setup_collectd.sh
 
 echo "=== Setup haraka mail relay ==="
 docker rm -f haraka || true
-docker pull girish/haraka:0.1
+docker pull girish/haraka:0.1 || true # this line is for dev convenience since it's already part of base image
 HARAKA_CONTAINER_ID=$(docker run --restart=always -d --name="haraka" --cap-add="NET_ADMIN"\
     -p 127.0.0.1:25:25 \
     -h $DOMAIN_NAME \
@@ -129,7 +129,7 @@ echo "=== Setup MySQL addon ==="
 docker rm -f mysql || true
 MYSQL_ROOT_PASSWORD=$(pwgen -1 -s)
 DOCKER0_IP=$( /sbin/ifconfig docker0 | grep "inet addr" | awk -F: '{print $2}' | awk '{print $1}')
-docker pull girish/mysql:0.1
+docker pull girish/mysql:0.1 || true # this line for dev convenience since it's already part of base image
 MYSQL_CONTAINER_ID=$(docker run --restart=always -d --name="mysql" \
     -p 127.0.0.1:3306:3306 \
     -h "$DOMAIN_NAME" \
@@ -141,7 +141,7 @@ echo "MySQL container id: $MYSQL_CONTAINER_ID"
 echo "=== Setup Postgres addon ==="
 docker rm -f postgresql || true
 POSTGRESQL_ROOT_PASSWORD=$(pwgen -1 -s)
-docker pull girish/postgresql:0.1
+docker pull girish/postgresql:0.1 || true # this line for dev convenience since it's already part of base image
 POSTGRESQL_CONTAINER_ID=$(docker run --restart=always -d --name="postgresql" \
     -p 127.0.0.1:5432:5432 \
     -h "$DOMAIN_NAME" \
@@ -150,7 +150,7 @@ POSTGRESQL_CONTAINER_ID=$(docker run --restart=always -d --name="postgresql" \
 echo "PostgreSQL container id: $POSTGRESQL_CONTAINER_ID"
 
 echo "=== Pulling Redis addon ==="
-docker pull girish/redis:0.1
+docker pull girish/redis:0.1 || true # this line for dev convenience since it's already part of base image
 
 echo "==== Creating cloudron.conf ===="
 sudo -u yellowtent -H bash <<EOF
