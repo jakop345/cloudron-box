@@ -207,7 +207,7 @@ angular.module('Application').service('Client', function ($http, md5) {
         $http.get('/api/v1/apps').success(function (data, status) {
             if (status !== 200) return callback(new ClientError(status, data));
             callback(null, data.apps);
-        });
+        }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.getApp = function (appId, callback) {
