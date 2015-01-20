@@ -29,6 +29,7 @@ var MainController = function ($scope, $route, $interval, Client) {
     };
 
     $scope.error = function (error) {
+        console.error(error);
         window.location.href = '/error.html';
     };
 
