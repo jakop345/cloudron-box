@@ -9,6 +9,7 @@ require('supererror')({ splatchError: true });
 var addons = require('./addons.js'),
     appdb = require('./appdb.js'),
     appFqdn = require('./apps.js').appFqdn,
+    clientdb = require('./clientdb.js'),
     assert = require('assert'),
     async = require('async'),
     child_process = require('child_process'),
@@ -43,6 +44,8 @@ exports = module.exports = {
     _setNakedDomain: setNakedDomain,
     _createVolume: createVolume,
     _deleteVolume: deleteVolume,
+    _allocateOAuthCredentials: allocateOAuthCredentials,
+    _removeOAuthCredentials: removeOAuthCredentials,
     _downloadManifest: downloadManifest,
     _registerSubdomain: registerSubdomain,
     _unregisterSubdomain: unregisterSubdomain,
@@ -275,6 +278,33 @@ function createVolume(app, callback) {
 function deleteVolume(app, callback) {
     execFile(SUDO, [ RMAPPDIR_CMD, app.id ], { }, function (error, stdout, stderr) {
         if (error) console.error('Error removing volume', error, stdout, stderr);
+        return callback(error);
+    });
+}
+
+function allocateOAuthCredentials(app, callback) {
+    assert(typeof app === 'object');
+    assert(typeof callback === 'function');
+
+    if (!app.accessRestriction) return callback(null);
+
+    var id = uuid.v4();
+    var appId = 'proxy-' + app.id;
+    var clientId = 'cid-' + uuid.v4();
+    var clientSecret = uuid.v4();
+    var name = app.manifest.title;
+    var redirectURI = 'https://' + appFqdn(app.location);
+    var scope = 'profile,' + app.accessRestriction;
+
+    clientdb.add(id, appId, clientId, clientSecret, name, redirectURI, scope, callback);
+}
+
+function removeOAuthCredentials(app, callback) {
+    assert(typeof app === 'object');
+    assert(typeof callback === 'function');
+
+    clientdb.delByAppId('proxy-' + app.id, function (error) {
+        if (error) console.error('Error removing OAuth client id', error);
         return callback(error);
     });
 }
@@ -527,6 +557,10 @@ function install(app, callback) {
         updateApp.bind(null, app, { installationProgress: 'Registering subdomain' }),
         registerSubdomain.bind(null, app),
 
+        // create proxy OAuth credentials
+        updateApp.bind(null, app, { installationProgress: 'Create OAuth credentials' }),
+        allocateOAuthCredentials.bind(null, app),
+
         // download manifest
         updateApp.bind(null, app, { installationProgress: 'Downloading manifest' }),
         downloadManifest.bind(null, app),
@@ -585,6 +619,12 @@ function restore(app, callback) {
         updateApp.bind(null, app, { installationProgress: 'Registering subdomain' }),
         registerSubdomain.bind(null, app),
 
+        updateApp.bind(null, app, { installationProgress: 'Remove OAuth credentials' }),
+        removeOAuthCredentials.bind(null, app),
+
+        updateApp.bind(null, app, { installationProgress: 'Create OAuth credentials' }),
+        allocateOAuthCredentials.bind(null, app),
+
         // download manifest FIXME: should we restore to app.version ?
         updateApp.bind(null, app, { installationProgress: 'Downloading manifest' }),
         downloadManifest.bind(null, app),
@@ -640,11 +680,17 @@ function configure(app, callback) {
         updateApp.bind(null, app, { installationProgress: 'Unregistering subdomain' }),
         unregisterSubdomain.bind(null, app),
 
+        updateApp.bind(null, app, { installationProgress: 'Remove OAuth credentials' }),
+        removeOAuthCredentials.bind(null, app),
+
         updateApp.bind(null, app, { installationProgress: 'Configuring Nginx' }),
         configureNginx.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: 'Registering subdomain' }),
         registerSubdomain.bind(null, app),
+
+        updateApp.bind(null, app, { installationProgress: 'Create OAuth credentials' }),
+        allocateOAuthCredentials.bind(null, app),
 
         // addons like oauth might rely on the app's fqdn
         updateApp.bind(null, app, { installationProgress: 'Setting up addons' }),
@@ -754,6 +800,9 @@ function uninstall(app, callback) {
 
         updateApp.bind(null, app, { installationProgress: 'Unregistering subdomain' }),
         unregisterSubdomain.bind(null, app),
+
+        updateApp.bind(null, app, { installationProgress: 'Remove OAuth credentials' }),
+        removeOAuthCredentials.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: 'Cleanup manifest' }),
         removeIcon.bind(null, app),
