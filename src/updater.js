@@ -7,7 +7,6 @@ var appdb = require('./appdb.js'),
     cloudron = require('./cloudron.js'),
     config = require('../config.js'),
     debug = require('debug')('box:updater'),
-    execFile = require('child_process').execFile,
     fs = require('fs'),
     path = require('path'),
     paths = require('./paths.js'),
@@ -34,10 +33,9 @@ function getUpdateInfo() {
         apps: gAppUpdateInfo,
         box: gBoxUpdateInfo
     };
-};
+}
 
 function checkAppUpdates(callback) {
-    debug('Checking app updates');
     appdb.getAppVersions(function (error, appVersions) {
         if (error) return callback(error);
 
@@ -45,9 +43,9 @@ function checkAppUpdates(callback) {
 
         superagent.post(config.appServerUrl() + '/api/v1/appupdates').send({ appIds: appStoreIds }).end(function (error, result) {
             if (error) return callback(error);
-            if (result.statusCode !== 200) return callback(new Error('Error checking app update: ' + result.statusCode + ' ' + result.body.message));
+            if (result.statusCode !== 200) return callback(new Error('Error checking app update: ', result.statusCode, result.body.message));
 
-            debug('appupdate: %j', result.body);
+            debug('checkAppUpdates: %j', result.body);
 
             callback(null, result.body.appVersions);
         });
@@ -55,8 +53,6 @@ function checkAppUpdates(callback) {
 }
 
 function checkBoxUpdates(callback) {
-    debug('checking for box update');
-
     var currentVersion = require(paths.VERSION_FILENAME).version;
 
     superagent.get(config.get('boxVersionsUrl')).end(function (error, result) {
@@ -67,7 +63,7 @@ function checkBoxUpdates(callback) {
 
         if (!versions) return callback(new Error('versions is not valid json:' + safe.error));
 
-        debug('latest version is %s etag:%s', Object.keys(versions).sort(semver.compare).pop(), result.header['etag']);
+        debug('checkBoxUpdates: Latest version is %s etag:%s', Object.keys(versions).sort(semver.compare).pop(), result.header['etag']);
 
         var currentVersionInfo = versions[currentVersion];
         if (!currentVersionInfo) return callback(new Error('Cloudron runs on unknown version ' + currentVersion));
@@ -76,23 +72,25 @@ function checkBoxUpdates(callback) {
         var nextVersionInfo = nextVersion ? versions[nextVersion] : null;
 
         if (nextVersionInfo && typeof nextVersionInfo === 'object') {
-            debug('boxupdate: new version %s available. imageId: %d code: %s', nextVersion, nextVersionInfo.imageId, nextVersionInfo.sourceTarballUrl);
+            debug('checkBoxUpdates: new version %s available. imageId: %d code: %s', nextVersion, nextVersionInfo.imageId, nextVersionInfo.sourceTarballUrl);
             callback(null, { version: nextVersion, info: nextVersionInfo, upgrade: nextVersionInfo.imageId !== currentVersionInfo.imageId });
         } else {
-            debug('boxupdate: no new version available.');
+            debug('checkBoxUpdates: no new version available.');
             callback(null, null);
         }
     });
-};
+}
 
 function checkUpdates() {
+    debug('Checking for app and box updates...');
+
     checkAppUpdates(function (error, appUpdateInfo) {
-        if (error) debug('Error checkihg app updates: ', error);
+        if (error) debug('Error checking app updates: ', error);
 
         if (appUpdateInfo) gAppUpdateInfo = appUpdateInfo;
 
         checkBoxUpdates(function (error, result) {
-            if (error) debug('Error checkihg box updates: ', error);
+            if (error) debug('Error checking box updates: ', error);
 
             if (result) gBoxUpdateInfo = result;
 
@@ -106,7 +104,7 @@ function initialize(callback) {
 
     gCheckUpdatesTimeoutId = setTimeout(checkUpdates, 10 * 1000);
     callback(null);
-};
+}
 
 function uninitialize(callback) {
     assert(typeof callback === 'function');
@@ -115,7 +113,7 @@ function uninitialize(callback) {
     gCheckUpdatesTimeoutId = null;
 
     callback(null);
-};
+}
 
 function update(callback) {
     assert(typeof callback === 'function');
