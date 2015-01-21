@@ -81,7 +81,10 @@ function processQueue() {
 
     async.mapSeries(mailQueueCopy, function iterator(mailOptions, callback) {
         gTransport.sendMail(mailOptions, function (error, info) {
-            if (error) return console.error(error);
+            if (error) {
+                if (config.LOCAL) debug('Print email in local mode:', mailOptions);
+                return console.error(error);
+            }
 
             debug('Email sent to ' + mailOptions.to);
         });
