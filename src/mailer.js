@@ -103,7 +103,7 @@ function render(templateFile, params) {
     return ejs.render(safe.fs.readFileSync(path.join(MAIL_TEMPLATES_DIR, templateFile), 'utf8'), params);
 }
 
-function mailAdmins(user, event) {
+function mailUserEventToAdmins(user, event) {
     assert(typeof user === 'object');
     assert(typeof event === 'string');
 
@@ -147,7 +147,7 @@ function userAdded(user, password) {
 
     enqueue(mailOptions);
 
-    mailAdmins(user, 'added');
+    mailUserEventToAdmins(user, 'added');
 }
 
 function userRemoved(username) {
@@ -155,7 +155,7 @@ function userRemoved(username) {
 
     debug('Sending mail for userRemoved');
 
-    mailAdmins({ username: username }, 'removed');
+    mailUserEventToAdmins({ username: username }, 'removed');
 }
 
 function adminChanged(user) {
@@ -163,7 +163,7 @@ function adminChanged(user) {
 
     debug('Sending mail for adminChanged');
 
-    mailAdmins(user, user.admin ? 'made an admin' : 'removed as admin');
+    mailUserEventToAdmins(user, user.admin ? 'made an admin' : 'removed as admin');
 }
 
 function passwordReset(user, token) {
