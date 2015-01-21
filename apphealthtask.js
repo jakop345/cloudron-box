@@ -27,7 +27,7 @@ var FATAL_CALLBACK = function (error) {
 };
 
 var HEALTHCHECK_INTERVAL = 30000;
-var gDeadApps = { };
+var gLastSeen = { }; // { time, emailSent }
 
 function initialize(callback) {
     async.series([
@@ -36,22 +36,33 @@ function initialize(callback) {
     ], callback);
 }
 
-function setHealth(app, healthy, runState, callback) {
+function setHealth(app, alive, runState, callback) {
+    assert(typeof app === 'object');
+    assert(typeof alive === 'boolean');
+    assert(typeof runState === 'string');
+    assert(typeof callback === 'function');
+
+    var healthy = true; // app is unhealthy if not alive for 2 mins
+    var now = new Date();
+
+    if (alive || !(app.id in gLastSeen)) { // give never seen apps 2 mins to come up
+        gLastSeen[app.id] = { time: now, emailSent: false };
+    } else if (Math.abs(now - gLastSeen[app.id].time) > 120 * 1000) { // not seen for 2 mins
+        debug('app %s not seen for more than 2 mins, marking as unhealthy', app.id);
+        healthy = false;
+    }
+
+    if (!healthy && !gLastSeen[app.id].emailSent) {
+        gLastSeen[app.id].emailSent = true;
+        mailer.appDied(app);
+    }
+
     appdb.setHealth(app.id, healthy, runState, function (error) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) { // app got uninstalled
-            return callback(null);
-        }
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null); // app uninstalled?
         if (error) return callback(error);
 
         app.healthy = healthy;
         app.runState = runState;
-
-        if (healthy) {
-            delete gDeadApps[app.id];
-        } else if (!(app.id in gDeadApps)) {
-            gDeadApps[app.id] = true;
-            mailer.appDied(app);
-        }
 
         callback(null);
     });
@@ -74,7 +85,7 @@ function checkAppHealth(app, callback) {
         }
 
         if (data.State.Running !== true) {
-            debug(app.id + ' has exited');
+            debug('app %s has exited', app.id);
             return setHealth(app, false, appdb.RSTATE_DEAD, callback);
         }
 
@@ -85,10 +96,10 @@ function checkAppHealth(app, callback) {
             .end(function (error, res) {
 
             if (error || res.status !== 200) {
-                debug('Marking application as dead: ' + app.id);
+                debug('app %s is not alive ', app.id);
                 setHealth(app, false, appdb.RSTATE_RUNNING, callback);
             } else {
-                debug('healthy app:' + app.id);
+                debug('app %s is alive', app.id);
                 setHealth(app, true, appdb.RSTATE_RUNNING, callback);
             }
         });
