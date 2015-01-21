@@ -11,6 +11,7 @@ var appdb = require('./src/appdb.js'),
     DatabaseError = require('./src/databaseerror.js'),
     debug = require('debug')('box:apphealthtask'),
     docker = require('./src/docker.js'),
+    mailer = require('./src/mailer.js'),
     os = require('os'),
     superagent = require('superagent');
 
@@ -25,13 +26,37 @@ var FATAL_CALLBACK = function (error) {
     process.exit(2);
 };
 
-var HEALTHCHECK_INTERVAL = 5000;
+var HEALTHCHECK_INTERVAL = 30000;
+var gDeadApps = { };
 
-function initialize() {
-    database.initialize(function (error) {
-        if (error) throw error;
+function initialize(callback) {
+    async.series([
+        database.initialize,
+        mailer.initialize
+    ], callback);
+}
+
+function setHealth(app, healthy, runState, callback) {
+    appdb.setHealth(app.id, healthy, runState, function (error) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) { // app got uninstalled
+            return callback(null);
+        }
+        if (error) return callback(error);
+
+        app.healthy = healthy;
+        app.runState = runState;
+
+        if (healthy) {
+            delete gDeadApps[app.id];
+        } else if (!(app.id in gDeadApps)) {
+            gDeadApps[app.id] = true;
+            mailer.appDied(app);
+        }
+
+        callback(null);
     });
 }
+
 
 // # TODO should probably poll from the outside network instead of the docker network?
 // callback is called with error for fatal errors and not if health check failed
@@ -41,19 +66,6 @@ function checkAppHealth(app, callback) {
 
     var container = docker.getContainer(app.containerId),
         manifest = app.manifest;
-
-    function setHealth(app, healthy, runState, callback) {
-        appdb.setHealth(app.id, healthy, runState, function (error) {
-            if (error && error.reason === DatabaseError.NOT_FOUND) { // app got uninstalled
-                return callback(null);
-            }
-            if (error) return callback(error);
-
-            app.healthy = healthy;
-            app.runState = runState;
-            callback(null);
-        });
-     }
 
     container.inspect(function (err, data) {
         if (err || !data || !data.State) {

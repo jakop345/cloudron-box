@@ -2,7 +2,8 @@
 
 'use strict';
 
-var assert = require('assert'),
+var appFqdn = require('./apps.js').appFqdn,
+    assert = require('assert'),
     async = require('async'),
     cloudron = require('./cloudron.js'),
     config = require('../config.js'),
@@ -13,7 +14,8 @@ var assert = require('assert'),
     path = require('path'),
     safe = require('safetydance'),
     smtpTransport = require('nodemailer-smtp-transport'),
-    userdb = require('./userdb.js');
+    userdb = require('./userdb.js'),
+    util = require('util');
 
 exports = module.exports = {
     initialize: initialize,
@@ -22,7 +24,9 @@ exports = module.exports = {
     userAdded: userAdded,
     userRemoved: userRemoved,
     adminChanged: adminChanged,
-    passwordReset: passwordReset
+    passwordReset: passwordReset,
+
+    appDied: appDied
 };
 
 var MAIL_TEMPLATES_DIR = path.join(__dirname, 'mail_templates');
@@ -184,3 +188,27 @@ function passwordReset(user, token) {
 
     enqueue(mailOptions);
 }
+
+function appDied(app) {
+    assert(typeof app === 'object');
+
+    debug('Sending mail for app %s @ %s died', app.id, app.location);
+
+    userdb.getAllAdmins(function (error, admins) {
+        if (error) return console.log('Error getting admins', error);
+
+        var adminEmails = [ ];
+        admins.forEach(function (admin) { adminEmails.push(admin.email); });
+
+        var mailOptions = {
+            from: config.get('mailUsername'),
+            to: adminEmails.join(', '),
+            subject: util.format('App %s is down', app.location),
+            text: render('app_down_text.ejs', { name: app.location, location: appFqdn(app.location) }),
+            html: render('app_down_html.ejs', { name: app.location, location : appFqdn(app.location) })
+        };
+
+        enqueue(mailOptions);
+    });
+}
+
