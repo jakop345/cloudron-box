@@ -430,52 +430,6 @@ function delClientTokens(req, res, next) {
     });
 }
 
-var applicationProxy = [
-    function (req, res, next) {
-        if (req.path === '/api/v1/oauth/proxy/api/v1/session/login') {
-            if (req.method === 'GET') {
-
-                // in case we login, the returnTo needs to be rewritten, to get rid of the proxy prefix
-                var proxyPrefix = '/api/v1/oauth/proxy';
-                req.session.returnTo = req.session.returnTo.indexOf(proxyPrefix) === 0 ? req.session.returnTo.slice(proxyPrefix.length) : req.session.returnTo;
-
-                return loginForm(req, res);
-            } else if (req.method === 'POST') {
-                // TODO check for roleUser/roleAdmin
-                return passport.authenticate('local', {
-                    successReturnToOrRedirect: '/api/v1/session/error',
-                    failureRedirect: '/api/v1/session/login'
-                })(req, res, next);
-            }
-        }
-        next();
-    },
-    session.ensureLoggedIn('/api/v1/session/login'),
-    function proxyToApplication(req, res, next) {
-        var port = parseInt(req.headers['x-cloudron-proxy-port'], 10);
-        if (!Number.isFinite(port)) return next(new HttpError(500, 'Routing error'));
-
-        var proxyMiddleware = gProxyMiddlewareCache[port];
-        if (!proxyMiddleware) {
-            debug('Adding proxy middleware for port %d', port);
-            proxyMiddleware = middleware.proxy(url.parse('http://127.0.0.1:' + port));
-            gProxyMiddlewareCache[port] = proxyMiddleware;
-        }
-
-        // if you fix the code below, code in routes/graphs.js:forwardToGraphite probably needs fixing
-        // TODO: is it safe to pass the cookie?
-        var parsedUrl = url.parse(req.url, true /* parseQueryString */);
-        delete parsedUrl.query['access_token'];
-        delete req.headers['authorization']
-
-        debug('proxying %s to port %d', req.params[0], port);
-
-        req.url = url.format({ pathname: req.params[0] /* parsedUrl.pathname */, query: parsedUrl.query });
-
-        proxyMiddleware(req, res, next);
-    }
-];
-
 // Cross-site request forgery protection middleware for login form
 var csrf = [
     middleware.csrf(),
@@ -509,6 +463,5 @@ exports = module.exports = {
     getClients: getClients,
     getClientTokens: getClientTokens,
     delClientTokens: delClientTokens,
-    applicationProxy: applicationProxy,
     csrf: csrf
 };
