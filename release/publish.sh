@@ -3,7 +3,7 @@
 # set -x
 set -e
 
-SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd )"
+SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
 
 if [ ! -f "$SOURCE_DIR/../installer/scripts/digitalOceanFunctions.sh" ]; then
     echo "Could not locate digitalOceanFunctions.sh"

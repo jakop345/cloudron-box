@@ -13,7 +13,7 @@ scripts=("${SOURCE_DIR}/src/scripts/rmappdir.sh" \
 
 for script in "${scripts[@]}"; do
     output=$(sudo -n "${script}" --check 2>/dev/null)
-    if [ "${output}" != "OK" ]; then
+    if [[ "${output}" != "OK" ]]; then
         echo "${script} does not have sudo access"
         exit 1
     fi
