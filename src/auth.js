@@ -26,20 +26,14 @@ function initialize(callback) {
     assert(typeof callback === 'function');
 
     passport.serializeUser(function (user, callback) {
-        debug('serializeUser: %j', user);
-
         callback(null, user.username);
     });
 
     passport.deserializeUser(function(username, callback) {
-        debug('deserializeUser: %s', username);
-
         userdb.get(username, callback);
     });
 
     passport.use(new LocalStrategy(function (username, password, callback) {
-        debug('LocalStrategy: ' + username + ' ' + password.length);
-
         user.verify(username, password, function (error, result) {
             if (error && error.reason === UserError.NOT_FOUND) return callback(null, false);
             if (error && error.reason === UserError.WRONG_PASSWORD) return callback(null, false);
@@ -50,8 +44,6 @@ function initialize(callback) {
     }));
 
     passport.use(new BasicStrategy(function (username, password, callback) {
-        debug('BasicStrategy: ' + username + ' ' + password.length);
-
         if (username.indexOf('cid-') === 0) {
             debug('BasicStrategy: detected clientId %s instead of username:password', username);
             // username is actually client id here
@@ -74,8 +66,6 @@ function initialize(callback) {
     }));
 
     passport.use(new ClientPasswordStrategy(function (clientId, clientSecret, callback) {
-        debug('ClientPasswordStrategy: clientId:%s clientSecret:%s', clientId, clientSecret);
-
         clientdb.getByClientId(clientId, function(error, client) {
             if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
             if (error) { return callback(error); }
@@ -85,8 +75,6 @@ function initialize(callback) {
     }));
 
     passport.use(new BearerStrategy(function (accessToken, callback) {
-        debug('BearerStrategy: %s', accessToken);
-
         tokendb.get(accessToken, function (error, token) {
             if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
             if (error) return callback(error);

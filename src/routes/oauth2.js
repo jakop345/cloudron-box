@@ -356,7 +356,6 @@ function scope(requestedScope) {
             if (req.authInfo.scope === '*') return next();
 
             var scopes = req.authInfo.scope.split(',');
-            debug('scope: provided scopes', scopes);
 
             for (var i = 0; i < requestedScopes.length; ++i) {
                 if (scopes.indexOf(requestedScopes[i]) === -1) {
