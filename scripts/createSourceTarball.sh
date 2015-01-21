@@ -8,9 +8,9 @@ set -e
 readonly SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
 readonly TMPDIR=${TMPDIR:-/tmp} # why is this not set on mint?
 
-readonly version=$(cd "${SOURCE_DIR}" && git rev-parse HEAD)
-readonly bundle_dir=$(mktemp -d -t box 2>/dev/null || mktemp -d box-XXXXXXXXXX --tmpdir=$TMPDIR)
-readonly bundle_file="${TMPDIR}/box-${version}.tar.gz"
+version=$(cd "${SOURCE_DIR}" && git rev-parse HEAD)
+bundle_dir=$(mktemp -d -t box 2>/dev/null || mktemp -d box-XXXXXXXXXX --tmpdir=$TMPDIR)
+bundle_file="${TMPDIR}/box-${version}.tar.gz"
 
 chmod "o+rx,g+rx" "${bundle_dir}" # otherwise extracted tarball director won't be readable by others/group
 echo "Checking out code [${version}] into ${bundle_dir}"

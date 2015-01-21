@@ -19,8 +19,8 @@ if [ $# -lt 1 ]; then
     exit 1
 fi
 
-readonly backup_url="$1"
-readonly now=$(date "+%Y-%m-%dT%H:%M:%S")
+backup_url="$1"
+now=$(date "+%Y-%m-%dT%H:%M:%S")
 
 echo "Snapshoting backup as backup-${now}"
 btrfs subvolume snapshot -r "${HOME}/data" "${HOME}/backup-${now}"
