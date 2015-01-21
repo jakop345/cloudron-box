@@ -89,6 +89,7 @@ function processQueue() {
 
 function enqueue(mailOptions) {
     assert(typeof mailOptions === 'object');
+
     debug('Queued mail for ' + mailOptions.from + ' to ' + mailOptions.to);
     gMailQueue.push(mailOptions);
 
@@ -96,6 +97,9 @@ function enqueue(mailOptions) {
 }
 
 function render(templateFile, params) {
+    assert(typeof templateFile === 'string');
+    assert(typeof params === 'object');
+
     return ejs.render(safe.fs.readFileSync(path.join(MAIL_TEMPLATES_DIR, templateFile), 'utf8'), params);
 }
 
@@ -122,6 +126,9 @@ function mailAdmins(user, event) {
 }
 
 function userAdded(user, password) {
+    assert(typeof user === 'object');
+    assert(typeof password === 'string');
+
     debug('Sending mail for userAdded');
 
     var templateData = {
@@ -144,21 +151,28 @@ function userAdded(user, password) {
 }
 
 function userRemoved(username) {
+    assert(typeof username === 'string');
+
     debug('Sending mail for userRemoved');
 
     mailAdmins({ username: username }, 'removed');
 }
 
 function adminChanged(user) {
+    assert(typeof user === 'object');
+
     debug('Sending mail for adminChanged');
 
     mailAdmins(user, user.admin ? 'made an admin' : 'removed as admin');
 }
 
 function passwordReset(user, token) {
+    assert(typeof user === 'object');
+    assert(typeof token === 'string');
+
     debug('Sending mail for password reset for user %s.', user.username);
 
-    var resetLink = config.adminOrigin() + '/api/v1/session/password/reset.html?reset_token='+token;
+    var resetLink = config.adminOrigin() + '/api/v1/session/password/reset.html?reset_token=' + token;
 
     var mailOptions = {
         from: config.get('mailUsername'),
