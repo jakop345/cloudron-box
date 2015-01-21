@@ -15,6 +15,11 @@ exports = module.exports = {
     get: get,
     set: set,
 
+    // ifdefs to check environment
+    CLOUDRON: process.env.NODE_ENV === 'cloudron',
+    TEST: process.env.NODE_ENV === 'test',
+    LOCAL: process.env.NODE_ENV === 'local' || !process.env.NODE_ENV,
+
     // convenience getters
     appServerUrl: appServerUrl,
     fqdn: fqdn,
@@ -23,30 +28,34 @@ exports = module.exports = {
 };
 
 var homeDir = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
-var production = process.env.NODE_ENV === 'production';
 
 var data = { };
 
 function baseDir() {
-   return production
-        ? path.join(homeDir, process.env.CLOUDRON === '1' ? '' : '.yellowtent')
-        : path.join(homeDir, '.yellowtenttest');
+    if (exports.CLOUDRON) return homeDir;
+    if (exports.TEST) return path.join(homeDir, '.yellowtenttest');
+    if (exports.LOCAL) return path.join(homeDir, '.yellowtent');
 }
 
 var cloudronConfigFileName = path.join(baseDir(), 'configs/cloudron.conf');
 
 function saveSync() {
     fs.writeFileSync(cloudronConfigFileName, JSON.stringify(data, null, 4)); // functions are ignored by JSON.stringify
-};
+}
 
 (function initConfig() {
     // setup defaults
-    if (production) {
+    if (exports.CLOUDRON) {
         data.port = 3000;
         data.appServerUrl = process.env.APP_SERVER_URL || null; // APP_SERVER_URL is set during bootstrap in the box's supervisor manifest
-    } else {
+    } else if (exports.TEST) {
         data.port = 5454;
         data.appServerUrl = 'http://localhost:6060'; // hock doesn't support https
+    } else if (exports.LOCAL) {
+        data.port = 3000;
+        data.appServerUrl = 'http://localhost:5050';
+    } else {
+        assert(false, 'Unknown environment. This should not happen!');
     }
 
     data.fqdn = 'localhost';
