@@ -240,7 +240,10 @@ var callback = [
 var error = [
     session.ensureLoggedIn('/api/v1/session/login'),
     function (req, res) {
-        res.render('error', { adminOrigin: config.adminOrigin() });
+        res.render('error', {
+            adminOrigin: config.adminOrigin(),
+            message: 'Invalid OAuth Client'
+        });
     }
 ];
 
@@ -461,6 +464,19 @@ var applicationProxy = [
     }
 ];
 
+// Cross-site request forgery protection middleware for login form
+var csrf = [
+    middleware.csrf(),
+    function (err, req, res, next) {
+        if (err.code !== 'EBADCSRFTOKEN') return next(err);
+
+        res.render('error', {
+            adminOrigin: config.adminOrigin(),
+            message: 'Form expired'
+        });
+    }
+];
+
 exports = module.exports = {
     loginForm: loginForm,
     login: login,
@@ -480,5 +496,6 @@ exports = module.exports = {
     getClients: getClients,
     getClientTokens: getClientTokens,
     delClientTokens: delClientTokens,
-    applicationProxy: applicationProxy
+    applicationProxy: applicationProxy,
+    csrf: csrf
 };

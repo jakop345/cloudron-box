@@ -40,8 +40,7 @@ function initializeExpressSync() {
     var REQUEST_TIMEOUT = 10000; // timeout for all requests
 
     var json = middleware.json({ strict: true, limit: QUERY_LIMIT }), // application/json
-        urlencoded = middleware.urlencoded({ extended: false, limit: QUERY_LIMIT }), // application/x-www-form-urlencoded
-        csrf = middleware.csrf(); // Cross-site request forgery protection middleware for login form
+        urlencoded = middleware.urlencoded({ extended: false, limit: QUERY_LIMIT }); // application/x-www-form-urlencoded
 
     gApp.set('views', path.join(__dirname, 'oauth2views'));
     gApp.set('view options', { layout: true, debug: true });
@@ -80,6 +79,9 @@ function initializeExpressSync() {
     var usersScope = routes.oauth2.scope('users');
     var appsScope = routes.oauth2.scope('apps');
     var settingsScope = routes.oauth2.scope('settings');
+
+    // csrf protection
+    var csrf = routes.oauth2.csrf;
 
     // public routes
     router.post('/api/v1/cloudron/activate', routes.cloudron.activate);    // FIXME any number of admins can be created without auth!
