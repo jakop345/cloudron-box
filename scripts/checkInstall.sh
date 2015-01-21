@@ -1,19 +1,20 @@
 #!/bin/bash
 
-SRCDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+set -e
+
+readonly SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # checks if all scripts are sudo access
-scripts=($SRCDIR/src/scripts/rmappdir.sh \
-         $SRCDIR/src/scripts/reloadnginx.sh \
-         $SRCDIR/src/scripts/backup.sh \
-         $SRCDIR/src/scripts/reboot.sh \
-         $SRCDIR/src/scripts/reloadcollectd.sh)
+scripts=("${SOURCE_DIR}/src/scripts/rmappdir.sh" \
+         "${SOURCE_DIR}/src/scripts/reloadnginx.sh" \
+         "${SOURCE_DIR}/src/scripts/backup.sh" \
+         "${SOURCE_DIR}/src/scripts/reboot.sh" \
+         "${SOURCE_DIR}/src/scripts/reloadcollectd.sh")
 
 for script in "${scripts[@]}"; do
-    OUTPUT=$(sudo -n "$script" --check 2>/dev/null)
-    # echo "$script: $OUTPUT"
-    if [ "$OUTPUT" != "OK" ]; then
-        echo "$script does not have sudo access"
+    output=$(sudo -n "${script}" --check 2>/dev/null)
+    if [ "${output}" != "OK" ]; then
+        echo "${script} does not have sudo access"
         exit 1
     fi
 done
