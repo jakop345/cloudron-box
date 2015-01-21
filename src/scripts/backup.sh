@@ -1,34 +1,35 @@
 #!/bin/bash
 
-if [ $EUID -ne 0 ]; then
+set -e
+
+if [[ $EUID -ne 0 ]]; then
     echo "This script should be run as root." > /dev/stderr
     exit 1
 fi
 
-if [ "$1" == "--check" ]; then
+if [[ "$1" == "--check" ]]; then
     echo "OK"
     exit 0
 fi
 
-set -e
-
-NOW=$(date +%Y-%m-%dT%H:%M:%S)
-LOG="/var/log/cloudron/backup.log"
-exec 2>&1 1>> $LOG
+exec 2>&1 1>> "/var/log/cloudron/backup.log"
 
 if [ $# -lt 1 ]; then
     echo "Usage: backup.sh <url>"
     exit 1
 fi
 
-BACKUP_URL="$1"
+readonly backup_url="$1"
+readonly now=$(date "+%Y-%m-%dT%H:%M:%S")
 
-echo "Snapshoting backup as backup-${NOW}"
-btrfs subvolume snapshot -r $HOME/data $HOME/backup-${NOW}
-echo "Uploading backup to $BACKUP_URL"
-tar -cvzf - -C $HOME/backup-${NOW} . | curl -H "Content-Type:" -X PUT --data-binary @- "$BACKUP_URL"
+echo "Snapshoting backup as backup-${now}"
+btrfs subvolume snapshot -r "${HOME}/data" "${HOME}/backup-${now}"
+
+echo "Uploading backup to ${backup_url}"
+tar -cvzf - -C "${HOME}/backup-${now}" . | curl -H "Content-Type:" -X PUT --data-binary @- "${backup_url}"
+
 echo "Deleting backup snapshot"
-btrfs subvolume delete $HOME/backup-${NOW}
+btrfs subvolume delete "${HOME}/backup-${now}"
 
 echo "Backup over"
 
