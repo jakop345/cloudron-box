@@ -1,5 +1,14 @@
 <% include header %>
 
+<!-- Navigation -->
+<nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+    <li class="navbar-brand" href="index.html">Cloudron</li>
+    <ul class="nav navbar-top-links navbar-right">
+        <li><a href="/api/v1/session/logout"><i class="fa fa-sign-out fa-fw"></i> Sign out</a></li>
+        <li class="navbar-text"><img src="<%= user.gravatar %>"/> <%= user.username %></li>
+    </ul>
+</nav>
+
 <br/>
 
 <div class="container">
@@ -7,7 +16,7 @@
         <div class="col-md-2"></div>
         <div class="col-md-8">
             <div class="alert alert-danger">
-                <%= message %>
+                <%- message %>
             </div>
         </div>
         <div class="col-md-2"></div>

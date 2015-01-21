@@ -241,6 +241,7 @@ var error = [
     session.ensureLoggedIn('/api/v1/session/login'),
     function (req, res) {
         res.render('error', {
+            user: req.user,
             adminOrigin: config.adminOrigin(),
             message: 'Invalid OAuth Client'
         });
@@ -286,6 +287,17 @@ var authorization = [
     function (req, res, next) {
         assert(typeof req.body === 'object');
         assert(typeof req.oauth2 === 'object');
+
+        var scopes = req.oauth2.client.scope ? req.oauth2.client.scope.split(',') : ['profile','roleUser'];
+
+        if (scopes.indexOf('roleAdmin') !== -1 && !req.user.admin) {
+            debug('authorization: not allowed, user needs to be admin');
+            return res.render('error', {
+                user: req.user,
+                adminOrigin: config.adminOrigin(),
+                message: 'Admin capabilities required. <a href="' + req.oauth2.client.redirectURI + '">Retry</a>'
+            });
+        }
 
         req.body.transaction_id = req.oauth2.transactionID;
         next();
@@ -471,6 +483,7 @@ var csrf = [
         if (err.code !== 'EBADCSRFTOKEN') return next(err);
 
         res.render('error', {
+            user: req.user,
             adminOrigin: config.adminOrigin(),
             message: 'Form expired'
         });

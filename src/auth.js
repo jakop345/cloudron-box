@@ -11,6 +11,7 @@ var assert = require('assert'),
     DatabaseError = require('./databaseerror'),
     debug = require('debug')('box:auth'),
     LocalStrategy = require('passport-local').Strategy,
+    crypto = require('crypto'),
     passport = require('passport'),
     tokendb = require('./tokendb'),
     user = require('./user'),
@@ -30,7 +31,14 @@ function initialize(callback) {
     });
 
     passport.deserializeUser(function(username, callback) {
-        userdb.get(username, callback);
+        userdb.get(username, function (error, result) {
+            if (error) return callback(error);
+
+            var md5 = crypto.createHash('md5').update(result.email.toLowerCase()).digest('hex');
+            result.gravatar = 'https://www.gravatar.com/avatar/' + md5 + '.jpg?s=24&d=mm';
+
+            callback(null, result);
+        });
     });
 
     passport.use(new LocalStrategy(function (username, password, callback) {
