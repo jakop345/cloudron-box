@@ -50,13 +50,6 @@ EOF
 ADMIN_FQDN="admin-$PROVISION_FQDN"
 ADMIN_ORIGIN="https://$ADMIN_FQDN"
 
-# Every docker restart results in a new IP. Give our mail server a
-# static IP. Alternately, we need to link the mail container with
-# all our apps
-# This IP is set by the haraka container on every start and the firewall
-# allows connect to port 25
-MAIL_SERVER="172.17.120.120"
-
 echo "==== Sudoers file for app removal ===="
 cat > /etc/sudoers.d/yellowtent <<EOF
 Defaults!$SRCDIR/src/scripts/rmappdir.sh env_keep=HOME
@@ -124,6 +117,16 @@ HARAKA_CONTAINER_ID=$(docker run --restart=always -d --name="haraka" --cap-add="
     -e DOMAIN_NAME=$DOMAIN_NAME \
     -v $HARAKA_DIR:/app/data girish/haraka:0.1)
 echo "Haraka container id: $HARAKA_CONTAINER_ID"
+# Every docker restart results in a new IP. Give our mail server a
+# static IP. Alternately, we need to link the mail container with
+# all our apps
+# This IP is set by the haraka container on every start and the firewall
+# allows connect to port 25. The ping gets the ARP lookup working
+MAIL_SERVER="172.17.120.120"
+echo "Checking connectivity to haraka($MAIL_SERVER)"
+if ! ping -c 20 "$MAIL_SERVER"; then
+    echo "Could not connect to mail server"
+fi
 
 echo "=== Setup MySQL addon ==="
 docker rm -f mysql || true
