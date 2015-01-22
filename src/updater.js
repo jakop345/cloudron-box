@@ -92,7 +92,7 @@ function checkUpdates() {
         checkBoxUpdates(function (error, result) {
             if (error) debug('Error checking box updates: ', error);
 
-            if (result) gBoxUpdateInfo = result;
+            gBoxUpdateInfo = result;
 
             gCheckUpdatesTimeoutId = setTimeout(checkUpdates, 60 * 1000);
         });
