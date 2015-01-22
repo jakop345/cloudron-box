@@ -26,8 +26,8 @@ user=yellowtent
 environment=HOME="/home/yellowtent",USER="yellowtent",DEBUG="box*,connect-lastmile",NODE_ENV="cloudron"
 EOF
 
-cat > /etc/supervisor/conf.d/proxy.conf <<EOF
-[program:proxy]
+cat > /etc/supervisor/conf.d/oauthproxy.conf <<EOF
+[program:oauthproxy]
 command=/usr/bin/node "${BOX_SRC_DIR}/oauthproxy.js"
 autostart=true
 autorestart=true
