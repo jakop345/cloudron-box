@@ -27,15 +27,30 @@ gulp.task('3rdparty', function () {
         .pipe(gulp.dest('dist/3rdparty/'));
 });
 
-gulp.task('html', ['html_templates'], function () {
-    gulp.src(['webadmin/*.html', 'webadmin/views/*.html'])
+gulp.task('jsViews', function () {
+    return gulp.src('webadmin/views/*.js')
+        .pipe(gulp.dest('dist/views'));
+});
+
+gulp.task('js', ['jsViews'], function () {
+    return gulp.src('webadmin/js/*.js')
+        .pipe(gulp.dest('dist/js'));
+});
+
+gulp.task('htmlViews', function () {
+    return gulp.src('webadmin/views/*.html')
+        .pipe(gulp.dest('dist/views'));
+});
+
+gulp.task('html', ['html_templates', 'htmlViews'], function () {
+    return gulp.src('webadmin/*.html')
         .pipe(gulp.dest('dist'));
 });
 
 gulp.task('html_templates', function () {
     var config = JSON.parse(fs.readFileSync('./deploymentConfig.json'));
 
-    gulp.src('webadmin/*.ejs')
+    return gulp.src('webadmin/*.ejs')
         .pipe(ejs(config, { ext: '.html' }))
         .pipe(gulp.dest('dist'));
 });
@@ -45,5 +60,5 @@ gulp.task('clean', function (callback) {
 });
 
 gulp.task('default', ['clean'], function () {
-    gulp.start('html', '3rdparty');
+    gulp.start('html', 'js', '3rdparty');
 });
