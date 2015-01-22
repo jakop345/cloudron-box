@@ -209,3 +209,6 @@ echo "{ \"version\": \"${provision_version}\", \"boxVersionsUrl\": \"${provision
 echo "==== Setup supervisord ===="
 ${BOX_SRC_DIR}/setup/postinstall/setup_supervisord.sh
 
+echo "==== Starting box ==="
+${BOX_SRC_DIR}/setup/postinstall/startbox.sh
+
