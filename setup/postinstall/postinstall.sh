@@ -21,7 +21,6 @@ readonly CLOUDRON_CONF="${CONFIG_DIR}/cloudron.conf"
 readonly CLOUDRON_SQLITE="${DATA_DIR}/cloudron.sqlite"
 readonly MYSQL_DIR="${DATA_DIR}/mysql"
 readonly POSTGRESQL_DIR="${DATA_DIR}/postgresql"
-readonly DOMAIN_NAME=$(hostname -f)
 readonly JSON="${BOX_SRC_DIR}/node_modules/.bin/json"
 readonly MAIL_SERVER_IP="172.17.120.120" # hardcoded in haraka container
 
@@ -122,8 +121,8 @@ docker rm -f haraka || true
 docker pull girish/haraka:0.1 || true # this line is for dev convenience since it's already part of base image
 haraka_container_id=$(docker run --restart=always -d --name="haraka" --cap-add="NET_ADMIN"\
     -p 127.0.0.1:25:25 \
-    -h "${DOMAIN_NAME}" \
-    -e "DOMAIN_NAME=${DOMAIN_NAME}" \
+    -h "${provision_fqdn}" \
+    -e "DOMAIN_NAME=${provision_fqdn}" \
     -v "${HARAKA_DIR}:/app/data" \
     girish/haraka:0.1)
 echo "Haraka container id: ${haraka_container_id}"
@@ -144,7 +143,7 @@ docker0_ip=$(/sbin/ifconfig docker0 | grep "inet addr" | awk -F: '{print $2}' | 
 docker pull girish/mysql:0.1 || true # this line for dev convenience since it's already part of base image
 mysql_container_id=$(docker run --restart=always -d --name="mysql" \
     -p 127.0.0.1:3306:3306 \
-    -h "${DOMAIN_NAME}" \
+    -h "${provision_fqdn}" \
     -e "MYSQL_ROOT_PASSWORD=${mysql_root_password}" \
     -e "MYSQL_ROOT_HOST=${docker0_ip}" \
     -v "${MYSQL_DIR}:/var/lib/mysql" \
@@ -157,7 +156,7 @@ postgresql_root_password=$(pwgen -1 -s)
 docker pull girish/postgresql:0.1 || true # this line for dev convenience since it's already part of base image
 postgresql_container_id=$(docker run --restart=always -d --name="postgresql" \
     -p 127.0.0.1:5432:5432 \
-    -h "${DOMAIN_NAME}" \
+    -h "${provision_fqdn}" \
     -e "POSTGRESQL_ROOT_PASSWORD=${postgresql_root_password}" \
     -v "${POSTGRESQL_DIR}:/var/lib/mysql" \
     girish/postgresql:0.1)
@@ -180,7 +179,7 @@ cat > "${CLOUDRON_CONF}" <<CONF_END
     "adminOrigin": "${admin_origin}",
     "boxVersionsUrl": "${provision_box_versions_url}",
     "mailServer": "${MAIL_SERVER_IP}",
-    "mailUsername": "admin@${DOMAIN_NAME}",
+    "mailUsername": "admin@${provision_fqdn}",
     "addons": {
         "mysql": {
             "rootPassword": "${mysql_root_password}"
