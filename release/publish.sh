@@ -40,7 +40,7 @@ while true; do
     --new) cmd="new"; new_versions_file="$2"; shift 2;;
     --list) cmd="list"; shift;;
     --revert) cmd="revert"; shift;;
-    --changelog) changelog="$2";;
+    --changelog) changelog="$2"; shift 2;;
     --) shift; break;;
     *) echo "Unknown option $2"; exit;;
     esac
