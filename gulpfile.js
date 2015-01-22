@@ -7,6 +7,8 @@ var _ejs = require('ejs'),
     gulp = require('gulp'),
     del = require('del'),
     path = require('path'),
+    concat = require('gulp-concat'),
+    sourcemaps = require('gulp-sourcemaps'),
     fs = require('fs');
 
 _ejs.filters.basename = function (obj) {
@@ -29,7 +31,10 @@ gulp.task('3rdparty', function () {
 
 gulp.task('jsViews', function () {
     return gulp.src('webadmin/src/views/*.js')
-        .pipe(gulp.dest('webadmin/dist/views'));
+        .pipe(sourcemaps.init())
+        .pipe(concat('views.js'))
+        .pipe(sourcemaps.write())
+        .pipe(gulp.dest('webadmin/dist/js'));
 });
 
 gulp.task('js', ['jsViews'], function () {
