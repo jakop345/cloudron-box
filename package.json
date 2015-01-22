@@ -93,6 +93,7 @@
     "precommit": "/bin/true",
     "prepush": "npm test",
     "postmerge": "/bin/true",
-    "migrate_data": "DATABASE_URL=sqlite3:///home/yellowtent/data/cloudron.sqlite db-migrate up"
+    "migrate_data": "DATABASE_URL=sqlite3:///home/yellowtent/data/cloudron.sqlite db-migrate up",
+    "webadmin": "node_modules/.bin/gulp"
   }
 }
