@@ -204,6 +204,9 @@ sqlite3 "${CLOUDRON_SQLITE}" "INSERT OR REPLACE INTO clients (id, appId, clientI
 
 EOF
 
+# bookkeep the version as part of data
+echo "{ \"version\": \"${provision_version}\", \"boxVersionsUrl\": \"${provision_box_versions_url}\" }" > "${DATA_DIR}/version"
+
 echo "==== Setup supervisord ===="
 ${BOX_SRC_DIR}/setup/postinstall/setup_supervisord.sh
 
