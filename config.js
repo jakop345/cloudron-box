@@ -24,7 +24,8 @@ exports = module.exports = {
     appServerUrl: appServerUrl,
     fqdn: fqdn,
     adminOrigin: adminOrigin,
-    token: token
+    token: token,
+    version: version
 };
 
 var homeDir = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
@@ -65,6 +66,7 @@ function saveSync() {
     data.mailUsername = null;
     data.mailDnsRecordIds = [ ];
     data.boxVersionsUrl = null;
+    data.version = null;
 
     if (safe.fs.existsSync(cloudronConfigFileName)) {
         var existingData = safe.JSON.parse(safe.fs.readFileSync(cloudronConfigFileName, 'utf8'));
@@ -111,5 +113,9 @@ function adminOrigin() {
 
 function token() {
     return get('token');
+}
+
+function version() {
+    return get('version');
 }
 

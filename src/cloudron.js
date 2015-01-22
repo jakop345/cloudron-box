@@ -45,8 +45,7 @@ var SUDO = '/usr/bin/sudo',
 var gBackupTimerId = null,
     gAddMailDnsRecordsTimerId = null,
     gGetCertificateTimerId = null,
-    gCachedIp = null,
-    gCurrentVersion = require(paths.VERSION_FILENAME).version;
+    gCachedIp = null;
 
 function CloudronError(reason, errorOrMessage) {
     assert(typeof reason === 'string');
@@ -141,7 +140,7 @@ function getBackupUrl(callback) {
 
     var url = config.appServerUrl() + '/api/v1/boxes/' + config.fqdn() + '/backupurl';
 
-    superagent.put(url).query({ token: config.token(), boxVersion: gCurrentVersion }).end(function (error, result) {
+    superagent.put(url).query({ token: config.token(), boxVersion: config.version() }).end(function (error, result) {
         if (error) return callback(new Error('Error getting presigned backup url: ' + error.message));
 
         if (result.statusCode !== 201 || !result.body || !result.body.url) return callback(new Error('Error getting presigned backup url : ' + result.statusCode));
@@ -190,7 +189,7 @@ function getStatus(callback) {
     userdb.count(function (error, count) {
         if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
-        callback(null, { activated: count !== 0, version: gCurrentVersion });
+        callback(null, { activated: count !== 0, version: config.version() });
     });
 }
 
@@ -202,7 +201,7 @@ function getConfig(callback) {
         isDev: /dev/i.test(config.get('boxVersionsUrl')),
         fqdn: config.fqdn(),
         ip: getIp(),
-        version: gCurrentVersion,
+        version: config.version(),
         update: updater.getUpdateInfo()
     })
 }

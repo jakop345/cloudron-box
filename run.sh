@@ -26,9 +26,6 @@ touch "${NGINX_ROOT}/naked_domain.conf"
 sed -e "s/##ADMIN_FQDN##/admin-localhost/" -e "s|##BOX_SRC_DIR##|${BOX_SRC_DIR}|" postinstall/nginx/admin.conf_template > "${NGINX_ROOT}/applications/admin.conf"
 sed -e "s/user www-data/user $USER/" -i $NGINX_ROOT/nginx.conf
 
-# create basic version.json
-echo "{ \"version\": \"${PROVISION_VERSION}\", \"boxVersionsUrl\": \"${PROVISION_BOX_VERSIONS_URL}\" }" > "${DATA_DIR}/version.json"
-
 # add webadmin oauth client
 readonly WEBADMIN_ID=abcdefg
 readonly WEBADMIN_ORIGIN=https://admin-localhost

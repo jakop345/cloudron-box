@@ -53,7 +53,7 @@ function checkAppUpdates(callback) {
 }
 
 function checkBoxUpdates(callback) {
-    var currentVersion = require(paths.VERSION_FILENAME).version;
+    var currentVersion = config.version();
 
     superagent.get(config.get('boxVersionsUrl')).end(function (error, result) {
         if (error) return callback(error);

@@ -33,10 +33,11 @@ provision_tls_key=""
 provision_app_server_url=""
 provision_fqdn=""
 provision_token=""
+provision_version=""
 admin_fqdn=""
 admin_origin=""
 
-args=$(getopt -o "" -l "boxversionsurl:,data:,tlscert:,tlskey:" -n "$0" -- "$@")
+args=$(getopt -o "" -l "boxversionsurl:,data:,tlscert:,tlskey:,version:" -n "$0" -- "$@")
 eval set -- "${args}"
 
 while true; do
@@ -51,6 +52,7 @@ EOF
         ;;
     --tlscert) provision_tls_cert="$2";;
     --tlskey) provision_tls_key="$2";;
+    --version) provision_version="$2";;
     --) break;;
     *) echo "Unknown option $1"; exit 1;;
     esac
@@ -171,6 +173,7 @@ set -x
 echo "Creating cloudron.conf"
 cat > "${CLOUDRON_CONF}" <<CONF_END
 {
+    "version": "${provision_version}",
     "token": "${provision_token}",
     "appServerUrl": "${provision_app_server_url}",
     "fqdn": "${provision_fqdn}",
