@@ -4,7 +4,7 @@ echo
 echo "Starting Cloudron at port 443"
 echo
 
-readonly SRCDIR="$(cd $(dirname "$0"); pwd)"
+readonly BOX_SRC_DIR="$(cd $(dirname "$0"); pwd)"
 readonly NGINX_ROOT=~/.yellowtent/nginx
 readonly PROVISION_VERSION=0.1
 readonly PROVISION_BOX_VERSIONS_URL=0.1
@@ -23,7 +23,7 @@ cp postinstall/nginx/cert/* "${NGINX_ROOT}/cert/"
 
 # adjust the generated nginx config for local use
 touch "${NGINX_ROOT}/naked_domain.conf"
-sed -e "s/##ADMIN_FQDN##/admin-localhost/" -e "s|##SRCDIR##|${SRCDIR}|" postinstall/nginx/admin.conf_template > "${NGINX_ROOT}/applications/admin.conf"
+sed -e "s/##ADMIN_FQDN##/admin-localhost/" -e "s|##BOX_SRC_DIR##|${BOX_SRC_DIR}|" postinstall/nginx/admin.conf_template > "${NGINX_ROOT}/applications/admin.conf"
 sed -e "s/user www-data/user $USER/" -i $NGINX_ROOT/nginx.conf
 
 # create basic version.json

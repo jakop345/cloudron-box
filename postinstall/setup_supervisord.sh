@@ -2,8 +2,8 @@
 
 set -e
 
-readonly BOX_SRCDIR=/home/yellowtent/box
-readonly DATA_DIR=/home/yellowtent/data
+readonly BOX_SRC_DIR="/home/yellowtent/box"
+readonly DATA_DIR="/home/yellowtent/data"
 
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -15,7 +15,7 @@ echo "Writing supervisor configs..."
 
 cat > /etc/supervisor/conf.d/box.conf <<EOF
 [program:box]
-command=/usr/bin/node "${BOX_SRCDIR}/app.js"
+command=/usr/bin/node "${BOX_SRC_DIR}/app.js"
 autostart=true
 autorestart=true
 redirect_stderr=true
@@ -28,7 +28,7 @@ EOF
 
 cat > /etc/supervisor/conf.d/proxy.conf <<EOF
 [program:proxy]
-command=/usr/bin/node "${BOX_SRCDIR}/proxy.js"
+command=/usr/bin/node "${BOX_SRC_DIR}/proxy.js"
 autostart=true
 autorestart=true
 redirect_stderr=true
@@ -41,7 +41,7 @@ EOF
 
 cat > /etc/supervisor/conf.d/apphealthtask.conf <<EOF
 [program:apphealthtask]
-command=/usr/bin/node "${BOX_SRCDIR}/apphealthtask.js"
+command=/usr/bin/node "${BOX_SRC_DIR}/apphealthtask.js"
 autostart=true
 autorestart=true
 redirect_stderr=true
