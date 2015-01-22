@@ -87,7 +87,7 @@ function checkUpdates() {
     checkAppUpdates(function (error, appUpdateInfo) {
         if (error) debug('Error checking app updates: ', error);
 
-        if (appUpdateInfo) gAppUpdateInfo = appUpdateInfo;
+        gAppUpdateInfo = appUpdateInfo;
 
         checkBoxUpdates(function (error, result) {
             if (error) debug('Error checking box updates: ', error);
