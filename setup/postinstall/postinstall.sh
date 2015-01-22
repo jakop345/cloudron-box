@@ -91,10 +91,10 @@ echo "==== Setup nginx ===="
 unlink /etc/nginx 2>/dev/null || rm -rf /etc/nginx
 ln -s "${NGINX_CONFIG_DIR}" /etc/nginx
 mkdir -p "${NGINX_APPCONFIG_DIR}"
-cp "${BOX_SRC_DIR}/postinstall/nginx/nginx.conf" "${NGINX_CONFIG_DIR}/nginx.conf"
-cp "${BOX_SRC_DIR}/postinstall/nginx/mime.types" "${NGINX_CONFIG_DIR}/mime.types"
+cp "${BOX_SRC_DIR}/setup/postinstall/nginx/nginx.conf" "${NGINX_CONFIG_DIR}/nginx.conf"
+cp "${BOX_SRC_DIR}/setup/postinstall/nginx/mime.types" "${NGINX_CONFIG_DIR}/mime.types"
 touch "${NGINX_CONFIG_DIR}/naked_domain.conf"
-sed -e "s/##ADMIN_FQDN##/${admin_fqdn}/" -e "s|##BOX_SRC_DIR##|${BOX_SRC_DIR}|" "${BOX_SRC_DIR}/postinstall/nginx/admin.conf_template" > "${NGINX_APPCONFIG_DIR}/admin.conf"
+sed -e "s/##ADMIN_FQDN##/${admin_fqdn}/" -e "s|##BOX_SRC_DIR##|${BOX_SRC_DIR}|" "${BOX_SRC_DIR}/setup/postinstall/nginx/admin.conf_template" > "${NGINX_APPCONFIG_DIR}/admin.conf"
 
 echo "==== Setup ssl certs ===="
 certificate_dir="${NGINX_CONFIG_DIR}/cert"
@@ -115,7 +115,7 @@ if [[ -n "${existing_containers}" ]]; then
 fi
 
 echo "=== Setup collectd and graphite ==="
-${BOX_SRC_DIR}/postinstall/setup_collectd.sh
+${BOX_SRC_DIR}/setup/postinstall/setup_collectd.sh
 
 echo "=== Setup haraka mail relay ==="
 docker rm -f haraka || true
@@ -205,5 +205,5 @@ sqlite3 "${CLOUDRON_SQLITE}" "INSERT OR REPLACE INTO clients (id, appId, clientI
 EOF
 
 echo "==== Setup supervisord ===="
-${BOX_SRC_DIR}/postinstall/setup_supervisord.sh
+${BOX_SRC_DIR}/setup/postinstall/setup_supervisord.sh
 

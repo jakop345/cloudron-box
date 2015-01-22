@@ -17,14 +17,14 @@ mkdir -p "${DATA_DIR}"
 # get the database current
 npm run-script migrate
 
-cp postinstall/nginx/nginx.conf "${NGINX_ROOT}/nginx.conf"
-cp postinstall/nginx/mime.types "${NGINX_ROOT}/mime.types"
-cp postinstall/nginx/cert/* "${NGINX_ROOT}/cert/"
+cp setup/postinstall/nginx/nginx.conf "${NGINX_ROOT}/nginx.conf"
+cp setup/postinstall/nginx/mime.types "${NGINX_ROOT}/mime.types"
+cp setup/postinstall/nginx/cert/* "${NGINX_ROOT}/cert/"
 
 # adjust the generated nginx config for local use
 touch "${NGINX_ROOT}/naked_domain.conf"
-sed -e "s/##ADMIN_FQDN##/admin-localhost/" -e "s|##BOX_SRC_DIR##|${BOX_SRC_DIR}|" postinstall/nginx/admin.conf_template > "${NGINX_ROOT}/applications/admin.conf"
-sed -e "s/user www-data/user $USER/" -i $NGINX_ROOT/nginx.conf
+sed -e "s/##ADMIN_FQDN##/admin-localhost/" -e "s|##BOX_SRC_DIR##|${BOX_SRC_DIR}|" setup/postinstall/nginx/admin.conf_template > "${NGINX_ROOT}/applications/admin.conf"
+sed -e "s/user www-data/user ${USER}/" -i "${NGINX_ROOT}/nginx.conf"
 
 # add webadmin oauth client
 readonly WEBADMIN_ID=abcdefg
