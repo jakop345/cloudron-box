@@ -57,6 +57,7 @@
     "readdirp": "^1.0.1",
     "rimraf": "^2.2.6",
     "safetydance": "0.0.12",
+    "semver": "~4.2.0",
     "serve-favicon": "~2.1.7",
     "split": "^0.3.0",
     "sqlite3": "^3.0.0",
@@ -64,8 +65,7 @@
     "supererror": "~0.6.0",
     "underscore": "~1.7.0",
     "ursa": "^0.8.0",
-    "validator": "~3.22.1",
-    "semver": "~4.2.0"
+    "validator": "~3.22.1"
   },
   "devDependencies": {
     "apidoc": "*",
@@ -87,13 +87,13 @@
     "sinon": "~1.10.3"
   },
   "scripts": {
-    "migrate": "mkdir -p $HOME/.yellowtent/data; DATABASE_URL=sqlite3:///$HOME/.yellowtent/data/cloudron.sqlite node_modules/.bin/db-migrate up",
     "create_testdb": "rm -rf $HOME/.yellowtenttest/*; mkdir -p $HOME/.yellowtenttest/data; NODE_ENV=test DATABASE_URL=sqlite3:///$HOME/.yellowtenttest/data/cloudron.sqlite node_modules/.bin/db-migrate up",
+    "migrate": "mkdir -p $HOME/.yellowtent/data; DATABASE_URL=sqlite3:///$HOME/.yellowtent/data/cloudron.sqlite node_modules/.bin/db-migrate up",
+    "migrate_data": "DATABASE_URL=sqlite3:///home/yellowtent/data/cloudron.sqlite db-migrate up",
     "test": "scripts/checkInstall.sh && npm run-script create_testdb && NODE_ENV=test ./node_modules/istanbul/lib/cli.js test $1 ./node_modules/mocha/bin/_mocha -- -R spec ./src/test ./src/routes/test",
+    "postmerge": "/bin/true",
     "precommit": "/bin/true",
     "prepush": "npm test",
-    "postmerge": "/bin/true",
-    "migrate_data": "DATABASE_URL=sqlite3:///home/yellowtent/data/cloudron.sqlite db-migrate up",
     "webadmin": "node_modules/.bin/gulp"
   }
 }
