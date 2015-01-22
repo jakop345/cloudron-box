@@ -29,27 +29,27 @@ gulp.task('3rdparty', function () {
         .pipe(gulp.dest('webadmin/dist/3rdparty/'));
 });
 
-gulp.task('jsViews', function () {
-    return gulp.src('webadmin/src/views/*.js')
+gulp.task('js-index', function () {
+    return gulp.src(['webadmin/src/js/index.js', 'webadmin/src/js/client.js', 'webadmin/src/js/appstore.js', 'webadmin/src/js/main.js', 'webadmin/src/views/*.js'])
         .pipe(sourcemaps.init())
-        .pipe(concat('views.js'))
+        .pipe(concat('index.js'))
         .pipe(sourcemaps.write())
         .pipe(gulp.dest('webadmin/dist/js'));
 });
 
-gulp.task('js', ['jsViews'], function () {
-    return gulp.src('webadmin/src/js/*.js')
+gulp.task('js-setup', function () {
+    return gulp.src(['webadmin/src/js/setup.js', 'webadmin/src/js/client.js'])
+        .pipe(sourcemaps.init())
+        .pipe(concat('setup.js'))
+        .pipe(sourcemaps.write())
         .pipe(gulp.dest('webadmin/dist/js'));
 });
+
+gulp.task('js', ['js-index', 'js-setup'], function () {});
 
 gulp.task('htmlViews', function () {
     return gulp.src('webadmin/src/views/*.html')
         .pipe(gulp.dest('webadmin/dist/views'));
-});
-
-gulp.task('html', ['html_templates', 'htmlViews'], function () {
-    return gulp.src('webadmin/src/*.html')
-        .pipe(gulp.dest('webadmin/dist'));
 });
 
 gulp.task('html_templates', function () {
@@ -57,6 +57,11 @@ gulp.task('html_templates', function () {
 
     return gulp.src('webadmin/src/*.ejs')
         .pipe(ejs(config, { ext: '.html' }))
+        .pipe(gulp.dest('webadmin/dist'));
+});
+
+gulp.task('html', ['html_templates', 'htmlViews'], function () {
+    return gulp.src('webadmin/src/*.html')
         .pipe(gulp.dest('webadmin/dist'));
 });
 
