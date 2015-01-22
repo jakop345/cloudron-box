@@ -1,0 +1,41 @@
+
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-6">
+
+    <h1>Install {{ app.title }}</h1>
+    <form class="form-signin" role="form" name="install_form" ng-submit="installApp()" autocomplete="off">
+        <div class="form-group" ng-class="{ 'has-error': install_form.location.$dirty && install_form.location.$invalid }">
+            <label class="control-label" for="inputLocation">Location</label>
+            <div class="input-group form-inline">
+                <input type="text" class="form-control" ng-model="location" id="inputLocation" name="location" required autofocus>
+                <div class="input-group-addon">.{{domain}}</div>
+            </div>
+        </div>
+        <div class="form-group" ng-class="{ 'has-error': install_form.password.$dirty && install_form.password.$invalid }">
+            <label class="control-label" for="inputPassword">Password</label>
+            <input type="password" class="form-control" ng-model="password" id="inputPassword" name="password" ng-maxlength="512" ng-minlength="5" required>
+        </div>
+        <div ng-repeat="(port, portInfo) in portBindings">
+            <ng-form name="portInfo_form">
+                <div class="form-group" ng-class="{ 'has-error': portInfo_form.itemName{{$index}}.$dirty && portInfo_form.itemName{{$index}}.$invalid }">
+                    <label class="control-label" for="inputPortInfo{{port}}">{{ portInfo.description }} ({{ hostPortMin }} - {{ hostPortMax }})</label>
+                    <input type="number" class="form-control" ng-model="portBindings[port].hostPort" id="inputPortInfo{{port}}" later-name="itemName{{$index}}" min="{{hostPortMin}}" max="{{hostPortMax}}" required>
+                </div>
+            </ng-form>
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="accessRestriction">Access Restriction</label>
+            <select class="form-control" id="accessRestriction" ng-model="accessRestriction">
+                <option value="">Public</option>
+                <option value="roleUser">Private</option>
+                <option value="roleAdmin">Private (Admins only)</option>
+            </select>
+        </div>
+        <input class="btn btn-default btn-outline" ng-click="cancel()" type="button" value="Cancel"/>
+        <input class="btn btn-primary btn-outline pull-right" type="submit" ng-disabled="install_form.$invalid || busy" value="Install"/>
+    </form>
+
+    </div>
+    <div class="col-md-3"></div>
+</div>

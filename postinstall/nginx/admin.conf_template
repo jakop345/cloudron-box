@@ -26,7 +26,7 @@ server {
     }
 
     location / {
-        root   ##BOX_SRC_DIR##/webadmin/;
+        root   ##BOX_SRC_DIR##/webadmin/dist/;
         index  index.html index.htm;
     }
 }

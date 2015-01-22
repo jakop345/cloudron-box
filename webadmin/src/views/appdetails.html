@@ -1,0 +1,150 @@
+<div class="animateMeOpacity ng-hide" ng-show="initialized">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="page-header">
+                <img ng-show="app.icon" width="48" height="48" ng-src="{{ app.icon }}"/>
+                <span ng-show="!app.icon" class="fa fa-space-shuttle"></span>
+                &nbsp; <a target="_blank" ng-href="https://{{ app.fqdn + app.manifest.home_url }}">{{ app.manifest.title }}</a>
+            </h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    Configuration
+                </div>
+                <div class="panel-body">
+                    <ul class="list-group">
+                        <li class="list-group-item">Location <span class="pull-right"><a target="_blank" ng-href="https://{{ app.fqdn + app.manifest.home_url }}">{{ app.fqdn + app.manifest.home_url }}</a></span></li>
+                        <li class="list-group-item">Health <i ng-show="app.healthy" class="fa fa-smile-o fa-fw pull-right text-success"></i><i ng-show="!app.healthy" class="fa fa-frown-o fa-fw pull-right text-danger"></i></li>
+                        <li class="list-group-item" ng-show="app.installationState !== 'installed'">Installation Status <span class="pull-right">{{ app.installationState | installationStateLabel }}</span></li>
+                        <li class="list-group-item" ng-show="app.installationState !== 'installed'">Installation Details <span class="pull-right">{{ app.installationProgress }}</span></li>
+                        <li class="list-group-item" ng-show="app.installationState === 'installed'">Run Status <span class="pull-right">{{ app.runState }}</span></li>
+                        <li class="list-group-item">Version <span class="pull-right">{{ app.manifest.version }}</span></li>
+                        <li class="list-group-item">Access Restriction<span class="pull-right">{{ app.accessRestriction | accessRestrictionLabel }}</span></li>
+                    </ul>
+
+                    <a class="btn btn-outline btn-primary pull-left" ng-show="app.installationState === 'installed'" ng-href="#/app/{{app.id}}/configure">Configure</a>
+                    <button class="btn btn-outline btn-primary pull-left" ng-show="app.installationState === 'installed' && (app.runState === 'stopped' || app.runState === 'error')" ng-click="startApp()">Start</button>
+                    <button class="btn btn-outline btn-danger pull-left" ng-show="app.installationState === 'installed' && app.runState === 'running'" ng-click="stopApp()">Stop</button>
+                    <button class="btn btn-outline btn-danger pull-right" data-toggle="modal" data-target="#deleteAppModal">Delete</button>
+                    <button class="btn btn-outline btn-primary pull-right" ng-show="updateAvailable" ng-click="updateApp()">Update</button>
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="deleteAppModal" tabindex="-1" role="dialog" aria-labelledby="deleteAppModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                    <h4 class="modal-title" id="deleteAppModalLabel">Really delete {{ app.manifest.title }}?</h4>
+                                </div>
+                                <div class="modal-body">
+                                    Deleting the app will also remove all content generated within this app.
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-danger" ng-click="deleteApp()">Delete</button>
+                                </div>
+                            </div>
+                            <!-- /.modal-content -->
+                        </div>
+                        <!-- /.modal-dialog -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" ng-show="app.installationState === 'installed'">
+        <div class="col-lg-12">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    Graphs
+                </div>
+                <div class="panel-body" id="logs">
+                    <a class="btn btn-outline btn-primary pull-right" ng-href="{{appLogUrl}}">
+                        Logs
+                    </a>
+
+                    <ul class="nav nav-tabs">
+                        <li ng-class="{ active: activeTab === 'day' }">
+                            <a ng-click="activeTab = 'day'; updateGraphs()" href="">24 hours</a>
+                        </li>
+
+                        <li ng-class="{ active: activeTab === 'month' }">
+                            <a ng-click="activeTab = 'month'; updateGraphs()" href="">Month</a>
+                        </li>
+
+                        <li ng-class="{ active: activeTab === 'year' }">
+                            <a ng-click="activeTab = 'year'; updateGraphs()" href="">Year</a>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <div ng-switch="activeTab">
+                            <div ng-switch-when="day">
+                                <h3> CPU </h3>
+                                   <div id="dayCpuChartContainer" style="position: relative">
+                                       <div id="dayCpuYAxis" style="position: absolute; top: 0; bottom: 0; width: 40px"></div>
+                                       <div id="dayCpuChart" style="position: relative; left: 40px"></div>
+                                   </div>
+                                <h3> Disk </h3>
+                                   <div id="dayDiskChartContainer" style="position: relative">
+                                       <div id="dayDiskLegend" style="position: absolute; left: 540px"></div>
+                                       <div id="dayDiskYAxis" style="position: absolute; top: 0; bottom: 0; width: 40px"></div>
+                                       <div id="dayDiskChart" style="position: relative; left: 40px"></div>
+                                   </div>
+                                <h3> Memory </h3>
+                                   <div id="dayMemoryChartContainer" style="position: relative">
+                                       <div id="dayMemoryYAxis" style="position: absolute; top: 0; bottom: 0; width: 40px"></div>
+                                       <div id="dayMemoryChart" style="position: relative; left: 40px"></div>
+                                   </div>
+                            </div>
+
+                            <div ng-switch-when="month">
+                                <h3> CPU </h3>
+                                   <div id="monthCpuChartContainer" style="position: relative">
+                                       <div id="monthCpuYAxis" style="position: absolute; top: 0; bottom: 0; width: 40px"></div>
+                                       <div id="monthCpuChart" style="position: relative; left: 40px"></div>
+                                   </div>
+                                <h3> Disk </h3>
+                                   <div id="monthDiskChartContainer" style="position: relative">
+                                       <div id="monthDiskLegend" style="position: absolute; left: 540px"></div>
+                                       <div id="monthDiskYAxis" style="position: absolute; top: 0; bottom: 0; width: 40px"></div>
+                                       <div id="monthDiskChart" style="position: relative; left: 40px"></div>
+                                   </div>
+                                <h3> Memory </h3>
+                                   <div id="monthMemoryChartContainer" style="position: relative">
+                                       <div id="monthMemoryYAxis" style="position: absolute; top: 0; bottom: 0; width: 40px"></div>
+                                       <div id="monthMemoryChart" style="position: relative; left: 40px"></div>
+                                   </div>
+                            </div>
+
+                            <div ng-switch-when="year">
+                                <h3> CPU </h3>
+                                   <div id="yearCpuChartContainer" style="position: relative">
+                                       <div id="yearCpuYAxis" style="position: absolute; top: 0; bottom: 0; width: 40px"></div>
+                                       <div id="yearCpuChart" style="position: relative; left: 40px"></div>
+                                   </div>
+                                <h3> Disk </h3>
+                                   <div id="yearDiskChartContainer" style="position: relative">
+                                       <div id="yearDiskLegend" style="position: absolute; left: 540px"></div>
+                                       <div id="yearDiskYAxis" style="position: absolute; top: 0; bottom: 0; width: 40px"></div>
+                                       <div id="yearDiskChart" style="position: relative; left: 40px"></div>
+                                   </div>
+                                <h3> Memory </h3>
+                                   <div id="yearMemoryChartContainer" style="position: relative">
+                                       <div id="yearMemoryYAxis" style="position: absolute; top: 0; bottom: 0; width: 40px"></div>
+                                       <div id="yearMemoryChart" style="position: relative; left: 40px"></div>
+                                   </div>
+                            </div>
+                        </div> <!-- active tab -->
+                    </div> <!-- tab content -->
+                </div> <!-- panel body -->
+            </div> <!-- panel -->
+        </div> <!-- 12col -->
+    </div> <!-- row -->
+
+</div>

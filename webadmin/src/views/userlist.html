@@ -1,0 +1,78 @@
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Users</h1>
+    </div>
+</div>
+
+<div class="row" ng-show="userInfo.admin">
+    <div class="col-lg-12">
+        <button class="btn btn-primary btn-outline pull-right" ng-click="addUser()">New User</button>
+    </div>
+</div>
+
+<div class="row animateMeOpacity ng-hide" ng-show="!ready">
+    <div class="col-lg-12" class="text-center">
+        <center>
+            <h2>Loading</h2>
+            <i class="fa fa-circle-o-notch fa-spin fa-5x"></i>
+        </center>
+    </div>
+</div>
+
+<div class="row animateMeOpacity ng-hide" ng-show="ready">
+    <div class="col-lg-12">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th style="text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="user in users">
+                    <td>
+                        {{ user.username }}
+                        <span ng-show="isMe(user)" class="label label-primary" style="margin-left: 20px;">This is you!</span>
+                        <span ng-show="isAdmin(user)" class="label label-danger" style="margin-left: 20px;">Admin</span>
+                    </td>
+                    <td style="text-align: right;">
+                        <button ng-show="!isMe(user) && userInfo.admin" ng-click="toggleAdmin(user)" class="btn btn-xs btn-default">
+                            <span ng-show="!user.admin"><i class="fa fa-plus"></i> Add Admin</span>
+                            <span ng-show="user.admin"><i class="fa fa-minus"></i> Remove Admin</span>
+                        </button>
+                        <button ng-show="!isMe(user) && userInfo.admin" data-toggle="modal" data-target="#userDeleteModal-{{user.username}}" class="btn btn-xs btn-danger"><i class="fa fa-trash-o"></i> Delete</button>
+
+                        <!-- Modal really delete -->
+                        <div class="modal fade" id="userDeleteModal-{{user.username}}" tabindex="-1" role="dialog" aria-labelledby="userDeleteModalLabel-{{user.username}}" aria-hidden="true" style="text-align: left;">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                        <h4 class="modal-title" id="userDeleteModalLabel-{{user.username}}">Delete user {{ user.username }}</h4>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form class="form-user-delete" role="form" ng-submit="deleteUser(user)" name="userDeleteConfirm" autocomplete="off">
+                                            <div class="form-group">
+                                                <label class="control-label" for="userDeleteConfirmUsername">Just to be sure you really want to delete this user, please type the user's name</label>
+                                                <input type="text" class="form-control" ng-model="userDeleteForm.username" id="userDeleteConfirmUsername" name="userDeleteConfirm" placeholder="Username" required autofocus>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label" for="userDeleteConfirmPassword">Give your password to verify that you are performing that action</label>
+                                                <input type="password" class="form-control" ng-model="userDeleteForm.password" id="userDeleteConfirmPassword" name="userDeleteConfirmPassword" placeholder="Password" required>
+                                            </div>
+                                            <input class="hide" type="submit"/>
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                        <button type="button" class="btn btn-danger" ng-click="deleteUser(user)">Delete</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

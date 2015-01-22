@@ -1,0 +1,51 @@
+<div class="row">
+    <div class="col-lg-12">
+        <br/>
+    </div>
+</div>
+
+<div class="row animateMeOpacity ng-hide" ng-show="loadStatus == LOADING">
+    <div class="col-lg-12" style="text-align: center;">
+        <h2>Loading</h2>
+        <i class="fa fa-circle-o-notch fa-spin fa-5x"></i>
+    </div>
+</div>
+
+<div class="row animateMeOpacity ng-hide" ng-show="loadStatus == ERROR">
+    <div class="col-lg-12" style="text-align: center;">
+        <h2>Error reaching the Store</h2>
+    </div>
+</div>
+
+<div class="row animateMeOpacity ng-hide" ng-show="loadStatus == LOADED && !apps.length">
+    <div class="col-lg-12" style="text-align: center;">
+        <h2>No Apps available</h2>
+    </div>
+</div>
+
+<div class="row animateMeOpacity ng-hide" ng-show="loadStatus == LOADED">
+    <div class="col-lg-4 col-md-6" ng-repeat="app in apps">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-xs-3">
+                        <img ng-show="app.icon" width="48" height="48" ng-src="{{app.icon}}"/>
+                        <span ng-show="!app.icon" class="fa fa-space-shuttle fa-4x"></span>
+                    </div>
+                    <div class="col-xs-9 text-right">
+                        <div class="huge">{{ app.title }}</div>
+                        <div>{{ app.userId }}</div>
+                        <div>{{ app.description || "No description" }}</div>
+                    </div>
+                </div>
+            </div>
+            <a href="" ng-click="installApp(app)">
+                <div class="panel-footer">
+                    <span class="pull-left">Install</span>
+                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                    <div class="clearfix"></div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>

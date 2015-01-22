@@ -1,0 +1,138 @@
+
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Settings</h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6 col-md-6">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                Account
+            </div>
+            <div class="panel-body">
+                <ul class="list-group">
+                    <li class="list-group-item">Username <span class="pull-right">{{user.username}}</span></li>
+                    <li class="list-group-item">Email <span class="pull-right">{{user.email}}</span></li>
+                </ul>
+                <button class="btn btn-outline btn-danger pull-right" ng-click="changePassword()">Change Password</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6 col-md-6">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                Software
+            </div>
+            <div class="panel-body">
+                <ul class="list-group">
+                    <li class="list-group-item">Appstore <a ng-href="{{config.appServerUrl}}" target="_blank" class="pull-right">{{config.appServerUrl}}</a></li>
+                    <li class="list-group-item">Version <span class="pull-right">{{config.version}}</span></li>
+                    <li class="list-group-item" ng-show="config.revision">Revision <span class="pull-right">{{config.revision}}</span></li>
+                </ul>
+                <button class="btn btn-outline btn-success pull-left" ng-click="backup()" ng-show="config.isDev">Backup</button>
+                <button class="btn btn-outline btn-success pull-right" data-toggle="modal" data-target="#updateModal" ng-show="config.update.box">{{config.update.box.upgrade ? 'Upgrade' : 'Update'}} to Version {{config.update.box.version}}</button>
+
+                <!-- Modal really update -->
+                <div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title" id="updateModalLabel">Really update the box software?</h4>
+                            </div>
+                            <div class="modal-body" ng-show="config.update.box">
+                                <p>This update will install version <b>{{config.update.box.version}}</b> on your cloudron.</p>
+                                <p>Recent Changes:</p>
+                                <ul>
+                                    <li ng-repeat="change in config.update.box.changelog">{{change}}</li>
+                                </ul>
+                            </div>
+                            <div class="modal-body" ng-show="config.isDev && !config.update.box">
+                                You are running a development version. This will update the cloudron to HEAD of master.
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-danger" ng-click="update()">Update</button>
+                            </div>
+                        </div>
+                        <!-- /.modal-content -->
+                    </div>
+                    <!-- /.modal-dialog -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6 col-md-6">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                Server
+            </div>
+            <div class="panel-body">
+                <ul class="list-group">
+                    <li class="list-group-item">Domain <span class="pull-right">{{config.fqdn}}</span></li>
+                    <li class="list-group-item">IP <span class="pull-right">{{config.ip}}</span></li>
+                    <li class="list-group-item"><p>Naked Domain App: </p>
+                        <select class="form-control" ng-model="nakedDomainApp" ng-options="app.manifest.title for app in apps" ng-change="setNakedDomain()">
+                            <option value="">(Unset)</option>
+                        </select>
+                    </li>
+                </ul>
+                <button class="btn btn-outline btn-success pull-right" data-toggle="modal" data-target="#rebootModal">Reboot</button>
+
+                <!-- Modal really reboot -->
+                <div class="modal fade" id="rebootModal" tabindex="-1" role="dialog" aria-labelledby="rebootModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title" id="rebootModalLabel">Really reboot the box software?</h4>
+                            </div>
+                            <div class="modal-body">
+                                Your cloudron will be unreachable during the reboot.
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-danger" ng-click="reboot()">Reboot</button>
+                            </div>
+                        </div>
+                        <!-- /.modal-content -->
+                    </div>
+                    <!-- /.modal-dialog -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6 col-md-6">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                Drives
+            </div>
+            <div class="panel-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Drive</th>
+                                <th>Mount Point</th>
+                                <th>Size</th>
+                                <th>Used</th>
+                                <th>Available</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="drive in drives">
+                                <td>{{ drive.drive }}</td>
+                                <td>{{ drive.mountpoint }}</td>
+                                <td>{{ drive.total }}</td>
+                                <td>{{ drive.used }}</td>
+                                <td>{{ drive.available }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
