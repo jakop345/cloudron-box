@@ -5,10 +5,28 @@ set -e
 
 [[ ! -f "${HOME}/.s3cfg" ]] && echo "~/.s3cfg missing" && exit 1
 
+# Only GNU getopt supports long options. OS X comes bundled with the BSD getopt
+# brew install gnu-getopt to get the GNU getopt on OS X
+[[ $(uname -s) == "Darwin" ]] && GNU_GETOPT="/usr/local/opt/gnu-getopt/bin/getopt" || GNU_GETOPT="getopt"
+readonly GNU_GETOPT
+
+args=$(${GNU_GETOPT} -o "" -l "revision:" -n "$0" -- "$@")
+eval set -- "${args}"
+
+commitish="HEAD"
+
+while true; do
+    case "$1" in
+    --revision) commitish="$2"; shift 2;;
+    --) break;;
+    *) echo "Unknown option $1"; exit 1;;
+    esac
+done
+
 readonly SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
 readonly TMPDIR=${TMPDIR:-/tmp} # why is this not set on mint?
 
-version=$(cd "${SOURCE_DIR}" && git rev-parse HEAD)
+version=$(cd "${SOURCE_DIR}" && git rev-parse "${commitish}")
 bundle_dir=$(mktemp -d -t box 2>/dev/null || mktemp -d box-XXXXXXXXXX --tmpdir=$TMPDIR)
 bundle_file="${TMPDIR}/box-${version}.tar.gz"
 
