@@ -23,10 +23,11 @@ source_tarball_url=""
 image_id=""
 cmd=""
 new_version=""
+changelog=""
 
 # --code and--image is provided for readability. The code below assumes number is an image id
 # and anything else is the source tarball url. So, one can just say "publish.sh 2345 https://foo.tar.gz"
-args=$($GNU_GETOPT -o "" -l "dev,stable,code:,image:,rerelease,new:,list,revert" -n "$0" -- "$@")
+args=$($GNU_GETOPT -o "" -l "dev,stable,code:,image:,rerelease,new:,list,revert,changelog:" -n "$0" -- "$@")
 eval set -- "${args}"
 
 while true; do
@@ -39,6 +40,7 @@ while true; do
     --new) cmd="new"; new_versions_file="$2"; shift 2;;
     --list) cmd="list"; shift;;
     --revert) cmd="revert"; shift;;
+    --changelog) changelog="$2";;
     --) shift; break;;
     *) echo "Unknown option $2"; exit;;
     esac
@@ -86,6 +88,7 @@ if [[ "${cmd}" == "new" ]]; then
                 "sourceTarballUrl": "${source_tarball_url}",
                 "imageId": ${image_id},
                 "imageName": "${image_name}",
+                "changelog": [ "Let's start at the very beginning, a very good way to start" ],
                 "next": null
             }
         }
@@ -120,7 +123,7 @@ else
     image_name=$(get_image_name "${image_id}")
 
     $JSON -q -I -f "${new_versions_file}" -e "this['${last_version}'].next = '${new_version}'"
-    $JSON -q -I -f "${new_versions_file}" -e "this['${new_version}'] = { 'sourceTarballUrl': '${source_tarball_url}', 'imageId': ${image_id}, 'imageName': '${image_name}', 'next': null }"
+    $JSON -q -I -f "${new_versions_file}" -e "this['${new_version}'] = { 'sourceTarballUrl': '${source_tarball_url}', 'imageId': ${image_id}, 'imageName': '${image_name}', 'changelog': [ '${changelog}' ], 'next': null }"
 fi
 
 echo "Verifying new versions file"
