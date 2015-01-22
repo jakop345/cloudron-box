@@ -95,7 +95,7 @@ elif [[ "${cmd}" == "revert" ]]; then
     last_version=$(cat "${new_versions_file}" | $JSON -ka | tail -n 1)
     second_last_version=$(cat "${new_versions_file}" | $JSON -ka | tail -n 2 | head -n 1)
 
-    echo "$last_version $second_last_version"
+    echo "Removing $last_version and making $second_last_version the last release"
     $JSON -q -I -f "${new_versions_file}" -e "delete this['${last_version}']"
     $JSON -q -I -f "${new_versions_file}" -e "this['${second_last_version}'].next = null"
 else
