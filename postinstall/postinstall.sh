@@ -95,7 +95,6 @@ touch "${NGINX_CONFIG_DIR}/naked_domain.conf"
 sed -e "s/##ADMIN_FQDN##/${admin_fqdn}/" -e "s|##BOX_SRC_DIR##|${BOX_SRC_DIR}|" "${BOX_SRC_DIR}/postinstall/nginx/admin.conf_template" > "${NGINX_APPCONFIG_DIR}/admin.conf"
 
 echo "==== Setup ssl certs ===="
-# The nginx cert dir is excluded from backup in backup.sh
 certificate_dir="${NGINX_CONFIG_DIR}/cert"
 mkdir -p "${certificate_dir}"
 cd "${certificate_dir}"
