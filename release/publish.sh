@@ -26,7 +26,7 @@ new_version=""
 
 # --code and--image is provided for readability. The code below assumes number is an image id
 # and anything else is the source tarball url. So, one can just say "publish.sh 2345 https://foo.tar.gz"
-args=$($GNU_GETOPT -o "" -l "dev,stable,code:,image:,rerelease,new:,list" -n "$0" -- "$@")
+args=$($GNU_GETOPT -o "" -l "dev,stable,code:,image:,rerelease,new:,list,revert" -n "$0" -- "$@")
 eval set -- "${args}"
 
 while true; do
@@ -38,6 +38,7 @@ while true; do
     --rerelease) cmd="rerelease"; shift;;
     --new) cmd="new"; new_versions_file="$2"; shift 2;;
     --list) cmd="list"; shift;;
+    --revert) cmd="revert"; shift;;
     --) shift; break;;
     *) echo "Unknown option $2"; exit;;
     esac
@@ -90,6 +91,13 @@ if [[ "${cmd}" == "new" ]]; then
         }
 EOF
     fi
+elif [[ "${cmd}" == "revert" ]]; then
+    last_version=$(cat "${new_versions_file}" | $JSON -ka | tail -n 1)
+    second_last_version=$(cat "${new_versions_file}" | $JSON -ka | tail -n 2 | head -n 1)
+
+    echo "$last_version $second_last_version"
+    $JSON -q -I -f "${new_versions_file}" -e "delete this['${last_version}']"
+    $JSON -q -I -f "${new_versions_file}" -e "this['${second_last_version}'].next = null"
 else
     # modify existing versions.json
     if [[ -z "${source_tarball_url}" && -z "${image_id}" && "${cmd}" != "rerelease" ]]; then
@@ -122,6 +130,4 @@ echo "Uploading new versions file"
 $SOURCE_DIR/node_modules/.bin/s3-cli put --acl-public --default-mime-type "application/json" "${new_versions_file}" "${VERSIONS_S3_URL}"
 
 cat "${new_versions_file}"
-
-echo "Released version $new_version"
 
