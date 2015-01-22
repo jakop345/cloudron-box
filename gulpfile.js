@@ -53,7 +53,7 @@ gulp.task('htmlViews', function () {
 });
 
 gulp.task('html_templates', function () {
-    var config = JSON.parse(fs.readFileSync('./deploymentConfig.json'));
+    var config = JSON.parse(fs.readFileSync('./webadmin/deploymentConfig.json'));
 
     return gulp.src('webadmin/src/*.ejs')
         .pipe(ejs(config, { ext: '.html' }))

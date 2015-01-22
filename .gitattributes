@@ -5,6 +5,6 @@
 /scripts export-ignore
 test export-ignore
 /webadmin/src export-ignore
-/deploymentConfig.json export-ignore
+/webadmin/deploymentConfig.json export-ignore
 /gulpfile.json export-ignore
 
