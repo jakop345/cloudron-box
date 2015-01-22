@@ -28,7 +28,7 @@ EOF
 
 cat > /etc/supervisor/conf.d/proxy.conf <<EOF
 [program:proxy]
-command=/usr/bin/node "${BOX_SRC_DIR}/proxy.js"
+command=/usr/bin/node "${BOX_SRC_DIR}/oauthproxy.js"
 autostart=true
 autorestart=true
 redirect_stderr=true
