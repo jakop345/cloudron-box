@@ -52,10 +52,6 @@ shift $(expr $OPTIND - 1)
 download_current() {
     # download the existing version file if the user hasn't provided one
     local current_versions_file=$(mktemp -t box-versions 2>/dev/null || mktemp)
-    cleanup() {
-        rm "${current_versions_file}"
-    }
-    trap cleanup EXIT
 
     if ! wget -q -O "${current_versions_file}" "${VERSIONS_URL}"; then
         echo "Error downloading versions file"
@@ -66,7 +62,7 @@ download_current() {
 }
 
 if [[ "${cmd}" == "list" ]]; then
-    cat "${new_versions_file}"
+    cat "$(download_current)"
     exit 0
 elif [[ "${cmd}" == "release" ]]; then
     if [[ ! -f "${new_versions_file}" ]]; then
