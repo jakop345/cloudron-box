@@ -1,6 +1,5 @@
 #!/bin/sh
 
-set -e
-set -u
+set -eu
 
 ./node_modules/.bin/apidoc -i src/routes -o docs

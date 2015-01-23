@@ -1,8 +1,6 @@
 #!/bin/bash
 
-# set -x
-set -e
-set -u
+set -eu
 
 [[ ! -f "${HOME}/.s3cfg" ]] && echo "~/.s3cfg missing" && exit 1
 

@@ -5,9 +5,7 @@ install_count=$(find /var/log/cloudron -name "installer*" | wc -l)
 exec > >(tee "/var/log/cloudron/postinstall-$install_count.log")
 exec 2>&1
 
-set -e
-set -u
-set -x
+set -eux
 
 echo "==== Cloudron post installation ===="
 
