@@ -4,7 +4,8 @@ var AWS = require('aws-sdk'),
     fs = require('fs'),
     path = require('path'),
     safe = require('safetydance'),
-    semver = require('semver');
+    semver = require('semver'),
+    url = require('url');
 
 function die(msg) {
     console.error(msg);
@@ -26,6 +27,9 @@ function verify(versionsFileName) {
         if ('changeLog' in versionsJson[version] && !util.isArray(versionsJson[version].changeLog)) die('version ' + version + ' does not have proper changeLog');
         if (versionsJson[version].next !== null && typeof versionsJson[version].next !== 'string') die('version ' + version + ' does not have proper next');
         if (typeof versionsJson[version].sourceTarballUrl !== 'string') die('version ' + version + ' does not have proper sourceTarballUrl');
+        var tarballUrl = url.parse(versionsJson[version].sourceTarballUrl);
+        if (tarballUrl.protocol !== 'https:') die('sourceTarballUrl must be https');
+        if (!/.tar.gz$/.test(tarballUrl.path)) die('sourceTarballUrl must be tar.gz');
 
         var nextVersion = versionsJson[version].next;
         // despite having the 'next' field, the appstore code currently relies on all versions being sorted based on semver.compare (see boxversions.js)
