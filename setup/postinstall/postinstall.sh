@@ -41,8 +41,6 @@ provision_app_server_url=""
 provision_fqdn=""
 provision_token=""
 provision_version=""
-admin_fqdn=""
-admin_origin=""
 
 args=$(getopt -o "" -l "boxversionsurl:,data:,version:" -n "$0" -- "$@")
 eval set -- "${args}"
@@ -56,9 +54,6 @@ while true; do
 EOF
         provision_tls_cert=$(echo "$2" | $JSON tlsCert)
         provision_tls_key=$(echo "$2" | $JSON tlsKey)
-
-        admin_fqdn="admin-${provision_fqdn}"
-        admin_origin="https://${admin_fqdn}"
         ;;
     --version) provision_version="$2";;
     --) break;;
@@ -103,7 +98,7 @@ mkdir -p "${NGINX_APPCONFIG_DIR}"
 cp "${BOX_SRC_DIR}/setup/postinstall/nginx/nginx.conf" "${NGINX_CONFIG_DIR}/nginx.conf"
 cp "${BOX_SRC_DIR}/setup/postinstall/nginx/mime.types" "${NGINX_CONFIG_DIR}/mime.types"
 touch "${NGINX_CONFIG_DIR}/naked_domain.conf"
-sed -e "s/##ADMIN_FQDN##/${admin_fqdn}/" -e "s|##BOX_SRC_DIR##|${BOX_SRC_DIR}|" "${BOX_SRC_DIR}/setup/postinstall/nginx/admin.conf_template" > "${NGINX_APPCONFIG_DIR}/admin.conf"
+sed -e "s/##ADMIN_FQDN##/admin-${provision_fqdn}/" -e "s|##BOX_SRC_DIR##|${BOX_SRC_DIR}|" "${BOX_SRC_DIR}/setup/postinstall/nginx/admin.conf_template" > "${NGINX_APPCONFIG_DIR}/admin.conf"
 
 echo "==== Setup ssl certs ===="
 certificate_dir="${NGINX_CONFIG_DIR}/cert"
@@ -198,7 +193,7 @@ cat > "${CLOUDRON_CONF}" <<CONF_END
     "token": "${provision_token}",
     "appServerUrl": "${provision_app_server_url}",
     "fqdn": "${provision_fqdn}",
-    "adminOrigin": "${admin_origin}",
+    "adminOrigin": "https://admin-${provision_fqdn}",
     "boxVersionsUrl": "${provision_box_versions_url}",
     "mailServer": "${MAIL_SERVER_IP}",
     "mailUsername": "admin@${provision_fqdn}",
