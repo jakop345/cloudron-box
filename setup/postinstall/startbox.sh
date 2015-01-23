@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+set -u
 
 # looks like restarting supervisor completely is the only way to reload it
 reload_supervisor() {

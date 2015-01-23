@@ -6,6 +6,7 @@ exec > >(tee "/var/log/cloudron/postinstall-$install_count.log")
 exec 2>&1
 
 set -e
+set -u
 set -x
 
 echo "==== Cloudron post installation ===="

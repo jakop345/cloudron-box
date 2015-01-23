@@ -2,6 +2,7 @@
 
 # set -x
 set -e
+set -u
 
 [[ ! -f "${HOME}/.s3cfg" ]] && echo "~/.s3cfg missing" && exit 1
 

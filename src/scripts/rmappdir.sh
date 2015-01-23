@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+set -u
 
 if [[ ${EUID} -ne 0 ]]; then
     echo "This script should be run as root." > /dev/stderr

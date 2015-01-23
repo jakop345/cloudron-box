@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+set -u
 
 readonly GRAPHITE_DIR="/home/yellowtent/data/graphite"
 readonly COLLECTD_CONFIG_DIR="/home/yellowtent/configs/collectd"

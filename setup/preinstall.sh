@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+set -u
 
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly NGINX_CONFIG_DIR=/home/yellowtent/setup_configs/nginx # do not reuse configs since it will be removed by installer

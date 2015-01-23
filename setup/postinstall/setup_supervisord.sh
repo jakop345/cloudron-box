@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+set -u
 
 readonly BOX_SRC_DIR="/home/yellowtent/box"
 readonly DATA_DIR="/home/yellowtent/data"
