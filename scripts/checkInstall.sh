@@ -4,6 +4,9 @@ set -e
 
 readonly SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
+# reset sudo timestamp to avoid wrong success
+sudo --reset-timestamp
+
 # checks if all scripts are sudo access
 scripts=("${SOURCE_DIR}/src/scripts/rmappdir.sh" \
          "${SOURCE_DIR}/src/scripts/reloadnginx.sh" \
@@ -12,9 +15,14 @@ scripts=("${SOURCE_DIR}/src/scripts/rmappdir.sh" \
          "${SOURCE_DIR}/src/scripts/reloadcollectd.sh")
 
 for script in "${scripts[@]}"; do
-    output=$(sudo -n "${script}" --check 2>/dev/null)
-    if [[ "${output}" != "OK" ]]; then
-        echo "${script} does not have sudo access"
+    if [[ $(sudo -n "${script}" --check 2>/dev/null) != "OK" ]]; then
+        echo ""
+        echo "${script} does not have sudo access."
+        echo "You have to add the lines below to /etc/sudoers.d/yellowtent."
+        echo ""
+        echo "Defaults!${script} env_keep=HOME"
+        echo "${USER} ALL=(ALL) NOPASSWD: ${script}"
+        echo ""
         exit 1
     fi
 done
