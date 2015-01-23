@@ -51,9 +51,12 @@ while true; do
     case "$1" in
     --boxversionsurl) provision_box_versions_url="$2";;
     --data)
-        read -r provision_app_server_url provision_fqdn provision_token provision_tls_cert provision_tls_key <<EOF
-        $(echo "$2" | $JSON appServerUrl fqdn token tlsCert tlsKey | tr '\n' ' ')
+        read -r provision_app_server_url provision_fqdn provision_token <<EOF
+        $(echo "$2" | $JSON appServerUrl fqdn token | tr '\n' ' ')
 EOF
+        provision_tls_cert=$(echo "$2" | $JSON tlsCert)
+        provision_tls_key=$(echo "$2" | $JSON tlsKey)
+
         admin_fqdn="admin-${provision_fqdn}"
         admin_origin="https://${admin_fqdn}"
         ;;
