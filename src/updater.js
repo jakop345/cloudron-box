@@ -142,11 +142,12 @@ function update(callback) {
             return;
         }
 
+        // NOTE: the args here are tied to the installer revision, box code and appstore provisioning logic
         var args = {
             version: gBoxUpdateInfo.version,
             boxVersionsUrl: config.get('boxVersionsUrl'),
 
-            // this data is opaque to the installer and will be passed to postinstall.sh
+            // this data is opaque to the installer
             data: {
                 appServerUrl: config.appServerUrl(),
                 fqdn: config.fqdn(),
