@@ -90,7 +90,7 @@
     "create_testdb": "rm -rf $HOME/.yellowtenttest/*; mkdir -p $HOME/.yellowtenttest/data; NODE_ENV=test DATABASE_URL=sqlite3:///$HOME/.yellowtenttest/data/cloudron.sqlite node_modules/.bin/db-migrate up",
     "migrate": "mkdir -p $HOME/.yellowtent/data; DATABASE_URL=sqlite3:///$HOME/.yellowtent/data/cloudron.sqlite node_modules/.bin/db-migrate up",
     "migrate_data": "DATABASE_URL=sqlite3:///home/yellowtent/data/cloudron.sqlite db-migrate up",
-    "test": "scripts/checkInstall.sh && npm run-script create_testdb && NODE_ENV=test ./node_modules/istanbul/lib/cli.js test $1 ./node_modules/mocha/bin/_mocha -- -R spec ./src/test ./src/routes/test",
+    "test": "scripts/checkInstall && npm run-script create_testdb && NODE_ENV=test ./node_modules/istanbul/lib/cli.js test $1 ./node_modules/mocha/bin/_mocha -- -R spec ./src/test ./src/routes/test",
     "postmerge": "/bin/true",
     "precommit": "/bin/true",
     "prepush": "npm test",
