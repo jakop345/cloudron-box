@@ -24,8 +24,15 @@ readonly MYSQL_DIR="${DATA_DIR}/mysql"
 readonly POSTGRESQL_DIR="${DATA_DIR}/postgresql"
 readonly JSON="${BOX_SRC_DIR}/node_modules/.bin/json"
 readonly MAIL_SERVER_IP="172.17.120.120" # hardcoded in haraka container
+readonly SETUP_PROGRESS_JSON="/home/yellowtent/setup/website/progress.json"
 
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+set_progress() {
+    local progress="$1"
+
+    echo "{ \"progress\": \"${progress}\" }" > "${SETUP_PROGRESS_JSON}"
+}
 
 provision_box_versions_url=""
 provision_tls_cert=""
@@ -79,6 +86,7 @@ ${USER} ALL=(root) NOPASSWD: ${BOX_SRC_DIR}/src/scripts/reloadcollectd.sh
 
 EOF
 
+set_progress "10"
 echo "==== Migrate data ===="
 sudo -u "${USER}" -H bash <<EOF
 set -e
@@ -105,6 +113,7 @@ echo "${provision_tls_key}" > host.key
 
 chown "${USER}:${USER}" -R "/home/${USER}"
 
+set_progress "20"
 echo "=== Remove all containers ==="
 # removing containers ensures containers are launched with latest config updates
 # restore code in appatask does not delete old containers
@@ -114,8 +123,12 @@ if [[ -n "${existing_containers}" ]]; then
     echo "${existing_containers}" | xargs docker rm -f
 fi
 
+set_progress "30"
+
 echo "=== Setup collectd and graphite ==="
 ${BOX_SRC_DIR}/setup/postinstall/setup_collectd.sh
+
+set_progress "40"
 
 echo "=== Setup haraka mail relay ==="
 docker rm -f haraka || true
@@ -137,6 +150,8 @@ if ! ping -c 20 "${MAIL_SERVER_IP}"; then
     echo "Could not connect to mail server"
 fi
 
+set_progress "50"
+
 echo "=== Setup MySQL addon ==="
 docker rm -f mysql || true
 mysql_root_password=$(pwgen -1 -s)
@@ -151,6 +166,8 @@ mysql_container_id=$(docker run --restart=always -d --name="mysql" \
     girish/mysql:0.1)
 echo "MySQL container id: ${mysql_container_id}"
 
+set_progress "60"
+
 echo "=== Setup Postgres addon ==="
 docker rm -f postgresql || true
 postgresql_root_password=$(pwgen -1 -s)
@@ -163,8 +180,12 @@ postgresql_container_id=$(docker run --restart=always -d --name="postgresql" \
     girish/postgresql:0.1)
 echo "PostgreSQL container id: ${postgresql_container_id}"
 
+set_progress "70"
+
 echo "=== Pulling Redis addon ==="
 docker pull girish/redis:0.1 || true # this line for dev convenience since it's already part of base image
+
+set_progress "80"
 
 echo "==== Creating cloudron.conf ===="
 sudo -u yellowtent -H bash <<EOF
@@ -207,9 +228,15 @@ EOF
 # bookkeep the version as part of data
 echo "{ \"version\": \"${provision_version}\", \"boxVersionsUrl\": \"${provision_box_versions_url}\" }" > "${DATA_DIR}/version"
 
+set_progress "90"
+
 echo "==== Setup supervisord ===="
 ${BOX_SRC_DIR}/setup/postinstall/setup_supervisord.sh
 
+set_progress "99"
+
 echo "==== Starting box ==="
 ${BOX_SRC_DIR}/setup/postinstall/startbox.sh
+
+set_progress "100"
 
