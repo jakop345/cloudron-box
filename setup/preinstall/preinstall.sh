@@ -7,6 +7,8 @@ readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly NGINX_CONFIG_DIR="/home/yellowtent/setup/configs/nginx" # do not reuse configs since it will be removed by installer
 readonly SETUP_WEBSITE_DIR="/home/yellowtent/setup/website"
 
+mkdir -p "${SETUP_WEBSITE_DIR}" # FIXME: this is only here for progress.json. setup_nginx should have created this
+
 readonly CERT_DIR="/home/yellowtent/configs/nginx/cert"
 
 setup_nginx() {
