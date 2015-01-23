@@ -27,7 +27,7 @@ changelog=""
 
 # --code and--image is provided for readability. The code below assumes number is an image id
 # and anything else is the source tarball url. So, one can just say "publish.sh 2345 https://foo.tar.gz"
-args=$($GNU_GETOPT -o "" -l "dev,stable,code:,image:,rerelease,new:,list,revert,changelog:" -n "$0" -- "$@")
+args=$($GNU_GETOPT -o "" -l "dev,stable,code:,image:,rerelease,new,list,revert,changelog:,release:" -n "$0" -- "$@")
 eval set -- "${args}"
 
 while true; do
@@ -37,7 +37,8 @@ while true; do
     --code) source_tarball_url="$2"; shift 2;;
     --image) image_id="$2"; shift 2;;
     --rerelease) cmd="rerelease"; shift;;
-    --new) cmd="new"; new_versions_file="$2"; shift 2;;
+    --new) cmd="new"; shift;;
+    --release) cmd="release"; new_versions_file="$2"; shift 2;;
     --list) cmd="list"; shift;;
     --revert) cmd="revert"; shift;;
     --changelog) changelog="$2"; shift 2;;
@@ -48,53 +49,53 @@ done
 
 shift $(expr $OPTIND - 1)
 
-while test $# -gt 0; do
-    if [[ "$1" -eq "$1" ]] 2>/dev/null; then image_id="$1"; else source_tarball_url="$1"; fi # -eq detects integers
-    shift
-done
-
-if [[ -z "${new_versions_file}" ]]; then
-    new_versions_file=$(mktemp -t box-versions 2>/dev/null || mktemp)
+download_current() {
+    # download the existing version file if the user hasn't provided one
+    local current_versions_file=$(mktemp -t box-versions 2>/dev/null || mktemp)
     cleanup() {
-        rm "${new_versions_file}"
+        rm "${current_versions_file}"
     }
     trap cleanup EXIT
 
-    if ! wget -q -O "${new_versions_file}" "${VERSIONS_URL}"; then
+    if ! wget -q -O "${current_versions_file}" "${VERSIONS_URL}"; then
         echo "Error downloading versions file"
         exit 1
     fi
-fi
+
+    echo "${current_versions_file}"
+}
 
 if [[ "${cmd}" == "list" ]]; then
     cat "${new_versions_file}"
     exit 0
-fi
-
-if [[ "${cmd}" == "new" ]]; then
-    # generate a new versions.json if the user hasn't provided one
-    if [[ -z "${new_versions_file}" ]]; then
-        if [[ -z "${source_tarball_url}" || -z "${image_id}" ]]; then
-            echo "--code and --image is required"
-            exit 1
-        fi
-
-        new_version="0.0.1"
-        image_name=$(get_image_name "${image_id}")
-
-        cat > "${new_versions_file}" <<EOF
-        {
-            "0.0.1": {
-                "sourceTarballUrl": "${source_tarball_url}",
-                "imageId": ${image_id},
-                "imageName": "${image_name}",
-                "changelog": [ "Let's start at the very beginning, a very good way to start" ],
-                "next": null
-            }
-        }
-EOF
+elif [[ "${cmd}" == "release" ]]; then
+    if [[ ! -f "${new_versions_file}" ]]; then
+        echo "${new_versions_file} cannot be found"
+        exit 1
     fi
+elif [[ "${cmd}" == "new" ]]; then
+    if [[ -z "${source_tarball_url}" || -z "${image_id}" ]]; then
+        echo "--code and --image is required"
+        exit 1
+    fi
+
+    new_version="0.0.1"
+    image_name=$(get_image_name "${image_id}")
+
+    new_versions_file=$(mktemp -t box-versions 2>/dev/null || mktemp)
+    cat > "${new_versions_file}" <<EOF
+    {
+        "0.0.1": {
+            "sourceTarballUrl": "${source_tarball_url}",
+            "imageId": ${image_id},
+            "imageName": "${image_name}",
+            "changelog": [ "Let's start at the very beginning, a very good way to start" ],
+            "next": null
+        }
+    }
+EOF
 elif [[ "${cmd}" == "revert" ]]; then
+    new_versions_file=$(download_current)
     last_version=$(cat "${new_versions_file}" | $JSON -ka | tail -n 1)
     second_last_version=$(cat "${new_versions_file}" | $JSON -ka | tail -n 2 | head -n 1)
 
@@ -102,6 +103,7 @@ elif [[ "${cmd}" == "revert" ]]; then
     $JSON -q -I -f "${new_versions_file}" -e "delete this['${last_version}']"
     $JSON -q -I -f "${new_versions_file}" -e "this['${second_last_version}'].next = null"
 else
+    new_versions_file=$(download_current)
     # modify existing versions.json
     if [[ -z "${source_tarball_url}" && -z "${image_id}" && "${cmd}" != "rerelease" ]]; then
         echo "--code or --image is required"
