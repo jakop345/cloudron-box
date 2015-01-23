@@ -23,7 +23,7 @@ source_tarball_url=""
 image_id=""
 cmd=""
 new_version=""
-changelog=""
+changelog="If I told you, I'd have to kill you"
 
 # --code and--image is provided for readability. The code below assumes number is an image id
 # and anything else is the source tarball url. So, one can just say "publish.sh 2345 https://foo.tar.gz"
