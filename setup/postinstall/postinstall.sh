@@ -44,21 +44,19 @@ provision_version=""
 admin_fqdn=""
 admin_origin=""
 
-args=$(getopt -o "" -l "boxversionsurl:,data:,tlscert:,tlskey:,version:" -n "$0" -- "$@")
+args=$(getopt -o "" -l "boxversionsurl:,data:,version:" -n "$0" -- "$@")
 eval set -- "${args}"
 
 while true; do
     case "$1" in
     --boxversionsurl) provision_box_versions_url="$2";;
     --data)
-        read -r provision_app_server_url provision_fqdn provision_token <<EOF
-        $(echo "$2" | $JSON appServerUrl fqdn token | tr '\n' ' ')
+        read -r provision_app_server_url provision_fqdn provision_token provision_tls_cert provision_tls_key <<EOF
+        $(echo "$2" | $JSON appServerUrl fqdn token tlsCert tlsKey | tr '\n' ' ')
 EOF
         admin_fqdn="admin-${provision_fqdn}"
         admin_origin="https://${admin_fqdn}"
         ;;
-    --tlscert) provision_tls_cert="$2";;
-    --tlskey) provision_tls_key="$2";;
     --version) provision_version="$2";;
     --) break;;
     *) echo "Unknown option $1"; exit 1;;
@@ -107,9 +105,8 @@ sed -e "s/##ADMIN_FQDN##/${admin_fqdn}/" -e "s|##BOX_SRC_DIR##|${BOX_SRC_DIR}|" 
 echo "==== Setup ssl certs ===="
 certificate_dir="${NGINX_CONFIG_DIR}/cert"
 mkdir -p "${certificate_dir}"
-cd "${certificate_dir}"
-echo "${provision_tls_cert}" > host.cert
-echo "${provision_tls_key}" > host.key
+echo "${provision_tls_cert}" > ${certificate_dir}/host.cert
+echo "${provision_tls_key}" > ${certificate_dir}/host.key
 
 chown "${USER}:${USER}" -R "/home/${USER}"
 

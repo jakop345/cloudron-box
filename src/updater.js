@@ -145,14 +145,14 @@ function update(callback) {
         var args = {
             version: gBoxUpdateInfo.version,
             boxVersionsUrl: config.get('boxVersionsUrl'),
-            tlsCert: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), 'utf8'),
-            tlsKey: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'), 'utf8'),
 
             // this data is opaque to the installer and will be passed to postinstall.sh
             data: {
                 appServerUrl: config.appServerUrl(),
                 fqdn: config.fqdn(),
-                token: config.token()
+                token: config.token(),
+                tlsCert: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), 'utf8'),
+                tlsKey: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'), 'utf8')
             }
         };
 
