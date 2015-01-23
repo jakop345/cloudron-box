@@ -6,7 +6,7 @@ set -u
 readonly SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # reset sudo timestamp to avoid wrong success
-sudo --reset-timestamp
+sudo -k || sudo --reset-timestamp
 
 # checks if all scripts are sudo access
 scripts=("${SOURCE_DIR}/src/scripts/rmappdir.sh" \
