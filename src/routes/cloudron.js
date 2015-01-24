@@ -120,7 +120,7 @@ function update(req, res, next) {
     updater.update(function (error) {
         if (error) return next(new HttpError(500, error));
 
-        res.send(202, { });
+        next(new HttpSuccess(202, {}));
     });
-};
+}
 
