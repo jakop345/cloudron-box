@@ -28,7 +28,7 @@ set_progress() {
     local message="$2"
 
     echo "==== ${message} ===="
-    echo "{ \"progress\": \"${progress}\", \"message\": \"${message}\" }" > "${SETUP_PROGRESS_JSON}" 2> /dev/null || true # as this will fail in non-update mode
+    (echo "{ \"progress\": \"${progress}\", \"message\": \"${message}\" }" > "${SETUP_PROGRESS_JSON}") 2> /dev/null || true # as this will fail in non-update mode
 }
 
 set_progress "5" "Configuring Sudoers file"
