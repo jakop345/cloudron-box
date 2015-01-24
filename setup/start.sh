@@ -152,7 +152,6 @@ cat > "${CONFIG_DIR}/cloudron.conf" <<CONF_END
     "token": "${arg_token}",
     "appServerUrl": "${arg_app_server_url}",
     "fqdn": "${arg_fqdn}",
-    "adminOrigin": "${admin_origin}",
     "boxVersionsUrl": "${arg_box_versions_url}",
     "mailServer": "${MAIL_SERVER_IP}",
     "mailUsername": "admin@${arg_fqdn}",
