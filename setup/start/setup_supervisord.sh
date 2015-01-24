@@ -5,11 +5,11 @@ set -eu
 readonly BOX_SRC_DIR="/home/yellowtent/box"
 readonly DATA_DIR="/home/yellowtent/data"
 
-readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 rm -rf /etc/supervisor
 mkdir -p /etc/supervisor/conf.d
-cp "${SCRIPT_DIR}/supervisord/supervisord.conf" /etc/supervisor/
+cp "${script_dir}/supervisord/supervisord.conf" /etc/supervisor/
 
 echo "Writing supervisor configs..."
 
