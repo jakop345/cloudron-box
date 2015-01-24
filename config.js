@@ -70,6 +70,7 @@ function saveSync() {
     data.mailDnsRecordIds = [ ];
     data.boxVersionsUrl = null;
     data.version = null;
+    data.isCustomDomain = false;
 
     if (safe.fs.existsSync(cloudronConfigFileName)) {
         var existingData = safe.JSON.parse(safe.fs.readFileSync(cloudronConfigFileName, 'utf8'));
@@ -110,12 +111,13 @@ function fqdn() {
     return get('fqdn');
 }
 
-function adminOrigin() {
-    return 'https://admin-' + fqdn();
+function appFqdn(location) {
+    assert(typeof location === 'string');
+    return get('isCustomDomain') === true ? location + '.' + fqdn() : location + '-' + fqdn();
 }
 
-function appFqdn(location) {
-    return location + '-' + fqdn();
+function adminOrigin() {
+    return 'https://' + appFqdn('admin');
 }
 
 function token() {

@@ -23,6 +23,8 @@ box_src_tmp_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
 
 source "${script_dir}/argparser.sh" "$@" # this injects the arg_* variables used below
 
+admin_fqdn=$([[ "${arg_is_custom_domain}" == "true" ]] && echo "admin.${arg_fqdn}" ||  echo "admin-${arg_fqdn}")
+
 set_progress() {
     local progress="$1"
     local message="$2"
@@ -66,7 +68,7 @@ mkdir -p "${nginx_appconfig_dir}"
 cp "${script_dir}/start/nginx/nginx.conf" "${nginx_config_dir}/nginx.conf"
 cp "${script_dir}/start/nginx/mime.types" "${nginx_config_dir}/mime.types"
 touch "${nginx_config_dir}/naked_domain.conf"
-sed -e "s/##ADMIN_FQDN##/admin-${arg_fqdn}/" -e "s|##BOX_SRC_DIR##|${BOX_SRC_DIR}|" "${script_dir}/start/nginx/admin.conf_template" > "${nginx_appconfig_dir}/admin.conf"
+sed -e "s/##ADMIN_FQDN##/${admin_fqdn}/" -e "s|##BOX_SRC_DIR##|${BOX_SRC_DIR}|" "${script_dir}/start/nginx/admin.conf_template" > "${nginx_appconfig_dir}/admin.conf"
 
 certificate_dir="${nginx_config_dir}/cert"
 mkdir -p "${certificate_dir}"
@@ -142,7 +144,7 @@ docker pull girish/redis:0.1 || true # this line for dev convenience since it's 
 
 set_progress "80" "Creating cloudron.conf"
 cloudron_sqlite="${DATA_DIR}/cloudron.sqlite"
-admin_origin="https://admin-${arg_fqdn}"
+admin_origin="https://${admin_fqdn}"
 sudo -u yellowtent -H bash <<EOF
 set -eux
 echo "Creating cloudron.conf"
@@ -152,6 +154,7 @@ cat > "${CONFIG_DIR}/cloudron.conf" <<CONF_END
     "token": "${arg_token}",
     "appServerUrl": "${arg_app_server_url}",
     "fqdn": "${arg_fqdn}",
+    "isCustomDomain": ${arg_is_custom_domain},
     "boxVersionsUrl": "${arg_box_versions_url}",
     "mailServer": "${MAIL_SERVER_IP}",
     "mailUsername": "admin@${arg_fqdn}",
