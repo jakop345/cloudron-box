@@ -1,7 +1,6 @@
 'use strict';
 
-var appFqdn = require('./apps').appFqdn,
-    appdb = require('./appdb.js'),
+var appdb = require('./appdb.js'),
     assert = require('assert'),
     async = require('async'),
     child_process = require('child_process'),
@@ -110,7 +109,7 @@ function allocateOAuthCredentials(app, callback) {
     var clientId = 'cid-' + uuid.v4();
     var clientSecret = uuid.v4();
     var name = app.manifest.title;
-    var redirectURI = 'https://' + appFqdn(app.location);
+    var redirectURI = 'https://' + config.appFqdn(app.location);
     var scope = 'profile,roleUser';
 
     debug('allocateOAuthCredentials: id:%s clientId:%s clientSecret:%s name:%s', id, clientId, clientSecret, name);
@@ -282,7 +281,7 @@ function setupRedis(app, callback) {
 
     var createOptions = {
         name: 'redis-' + app.id,
-        Hostname: appFqdn(app.location),
+        Hostname: config.appFqdn(app.location),
         Tty: true,
         Image: 'girish/redis:0.1',
         Cmd: null,

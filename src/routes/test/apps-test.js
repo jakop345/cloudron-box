@@ -7,7 +7,6 @@
 /* global after:false */
 
 var appdb = require('../../appdb.js'),
-    appFqdn = require('../../apps').appFqdn,
     assert = require('assert'),
     async = require('async'),
     clientdb = require('../../clientdb.js'),
@@ -417,7 +416,7 @@ describe('App installation', function () {
         docker.getContainer(appInfo.containerId).inspect(function (error, data) {
             expect(error).to.not.be.ok();
             expect(data.Config.ExposedPorts['7777/tcp']).to.eql({ });
-            expect(data.Config.Env).to.contain('APP_ORIGIN=https://' + appFqdn(appInfo.location));
+            expect(data.Config.Env).to.contain('APP_ORIGIN=https://' + config.appFqdn(appInfo.location));
             expect(data.Config.Env).to.contain('ADMIN_ORIGIN=' + config.adminOrigin());
             clientdb.getByAppId(appInfo.id, function (error, client) {
                 expect(error).to.not.be.ok();

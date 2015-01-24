@@ -35,8 +35,6 @@ exports = module.exports = {
     start: start,
     stop: stop,
 
-    appFqdn: appFqdn,
-
     // exported for testing
     _validateHostname: validateHostname,
     _validatePortBindings: validatePortBindings
@@ -124,10 +122,6 @@ AppsError.NOT_FOUND = 'Not Found';
 AppsError.BAD_FIELD = 'Bad Field';
 AppsError.BAD_STATE = 'Bad State';
 
-function appFqdn(location) {
-    return location + '-' + config.fqdn();
-}
-
 // Hostname validation comes from RFC 1123 (section 2.1)
 // Domain name validation comes from RFC 2181 (Name syntax)
 // https://en.wikipedia.org/wiki/Hostname#Restrictions_on_valid_host_names
@@ -192,7 +186,7 @@ function get(appId, callback) {
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
         app.icon = getIconURLSync(app);
-        app.fqdn = appFqdn(app.location);
+        app.fqdn = config.appFqdn(app.location);
 
         callback(null, app);
     });
@@ -207,7 +201,7 @@ function getBySubdomain(subdomain, callback) {
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
         app.icon = getIconURLSync(app);
-        app.fqdn = appFqdn(app.location);
+        app.fqdn = config.appFqdn(app.location);
 
         callback(null, app);
     });
@@ -221,7 +215,7 @@ function getAll(callback) {
 
         apps.forEach(function (app) {
             app.icon = getIconURLSync(app);
-            app.fqdn = appFqdn(app.location);
+            app.fqdn = config.appFqdn(app.location);
         });
 
         callback(null, apps);

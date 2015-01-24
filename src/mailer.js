@@ -2,8 +2,7 @@
 
 'use strict';
 
-var appFqdn = require('./apps.js').appFqdn,
-    assert = require('assert'),
+var assert = require('assert'),
     async = require('async'),
     cloudron = require('./cloudron.js'),
     config = require('../config.js'),
@@ -207,8 +206,8 @@ function appDied(app) {
             from: config.get('mailUsername'),
             to: adminEmails.join(', '),
             subject: util.format('App %s is down', app.location),
-            text: render('app_down_text.ejs', { name: app.location, location: appFqdn(app.location) }),
-            html: render('app_down_html.ejs', { name: app.location, location : appFqdn(app.location) })
+            text: render('app_down_text.ejs', { name: app.location, location: config.appFqdn(app.location) }),
+            html: render('app_down_html.ejs', { name: app.location, location : config.appFqdn(app.location) })
         };
 
         enqueue(mailOptions);

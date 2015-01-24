@@ -23,9 +23,12 @@ exports = module.exports = {
     // convenience getters
     appServerUrl: appServerUrl,
     fqdn: fqdn,
-    adminOrigin: adminOrigin,
     token: token,
-    version: version
+    version: version,
+
+    // these values are derived
+    adminOrigin: adminOrigin,
+    appFqdn: appFqdn
 };
 
 var homeDir = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
@@ -109,6 +112,10 @@ function fqdn() {
 
 function adminOrigin() {
     return 'https://admin-' + fqdn();
+}
+
+function appFqdn(location) {
+    return location + '-' + fqdn();
 }
 
 function token() {

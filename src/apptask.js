@@ -8,7 +8,6 @@ require('supererror')({ splatchError: true });
 
 var addons = require('./addons.js'),
     appdb = require('./appdb.js'),
-    appFqdn = require('./apps.js').appFqdn,
     clientdb = require('./clientdb.js'),
     assert = require('assert'),
     async = require('async'),
@@ -99,7 +98,7 @@ function configureNginx(app, callback) {
         if (error) return callback(error);
 
         var sourceDir = path.resolve(__dirname, '..');
-        var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: appFqdn(app.location), port: freePort, accessRestriction: app.accessRestriction });
+        var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: config.appFqdn(app.location), port: freePort, accessRestriction: app.accessRestriction });
 
         var nginxConfigFilename = path.join(paths.NGINX_APPCONFIG_DIR, app.id + '.conf');
         debug('writing config to ' + nginxConfigFilename);
@@ -202,14 +201,14 @@ function createContainer(app, callback) {
             env.push(manifest.tcpPorts[containerPort].environmentVariable + '=' + portBindings[containerPort]);
         }
 
-        env.push('APP_ORIGIN' + '=' + 'https://' + appFqdn(app.location));
+        env.push('APP_ORIGIN' + '=' + 'https://' + config.appFqdn(app.location));
         env.push('ADMIN_ORIGIN' + '=' + config.adminOrigin());
 
         addons.getEnvironment(app.id, function (error, addonEnv) {
             if (error) return callback(new Error('Error getting addon env:', + error));
 
             var containerOptions = {
-                Hostname: appFqdn(app.location),
+                Hostname: config.appFqdn(app.location),
                 Tty: true,
                 Image: manifest.dockerImage,
                 Cmd: null,
@@ -293,7 +292,7 @@ function allocateOAuthProxyCredentials(app, callback) {
     var clientId = 'cid-' + uuid.v4();
     var clientSecret = uuid.v4();
     var name = app.manifest.title;
-    var redirectURI = 'https://' + appFqdn(app.location);
+    var redirectURI = 'https://' + config.appFqdn(app.location);
     var scope = 'profile,' + app.accessRestriction;
 
     clientdb.add(id, appId, clientId, clientSecret, name, redirectURI, scope, callback);
@@ -501,7 +500,7 @@ function waitForDnsPropagation(app, callback) {
 
     var ip = cloudron.getIp(),
         zoneName = config.fqdn().substr(config.fqdn().indexOf('.') + 1), // TODO: send zone from appstore
-        fqdn = appFqdn(app.location);
+        fqdn = config.appFqdn(app.location);
 
     function retry(error) {
         console.error(error);
