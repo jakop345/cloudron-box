@@ -98,7 +98,7 @@ haraka_container_id=$(docker run --restart=always -d --name="haraka" --cap-add="
     -p 127.0.0.1:25:25 \
     -h "${arg_fqdn}" \
     -e "DOMAIN_NAME=${arg_fqdn}" \
-    -v "${DATA_DIR}/haraka:/app/data" \
+    -v "${CONFIG_DIR}/haraka:/app/data" \
     girish/haraka:0.1)
 echo "Haraka container id: ${haraka_container_id}"
 # Every docker restart results in a new IP. Give our mail server a
