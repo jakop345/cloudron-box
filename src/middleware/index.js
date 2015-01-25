@@ -10,6 +10,7 @@ exports = module.exports = {
     morgan: require('morgan'),
     proxy: require('proxy-middleware'),
     lastMile: require('connect-lastmile'),
+    multipart: require('./multipart.js'),
     session: require('express-session'),
     timeout: require('connect-timeout'),
     urlencoded: require('body-parser').urlencoded

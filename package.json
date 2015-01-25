@@ -39,7 +39,7 @@
     "mime": "^1.2.11",
     "mkdirp": "~0.3.5",
     "morgan": "~1.0.1",
-    "multiparty": "~4.0.0",
+    "multiparty": "http://registry.npmjs.org/multiparty/-/multiparty-4.0.0.tgz",
     "native-dns": "~0.6.1",
     "node-uuid": "^1.4.1",
     "nodejs-disks": "~0.2.1",
