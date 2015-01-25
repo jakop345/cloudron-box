@@ -11,6 +11,7 @@ var assert = require('assert'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
     path = require('path'),
+    safe = require('safetydance'),
     UserError = require('../user.js').UserError,
     updater = require('../updater.js');
 
@@ -24,7 +25,8 @@ exports = module.exports = {
     reboot: reboot,
     createBackup: createBackup,
     getConfig: getConfig,
-    update: update
+    update: update,
+    setCertificate: setCertificate
 };
 
 /**
@@ -118,6 +120,23 @@ function getConfig(req, res, next) {
 
 function update(req, res, next) {
     updater.update(function (error) {
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(202, {}));
+    });
+}
+
+function setCertificate(req, res, next) {
+    assert(typeof req.files === 'object');
+
+    if (!req.files.certificate) return next(new HttpError(400, 'certificate must be provided'));
+    var certificate = safe.fs.readFileSync(req.files.certificate.path, 'utf8');
+
+    if (!req.files.key) return next(new HttpError(400, 'key must be provided'));
+    var key = safe.fs.readFileSync(req.files.key.path, 'utf8');
+
+    cloudron.setCertificate(certificate, key, function (error) {
+        if (error && error.reason === CloudronError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(202, {}));

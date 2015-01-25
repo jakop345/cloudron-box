@@ -68,6 +68,12 @@ function initializeExpressSync() {
        .use(router)
        .use(middleware.lastMile());
 
+    var FIELD_LIMIT = 2 * 1024, // max fields that can appear in multipart
+        FILE_SIZE_LIMIT = '521mb', // max file size that can be uploaded
+        FILE_TIMEOUT = 60 * 1000; // increased timeout for file uploads (1 min)
+
+    var multipart = middleware.multipart({ maxFieldsSize: FIELD_LIMIT, limit: FILE_SIZE_LIMIT, timeout: FILE_TIMEOUT });
+
     // middleware shortcuts for authentification
     var bearer = passport.authenticate(['bearer'], { session: false });
     var basic = passport.authenticate(['basic'], { session: false });
@@ -92,6 +98,7 @@ function initializeExpressSync() {
     router.get ('/api/v1/cloudron/reboot', rootScope, routes.cloudron.reboot);
     router.get ('/api/v1/cloudron/stats', rootScope, routes.cloudron.getStats);
     router.post('/api/v1/cloudron/backups', rootScope, routes.cloudron.createBackup);
+    router.post('/api/v1/cloudron/certificate', rootScope, multipart, routes.cloudron.setCertificate);
     router.get ('/api/v1/cloudron/graphs', rootScope, routes.graphs.getGraphs);
 
     router.get ('/api/v1/profile', profileScope, routes.user.info); // FIXME how is this different from info route below?
@@ -157,6 +164,7 @@ function start(callback) {
 
     mkdirp.sync(paths.APPICONS_DIR);
     mkdirp.sync(paths.NGINX_APPCONFIG_DIR);
+    mkdirp.sync(paths.NGINX_CERT_DIR);
     mkdirp.sync(paths.APPDATA_DIR);
     mkdirp.sync(paths.COLLECTD_APPCONFIG_DIR);
     mkdirp.sync(paths.HARAKA_CONFIG_DIR);

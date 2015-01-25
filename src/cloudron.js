@@ -14,6 +14,7 @@ exports = module.exports = {
     backup: backup,
 
     getBackupUrl: getBackupUrl,
+    setCertificate: setCertificate,
 
     getIp: getIp
 };
@@ -40,7 +41,8 @@ var assert = require('assert'),
 
 var SUDO = '/usr/bin/sudo',
     TAR = os.platform() === 'darwin' ? '/usr/bin/tar' : '/bin/tar',
-    BACKUP_CMD = path.join(__dirname, 'scripts/backup.sh');
+    BACKUP_CMD = path.join(__dirname, 'scripts/backup.sh'),
+    RELOAD_NGINX_CMD = path.join(__dirname, 'scripts/reloadnginx.sh');
 
 var gBackupTimerId = null,
     gAddMailDnsRecordsTimerId = null,
@@ -290,6 +292,27 @@ function addMailDnsRecords() {
 
         debug('Added Mail DNS records successfully');
         config.set('mailDnsRecordIds', ids);
+    });
+}
+
+function setCertificate(certificate, key, callback) {
+    assert(typeof certificate === 'string');
+    assert(typeof key === 'string');
+
+    debug('Updating certificates');
+
+    if (!safe.fs.writeFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), certificate)) {
+        return callback(new CloudronError(CloudronError.INTERNAL_ERROR, safe.error.message));
+    }
+
+    if (!safe.fs.writeFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'), key)) {
+        return callback(new CloudronError(CloudronError.INTERNAL_ERROR, safe.error.message));
+    }
+
+    execFile(SUDO, [ RELOAD_NGINX_CMD ], { timeout: 10000 }, function (error) {
+        if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
+
+        return callback(null);
     });
 }
 
