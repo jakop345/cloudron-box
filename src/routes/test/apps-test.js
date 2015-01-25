@@ -36,7 +36,6 @@ var APP_STORE_ID = 'test', APP_ID;
 var APP_LOCATION = 'location';
 
 var USERNAME = 'admin', PASSWORD = 'password', EMAIL ='silly@me.com';
-var server;
 var token = null; // authentication token
 
 function startDockerProxy(interceptor, callback) {
