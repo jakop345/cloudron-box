@@ -25,6 +25,7 @@ exports = module.exports = {
     fqdn: fqdn,
     token: token,
     version: version,
+    isCustomDomain: isCustomDomain,
 
     // these values are derived
     adminOrigin: adminOrigin,
@@ -113,7 +114,7 @@ function fqdn() {
 
 function appFqdn(location) {
     assert(typeof location === 'string');
-    return get('isCustomDomain') === true ? location + '.' + fqdn() : location + '-' + fqdn();
+    return isCustomDomain() ? location + '.' + fqdn() : location + '-' + fqdn();
 }
 
 function adminOrigin() {
@@ -126,5 +127,9 @@ function token() {
 
 function version() {
     return get('version');
+}
+
+function isCustomDomain() {
+    return get('isCustomDomain');
 }
 
