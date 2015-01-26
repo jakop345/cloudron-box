@@ -72,10 +72,14 @@ function checkBoxUpdates(callback) {
         var nextVersionInfo = nextVersion ? versions[nextVersion] : null;
 
         if (nextVersionInfo && typeof nextVersionInfo === 'object') {
-            debug('checkBoxUpdates: new version %s available. imageId: %d code: %s', nextVersion, nextVersionInfo.imageId, nextVersionInfo.sourceTarballUrl);
-            callback(null, { version: nextVersion, changelog: nextVersionInfo.changelog, upgrade: nextVersionInfo.imageId !== currentVersionInfo.imageId });
+            debug('new version %s available. imageId: %d code: %s', nextVersion, nextVersionInfo.imageId, nextVersionInfo.sourceTarballUrl);
+            callback(null, {
+                version: nextVersion,
+                changelog: nextVersionInfo.changelog,
+                upgrade: nextVersionInfo.imageId !== currentVersionInfo.imageId
+            });
         } else {
-            debug('checkBoxUpdates: no new version available.');
+            debug('no new version available.');
             callback(null, null);
         }
     });
@@ -119,7 +123,7 @@ function update(callback) {
     assert(typeof callback === 'function');
 
     if (!gBoxUpdateInfo) {
-        debug('update: no box update available');
+        debug('no box update available');
         return callback(new Error('No update available'));
     }
 
@@ -127,7 +131,7 @@ function update(callback) {
         if (error) return callback(error);
 
         if (gBoxUpdateInfo && gBoxUpdateInfo.upgrade) {
-            debug('update: box needs upgrade');
+            debug('box needs upgrade');
 
             superagent.post(config.appServerUrl() + '/api/v1/boxes/' + config.fqdn() + '/upgrade')
                 .query({ token: config.token() })
@@ -158,7 +162,7 @@ function update(callback) {
             }
         };
 
-        debug('updater: updating box %j', args);
+        debug('updating box %j', args);
 
         superagent.post(INSTALLER_UPDATE_URL)
             .send(args)
