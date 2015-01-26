@@ -9,6 +9,10 @@ var SettingsController = function ($scope, Client) {
     $scope.config = Client.getConfig();
     $scope.nakedDomainApp = null;
     $scope.drives = [];
+    $scope.certificateFile = null;
+    $scope.certificateFileName = '';
+    $scope.keyFile = null;
+    $scope.keyFileName = '';
 
     $scope.setNakedDomain = function () {
         var appid = $scope.nakedDomainApp ? $scope.nakedDomainApp.id : null;
@@ -86,6 +90,33 @@ var SettingsController = function ($scope, Client) {
             }
 
             window.setTimeout(checkIfDone, 5000);
+        });
+    };
+
+    document.getElementById('idCertificate').onchange = function (event) {
+        $scope.$apply(function () {
+            $scope.certificateFile = event.target.files[0];
+            $scope.certificateFileName = event.target.files[0].name;
+        });
+    };
+
+    document.getElementById('idKey').onchange = function (event) {
+        $scope.$apply(function () {
+            $scope.keyFile = event.target.files[0];
+            $scope.keyFileName = event.target.files[0].name;
+        });
+    };
+
+    $scope.setCertificate = function () {
+        console.log('Will set the certificate');
+
+        if (!$scope.certificateFile) return console.log('Certificate not set');
+        if (!$scope.keyFile) return console.log('Key not set');
+
+        Client.setCertificate($scope.certificateFile, $scope.keyFile, function (error) {
+            if (error) return console.log(error);
+
+            window.setTimeout(window.location.reload.bind(window.location, true), 3000);
         });
     };
 

@@ -321,6 +321,22 @@ angular.module('Application').service('Client', function ($http, md5) {
         }).error(defaultErrorHandler(callback));
     };
 
+    Client.prototype.setCertificate = function (certificateFile, keyFile, callback) {
+        console.log('will set certificate');
+
+        var fd = new FormData();
+        fd.append('certificate', certificateFile);
+        fd.append('key', keyFile);
+
+        $http.post('/api/v1/cloudron/certificate', fd, {
+            headers: { 'Content-Type': undefined },
+            transformRequest: angular.identity
+        }).success(function(data, status) {
+            if (status !== 202) return callback(new ClientError(status, data));
+            callback(null);
+        }).error(defaultErrorHandler(callback));
+    };
+
     Client.prototype.graphs = function (targets, from, callback) {
         var config = {
             params: {

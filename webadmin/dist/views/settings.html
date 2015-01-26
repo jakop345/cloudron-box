@@ -132,4 +132,28 @@
             </div>
         </div>
     </div>
+    <div class="col-lg-6 col-md-6">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                Certificate
+            </div>
+            <div class="panel-body">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <input type="file" class="pull-right" id="idCertificate" style="display:none">Certificate</input>
+                        <button class="btn btn-default pull-right" type="button" onclick="getElementById('idCertificate').click();">Browse</button>
+                        <span class="pull-right">{{certificateFileName}}</span>
+                    </li>
+                    <li class="list-group-item">
+                        <input type="file" class="pull-right" id="idKey" style="display:none">Key</input>
+                        <button class="btn btn-default pull-right" type="button" onclick="getElementById('idKey').click();">Browse</button>
+                        <span class="pull-right">{{keyFileName}}</span>
+                    </li>
+                    <li>
+                        <button class="btn btn-outline btn-success pull-right" ng-click="setCertificate()">Upload Certificate</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
 </div>
