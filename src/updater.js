@@ -76,7 +76,7 @@ function checkBoxUpdates(callback) {
             callback(null, {
                 version: nextVersion,
                 changelog: nextVersionInfo.changelog,
-                upgrade: nextVersionInfo.imageId !== currentVersionInfo.imageId
+                upgrade: nextVersionInfo.upgrade
             });
         } else {
             debug('no new version available.');

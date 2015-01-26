@@ -24,10 +24,11 @@ image_id=""
 cmd=""
 new_version=""
 changelog="If I told you, I'd have to kill you"
+upgrade="autodetect"
 
 # --code and--image is provided for readability. The code below assumes number is an image id
 # and anything else is the source tarball url. So, one can just say "publish.sh 2345 https://foo.tar.gz"
-args=$($GNU_GETOPT -o "" -l "dev,stable,code:,image:,rerelease,new,list,revert,changelog:,release:" -n "$0" -- "$@")
+args=$($GNU_GETOPT -o "" -l "dev,stable,code:,image:,rerelease,new,list,revert,changelog:,release:,upgrade" -n "$0" -- "$@")
 eval set -- "${args}"
 
 while true; do
@@ -42,6 +43,7 @@ while true; do
     --list) cmd="list"; shift;;
     --revert) cmd="revert"; shift;;
     --changelog) changelog="$2"; shift 2;;
+    --upgrade) upgrade="true"; shift;;
     --) shift; break;;
     *) echo "Unknown option $2"; exit;;
     esac
@@ -116,12 +118,17 @@ else
         echo "Using the previous image id : ${image_id}"
     fi
 
+    if [[ "${upgrade}" == "autodetect" ]]; then
+        old_image_id=$($JSON -f "${new_versions_file}" -D, "${last_version},imageId")
+        upgrade=$([[ "${old_image_id}" != "${image_id}" ]] && echo "true" || echo "false")
+    fi
+
     new_version=$($SOURCE_DIR/node_modules/.bin/semver -i "${last_version}")
     echo "Releasing version ${new_version}"
     image_name=$(get_image_name "${image_id}")
 
     $JSON -q -I -f "${new_versions_file}" -e "this['${last_version}'].next = '${new_version}'"
-    $JSON -q -I -f "${new_versions_file}" -e "this['${new_version}'] = { 'sourceTarballUrl': '${source_tarball_url}', 'imageId': ${image_id}, 'imageName': '${image_name}', 'changelog': [ \"${changelog}\" ], 'next': null }"
+    $JSON -q -I -f "${new_versions_file}" -e "this['${new_version}'] = { 'sourceTarballUrl': '${source_tarball_url}', 'imageId': ${image_id}, 'imageName': '${image_name}', 'changelog': [ \"${changelog}\" ], 'upgrade': ${upgrade}, 'next': null }"
 fi
 
 echo "Verifying new versions file"
