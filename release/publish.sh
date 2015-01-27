@@ -88,6 +88,7 @@ elif [[ "${cmd}" == "new" ]]; then
             "imageId": ${image_id},
             "imageName": "${image_name}",
             "changelog": [ "Let's start at the very beginning, a very good way to start" ],
+            "date": "$(date -u)",
             "next": null
         }
     }
@@ -128,7 +129,7 @@ else
     image_name=$(get_image_name "${image_id}")
 
     $JSON -q -I -f "${new_versions_file}" -e "this['${last_version}'].next = '${new_version}'"
-    $JSON -q -I -f "${new_versions_file}" -e "this['${new_version}'] = { 'sourceTarballUrl': '${source_tarball_url}', 'imageId': ${image_id}, 'imageName': '${image_name}', 'changelog': [ \"${changelog}\" ], 'upgrade': ${upgrade}, 'next': null }"
+    $JSON -q -I -f "${new_versions_file}" -e "this['${new_version}'] = { 'sourceTarballUrl': '${source_tarball_url}', 'imageId': ${image_id}, 'imageName': '${image_name}', 'changelog': [ \"${changelog}\" ], 'upgrade': ${upgrade}, 'date': '$(date -u)', 'next': null }"
 fi
 
 echo "Verifying new versions file"

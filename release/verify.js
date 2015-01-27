@@ -25,6 +25,7 @@ function verify(versionsFileName) {
         if (typeof versionsJson[version].imageId !== 'number') die('version ' + version + ' does not have proper imageId');
         if (typeof versionsJson[version].imageName !== 'string' || !versionsJson[version].imageName.length) die('version ' + version + ' does not have proper imageName');
         if ('changeLog' in versionsJson[version] && !util.isArray(versionsJson[version].changeLog)) die('version ' + version + ' does not have proper changeLog');
+        if (typeof versionsJson[version].date !== 'string' || ((new Date(versionsJson[version].date)).toString() === 'Invalid Date')) die('invalid date or missing date');
         if (versionsJson[version].next !== null && typeof versionsJson[version].next !== 'string') die('version ' + version + ' does not have proper next');
         if (typeof versionsJson[version].sourceTarballUrl !== 'string') die('version ' + version + ' does not have proper sourceTarballUrl');
         var tarballUrl = url.parse(versionsJson[version].sourceTarballUrl);
