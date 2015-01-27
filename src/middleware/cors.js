@@ -1,3 +1,7 @@
+/* jshint node:true */
+
+'use strict';
+
 var url = require('url');
 
 /*
@@ -18,9 +22,9 @@ module.exports = function cors(options) {
         requestOrigin = url.parse(requestOrigin);
 
         var hostname = requestOrigin.host.split(':')[0]; // remove any port
-        var originAllowed = origins.some(function (o) { return o === '*' || o === hostname });
+        var originAllowed = origins.some(function (o) { return o === '*' || o === hostname; });
         if (!originAllowed) {
-            return res.send(405, 'CORS not allowed from this domain');
+            return res.status(405).send('CORS not allowed from this domain');
         }
 
         // respond back with req.headers.origin which might contain the scheme
@@ -39,7 +43,7 @@ module.exports = function cors(options) {
 
             res.header('Access-Control-Max-Age', maxAge);
 
-            return res.send(200);
+            return res.status(200).send();
         }
 
         if (req.headers['access-control-request-headers']) {
@@ -47,5 +51,5 @@ module.exports = function cors(options) {
         }
 
         next();
-    }
+    };
 };
