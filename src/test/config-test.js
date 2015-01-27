@@ -33,6 +33,14 @@ describe('config', function () {
         done();
     });
 
+    it('did set default values', function () {
+        expect(config.isCustomDomain()).to.equal(false);
+        expect(config.fqdn()).to.equal('localhost');
+        expect(config.adminOrigin()).to.equal('https://admin-localhost');
+        expect(config.appFqdn('app')).to.equal('app-localhost');
+        expect(config.zoneName()).to.equal('localhost');
+    });
+
     it('set saves value in file', function (done) {
         config.set('token', 'TOKEN');
         expect(JSON.parse(fs.readFileSync(path.join(config.baseDir(), 'configs/cloudron.conf'))).token).to.eql('TOKEN');
@@ -51,6 +59,28 @@ describe('config', function () {
         done();
     });
 
+    it('uses dotted locations with custom domain', function () {
+        config.set('fqdn', 'example.com');
+        config.set('isCustomDomain', true);
+
+        expect(config.isCustomDomain()).to.equal(true);
+        expect(config.fqdn()).to.equal('example.com');
+        expect(config.adminOrigin()).to.equal('https://admin.example.com');
+        expect(config.appFqdn('app')).to.equal('app.example.com');
+        expect(config.zoneName()).to.equal('example.com');
+    });
+
+    it('uses hyphen locations with non-custom domain', function () {
+        config.set('fqdn', 'test.example.com');
+        config.set('isCustomDomain', false);
+
+        expect(config.isCustomDomain()).to.equal(false);
+        expect(config.fqdn()).to.equal('test.example.com');
+        expect(config.adminOrigin()).to.equal('https://admin-test.example.com');
+        expect(config.appFqdn('app')).to.equal('app-test.example.com');
+        expect(config.zoneName()).to.equal('example.com');
+    });
+
     it('throws with bad key', function (done) {
         safe(function () { config.set('random', 'value'); });
         expect(safe.error).to.be.ok();
@@ -58,5 +88,6 @@ describe('config', function () {
         expect(safe.error).to.be.ok();
         done();
     });
+
 });
 

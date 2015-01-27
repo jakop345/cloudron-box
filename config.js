@@ -135,9 +135,9 @@ function isCustomDomain() {
 }
 
 function zoneName() {
-    if (isCustomDomain()) return config.fqdn(); // the appstore sets up the custom domain as a zone
+    if (isCustomDomain()) return fqdn(); // the appstore sets up the custom domain as a zone
 
     // for shared domain name, strip out the hostname
-    return config.fqdn().substr(config.fqdn().indexOf('.') + 1);
+    return fqdn().substr(fqdn().indexOf('.') + 1);
 }
 
