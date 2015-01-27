@@ -29,7 +29,8 @@ exports = module.exports = {
 
     // these values are derived
     adminOrigin: adminOrigin,
-    appFqdn: appFqdn
+    appFqdn: appFqdn,
+    zoneName: zoneName
 };
 
 var homeDir = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
@@ -131,5 +132,12 @@ function version() {
 
 function isCustomDomain() {
     return get('isCustomDomain');
+}
+
+function zoneName() {
+    if (isCustomDomain()) return config.fqdn(); // the appstore sets up the custom domain as a zone
+
+    // for shared domain name, strip out the hostname
+    return config.fqdn().substr(config.fqdn().indexOf('.') + 1);
 }
 

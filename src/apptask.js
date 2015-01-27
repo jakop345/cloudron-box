@@ -499,7 +499,7 @@ function waitForDnsPropagation(app, callback) {
     }
 
     var ip = cloudron.getIp(),
-        zoneName = config.fqdn().substr(config.fqdn().indexOf('.') + 1), // TODO: send zone from appstore
+        zoneName = config.zoneName(),
         fqdn = config.appFqdn(app.location);
 
     function retry(error) {
