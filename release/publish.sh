@@ -7,8 +7,8 @@ readonly JSON="${SOURCE_DIR}/node_modules/.bin/json"
 [ "$(uname -s)" == "Darwin" ] && GNU_GETOPT="/usr/local/opt/gnu-getopt/bin/getopt" || GNU_GETOPT="getopt"
 readonly GNU_GETOPT
 
-readonly VERSIONS_URL="https://s3.amazonaws.com/cloudron-releases/versions-dev.json"
-readonly VERSIONS_S3_URL="s3://cloudron-releases/versions-dev.json"
+readonly VERSIONS_URL_DEV="https://s3.amazonaws.com/cloudron-releases/versions-dev.json"
+readonly VERSIONS_S3_URL_DEV="s3://cloudron-releases/versions-dev.json"
 
 if [[ ! -f "${SOURCE_DIR}/../installer/scripts/digitalOceanFunctions.sh" ]]; then
     echo "Could not locate digitalOceanFunctions.sh"
@@ -49,10 +49,11 @@ done
 shift $(expr $OPTIND - 1)
 
 download_current() {
+    versions_url="$1"
     # download the existing version file if the user hasn't provided one
     local current_versions_file=$(mktemp -t box-versions 2>/dev/null || mktemp)
 
-    if ! wget -q -O "${current_versions_file}" "${VERSIONS_URL}"; then
+    if ! wget -q -O "${current_versions_file}" "${versions_url}"; then
         echo "Error downloading versions file"
         exit 1
     fi
@@ -61,7 +62,7 @@ download_current() {
 }
 
 if [[ "${cmd}" == "list" ]]; then
-    cat "$(download_current)"
+    cat "$(download_current "${VERSIONS_URL_DEV}")"
     exit 0
 elif [[ "${cmd}" == "release" ]]; then
     if [[ ! -f "${new_versions_file}" ]]; then
@@ -91,7 +92,7 @@ elif [[ "${cmd}" == "new" ]]; then
     }
 EOF
 elif [[ "${cmd}" == "revert" ]]; then
-    new_versions_file=$(download_current)
+    new_versions_file=$(download_current "${VERSIONS_URL_DEV}")
     last_version=$(cat "${new_versions_file}" | $JSON -ka | tail -n 1)
     second_last_version=$(cat "${new_versions_file}" | $JSON -ka | tail -n 2 | head -n 1)
 
@@ -99,7 +100,7 @@ elif [[ "${cmd}" == "revert" ]]; then
     $JSON -q -I -f "${new_versions_file}" -e "delete this['${last_version}']"
     $JSON -q -I -f "${new_versions_file}" -e "this['${second_last_version}'].next = null"
 else
-    new_versions_file=$(download_current)
+    new_versions_file=$(download_current "${VERSIONS_URL_DEV}")
     # modify existing versions.json
     if [[ -z "${source_tarball_url}" && -z "${image_id}" && "${cmd}" != "rerelease" ]]; then
         echo "--code or --image is required"
@@ -133,7 +134,7 @@ echo "Verifying new versions file"
 $SOURCE_DIR/release/verify.js "${new_versions_file}"
 
 echo "Uploading new versions file"
-$SOURCE_DIR/node_modules/.bin/s3-cli put --acl-public --default-mime-type "application/json" "${new_versions_file}" "${VERSIONS_S3_URL}"
+$SOURCE_DIR/node_modules/.bin/s3-cli put --acl-public --default-mime-type "application/json" "${new_versions_file}" "${VERSIONS_S3_URL_DEV}"
 
 cat "${new_versions_file}"
 
