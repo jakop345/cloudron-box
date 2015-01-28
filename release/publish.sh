@@ -1,7 +1,6 @@
 #!/bin/bash
 
-# set -x
-set -e
+set -eu
 
 readonly SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
 readonly JSON="${SOURCE_DIR}/node_modules/.bin/json"
