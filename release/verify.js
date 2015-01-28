@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+'use strict';
+
 var AWS = require('aws-sdk'),
     fs = require('fs'),
     path = require('path'),
