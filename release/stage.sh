@@ -30,11 +30,12 @@ read_changelog() {
     version="$1"
     changelog_file="${SOURCE_DIR}/release/CHANGES"
 
-    echo "Some changelog output here"
-
-#    if [[ -f "${changelog_file}" ]]; then
-#        cat "${changelog_file}" | grep -v "^#" | sed -e '/^$/d' -e 's/\(.*\)/"\1"/g' | paste -d, - -
-#    fi
+     # get change lines, remove comments, remove leading space and hyphen, quote the lines and join lines by comma
+    $SOURCE_DIR/release/parse_changes.js "${version}" \
+        | grep -v "^#"  \
+        | sed 's/^[ -]*//' \
+        | sed -e '/^$/d' -e 's/\(.*\)/"\1"/g' \
+        | paste -d, - -
 }
 
 if [[ $# -lt 1 ]]; then

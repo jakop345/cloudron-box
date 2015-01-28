@@ -1,0 +1,25 @@
+{
+  "0.0.1": {
+    "sourceTarballUrl": "https://s3.amazonaws.com/cloudron-releases/box-fd52179fcf0a26e234cd9ea0709dcde588af952c.tar.gz",
+    "imageId": 10227329,
+    "imageName": "box-bab6a5f-2015-01-24-005328",
+    "changelog": [
+      "If I told you, I'd have to kill you"
+    ],
+    "upgrade": false,
+    "date": "Wed Jan 28 01:15:53 UTC 2015",
+    "next": "0.0.2"
+  },
+  "0.0.2": {
+    "sourceTarballUrl": "https://s3.amazonaws.com/cloudron-releases/box-fd52179fcf0a26e234cd9ea0709dcde588af952c.tar.gz",
+    "imageId": 10227329,
+    "imageName": "box-bab6a5f-2015-01-24-005328",
+    "changelog": [
+      "Basic functionality works",
+      "Fixed buggy patch"
+    ],
+    "upgrade": false,
+    "date": "Wed Jan 28 06:48:38 UTC 2015",
+    "next": null
+  }
+}
