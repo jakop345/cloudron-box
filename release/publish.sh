@@ -9,6 +9,8 @@ readonly GNU_GETOPT
 
 readonly VERSIONS_URL_DEV="https://s3.amazonaws.com/cloudron-releases/versions-dev.json"
 readonly VERSIONS_S3_URL_DEV="s3://cloudron-releases/versions-dev.json"
+readonly VERSIONS_URL_STAGING="https://s3.amazonaws.com/cloudron-releases/versions-staging.json"
+readonly VERSIONS_S3_URL_STAGING="s3://cloudron-releases/versions-staging.json"
 
 if [[ ! -f "${SOURCE_DIR}/../installer/scripts/digitalOceanFunctions.sh" ]]; then
     echo "Could not locate digitalOceanFunctions.sh"
@@ -24,14 +26,16 @@ cmd=""
 new_version=""
 changelog="If I told you, I'd have to kill you"
 upgrade="autodetect"
+versions_url="${VERSIONS_URL_DEV}"
+versions_s3_url="${VERSIONS_S3_URL_DEV}"
 
-args=$($GNU_GETOPT -o "" -l "dev,stable,code:,image:,rerelease,new,list,revert,changelog:,release:,upgrade" -n "$0" -- "$@")
+args=$($GNU_GETOPT -o "" -l "dev,staging,code:,image:,rerelease,new,list,revert,changelog:,release:,upgrade" -n "$0" -- "$@")
 eval set -- "${args}"
 
 while true; do
     case "$1" in
     --dev) shift;;
-    --stable) echo "Not implemented yet. Need to figure how to bump version"; exit 1;;
+    --staging) versions_url="${VERSIONS_URL_STAGING}"; versions_s3_url="${VERSIONS_S3_URL_STAGING}"; shift;;
     --code) source_tarball_url="$2"; shift 2;;
     --image) image_id="$2"; shift 2;;
     --rerelease) cmd="rerelease"; shift;;
@@ -62,7 +66,7 @@ download_current() {
 }
 
 if [[ "${cmd}" == "list" ]]; then
-    cat "$(download_current "${VERSIONS_URL_DEV}")"
+    cat "$(download_current "${versions_url}")"
     exit 0
 elif [[ "${cmd}" == "release" ]]; then
     if [[ ! -f "${new_versions_file}" ]]; then
@@ -92,7 +96,7 @@ elif [[ "${cmd}" == "new" ]]; then
     }
 EOF
 elif [[ "${cmd}" == "revert" ]]; then
-    new_versions_file=$(download_current "${VERSIONS_URL_DEV}")
+    new_versions_file=$(download_current "${versions_url}")
     last_version=$(cat "${new_versions_file}" | $JSON -ka | tail -n 1)
     second_last_version=$(cat "${new_versions_file}" | $JSON -ka | tail -n 2 | head -n 1)
 
@@ -100,7 +104,7 @@ elif [[ "${cmd}" == "revert" ]]; then
     $JSON -q -I -f "${new_versions_file}" -e "delete this['${last_version}']"
     $JSON -q -I -f "${new_versions_file}" -e "this['${second_last_version}'].next = null"
 else
-    new_versions_file=$(download_current "${VERSIONS_URL_DEV}")
+    new_versions_file=$(download_current "${versions_url}")
     # modify existing versions.json
     if [[ -z "${source_tarball_url}" && -z "${image_id}" && "${cmd}" != "rerelease" ]]; then
         echo "--code or --image is required"
@@ -134,7 +138,7 @@ echo "Verifying new versions file"
 $SOURCE_DIR/release/verify.js "${new_versions_file}"
 
 echo "Uploading new versions file"
-$SOURCE_DIR/node_modules/.bin/s3-cli put --acl-public --default-mime-type "application/json" "${new_versions_file}" "${VERSIONS_S3_URL_DEV}"
+$SOURCE_DIR/node_modules/.bin/s3-cli put --acl-public --default-mime-type "application/json" "${new_versions_file}" "${versions_s3_url}"
 
 cat "${new_versions_file}"
 
