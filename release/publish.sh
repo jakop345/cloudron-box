@@ -4,7 +4,7 @@ set -eu
 
 readonly SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
 readonly JSON="${SOURCE_DIR}/node_modules/.bin/json"
-[ $(uname -s) == "Darwin" ] && GNU_GETOPT="/usr/local/opt/gnu-getopt/bin/getopt" || GNU_GETOPT="getopt"
+[ "$(uname -s)" == "Darwin" ] && GNU_GETOPT="/usr/local/opt/gnu-getopt/bin/getopt" || GNU_GETOPT="getopt"
 readonly GNU_GETOPT
 
 readonly VERSIONS_URL="https://s3.amazonaws.com/cloudron-releases/versions-dev.json"
@@ -25,8 +25,6 @@ new_version=""
 changelog="If I told you, I'd have to kill you"
 upgrade="autodetect"
 
-# --code and--image is provided for readability. The code below assumes number is an image id
-# and anything else is the source tarball url. So, one can just say "publish.sh 2345 https://foo.tar.gz"
 args=$($GNU_GETOPT -o "" -l "dev,stable,code:,image:,rerelease,new,list,revert,changelog:,release:,upgrade" -n "$0" -- "$@")
 eval set -- "${args}"
 
