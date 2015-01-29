@@ -10,7 +10,7 @@ exports = module.exports = {
     NGINX_APPCONFIG_DIR: path.join(config.baseDir(), 'configs/nginx/applications'),
     NGINX_CERT_DIR: path.join(config.baseDir(), 'configs/nginx/cert'),
 
-    HARAKA_CONFIG_DIR: path.join(config.baseDir(), 'configs/haraka'),
+    MAIL_DATA_DIR: path.join(config.baseDir(), 'data/mail'),
 
     COLLECTD_APPCONFIG_DIR: path.join(config.baseDir(), 'configs/collectd/collectd.conf.d'),
 

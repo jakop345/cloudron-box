@@ -162,12 +162,13 @@ function start(callback) {
     assert(typeof callback === 'function');
     assert(gApp === null, 'Server is already up and running.');
 
+    // TODO: move this into setup script instead
     mkdirp.sync(paths.APPICONS_DIR);
     mkdirp.sync(paths.NGINX_APPCONFIG_DIR);
     mkdirp.sync(paths.NGINX_CERT_DIR);
     mkdirp.sync(paths.APPDATA_DIR);
     mkdirp.sync(paths.COLLECTD_APPCONFIG_DIR);
-    mkdirp.sync(paths.HARAKA_CONFIG_DIR);
+    mkdirp.sync(paths.MAIL_DATA_DIR);
 
     initializeExpressSync();
 

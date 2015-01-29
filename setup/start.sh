@@ -15,7 +15,7 @@ readonly USER="yellowtent"
 readonly BOX_SRC_DIR="/home/${USER}/box"
 readonly DATA_DIR="/home/${USER}/data"
 readonly CONFIG_DIR="/home/${USER}/configs"
-readonly MAIL_SERVER_IP="172.17.120.120" # hardcoded in haraka container
+readonly MAIL_SERVER_IP="172.17.120.120" # hardcoded in mail container
 readonly SETUP_PROGRESS_JSON="/home/yellowtent/setup/website/progress.json"
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -93,22 +93,23 @@ fi
 set_progress "30" "Setup collectd and graphite"
 ${script_dir}/start/setup_collectd.sh
 
-set_progress "40" "Setup haraka mail relay"
-docker rm -f haraka || true
-docker pull girish/haraka:0.1 || true # this line is for dev convenience since it's already part of base image
-haraka_container_id=$(docker run --restart=always -d --name="haraka" --cap-add="NET_ADMIN"\
+set_progress "40" "Setup mail relay"
+docker rm -f mail || true
+docker pull girish/mail:0.1 || true # this line is for dev convenience since it's already part of base image
+mail_container_id=$(docker run --restart=always -d --name="mail" --cap-add="NET_ADMIN"\
     -p 127.0.0.1:25:25 \
     -h "${arg_fqdn}" \
     -e "DOMAIN_NAME=${arg_fqdn}" \
-    -v "${CONFIG_DIR}/haraka:/app/data" \
-    girish/haraka:0.1)
-echo "Haraka container id: ${haraka_container_id}"
+    -v "${DATA_DIR}/mail:/app/data" \
+    girish/mail:0.1)
+echo "Mail container id: ${mail_container_id}"
 # Every docker restart results in a new IP. Give our mail server a
 # static IP. Alternately, we need to link the mail container with
 # all our apps
-# This IP is set by the haraka container on every start and the firewall
+# This IP is set by the mail container on every start and the firewall
 # allows connect to port 25. The ping gets the ARP lookup working
-echo "Checking connectivity to haraka(${MAIL_SERVER_IP})"
+echo "Checking connectivity to mail relay (${MAIL_SERVER_IP})"
+arp -d "${MAIL_SERVER_IP}" || true
 if ! ping -c 20 "${MAIL_SERVER_IP}"; then
     echo "Could not connect to mail server"
 fi
@@ -117,26 +118,26 @@ set_progress "50" "Setup MySQL addon"
 docker rm -f mysql || true
 mysql_root_password=$(pwgen -1 -s)
 docker0_ip=$(/sbin/ifconfig docker0 | grep "inet addr" | awk -F: '{print $2}' | awk '{print $1}')
-docker pull girish/mysql:0.1 || true # this line for dev convenience since it's already part of base image
+docker pull girish/mysql:0.2 || true # this line for dev convenience since it's already part of base image
 mysql_container_id=$(docker run --restart=always -d --name="mysql" \
     -p 127.0.0.1:3306:3306 \
     -h "${arg_fqdn}" \
     -e "MYSQL_ROOT_PASSWORD=${mysql_root_password}" \
     -e "MYSQL_ROOT_HOST=${docker0_ip}" \
     -v "${DATA_DIR}/mysql:/var/lib/mysql" \
-    girish/mysql:0.1)
+    girish/mysql:0.2)
 echo "MySQL container id: ${mysql_container_id}"
 
 set_progress "60" "Setup Postgres addon"
 docker rm -f postgresql || true
 postgresql_root_password=$(pwgen -1 -s)
-docker pull girish/postgresql:0.1 || true # this line for dev convenience since it's already part of base image
+docker pull girish/postgresql:0.2 || true # this line for dev convenience since it's already part of base image
 postgresql_container_id=$(docker run --restart=always -d --name="postgresql" \
     -p 127.0.0.1:5432:5432 \
     -h "${arg_fqdn}" \
     -e "POSTGRESQL_ROOT_PASSWORD=${postgresql_root_password}" \
     -v "${DATA_DIR}/postgresql:/var/lib/mysql" \
-    girish/postgresql:0.1)
+    girish/postgresql:0.2)
 echo "PostgreSQL container id: ${postgresql_container_id}"
 
 set_progress "70" "Pulling Redis addon"
