@@ -560,13 +560,13 @@ function install(app, callback) {
         updateApp.bind(null, app, { installationProgress: 'Registering subdomain' }),
         registerSubdomain.bind(null, app),
 
-        // create proxy OAuth credentials
-        updateApp.bind(null, app, { installationProgress: 'Create OAuth credentials' }),
-        allocateOAuthProxyCredentials.bind(null, app),
-
         // download manifest
         updateApp.bind(null, app, { installationProgress: 'Downloading manifest' }),
         downloadManifest.bind(null, app),
+
+        // create proxy OAuth credentials
+        updateApp.bind(null, app, { installationProgress: 'Creating OAuth proxy credentials' }),
+        allocateOAuthProxyCredentials.bind(null, app),
 
         // download the image
         updateApp.bind(null, app, { installationProgress: 'Downloading image' }),
@@ -622,15 +622,14 @@ function restore(app, callback) {
         updateApp.bind(null, app, { installationProgress: 'Registering subdomain' }),
         registerSubdomain.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Remove OAuth credentials' }),
-        removeOAuthProxyCredentials.bind(null, app),
-
-        updateApp.bind(null, app, { installationProgress: 'Create OAuth credentials' }),
-        allocateOAuthProxyCredentials.bind(null, app),
-
         // download manifest FIXME: should we restore to app.version ?
         updateApp.bind(null, app, { installationProgress: 'Downloading manifest' }),
         downloadManifest.bind(null, app),
+
+        // setup oauth proxy
+        updateApp.bind(null, app, { installationProgress: 'Setting up OAuth proxy credentials' }),
+        removeOAuthProxyCredentials.bind(null, app),
+        allocateOAuthProxyCredentials.bind(null, app),
 
         // download the image
         updateApp.bind(null, app, { installationProgress: 'Downloading image' }),
@@ -692,7 +691,7 @@ function configure(app, callback) {
         updateApp.bind(null, app, { installationProgress: 'Registering subdomain' }),
         registerSubdomain.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Create OAuth credentials' }),
+        updateApp.bind(null, app, { installationProgress: 'Create OAuth proxy credentials' }),
         allocateOAuthProxyCredentials.bind(null, app),
 
         // addons like oauth might rely on the app's fqdn
