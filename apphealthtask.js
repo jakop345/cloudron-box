@@ -92,10 +92,11 @@ function checkAppHealth(app, callback) {
         var healthCheckUrl = 'http://127.0.0.1:' + app.httpPort + manifest.healthCheckPath;
         superagent
             .get(healthCheckUrl)
+            .redirects(0)
             .timeout(HEALTHCHECK_INTERVAL)
             .end(function (error, res) {
 
-            if (error || res.status !== 200) {
+            if (error || res.status >= 400) { // 2xx and 3xx are ok
                 debug('app %s is not alive : %s', app.id, error || res.status);
                 setHealth(app, false, appdb.RSTATE_RUNNING, callback);
             } else {
