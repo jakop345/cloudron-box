@@ -69,7 +69,6 @@ function setHealth(app, alive, runState, callback) {
 }
 
 
-// # TODO should probably poll from the outside network instead of the docker network?
 // callback is called with error for fatal errors and not if health check failed
 function checkAppHealth(app, callback) {
     // only check status of installed apps. we could possibly optimize more by checking runState as well
@@ -89,6 +88,7 @@ function checkAppHealth(app, callback) {
             return setHealth(app, false, appdb.RSTATE_DEAD, callback);
         }
 
+        // poll through docker network instead of nginx to bypass any potential oauth proxy
         var healthCheckUrl = 'http://127.0.0.1:' + app.httpPort + manifest.healthCheckPath;
         superagent
             .get(healthCheckUrl)
