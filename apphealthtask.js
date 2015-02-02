@@ -96,7 +96,7 @@ function checkAppHealth(app, callback) {
             .end(function (error, res) {
 
             if (error || res.status !== 200) {
-                debug('app %s is not alive ', app.id);
+                debug('app %s is not alive : %s', app.id, error || res.status);
                 setHealth(app, false, appdb.RSTATE_RUNNING, callback);
             } else {
                 debug('app %s is alive', app.id);
