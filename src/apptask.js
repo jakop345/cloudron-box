@@ -346,7 +346,8 @@ function startContainer(app, callback) {
         var startOptions = {
             Binds: [ appDataDir + ':/app/data:rw' ],
             PortBindings: portBindings,
-            PublishAllPorts: false
+            PublishAllPorts: false,
+            Links: addons.getLinksSync(app)
         };
 
         var container = docker.getContainer(app.containerId);

@@ -20,6 +20,7 @@ exports = module.exports = {
     setupAddons: setupAddons,
     teardownAddons: teardownAddons,
     getEnvironment: getEnvironment,
+    getLinksSync: getLinksSync,
 
     // exported for testing
     _allocateOAuthCredentials: allocateOAuthCredentials,
@@ -98,6 +99,19 @@ function getEnvironment(appId, callback) {
     assert(typeof callback === 'function');
 
     appdb.getAddonConfigByAppId(appId, callback);
+}
+
+function getLinksSync(app) {
+    assert(typeof app === 'object');
+    assert(!app.manifest.addons || util.isArray(app.manifest.addons));
+
+    var links = [ ];
+
+    if (!app.manifest.addons) return links;
+
+    if (app.manifest.addons.indexOf('mysql') !== -1) links.push('mysql:mysql');
+
+    return links;
 }
 
 function allocateOAuthCredentials(app, callback) {
