@@ -14,7 +14,6 @@ var addons = require('../addons.js'),
     DatabaseError = require('../databaseerror.js'),
     expect = require('expect.js'),
     fs = require('fs'),
-    mkdirp = require('mkdirp'),
     net = require('net'),
     nock = require('nock'),
     paths = require('../paths.js');
@@ -36,9 +35,6 @@ var APP = {
 
 describe('apptask', function () {
     before(function (done) {
-        mkdirp.sync(paths.APPDATA_DIR);
-        mkdirp.sync(paths.NGINX_APPCONFIG_DIR);
-
         database.initialize(function (error) {
             expect(error).to.be(null);
             appdb.add(APP.id, APP.appStoreId, APP.location, APP.portBindings, APP.accessRestriction, done);

@@ -33,6 +33,18 @@ set_progress() {
     (echo "{ \"progress\": \"${progress}\", \"message\": \"${message}\" }" > "${SETUP_PROGRESS_JSON}") 2> /dev/null || true # as this will fail in non-update mode
 }
 
+set_progress "1" "Creating directories"
+sudo -u "${USER}" -H bash <<EOF
+set -eux
+# keep these in sync with paths.js
+mkdir -p "${DATA_DIR}/appicons"
+mkdir -p "${DATA_DIR}/appdata"
+mkdir -p "${DATA_DIR}/mail"
+mkdir -p "${CONFIG_DIR}/nginx/applications"
+mkdir -p "${CONFIG_DIR}/nginx/cert"
+mkdir -p "${CONFIG_DIR}/collectd/collectd.conf.d"
+EOF
+
 set_progress "5" "Configuring Sudoers file"
 cat > /etc/sudoers.d/yellowtent <<EOF
 Defaults!${BOX_SRC_DIR}/src/scripts/rmappdir.sh env_keep=HOME

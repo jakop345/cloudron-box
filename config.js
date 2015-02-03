@@ -7,8 +7,7 @@ var path = require('path'),
     safe = require('safetydance'),
     assert = require('assert'),
     _ = require('underscore'),
-    path = require('path'),
-    mkdirp = require('mkdirp');
+    path = require('path');
 
 exports = module.exports = {
     baseDir: baseDir,
@@ -80,7 +79,6 @@ function saveSync() {
         return;
     }
 
-    mkdirp.sync(path.dirname(cloudronConfigFileName));
     saveSync();
 })();
 

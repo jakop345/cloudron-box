@@ -5,6 +5,7 @@
 var config = require('../config.js'),
     path = require('path');
 
+// keep these values in sync with start.sh
 exports = module.exports = {
     NGINX_CONFIG_DIR: path.join(config.baseDir(), 'configs/nginx'),
     NGINX_APPCONFIG_DIR: path.join(config.baseDir(), 'configs/nginx/applications'),

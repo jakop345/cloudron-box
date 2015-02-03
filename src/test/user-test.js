@@ -9,7 +9,6 @@
 var config = require('../../config.js'),
     database = require('../database.js'),
     expect = require('expect.js'),
-    mkdirp = require('mkdirp'),
     paths = require('../paths.js'),
     user = require('../user.js'),
     UserError = user.UserError;

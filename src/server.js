@@ -16,7 +16,6 @@ var apps = require('./apps'),
     HttpSuccess = require('connect-lastmile').HttpSuccess,
     mailer = require('./mailer.js'),
     middleware = require('./middleware'),
-    mkdirp = require('mkdirp'),
     passport = require('passport'),
     path = require('path'),
     paths = require('./paths.js'),
@@ -161,14 +160,6 @@ function initializeExpressSync() {
 function start(callback) {
     assert(typeof callback === 'function');
     assert(gApp === null, 'Server is already up and running.');
-
-    // TODO: move this into setup script instead
-    mkdirp.sync(paths.APPICONS_DIR);
-    mkdirp.sync(paths.NGINX_APPCONFIG_DIR);
-    mkdirp.sync(paths.NGINX_CERT_DIR);
-    mkdirp.sync(paths.APPDATA_DIR);
-    mkdirp.sync(paths.COLLECTD_APPCONFIG_DIR);
-    mkdirp.sync(paths.MAIL_DATA_DIR);
 
     initializeExpressSync();
 

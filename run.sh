@@ -5,15 +5,19 @@ echo "Starting Cloudron at port 443"
 echo
 
 readonly BOX_SRC_DIR="$(cd $(dirname "$0"); pwd)"
-readonly NGINX_ROOT=~/.yellowtent/nginx
 readonly PROVISION_VERSION=0.1
 readonly PROVISION_BOX_VERSIONS_URL=0.1
 readonly DATA_DIR=~/.yellowtent/data
+readonly CONFIG_DIR=~/.yellowtent/configs
+readonly NGINX_ROOT=~/.yellowtent/configs/nginx
 readonly FQDN=admin-localhost
 
 mkdir -p "${NGINX_ROOT}/applications"
 mkdir -p "${NGINX_ROOT}/cert"
-mkdir -p "${DATA_DIR}"
+mkdir -p "${DATA_DIR}/appicons"
+mkdir -p "${DATA_DIR}/appdata"
+mkdir -p "${DATA_DIR}/mail"
+mkdir -p "${CONFIG_DIR}/collectd/collectd.conf.d"
 
 # get the database current
 npm run-script migrate
