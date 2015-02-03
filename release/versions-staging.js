@@ -1,7 +1,0 @@
-{
-    "0.0.1": {
-        "revision": "9f09f8e7a8633e8b3341bb9c610f5f631ccd288c",
-        "imageId": 7531071,
-        "next": null
-    }
-}
