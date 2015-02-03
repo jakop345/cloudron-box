@@ -11,7 +11,7 @@ readonly script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 mkdir -p "${GRAPHITE_DIR}"
 
 docker rm -f graphite || true
-docker pull girish/graphite:0.2
+docker pull girish/graphite:0.2 || true
 docker run --restart=always -d --name="graphite" \
     -p 127.0.0.1:2003:2003 \
     -p 127.0.0.1:2004:2004 \
