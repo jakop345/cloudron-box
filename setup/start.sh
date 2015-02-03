@@ -130,13 +130,16 @@ set_progress "50" "Setup MySQL addon"
 docker rm -f mysql || true
 mysql_root_password=$(pwgen -1 -s)
 docker0_ip=$(/sbin/ifconfig docker0 | grep "inet addr" | awk -F: '{print $2}' | awk '{print $1}')
+cat > "${DATA_DIR}/mysql_vars.sh" <<EOF
+readonly MYSQL_ROOT_PASSWORD='${mysql_root_password}'
+readonly MYSQL_ROOT_HOST='${docker0_ip}'
+EOF
 docker pull girish/mysql:0.2 || true # this line for dev convenience since it's already part of base image
 mysql_container_id=$(docker run --restart=always -d --name="mysql" \
     -p 127.0.0.1:3306:3306 \
     -h "${arg_fqdn}" \
-    -e "MYSQL_ROOT_PASSWORD=${mysql_root_password}" \
-    -e "MYSQL_ROOT_HOST=${docker0_ip}" \
     -v "${DATA_DIR}/mysql:/var/lib/mysql" \
+    -v "${DATA_DIR}/mysql_vars.sh:/etc/mysql/mysql_vars.sh" \
     girish/mysql:0.2)
 echo "MySQL container id: ${mysql_container_id}"
 
