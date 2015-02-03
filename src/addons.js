@@ -110,6 +110,7 @@ function getLinksSync(app) {
     if (!app.manifest.addons) return links;
 
     if (app.manifest.addons.indexOf('mysql') !== -1) links.push('mysql:mysql');
+    if (app.manifest.addons.indexOf('postgresql') !== -1) links.push('postgresql:postgresql');
 
     return links;
 }

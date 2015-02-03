@@ -146,12 +146,15 @@ echo "MySQL container id: ${mysql_container_id}"
 set_progress "60" "Setup Postgres addon"
 docker rm -f postgresql || true
 postgresql_root_password=$(pwgen -1 -s)
+cat > "${DATA_DIR}/postgresql_vars.sh" <<EOF
+readonly POSTGRESQL_ROOT_PASSWORD='${postgresql_root_password}'
+EOF
 docker pull girish/postgresql:0.2 || true # this line for dev convenience since it's already part of base image
 postgresql_container_id=$(docker run --restart=always -d --name="postgresql" \
     -p 127.0.0.1:5432:5432 \
     -h "${arg_fqdn}" \
-    -e "POSTGRESQL_ROOT_PASSWORD=${postgresql_root_password}" \
     -v "${DATA_DIR}/postgresql:/var/lib/mysql" \
+    -v "${DATA_DIR}/postgresql_vars.sh:/etc/postgresql/postgresql_vars.sh" \
     girish/postgresql:0.2)
 echo "PostgreSQL container id: ${postgresql_container_id}"
 
