@@ -16,11 +16,14 @@ var appdb = require('./appdb.js'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
     util = require('util'),
-    uuid = require('node-uuid');
+    uuid = require('node-uuid'),
+    _ = require('underscore');
 
 exports = module.exports = {
     setupAddons: setupAddons,
     teardownAddons: teardownAddons,
+    updateAddons: updateAddons,
+
     getEnvironment: getEnvironment,
     getLinksSync: getLinksSync,
 
@@ -94,6 +97,23 @@ function teardownAddons(app, callback) {
 
         KNOWN_ADDONS[addon].teardown(app, iteratorCallback);
     }, callback);
+}
+
+function updateAddons(app, oldManifest, callback) {
+    assert(typeof app === 'object');
+    assert(typeof oldManifest === 'object');
+    assert(typeof callback === 'function');
+
+    setupAddons(app, function (error) {
+        if (error) return callback(error);
+
+        // teardown the old addons
+        async.eachSeries(_.difference(oldManifest.addons, app.manifest.addons), function iterator(addon, iteratorCallback) {
+            if (!(addon in KNOWN_ADDONS)) return iteratorCallback(new Error('No such addon:' + addon));
+
+            KNOWN_ADDONS[addon].teardown(app, iteratorCallback);
+        }, callback);
+    });
 }
 
 function getEnvironment(appId, callback) {

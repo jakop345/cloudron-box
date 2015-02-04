@@ -638,7 +638,6 @@ function restore(app, callback) {
 
         // setup addons
         updateApp.bind(null, app, { installationProgress: 'Setting up addons' }),
-        addons.teardownAddons.bind(null, app),
         addons.setupAddons.bind(null, app),
 
         // create container (old containers are deleted by update script)
@@ -697,7 +696,6 @@ function configure(app, callback) {
 
         // addons like oauth might rely on the app's fqdn
         updateApp.bind(null, app, { installationProgress: 'Setting up addons' }),
-        addons.teardownAddons.bind(null, app),
         addons.setupAddons.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: 'Creating container' }),
@@ -726,6 +724,8 @@ function configure(app, callback) {
 }
 
 function update(app, callback) {
+    var oldManifest = app.manifest;
+
     async.series([
         updateApp.bind(null, app, { installationProgress: 'Stopping app' }),
         stopApp.bind(null, app),
@@ -733,17 +733,14 @@ function update(app, callback) {
         updateApp.bind(null, app, { installationProgress: 'Deleting container' }),
         deleteContainer.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Tearing down addons' }),
-        addons.teardownAddons.bind(null, app), // tear down addons based on old manifest file
-
         updateApp.bind(null, app, { installationProgress: 'Downloading manifest' }),
         downloadManifest.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: 'Downloading image' }),
         downloadImage.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Setting up addons' }),
-        addons.setupAddons.bind(null, app),
+        updateApp.bind(null, app, { installationProgress: 'Updating addons' }),
+        addons.updateAddons.bind(null, app, oldManifest),
 
         updateApp.bind(null, app, { installationProgress: 'Creating container' }),
         createContainer.bind(null, app),
