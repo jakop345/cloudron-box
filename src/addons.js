@@ -9,6 +9,7 @@ var appdb = require('./appdb.js'),
     DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:addons'),
     docker = require('./docker.js'),
+    execFile = child_process.execFile,
     generatePassword = require('password-generator'),
     MemoryStream = require('memorystream'),
     os = require('os'),
@@ -55,6 +56,9 @@ var KNOWN_ADDONS = {
         teardown: teardownRedis
     }
 };
+
+var SUDO = '/usr/bin/sudo',
+    RMAPPDIR_CMD = path.join(__dirname, 'scripts/rmappdir.sh');
 
 function setupAddons(app, callback) {
     assert(typeof app === 'object');
@@ -306,13 +310,32 @@ function teardownPostgreSql(app, callback) {
     });
 }
 
+function forwardRedisPort(appId, callback) {
+    assert(typeof appId === 'string');
+    assert(typeof callback === 'function');
+
+    docker.getContainer('redis-' + appId).inspect(function (error, data) {
+        if (error) return callback(new Error('Unable to inspect container:' + error));
+
+        var redisPort = safe.query(data, 'NetworkSettings.Ports.6379/tcp[0].HostPort');
+        if (!redisPort) return callback(new Error('Unable to get container port mapping'));
+
+        vbox.forwardFromHostToVirtualBox('redis-' + appId, redisPort);
+
+        return callback(null);
+    });
+}
+
 function setupRedis(app, callback) {
     var redisPassword = generatePassword(64, false /* memorable */);
     var redisVarsFile = path.join(paths.ADDON_CONFIG_DIR, 'redis-' + app.id + '_vars.sh');
+    var redisDataDir = path.join(paths.DATA_DIR, 'redis-' + app.id);
 
     if (!safe.fs.writeFileSync(redisVarsFile, 'REDIS_PASSWORD=' + redisPassword)) {
         return callback(new Error('Error writing redis config'));
     }
+
+    if (!safe.fs.mkdirSync(redisDataDir) && safe.error.code !== 'EEXIST') return callback(new Error('Error creating redis data dir:' + safe.error));
 
     var createOptions = {
         name: 'redis-' + app.id,
@@ -327,7 +350,10 @@ function setupRedis(app, callback) {
     var isMac = os.platform() === 'darwin';
 
     var startOptions = {
-        Binds: [ redisVarsFile + ':/etc/redis/redis_vars.sh:r' ],
+        Binds: [
+            redisVarsFile + ':/etc/redis/redis_vars.sh:r',
+            redisDataDir + ':/var/lib/redis:rw'
+        ],
         // On Mac (boot2docker), we have to export the port to external world for port forwarding from Mac to work
         // On linux, export to localhost only for testing purposes and not for the app itself
         PortBindings: {
@@ -335,31 +361,21 @@ function setupRedis(app, callback) {
         },
     };
 
-    // docker.run does not return until the container ends :/
-    docker.createContainer(createOptions, function (error, container) {
-        if (error) return callback(new Error('Error creating container:' + error));
+    var env = [ 'REDIS_URL=redis://redisuser:' + redisPassword + '@redis-' + app.id + ':6379' ];
 
-        debug('Created redis container for %s with id %s', app.id, container.id);
+    var redisContainer = docker.getContainer(createOptions.name);
 
-        container.start(startOptions, function (error) {
-            if (error) return callback(new Error('Error starting container:' + error));
+    async.series([
+        teardownRedis.bind(null, app),
 
-            debug('Started redis container for %s with id %s', app.id, container.id);
+        docker.createContainer.bind(docker, createOptions),
 
-            container.inspect(function (error, data) {
-                if (error) return callback(new Error('Unable to inspect container:' + error));
+        redisContainer.start.bind(redisContainer, startOptions),
 
-                var redisPort = safe.query(data, 'NetworkSettings.Ports.6379/tcp[0].HostPort');
-                if (!redisPort) return callback(new Error('Unable to get container port mapping'));
+        appdb.setAddonConfig.bind(null, app.id, 'redis', env),
 
-                vbox.forwardFromHostToVirtualBox('redis-' + app.id, redisPort);
-
-                var env = [ 'REDIS_URL=redis://redisuser:' + redisPassword + '@redis-' + app.id + ':6379' ];
-
-                appdb.setAddonConfig(app.id, 'redis', env, callback);
-            });
-        });
-    });
+        forwardRedisPort.bind(null, app.id)
+    ], callback);
 }
 
 function teardownRedis(app, callback) {
@@ -378,7 +394,11 @@ function teardownRedis(app, callback) {
 
        safe.fs.unlinkSync(paths.ADDON_CONFIG_DIR, 'redis-' + app.id + '_vars.sh');
 
-       callback(null);
+        execFile(SUDO, [ RMAPPDIR_CMD, 'redis-' + app.id ], { }, function (error, stdout, stderr) {
+            if (error) return callback(new Error('Error removing redis data:' + error));
+
+            appdb.unsetAddonConfig(app.id, 'redis', callback);
+        });
    });
 }
 

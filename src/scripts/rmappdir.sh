@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# This script exists because docker mounted data volumes can have files with arbitrary
+# permissions. The box code runs as normal user and thus cannot delete those files. This
+# hack can be removed once docker supports user namespaces
+
 set -eu
 
 if [[ ${EUID} -ne 0 ]]; then
@@ -17,8 +21,8 @@ if [[ "$1" == "--check" ]]; then
     exit 0
 fi
 
-readonly APPDATA="${HOME}/data/appdata"
-readonly APPDATA_TEST="${HOME}/.yellowtenttest/data/appdata"
+readonly DATA="${HOME}/data"
+readonly DATA_TEST="${HOME}/.yellowtenttest/data"
 
-rm -rf "${APPDATA}/$1"
-rm -rf "${APPDATA_TEST}/$1"
+rm -rf "${DATA}/$1"
+rm -rf "${DATA_TEST}/$1"

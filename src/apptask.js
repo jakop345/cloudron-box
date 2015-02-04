@@ -260,7 +260,7 @@ function createVolume(app, callback) {
 }
 
 function deleteVolume(app, callback) {
-    execFile(SUDO, [ RMAPPDIR_CMD, app.id ], { }, function (error, stdout, stderr) {
+    execFile(SUDO, [ RMAPPDIR_CMD, 'appdata/' + app.id ], { }, function (error, stdout, stderr) {
         if (error) console.error('Error removing volume', error, stdout, stderr);
         return callback(error);
     });
