@@ -303,7 +303,7 @@ function teardownPostgreSql(app, callback) {
 
 function setupRedis(app, callback) {
     var redisPassword = generatePassword(64, false /* memorable */);
-    var redisVarsFile = path.join(paths.DATA_DIR, 'redis-' + app.id + '_vars.sh');
+    var redisVarsFile = path.join(paths.ADDON_CONFIG_DIR, 'redis-' + app.id + '_vars.sh');
 
     if (!safe.fs.writeFileSync(redisVarsFile, 'REDIS_PASSWORD=' + redisPassword)) {
         return callback(new Error('Error writing redis config'));
@@ -371,7 +371,7 @@ function teardownRedis(app, callback) {
 
        unforwardFromHostToVirtualBox('redis-' + app.id);
 
-       safe.fs.unlinkSync(paths.DATA_DIR, 'redis-' + app.id + '_vars.sh');
+       safe.fs.unlinkSync(paths.ADDON_CONFIG_DIR, 'redis-' + app.id + '_vars.sh');
 
        callback(null);
    });

@@ -39,6 +39,7 @@ set -eux
 mkdir -p "${DATA_DIR}/appicons"
 mkdir -p "${DATA_DIR}/appdata"
 mkdir -p "${DATA_DIR}/mail"
+mkdir -p "${CONFIG_DIR}/addons"
 mkdir -p "${CONFIG_DIR}/nginx/applications"
 mkdir -p "${CONFIG_DIR}/nginx/cert"
 mkdir -p "${CONFIG_DIR}/collectd/collectd.conf.d"
@@ -119,7 +120,7 @@ set_progress "50" "Setup MySQL addon"
 docker rm -f mysql || true
 mysql_root_password=$(pwgen -1 -s)
 docker0_ip=$(/sbin/ifconfig docker0 | grep "inet addr" | awk -F: '{print $2}' | awk '{print $1}')
-cat > "${DATA_DIR}/mysql_vars.sh" <<EOF
+cat > "${CONFIG_DIR}/addons/mysql_vars.sh" <<EOF
 readonly MYSQL_ROOT_PASSWORD='${mysql_root_password}'
 readonly MYSQL_ROOT_HOST='${docker0_ip}'
 EOF
@@ -128,14 +129,14 @@ mysql_container_id=$(docker run --restart=always -d --name="mysql" \
     -p 127.0.0.1:3306:3306 \
     -h "${arg_fqdn}" \
     -v "${DATA_DIR}/mysql:/var/lib/mysql" \
-    -v "${DATA_DIR}/mysql_vars.sh:/etc/mysql/mysql_vars.sh" \
+    -v "${CONFIG_DIR}/addons/mysql_vars.sh:/etc/mysql/mysql_vars.sh" \
     girish/mysql:0.2)
 echo "MySQL container id: ${mysql_container_id}"
 
 set_progress "60" "Setup Postgres addon"
 docker rm -f postgresql || true
 postgresql_root_password=$(pwgen -1 -s)
-cat > "${DATA_DIR}/postgresql_vars.sh" <<EOF
+cat > "${CONFIG_DIR}/addons/postgresql_vars.sh" <<EOF
 readonly POSTGRESQL_ROOT_PASSWORD='${postgresql_root_password}'
 EOF
 docker pull girish/postgresql:0.2 || true # this line for dev convenience since it's already part of base image
@@ -143,7 +144,7 @@ postgresql_container_id=$(docker run --restart=always -d --name="postgresql" \
     -p 127.0.0.1:5432:5432 \
     -h "${arg_fqdn}" \
     -v "${DATA_DIR}/postgresql:/var/lib/mysql" \
-    -v "${DATA_DIR}/postgresql_vars.sh:/etc/postgresql/postgresql_vars.sh" \
+    -v "${CONFIG_DIR}/addons/postgresql_vars.sh:/etc/postgresql/postgresql_vars.sh" \
     girish/postgresql:0.2)
 echo "PostgreSQL container id: ${postgresql_container_id}"
 

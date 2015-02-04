@@ -86,7 +86,7 @@
     "sinon": "~1.10.3"
   },
   "scripts": {
-    "create_testdir": "rm -rf $HOME/.yellowtenttest/*; cd $HOME/.yellowtenttest; mkdir -p data/appdata data/appicons data/mail configs/nginx/cert configs/nginx/applications configs/collectd/collectd.conf.d",
+    "create_testdir": "rm -rf $HOME/.yellowtenttest/*; cd $HOME/.yellowtenttest; mkdir -p data/appdata data/appicons data/mail configs/nginx/cert configs/nginx/applications configs/collectd/collectd.conf.d configs/addons",
     "create_testdb": "NODE_ENV=test DATABASE_URL=sqlite3:///$HOME/.yellowtenttest/data/cloudron.sqlite node_modules/.bin/db-migrate up",
     "migrate": "mkdir -p $HOME/.yellowtent/data; DATABASE_URL=sqlite3:///$HOME/.yellowtent/data/cloudron.sqlite node_modules/.bin/db-migrate up",
     "migrate_data": "DATABASE_URL=sqlite3:///home/yellowtent/data/cloudron.sqlite db-migrate up",
