@@ -80,10 +80,10 @@ function processQueue() {
             port: 25
         }));
 
-        debug('Processing mail queue of size %d', mailQueueCopy.length);
-
         var mailQueueCopy = gMailQueue;
         gMailQueue = [ ];
+
+        debug('Processing mail queue of size %d', mailQueueCopy.length);
 
         async.mapSeries(mailQueueCopy, function iterator(mailOptions, callback) {
             transport.sendMail(mailOptions, function (error, info) {
