@@ -129,7 +129,7 @@ mysql_container_id=$(docker run --restart=always -d --name="mysql" \
     -p 127.0.0.1:3306:3306 \
     -h "${arg_fqdn}" \
     -v "${DATA_DIR}/mysql:/var/lib/mysql" \
-    -v "${CONFIG_DIR}/addons/mysql_vars.sh:/etc/mysql/mysql_vars.sh" \
+    -v "${CONFIG_DIR}/addons/mysql_vars.sh:/etc/mysql/mysql_vars.sh:r" \
     girish/mysql:0.2)
 echo "MySQL container id: ${mysql_container_id}"
 
@@ -144,7 +144,7 @@ postgresql_container_id=$(docker run --restart=always -d --name="postgresql" \
     -p 127.0.0.1:5432:5432 \
     -h "${arg_fqdn}" \
     -v "${DATA_DIR}/postgresql:/var/lib/mysql" \
-    -v "${CONFIG_DIR}/addons/postgresql_vars.sh:/etc/postgresql/postgresql_vars.sh" \
+    -v "${CONFIG_DIR}/addons/postgresql_vars.sh:/etc/postgresql/postgresql_vars.sh:r" \
     girish/postgresql:0.2)
 echo "PostgreSQL container id: ${postgresql_container_id}"
 
