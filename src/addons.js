@@ -17,6 +17,7 @@ var appdb = require('./appdb.js'),
     safe = require('safetydance'),
     util = require('util'),
     uuid = require('node-uuid'),
+    vbox = require('./vbox.js'),
     _ = require('underscore');
 
 exports = module.exports = {
@@ -54,22 +55,6 @@ var KNOWN_ADDONS = {
         teardown: teardownRedis
     }
 };
-
-function forwardFromHostToVirtualBox(rulename, port) {
-    if (os.platform() === 'darwin') {
-        debug('Setting up VirtualBox port forwarding for '+ rulename + ' at ' + port);
-        child_process.exec(
-            'VBoxManage controlvm boot2docker-vm natpf1 delete ' + rulename + ';' +
-            'VBoxManage controlvm boot2docker-vm natpf1 ' + rulename + ',tcp,127.0.0.1,' + port + ',,' + port);
-    }
-}
-
-function unforwardFromHostToVirtualBox(rulename) {
-    if (os.platform() === 'darwin') {
-        debug('Removing VirtualBox port forwarding for '+ rulename);
-        child_process.exec('VBoxManage controlvm boot2docker-vm natpf1 delete ' + rulename);
-    }
-}
 
 function setupAddons(app, callback) {
     assert(typeof app === 'object');
@@ -367,7 +352,7 @@ function setupRedis(app, callback) {
                 var redisPort = safe.query(data, 'NetworkSettings.Ports.6379/tcp[0].HostPort');
                 if (!redisPort) return callback(new Error('Unable to get container port mapping'));
 
-                forwardFromHostToVirtualBox('redis-' + app.id, redisPort);
+                vbox.forwardFromHostToVirtualBox('redis-' + app.id, redisPort);
 
                 var env = [ 'REDIS_URL=redis://redisuser:' + redisPassword + '@redis-' + app.id + ':6379' ];
 
@@ -389,7 +374,7 @@ function teardownRedis(app, callback) {
        if (error && error.statusCode === 404) return callback(null);
        if (error) return callback(new Error('Error removing container:' + error));
 
-       unforwardFromHostToVirtualBox('redis-' + app.id);
+       vbox.unforwardFromHostToVirtualBox('redis-' + app.id);
 
        safe.fs.unlinkSync(paths.ADDON_CONFIG_DIR, 'redis-' + app.id + '_vars.sh');
 

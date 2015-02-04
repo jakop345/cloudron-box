@@ -29,7 +29,8 @@ var addons = require('./addons.js'),
     safe = require('safetydance'),
     superagent = require('superagent'),
     util = require('util'),
-    uuid = require('node-uuid');
+    uuid = require('node-uuid'),
+    vbox = require('./vbox.js');
 
 exports = module.exports = {
     initialize: initialize,
@@ -73,22 +74,6 @@ function getFreePort(callback) {
     });
 }
 
-function forwardFromHostToVirtualBox(rulename, port) {
-    if (os.platform() === 'darwin') {
-        debug('Setting up VirtualBox port forwarding for '+ rulename + ' at ' + port);
-        child_process.exec(
-            'VBoxManage controlvm boot2docker-vm natpf1 delete ' + rulename + ';' +
-            'VBoxManage controlvm boot2docker-vm natpf1 ' + rulename + ',tcp,127.0.0.1,' + port + ',,' + port);
-    }
-}
-
-function unforwardFromHostToVirtualBox(rulename) {
-    if (os.platform() === 'darwin') {
-        debug('Removing VirtualBox port forwarding for '+ rulename);
-        child_process.exec('VBoxManage controlvm boot2docker-vm natpf1 delete ' + rulename);
-    }
-}
-
 function reloadNginx(callback) {
     execFile(SUDO, [ RELOAD_NGINX_CMD ], { timeout: 10000 }, callback);
 }
@@ -111,7 +96,7 @@ function configureNginx(app, callback) {
                 updateApp(app, { httpPort: freePort }, callback);
             });
 
-            forwardFromHostToVirtualBox(app.id + '-http', freePort);
+            vbox.forwardFromHostToVirtualBox(app.id + '-http', freePort);
         });
     });
 }
@@ -125,7 +110,7 @@ function unconfigureNginx(app, callback) {
 
     exports._reloadNginx(callback);
 
-    unforwardFromHostToVirtualBox(app.id + '-http');
+    vbox.unforwardFromHostToVirtualBox(app.id + '-http');
 }
 
 function setNakedDomain(app, callback) {
@@ -340,7 +325,7 @@ function startContainer(app, callback) {
         for (var containerPort in manifest.tcpPorts) {
             if (!(containerPort in portConfigs)) continue;
             portBindings[containerPort + '/tcp'] = [ { HostPort: portConfigs[containerPort] } ];
-            forwardFromHostToVirtualBox(app.id + '-tcp' + containerPort, portConfigs[containerPort]);
+            vbox.forwardFromHostToVirtualBox(app.id + '-tcp' + containerPort, portConfigs[containerPort]);
         }
 
         var startOptions = {
@@ -373,7 +358,7 @@ function stopContainer(app, callback) {
         if (error && (error.statusCode !== 304 && error.statusCode !== 404)) return callback(new Error('Error stopping container:' + error));
 
         for (var containerPort in app.manifest.tcpPorts) {
-            unforwardFromHostToVirtualBox(app.id + '-tcp' + containerPort);
+            vbox.unforwardFromHostToVirtualBox(app.id + '-tcp' + containerPort);
         }
 
         return callback(null);
