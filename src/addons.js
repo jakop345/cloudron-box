@@ -12,6 +12,8 @@ var appdb = require('./appdb.js'),
     generatePassword = require('password-generator'),
     MemoryStream = require('memorystream'),
     os = require('os'),
+    path = require('path'),
+    paths = require('./paths.js'),
     safe = require('safetydance'),
     util = require('util'),
     uuid = require('node-uuid');
@@ -109,9 +111,15 @@ function getLinksSync(app) {
 
     if (!app.manifest.addons) return links;
 
-    if (app.manifest.addons.indexOf('mysql') !== -1) links.push('mysql:mysql');
-    if (app.manifest.addons.indexOf('postgresql') !== -1) links.push('postgresql:postgresql');
-    if (app.manifest.addons.indexOf('sendmail') !== -1) links.push('mail:mail');
+    for (var i = 0; i < app.manifest.addons.length; i++) {
+        switch (app.manifest.addons[i]) {
+        case 'mysql': links.push('mysql:mysql'); break;
+        case 'postgresql': links.push('postgresql:postgresql'); break;
+        case 'sendmail': links.push('mail:mail'); break;
+        case 'redis': links.push('redis-' + app.id + ':redis-' + app.id); break;
+        default: break;
+        }
+    }
 
     return links;
 }
@@ -295,27 +303,31 @@ function teardownPostgreSql(app, callback) {
 
 function setupRedis(app, callback) {
     var redisPassword = generatePassword(64, false /* memorable */);
+    var redisVarsFile = path.join(paths.DATA_DIR, 'redis-' + app.id + '_vars.sh');
+
+    if (!safe.fs.writeFileSync(redisVarsFile, 'REDIS_PASSWORD=' + redisPassword)) {
+        return callback(new Error('Error writing redis config'));
+    }
 
     var createOptions = {
         name: 'redis-' + app.id,
         Hostname: config.appFqdn(app.location),
         Tty: true,
-        Image: 'girish/redis:0.1',
+        Image: 'girish/redis:0.2',
         Cmd: null,
         Volumes: { },
-        VolumesFrom: '',
-        Env: [ 'REDIS_PASSWORD=' + redisPassword ]
+        VolumesFrom: ''
     };
 
     var isMac = os.platform() === 'darwin';
 
     var startOptions = {
-        Binds: [ ],
+        Binds: [ redisVarsFile + ':/etc/redis/redis_vars.sh:r' ],
         // On Mac (boot2docker), we have to export the port to external world for port forwarding from Mac to work
         // On linux, export to localhost only for testing purposes and not for the app itself
         PortBindings: {
             '6379/tcp': [{ HostPort: '0', HostIp: isMac ? '0.0.0.0' : '127.0.0.1' }]
-        }
+        },
     };
 
     // docker.run does not return until the container ends :/
@@ -332,15 +344,12 @@ function setupRedis(app, callback) {
             container.inspect(function (error, data) {
                 if (error) return callback(new Error('Unable to inspect container:' + error));
 
-                var redisIp = safe.query(data, 'NetworkSettings.IPAddress');
-                if (!redisIp) return callback(new Error('Unable to get container ip'));
- 
                 var redisPort = safe.query(data, 'NetworkSettings.Ports.6379/tcp[0].HostPort');
                 if (!redisPort) return callback(new Error('Unable to get container port mapping'));
 
                 forwardFromHostToVirtualBox('redis-' + app.id, redisPort);
 
-                var env = [ 'REDIS_URL=redis://redisuser:' + redisPassword + '@' + redisIp + ':6379' ];
+                var env = [ 'REDIS_URL=redis://redisuser:' + redisPassword + '@redis-' + app.id + ':6379' ];
 
                 appdb.setAddonConfig(app.id, 'redis', env, callback);
             });
@@ -361,6 +370,8 @@ function teardownRedis(app, callback) {
        if (error) return callback(new Error('Error removing container:' + error));
 
        unforwardFromHostToVirtualBox('redis-' + app.id);
+
+       safe.fs.unlinkSync(paths.DATA_DIR, 'redis-' + app.id + '_vars.sh');
 
        callback(null);
    });

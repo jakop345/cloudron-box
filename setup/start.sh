@@ -148,7 +148,7 @@ postgresql_container_id=$(docker run --restart=always -d --name="postgresql" \
 echo "PostgreSQL container id: ${postgresql_container_id}"
 
 set_progress "70" "Pulling Redis addon"
-docker pull girish/redis:0.1 || true # this line for dev convenience since it's already part of base image
+docker pull girish/redis:0.2 || true # this line for dev convenience since it's already part of base image
 
 set_progress "80" "Creating cloudron.conf"
 cloudron_sqlite="${DATA_DIR}/cloudron.sqlite"
