@@ -32,8 +32,8 @@ if ! docker inspect girish/test:0.6 >/dev/null 2>/dev/null; then
     exit 1
 fi
 
-if ! docker inspect girish/redis:0.1 >/dev/null 2>/dev/null; then
-    echo "docker pull girish/redis:0.1 for tests to run"
+if ! docker inspect girish/redis:0.2 >/dev/null 2>/dev/null; then
+    echo "docker pull girish/redis:0.2 for tests to run"
     exit 1
 fi
 
