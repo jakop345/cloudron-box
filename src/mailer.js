@@ -8,6 +8,7 @@ var assert = require('assert'),
     config = require('../config.js'),
     debug = require('debug')('box:mailer'),
     digitalocean = require('./digitalocean.js'),
+    docker = require('./docker.js'),
     ejs = require('ejs'),
     nodemailer = require('nodemailer'),
     path = require('path'),
@@ -29,11 +30,6 @@ exports = module.exports = {
 };
 
 var MAIL_TEMPLATES_DIR = path.join(__dirname, 'mail_templates');
-
-var gTransport = nodemailer.createTransport(smtpTransport({
-    host: config.get('mailServer'),
-    port: 25
-}));
 
 var gMailQueue = [ ],
     gDnsReady = false,
@@ -73,23 +69,35 @@ function checkDns() {
 }
 
 function processQueue() {
-    var mailQueueCopy = gMailQueue;
-    gMailQueue = [ ];
+    docker.getContainer('mail').inspect(function (error, data) {
+        if (error) return console.error(error);
 
-    debug('Processing mail queue of size %d', mailQueueCopy.length);
+        var mailServerIp = safe.query(data, 'NetworkSettings.IPAddress');
+        if (!mailServerIp) return debug('Error querying mail server IP');
 
-    async.mapSeries(mailQueueCopy, function iterator(mailOptions, callback) {
-        gTransport.sendMail(mailOptions, function (error, info) {
-            if (error) {
-                if (config.LOCAL) debug('Print email in local mode:', mailOptions);
-                return console.error(error);
-            }
+        var transport = nodemailer.createTransport(smtpTransport({
+            host: mailServerIp,
+            port: 25
+        }));
 
-            debug('Email sent to ' + mailOptions.to);
+        debug('Processing mail queue of size %d', mailQueueCopy.length);
+
+        var mailQueueCopy = gMailQueue;
+        gMailQueue = [ ];
+
+        async.mapSeries(mailQueueCopy, function iterator(mailOptions, callback) {
+            transport.sendMail(mailOptions, function (error, info) {
+                if (error) { // TODO: requeue?
+                    if (config.LOCAL) debug('Print email in local mode:', mailOptions);
+                    return console.error(error);
+                }
+
+                debug('Email sent to ' + mailOptions.to);
+            });
+            callback(null);
+        }, function done() {
+            debug('Done processing mail queue');
         });
-        callback(null);
-    }, function done() {
-        debug('Done processing mail queue');
     });
 }
 

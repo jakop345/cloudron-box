@@ -111,6 +111,7 @@ function getLinksSync(app) {
 
     if (app.manifest.addons.indexOf('mysql') !== -1) links.push('mysql:mysql');
     if (app.manifest.addons.indexOf('postgresql') !== -1) links.push('postgresql:postgresql');
+    if (app.manifest.addons.indexOf('sendmail') !== -1) links.push('mail:mail');
 
     return links;
 }
@@ -160,7 +161,7 @@ function setupSendMail(app, callback) {
     assert(typeof callback === 'function');
 
     var env = [
-        'MAIL_SMTP_SERVER=' + config.get('mailServer'),
+        'MAIL_SMTP_SERVER=mail',
         'MAIL_SMTP_PORT=25',
         'MAIL_SMTP_USERNAME=' + app.location,
         'MAIL_DOMAIN=' + config.fqdn()

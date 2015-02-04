@@ -15,7 +15,6 @@ readonly USER="yellowtent"
 readonly BOX_SRC_DIR="/home/${USER}/box"
 readonly DATA_DIR="/home/${USER}/data"
 readonly CONFIG_DIR="/home/${USER}/configs"
-readonly MAIL_SERVER_IP="172.17.120.120" # hardcoded in mail container
 readonly SETUP_PROGRESS_JSON="/home/yellowtent/setup/website/progress.json"
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -107,24 +106,14 @@ ${script_dir}/start/setup_collectd.sh
 
 set_progress "40" "Setup mail relay"
 docker rm -f mail || true
-docker pull girish/mail:0.1 || true # this line is for dev convenience since it's already part of base image
-mail_container_id=$(docker run --restart=always -d --name="mail" --cap-add="NET_ADMIN"\
+docker pull girish/mail:0.2 || true # this line is for dev convenience since it's already part of base image
+mail_container_id=$(docker run --restart=always -d --name="mail" \
     -p 127.0.0.1:25:25 \
     -h "${arg_fqdn}" \
     -e "DOMAIN_NAME=${arg_fqdn}" \
     -v "${DATA_DIR}/mail:/app/data" \
-    girish/mail:0.1)
+    girish/mail:0.2)
 echo "Mail container id: ${mail_container_id}"
-# Every docker restart results in a new IP. Give our mail server a
-# static IP. Alternately, we need to link the mail container with
-# all our apps
-# This IP is set by the mail container on every start and the firewall
-# allows connect to port 25. The ping gets the ARP lookup working
-echo "Checking connectivity to mail relay (${MAIL_SERVER_IP})"
-arp -d "${MAIL_SERVER_IP}" || true
-if ! ping -c 20 "${MAIL_SERVER_IP}"; then
-    echo "Could not connect to mail server"
-fi
 
 set_progress "50" "Setup MySQL addon"
 docker rm -f mysql || true
@@ -175,7 +164,6 @@ cat > "${CONFIG_DIR}/cloudron.conf" <<CONF_END
     "fqdn": "${arg_fqdn}",
     "isCustomDomain": ${arg_is_custom_domain},
     "boxVersionsUrl": "${arg_box_versions_url}",
-    "mailServer": "${MAIL_SERVER_IP}",
     "mailUsername": "admin@${arg_fqdn}",
     "addons": {
         "mysql": {
