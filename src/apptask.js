@@ -193,6 +193,7 @@ function createContainer(app, callback) {
             if (error) return callback(new Error('Error getting addon env:', + error));
 
             var containerOptions = {
+                name: app.id,
                 Hostname: config.appFqdn(app.location),
                 Tty: true,
                 Image: manifest.dockerImage,
