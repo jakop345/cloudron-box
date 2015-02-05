@@ -333,7 +333,11 @@ function startContainer(app, callback) {
             Binds: [ appDataDir + ':/app/data:rw' ],
             PortBindings: portBindings,
             PublishAllPorts: false,
-            Links: addons.getLinksSync(app)
+            Links: addons.getLinksSync(app),
+            RestartPolicy: {
+                "Name": "on-failure",
+                "MaximumRetryCount": 100
+            }
         };
 
         var container = docker.getContainer(app.containerId);
