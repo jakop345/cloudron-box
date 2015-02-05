@@ -363,19 +363,23 @@ function setAddonConfig(appId, addonId, env, callback) {
     assert(util.isArray(env));
     assert(typeof callback === 'function');
 
-    if (env.length === 0) return callback(null);
+    unsetAddonConfig(appId, addonId, function (error) {
+        if (error) return callback(error);
 
-    var query = 'INSERT INTO appAddonConfigs(appId, addonId, value) VALUES ';
-    var args = [ ], queryArgs = [ ];
-    for (var i = 0; i < env.length; i++) {
-        args.push(appId, addonId, env[i]);
-        queryArgs.push('(?, ?, ?)');
-    }
+        if (env.length === 0) return callback(null);
 
-    database.run(query + queryArgs.join(','), args, function (error) {
-        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        var query = 'INSERT INTO appAddonConfigs(appId, addonId, value) VALUES ';
+        var args = [ ], queryArgs = [ ];
+        for (var i = 0; i < env.length; i++) {
+            args.push(appId, addonId, env[i]);
+            queryArgs.push('(?, ?, ?)');
+        }
 
-        return callback(null);
+        database.run(query + queryArgs.join(','), args, function (error) {
+            if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+
+            return callback(null);
+        });
     });
 }
 
