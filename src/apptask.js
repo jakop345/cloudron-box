@@ -628,7 +628,7 @@ function restore(app, callback) {
 
         // setup addons
         updateApp.bind(null, app, { installationProgress: 'Setting up addons' }),
-        addons.setupAddons.bind(null, app),
+        addons.updateAddons.bind(null, app),
 
         // create container (old containers are deleted by update script)
         updateApp.bind(null, app, { installationProgress: 'Creating container' }),
