@@ -368,18 +368,21 @@ function setupRedis(app, callback) {
     var env = [ 'REDIS_URL=redis://redisuser:' + redisPassword + '@redis-' + app.id + ':6379' ];
 
     var redisContainer = docker.getContainer(createOptions.name);
+    redisContainer.remove({ force: true, v: false }, function (ignoredError) {
+        docker.createContainer(createOptions, function (error) {
+            if (error && error.statusCode !== 409) return callback(error); // if not already created
 
-    async.series([
-        teardownRedis.bind(null, app),
+            redisContainer.start(startOptions, function (error) {
+                if (error && error.statusCode !== 304) return callback(error); // if not already running
 
-        docker.createContainer.bind(docker, createOptions),
+                appdb.setAddonConfig(app.id, 'redis', env, function (error) {
+                    if (error) return callback(error);
 
-        redisContainer.start.bind(redisContainer, startOptions),
-
-        appdb.setAddonConfig.bind(null, app.id, 'redis', env),
-
-        forwardRedisPort.bind(null, app.id)
-    ], callback);
+                    forwardRedisPort(app.id, callback);
+                });
+            });
+        });
+    });
 }
 
 function teardownRedis(app, callback) {
