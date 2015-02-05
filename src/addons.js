@@ -359,7 +359,10 @@ function setupRedis(app, callback) {
         PortBindings: {
             '6379/tcp': [{ HostPort: '0', HostIp: isMac ? '0.0.0.0' : '127.0.0.1' }]
         },
-        RestartPolicy: 'always'
+        RestartPolicy: {
+            'Name': 'always',
+            'MaximumRetryCount': 0
+        }
     };
 
     var env = [ 'REDIS_URL=redis://redisuser:' + redisPassword + '@redis-' + app.id + ':6379' ];
