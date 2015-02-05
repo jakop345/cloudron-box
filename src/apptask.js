@@ -600,6 +600,8 @@ function install(app, callback) {
 }
 
 function restore(app, callback) {
+    var oldManifest = app.manifest;
+
     async.series([
         // unconfigure nginx in case of FQDN change
         updateApp.bind(null, app, { installationProgress: 'Unconfiguring nginx' }),
@@ -628,7 +630,7 @@ function restore(app, callback) {
 
         // setup addons
         updateApp.bind(null, app, { installationProgress: 'Setting up addons' }),
-        addons.updateAddons.bind(null, app),
+        addons.updateAddons.bind(null, app, oldManifest),
 
         // create container (old containers are deleted by update script)
         updateApp.bind(null, app, { installationProgress: 'Creating container' }),
