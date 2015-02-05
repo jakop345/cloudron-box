@@ -326,6 +326,7 @@ function forwardRedisPort(appId, callback) {
     });
 }
 
+// Ensures that app's addon redis container is running. Can be called when named container already exists/running
 function setupRedis(app, callback) {
     var redisPassword = generatePassword(64, false /* memorable */);
     var redisVarsFile = path.join(paths.ADDON_CONFIG_DIR, 'redis-' + app.id + '_vars.sh');
