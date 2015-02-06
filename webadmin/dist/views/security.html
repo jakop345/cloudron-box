@@ -10,11 +10,11 @@
         <div class="panel-group" id="accordion">
             <div class="panel panel-default" ng-repeat="client in activeClients">
                 <div class="panel-heading">
-                    <h4 class="panel-title" data-toggle="collapse" data-parent="#accordion" data-target="#collapse{{client.clientId}}" style="cursor: pointer;">
+                    <h4 class="panel-title" data-toggle="collapse" data-parent="#accordion" data-target="#collapse{{client.id}}" style="cursor: pointer;">
                         {{client.name}}
                     </h4>
                 </div>
-                <div id="collapse{{client.clientId}}" class="panel-collapse collapse">
+                <div id="collapse{{client.id}}" class="panel-collapse collapse">
                     <div class="panel-body">
                         <h4>Details</h4>
                         <p>Permissions: <b>{{ client.scope }}</b></p>
