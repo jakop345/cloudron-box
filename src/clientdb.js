@@ -4,6 +4,10 @@
 
 var assert = require('assert'),
     database = require('./database.js'),
+    appdb = require('./appdb.js'),
+    config = require('../config.js'),
+    async = require('async'),
+    safe = require('safetydance'),
     DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:clientdb');
 
@@ -52,7 +56,40 @@ function getAllWithDetails(callback) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (typeof results === 'undefined') results = [];
 
-        callback(null, results);
+        // We have three types of records here
+        //   1) webadmin has an app id of 'webadmin'
+        //   2) oauth proxy records are always the app id prefixed with 'proxy-'
+        //   3) normal oauth records for apps
+
+        var tmp = [];
+        async.each(results, function (record, callback) {
+            console.log('+++', record)
+            if (record.appId === 'webadmin') {
+                record.name = 'Webadmin';
+                record.location = config.adminOrigin();
+                tmp.push(record);
+                return callback(null);
+            }
+
+            var appId = record.appId.indexOf('proxy-') === 0 ? record.appId.slice('proxy-'.length) : record.appId;
+            appdb.get(appId, function (error, result) {
+                if (error) return callback(error);
+
+                var manifest = safe.JSON.parse(result.manifestJSON);
+                if (!manifest) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, new Error('Invalid JSON')));
+
+                record.name = manifest.title;
+                record.location = result.location;
+
+                tmp.push(record);
+
+                callback(null);
+            });
+        }, function (error) {
+            if (error) return callback(error);
+            console.log('----',tmp)
+            callback(null, tmp);
+        });
     });
 }
 
