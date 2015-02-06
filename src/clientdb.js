@@ -7,7 +7,6 @@ var assert = require('assert'),
     appdb = require('./appdb.js'),
     config = require('../config.js'),
     async = require('async'),
-    safe = require('safetydance'),
     DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:clientdb');
 
@@ -63,7 +62,6 @@ function getAllWithDetails(callback) {
 
         var tmp = [];
         async.each(results, function (record, callback) {
-            console.log('+++', record)
             if (record.appId === 'webadmin') {
                 record.name = 'Webadmin';
                 record.location = config.adminOrigin();
@@ -75,10 +73,7 @@ function getAllWithDetails(callback) {
             appdb.get(appId, function (error, result) {
                 if (error) return callback(error);
 
-                var manifest = safe.JSON.parse(result.manifestJSON);
-                if (!manifest) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, new Error('Invalid JSON')));
-
-                record.name = manifest.title;
+                record.name = result.manifest.title;
                 record.location = result.location;
 
                 tmp.push(record);
