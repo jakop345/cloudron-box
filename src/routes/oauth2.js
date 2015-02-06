@@ -269,7 +269,7 @@ var authorization = [
     gServer.authorization(function (clientID, redirectURI, callback) {
         debug('authorization: client %s with callback to %s.', clientID, redirectURI);
 
-        clientdb.getByClientId(clientID, function (error, client) {
+        clientdb.get(clientID, function (error, client) {
             if (error) {
                 console.error('Unkown client id %s.', clientID);
                 return callback(error);

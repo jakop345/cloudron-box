@@ -273,15 +273,13 @@ function allocateOAuthProxyCredentials(app, callback) {
 
     if (!app.accessRestriction) return callback(null);
 
-    var id = uuid.v4();
     var appId = 'proxy-' + app.id;
-    var clientId = 'cid-' + uuid.v4();
+    var id = 'cid-' + uuid.v4();
     var clientSecret = uuid.v4();
-    var name = app.manifest.title;
     var redirectURI = 'https://' + config.appFqdn(app.location);
     var scope = 'profile,' + app.accessRestriction;
 
-    clientdb.add(id, appId, clientId, clientSecret, name, redirectURI, scope, callback);
+    clientdb.add(id, appId, clientSecret, redirectURI, scope, callback);
 }
 
 function removeOAuthProxyCredentials(app, callback) {

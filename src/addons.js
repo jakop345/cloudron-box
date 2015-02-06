@@ -137,21 +137,19 @@ function allocateOAuthCredentials(app, callback) {
     assert(typeof app === 'object');
     assert(typeof callback === 'function');
 
-    var id = uuid.v4();
     var appId = app.id;
-    var clientId = 'cid-' + uuid.v4();
+    var id = 'cid-' + uuid.v4();
     var clientSecret = uuid.v4();
-    var name = app.manifest.title;
     var redirectURI = 'https://' + config.appFqdn(app.location);
     var scope = 'profile,roleUser';
 
-    debug('allocateOAuthCredentials: id:%s clientId:%s clientSecret:%s name:%s', id, clientId, clientSecret, name);
+    debug('allocateOAuthCredentials: id:%s clientSecret:%s', id, clientSecret);
 
-    clientdb.add(id, appId, clientId, clientSecret, name, redirectURI, scope, function (error) {
+    clientdb.add(id, appId, clientSecret, redirectURI, scope, function (error) {
         if (error) return callback(error);
 
         var env = [
-            'OAUTH_CLIENT_ID=' + clientId,
+            'OAUTH_CLIENT_ID=' + id,
             'OAUTH_CLIENT_SECRET=' + clientSecret
         ];
 

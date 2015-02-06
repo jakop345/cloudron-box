@@ -42,7 +42,7 @@ sed -e "s/user www-data/user ${USER}/" -i "${NGINX_ROOT}/nginx.conf"
 # add webadmin oauth client
 readonly WEBADMIN_ID=abcdefg
 readonly WEBADMIN_SCOPES="root,profile,users,apps,settings,roleAdmin"
-sqlite3 "${DATA_DIR}/cloudron.sqlite" "INSERT OR REPLACE INTO clients (id, appId, clientId, clientSecret, name, redirectURI, scope) VALUES (\"${WEBADMIN_ID}\", \"webadmin\", \"cid-webadmin\", \"secret-webadmin\", \"WebAdmin\", \"https://${FQDN}\", \"${WEBADMIN_SCOPES}\")"
+sqlite3 "${DATA_DIR}/cloudron.sqlite" "INSERT OR REPLACE INTO clients (id, appId, clientSecret, redirectURI, scope) VALUES (\"cid-webadmin\", \"webadmin\", \"secret-webadmin\", \"https://${FQDN}\", \"${WEBADMIN_SCOPES}\")"
 
 # start nginx
 sudo nginx -c nginx.conf -p "${NGINX_ROOT}"

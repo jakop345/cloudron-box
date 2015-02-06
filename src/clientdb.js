@@ -11,17 +11,15 @@ exports = module.exports = {
     get: get,
     getAll: getAll,
     getAllWithDetails: getAllWithDetails,
-    getByClientId: getByClientId,
     add: add,
     del: del,
-    replaceByAppId: replaceByAppId,
     getByAppId: getByAppId,
     delByAppId: delByAppId,
     clear: clear
 };
 
-var CLIENTS_FIELDS = [ 'id', 'appId', 'clientId', 'clientSecret', 'name', 'redirectURI', 'scope' ].join(',');
-var CLIENTS_FIELDS_PREFIXED = [ 'clients.id', 'clients.appId', 'clients.clientId', 'clients.clientSecret', 'clients.name', 'clients.redirectURI', 'clients.scope' ].join(',');
+var CLIENTS_FIELDS = [ 'id', 'appId', 'clientSecret', 'redirectURI', 'scope' ].join(',');
+var CLIENTS_FIELDS_PREFIXED = [ 'clients.id', 'clients.appId', 'clients.clientSecret', 'clients.redirectURI', 'clients.scope' ].join(',');
 
 function get(id, callback) {
     assert(typeof id === 'string');
@@ -58,18 +56,6 @@ function getAllWithDetails(callback) {
     });
 }
 
-function getByClientId(clientId, callback) {
-    assert(typeof clientId === 'string');
-    assert(typeof callback === 'function');
-
-    database.get('SELECT ' + CLIENTS_FIELDS + ' FROM clients WHERE clientId = ? LIMIT 1', [ clientId ], function (error, result) {
-        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
-        if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
-
-        return callback(null, result);
-    });
-}
-
 function getByAppId(appId, callback) {
     assert(typeof appId === 'string');
     assert(typeof callback === 'function');
@@ -82,12 +68,10 @@ function getByAppId(appId, callback) {
     });
 }
 
-function add(id, appId, clientId, clientSecret, name, redirectURI, scope, callback) {
+function add(id, appId, clientSecret, redirectURI, scope, callback) {
     assert(typeof id === 'string');
     assert(typeof appId === 'string');
-    assert(typeof clientId === 'string');
     assert(typeof clientSecret === 'string');
-    assert(typeof name === 'string');
     assert(typeof redirectURI === 'string');
     assert(typeof scope === 'string');
     assert(typeof callback === 'function');
@@ -95,14 +79,12 @@ function add(id, appId, clientId, clientSecret, name, redirectURI, scope, callba
     var data = {
         $id: id,
         $appId: appId,
-        $clientId: clientId,
         $clientSecret: clientSecret,
-        $name: name,
         $redirectURI: redirectURI,
         $scope: scope
     };
 
-    database.run('INSERT INTO clients (id, appId, clientId, clientSecret, name, redirectURI, scope) VALUES ($id, $appId, $clientId, $clientSecret, $name, $redirectURI, $scope)', data, function (error) {
+    database.run('INSERT INTO clients (id, appId, clientSecret, redirectURI, scope) VALUES ($id, $appId, $clientSecret, $redirectURI, $scope)', data, function (error) {
         if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
         if (error || !this.lastID) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
@@ -131,34 +113,6 @@ function delByAppId(appId, callback) {
         if (this.changes !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         return callback(null);
-    });
-}
-
-function replaceByAppId(id, appId, clientId, clientSecret, name, redirectURI, scope, callback) {
-    assert(typeof id === 'string');
-    assert(typeof appId === 'string');
-    assert(typeof clientId === 'string');
-    assert(typeof clientSecret === 'string');
-    assert(typeof name === 'string');
-    assert(typeof redirectURI === 'string');
-    assert(typeof scope === 'string');
-    assert(typeof callback === 'function');
-
-    var data = {
-        $id: id,
-        $appId: appId,
-        $clientId: clientId,
-        $clientSecret: clientSecret,
-        $name: name,
-        $redirectURI: redirectURI,
-        $scope: scope
-    };
-
-    database.run('INSERT OR REPLACE INTO clients (id, appId, clientId, clientSecret, name, redirectURI, scope) VALUES ($id, $appId, $clientId, $clientSecret, $name, $redirectURI, $scope)', data, function (error) {
-        if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
-        if (error || !this.lastID) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
-
-        callback(null);
     });
 }
 

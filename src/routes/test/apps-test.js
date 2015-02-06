@@ -150,7 +150,7 @@ describe('App API', function () {
             done(err);
         });
     });
- 
+
     it('app install fails - invalid location', function (done) {
         request.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
@@ -419,9 +419,9 @@ describe('App installation', function () {
             expect(data.Config.Env).to.contain('ADMIN_ORIGIN=' + config.adminOrigin());
             clientdb.getByAppId(appInfo.id, function (error, client) {
                 expect(error).to.not.be.ok();
-                expect(client.clientId.length).to.be(40); // cid- + 32 hex chars (128 bits) + 4 hyphens
+                expect(client.id.length).to.be(40); // cid- + 32 hex chars (128 bits) + 4 hyphens
                 expect(client.clientSecret.length).to.be(36); // 32 hex chars (128 bits) + 4 hyphens
-                expect(data.Config.Env).to.contain('OAUTH_CLIENT_ID=' + client.clientId);
+                expect(data.Config.Env).to.contain('OAUTH_CLIENT_ID=' + client.id);
                 expect(data.Config.Env).to.contain('OAUTH_CLIENT_SECRET=' + client.clientSecret);
                 done();
             });

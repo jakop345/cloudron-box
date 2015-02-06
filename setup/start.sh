@@ -182,10 +182,10 @@ echo "Marking apps for restore"
 sqlite3 "${cloudron_sqlite}" 'UPDATE apps SET installationState = "pending_restore", healthy = NULL, runState = NULL, containerId = NULL, httpPort = NULL, installationProgress = NULL'
 
 # Add webadmin oauth client
+# The domain might have changed, therefor we have to update the record
 echo "Add webadmin oauth cient"
 ADMIN_SCOPES="root,profile,users,apps,settings,roleAdmin "
-ADMIN_ID="cid-webadmin"
-sqlite3 "${cloudron_sqlite}" "INSERT OR REPLACE INTO clients (id, appId, clientId, clientSecret, name, redirectURI, scope) VALUES (\"\$ADMIN_ID\", \"webadmin\", \"cid-webadmin\", \"secret-webadmin\", \"WebAdmin\", \"${admin_origin}\", \"\$ADMIN_SCOPES\")"
+sqlite3 "${cloudron_sqlite}" "INSERT OR REPLACE INTO clients (id, appId, clientSecret, redirectURI, scope) VALUES (\"cid-webadmin\", \"webadmin\", \"secret-webadmin\", \"${admin_origin}\", \"\$ADMIN_SCOPES\")"
 
 EOF
 

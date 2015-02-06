@@ -75,8 +75,7 @@ function startServer(callback) {
 
                     var callbackURL = result.redirectURI + CALLBACK_URI;
                     var scope = 'profile,roleUser';
-                    var clientId = result.clientId;
-                    var oauthLogin = config.adminOrigin() + '/api/v1/oauth/dialog/authorize?response_type=code&client_id=' + clientId + '&redirect_uri=' + callbackURL + '&scope=' + scope;
+                    var oauthLogin = config.adminOrigin() + '/api/v1/oauth/dialog/authorize?response_type=code&client_id=' + result.id + '&redirect_uri=' + callbackURL + '&scope=' + scope;
 
                     debug('begin OAuth flow for client %s.', result.name);
 

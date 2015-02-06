@@ -53,10 +53,10 @@ function initialize(callback) {
 
     passport.use(new BasicStrategy(function (username, password, callback) {
         if (username.indexOf('cid-') === 0) {
-            debug('BasicStrategy: detected clientId %s instead of username:password', username);
+            debug('BasicStrategy: detected client id %s instead of username:password', username);
             // username is actually client id here
             // password is client secret
-            clientdb.getByClientId(username, function (error, client) {
+            clientdb.get(username, function (error, client) {
                 if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
                 if (error) return callback(error);
                 if (client.clientSecret != password) return callback(null, false);
@@ -74,7 +74,7 @@ function initialize(callback) {
     }));
 
     passport.use(new ClientPasswordStrategy(function (clientId, clientSecret, callback) {
-        clientdb.getByClientId(clientId, function(error, client) {
+        clientdb.get(clientId, function(error, client) {
             if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
             if (error) { return callback(error); }
             if (client.clientSecret != clientSecret) { return callback(null, false); }
