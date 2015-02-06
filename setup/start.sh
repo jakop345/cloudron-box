@@ -183,8 +183,8 @@ sqlite3 "${cloudron_sqlite}" 'UPDATE apps SET installationState = "pending_resto
 
 # Add webadmin oauth client
 echo "Add webadmin oauth cient"
-ADMIN_SCOPES="root,profile,users,apps,settings,roleAdmin"
-ADMIN_ID=$(cat /proc/sys/kernel/random/uuid)
+ADMIN_SCOPES="root,profile,users,apps,settings,roleAdmin "
+ADMIN_ID="cid-webadmin"
 sqlite3 "${cloudron_sqlite}" "INSERT OR REPLACE INTO clients (id, appId, clientId, clientSecret, name, redirectURI, scope) VALUES (\"\$ADMIN_ID\", \"webadmin\", \"cid-webadmin\", \"secret-webadmin\", \"WebAdmin\", \"${admin_origin}\", \"\$ADMIN_SCOPES\")"
 
 EOF
