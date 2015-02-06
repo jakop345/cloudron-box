@@ -64,7 +64,7 @@ function getAllWithDetails(callback) {
         async.each(results, function (record, callback) {
             if (record.appId === 'webadmin') {
                 record.name = 'Webadmin';
-                record.location = config.adminOrigin();
+                record.location = 'admin';
                 tmp.push(record);
                 return callback(null);
             }
@@ -73,7 +73,7 @@ function getAllWithDetails(callback) {
             appdb.get(appId, function (error, result) {
                 if (error) return callback(error);
 
-                record.name = result.manifest.title;
+                record.name = result.manifest.title + (record.appId.indexOf('proxy-') === 0 ? 'OAuth Proxy' : '');
                 record.location = result.location;
 
                 tmp.push(record);
