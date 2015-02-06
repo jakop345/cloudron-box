@@ -622,7 +622,7 @@ describe('database', function () {
             });
         });
 
-        it('can set app as health when installed and no pending runState', function (done) {
+        it('can set app as healthy when installed and no pending runState', function (done) {
             appdb.update(APP_1.id, { runState: appdb.RSTATE_RUNNING, installationState: appdb.ISTATE_INSTALLED }, function (error) {
                 expect(error).to.be(null);
 

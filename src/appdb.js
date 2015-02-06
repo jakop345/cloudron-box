@@ -85,7 +85,7 @@ function get(id, callback) {
 
     database.get('SELECT ' + APPS_FIELDS_PREFIXED + ','
         + 'GROUP_CONCAT(appPortBindings.hostPort) AS hostPorts, GROUP_CONCAT(appPortBindings.containerPort) AS containerPorts'
-        + ' FROM apps LEFT OUTER JOIN appPortBindings WHERE apps.id = ? GROUP BY apps.id', [ id ], function (error, result) {
+        + ' FROM apps LEFT OUTER JOIN appPortBindings ON apps.id = appPortBindings.appId WHERE apps.id = ? GROUP BY apps.id', [ id ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
@@ -102,7 +102,7 @@ function getBySubdomain(subdomain, callback) {
 
     database.get('SELECT ' + APPS_FIELDS_PREFIXED + ','
         + 'GROUP_CONCAT(appPortBindings.hostPort) AS hostPorts, GROUP_CONCAT(appPortBindings.containerPort) AS containerPorts'
-        + '  FROM apps LEFT OUTER JOIN appPortBindings WHERE location = ? GROUP BY apps.id', [ subdomain ], function (error, result) {
+        + '  FROM apps LEFT OUTER JOIN appPortBindings ON apps.id = appPortBindings.appId WHERE location = ? GROUP BY apps.id', [ subdomain ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
@@ -119,7 +119,7 @@ function getByHttpPort(httpPort, callback) {
 
     database.get('SELECT ' + APPS_FIELDS_PREFIXED + ','
         + 'GROUP_CONCAT(appPortBindings.hostPort) AS hostPorts, GROUP_CONCAT(appPortBindings.containerPort) AS containerPorts'
-        + '  FROM apps LEFT OUTER JOIN appPortBindings WHERE httpPort = ? GROUP BY apps.id', [ httpPort ], function (error, result) {
+        + '  FROM apps LEFT OUTER JOIN appPortBindings ON apps.id = appPortBindings.appId WHERE httpPort = ? GROUP BY apps.id', [ httpPort ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
