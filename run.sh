@@ -1,5 +1,11 @@
 #!/bin/bash
 
+set -eu
+
+# Only GNU sed supports inline replace. brew install gnu-sed to get the GNU sed on OS X
+[[ $(uname -s) == "Darwin" ]] && GNU_SED="/usr/local/bin/gsed" || GNU_SED="sed"
+readonly GNU_SED
+
 echo
 echo "Starting Cloudron at port 443"
 echo
@@ -36,8 +42,9 @@ ${SCRIPT_DIR}/../appstore/src/scripts/generate_certificate.sh "US" "California" 
 
 # adjust the generated nginx config for local use
 touch "${NGINX_ROOT}/naked_domain.conf"
-sed -e "s/##ADMIN_FQDN##/${FQDN}/" -e "s|##BOX_SRC_DIR##|${BOX_SRC_DIR}|" setup/start/nginx/admin.conf_template > "${NGINX_ROOT}/applications/admin.conf"
-sed -e "s/user www-data/user ${USER}/" -i "${NGINX_ROOT}/nginx.conf"
+$GNU_SED -e "s/##ADMIN_FQDN##/${FQDN}/" -e "s|##BOX_SRC_DIR##|${BOX_SRC_DIR}|" setup/start/nginx/admin.conf_template > "${NGINX_ROOT}/applications/admin.conf"
+$GNU_SED -e "s/user www-data/user ${USER}/" -i "${NGINX_ROOT}/nginx.conf"
+$GNU_SED -e "s/^pid .*/pid \/tmp\/nginx.pid;/" -i "${NGINX_ROOT}/nginx.conf"
 
 # add webadmin oauth client
 readonly WEBADMIN_ID=abcdefg
