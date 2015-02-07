@@ -3,9 +3,7 @@
 var assert = require('assert'),
     database = require('./database.js'),
     debug = require('debug')('box:userdb'),
-    DatabaseError = require('./databaseerror'),
-    path = require('path'),
-    tokendb = require('./tokendb');
+    DatabaseError = require('./databaseerror');
 
 exports = module.exports = {
     get: get,

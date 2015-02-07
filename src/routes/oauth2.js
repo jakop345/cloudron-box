@@ -8,10 +8,8 @@ var assert = require('assert'),
     config = require('../../config.js'),
     DatabaseError = require('../databaseerror'),
     debug = require('debug')('box:routes/oauth2'),
-    http = require('http'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
-    mailer = require('../mailer.js'),
     middleware = require('../middleware/index.js'),
     oauth2orize = require('oauth2orize'),
     passport = require('passport'),
@@ -19,14 +17,10 @@ var assert = require('assert'),
     tokendb = require('../tokendb'),
     url = require('url'),
     user = require('../user.js'),
-    userdb = require('../userdb'),
     uuid = require('node-uuid');
 
 // create OAuth 2.0 server
 var gServer = oauth2orize.createServer();
-
-// Proxy cache stored by port
-var gProxyMiddlewareCache =  { };
 
 // Register serialialization and deserialization functions.
 //
@@ -124,9 +118,6 @@ function loginForm(req, res) {
     res.render('login', { adminOrigin: config.adminOrigin(), csrf: req.csrfToken() });
 }
 
-// In memory password reset token store
-var resetTokens = {};
-
 // Form to enter email address to send a password reset request mail
 function passwordResetRequestSite(req, res) {
     res.render('password_reset_request', { adminOrigin: config.adminOrigin(), csrf: req.csrfToken() });
@@ -140,12 +131,8 @@ function passwordResetRequest(req, res, next) {
 
     debug('passwordResetRequest: email %s.', req.body.email);
 
-    userdb.getByEmail(req.body.email, function (error, result) {
-        if (!error) {
-            resetTokens[result.id] = uuid.v4();
-            debug('passwordResetRequest: found user %s send reset token %s', result.username, resetTokens[result.id]);
-            mailer.passwordReset(result, resetTokens[result.id]);
-        }
+    user.resetPasswordByEmail(req.body.email, function (error) {
+        if (error) console.error(error); // TODO redirect to an error page
 
         res.redirect('/api/v1/session/password/sent.html');
     });
@@ -162,19 +149,11 @@ function passwordResetSite(req, res, next) {
 
     debug('passwordResetSite: with token %s.', req.query.reset_token);
 
-    function finish(key) {
-        userdb.get(key, function (error, result) {
-            if (error) return next(new HttpError(400, 'Unknown reset token'));
+    user.getByResetToken(req.query.reset_token, function (error, user) {
+        if (error) return next(new HttpError(400, 'Unkown reset_token'));
 
-            res.render('password_reset', { adminOrigin: config.adminOrigin(), user: result, csrf: req.csrfToken(), resetToken: req.query.reset_token });
-        });
-    }
-
-    for (var key in resetTokens) {
-        if (resetTokens[key] === req.query.reset_token) return finish(key);
-    }
-
-    next(new HttpError(400, 'Unkown reset_token'));
+        res.render('password_reset', { adminOrigin: config.adminOrigin(), user: user, csrf: req.csrfToken(), resetToken: req.query.reset_token });
+    });
 }
 
 function passwordReset(req, res, next) {
@@ -188,19 +167,15 @@ function passwordReset(req, res, next) {
 
     if (req.body.password !== req.body.passwordRepeat) return next(new HttpError(400, 'Passwords don\'t match'));
 
-    function finish(userId) {
-        user.resetPassword(userId, req.body.password, function (error) {
+    user.getByResetToken(req.body.resetToken, function (error, result) {
+        if (error) return next(new HttpError(400, 'Unkown resetToken'));
+
+        user.setPassword(result.id, req.body.password, function (error) {
             if (error) return next(new HttpError(400, 'Unknown reset token'));
 
             res.redirect(config.adminOrigin());
         });
-    }
-
-    for (var userId in resetTokens) {
-        if (resetTokens[userId] === req.body.resetToken) return finish(userId);
-    }
-
-    next(new HttpError(400, 'Unkown resetToken'));
+    });
 }
 
 // performs the login POST from the above form

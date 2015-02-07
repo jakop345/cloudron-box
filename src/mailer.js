@@ -87,11 +87,7 @@ function processQueue() {
 
         async.mapSeries(mailQueueCopy, function iterator(mailOptions, callback) {
             transport.sendMail(mailOptions, function (error, info) {
-                if (error) { // TODO: requeue?
-                    if (config.LOCAL) debug('Print email in local mode:', mailOptions);
-                    return console.error(error);
-                }
-
+                if (error) return console.error(error); // TODO: requeue?
                 debug('Email sent to ' + mailOptions.to);
             });
             callback(null);
@@ -106,6 +102,8 @@ function enqueue(mailOptions) {
 
     debug('Queued mail for ' + mailOptions.from + ' to ' + mailOptions.to);
     gMailQueue.push(mailOptions);
+
+    if (config.LOCAL) debug('Print email in local mode:', mailOptions);
 
     if (gDnsReady) processQueue();
 }

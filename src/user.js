@@ -10,8 +10,10 @@ exports = module.exports = {
     verify: verifyUser,
     remove: removeUser,
     get: getUser,
+    getByResetToken: getByResetToken,
     changeAdmin: changeAdmin,
-    resetPassword: resetPassword,
+    resetPasswordByEmail: resetPasswordByEmail,
+    setPassword: setPassword,
     changePassword: changePassword,
     update: updateUser,
     clear: clear
@@ -24,11 +26,13 @@ var aes = require('../src/aes-helper.js'),
     DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:user'),
     mailer = require('./mailer.js'),
-    safe = require('safetydance'),
+    uuid = require('node-uuid'),
     ursa = require('ursa'),
     userdb = require('./userdb.js'),
     util = require('util'),
     validator = require('validator');
+
+var resetTokens = {};
 
 var CRYPTO_SALT_SIZE = 64; // 512-bit salt
 var CRYPTO_ITERATIONS = 10000; // iterations
@@ -186,16 +190,32 @@ function removeUser(username, callback) {
     });
 }
 
-function getUser(username, callback) {
-    assert(typeof username === 'string');
+function getUser(userId, callback) {
+    assert(typeof userId === 'string');
     assert(typeof callback === 'function');
 
-    userdb.get(username, function (error, result) {
+    userdb.get(userId, function (error, result) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
         return callback(null, result);
     });
+}
+
+function getByResetToken(resetToken, callback) {
+    assert(typeof resetToken === 'string');
+    assert(typeof callback === 'function');
+
+    var userId = null;
+    for (var id in resetTokens) {
+        if (resetTokens[id] === resetToken) {
+            userId = id;
+            break;
+        }
+    }
+
+    if (!userId) return callback(new UserError(UserError.NOT_FOUND));
+    getUser(userId, callback);
 }
 
 function updateUser(username, callback) {
@@ -232,7 +252,22 @@ function changeAdmin(username, admin, callback) {
     });
 }
 
-function resetPassword(userId, newPassword, callback) {
+function resetPasswordByEmail(email, callback) {
+    assert(typeof email === 'string');
+    assert(typeof callback === 'function');
+
+    userdb.getByEmail(email, function (error, result) {
+        if (error) return callback(error);
+
+        resetTokens[result.id] = uuid.v4();
+        console.log('resetPasswordByEmail', resetTokens)
+        mailer.passwordReset(result, resetTokens[result.id]);
+
+        callback(null);
+    });
+}
+
+function setPassword(userId, newPassword, callback) {
     assert(typeof userId === 'string');
     assert(typeof newPassword === 'string');
     assert(typeof callback === 'function');
