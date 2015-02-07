@@ -227,33 +227,29 @@ describe('User', function () {
         });
 
         it('fails due to wrong password', function (done) {
-            user.changePassword(USERNAME, 'wrongpassword', NEW_PASSWORD, function (error, result) {
+            user.changePassword(USERNAME, 'wrongpassword', NEW_PASSWORD, function (error) {
                 expect(error).to.be.ok();
-                expect(result).to.not.be.ok();
                 done();
             });
         });
 
         it('fails due to empty new password', function (done) {
-            user.changePassword(USERNAME, PASSWORD, '', function (error, result) {
+            user.changePassword(USERNAME, PASSWORD, '', function (error) {
                 expect(error).to.be.ok();
-                expect(result).to.not.be.ok();
                 done();
             });
         });
 
         it('fails due to unknown user', function (done) {
-            user.changePassword('somerandomuser', PASSWORD, NEW_PASSWORD, function (error, result) {
+            user.changePassword('somerandomuser', PASSWORD, NEW_PASSWORD, function (error) {
                 expect(error).to.be.ok();
-                expect(result).to.not.be.ok();
                 done();
             });
         });
 
         it('succeeds', function (done) {
-            user.changePassword(USERNAME, PASSWORD, NEW_PASSWORD, function (error, result) {
+            user.changePassword(USERNAME, PASSWORD, NEW_PASSWORD, function (error) {
                 expect(error).to.not.be.ok();
-                expect(result).to.be.ok();
                 done();
             });
         });
@@ -271,6 +267,26 @@ describe('User', function () {
             user.verify(USERNAME, NEW_PASSWORD, function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
+                done();
+            });
+        });
+    });
+
+    describe('resetPasswordByEmail', function () {
+        before(createUser);
+        after(cleanupUsers);
+
+        it('fails due to unkown email', function (done) {
+            user.resetPasswordByEmail('unknown@mail.com', function (error) {
+                expect(error).to.be.an(UserError);
+                expect(error.reason).to.eql(UserError.NOT_FOUND);
+                done();
+            });
+        });
+
+        it('succeeds', function (done) {
+            user.resetPasswordByEmail(EMAIL, function (error) {
+                expect(error).to.not.be.ok();
                 done();
             });
         });

@@ -257,10 +257,10 @@ function resetPasswordByEmail(email, callback) {
     assert(typeof callback === 'function');
 
     userdb.getByEmail(email, function (error, result) {
-        if (error) return callback(error);
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
+        if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
         resetTokens[result.id] = uuid.v4();
-        console.log('resetPasswordByEmail', resetTokens)
         mailer.passwordReset(result, resetTokens[result.id]);
 
         callback(null);
@@ -313,24 +313,7 @@ function changePassword(username, oldPassword, newPassword, callback) {
     verifyUser(username, oldPassword, function (error, user) {
         if (error) return callback(error);
 
-        var saltBuffer = new Buffer(user._salt, 'hex');
-        crypto.pbkdf2(newPassword, saltBuffer, CRYPTO_ITERATIONS, CRYPTO_KEY_LENGTH, function (error, derivedKey) {
-            if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
-
-            var privateKeyPem = aes.decrypt(user._privatePemCipher, oldPassword, saltBuffer);
-            var keyPair = ursa.createPrivateKey(privateKeyPem, oldPassword, 'utf8');
-
-            user.modifiedAt = (new Date()).toUTCString();
-            user._password = new Buffer(derivedKey, 'binary').toString('hex');
-            user._privatePemCipher = aes.encrypt(keyPair.toPrivatePem(), newPassword, saltBuffer);
-
-            userdb.update(username, user, function (error) {
-                if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
-                if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
-
-                callback(null, user);
-            });
-        });
+        setPassword(user.id, newPassword, callback);
     });
 }
 
