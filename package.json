@@ -1,6 +1,6 @@
 {
-  "name": "yellowtent",
-  "description": "Yellow tent",
+  "name": "Cloudron",
+  "description": "Main code for a cloudron",
   "version": "0.0.1",
   "private": "true",
   "author": {
@@ -14,7 +14,7 @@
     "node >= 0.10.0"
   ],
   "bin": {
-    "yellowtent": "./server.js"
+    "cloudron": "./server.js"
   },
   "dependencies": {
     "async": "^0.6.2",
