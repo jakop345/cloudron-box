@@ -141,20 +141,34 @@
             </div>
             <div class="panel-body">
                 <ul class="list-group">
-                    <li class="list-group-item">
-                        <input type="file" class="pull-right" id="idCertificate" style="display:none">Certificate</input>
-                        <button class="btn btn-default pull-right" type="button" onclick="getElementById('idCertificate').click();">Browse</button>
-                        <span class="pull-right">{{certificateFileName}}</span>
+                     <li class="list-group-item">
+                        <input type="file" id="idCertificate" style="display:none"/>
+
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button" onclick="getElementById('idCertificate').click();">Certificate</button>
+                            </span>
+                            <input type="text" class="form-control" ng-model="certificateFileName" onclick="getElementById('idCertificate').click();" style="cursor: pointer;"/>
+                            <span class="input-group-addon">
+                                <i class="fa fa-upload" onclick="getElementById('idCertificate').click();"></i>
+                            </span>
+                        </div>
                     </li>
                     <li class="list-group-item">
-                        <input type="file" class="pull-right" id="idKey" style="display:none">Key</input>
-                        <button class="btn btn-default pull-right" type="button" onclick="getElementById('idKey').click();">Browse</button>
-                        <span class="pull-right">{{keyFileName}}</span>
-                    </li>
-                    <li>
-                        <button class="btn btn-outline btn-success pull-right" ng-click="setCertificate()">Upload Certificate</button>
+                        <input type="file" id="idKey" style="display:none"/>
+
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button" onclick="getElementById('idKey').click();">Key</button>
+                            </span>
+                            <input type="text" class="form-control" ng-model="keyFileName" onclick="getElementById('idKey').click();" style="cursor: pointer;"/>
+                            <span class="input-group-addon">
+                                <i class="fa fa-upload" onclick="getElementById('idKey').click();"></i>
+                            </span>
+                        </div>
                     </li>
                 </ul>
+                <button class="btn btn-outline btn-success pull-right" ng-click="setCertificate()">Upload Certificate</button>
             </div>
         </div>
     </div>
