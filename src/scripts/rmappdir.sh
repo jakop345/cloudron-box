@@ -22,7 +22,7 @@ if [[ "$1" == "--check" ]]; then
 fi
 
 readonly DATA="${HOME}/data"
-readonly DATA_TEST="${HOME}/.yellowtenttest/data"
+readonly DATA_TEST="${HOME}/.cloudron_test/data"
 
 rm -rf "${DATA}/$1"
 rm -rf "${DATA_TEST}/$1"

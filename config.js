@@ -38,8 +38,8 @@ var data = { };
 
 function baseDir() {
     if (exports.CLOUDRON) return homeDir;
-    if (exports.TEST) return path.join(homeDir, '.yellowtenttest');
-    if (exports.LOCAL) return path.join(homeDir, '.yellowtent');
+    if (exports.TEST) return path.join(homeDir, '.cloudron_test');
+    if (exports.LOCAL) return path.join(homeDir, '.cloudron');
 }
 
 var cloudronConfigFileName = path.join(baseDir(), 'configs/cloudron.conf');
