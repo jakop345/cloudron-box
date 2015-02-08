@@ -131,6 +131,7 @@ function createUser(username, password, email, admin, callback) {
 
             var now = (new Date()).toUTCString();
             var user = {
+                id: username,
                 username: username,
                 email: email,
                 _password: new Buffer(derivedKey, 'binary').toString('hex'),
@@ -142,14 +143,17 @@ function createUser(username, password, email, admin, callback) {
                 modifiedAt: now
             };
 
-            userdb.add(username, user, function (error) {
+            userdb.add(user.id, user, function (error) {
                 if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new UserError(UserError.ALREADY_EXISTS));
                 if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
                 callback(null, user);
 
+                resetTokens[user.id] = uuid.v4();
+
                 // only send welcome mail if user is not an admin. This i only the case for the first user!
-                if (!user.admin) mailer.userAdded(user, password);
+                // The welcome email contains a link to create a new password
+                if (!user.admin) mailer.userAdded(user, resetTokens[user.id]);
             });
         });
     });

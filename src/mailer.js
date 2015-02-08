@@ -70,7 +70,11 @@ function checkDns() {
 
 function processQueue() {
     docker.getContainer('mail').inspect(function (error, data) {
-        if (error) return console.error(error);
+        if (error) {
+            if (config.LOCAL) debug('No mail container found. This is ok in LOCAL mode.');
+            else console.error(error);
+            return;
+        }
 
         var mailServerIp = safe.query(data, 'NetworkSettings.IPAddress');
         if (!mailServerIp) return debug('Error querying mail server IP');
@@ -137,16 +141,16 @@ function mailUserEventToAdmins(user, event) {
     });
 }
 
-function userAdded(user, password) {
+function userAdded(user, token) {
     assert(typeof user === 'object');
-    assert(typeof password === 'string');
+    assert(typeof token === 'string');
 
     debug('Sending mail for userAdded');
 
     var templateData = {
         user: user,
-        password: password,
-        webadminUrl: config.adminOrigin()
+        webadminUrl: config.adminOrigin(),
+        setupLink: config.adminOrigin() + '/api/v1/session/password/setup.html?reset_token=' + token
     };
 
     var mailOptions = {

@@ -156,6 +156,18 @@ function passwordResetSite(req, res, next) {
     });
 }
 
+function passwordSetupSite(req, res, next) {
+    if (!req.query.reset_token) return next(new HttpError(400, 'Missing reset_token'));
+
+    debug('passwordSetupSite: with token %s.', req.query.reset_token);
+
+    user.getByResetToken(req.query.reset_token, function (error, user) {
+        if (error) return next(new HttpError(400, 'Unkown reset_token'));
+
+        res.render('password_setup', { adminOrigin: config.adminOrigin(), user: user, csrf: req.csrfToken(), resetToken: req.query.reset_token });
+    });
+}
+
 function passwordReset(req, res, next) {
     assert(typeof req.body === 'object');
 
@@ -429,6 +441,7 @@ exports = module.exports = {
     passwordResetRequest: passwordResetRequest,
     passwordSentSite: passwordSentSite,
     passwordResetSite: passwordResetSite,
+    passwordSetupSite: passwordSetupSite,
     passwordReset: passwordReset,
     authorization: authorization,
     decision: decision,
