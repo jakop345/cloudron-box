@@ -14,9 +14,11 @@
     </style>
 
     <script src="javascripts/superagent.js"></script>
-    <script src="/api/v1/oauth/yellowtent.js"></script>
+    <script src="/api/v1/oauth/cloudron.js"></script>
 
 <script>
+
+'use strict';
 
 var tokenBtn, authCode, oauthResult, accessToken;
 var isReady = false;
@@ -25,8 +27,6 @@ var clientSecret = 'unused';
 
 function setAuthCode(code) {
     if (!isReady) return;
-
-    console.log('---- setAuthCode()', code);
 
     if (code) {
         tokenBtn.style.display = 'block';
@@ -73,7 +73,7 @@ function init() {
 
 <body onload="init()">
 
-OAuth based login: <div class="yellowtent-signin" data-callback="setAuthCode" data-clientid="cid-webadmin" data-requestscopes="*"></div>
+OAuth based login: <div class="cloudron-signin" data-callback="setAuthCode" data-clientid="cid-webadmin" data-requestscopes="*"></div>
 
 <div id="oauthResult"></div>
 <button id="tokenButton" style="display: none"/>Exchange code for token</button>

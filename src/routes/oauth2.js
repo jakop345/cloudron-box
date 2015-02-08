@@ -329,7 +329,7 @@ var token = [
 */
 function library(req, res) {
     res.setHeader('Content-Type', 'application/javascript');
-    res.render('yellowtent', { adminOrigin: config.adminOrigin() });
+    res.render('cloudron', { adminOrigin: config.adminOrigin() });
 }
 
 

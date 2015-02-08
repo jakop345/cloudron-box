@@ -129,7 +129,7 @@ function initializeExpressSync() {
     router.get ('/api/v1/oauth/dialog/authorize', routes.oauth2.authorization);
     router.post('/api/v1/oauth/dialog/authorize/decision', csrf, routes.oauth2.decision);
     router.post('/api/v1/oauth/token', routes.oauth2.token);
-    router.get ('/api/v1/oauth/yellowtent.js', routes.oauth2.library);
+    router.get ('/api/v1/oauth/cloudron.js', routes.oauth2.library);
     router.get ('/api/v1/oauth/clients', settingsScope, routes.oauth2.getClients);
     router.get ('/api/v1/oauth/clients/:clientId/tokens', settingsScope, routes.oauth2.getClientTokens);
     router.del ('/api/v1/oauth/clients/:clientId/tokens', settingsScope, routes.oauth2.delClientTokens);

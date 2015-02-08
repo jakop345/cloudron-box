@@ -1,39 +1,39 @@
 (function () {
 'use strict';
 
-if (!window.yellowtent) {
-    window.yellowtent = {};
+if (!window.cloudron) {
+    window.cloudron = {};
 }
 
-var yellowtent = window.yellowtent;
+var cloudron = window.cloudron;
 var server = '<%= adminOrigin %>';
 
 // handle the oauth flow
-yellowtent.oauth = {};
-yellowtent.endOAuth = endOAuth;
-yellowtent.setupButton = setupButton;
+cloudron.oauth = {};
+cloudron.endOAuth = endOAuth;
+cloudron.setupButton = setupButton;
 
 function startOAuth(button, resultCallback) {
     var clientId = button.getAttribute('data-clientid');
     var callback = button.getAttribute('data-callback');
 
-    yellowtent.oauth = {};
-    yellowtent.oauth.button = button;
-    yellowtent.oauth.clientId = clientId;
-    yellowtent.oauth.callback = resultCallback || window[callback];
-    yellowtent.oauth.redirectURI = button.getAttribute('data-redirect-uri') || '';
+    cloudron.oauth = {};
+    cloudron.oauth.button = button;
+    cloudron.oauth.clientId = clientId;
+    cloudron.oauth.callback = resultCallback || window[callback];
+    cloudron.oauth.redirectURI = button.getAttribute('data-redirect-uri') || '';
 
     var width = 400;
     var height = 600;
     var left = screen.width / 2.0 - width / 2.0;
     var top = screen.height / 2.0 - height / 2.0;
-    var oauthURI = server + '/api/v1/oauth/dialog/authorize?response_type=code&client_id=' + clientId + '&redirect_uri=' + server + yellowtent.oauth.redirectURI;
+    var oauthURI = server + '/api/v1/oauth/dialog/authorize?response_type=code&client_id=' + clientId + '&redirect_uri=' + server + cloudron.oauth.redirectURI;
 
-    window.open(oauthURI, 'Yellowtent', 'width=400, height=600, left=' + left + ', top=' + top);
+    window.open(oauthURI, 'cloudron', 'width=400, height=600, left=' + left + ', top=' + top);
 }
 
 function endOAuth(result) {
-    if (!yellowtent.oauth) {
+    if (!cloudron.oauth) {
         return;
     }
 
@@ -42,11 +42,11 @@ function endOAuth(result) {
         return;
     }
 
-    yellowtent.oauth.callback.apply(null, [result.authCode]);
+    cloudron.oauth.callback.apply(null, [result.authCode]);
 }
 
 function setupButton(button, resultCallback) {
-    button.innerHTML = '<input class="btn btn-green btn-block" type="button" value="Sign in with Yellowtent"/>';
+    button.innerHTML = '<input class="btn btn-green btn-block" type="button" value="Sign in with your cloudron"/>';
     button.onclick = function () {
         startOAuth(button, resultCallback);
     };
@@ -57,11 +57,11 @@ window.addEventListener('load', function () {
         startOAuth(event.target.parentElement);
     }
 
-    var signIns = window.document.getElementsByClassName('yellowtent-signin');
+    var signIns = window.document.getElementsByClassName('cloudron-signin');
     for (var i = 0; i < signIns.length; ++i) {
         var button = signIns[0];
 
-        button.innerHTML = '<input class="btn btn-green btn-block" type="button" value="Sign in with Yellowtent"/>';
+        button.innerHTML = '<input class="btn btn-green btn-block" type="button" value="Sign in with your cloudron"/>';
         button.onclick = clickEventHandler;
     }
 
