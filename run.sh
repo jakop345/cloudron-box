@@ -14,9 +14,9 @@ readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly BOX_SRC_DIR="$(cd $(dirname "$0"); pwd)"
 readonly PROVISION_VERSION=0.1
 readonly PROVISION_BOX_VERSIONS_URL=0.1
-readonly DATA_DIR=~/.yellowtent/data
-readonly CONFIG_DIR=~/.yellowtent/configs
-readonly NGINX_ROOT=~/.yellowtent/configs/nginx
+readonly DATA_DIR=~/.cloudron/data
+readonly CONFIG_DIR=~/.cloudron/configs
+readonly NGINX_ROOT=~/.cloudron/configs/nginx
 readonly FQDN=admin-localhost
 
 if [[ ! -f "${SCRIPT_DIR}/../appstore/src/scripts/generate_certificate.sh" ]]; then
