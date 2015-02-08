@@ -44,7 +44,6 @@ function generatePassword() {
  * A normal user can create its own volumes and is able to share those with other users.
  *
  * @apiParam {string} username The new user's login name
- * @apiParam {string} password The new users's password
  * @apiParam {string} email The new users's email address
  *
  * @apiSuccess (Created 201) none User successfully created

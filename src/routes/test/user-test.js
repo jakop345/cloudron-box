@@ -17,9 +17,9 @@ var config = require('../../../config.js'),
 var SERVER_URL = 'http://localhost:' + config.get('port');
 
 var USERNAME_0 = 'admin', PASSWORD = 'password', EMAIL ='silly@me.com';
-var USERNAME_1 = 'userTheFirst', PASSWORD_1 = 'chocolatecookie', EMAIL_1 = 'tao@zen.mac';
-var USERNAME_2 = 'userTheSecond', PASSWORD_2 = 'userpassword', EMAIL_2 = 'user@foo.bar';
-var USERNAME_3 = 'userTheThird', PASSWORD_3 = 'userpassword333', EMAIL_3 = 'user3@foo.bar';
+var USERNAME_1 = 'userTheFirst', EMAIL_1 = 'tao@zen.mac';
+var USERNAME_2 = 'userTheSecond', EMAIL_2 = 'user@foo.bar';
+var USERNAME_3 = 'userTheThird', EMAIL_3 = 'user3@foo.bar';
 
 var server;
 function setup(done) {
@@ -223,7 +223,7 @@ describe('User API', function () {
     it('create second user succeeds', function (done) {
         request.post(SERVER_URL + '/api/v1/users')
                .query({ access_token: token })
-               .send({ username: USERNAME_1, password: PASSWORD_1, email: EMAIL_1 })
+               .send({ username: USERNAME_1, email: EMAIL_1 })
                .end(function (err, res) {
             expect(err).to.not.be.ok();
             expect(res.statusCode).to.equal(201);
@@ -309,14 +309,14 @@ describe('User API', function () {
     it('create second and third user', function (done) {
         request.post(SERVER_URL + '/api/v1/users')
                .query({ access_token: token })
-               .send({ username: USERNAME_2, password: PASSWORD_2, email: EMAIL_2 })
+               .send({ username: USERNAME_2, email: EMAIL_2 })
                .end(function (error, res) {
             expect(error).to.not.be.ok();
             expect(res.statusCode).to.equal(201);
 
             request.post(SERVER_URL + '/api/v1/users')
                    .query({ access_token: token })
-                   .send({ username: USERNAME_3, password: PASSWORD_3, email: EMAIL_3 })
+                   .send({ username: USERNAME_3, email: EMAIL_3 })
                    .end(function (error, res) {
                 expect(error).to.not.be.ok();
                 expect(res.statusCode).to.equal(201);
@@ -344,7 +344,7 @@ describe('User API', function () {
     it('create user with same username should fail', function (done) {
         request.post(SERVER_URL + '/api/v1/users')
                .query({ access_token: token })
-               .send({ username: USERNAME_2, password: PASSWORD, email: EMAIL })
+               .send({ username: USERNAME_2, email: EMAIL })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(409);
             done(err);
@@ -365,20 +365,10 @@ describe('User API', function () {
         });
     });
 
-    it('remove admin user by normal user should fail', function (done) {
-        request.del(SERVER_URL + '/api/v1/users/' + USERNAME_0)
-               .query({ access_token: token_2 })
-               .send({ username: USERNAME_0, password: PASSWORD_2 })
-               .end(function (err, res) {
-            expect(res.statusCode).to.equal(403);
-            done(err);
-        });
-    });
-
     it('user removes himself is not allowed', function (done) {
-        request.del(SERVER_URL + '/api/v1/users/' + USERNAME_2)
-               .query({ access_token: token_2 })
-               .send({ username: USERNAME_2, password: PASSWORD_2 })
+        request.del(SERVER_URL + '/api/v1/users/' + USERNAME_0)
+               .query({ access_token: token })
+               .send({ username: USERNAME_0, password: PASSWORD })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(403);
             done(err);
@@ -398,7 +388,7 @@ describe('User API', function () {
     it('admin cannot remove normal user with giving wrong password', function (done) {
         request.del(SERVER_URL + '/api/v1/users/' + USERNAME_3)
                .query({ access_token: token })
-               .send({ username: USERNAME_3, password: PASSWORD_3 })
+               .send({ username: USERNAME_3, password: PASSWORD + PASSWORD })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(403);
             done(err);
