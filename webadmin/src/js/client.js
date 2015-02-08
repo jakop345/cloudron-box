@@ -352,10 +352,9 @@ angular.module('Application').service('Client', function ($http, md5) {
         }).error(defaultErrorHandler(callback));
     };
 
-    Client.prototype.createUser = function (username, password, email, callback) {
+    Client.prototype.createUser = function (username, email, callback) {
         var data = {
             username: username,
-            password: password,
             email: email
         };
 
