@@ -8,6 +8,7 @@
 
 var config = require('../../../config.js'),
     database = require('../../database.js'),
+    tokendb = require('../../tokendb.js'),
     expect = require('expect.js'),
     request = require('superagent'),
     server = require('../../../src/server.js'),
@@ -40,8 +41,8 @@ describe('User API', function () {
     this.timeout(5000);
 
     var token = null;
-    var token_1 = null;
-    var token_2 = null;
+    var token_1 = tokendb.generateToken();
+    var token_2 = tokendb.generateToken();
 
     before(setup);
     after(cleanup);
@@ -219,27 +220,27 @@ describe('User API', function () {
         });
     });
 
-    it('create second admin should succeed with first admin credentials', function (done) {
-        request.post(SERVER_URL + '/api/v1/cloudron/activate')
+    it('create second user succeeds', function (done) {
+        request.post(SERVER_URL + '/api/v1/users')
                .query({ access_token: token })
                .send({ username: USERNAME_1, password: PASSWORD_1, email: EMAIL_1 })
                .end(function (err, res) {
+            expect(err).to.not.be.ok();
             expect(res.statusCode).to.equal(201);
-            done(err);
+
+            // HACK to get a token for second user (passwords are generated and the user should have gotten a password setup link...)
+            tokendb.add(token_1, USERNAME_1, 'test-client-id',  Date.now().toString(), '*', done);
         });
     });
 
-    it('get second admin token', function (done) {
-        request.get(SERVER_URL + '/api/v1/users/' + USERNAME_1 + '/login')
-               .auth(USERNAME_1, PASSWORD_1)
-               .end(function (error, result) {
-            expect(error).to.be(null);
-            expect(result.body.token).to.be.a('string');
-
-            // safe token for further calls
-            token_1 = result.body.token;
-
-            done();
+    it('set second user as admin succeeds', function (done) {
+        // TODO is USERNAME_1 in body and url redundant?
+        request.post(SERVER_URL + '/api/v1/users/' + USERNAME_1 + '/admin')
+               .query({ access_token: token })
+               .send({ username: USERNAME_1, admin: true })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(204);
+            done(err);
         });
     });
 
@@ -283,20 +284,25 @@ describe('User API', function () {
         });
     });
 
-    it('create user missing arguments should fail', function (done) {
+    it('create user missing username fails', function (done) {
         request.post(SERVER_URL + '/api/v1/users')
                .query({ access_token: token })
-               .send({ username: USERNAME_2, email: EMAIL })
-               .end(function (err, res) {
-            expect(res.statusCode).to.equal(400);
+               .send({ email: EMAIL_2 })
+               .end(function (error, result) {
+            expect(error).to.not.be.ok();
+            expect(result.statusCode).to.equal(400);
+            done();
+        });
+    });
 
-            request.post(SERVER_URL + '/api/v1/users')
-                   .query({ access_token: token })
-                   .send({ username: USERNAME_2, password: PASSWORD })
-                   .end(function (err, res) {
-                expect(res.statusCode).to.equal(400);
-                done(err);
-            });
+    it('create user missing email fails', function (done) {
+        request.post(SERVER_URL + '/api/v1/users')
+               .query({ access_token: token })
+               .send({ username: USERNAME_2 })
+               .end(function (error, result) {
+            expect(error).to.not.be.ok();
+            expect(result.statusCode).to.equal(400);
+            done();
         });
     });
 
@@ -304,40 +310,34 @@ describe('User API', function () {
         request.post(SERVER_URL + '/api/v1/users')
                .query({ access_token: token })
                .send({ username: USERNAME_2, password: PASSWORD_2, email: EMAIL_2 })
-               .end(function (err, res) {
+               .end(function (error, res) {
+            expect(error).to.not.be.ok();
             expect(res.statusCode).to.equal(201);
 
             request.post(SERVER_URL + '/api/v1/users')
                    .query({ access_token: token })
                    .send({ username: USERNAME_3, password: PASSWORD_3, email: EMAIL_3 })
-                   .end(function (err, res) {
+                   .end(function (error, res) {
+                expect(error).to.not.be.ok();
                 expect(res.statusCode).to.equal(201);
-                done(err);
+
+                // HACK to get a token for second user (passwords are generated and the user should have gotten a password setup link...)
+                tokendb.add(token_2, USERNAME_2, 'test-client-id',  Date.now().toString(), '*', done);
             });
         });
     });
 
     it('second user userInfo', function (done) {
-        request.get(SERVER_URL + '/api/v1/users/' + USERNAME_1 + '/login')
-               .auth(USERNAME_2, PASSWORD_2)
+        request.get(SERVER_URL + '/api/v1/users/' + USERNAME_1)
+               .query({ access_token: token_2 })
                .end(function (error, result) {
             expect(error).to.be(null);
-            expect(result.body.token).to.be.a('string');
+            expect(result.statusCode).to.equal(200);
+            expect(result.body.username).to.equal(USERNAME_2);
+            expect(result.body.email).to.equal(EMAIL_2);
+            expect(result.body.admin).to.not.be.ok();
 
-            // safe token for further calls
-            token_2 = result.body.token;
-
-            request.get(SERVER_URL + '/api/v1/users/' + USERNAME_1)
-                   .query({ access_token: token_2 })
-                   .end(function (error, result) {
-                expect(error).to.be(null);
-                expect(result.statusCode).to.equal(200);
-                expect(result.body.username).to.equal(USERNAME_2);
-                expect(result.body.email).to.equal(EMAIL_2);
-                expect(result.body.admin).to.not.be.ok();
-
-                done();
-            });
+            done();
         });
     });
 

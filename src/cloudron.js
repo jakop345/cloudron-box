@@ -113,22 +113,27 @@ function activate(username, password, email, callback) {
 
     debug('activating user:%s email:%s', username, email);
 
-    user.create(username, password, email, true /* admin */, function (error) {
-        if (error && error.reason === UserError.ALREADY_EXISTS) return callback(new CloudronError(CloudronError.ALREADY_PROVISIONED));
-        if (error && error instanceof UserError) return callback(error);
+    userdb.count(function (error, count) {
         if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
+        if (count !== 0) return callback(new CloudronError(CloudronError.ALREADY_PROVISIONED));
 
-        clientdb.getByAppId('webadmin', function (error, result) {
+        user.create(username, password, email, true /* admin */, function (error) {
+            if (error && error.reason === UserError.ALREADY_EXISTS) return callback(new CloudronError(CloudronError.ALREADY_PROVISIONED));
+            if (error && error instanceof UserError) return callback(error);
             if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
-            // Also generate a token so the admin creation can also act as a login
-            var token = tokendb.generateToken();
-            var expires = new Date(Date.now() + 60 * 60000).toUTCString(); // 1 hour
-
-            tokendb.add(token, username, result.id, expires, '*', function (error) {
+            clientdb.getByAppId('webadmin', function (error, result) {
                 if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
-                callback(null, { token: token, expires: expires });
+                // Also generate a token so the admin creation can also act as a login
+                var token = tokendb.generateToken();
+                var expires = new Date(Date.now() + 60 * 60000).toUTCString(); // 1 hour
+
+                tokendb.add(token, username, result.id, expires, '*', function (error) {
+                    if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
+
+                    callback(null, { token: token, expires: expires });
+                });
             });
         });
     });
