@@ -364,7 +364,12 @@ function setupRedis(app, callback) {
         }
     };
 
-    var env = [ 'REDIS_URL=redis://redisuser:' + redisPassword + '@redis-' + app.id ];
+    var env = [
+        'REDIS_URL=redis://redisuser:' + redisPassword + '@redis-' + app.id,
+        'REDIS_PASSWORD=' + redisPassword,
+        'REDIS_HOST=redis-' + app.id,
+        'REDIS_PORT=6379'
+    ];
 
     var redisContainer = docker.getContainer(createOptions.name);
     redisContainer.remove({ force: true, v: false }, function (ignoredError) {

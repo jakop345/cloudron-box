@@ -487,9 +487,14 @@ describe('App installation', function () {
             expect(redisUrl).to.be.ok();
 
             var urlp = url.parse(redisUrl);
+            var password = urlp.auth.split(':')[1];
+
+            expect(data.Config.Env).to.contain('REDIS_PORT=6379');
+            expect(data.Config.Env).to.contain('REDIS_HOST=redis-' + APP_ID);
+            expect(data.Config.Env).to.contain('REDIS_PASSWORD=' + password);
+
             expect(urlp.hostname).to.be('redis-' + APP_ID);
 
-            var password = urlp.auth.split(':')[1];
             var isMac = os.platform() === 'darwin';
             var client =
                 isMac ? redis.createClient(parseInt(exportedRedisPort, 10), '127.0.0.1', { auth_pass: password })
@@ -838,11 +843,16 @@ describe('App installation - port bindings', function () {
             data.Config.Env.forEach(function (env) { if (env.indexOf('REDIS_URL=') === 0) redisUrl = env.split('=')[1]; });
             expect(redisUrl).to.be.ok();
 
-            function checkRedis() {
-                var urlp = url.parse(redisUrl);
-                expect(urlp.hostname).to.be('redis-' + APP_ID);
+            var urlp = url.parse(redisUrl);
+            expect(urlp.hostname).to.be('redis-' + APP_ID);
 
-                var password = urlp.auth.split(':')[1];
+            var password = urlp.auth.split(':')[1];
+
+            expect(data.Config.Env).to.contain('REDIS_PORT=6379');
+            expect(data.Config.Env).to.contain('REDIS_HOST=redis-' + APP_ID);
+            expect(data.Config.Env).to.contain('REDIS_PASSWORD=' + password);
+
+            function checkRedis() {
                 var isMac = os.platform() === 'darwin';
                 var client =
                     isMac ? redis.createClient(parseInt(exportedRedisPort, 10), '127.0.0.1', { auth_pass: password })
@@ -920,6 +930,13 @@ describe('App installation - port bindings', function () {
 
             var urlp = url.parse(redisUrl);
             var password = urlp.auth.split(':')[1];
+
+            expect(urlp.hostname).to.be('redis-' + APP_ID);
+
+            expect(data.Config.Env).to.contain('REDIS_PORT=6379');
+            expect(data.Config.Env).to.contain('REDIS_HOST=redis-' + APP_ID);
+            expect(data.Config.Env).to.contain('REDIS_PASSWORD=' + password);
+
             var isMac = os.platform() === 'darwin';
             var client =
                 isMac ? redis.createClient(parseInt(exportedRedisPort, 10), '127.0.0.1', { auth_pass: password })
