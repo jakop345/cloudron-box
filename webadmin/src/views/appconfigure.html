@@ -4,23 +4,25 @@
     <div class="col-md-6">
 
     <h1>Configure {{ app.manifest.title }}</h1>
-    <form class="form-signin" role="form" ng-submit="configureApp()" autocomplete="off">
-        <div class="form-group">
+    <form class="form-signin" role="form" name="config_form" ng-submit="configureApp()" autocomplete="off">
+        <div class="form-group" ng-class="{ 'has-error': config_form.location.$dirty && config_form.location.$invalid }">
             <label class="control-label" for="inputLocation">Location</label>
             <div class="input-group form-inline">
-                <input type="text" class="form-control" ng-model="location" id="inputLocation" required autofocus>
+                <input type="text" class="form-control" ng-model="location" id="inputLocation" name="location" required autofocus>
                 <div class="input-group-addon">.{{domain}}</div>
             </div>
         </div>
-        <div class="form-group">
+        <div class="form-group" ng-class="{ 'has-error': (!config_form.password.$dirty && error.password) || (config_form.password.$dirty && config_form.password.$invalid) }">
             <label class="control-label" for="inputPassword">Password</label>
-            <input type="password" class="form-control" ng-model="password" id="inputPassword" required>
+            <input type="password" class="form-control" ng-model="password" id="inputPassword" name="password" ng-maxlength="512" ng-minlength="5" required>
         </div>
         <div ng-repeat="(port, portInfo) in portBindings">
-            <div class="form-group">
-                <label class="control-label" for="inputPortInfo{{portInfo.description}}">{{ portInfo.description }}</label>
-                <input type="text" class="form-control" ng-model="portBindings[port].hostPort" id="inputPortInfo{{portInfo.description}}" required>
-            </div>
+            <ng-form name="portInfo_form">
+                <div class="form-group" ng-class="{ 'has-error': portInfo_form.itemName{{$index}}.$dirty && portInfo_form.itemName{{$index}}.$invalid }">
+                    <label class="control-label" for="inputPortInfo{{port}}">{{ portInfo.description }} ({{ hostPortMin }} - {{ hostPortMax }})</label>
+                    <input type="number" class="form-control" ng-model="portBindings[port].hostPort" id="inputPortInfo{{port}}" later-name="itemName{{$index}}" min="{{hostPortMin}}" max="{{hostPortMax}}" required>
+                </div>
+            </ng-form>
         </div>
         <div class="form-group">
             <label class="control-label" for="accessRestriction">Access Restriction</label>
@@ -31,7 +33,7 @@
             </select>
         </div>
         <input class="btn btn-default btn-outline" ng-click="cancel()" type="button" value="Cancel"/>
-        <input class="btn btn-primary btn-outline pull-right" type="submit" ng-disabled="{{disabled}}" value="Configure"/>
+        <input class="btn btn-primary btn-outline pull-right" type="submit" ng-disabled="config_form.$invalid || busy" value="Configure"/>
     </form>
 
     </div>

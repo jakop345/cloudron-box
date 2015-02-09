@@ -50,7 +50,7 @@ var AppInstallController = function ($scope, $routeParams, Client, AppStore, $ti
                     $scope.error.name = 'Application already exists.';
                 } else if (error.statusCode === 403) {
                     $scope.error.password = 'Wrong password provided.';
-                    $scope.app.password = '';
+                    $scope.password = '';
                 } else {
                     $scope.error.name = 'App with the name ' + $scope.app.name + ' cannot be installed.';
                 }

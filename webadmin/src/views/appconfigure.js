@@ -8,7 +8,7 @@ var AppConfigureController = function ($scope, $routeParams, Client) {
     $scope.location = '';
     $scope.accessRestriction = '';
     $scope.disabled = false;
-    $scope.error = { };
+    $scope.error = {};
     $scope.domain = '';
     $scope.portBindings = { };
 
@@ -25,7 +25,7 @@ var AppConfigureController = function ($scope, $routeParams, Client) {
             if (error) {
                 if (error.statusCode === 403) {
                     $scope.error.password = 'Wrong password provided.';
-                    $scope.app.password = '';
+                    $scope.password = '';
                 } else {
                     $scope.error.name = 'App with the name ' + $scope.app.name + ' cannot be configured.';
                 }
