@@ -153,9 +153,6 @@ function initializeExpressSync() {
     // settings routes
     router.get ('/api/v1/settings/naked_domain', settingsScope, routes.settings.getNakedDomain);
     router.post('/api/v1/settings/naked_domain', settingsScope, routes.settings.setNakedDomain);
-
-    // graphite calls (FIXME: remove before release)
-    router.get([ '/graphite/*', '/content/*', '/metrics/*', '/dashboard/*', '/render/*', '/browser/*', '/composer/*' ], routes.graphs.forwardToGraphite);
 }
 
 function start(callback) {

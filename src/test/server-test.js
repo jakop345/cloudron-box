@@ -243,29 +243,5 @@ describe('Server', function () {
             }, 100);
         });
     });
-
-    describe('graphite urls', function () {
-        var scope;
-
-        before(function (done) {
-            scope = nock('http://127.0.0.1:8000')
-            scope.get('/graphite/someurl').reply(200); // url must not have access_token
-
-            server.start(done);
-        });
-
-        after(function (done) {
-            nock.cleanAll();
-            server.stop(done);
-        });
-
-        it('can access graphite url', function (done) {
-            request.get(SERVER_URL + '/graphite/someurl').query({ access_token: ACCESS_TOKEN }).end(function (error, res) {
-                expect(res.statusCode).to.be(200);
-                expect(scope.isDone()).to.be.ok();
-                done();
-            });
-        });
-    });
 });
 
