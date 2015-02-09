@@ -19,15 +19,13 @@ exports = module.exports = {
     clear: clear
 };
 
-var aes = require('../src/aes-helper.js'),
-    assert = require('assert'),
+var assert = require('assert'),
     crypto = require('crypto'),
     database = require('./database'),
     DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:user'),
     mailer = require('./mailer.js'),
     uuid = require('node-uuid'),
-    ursa = require('ursa'),
     userdb = require('./userdb.js'),
     util = require('util'),
     validator = require('validator');
@@ -126,16 +124,12 @@ function createUser(username, password, email, admin, callback) {
         crypto.pbkdf2(password, salt, CRYPTO_ITERATIONS, CRYPTO_KEY_LENGTH, function (error, derivedKey) {
             if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-            // now generate the pub/priv keypairs for volume header
-            var keyPair = ursa.generatePrivateKey(2048 /* modulusBits */, 65537 /* exponent */);
-
             var now = (new Date()).toUTCString();
             var user = {
                 id: username,
                 username: username,
                 email: email,
                 _password: new Buffer(derivedKey, 'binary').toString('hex'),
-                publicPem: keyPair.toPublicPem().toString('hex'),
                 admin: admin,
                 _salt: salt.toString('hex'),
                 createdAt: now,
