@@ -108,7 +108,7 @@ var GraphsController = function ($scope, Client) {
         if (dataUsedData && dataUsedData.datapoints) {
             transformedDataUsed = dataUsedData.datapoints.map(function (point) { return { y: point[0], x: point[1] }; });
         }
- 
+
         var diskGraph = new Rickshaw.Graph({
             element: document.querySelector('#' + activeTab + 'DiskChart'),
             renderer: 'area',

@@ -19,10 +19,10 @@ function forwardToGraphite(req, res, next) {
     req.url = url.format({ pathname: parsedUrl.pathname, query: parsedUrl.query });
 
     graphiteProxy(req, res, next);
-};
+}
 
 function getGraphs(req, res, next) {
-    req.url = req.url.replace(/^\/api\/v1\/graphs(\?.*)/, '/render$1');
+    req.url = req.url.replace(/^\/api\/v1\/cloudron\/graphs(\?.*)/, '/render$1');
     forwardToGraphite(req, res, next);
 }
 
