@@ -69,7 +69,6 @@ var AppInstallController = function ($scope, $routeParams, Client, AppStore, $ti
 
     // hack for autofocus with angular
     $scope.$on('$viewContentLoaded', function () {
-        $timeout(function () { $('input[autofocus]:visible:first').focus();
-        console.log($scope.install_form) }, 1000);
+        $timeout(function () { $('input[autofocus]:visible:first').focus(); }, 1000);
     });
 };
