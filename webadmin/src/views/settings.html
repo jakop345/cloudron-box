@@ -72,7 +72,7 @@
                     <li class="list-group-item">IP <span class="pull-right">{{config.ip}}</span></li>
                     <li class="list-group-item">Naked Domain App:
                         <span class="pull-right">
-                            <select ng-model="nakedDomainApp" ng-options="app.manifest.location for app in apps" ng-change="setNakedDomain()">
+                            <select ng-model="nakedDomainApp" ng-options="app.location for app in apps" ng-change="setNakedDomain()">
                                 <option value="">(Unset)</option>
                             </select>
                         </span>
