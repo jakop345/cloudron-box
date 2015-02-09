@@ -135,7 +135,6 @@ function createUser(username, password, email, admin, callback) {
                 username: username,
                 email: email,
                 _password: new Buffer(derivedKey, 'binary').toString('hex'),
-                _privatePemCipher: aes.encrypt(keyPair.toPrivatePem(), password, salt),
                 publicPem: keyPair.toPublicPem().toString('hex'),
                 admin: admin,
                 _salt: salt.toString('hex'),
@@ -287,13 +286,8 @@ function setPassword(userId, newPassword, callback) {
         crypto.pbkdf2(newPassword, saltBuffer, CRYPTO_ITERATIONS, CRYPTO_KEY_LENGTH, function (error, derivedKey) {
             if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-            // var privateKeyPem = aes.decrypt(user._privatePemCipher, oldPassword, saltBuffer);
-            // var keyPair = ursa.createPrivateKey(privateKeyPem, oldPassword, 'utf8');
-            var keyPair = ursa.generatePrivateKey(2048 /* modulusBits */, 65537 /* exponent */);
-
             user.modifiedAt = (new Date()).toUTCString();
             user._password = new Buffer(derivedKey, 'binary').toString('hex');
-            user._privatePemCipher = aes.encrypt(keyPair.toPrivatePem(), newPassword, saltBuffer);
 
             userdb.update(userId, user, function (error) {
                 if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));

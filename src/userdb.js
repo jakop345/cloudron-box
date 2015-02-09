@@ -20,7 +20,7 @@ exports = module.exports = {
     adminCount: adminCount
 };
 
-var USERS_FIELDS = [ 'id', 'username', 'email', '_password', 'publicPem', '_privatePemCipher', '_salt', 'createdAt', 'modifiedAt', 'admin' ].join(',');
+var USERS_FIELDS = [ 'id', 'username', 'email', '_password', 'publicPem', '_salt', 'createdAt', 'modifiedAt', 'admin' ].join(',');
 
 function get(userId, callback) {
     assert(typeof userId === 'string');
@@ -80,7 +80,6 @@ function add(userId, user, callback) {
     assert(typeof user.username === 'string');
     assert(typeof user._password === 'string');
     assert(typeof user.email === 'string');
-    assert(typeof user._privatePemCipher === 'string');
     assert(typeof user.publicPem === 'string');
     assert(typeof user.admin === 'boolean');
     assert(typeof user._salt === 'string');
@@ -88,9 +87,9 @@ function add(userId, user, callback) {
     assert(typeof user.modifiedAt === 'string');
     assert(typeof callback === 'function');
 
-    var data = [ userId, user.username, user._password, user.email, user._privatePemCipher, user.publicPem,
+    var data = [ userId, user.username, user._password, user.email, user.publicPem,
                  user.admin, user._salt, user.createdAt, user.modifiedAt ];
-    database.run('INSERT INTO users (id, username, _password, email, _privatePemCipher, publicPem, admin, _salt, createdAt, modifiedAt) '
+    database.run('INSERT INTO users (id, username, _password, email, publicPem, admin, _salt, createdAt, modifiedAt) '
            + 'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
            data, function (error) {
         if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
