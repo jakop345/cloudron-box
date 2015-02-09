@@ -9,12 +9,3 @@ docs/
 supervisord.pid
 supervisord.log
 
-# nginx
-nginx/*.log
-nginx/*.pid
-nginx/naked_domain.conf
-nginx/applications/
-
-# release files
-release/versions-dev.json
-
