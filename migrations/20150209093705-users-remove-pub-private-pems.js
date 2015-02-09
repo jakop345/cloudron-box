@@ -24,7 +24,7 @@ exports.up = function(db, callback) {
             if (error) return callback(error);
 
             async.eachSeries(result, function (record, callback) {
-                db.runSql('INSERT INTO users (id, username, email, _password, _salt, createdAt, modifiedAt, admin) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', record.clientId, record.username, record.email, record._password, record._salt, record.createdAt, record.modifiedAt, record.admin, callback);
+                db.runSql('INSERT INTO users (id, username, email, _password, _salt, createdAt, modifiedAt, admin) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', record.id, record.username, record.email, record._password, record._salt, record.createdAt, record.modifiedAt, record.admin, callback);
             }, function (error) {
                 if (error) return callback(error);
 
