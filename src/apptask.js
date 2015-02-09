@@ -186,6 +186,7 @@ function createContainer(app, callback) {
             env.push(manifest.tcpPorts[containerPort].environmentVariable + '=' + portBindings[containerPort]);
         }
 
+        env.push('CLOUDRON=1');
         env.push('APP_ORIGIN' + '=' + 'https://' + config.appFqdn(app.location));
         env.push('ADMIN_ORIGIN' + '=' + config.adminOrigin());
 
