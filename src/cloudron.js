@@ -242,7 +242,7 @@ function sendMailDnsRecordsRequest(callback) {
     assert(typeof callback === 'function');
 
     var DKIM_SELECTOR = 'mail';
-    var DMARC_REPORT_EMAIL = 'girish@forwardbias.in';
+    var DMARC_REPORT_EMAIL = 'dmarc-report@cloudron.io';
 
     var dkimPublicKeyFile = path.join(paths.MAIL_DATA_DIR, 'dkim/' + config.fqdn() + '/public');
     var publicKey = safe.fs.readFileSync(dkimPublicKeyFile, 'utf8');
