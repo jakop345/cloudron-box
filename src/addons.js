@@ -340,7 +340,7 @@ function setupRedis(app, callback) {
         name: 'redis-' + app.id,
         Hostname: config.appFqdn(app.location),
         Tty: true,
-        Image: 'girish/redis:0.2',
+        Image: 'girish/redis:0.3',
         Cmd: null,
         Volumes: { },
         VolumesFrom: ''
