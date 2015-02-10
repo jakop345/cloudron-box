@@ -107,13 +107,13 @@ ${script_dir}/start/setup_collectd.sh
 
 set_progress "40" "Setup mail relay"
 docker rm -f mail || true
-docker pull girish/mail:0.2 || true # this line is for dev convenience since it's already part of base image
+docker pull girish/mail:0.3 || true # this line is for dev convenience since it's already part of base image
 mail_container_id=$(docker run --restart=always -d --name="mail" \
     -p 127.0.0.1:25:25 \
     -h "${arg_fqdn}" \
     -e "DOMAIN_NAME=${arg_fqdn}" \
     -v "${DATA_DIR}/mail:/app/data" \
-    girish/mail:0.2)
+    girish/mail:0.3)
 echo "Mail container id: ${mail_container_id}"
 
 set_progress "50" "Setup MySQL addon"
@@ -124,13 +124,13 @@ cat > "${CONFIG_DIR}/addons/mysql_vars.sh" <<EOF
 readonly MYSQL_ROOT_PASSWORD='${mysql_root_password}'
 readonly MYSQL_ROOT_HOST='${docker0_ip}'
 EOF
-docker pull girish/mysql:0.2 || true # this line for dev convenience since it's already part of base image
+docker pull girish/mysql:0.3 || true # this line for dev convenience since it's already part of base image
 mysql_container_id=$(docker run --restart=always -d --name="mysql" \
     -p 127.0.0.1:3306:3306 \
     -h "${arg_fqdn}" \
     -v "${DATA_DIR}/mysql:/var/lib/mysql" \
     -v "${CONFIG_DIR}/addons/mysql_vars.sh:/etc/mysql/mysql_vars.sh:r" \
-    girish/mysql:0.2)
+    girish/mysql:0.3)
 echo "MySQL container id: ${mysql_container_id}"
 
 set_progress "60" "Setup Postgres addon"
@@ -139,17 +139,17 @@ postgresql_root_password=$(pwgen -1 -s)
 cat > "${CONFIG_DIR}/addons/postgresql_vars.sh" <<EOF
 readonly POSTGRESQL_ROOT_PASSWORD='${postgresql_root_password}'
 EOF
-docker pull girish/postgresql:0.2 || true # this line for dev convenience since it's already part of base image
+docker pull girish/postgresql:0.3 || true # this line for dev convenience since it's already part of base image
 postgresql_container_id=$(docker run --restart=always -d --name="postgresql" \
     -p 127.0.0.1:5432:5432 \
     -h "${arg_fqdn}" \
     -v "${DATA_DIR}/postgresql:/var/lib/mysql" \
     -v "${CONFIG_DIR}/addons/postgresql_vars.sh:/etc/postgresql/postgresql_vars.sh:r" \
-    girish/postgresql:0.2)
+    girish/postgresql:0.3)
 echo "PostgreSQL container id: ${postgresql_container_id}"
 
 set_progress "70" "Pulling Redis addon"
-docker pull girish/redis:0.2 || true # this line for dev convenience since it's already part of base image
+docker pull girish/redis:0.3 || true # this line for dev convenience since it's already part of base image
 
 set_progress "80" "Creating cloudron.conf"
 cloudron_sqlite="${DATA_DIR}/cloudron.sqlite"
