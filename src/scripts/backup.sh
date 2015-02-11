@@ -26,7 +26,7 @@ echo "Snapshoting backup as backup-${now}"
 btrfs subvolume snapshot -r "${HOME}/data" "${HOME}/backup-${now}"
 
 echo "Uploading backup to ${backup_url}"
-tar -cvzf - -C "${HOME}/backup-${now}" . | curl -H "Content-Type:" -X PUT --data-binary @- "${backup_url}"
+tar -cvzf - -C "${HOME}/backup-${now}" . | curl --fail -H "Content-Type:" -X PUT --data-binary @- "${backup_url}"
 
 echo "Deleting backup snapshot"
 btrfs subvolume delete "${HOME}/backup-${now}"
