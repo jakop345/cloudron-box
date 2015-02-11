@@ -22,6 +22,7 @@ box_src_tmp_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
 
 source "${script_dir}/argparser.sh" "$@" # this injects the arg_* variables used below
 
+# keep this is sync with config.js appFqdn()
 admin_fqdn=$([[ "${arg_is_custom_domain}" == "true" ]] && echo "admin.${arg_fqdn}" ||  echo "admin-${arg_fqdn}")
 
 set_progress() {
@@ -80,7 +81,8 @@ mkdir -p "${nginx_appconfig_dir}"
 cp "${script_dir}/start/nginx/nginx.conf" "${nginx_config_dir}/nginx.conf"
 cp "${script_dir}/start/nginx/mime.types" "${nginx_config_dir}/mime.types"
 touch "${nginx_config_dir}/naked_domain.conf"
-sed -e "s/##ADMIN_FQDN##/${admin_fqdn}/" -e "s|##BOX_SRC_DIR##|${BOX_SRC_DIR}|" "${script_dir}/start/nginx/admin.conf_template" > "${nginx_appconfig_dir}/admin.conf"
+${box_src_tmp_dir}/node_modules/.bin/ejs-cli -f "${script_dir}/start/nginx/appconfig.ejs" \
+    -O "{ \"vhost\": \"${admin_fqdn}\", \"isWebAdmin\": true, \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${nginx_appconfig_dir}/admin.conf"
 
 certificate_dir="${nginx_config_dir}/cert"
 mkdir -p "${certificate_dir}"

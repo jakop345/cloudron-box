@@ -1,0 +1,57 @@
+server {
+    listen       443;
+    server_name  <%= vhost %>;
+
+    ssl                  on;
+    # paths are relative to prefix and not to this file
+    ssl_certificate      cert/host.cert;
+    ssl_certificate_key  cert/host.key;
+    ssl_session_timeout  5m;
+
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2; # don't use SSLv3 ref: POODLE
+    ssl_ciphers "HIGH:!aNULL:!MD5 or HIGH:!aNULL:!MD5:!3DES";
+    ssl_prefer_server_ciphers on;
+
+    proxy_http_version 1.1;
+    proxy_intercept_errors on;
+    proxy_read_timeout       3500;
+    proxy_connect_timeout    3250;
+
+    proxy_set_header   Host               $host;
+    proxy_set_header   X-Forwarded-For    $remote_addr;
+    proxy_set_header   X-Forwarded-Host   $host;
+    proxy_set_header   X-Forwarded-Proto  https;
+
+    error_page 500 502 503 504 =302 @appstatus;
+    location @appstatus {
+        internal;
+        root <%= sourceDir %>/webadmin/dist;
+        rewrite ^/$ /appstatus.html break;
+    }
+
+    location / {
+<% if ( isWebAdmin ) { %>
+        location /api/ {
+            proxy_pass   http://127.0.0.1:3000;
+            client_max_body_size 1m;
+        }
+
+        # graphite paths
+        location ~ ^/(graphite|content|metrics|dashboard|render|browser|composer)/ {
+            proxy_pass   http://127.0.0.1:8000;
+            client_max_body_size 1m;
+        }
+
+        location / {
+            root   <%= sourceDir %>/webadmin/dist;
+            index  index.html index.htm;
+        }
+<% } else if ( accessRestriction.length > 0 ) { %>
+        proxy_pass http://127.0.0.1:4000;
+        proxy_set_header   X-Cloudron-Proxy-Port   <%= port %>;
+<% } else { %>
+        proxy_pass http://127.0.0.1:<%= port %>;
+<% } %>
+    }
+}
+

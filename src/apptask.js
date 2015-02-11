@@ -53,7 +53,7 @@ exports = module.exports = {
     _waitForDnsPropagation: waitForDnsPropagation
 };
 
-var NGINX_APPCONFIG_EJS = fs.readFileSync(__dirname + '/nginx.appconfig.ejs', { encoding: 'utf8' }),
+var NGINX_APPCONFIG_EJS = fs.readFileSync(__dirname + '/../setup/start/nginx/appconfig.ejs', { encoding: 'utf8' }),
     COLLECTD_CONFIG_EJS = fs.readFileSync(__dirname + '/collectd.config.ejs', { encoding: 'utf8' }),
     SUDO = '/usr/bin/sudo',
     RELOAD_NGINX_CMD = path.join(__dirname, 'scripts/reloadnginx.sh'),
@@ -83,7 +83,7 @@ function configureNginx(app, callback) {
         if (error) return callback(error);
 
         var sourceDir = path.resolve(__dirname, '..');
-        var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: config.appFqdn(app.location), port: freePort, accessRestriction: app.accessRestriction });
+        var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: config.appFqdn(app.location), isWebAdmin: false, port: freePort, accessRestriction: app.accessRestriction });
 
         var nginxConfigFilename = path.join(paths.NGINX_APPCONFIG_DIR, app.id + '.conf');
         debug('writing config to ' + nginxConfigFilename);
@@ -115,7 +115,7 @@ function unconfigureNginx(app, callback) {
 
 function setNakedDomain(app, callback) {
     var sourceDir = path.resolve(__dirname, '..');
-    var nginxConf = app ? ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: config.fqdn(), port: app.httpPort, accessRestriction: app.accessRestriction }) : '';
+    var nginxConf = app ? ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: config.fqdn(), isWebAdmin: false, port: app.httpPort, accessRestriction: app.accessRestriction }) : '';
 
     var nginxNakedDomainFilename = path.join(paths.NGINX_CONFIG_DIR, 'naked_domain.conf');
     debug('writing naked domain config to ' + nginxNakedDomainFilename);

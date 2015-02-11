@@ -119,6 +119,7 @@ function fqdn() {
     return get('fqdn');
 }
 
+// keep this in sync with start.sh admin.conf generation code
 function appFqdn(location) {
     assert(typeof location === 'string');
     return isCustomDomain() ? location + '.' + fqdn() : location + '-' + fqdn();
