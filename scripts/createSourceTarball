@@ -2,12 +2,9 @@
 
 set -eu
 
-: ${AWS_BOX_RELEASE_ACCESS_KEY:=}
-: ${AWS_BOX_RELEASE_SECRET_KEY:=}
-if [[ -z "${AWS_BOX_RELEASE_ACCESS_KEY}" || -z "${AWS_BOX_RELEASE_SECRET_KEY}" ]]; then
-    echo "AWS_BOX_RELEASE_ACCESS_KEY and AWS_BOX_RELEASE_SECRET_KEY env is not set"
-    exit 1
-fi
+assertNotEmpty() {
+    : "${!1:? "$1 is not set."}"
+}
 
 # Only GNU getopt supports long options. OS X comes bundled with the BSD getopt
 # brew install gnu-getopt to get the GNU getopt on OS X
@@ -30,6 +27,9 @@ done
 readonly SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
 readonly TMPDIR=${TMPDIR:-/tmp} # why is this not set on mint?
 
+assertNotEmpty AWS_DEV_ACCESS_KEY
+assertNotEmpty AWS_DEV_SECRET_KEY
+
 version=$(cd "${SOURCE_DIR}" && git rev-parse "${commitish}")
 bundle_dir=$(mktemp -d -t box 2>/dev/null || mktemp -d box-XXXXXXXXXX --tmpdir=$TMPDIR)
 bundle_file="${TMPDIR}/box-${version}.tar.gz"
@@ -44,7 +44,7 @@ cd "${bundle_dir}" && npm install --production
 cd "${bundle_dir}" && tar czvf "${bundle_file}" .
 
 echo "Uploading bundle to S3"
-s3cmd --acl-public --access_key="${AWS_BOX_RELEASE_ACCESS_KEY}" --secret_key="${AWS_BOX_RELEASE_SECRET_KEY}" --no-mime-magic put "${bundle_file}" "s3://cloudron-releases/box-${version}.tar.gz"
+s3cmd --acl-public --access_key="${AWS_DEV_ACCESS_KEY}" --secret_key="${AWS_DEV_SECRET_KEY}" --no-mime-magic put "${bundle_file}" "s3://cloudron-dev-releases/box-${version}.tar.gz"
 
 echo "Cleaning up ${bundle_dir}"
 rm -rf "${bundle_dir}" "${bundle_file}"
