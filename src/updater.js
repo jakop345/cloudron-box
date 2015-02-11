@@ -61,15 +61,23 @@ function checkBoxUpdates(callback) {
 
         var versions = safe.JSON.parse(result.text);
 
-        if (!versions) return callback(new Error('versions is not valid json:' + safe.error));
+        if (!versions || typeof versions !== 'object') return callback(new Error('versions is not in valid format:' + safe.error));
 
-        debug('checkBoxUpdates: Latest version is %s etag:%s', Object.keys(versions).sort(semver.compare).pop(), result.header['etag']);
+        var latestVersion = Object.keys(versions).sort(semver.compare).pop();
+        debug('checkBoxUpdates: Latest version is %s etag:%s', latestVersion, result.header['etag']);
 
+        if (!latestVersion) return callback(new Error('No version available'));
+
+        var nextVersion = null, nextVersionInfo = null;
         var currentVersionInfo = versions[currentVersion];
-        if (!currentVersionInfo) return callback(new Error('Cloudron runs on unknown version ' + currentVersion));
-
-        var nextVersion = currentVersionInfo.next;
-        var nextVersionInfo = nextVersion ? versions[nextVersion] : null;
+        if (!currentVersionInfo) {
+            debug('Cloudron runs on unknown version %s. Offering to update to latest version', currentVersion);
+            nextVersion = latestVersion;
+            nextVersionInfo = versions[latestVersion];
+        } else {
+            nextVersion = currentVersionInfo.next;
+            nextVersionInfo = nextVersion ? versions[nextVersion] : null;
+        }
 
         if (nextVersionInfo && typeof nextVersionInfo === 'object') {
             debug('new version %s available. imageId: %d code: %s', nextVersion, nextVersionInfo.imageId, nextVersionInfo.sourceTarballUrl);
