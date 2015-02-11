@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eu
+set -eux
 
 # looks like restarting supervisor completely is the only way to reload it
 service supervisor stop || true

@@ -106,7 +106,6 @@ set_progress "30" "Setup collectd and graphite"
 ${script_dir}/start/setup_collectd.sh
 
 set_progress "40" "Setup mail relay"
-docker rm -f mail || true
 docker pull girish/mail:0.3 || true # this line is for dev convenience since it's already part of base image
 mail_container_id=$(docker run --restart=always -d --name="mail" \
     -p 127.0.0.1:25:25 \
@@ -117,7 +116,6 @@ mail_container_id=$(docker run --restart=always -d --name="mail" \
 echo "Mail container id: ${mail_container_id}"
 
 set_progress "50" "Setup MySQL addon"
-docker rm -f mysql || true
 mysql_root_password=$(pwgen -1 -s)
 docker0_ip=$(/sbin/ifconfig docker0 | grep "inet addr" | awk -F: '{print $2}' | awk '{print $1}')
 cat > "${CONFIG_DIR}/addons/mysql_vars.sh" <<EOF
@@ -134,7 +132,6 @@ mysql_container_id=$(docker run --restart=always -d --name="mysql" \
 echo "MySQL container id: ${mysql_container_id}"
 
 set_progress "60" "Setup Postgres addon"
-docker rm -f postgresql || true
 postgresql_root_password=$(pwgen -1 -s)
 cat > "${CONFIG_DIR}/addons/postgresql_vars.sh" <<EOF
 readonly POSTGRESQL_ROOT_PASSWORD='${postgresql_root_password}'

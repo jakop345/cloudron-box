@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eu
+set -eux
 
 readonly BOX_SRC_DIR="/home/yellowtent/box"
 readonly DATA_DIR="/home/yellowtent/data"
