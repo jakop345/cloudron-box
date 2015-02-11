@@ -63,7 +63,7 @@ var AppStoreController = function ($scope, $location, Client, AppStore) {
     };
 
     Client.onConfig(function (config) {
-        if (!config.appServerUrl) return;
+        if (!config.apiServerOrigin) return;
         $scope.refresh();
     });
 };

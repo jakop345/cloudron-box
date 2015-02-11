@@ -1,3 +1,4 @@
 {
-	"appServerUrl": "https://dev.cloudron.io"
+	"webServerOrigin": "https://dev.cloudron.io",
+	"apiServerOrigin": "https://cloudron-dev.herokuapp.com"
 }

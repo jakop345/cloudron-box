@@ -131,7 +131,7 @@ describe('apptask', function () {
     });
 
     it('barfs on empty manifest', function (done) {
-        var scope = nock(config.appServerUrl()).get('/api/v1/appstore/apps/' + APP.appStoreId + '/manifest').reply(200, { });
+        var scope = nock(config.apiServerOrigin()).get('/api/v1/appstore/apps/' + APP.appStoreId + '/manifest').reply(200, { });
 
         apptask._downloadManifest(APP, function (error) {
             expect(error).to.be.ok();
@@ -142,7 +142,7 @@ describe('apptask', function () {
 
     it('barfs on bad field in manifest', function (done) {
         var manifest = { version: '0.1', dockerImage: 'foo', healthCheckPath: '/', httpPort: 3, title: 'ok' };
-        var scope = nock(config.appServerUrl()).get('/api/v1/appstore/apps/' + APP.appStoreId + '/manifest').reply(200, manifest);
+        var scope = nock(config.apiServerOrigin()).get('/api/v1/appstore/apps/' + APP.appStoreId + '/manifest').reply(200, manifest);
 
         apptask._downloadManifest(APP, function (error) {
             expect(error).to.be.ok();
@@ -152,7 +152,7 @@ describe('apptask', function () {
     });
 
     it('barfs on malformed manifest', function (done) {
-        var scope = nock(config.appServerUrl()).get('/api/v1/appstore/apps/' + APP.appStoreId + '/manifest').reply(200, 'you evil man');
+        var scope = nock(config.apiServerOrigin()).get('/api/v1/appstore/apps/' + APP.appStoreId + '/manifest').reply(200, 'you evil man');
 
         apptask._downloadManifest(APP, function (error) {
             expect(error).to.be.ok();
@@ -163,7 +163,7 @@ describe('apptask', function () {
 
     it('downloads manifest', function (done) {
         var manifest = { version: '0.1', dockerImage: 'foo', healthCheckPath: '/', httpPort: '3', title: 'ok' };
-        var scope = nock(config.appServerUrl()).get('/api/v1/appstore/apps/' + APP.appStoreId + '/manifest').reply(200, manifest);
+        var scope = nock(config.apiServerOrigin()).get('/api/v1/appstore/apps/' + APP.appStoreId + '/manifest').reply(200, manifest);
 
         apptask._downloadManifest(APP, function (error) {
             expect(error).to.be(null);
@@ -174,7 +174,7 @@ describe('apptask', function () {
 
     it('registers subdomain', function (done) {
         var scope =
-            nock(config.appServerUrl())
+            nock(config.apiServerOrigin())
                 .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP.location, type: 'A' } ] })
                 .reply(201, { ids: [ 'someid' ] });
 
@@ -186,7 +186,7 @@ describe('apptask', function () {
     });
 
     it('unregisters subdomain', function (done) {
-        var scope = nock(config.appServerUrl()).delete('/api/v1/subdomains/someid').reply(200, { });
+        var scope = nock(config.apiServerOrigin()).delete('/api/v1/subdomains/someid').reply(200, { });
 
         apptask._unregisterSubdomain(APP, function (error) {
             expect(error).to.be(null);

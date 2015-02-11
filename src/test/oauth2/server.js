@@ -21,8 +21,6 @@ console.log();
 console.log(' Cloudron config:                ', config.cloudronConfigFile);
 console.log(' Port:                           ', config.get('port'));
 console.log(' Admin Origin:                   ', config.adminOrigin());
-console.log(' Appstore token:                 ', config.token());
-console.log(' Appstore server origin:         ', config.appServerUrl());
 console.log();
 console.log('==========================================');
 console.log();

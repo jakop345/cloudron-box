@@ -142,10 +142,10 @@ function activate(username, password, email, callback) {
 function getBackupUrl(callback) {
     assert(typeof callback === 'function');
 
-    if (!config.appServerUrl()) return callback(new Error('No appstore server url set'));
+    if (!config.apiServerOrigin()) return callback(new Error('No api server url set'));
     if (!config.token()) return callback(new Error('No appstore server token set'));
 
-    var url = config.appServerUrl() + '/api/v1/boxes/' + config.fqdn() + '/backupurl';
+    var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/backupurl';
 
     superagent.put(url).query({ token: config.token(), boxVersion: config.version() }).end(function (error, result) {
         if (error) return callback(new Error('Error getting presigned backup url: ' + error.message));
@@ -204,7 +204,8 @@ function getConfig(callback) {
     assert(typeof callback === 'function');
 
     callback(null, {
-        appServerUrl: config.appServerUrl(),
+        apiServerOrigin: config.apiServerOrigin(),
+        webServerOrigin: config.webServerOrigin(),
         isDev: /dev/i.test(config.get('boxVersionsUrl')),
         fqdn: config.fqdn(),
         ip: getIp(),
@@ -216,7 +217,7 @@ function getConfig(callback) {
 function sendHeartBeat() {
     var HEARTBEAT_INTERVAL = 1000 * 60;
 
-    if (!config.appServerUrl()) {
+    if (!config.apiServerOrigin()) {
         debug('No appstore server url set. Not sending heartbeat.');
         return;
     }
@@ -226,7 +227,7 @@ function sendHeartBeat() {
         return;
     }
 
-    var url = config.appServerUrl() + '/api/v1/boxes/' + config.fqdn() + '/heartbeat';
+    var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/heartbeat';
     debug('Sending heartbeat ' + url);
 
     superagent.get(url).query({ token: config.token(), version: config.version() }).end(function (error, result) {
@@ -265,7 +266,7 @@ function sendMailDnsRecordsRequest(callback) {
     debug('sendMailDnsRecords request:%s', JSON.stringify(records));
 
     superagent
-        .post(config.appServerUrl() + '/api/v1/subdomains')
+        .post(config.apiServerOrigin() + '/api/v1/subdomains')
         .set('Accept', 'application/json')
         .query({ token: config.token() })
         .send({ records: records })

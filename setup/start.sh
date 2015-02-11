@@ -161,7 +161,6 @@ cat > "${CONFIG_DIR}/cloudron.conf" <<CONF_END
 {
     "version": "${arg_version}",
     "token": "${arg_token}",
-    "appServerUrl": "${arg_app_server_url}",
     "apiServerOrigin": "${arg_api_server_origin}",
     "webServerOrigin": "${arg_web_server_origin}",
     "fqdn": "${arg_fqdn}",

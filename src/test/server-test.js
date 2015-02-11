@@ -226,7 +226,7 @@ describe('Server', function () {
             config.set('token', 'forheartbeat');
             server.start(done);
 
-            var scope = nock(config.appServerUrl());
+            var scope = nock(config.apiServerOrigin());
             successfulHeartbeatGet = scope.get('/api/v1/boxes/' + config.fqdn() + '/heartbeat');
             successfulHeartbeatGet.reply(200);
         });

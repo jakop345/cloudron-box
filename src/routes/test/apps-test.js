@@ -349,7 +349,7 @@ describe('App installation', function () {
             setup,
 
             function (callback) {
-                var port = parseInt(url.parse(config.appServerUrl()).port, 10);
+                var port = parseInt(url.parse(config.apiServerOrigin()).port, 10);
                 hock({ port: port, throwOnUnmatched: false }, function (error, server) {
                     if (error) return done(error);
                     var manifest = JSON.parse(fs.readFileSync(__dirname + '/test.app', 'utf8'));
@@ -692,7 +692,7 @@ describe('App installation - port bindings', function () {
             setup,
 
             function (callback) {
-                var port = parseInt(url.parse(config.appServerUrl()).port, 10);
+                var port = parseInt(url.parse(config.apiServerOrigin()).port, 10);
                 hock({ port: port, throwOnUnmatched: false }, function (error, server) {
                     if (error) return done(error);
                     var manifest = JSON.parse(fs.readFileSync(__dirname + '/test.app', 'utf8'));

@@ -400,7 +400,7 @@ function downloadManifest(app, callback) {
     debug('Downloading manifest for :', app.id);
 
     superagent
-        .get(config.appServerUrl() + '/api/v1/appstore/apps/' + app.appStoreId + '/manifest')
+        .get(config.apiServerOrigin() + '/api/v1/appstore/apps/' + app.appStoreId + '/manifest')
         .set('Accept', 'application/json')
         .end(function (err, res) {
             if (err) return callback(err);
@@ -435,7 +435,7 @@ function registerSubdomain(app, callback) {
     var record = { subdomain: app.location, appId: app.id, type: 'A' };
 
     superagent
-        .post(config.appServerUrl() + '/api/v1/subdomains')
+        .post(config.apiServerOrigin() + '/api/v1/subdomains')
         .set('Accept', 'application/json')
         .query({ token: config.token() })
         .send({ records: [ record ] })
@@ -459,7 +459,7 @@ function unregisterSubdomain(app, callback) {
 
     debug('Unregistering subdomain for ' + app.id + ' at ' + app.location);
     superagent
-        .del(config.appServerUrl() + '/api/v1/subdomains/' + app.dnsRecordId)
+        .del(config.apiServerOrigin() + '/api/v1/subdomains/' + app.dnsRecordId)
         .query({ token: config.token() })
         .end(function (error, res) {
             if (error) {

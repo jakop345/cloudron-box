@@ -23,7 +23,8 @@ exports = module.exports = {
     LOCAL: process.env.NODE_ENV === 'local' || !process.env.NODE_ENV,
 
     // convenience getters
-    appServerUrl: appServerUrl,
+    apiServerOrigin: apiServerOrigin,
+    webServerOrigin: webServerOrigin,
     fqdn: fqdn,
     token: token,
     version: version,
@@ -55,13 +56,13 @@ function saveSync() {
     // setup defaults
     if (exports.CLOUDRON) {
         data.port = 3000;
-        data.appServerUrl = process.env.APP_SERVER_URL || null; // APP_SERVER_URL is set during bootstrap in the box's supervisor manifest
+        data.apiServerOrigin = null;
     } else if (exports.TEST) {
         data.port = 5454;
-        data.appServerUrl = 'http://localhost:6060'; // hock doesn't support https
+        data.apiServerOrigin = 'http://localhost:6060'; // hock doesn't support https
     } else if (exports.LOCAL) {
         data.port = 3000;
-        data.appServerUrl = 'http://localhost:5050';
+        data.apiServerOrigin = 'http://localhost:5050';
     } else {
         assert(false, 'Unknown environment. This should not happen!');
     }
@@ -106,8 +107,12 @@ function get(key) {
     return safe.query(data, key);
 }
 
-function appServerUrl() {
-    return get('appServerUrl');
+function apiServerOrigin() {
+    return get('apiServerOrigin');
+}
+
+function webServerOrigin() {
+    return get('webServerOrigin');
 }
 
 function fqdn() {

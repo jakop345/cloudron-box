@@ -37,7 +37,8 @@ angular.module('Application').service('Client', function ($http, md5) {
         this._clientId = 'cid-webadmin';
         this._clientSecret = 'unused';
         this._config = {
-            appServerUrl: null,
+            apiServerOrigin: null,
+            webServerOrigin: null,
             fqdn: null,
             ip: null,
             revision: null,
@@ -78,7 +79,8 @@ angular.module('Application').service('Client', function ($http, md5) {
 
     Client.prototype.setConfig = function (config) {
         // In order to keep the angular bindings alive, set each property individually
-        this._config.appServerUrl = config.appServerUrl;
+        this._config.apiServerOrigin = config.apiServerOrigin;
+        this._config.webServerOrigin = config.webServerOrigin;
         this._config.version = config.version;
         this._config.fqdn = config.fqdn;
         this._config.ip = config.ip;

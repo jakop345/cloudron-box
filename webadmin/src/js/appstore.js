@@ -20,11 +20,11 @@ angular.module('Application').service('AppStore', function ($http, Client) {
     }
 
     AppStore.prototype.getApps = function (callback) {
-        if (Client.getConfig().appServerUrl === null) return callback(new AppStoreError(500, 'Not yet initialized'));
+        if (Client.getConfig().apiServerOrigin === null) return callback(new AppStoreError(500, 'Not yet initialized'));
 
         var that = this;
 
-        $http.get(Client.getConfig().appServerUrl + '/api/v1/appstore/apps').success(function (data, status) {
+        $http.get(Client.getConfig().apiServerOrigin + '/api/v1/appstore/apps').success(function (data, status) {
             if (status !== 200) return callback(new AppStoreError(status, data));
 
             // TODO remove old apps
@@ -54,9 +54,9 @@ angular.module('Application').service('AppStore', function ($http, Client) {
     };
 
     AppStore.prototype.getManifest = function (appId, callback) {
-        if (Client.getConfig().appServerUrl === null) return callback(new AppStoreError(500, 'Not yet initialized'));
+        if (Client.getConfig().apiServerOrigin === null) return callback(new AppStoreError(500, 'Not yet initialized'));
 
-        var manifestUrl = Client.getConfig().appServerUrl + '/api/v1/appstore/apps/' + appId + '/manifest';
+        var manifestUrl = Client.getConfig().apiServerOrigin + '/api/v1/appstore/apps/' + appId + '/manifest';
         console.log('Getting the manifest of ', appId, manifestUrl);
         $http.get(manifestUrl).success(function (data, status) {
             return callback(null, data);

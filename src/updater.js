@@ -41,7 +41,7 @@ function checkAppUpdates(callback) {
 
         var appStoreIds = appVersions.map(function (appVersion) { return appVersion.appStoreId; });
 
-        superagent.post(config.appServerUrl() + '/api/v1/appupdates').send({ appIds: appStoreIds }).end(function (error, result) {
+        superagent.post(config.apiServerOrigin() + '/api/v1/appupdates').send({ appIds: appStoreIds }).end(function (error, result) {
             if (error) return callback(error);
             if (result.statusCode !== 200) return callback(new Error('Error checking app update: ', result.statusCode, result.body.message));
 
@@ -133,7 +133,7 @@ function update(callback) {
         if (gBoxUpdateInfo && gBoxUpdateInfo.upgrade) {
             debug('box needs upgrade');
 
-            superagent.post(config.appServerUrl() + '/api/v1/boxes/' + config.fqdn() + '/upgrade')
+            superagent.post(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/upgrade')
                 .query({ token: config.token() })
                 .send({ version: gBoxUpdateInfo.version })
                 .end(function (error, result) {
@@ -153,7 +153,8 @@ function update(callback) {
 
             // this data is opaque to the installer
             data: {
-                appServerUrl: config.appServerUrl(),
+                apiServerOrigin: config.apiServerOrigin(),
+                webServerOrigin: config.webServerOrigin(),
                 fqdn: config.fqdn(),
                 token: config.token(),
                 tlsCert: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), 'utf8'),
