@@ -21,13 +21,26 @@
         <!-- Bootstrap Core JavaScript -->
         <script src="3rdparty/sb-admin-2/js/bootstrap.min.js"></script>
 
+        <script>
+            document.addEventListener("DOMContentLoaded", function(event) {
+                var req = new XMLHttpRequest();
+                req.onreadystatechange = function () {
+                    if (req.readyState === 4 && req.status === 200) {
+                        config = JSON.parse(req.responseText);
+                        document.getElementById('webServerOriginLink').href = config.webServerOrigin + '/console.html';
+                    }
+                }
+                req.open('GET', 'config.json');
+                req.send();
+            });
+        </script>
     </head>
 
 <body>
 
     <center>
         <h1> <i class="fa fa-frown-o fa-fw text-danger"></i> Something has gone wrong. </h1>
-        Please restore your cloudron from <a href="https://dev.cloudron.io/console.html">here</a>.
+        Please restore your cloudron from <a id="webServerOriginLink" href="">here</a>.
     </center>
 
 </body>

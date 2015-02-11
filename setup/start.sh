@@ -175,6 +175,13 @@ cat > "${CONFIG_DIR}/cloudron.conf" <<CONF_END
 }
 CONF_END
 
+echo "Creating config.json for webadmin"
+cat > "${BOX_SRC_DIR}/webadmin/dist/config.json" <<CONF_END
+{
+    "webServerOrigin": "${arg_web_server_origin}"
+}
+CONF_END
+
 echo "Marking apps for restore"
 # TODO: do not auto-start stopped containers (httpPort might need fixing to start them)
 sqlite3 "${cloudron_sqlite}" 'UPDATE apps SET installationState = "pending_restore", healthy = NULL, runState = NULL, containerId = NULL, httpPort = NULL, installationProgress = NULL'
@@ -184,7 +191,6 @@ sqlite3 "${cloudron_sqlite}" 'UPDATE apps SET installationState = "pending_resto
 echo "Add webadmin oauth cient"
 ADMIN_SCOPES="root,profile,users,apps,settings,roleAdmin "
 sqlite3 "${cloudron_sqlite}" "INSERT OR REPLACE INTO clients (id, appId, clientSecret, redirectURI, scope) VALUES (\"cid-webadmin\", \"webadmin\", \"secret-webadmin\", \"${admin_origin}\", \"\$ADMIN_SCOPES\")"
-
 EOF
 
 # bookkeep the version as part of data
