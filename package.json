@@ -4,8 +4,7 @@
   "version": "0.0.1",
   "private": "true",
   "author": {
-    "name": "Yellow tent authors",
-    "email": "girish@forwardbias.in"
+    "name": "Cloudron authors"
   },
   "repository": {
     "type": "git"
