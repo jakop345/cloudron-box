@@ -31,9 +31,6 @@ angular.module('Application').service('AppStore', function ($http, Client) {
             data.apps.forEach(function (app) {
                 if (that._appsCache[app.id]) return;
 
-                // prefix the appstore server url to icons
-                if (app.icon) app.icon = Client.getConfig().appServerUrl + app.icon;
-
                 that._appsCache[app.id] = app;
             });
 
