@@ -360,7 +360,7 @@ function stopContainer(app, callback) {
     container.stop(options, function (error) {
         if (error && (error.statusCode !== 304 && error.statusCode !== 404)) return callback(new Error('Error stopping container:' + error));
 
-        var tcpPorts = app.manifest ? app.manifest.tcpPorts : { };
+        var tcpPorts = safe.query(app, 'manifest.tcpPorts', { });
         for (var containerPort in tcpPorts) {
             vbox.unforwardFromHostToVirtualBox(app.id + '-tcp' + containerPort);
         }
