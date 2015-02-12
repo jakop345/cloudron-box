@@ -44,7 +44,7 @@ cd "${bundle_dir}" && npm install --production
 cd "${bundle_dir}" && tar czvf "${bundle_file}" .
 
 echo "Uploading bundle to S3"
-s3cmd --acl-public --access_key="${AWS_DEV_ACCESS_KEY}" --secret_key="${AWS_DEV_SECRET_KEY}" --no-mime-magic put "${bundle_file}" "s3://cloudron-dev-releases/box-${version}.tar.gz"
+s3cmd --ssl --acl-public --access_key="${AWS_DEV_ACCESS_KEY}" --secret_key="${AWS_DEV_SECRET_KEY}" --no-mime-magic put "${bundle_file}" "s3://cloudron-dev-releases/box-${version}.tar.gz"
 
 echo "Cleaning up ${bundle_dir}"
 rm -rf "${bundle_dir}" "${bundle_file}"
