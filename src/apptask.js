@@ -27,6 +27,7 @@ var addons = require('./addons.js'),
     path = require('path'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
+    settings = require('./settings.js'),
     superagent = require('superagent'),
     util = require('util'),
     uuid = require('node-uuid'),
@@ -35,13 +36,13 @@ var addons = require('./addons.js'),
 exports = module.exports = {
     initialize: initialize,
     startTask: startTask,
-    setNakedDomain: setNakedDomain,
+    writeNginxNakedDomainConfig: writeNginxNakedDomainConfig,
 
     // exported for testing
     _getFreePort: getFreePort,
+    _setNakedDomain: writeNginxNakedDomainConfig,
     _configureNginx: configureNginx,
     _unconfigureNginx: unconfigureNginx,
-    _setNakedDomain: setNakedDomain,
     _createVolume: createVolume,
     _deleteVolume: deleteVolume,
     _allocateOAuthProxyCredentials: allocateOAuthProxyCredentials,
@@ -90,16 +91,18 @@ function configureNginx(app, callback) {
         var nginxConfigFilename = path.join(paths.NGINX_APPCONFIG_DIR, app.id + '.conf');
         debug('writing config to ' + nginxConfigFilename);
 
-        fs.writeFile(nginxConfigFilename, nginxConf, function (error) {
-            if (error) return callback(error);
+        if (!safe.fs.writeFileSync(nginxConfigFilename, nginxConf)) {
+            console.error('Error creating nginx config ' + safe.error);
+            return callback(safe.error);
+        }
 
-            exports._reloadNginx(function (error) {
-                if (error) return callback(error);
-                updateApp(app, { httpPort: freePort }, callback);
-            });
+        async.series([
+            exports._reloadNginx,
+            settings.configureNakedDomain.bind(null, app),
+            updateApp.bind(null, app, { httpPort: freePort })
+        ], callback);
 
-            vbox.forwardFromHostToVirtualBox(app.id + '-http', freePort);
-        });
+        vbox.forwardFromHostToVirtualBox(app.id + '-http', freePort);
     });
 }
 
@@ -110,12 +113,16 @@ function unconfigureNginx(app, callback) {
         return callback(null);
     }
 
-    exports._reloadNginx(callback);
+    exports._reloadNginx(function (error) {
+        if (error) return callback(error);
+
+        settings.unconfigureNakedDomain(app, callback);
+    });
 
     vbox.unforwardFromHostToVirtualBox(app.id + '-http');
 }
 
-function setNakedDomain(app, callback) {
+function writeNginxNakedDomainConfig(app, callback) {
     assert(app === null || typeof app === 'object');
     assert(typeof callback === 'function');
 

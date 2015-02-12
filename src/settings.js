@@ -2,17 +2,19 @@
 
 var apps = require('./apps.js'),
     AppsError = apps.AppsError,
-    apptask = require('./apptask.js'),
     assert = require('assert'),
     async = require('async'),
-    settingsdb = require('./settingsdb'),
+    settingsdb = require('./settingsdb.js'),
     util = require('util');
 
 exports = module.exports = {
     SettingsError: SettingsError,
 
     getNakedDomain: getNakedDomain,
-    setNakedDomain: setNakedDomain
+    setNakedDomain: setNakedDomain,
+
+    configureNakedDomain: configureNakedDomain,
+    unconfigureNakedDomain: unconfigureNakedDomain
 };
 
 function SettingsError(reason, errorOrMessage) {
@@ -57,17 +59,47 @@ function setNakedDomain(appId, callback) {
     assert(typeof appId === 'string');
     assert(typeof callback === 'function');
 
+    var apptask = require('./apptask.js');
+
     getApp(appId, function (error, app) {
         if (error && error.reason === AppsError.NOT_FOUND) return callback(new SettingsError(SettingsError.NOT_FOUND));
 
         async.series([
-            apptask.setNakedDomain.bind(null, app),
+            apptask.writeNginxNakedDomainConfig.bind(null, app),
             settingsdb.setNakedDomain.bind(null, appId)
         ], function (error) {
             if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
 
             callback(null);
         });
+    });
+}
+
+function configureNakedDomain(app, callback) {
+    assert(typeof app === 'object');
+    assert(typeof callback === 'function');
+
+    var apptask = require('./apptask.js');
+
+    getNakedDomain(function (error, nakedDomainAppId) {
+        if (error) return callback(error);
+
+        if (nakedDomainAppId !== app.id) return callback(null);
+
+        apptask.writeNginxNakedDomainConfig(app, callback);
+    });
+}
+
+function unconfigureNakedDomain(app, callback) {
+    assert(typeof app === 'object');
+    assert(typeof callback === 'function');
+
+    getNakedDomain(function (error, nakedDomainAppId) {
+        if (error) return callback(error);
+
+        if (nakedDomainAppId !== app.id) return callback(null);
+
+        setNakedDomain('admin', callback);
     });
 }
 
