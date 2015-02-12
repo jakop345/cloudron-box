@@ -2,8 +2,6 @@
 
 set -eu
 
-readonly TMPDIR=${TMPDIR:-/tmp} # why is this not set on mint?
-
 if [[ $EUID -ne 0 ]]; then
     echo "This script should be run as root." > /dev/stderr
     exit 1
@@ -28,14 +26,8 @@ now=$(date "+%Y-%m-%dT%H:%M:%S")
 echo "Snapshoting backup as backup-${now}"
 btrfs subvolume snapshot -r "${HOME}/data" "${HOME}/backup-${now}"
 
-echo "Creating backup"
-tar -cvzf "${TMPDIR}/backup-${now}.tar.gz" "${HOME}/backup-${now}"
-
-echo "Encrypting backup"
-openssl aes-256-cbc -e -in "${TMPDIR}/backup-${now}.tar.gz" -out "${TMPDIR}/backup-${now}.tar.gz.enc" -pass "pass:${backup_key}"
-
 echo "Uploading backup to ${backup_url}"
-curl --fail -H "Content-Type:" -X PUT --data-binary @"${TMPDIR}/backup-${now}.tar.gz.enc" "${backup_url}"
+tar -cvzf - -C "${HOME}/backup-${now}" . | openssl aes-256-cbc -e -pass "pass:${provision_backup_key}" | curl --fail -H "Content-Type:" -X PUT --data-binary @- "${backup_url}"
 
 echo "Deleting backup snapshot"
 btrfs subvolume delete "${HOME}/backup-${now}"
