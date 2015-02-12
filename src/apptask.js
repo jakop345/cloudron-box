@@ -40,7 +40,6 @@ exports = module.exports = {
 
     // exported for testing
     _getFreePort: getFreePort,
-    _setNakedDomain: writeNginxNakedDomainConfig,
     _configureNginx: configureNginx,
     _unconfigureNginx: unconfigureNginx,
     _createVolume: createVolume,
