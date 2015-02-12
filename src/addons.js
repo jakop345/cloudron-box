@@ -76,8 +76,11 @@ function setupAddons(app, callback) {
 
 function teardownAddons(app, callback) {
     assert(typeof app === 'object');
-    assert(!app.manifest.addons || util.isArray(app.manifest.addons));
     assert(typeof callback === 'function');
+
+    if (!app.manifest) return callback(null);
+
+    assert(!app.manifest.addons || util.isArray(app.manifest.addons));
 
     if (!app.manifest.addons) return callback(null);
 
