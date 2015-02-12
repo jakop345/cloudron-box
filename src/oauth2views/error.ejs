@@ -1,6 +1,7 @@
 <% include header %>
 
 <!-- Navigation -->
+<% if (user) { %>
 <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
     <li class="navbar-brand" href="index.html">Cloudron</li>
     <ul class="nav navbar-top-links navbar-right">
@@ -8,6 +9,7 @@
         <li class="navbar-text"><img src="<%= user.gravatar %>"/> <%= user.username %></li>
     </ul>
 </nav>
+<% } %>
 
 <br/>
 
