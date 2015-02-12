@@ -97,7 +97,6 @@ function configureNginx(app, callback) {
 
         async.series([
             exports._reloadNginx,
-            settings.configureNakedDomain.bind(null, app),
             updateApp.bind(null, app, { httpPort: freePort })
         ], callback);
 
@@ -112,11 +111,7 @@ function unconfigureNginx(app, callback) {
         return callback(null);
     }
 
-    exports._reloadNginx(function (error) {
-        if (error) return callback(error);
-
-        settings.unconfigureNakedDomain(app, callback);
-    });
+    exports._reloadNginx(callback);
 
     vbox.unforwardFromHostToVirtualBox(app.id + '-http');
 }
@@ -140,6 +135,36 @@ function writeNginxNakedDomainConfig(app, callback) {
         if (error) return callback(error);
 
         exports._reloadNginx(callback);
+    });
+}
+
+function configureNakedDomain(app, callback) {
+    assert(typeof app === 'object');
+    assert(typeof callback === 'function');
+
+    settings.getNakedDomain(function (error, nakedDomainAppId) {
+        if (error) return callback(error);
+
+        if (nakedDomainAppId !== app.id) return callback(null);
+
+        debug('configureNakedDomain: writing nginx config for %s', app.id);
+
+        writeNginxNakedDomainConfig(app, callback);
+    });
+}
+
+function unconfigureNakedDomain(app, callback) {
+    assert(typeof app === 'object');
+    assert(typeof callback === 'function');
+
+    settings.getNakedDomain(function (error, nakedDomainAppId) {
+        if (error) return callback(error);
+
+        if (nakedDomainAppId !== app.id) return callback(null);
+
+        debug('unconfigureNakedDomain: resetting to admin');
+
+        settings.setNakedDomain('admin', callback);
     });
 }
 
@@ -618,13 +643,10 @@ function restore(app, callback) {
     var oldManifest = app.manifest;
 
     async.series([
-        // unconfigure nginx in case of FQDN change
-        updateApp.bind(null, app, { installationProgress: 'Unconfiguring nginx' }),
-        unconfigureNginx.bind(null, app),
-
         // configure nginx
         updateApp.bind(null, app, { installationProgress: 'Configuring nginx' }),
         configureNginx.bind(null, app),
+        configureNakedDomain.bind(null, app),
 
         // register subdomain
         updateApp.bind(null, app, { installationProgress: 'Registering subdomain' }),
@@ -680,9 +702,6 @@ function configure(app, callback) {
         updateApp.bind(null, app, { installationProgress: 'Stopping app' }),
         stopApp.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Unconfiguring nginx' }),
-        unconfigureNginx.bind(null, app),
-
         updateApp.bind(null, app, { installationProgress: 'Deleting container' }),
         deleteContainer.bind(null, app),
 
@@ -694,6 +713,7 @@ function configure(app, callback) {
 
         updateApp.bind(null, app, { installationProgress: 'Configuring Nginx' }),
         configureNginx.bind(null, app),
+        configureNakedDomain.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: 'Registering subdomain' }),
         registerSubdomain.bind(null, app),
@@ -730,7 +750,8 @@ function configure(app, callback) {
     });
 }
 
-// nginx configuration is skipped because app.httpPort is expected to be available
+// nginx and naked domain configuration is skipped because app.httpPort is expected to be available
+// TODO: old image should probably be deleted, but what if it's used by another app instance
 function update(app, callback) {
     var oldManifest = app.manifest;
 
@@ -787,6 +808,7 @@ function uninstall(app, callback) {
 
         updateApp.bind(null, app, { installationProgress: 'Unconfiguring Nginx' }),
         unconfigureNginx.bind(null, app),
+        unconfigureNakedDomain.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: 'Stopping app' }),
         stopApp.bind(null, app),

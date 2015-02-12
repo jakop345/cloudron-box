@@ -12,10 +12,7 @@ exports = module.exports = {
     SettingsError: SettingsError,
 
     getNakedDomain: getNakedDomain,
-    setNakedDomain: setNakedDomain,
-
-    configureNakedDomain: configureNakedDomain,
-    unconfigureNakedDomain: unconfigureNakedDomain
+    setNakedDomain: setNakedDomain
 };
 
 function SettingsError(reason, errorOrMessage) {
@@ -73,38 +70,6 @@ function setNakedDomain(appId, callback) {
 
             callback(null);
         });
-    });
-}
-
-function configureNakedDomain(app, callback) {
-    assert(typeof app === 'object');
-    assert(typeof callback === 'function');
-
-    var apptask = require('./apptask.js'); // TODO: here to avoid circular dep
-
-    getNakedDomain(function (error, nakedDomainAppId) {
-        if (error) return callback(error);
-
-        if (nakedDomainAppId !== app.id) return callback(null);
-
-        debug('configureNakedDomain: writing nginx config for %s', app.id);
-
-        apptask.writeNginxNakedDomainConfig(app, callback);
-    });
-}
-
-function unconfigureNakedDomain(app, callback) {
-    assert(typeof app === 'object');
-    assert(typeof callback === 'function');
-
-    getNakedDomain(function (error, nakedDomainAppId) {
-        if (error) return callback(error);
-
-        if (nakedDomainAppId !== app.id) return callback(null);
-
-        debug('unconfigureNakedDomain: setting to admin');
-
-        setNakedDomain('admin', callback);
     });
 }
 
