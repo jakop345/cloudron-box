@@ -38,15 +38,18 @@
             var i = setInterval(function () {
                 var req = new XMLHttpRequest();
                 req.onreadystatechange = function () {
-                    if (req.readyState === 4 && req.status === 200) {
+                    if (req.readyState !== 4) return;
+                    if (req.status === 200) {
                         var data = JSON.parse(req.responseText);
                         document.getElementById('updateProgressBar').style.width = data.progress + '%';
                         document.getElementById('updateProgressMessage').innerHTML = data.message;
 
-                        if (data.progress === "100") {
+                        if (data.progress === '100') {
                             clearInterval(i);
                             setTimeout(location.reload.bind(location, true /* forceGet from server */), 1000);
                         }
+                    } else if (req.status === 404) { // sometimes we miss '100%'
+                        setTimeout(location.reload.bind(location, true /* forceGet from server */), 1000);
                     }
                 };
                 req.open('GET', '/progress.json');
