@@ -59,7 +59,7 @@ function setNakedDomain(appId, callback) {
     assert(typeof appId === 'string');
     assert(typeof callback === 'function');
 
-    var apptask = require('./apptask.js');
+    var apptask = require('./apptask.js'); // TODO: here to avoid circular dep
 
     getApp(appId, function (error, app) {
         if (error && error.reason === AppsError.NOT_FOUND) return callback(new SettingsError(SettingsError.NOT_FOUND));
@@ -79,7 +79,7 @@ function configureNakedDomain(app, callback) {
     assert(typeof app === 'object');
     assert(typeof callback === 'function');
 
-    var apptask = require('./apptask.js');
+    var apptask = require('./apptask.js'); // TODO: here to avoid circular dep
 
     getNakedDomain(function (error, nakedDomainAppId) {
         if (error) return callback(error);
