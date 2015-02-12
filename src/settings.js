@@ -4,6 +4,7 @@ var apps = require('./apps.js'),
     AppsError = apps.AppsError,
     assert = require('assert'),
     async = require('async'),
+    debug = require('debug')('box:settings'),
     settingsdb = require('./settingsdb.js'),
     util = require('util');
 
@@ -86,6 +87,8 @@ function configureNakedDomain(app, callback) {
 
         if (nakedDomainAppId !== app.id) return callback(null);
 
+        debug('configureNakedDomain: writing nginx config for %s', app.id);
+
         apptask.writeNginxNakedDomainConfig(app, callback);
     });
 }
@@ -98,6 +101,8 @@ function unconfigureNakedDomain(app, callback) {
         if (error) return callback(error);
 
         if (nakedDomainAppId !== app.id) return callback(null);
+
+        debug('unconfigureNakedDomain: setting to admin');
 
         setNakedDomain('admin', callback);
     });
