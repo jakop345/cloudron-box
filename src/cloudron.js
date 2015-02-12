@@ -148,19 +148,19 @@ function getBackupUrl(callback) {
 
         if (result.statusCode !== 201 || !result.body || !result.body.url) return callback(new Error('Error getting presigned backup url : ' + result.statusCode));
 
-        return callback(null, result.body.url);
+        return callback(null, result.body);
     });
 }
 
 function backup(callback) {
     assert(typeof callback === 'function');
 
-    getBackupUrl(function (error, url) {
+    getBackupUrl(function (error, result) {
         if (error) return callback(new CloudronError(CloudronError.APPSTORE_DOWN, error.message));
 
-        debug('backup: url %s', url);
+        debug('backup: url %s', result.url);
 
-        execFile(SUDO, [ BACKUP_CMD,  url ], { }, function (error) {
+        execFile(SUDO, [ BACKUP_CMD,  result.url, result.backupKey ], { }, function (error) {
             if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
             return callback(null);
