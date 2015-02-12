@@ -187,7 +187,6 @@ function createContainer(app, callback) {
         }
 
         env.push('CLOUDRON=1');
-        env.push('APP_ORIGIN' + '=' + 'https://' + config.appFqdn(app.location));
         env.push('ADMIN_ORIGIN' + '=' + config.adminOrigin());
 
         addons.getEnvironment(app.id, function (error, addonEnv) {

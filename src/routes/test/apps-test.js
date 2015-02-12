@@ -415,7 +415,6 @@ describe('App installation', function () {
         docker.getContainer(appInfo.containerId).inspect(function (error, data) {
             expect(error).to.not.be.ok();
             expect(data.Config.ExposedPorts['7777/tcp']).to.eql({ });
-            expect(data.Config.Env).to.contain('APP_ORIGIN=https://' + config.appFqdn(appInfo.location));
             expect(data.Config.Env).to.contain('ADMIN_ORIGIN=' + config.adminOrigin());
             expect(data.Config.Env).to.contain('CLOUDRON=1');
             clientdb.getByAppId(appInfo.id, function (error, client) {
