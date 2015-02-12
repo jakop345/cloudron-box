@@ -2,15 +2,12 @@
 
 'use strict';
 
-var apps = require('../apps.js'),
-    AppsError = apps.AppsError,
-    apptask = require('../apptask.js'),
-    assert = require('assert'),
-    DatabaseError = require('../databaseerror.js'),
+var assert = require('assert'),
     debug = require('debug')('box:routes/settings'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
-    settingsdb = require('../settingsdb.js');
+    settings = require('../settings.js'),
+    SettingsError = settings.SettingsError;
 
 exports = module.exports = {
     getNakedDomain: getNakedDomain,
@@ -18,7 +15,7 @@ exports = module.exports = {
 };
 
 function getNakedDomain(req, res, next) {
-    settingsdb.getNakedDomain(function (error, nakedDomain) {
+    settings.getNakedDomain(function (error, nakedDomain) {
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(200, { appid: nakedDomain }));
@@ -28,23 +25,13 @@ function getNakedDomain(req, res, next) {
 function setNakedDomain(req, res, next) {
     assert(typeof req.body === 'object');
 
-    var data = req.body;
-    if (typeof data.appid !== 'string') return next(new HttpError(400, 'appid is required'));
+    if (typeof req.body.appid !== 'string') return next(new HttpError(400, 'appid is required'));
 
-    function getApp(appId, callback) { return appId !== 'admin' ? apps.get(appId, callback): callback(null, null); }
+    settings.setNakedDomain(req.body.appid, function (error) {
+        if (error && error.reason === SettingsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
+        if (error) return next(new HttpError(500, error));
 
-    getApp(data.appid, function (error, app) {
-        if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
-
-        apptask.setNakedDomain(app, function (error) {
-            if (error) return next(new HttpError(500, error));
-            settingsdb.setNakedDomain(data.appid, function (error) {
-
-                if (error) return next(new HttpError(500, error));
-
-                next(new HttpSuccess(204));
-            });
-        });
+        next(new HttpSuccess(204));
     });
 }
 
