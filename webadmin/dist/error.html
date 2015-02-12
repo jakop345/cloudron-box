@@ -33,6 +33,8 @@
                 req.open('GET', 'config.json');
                 req.send();
             });
+
+            setTimeout(function () { window.location.replace('/'); }, 10000); // see if we came back
         </script>
     </head>
 
