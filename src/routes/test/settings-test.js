@@ -78,7 +78,7 @@ describe('Settings API', function () {
                .query({ access_token: token })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
-            expect(res.body).to.eql({ appid: '' });
+            expect(res.body).to.eql({ appid: 'admin' });
             done(err);
         });
     });
@@ -96,6 +96,16 @@ describe('Settings API', function () {
         request.post(SERVER_URL + '/api/v1/settings/naked_domain')
                .query({ access_token: token })
                .send({ appid: 'random' })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(404);
+            done();
+        });
+    });
+
+    it('cannot set naked domain to empty appid', function (done) {
+        request.post(SERVER_URL + '/api/v1/settings/naked_domain')
+               .query({ access_token: token })
+               .send({ appid: '' })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(404);
             done();
@@ -127,27 +137,27 @@ describe('Settings API', function () {
         });
     });
 
-    it('can unset naked domain', function (done) {
+    it('can set naked domain to admin', function (done) {
         var reloadNginxStub = sinon.stub(apptask, '_reloadNginx').callsArgWith(0, null);
 
         request.post(SERVER_URL + '/api/v1/settings/naked_domain')
                .query({ access_token: token })
-               .send({ appid: '' })
+               .send({ appid: 'admin' })
                .end(function (err, res) {
             reloadNginxStub.restore();
             expect(res.statusCode).to.equal(204);
-            expect(fs.readFileSync(paths.NGINX_CONFIG_DIR + '/naked_domain.conf').length === 0).to.be.ok();
+            expect(fs.readFileSync(paths.NGINX_CONFIG_DIR + '/naked_domain.conf').length !== 0).to.be.ok();
             expect(reloadNginxStub.callCount).to.be(1);
             done();
         });
     });
 
-    it('must have no naked domain', function (done) {
+    it('must have admin as naked domain', function (done) {
         request.get(SERVER_URL + '/api/v1/settings/naked_domain')
                .query({ access_token: token })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
-            expect(res.body).to.eql({ appid: '' });
+            expect(res.body).to.eql({ appid: 'admin' });
             done(err);
         });
     });

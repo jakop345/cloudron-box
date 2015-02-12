@@ -199,7 +199,7 @@ angular.module('Application').service('Client', function ($http, md5) {
     };
 
     Client.prototype.setNakedDomain = function (appid, callback) {
-        $http.post('/api/v1/settings/naked_domain', { appid: appid || '' }).success(function (data, status) {
+        $http.post('/api/v1/settings/naked_domain', { appid: appid }).success(function (data, status) {
             if (status !== 204) return callback(new ClientError(status));
             callback(null);
         }).error(defaultErrorHandler(callback));

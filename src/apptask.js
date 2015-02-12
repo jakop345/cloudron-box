@@ -83,7 +83,7 @@ function configureNginx(app, callback) {
         if (error) return callback(error);
 
         var sourceDir = path.resolve(__dirname, '..');
-        var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: config.appFqdn(app.location), isWebAdmin: false, port: freePort, accessRestriction: app.accessRestriction });
+        var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: config.appFqdn(app.location), appId: app.id, port: freePort, accessRestriction: app.accessRestriction });
 
         var nginxConfigFilename = path.join(paths.NGINX_APPCONFIG_DIR, app.id + '.conf');
         debug('writing config to ' + nginxConfigFilename);
@@ -114,8 +114,16 @@ function unconfigureNginx(app, callback) {
 }
 
 function setNakedDomain(app, callback) {
+    assert(app === null || typeof app === 'object');
+    assert(typeof callback === 'function');
+
     var sourceDir = path.resolve(__dirname, '..');
-    var nginxConf = app ? ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: config.fqdn(), isWebAdmin: false, port: app.httpPort, accessRestriction: app.accessRestriction }) : '';
+    var nginxConf;
+    if (app === null) { // admin
+        nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: config.fqdn(), appId: 'admin' });
+    } else {
+        nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: config.fqdn(), appId: app.id, port: app.httpPort, accessRestriction: app.accessRestriction });
+    }
 
     var nginxNakedDomainFilename = path.join(paths.NGINX_CONFIG_DIR, 'naked_domain.conf');
     debug('writing naked domain config to ' + nginxNakedDomainFilename);

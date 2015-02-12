@@ -15,7 +15,7 @@ var SettingsController = function ($scope, Client) {
     $scope.keyFileName = '';
 
     $scope.setNakedDomain = function () {
-        var appid = $scope.nakedDomainApp ? $scope.nakedDomainApp.id : null;
+        var appid = $scope.nakedDomainApp ? $scope.nakedDomainApp.id : 'admin';
 
         Client.setNakedDomain(appid, function (error) {
             if (error) return console.error('Error setting naked domain', error);
@@ -130,6 +130,7 @@ var SettingsController = function ($scope, Client) {
             Client.getNakedDomain(function (error, appid) {
                 if (error) return console.error(error);
 
+                $scope.nakedDomainApp = null;
                 for (var i = 0; i < $scope.apps.length; i++) {
                     if ($scope.apps[i].id === appid) {
                         $scope.nakedDomainApp = $scope.apps[i];
