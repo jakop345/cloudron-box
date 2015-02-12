@@ -24,7 +24,6 @@ var assert = require('assert'),
     debug = require('debug')('box:cloudron'),
     clientdb = require('./clientdb.js'),
     execFile = require('child_process').execFile,
-    fs = require('fs'),
     os = require('os'),
     path = require('path'),
     paths = require('./paths.js'),
@@ -35,12 +34,9 @@ var assert = require('assert'),
     user = require('./user.js'),
     UserError = user.UserError,
     userdb = require('./userdb.js'),
-    util = require('util'),
-    uuid = require('node-uuid'),
-    _ = require('underscore');
+    util = require('util');
 
 var SUDO = '/usr/bin/sudo',
-    TAR = os.platform() === 'darwin' ? '/usr/bin/tar' : '/bin/tar',
     BACKUP_CMD = path.join(__dirname, 'scripts/backup.sh'),
     RELOAD_NGINX_CMD = path.join(__dirname, 'scripts/reloadnginx.sh');
 
@@ -188,7 +184,7 @@ function getIp() {
     }
 
     return null;
-};
+}
 
 function getStatus(callback) {
     assert(typeof callback === 'function');
