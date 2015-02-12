@@ -73,9 +73,9 @@ function startServer(callback) {
                     req.session.port = port;
                     req.session.returnTo =  result.redirectURI + req.path;
 
-                    var callbackURL = result.redirectURI + CALLBACK_URI;
+                    var callbackUrl = result.redirectURI + CALLBACK_URI;
                     var scope = 'profile,roleUser';
-                    var oauthLogin = config.adminOrigin() + '/api/v1/oauth/dialog/authorize?response_type=code&client_id=' + result.id + '&redirect_uri=' + callbackURL + '&scope=' + scope;
+                    var oauthLogin = config.adminOrigin() + '/api/v1/oauth/dialog/authorize?response_type=code&client_id=' + result.id + '&redirect_uri=' + callbackUrl + '&scope=' + scope;
 
                     debug('begin OAuth flow for client %s.', result.name);
 
