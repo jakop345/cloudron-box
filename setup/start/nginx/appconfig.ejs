@@ -8,9 +8,12 @@ server {
     ssl_certificate_key  cert/host.key;
     ssl_session_timeout  5m;
 
-    ssl_protocols TLSv1 TLSv1.1 TLSv1.2; # don't use SSLv3 ref: POODLE
-    ssl_ciphers "HIGH:!aNULL:!MD5 or HIGH:!aNULL:!MD5:!3DES";
+    # https://bettercrypto.org/static/applied-crypto-hardening.pdf
+    # https://cipherli.st/
     ssl_prefer_server_ciphers on;
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2; # don't use SSLv3 ref: POODLE
+    ssl_ciphers 'AES128+EECDH:AES128+EDH';
+    add_header Strict-Transport-Security "max-age=15768000; includeSubDomains";
 
     proxy_http_version 1.1;
     proxy_intercept_errors on;
