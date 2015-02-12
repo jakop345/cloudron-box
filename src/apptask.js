@@ -64,6 +64,8 @@ function initialize(callback) {
     database.initialize(callback);
 }
 
+// We expect conflicts to not happen despite closing the port (parallel app installs, app update does not reconfigure nginx etc)
+// https://tools.ietf.org/html/rfc6056#section-3.5 says linux uses random ephemeral port allocation
 function getFreePort(callback) {
     var server = net.createServer();
     server.listen(0, function () {
@@ -722,6 +724,7 @@ function configure(app, callback) {
     });
 }
 
+// nginx configuration is skipped because app.httpPort is expected to be available
 function update(app, callback) {
     var oldManifest = app.manifest;
 
