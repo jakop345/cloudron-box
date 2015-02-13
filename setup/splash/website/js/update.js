@@ -31,7 +31,7 @@ var Controller = function ($scope, $http, $interval) {
         $http.defaults.headers.common.Authorization = 'Bearer ' + localStorage.token;
         $http.get('/api/v1/cloudron/config').success(function(data, status) {
             if (status !== 200 || typeof data !== 'object') return callback(new Error('Got ' + status + '. ' + data));
-            callback(null, data.isUpdate);
+            callback(null, data.isUpdating);
         }).error(function (data, status) {
             console.error(status, data);
             callback(new Error('Got ' + status + '. ' + data));
@@ -40,8 +40,8 @@ var Controller = function ($scope, $http, $interval) {
 
     function refresh() {
         if (localStorage.token) {
-            fetchConfig(function (error, isUpdate) {
-                if (error || isUpdate) fetchProgress();
+            fetchConfig(function (error, isUpdating) {
+                if (error || isUpdating) fetchProgress();
                 else reloadPage();
             });
         } else {

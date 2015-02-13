@@ -72,7 +72,6 @@ var SettingsController = function ($scope, Client) {
 
     $scope.update = function () {
         $('#updateModal').modal('hide');
-        $('#updateProgressModal').modal('show');
 
         $scope.$parent.initialized = false;
 
