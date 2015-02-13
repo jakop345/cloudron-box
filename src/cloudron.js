@@ -206,7 +206,8 @@ function getConfig(callback) {
         fqdn: config.fqdn(),
         ip: getIp(),
         version: config.version(),
-        update: updater.getUpdateInfo()
+        update: updater.getUpdateInfo(),
+        isUpdating: config.isUpdating()
     })
 }
 

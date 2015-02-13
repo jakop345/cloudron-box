@@ -114,6 +114,7 @@ function checkUpdates() {
 function initialize(callback) {
     assert(typeof callback === 'function');
 
+    config.setUpdating(false); // in case we crashed and restarted during an update
     gCheckUpdatesTimeoutId = setTimeout(checkUpdates, 10 * 1000);
     callback(null);
 }
@@ -130,6 +131,16 @@ function uninitialize(callback) {
 function update(callback) {
     assert(typeof callback === 'function');
 
+    config.setUpdating(true);
+
+    startUpdate(function (error) {
+        config.setUpdating(!error);
+
+        callback(error);
+    });
+}
+
+function startUpdate(callback) {
     if (!gBoxUpdateInfo) {
         debug('no box update available');
         return callback(new Error('No update available'));

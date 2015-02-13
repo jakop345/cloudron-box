@@ -22,6 +22,9 @@ exports = module.exports = {
     TEST: process.env.NODE_ENV === 'test',
     LOCAL: process.env.NODE_ENV === 'local' || !process.env.NODE_ENV,
 
+    setUpdating: setUpdating,
+    isUpdating: isUpdating,
+
     // convenience getters
     apiServerOrigin: apiServerOrigin,
     webServerOrigin: webServerOrigin,
@@ -76,6 +79,7 @@ function saveSync() {
     data.boxVersionsUrl = null;
     data.version = null;
     data.isCustomDomain = false;
+    data.isUpdating = false;
 
     if (safe.fs.existsSync(cloudronConfigFileName)) {
         var existingData = safe.JSON.parse(safe.fs.readFileSync(cloudronConfigFileName, 'utf8'));
@@ -146,5 +150,13 @@ function zoneName() {
 
     // for shared domain name, strip out the hostname
     return fqdn().substr(fqdn().indexOf('.') + 1);
+}
+
+function setUpdating(updating) {
+    set('isUpdating', updating);
+}
+
+function isUpdating() {
+    get('isUpdating');
 }
 
