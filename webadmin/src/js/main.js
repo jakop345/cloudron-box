@@ -65,8 +65,8 @@ var MainController = function ($scope, $route, $interval, Client) {
                         // now mark the Client to be ready
                         Client.setReady();
 
-                        // now show UI
-                        $scope.initialized = true;
+                        // if we are not updating currently, show the UI
+                        if (!Client.getConfig().isUpdating) $scope.initialized = true;
                     });
                 });
             });
@@ -75,15 +75,15 @@ var MainController = function ($scope, $route, $interval, Client) {
         }
     });
 
-    Client.onConfig(function (config) {
-        if (config.isUpdating) {
-            // wait till the view has loaded until showing a modal dialog
-            $scope.$on('$viewContentLoaded', function() {
-                $scope.$parent.initialized = false;
+    // wait till the view has loaded until showing a modal dialog
+    $scope.$on('$viewContentLoaded', function () {
+        Client.onConfig(function (config) {
+            if (config.isUpdating) {
+                $scope.initialized = false;
                 $('#updateProgressModal').modal('show');
 
                 window.setTimeout(window.location.reload.bind(window.location, true), 10000);
-            });
-        }
+            }
+        });
     });
 };

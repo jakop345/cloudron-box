@@ -208,7 +208,7 @@ function getConfig(callback) {
         version: config.version(),
         update: updater.getUpdateInfo(),
         isUpdating: config.isUpdating()
-    })
+    });
 }
 
 function sendHeartBeat() {
@@ -234,7 +234,7 @@ function sendHeartBeat() {
 
         setTimeout(sendHeartBeat, HEARTBEAT_INTERVAL);
     });
-};
+}
 
 function sendMailDnsRecordsRequest(callback) {
     assert(typeof callback === 'function');
