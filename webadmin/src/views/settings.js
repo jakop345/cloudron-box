@@ -78,18 +78,7 @@ var SettingsController = function ($scope, Client) {
         Client.update(function (error) {
             if (error) console.error(error);
 
-            // now start query
-            function checkIfDone() {
-                Client.version(function (error) {
-                    if (error) return window.setTimeout(checkIfDone, 1000);
-
-                    $('#updateProgressModal').modal('hide');
-
-                    window.setTimeout(window.location.reload.bind(window.location, true), 1000);
-                });
-            }
-
-            window.setTimeout(checkIfDone, 5000);
+            // the modal dialog is never hidden. the main page will reload itself when update has finished
         });
     };
 

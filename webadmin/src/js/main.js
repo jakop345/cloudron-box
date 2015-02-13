@@ -74,4 +74,16 @@ var MainController = function ($scope, $route, $interval, Client) {
             $scope.login();
         }
     });
+
+    Client.onConfig(function (config) {
+        if (config.isUpdating) {
+            // wait till the view has loaded until showing a modal dialog
+            $scope.$on('$viewContentLoaded', function() {
+                $scope.$parent.initialized = false;
+                $('#updateProgressModal').modal('show');
+
+                window.setTimeout(window.location.reload.bind(window.location, true), 10000);
+            });
+        }
+    });
 };

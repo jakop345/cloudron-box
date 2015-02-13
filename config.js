@@ -157,6 +157,6 @@ function setUpdating(updating) {
 }
 
 function isUpdating() {
-    get('isUpdating');
+    return get('isUpdating');
 }
 
