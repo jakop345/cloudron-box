@@ -72,7 +72,15 @@ gulp.task('js-setup', function () {
         .pipe(gulp.dest('webadmin/dist/js'));
 });
 
-gulp.task('js', ['js-index', 'js-setup'], function () {});
+gulp.task('js-update', function () {
+    return gulp.src(['webadmin/src/js/update.js'])
+        .pipe(sourcemaps.init())
+        .pipe(concat('update.js'))
+        .pipe(sourcemaps.write())
+        .pipe(gulp.dest('webadmin/dist/js'));
+});
+
+gulp.task('js', ['js-index', 'js-setup', 'js-update'], function () {});
 
 gulp.task('htmlViews', function () {
     return gulp.src('webadmin/src/views/*.html')
