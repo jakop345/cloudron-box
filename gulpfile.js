@@ -23,8 +23,7 @@ gulp.task('3rdparty', function () {
             'webadmin/src/3rdparty/**/*.eot',
             'webadmin/src/3rdparty/**/*.svg',
             'webadmin/src/3rdparty/**/*.ttf',
-            'webadmin/src/3rdparty/**/*.woff',
-            'webadmin/src/3rdparty/**/*.js'
+            'webadmin/src/3rdparty/**/*.woff'
         ])
         .pipe(gulp.dest('webadmin/dist/3rdparty/'));
 });
@@ -32,7 +31,12 @@ gulp.task('3rdparty', function () {
 gulp.task('update-3rdparty', function () {
     return gulp.src([
             'webadmin/src/3rdparty/**/*.js',
-            'webadmin/src/3rdparty/**/*.css'
+            'webadmin/src/3rdparty/**/*.css',
+            'webadmin/src/3rdparty/**/*.otf',
+            'webadmin/src/3rdparty/**/*.eot',
+            'webadmin/src/3rdparty/**/*.svg',
+            'webadmin/src/3rdparty/**/*.ttf',
+            'webadmin/src/3rdparty/**/*.woff'
         ])
         .pipe(gulp.dest('setup/splash/website/3rdparty'));
 });
@@ -93,5 +97,5 @@ gulp.task('clean', function (callback) {
 });
 
 gulp.task('default', ['clean'], function () {
-    gulp.start('html', 'js', '3rdparty');
+    gulp.start('html', 'js', '3rdparty', 'update');
 });
