@@ -73,12 +73,13 @@ var SettingsController = function ($scope, Client) {
     $scope.update = function () {
         $('#updateModal').modal('hide');
         $('#updateProgressModal').modal('show');
+
         $scope.$parent.initialized = false;
 
         Client.update(function (error) {
             if (error) console.error(error);
 
-            // the modal dialog is never hidden. the main page will reload itself when update has finished
+            window.location.href = '/update.html';
         });
     };
 

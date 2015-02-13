@@ -45,6 +45,9 @@ var MainController = function ($scope, $route, $interval, Client) {
                 if (error && error.statusCode === 401) return $scope.login();
                 if (error) return $scope.error(error);
 
+                // check if we are actually updateing
+                if (Client.getConfig().isUpdating) window.location.href = '/update.html';
+
                 Client.userInfo(function (error, result) {
                     if (error) return $scope.error(error);
 
@@ -65,8 +68,7 @@ var MainController = function ($scope, $route, $interval, Client) {
                         // now mark the Client to be ready
                         Client.setReady();
 
-                        // if we are not updating currently, show the UI
-                        if (!Client.getConfig().isUpdating) $scope.initialized = true;
+                        $scope.initialized = true;
                     });
                 });
             });
@@ -76,14 +78,9 @@ var MainController = function ($scope, $route, $interval, Client) {
     });
 
     // wait till the view has loaded until showing a modal dialog
-    $scope.$on('$viewContentLoaded', function () {
-        Client.onConfig(function (config) {
-            if (config.isUpdating) {
-                $scope.initialized = false;
-                $('#updateProgressModal').modal('show');
-
-                window.setTimeout(window.location.reload.bind(window.location, true), 10000);
-            }
-        });
+    Client.onConfig(function (config) {
+        if (config.isUpdating) {
+            window.location.href = '/update.html';
+        }
     });
 };

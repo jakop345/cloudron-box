@@ -29,6 +29,29 @@ gulp.task('3rdparty', function () {
         .pipe(gulp.dest('webadmin/dist/3rdparty/'));
 });
 
+gulp.task('update-3rdparty', function () {
+    return gulp.src([
+            'webadmin/src/3rdparty/**/*.js',
+            'webadmin/src/3rdparty/**/*.css'
+        ])
+        .pipe(gulp.dest('setup/splash/website/3rdparty'));
+});
+
+gulp.task('update-js', function () {
+    return gulp.src(['webadmin/src/js/update.js']).pipe(gulp.dest('setup/splash/website/js'));
+});
+
+gulp.task('update-html', function () {
+    return gulp.src(['webadmin/src/update.html']).pipe(gulp.dest('setup/splash/website'));
+});
+
+gulp.task('update', ['update-html', 'update-js', 'update-3rdparty'], function () {});
+
+gulp.task('update-watch', ['update-html', 'update-js', 'update-3rdparty'], function () {
+    gulp.watch('webadmin/src/update.html', ['update-html']);
+    gulp.watch('webadmin/src/js/update.js', ['update-js']);
+});
+
 gulp.task('js-index', function () {
     return gulp.src(['webadmin/src/js/index.js', 'webadmin/src/js/client.js', 'webadmin/src/js/appstore.js', 'webadmin/src/js/main.js', 'webadmin/src/views/*.js'])
         .pipe(sourcemaps.init())
@@ -66,7 +89,7 @@ gulp.task('html', ['html_templates', 'htmlViews'], function () {
 });
 
 gulp.task('clean', function (callback) {
-    del(['webadmin/dist'], callback);
+    del(['webadmin/dist', 'setup/splash/website'], callback);
 });
 
 gulp.task('default', ['clean'], function () {
