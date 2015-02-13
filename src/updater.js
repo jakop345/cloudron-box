@@ -114,7 +114,7 @@ function checkUpdates() {
 function initialize(callback) {
     assert(typeof callback === 'function');
 
-    // config.setUpdating(false); // in case we crashed and restarted during an update
+    config.setUpdating(false); // in case we crashed and restarted during an update
     gCheckUpdatesTimeoutId = setTimeout(checkUpdates, 10 * 1000);
     callback(null);
 }
