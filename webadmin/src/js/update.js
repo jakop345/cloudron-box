@@ -14,6 +14,10 @@ var Controller = function ($scope, $http, $interval) {
         setTimeout(location.reload.bind(location, true /* forceGet from server */), 1000);
     }
 
+    function loadWebadmin() {
+        window.location.href = '/';
+    }
+
     function fetchProgress() {
         $http.get('/progress.json').success(function(data, status) {
             if (status === 404) return reloadPage(); // sometimes we miss '100%'
@@ -33,7 +37,6 @@ var Controller = function ($scope, $http, $interval) {
             if (status !== 200 || typeof data !== 'object') return callback(new Error('Got ' + status + '. ' + data));
             callback(null, data.isUpdating);
         }).error(function (data, status) {
-            console.error(status, data);
             callback(new Error('Got ' + status + '. ' + data));
         });
     }
@@ -42,6 +45,7 @@ var Controller = function ($scope, $http, $interval) {
         if (localStorage.token) {
             fetchConfig(function (error, isUpdating) {
                 if (error || isUpdating) fetchProgress();
+                else if (!isUpdating) loadWebadmin();
                 else reloadPage();
             });
         } else {
