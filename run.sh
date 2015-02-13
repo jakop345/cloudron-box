@@ -41,8 +41,11 @@ cp setup/start/nginx/mime.types "${NGINX_ROOT}/mime.types"
 ${SCRIPT_DIR}/../appstore/src/scripts/generate_certificate.sh "US" "California" "San Francisco" "Cloudron Company" "Cloudron" "localhost" "cert@cloudron.io" "${NGINX_ROOT}/cert"
 
 # adjust the generated nginx config for local use
-touch "${NGINX_ROOT}/naked_domain.conf"
-$GNU_SED -e "s/##ADMIN_FQDN##/${FQDN}/" -e "s|##BOX_SRC_DIR##|${BOX_SRC_DIR}|" setup/start/nginx/admin.conf_template > "${NGINX_ROOT}/applications/admin.conf"
+${SCRIPT_DIR}/node_modules/.bin/ejs-cli -f "${SCRIPT_DIR}/setup/start/nginx/appconfig.ejs" \
+    -O "{ \"vhost\": \"${FQDN}\", \"appId\": \"admin\", \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${NGINX_ROOT}/naked_domain.conf"
+${SCRIPT_DIR}/node_modules/.bin/ejs-cli -f "${SCRIPT_DIR}/setup/start/nginx/appconfig.ejs" \
+    -O "{ \"vhost\": \"${FQDN}\", \"appId\": \"admin\", \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${NGINX_ROOT}/admin.conf"
+
 $GNU_SED -e "s/user www-data/user ${USER}/" -i "${NGINX_ROOT}/nginx.conf"
 $GNU_SED -e "s/^pid .*/pid \/tmp\/nginx.pid;/" -i "${NGINX_ROOT}/nginx.conf"
 
