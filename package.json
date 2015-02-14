@@ -54,7 +54,7 @@
     "serve-favicon": "^2.2.0",
     "split": "^0.3.3",
     "sqlite3": "^3.0.5",
-    "superagent": "^0.17.0",
+    "superagent": "~0.21.0",
     "supererror": "^0.6.0",
     "underscore": "^1.7.0",
     "validator": "^3.30.0",

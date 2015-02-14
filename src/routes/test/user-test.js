@@ -126,7 +126,7 @@ describe('User API', function () {
                .auth(USERNAME_0, '')
                .end(function (err, res) {
             expect(err).to.not.be.ok();
-            expect(res.statusCode).to.equal(400);
+            expect(res.statusCode).to.equal(401);
             done(err);
         });
     });
