@@ -18,7 +18,6 @@
   "dependencies": {
     "async": "^0.6.2",
     "body-parser": "~1.9.3",
-    "commander": "^2.2.0",
     "connect-ensure-login": "^0.1.1",
     "connect-lastmile": "0.0.8",
     "connect-timeout": "~1.4.0",
