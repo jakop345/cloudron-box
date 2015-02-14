@@ -49,7 +49,6 @@
     "passport-oauth2-client-password": "~0.1.2",
     "password-generator": "~0.2.3",
     "proxy-middleware": "~0.11.0",
-    "rimraf": "^2.2.6",
     "safetydance": "0.0.12",
     "semver": "~4.3.0",
     "serve-favicon": "~2.2.0",
