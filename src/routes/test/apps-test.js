@@ -322,7 +322,7 @@ describe('App API', function () {
 describe('App installation', function () {
     this.timeout(50000);
 
-    var hockServer, dockerProxy;
+    var hockInstance = hock.createHock({ throwOnUnmatched: false }), hockServer, dockerProxy;
     var imageDeleted = false, imageCreated = false;
 
     before(function (done) {
@@ -349,21 +349,18 @@ describe('App installation', function () {
             setup,
 
             function (callback) {
-                var port = parseInt(url.parse(config.apiServerOrigin()).port, 10);
-                hock({ port: port, throwOnUnmatched: false }, function (error, server) {
-                    if (error) return done(error);
-                    var manifest = JSON.parse(fs.readFileSync(__dirname + '/test.app', 'utf8'));
-                    hockServer = server;
+                var manifest = JSON.parse(fs.readFileSync(__dirname + '/test.app', 'utf8'));
 
-                    hockServer
-                        .get('/api/v1/appstore/apps/' + APP_STORE_ID + '/manifest')
-                        .reply(200, manifest, { 'Content-Type': 'application/json' })
-                        .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP_LOCATION, appId: APP_ID, type: 'A' } ] })
-                        .reply(201, { ids: [ 'dnsrecordid' ] }, { 'Content-Type': 'application/json' })
-                        .delete('/api/v1/subdomains/dnsrecordid?token=' + config.token())
-                        .reply(204, { }, { 'Content-Type': 'application/json' });
-                    callback();
-                });
+                hockInstance
+                    .get('/api/v1/appstore/apps/' + APP_STORE_ID + '/manifest')
+                    .reply(200, manifest, { 'Content-Type': 'application/json' })
+                    .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP_LOCATION, appId: APP_ID, type: 'A' } ] })
+                    .reply(201, { ids: [ 'dnsrecordid' ] }, { 'Content-Type': 'application/json' })
+                    .delete('/api/v1/subdomains/dnsrecordid?token=' + config.token())
+                    .reply(204, { }, { 'Content-Type': 'application/json' });
+
+                var port = parseInt(url.parse(config.apiServerOrigin()).port, 10);
+                hockServer = http.createServer(hockInstance.handler).listen(port, callback);
             }
         ], done);
     });
@@ -643,7 +640,7 @@ describe('App installation', function () {
     });
 
     it('uninstalled - unregistered subdomain', function (done) {
-        hockServer.done(function (error) { // checks if all the hockServer APIs were called
+        hockInstance.done(function (error) { // checks if all the hockServer APIs were called
             expect(!error).to.be.ok();
             done();
         });
@@ -665,7 +662,7 @@ describe('App installation', function () {
 describe('App installation - port bindings', function () {
     this.timeout(50000);
 
-    var hockServer, dockerProxy;
+    var hockInstance = hock.createHock({ throwOnUnmatched: false }), hockServer, dockerProxy;
     var imageDeleted = false, imageCreated = false;
 
     before(function (done) {
@@ -691,13 +688,9 @@ describe('App installation - port bindings', function () {
             setup,
 
             function (callback) {
-                var port = parseInt(url.parse(config.apiServerOrigin()).port, 10);
-                hock({ port: port, throwOnUnmatched: false }, function (error, server) {
-                    if (error) return done(error);
-                    var manifest = JSON.parse(fs.readFileSync(__dirname + '/test.app', 'utf8'));
-                    hockServer = server;
+                var manifest = JSON.parse(fs.readFileSync(__dirname + '/test.app', 'utf8'));
 
-                hockServer
+                hockInstance
                     .get('/api/v1/appstore/apps/' + APP_STORE_ID + '/manifest')
                     .reply(200, manifest, { 'Content-Type': 'application/json' })
                     // app install
@@ -712,8 +705,8 @@ describe('App installation - port bindings', function () {
                     .delete('/api/v1/subdomains/anotherdnsid?token=' + config.token())
                     .reply(204, { }, { 'Content-Type': 'application/json' });
 
-                    callback();
-                });
+                var port = parseInt(url.parse(config.apiServerOrigin()).port, 10);
+                hockServer = http.createServer(hockInstance.handler).listen(port, callback);
             }
         ], done);
     });
@@ -1012,7 +1005,7 @@ describe('App installation - port bindings', function () {
     });
 
     it('uninstalled - unregistered subdomain', function (done) {
-        hockServer.done(function (error) { // checks if all the hockServer APIs were called
+        hockInstance.done(function (error) { // checks if all the hockServer APIs were called
             expect(!error).to.be.ok();
             done();
         });
