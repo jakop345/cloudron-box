@@ -640,7 +640,7 @@ function install(app, callback) {
 }
 
 function restore(app, callback) {
-    var oldManifest = app.manifest;
+    if (!app.manifest) return callback(new Error('Cannot restore app without existing manifest'));
 
     async.series([
         // configure nginx
@@ -651,10 +651,6 @@ function restore(app, callback) {
         // register subdomain
         updateApp.bind(null, app, { installationProgress: 'Registering subdomain' }),
         registerSubdomain.bind(null, app),
-
-        // download manifest FIXME: should we restore to app.version ?
-        updateApp.bind(null, app, { installationProgress: 'Downloading manifest' }),
-        downloadManifest.bind(null, app),
 
         // setup oauth proxy
         updateApp.bind(null, app, { installationProgress: 'Setting up OAuth proxy credentials' }),
