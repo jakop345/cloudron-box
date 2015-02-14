@@ -554,26 +554,6 @@
         }
       }
     },
-    "js-yaml": {
-      "version": "3.2.5",
-      "from": "js-yaml@3.2.5",
-      "dependencies": {
-        "argparse": {
-          "version": "0.1.16",
-          "from": "argparse@0.1.16",
-          "dependencies": {
-            "underscore.string": {
-              "version": "2.4.0",
-              "from": "underscore.string@2.4.0"
-            }
-          }
-        },
-        "esprima": {
-          "version": "1.0.4",
-          "from": "esprima@1.0.4"
-        }
-      }
-    },
     "json": {
       "version": "9.0.3",
       "from": "json@9.0.3"
