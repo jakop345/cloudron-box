@@ -197,6 +197,9 @@ ADMIN_SCOPES="root,profile,users,apps,settings,roleAdmin "
 sqlite3 "${cloudron_sqlite}" "INSERT OR REPLACE INTO clients (id, appId, clientSecret, redirectURI, scope) VALUES (\"cid-webadmin\", \"webadmin\", \"secret-webadmin\", \"${admin_origin}\", \"\$ADMIN_SCOPES\")"
 EOF
 
+set_progress "85" "Setup logrotate"
+${script_dir}/start/setup_logrotate.sh
+
 # bookkeep the version as part of data
 echo "{ \"version\": \"${arg_version}\", \"boxVersionsUrl\": \"${arg_box_versions_url}\" }" > "${DATA_DIR}/version"
 
