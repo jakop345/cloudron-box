@@ -9,30 +9,6 @@
         <!-- Bootstrap Core CSS -->
         <link href="3rdparty/sb-admin-2/css/bootstrap.min.css" rel="stylesheet">
 
-        <!-- Custom CSS -->
-        <link href="3rdparty/sb-admin-2/css/sb-admin-2.css" rel="stylesheet">
-
-        <!-- Custom Fonts -->
-        <link href="3rdparty/sb-admin-2/font-awesome-4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
-
-        <style>
-
-        .animateMe {
-            opacity: 1;
-            transform: scale(1, 1);
-            -webkit-transition: 0.25s linear all;
-            transition: 0.25s linear all;
-        }
-
-        .animateMe.ng-hide-add,
-        .animateMe.ng-hide-remove {
-            display: block !important;
-            transform: scale(0.9, 0.9);
-            opacity: 0;
-        }
-
-        </style>
-
         <!-- angularjs scripts -->
         <script src="3rdparty/js/angular.min.js"></script>
         <script src="3rdparty/js/angular-loader.min.js"></script>
@@ -49,7 +25,6 @@
 </head>
 
 <body ng-app="Application" ng-controller="Controller">
-    <!-- Modal update progress -->
     <div class="modal show" id="updateProgressModal" tabindex="-1" role="dialog" aria-labelledby="updateProgressModalLabel" aria-hidden="true" data-keyboard="false" data-backdrop="static">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -63,9 +38,7 @@
                     <span id="updateProgressMessage"></span>
                 </div>
             </div>
-            <!-- /.modal-content -->
         </div>
-        <!-- /.modal-dialog -->
     </div>
 </body>
 
