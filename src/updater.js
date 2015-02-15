@@ -135,9 +135,10 @@ function update(callback) {
     progress.set(progress.UPDATE, 0, 'Begin update');
 
     startUpdate(function (error) {
-        if (error) return callback(error);
-
-        progress.clear(progress.UPDATE);
+        if (error) {
+            progress.clear(progress.UPDATE);    // update failed, clear the update process
+            return callback(error);
+        }
 
         callback(null);
     });
