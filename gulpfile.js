@@ -12,6 +12,7 @@ var ejs = require('gulp-ejs'),
 gulp.task('3rdparty', function () {
     return gulp.src([
             'webadmin/src/3rdparty/**/*.js',
+            'webadmin/src/3rdparty/**/*.map',
             'webadmin/src/3rdparty/**/*.css',
             'webadmin/src/3rdparty/**/*.otf',
             'webadmin/src/3rdparty/**/*.eot',
@@ -25,6 +26,7 @@ gulp.task('3rdparty', function () {
 gulp.task('update-3rdparty', function () {
     return gulp.src([
             'webadmin/src/3rdparty/**/*.js',
+            'webadmin/src/3rdparty/**/*.map',
             'webadmin/src/3rdparty/**/*.css',
             'webadmin/src/3rdparty/**/*.otf',
             'webadmin/src/3rdparty/**/*.eot',
