@@ -2,18 +2,12 @@
 
 'use strict';
 
-var _ejs = require('ejs'),
-    ejs = require('gulp-ejs'),
+var ejs = require('gulp-ejs'),
     gulp = require('gulp'),
     del = require('del'),
-    path = require('path'),
     concat = require('gulp-concat'),
     sourcemaps = require('gulp-sourcemaps'),
     fs = require('fs');
-
-_ejs.filters.basename = function (obj) {
-    return path.basename(obj);
-};
 
 gulp.task('3rdparty', function () {
     return gulp.src([
