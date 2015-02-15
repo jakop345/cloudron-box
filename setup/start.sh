@@ -26,11 +26,11 @@ source "${script_dir}/argparser.sh" "$@" # this injects the arg_* variables used
 admin_fqdn=$([[ "${arg_is_custom_domain}" == "true" ]] && echo "admin.${arg_fqdn}" ||  echo "admin-${arg_fqdn}")
 
 set_progress() {
-    local progress="$1"
+    local percent="$1"
     local message="$2"
 
     echo "==== ${message} ===="
-    (echo "{ \"progress\": \"${progress}\", \"message\": \"${message}\" }" > "${SETUP_PROGRESS_JSON}") 2> /dev/null || true # as this will fail in non-update mode
+    (echo "{ \"update\": { \"percent\": \"${percent}\", \"message\": \"${message}\" }, \"backup\": {} }" > "${SETUP_PROGRESS_JSON}") 2> /dev/null || true # as this will fail in non-update mode
 }
 
 set_progress "1" "Creating directories"
