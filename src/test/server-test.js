@@ -6,7 +6,7 @@
 
 'use strict';
 
-var cloudron = require('../cloudron.js'),
+var progress = require('../progress.js'),
     config = require('../../config.js'),
     database = require('../database.js'),
     expect = require('expect.js'),
@@ -158,6 +158,57 @@ describe('Server', function () {
                 expect(err).to.not.be.ok();
                 expect(res.statusCode).to.equal(401);
                 done(err);
+            });
+        });
+    });
+
+    describe('progress', function () {
+        before(function (done) {
+            server.start(done);
+        });
+
+        after(function (done) {
+            server.stop(function () {
+                done();
+            });
+        });
+
+        it('succeeds with no progress', function (done) {
+            request.get(SERVER_URL + '/api/v1/cloudron/progress', function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(200);
+                expect(result.body.update).to.be(null);
+                expect(result.body.backup).to.be(null);
+                done();
+            });
+        });
+
+        it('succeeds with update progress', function (done) {
+            progress.set(progress.UPDATE, 13, 'This is some status string');
+
+            request.get(SERVER_URL + '/api/v1/cloudron/progress', function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(200);
+                expect(result.body.update).to.be.an('object');
+                expect(result.body.update.percent).to.be.a('number');
+                expect(result.body.update.percent).to.equal(13);
+                expect(result.body.update.message).to.be.a('string');
+                expect(result.body.update.message).to.equal('This is some status string');
+
+                expect(result.body.backup).to.be(null);
+                done();
+            });
+        });
+
+        it('succeeds with no progress after clearing the update', function (done) {
+            progress.clear(progress.UPDATE);
+
+            request.get(SERVER_URL + '/api/v1/cloudron/progress', function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(200);
+                expect(result.body.update).to.be(null);
+                expect(result.body.backup).to.be(null);
+                done();
             });
         });
     });

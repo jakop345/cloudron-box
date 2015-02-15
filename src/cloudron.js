@@ -27,6 +27,7 @@ var assert = require('assert'),
     os = require('os'),
     path = require('path'),
     paths = require('./paths.js'),
+    progress = require('./progress.js'),
     safe = require('safetydance'),
     superagent = require('superagent'),
     tokendb = require('./tokendb.js'),
@@ -207,7 +208,7 @@ function getConfig(callback) {
         ip: getIp(),
         version: config.version(),
         update: updater.getUpdateInfo(),
-        isUpdating: config.isUpdating()
+        progress: progress.get()
     });
 }
 

@@ -4,6 +4,7 @@
 
 var assert = require('assert'),
     cloudron = require('../cloudron.js'),
+    progress = require('../progress.js'),
     CloudronError = cloudron.CloudronError,
     debug = require('debug')('box:routes/cloudron'),
     df = require('nodejs-disks'),
@@ -23,6 +24,7 @@ exports = module.exports = {
     getStatus: getStatus,
     getStats: getStats,
     reboot: reboot,
+    getProgress: getProgress,
     createBackup: createBackup,
     getConfig: getConfig,
     update: update,
@@ -83,6 +85,10 @@ function getStats(req, res, next) {
             next(new HttpSuccess(200, { drives: data }));
         });
     });
+}
+
+function getProgress(req, res, next) {
+    return next(new HttpSuccess(200, progress.get()));
 }
 
 function reboot(req, res, next) {

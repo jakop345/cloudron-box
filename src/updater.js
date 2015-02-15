@@ -5,6 +5,7 @@
 var appdb = require('./appdb.js'),
     assert = require('assert'),
     cloudron = require('./cloudron.js'),
+    progress = require('./progress.js'),
     config = require('../config.js'),
     debug = require('debug')('box:updater'),
     fs = require('fs'),
@@ -114,7 +115,7 @@ function checkUpdates() {
 function initialize(callback) {
     assert(typeof callback === 'function');
 
-    config.setUpdating(false); // in case we crashed and restarted during an update
+    progress.clear(progress.UPDATE);
     gCheckUpdatesTimeoutId = setTimeout(checkUpdates, 10 * 1000);
     callback(null);
 }
@@ -131,12 +132,14 @@ function uninitialize(callback) {
 function update(callback) {
     assert(typeof callback === 'function');
 
-    config.setUpdating(true);
+    progress.set(progress.UPDATE, 0, 'Begin update');
 
     startUpdate(function (error) {
-        config.setUpdating(!error);
+        if (error) return callback(error);
 
-        callback(error);
+        progress.clear(progress.UPDATE);
+
+        callback(null);
     });
 }
 

@@ -18,7 +18,6 @@ var apps = require('./apps'),
     middleware = require('./middleware'),
     passport = require('passport'),
     path = require('path'),
-    paths = require('./paths.js'),
     routes = require('./routes/index.js'),
     updater = require('./updater.js');
 
@@ -90,8 +89,10 @@ function initializeExpressSync() {
 
     // public routes
     router.post('/api/v1/cloudron/activate', routes.cloudron.activate);    // FIXME any number of admins can be created without auth!
+    router.get ('/api/v1/cloudron/progress', routes.cloudron.getProgress);
+    router.get ('/api/v1/cloudron/status', routes.cloudron.getStatus);
 
-    router.get ('/api/v1/cloudron/status', routes.cloudron.getStatus); // public route
+    // private routes
     router.get ('/api/v1/cloudron/config', rootScope, routes.cloudron.getConfig);
     router.get ('/api/v1/cloudron/update', rootScope, routes.cloudron.update);
     router.get ('/api/v1/cloudron/reboot', rootScope, routes.cloudron.reboot);

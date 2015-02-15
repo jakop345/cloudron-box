@@ -44,7 +44,7 @@ angular.module('Application').service('Client', function ($http, md5) {
             revision: null,
             update: null,
             isDev: false,
-            isUpdating: false
+            progress: {}
         };
         this._installedApps = [];
 
@@ -88,7 +88,7 @@ angular.module('Application').service('Client', function ($http, md5) {
         this._config.revision = config.revision;
         this._config.update = config.update;
         this._config.isDev = config.isDev;
-        this._config.isUpdating = config.isUpdating;
+        this._config.progress = config.progress;
 
         var that = this;
 

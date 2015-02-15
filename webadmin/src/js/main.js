@@ -46,7 +46,7 @@ var MainController = function ($scope, $route, $interval, Client) {
                 if (error) return $scope.error(error);
 
                 // check if we are actually updateing
-                if (Client.getConfig().isUpdating) window.location.href = '/update.html';
+                if (Client.getConfig().progress.update) window.location.href = '/update.html';
 
                 Client.userInfo(function (error, result) {
                     if (error) return $scope.error(error);
@@ -79,7 +79,7 @@ var MainController = function ($scope, $route, $interval, Client) {
 
     // wait till the view has loaded until showing a modal dialog
     Client.onConfig(function (config) {
-        if (config.isUpdating) {
+        if (config.progress.update) {
             window.location.href = '/update.html';
         }
     });
