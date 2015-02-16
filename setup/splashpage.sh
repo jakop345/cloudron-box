@@ -27,6 +27,6 @@ echo "${arg_tls_key}" > "${NGINX_CONFIG_DIR}/cert/host.key"
 unlink /etc/nginx 2>/dev/null || rm -rf /etc/nginx
 ln -s "${NGINX_CONFIG_DIR}" /etc/nginx
 
-echo '{ "progress": "0", "message": "Updating" }' > "${SETUP_WEBSITE_DIR}/progress.json"
+echo '{ "update": { "percent": "10", "message": "Updating cloudron software" }, "backup": null }' > "${SETUP_WEBSITE_DIR}/progress.json"
 
 nginx -s reload
