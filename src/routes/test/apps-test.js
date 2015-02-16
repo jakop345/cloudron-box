@@ -554,7 +554,8 @@ describe('App installation', function () {
     });
 
     it('installation - postgresql addon config', function (done) {
-        docker.getContainer(appInfo.containerId).inspect(function (error, data) {
+        var appContainer = docker.getContainer(appInfo.containerId);
+        appContainer.inspect(function (error, data) {
             var postgresqlUrl = null;
             data.Config.Env.forEach(function (env) { if (env.indexOf('POSTGRESQL_URL=') === 0) postgresqlUrl = env.split('=')[1]; });
             expect(postgresqlUrl).to.be.ok();
@@ -570,10 +571,10 @@ describe('App installation', function () {
             expect(data.Config.Env).to.contain('POSTGRESQL_PASSWORD=' + password);
             expect(data.Config.Env).to.contain('POSTGRESQL_DATABASE=' + dbname);
 
-            var cmd = util.format('psql -q -h %s -U%s --dbname=%s -e "CREATE TABLE IF NOT EXISTS foo (id INT);"',
-                'postgresql', username, dbname);
+            var cmd = util.format('bash -c "PGPASSWORD=%s psql -q -h %s -U%s --dbname=%s -e \'CREATE TABLE IF NOT EXISTS foo (id INT);\'"',
+                password, 'postgresql', username, dbname);
 
-            child_process.exec('docker exec ' + appContainer.id + ' ' + cmd, { timeout: 5000, env: { PGPASSWORD: password } }, function (error, stdout, stderr) {
+            child_process.exec('docker exec ' + appContainer.id + ' ' + cmd, { timeout: 5000 }, function (error, stdout, stderr) {
                 expect(!error).to.be.ok();
                 expect(stdout.length).to.be(0);
                 expect(stderr.length).to.be(0);
