@@ -47,11 +47,6 @@ gulp.task('update-html', function () {
 
 gulp.task('update', ['update-html', 'update-js', 'update-3rdparty'], function () {});
 
-gulp.task('update-watch', ['update-html', 'update-js', 'update-3rdparty'], function () {
-    gulp.watch('webadmin/src/update.html', ['update-html']);
-    gulp.watch('webadmin/src/js/update.js', ['update-js']);
-});
-
 gulp.task('js-index', function () {
     return gulp.src(['webadmin/src/js/index.js', 'webadmin/src/js/client.js', 'webadmin/src/js/appstore.js', 'webadmin/src/js/main.js', 'webadmin/src/views/*.js'])
         .pipe(sourcemaps.init())
@@ -78,12 +73,12 @@ gulp.task('js-update', function () {
 
 gulp.task('js', ['js-index', 'js-setup', 'js-update'], function () {});
 
-gulp.task('htmlViews', function () {
+gulp.task('html-views', function () {
     return gulp.src('webadmin/src/views/*.html')
         .pipe(gulp.dest('webadmin/dist/views'));
 });
 
-gulp.task('html_templates', function () {
+gulp.task('html-templates', function () {
     var config = JSON.parse(fs.readFileSync('./webadmin/deploymentConfig.json'));
 
     return gulp.src('webadmin/src/*.ejs')
@@ -91,9 +86,21 @@ gulp.task('html_templates', function () {
         .pipe(gulp.dest('webadmin/dist'));
 });
 
-gulp.task('html', ['html_templates', 'htmlViews'], function () {
+gulp.task('html', ['html-templates', 'html-views'], function () {
     return gulp.src('webadmin/src/*.html')
         .pipe(gulp.dest('webadmin/dist'));
+});
+
+gulp.task('watch', ['default'], function () {
+    gulp.watch('webadmin/src/*.html', ['html']);
+    gulp.watch('webadmin/src/*.ejs', ['html-templates']);
+    gulp.watch('webadmin/src/views/*.html', ['html-views']);
+    gulp.watch('webadmin/src/js/update.js', ['js-update']);
+    gulp.watch(['webadmin/src/js/setup.js', 'webadmin/src/js/client.js'], ['js-setup']);
+    gulp.watch(['webadmin/src/js/index.js', 'webadmin/src/js/client.js', 'webadmin/src/js/appstore.js', 'webadmin/src/js/main.js', 'webadmin/src/views/*.js'], ['js-index']);
+    gulp.watch('webadmin/src/update.html', ['update-html']);
+    gulp.watch('webadmin/src/js/update.js', ['update-js']);
+    gulp.watch('webadmin/src/3rdparty/**/*', ['3rdparty', 'update-3rdparty']);
 });
 
 gulp.task('clean', function (callback) {
