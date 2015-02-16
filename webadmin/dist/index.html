@@ -155,7 +155,7 @@
             <div class="navbar-default sidebar" role="navigation">
                 <div class="sidebar-nav navbar-collapse">
                     <ul class="nav" id="side-menu">
-                        <li>
+                        <li ng-show="userInfo.admin">
                             <a href=""><i class="fa fa-cloud-download fa-fw"></i> My Apps ({{installedApps.length}}) <span class="fa arrow"></span></a>
                             <ul class="nav nav-second-level">
                                 <li ng-show="!installedApps.length">
@@ -173,19 +173,19 @@
                                 </li>
                             </ul>
                         </li>
-                        <li>
+                        <li ng-show="userInfo.admin">
                             <a ng-class="{ active: isActive('/appstore')}" href="#/appstore"><i class="fa fa-cloud fa-fw"></i> App Store</a>
                         </li>
-                        <li>
+                        <li ng-show="userInfo.admin">
                             <a ng-class="{ active: isActive('/userlist')}" href="#/userlist"><i class="fa fa-users fa-fw"></i> Users</a>
                         </li>
-                        <li>
+                        <li ng-show="userInfo.admin">
                             <a ng-class="{ active: isActive('/graphs')}" href="#/graphs"><i class="fa fa-bar-chart-o fa-fw"></i> Graphs</a>
                         </li>
                         <li>
                             <a ng-class="{ active: isActive('/security')}" href="#/security"><i class="fa fa-unlock-alt fa-fw"></i> Security</a>
                         </li>
-                        <li>
+                        <li ng-show="userInfo.admin">
                             <a ng-class="{ active: isActive('/settings')}" href="#/settings"><i class="fa fa-wrench fa-fw"></i> Settings</a>
                         </li>
                     </ul>
