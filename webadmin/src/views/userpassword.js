@@ -1,8 +1,6 @@
-/* exported UserPasswordController */
-
 'use strict';
 
-function UserPasswordController ($scope, $routeParams, $location, Client) {
+angular.module('Application').controller('UserPasswordController', ['$scope', '$routeParams', '$location', 'Client', function ($scope, $routeParams, $location, Client) {
     if (!Client.getUserInfo().admin) $location.path('/');
 
     $scope.active = false;
@@ -46,4 +44,4 @@ function UserPasswordController ($scope, $routeParams, $location, Client) {
     };
 
     document.getElementById('inputCurrentPassword').focus();
-}
+}]);

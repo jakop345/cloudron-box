@@ -1,8 +1,6 @@
-/* exported AppInstallController */
-
 'use strict';
 
-var AppInstallController = function ($scope, $routeParams, $location, Client, AppStore, $timeout) {
+angular.module('Application').controller('AppInstallController', ['$scope', '$routeParams', '$location', 'Client', 'AppStore', '$timeout', function ($scope, $routeParams, $location, Client, AppStore, $timeout) {
     if (!Client.getUserInfo().admin) $location.path('/');
 
     $scope.app = null;
@@ -73,4 +71,4 @@ var AppInstallController = function ($scope, $routeParams, $location, Client, Ap
     $scope.$on('$viewContentLoaded', function () {
         $timeout(function () { $('input[autofocus]:visible:first').focus(); }, 1000);
     });
-};
+}]);

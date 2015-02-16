@@ -7,7 +7,7 @@
     <script>
 
     var app = angular.module('Application', []);
-    function MainController($scope, $http) {
+    app.controller('MainController', ['$scope', '$http', function ($scope, $http) {
         var authCode = window.location.search.slice('?authCode='.length);
 
         if (!authCode) {
@@ -36,7 +36,7 @@
             // TODO: display a real error page instead of simply forward to /
             // window.location.href = '/';
         });
-    }
+    }]);
 
     </script>
 

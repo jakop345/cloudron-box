@@ -1,8 +1,6 @@
-/* exported AppConfigureController */
-
 'use strict';
 
-var AppConfigureController = function ($scope, $routeParams, $location, Client) {
+angular.module('Application').controller('AppConfigureController', ['$scope', '$routeParams', '$location', 'Client', function ($scope, $routeParams, $location, Client) {
     if (!Client.getUserInfo().admin) $location.path('/');
 
     $scope.app = null;
@@ -62,4 +60,4 @@ var AppConfigureController = function ($scope, $routeParams, $location, Client) 
     });
 
     document.getElementById('inputLocation').focus();
-};
+}]);

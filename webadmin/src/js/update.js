@@ -1,11 +1,9 @@
-/* exported Controller */
-
 'use strict';
 
 // create main application module
-angular.module('Application', []);
+var app = angular.module('Application', []);
 
-var Controller = function ($scope, $http, $interval) {
+app.controller('Controller', ['$scope', '$http', '$interval', function ($scope, $http, $interval) {
 
     function loadWebadmin() {
         window.location.href = '/';
@@ -27,4 +25,4 @@ var Controller = function ($scope, $http, $interval) {
     $interval(fetchProgress, 2000);
 
     fetchProgress();
-};
+}]);

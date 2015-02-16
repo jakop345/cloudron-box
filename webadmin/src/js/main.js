@@ -1,8 +1,6 @@
-/* exported MainController */
-
 'use strict';
 
-var MainController = function ($scope, $route, $interval, Client) {
+angular.module('Application').controller('MainController', ['$scope', '$route', '$interval', 'Client', function ($scope, $route, $interval, Client) {
     $scope.initialized = false;
     $scope.userInfo = Client.getUserInfo();
     $scope.installedApps = Client.getInstalledApps();
@@ -83,4 +81,4 @@ var MainController = function ($scope, $route, $interval, Client) {
             window.location.href = '/update.html';
         }
     });
-};
+}]);

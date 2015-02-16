@@ -1,9 +1,9 @@
 /* global $:true */
-/* exported AppDetailsController */
+/* global Rickshaw:true */
 
 'use strict';
 
-var AppDetailsController = function ($scope, $http, $routeParams, $location, Client) {
+angular.module('Application').controller('AppDetailsController', ['$scope', '$http', '$routeParams', '$location', 'Client', function ($scope, $http, $routeParams, $location, Client) {
     if (!Client.getUserInfo().admin) $location.path('/');
 
     $scope.app = {};
@@ -213,4 +213,4 @@ var AppDetailsController = function ($scope, $http, $routeParams, $location, Cli
             $scope.initialized = true;
         });
     });
-};
+}]);

@@ -1,9 +1,6 @@
-/* exported SecurityController */
-/* global $ */
-
 'use strict';
 
-var SecurityController = function ($scope, Client) {
+angular.module('Application').controller('SecurityController', ['$scope', 'Client', function ($scope, Client) {
     $scope.activeClients = [];
     $scope.tokenInUse = null;
 
@@ -26,4 +23,4 @@ var SecurityController = function ($scope, Client) {
             $scope.activeClients = activeClients;
         });
     });
-};
+}]);

@@ -1,9 +1,6 @@
-/* exported UserListController */
-/* global $:true */
-
 'use strict';
 
-function UserListController ($scope, $location, Client) {
+angular.module('Application').controller('UserListController', ['$scope', '$location', 'Client', function ($scope, $location, Client) {
     if (!Client.getUserInfo().admin) $location.path('/');
 
     $scope.ready = false;
@@ -58,4 +55,4 @@ function UserListController ($scope, $location, Client) {
     };
 
     refresh();
-}
+}]);

@@ -1,10 +1,6 @@
-/* exported SettingsController */
-/* global $:true */
-
 'use strict';
 
-
-var SettingsController = function ($scope, $location, Client) {
+angular.module('Application').controller('SettingsController', ['$scope', '$location', 'Client', function ($scope, $location, Client) {
     if (!Client.getUserInfo().admin) $location.path('/');
 
     $scope.user = Client.getUserInfo();
@@ -137,4 +133,4 @@ var SettingsController = function ($scope, $location, Client) {
             });
         });
     });
-};
+}]);

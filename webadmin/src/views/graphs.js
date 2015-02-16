@@ -1,8 +1,8 @@
-/* exported GraphsController */
+/* global:Rickshaw:true */
 
 'use strict';
 
-var GraphsController = function ($scope, $location, Client) {
+angular.module('Application').controller('GraphsController', ['$scope', '$location', 'Client', function ($scope, $location, Client) {
     if (!Client.getUserInfo().admin) $location.path('/');
 
     $scope.activeTab = 'day';
@@ -175,5 +175,4 @@ var GraphsController = function ($scope, $location, Client) {
     };
 
     Client.onReady($scope.updateGraphs);
-};
-
+}]);

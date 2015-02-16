@@ -1,8 +1,6 @@
-/* exported UserCreateController */
-
 'use strict';
 
-function UserCreateController ($scope, $routeParams, $location, Client) {
+angular.module('Application').controller('UserCreateController', ['$scope', '$routeParams', '$location', 'Client', function ($scope, $routeParams, $location, Client) {
     if (!Client.getUserInfo().admin) $location.path('/');
 
     $scope.disabled = false;
@@ -30,4 +28,4 @@ function UserCreateController ($scope, $routeParams, $location, Client) {
     $scope.cancel = function () {
         window.history.back();
     };
-}
+}]);

@@ -1,8 +1,6 @@
-/* exported AccountController */
-
 'use strict';
 
-var AccountController = function ($scope, $location, Client) {
+angular.module('Application').controller('AccountController', ['$scope', '$location', 'Client', function ($scope, $location, Client) {
     $scope.user = Client.getUserInfo();
     $scope.config = Client.getConfig();
 
@@ -10,4 +8,4 @@ var AccountController = function ($scope, $location, Client) {
         $location.path('/userpassword');
         // window.location.href = '#/userpassword';
     };
-};
+}]);

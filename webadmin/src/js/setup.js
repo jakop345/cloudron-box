@@ -1,11 +1,9 @@
-/* exported SetupController */
-
 'use strict';
 
 // create main application module
 var app = angular.module('Application', ['ngAnimate', 'angular-md5']);
 
-var SetupController = function ($scope, Client) {
+app.controller('SetupController', ['$scope', 'Client', function ($scope, Client) {
     $scope.initialized = false;
     $scope.busy = false;
 
@@ -49,4 +47,4 @@ var SetupController = function ($scope, Client) {
         // hack for autofocus with angular
         setTimeout( function () { $('input[autofocus]:visible:first').focus(); }, 0);
     });
-};
+}]);

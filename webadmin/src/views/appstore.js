@@ -1,8 +1,6 @@
-/* exported AppStoreController */
-
 'use strict';
 
-var AppStoreController = function ($scope, $location, Client, AppStore) {
+angular.module('Application').controller('AppStoreController', ['$scope', '$location', 'Client', 'AppStore', function ($scope, $location, Client, AppStore) {
     if (!Client.getUserInfo().admin) $location.path('/');
 
     $scope.LOADING = 1;
@@ -68,4 +66,4 @@ var AppStoreController = function ($scope, $location, Client, AppStore) {
         if (!config.apiServerOrigin) return;
         $scope.refresh();
     });
-};
+}]);

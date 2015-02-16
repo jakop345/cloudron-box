@@ -1,7 +1,5 @@
-/* exported DashboardController */
-
 'use strict';
 
-var DashboardController = function () {
+angular.module('Application').controller('DashboardController', function () {
 
-};
+});
