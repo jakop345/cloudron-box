@@ -42,7 +42,7 @@ function checkAppUpdates(callback) {
 
         var appStoreIds = appVersions.map(function (appVersion) { return appVersion.appStoreId; });
 
-        superagent.post(config.apiServerOrigin() + '/api/v1/appupdates').send({ appIds: appStoreIds }).end(function (error, result) {
+        superagent.post(config.apiServerOrigin() + '/api/v1/appupdates').send({ appIds: appStoreIds, boxVersion: config.version() }).end(function (error, result) {
             if (error) return callback(error);
             if (result.statusCode !== 200) return callback(new Error('Error checking app update: ', result.statusCode, result.body.message));
 
