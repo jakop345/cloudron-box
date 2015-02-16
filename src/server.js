@@ -47,7 +47,7 @@ function initializeExpressSync() {
     if (process.env.NODE_ENV === 'test') {
        gApp.use(express.static(path.join(__dirname, '/../webadmin')));
     } else {
-        gApp.use(middleware.morgan({ format: 'dev', immediate: false }));
+        gApp.use(middleware.morgan('dev', { immediate: false }));
     }
 
     var router = new express.Router();
