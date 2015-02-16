@@ -20,10 +20,6 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         });
     };
 
-    $scope.changePassword = function () {
-        window.location.href = '#/userpassword';
-    };
-
     $scope.backup = function () {
         $('#backupProgressModal').modal('show');
         $scope.$parent.initialized = false;
