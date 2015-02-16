@@ -3,7 +3,7 @@
 'use strict';
 
 // create main application module
-angular.module('Application', ['ngAnimate']);
+angular.module('Application', []);
 
 var Controller = function ($scope, $http, $interval) {
 
