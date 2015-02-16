@@ -4,7 +4,9 @@
 'use strict';
 
 
-var SettingsController = function ($scope, Client) {
+var SettingsController = function ($scope, $location, Client) {
+    if (!Client.getUserInfo().admin) $location.path('/');
+
     $scope.user = Client.getUserInfo();
     $scope.config = Client.getConfig();
     $scope.nakedDomainApp = null;

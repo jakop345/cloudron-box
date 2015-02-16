@@ -3,7 +3,9 @@
 
 'use strict';
 
-function UserListController ($scope, Client) {
+function UserListController ($scope, $location, Client) {
+    if (!Client.getUserInfo().admin) $location.path('/');
+
     $scope.ready = false;
     $scope.users = [];
     $scope.userInfo = Client.getUserInfo();

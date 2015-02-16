@@ -2,7 +2,9 @@
 
 'use strict';
 
-function UserCreateController ($scope, $routeParams, Client) {
+function UserCreateController ($scope, $routeParams, $location, Client) {
+    if (!Client.getUserInfo().admin) $location.path('/');
+
     $scope.disabled = false;
 
     $scope.username = '';

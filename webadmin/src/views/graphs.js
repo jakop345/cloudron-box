@@ -1,9 +1,10 @@
 /* exported GraphsController */
-/* global $:true */
 
 'use strict';
 
-var GraphsController = function ($scope, Client) {
+var GraphsController = function ($scope, $location, Client) {
+    if (!Client.getUserInfo().admin) $location.path('/');
+
     $scope.activeTab = 'day';
 
     var cpuUsageTarget = 'transformNull(' +

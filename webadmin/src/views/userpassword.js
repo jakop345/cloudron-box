@@ -2,7 +2,9 @@
 
 'use strict';
 
-function UserPasswordController ($scope, $routeParams, Client) {
+function UserPasswordController ($scope, $routeParams, $location, Client) {
+    if (!Client.getUserInfo().admin) $location.path('/');
+
     $scope.active = false;
     $scope.currentPassword = '';
     $scope.newPassword = '';

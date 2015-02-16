@@ -3,6 +3,8 @@
 'use strict';
 
 var AppStoreController = function ($scope, $location, Client, AppStore) {
+    if (!Client.getUserInfo().admin) $location.path('/');
+
     $scope.LOADING = 1;
     $scope.ERROR = 2;
     $scope.LOADED = 3;

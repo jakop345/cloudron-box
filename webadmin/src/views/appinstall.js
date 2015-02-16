@@ -2,7 +2,9 @@
 
 'use strict';
 
-var AppInstallController = function ($scope, $routeParams, Client, AppStore, $timeout) {
+var AppInstallController = function ($scope, $routeParams, $location, Client, AppStore, $timeout) {
+    if (!Client.getUserInfo().admin) $location.path('/');
+
     $scope.app = null;
     $scope.password = '';
     $scope.location = '';

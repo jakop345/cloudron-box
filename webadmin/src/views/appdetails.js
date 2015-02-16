@@ -3,7 +3,9 @@
 
 'use strict';
 
-var AppDetailsController = function ($scope, $http, $routeParams, Client) {
+var AppDetailsController = function ($scope, $http, $routeParams, $location, Client) {
+    if (!Client.getUserInfo().admin) $location.path('/');
+
     $scope.app = {};
     $scope.initialized = false;
     $scope.updateAvailable = false;

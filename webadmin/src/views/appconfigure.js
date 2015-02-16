@@ -2,7 +2,9 @@
 
 'use strict';
 
-var AppConfigureController = function ($scope, $routeParams, Client) {
+var AppConfigureController = function ($scope, $routeParams, $location, Client) {
+    if (!Client.getUserInfo().admin) $location.path('/');
+
     $scope.app = null;
     $scope.password = '';
     $scope.location = '';
