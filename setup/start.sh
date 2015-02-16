@@ -33,7 +33,7 @@ set_progress() {
     (echo "{ \"update\": { \"percent\": \"${percent}\", \"message\": \"${message}\" }, \"backup\": {} }" > "${SETUP_PROGRESS_JSON}") 2> /dev/null || true # as this will fail in non-update mode
 }
 
-set_progress "1" "Creating directories"
+set_progress "15" "Creating directories"
 sudo -u "${USER}" -H bash <<EOF
 set -eux
 # keep these in sync with paths.js
@@ -46,7 +46,7 @@ mkdir -p "${CONFIG_DIR}/nginx/cert"
 mkdir -p "${CONFIG_DIR}/collectd/collectd.conf.d"
 EOF
 
-set_progress "5" "Configuring Sudoers file"
+set_progress "20" "Configuring Sudoers file"
 cat > /etc/sudoers.d/yellowtent <<EOF
 Defaults!${BOX_SRC_DIR}/src/scripts/rmappdir.sh env_keep=HOME
 ${USER} ALL=(root) NOPASSWD: ${BOX_SRC_DIR}/src/scripts/rmappdir.sh
@@ -65,14 +65,14 @@ ${USER} ALL=(root) NOPASSWD: ${BOX_SRC_DIR}/src/scripts/reloadcollectd.sh
 
 EOF
 
-set_progress "10" "Migrating data"
+set_progress "25" "Migrating data"
 sudo -u "${USER}" -H bash <<EOF
 set -eux
 cd "${box_src_tmp_dir}"
 PATH="${PATH}:${box_src_tmp_dir}/node_modules/.bin" npm run-script migrate_data
 EOF
 
-set_progress "15" "Setup nginx"
+set_progress "30" "Setup nginx"
 nginx_config_dir="${CONFIG_DIR}/nginx"
 nginx_appconfig_dir="${CONFIG_DIR}/nginx/applications"
 
@@ -97,7 +97,7 @@ ln -s "${nginx_config_dir}" /etc/nginx
 
 chown "${USER}:${USER}" -R "/home/${USER}"
 
-set_progress "20" "Removing existing container"
+set_progress "35" "Removing existing container"
 # removing containers ensures containers are launched with latest config updates
 # restore code in appatask does not delete old containers
 existing_containers=$(docker ps -qa)
@@ -106,10 +106,10 @@ if [[ -n "${existing_containers}" ]]; then
     echo "${existing_containers}" | xargs docker rm -f
 fi
 
-set_progress "30" "Setup collectd and graphite"
+set_progress "45" "Setup collectd and graphite"
 ${script_dir}/start/setup_collectd.sh
 
-set_progress "40" "Setup mail relay"
+set_progress "45" "Setup mail relay"
 docker pull girish/mail:0.3 || true # this line is for dev convenience since it's already part of base image
 mail_container_id=$(docker run --restart=always -d --name="mail" \
     -p 127.0.0.1:25:25 \
@@ -135,7 +135,7 @@ mysql_container_id=$(docker run --restart=always -d --name="mysql" \
     girish/mysql:0.3)
 echo "MySQL container id: ${mysql_container_id}"
 
-set_progress "60" "Setup Postgres addon"
+set_progress "55" "Setup Postgres addon"
 postgresql_root_password=$(pwgen -1 -s)
 cat > "${CONFIG_DIR}/addons/postgresql_vars.sh" <<EOF
 readonly POSTGRESQL_ROOT_PASSWORD='${postgresql_root_password}'
@@ -149,10 +149,10 @@ postgresql_container_id=$(docker run --restart=always -d --name="postgresql" \
     girish/postgresql:0.3)
 echo "PostgreSQL container id: ${postgresql_container_id}"
 
-set_progress "70" "Pulling Redis addon"
+set_progress "60" "Pulling Redis addon"
 docker pull girish/redis:0.3 || true # this line for dev convenience since it's already part of base image
 
-set_progress "80" "Creating cloudron.conf"
+set_progress "65" "Creating cloudron.conf"
 cloudron_sqlite="${DATA_DIR}/cloudron.sqlite"
 admin_origin="https://${admin_fqdn}"
 sudo -u yellowtent -H bash <<EOF
@@ -197,19 +197,19 @@ ADMIN_SCOPES="root,profile,users,apps,settings,roleAdmin "
 sqlite3 "${cloudron_sqlite}" "INSERT OR REPLACE INTO clients (id, appId, clientSecret, redirectURI, scope) VALUES (\"cid-webadmin\", \"webadmin\", \"secret-webadmin\", \"${admin_origin}\", \"\$ADMIN_SCOPES\")"
 EOF
 
-set_progress "85" "Setup logrotate"
+set_progress "70" "Setup logrotate"
 ${script_dir}/start/setup_logrotate.sh
 
 # bookkeep the version as part of data
 echo "{ \"version\": \"${arg_version}\", \"boxVersionsUrl\": \"${arg_box_versions_url}\" }" > "${DATA_DIR}/version"
 
-set_progress "90" "Setup supervisord"
+set_progress "75" "Setup supervisord"
 ${script_dir}/start/setup_supervisord.sh
 
-set_progress "95" "Reloading supervisor"
+set_progress "80" "Reloading supervisor"
 ${script_dir}/start/reload_supervisord.sh
 
-set_progress "99" "Reloading nginx"
+set_progress "85" "Reloading nginx"
 nginx -s reload
 
 set_progress "100" "Done"

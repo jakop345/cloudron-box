@@ -150,6 +150,8 @@ function startUpdate(callback) {
         return callback(new Error('No update available'));
     }
 
+    progress.set(progress.UPDATE, 5, 'Create backup');
+
     cloudron.backup(function (error) {
         if (error) return callback(error);
 
@@ -162,6 +164,8 @@ function startUpdate(callback) {
                 .end(function (error, result) {
                 if (error) return callback(new Error('Error making upgrade request: ' + error));
                 if (result.status !== 202) return callback(new Error('Server not ready to upgrade: ' + result.body));
+
+                progress.set(progress.UPDATE, 10, 'Updating base system');
 
                 callback(null);
             });
@@ -193,6 +197,8 @@ function startUpdate(callback) {
             .end(function (error, result) {
                 if (error) return callback(error);
                 if (result.status !== 202) return callback(new Error('Error initiating update: ' + result.body));
+
+                progress.set(progress.UPDATE, 10, 'Updating cloudron software');
 
                 callback(null);
         });
