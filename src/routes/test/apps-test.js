@@ -9,6 +9,7 @@
 var appdb = require('../../appdb.js'),
     assert = require('assert'),
     async = require('async'),
+    child_process = require('child_process'),
     clientdb = require('../../clientdb.js'),
     config = require('../../../config.js'),
     database = require('../../database.js'),
@@ -27,6 +28,7 @@ var appdb = require('../../appdb.js'),
     server = require('../../server.js'),
     url = require('url'),
     userdb = require('../../userdb.js'),
+    util = require('util'),
     uuid = require('node-uuid'),
     _ = require('underscore');
 
@@ -88,24 +90,39 @@ function setup(done) {
                 config.set('token', 'APPSTORE_TOKEN');
                 callback();
             });
+        },
+
+        child_process.exec.bind(null, __dirname + '/start_addons.sh'),
+
+        function (callback) {
+            config.set('addons.mysql.rootPassword', 'secret');
+            config.set('addons.postgresql.rootPassword', 'secret');
+
+            callback(null);
         }
     ], done);
 }
 
-// remove all temporary folders
 function cleanup(done) {
-    database.clear(function (error) {
-        expect(!error).to.be.ok();
+    async.series([
+        database.clear,
 
-        server.stop(function (error) {
-            expect(error).to.be(null);
+        server.stop,
+
+        child_process.exec.bind(null, 'docker rm -f mysql; docker rm -f postgresql'),
+
+        function (callback) {
             config.set('token', null);
-            done();
-        });
-    });
+            config.set('addons.mysql.rootPassword', null);
+            config.set('addons.postgresql.rootPassword', null);
+ 
+            callback();
+        }
+    ], done);
 }
 
 describe('App API', function () {
+    this.timeout(50000);
     var dockerProxy;
 
     before(function (done) {
@@ -331,12 +348,12 @@ describe('App installation', function () {
         async.series([
             function (callback) {
                 dockerProxy = startDockerProxy(function interceptor(req, res) {
-                    if (req.method === 'POST' && req.url === '/images/create?fromImage=girish%2Ftest&tag=0.7') {
+                    if (req.method === 'POST' && req.url === '/images/create?fromImage=girish%2Ftest&tag=0.8') {
                         imageCreated = true;
                         res.writeHead(200);
                         res.end();
                         return true;
-                    } else if (req.method === 'DELETE' && req.url === '/images/girish/test:0.7?force=true&noprune=false') {
+                    } else if (req.method === 'DELETE' && req.url === '/images/girish/test:0.8?force=true&noprune=false') {
                         imageDeleted = true;
                         res.writeHead(200);
                         res.end();
@@ -506,6 +523,65 @@ describe('App installation', function () {
         });
     });
 
+    it('installation - mysql addon config', function (done) {
+        var appContainer = docker.getContainer(appInfo.containerId);
+        appContainer.inspect(function (error, data) {
+            var mysqlUrl = null;
+            data.Config.Env.forEach(function (env) { if (env.indexOf('MYSQL_URL=') === 0) mysqlUrl = env.split('=')[1]; });
+            expect(mysqlUrl).to.be.ok();
+
+            var urlp = url.parse(mysqlUrl);
+            var username = urlp.auth.split(':')[0];
+            var password = urlp.auth.split(':')[1];
+            var dbname = urlp.path.substr(1);
+
+            expect(data.Config.Env).to.contain('MYSQL_PORT=3306');
+            expect(data.Config.Env).to.contain('MYSQL_HOST=mysql');
+            expect(data.Config.Env).to.contain('MYSQL_USERNAME=' + username);
+            expect(data.Config.Env).to.contain('MYSQL_PASSWORD=' + password);
+            expect(data.Config.Env).to.contain('MYSQL_DATABASE=' + dbname);
+
+            var cmd = util.format('mysql -h %s -u%s -p%s --database=%s -e "CREATE TABLE IF NOT EXISTS foo (id INT);"',
+                'mysql', username, password, dbname);
+
+            child_process.exec('docker exec ' + appContainer.id + ' ' + cmd, { timeout: 5000 }, function (error, stdout, stderr) {
+                expect(!error).to.be.ok();
+                expect(stdout.length).to.be(0);
+                expect(stderr.length).to.be(0);
+                done();
+            });
+        });
+    });
+
+    it('installation - postgresql addon config', function (done) {
+        docker.getContainer(appInfo.containerId).inspect(function (error, data) {
+            var postgresqlUrl = null;
+            data.Config.Env.forEach(function (env) { if (env.indexOf('POSTGRESQL_URL=') === 0) postgresqlUrl = env.split('=')[1]; });
+            expect(postgresqlUrl).to.be.ok();
+
+            var urlp = url.parse(postgresqlUrl);
+            var username = urlp.auth.split(':')[0];
+            var password = urlp.auth.split(':')[1];
+            var dbname = urlp.path.substr(1);
+
+            expect(data.Config.Env).to.contain('POSTGRESQL_PORT=5432');
+            expect(data.Config.Env).to.contain('POSTGRESQL_HOST=postgresql');
+            expect(data.Config.Env).to.contain('POSTGRESQL_USERNAME=' + username);
+            expect(data.Config.Env).to.contain('POSTGRESQL_PASSWORD=' + password);
+            expect(data.Config.Env).to.contain('POSTGRESQL_DATABASE=' + dbname);
+
+            var cmd = util.format('psql -q -h %s -U%s --dbname=%s -e "CREATE TABLE IF NOT EXISTS foo (id INT);"',
+                'postgresql', username, dbname);
+
+            child_process.exec('docker exec ' + appContainer.id + ' ' + cmd, { timeout: 5000, env: { PGPASSWORD: password } }, function (error, stdout, stderr) {
+                expect(!error).to.be.ok();
+                expect(stdout.length).to.be(0);
+                expect(stderr.length).to.be(0);
+                done();
+            });
+        });
+    });
+
     it('logs - stdout and stderr', function (done) {
         request.get(SERVER_URL + '/api/v1/apps/' + APP_ID + '/logs')
             .query({ access_token: token })
@@ -670,12 +746,12 @@ describe('App installation - port bindings', function () {
         async.series([
             function (callback) {
                 dockerProxy = startDockerProxy(function interceptor(req, res) {
-                    if (req.method === 'POST' && req.url === '/images/create?fromImage=girish%2Ftest&tag=0.7') {
+                    if (req.method === 'POST' && req.url === '/images/create?fromImage=girish%2Ftest&tag=0.8') {
                         imageCreated = true;
                         res.writeHead(200);
                         res.end();
                         return true;
-                    } else if (req.method === 'DELETE' && req.url === '/images/girish/test:0.7?force=true&noprune=false') {
+                    } else if (req.method === 'DELETE' && req.url === '/images/girish/test:0.8?force=true&noprune=false') {
                         imageDeleted = true;
                         res.writeHead(200);
                         res.end();

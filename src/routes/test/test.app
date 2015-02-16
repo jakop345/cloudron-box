@@ -1,7 +1,7 @@
 {
   "title": "test",
-  "version": "0.7",
-  "dockerImage": "girish/test:0.7",
+  "version": "0.8",
+  "dockerImage": "girish/test:0.8",
   "healthCheckPath": "/",
   "httpPort": "7777",
   "tcpPorts": {
@@ -12,6 +12,8 @@
   },
   "addons": [
     "oauth",
-    "redis"
+    "redis",
+    "mysql",
+    "postgresql"
   ]
 }

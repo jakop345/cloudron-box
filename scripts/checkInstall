@@ -27,13 +27,23 @@ for script in "${scripts[@]}"; do
     fi
 done
 
-if ! docker inspect girish/test:0.7 >/dev/null 2>/dev/null; then
-    echo "docker pull girish/test:0.7 for tests to run"
+if ! docker inspect girish/test:0.8 >/dev/null 2>/dev/null; then
+    echo "docker pull girish/test:0.8 for tests to run"
     exit 1
 fi
 
-if ! docker inspect girish/redis:0.2 >/dev/null 2>/dev/null; then
-    echo "docker pull girish/redis:0.2 for tests to run"
+if ! docker inspect girish/redis:0.3 >/dev/null 2>/dev/null; then
+    echo "docker pull girish/redis:0.3 for tests to run"
+    exit 1
+fi
+
+if ! docker inspect girish/mysql:0.3 >/dev/null 2>/dev/null; then
+    echo "docker pull girish/mysql:0.3 for tests to run"
+    exit 1
+fi
+
+if ! docker inspect girish/postgresql:0.3 >/dev/null 2>/dev/null; then
+    echo "docker pull girish/postgresql:0.3 for tests to run"
     exit 1
 fi
 

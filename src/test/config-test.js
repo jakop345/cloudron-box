@@ -81,11 +81,13 @@ describe('config', function () {
         expect(config.zoneName()).to.equal('example.com');
     });
 
-    it('throws with bad key', function (done) {
-        safe(function () { config.set('random', 'value'); });
-        expect(safe.error).to.be.ok();
-        safe(function () { config.set({ random: 'value' }); });
-        expect(safe.error).to.be.ok();
+    it('can set arbitrary values', function (done) {
+        config.set('random', 'value');
+        expect(config.get('random')).to.equal('value');
+
+        config.set('this.is.madness', 42);
+        expect(config.get('this.is.madness')).to.equal(42);
+
         done();
     });
 

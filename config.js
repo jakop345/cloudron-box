@@ -95,8 +95,7 @@ function set(key, value) {
             data[k] = obj[k];
         }
     } else {
-        assert(key in data, 'config.js is missing key "' + key + '"');
-        data[key] = value;
+        data = safe.set(data, key, value);
     }
     saveSync();
 }
