@@ -1041,8 +1041,8 @@
       "from": "proxy-middleware@^0.11.0"
     },
     "safetydance": {
-      "version": "0.0.12",
-      "from": "safetydance@0.0.12"
+      "version": "0.0.13",
+      "from": "safetydance@>=0.0.13 <0.0.14"
     },
     "semver": {
       "version": "4.3.0",
