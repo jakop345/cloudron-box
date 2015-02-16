@@ -24,7 +24,7 @@ angular.module('Application').service('AppStore', function ($http, Client) {
 
         var that = this;
 
-        $http.get(Client.getConfig().apiServerOrigin + '/api/v1/appstore/apps').success(function (data, status) {
+        $http.get(Client.getConfig().apiServerOrigin + '/api/v1/appstore/apps', { params: { boxVersion: Client.getConfig().version } }).success(function (data, status) {
             if (status !== 200) return callback(new AppStoreError(status, data));
 
             // TODO remove old apps
