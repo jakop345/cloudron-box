@@ -12,8 +12,6 @@ var apps = require('./apps'),
     debug = require('debug')('box:server'),
     express = require('express'),
     http = require('http'),
-    HttpError = require('connect-lastmile').HttpError,
-    HttpSuccess = require('connect-lastmile').HttpSuccess,
     mailer = require('./mailer.js'),
     middleware = require('./middleware'),
     passport = require('passport'),
@@ -66,8 +64,7 @@ function initializeExpressSync() {
        .use(router)
        .use(middleware.lastMile());
 
-    var FIELD_LIMIT = 2 * 1024, // max fields that can appear in multipart
-        FILE_SIZE_LIMIT = '521mb', // max file size that can be uploaded
+    var FILE_SIZE_LIMIT = '521mb', // max file size that can be uploaded
         FILE_TIMEOUT = 60 * 1000; // increased timeout for file uploads (1 min)
 
     var multipart = middleware.multipart({ maxFieldsSize: FIELD_LIMIT, limit: FILE_SIZE_LIMIT, timeout: FILE_TIMEOUT });
@@ -75,7 +72,6 @@ function initializeExpressSync() {
     // middleware shortcuts for authentification
     var bearer = passport.authenticate(['bearer'], { session: false });
     var basic = passport.authenticate(['basic'], { session: false });
-    var both = passport.authenticate(['basic', 'bearer'], { session: false });
 
     // scope middleware implicitly also adds bearer token verification
     var rootScope = routes.oauth2.scope('root');
