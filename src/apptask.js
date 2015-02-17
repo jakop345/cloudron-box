@@ -51,7 +51,8 @@ exports = module.exports = {
     _registerSubdomain: registerSubdomain,
     _unregisterSubdomain: unregisterSubdomain,
     _reloadNginx: reloadNginx,
-    _waitForDnsPropagation: waitForDnsPropagation
+    _waitForDnsPropagation: waitForDnsPropagation,
+    _validateManifest: validateManifest
 };
 
 var NGINX_APPCONFIG_EJS = fs.readFileSync(__dirname + '/../setup/start/nginx/appconfig.ejs', { encoding: 'utf8' }),
