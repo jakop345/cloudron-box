@@ -445,6 +445,10 @@ function validateManifest(manifest) {
         if (!semver.valid(manifest['maxBoxVersion'])) return new Error('maxBoxVersion is not valid semver');
     }
 
+    if ('targetBoxVersion' in manifest) {
+        if (!semver.valid(manifest['targetBoxVersion'])) return new Error('targetBoxVersion is not valid semver');
+    }
+
     return null;
 }
 
