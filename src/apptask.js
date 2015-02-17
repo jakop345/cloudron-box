@@ -27,6 +27,7 @@ var addons = require('./addons.js'),
     path = require('path'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
+    semver = require('semver'),
     settings = require('./settings.js'),
     superagent = require('superagent'),
     util = require('util'),
@@ -432,6 +433,14 @@ function validateManifest(manifest) {
         for (var i = 0; i < manifest.addons.length; i++) {
             if (typeof manifest.addons[i] !== 'string') return new Error('addons must be strings');
         }
+    }
+
+    if ('minBoxVersion' in manifest) {
+        if (!semver.valid(manifest['minBoxVersion'])) return callback(new AppsError(AppsError.BAD_FIELD, 'minBoxVersion is not valid semver'));
+    }
+
+    if ('maxBoxVersion' in manifest) {
+        if (!semver.valid(manifest['maxBoxVersion'])) return callback(new AppsError(AppsError.BAD_FIELD, 'maxBoxVersion is not valid semver'));
     }
 
     return null;
