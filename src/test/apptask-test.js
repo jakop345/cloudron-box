@@ -162,7 +162,7 @@ describe('apptask', function () {
     });
 
     it('downloads manifest', function (done) {
-        var manifest = { version: '0.1', dockerImage: 'foo', healthCheckPath: '/', httpPort: '3', title: 'ok' };
+        var manifest = { version: '0.0.1', dockerImage: 'foo', healthCheckPath: '/', httpPort: '3', title: 'ok' };
         var scope = nock(config.apiServerOrigin()).get('/api/v1/appstore/apps/' + APP.appStoreId + '/manifest').reply(200, manifest);
 
         apptask._downloadManifest(APP, function (error) {

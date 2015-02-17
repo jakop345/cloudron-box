@@ -426,6 +426,8 @@ function validateManifest(manifest) {
          if (manifest[field].length === 0) return new Error(field + ' cannot be empty');
      }
 
+    if (!semver.valid(manifest['version'])) return new Error('version is not valid semver');
+
     if ('addons' in manifest) {
         // addons must be array of strings
         if (!util.isArray(manifest.addons)) return new Error('addons must be an array');
@@ -436,11 +438,11 @@ function validateManifest(manifest) {
     }
 
     if ('minBoxVersion' in manifest) {
-        if (!semver.valid(manifest['minBoxVersion'])) return callback(new AppsError(AppsError.BAD_FIELD, 'minBoxVersion is not valid semver'));
+        if (!semver.valid(manifest['minBoxVersion'])) return new Error('minBoxVersion is not valid semver');
     }
 
     if ('maxBoxVersion' in manifest) {
-        if (!semver.valid(manifest['maxBoxVersion'])) return callback(new AppsError(AppsError.BAD_FIELD, 'maxBoxVersion is not valid semver'));
+        if (!semver.valid(manifest['maxBoxVersion'])) return new Error('maxBoxVersion is not valid semver');
     }
 
     return null;
@@ -461,7 +463,7 @@ function downloadManifest(app, callback) {
 
             var manifest = safe.JSON.parse(res.text);
             var error = validateManifest(manifest);
-            if (error) return callback(new Error(util.format('Manifest error: %j', error)));
+            if (error) return callback(new Error(util.format('Manifest error: %s', error.message)));
 
             if (manifest.icon) {
                 safe.fs.writeFileSync(path.join(paths.APPICONS_DIR, app.id + '.png'), new Buffer(manifest.icon));
