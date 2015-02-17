@@ -159,9 +159,9 @@ function startUpdate(callback) {
             debug('box needs upgrade');
 
             superagent.post(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/upgrade')
-                .query({ token: config.token() })
-                .send({ version: gBoxUpdateInfo.version })
-                .end(function (error, result) {
+              .query({ token: config.token() })
+              .send({ version: gBoxUpdateInfo.version })
+              .end(function (error, result) {
                 if (error) return callback(new Error('Error making upgrade request: ' + error));
                 if (result.status !== 202) return callback(new Error('Server not ready to upgrade: ' + result.body));
 
@@ -173,34 +173,41 @@ function startUpdate(callback) {
             return;
         }
 
-        // NOTE: the args here are tied to the installer revision, box code and appstore provisioning logic
-        var args = {
-            version: gBoxUpdateInfo.version,
-            boxVersionsUrl: config.get('boxVersionsUrl'),
+        // fetch a signed sourceTarballUrl
+        superagent.get(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/sourcetarballurl')
+          .query({ token: config.token(), boxVersion: gBoxUpdateInfo.version })
+          .end(function (error, result) {
+            if (error) return callback(new Error('Error fetching sourceTarballUrl: ' + error));
+            if (result.status !== 200) return callback(new Error('Error fetching sourceTarballUrl status: ' + result.status));
 
-            // this data is opaque to the installer
-            data: {
-                apiServerOrigin: config.apiServerOrigin(),
-                webServerOrigin: config.webServerOrigin(),
-                fqdn: config.fqdn(),
-                token: config.token(),
-                tlsCert: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), 'utf8'),
-                tlsKey: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'), 'utf8'),
-                isCustomDomain: config.isCustomDomain()
-            }
-        };
+            // NOTE: the args here are tied to the installer revision, box code and appstore provisioning logic
+            var args = {
+                version: gBoxUpdateInfo.version,
+                boxVersionsUrl: config.get('boxVersionsUrl'),
+                sourceTarballUrl: result.url,
 
-        debug('updating box %j', args);
+                // this data is opaque to the installer
+                data: {
+                    apiServerOrigin: config.apiServerOrigin(),
+                    webServerOrigin: config.webServerOrigin(),
+                    fqdn: config.fqdn(),
+                    token: config.token(),
+                    tlsCert: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), 'utf8'),
+                    tlsKey: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'), 'utf8'),
+                    isCustomDomain: config.isCustomDomain()
+                }
+            };
 
-        superagent.post(INSTALLER_UPDATE_URL)
-            .send(args)
-            .end(function (error, result) {
+            debug('updating box %j', args);
+
+            superagent.post(INSTALLER_UPDATE_URL).send(args).end(function (error, result) {
                 if (error) return callback(error);
                 if (result.status !== 202) return callback(new Error('Error initiating update: ' + result.body));
 
                 progress.set(progress.UPDATE, 10, 'Updating cloudron software');
 
                 callback(null);
+            });
         });
 
         // Do not add any code here. The installer script will stop the box code any instant
