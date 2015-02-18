@@ -49,3 +49,5 @@ s3cmd --ssl --add-header=x-amz-acl:authenticated-read --access_key="${AWS_DEV_AC
 echo "Cleaning up ${bundle_dir}"
 rm -rf "${bundle_dir}" "${bundle_file}"
 
+echo "The URL for the versions file is: https://cloudron-dev-releases.s3.amazonaws.com/box-${version}.tar.gz"
+

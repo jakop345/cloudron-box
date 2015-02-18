@@ -2,7 +2,7 @@
 
 /* global angular:false */
 
-angular.module('Application').service('AppStore', function ($http, Client) {
+angular.module('Application').service('AppStore', ['$http', 'Client', function ($http, Client) {
 
     function AppStoreError(statusCode, message) {
         Error.call(this);
@@ -59,10 +59,11 @@ angular.module('Application').service('AppStore', function ($http, Client) {
         var manifestUrl = Client.getConfig().apiServerOrigin + '/api/v1/appstore/apps/' + appId + '/manifest';
         console.log('Getting the manifest of ', appId, manifestUrl);
         $http.get(manifestUrl).success(function (data, status) {
+            if (status !== 200) return callback(new AppStoreError(status, data));
             return callback(null, data);
         }).error(function (data, status) {
             return callback(new AppStoreError(status, data));
         });
     };
     return new AppStore();
-});
+}]);
