@@ -24,6 +24,7 @@ angular.module('Application').controller('AppInstallController', ['$scope', '$ro
             $scope.app = app;
         });
 
+        // TODO: this should be based on boxVersion
         AppStore.getManifest($routeParams.appStoreId, function (error, manifest) {
             $scope.error = error || { };
             if (error) return;
