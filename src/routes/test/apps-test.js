@@ -115,7 +115,7 @@ function cleanup(done) {
             config.set('token', null);
             config.set('addons.mysql.rootPassword', null);
             config.set('addons.postgresql.rootPassword', null);
- 
+
             callback();
         }
     ], done);
@@ -330,6 +330,7 @@ describe('App API', function () {
 
     it('cannot uninstall invalid app', function (done) {
         request.post(SERVER_URL + '/api/v1/apps/whatever/uninstall')
+            .send({ password: PASSWORD })
             .query({ access_token: token })
             .end(function (err, res) {
             expect(res.statusCode).to.equal(404);
@@ -337,8 +338,28 @@ describe('App API', function () {
         });
     });
 
+    it('cannot uninstall app without password', function (done) {
+        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/uninstall')
+            .query({ access_token: token })
+            .end(function (err, res) {
+            expect(res.statusCode).to.equal(400);
+            done(err);
+        });
+    });
+
+    it('cannot uninstall app with wrong password', function (done) {
+        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/uninstall')
+            .send({ password: PASSWORD+PASSWORD })
+            .query({ access_token: token })
+            .end(function (err, res) {
+            expect(res.statusCode).to.equal(403);
+            done(err);
+        });
+    });
+
     it('can uninstall app', function (done) {
         request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/uninstall')
+            .send({ password: PASSWORD })
             .query({ access_token: token })
             .end(function (err, res) {
             expect(res.statusCode).to.equal(202);
@@ -700,6 +721,7 @@ describe('App installation', function () {
         }
 
         request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/uninstall')
+            .send({ password: PASSWORD })
             .query({ access_token: token })
             .end(function (err, res) {
             expect(res.statusCode).to.equal(202);
@@ -1067,6 +1089,7 @@ describe('App installation - port bindings', function () {
         }
 
         request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/uninstall')
+            .send({ password: PASSWORD })
             .query({ access_token: token })
             .end(function (err, res) {
             expect(res.statusCode).to.equal(202);

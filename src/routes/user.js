@@ -234,7 +234,7 @@ function verifyPassword(req, res, next) {
 
         next();
     });
-};
+}
 
 /*
     Middleware which makes the route only accessable for the admin user.
@@ -245,5 +245,5 @@ function requireAdmin(req, res, next) {
     if (!req.user.admin) return next(new HttpError(403, 'API call requires the admin rights.'));
 
     next();
-};
+}
 

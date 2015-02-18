@@ -134,7 +134,7 @@ function initializeExpressSync() {
     // app routes
     router.get ('/api/v1/apps', appsScope, routes.apps.getApps);
     router.get ('/api/v1/apps/:id', appsScope, routes.apps.getApp);
-    router.post('/api/v1/apps/:id/uninstall', appsScope, routes.apps.uninstallApp); // FIXME require password
+    router.post('/api/v1/apps/:id/uninstall', appsScope, routes.user.verifyPassword, routes.apps.uninstallApp);
     router.post('/api/v1/apps/install', appsScope, routes.user.verifyPassword, routes.apps.installApp);
     router.post('/api/v1/apps/:id/configure', appsScope, routes.user.verifyPassword, routes.apps.configureApp);
     router.post('/api/v1/apps/:id/update', appsScope, routes.apps.updateApp); // FIXME require password
