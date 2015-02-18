@@ -38,6 +38,8 @@ angular.module('Application').controller('AppDetailsController', ['$scope', '$ht
                 console.error(error);
             } else {
                 $('#updateAppModal').modal('hide');
+                $scope.updateAvailable = false;
+                $scope.updateVersion = null;
                 $scope.password = '';
             }
         });
