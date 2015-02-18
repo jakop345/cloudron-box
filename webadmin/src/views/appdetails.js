@@ -10,6 +10,7 @@ angular.module('Application').controller('AppDetailsController', ['$scope', '$ht
     $scope.initialized = false;
     $scope.updateAvailable = false;
     $scope.activeTab = 'day';
+    $scope.updateVersion = null;
 
     $scope.startApp = function () {
         Client.startApp($routeParams.appId, function (error) {
@@ -24,7 +25,7 @@ angular.module('Application').controller('AppDetailsController', ['$scope', '$ht
     };
 
     $scope.updateApp = function () {
-        Client.updateApp($routeParams.appId, function (error) {
+        Client.updateApp($routeParams.appId, $scope.updateVersion, function (error) {
             if (error) console.error(error);
         });
     };
@@ -203,9 +204,13 @@ angular.module('Application').controller('AppDetailsController', ['$scope', '$ht
             $scope.appLogUrl = Client.getAppLogUrl(app.id);
 
             if (Client.getConfig().update && Client.getConfig().update.apps) {
-                $scope.updateAvailable = Client.getConfig().update.apps.some(function (x) {
-                    return x.appId === $scope.app.appStoreId && x.version !== $scope.app.version;
-                });
+                var appUpdates = Client.getConfig().update.apps;
+                for (var i = 0; i < appUpdates.length; i++) {
+                    if (appUpdates[i].appId === $scope.app.appStoreId && appUpdates[i].version !==  $scope.app.version) {
+                        $scope.updateAvailable = true;
+                        $scope.updateVersion = appUpdates[i].version;
+                    }
+                }
             }
 
             $scope.updateGraphs();

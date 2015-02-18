@@ -155,8 +155,8 @@ angular.module('Application').service('Client', function ($http, md5) {
         }).error(defaultErrorHandler(callback));
     };
 
-    Client.prototype.updateApp = function (id, callback) {
-        $http.post('/api/v1/apps/' + id + '/update', { }).success(function (data, status) {
+    Client.prototype.updateApp = function (id, version, callback) {
+        $http.post('/api/v1/apps/' + id + '/update', { version: version }).success(function (data, status) {
             if (status !== 202) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
