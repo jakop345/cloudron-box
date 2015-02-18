@@ -453,6 +453,18 @@ function validateManifest(manifest) {
     return null;
 }
 
+function checkManifestConstraints(manifest) {
+    if (semver.valid(manifest.maxBoxVersion) && semver.gt(config.version(), manifest.maxBoxVersion)) {
+        return new Error('Box version exceeds Apps maxBoxVersion');
+    }
+
+    if (semver.valid(manifest.minBoxVersion) && semver.lt(manifest.minBoxVersion, config.version())) {
+        return new Error('Box version exceeds Apps maxBoxVersion');
+    }
+
+    return null;
+}
+
 function downloadManifest(app, callback) {
     debug('Downloading manifest for :', app.id);
 
@@ -469,6 +481,9 @@ function downloadManifest(app, callback) {
             var manifest = safe.JSON.parse(res.text);
             var error = validateManifest(manifest);
             if (error) return callback(new Error(util.format('Manifest error: %s', error.message)));
+
+            error = checkManifestConstraints(manifest);
+            if (error) return callback(error);
 
             if (manifest.icon) {
                 safe.fs.writeFileSync(path.join(paths.APPICONS_DIR, app.id + '.png'), new Buffer(manifest.icon));
