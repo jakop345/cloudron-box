@@ -13,7 +13,7 @@ exports = module.exports = {
     get: getUser,
     getByResetToken: getByResetToken,
     changeAdmin: changeAdmin,
-    resetPasswordByEmail: resetPasswordByEmail,
+    resetPasswordByIdentifier: resetPasswordByIdentifier,
     setPassword: setPassword,
     changePassword: changePassword,
     update: updateUser,
@@ -271,11 +271,15 @@ function changeAdmin(username, admin, callback) {
     });
 }
 
-function resetPasswordByEmail(email, callback) {
-    assert(typeof email === 'string');
+function resetPasswordByIdentifier(identifier, callback) {
+    assert(typeof identifier === 'string');
     assert(typeof callback === 'function');
 
-    userdb.getByEmail(email, function (error, result) {
+    var getter;
+    if (identifier.indexOf('@') === -1) getter = userdb.getByUsername;
+    else getter = userdb.getByEmail;
+
+    getter(identifier, function (error, result) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 

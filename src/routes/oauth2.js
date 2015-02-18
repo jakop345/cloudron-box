@@ -127,11 +127,11 @@ function passwordResetRequestSite(req, res) {
 function passwordResetRequest(req, res, next) {
     assert(typeof req.body === 'object');
 
-    if (typeof req.body.email !== 'string') return next(new HttpError(400, 'Missing email'));
+    if (typeof req.body.identifier !== 'string') return next(new HttpError(400, 'Missing identifier'));
 
-    debug('passwordResetRequest: email %s.', req.body.email);
+    debug('passwordResetRequest: email or username %s.', req.body.identifier);
 
-    user.resetPasswordByEmail(req.body.email, function (error) {
+    user.resetPasswordByIdentifier(req.body.identifier, function (error) {
         if (error) console.error(error); // TODO redirect to an error page
 
         res.redirect('/api/v1/session/password/sent.html');

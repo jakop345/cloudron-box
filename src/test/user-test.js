@@ -316,20 +316,35 @@ describe('User', function () {
         });
     });
 
-    describe('resetPasswordByEmail', function () {
+    describe('resetPasswordByIdentifier', function () {
         before(createUser);
         after(cleanupUsers);
 
         it('fails due to unkown email', function (done) {
-            user.resetPasswordByEmail('unknown@mail.com', function (error) {
+            user.resetPasswordByIdentifier('unknown@mail.com', function (error) {
                 expect(error).to.be.an(UserError);
                 expect(error.reason).to.eql(UserError.NOT_FOUND);
                 done();
             });
         });
 
-        it('succeeds', function (done) {
-            user.resetPasswordByEmail(EMAIL, function (error) {
+        it('fails due to unkown username', function (done) {
+            user.resetPasswordByIdentifier('unknown', function (error) {
+                expect(error).to.be.an(UserError);
+                expect(error.reason).to.eql(UserError.NOT_FOUND);
+                done();
+            });
+        });
+
+        it('succeeds with email', function (done) {
+            user.resetPasswordByIdentifier(EMAIL, function (error) {
+                expect(error).to.not.be.ok();
+                done();
+            });
+        });
+
+        it('succeeds with username', function (done) {
+            user.resetPasswordByIdentifier(USERNAME, function (error) {
                 expect(error).to.not.be.ok();
                 done();
             });
