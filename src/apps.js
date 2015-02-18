@@ -303,10 +303,12 @@ function configure(appId, location, portBindings, accessRestriction, callback) {
 
 function update(appId, version, callback) {
     assert(typeof appId === 'string');
-    assert(typeof version === 'version');
+    assert(typeof version === 'string');
     assert(typeof callback === 'function');
 
     debug('Will update app with id:%s', appId);
+
+    if (!semver.valid(version)) return callback(new AppsError(AppsError.BAD_FIELD, 'version is not valid semver'));
 
     appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_UPDATE, { version: version }, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE)); // might be a bad guess
