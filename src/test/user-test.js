@@ -149,6 +149,50 @@ describe('User', function () {
         });
     });
 
+    describe('verifyWithEmail', function () {
+        before(createUser);
+        after(cleanupUsers);
+
+        it('fails due to non existing user', function (done) {
+            user.verifyWithEmail(EMAIL+EMAIL, PASSWORD, function (error, result) {
+                expect(error).to.be.ok();
+                expect(result).to.not.be.ok();
+                expect(error.reason).to.equal(UserError.NOT_FOUND);
+
+                done();
+            });
+        });
+
+        it('fails due to empty password', function (done) {
+            user.verifyWithEmail(EMAIL, '', function (error, result) {
+                expect(error).to.be.ok();
+                expect(result).to.not.be.ok();
+                expect(error.reason).to.equal(UserError.WRONG_PASSWORD);
+
+                done();
+            });
+        });
+
+        it('fails due to wrong password', function (done) {
+            user.verifyWithEmail(EMAIL, PASSWORD+PASSWORD, function (error, result) {
+                expect(error).to.be.ok();
+                expect(result).to.not.be.ok();
+                expect(error.reason).to.equal(UserError.WRONG_PASSWORD);
+
+                done();
+            });
+        });
+
+        it('succeeds', function (done) {
+            user.verifyWithEmail(EMAIL, PASSWORD, function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result).to.be.ok();
+
+                done();
+            });
+        });
+    });
+
     describe('retrieving', function () {
         before(createUser);
         after(cleanupUsers);

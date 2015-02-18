@@ -7,7 +7,8 @@ exports = module.exports = {
 
     list: listUsers,
     create: createUser,
-    verify: verifyUser,
+    verify: verify,
+    verifyWithEmail: verifyWithEmail,
     remove: removeUser,
     get: getUser,
     getByResetToken: getByResetToken,
@@ -152,12 +153,33 @@ function createUser(username, password, email, admin, callback) {
     });
 }
 
-function verifyUser(username, password, callback) {
+function verify(username, password, callback) {
     assert(typeof username === 'string');
     assert(typeof password === 'string');
     assert(typeof callback === 'function');
 
     userdb.get(username, function (error, user) {
+        if (error && error.reason == DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
+        if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+
+        var saltBinary = new Buffer(user._salt, 'hex');
+        crypto.pbkdf2(password, saltBinary, CRYPTO_ITERATIONS, CRYPTO_KEY_LENGTH, function (error, derivedKey) {
+            if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+
+            var derivedKeyHex = new Buffer(derivedKey, 'binary').toString('hex');
+            if (derivedKeyHex !== user._password) return callback(new UserError(UserError.WRONG_PASSWORD));
+
+            callback(null, user);
+        });
+    });
+}
+
+function verifyWithEmail(email, password, callback) {
+    assert(typeof email === 'string');
+    assert(typeof password === 'string');
+    assert(typeof callback === 'function');
+
+    userdb.getByEmail(email, function (error, user) {
         if (error && error.reason == DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
@@ -302,7 +324,7 @@ function changePassword(username, oldPassword, newPassword, callback) {
     var error = validatePassword(newPassword);
     if (error) return callback(error);
 
-    verifyUser(username, oldPassword, function (error, user) {
+    verify(username, oldPassword, function (error, user) {
         if (error) return callback(error);
 
         setPassword(user.id, newPassword, callback);
