@@ -133,9 +133,9 @@ angular.module('Application').service('Client', function ($http, md5) {
         }).error(defaultErrorHandler(callback));
     };
 
-    Client.prototype.installApp = function (id, password, title, config, callback) {
+    Client.prototype.installApp = function (id, version, password, title, config, callback) {
         var that = this;
-        var data = { appStoreId: id, password: password, location: config.location, portBindings: config.portBindings, accessRestriction: config.accessRestriction };
+        var data = { appStoreId: id, version: version, password: password, location: config.location, portBindings: config.portBindings, accessRestriction: config.accessRestriction };
         $http.post('/api/v1/apps/install', data).success(function (data, status) {
             if (status !== 202 || typeof data !== 'object') return callback(new ClientError(status, data));
 

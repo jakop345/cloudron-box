@@ -10,6 +10,7 @@ angular.module('Application').controller('AppInstallController', ['$scope', '$ro
     $scope.disabled = false;
     $scope.error = { };
     $scope.domain = '';
+    $scope.version = null;
     $scope.portBindings = { };
     $scope.hostPortMin = 1025;
     $scope.hostPortMax = 9999;
@@ -26,6 +27,7 @@ angular.module('Application').controller('AppInstallController', ['$scope', '$ro
         AppStore.getManifest($routeParams.appStoreId, function (error, manifest) {
             $scope.error = error || { };
             if (error) return;
+            $scope.version = manifest.version;
             $scope.portBindings = manifest.tcpPorts;
             $scope.accessRestriction = manifest.accessRestriction || '';
             // default setting is to map ports as they are in manifest
@@ -44,7 +46,7 @@ angular.module('Application').controller('AppInstallController', ['$scope', '$ro
             portBindings[port] = $scope.portBindings[port].hostPort;
         }
 
-        Client.installApp($routeParams.appStoreId, $scope.password, $scope.app.title, { location: $scope.location, portBindings: portBindings, accessRestriction: $scope.accessRestriction }, function (error, appId) {
+        Client.installApp($routeParams.appStoreId, $scope.version, $scope.password, $scope.app.title, { location: $scope.location, portBindings: portBindings, accessRestriction: $scope.accessRestriction }, function (error, appId) {
             if (error) {
                 if (error.statusCode === 409) {
                     $scope.error.name = 'Application already exists.';
