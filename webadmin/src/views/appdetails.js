@@ -12,6 +12,7 @@ angular.module('Application').controller('AppDetailsController', ['$scope', '$ht
     $scope.activeTab = 'day';
     $scope.updateVersion = null;
     $scope.password = '';
+    $scope.passwordWrong = false;
 
     $scope.startApp = function () {
         Client.startApp($routeParams.appId, function (error) {
@@ -32,11 +33,19 @@ angular.module('Application').controller('AppDetailsController', ['$scope', '$ht
     };
 
     $scope.uninstallApp = function () {
-        $('#uninstallAppModal').modal('hide');
+        $scope.passwordWrong = false;
 
         Client.uninstallApp($routeParams.appId, $scope.password, function (error) {
-            if (error) console.error(error);
-            window.location.href = '#/';
+            if (error && error.statusCode === 403) {
+                $scope.password = '';
+                $scope.passwordWrong = true;
+                $('#inputPassword').focus();
+            } else if (error) {
+                console.error(error);
+            } else {
+                $('#uninstallAppModal').modal('hide');
+                window.location.href = '#/';
+            }
         });
     };
 

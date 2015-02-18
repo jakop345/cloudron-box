@@ -44,7 +44,7 @@
                                     <p>Deleting the app will also remove all content generated within this app!</p>
 
                                     <form class="form-user-delete" role="form" novalidate ng-submit="uninstallApp()" name="uninstallapp_form" autocomplete="off">
-                                        <div class="form-group" ng-class="{ 'has-error': uninstallapp_form.password.$dirty && uninstallapp_form.password.$invalid }">
+                                        <div class="form-group" ng-class="{ 'has-error': (uninstallapp_form.password.$dirty && uninstallapp_form.password.$invalid) || (!uninstallapp_form.password.$dirty && passwordWrong) }">
                                             <label class="control-label" for="inputPassword">Give your password to verify that you are performing that action</label>
                                             <input type="password" class="form-control" ng-model="password" id="inputPassword" name="password" placeholder="Password" ng-maxlength="512" ng-minlength="5" required>
                                         </div>
