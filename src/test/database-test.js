@@ -406,8 +406,8 @@ describe('database', function () {
         var APP_0 = {
             id: 'appid-0',
             appStoreId: 'appStoreId-0',
+            version: '0.0.1',
             dnsRecordId: null,
-            version: null,
             installationState: appdb.ISTATE_PENDING_INSTALL,
             installationProgress: null,
             runState: null,
@@ -422,8 +422,8 @@ describe('database', function () {
         var APP_1 = {
             id: 'appid-1',
             appStoreId: 'appStoreId-1',
+            version: '0.0.1',
             dnsRecordId: null,
-            version: null,
             installationState: appdb.ISTATE_PENDING_INSTALL, // app health tests rely on this initial state
             installationProgress: null,
             runState: null,
@@ -437,7 +437,7 @@ describe('database', function () {
         };
 
         it('add fails due to missing arguments', function () {
-            expect(function () { appdb.add(APP_0.id, APP_0.installationState, function () {}); }).to.throwError();
+            expect(function () { appdb.add(APP_0.id, APP_0.version, APP_0.installationState, function () {}); }).to.throwError();
             expect(function () { appdb.add(APP_0.id, function () {}); }).to.throwError();
         });
 
@@ -450,7 +450,7 @@ describe('database', function () {
         });
 
         it('add succeeds', function (done) {
-            appdb.add(APP_0.id, APP_0.appStoreId, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, function (error) {
+            appdb.add(APP_0.id, APP_0.appStoreId, APP_0.version, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, function (error) {
                 expect(error).to.be(null);
                 done();
             });
@@ -474,7 +474,7 @@ describe('database', function () {
         });
 
         it('add of same app fails', function (done) {
-            appdb.add(APP_0.id, APP_0.appStoreId, APP_0.location, [ ], APP_0.accessRestriction, function (error) {
+            appdb.add(APP_0.id, APP_0.appStoreId, APP_0.version, APP_0.location, [ ], APP_0.accessRestriction, function (error) {
                 expect(error).to.be.a(DatabaseError);
                 expect(error.reason).to.be(DatabaseError.ALREADY_EXISTS);
                 done();
@@ -536,7 +536,7 @@ describe('database', function () {
         });
 
         it('add second app succeeds', function (done) {
-            appdb.add(APP_1.id, APP_1.appStoreId, APP_1.location, [ ], APP_1.accessRestriction, function (error) {
+            appdb.add(APP_1.id, APP_1.appStoreId, APP_1.version, APP_1.location, [ ], APP_1.accessRestriction, function (error) {
                 expect(error).to.be(null);
                 done();
             });

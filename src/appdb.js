@@ -147,9 +147,10 @@ function getAll(callback) {
     });
 }
 
-function add(id, appStoreId, location, portBindings, accessRestriction, callback) {
+function add(id, appStoreId, version, location, portBindings, accessRestriction, callback) {
     assert(typeof id === 'string');
     assert(typeof appStoreId === 'string');
+    assert(typeof version === 'string');
     assert(typeof location === 'string');
     assert(typeof portBindings === 'object');
     assert(typeof accessRestriction === 'string');
@@ -159,8 +160,8 @@ function add(id, appStoreId, location, portBindings, accessRestriction, callback
 
     var conn = database.beginTransaction();
 
-    conn.run('INSERT INTO apps (id, appStoreId, installationState, location, accessRestriction) VALUES (?, ?, ?, ?, ?)',
-           [ id, appStoreId, exports.ISTATE_PENDING_INSTALL, location, accessRestriction ], function (error) {
+    conn.run('INSERT INTO apps (id, appStoreId, version, installationState, location, accessRestriction) VALUES (?, ?, ?, ?, ?, ?)',
+           [ id, appStoreId, version, exports.ISTATE_PENDING_INSTALL, location, accessRestriction ], function (error) {
         if (error || !this.lastID) database.rollback(conn);
 
         if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));

@@ -17,7 +17,7 @@ describe('Apps', function () {
     var APP_0 = {
         id: 'appid-0',
         appStoreId: 'appStoreId-0',
-        version: null,
+        version: '0.0.1',
         installationState: appdb.ISTATE_PENDING_INSTALL,
         installationProgress: null,
         runState: null,
@@ -33,7 +33,7 @@ describe('Apps', function () {
     before(function (done) {
         database.initialize(function (error) {
             expect(error).to.be(null);
-            appdb.add(APP_0.id, APP_0.appStoreId, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, done);
+            appdb.add(APP_0.id, APP_0.appStoreId, APP_0.version, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, done);
         });
     });
 

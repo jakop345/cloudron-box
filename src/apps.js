@@ -12,6 +12,7 @@ var appdb = require('./appdb.js'),
     fs = require('fs'),
     os = require('os'),
     paths = require('./paths.js'),
+    semver = require('semver'),
     split = require('split'),
     stream = require('stream'),
     util = require('util');
@@ -234,12 +235,16 @@ function validateAccessRestriction(accessRestriction) {
     }
 }
 
-function install(appId, appStoreId, location, portBindings, accessRestriction, callback) {
+function install(appId, appStoreId, version, location, portBindings, accessRestriction, callback) {
     assert(typeof appId === 'string');
+    assert(typeof appStoreId === 'string');
+    assert(typeof version === 'string');
     assert(typeof location === 'string');
     assert(!portBindings || typeof portBindings === 'object');
     assert(typeof accessRestriction === 'string');
     assert(typeof callback === 'function');
+
+    if (!semver.valid(version)) return callback(new AppsError(AppsError.BAD_FIELD, 'version is not valid semver'));
 
     var error = validateHostname(location, config.fqdn());
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
@@ -252,7 +257,7 @@ function install(appId, appStoreId, location, portBindings, accessRestriction, c
 
     debug('Will install app with id : ' + appId);
 
-    appdb.add(appId, appStoreId, location.toLowerCase(), portBindings, accessRestriction, function (error) {
+    appdb.add(appId, appStoreId, version, location.toLowerCase(), portBindings, accessRestriction, function (error) {
         if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new AppsError(AppsError.ALREADY_EXISTS));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
@@ -296,13 +301,14 @@ function configure(appId, location, portBindings, accessRestriction, callback) {
     });
 }
 
-function update(appId, callback) {
+function update(appId, version, callback) {
     assert(typeof appId === 'string');
+    assert(typeof version === 'version');
     assert(typeof callback === 'function');
 
     debug('Will update app with id:%s', appId);
 
-    appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_UPDATE, function (error) {
+    appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_UPDATE, { version: version }, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE)); // might be a bad guess
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 

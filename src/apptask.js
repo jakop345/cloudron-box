@@ -457,7 +457,7 @@ function downloadManifest(app, callback) {
     debug('Downloading manifest for :', app.id);
 
     superagent
-        .get(config.apiServerOrigin() + '/api/v1/appstore/apps/' + app.appStoreId + '/manifest')
+        .get(config.apiServerOrigin() + '/api/v1/appstore/apps/' + app.appStoreId + '/versions/' + app.version + '/manifest')
         .set('Accept', 'application/json')
         .end(function (err, res) {
             if (err) return callback(err);
@@ -477,7 +477,7 @@ function downloadManifest(app, callback) {
                 delete manifest.icon;
             }
 
-            updateApp(app, { manifest: manifest, version: manifest.version }, callback);
+            updateApp(app, { manifest: manifest }, callback);
         });
 }
 
@@ -656,7 +656,7 @@ function install(app, callback) {
 }
 
 function restore(app, callback) {
-    if (!app.manifest) return callback(new Error('Cannot restore app without existing manifest'));
+    var oldManifest = app.manifest; // TODO: this won't be correct all the time should we crash after download manifest
 
     async.series([
         // configure nginx
@@ -667,6 +667,10 @@ function restore(app, callback) {
         // register subdomain
         updateApp.bind(null, app, { installationProgress: 'Registering subdomain' }),
         registerSubdomain.bind(null, app),
+
+        // download manifest in case it wasn't downloaded when backup was made
+        updateApp.bind(null, app, { installationProgress: 'Downloading manifest' }),
+        downloadManifest.bind(null, app),
 
         // setup oauth proxy
         updateApp.bind(null, app, { installationProgress: 'Setting up OAuth proxy credentials' }),
@@ -765,7 +769,7 @@ function configure(app, callback) {
 // nginx and naked domain configuration is skipped because app.httpPort is expected to be available
 // TODO: old image should probably be deleted, but what if it's used by another app instance
 function update(app, callback) {
-    var oldManifest = app.manifest;
+    var oldManifest = app.manifest; // TODO: this won't be correct all the time should we crash after download manifest
 
     async.series([
         updateApp.bind(null, app, { installationProgress: 'Stopping app' }),

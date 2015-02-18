@@ -83,6 +83,7 @@ function getAppIcon(req, res, next) {
 /*
  * Installs an app
  * @bodyparam {string} appStoreId The id of the app to be installed
+ * @bodyparam {semver} version The app version
  * @bodyparam {string} password The user's password
  * @bodyparam {string} location The subdomain where the app is to be installed
  * @bodyparam {object} portBindings map from container port to (public) host port. can be null.
@@ -94,6 +95,7 @@ function installApp(req, res, next) {
 
     if (!data) return next(new HttpError(400, 'Cannot parse data field'));
     if (typeof data.password !== 'string') return next(new HttpError(401, 'password is missing'));
+    if (typeof data.version !== 'string') return next(new HttpError(400, 'version is required'));
     if (typeof data.appStoreId !== 'string') return next(new HttpError(400, 'appStoreId is required'));
     if (typeof data.location !== 'string') return next(new HttpError(400, 'location is required'));
     if (('portBindings' in data) && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
@@ -104,7 +106,7 @@ function installApp(req, res, next) {
 
     debug('Installing app id:%s storeid:%s loc:%s port:%j restrict:%s', appId, data.appStoreId, data.location, data.portBindings, data.accessRestriction);
 
-    apps.install(appId, data.appStoreId, data.location, data.portBindings, data.accessRestriction, function (error) {
+    apps.install(appId, data.appStoreId, data.version, data.location, data.portBindings, data.accessRestriction, function (error) {
         if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, 'App already exists'));
         if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error) return next(new HttpError(500, error));
@@ -190,10 +192,16 @@ function stopApp(req, res, next) {
 
 function updateApp(req, res, next) {
     assert(typeof req.params.id === 'string');
+    assert(typeof req.body === 'object');
 
-    debug('Update app id:%s', req.params.id);
+    var data = req.body;
 
-    apps.update(req.params.id, function (error) {
+    if (!data) return next(new HttpError(400, 'Cannot parse data field'));
+    if (typeof data.version !== 'string') return next(new HttpError(400, 'version is missing'));
+
+    debug('Update app id:%s to version:%s', req.params.id, data.version);
+
+    apps.update(req.params.id, data.version, function (error) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
         if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
         if (error) return next(new HttpError(500, error));

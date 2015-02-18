@@ -93,11 +93,13 @@ function teardownAddons(app, callback) {
 
 function updateAddons(app, oldManifest, callback) {
     assert(typeof app === 'object');
-    assert(typeof oldManifest === 'object');
+    assert(!oldManifest || typeof oldManifest === 'object');
     assert(typeof callback === 'function');
 
     setupAddons(app, function (error) {
         if (error) return callback(error);
+
+        if (!oldManifest) return callback(null);
 
         // teardown the old addons
         async.eachSeries(_.difference(oldManifest.addons, app.manifest.addons), function iterator(addon, iteratorCallback) {
