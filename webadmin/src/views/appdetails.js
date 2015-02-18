@@ -30,10 +30,10 @@ angular.module('Application').controller('AppDetailsController', ['$scope', '$ht
         });
     };
 
-    $scope.deleteApp = function () {
-        $('#deleteAppModal').modal('hide');
+    $scope.uninstallApp = function () {
+        $('#uninstallAppModal').modal('hide');
 
-        Client.removeApp($routeParams.appId, function (error) {
+        Client.uninstallApp($routeParams.appId, function (error) {
             if (error) console.error(error);
             window.location.href = '#/';
         });

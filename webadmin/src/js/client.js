@@ -229,7 +229,7 @@ angular.module('Application').service('Client', ['$http', 'md5', function ($http
         else return callback(new Error('App not found'));
     };
 
-    Client.prototype.removeApp = function (appId, callback) {
+    Client.prototype.uninstallApp = function (appId, callback) {
         $http.post('/api/v1/apps/' + appId + '/uninstall').success(function (data, status) {
             if (status !== 202) return callback(new ClientError(status, data));
             callback(null);
