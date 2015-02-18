@@ -29,7 +29,7 @@
                     <a class="btn btn-outline btn-primary pull-left" ng-show="app.installationState === 'installed'" ng-href="#/app/{{app.id}}/configure">Configure</a>
                     <button class="btn btn-outline btn-primary pull-left" ng-show="app.installationState === 'installed' && (app.runState === 'stopped' || app.runState === 'error')" ng-click="startApp()">Start</button>
                     <button class="btn btn-outline btn-danger pull-left" ng-show="app.installationState === 'installed' && app.runState === 'running'" ng-click="stopApp()">Stop</button>
-                    <button class="btn btn-outline btn-danger pull-right" data-toggle="modal" data-target="#uninstallAppModal">Delete</button>
+                    <button class="btn btn-outline btn-danger pull-right" data-toggle="modal" data-target="#uninstallAppModal">Uninstall</button>
                     <button class="btn btn-outline btn-primary pull-right" ng-show="updateAvailable" ng-click="updateApp()">Update to {{ updateVersion }}</button>
 
                     <!-- Modal -->
@@ -41,11 +41,19 @@
                                     <h4 class="modal-title" id="uninstallAppModalLabel">Really delete {{ app.manifest.title }}?</h4>
                                 </div>
                                 <div class="modal-body">
-                                    Deleting the app will also remove all content generated within this app.
+                                    <p>Deleting the app will also remove all content generated within this app!</p>
+
+                                    <form class="form-user-delete" role="form" novalidate ng-submit="uninstallApp()" name="uninstallapp_form" autocomplete="off">
+                                        <div class="form-group" ng-class="{ 'has-error': uninstallapp_form.password.$dirty && uninstallapp_form.password.$invalid }">
+                                            <label class="control-label" for="inputPassword">Give your password to verify that you are performing that action</label>
+                                            <input type="password" class="form-control" ng-model="password" id="inputPassword" name="password" placeholder="Password" ng-maxlength="512" ng-minlength="5" required>
+                                        </div>
+                                        <input class="hide" ng-disabled="uninstallapp_form.$invalid" type="submit"/>
+                                    </form>
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                                    <button type="button" class="btn btn-danger" ng-click="uninstallApp()">Delete</button>
+                                    <button type="button" class="btn btn-danger" ng-disabled="uninstallapp_form.$invalid" ng-click="uninstallApp()">Uninstall</button>
                                 </div>
                             </div>
                             <!-- /.modal-content -->

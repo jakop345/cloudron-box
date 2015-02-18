@@ -147,6 +147,14 @@ angular.module('Application').service('Client', ['$http', 'md5', function ($http
         }).error(defaultErrorHandler(callback));
     };
 
+    Client.prototype.uninstallApp = function (appId, password, callback) {
+        var data = { password: password };
+        $http.post('/api/v1/apps/' + appId + '/uninstall', data).success(function (data, status) {
+            if (status !== 202) return callback(new ClientError(status, data));
+            callback(null);
+        }).error(defaultErrorHandler(callback));
+    };
+
     Client.prototype.configureApp = function (id, password, config, callback) {
         var data = { appId: id, password: password, location: config.location, portBindings: config.portBindings, accessRestriction: config.accessRestriction };
         $http.post('/api/v1/apps/' + id + '/configure', data).success(function (data, status) {
@@ -227,13 +235,6 @@ angular.module('Application').service('Client', ['$http', 'md5', function ($http
 
         if (appFound) return callback(null, appFound);
         else return callback(new Error('App not found'));
-    };
-
-    Client.prototype.uninstallApp = function (appId, callback) {
-        $http.post('/api/v1/apps/' + appId + '/uninstall').success(function (data, status) {
-            if (status !== 202) return callback(new ClientError(status, data));
-            callback(null);
-        }).error(defaultErrorHandler(callback));
     };
 
     Client.prototype.getAppLogStream = function (appId) {
