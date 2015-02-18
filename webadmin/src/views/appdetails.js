@@ -38,6 +38,7 @@ angular.module('Application').controller('AppDetailsController', ['$scope', '$ht
                 console.error(error);
             } else {
                 $('#updateAppModal').modal('hide');
+                $scope.password = '';
             }
         });
     };
@@ -54,6 +55,7 @@ angular.module('Application').controller('AppDetailsController', ['$scope', '$ht
                 console.error(error);
             } else {
                 $('#uninstallAppModal').modal('hide');
+                $scope.password = '';
                 window.location.href = '#/';
             }
         });
