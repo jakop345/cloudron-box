@@ -234,10 +234,8 @@ function validateAccessRestriction(accessRestriction) {
     }
 }
 
-function install(appId, appStoreId, username, password, location, portBindings, accessRestriction, callback) {
+function install(appId, appStoreId, location, portBindings, accessRestriction, callback) {
     assert(typeof appId === 'string');
-    assert(typeof username === 'string');
-    assert(typeof password === 'string');
     assert(typeof location === 'string');
     assert(!portBindings || typeof portBindings === 'object');
     assert(typeof accessRestriction === 'string');
@@ -265,10 +263,8 @@ function install(appId, appStoreId, username, password, location, portBindings, 
     });
 }
 
-function configure(appId, username, password, location, portBindings, accessRestriction, callback) {
+function configure(appId, location, portBindings, accessRestriction, callback) {
     assert(typeof appId === 'string');
-    assert(typeof username === 'string');
-    assert(typeof password === 'string');
     assert(!portBindings || typeof portBindings === 'object');
     assert(typeof accessRestriction === 'string');
     assert(typeof callback === 'function');
