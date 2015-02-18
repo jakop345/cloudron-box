@@ -20,7 +20,7 @@ angular.module('Application').service('AppStore', ['$http', 'Client', function (
     }
 
     AppStore.prototype.getApps = function (callback) {
-        if (Client.getConfig().apiServerOrigin === null) return callback(new AppStoreError(500, 'Not yet initialized'));
+        if (Client.getConfig().apiServerOrigin === null) return callback(new AppStoreError(420, 'Enhance Your Calm'));
 
         var that = this;
 
@@ -54,7 +54,7 @@ angular.module('Application').service('AppStore', ['$http', 'Client', function (
     };
 
     AppStore.prototype.getManifest = function (appId, callback) {
-        if (Client.getConfig().apiServerOrigin === null) return callback(new AppStoreError(500, 'Not yet initialized'));
+        if (Client.getConfig().apiServerOrigin === null) return callback(new AppStoreError(420, 'Enhance Your Calm'));
 
         var manifestUrl = Client.getConfig().apiServerOrigin + '/api/v1/appstore/apps/' + appId + '/manifest';
         console.log('Getting the manifest of ', appId, manifestUrl);

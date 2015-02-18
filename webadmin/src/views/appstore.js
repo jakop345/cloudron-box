@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('Application').controller('AppStoreController', ['$scope', '$location', 'Client', 'AppStore', function ($scope, $location, Client, AppStore) {
+angular.module('Application').controller('AppStoreController', ['$scope', '$location', '$timeout', 'Client', 'AppStore', function ($scope, $location, $timeout, Client, AppStore) {
     if (!Client.getUserInfo().admin) $location.path('/');
 
     $scope.LOADING = 1;
@@ -12,15 +12,29 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
 
     $scope.apps = [];
 
-    $scope.refresh = function () {
-        Client.refreshInstalledApps(function (error) {
+    $scope.installApp = function (app) {
+        $location.path('/app/' + app.id + '/install');
+    };
+
+    $scope.openApp = function (app) {
+        for (var i = 0; i < Client._installedApps.length; i++) {
+            if (Client._installedApps[i].appStoreId === app.id) {
+                window.open('https://' + Client._installedApps[i].fqdn);
+                break;
+            }
+        }
+    };
+
+    function refresh() {
+        AppStore.getApps(function (error, apps) {
+            if (error && error.statusCode === 420) return $timeout(refresh, 500);
             if (error) {
                 $scope.loadStatus = $scope.ERROR;
                 $scope.loadError = error.message;
                 return;
             }
 
-            AppStore.getApps(function (error, apps) {
+            Client.refreshInstalledApps(function (error) {
                 if (error) {
                     $scope.loadStatus = $scope.ERROR;
                     $scope.loadError = error.message;
@@ -47,23 +61,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
                 $scope.loadStatus = $scope.LOADED;
             });
         });
-    };
+    }
 
-    $scope.installApp = function (app) {
-        $location.path('/app/' + app.id + '/install');
-    };
-
-    $scope.openApp = function (app) {
-        for (var i = 0; i < Client._installedApps.length; i++) {
-            if (Client._installedApps[i].appStoreId === app.id) {
-                window.open('https://' + Client._installedApps[i].fqdn);
-                break;
-            }
-        }
-    };
-
-    Client.onConfig(function (config) {
-        if (!config.apiServerOrigin) return;
-        $scope.refresh();
-    });
+    refresh();
 }]);
