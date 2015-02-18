@@ -179,12 +179,13 @@ function startUpdate(callback) {
           .end(function (error, result) {
             if (error) return callback(new Error('Error fetching sourceTarballUrl: ' + error));
             if (result.status !== 200) return callback(new Error('Error fetching sourceTarballUrl status: ' + result.status));
+            if (!safe.query(result, 'body.url')) return callback(new Error('Error fetching sourceTarballUrl response: ' + result.body));
 
             // NOTE: the args here are tied to the installer revision, box code and appstore provisioning logic
             var args = {
                 version: gBoxUpdateInfo.version,
                 boxVersionsUrl: config.get('boxVersionsUrl'),
-                sourceTarballUrl: result.url,
+                sourceTarballUrl: result.body.url,
 
                 // this data is opaque to the installer
                 data: {
