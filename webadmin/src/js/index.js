@@ -6,7 +6,7 @@
 var app = angular.module('Application', ['ngRoute', 'ngAnimate', 'angular-md5']);
 
 // setup all major application routes
-app.config(function ($routeProvider) {
+app.config(['$routeProvider', function ($routeProvider) {
     $routeProvider.when('/', {
         redirectTo: '/dashboard'
     }).when('/dashboard', {
@@ -46,7 +46,7 @@ app.config(function ($routeProvider) {
         controller: 'SecurityController',
         templateUrl: 'views/security.html'
     }).otherwise({ redirectTo: '/'});
-});
+}]);
 
 app.filter('installationActive', function() {
     return function(input) {

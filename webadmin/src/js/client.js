@@ -3,7 +3,7 @@
 /* global angular */
 /* global EventSource */
 
-angular.module('Application').service('Client', function ($http, md5) {
+angular.module('Application').service('Client', ['$http', 'md5', function ($http, md5) {
     var client = null;
 
     function ClientError(statusCode, message) {
@@ -469,4 +469,4 @@ angular.module('Application').service('Client', function ($http, md5) {
 
     client = new Client();
     return client;
-});
+}]);

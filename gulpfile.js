@@ -6,6 +6,7 @@ var ejs = require('gulp-ejs'),
     gulp = require('gulp'),
     del = require('del'),
     concat = require('gulp-concat'),
+    uglify = require('gulp-uglify'),
     sourcemaps = require('gulp-sourcemaps'),
     fs = require('fs');
 
@@ -40,7 +41,8 @@ gulp.task('js-index', function () {
         'webadmin/src/views/*.js'
         ])
         .pipe(sourcemaps.init())
-        .pipe(concat('index.js'))
+        .pipe(concat('index.js', { newLine: ';' }))
+        .pipe(uglify())
         .pipe(sourcemaps.write())
         .pipe(gulp.dest('webadmin/dist/js'));
 });
@@ -48,13 +50,17 @@ gulp.task('js-index', function () {
 gulp.task('js-setup', function () {
     gulp.src(['webadmin/src/js/setup.js', 'webadmin/src/js/client.js'])
         .pipe(sourcemaps.init())
-        .pipe(concat('setup.js'))
+        .pipe(concat('setup.js', { newLine: ';' }))
+        .pipe(uglify())
         .pipe(sourcemaps.write())
         .pipe(gulp.dest('webadmin/dist/js'));
 });
 
 gulp.task('js-update', function () {
     gulp.src(['webadmin/src/js/update.js'])
+        .pipe(sourcemaps.init())
+        .pipe(uglify())
+        .pipe(sourcemaps.write())
         .pipe(gulp.dest('webadmin/dist/js'))
         .pipe(gulp.dest('setup/splash/website/js'));
 });
