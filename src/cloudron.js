@@ -154,7 +154,7 @@ function getBackupUrl(callback) {
 }
 
 function backup(callback) {
-    assert(typeof callback === 'function');
+    callback = callback || function () { }; // callback can be empty for timer triggered backup
 
     getBackupUrl(function (error, result) {
         if (error) return callback(new CloudronError(CloudronError.APPSTORE_DOWN, error.message));
