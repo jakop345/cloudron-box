@@ -30,9 +30,9 @@
                     <button class="btn btn-outline btn-primary pull-left" ng-show="app.installationState === 'installed' && (app.runState === 'stopped' || app.runState === 'error')" ng-click="startApp()">Start</button>
                     <button class="btn btn-outline btn-danger pull-left" ng-show="app.installationState === 'installed' && app.runState === 'running'" ng-click="stopApp()">Stop</button>
                     <button class="btn btn-outline btn-danger pull-right" data-toggle="modal" data-target="#uninstallAppModal">Uninstall</button>
-                    <button class="btn btn-outline btn-primary pull-right" ng-show="updateAvailable" ng-click="updateApp()">Update to {{ updateVersion }}</button>
+                    <button class="btn btn-outline btn-primary pull-right" ng-show="updateAvailable" data-toggle="modal" data-target="#uninstallAppModal">Update to {{ updateVersion }}</button>
 
-                    <!-- Modal -->
+                    <!-- Uninstall Modal -->
                     <div class="modal fade" id="uninstallAppModal" tabindex="-1" role="dialog" aria-labelledby="uninstallAppModalLabel" aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">
@@ -43,10 +43,10 @@
                                 <div class="modal-body">
                                     <p>Deleting the app will also remove all content generated within this app!</p>
 
-                                    <form class="form-user-delete" role="form" novalidate ng-submit="uninstallApp()" name="uninstallapp_form" autocomplete="off">
+                                    <form role="form" novalidate ng-submit="uninstallApp()" name="uninstallapp_form" autocomplete="off">
                                         <div class="form-group" ng-class="{ 'has-error': (uninstallapp_form.password.$dirty && uninstallapp_form.password.$invalid) || (!uninstallapp_form.password.$dirty && passwordWrong) }">
-                                            <label class="control-label" for="inputPassword">Give your password to verify that you are performing that action</label>
-                                            <input type="password" class="form-control" ng-model="password" id="inputPassword" name="password" placeholder="Password" ng-maxlength="512" ng-minlength="5" required>
+                                            <label class="control-label" for="inputPasswordUninstall">Give your password to verify that you are performing that action</label>
+                                            <input type="password" class="form-control" ng-model="password" id="inputPasswordUninstall" name="password" placeholder="Password" ng-maxlength="512" ng-minlength="5" required>
                                         </div>
                                         <input class="hide" ng-disabled="uninstallapp_form.$invalid" type="submit"/>
                                     </form>
@@ -56,9 +56,32 @@
                                     <button type="button" class="btn btn-danger" ng-disabled="uninstallapp_form.$invalid" ng-click="uninstallApp()">Uninstall</button>
                                 </div>
                             </div>
-                            <!-- /.modal-content -->
                         </div>
-                        <!-- /.modal-dialog -->
+                    </div>
+
+                    <!-- Update Modal -->
+                    <div class="modal fade" id="updateAppModal" tabindex="-1" role="dialog" aria-labelledby="updateAppModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                    <h4 class="modal-title" id="updateAppModalLabel">Really update {{ app.manifest.title }}?</h4>
+                                </div>
+                                <div class="modal-body">
+                                    <form role="form" novalidate ng-submit="updateApp()" name="updateApp_form" autocomplete="off">
+                                        <div class="form-group" ng-class="{ 'has-error': (updateApp_form.password.$dirty && updateApp_form.password.$invalid) || (!updateApp_form.password.$dirty && passwordWrong) }">
+                                            <label class="control-label" for="inputPasswordUpdate">Give your password to verify that you are performing that action</label>
+                                            <input type="password" class="form-control" ng-model="password" id="inputPasswordUpdate" name="password" placeholder="Password" ng-maxlength="512" ng-minlength="5" required>
+                                        </div>
+                                        <input class="hide" ng-disabled="updateApp_form.$invalid" type="submit"/>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-danger" ng-disabled="updateApp_form.$invalid" ng-click="updateApp()">Update</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

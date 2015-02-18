@@ -27,8 +27,18 @@ angular.module('Application').controller('AppDetailsController', ['$scope', '$ht
     };
 
     $scope.updateApp = function () {
-        Client.updateApp($routeParams.appId, $scope.updateVersion, function (error) {
-            if (error) console.error(error);
+        $scope.passwordWrong = false;
+
+        Client.updateApp($routeParams.appId, $scope.updateVersion, $scope.password, function (error) {
+            if (error && error.statusCode === 403) {
+                $scope.password = '';
+                $scope.passwordWrong = true;
+                $('#inputPasswordUpdate').focus();
+            } else if (error) {
+                console.error(error);
+            } else {
+                $('#updateAppModal').modal('hide');
+            }
         });
     };
 
@@ -39,7 +49,7 @@ angular.module('Application').controller('AppDetailsController', ['$scope', '$ht
             if (error && error.statusCode === 403) {
                 $scope.password = '';
                 $scope.passwordWrong = true;
-                $('#inputPassword').focus();
+                $('#inputPasswordUninstall').focus();
             } else if (error) {
                 console.error(error);
             } else {
