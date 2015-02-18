@@ -44,6 +44,7 @@ cd "${bundle_dir}" && npm install --production
 cd "${bundle_dir}" && tar czvf "${bundle_file}" .
 
 echo "Uploading bundle to S3"
+# That special header is needed to allow access with singed urls created with different aws credentials than the ones the file got uploaded
 s3cmd --ssl --add-header=x-amz-acl:authenticated-read --access_key="${AWS_DEV_ACCESS_KEY}" --secret_key="${AWS_DEV_SECRET_KEY}" --no-mime-magic put "${bundle_file}" "s3://cloudron-dev-releases/box-${version}.tar.gz"
 
 echo "Cleaning up ${bundle_dir}"
