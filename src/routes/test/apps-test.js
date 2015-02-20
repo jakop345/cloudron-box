@@ -8,6 +8,7 @@
 
 var appdb = require('../../appdb.js'),
     assert = require('assert'),
+    nock = require('nock'),
     async = require('async'),
     child_process = require('child_process'),
     clientdb = require('../../clientdb.js'),
@@ -73,11 +74,15 @@ function setup(done) {
         userdb.clear,
 
         function (callback) {
+            var scope = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
+
             request.post(SERVER_URL + '/api/v1/cloudron/activate')
+                   .query({ setupToken: 'somesetuptoken' })
                    .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
+                expect(scope.isDone());
                 callback();
             });
         },

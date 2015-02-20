@@ -17,6 +17,7 @@ var appdb = require('../../appdb.js'),
     request = require('superagent'),
     server = require('../../server.js'),
     sinon = require('sinon'),
+    nock = require('nock'),
     userdb = require('../../userdb.js');
 
 var SERVER_URL = 'http://localhost:' + config.get('port');
@@ -32,11 +33,15 @@ function setup(done) {
         userdb.clear,
 
         function createAdmin(callback) {
+            var scope = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
+
             request.post(SERVER_URL + '/api/v1/cloudron/activate')
+                   .query({ setupToken: 'somesetuptoken' })
                    .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
+                expect(scope.isDone());
                 callback();
             });
         },

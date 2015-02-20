@@ -5,7 +5,6 @@
 /* global describe:false */
 /* global before:false */
 /* global after:false */
-/* global afterEach:false */
 
 var async = require('async'),
     config = require('../../../config.js'),
@@ -14,6 +13,7 @@ var async = require('async'),
     fs = require('fs'),
     os = require('os'),
     path = require('path'),
+    nock = require('nock'),
     paths = require('../../paths.js'),
     request = require('superagent'),
     server = require('../../server.js');
@@ -43,7 +43,7 @@ describe('Cloudron', function () {
         before(setup);
         after(cleanup);
 
-        it('fails due to empty username', function (done) {
+        it('fails due to missing setupToken', function (done) {
             request.post(SERVER_URL + '/api/v1/cloudron/activate')
                    .send({ username: '', password: 'somepassword', email: 'admin@foo.bar' })
                    .end(function (error, result) {
@@ -53,52 +53,86 @@ describe('Cloudron', function () {
             });
         });
 
-        it('fails due to empty password', function (done) {
+        it('fails due to empty username', function (done) {
+            var scope = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
+
             request.post(SERVER_URL + '/api/v1/cloudron/activate')
+                   .query({ setupToken: 'somesetuptoken' })
+                   .send({ username: '', password: 'somepassword', email: 'admin@foo.bar' })
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(400);
+                expect(scope.isDone());
+                done();
+            });
+        });
+
+        it('fails due to empty password', function (done) {
+            var scope = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
+
+            request.post(SERVER_URL + '/api/v1/cloudron/activate')
+                   .query({ setupToken: 'somesetuptoken' })
                    .send({ username: 'someuser', password: '', email: 'admin@foo.bar' })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
+                expect(scope.isDone());
                 done();
             });
         });
 
         it('fails due to empty email', function (done) {
+            var scope = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
+
             request.post(SERVER_URL + '/api/v1/cloudron/activate')
+                   .query({ setupToken: 'somesetuptoken' })
                    .send({ username: 'someuser', password: 'somepassword', email: '' })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
+                expect(scope.isDone());
                 done();
             });
         });
 
         it('fails due to invalid email', function (done) {
+            var scope = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
+
             request.post(SERVER_URL + '/api/v1/cloudron/activate')
+                   .query({ setupToken: 'somesetuptoken' })
                    .send({ username: 'someuser', password: 'somepassword', email: 'invalidemail' })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
+                expect(scope.isDone());
                 done();
             });
         });
 
         it('succeeds', function (done) {
+            var scope = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
+
             request.post(SERVER_URL + '/api/v1/cloudron/activate')
+                   .query({ setupToken: 'somesetuptoken' })
                    .send({ username: 'someuser', password: 'somepassword', email: 'admin@foo.bar' })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(201);
+                expect(scope.isDone());
                 done();
             });
         });
 
         it('fails the second time', function (done) {
+            var scope = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
+
             request.post(SERVER_URL + '/api/v1/cloudron/activate')
+                   .query({ setupToken: 'somesetuptoken' })
                    .send({ username: 'someuser', password: 'somepassword', email: 'admin@foo.bar' })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(409);
+                expect(scope.isDone());
                 done();
             });
         });
@@ -118,11 +152,15 @@ describe('Cloudron', function () {
                 setup,
 
                 function (callback) {
+                    var scope = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
+
                     request.post(SERVER_URL + '/api/v1/cloudron/activate')
+                           .query({ setupToken: 'somesetuptoken' })
                            .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
                            .end(function (error, result) {
                         expect(error).to.not.be.ok();
                         expect(result).to.be.ok();
+                        expect(scope.isDone());
                         callback();
                     });
                 },

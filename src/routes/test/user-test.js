@@ -11,6 +11,7 @@ var config = require('../../../config.js'),
     tokendb = require('../../tokendb.js'),
     expect = require('expect.js'),
     request = require('superagent'),
+    nock = require('nock'),
     server = require('../../../src/server.js'),
     userdb = require('../../userdb.js');
 
@@ -57,10 +58,14 @@ describe('User API', function () {
     });
 
     it('create admin fails due to missing parameters', function (done) {
+        var scope = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
+
         request.post(SERVER_URL + '/api/v1/cloudron/activate')
+               .query({ setupToken: 'somesetuptoken' })
                .send({ username: USERNAME_0 })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
+            expect(scope.isDone());
             done(err);
         });
     });
@@ -74,10 +79,14 @@ describe('User API', function () {
     });
 
     it('create admin', function (done) {
+        var scope = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
+
         request.post(SERVER_URL + '/api/v1/cloudron/activate')
+               .query({ setupToken: 'somesetuptoken' })
                .send({ username: USERNAME_0, password: PASSWORD, email: EMAIL })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(201);
+            expect(scope.isDone());
             done(err);
         });
     });
