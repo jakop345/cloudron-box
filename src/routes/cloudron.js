@@ -45,6 +45,7 @@ exports = module.exports = {
  */
 function activate(req, res, next) {
     assert(typeof req.body === 'object');
+    assert(typeof req.query.setupToken === 'string');
 
     if (typeof req.body.username !== 'string') return next(new HttpError(400, 'username must be string'));
     if (typeof req.body.password !== 'string') return next(new HttpError(400, 'password must be string'));
@@ -63,10 +64,18 @@ function activate(req, res, next) {
             if (error.reason === UserError.BAD_USERNAME) return next(new HttpError(400, 'Bad username'));
             else return next(new HttpError(400, 'Invalid message'));
         }
-        if (error && error.reason === CloudronError.ALREADY_PROVISIONED) return next(new HttpError(409, 'Already provisioned'));
+        if (error && error.reason === CloudronError.ALREADY_PROVISIONED) return next(new HttpError(409, 'Already setup'));
         if (error) return next(new HttpError(500, error));
 
-        next(new HttpSuccess(201, info));
+        // Now let the api server know we got activated
+        superagent.post(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/setup/done').query({ setupToken:req.query.setupToken }).end(function (error, result) {
+            if (error) return next(new HttpError(500, error));
+            if (result.statusCode === 403) return next(new HttpError(403, 'Invalid token'));
+            if (result.statusCode === 409) return next(new HttpError(409, 'Already setup'));
+            if (result.statusCode !== 201) return next(new HttpError(500, result.text ? result.text.message : 'Internal error'));
+
+            next(new HttpSuccess(201, info));
+        });
     });
 }
 

@@ -115,14 +115,16 @@ describe('Server', function () {
         });
 
         it('stats', function (done) {
-            var scope = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
+            var scope1 = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
+            var scope2 = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/setup/done?setupToken=somesetuptoken').reply(201, {});
 
             request.post(SERVER_URL + '/api/v1/cloudron/activate')
                    .query({ setupToken: 'somesetuptoken' })
                    .send({ username: 'admin', password: 'password', email: 'xx@xx.xx' })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(201);
-                expect(scope.isDone());
+                expect(scope1.isDone());
+                expect(scope2.isDone());
 
                 ACCESS_TOKEN = res.body.token;
 

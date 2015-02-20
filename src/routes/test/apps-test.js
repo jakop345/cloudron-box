@@ -74,7 +74,8 @@ function setup(done) {
         userdb.clear,
 
         function (callback) {
-            var scope = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
+            var scope1 = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
+            var scope2 = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/setup/done?setupToken=somesetuptoken').reply(201, {});
 
             request.post(SERVER_URL + '/api/v1/cloudron/activate')
                    .query({ setupToken: 'somesetuptoken' })
@@ -82,7 +83,9 @@ function setup(done) {
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
-                expect(scope.isDone());
+                expect(result.statusCode).to.eql(201);
+                expect(scope1.isDone());
+                expect(scope2.isDone());
                 callback();
             });
         },
