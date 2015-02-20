@@ -1,5 +1,5 @@
 /var/log/cloudron/*log {
-	missingok
-	size 100k
-	nocompress
+    missingok
+    size 100k
+    nocompress
 }
