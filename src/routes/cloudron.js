@@ -21,6 +21,7 @@ var SUDO = '/usr/bin/sudo',
 
 exports = module.exports = {
     activate: activate,
+    setupTokenAuth: setupTokenAuth,
     getStatus: getStatus,
     getStats: getStats,
     reboot: reboot,
@@ -65,6 +66,16 @@ function activate(req, res, next) {
 
         next(new HttpSuccess(201, info));
     });
+}
+
+function setupTokenAuth(req, res, next) {
+    assert(typeof req.query === 'object');
+
+    if (typeof req.query.setupToken !== 'string') return next(new HttpError(400, 'no setupToken provided'));
+
+    // TODO call the api server to verify the setup token
+
+    next();
 }
 
 function getStatus(req, res, next) {

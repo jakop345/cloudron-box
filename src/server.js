@@ -84,7 +84,7 @@ function initializeExpressSync() {
     var csrf = routes.oauth2.csrf;
 
     // public routes
-    router.post('/api/v1/cloudron/activate', routes.cloudron.activate);    // FIXME any number of admins can be created without auth!
+    router.post('/api/v1/cloudron/activate', routes.cloudron.setupTokenAuth, routes.cloudron.activate);
     router.get ('/api/v1/cloudron/progress', routes.cloudron.getProgress);
     router.get ('/api/v1/cloudron/status', routes.cloudron.getStatus);
 
