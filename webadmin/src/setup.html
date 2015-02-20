@@ -53,7 +53,12 @@
 
 <body ng-app="Application" ng-controller="SetupController">
 
-    <div class="container animateMe ng-hide" ng-show="initialized && !busy">
+    <center ng-hide="setupToken">
+        <h1> <i class="fa fa-frown-o fa-fw text-danger"></i> No setup token provided. </h1>
+        Please use the setup link for this cloudron.
+    </center>
+
+    <div class="container animateMe ng-hide" ng-show="initialized && !busy && setupToken">
         <div class="row">
             <div class="col-md-12 text-center">
                 <h1>Welcome to your Cloudron</h1>
@@ -91,7 +96,7 @@
         </div>
     </div>
 
-    <div class="container animateMe ng-hide" ng-show="busy">
+    <div class="container animateMe ng-hide" ng-show="busy && setupToken">
         <div class="col-lg-12" style="text-align: center;">
             <h2>Your Cloudron is being initialized</h2>
             <i class="fa fa-circle-o-notch fa-spin fa-5x"></i>

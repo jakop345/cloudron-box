@@ -12,13 +12,18 @@ app.controller('SetupController', ['$scope', 'Client', function ($scope, Client)
     $scope.password = '';
     $scope.passwordRepeat = '';
 
+    // Stupid angular location provider either wants html5 location mode or not, do the query parsing on my own
+    var search = window.location.search.slice(1).split('&').map(function (item) { return item.split('='); }).reduce(function (o, k) { o[k[0]] = k[1]; return o; }, {});
+
+    $scope.setupToken = search.setupToken;
+
     $scope.error = '';
 
     $scope.submit = function () {
         $scope.busy = true;
         $scope.error = '';
 
-        Client.createAdmin($scope.username, $scope.password, $scope.email, function (error) {
+        Client.createAdmin($scope.username, $scope.password, $scope.email, $scope.setupToken, function (error) {
             if (error) {
                 $scope.error = error.message;
                 console.error('Internal error', error);

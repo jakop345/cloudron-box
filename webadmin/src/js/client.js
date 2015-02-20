@@ -258,7 +258,7 @@ angular.module('Application').service('Client', ['$http', 'md5', function ($http
         }).error(defaultErrorHandler(callback));
     };
 
-    Client.prototype.createAdmin = function (username, password, email, callback) {
+    Client.prototype.createAdmin = function (username, password, email, setupToken, callback) {
         var payload = {
             username: username,
             password: password,
@@ -267,7 +267,7 @@ angular.module('Application').service('Client', ['$http', 'md5', function ($http
 
         var that = this;
 
-        $http.post('/api/v1/cloudron/activate', payload).success(function(data, status) {
+        $http.post('/api/v1/cloudron/activate?setupToken=' + setupToken, payload).success(function(data, status) {
             if (status !== 201 || typeof data !== 'object') return callback(new ClientError(status, data));
 
             that.setToken(data.token);
