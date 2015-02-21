@@ -1,0 +1,7 @@
+/home/yellowtent/logs/* /home/yellowtent/logs/*/* /home/yellowtent/logs/*/*/* {
+    missingok
+    copytruncate
+    notifempty
+    size 100k
+    nocompress
+}
