@@ -144,6 +144,9 @@
             <!-- /.navbar-header -->
 
             <ul class="nav navbar-top-links navbar-right">
+                <li ng-show="userInfo.admin">
+                    <a ng-class="{ active: isActive('/userlist')}" href="#/userlist"><i class="fa fa-users fa-fw"></i> Users</a>
+                </li>
                 <li class="dropdown">
                   <a href="" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><img ng-src="{{userInfo.gravatar}}"/> {{userInfo.username}} <span class="caret"></span></a>
                   <ul class="dropdown-menu" role="menu">
@@ -179,9 +182,6 @@
                         </li>
                         <li ng-show="userInfo.admin">
                             <a ng-class="{ active: isActive('/appstore')}" href="#/appstore"><i class="fa fa-cloud fa-fw"></i> App Store</a>
-                        </li>
-                        <li ng-show="userInfo.admin">
-                            <a ng-class="{ active: isActive('/userlist')}" href="#/userlist"><i class="fa fa-users fa-fw"></i> Users</a>
                         </li>
                         <li ng-show="userInfo.admin">
                             <a ng-class="{ active: isActive('/settings')}" href="#/settings"><i class="fa fa-wrench fa-fw"></i> Settings</a>
