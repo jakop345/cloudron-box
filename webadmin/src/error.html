@@ -33,9 +33,14 @@
 
 <body ng-app="Application" ng-controller="ErrorController">
 
-    <center>
-        <h1> <i class="fa fa-frown-o fa-fw text-danger"></i> Something has gone wrong. </h1>
-        Please restore your cloudron from <a href="" ng-click="webServerOriginLink">here</a>.
+    <center ng-show="errorCode == 0">
+        <h1> <i class="fa fa-frown-o fa-fw text-danger"></i> Something has gone wrong </h1>
+        Please check your cloudron status <a href="" ng-click="webServerOriginLink">here</a>.
+    </center>
+
+    <center ng-show="errorCode == 1">
+        <h1> <i class="fa fa-frown-o fa-fw text-danger"></i> Cloudron is not setup </h1>
+        Please use the setup link you received via mail or use the setup button <a href="" ng-click="webServerOriginLink">here</a>.
     </center>
 
 </body>

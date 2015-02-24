@@ -23,7 +23,7 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
     };
 
     $scope.setup = function () {
-        window.location.href = '/error.html';
+        window.location.href = '/error.html?errorCode=1';
     };
 
     $scope.error = function (error) {
