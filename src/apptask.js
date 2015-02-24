@@ -615,7 +615,7 @@ function updateApp(app, values, callback) {
         app[value] = values[value];
     }
 
-    debug(app.id + ' installationState:' + app.installationState);
+    debug(app.id + ' installationState:' + app.installationState + ' progress: ' + app.installationProgress);
 
     appdb.update(app.id, values, callback);
 }
