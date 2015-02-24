@@ -154,7 +154,7 @@ function allocateOAuthCredentials(app, callback) {
 
     debug('allocateOAuthCredentials: id:%s clientSecret:%s', id, clientSecret);
 
-    clientdb.add(id, appId, clientSecret, redirectURI, scope, function (error) {
+    clientdb.add(id, 'addon-' + appId, clientSecret, redirectURI, scope, function (error) {
         if (error) return callback(error);
 
         var env = [
@@ -174,7 +174,7 @@ function removeOAuthCredentials(app, callback) {
 
     debug('removeOAuthCredentials: %s', app.id);
 
-    clientdb.delByAppId(app.id, function (error) {
+    clientdb.delByAppId('addon-' + app.id, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null);
         if (error) console.error(error);
 

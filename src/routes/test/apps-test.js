@@ -471,7 +471,7 @@ describe('App installation', function () {
             expect(data.Config.ExposedPorts['7777/tcp']).to.eql({ });
             expect(data.Config.Env).to.contain('ADMIN_ORIGIN=' + config.adminOrigin());
             expect(data.Config.Env).to.contain('CLOUDRON=1');
-            clientdb.getByAppId(appInfo.id, function (error, client) {
+            clientdb.getByAppId('addon-' + appInfo.id, function (error, client) {
                 expect(error).to.not.be.ok();
                 expect(client.id.length).to.be(46); // cid-addon- + 32 hex chars (128 bits) + 4 hyphens
                 expect(client.clientSecret.length).to.be(36); // 32 hex chars (128 bits) + 4 hyphens
