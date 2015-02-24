@@ -67,6 +67,9 @@ function activate(req, res, next) {
         if (error && error.reason === CloudronError.ALREADY_PROVISIONED) return next(new HttpError(409, 'Already setup'));
         if (error) return next(new HttpError(500, error));
 
+        // skip calling the api server when running locally
+        if (config.LOCAL) return next(new HttpSuccess(201, info));
+
         // Now let the api server know we got activated
         superagent.post(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/setup/done').query({ setupToken:req.query.setupToken }).end(function (error, result) {
             if (error) return next(new HttpError(500, error));
@@ -83,6 +86,9 @@ function setupTokenAuth(req, res, next) {
     assert(typeof req.query === 'object');
 
     if (typeof req.query.setupToken !== 'string') return next(new HttpError(400, 'no setupToken provided'));
+
+    // Allow all setup tokens locally
+    if (config.LOCAL) return next();
 
     superagent.get(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/setup/verify').query({ setupToken:req.query.setupToken }).end(function (error, result) {
         if (error) return next(new HttpError(500, error));
