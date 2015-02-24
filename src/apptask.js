@@ -360,7 +360,6 @@ function startContainer(app, callback) {
 
         var manifest = app.manifest;
         var appDataDir = path.join(paths.APPDATA_DIR, app.id);
-        var appLogDir = path.join(paths.APPLOGS_DIR, app.id);
 
         var portBindings = { };
         portBindings[manifest.httpPort + '/tcp'] = [ { HostPort: app.httpPort + '' } ];
@@ -371,12 +370,8 @@ function startContainer(app, callback) {
             vbox.forwardFromHostToVirtualBox(app.id + '-tcp' + containerPort, portConfigs[containerPort]);
         }
 
-        var binds = [ ];
-        binds.push(appDataDir + ':/app/data:rw');
-        binds.push(appLogDir + ':/var/log:rw');
-
         var startOptions = {
-            Binds: binds,
+            Binds: [ appDataDir + ':/app/data:rw' ],
             PortBindings: portBindings,
             PublishAllPorts: false,
             Links: addons.getLinksSync(app),

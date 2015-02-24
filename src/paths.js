@@ -13,8 +13,6 @@ exports = module.exports = {
 
     ADDON_CONFIG_DIR: path.join(config.baseDir(), 'configs/addons'),
 
-    APPLOGS_DIR: path.join(config.baseDir(), 'logs'),
-
     MAIL_DATA_DIR: path.join(config.baseDir(), 'data/mail'),
 
     COLLECTD_APPCONFIG_DIR: path.join(config.baseDir(), 'configs/collectd/collectd.conf.d'),

@@ -14,7 +14,6 @@ readonly USER="yellowtent"
 # and the whole code will relocated to BOX_SRC_DIR by the installer. Use paths relative to script_dir or box_src_tmp_dir
 readonly BOX_SRC_DIR="/home/${USER}/box"
 readonly DATA_DIR="/home/${USER}/data"
-readonly LOGS_DIR="/home/${USER}/logs"
 readonly CONFIG_DIR="/home/${USER}/configs"
 readonly SETUP_PROGRESS_JSON="/home/yellowtent/setup/website/progress.json"
 
@@ -38,7 +37,6 @@ set_progress "15" "Creating directories"
 sudo -u "${USER}" -H bash <<EOF
 set -eux
 # keep these in sync with paths.js
-mkdir -p "${LOGS_DIR}"
 mkdir -p "${DATA_DIR}/appicons"
 mkdir -p "${DATA_DIR}/appdata"
 mkdir -p "${DATA_DIR}/mail"
@@ -118,7 +116,6 @@ mail_container_id=$(docker run --restart=always -d --name="mail" \
     -h "${arg_fqdn}" \
     -e "DOMAIN_NAME=${arg_fqdn}" \
     -v "${DATA_DIR}/mail:/app/data" \
-    -v "${LOGS_DIR}/mail:/var/log" \
     girish/mail:0.3)
 echo "Mail container id: ${mail_container_id}"
 
@@ -135,7 +132,6 @@ mysql_container_id=$(docker run --restart=always -d --name="mysql" \
     -h "${arg_fqdn}" \
     -v "${DATA_DIR}/mysql:/var/lib/mysql" \
     -v "${CONFIG_DIR}/addons/mysql_vars.sh:/etc/mysql/mysql_vars.sh:r" \
-    -v "${LOGS_DIR}/mysql:/var/log" \
     girish/mysql:0.3)
 echo "MySQL container id: ${mysql_container_id}"
 
@@ -150,7 +146,6 @@ postgresql_container_id=$(docker run --restart=always -d --name="postgresql" \
     -h "${arg_fqdn}" \
     -v "${DATA_DIR}/postgresql:/var/lib/mysql" \
     -v "${CONFIG_DIR}/addons/postgresql_vars.sh:/etc/postgresql/postgresql_vars.sh:r" \
-    -v "${LOGS_DIR}/postgresql:/var/log" \
     girish/postgresql:0.3)
 echo "PostgreSQL container id: ${postgresql_container_id}"
 
