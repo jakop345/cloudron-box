@@ -144,7 +144,10 @@
             <!-- /.navbar-header -->
 
             <ul class="nav navbar-top-links navbar-right">
-                <li ng-show="userInfo.admin">
+                <li>
+                    <a ng-class="{ active: isActive('/apps')}" href="#/apps"><i class="fa fa-cloud-download fa-fw"></i> My Apps</a>
+                </li>
+                <li>
                     <a ng-class="{ active: isActive('/appstore')}" href="#/appstore"><i class="fa fa-th-large fa-fw"></i> App Store</a>
                 </li>
                 <li ng-show="userInfo.admin">

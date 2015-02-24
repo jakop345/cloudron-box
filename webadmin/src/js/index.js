@@ -8,7 +8,7 @@ var app = angular.module('Application', ['ngRoute', 'ngAnimate', 'angular-md5'])
 // setup all major application routes
 app.config(['$routeProvider', function ($routeProvider) {
     $routeProvider.when('/', {
-        redirectTo: '/dashboard'
+        redirectTo: '/apps'
     }).when('/dashboard', {
         controller: 'DashboardController',
         templateUrl: 'views/dashboard.html'
@@ -24,6 +24,9 @@ app.config(['$routeProvider', function ($routeProvider) {
     }).when('/appstore', {
         controller: 'AppStoreController',
         templateUrl: 'views/appstore.html'
+    }).when('/apps', {
+        controller: 'AppListController',
+        templateUrl: 'views/applist.html'
     }).when('/app/:appStoreId/install', {
         controller: 'AppInstallController',
         templateUrl: 'views/appinstall.html'
