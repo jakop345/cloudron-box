@@ -165,7 +165,7 @@ describe('apptask', function () {
     });
 
     it('downloads manifest', function (done) {
-        var manifest = { version: '0.0.1', dockerImage: 'foo', healthCheckPath: '/', httpPort: '3', title: 'ok' };
+        var manifest = { version: '0.0.1', manifestVersion: 1, dockerImage: 'foo', healthCheckPath: '/', httpPort: '3', title: 'ok' };
         var scope = nock(config.apiServerOrigin()).get('/api/v1/appstore/apps/' + APP.appStoreId + '/versions/' + APP.version + '/manifest').reply(200, manifest);
 
         apptask._downloadManifest(APP, function (error) {
@@ -209,6 +209,7 @@ describe('validateManifest', function () {
     });
 
     var manifest = {
+        manifestVersion: 1,
         version: '0.1.2',
         dockerImage: 'girish/foo:0.2',
         healthCheckPath: '/',
@@ -253,6 +254,12 @@ describe('validateManifest', function () {
     it('fails for bad targetBoxVersion', function () {
         var manifestCopy = _.extend({ }, manifest);
         manifestCopy.targetBoxVersion = '0.2';
+        expect(apptask._validateManifest(manifestCopy)).to.be.an(Error);
+    });
+
+    it('fails for bad manifestVersion', function () {
+        var manifestCopy = _.extend({ }, manifest);
+        manifestCopy.manifestVersion = 2;
         expect(apptask._validateManifest(manifestCopy)).to.be.an(Error);
     });
 

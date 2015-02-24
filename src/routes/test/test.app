@@ -1,6 +1,7 @@
 {
   "title": "test",
   "version": "0.0.8",
+  "manifestVersion": 1,
   "dockerImage": "girish/test:0.8",
   "healthCheckPath": "/",
   "httpPort": "7777",

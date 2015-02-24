@@ -421,6 +421,8 @@ function stopContainer(app, callback) {
 function validateManifest(manifest) {
      if (manifest === null) return new Error('Unable to parse manifest: ' + safe.error.message);
 
+     if (manifest['manifestVersion'] !== 1) return new Error('manifestVersion must be set');
+
      var fields = [ 'version', 'dockerImage', 'healthCheckPath', 'httpPort', 'title' ];
 
      for (var i = 0; i < fields.length; i++) {
