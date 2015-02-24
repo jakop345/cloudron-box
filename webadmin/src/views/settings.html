@@ -49,8 +49,6 @@
             </div>
             <div class="panel-body">
                 <ul class="list-group">
-                    <li class="list-group-item">Domain <span class="pull-right">{{config.fqdn}}</span></li>
-                    <li class="list-group-item">IP <span class="pull-right">{{config.ip}}</span></li>
                     <li class="list-group-item">Naked Domain App:
                         <span class="pull-right">
                             <select ng-model="nakedDomainApp" ng-options="app.location for app in apps" ng-change="setNakedDomain()">
@@ -59,28 +57,6 @@
                         </span>
                     </li>
                 </ul>
-                <button class="btn btn-outline btn-success pull-right" data-toggle="modal" data-target="#rebootModal">Reboot</button>
-
-                <!-- Modal really reboot -->
-                <div class="modal fade" id="rebootModal" tabindex="-1" role="dialog" aria-labelledby="rebootModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                                <h4 class="modal-title" id="rebootModalLabel">Really reboot the box software?</h4>
-                            </div>
-                            <div class="modal-body">
-                                Your cloudron will be unreachable during the reboot.
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                                <button type="button" class="btn btn-danger" ng-click="reboot()">Reboot</button>
-                            </div>
-                        </div>
-                        <!-- /.modal-content -->
-                    </div>
-                    <!-- /.modal-dialog -->
-                </div>
             </div>
         </div>
     </div>
