@@ -209,6 +209,8 @@ describe('User API', function () {
             expect(res.body.username).to.equal(USERNAME_0);
             expect(res.body.email).to.equal(EMAIL);
             expect(res.body.admin).to.be.ok();
+            expect(res.body._password).to.not.be.ok();
+            expect(res.body._salt).to.not.be.ok();
             done(err);
         });
     });
@@ -370,7 +372,15 @@ describe('User API', function () {
             expect(res.statusCode).to.equal(200);
             expect(res.body.users).to.be.an('array');
             expect(res.body.users.length).to.equal(4);
-            expect(res.body.users[0]).to.be.an('object');
+
+            res.body.users.forEach(function (user) {
+                expect(user).to.be.an('object');
+                expect(user.id).to.be.ok();
+                expect(user.username).to.be.ok();
+                expect(user.email).to.be.ok();
+                expect(user._password).to.not.be.ok();
+                expect(user._salt).to.not.be.ok();
+            });
 
             done();
         });
@@ -455,6 +465,8 @@ describe('User API', function () {
             expect(res.body.expires).to.be.a('string');
             expect(res.body.username).to.not.be.ok();
             expect(res.body.email).to.not.be.ok();
+            expect(res.body._password).to.not.be.ok();
+            expect(res.body._salt).to.not.be.ok();
 
             done();
         });
