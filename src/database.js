@@ -1,61 +1,93 @@
-/* jslint node:true */
+/* jslint node: true */
 
 'use strict';
 
 var assert = require('assert'),
     async = require('async'),
     config = require('../config.js'),
-    DatabaseError = require('./databaseerror.js'),
-    debug = require('debug')('box:database'),
-    paths = require('./paths.js'),
-    sqlite3 = require('sqlite3');
+    mysql = require('mysql'),
+    util = require('util');
 
 exports = module.exports = {
     initialize: initialize,
     uninitialize: uninitialize,
+    query: query,
     beginTransaction: beginTransaction,
     rollback: rollback,
     commit: commit,
 
-    get: get,
-    all: all,
-    run: run,
-
-    // exported for testing
-    _clear: clear
+    _clear: clear,
 };
 
-var gConnectionPool = [ ], // used to track active transactions
-    gDatabase = null;
 
-var NOOP_CALLBACK = function (error) { if (error) console.error(error); };
+var gConnectionPool = null,
+    gDefaultConnection = null;
 
-function initialize(callback) {
-    gDatabase = new sqlite3.Database(paths.DATABASE_FILENAME);
-    gDatabase.on('error', function (error) {
-        console.error('Database error in ' + paths.DATABASE_FILENAME + ':', error);
+function initialize(options, callback) {
+    if (typeof options === 'function') {
+        callback = options;
+        options = {
+            connectionLimit: 5
+        };
+    }
+
+    assert(typeof options.connectionLimit === 'number');
+    assert(typeof callback === 'function');
+
+    if (gConnectionPool !== null) return callback(null);
+
+    gConnectionPool  = mysql.createPool({
+        connectionLimit: options.connectionLimit,
+        host: config.database().hostname,
+        user: config.database().username,
+        password: config.database().password,
+        port: config.database().port,
+        database: config.database().name,
+        multipleStatements: false,
+        ssl: false
     });
 
-    gDatabase.run('PRAGMA busy_timeout=5000', callback);
+    reconnect(callback);
 }
 
 function uninitialize(callback) {
-    assert(typeof callback === 'function');
+    if (gConnectionPool) {
+        gConnectionPool.end(callback);
+        gConnectionPool = null;
+    } else {
+        callback(null);
+    }
+}
 
-    debug('Closing database');
-    gDatabase.close();
-    gDatabase = null;
+function reconnect(callback) {
+    callback = callback || function () { };
 
-    debug('Closing %d active transactions', gConnectionPool.length);
-    gConnectionPool.forEach(function (conn) { conn.close(); });
-    gConnectionPool = [ ];
+    gConnectionPool.getConnection(function (error, connection) {
+        if (error) {
+            console.error('Unable to reestablish connection to database. Try again in a bit.', error.message);
+            setTimeout(reconnect, 1000);
+            return;
+        }
 
-    callback(null);
+        connection.on('error', function (error) {
+            console.error('Lost connection to database server. Reason: %s. Reestablishing...', error.message);
+            reconnect();
+        });
+
+        connection.query('USE ' + config.database().name + ';', function (error) {
+            if (error) return callback(error);
+
+            gDefaultConnection = connection;
+
+            callback(null);
+        });
+    });
 }
 
 function clear(callback) {
     assert(typeof callback === 'function');
 
+    // the clear funcs don't completely clear the db, they leave the migration code defaults
     async.series([
         require('./appdb.js')._clear,
         require('./authcodedb.js')._clear,
@@ -65,50 +97,57 @@ function clear(callback) {
     ], callback);
 }
 
-function beginTransaction() {
-    var conn = new sqlite3.Database(paths.DATABASE_FILENAME);
-    conn._started = Date.now();
-    conn._slowWarningIntervalId = setInterval((function () {
-        debug('Transaction running for %d msecs', Date.now() - this._started);
-    }).bind(conn), 2000);
+function beginTransaction(callback) {
+    assert(typeof callback === 'function');
 
-    gConnectionPool.push(conn);
-    conn.serialize();
-    conn.run('PRAGMA busy_timeout=5000', NOOP_CALLBACK);
-    conn.run('BEGIN TRANSACTION', NOOP_CALLBACK);
-    return conn;
+    gConnectionPool.getConnection(function (error, connection) {
+        if (error) return callback(error);
+
+        connection.on('error', console.error); // this needs to match the removeListener below
+
+        connection.query('USE ' + config.database().name + ';', function (error) {
+            if (error) return callback(error);
+
+            connection.beginTransaction(function (error) {
+                if (error) return callback(error);
+
+                return callback(null, connection);
+            });
+        });
+    });
 }
 
-function rollback(conn, callback) {
-    gConnectionPool.splice(gConnectionPool.indexOf(conn), 1);
-    conn.run('ROLLBACK', NOOP_CALLBACK);
-    clearInterval(conn._slowWarningIntervalId);
-    debug('Transaction took %d msecs', Date.now() - conn._started);
-    conn.close(); // close waits for pending statements
-    if (callback) callback();
-}
+function rollback(connection, callback) {
+    assert(typeof callback === 'function');
 
-function commit(conn, callback) {
-    gConnectionPool.splice(gConnectionPool.indexOf(conn), 1);
-    conn.run('COMMIT', function (error) {
-        clearInterval(conn._slowWarningIntervalId);
-        debug('Transaction took %d msecs', Date.now() - conn._started);
-        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+    connection.rollback(function () {
+        connection.removeListener('error', console.error);
 
+        connection.release();
         callback(null);
     });
-    conn.close(); // close waits for pending statements
 }
 
-function get() {
-    return gDatabase.get.apply(gDatabase, arguments);
+function commit(connection, callback) {
+    assert(typeof callback === 'function');
+
+    connection.commit(function (error) {
+        if (error) return rollback(connection, callback);
+
+        connection.removeListener('error', console.error);
+        connection.release();
+
+        return callback(null);
+    });
 }
 
-function all() {
-    return gDatabase.all.apply(gDatabase, arguments);
-}
+function query() {
+    var args = Array.prototype.slice.call(arguments);
+    var callback = args[args.length - 1];
+    assert(typeof callback === 'function');
 
-function run() {
-    return gDatabase.run.apply(gDatabase, arguments);
+    if (gDefaultConnection === null) return callback(new Error('No connection to database'));
+
+    gDefaultConnection.query.apply(gDefaultConnection, args);
 }
 

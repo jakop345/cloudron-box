@@ -2,14 +2,14 @@ CREATE TABLE IF NOT EXISTS users(
     id VARCHAR(128) NOT NULL UNIQUE,
     username VARCHAR(512) NOT NULL,
     email VARCHAR(512) NOT NULL,
-    _password VARCHAR(512) NOT NULL,
+    _password VARCHAR(1024) NOT NULL,
     publicPem VARCHAR(2048) NOT NULL,
-    _privatePemCipher VARCHAR(2048) NOT NULL,
+   _privatePemCipher VARCHAR(2048) NOT NULL,
     _salt VARCHAR(512) NOT NULL,
     createdAt VARCHAR(512) NOT NULL,
     modifiedAt VARCHAR(512) NOT NULL,
     admin INTEGER NOT NULL,
-    PRIMARY KEY(id));
+    PRIMARY KEY(id)) CHARSET=utf8 COLLATE=utf8_bin;
 
 CREATE TABLE IF NOT EXISTS tokens(
     accessToken VARCHAR(128) NOT NULL UNIQUE,
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS tokens(
     clientId VARCHAR(128),
     scope VARCHAR(512) NOT NULL,
     expires VARCHAR(512) NOT NULL,
-    PRIMARY KEY(accessToken));
+    PRIMARY KEY(accessToken)) CHARSET=utf8 COLLATE=utf8_bin;
 
 CREATE TABLE IF NOT EXISTS clients(
     id VARCHAR(128) NOT NULL UNIQUE,
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS clients(
     name VARCHAR(512) NOT NULL,
     redirectURI VARCHAR(512) NOT NULL,
     scope VARCHAR(512) NOT NULL,
-    PRIMARY KEY(id));
+    PRIMARY KEY(id)) CHARSET=utf8 COLLATE=utf8_bin;
 
 CREATE TABLE IF NOT EXISTS apps(
     id VARCHAR(128) NOT NULL UNIQUE,
@@ -38,27 +38,27 @@ CREATE TABLE IF NOT EXISTS apps(
     runState VARCHAR(512),
     healthy INTEGER,
     containerId VARCHAR(128),
-    manifestJson TEXT,
+    manifestJson VARCHAR(2048),
     httpPort INTEGER,
     location VARCHAR(128) NOT NULL UNIQUE,
     dnsRecordId VARCHAR(512),
     accessRestriction VARCHAR(512),
-    PRIMARY KEY(id));
+    PRIMARY KEY(id)) CHARSET=utf8 COLLATE=utf8_bin;
 
 CREATE TABLE IF NOT EXISTS appPortBindings(
     hostPort VARCHAR(5) NOT NULL UNIQUE,
     containerPort VARCHAR(5) NOT NULL,
     appId VARCHAR(128) NOT NULL,
     FOREIGN KEY(appId) REFERENCES apps(id),
-    PRIMARY KEY(hostPort));
+    PRIMARY KEY(hostPort)) CHARSET=utf8 COLLATE=utf8_bin;
 
 CREATE TABLE IF NOT EXISTS authcodes(
     authCode VARCHAR(128) NOT NULL UNIQUE,
     userId VARCHAR(128) NOT NULL,
     clientId VARCHAR(128) NOT NULL,
-    PRIMARY KEY(authCode));
+    PRIMARY KEY(authCode)) CHARSET=utf8 COLLATE=utf8_bin;
 
 CREATE TABLE IF NOT EXISTS settings(
     name VARCHAR(128) NOT NULL UNIQUE,
     value VARCHAR(512),
-    PRIMARY KEY(name));
+    PRIMARY KEY(name)) CHARSET=utf8 COLLATE=utf8_bin;

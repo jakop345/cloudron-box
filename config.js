@@ -29,6 +29,7 @@ exports = module.exports = {
     token: token,
     version: version,
     isCustomDomain: isCustomDomain,
+    database: database,
 
     // these values are derived
     adminOrigin: adminOrigin,
@@ -57,12 +58,27 @@ function saveSync() {
     if (exports.CLOUDRON) {
         data.port = 3000;
         data.apiServerOrigin = null;
+        data.database = null;
     } else if (exports.TEST) {
         data.port = 5454;
         data.apiServerOrigin = 'http://localhost:6060'; // hock doesn't support https
+        data.database = {
+            hostname: 'localhost',
+            username: 'root',
+            password: '',
+            port: 3306,
+            name: 'boxtest'
+        };
     } else if (exports.LOCAL) {
         data.port = 3000;
         data.apiServerOrigin = 'http://localhost:5050';
+        data.database = {
+            hostname: 'localhost',
+            username: 'root',
+            password: '',
+            port: 3306,
+            name: 'box'
+        };
     } else {
         assert(false, 'Unknown environment. This should not happen!');
     }
@@ -146,3 +162,8 @@ function zoneName() {
     // for shared domain name, strip out the hostname
     return fqdn().substr(fqdn().indexOf('.') + 1);
 }
+
+function database() {
+    return get('database');
+}
+

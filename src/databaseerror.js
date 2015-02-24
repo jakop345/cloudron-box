@@ -9,13 +9,13 @@ module.exports = exports = DatabaseError;
 
 function DatabaseError(reason, errorOrMessage) {
     assert(typeof reason === 'string');
-    assert(errorOrMessage instanceof Error || typeof errorOrMessage === 'string' || typeof errorOrMessage === 'undefined');
+    assert(errorOrMessage instanceof Error || typeof errorOrMessage === 'string' || typeof errorOrMessage === 'undefined' || errorOrMessage === null);
 
     Error.call(this);
     Error.captureStackTrace(this, this.constructor);
 
     this.reason = reason;
-    if (typeof errorOrMessage === 'undefined') {
+    if (typeof errorOrMessage === 'undefined' || errorOrMessage === null) {
         this.message = reason;
     } else if (typeof errorOrMessage === 'string') {
         this.message = errorOrMessage;

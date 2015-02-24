@@ -9,6 +9,7 @@
 var appdb = require('../appdb.js'),
     apps = require('../apps.js'),
     AppsError = apps.AppsError,
+    async = require('async'),
     config = require('../../config.js'),
     database = require('../database.js'),
     expect = require('expect.js');
@@ -31,10 +32,11 @@ describe('Apps', function () {
     };
 
     before(function (done) {
-        database.initialize(function (error) {
-            expect(error).to.be(null);
-            appdb.add(APP_0.id, APP_0.appStoreId, APP_0.version, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, done);
-        });
+        async.series([
+            database.initialize,
+            database._clear,
+            appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.version, APP_0.location, APP_0.portBindings, APP_0.accessRestriction)
+        ], done);
     });
 
     after(function (done) {

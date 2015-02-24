@@ -23,22 +23,19 @@ function get(key, callback) {
     assert(typeof key === 'string');
     assert(typeof callback === 'function');
 
-    database.get('SELECT * FROM settings WHERE name = ?', [ key ], function (error, result) {
+    database.query('SELECT * FROM settings WHERE name = ?', [ key ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
-        if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
-
-        callback(null, result.value);
+        callback(null, result[0].value);
     });
 }
 
 function getAll(callback) {
-    database.all('SELECT * FROM settings', function (error, result) {
+    database.query('SELECT * FROM settings', function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
-        if (typeof result === 'undefined') result = [ ];
-
-        callback(null, result);
+        callback(null, results);
     });
 }
 
@@ -47,9 +44,8 @@ function set(key, value, callback) {
     assert(value === null || typeof value === 'string');
     assert(typeof callback === 'function');
 
-    // sqlite does not have upsert
-    database.run('INSERT OR REPLACE INTO settings (name, value) VALUES (?, ?)', [ key, value ], function (error) {
-        if (error || this.changes !== 1) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+    database.query('INSERT INTO settings (name, value) VALUES (?, ?) ON DUPLICATE KEY UPDATE value=VALUES(value)', [ key, value ], function (error, result) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error)); // don't rely on affectedRows here since it gives 2
 
         callback(null);
     });

@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS users(
     id VARCHAR(128) NOT NULL UNIQUE,
     username VARCHAR(512) NOT NULL,
     email VARCHAR(512) NOT NULL,
-    _password VARCHAR(512) NOT NULL,
+    _password VARCHAR(1024) NOT NULL,
     _salt VARCHAR(512) NOT NULL,
     createdAt VARCHAR(512) NOT NULL,
     modifiedAt VARCHAR(512) NOT NULL,

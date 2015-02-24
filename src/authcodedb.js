@@ -21,12 +21,11 @@ function get(authCode, callback) {
     assert(typeof authCode === 'string');
     assert(typeof callback === 'function');
 
-    database.get('SELECT ' + AUTHCODES_FIELDS + ' FROM authcodes WHERE authCode = ?', [ authCode ], function (error, result) {
+    database.query('SELECT ' + AUTHCODES_FIELDS + ' FROM authcodes WHERE authCode = ?', [ authCode ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
-        if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
-
-        callback(null, result);
+        callback(null, result[0]);
     });
 }
 
@@ -36,10 +35,10 @@ function add(authCode, clientId, userId, callback) {
     assert(typeof userId === 'string');
     assert(typeof callback === 'function');
 
-    database.run('INSERT INTO authcodes (authCode, clientId, userId) VALUES (?, ?, ?)',
-            [ authCode, clientId, userId ], function (error) {
-        if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
-        if (error || !this.lastID) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+    database.query('INSERT INTO authcodes (authCode, clientId, userId) VALUES (?, ?, ?)',
+            [ authCode, clientId, userId ], function (error, result) {
+        if (error && error.code === 'ER_DUP_ENTRY') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
+        if (error || result.affectedRows !== 1) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         callback(null);
     });
@@ -49,9 +48,9 @@ function del(authCode, callback) {
     assert(typeof authCode === 'string');
     assert(typeof callback === 'function');
 
-    database.run('DELETE FROM authcodes WHERE authCode = ?', [ authCode ], function (error) {
+    database.query('DELETE FROM authcodes WHERE authCode = ?', [ authCode ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
-        if (this.changes !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
+        if (result.affectedRows !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         callback(null);
     });
@@ -60,7 +59,7 @@ function del(authCode, callback) {
 function clear(callback) {
     assert(typeof callback === 'function');
 
-    database.run('DELETE FROM authcodes', function (error) {
+    database.query('DELETE FROM authcodes', function (error) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         callback(null);

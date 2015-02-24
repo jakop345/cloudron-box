@@ -3,10 +3,10 @@
 'use strict';
 
 var assert = require('assert'),
-    database = require('./database.js'),
     appdb = require('./appdb.js'),
     config = require('../config.js'),
     async = require('async'),
+    database = require('./database.js'),
     DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:clientdb');
 
@@ -29,20 +29,19 @@ function get(id, callback) {
     assert(typeof id === 'string');
     assert(typeof callback === 'function');
 
-    database.get('SELECT ' + CLIENTS_FIELDS + ' FROM clients WHERE id = ?', [ id ], function (error, result) {
+    database.query('SELECT ' + CLIENTS_FIELDS + ' FROM clients WHERE id = ?', [ id ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
-        if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
+        if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
-        callback(null, result);
+        callback(null, result[0]);
     });
 }
 
 function getAll(callback) {
     assert(typeof callback === 'function');
 
-    database.all('SELECT ' + CLIENTS_FIELDS + ' FROM clients', [ ], function (error, results) {
+    database.query('SELECT ' + CLIENTS_FIELDS + ' FROM clients ORDER BY appId', function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
-        if (typeof results === 'undefined') results = [];
 
         callback(null, results);
     });
@@ -54,7 +53,6 @@ function getAllWithDetails(callback) {
     // TODO should this be per user?
     database.query('SELECT ' + CLIENTS_FIELDS_PREFIXED + ',COUNT(tokens.clientId) AS tokenCount FROM clients LEFT OUTER JOIN tokens ON clients.id=tokens.clientId GROUP BY clients.id', function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
-        if (typeof results === 'undefined') results = [];
 
         // We have three types of records here
         //   1) webadmin has an app id of 'webadmin'
@@ -85,11 +83,11 @@ function getByAppId(appId, callback) {
     assert(typeof appId === 'string');
     assert(typeof callback === 'function');
 
-    database.get('SELECT ' + CLIENTS_FIELDS + ' FROM clients WHERE appId = ? LIMIT 1', [ appId ], function (error, result) {
+    database.query('SELECT ' + CLIENTS_FIELDS + ' FROM clients WHERE appId = ? LIMIT 1', [ appId ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
-        if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
+        if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
-        return callback(null, result);
+        return callback(null, result[0]);
     });
 }
 
@@ -101,17 +99,11 @@ function add(id, appId, clientSecret, redirectURI, scope, callback) {
     assert(typeof scope === 'string');
     assert(typeof callback === 'function');
 
-    var data = {
-        $id: id,
-        $appId: appId,
-        $clientSecret: clientSecret,
-        $redirectURI: redirectURI,
-        $scope: scope
-    };
+    var data = [ id, appId, clientSecret, redirectURI, scope ];
 
-    database.run('INSERT INTO clients (id, appId, clientSecret, redirectURI, scope) VALUES ($id, $appId, $clientSecret, $redirectURI, $scope)', data, function (error) {
-        if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
-        if (error || !this.lastID) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+    database.query('INSERT INTO clients (id, appId, clientSecret, redirectURI, scope) VALUES (?, ?, ?, ?, ?)', data, function (error, result) {
+        if (error && error.code === 'ER_DUP_ENTRY') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
+        if (error || result.affectedRows === 0) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         callback(null);
     });
@@ -121,9 +113,9 @@ function del(id, callback) {
     assert(typeof id === 'string');
     assert(typeof callback === 'function');
 
-    database.run('DELETE FROM clients WHERE id = ?', [ id ], function (error) {
+    database.query('DELETE FROM clients WHERE id = ?', [ id ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
-        if (this.changes !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
+        if (result.affectedRows !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         callback(null);
     });
@@ -133,9 +125,9 @@ function delByAppId(appId, callback) {
     assert(typeof appId === 'string');
     assert(typeof callback === 'function');
 
-    database.run('DELETE FROM clients WHERE appId=?', [ appId ], function (error) {
+    database.query('DELETE FROM clients WHERE appId=?', [ appId ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
-        if (this.changes !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
+        if (result.affectedRows !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         return callback(null);
     });
@@ -144,7 +136,7 @@ function delByAppId(appId, callback) {
 function clear(callback) {
     assert(typeof callback === 'function');
 
-    database.run('DELETE FROM clients WHERE appId!="webadmin"', function (error) {
+    database.query('DELETE FROM clients WHERE appId!="webadmin"', function (error) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         return callback(null);

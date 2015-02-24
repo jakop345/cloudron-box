@@ -29,10 +29,9 @@ function get(userId, callback) {
 
     database.query('SELECT ' + USERS_FIELDS + ' FROM users WHERE id = ?', [ userId ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
-        if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
-
-        callback(null, result);
+        callback(null, result[0]);
     });
 }
 
@@ -50,29 +49,29 @@ function getByEmail(email, callback) {
 
     database.query('SELECT ' + USERS_FIELDS + ' FROM users WHERE email = ?', [ email ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
-        if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
+        if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
-        callback(null, result);
+        callback(null, result[0]);
     });
 }
 
 function getAll(callback) {
     assert(typeof callback === 'function');
 
-    database.all('SELECT ' + USERS_FIELDS + ' FROM users', function (error, result) {
+    database.query('SELECT ' + USERS_FIELDS + ' FROM users', function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
-        callback(null, result);
+        callback(null, results);
     });
 }
 
 function getAllAdmins(callback) {
     assert(typeof callback === 'function');
 
-    database.all('SELECT ' + USERS_FIELDS + ' FROM users WHERE admin=1', function (error, result) {
+    database.query('SELECT ' + USERS_FIELDS + ' FROM users WHERE admin=1', function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
-        callback(null, result);
+        callback(null, results);
     });
 }
 
@@ -88,10 +87,10 @@ function add(userId, user, callback) {
     assert(typeof callback === 'function');
 
     var data = [ userId, user.username, user._password, user.email, user.admin, user._salt, user.createdAt, user.modifiedAt ];
-    database.run('INSERT INTO users (id, username, _password, email, admin, _salt, createdAt, modifiedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-           data, function (error) {
-        if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
-        if (error || !this.lastID) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+    database.query('INSERT INTO users (id, username, _password, email, admin, _salt, createdAt, modifiedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+           data, function (error, result) {
+        if (error && error.code === 'ER_DUP_ENTRY') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
+        if (error || result.affectedRows !== 1) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         callback(null);
     });
@@ -101,9 +100,9 @@ function del(userId, callback) {
     assert(typeof userId === 'string');
     assert(typeof callback === 'function');
 
-    database.run('DELETE FROM users WHERE id = ?', [ userId ], function (error) {
+    database.query('DELETE FROM users WHERE id = ?', [ userId ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
-        if (this.changes !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
+        if (result.affectedRows !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         callback(error);
     });
@@ -115,17 +114,16 @@ function getByAccessToken(accessToken, callback) {
 
     debug('getByAccessToken: ' +  accessToken);
 
-    database.get('SELECT ' + USERS_FIELDS + ' FROM users, tokens WHERE tokens.accessToken = ?', [ accessToken ], function (error, result) {
+    database.query('SELECT ' + USERS_FIELDS + ' FROM users, tokens WHERE tokens.accessToken = ?', [ accessToken ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
-        if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
-
-        callback(null, result);
+        callback(null, result[0]);
     });
 }
 
 function clear(callback) {
-    database.run('DELETE FROM users', function (error) {
+    database.query('DELETE FROM users', function (error) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         callback(error);
@@ -137,17 +135,17 @@ function update(userId, user, callback) {
     assert(typeof user === 'object');
     assert(typeof callback === 'function');
 
-    var data = { $id: userId };
-    var values = [ ];
+    var args = [ ];
+    var fields = [ ];
     for (var k in user) {
-        data['$' + k] = user[k];
-        values.push(k + ' = $' + k);
+        fields.push(k + ' = ?');
+        args.push(user[k]);
     }
+    args.push(userId);
 
-    database.run('UPDATE users SET ' + values.join(', ') + ' WHERE id = $id', data, function (error) {
-        if (error && error.code === 'SQLITE_CONSTRAINT') return callback(new DatabaseError(DatabaseError.FIELD_ERROR, error));
+    database.query('UPDATE users SET ' + fields.join(', ') + ' WHERE id = ?', args, function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
-        if (this.changes !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
+        if (result.affectedRows !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         return callback(null);
     });
@@ -156,20 +154,20 @@ function update(userId, user, callback) {
 function count(callback) {
     assert(typeof callback === 'function');
 
-    database.get('SELECT COUNT(*) AS total FROM users', function (error, result) {
+    database.query('SELECT COUNT(*) AS total FROM users', function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
-        return callback(null, result.total);
+        return callback(null, result[0].total);
     });
 }
 
 function adminCount(callback) {
     assert(typeof callback === 'function');
 
-    database.get('SELECT COUNT(*) AS total FROM users WHERE admin=1', function (error, result) {
+    database.query('SELECT COUNT(*) AS total FROM users WHERE admin=1', function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
-        return callback(null, result.total);
+        return callback(null, result[0].total);
     });
 }
 
