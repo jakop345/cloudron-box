@@ -70,6 +70,8 @@ function setupAddons(app, callback) {
     async.eachSeries(app.manifest.addons, function iterator(addon, iteratorCallback) {
         if (!(addon in KNOWN_ADDONS)) return iteratorCallback(new Error('No such addon:' + addon));
 
+        debug('Setting up addon %s of appId:%s', addon, app.id);
+
         KNOWN_ADDONS[addon].setup(app, iteratorCallback);
     }, callback);
 }
@@ -86,6 +88,8 @@ function teardownAddons(app, callback) {
 
     async.eachSeries(app.manifest.addons, function iterator(addon, iteratorCallback) {
         if (!(addon in KNOWN_ADDONS)) return iteratorCallback(new Error('No such addon:' + addon));
+
+        debug('Tearing down addon %s of appId:%s', addon, app.id);
 
         KNOWN_ADDONS[addon].teardown(app, iteratorCallback);
     }, callback);
