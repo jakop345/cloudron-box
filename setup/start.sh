@@ -128,7 +128,6 @@ readonly MYSQL_ROOT_HOST='${docker0_ip}'
 EOF
 docker pull girish/mysql:0.3 || true # this line for dev convenience since it's already part of base image
 mysql_container_id=$(docker run --restart=always -d --name="mysql" \
-    -p 127.0.0.1:3306:3306 \
     -h "${arg_fqdn}" \
     -v "${DATA_DIR}/mysql:/var/lib/mysql" \
     -v "${CONFIG_DIR}/addons/mysql_vars.sh:/etc/mysql/mysql_vars.sh:r" \
@@ -142,7 +141,6 @@ readonly POSTGRESQL_ROOT_PASSWORD='${postgresql_root_password}'
 EOF
 docker pull girish/postgresql:0.3 || true # this line for dev convenience since it's already part of base image
 postgresql_container_id=$(docker run --restart=always -d --name="postgresql" \
-    -p 127.0.0.1:5432:5432 \
     -h "${arg_fqdn}" \
     -v "${DATA_DIR}/postgresql:/var/lib/mysql" \
     -v "${CONFIG_DIR}/addons/postgresql_vars.sh:/etc/postgresql/postgresql_vars.sh:r" \
