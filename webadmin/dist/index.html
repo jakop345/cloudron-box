@@ -145,6 +145,9 @@
 
             <ul class="nav navbar-top-links navbar-right">
                 <li ng-show="userInfo.admin">
+                    <a ng-class="{ active: isActive('/appstore')}" href="#/appstore"><i class="fa fa-th-large fa-fw"></i> App Store</a>
+                </li>
+                <li ng-show="userInfo.admin">
                     <a ng-class="{ active: isActive('/userlist')}" href="#/userlist"><i class="fa fa-users fa-fw"></i> Users</a>
                 </li>
                 <li class="dropdown">
@@ -179,9 +182,6 @@
                                     </a>
                                 </li>
                             </ul>
-                        </li>
-                        <li ng-show="userInfo.admin">
-                            <a ng-class="{ active: isActive('/appstore')}" href="#/appstore"><i class="fa fa-cloud fa-fw"></i> App Store</a>
                         </li>
                         <li ng-show="userInfo.admin">
                             <a ng-class="{ active: isActive('/settings')}" href="#/settings"><i class="fa fa-wrench fa-fw"></i> Settings</a>
