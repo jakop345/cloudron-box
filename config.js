@@ -55,6 +55,17 @@ function saveSync() {
 
 (function initConfig() {
     // setup defaults
+    data.fqdn = 'localhost';
+
+    data.token = null;
+    data.mailServer = null;
+    data.mailUsername = null;
+    data.mailDnsRecordIds = [ ];
+    data.boxVersionsUrl = null;
+    data.version = null;
+    data.isCustomDomain = false;
+    data.webServerOrigin = null;
+
     if (exports.CLOUDRON) {
         data.port = 3000;
         data.apiServerOrigin = null;
@@ -79,19 +90,11 @@ function saveSync() {
             port: 3306,
             name: 'box'
         };
+        data.version = '1.33.7';
+        data.webServerOrigin = 'http://dev.cloudron.io';
     } else {
         assert(false, 'Unknown environment. This should not happen!');
     }
-
-    data.fqdn = 'localhost';
-
-    data.token = null;
-    data.mailServer = null;
-    data.mailUsername = null;
-    data.mailDnsRecordIds = [ ];
-    data.boxVersionsUrl = null;
-    data.version = null;
-    data.isCustomDomain = false;
 
     if (safe.fs.existsSync(cloudronConfigFileName)) {
         var existingData = safe.JSON.parse(safe.fs.readFileSync(cloudronConfigFileName, 'utf8'));
