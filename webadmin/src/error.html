@@ -1,48 +1,41 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />
 
-        <title> Cloudron Error </title>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />
 
-        <!-- Bootstrap Core CSS -->
-        <link href="3rdparty/sb-admin-2/css/bootstrap.min.css" rel="stylesheet">
+    <title> Cloudron Error </title>
 
-        <!-- Custom CSS -->
-        <link href="3rdparty/sb-admin-2/css/sb-admin-2.css" rel="stylesheet">
+    <!-- Bootstrap Core CSS -->
+    <link href="3rdparty/sb-admin-2/css/bootstrap.min.css" rel="stylesheet">
 
-        <!-- Custom Fonts -->
-        <link href="3rdparty/sb-admin-2/font-awesome-4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <!-- Custom CSS -->
+    <link href="3rdparty/sb-admin-2/css/sb-admin-2.css" rel="stylesheet">
 
-        <!-- jQuery Version 1.11.0 -->
-        <script src="3rdparty/sb-admin-2/js/jquery-1.11.0.js"></script>
+    <!-- Custom Fonts -->
+    <link href="3rdparty/sb-admin-2/font-awesome-4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
 
-        <!-- Bootstrap Core JavaScript -->
-        <script src="3rdparty/sb-admin-2/js/bootstrap.min.js"></script>
+    <!-- angularjs scripts -->
+    <script src="3rdparty/js/angular.min.js"></script>
+    <script src="3rdparty/js/angular-loader.min.js"></script>
 
-        <script>
-            document.addEventListener("DOMContentLoaded", function(event) {
-                var req = new XMLHttpRequest();
-                req.onreadystatechange = function () {
-                    if (req.readyState === 4 && req.status === 200) {
-                        config = JSON.parse(req.responseText);
-                        document.getElementById('webServerOriginLink').href = config.webServerOrigin + '/console.html';
-                    }
-                }
-                req.open('GET', 'config.json');
-                req.send();
-            });
+    <!-- jQuery Version 1.11.0 -->
+    <script src="3rdparty/sb-admin-2/js/jquery-1.11.0.js"></script>
 
-            setTimeout(function () { window.location.replace('/'); }, 10000); // see if we came back
-        </script>
-    </head>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="3rdparty/sb-admin-2/js/bootstrap.min.js"></script>
 
-<body>
+    <!-- application -->
+    <script src="js/error.js"></script>
+
+</head>
+
+<body ng-app="Application" ng-controller="ErrorController">
 
     <center>
         <h1> <i class="fa fa-frown-o fa-fw text-danger"></i> Something has gone wrong. </h1>
-        Please restore your cloudron from <a id="webServerOriginLink" href="">here</a>.
+        Please restore your cloudron from <a href="" ng-click="webServerOriginLink">here</a>.
     </center>
 
 </body>

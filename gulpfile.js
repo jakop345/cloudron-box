@@ -30,7 +30,7 @@ gulp.task('3rdparty', function () {
 // JavaScript
 // --------------
 
-gulp.task('js', ['js-index', 'js-setup', 'js-update'], function () {});
+gulp.task('js', ['js-index', 'js-setup', 'js-update', 'js-error'], function () {});
 
 gulp.task('js-index', function () {
     gulp.src([
@@ -51,6 +51,14 @@ gulp.task('js-setup', function () {
     gulp.src(['webadmin/src/js/setup.js', 'webadmin/src/js/client.js'])
         .pipe(sourcemaps.init())
         .pipe(concat('setup.js', { newLine: ';' }))
+        .pipe(uglify())
+        .pipe(sourcemaps.write())
+        .pipe(gulp.dest('webadmin/dist/js'));
+});
+
+gulp.task('js-error', function () {
+    gulp.src(['webadmin/src/js/error.js'])
+        .pipe(sourcemaps.init())
         .pipe(uglify())
         .pipe(sourcemaps.write())
         .pipe(gulp.dest('webadmin/dist/js'));
@@ -97,6 +105,7 @@ gulp.task('watch', ['default'], function () {
     gulp.watch(['webadmin/src/*.ejs'], ['html-templates']);
     gulp.watch(['webadmin/src/views/*.html'], ['html-views']);
     gulp.watch(['webadmin/src/js/update.js'], ['js-update']);
+    gulp.watch(['webadmin/src/js/error.js'], ['js-error']);
     gulp.watch(['webadmin/src/js/setup.js', 'webadmin/src/js/client.js'], ['js-setup']);
     gulp.watch(['webadmin/src/js/index.js', 'webadmin/src/js/client.js', 'webadmin/src/js/appstore.js', 'webadmin/src/js/main.js', 'webadmin/src/views/*.js'], ['js-index']);
     gulp.watch(['webadmin/src/3rdparty/**/*'], ['3rdparty']);

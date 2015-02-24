@@ -15,11 +15,18 @@
         <!-- Custom Fonts -->
         <link href="3rdparty/sb-admin-2/font-awesome-4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
 
+        <!-- angularjs scripts -->
+        <script src="3rdparty/js/angular.min.js"></script>
+        <script src="3rdparty/js/angular-loader.min.js"></script>
+
         <!-- jQuery Version 1.11.0 -->
         <script src="3rdparty/sb-admin-2/js/jquery-1.11.0.js"></script>
 
         <!-- Bootstrap Core JavaScript -->
         <script src="3rdparty/sb-admin-2/js/bootstrap.min.js"></script>
+
+        <!-- setup application -->
+        <script src="js/error.js"></script>
 
         <script>
             document.addEventListener("DOMContentLoaded", function(event) {
@@ -38,7 +45,7 @@
         </script>
     </head>
 
-<body>
+<body ng-app="Application" ng-controller="ErrorController">
 
     <center>
         <h1> <i class="fa fa-frown-o fa-fw text-danger"></i> Something has gone wrong. </h1>
