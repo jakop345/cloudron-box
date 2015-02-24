@@ -473,7 +473,7 @@ describe('App installation', function () {
             expect(data.Config.Env).to.contain('CLOUDRON=1');
             clientdb.getByAppId(appInfo.id, function (error, client) {
                 expect(error).to.not.be.ok();
-                expect(client.id.length).to.be(40); // cid- + 32 hex chars (128 bits) + 4 hyphens
+                expect(client.id.length).to.be(46); // cid-addon- + 32 hex chars (128 bits) + 4 hyphens
                 expect(client.clientSecret.length).to.be(36); // 32 hex chars (128 bits) + 4 hyphens
                 expect(data.Config.Env).to.contain('OAUTH_CLIENT_ID=' + client.id);
                 expect(data.Config.Env).to.contain('OAUTH_CLIENT_SECRET=' + client.clientSecret);

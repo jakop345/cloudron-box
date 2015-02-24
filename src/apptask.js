@@ -317,7 +317,7 @@ function allocateOAuthProxyCredentials(app, callback) {
     if (!app.accessRestriction) return callback(null);
 
     var appId = 'proxy-' + app.id;
-    var id = 'cid-' + uuid.v4();
+    var id = 'cid-proxy-' + uuid.v4();
     var clientSecret = uuid.v4();
     var redirectURI = 'https://' + config.appFqdn(app.location);
     var scope = 'profile,' + app.accessRestriction;
