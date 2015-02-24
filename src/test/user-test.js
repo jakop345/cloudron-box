@@ -43,7 +43,7 @@ function setup(done) {
 }
 
 function cleanup(done) {
-    database.clear(done);
+    database._clear(done);
 }
 
 describe('User', function () {
