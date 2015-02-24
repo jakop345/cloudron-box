@@ -12,17 +12,17 @@ CREATE TABLE IF NOT EXISTS users(
     PRIMARY KEY(id));
 
 CREATE TABLE IF NOT EXISTS tokens(
-    accessToken VARCHAR(512) NOT NULL UNIQUE,
-    userId VARCHAR(512) NOT NULL,
-    clientId VARCHAR(512),
+    accessToken VARCHAR(128) NOT NULL UNIQUE,
+    userId VARCHAR(128) NOT NULL,
+    clientId VARCHAR(128),
     scope VARCHAR(512) NOT NULL,
     expires VARCHAR(512) NOT NULL,
     PRIMARY KEY(accessToken));
 
 CREATE TABLE IF NOT EXISTS clients(
-    id VARCHAR(512) NOT NULL UNIQUE,
-    appId VARCHAR(512) NOT NULL,
-    clientId VARCHAR(512) NOT NULL,
+    id VARCHAR(128) NOT NULL UNIQUE,
+    appId VARCHAR(128) NOT NULL,
+    clientId VARCHAR(128) NOT NULL,
     clientSecret VARCHAR(512) NOT NULL,
     name VARCHAR(512) NOT NULL,
     redirectURI VARCHAR(512) NOT NULL,
@@ -30,17 +30,17 @@ CREATE TABLE IF NOT EXISTS clients(
     PRIMARY KEY(id));
 
 CREATE TABLE IF NOT EXISTS apps(
-    id VARCHAR(512) NOT NULL UNIQUE,
-    appStoreId VARCHAR(512) NOT NULL,
+    id VARCHAR(128) NOT NULL UNIQUE,
+    appStoreId VARCHAR(128) NOT NULL,
     version VARCHAR(32),
     installationState VARCHAR(512) NOT NULL,
     installationProgress VARCHAR(512),
     runState VARCHAR(512),
     healthy INTEGER,
     containerId VARCHAR(128),
-    manifestJson VARCHAR,
+    manifestJson TEXT,
     httpPort INTEGER,
-    location VARCHAR(512) NOT NULL UNIQUE,
+    location VARCHAR(128) NOT NULL UNIQUE,
     dnsRecordId VARCHAR(512),
     accessRestriction VARCHAR(512),
     PRIMARY KEY(id));
@@ -48,18 +48,17 @@ CREATE TABLE IF NOT EXISTS apps(
 CREATE TABLE IF NOT EXISTS appPortBindings(
     hostPort VARCHAR(5) NOT NULL UNIQUE,
     containerPort VARCHAR(5) NOT NULL,
-    appId VARCHAR(512) NOT NULL,
+    appId VARCHAR(128) NOT NULL,
     FOREIGN KEY(appId) REFERENCES apps(id),
     PRIMARY KEY(hostPort));
 
 CREATE TABLE IF NOT EXISTS authcodes(
-    authCode VARCHAR(512) NOT NULL UNIQUE,
-    userId VARCHAR(512) NOT NULL,
-    clientId VARCHAR(512) NOT NULL,
+    authCode VARCHAR(128) NOT NULL UNIQUE,
+    userId VARCHAR(128) NOT NULL,
+    clientId VARCHAR(128) NOT NULL,
     PRIMARY KEY(authCode));
 
 CREATE TABLE IF NOT EXISTS settings(
-    key VARCHAR(512) NOT NULL UNIQUE,
+    name VARCHAR(128) NOT NULL UNIQUE,
     value VARCHAR(512),
-    PRIMARY KEY(key));
-
+    PRIMARY KEY(name));

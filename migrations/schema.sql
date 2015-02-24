@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS authcodes(
     PRIMARY KEY(authCode));
 
 CREATE TABLE IF NOT EXISTS settings(
-    key VARCHAR(512) NOT NULL UNIQUE,
+    name VARCHAR(512) NOT NULL UNIQUE,
     value VARCHAR(512),
-    PRIMARY KEY(key));
+    PRIMARY KEY(name));
 

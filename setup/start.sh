@@ -71,7 +71,7 @@ set_progress "25" "Migrating data"
 sudo -u "${USER}" -H bash <<EOF
 set -eux
 cd "${box_src_tmp_dir}"
-PATH="${PATH}:${box_src_tmp_dir}/node_modules/.bin" npm run-script migrate_data
+PATH="${PATH}:${box_src_tmp_dir}/node_modules/.bin" npm run-script migrate
 EOF
 
 set_progress "30" "Setup nginx"
