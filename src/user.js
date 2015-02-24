@@ -28,7 +28,8 @@ var assert = require('assert'),
     uuid = require('node-uuid'),
     userdb = require('./userdb.js'),
     util = require('util'),
-    validator = require('validator');
+    validator = require('validator'),
+    _ = require('underscore');
 
 var resetTokens = {};
 
@@ -73,7 +74,7 @@ function listUsers(callback) {
     userdb.getAll(function (error, result) {
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-        return callback(null, result.map(database.removePrivates));
+        return callback(null, result.map(function (obj) { return _.pick(obj, 'id', 'username', 'email', 'admin'); }));
     });
 }
 

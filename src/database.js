@@ -13,7 +13,6 @@ var assert = require('assert'),
 exports = module.exports = {
     initialize: initialize,
     uninitialize: uninitialize,
-    removePrivates: removePrivates,
     beginTransaction: beginTransaction,
     rollback: rollback,
     commit: commit,
@@ -99,18 +98,6 @@ function commit(conn, callback) {
         callback(null);
     });
     conn.close(); // close waits for pending statements
-}
-
-function removePrivates(obj) {
-    var res = { };
-
-    for (var p in obj) {
-        if (!obj.hasOwnProperty(p)) continue;
-        if (p.substring(0, 1) === '_') continue;
-        res[p] = obj[p]; // ## make deep copy?
-    }
-
-    return res;
 }
 
 function get() {

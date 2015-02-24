@@ -30,20 +30,6 @@ describe('database', function () {
         database._clear(done);
     });
 
-    it('remove privates', function () {
-        var obj = {
-            username: 'username',
-            _password: 'password',
-            email: 'girs@foc.com',
-            _salt: 'morton'
-        };
-        var result = database.removePrivates(obj);
-        expect(result.username).to.equal('username');
-        expect(result.email).to.equal('girs@foc.com');
-        expect(result._password).to.not.be.ok();
-        expect(result._salt).to.not.be.ok();
-    });
-
     describe('userdb', function () {
         var USER_0 = {
             id: 'uuid213',

@@ -16,7 +16,8 @@ var assert = require('assert'),
     tokendb = require('./tokendb'),
     user = require('./user'),
     userdb = require('./userdb'),
-    UserError = user.UserError;
+    UserError = user.UserError,
+    _ = require('underscore');
 
 exports = module.exports = {
     initialize: initialize,
@@ -48,7 +49,7 @@ function initialize(callback) {
                 if (error && error.reason === UserError.WRONG_PASSWORD) return callback(null, false);
                 if (error) return callback(error);
                 if (!result) return callback(null, false);
-                callback(null, database.removePrivates(result));
+                callback(null, _.pick(result, 'id', 'username', 'email', 'admin'));
             });
         } else {
             user.verifyWithEmail(username, password, function (error, result) {
@@ -56,7 +57,7 @@ function initialize(callback) {
                 if (error && error.reason === UserError.WRONG_PASSWORD) return callback(null, false);
                 if (error) return callback(error);
                 if (!result) return callback(null, false);
-                callback(null, database.removePrivates(result));
+                callback(null, _.pick(result, 'id', 'username', 'email', 'admin'));
             });
         }
     }));
