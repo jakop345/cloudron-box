@@ -3,7 +3,6 @@
 angular.module('Application').controller('MainController', ['$scope', '$route', '$interval', 'Client', function ($scope, $route, $interval, Client) {
     $scope.initialized = false;
     $scope.userInfo = Client.getUserInfo();
-    $scope.installedApps = Client.getInstalledApps();
     $scope.config = {};
 
     $scope.isActive = function (url) {
