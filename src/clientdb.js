@@ -52,7 +52,7 @@ function getAllWithDetails(callback) {
     assert(typeof callback === 'function');
 
     // TODO should this be per user?
-    database.all('SELECT ' + CLIENTS_FIELDS_PREFIXED + ',COUNT(tokens.clientId) AS tokenCount FROM clients LEFT OUTER JOIN tokens ON clients.id=tokens.clientId GROUP BY clients.id', [], function (error, results) {
+    database.query('SELECT ' + CLIENTS_FIELDS_PREFIXED + ',COUNT(tokens.clientId) AS tokenCount FROM clients LEFT OUTER JOIN tokens ON clients.id=tokens.clientId GROUP BY clients.id', function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (typeof results === 'undefined') results = [];
 
@@ -61,13 +61,11 @@ function getAllWithDetails(callback) {
         //   2) oauth proxy records are always the app id prefixed with 'proxy-'
         //   3) normal oauth records for apps
 
-        var tmp = [];
         async.each(results, function (record, callback) {
             if (record.appId === 'webadmin') {
                 record.name = 'Webadmin';
                 record.location = 'admin';
-                tmp.push(record);
-                return callback(null);
+                return callback(null, record);
             }
 
             var appId = record.appId.indexOf('proxy-') === 0 ? record.appId.slice('proxy-'.length) : record.appId;
@@ -77,15 +75,9 @@ function getAllWithDetails(callback) {
                 record.name = result.manifest.title + (record.appId.indexOf('proxy-') === 0 ? 'OAuth Proxy' : '');
                 record.location = result.location;
 
-                tmp.push(record);
-
-                callback(null);
+                callback(null, record);
             });
-        }, function (error) {
-            if (error) return callback(error);
-            console.log('----',tmp)
-            callback(null, tmp);
-        });
+        }, callback);
     });
 }
 

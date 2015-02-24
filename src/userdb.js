@@ -27,7 +27,7 @@ function get(userId, callback) {
     assert(typeof userId === 'string');
     assert(typeof callback === 'function');
 
-    database.get('SELECT ' + USERS_FIELDS + ' FROM users WHERE id = ?', [ userId ], function (error, result) {
+    database.query('SELECT ' + USERS_FIELDS + ' FROM users WHERE id = ?', [ userId ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
@@ -48,7 +48,7 @@ function getByEmail(email, callback) {
     assert(typeof email === 'string');
     assert(typeof callback === 'function');
 
-    database.get('SELECT ' + USERS_FIELDS + ' FROM users WHERE email = ?', [ email ], function (error, result) {
+    database.query('SELECT ' + USERS_FIELDS + ' FROM users WHERE email = ?', [ email ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (typeof result === 'undefined') return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
