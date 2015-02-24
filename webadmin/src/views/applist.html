@@ -3,3 +3,34 @@
         <h1 class="page-header">Installed Applications</h1>
     </div>
 </div>
+
+<div class="row">
+    <div class="col-lg-6 col-md-6" ng-repeat="app in installedApps">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <div class="row">
+                    <div class="col-xs-3">
+                        <img ng-show="app.icon" width="48" height="48" ng-src="{{app.icon}}"/>
+                        <span ng-show="!app.icon" class="fa fa-space-shuttle fa-4x"></span>
+                    </div>
+                    <div class="col-xs-9 text-right">
+                        <div class="huge">{{ app.location || "App" }}</div>
+                        <div>{{ app.installationState | installationStateLabel }}</div>
+                        <div ng-show="app.installationState | installationActive" class="animateMe ng-hide">
+                            <div class="progress progress-striped active">
+                                <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <a href="" ng-click="showDetails(app)">
+                <div class="panel-footer">
+                    <span class="pull-left">Details</span>
+                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                    <div class="clearfix"></div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
