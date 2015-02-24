@@ -162,6 +162,8 @@ function allocateOAuthCredentials(app, callback) {
             'OAUTH_CLIENT_SECRET=' + clientSecret
         ];
 
+        debug('Setting oauth addon config of %s to to %j', appId, env);
+
         appdb.setAddonConfig(appId, 'oauth', env, callback);
     });
 }
@@ -232,7 +234,7 @@ function setupMySql(app, callback) {
             stream.on('error', callback);
             stream.on('end', function () {
                 var env = Buffer.concat(chunks).toString('utf8').split('\n').slice(0, -1); // remove trailing newline
-                debug('Setting mysql addon config to %j', env);
+                debug('Setting mysql addon config of %s to %j', app.id, env);
                 appdb.setAddonConfig(app.id, 'mysql', env, callback);
             });
         });
@@ -288,7 +290,7 @@ function setupPostgreSql(app, callback) {
             stream.on('error', callback);
             stream.on('end', function () {
                 var env = Buffer.concat(chunks).toString('utf8').split('\n').slice(0, -1); // remove trailing newline
-                debug('Setting postgresql addon config to %j', env);
+                debug('Setting postgresql addon config of %s to %j', app.id, env);
                 appdb.setAddonConfig(app.id, 'postgresql', env, callback);
             });
         });
