@@ -12,11 +12,6 @@
                 Software
             </div>
             <div class="panel-body">
-                <ul class="list-group">
-                    <li class="list-group-item">Appstore <a ng-href="{{config.webServerOrigin}}" target="_blank" class="pull-right">{{config.webServerOrigin}}</a></li>
-                    <li class="list-group-item">Version <span class="pull-right">{{config.version}}</span></li>
-                    <li class="list-group-item" ng-show="config.revision">Revision <span class="pull-right">{{config.revision}}</span></li>
-                </ul>
                 <button class="btn btn-outline btn-success pull-left" ng-click="backup()" ng-show="config.isDev">Backup</button>
                 <button class="btn btn-outline btn-success pull-right" data-toggle="modal" data-target="#updateModal" ng-show="config.update.box">{{config.update.box.upgrade ? 'Upgrade' : 'Update'}} to Version {{config.update.box.version}}</button>
 

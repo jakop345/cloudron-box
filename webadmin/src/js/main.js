@@ -4,6 +4,7 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
     $scope.initialized = false;
     $scope.userInfo = Client.getUserInfo();
     $scope.installedApps = Client.getInstalledApps();
+    $scope.config = {};
 
     $scope.isActive = function (url) {
         if (!$route.current) return false;
@@ -65,6 +66,8 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
 
                         // now mark the Client to be ready
                         Client.setReady();
+
+                        $scope.config = Client.getConfig();
 
                         $scope.initialized = true;
                     });
