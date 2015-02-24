@@ -220,7 +220,7 @@ function setupMySql(app, callback) {
             var stderr = new MemoryStream();
 
             execContainer.modem.demuxStream(stream, stdout, stderr);
-            stderr.on('data', function (data) { debug(data); }); // set -e output
+            stderr.on('data', function (data) { debug(data.toString('utf8')); }); // set -e output
 
             var chunks = [ ];
             stdout.on('data', function (chunk) { chunks.push(chunk); });
@@ -276,7 +276,7 @@ function setupPostgreSql(app, callback) {
             var stderr = new MemoryStream();
 
             execContainer.modem.demuxStream(stream, stdout, stderr);
-            stderr.on('data', function (data) { debug(data); }); // set -e output
+            stderr.on('data', function (data) { debug(data.toString('utf8')); }); // set -e output
 
             var chunks = [ ];
             stdout.on('data', function (chunk) { chunks.push(chunk); });
