@@ -18,7 +18,8 @@ exports = module.exports = {
     del: del,
     getByAppId: getByAppId,
     delByAppId: delByAppId,
-    clear: clear
+
+    _clear: clear
 };
 
 var CLIENTS_FIELDS = [ 'id', 'appId', 'clientSecret', 'redirectURI', 'scope' ].join(',');

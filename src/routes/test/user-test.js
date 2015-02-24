@@ -26,12 +26,12 @@ var server;
 function setup(done) {
     server.start(function (error) {
         expect(!error).to.be.ok();
-        userdb.clear(done);
+        userdb._clear(done);
     });
 }
 
 function cleanup(done) {
-    database.clear(function (error) {
+    database._clear(function (error) {
         expect(!error).to.be.ok();
 
         server.stop(done);

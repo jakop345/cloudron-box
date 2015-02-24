@@ -14,10 +14,11 @@ exports = module.exports = {
     getAllAdmins: getAllAdmins,
     add: add,
     del: del,
-    clear: clear,
     update: update,
     count: count,
-    adminCount: adminCount
+    adminCount: adminCount,
+
+    _clear: clear
 };
 
 var USERS_FIELDS = [ 'id', 'username', 'email', '_password', '_salt', 'createdAt', 'modifiedAt', 'admin' ].join(',');

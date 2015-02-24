@@ -11,6 +11,7 @@ var config = require('../../config.js'),
     expect = require('expect.js'),
     paths = require('../paths.js'),
     user = require('../user.js'),
+    userdb = require('../userdb.js'),
     UserError = user.UserError;
 
 var USERNAME = 'nobody';
@@ -20,7 +21,7 @@ var NEW_PASSWORD = 'somenewpassword';
 var IS_ADMIN = true;
 
 function cleanupUsers(done) {
-    user.clear(function () {
+    userdb._clear(function () {
         done();
     });
 }

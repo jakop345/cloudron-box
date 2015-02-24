@@ -71,7 +71,7 @@ function setup(done) {
     async.series([
         server.start.bind(server),
 
-        userdb.clear,
+        userdb._clear,
 
         function (callback) {
             var scope1 = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
@@ -113,7 +113,7 @@ function setup(done) {
 
 function cleanup(done) {
     async.series([
-        database.clear,
+        database._clear,
 
         server.stop,
 

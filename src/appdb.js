@@ -20,7 +20,6 @@ exports = module.exports = {
     update: update,
     getAll: getAll,
     getPortBindings: getPortBindings,
-    clear: clear,
 
     setAddonConfig: setAddonConfig,
     getAddonConfig: getAddonConfig,
@@ -47,7 +46,9 @@ exports = module.exports = {
     RSTATE_PENDING_STOP: 'pending_stop',
     RSTATE_STOPPED: 'stopped', // app stopped by user
     RSTATE_DEAD: 'dead', // app stopped on it's own
-    RSTATE_ERROR: 'error'
+    RSTATE_ERROR: 'error',
+
+    _clear: clear
 };
 
 var APPS_FIELDS = [ 'id', 'appStoreId', 'version', 'installationState', 'installationProgress', 'runState',

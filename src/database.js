@@ -17,11 +17,13 @@ exports = module.exports = {
     beginTransaction: beginTransaction,
     rollback: rollback,
     commit: commit,
-    clear: clear,
 
     get: get,
     all: all,
-    run: run
+    run: run,
+
+    // exported for testing
+    _clear: clear
 };
 
 var gConnectionPool = [ ], // used to track active transactions
@@ -53,12 +55,14 @@ function uninitialize(callback) {
 }
 
 function clear(callback) {
+    assert(typeof callback === 'function');
+
     async.series([
-        require('./appdb.js').clear,
-        require('./authcodedb.js').clear,
-        require('./clientdb.js').clear,
-        require('./tokendb.js').clear,
-        require('./userdb.js').clear
+        require('./appdb.js')._clear,
+        require('./authcodedb.js')._clear,
+        require('./clientdb.js')._clear,
+        require('./tokendb.js')._clear,
+        require('./userdb.js')._clear
     ], callback);
 }
 

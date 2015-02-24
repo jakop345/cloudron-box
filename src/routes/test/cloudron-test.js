@@ -29,7 +29,7 @@ function setup(done) {
 }
 
 function cleanup(done) {
-    database.clear(function (error) {
+    database._clear(function (error) {
         expect(error).to.not.be.ok();
 
         server.stop(done);

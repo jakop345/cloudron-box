@@ -68,7 +68,7 @@ describe('Server', function () {
         });
 
         after(function (done) {
-            database.clear(function (error) {
+            database._clear(function (error) {
                 expect(!error).to.be.ok();
                 server.stop(function () {
                     done();

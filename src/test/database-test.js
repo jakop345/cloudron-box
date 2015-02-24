@@ -22,12 +22,12 @@ describe('database', function () {
     before(function (done) {
         async.series([
             database.initialize,
-            database.clear
+            database._clear
         ], done);
     });
 
     after(function (done) {
-        database.clear(done);
+        database._clear(done);
     });
 
     it('remove privates', function () {
@@ -189,7 +189,7 @@ describe('database', function () {
         });
 
         it('can clear table', function (done) {
-            userdb.clear(function (error) {
+            userdb._clear(function (error) {
                 expect(error).to.not.be.ok();
                 userdb.count(function (error, count) {
                     expect(error).to.not.be.ok();

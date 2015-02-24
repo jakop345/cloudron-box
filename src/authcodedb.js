@@ -11,7 +11,8 @@ exports = module.exports = {
     get: get,
     add: add,
     del: del,
-    clear: clear
+
+    _clear: clear
 };
 
 var AUTHCODES_FIELDS = [ 'authCode', 'userId', 'clientId' ].join(',');

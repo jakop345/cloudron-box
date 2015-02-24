@@ -13,11 +13,12 @@ exports = module.exports = {
     get: get,
     add: add,
     del: del,
-    clear: clear,
     getByUserId: getByUserId,
     delByUserId: delByUserId,
     getByUserIdAndClientId: getByUserIdAndClientId,
-    delByUserIdAndClientId: delByUserIdAndClientId
+    delByUserIdAndClientId: delByUserIdAndClientId,
+
+    _clear: clear
 };
 
 var TOKENS_FIELDS = [ 'accessToken', 'userId', 'clientId', 'scope', 'expires' ].join(',');

@@ -38,7 +38,7 @@ describe('Apps', function () {
     });
 
     after(function (done) {
-        database.clear(done);
+        database._clear(done);
     });
 
     describe('validateHostname', function () {

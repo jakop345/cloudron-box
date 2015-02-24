@@ -16,8 +16,7 @@ exports = module.exports = {
     resetPasswordByIdentifier: resetPasswordByIdentifier,
     setPassword: setPassword,
     changePassword: changePassword,
-    update: updateUser,
-    clear: clear
+    update: updateUser
 };
 
 var assert = require('assert'),
@@ -332,16 +331,6 @@ function changePassword(username, oldPassword, newPassword, callback) {
         if (error) return callback(error);
 
         setPassword(user.id, newPassword, callback);
-    });
-}
-
-function clear(callback) {
-    assert(typeof callback === 'function');
-
-    userdb.clear(function (error) {
-        if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
-
-        return callback(null);
     });
 }
 

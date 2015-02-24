@@ -45,7 +45,7 @@ describe('apptask', function () {
     });
 
     after(function (done) {
-        database.clear(done);
+        database._clear(done);
     });
 
     it('initializes succesfully', function (done) {
