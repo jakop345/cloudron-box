@@ -22,9 +22,13 @@ fi
 backup_url="$1"
 backup_key="$2"
 now=$(date "+%Y-%m-%dT%H:%M:%S")
+DATA_DIR="${HOME}/data"
+
+echo "Creating MySQL dump"
+mysqldump -u root -ppassword box > "${DATA_DIR}/box.mysql"
 
 echo "Snapshoting backup as backup-${now}"
-btrfs subvolume snapshot -r "${HOME}/data" "${HOME}/backup-${now}"
+btrfs subvolume snapshot -r "${DATA_DIR}" "${HOME}/backup-${now}"
 
 echo "Uploading backup to ${backup_url}"
 tar -cvzf - -C "${HOME}/backup-${now}" . | openssl aes-256-cbc -e -pass "pass:${backup_key}" | curl --fail -H "Content-Type:" -X PUT --data-binary @- "${backup_url}"

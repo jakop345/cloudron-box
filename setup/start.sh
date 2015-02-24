@@ -65,11 +65,19 @@ ${USER} ALL=(root) NOPASSWD: ${BOX_SRC_DIR}/src/scripts/reloadcollectd.sh
 
 EOF
 
+set_progress "21" "Setting up MySQL"
+mysqladmin -u root -ppassword password password # reset default root password
+mysql -u root -ppassword -e 'CREATE DATABASE IF NOT EXISTS box'
+if [[ -f "${DATA_DIR}/box.sql" ]]; then
+    echo "Importing existing database into MySQL"
+    mysql -u root -ppassword box < "${DATA_DIR}/box.sql"
+fi
+
 set_progress "25" "Migrating data"
 sudo -u "${USER}" -H bash <<EOF
 set -eux
 cd "${box_src_tmp_dir}"
-PATH="${PATH}:${box_src_tmp_dir}/node_modules/.bin" npm run-script migrate
+DATABASE_URL=mysql://root:password@localhost/box PATH="${PATH}:${box_src_tmp_dir}/node_modules/.bin" npm run-script migrate
 EOF
 
 set_progress "30" "Setup nginx"
@@ -166,6 +174,13 @@ cat > "${CONFIG_DIR}/cloudron.conf" <<CONF_END
     "isCustomDomain": ${arg_is_custom_domain},
     "boxVersionsUrl": "${arg_box_versions_url}",
     "mailUsername": "admin@${arg_fqdn}",
+    "database": {
+        "hostname": "localhost",
+        "username": "root",
+        "password": "password",
+        "port": 3306,
+        "name": "box"
+    },
     "addons": {
         "mysql": {
             "rootPassword": "${mysql_root_password}"
