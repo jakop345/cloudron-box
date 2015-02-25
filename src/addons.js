@@ -34,6 +34,8 @@ exports = module.exports = {
     _removeOAuthCredentials: removeOAuthCredentials
 };
 
+// setup can be called multiple times for the same app (configure crash restart) and existing data must not be lost
+// teardown is destructive. app data stored with the addon is lost
 var KNOWN_ADDONS = {
     oauth: {
         setup: allocateOAuthCredentials,
@@ -154,17 +156,21 @@ function allocateOAuthCredentials(app, callback) {
 
     debug('allocateOAuthCredentials: id:%s clientSecret:%s', id, clientSecret);
 
-    clientdb.add(id, 'addon-' + appId, clientSecret, redirectURI, scope, function (error) {
-        if (error) return callback(error);
+    clientdb.delByAppId('addon-' + appId, function (error, result) { // remove existing creds
+        if (error && error.reason !== DatabaseError.NOT_FOUND) return callback(error);
 
-        var env = [
-            'OAUTH_CLIENT_ID=' + id,
-            'OAUTH_CLIENT_SECRET=' + clientSecret
-        ];
+        clientdb.add(id, 'addon-' + appId, clientSecret, redirectURI, scope, function (error) {
+            if (error) return callback(error);
 
-        debug('Setting oauth addon config of %s to to %j', appId, env);
+            var env = [
+                'OAUTH_CLIENT_ID=' + id,
+                'OAUTH_CLIENT_SECRET=' + clientSecret
+            ];
 
-        appdb.setAddonConfig(appId, 'oauth', env, callback);
+            debug('Setting oauth addon config of %s to to %j', appId, env);
+
+            appdb.setAddonConfig(appId, 'oauth', env, callback);
+        });
     });
 }
 
