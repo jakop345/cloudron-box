@@ -68,9 +68,9 @@ EOF
 set_progress "21" "Setting up MySQL"
 mysqladmin -u root -ppassword password password # reset default root password
 mysql -u root -ppassword -e 'CREATE DATABASE IF NOT EXISTS box'
-if [[ -f "${DATA_DIR}/box.sql" ]]; then
+if [[ -f "${DATA_DIR}/box.mysqldump" ]]; then
     echo "Importing existing database into MySQL"
-    mysql -u root -ppassword box < "${DATA_DIR}/box.sql"
+    mysql -u root -ppassword box < "${DATA_DIR}/box.mysqldump"
 fi
 
 set_progress "25" "Migrating data"
