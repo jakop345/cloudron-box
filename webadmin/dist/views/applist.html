@@ -17,7 +17,7 @@
                 <br/>
                 <div class="row">
                     <div class="col-xs-12 text-left">
-                        <div>{{ app.location || "App" }}</div>
+                        <div style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden">{{ app.location || "App" }}</div>
                         <div class="text-muted">{{ app.installationState | installationStateLabel }}</div>
                         <div ng-show="app.installationState | installationActive" class="animateMe ng-hide">
                             <div class="progress progress-striped active">
