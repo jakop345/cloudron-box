@@ -80,7 +80,7 @@
   },
   "scripts": {
     "create_testdir": "rm -rf $HOME/.cloudron_test; mkdir -p $HOME/.cloudron_test; cd $HOME/.cloudron_test; mkdir -p data/appdata data/appicons data/mail configs/nginx/cert configs/nginx/applications configs/collectd/collectd.conf.d configs/addons",
-    "migrate": "NODE_ENV=local DATABASE_URL=mysql://root:@localhost/box node_modules/.bin/db-migrate up",
+    "migrate_local": "NODE_ENV=local DATABASE_URL=mysql://root:@localhost/box node_modules/.bin/db-migrate up",
     "migrate_test": "NODE_ENV=test DATABASE_URL=mysql://root:@localhost/boxtest node_modules/.bin/db-migrate up",
     "test": "scripts/checkInstall && npm run create_testdir && npm run migrate_test && NODE_ENV=test ./node_modules/istanbul/lib/cli.js test $1 ./node_modules/mocha/bin/_mocha -- -R spec ./src/test ./src/routes/test",
     "postmerge": "/bin/true",

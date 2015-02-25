@@ -77,7 +77,7 @@ set_progress "25" "Migrating data"
 sudo -u "${USER}" -H bash <<EOF
 set -eux
 cd "${box_src_tmp_dir}"
-DATABASE_URL=mysql://root:password@localhost/box PATH="${PATH}:${box_src_tmp_dir}/node_modules/.bin" npm run-script migrate
+NODE_ENV=cloudron DATABASE_URL=mysql://root:password@localhost/box "${box_src_tmp_dir}/node_modules/.bin/db-migrate" up
 EOF
 
 set_progress "30" "Setup nginx"
