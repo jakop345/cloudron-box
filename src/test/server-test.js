@@ -105,40 +105,6 @@ describe('Server', function () {
                 });
             });
         });
-
-        it('stats fails due missing token', function (done) {
-            request.get(SERVER_URL + '/api/v1/cloudron/stats').end(function (err, res) {
-                expect(err).to.not.be.ok();
-                expect(res.statusCode).to.equal(401);
-                done(err);
-            });
-        });
-
-        it('stats', function (done) {
-            var scope1 = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
-            var scope2 = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/setup/done?setupToken=somesetuptoken').reply(201, {});
-
-            request.post(SERVER_URL + '/api/v1/cloudron/activate')
-                   .query({ setupToken: 'somesetuptoken' })
-                   .send({ username: 'admin', password: 'password', email: 'xx@xx.xx' })
-                   .end(function (err, res) {
-                expect(res.statusCode).to.equal(201);
-                expect(scope1.isDone());
-                expect(scope2.isDone());
-
-                ACCESS_TOKEN = res.body.token;
-
-                request.get(SERVER_URL + '/api/v1/cloudron/stats').query({ access_token: ACCESS_TOKEN }).end(function (err, res) {
-                    expect(err).to.not.be.ok();
-                    expect(res.statusCode).to.equal(200);
-                    expect(res.body).to.be.an(Object);
-                    expect(res.body.drives).to.be.an(Array);
-                    expect(res.body.drives[0]).to.be.an(Object);
-                    expect(res.body.drives[0].mountpoint).to.be.a('string');
-                    done(err);
-                });
-            });
-        });
     });
 
     describe('config', function () {
