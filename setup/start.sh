@@ -16,7 +16,7 @@ readonly BOX_SRC_DIR="/home/${USER}/box"
 readonly DATA_DIR="/home/${USER}/data"
 readonly CONFIG_DIR="/home/${USER}/configs"
 readonly SETUP_PROGRESS_JSON="/home/yellowtent/setup/website/progress.json"
-readonly ADMIN_LOCATION="admin" # keep this in sync with constants.js
+readonly ADMIN_LOCATION="my" # keep this in sync with constants.js
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 box_src_tmp_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
