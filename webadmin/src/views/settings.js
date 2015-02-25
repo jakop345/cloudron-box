@@ -6,7 +6,6 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     $scope.user = Client.getUserInfo();
     $scope.config = Client.getConfig();
     $scope.nakedDomainApp = null;
-    $scope.drives = [];
     $scope.certificateFile = null;
     $scope.certificateFileName = '';
     $scope.keyFile = null;
@@ -97,12 +96,6 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
                         break;
                     }
                 }
-            });
-
-            Client.stats(function (error, stats) {
-                if (error) return console.error(error);
-
-                $scope.drives = stats.drives;
             });
         });
     });
