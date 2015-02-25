@@ -10,6 +10,7 @@ var appdb = require('../appdb.js'),
     authcodedb = require('../authcodedb.js'),
     clientdb = require('../clientdb.js'),
     config = require('../../config.js'),
+    constants = require('../../constants.js'),
     database = require('../database'),
     DatabaseError = require('../databaseerror.js'),
     expect = require('expect.js'),
@@ -821,7 +822,7 @@ describe('database', function () {
                 expect(error).to.be(null);
                 expect(result).to.be.an(Array);
                 expect(result.length).to.be(2);
-                expect(result[0]).to.eql({ name: 'naked_domain', value: 'admin' });
+                expect(result[0]).to.eql({ name: 'naked_domain', value: constants.ADMIN_LOCATION });
                 expect(result[1]).to.eql({ name: 'somekey', value: 'somevalue' });
                 done();
             });

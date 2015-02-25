@@ -17,7 +17,8 @@ readonly PROVISION_BOX_VERSIONS_URL=0.1
 readonly DATA_DIR=~/.cloudron/data
 readonly CONFIG_DIR=~/.cloudron/configs
 readonly NGINX_ROOT=~/.cloudron/configs/nginx
-readonly FQDN=admin-localhost
+readonly ADMIN_LOCATION=admin
+readonly FQDN="${ADMIN_LOCATION}-localhost"
 
 if [[ ! -f "${SCRIPT_DIR}/../appstore/src/scripts/generate_certificate.sh" ]]; then
     echo "Could not locate generate_certificate.sh"

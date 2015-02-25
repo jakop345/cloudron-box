@@ -4,6 +4,7 @@ var apps = require('./apps.js'),
     AppsError = apps.AppsError,
     assert = require('assert'),
     async = require('async'),
+    constants = require('../constants.js'),
     debug = require('debug')('box:settings'),
     settingsdb = require('./settingsdb.js'),
     util = require('util');
@@ -48,7 +49,7 @@ function getNakedDomain(callback) {
 }
 
 function getApp(appId, callback) {
-    if (appId === 'admin') return callback(null, null);
+    if (appId === constants.ADMIN_APPID) return callback(null, null);
 
     apps.get(appId, callback);
 }

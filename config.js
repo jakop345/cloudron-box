@@ -2,12 +2,12 @@
 
 'use strict';
 
-var path = require('path'),
+var assert = require('assert'),
+    constants = require('./constants.js'),
     fs = require('fs'),
+    path = require('path'),
     safe = require('safetydance'),
-    assert = require('assert'),
-    _ = require('underscore'),
-    path = require('path');
+    _ = require('underscore');
 
 exports = module.exports = {
     baseDir: baseDir,
@@ -144,7 +144,7 @@ function appFqdn(location) {
 }
 
 function adminOrigin() {
-    return 'https://' + appFqdn('admin');
+    return 'https://' + appFqdn(constants.ADMIN_LOCATION);
 }
 
 function token() {

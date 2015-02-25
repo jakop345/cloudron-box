@@ -5,6 +5,7 @@
 var assert = require('assert'),
     appdb = require('./appdb.js'),
     config = require('../config.js'),
+    constants = require('../constants.js'),
     async = require('async'),
     database = require('./database.js'),
     DatabaseError = require('./databaseerror.js'),
@@ -57,12 +58,12 @@ function getAllWithDetails(callback) {
         // We have three types of records here
         //   1) webadmin has an app id of 'webadmin'
         //   2) oauth proxy records are always the app id prefixed with 'proxy-'
-        //   3) normal oauth records for apps
+        //   3) addon oauth records for apps prefixed with 'addon-'
 
         async.each(results, function (record, callback) {
-            if (record.appId === 'webadmin') {
+            if (record.appId === constants.ADMIN_CLIENT_ID) {
                 record.name = 'Webadmin';
-                record.location = 'admin';
+                record.location = constants.ADMIN_LOCATION;
                 return callback(null, record);
             }
 

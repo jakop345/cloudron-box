@@ -11,6 +11,7 @@ var appdb = require('../appdb.js'),
     AppsError = apps.AppsError,
     async = require('async'),
     config = require('../../config.js'),
+    constants = require('../../constants.js'),
     database = require('../database.js'),
     expect = require('expect.js');
 
@@ -45,7 +46,7 @@ describe('Apps', function () {
 
     describe('validateHostname', function () {
         it('does not allow admin subdomain', function () {
-            expect(apps._validateHostname('admin', 'cloudron.us')).to.be.an(Error);
+            expect(apps._validateHostname(constants.ADMIN_LOCATION, 'cloudron.us')).to.be.an(Error);
         });
 
         it('cannot have >63 length subdomains', function () {

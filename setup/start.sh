@@ -16,6 +16,7 @@ readonly BOX_SRC_DIR="/home/${USER}/box"
 readonly DATA_DIR="/home/${USER}/data"
 readonly CONFIG_DIR="/home/${USER}/configs"
 readonly SETUP_PROGRESS_JSON="/home/yellowtent/setup/website/progress.json"
+readonly ADMIN_LOCATION="admin" # keep this in sync with constants.js
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 box_src_tmp_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
@@ -23,7 +24,7 @@ box_src_tmp_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
 source "${script_dir}/argparser.sh" "$@" # this injects the arg_* variables used below
 
 # keep this is sync with config.js appFqdn()
-admin_fqdn=$([[ "${arg_is_custom_domain}" == "true" ]] && echo "admin.${arg_fqdn}" ||  echo "admin-${arg_fqdn}")
+admin_fqdn=$([[ "${arg_is_custom_domain}" == "true" ]] && echo "${ADMIN_LOCATION}.${arg_fqdn}" ||  echo "${ADMIN_LOCATION}-${arg_fqdn}")
 
 set_progress() {
     local percent="$1"

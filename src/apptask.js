@@ -8,12 +8,13 @@ require('supererror')({ splatchError: true });
 
 var addons = require('./addons.js'),
     appdb = require('./appdb.js'),
-    clientdb = require('./clientdb.js'),
     assert = require('assert'),
     async = require('async'),
+    clientdb = require('./clientdb.js'),
     child_process = require('child_process'),
     cloudron = require('./cloudron.js'),
     config = require('../config.js'),
+    constants = require('../constants.js'),
     database = require('./database.js'),
     DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:apptask'),
@@ -125,7 +126,7 @@ function writeNginxNakedDomainConfig(app, callback) {
     var sourceDir = path.resolve(__dirname, '..');
     var nginxConf;
     if (app === null) { // admin
-        nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: config.fqdn(), appId: 'admin' });
+        nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: config.fqdn(), appId: constants.ADMIN_APPID });
     } else {
         nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: config.fqdn(), appId: app.id, port: app.httpPort, accessRestriction: app.accessRestriction });
     }
@@ -166,7 +167,7 @@ function unconfigureNakedDomain(app, callback) {
 
         debug('unconfigureNakedDomain: resetting to admin');
 
-        settings.setNakedDomain('admin', callback);
+        settings.setNakedDomain(constants.ADMIN_APPID, callback);
     });
 }
 

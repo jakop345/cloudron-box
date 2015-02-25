@@ -10,6 +10,7 @@ var appdb = require('../../appdb.js'),
     apptask = require('../../apptask.js'),
     async = require('async'),
     config = require('../../../config.js'),
+    constants = require('../../../constants.js'),
     database = require('../../database.js'),
     expect = require('expect.js'),
     fs = require('fs'),
@@ -86,7 +87,7 @@ describe('Settings API', function () {
                .query({ access_token: token })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
-            expect(res.body).to.eql({ appid: 'admin' });
+            expect(res.body).to.eql({ appid: constants.ADMIN_APPID });
             done(err);
         });
     });
@@ -150,7 +151,7 @@ describe('Settings API', function () {
 
         request.post(SERVER_URL + '/api/v1/settings/naked_domain')
                .query({ access_token: token })
-               .send({ appid: 'admin' })
+               .send({ appid: constants.ADMIN_APPID })
                .end(function (err, res) {
             reloadNginxStub.restore();
             expect(res.statusCode).to.equal(204);
@@ -165,7 +166,7 @@ describe('Settings API', function () {
                .query({ access_token: token })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
-            expect(res.body).to.eql({ appid: 'admin' });
+            expect(res.body).to.eql({ appid: constants.ADMIN_APPID });
             done(err);
         });
     });

@@ -1,4 +1,4 @@
-/* jslint node:true */
++ /* jslint node:true */
 /* global it:false */
 /* global describe:false */
 /* global after:false */
@@ -6,7 +6,8 @@
 
 'use strict';
 
-var expect = require('expect.js'),
+var constants = require('../../constants.js'),
+    expect = require('expect.js'),
     fs = require('fs'),
     path = require('path'),
     safe = require('safetydance');
@@ -36,7 +37,7 @@ describe('config', function () {
     it('did set default values', function () {
         expect(config.isCustomDomain()).to.equal(false);
         expect(config.fqdn()).to.equal('localhost');
-        expect(config.adminOrigin()).to.equal('https://admin-localhost');
+        expect(config.adminOrigin()).to.equal('https://' + constants.ADMIN_LOCATION + '-localhost');
         expect(config.appFqdn('app')).to.equal('app-localhost');
         expect(config.zoneName()).to.equal('localhost');
     });
@@ -65,7 +66,7 @@ describe('config', function () {
 
         expect(config.isCustomDomain()).to.equal(true);
         expect(config.fqdn()).to.equal('example.com');
-        expect(config.adminOrigin()).to.equal('https://admin.example.com');
+        expect(config.adminOrigin()).to.equal('https://' + constants.ADMIN_LOCATION + '.example.com');
         expect(config.appFqdn('app')).to.equal('app.example.com');
         expect(config.zoneName()).to.equal('example.com');
     });
@@ -76,7 +77,7 @@ describe('config', function () {
 
         expect(config.isCustomDomain()).to.equal(false);
         expect(config.fqdn()).to.equal('test.example.com');
-        expect(config.adminOrigin()).to.equal('https://admin-test.example.com');
+        expect(config.adminOrigin()).to.equal('https://' + constants.ADMIN_LOCATION + '-test.example.com');
         expect(config.appFqdn('app')).to.equal('app-test.example.com');
         expect(config.zoneName()).to.equal('example.com');
     });

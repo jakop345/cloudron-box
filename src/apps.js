@@ -6,6 +6,7 @@ var appdb = require('./appdb.js'),
     assert = require('assert'),
     child_process = require('child_process'),
     config = require('../config.js'),
+    constants = require('../constants.js'),
     DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:apps'),
     docker = require('./docker.js'),
@@ -128,7 +129,7 @@ AppsError.BAD_STATE = 'Bad State';
 // https://en.wikipedia.org/wiki/Hostname#Restrictions_on_valid_host_names
 // We are validating the validity of the location-fqdn as host name
 function validateHostname(location, fqdn) {
-    var RESERVED_LOCATIONS = [ 'admin', 'my' ];
+    var RESERVED_LOCATIONS = [ constants.ADMIN_LOCATION ];
 
     if (RESERVED_LOCATIONS.indexOf(location) !== -1) return new Error(location + ' is reserved');
 

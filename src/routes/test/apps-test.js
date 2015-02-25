@@ -8,11 +8,11 @@
 
 var appdb = require('../../appdb.js'),
     assert = require('assert'),
-    nock = require('nock'),
     async = require('async'),
     child_process = require('child_process'),
     clientdb = require('../../clientdb.js'),
     config = require('../../../config.js'),
+    constants = require('../../../constants.js'),
     database = require('../../database.js'),
     docker = require('../../docker.js'),
     expect = require('expect.js'),
@@ -21,6 +21,7 @@ var appdb = require('../../appdb.js'),
     http = require('http'),
     https = require('https'),
     net = require('net'),
+    nock = require('nock'),
     os = require('os'),
     paths = require('../../paths.js'),
     redis = require('redis'),
@@ -234,10 +235,10 @@ describe('App API', function () {
     it('app install fails - reserved location', function (done) {
         request.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
-               .send({ appStoreId: APP_STORE_ID, version: APP_VERSION, password: PASSWORD, location: 'my', accessRestriction: '' })
+               .send({ appStoreId: APP_STORE_ID, version: APP_VERSION, password: PASSWORD, location: constants.ADMIN_LOCATION, accessRestriction: '' })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
-            expect(res.body.message).to.eql('my is reserved');
+            expect(res.body.message).to.eql(constants.ADMIN_LOCATION + ' is reserved');
             done(err);
         });
     });
