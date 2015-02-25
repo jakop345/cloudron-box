@@ -30,4 +30,4 @@ DatabaseError.INTERNAL_ERROR = 'Internal error';
 DatabaseError.ALREADY_EXISTS = 'Entry already exist';
 DatabaseError.NOT_FOUND = 'Record not found';
 DatabaseError.RECORD_SCHEMA = 'Record does not match the schema';
-DatabaseError.FIELD_ERROR = 'Invalid field';
+DatabaseError.BAD_FIELD = 'Invalid field';

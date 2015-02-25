@@ -145,10 +145,10 @@ describe('database', function () {
             });
         });
 
-        xit('cannot update with bad field', function (done) {
+        it('cannot update with null field', function (done) {
             userdb.update(USER_0.id, { email: null }, function (error) {
                 expect(error).to.be.ok();
-                expect(error.reason).to.be(DatabaseError.FIELD_ERROR);
+                expect(error.reason).to.be(DatabaseError.BAD_FIELD);
                 done();
             });
         });
