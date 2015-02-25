@@ -20,12 +20,6 @@ exports = module.exports = {
     run: run
 };
 
-var FATAL_CALLBACK = function (error) {
-    if (!error) return;
-    console.error(error);
-    process.exit(2);
-};
-
 var HEALTHCHECK_INTERVAL = 30000;
 var gLastSeen = { }; // { time, emailSent }
 
