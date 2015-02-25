@@ -228,6 +228,7 @@ function sendHeartBeat() {
     var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/heartbeat';
     debug('Sending heartbeat ' + url);
 
+    // TODO: this must be a POST
     superagent.get(url).query({ token: config.token(), version: config.version() }).end(function (error, result) {
         if (error) debug('Error sending heartbeat.', error);
         else if (result.statusCode !== 200) debug('Server responded to heartbeat with ' + result.statusCode);
