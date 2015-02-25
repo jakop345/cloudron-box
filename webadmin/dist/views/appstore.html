@@ -24,18 +24,20 @@
 </div>
 
 <div class="row animateMeOpacity ng-hide" ng-show="loadStatus == LOADED">
-    <div class="col-lg-4 col-md-6" ng-repeat="app in apps">
-        <div class="panel panel-primary">
+    <div class="col-md-1" ng-repeat="app in apps" style="padding: 15px">
+        <div style="background-color: white;">
             <div class="panel-heading">
                 <div class="row">
-                    <div class="col-xs-3">
+                    <div class="col-xs-12 text-center">
                         <img ng-show="app.icon" width="48" height="48" ng-src="{{app.icon}}"/>
                         <span ng-show="!app.icon" class="fa fa-space-shuttle fa-4x"></span>
                     </div>
-                    <div class="col-xs-9 text-right">
-                        <div class="huge">{{ app.title }}</div>
-                        <div>{{ app.contactEmail }}</div>
-                        <div>{{ app.description || "No description" }}</div>
+                </div>
+                <br/>
+                <div class="row">
+                    <div class="col-xs-12 text-left">
+                        <div>{{ app.title }}</div>
+                        <div class="text-muted">{{ app.description || "No description" }}</div>
                     </div>
                 </div>
             </div>

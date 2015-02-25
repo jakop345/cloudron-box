@@ -24,8 +24,9 @@
     <!-- Custom Fonts -->
     <link href="3rdparty/sb-admin-2/font-awesome-4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
 
-
     <link href="3rdparty/rickshaw/rickshaw.min.css" rel="stylesheet">
+
+    <link href='https://fonts.googleapis.com/css?family=Roboto:300' rel='stylesheet' type='text/css'>
 
     <style>
 
@@ -52,6 +53,10 @@
     .animateMeOpacity.ng-hide-remove {
         display: block !important;
         opacity: 0;
+    }
+
+    body {
+        font-family: 'Roboto', sans-serif;
     }
 
     </style>
@@ -167,7 +172,7 @@
             <!-- /.navbar-top-links -->
         </nav>
 
-        <div id="page-wrapper">
+        <div id="page-wrapper" style="background-color: #E5E5E5">
             <div ng-view id="ng-view"></div>
         </div>
     </div>
