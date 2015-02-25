@@ -68,7 +68,13 @@ function setupConnection(connection, callback) {
     async.series([
         connection.query.bind(connection, 'USE ' + config.database().name),
         connection.query.bind(connection, 'SET SESSION sql_mode = \'strict_all_tables\'')
-    ], callback);
+    ], function (error) {
+        connection.removeListener('error', console.error);
+
+        if (error) connection.release();
+
+        callback(error);
+    });
 }
 
 function reconnect(callback) {
@@ -80,13 +86,18 @@ function reconnect(callback) {
             return setTimeout(reconnect.bind(null, callback), 1000);
         }
 
-        connection.on('error', reconnect);
+        connection.on('error', function (error) {
+            // by design, we catch all normal errors by providing callbacks.
+            // this function should be invoked only when we have no callbacks pending and we have a fatal error
+            assert(error.fatal, 'Non-fatal error on connection object');
+            setTimeout(reconnect.bind(null, callback), 1000);
+        });
 
         setupConnection(connection, function (error) {
             if (error) return setTimeout(reconnect.bind(null, callback), 1000);
- 
+
             gDefaultConnection = connection;
- 
+
             callback(null);
         });
     });
@@ -129,7 +140,6 @@ function rollback(connection, callback) {
     connection.rollback(function (error) {
         if (error) console.error(error); // can this happen?
 
-        connection.removeAllListeners('error');
         connection.release();
         callback(null);
     });
@@ -141,9 +151,7 @@ function commit(connection, callback) {
     connection.commit(function (error) {
         if (error) return rollback(connection, callback);
 
-        connection.removeAllListeners('error');
         connection.release();
-
         return callback(null);
     });
 }
@@ -154,6 +162,15 @@ function query() {
     assert(typeof callback === 'function');
 
     if (gDefaultConnection === null) return callback(new Error('No connection to database'));
+
+    args[args.length -1 ] = function (error, result) {
+        if (error && error.fatal) {
+            gDefaultConnection = null;
+            setTimeout(reconnect, 1000);
+        }
+
+        callback(error, result);
+    };
 
     gDefaultConnection.query.apply(gDefaultConnection, args);
 }
