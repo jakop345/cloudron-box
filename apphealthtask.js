@@ -16,7 +16,6 @@ var appdb = require('./src/appdb.js'),
     superagent = require('superagent');
 
 exports = module.exports = {
-    initialize: initialize,
     run: run
 };
 
@@ -24,6 +23,8 @@ var HEALTHCHECK_INTERVAL = 30000;
 var gLastSeen = { }; // { time, emailSent }
 
 function initialize(callback) {
+    assert(typeof callback === 'function');
+
     async.series([
         database.initialize,
         mailer.initialize
@@ -112,19 +113,22 @@ function processApps(callback) {
     });
 }
 
-function run(callback) {
+function run() {
     processApps(function (error) {
-        if (error) return callback(error);
-        setTimeout(run.bind(null, callback), HEALTHCHECK_INTERVAL);
+        if (error) console.error(error);
+
+        setTimeout(run, HEALTHCHECK_INTERVAL);
     });
 }
 
 if (require.main === module) {
-    initialize();
+    initialize(function (error) {
+        if (error) {
+            console.error('apphealth task exiting with error', error);
+            process.exit(1);
+        }
 
-    run(function (error) {
-        console.error('apphealth task exiting with error.', error);
-        process.exit(error ? 1 : 0);
+        run();
     });
 }
 
