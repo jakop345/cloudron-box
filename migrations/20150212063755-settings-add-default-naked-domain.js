@@ -4,7 +4,7 @@ var type = dbm.dataType;
 var constants = require('../constants.js');
 
 exports.up = function(db, callback) {
-    db.runSql('INSERT settings (name, value) VALUES("naked_domain", ?)', [ constants.ADMIN_LOCATION ], callback);
+    db.runSql('INSERT settings (name, value) VALUES("naked_domain", ?)', [ constants.ADMIN_APPID ], callback);
 };
 
 exports.down = function(db, callback) {
