@@ -100,7 +100,7 @@ gulp.task('html-templates', function () {
 // Utilities
 // --------------
 
-gulp.task('watch', ['default'], function () {
+gulp.task('develop', ['default'], function () {
     gulp.watch(['webadmin/src/*.html'], ['html']);
     gulp.watch(['webadmin/src/*.ejs'], ['html-templates']);
     gulp.watch(['webadmin/src/views/*.html'], ['html-views']);
