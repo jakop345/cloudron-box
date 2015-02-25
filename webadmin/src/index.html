@@ -60,9 +60,9 @@
     }
 
     .shadow {
-        -moz-box-shadow:    0px 3px 10px 5px #ccc;
-        -webkit-box-shadow: 0px 3px 10px 5px #ccc;
-        box-shadow:         0px 3px 10px 5px #ccc;
+        box-shadow:         0px 2px 5px rgba(0, 0, 0, 0.1);
+        -moz-box-shadow:    0px 2px 5px rgba(0, 0, 0, 0.1);
+        -webkit-box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
     }
 
     </style>
@@ -142,7 +142,7 @@
     <div id="wrapper" class="animateMe ng-hide" ng-show="initialized">
 
         <!-- Navigation -->
-        <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+        <nav class="navbar navbar-default navbar-static-top shadow" role="navigation" style="margin-bottom: 0">
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
                     <span class="sr-only">Toggle navigation</span>
@@ -150,7 +150,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="index.html">Cloudron</a>
+                <a class="navbar-brand" href="index.html">Cloudron <span class="small text-muted">{{config.version}}</span></a>
             </div>
             <!-- /.navbar-header -->
 
@@ -182,14 +182,6 @@
             <div ng-view id="ng-view"></div>
         </div>
     </div>
-
-    <footer class="navbar navbar-default navbar-fixed-bottom">
-        <div class="container">
-            <p class="navbar-text pull-left">© 2015 - <a href="{{config.webServerOrigin}}" target="_blank" >Cloudron</a></p>
-            <!-- <a href="" class="navbar-btn btn btn-outline btn-success pull-right" data-toggle="modal" data-target="#updateModal">Update</a> -->
-            <p class="navbar-text pull-right">Version <b>{{config.version}}</b></p>
-        </div>
-    </footer>
 
 </body>
 </html>
