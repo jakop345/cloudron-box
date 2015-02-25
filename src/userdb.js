@@ -21,7 +21,7 @@ exports = module.exports = {
     _clear: clear
 };
 
-var USERS_FIELDS = [ 'id', 'username', 'email', '_password', '_salt', 'createdAt', 'modifiedAt', 'admin' ].join(',');
+var USERS_FIELDS = [ 'id', 'username', 'email', 'password', 'salt', 'createdAt', 'modifiedAt', 'admin' ].join(',');
 
 function get(userId, callback) {
     assert(typeof userId === 'string');
@@ -78,16 +78,16 @@ function getAllAdmins(callback) {
 function add(userId, user, callback) {
     assert(typeof userId === 'string');
     assert(typeof user.username === 'string');
-    assert(typeof user._password === 'string');
+    assert(typeof user.password === 'string');
     assert(typeof user.email === 'string');
     assert(typeof user.admin === 'boolean');
-    assert(typeof user._salt === 'string');
+    assert(typeof user.salt === 'string');
     assert(typeof user.createdAt === 'string');
     assert(typeof user.modifiedAt === 'string');
     assert(typeof callback === 'function');
 
-    var data = [ userId, user.username, user._password, user.email, user.admin, user._salt, user.createdAt, user.modifiedAt ];
-    database.query('INSERT INTO users (id, username, _password, email, admin, _salt, createdAt, modifiedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+    var data = [ userId, user.username, user.password, user.email, user.admin, user.salt, user.createdAt, user.modifiedAt ];
+    database.query('INSERT INTO users (id, username, password, email, admin, salt, createdAt, modifiedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
            data, function (error, result) {
         if (error && error.code === 'ER_DUP_ENTRY') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
         if (error || result.affectedRows !== 1) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));

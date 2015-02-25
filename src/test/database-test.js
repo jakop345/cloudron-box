@@ -35,10 +35,10 @@ describe('database', function () {
         var USER_0 = {
             id: 'uuid213',
             username: 'uuid213',
-            _password: 'secret',
+            password: 'secret',
             email: 'safe@me.com',
             admin: false,
-            _salt: 'morton',
+            salt: 'morton',
             createdAt: 'sometime back',
             modifiedAt: 'now'
         };
@@ -46,10 +46,10 @@ describe('database', function () {
         var ADMIN_0 = {
             id: 'uuid456',
             username: 'uuid456',
-            _password: 'secret',
+            password: 'secret',
             email: 'safe@me.com',
             admin: true,
-            _salt: 'tata',
+            salt: 'tata',
             createdAt: 'sometime back',
             modifiedAt: 'now'
         };

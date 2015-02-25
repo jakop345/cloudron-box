@@ -209,8 +209,8 @@ describe('User API', function () {
             expect(res.body.username).to.equal(USERNAME_0);
             expect(res.body.email).to.equal(EMAIL);
             expect(res.body.admin).to.be.ok();
-            expect(res.body._password).to.not.be.ok();
-            expect(res.body._salt).to.not.be.ok();
+            expect(res.body.password).to.not.be.ok();
+            expect(res.body.salt).to.not.be.ok();
             done(err);
         });
     });
@@ -378,8 +378,8 @@ describe('User API', function () {
                 expect(user.id).to.be.ok();
                 expect(user.username).to.be.ok();
                 expect(user.email).to.be.ok();
-                expect(user._password).to.not.be.ok();
-                expect(user._salt).to.not.be.ok();
+                expect(user.password).to.not.be.ok();
+                expect(user.salt).to.not.be.ok();
             });
 
             done();
@@ -465,8 +465,8 @@ describe('User API', function () {
             expect(res.body.expires).to.be.a('string');
             expect(res.body.username).to.not.be.ok();
             expect(res.body.email).to.not.be.ok();
-            expect(res.body._password).to.not.be.ok();
-            expect(res.body._salt).to.not.be.ok();
+            expect(res.body.password).to.not.be.ok();
+            expect(res.body.salt).to.not.be.ok();
 
             done();
         });
@@ -505,7 +505,7 @@ describe('User API', function () {
     it('change password fails due to wrong password', function (done) {
         request.post(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/password')
                .query({ access_token: token })
-               .send({ password: 'some wrong password', newPassword: 'new_password' })
+               .send({ password: 'some wrong password', newPassword: 'newpassword' })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(403);
             done(err);

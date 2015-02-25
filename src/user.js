@@ -130,9 +130,9 @@ function createUser(username, password, email, admin, callback) {
                 id: username,
                 username: username,
                 email: email,
-                _password: new Buffer(derivedKey, 'binary').toString('hex'),
+                password: new Buffer(derivedKey, 'binary').toString('hex'),
                 admin: admin,
-                _salt: salt.toString('hex'),
+                salt: salt.toString('hex'),
                 createdAt: now,
                 modifiedAt: now
             };
@@ -162,12 +162,12 @@ function verify(username, password, callback) {
         if (error && error.reason == DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-        var saltBinary = new Buffer(user._salt, 'hex');
+        var saltBinary = new Buffer(user.salt, 'hex');
         crypto.pbkdf2(password, saltBinary, CRYPTO_ITERATIONS, CRYPTO_KEY_LENGTH, function (error, derivedKey) {
             if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
             var derivedKeyHex = new Buffer(derivedKey, 'binary').toString('hex');
-            if (derivedKeyHex !== user._password) return callback(new UserError(UserError.WRONG_PASSWORD));
+            if (derivedKeyHex !== user.password) return callback(new UserError(UserError.WRONG_PASSWORD));
 
             callback(null, user);
         });
@@ -183,12 +183,12 @@ function verifyWithEmail(email, password, callback) {
         if (error && error.reason == DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-        var saltBinary = new Buffer(user._salt, 'hex');
+        var saltBinary = new Buffer(user.salt, 'hex');
         crypto.pbkdf2(password, saltBinary, CRYPTO_ITERATIONS, CRYPTO_KEY_LENGTH, function (error, derivedKey) {
             if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
             var derivedKeyHex = new Buffer(derivedKey, 'binary').toString('hex');
-            if (derivedKeyHex !== user._password) return callback(new UserError(UserError.WRONG_PASSWORD));
+            if (derivedKeyHex !== user.password) return callback(new UserError(UserError.WRONG_PASSWORD));
 
             callback(null, user);
         });
@@ -302,12 +302,12 @@ function setPassword(userId, newPassword, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-        var saltBuffer = new Buffer(user._salt, 'hex');
+        var saltBuffer = new Buffer(user.salt, 'hex');
         crypto.pbkdf2(newPassword, saltBuffer, CRYPTO_ITERATIONS, CRYPTO_KEY_LENGTH, function (error, derivedKey) {
             if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
             user.modifiedAt = (new Date()).toUTCString();
-            user._password = new Buffer(derivedKey, 'binary').toString('hex');
+            user.password = new Buffer(derivedKey, 'binary').toString('hex');
 
             userdb.update(userId, user, function (error) {
                 if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
