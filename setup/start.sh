@@ -91,9 +91,9 @@ cp "${script_dir}/start/nginx/nginx.conf" "${nginx_config_dir}/nginx.conf"
 cp "${script_dir}/start/nginx/mime.types" "${nginx_config_dir}/mime.types"
 # setup naked domain to use admin by default
 ${box_src_tmp_dir}/node_modules/.bin/ejs-cli -f "${script_dir}/start/nginx/appconfig.ejs" \
-    -O "{ \"vhost\": \"${arg_fqdn}\", \"appId\": \"admin\", \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${nginx_config_dir}/naked_domain.conf"
+    -O "{ \"vhost\": \"${arg_fqdn}\", \"isAdmin\": true, \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${nginx_config_dir}/naked_domain.conf"
 ${box_src_tmp_dir}/node_modules/.bin/ejs-cli -f "${script_dir}/start/nginx/appconfig.ejs" \
-    -O "{ \"vhost\": \"${admin_fqdn}\", \"appId\": \"admin\", \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${nginx_appconfig_dir}/admin.conf"
+    -O "{ \"vhost\": \"${admin_fqdn}\", \"isAdmin\": true, \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${nginx_appconfig_dir}/admin.conf"
 
 certificate_dir="${nginx_config_dir}/cert"
 mkdir -p "${certificate_dir}"

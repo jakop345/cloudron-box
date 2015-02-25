@@ -43,9 +43,9 @@ ${SCRIPT_DIR}/../appstore/src/scripts/generate_certificate.sh "US" "California" 
 
 # adjust the generated nginx config for local use
 ${SCRIPT_DIR}/node_modules/.bin/ejs-cli -f "${SCRIPT_DIR}/setup/start/nginx/appconfig.ejs" \
-    -O "{ \"vhost\": \"${FQDN}\", \"appId\": \"admin\", \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${NGINX_ROOT}/naked_domain.conf"
+    -O "{ \"vhost\": \"${FQDN}\", \"isAdmin\": true, \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${NGINX_ROOT}/naked_domain.conf"
 ${SCRIPT_DIR}/node_modules/.bin/ejs-cli -f "${SCRIPT_DIR}/setup/start/nginx/appconfig.ejs" \
-    -O "{ \"vhost\": \"${FQDN}\", \"appId\": \"admin\", \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${NGINX_ROOT}/admin.conf"
+    -O "{ \"vhost\": \"${FQDN}\", \"isAdmin\": true, \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${NGINX_ROOT}/admin.conf"
 
 $GNU_SED -e "s/user www-data/user ${USER}/" -i "${NGINX_ROOT}/nginx.conf"
 $GNU_SED -e "s/^pid .*/pid \/tmp\/nginx.pid;/" -i "${NGINX_ROOT}/nginx.conf"
