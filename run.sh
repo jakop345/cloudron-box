@@ -33,7 +33,7 @@ mkdir -p "${CONFIG_DIR}/addons"
 mkdir -p "${CONFIG_DIR}/collectd/collectd.conf.d"
 
 # get the database current
-npm run-script migrate
+npm run-script migrate_local
 
 cp setup/start/nginx/nginx.conf "${NGINX_ROOT}/nginx.conf"
 cp setup/start/nginx/mime.types "${NGINX_ROOT}/mime.types"
