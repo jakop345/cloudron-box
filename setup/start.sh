@@ -89,7 +89,7 @@ nginx_appconfig_dir="${CONFIG_DIR}/nginx/applications"
 mkdir -p "${nginx_appconfig_dir}"
 cp "${script_dir}/start/nginx/nginx.conf" "${nginx_config_dir}/nginx.conf"
 cp "${script_dir}/start/nginx/mime.types" "${nginx_config_dir}/mime.types"
-# setup naked domain to use admin by default
+# setup naked domain to use admin by default. app restoration will overwrite this config
 ${box_src_tmp_dir}/node_modules/.bin/ejs-cli -f "${script_dir}/start/nginx/appconfig.ejs" \
     -O "{ \"vhost\": \"${arg_fqdn}\", \"isAdmin\": true, \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${nginx_config_dir}/naked_domain.conf"
 ${box_src_tmp_dir}/node_modules/.bin/ejs-cli -f "${script_dir}/start/nginx/appconfig.ejs" \
