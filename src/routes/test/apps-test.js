@@ -234,10 +234,10 @@ describe('App API', function () {
     it('app install fails - reserved location', function (done) {
         request.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
-               .send({ appStoreId: APP_STORE_ID, version: APP_VERSION, password: PASSWORD, location: 'admin', accessRestriction: '' })
+               .send({ appStoreId: APP_STORE_ID, version: APP_VERSION, password: PASSWORD, location: 'my', accessRestriction: '' })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
-            expect(res.body.message).to.eql('admin is reserved');
+            expect(res.body.message).to.eql('my is reserved');
             done(err);
         });
     });
