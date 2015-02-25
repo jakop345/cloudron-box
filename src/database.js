@@ -59,26 +59,34 @@ function uninitialize(callback) {
     }
 }
 
+function setupConnection(connection, callback) {
+    assert(typeof connection === 'object');
+    assert(typeof callback === 'function');
+
+    connection.on('error', console.error);
+
+    async.series([
+        connection.query.bind(connection, 'USE ' + config.database().name),
+        connection.query.bind(connection, 'SET SESSION sql_mode = \'strict_all_tables\'')
+    ], callback);
+}
+
 function reconnect(callback) {
     callback = callback || function () { };
 
     gConnectionPool.getConnection(function (error, connection) {
         if (error) {
             console.error('Unable to reestablish connection to database. Try again in a bit.', error.message);
-            setTimeout(reconnect, 1000);
-            return;
+            return setTimeout(reconnect.bind(null, callback), 1000);
         }
 
-        connection.on('error', function (error) {
-            console.error('Lost connection to database server. Reason: %s. Reestablishing...', error.message);
-            reconnect();
-        });
+        connection.on('error', reconnect);
 
-        connection.query('USE ' + config.database().name + ';', function (error) {
-            if (error) return callback(error);
-
+        setupConnection(connection, function (error) {
+            if (error) return setTimeout(reconnect.bind(null, callback), 1000);
+ 
             gDefaultConnection = connection;
-
+ 
             callback(null);
         });
     });
@@ -103,9 +111,7 @@ function beginTransaction(callback) {
     gConnectionPool.getConnection(function (error, connection) {
         if (error) return callback(error);
 
-        connection.on('error', console.error); // this needs to match the removeListener below
-
-        connection.query('USE ' + config.database().name + ';', function (error) {
+        setupConnection(connection, function (error) {
             if (error) return callback(error);
 
             connection.beginTransaction(function (error) {
@@ -120,9 +126,10 @@ function beginTransaction(callback) {
 function rollback(connection, callback) {
     assert(typeof callback === 'function');
 
-    connection.rollback(function () {
-        connection.removeListener('error', console.error);
+    connection.rollback(function (error) {
+        if (error) console.error(error); // can this happen?
 
+        connection.removeAllListeners('error');
         connection.release();
         callback(null);
     });
@@ -134,7 +141,7 @@ function commit(connection, callback) {
     connection.commit(function (error) {
         if (error) return rollback(connection, callback);
 
-        connection.removeListener('error', console.error);
+        connection.removeAllListeners('error');
         connection.release();
 
         return callback(null);
