@@ -201,13 +201,13 @@ CONF_END
 
 echo "Marking apps for restore"
 # TODO: do not auto-start stopped containers (httpPort might need fixing to start them)
-sqlite3 "${cloudron_sqlite}" 'UPDATE apps SET installationState = "pending_restore", healthy = NULL, runState = NULL, containerId = NULL, httpPort = NULL, installationProgress = NULL'
+mysql -u root -ppassword -e 'UPDATE apps SET installationState = "pending_restore", healthy = NULL, runState = NULL, containerId = NULL, httpPort = NULL, installationProgress = NULL' box
 
 # Add webadmin oauth client
 # The domain might have changed, therefor we have to update the record
 echo "Add webadmin oauth cient"
 ADMIN_SCOPES="root,profile,users,apps,settings,roleUser"
-sqlite3 "${cloudron_sqlite}" "INSERT OR REPLACE INTO clients (id, appId, clientSecret, redirectURI, scope) VALUES (\"cid-webadmin\", \"webadmin\", \"secret-webadmin\", \"${admin_origin}\", \"\$ADMIN_SCOPES\")"
+mysql -u root -ppassword -e "REPLACE INTO clients (id, appId, clientSecret, redirectURI, scope) VALUES (\"cid-webadmin\", \"webadmin\", \"secret-webadmin\", \"${admin_origin}\", \"\$ADMIN_SCOPES\")" box
 EOF
 
 set_progress "70" "Setup logrotate"
