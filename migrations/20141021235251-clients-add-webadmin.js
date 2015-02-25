@@ -10,8 +10,8 @@ exports.up = function(db, callback) {
     // postinstall.sh creates the webadmin entry in production mode
     if (process.env.NODE_ENV !== 'test') return callback(null);
 
-    db.runSql('INSERT INTO clients (id, appId, clientId, clientSecret, name, redirectURI, scope) ' +
-              'VALUES (?, ?, ?, ?, ?, ?, ?)', [ uuid.v4(), 'webadmin', 'cid-webadmin', 'unused', 'WebAdmin', adminOrigin, scopes ],
+    db.runSql('INSERT INTO clients (id, appId, clientSecret, redirectURI, scope) ' +
+              'VALUES (?, ?, ?, ?, ?)', [ 'cid-' + uuid.v4(), 'webadmin', 'unused', adminOrigin, scopes ],
               callback);
 };
 

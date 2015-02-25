@@ -1,6 +1,14 @@
 #### WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
 #### This file is not used by any code and is here to document the latest schema
 
+#### General ideas
+#### Default char set is utf8 and DEFAULT COLLATE is utf8_bin. Collate affects comparisons in WHERE and ORDER
+#### Strict mode is enabled
+#### VARCHAR - stored as part of table row (use for strings)
+#### TEXT - stored offline from table row (use for strings)
+#### BLOB - stored offline from table row (use for binary data)
+#### https://dev.mysql.com/doc/refman/5.0/en/storage-requirements.html
+
 CREATE TABLE IF NOT EXISTS users(
     id VARCHAR(128) NOT NULL UNIQUE,
     username VARCHAR(512) NOT NULL,
@@ -13,33 +21,33 @@ CREATE TABLE IF NOT EXISTS users(
     PRIMARY KEY(id));
 
 CREATE TABLE IF NOT EXISTS tokens(
-    accessToken VARCHAR(512) NOT NULL UNIQUE,
-    userId VARCHAR(512) NOT NULL,
-    clientId VARCHAR(512),
+    accessToken VARCHAR(128) NOT NULL UNIQUE,
+    userId VARCHAR(128) NOT NULL,
+    clientId VARCHAR(128),
     scope VARCHAR(512) NOT NULL,
     expires VARCHAR(512) NOT NULL,
     PRIMARY KEY(accessToken));
 
 CREATE TABLE IF NOT EXISTS clients(
-    id VARCHAR(512) NOT NULL UNIQUE,
-    appId VARCHAR(512) NOT NULL,
+    id VARCHAR(128) NOT NULL UNIQUE,
+    appId VARCHAR(128) NOT NULL,
     clientSecret VARCHAR(512) NOT NULL,
     redirectURI VARCHAR(512) NOT NULL,
     scope VARCHAR(512) NOT NULL,
     PRIMARY KEY(id));
 
 CREATE TABLE IF NOT EXISTS apps(
-    id VARCHAR(512) NOT NULL UNIQUE,
-    appStoreId VARCHAR(512) NOT NULL,
+    id VARCHAR(128) NOT NULL UNIQUE,
+    appStoreId VARCHAR(128) NOT NULL,
     version VARCHAR(32),
     installationState VARCHAR(512) NOT NULL,
     installationProgress VARCHAR(512),
     runState VARCHAR(512),
     healthy INTEGER,
     containerId VARCHAR(128),
-    manifestJson VARCHAR,
+    manifestJson VARCHAR(2048),
     httpPort INTEGER,
-    location VARCHAR(512) NOT NULL UNIQUE,
+    location VARCHAR(128) NOT NULL UNIQUE,
     dnsRecordId VARCHAR(512),
     accessRestriction VARCHAR(512),
     PRIMARY KEY(id));
@@ -47,24 +55,24 @@ CREATE TABLE IF NOT EXISTS apps(
 CREATE TABLE IF NOT EXISTS appPortBindings(
     hostPort VARCHAR(5) NOT NULL UNIQUE,
     containerPort VARCHAR(5) NOT NULL,
-    appId VARCHAR(512) NOT NULL,
+    appId VARCHAR(128) NOT NULL,
     FOREIGN KEY(appId) REFERENCES apps(id),
     PRIMARY KEY(hostPort));
 
-CREATE TABLE IF NOT EXISTS appAddonConfigs(
-    appId VARCHAR(512) NOT NULL,
-    addonId VARCHAR(32) NOT NULL,
-    value VARCHAR(512),
-    FOREIGN KEY(appId) REFERENCES apps(id));
-
 CREATE TABLE IF NOT EXISTS authcodes(
-    authCode VARCHAR(512) NOT NULL UNIQUE,
-    userId VARCHAR(512) NOT NULL,
-    clientId VARCHAR(512) NOT NULL,
+    authCode VARCHAR(128) NOT NULL UNIQUE,
+    userId VARCHAR(128) NOT NULL,
+    clientId VARCHAR(128) NOT NULL,
     PRIMARY KEY(authCode));
 
 CREATE TABLE IF NOT EXISTS settings(
-    name VARCHAR(512) NOT NULL UNIQUE,
+    name VARCHAR(128) NOT NULL UNIQUE,
     value VARCHAR(512),
     PRIMARY KEY(name));
+
+CREATE TABLE IF NOT EXISTS appAddonConfigs(
+    appId VARCHAR(128) NOT NULL,
+    addonId VARCHAR(32) NOT NULL,
+    value VARCHAR(512) NOT NULL,
+    FOREIGN KEY(appId) REFERENCES apps(id));
 
