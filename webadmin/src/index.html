@@ -38,58 +38,8 @@
     <!-- Main Application -->
     <script src="js/index.js"></script>
 
-    <style>
-
-        .animateMe {
-            opacity: 1;
-            -webkit-transition: 0.25s ease all;
-            transition: 0.25s ease all;
-        }
-
-        .animateMe.ng-hide-add,
-        .animateMe.ng-hide-remove {
-            display: block !important;
-            transform: scale(0.9, 0.9);
-            opacity: 0;
-        }
-
-        .animateMeOpacity {
-            opacity: 1;
-            -webkit-transition: 0.25s ease all;
-            transition: 0.25s ease all;
-        }
-
-        .animateMeOpacity.ng-hide-add,
-        .animateMeOpacity.ng-hide-remove {
-            display: block !important;
-            opacity: 0;
-        }
-
-        body {
-            font-family: 'Roboto', sans-serif;
-        }
-
-        .shadow {
-            box-shadow:         0px 2px 5px rgba(0, 0, 0, 0.1);
-            -moz-box-shadow:    0px 2px 5px rgba(0, 0, 0, 0.1);
-            -webkit-box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        .highlight:hover {
-            background-color: rgba(0, 0, 0, 0.1) !important;
-        }
-
-        .grid-item-top {
-            padding: 10px 15px;
-        }
-
-        .grid-item-bottom {
-            padding: 10px 15px;
-            border-top: 1px solid #ddd;
-            background-color: white
-        }
-
-    </style>
+    <!-- Theme CSS -->
+    <link href="theme.css" rel="stylesheet">
 
 </head>
 
@@ -131,7 +81,7 @@
         <!-- /.modal-dialog -->
     </div>
 
-    <div id="wrapper" class="animateMe ng-hide" ng-show="initialized">
+    <div class="animateMe ng-hide" ng-show="initialized">
 
         <!-- Navigation -->
         <nav class="navbar navbar-default navbar-static-top shadow" role="navigation" style="margin-bottom: 0">
@@ -174,7 +124,7 @@
             </div>
         </nav>
 
-        <div id="page-wrapper" style="background-color: #E5E5E5">
+        <div class="page-wrapper">
             <div ng-view id="ng-view"></div>
         </div>
     </div>

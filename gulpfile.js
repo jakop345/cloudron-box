@@ -98,10 +98,20 @@ gulp.task('html-templates', function () {
 
 
 // --------------
+// CSS
+// --------------
+
+gulp.task('css', [], function () {
+    gulp.src('webadmin/src/theme.css').pipe(gulp.dest('webadmin/dist')).pipe(gulp.dest('setup/splash/website'));
+});
+
+
+// --------------
 // Utilities
 // --------------
 
 gulp.task('develop', ['default'], function () {
+    gulp.watch(['webadmin/src/theme.css'], ['css']);
     gulp.watch(['webadmin/src/*.html'], ['html']);
     gulp.watch(['webadmin/src/*.ejs'], ['html-templates']);
     gulp.watch(['webadmin/src/views/*.html'], ['html-views']);
@@ -117,5 +127,5 @@ gulp.task('clean', function (callback) {
 });
 
 gulp.task('default', ['clean'], function () {
-    gulp.start('html', 'js', '3rdparty');
+    gulp.start('html', 'js', '3rdparty', 'css');
 });
