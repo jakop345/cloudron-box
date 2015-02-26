@@ -488,8 +488,14 @@ function downloadManifest(app, callback) {
             error = checkManifestConstraints(manifest);
             if (error) return callback(error);
 
+            // See http://nodejs.org/api/buffer.html#buffer_buf_tojson
+            // in node v0.12 the Buffer constructor would know how to handle manifest.icon directly but not in 0.10
             if (manifest.icon) {
-                safe.fs.writeFileSync(path.join(paths.APPICONS_DIR, app.id + '.png'), new Buffer(manifest.icon));
+                if (manifest.icon.type === 'Buffer') {
+                    safe.fs.writeFileSync(path.join(paths.APPICONS_DIR, app.id + '.png'), new Buffer(manifest.icon.data));
+                } else {
+                    safe.fs.writeFileSync(path.join(paths.APPICONS_DIR, app.id + '.png'), new Buffer(manifest.icon));
+                }
 
                 // delete icon buffer, so we don't store it in the db
                 delete manifest.icon;
