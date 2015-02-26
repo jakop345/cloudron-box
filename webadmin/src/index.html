@@ -1,87 +1,28 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />
 
     <title> Cloudron </title>
 
-    <!-- Bootstrap Core CSS -->
-    <link href="3rdparty/sb-admin-2/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- MetisMenu CSS -->
-    <link href="3rdparty/sb-admin-2/css/plugins/metisMenu/metisMenu.min.css" rel="stylesheet">
-
-    <!-- Timeline CSS -->
-    <link href="3rdparty/sb-admin-2/css/plugins/timeline.css" rel="stylesheet">
-
-    <!-- Custom CSS -->
-    <link href="3rdparty/sb-admin-2/css/sb-admin-2.css" rel="stylesheet">
-
-    <!-- Morris Charts CSS -->
-    <link href="3rdparty/sb-admin-2/css/plugins/morris.css" rel="stylesheet">
-
     <!-- Custom Fonts -->
-    <link href="3rdparty/sb-admin-2/font-awesome-4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="3rdparty/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="3rdparty/fonts/roboto.woff2" rel="stylesheet" type="text/css">  <!-- From https://fonts.googleapis.com/css?family=Roboto:300 -->
 
-    <link href="3rdparty/rickshaw/rickshaw.min.css" rel="stylesheet">
+    <!-- jQuery-->
+    <script src="3rdparty/js/jquery.min.js"></script>
 
-    <link href='https://fonts.googleapis.com/css?family=Roboto:300' rel='stylesheet' type='text/css'>
+    <!-- Bootstrap Core CSS -->
+    <link href="3rdparty/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 
-    <style>
+    <!-- Bootstrap Theme CSS -->
+    <link href="3rdparty/bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
 
-    .animateMe {
-        opacity: 1;
-        -webkit-transition: 0.25s ease all;
-        transition: 0.25s ease all;
-    }
+    <!-- Bootstrap Core JavaScript -->
+    <script src="3rdparty/bootstrap/js/bootstrap.min.js"></script>
 
-    .animateMe.ng-hide-add,
-    .animateMe.ng-hide-remove {
-        display: block !important;
-        transform: scale(0.9, 0.9);
-        opacity: 0;
-    }
-
-    .animateMeOpacity {
-        opacity: 1;
-        -webkit-transition: 0.25s ease all;
-        transition: 0.25s ease all;
-    }
-
-    .animateMeOpacity.ng-hide-add,
-    .animateMeOpacity.ng-hide-remove {
-        display: block !important;
-        opacity: 0;
-    }
-
-    body {
-        font-family: 'Roboto', sans-serif;
-    }
-
-    .shadow {
-        box-shadow:         0px 2px 5px rgba(0, 0, 0, 0.1);
-        -moz-box-shadow:    0px 2px 5px rgba(0, 0, 0, 0.1);
-        -webkit-box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
-    }
-
-    .highlight:hover {
-        background-color: rgba(0, 0, 0, 0.1) !important;
-    }
-
-    .grid-item-top {
-        padding: 10px 15px;
-    }
-
-    .grid-item-bottom {
-        padding: 10px 15px;
-        border-top: 1px solid #ddd;
-        background-color: white
-    }
-
-    </style>
-
-    <!-- angularjs scripts -->
+    <!-- Angularjs scripts -->
     <script src="3rdparty/js/angular.min.js"></script>
     <script src="3rdparty/js/angular-loader.min.js"></script>
     <script src="3rdparty/js/angular-route.min.js"></script>
@@ -89,31 +30,68 @@
     <script src="3rdparty/js/angular-md5.min.js"></script>
     <script src="3rdparty/js/autofill-event.js"></script>
 
-    <!-- jQuery Version 1.11.0 -->
-    <script src="3rdparty/sb-admin-2/js/jquery-1.11.0.js"></script>
-
     <script src="3rdparty/js/ansi_up.js"></script>
 
-    <!-- Bootstrap Core JavaScript -->
-    <script src="3rdparty/sb-admin-2/js/bootstrap.min.js"></script>
-
-    <!-- Metis Menu Plugin JavaScript -->
-    <script src="3rdparty/sb-admin-2/js/plugins/metisMenu/metisMenu.min.js"></script>
-
-    <!-- Custom Theme JavaScript -->
-    <script src="3rdparty/sb-admin-2/js/sb-admin-2.js"></script>
-
-    <!-- Rickshaw -->
-    <script src="3rdparty/rickshaw/d3.js"></script>
-    <script src="3rdparty/rickshaw/rickshaw.js"></script>
-
-    <!-- cloudron oauth -->
+    <!-- Cloudron oauth -->
     <script src="/api/v1/oauth/cloudron.js"></script>
 
-    <!-- application -->
+    <!-- Main Application -->
     <script src="js/index.js"></script>
 
-  </head>
+    <style>
+
+        .animateMe {
+            opacity: 1;
+            -webkit-transition: 0.25s ease all;
+            transition: 0.25s ease all;
+        }
+
+        .animateMe.ng-hide-add,
+        .animateMe.ng-hide-remove {
+            display: block !important;
+            transform: scale(0.9, 0.9);
+            opacity: 0;
+        }
+
+        .animateMeOpacity {
+            opacity: 1;
+            -webkit-transition: 0.25s ease all;
+            transition: 0.25s ease all;
+        }
+
+        .animateMeOpacity.ng-hide-add,
+        .animateMeOpacity.ng-hide-remove {
+            display: block !important;
+            opacity: 0;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .shadow {
+            box-shadow:         0px 2px 5px rgba(0, 0, 0, 0.1);
+            -moz-box-shadow:    0px 2px 5px rgba(0, 0, 0, 0.1);
+            -webkit-box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .highlight:hover {
+            background-color: rgba(0, 0, 0, 0.1) !important;
+        }
+
+        .grid-item-top {
+            padding: 10px 15px;
+        }
+
+        .grid-item-bottom {
+            padding: 10px 15px;
+            border-top: 1px solid #ddd;
+            background-color: white
+        }
+
+    </style>
+
+</head>
 
 <body ng-app="Application" ng-controller="MainController">
 
@@ -157,39 +135,43 @@
 
         <!-- Navigation -->
         <nav class="navbar navbar-default navbar-static-top shadow" role="navigation" style="margin-bottom: 0">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="index.html">Cloudron <span class="small text-muted">{{config.version}}</span></a>
-            </div>
-            <!-- /.navbar-header -->
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="index.html">Cloudron <span class="small text-muted">{{config.version}}</span></a>
+                </div>
+                <!-- /.navbar-header -->
 
-            <ul class="nav navbar-top-links navbar-right">
-                <li>
-                    <a ng-class="{ active: isActive('/apps')}" href="#/apps"><i class="fa fa-cloud-download fa-fw"></i> My Apps</a>
-                </li>
-                <li>
-                    <a ng-class="{ active: isActive('/appstore')}" href="#/appstore"><i class="fa fa-th-large fa-fw"></i> App Store</a>
-                </li>
-                <li ng-show="userInfo.admin">
-                    <a ng-class="{ active: isActive('/userlist')}" href="#/userlist"><i class="fa fa-users fa-fw"></i> Users</a>
-                </li>
-                <li class="dropdown">
-                  <a href="" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><img ng-src="{{userInfo.gravatar}}"/> {{userInfo.username}} <span class="caret"></span></a>
-                  <ul class="dropdown-menu" role="menu">
-                    <li><a href="#/account"><i class="fa fa-user fa-fw"></i> Account</a></li>
-                    <li><a href="#/security"><i class="fa fa-unlock-alt fa-fw"></i> Security</a></li>
-                    <li ng-show="userInfo.admin"><a href="#/settings"><i class="fa fa-wrench fa-fw"></i> Settings</a></li>
-                    <li class="divider"></li>
-                    <li><a href="" ng-click="logout($event)"><i class="fa fa-sign-out fa-fw"></i> Logout</a></li>
-                  </ul>
-                </li>
-            </ul>
-            <!-- /.navbar-top-links -->
+                <div class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav navbar-right">
+                        <li>
+                            <a ng-class="{ active: isActive('/apps')}" href="#/apps"><i class="fa fa-cloud-download fa-fw"></i> My Apps</a>
+                        </li>
+                        <li>
+                            <a ng-class="{ active: isActive('/appstore')}" href="#/appstore"><i class="fa fa-th-large fa-fw"></i> App Store</a>
+                        </li>
+                        <li ng-show="userInfo.admin">
+                            <a ng-class="{ active: isActive('/userlist')}" href="#/userlist"><i class="fa fa-users fa-fw"></i> Users</a>
+                        </li>
+                        <li class="dropdown">
+                          <a href="" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><img ng-src="{{userInfo.gravatar}}"/> {{userInfo.username}} <span class="caret"></span></a>
+                          <ul class="dropdown-menu" role="menu">
+                            <li><a href="#/account"><i class="fa fa-user fa-fw"></i> Account</a></li>
+                            <li><a href="#/security"><i class="fa fa-unlock-alt fa-fw"></i> Security</a></li>
+                            <li ng-show="userInfo.admin"><a href="#/settings"><i class="fa fa-wrench fa-fw"></i> Settings</a></li>
+                            <li class="divider"></li>
+                            <li><a href="" ng-click="logout($event)"><i class="fa fa-sign-out fa-fw"></i> Logout</a></li>
+                          </ul>
+                        </li>
+                    </ul>
+
+                </div>
+            </div>
         </nav>
 
         <div id="page-wrapper" style="background-color: #E5E5E5">
