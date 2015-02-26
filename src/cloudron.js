@@ -211,7 +211,7 @@ function getConfig(callback) {
     callback(null, {
         apiServerOrigin: config.apiServerOrigin(),
         webServerOrigin: config.webServerOrigin(),
-        isDev: /dev/i.test(config.get('boxVersionsUrl')),
+        isDev: /dev/i.test(config.get('boxVersionsUrl')) || config.LOCAL,
         fqdn: config.fqdn(),
         ip: getIp(),
         version: config.version(),
