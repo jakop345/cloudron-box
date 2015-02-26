@@ -3,13 +3,7 @@
 angular.module('Application').controller('AppStoreController', ['$scope', '$location', '$timeout', 'Client', 'AppStore', function ($scope, $location, $timeout, Client, AppStore) {
     if (!Client.getUserInfo().admin) $location.path('/');
 
-    $scope.LOADING = 1;
-    $scope.ERROR = 2;
-    $scope.LOADED = 3;
-
-    $scope.loadStatus = $scope.LOADING;
-    $scope.loadError = '';
-
+    $scope.ready = false;
     $scope.apps = [];
 
     $scope.installApp = function (app) {
@@ -26,40 +20,16 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
     };
 
     function refresh() {
+        $scope.ready = false;
+
         AppStore.getApps(function (error, apps) {
-            if (error && error.statusCode === 420) return $timeout(refresh, 500);
             if (error) {
-                $scope.loadStatus = $scope.ERROR;
-                $scope.loadError = error.message;
-                return;
+                console.error(error);
+                return $timeout(refresh, 1000);
             }
 
-            Client.refreshInstalledApps(function (error) {
-                if (error) {
-                    $scope.loadStatus = $scope.ERROR;
-                    $scope.loadError = error.message;
-                    return;
-                }
-
-                for (var app in apps) {
-                    var found = false;
-                    for (var i = 0; i < $scope.apps.length; ++i) {
-                        if (apps[app].id === $scope.apps[i].id) {
-                            found = true;
-                            break;
-                        }
-                    }
-
-                    if (!found) $scope.apps.push(apps[app]);
-                }
-
-                $scope.apps.forEach(function (app, index) {
-                    if (Client._installedApps) app.installed = Client._installedApps.some(function (a) { return a.appStoreId === app.id; });
-                    if (!apps[app.id]) $scope.apps.splice(index, 1);
-                });
-
-                $scope.loadStatus = $scope.LOADED;
-            });
+            $scope.apps = apps;
+            $scope.ready = true;
         });
     }
 
