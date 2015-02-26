@@ -1,21 +1,18 @@
-<div class="row">
-    <div class="col-lg-12">
-        <h1 class="page-header">Users</h1>
-    </div>
-</div>
-
-<div class="row" ng-show="userInfo.admin">
-    <div class="col-lg-12">
-        <button class="btn btn-primary btn-outline pull-right" ng-click="addUser()">New User</button>
-    </div>
-</div>
-
 <div class="row animateMeOpacity ng-hide" ng-show="!ready">
-    <div class="col-lg-12" class="text-center">
-        <center>
-            <h2>Loading</h2>
-            <i class="fa fa-circle-o-notch fa-spin fa-5x"></i>
-        </center>
+    <div class="col-lg-12 text-center">
+        <h2><i class="fa fa-spinner fa-pulse"></i> Loading</h2>
+    </div>
+</div>
+
+<div class="row animateMeOpacity ng-hide" ng-show="ready">
+    <div class="col-lg-12">
+        <h1>Users</h1>
+    </div>
+</div>
+
+<div class="row animateMeOpacity ng-hide" ng-show="ready && userInfo.admin">
+    <div class="col-lg-12">
+        <button class="btn btn-primary btn-outline pull-right" ng-click="addUser()"><i class="fa fa-user-plus"></i> New User</button>
     </div>
 </div>
 
