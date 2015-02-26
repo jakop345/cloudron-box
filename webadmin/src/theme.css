@@ -85,3 +85,7 @@ body {
     padding-top: 150px;
     text-align: center;
 }
+
+.badge-success {
+    background-color: #5CB85C;
+}

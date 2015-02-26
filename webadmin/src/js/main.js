@@ -31,6 +31,18 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
         window.location.href = '/error.html';
     };
 
+    $scope.update = function () {
+        $('#updateModal').modal('hide');
+
+        $scope.initialized = false;
+
+        Client.update(function (error) {
+            if (error) console.error(error);
+
+            window.location.href = '/update.html';
+        });
+    };
+
     Client.isServerFirstTime(function (error, isFirstTime) {
         if (error) return $scope.error(error);
         if (isFirstTime) return $scope.setup();

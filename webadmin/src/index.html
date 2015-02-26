@@ -63,6 +63,31 @@
         <!-- /.modal-dialog -->
     </div>
 
+    <!-- Modal really update -->
+    <div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="updateModalLabel">Really update the Cloudron?</h4>
+                </div>
+                <div class="modal-body">
+                    <p>This update will install version <b>{{config.update.box.version}}</b> on your Cloudron.</p>
+                    <p>Recent Changes:</p>
+                    <ul>
+                        <li ng-repeat="change in config.update.box.changelog">{{change}}</li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-danger" ng-click="update()">Update</button>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+
     <div class="animateMe ng-hide" ng-show="initialized">
 
         <!-- Navigation -->
@@ -76,6 +101,7 @@
                         <span class="icon-bar"></span>
                     </button>
                     <a class="navbar-brand" href="index.html">Cloudron <span class="small text-muted">{{config.version}}</span></a>
+                    <a class="navbar-text" href="" data-toggle="modal" data-target="#updateModal" ng-show="config.update.box"><span class="badge badge-success">Update available</span></a>
                 </div>
                 <!-- /.navbar-header -->
 
