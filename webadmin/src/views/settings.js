@@ -3,6 +3,7 @@
 angular.module('Application').controller('SettingsController', ['$scope', '$location', 'Client', function ($scope, $location, Client) {
     if (!Client.getUserInfo().admin) $location.path('/');
 
+    $scope.ready = false;
     $scope.user = Client.getUserInfo();
     $scope.config = Client.getConfig();
     $scope.nakedDomainApp = null;
@@ -96,6 +97,8 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
                         break;
                     }
                 }
+
+                $scope.ready = true;
             });
         });
     });
