@@ -27,6 +27,10 @@ gulp.task('3rdparty', function () {
         ])
         .pipe(gulp.dest('webadmin/dist/3rdparty/'))
         .pipe(gulp.dest('setup/splash/website/3rdparty'));
+
+    gulp.src('node_modules/bootstrap-sass/assets/javascripts/bootstrap.min.js')
+        .pipe(gulp.dest('webadmin/dist/3rdparty/js'))
+        .pipe(gulp.dest('setup/splash/website/3rdparty/js'));
 });
 
 
