@@ -7,7 +7,10 @@ var ejs = require('gulp-ejs'),
     del = require('del'),
     concat = require('gulp-concat'),
     uglify = require('gulp-uglify'),
+    sass = require('gulp-sass'),
     sourcemaps = require('gulp-sourcemaps'),
+    minifyCSS = require('gulp-minify-css'),
+    autoprefixer = require('gulp-autoprefixer'),
     fs = require('fs');
 
 gulp.task('3rdparty', function () {
@@ -102,7 +105,14 @@ gulp.task('html-templates', function () {
 // --------------
 
 gulp.task('css', [], function () {
-    gulp.src('webadmin/src/theme.css').pipe(gulp.dest('webadmin/dist')).pipe(gulp.dest('setup/splash/website'));
+    gulp.src('webadmin/src/theme.scss')
+        .pipe(sourcemaps.init())
+        .pipe(sass({ includePaths: ['node_modules/bootstrap-sass/assets/stylesheets/'] }))
+        .pipe(autoprefixer())
+        .pipe(minifyCSS())
+        .pipe(sourcemaps.write())
+        .pipe(gulp.dest('webadmin/dist'))
+        .pipe(gulp.dest('setup/splash/website'));
 });
 
 
@@ -111,7 +121,7 @@ gulp.task('css', [], function () {
 // --------------
 
 gulp.task('develop', ['default'], function () {
-    gulp.watch(['webadmin/src/theme.css'], ['css']);
+    gulp.watch(['webadmin/src/theme.scss'], ['css']);
     gulp.watch(['webadmin/src/*.html'], ['html']);
     gulp.watch(['webadmin/src/*.ejs'], ['html-templates']);
     gulp.watch(['webadmin/src/views/*.html'], ['html-views']);
