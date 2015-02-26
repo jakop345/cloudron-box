@@ -3,6 +3,7 @@
 angular.module('Application').controller('SecurityController', ['$scope', 'Client', function ($scope, Client) {
     $scope.activeClients = [];
     $scope.tokenInUse = null;
+    $scope.ready = false;
 
     $scope.removeAccessTokens = function (client, event) {
         client._busy = true;
@@ -21,6 +22,7 @@ angular.module('Application').controller('SecurityController', ['$scope', 'Clien
             if (error) return console.error(error);
 
             $scope.activeClients = activeClients;
+            $scope.ready = true;
         });
     });
 }]);
