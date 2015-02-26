@@ -39,8 +39,15 @@ body {
 }
 
 .grid-item {
+    padding: 15px;
+    min-width: 128px;
+}
+
+.grid-item-content {
     background-color: white;
-    margin: 10px;
+    box-shadow:         0px 2px 5px rgba(0, 0, 0, 0.1);
+    -moz-box-shadow:    0px 2px 5px rgba(0, 0, 0, 0.1);
+    -webkit-box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .grid-item-top {
