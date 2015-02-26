@@ -1,29 +1,31 @@
-<div class="row">
-    <div class="col-md-4 col-md-offset-4">
+<div style="max-width: 600px; margin: 0 auto;">
+    <div class="text-left">
         <h1>Account</h1>
     </div>
 </div>
 
-<div class="row">
-    <div class="col-md-4 col-md-offset-4">
-        <div style="background-color: white;" class="shadow">
-            <div class="grid-item-top">
+<div style="background-color: white; max-width: 600px; margin: 0 auto;" class="shadow">
+    <div class="grid-item-top">
+        <div class="row">
+            <div class="col-xs-4" style="min-width: 150px;">
+                <img width="128" height="128" ng-src="{{ userInfo.gravatarHuge }}"/>
+            </div>
+            <div class="col-xs-8">
                 <div class="row">
-                    <div class="col-md-3">
-                        <img width="128" height="128" ng-src="{{ userInfo.gravatarHuge }}"/>
-                    </div>
-                    <div class="col-md-2 text-left">
-                        <div class="text-muted"><h4>Username</h4></div>
-                        <div class="text-muted"><h4>Email</h4></div>
-                    </div>
-                    <div class="col-md-7 text-right">
-                        <div style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden"><h4>{{ user.username }}</h4></div>
-                        <div style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden"><h4>{{ user.email }}</h4></div>
-                        <br/><br/><br/>
-                        <button class="btn btn-outline btn-danger pull-right" ng-click="changePassword()">Change Password</button>
+                    <div class="col-xs-4 text-muted"><h4>Username</h4></div>
+                    <div class="col-xs-8 text-right"><h4>{{ user.username }}</h4></div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-4 text-muted"><h4>Email</h4></div>
+                    <div class="col-xs-8 text-right"><h4 class="text-right">{{ user.email }}</h4></div>
+                </div>
+                <br/>
+                <div class="row">
+                    <div class="col-xs-12 text-right">
+                        <button class="btn btn-outline btn-danger" ng-click="changePassword()">Change Password</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</div
