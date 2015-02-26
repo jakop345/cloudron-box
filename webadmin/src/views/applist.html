@@ -6,8 +6,8 @@
 
 <div class="row">
     <div class="col-md-1" ng-repeat="app in installedApps" style="padding: 15px">
-        <div style="background-color: white;" class="shadow">
-            <div class="panel-heading">
+        <div style="background-color: white;" class="shadow highlight">
+            <div class="grid-item-top">
                 <div class="row">
                     <div class="col-xs-12 text-center">
                         <img ng-show="app.icon" width="48" height="48" ng-src="{{app.icon}}"/>
@@ -28,7 +28,7 @@
                 </div>
             </div>
             <a href="" ng-click="showDetails(app)">
-                <div class="panel-footer">
+                <div class="grid-item-bottom">
                     <span class="pull-left">Details</span>
                     <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
                     <div class="clearfix"></div>
