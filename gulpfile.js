@@ -19,7 +19,8 @@ gulp.task('3rdparty', function () {
         'webadmin/src/3rdparty/**/*.eot',
         'webadmin/src/3rdparty/**/*.svg',
         'webadmin/src/3rdparty/**/*.ttf',
-        'webadmin/src/3rdparty/**/*.woff'
+        'webadmin/src/3rdparty/**/*.woff',
+        'webadmin/src/3rdparty/**/*.woff2'
         ])
         .pipe(gulp.dest('webadmin/dist/3rdparty/'))
         .pipe(gulp.dest('setup/splash/website/3rdparty'));
