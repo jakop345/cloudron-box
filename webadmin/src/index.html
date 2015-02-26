@@ -121,7 +121,7 @@
                           <ul class="dropdown-menu" role="menu">
                             <li><a href="#/account"><i class="fa fa-user fa-fw"></i> Account</a></li>
                             <li><a href="#/security"><i class="fa fa-unlock-alt fa-fw"></i> Security</a></li>
-                            <li ng-show="userInfo.admin"><a href="#/settings"><i class="fa fa-wrench fa-fw"></i> Settings</a></li>
+                            <li ng-show="userInfo.admin && config.isDev"><a href="#/settings"><i class="fa fa-wrench fa-fw"></i> Settings</a></li>
                             <li ng-show="userInfo.admin && config.isDev"><a href="" ng-click="backup()"><i class="fa fa-database fa-fw"></i> Backup</a></li>
                             <li class="divider"></li>
                             <li><a href="" ng-click="logout($event)"><i class="fa fa-sign-out fa-fw"></i> Logout</a></li>
