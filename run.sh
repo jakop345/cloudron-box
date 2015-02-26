@@ -17,7 +17,7 @@ readonly PROVISION_BOX_VERSIONS_URL=0.1
 readonly DATA_DIR=~/.cloudron/data
 readonly CONFIG_DIR=~/.cloudron/configs
 readonly NGINX_ROOT=~/.cloudron/configs/nginx
-readonly ADMIN_LOCATION=admin
+readonly ADMIN_LOCATION=my
 readonly FQDN="${ADMIN_LOCATION}-localhost"
 
 if [[ ! -f "${SCRIPT_DIR}/../appstore/src/scripts/generate_certificate.sh" ]]; then
@@ -43,9 +43,9 @@ ${SCRIPT_DIR}/../appstore/src/scripts/generate_certificate.sh "US" "California" 
 
 # adjust the generated nginx config for local use
 ${SCRIPT_DIR}/node_modules/.bin/ejs-cli -f "${SCRIPT_DIR}/setup/start/nginx/appconfig.ejs" \
-    -O "{ \"vhost\": \"${FQDN}\", \"isAdmin\": true, \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${NGINX_ROOT}/naked_domain.conf"
+    -O "{ \"vhost\": \"localhost\", \"isAdmin\": true, \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${NGINX_ROOT}/naked_domain.conf"
 ${SCRIPT_DIR}/node_modules/.bin/ejs-cli -f "${SCRIPT_DIR}/setup/start/nginx/appconfig.ejs" \
-    -O "{ \"vhost\": \"${FQDN}\", \"isAdmin\": true, \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${NGINX_ROOT}/admin.conf"
+    -O "{ \"vhost\": \"${FQDN}\", \"isAdmin\": true, \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${NGINX_ROOT}/applications/admin.conf"
 
 $GNU_SED -e "s/user www-data/user ${USER}/" -i "${NGINX_ROOT}/nginx.conf"
 $GNU_SED -e "s/^pid .*/pid \/tmp\/nginx.pid;/" -i "${NGINX_ROOT}/nginx.conf"
