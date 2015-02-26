@@ -150,11 +150,12 @@ function validatePortBindings(portBindings) {
         53, /* dns */
         80, /* http */
         443, /* https */
-        2003, /* graphite */
-        2004, /* graphite */
+        2003, /* graphite (lo) */
+        2004, /* graphite (lo) */
         2020, /* install server */
-        3000, /* app server */
-        8000 /* graphite */
+        3000, /* app server (lo) */
+        3306, /* mysql (lo) */
+        8000 /* graphite (lo) */
     ];
 
     for (var containerPort in portBindings) {
