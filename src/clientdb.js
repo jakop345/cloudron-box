@@ -60,11 +60,15 @@ function getAllWithDetails(callback) {
         //   2) oauth proxy records are always the app id prefixed with 'proxy-'
         //   3) addon oauth records for apps prefixed with 'addon-'
 
+        var tmp = [];
         async.each(results, function (record, callback) {
             if (record.appId === constants.ADMIN_CLIENT_ID) {
                 record.name = 'Webadmin';
                 record.location = constants.ADMIN_LOCATION;
-                return callback(null, record);
+
+                tmp.push(record);
+
+                return callback(null);
             }
 
             var appId = record.appId.indexOf('proxy-') === 0 ? record.appId.slice('proxy-'.length) : record.appId;
@@ -74,9 +78,14 @@ function getAllWithDetails(callback) {
                 record.name = result.manifest.title + (record.appId.indexOf('proxy-') === 0 ? 'OAuth Proxy' : '');
                 record.location = result.location;
 
-                callback(null, record);
+                tmp.push(record);
+
+                callback(null);
             });
-        }, callback);
+        }, function (error) {
+            if (error) return callback(error);
+            callback(null, tmp);
+        });
     });
 }
 
