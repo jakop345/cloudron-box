@@ -69,6 +69,9 @@ CloudronError.BAD_FIELD = 'Field error';
 CloudronError.INTERNAL_ERROR = 'Internal Error';
 CloudronError.ALREADY_PROVISIONED = 'Already Provisioned';
 CloudronError.APPSTORE_DOWN = 'Appstore Down';
+CloudronError.BAD_USERNAME = 'Bad username';
+CloudronError.BAD_EMAIL = 'Bad email';
+CloudronError.BAD_PASSWORD = 'Bad password';
 
 function initialize(callback) {
     assert(typeof callback === 'function');
@@ -115,9 +118,14 @@ function activate(username, password, email, callback) {
         if (count !== 0) return callback(new CloudronError(CloudronError.ALREADY_PROVISIONED));
 
         user.create(username, password, email, true /* admin */, function (error) {
-            if (error && error.reason === UserError.ALREADY_EXISTS) return callback(new CloudronError(CloudronError.ALREADY_PROVISIONED));
-            if (error && error instanceof UserError) return callback(error);
-            if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
+            if (error) {
+                if (error.reason === UserError.ALREADY_EXISTS) return callback(new CloudronError(CloudronError.ALREADY_PROVISIONED));
+                if (error.reason === UserError.BAD_USERNAME) return callback(new CloudronError(CloudronError.BAD_USERNAME));
+                if (error.reason === UserError.BAD_PASSWORD) return callback(new CloudronError(CloudronError.BAD_PASSWORD));
+                if (error.reason === UserError.BAD_EMAIL) return callback(new CloudronError(CloudronError.BAD_EMAIL));
+
+                return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
+            }
 
             clientdb.getByAppId('webadmin', function (error, result) {
                 if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
