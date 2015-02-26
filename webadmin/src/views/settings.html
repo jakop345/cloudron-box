@@ -11,12 +11,12 @@
 </div>
 
 <div class="row animateMeOpacity ng-hide" ng-show="ready">
-    <div class="col-lg-6 col-md-6">
-        <div class="panel panel-primary">
-            <div class="panel-heading">
-                Server
+    <div class="col-md-6">
+        <div class="shadow grid-item">
+            <div class="grid-item-top">
+                <big>Server</big>
             </div>
-            <div class="panel-body">
+            <div class="grid-item-bottom">
                 <ul class="list-group">
                     <li class="list-group-item">Naked Domain App:
                         <span class="pull-right">
@@ -29,12 +29,13 @@
             </div>
         </div>
     </div>
-    <div class="col-lg-6 col-md-6">
-        <div class="panel panel-primary">
-            <div class="panel-heading">
-                Certificate
+
+    <div class="col-md-6">
+        <div class="shadow grid-item">
+            <div class="grid-item-top">
+                <big>Certificate</big>
             </div>
-            <div class="panel-body">
+            <div class="grid-item-bottom text-right">
                 <ul class="list-group">
                      <li class="list-group-item">
                         <input type="file" id="idCertificate" style="display:none"/>
@@ -63,7 +64,7 @@
                         </div>
                     </li>
                 </ul>
-                <button class="btn btn-outline btn-success pull-right" ng-click="setCertificate()">Upload Certificate</button>
+                <button class="btn btn-outline btn-success" ng-click="setCertificate()">Upload Certificate</button>
             </div>
         </div>
     </div>
