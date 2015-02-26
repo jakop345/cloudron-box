@@ -51,3 +51,32 @@ body {
 .page-wrapper {
     padding: 0px 30px;
 }
+
+.navbar-default .navbar-nav>li>a {
+    color: #428BCA;
+}
+
+.navbar-default .navbar-nav>li>a:hover {
+    color: #337ab7;
+}
+
+.btn.btn-outline:hover {
+    color: #FFF;
+}
+
+.btn.btn-outline {
+    color: #245580;
+}
+
+.btn-success.btn-outline {
+    color: #5CB85C;
+}
+
+.btn-danger.btn-outline {
+    color: #b92c28;
+}
+
+.btn.btn-outline {
+    background-color: transparent;
+    background-image: none;
+}
