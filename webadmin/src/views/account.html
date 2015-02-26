@@ -1,22 +1,28 @@
-
 <div class="row">
-    <div class="col-lg-12">
-        <h1 class="page-header">Account</h1>
+    <div class="col-md-4 col-md-offset-4">
+        <h1>Account</h1>
     </div>
 </div>
 
 <div class="row">
-    <div class="col-lg-6 col-md-6">
-        <div class="panel panel-primary">
-            <div class="panel-heading">
-                Account
-            </div>
-            <div class="panel-body">
-                <ul class="list-group">
-                    <li class="list-group-item">Username <span class="pull-right">{{user.username}}</span></li>
-                    <li class="list-group-item">Email <span class="pull-right">{{user.email}}</span></li>
-                </ul>
-                <button class="btn btn-outline btn-danger pull-right" ng-click="changePassword()">Change Password</button>
+    <div class="col-md-4 col-md-offset-4">
+        <div style="background-color: white;" class="shadow">
+            <div class="grid-item-top">
+                <div class="row">
+                    <div class="col-md-3">
+                        <img width="128" height="128" ng-src="{{ userInfo.gravatarHuge }}"/>
+                    </div>
+                    <div class="col-md-2 text-left">
+                        <div class="text-muted"><h4>Username</h4></div>
+                        <div class="text-muted"><h4>Email</h4></div>
+                    </div>
+                    <div class="col-md-7 text-right">
+                        <div style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden"><h4>{{ user.username }}</h4></div>
+                        <div style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden"><h4>{{ user.email }}</h4></div>
+                        <br/><br/><br/>
+                        <button class="btn btn-outline btn-danger pull-right" ng-click="changePassword()">Change Password</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
