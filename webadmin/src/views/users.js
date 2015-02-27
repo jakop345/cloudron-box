@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('Application').controller('UserListController', ['$scope', '$location', 'Client', function ($scope, $location, Client) {
+angular.module('Application').controller('UsersController', ['$scope', '$location', 'Client', function ($scope, $location, Client) {
     if (!Client.getUserInfo().admin) $location.path('/');
 
     $scope.ready = false;

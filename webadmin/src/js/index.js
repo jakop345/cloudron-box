@@ -12,9 +12,9 @@ app.config(['$routeProvider', function ($routeProvider) {
     }).when('/userpassword', {
         controller: 'UserPasswordController',
         templateUrl: 'views/userpassword.html'
-    }).when('/userlist', {
-        controller: 'UserListController',
-        templateUrl: 'views/userlist.html'
+    }).when('/users', {
+        controller: 'UsersController',
+        templateUrl: 'views/users.html'
     }).when('/appstore', {
         controller: 'AppStoreController',
         templateUrl: 'views/appstore.html'
