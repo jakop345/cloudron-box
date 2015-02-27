@@ -9,9 +9,6 @@ var app = angular.module('Application', ['ngRoute', 'ngAnimate', 'angular-md5'])
 app.config(['$routeProvider', function ($routeProvider) {
     $routeProvider.when('/', {
         redirectTo: '/apps'
-    }).when('/userpassword', {
-        controller: 'UserPasswordController',
-        templateUrl: 'views/userpassword.html'
     }).when('/users', {
         controller: 'UsersController',
         templateUrl: 'views/users.html'
