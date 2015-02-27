@@ -14,10 +14,6 @@ angular.module('Application').controller('AppListController', ['$scope', '$locat
         accessRestriction: ''
     };
 
-    $scope.showDetails = function (app) {
-        $location.path('/app/' + app.id + '/details');
-    };
-
     $scope.showConfigure = function (app) {
         $scope.appconfigure.app = app;
         $scope.appconfigure.location = app.location;

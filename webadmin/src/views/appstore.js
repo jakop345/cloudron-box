@@ -5,18 +5,60 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
 
     $scope.ready = false;
     $scope.apps = [];
+    $scope.config = Client.getConfig();
 
-    $scope.installApp = function (app) {
-        $location.path('/app/' + app.id + '/install');
+    $scope.appinstall = {
+        busy: false,
+        error: {},
+        app: {},
+        location: '',
+        password: '',
+        portBindings: {},
+        accessRestriction: ''
     };
 
-    $scope.openApp = function (app) {
-        for (var i = 0; i < Client._installedApps.length; i++) {
-            if (Client._installedApps[i].appStoreId === app.id) {
-                window.open('https://' + Client._installedApps[i].fqdn);
-                break;
-            }
+    $scope.showInstall = function (app) {
+        $scope.appinstall.app = app;
+        $scope.appinstall.location = app.location;
+        $scope.appinstall.portBindings = app.manifest.tcpPorts;
+        $scope.appinstall.accessRestriction = app.accessRestriction;
+        for (var containerPort in $scope.appinstall.portBindings) {
+            $scope.appinstall.portBindings[containerPort].hostPort = app.portBindings[containerPort];
         }
+
+        $('#appInstallModal').modal('show');
+    };
+
+    $scope.doInstall = function () {
+        $scope.appinstall.busy = true;
+        $scope.appinstall.error.name = null;
+        $scope.appinstall.error.password = null;
+
+        var portBindings = { };
+        for (var containerPort in $scope.appinstall.portBindings) {
+            portBindings[containerPort] = $scope.appinstall.portBindings[containerPort].hostPort;
+        }
+
+        Client.installApp($scope.appinstall.app.id, $scope.app.version, $scope.appinstall.password, $scope.appinstall.app.title, { location: $scope.appinstall.location, portBindings: portBindings, accessRestriction: $scope.appinstall.accessRestriction }, function (error) {
+            if (error) {
+                if (error.statusCode === 409) {
+                    $scope.appinstall.error.name = 'Application already exists.';
+                } else if (error.statusCode === 403) {
+                    $scope.appinstall.error.password = 'Wrong password provided.';
+                    $scope.appinstall.password = '';
+                } else {
+                    $scope.appinstall.error.name = 'App with the name ' + $scope.appinstall.app.name + ' cannot be installed.';
+                }
+
+                $scope.appinstall.busy = false;
+                return;
+            }
+
+            $scope.appinstall.password = '';
+            $scope.appinstall.busy = false;
+
+            $('#appInstallModal').modal('hide');
+        });
     };
 
     function refresh() {
