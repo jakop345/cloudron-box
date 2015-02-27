@@ -13,15 +13,15 @@
                 <h4 class="modal-title" id="appInstallModalLabel">Install {{ appinstall.app.manifest.title }}</h4>
             </div>
             <div class="modal-body">
-                <form class="form-signin" role="form" name="config_form" ng-submit="doInstall()" autocomplete="off">
-                    <div class="form-group" ng-class="{ 'has-error': config_form.location.$dirty && config_form.location.$invalid }">
+                <form class="form-signin" role="form" name="install_form" ng-submit="doInstall(install_form)" autocomplete="off">
+                    <div class="form-group" ng-class="{ 'has-error': install_form.location.$dirty && install_form.location.$invalid }">
                         <label class="control-label" for="inputLocation">Location</label>
                         <div class="input-group form-inline">
                             <input type="text" class="form-control" ng-model="appinstall.location" id="inputLocation" name="location" required autofocus>
                             <div class="input-group-addon">.{{ config.fqdn }}</div>
                         </div>
                     </div>
-                    <div class="form-group" ng-class="{ 'has-error': (!config_form.password.$dirty && error.password) || (config_form.password.$dirty && config_form.password.$invalid) }">
+                    <div class="form-group" ng-class="{ 'has-error': (!install_form.password.$dirty && error.password) || (install_form.password.$dirty && install_form.password.$invalid) }">
                         <label class="control-label" for="inputPassword">Password</label>
                         <input type="password" class="form-control" ng-model="appinstall.password" id="inputPassword" name="password" ng-maxlength="512" ng-minlength="5" required>
                     </div>
@@ -41,13 +41,13 @@
                             <option value="roleAdmin">Private (Admins only)</option>
                         </select>
                     </div>
-                    <input class="ng-hide" type="submit" ng-disabled="config_form.$invalid || busy"/>
+                    <input class="ng-hide" type="submit" ng-disabled="install_form.$invalid || busy"/>
                 </form>
 
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" ng-click="doInstall()" ng-disabled="config_form.$invalid || busy">Install</button>
+                <button type="button" class="btn btn-danger" ng-click="doInstall(install_form)" ng-disabled="install_form.$invalid || busy">Install</button>
             </div>
         </div>
     </div>

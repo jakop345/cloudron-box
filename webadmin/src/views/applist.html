@@ -16,7 +16,7 @@
                 <h4 class="modal-title" id="appConfigureModalLabel">Configure {{ appconfigure.app.manifest.title }}</h4>
             </div>
             <div class="modal-body">
-                <form class="form-signin" role="form" name="config_form" ng-submit="doConfigure()" autocomplete="off">
+                <form class="form-signin" role="form" name="config_form" ng-submit="doConfigure(config_form)" autocomplete="off">
                     <div class="form-group" ng-class="{ 'has-error': config_form.location.$dirty && config_form.location.$invalid }">
                         <label class="control-label" for="inputLocation">Location</label>
                         <div class="input-group form-inline">
@@ -50,7 +50,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" ng-click="doConfigure()" ng-disabled="config_form.$invalid || busy" value="Configure">Save</button>
+                <button type="button" class="btn btn-danger" ng-click="doConfigure(config_form)" ng-disabled="config_form.$invalid || busy" value="Configure">Save</button>
             </div>
         </div>
     </div>
@@ -77,8 +77,8 @@
                     <div class="row">
                         <div class="col-xs-12 text-left">
                             <div style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden">{{ app.location || "App" }}</div>
-                            <div class="text-muted animateMe ng-hide" ng-show="!(app.installationState | installationActive)">{{ app.installationState | installationStateLabel }}</div>
-                            <div class="animateMe ng-hide" ng-show="(app.installationState | installationActive)">
+                            <div class="text-muted ng-hide" ng-show="!(app.installationState | installationActive)">{{ app.installationState | installationStateLabel }}</div>
+                            <div class="ng-hide" ng-show="(app.installationState | installationActive)">
                                 <div class="progress progress-striped active" style="margin-bottom: 0">
                                     <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">{{ app.installationState | installationStateLabel }}</div>
                                 </div>

@@ -26,7 +26,7 @@ angular.module('Application').controller('AppListController', ['$scope', '$locat
         $('#appConfigureModal').modal('show');
     };
 
-    $scope.doConfigure = function () {
+    $scope.doConfigure = function (form) {
 
         $scope.appconfigure.busy = true;
         $scope.appconfigure.error.name = null;
@@ -50,8 +50,16 @@ angular.module('Application').controller('AppListController', ['$scope', '$locat
                 return;
             }
 
-            $scope.appconfigure.password = '';
             $scope.appconfigure.busy = false;
+            $scope.appconfigure.error = {};
+            $scope.appconfigure.app = {};
+            $scope.appconfigure.location = '';
+            $scope.appconfigure.password = '';
+            $scope.appconfigure.portBindings = {};
+            $scope.appconfigure.accessRestriction = '';
+
+            form.$setPristine();
+            form.$setUntouched();
 
             $('#appConfigureModal').modal('hide');
         });

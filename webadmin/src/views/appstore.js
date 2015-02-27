@@ -18,18 +18,22 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
     };
 
     $scope.showInstall = function (app) {
-        $scope.appinstall.app = app;
-        $scope.appinstall.location = app.location;
-        $scope.appinstall.portBindings = app.manifest.tcpPorts;
-        $scope.appinstall.accessRestriction = app.accessRestriction;
-        for (var containerPort in $scope.appinstall.portBindings) {
-            $scope.appinstall.portBindings[containerPort].hostPort = app.portBindings[containerPort];
-        }
+        AppStore.getManifest(app.id, function (error, manifest) {
+            if (error) return console.error(error);
 
-        $('#appInstallModal').modal('show');
+            $scope.appinstall.app = app;
+            $scope.appinstall.location = app.location;
+            $scope.appinstall.portBindings = manifest.tcpPorts;
+            $scope.appinstall.accessRestriction = app.accessRestriction;
+            for (var port in $scope.appinstall.portBindings) {
+                $scope.appinstall.portBindings[port].hostPort = parseInt(port);
+            }
+
+            $('#appInstallModal').modal('show');
+        });
     };
 
-    $scope.doInstall = function () {
+    $scope.doInstall = function (form) {
         $scope.appinstall.busy = true;
         $scope.appinstall.error.name = null;
         $scope.appinstall.error.password = null;
@@ -54,8 +58,16 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
                 return;
             }
 
-            $scope.appinstall.password = '';
             $scope.appinstall.busy = false;
+            $scope.appinstall.error = {};
+            $scope.appinstall.app = {};
+            $scope.appinstall.location = '';
+            $scope.appinstall.password = '';
+            $scope.appinstall.portBindings = {};
+            $scope.appinstall.accessRestriction = '';
+
+            form.$setPristine();
+            form.$setUntouched();
 
             $('#appInstallModal').modal('hide');
         });
