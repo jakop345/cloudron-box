@@ -11,6 +11,14 @@ angular.module('Application').controller('UserListController', ['$scope', '$loca
         password: ''
     };
 
+    $scope.useradd = {
+        busy: false,
+        alreadyTaken: false,
+        error: {},
+        username: '',
+        email: ''
+    };
+
     $scope.isMe = function (user) {
         return user.username === Client.getUserInfo().username;
     };
@@ -24,6 +32,36 @@ angular.module('Application').controller('UserListController', ['$scope', '$loca
             if (error) return console.error(error);
 
             user.admin = !user.admin;
+        });
+    };
+
+    $scope.doAdd = function () {
+        $scope.useradd.alreadyTaken = '';
+        $scope.useradd.error.username = null;
+        $scope.useradd.error.email = null;
+
+        Client.createUser($scope.useradd.username, $scope.useradd.email, function (error) {
+            if (error && error.statusCode === 409) {
+                $scope.useradd.alreadyTaken = $scope.username;
+                return console.error('Username already taken');
+            }
+            if (error && error.statusCode === 400) {
+                if (error.message.indexOf('email') !== -1) {
+                    $scope.useradd.error.email = 'Invalid Email';
+                    $scope.useradd.email = '';
+                    return;
+                }
+                if (error.message.indexOf('username') !== -1) {
+                    $scope.useradd.error.username = 'Invalid Username';
+                    $scope.useradd.username = '';
+                    return;
+                }
+                return;
+            }
+            if (error) console.error('Unable to create user.', error);
+
+            refresh();
+            $('#userAddModal').modal('hide');
         });
     };
 
@@ -49,10 +87,6 @@ angular.module('Application').controller('UserListController', ['$scope', '$loca
             $scope.ready = true;
         });
     }
-
-    $scope.addUser = function () {
-        window.location.href = '#/usercreate';
-    };
 
     refresh();
 }]);
