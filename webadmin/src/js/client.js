@@ -300,7 +300,7 @@ angular.module('Application').service('Client', ['$http', 'md5', function ($http
     };
 
     Client.prototype.update = function (password, callback) {
-        $http.post('/api/v1/cloudron/update', { pasword: password }).success(function(data, status) {
+        $http.post('/api/v1/cloudron/update', { password: password }).success(function(data, status) {
             if (status !== 202 || typeof data !== 'object') return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));
