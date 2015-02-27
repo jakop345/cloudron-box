@@ -206,10 +206,8 @@ function removeUser(req, res, next) {
     assert(typeof req.body === 'object');
 
     if (typeof req.body.username !== 'string') return next(new HttpError(400, 'username must be string'));
-    if (typeof req.body.password !== 'string') return next(new HttpError(400, 'password must be string'));
 
     var username = req.body.username;
-    var password = req.body.password;
 
     // rules:
     // - admin can remove any user
