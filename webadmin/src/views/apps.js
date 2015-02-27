@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('Application').controller('AppListController', ['$scope', '$location', 'Client', function ($scope, $location, Client) {
+angular.module('Application').controller('AppsController', ['$scope', '$location', 'Client', function ($scope, $location, Client) {
     $scope.installedApps = Client.getInstalledApps();
     $scope.config = Client.getConfig();
 

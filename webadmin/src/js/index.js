@@ -19,8 +19,8 @@ app.config(['$routeProvider', function ($routeProvider) {
         controller: 'AppStoreController',
         templateUrl: 'views/appstore.html'
     }).when('/apps', {
-        controller: 'AppListController',
-        templateUrl: 'views/applist.html'
+        controller: 'AppsController',
+        templateUrl: 'views/apps.html'
     }).when('/dns', {
         controller: 'DnsController',
         templateUrl: 'views/dns.html'
