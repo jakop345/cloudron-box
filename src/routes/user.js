@@ -63,6 +63,9 @@ function createUser(req, res, next) {
     var email = req.body.email;
 
     user.create(username, password, email, false /* admin */, function (error) {
+        if (error && error.reason === UserError.BAD_USERNAME) return next(new HttpError(400, 'Invalid username'));
+        if (error && error.reason === UserError.BAD_EMAIL) return next(new HttpError(400, 'Invalid email'));
+        if (error && error.reason === UserError.BAD_PASSWORD) return next(new HttpError(400, 'Invalid password'));
         if (error && error.reason === UserError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error && error.reason === UserError.ALREADY_EXISTS) return next(new HttpError(409, 'Already exists'));
         if (error) return next(new HttpError(500, error));
