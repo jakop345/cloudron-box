@@ -47,19 +47,15 @@
 
 <div class="row animateMeOpacity ng-hide" ng-show="ready">
     <div class="col-lg-12">
-        <h1>Users</h1>
+        <h1>Users <button class="btn btn-primary btn-outline pull-right" data-toggle="modal" data-target="#userAddModal"><i class="fa fa-user-plus"></i> New User</button></h1>
     </div>
 </div>
 
-<div class="row animateMeOpacity ng-hide" ng-show="ready && userInfo.admin">
-    <div class="col-lg-12">
-        <button class="btn btn-primary btn-outline pull-right" data-toggle="modal" data-target="#userAddModal"><i class="fa fa-user-plus"></i> New User</button>
-    </div>
-</div>
+<br/>
 
 <div class="row animateMeOpacity ng-hide" ng-show="ready">
     <div class="col-lg-12">
-        <table class="table table-hover">
+        <table class="table table-hover shadow" style="background-color: white;">
             <thead>
                 <tr>
                     <th>Username</th>
