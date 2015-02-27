@@ -9,12 +9,6 @@ var app = angular.module('Application', ['ngRoute', 'ngAnimate', 'angular-md5'])
 app.config(['$routeProvider', function ($routeProvider) {
     $routeProvider.when('/', {
         redirectTo: '/apps'
-    }).when('/dashboard', {
-        controller: 'DashboardController',
-        templateUrl: 'views/dashboard.html'
-    }).when('/usercreate', {
-        controller: 'UserCreateController',
-        templateUrl: 'views/usercreate.html'
     }).when('/userpassword', {
         controller: 'UserPasswordController',
         templateUrl: 'views/userpassword.html'
@@ -27,15 +21,6 @@ app.config(['$routeProvider', function ($routeProvider) {
     }).when('/apps', {
         controller: 'AppListController',
         templateUrl: 'views/applist.html'
-    }).when('/app/:appStoreId/install', {
-        controller: 'AppInstallController',
-        templateUrl: 'views/appinstall.html'
-    }).when('/app/:appId/configure', {
-        controller: 'AppConfigureController',
-        templateUrl: 'views/appconfigure.html'
-    }).when('/app/:appId/details', {
-        controller: 'AppDetailsController',
-        templateUrl: 'views/appdetails.html'
     }).when('/dns', {
         controller: 'DnsController',
         templateUrl: 'views/dns.html'
