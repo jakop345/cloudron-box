@@ -5,6 +5,11 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
     $scope.userInfo = Client.getUserInfo();
     $scope.config = {};
 
+    $scope.update = {
+        error: {},
+        password: ''
+    };
+
     $scope.isActive = function (url) {
         if (!$route.current) return false;
         return $route.current.$$route.originalPath.indexOf(url) === 0;
@@ -31,13 +36,29 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
         window.location.href = '/error.html';
     };
 
-    $scope.update = function () {
-        $('#updateModal').modal('hide');
+    $scope.showUpdateModal = function (form) {
+        $scope.update.error.password = null;
+        $scope.update.password = '';
 
-        $scope.initialized = false;
+        form.$setPristine();
+        form.$setUntouched();
 
-        Client.update(function (error) {
-            if (error) console.error(error);
+        $('#updateModal').modal('show');
+    };
+
+    $scope.doUpdate = function () {
+        $scope.update.error.password = null;
+
+        Client.update($scope.update.password, function (error) {
+            if (error) {
+                if (error.statusCode === 403) {
+                    $scope.update.error.password = 'Incorrect password';
+                    $scope.update.password = '';
+                } else {
+                    console.error('Unable to update.', error);
+                }
+                return;
+            }
 
             window.location.href = '/update.html';
         });

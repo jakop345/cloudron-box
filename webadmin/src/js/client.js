@@ -299,8 +299,8 @@ angular.module('Application').service('Client', ['$http', 'md5', function ($http
         }).error(defaultErrorHandler(callback));
     };
 
-    Client.prototype.update = function (callback) {
-        $http.get('/api/v1/cloudron/update').success(function(data, status) {
+    Client.prototype.update = function (password, callback) {
+        $http.post('/api/v1/cloudron/update', { pasword: password }).success(function(data, status) {
             if (status !== 202 || typeof data !== 'object') return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));

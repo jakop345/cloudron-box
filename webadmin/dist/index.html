@@ -57,7 +57,7 @@
         <!-- /.modal-dialog -->
     </div>
 
-    <!-- Modal really update -->
+    <!-- Modal update -->
     <div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -71,15 +71,29 @@
                     <ul>
                         <li ng-repeat="change in config.update.box.changelog">{{change}}</li>
                     </ul>
+                    <br/>
+                    <fieldset>
+                        <form name="update_form" role="form" ng-submit="doUpdate()" autocomplete="off">
+                            <div class="form-group" ng-class="{ 'has-error': update_form.password.$dirty && update_form.password.$invalid }">
+                                <label class="control-label" for="updatePassword">Give your password to verify that you are performing that action</label>
+                                <div class="control-label" ng-show="(!update_form.password.$dirty && update.error.password) || (update_form.password.$dirty && update_form.password.$invalid)">
+                                    <small ng-show="update_form.password.$error.required && !update.error.password">A password is required</small>
+                                    <small ng-show="update_form.password.$error.minlength">The password is too short</small>
+                                    <small ng-show="update_form.password.$error.maxlength">The password is too long</small>
+                                    <small ng-show="update.error.password">Incorrect password</small>
+                                </div>
+                                <input type="password" class="form-control" ng-model="update.password" id="updatePassword" name="password" placeholder="Password" ng-maxlength="512" ng-minlength="5" required>
+                            </div>
+                            <input class="ng-hide" type="submit" ng-disabled="update_form.$invalid"/>
+                        </form>
+                    </fieldset>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-danger" ng-click="update()">Update</button>
+                    <button type="button" class="btn btn-danger" ng-click="doUpdate()">Update</button>
                 </div>
             </div>
-            <!-- /.modal-content -->
         </div>
-        <!-- /.modal-dialog -->
     </div>
 
     <div class="animateMe ng-hide" ng-show="initialized">
@@ -95,7 +109,7 @@
                         <span class="icon-bar"></span>
                     </button>
                     <a class="navbar-brand" href="index.html">Cloudron <span class="small text-muted">{{config.version}}</span></a>
-                    <a class="navbar-text" href="" data-toggle="modal" data-target="#updateModal" ng-show="config.update.box"><span class="badge badge-success">Update available</span></a>
+                    <a class="navbar-text" href="" ng-show="config.update.box" ng-click="showUpdateModal(update_form)"><span class="badge badge-success">Update available</span></a>
                 </div>
                 <!-- /.navbar-header -->
 
