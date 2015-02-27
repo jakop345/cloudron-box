@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('Application').controller('DnsController', ['$scope', '$location', 'Client', function ($scope, $location, Client) {
-    if (!Client.getUserInfo().admin) $location.path('/');
+    Client.onReady(function () { if (!Client.getUserInfo().admin) $location.path('/'); });
 
     $scope.ready = false;
     $scope.user = Client.getUserInfo();

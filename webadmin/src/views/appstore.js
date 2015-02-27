@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('Application').controller('AppStoreController', ['$scope', '$location', '$timeout', 'Client', 'AppStore', function ($scope, $location, $timeout, Client, AppStore) {
-    if (!Client.getUserInfo().admin) $location.path('/');
+    Client.onReady(function () { if (!Client.getUserInfo().admin) $location.path('/'); });
 
     $scope.ready = false;
     $scope.apps = [];
