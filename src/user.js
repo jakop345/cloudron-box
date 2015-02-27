@@ -21,11 +21,10 @@ exports = module.exports = {
 
 var assert = require('assert'),
     crypto = require('crypto'),
-    database = require('./database'),
     DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:user'),
     mailer = require('./mailer.js'),
-    uuid = require('node-uuid'),
+    hat = require('hat'),
     userdb = require('./userdb.js'),
     util = require('util'),
     validator = require('validator'),
@@ -143,7 +142,7 @@ function createUser(username, password, email, admin, callback) {
 
                 callback(null, user);
 
-                resetTokens[user.id] = uuid.v4();
+                resetTokens[user.id] = hat();
 
                 // only send welcome mail if user is not an admin. This i only the case for the first user!
                 // The welcome email contains a link to create a new password
@@ -283,7 +282,7 @@ function resetPasswordByIdentifier(identifier, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-        resetTokens[result.id] = uuid.v4();
+        resetTokens[result.id] = hat();
         mailer.passwordReset(result, resetTokens[result.id]);
 
         callback(null);

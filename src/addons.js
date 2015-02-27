@@ -18,6 +18,7 @@ var appdb = require('./appdb.js'),
     safe = require('safetydance'),
     util = require('util'),
     uuid = require('node-uuid'),
+    hat = require('hat'),
     vbox = require('./vbox.js'),
     _ = require('underscore');
 
@@ -150,7 +151,7 @@ function allocateOAuthCredentials(app, callback) {
 
     var appId = app.id;
     var id = 'cid-addon-' + uuid.v4();
-    var clientSecret = uuid.v4();
+    var clientSecret = hat();
     var redirectURI = 'https://' + config.appFqdn(app.location);
     var scope = 'profile,roleUser';
 

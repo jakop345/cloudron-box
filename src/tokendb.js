@@ -6,7 +6,7 @@ var assert = require('assert'),
     database = require('./database.js'),
     DatabaseError = require('./databaseerror'),
     debug = require('debug')('box:tokendb'),
-    uuid = require('node-uuid');
+    hat = require('hat');
 
 exports = module.exports = {
     generateToken: generateToken,
@@ -24,7 +24,7 @@ exports = module.exports = {
 var TOKENS_FIELDS = [ 'accessToken', 'userId', 'clientId', 'scope', 'expires' ].join(',');
 
 function generateToken() {
-    return uuid.v4();
+    return hat();
 }
 
 function get(accessToken, callback) {

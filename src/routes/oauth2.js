@@ -17,7 +17,7 @@ var assert = require('assert'),
     tokendb = require('../tokendb'),
     url = require('url'),
     user = require('../user.js'),
-    uuid = require('node-uuid');
+    hat = require('hat');
 
 // create OAuth 2.0 server
 var gServer = oauth2orize.createServer();
@@ -68,7 +68,7 @@ gServer.deserializeClient(function (id, callback) {
 gServer.grant(oauth2orize.grant.code({ scopeSeparator: ',' }, function (client, redirectURI, user, ares, callback) {
     debug('grant code:', client, redirectURI, user.id, ares);
 
-    var code = uuid.v4();
+    var code = hat();
     var scopes = client.scope ? client.scope.split(',') : ['profile','roleUser'];
 
     if (scopes.indexOf('roleAdmin') !== -1 && !user.admin) {

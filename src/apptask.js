@@ -24,7 +24,7 @@ var addons = require('./addons.js'),
     execFile = child_process.execFile,
     fs = require('fs'),
     net = require('net'),
-    os = require('os'),
+    hat = require('hat'),
     path = require('path'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
@@ -319,7 +319,7 @@ function allocateOAuthProxyCredentials(app, callback) {
 
     var appId = 'proxy-' + app.id;
     var id = 'cid-proxy-' + uuid.v4();
-    var clientSecret = uuid.v4();
+    var clientSecret = hat();
     var redirectURI = 'https://' + config.appFqdn(app.location);
     var scope = 'profile,' + app.accessRestriction;
 
