@@ -13,7 +13,9 @@ var appdb = require('../appdb.js'),
     config = require('../../config.js'),
     constants = require('../../constants.js'),
     database = require('../database.js'),
-    expect = require('expect.js');
+    expect = require('expect.js'),
+    safe = require('safetydance'),
+    _ = require('underscore');
 
 describe('Apps', function () {
     var APP_0 = {
@@ -147,6 +149,83 @@ describe('Apps', function () {
                 done();
             });
         });
+    });
+});
+
+describe('validateManifest', function () {
+    it('errors for non-object', function () {
+        expect(function () { apps.validateManifest('garbage'); }).to.throwError();
+        expect(function () { apps.validateManifest(null); }).to.throwError();
+        expect(function () { apps.validateManifest(); }).to.throwError();
+    });
+
+    var manifest = {
+        manifestVersion: 1,
+        version: '0.1.2',
+        dockerImage: 'girish/foo:0.2',
+        healthCheckPath: '/',
+        httpPort: '23',
+        title: 'Awesome app'
+    };
+
+    Object.keys(manifest).forEach(function (key) {
+        var manifestCopy = _.extend({ }, manifest);
+        delete manifestCopy[key];
+        it('errors for missing ' + key, function () {
+            expect(apps.validateManifest(manifestCopy)).to.be.an(Error);
+        });
+    });
+
+    new Array(null, [ 23 ], [ "mysql", 34 ], [ null, "mysql" ]).forEach(function (invalidAddon, idx) {
+        it('fails for invalid addon testcase ' + idx, function () {
+            var manifestCopy = _.extend({ }, manifest);
+            manifestCopy.addons = invalidAddon;
+            expect(apps.validateManifest(manifestCopy)).to.be.an(Error);
+        });
+    });
+
+    it('fails for bad version', function () {
+        var manifestCopy = _.extend({ }, manifest);
+        manifestCopy.version = '0.2';
+        expect(apps.validateManifest(manifestCopy)).to.be.an(Error);
+    });
+
+    it('fails for bad minBoxVersion', function () {
+        var manifestCopy = _.extend({ }, manifest);
+        manifestCopy.minBoxVersion = '0.2';
+        expect(apps.validateManifest(manifestCopy)).to.be.an(Error);
+    });
+
+    it('fails for bad maxBoxVersion', function () {
+        var manifestCopy = _.extend({ }, manifest);
+        manifestCopy.maxBoxVersion = '0.2';
+        expect(apps.validateManifest(manifestCopy)).to.be.an(Error);
+    });
+
+    it('fails for bad targetBoxVersion', function () {
+        var manifestCopy = _.extend({ }, manifest);
+        manifestCopy.targetBoxVersion = '0.2';
+        expect(apps.validateManifest(manifestCopy)).to.be.an(Error);
+    });
+
+    it('fails for bad manifestVersion', function () {
+        var manifestCopy = _.extend({ }, manifest);
+        manifestCopy.manifestVersion = 2;
+        expect(apps.validateManifest(manifestCopy)).to.be.an(Error);
+    });
+
+    it('succeeds for minimal valid manifest', function () {
+        expect(apps.validateManifest(manifest)).to.be(null);
+    });
+
+    it('succeeds for maximal valid manifest', function () {
+        var manifestCopy = _.extend({ }, manifest);
+        manifestCopy.minBoxVersion = '0.0.1';
+        manifestCopy.maxBoxVersion = '1.0.0';
+        manifestCopy.targetBoxVersion = '1.0.0';
+        manifestCopy.addons = [ "mysql", "postgresql" ];
+
+        expect(apps.validateManifest(manifestCopy)).to.be(null);
     });
 });
 

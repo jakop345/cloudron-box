@@ -37,6 +37,9 @@ exports = module.exports = {
     start: start,
     stop: stop,
 
+    validateManifest: validateManifest,
+    checkManifestConstraints: checkManifestConstraints,
+
     // exported for testing
     _validateHostname: validateHostname,
     _validatePortBindings: validatePortBindings
@@ -424,5 +427,60 @@ function stop(appId, callback) {
 
         callback(null);
     });
+}
+
+// NOTE: keep this in sync with appstore's apps.js
+function validateManifest(manifest) {
+    assert(manifest && typeof manifest === 'object');
+
+    if (manifest['manifestVersion'] !== 1) return new Error('manifestVersion must be set');
+
+    var fields = [ 'version', 'dockerImage', 'healthCheckPath', 'httpPort', 'title' ];
+
+    for (var i = 0; i < fields.length; i++) {
+        var field = fields[i];
+        if (!(field in manifest)) return new Error('Missing ' + field + ' in manifest');
+
+        if (typeof manifest[field] !== 'string') return new Error(field + ' must be a string');
+
+        if (manifest[field].length === 0) return new Error(field + ' cannot be empty');
+    }
+
+    if (!semver.valid(manifest['version'])) return new Error('version is not valid semver');
+
+    if ('addons' in manifest) {
+        // addons must be array of strings
+        if (!util.isArray(manifest.addons)) return new Error('addons must be an array');
+
+        for (var i = 0; i < manifest.addons.length; i++) {
+            if (typeof manifest.addons[i] !== 'string') return new Error('addons must be strings');
+        }
+    }
+
+    if ('minBoxVersion' in manifest) {
+        if (!semver.valid(manifest['minBoxVersion'])) return new Error('minBoxVersion is not valid semver');
+    }
+
+    if ('maxBoxVersion' in manifest) {
+        if (!semver.valid(manifest['maxBoxVersion'])) return new Error('maxBoxVersion is not valid semver');
+    }
+
+    if ('targetBoxVersion' in manifest) {
+        if (!semver.valid(manifest['targetBoxVersion'])) return new Error('targetBoxVersion is not valid semver');
+    }
+
+    return null;
+}
+
+function checkManifestConstraints(manifest) {
+    if (semver.valid(manifest.maxBoxVersion) && semver.gt(config.version(), manifest.maxBoxVersion)) {
+        return new Error('Box version exceeds Apps maxBoxVersion');
+    }
+
+    if (semver.valid(manifest.minBoxVersion) && semver.lt(manifest.minBoxVersion, config.version())) {
+        return new Error('Box version exceeds Apps maxBoxVersion');
+    }
+
+    return null;
 }
 

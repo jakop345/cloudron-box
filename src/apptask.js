@@ -8,6 +8,7 @@ require('supererror')({ splatchError: true });
 
 var addons = require('./addons.js'),
     appdb = require('./appdb.js'),
+    apps = require('./apps.js'),
     assert = require('assert'),
     async = require('async'),
     clientdb = require('./clientdb.js'),
@@ -28,7 +29,6 @@ var addons = require('./addons.js'),
     path = require('path'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
-    semver = require('semver'),
     settings = require('./settings.js'),
     superagent = require('superagent'),
     util = require('util'),
@@ -52,8 +52,7 @@ exports = module.exports = {
     _registerSubdomain: registerSubdomain,
     _unregisterSubdomain: unregisterSubdomain,
     _reloadNginx: reloadNginx,
-    _waitForDnsPropagation: waitForDnsPropagation,
-    _validateManifest: validateManifest
+    _waitForDnsPropagation: waitForDnsPropagation
 };
 
 var NGINX_APPCONFIG_EJS = fs.readFileSync(__dirname + '/../setup/start/nginx/appconfig.ejs', { encoding: 'utf8' }),
@@ -421,61 +420,6 @@ function stopContainer(app, callback) {
     });
 }
 
-// NOTE: keep this in sync with appstore's apps.js
-function validateManifest(manifest) {
-     if (manifest === null) return new Error('Unable to parse manifest: ' + safe.error.message);
-
-     if (manifest['manifestVersion'] !== 1) return new Error('manifestVersion must be set');
-
-     var fields = [ 'version', 'dockerImage', 'healthCheckPath', 'httpPort', 'title' ];
-
-     for (var i = 0; i < fields.length; i++) {
-         var field = fields[i];
-         if (!(field in manifest)) return new Error('Missing ' + field + ' in manifest');
-
-         if (typeof manifest[field] !== 'string') return new Error(field + ' must be a string');
-
-         if (manifest[field].length === 0) return new Error(field + ' cannot be empty');
-     }
-
-    if (!semver.valid(manifest['version'])) return new Error('version is not valid semver');
-
-    if ('addons' in manifest) {
-        // addons must be array of strings
-        if (!util.isArray(manifest.addons)) return new Error('addons must be an array');
-
-        for (var i = 0; i < manifest.addons.length; i++) {
-            if (typeof manifest.addons[i] !== 'string') return new Error('addons must be strings');
-        }
-    }
-
-    if ('minBoxVersion' in manifest) {
-        if (!semver.valid(manifest['minBoxVersion'])) return new Error('minBoxVersion is not valid semver');
-    }
-
-    if ('maxBoxVersion' in manifest) {
-        if (!semver.valid(manifest['maxBoxVersion'])) return new Error('maxBoxVersion is not valid semver');
-    }
-
-    if ('targetBoxVersion' in manifest) {
-        if (!semver.valid(manifest['targetBoxVersion'])) return new Error('targetBoxVersion is not valid semver');
-    }
-
-    return null;
-}
-
-function checkManifestConstraints(manifest) {
-    if (semver.valid(manifest.maxBoxVersion) && semver.gt(config.version(), manifest.maxBoxVersion)) {
-        return new Error('Box version exceeds Apps maxBoxVersion');
-    }
-
-    if (semver.valid(manifest.minBoxVersion) && semver.lt(manifest.minBoxVersion, config.version())) {
-        return new Error('Box version exceeds Apps maxBoxVersion');
-    }
-
-    return null;
-}
-
 function downloadManifest(app, callback) {
     debug('Downloading manifest for :', app.id);
 
@@ -490,10 +434,12 @@ function downloadManifest(app, callback) {
             debug('Downloaded application manifest: ' + res.text);
 
             var manifest = safe.JSON.parse(res.text);
-            var error = validateManifest(manifest);
+            if (!manifest) return callback(new Error(util.format('Manifest parse error: %s', safe.error.message)));
+
+            var error = apps.validateManifest(manifest);
             if (error) return callback(new Error(util.format('Manifest error: %s', error.message)));
 
-            error = checkManifestConstraints(manifest);
+            error = apps.checkManifestConstraints(manifest);
             if (error) return callback(error);
 
             // See http://nodejs.org/api/buffer.html#buffer_buf_tojson
