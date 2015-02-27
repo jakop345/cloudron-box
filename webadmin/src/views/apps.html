@@ -108,7 +108,7 @@
                     <div class="row">
                         <div class="col-xs-12 text-left">
                             <div style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden">{{ app.location || "App" }}</div>
-                            <div class="text-muted">
+                            <div class="text-muted" style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden">
                                 <i class="fa fa-spinner fa-pulse ng-hide" ng-show="(app.installationState | installationActive)"></i> {{ app.installationState | installationStateLabel }}
                             </div>
                         </div>
