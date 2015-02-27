@@ -175,7 +175,7 @@ function validatePortBindings(portBindings) {
     return null;
 }
 
-function getIconURLSync(app) {
+function getIconUrlSync(app) {
     var iconPath = paths.APPICONS_DIR + '/' + app.id + '.png';
     return fs.existsSync(iconPath) ? '/api/v1/apps/' + app.id + '/icon' : null;
 }
@@ -188,7 +188,7 @@ function get(appId, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        app.icon = getIconURLSync(app);
+        app.icon = getIconUrlSync(app);
         app.fqdn = config.appFqdn(app.location);
 
         callback(null, app);
@@ -203,7 +203,7 @@ function getBySubdomain(subdomain, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        app.icon = getIconURLSync(app);
+        app.icon = getIconUrlSync(app);
         app.fqdn = config.appFqdn(app.location);
 
         callback(null, app);
@@ -217,7 +217,7 @@ function getAll(callback) {
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
         apps.forEach(function (app) {
-            app.icon = getIconURLSync(app);
+            app.icon = getIconUrlSync(app);
             app.fqdn = config.appFqdn(app.location);
         });
 
