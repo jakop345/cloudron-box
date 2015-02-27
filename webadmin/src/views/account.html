@@ -1,3 +1,55 @@
+<!-- Modal change password -->
+<div class="modal fade" id="passwordChangeModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Change Your Password</h4>
+            </div>
+            <div class="modal-body">
+                <form name="passwordchange_form" class="form-signin" role="form" novalidate ng-submit="doChangePassword(passwordchange_form)" autocomplete="off">
+                    <fieldset>
+                        <div class="form-group" ng-class="{ 'has-error': (passwordchange_form.password.$dirty && passwordchange_form.password.$invalid)}">
+                            <label class="control-label" for="inputpassword">Current Password</label>
+                            <div class="control-label" ng-show="(!passwordchange_form.password.$dirty && passwordchange.error.password) || (passwordchange_form.password.$dirty && passwordchange_form.password.$invalid)">
+                                <small ng-show="passwordchange_form.password.$error.required">A password is required</small>
+                                <small ng-show="passwordchange_form.password.$error.minlength">The password is too short</small>
+                                <small ng-show="passwordchange_form.password.$error.maxlength">The password is too long</small>
+                                <small ng-show="passwordchange_form.password.$dirty && passwordchange.error.password">Invalid pasword</small>
+                            </div>
+                            <input type="password" class="form-control" ng-model="passwordchange.password" id="inputpassword" name="password" ng-maxlength="512" ng-minlength="3" required autofocus>
+                        </div>
+                        <div class="form-group" ng-class="{ 'has-error': (passwordchange_form.newPassword.$dirty && passwordchange_form.newPassword.$invalid)}">
+                            <label class="control-label" for="inputnewpassword">New Password</label>
+                            <div class="control-label" ng-show="(!passwordchange_form.newPassword.$dirty && passwordchange.error.newPassword) || (passwordchange_form.newPassword.$dirty && passwordchange_form.newPassword.$invalid)">
+                                <small ng-show="passwordchange_form.newPassword.$error.required">A password is required</small>
+                                <small ng-show="passwordchange_form.newPassword.$error.minlength">The password is too short</small>
+                                <small ng-show="passwordchange_form.newPassword.$error.maxlength">The password is too long</small>
+                            </div>
+                            <input type="password" class="form-control" ng-model="passwordchange.newPassword" id="inputnewpassword" name="newPassword" ng-maxlength="512" ng-minlength="3" required autofocus>
+                        </div>
+                        <div class="form-group" ng-class="{ 'has-error': (passwordchange_form.newPasswordRepeat.$dirty && passwordchange_form.newPasswordRepeat.$invalid) || (passwordchange_form.newPasswordRepeat.$dirty && passwordchange.newPassword !== passwordchange.newPasswordRepeat) }">
+                            <label class="control-label" for="inputnewpasswordrepeat">Repeat New Password</label>
+                            <div class="control-label" ng-show="(!passwordchange_form.newPasswordRepeat.$dirty && passwordchange.error.newPasswordRepeat) || (passwordchange_form.newPasswordRepeat.$dirty && passwordchange_form.newPasswordRepeat.$invalid) || (passwordchange_form.newPasswordRepeat.$dirty && passwordchange.newPassword !== passwordchange.newPasswordRepeat)">
+                                <small ng-show="passwordchange_form.newPasswordRepeat.$error.required">A password is required</small>
+                                <small ng-show="passwordchange_form.newPasswordRepeat.$error.minlength">The password is too short</small>
+                                <small ng-show="passwordchange_form.newPasswordRepeat.$error.maxlength">The password is too long</small>
+                                <small ng-show="passwordchange_form.newPasswordRepeat.$dirty && passwordchange.newPassword !== passwordchange.newPasswordRepeat">Passwords don't match</small>
+                            </div>
+                            <input type="password" class="form-control" ng-model="passwordchange.newPasswordRepeat" id="inputnewpasswordrepeat" name="newPasswordRepeat" ng-maxlength="512" ng-minlength="3" required autofocus>
+                        </div>
+                        <input class="ng-hide" type="submit" ng-disabled="passwordchange_form.$invalid"/>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" ng-click="doChangePassword(passwordchange_form)" ng-disabled="passwordchange_form.$invalid || busy">Change</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div style="max-width: 600px; margin: 0 auto;">
     <div class="text-left">
         <h1>Account</h1>
@@ -22,7 +74,7 @@
                 <br/>
                 <div class="row">
                     <div class="col-xs-12 text-right">
-                        <button class="btn btn-outline btn-danger" ng-click="changePassword()">Change Password</button>
+                        <button class="btn btn-outline btn-danger" ng-click="showChangePassword(passwordchange_form)">Change Password</button>
                     </div>
                 </div>
             </div>
