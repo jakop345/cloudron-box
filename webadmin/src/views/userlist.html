@@ -99,8 +99,9 @@
         <table class="table table-hover shadow" style="background-color: white;">
             <thead>
                 <tr>
-                    <th>Username</th>
-                    <th style="text-align: right;">Actions</th>
+                    <th style="width: 33%">Username</th>
+                    <th style="width: 33%" class="text-center">Email</th>
+                    <th style="width: 33%" class="text-right">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -110,7 +111,10 @@
                         <span ng-show="isMe(user)" class="label label-primary" style="margin-left: 20px;">This is you!</span>
                         <span ng-show="isAdmin(user)" class="label label-danger" style="margin-left: 20px;">Admin</span>
                     </td>
-                    <td style="text-align: right;">
+                    <td class="text-center">
+                        {{ user.email }}
+                    </td>
+                    <td class="text-right">
                         <button ng-show="!isMe(user) && userInfo.admin" ng-click="toggleAdmin(user)" class="btn btn-xs btn-default">
                             <span ng-show="!user.admin"><i class="fa fa-plus"></i> Add Admin</span>
                             <span ng-show="user.admin"><i class="fa fa-minus"></i> Remove Admin</span>
