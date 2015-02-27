@@ -25,8 +25,9 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appconfigure.location = app.location;
         $scope.appconfigure.portBindings = app.manifest.tcpPorts;
         $scope.appconfigure.accessRestriction = app.accessRestriction;
+
         for (var containerPort in $scope.appconfigure.portBindings) {
-            $scope.appconfigure.portBindings[containerPort].hostPort = app.portBindings[containerPort].hostPort;
+            $scope.appconfigure.portBindings[containerPort].hostPort = parseInt($scope.appconfigure.app.portBindings[containerPort]);
         }
 
         $('#appConfigureModal').modal('show');
