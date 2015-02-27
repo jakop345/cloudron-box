@@ -14,6 +14,12 @@ angular.module('Application').controller('AppListController', ['$scope', '$locat
         accessRestriction: ''
     };
 
+    $scope.appuninstall = {
+        error: {},
+        app: {},
+        password: ''
+    };
+
     $scope.showConfigure = function (app) {
         $scope.appconfigure.app = app;
         $scope.appconfigure.location = app.location;
@@ -27,7 +33,6 @@ angular.module('Application').controller('AppListController', ['$scope', '$locat
     };
 
     $scope.doConfigure = function (form) {
-
         $scope.appconfigure.busy = true;
         $scope.appconfigure.error.name = null;
         $scope.appconfigure.error.password = null;
@@ -62,6 +67,37 @@ angular.module('Application').controller('AppListController', ['$scope', '$locat
             form.$setUntouched();
 
             $('#appConfigureModal').modal('hide');
+        });
+    };
+
+    $scope.showUninstall = function (app) {
+        $scope.appuninstall.app = app;
+        $scope.appuninstall.error.password = null;
+
+        $('#appUninstallModal').modal('show');
+    };
+
+    $scope.doUninstall = function (form) {
+        $scope.appuninstall.error.password = null;
+
+        Client.uninstallApp($scope.appuninstall.app.id, $scope.appuninstall.password, function (error) {
+            if (error) {
+                if (error.statusCode === 403) {
+                    $scope.appuninstall.password = '';
+                    $scope.appuninstall.error.password = true;
+                } else {
+                    console.error(error);
+                }
+                return;
+            }
+
+            $scope.appuninstall.app = {};
+            $scope.appuninstall.password = '';
+
+            form.$setPristine();
+            form.$setUntouched();
+
+            $('#appUninstallModal').modal('hide');
         });
     };
 
