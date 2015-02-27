@@ -27,7 +27,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
             $scope.appinstall.app = app;
             $scope.appinstall.location = app.location;
             $scope.appinstall.portBindings = manifest.tcpPorts;
-            $scope.appinstall.accessRestriction = app.accessRestriction;
+            $scope.appinstall.accessRestriction = app.accessRestriction || '';
             for (var port in $scope.appinstall.portBindings) {
                 $scope.appinstall.portBindings[port].hostPort = parseInt(port);
             }
