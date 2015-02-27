@@ -6,7 +6,11 @@ angular.module('Application').controller('UserListController', ['$scope', '$loca
     $scope.ready = false;
     $scope.users = [];
     $scope.userInfo = Client.getUserInfo();
-    $scope.userDeleteForm = {
+
+    $scope.userremove = {
+        busy: false,
+        error: {},
+        userInfo: {},
         username: '',
         password: ''
     };
@@ -65,15 +69,39 @@ angular.module('Application').controller('UserListController', ['$scope', '$loca
         });
     };
 
-    $scope.deleteUser = function (user) {
-        // TODO add busy indicator and block form
-        if ($scope.userDeleteForm.username !== user.username) return console.error('Username does not match');
+    $scope.showUserRemove = function (userInfo) {
+        $scope.userremove.error.username = null;
+        $scope.userremove.error.password = null;
+        $scope.userremove.userInfo = userInfo;
+        $('#userRemoveModal').modal('show');
+    };
 
-        Client.removeUser(user.username, $scope.userDeleteForm.password, function (error) {
-            if (error && error.statusCode === 401) return console.error('Wrong password');
+    $scope.doUserRemove = function (form) {
+        $scope.userremove.error.username = null;
+        $scope.userremove.error.password = null;
+
+        if ($scope.userremove.username !== $scope.userremove.userInfo.username) {
+            $scope.userremove.error.username = 'Username does not match';
+            $scope.userremove.username = '';
+            return;
+        }
+
+        Client.removeUser($scope.userremove.username, $scope.userremove.password, function (error) {
+            if (error && error.statusCode === 403) {
+                $scope.userremove.error.password = 'Incorrect password';
+                $scope.userremove.password = '';
+                return;
+            }
             if (error) return console.error('Unable to delete user.', error);
 
-            $('#userDeleteModal-' + user.username).modal('hide');
+            $scope.userremove.userInfo = {};
+            $scope.userremove.username = '';
+            $scope.userremove.password = '';
+
+            form.$setPristine();
+            form.$setUntouched();
+
+            $('#userRemoveModal').modal('hide');
 
             refresh();
         });
