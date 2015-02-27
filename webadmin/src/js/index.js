@@ -48,6 +48,7 @@ app.filter('installationStateLabel', function() {
         if (input === 'installed') return 'Installed';
         if (input === 'downloading_image') return 'Downloading';
         if (input === 'pending_install') return 'Installing';
+        if (input === 'pending_restore') return 'Starting';
         if (input === 'pending_uninstall') return 'Uninstalling';
         if (input === 'creating_container') return 'Container';
         if (input === 'downloading_manifest') return 'Manifest';
