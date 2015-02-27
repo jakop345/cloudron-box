@@ -409,7 +409,15 @@ function stopContainer(app, callback) {
             vbox.unforwardFromHostToVirtualBox(app.id + '-tcp' + containerPort);
         }
 
-        return callback(null);
+        debug('Waiting for container ' + container.id);
+
+        container.wait(function (error, data) {
+            if (error && (error.statusCode !== 304 && error.statusCode !== 404)) return callback(new Error('Error waiting on container:' + error));
+
+            debug('Container stopped with status code [%s]', data ? String(data.StatusCode) : '');
+
+            return callback(null);
+        });
     });
 }
 
