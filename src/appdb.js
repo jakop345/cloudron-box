@@ -51,10 +51,12 @@ exports = module.exports = {
     _clear: clear
 };
 
-var APPS_FIELDS = [ 'id', 'appStoreId', 'version', 'installationState', 'installationProgress', 'runState',
+// version is intentionally missing. version is used for joins primarily and is a cache of manifest.version
+var APPS_FIELDS = [ 'id', 'appStoreId', 'installationState', 'installationProgress', 'runState',
     'healthy', 'containerId', 'manifestJson', 'httpPort', 'location', 'dnsRecordId', 'accessRestriction' ].join(',');
 
-var APPS_FIELDS_PREFIXED = [ 'apps.id', 'apps.appStoreId', 'apps.version', 'apps.installationState', 'apps.installationProgress', 'apps.runState',
+// version is intentionally missing. version is used for joins primarily and is a cache of manifest.version
+var APPS_FIELDS_PREFIXED = [ 'apps.id', 'apps.appStoreId', 'apps.installationState', 'apps.installationProgress', 'apps.runState',
     'apps.healthy', 'apps.containerId', 'apps.manifestJson', 'apps.httpPort', 'apps.location', 'apps.dnsRecordId', 'apps.accessRestriction' ].join(',');
 
 var PORT_BINDINGS_FIELDS = [ 'hostPort', 'containerPort', 'appId' ].join(',');
@@ -145,10 +147,11 @@ function getAll(callback) {
     });
 }
 
-function add(id, appStoreId, version, location, portBindings, accessRestriction, callback) {
+function add(id, appStoreId, manifest, location, portBindings, accessRestriction, callback) {
     assert(typeof id === 'string');
     assert(typeof appStoreId === 'string');
-    assert(typeof version === 'string');
+    assert(manifest && typeof manifest === 'object');
+    assert(typeof manifest.version === 'string');
     assert(typeof location === 'string');
     assert(typeof portBindings === 'object');
     assert(typeof accessRestriction === 'string');
@@ -156,11 +159,13 @@ function add(id, appStoreId, version, location, portBindings, accessRestriction,
 
     portBindings = portBindings || { };
 
+    var manifestJson = JSON.stringify(manifest);
+
     database.beginTransaction(function (error, conn) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
-        conn.query('INSERT INTO apps (id, appStoreId, version, installationState, location, accessRestriction) VALUES (?, ?, ?, ?, ?, ?)',
-               [ id, appStoreId, version, exports.ISTATE_PENDING_INSTALL, location, accessRestriction ], function (error) {
+        conn.query('INSERT INTO apps (id, appStoreId, manifestJson, version, installationState, location, accessRestriction) VALUES (?, ?, ?, ?, ?, ?, ?)',
+               [ id, appStoreId, manifestJson, manifest.version, exports.ISTATE_PENDING_INSTALL, location, accessRestriction ], function (error) {
             if (error && error.code === 'ER_DUP_ENTRY') return database.rollback(conn, callback.bind(null, new DatabaseError(DatabaseError.ALREADY_EXISTS)));
             if (error) return database.rollback(conn, callback.bind(null, new DatabaseError(DatabaseError.INTERNAL_ERROR, error)));
 
@@ -270,6 +275,9 @@ function updateWithConstraints(id, app, constraints, callback) {
                 if (p === 'manifest') {
                     args.push('manifestJson = ?');
                     values.push(JSON.stringify(app[p]));
+
+                    args.push('version = ?');
+                    values.push(app['manifest'].version);
                 } else if (p !== 'portBindings') {
                     args.push(p + ' = ?');
                     values.push(app[p]);

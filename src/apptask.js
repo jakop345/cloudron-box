@@ -48,7 +48,7 @@ exports = module.exports = {
     _deleteVolume: deleteVolume,
     _allocateOAuthProxyCredentials: allocateOAuthProxyCredentials,
     _removeOAuthProxyCredentials: removeOAuthProxyCredentials,
-    _downloadManifest: downloadManifest,
+    _verifyManifest: verifyManifest,
     _registerSubdomain: registerSubdomain,
     _unregisterSubdomain: unregisterSubdomain,
     _reloadNginx: reloadNginx,
@@ -420,43 +420,30 @@ function stopContainer(app, callback) {
     });
 }
 
-function downloadManifest(app, callback) {
-    debug('Downloading manifest for :', app.id);
+function verifyManifest(app, callback) {
+    debug('Verifying manifest for :', app.id);
 
-    superagent
-        .get(config.apiServerOrigin() + '/api/v1/appstore/apps/' + app.appStoreId + '/versions/' + app.version + '/manifest')
-        .set('Accept', 'application/json')
-        .end(function (err, res) {
-            if (err) return callback(err);
+    var manifest = app.manifest;
+    var error = apps.validateManifest(manifest);
+    if (error) return callback(new Error(util.format('Manifest error: %s', error.message)));
 
-            if (res.status !== 200) return callback(new Error(util.format('Error downloading manifest %s %j', res.status, res.body)));
+    error = apps.checkManifestConstraints(manifest);
+    if (error) return callback(error);
 
-            debug('Downloaded application manifest: ' + res.text);
+    // See http://nodejs.org/api/buffer.html#buffer_buf_tojson
+    // in node v0.12 the Buffer constructor would know how to handle manifest.icon directly but not in 0.10
+    if (manifest.icon) {
+        if (manifest.icon.type === 'Buffer') {
+            safe.fs.writeFileSync(path.join(paths.APPICONS_DIR, app.id + '.png'), new Buffer(manifest.icon.data));
+        } else {
+            safe.fs.writeFileSync(path.join(paths.APPICONS_DIR, app.id + '.png'), new Buffer(manifest.icon));
+        }
 
-            var manifest = safe.JSON.parse(res.text);
-            if (!manifest) return callback(new Error(util.format('Manifest parse error: %s', safe.error.message)));
+        // delete icon buffer, so we don't store it in the db
+        delete manifest.icon;
+    }
 
-            var error = apps.validateManifest(manifest);
-            if (error) return callback(new Error(util.format('Manifest error: %s', error.message)));
-
-            error = apps.checkManifestConstraints(manifest);
-            if (error) return callback(error);
-
-            // See http://nodejs.org/api/buffer.html#buffer_buf_tojson
-            // in node v0.12 the Buffer constructor would know how to handle manifest.icon directly but not in 0.10
-            if (manifest.icon) {
-                if (manifest.icon.type === 'Buffer') {
-                    safe.fs.writeFileSync(path.join(paths.APPICONS_DIR, app.id + '.png'), new Buffer(manifest.icon.data));
-                } else {
-                    safe.fs.writeFileSync(path.join(paths.APPICONS_DIR, app.id + '.png'), new Buffer(manifest.icon));
-                }
-
-                // delete icon buffer, so we don't store it in the db
-                delete manifest.icon;
-            }
-
-            updateApp(app, { manifest: manifest }, callback);
-        });
+    callback(null);
 }
 
 function registerSubdomain(app, callback) {
@@ -467,7 +454,7 @@ function registerSubdomain(app, callback) {
 
     debug('Registering subdomain for ' + app.id + ' at ' + app.location);
 
-    var record = { subdomain: app.location, appId: app.id, type: 'A' };
+    var record = { subdomain: app.location, type: 'A' };
 
     superagent
         .post(config.apiServerOrigin() + '/api/v1/subdomains')
@@ -585,9 +572,9 @@ function install(app, callback) {
         updateApp.bind(null, app, { installationProgress: 'Registering subdomain' }),
         registerSubdomain.bind(null, app),
 
-        // download manifest
-        updateApp.bind(null, app, { installationProgress: 'Downloading manifest' }),
-        downloadManifest.bind(null, app),
+        // verify manifest
+        updateApp.bind(null, app, { installationProgress: 'Verifying manifest' }),
+        verifyManifest.bind(null, app),
 
         // create proxy OAuth credentials
         updateApp.bind(null, app, { installationProgress: 'Creating OAuth proxy credentials' }),
@@ -646,9 +633,9 @@ function restore(app, callback) {
         updateApp.bind(null, app, { installationProgress: 'Registering subdomain' }),
         registerSubdomain.bind(null, app),
 
-        // download manifest in case it wasn't downloaded when backup was made
-        updateApp.bind(null, app, { installationProgress: 'Downloading manifest' }),
-        downloadManifest.bind(null, app),
+        // verify manifest
+        updateApp.bind(null, app, { installationProgress: 'Verify manifest' }),
+        verifyManifest.bind(null, app),
 
         // setup oauth proxy
         updateApp.bind(null, app, { installationProgress: 'Setting up OAuth proxy credentials' }),
@@ -756,8 +743,8 @@ function update(app, callback) {
         updateApp.bind(null, app, { installationProgress: 'Deleting container' }),
         deleteContainer.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Downloading manifest' }),
-        downloadManifest.bind(null, app),
+        updateApp.bind(null, app, { installationProgress: 'Verify manifest' }),
+        verifyManifest.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: 'Downloading image' }),
         downloadImage.bind(null, app),

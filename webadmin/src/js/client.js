@@ -134,9 +134,9 @@ angular.module('Application').service('Client', ['$http', 'md5', function ($http
         }).error(defaultErrorHandler(callback));
     };
 
-    Client.prototype.installApp = function (id, version, password, title, config, callback) {
+    Client.prototype.installApp = function (id, manifest, password, title, config, callback) {
         var that = this;
-        var data = { appStoreId: id, version: version, password: password, location: config.location, portBindings: config.portBindings, accessRestriction: config.accessRestriction };
+        var data = { appStoreId: id, manifest: manifest, password: password, location: config.location, portBindings: config.portBindings, accessRestriction: config.accessRestriction };
         $http.post('/api/v1/apps/install', data).success(function (data, status) {
             if (status !== 202 || typeof data !== 'object') return callback(new ClientError(status, data));
 
@@ -164,8 +164,8 @@ angular.module('Application').service('Client', ['$http', 'md5', function ($http
         }).error(defaultErrorHandler(callback));
     };
 
-    Client.prototype.updateApp = function (id, version, password, callback) {
-        $http.post('/api/v1/apps/' + id + '/update', { version: version, password: password }).success(function (data, status) {
+    Client.prototype.updateApp = function (id, manifest, password, callback) {
+        $http.post('/api/v1/apps/' + id + '/update', { manifest: manifest, password: password }).success(function (data, status) {
             if (status !== 202) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));

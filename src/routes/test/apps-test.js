@@ -37,8 +37,8 @@ var appdb = require('../../appdb.js'),
 var SERVER_URL = 'http://localhost:' + config.get('port');
 
 var APP_STORE_ID = 'test', APP_ID;
-var APP_LOCATION = 'location', APP_VERSION = '1.2.3';
-
+var APP_LOCATION = 'appslocation';
+var APP_MANIFEST = JSON.parse(fs.readFileSync(__dirname + '/test.app', 'utf8'));
 var USERNAME = 'admin', PASSWORD = 'password', EMAIL ='silly@me.com';
 var token = null; // authentication token
 
@@ -156,13 +156,13 @@ describe('App API', function () {
         });
     });
 
-    it('app install fails - missing version', function (done) {
+    it('app install fails - missing manifest', function (done) {
         request.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
                .send({ appStoreId: APP_STORE_ID, password: PASSWORD })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
-            expect(res.body.message).to.eql('version is required');
+            expect(res.body.message).to.eql('manifest is required');
             done(err);
         });
     });
@@ -170,7 +170,7 @@ describe('App API', function () {
     it('app install fails - missing appId', function (done) {
         request.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
-               .send({ version: APP_VERSION, password: PASSWORD })
+               .send({ manifest: APP_MANIFEST, password: PASSWORD })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             expect(res.body.message).to.eql('appStoreId is required');
@@ -191,7 +191,7 @@ describe('App API', function () {
     it('app install fails - invalid location', function (done) {
         request.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
-               .send({ appStoreId: APP_STORE_ID, version: APP_VERSION, password: PASSWORD, location: '!awesome', accessRestriction: '' })
+               .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: '!awesome', accessRestriction: '' })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             expect(res.body.message).to.eql('Hostname can only contain alphanumerics and hyphen');
@@ -202,7 +202,7 @@ describe('App API', function () {
     it('app install fails - invalid location type', function (done) {
         request.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
-               .send({ appStoreId: APP_STORE_ID, version: APP_VERSION, password: PASSWORD, location: 42, accessRestriction: '' })
+               .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: 42, accessRestriction: '' })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             expect(res.body.message).to.eql('location is required');
@@ -213,7 +213,7 @@ describe('App API', function () {
     it('app install fails - invalid password type', function (done) {
         request.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
-               .send({ appStoreId: APP_STORE_ID, version: APP_VERSION, password: 3.52, location: 'ninja', accessRestriction: '' })
+               .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: 3.52, location: 'ninja', accessRestriction: '' })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             expect(res.body.message).to.eql('API call requires user password');
@@ -224,7 +224,7 @@ describe('App API', function () {
     it('app install fails - invalid password', function (done) {
         request.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
-               .send({ appStoreId: APP_STORE_ID, version: APP_VERSION, password: PASSWORD + 'x', location: 'ninja', accessRestriction: '' })
+               .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD + 'x', location: 'ninja', accessRestriction: '' })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(403);
             expect(res.body.message).to.eql('Password incorrect');
@@ -235,7 +235,7 @@ describe('App API', function () {
     it('app install fails - reserved location', function (done) {
         request.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
-               .send({ appStoreId: APP_STORE_ID, version: APP_VERSION, password: PASSWORD, location: constants.ADMIN_LOCATION, accessRestriction: '' })
+               .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: constants.ADMIN_LOCATION, accessRestriction: '' })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             expect(res.body.message).to.eql(constants.ADMIN_LOCATION + ' is reserved');
@@ -246,7 +246,7 @@ describe('App API', function () {
     it('app install fails - portBindings must be object', function (done) {
         request.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
-               .send({ appStoreId: APP_STORE_ID, version: APP_VERSION, password: PASSWORD, location: APP_LOCATION, portBindings: 23, accessRestriction: '' })
+               .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: 23, accessRestriction: '' })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             expect(res.body.message).to.eql('portBindings must be an object');
@@ -257,7 +257,7 @@ describe('App API', function () {
     it('app install fails - accessRestriction is required', function (done) {
         request.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
-               .send({ appStoreId: APP_STORE_ID, version: APP_VERSION, password: PASSWORD, location: APP_LOCATION, portBindings: {} })
+               .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: {} })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             expect(res.body.message).to.eql('accessRestriction is required');
@@ -268,7 +268,7 @@ describe('App API', function () {
     it('app install succeeds', function (done) {
         request.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
-               .send({ appStoreId: APP_STORE_ID, version: APP_VERSION, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: '' })
+               .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: '' })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(202);
             expect(res.body.id).to.be.a('string');
@@ -280,7 +280,7 @@ describe('App API', function () {
     it('app install fails because of conflicting location', function (done) {
         request.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
-               .send({ appStoreId: APP_STORE_ID, version: APP_VERSION, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: '' })
+               .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: '' })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(409);
             done();
@@ -407,12 +407,8 @@ describe('App installation', function () {
             setup,
 
             function (callback) {
-                var manifest = JSON.parse(fs.readFileSync(__dirname + '/test.app', 'utf8'));
-
                 hockInstance
-                    .get('/api/v1/appstore/apps/' + APP_STORE_ID + '/versions/' + APP_VERSION + '/manifest')
-                    .reply(200, manifest, { 'Content-Type': 'application/json' })
-                    .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP_LOCATION, appId: APP_ID, type: 'A' } ] })
+                    .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP_LOCATION, type: 'A' } ] })
                     .reply(201, { ids: [ 'dnsrecordid' ] }, { 'Content-Type': 'application/json' })
                     .delete('/api/v1/subdomains/dnsrecordid?token=' + config.token())
                     .reply(204, { }, { 'Content-Type': 'application/json' });
@@ -451,7 +447,7 @@ describe('App installation', function () {
 
         request.post(SERVER_URL + '/api/v1/apps/install')
               .query({ access_token: token })
-              .send({ appId: APP_ID, appStoreId: APP_STORE_ID, version: APP_VERSION, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: '' })
+              .send({ appId: APP_ID, appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: '' })
               .end(function (err, res) {
             expect(res.statusCode).to.equal(202);
             expect(res.body.id).to.be.a('string');
@@ -807,18 +803,14 @@ describe('App installation - port bindings', function () {
             setup,
 
             function (callback) {
-                var manifest = JSON.parse(fs.readFileSync(__dirname + '/test.app', 'utf8'));
-
                 hockInstance
-                    .get('/api/v1/appstore/apps/' + APP_STORE_ID + '/versions/' + APP_VERSION + '/manifest')
-                    .reply(200, manifest, { 'Content-Type': 'application/json' })
                     // app install
-                    .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP_LOCATION, appId: APP_ID, type: 'A' } ] })
+                    .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP_LOCATION, type: 'A' } ] })
                     .reply(201, { ids: [ 'dnsrecordid' ] }, { 'Content-Type': 'application/json' })
                     // app configure
                     .delete('/api/v1/subdomains/dnsrecordid?token=' + config.token())
                     .reply(204, { }, { 'Content-Type': 'application/json' })
-                    .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP_LOCATION, appId: APP_ID, type: 'A' } ] })
+                    .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP_LOCATION, type: 'A' } ] })
                     .reply(201, { ids: [ 'anotherdnsid' ] }, { 'Content-Type': 'application/json' })
                     // app remove
                     .delete('/api/v1/subdomains/anotherdnsid?token=' + config.token())
@@ -858,7 +850,7 @@ describe('App installation - port bindings', function () {
 
         request.post(SERVER_URL + '/api/v1/apps/install')
               .query({ access_token: token })
-              .send({ appId: APP_ID, appStoreId: APP_STORE_ID, version: APP_VERSION, password: PASSWORD, location: APP_LOCATION, portBindings: { '7778' : '7171' }, accessRestriction: '' })
+              .send({ appId: APP_ID, appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: { '7778' : '7171' }, accessRestriction: '' })
               .end(function (err, res) {
             expect(res.statusCode).to.equal(202);
             expect(res.body.id).to.equal(APP_ID);

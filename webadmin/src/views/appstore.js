@@ -46,7 +46,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
             portBindings[containerPort] = $scope.appinstall.portBindings[containerPort].hostPort;
         }
 
-        Client.installApp($scope.appinstall.app.id, $scope.appinstall.app.manifest.version, $scope.appinstall.password, $scope.appinstall.app.title, { location: $scope.appinstall.location, portBindings: portBindings, accessRestriction: $scope.appinstall.accessRestriction }, function (error) {
+        Client.installApp($scope.appinstall.app.id, $scope.appinstall.app.manifest, $scope.appinstall.password, $scope.appinstall.app.title, { location: $scope.appinstall.location, portBindings: portBindings, accessRestriction: $scope.appinstall.accessRestriction }, function (error) {
             if (error) {
                 if (error.statusCode === 409) {
                     $scope.appinstall.error.name = 'Application already exists.';

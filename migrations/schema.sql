@@ -39,14 +39,14 @@ CREATE TABLE IF NOT EXISTS clients(
 CREATE TABLE IF NOT EXISTS apps(
     id VARCHAR(128) NOT NULL UNIQUE,
     appStoreId VARCHAR(128) NOT NULL,
-    version VARCHAR(32),
+    version VARCHAR(32),                      // this is just a cache of manifest.version
     installationState VARCHAR(512) NOT NULL,
     installationProgress VARCHAR(512),
     runState VARCHAR(512),
     healthy INTEGER,
     containerId VARCHAR(128),
     manifestJson VARCHAR(2048),
-    httpPort INTEGER,
+    httpPort INTEGER,                        // this is the nginx proxy port and not manifest.httpPort
     location VARCHAR(128) NOT NULL UNIQUE,
     dnsRecordId VARCHAR(512),
     accessRestriction VARCHAR(512),

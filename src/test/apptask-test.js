@@ -23,13 +23,10 @@ var addons = require('../addons.js'),
 var APP = {
     id: 'appid',
     appStoreId: 'appStoreId',
-    version: '0.0.1',
     installationState: appdb.ISTATE_PENDING_INSTALL,
     runState: null,
     location: 'applocation',
-    manifest: {
-        title: 'testapplication'
-    },
+    manifest: { version: '0.0.1', dockerImage: 'docker/app0', healthCheckPath: '/', httpPort: 80, title: 'testapplication' },
     containerId: null,
     httpPort: 4567,
     portBindings: null,
@@ -40,7 +37,7 @@ describe('apptask', function () {
     before(function (done) {
         database.initialize(function (error) {
             expect(error).to.be(null);
-            appdb.add(APP.id, APP.appStoreId, APP.version, APP.location, APP.portBindings, APP.accessRestriction, done);
+            appdb.add(APP.id, APP.appStoreId, APP.manifest, APP.location, APP.portBindings, APP.accessRestriction, done);
         });
     });
 
@@ -134,43 +131,41 @@ describe('apptask', function () {
     });
 
     it('barfs on empty manifest', function (done) {
-        var scope = nock(config.apiServerOrigin()).get('/api/v1/appstore/apps/' + APP.appStoreId + '/versions/' + APP.version + '/manifest').reply(200, { });
+        var badApp = _.extend({ }, APP);
+        badApp.manifest = { };
 
-        apptask._downloadManifest(APP, function (error) {
+        apptask._verifyManifest(badApp, function (error) {
             expect(error).to.be.ok();
-            expect(scope.isDone());
             done();
         });
     });
 
     it('barfs on bad field in manifest', function (done) {
-        var manifest = { version: '0.1', dockerImage: 'foo', healthCheckPath: '/', httpPort: 3, title: 'ok' };
-        var scope = nock(config.apiServerOrigin()).get('/api/v1/appstore/apps/' + APP.appStoreId + '/versions/' + APP.version + '/manifest').reply(200, manifest);
+        var badApp = _.extend({ }, APP);
+        badApp.manifest = { version: '0.1', dockerImage: 'foo', healthCheckPath: '/', httpPort: 3, title: 'ok' }; // version is not semver
 
-        apptask._downloadManifest(APP, function (error) {
+        apptask._verifyManifest(badApp, function (error) {
             expect(error).to.be.ok();
-            expect(scope.isDone());
             done();
         });
     });
 
-    it('barfs on malformed manifest', function (done) {
-        var scope = nock(config.apiServerOrigin()).get('/api/v1/appstore/apps/' + APP.appStoreId + '/versions/' + APP.version + '/manifest').reply(200, 'you evil man');
+    it('barfs on icompatible manifest', function (done) {
+        var badApp = _.extend({ }, APP);
+        badApp.manifest = { version: '0.0.1', maxBoxVersion: '0.0.0', dockerImage: 'foo', healthCheckPath: '/', httpPort: 3, title: 'ok' }; // max box version is too small
 
-        apptask._downloadManifest(APP, function (error) {
+        apptask._verifyManifest(badApp, function (error) {
             expect(error).to.be.ok();
-            expect(scope.isDone());
             done();
         });
     });
 
-    it('downloads manifest', function (done) {
-        var manifest = { version: '0.0.1', manifestVersion: 1, dockerImage: 'foo', healthCheckPath: '/', httpPort: '3', title: 'ok' };
-        var scope = nock(config.apiServerOrigin()).get('/api/v1/appstore/apps/' + APP.appStoreId + '/versions/' + APP.version + '/manifest').reply(200, manifest);
+    it('verifies manifest', function (done) {
+        var goodApp = _.extend({ }, APP);
+        goodApp.manifest = { version: '0.0.1', manifestVersion: 1, dockerImage: 'foo', healthCheckPath: '/', httpPort: '3', title: 'ok' };
 
-        apptask._downloadManifest(APP, function (error) {
+        apptask._verifyManifest(goodApp, function (error) {
             expect(error).to.be(null);
-            expect(scope.isDone());
             done();
         });
     });
@@ -189,7 +184,7 @@ describe('apptask', function () {
     });
 
     it('unregisters subdomain', function (done) {
-        var scope = nock(config.apiServerOrigin()).delete('/api/v1/subdomains/someid').reply(200, { });
+        var scope = nock(config.apiServerOrigin()).delete('/api/v1/subdomains/someid?token=' + config.token()).reply(200, { });
 
         apptask._unregisterSubdomain(APP, function (error) {
             expect(error).to.be(null);

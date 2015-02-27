@@ -21,12 +21,11 @@ describe('Apps', function () {
     var APP_0 = {
         id: 'appid-0',
         appStoreId: 'appStoreId-0',
-        version: '0.0.1',
         installationState: appdb.ISTATE_PENDING_INSTALL,
         installationProgress: null,
         runState: null,
         location: 'some-location-0',
-        manifest: null,
+        manifest: { version: '0.1', dockerImage: 'docker/app0', healthCheckPath: '/', httpPort: 80, title: 'app0' },
         httpPort: null,
         containerId: null,
         portBindings: { '1234': '5678' },
@@ -38,7 +37,7 @@ describe('Apps', function () {
         async.series([
             database.initialize,
             database._clear,
-            appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.version, APP_0.location, APP_0.portBindings, APP_0.accessRestriction)
+            appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction)
         ], done);
     });
 
