@@ -1,40 +1,94 @@
 'use strict';
 
 // create main application module
-var app = angular.module('Application', ['ngAnimate', 'angular-md5']);
+var app = angular.module('Application', ['ngRoute', 'ngAnimate', 'angular-md5']);
 
-app.controller('SetupController', ['$scope', 'Client', function ($scope, Client) {
-    $scope.initialized = false;
-    $scope.busy = false;
+app.directive('ngEnter', function () {
+    return function (scope, element, attrs) {
+        element.bind('keydown keypress', function (event) {
+            if(event.which === 13) {
+                scope.$apply(function (){
+                    scope.$eval(attrs.ngEnter);
+                });
 
-    $scope.username = '';
-    $scope.email = '';
-    $scope.password = '';
-    $scope.passwordRepeat = '';
+                event.preventDefault();
+            }
+        });
+    };
+});
 
-    // Stupid angular location provider either wants html5 location mode or not, do the query parsing on my own
-    var search = window.location.search.slice(1).split('&').map(function (item) { return item.split('='); }).reduce(function (o, k) { o[k[0]] = k[1]; return o; }, {});
+// setup all major application routes
+app.config(['$routeProvider', function ($routeProvider) {
+    $routeProvider.when('/', {
+        redirectTo: '/step1'
+    }).when('/step1', {
+        controller: 'StepController',
+        templateUrl: 'views/setup/step1.html'
+    }).when('/step2', {
+        controller: 'StepController',
+        templateUrl: 'views/setup/step2.html'
+    }).when('/step3', {
+        controller: 'StepController',
+        templateUrl: 'views/setup/step3.html'
+    }).when('/step4', {
+        controller: 'StepController',
+        templateUrl: 'views/setup/step4.html'
+    }).when('/step5', {
+        controller: 'FinishController',
+        templateUrl: 'views/setup/step5.html'
+    }).otherwise({ redirectTo: '/'});
+}]);
 
-    $scope.setupToken = search.setupToken;
+app.service('Wizard', [ function () {
+    var instance = null;
 
-    $scope.error = '';
+    function Wizard() {
+        this.username = '';
+        this.email = '';
+        this.password = '';
+    }
 
-    $scope.submit = function () {
-        $scope.busy = true;
-        $scope.error = '';
+    instance = new Wizard();
+    return instance;
+}]);
 
-        Client.createAdmin($scope.username, $scope.password, $scope.email, $scope.setupToken, function (error) {
+app.controller('StepController', ['$scope', '$location', 'Wizard', function ($scope, $location, Wizard) {
+    $scope.wizard = Wizard;
+
+    $scope.ok = function (page, bad) {
+        if (!bad) $location.path(page);
+    };
+
+    $scope.$on('$viewContentLoaded', function () {
+        $('input[autofocus]').focus();
+    });
+}]);
+
+app.controller('FinishController', ['$scope', '$location', '$timeout', 'Wizard', 'Client', function ($scope, $location, $timeout, Wizard, Client) {
+    $scope.wizard = Wizard;
+
+    function finish() {
+        Client.createAdmin($scope.wizard.username, $scope.wizard.password, $scope.wizard.email, $scope.setupToken, function (error) {
             if (error) {
-                $scope.error = error.message;
                 console.error('Internal error', error);
-
-                $scope.busy = false;
+                window.location.href = '/error.html';
                 return;
             }
 
             window.location.href = '/';
         });
-    };
+    }
+
+    $timeout(finish, 1000);
+}]);
+
+app.controller('SetupController', ['$scope', '$location', 'Client', 'Wizard', function ($scope, $location, Client, Wizard) {
+    $scope.initialized = false;
+
+    // Stupid angular location provider either wants html5 location mode or not, do the query parsing on my own
+    var search = window.location.search.slice(1).split('&').map(function (item) { return item.split('='); }).reduce(function (o, k) { o[k[0]] = k[1]; return o; }, {});
+
+    $scope.setupToken = search.setupToken;
 
     Client.isServerFirstTime(function (error, isFirstTime) {
         if (error) {
@@ -47,9 +101,9 @@ app.controller('SetupController', ['$scope', 'Client', function ($scope, Client)
             return;
         }
 
+        if (!Wizard.username) $location.path('/step1');
+
         $scope.initialized = true;
 
-        // hack for autofocus with angular
-        setTimeout( function () { $('input[autofocus]:visible:first').focus(); }, 0);
     });
 }]);

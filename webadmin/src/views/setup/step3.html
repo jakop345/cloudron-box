@@ -1,0 +1,19 @@
+<div class="row">
+    <div class="col-md-12 text-center">
+        <h1>Hi {{ wizard.username }}, what is your Email address?</h1>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12 text-center">
+        <div class="form-group" ng-class="{ 'has-error': setup_form.email.$dirty && setup_form.email.$invalid }">
+            <label class="control-label" for="inputEmail"></label>
+            <input type="email" class="form-control" ng-model="wizard.email" id="inputEmail" name="email" ng-enter="ok('/step4', setup_form.email.$invalid)" autofocus required>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12 text-center">
+        <a class="btn btn-primary btn-outline pull-left" href="#/step2">Back</a>
+        <a class="btn btn-primary btn-outline pull-right" href="#/step4" ng-disabled="setup_form.email.$invalid">Alright</a>
+    </div>
+</div>

@@ -92,7 +92,7 @@ gulp.task('html', ['html-templates', 'html-views'], function () {
 });
 
 gulp.task('html-views', function () {
-    gulp.src('webadmin/src/views/*.html').pipe(gulp.dest('webadmin/dist/views'));
+    gulp.src('webadmin/src/views/**/*.html').pipe(gulp.dest('webadmin/dist/views'));
 });
 
 gulp.task('html-templates', function () {
@@ -126,7 +126,7 @@ gulp.task('css', [], function () {
 
 gulp.task('develop', ['default'], function () {
     gulp.watch(['webadmin/src/theme.scss'], ['css']);
-    gulp.watch(['webadmin/src/*.html'], ['html']);
+    gulp.watch(['webadmin/src/**/*.html'], ['html']);
     gulp.watch(['webadmin/src/*.ejs'], ['html-templates']);
     gulp.watch(['webadmin/src/views/*.html'], ['html-views']);
     gulp.watch(['webadmin/src/js/update.js'], ['js-update']);
