@@ -21,6 +21,9 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         AppStore.getManifest(app.id, function (error, manifest) {
             if (error) return console.error(error);
 
+            // add manifest to app object
+            app.manifest = manifest;
+
             $scope.appinstall.app = app;
             $scope.appinstall.location = app.location;
             $scope.appinstall.portBindings = manifest.tcpPorts;
@@ -70,6 +73,8 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
             form.$setUntouched();
 
             $('#appInstallModal').modal('hide');
+
+            $location.path('/apps');
         });
     };
 
