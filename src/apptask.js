@@ -430,20 +430,18 @@ function verifyManifest(app, callback) {
     error = apps.checkManifestConstraints(manifest);
     if (error) return callback(error);
 
-    // See http://nodejs.org/api/buffer.html#buffer_buf_tojson
-    // in node v0.12 the Buffer constructor would know how to handle manifest.icon directly but not in 0.10
-    if (manifest.icon) {
-        if (manifest.icon.type === 'Buffer') {
-            safe.fs.writeFileSync(path.join(paths.APPICONS_DIR, app.id + '.png'), new Buffer(manifest.icon.data));
-        } else {
-            safe.fs.writeFileSync(path.join(paths.APPICONS_DIR, app.id + '.png'), new Buffer(manifest.icon));
-        }
+    if (!manifest.iconUrl) return callback(null);
 
-        // delete icon buffer, so we don't store it in the db
-        delete manifest.icon;
-    }
+    superagent
+        .get(manifest.iconUrl)
+        .buffer(true)
+        .end(function (error, res) {
+            if (error) return callback(new Error('Error downloading icon:' + error.message));
 
-    callback(null);
+            if (!safe.fs.writeFileSync(path.join(paths.APPICONS_DIR, app.id + '.png'), res.text)) return callback(new Error('Error saving icon:' + safe.error.message));
+
+            callback(null);
+    });
 }
 
 function registerSubdomain(app, callback) {
