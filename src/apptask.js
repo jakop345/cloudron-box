@@ -438,7 +438,7 @@ function verifyManifest(app, callback) {
         .end(function (error, res) {
             if (error) return callback(new Error('Error downloading icon:' + error.message));
 
-            if (!safe.fs.writeFileSync(path.join(paths.APPICONS_DIR, app.id + '.png'), res.text)) return callback(new Error('Error saving icon:' + safe.error.message));
+            if (!safe.fs.writeFileSync(path.join(paths.APPICONS_DIR, app.id + '.png'), res.body)) return callback(new Error('Error saving icon:' + safe.error.message));
 
             callback(null);
     });
