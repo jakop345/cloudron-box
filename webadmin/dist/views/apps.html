@@ -99,9 +99,7 @@
                 <div class="grid-item-top">
                     <div class="row">
                         <div class="col-xs-12 text-center">
-                            <img ng-show="app.icon" width="48" height="48" ng-src="{{app.icon}}"/>
-                            <span ng-show="!app.icon" class="fa fa-space-shuttle fa-4x"></span>
-
+                            <img ng-src="{{app.iconUrl}}" onerror="this.onerror=null;this.src='img/appicon_fallback.png'" width="48" height="48"/>
                         </div>
                     </div>
                     <br/>

@@ -119,6 +119,10 @@ gulp.task('css', [], function () {
         .pipe(gulp.dest('setup/splash/website'));
 });
 
+gulp.task('images', function () {
+    return gulp.src('webadmin/src/img/**')
+        .pipe(gulp.dest('webadmin/dist/img'));
+});
 
 // --------------
 // Utilities
@@ -126,6 +130,7 @@ gulp.task('css', [], function () {
 
 gulp.task('develop', ['default'], function () {
     gulp.watch(['webadmin/src/theme.scss'], ['css']);
+    gulp.watch(['webadmin/src/img/*'], ['images']);
     gulp.watch(['webadmin/src/**/*.html'], ['html']);
     gulp.watch(['webadmin/src/*.ejs'], ['html-templates']);
     gulp.watch(['webadmin/src/views/*.html'], ['html-views']);
@@ -141,5 +146,5 @@ gulp.task('clean', function (callback) {
 });
 
 gulp.task('default', ['clean'], function () {
-    gulp.start('html', 'js', '3rdparty', 'css');
+    gulp.start('html', 'js', '3rdparty', 'css', 'images');
 });
