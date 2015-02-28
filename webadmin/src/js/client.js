@@ -42,7 +42,7 @@ angular.module('Application').service('Client', ['$http', 'md5', function ($http
             fqdn: null,
             ip: null,
             revision: null,
-            update: null,
+            update: { box: null, apps: null },
             isDev: false,
             progress: {}
         };

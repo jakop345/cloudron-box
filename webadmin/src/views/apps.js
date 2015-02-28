@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('Application').controller('AppsController', ['$scope', '$location', 'Client', function ($scope, $location, Client) {
+angular.module('Application').controller('AppsController', ['$scope', '$location', 'Client', 'AppStore', function ($scope, $location, Client, AppStore) {
     $scope.installedApps = Client.getInstalledApps();
     $scope.config = Client.getConfig();
 
@@ -112,13 +112,19 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appupdate.app = app;
         $scope.appupdate.error.password = null;
 
-        $('#appUpdateModal').modal('show');
+        AppStore.getManifest(app.appStoreId, function (error, manifest) {
+            if (error) return console.error(error);
+
+            $scope.appupdate.app.manifest = manifest;
+
+            $('#appUpdateModal').modal('show');
+        });
     };
 
     $scope.doUpdate = function (form) {
         $scope.appupdate.error.password = null;
 
-        Client.updateApp($scope.appupdate.app.id, $scope.appupdate.password, function (error) {
+        Client.updateApp($scope.appupdate.app.id, $scope.appupdate.app.manifest, $scope.appupdate.password, function (error) {
             if (error) {
                 if (error.statusCode === 403) {
                     $scope.appupdate.password = '';
