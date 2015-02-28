@@ -2,6 +2,15 @@
 
 'use strict';
 
+// intentionally placed here because of circular dep with cloudron.js
+module.exports = exports = {
+    initialize: initialize,
+    uninitialize: uninitialize,
+
+    getUpdateInfo: getUpdateInfo,
+    update: update
+};
+
 var appdb = require('./appdb.js'),
     assert = require('assert'),
     cloudron = require('./cloudron.js'),
@@ -20,14 +29,6 @@ var INSTALLER_UPDATE_URL = 'http://127.0.0.1:2020/api/v1/installer/update';
 var gCheckUpdatesTimeoutId = null,
     gAppUpdateInfo = null,
     gBoxUpdateInfo = null;
-
-module.exports = exports = {
-    initialize: initialize,
-    uninitialize: uninitialize,
-
-    getUpdateInfo: getUpdateInfo,
-    update: update
-};
 
 function getUpdateInfo() {
     return {

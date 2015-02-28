@@ -10,13 +10,12 @@ var appdb = require('./appdb.js'),
     DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:apps'),
     docker = require('./docker.js'),
+    updater = require('./updater.js'),
     fs = require('fs'),
-    os = require('os'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
     semver = require('semver'),
     split = require('split'),
-    stream = require('stream'),
     util = require('util');
 
 exports = module.exports = {
@@ -217,12 +216,24 @@ function getBySubdomain(subdomain, callback) {
 function getAll(callback) {
     assert(typeof callback === 'function');
 
+    var updates = updater.getUpdateInfo().apps || [];
+
     appdb.getAll(function (error, apps) {
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
         apps.forEach(function (app) {
             app.iconUrl = getIconUrlSync(app);
             app.fqdn = config.appFqdn(app.location);
+            app.updateVersion = null;
+
+            updates.some(function (update) {
+                if (update.appId === app.appStoreId && update.version !== app.version) {
+                    app.updateVersion = update.version;
+                    return true;
+                } else {
+                    return false;
+                }
+            });
         });
 
         callback(null, apps);
