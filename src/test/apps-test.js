@@ -213,6 +213,12 @@ describe('validateManifest', function () {
         expect(apps.validateManifest(manifestCopy)).to.be.an(Error);
     });
 
+    it('fails for bad iconUrl', function () {
+        var manifestCopy = _.extend({ }, manifest);
+        manifestCopy.iconUrl = 34;
+        expect(apps.validateManifest(manifestCopy)).to.be.an(Error);
+    });
+
     it('succeeds for minimal valid manifest', function () {
         expect(apps.validateManifest(manifest)).to.be(null);
     });
@@ -223,6 +229,7 @@ describe('validateManifest', function () {
         manifestCopy.maxBoxVersion = '1.0.0';
         manifestCopy.targetBoxVersion = '1.0.0';
         manifestCopy.addons = [ "mysql", "postgresql" ];
+        manifestCopy.iconUrl = 'https://www.cloudron.us';
 
         expect(apps.validateManifest(manifestCopy)).to.be(null);
     });

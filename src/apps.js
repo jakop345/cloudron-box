@@ -13,6 +13,7 @@ var appdb = require('./appdb.js'),
     fs = require('fs'),
     os = require('os'),
     paths = require('./paths.js'),
+    safe = require('safetydance'),
     semver = require('semver'),
     split = require('split'),
     stream = require('stream'),
@@ -475,6 +476,10 @@ function validateManifest(manifest) {
 
     if ('targetBoxVersion' in manifest) {
         if (!semver.valid(manifest['targetBoxVersion'])) return new Error('targetBoxVersion is not valid semver');
+    }
+
+    if ('iconUrl' in manifest) {
+        if (!safe.url.parse(manifest.iconUrl)) return new Error('Invalid icon url');
     }
 
     return null;
