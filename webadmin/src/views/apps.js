@@ -20,6 +20,12 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         password: ''
     };
 
+    $scope.appupdate = {
+        error: {},
+        app: {},
+        password: ''
+    };
+
     $scope.showConfigure = function (app) {
         $scope.appconfigure.app = app;
         $scope.appconfigure.location = app.location;
@@ -99,6 +105,37 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
             form.$setUntouched();
 
             $('#appUninstallModal').modal('hide');
+        });
+    };
+
+    $scope.showUpdate = function (app) {
+        $scope.appupdate.app = app;
+        $scope.appupdate.error.password = null;
+
+        $('#appUpdateModal').modal('show');
+    };
+
+    $scope.doUpdate = function (form) {
+        $scope.appupdate.error.password = null;
+
+        Client.updateApp($scope.appupdate.app.id, $scope.appupdate.password, function (error) {
+            if (error) {
+                if (error.statusCode === 403) {
+                    $scope.appupdate.password = '';
+                    $scope.appupdate.error.password = true;
+                } else {
+                    console.error(error);
+                }
+                return;
+            }
+
+            $scope.appupdate.app = {};
+            $scope.appupdate.password = '';
+
+            form.$setPristine();
+            form.$setUntouched();
+
+            $('#appUpdateModal').modal('hide');
         });
     };
 
