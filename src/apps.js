@@ -192,7 +192,7 @@ function get(appId, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        app.icon = getIconUrlSync(app);
+        app.iconUrl = getIconUrlSync(app);
         app.fqdn = config.appFqdn(app.location);
 
         callback(null, app);
@@ -207,7 +207,7 @@ function getBySubdomain(subdomain, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        app.icon = getIconUrlSync(app);
+        app.iconUrl = getIconUrlSync(app);
         app.fqdn = config.appFqdn(app.location);
 
         callback(null, app);
@@ -221,7 +221,7 @@ function getAll(callback) {
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
         apps.forEach(function (app) {
-            app.icon = getIconUrlSync(app);
+            app.iconUrl = getIconUrlSync(app);
             app.fqdn = config.appFqdn(app.location);
         });
 
