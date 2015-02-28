@@ -227,7 +227,7 @@ function getAll(callback) {
             app.updateVersion = null;
 
             updates.some(function (update) {
-                if (update.appId === app.appStoreId && update.version !== app.version) {
+                if (update.appId === app.appStoreId && update.version !== app.manifest.version) {
                     app.updateVersion = update.version;
                     return true;
                 } else {
