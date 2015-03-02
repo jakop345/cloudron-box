@@ -387,6 +387,18 @@ angular.module('Application').service('Client', ['$http', 'md5', function ($http
         }).error(defaultErrorHandler(callback));
     };
 
+    Client.prototype.changeEmail = function (email, password, callback) {
+        var data = {
+            password: password,
+            email: email
+        };
+
+        $http.put('/api/v1/users/' + this._userInfo.username, data).success(function(data, status) {
+            if (status !== 204) return callback(new ClientError(status, data));
+            callback(null, data);
+        }).error(defaultErrorHandler(callback));
+    };
+
     Client.prototype.refreshConfig = function (callback) {
         var that = this;
 

@@ -138,3 +138,15 @@ $table-border-color:                        transparent !default;
 .text-success {
     color: #5CB85C;
 }
+
+.text-large {
+    font-size: $font-size-h1;
+}
+
+.text-medium {
+    font-size: $font-size-h4;
+}
+
+.text-small {
+    font-size: $font-size-h6;
+}

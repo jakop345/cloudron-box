@@ -15,6 +15,13 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
         newPasswordRepeat: ''
     };
 
+    $scope.emailchange = {
+        busy: false,
+        error: {},
+        email: '',
+        password: ''
+    };
+
     function passwordChangeReset (form) {
         $scope.passwordchange.error.password = null;
         $scope.passwordchange.error.newPassword = null;
@@ -22,6 +29,18 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
         $scope.passwordchange.password = '';
         $scope.passwordchange.newPassword = '';
         $scope.passwordchange.newPasswordRepeat = '';
+
+        if (form) {
+            form.$setPristine();
+            form.$setUntouched();
+        }
+    }
+
+    function emailChangeReset (form) {
+        $scope.emailchange.error.email = null;
+        $scope.emailchange.error.password = null;
+        $scope.emailchange.email = '';
+        $scope.emailchange.password = '';
 
         if (form) {
             form.$setPristine();
@@ -53,10 +72,39 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
         });
     };
 
+    $scope.doChangeEmail = function (form) {
+        $scope.emailchange.error.email = null;
+        $scope.emailchange.error.password = null;
+        $scope.emailchange.busy = true;
+
+        Client.changeEmail($scope.emailchange.email, $scope.emailchange.password, function (error) {
+            if (error) {
+                if (error.statusCode === 403) {
+                    $scope.emailchange.error.password = true;
+                    $scope.emailchange.password = '';
+                } else {
+                    console.error('Unable to change email.', error);
+                }
+                return;
+            }
+
+            $scope.emailchange.busy = false;
+            emailChangeReset(form);
+
+            $('#emailChangeModal').modal('hide');
+        });
+    };
+
     $scope.showChangePassword = function (form) {
         passwordChangeReset(form);
 
         $('#passwordChangeModal').modal('show');
+    };
+
+    $scope.showChangeEmail = function (form) {
+        emailChangeReset(form);
+
+        $('#emailChangeModal').modal('show');
     };
 
     $scope.removeAccessTokens = function (client, event) {
