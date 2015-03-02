@@ -14,6 +14,7 @@ exports = module.exports = {
     createToken: createToken,
     logout: logout,
     info: info,
+    update: update,
     list: listUser,
     create: createUser,
     changePassword: changePassword,
@@ -77,6 +78,21 @@ function createUser(req, res, next) {
         };
 
         next(new HttpSuccess(201, { userInfo: userInfo }));
+    });
+}
+
+function update(req, res, next) {
+    assert(typeof req.user === 'object');
+    assert(typeof req.body === 'object');
+
+    // if (typeof req.body.username !== 'string') return next(new HttpError(400, 'username must be string'));
+    if (typeof req.body.email !== 'string') return next(new HttpError(400, 'email must be string'));
+
+    user.update(req.user.id, req.user.username, req.body.email, function (error) {
+        if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'User not found'));
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(204));
     });
 }
 

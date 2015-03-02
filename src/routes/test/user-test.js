@@ -17,7 +17,7 @@ var config = require('../../../config.js'),
 
 var SERVER_URL = 'http://localhost:' + config.get('port');
 
-var USERNAME_0 = 'admin', PASSWORD = 'password', EMAIL ='silly@me.com';
+var USERNAME_0 = 'admin', PASSWORD = 'password', EMAIL = 'silly@me.com', EMAIL_0_NEW = 'stupid@me.com';
 var USERNAME_1 = 'userTheFirst', EMAIL_1 = 'tao@zen.mac';
 var USERNAME_2 = 'userTheSecond', EMAIL_2 = 'user@foo.bar';
 var USERNAME_3 = 'userTheThird', EMAIL_3 = 'user3@foo.bar';
@@ -482,6 +482,48 @@ describe('User API', function () {
         });
     });
 
+    // Change email
+    it('change email fails due to missing token', function (done) {
+        request.put(SERVER_URL + '/api/v1/users/' + USERNAME_0)
+               .send({ password: PASSWORD, email: EMAIL_0_NEW })
+               .end(function (error, result) {
+            expect(result.statusCode).to.equal(401);
+            done(error);
+        });
+    });
+
+    it('change email fails due to missing password', function (done) {
+        request.put(SERVER_URL + '/api/v1/users/' + USERNAME_0)
+               .query({ access_token: token })
+               .send({ email: EMAIL_0_NEW })
+               .end(function (error, result) {
+            expect(result.statusCode).to.equal(400);
+            done(error);
+        });
+    });
+
+    it('change email fails due to wrong password', function (done) {
+        request.put(SERVER_URL + '/api/v1/users/' + USERNAME_0)
+               .query({ access_token: token })
+               .send({ password: PASSWORD+PASSWORD, email: EMAIL_0_NEW })
+               .end(function (error, result) {
+            expect(result.statusCode).to.equal(403);
+            done(error);
+        });
+    });
+
+    it('change email succeeds', function (done) {
+        request.put(SERVER_URL + '/api/v1/users/' + USERNAME_0)
+               .query({ access_token: token })
+               .send({ password: PASSWORD, email: EMAIL_0_NEW })
+               .end(function (error, result) {
+            console.log(result)
+            expect(result.statusCode).to.equal(204);
+            done(error);
+        });
+    });
+
+    // Change password
     it('change password fails due to missing current password', function (done) {
         request.post(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/password')
                .query({ access_token: token })
@@ -512,7 +554,7 @@ describe('User API', function () {
         });
     });
 
-      it('change password succeeds', function (done) {
+    it('change password succeeds', function (done) {
         request.post(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/password')
                .query({ access_token: token })
                .send({ password: PASSWORD, newPassword: 'new_password' })
