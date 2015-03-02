@@ -59,6 +59,13 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
         $('#passwordChangeModal').modal('show');
     };
 
+    $scope.removeAccessTokens = function (client, event) {
+        Client.delTokensByClientId(client.id, function (error) {
+            if (error) return console.error(error);
+            $(event.target).addClass('disabled');
+        });
+    };
+
     Client.onReady(function () {
         $scope.tokenInUse = Client._token;
 
