@@ -15,7 +15,9 @@ var config = require('../../config.js'),
     UserError = user.UserError;
 
 var USERNAME = 'nobody';
+var USERNAME_NEW = 'nobodynew';
 var EMAIL = 'nobody@no.body';
+var EMAIL_NEW = 'nobodynew@no.body';
 var PASSWORD = 'foobar';
 var NEW_PASSWORD = 'somenewpassword';
 var IS_ADMIN = true;
@@ -213,6 +215,53 @@ describe('User', function () {
                 expect(result).to.be.ok();
 
                 done();
+            });
+        });
+    });
+
+    describe('update', function () {
+        before(createUser);
+        after(cleanupUsers);
+
+        it('fails due to unknown userid', function (done) {
+            user.update(USERNAME+USERNAME, USERNAME_NEW, EMAIL_NEW, function (error) {
+                expect(error).to.be.a(UserError);
+                expect(error.reason).to.equal(UserError.NOT_FOUND);
+
+                done();
+            });
+        });
+
+        it('fails due to invalid username', function (done) {
+            user.update(USERNAME, '', EMAIL_NEW, function (error) {
+                expect(error).to.be.a(UserError);
+                expect(error.reason).to.equal(UserError.BAD_USERNAME);
+
+                done();
+            });
+        });
+
+        it('fails due to invalid email', function (done) {
+            user.update(USERNAME, USERNAME_NEW, 'brokenemailaddress', function (error) {
+                expect(error).to.be.a(UserError);
+                expect(error.reason).to.equal(UserError.BAD_EMAIL);
+
+                done();
+            });
+        });
+
+        it('succeeds', function (done) {
+            user.update(USERNAME, USERNAME_NEW, EMAIL_NEW, function (error) {
+                expect(error).to.not.be.ok();
+
+                user.get(USERNAME, function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result).to.be.ok();
+                    expect(result.email).to.equal(EMAIL_NEW);
+                    expect(result.username).to.equal(USERNAME_NEW);
+
+                    done();
+                });
             });
         });
     });

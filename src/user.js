@@ -236,11 +236,23 @@ function getByResetToken(resetToken, callback) {
     getUser(userId, callback);
 }
 
-function updateUser(username, callback) {
+function updateUser(userId, username, email, callback) {
+    assert(typeof userId === 'string');
     assert(typeof username === 'string');
+    assert(typeof email === 'string');
     assert(typeof callback === 'function');
 
-    callback(new UserError(UserError.INTERNAL_ERROR, 'Not implemented'));
+    var error = validateUsername(username);
+    if (error) return callback(error);
+
+    error = validateEmail(email);
+    if (error) return callback(error);
+
+    userdb.update(userId, { username: username, email: email }, function (error) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND, error));
+        if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+        callback(null);
+    });
 }
 
 function changeAdmin(username, admin, callback) {
