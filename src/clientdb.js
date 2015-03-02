@@ -65,18 +65,34 @@ function getAllWithDetails(callback) {
             if (record.appId === constants.ADMIN_CLIENT_ID) {
                 record.name = constants.ADMIN_NAME;
                 record.location = constants.ADMIN_LOCATION;
+                record.type = 'webadmin';
 
                 tmp.push(record);
 
                 return callback(null);
             }
 
-            var appId = record.appId.indexOf('proxy-') === 0 ? record.appId.slice('proxy-'.length) : record.appId;
+            var appId = record.appId;
+            var type = 'app';
+
+            // Handle our different types of oauth clients
+            if (record.appId.indexOf('addon-') === 0) {
+                appId = record.appId.slice('addon-'.length);
+                type = 'addon';
+            } else if (record.appId.indexOf('proxy-') === 0) {
+                appId = record.appId.slice('proxy-'.length);
+                type = 'proxy';
+            }
+
             appdb.get(appId, function (error, result) {
-                if (error) return callback(error);
+                if (error) {
+                    console.error('Failed to get app details for oauth client', result, error);
+                    return callback(null);  // ignore error so we continue listing clients
+                }
 
                 record.name = result.manifest.title + (record.appId.indexOf('proxy-') === 0 ? 'OAuth Proxy' : '');
                 record.location = result.location;
+                record.type = type;
 
                 tmp.push(record);
 
