@@ -63,7 +63,7 @@ function getAllWithDetails(callback) {
         var tmp = [];
         async.each(results, function (record, callback) {
             if (record.appId === constants.ADMIN_CLIENT_ID) {
-                record.name = 'Webadmin';
+                record.name = constants.ADMIN_NAME;
                 record.location = constants.ADMIN_LOCATION;
 
                 tmp.push(record);
