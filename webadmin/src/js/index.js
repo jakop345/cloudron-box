@@ -27,9 +27,6 @@ app.config(['$routeProvider', function ($routeProvider) {
     }).when('/graphs', {
         controller: 'GraphsController',
         templateUrl: 'views/graphs.html'
-    }).when('/security', {
-        controller: 'SecurityController',
-        templateUrl: 'views/security.html'
     }).otherwise({ redirectTo: '/'});
 }]);
 
