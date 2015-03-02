@@ -6,6 +6,7 @@ var assert = require('assert'),
     authcodedb = require('../authcodedb'),
     clientdb = require('../clientdb'),
     config = require('../../config.js'),
+    constants = require('../../constants.js'),
     DatabaseError = require('../databaseerror'),
     debug = require('debug')('box:routes/oauth2'),
     HttpError = require('connect-lastmile').HttpError,
@@ -15,6 +16,7 @@ var assert = require('assert'),
     passport = require('passport'),
     session = require('connect-ensure-login'),
     tokendb = require('../tokendb'),
+    appdb = require('../appdb'),
     url = require('url'),
     user = require('../user.js'),
     hat = require('hat');
@@ -115,7 +117,49 @@ gServer.exchange(oauth2orize.exchange.code(function (client, code, redirectURI, 
 
 // Main login form username and password
 function loginForm(req, res) {
-    res.render('login', { adminOrigin: config.adminOrigin(), csrf: req.csrfToken() });
+    var u = url.parse(req.session.returnTo, true);
+
+    if (!u.query.client_id) {
+        return res.render('error', {
+            user: req.user,
+            adminOrigin: config.adminOrigin(),
+            message: 'Invalid login request'
+        });
+    }
+
+    clientdb.get(u.query.client_id, function (error, result) {
+        if (error) {
+            return res.render('error', {
+                user: req.user,
+                adminOrigin: config.adminOrigin(),
+                message: 'Unknown OAuth client'
+            });
+        }
+
+        if (result.appId === constants.ADMIN_CLIENT_ID) {
+            return res.render('login', { adminOrigin: config.adminOrigin(), csrf: req.csrfToken(), applicationName: constants.ADMIN_NAME });
+        }
+
+        var appId = result.appId;
+        // Handle our different types of oauth clients
+        if (result.appId.indexOf('addon-') === 0) {
+            appId = result.appId.slice('addon-'.length);
+        } else if (result.appId.indexOf('proxy-') === 0) {
+            appId = result.appId.slice('proxy-'.length);
+        }
+
+        appdb.get(appId, function (error, result) {
+            if (error) {
+                return res.render('error', {
+                    user: req.user,
+                    adminOrigin: config.adminOrigin(),
+                    message: 'Unknown Application for those OAuth credentials'
+                });
+            }
+
+            res.render('login', { adminOrigin: config.adminOrigin(), csrf: req.csrfToken(), applicationName: result.location });
+        });
+    });
 }
 
 // Form to enter email address to send a password reset request mail
