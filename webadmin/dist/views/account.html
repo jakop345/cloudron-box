@@ -81,3 +81,39 @@
         </div>
     </div>
 </div>
+
+<div style="max-width: 600px; margin: 0 auto;">
+    <div class="text-left">
+        <h3>Application Access</h3>
+    </div>
+</div>
+
+<div class="card" ng-repeat="client in activeClients">
+    <div class="grid-item-top">
+        <div class="row">
+            <div class="col-xs-12">
+                <h4 class="text-muted">{{client.name}} on {{client.location}}.{{config.fqdn}}</h4>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="row">
+                    <div class="col-xs-12">
+                        You logged in <b>{{ client.tokenCount }}</b> times to this application.
+                        <button class="btn btn-xs btn-danger pull-right" ng-click="removeAccessTokens(client, $event)" ng-disabled="!client.tokenCount"><i ng-hide="!client._busy" class="fa fa-circle-o-notch fa-spin"></i> Remove access</button>
+                        <br/>
+                        <a href="" data-toggle="collapse" data-parent="#accordion" data-target="#collapse{{client.id}}">Advanced</a>
+                        <div id="collapse{{client.id}}" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                <h4 class="text-muted">Credentials</h4>
+                                <p>Permissions: <b>{{ client.scope }}</b></p>
+                                <p>Client ID: <b>{{ client.id }}</b></p>
+                                <p>Client Secret: <b>{{ client.clientSecret }}</b></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

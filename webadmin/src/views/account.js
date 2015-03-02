@@ -4,6 +4,9 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
     $scope.user = Client.getUserInfo();
     $scope.config = Client.getConfig();
 
+    $scope.activeClients = [];
+    $scope.tokenInUse = null;
+
     $scope.passwordchange = {
         busy: false,
         error: {},
@@ -55,4 +58,14 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
 
         $('#passwordChangeModal').modal('show');
     };
+
+    Client.onReady(function () {
+        $scope.tokenInUse = Client._token;
+
+        Client.getOAuthClients(function (error, activeClients) {
+            if (error) return console.error(error);
+
+            $scope.activeClients = activeClients;
+        });
+    });
 }]);
