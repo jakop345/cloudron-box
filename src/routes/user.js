@@ -63,7 +63,7 @@ function createUser(req, res, next) {
     var password = generatePassword();
     var email = req.body.email;
 
-    user.create(username, password, email, false /* admin */, function (error) {
+    user.create(username, password, email, false /* admin */, function (error, user) {
         if (error && error.reason === UserError.BAD_USERNAME) return next(new HttpError(400, 'Invalid username'));
         if (error && error.reason === UserError.BAD_EMAIL) return next(new HttpError(400, 'Invalid email'));
         if (error && error.reason === UserError.BAD_PASSWORD) return next(new HttpError(400, 'Invalid password'));
@@ -72,9 +72,10 @@ function createUser(req, res, next) {
         if (error) return next(new HttpError(500, error));
 
         var userInfo = {
-            username: username,
-            email: email,
-            admin: false
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            admin: user.admin
         };
 
         next(new HttpSuccess(201, { userInfo: userInfo }));
@@ -158,6 +159,7 @@ function createToken(req, res, next) {
             token: token,
             expires: expires,
             userInfo: {
+                id: req.user.id,
                 username: req.user.username,
                 email: req.user.email,
                 admin: req.user.admin
@@ -180,6 +182,7 @@ function info(req, res, next) {
     assert(typeof req.user === 'object');
 
     next(new HttpSuccess(200, {
+        id: req.user.id,
         username: req.user.username,
         email: req.user.email,
         admin: req.user.admin

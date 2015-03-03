@@ -98,6 +98,12 @@ function initialize(callback) {
             if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
             if (error) return callback(error);
 
+            // check if token is expired
+            if ((new Date(token.expires)).getTime() < Date.now()) {
+                console.error('Token is expired');
+                return callback(null, false);
+            }
+
             userdb.get(token.userId, function (error, user) {
                 if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
                 if (error) return callback(error);

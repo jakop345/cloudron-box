@@ -41,6 +41,7 @@ function cleanup(done) {
 describe('User API', function () {
     this.timeout(5000);
 
+    var user_0 = null;
     var token = null;
     var token_1 = tokendb.generateToken();
     var token_2 = tokendb.generateToken();
@@ -87,6 +88,10 @@ describe('User API', function () {
                .send({ username: USERNAME_0, password: PASSWORD, email: EMAIL })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(201);
+
+            // stash for later use
+            token = res.body.token;
+
             expect(scope1.isDone());
             expect(scope2.isDone());
             done(err);
@@ -99,6 +104,41 @@ describe('User API', function () {
             expect(res.statusCode).to.equal(200);
             expect(res.body.activated).to.be.ok();
             done(err);
+        });
+    });
+
+    it('can get userInfo with token', function (done) {
+        request.get(SERVER_URL + '/api/v1/users/' + USERNAME_0)
+        .query({ access_token: token })
+        .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            expect(res.body.username).to.equal(USERNAME_0);
+            expect(res.body.email).to.equal(EMAIL);
+            expect(res.body.admin).to.be.ok();
+
+            // stash for further use
+            user_0 = res.body;
+
+            done(err);
+        });
+    });
+
+    it('cannot get userInfo with expired token', function (done) {
+        var token = tokendb.generateToken();
+        var expires = new Date(Date.now() + 2000).toUTCString(); // 1 sec
+
+        tokendb.add(token, user_0.id, null, expires, '*', function (error) {
+            expect(error).to.not.be.ok();
+
+            setTimeout(function () {
+                request.get(SERVER_URL + '/api/v1/users/' + user_0.username)
+                .query({ access_token: token })
+                .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.statusCode).to.equal(401);
+                    done();
+                });
+            }, 2000);
         });
     });
 
