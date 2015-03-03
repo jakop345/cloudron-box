@@ -9,7 +9,7 @@
 var appdb = require('../appdb.js'),
     authcodedb = require('../authcodedb.js'),
     clientdb = require('../clientdb.js'),
-    config = require('../../config.js'),
+    hat = require('hat'),
     constants = require('../../constants.js'),
     database = require('../database'),
     DatabaseError = require('../databaseerror.js'),
@@ -41,7 +41,7 @@ describe('database', function () {
             salt: 'morton',
             createdAt: 'sometime back',
             modifiedAt: 'now',
-            resetToken: ''
+            resetToken: hat()
         };
 
         var ADMIN_0 = {
@@ -96,6 +96,23 @@ describe('database', function () {
 
         it('can get by email', function (done) {
             userdb.getByEmail(USER_0.email, function (error, user) {
+                expect(error).to.not.be.ok();
+                expect(user).to.eql(USER_0);
+                done();
+            });
+        });
+
+        it('can get by resetToken fails for empty resetToken', function (done) {
+            userdb.getByResetToken('', function (error, user) {
+                expect(error).to.be.ok();
+                expect(error.reason).to.be(DatabaseError.INTERNAL_ERROR);
+                expect(user).to.not.be.ok();
+                done();
+            });
+        });
+
+        it('can get by resetToken', function (done) {
+            userdb.getByResetToken(USER_0.resetToken, function (error, user) {
                 expect(error).to.not.be.ok();
                 expect(user).to.eql(USER_0);
                 done();

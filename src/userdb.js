@@ -10,6 +10,7 @@ exports = module.exports = {
     getByUsername: getByUsername,
     getByEmail: getByEmail,
     getByAccessToken: getByAccessToken,
+    getByResetToken: getByResetToken,
     getAll: getAll,
     getAllAdmins: getAllAdmins,
     add: add,
@@ -48,6 +49,20 @@ function getByEmail(email, callback) {
     assert(typeof callback === 'function');
 
     database.query('SELECT ' + USERS_FIELDS + ' FROM users WHERE email = ?', [ email ], function (error, result) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
+
+        callback(null, result[0]);
+    });
+}
+
+function getByResetToken(resetToken, callback) {
+    assert(typeof resetToken === 'string');
+    assert(typeof callback === 'function');
+
+    if (resetToken.length === 0) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, 'Empty resetToken not allowed'));
+
+    database.query('SELECT ' + USERS_FIELDS + ' FROM users WHERE resetToken=?', [ resetToken ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
