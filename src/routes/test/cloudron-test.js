@@ -154,7 +154,8 @@ describe('Cloudron', function () {
                 setup,
 
                 function (callback) {
-                    var scope = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
+                    var scope1 = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
+                    var scope2 = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/setup/done?setupToken=somesetuptoken').reply(201, {});
 
                     request.post(SERVER_URL + '/api/v1/cloudron/activate')
                            .query({ setupToken: 'somesetuptoken' })
@@ -162,21 +163,17 @@ describe('Cloudron', function () {
                            .end(function (error, result) {
                         expect(error).to.not.be.ok();
                         expect(result).to.be.ok();
-                        expect(scope.isDone());
+                        expect(scope1.isDone());
+                        expect(scope2.isDone());
+
+                        // stash token for further use
+                        token = result.body.token;
+
+                        config.set('token', 'APPSTORE_TOKEN');
+
                         callback();
                     });
                 },
-
-                function (callback) {
-                    request.get(SERVER_URL + '/api/v1/users/' + USERNAME + '/login')
-                           .auth(USERNAME, PASSWORD)
-                           .end(function (error, result) {
-                        expect(error).to.not.be.ok();
-                        token = result.body.token;
-                        config.set('token', 'APPSTORE_TOKEN');
-                        callback();
-                    });
-                }
             ], done);
         });
 

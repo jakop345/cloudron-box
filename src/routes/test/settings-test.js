@@ -46,18 +46,10 @@ function setup(done) {
                 expect(result.statusCode).to.eql(201);
                 expect(scope1.isDone());
                 expect(scope2.isDone());
-                callback();
-            });
-        },
 
-        function createToken(callback) {
-            request.get(SERVER_URL + '/api/v1/users/' + USERNAME + '/login')
-                   .auth(USERNAME, PASSWORD)
-                   .end(function (error, result) {
-                expect(error).to.be(null);
-                expect(result).to.be.ok();
-
+                // stash token for further use
                 token = result.body.token;
+
                 callback();
             });
         },

@@ -69,10 +69,6 @@ function initializeExpressSync() {
 
     var multipart = middleware.multipart({ maxFieldsSize: FIELD_LIMIT, limit: FILE_SIZE_LIMIT, timeout: FILE_TIMEOUT });
 
-    // middleware shortcuts for authentification
-    var bearer = passport.authenticate(['bearer'], { session: false });
-    var basic = passport.authenticate(['basic'], { session: false });
-
     // scope middleware implicitly also adds bearer token verification
     var rootScope = routes.oauth2.scope('root');
     var profileScope = routes.oauth2.scope('profile');
@@ -105,8 +101,6 @@ function initializeExpressSync() {
     router.del ('/api/v1/users/:userName', usersScope, routes.user.requireAdmin, routes.user.verifyPassword, routes.user.remove);
     router.post('/api/v1/users/:userName/password', usersScope, routes.user.changePassword); // changePassword verifies password
     router.post('/api/v1/users/:userName/admin', usersScope, routes.user.requireAdmin, routes.user.changeAdmin);
-
-    router.get ('/api/v1/users/:userName/login', basic, routes.user.createToken);    // FIXME this should not be needed with OAuth
 
     // form based login routes used by oauth2 frame
     router.get ('/api/v1/session/login', csrf, routes.oauth2.loginForm);

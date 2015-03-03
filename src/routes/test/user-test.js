@@ -142,66 +142,6 @@ describe('User API', function () {
         });
     });
 
-    it('login fails due to wrong credentials', function (done) {
-        request.get(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/login')
-               .auth(USERNAME_0, 'wrong' + PASSWORD)
-               .end(function (err, res) {
-            expect(err).to.not.be.ok();
-            expect(res.statusCode).to.equal(401);
-            done(err);
-        });
-    });
-
-    it('login fails due to non basic auth header', function (done) {
-        request.get(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/login')
-               .set('Authorization', USERNAME_0 + ':wrong' + PASSWORD)
-               .end(function (err, res) {
-            expect(err).to.not.be.ok();
-            expect(res.statusCode).to.equal(400);
-            done(err);
-        });
-    });
-
-    it('login fails due to broken basic auth header', function (done) {
-        request.get(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/login')
-               .set('Authorization', 'Basic ' + USERNAME_0 + ':wrong' + PASSWORD)
-               .end(function (err, res) {
-            expect(err).to.not.be.ok();
-            expect(res.statusCode).to.equal(400);
-            done(err);
-        });
-    });
-
-    it('login fails due to wrong arguments', function (done) {
-        request.get(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/login')
-               .auth(USERNAME_0, '')
-               .end(function (err, res) {
-            expect(err).to.not.be.ok();
-            expect(res.statusCode).to.equal(401);
-            done(err);
-        });
-    });
-
-    it('login succeeds', function (done) {
-        request.get(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/login')
-               .auth(USERNAME_0, PASSWORD)
-               .end(function (err, res) {
-            expect(res.statusCode).to.equal(200);
-            expect(res.body.token).to.be.a('string');
-            expect(res.body.expires).to.be.a('string');
-            expect(res.body.username).to.not.be.ok();
-            expect(res.body.email).to.not.be.ok();
-            expect(res.body.userInfo).to.be.ok();
-            expect(res.body.userInfo.username).to.be.ok();
-            expect(res.body.userInfo.admin).to.be.ok();
-
-            // save token for further calls
-            token = res.body.token;
-
-            done(err);
-        });
-    });
-
     it('can get userInfo with token', function (done) {
         request.get(SERVER_URL + '/api/v1/users/' + USERNAME_0)
                .query({ access_token: token })

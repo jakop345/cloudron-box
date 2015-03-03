@@ -87,16 +87,10 @@ function setup(done) {
                 expect(result.statusCode).to.eql(201);
                 expect(scope1.isDone());
                 expect(scope2.isDone());
-                callback();
-            });
-        },
 
-        function (callback) {
-            request.get(SERVER_URL + '/api/v1/users/' + USERNAME + '/login')
-                   .auth(USERNAME, PASSWORD)
-                   .end(function (error, result) {
+                // stash for further use
                 token = result.body.token;
-                config.set('token', 'APPSTORE_TOKEN');
+
                 callback();
             });
         },

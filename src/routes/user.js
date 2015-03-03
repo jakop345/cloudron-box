@@ -6,12 +6,10 @@ var assert = require('assert'),
     debug = require('debug')('box:routes/user'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
-    tokendb = require('../tokendb.js'),
     user = require('../user.js'),
     UserError = user.UserError;
 
 exports = module.exports = {
-    createToken: createToken,
     info: info,
     update: update,
     list: listUser,
@@ -130,40 +128,6 @@ function listUser(req, res, next) {
     user.list(function (error, result) {
         if (error) return next(new HttpError(500, error));
         next(new HttpSuccess(200, { users: result }));
-    });
-}
-
-/**
- * @api {get} /api/v1/token token
- * @apiName token
- * @apiGroup user
- * @apiDescription
- * This route may be used to verify a user and retrieve an access token for further API access.
- * As any other route, the authentication is using the auth header.
- *
- * @apiSuccess {String} token Access token to be used for further API calls
- * @apiSuccess {Date} expires Expiration date for the access token
- * @apiSuccess {String} username Username associated with the access token
- * @apiSuccess {String} email Email associated with the access token
- */
-function createToken(req, res, next) {
-    assert(typeof req.user === 'object');
-
-    var token = tokendb.generateToken();
-    var expires = new Date(Date.now() + 60 * 60000).toUTCString(); // 1 hour
-
-    tokendb.add(token, req.user.username, null, expires, '*', function (err) {
-        if (err) return next(new HttpError(500, err));
-        next(new HttpSuccess(200, {
-            token: token,
-            expires: expires,
-            userInfo: {
-                id: req.user.id,
-                username: req.user.username,
-                email: req.user.email,
-                admin: req.user.admin
-            }
-        }));
     });
 }
 
