@@ -466,52 +466,6 @@ describe('User API', function () {
         });
     });
 
-    it('cannot logout with invalid token', function (done) {
-        request.get(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/logout')
-               .query({ access_token: token.toUpperCase() })
-               .end(function (err, res) {
-            expect(res.statusCode).to.equal(401);
-            done(err);
-        });
-    });
-
-    it('can logout', function (done) {
-        request.get(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/logout')
-               .query({ access_token: token })
-               .end(function (err, res) {
-            expect(res.statusCode).to.equal(204);
-            done(err);
-        });
-    });
-
-    it('cannot get userInfo with old token (previous logout)', function (done) {
-        request.get(SERVER_URL + '/api/v1/users/' + USERNAME_0)
-               .query({ access_token: token })
-               .end(function (err, res) {
-            expect(res.statusCode).to.equal(401);
-            done(err);
-        });
-    });
-
-    it('can login again', function (done) {
-        request.get(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/login')
-               .auth(USERNAME_0, PASSWORD)
-               .end(function (error, res) {
-            expect(error).to.be(null);
-            expect(res.statusCode).to.equal(200);
-            expect(res.body.token).to.be.a('string');
-            token = res.body.token;
-
-            expect(res.body.expires).to.be.a('string');
-            expect(res.body.username).to.not.be.ok();
-            expect(res.body.email).to.not.be.ok();
-            expect(res.body.password).to.not.be.ok();
-            expect(res.body.salt).to.not.be.ok();
-
-            done();
-        });
-    });
-
     it('admin removes himself should not be allowed', function (done) {
         request.del(SERVER_URL + '/api/v1/users/' + USERNAME_0)
                .query({ access_token: token })

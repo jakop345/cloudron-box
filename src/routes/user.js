@@ -12,7 +12,6 @@ var assert = require('assert'),
 
 exports = module.exports = {
     createToken: createToken,
-    logout: logout,
     info: info,
     update: update,
     list: listUser,
@@ -187,25 +186,6 @@ function info(req, res, next) {
         email: req.user.email,
         admin: req.user.admin
     }));
-}
-
-/**
- * @api {get} /api/v1/logout logout
- * @apiName logout
- * @apiGroup user
- * @apiDescription
- * Invalidates all access tokens associated with this user.
- *
- * @apiSuccess none User successfully logged out
- */
-function logout(req, res, next) {
-    var req_token = req.query.access_token ? req.query.access_token : req.cookies.token;
-
-    // Invalidate token so the cookie cannot be reused after logout
-    tokendb.del(req_token, function (error) {
-        if (error) return next(new HttpError(500, error));
-        next(new HttpSuccess(204));
-    });
 }
 
 /**

@@ -107,7 +107,6 @@ function initializeExpressSync() {
     router.post('/api/v1/users/:userName/admin', usersScope, routes.user.requireAdmin, routes.user.changeAdmin);
 
     router.get ('/api/v1/users/:userName/login', basic, routes.user.createToken);    // FIXME this should not be needed with OAuth
-    router.get ('/api/v1/users/:userName/logout', bearer, routes.user.logout);       // FIXME this should not be needed with OAuth
 
     // form based login routes used by oauth2 frame
     router.get ('/api/v1/session/login', csrf, routes.oauth2.loginForm);
