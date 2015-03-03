@@ -120,7 +120,7 @@ function delByUserIdAndClientId(userId, clientId, callback) {
 function delExpired(callback) {
     assert(typeof callback === 'function');
 
-    database.query('DELETE FROM tokens WHERE expires <= NOW()', [], function (error, result) {
+    database.query('DELETE FROM tokens WHERE expires <= ?', [ Date.now() ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         return callback(null, result.affectedRows);
     });
