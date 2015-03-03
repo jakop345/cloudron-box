@@ -43,7 +43,7 @@ function add(accessToken, userId, clientId, expires, scope, callback) {
     assert(typeof accessToken === 'string');
     assert(typeof userId === 'string');
     assert(typeof clientId === 'string' || clientId === null);
-    assert(typeof expires === 'string');
+    assert(typeof expires === 'number');
     assert(typeof scope === 'string');
     assert(typeof callback === 'function');
 

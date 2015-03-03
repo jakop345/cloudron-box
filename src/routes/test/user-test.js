@@ -125,7 +125,7 @@ describe('User API', function () {
 
     it('cannot get userInfo with expired token', function (done) {
         var token = tokendb.generateToken();
-        var expires = new Date(Date.now() + 2000).toUTCString(); // 1 sec
+        var expires = Date.now() + 2000; // 1 sec
 
         tokendb.add(token, user_0.id, null, expires, '*', function (error) {
             expect(error).to.not.be.ok();
@@ -222,7 +222,7 @@ describe('User API', function () {
             expect(res.statusCode).to.equal(201);
 
             // HACK to get a token for second user (passwords are generated and the user should have gotten a password setup link...)
-            tokendb.add(token_1, USERNAME_1, 'test-client-id',  Date.now().toString(), '*', done);
+            tokendb.add(token_1, USERNAME_1, 'test-client-id',  Date.now() + 10000, '*', done);
         });
     });
 
@@ -315,7 +315,7 @@ describe('User API', function () {
                 expect(res.statusCode).to.equal(201);
 
                 // HACK to get a token for second user (passwords are generated and the user should have gotten a password setup link...)
-                tokendb.add(token_2, USERNAME_2, 'test-client-id',  Date.now().toString(), '*', done);
+                tokendb.add(token_2, USERNAME_2, 'test-client-id',  Date.now() + 10000, '*', done);
             });
         });
     });

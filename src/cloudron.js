@@ -132,7 +132,7 @@ function activate(username, password, email, callback) {
 
                 // Also generate a token so the admin creation can also act as a login
                 var token = tokendb.generateToken();
-                var expires = new Date(Date.now() + 60 * 60000).toUTCString(); // 1 hour
+                var expires = Date.now() + 60 * 60000; // 1 hour
 
                 tokendb.add(token, username, result.id, expires, '*', function (error) {
                     if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));

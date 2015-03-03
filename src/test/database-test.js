@@ -278,14 +278,14 @@ describe('database', function () {
             accessToken: tokendb.generateToken(),
             userId: 'userid-0',
             clientId: 'clientid-0',
-            expires: Date.now().toString(),
+            expires: Date.now() + 60 * 60000,
             scope: '*'
         };
         var TOKEN_1 = {
             accessToken: tokendb.generateToken(),
             userId: 'userid-1',
             clientId: 'clientid-1',
-            expires: Date.now().toString(),
+            expires: Date.now() + 60 * 60000,
             scope: '*'
         };
 
