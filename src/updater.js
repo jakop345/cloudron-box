@@ -196,7 +196,9 @@ function startUpdate(callback) {
                     token: config.token(),
                     tlsCert: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), 'utf8'),
                     tlsKey: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'), 'utf8'),
-                    isCustomDomain: config.isCustomDomain()
+                    isCustomDomain: config.isCustomDomain(),
+                    restoreUrl: null,
+                    restoreKey: null
                 }
             };
 
