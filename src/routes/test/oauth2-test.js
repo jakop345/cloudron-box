@@ -201,12 +201,13 @@ describe('Password', function () {
             });
         });
 
-        xit('setup succeeds', function (done) {
+        it('setup succeeds', function (done) {
             superagent.get(SERVER_URL + '/api/v1/session/password/setup.html')
+            .query({ reset_token: USER_0.resetToken })
             .end(function (error, result) {
                 expect(error).to.not.be.ok();
-                expect(result.text.indexOf('<!-- tester -->')).to.not.equal(-1);
                 expect(result.statusCode).to.equal(200);
+                expect(result.text.indexOf('<!-- tester -->')).to.not.equal(-1);
                 done();
             });
         });
