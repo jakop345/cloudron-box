@@ -138,7 +138,8 @@ describe('Password', function () {
         admin: true,
         salt: 'somesalt',
         createdAt: (new Date()).toUTCString(),
-        modifiedAt: (new Date()).toUTCString()
+        modifiedAt: (new Date()).toUTCString(),
+        resetToken: hat()
     };
 
     // make csrf always succeed for testing

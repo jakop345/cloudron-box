@@ -40,7 +40,8 @@ describe('database', function () {
             admin: false,
             salt: 'morton',
             createdAt: 'sometime back',
-            modifiedAt: 'now'
+            modifiedAt: 'now',
+            resetToken: ''
         };
 
         var ADMIN_0 = {
@@ -51,7 +52,8 @@ describe('database', function () {
             admin: true,
             salt: 'tata',
             createdAt: 'sometime back',
-            modifiedAt: 'now'
+            modifiedAt: 'now',
+            resetToken: ''
         };
 
         it('can add user', function (done) {

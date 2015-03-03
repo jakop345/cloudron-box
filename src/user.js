@@ -142,7 +142,8 @@ function createUser(username, password, email, admin, callback) {
                 admin: admin,
                 salt: salt.toString('hex'),
                 createdAt: now,
-                modifiedAt: now
+                modifiedAt: now,
+                resetToken: ''
             };
 
             userdb.add(user.id, user, function (error) {
