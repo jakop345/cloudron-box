@@ -15,7 +15,7 @@ exports = module.exports = {
     _clear: clear
 };
 
-var AUTHCODES_FIELDS = [ 'authCode', 'userId', 'clientId' ].join(',');
+var AUTHCODES_FIELDS = [ 'authCode', 'userId', 'clientId', 'expiresAt' ].join(',');
 
 function get(authCode, callback) {
     assert(typeof authCode === 'string');
@@ -29,14 +29,15 @@ function get(authCode, callback) {
     });
 }
 
-function add(authCode, clientId, userId, callback) {
+function add(authCode, clientId, userId, expiresAt, callback) {
     assert(typeof authCode === 'string');
     assert(typeof clientId === 'string');
     assert(typeof userId === 'string');
+    assert(typeof expiresAt === 'number');
     assert(typeof callback === 'function');
 
-    database.query('INSERT INTO authcodes (authCode, clientId, userId) VALUES (?, ?, ?)',
-            [ authCode, clientId, userId ], function (error, result) {
+    database.query('INSERT INTO authcodes (authCode, clientId, userId, expiresAt) VALUES (?, ?, ?, ?)',
+            [ authCode, clientId, userId, expiresAt ], function (error, result) {
         if (error && error.code === 'ER_DUP_ENTRY') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
         if (error || result.affectedRows !== 1) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 

@@ -71,6 +71,7 @@ gServer.grant(oauth2orize.grant.code({ scopeSeparator: ',' }, function (client, 
     debug('grant code:', client, redirectURI, user.id, ares);
 
     var code = hat();
+    var expiresAt = Date.now() + 60 * 60000; // 1 hour
     var scopes = client.scope ? client.scope.split(',') : ['profile','roleUser'];
 
     if (scopes.indexOf('roleAdmin') !== -1 && !user.admin) {
@@ -78,7 +79,7 @@ gServer.grant(oauth2orize.grant.code({ scopeSeparator: ',' }, function (client, 
         return callback(new Error('Admin capabilities required'));
     }
 
-    authcodedb.add(code, client.id, user.username, function (error) {
+    authcodedb.add(code, client.id, user.username, expiresAt, function (error) {
         if (error) return callback(error);
         callback(null, code);
     });

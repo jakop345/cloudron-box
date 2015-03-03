@@ -209,12 +209,14 @@ describe('database', function () {
         var AUTHCODE_0 = {
             authCode: 'authcode-0',
             clientId: 'clientid-0',
-            userId: 'userid-0'
+            userId: 'userid-0',
+            expiresAt: Date.now() + 5000
         };
         var AUTHCODE_1 = {
             authCode: 'authcode-1',
             clientId: 'clientid-1',
-            userId: 'userid-1'
+            userId: 'userid-1',
+            expiresAt: Date.now() + 5000
         };
 
         it('add fails due to missing arguments', function () {
@@ -224,14 +226,14 @@ describe('database', function () {
         });
 
         it('add succeeds', function (done) {
-            authcodedb.add(AUTHCODE_0.authCode, AUTHCODE_0.clientId, AUTHCODE_0.userId, function (error) {
+            authcodedb.add(AUTHCODE_0.authCode, AUTHCODE_0.clientId, AUTHCODE_0.userId, AUTHCODE_0.expiresAt, function (error) {
                 expect(error).to.be(null);
                 done();
             });
         });
 
         it('add of same authcode fails', function (done) {
-            authcodedb.add(AUTHCODE_0.authCode, AUTHCODE_0.clientId, AUTHCODE_0.userId, function (error) {
+            authcodedb.add(AUTHCODE_0.authCode, AUTHCODE_0.clientId, AUTHCODE_0.userId, AUTHCODE_0.expiresAt, function (error) {
                 expect(error).to.be.a(DatabaseError);
                 expect(error.reason).to.be(DatabaseError.ALREADY_EXISTS);
                 done();

@@ -63,6 +63,7 @@ CREATE TABLE IF NOT EXISTS authcodes(
     authCode VARCHAR(128) NOT NULL UNIQUE,
     userId VARCHAR(128) NOT NULL,
     clientId VARCHAR(128) NOT NULL,
+    expiresAt BIGINT NOT NULL,
     PRIMARY KEY(authCode));
 
 CREATE TABLE IF NOT EXISTS settings(
