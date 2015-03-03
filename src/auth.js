@@ -100,7 +100,6 @@ function initialize(callback) {
 
             // check if token is expired
             if ((new Date(token.expires)).getTime() < Date.now()) {
-                console.error('Token is expired');
                 return callback(null, false);
             }
 
