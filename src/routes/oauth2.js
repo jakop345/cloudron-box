@@ -223,6 +223,7 @@ function passwordReset(req, res, next) {
     user.getByResetToken(req.body.resetToken, function (error, result) {
         if (error) return next(new HttpError(401, 'Invalid resetToken'));
 
+        // setPassword clears the resetToken
         user.setPassword(result.id, req.body.password, function (error) {
             if (error) return next(new HttpError(500, error));
 

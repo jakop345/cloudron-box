@@ -330,6 +330,7 @@ function setPassword(userId, newPassword, callback) {
 
             user.modifiedAt = (new Date()).toUTCString();
             user.password = new Buffer(derivedKey, 'binary').toString('hex');
+            user.resetToken = '';
 
             userdb.update(userId, user, function (error) {
                 if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
