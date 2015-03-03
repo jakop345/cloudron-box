@@ -9,6 +9,7 @@
 var expect = require('expect.js'),
     uuid = require('node-uuid'),
     hat = require('hat'),
+    nock = require('nock'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
     oauth2 = require('../oauth2.js'),
@@ -174,17 +175,19 @@ describe('Password', function () {
         it('reset request succeeds', function (done) {
             superagent.get(SERVER_URL + '/api/v1/session/password/resetRequest.html')
             .end(function (error, result) {
+                expect(error).to.not.be.ok();
                 expect(result.text.indexOf('<!-- tester -->')).to.not.equal(-1);
                 expect(result.statusCode).to.equal(200);
-                done(error);
+                done();
             });
         });
 
         it('setup fails due to missing reset_token', function (done) {
             superagent.get(SERVER_URL + '/api/v1/session/password/setup.html')
             .end(function (error, result) {
+                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
-                done(error);
+                done();
             });
         });
 
@@ -192,25 +195,28 @@ describe('Password', function () {
             superagent.get(SERVER_URL + '/api/v1/session/password/setup.html')
             .query({ reset_token: hat() })
             .end(function (error, result) {
+                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
-                done(error);
+                done();
             });
         });
 
         xit('setup succeeds', function (done) {
             superagent.get(SERVER_URL + '/api/v1/session/password/setup.html')
             .end(function (error, result) {
+                expect(error).to.not.be.ok();
                 expect(result.text.indexOf('<!-- tester -->')).to.not.equal(-1);
                 expect(result.statusCode).to.equal(200);
-                done(error);
+                done();
             });
         });
 
         it('reset fails due to missing reset_token', function (done) {
             superagent.get(SERVER_URL + '/api/v1/session/password/reset.html')
             .end(function (error, result) {
+                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
-                done(error);
+                done();
             });
         });
 
@@ -218,27 +224,30 @@ describe('Password', function () {
             superagent.get(SERVER_URL + '/api/v1/session/password/reset.html')
             .query({ reset_token: hat() })
             .end(function (error, result) {
+                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
-                done(error);
+                done();
             });
         });
 
-        xit('reset succeeds', function (done) {
+        it('reset succeeds', function (done) {
             superagent.get(SERVER_URL + '/api/v1/session/password/reset.html')
-            .query({ reset_token: hat() })
+            .query({ reset_token: USER_0.resetToken })
             .end(function (error, result) {
+                expect(error).to.not.be.ok();
                 expect(result.text.indexOf('<!-- tester -->')).to.not.equal(-1);
                 expect(result.statusCode).to.equal(200);
-                done(error);
+                done();
             });
         });
 
         it('sent succeeds', function (done) {
             superagent.get(SERVER_URL + '/api/v1/session/password/sent.html')
             .end(function (error, result) {
+                expect(error).to.not.be.ok();
                 expect(result.text.indexOf('<!-- tester -->')).to.not.equal(-1);
                 expect(result.statusCode).to.equal(200);
-                done(error);
+                done();
             });
         });
     });
@@ -251,9 +260,10 @@ describe('Password', function () {
             superagent.post(SERVER_URL + '/api/v1/session/password/resetRequest')
             .send({ identifier: USER_0.email })
             .end(function (error, result) {
+                expect(error).to.not.be.ok();
                 expect(result.text.indexOf('<!-- tester -->')).to.not.equal(-1);
                 expect(result.statusCode).to.equal(200);
-                done(error);
+                done();
             });
         });
     });
@@ -266,8 +276,9 @@ describe('Password', function () {
             superagent.post(SERVER_URL + '/api/v1/session/password/reset')
             .send({ password: 'somepassword' })
             .end(function (error, result) {
+                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
-                done(error);
+                done();
             });
         });
 
@@ -275,8 +286,9 @@ describe('Password', function () {
             superagent.post(SERVER_URL + '/api/v1/session/password/reset')
             .send({ resetToken: hat() })
             .end(function (error, result) {
+                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
-                done(error);
+                done();
             });
         });
 
@@ -284,8 +296,9 @@ describe('Password', function () {
             superagent.post(SERVER_URL + '/api/v1/session/password/reset')
             .send({ password: '', resetToken: hat() })
             .end(function (error, result) {
+                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
-                done(error);
+                done();
             });
         });
 
@@ -293,18 +306,22 @@ describe('Password', function () {
             superagent.post(SERVER_URL + '/api/v1/session/password/reset')
             .send({ password: '', resetToken: '' })
             .end(function (error, result) {
+                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
-                done(error);
+                done();
             });
         });
 
-        xit('succeeds', function (done) {
+        it('succeeds', function (done) {
+            var scope = nock(config.adminOrigin()).get('/').reply(200, {});
+
             superagent.post(SERVER_URL + '/api/v1/session/password/reset')
-            .send({ password: 'somepassword', resetToken: hat() })
+            .send({ password: 'somepassword', resetToken: USER_0.resetToken })
             .end(function (error, result) {
-                expect(result.text.indexOf('<!-- tester -->')).to.not.equal(-1);
+                expect(error).to.not.be.ok();
+                expect(scope.isDone());
                 expect(result.statusCode).to.equal(200);
-                done(error);
+                done();
             });
         });
     });
