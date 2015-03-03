@@ -141,16 +141,15 @@ function mailUserEventToAdmins(user, event) {
     });
 }
 
-function userAdded(user, token) {
+function userAdded(user) {
     assert(typeof user === 'object');
-    assert(typeof token === 'string');
 
     debug('Sending mail for userAdded');
 
     var templateData = {
         user: user,
         webadminUrl: config.adminOrigin(),
-        setupLink: config.adminOrigin() + '/api/v1/session/password/setup.html?reset_token=' + token
+        setupLink: config.adminOrigin() + '/api/v1/session/password/setup.html?reset_token=' + user.resetToken
     };
 
     var mailOptions = {
@@ -182,13 +181,12 @@ function adminChanged(user) {
     mailUserEventToAdmins(user, user.admin ? 'made an admin' : 'removed as admin');
 }
 
-function passwordReset(user, token) {
+function passwordReset(user) {
     assert(typeof user === 'object');
-    assert(typeof token === 'string');
 
     debug('Sending mail for password reset for user %s.', user.username);
 
-    var resetLink = config.adminOrigin() + '/api/v1/session/password/reset.html?reset_token=' + token;
+    var resetLink = config.adminOrigin() + '/api/v1/session/password/reset.html?reset_token=' + user.resetToken;
 
     var mailOptions = {
         from: config.get('mailUsername'),

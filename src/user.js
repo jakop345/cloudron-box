@@ -30,8 +30,6 @@ var assert = require('assert'),
     validator = require('validator'),
     _ = require('underscore');
 
-var resetTokens = {};
-
 var CRYPTO_SALT_SIZE = 64; // 512-bit salt
 var CRYPTO_ITERATIONS = 10000; // iterations
 var CRYPTO_KEY_LENGTH = 512; // bits
@@ -143,7 +141,7 @@ function createUser(username, password, email, admin, callback) {
                 salt: salt.toString('hex'),
                 createdAt: now,
                 modifiedAt: now,
-                resetToken: ''
+                resetToken: hat()
             };
 
             userdb.add(user.id, user, function (error) {
@@ -152,11 +150,9 @@ function createUser(username, password, email, admin, callback) {
 
                 callback(null, user);
 
-                resetTokens[user.id] = hat();
-
                 // only send welcome mail if user is not an admin. This i only the case for the first user!
                 // The welcome email contains a link to create a new password
-                if (!user.admin) mailer.userAdded(user, resetTokens[user.id]);
+                if (!user.admin) mailer.userAdded(user);
             });
         });
     });
@@ -237,16 +233,12 @@ function getByResetToken(resetToken, callback) {
     var error = validateToken(resetToken);
     if (error) return callback(error);
 
-    var userId = null;
-    for (var id in resetTokens) {
-        if (resetTokens[id] === resetToken) {
-            userId = id;
-            break;
-        }
-    }
+    userdb.getByResetToken(resetToken, function (error, result) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
+        if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-    if (!userId) return callback(new UserError(UserError.NOT_FOUND));
-    getUser(userId, callback);
+        callback(null, result);
+    });
 }
 
 function updateUser(userId, username, email, callback) {
@@ -307,10 +299,16 @@ function resetPasswordByIdentifier(identifier, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-        resetTokens[result.id] = hat();
-        mailer.passwordReset(result, resetTokens[result.id]);
+        result.resetToken = hat();
 
-        callback(null);
+        userdb.update(result.id, result, function (error) {
+            if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
+            if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+
+            mailer.passwordReset(result);
+
+            callback(null);
+        });
     });
 }
 
