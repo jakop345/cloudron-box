@@ -123,4 +123,11 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
             $scope.activeClients = activeClients;
         });
     });
+
+    // setup all the dialog focus handling
+    ['passwordChangeModal', 'emailChangeModal'].forEach(function (id) {
+        $('#' + id).on('shown.bs.modal', function () {
+            $(this).find("[autofocus]:first").focus();
+        });
+    });
 }]);

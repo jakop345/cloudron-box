@@ -117,4 +117,11 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
     }
 
     refresh();
+
+    // setup all the dialog focus handling
+    ['userAddModal', 'userRemoveModal'].forEach(function (id) {
+        $('#' + id).on('shown.bs.modal', function () {
+            $(this).find("[autofocus]:first").focus();
+        });
+    });
 }]);

@@ -82,7 +82,7 @@
                                     <small ng-show="update_form.password.$error.maxlength">The password is too long</small>
                                     <small ng-show="update.error.password">Incorrect password</small>
                                 </div>
-                                <input type="password" class="form-control" ng-model="update.password" id="updatePassword" name="password" placeholder="Password" ng-maxlength="512" ng-minlength="5" required>
+                                <input type="password" class="form-control" ng-model="update.password" id="updatePassword" name="password" placeholder="Password" ng-maxlength="512" ng-minlength="5" required autofocus>
                             </div>
                             <input class="ng-hide" type="submit" ng-disabled="update_form.$invalid"/>
                         </form>

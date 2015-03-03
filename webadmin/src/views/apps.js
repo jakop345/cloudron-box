@@ -148,4 +148,11 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
     $scope.cancel = function () {
         window.history.back();
     };
+
+    // setup all the dialog focus handling
+    ['appConfigureModal', 'appUninstallModal', 'appUpdateModal'].forEach(function (id) {
+        $('#' + id).on('shown.bs.modal', function () {
+            $(this).find("[autofocus]:first").focus();
+        });
+    });
 }]);

@@ -71,7 +71,7 @@
                     <form class="form-signin" role="form" name="uninstall_form" ng-submit="doUninstall(uninstall_form)" autocomplete="off">
                         <div class="form-group" ng-class="{ 'has-error': (!uninstall_form.password.$dirty && appuninstall.error.password) || (uninstall_form.password.$dirty && uninstall_form.password.$invalid) }">
                             <label class="control-label" for="inputUninstallPassword">Password</label>
-                            <input type="password" class="form-control" ng-model="appuninstall.password" id="inputUninstallPassword" name="password" ng-maxlength="512" ng-minlength="5" required>
+                            <input type="password" class="form-control" ng-model="appuninstall.password" id="inputUninstallPassword" name="password" ng-maxlength="512" ng-minlength="5" required autofocus>
                         </div>
 
                         <input class="ng-hide" type="submit" ng-disabled="uninstall_form.$invalid || busy"/>
@@ -99,7 +99,7 @@
                     <form class="form-signin" role="form" name="update_form" ng-submit="doUpdate(update_form)" autocomplete="off">
                         <div class="form-group" ng-class="{ 'has-error': (!update_form.password.$dirty && appupdate.error.password) || (update_form.password.$dirty && update_form.password.$invalid) }">
                             <label class="control-label" for="inputUpdatePassword">Password</label>
-                            <input type="password" class="form-control" ng-model="appupdate.password" id="inputUpdatePassword" name="password" ng-maxlength="512" ng-minlength="5" required>
+                            <input type="password" class="form-control" ng-model="appupdate.password" id="inputUpdatePassword" name="password" ng-maxlength="512" ng-minlength="5" required autofocus>
                         </div>
 
                         <input class="ng-hide" type="submit" ng-disabled="update_form.$invalid || busy"/>

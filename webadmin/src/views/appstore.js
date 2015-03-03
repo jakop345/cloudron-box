@@ -93,4 +93,11 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
     }
 
     refresh();
+
+    // setup all the dialog focus handling
+    ['appInstallModal'].forEach(function (id) {
+        $('#' + id).on('shown.bs.modal', function () {
+            $(this).find("[autofocus]:first").focus();
+        });
+    });
 }]);

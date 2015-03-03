@@ -139,4 +139,10 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
             window.location.href = '/update.html';
         }
     });
+
+    ['updateModal'].forEach(function (id) {
+        $('#' + id).on('shown.bs.modal', function () {
+            $(this).find("[autofocus]:first").focus();
+        });
+    });
 }]);
