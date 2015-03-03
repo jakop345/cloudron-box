@@ -7,10 +7,19 @@
 'use strict';
 
 var expect = require('expect.js'),
+    uuid = require('node-uuid'),
+    hat = require('hat'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
     oauth2 = require('../oauth2.js'),
+    server = require('../../server.js'),
+    database = require('../../database.js'),
+    userdb = require('../../userdb.js'),
+    config = require('../../../config.js'),
+    superagent = require('superagent'),
     passport = require('passport');
+
+var SERVER_URL = 'http://localhost:' + config.get('port');
 
 describe('OAuth2', function () {
     var passportAuthenticateSave = null;
@@ -117,5 +126,185 @@ describe('OAuth2', function () {
             });
         });
     });
+
 });
 
+describe('Password', function () {
+    var USER_0 = {
+        userId: uuid.v4(),
+        username: 'someusername',
+        password: 'somepassword',
+        email: 'some@email.com',
+        admin: true,
+        salt: 'somesalt',
+        createdAt: (new Date()).toUTCString(),
+        modifiedAt: (new Date()).toUTCString()
+    };
+
+    // make csrf always succeed for testing
+    oauth2.csrf = function (req, res, next) {
+        req.csrfToken = function () { return hat(); };
+        next();
+    };
+
+    function setup(done) {
+        server.start(function (error) {
+            expect(error).to.not.be.ok();
+            database._clear(function (error) {
+                expect(error).to.not.be.ok();
+
+                userdb.add(USER_0.userId, USER_0, done);
+            });
+        });
+    }
+
+    function cleanup(done) {
+        database._clear(function (error) {
+            expect(error).to.not.be.ok();
+
+            server.stop(done);
+        });
+    }
+
+    describe('pages', function () {
+        before(setup);
+        after(cleanup);
+
+        it('reset request succeeds', function (done) {
+            superagent.get(SERVER_URL + '/api/v1/session/password/resetRequest.html')
+            .end(function (error, result) {
+                expect(result.text.indexOf('<!-- tester !>')).to.not.equal(-1);
+                expect(result.statusCode).to.equal(200);
+                done(error);
+            });
+        });
+
+        it('setup fails due to missing reset_token', function (done) {
+            superagent.get(SERVER_URL + '/api/v1/session/password/setup.html')
+            .end(function (error, result) {
+                expect(result.statusCode).to.equal(400);
+                done(error);
+            });
+        });
+
+        it('setup fails due to invalid reset_token', function (done) {
+            superagent.get(SERVER_URL + '/api/v1/session/password/setup.html')
+            .query({ reset_token: hat() })
+            .end(function (error, result) {
+                expect(result.statusCode).to.equal(401);
+                done(error);
+            });
+        });
+
+        xit('setup succeeds', function (done) {
+            superagent.get(SERVER_URL + '/api/v1/session/password/setup.html')
+            .end(function (error, result) {
+                expect(result.text.indexOf('<!-- tester !>')).to.not.equal(-1);
+                expect(result.statusCode).to.equal(200);
+                done(error);
+            });
+        });
+
+        it('reset fails due to missing reset_token', function (done) {
+            superagent.get(SERVER_URL + '/api/v1/session/password/reset.html')
+            .end(function (error, result) {
+                expect(result.statusCode).to.equal(400);
+                done(error);
+            });
+        });
+
+        it('reset fails due to invalid reset_token', function (done) {
+            superagent.get(SERVER_URL + '/api/v1/session/password/reset.html')
+            .query({ reset_token: hat() })
+            .end(function (error, result) {
+                expect(result.statusCode).to.equal(401);
+                done(error);
+            });
+        });
+
+        xit('reset succeeds', function (done) {
+            superagent.get(SERVER_URL + '/api/v1/session/password/reset.html')
+            .query({ reset_token: hat() })
+            .end(function (error, result) {
+                expect(result.text.indexOf('<!-- tester !>')).to.not.equal(-1);
+                expect(result.statusCode).to.equal(200);
+                done(error);
+            });
+        });
+
+        it('sent succeeds', function (done) {
+            superagent.get(SERVER_URL + '/api/v1/session/password/sent.html')
+            .end(function (error, result) {
+                expect(result.text.indexOf('<!-- tester !>')).to.not.equal(-1);
+                expect(result.statusCode).to.equal(200);
+                done(error);
+            });
+        });
+    });
+
+    describe('reset request handler', function () {
+        before(setup);
+        after(cleanup);
+
+        it('succeeds', function (done) {
+            superagent.post(SERVER_URL + '/api/v1/session/password/resetRequest')
+            .send({ identifier: USER_0.email })
+            .end(function (error, result) {
+                expect(result.text.indexOf('<!-- tester !>')).to.not.equal(-1);
+                expect(result.statusCode).to.equal(200);
+                done(error);
+            });
+        });
+    });
+
+    describe('reset handler', function () {
+        before(setup);
+        after(cleanup);
+
+        it('fails due to missing resetToken', function (done) {
+            superagent.post(SERVER_URL + '/api/v1/session/password/reset')
+            .send({ password: 'somepassword' })
+            .end(function (error, result) {
+                expect(result.statusCode).to.equal(400);
+                done(error);
+            });
+        });
+
+        it('fails due to missing password', function (done) {
+            superagent.post(SERVER_URL + '/api/v1/session/password/reset')
+            .send({ resetToken: hat() })
+            .end(function (error, result) {
+                expect(result.statusCode).to.equal(400);
+                done(error);
+            });
+        });
+
+        it('fails due to empty password', function (done) {
+            superagent.post(SERVER_URL + '/api/v1/session/password/reset')
+            .send({ password: '', resetToken: hat() })
+            .end(function (error, result) {
+                expect(result.statusCode).to.equal(401);
+                done(error);
+            });
+        });
+
+        it('fails due to empty resetToken', function (done) {
+            superagent.post(SERVER_URL + '/api/v1/session/password/reset')
+            .send({ password: '', resetToken: '' })
+            .end(function (error, result) {
+                expect(result.statusCode).to.equal(401);
+                done(error);
+            });
+        });
+
+        xit('succeeds', function (done) {
+            superagent.post(SERVER_URL + '/api/v1/session/password/reset')
+            .send({ password: 'somepassword', resetToken: hat() })
+            .end(function (error, result) {
+                expect(result.text.indexOf('<!-- tester !>')).to.not.equal(-1);
+                expect(result.statusCode).to.equal(200);
+                done(error);
+            });
+        });
+    });
+});
