@@ -217,11 +217,8 @@ function passwordReset(req, res, next) {
 
     if (typeof req.body.resetToken !== 'string') return next(new HttpError(400, 'Missing resetToken'));
     if (typeof req.body.password !== 'string') return next(new HttpError(400, 'Missing password'));
-    if (typeof req.body.passwordRepeat !== 'string') return next(new HttpError(400, 'Missing passwordRepeat'));
 
     debug('passwordReset: with token %s.', req.body.resetToken);
-
-    if (req.body.password !== req.body.passwordRepeat) return next(new HttpError(400, 'Passwords don\'t match'));
 
     user.getByResetToken(req.body.resetToken, function (error, result) {
         if (error) return next(new HttpError(401, 'Invalid resetToken'));
