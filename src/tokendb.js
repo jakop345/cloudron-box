@@ -17,6 +17,7 @@ exports = module.exports = {
     delByUserId: delByUserId,
     getByUserIdAndClientId: getByUserIdAndClientId,
     delByUserIdAndClientId: delByUserIdAndClientId,
+    delExpired: delExpired,
 
     _clear: clear
 };
@@ -113,6 +114,15 @@ function delByUserIdAndClientId(userId, clientId, callback) {
         if (result.affectedRows !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         return callback(null);
+    });
+}
+
+function delExpired(callback) {
+    assert(typeof callback === 'function');
+
+    database.query('DELETE FROM tokens WHERE expires <= NOW()', [], function (error, result) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        return callback(null, result.affectedRows);
     });
 }
 

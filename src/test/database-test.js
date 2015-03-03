@@ -288,6 +288,13 @@ describe('database', function () {
             expires: Date.now() + 60 * 60000,
             scope: '*'
         };
+        var TOKEN_2 = {
+            accessToken: tokendb.generateToken(),
+            userId: 'userid-2',
+            clientId: 'clientid-2',
+            expires: Date.now(),
+            scope: '*'
+        };
 
         it('add fails due to missing arguments', function () {
             expect(function () { tokendb.add(TOKEN_0.accessToken, TOKEN_0.userId, TOKEN_0.clientId, TOKEN_0.scope); }).to.throwError();
@@ -377,7 +384,7 @@ describe('database', function () {
         });
 
         it('getByUserIdAndClientId succeeds', function (done) {
-             tokendb.add(TOKEN_0.accessToken, TOKEN_0.userId, TOKEN_0.clientId, TOKEN_0.expires, TOKEN_0.scope, function (error) {
+            tokendb.add(TOKEN_0.accessToken, TOKEN_0.userId, TOKEN_0.clientId, TOKEN_0.expires, TOKEN_0.scope, function (error) {
                 expect(error).to.be(null);
 
                 tokendb.getByUserIdAndClientId(TOKEN_0.userId, TOKEN_0.clientId, function (error, result) {
@@ -403,6 +410,24 @@ describe('database', function () {
                 expect(error.reason).to.be(DatabaseError.NOT_FOUND);
                 expect(result).to.not.be.ok();
                 done();
+            });
+        });
+
+        it('delExpired succeeds', function (done) {
+            tokendb.add(TOKEN_2.accessToken, TOKEN_2.userId, TOKEN_2.clientId, TOKEN_2.expires, TOKEN_2.scope, function (error) {
+                expect(error).to.be(null);
+
+                tokendb.delExpired(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result).to.eql(1);
+
+                    tokendb.get(TOKEN_2.accessToken, function (error, result) {
+                        expect(error).to.be.a(DatabaseError);
+                        expect(error.reason).to.be(DatabaseError.NOT_FOUND);
+                        expect(result).to.not.be.ok();
+                        done();
+                    });
+                });
             });
         });
     });
