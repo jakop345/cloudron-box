@@ -52,3 +52,15 @@ user=yellowtent
 environment=HOME="/home/yellowtent",USER="yellowtent",DEBUG="box*",NODE_ENV="cloudron"
 EOF
 
+cat > /etc/supervisor/conf.d/janitor.conf <<EOF
+[program:janitor]
+command=/usr/bin/node "${BOX_SRC_DIR}/janitor.js"
+autostart=true
+autorestart=true
+redirect_stderr=true
+stdout_logfile=/var/log/supervisor/janitor.log
+stdout_logfile_maxbytes=50MB
+stdout_logfile_backups=2
+user=yellowtent
+environment=HOME="/home/yellowtent",USER="yellowtent",DEBUG="box*",NODE_ENV="cloudron"
+EOF
