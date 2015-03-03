@@ -517,7 +517,6 @@ describe('User API', function () {
                .query({ access_token: token })
                .send({ password: PASSWORD, email: EMAIL_0_NEW })
                .end(function (error, result) {
-            console.log(result)
             expect(result.statusCode).to.equal(204);
             done(error);
         });
