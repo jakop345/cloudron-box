@@ -65,6 +65,7 @@ UserError.BAD_FIELD = 'Bad field';
 UserError.BAD_USERNAME = 'Bad username';
 UserError.BAD_EMAIL = 'Bad email';
 UserError.BAD_PASSWORD = 'Bad password';
+UserError.BAD_TOKEN = 'Bad token';
 UserError.NOT_ALLOWED = 'Not Allowed';
 
 function listUsers(callback) {
@@ -98,6 +99,14 @@ function validateEmail(email) {
     assert(typeof email === 'string');
 
     if (!validator.isEmail(email)) return new UserError(UserError.BAD_EMAIL, 'Invalid email');
+
+    return null;
+}
+
+function validateToken(token) {
+    assert(typeof token === 'string');
+
+    if (token.length !== 32) return new UserError(UserError.BAD_TOKEN, 'Invalid token');
 
     return null;
 }
@@ -223,6 +232,9 @@ function getUser(userId, callback) {
 function getByResetToken(resetToken, callback) {
     assert(typeof resetToken === 'string');
     assert(typeof callback === 'function');
+
+    var error = validateToken(resetToken);
+    if (error) return callback(error);
 
     var userId = null;
     for (var id in resetTokens) {

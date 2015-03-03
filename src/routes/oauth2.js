@@ -194,7 +194,7 @@ function passwordResetSite(req, res, next) {
     debug('passwordResetSite: with token %s.', req.query.reset_token);
 
     user.getByResetToken(req.query.reset_token, function (error, user) {
-        if (error) return next(new HttpError(400, 'Unkown reset_token'));
+        if (error) return next(new HttpError(401, 'Invalid reset_token'));
 
         res.render('password_reset', { adminOrigin: config.adminOrigin(), user: user, csrf: req.csrfToken(), resetToken: req.query.reset_token });
     });
@@ -206,7 +206,7 @@ function passwordSetupSite(req, res, next) {
     debug('passwordSetupSite: with token %s.', req.query.reset_token);
 
     user.getByResetToken(req.query.reset_token, function (error, user) {
-        if (error) return next(new HttpError(400, 'Unkown reset_token'));
+        if (error) return next(new HttpError(401, 'Invalid reset_token'));
 
         res.render('password_setup', { adminOrigin: config.adminOrigin(), user: user, csrf: req.csrfToken(), resetToken: req.query.reset_token });
     });
@@ -224,10 +224,10 @@ function passwordReset(req, res, next) {
     if (req.body.password !== req.body.passwordRepeat) return next(new HttpError(400, 'Passwords don\'t match'));
 
     user.getByResetToken(req.body.resetToken, function (error, result) {
-        if (error) return next(new HttpError(400, 'Unkown resetToken'));
+        if (error) return next(new HttpError(401, 'Invalid resetToken'));
 
         user.setPassword(result.id, req.body.password, function (error) {
-            if (error) return next(new HttpError(400, 'Unknown reset token'));
+            if (error) return next(new HttpError(500, error));
 
             res.redirect(config.adminOrigin());
         });
