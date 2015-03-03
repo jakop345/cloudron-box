@@ -35,3 +35,16 @@ EOF
     shift 2
 done
 
+echo "Parsed arguments:"
+echo "restore url: ${arg_restore_url}"
+echo "box versions url: ${arg_box_versions_url}"
+echo "tls cert: ${arg_tls_cert}"
+echo "tls key: ${arg_tls_key}"
+echo "api server: ${arg_api_server_origin}"
+echo "web server: ${arg_web_server_origin}"
+echo "fqdn: ${arg_fqdn}"
+echo "token: ${arg_token}"
+echo "version: ${arg_version}"
+echo "custom domain: ${arg_is_custom_domain}"
+
+

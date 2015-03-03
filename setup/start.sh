@@ -5,7 +5,7 @@ install_count=$(find /var/log/cloudron -name "installer*" | wc -l)
 exec > >(tee "/var/log/cloudron/start-$install_count.log")
 exec 2>&1
 
-set -eux
+set -eu
 
 echo "==== Cloudron Start ===="
 
@@ -48,7 +48,7 @@ fi
 
 set_progress "15" "Ensuring directories"
 sudo -u "${USER}" -H bash <<EOF
-set -eux
+set -eu
 # keep these in sync with paths.js
 mkdir -p "${DATA_DIR}/appicons"
 mkdir -p "${DATA_DIR}/appdata"
@@ -88,7 +88,7 @@ fi
 
 set_progress "25" "Migrating data"
 sudo -u "${USER}" -H bash <<EOF
-set -eux
+set -eu
 cd "${box_src_tmp_dir}"
 NODE_ENV=cloudron DATABASE_URL=mysql://root:password@localhost/box "${box_src_tmp_dir}/node_modules/.bin/db-migrate" up
 EOF
@@ -175,7 +175,7 @@ set_progress "65" "Creating cloudron.conf"
 cloudron_sqlite="${DATA_DIR}/cloudron.sqlite"
 admin_origin="https://${admin_fqdn}"
 sudo -u yellowtent -H bash <<EOF
-set -eux
+set -eu
 echo "Creating cloudron.conf"
 cat > "${CONFIG_DIR}/cloudron.conf" <<CONF_END
 {
