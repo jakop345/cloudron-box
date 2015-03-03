@@ -32,7 +32,7 @@ function get(accessToken, callback) {
     assert(typeof accessToken === 'string');
     assert(typeof callback === 'function');
 
-    database.query('SELECT ' + TOKENS_FIELDS + ' FROM tokens WHERE accessToken = ?', [ accessToken ], function (error, result) {
+    database.query('SELECT ' + TOKENS_FIELDS + ' FROM tokens WHERE accessToken = ? AND expires > ?', [ accessToken, Date.now() ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
