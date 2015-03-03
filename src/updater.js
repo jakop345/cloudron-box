@@ -184,12 +184,12 @@ function startUpdate(callback) {
 
             // NOTE: the args here are tied to the installer revision, box code and appstore provisioning logic
             var args = {
-                version: gBoxUpdateInfo.version,
-                boxVersionsUrl: config.get('boxVersionsUrl'),
                 sourceTarballUrl: result.body.url,
 
                 // this data is opaque to the installer
                 data: {
+                    boxVersionsUrl: config.get('boxVersionsUrl'),
+                    version: gBoxUpdateInfo.version,
                     apiServerOrigin: config.apiServerOrigin(),
                     webServerOrigin: config.webServerOrigin(),
                     fqdn: config.fqdn(),

@@ -18,6 +18,8 @@ readonly CONFIG_DIR="/home/${USER}/configs"
 readonly SETUP_PROGRESS_JSON="/home/yellowtent/setup/website/progress.json"
 readonly ADMIN_LOCATION="my" # keep this in sync with constants.js
 
+readonly curl="curl --fail --connect-timeout 20 --retry 10 --retry-delay 2 --max-time 2400"
+
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 box_src_tmp_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
 
@@ -34,7 +36,17 @@ set_progress() {
     (echo "{ \"update\": { \"percent\": \"${percent}\", \"message\": \"${message}\" }, \"backup\": {} }" > "${SETUP_PROGRESS_JSON}") 2> /dev/null || true # as this will fail in non-update mode
 }
 
-set_progress "15" "Creating directories"
+set_progress "1" "Downloading restore data"
+if [[ -n "${arg_restore_url}" ]]; then
+    echo "Downloading backup: ${arg_restore_url} and key: ${arg_restore_key}"
+
+    while true; do
+        if $curl -L "${arg_restore_url}" | openssl aes-256-cbc -d -pass "pass:${arg_restore_key}" | tar -zxf - -C "${DATA_DIR}"; then break; fi
+        echo "Failed to download data, trying again"
+    done
+fi
+
+set_progress "15" "Ensuring directories"
 sudo -u "${USER}" -H bash <<EOF
 set -eux
 # keep these in sync with paths.js
