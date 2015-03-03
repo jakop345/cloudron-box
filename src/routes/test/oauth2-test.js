@@ -174,7 +174,7 @@ describe('Password', function () {
         it('reset request succeeds', function (done) {
             superagent.get(SERVER_URL + '/api/v1/session/password/resetRequest.html')
             .end(function (error, result) {
-                expect(result.text.indexOf('<!-- tester !>')).to.not.equal(-1);
+                expect(result.text.indexOf('<!-- tester -->')).to.not.equal(-1);
                 expect(result.statusCode).to.equal(200);
                 done(error);
             });
@@ -200,7 +200,7 @@ describe('Password', function () {
         xit('setup succeeds', function (done) {
             superagent.get(SERVER_URL + '/api/v1/session/password/setup.html')
             .end(function (error, result) {
-                expect(result.text.indexOf('<!-- tester !>')).to.not.equal(-1);
+                expect(result.text.indexOf('<!-- tester -->')).to.not.equal(-1);
                 expect(result.statusCode).to.equal(200);
                 done(error);
             });
@@ -227,7 +227,7 @@ describe('Password', function () {
             superagent.get(SERVER_URL + '/api/v1/session/password/reset.html')
             .query({ reset_token: hat() })
             .end(function (error, result) {
-                expect(result.text.indexOf('<!-- tester !>')).to.not.equal(-1);
+                expect(result.text.indexOf('<!-- tester -->')).to.not.equal(-1);
                 expect(result.statusCode).to.equal(200);
                 done(error);
             });
@@ -236,7 +236,7 @@ describe('Password', function () {
         it('sent succeeds', function (done) {
             superagent.get(SERVER_URL + '/api/v1/session/password/sent.html')
             .end(function (error, result) {
-                expect(result.text.indexOf('<!-- tester !>')).to.not.equal(-1);
+                expect(result.text.indexOf('<!-- tester -->')).to.not.equal(-1);
                 expect(result.statusCode).to.equal(200);
                 done(error);
             });
@@ -251,7 +251,7 @@ describe('Password', function () {
             superagent.post(SERVER_URL + '/api/v1/session/password/resetRequest')
             .send({ identifier: USER_0.email })
             .end(function (error, result) {
-                expect(result.text.indexOf('<!-- tester !>')).to.not.equal(-1);
+                expect(result.text.indexOf('<!-- tester -->')).to.not.equal(-1);
                 expect(result.statusCode).to.equal(200);
                 done(error);
             });
@@ -302,7 +302,7 @@ describe('Password', function () {
             superagent.post(SERVER_URL + '/api/v1/session/password/reset')
             .send({ password: 'somepassword', resetToken: hat() })
             .end(function (error, result) {
-                expect(result.text.indexOf('<!-- tester !>')).to.not.equal(-1);
+                expect(result.text.indexOf('<!-- tester -->')).to.not.equal(-1);
                 expect(result.statusCode).to.equal(200);
                 done(error);
             });
