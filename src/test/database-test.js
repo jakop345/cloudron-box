@@ -218,6 +218,12 @@ describe('database', function () {
             userId: 'userid-1',
             expiresAt: Date.now() + 5000
         };
+        var AUTHCODE_2 = {
+            authCode: 'authcode-2',
+            clientId: 'clientid-2',
+            userId: 'userid-2',
+            expiresAt: Date.now()
+        };
 
         it('add fails due to missing arguments', function () {
             expect(function () { authcodedb.add(AUTHCODE_0.authCode, AUTHCODE_0.clientId, AUTHCODE_0.userId); }).to.throwError();
@@ -255,6 +261,33 @@ describe('database', function () {
                 expect(error.reason).to.be(DatabaseError.NOT_FOUND);
                 expect(result).to.not.be.ok();
                 done();
+            });
+        });
+
+        it('get of expired code fails', function (done) {
+            authcodedb.add(AUTHCODE_2.authCode, AUTHCODE_2.clientId, AUTHCODE_2.userId, AUTHCODE_2.expiresAt, function (error) {
+                expect(error).to.be(null);
+
+                authcodedb.get(AUTHCODE_2.authCode, function (error, result) {
+                    expect(error).to.be.a(DatabaseError);
+                    expect(error.reason).to.be(DatabaseError.NOT_FOUND);
+                    expect(result).to.not.be.ok();
+                    done();
+                });
+            });
+        });
+
+        it('delExpired succeeds', function (done) {
+            authcodedb.delExpired(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result).to.eql(1);
+
+                authcodedb.get(AUTHCODE_2.authCode, function (error, result) {
+                    expect(error).to.be.a(DatabaseError);
+                    expect(error.reason).to.be(DatabaseError.NOT_FOUND);
+                    expect(result).to.not.be.ok();
+                    done();
+                });
             });
         });
 

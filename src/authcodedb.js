@@ -11,6 +11,7 @@ exports = module.exports = {
     get: get,
     add: add,
     del: del,
+    delExpired: delExpired,
 
     _clear: clear
 };
@@ -21,7 +22,7 @@ function get(authCode, callback) {
     assert(typeof authCode === 'string');
     assert(typeof callback === 'function');
 
-    database.query('SELECT ' + AUTHCODES_FIELDS + ' FROM authcodes WHERE authCode = ?', [ authCode ], function (error, result) {
+    database.query('SELECT ' + AUTHCODES_FIELDS + ' FROM authcodes WHERE authCode = ? AND expiresAt > ?', [ authCode, Date.now() ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
@@ -54,6 +55,15 @@ function del(authCode, callback) {
         if (result.affectedRows !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         callback(null);
+    });
+}
+
+function delExpired(callback) {
+    assert(typeof callback === 'function');
+
+    database.query('DELETE FROM authcodes WHERE expiresAt <= ?', [ Date.now() ], function (error, result) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        return callback(null, result.affectedRows);
     });
 }
 
