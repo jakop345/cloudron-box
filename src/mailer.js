@@ -213,8 +213,7 @@ function appDied(app) {
             from: config.get('mailUsername'),
             to: adminEmails.join(', '),
             subject: util.format('App %s is down', app.location),
-            text: render('app_down_text.ejs', { name: app.location, location: config.appFqdn(app.location) }),
-            html: render('app_down_html.ejs', { name: app.location, location : config.appFqdn(app.location) })
+            text: render('app_down.ejs', { fqdn: config.fqdn(), title: app.manifest.title, appFqdn: config.appFqdn(app.location), format: 'text' })
         };
 
         enqueue(mailOptions);
