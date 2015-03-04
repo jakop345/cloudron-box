@@ -148,7 +148,8 @@ function userAdded(user) {
     var templateData = {
         user: user,
         webadminUrl: config.adminOrigin(),
-        setupLink: config.adminOrigin() + '/api/v1/session/password/setup.html?reset_token=' + user.resetToken
+        setupLink: config.adminOrigin() + '/api/v1/session/password/setup.html?reset_token=' + user.resetToken,
+        format: 'text'
     };
 
     var mailOptions = {
