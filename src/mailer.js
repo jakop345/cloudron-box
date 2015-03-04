@@ -132,7 +132,7 @@ function mailUserEventToAdmins(user, event) {
         var mailOptions = {
             from: config.get('mailUsername'),
             to: adminEmails.join(', '),
-            subject: util.format('User %s in Cloudron %s', event, config.fqdn()),
+            subject: util.format('%s %s in Cloudron %s', user.username, event, config.fqdn()),
             text: render('user_event.ejs', { fqdn: config.fqdn(), username: user.username, email: user.email, event: event, format: 'text' }),
         };
 
@@ -160,7 +160,7 @@ function userAdded(user) {
 
     enqueue(mailOptions);
 
-    mailUserEventToAdmins(user, 'added');
+    mailUserEventToAdmins(user, 'was added');
 }
 
 function userRemoved(username) {
@@ -168,7 +168,7 @@ function userRemoved(username) {
 
     debug('Sending mail for userRemoved');
 
-    mailUserEventToAdmins({ username: username }, 'removed');
+    mailUserEventToAdmins({ username: username }, 'was removed');
 }
 
 function adminChanged(user) {
@@ -176,7 +176,7 @@ function adminChanged(user) {
 
     debug('Sending mail for adminChanged');
 
-    mailUserEventToAdmins(user, user.admin ? 'made an admin' : 'removed as admin');
+    mailUserEventToAdmins(user, user.admin ? 'is now an admin' : 'is no more an admin');
 }
 
 function passwordReset(user) {
