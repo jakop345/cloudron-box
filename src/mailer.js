@@ -133,8 +133,7 @@ function mailUserEventToAdmins(user, event) {
             from: config.get('mailUsername'),
             to: adminEmails.join(', '),
             subject: 'User ' + event,
-            text: render('user_text.ejs', { username: user.username, event: event }),
-            html: render('user_html.ejs', { username: user.username, event: event })
+            text: render('user_event.ejs', { fqdn: config.fqdn(), username: user.username, email: user.email, event: event, format: 'text' }),
         };
 
         enqueue(mailOptions);
