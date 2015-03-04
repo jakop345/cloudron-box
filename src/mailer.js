@@ -192,8 +192,7 @@ function passwordReset(user) {
         from: config.get('mailUsername'),
         to: user.email,
         subject: 'Password Reset Request',
-        text: render('password_reset_text.ejs', { username: user.username, resetLink: resetLink }),
-        html: render('password_reset_html.ejs', { username: user.username, resetLink: resetLink })
+        text: render('password_reset.ejs', { fqdn: config.fqdn(), username: user.username, resetLink: resetLink, format: 'text' })
     };
 
     enqueue(mailOptions);
