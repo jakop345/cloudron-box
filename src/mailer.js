@@ -132,7 +132,7 @@ function mailUserEventToAdmins(user, event) {
         var mailOptions = {
             from: config.get('mailUsername'),
             to: adminEmails.join(', '),
-            subject: 'User ' + event,
+            subject: util.format('User %s in Cloudron %s', event, config.fqdn()),
             text: render('user_event.ejs', { fqdn: config.fqdn(), username: user.username, email: user.email, event: event, format: 'text' }),
         };
 
@@ -154,9 +154,8 @@ function userAdded(user) {
     var mailOptions = {
         from: config.get('mailUsername'),
         to: user.email,
-        subject: 'Welcome to Cloudron',
-        text: render('welcome_text.ejs', templateData),
-        html: render('welcome_html.ejs', templateData)
+        subject: util.format('Welcome to Cloudron %s', config.fqdn()),
+        text: render('welcome_user.ejs', templateData)
     };
 
     enqueue(mailOptions);
