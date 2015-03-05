@@ -39,7 +39,7 @@ npm run-script migrate_local
 cp setup/start/nginx/nginx.conf "${NGINX_ROOT}/nginx.conf"
 cp setup/start/nginx/mime.types "${NGINX_ROOT}/mime.types"
 
-${SCRIPT_DIR}/../appstore/src/scripts/generate_certificate.sh "US" "California" "San Francisco" "Cloudron Company" "Cloudron" "localhost" "cert@cloudron.io" "${NGINX_ROOT}/cert"
+${SCRIPT_DIR}/../appstore/src/scripts/generate_certificate.sh "US" "California" "San Francisco" "Cloudron Company" "Cloudron" "my-localhost" "cert@cloudron.io" "${NGINX_ROOT}/cert"
 
 # adjust the generated nginx config for local use
 ${SCRIPT_DIR}/node_modules/.bin/ejs-cli -f "${SCRIPT_DIR}/setup/start/nginx/appconfig.ejs" \
@@ -57,5 +57,12 @@ mysql --user=root --password="" -e "REPLACE INTO clients (id, appId, clientSecre
 mysql --user=root --password="" -e "REPLACE INTO apps (id, appStoreId, version, installationState, installationProgress, runState, healthy, containerId, manifestJson, httpPort, location, dnsRecordId, accessRestriction) VALUES (\"testApp\", \"testAppAppstoreId\", \"1.2.3\", \"installed\", \"done\", \"running\", \"1\", \"testAppContainerId\", \"{}\", 1337, \"testAppLocation\", \"testAppDnsRecordId\", \"public\")" box
 
 # start nginx
+echo "Restarting nginx..."
+
+if [[ `ps -A | grep nginx` ]]; then
+	sudo killall nginx
+	sleep 1
+fi
+
 sudo nginx -c nginx.conf -p "${NGINX_ROOT}"
 
