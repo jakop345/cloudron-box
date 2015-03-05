@@ -246,6 +246,8 @@ describe('Cloudron', function () {
                     var scope1 = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
                     var scope2 = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/setup/done?setupToken=somesetuptoken').reply(201, {});
 
+                    config._reset();
+
                     request.post(SERVER_URL + '/api/v1/cloudron/activate')
                            .query({ setupToken: 'somesetuptoken' })
                            .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
@@ -257,8 +259,6 @@ describe('Cloudron', function () {
 
                         // stash token for further use
                         token = result.body.token;
-
-                        config.set('token', 'APPSTORE_TOKEN');
 
                         callback();
                     });
@@ -283,17 +283,13 @@ describe('Cloudron', function () {
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(200);
-                expect(result.body).to.eql({
-                    apiServerOrigin: 'http://localhost:6060',
-                    webServerOrigin: null,
-                    isDev: false,
-                    fqdn: 'localhost',
-                    ip: '10.0.0.137',
-                    version: null,
-                    update: { apps: null, box: null },
-                    progress: { update: null, backup: null },
-                    isCustomDomain: false
-                });
+                expect(result.body.apiServerOrigin).to.eql('http://localhost:6060');
+                expect(result.body.webServerOrigin).to.eql(null);
+                expect(result.body.fqdn).to.eql('localhost');
+                expect(result.body.isCustomDomain).to.eql(false);
+                expect(result.body.progress).to.be.an('object');
+                expect(result.body.update).to.be.an('object');
+                expect(result.body.version).to.eql(null);
                 done();
             });
         });

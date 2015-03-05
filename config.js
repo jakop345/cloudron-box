@@ -34,7 +34,10 @@ exports = module.exports = {
     // these values are derived
     adminOrigin: adminOrigin,
     appFqdn: appFqdn,
-    zoneName: zoneName
+    zoneName: zoneName,
+
+    // for testing resets to defaults
+    _reset: initConfig
 };
 
 var homeDir = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
@@ -53,7 +56,7 @@ function saveSync() {
     fs.writeFileSync(cloudronConfigFileName, JSON.stringify(data, null, 4)); // functions are ignored by JSON.stringify
 }
 
-(function initConfig() {
+function initConfig() {
     // setup defaults
     data.fqdn = 'localhost';
 
@@ -103,7 +106,9 @@ function saveSync() {
     }
 
     saveSync();
-})();
+}
+
+initConfig();
 
 // set(obj) or set(key, value)
 function set(key, value) {
