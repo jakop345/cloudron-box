@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eu
+set -eu -o pipefail
 
 # Only GNU sed supports inline replace. brew install gnu-sed to get the GNU sed on OS X
 [[ $(uname -s) == "Darwin" ]] && GNU_SED="/usr/local/bin/gsed" || GNU_SED="sed"

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eux
+set -eu -o pipefail
 
 readonly LOGROTATE_CONFIG_DIR="/etc/logrotate.d"
 

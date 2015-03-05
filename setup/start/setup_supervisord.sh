@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eux
+set -eu -o pipefail
 
 readonly BOX_SRC_DIR="/home/yellowtent/box"
 readonly DATA_DIR="/home/yellowtent/data"

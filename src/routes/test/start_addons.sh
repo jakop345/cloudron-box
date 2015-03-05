@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eu
+set -eu -o pipefail
 
 readonly mysqldatadir="/tmp/mysqldata-$(date +%s)"
 readonly postgresqldatadir="/tmp/postgresqldata-$(date +%s)"

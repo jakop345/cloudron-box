@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eu
+set -eu -o pipefail
 
 readonly NGINX_CONFIG_DIR="/home/yellowtent/setup/configs/nginx" # do not reuse configs since it will be removed by installer
 readonly SETUP_WEBSITE_DIR="/home/yellowtent/setup/website"

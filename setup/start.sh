@@ -5,7 +5,7 @@ install_count=$(find /var/log/cloudron -name "installer*" | wc -l)
 exec > >(tee "/var/log/cloudron/start-$install_count.log")
 exec 2>&1
 
-set -eu
+set -eu -o pipefail
 
 echo "==== Cloudron Start ===="
 

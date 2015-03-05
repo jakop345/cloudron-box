@@ -4,7 +4,7 @@
 # permissions. The box code runs as normal user and thus cannot delete those files. This
 # hack can be removed once docker supports user namespaces
 
-set -eu
+set -eu -o pipefail
 
 if [[ ${EUID} -ne 0 ]]; then
     echo "This script should be run as root." > /dev/stderr

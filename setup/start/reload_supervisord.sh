@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eux
+set -eu -o pipefail
 
 # looks like restarting supervisor completely is the only way to reload it
 service supervisor stop || true

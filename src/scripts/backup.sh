@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eu
+set -eu -o pipefail
 
 if [[ $EUID -ne 0 ]]; then
     echo "This script should be run as root." > /dev/stderr

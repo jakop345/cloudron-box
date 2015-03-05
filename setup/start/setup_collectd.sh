@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eux
+set -eu -o pipefail
 
 readonly GRAPHITE_DIR="/home/yellowtent/data/graphite"
 readonly COLLECTD_CONFIG_DIR="/home/yellowtent/configs/collectd"
