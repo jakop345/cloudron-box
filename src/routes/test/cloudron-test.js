@@ -236,6 +236,68 @@ describe('Cloudron', function () {
             done();
         });
     });
+
+    describe('get config', function () {
+        before(function (done) {
+            async.series([
+                setup,
+
+                function (callback) {
+                    var scope1 = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
+                    var scope2 = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/setup/done?setupToken=somesetuptoken').reply(201, {});
+
+                    request.post(SERVER_URL + '/api/v1/cloudron/activate')
+                           .query({ setupToken: 'somesetuptoken' })
+                           .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
+                           .end(function (error, result) {
+                        expect(error).to.not.be.ok();
+                        expect(result).to.be.ok();
+                        expect(scope1.isDone());
+                        expect(scope2.isDone());
+
+                        // stash token for further use
+                        token = result.body.token;
+
+                        config.set('token', 'APPSTORE_TOKEN');
+
+                        callback();
+                    });
+                },
+            ], done);
+        });
+
+        after(cleanup);
+
+        it('cannot get without token', function (done) {
+            request.get(SERVER_URL + '/api/v1/cloudron/config')
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(401);
+                done();
+            });
+        });
+
+        it('succeeds', function (done) {
+            request.get(SERVER_URL + '/api/v1/cloudron/config')
+                   .query({ access_token: token })
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(200);
+                expect(result.body).to.eql({
+                    apiServerOrigin: 'http://localhost:6060',
+                    webServerOrigin: null,
+                    isDev: false,
+                    fqdn: 'localhost',
+                    ip: '10.0.0.137',
+                    version: null,
+                    update: { apps: null, box: null },
+                    progress: { update: null, backup: null },
+                    isCustomDomain: false
+                });
+                done();
+            });
+        });
+    });
 });
 
 

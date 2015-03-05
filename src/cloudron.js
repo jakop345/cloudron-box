@@ -216,7 +216,8 @@ function getConfig(callback) {
         ip: getIp(),
         version: config.version(),
         update: updater.getUpdateInfo(),
-        progress: progress.get()
+        progress: progress.get(),
+        isCustomDomain: config.isCustomDomain()
     });
 }
 
