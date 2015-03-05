@@ -42,10 +42,11 @@ app.filter('installationStateLabel', function() {
     return function(input) {
         if (input === 'error') return 'Error';
         if (input === 'subdomain_error') return 'Error';
-        if (input === 'installed') return 'Installed';
+        if (input === 'installed') return 'Running';
         if (input === 'downloading_image') return 'Downloading';
         if (input === 'pending_install') return 'Installing';
         if (input === 'pending_restore') return 'Starting';
+        if (input === 'pending_configure') return 'Configuring';
         if (input === 'pending_uninstall') return 'Uninstalling';
         if (input === 'creating_container') return 'Container';
         if (input === 'downloading_manifest') return 'Manifest';
