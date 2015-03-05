@@ -134,7 +134,7 @@
     <div class="grid-item-top">
         <div class="row">
             <div class="col-xs-12">
-                <h4 class="text-muted">{{client.name}} on {{client.location}}.{{config.fqdn}}</h4>
+                <h4 class="text-muted">{{client.name}} on {{client.location}}{{ config.isCustomDomain ? '.' : '-' }}{{config.fqdn}}</h4>
             </div>
         </div>
         <div class="row">

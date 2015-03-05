@@ -44,7 +44,8 @@ angular.module('Application').service('Client', ['$http', 'md5', function ($http
             revision: null,
             update: { box: null, apps: null },
             isDev: false,
-            progress: {}
+            progress: {},
+            isCustomDomain: false
         };
         this._installedApps = [];
 
@@ -90,6 +91,7 @@ angular.module('Application').service('Client', ['$http', 'md5', function ($http
         this._config.update = config.update;
         this._config.isDev = config.isDev;
         this._config.progress = config.progress;
+        this._config.isCustomDomain = config.isCustomDomain;
 
         var that = this;
 

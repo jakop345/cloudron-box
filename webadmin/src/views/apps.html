@@ -21,7 +21,7 @@
                             <label class="control-label" for="inputLocation">Location</label>
                             <div class="input-group form-inline">
                                 <input type="text" class="form-control" ng-model="appconfigure.location" id="inputLocation" name="location" required autofocus>
-                                <div class="input-group-addon">.{{ config.fqdn }}</div>
+                                <div class="input-group-addon">{{ config.isCustomDomain ? '.' : '-' }}{{ config.fqdn }}</div>
                             </div>
                         </div>
                         <div class="form-group" ng-class="{ 'has-error': (!config_form.password.$dirty && error.password) || (config_form.password.$dirty && config_form.password.$invalid) }">
