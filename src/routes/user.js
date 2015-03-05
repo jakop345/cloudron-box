@@ -10,6 +10,7 @@ var assert = require('assert'),
     UserError = user.UserError;
 
 exports = module.exports = {
+    profile: profile,
     info: info,
     update: update,
     list: listUser,
@@ -30,6 +31,17 @@ function generatePassword() {
         retVal += charset.charAt(Math.floor(Math.random() * n));
     }
     return retVal;
+}
+
+function profile(req, res, next) {
+    assert(typeof req.user === 'object');
+
+    next(new HttpSuccess(200, {
+        id: req.user.id,
+        username: req.user.username,
+        email: req.user.email,
+        admin: req.user.admin
+    }));
 }
 
 /**
