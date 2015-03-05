@@ -140,6 +140,7 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
         }
     });
 
+    // setup all the dialog focus handling
     ['updateModal'].forEach(function (id) {
         $('#' + id).on('shown.bs.modal', function () {
             $(this).find("[autofocus]:first").focus();
