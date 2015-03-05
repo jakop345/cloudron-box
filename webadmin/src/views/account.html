@@ -129,7 +129,8 @@
     </div>
 </div>
 
-<div class="card" ng-repeat="client in activeClients" style="margin-bottom: 15px;">
+<!-- we will always at least have the webadmin token here, so activeClients always will have one entry with at least one token -->
+<div class="card" ng-repeat="client in activeClients" style="margin-bottom: 15px;" ng-hide="client.tokenCount === 0">
     <div class="grid-item-top">
         <div class="row">
             <div class="col-xs-12">
