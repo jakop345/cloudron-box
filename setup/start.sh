@@ -163,7 +163,7 @@ EOF
 docker pull girish/postgresql:0.3 || true # this line for dev convenience since it's already part of base image
 postgresql_container_id=$(docker run --restart=always -d --name="postgresql" \
     -h "${arg_fqdn}" \
-    -v "${DATA_DIR}/postgresql:/var/lib/mysql" \
+    -v "${DATA_DIR}/postgresql:/var/lib/postgresql" \
     -v "${CONFIG_DIR}/addons/postgresql_vars.sh:/etc/postgresql/postgresql_vars.sh:r" \
     girish/postgresql:0.3)
 echo "PostgreSQL container id: ${postgresql_container_id}"
