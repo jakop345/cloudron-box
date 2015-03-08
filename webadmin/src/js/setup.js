@@ -89,6 +89,7 @@ app.controller('SetupController', ['$scope', '$location', 'Client', 'Wizard', fu
     var search = decodeURIComponent(window.location.search).slice(1).split('&').map(function (item) { return item.split('='); }).reduce(function (o, k) { o[k[0]] = k[1]; return o; }, {});
 
     $scope.setupToken = search.setupToken;
+    Wizard.email = search.email;
 
     Client.isServerFirstTime(function (error, isFirstTime) {
         if (error) {
