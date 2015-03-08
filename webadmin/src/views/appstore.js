@@ -17,7 +17,21 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         accessRestriction: ''
     };
 
+    $scope.reset = function() {
+        $scope.appinstall.app = {};
+        $scope.appinstall.location = '';
+        $scope.appinstall.password = '';
+        $scope.appinstall.portBindings = {};
+        $scope.appinstall.accessRestriction = '';
+        $scope.appinstall.error = {};
+
+        $scope.install_form.$setPristine();
+        $scope.install_form.$setUntouched();
+    };
+
     $scope.showInstall = function (app) {
+        $scope.reset();
+
         AppStore.getManifest(app.id, function (error, manifest) {
             if (error) return console.error(error);
 
@@ -36,7 +50,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         });
     };
 
-    $scope.doInstall = function (form) {
+    $scope.doInstall = function () {
         $scope.appinstall.busy = true;
         $scope.appinstall.error.name = null;
         $scope.appinstall.error.password = null;
@@ -62,17 +76,10 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
             }
 
             $scope.appinstall.busy = false;
-            $scope.appinstall.error = {};
-            $scope.appinstall.app = {};
-            $scope.appinstall.location = '';
-            $scope.appinstall.password = '';
-            $scope.appinstall.portBindings = {};
-            $scope.appinstall.accessRestriction = '';
-
-            form.$setPristine();
-            form.$setUntouched();
 
             $('#appInstallModal').modal('hide');
+
+            $scope.reset();
 
             $location.path('/apps');
         });

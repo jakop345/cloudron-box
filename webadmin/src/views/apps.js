@@ -26,7 +26,28 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         password: ''
     };
 
+    $scope.reset = function () {
+        $scope.appconfigure.error = {};
+        $scope.appconfigure.app = {};
+        $scope.appconfigure.location = '';
+        $scope.appconfigure.password = '';
+        $scope.appconfigure.portBindings = {};
+        $scope.appconfigure.accessRestriction = '';
+
+        $scope.config_form.$setPristine();
+        $scope.config_form.$setUntouched();
+
+        $scope.appuninstall.app = {};
+        $scope.appuninstall.error = {};
+        $scope.appuninstall.password = '';
+
+        $scope.uninstall_form.$setPristine();
+        $scope.uninstall_form.$setUntouched();
+    };
+
     $scope.showConfigure = function (app) {
+        $scope.reset();
+
         $scope.appconfigure.app = app;
         $scope.appconfigure.location = app.location;
         $scope.appconfigure.portBindings = app.manifest.tcpPorts;
@@ -39,7 +60,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $('#appConfigureModal').modal('show');
     };
 
-    $scope.doConfigure = function (form) {
+    $scope.doConfigure = function () {
         $scope.appconfigure.busy = true;
         $scope.appconfigure.error.name = null;
         $scope.appconfigure.error.password = null;
@@ -63,28 +84,22 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
             }
 
             $scope.appconfigure.busy = false;
-            $scope.appconfigure.error = {};
-            $scope.appconfigure.app = {};
-            $scope.appconfigure.location = '';
-            $scope.appconfigure.password = '';
-            $scope.appconfigure.portBindings = {};
-            $scope.appconfigure.accessRestriction = '';
-
-            form.$setPristine();
-            form.$setUntouched();
 
             $('#appConfigureModal').modal('hide');
+
+            $scope.reset();
         });
     };
 
     $scope.showUninstall = function (app) {
+        $scope.reset();
+
         $scope.appuninstall.app = app;
-        $scope.appuninstall.error.password = null;
 
         $('#appUninstallModal').modal('show');
     };
 
-    $scope.doUninstall = function (form) {
+    $scope.doUninstall = function () {
         $scope.appuninstall.error.password = null;
 
         Client.uninstallApp($scope.appuninstall.app.id, $scope.appuninstall.password, function (error) {
@@ -98,13 +113,9 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
                 return;
             }
 
-            $scope.appuninstall.app = {};
-            $scope.appuninstall.password = '';
-
-            form.$setPristine();
-            form.$setUntouched();
-
             $('#appUninstallModal').modal('hide');
+
+            $scope.reset();
         });
     };
 

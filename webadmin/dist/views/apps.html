@@ -16,7 +16,7 @@
             </div>
             <div class="modal-body">
                 <fieldset>
-                    <form class="form-signin" role="form" name="config_form" ng-submit="doConfigure(config_form)" autocomplete="off">
+                    <form class="form-signin" role="form" name="config_form" ng-submit="doConfigure()" autocomplete="off">
                         <div class="form-group" ng-class="{ 'has-error': config_form.location.$dirty && config_form.location.$invalid }">
                             <label class="control-label" for="inputLocation">Location</label>
                             <div class="input-group form-inline">
@@ -50,7 +50,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success" ng-click="doConfigure(config_form)" ng-disabled="config_form.$invalid || busy">Save</button>
+                <button type="button" class="btn btn-success" ng-click="doConfigure()" ng-disabled="config_form.$invalid || busy">Save</button>
             </div>
         </div>
     </div>
@@ -66,7 +66,7 @@
             <div class="modal-body">
                 <p>Deleting the app will also remove all content generated within this app!</p>
                 <fieldset>
-                    <form class="form-signin" role="form" name="uninstall_form" ng-submit="doUninstall(uninstall_form)" autocomplete="off">
+                    <form class="form-signin" role="form" name="uninstall_form" ng-submit="doUninstall()" autocomplete="off">
                         <div class="form-group" ng-class="{ 'has-error': (!uninstall_form.password.$dirty && appuninstall.error.password) || (uninstall_form.password.$dirty && uninstall_form.password.$invalid) }">
                             <label class="control-label" for="inputUninstallPassword">Password</label>
                             <input type="password" class="form-control" ng-model="appuninstall.password" id="inputUninstallPassword" name="password" ng-maxlength="512" ng-minlength="5" required autofocus>
@@ -78,7 +78,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" ng-click="doUninstall(uninstall_form)" ng-disabled="uninstall_form.$invalid || busy">Uninstall</button>
+                <button type="button" class="btn btn-danger" ng-click="doUninstall()" ng-disabled="uninstall_form.$invalid || busy">Uninstall</button>
             </div>
         </div>
     </div>
