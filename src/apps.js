@@ -42,7 +42,7 @@ exports = module.exports = {
 
     // exported for testing
     _validateHostname: validateHostname,
-    _validatePortBindings: validatePortBindings
+    _validatePortConfigs: validatePortConfigs
 };
 
 var gTasks = { };
@@ -145,7 +145,7 @@ function validateHostname(location, fqdn) {
 }
 
 // validate the port bindings
-function validatePortBindings(portBindings) {
+function validatePortConfigs(portConfigs) {
     // keep the public ports in sync with firewall rules in scripts/initializeBaseUbuntuImage.sh
     var RESERVED_PORTS = [
         22, /* ssh */
@@ -161,15 +161,12 @@ function validatePortBindings(portBindings) {
         8000 /* graphite (lo) */
     ];
 
-    for (var containerPort in portBindings) {
-        var containerPortInt = parseInt(containerPort, 10);
-        if (isNaN(containerPortInt) || containerPortInt <= 0 || containerPortInt > 65535) {
-            return new Error(containerPort + ' is not a valid port');
-        }
-
-        var hostPortInt = parseInt(portBindings[containerPort], 10);
+    for (var env in portConfigs) {
+        if (!/^[a-zA-Z0-9_]+$/.test(env)) return new Error(env + ' is not valid environment variable');
+ 
+        var hostPortInt = parseInt(portConfigs[env], 10);
         if (isNaN(hostPortInt) || hostPortInt <= 1024 || hostPortInt > 65535) {
-            return new Error(portBindings[containerPort] + ' is not a valid port');
+            return new Error(portConfigs[env].hostPort + ' is not a valid host port');
         }
 
         if (RESERVED_PORTS.indexOf(hostPortInt) !== -1) return new Error(hostPortInt + ' is reserved');
@@ -194,6 +191,11 @@ function get(appId, callback) {
         app.iconUrl = getIconUrlSync(app);
         app.fqdn = config.appFqdn(app.location);
 
+        app.portConfigs = { };
+        for (var env in app.portBindings) {
+            app.portConfigs[env] = app.portBindings[env].hostPort;
+        }
+
         callback(null, app);
     });
 }
@@ -208,6 +210,11 @@ function getBySubdomain(subdomain, callback) {
 
         app.iconUrl = getIconUrlSync(app);
         app.fqdn = config.appFqdn(app.location);
+
+        app.portConfigs = { };
+        for (var env in app.portBindings) {
+            app.portConfigs[env] = app.portBindings[env].hostPort;
+        }
 
         callback(null, app);
     });
@@ -224,6 +231,12 @@ function getAll(callback) {
         apps.forEach(function (app) {
             app.iconUrl = getIconUrlSync(app);
             app.fqdn = config.appFqdn(app.location);
+
+            app.portConfigs = { };
+            for (var env in app.portBindings) {
+                app.portConfigs[env] = app.portBindings[env].hostPort;
+            }
+
             app.updateVersion = null;
 
             updates.some(function (update) {
@@ -252,12 +265,12 @@ function validateAccessRestriction(accessRestriction) {
     }
 }
 
-function install(appId, appStoreId, manifest, location, portBindings, accessRestriction, callback) {
+function install(appId, appStoreId, manifest, location, portConfigs, accessRestriction, callback) {
     assert(typeof appId === 'string');
     assert(typeof appStoreId === 'string');
     assert(manifest && typeof manifest === 'object');
     assert(typeof location === 'string');
-    assert(!portBindings || typeof portBindings === 'object');
+    assert(!portConfigs || typeof portConfigs === 'object');
     assert(typeof accessRestriction === 'string');
     assert(typeof callback === 'function');
 
@@ -270,13 +283,22 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
     var error = validateHostname(location, config.fqdn());
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
-    error = validatePortBindings(portBindings);
+    error = validatePortConfigs(portConfigs);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
     error = validateAccessRestriction(accessRestriction);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
     debug('Will install app with id : ' + appId);
+
+    // determine the container port
+    var portBindings = { };
+    var tcpPorts = manifest.tcpPorts || { };
+    for (var env in portConfigs) {
+        if (!(env in tcpPorts)) return callback(new AppsError(AppsError.BAD_FIELD, 'Invalid portConfigs ' + env));
+
+        portBindings[env] = { hostPort: portConfigs[env], containerPort: tcpPorts[env].containerPort || portConfigs[env] };
+    }
 
     appdb.add(appId, appStoreId, manifest, location.toLowerCase(), portBindings, accessRestriction, function (error) {
         if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new AppsError(AppsError.ALREADY_EXISTS));
@@ -289,16 +311,16 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
     });
 }
 
-function configure(appId, location, portBindings, accessRestriction, callback) {
+function configure(appId, location, portConfigs, accessRestriction, callback) {
     assert(typeof appId === 'string');
-    assert(!portBindings || typeof portBindings === 'object');
+    assert(!portConfigs || typeof portConfigs === 'object');
     assert(typeof accessRestriction === 'string');
     assert(typeof callback === 'function');
 
     var error = location ? validateHostname(location, config.fqdn()) : null;
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
-    error = portBindings ? validatePortBindings(portBindings) : null;
+    error = portConfigs ? validatePortConfigs(portConfigs) : null;
     if (error) return callback(error);
 
     error = validateAccessRestriction(accessRestriction);
@@ -306,19 +328,32 @@ function configure(appId, location, portBindings, accessRestriction, callback) {
 
     var values = { };
     if (location) values.location = location.toLowerCase();
-    values.portBindings = portBindings;
     values.accessRestriction = accessRestriction;
 
-    debug('Will install app with id:%s', appId);
-
-    appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_CONFIGURE, values, function (error) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE));
+    appdb.get(appId, function (error, app) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        stopTask(appId);
-        startTask(appId);
+        // determine the container port
+        values.portBindings = { };
+        var tcpPorts = app.manifest.tcpPorts || { };
+        for (var env in portConfigs) {
+            if (!(env in tcpPorts)) return callback(new AppsError(AppsError.BAD_FIELD, 'Invalid portConfigs ' + env));
 
-        callback(null);
+            values.portBindings[env] = { hostPort: portConfigs[env], containerPort: tcpPorts[env].containerPort || portConfigs[env] };
+        }
+
+        debug('Will configure app with id:%s values:%j', appId, values);
+
+        appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_CONFIGURE, values, function (error) {
+            if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE));
+            if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+            stopTask(appId);
+            startTask(appId);
+
+            callback(null);
+        });
     });
 }
 
@@ -335,7 +370,7 @@ function update(appId, manifest, callback) {
     error = checkManifestConstraints(manifest);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Mainfest cannot be installed:' + error.message));
 
-    appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_UPDATE, { manifest: manifest }, function (error) {
+    appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_UPDATE, { manifest: manifest, portBindings: { } }, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE)); // might be a bad guess
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 

@@ -28,7 +28,7 @@ describe('Apps', function () {
         manifest: { version: '0.1', dockerImage: 'docker/app0', healthCheckPath: '/', httpPort: 80, title: 'app0' },
         httpPort: null,
         containerId: null,
-        portBindings: { '1234': '5678' },
+        portBindings: { "PORT": { containerPort: '1234', hostPort: '5678' } },
         healthy: null,
         accessRestriction: ''
     };
@@ -79,25 +79,22 @@ describe('Apps', function () {
         });
     });
 
-    describe('validatePortBindings', function () {
-        it('does not allow invalid container port', function () {
-            expect(apps._validatePortBindings({ '-1': '5000' })).to.be.an(Error);
-            expect(apps._validatePortBindings({ '0': '5000' })).to.be.an(Error);
-            expect(apps._validatePortBindings({ 'text': '5000' })).to.be.an(Error);
-            expect(apps._validatePortBindings({ '65536': '5000' })).to.be.an(Error);
-        });
-
+    describe('validatePortConfigs', function () {
         it('does not allow invalid host port', function () {
-            expect(apps._validatePortBindings({ '3000': '-1' })).to.be.an(Error);
-            expect(apps._validatePortBindings({ '3000': '0' })).to.be.an(Error);
-            expect(apps._validatePortBindings({ '3000': 'text' })).to.be.an(Error);
-            expect(apps._validatePortBindings({ '3000': '65536' })).to.be.an(Error);
-            expect(apps._validatePortBindings({ '3000': '1024' })).to.be.an(Error);
+            expect(apps._validatePortConfigs({ port: '-1' })).to.be.an(Error);
+            expect(apps._validatePortConfigs({ port: '0' })).to.be.an(Error);
+            expect(apps._validatePortConfigs({ port: 'text' })).to.be.an(Error);
+            expect(apps._validatePortConfigs({ port: '65536' })).to.be.an(Error);
+            expect(apps._validatePortConfigs({ port: '1024' })).to.be.an(Error);
         });
 
         it('allows valid bindings', function () {
-            expect(apps._validatePortBindings({ '3000': '1025' })).to.be(null);
-            expect(apps._validatePortBindings({ '100': '4033', '25': '3242', '553': '1234' })).to.be(null);
+            expect(apps._validatePortConfigs({ port: '1025' })).to.be(null);
+            expect(apps._validatePortConfigs({
+                port1: '4033',
+                port2: '3242',
+                port3: '1234'
+            })).to.be(null);
         });
     });
 

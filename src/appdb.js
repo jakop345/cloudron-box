@@ -59,7 +59,7 @@ var APPS_FIELDS = [ 'id', 'appStoreId', 'installationState', 'installationProgre
 var APPS_FIELDS_PREFIXED = [ 'apps.id', 'apps.appStoreId', 'apps.installationState', 'apps.installationProgress', 'apps.runState',
     'apps.healthy', 'apps.containerId', 'apps.manifestJson', 'apps.httpPort', 'apps.location', 'apps.dnsRecordId', 'apps.accessRestriction' ].join(',');
 
-var PORT_BINDINGS_FIELDS = [ 'hostPort', 'containerPort', 'appId' ].join(',');
+var PORT_BINDINGS_FIELDS = [ 'hostPort', 'containerPort', 'environmentVariable', 'appId' ].join(',');
 
 function postProcess(result) {
     assert(typeof result === 'object');
@@ -71,16 +71,22 @@ function postProcess(result) {
 
     assert(result.hostPorts === null || typeof result.hostPorts === 'string');
     assert(result.containerPorts === null || typeof result.containerPorts === 'string');
+    assert(result.environmentVariables === null || typeof result.environmentVariables === 'string');
 
     result.portBindings = { };
     var hostPorts = result.hostPorts === null ? [ ] : result.hostPorts.split(',');
     var containerPorts = result.containerPorts === null ? [ ] : result.containerPorts.split(',');
+    var environmentVariables = result.environmentVariables === null ? [ ] : result.environmentVariables.split(',');
 
     delete result.hostPorts;
     delete result.containerPorts;
+    delete result.environmentVariables;
 
-    for (var i = 0; i < hostPorts.length; i++) {
-        result.portBindings[containerPorts[i]] = hostPorts[i];
+    for (var i = 0; i < environmentVariables.length; i++) {
+        result.portBindings[environmentVariables[i]] = {
+            hostPort: hostPorts[i],
+            containerPort: containerPorts[i]
+        };
     }
 }
 
@@ -89,7 +95,7 @@ function get(id, callback) {
     assert(typeof callback === 'function');
 
     database.query('SELECT ' + APPS_FIELDS_PREFIXED + ','
-        + 'GROUP_CONCAT(appPortBindings.hostPort) AS hostPorts, GROUP_CONCAT(appPortBindings.containerPort) AS containerPorts'
+        + 'GROUP_CONCAT(appPortBindings.hostPort) AS hostPorts, GROUP_CONCAT(appPortBindings.containerPort) AS containerPorts, GROUP_CONCAT(appPortBindings.environmentVariable) AS environmentVariables'
         + ' FROM apps LEFT OUTER JOIN appPortBindings ON apps.id = appPortBindings.appId WHERE apps.id = ? GROUP BY apps.id', [ id ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
@@ -105,7 +111,7 @@ function getBySubdomain(subdomain, callback) {
     assert(typeof callback === 'function');
 
     database.query('SELECT ' + APPS_FIELDS_PREFIXED + ','
-        + 'GROUP_CONCAT(appPortBindings.hostPort) AS hostPorts, GROUP_CONCAT(appPortBindings.containerPort) AS containerPorts'
+        + 'GROUP_CONCAT(appPortBindings.hostPort) AS hostPorts, GROUP_CONCAT(appPortBindings.containerPort) AS containerPorts, GROUP_CONCAT(appPortBindings.environmentVariable) AS environmentVariables'
         + '  FROM apps LEFT OUTER JOIN appPortBindings ON apps.id = appPortBindings.appId WHERE location = ? GROUP BY apps.id', [ subdomain ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
@@ -121,7 +127,7 @@ function getByHttpPort(httpPort, callback) {
     assert(typeof callback === 'function');
 
     database.query('SELECT ' + APPS_FIELDS_PREFIXED + ','
-        + 'GROUP_CONCAT(appPortBindings.hostPort) AS hostPorts, GROUP_CONCAT(appPortBindings.containerPort) AS containerPorts'
+        + 'GROUP_CONCAT(appPortBindings.hostPort) AS hostPorts, GROUP_CONCAT(appPortBindings.containerPort) AS containerPorts, GROUP_CONCAT(appPortBindings.environmentVariable) AS environmentVariables'
         + '  FROM apps LEFT OUTER JOIN appPortBindings ON apps.id = appPortBindings.appId WHERE httpPort = ? GROUP BY apps.id', [ httpPort ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
@@ -136,7 +142,7 @@ function getAll(callback) {
     assert(typeof callback === 'function');
 
     database.query('SELECT ' + APPS_FIELDS_PREFIXED + ','
-        + 'GROUP_CONCAT(appPortBindings.hostPort) AS hostPorts, GROUP_CONCAT(appPortBindings.containerPort) AS containerPorts'
+        + 'GROUP_CONCAT(appPortBindings.hostPort) AS hostPorts, GROUP_CONCAT(appPortBindings.containerPort) AS containerPorts, GROUP_CONCAT(appPortBindings.environmentVariable) AS environmentVariables'
         + ' FROM apps LEFT OUTER JOIN appPortBindings ON apps.id = appPortBindings.appId'
         + ' GROUP BY apps.id ORDER BY apps.id', function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
@@ -169,9 +175,9 @@ function add(id, appStoreId, manifest, location, portBindings, accessRestriction
             if (error && error.code === 'ER_DUP_ENTRY') return database.rollback(conn, callback.bind(null, new DatabaseError(DatabaseError.ALREADY_EXISTS)));
             if (error) return database.rollback(conn, callback.bind(null, new DatabaseError(DatabaseError.INTERNAL_ERROR, error)));
 
-            async.eachSeries(Object.keys(portBindings), function iterator(containerPort, callback) {
-                conn.query('INSERT INTO appPortBindings (hostPort, containerPort, appId) VALUES (?, ?, ?)',
-                         [ portBindings[containerPort], containerPort, id ], callback);
+            async.eachSeries(Object.keys(portBindings), function iterator(env, callback) {
+                conn.query('INSERT INTO appPortBindings (environmentVariable, containerPort, hostPort, appId) VALUES (?, ?, ?, ?)',
+                         [ env, portBindings[env].containerPort, portBindings[env].hostPort, id ], callback);
             }, function done(error) {
                 if (error && error.code === 'ER_DUP_ENTRY') return database.rollback(conn, callback.bind(null, new DatabaseError(DatabaseError.ALREADY_EXISTS)));
                 if (error) return database.rollback(conn, callback.bind(null, new DatabaseError(DatabaseError.INTERNAL_ERROR, error)));
@@ -202,7 +208,7 @@ function getPortBindings(id, callback) {
 
         var portBindings = { };
         for (var i = 0; i < results.length; i++) {
-            portBindings[results[i].containerPort] = results[i].hostPort;
+            portBindings[results[i].environmentVariable] = { hostPort: results[i].hostPort, containerPort: results[i].containerPort };
         }
 
         callback(null, portBindings);
@@ -262,9 +268,9 @@ function updateWithConstraints(id, app, constraints, callback) {
     database.beginTransaction(function (error, conn) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
-        async.eachSeries(Object.keys(portBindings), function iterator(containerPort, callback) {
-            var values = [ portBindings[containerPort], containerPort, id ];
-            conn.query('UPDATE appPortBindings SET hostPort = ? WHERE containerPort = ? AND appId = ?', values, callback);
+        async.eachSeries(Object.keys(portBindings), function iterator(env, callback) { // TODO: remove old portBindings ?
+            var values = [ portBindings[env].hostPort, portBindings[env].containerPort, env, id ];
+            conn.query('UPDATE appPortBindings SET hostPort = ?, containerPort = ? WHERE environmentVariable = ? AND appId = ?', values, callback);
         }, function seriesDone(error) {
             if (error) return database.rollback(conn, callback.bind(null, new DatabaseError(DatabaseError.INTERNAL_ERROR, error)));
 

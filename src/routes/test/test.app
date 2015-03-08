@@ -6,9 +6,9 @@
   "healthCheckPath": "/",
   "httpPort": "7777",
   "tcpPorts": {
-    "7778": {
+    "ECHO_SERVER_PORT": {
       "description": "Echo server",
-      "environmentVariable": "ECHO_SERVER_PORT"
+      "containerPort": "7778"
     }
   },
   "addons": [
