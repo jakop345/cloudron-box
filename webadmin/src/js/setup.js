@@ -86,7 +86,7 @@ app.controller('SetupController', ['$scope', '$location', 'Client', 'Wizard', fu
     $scope.initialized = false;
 
     // Stupid angular location provider either wants html5 location mode or not, do the query parsing on my own
-    var search = window.location.search.slice(1).split('&').map(function (item) { return item.split('='); }).reduce(function (o, k) { o[k[0]] = k[1]; return o; }, {});
+    var search = decodeURIComponent(window.location.search).slice(1).split('&').map(function (item) { return item.split('='); }).reduce(function (o, k) { o[k[0]] = k[1]; return o; }, {});
 
     $scope.setupToken = search.setupToken;
 
