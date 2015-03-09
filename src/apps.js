@@ -145,7 +145,7 @@ function validateHostname(location, fqdn) {
 }
 
 // validate the port bindings
-function validatePortConfigs(portConfigs) {
+function validatePortConfigs(portConfigs, tcpPorts) {
     // keep the public ports in sync with firewall rules in scripts/initializeBaseUbuntuImage.sh
     var RESERVED_PORTS = [
         22, /* ssh */
@@ -161,6 +161,8 @@ function validatePortConfigs(portConfigs) {
         8000 /* graphite (lo) */
     ];
 
+    if (!portConfigs) return null;
+
     for (var env in portConfigs) {
         if (!/^[a-zA-Z0-9_]+$/.test(env)) return new Error(env + ' is not valid environment variable');
  
@@ -170,6 +172,13 @@ function validatePortConfigs(portConfigs) {
         }
 
         if (RESERVED_PORTS.indexOf(hostPortInt) !== -1) return new Error(hostPortInt + ' is reserved');
+    }
+
+    // it is OK if there is no 1-1 mapping between values in manifest.tcpPorts and portConfigs. missing values implies
+    // that the user wants the service disabled
+    tcpPorts = tcpPorts || { };
+    for (var env in portConfigs) {
+        if (!(env in tcpPorts)) return new Error('Invalid portConfigs ' + env);
     }
 
     return null;
@@ -283,20 +292,13 @@ function install(appId, appStoreId, manifest, location, portConfigs, accessRestr
     var error = validateHostname(location, config.fqdn());
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
-    error = validatePortConfigs(portConfigs);
+    error = validatePortConfigs(portConfigs, manifest.tcpPorts);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
     error = validateAccessRestriction(accessRestriction);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
     debug('Will install app with id : ' + appId);
-
-    // it is OK if there is no 1-1 mapping between values in manifest.tcpPorts and portConfigs. missing values implies
-    // that the user wants the service disabled
-    var tcpPorts = manifest.tcpPorts || { };
-    for (var env in portConfigs) {
-        if (!(env in tcpPorts)) return callback(new AppsError(AppsError.BAD_FIELD, 'Invalid portConfigs ' + env));
-    }
 
     appdb.add(appId, appStoreId, manifest, location.toLowerCase(), portConfigs, accessRestriction, function (error) {
         if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new AppsError(AppsError.ALREADY_EXISTS));
@@ -318,9 +320,6 @@ function configure(appId, location, portConfigs, accessRestriction, callback) {
     var error = location ? validateHostname(location, config.fqdn()) : null;
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
-    error = portConfigs ? validatePortConfigs(portConfigs) : null;
-    if (error) return callback(error);
-
     error = validateAccessRestriction(accessRestriction);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
@@ -332,12 +331,9 @@ function configure(appId, location, portConfigs, accessRestriction, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        // it is OK if there is no 1-1 mapping between values in manifest.tcpPorts and portConfigs. missing values implies
-        // that the user wants the service disabled
-        var tcpPorts = app.manifest.tcpPorts || { };
-        for (var env in portConfigs) {
-            if (!(env in tcpPorts)) return callback(new AppsError(AppsError.BAD_FIELD, 'Invalid portConfigs ' + env));
-        }
+        error = validatePortConfigs(portConfigs, app.manifest.tcpPorts);
+        if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
+
         values.portBindings = portConfigs;
 
         debug('Will configure app with id:%s values:%j', appId, values);
