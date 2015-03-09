@@ -192,7 +192,6 @@ function stopApp(req, res, next) {
     });
 }
 
-// FIXME: handle case where portBindings changes
 function updateApp(req, res, next) {
     assert(typeof req.params.id === 'string');
     assert(typeof req.body === 'object');
@@ -201,10 +200,11 @@ function updateApp(req, res, next) {
 
     if (!data) return next(new HttpError(400, 'Cannot parse data field'));
     if (!data.manifest || typeof data.manifest !== 'object') return next(new HttpError(400, 'manifest is required'));
+    if (('portConfigs' in data) && typeof data.portConfigs !== 'object') return next(new HttpError(400, 'portConfigs must be an object'));
 
     debug('Update app id:%s to manifest:%j', req.params.id, data.manifest);
 
-    apps.update(req.params.id, data.manifest, function (error) {
+    apps.update(req.params.id, data.manifest, data.portConfigs, function (error) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
         if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
         if (error) return next(new HttpError(500, error));

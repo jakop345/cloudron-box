@@ -350,9 +350,10 @@ function configure(appId, location, portConfigs, accessRestriction, callback) {
     });
 }
 
-function update(appId, manifest, callback) {
+function update(appId, manifest, portConfigs, callback) {
     assert(typeof appId === 'string');
     assert(manifest && typeof manifest === 'object');
+    assert(!portConfigs || typeof portConfigs === 'object');
     assert(typeof callback === 'function');
 
     debug('Will update app with id:%s', appId);
@@ -363,7 +364,10 @@ function update(appId, manifest, callback) {
     error = checkManifestConstraints(manifest);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Mainfest cannot be installed:' + error.message));
 
-    appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_UPDATE, { manifest: manifest }, function (error) {
+    error = validatePortConfigs(portConfigs, manifest.tcpPorts);
+    if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
+
+    appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_UPDATE, { manifest: manifest, portConfigs: portConfigs }, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE)); // might be a bad guess
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
