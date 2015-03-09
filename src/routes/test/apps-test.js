@@ -1059,6 +1059,7 @@ describe('App installation - port bindings', function () {
         });
     });
 
+    // osx: if this test is failing, it is probably because of a stray port binding in boot2docker
     it('did stop the app', function (done) {
         setTimeout(function () {
             var client = net.connect(7171);
