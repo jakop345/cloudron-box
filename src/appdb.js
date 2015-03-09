@@ -251,12 +251,16 @@ function updateWithConstraints(id, app, constraints, callback) {
     assert(!('portBindings' in app) || typeof app.portBindings === 'object');
 
     var queries = [ ];
-    var portBindings = app.portBindings || { };
 
-    Object.keys(portBindings).forEach(function (env) { // TODO: remove old portBindings ?
-        var values = [ portBindings[env], env, id ];
-        queries.push({ query: 'UPDATE appPortBindings SET hostPort = ? WHERE environmentVariable = ? AND appId = ?', args: values });
-    });
+    if ('portBindings' in app) {
+        var portBindings = app.portBindings || { };
+        // replace entries by app id
+        queries.push({ query: 'DELETE FROM appPortBindings WHERE appId = ?', args: [ id ] });
+        Object.keys(portBindings).forEach(function (env) {
+            var values = [ portBindings[env], env, id ];
+            queries.push({ query: 'INSERT INTO appPortBindings (hostPort, environmentVariable, appId) VALUES(?, ?, ?)', args: values });
+        });
+    }
  
     var fields = [ ], values = [ ];
     for (var p in app) {
