@@ -12,6 +12,8 @@ exports = module.exports = {
     initialize: initialize,
     uninitialize: uninitialize,
     query: query,
+    transaction: transaction,
+
     beginTransaction: beginTransaction,
     rollback: rollback,
     commit: commit,
@@ -173,5 +175,22 @@ function query() {
     };
 
     gDefaultConnection.query.apply(gDefaultConnection, args);
+}
+
+function transaction(queries, callback) {
+    assert(util.isArray(queries));
+    assert(typeof callback === 'function');
+
+    beginTransaction(function (error, conn) {
+        if (error) return callback(error);
+
+        async.mapSeries(queries, function iterator(query, done) {
+            conn.query(query.query, query.args, done);
+        }, function seriesDone(error, results) {
+            if (error) return rollback(conn, callback.bind(null, error));
+
+            commit(conn, callback.bind(null, null, results));
+        });
+    });
 }
 

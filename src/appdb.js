@@ -161,23 +161,24 @@ function add(id, appStoreId, manifest, location, portBindings, accessRestriction
 
     var manifestJson = JSON.stringify(manifest);
 
-    database.beginTransaction(function (error, conn) {
+    var queries = [ ];
+    queries.push({
+        query: 'INSERT INTO apps (id, appStoreId, manifestJson, version, installationState, location, accessRestriction) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        args: [ id, appStoreId, manifestJson, manifest.version, exports.ISTATE_PENDING_INSTALL, location, accessRestriction ]
+    });
+
+    Object.keys(portBindings).forEach(function (env) {
+        queries.push({
+            query: 'INSERT INTO appPortBindings (environmentVariable, hostPort, appId) VALUES (?, ?, ?)',
+            args: [ env, portBindings[env], id ]
+        });
+    });
+
+    database.transaction(queries, function (error, results) {
+        if (error && error.code === 'ER_DUP_ENTRY') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
-        conn.query('INSERT INTO apps (id, appStoreId, manifestJson, version, installationState, location, accessRestriction) VALUES (?, ?, ?, ?, ?, ?, ?)',
-               [ id, appStoreId, manifestJson, manifest.version, exports.ISTATE_PENDING_INSTALL, location, accessRestriction ], function (error) {
-            if (error && error.code === 'ER_DUP_ENTRY') return database.rollback(conn, callback.bind(null, new DatabaseError(DatabaseError.ALREADY_EXISTS)));
-            if (error) return database.rollback(conn, callback.bind(null, new DatabaseError(DatabaseError.INTERNAL_ERROR, error)));
-
-            async.eachSeries(Object.keys(portBindings), function iterator(env, callback) {
-                conn.query('INSERT INTO appPortBindings (environmentVariable, hostPort, appId) VALUES (?, ?, ?)', [ env, portBindings[env], id ], callback);
-            }, function done(error) {
-                if (error && error.code === 'ER_DUP_ENTRY') return database.rollback(conn, callback.bind(null, new DatabaseError(DatabaseError.ALREADY_EXISTS)));
-                if (error) return database.rollback(conn, callback.bind(null, new DatabaseError(DatabaseError.INTERNAL_ERROR, error)));
-
-                database.commit(conn, callback);
-            });
-        });
+        callback(null);
     });
 }
 
@@ -212,17 +213,16 @@ function del(id, callback) {
     assert(typeof id === 'string');
     assert(typeof callback === 'function');
 
-    database.beginTransaction(function (error, conn) {
+    var queries = [
+        { query: 'DELETE FROM appPortBindings WHERE appId = ?', args: [ id ] },
+        { query: 'DELETE FROM apps WHERE id = ?', args: [ id ] }
+    ];
+
+    database.transaction(queries, function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        if (results[1].affectedRows !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
-        conn.query('DELETE FROM appPortBindings WHERE appId = ?', [ id ], function (error) {
-            conn.query('DELETE FROM apps WHERE id = ?', [ id ], function (error, result) {
-                if (error) return database.rollback(conn, callback.bind(null, new DatabaseError(DatabaseError.INTERNAL_ERROR, error)));
-                if (result.affectedRows !== 1) return database.rollback(conn, callback.bind(null, new DatabaseError(DatabaseError.NOT_FOUND)));
-
-                database.commit(conn, callback);
-            });
-        });
+        callback(null);
     });
 }
 
@@ -250,44 +250,38 @@ function updateWithConstraints(id, app, constraints, callback) {
     assert(typeof callback === 'function');
     assert(!('portBindings' in app) || typeof app.portBindings === 'object');
 
+    var queries = [ ];
     var portBindings = app.portBindings || { };
 
-    database.beginTransaction(function (error, conn) {
+    Object.keys(portBindings).forEach(function (env) { // TODO: remove old portBindings ?
+        var values = [ portBindings[env], env, id ];
+        queries.push({ query: 'UPDATE appPortBindings SET hostPort = ? WHERE environmentVariable = ? AND appId = ?', args: values });
+    });
+ 
+    var fields = [ ], values = [ ];
+    for (var p in app) {
+        if (p === 'manifest') {
+            fields.push('manifestJson = ?');
+            values.push(JSON.stringify(app[p]));
+
+            fields.push('version = ?');
+            values.push(app['manifest'].version);
+        } else if (p !== 'portBindings') {
+            fields.push(p + ' = ?');
+            values.push(app[p]);
+        }
+    }
+
+    if (values.length !== 0) {
+        values.push(id);
+        queries.push({ query: 'UPDATE apps SET ' + fields.join(', ') + ' WHERE id = ? ' + constraints, args: values });
+    }
+
+    database.transaction(queries, function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        if (results[results.length - 1].affectedRows !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
-        async.eachSeries(Object.keys(portBindings), function iterator(env, callback) { // TODO: remove old portBindings ?
-            var values = [ portBindings[env], env, id ];
-            conn.query('UPDATE appPortBindings SET hostPort = ? WHERE environmentVariable = ? AND appId = ?', values, callback);
-        }, function seriesDone(error) {
-            if (error) return database.rollback(conn, callback.bind(null, new DatabaseError(DatabaseError.INTERNAL_ERROR, error)));
-
-            var args = [ ], values = [ ];
-            for (var p in app) {
-                if (!app.hasOwnProperty(p)) continue;
-
-                if (p === 'manifest') {
-                    args.push('manifestJson = ?');
-                    values.push(JSON.stringify(app[p]));
-
-                    args.push('version = ?');
-                    values.push(app['manifest'].version);
-                } else if (p !== 'portBindings') {
-                    args.push(p + ' = ?');
-                    values.push(app[p]);
-                }
-            }
-
-            if (values.length === 0) return database.commit(conn, callback);
-
-            values.push(id);
-
-            conn.query('UPDATE apps SET ' + args.join(', ') + ' WHERE id = ? ' + constraints, values, function (error, result) {
-                if (error) return database.rollback(conn, callback.bind(null, new DatabaseError(DatabaseError.INTERNAL_ERROR, error)));
-                if (result.affectedRows !== 1) return database.rollback(conn, callback.bind(null, new DatabaseError(DatabaseError.NOT_FOUND)));
-
-                database.commit(conn, callback);
-            });
-        });
+        return callback(null);
     });
 }
 
