@@ -25,10 +25,18 @@ describe('Apps', function () {
         installationProgress: null,
         runState: null,
         location: 'some-location-0',
-        manifest: { version: '0.1', dockerImage: 'docker/app0', healthCheckPath: '/', httpPort: 80, title: 'app0' },
+        manifest: {
+            version: '0.1', dockerImage: 'docker/app0', healthCheckPath: '/', httpPort: 80, title: 'app0',
+            tcpPorts: {
+                PORT: {
+                    description: 'this is a port that i expose',
+                    containerPort: '1234'
+                }
+            }
+        },
         httpPort: null,
         containerId: null,
-        portBindings: { "PORT": { containerPort: '1234', hostPort: '5678' } },
+        portBindings: { PORT: '5678' },
         healthy: null,
         accessRestriction: ''
     };

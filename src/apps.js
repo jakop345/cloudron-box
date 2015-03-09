@@ -293,15 +293,12 @@ function install(appId, appStoreId, manifest, location, portConfigs, accessRestr
 
     // it is OK if there is no 1-1 mapping between values in manifest.tcpPorts and portConfigs. missing values implies
     // that the user wants the service disabled
-    var portBindings = { };
     var tcpPorts = manifest.tcpPorts || { };
     for (var env in portConfigs) {
         if (!(env in tcpPorts)) return callback(new AppsError(AppsError.BAD_FIELD, 'Invalid portConfigs ' + env));
-
-        portBindings[env] = { hostPort: portConfigs[env], containerPort: tcpPorts[env].containerPort || portConfigs[env] };
     }
 
-    appdb.add(appId, appStoreId, manifest, location.toLowerCase(), portBindings, accessRestriction, function (error) {
+    appdb.add(appId, appStoreId, manifest, location.toLowerCase(), portConfigs, accessRestriction, function (error) {
         if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new AppsError(AppsError.ALREADY_EXISTS));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
@@ -337,13 +334,11 @@ function configure(appId, location, portConfigs, accessRestriction, callback) {
 
         // it is OK if there is no 1-1 mapping between values in manifest.tcpPorts and portConfigs. missing values implies
         // that the user wants the service disabled
-        values.portBindings = { };
         var tcpPorts = app.manifest.tcpPorts || { };
         for (var env in portConfigs) {
             if (!(env in tcpPorts)) return callback(new AppsError(AppsError.BAD_FIELD, 'Invalid portConfigs ' + env));
-
-            values.portBindings[env] = { hostPort: portConfigs[env], containerPort: tcpPorts[env].containerPort || portConfigs[env] };
         }
+        values.portBindings = portConfigs;
 
         debug('Will configure app with id:%s values:%j', appId, values);
 
@@ -372,7 +367,7 @@ function update(appId, manifest, callback) {
     error = checkManifestConstraints(manifest);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Mainfest cannot be installed:' + error.message));
 
-    appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_UPDATE, { manifest: manifest, portBindings: { } }, function (error) {
+    appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_UPDATE, { manifest: manifest }, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE)); // might be a bad guess
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 

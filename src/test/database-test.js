@@ -479,7 +479,7 @@ describe('database', function () {
             manifest: { version: '0.1', dockerImage: 'docker/app0', healthCheckPath: '/', httpPort: 80, title: 'app0' },
             httpPort: null,
             containerId: null,
-            portBindings: { port: { containerPort: '1234', hostPort: '5678' } },
+            portBindings: { port: '5678' },
             healthy: null,
             accessRestriction: ''
         };
@@ -531,7 +531,7 @@ describe('database', function () {
             appdb.getPortBindings(APP_0.id, function (error, bindings) {
                 expect(error).to.be(null);
                 expect(bindings).to.be.an(Object);
-                expect(bindings).to.be.eql({ port: { containerPort: '1234', hostPort: '5678' } });
+                expect(bindings).to.be.eql({ port: '5678' });
                 done();
             });
         });

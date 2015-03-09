@@ -224,9 +224,9 @@ function createContainer(app, callback) {
         if (error) return callback(error);
 
         var env = [ ];
-        for (var e in manifest.tcpPorts) {
-            if (!(e in portBindings)) continue;
-            env.push(e + '=' + portBindings[e].hostPort);
+        for (var e in portBindings) {
+            var hostPort = portBindings[e];
+            env.push(e + '=' + hostPort);
         }
 
         env.push('CLOUDRON=1');
@@ -364,10 +364,11 @@ function startContainer(app, callback) {
         var portBindings = { };
         portBindings[manifest.httpPort + '/tcp'] = [ { HostPort: app.httpPort + '' } ];
 
-        for (var e in manifest.tcpPorts) {
-            if (!(e in portConfigs)) continue;
-            portBindings[portConfigs[e].containerPort + '/tcp'] = [ { HostPort: portConfigs[e].hostPort } ];
-            vbox.forwardFromHostToVirtualBox(app.id + '-tcp' + portConfigs[e].containerPort, portConfigs[e].hostPort);
+        for (var env in portConfigs) {
+            var hostPort = portConfigs[env];
+            var containerPort = manifest.tcpPorts[env].containerPort || hostPort;
+            portBindings[containerPort + '/tcp'] = [ { HostPort: hostPort } ];
+            vbox.forwardFromHostToVirtualBox(app.id + '-tcp' + containerPort, hostPort);
         }
 
         var startOptions = {

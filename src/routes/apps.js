@@ -192,6 +192,7 @@ function stopApp(req, res, next) {
     });
 }
 
+// FIXME: handle case where portBindings changes
 function updateApp(req, res, next) {
     assert(typeof req.params.id === 'string');
     assert(typeof req.body === 'object');
