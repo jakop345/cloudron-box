@@ -20,13 +20,13 @@
                             <div class="input-group-addon">{{ config.isCustomDomain ? '.' : '-' }}{{ config.fqdn }}</div>
                         </div>
                     </div>
-                    <div class="form-group" ng-class="{ 'has-error': (!install_form.password.$dirty && error.password) || (install_form.password.$dirty && install_form.password.$invalid) }">
+                    <div class="form-group" ng-class="{ 'has-error': (!install_form.password.$dirty && appinstall.error.password) || (install_form.password.$dirty && install_form.password.$invalid) }">
                         <label class="control-label" for="inputPassword">Password</label>
                         <input type="password" class="form-control" ng-model="appinstall.password" id="inputPassword" name="password" ng-maxlength="512" ng-minlength="5" required>
                     </div>
                     <div ng-repeat="(env, portInfo) in appinstall.portBindings">
                         <ng-form name="portInfo_form">
-                            <div class="form-group" ng-class="{ 'has-error': portInfo_form.itemName{{$index}}.$dirty && portInfo_form.itemName{{$index}}.$invalid }">
+                            <div class="form-group" ng-class="{ 'has-error': (!install_form.itemName{{$index}}.$dirty && appinstall.error.port) || (portInfo_form.itemName{{$index}}.$dirty && portInfo_form.itemName{{$index}}.$invalid) }">
                                 <label class="control-label" for="inputPortInfo{{env}}">{{ portInfo.description }} ({{ hostPortMin }} - {{ hostPortMax }})</label>
                                 <input type="number" class="form-control" ng-model="appinstall.portBindings[env].hostPort" id="inputPortInfo{{env}}" later-name="itemName{{$index}}" min="{{hostPortMin}}" max="{{hostPortMax}}" required>
                             </div>

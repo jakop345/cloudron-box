@@ -51,6 +51,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         $scope.appinstall.busy = true;
         $scope.appinstall.error.name = null;
         $scope.appinstall.error.password = null;
+        $scope.appinstall.error.port = null;
 
         var portBindings = { };
         for (var env in $scope.appinstall.portBindings) {
@@ -59,7 +60,9 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
 
         Client.installApp($scope.appinstall.app.id, $scope.appinstall.app.manifest, $scope.appinstall.password, $scope.appinstall.app.title, { location: $scope.appinstall.location, portBindings: portBindings, accessRestriction: $scope.appinstall.accessRestriction }, function (error) {
             if (error) {
-                if (error.statusCode === 409) {
+                if (error.statusCode === 409 && error.message.indexOf('is reserved') !== -1) {
+                    $scope.appinstall.error.port = 'This port is already in use.';
+                } else if (error.statusCode === 409) {
                     $scope.appinstall.error.name = 'Application already exists.';
                 } else if (error.statusCode === 403) {
                     $scope.appinstall.error.password = 'Wrong password provided.';
