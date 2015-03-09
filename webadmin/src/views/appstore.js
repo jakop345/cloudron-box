@@ -42,9 +42,6 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
             $scope.appinstall.location = app.location;
             $scope.appinstall.portBindings = manifest.tcpPorts;
             $scope.appinstall.accessRestriction = app.accessRestriction || '';
-            for (var port in $scope.appinstall.portBindings) {
-                $scope.appinstall.portBindings[port].hostPort = parseInt(port);
-            }
 
             $('#appInstallModal').modal('show');
         });
@@ -56,8 +53,8 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         $scope.appinstall.error.password = null;
 
         var portBindings = { };
-        for (var containerPort in $scope.appinstall.portBindings) {
-            portBindings[containerPort] = $scope.appinstall.portBindings[containerPort].hostPort;
+        for (var env in $scope.appinstall.portBindings) {
+            portBindings[env] = $scope.appinstall.portBindings[env].hostPort;
         }
 
         Client.installApp($scope.appinstall.app.id, $scope.appinstall.app.manifest, $scope.appinstall.password, $scope.appinstall.app.title, { location: $scope.appinstall.location, portBindings: portBindings, accessRestriction: $scope.appinstall.accessRestriction }, function (error) {

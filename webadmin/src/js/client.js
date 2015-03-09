@@ -166,8 +166,8 @@ angular.module('Application').service('Client', ['$http', 'md5', function ($http
         }).error(defaultErrorHandler(callback));
     };
 
-    Client.prototype.updateApp = function (id, manifest, password, callback) {
-        $http.post('/api/v1/apps/' + id + '/update', { manifest: manifest, password: password }).success(function (data, status) {
+    Client.prototype.updateApp = function (id, manifest, portBindings, password, callback) {
+        $http.post('/api/v1/apps/' + id + '/update', { manifest: manifest, password: password, portBindings: portBindings }).success(function (data, status) {
             if (status !== 202) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));

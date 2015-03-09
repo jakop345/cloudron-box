@@ -53,10 +53,6 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appconfigure.portBindings = app.manifest.tcpPorts;
         $scope.appconfigure.accessRestriction = app.accessRestriction;
 
-        for (var containerPort in $scope.appconfigure.portBindings) {
-            $scope.appconfigure.portBindings[containerPort].hostPort = parseInt($scope.appconfigure.app.portBindings[containerPort]);
-        }
-
         $('#appConfigureModal').modal('show');
     };
 
@@ -66,8 +62,8 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appconfigure.error.password = null;
 
         var portBindings = { };
-        for (var containerPort in $scope.appconfigure.portBindings) {
-            portBindings[containerPort] = $scope.appconfigure.portBindings[containerPort].hostPort;
+        for (var env in $scope.appconfigure.portBindings) {
+            portBindings[env] = $scope.appconfigure.portBindings[env].hostPort;
         }
 
         Client.configureApp($scope.appconfigure.app.id, $scope.appconfigure.password, { location: $scope.appconfigure.location, portBindings: portBindings, accessRestriction: $scope.appconfigure.accessRestriction }, function (error) {
@@ -135,7 +131,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
     $scope.doUpdate = function (form) {
         $scope.appupdate.error.password = null;
 
-        Client.updateApp($scope.appupdate.app.id, $scope.appupdate.app.manifest, $scope.appupdate.password, function (error) {
+        Client.updateApp($scope.appupdate.app.id, $scope.appupdate.app.manifest, $scope.appupdate.app.portBindings, $scope.appupdate.password, function (error) {
             if (error) {
                 if (error.statusCode === 403) {
                     $scope.appupdate.password = '';
