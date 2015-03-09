@@ -147,8 +147,7 @@ function activate(username, password, email, callback) {
 function getBackupUrl(callback) {
     assert(typeof callback === 'function');
 
-    if (!config.apiServerOrigin()) return callback(new Error('No api server url set'));
-    if (!config.token()) return callback(new Error('No appstore server token set'));
+    if (config.LOCAL) return callback(null);    // skip this when running locally
 
     var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/backupurl';
 
@@ -229,7 +228,8 @@ function sendHeartBeat() {
         return;
     }
 
-    if (!config.token()) {
+    // skip this when running locally
+    if (config.LOCAL) {
         debug('No appstore server token set. Not sending heartbeat.');
         return;
     }
@@ -292,9 +292,7 @@ function sendMailDnsRecordsRequest(callback) {
 }
 
 function addMailDnsRecords() {
-    // TODO assert replaced with a non fatal return, for local development
-    if (!config.token()) return;
-
+    if (config.LOCAL) return;   // skip this when running locally
     if (config.get('mailDnsRecordIds').length !== 0) return; // already registered
 
     sendMailDnsRecordsRequest(function (error, ids) {
