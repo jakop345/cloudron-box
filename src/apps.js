@@ -42,7 +42,7 @@ exports = module.exports = {
 
     // exported for testing
     _validateHostname: validateHostname,
-    _validatePortConfigs: validatePortConfigs
+    _validatePortBindings: validatePortBindings
 };
 
 var gTasks = { };
@@ -145,7 +145,7 @@ function validateHostname(location, fqdn) {
 }
 
 // validate the port bindings
-function validatePortConfigs(portConfigs, tcpPorts) {
+function validatePortBindings(portBindings, tcpPorts) {
     // keep the public ports in sync with firewall rules in scripts/initializeBaseUbuntuImage.sh
     var RESERVED_PORTS = [
         22, /* ssh */
@@ -161,24 +161,24 @@ function validatePortConfigs(portConfigs, tcpPorts) {
         8000 /* graphite (lo) */
     ];
 
-    if (!portConfigs) return null;
+    if (!portBindings) return null;
 
-    for (var env in portConfigs) {
+    for (var env in portBindings) {
         if (!/^[a-zA-Z0-9_]+$/.test(env)) return new Error(env + ' is not valid environment variable');
  
-        var hostPortInt = parseInt(portConfigs[env], 10);
+        var hostPortInt = parseInt(portBindings[env], 10);
         if (isNaN(hostPortInt) || hostPortInt <= 1024 || hostPortInt > 65535) {
-            return new Error(portConfigs[env].hostPort + ' is not a valid host port');
+            return new Error(portBindings[env].hostPort + ' is not a valid host port');
         }
 
         if (RESERVED_PORTS.indexOf(hostPortInt) !== -1) return new Error(hostPortInt + ' is reserved');
     }
 
-    // it is OK if there is no 1-1 mapping between values in manifest.tcpPorts and portConfigs. missing values implies
+    // it is OK if there is no 1-1 mapping between values in manifest.tcpPorts and portBindings. missing values implies
     // that the user wants the service disabled
     tcpPorts = tcpPorts || { };
-    for (var env in portConfigs) {
-        if (!(env in tcpPorts)) return new Error('Invalid portConfigs ' + env);
+    for (var env in portBindings) {
+        if (!(env in tcpPorts)) return new Error('Invalid portBindings ' + env);
     }
 
     return null;
@@ -200,11 +200,6 @@ function get(appId, callback) {
         app.iconUrl = getIconUrlSync(app);
         app.fqdn = config.appFqdn(app.location);
 
-        app.portConfigs = { };
-        for (var env in app.portBindings) {
-            app.portConfigs[env] = app.portBindings[env].hostPort;
-        }
-
         callback(null, app);
     });
 }
@@ -219,11 +214,6 @@ function getBySubdomain(subdomain, callback) {
 
         app.iconUrl = getIconUrlSync(app);
         app.fqdn = config.appFqdn(app.location);
-
-        app.portConfigs = { };
-        for (var env in app.portBindings) {
-            app.portConfigs[env] = app.portBindings[env].hostPort;
-        }
 
         callback(null, app);
     });
@@ -240,12 +230,6 @@ function getAll(callback) {
         apps.forEach(function (app) {
             app.iconUrl = getIconUrlSync(app);
             app.fqdn = config.appFqdn(app.location);
-
-            app.portConfigs = { };
-            for (var env in app.portBindings) {
-                app.portConfigs[env] = app.portBindings[env].hostPort;
-            }
-
             app.updateVersion = null;
 
             updates.some(function (update) {
@@ -274,12 +258,12 @@ function validateAccessRestriction(accessRestriction) {
     }
 }
 
-function install(appId, appStoreId, manifest, location, portConfigs, accessRestriction, callback) {
+function install(appId, appStoreId, manifest, location, portBindings, accessRestriction, callback) {
     assert(typeof appId === 'string');
     assert(typeof appStoreId === 'string');
     assert(manifest && typeof manifest === 'object');
     assert(typeof location === 'string');
-    assert(!portConfigs || typeof portConfigs === 'object');
+    assert(!portBindings || typeof portBindings === 'object');
     assert(typeof accessRestriction === 'string');
     assert(typeof callback === 'function');
 
@@ -292,7 +276,7 @@ function install(appId, appStoreId, manifest, location, portConfigs, accessRestr
     var error = validateHostname(location, config.fqdn());
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
-    error = validatePortConfigs(portConfigs, manifest.tcpPorts);
+    error = validatePortBindings(portBindings, manifest.tcpPorts);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
     error = validateAccessRestriction(accessRestriction);
@@ -300,7 +284,7 @@ function install(appId, appStoreId, manifest, location, portConfigs, accessRestr
 
     debug('Will install app with id : ' + appId);
 
-    appdb.add(appId, appStoreId, manifest, location.toLowerCase(), portConfigs, accessRestriction, function (error) {
+    appdb.add(appId, appStoreId, manifest, location.toLowerCase(), portBindings, accessRestriction, function (error) {
         if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new AppsError(AppsError.ALREADY_EXISTS));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
@@ -311,9 +295,9 @@ function install(appId, appStoreId, manifest, location, portConfigs, accessRestr
     });
 }
 
-function configure(appId, location, portConfigs, accessRestriction, callback) {
+function configure(appId, location, portBindings, accessRestriction, callback) {
     assert(typeof appId === 'string');
-    assert(!portConfigs || typeof portConfigs === 'object');
+    assert(!portBindings || typeof portBindings === 'object');
     assert(typeof accessRestriction === 'string');
     assert(typeof callback === 'function');
 
@@ -331,10 +315,10 @@ function configure(appId, location, portConfigs, accessRestriction, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        error = validatePortConfigs(portConfigs, app.manifest.tcpPorts);
+        error = validatePortBindings(portBindings, app.manifest.tcpPorts);
         if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
-        values.portBindings = portConfigs;
+        values.portBindings = portBindings;
 
         debug('Will configure app with id:%s values:%j', appId, values);
 
@@ -350,10 +334,10 @@ function configure(appId, location, portConfigs, accessRestriction, callback) {
     });
 }
 
-function update(appId, manifest, portConfigs, callback) {
+function update(appId, manifest, portBindings, callback) {
     assert(typeof appId === 'string');
     assert(manifest && typeof manifest === 'object');
-    assert(!portConfigs || typeof portConfigs === 'object');
+    assert(!portBindings || typeof portBindings === 'object');
     assert(typeof callback === 'function');
 
     debug('Will update app with id:%s', appId);
@@ -364,10 +348,10 @@ function update(appId, manifest, portConfigs, callback) {
     error = checkManifestConstraints(manifest);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Mainfest cannot be installed:' + error.message));
 
-    error = validatePortConfigs(portConfigs, manifest.tcpPorts);
+    error = validatePortBindings(portBindings, manifest.tcpPorts);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
-    appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_UPDATE, { manifest: manifest, portConfigs: portConfigs }, function (error) {
+    appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_UPDATE, { manifest: manifest, portBindings: portBindings }, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE)); // might be a bad guess
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 

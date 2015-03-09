@@ -86,8 +86,8 @@ function getAppIcon(req, res, next) {
  * @bodyparam {manifest} manifest The app manifest
  * @bodyparam {string} password The user's password
  * @bodyparam {string} location The subdomain where the app is to be installed
- * @bodyparam {object} portConfigs map from environment variable name to (public) host port. can be null.
-                       If a value in manifest.tcpPorts is missing in portConfigs, the port/service is disabled
+ * @bodyparam {object} portBindings map from environment variable name to (public) host port. can be null.
+                       If a value in manifest.tcpPorts is missing in portBindings, the port/service is disabled
  */
 function installApp(req, res, next) {
     assert(typeof req.body === 'object');
@@ -99,15 +99,15 @@ function installApp(req, res, next) {
     if (!data.manifest || typeof data.manifest !== 'object') return next(new HttpError(400, 'manifest is required'));
     if (typeof data.appStoreId !== 'string') return next(new HttpError(400, 'appStoreId is required'));
     if (typeof data.location !== 'string') return next(new HttpError(400, 'location is required'));
-    if (('portConfigs' in data) && typeof data.portConfigs !== 'object') return next(new HttpError(400, 'portConfigs must be an object'));
+    if (('portBindings' in data) && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
     if (typeof data.accessRestriction !== 'string') return next(new HttpError(400, 'accessRestriction is required'));
 
     // allow tests to provide an appId for testing
     var appId = (process.env.NODE_ENV === 'test' && typeof data.appId === 'string') ? data.appId : uuid.v4();
 
-    debug('Installing app id:%s storeid:%s loc:%s port:%j restrict:%s manifest:%j', appId, data.appStoreId, data.location, data.portConfigs, data.accessRestriction, data.manifest);
+    debug('Installing app id:%s storeid:%s loc:%s port:%j restrict:%s manifest:%j', appId, data.appStoreId, data.location, data.portBindings, data.accessRestriction, data.manifest);
 
-    apps.install(appId, data.appStoreId, data.manifest, data.location, data.portConfigs, data.accessRestriction, function (error) {
+    apps.install(appId, data.appStoreId, data.manifest, data.location, data.portBindings, data.accessRestriction, function (error) {
         if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, 'App already exists'));
         if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error) return next(new HttpError(500, error));
@@ -121,8 +121,8 @@ function installApp(req, res, next) {
  * @bodyparam {string} appId The id of the app to be installed
  * @bodyparam {string} password The user's password
  * @bodyparam {string} location The subdomain where the app is to be installed
- * @bodyparam {object} portConfigs map from env to (public) host port. can be null.
-                       If a value in manifest.tcpPorts is missing in portConfigs, the port/service is disabled
+ * @bodyparam {object} portBindings map from env to (public) host port. can be null.
+                       If a value in manifest.tcpPorts is missing in portBindings, the port/service is disabled
  */
 function configureApp(req, res, next) {
     assert(typeof req.body === 'object');
@@ -132,12 +132,12 @@ function configureApp(req, res, next) {
     if (!data) return next(new HttpError(400, 'Cannot parse data field'));
     if (typeof data.password !== 'string') return next(new HttpError(401, 'password is missing'));
     if (typeof data.appId !== 'string') return next(new HttpError(400, 'appId is required'));
-    if (('portConfigs' in data) && typeof data.portConfigs !== 'object') return next(new HttpError(400, 'portConfigs must be an object'));
+    if (('portBindings' in data) && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
     if (typeof data.accessRestriction !== 'string') return next(new HttpError(400, 'accessRestriction is required'));
 
-    debug('Configuring app id:%s location:%s bindings:%j', data.appId, data.location, data.portConfigs);
+    debug('Configuring app id:%s location:%s bindings:%j', data.appId, data.location, data.portBindings);
 
-    apps.configure(data.appId, data.location, data.portConfigs, data.accessRestriction, function (error) {
+    apps.configure(data.appId, data.location, data.portBindings, data.accessRestriction, function (error) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
         if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
         if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));
@@ -200,11 +200,11 @@ function updateApp(req, res, next) {
 
     if (!data) return next(new HttpError(400, 'Cannot parse data field'));
     if (!data.manifest || typeof data.manifest !== 'object') return next(new HttpError(400, 'manifest is required'));
-    if (('portConfigs' in data) && typeof data.portConfigs !== 'object') return next(new HttpError(400, 'portConfigs must be an object'));
+    if (('portBindings' in data) && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
 
     debug('Update app id:%s to manifest:%j', req.params.id, data.manifest);
 
-    apps.update(req.params.id, data.manifest, data.portConfigs, function (error) {
+    apps.update(req.params.id, data.manifest, data.portBindings, function (error) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
         if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
         if (error) return next(new HttpError(500, error));

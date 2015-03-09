@@ -87,23 +87,23 @@ describe('Apps', function () {
         });
     });
 
-    describe('validatePortConfigs', function () {
+    describe('validatePortBindings', function () {
         it('does not allow invalid host port', function () {
-            expect(apps._validatePortConfigs({ port: '-1' })).to.be.an(Error);
-            expect(apps._validatePortConfigs({ port: '0' })).to.be.an(Error);
-            expect(apps._validatePortConfigs({ port: 'text' })).to.be.an(Error);
-            expect(apps._validatePortConfigs({ port: '65536' })).to.be.an(Error);
-            expect(apps._validatePortConfigs({ port: '1024' })).to.be.an(Error);
+            expect(apps._validatePortBindings({ port: '-1' })).to.be.an(Error);
+            expect(apps._validatePortBindings({ port: '0' })).to.be.an(Error);
+            expect(apps._validatePortBindings({ port: 'text' })).to.be.an(Error);
+            expect(apps._validatePortBindings({ port: '65536' })).to.be.an(Error);
+            expect(apps._validatePortBindings({ port: '1024' })).to.be.an(Error);
         });
 
         it('does not allow ports not as part of manifest', function () {
-            expect(apps._validatePortConfigs({ port: '1567' })).to.be.an(Error);
-            expect(apps._validatePortConfigs({ port: '1567' }, { port3: null })).to.be.an(Error);
+            expect(apps._validatePortBindings({ port: '1567' })).to.be.an(Error);
+            expect(apps._validatePortBindings({ port: '1567' }, { port3: null })).to.be.an(Error);
         });
 
         it('allows valid bindings', function () {
-            expect(apps._validatePortConfigs({ port: '1025' }, { port: null })).to.be(null);
-            expect(apps._validatePortConfigs({
+            expect(apps._validatePortBindings({ port: '1025' }, { port: null })).to.be(null);
+            expect(apps._validatePortBindings({
                 port1: '4033',
                 port2: '3242',
                 port3: '1234'

@@ -355,25 +355,25 @@ function removeCollectdProfile(app, callback) {
 }
 
 function startContainer(app, callback) {
-    appdb.getPortBindings(app.id, function (error, portConfigs) {
+    appdb.getPortBindings(app.id, function (error, portBindings) {
         if (error) return callback(error);
 
         var manifest = app.manifest;
         var appDataDir = path.join(paths.APPDATA_DIR, app.id);
 
-        var portBindings = { };
-        portBindings[manifest.httpPort + '/tcp'] = [ { HostPort: app.httpPort + '' } ];
+        var dockerPortBindings = { };
+        dockerPortBindings[manifest.httpPort + '/tcp'] = [ { HostPort: app.httpPort + '' } ];
 
-        for (var env in portConfigs) {
-            var hostPort = portConfigs[env];
+        for (var env in portBindings) {
+            var hostPort = portBindings[env];
             var containerPort = manifest.tcpPorts[env].containerPort || hostPort;
-            portBindings[containerPort + '/tcp'] = [ { HostPort: hostPort } ];
+            dockerPortBindings[containerPort + '/tcp'] = [ { HostPort: hostPort } ];
             vbox.forwardFromHostToVirtualBox(app.id + '-tcp' + containerPort, hostPort);
         }
 
         var startOptions = {
             Binds: [ appDataDir + ':/app/data:rw' ],
-            PortBindings: portBindings,
+            PortBindings: dockerPortBindings,
             PublishAllPorts: false,
             Links: addons.getLinksSync(app),
             RestartPolicy: {
