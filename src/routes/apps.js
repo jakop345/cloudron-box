@@ -87,6 +87,7 @@ function getAppIcon(req, res, next) {
  * @bodyparam {string} password The user's password
  * @bodyparam {string} location The subdomain where the app is to be installed
  * @bodyparam {object} portConfigs map from environment variable name to (public) host port. can be null.
+                       If a value in manifest.tcpPorts is missing in portConfigs, the port/service is disabled
  */
 function installApp(req, res, next) {
     assert(typeof req.body === 'object');
@@ -121,6 +122,7 @@ function installApp(req, res, next) {
  * @bodyparam {string} password The user's password
  * @bodyparam {string} location The subdomain where the app is to be installed
  * @bodyparam {object} portConfigs map from env to (public) host port. can be null.
+                       If a value in manifest.tcpPorts is missing in portConfigs, the port/service is disabled
  */
 function configureApp(req, res, next) {
     assert(typeof req.body === 'object');

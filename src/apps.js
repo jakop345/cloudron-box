@@ -291,7 +291,8 @@ function install(appId, appStoreId, manifest, location, portConfigs, accessRestr
 
     debug('Will install app with id : ' + appId);
 
-    // determine the container port
+    // it is OK if there is no 1-1 mapping between values in manifest.tcpPorts and portConfigs. missing values implies
+    // that the user wants the service disabled
     var portBindings = { };
     var tcpPorts = manifest.tcpPorts || { };
     for (var env in portConfigs) {
@@ -334,7 +335,8 @@ function configure(appId, location, portConfigs, accessRestriction, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        // determine the container port
+        // it is OK if there is no 1-1 mapping between values in manifest.tcpPorts and portConfigs. missing values implies
+        // that the user wants the service disabled
         values.portBindings = { };
         var tcpPorts = app.manifest.tcpPorts || { };
         for (var env in portConfigs) {
