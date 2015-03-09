@@ -147,6 +147,7 @@ function rollback(connection, callback) {
     });
 }
 
+// FIXME: if commit fails, is it supposed to return an error ?
 function commit(connection, callback) {
     assert(typeof callback === 'function');
 
