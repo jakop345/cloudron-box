@@ -109,6 +109,7 @@ function installApp(req, res, next) {
 
     apps.install(appId, data.appStoreId, data.manifest, data.location, data.portBindings, data.accessRestriction, function (error) {
         if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, 'App already exists'));
+        if (error && error.reason === AppsError.PORT_RESERVED) return next(new HttpError(409, 'Port ' + error.message + ' is reserved.'));
         if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error) return next(new HttpError(500, error));
 

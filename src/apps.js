@@ -126,6 +126,7 @@ AppsError.ALREADY_EXISTS = 'Already Exists';
 AppsError.NOT_FOUND = 'Not Found';
 AppsError.BAD_FIELD = 'Bad Field';
 AppsError.BAD_STATE = 'Bad State';
+AppsError.PORT_RESERVED = 'Port Reserved';
 
 // Hostname validation comes from RFC 1123 (section 2.1)
 // Domain name validation comes from RFC 2181 (Name syntax)
@@ -164,21 +165,21 @@ function validatePortBindings(portBindings, tcpPorts) {
     if (!portBindings) return null;
 
     for (var env in portBindings) {
-        if (!/^[a-zA-Z0-9_]+$/.test(env)) return new Error(env + ' is not valid environment variable');
- 
+        if (!/^[a-zA-Z0-9_]+$/.test(env)) return new AppsError(AppsError.BAD_FIELD, env + ' is not valid environment variable');
+
         var hostPortInt = parseInt(portBindings[env], 10);
         if (isNaN(hostPortInt) || hostPortInt <= 1024 || hostPortInt > 65535) {
             return new Error(portBindings[env].hostPort + ' is not a valid host port');
         }
 
-        if (RESERVED_PORTS.indexOf(hostPortInt) !== -1) return new Error(hostPortInt + ' is reserved');
+        if (RESERVED_PORTS.indexOf(hostPortInt) !== -1) return new AppsError(AppsError.PORT_RESERVED, ' ' + hostPortInt);
     }
 
     // it is OK if there is no 1-1 mapping between values in manifest.tcpPorts and portBindings. missing values implies
     // that the user wants the service disabled
     tcpPorts = tcpPorts || { };
     for (var env in portBindings) {
-        if (!(env in tcpPorts)) return new Error('Invalid portBindings ' + env);
+        if (!(env in tcpPorts)) return new AppsError(AppsError.BAD_FIELD, 'Invalid portBindings ' + env);
     }
 
     return null;
@@ -273,11 +274,11 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
     error = checkManifestConstraints(manifest);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Mainfest cannot be installed: ' + error.message));
 
-    var error = validateHostname(location, config.fqdn());
+    error = validateHostname(location, config.fqdn());
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
     error = validatePortBindings(portBindings, manifest.tcpPorts);
-    if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
+    if (error) return callback(error);
 
     error = validateAccessRestriction(accessRestriction);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
