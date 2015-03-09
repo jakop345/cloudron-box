@@ -240,21 +240,15 @@ function clear(callback) {
 }
 
 function update(id, app, callback) {
-    updateWithConstraints(id, app, callback);
+    updateWithConstraints(id, app, '', callback);
 }
 
 function updateWithConstraints(id, app, constraints, callback) {
     assert(typeof id === 'string');
     assert(typeof app === 'object');
+    assert(typeof constraints === 'string');
+    assert(typeof callback === 'function');
     assert(!('portBindings' in app) || typeof app.portBindings === 'object');
-
-    if (typeof constraints === 'function') {
-        callback = constraints;
-        constraints = '';
-    } else {
-        assert(typeof constraints === 'string');
-        assert(typeof callback === 'function');
-    }
 
     var portBindings = app.portBindings || { };
 
