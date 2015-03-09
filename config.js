@@ -85,7 +85,7 @@ function initConfig() {
         };
     } else if (exports.LOCAL) {
         data.port = 3000;
-        data.apiServerOrigin = 'http://localhost:5050';
+        data.apiServerOrigin = 'https://cloudron-dev.herokuapp.com';
         data.database = {
             hostname: 'localhost',
             username: 'root',
@@ -95,6 +95,7 @@ function initConfig() {
         };
         data.version = '1.33.7';
         data.webServerOrigin = 'http://dev.cloudron.io';
+        data.token = '';
     } else {
         assert(false, 'Unknown environment. This should not happen!');
     }
