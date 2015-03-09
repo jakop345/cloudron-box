@@ -148,6 +148,8 @@ function validateHostname(location, fqdn) {
 // validate the port bindings
 function validatePortBindings(portBindings, tcpPorts) {
     // keep the public ports in sync with firewall rules in scripts/initializeBaseUbuntuImage.sh
+    // these ports are reserved even if we listen only on 127.0.0.1 because we setup HostIp to be 127.0.0.1
+    // for custom tcp ports
     var RESERVED_PORTS = [
         22, /* ssh */
         25, /* smtp */

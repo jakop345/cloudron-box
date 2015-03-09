@@ -362,12 +362,12 @@ function startContainer(app, callback) {
         var appDataDir = path.join(paths.APPDATA_DIR, app.id);
 
         var dockerPortBindings = { };
-        dockerPortBindings[manifest.httpPort + '/tcp'] = [ { HostPort: app.httpPort + '' } ];
+        dockerPortBindings[manifest.httpPort + '/tcp'] = [ { HostIp: '127.0.0.1', HostPort: app.httpPort + '' } ];
 
         for (var env in portBindings) {
             var hostPort = portBindings[env];
             var containerPort = manifest.tcpPorts[env].containerPort || hostPort;
-            dockerPortBindings[containerPort + '/tcp'] = [ { HostPort: hostPort } ];
+            dockerPortBindings[containerPort + '/tcp'] = [ { HostIp: '0.0.0.0', HostPort: hostPort } ];
             vbox.forwardFromHostToVirtualBox(app.id + '-tcp' + containerPort, hostPort);
         }
 
