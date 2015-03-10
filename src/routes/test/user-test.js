@@ -321,8 +321,8 @@ describe('User API', function () {
     });
 
     it('second user userInfo', function (done) {
-        request.get(SERVER_URL + '/api/v1/users/' + USERNAME_1)
-               .query({ access_token: token_2 })
+        request.get(SERVER_URL + '/api/v1/users/' + USERNAME_2)
+               .query({ access_token: token_1 })
                .end(function (error, result) {
             expect(error).to.be(null);
             expect(result.statusCode).to.equal(200);

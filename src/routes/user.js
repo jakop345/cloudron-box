@@ -154,14 +154,19 @@ function listUser(req, res, next) {
  * @apiSuccess {String} email User's email address
  */
 function info(req, res, next) {
-    assert(typeof req.user === 'object');
+    assert(typeof req.params.userId === 'string');
 
-    next(new HttpSuccess(200, {
-        id: req.user.id,
-        username: req.user.username,
-        email: req.user.email,
-        admin: req.user.admin
-    }));
+    user.get(req.params.userId, function (error, result) {
+        if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'No such user'));
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(200, {
+            id: result.id,
+            username: result.username,
+            email: result.email,
+            admin: result.admin
+        }));
+    });
 }
 
 /**
