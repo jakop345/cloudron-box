@@ -39,22 +39,26 @@ app.filter('installationActive', function() {
 });
 
 app.filter('installationStateLabel', function() {
-    return function(input) {
-        if (input === 'error') return 'Error';
-        if (input === 'subdomain_error') return 'Error';
-        if (input === 'installed') return 'Running';
-        if (input === 'downloading_image') return 'Downloading';
-        if (input === 'pending_install') return 'Installing';
-        if (input === 'pending_restore') return 'Starting';
-        if (input === 'pending_configure') return 'Configuring';
-        if (input === 'pending_uninstall') return 'Uninstalling';
-        if (input === 'creating_container') return 'Container';
-        if (input === 'downloading_manifest') return 'Manifest';
-        if (input === 'creating_volume') return 'Volume';
-        if (input === 'registering_subdomain') return 'Subdomain';
-        if (input === 'allocated_oauth_credentials') return 'OAuth';
+    // keep in sync with appdb.js
+    var ISTATE_PENDING_INSTALL = 'pending_install';
+    var ISTATE_PENDING_CONFIGURE = 'pending_configure';
+    var ISTATE_PENDING_UNINSTALL = 'pending_uninstall';
+    var ISTATE_PENDING_RESTORE = 'pending_restore';
+    var ISTATE_PENDING_UPDATE = 'pending_update';
+    var ISTATE_ERROR = 'error';
+    var ISTATE_INSTALLED = 'installed';
 
-        return input;
+    return function(input) {
+        switch (input) {
+        case ISTATE_PENDING_INSTALL: return 'Installing';
+        case ISTATE_PENDING_CONFIGURE: return 'Configuring';
+        case ISTATE_PENDING_UNINSTALL: return 'Uninstalling';
+        case ISTATE_PENDING_RESTORE: return 'Starting';
+        case ISTATE_PENDING_UPDATE: return 'Updating';
+        case ISTATE_ERROR: return 'Error';
+        case ISTATE_INSTALLED: return 'Running';
+        default: return input;
+        }
     };
 });
 

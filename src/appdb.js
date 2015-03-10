@@ -32,7 +32,7 @@ exports = module.exports = {
     setRunCommand: setRunCommand,
     getAppVersions: getAppVersions,
 
-    // status codes
+    // status codes (keep in sync in UI)
     ISTATE_PENDING_INSTALL: 'pending_install',
     ISTATE_PENDING_CONFIGURE: 'pending_configure',
     ISTATE_PENDING_UNINSTALL: 'pending_uninstall',
