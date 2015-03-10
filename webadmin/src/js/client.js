@@ -371,13 +371,12 @@ angular.module('Application').service('Client', ['$http', 'md5', function ($http
         }).error(defaultErrorHandler(callback));
     };
 
-    Client.prototype.removeUser = function (username, password, callback) {
+    Client.prototype.removeUser = function (userId, password, callback) {
         var data = {
-            username: username,
             password: password
         };
 
-        $http({ method: 'DELETE', url: '/api/v1/users/' + username, data: data, headers: { 'Content-Type': 'application/json' }}).success(function(data, status) {
+        $http({ method: 'DELETE', url: '/api/v1/users/' + userId, data: data, headers: { 'Content-Type': 'application/json' }}).success(function(data, status) {
             if (status !== 204) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));

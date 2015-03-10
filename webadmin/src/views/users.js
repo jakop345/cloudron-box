@@ -86,7 +86,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
             return;
         }
 
-        Client.removeUser($scope.userremove.username, $scope.userremove.password, function (error) {
+        Client.removeUser($scope.userremove.userInfo.id, $scope.userremove.password, function (error) {
             if (error && error.statusCode === 403) {
                 $scope.userremove.error.password = 'Incorrect password';
                 $scope.userremove.password = '';
