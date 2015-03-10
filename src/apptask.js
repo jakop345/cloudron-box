@@ -748,6 +748,8 @@ function configure(app, callback) {
 function update(app, callback) {
     var oldManifest = app.manifest; // TODO: this won't be correct all the time should we crash after download manifest
 
+    debug('Updating %s to %s', app.id, safe.query(app, 'manifest.version'));
+
     async.series([
         updateApp.bind(null, app, { installationProgress: 'Stopping app' }),
         stopApp.bind(null, app),
