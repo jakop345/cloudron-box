@@ -188,7 +188,8 @@ function validatePortBindings(portBindings, tcpPorts) {
 }
 
 function getIconUrlSync(app) {
-    return '/api/v1/apps/' + app.id + '/icon';
+    var iconPath = paths.APPICONS_DIR + '/' + app.id + '.png';
+    return fs.existsSync(iconPath) ? '/api/v1/apps/' + app.id + '/icon' : null;
 }
 
 function get(appId, callback) {
