@@ -30,19 +30,24 @@ mysqldump -u root -ppassword box > "${DATA_DIR}/box.mysqldump"
 echo "Snapshoting backup as backup-${now}"
 btrfs subvolume snapshot -r "${DATA_DIR}" "${HOME}/backup-${now}"
 
-for i in `seq 1 5`; do
-    echo "Uploading backup to ${backup_url} (try ${i})"
+for try in `seq 1 5`; do
+    echo "Uploading backup to ${backup_url} (try ${try})"
+    error_log=$(mktemp)
     if tar -cvzf - -C "${HOME}/backup-${now}" . \
            | openssl aes-256-cbc -e -pass "pass:${backup_key}" \
-           | curl --fail -H "Content-Type:" -X PUT --data-binary @- "${backup_url}" 2>/tmp/backup_upload.log; then
+           | curl --fail -H "Content-Type:" -X PUT --data-binary @- "${backup_url}" 2>"${error_log}"; then
         break
     fi
-    cat /tmp/backup_upload.log && rm /tmp/backup_upload.log
-    [[ $i -eq 5 ]] && exit 1
+    cat "${error_log}" && rm "${error_log}"
 done
 
 echo "Deleting backup snapshot"
 btrfs subvolume delete "${HOME}/backup-${now}"
 
-echo "Backup over"
+if [[ ${try} -eq 5 ]]; then
+    echo "Backup failed"
+    exit 1
+else
+    echo "Backup successful"
+fi
 
