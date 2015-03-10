@@ -30,33 +30,35 @@ app.config(['$routeProvider', function ($routeProvider) {
     }).otherwise({ redirectTo: '/'});
 }]);
 
+// keep in sync with appdb.js
+var ISTATES = {
+    ISTATE_PENDING_INSTALL: 'pending_install',
+    ISTATE_PENDING_CONFIGURE: 'pending_configure',
+    ISTATE_PENDING_UNINSTALL: 'pending_uninstall',
+    ISTATE_PENDING_RESTORE: 'pending_restore',
+    ISTATE_PENDING_UPDATE: 'pending_update',
+    ISTATE_ERROR: 'error',
+    ISTATE_INSTALLED: 'installed'
+};
+
 app.filter('installationActive', function() {
     return function(input) {
-        if (input === 'error') return false;
-        if (input === 'installed') return false;
+        if (input === ISTATES.ISTATE_ERROR) return false;
+        if (input === ISTATES.ISTATE_INSTALLED) return false;
         return true;
     };
 });
 
 app.filter('installationStateLabel', function() {
-    // keep in sync with appdb.js
-    var ISTATE_PENDING_INSTALL = 'pending_install';
-    var ISTATE_PENDING_CONFIGURE = 'pending_configure';
-    var ISTATE_PENDING_UNINSTALL = 'pending_uninstall';
-    var ISTATE_PENDING_RESTORE = 'pending_restore';
-    var ISTATE_PENDING_UPDATE = 'pending_update';
-    var ISTATE_ERROR = 'error';
-    var ISTATE_INSTALLED = 'installed';
-
     return function(input) {
         switch (input) {
-        case ISTATE_PENDING_INSTALL: return 'Installing';
-        case ISTATE_PENDING_CONFIGURE: return 'Configuring';
-        case ISTATE_PENDING_UNINSTALL: return 'Uninstalling';
-        case ISTATE_PENDING_RESTORE: return 'Starting';
-        case ISTATE_PENDING_UPDATE: return 'Updating';
-        case ISTATE_ERROR: return 'Error';
-        case ISTATE_INSTALLED: return 'Running';
+        case ISTATES.ISTATE_PENDING_INSTALL: return 'Installing';
+        case ISTATES.ISTATE_PENDING_CONFIGURE: return 'Configuring';
+        case ISTATES.ISTATE_PENDING_UNINSTALL: return 'Uninstalling';
+        case ISTATES.ISTATE_PENDING_RESTORE: return 'Starting';
+        case ISTATES.ISTATE_PENDING_UPDATE: return 'Updating';
+        case ISTATES.ISTATE_ERROR: return 'Error';
+        case ISTATES.ISTATE_INSTALLED: return 'Running';
         default: return input;
         }
     };
