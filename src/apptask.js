@@ -223,6 +223,15 @@ function createContainer(app, callback) {
     appdb.getPortBindings(app.id, function (error, portBindings) {
         if (error) return callback(error);
 
+        var manifest = app.manifest;
+        var exposedPorts = { };
+
+        for (var e in portBindings) {
+            var hostPort = portBindings[e];
+            var containerPort = manifest.tcpPorts[e].containerPort || hostPort;
+            exposedPorts[containerPort + '/tcp'] = { };
+        }
+
         var env = [ ];
         for (var e in portBindings) {
             var hostPort = portBindings[e];
@@ -243,7 +252,8 @@ function createContainer(app, callback) {
                 Cmd: null,
                 Volumes: { },
                 VolumesFrom: '',
-                Env: env.concat(addonEnv)
+                Env: env.concat(addonEnv),
+                ExposedPorts: exposedPorts
             };
 
             debug('Creating container for %s', manifest.dockerImage);
