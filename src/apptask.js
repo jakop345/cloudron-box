@@ -530,6 +530,9 @@ function waitForDnsPropagation(app, callback) {
 
     debug('Checking if DNS is setup for %s to resolve to %s (zone: %s)', fqdn, ip, zoneName);
 
+    // localhost is always known
+    if (zoneName === 'localhost') return callback(null);
+
     dns.resolveNs(zoneName, function (error, nameservers) {
         if (error || nameservers.length === 0) return retry(new Error('Failed to get NS of ' + zoneName));
 
