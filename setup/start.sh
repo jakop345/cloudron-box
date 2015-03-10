@@ -116,7 +116,8 @@ echo "${arg_tls_key}" > ${certificate_dir}/host.key
 unlink /etc/nginx 2>/dev/null || rm -rf /etc/nginx
 ln -s "${nginx_config_dir}" /etc/nginx
 
-chown "${USER}:${USER}" -R "/home/${USER}"
+set_progress "33" "Changing ownership of source, data, configs"
+chown "${USER}:${USER}" -R "${BOX_SRC_DIR}" "${DATA_DIR}" "${CONFIG_DIR}"
 
 set_progress "35" "Removing existing container"
 # removing containers ensures containers are launched with latest config updates
