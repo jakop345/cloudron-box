@@ -130,8 +130,14 @@ angular.module('Application').service('Client', ['$http', 'md5', function ($http
     };
 
     Client.prototype.userInfo = function (callback) {
+        var that = this;
+
         $http.get('/api/v1/profile').success(function(data, status) {
             if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));
+
+            // cache user info
+            that.setUserInfo(data);
+
             callback(null, data);
         }).error(defaultErrorHandler(callback));
     };

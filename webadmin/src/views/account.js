@@ -91,6 +91,9 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
             $scope.emailchange.busy = false;
             emailChangeReset(form);
 
+            // fetch new info in the background
+            Client.userInfo(function () {});
+
             $('#emailChangeModal').modal('hide');
         });
     };

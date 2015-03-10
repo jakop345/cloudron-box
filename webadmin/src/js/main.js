@@ -105,8 +105,6 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
                 Client.userInfo(function (error, result) {
                     if (error) return $scope.error(error);
 
-                    Client.setUserInfo(result);
-
                     Client.refreshInstalledApps(function (error) {
                         if (error) return $scope.error(error);
 
