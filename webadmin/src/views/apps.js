@@ -23,7 +23,9 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
     $scope.appupdate = {
         error: {},
         app: {},
-        password: ''
+        password: '',
+        manifest: {},
+        portBindings: {}
     };
 
     $scope.reset = function () {
@@ -40,6 +42,8 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appuninstall.app = {};
         $scope.appuninstall.error = {};
         $scope.appuninstall.password = '';
+        $scope.appuninstall.manifest = {};
+        $scope.appuninstall.portBindings = {};
 
         $scope.uninstall_form.$setPristine();
         $scope.uninstall_form.$setUntouched();
@@ -122,7 +126,8 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         AppStore.getManifest(app.appStoreId, function (error, manifest) {
             if (error) return console.error(error);
 
-            $scope.appupdate.app.manifest = manifest;
+            $scope.appupdate.manifest = manifest;
+            $scope.appupdate.portBindings = app.portBindings;
 
             $('#appUpdateModal').modal('show');
         });
@@ -131,7 +136,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
     $scope.doUpdate = function (form) {
         $scope.appupdate.error.password = null;
 
-        Client.updateApp($scope.appupdate.app.id, $scope.appupdate.app.manifest, $scope.appupdate.app.portBindings, $scope.appupdate.password, function (error) {
+        Client.updateApp($scope.appupdate.app.id, $scope.appupdate.manifest, $scope.appupdate.portBindings, $scope.appupdate.password, function (error) {
             if (error) {
                 if (error.statusCode === 403) {
                     $scope.appupdate.password = '';
