@@ -12,7 +12,7 @@ if [[ $# == 1 && "$1" == "--check" ]]; then
     exit 0
 fi
 
-exec 2>&1 1>> "/var/log/cloudron/backup.log"
+exec 1>> "/var/log/cloudron/backup.log" 2>&1
 
 if [ $# -lt 2 ]; then
     echo "Usage: backup.sh <url> <key>"
