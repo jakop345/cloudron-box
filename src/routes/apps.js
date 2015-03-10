@@ -76,7 +76,7 @@ function getAppIcon(req, res, next) {
     var iconPath = paths.APPICONS_DIR + '/' + req.params.id + '.png';
     fs.exists(iconPath, function (exists) {
         if (!exists) return next(new HttpError(404, 'No such icon'));
-        res.sendfile(iconPath);
+        res.sendFile(iconPath);
     });
 }
 
