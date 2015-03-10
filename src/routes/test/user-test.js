@@ -250,7 +250,7 @@ describe('User API', function () {
     it('remove second user by first, now normal, user fails', function (done) {
         request.del(SERVER_URL + '/api/v1/users/' + USERNAME_1)
                .query({ access_token: token })
-               .send({ username: USERNAME_1, password: PASSWORD })
+               .send({ password: PASSWORD })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(403);
             done(err);
@@ -369,7 +369,7 @@ describe('User API', function () {
     it('user removes himself is not allowed', function (done) {
         request.del(SERVER_URL + '/api/v1/users/' + USERNAME_0)
                .query({ access_token: token })
-               .send({ username: USERNAME_0, password: PASSWORD })
+               .send({ password: PASSWORD })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(403);
             done(err);
@@ -379,9 +379,18 @@ describe('User API', function () {
     it('admin cannot remove normal user without giving a password', function (done) {
         request.del(SERVER_URL + '/api/v1/users/' + USERNAME_3)
                .query({ access_token: token })
-               .send({ username: USERNAME_3 })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
+            done(err);
+        });
+    });
+
+    it('admin cannot remove normal user with empty password', function (done) {
+        request.del(SERVER_URL + '/api/v1/users/' + USERNAME_3)
+               .query({ access_token: token })
+               .send({ password: '' })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(403);
             done(err);
         });
     });
@@ -389,7 +398,7 @@ describe('User API', function () {
     it('admin cannot remove normal user with giving wrong password', function (done) {
         request.del(SERVER_URL + '/api/v1/users/' + USERNAME_3)
                .query({ access_token: token })
-               .send({ username: USERNAME_3, password: PASSWORD + PASSWORD })
+               .send({ password: PASSWORD + PASSWORD })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(403);
             done(err);
@@ -399,7 +408,7 @@ describe('User API', function () {
     it('admin removes normal user', function (done) {
         request.del(SERVER_URL + '/api/v1/users/' + USERNAME_3)
                .query({ access_token: token })
-               .send({ username: USERNAME_3, password: PASSWORD })
+               .send({ password: PASSWORD })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(204);
             done(err);
@@ -409,7 +418,7 @@ describe('User API', function () {
     it('admin removes himself should not be allowed', function (done) {
         request.del(SERVER_URL + '/api/v1/users/' + USERNAME_0)
                .query({ access_token: token })
-               .send({ username: USERNAME_0, password: PASSWORD })
+               .send({ password: PASSWORD })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(403);
             done(err);

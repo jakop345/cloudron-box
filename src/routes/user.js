@@ -183,19 +183,16 @@ function info(req, res, next) {
  * @apiError (Forbidden 403) {String} message Error details
  */
 function removeUser(req, res, next) {
-    assert(typeof req.body === 'object');
-
-    if (typeof req.body.username !== 'string') return next(new HttpError(400, 'username must be string'));
-
-    var username = req.body.username;
+    assert(typeof req.params.userId === 'string');
 
     // rules:
     // - admin can remove any user
     // - admin cannot remove admin
+    // - user cannot remove himself <- TODO should this actually work?
 
-    if (req.user.username === username) return next(new HttpError(403, 'Not allowed to remove this user.'));
+    if (req.user.id === req.params.userId) return next(new HttpError(403, 'Not allowed to remove yourself.'));
 
-    user.remove(username, function (error) {
+    user.remove(req.params.userId, function (error) {
         if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'User not found'));
         if (error) return next(new HttpError(500, error));
 
