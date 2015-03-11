@@ -259,7 +259,7 @@ function createContainer(app, callback) {
             debug('Creating container for %s', manifest.dockerImage);
 
             docker.createContainer(containerOptions, function (error, container) {
-                if (error) return callback(new Error('Error creating container:' + error));
+                if (error && error.statusCode !== 409) return callback(new Error('Error creating container:' + error));
 
                 updateApp(app, { containerId: container.id }, callback);
             });
@@ -601,8 +601,9 @@ function install(app, callback) {
         addons.teardownAddons.bind(null, app),
         addons.setupAddons.bind(null, app),
 
-        // create container
+        // recreate container
         updateApp.bind(null, app, { installationProgress: 'Creating container' }),
+        deleteContainer.bind(null, app),
         createContainer.bind(null, app),
 
         // recreate data volume
