@@ -38,7 +38,7 @@ var SERVER_URL = 'http://localhost:' + config.get('port');
 
 var APP_STORE_ID = 'test', APP_ID;
 var APP_LOCATION = 'appslocation';
-var APP_MANIFEST = JSON.parse(fs.readFileSync(__dirname + '/test.app', 'utf8'));
+var APP_MANIFEST = JSON.parse(fs.readFileSync(__dirname + '/CloudronManifest.json', 'utf8'));
 var USERNAME = 'admin', PASSWORD = 'password', EMAIL ='silly@me.com';
 var token = null; // authentication token
 
