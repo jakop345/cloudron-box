@@ -327,7 +327,7 @@ describe('Cloudron', function () {
         after(cleanup);
 
         it('cannot login without body', function (done) {
-            request.get(SERVER_URL + '/api/v1/developer/login')
+            request.post(SERVER_URL + '/api/v1/developer/login')
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
@@ -336,7 +336,7 @@ describe('Cloudron', function () {
         });
 
         it('cannot login without username', function (done) {
-            request.get(SERVER_URL + '/api/v1/developer/login')
+            request.post(SERVER_URL + '/api/v1/developer/login')
                    .send({ password: PASSWORD })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -346,7 +346,7 @@ describe('Cloudron', function () {
         });
 
         it('cannot login without password', function (done) {
-            request.get(SERVER_URL + '/api/v1/developer/login')
+            request.post(SERVER_URL + '/api/v1/developer/login')
                    .send({ username: USERNAME })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -356,7 +356,7 @@ describe('Cloudron', function () {
         });
 
         it('cannot login with empty username', function (done) {
-            request.get(SERVER_URL + '/api/v1/developer/login')
+            request.post(SERVER_URL + '/api/v1/developer/login')
                    .send({ username: '', password: PASSWORD })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -366,7 +366,7 @@ describe('Cloudron', function () {
         });
 
         it('cannot login with empty password', function (done) {
-            request.get(SERVER_URL + '/api/v1/developer/login')
+            request.post(SERVER_URL + '/api/v1/developer/login')
                    .send({ username: USERNAME, password: '' })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -376,7 +376,7 @@ describe('Cloudron', function () {
         });
 
         it('cannot login with unknown username', function (done) {
-            request.get(SERVER_URL + '/api/v1/developer/login')
+            request.post(SERVER_URL + '/api/v1/developer/login')
                    .send({ username: USERNAME.toUpperCase(), password: PASSWORD })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -386,7 +386,7 @@ describe('Cloudron', function () {
         });
 
         it('cannot login with wrong password', function (done) {
-            request.get(SERVER_URL + '/api/v1/developer/login')
+            request.post(SERVER_URL + '/api/v1/developer/login')
                    .send({ username: USERNAME, password: PASSWORD.toUpperCase() })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -396,7 +396,7 @@ describe('Cloudron', function () {
         });
 
         it('login with username succeeds', function (done) {
-            request.get(SERVER_URL + '/api/v1/developer/login')
+            request.post(SERVER_URL + '/api/v1/developer/login')
                    .send({ username: USERNAME, password: PASSWORD })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -408,7 +408,7 @@ describe('Cloudron', function () {
         });
 
         it('login with email succeeds', function (done) {
-            request.get(SERVER_URL + '/api/v1/developer/login')
+            request.post(SERVER_URL + '/api/v1/developer/login')
                    .send({ username: EMAIL, password: PASSWORD })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
