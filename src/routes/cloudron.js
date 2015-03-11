@@ -6,6 +6,7 @@ var assert = require('assert'),
     cloudron = require('../cloudron.js'),
     config = require('../../config.js'),
     progress = require('../progress.js'),
+    passport = require('passport'),
     CloudronError = cloudron.CloudronError,
     debug = require('debug')('box:routes/cloudron'),
     df = require('nodejs-disks'),
@@ -31,7 +32,8 @@ exports = module.exports = {
     createBackup: createBackup,
     getConfig: getConfig,
     update: update,
-    setCertificate: setCertificate
+    setCertificate: setCertificate,
+    login: login
 };
 
 /**
@@ -184,3 +186,15 @@ function setCertificate(req, res, next) {
     });
 }
 
+function login(req, res, next) {
+    passport.authenticate('local', function (error, user) {
+        if (error) return next(new HttpError(500, error));
+        if (!user) return next(new HttpError(401, 'Invalid credentials'));
+
+        cloudron.issueDeveloperToken(user, function (error, result) {
+            if (error) return next(new HttpError(500, error));
+
+            next(new HttpSuccess(200, { token: result.token, expiresAt: result.expiresAt }));
+        });
+  })(req, res, next);
+}
