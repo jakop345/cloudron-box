@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS users(
 
 CREATE TABLE IF NOT EXISTS tokens(
     accessToken VARCHAR(128) NOT NULL UNIQUE,
-    userId VARCHAR(128) NOT NULL,
+    identifier VARCHAR(128) NOT NULL,
     clientId VARCHAR(128),
     scope VARCHAR(512) NOT NULL,
     expires BIGINT NOT NULL,
