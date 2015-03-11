@@ -118,6 +118,14 @@ gServer.exchange(oauth2orize.exchange.code(function (client, code, redirectURI, 
 
 // Main login form username and password
 function loginForm(req, res) {
+    if (!req.session.returnTo) {
+        return res.render('error', {
+            user: req.user,
+            adminOrigin: config.adminOrigin(),
+            message: 'Invalid login request'
+        });
+    }
+
     var u = url.parse(req.session.returnTo, true);
 
     if (!u.query.client_id) {
