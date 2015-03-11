@@ -98,6 +98,10 @@ function initialize(callback) {
             if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
             if (error) return callback(error);
 
+            if (token.identifier.indexOf('dev-') === 0) {
+                token.identifier = token.identifier.slice('dev-'.length);
+            }
+
             userdb.get(token.identifier, function (error, user) {
                 if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
                 if (error) return callback(error);
