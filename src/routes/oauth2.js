@@ -434,7 +434,7 @@ function getClientTokens(req, res, next) {
 
     debug('getClientTokens');
 
-    tokendb.getByUserIdAndClientId(req.user.id, req.params.clientId, function (error, result) {
+    tokendb.getByIdentifierAndClientId(req.user.id, req.params.clientId, function (error, result) {
         if (error && error.reason !== DatabaseError.NOT_FOUND) return next(new HttpError(500, error));
 
         result = result || [];
@@ -451,7 +451,7 @@ function delClientTokens(req, res, next) {
 
     debug('delClientTokens: user %s and client %s.', req.user.id, req.params.clientId);
 
-    tokendb.delByUserIdAndClientId(req.user.id, req.params.clientId, function (error) {
+    tokendb.delByIdentifierAndClientId(req.user.id, req.params.clientId, function (error) {
         if (error && error.reason !== DatabaseError.NOT_FOUND) return next(new HttpError(500, error));
 
         debug('delClientTokens: success.');

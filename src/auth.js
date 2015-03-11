@@ -98,7 +98,7 @@ function initialize(callback) {
             if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
             if (error) return callback(error);
 
-            userdb.get(token.userId, function (error, user) {
+            userdb.get(token.identifier, function (error, user) {
                 if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
                 if (error) return callback(error);
 

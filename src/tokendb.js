@@ -13,16 +13,16 @@ exports = module.exports = {
     get: get,
     add: add,
     del: del,
-    getByUserId: getByUserId,
-    delByUserId: delByUserId,
-    getByUserIdAndClientId: getByUserIdAndClientId,
-    delByUserIdAndClientId: delByUserIdAndClientId,
+    getByIdentifier: getByIdentifier,
+    delByIdentifier: delByIdentifier,
+    getByIdentifierAndClientId: getByIdentifierAndClientId,
+    delByIdentifierAndClientId: delByIdentifierAndClientId,
     delExpired: delExpired,
 
     _clear: clear
 };
 
-var TOKENS_FIELDS = [ 'accessToken', 'userId', 'clientId', 'scope', 'expires' ].join(',');
+var TOKENS_FIELDS = [ 'accessToken', 'identifier', 'clientId', 'scope', 'expires' ].join(',');
 
 function generateToken() {
     return hat();
@@ -40,16 +40,16 @@ function get(accessToken, callback) {
     });
 }
 
-function add(accessToken, userId, clientId, expires, scope, callback) {
+function add(accessToken, identifier, clientId, expires, scope, callback) {
     assert(typeof accessToken === 'string');
-    assert(typeof userId === 'string');
+    assert(typeof identifier === 'string');
     assert(typeof clientId === 'string' || clientId === null);
     assert(typeof expires === 'number');
     assert(typeof scope === 'string');
     assert(typeof callback === 'function');
 
-    database.query('INSERT INTO tokens (accessToken, userId, clientId, expires, scope) VALUES (?, ?, ?, ?, ?)',
-           [ accessToken, userId, clientId, expires, scope ], function (error, result) {
+    database.query('INSERT INTO tokens (accessToken, identifier, clientId, expires, scope) VALUES (?, ?, ?, ?, ?)',
+           [ accessToken, identifier, clientId, expires, scope ], function (error, result) {
         if (error && error.code === 'ER_DUP_ENTRY') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
         if (error || result.affectedRows !== 1) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
@@ -69,22 +69,22 @@ function del(accessToken, callback) {
     });
 }
 
-function getByUserId(userId, callback) {
-    assert(typeof userId === 'string');
+function getByIdentifier(identifier, callback) {
+    assert(typeof identifier === 'string');
     assert(typeof callback === 'function');
 
-    database.query('SELECT ' + TOKENS_FIELDS + ' FROM tokens WHERE userId = ?', [ userId ], function (error, results) {
+    database.query('SELECT ' + TOKENS_FIELDS + ' FROM tokens WHERE identifier = ?', [ identifier ], function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         callback(null, results);
     });
 }
 
-function delByUserId(userId, callback) {
-    assert(typeof userId === 'string');
+function delByIdentifier(identifier, callback) {
+    assert(typeof identifier === 'string');
     assert(typeof callback === 'function');
 
-    database.query('DELETE FROM tokens WHERE userId = ?', [ userId ], function (error, result) {
+    database.query('DELETE FROM tokens WHERE identifier = ?', [ identifier ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (result.affectedRows !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
@@ -92,24 +92,24 @@ function delByUserId(userId, callback) {
     });
 }
 
-function getByUserIdAndClientId(userId, clientId, callback) {
-    assert(typeof userId === 'string');
+function getByIdentifierAndClientId(identifier, clientId, callback) {
+    assert(typeof identifier === 'string');
     assert(typeof clientId === 'string');
     assert(typeof callback === 'function');
 
-    database.query('SELECT ' + TOKENS_FIELDS + ' FROM tokens WHERE userId=? AND clientId=?', [ userId, clientId ], function (error, results) {
+    database.query('SELECT ' + TOKENS_FIELDS + ' FROM tokens WHERE identifier=? AND clientId=?', [ identifier, clientId ], function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         callback(null, results);
     });
 }
 
-function delByUserIdAndClientId(userId, clientId, callback) {
-    assert(typeof userId === 'string');
+function delByIdentifierAndClientId(identifier, clientId, callback) {
+    assert(typeof identifier === 'string');
     assert(typeof clientId === 'string');
     assert(typeof callback === 'function');
 
-    database.query('DELETE FROM tokens WHERE userId = ? AND clientId = ?', [ userId, clientId ], function (error, result) {
+    database.query('DELETE FROM tokens WHERE identifier = ? AND clientId = ?', [ identifier, clientId ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (result.affectedRows !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
