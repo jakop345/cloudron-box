@@ -36,6 +36,19 @@
             background-color: white;
         }
 
+        .domain-hint {
+            display: none;
+        }
+
+        @media(min-width:767px) {
+            .domain-hint {
+                position: fixed;
+                left: 100px;
+                top: 10px;
+                display: block;
+            }
+        }
+
     </style>
 
 </head>
@@ -50,9 +63,20 @@
     </br>
     </br>
     </br>
+    </br>
 
     <form role="form" name="setup_form" novalidate>
         <div class="page-wrapper ng-hide" ng-show="initialized && !busy && setupToken">
+
+            <div class="domain-hint animation-plop">
+                <center>
+                    <i class="fa fa-arrow-up fa-2x text-success"></i>
+                    <p class="text-muted">
+                         This is your Cloudron's domain
+                    </p>
+                </center>
+            </div>
+
             <div class="row">
                 <div class="col-md-4 col-md-offset-4">
                     <div ng-view id="ng-view"></div>
@@ -60,60 +84,6 @@
             </div>
         </div>
     </form>
-
-<!--     <div class="container animateMe ng-hide" ng-show="initialized && !busy && setupToken">
-        <form class="signin-form" role="form" name="setup_form" novalidate ng-submit="submit()">
-            <div class="ng-hide" ng-show="step === 1">
-                <div class="row">
-                    <div class="col-md-12 text-center">
-                        <h1>Welcome</h1>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12 text-center">
-                        <h3 class="">Before we can get started, let's create a user</h3>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12 text-center">
-                        <button class="btn btn-primary btn-outline" ng-click="nextStep()">Awesome</button>
-                    </div>
-                </div>
-
-            </div>
-            <div class="ng-hide" ng-show="step === 2">
-                <div class="row">
-                    <div class="col-md-6 col-md-offset-3">
-                        <div class="form-group" ng-class="{ 'has-error': setup_form.username.$dirty && setup_form.username.$invalid }">
-                            <label class="control-label" for="inputUsername"></label>
-                            <input type="text" class="form-control" ng-model="username" id="inputUsername" name="username" ng-maxlength="512" ng-minlength="3" autofocus required>
-                        </div>
-                        <div class="form-group" ng-class="{ 'has-error': setup_form.email.$dirty && setup_form.email.$invalid }">
-                            <label class="control-label" for="inputEmail">Email</label>
-                            <input type="email" class="form-control" ng-model="email" id="inputEmail" name="email" required>
-                        </div>
-                        <div class="form-group" ng-class="{ 'has-error': setup_form.password.$dirty && setup_form.password.$invalid }">
-                            <label class="control-label" for="inputPassword">Password</label>
-                            <input type="password" class="form-control" ng-model="password" id="inputPassword" name="password" ng-maxlength="512" ng-minlength="5" required>
-                        </div>
-                        <div class="form-group" ng-class="{ 'has-error': setup_form.repeatPassword.$dirty && (setup_form.repeatPassword.$invalid || password !== passwordRepeat) }">
-                            <label class="control-label" for="inputPasswordRepeat">Repeat Password</label>
-                            <input type="password" class="form-control" ng-model="passwordRepeat" id="inputPasswordRepeat" name="repeatPassword" required>
-                        </div>
-                        <input class="btn btn-primary btn-outline pull-right" type="submit" ng-disabled="setup_form.$invalid || password !== passwordRepeat || busy" value="Create User"/>
-                    </div>
-                </div>
-            </div>
-        </div>
-        </form>
-    </div> -->
-
-    <div class="container animateMe ng-hide" ng-show="busy && setupToken">
-        <div class="col-lg-12" style="text-align: center;">
-            <h2>Your Cloudron is being initialized</h2>
-            <i class="fa fa-circle-o-notch fa-spin fa-5x"></i>
-        </div>
-    </div>
 
 </body>
 </html>

@@ -45,31 +45,6 @@ $table-border-color:                        transparent !default;
 
 @import "bootstrap";
 
-.animateMe {
-    opacity: 1;
-    -webkit-transition: 0.25s ease all;
-    transition: 0.25s ease all;
-}
-
-.animateMe.ng-hide-add,
-.animateMe.ng-hide-remove {
-    display: block !important;
-    transform: scale(0.9, 0.9);
-    opacity: 0;
-}
-
-.animateMeOpacity {
-    opacity: 1;
-    -webkit-transition: 0.25s ease all;
-    transition: 0.25s ease all;
-}
-
-.animateMeOpacity.ng-hide-add,
-.animateMeOpacity.ng-hide-remove {
-    display: block !important;
-    opacity: 0;
-}
-
 .shadow {
     box-shadow:         0px 2px 5px rgba(0, 0, 0, 0.1);
 }
@@ -149,4 +124,120 @@ $table-border-color:                        transparent !default;
 
 .text-small {
     font-size: $font-size-h6;
+}
+
+
+// ----------------------------
+// Animations
+// ----------------------------
+
+.animateMe {
+    opacity: 1;
+    -webkit-transition: 0.25s ease all;
+    transition: 0.25s ease all;
+}
+
+.animateMe.ng-hide-add,
+.animateMe.ng-hide-remove {
+    display: block !important;
+    transform: scale(0.9, 0.9);
+    opacity: 0;
+}
+
+.animateMeOpacity {
+    opacity: 1;
+    -webkit-transition: 0.25s ease all;
+    transition: 0.25s ease all;
+}
+
+.animateMeOpacity.ng-hide-add,
+.animateMeOpacity.ng-hide-remove {
+    display: block !important;
+    opacity: 0;
+}
+
+.animation-rise {
+    animation-duration: 3s;
+    animation-name: rise;
+}
+
+.animation-plop {
+    transform: scale(0);
+    animation-name: plop;
+    animation-delay: 2s;
+    animation-duration: 350ms;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-out;
+    animation-fill-mode: forwards;
+}
+
+.animation-fade {
+    opacity: 0;
+    animation-name: fade;
+    animation-delay: 4s;
+    animation-duration: 250ms;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-out;
+    animation-fill-mode: forwards;
+}
+
+.animation-pulse {
+    animation-duration: 1.5s;
+    animation-name: pulse;
+    animation-timing-function: ease-in;
+    animation-iteration-count: infinite;
+}
+
+@keyframes rise {
+    from {
+        color: transparent;
+    }
+
+    to {
+        color: white;
+    }
+}
+
+@keyframes plop {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    50% {
+        transform: scale(1.2);
+        opacity: 0.3
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes fade {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(0.8);
+        opacity: 0.5;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
