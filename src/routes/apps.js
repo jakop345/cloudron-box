@@ -288,6 +288,7 @@ function exec(req, res, next) {
             'Connection': 'keep-alive',
             'X-Accel-Buffering': 'no' // disable nginx buffering
         });
+
         duplexStream.pipe(res);
         res.pipe(duplexStream);
     });

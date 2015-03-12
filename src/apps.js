@@ -542,15 +542,20 @@ function exec(appId, callback) {
 
         var container = docker.getContainer(app.containerId);
         var execOptions = {
-             AttachStdin: true,
-             AttachStdout: true,
-             AttachStderr: true,
-             Tty: true,
-             Cmd: [ '/bin/bash' ]
+            AttachStdin: true,
+            AttachStdout: true,
+            AttachStderr: true,
+            Tty: true,
+            Cmd: [ '/bin/bash' ]
         };
         container.exec(execOptions, function (error, exec) {
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
-            exec.start({ Detach: false, Tty: true, stdin: true, stream: true }, function(error, stream) {
+            var startOptions = {
+                Detach: false,
+                Tty: true,
+                stdin: true // this is a dockerode option that enabled openStdin in the modem
+            };
+            exec.start(startOptions, function(error, stream) {
                 if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
                 return callback(null, stream);
