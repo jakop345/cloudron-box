@@ -278,19 +278,15 @@ function exec(req, res, next) {
     debug('Execing into app id:%s', req.params.id);
 
     apps.exec(req.params.id, function (error, duplexStream) {
+        if (error) console.error(error);
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
         if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
         if (error) return next(new HttpError(500, error));
 
-        res.writeHead(200, {
-            'Content-Type': 'application/x-shell',
-            'Cache-Control': 'no-cache',
-            'Connection': 'keep-alive',
-            'X-Accel-Buffering': 'no' // disable nginx buffering
-        });
+        res.sendUpgradeHandshake();
 
-        duplexStream.pipe(res);
-        res.pipe(duplexStream);
+        duplexStream.pipe(res.socket);
+        res.socket.pipe(duplexStream);
     });
 }
 

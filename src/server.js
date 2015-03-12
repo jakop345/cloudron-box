@@ -29,6 +29,7 @@ exports = module.exports = {
 
 function initializeExpressSync() {
     var app = express();
+    var httpServer = http.createServer(app);
 
     var QUERY_LIMIT = '10mb', // max size for json and urlencoded queries
         FIELD_LIMIT = 2 * 1024; // max fields that can appear in multipart
@@ -148,16 +149,32 @@ function initializeExpressSync() {
     router.get ('/api/v1/settings/naked_domain', settingsScope, routes.settings.getNakedDomain);
     router.post('/api/v1/settings/naked_domain', settingsScope, routes.settings.setNakedDomain);
 
-    return app;
+    // upgrade handler
+    httpServer.on('upgrade', function (req, socket, head) {
+        if (req.headers['upgrade'] !== 'tcp') return req.end('Only TCP upgrades are possible');
+
+        // create a node response object for express
+        var res = new http.ServerResponse({});
+        res.assignSocket(socket);
+        res.sendUpgradeHandshake = function () {
+            socket.write('HTTP/1.1 101 TCP Handshake\r\n' +
+                         'Upgrade: tcp\r\n' +
+                         'Connection: Upgrade\r\n' +
+                         '\r\n');
+        };
+
+        // route through express middleware
+        app(req, res);
+    });
+
+    return httpServer;
 }
 
 function start(callback) {
     assert(typeof callback === 'function');
     assert(gHttpServer === null, 'Server is already up and running.');
 
-    var app = initializeExpressSync();
-
-    gHttpServer = http.createServer(app);
+    gHttpServer = initializeExpressSync();
 
     async.series([
         auth.initialize,
