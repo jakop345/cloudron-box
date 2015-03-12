@@ -6,9 +6,6 @@
 exports = module.exports = {
     DeveloperError: DeveloperError,
 
-    initialize: initialize,
-    uninitialize: uninitialize,
-
     issueDeveloperToken: issueDeveloperToken
 };
 
@@ -37,18 +34,6 @@ function DeveloperError(reason, errorOrMessage) {
 }
 util.inherits(DeveloperError, Error);
 DeveloperError.INTERNAL_ERROR = 'Internal Error';
-
-function initialize(callback) {
-    assert(typeof callback === 'function');
-
-    callback(null);
-}
-
-function uninitialize(callback) {
-    assert(typeof callback === 'function');
-
-    callback(null);
-}
 
 function issueDeveloperToken(user, callback) {
     assert(typeof user === 'object');

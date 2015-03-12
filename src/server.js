@@ -163,7 +163,6 @@ function start(callback) {
         database.initialize,
         apps.initialize,
         cloudron.initialize,
-        developer.initialize,
         updater.initialize,
         mailer.initialize,
         gHttpServer.listen.bind(gHttpServer, config.get('port'), '127.0.0.1')
