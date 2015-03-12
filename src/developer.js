@@ -57,7 +57,7 @@ function issueDeveloperToken(user, callback) {
     var token = tokendb.generateToken();
     var expiresAt = Date.now() + 60 * 60000; // 1 hour
 
-    tokendb.add(token, 'dev-' + user.id, '', expiresAt, '*', function (error) {
+    tokendb.add(token, 'dev-' + user.id, '', expiresAt, 'apps,roleDeveloper', function (error) {
         if (error) return callback(new DeveloperError(DeveloperError.INTERNAL_ERROR, error));
 
         callback(null, { token: token, expiresAt: expiresAt });

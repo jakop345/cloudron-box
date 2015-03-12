@@ -370,6 +370,39 @@ describe('App API', function () {
             done(err);
         });
     });
+
+    it('app install succeeds without password but developer token', function (done) {
+        request.post(SERVER_URL + '/api/v1/developer/login')
+               .send({ username: USERNAME, password: PASSWORD })
+               .end(function (error, result) {
+            expect(error).to.not.be.ok();
+            expect(result.statusCode).to.equal(200);
+            expect(result.body.expiresAt).to.be.a('number');
+            expect(result.body.token).to.be.a('string');
+
+            // overwrite non dev token
+            token = result.body.token;
+
+            request.post(SERVER_URL + '/api/v1/apps/install')
+                   .query({ access_token: token })
+                   .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, location: APP_LOCATION+APP_LOCATION, portBindings: null, accessRestriction: '' })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(202);
+                expect(res.body.id).to.be.a('string');
+                APP_ID = res.body.id;
+                done(err);
+            });
+        });
+    });
+
+    it('can uninstall app without password but developer token', function (done) {
+        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/uninstall')
+            .query({ access_token: token })
+            .end(function (err, res) {
+            expect(res.statusCode).to.equal(202);
+            done(err);
+        });
+    });
 });
 
 describe('App installation', function () {

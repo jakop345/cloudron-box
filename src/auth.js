@@ -109,6 +109,7 @@ function initialize(callback) {
                 // scopes here can define what capabilities that token carries
                 // passport put the 'info' object into req.authInfo, where we can further validate the scopes
                 var info = { scope: token.scope };
+
                 callback(null, user, info);
             });
         });

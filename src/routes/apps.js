@@ -96,7 +96,6 @@ function installApp(req, res, next) {
     var data = req.body;
 
     if (!data) return next(new HttpError(400, 'Cannot parse data field'));
-    if (typeof data.password !== 'string') return next(new HttpError(401, 'password is missing'));
     if (!data.manifest || typeof data.manifest !== 'object') return next(new HttpError(400, 'manifest is required'));
     if (typeof data.appStoreId !== 'string') return next(new HttpError(400, 'appStoreId is required'));
     if (typeof data.location !== 'string') return next(new HttpError(400, 'location is required'));

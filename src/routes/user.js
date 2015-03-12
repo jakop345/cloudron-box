@@ -203,6 +203,9 @@ function removeUser(req, res, next) {
 function verifyPassword(req, res, next) {
     assert(typeof req.body === 'object');
 
+    // developers are allowed to through without password
+    if (req.authInfo.scope.indexOf('roleDeveloper') !== -1) return next();
+
     if (typeof req.body.password !== 'string') return next(new HttpError(400, 'API call requires user password'));
 
     user.verify(req.user.username, req.body.password, function (error) {
