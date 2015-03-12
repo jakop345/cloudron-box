@@ -107,6 +107,10 @@ function initialize(callback) {
             } else if (token.identifier.indexOf('app-') === 0) {
                 // hand back an empty user object as we do not really have an user
                 return callback(null, {}, info);
+            } else if (token.identifier.indexOf('user-') === 0) {
+                token.identifier = token.identifier.slice('user-'.length);
+            } else {
+                // legacy tokens assuming a user access token
             }
 
             userdb.get(token.identifier, function (error, user) {

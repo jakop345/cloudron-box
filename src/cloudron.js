@@ -119,7 +119,7 @@ function activate(username, password, email, callback) {
         if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
         if (count !== 0) return callback(new CloudronError(CloudronError.ALREADY_PROVISIONED));
 
-        user.create(username, password, email, true /* admin */, function (error) {
+        user.create(username, password, email, true /* admin */, function (error, userObject) {
             if (error) {
                 if (error.reason === UserError.ALREADY_EXISTS) return callback(new CloudronError(CloudronError.ALREADY_PROVISIONED));
                 if (error.reason === UserError.BAD_USERNAME) return callback(new CloudronError(CloudronError.BAD_USERNAME));
@@ -136,7 +136,7 @@ function activate(username, password, email, callback) {
                 var token = tokendb.generateToken();
                 var expires = Date.now() + 60 * 60000; // 1 hour
 
-                tokendb.add(token, username, result.id, expires, '*', function (error) {
+                tokendb.add(token, 'user-' + userObject.id, result.id, expires, '*', function (error) {
                     if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
                     callback(null, { token: token, expires: expires });
