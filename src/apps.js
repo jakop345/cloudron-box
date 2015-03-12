@@ -365,9 +365,9 @@ function update(appId, manifest, portBindings, callback) {
     });
 }
 
-function getLogStream(appId, options, callback) {
+function getLogStream(appId, fromLine, callback) {
     assert(typeof appId === 'string');
-    assert(typeof options === 'object');
+    assert(typeof fromLine === 'number'); // behaves like tail -n
     assert(typeof callback === 'function');
 
     debug('Getting logs for %s', appId);
@@ -378,14 +378,16 @@ function getLogStream(appId, options, callback) {
         if (app.installationState !== appdb.ISTATE_INSTALLED) return callback(new AppsError(AppsError.BAD_STATE, 'App not installed'));
 
         var container = docker.getContainer(app.containerId);
+        var tail = fromLine < 0 ? -fromLine : 'all';
+
         // note: cannot access docker file directly because it needs root access
-        container.logs({ stdout: true, stderr: true, follow: true, timestamps: true, tail: 'all' }, function (error, logStream) {
+        container.logs({ stdout: true, stderr: true, follow: true, timestamps: true, tail: tail }, function (error, logStream) {
             if (error && error.statusCode === 404) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
             var lineCount = 0;
             var skipLinesStream = split(function mapper(line) {
-                if (++lineCount < options.fromLine) return undefined;
+                if (++lineCount < fromLine) return undefined;
                 return JSON.stringify({ lineNumber: lineCount, log: line });
             });
             skipLinesStream.close = logStream.req.abort;

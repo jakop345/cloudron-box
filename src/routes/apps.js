@@ -214,20 +214,20 @@ function updateApp(req, res, next) {
     });
 }
 
+// this route is for streaming logs
 function getLogStream(req, res, next) {
     assert(typeof req.params.id === 'string');
 
     debug('Getting logstream of app id:%s', req.params.id);
 
-    var fromLine = parseInt(req.query.fromLine || 0, 10);
+    var fromLine = req.query.fromLine ? parseInt(req.query.fromLine, 10) : -10; // we ignore last-event-id
+    if (isNaN(fromLine)) return next(new HttpError(400, 'fromLine must be a valid number'));
 
     function sse(id, data) { return 'id: ' + id + '\ndata: ' + data + '\n\n'; };
 
     if (req.headers.accept !== 'text/event-stream') return next(new HttpError(400, 'This API call requires EventStream'));
 
-    var fromLine = (parseInt(req.headers['last-event-id'], 10) + 1) || 1;
-
-    apps.getLogStream(req.params.id, { fromLine: fromLine }, function (error, logStream) {
+    apps.getLogStream(req.params.id, fromLine, function (error, logStream) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
         if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
         if (error) return next(new HttpError(500, error));
@@ -250,6 +250,7 @@ function getLogStream(req, res, next) {
     });
 }
 
+// this route is for downloading logs
 function getLogs(req, res, next) {
     assert(typeof req.params.id === 'string');
 
