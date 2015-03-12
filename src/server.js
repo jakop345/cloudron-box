@@ -139,6 +139,7 @@ function initializeExpressSync() {
     router.get ('/api/v1/apps/:id/icon', routes.apps.getAppIcon);
     router.get ('/api/v1/apps/:id/logstream', appsScope, routes.apps.getLogStream);
     router.get ('/api/v1/apps/:id/logs', appsScope, routes.apps.getLogs);
+    router.get ('/api/v1/apps/:id/exec', appsScope, routes.apps.exec);
 
     // subdomain routes
     router.get ('/api/v1/subdomains/:subdomain', routes.apps.getAppBySubdomain);

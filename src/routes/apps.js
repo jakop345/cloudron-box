@@ -26,7 +26,8 @@ exports = module.exports = {
     getLogStream: getLogStream,
 
     stopApp: stopApp,
-    startApp: startApp
+    startApp: startApp,
+    exec: exec
 };
 
 /*
@@ -269,6 +270,27 @@ function getLogs(req, res, next) {
             'X-Accel-Buffering': 'no' // disable nginx buffering
         });
         logStream.pipe(res);
+    });
+}
+
+function exec(req, res, next) {
+    assert(typeof req.params.id === 'string');
+
+    debug('Execing into app id:%s', req.params.id);
+
+    apps.exec(req.params.id, function (error, duplexStream) {
+        if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
+        if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
+        if (error) return next(new HttpError(500, error));
+
+        res.writeHead(200, {
+            'Content-Type': 'application/x-shell',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+            'X-Accel-Buffering': 'no' // disable nginx buffering
+        });
+        duplexStream.pipe(res);
+        res.pipe(duplexStream);
     });
 }
 

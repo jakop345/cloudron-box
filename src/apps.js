@@ -37,6 +37,8 @@ exports = module.exports = {
     start: start,
     stop: stop,
 
+    exec: exec,
+
     validateManifest: validateManifest,
     checkManifestConstraints: checkManifestConstraints,
 
@@ -528,5 +530,32 @@ function checkManifestConstraints(manifest) {
     }
 
     return null;
+}
+
+function exec(appId, callback) {
+    assert(typeof appId === 'string');
+    assert(typeof callback === 'function');
+
+    appdb.get(appId, function (error, app) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
+        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+        var container = docker.getContainer(app.containerId);
+        var execOptions = {
+             AttachStdin: true,
+             AttachStdout: true,
+             AttachStderr: true,
+             Tty: true,
+             Cmd: [ '/bin/bash' ]
+        };
+        container.exec(execOptions, function (error, exec) {
+            if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+            exec.start({ Detach: false, Tty: true, stdin: true, stream: true }, function(error, stream) {
+                if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+                return callback(null, stream);
+            });
+        });
+    });
 }
 
