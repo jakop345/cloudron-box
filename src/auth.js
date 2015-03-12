@@ -98,17 +98,20 @@ function initialize(callback) {
             if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
             if (error) return callback(error);
 
+            // scopes here can define what capabilities that token carries
+            // passport put the 'info' object into req.authInfo, where we can further validate the scopes
+            var info = { scope: token.scope };
+
             if (token.identifier.indexOf('dev-') === 0) {
                 token.identifier = token.identifier.slice('dev-'.length);
+            } else if (token.identifier.indexOf('app-') === 0) {
+                // hand back an empty user object as we do not really have an user
+                return callback(null, {}, info);
             }
 
             userdb.get(token.identifier, function (error, user) {
                 if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
                 if (error) return callback(error);
-
-                // scopes here can define what capabilities that token carries
-                // passport put the 'info' object into req.authInfo, where we can further validate the scopes
-                var info = { scope: token.scope };
 
                 callback(null, user, info);
             });
