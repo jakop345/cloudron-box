@@ -16,9 +16,7 @@ exports = module.exports = {
     getBackupUrl: getBackupUrl,
     setCertificate: setCertificate,
 
-    getIp: getIp,
-
-    issueDeveloperToken: issueDeveloperToken
+    getIp: getIp
 };
 
 var assert = require('assert'),
@@ -327,19 +325,5 @@ function setCertificate(certificate, key, callback) {
         if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
         return callback(null);
-    });
-}
-
-function issueDeveloperToken(user, callback) {
-    assert(typeof user === 'object');
-    assert(typeof callback === 'function');
-
-    var token = tokendb.generateToken();
-    var expiresAt = Date.now() + 60 * 60000; // 1 hour
-
-    tokendb.add(token, 'dev-' + user.id, '', expiresAt, '*', function (error) {
-        if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
-
-        callback(null, { token: token, expiresAt: expiresAt });
     });
 }
