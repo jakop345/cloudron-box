@@ -388,7 +388,8 @@ function getLogStream(appId, fromLine, callback) {
             var lineCount = 0;
             var skipLinesStream = split(function mapper(line) {
                 if (++lineCount < fromLine) return undefined;
-                return JSON.stringify({ lineNumber: lineCount, log: line });
+                var timestamp = line.substr(0, line.indexOf(' ')); // sometimes this has square brackets around it
+                return JSON.stringify({ lineNumber: lineCount, timestamp: timestamp.replace(/[[\]]/g,''), log: line.substr(timestamp.length + 1) });
             });
             skipLinesStream.close = logStream.req.abort;
             logStream.pipe(skipLinesStream);

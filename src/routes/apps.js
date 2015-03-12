@@ -243,7 +243,7 @@ function getLogStream(req, res, next) {
         res.on('close', logStream.close);
         logStream.on('data', function (data) {
             var obj = JSON.parse(data);
-            res.write(sse(obj.lineNumber, obj.log));
+            res.write(sse(obj.lineNumber, JSON.stringify(obj)));
         });
         logStream.on('end', res.end.bind(res));
         logStream.on('error', res.end.bind(res, null));
