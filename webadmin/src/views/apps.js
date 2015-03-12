@@ -129,6 +129,22 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
             $scope.appupdate.manifest = manifest;
             $scope.appupdate.portBindings = app.portBindings;
 
+            // detect new portbindings
+            $scope.appupdate.newPortBindings = null;
+            for (var elem in $scope.appupdate.manifest.tcpPorts) {
+                if ($scope.appupdate.app.portBindings[elem]) continue;
+                if (!$scope.appupdate.newPortBindings) $scope.appupdate.newPortBindings = {};
+                $scope.appupdate.newPortBindings[elem] = $scope.appupdate.manifest.tcpPorts[elem];
+            }
+
+            // detect obsolete portbindings
+            $scope.appupdate.obsoletePortBindings = null;
+            for (elem in $scope.appupdate.app.portBindings) {
+                if ($scope.appupdate.manifest.tcpPorts[elem]) continue;
+                if (!$scope.appupdate.obsoletePortBindings) $scope.appupdate.obsoletePortBindings = {};
+                $scope.appupdate.obsoletePortBindings[elem] = $scope.appupdate.app.portBindings[elem];
+            }
+
             $('#appUpdateModal').modal('show');
         });
     };

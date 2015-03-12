@@ -94,10 +94,24 @@
             <div class="modal-body">
                 <fieldset>
                     <form class="form-signin" role="form" name="update_form" ng-submit="doUpdate(update_form)" autocomplete="off">
+                        <div ng-repeat="(env, portInfo) in appupdate.newPortBindings">
+                            <ng-form name="portInfo_form">
+                                <div class="form-group" ng-class="{ 'has-error': portInfo_form.itemName{{$index}}.$dirty && portInfo_form.itemName{{$index}}.$invalid }">
+                                    <label class="control-label" for="inputPortInfo{{env}}">New {{ portInfo.description }} ({{ hostPortMin }} - {{ hostPortMax }})</label>
+                                    <input type="number" class="form-control" ng-model="appupdate.portBindings[env].hostPort" id="inputPortInfo{{port}}" later-name="itemName{{$index}}" min="{{hostPortMin}}" max="{{hostPortMax}}" required>
+                                </div>
+                            </ng-form>
+                        </div>
                         <div class="form-group" ng-class="{ 'has-error': (!update_form.password.$dirty && appupdate.error.password) || (update_form.password.$dirty && update_form.password.$invalid) }">
                             <label class="control-label" for="inputUpdatePassword">Password</label>
                             <input type="password" class="form-control" ng-model="appupdate.password" id="inputUpdatePassword" name="password" ng-maxlength="512" ng-minlength="5" required autofocus>
                         </div>
+                        <h4 ng-show="appupdate.obsoletePortBindings" class="text-danger">Obsolete TCP port requirements</h4>
+                        <ul>
+                            <li ng-repeat="(env, portInfo) in appupdate.obsoletePortBindings">
+                                {{ env }}
+                            </li>
+                        </ul>
 
                         <input class="ng-hide" type="submit" ng-disabled="update_form.$invalid || busy"/>
                     </form>
@@ -141,7 +155,7 @@
             <div class="grid-item-bottom">
                 <div class="row">
                     <div class="col-xs-4"><a href="" ng-click="showConfigure(app)"><i class="fa fa-wrench"></i></a></div>
-                    <div class="col-xs-4"><a href="" ng-click="showUpdate(app)" class="ng-hide animateMe" ng-show="app.updateVersion"><i class="fa fa-arrow-up text-success"></i></a></div>
+                    <div class="col-xs-4"><a href="" ng-click="showUpdate(app)" class="ng-hide animateMe" ng-show="!app.updateVersion"><i class="fa fa-arrow-up text-success"></i></a></div>
                     <div class="col-xs-4"><a href="" ng-click="showUninstall(app)"><i class="fa fa-remove"></i></a></div>
                 </div>
                 <!-- <div class="clearfix"></div> -->
