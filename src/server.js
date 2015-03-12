@@ -7,6 +7,7 @@ var apps = require('./apps'),
     async = require('async'),
     auth = require('./auth.js'),
     cloudron = require('./cloudron.js'),
+    developer = require('./developer.js'),
     config = require('../config.js'),
     database = require('./database.js'),
     debug = require('debug')('box:server'),
@@ -85,7 +86,7 @@ function initializeExpressSync() {
     router.get ('/api/v1/cloudron/status', routes.cloudron.getStatus);
 
     // developer routes
-    router.post ('/api/v1/developer/login', routes.cloudron.login);
+    router.post ('/api/v1/developer/login', routes.developer.login);
 
     // private routes
     router.get ('/api/v1/cloudron/config', rootScope, routes.cloudron.getConfig);
@@ -162,6 +163,7 @@ function start(callback) {
         database.initialize,
         apps.initialize,
         cloudron.initialize,
+        developer.initialize,
         updater.initialize,
         mailer.initialize,
         gHttpServer.listen.bind(gHttpServer, config.get('port'), '127.0.0.1')
