@@ -129,6 +129,7 @@ function installApp(req, res, next) {
  */
 function configureApp(req, res, next) {
     assert(typeof req.body === 'object');
+    assert(typeof req.params.id === 'string');
 
     var data = req.body;
 
@@ -137,9 +138,9 @@ function configureApp(req, res, next) {
     if (('portBindings' in data) && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
     if (typeof data.accessRestriction !== 'string') return next(new HttpError(400, 'accessRestriction is required'));
 
-    debug('Configuring app id:%s location:%s bindings:%j', data.appId, data.location, data.portBindings);
+    debug('Configuring app id:%s location:%s bindings:%j', req.params.id, data.location, data.portBindings);
 
-    apps.configure(data.appId, data.location, data.portBindings, data.accessRestriction, function (error) {
+    apps.configure(req.params.id, data.location, data.portBindings, data.accessRestriction, function (error) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
         if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
         if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));
