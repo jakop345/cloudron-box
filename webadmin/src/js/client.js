@@ -45,7 +45,8 @@ angular.module('Application').service('Client', ['$http', 'md5', function ($http
             update: { box: null, apps: null },
             isDev: false,
             progress: {},
-            isCustomDomain: false
+            isCustomDomain: false,
+            developerMode: false
         };
         this._installedApps = [];
 
@@ -91,7 +92,9 @@ angular.module('Application').service('Client', ['$http', 'md5', function ($http
         this._config.update = config.update;
         this._config.isDev = config.isDev;
         this._config.progress = config.progress;
+        this._config.progress = config.progress;
         this._config.isCustomDomain = config.isCustomDomain;
+        this._config.developerMode = config.developerMode;
 
         var that = this;
 
@@ -139,6 +142,20 @@ angular.module('Application').service('Client', ['$http', 'md5', function ($http
             that.setUserInfo(data);
 
             callback(null, data);
+        }).error(defaultErrorHandler(callback));
+    };
+
+    Client.prototype.changeDeveloperMode = function (enabled, password, callback) {
+        var that = this;
+
+        var data = { password: password, enabled: enabled };
+        $http.post('/api/v1/developer', data).success(function (data, status) {
+            if (status !== 200) return callback(new ClientError(status, data));
+
+            // will get overriden after polling for config, but ensures quick UI update
+            that._config.developerMode = enabled;
+
+            callback(null);
         }).error(defaultErrorHandler(callback));
     };
 
