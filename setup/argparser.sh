@@ -14,6 +14,7 @@ arg_fqdn=""
 arg_token=""
 arg_version=""
 arg_is_custom_domain="false"
+arg_developer_mode=""
 
 args=$(getopt -o "" -l "data:" -n "$0" -- "$@")
 eval set -- "${args}"
@@ -28,6 +29,9 @@ EOF
         # read possibly empty parameters here
         arg_tls_cert=$(echo "$2" | $json tlsCert)
         arg_tls_key=$(echo "$2" | $json tlsKey)
+
+        arg_developer_mode=$(echo "$2" | $json developerMode)
+        [[ "${arg_developer_mode}" == "" ]] && arg_developer_mode="false"
 
         arg_restore_url=$(echo "$2" | $json restoreUrl)
         [[ "${arg_restore_url}" == "null" ]] && arg_restore_url=""
@@ -54,4 +58,4 @@ echo "version: ${arg_version}"
 echo "custom domain: ${arg_is_custom_domain}"
 echo "tls cert: ${arg_tls_cert}"
 echo "tls key: ${arg_tls_key}"
-
+echo "developer mode: ${arg_developer_mode}"

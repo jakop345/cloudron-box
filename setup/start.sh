@@ -202,7 +202,8 @@ cat > "${CONFIG_DIR}/cloudron.conf" <<CONF_END
         "postgresql": {
             "rootPassword": "${postgresql_root_password}"
         }
-    }
+    },
+    "developerMode": ${arg_developer_mode}
 }
 CONF_END
 
