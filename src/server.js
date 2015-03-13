@@ -86,6 +86,7 @@ function initializeExpressSync() {
     router.get ('/api/v1/cloudron/status', routes.cloudron.getStatus);
 
     // developer routes
+    router.get ('/api/v1/developer', routes.developer.enabled, routes.developer.status);
     router.post ('/api/v1/developer/login', routes.developer.login);
 
     // private routes

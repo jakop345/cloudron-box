@@ -9,8 +9,21 @@ var developer = require('../developer.js'),
     HttpSuccess = require('connect-lastmile').HttpSuccess;
 
 exports = module.exports = {
+    enabled: enabled,
+    status: status,
     login: login
 };
+
+function enabled(req, res, next) {
+    developer.enabled(function (error, enabled) {
+        if (enabled) return next();
+        next(new HttpError(412, 'Developer mode not enabled'));
+    });
+}
+
+function status(req, res, next) {
+    next(new HttpSuccess(200, {}));
+}
 
 function login(req, res, next) {
     passport.authenticate('local', function (error, user) {

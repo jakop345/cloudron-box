@@ -6,12 +6,14 @@
 exports = module.exports = {
     DeveloperError: DeveloperError,
 
+    enabled: enabled,
     issueDeveloperToken: issueDeveloperToken
 };
 
 var assert = require('assert'),
     debug = require('debug')('box:developer'),
     tokendb = require('./tokendb.js'),
+    config = require('../config.js'),
     util = require('util');
 
 function DeveloperError(reason, errorOrMessage) {
@@ -34,6 +36,12 @@ function DeveloperError(reason, errorOrMessage) {
 }
 util.inherits(DeveloperError, Error);
 DeveloperError.INTERNAL_ERROR = 'Internal Error';
+
+function enabled(callback) {
+    assert(typeof callback === 'function');
+
+    callback(null, config.developerMode());
+}
 
 function issueDeveloperToken(user, callback) {
     assert(typeof user === 'object');
