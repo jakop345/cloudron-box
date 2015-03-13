@@ -532,8 +532,9 @@ function checkManifestConstraints(manifest) {
     return null;
 }
 
-function exec(appId, callback) {
+function exec(appId, cmd, callback) {
     assert(typeof appId === 'string');
+    assert(util.isArray(cmd) && cmd.length > 0);
     assert(typeof callback === 'function');
 
     appdb.get(appId, function (error, app) {
@@ -546,7 +547,7 @@ function exec(appId, callback) {
             AttachStdout: true,
             AttachStderr: true,
             Tty: true,
-            Cmd: [ '/bin/bash' ]
+            Cmd: cmd
         };
         container.exec(execOptions, function (error, exec) {
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
