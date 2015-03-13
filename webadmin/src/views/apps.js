@@ -131,19 +131,28 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
             // app.portBindings['TEST_SSH'] = { port: 1337, description: 'SSH server'};
 
             $scope.appupdate.manifest = manifest;
-            $scope.appupdate.portBindings = angular.copy(app.portBindings);
+            var portBindings = angular.copy(app.portBindings);
+            var portsChanged = false;
 
             // detect new portbindings
             for (var env in $scope.appupdate.manifest.tcpPorts) {
-                $scope.appupdate.portBindings[env] = $scope.appupdate.manifest.tcpPorts[env];
-                $scope.appupdate.portBindings[env].isNew = !$scope.appupdate.app.portBindings[env];
+                portBindings[env] = $scope.appupdate.manifest.tcpPorts[env];
+                if (!$scope.appupdate.app.portBindings[env]) {
+                    portBindings[env].isNew = true;
+                    portsChanged = true;
+                }
             }
 
             // detect obsolete portbindings
             for (env in $scope.appupdate.app.portBindings) {
-                if ($scope.appupdate.manifest.tcpPorts[env]) continue;
-                $scope.appupdate.portBindings[env].isObsolete = true;
+                if (!$scope.appupdate.manifest.tcpPorts[env]) {
+                    portBindings[env].isObsolete = true;
+                    portsChanged = true;
+                }
             }
+
+            if (portsChanged) $scope.appupdate.portBindings = portBindings;
+            else $scope.appupdate.portBindings = {};
 
             $('#appUpdateModal').modal('show');
         });
