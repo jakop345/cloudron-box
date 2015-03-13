@@ -164,7 +164,12 @@ function initializeExpressSync() {
         };
 
         // route through express middleware
-        app(req, res, function (error) { if (error) socket.destroy(); });
+        app(req, res, function (error) {
+            if (error) {
+                console.error(error);
+                socket.destroy();
+            }
+        });
     });
 
     return httpServer;
