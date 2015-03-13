@@ -221,23 +221,22 @@ function downloadImage(app, callback) {
 }
 
 function createContainer(app, callback) {
-    var manifest = app.manifest;
-
     appdb.getPortBindings(app.id, function (error, portBindings) {
         if (error) return callback(error);
 
         var manifest = app.manifest;
-        var exposedPorts = { };
+        var exposedPorts = {};
+        var env = [];
+        var e, hostPort, containerPort;
 
-        for (var e in portBindings) {
-            var hostPort = portBindings[e];
-            var containerPort = manifest.tcpPorts[e].containerPort || hostPort;
-            exposedPorts[containerPort + '/tcp'] = { };
+        for (e in portBindings) {
+            hostPort = portBindings[e];
+            containerPort = manifest.tcpPorts[e].containerPort || hostPort;
+            exposedPorts[containerPort + '/tcp'] = {};
         }
 
-        var env = [ ];
-        for (var e in portBindings) {
-            var hostPort = portBindings[e];
+        for (e in portBindings) {
+            hostPort = portBindings[e];
             env.push(e + '=' + hostPort);
         }
 
