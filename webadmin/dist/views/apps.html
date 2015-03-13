@@ -57,10 +57,6 @@
 </div>
 
 <!-- Modal uninstall app -->
-<style>
-
-</style>
-
 <div class="modal fade" id="appUninstallModal" tabindex="-1" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -161,7 +157,7 @@
             <div class="grid-item-bottom">
                 <div class="row">
                     <div class="col-xs-4"><a href="" ng-click="showConfigure(app)"><i class="fa fa-wrench"></i></a></div>
-                    <div class="col-xs-4"><a href="" ng-click="showUpdate(app)" class="ng-hide animateMe" ng-show="!app.updateVersion"><i class="fa fa-arrow-up text-success"></i></a></div>
+                    <div class="col-xs-4"><a href="" ng-click="showUpdate(app)" class="ng-hide animateMe" ng-show="app.updateVersion"><i class="fa fa-arrow-up text-success"></i></a></div>
                     <div class="col-xs-4"><a href="" ng-click="showUninstall(app)"><i class="fa fa-remove"></i></a></div>
                 </div>
                 <!-- <div class="clearfix"></div> -->

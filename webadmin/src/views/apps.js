@@ -152,7 +152,13 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
     $scope.doUpdate = function (form) {
         $scope.appupdate.error.password = null;
 
-        Client.updateApp($scope.appupdate.app.id, $scope.appupdate.manifest, $scope.appupdate.portBindings, $scope.appupdate.password, function (error) {
+        var portBindings = {};
+        for (var env in $scope.appupdate.portBindings) {
+            if ($scope.appupdate.portBindings[env].isObsolete) continue;
+            portBindings[env] = $scope.appupdate.portBindings[env].hostPort;
+        }
+
+        Client.updateApp($scope.appupdate.app.id, $scope.appupdate.manifest, portBindings, $scope.appupdate.password, function (error) {
             if (error) {
                 if (error.statusCode === 403) {
                     $scope.appupdate.password = '';
