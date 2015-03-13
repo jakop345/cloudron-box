@@ -75,7 +75,7 @@ function initializeExpressSync() {
     var profileScope = routes.oauth2.scope('profile');
     var usersScope = routes.oauth2.scope('users');
     var appsScope = routes.oauth2.scope('apps');
-    var developScope = routes.oauth2.scope('develop');
+    var developerScope = routes.oauth2.scope('developer');
     var settingsScope = routes.oauth2.scope('settings');
 
     // csrf protection
@@ -87,8 +87,8 @@ function initializeExpressSync() {
     router.get ('/api/v1/cloudron/status', routes.cloudron.getStatus);
 
     // developer routes
-    router.post('/api/v1/developer', developScope, routes.user.requireAdmin, routes.user.verifyPassword, routes.developer.setEnabled);
-    router.get ('/api/v1/developer', developScope, routes.developer.enabled, routes.developer.status);
+    router.post('/api/v1/developer', developerScope, routes.user.requireAdmin, routes.user.verifyPassword, routes.developer.setEnabled);
+    router.get ('/api/v1/developer', developerScope, routes.developer.enabled, routes.developer.status);
     router.post('/api/v1/developer/login', routes.developer.enabled, routes.developer.login);
 
     // private routes
