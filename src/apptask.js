@@ -621,6 +621,10 @@ function install(app, callback) {
         updateApp.bind(null, app, { installationProgress: 'Creating OAuth proxy credentials' }),
         allocateOAuthProxyCredentials.bind(null, app),
 
+        // allocate access token
+        updateApp.bind(null, app, { installationProgress: 'Allocate access token' }),
+        allocateAccessToken.bind(null, app),
+
         // download the image
         updateApp.bind(null, app, { installationProgress: 'Downloading image' }),
         downloadImage.bind(null, app),
@@ -684,6 +688,11 @@ function restore(app, callback) {
         removeOAuthProxyCredentials.bind(null, app),
         allocateOAuthProxyCredentials.bind(null, app),
 
+        // allocate access token
+        updateApp.bind(null, app, { installationProgress: 'Allocate access token' }),
+        removeAccessToken.bind(null, app),
+        allocateAccessToken.bind(null, app),
+
         // download the image
         updateApp.bind(null, app, { installationProgress: 'Downloading image' }),
         downloadImage.bind(null, app),
@@ -734,6 +743,9 @@ function configure(app, callback) {
         updateApp.bind(null, app, { installationProgress: 'Remove OAuth credentials' }),
         removeOAuthProxyCredentials.bind(null, app),
 
+        updateApp.bind(null, app, { installationProgress: 'Remove access token' }),
+        removeAccessToken.bind(null, app),
+
         updateApp.bind(null, app, { installationProgress: 'Configuring Nginx' }),
         configureNginx.bind(null, app),
         configureNakedDomain.bind(null, app),
@@ -743,6 +755,10 @@ function configure(app, callback) {
 
         updateApp.bind(null, app, { installationProgress: 'Create OAuth proxy credentials' }),
         allocateOAuthProxyCredentials.bind(null, app),
+
+        // allocate access token
+        updateApp.bind(null, app, { installationProgress: 'Allocate access token' }),
+        allocateAccessToken.bind(null, app),
 
         // addons like oauth might rely on the app's fqdn
         updateApp.bind(null, app, { installationProgress: 'Setting up addons' }),
@@ -855,6 +871,9 @@ function uninstall(app, callback) {
 
         updateApp.bind(null, app, { installationProgress: 'Unregistering subdomain' }),
         unregisterSubdomain.bind(null, app),
+
+        updateApp.bind(null, app, { installationProgress: 'Remove access token' }),
+        removeAccessToken.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: 'Remove OAuth credentials' }),
         removeOAuthProxyCredentials.bind(null, app),
