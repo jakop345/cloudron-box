@@ -54,7 +54,6 @@ $GNU_SED -e "s/^pid .*/pid \/tmp\/nginx.pid;/" -i "${NGINX_ROOT}/nginx.conf"
 readonly WEBADMIN_ID=abcdefg
 readonly WEBADMIN_SCOPES="root,developer,profile,users,apps,settings,roleUser"
 mysql --user=root --password="" -e "REPLACE INTO clients (id, appId, clientSecret, redirectURI, scope) VALUES (\"cid-webadmin\", \"webadmin\", \"secret-webadmin\", \"https://${FQDN}\", \"${WEBADMIN_SCOPES}\")" box
-mysql --user=root --password="" -e "REPLACE INTO apps (id, appStoreId, version, installationState, installationProgress, runState, healthy, containerId, manifestJson, httpPort, location, dnsRecordId, accessRestriction) VALUES (\"testApp\", \"testAppAppstoreId\", \"1.2.3\", \"installed\", \"done\", \"running\", \"1\", \"testAppContainerId\", \"{}\", 1337, \"testAppLocation\", \"testAppDnsRecordId\", \"public\")" box
 
 # start nginx
 echo "Restarting nginx..."
