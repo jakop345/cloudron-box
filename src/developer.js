@@ -7,6 +7,7 @@ exports = module.exports = {
     DeveloperError: DeveloperError,
 
     enabled: enabled,
+    setEnabled: setEnabled,
     issueDeveloperToken: issueDeveloperToken
 };
 
@@ -41,6 +42,15 @@ function enabled(callback) {
     assert(typeof callback === 'function');
 
     callback(null, config.developerMode());
+}
+
+function setEnabled(enabled, callback) {
+    assert(typeof enabled === 'boolean');
+    assert(typeof callback === 'function');
+
+    config.set('developerMode', enabled);
+
+    callback(null);
 }
 
 function issueDeveloperToken(user, callback) {

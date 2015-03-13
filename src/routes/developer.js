@@ -10,6 +10,7 @@ var developer = require('../developer.js'),
 
 exports = module.exports = {
     enabled: enabled,
+    setEnabled: setEnabled,
     status: status,
     login: login
 };
@@ -18,6 +19,15 @@ function enabled(req, res, next) {
     developer.enabled(function (error, enabled) {
         if (enabled) return next();
         next(new HttpError(412, 'Developer mode not enabled'));
+    });
+}
+
+function setEnabled(req, res, next) {
+    if (typeof req.body.enabled !== 'boolean') return next(new HttpError(400, 'enabled must be boolean'));
+
+    developer.setEnabled(req.body.enabled, function (error) {
+        if (error) return next(new HttpError(500, error));
+        next(new HttpSuccess(200, {}));
     });
 }
 
