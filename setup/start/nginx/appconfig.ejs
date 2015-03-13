@@ -34,6 +34,7 @@ server {
     # upgrade is a hop-by-hop header (http://nginx.org/en/docs/http/websocket.html)
     proxy_set_header Upgrade $http_upgrade;
     proxy_set_header Connection $connection_upgrade;
+    proxy_read_timeout 2m;
 
     error_page 500 502 503 504 =302 @appstatus;
     location @appstatus {
