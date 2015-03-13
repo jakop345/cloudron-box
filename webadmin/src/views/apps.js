@@ -1,6 +1,9 @@
 'use strict';
 
 angular.module('Application').controller('AppsController', ['$scope', '$location', 'Client', 'AppStore', function ($scope, $location, Client, AppStore) {
+    $scope.HOST_PORT_MIN = 1024;
+    $scope.HOST_PORT_MAX = 65535;
+
     $scope.installedApps = Client.getInstalledApps();
     $scope.config = Client.getConfig();
 
@@ -42,8 +45,6 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appuninstall.app = {};
         $scope.appuninstall.error = {};
         $scope.appuninstall.password = '';
-        $scope.appuninstall.manifest = {};
-        $scope.appuninstall.portBindings = {};
 
         $scope.uninstall_form.$setPristine();
         $scope.uninstall_form.$setUntouched();
@@ -54,9 +55,12 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
 
         $scope.appconfigure.app = app;
         $scope.appconfigure.location = app.location;
-        $scope.appconfigure.portBindings = app.manifest.tcpPorts;
+        $scope.appconfigure.portBindings = angular.copy(app.portBindings);
         $scope.appconfigure.accessRestriction = app.accessRestriction;
 
+console.dir(app);
+console.dir($scope.appconfigure.portBindings);
+console.log('showing app');
         $('#appConfigureModal').modal('show');
     };
 
@@ -65,12 +69,10 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appconfigure.error.name = null;
         $scope.appconfigure.error.password = null;
 
-        var portBindings = { };
-        for (var env in $scope.appconfigure.portBindings) {
-            portBindings[env] = $scope.appconfigure.portBindings[env].hostPort;
-        }
+console.log('Doing configure');
+console.dir($scope.appconfigure.portBindings);
 
-        Client.configureApp($scope.appconfigure.app.id, $scope.appconfigure.password, { location: $scope.appconfigure.location, portBindings: portBindings, accessRestriction: $scope.appconfigure.accessRestriction }, function (error) {
+        Client.configureApp($scope.appconfigure.app.id, $scope.appconfigure.password, { location: $scope.appconfigure.location, portBindings: $scope.appconfigure.portBindings, accessRestriction: $scope.appconfigure.accessRestriction }, function (error) {
             if (error) {
                 if (error.statusCode === 403) {
                     $scope.appconfigure.error.password = 'Wrong password provided.';
