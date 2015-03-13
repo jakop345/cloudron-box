@@ -20,8 +20,7 @@ var apps = require('./apps'),
     routes = require('./routes/index.js'),
     updater = require('./updater.js');
 
-var gHttpServer = null,
-    gApp = null;
+var gHttpServer = null;
 
 exports = module.exports = {
     start: start,
@@ -29,7 +28,7 @@ exports = module.exports = {
 };
 
 function initializeExpressSync() {
-    gApp = express();
+    var app = express();
 
     var QUERY_LIMIT = '10mb', // max size for json and urlencoded queries
         FIELD_LIMIT = 2 * 1024; // max fields that can appear in multipart
@@ -39,20 +38,20 @@ function initializeExpressSync() {
     var json = middleware.json({ strict: true, limit: QUERY_LIMIT }), // application/json
         urlencoded = middleware.urlencoded({ extended: false, limit: QUERY_LIMIT }); // application/x-www-form-urlencoded
 
-    gApp.set('views', path.join(__dirname, 'oauth2views'));
-    gApp.set('view options', { layout: true, debug: true });
-    gApp.set('view engine', 'ejs');
+    app.set('views', path.join(__dirname, 'oauth2views'));
+    app.set('view options', { layout: true, debug: true });
+    app.set('view engine', 'ejs');
 
     if (process.env.NODE_ENV === 'test') {
-       gApp.use(express.static(path.join(__dirname, '/../webadmin')));
+       app.use(express.static(path.join(__dirname, '/../webadmin')));
     } else {
-        gApp.use(middleware.morgan('dev', { immediate: false }));
+        app.use(middleware.morgan('dev', { immediate: false }));
     }
 
     var router = new express.Router();
     router.del = router.delete; // amend router.del for readability further on
 
-    gApp
+    app
        .use(middleware.timeout(REQUEST_TIMEOUT))
        .use(json)
        .use(urlencoded)
@@ -148,15 +147,17 @@ function initializeExpressSync() {
     // settings routes
     router.get ('/api/v1/settings/naked_domain', settingsScope, routes.settings.getNakedDomain);
     router.post('/api/v1/settings/naked_domain', settingsScope, routes.settings.setNakedDomain);
+
+    return app;
 }
 
 function start(callback) {
     assert(typeof callback === 'function');
-    assert(gApp === null, 'Server is already up and running.');
+    assert(gHttpServer === null, 'Server is already up and running.');
 
-    initializeExpressSync();
+    var app = initializeExpressSync();
 
-    gHttpServer = http.createServer(gApp);
+    gHttpServer = http.createServer(app);
 
     async.series([
         auth.initialize,
@@ -185,7 +186,7 @@ function stop(callback) {
     ], function (error) {
         if (error) console.error(error);
 
-        gApp = null;
+        gHttpServer = null;
 
         callback(null);
     });
