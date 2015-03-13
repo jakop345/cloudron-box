@@ -85,7 +85,7 @@ function initConfig() {
             port: 3306,
             name: 'boxtest'
         };
-        data.developerMode = true;
+        data.developerMode = false;
     } else if (exports.LOCAL) {
         data.port = 3000;
         data.apiServerOrigin = 'https://cloudron-dev.herokuapp.com';

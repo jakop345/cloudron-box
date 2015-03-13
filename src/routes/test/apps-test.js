@@ -372,6 +372,8 @@ describe('App API', function () {
     });
 
     it('app install succeeds without password but developer token', function (done) {
+        config.set('developerMode', true);
+
         request.post(SERVER_URL + '/api/v1/developer/login')
                .send({ username: USERNAME, password: PASSWORD })
                .end(function (error, result) {

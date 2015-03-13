@@ -69,17 +69,6 @@ describe('Developer API', function () {
 
         after(cleanup);
 
-        it('succeeds (not enabled)', function (done) {
-            config.set('developerMode', false);
-
-            request.get(SERVER_URL + '/api/v1/developer')
-                   .end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(412);
-                done();
-            });
-        });
-
         it('succeeds (enabled)', function (done) {
             config.set('developerMode', true);
 
@@ -90,10 +79,23 @@ describe('Developer API', function () {
                 done();
             });
         });
+
+        it('succeeds (not enabled)', function (done) {
+            config.set('developerMode', false);
+
+            request.get(SERVER_URL + '/api/v1/developer')
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(412);
+                done();
+            });
+        });
     });
 
     describe('login', function () {
         before(function (done) {
+            config.set('developerMode', true);
+
             async.series([
                 setup,
 
