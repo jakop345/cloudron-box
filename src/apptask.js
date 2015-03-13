@@ -244,27 +244,33 @@ function createContainer(app, callback) {
         env.push('CLOUDRON=1');
         env.push('ADMIN_ORIGIN' + '=' + config.adminOrigin());
 
-        addons.getEnvironment(app.id, function (error, addonEnv) {
-            if (error) return callback(new Error('Error getting addon env:', + error));
+        tokendb.getByIdentifier('app-' + app.id, function (error, results) {
+            if (error || results.length === 0) return callback(new Error('No access token found: ' + error));
 
-            var containerOptions = {
-                name: app.id,
-                Hostname: config.appFqdn(app.location),
-                Tty: true,
-                Image: manifest.dockerImage,
-                Cmd: null,
-                Volumes: { },
-                VolumesFrom: '',
-                Env: env.concat(addonEnv),
-                ExposedPorts: exposedPorts
-            };
+            env.push('ACCESS_TOKEN' + '=' + results[0].accessToken);
 
-            debug('Creating container for %s', manifest.dockerImage);
+            addons.getEnvironment(app.id, function (error, addonEnv) {
+                if (error) return callback(new Error('Error getting addon env: ' + error));
 
-            docker.createContainer(containerOptions, function (error, container) {
-                if (error && error.statusCode !== 409) return callback(new Error('Error creating container:' + error));
+                var containerOptions = {
+                    name: app.id,
+                    Hostname: config.appFqdn(app.location),
+                    Tty: true,
+                    Image: manifest.dockerImage,
+                    Cmd: null,
+                    Volumes: { },
+                    VolumesFrom: '',
+                    Env: env.concat(addonEnv),
+                    ExposedPorts: exposedPorts
+                };
 
-                updateApp(app, { containerId: container.id }, callback);
+                debug('Creating container for %s', manifest.dockerImage);
+
+                docker.createContainer(containerOptions, function (error, container) {
+                    if (error && error.statusCode !== 409) return callback(new Error('Error creating container: ' + error));
+
+                    updateApp(app, { containerId: container.id }, callback);
+                });
             });
         });
     });
