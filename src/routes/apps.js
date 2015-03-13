@@ -283,6 +283,7 @@ function exec(req, res, next) {
         if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
         if (error) return next(new HttpError(500, error));
 
+        req.clearTimeout();
         res.sendUpgradeHandshake();
 
         duplexStream.pipe(res.socket);

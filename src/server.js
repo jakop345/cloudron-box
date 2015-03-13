@@ -156,7 +156,7 @@ function initializeExpressSync() {
         // create a node response object for express
         var res = new http.ServerResponse({});
         res.assignSocket(socket);
-        res.sendUpgradeHandshake = function () {
+        res.sendUpgradeHandshake = function () { // could extend express.response as well
             socket.write('HTTP/1.1 101 TCP Handshake\r\n' +
                          'Upgrade: tcp\r\n' +
                          'Connection: Upgrade\r\n' +
@@ -164,7 +164,7 @@ function initializeExpressSync() {
         };
 
         // route through express middleware
-        app(req, res);
+        app(req, res, function (error) { if (error) socket.destroy(); });
     });
 
     return httpServer;
