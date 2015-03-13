@@ -4,6 +4,10 @@
 
 'use strict';
 
+// inject MAX_SAFE_INTEGER for node prior 0.12
+// TODO remove this if we move to newer node version on the cloudron
+if (!Number.MAX_SAFE_INTEGER) Number.MAX_SAFE_INTEGER = 9007199254740991;
+
 require('supererror')({ splatchError: true });
 
 var addons = require('./addons.js'),
