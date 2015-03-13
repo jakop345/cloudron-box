@@ -89,6 +89,40 @@
     </div>
 </div>
 
+<!-- Modal developer mode -->
+<div class="modal fade" id="developerModeChangeModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" ng-hide="config.developerMode">Enable Developer Mode</h4>
+                <h4 class="modal-title" ng-show="config.developerMode">Disable Developer Mode</h4>
+            </div>
+            <div class="modal-body">
+                <form name="developerModeChangeForm" class="form-signin" role="form" novalidate ng-submit="doChangeDeveloperMode(developerModeChangeForm)" autocomplete="off">
+                    <fieldset>
+                        <div class="form-group" ng-class="{ 'has-error': (developerModeChangeForm.password.$dirty && developerModeChangeForm.password.$invalid)}">
+                            <label class="control-label" for="inputDeveloperModeChangePassword">Give your password to verify that you are performing that action</label>
+                            <div class="control-label" ng-show="(!developerModeChangeForm.password.$dirty && developerModeChange.error.password) || (developerModeChangeForm.password.$dirty && developerModeChangeForm.password.$invalid)">
+                                <small ng-show="developerModeChangeForm.password.$error.required">A password is required</small>
+                                <small ng-show="developerModeChangeForm.password.$error.minlength">The password is too short</small>
+                                <small ng-show="developerModeChangeForm.password.$error.maxlength">The password is too long</small>
+                                <small ng-show="developerModeChangeForm.password.$dirty && developerModeChange.error.password">Invalid pasword</small>
+                            </div>
+                            <input type="password" class="form-control" ng-model="developerModeChange.password" id="inputDeveloperModeChangePassword" name="password" ng-maxlength="512" ng-minlength="3" required autofocus>
+                        </div>
+                        <input class="ng-hide" type="submit" ng-disabled="developerModeChangeForm.$invalid"/>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" ng-hide="config.developerMode" ng-click="doChangeDeveloperMode(developerModeChangeForm)" ng-disabled="developerModeChangeForm.$invalid || busy">Enable</button>
+                <button type="button" class="btn btn-success" ng-show="config.developerMode" ng-click="doChangeDeveloperMode(developerModeChangeForm)" ng-disabled="developerModeChangeForm.$invalid || busy">Disable</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div style="max-width: 600px; margin: 0 auto;">
     <div class="text-left">
         <h1>Account</h1>
@@ -155,6 +189,26 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div style="max-width: 600px; margin: 0 auto;" ng-show="user.admin">
+    <div class="text-left">
+        <h3>Advanced</h3>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom: 15px;" ng-show="user.admin">
+    <div class="grid-item-top">
+        <div class="row">
+            <div class="col-xs-6">
+                Developer Mode
+            </div>
+            <div class="col-xs-6 text-right">
+                <a href="" class="text-danger" ng-show="config.developerMode" ng-click="showChangeDeveloperMode()">Enabled</a>
+                <a href="" ng-hide="config.developerMode" ng-click="showChangeDeveloperMode()">Disabled</a>
             </div>
         </div>
     </div>

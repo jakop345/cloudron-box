@@ -22,6 +22,12 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
         password: ''
     };
 
+    $scope.developerModeChange = {
+        busy: false,
+        error: {},
+        password: ''
+    };
+
     function passwordChangeReset (form) {
         $scope.passwordchange.error.password = null;
         $scope.passwordchange.error.newPassword = null;
@@ -46,6 +52,14 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
             form.$setPristine();
             form.$setUntouched();
         }
+    }
+
+    function developerModeChangeReset () {
+        $scope.developerModeChange.error.password = null;
+        $scope.developerModeChange.password = '';
+
+        $scope.developerModeChangeForm.$setPristine();
+        $scope.developerModeChangeForm.$setUntouched();
     }
 
     $scope.doChangePassword = function (form) {
@@ -98,6 +112,28 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
         });
     };
 
+    $scope.doChangeDeveloperMode = function () {
+        $scope.developerModeChange.error.password = null;
+        $scope.developerModeChange.busy = true;
+
+        Client.changeDeveloperMode(!$scope.config.developerMode, $scope.developerModeChange.password, function (error) {
+            if (error) {
+                if (error.statusCode === 403) {
+                    $scope.developerModeChange.error.password = true;
+                    $scope.developerModeChange.password = '';
+                } else {
+                    console.error('Unable to change password.', error);
+                }
+                return;
+            }
+
+            $scope.developerModeChange.busy = false;
+            developerModeChangeReset();
+
+            $('#developerModeChangeModal').modal('hide');
+        });
+    };
+
     $scope.showChangePassword = function (form) {
         passwordChangeReset(form);
 
@@ -108,6 +144,12 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
         emailChangeReset(form);
 
         $('#emailChangeModal').modal('show');
+    };
+
+    $scope.showChangeDeveloperMode = function () {
+        developerModeChangeReset();
+
+        $('#developerModeChangeModal').modal('show');
     };
 
     $scope.removeAccessTokens = function (client, event) {
@@ -128,7 +170,7 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
     });
 
     // setup all the dialog focus handling
-    ['passwordChangeModal', 'emailChangeModal'].forEach(function (id) {
+    ['passwordChangeModal', 'emailChangeModal', 'developerModeChangeModal'].forEach(function (id) {
         $('#' + id).on('shown.bs.modal', function () {
             $(this).find("[autofocus]:first").focus();
         });
