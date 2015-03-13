@@ -133,7 +133,6 @@ function configureApp(req, res, next) {
     var data = req.body;
 
     if (!data) return next(new HttpError(400, 'Cannot parse data field'));
-    if (typeof data.password !== 'string') return next(new HttpError(401, 'password is missing'));
     if (typeof data.appId !== 'string') return next(new HttpError(400, 'appId is required'));
     if (('portBindings' in data) && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
     if (typeof data.accessRestriction !== 'string') return next(new HttpError(400, 'accessRestriction is required'));
