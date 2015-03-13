@@ -290,6 +290,7 @@ describe('Cloudron', function () {
                 expect(result.body.progress).to.be.an('object');
                 expect(result.body.update).to.be.an('object');
                 expect(result.body.version).to.eql(null);
+                expect(result.body.developerMode).to.be.a('boolean');
                 done();
             });
         });

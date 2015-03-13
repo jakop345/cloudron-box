@@ -216,7 +216,8 @@ function getConfig(callback) {
         version: config.version(),
         update: updater.getUpdateInfo(),
         progress: progress.get(),
-        isCustomDomain: config.isCustomDomain()
+        isCustomDomain: config.isCustomDomain(),
+        developerMode: config.developerMode()
     });
 }
 
