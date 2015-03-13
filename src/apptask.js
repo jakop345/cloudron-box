@@ -8,6 +8,7 @@ require('supererror')({ splatchError: true });
 
 var addons = require('./addons.js'),
     appdb = require('./appdb.js'),
+    tokendb = require('./tokendb.js'),
     apps = require('./apps.js'),
     assert = require('assert'),
     async = require('async'),
@@ -48,6 +49,8 @@ exports = module.exports = {
     _deleteVolume: deleteVolume,
     _allocateOAuthProxyCredentials: allocateOAuthProxyCredentials,
     _removeOAuthProxyCredentials: removeOAuthProxyCredentials,
+    _allocateAccessToken: allocateAccessToken,
+    _removeAccessToken: removeAccessToken,
     _verifyManifest: verifyManifest,
     _registerSubdomain: registerSubdomain,
     _unregisterSubdomain: unregisterSubdomain,
@@ -342,6 +345,32 @@ function removeOAuthProxyCredentials(app, callback) {
     clientdb.delByAppId('proxy-' + app.id, function (error) {
         if (error && error.reason !== DatabaseError.NOT_FOUND) {
             console.error('Error removing OAuth client id', error);
+            return callback(error);
+        }
+
+        callback(null);
+    });
+}
+
+function allocateAccessToken(app, callback) {
+    assert(typeof app === 'object');
+    assert(typeof callback === 'function');
+
+    var token = tokendb.generateToken();
+    var expiresAt = Number.MAX_SAFE_INTEGER;    // basically never expire
+    var scopes = 'profile,users';               // TODO This should be put into the manifest and the user should know those
+    var clientId = '';                          // meaningless for apps so far
+
+    tokendb.add(token, 'app-' + app.id, clientId, expiresAt, scopes, callback);
+}
+
+function removeAccessToken(app, callback) {
+    assert(typeof app === 'object');
+    assert(typeof callback === 'function');
+
+    tokendb.delByIdentifier('app-' + app.id, function (error) {
+        if (error && error.reason !== DatabaseError.NOT_FOUND) {
+            console.error('Error removing access token', error);
             return callback(error);
         }
 

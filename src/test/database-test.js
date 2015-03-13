@@ -320,7 +320,7 @@ describe('database', function () {
             accessToken: tokendb.generateToken(),
             identifier: 'user-1',
             clientId: 'clientid-1',
-            expires: Date.now() + 60 * 60000,
+            expires: Number.MAX_SAFE_INTEGER,
             scope: '*'
         };
         var TOKEN_2 = {
