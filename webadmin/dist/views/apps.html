@@ -57,6 +57,10 @@
 </div>
 
 <!-- Modal uninstall app -->
+<style>
+
+</style>
+
 <div class="modal fade" id="appUninstallModal" tabindex="-1" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -94,11 +98,13 @@
             <div class="modal-body">
                 <fieldset>
                     <form class="form-signin" role="form" name="update_form" ng-submit="doUpdate(update_form)" autocomplete="off">
-                        <div ng-repeat="(env, portInfo) in appupdate.newPortBindings">
+                        <div ng-repeat="(env, portInfo) in appupdate.portBindings" ng-class="{ 'newPort': portInfo.isNew, 'obsoletePort': portInfo.isObsolete }">
                             <ng-form name="portInfo_form">
-                                <div class="form-group" ng-class="{ 'has-error': portInfo_form.itemName{{$index}}.$dirty && portInfo_form.itemName{{$index}}.$invalid }">
-                                    <label class="control-label" for="inputPortInfo{{env}}">New {{ portInfo.description }} ({{ hostPortMin }} - {{ hostPortMax }})</label>
-                                    <input type="number" class="form-control" ng-model="appupdate.portBindings[env].hostPort" id="inputPortInfo{{port}}" later-name="itemName{{$index}}" min="{{hostPortMin}}" max="{{hostPortMax}}" required>
+                                <div class="form-group" ng-class="{ 'has-error': portInfo_form.itemName{{$index}}.$dirty && portInfo_form.itemName{{$index}}.$invalid, 'text-muted': portInfo.isObsolete }">
+                                    <span ng-show="portInfo.isNew">New - </span>
+                                    <span ng-show="portInfo.isObsolete">Obsolete - </span>
+                                    <label class="control-label" for="inputPortInfo{{env}}">{{ portInfo.description }} ({{ hostPortMin }} - {{ hostPortMax }})</label>
+                                    <input type="number" class="form-control" ng-model="appupdate.portBindings[env].hostPort" id="inputPortInfo{{port}}" later-name="itemName{{$index}}" min="{{hostPortMin}}" max="{{hostPortMax}}" ng-disabled="portInfo.isObsolete" required>
                                 </div>
                             </ng-form>
                         </div>
@@ -155,7 +161,7 @@
             <div class="grid-item-bottom">
                 <div class="row">
                     <div class="col-xs-4"><a href="" ng-click="showConfigure(app)"><i class="fa fa-wrench"></i></a></div>
-                    <div class="col-xs-4"><a href="" ng-click="showUpdate(app)" class="ng-hide animateMe" ng-show="app.updateVersion"><i class="fa fa-arrow-up text-success"></i></a></div>
+                    <div class="col-xs-4"><a href="" ng-click="showUpdate(app)" class="ng-hide animateMe" ng-show="!app.updateVersion"><i class="fa fa-arrow-up text-success"></i></a></div>
                     <div class="col-xs-4"><a href="" ng-click="showUninstall(app)"><i class="fa fa-remove"></i></a></div>
                 </div>
                 <!-- <div class="clearfix"></div> -->

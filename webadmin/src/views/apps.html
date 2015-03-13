@@ -94,11 +94,13 @@
             <div class="modal-body">
                 <fieldset>
                     <form class="form-signin" role="form" name="update_form" ng-submit="doUpdate(update_form)" autocomplete="off">
-                        <div ng-repeat="(env, portInfo) in appupdate.newPortBindings">
+                        <div ng-repeat="(env, portInfo) in appupdate.portBindings" ng-class="{ 'newPort': portInfo.isNew, 'obsoletePort': portInfo.isObsolete }">
                             <ng-form name="portInfo_form">
-                                <div class="form-group" ng-class="{ 'has-error': portInfo_form.itemName{{$index}}.$dirty && portInfo_form.itemName{{$index}}.$invalid }">
-                                    <label class="control-label" for="inputPortInfo{{env}}">New {{ portInfo.description }} ({{ hostPortMin }} - {{ hostPortMax }})</label>
-                                    <input type="number" class="form-control" ng-model="appupdate.portBindings[env].hostPort" id="inputPortInfo{{port}}" later-name="itemName{{$index}}" min="{{hostPortMin}}" max="{{hostPortMax}}" required>
+                                <div class="form-group" ng-class="{ 'has-error': portInfo_form.itemName{{$index}}.$dirty && portInfo_form.itemName{{$index}}.$invalid, 'text-muted': portInfo.isObsolete }">
+                                    <span ng-show="portInfo.isNew">New - </span>
+                                    <span ng-show="portInfo.isObsolete">Obsolete - </span>
+                                    <label class="control-label" for="inputPortInfo{{env}}">{{ portInfo.description }} ({{ hostPortMin }} - {{ hostPortMax }})</label>
+                                    <input type="number" class="form-control" ng-model="appupdate.portBindings[env].hostPort" id="inputPortInfo{{port}}" later-name="itemName{{$index}}" min="{{hostPortMin}}" max="{{hostPortMax}}" ng-disabled="portInfo.isObsolete" required>
                                 </div>
                             </ng-form>
                         </div>

@@ -126,6 +126,15 @@ $table-border-color:                        transparent !default;
     font-size: $font-size-h6;
 }
 
+.newPort {
+    border-left: 5px solid $brand-success;
+    padding-left: 5px;
+}
+
+.obsoletePort {
+    border-left: 5px solid $gray-light;
+    padding-left: 5px;
+}
 
 // ----------------------------
 // Animations

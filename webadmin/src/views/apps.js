@@ -126,23 +126,23 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         AppStore.getManifest(app.appStoreId, function (error, manifest) {
             if (error) return console.error(error);
 
+            // Activate below two lines for testing the UI
+            // manifest.tcpPorts['TEST_HTTP'] = { port: 1337, description: 'HTTP server'};
+            // app.portBindings['TEST_SSH'] = { port: 1337, description: 'SSH server'};
+
             $scope.appupdate.manifest = manifest;
-            $scope.appupdate.portBindings = app.portBindings;
+            $scope.appupdate.portBindings = angular.copy(app.portBindings);
 
             // detect new portbindings
-            $scope.appupdate.newPortBindings = null;
-            for (var elem in $scope.appupdate.manifest.tcpPorts) {
-                if ($scope.appupdate.app.portBindings[elem]) continue;
-                if (!$scope.appupdate.newPortBindings) $scope.appupdate.newPortBindings = {};
-                $scope.appupdate.newPortBindings[elem] = $scope.appupdate.manifest.tcpPorts[elem];
+            for (var env in $scope.appupdate.manifest.tcpPorts) {
+                $scope.appupdate.portBindings[env] = $scope.appupdate.manifest.tcpPorts[env];
+                $scope.appupdate.portBindings[env].isNew = !$scope.appupdate.app.portBindings[env];
             }
 
             // detect obsolete portbindings
-            $scope.appupdate.obsoletePortBindings = null;
-            for (elem in $scope.appupdate.app.portBindings) {
-                if ($scope.appupdate.manifest.tcpPorts[elem]) continue;
-                if (!$scope.appupdate.obsoletePortBindings) $scope.appupdate.obsoletePortBindings = {};
-                $scope.appupdate.obsoletePortBindings[elem] = $scope.appupdate.app.portBindings[elem];
+            for (env in $scope.appupdate.app.portBindings) {
+                if ($scope.appupdate.manifest.tcpPorts[env]) continue;
+                $scope.appupdate.portBindings[env].isObsolete = true;
             }
 
             $('#appUpdateModal').modal('show');
