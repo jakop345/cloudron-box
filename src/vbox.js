@@ -2,7 +2,7 @@
 
 var assert = require('assert'),
     child_process = require('child_process'),
-    debug = require('debug')('box:vbox.js'),
+    debug = require('debug')('box:vbox'),
     os = require('os');
 
 exports = module.exports = {
