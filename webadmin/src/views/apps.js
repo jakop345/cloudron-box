@@ -58,9 +58,6 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appconfigure.portBindings = angular.copy(app.portBindings);
         $scope.appconfigure.accessRestriction = app.accessRestriction;
 
-console.dir(app);
-console.dir($scope.appconfigure.portBindings);
-console.log('showing app');
         $('#appConfigureModal').modal('show');
     };
 
@@ -68,9 +65,6 @@ console.log('showing app');
         $scope.appconfigure.busy = true;
         $scope.appconfigure.error.name = null;
         $scope.appconfigure.error.password = null;
-
-console.log('Doing configure');
-console.dir($scope.appconfigure.portBindings);
 
         Client.configureApp($scope.appconfigure.app.id, $scope.appconfigure.password, { location: $scope.appconfigure.location, portBindings: $scope.appconfigure.portBindings, accessRestriction: $scope.appconfigure.accessRestriction }, function (error) {
             if (error) {
