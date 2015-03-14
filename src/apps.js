@@ -172,7 +172,7 @@ function validatePortBindings(portBindings, tcpPorts) {
         if (!/^[a-zA-Z0-9_]+$/.test(env)) return new AppsError(AppsError.BAD_FIELD, env + ' is not valid environment variable');
 
         if (!Number.isInteger(portBindings[env])) return new Error(portBindings[env] + ' is not an integer');
-        if (portsBindings[env] <= 0 || portBindings[env] > 65535) return new Error(portBindings[env] + ' is out of range');
+        if (portBindings[env] <= 0 || portBindings[env] > 65535) return new Error(portBindings[env] + ' is out of range');
 
         if (RESERVED_PORTS.indexOf(portBindings[env]) !== -1) return new AppsError(AppsError.PORT_RESERVED, + portBindings[env]);
     }

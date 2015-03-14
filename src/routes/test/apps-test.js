@@ -880,7 +880,7 @@ describe('App installation - port bindings', function () {
 
         request.post(SERVER_URL + '/api/v1/apps/install')
               .query({ access_token: token })
-              .send({ appId: APP_ID, appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: { ECHO_SERVER_PORT: '7171' }, accessRestriction: '' })
+              .send({ appId: APP_ID, appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: { ECHO_SERVER_PORT: 7171 }, accessRestriction: '' })
               .end(function (err, res) {
             expect(res.statusCode).to.equal(202);
             expect(res.body.id).to.equal(APP_ID);

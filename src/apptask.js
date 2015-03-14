@@ -227,16 +227,12 @@ function createContainer(app, callback) {
         var manifest = app.manifest;
         var exposedPorts = {};
         var env = [];
-        var e, hostPort, containerPort;
 
-        for (e in portBindings) {
-            hostPort = portBindings[e];
-            containerPort = manifest.tcpPorts[e].containerPort || hostPort;
+        for (var e in portBindings) {
+            var hostPort = portBindings[e];
+            var containerPort = manifest.tcpPorts[e].containerPort || hostPort;
             exposedPorts[containerPort + '/tcp'] = {};
-        }
 
-        for (e in portBindings) {
-            hostPort = portBindings[e];
             env.push(e + '=' + hostPort);
         }
 
@@ -411,7 +407,7 @@ function startContainer(app, callback) {
         for (var env in portBindings) {
             var hostPort = portBindings[env];
             var containerPort = manifest.tcpPorts[env].containerPort || hostPort;
-            dockerPortBindings[containerPort + '/tcp'] = [ { HostIp: '0.0.0.0', HostPort: hostPort } ];
+            dockerPortBindings[containerPort + '/tcp'] = [ { HostIp: '0.0.0.0', HostPort: hostPort + '' } ];
             vbox.forwardFromHostToVirtualBox(app.id + '-tcp' + containerPort, hostPort);
         }
 

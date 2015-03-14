@@ -81,7 +81,7 @@ function postProcess(result) {
     delete result.environmentVariables;
 
     for (var i = 0; i < environmentVariables.length; i++) {
-        result.portBindings[environmentVariables[i]] = hostPorts[i];
+        result.portBindings[environmentVariables[i]] = parseInt(hostPorts[i], 10);
     }
 }
 
@@ -90,7 +90,7 @@ function get(id, callback) {
     assert(typeof callback === 'function');
 
     database.query('SELECT ' + APPS_FIELDS_PREFIXED + ','
-        + 'GROUP_CONCAT(appPortBindings.hostPort) AS hostPorts, GROUP_CONCAT(appPortBindings.environmentVariable) AS environmentVariables'
+        + 'GROUP_CONCAT(CAST(appPortBindings.hostPort AS CHAR(6))) AS hostPorts, GROUP_CONCAT(appPortBindings.environmentVariable) AS environmentVariables'
         + ' FROM apps LEFT OUTER JOIN appPortBindings ON apps.id = appPortBindings.appId WHERE apps.id = ? GROUP BY apps.id', [ id ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
@@ -106,7 +106,7 @@ function getBySubdomain(subdomain, callback) {
     assert(typeof callback === 'function');
 
     database.query('SELECT ' + APPS_FIELDS_PREFIXED + ','
-        + 'GROUP_CONCAT(appPortBindings.hostPort) AS hostPorts, GROUP_CONCAT(appPortBindings.environmentVariable) AS environmentVariables'
+        + 'GROUP_CONCAT(CAST(appPortBindings.hostPort AS CHAR(6))) AS hostPorts, GROUP_CONCAT(appPortBindings.environmentVariable) AS environmentVariables'
         + '  FROM apps LEFT OUTER JOIN appPortBindings ON apps.id = appPortBindings.appId WHERE location = ? GROUP BY apps.id', [ subdomain ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
@@ -122,7 +122,7 @@ function getByHttpPort(httpPort, callback) {
     assert(typeof callback === 'function');
 
     database.query('SELECT ' + APPS_FIELDS_PREFIXED + ','
-        + 'GROUP_CONCAT(appPortBindings.hostPort) AS hostPorts, GROUP_CONCAT(appPortBindings.environmentVariable) AS environmentVariables'
+        + 'GROUP_CONCAT(CAST(appPortBindings.hostPort AS CHAR(6))) AS hostPorts, GROUP_CONCAT(appPortBindings.environmentVariable) AS environmentVariables'
         + '  FROM apps LEFT OUTER JOIN appPortBindings ON apps.id = appPortBindings.appId WHERE httpPort = ? GROUP BY apps.id', [ httpPort ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
@@ -137,7 +137,7 @@ function getAll(callback) {
     assert(typeof callback === 'function');
 
     database.query('SELECT ' + APPS_FIELDS_PREFIXED + ','
-        + 'GROUP_CONCAT(appPortBindings.hostPort) AS hostPorts, GROUP_CONCAT(appPortBindings.environmentVariable) AS environmentVariables'
+        + 'GROUP_CONCAT(CAST(appPortBindings.hostPort AS CHAR(6))) AS hostPorts, GROUP_CONCAT(appPortBindings.environmentVariable) AS environmentVariables'
         + ' FROM apps LEFT OUTER JOIN appPortBindings ON apps.id = appPortBindings.appId'
         + ' GROUP BY apps.id ORDER BY apps.id', function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
