@@ -1020,7 +1020,7 @@ describe('App installation - port bindings', function () {
 
         request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
               .query({ access_token: token })
-              .send({ appId: APP_ID, password: PASSWORD, portBindings: { ECHO_SERVER_PORT: '7172' }, accessRestriction: 'roleAdmin' })
+              .send({ appId: APP_ID, password: PASSWORD, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: 'roleAdmin' })
               .end(function (err, res) {
             expect(res.statusCode).to.equal(202);
             checkConfigureStatus();

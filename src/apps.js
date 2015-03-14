@@ -171,12 +171,10 @@ function validatePortBindings(portBindings, tcpPorts) {
     for (var env in portBindings) {
         if (!/^[a-zA-Z0-9_]+$/.test(env)) return new AppsError(AppsError.BAD_FIELD, env + ' is not valid environment variable');
 
-        var hostPortInt = parseInt(portBindings[env], 10);
-        if (isNaN(hostPortInt) || hostPortInt <= 1024 || hostPortInt > 65535) {
-            return new Error(portBindings[env].hostPort + ' is not a valid host port');
-        }
+        if (!Number.isInteger(portBindings[env])) return new Error(portBindings[env] + ' is not an integer');
+        if (portsBindings[env] <= 0 || portBindings[env] > 65535) return new Error(portBindings[env] + ' is out of range');
 
-        if (RESERVED_PORTS.indexOf(hostPortInt) !== -1) return new AppsError(AppsError.PORT_RESERVED, ' ' + hostPortInt);
+        if (RESERVED_PORTS.indexOf(portBindings[env]) !== -1) return new AppsError(AppsError.PORT_RESERVED, + portBindings[env]);
     }
 
     // it is OK if there is no 1-1 mapping between values in manifest.tcpPorts and portBindings. missing values implies

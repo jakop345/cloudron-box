@@ -8,7 +8,7 @@
   "tcpPorts": {
     "ECHO_SERVER_PORT": {
       "description": "Echo server",
-      "containerPort": "7778"
+      "containerPort": 7778
     }
   },
   "addons": [
