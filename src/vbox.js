@@ -1,5 +1,11 @@
 'use strict';
 
+// we can possibly remove this entire file and make our tests
+// smarter to just use the host interface provided by boot2docker
+// https://github.com/boot2docker/boot2docker#container-port-redirection
+// https://github.com/boot2docker/boot2docker/pull/93
+// https://github.com/docker/docker/issues/4007
+
 var assert = require('assert'),
     child_process = require('child_process'),
     debug = require('debug')('box:vbox'),
