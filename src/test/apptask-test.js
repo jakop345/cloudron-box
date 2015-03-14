@@ -176,7 +176,7 @@ describe('apptask', function () {
 
     it('verifies manifest', function (done) {
         var goodApp = _.extend({ }, APP);
-        goodApp.manifest = { version: '0.0.1', manifestVersion: 1, dockerImage: 'foo', healthCheckPath: '/', httpPort: '3', title: 'ok' };
+        goodApp.manifest = { version: '0.0.1', manifestVersion: 1, dockerImage: 'foo', healthCheckPath: '/', httpPort: 3, title: 'ok' };
 
         apptask._verifyManifest(goodApp, function (error) {
             expect(error).to.be(null);

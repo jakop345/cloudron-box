@@ -173,7 +173,7 @@ describe('validateManifest', function () {
         version: '0.1.2',
         dockerImage: 'girish/foo:0.2',
         healthCheckPath: '/',
-        httpPort: '23',
+        httpPort: 23,
         title: 'Awesome app'
     };
 

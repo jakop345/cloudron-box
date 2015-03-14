@@ -479,7 +479,7 @@ function validateManifest(manifest) {
 
     if (manifest['manifestVersion'] !== 1) return new Error('manifestVersion must be set');
 
-    var fields = [ 'version', 'dockerImage', 'healthCheckPath', 'httpPort', 'title' ];
+    var fields = [ 'version', 'dockerImage', 'healthCheckPath', 'title' ];
 
     for (var i = 0; i < fields.length; i++) {
         var field = fields[i];
@@ -489,6 +489,9 @@ function validateManifest(manifest) {
 
         if (manifest[field].length === 0) return new Error(field + ' cannot be empty');
     }
+
+    if (!Number.isInteger(manifest['httpPort'])) return new Error('httpPort is not a number');
+    if (manifest.httpPort <= 0 || manifest.httpPort > 65535) return new Error('httpPort is out of range');
 
     if (!semver.valid(manifest['version'])) return new Error('version is not valid semver');
 

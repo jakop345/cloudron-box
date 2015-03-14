@@ -4,7 +4,7 @@
   "manifestVersion": 1,
   "dockerImage": "girish/test:0.8",
   "healthCheckPath": "/",
-  "httpPort": "7777",
+  "httpPort": 7777,
   "tcpPorts": {
     "ECHO_SERVER_PORT": {
       "description": "Echo server",

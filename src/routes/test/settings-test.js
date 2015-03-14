@@ -55,7 +55,7 @@ function setup(done) {
         },
 
         function addApp(callback) {
-            var manifest = { version: '0.0.1', manifestVersion: 1, dockerImage: 'foo', healthCheckPath: '/', httpPort: '3', title: 'ok' };
+            var manifest = { version: '0.0.1', manifestVersion: 1, dockerImage: 'foo', healthCheckPath: '/', httpPort: 3, title: 'ok' };
             appdb.add('appid', 'appStoreId', manifest, 'location', [ ] /* portBindings */, '' /* accessRestriction */, callback);
         }
     ], done);
