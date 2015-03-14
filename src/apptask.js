@@ -25,8 +25,9 @@ var addons = require('./addons.js'),
     ejs = require('ejs'),
     execFile = child_process.execFile,
     fs = require('fs'),
-    net = require('net'),
     hat = require('hat'),
+    net = require('net'),
+    os = require('os'),
     path = require('path'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
@@ -402,7 +403,10 @@ function startContainer(app, callback) {
         var appDataDir = path.join(paths.APPDATA_DIR, app.id);
 
         var dockerPortBindings = { };
-        dockerPortBindings[manifest.httpPort + '/tcp'] = [ { HostIp: '127.0.0.1', HostPort: app.httpPort + '' } ];
+        var isMac = os.platform() === 'darwin';
+
+        // On Mac (boot2docker), we have to export the port to external world for port forwarding from Mac to work
+        dockerPortBindings[manifest.httpPort + '/tcp'] = [ { HostIp: isMac ? '0.0.0.0' : '127.0.0.1', HostPort: app.httpPort + '' } ];
 
         for (var env in portBindings) {
             var hostPort = portBindings[env];
@@ -836,7 +840,7 @@ function update(app, callback) {
 }
 
 function uninstall(app, callback) {
-   debug('uninstalling ' + app.id);
+    debug('uninstalling ' + app.id);
 
     // TODO: figure what happens if one of the steps fail
     async.series([
