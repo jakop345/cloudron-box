@@ -108,13 +108,6 @@
                             <label class="control-label" for="inputUpdatePassword">Password</label>
                             <input type="password" class="form-control" ng-model="appupdate.password" id="inputUpdatePassword" name="password" ng-maxlength="512" ng-minlength="5" required autofocus>
                         </div>
-                        <h4 ng-show="appupdate.obsoletePortBindings" class="text-danger">Obsolete TCP port requirements</h4>
-                        <ul>
-                            <li ng-repeat="(env, portInfo) in appupdate.obsoletePortBindings">
-                                {{ env }}
-                            </li>
-                        </ul>
-
                         <input class="ng-hide" type="submit" ng-disabled="update_form.$invalid || busy"/>
                     </form>
                 </fieldset>
