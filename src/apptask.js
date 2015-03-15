@@ -243,7 +243,7 @@ function createContainer(app, callback) {
         tokendb.getByIdentifier('app-' + app.id, function (error, results) {
             if (error || results.length === 0) return callback(new Error('No access token found: ' + error));
 
-            env.push('ACCESS_TOKEN' + '=' + results[0].accessToken);
+            env.push('CLOUDRON_TOKEN' + '=' + results[0].accessToken);
 
             addons.getEnvironment(app.id, function (error, addonEnv) {
                 if (error) return callback(new Error('Error getting addon env: ' + error));
