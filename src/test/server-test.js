@@ -15,7 +15,6 @@ var progress = require('../progress.js'),
     server = require('../server.js');
 
 var SERVER_URL = 'http://localhost:' + config.get('port');
-var ACCESS_TOKEN = null;
 
 function cleanup(done) {
     done();
@@ -50,7 +49,7 @@ describe('Server', function () {
         });
 
         it('should fail because already running', function (done) {
-            expect(server.start).to.throwException(function (e) {
+            expect(server.start).to.throwException(function () {
                 done();
             });
         });
