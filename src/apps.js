@@ -518,6 +518,28 @@ function validateManifest(manifest) {
         if (!safe.url.parse(manifest.iconUrl)) return new Error('Invalid icon url');
     }
 
+    if ('tcpPorts' in manifest) {
+        if (!manifest['tcpPorts'] || typeof manifest['tcpPorts'] !== 'object') return new Error('tcpPorts must be an object');
+
+        for (var env in manifest['tcpPorts']) {
+            if (!/^[a-zA-Z0-9_]+$/.test(env)) return new Error('Environment variable ' + env + ' can have only alnum and underscore');
+
+            if (typeof manifest['tcpPorts'][env].description !== 'string') return new Error('Missing ' + env + ' port description');
+
+            if ('containerPort' in manifest['tcpPorts'][env]) {
+                var containerPort = manifest.tcpPorts[env].containerPort;
+                if (!Number.isInteger(containerPort)) return new Error('containerPort must be an integer');
+                if (containerPort <= 0 || containerPort > 65535) return new Error('containerPort out of range');
+            }
+
+            if ('defaultValue' in manifest['tcpPorts'][env]) {
+                var defaultHostPort = manifest.tcpPorts[env].defaultValue;
+                if (!Number.isInteger(defaultHostPort)) return new Error('defaultValue must be an integer');
+                if (defaultHostPort <= 1023 || defaultHostPort > 65535) return new Error('defaultValue out of range');
+            }
+        }
+    }
+
     return null;
 }
 

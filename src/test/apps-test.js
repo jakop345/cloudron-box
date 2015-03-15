@@ -240,6 +240,21 @@ describe('validateManifest', function () {
         manifestCopy.targetBoxVersion = '1.0.0';
         manifestCopy.addons = [ "mysql", "postgresql" ];
         manifestCopy.iconUrl = 'https://www.cloudron.us';
+        manifestCopy.tcpPorts = {
+            'env': {
+                'description': 'awesome must have service',
+                'containerPort': 3042,
+                'defaultValue': 3402
+            },
+            'env2': {
+                'description': 'another awesome must have service',
+                'defaultValue': 3402
+            },
+            'env3': {
+                'description': 'another awesome must have service',
+                'containerPort': 3062
+            }
+        };
 
         expect(apps.validateManifest(manifestCopy)).to.be(null);
     });
