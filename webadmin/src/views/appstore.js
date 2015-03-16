@@ -40,8 +40,8 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
 
             $scope.appinstall.app = app;
             $scope.appinstall.location = app.location;
-            $scope.appinstall.portBindingsInfo = manifest.tcpPorts;     // Portbinding map only for information
-            $scope.appinstall.portBindings = {};                        // This is the actual model holding the env:port pair
+            $scope.appinstall.portBindingsInfo = manifest.tcpPorts || {};   // Portbinding map only for information
+            $scope.appinstall.portBindings = {};                            // This is the actual model holding the env:port pair
             $scope.appinstall.accessRestriction = app.accessRestriction || '';
 
             // set default ports

@@ -56,7 +56,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appconfigure.app = app;
         $scope.appconfigure.location = app.location;
         $scope.appconfigure.accessRestriction = app.accessRestriction;
-        $scope.appconfigure.portBindingsInfo = app.manifest.tcpPorts;         // Portbinding map only for information
+        $scope.appconfigure.portBindingsInfo = app.manifest.tcpPorts || {};   // Portbinding map only for information
         $scope.appconfigure.portBindings = angular.copy(app.portBindings);    // This is the actual model holding the env:port pair
 
         $('#appConfigureModal').modal('show');
@@ -132,41 +132,50 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
             var portBindingsInfo = {};          // Portbinding map only for information
             var portBindings = {};              // This is the actual model holding the env:port pair
             var obsoletePortBindings = {};      // Info map for obsolete port bindings, this is for display use only and thus not in the model
-            var newPorts = false;
+            var portsChanged = false;
+            var env;
 
             // detect new portbindings and copy all from manifest.tcpPorts
-            for (var env in manifest.tcpPorts) {
-                portBindingsInfo[env] = manifest.tcpPorts[env];
-                if (!app.portBindings[env]) {
-                    portBindingsInfo[env].isNew = true;
+            if (manifest.tcpPorts) {
+                for (env in manifest.tcpPorts) {
+                    portBindingsInfo[env] = manifest.tcpPorts[env];
+                    if (!app.portBindings[env]) {
+                        portBindingsInfo[env].isNew = true;
 
-                    // use default integer port value in model
-                    portBindings[env] = manifest.tcpPorts[env].defaultValue || 0;
+                        // use default integer port value in model
+                        portBindings[env] = manifest.tcpPorts[env].defaultValue || 0;
 
-                    newPorts = true;
-                } else {
-                    // just copy the integer port value into model
-                    portBindings[env] = app.portBindings[env];
+                        portsChanged = true;
+                    } else {
+                        // just copy the integer port value into model
+                        portBindings[env] = app.portBindings[env];
+                    }
                 }
             }
 
             // detect obsolete portbindings (mappings in app.portBindings, but not anymore in manifest.tcpPorts)
-            for (env in app.portBindings) {
-                if (!manifest.tcpPorts[env]) {
-                    obsoletePortBindings[env] = app.portBindings[env];
+            if (manifest.tcpPorts) {
+                for (env in app.portBindings) {
+                    if (!manifest.tcpPorts[env]) {
+                        obsoletePortBindings[env] = app.portBindings[env];
+                        portsChanged = true;
+                    }
                 }
+            } else {
+                obsoletePortBindings = angular.copy(app.portBindings);
+                portsChanged = true;
             }
 
             // now inject the maps into the $scope, we only show those if ports have changed
-            if (newPorts) {
+            if (portsChanged) {
                 $scope.appupdate.portBindingsInfo = portBindingsInfo;
                 $scope.appupdate.portBindings = portBindings;
+                $scope.appupdate.obsoletePortBindings = obsoletePortBindings;
             } else {
                 $scope.appupdate.portBindingsInfo = {};
                 $scope.appupdate.portBindings = {};
+                $scope.appupdate.obsoletePortBindings = {};
             }
-
-            $scope.appupdate.obsoletePortBindings = obsoletePortBindings;
 
             $('#appUpdateModal').modal('show');
         });
