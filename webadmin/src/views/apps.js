@@ -55,8 +55,9 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
 
         $scope.appconfigure.app = app;
         $scope.appconfigure.location = app.location;
-        $scope.appconfigure.portBindings = angular.copy(app.portBindings);
         $scope.appconfigure.accessRestriction = app.accessRestriction;
+        $scope.appconfigure.portBindingsInfo = app.manifest.tcpPorts;         // Portbinding map only for information
+        $scope.appconfigure.portBindings = angular.copy(app.portBindings);    // This is the actual model holding the env:port pair
 
         $('#appConfigureModal').modal('show');
     };
