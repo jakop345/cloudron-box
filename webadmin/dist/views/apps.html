@@ -94,13 +94,21 @@
             <div class="modal-body">
                 <fieldset>
                     <form class="form-signin" role="form" name="update_form" ng-submit="doUpdate(update_form)" autocomplete="off">
-                        <div ng-repeat="(env, portInfo) in appupdate.portBindings" ng-class="{ 'newPort': portInfo.isNew, 'obsoletePort': portInfo.isObsolete }">
+                        <div ng-repeat="(env, info) in appupdate.portBindingsInfo" ng-class="{ 'newPort': info.isNew }">
                             <ng-form name="portInfo_form">
-                                <div class="form-group" ng-class="{ 'has-error': portInfo_form.itemName{{$index}}.$dirty && portInfo_form.itemName{{$index}}.$invalid, 'text-muted': portInfo.isObsolete }">
-                                    <span ng-show="portInfo.isNew">New - </span>
-                                    <span ng-show="portInfo.isObsolete">Obsolete - </span>
-                                    <label class="control-label" for="inputPortInfo{{env}}">{{ portInfo.description }} ({{ HOST_PORT_MIN }} - {{ HOST_PORT_MAX }})</label>
-                                    <input type="number" class="form-control" ng-model="appupdate.portBindings[env].hostPort" id="inputPortInfo{{port}}" later-name="itemName{{$index}}" min="{{HOST_PORT_MIN}}" max="{{HOST_PORT_MAX}}" ng-disabled="portInfo.isObsolete" required>
+                                <div class="form-group" ng-class="{ 'has-error': portInfo_form.itemName{{$index}}.$dirty && portInfo_form.itemName{{$index}}.$invalid }">
+                                    <span ng-show="info.isNew">New - </span>
+                                    <label class="control-label" for="inputPortInfo{{env}}">{{ info.description }} ({{ HOST_PORT_MIN }} - {{ HOST_PORT_MAX }})</label>
+                                    <input type="number" class="form-control" ng-model="appupdate.portBindings[env]" id="inputPortInfo{{env}}" later-name="itemName{{$index}}" min="{{HOST_PORT_MIN}}" max="{{HOST_PORT_MAX}}" required>
+                                </div>
+                            </ng-form>
+                        </div>
+                        <div ng-repeat="(env, port) in appupdate.obsoletePortBindings" class="obsoletePort">
+                            <ng-form name="obsoletePortInfo_form">
+                                <div class="form-group">
+                                    Obsolete -
+                                    <label class="control-label">{{ env }}</label>
+                                    <input type="number" class="form-control" ng-model="port" disabled>
                                 </div>
                             </ng-form>
                         </div>

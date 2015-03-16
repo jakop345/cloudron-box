@@ -124,32 +124,49 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
             if (error) return console.error(error);
 
             // Activate below two lines for testing the UI
-            // manifest.tcpPorts['TEST_HTTP'] = { port: 1337, description: 'HTTP server'};
-            // app.portBindings['TEST_SSH'] = { port: 1337, description: 'SSH server'};
+            // manifest.tcpPorts['TEST_HTTP'] = { defaultValue: 1337, description: 'HTTP server'};
+            // app.portBindings['TEST_SSH'] = 1337;
 
             $scope.appupdate.manifest = manifest;
-            var portBindings = angular.copy(app.portBindings);
-            var portsChanged = false;
 
-            // detect new portbindings
-            for (var env in $scope.appupdate.manifest.tcpPorts) {
-                portBindings[env] = $scope.appupdate.manifest.tcpPorts[env];
-                if (!$scope.appupdate.app.portBindings[env]) {
-                    portBindings[env].isNew = true;
-                    portsChanged = true;
+            var portBindingsInfo = {};          // Portbinding map only for information
+            var portBindings = {};              // This is the actual model holding the env:port pair
+            var obsoletePortBindings = {};      // Info map for obsolete port bindings, this is for display use only and thus not in the model
+            var newPorts = false;
+
+            // detect new portbindings and copy all from manifest.tcpPorts
+            for (var env in manifest.tcpPorts) {
+                portBindingsInfo[env] = manifest.tcpPorts[env];
+                if (!app.portBindings[env]) {
+                    portBindingsInfo[env].isNew = true;
+
+                    // use default integer port value in model
+                    portBindings[env] = manifest.tcpPorts[env].defaultValue || 0;
+
+                    newPorts = true;
+                } else {
+                    // just copy the integer port value into model
+                    portBindings[env] = app.portBindings[env];
                 }
             }
 
-            // detect obsolete portbindings
-            for (env in $scope.appupdate.app.portBindings) {
-                if (!$scope.appupdate.manifest.tcpPorts[env]) {
-                    portBindings[env].isObsolete = true;
-                    portsChanged = true;
+            // detect obsolete portbindings (mappings in app.portBindings, but not anymore in manifest.tcpPorts)
+            for (env in app.portBindings) {
+                if (!manifest.tcpPorts[env]) {
+                    obsoletePortBindings[env] = app.portBindings[env];
                 }
             }
 
-            if (portsChanged) $scope.appupdate.portBindings = portBindings;
-            else $scope.appupdate.portBindings = {};
+            // now inject the maps into the $scope, we only show those if ports have changed
+            if (newPorts) {
+                $scope.appupdate.portBindingsInfo = portBindingsInfo;
+                $scope.appupdate.portBindings = portBindings;
+            } else {
+                $scope.appupdate.portBindingsInfo = {};
+                $scope.appupdate.portBindings = {};
+            }
+
+            $scope.appupdate.obsoletePortBindings = obsoletePortBindings;
 
             $('#appUpdateModal').modal('show');
         });
@@ -158,13 +175,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
     $scope.doUpdate = function (form) {
         $scope.appupdate.error.password = null;
 
-        var portBindings = {};
-        for (var env in $scope.appupdate.portBindings) {
-            if ($scope.appupdate.portBindings[env].isObsolete) continue;
-            portBindings[env] = $scope.appupdate.portBindings[env].hostPort;
-        }
-
-        Client.updateApp($scope.appupdate.app.id, $scope.appupdate.manifest, portBindings, $scope.appupdate.password, function (error) {
+        Client.updateApp($scope.appupdate.app.id, $scope.appupdate.manifest, $scope.appupdate.portBindings, $scope.appupdate.password, function (error) {
             if (error) {
                 if (error.statusCode === 403) {
                     $scope.appupdate.password = '';
