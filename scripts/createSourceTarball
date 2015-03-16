@@ -38,9 +38,22 @@ chmod "o+rx,g+rx" "${bundle_dir}" # otherwise extracted tarball director won't b
 echo "Checking out code [${version}] into ${bundle_dir}"
 (cd "${SOURCE_DIR}" && git archive --format=tar HEAD | (cd "${bundle_dir}" && tar xf -))
 
-echo "Installing modules"
-cd "${bundle_dir}" && npm install --production
+echo "Installing modules with dev dependencies"
+cd "${bundle_dir}" && npm install
 
+echo "Building webadmin assets"
+echo "{}" > "${bundle_dir}/webadmin/deploymentConfig.json"
+(cd "${bundle_dir}" && gulp)
+
+echo "Remove intermediate files required at build-time only"
+rm -rf "${bundle_dir}/node_modules/"
+rm -rf "${bundle_dir}/webadmin/src"
+rm -rf "${bundle_dir}/gulpfile.js"
+
+echo "Installing node modules for production"
+(cd "${bundle_dir}" && npm install --production)
+
+echo "Create final tarball"
 cd "${bundle_dir}" && tar czvf "${bundle_file}" .
 
 echo "Uploading bundle to S3"
