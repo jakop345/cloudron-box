@@ -24,11 +24,11 @@
                         <label class="control-label" for="inputPassword">Password</label>
                         <input type="password" class="form-control" ng-model="appinstall.password" id="inputPassword" name="password" ng-maxlength="512" ng-minlength="5" required>
                     </div>
-                    <div ng-repeat="(env, portInfo) in appinstall.portBindings">
+                    <div ng-repeat="(env, info) in appinstall.portBindingsInfo">
                         <ng-form name="portInfo_form">
                             <div class="form-group" ng-class="{ 'has-error': (!install_form.itemName{{$index}}.$dirty && appinstall.error.port) || (portInfo_form.itemName{{$index}}.$dirty && portInfo_form.itemName{{$index}}.$invalid) }">
-                                <label class="control-label" for="inputPortInfo{{env}}">{{ portInfo.description }} ({{ hostPortMin }} - {{ hostPortMax }})</label>
-                                <input type="number" class="form-control" ng-model="appinstall.portBindings[env].hostPort" id="inputPortInfo{{env}}" later-name="itemName{{$index}}" min="{{hostPortMin}}" max="{{hostPortMax}}" required>
+                                <label class="control-label" for="inputPortInfo{{env}}">{{ info.description }} ({{ hostPortMin }} - {{ hostPortMax }})</label>
+                                <input type="number" class="form-control" ng-model="appinstall.portBindings[env]" id="inputPortInfo{{env}}" later-name="itemName{{$index}}" min="{{hostPortMin}}" max="{{hostPortMax}}" required>
                             </div>
                         </ng-form>
                     </div>

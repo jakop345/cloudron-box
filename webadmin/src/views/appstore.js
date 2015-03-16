@@ -40,8 +40,14 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
 
             $scope.appinstall.app = app;
             $scope.appinstall.location = app.location;
-            $scope.appinstall.portBindings = manifest.tcpPorts;
+            $scope.appinstall.portBindingsInfo = manifest.tcpPorts;     // Portbinding map only for information
+            $scope.appinstall.portBindings = {};                        // This is the actual model holding the env:port pair
             $scope.appinstall.accessRestriction = app.accessRestriction || '';
+
+            // set default ports
+            for (var env in manifest.tcpPorts) {
+                $scope.appinstall.portBindings[env] = manifest.tcpPorts[env].defaultValue || 0;
+            }
 
             $('#appInstallModal').modal('show');
         });
@@ -53,12 +59,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         $scope.appinstall.error.password = null;
         $scope.appinstall.error.port = null;
 
-        var portBindings = { };
-        for (var env in $scope.appinstall.portBindings) {
-            portBindings[env] = $scope.appinstall.portBindings[env].hostPort;
-        }
-
-        Client.installApp($scope.appinstall.app.id, $scope.appinstall.app.manifest, $scope.appinstall.password, $scope.appinstall.app.title, { location: $scope.appinstall.location, portBindings: portBindings, accessRestriction: $scope.appinstall.accessRestriction }, function (error) {
+        Client.installApp($scope.appinstall.app.id, $scope.appinstall.app.manifest, $scope.appinstall.password, $scope.appinstall.app.title, { location: $scope.appinstall.location, portBindings: $scope.appinstall.portBindings, accessRestriction: $scope.appinstall.accessRestriction }, function (error) {
             if (error) {
                 if (error.statusCode === 409 && error.message.indexOf('is reserved') !== -1) {
                     $scope.appinstall.error.port = 'This port is already in use.';
