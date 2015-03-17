@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS apps(
 
 CREATE TABLE IF NOT EXISTS appPortBindings(
     hostPort INTEGER NOT NULL UNIQUE,
-    environmentVariable NOT NULL VARCHAR(128),
+    environmentVariable VARCHAR(128) NOT NULL,
     appId VARCHAR(128) NOT NULL,
     FOREIGN KEY(appId) REFERENCES apps(id),
     PRIMARY KEY(hostPort));
