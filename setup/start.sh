@@ -220,6 +220,7 @@ mysql -u root -ppassword -e 'UPDATE apps SET installationState = "pending_restor
 
 # Add webadmin oauth client
 # The domain might have changed, therefor we have to update the record
+# !!! This needs to be in sync with the webadmin, specifically login_callback.js
 echo "Add webadmin oauth cient"
 ADMIN_SCOPES="root,developer,profile,users,apps,settings,roleUser"
 mysql -u root -ppassword -e "REPLACE INTO clients (id, appId, clientSecret, redirectURI, scope) VALUES (\"cid-webadmin\", \"webadmin\", \"secret-webadmin\", \"${admin_origin}\", \"\$ADMIN_SCOPES\")" box
