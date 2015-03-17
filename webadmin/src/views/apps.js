@@ -145,15 +145,17 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         AppStore.getManifest(app.appStoreId, function (error, manifest) {
             if (error) return console.error(error);
 
-            // Activate below two lines for testing the UI
-            // manifest.tcpPorts['TEST_HTTP'] = { defaultValue: 1337, description: 'HTTP server'};
-            // app.portBindings['TEST_SSH'] = 1337;
-
             $scope.appupdate.manifest = manifest;
 
             // ensure we always operate on objects here
             app.portBindings = app.portBindings || {};
+            app.manifest.tcpPorts = app.manifest.tcpPorts || {};
             manifest.tcpPorts = manifest.tcpPorts || {};
+
+            // Activate below two lines for testing the UI
+            // manifest.tcpPorts['TEST_HTTP'] = { defaultValue: 1337, description: 'HTTP server'};
+            // app.manifest.tcpPorts['TEST_FOOBAR'] = { defaultValue: 1338, description: 'FOOBAR server'};
+            // app.portBindings['TEST_SSH'] = 1339;
 
             var portBindingsInfo = {};                  // Portbinding map only for information
             var portBindings = {};                      // This is the actual model holding the env:port pair
@@ -165,7 +167,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
             // detect new portbindings and copy all from manifest.tcpPorts
             for (env in manifest.tcpPorts) {
                 portBindingsInfo[env] = manifest.tcpPorts[env];
-                if (!app.portBindings[env]) {
+                if (!app.manifest.tcpPorts[env]) {
                     portBindingsInfo[env].isNew = true;
                     portBindingsEnabled[env] = true;
 
@@ -174,15 +176,21 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
 
                     portsChanged = true;
                 } else {
-                    // just copy the integer port value into model
-                    portBindings[env] = app.portBindings[env];
-                    portBindingsEnabled[env] = true;
+                    // detect if the port binding was enabled
+                    if (app.portBindings[env]) {
+                        portBindings[env] = app.portBindings[env];
+                        portBindingsEnabled[env] = true;
+                    } else {
+                        portBindings[env] = manifest.tcpPorts[env].defaultValue || 0;
+                        portBindingsEnabled[env] = false;
+                    }
                 }
             }
 
             // detect obsolete portbindings (mappings in app.portBindings, but not anymore in manifest.tcpPorts)
-            for (env in app.portBindings) {
-                if (!manifest.tcpPorts[env]) {
+            for (env in app.manifest.tcpPorts) {
+                // only list the port if it is not in the new manifest and was enabled previously
+                if (!manifest.tcpPorts[env] && app.portBindings[env]) {
                     obsoletePortBindings[env] = app.portBindings[env];
                     portsChanged = true;
                 }
