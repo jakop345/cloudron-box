@@ -61,7 +61,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         $scope.appinstall.error.password = null;
         $scope.appinstall.error.port = null;
 
-        // only use enabled ports from portmapping
+        // only use enabled ports from portBindings
         var finalPortBindings = {};
         for (var env in $scope.appinstall.portBindings) {
             if ($scope.appinstall.portBindingsEnabled[env]) {

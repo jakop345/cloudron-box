@@ -81,7 +81,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appconfigure.error.name = null;
         $scope.appconfigure.error.password = null;
 
-        // only use enabled ports from portmapping
+        // only use enabled ports from portBindings
         var finalPortBindings = {};
         for (var env in $scope.appconfigure.portBindings) {
             if ($scope.appconfigure.portBindingsEnabled[env]) {
@@ -157,6 +157,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
 
             var portBindingsInfo = {};                  // Portbinding map only for information
             var portBindings = {};                      // This is the actual model holding the env:port pair
+            var portBindingsEnabled = {};               // This is the actual model holding the enabled/disabled flag
             var obsoletePortBindings = {};              // Info map for obsolete port bindings, this is for display use only and thus not in the model
             var portsChanged = false;
             var env;
@@ -166,6 +167,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
                 portBindingsInfo[env] = manifest.tcpPorts[env];
                 if (!app.portBindings[env]) {
                     portBindingsInfo[env].isNew = true;
+                    portBindingsEnabled[env] = true;
 
                     // use default integer port value in model
                     portBindings[env] = manifest.tcpPorts[env].defaultValue || 0;
@@ -174,6 +176,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
                 } else {
                     // just copy the integer port value into model
                     portBindings[env] = app.portBindings[env];
+                    portBindingsEnabled[env] = true;
                 }
             }
 
@@ -186,7 +189,8 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
             }
 
             // now inject the maps into the $scope, we only show those if ports have changed
-            $scope.appupdate.portBindings = portBindings;   // always inject the model, so it gets used in the actual update call
+            $scope.appupdate.portBindings = portBindings;                 // always inject the model, so it gets used in the actual update call
+            $scope.appupdate.portBindingsEnabled = portBindingsEnabled;   // always inject the model, so it gets used in the actual update call
 
             if (portsChanged) {
                 $scope.appupdate.portBindingsInfo = portBindingsInfo;
@@ -203,7 +207,15 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
     $scope.doUpdate = function (form) {
         $scope.appupdate.error.password = null;
 
-        Client.updateApp($scope.appupdate.app.id, $scope.appupdate.manifest, $scope.appupdate.portBindings, $scope.appupdate.password, function (error) {
+        // only use enabled ports from portBindings
+        var finalPortBindings = {};
+        for (var env in $scope.appupdate.portBindings) {
+            if ($scope.appupdate.portBindingsEnabled[env]) {
+                finalPortBindings[env] = $scope.appupdate.portBindings[env];
+            }
+        }
+
+        Client.updateApp($scope.appupdate.app.id, $scope.appupdate.manifest, finalPortBindings, $scope.appupdate.password, function (error) {
             if (error) {
                 if (error.statusCode === 403) {
                     $scope.appupdate.password = '';
