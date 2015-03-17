@@ -39,9 +39,9 @@ function profile(req, res, next) {
 
     var result = {};
     result.id = req.user.id;
-    result.type = req.user.type;
+    result.tokenType = req.user.tokenType;
 
-    if (req.user.type === tokendb.TYPE_USER || req.user.type === tokendb.TYPE_DEV) {
+    if (req.user.tokenType === tokendb.TYPE_USER || req.user.tokenType === tokendb.TYPE_DEV) {
         result.username = req.user.username;
         result.email = req.user.email;
         result.admin = req.user.admin;
@@ -101,7 +101,6 @@ function update(req, res, next) {
     assert(typeof req.user === 'object');
     assert(typeof req.body === 'object');
 
-    // if (typeof req.body.username !== 'string') return next(new HttpError(400, 'username must be string'));
     if (typeof req.body.email !== 'string') return next(new HttpError(400, 'email must be string'));
 
     user.update(req.user.id, req.user.username, req.body.email, function (error) {

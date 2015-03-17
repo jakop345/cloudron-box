@@ -101,28 +101,28 @@ function initialize(callback) {
             // scopes here can define what capabilities that token carries
             // passport put the 'info' object into req.authInfo, where we can further validate the scopes
             var info = { scope: token.scope };
-            var type;
+            var tokenType;
 
             if (token.identifier.indexOf(tokendb.PREFIX_DEV) === 0) {
                 token.identifier = token.identifier.slice(tokendb.PREFIX_DEV.length);
-                type = tokendb.TYPE_DEV;
+                tokenType = tokendb.TYPE_DEV;
             } else if (token.identifier.indexOf(tokendb.PREFIX_APP) === 0) {
-                type = tokendb.TYPE_APP;
-                return callback(null, { id: token.identifier.slice(tokendb.PREFIX_APP.length), type: type }, info);
+                tokenType = tokendb.TYPE_APP;
+                return callback(null, { id: token.identifier.slice(tokendb.PREFIX_APP.length), tokenType: tokenType }, info);
             } else if (token.identifier.indexOf(tokendb.PREFIX_USER) === 0) {
-                type = tokendb.TYPE_USER;
+                tokenType = tokendb.TYPE_USER;
                 token.identifier = token.identifier.slice(tokendb.PREFIX_USER.length);
             } else {
                 // legacy tokens assuming a user access token
-                type = tokendb.TYPE_USER;
+                tokenType = tokendb.TYPE_USER;
             }
 
             userdb.get(token.identifier, function (error, user) {
                 if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
                 if (error) return callback(error);
 
-                // amend the type of the token owner
-                user.type = type;
+                // amend the tokenType of the token owner
+                user.tokenType = tokenType;
 
                 callback(null, user, info);
             });
