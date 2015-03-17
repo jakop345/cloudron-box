@@ -103,6 +103,8 @@ function update(req, res, next) {
 
     if (typeof req.body.email !== 'string') return next(new HttpError(400, 'email must be string'));
 
+    if (req.user.tokenType !== tokendb.TYPE_USER) return next(new HttpError(403, 'Token type not allowed'));
+
     user.update(req.user.id, req.user.username, req.body.email, function (error) {
         if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'User not found'));
         if (error) return next(new HttpError(500, error));
@@ -131,6 +133,8 @@ function changePassword(req, res, next) {
 
     if (typeof req.body.password !== 'string') return next(new HttpError(400, 'API call requires the users old password.'));
     if (typeof req.body.newPassword !== 'string') return next(new HttpError(400, 'API call requires the users new password.'));
+
+    if (req.user.tokenType !== tokendb.TYPE_USER) return next(new HttpError(403, 'Token type not allowed'));
 
     user.changePassword(req.user.username, req.body.password, req.body.newPassword, function (error) {
         if (error && error.reason === UserError.WRONG_PASSWORD) return next(new HttpError(403, 'Wrong password'));
@@ -209,7 +213,7 @@ function verifyPassword(req, res, next) {
     assert(typeof req.body === 'object');
 
     // developers are allowed to through without password
-    if (req.authInfo.scope.indexOf('roleDeveloper') !== -1) return next();
+    if (req.user.tokenType === tokendb.TYPE_DEV) return next();
 
     if (typeof req.body.password !== 'string') return next(new HttpError(400, 'API call requires user password'));
 
