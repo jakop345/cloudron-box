@@ -19,6 +19,14 @@ exports = module.exports = {
     delByIdentifierAndClientId: delByIdentifierAndClientId,
     delExpired: delExpired,
 
+    TYPE_USER: 'user',
+    TYPE_DEV: 'developer',
+    TYPE_APP: 'appliation',
+
+    PREFIX_USER: 'user-',
+    PREFIX_DEV: 'dev-',
+    PREFIX_APP: 'app-',
+
     _clear: clear
 };
 

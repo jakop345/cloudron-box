@@ -134,7 +134,7 @@ function activate(username, password, email, callback) {
                 var token = tokendb.generateToken();
                 var expires = Date.now() + 60 * 60000; // 1 hour
 
-                tokendb.add(token, 'user-' + userObject.id, result.id, expires, '*', function (error) {
+                tokendb.add(token, tokendb.PREFIX_USER + userObject.id, result.id, expires, '*', function (error) {
                     if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
                     callback(null, { token: token, expires: expires });

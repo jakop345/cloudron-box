@@ -105,7 +105,7 @@ gServer.exchange(oauth2orize.exchange.code(function (client, code, redirectURI, 
             var token = tokendb.generateToken();
             var expires = Date.now() + 60 * 60000; // 1 hour
 
-            tokendb.add(token, 'user-' + authCode.userId, authCode.clientId, expires, client.scope, function (error) {
+            tokendb.add(token, tokendb.PREFIX_USER + authCode.userId, authCode.clientId, expires, client.scope, function (error) {
                 if (error) return callback(error);
 
                 debug('new access token for client ' + client.id + ' token ' + token);
@@ -442,7 +442,7 @@ function getClientTokens(req, res, next) {
 
     debug('getClientTokens');
 
-    tokendb.getByIdentifierAndClientId('user-', req.user.id, req.params.clientId, function (error, result) {
+    tokendb.getByIdentifierAndClientId(tokendb.PREFIX_USER, req.user.id, req.params.clientId, function (error, result) {
         if (error && error.reason !== DatabaseError.NOT_FOUND) return next(new HttpError(500, error));
 
         result = result || [];
@@ -459,7 +459,7 @@ function delClientTokens(req, res, next) {
 
     debug('delClientTokens: user %s and client %s.', req.user.id, req.params.clientId);
 
-    tokendb.delByIdentifierAndClientId('user-' + req.user.id, req.params.clientId, function (error) {
+    tokendb.delByIdentifierAndClientId(tokendb.PREFIX_USER + req.user.id, req.params.clientId, function (error) {
         if (error && error.reason !== DatabaseError.NOT_FOUND) return next(new HttpError(500, error));
 
         debug('delClientTokens: success.');

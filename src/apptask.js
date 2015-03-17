@@ -240,7 +240,7 @@ function createContainer(app, callback) {
         env.push('CLOUDRON=1');
         env.push('ADMIN_ORIGIN' + '=' + config.adminOrigin());
 
-        tokendb.getByIdentifier('app-' + app.id, function (error, results) {
+        tokendb.getByIdentifier(tokendb.PREFIX_APP + app.id, function (error, results) {
             if (error || results.length === 0) return callback(new Error('No access token found: ' + error));
 
             env.push('CLOUDRON_TOKEN' + '=' + results[0].accessToken);
@@ -363,14 +363,14 @@ function allocateAccessToken(app, callback) {
     var scopes = 'profile,users';               // TODO This should be put into the manifest and the user should know those
     var clientId = '';                          // meaningless for apps so far
 
-    tokendb.add(token, 'app-' + app.id, clientId, expiresAt, scopes, callback);
+    tokendb.add(token, tokendb.PREFIX_APP + app.id, clientId, expiresAt, scopes, callback);
 }
 
 function removeAccessToken(app, callback) {
     assert(typeof app === 'object');
     assert(typeof callback === 'function');
 
-    tokendb.delByIdentifier('app-' + app.id, function (error) {
+    tokendb.delByIdentifier(tokendb.PREFIX_APP + app.id, function (error) {
         if (error && error.reason !== DatabaseError.NOT_FOUND) {
             console.error('Error removing access token', error);
             return callback(error);
