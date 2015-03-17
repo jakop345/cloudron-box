@@ -1,10 +1,12 @@
 <html>
 <head>
-    <title> OAuth Callback </title>
+    <title> Cloudron OAuth Callback </title>
 
     <script src="3rdparty/js/angular.min.js"></script>
 
     <script>
+
+    'use strict';
 
     var app = angular.module('Application', []);
     app.controller('MainController', ['$scope', '$http', function ($scope, $http) {
@@ -13,8 +15,6 @@
         if (!authCode) {
             console.error('No authCode found.');
             window.location.href = '/';
-        } else {
-            console.debug('Got authCode as result of OAuth flow.', authCode);
         }
 
         var data = {
@@ -26,15 +26,16 @@
         };
 
         $http.post('/api/v1/oauth/token?response_type=token&client_id=' + data.client_id, data)
-        .success(function(data, status, headers, config) {
-            if (status !== 200) return callback(new ClientError(status, data));
+        .success(function(data, status) {
+            if (status !== 200) return console.error('Unable to exchange authCode for an access token.', status, data);
+
+            // the actual app picks up the access token from localStorage
             localStorage.token = data.access_token;
+
             window.location.href = '/';
         })
-        .error(function(data, status, headers, config) {
+        .error(function(data, status) {
             console.error('Unable to exchange code for an access token.', status, data);
-            // TODO: display a real error page instead of simply forward to /
-            // window.location.href = '/';
         });
     }]);
 
