@@ -7,6 +7,7 @@ var assert = require('assert'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
     user = require('../user.js'),
+    tokendb = require('../tokendb.js'),
     UserError = user.UserError;
 
 exports = module.exports = {
@@ -36,12 +37,17 @@ function generatePassword() {
 function profile(req, res, next) {
     assert(typeof req.user === 'object');
 
-    next(new HttpSuccess(200, {
-        id: req.user.id,
-        username: req.user.username,
-        email: req.user.email,
-        admin: req.user.admin
-    }));
+    var result = {};
+    result.id = req.user.id;
+    result.type = req.user.type;
+
+    if (req.user.type === tokendb.TYPE_USER || req.user.type === tokendb.TYPE_DEV) {
+        result.username = req.user.username;
+        result.email = req.user.email;
+        result.admin = req.user.admin;
+    }
+
+    next(new HttpSuccess(200, result));
 }
 
 /**
