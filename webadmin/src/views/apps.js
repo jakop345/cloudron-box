@@ -14,6 +14,8 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         location: '',
         password: '',
         portBindings: {},
+        portBindingsEnabled: {},
+        portBindingsInfo: {},
         accessRestriction: ''
     };
 
@@ -57,7 +59,19 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appconfigure.location = app.location;
         $scope.appconfigure.accessRestriction = app.accessRestriction;
         $scope.appconfigure.portBindingsInfo = app.manifest.tcpPorts || {}; // Portbinding map only for information
-        $scope.appconfigure.portBindings = angular.copy(app.portBindings);  // This is the actual model holding the env:port pair
+        $scope.appconfigure.portBindings = {};                              // This is the actual model holding the env:port pair
+        $scope.appconfigure.portBindingsEnabled = {};                       // This is the actual model holding the enabled/disabled flag
+
+        // fill the portBinding structures. There might be holes in the app.portBindings, which signalizes a disabled port
+        for (var env in $scope.appconfigure.portBindingsInfo) {
+            if (app.portBindings && app.portBindings[env]) {
+                $scope.appconfigure.portBindings[env] = app.portBindings[env];
+                $scope.appconfigure.portBindingsEnabled[env] = true;
+            } else {
+                $scope.appconfigure.portBindings[env] = $scope.appconfigure.portBindingsInfo[env].defaultValue || 0;
+                $scope.appconfigure.portBindingsEnabled[env] = false;
+            }
+        }
 
         $('#appConfigureModal').modal('show');
     };
@@ -67,7 +81,15 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appconfigure.error.name = null;
         $scope.appconfigure.error.password = null;
 
-        Client.configureApp($scope.appconfigure.app.id, $scope.appconfigure.password, { location: $scope.appconfigure.location, portBindings: $scope.appconfigure.portBindings, accessRestriction: $scope.appconfigure.accessRestriction }, function (error) {
+        // only use enabled ports from portmapping
+        var finalPortBindings = {};
+        for (var env in $scope.appconfigure.portBindings) {
+            if ($scope.appconfigure.portBindingsEnabled[env]) {
+                finalPortBindings[env] = $scope.appconfigure.portBindings[env];
+            }
+        }
+
+        Client.configureApp($scope.appconfigure.app.id, $scope.appconfigure.password, { location: $scope.appconfigure.location, portBindings: finalPortBindings, accessRestriction: $scope.appconfigure.accessRestriction }, function (error) {
             if (error) {
                 if (error.statusCode === 403) {
                     $scope.appconfigure.error.password = 'Wrong password provided.';

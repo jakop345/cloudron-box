@@ -31,8 +31,8 @@
                         <div ng-repeat="(env, info) in appconfigure.portBindingsInfo">
                             <ng-form name="portInfo_form">
                                 <div class="form-group" ng-class="{ 'has-error': portInfo_form.itemName{{$index}}.$dirty && portInfo_form.itemName{{$index}}.$invalid }">
-                                    <label class="control-label" for="inputPortInfo{{env}}">{{ info.description }} ({{ HOST_PORT_MIN }} - {{ HOST_PORT_MAX }})</label>
-                                    <input type="number" class="form-control" ng-model="appconfigure.portBindings[env]" id="inputPortInfo{{env}}" later-name="itemName{{$index}}" min="{{HOST_PORT_MIN}}" max="{{HOST_PORT_MAX}}" required>
+                                    <label class="control-label" for="inputPortInfo{{env}}"><input type="checkbox" ng-model="appconfigure.portBindingsEnabled[env]"> {{ info.description }} ({{ HOST_PORT_MIN }} - {{ HOST_PORT_MAX }})</label>
+                                    <input type="number" class="form-control" ng-model="appconfigure.portBindings[env]" ng-disabled="!appconfigure.portBindingsEnabled[env]" id="inputPortInfo{{env}}" later-name="itemName{{$index}}" min="{{HOST_PORT_MIN}}" max="{{HOST_PORT_MAX}}" required>
                                 </div>
                             </ng-form>
                         </div>
