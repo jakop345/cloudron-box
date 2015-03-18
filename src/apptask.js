@@ -263,7 +263,7 @@ function createContainer(app, callback) {
                 debug('Creating container for %s', manifest.dockerImage);
 
                 docker.createContainer(containerOptions, function (error, container) {
-                    if (error && error.statusCode !== 409) return callback(new Error('Error creating container: ' + error));
+                    if (error) return callback(new Error('Error creating container: ' + error));
 
                     updateApp(app, { containerId: container.id }, callback);
                 });
@@ -708,6 +708,7 @@ function restore(app, callback) {
 
         // create container (old containers are deleted by update script)
         updateApp.bind(null, app, { installationProgress: 'Creating container' }),
+        deleteContainer.bind(null, app),
         createContainer.bind(null, app),
 
         // add collectd profile
