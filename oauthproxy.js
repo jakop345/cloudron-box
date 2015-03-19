@@ -21,7 +21,6 @@ var express = require('express'),
 // Allow self signed certs!
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
-var gSessions = {};
 var gProxyMiddlewareCache = {};
 var gApp = express();
 var gHttpServer = http.createServer(gApp);
@@ -38,8 +37,30 @@ function startServer(callback) {
         keys: ['blue', 'cheese', 'is', 'something']
     }));
 
+    gApp.use(function verifySession(req, res, next) {
+        if (!req.session || !req.session.accessToken) {
+            req.authenticated = false;
+            return next();
+        }
+
+        superagent.get(config.adminOrigin() + '/api/v1/profile').query({ access_token: req.session.accessToken}).end(function (error, result) {
+            if (error) {
+                console.error(error);
+                req.authenticated = false;
+            } else if (result.statusCode !== 200) {
+                req.session.accessToken = null;
+                req.authenticated = false;
+            } else {
+                req.authenticated = true;
+            }
+
+            next();
+        });
+    });
+
     gApp.use(function (req, res, next) {
-        if (req.session && gSessions[req.session.sessid]) return next();
+        // proceed if we are authenticated
+        if (req.authenticated) return next();
 
         if (req.path === CALLBACK_URI) {
             // exchange auth code for an access token
@@ -66,10 +87,7 @@ function startServer(callback) {
                     return res.send(500, 'Failed to exchange auth code for a token.');
                 }
 
-                req.session.sessid = result.body.access_token;
-
-                // this is a simple in memory auth store
-                gSessions[req.session.sessid] = 'ok';
+                req.session.accessToken = result.body.access_token;
 
                 debug('user verified.');
 
