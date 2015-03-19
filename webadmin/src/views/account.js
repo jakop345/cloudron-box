@@ -76,13 +76,13 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
                 } else {
                     console.error('Unable to change password.', error);
                 }
-                return;
+            } else {
+                passwordChangeReset(form);
+
+                $('#passwordChangeModal').modal('hide');
             }
 
             $scope.passwordchange.busy = false;
-            passwordChangeReset(form);
-
-            $('#passwordChangeModal').modal('hide');
         });
     };
 
@@ -99,16 +99,16 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
                 } else {
                     console.error('Unable to change email.', error);
                 }
-                return;
+            } else {
+                emailChangeReset(form);
+
+                // fetch new info in the background
+                Client.userInfo(function () {});
+
+                $('#emailChangeModal').modal('hide');
             }
 
             $scope.emailchange.busy = false;
-            emailChangeReset(form);
-
-            // fetch new info in the background
-            Client.userInfo(function () {});
-
-            $('#emailChangeModal').modal('hide');
         });
     };
 
@@ -124,13 +124,13 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
                 } else {
                     console.error('Unable to change password.', error);
                 }
-                return;
+            } else {
+                developerModeChangeReset();
+
+                $('#developerModeChangeModal').modal('hide');
             }
 
             $scope.developerModeChange.busy = false;
-            developerModeChangeReset();
-
-            $('#developerModeChangeModal').modal('hide');
         });
     };
 
