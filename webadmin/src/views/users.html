@@ -6,7 +6,7 @@
                 <h4 class="modal-title" id="userAddModalLabel">Add User</h4>
             </div>
             <div class="modal-body">
-                <form name="useradd_form" class="form-signin" role="form" novalidate ng-submit="doAdd(useradd_form)" autocomplete="off">
+                <form name="useradd_form" class="form-signin" role="form" novalidate ng-submit="doAdd()" autocomplete="off">
                     <fieldset>
                         <div class="form-group" ng-class="{ 'has-error': (useradd_form.username.$dirty && useradd_form.username.$invalid) || useradd.alreadyTaken }">
                             <label class="control-label" for="inputUsername">Username</label>
@@ -32,7 +32,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success" ng-click="doAdd(useradd_form)" ng-disabled="useradd_form.$invalid || busy">Add User</button>
+                <button type="button" class="btn btn-success" ng-click="doAdd()" ng-disabled="useradd_form.$invalid || useradd.busy"><i class="fa fa-spinner fa-pulse" ng-show="useradd.busy"></i> Add User</button>
             </div>
         </div>
     </div>
@@ -47,7 +47,7 @@
             </div>
             <div class="modal-body">
                 <fieldset>
-                    <form name="userremove_form" class="form-user-delete" role="form" ng-submit="doUserRemove(userremove_form)" name="userDeleteConfirm" autocomplete="off">
+                    <form name="userremove_form" class="form-user-delete" role="form" ng-submit="doUserRemove()" name="userDeleteConfirm" autocomplete="off">
                         <div class="form-group" ng-class="{ 'has-error': (userremove_form.username.$dirty && userremove_form.username.$invalid) || (!userremove_form.username.$dirty && userremove.error.username) }">
                             <label class="control-label" for="userRemoveUsername">Just to be sure you really want to delete this user, please type the user's name</label>
                             <div class="control-label" ng-show="(!userremove_form.username.$dirty && userremove.error.username) || (userremove_form.username.$dirty && userremove_form.username.$invalid)">
@@ -72,19 +72,19 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-danger" ng-click="doUserRemove(userremove_form)">Delete</button>
+                <button type="button" class="btn btn-danger" ng-click="doUserRemove()" ng-disabled="userremove_form.$invalid || userremove.busy"><i class="fa fa-spinner fa-pulse" ng-show="userremove.busy"></i> Delete</button>
             </div>
         </div>
     </div>
 </div>
 
-<div style="max-width: 600px; margin: 0 auto;">
+<div style="max-width: 800px; margin: 0 auto;">
     <div class="text-left">
         <h1>Users <button class="btn btn-primary btn-outline pull-right" data-toggle="modal" data-target="#userAddModal"><i class="fa fa-user-plus"></i> New User</button></h1>
     </div>
 </div>
 
-<div class="card">
+<div class="card" style="max-width: 800px;">
     <div class="grid-item-top">
         <div class="row ng-hide" ng-show="!ready">
             <div class="col-lg-12 text-center">

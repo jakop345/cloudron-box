@@ -40,31 +40,42 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
     };
 
     $scope.doAdd = function () {
-        $scope.useradd.alreadyTaken = '';
+        $scope.useradd.busy = true;
+
+        $scope.useradd.alreadyTaken = false;
         $scope.useradd.error.username = null;
         $scope.useradd.error.email = null;
 
         Client.createUser($scope.useradd.username, $scope.useradd.email, function (error) {
+            $scope.useradd.busy = false;
+
             if (error && error.statusCode === 409) {
                 $scope.useradd.alreadyTaken = $scope.username;
-                return console.error('Username already taken');
+                return;
             }
             if (error && error.statusCode === 400) {
                 if (error.message.indexOf('email') !== -1) {
                     $scope.useradd.error.email = 'Invalid Email';
                     $scope.useradd.email = '';
-                    return;
-                }
-                if (error.message.indexOf('username') !== -1) {
+                } else if (error.message.indexOf('username') !== -1) {
                     $scope.useradd.error.username = 'Invalid Username';
                     $scope.useradd.username = '';
-                    return;
+                } else {
+                    console.error('Unable to create user.', error.statusCode, error.message);
                 }
                 return;
             }
-            if (error) console.error('Unable to create user.', error);
+            if (error) return console.error('Unable to create user.', error.statusCode, error.message);
+
+            $scope.useradd.error = {};
+            $scope.useradd.username = '';
+            $scope.useradd.email = '';
+
+            $scope.useradd_form.$setUntouched();
+            $scope.useradd_form.$setPristine();
 
             refresh();
+
             $('#userAddModal').modal('hide');
         });
     };
@@ -76,7 +87,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         $('#userRemoveModal').modal('show');
     };
 
-    $scope.doUserRemove = function (form) {
+    $scope.doUserRemove = function () {
         $scope.userremove.error.username = null;
         $scope.userremove.error.password = null;
 
@@ -86,7 +97,11 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
             return;
         }
 
+        $scope.userremove.busy = true;
+
         Client.removeUser($scope.userremove.userInfo.id, $scope.userremove.password, function (error) {
+            $scope.userremove.busy = false;
+
             if (error && error.statusCode === 403) {
                 $scope.userremove.error.password = 'Incorrect password';
                 $scope.userremove.password = '';
@@ -98,12 +113,12 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
             $scope.userremove.username = '';
             $scope.userremove.password = '';
 
-            form.$setPristine();
-            form.$setUntouched();
-
-            $('#userRemoveModal').modal('hide');
+            $scope.userremove_form.$setPristine();
+            $scope.userremove_form.$setUntouched();
 
             refresh();
+
+            $('#userRemoveModal').modal('hide');
         });
     };
 
