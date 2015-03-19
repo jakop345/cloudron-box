@@ -6,6 +6,7 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
     $scope.config = {};
 
     $scope.update = {
+        busy: false,
         error: {},
         password: ''
     };
@@ -49,14 +50,17 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
     $scope.doUpdate = function () {
         $scope.update.error.password = null;
 
+        $scope.update.busy = true;
         Client.update($scope.update.password, function (error) {
             if (error) {
                 if (error.statusCode === 403) {
                     $scope.update.error.password = 'Incorrect password';
                     $scope.update.password = '';
+                    $('#updatePassword').focus();
                 } else {
                     console.error('Unable to update.', error);
                 }
+                $scope.update.busy = false;
                 return;
             }
 

@@ -84,13 +84,13 @@
                                 </div>
                                 <input type="password" class="form-control" ng-model="update.password" id="updatePassword" name="password" placeholder="Password" ng-maxlength="512" ng-minlength="5" required autofocus>
                             </div>
-                            <input class="ng-hide" type="submit" ng-disabled="update_form.$invalid"/>
+                            <input class="ng-hide" type="submit" ng-disabled="update_form.$invalid || update.busy"/>
                         </form>
                     </fieldset>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-danger" ng-click="doUpdate()">Update</button>
+                    <button type="button" class="btn btn-danger" ng-click="doUpdate()" ng-disabled="update_form.$invalid || update.busy"><i class="fa fa-spinner fa-pulse" ng-show="update.busy"></i> Update</button>
                 </div>
             </div>
         </div>
@@ -109,7 +109,7 @@
                         <span class="icon-bar"></span>
                     </button>
                     <a class="navbar-brand" href="index.html">Cloudron <span class="small text-muted">{{config.version}}</span></a>
-                    <a class="navbar-text" href="" ng-show="config.update.box" ng-click="showUpdateModal(update_form)"><span class="badge badge-success">Update available</span></a>
+                    <a class="navbar-text" href="" ng-show="!config.update.box" ng-click="showUpdateModal(update_form)"><span class="badge badge-success">Update available</span></a>
                 </div>
                 <!-- /.navbar-header -->
 
