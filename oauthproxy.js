@@ -7,6 +7,7 @@ require('supererror')({ splatchError: true });
 var express = require('express'),
     url = require('url'),
     async = require('async'),
+    superagent = require('superagent'),
     assert = require('assert'),
     debug = require('debug')('box:proxy'),
     proxy = require('proxy-middleware'),
@@ -16,6 +17,9 @@ var express = require('express'),
     clientdb = require('./src/clientdb.js'),
     config = require('./config.js'),
     http = require('http');
+
+// Allow self signed certs!
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 var gSessions = {};
 var gProxyMiddlewareCache = {};
@@ -38,16 +42,40 @@ function startServer(callback) {
         if (req.session && gSessions[req.session.sessid]) return next();
 
         if (req.path === CALLBACK_URI) {
-            // FIXME we need to exchange the authCode and verify it
-            req.session.sessid = req.query.authCode;
+            // exchange auth code for an access token
+            var query = {
+                response_type: 'token',
+                client_id: req.session.clientId
+            };
 
-            // this is a simple in memory auth store
-            gSessions[req.session.sessid] = 'ok';
+            var data = {
+                grant_type: 'authorization_code',
+                code: req.query.authCode,
+                redirect_uri: req.session.returnTo,
+                client_id: req.session.clientId,
+                client_secret: req.session.clientSecret
+            };
 
-            debug('user verified.');
+            superagent.post(config.adminOrigin() + '/api/v1/oauth/token').query(query).send(data).end(function (error, result) {
+                if (error) {
+                    console.error(error);
+                    return res.send(500, 'Unable to contact the oauth server.');
+                }
+                if (result.statusCode !== 200) {
+                    console.error('Failed to exchange auth code for a token.', result.statusCode, result.body);
+                    return res.send(500, 'Failed to exchange auth code for a token.');
+                }
 
-            // now redirect to the actual initially requested URL
-            res.redirect(req.session.returnTo);
+                req.session.sessid = result.body.access_token;
+
+                // this is a simple in memory auth store
+                gSessions[req.session.sessid] = 'ok';
+
+                debug('user verified.');
+
+                // now redirect to the actual initially requested URL
+                res.redirect(req.session.returnTo);
+            });
         } else {
             var port = parseInt(req.headers['x-cloudron-proxy-port'], 10);
 
@@ -72,6 +100,8 @@ function startServer(callback) {
 
                     req.session.port = port;
                     req.session.returnTo =  result.redirectURI + req.path;
+                    req.session.clientId = result.id;
+                    req.session.clientSecret = result.clientSecret;
 
                     var callbackUrl = result.redirectURI + CALLBACK_URI;
                     var scope = 'profile,roleUser';
