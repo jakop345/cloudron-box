@@ -88,11 +88,13 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
 
             $scope.appinstall.busy = false;
 
+            // wait for dialog to be fully closed to avoid modal behavior breakage when moving to a different view already
+            $('#appInstallModal').on('hidden.bs.modal', function () {
+                $scope.reset();
+                $location.path('/apps');
+            });
+
             $('#appInstallModal').modal('hide');
-
-            $scope.reset();
-
-            $location.path('/apps');
         });
     };
 
