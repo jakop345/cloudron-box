@@ -140,6 +140,12 @@ $table-border-color:                        transparent !default;
 // Animations
 // ----------------------------
 
+// ngAnimate will delay hiding the element if there is an animation attached
+.fa-spin.ng-hide,
+.fa-pulse.ng-hide {
+    display: none !important;
+}
+
 .animateMe {
     opacity: 1;
     -webkit-transition: 0.25s ease all;
