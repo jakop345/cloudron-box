@@ -6,6 +6,7 @@ require('supererror')({ splatchError: true });
 
 var express = require('express'),
     url = require('url'),
+    uuid = require('node-uuid'),
     async = require('async'),
     superagent = require('superagent'),
     assert = require('assert'),
@@ -21,6 +22,7 @@ var express = require('express'),
 // Allow self signed certs!
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
+var gSessions = {};
 var gProxyMiddlewareCache = {};
 var gApp = express();
 var gHttpServer = http.createServer(gApp);
@@ -37,18 +39,35 @@ function startServer(callback) {
         keys: ['blue', 'cheese', 'is', 'something']
     }));
 
+    // ensure we have a in memory store for the session to cache client information
+    gApp.use(function (req, res, next) {
+        assert(typeof req.session === 'object');
+
+        if (!req.session.id || !gSessions[req.session.id]) {
+            req.session.id = uuid.v4();
+            gSessions[req.session.id] = {};
+        }
+
+        // attach the session data to the requeset
+        req.sessionData = gSessions[req.session.id];
+
+        next();
+    });
+
     gApp.use(function verifySession(req, res, next) {
-        if (!req.session || !req.session.accessToken) {
+        assert(typeof req.sessionData === 'object');
+
+        if (!req.sessionData.accessToken) {
             req.authenticated = false;
             return next();
         }
 
-        superagent.get(config.adminOrigin() + '/api/v1/profile').query({ access_token: req.session.accessToken}).end(function (error, result) {
+        superagent.get(config.adminOrigin() + '/api/v1/profile').query({ access_token: req.sessionData.accessToken}).end(function (error, result) {
             if (error) {
                 console.error(error);
                 req.authenticated = false;
             } else if (result.statusCode !== 200) {
-                req.session.accessToken = null;
+                req.sessionData.accessToken = null;
                 req.authenticated = false;
             } else {
                 req.authenticated = true;
@@ -66,15 +85,15 @@ function startServer(callback) {
             // exchange auth code for an access token
             var query = {
                 response_type: 'token',
-                client_id: req.session.clientId
+                client_id: req.sessionData.clientId
             };
 
             var data = {
                 grant_type: 'authorization_code',
                 code: req.query.authCode,
-                redirect_uri: req.session.returnTo,
-                client_id: req.session.clientId,
-                client_secret: req.session.clientSecret
+                redirect_uri: req.sessionData.returnTo,
+                client_id: req.sessionData.clientId,
+                client_secret: req.sessionData.clientSecret
             };
 
             superagent.post(config.adminOrigin() + '/api/v1/oauth/token').query(query).send(data).end(function (error, result) {
@@ -87,12 +106,12 @@ function startServer(callback) {
                     return res.send(500, 'Failed to exchange auth code for a token.');
                 }
 
-                req.session.accessToken = result.body.access_token;
+                req.sessionData.accessToken = result.body.access_token;
 
                 debug('user verified.');
 
                 // now redirect to the actual initially requested URL
-                res.redirect(req.session.returnTo);
+                res.redirect(req.sessionData.returnTo);
             });
         } else {
             var port = parseInt(req.headers['x-cloudron-proxy-port'], 10);
@@ -116,10 +135,10 @@ function startServer(callback) {
                         return res.send(500, 'Unknown OAuth client.');
                     }
 
-                    req.session.port = port;
-                    req.session.returnTo =  result.redirectURI + req.path;
-                    req.session.clientId = result.id;
-                    req.session.clientSecret = result.clientSecret;
+                    req.sessionData.port = port;
+                    req.sessionData.returnTo = result.redirectURI + req.path;
+                    req.sessionData.clientId = result.id;
+                    req.sessionData.clientSecret = result.clientSecret;
 
                     var callbackUrl = result.redirectURI + CALLBACK_URI;
                     var scope = 'profile,roleUser';
@@ -135,7 +154,7 @@ function startServer(callback) {
     });
 
     gApp.use(function (req, res, next) {
-        var port = req.session.port;
+        var port = req.sessionData.port;
 
         debug('proxy request for port %s with path %s.', port, req.path);
 
