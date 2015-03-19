@@ -106,6 +106,7 @@ function update(req, res, next) {
     if (req.user.tokenType !== tokendb.TYPE_USER) return next(new HttpError(403, 'Token type not allowed'));
 
     user.update(req.user.id, req.user.username, req.body.email, function (error) {
+        if (error && error.reason === UserError.BAD_EMAIL) return next(new HttpError(400, error.message));
         if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'User not found'));
         if (error) return next(new HttpError(500, error));
 
