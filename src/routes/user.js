@@ -137,6 +137,7 @@ function changePassword(req, res, next) {
     if (req.user.tokenType !== tokendb.TYPE_USER) return next(new HttpError(403, 'Token type not allowed'));
 
     user.changePassword(req.user.username, req.body.password, req.body.newPassword, function (error) {
+        if (error && error.reason === UserError.BAD_PASSWORD) return next(new HttpError(400, error.message));
         if (error && error.reason === UserError.WRONG_PASSWORD) return next(new HttpError(403, 'Wrong password'));
         if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(403, 'Wrong password'));
         if (error) return next(new HttpError(500, error));
