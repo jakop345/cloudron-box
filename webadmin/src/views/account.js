@@ -159,6 +159,13 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
             if (error) console.error(error);
 
             client.busy = false;
+
+            // update the list
+            Client.getOAuthClients(function (error, activeClients) {
+                if (error) return console.error(error);
+
+                $scope.activeClients = activeClients;
+            });
         });
     };
 
