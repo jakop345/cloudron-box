@@ -50,16 +50,22 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
             $scope.useradd.busy = false;
 
             if (error && error.statusCode === 409) {
-                $scope.useradd.alreadyTaken = $scope.username;
+                $scope.useradd.error.username = 'Username already taken';
+                $scope.useradd_form.username.$setPristine();
+                $('#inputUserAddUsername').focus();
                 return;
             }
             if (error && error.statusCode === 400) {
                 if (error.message.indexOf('email') !== -1) {
                     $scope.useradd.error.email = 'Invalid Email';
-                    $scope.useradd.email = '';
+                    $scope.useradd.error.emailAttempted = $scope.useradd.email;
+                    $scope.useradd_form.email.$setPristine();
+                    $('#inputUserAddEmail').focus();
                 } else if (error.message.indexOf('username') !== -1) {
                     $scope.useradd.error.username = 'Invalid Username';
-                    $scope.useradd.username = '';
+                    $scope.useradd.error.usernameAttempted = $scope.useradd.username;
+                    $scope.useradd_form.username.$setPristine();
+                    $('#inputUserAddUsername').focus();
                 } else {
                     console.error('Unable to create user.', error.statusCode, error.message);
                 }
@@ -94,6 +100,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         if ($scope.userremove.username !== $scope.userremove.userInfo.username) {
             $scope.userremove.error.username = 'Username does not match';
             $scope.userremove.username = '';
+            $('#inputUserRemoveUsername').focus();
             return;
         }
 
@@ -105,6 +112,8 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
             if (error && error.statusCode === 403) {
                 $scope.userremove.error.password = 'Incorrect password';
                 $scope.userremove.password = '';
+                $scope.userremove_form.password.$setPristine();
+                $('#inputUserRemovePassword').focus();
                 return;
             }
             if (error) return console.error('Unable to delete user.', error);

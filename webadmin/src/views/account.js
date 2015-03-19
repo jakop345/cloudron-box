@@ -73,6 +73,7 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
                 if (error.statusCode === 403) {
                     $scope.passwordchange.error.password = true;
                     $scope.passwordchange.password = '';
+                    $('#inputPasswordChangePassword').focus();
                 } else {
                     console.error('Unable to change password.', error);
                 }
@@ -96,6 +97,7 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
                 if (error.statusCode === 403) {
                     $scope.emailchange.error.password = true;
                     $scope.emailchange.password = '';
+                    $('#inputEmailChangePassword').focus();
                 } else {
                     console.error('Unable to change email.', error);
                 }
@@ -121,6 +123,7 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
                 if (error.statusCode === 403) {
                     $scope.developerModeChange.error.password = true;
                     $scope.developerModeChange.password = '';
+                    $('#inputDeveloperModeChangePassword').focus();
                 } else {
                     console.error('Unable to change password.', error);
                 }

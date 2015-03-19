@@ -75,14 +75,14 @@
                     <fieldset>
                         <form name="update_form" role="form" ng-submit="doUpdate()" autocomplete="off">
                             <div class="form-group" ng-class="{ 'has-error': update_form.password.$dirty && update_form.password.$invalid }">
-                                <label class="control-label" for="updatePassword">Give your password to verify that you are performing that action</label>
+                                <label class="control-label" for="inputUpdatePassword">Give your password to verify that you are performing that action</label>
                                 <div class="control-label" ng-show="(!update_form.password.$dirty && update.error.password) || (update_form.password.$dirty && update_form.password.$invalid)">
                                     <small ng-show="update_form.password.$error.required && !update.error.password">A password is required</small>
                                     <small ng-show="update_form.password.$error.minlength">The password is too short</small>
                                     <small ng-show="update_form.password.$error.maxlength">The password is too long</small>
                                     <small ng-show="update.error.password">Incorrect password</small>
                                 </div>
-                                <input type="password" class="form-control" ng-model="update.password" id="updatePassword" name="password" placeholder="Password" ng-maxlength="512" ng-minlength="5" required autofocus>
+                                <input type="password" class="form-control" ng-model="update.password" id="inputUpdatePassword" name="password" placeholder="Password" ng-maxlength="512" ng-minlength="5" required autofocus>
                             </div>
                             <input class="ng-hide" type="submit" ng-disabled="update_form.$invalid || update.busy"/>
                         </form>

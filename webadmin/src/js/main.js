@@ -56,7 +56,7 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
                 if (error.statusCode === 403) {
                     $scope.update.error.password = 'Incorrect password';
                     $scope.update.password = '';
-                    $('#updatePassword').focus();
+                    $('#inputUpdatePassword').focus();
                 } else {
                     console.error('Unable to update.', error);
                 }

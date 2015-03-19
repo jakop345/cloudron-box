@@ -8,23 +8,24 @@
             <div class="modal-body">
                 <form name="useradd_form" class="form-signin" role="form" novalidate ng-submit="doAdd()" autocomplete="off">
                     <fieldset>
-                        <div class="form-group" ng-class="{ 'has-error': (useradd_form.username.$dirty && useradd_form.username.$invalid) || useradd.alreadyTaken }">
-                            <label class="control-label" for="inputUsername">Username</label>
-                            <div class="control-label" ng-show="(!useradd_form.username.$dirty && useradd.error.username) || (useradd_form.username.$dirty && useradd_form.username.$invalid) || useradd.alreadyTaken">
+                        <div class="form-group" ng-class="{ 'has-error': (useradd_form.username.$dirty && useradd_form.username.$invalid) || (!useradd_form.username.$dirty && useradd.error.username) }">
+                            <label class="control-label" for="inputUserAddUsername">Username</label>
+                            <div class="control-label" ng-show="(!useradd_form.username.$dirty && useradd.error.username) || (useradd_form.username.$dirty && useradd_form.username.$invalid) || (!useradd_form.username.$dirty && useradd.error.username)">
                                 <small ng-show="useradd_form.username.$error.required">A username is required</small>
                                 <small ng-show="useradd_form.username.$error.minlength">The username is too short</small>
                                 <small ng-show="useradd_form.username.$error.maxlength">The username is too long</small>
-                                <small ng-show="useradd.alreadyTaken && useradd.alreadyTaken === username">The username is already taken</small>
+                                <small ng-show="!useradd_form.username.$dirty && useradd.error.username">{{ useradd.error.username }}</small>
                             </div>
-                            <input type="text" class="form-control" ng-model="useradd.username" id="inputUsername" name="username" ng-maxlength="512" ng-minlength="5" required autofocus>
+                            <input type="text" class="form-control" ng-model="useradd.username" id="inputUserAddUsername" name="username" ng-maxlength="512" ng-minlength="5" required autofocus>
                         </div>
-                        <div class="form-group" ng-class="{ 'has-error': useradd_form.email.$dirty && useradd_form.email.$invalid }">
-                            <label class="control-label" for="inputEmail">Email</label>
-                            <div class="control-label" ng-show="(!useradd_form.email.$dirty && useradd.error.email) || (useradd_form.email.$dirty && useradd_form.email.$invalid)">
+                        <div class="form-group" ng-class="{ 'has-error': (useradd_form.email.$dirty && useradd_form.email.$invalid) || (!useradd_form.email.$dirty && useradd.error.email) }">
+                            <label class="control-label" for="inputUserAddEmail">Email</label>
+                            <div class="control-label" ng-show="(!useradd_form.email.$dirty && useradd.error.email) || (useradd_form.email.$dirty && useradd_form.email.$invalid) || (!useradd_form.email.$dirty && useradd.error.email)">
                                 <small ng-show="useradd_form.email.$error.required">An email is required</small>
                                 <small ng-show="useradd_form.email.$error.email">This is not a valid email</small>
+                                <small ng-show="!useradd_form.email.$dirty && useradd.error.email">{{ useradd.error.email }}</small>
                             </div>
-                            <input type="email" class="form-control" ng-model="useradd.email" id="inputEmail" name="email" required>
+                            <input type="email" class="form-control" ng-model="useradd.email" id="inputUserAddEmail" name="email" required>
                         </div>
                         <input class="ng-hide" type="submit" ng-disabled="useradd_form.$invalid || useradd.alreadyTaken === username"/>
                     </fieldset>
@@ -49,22 +50,22 @@
                 <fieldset>
                     <form name="userremove_form" class="form-user-delete" role="form" ng-submit="doUserRemove()" name="userDeleteConfirm" autocomplete="off">
                         <div class="form-group" ng-class="{ 'has-error': (userremove_form.username.$dirty && userremove_form.username.$invalid) || (!userremove_form.username.$dirty && userremove.error.username) }">
-                            <label class="control-label" for="userRemoveUsername">Just to be sure you really want to delete this user, please type the user's name</label>
+                            <label class="control-label" for="inputUserRemoveUsername">Just to be sure you really want to delete this user, please type the user's name</label>
                             <div class="control-label" ng-show="(!userremove_form.username.$dirty && userremove.error.username) || (userremove_form.username.$dirty && userremove_form.username.$invalid)">
                                 <small ng-show="userremove_form.username.$error.required">A username is required</small>
                                 <small ng-show="userremove_form.error.username">The username does not match</small>
                             </div>
-                            <input type="text" class="form-control" ng-model="userremove.username" id="userRemoveUsername" name="userDeleteConfirm" placeholder="Username" required autofocus>
+                            <input type="text" class="form-control" ng-model="userremove.username" id="inputUserRemoveUsername" name="userDeleteConfirm" placeholder="Username" required autofocus>
                         </div>
-                        <div class="form-group" ng-class="{ 'has-error': userremove_form.password.$dirty && userremove_form.password.$invalid }">
-                            <label class="control-label" for="userRemovePassword">Give your password to verify that you are performing that action</label>
+                        <div class="form-group" ng-class="{ 'has-error': (userremove_form.password.$dirty && userremove_form.password.$invalid) || (!userremove_form.password.$dirty && userremove.error.password)}">
+                            <label class="control-label" for="inputUserRemovePassword">Give your password to verify that you are performing that action</label>
                             <div class="control-label" ng-show="(!userremove_form.password.$dirty && userremove.error.password) || (userremove_form.password.$dirty && userremove_form.password.$invalid)">
                                 <small ng-show="userremove_form.password.$error.required && !userremove.error.password">A password is required</small>
                                 <small ng-show="userremove_form.password.$error.minlength">The password is too short</small>
                                 <small ng-show="userremove_form.password.$error.maxlength">The password is too long</small>
-                                <small ng-show="userremove.error.password">Incorrect password</small>
+                                <small ng-show="!useradd_form.email.$dirty && userremove.error.password">{{ userremove.error.password }}</small>
                             </div>
-                            <input type="password" class="form-control" ng-model="userremove.password" id="userRemovePassword" name="password" placeholder="Password" ng-maxlength="512" ng-minlength="5" required>
+                            <input type="password" class="form-control" ng-model="userremove.password" id="inputUserRemovePassword" name="password" placeholder="Password" ng-maxlength="512" ng-minlength="5" required>
                         </div>
                         <input class="hide" type="submit"/>
                     </form>
