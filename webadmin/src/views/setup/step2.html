@@ -7,7 +7,7 @@
     <div class="col-md-12 text-center">
         <div class="form-group" ng-class="{ 'has-error': setup_form.username.$dirty && setup_form.username.$invalid }">
             <label class="control-label" for="inputUsername"></label>
-            <input type="text" class="form-control" ng-model="wizard.username" id="inputUsername" name="username" ng-enter="ok('/step3', setup_form.username.$invalid)" ng-maxlength="512" ng-minlength="3" autofocus required>
+            <input type="text" class="form-control" ng-model="wizard.username" id="inputUsername" name="username" ng-enter="ok('/step3', setup_form.username.$invalid)" ng-maxlength="512" ng-minlength="5" autofocus required>
         </div>
     </div>
 </div>
