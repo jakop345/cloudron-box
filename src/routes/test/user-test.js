@@ -455,6 +455,16 @@ describe('User API', function () {
         });
     });
 
+    it('change email fails due to invalid email', function (done) {
+        request.put(SERVER_URL + '/api/v1/users/' + USERNAME_0)
+               .query({ access_token: token })
+               .send({ password: PASSWORD, email: 'foo@bar' })
+               .end(function (error, result) {
+            expect(result.statusCode).to.equal(400);
+            done(error);
+        });
+    });
+
     it('change email succeeds', function (done) {
         request.put(SERVER_URL + '/api/v1/users/' + USERNAME_0)
                .query({ access_token: token })
@@ -492,6 +502,16 @@ describe('User API', function () {
                .send({ password: 'some wrong password', newPassword: 'newpassword' })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(403);
+            done(err);
+        });
+    });
+
+    it('change password fails due to invalid password', function (done) {
+        request.post(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/password')
+               .query({ access_token: token })
+               .send({ password: PASSWORD, newPassword: 'five' })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(400);
             done(err);
         });
     });
