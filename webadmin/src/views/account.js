@@ -152,10 +152,13 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
         $('#developerModeChangeModal').modal('show');
     };
 
-    $scope.removeAccessTokens = function (client, event) {
+    $scope.removeAccessTokens = function (client) {
+        client.busy = true;
+
         Client.delTokensByClientId(client.id, function (error) {
-            if (error) return console.error(error);
-            $(event.target).addClass('disabled');
+            if (error) console.error(error);
+
+            client.busy = false;
         });
     };
 

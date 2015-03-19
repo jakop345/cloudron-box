@@ -176,7 +176,7 @@
                 <div class="row">
                     <div class="col-xs-12">
                         You logged in <b>{{ client.tokenCount }}</b> times to this application.
-                        <button class="btn btn-xs btn-danger pull-right" ng-click="removeAccessTokens(client, $event)" ng-disabled="!client.tokenCount"><i ng-hide="!client._busy" class="fa fa-circle-o-notch fa-spin"></i> Remove access</button>
+                        <button class="btn btn-xs btn-danger pull-right" ng-click="removeAccessTokens(client)" ng-disabled="!client.tokenCount || client.busy"><i ng-show="client.busy" class="fa fa-circle-o-notch fa-spin ng-hide"></i> Remove access</button>
                         <br/>
                         <a href="" data-toggle="collapse" data-parent="#accordion" data-target="#collapse{{client.id}}">Advanced</a>
                         <div id="collapse{{client.id}}" class="panel-collapse collapse">
