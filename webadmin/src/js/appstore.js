@@ -24,7 +24,7 @@ angular.module('Application').service('AppStore', ['$http', 'Client', function (
 
         var that = this;
 
-        $http.get(Client.getConfig().apiServerOrigin + '/api/v1/appstore/apps', { params: { boxVersion: Client.getConfig().version } }).success(function (data, status) {
+        $http.get(Client.getConfig().apiServerOrigin + '/api/v1/apps', { params: { boxVersion: Client.getConfig().version } }).success(function (data, status) {
             if (status !== 200) return callback(new AppStoreError(status, data));
 
             // TODO remove old apps
@@ -56,7 +56,7 @@ angular.module('Application').service('AppStore', ['$http', 'Client', function (
     AppStore.prototype.getManifest = function (appId, callback) {
         if (Client.getConfig().apiServerOrigin === null) return callback(new AppStoreError(420, 'Enhance Your Calm'));
 
-        var manifestUrl = Client.getConfig().apiServerOrigin + '/api/v1/appstore/apps/' + appId + '/manifest';
+        var manifestUrl = Client.getConfig().apiServerOrigin + '/api/v1/apps/' + appId + '/manifest';
         console.log('Getting the manifest of ', appId, manifestUrl);
         $http.get(manifestUrl).success(function (data, status) {
             if (status !== 200) return callback(new AppStoreError(status, data));
