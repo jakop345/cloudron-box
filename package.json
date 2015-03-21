@@ -32,6 +32,7 @@
     "express": "^4.11.2",
     "express-session": "^1.10.2",
     "hat": "0.0.3",
+    "java-packagename-regex": "^1.0.0",
     "json": "^9.0.3",
     "memorystream": "^0.3.0",
     "mime": "^1.3.4",
@@ -58,6 +59,7 @@
     "split": "^0.3.3",
     "superagent": "~0.21.0",
     "supererror": "^0.6.0",
+    "tv4": "^1.1.9",
     "underscore": "^1.7.0",
     "validator": "^3.30.0"
   },
