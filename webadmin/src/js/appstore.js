@@ -56,11 +56,11 @@ angular.module('Application').service('AppStore', ['$http', 'Client', function (
     AppStore.prototype.getManifest = function (appId, callback) {
         if (Client.getConfig().apiServerOrigin === null) return callback(new AppStoreError(420, 'Enhance Your Calm'));
 
-        var manifestUrl = Client.getConfig().apiServerOrigin + '/api/v1/apps/' + appId + '/manifest';
+        var manifestUrl = Client.getConfig().apiServerOrigin + '/api/v1/apps/' + appId;
         console.log('Getting the manifest of ', appId, manifestUrl);
         $http.get(manifestUrl).success(function (data, status) {
             if (status !== 200) return callback(new AppStoreError(status, data));
-            return callback(null, data);
+            return callback(null, data.manifest);
         }).error(function (data, status) {
             return callback(new AppStoreError(status, data));
         });
