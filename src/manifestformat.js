@@ -69,6 +69,9 @@ var manifestSchema = {
             type: 'string',
             format: 'semver'
         },
+        'icon': {
+            type: 'string'
+        },
         'addons': {
             type: 'array',
             items: {
@@ -115,6 +118,7 @@ var manifestSchema = {
 exports = module.exports = {
     parse: parse,
     parseString: parseString,
+    parseFile: parseFile,
 
     SCHEMA: manifestSchema
 };
@@ -163,5 +167,14 @@ function parseString(manifestJson) {
     var error = manifest ? parse(manifest) : new Error('Unable to parse manifest: ' + safe.error.message);
 
     return { manifest: error ? null : manifest, error: error };
+}
+
+function parseFile(manifestFile) {
+    assert(typeof manifestFile === 'string');
+
+    var manifestJson = safe.fs.readFileSync(manifestFile, 'utf8');
+    if (!manifestJson) return { manifest: null, error: new Error('Unable to read file: ' + safe.error.message) };
+
+    return parseString(manifestJson);
 }
 
