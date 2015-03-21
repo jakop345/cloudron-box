@@ -12,6 +12,7 @@ var appdb = require('./appdb.js'),
     docker = require('./docker.js'),
     updater = require('./updater.js'),
     fs = require('fs'),
+    manifestFormat = require('./manifestformat.js'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
     semver = require('semver'),
@@ -39,7 +40,6 @@ exports = module.exports = {
 
     exec: exec,
 
-    validateManifest: validateManifest,
     checkManifestConstraints: checkManifestConstraints,
 
     // exported for testing
@@ -270,7 +270,7 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
     assert(typeof accessRestriction === 'string');
     assert(typeof callback === 'function');
 
-    var error = validateManifest(manifest);
+    var error = manifestFormat.parse(manifest);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Mainfest error: ' + error.message));
 
     error = checkManifestConstraints(manifest);
@@ -345,7 +345,7 @@ function update(appId, manifest, portBindings, callback) {
 
     debug('Will update app with id:%s', appId);
 
-    var error = validateManifest(manifest);
+    var error = manifestFormat.parse(manifest);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Mainfest error:' + error.message));
 
     error = checkManifestConstraints(manifest);
@@ -469,78 +469,6 @@ function stop(appId, callback) {
 
         callback(null);
     });
-}
-
-// NOTE: keep this in sync with appstore's apps.js
-function validateManifest(manifest) {
-    assert(manifest && typeof manifest === 'object');
-
-    if (manifest['manifestVersion'] !== 1) return new Error('manifestVersion must be set');
-
-    var fields = [ 'version', 'dockerImage', 'healthCheckPath', 'title' ];
-
-    for (var i = 0; i < fields.length; i++) {
-        var field = fields[i];
-        if (!(field in manifest)) return new Error('Missing ' + field + ' in manifest');
-
-        if (typeof manifest[field] !== 'string') return new Error(field + ' must be a string');
-
-        if (manifest[field].length === 0) return new Error(field + ' cannot be empty');
-    }
-
-    if (!Number.isInteger(manifest['httpPort'])) return new Error('httpPort is not a number');
-    if (manifest.httpPort <= 0 || manifest.httpPort > 65535) return new Error('httpPort is out of range');
-
-    if (!semver.valid(manifest['version'])) return new Error('version is not valid semver');
-
-    if ('addons' in manifest) {
-        // addons must be array of strings
-        if (!util.isArray(manifest.addons)) return new Error('addons must be an array');
-
-        for (var i = 0; i < manifest.addons.length; i++) {
-            if (typeof manifest.addons[i] !== 'string') return new Error('addons must be strings');
-        }
-    }
-
-    if ('minBoxVersion' in manifest) {
-        if (!semver.valid(manifest['minBoxVersion'])) return new Error('minBoxVersion is not valid semver');
-    }
-
-    if ('maxBoxVersion' in manifest) {
-        if (!semver.valid(manifest['maxBoxVersion'])) return new Error('maxBoxVersion is not valid semver');
-    }
-
-    if ('targetBoxVersion' in manifest) {
-        if (!semver.valid(manifest['targetBoxVersion'])) return new Error('targetBoxVersion is not valid semver');
-    }
-
-    if ('iconUrl' in manifest) {
-        if (!safe.url.parse(manifest.iconUrl)) return new Error('Invalid icon url');
-    }
-
-    if ('tcpPorts' in manifest) {
-        if (!manifest['tcpPorts'] || typeof manifest['tcpPorts'] !== 'object') return new Error('tcpPorts must be an object');
-
-        for (var env in manifest['tcpPorts']) {
-            if (!/^[a-zA-Z0-9_]+$/.test(env)) return new Error('Environment variable ' + env + ' can have only alnum and underscore');
-
-            if (typeof manifest['tcpPorts'][env].description !== 'string') return new Error('Missing ' + env + ' port description');
-
-            if ('containerPort' in manifest['tcpPorts'][env]) {
-                var containerPort = manifest.tcpPorts[env].containerPort;
-                if (!Number.isInteger(containerPort)) return new Error('containerPort must be an integer');
-                if (containerPort <= 0 || containerPort > 65535) return new Error('containerPort out of range');
-            }
-
-            if ('defaultValue' in manifest['tcpPorts'][env]) {
-                var defaultHostPort = manifest.tcpPorts[env].defaultValue;
-                if (!Number.isInteger(defaultHostPort)) return new Error('defaultValue must be an integer');
-                if (defaultHostPort <= 1023 || defaultHostPort > 65535) return new Error('defaultValue out of range');
-            }
-        }
-    }
-
-    return null;
 }
 
 function checkManifestConstraints(manifest) {

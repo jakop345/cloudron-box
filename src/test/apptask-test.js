@@ -20,13 +20,40 @@ var addons = require('../addons.js'),
     safe = require('safetydance'),
     _ = require('underscore');
 
+var MANIFEST = {
+  "id": "io.cloudron.test",
+  "title": "test title",
+  "description": "test description",
+  "tagline": "test rocks",
+  "website": "http://test.cloudron.io",
+  "contactEmail": "support@cloudron.io",
+  "version": "0.0.8",
+  "manifestVersion": 1,
+  "dockerImage": "girish/test:0.8",
+  "healthCheckPath": "/",
+  "httpPort": 7777,
+  "tcpPorts": {
+    "ECHO_SERVER_PORT": {
+      "title": "Echo Server Port",
+      "description": "Echo server",
+      "containerPort": 7778
+    }
+  },
+  "addons": [
+    "oauth",
+    "redis",
+    "mysql",
+    "postgresql"
+  ]
+};
+
 var APP = {
     id: 'appid',
     appStoreId: 'appStoreId',
     installationState: appdb.ISTATE_PENDING_INSTALL,
     runState: null,
     location: 'applocation',
-    manifest: { version: '0.0.1', dockerImage: 'docker/app0', healthCheckPath: '/', httpPort: 80, title: 'testapplication' },
+    manifest: MANIFEST,
     containerId: null,
     httpPort: 4567,
     portBindings: null,
@@ -35,6 +62,7 @@ var APP = {
 
 describe('apptask', function () {
     before(function (done) {
+        config.set('version', '0.5.0');
         database.initialize(function (error) {
             expect(error).to.be(null);
             appdb.add(APP.id, APP.appStoreId, APP.manifest, APP.location, APP.portBindings, APP.accessRestriction, done);
@@ -154,9 +182,10 @@ describe('apptask', function () {
         });
     });
 
-    it('barfs on bad field in manifest', function (done) {
+    it('barfs on bad manifest', function (done) {
         var badApp = _.extend({ }, APP);
-        badApp.manifest = { version: '0.1', dockerImage: 'foo', healthCheckPath: '/', httpPort: 3, title: 'ok' }; // version is not semver
+        badApp.manifest = _.extend({ }, APP.manifest);
+        delete badApp.manifest['id'];
 
         apptask._verifyManifest(badApp, function (error) {
             expect(error).to.be.ok();
@@ -164,9 +193,10 @@ describe('apptask', function () {
         });
     });
 
-    it('barfs on icompatible manifest', function (done) {
+    it('barfs on incompatible manifest', function (done) {
         var badApp = _.extend({ }, APP);
-        badApp.manifest = { version: '0.0.1', maxBoxVersion: '0.0.0', dockerImage: 'foo', healthCheckPath: '/', httpPort: 3, title: 'ok' }; // max box version is too small
+        badApp.manifest = _.extend({ }, APP.manifest);
+        badApp.manifest.maxBoxVersion = '0.0.0'; // max box version is too small
 
         apptask._verifyManifest(badApp, function (error) {
             expect(error).to.be.ok();
@@ -176,7 +206,6 @@ describe('apptask', function () {
 
     it('verifies manifest', function (done) {
         var goodApp = _.extend({ }, APP);
-        goodApp.manifest = { version: '0.0.1', manifestVersion: 1, dockerImage: 'foo', healthCheckPath: '/', httpPort: 3, title: 'ok' };
 
         apptask._verifyManifest(goodApp, function (error) {
             expect(error).to.be(null);

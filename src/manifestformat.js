@@ -114,6 +114,7 @@ var manifestSchema = {
 
 exports = module.exports = {
     parse: parse,
+    parseString: parseString,
 
     SCHEMA: manifestSchema
 };
@@ -145,21 +146,22 @@ tv4.addFormat('email', function (data, schema) {
     return validator.isEmail(data) ? null : 'Invalid email';
 });
 
-// NOTE: keep this in sync with the code in apptask.js in box
-function parse(manifestJson) {
-    assert(typeof manifestJson === 'string');
+function parse(manifest) {
+    assert(manifest && typeof manifest === 'object');
 
-    function error(msg) {
-        return { error: new Error(msg), manifest: null };
-    }
+    var result = tv4.validateResult(manifest, manifestSchema, false /* recursive */, true /* banUnknownProperties */);
+    if (!result.valid) return new Error(result.error.message + (result.error.dataPath ? ' @ ' + result.error.dataPath : ''));
+
+    return null;
+}
+
+function parseString(manifestJson) {
+    assert(typeof manifestJson === 'string');
 
     var manifest = safe.JSON.parse(manifestJson);
 
-    if (manifest === null) return error('Unable to parse manifest: ' + safe.error.message);
+    var error = manifest ? parse(manifest) : new Error('Unable to parse manifest: ' + safe.error.message);
 
-    var result = tv4.validateResult(manifest, manifestSchema, false /* recursive */, true /* banUnknownProperties */);
-    if (!result.valid) return error(result.error.message + (result.error.dataPath ? ' @ ' + result.error.dataPath : ''));
-
-    return { manifest: manifest, error: null };
+    return { manifest: error ? null : manifest, error: error };
 }
 

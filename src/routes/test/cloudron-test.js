@@ -25,6 +25,7 @@ var token = null; // authentication token
 
 var server;
 function setup(done) {
+    config.set('version', '0.5.0');
     server.start(done);
 }
 
@@ -289,7 +290,7 @@ describe('Cloudron', function () {
                 expect(result.body.isCustomDomain).to.eql(false);
                 expect(result.body.progress).to.be.an('object');
                 expect(result.body.update).to.be.an('object');
-                expect(result.body.version).to.eql(null);
+                expect(result.body.version).to.eql('0.5.0');
                 expect(result.body.developerMode).to.be.a('boolean');
                 done();
             });

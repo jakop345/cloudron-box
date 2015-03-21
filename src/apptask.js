@@ -26,6 +26,7 @@ var addons = require('./addons.js'),
     execFile = child_process.execFile,
     fs = require('fs'),
     hat = require('hat'),
+    manifestFormat = require('./manifestformat.js'),
     net = require('net'),
     os = require('os'),
     path = require('path'),
@@ -469,7 +470,7 @@ function verifyManifest(app, callback) {
     debug('Verifying manifest for :', app.id);
 
     var manifest = app.manifest;
-    var error = apps.validateManifest(manifest);
+    var error = manifestFormat.parse(manifest);
     if (error) return callback(new Error(util.format('Manifest error: %s', error.message)));
 
     error = apps.checkManifestConstraints(manifest);

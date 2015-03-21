@@ -23,6 +23,10 @@ function cleanup(done) {
 describe('Server', function () {
     this.timeout(5000);
 
+    before(function () {
+        config.set('version', '0.5.0');
+    });
+
     after(cleanup);
 
     describe('startup', function () {
@@ -87,7 +91,7 @@ describe('Server', function () {
             request.get(SERVER_URL + '/api/v1/cloudron/status', function (err, res) {
                 expect(err).to.not.be.ok();
                 expect(res.statusCode).to.equal(200);
-                expect(res.body.version).to.equal(null);
+                expect(res.body.version).to.equal('0.5.0');
                 done(err);
             });
         });

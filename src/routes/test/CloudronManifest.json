@@ -1,5 +1,10 @@
 {
-  "title": "test",
+  "id": "io.cloudron.test",
+  "title": "test title",
+  "description": "test description",
+  "tagline": "test rocks",
+  "website": "http://test.cloudron.io",
+  "contactEmail": "support@cloudron.io",
   "version": "0.0.8",
   "manifestVersion": 1,
   "dockerImage": "girish/test:0.8",
@@ -7,6 +12,7 @@
   "httpPort": 7777,
   "tcpPorts": {
     "ECHO_SERVER_PORT": {
+      "title": "Echo Server Port",
       "description": "Echo server",
       "containerPort": 7778
     }
