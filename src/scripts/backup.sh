@@ -25,7 +25,7 @@ now=$(date "+%Y-%m-%dT%H:%M:%S")
 DATA_DIR="${HOME}/data"
 
 echo "Creating MySQL dump"
-mysqldump -u root -ppassword box > "${DATA_DIR}/box.mysqldump"
+mysqldump -u root -ppassword --single-transaction --routines --triggers box > "${DATA_DIR}/box.mysqldump"
 
 echo "Snapshoting backup as backup-${now}"
 btrfs subvolume snapshot -r "${DATA_DIR}" "${HOME}/backup-${now}"
