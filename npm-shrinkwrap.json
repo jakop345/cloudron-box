@@ -1237,8 +1237,8 @@
     },
     "manifestformat": {
       "version": "1.0.0",
-      "from": "https://gitlab-yellowtent.cloudron.me/girish/manifestformat/repository/archive.tar.gz?ref=dfad237b5156f2c08b5e24bf800a21f1b9f0abd4",
-      "resolved": "https://gitlab-yellowtent.cloudron.me/girish/manifestformat/repository/archive.tar.gz?ref=dfad237b5156f2c08b5e24bf800a21f1b9f0abd4",
+      "from": "https://gitlab-yellowtent.cloudron.me/yellowtent/manifestformat/repository/archive.tar.gz?ref=1edd3117226fca2a5a809233e7e8bf1e8169e22a",
+      "resolved": "https://gitlab-yellowtent.cloudron.me/yellowtent/manifestformat/repository/archive.tar.gz?ref=1edd3117226fca2a5a809233e7e8bf1e8169e22a",
       "dependencies": {
         "java-packagename-regex": {
           "version": "1.0.0",
