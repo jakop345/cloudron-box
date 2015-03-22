@@ -476,10 +476,16 @@ function verifyManifest(app, callback) {
     error = apps.checkManifestConstraints(manifest);
     if (error) return callback(error);
 
-    if (!manifest.iconUrl) return callback(null);
+    return callback(null);
+}
+
+function downloadIcon(app, callback) {
+    debug('Downloading icon of %s@%s', app.appStoreId, app.manifest.version);
+
+    var iconUrl = config.apiServerOrigin() + '/api/v1/apps/' + app.appStoreId + '/versions/' + app.manifest.version + '/icon';
 
     superagent
-        .get(manifest.iconUrl)
+        .get(iconUrl)
         .buffer(true)
         .end(function (error, res) {
             if (error) return callback(new Error('Error downloading icon:' + error.message));
@@ -622,6 +628,7 @@ function install(app, callback) {
         // verify manifest
         updateApp.bind(null, app, { installationProgress: 'Verifying manifest' }),
         verifyManifest.bind(null, app),
+        downloadIcon.bind(null, app),
 
         // create proxy OAuth credentials
         updateApp.bind(null, app, { installationProgress: 'Creating OAuth proxy credentials' }),
@@ -688,6 +695,7 @@ function restore(app, callback) {
         // verify manifest
         updateApp.bind(null, app, { installationProgress: 'Verify manifest' }),
         verifyManifest.bind(null, app),
+        downloadIcon.bind(null, app),
 
         // setup oauth proxy
         updateApp.bind(null, app, { installationProgress: 'Setting up OAuth proxy credentials' }),
@@ -812,6 +820,7 @@ function update(app, callback) {
 
         updateApp.bind(null, app, { installationProgress: 'Verify manifest' }),
         verifyManifest.bind(null, app),
+        downloadIcon.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: 'Downloading image' }),
         downloadImage.bind(null, app),
