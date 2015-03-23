@@ -174,7 +174,7 @@ function add(id, appStoreId, manifest, location, portBindings, accessRestriction
     });
 
     database.transaction(queries, function (error, results) {
-        if (error && error.code === 'ER_DUP_ENTRY') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
+        if (error && error.code === 'ER_DUP_ENTRY') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error.message));
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         callback(null);
@@ -260,7 +260,7 @@ function updateWithConstraints(id, app, constraints, callback) {
             queries.push({ query: 'INSERT INTO appPortBindings (hostPort, environmentVariable, appId) VALUES(?, ?, ?)', args: values });
         });
     }
- 
+
     var fields = [ ], values = [ ];
     for (var p in app) {
         if (p === 'manifest') {

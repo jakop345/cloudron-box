@@ -129,6 +129,7 @@ AppsError.NOT_FOUND = 'Not Found';
 AppsError.BAD_FIELD = 'Bad Field';
 AppsError.BAD_STATE = 'Bad State';
 AppsError.PORT_RESERVED = 'Port Reserved';
+AppsError.PORT_CONFLICT = 'Port Conflict';
 
 // Hostname validation comes from RFC 1123 (section 2.1)
 // Domain name validation comes from RFC 2181 (Name syntax)
@@ -185,6 +186,28 @@ function validatePortBindings(portBindings, tcpPorts) {
     }
 
     return null;
+}
+
+function getDuplicateErrorDetails(location, portBindings, error) {
+    assert(typeof location === 'string');
+    assert(typeof portBindings === 'object');
+    assert(error.reason === DatabaseError.ALREADY_EXISTS);
+
+    var match = error.message.match(/ER_DUP_ENTRY: Duplicate entry '(.*)' for key/);
+    if (!match) {
+        console.error('Unexpected SQL error message.', error);
+        return new AppsError(AppsError.INTERNAL_ERROR);
+    }
+
+    // check if the location conflicts
+    if (match[1] === location) return new AppsError(AppsError.ALREADY_EXISTS);
+
+    // check if any of the port bindings conflict
+    for (var env in portBindings) {
+        if (portBindings[env] === parseInt(match[1])) return new AppsError(AppsError.PORT_CONFLICT, match[1]);
+    }
+
+    return new AppsError(AppsError.ALREADY_EXISTS);
 }
 
 function getIconUrlSync(app) {
@@ -288,7 +311,7 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
     debug('Will install app with id : ' + appId);
 
     appdb.add(appId, appStoreId, manifest, location.toLowerCase(), portBindings, accessRestriction, function (error) {
-        if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new AppsError(AppsError.ALREADY_EXISTS));
+        if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(getDuplicateErrorDetails(location.toLowerCase(), portBindings, error));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
         stopTask(appId);
