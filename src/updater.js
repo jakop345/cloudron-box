@@ -26,7 +26,7 @@ var appdb = require('./appdb.js'),
 
 var INSTALLER_UPDATE_URL = 'http://127.0.0.1:2020/api/v1/installer/update';
 
-var gCheckUpdatesTimeoutId = null,
+var gCheckUpdatesIntervalId = null,
     gAppUpdateInfo = null,
     gBoxUpdateInfo = null;
 
@@ -108,7 +108,7 @@ function checkUpdates() {
 
             gBoxUpdateInfo = result;
 
-            gCheckUpdatesTimeoutId = setTimeout(checkUpdates, 60 * 1000);
+            // Done we call this in an interval
         });
     });
 }
@@ -117,15 +117,15 @@ function initialize(callback) {
     assert(typeof callback === 'function');
 
     progress.clear(progress.UPDATE);
-    gCheckUpdatesTimeoutId = setTimeout(checkUpdates, 10 * 1000);
+    gCheckUpdatesIntervalId = setInterval(checkUpdates, 10 * 1000);
     callback(null);
 }
 
 function uninitialize(callback) {
     assert(typeof callback === 'function');
 
-    clearTimeout(gCheckUpdatesTimeoutId);
-    gCheckUpdatesTimeoutId = null;
+    clearInterval(gCheckUpdatesIntervalId);
+    gCheckUpdatesIntervalId = null;
 
     callback(null);
 }
