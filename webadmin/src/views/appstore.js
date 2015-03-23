@@ -25,6 +25,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         $scope.appinstall.portBindings = {};
         $scope.appinstall.accessRestriction = '';
         $scope.appinstall.installFormVisible = false;
+        $('#collapseInstallForm').collapse('hide');
         $scope.appinstall.error = {};
 
         $scope.install_form.$setPristine();
