@@ -147,7 +147,7 @@ function activate(username, password, email, callback) {
 function getBackupUrl(callback) {
     assert(typeof callback === 'function');
 
-    if (config.LOCAL) return callback(null);    // skip this when running locally
+    if (config.LOCAL) return callback(null, {});    // skip this when running locally
 
     var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/backupurl';
 
