@@ -270,3 +270,7 @@ $table-border-color:                        transparent !default;
     bottom: 0;
     height: auto !important;
 }
+
+.has-error {
+    color: $brand-danger;
+}

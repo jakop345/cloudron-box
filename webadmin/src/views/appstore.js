@@ -32,14 +32,14 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         $scope.appinstall.mediaLinks = [];
         $('#collapseInstallForm').collapse('hide');
 
-        $scope.install_form.$setPristine();
-        $scope.install_form.$setUntouched();
+        $scope.appInstallForm.$setPristine();
+        $scope.appInstallForm.$setUntouched();
     };
 
     $scope.showInstallForm = function () {
         $scope.appinstall.installFormVisible = true;
         $('#collapseInstallForm').collapse('show');
-        $('#inputLocation').focus();
+        $('#appInstallLocationInput').focus();
     };
 
     $scope.showInstall = function (app) {
@@ -73,7 +73,8 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
 
     $scope.doInstall = function () {
         $scope.appinstall.busy = true;
-        $scope.appinstall.error.name = null;
+        $scope.appinstall.error.other = null;
+        $scope.appinstall.error.location = null;
         $scope.appinstall.error.password = null;
         $scope.appinstall.error.port = null;
 
@@ -87,15 +88,18 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
 
         Client.installApp($scope.appinstall.app.id, $scope.appinstall.app.manifest, $scope.appinstall.password, $scope.appinstall.app.title, { location: $scope.appinstall.location, portBindings: finalPortBindings, accessRestriction: $scope.appinstall.accessRestriction }, function (error) {
             if (error) {
-                if (error.statusCode === 409 && error.message.indexOf('is reserved') !== -1) {
-                    $scope.appinstall.error.port = 'This port is already in use.';
+                if (error.statusCode === 409 && (error.message.indexOf('is reserved') !== -1 || error.message.indexOf('is already in use') !== -1)) {
+                    $scope.appinstall.error.port = error.message;
                 } else if (error.statusCode === 409) {
-                    $scope.appinstall.error.name = 'Application already exists.';
+                    $scope.appinstall.error.location = 'This name is already taken.';
+                    $scope.appInstallForm.location.$setPristine();
+                    $('#appInstallLocationInput').focus();
                 } else if (error.statusCode === 403) {
                     $scope.appinstall.error.password = 'Wrong password provided.';
                     $scope.appinstall.password = '';
+                    $('#appInstallPasswordInput').focus();
                 } else {
-                    $scope.appinstall.error.name = 'App with the name ' + $scope.appinstall.app.name + ' cannot be installed.';
+                    $scope.appinstall.error.other = 'App with the name ' + $scope.appinstall.app.manifest.title + ' cannot be installed.';
                 }
 
                 $scope.appinstall.busy = false;

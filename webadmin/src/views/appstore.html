@@ -34,21 +34,23 @@
                     </div>
                     <div class="collapse" id="collapseInstallForm" data-toggle="false">
                         <h3>Installation</h3>
-                        <form class="form-signin" role="form" name="install_form" ng-submit="doInstall(install_form)" autocomplete="off">
-                            <div class="form-group" ng-class="{ 'has-error': install_form.location.$dirty && install_form.location.$invalid }">
-                                <label class="control-label" for="inputLocation">Location</label>
+                        <form class="form-signin" role="form" name="appInstallForm" ng-submit="doInstall()" autocomplete="off">
+                        <div class="has-error text-center" ng-show="appinstall.error.other">{{ appinstall.error.other }}</div>
+                            <div class="form-group" ng-class="{ 'has-error': (appInstallForm.location.$dirty && appInstallForm.location.$invalid) || (!appInstallForm.location.$dirty && appinstall.error.location) }">
+                                <label class="control-label" for="appInstallLocationInput">Location {{ appinstall.error.location }} </label>
                                 <div class="input-group form-inline">
-                                    <input type="text" class="form-control" ng-model="appinstall.location" id="inputLocation" name="location" required autofocus>
+                                    <input type="text" class="form-control" ng-model="appinstall.location" id="appInstallLocationInput" name="location" required autofocus>
                                     <div class="input-group-addon">{{ config.isCustomDomain ? '.' : '-' }}{{ config.fqdn }}</div>
                                 </div>
                             </div>
-                            <div class="form-group" ng-class="{ 'has-error': (!install_form.password.$dirty && appinstall.error.password) || (install_form.password.$dirty && install_form.password.$invalid) }">
-                                <label class="control-label" for="inputPassword">Password</label>
-                                <input type="password" class="form-control" ng-model="appinstall.password" id="inputPassword" name="password" ng-maxlength="512" ng-minlength="5" required>
+                            <div class="form-group" ng-class="{ 'has-error': (appInstallForm.password.$dirty && appInstallForm.password.$invalid) || (!appInstallForm.password.$dirty && appinstall.error.password) }">
+                                <label class="control-label" for="appInstallPasswordInput">Password</label>
+                                <input type="password" class="form-control" ng-model="appinstall.password" id="appInstallPasswordInput" name="password" ng-maxlength="512" ng-minlength="5" required>
                             </div>
+                            <div class="has-error text-center" ng-show="appinstall.error.port">{{ appinstall.error.port }}</div>
                             <div ng-repeat="(env, info) in appinstall.portBindingsInfo">
                                 <ng-form name="portInfo_form">
-                                    <div class="form-group" ng-class="{ 'has-error': (!install_form.itemName{{$index}}.$dirty && appinstall.error.port) || (portInfo_form.itemName{{$index}}.$dirty && portInfo_form.itemName{{$index}}.$invalid) }">
+                                    <div class="form-group" ng-class="{ 'has-error': (!appInstallForm.itemName{{$index}}.$dirty && appinstall.error.port) || (portInfo_form.itemName{{$index}}.$dirty && portInfo_form.itemName{{$index}}.$invalid) }">
                                         <label class="control-label" for="inputPortInfo{{env}}"><input type="checkbox" ng-model="appinstall.portBindingsEnabled[env]"> {{ info.description }} ({{ hostPortMin }} - {{ hostPortMax }})</label>
                                         <input type="number" class="form-control" ng-model="appinstall.portBindings[env]" ng-disabled="!appinstall.portBindingsEnabled[env]" id="inputPortInfo{{env}}" later-name="itemName{{$index}}" min="{{hostPortMin}}" max="{{hostPortMax}}" required>
                                     </div>
@@ -61,14 +63,14 @@
                                     <option value="roleUser">Only for Cloudron Users</option>
                                 </select>
                             </div>
-                            <input class="ng-hide" type="submit" ng-disabled="install_form.$invalid || busy"/>
+                            <input class="ng-hide" type="submit" ng-disabled="appInstallForm.$invalid || busy"/>
                         </form>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-success" ng-show="appinstall.installFormVisible && appinstall.ready" ng-click="doInstall()" ng-disabled="install_form.$invalid || busy">Install</button>
+                <button type="button" class="btn btn-success" ng-show="appinstall.installFormVisible && appinstall.ready" ng-click="doInstall()" ng-disabled="appInstallForm.$invalid || busy">Install</button>
                 <button type="button" class="btn btn-success" ng-show="!appinstall.installFormVisible && appinstall.ready" ng-click="showInstallForm()">Install</button>
             </div>
         </div>

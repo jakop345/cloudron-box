@@ -6,21 +6,27 @@
 angular.module('Application').service('Client', ['$http', 'md5', function ($http, md5) {
     var client = null;
 
-    function ClientError(statusCode, message) {
+    function ClientError(statusCode, messageOrObject) {
         Error.call(this);
         this.name = this.constructor.name;
         this.statusCode = statusCode;
-        if (typeof message == 'string') {
-            this.message = message;
+        if (typeof messageOrObject === 'string') {
+            this.message = messageOrObject;
+        } else if (messageOrObject.message) {
+            this.message = messageOrObject.message;
         } else {
-            this.message = JSON.stringify(message);
+            this.message = JSON.stringify(messageOrObject);
         }
     }
 
     function defaultErrorHandler(callback) {
         return function (data, status) {
             if (status === 401) return client.logout();
-            callback(new ClientError(status, data));
+            var obj = data;
+            try {
+                obj = JSON.parse(data);
+            } catch (e) {}
+            callback(new ClientError(status, obj));
         };
     }
 
@@ -163,7 +169,7 @@ angular.module('Application').service('Client', ['$http', 'md5', function ($http
         var that = this;
         var data = { appStoreId: id, manifest: manifest, password: password, location: config.location, portBindings: config.portBindings, accessRestriction: config.accessRestriction };
         $http.post('/api/v1/apps/install', data).success(function (data, status) {
-            if (status !== 202 || typeof data !== 'object') return callback(new ClientError(status, data));
+            if (status !== 202 || typeof data !== 'object') return defaultErrorHandler(callback);
 
             // put new app with amended title in cache
             data.manifest = { title: title };
