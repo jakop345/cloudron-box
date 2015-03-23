@@ -78,23 +78,21 @@
 
 <div class="row animateMeOpacity ng-hide" ng-show="ready">
     <div class="col-sm-1 grid-item" ng-repeat="app in apps">
-        <div class="highlight grid-item-content">
-            <a href="" ng-click="showInstall(app)">
-                <div class="grid-item-top">
-                    <div class="row">
-                        <div class="col-xs-12 text-center">
-                            <img ng-src="{{app.iconUrl}}" onerror="this.onerror=null;this.src='img/appicon_fallback.png'" width="64" height="64"/>
-                        </div>
-                    </div>
-                    <br/>
-                    <div class="row">
-                        <div class="col-xs-12 text-left">
-                            <div style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden">{{ app.manifest.title }}</div>
-                            <a ng-href="{{ app.manifest.website }}" target="_blank"><div style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden" class="text-muted">{{ app.manifest.website | prettyHref }}</div></a>
-                        </div>
+        <div class="highlight grid-item-content" style="cursor: pointer" ng-click="showInstall(app)">
+            <div class="grid-item-top">
+                <div class="row">
+                    <div class="col-xs-12 text-center">
+                        <img ng-src="{{app.iconUrl}}" onerror="this.onerror=null;this.src='img/appicon_fallback.png'" width="64" height="64"/>
                     </div>
                 </div>
-            </a>
+                <br/>
+                <div class="row">
+                    <div class="col-xs-12 text-left">
+                        <div style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden">{{ app.manifest.title }}</div>
+                        <a ng-href="{{ app.manifest.website }}" target="_blank"><div style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden" class="text-muted">{{ app.manifest.website | prettyHref }}</div></a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
