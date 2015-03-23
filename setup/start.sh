@@ -214,9 +214,9 @@ cat > "${BOX_SRC_DIR}/webadmin/dist/config.json" <<CONF_END
 }
 CONF_END
 
-echo "Marking apps for restore"
-# TODO: do not auto-start stopped containers (httpPort might need fixing to start them)
-mysql -u root -ppassword -e 'UPDATE apps SET installationState = "pending_restore", healthy = NULL, runState = NULL, containerId = NULL, httpPort = NULL, installationProgress = NULL' box
+# all other states other than install should proceed from where they left off
+echo "Marking installed apps for restore"
+mysql -u root -ppassword -e 'UPDATE apps SET installationState = "pending_restore" WHERE installationState = "installed"' box
 
 # Add webadmin oauth client
 # The domain might have changed, therefor we have to update the record
