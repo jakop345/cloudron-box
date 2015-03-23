@@ -15,7 +15,8 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         location: '',
         password: '',
         portBindings: {},
-        accessRestriction: ''
+        accessRestriction: '',
+        mediaLinks: []
     };
 
     $scope.reset = function() {
@@ -25,6 +26,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         $scope.appinstall.portBindings = {};
         $scope.appinstall.accessRestriction = '';
         $scope.appinstall.installFormVisible = false;
+        $scope.appinstall.mediaLinks = [];
         $('#collapseInstallForm').collapse('hide');
         $scope.appinstall.error = {};
 
@@ -46,6 +48,8 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
 
             // add manifest to app object
             app.manifest = manifest;
+
+            $scope.appinstall.mediaLinks = manifest.mediaLinks;
 
             $scope.appinstall.app = app;
             $scope.appinstall.location = app.location;

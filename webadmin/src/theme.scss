@@ -256,3 +256,10 @@ $table-border-color:                        transparent !default;
         opacity: 1;
     }
 }
+
+.slick-item {
+     height: 200px;
+     background-position: center;
+     background-repeat: no-repeat;
+     background-size: cover;
+}
