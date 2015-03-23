@@ -136,7 +136,7 @@
 <div class="row animateMeOpacity ng-hide" ng-show="installedApps.length > 0">
     <div class="col-sm-1 grid-item" ng-repeat="app in installedApps">
         <div style="background-color: white;" class="highlight grid-item-content">
-            <a href="https://{{ app.fqdn + app.manifest.home_url }}" target="_blank">
+            <a ng-href="{{app | applicationLink}}" target="_blank">
                 <div class="grid-item-top">
                     <div class="row">
                         <div class="col-xs-12 text-center" style="height: 48px">
