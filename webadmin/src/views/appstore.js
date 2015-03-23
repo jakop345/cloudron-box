@@ -9,7 +9,6 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
 
     $scope.appinstall = {
         busy: false,
-        ready: false,
         installFormVisible: false,
         error: {},
         app: {},
@@ -22,7 +21,6 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
 
     $scope.reset = function() {
         $scope.appinstall.app = {};
-        $scope.appinstall.ready = false;
         $scope.appinstall.error = {};
         $scope.appinstall.location = '';
         $scope.appinstall.password = '';
@@ -45,30 +43,22 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
     $scope.showInstall = function (app) {
         $scope.reset();
 
-        $scope.appinstall.app = app;
+        // make a copy to work with in case the app object gets updated while polling
+        angular.copy(app, $scope.appinstall.app);
         $('#appInstallModal').modal('show');
 
-        AppStore.getManifest(app.id, function (error, manifest) {
-            if (error) return console.error(error);
+        $scope.appinstall.mediaLinks = $scope.appinstall.app.manifest.mediaLinks || [];
+        $scope.appinstall.location = app.location;
+        $scope.appinstall.portBindingsInfo = $scope.appinstall.app.manifest.tcpPorts || {};   // Portbinding map only for information
+        $scope.appinstall.portBindings = {};                            // This is the actual model holding the env:port pair
+        $scope.appinstall.portBindingsEnabled = {};                     // This is the actual model holding the enabled/disabled flag
+        $scope.appinstall.accessRestriction = app.accessRestriction || '';
 
-            // add manifest to app object
-            $scope.appinstall.app.manifest = manifest;
-
-            $scope.appinstall.mediaLinks = manifest.mediaLinks || [];
-            $scope.appinstall.location = app.location;
-            $scope.appinstall.portBindingsInfo = manifest.tcpPorts || {};   // Portbinding map only for information
-            $scope.appinstall.portBindings = {};                            // This is the actual model holding the env:port pair
-            $scope.appinstall.portBindingsEnabled = {};                     // This is the actual model holding the enabled/disabled flag
-            $scope.appinstall.accessRestriction = app.accessRestriction || '';
-
-            // set default ports
-            for (var env in manifest.tcpPorts) {
-                $scope.appinstall.portBindings[env] = manifest.tcpPorts[env].defaultValue || 0;
-                $scope.appinstall.portBindingsEnabled[env] = true;
-            }
-
-            $scope.appinstall.ready = true;
-        });
+        // set default ports
+        for (var env in $scope.appinstall.app.manifest.tcpPorts) {
+            $scope.appinstall.portBindings[env] = $scope.appinstall.app.manifest.tcpPorts[env].defaultValue || 0;
+            $scope.appinstall.portBindingsEnabled[env] = true;
+        }
     };
 
     $scope.doInstall = function () {
