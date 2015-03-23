@@ -20,7 +20,7 @@
                 </div>
                 <div ng-show="appinstall.ready">
                     <div>
-                        <slick init-onload="true" autoplay="true" arrows="false" autoplay-speed="2000" center-mode="true" data="appinstall.mediaLinks" ng-show="appinstall.mediaLinks.length !== 0">
+                        <slick init-onload="true" autoplay="true" arrows="false" autoplay-speed="2000" data="appinstall.mediaLinks" ng-show="appinstall.mediaLinks.length !== 0">
                             <div ng-repeat="mediaLink in appinstall.mediaLinks" class="slick-item" style="background-image: url('{{mediaLink}}');">
                             </div>
                         </slick>

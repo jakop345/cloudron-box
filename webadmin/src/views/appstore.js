@@ -54,7 +54,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
             // add manifest to app object
             $scope.appinstall.app.manifest = manifest;
 
-            $scope.appinstall.mediaLinks = manifest.mediaLinks;
+            $scope.appinstall.mediaLinks = manifest.mediaLinks || [];
             $scope.appinstall.location = app.location;
             $scope.appinstall.portBindingsInfo = manifest.tcpPorts || {};   // Portbinding map only for information
             $scope.appinstall.portBindings = {};                            // This is the actual model holding the env:port pair
