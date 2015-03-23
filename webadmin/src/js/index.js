@@ -76,6 +76,7 @@ app.filter('accessRestrictionLabel', function() {
 
 app.filter('prettyHref', function () {
     return function (input) {
+        if (!input) return input;
         if (input.indexOf('http://') === 0) return input.slice('http://'.length);
         if (input.indexOf('https://') === 0) return input.slice('https://'.length);
         return input;
