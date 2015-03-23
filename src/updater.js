@@ -38,7 +38,7 @@ function getUpdateInfo() {
 }
 
 function checkAppUpdates(callback) {
-    appdb.getAppVersions(function (error, appVersions) {
+    appdb.getAppStoreIds(function (error, appVersions) {
         if (error) return callback(error);
 
         var appStoreIds = appVersions.map(function (appVersion) { return appVersion.appStoreId; });

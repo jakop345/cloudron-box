@@ -30,7 +30,7 @@ exports = module.exports = {
     setHealth: setHealth,
     setInstallationCommand: setInstallationCommand,
     setRunCommand: setRunCommand,
-    getAppVersions: getAppVersions,
+    getAppStoreIds: getAppStoreIds,
 
     // installation codes (keep in sync in UI)
     ISTATE_PENDING_INSTALL: 'pending_install',
@@ -52,11 +52,9 @@ exports = module.exports = {
     _clear: clear
 };
 
-// version is intentionally missing. version is used for joins primarily and is a cache of manifest.version
 var APPS_FIELDS = [ 'id', 'appStoreId', 'installationState', 'installationProgress', 'runState',
     'healthy', 'containerId', 'manifestJson', 'httpPort', 'location', 'dnsRecordId', 'accessRestriction' ].join(',');
 
-// version is intentionally missing. version is used for joins primarily and is a cache of manifest.version
 var APPS_FIELDS_PREFIXED = [ 'apps.id', 'apps.appStoreId', 'apps.installationState', 'apps.installationProgress', 'apps.runState',
     'apps.healthy', 'apps.containerId', 'apps.manifestJson', 'apps.httpPort', 'apps.location', 'apps.dnsRecordId', 'apps.accessRestriction' ].join(',');
 
@@ -164,8 +162,8 @@ function add(id, appStoreId, manifest, location, portBindings, accessRestriction
 
     var queries = [ ];
     queries.push({
-        query: 'INSERT INTO apps (id, appStoreId, manifestJson, version, installationState, location, accessRestriction) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        args: [ id, appStoreId, manifestJson, manifest.version, exports.ISTATE_PENDING_INSTALL, location, accessRestriction ]
+        query: 'INSERT INTO apps (id, appStoreId, manifestJson, installationState, location, accessRestriction) VALUES (?, ?, ?, ?, ?, ?)',
+        args: [ id, appStoreId, manifestJson, exports.ISTATE_PENDING_INSTALL, location, accessRestriction ]
     });
 
     Object.keys(portBindings).forEach(function (env) {
@@ -268,9 +266,6 @@ function updateWithConstraints(id, app, constraints, callback) {
         if (p === 'manifest') {
             fields.push('manifestJson = ?');
             values.push(JSON.stringify(app[p]));
-
-            fields.push('version = ?');
-            values.push(app['manifest'].version);
         } else if (p !== 'portBindings') {
             fields.push(p + ' = ?');
             values.push(app[p]);
@@ -340,10 +335,10 @@ function setRunCommand(appId, runState, callback) {
     updateWithConstraints(appId, values, 'AND runState NOT LIKE "pending_%" AND installationState = "installed"', callback);
 }
 
-function getAppVersions(callback) {
+function getAppStoreIds(callback) {
     assert(typeof callback === 'function');
 
-    database.query('SELECT id, appStoreId, version FROM apps', function (error, results) {
+    database.query('SELECT id, appStoreId FROM apps', function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         callback(null, results);

@@ -616,13 +616,13 @@ describe('database', function () {
             });
         });
 
-        it('getAppVersions succeeds', function (done) {
-            appdb.getAppVersions(function (error, results) {
+        it('getAppStoreIds succeeds', function (done) {
+            appdb.getAppStoreIds(function (error, results) {
                 expect(error).to.be(null);
                 expect(results).to.be.an(Array);
                 expect(results.length).to.be(2);
-                expect(results[0].version).to.equal(APP_0.manifest.version);
-                expect(results[1].version).to.equal(APP_1.manifest.version);
+                expect(results[0].appStoreId).to.equal(APP_0.appStoreId);
+                expect(results[1].appStoreId).to.equal(APP_1.appStoreId);
                 done();
             });
         });
