@@ -43,7 +43,11 @@ function checkAppUpdates(callback) {
 
         var appStoreIds = appVersions.map(function (appVersion) { return appVersion.appStoreId; });
 
-        superagent.post(config.apiServerOrigin() + '/api/v1/appupdates').send({ appIds: appStoreIds, boxVersion: config.version() }).end(function (error, result) {
+        superagent
+            .post(config.apiServerOrigin() + '/api/v1/appupdates')
+            .send({ appIds: appStoreIds, boxVersion: config.version() })
+            .timeout(10 * 1000)
+            .end(function (error, result) {
             if (error) return callback(error);
             if (result.statusCode !== 200) return callback(new Error('Error checking app update: ', result.statusCode, result.body.message));
 
@@ -57,7 +61,10 @@ function checkAppUpdates(callback) {
 function checkBoxUpdates(callback) {
     var currentVersion = config.version();
 
-    superagent.get(config.get('boxVersionsUrl')).end(function (error, result) {
+    superagent
+        .get(config.get('boxVersionsUrl'))
+        .timeout(10 * 1000)
+        .end(function (error, result) {
         if (error) return callback(error);
         if (result.status !== 200) return callback(new Error('Bad status:', result.status));
 
@@ -117,7 +124,7 @@ function initialize(callback) {
     assert(typeof callback === 'function');
 
     progress.clear(progress.UPDATE);
-    gCheckUpdatesIntervalId = setInterval(checkUpdates, 10 * 1000);
+    gCheckUpdatesIntervalId = setInterval(checkUpdates, 60 * 1000); // every minute
     callback(null);
 }
 
