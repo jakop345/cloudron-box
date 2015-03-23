@@ -263,3 +263,10 @@ $table-border-color:                        transparent !default;
      background-repeat: no-repeat;
      background-size: cover;
 }
+
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    height: auto !important;
+}
