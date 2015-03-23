@@ -39,9 +39,8 @@
                         <div class="form-group">
                             <label class="control-label" for="accessRestriction">Access Restriction</label>
                             <select class="form-control" id="accessRestriction" ng-model="appconfigure.accessRestriction">
-                                <option value="">Public</option>
-                                <option value="roleUser">Private</option>
-                                <option value="roleAdmin">Private (Admins only)</option>
+                                <option value="">None</option>
+                                <option value="roleUser">Only for Cloudron Users</option>
                             </select>
                         </div>
                         <input class="ng-hide" type="submit" ng-disabled="config_form.$invalid || busy"/>
