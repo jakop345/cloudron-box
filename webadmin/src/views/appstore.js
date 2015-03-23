@@ -9,6 +9,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
 
     $scope.appinstall = {
         busy: false,
+        installFormVisible: false,
         error: {},
         app: {},
         location: '',
@@ -23,10 +24,17 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         $scope.appinstall.password = '';
         $scope.appinstall.portBindings = {};
         $scope.appinstall.accessRestriction = '';
+        $scope.appinstall.installFormVisible = false;
         $scope.appinstall.error = {};
 
         $scope.install_form.$setPristine();
         $scope.install_form.$setUntouched();
+    };
+
+    $scope.showInstallForm = function () {
+        $scope.appinstall.installFormVisible = true;
+        $('#collapseInstallForm').collapse('show');
+        $('#inputLocation').focus();
     };
 
     $scope.showInstall = function (app) {
