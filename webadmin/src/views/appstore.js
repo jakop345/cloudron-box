@@ -9,6 +9,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
 
     $scope.appinstall = {
         busy: false,
+        ready: false,
         installFormVisible: false,
         error: {},
         app: {},
@@ -21,6 +22,8 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
 
     $scope.reset = function() {
         $scope.appinstall.app = {};
+        $scope.appinstall.ready = false;
+        $scope.appinstall.error = {};
         $scope.appinstall.location = '';
         $scope.appinstall.password = '';
         $scope.appinstall.portBindings = {};
@@ -28,7 +31,6 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         $scope.appinstall.installFormVisible = false;
         $scope.appinstall.mediaLinks = [];
         $('#collapseInstallForm').collapse('hide');
-        $scope.appinstall.error = {};
 
         $scope.install_form.$setPristine();
         $scope.install_form.$setUntouched();
@@ -43,15 +45,16 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
     $scope.showInstall = function (app) {
         $scope.reset();
 
+        $scope.appinstall.app = app;
+        $('#appInstallModal').modal('show');
+
         AppStore.getManifest(app.id, function (error, manifest) {
             if (error) return console.error(error);
 
             // add manifest to app object
-            app.manifest = manifest;
+            $scope.appinstall.app.manifest = manifest;
 
             $scope.appinstall.mediaLinks = manifest.mediaLinks;
-
-            $scope.appinstall.app = app;
             $scope.appinstall.location = app.location;
             $scope.appinstall.portBindingsInfo = manifest.tcpPorts || {};   // Portbinding map only for information
             $scope.appinstall.portBindings = {};                            // This is the actual model holding the env:port pair
@@ -64,7 +67,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
                 $scope.appinstall.portBindingsEnabled[env] = true;
             }
 
-            $('#appInstallModal').modal('show');
+            $scope.appinstall.ready = true;
         });
     };
 
