@@ -9,19 +9,23 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title" id="appInstallModalLabel">{{ appinstall.app.manifest.title }}</h3>
+                <h3 class="modal-title" id="appInstallModalLabel">
+                    <img ng-src="{{appinstall.app.iconUrl}}" onerror="this.onerror=null;this.src='img/appicon_fallback.png'" width="64" height="64"/>
+                    {{ appinstall.app.manifest.title }}
+                </h3>
             </div>
             <div class="modal-body">
                 <div>
-                    <img ng-src="{{appinstall.app.iconUrl}}" onerror="this.onerror=null;this.src='img/appicon_fallback.png'" width="64" height="64"/>
-                    <p>{{appinstall.app.manifest.tagline}}</p>
-                    <p>Version: {{appinstall.app.manifest.version}}</p>
-                    <p>Website: {{appinstall.app.manifest.website}}</p>
-                    <p>Contact: {{appinstall.app.manifest.contactEmail}}</p>
+                    <h3>{{appinstall.app.manifest.tagline}}</h3>
+                    <p>
+                        <span class="text-muted">Version:</span> {{appinstall.app.manifest.version}}<br/>
+                        <span class="text-muted">Website:</span> <a ng-href="{{ appinstall.app.manifest.website }}" target="_blank">{{ appinstall.app.manifest.website | prettyHref }}</a><br/>
+                        <span class="text-muted">Contact:</span> <a ng-href="mailto: {{ appinstall.app.manifest.contactEmail }}" target="_blank">{{ appinstall.app.manifest.contactEmail }}</a><br/>
+                    </p>
                     <p>{{appinstall.app.manifest.description}}</p>
                 </div>
                 <div class="collapse" id="collapseInstallForm" data-toggle="false">
-                    <h4>Install</h4>
+                    <h3>Installation</h3>
                     <form class="form-signin" role="form" name="install_form" ng-submit="doInstall(install_form)" autocomplete="off">
                         <div class="form-group" ng-class="{ 'has-error': install_form.location.$dirty && install_form.location.$invalid }">
                             <label class="control-label" for="inputLocation">Location</label>
