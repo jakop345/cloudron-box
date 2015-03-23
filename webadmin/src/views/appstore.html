@@ -61,24 +61,20 @@
 <div class="row animateMeOpacity ng-hide" ng-show="ready">
     <div class="col-sm-1 grid-item" ng-repeat="app in apps">
         <div class="highlight grid-item-content">
-            <div class="grid-item-top">
-                <div class="row">
-                    <div class="col-xs-12 text-center">
-                        <img ng-src="{{app.iconUrl}}" onerror="this.onerror=null;this.src='img/appicon_fallback.png'" width="48" height="48"/>
-                    </div>
-                </div>
-                <br/>
-                <div class="row">
-                    <div class="col-xs-12 text-left">
-                        <div style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden">{{ app.manifest.title }}</div>
-                    </div>
-                </div>
-            </div>
             <a href="" ng-click="showInstall(app)">
-                <div class="grid-item-bottom">
-                    <span class="pull-left">Install</span>
-                    <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
-                    <div class="clearfix"></div>
+                <div class="grid-item-top">
+                    <div class="row">
+                        <div class="col-xs-12 text-center">
+                            <img ng-src="{{app.iconUrl}}" onerror="this.onerror=null;this.src='img/appicon_fallback.png'" width="48" height="48"/>
+                        </div>
+                    </div>
+                    <br/>
+                    <div class="row">
+                        <div class="col-xs-12 text-left">
+                            <div style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden">{{ app.manifest.title }}</div>
+                            <a ng-href="{{ app.manifest.website }}" target="_blank"><div style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden" class="text-muted">{{ app.manifest.website | prettyHref }}</div></a>
+                        </div>
+                    </div>
                 </div>
             </a>
         </div>

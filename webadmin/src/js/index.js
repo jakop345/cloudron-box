@@ -65,11 +65,19 @@ app.filter('installationStateLabel', function() {
 });
 
 app.filter('accessRestrictionLabel', function() {
-    return function(input) {
+    return function (input) {
         if (input === '') return 'public';
         if (input === 'roleUser') return 'private';
         if (input === 'roleAdmin') return 'private (Admins only)';
 
+        return input;
+    };
+});
+
+app.filter('prettyHref', function () {
+    return function (input) {
+        if (input.indexOf('http://') === 0) return input.slice('http://'.length);
+        if (input.indexOf('https://') === 0) return input.slice('https://'.length);
         return input;
     };
 });
