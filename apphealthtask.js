@@ -31,33 +31,29 @@ function initialize(callback) {
     ], callback);
 }
 
-function setHealth(app, alive, runState, callback) {
+function setHealth(app, health, callback) {
     assert(typeof app === 'object');
-    assert(typeof alive === 'boolean');
-    assert(typeof runState === 'string');
+    assert(typeof health === 'string');
     assert(typeof callback === 'function');
 
-    var healthy = true;
     var now = new Date();
 
-    if (alive || !(app.id in gLastSeen)) { // add new apps to list
+    if (health === appdb.HEALTH_HEALTHY || !(app.id in gLastSeen)) { // add new apps to list
         gLastSeen[app.id] = { time: now, emailSent: false };
     } else if (Math.abs(now - gLastSeen[app.id].time) > HEALTHCHECK_INTERVAL * 5) { // not seen for 5 intervals
         debug('app %s not seen for more than %s secs, marking as unhealthy', app.id, HEALTHCHECK_INTERVAL/1000 * 5);
-        healthy = false;
+
+        if (!gLastSeen[app.id].emailSent) {
+            gLastSeen[app.id].emailSent = true;
+            mailer.appDied(app);
+        }
     }
 
-    if (!healthy && !gLastSeen[app.id].emailSent) {
-        gLastSeen[app.id].emailSent = true;
-        mailer.appDied(app);
-    }
-
-    appdb.setHealth(app.id, healthy, runState, function (error) {
+    appdb.setHealth(app.id, health, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null); // app uninstalled?
         if (error) return callback(error);
 
-        app.healthy = healthy;
-        app.runState = runState;
+        app.health = health;
 
         callback(null);
     });
@@ -75,12 +71,12 @@ function checkAppHealth(app, callback) {
     container.inspect(function (err, data) {
         if (err || !data || !data.State) {
             debug('Error inspecting container');
-            return setHealth(app, false, appdb.RSTATE_ERROR, callback);
+            return setHealth(app, appdb.HEALTH_ERROR, callback);
         }
 
         if (data.State.Running !== true) {
             debug('app %s has exited', app.id);
-            return setHealth(app, false, appdb.RSTATE_DEAD, callback);
+            return setHealth(app, appdb.HEALTH_DEAD, callback);
         }
 
         // poll through docker network instead of nginx to bypass any potential oauth proxy
@@ -93,10 +89,10 @@ function checkAppHealth(app, callback) {
 
             if (error || res.status >= 400) { // 2xx and 3xx are ok
                 debug('app %s is not alive : %s', app.id, error || res.status);
-                setHealth(app, false, appdb.RSTATE_RUNNING, callback);
+                setHealth(app, appdb.HEALTH_UNHEALTHY, callback);
             } else {
                 debug('app %s is alive', app.id);
-                setHealth(app, true, appdb.RSTATE_RUNNING, callback);
+                setHealth(app, appdb.HEALTH_HEALTHY, callback);
             }
         });
     });

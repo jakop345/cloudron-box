@@ -480,7 +480,7 @@ describe('database', function () {
             httpPort: null,
             containerId: null,
             portBindings: { port: '5678' },
-            healthy: null,
+            health: null,
             accessRestriction: ''
         };
         var APP_1 = {
@@ -495,7 +495,7 @@ describe('database', function () {
             httpPort: null,
             containerId: null,
             portBindings: { },
-            healthy: null,
+            health: null,
             accessRestriction: 'roleAdmin'
         };
 
@@ -653,7 +653,7 @@ describe('database', function () {
         });
 
         it('cannot set app as healthy because app is not installed', function (done) {
-            appdb.setHealth(APP_1.id, true, appdb.RSTATE_RUNNING, function (error) {
+            appdb.setHealth(APP_1.id, appdb.HEALTH_HEALTHY, function (error) {
                 expect(error).to.be.ok();
                 done();
             });
@@ -663,7 +663,7 @@ describe('database', function () {
             appdb.update(APP_1.id, { runState: appdb.RSTATE_PENDING_STOP, installationState: appdb.ISTATE_INSTALLED }, function (error) {
                 expect(error).to.be(null);
 
-                appdb.setHealth(APP_1.id, true, appdb.RSTATE_RUNNING, function (error) {
+                appdb.setHealth(APP_1.id, appdb.HEALTH_HEALTHY, function (error) {
                     expect(error).to.be.ok();
                     done();
                 });
@@ -674,7 +674,7 @@ describe('database', function () {
             appdb.update(APP_1.id, { runState: null, installationState: appdb.ISTATE_INSTALLED }, function (error) {
                 expect(error).to.be(null);
 
-                appdb.setHealth(APP_1.id, true, appdb.RSTATE_RUNNING, function (error) {
+                appdb.setHealth(APP_1.id, appdb.HEALTH_HEALTHY, function (error) {
                     expect(error).to.be.ok();
                     done();
                 });
@@ -685,11 +685,11 @@ describe('database', function () {
             appdb.update(APP_1.id, { runState: appdb.RSTATE_RUNNING, installationState: appdb.ISTATE_INSTALLED }, function (error) {
                 expect(error).to.be(null);
 
-                appdb.setHealth(APP_1.id, true, appdb.RSTATE_RUNNING, function (error) {
+                appdb.setHealth(APP_1.id, appdb.HEALTH_HEALTHY, function (error) {
                     expect(error).to.be(null);
                     appdb.get(APP_1.id, function (error, app) {
                         expect(error).to.be(null);
-                        expect(app.healthy).to.be(1);
+                        expect(app.health).to.be(appdb.HEALTH_HEALTHY);
                         done();
                     });
                 });
@@ -697,7 +697,7 @@ describe('database', function () {
         });
 
         it('cannot set health of unknown app', function (done) {
-            appdb.setHealth('randomId', true, appdb.RSTATE_RUNNING, function (error) {
+            appdb.setHealth('randomId', appdb.HEALTH_HEALTHY, function (error) {
                 expect(error).to.be.ok();
                 done();
             });

@@ -46,17 +46,20 @@ exports = module.exports = {
     RSTATE_PENDING_START: 'pending_start',
     RSTATE_PENDING_STOP: 'pending_stop',
     RSTATE_STOPPED: 'stopped', // app stopped by user
-    RSTATE_DEAD: 'dead', // app stopped on it's own
-    RSTATE_ERROR: 'error',
+
+    HEALTH_HEALTHY: 'healthy',
+    HEALTH_UNHEALTHY: 'unhealthy',
+    HEALTH_ERROR: 'error',
+    HEALTH_DEAD: 'dead',
 
     _clear: clear
 };
 
 var APPS_FIELDS = [ 'id', 'appStoreId', 'installationState', 'installationProgress', 'runState',
-    'healthy', 'containerId', 'manifestJson', 'httpPort', 'location', 'dnsRecordId', 'accessRestriction' ].join(',');
+    'health', 'containerId', 'manifestJson', 'httpPort', 'location', 'dnsRecordId', 'accessRestriction' ].join(',');
 
 var APPS_FIELDS_PREFIXED = [ 'apps.id', 'apps.appStoreId', 'apps.installationState', 'apps.installationProgress', 'apps.runState',
-    'apps.healthy', 'apps.containerId', 'apps.manifestJson', 'apps.httpPort', 'apps.location', 'apps.dnsRecordId', 'apps.accessRestriction' ].join(',');
+    'apps.health', 'apps.containerId', 'apps.manifestJson', 'apps.httpPort', 'apps.location', 'apps.dnsRecordId', 'apps.accessRestriction' ].join(',');
 
 var PORT_BINDINGS_FIELDS = [ 'hostPort', 'environmentVariable', 'appId' ].join(',');
 
@@ -285,22 +288,15 @@ function updateWithConstraints(id, app, constraints, callback) {
     });
 }
 
-// sets health on installed apps that have a runState which is not null or pending
-function setHealth(appId, healthy, runState, callback) {
+// not sure if health should influence runState
+function setHealth(appId, health, callback) {
     assert(typeof appId === 'string');
-    assert(typeof healthy === 'boolean');
-    assert(typeof runState === 'string');
+    assert(typeof health === 'string');
     assert(typeof callback === 'function');
 
-    var values = {
-        healthy: healthy,
-        runState: runState
-    };
+    var values = { health: health };
 
     var constraints = 'AND runState NOT LIKE "pending_%" AND installationState = "installed"';
-    if (runState === exports.RSTATE_DEAD) { // don't mark stopped apps as dead
-        constraints += ' AND runState != "stopped"';
-    }
 
     updateWithConstraints(appId, values, constraints, callback);
 }

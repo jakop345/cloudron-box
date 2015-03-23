@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS apps(
     installationState VARCHAR(512) NOT NULL,
     installationProgress VARCHAR(512),
     runState VARCHAR(512),
-    healthy INTEGER,
+    health VARCHAR(128),
     containerId VARCHAR(128),
     manifestJson VARCHAR(2048),
     httpPort INTEGER,                        // this is the nginx proxy port and not manifest.httpPort
