@@ -925,7 +925,7 @@ function postInstall(app, callback) {
         return stopApp(app, callback);
     }
 
-    if (app.runState !== appdb.RSTATE_STOPPED) {
+    if (app.runState === appdb.RSTATE_PENDING_START || app.runState === appdb.RSTATE_RUNNING) {
         debug('Resuming app with state : %s %s', app.runState, app.id);
         return runApp(app, callback);
     }
