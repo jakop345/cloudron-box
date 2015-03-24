@@ -21,13 +21,13 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         accessRestriction: ''
     };
 
-    $scope.appuninstall = {
+    $scope.appUninstall = {
         error: {},
         app: {},
         password: ''
     };
 
-    $scope.appupdate = {
+    $scope.appUpdate = {
         error: {},
         app: {},
         password: '',
@@ -43,15 +43,24 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appConfigure.portBindings = {};
         $scope.appConfigure.accessRestriction = '';
 
-        $scope.config_form.$setPristine();
-        $scope.config_form.$setUntouched();
+        $scope.appConfigureForm.$setPristine();
+        $scope.appConfigureForm.$setUntouched();
 
-        $scope.appuninstall.app = {};
-        $scope.appuninstall.error = {};
-        $scope.appuninstall.password = '';
+        $scope.appUninstall.app = {};
+        $scope.appUninstall.error = {};
+        $scope.appUninstall.password = '';
 
-        $scope.uninstall_form.$setPristine();
-        $scope.uninstall_form.$setUntouched();
+        $scope.appUninstallForm.$setPristine();
+        $scope.appUninstallForm.$setUntouched();
+
+        $scope.appUpdate.error = {};
+        $scope.appUpdate.app = {};
+        $scope.appUpdate.password = {};
+        $scope.appUpdate.manifest = {};
+        $scope.appUpdate.portBindings = {};
+
+        $scope.appUpdateForm.$setPristine();
+        $scope.appUpdateForm.$setUntouched();
     };
 
     $scope.showConfigure = function (app) {
@@ -115,19 +124,19 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
     $scope.showUninstall = function (app) {
         $scope.reset();
 
-        $scope.appuninstall.app = app;
+        $scope.appUninstall.app = app;
 
         $('#appUninstallModal').modal('show');
     };
 
     $scope.doUninstall = function () {
-        $scope.appuninstall.error.password = null;
+        $scope.appUninstall.error.password = null;
 
-        Client.uninstallApp($scope.appuninstall.app.id, $scope.appuninstall.password, function (error) {
+        Client.uninstallApp($scope.appUninstall.app.id, $scope.appUninstall.password, function (error) {
             if (error) {
                 if (error.statusCode === 403) {
-                    $scope.appuninstall.password = '';
-                    $scope.appuninstall.error.password = true;
+                    $scope.appUninstall.password = '';
+                    $scope.appUninstall.error.password = true;
                 } else {
                     console.error(error);
                 }
@@ -141,13 +150,14 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
     };
 
     $scope.showUpdate = function (app) {
-        $scope.appupdate.app = app;
-        $scope.appupdate.error.password = null;
+        $scope.reset();
+
+        $scope.appUpdate.app = app;
 
         AppStore.getManifest(app.appStoreId, function (error, manifest) {
             if (error) return console.error(error);
 
-            $scope.appupdate.manifest = manifest;
+            $scope.appUpdate.manifest = manifest;
 
             // ensure we always operate on objects here
             app.portBindings = app.portBindings || {};
@@ -199,15 +209,15 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
             }
 
             // now inject the maps into the $scope, we only show those if ports have changed
-            $scope.appupdate.portBindings = portBindings;                 // always inject the model, so it gets used in the actual update call
-            $scope.appupdate.portBindingsEnabled = portBindingsEnabled;   // always inject the model, so it gets used in the actual update call
+            $scope.appUpdate.portBindings = portBindings;                 // always inject the model, so it gets used in the actual update call
+            $scope.appUpdate.portBindingsEnabled = portBindingsEnabled;   // always inject the model, so it gets used in the actual update call
 
             if (portsChanged) {
-                $scope.appupdate.portBindingsInfo = portBindingsInfo;
-                $scope.appupdate.obsoletePortBindings = obsoletePortBindings;
+                $scope.appUpdate.portBindingsInfo = portBindingsInfo;
+                $scope.appUpdate.obsoletePortBindings = obsoletePortBindings;
             } else {
-                $scope.appupdate.portBindingsInfo = {};
-                $scope.appupdate.obsoletePortBindings = {};
+                $scope.appUpdate.portBindingsInfo = {};
+                $scope.appUpdate.obsoletePortBindings = {};
             }
 
             $('#appUpdateModal').modal('show');
@@ -215,29 +225,29 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
     };
 
     $scope.doUpdate = function (form) {
-        $scope.appupdate.error.password = null;
+        $scope.appUpdate.error.password = null;
 
         // only use enabled ports from portBindings
         var finalPortBindings = {};
-        for (var env in $scope.appupdate.portBindings) {
-            if ($scope.appupdate.portBindingsEnabled[env]) {
-                finalPortBindings[env] = $scope.appupdate.portBindings[env];
+        for (var env in $scope.appUpdate.portBindings) {
+            if ($scope.appUpdate.portBindingsEnabled[env]) {
+                finalPortBindings[env] = $scope.appUpdate.portBindings[env];
             }
         }
 
-        Client.updateApp($scope.appupdate.app.id, $scope.appupdate.manifest, finalPortBindings, $scope.appupdate.password, function (error) {
+        Client.updateApp($scope.appUpdate.app.id, $scope.appUpdate.manifest, finalPortBindings, $scope.appUpdate.password, function (error) {
             if (error) {
                 if (error.statusCode === 403) {
-                    $scope.appupdate.password = '';
-                    $scope.appupdate.error.password = true;
+                    $scope.appUpdate.password = '';
+                    $scope.appUpdate.error.password = true;
                 } else {
                     console.error(error);
                 }
                 return;
             }
 
-            $scope.appupdate.app = {};
-            $scope.appupdate.password = '';
+            $scope.appUpdate.app = {};
+            $scope.appUpdate.password = '';
 
             form.$setPristine();
             form.$setUntouched();

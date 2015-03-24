@@ -16,15 +16,15 @@
             </div>
             <div class="modal-body">
                 <fieldset>
-                    <form class="form-signin" role="form" name="config_form" ng-submit="doConfigure()" autocomplete="off">
-                        <div class="form-group" ng-class="{ 'has-error': config_form.location.$dirty && config_form.location.$invalid }">
+                    <form class="form-signin" role="form" name="appConfigureForm" ng-submit="doConfigure()" autocomplete="off">
+                        <div class="form-group" ng-class="{ 'has-error': appConfigureForm.location.$dirty && appConfigureForm.location.$invalid }">
                             <label class="control-label" for="inputLocation">Location</label>
                             <div class="input-group form-inline">
                                 <input type="text" class="form-control" ng-model="appConfigure.location" id="inputLocation" name="location" required autofocus>
                                 <div class="input-group-addon">{{ config.isCustomDomain ? '.' : '-' }}{{ config.fqdn }}</div>
                             </div>
                         </div>
-                        <div class="form-group" ng-class="{ 'has-error': (!config_form.password.$dirty && error.password) || (config_form.password.$dirty && config_form.password.$invalid) }">
+                        <div class="form-group" ng-class="{ 'has-error': (!appConfigureForm.password.$dirty && error.password) || (appConfigureForm.password.$dirty && appConfigureForm.password.$invalid) }">
                             <label class="control-label" for="inputPassword">Password</label>
                             <input type="password" class="form-control" ng-model="appConfigure.password" id="inputPassword" name="password" ng-maxlength="512" ng-minlength="5" required>
                         </div>
@@ -43,13 +43,13 @@
                                 <option value="roleUser">Only for Cloudron Users</option>
                             </select>
                         </div>
-                        <input class="ng-hide" type="submit" ng-disabled="config_form.$invalid || busy"/>
+                        <input class="ng-hide" type="submit" ng-disabled="appConfigureForm.$invalid || busy"/>
                     </form>
                 </fieldset>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success" ng-click="doConfigure()" ng-disabled="config_form.$invalid || busy">Save</button>
+                <button type="button" class="btn btn-success" ng-click="doConfigure()" ng-disabled="appConfigureForm.$invalid || busy">Save</button>
             </div>
         </div>
     </div>
@@ -60,24 +60,24 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Really uninstall {{ appuninstall.app.location }}</h4>
+                <h4 class="modal-title">Really uninstall {{ appUninstall.app.location }}</h4>
             </div>
             <div class="modal-body">
                 <p>Deleting the app will also remove all content generated within this app!</p>
                 <fieldset>
-                    <form class="form-signin" role="form" name="uninstall_form" ng-submit="doUninstall()" autocomplete="off">
-                        <div class="form-group" ng-class="{ 'has-error': (!uninstall_form.password.$dirty && appuninstall.error.password) || (uninstall_form.password.$dirty && uninstall_form.password.$invalid) }">
+                    <form class="form-signin" role="form" name="appUninstallForm" ng-submit="doUninstall()" autocomplete="off">
+                        <div class="form-group" ng-class="{ 'has-error': (!appUninstallForm.password.$dirty && appUninstall.error.password) || (appUninstallForm.password.$dirty && appUninstallForm.password.$invalid) }">
                             <label class="control-label" for="inputUninstallPassword">Password</label>
-                            <input type="password" class="form-control" ng-model="appuninstall.password" id="inputUninstallPassword" name="password" ng-maxlength="512" ng-minlength="5" required autofocus>
+                            <input type="password" class="form-control" ng-model="appUninstall.password" id="inputUninstallPassword" name="password" ng-maxlength="512" ng-minlength="5" required autofocus>
                         </div>
 
-                        <input class="ng-hide" type="submit" ng-disabled="uninstall_form.$invalid || busy"/>
+                        <input class="ng-hide" type="submit" ng-disabled="appUninstallForm.$invalid || busy"/>
                     </form>
                 </fieldset>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" ng-click="doUninstall()" ng-disabled="uninstall_form.$invalid || busy">Uninstall</button>
+                <button type="button" class="btn btn-danger" ng-click="doUninstall()" ng-disabled="appUninstallForm.$invalid || busy">Uninstall</button>
             </div>
         </div>
     </div>
@@ -88,20 +88,20 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Update {{ appupdate.app.location }}</h4>
+                <h4 class="modal-title">Update {{ appUpdate.app.location }}</h4>
             </div>
             <div class="modal-body">
                 <fieldset>
-                    <form class="form-signin" role="form" name="update_form" ng-submit="doUpdate(update_form)" autocomplete="off">
-                        <div ng-repeat="(env, info) in appupdate.portBindingsInfo" ng-class="{ 'newPort': info.isNew }">
+                    <form class="form-signin" role="form" name="appUpdateForm" ng-submit="doUpdate(appUpdateForm)" autocomplete="off">
+                        <div ng-repeat="(env, info) in appUpdate.portBindingsInfo" ng-class="{ 'newPort': info.isNew }">
                             <ng-form name="portInfo_form">
                                 <div class="form-group" ng-class="{ 'has-error': portInfo_form.itemName{{$index}}.$dirty && portInfo_form.itemName{{$index}}.$invalid }">
-                                    <label class="control-label" for="inputPortInfo{{env}}"><input type="checkbox" ng-model="appupdate.portBindingsEnabled[env]"> <span ng-show="info.isNew">New - </span> {{ info.description }} ({{ HOST_PORT_MIN }} - {{ HOST_PORT_MAX }})</label>
-                                    <input type="number" class="form-control" ng-model="appupdate.portBindings[env]" ng-disabled="!appupdate.portBindingsEnabled[env]" id="inputPortInfo{{env}}" later-name="itemName{{$index}}" min="{{HOST_PORT_MIN}}" max="{{HOST_PORT_MAX}}" required>
+                                    <label class="control-label" for="inputPortInfo{{env}}"><input type="checkbox" ng-model="appUpdate.portBindingsEnabled[env]"> <span ng-show="info.isNew">New - </span> {{ info.description }} ({{ HOST_PORT_MIN }} - {{ HOST_PORT_MAX }})</label>
+                                    <input type="number" class="form-control" ng-model="appUpdate.portBindings[env]" ng-disabled="!appUpdate.portBindingsEnabled[env]" id="inputPortInfo{{env}}" later-name="itemName{{$index}}" min="{{HOST_PORT_MIN}}" max="{{HOST_PORT_MAX}}" required>
                                 </div>
                             </ng-form>
                         </div>
-                        <div ng-repeat="(env, port) in appupdate.obsoletePortBindings" class="obsoletePort">
+                        <div ng-repeat="(env, port) in appUpdate.obsoletePortBindings" class="obsoletePort">
                             <ng-form name="obsoletePortInfo_form">
                                 <div class="form-group">
                                     Obsolete -
@@ -110,17 +110,17 @@
                                 </div>
                             </ng-form>
                         </div>
-                        <div class="form-group" ng-class="{ 'has-error': (!update_form.password.$dirty && appupdate.error.password) || (update_form.password.$dirty && update_form.password.$invalid) }">
+                        <div class="form-group" ng-class="{ 'has-error': (!appUpdateForm.password.$dirty && appUpdate.error.password) || (appUpdateForm.password.$dirty && appUpdateForm.password.$invalid) }">
                             <label class="control-label" for="inputUpdatePassword">Password</label>
-                            <input type="password" class="form-control" ng-model="appupdate.password" id="inputUpdatePassword" name="password" ng-maxlength="512" ng-minlength="5" required autofocus>
+                            <input type="password" class="form-control" ng-model="appUpdate.password" id="inputUpdatePassword" name="password" ng-maxlength="512" ng-minlength="5" required autofocus>
                         </div>
-                        <input class="ng-hide" type="submit" ng-disabled="update_form.$invalid || busy"/>
+                        <input class="ng-hide" type="submit" ng-disabled="appUpdateForm.$invalid || busy"/>
                     </form>
                 </fieldset>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" ng-click="doUpdate(update_form)" ng-disabled="update_form.$invalid || busy">Update</button>
+                <button type="button" class="btn btn-danger" ng-click="doUpdate(appUpdateForm)" ng-disabled="appUpdateForm.$invalid || busy">Update</button>
             </div>
         </div>
     </div>
