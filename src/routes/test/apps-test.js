@@ -39,6 +39,7 @@ var SERVER_URL = 'http://localhost:' + config.get('port');
 
 var APP_STORE_ID = 'test', APP_ID;
 var APP_LOCATION = 'appslocation';
+var APP_LOCATION_NEW = 'appslocationnew';
 var APP_MANIFEST = JSON.parse(fs.readFileSync(__dirname + '/CloudronManifest.json', 'utf8'));
 var USERNAME = 'admin', PASSWORD = 'password', EMAIL ='silly@me.com';
 var token = null; // authentication token
@@ -841,7 +842,7 @@ describe('App installation - port bindings', function () {
                     // app configure
                     .delete('/api/v1/subdomains/dnsrecordid?token=' + config.token())
                     .reply(204, { }, { 'Content-Type': 'application/json' })
-                    .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP_LOCATION, type: 'A', value: cloudron.getIp() } ] })
+                    .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP_LOCATION_NEW, type: 'A', value: cloudron.getIp() } ] })
                     .reply(201, { ids: [ 'anotherdnsid' ] }, { 'Content-Type': 'application/json' })
                     // app remove
                     .delete('/api/v1/subdomains/anotherdnsid?token=' + config.token())
@@ -1005,26 +1006,58 @@ describe('App installation - port bindings', function () {
         });
     });
 
-    it('can reconfigure app', function (done) {
-        var count = 0;
-        function checkConfigureStatus() {
-            request.get(SERVER_URL + '/api/v1/apps/' + APP_ID)
-               .query({ access_token: token })
-               .end(function (err, res) {
-                expect(res.statusCode).to.equal(200);
-                if (res.body.installationState === appdb.ISTATE_INSTALLED) { appInfo = res.body; expect(appInfo).to.be.ok(); return done(null); }
-                if (res.body.installationState === appdb.ISTATE_ERROR) return done(new Error('Install error'));
-                if (++count > 50) return done(new Error('Timedout'));
-                setTimeout(checkConfigureStatus, 1000);
-            });
-        }
+    function checkConfigureStatus(count, done) {
+        assert(typeof count === 'number');
+        assert(typeof done === 'function');
 
+        request.get(SERVER_URL + '/api/v1/apps/' + APP_ID)
+           .query({ access_token: token })
+           .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            if (res.body.installationState === appdb.ISTATE_INSTALLED) { appInfo = res.body; expect(appInfo).to.be.ok(); return done(null); }
+            if (res.body.installationState === appdb.ISTATE_ERROR) return done(new Error('Install error'));
+            if (++count > 50) return done(new Error('Timedout'));
+            setTimeout(checkConfigureStatus.bind(null, count, done), 1000);
+        });
+    }
+
+    it('cannot reconfigure app with missing location', function (done) {
         request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
               .query({ access_token: token })
               .send({ appId: APP_ID, password: PASSWORD, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: 'roleAdmin' })
               .end(function (err, res) {
+            expect(res.statusCode).to.equal(400);
+            done();
+        });
+    });
+
+    it('cannot reconfigure app with missing portBindings', function (done) {
+        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
+              .query({ access_token: token })
+              .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, accessRestriction: 'roleAdmin' })
+              .end(function (err, res) {
+            expect(res.statusCode).to.equal(400);
+            done();
+        });
+    });
+
+    it('cannot reconfigure app with missing accessRestriction', function (done) {
+        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
+              .query({ access_token: token })
+              .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 } })
+              .end(function (err, res) {
+            expect(res.statusCode).to.equal(400);
+            done();
+        });
+    });
+
+    it('can reconfigure app', function (done) {
+        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
+              .query({ access_token: token })
+              .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: 'roleAdmin' })
+              .end(function (err, res) {
             expect(res.statusCode).to.equal(202);
-            checkConfigureStatus();
+            checkConfigureStatus(0, done);
         });
     });
 
