@@ -555,7 +555,7 @@ function removeIcon(app, callback) {
 }
 
 function waitForDnsPropagation(app, callback) {
-    if (process.env.NODE_ENV === 'test') {
+    if (!config.CLOUDRON) {
         debug('Skipping dns propagation check for development');
         return callback(null);
     }
