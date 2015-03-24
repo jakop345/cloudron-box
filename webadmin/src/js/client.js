@@ -3,7 +3,7 @@
 /* global angular */
 /* global EventSource */
 
-angular.module('Application').service('Client', ['$http', 'md5', function ($http, md5) {
+angular.module('Application').service('Client', ['$http', 'md5', 'Notification', function ($http, md5, Notification) {
     var client = null;
 
     function ClientError(statusCode, messageOrObject) {
@@ -22,6 +22,8 @@ angular.module('Application').service('Client', ['$http', 'md5', function ($http
     function defaultErrorHandler(callback) {
         return function (data, status) {
             if (status === 401) return client.logout();
+            if (status >= 500) return client.error(data);
+
             var obj = data;
             try {
                 obj = JSON.parse(data);
@@ -58,6 +60,18 @@ angular.module('Application').service('Client', ['$http', 'md5', function ($http
 
         this.setToken(localStorage.token);
     }
+
+    Client.prototype.error = function (error) {
+        var message = '';
+
+        if (typeof error === 'object') {
+            message = error.message || error;
+        } else {
+            message = error;
+        }
+
+        Notification.error({ title: 'Cloudron Error', message: message, delay: 1000 });
+    };
 
     Client.prototype.setReady = function () {
         if (this._ready) return;

@@ -3,7 +3,7 @@
 /* global angular:false */
 
 // create main application module
-var app = angular.module('Application', ['ngRoute', 'ngAnimate', 'angular-md5', 'slick']);
+var app = angular.module('Application', ['ngRoute', 'ngAnimate', 'angular-md5', 'slick', 'ui-notification']);
 
 // setup all major application routes
 app.config(['$routeProvider', function ($routeProvider) {
