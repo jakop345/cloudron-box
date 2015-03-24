@@ -136,12 +136,14 @@ function configureApp(req, res, next) {
 
     if (!data) return next(new HttpError(400, 'Cannot parse data field'));
     if (typeof data.appId !== 'string') return next(new HttpError(400, 'appId is required'));
+    if (typeof data.location !== 'string') return next(new HttpError(400, 'location is required'));
     if (('portBindings' in data) && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
     if (typeof data.accessRestriction !== 'string') return next(new HttpError(400, 'accessRestriction is required'));
 
     debug('Configuring app id:%s location:%s bindings:%j', req.params.id, data.location, data.portBindings);
 
     apps.configure(req.params.id, data.location, data.portBindings, data.accessRestriction, function (error) {
+        if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, error.message));
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
         if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
         if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));

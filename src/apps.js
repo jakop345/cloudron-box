@@ -323,19 +323,16 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
 
 function configure(appId, location, portBindings, accessRestriction, callback) {
     assert(typeof appId === 'string');
-    assert(!portBindings || typeof portBindings === 'object');
+    assert(typeof location === 'string');
+    assert(typeof portBindings === 'object');
     assert(typeof accessRestriction === 'string');
     assert(typeof callback === 'function');
 
-    var error = location ? validateHostname(location, config.fqdn()) : null;
+    var error = validateHostname(location, config.fqdn());
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
     error = validateAccessRestriction(accessRestriction);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
-
-    var values = { };
-    if (location) values.location = location.toLowerCase();
-    values.accessRestriction = accessRestriction;
 
     appdb.get(appId, function (error, app) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
@@ -344,11 +341,16 @@ function configure(appId, location, portBindings, accessRestriction, callback) {
         error = validatePortBindings(portBindings, app.manifest.tcpPorts);
         if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
-        values.portBindings = portBindings;
+        var values = {
+            location: location.toLowerCase(),
+            accessRestriction: accessRestriction,
+            portBindings: portBindings
+        };
 
         debug('Will configure app with id:%s values:%j', appId, values);
 
         appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_CONFIGURE, values, function (error) {
+            if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(getDuplicateErrorDetails(location.toLowerCase(), portBindings, error));
             if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE));
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
