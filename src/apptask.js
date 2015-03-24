@@ -504,7 +504,7 @@ function registerSubdomain(app, callback) {
 
     debug('Registering subdomain for ' + app.id + ' at ' + app.location);
 
-    var record = { subdomain: app.location, type: 'A' };
+    var record = { subdomain: app.location, type: 'A', value: cloudron.getIp() };
 
     superagent
         .post(config.apiServerOrigin() + '/api/v1/subdomains')

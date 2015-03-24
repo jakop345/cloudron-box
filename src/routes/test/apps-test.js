@@ -11,6 +11,7 @@ var appdb = require('../../appdb.js'),
     async = require('async'),
     child_process = require('child_process'),
     clientdb = require('../../clientdb.js'),
+    cloudron = require('../../cloudron.js'),
     config = require('../../../config.js'),
     constants = require('../../../constants.js'),
     database = require('../../database.js'),
@@ -438,7 +439,7 @@ describe('App installation', function () {
 
             function (callback) {
                 hockInstance
-                    .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP_LOCATION, type: 'A' } ] })
+                    .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP_LOCATION, type: 'A', value: cloudron.getIp() } ] })
                     .reply(201, { ids: [ 'dnsrecordid' ] }, { 'Content-Type': 'application/json' })
                     .delete('/api/v1/subdomains/dnsrecordid?token=' + config.token())
                     .reply(204, { }, { 'Content-Type': 'application/json' });
@@ -835,12 +836,12 @@ describe('App installation - port bindings', function () {
             function (callback) {
                 hockInstance
                     // app install
-                    .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP_LOCATION, type: 'A' } ] })
+                    .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP_LOCATION, type: 'A', value: cloudron.getIp() } ] })
                     .reply(201, { ids: [ 'dnsrecordid' ] }, { 'Content-Type': 'application/json' })
                     // app configure
                     .delete('/api/v1/subdomains/dnsrecordid?token=' + config.token())
                     .reply(204, { }, { 'Content-Type': 'application/json' })
-                    .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP_LOCATION, type: 'A' } ] })
+                    .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP_LOCATION, type: 'A', value: cloudron.getIp() } ] })
                     .reply(201, { ids: [ 'anotherdnsid' ] }, { 'Content-Type': 'application/json' })
                     // app remove
                     .delete('/api/v1/subdomains/anotherdnsid?token=' + config.token())
