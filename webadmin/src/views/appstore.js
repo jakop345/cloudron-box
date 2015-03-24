@@ -89,7 +89,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
                     $scope.appinstall.password = '';
                     $('#appInstallPasswordInput').focus();
                 } else {
-                    $scope.appinstall.error.other = 'App with the name ' + $scope.appinstall.app.manifest.title + ' cannot be installed.';
+                    $scope.appinstall.error.other = error.message;
                 }
 
                 $scope.appinstall.busy = false;

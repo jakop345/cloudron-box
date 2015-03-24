@@ -31,7 +31,7 @@
                 <div class="collapse" id="collapseInstallForm" data-toggle="false">
                     <h3>Installation</h3>
                     <form class="form-signin" role="form" name="appInstallForm" ng-submit="doInstall()" autocomplete="off">
-                    <div class="has-error text-center" ng-show="appinstall.error.other">{{ appinstall.error.other }}</div>
+                        <div class="has-error text-center" ng-show="appinstall.error.other">{{ appinstall.error.other }}</div>
                         <div class="form-group" ng-class="{ 'has-error': (appInstallForm.location.$dirty && appInstallForm.location.$invalid) || (!appInstallForm.location.$dirty && appinstall.error.location) }">
                             <label class="control-label" for="appInstallLocationInput">Location {{ appinstall.error.location }} </label>
                             <div class="input-group form-inline">

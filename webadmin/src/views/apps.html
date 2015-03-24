@@ -17,22 +17,24 @@
             <div class="modal-body">
                 <fieldset>
                     <form class="form-signin" role="form" name="appConfigureForm" ng-submit="doConfigure()" autocomplete="off">
-                        <div class="form-group" ng-class="{ 'has-error': appConfigureForm.location.$dirty && appConfigureForm.location.$invalid }">
-                            <label class="control-label" for="inputLocation">Location</label>
+                        <div class="has-error text-center" ng-show="appConfigure.error.other">{{ appConfigure.error.other }}</div>
+                        <div class="form-group" ng-class="{ 'has-error': (appConfigureForm.location.$dirty && appConfigureForm.location.$invalid) || (!appConfigureForm.location.$dirty && appConfigure.error.location)  }">
+                            <label class="control-label" for="appConfigureLocationInput">Location {{ appConfigure.error.location }} </label>
                             <div class="input-group form-inline">
-                                <input type="text" class="form-control" ng-model="appConfigure.location" id="inputLocation" name="location" required autofocus>
+                                <input type="text" class="form-control" ng-model="appConfigure.location" id="appConfigureLocationInput" name="location" required autofocus>
                                 <div class="input-group-addon">{{ config.isCustomDomain ? '.' : '-' }}{{ config.fqdn }}</div>
                             </div>
                         </div>
-                        <div class="form-group" ng-class="{ 'has-error': (!appConfigureForm.password.$dirty && error.password) || (appConfigureForm.password.$dirty && appConfigureForm.password.$invalid) }">
-                            <label class="control-label" for="inputPassword">Password</label>
-                            <input type="password" class="form-control" ng-model="appConfigure.password" id="inputPassword" name="password" ng-maxlength="512" ng-minlength="5" required>
+                        <div class="form-group" ng-class="{ 'has-error': (appConfigureForm.password.$dirty && appConfigureForm.password.$invalid) || (!appConfigureForm.password.$dirty && appConfigure.error.password) }">
+                            <label class="control-label" for="appConfigurePasswordInput">Password</label>
+                            <input type="password" class="form-control" ng-model="appConfigure.password" id="appConfigurePasswordInput" name="password" ng-maxlength="512" ng-minlength="5" required>
                         </div>
+                        <div class="has-error text-center" ng-show="appConfigure.error.port">{{ appConfigure.error.port }}</div>
                         <div ng-repeat="(env, info) in appConfigure.portBindingsInfo">
                             <ng-form name="portInfo_form">
-                                <div class="form-group" ng-class="{ 'has-error': portInfo_form.itemName{{$index}}.$dirty && portInfo_form.itemName{{$index}}.$invalid }">
-                                    <label class="control-label" for="inputPortInfo{{env}}"><input type="checkbox" ng-model="appConfigure.portBindingsEnabled[env]"> {{ info.description }} ({{ HOST_PORT_MIN }} - {{ HOST_PORT_MAX }})</label>
-                                    <input type="number" class="form-control" ng-model="appConfigure.portBindings[env]" ng-disabled="!appConfigure.portBindingsEnabled[env]" id="inputPortInfo{{env}}" later-name="itemName{{$index}}" min="{{HOST_PORT_MIN}}" max="{{HOST_PORT_MAX}}" required>
+                                <div class="form-group" ng-class="{ 'has-error': (!appConfigureForm.itemName{{$index}}.$dirty && appConfigure.error.port) || (portInfo_form.itemName{{$index}}.$dirty && portInfo_form.itemName{{$index}}.$invalid) }">
+                                    <label class="control-label" for="appConfigurePortInput{{env}}"><input type="checkbox" ng-model="appConfigure.portBindingsEnabled[env]"> {{ info.description }} ({{ HOST_PORT_MIN }} - {{ HOST_PORT_MAX }})</label>
+                                    <input type="number" class="form-control" ng-model="appConfigure.portBindings[env]" ng-disabled="!appConfigure.portBindingsEnabled[env]" id="appConfigurePortInput{{env}}" later-name="itemName{{$index}}" min="{{HOST_PORT_MIN}}" max="{{HOST_PORT_MAX}}" required>
                                 </div>
                             </ng-form>
                         </div>

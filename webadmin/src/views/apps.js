@@ -89,7 +89,8 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
 
     $scope.doConfigure = function () {
         $scope.appConfigure.busy = true;
-        $scope.appConfigure.error.name = null;
+        $scope.appConfigure.error.other = null;
+        $scope.appConfigure.error.location = null;
         $scope.appConfigure.error.password = null;
 
         // only use enabled ports from portBindings
@@ -102,11 +103,18 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
 
         Client.configureApp($scope.appConfigure.app.id, $scope.appConfigure.password, { location: $scope.appConfigure.location, portBindings: finalPortBindings, accessRestriction: $scope.appConfigure.accessRestriction }, function (error) {
             if (error) {
-                if (error.statusCode === 403) {
+                if (error.statusCode === 409 && (error.message.indexOf('is reserved') !== -1 || error.message.indexOf('is already in use') !== -1)) {
+                    $scope.appConfigure.error.port = error.message;
+                } else if (error.statusCode === 409) {
+                    $scope.appConfigure.error.location = 'This name is already taken.';
+                    $scope.appConfigureForm.location.$setPristine();
+                    $('#appConfigureLocationInput').focus();
+                } else if (error.statusCode === 403) {
                     $scope.appConfigure.error.password = 'Wrong password provided.';
                     $scope.appConfigure.password = '';
+                    $('#appConfigurePasswordInput').focus();
                 } else {
-                    $scope.appConfigure.error.name = 'App with the name ' + $scope.appConfigure.app.name + ' cannot be configured.';
+                    $scope.appConfigure.error.other = error.message;
                 }
 
                 $scope.appConfigure.busy = false;
