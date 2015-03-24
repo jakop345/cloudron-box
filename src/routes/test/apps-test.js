@@ -8,6 +8,7 @@
 
 var appdb = require('../../appdb.js'),
     assert = require('assert'),
+    path = require('path'),
     async = require('async'),
     child_process = require('child_process'),
     clientdb = require('../../clientdb.js'),
@@ -30,7 +31,6 @@ var appdb = require('../../appdb.js'),
     safe = require('safetydance'),
     server = require('../../server.js'),
     url = require('url'),
-    userdb = require('../../userdb.js'),
     util = require('util'),
     uuid = require('node-uuid'),
     _ = require('underscore');
@@ -440,6 +440,8 @@ describe('App installation', function () {
 
             function (callback) {
                 hockInstance
+                    .get('/api/v1/apps/' + APP_STORE_ID + '/versions/' + APP_MANIFEST.version + '/icon')
+                    .replyWithFile(200, path.resolve(__dirname, '../../../webadmin/src/img/appicon_fallback.png'))
                     .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP_LOCATION, type: 'A', value: cloudron.getIp() } ] })
                     .reply(201, { ids: [ 'dnsrecordid' ] }, { 'Content-Type': 'application/json' })
                     .delete('/api/v1/subdomains/dnsrecordid?token=' + config.token())
@@ -667,7 +669,7 @@ describe('App installation', function () {
     });
 
     it('logStream - requires event-stream accept header', function (done) {
-        var req = request.get(SERVER_URL + '/api/v1/apps/' + APP_ID + '/logstream')
+        request.get(SERVER_URL + '/api/v1/apps/' + APP_ID + '/logstream')
             .query({ access_token: token, fromLine: 0 })
             .end(function (err, res) {
             expect(res.statusCode).to.be(400);
@@ -837,6 +839,8 @@ describe('App installation - port bindings', function () {
             function (callback) {
                 hockInstance
                     // app install
+                    .get('/api/v1/apps/' + APP_STORE_ID + '/versions/' + APP_MANIFEST.version + '/icon')
+                    .replyWithFile(200, path.resolve(__dirname, '../../../webadmin/src/img/appicon_fallback.png'))
                     .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP_LOCATION, type: 'A', value: cloudron.getIp() } ] })
                     .reply(201, { ids: [ 'dnsrecordid' ] }, { 'Content-Type': 'application/json' })
                     // app configure
@@ -1071,8 +1075,6 @@ describe('App installation - port bindings', function () {
             client.on('error', done);
         }, 2000);
     });
-
-    var redisIp, exportedRedisPort;
 
     it('reconfiguration - redis addon recreated', function (done) {
         docker.getContainer('redis-' + APP_ID).inspect(function (error, data) {
