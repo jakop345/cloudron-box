@@ -9,6 +9,7 @@
 var addons = require('../addons.js'),
     appdb = require('../appdb.js'),
     apptask = require('../apptask.js'),
+    cloudron = require('../cloudron.js'),
     config = require('../../config.js'),
     database = require('../database.js'),
     DatabaseError = require('../databaseerror.js'),
@@ -57,7 +58,8 @@ var APP = {
     containerId: null,
     httpPort: 4567,
     portBindings: null,
-    accessRestriction: ''
+    accessRestriction: '',
+    dnsRecordId: 'someDnsRecordId'
 };
 
 describe('apptask', function () {
@@ -214,20 +216,25 @@ describe('apptask', function () {
     });
 
     it('registers subdomain', function (done) {
-        var scope =
-            nock(config.apiServerOrigin())
-                .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP.location, type: 'A' } ] })
-                .reply(201, { ids: [ 'someid' ] });
+        var scope1 = nock(config.apiServerOrigin())
+            .delete('/api/v1/subdomains/' + APP.dnsRecordId + '?token=' + config.token())
+            .reply(204, {});
+        var scope2 = nock(config.apiServerOrigin())
+            .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP.location, type: 'A', value: cloudron.getIp() } ] })
+            .reply(201, { ids: [ APP.dnsRecordId ] });
 
         apptask._registerSubdomain(APP, function (error) {
             expect(error).to.be(null);
-            expect(scope.isDone());
+            expect(scope1.isDone());
+            expect(scope2.isDone());
             done();
         });
     });
 
     it('unregisters subdomain', function (done) {
-        var scope = nock(config.apiServerOrigin()).delete('/api/v1/subdomains/someid?token=' + config.token()).reply(200, { });
+        var scope = nock(config.apiServerOrigin())
+            .delete('/api/v1/subdomains/' + APP.dnsRecordId + '?token=' + config.token())
+            .reply(204, {});
 
         apptask._unregisterSubdomain(APP, function (error) {
             expect(error).to.be(null);
