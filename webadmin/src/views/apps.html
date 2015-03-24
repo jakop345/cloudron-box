@@ -12,7 +12,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Configure {{ appconfigure.app.manifest.title }}</h4>
+                <h4 class="modal-title">Configure {{ appConfigure.app.manifest.title }}</h4>
             </div>
             <div class="modal-body">
                 <fieldset>
@@ -20,25 +20,25 @@
                         <div class="form-group" ng-class="{ 'has-error': config_form.location.$dirty && config_form.location.$invalid }">
                             <label class="control-label" for="inputLocation">Location</label>
                             <div class="input-group form-inline">
-                                <input type="text" class="form-control" ng-model="appconfigure.location" id="inputLocation" name="location" required autofocus>
+                                <input type="text" class="form-control" ng-model="appConfigure.location" id="inputLocation" name="location" required autofocus>
                                 <div class="input-group-addon">{{ config.isCustomDomain ? '.' : '-' }}{{ config.fqdn }}</div>
                             </div>
                         </div>
                         <div class="form-group" ng-class="{ 'has-error': (!config_form.password.$dirty && error.password) || (config_form.password.$dirty && config_form.password.$invalid) }">
                             <label class="control-label" for="inputPassword">Password</label>
-                            <input type="password" class="form-control" ng-model="appconfigure.password" id="inputPassword" name="password" ng-maxlength="512" ng-minlength="5" required>
+                            <input type="password" class="form-control" ng-model="appConfigure.password" id="inputPassword" name="password" ng-maxlength="512" ng-minlength="5" required>
                         </div>
-                        <div ng-repeat="(env, info) in appconfigure.portBindingsInfo">
+                        <div ng-repeat="(env, info) in appConfigure.portBindingsInfo">
                             <ng-form name="portInfo_form">
                                 <div class="form-group" ng-class="{ 'has-error': portInfo_form.itemName{{$index}}.$dirty && portInfo_form.itemName{{$index}}.$invalid }">
-                                    <label class="control-label" for="inputPortInfo{{env}}"><input type="checkbox" ng-model="appconfigure.portBindingsEnabled[env]"> {{ info.description }} ({{ HOST_PORT_MIN }} - {{ HOST_PORT_MAX }})</label>
-                                    <input type="number" class="form-control" ng-model="appconfigure.portBindings[env]" ng-disabled="!appconfigure.portBindingsEnabled[env]" id="inputPortInfo{{env}}" later-name="itemName{{$index}}" min="{{HOST_PORT_MIN}}" max="{{HOST_PORT_MAX}}" required>
+                                    <label class="control-label" for="inputPortInfo{{env}}"><input type="checkbox" ng-model="appConfigure.portBindingsEnabled[env]"> {{ info.description }} ({{ HOST_PORT_MIN }} - {{ HOST_PORT_MAX }})</label>
+                                    <input type="number" class="form-control" ng-model="appConfigure.portBindings[env]" ng-disabled="!appConfigure.portBindingsEnabled[env]" id="inputPortInfo{{env}}" later-name="itemName{{$index}}" min="{{HOST_PORT_MIN}}" max="{{HOST_PORT_MAX}}" required>
                                 </div>
                             </ng-form>
                         </div>
                         <div class="form-group">
                             <label class="control-label" for="accessRestriction">Access Restriction</label>
-                            <select class="form-control" id="accessRestriction" ng-model="appconfigure.accessRestriction">
+                            <select class="form-control" id="accessRestriction" ng-model="appConfigure.accessRestriction">
                                 <option value="">None</option>
                                 <option value="roleUser">Only for Cloudron Users</option>
                             </select>
