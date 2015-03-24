@@ -54,8 +54,6 @@ describe('Developer API', function () {
                         // stash token for further use
                         token = result.body.token;
 
-                        config.set('token', 'APPSTORE_TOKEN');
-
                         callback();
                     });
                 },
@@ -120,8 +118,6 @@ describe('Developer API', function () {
 
                         // stash token for further use
                         token = result.body.token;
-
-                        config.set('token', 'APPSTORE_TOKEN');
 
                         callback();
                     });
@@ -255,8 +251,6 @@ describe('Developer API', function () {
 
                         // stash token for further use
                         token = result.body.token;
-
-                        config.set('token', 'APPSTORE_TOKEN');
 
                         callback();
                     });

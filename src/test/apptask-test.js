@@ -12,13 +12,11 @@ var addons = require('../addons.js'),
     cloudron = require('../cloudron.js'),
     config = require('../../config.js'),
     database = require('../database.js'),
-    DatabaseError = require('../databaseerror.js'),
     expect = require('expect.js'),
     fs = require('fs'),
     net = require('net'),
     nock = require('nock'),
     paths = require('../paths.js'),
-    safe = require('safetydance'),
     _ = require('underscore');
 
 var MANIFEST = {
@@ -216,12 +214,15 @@ describe('apptask', function () {
     });
 
     it('registers subdomain', function (done) {
+        nock.cleanAll();
         var scope1 = nock(config.apiServerOrigin())
             .delete('/api/v1/subdomains/' + APP.dnsRecordId + '?token=' + config.token())
             .reply(204, {});
         var scope2 = nock(config.apiServerOrigin())
             .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP.location, type: 'A', value: cloudron.getIp() } ] })
             .reply(201, { ids: [ APP.dnsRecordId ] });
+
+        console.log(APP.location, cloudron.getIp(), config.token())
 
         apptask._registerSubdomain(APP, function (error) {
             expect(error).to.be(null);
@@ -232,6 +233,7 @@ describe('apptask', function () {
     });
 
     it('unregisters subdomain', function (done) {
+        nock.cleanAll();
         var scope = nock(config.apiServerOrigin())
             .delete('/api/v1/subdomains/' + APP.dnsRecordId + '?token=' + config.token())
             .reply(204, {});

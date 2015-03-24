@@ -43,14 +43,14 @@ describe('config', function () {
     });
 
     it('set saves value in file', function (done) {
-        config.set('token', 'TOKEN');
-        expect(JSON.parse(fs.readFileSync(path.join(config.baseDir(), 'configs/cloudron.conf'))).token).to.eql('TOKEN');
+        config.set('foobar', 'somevalue');
+        expect(JSON.parse(fs.readFileSync(path.join(config.baseDir(), 'configs/cloudron.conf'))).foobar).to.eql('somevalue');
         done();
     });
 
     it('set - simple key value', function (done) {
-        config.set('token', 'TOKEN');
-        expect(config.token()).to.eql('TOKEN');
+        config.set('foobar', 'somevalue2');
+        expect(config.get('foobar')).to.eql('somevalue2');
         done();
     });
 

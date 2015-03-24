@@ -250,7 +250,6 @@ describe('Server', function () {
         var successfulHeartbeatGet;
 
         before(function (done) {
-            config.set('token', 'forheartbeat');
             server.start(done);
 
             var scope = nock(config.apiServerOrigin());

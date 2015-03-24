@@ -100,7 +100,6 @@ function setup(done) {
         child_process.exec.bind(null, __dirname + '/start_addons.sh'),
 
         function (callback) {
-            config.set('token', 'appstoretoken');
             config.set('addons.mysql.rootPassword', 'secret');
             config.set('addons.postgresql.rootPassword', 'secret');
 
@@ -118,7 +117,6 @@ function cleanup(done) {
         child_process.exec.bind(null, 'docker rm -f mysql; docker rm -f postgresql'),
 
         function (callback) {
-            config.set('token', null);
             config.set('addons.mysql.rootPassword', null);
             config.set('addons.postgresql.rootPassword', null);
 

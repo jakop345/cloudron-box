@@ -85,6 +85,7 @@ function initConfig() {
             port: 3306,
             name: 'boxtest'
         };
+        data.token = 'APPSTORE_TOKEN';
         data.developerMode = false;
     } else if (exports.LOCAL) {
         data.port = 3000;
