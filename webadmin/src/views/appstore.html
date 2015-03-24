@@ -10,53 +10,53 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3 class="modal-title" id="appInstallModalLabel">
-                    <img ng-src="{{appinstall.app.iconUrl}}" onerror="this.onerror=null;this.src='img/appicon_fallback.png'" width="64" height="64"/>
-                    {{ appinstall.app.manifest.title }}
+                    <img ng-src="{{appInstall.app.iconUrl}}" onerror="this.onerror=null;this.src='img/appicon_fallback.png'" width="64" height="64"/>
+                    {{ appInstall.app.manifest.title }}
                 </h3>
             </div>
             <div class="modal-body">
                 <div>
                     <div class="collapse" id="collapseMediaLinksCarousel" data-toggle="false">
-                        <slick init-onload="true" autoplay="true" arrows="false" autoplay-speed="2000" data="appinstall.mediaLinks" ng-show="appinstall.mediaLinks.length !== 0)">
-                            <div ng-repeat="mediaLink in appinstall.mediaLinks" class="slick-item" style="background-image: url('{{mediaLink}}');">
+                        <slick init-onload="true" autoplay="true" arrows="false" autoplay-speed="2000" data="appInstall.mediaLinks" ng-show="appInstall.mediaLinks.length !== 0">
+                            <div ng-repeat="mediaLink in appInstall.mediaLinks" class="slick-item" style="background-image: url('{{mediaLink}}');">
                             </div>
                         </slick>
                     </div>
-                    <h3>{{appinstall.app.manifest.tagline}}</h3>
+                    <h3>{{appInstall.app.manifest.tagline}}</h3>
                     <p>
-                        <span class="text-muted">Version:</span> {{appinstall.app.manifest.version}}<br/>
-                        <span class="text-muted">Website:</span> <a ng-href="{{ appinstall.app.manifest.website }}" target="_blank">{{ appinstall.app.manifest.website | prettyHref }}</a><br/>
-                        <span class="text-muted">Contact:</span> <a ng-href="mailto: {{ appinstall.app.manifest.contactEmail }}" target="_blank">{{ appinstall.app.manifest.contactEmail }}</a><br/>
+                        <span class="text-muted">Version:</span> {{appInstall.app.manifest.version}}<br/>
+                        <span class="text-muted">Website:</span> <a ng-href="{{ appInstall.app.manifest.website }}" target="_blank">{{ appInstall.app.manifest.website | prettyHref }}</a><br/>
+                        <span class="text-muted">Contact:</span> <a ng-href="mailto: {{ appInstall.app.manifest.contactEmail }}" target="_blank">{{ appInstall.app.manifest.contactEmail }}</a><br/>
                     </p>
-                    <p>{{appinstall.app.manifest.description}}</p>
+                    <p>{{appInstall.app.manifest.description}}</p>
                 </div>
                 <div class="collapse" id="collapseInstallForm" data-toggle="false">
                     <h3>Installation</h3>
                     <form class="form-signin" role="form" name="appInstallForm" ng-submit="doInstall()" autocomplete="off">
-                        <div class="has-error text-center" ng-show="appinstall.error.other">{{ appinstall.error.other }}</div>
-                        <div class="form-group" ng-class="{ 'has-error': (appInstallForm.location.$dirty && appInstallForm.location.$invalid) || (!appInstallForm.location.$dirty && appinstall.error.location) }">
-                            <label class="control-label" for="appInstallLocationInput">Location {{ appinstall.error.location }} </label>
+                        <div class="has-error text-center" ng-show="appInstall.error.other">{{ appInstall.error.other }}</div>
+                        <div class="form-group" ng-class="{ 'has-error': (appInstallForm.location.$dirty && appInstallForm.location.$invalid) || (!appInstallForm.location.$dirty && appInstall.error.location) }">
+                            <label class="control-label" for="appInstallLocationInput">Location {{ appInstall.error.location }} </label>
                             <div class="input-group form-inline">
-                                <input type="text" class="form-control" ng-model="appinstall.location" id="appInstallLocationInput" name="location" required autofocus>
+                                <input type="text" class="form-control" ng-model="appInstall.location" id="appInstallLocationInput" name="location" required autofocus>
                                 <div class="input-group-addon">{{ config.isCustomDomain ? '.' : '-' }}{{ config.fqdn }}</div>
                             </div>
                         </div>
-                        <div class="form-group" ng-class="{ 'has-error': (appInstallForm.password.$dirty && appInstallForm.password.$invalid) || (!appInstallForm.password.$dirty && appinstall.error.password) }">
+                        <div class="form-group" ng-class="{ 'has-error': (appInstallForm.password.$dirty && appInstallForm.password.$invalid) || (!appInstallForm.password.$dirty && appInstall.error.password) }">
                             <label class="control-label" for="appInstallPasswordInput">Password</label>
-                            <input type="password" class="form-control" ng-model="appinstall.password" id="appInstallPasswordInput" name="password" ng-maxlength="512" ng-minlength="5" required>
+                            <input type="password" class="form-control" ng-model="appInstall.password" id="appInstallPasswordInput" name="password" ng-maxlength="512" ng-minlength="5" required>
                         </div>
-                        <div class="has-error text-center" ng-show="appinstall.error.port">{{ appinstall.error.port }}</div>
-                        <div ng-repeat="(env, info) in appinstall.portBindingsInfo">
+                        <div class="has-error text-center" ng-show="appInstall.error.port">{{ appInstall.error.port }}</div>
+                        <div ng-repeat="(env, info) in appInstall.portBindingsInfo">
                             <ng-form name="portInfo_form">
-                                <div class="form-group" ng-class="{ 'has-error': (!appInstallForm.itemName{{$index}}.$dirty && appinstall.error.port) || (portInfo_form.itemName{{$index}}.$dirty && portInfo_form.itemName{{$index}}.$invalid) }">
-                                    <label class="control-label" for="inputPortInfo{{env}}"><input type="checkbox" ng-model="appinstall.portBindingsEnabled[env]"> {{ info.description }} ({{ hostPortMin }} - {{ hostPortMax }})</label>
-                                    <input type="number" class="form-control" ng-model="appinstall.portBindings[env]" ng-disabled="!appinstall.portBindingsEnabled[env]" id="inputPortInfo{{env}}" later-name="itemName{{$index}}" min="{{hostPortMin}}" max="{{hostPortMax}}" required>
+                                <div class="form-group" ng-class="{ 'has-error': (!appInstallForm.itemName{{$index}}.$dirty && appInstall.error.port) || (portInfo_form.itemName{{$index}}.$dirty && portInfo_form.itemName{{$index}}.$invalid) }">
+                                    <label class="control-label" for="inputPortInfo{{env}}"><input type="checkbox" ng-model="appInstall.portBindingsEnabled[env]"> {{ info.description }} ({{ hostPortMin }} - {{ hostPortMax }})</label>
+                                    <input type="number" class="form-control" ng-model="appInstall.portBindings[env]" ng-disabled="!appInstall.portBindingsEnabled[env]" id="inputPortInfo{{env}}" later-name="itemName{{$index}}" min="{{hostPortMin}}" max="{{hostPortMax}}" required>
                                 </div>
                             </ng-form>
                         </div>
                         <div class="form-group">
                             <label class="control-label" for="accessRestriction">Access Restriction</label>
-                            <select class="form-control" id="accessRestriction" ng-model="appinstall.accessRestriction">
+                            <select class="form-control" id="accessRestriction" ng-model="appInstall.accessRestriction">
                                 <option value="">None</option>
                                 <option value="roleUser">Only for Cloudron Users</option>
                             </select>
@@ -67,8 +67,8 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-success" ng-show="appinstall.installFormVisible" ng-click="doInstall()" ng-disabled="appInstallForm.$invalid || busy">Install</button>
-                <button type="button" class="btn btn-success" ng-show="!appinstall.installFormVisible" ng-click="showInstallForm()">Install</button>
+                <button type="button" class="btn btn-success" ng-show="appInstall.installFormVisible" ng-click="doInstall()" ng-disabled="appInstallForm.$invalid || appInstall.busy"><i class="fa fa-spinner fa-pulse" ng-show="appInstall.busy"></i> Install</button>
+                <button type="button" class="btn btn-success" ng-show="!appInstall.installFormVisible" ng-click="showInstallForm()">Install</button>
             </div>
         </div>
     </div>

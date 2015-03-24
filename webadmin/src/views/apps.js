@@ -22,12 +22,14 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
     };
 
     $scope.appUninstall = {
+        busy: false,
         error: {},
         app: {},
         password: ''
     };
 
     $scope.appUpdate = {
+        busy: false,
         error: {},
         app: {},
         password: '',
@@ -138,23 +140,22 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
     };
 
     $scope.doUninstall = function () {
+        $scope.appUninstall.busy = true;
         $scope.appUninstall.error.password = null;
 
         Client.uninstallApp($scope.appUninstall.app.id, $scope.appUninstall.password, function (error) {
-            if (error) {
-                if (error.statusCode === 403) {
-                    $scope.appUninstall.password = '';
-                    $scope.appUninstall.error.password = true;
-                    $('#appUninstallPasswordInput').focus();
-                } else {
-                    console.error(error);
-                }
-                return;
+            if (error && error.statusCode === 403) {
+                $scope.appUninstall.password = '';
+                $scope.appUninstall.error.password = true;
+                $('#appUninstallPasswordInput').focus();
+            } else if (error) {
+                Client.error(error);
+            } else {
+                $('#appUninstallModal').modal('hide');
+                $scope.reset();
             }
 
-            $('#appUninstallModal').modal('hide');
-
-            $scope.reset();
+            $scope.appUninstall.busy = false;
         });
     };
 
@@ -235,6 +236,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
 
     $scope.doUpdate = function (form) {
         $scope.appUpdate.error.password = null;
+        $scope.appUpdate.busy = true;
 
         // only use enabled ports from portBindings
         var finalPortBindings = {};
@@ -245,23 +247,22 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         }
 
         Client.updateApp($scope.appUpdate.app.id, $scope.appUpdate.manifest, finalPortBindings, $scope.appUpdate.password, function (error) {
-            if (error) {
-                if (error.statusCode === 403) {
-                    $scope.appUpdate.password = '';
-                    $scope.appUpdate.error.password = true;
-                } else {
-                    console.error(error);
-                }
-                return;
+            if (error && error.statusCode === 403) {
+                $scope.appUpdate.password = '';
+                $scope.appUpdate.error.password = true;
+            } else if (error) {
+                Client.error(error);
+            } else {
+                $scope.appUpdate.app = {};
+                $scope.appUpdate.password = '';
+
+                form.$setPristine();
+                form.$setUntouched();
+
+                $('#appUpdateModal').modal('hide');
             }
 
-            $scope.appUpdate.app = {};
-            $scope.appUpdate.password = '';
-
-            form.$setPristine();
-            form.$setUntouched();
-
-            $('#appUpdateModal').modal('hide');
+            $scope.appUpdate.busy = false;
         });
     };
 

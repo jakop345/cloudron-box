@@ -51,7 +51,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success" ng-click="doConfigure()" ng-disabled="appConfigureForm.$invalid || busy">Save</button>
+                <button type="button" class="btn btn-success" ng-click="doConfigure()" ng-disabled="appConfigureForm.$invalid || appConfigure.busy"><i class="fa fa-spinner fa-pulse" ng-show="appConfigure.busy"></i> Save</button>
             </div>
         </div>
     </div>
@@ -79,7 +79,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" ng-click="doUninstall()" ng-disabled="appUninstallForm.$invalid || busy">Uninstall</button>
+                <button type="button" class="btn btn-danger" ng-click="doUninstall()" ng-disabled="appUninstallForm.$invalid || appUninstall.busy"><i class="fa fa-spinner fa-pulse" ng-show="appUninstall.busy"></i> Uninstall</button>
             </div>
         </div>
     </div>
@@ -122,7 +122,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" ng-click="doUpdate(appUpdateForm)" ng-disabled="appUpdateForm.$invalid || busy">Update</button>
+                <button type="button" class="btn btn-danger" ng-click="doUpdate(appUpdateForm)" ng-disabled="appUpdateForm.$invalid || appUpdate.busy"><i class="fa fa-spinner fa-pulse" ng-show="appUpdate.busy"></i> Update</button>
             </div>
         </div>
     </div>

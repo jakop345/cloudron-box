@@ -7,7 +7,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
     $scope.apps = [];
     $scope.config = Client.getConfig();
 
-    $scope.appinstall = {
+    $scope.appInstall = {
         busy: false,
         installFormVisible: false,
         error: {},
@@ -20,14 +20,14 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
     };
 
     $scope.reset = function() {
-        $scope.appinstall.app = {};
-        $scope.appinstall.error = {};
-        $scope.appinstall.location = '';
-        $scope.appinstall.password = '';
-        $scope.appinstall.portBindings = {};
-        $scope.appinstall.accessRestriction = '';
-        $scope.appinstall.installFormVisible = false;
-        $scope.appinstall.mediaLinks = [];
+        $scope.appInstall.app = {};
+        $scope.appInstall.error = {};
+        $scope.appInstall.location = '';
+        $scope.appInstall.password = '';
+        $scope.appInstall.portBindings = {};
+        $scope.appInstall.accessRestriction = '';
+        $scope.appInstall.installFormVisible = false;
+        $scope.appInstall.mediaLinks = [];
         $('#collapseInstallForm').collapse('hide');
         $('#collapseMediaLinksCarousel').collapse('show');
 
@@ -36,7 +36,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
     };
 
     $scope.showInstallForm = function () {
-        $scope.appinstall.installFormVisible = true;
+        $scope.appInstall.installFormVisible = true;
         $('#collapseMediaLinksCarousel').collapse('hide');
         $('#collapseInstallForm').collapse('show');
         $('#appInstallLocationInput').focus();
@@ -46,59 +46,59 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         $scope.reset();
 
         // make a copy to work with in case the app object gets updated while polling
-        angular.copy(app, $scope.appinstall.app);
+        angular.copy(app, $scope.appInstall.app);
         $('#appInstallModal').modal('show');
 
-        $scope.appinstall.mediaLinks = $scope.appinstall.app.manifest.mediaLinks || [];
-        $scope.appinstall.location = app.location;
-        $scope.appinstall.portBindingsInfo = $scope.appinstall.app.manifest.tcpPorts || {};   // Portbinding map only for information
-        $scope.appinstall.portBindings = {};                            // This is the actual model holding the env:port pair
-        $scope.appinstall.portBindingsEnabled = {};                     // This is the actual model holding the enabled/disabled flag
-        $scope.appinstall.accessRestriction = app.accessRestriction || '';
+        $scope.appInstall.mediaLinks = $scope.appInstall.app.manifest.mediaLinks || [];
+        $scope.appInstall.location = app.location;
+        $scope.appInstall.portBindingsInfo = $scope.appInstall.app.manifest.tcpPorts || {};   // Portbinding map only for information
+        $scope.appInstall.portBindings = {};                            // This is the actual model holding the env:port pair
+        $scope.appInstall.portBindingsEnabled = {};                     // This is the actual model holding the enabled/disabled flag
+        $scope.appInstall.accessRestriction = app.accessRestriction || '';
 
         // set default ports
-        for (var env in $scope.appinstall.app.manifest.tcpPorts) {
-            $scope.appinstall.portBindings[env] = $scope.appinstall.app.manifest.tcpPorts[env].defaultValue || 0;
-            $scope.appinstall.portBindingsEnabled[env] = true;
+        for (var env in $scope.appInstall.app.manifest.tcpPorts) {
+            $scope.appInstall.portBindings[env] = $scope.appInstall.app.manifest.tcpPorts[env].defaultValue || 0;
+            $scope.appInstall.portBindingsEnabled[env] = true;
         }
     };
 
     $scope.doInstall = function () {
-        $scope.appinstall.busy = true;
-        $scope.appinstall.error.other = null;
-        $scope.appinstall.error.location = null;
-        $scope.appinstall.error.password = null;
-        $scope.appinstall.error.port = null;
+        $scope.appInstall.busy = true;
+        $scope.appInstall.error.other = null;
+        $scope.appInstall.error.location = null;
+        $scope.appInstall.error.password = null;
+        $scope.appInstall.error.port = null;
 
         // only use enabled ports from portBindings
         var finalPortBindings = {};
-        for (var env in $scope.appinstall.portBindings) {
-            if ($scope.appinstall.portBindingsEnabled[env]) {
-                finalPortBindings[env] = $scope.appinstall.portBindings[env];
+        for (var env in $scope.appInstall.portBindings) {
+            if ($scope.appInstall.portBindingsEnabled[env]) {
+                finalPortBindings[env] = $scope.appInstall.portBindings[env];
             }
         }
 
-        Client.installApp($scope.appinstall.app.id, $scope.appinstall.app.manifest, $scope.appinstall.password, $scope.appinstall.app.title, { location: $scope.appinstall.location, portBindings: finalPortBindings, accessRestriction: $scope.appinstall.accessRestriction }, function (error) {
+        Client.installApp($scope.appInstall.app.id, $scope.appInstall.app.manifest, $scope.appInstall.password, $scope.appInstall.app.title, { location: $scope.appInstall.location, portBindings: finalPortBindings, accessRestriction: $scope.appInstall.accessRestriction }, function (error) {
             if (error) {
                 if (error.statusCode === 409 && (error.message.indexOf('is reserved') !== -1 || error.message.indexOf('is already in use') !== -1)) {
-                    $scope.appinstall.error.port = error.message;
+                    $scope.appInstall.error.port = error.message;
                 } else if (error.statusCode === 409) {
-                    $scope.appinstall.error.location = 'This name is already taken.';
+                    $scope.appInstall.error.location = 'This name is already taken.';
                     $scope.appInstallForm.location.$setPristine();
                     $('#appInstallLocationInput').focus();
                 } else if (error.statusCode === 403) {
-                    $scope.appinstall.error.password = 'Wrong password provided.';
-                    $scope.appinstall.password = '';
+                    $scope.appInstall.error.password = 'Wrong password provided.';
+                    $scope.appInstall.password = '';
                     $('#appInstallPasswordInput').focus();
                 } else {
-                    $scope.appinstall.error.other = error.message;
+                    $scope.appInstall.error.other = error.message;
                 }
 
-                $scope.appinstall.busy = false;
+                $scope.appInstall.busy = false;
                 return;
             }
 
-            $scope.appinstall.busy = false;
+            $scope.appInstall.busy = false;
 
             // wait for dialog to be fully closed to avoid modal behavior breakage when moving to a different view already
             $('#appInstallModal').on('hidden.bs.modal', function () {
