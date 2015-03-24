@@ -560,49 +560,26 @@ function waitForDnsPropagation(app, callback) {
         return callback(null);
     }
 
-    var ip = cloudron.getIp(),
-        zoneName = config.zoneName(),
-        fqdn = config.appFqdn(app.location);
-
     function retry(error) {
         console.error(error);
         setTimeout(waitForDnsPropagation.bind(null, app, callback), 5000);
     }
 
-    debug('Checking if DNS is setup for %s to resolve to %s (zone: %s)', fqdn, ip, zoneName);
+    superagent
+        .get(config.apiServerOrigin() + '/api/v1/subdomains/' + app.dnsRecordId + '/status')
+        .set('Accept', 'application/json')
+        .query({ token: config.token() })
+        .end(function (error, res) {
+            if (error) return retry(new Error('Failed to get dns record status : ' + error.message));
 
-    // localhost is always known
-    if (zoneName === 'localhost') return callback(null);
+            debug('waitForDnsPropagation: app:%s dnsRecordId:%s status:%s', app.id, app.dnsRecordId, res.status);
 
-    dns.resolveNs(zoneName, function (error, nameservers) {
-        if (error || nameservers.length === 0) return retry(new Error('Failed to get NS of ' + zoneName));
+            if (res.status !== 200) return retry(new Error(util.format('Error getting record status: %s %j', res.status, res.body)));
 
-        debug('checkARecord: %s should resolve to %s by %s', fqdn, ip, nameservers[0]);
+            if (res.body.status !== 'done') return retry(new Error(util.format('app:%s not ready yet: %s', app.id, res.body.status)));
 
-        dns.resolve4(nameservers[0], function (error, dnsIps) {
-            if (error || dnsIps.length === 0) return retry(new Error('Failed to query DNS'));
-
-            var req = dns.Request({
-                question: dns.Question({ name: fqdn, type: 'A' }),
-                server: { address: dnsIps[0] },
-                timeout: 5000
-            });
-
-            req.on('timeout', function () { return retry(new Error('Timedout')); });
-
-            req.on('message', function (error, message) {
-                debug('checkARecord:', message.answer);
-
-                if (error || !message.answer || message.answer.length === 0) return retry(new Error('Nothing yet'));
-
-                if (message.answer[0].address !== ip) return retry(new Error('DNS resolved to another IP'));
-
-                callback(null);
-            });
-
-            req.send();
+            callback(null);
         });
-    });
 }
 
 // updates the app object and the database
