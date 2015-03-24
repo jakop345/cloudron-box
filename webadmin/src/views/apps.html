@@ -67,8 +67,8 @@
                 <fieldset>
                     <form class="form-signin" role="form" name="appUninstallForm" ng-submit="doUninstall()" autocomplete="off">
                         <div class="form-group" ng-class="{ 'has-error': (!appUninstallForm.password.$dirty && appUninstall.error.password) || (appUninstallForm.password.$dirty && appUninstallForm.password.$invalid) }">
-                            <label class="control-label" for="inputUninstallPassword">Password</label>
-                            <input type="password" class="form-control" ng-model="appUninstall.password" id="inputUninstallPassword" name="password" ng-maxlength="512" ng-minlength="5" required autofocus>
+                            <label class="control-label" for="appUninstallPasswordInput">Password</label>
+                            <input type="password" class="form-control" ng-model="appUninstall.password" id="appUninstallPasswordInput" name="password" ng-maxlength="512" ng-minlength="5" required autofocus>
                         </div>
 
                         <input class="ng-hide" type="submit" ng-disabled="appUninstallForm.$invalid || busy"/>

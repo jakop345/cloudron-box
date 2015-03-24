@@ -137,6 +137,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
                 if (error.statusCode === 403) {
                     $scope.appUninstall.password = '';
                     $scope.appUninstall.error.password = true;
+                    $('#appUninstallPasswordInput').focus();
                 } else {
                     console.error(error);
                 }
