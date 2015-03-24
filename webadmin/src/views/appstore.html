@@ -16,10 +16,12 @@
             </div>
             <div class="modal-body">
                 <div>
-                    <slick init-onload="true" autoplay="true" arrows="false" autoplay-speed="2000" data="appinstall.mediaLinks" ng-show="appinstall.mediaLinks.length !== 0">
-                        <div ng-repeat="mediaLink in appinstall.mediaLinks" class="slick-item" style="background-image: url('{{mediaLink}}');">
-                        </div>
-                    </slick>
+                    <div class="collapse" id="collapseMediaLinksCarousel" data-toggle="false">
+                        <slick init-onload="true" autoplay="true" arrows="false" autoplay-speed="2000" data="appinstall.mediaLinks" ng-show="appinstall.mediaLinks.length !== 0)">
+                            <div ng-repeat="mediaLink in appinstall.mediaLinks" class="slick-item" style="background-image: url('{{mediaLink}}');">
+                            </div>
+                        </slick>
+                    </div>
                     <h3>{{appinstall.app.manifest.tagline}}</h3>
                     <p>
                         <span class="text-muted">Version:</span> {{appinstall.app.manifest.version}}<br/>

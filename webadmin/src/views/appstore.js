@@ -29,6 +29,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         $scope.appinstall.installFormVisible = false;
         $scope.appinstall.mediaLinks = [];
         $('#collapseInstallForm').collapse('hide');
+        $('#collapseMediaLinksCarousel').collapse('show');
 
         $scope.appInstallForm.$setPristine();
         $scope.appInstallForm.$setUntouched();
@@ -36,6 +37,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
 
     $scope.showInstallForm = function () {
         $scope.appinstall.installFormVisible = true;
+        $('#collapseMediaLinksCarousel').collapse('hide');
         $('#collapseInstallForm').collapse('show');
         $('#appInstallLocationInput').focus();
     };
