@@ -497,7 +497,7 @@ function downloadIcon(app, callback) {
 }
 
 function registerSubdomain(app, callback) {
-    if (!config.token()) {
+    if (config.LOCAL) {
         debug('Skipping subdomain registration for development');
         return callback(null);
     }
@@ -524,7 +524,7 @@ function registerSubdomain(app, callback) {
 }
 
 function unregisterSubdomain(app, callback) {
-    if (!config.token()) {
+    if (config.LOCAL) {
         debug('Skipping subdomain unregistration for development');
         return callback(null);
     }
