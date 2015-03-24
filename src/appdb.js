@@ -281,6 +281,7 @@ function updateWithConstraints(id, app, constraints, callback) {
     }
 
     database.transaction(queries, function (error, results) {
+        if (error && error.code === 'ER_DUP_ENTRY') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error.message));
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (results[results.length - 1].affectedRows !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
