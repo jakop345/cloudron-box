@@ -317,7 +317,7 @@ function createVolume(app, callback) {
     }
 
     if (!safe.fs.mkdirSync(appDataDir + '/data')) {
-        return callback(new Error('Error creating app data directory ' + appDataDir + '/volume ' + safe.error));
+        return callback(new Error('Error creating app data directory ' + appDataDir + '/data' + safe.error));
     }
 
     return callback(null);
