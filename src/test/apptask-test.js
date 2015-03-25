@@ -222,8 +222,6 @@ describe('apptask', function () {
             .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP.location, type: 'A', value: cloudron.getIp() } ] })
             .reply(201, { ids: [ APP.dnsRecordId ] });
 
-        console.log(APP.location, cloudron.getIp(), config.token())
-
         apptask._registerSubdomain(APP, function (error) {
             expect(error).to.be(null);
             expect(scope1.isDone());
