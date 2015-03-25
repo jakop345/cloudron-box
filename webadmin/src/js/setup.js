@@ -1,7 +1,7 @@
 'use strict';
 
 // create main application module
-var app = angular.module('Application', ['ngRoute', 'ngAnimate', 'angular-md5']);
+var app = angular.module('Application', ['ngRoute', 'ngAnimate', 'angular-md5', 'ui-notification']);
 
 app.directive('ngEnter', function () {
     return function (scope, element, attrs) {
