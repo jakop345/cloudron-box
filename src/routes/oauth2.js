@@ -425,7 +425,7 @@ function scope(requestedScope) {
 function getClients(req, res, next) {
     debug('getClients');
 
-    clientdb.getAllWithDetails(function (error, result) {
+    clientdb.getAllWithDetails(tokendb.PREFIX_USER + req.user.id, function (error, result) {
         if (error && error.reason !== DatabaseError.NOT_FOUND) return next(new HttpError(500, error));
 
         result = result || [];

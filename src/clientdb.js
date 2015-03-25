@@ -48,11 +48,11 @@ function getAll(callback) {
     });
 }
 
-function getAllWithDetails(callback) {
+function getAllWithDetails(identifier, callback) {
+    assert(typeof identifier === 'string');
     assert(typeof callback === 'function');
 
-    // TODO should this be per user?
-    database.query('SELECT ' + CLIENTS_FIELDS_PREFIXED + ',COUNT(tokens.clientId) AS tokenCount FROM clients LEFT OUTER JOIN tokens ON clients.id=tokens.clientId GROUP BY clients.id', function (error, results) {
+    database.query('SELECT ' + CLIENTS_FIELDS_PREFIXED + ',COUNT(tokens.clientId) AS tokenCount FROM clients LEFT OUTER JOIN tokens ON clients.id=tokens.clientId WHERE tokens.identifier=? GROUP BY clients.id', [ identifier ], function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         // We have three types of records here
