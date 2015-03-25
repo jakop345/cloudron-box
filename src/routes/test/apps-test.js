@@ -522,7 +522,7 @@ describe('App installation', function () {
     });
 
     it('installation - volume created', function (done) {
-        expect(fs.existsSync(paths.APPDATA_DIR + '/' + APP_ID));
+        expect(fs.existsSync(paths.DATA_DIR + '/' + APP_ID));
         done();
     });
 
@@ -540,7 +540,7 @@ describe('App installation', function () {
     it('installation - running container has volume mounted', function (done) {
         docker.getContainer(appInfo.containerId).inspect(function (error, data) {
             expect(error).to.not.be.ok();
-            expect(data.Volumes['/app/data']).to.eql(paths.APPDATA_DIR + '/' + APP_ID);
+            expect(data.Volumes['/app/data']).to.eql(paths.DATA_DIR + '/' + APP_ID + '/data');
             done();
         });
     });
@@ -782,7 +782,7 @@ describe('App installation', function () {
     });
 
     it('uninstalled - volume destroyed', function (done) {
-        expect(!fs.existsSync(paths.APPDATA_DIR + '/' + APP_ID));
+        expect(!fs.existsSync(paths.DATA_DIR + '/' + APP_ID));
         done();
     });
 
@@ -919,7 +919,7 @@ describe('App installation - port bindings', function () {
     });
 
     it('installation - volume created', function (done) {
-        expect(fs.existsSync(paths.APPDATA_DIR + '/' + APP_ID));
+        expect(fs.existsSync(paths.DATA_DIR + '/' + APP_ID));
         done();
     });
 
@@ -952,7 +952,7 @@ describe('App installation - port bindings', function () {
     it('installation - running container has volume mounted', function (done) {
         docker.getContainer(appInfo.containerId).inspect(function (error, data) {
             expect(error).to.not.be.ok();
-            expect(data.Volumes['/app/data']).to.eql(paths.APPDATA_DIR + '/' + APP_ID);
+            expect(data.Volumes['/app/data']).to.eql(paths.DATA_DIR + '/' + APP_ID + '/data');
             done();
         });
     });
@@ -1177,7 +1177,7 @@ describe('App installation - port bindings', function () {
     });
 
     it('uninstalled - volume destroyed', function (done) {
-        expect(!fs.existsSync(paths.APPDATA_DIR + '/' + APP_ID));
+        expect(!fs.existsSync(paths.DATA_DIR + '/' + APP_ID));
         done();
     });
 
