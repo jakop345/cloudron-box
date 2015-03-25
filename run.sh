@@ -27,8 +27,7 @@ fi
 
 mkdir -p "${NGINX_ROOT}/applications"
 mkdir -p "${NGINX_ROOT}/cert"
-mkdir -p "${DATA_DIR}/appicons"
-mkdir -p "${DATA_DIR}/appdata"
+mkdir -p "${DATA_DIR}/box/appicons"
 mkdir -p "${DATA_DIR}/mail"
 mkdir -p "${CONFIG_DIR}/addons"
 mkdir -p "${CONFIG_DIR}/collectd/collectd.conf.d"
