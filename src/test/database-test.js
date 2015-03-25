@@ -298,7 +298,6 @@ describe('database', function () {
             });
         });
 
-        // Is this not supported by sqlite??
         it('cannot delete previously delete record', function (done) {
             authcodedb.del(AUTHCODE_0.authCode, function (error) {
                 expect(error).to.be.a(DatabaseError);
@@ -409,7 +408,6 @@ describe('database', function () {
             });
         });
 
-        // Is this not supported by sqlite??
         it('cannot delete previously delete record', function (done) {
             tokendb.del(TOKEN_0.accessToken, function (error) {
                 expect(error).to.be.a(DatabaseError);
@@ -643,7 +641,6 @@ describe('database', function () {
             });
         });
 
-        // Is this not supported by sqlite??
         it('cannot delete previously delete record', function (done) {
             appdb.del(APP_0.id, function (error) {
                 expect(error).to.be.a(DatabaseError);
