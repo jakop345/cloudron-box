@@ -18,9 +18,8 @@ exports = module.exports = {
     COLLECTD_APPCONFIG_DIR: path.join(config.baseDir(), 'configs/collectd/collectd.conf.d'),
 
     DATA_DIR: path.join(config.baseDir(), 'data'),
-    APPDATA_DIR: path.join(config.baseDir(), 'data/appdata'),
-    DATABASE_FILENAME: path.join(config.baseDir(), 'data/cloudron.sqlite'),
 
-    APPICONS_DIR: path.join(config.baseDir(), 'data/appicons')
+    BOX_DATA_DIR: path.join(config.baseDir(), 'data/box'),
+    APPICONS_DIR: path.join(config.baseDir(), 'data/box/appicons')
 };
 

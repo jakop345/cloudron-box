@@ -310,17 +310,21 @@ function deleteImage(app, callback) {
 }
 
 function createVolume(app, callback) {
-    var appDataDir = path.join(paths.APPDATA_DIR, app.id);
+    var appDataDir = path.join(paths.DATA_DIR, app.id);
 
     if (!safe.fs.mkdirSync(appDataDir)) {
         return callback(new Error('Error creating app data directory ' + appDataDir + ' ' + safe.error));
+    }
+
+    if (!safe.fs.mkdirSync(appDataDir + '/data')) {
+        return callback(new Error('Error creating app data directory ' + appDataDir + '/volume ' + safe.error));
     }
 
     return callback(null);
 }
 
 function deleteVolume(app, callback) {
-    execFile(SUDO, [ RMAPPDIR_CMD, 'appdata/' + app.id ], { }, function (error, stdout, stderr) {
+    execFile(SUDO, [ RMAPPDIR_CMD, app.id ], { }, function (error, stdout, stderr) {
         if (error) console.error('Error removing volume', error, stdout, stderr);
         return callback(error);
     });
@@ -401,7 +405,7 @@ function startContainer(app, callback) {
         if (error) return callback(error);
 
         var manifest = app.manifest;
-        var appDataDir = path.join(paths.APPDATA_DIR, app.id);
+        var appDataDir = path.join(paths.DATA_DIR, app.id, 'data');
 
         var dockerPortBindings = { };
         var isMac = os.platform() === 'darwin';
