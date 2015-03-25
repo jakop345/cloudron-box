@@ -50,14 +50,22 @@ set_progress "15" "Ensuring directories"
 sudo -u "${USER}" -H bash <<EOF
 set -eu
 # keep these in sync with paths.js
-mkdir -p "${DATA_DIR}/appicons"
-mkdir -p "${DATA_DIR}/appdata"
+mkdir -p "${DATA_DIR}/box/appicons"
 mkdir -p "${DATA_DIR}/mail"
 mkdir -p "${CONFIG_DIR}/addons"
 mkdir -p "${CONFIG_DIR}/nginx/applications"
 mkdir -p "${CONFIG_DIR}/nginx/cert"
 mkdir -p "${CONFIG_DIR}/collectd/collectd.conf.d"
 EOF
+
+### code below can be removed
+[[ -d "${DATA_DIR}/appicons" ]] && mv ${DATA_DIR}/appicons/* "${DATA_DIR}/box/appicons"
+if [[ -d ${DATA_DIR}/appdata ]]; then
+    for app in `find ${DATA_DIR}/appdata -maxdepth 1 -type d`; do
+        mkdir -p "${DATA_DIR}/`basename $app`/data"
+        mv $app/* "${DATA_DIR}/`basename $app`/data"
+    done
+fi
 
 set_progress "20" "Configuring Sudoers file"
 cat > /etc/sudoers.d/yellowtent <<EOF
