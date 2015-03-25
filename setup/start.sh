@@ -58,18 +58,6 @@ mkdir -p "${CONFIG_DIR}/nginx/cert"
 mkdir -p "${CONFIG_DIR}/collectd/collectd.conf.d"
 EOF
 
-#################################################################### code below can be removed
-[[ -d "${DATA_DIR}/appicons" ]] && mv ${DATA_DIR}/appicons/* "${DATA_DIR}/box/appicons"
-if [[ -d ${DATA_DIR}/appdata ]]; then
-    for app in `ls -d /home/yellowtent/data/appdata/*`; do
-        mkdir -p "${DATA_DIR}/`basename $app`/data"
-        mv $app/.* "${DATA_DIR}/`basename $app`/data" || true
-        mv $app/* "${DATA_DIR}/`basename $app`/data" || true
-    done
-fi
-mv "${DATA_DIR}/box.mysqldump" "${DATA_DIR}/box/box.mysqldump" || true
-##########################################################################
-
 set_progress "20" "Configuring Sudoers file"
 cat > /etc/sudoers.d/yellowtent <<EOF
 Defaults!${BOX_SRC_DIR}/src/scripts/rmappdir.sh env_keep=HOME
