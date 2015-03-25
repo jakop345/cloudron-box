@@ -64,6 +64,7 @@ if [[ -d ${DATA_DIR}/appdata ]]; then
     for app in `ls -d /home/yellowtent/data/appdata/*`; do
         mkdir -p "${DATA_DIR}/`basename $app`/data"
         mv $app/.* "${DATA_DIR}/`basename $app`/data" || true
+        mv $app/* "${DATA_DIR}/`basename $app`/data" || true
     done
 fi
 mv "${DATA_DIR}/box.mysqldump" "${DATA_DIR}/box/box.mysqldump" || true
