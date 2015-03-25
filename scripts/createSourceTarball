@@ -36,7 +36,7 @@ bundle_file="${TMPDIR}/box-${version}.tar.gz"
 
 chmod "o+rx,g+rx" "${bundle_dir}" # otherwise extracted tarball director won't be readable by others/group
 echo "Checking out code [${version}] into ${bundle_dir}"
-(cd "${SOURCE_DIR}" && git archive --format=tar HEAD | (cd "${bundle_dir}" && tar xf -))
+(cd "${SOURCE_DIR}" && git archive --format=tar ${version} | (cd "${bundle_dir}" && tar xf -))
 
 echo "Installing modules with dev dependencies"
 cd "${bundle_dir}" && npm install
