@@ -148,12 +148,12 @@ cat > "${CONFIG_DIR}/addons/mysql_vars.sh" <<EOF
 readonly MYSQL_ROOT_PASSWORD='${mysql_root_password}'
 readonly MYSQL_ROOT_HOST='${docker0_ip}'
 EOF
-docker pull girish/mysql:0.3 || true # this line for dev convenience since it's already part of base image
+docker pull girish/mysql:0.4 || true # this line for dev convenience since it's already part of base image
 mysql_container_id=$(docker run --restart=always -d --name="mysql" \
     -h "${arg_fqdn}" \
     -v "${DATA_DIR}/mysql:/var/lib/mysql" \
     -v "${CONFIG_DIR}/addons/mysql_vars.sh:/etc/mysql/mysql_vars.sh:r" \
-    girish/mysql:0.3)
+    girish/mysql:0.4)
 echo "MySQL container id: ${mysql_container_id}"
 
 set_progress "55" "Setup Postgres addon"
@@ -161,12 +161,12 @@ postgresql_root_password=$(pwgen -1 -s)
 cat > "${CONFIG_DIR}/addons/postgresql_vars.sh" <<EOF
 readonly POSTGRESQL_ROOT_PASSWORD='${postgresql_root_password}'
 EOF
-docker pull girish/postgresql:0.3 || true # this line for dev convenience since it's already part of base image
+docker pull girish/postgresql:0.4 || true # this line for dev convenience since it's already part of base image
 postgresql_container_id=$(docker run --restart=always -d --name="postgresql" \
     -h "${arg_fqdn}" \
     -v "${DATA_DIR}/postgresql:/var/lib/postgresql" \
     -v "${CONFIG_DIR}/addons/postgresql_vars.sh:/etc/postgresql/postgresql_vars.sh:r" \
-    girish/postgresql:0.3)
+    girish/postgresql:0.4)
 echo "PostgreSQL container id: ${postgresql_container_id}"
 
 set_progress "60" "Pulling Redis addon"
