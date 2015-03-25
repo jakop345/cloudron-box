@@ -58,7 +58,7 @@ mkdir -p "${CONFIG_DIR}/nginx/cert"
 mkdir -p "${CONFIG_DIR}/collectd/collectd.conf.d"
 EOF
 
-### code below can be removed
+#################################################################### code below can be removed
 [[ -d "${DATA_DIR}/appicons" ]] && mv ${DATA_DIR}/appicons/* "${DATA_DIR}/box/appicons"
 if [[ -d ${DATA_DIR}/appdata ]]; then
     for app in `ls -d /home/yellowtent/data/appdata/*`; do
@@ -66,6 +66,8 @@ if [[ -d ${DATA_DIR}/appdata ]]; then
         mv $app/.* "${DATA_DIR}/`basename $app`/data" || true
     done
 fi
+mv "${DATA_DIR}/box.mysqldump" "${DATA_DIR}/box/box.mysqldump" || true
+##########################################################################
 
 set_progress "20" "Configuring Sudoers file"
 cat > /etc/sudoers.d/yellowtent <<EOF
@@ -89,9 +91,9 @@ EOF
 set_progress "21" "Setting up MySQL"
 mysqladmin -u root -ppassword password password # reset default root password
 mysql -u root -ppassword -e 'CREATE DATABASE IF NOT EXISTS box'
-if [[ -f "${DATA_DIR}/box.mysqldump" ]]; then
+if [[ -f "${DATA_DIR}/box/box.mysqldump" ]]; then
     echo "Importing existing database into MySQL"
-    mysql -u root -ppassword box < "${DATA_DIR}/box.mysqldump"
+    mysql -u root -ppassword box < "${DATA_DIR}/box/box.mysqldump"
 fi
 
 set_progress "25" "Migrating data"
