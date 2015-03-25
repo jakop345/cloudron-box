@@ -107,6 +107,7 @@ function getByIdentifierAndClientId(identifier, clientId, callback) {
 
     database.query('SELECT ' + TOKENS_FIELDS + ' FROM tokens WHERE identifier=? AND clientId=?', [ identifier, clientId ], function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        if (results.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         callback(null, results);
     });

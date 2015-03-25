@@ -442,8 +442,17 @@ function getClientTokens(req, res, next) {
 
     debug('getClientTokens');
 
-    tokendb.getByIdentifierAndClientId(tokendb.PREFIX_USER, req.user.id, req.params.clientId, function (error, result) {
-        if (error && error.reason !== DatabaseError.NOT_FOUND) return next(new HttpError(500, error));
+    tokendb.getByIdentifierAndClientId(tokendb.PREFIX_USER + req.user.id, req.params.clientId, function (error, result) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) {
+            // this can mean either that there are no tokens or the clientId is actually unknown
+            clientdb.get(req.params.clientId, function (error/*, result*/) {
+                if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(404, 'no such client'));
+                if (error) return next(new HttpError(500, error));
+                next(new HttpSuccess(200, { tokens: [] }));
+            });
+            return;
+        }
+        if (error) return next(new HttpError(500, error));
 
         result = result || [];
 
@@ -460,7 +469,16 @@ function delClientTokens(req, res, next) {
     debug('delClientTokens: user %s and client %s.', req.user.id, req.params.clientId);
 
     tokendb.delByIdentifierAndClientId(tokendb.PREFIX_USER + req.user.id, req.params.clientId, function (error) {
-        if (error && error.reason !== DatabaseError.NOT_FOUND) return next(new HttpError(500, error));
+        if (error && error.reason === DatabaseError.NOT_FOUND) {
+            // this can mean either that there are no tokens or the clientId is actually unknown
+            clientdb.get(req.params.clientId, function (error/*, result*/) {
+                if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(404, 'no such client'));
+                if (error) return next(new HttpError(500, error));
+                next(new HttpSuccess(204, {}));
+            });
+            return;
+        }
+        if (error) return next(new HttpError(500, error));
 
         debug('delClientTokens: success.');
 
