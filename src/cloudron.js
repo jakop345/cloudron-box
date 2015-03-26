@@ -20,7 +20,9 @@ exports = module.exports = {
     getIp: getIp
 };
 
-var assert = require('assert'),
+var addons = require('./addons.js'),
+    apps = require('./apps.js'),
+    assert = require('assert'),
     config = require('../config.js'),
     debug = require('debug')('box:cloudron'),
     clientdb = require('./clientdb.js'),
@@ -168,7 +170,7 @@ function backupApp(app, callback) {
     addons.backupAddons(app, function (error) {
         if (error) return callback(error);
 
-        cloudron.getBackupUrl(app.id, null, function (error, result) {
+        getBackupUrl(app.id, null, function (error, result) {
             if (error) return callback(error);
 
             debug('backupApp: app url:%s id:%s', result.url, result.id);
@@ -176,7 +178,7 @@ function backupApp(app, callback) {
             execFile(SUDO, [ BACKUP_APP_CMD,  app.id, result.url, result.backupKey ], { }, function (error, stdout, stderr) {
                 if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, 'Error backing up : ' + stderr));
 
-                apps.setLastBackupId(app.id, result.id, callback.bind(null, result.id));
+                apps.setLastBackupId(app.id, result.id, callback.bind(null, null, result.id));
             });
         }); 
     });
@@ -201,10 +203,10 @@ function backupBox(backupIds, callback) {
 function backup(callback) {
     callback = callback || function () { }; // callback can be empty for timer triggered backup
 
-    apps.getAll(function (error, apps) {
+    apps.getAll(function (error, allApps) {
         if (error) return callback(error);
 
-        async.mapSeries(apps, backupApp.bind(null, app), function appsBackedUp(error, backupIds) {
+        async.mapSeries(allApps, backupApp.bind(null, app), function appsBackedUp(error, backupIds) {
             if (error) return callback(error);
 
             backupBox(backupIds, callback);

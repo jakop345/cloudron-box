@@ -2,23 +2,7 @@
 
 'use strict';
 
-var appdb = require('./appdb.js'),
-    assert = require('assert'),
-    child_process = require('child_process'),
-    config = require('../config.js'),
-    constants = require('../constants.js'),
-    DatabaseError = require('./databaseerror.js'),
-    debug = require('debug')('box:apps'),
-    docker = require('./docker.js'),
-    updater = require('./updater.js'),
-    fs = require('fs'),
-    manifestFormat = require('manifestformat'),
-    paths = require('./paths.js'),
-    safe = require('safetydance'),
-    semver = require('semver'),
-    split = require('split'),
-    util = require('util');
-
+// intentionally here because of circular dep between apps.js, updater.js and cloudron.js
 exports = module.exports = {
     AppsError: AppsError,
 
@@ -48,6 +32,23 @@ exports = module.exports = {
     _validateHostname: validateHostname,
     _validatePortBindings: validatePortBindings
 };
+
+var appdb = require('./appdb.js'),
+    assert = require('assert'),
+    child_process = require('child_process'),
+    config = require('../config.js'),
+    constants = require('../constants.js'),
+    DatabaseError = require('./databaseerror.js'),
+    debug = require('debug')('box:apps'),
+    docker = require('./docker.js'),
+    updater = require('./updater.js'),
+    fs = require('fs'),
+    manifestFormat = require('manifestformat'),
+    paths = require('./paths.js'),
+    safe = require('safetydance'),
+    semver = require('semver'),
+    split = require('split'),
+    util = require('util');
 
 var gTasks = { };
 
