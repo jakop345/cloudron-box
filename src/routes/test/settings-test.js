@@ -44,8 +44,8 @@ function setup(done) {
                 expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
                 expect(result.statusCode).to.eql(201);
-                expect(scope1.isDone());
-                expect(scope2.isDone());
+                expect(scope1.isDone()).to.be.ok();
+                expect(scope2.isDone()).to.be.ok();
 
                 // stash token for further use
                 token = result.body.token;

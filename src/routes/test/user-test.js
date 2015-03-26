@@ -66,7 +66,7 @@ describe('User API', function () {
                .send({ username: USERNAME_0 })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
-            expect(scope.isDone());
+            expect(scope.isDone()).to.be.ok();
             done(err);
         });
     });
@@ -92,8 +92,8 @@ describe('User API', function () {
             // stash for later use
             token = res.body.token;
 
-            expect(scope1.isDone());
-            expect(scope2.isDone());
+            expect(scope1.isDone()).to.be.ok();
+            expect(scope2.isDone()).to.be.ok();
             done(err);
         });
     });

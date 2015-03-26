@@ -224,8 +224,8 @@ describe('apptask', function () {
 
         apptask._registerSubdomain(APP, function (error) {
             expect(error).to.be(null);
-            expect(scope1.isDone());
-            expect(scope2.isDone());
+            expect(scope1.isDone()).to.be.ok();
+            expect(scope2.isDone()).to.be.ok();
             done();
         });
     });
@@ -238,7 +238,7 @@ describe('apptask', function () {
 
         apptask._unregisterSubdomain(APP, function (error) {
             expect(error).to.be(null);
-            expect(scope.isDone());
+            expect(scope.isDone()).to.be.ok();
             done();
         });
     });

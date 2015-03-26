@@ -48,8 +48,8 @@ describe('Developer API', function () {
                            .end(function (error, result) {
                         expect(error).to.not.be.ok();
                         expect(result).to.be.ok();
-                        expect(scope1.isDone());
-                        expect(scope2.isDone());
+                        expect(scope1.isDone()).to.be.ok();
+                        expect(scope2.isDone()).to.be.ok();
 
                         // stash token for further use
                         token = result.body.token;
@@ -113,8 +113,8 @@ describe('Developer API', function () {
                            .end(function (error, result) {
                         expect(error).to.not.be.ok();
                         expect(result).to.be.ok();
-                        expect(scope1.isDone());
-                        expect(scope2.isDone());
+                        expect(scope1.isDone()).to.be.ok();
+                        expect(scope2.isDone()).to.be.ok();
 
                         // stash token for further use
                         token = result.body.token;
@@ -246,8 +246,8 @@ describe('Developer API', function () {
                            .end(function (error, result) {
                         expect(error).to.not.be.ok();
                         expect(result).to.be.ok();
-                        expect(scope1.isDone());
-                        expect(scope2.isDone());
+                        expect(scope1.isDone()).to.be.ok();
+                        expect(scope2.isDone()).to.be.ok();
 
                         // stash token for further use
                         token = result.body.token;
