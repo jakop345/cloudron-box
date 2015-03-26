@@ -307,8 +307,8 @@ function backupMySql(app, callback) {
         execContainer.start(function (error, stream) {
             if (error) return callback(error);
 
+            execContainer.modem.demuxStream(stream, out, process.stderr);
             stream.on('error', callback);
-            stream.pipe(out);
         });
     });
 }
@@ -385,8 +385,8 @@ function backupPostgreSql(app, callback) {
         execContainer.start(function (error, stream) {
             if (error) return callback(error);
 
+            execContainer.modem.demuxStream(stream, out, process.stderr);
             stream.on('error', callback);
-            stream.pipe(out);
         });
     });
 }
