@@ -340,18 +340,18 @@ function restoreMySql(app, callback) {
     var container = docker.getContainer('mysql');
     var cmd = [ '/addons/mysql/service.sh', 'restore', config.get('addons.mysql.rootPassword'), app.id ];
 
-    debug('Restoring up mysql for %s', app.id);
+    debug('restoreMySql: %s (%s)', app.id, app.manifest.title);
 
     var input = fs.createReadStream(path.join(paths.DATA_DIR, app.id, 'mysqldump'));
     input.on('error', callback);
     input.on('finish', callback);
 
-    container.exec({ Cmd: cmd, AttachStdin: true, Tty: true, AttachStdout: true, AttachStderr: true }, function (error, execContainer) {
+    container.exec({ Cmd: cmd, AttachStdin: true, Tty: false, AttachStdout: true, AttachStderr: true }, function (error, execContainer) {
         if (error) return callback(error);
 
         var startOptions = {
             Detach: false,
-            Tty: true,
+            Tty: false,
             stdin: true // this is a dockerode option that enabled openStdin in the modem
         };
 
@@ -447,7 +447,7 @@ function restorePostgreSql(app, callback) {
     var container = docker.getContainer('mysql');
     var cmd = [ '/addons/postgresql/service.sh', 'restore', config.get('addons.postgresql.rootPassword'), app.id ];
 
-    debug('Restoring up postgresql for %s', app.id);
+    debug('restorePostgreSql: %s (%s)', app.id, app.manifest.title);
 
     var input = fs.createReadStream(path.join(paths.DATA_DIR, app.id, 'postgresqldump'));
     input.on('error', callback);
