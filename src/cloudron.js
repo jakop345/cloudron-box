@@ -192,13 +192,17 @@ function restoreApp(app, callback) {
         return callback(null);
     }
 
-    getRestoreUrl(app.lastBackupId, function (error, result) {
+    addons.restoreAddons(app, function (error) {
         if (error) return callback(error);
 
-        execFile(SUDO, [ RESTORE_APP_CMD,  app.id, result.url, result.backupKey ], { }, function (error, stdout, stderr) {
-            if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, 'Error backing up : ' + stderr));
+        getRestoreUrl(app.lastBackupId, function (error, result) {
+            if (error) return callback(error);
 
-            return callback(null);
+            execFile(SUDO, [ RESTORE_APP_CMD,  app.id, result.url, result.backupKey ], { }, function (error, stdout, stderr) {
+                if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, 'Error backing up : ' + stderr));
+
+                return callback(null);
+            });
         });
     });
 }

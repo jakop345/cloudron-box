@@ -28,6 +28,7 @@ exports = module.exports = {
     teardownAddons: teardownAddons,
     updateAddons: updateAddons,
     backupAddons: backupAddons,
+    restoreAddons: restoreAddons,
 
     getEnvironment: getEnvironment,
     getLinksSync: getLinksSync,
@@ -51,17 +52,19 @@ var KNOWN_ADDONS = {
     mysql: {
         setup: setupMySql,
         teardown: teardownMySql,
-        backup: backupMySql
+        backup: backupMySql,
+        restore: restoreMySql,
     },
     postgresql: {
         setup: setupPostgreSql,
         teardown: teardownPostgreSql,
-        backup: backupPostgreSql
+        backup: backupPostgreSql,
+        restore: restorePostgreSql
     },
     redis: {
         setup: setupRedis,
         teardown: teardownRedis
-        // no backup because we store redis as part of app's volume
+        // no backup or restore because we store redis as part of app's volume
     }
 };
 
@@ -135,6 +138,22 @@ function backupAddons(app, callback) {
         if (!KNOWN_ADDONS[addon].backup) return callback(null);
 
         KNOWN_ADDONS[addon].backup(app, iteratorCallback);
+    }, callback);
+}
+
+function restoreAddons(app, callback) {
+    assert(typeof app === 'object');
+    assert(!app.manifest.addons || util.isArray(app.manifest.addons));
+    assert(typeof callback === 'function');
+
+    if (!app.manifest.addons) return callback(null);
+
+    async.eachSeries(app.manifest.addons, function iterator (addon, iteratorCallback) {
+        if (!(addon in KNOWN_ADDONS)) return iteratorCallback(new Error('No such addon:' + addon));
+
+        if (!KNOWN_ADDONS[addon].restore) return callback(null);
+
+        KNOWN_ADDONS[addon].restore(app, iteratorCallback);
     }, callback);
 }
 
@@ -313,6 +332,35 @@ function backupMySql(app, callback) {
     });
 }
 
+function restoreMySql(app, callback) {
+    var container = docker.getContainer('mysql');
+    var cmd = [ '/addons/mysql/service.sh', 'restore', config.get('addons.mysql.rootPassword'), app.id ];
+
+    debug('Restoring up mysql for %s', app.id);
+
+    var input = fs.createReadStream(path.join(paths.DATA_DIR, app.id, 'mysqldump'));
+    input.on('error', callback);
+    input.on('finish', callback);
+
+    container.exec({ Cmd: cmd, AttachStdin: true, Tty: true, AttachStdout: true, AttachStderr: true }, function (error, execContainer) {
+        if (error) return callback(error);
+
+        var startOptions = {
+            Detach: false,
+            Tty: true,
+            stdin: true // this is a dockerode option that enabled openStdin in the modem
+        };
+
+        execContainer.start(startOptions, function (error, stream) {
+            if (error) return callback(error);
+
+            execContainer.modem.demuxStream(stream, process.stdout, process.stderr);
+            stream.on('error', callback);
+            input.pipe(stream);
+        });
+    });
+}
+
 function setupPostgreSql(app, callback) {
     assert(typeof app === 'object');
     assert(typeof callback === 'function');
@@ -387,6 +435,35 @@ function backupPostgreSql(app, callback) {
             execContainer.modem.demuxStream(stream, out, process.stderr);
             stream.on('error', callback);
             stream.on('end', callback);
+        });
+    });
+}
+
+function restorePostgreSql(app, callback) {
+    var container = docker.getContainer('mysql');
+    var cmd = [ '/addons/postgresql/service.sh', 'restore', config.get('addons.postgresql.rootPassword'), app.id ];
+
+    debug('Restoring up postgresql for %s', app.id);
+
+    var input = fs.createReadStream(path.join(paths.DATA_DIR, app.id, 'postgresqldump'));
+    input.on('error', callback);
+    input.on('finish', callback);
+
+    container.exec({ Cmd: cmd, AttachStdin: true, Tty: true, AttachStdout: true, AttachStderr: true }, function (error, execContainer) {
+        if (error) return callback(error);
+
+        var startOptions = {
+            Detach: false,
+            Tty: true,
+            stdin: true // this is a dockerode option that enabled openStdin in the modem
+        };
+
+        execContainer.start(startOptions, function (error, stream) {
+            if (error) return callback(error);
+
+            execContainer.modem.demuxStream(stream, process.stdout, process.stderr);
+            stream.on('error', callback);
+            input.pipe(stream);
         });
     });
 }
