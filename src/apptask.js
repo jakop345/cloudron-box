@@ -586,7 +586,7 @@ function waitForDnsPropagation(app, callback) {
 }
 
 function backupApp(app, callback) {
-    addons.backupAddons(app, function (callback) {
+    addons.backupAddons(app, function (error) {
         if (error) return callback(error);
 
         cloudron.getBackupUrl(app.id, function (error, result) {
@@ -599,7 +599,7 @@ function backupApp(app, callback) {
 
                 // TODO: update DB with last backup
 
-                return callback(null);
+                callback(null);
             });
         }); 
     });
