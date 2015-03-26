@@ -686,6 +686,11 @@ function restore(app, callback) {
         removeAccessToken.bind(null, app),
         allocateAccessToken.bind(null, app),
 
+        updateApp.bind(null, app, { installationProgress: 'Downloading last backup' }),
+        cloudron.deleteVolume.bind(null, app),
+        createVolume.bind(null, app),
+        restoreApp.bind(null, app),
+
         // download the image
         updateApp.bind(null, app, { installationProgress: 'Downloading image' }),
         downloadImage.bind(null, app),

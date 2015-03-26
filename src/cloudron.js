@@ -13,6 +13,7 @@ exports = module.exports = {
     getStatus: getStatus,
     backup: backup,
     backupApp: backupApp,
+    restoreApp: restoreApp,
 
     getBackupUrl: getBackupUrl,
     setCertificate: setCertificate,
@@ -44,7 +45,8 @@ var addons = require('./addons.js'),
 var SUDO = '/usr/bin/sudo',
     BACKUP_BOX_CMD = path.join(__dirname, 'scripts/backupbox.sh'),
     RELOAD_NGINX_CMD = path.join(__dirname, 'scripts/reloadnginx.sh'),
-    BACKUP_APP_CMD = path.join(__dirname, 'scripts/backupapp.sh');
+    BACKUP_APP_CMD = path.join(__dirname, 'scripts/backupapp.sh'),
+    RESTORE_APP_CMD = path.join(__dirname, 'scripts/restoreapp.sh');
 
 var gBackupTimerId = null,
     gAddMailDnsRecordsTimerId = null,
@@ -167,6 +169,40 @@ function getBackupUrl(appId, appBackupIds, callback) {
     });
 }
 
+function getRestoreUrl(backupId, callback) {
+    assert(typeof backupId === 'string');
+    assert(typeof callback === 'function');
+
+    if (config.LOCAL) return callback(null, {});    // skip this when running locally
+
+    var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/restoreurl';
+
+    superagent.put(url).query({ token: config.token(), backupId: backupId }).end(function (error, result) {
+        if (error) return callback(new Error('Error getting presigned download url: ' + error.message));
+
+        if (result.statusCode !== 201 || !result.body || !result.body.url) return callback(new Error('Error getting presigned download url : ' + result.statusCode));
+
+        return callback(null, result.body);
+    });
+}
+
+function restoreApp(app, callback) {
+    if (!app.lastBackupId) {
+        debug('No existing backup to return to. Skipping %d', app.id);
+        return callback(null);
+    }
+
+    getRestoreUrl(app.lastBackupId, function (error, result) {
+        if (error) return callback(error);
+
+        execFile(SUDO, [ RESTORE_APP_CMD,  app.id, result.url, result.backupKey ], { }, function (error, stdout, stderr) {
+            if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, 'Error backing up : ' + stderr));
+
+            return callback(null);
+        });
+    });
+}
+
 function backupApp(app, callback) {
     addons.backupAddons(app, function (error) {
         if (error) return callback(error);
@@ -185,8 +221,8 @@ function backupApp(app, callback) {
     });
 }
 
-function backupBox(backupIds, callback) {
-    assert(util.isArray(backupIds));
+function backupBox(appBackupIds, callback) {
+    assert(util.isArray(appBackupIds));
 
     getBackupUrl(null /* appId */, appBackupIds, function (error, result) {
         if (error) return callback(new CloudronError(CloudronError.APPSTORE_DOWN, error.message));
@@ -207,7 +243,7 @@ function backup(callback) {
     apps.getAll(function (error, allApps) {
         if (error) return callback(error);
 
-        async.mapSeries(allApps, backupApp.bind(null, app), function appsBackedUp(error, backupIds) {
+        async.mapSeries(allApps, backupApp, function appsBackedUp(error, backupIds) {
             if (error) return callback(error);
 
             backupBox(backupIds, callback);

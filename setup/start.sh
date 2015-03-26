@@ -36,17 +36,7 @@ set_progress() {
     (echo "{ \"update\": { \"percent\": \"${percent}\", \"message\": \"${message}\" }, \"backup\": {} }" > "${SETUP_PROGRESS_JSON}") 2> /dev/null || true # as this will fail in non-update mode
 }
 
-set_progress "1" "Downloading restore data"
-if [[ -n "${arg_restore_url}" ]]; then
-    echo "Downloading backup: ${arg_restore_url} and key: ${arg_restore_key}"
-
-    while true; do
-        if $curl -L "${arg_restore_url}" | openssl aes-256-cbc -d -pass "pass:${arg_restore_key}" | tar -zxf - -C "${DATA_DIR}"; then break; fi
-        echo "Failed to download data, trying again"
-    done
-fi
-
-set_progress "15" "Ensuring directories"
+set_progress "1" "Ensuring directories"
 sudo -u "${USER}" -H bash <<EOF
 set -eu
 # keep these in sync with paths.js
@@ -57,6 +47,16 @@ mkdir -p "${CONFIG_DIR}/nginx/applications"
 mkdir -p "${CONFIG_DIR}/nginx/cert"
 mkdir -p "${CONFIG_DIR}/collectd/collectd.conf.d"
 EOF
+
+set_progress "15" "Downloading restore data"
+if [[ -n "${arg_restore_url}" ]]; then
+    echo "Downloading backup: ${arg_restore_url} and key: ${arg_restore_key}"
+
+    while true; do
+        if $curl -L "${arg_restore_url}" | openssl aes-256-cbc -d -pass "pass:${arg_restore_key}" | tar -zxf - -C "${DATA_DIR}/box"; then break; fi
+        echo "Failed to download data, trying again"
+    done
+fi
 
 set_progress "20" "Configuring Sudoers file"
 cat > /etc/sudoers.d/yellowtent <<EOF
@@ -74,6 +74,9 @@ ${USER} ALL=(root) NOPASSWD: ${BOX_SRC_DIR}/src/scripts/backupbox.sh
 
 Defaults!${BOX_SRC_DIR}/src/scripts/backupapp.sh env_keep=HOME
 ${USER} ALL=(root) NOPASSWD: ${BOX_SRC_DIR}/src/scripts/backupapp.sh
+
+Defaults!${BOX_SRC_DIR}/src/scripts/restoreapp.sh env_keep=HOME
+${USER} ALL=(root) NOPASSWD: ${BOX_SRC_DIR}/src/scripts/restoreapp.sh
 
 Defaults!${BOX_SRC_DIR}/src/scripts/reboot.sh env_keep=HOME
 ${USER} ALL=(root) NOPASSWD: ${BOX_SRC_DIR}/src/scripts/reboot.sh
