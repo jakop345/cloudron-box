@@ -299,7 +299,6 @@ function backupMySql(app, callback) {
 
     var out = fs.createWriteStream(path.join(paths.DATA_DIR, app.id, 'mysqldump'));
     out.on('error', callback);
-    out.on('finish', callback);
 
     container.exec({ Cmd: cmd, AttachStdout: true, AttachStderr: true }, function (error, execContainer) {
         if (error) return callback(error);
@@ -309,6 +308,7 @@ function backupMySql(app, callback) {
 
             execContainer.modem.demuxStream(stream, out, process.stderr);
             stream.on('error', callback);
+            stream.on('end', callback);
         });
     });
 }
@@ -377,7 +377,6 @@ function backupPostgreSql(app, callback) {
 
     var out = fs.createWriteStream(path.join(paths.DATA_DIR, app.id, 'postgresqldump'));
     out.on('error', callback);
-    out.on('finish', callback);
 
     container.exec({ Cmd: cmd, AttachStdout: true, AttachStderr: true }, function (error, execContainer) {
         if (error) return callback(error);
@@ -387,6 +386,7 @@ function backupPostgreSql(app, callback) {
 
             execContainer.modem.demuxStream(stream, out, process.stderr);
             stream.on('error', callback);
+            stream.on('end', callback);
         });
     });
 }
