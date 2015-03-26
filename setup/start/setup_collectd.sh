@@ -21,7 +21,7 @@ mkdir -p "${COLLECTD_APPCONFIG_DIR}"
 cp -r "${script_dir}/collectd/collectd.conf" "${COLLECTD_CONFIG_DIR}/collectd.conf"
 rm -rf /etc/collectd
 ln -sfF "${COLLECTD_CONFIG_DIR}" /etc/collectd
-chown -R yellowtent.yellowtent "${COLLECTD_CONFIG_DIR}"
+chown -R yellowtent:yellowtent "${COLLECTD_CONFIG_DIR}"
 
 update-rc.d -f collectd defaults
 /etc/init.d/collectd restart
