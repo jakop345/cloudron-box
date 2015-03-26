@@ -479,7 +479,8 @@ describe('database', function () {
             containerId: null,
             portBindings: { port: '5678' },
             health: null,
-            accessRestriction: ''
+            accessRestriction: '',
+            lastBackupId: null
         };
         var APP_1 = {
             id: 'appid-1',
@@ -494,7 +495,8 @@ describe('database', function () {
             containerId: null,
             portBindings: { },
             health: null,
-            accessRestriction: 'roleAdmin'
+            accessRestriction: 'roleAdmin',
+            lastBackupId: null
         };
 
         it('add fails due to missing arguments', function () {

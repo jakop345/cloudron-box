@@ -42,6 +42,8 @@ exports = module.exports = {
 
     checkManifestConstraints: checkManifestConstraints,
 
+    setLastBackupId: setLastBackupId,
+
     // exported for testing
     _validateHostname: validateHostname,
     _validatePortBindings: validatePortBindings
@@ -538,6 +540,19 @@ function exec(appId, cmd, callback) {
                 return callback(null, stream);
             });
         });
+    });
+}
+
+function setLastBackupId(appId, lastBackupId, callback) {
+    assert(typeof appId === 'string');
+    assert(typeof lastBackupId === 'string');
+    assert(typeof callback === 'function');
+
+    appdb.update(appId, { lastBackupId: lastBackupId }, function (error) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
+        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+        return callback(null);
     });
 }
 

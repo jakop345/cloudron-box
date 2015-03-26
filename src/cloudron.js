@@ -170,14 +170,12 @@ function backupApp(app, callback) {
         cloudron.getBackupUrl(app.id, function (error, result) {
             if (error) return callback(error);
 
-            debug('backupApp: app url %s', result.url);
+            debug('backupApp: app url:%s id:%s', result.url, result.id);
 
             execFile(SUDO, [ BACKUP_APP_CMD,  app.id, result.url, result.backupKey ], { }, function (error, stdout, stderr) {
                 if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, 'Error backing up : ' + stderr));
 
-                // TODO: update DB with last backup
-
-                callback(null);
+                apps.setLastBackupId(app.id, result.id, callback);
             });
         }); 
     });
