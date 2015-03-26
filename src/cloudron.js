@@ -144,14 +144,15 @@ function activate(username, password, email, callback) {
     });
 }
 
-function getBackupUrl(callback) {
+function getBackupUrl(appId, callback) {
+    assert(!appId || typeof appId === 'string');
     assert(typeof callback === 'function');
 
     if (config.LOCAL) return callback(null, {});    // skip this when running locally
 
     var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/backupurl';
 
-    superagent.put(url).query({ token: config.token(), boxVersion: config.version() }).end(function (error, result) {
+    superagent.put(url).query({ token: config.token(), boxVersion: config.version(), appId: appId }).end(function (error, result) {
         if (error) return callback(new Error('Error getting presigned backup url: ' + error.message));
 
         if (result.statusCode !== 201 || !result.body || !result.body.url) return callback(new Error('Error getting presigned backup url : ' + result.statusCode));
@@ -163,7 +164,7 @@ function getBackupUrl(callback) {
 function backup(callback) {
     callback = callback || function () { }; // callback can be empty for timer triggered backup
 
-    getBackupUrl(function (error, result) {
+    getBackupUrl(null /* appId */, function (error, result) {
         if (error) return callback(new CloudronError(CloudronError.APPSTORE_DOWN, error.message));
 
         debug('backup: url %s', result.url);

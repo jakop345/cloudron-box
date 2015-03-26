@@ -66,7 +66,8 @@ var NGINX_APPCONFIG_EJS = fs.readFileSync(__dirname + '/../setup/start/nginx/app
     RELOAD_NGINX_CMD = path.join(__dirname, 'scripts/reloadnginx.sh'),
     RELOAD_COLLECTD_CMD = path.join(__dirname, 'scripts/reloadcollectd.sh'),
     RMAPPDIR_CMD = path.join(__dirname, 'scripts/rmappdir.sh'),
-    CREATEAPPDIR_CMD = path.join(__dirname, 'scripts/createappdir.sh');
+    CREATEAPPDIR_CMD = path.join(__dirname, 'scripts/createappdir.sh'),
+    BACKUP_APP_CMD = path.join(__dirname, 'scripts/backupapp.sh');
 
 function initialize(callback) {
     database.initialize(callback);
@@ -584,6 +585,26 @@ function waitForDnsPropagation(app, callback) {
         });
 }
 
+function backupApp(app, callback) {
+    addons.backupAddons(app, function (callback) {
+        if (error) return callback(error);
+
+        cloudron.getBackupUrl(app.id, function (error, result) {
+            if (error) return callback(new Error('Appstore down, cannot backup'));
+
+            debug('backup: app url %s', result.url);
+
+            execFile(SUDO, [ BACKUP_APP_CMD,  app.id, result.url, result.backupKey ], { }, function (error, stdout, stderr) {
+                if (error) return callback(new Error('Error backing up : ' + stderr));
+
+                // TODO: update DB with last backup
+
+                return callback(null);
+            });
+        }); 
+    });
+}
+
 // updates the app object and the database
 function updateApp(app, values, callback) {
     for (var value in values) {
@@ -796,6 +817,9 @@ function update(app, callback) {
 
         updateApp.bind(null, app, { installationProgress: 'Deleting container' }),
         deleteContainer.bind(null, app),
+
+        updateApp.bind(null, app, { installationProgress: 'Backing up' }),
+        backupApp.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: 'Verify manifest' }),
         verifyManifest.bind(null, app),

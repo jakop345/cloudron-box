@@ -10,6 +10,7 @@ var appdb = require('./appdb.js'),
     debug = require('debug')('box:addons'),
     docker = require('./docker.js'),
     execFile = child_process.execFile,
+    fs = require('fs'),
     generatePassword = require('password-generator'),
     MemoryStream = require('memorystream'),
     os = require('os'),
@@ -26,6 +27,7 @@ exports = module.exports = {
     setupAddons: setupAddons,
     teardownAddons: teardownAddons,
     updateAddons: updateAddons,
+    backupAddons: backupAddons,
 
     getEnvironment: getEnvironment,
     getLinksSync: getLinksSync,
@@ -48,15 +50,18 @@ var KNOWN_ADDONS = {
     },
     mysql: {
         setup: setupMySql,
-        teardown: teardownMySql
+        teardown: teardownMySql,
+        backup: backupMySql
     },
     postgresql: {
         setup: setupPostgreSql,
-        teardown: teardownPostgreSql
+        teardown: teardownPostgreSql,
+        backup: backupPostgreSql
     },
     redis: {
         setup: setupRedis,
         teardown: teardownRedis
+        // no backup because we store redis as part of app's volume
     }
 };
 
@@ -115,6 +120,22 @@ function updateAddons(app, oldManifest, callback) {
             KNOWN_ADDONS[addon].teardown(app, iteratorCallback);
         }, callback);
     });
+}
+
+function backupAddons(app, callback) {
+    assert(typeof app === 'object');
+    assert(!app.manifest.addons || util.isArray(app.manifest.addons));
+    assert(typeof callback === 'function');
+
+    if (!app.manifest.addons) return callback(null);
+
+    async.eachSeries(app.manifest.addons, function iterator (addon, iteratorCallback) {
+        if (!(addon in KNOWN_ADDONS)) return iteratorCallback(new Error('No such addon:' + addon));
+
+        if (!KNOWN_ADDONS[addon].backup) return callback(null);
+
+        KNOWN_ADDONS[addon].backup(app, iteratorCallback);
+    }, callback);
 }
 
 function getEnvironment(appId, callback) {
@@ -270,6 +291,28 @@ function teardownMySql(app, callback) {
     });
 }
 
+function backupMySql(app, callback) {
+    var container = docker.getContainer('mysql');
+    var cmd = [ '/addons/mysql/service.sh', 'backup', config.get('addons.mysql.rootPassword'), app.id ];
+
+    debug('Backing up mysql for %s', app.id);
+
+    var out = fs.createWriteStream(path.join(paths.DATA_DIR, app.id, 'mysqldump'));
+    out.on('error', callback);
+    out.on('finish', callback);
+
+    container.exec({ Cmd: cmd }, function (error, execContainer) {
+        if (error) return callback(error);
+
+        execContainer.start({ stream: true, stdout: true, stderr: true }, function (error, stream) {
+            if (error) return callback(error);
+
+            stream.on('error', callback);
+            stream.pipe(out);
+        });
+    });
+}
+
 function setupPostgreSql(app, callback) {
     assert(typeof app === 'object');
     assert(typeof callback === 'function');
@@ -322,6 +365,28 @@ function teardownPostgreSql(app, callback) {
             stream.on('end', function () {
                 appdb.unsetAddonConfig(app.id, 'postgresql', callback);
             });
+        });
+    });
+}
+
+function backupPostgreSql(app, callback) {
+    var container = docker.getContainer('postgresql');
+    var cmd = [ '/addons/postgresql/service.sh', 'backup', config.get('addons.postgresql.rootPassword'), app.id ];
+
+    debug('Backin up postgresql for %s', app.id);
+
+    var out = fs.createWriteStream(path.join(paths.DATA_DIR, app.id, 'postgresqldump'));
+    out.on('error', callback);
+    out.on('finish', callback);
+
+    container.exec({ Cmd: cmd }, function (error, execContainer) {
+        if (error) return callback(error);
+
+        execContainer.start({ stream: true, stdout: true, stderr: true }, function (error, stream) {
+            if (error) return callback(error);
+
+            stream.on('error', callback);
+            stream.pipe(out);
         });
     });
 }
