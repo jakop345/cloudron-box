@@ -39,7 +39,7 @@ var assert = require('assert'),
     util = require('util');
 
 var SUDO = '/usr/bin/sudo',
-    BACKUP_CMD = path.join(__dirname, 'scripts/backup.sh'),
+    BACKUP_BOX_CMD = path.join(__dirname, 'scripts/backupbox.sh'),
     RELOAD_NGINX_CMD = path.join(__dirname, 'scripts/reloadnginx.sh'),
     BACKUP_APP_CMD = path.join(__dirname, 'scripts/backupapp.sh');
 
@@ -173,7 +173,7 @@ function backupApp(app, callback) {
             debug('backupApp: app url %s', result.url);
 
             execFile(SUDO, [ BACKUP_APP_CMD,  app.id, result.url, result.backupKey ], { }, function (error, stdout, stderr) {
-                if (error) return callback(new Error('Error backing up : ' + stderr));
+                if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, 'Error backing up : ' + stderr));
 
                 // TODO: update DB with last backup
 
@@ -183,18 +183,30 @@ function backupApp(app, callback) {
     });
 }
 
-function backup(callback) {
-    callback = callback || function () { }; // callback can be empty for timer triggered backup
-
+function backupBox(callback) {
     getBackupUrl(null /* appId */, function (error, result) {
         if (error) return callback(new CloudronError(CloudronError.APPSTORE_DOWN, error.message));
 
         debug('backup: url %s', result.url);
 
-        execFile(SUDO, [ BACKUP_CMD,  result.url, result.backupKey ], { }, function (error) {
+        execFile(SUDO, [ BACKUP_BOX_CMD,  result.url, result.backupKey ], { }, function (error) {
             if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
             return callback(null);
+        });
+    });
+}
+
+function backup(callback) {
+    callback = callback || function () { }; // callback can be empty for timer triggered backup
+
+    apps.getAll(function (error, apps) {
+        if (error) return callback(error);
+
+        async.eachSeries(apps, backupApp.bind(null, app), function appsBackedUp(error) {
+            if (error) return callback(error);
+
+            backupBox(callback);
         });
     });
 }

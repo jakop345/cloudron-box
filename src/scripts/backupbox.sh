@@ -15,7 +15,7 @@ fi
 exec 1>> "/var/log/cloudron/backup.log" 2>&1
 
 if [ $# -lt 2 ]; then
-    echo "Usage: backup.sh <url> <key>"
+    echo "Usage: backupbox.sh <url> <key>"
     exit 1
 fi
 
@@ -33,7 +33,7 @@ btrfs subvolume snapshot -r "${DATA_DIR}" "${HOME}/backup-${now}"
 for try in `seq 1 5`; do
     echo "Uploading backup to ${backup_url} (try ${try})"
     error_log=$(mktemp)
-    if tar -cvzf - -C "${HOME}/backup-${now}" . \
+    if tar -cvzf - -C "${HOME}/backup-${now}/box" . \
            | openssl aes-256-cbc -e -pass "pass:${backup_key}" \
            | curl --fail -H "Content-Type:" -X PUT --data-binary @- "${backup_url}" 2>"${error_log}"; then
         break

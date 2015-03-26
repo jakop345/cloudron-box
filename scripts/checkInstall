@@ -11,7 +11,7 @@ sudo -k || sudo --reset-timestamp
 scripts=("${SOURCE_DIR}/src/scripts/rmappdir.sh" \
          "${SOURCE_DIR}/src/scripts/createappdir.sh" \
          "${SOURCE_DIR}/src/scripts/reloadnginx.sh" \
-         "${SOURCE_DIR}/src/scripts/backup.sh" \
+         "${SOURCE_DIR}/src/scripts/backupbox.sh" \
          "${SOURCE_DIR}/src/scripts/backupapp.sh" \
          "${SOURCE_DIR}/src/scripts/reboot.sh" \
          "${SOURCE_DIR}/src/scripts/reloadcollectd.sh")

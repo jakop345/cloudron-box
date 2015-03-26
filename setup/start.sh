@@ -69,8 +69,8 @@ ${USER} ALL=(root) NOPASSWD: ${BOX_SRC_DIR}/src/scripts/rmappdir.sh
 Defaults!${BOX_SRC_DIR}/src/scripts/reloadnginx.sh env_keep=HOME
 ${USER} ALL=(root) NOPASSWD: ${BOX_SRC_DIR}/src/scripts/reloadnginx.sh
 
-Defaults!${BOX_SRC_DIR}/src/scripts/backup.sh env_keep=HOME
-${USER} ALL=(root) NOPASSWD: ${BOX_SRC_DIR}/src/scripts/backup.sh
+Defaults!${BOX_SRC_DIR}/src/scripts/backupbox.sh env_keep=HOME
+${USER} ALL=(root) NOPASSWD: ${BOX_SRC_DIR}/src/scripts/backupbox.sh
 
 Defaults!${BOX_SRC_DIR}/src/scripts/backupapp.sh env_keep=HOME
 ${USER} ALL=(root) NOPASSWD: ${BOX_SRC_DIR}/src/scripts/backupapp.sh
