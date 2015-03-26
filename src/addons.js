@@ -346,7 +346,7 @@ function forwardRedisPort(appId, callback) {
 function setupRedis(app, callback) {
     var redisPassword = generatePassword(64, false /* memorable */);
     var redisVarsFile = path.join(paths.ADDON_CONFIG_DIR, 'redis-' + app.id + '_vars.sh');
-    var redisDataDir = path.join(paths.DATA_DIR, 'redis-' + app.id);
+    var redisDataDir = path.join(paths.DATA_DIR, app.id + '/redis');
 
     if (!safe.fs.writeFileSync(redisVarsFile, 'REDIS_PASSWORD=' + redisPassword)) {
         return callback(new Error('Error writing redis config'));
@@ -423,7 +423,7 @@ function teardownRedis(app, callback) {
 
        safe.fs.unlinkSync(paths.ADDON_CONFIG_DIR, 'redis-' + app.id + '_vars.sh');
 
-        execFile(SUDO, [ RMAPPDIR_CMD, 'redis-' + app.id ], { }, function (error, stdout, stderr) {
+        execFile(SUDO, [ RMAPPDIR_CMD, app.id + '/redis' ], { }, function (error, stdout, stderr) {
             if (error) return callback(new Error('Error removing redis data:' + error));
 
             appdb.unsetAddonConfig(app.id, 'redis', callback);

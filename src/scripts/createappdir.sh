@@ -24,6 +24,13 @@ fi
 readonly DATA="${HOME}/data"
 readonly DATA_TEST="${HOME}/.cloudron_test/data"
 
-[[ -d "${DATA}" ]] && mkdir -p "${DATA}/$1/data"
-[[ -d "${DATA_TEST}" ]] && mkdir -p "${DATA_TEST}/$1/data"
+if [[ -d "${DATA}" ]]; then
+     mkdir -p "${DATA}/$1/data"
+     chown -R yellowtent.yellowtent "${DATA}/$1"
+fi
+
+if [[ -d "${DATA_TEST}" ]]; then
+    mkdir -p "${DATA_TEST}/$1/data"
+    chown -R ${SUDO_USER}.${SUDO_USER} "${DATA_TEST}/$1"
+fi
 

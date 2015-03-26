@@ -621,6 +621,11 @@ function install(app, callback) {
         updateApp.bind(null, app, { installationProgress: 'Downloading image' }),
         downloadImage.bind(null, app),
 
+        // recreate data volume
+        updateApp.bind(null, app, { installationProgress: 'Creating volume' }),
+        deleteVolume.bind(null, app),
+        createVolume.bind(null, app),
+
         // setup addons
         updateApp.bind(null, app, { installationProgress: 'Setting up addons' }),
         addons.teardownAddons.bind(null, app),
@@ -630,11 +635,6 @@ function install(app, callback) {
         updateApp.bind(null, app, { installationProgress: 'Creating container' }),
         deleteContainer.bind(null, app),
         createContainer.bind(null, app),
-
-        // recreate data volume
-        updateApp.bind(null, app, { installationProgress: 'Creating volume' }),
-        deleteVolume.bind(null, app),
-        createVolume.bind(null, app),
 
         // add collectd profile
         updateApp.bind(null, app, { installationProgress: 'Setting up collectd profile' }),
