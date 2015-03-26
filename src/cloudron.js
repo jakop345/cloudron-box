@@ -23,6 +23,7 @@ exports = module.exports = {
 var addons = require('./addons.js'),
     apps = require('./apps.js'),
     assert = require('assert'),
+    async = require('async'),
     config = require('../config.js'),
     debug = require('debug')('box:cloudron'),
     clientdb = require('./clientdb.js'),
