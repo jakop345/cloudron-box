@@ -146,15 +146,16 @@ function activate(username, password, email, callback) {
     });
 }
 
-function getBackupUrl(appId, callback) {
+function getBackupUrl(appId, appBackupIds, callback) {
     assert(!appId || typeof appId === 'string');
+    assert(!appBackupIds || util.isArray(appBackupIds));
     assert(typeof callback === 'function');
 
     if (config.LOCAL) return callback(null, {});    // skip this when running locally
 
     var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/backupurl';
 
-    superagent.put(url).query({ token: config.token(), boxVersion: config.version(), appId: appId }).end(function (error, result) {
+    superagent.put(url).query({ token: config.token(), boxVersion: config.version(), appId: appId, appBackupIds: appBackupIds }).end(function (error, result) {
         if (error) return callback(new Error('Error getting presigned backup url: ' + error.message));
 
         if (result.statusCode !== 201 || !result.body || !result.body.url) return callback(new Error('Error getting presigned backup url : ' + result.statusCode));
@@ -167,7 +168,7 @@ function backupApp(app, callback) {
     addons.backupAddons(app, function (error) {
         if (error) return callback(error);
 
-        cloudron.getBackupUrl(app.id, function (error, result) {
+        cloudron.getBackupUrl(app.id, null, function (error, result) {
             if (error) return callback(error);
 
             debug('backupApp: app url:%s id:%s', result.url, result.id);
@@ -175,14 +176,16 @@ function backupApp(app, callback) {
             execFile(SUDO, [ BACKUP_APP_CMD,  app.id, result.url, result.backupKey ], { }, function (error, stdout, stderr) {
                 if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, 'Error backing up : ' + stderr));
 
-                apps.setLastBackupId(app.id, result.id, callback);
+                apps.setLastBackupId(app.id, result.id, callback.bind(null, result.id));
             });
         }); 
     });
 }
 
-function backupBox(callback) {
-    getBackupUrl(null /* appId */, function (error, result) {
+function backupBox(backupIds, callback) {
+    assert(util.isArray(backupIds));
+
+    getBackupUrl(null /* appId */, appBackupIds, function (error, result) {
         if (error) return callback(new CloudronError(CloudronError.APPSTORE_DOWN, error.message));
 
         debug('backup: url %s', result.url);
@@ -201,10 +204,10 @@ function backup(callback) {
     apps.getAll(function (error, apps) {
         if (error) return callback(error);
 
-        async.eachSeries(apps, backupApp.bind(null, app), function appsBackedUp(error) {
+        async.mapSeries(apps, backupApp.bind(null, app), function appsBackedUp(error, backupIds) {
             if (error) return callback(error);
 
-            backupBox(callback);
+            backupBox(backupIds, callback);
         });
     });
 }
