@@ -65,7 +65,8 @@ var NGINX_APPCONFIG_EJS = fs.readFileSync(__dirname + '/../setup/start/nginx/app
     SUDO = '/usr/bin/sudo',
     RELOAD_NGINX_CMD = path.join(__dirname, 'scripts/reloadnginx.sh'),
     RELOAD_COLLECTD_CMD = path.join(__dirname, 'scripts/reloadcollectd.sh'),
-    RMAPPDIR_CMD = path.join(__dirname, 'scripts/rmappdir.sh');
+    RMAPPDIR_CMD = path.join(__dirname, 'scripts/rmappdir.sh'),
+    CREATEAPPDIR_CMD = path.join(__dirname, 'scripts/createappdir.sh');
 
 function initialize(callback) {
     database.initialize(callback);
@@ -310,17 +311,14 @@ function deleteImage(app, callback) {
 }
 
 function createVolume(app, callback) {
-    var appDataDir = path.join(paths.DATA_DIR, app.id);
+    execFile(SUDO, [ CREATEAPPDIR_CMD, app.id ], { }, function (error, stdout, stderr) {
+        if (error) {
+            console.error('Error creating volume', error, stdout, stderr);
+            return callback(new Error('Error creating app data directory for ' + app.id + ':' + error.message));
+        }
 
-    if (!safe.fs.mkdirSync(appDataDir)) {
-        return callback(new Error('Error creating app data directory ' + appDataDir + ' ' + safe.error));
-    }
-
-    if (!safe.fs.mkdirSync(appDataDir + '/data')) {
-        return callback(new Error('Error creating app data directory ' + appDataDir + '/data' + safe.error));
-    }
-
-    return callback(null);
+        return callback(null);
+    });
 }
 
 function deleteVolume(app, callback) {

@@ -60,6 +60,9 @@ EOF
 
 set_progress "20" "Configuring Sudoers file"
 cat > /etc/sudoers.d/yellowtent <<EOF
+Defaults!${BOX_SRC_DIR}/src/scripts/createappdir.sh env_keep=HOME
+${USER} ALL=(root) NOPASSWD: ${BOX_SRC_DIR}/src/scripts/createappdir.sh
+
 Defaults!${BOX_SRC_DIR}/src/scripts/rmappdir.sh env_keep=HOME
 ${USER} ALL=(root) NOPASSWD: ${BOX_SRC_DIR}/src/scripts/rmappdir.sh
 
