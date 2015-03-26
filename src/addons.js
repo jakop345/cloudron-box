@@ -130,6 +130,8 @@ function backupAddons(app, callback) {
     assert(!app.manifest.addons || util.isArray(app.manifest.addons));
     assert(typeof callback === 'function');
 
+    debug('backupAddons: %s (%s)', app.id, app.manifest.title);
+
     if (!app.manifest.addons) return callback(null);
 
     async.eachSeries(app.manifest.addons, function iterator (addon, iteratorCallback) {
@@ -145,6 +147,8 @@ function restoreAddons(app, callback) {
     assert(typeof app === 'object');
     assert(!app.manifest.addons || util.isArray(app.manifest.addons));
     assert(typeof callback === 'function');
+
+    debug('restoreAddons: %s (%s)', app.id, app.manifest.title);
 
     if (!app.manifest.addons) return callback(null);
 
