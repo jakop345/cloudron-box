@@ -35,6 +35,7 @@ for try in `seq 1 5`; do
     if $curl -L "${restore_url}" \
         | openssl aes-256-cbc -d -pass "pass:${restore_key}" \
         | tar -zxf - -C "${DATA_DIR}/${app_id}" 2>"${error_log}"; then
+        chown -R yellowtent:yellowtent "${DATA_DIR}/${app_id}"
         break
     fi
     cat "${error_log}" && rm "${error_log}"
