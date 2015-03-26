@@ -12,6 +12,7 @@ exports = module.exports = {
     getConfig: getConfig,
     getStatus: getStatus,
     backup: backup,
+    backupApp: backupApp,
 
     getBackupUrl: getBackupUrl,
     setCertificate: setCertificate,
@@ -39,7 +40,8 @@ var assert = require('assert'),
 
 var SUDO = '/usr/bin/sudo',
     BACKUP_CMD = path.join(__dirname, 'scripts/backup.sh'),
-    RELOAD_NGINX_CMD = path.join(__dirname, 'scripts/reloadnginx.sh');
+    RELOAD_NGINX_CMD = path.join(__dirname, 'scripts/reloadnginx.sh'),
+    BACKUP_APP_CMD = path.join(__dirname, 'scripts/backupapp.sh');
 
 var gBackupTimerId = null,
     gAddMailDnsRecordsTimerId = null,
@@ -158,6 +160,26 @@ function getBackupUrl(appId, callback) {
         if (result.statusCode !== 201 || !result.body || !result.body.url) return callback(new Error('Error getting presigned backup url : ' + result.statusCode));
 
         return callback(null, result.body);
+    });
+}
+
+function backupApp(app, callback) {
+    addons.backupAddons(app, function (error) {
+        if (error) return callback(error);
+
+        cloudron.getBackupUrl(app.id, function (error, result) {
+            if (error) return callback(error);
+
+            debug('backupApp: app url %s', result.url);
+
+            execFile(SUDO, [ BACKUP_APP_CMD,  app.id, result.url, result.backupKey ], { }, function (error, stdout, stderr) {
+                if (error) return callback(new Error('Error backing up : ' + stderr));
+
+                // TODO: update DB with last backup
+
+                callback(null);
+            });
+        }); 
     });
 }
 
