@@ -275,10 +275,10 @@ function teardownMySql(app, callback) {
 
     debug('Tearing down mysql for %s', app.id);
 
-    container.exec({ Cmd: cmd }, function (error, execContainer) {
+    container.exec({ Cmd: cmd, AttachStdout: true, AttachStderr: true }, function (error, execContainer) {
         if (error) return callback(error);
 
-        execContainer.start({ stream: true, stdout: true, stderr: true }, function (error, stream) {
+        execContainer.start(function (error, stream) {
             if (error) return callback(error);
 
             var data = '';
@@ -301,10 +301,10 @@ function backupMySql(app, callback) {
     out.on('error', callback);
     out.on('finish', callback);
 
-    container.exec({ Cmd: cmd }, function (error, execContainer) {
+    container.exec({ Cmd: cmd, AttachStdout: true, AttachStderr: true }, function (error, execContainer) {
         if (error) return callback(error);
 
-        execContainer.start({ stream: true, stdout: true, stderr: true }, function (error, stream) {
+        execContainer.start(function (error, stream) {
             if (error) return callback(error);
 
             stream.on('error', callback);
@@ -353,10 +353,10 @@ function teardownPostgreSql(app, callback) {
 
     debug('Tearing down postgresql for %s', app.id);
 
-    container.exec({ Cmd: cmd }, function (error, execContainer) {
+    container.exec({ Cmd: cmd, AttachStdout: true, AttachStderr: true }, function (error, execContainer) {
         if (error) return callback(error);
 
-        execContainer.start({ stream: true, stdout: true, stderr: true }, function (error, stream) {
+        execContainer.start(function (error, stream) {
             if (error) return callback(error);
 
             var data = '';
@@ -379,10 +379,10 @@ function backupPostgreSql(app, callback) {
     out.on('error', callback);
     out.on('finish', callback);
 
-    container.exec({ Cmd: cmd }, function (error, execContainer) {
+    container.exec({ Cmd: cmd, AttachStdout: true, AttachStderr: true }, function (error, execContainer) {
         if (error) return callback(error);
 
-        execContainer.start({ stream: true, stdout: true, stderr: true }, function (error, stream) {
+        execContainer.start(function (error, stream) {
             if (error) return callback(error);
 
             stream.on('error', callback);
