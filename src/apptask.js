@@ -695,6 +695,9 @@ function restore(app, callback) {
         updateApp.bind(null, app, { installationProgress: 'Downloading image' }),
         downloadImage.bind(null, app),
 
+        updateApp.bind(null, app, { installationProgress: 'Restoring addons' }),
+        addons.restoreAddons.bind(null, app),
+
         // setup addons
         updateApp.bind(null, app, { installationProgress: 'Setting up addons' }),
         addons.updateAddons.bind(null, app, oldManifest),
@@ -802,7 +805,10 @@ function update(app, callback) {
         updateApp.bind(null, app, { installationProgress: 'Deleting container' }),
         deleteContainer.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Backing up' }),
+        updateApp.bind(null, app, { installationProgress: 'Backing up addons' }),
+        addons.backupAddons.bind(null, app),
+
+        updateApp.bind(null, app, { installationProgress: 'Uploading backup' }),
         cloudron.backupApp.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: 'Verify manifest' }),

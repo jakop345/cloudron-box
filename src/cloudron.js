@@ -21,8 +21,7 @@ exports = module.exports = {
     getIp: getIp
 };
 
-var addons = require('./addons.js'),
-    apps = require('./apps.js'),
+var apps = require('./apps.js'),
     assert = require('assert'),
     async = require('async'),
     config = require('../config.js'),
@@ -200,32 +199,24 @@ function restoreApp(app, callback) {
         execFile(SUDO, [ RESTORE_APP_CMD,  app.id, result.url, result.backupKey ], { }, function (error, stdout, stderr) {
             if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, 'Error backing up : ' + stderr));
 
-            addons.restoreAddons(app, function (error) {
-                if (error) return callback(error);
-
-                callback(null);
-            });
+            callback(null);
         });
     });
 }
 
 function backupApp(app, callback) {
-    addons.backupAddons(app, function (error) {
+    getBackupUrl(app.id, null, function (error, result) {
         if (error) return callback(error);
 
-        getBackupUrl(app.id, null, function (error, result) {
-            if (error) return callback(error);
+        debug('backupApp: %s (%s) app url:%s id:%s', app.id, app.manifest.title, result.url, result.id);
 
-            debug('backupApp: %s (%s) app url:%s id:%s', app.id, app.manifest.title, result.url, result.id);
+        execFile(SUDO, [ BACKUP_APP_CMD,  app.id, result.url, result.backupKey ], { }, function (error, stdout, stderr) {
+            if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, 'Error backing up : ' + stderr));
 
-            execFile(SUDO, [ BACKUP_APP_CMD,  app.id, result.url, result.backupKey ], { }, function (error, stdout, stderr) {
-                if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, 'Error backing up : ' + stderr));
+            debug('backupApp: %s (%s) successful', app.id, app.manifest.title);
 
-                debug('backupApp: %s (%s) successful', app.id, app.manifest.title);
-
-                apps.setLastBackupId(app.id, result.id, callback.bind(null, null, result.id));
-            });
-        }); 
+            apps.setLastBackupId(app.id, result.id, callback.bind(null, null, result.id));
+        });
     });
 }
 
