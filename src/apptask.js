@@ -563,7 +563,7 @@ function waitForDnsPropagation(app, callback) {
     }
 
     function retry(error) {
-        console.error(error);
+        console.log(error);
         setTimeout(waitForDnsPropagation.bind(null, app, callback), 5000);
     }
 
