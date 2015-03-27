@@ -22,7 +22,26 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
     function defaultErrorHandler(callback) {
         return function (data, status) {
             if (status === 401) return client.logout();
-            if (status >= 500) return client.error(data);
+            if (status === 503) {
+                // this could indicate a update/upgrade/restore/migration
+                client.progress(function (error, result) {
+                    if (error) {
+                        client.error(error);
+                        return callback(new ClientError(status, data));
+                    }
+
+                    if (result.update) window.location.href = '/update.html';
+                    else callback(new ClientError(status, data));
+                }, function (data, status) {
+                    client.error(data);
+                    return callback(new ClientError(status, data));
+                });
+                return;
+            }
+            if (status >= 500) {
+                client.error(data);
+                return callback(new ClientError(status, data));
+            }
 
             var obj = data;
             try {
@@ -232,11 +251,14 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
-    Client.prototype.progress = function (callback) {
+    Client.prototype.progress = function (callback, errorCallback) {
+        // this is used in the defaultErrorHandler itself, and avoids a loop
+        if (typeof errorCallback !== 'function') errorCallback = defaultErrorHandler(callback);
+
         $http.get('/api/v1/cloudron/progress').success(function(data, status) {
             if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));
             callback(null, data);
-        }).error(defaultErrorHandler(callback));
+        }).error(errorCallback);
     };
 
     Client.prototype.version = function (callback) {
