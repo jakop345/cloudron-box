@@ -17,9 +17,9 @@
             <div class="modal-body">
                 <div>
                     <div class="collapse" id="collapseMediaLinksCarousel" data-toggle="false">
-                        <slick init-onload="true" autoplay="true" arrows="false" autoplay-speed="2000" data="appInstall.mediaLinks" ng-show="appInstall.mediaLinks.length !== 0">
-                            <div ng-repeat="mediaLink in appInstall.mediaLinks" class="slick-item" style="background-image: url('{{mediaLink}}');">
-                            </div>
+                        <div ng-repeat="mediaLink in appInstall.mediaLinks" class="slick-item" style="background-image: url('{{mediaLink}}');" ng-show="appInstall.mediaLinks.length == 1"></div>
+                        <slick init-onload="true" current-index="0" autoplay="true" arrows="false" autoplay-speed="2000" data="appInstall.mediaLinks" ng-show="appInstall.mediaLinks.length > 1">
+                            <div ng-repeat="mediaLink in appInstall.mediaLinks" class="slick-item" style="background-image: url('{{mediaLink}}');"></div>
                         </slick>
                     </div>
                     <h3>{{appInstall.app.manifest.tagline}}</h3>

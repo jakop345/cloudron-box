@@ -61,6 +61,8 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
             $scope.appInstall.portBindings[env] = $scope.appInstall.app.manifest.tcpPorts[env].defaultValue || 0;
             $scope.appInstall.portBindingsEnabled[env] = true;
         }
+
+
     };
 
     $scope.doInstall = function () {
