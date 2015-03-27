@@ -802,10 +802,7 @@ function update(app, callback) {
         updateApp.bind(null, app, { installationProgress: 'Deleting container' }),
         deleteContainer.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Backing up addons' }),
-        addons.backupAddons.bind(null, app),
-
-        updateApp.bind(null, app, { installationProgress: 'Uploading backup' }),
+        updateApp.bind(null, app, { installationProgress: 'Backup and uploading app data' }),
         cloudron.backupApp.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: 'Verify manifest' }),

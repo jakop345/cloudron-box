@@ -43,10 +43,6 @@ set -eu
 mkdir -p "${DATA_DIR}/box/appicons"
 mkdir -p "${DATA_DIR}/mail"
 
-# addon will repopulate addons
-rm -rf "${DATA_DIR}/mysql
-rm -rf "${DATA_DIR}/postgresql
-
 mkdir -p "${CONFIG_DIR}/addons"
 mkdir -p "${CONFIG_DIR}/nginx/applications"
 mkdir -p "${CONFIG_DIR}/nginx/cert"
@@ -162,6 +158,7 @@ readonly MYSQL_ROOT_PASSWORD='${mysql_root_password}'
 readonly MYSQL_ROOT_HOST='${docker0_ip}'
 EOF
 docker pull girish/mysql:0.4 || true # this line for dev convenience since it's already part of base image
+rm -rf "${DATA_DIR}/mysql"
 mysql_container_id=$(docker run --restart=always -d --name="mysql" \
     -h "${arg_fqdn}" \
     -v "${DATA_DIR}/mysql:/var/lib/mysql" \
@@ -175,6 +172,7 @@ cat > "${CONFIG_DIR}/addons/postgresql_vars.sh" <<EOF
 readonly POSTGRESQL_ROOT_PASSWORD='${postgresql_root_password}'
 EOF
 docker pull girish/postgresql:0.4 || true # this line for dev convenience since it's already part of base image
+rm -rf "${DATA_DIR}/postgresql"
 postgresql_container_id=$(docker run --restart=always -d --name="postgresql" \
     -h "${arg_fqdn}" \
     -v "${DATA_DIR}/postgresql:/var/lib/postgresql" \
