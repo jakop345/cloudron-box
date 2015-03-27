@@ -13,10 +13,12 @@ var appdb = require('./appdb.js'),
     fs = require('fs'),
     generatePassword = require('password-generator'),
     MemoryStream = require('memorystream'),
+    once = require('once'),
     os = require('os'),
     path = require('path'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
+    spawn = child_process.spawn,
     util = require('util'),
     uuid = require('node-uuid'),
     hat = require('hat'),
@@ -337,32 +339,24 @@ function backupMySql(app, callback) {
 }
 
 function restoreMySql(app, callback) {
-    var container = docker.getContainer('mysql');
-    var cmd = [ '/addons/mysql/service.sh', 'restore', config.get('addons.mysql.rootPassword'), app.id ];
+    callback = once(callback); // ChildProcess exit may or may not be called after error
 
     debug('restoreMySql: %s (%s)', app.id, app.manifest.title);
 
     var input = fs.createReadStream(path.join(paths.DATA_DIR, app.id, 'mysqldump'));
     input.on('error', callback);
-    input.on('finish', callback);
 
-    container.exec({ Cmd: cmd, AttachStdin: true, Tty: false, AttachStdout: true, AttachStderr: true }, function (error, execContainer) {
-        if (error) return callback(error);
-
-        var startOptions = {
-            Detach: false,
-            Tty: false,
-            stdin: true // this is a dockerode option that enabled openStdin in the modem
-        };
-
-        execContainer.start(startOptions, function (error, stream) {
-            if (error) return callback(error);
-
-            execContainer.modem.demuxStream(stream, process.stdout, process.stderr);
-            stream.on('error', callback);
-            input.pipe(stream);
-        });
+    // cannot get this to work through docker.exec
+    var cp = spawn('/usr/bin/docker', [ 'exec', '-i', 'mysql', '/addons/mysql/service.sh', 'restore', config.get('addons.mysql.rootPassword'), app.id ]);
+    cp.on('error', callback);
+    cp.on('exit', function (code, signal) {
+        debug('restoreMySql: done %s %s', code, signal);
+        if (!callback.called) callback();
     });
+
+    cp.stdout.pipe(process.stdout);
+    cp.stderr.pipe(process.stderr);
+    input.pipe(cp.stdin);
 }
 
 function setupPostgreSql(app, callback) {
@@ -444,32 +438,24 @@ function backupPostgreSql(app, callback) {
 }
 
 function restorePostgreSql(app, callback) {
-    var container = docker.getContainer('mysql');
-    var cmd = [ '/addons/postgresql/service.sh', 'restore', config.get('addons.postgresql.rootPassword'), app.id ];
+    callback = once(callback); // ChildProcess exit may or may not be called after error
 
     debug('restorePostgreSql: %s (%s)', app.id, app.manifest.title);
 
     var input = fs.createReadStream(path.join(paths.DATA_DIR, app.id, 'postgresqldump'));
     input.on('error', callback);
-    input.on('finish', callback);
 
-    container.exec({ Cmd: cmd, AttachStdin: true, Tty: true, AttachStdout: true, AttachStderr: true }, function (error, execContainer) {
-        if (error) return callback(error);
-
-        var startOptions = {
-            Detach: false,
-            Tty: true,
-            stdin: true // this is a dockerode option that enabled openStdin in the modem
-        };
-
-        execContainer.start(startOptions, function (error, stream) {
-            if (error) return callback(error);
-
-            execContainer.modem.demuxStream(stream, process.stdout, process.stderr);
-            stream.on('error', callback);
-            input.pipe(stream);
-        });
+    // cannot get this to work through docker.exec
+    var cp = spawn('/usr/bin/docker', [ 'exec', '-i', 'postgresql', '/addons/postgresql/service.sh', 'restore', config.get('addons.postgresql.rootPassword'), app.id ]);
+    cp.on('error', callback);
+    cp.on('exit', function (code, signal) {
+        debug('restoreMySql: done %s %s', code, signal);
+        if (!callback.called) callback();
     });
+
+    cp.stdout.pipe(process.stdout);
+    cp.stderr.pipe(process.stderr);
+    input.pipe(cp.stdin);
 }
 
 function forwardRedisPort(appId, callback) {

@@ -1236,9 +1236,9 @@
       "resolved": "https://registry.npmjs.org/json/-/json-9.0.3.tgz"
     },
     "manifestformat": {
-      "version": "1.0.2",
-      "from": "https://gitlab-yellowtent.cloudron.me/yellowtent/manifestformat/repository/archive.tar.gz?ref=v1.0.2",
-      "resolved": "https://gitlab-yellowtent.cloudron.me/yellowtent/manifestformat/repository/archive.tar.gz?ref=v1.0.2",
+      "version": "1.0.1",
+      "from": "https://gitlab-yellowtent.cloudron.me/yellowtent/manifestformat/repository/archive.tar.gz?ref=v1.0.1",
+      "resolved": "https://gitlab-yellowtent.cloudron.me/yellowtent/manifestformat/repository/archive.tar.gz?ref=v1.0.1",
       "dependencies": {
         "java-packagename-regex": {
           "version": "1.0.0",
@@ -1664,7 +1664,7 @@
       "dependencies": {
         "wrappy": {
           "version": "1.0.1",
-          "from": "http://registry.npmjs.org/wrappy/-/wrappy-1.0.1.tgz",
+          "from": "wrappy@>=1.0.0 <2.0.0",
           "resolved": "http://registry.npmjs.org/wrappy/-/wrappy-1.0.1.tgz"
         }
       }
