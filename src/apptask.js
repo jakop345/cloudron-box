@@ -695,12 +695,9 @@ function restore(app, callback) {
         updateApp.bind(null, app, { installationProgress: 'Downloading image' }),
         downloadImage.bind(null, app),
 
+        // restore addons
         updateApp.bind(null, app, { installationProgress: 'Restoring addons' }),
         addons.restoreAddons.bind(null, app),
-
-        // setup addons
-        updateApp.bind(null, app, { installationProgress: 'Setting up addons' }),
-        addons.updateAddons.bind(null, app, oldManifest),
 
         // create container (old containers are deleted by update script)
         updateApp.bind(null, app, { installationProgress: 'Creating container' }),
