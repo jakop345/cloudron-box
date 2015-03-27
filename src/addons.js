@@ -317,25 +317,22 @@ function teardownMySql(app, callback) {
 }
 
 function backupMySql(app, callback) {
-    var container = docker.getContainer('mysql');
-    var cmd = [ '/addons/mysql/service.sh', 'backup', config.get('addons.mysql.rootPassword'), app.id ];
+    debug('Backin up mysql for %s', app.id);
 
-    debug('Backing up mysql for %s', app.id);
+    callback = once(callback); // ChildProcess exit may or may not be called after error
 
     var out = fs.createWriteStream(path.join(paths.DATA_DIR, app.id, 'mysqldump'));
     out.on('error', callback);
 
-    container.exec({ Cmd: cmd, AttachStdout: true, AttachStderr: true }, function (error, execContainer) {
-        if (error) return callback(error);
-
-        execContainer.start(function (error, stream) {
-            if (error) return callback(error);
-
-            execContainer.modem.demuxStream(stream, out, process.stderr);
-            stream.on('error', callback);
-            stream.on('end', callback);
-        });
+    var cp = spawn('/usr/bin/docker', [ 'exec', '/addons/mysql/service.sh', 'backup', config.get('addons.mysql.rootPassword'), app.id ]);
+    cp.on('error', callback);
+    cp.on('exit', function (code, signal) {
+        debug('backupMySql: done %s %s', code, signal);
+        if (!callback.called) callback();
     });
+
+    cp.stdout.pipe(output);
+    cp.stderr.pipe(process.stderr);
 }
 
 function restoreMySql(app, callback) {
@@ -416,25 +413,22 @@ function teardownPostgreSql(app, callback) {
 }
 
 function backupPostgreSql(app, callback) {
-    var container = docker.getContainer('postgresql');
-    var cmd = [ '/addons/postgresql/service.sh', 'backup', config.get('addons.postgresql.rootPassword'), app.id ];
-
     debug('Backin up postgresql for %s', app.id);
+
+    callback = once(callback); // ChildProcess exit may or may not be called after error
 
     var out = fs.createWriteStream(path.join(paths.DATA_DIR, app.id, 'postgresqldump'));
     out.on('error', callback);
 
-    container.exec({ Cmd: cmd, AttachStdout: true, AttachStderr: true }, function (error, execContainer) {
-        if (error) return callback(error);
-
-        execContainer.start(function (error, stream) {
-            if (error) return callback(error);
-
-            execContainer.modem.demuxStream(stream, out, process.stderr);
-            stream.on('error', callback);
-            stream.on('end', callback);
-        });
+    var cp = spawn('/usr/bin/docker', [ 'exec', '/addons/postgresql/service.sh', 'backup', config.get('addons.postgresql.rootPassword'), app.id ]);
+    cp.on('error', callback);
+    cp.on('exit', function (code, signal) {
+        debug('backupPostgreSql: done %s %s', code, signal);
+        if (!callback.called) callback();
     });
+
+    cp.stdout.pipe(output);
+    cp.stderr.pipe(process.stderr);
 }
 
 function restorePostgreSql(app, callback) {
