@@ -231,7 +231,9 @@ function backupBox(appBackupIds, callback) {
         execFile(SUDO, [ BACKUP_BOX_CMD,  result.url, result.backupKey ], { }, function (error) {
             if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
-            return callback(null);
+            debug('backup: successful');
+
+            callback(null);
         });
     });
 }
