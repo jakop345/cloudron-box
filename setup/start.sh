@@ -42,6 +42,11 @@ set -eu
 # keep these in sync with paths.js
 mkdir -p "${DATA_DIR}/box/appicons"
 mkdir -p "${DATA_DIR}/mail"
+
+# addon will repopulate addons
+rm -rf "${DATA_DIR}/mysql
+rm -rf "${DATA_DIR}/postgresql
+
 mkdir -p "${CONFIG_DIR}/addons"
 mkdir -p "${CONFIG_DIR}/nginx/applications"
 mkdir -p "${CONFIG_DIR}/nginx/cert"
