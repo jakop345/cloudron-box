@@ -37,8 +37,6 @@ set_progress() {
 }
 
 set_progress "1" "Ensuring directories"
-sudo -u "${USER}" -H bash <<EOF
-set -eu
 # keep these in sync with paths.js
 mkdir -p "${DATA_DIR}/box/appicons"
 mkdir -p "${DATA_DIR}/mail"
@@ -47,7 +45,6 @@ mkdir -p "${CONFIG_DIR}/addons"
 mkdir -p "${CONFIG_DIR}/nginx/applications"
 mkdir -p "${CONFIG_DIR}/nginx/cert"
 mkdir -p "${CONFIG_DIR}/collectd/collectd.conf.d"
-EOF
 
 set_progress "15" "Downloading restore data"
 if [[ -n "${arg_restore_url}" ]]; then
