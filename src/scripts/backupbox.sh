@@ -34,7 +34,7 @@ btrfs subvolume snapshot -r "${BOX_DATA_DIR}" "${box_snapshot_dir}"
 for try in `seq 1 5`; do
     echo "Uploading backup to ${backup_url} (try ${try})"
     error_log=$(mktemp)
-    if tar -cvzf - -C "${box_snpahost_dir}" . \
+    if tar -cvzf - -C "${box_snapshot_dir}" . \
            | openssl aes-256-cbc -e -pass "pass:${backup_key}" \
            | curl --fail -H "Content-Type:" -X PUT --data-binary @- "${backup_url}" 2>"${error_log}"; then
         break
