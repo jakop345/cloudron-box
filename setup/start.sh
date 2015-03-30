@@ -59,28 +59,28 @@ fi
 
 set_progress "20" "Configuring Sudoers file"
 cat > /etc/sudoers.d/yellowtent <<EOF
-Defaults!${BOX_SRC_DIR}/src/scripts/createappdir.sh env_keep=HOME
+Defaults!${BOX_SRC_DIR}/src/scripts/createappdir.sh env_keep="HOME NODE_ENV"
 ${USER} ALL=(root) NOPASSWD: ${BOX_SRC_DIR}/src/scripts/createappdir.sh
 
-Defaults!${BOX_SRC_DIR}/src/scripts/rmappdir.sh env_keep=HOME
+Defaults!${BOX_SRC_DIR}/src/scripts/rmappdir.sh env_keep="HOME NODE_ENV"
 ${USER} ALL=(root) NOPASSWD: ${BOX_SRC_DIR}/src/scripts/rmappdir.sh
 
-Defaults!${BOX_SRC_DIR}/src/scripts/reloadnginx.sh env_keep=HOME
+Defaults!${BOX_SRC_DIR}/src/scripts/reloadnginx.sh env_keep="HOME NODE_ENV"
 ${USER} ALL=(root) NOPASSWD: ${BOX_SRC_DIR}/src/scripts/reloadnginx.sh
 
-Defaults!${BOX_SRC_DIR}/src/scripts/backupbox.sh env_keep=HOME
+Defaults!${BOX_SRC_DIR}/src/scripts/backupbox.sh env_keep="HOME NODE_ENV"
 ${USER} ALL=(root) NOPASSWD: ${BOX_SRC_DIR}/src/scripts/backupbox.sh
 
-Defaults!${BOX_SRC_DIR}/src/scripts/backupapp.sh env_keep=HOME
+Defaults!${BOX_SRC_DIR}/src/scripts/backupapp.sh env_keep="HOME NODE_ENV"
 ${USER} ALL=(root) NOPASSWD: ${BOX_SRC_DIR}/src/scripts/backupapp.sh
 
-Defaults!${BOX_SRC_DIR}/src/scripts/restoreapp.sh env_keep=HOME
+Defaults!${BOX_SRC_DIR}/src/scripts/restoreapp.sh env_keep="HOME NODE_ENV"
 ${USER} ALL=(root) NOPASSWD: ${BOX_SRC_DIR}/src/scripts/restoreapp.sh
 
-Defaults!${BOX_SRC_DIR}/src/scripts/reboot.sh env_keep=HOME
+Defaults!${BOX_SRC_DIR}/src/scripts/reboot.sh env_keep="HOME NODE_ENV"
 ${USER} ALL=(root) NOPASSWD: ${BOX_SRC_DIR}/src/scripts/reboot.sh
 
-Defaults!${BOX_SRC_DIR}/src/scripts/reloadcollectd.sh env_keep=HOME
+Defaults!${BOX_SRC_DIR}/src/scripts/reloadcollectd.sh env_keep="HOME NODE_ENV"
 ${USER} ALL=(root) NOPASSWD: ${BOX_SRC_DIR}/src/scripts/reloadcollectd.sh
 
 EOF
