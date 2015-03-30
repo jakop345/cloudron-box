@@ -38,6 +38,7 @@ set_progress() {
 
 set_progress "1" "Ensuring directories"
 # keep these in sync with paths.js
+[[ ! -d "${DATA_DIR}/box" ]] && btrfs subvolume create "${DATA_DIR}/box"
 mkdir -p "${DATA_DIR}/box/appicons"
 mkdir -p "${DATA_DIR}/mail"
 
