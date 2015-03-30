@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# This script exists because docker mounted data volumes can have files with arbitrary
-# permissions. The box code runs as normal user and thus cannot delete those files. This
-# hack can be removed once docker supports user namespaces
-
 set -eu -o pipefail
 
 if [[ ${EUID} -ne 0 ]]; then
@@ -24,5 +20,11 @@ fi
 readonly DATA="${HOME}/data"
 readonly DATA_TEST="${HOME}/.cloudron_test/data"
 
-rm -rf "${DATA}/$1"
-rm -rf "${DATA_TEST}/$1"
+if [[ -d "${DATA}" ]]; then
+    rm -rf ${DATA}/$1/* ${DATA}/$1/.*
+    btrfs subvolume delete "${DATA}/$1"
+fi
+
+if [[ -d "${DATA_TEST}" ]]; then
+    rm -rf "${DATA_TEST}/$1"
+fi
