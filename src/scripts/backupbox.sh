@@ -22,18 +22,19 @@ fi
 backup_url="$1"
 backup_key="$2"
 now=$(date "+%Y-%m-%dT%H:%M:%S")
-DATA_DIR="${HOME}/data"
+BOX_DATA_DIR="${HOME}/data/box"
+box_snapshot_dir="${HOME}/data/box-${now}"
 
 echo "Creating MySQL dump"
-mysqldump -u root -ppassword --single-transaction --routines --triggers box > "${DATA_DIR}/box/box.mysqldump"
+mysqldump -u root -ppassword --single-transaction --routines --triggers box > "${BOX_DATA_DIR}/box.mysqldump"
 
 echo "Snapshoting backup as backup-${now}"
-btrfs subvolume snapshot -r "${DATA_DIR}" "${HOME}/backup-${now}"
+btrfs subvolume snapshot -r "${BOX_DATA_DIR}" "${box_snapshot_dir}"
 
 for try in `seq 1 5`; do
     echo "Uploading backup to ${backup_url} (try ${try})"
     error_log=$(mktemp)
-    if tar -cvzf - -C "${HOME}/backup-${now}/box" . \
+    if tar -cvzf - -C "${box_snpahost_dir}" . \
            | openssl aes-256-cbc -e -pass "pass:${backup_key}" \
            | curl --fail -H "Content-Type:" -X PUT --data-binary @- "${backup_url}" 2>"${error_log}"; then
         break
@@ -42,7 +43,7 @@ for try in `seq 1 5`; do
 done
 
 echo "Deleting backup snapshot"
-btrfs subvolume delete "${HOME}/backup-${now}"
+btrfs subvolume delete "${box_snapshot_dir}"
 
 if [[ ${try} -eq 5 ]]; then
     echo "Backup failed"
