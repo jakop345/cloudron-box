@@ -17,17 +17,14 @@ if [[ "$1" == "--check" ]]; then
     exit 0
 fi
 
-readonly DATA="${HOME}/data"
-readonly DATA_TEST="${HOME}/.cloudron_test/data"
-
-if [[ -d "${DATA}" ]]; then
-    btrfs subvolume create "${DATA}/$1"
-    mkdir -p "${DATA}/$1/data"
-    chown -R yellowtent:yellowtent "${DATA}/$1"
-fi
-
-if [[ -d "${DATA_TEST}" ]]; then
-    mkdir -p "${DATA_TEST}/$1/data"
-    chown -R ${SUDO_USER}:${SUDO_USER} "${DATA_TEST}/$1"
+if [[ "${NODE_ENV}" == "cloudron" ]]; then
+    readonly app_data_dir="${HOME}/data/$1"
+    btrfs subvolume create "${app_data_dir}"
+    mkdir -p "${app_data_dir}/data"
+    chown -R yellowtent:yellowtent "${app_data_dir}"
+else
+    readonly app_data_dir="${HOME}/.cloudron_test/data/$1"
+    mkdir -p "${app_data_dir}/data"
+    chown -R ${SUDO_USER}:${SUDO_USER} "${app_data_dir}"
 fi
 

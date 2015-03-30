@@ -12,4 +12,7 @@ if [[ $# == 1 && "$1" == "--check" ]]; then
     exit 0
 fi
 
-shutdown -r now
+if [[ "${NODE_ENV}" == "cloudron" ]]; then
+    shutdown -r now
+fi
+

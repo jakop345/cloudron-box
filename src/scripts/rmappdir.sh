@@ -17,14 +17,12 @@ if [[ "$1" == "--check" ]]; then
     exit 0
 fi
 
-readonly DATA="${HOME}/data"
-readonly DATA_TEST="${HOME}/.cloudron_test/data"
-
-if [[ -d "${DATA}" ]]; then
-    rm -rf ${DATA}/$1/* ${DATA}/$1/.*
-    btrfs subvolume delete "${DATA}/$1"
+if [[ "${NODE_ENV}" == "cloudron" ]]; then
+    readonly app_data_dir="${HOME}/data/$1"
+    rm -rf ${app_data_dir}/* ${app_data_dir}/.*
+    btrfs subvolume delete "${app_data_dir}"
+else
+    readonly app_data_dir="${HOME}/.cloudron_test/data/$1"
+    rm -rf "${app_data_dir}"
 fi
 
-if [[ -d "${DATA_TEST}" ]]; then
-    rm -rf "${DATA_TEST}/$1"
-fi
