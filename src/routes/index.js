@@ -7,6 +7,7 @@ exports = module.exports = {
     graphs: require('./graphs.js'),
     oauth2: require('./oauth2.js'),
     settings: require('./settings.js'),
+    clients: require('./clients.js'),
     user: require('./user.js')
 };
 
