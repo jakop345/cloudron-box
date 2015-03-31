@@ -38,9 +38,10 @@ set_progress() {
 
 set_progress "1" "Ensuring directories"
 # keep these in sync with paths.js
+find "${DATA_DIR}/box" -mindepth 1 -delete || true
 [[ ! -d "${DATA_DIR}/box" ]] && btrfs subvolume create "${DATA_DIR}/box"
 mkdir -p "${DATA_DIR}/box/appicons"
-mkdir -p "${DATA_DIR}/mail"
+mkdir -p "${DATA_DIR}/box/mail"
 
 mkdir -p "${CONFIG_DIR}/addons"
 mkdir -p "${CONFIG_DIR}/nginx/applications"
@@ -144,7 +145,7 @@ mail_container_id=$(docker run --restart=always -d --name="mail" \
     -p 127.0.0.1:25:25 \
     -h "${arg_fqdn}" \
     -e "DOMAIN_NAME=${arg_fqdn}" \
-    -v "${DATA_DIR}/mail:/app/data" \
+    -v "${DATA_DIR}/box/mail:/app/data" \
     girish/mail:0.3)
 echo "Mail container id: ${mail_container_id}"
 

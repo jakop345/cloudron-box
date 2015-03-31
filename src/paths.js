@@ -13,13 +13,11 @@ exports = module.exports = {
 
     ADDON_CONFIG_DIR: path.join(config.baseDir(), 'configs/addons'),
 
-    MAIL_DATA_DIR: path.join(config.baseDir(), 'data/mail'),
-
     COLLECTD_APPCONFIG_DIR: path.join(config.baseDir(), 'configs/collectd/collectd.conf.d'),
 
     DATA_DIR: path.join(config.baseDir(), 'data'),
-
     BOX_DATA_DIR: path.join(config.baseDir(), 'data/box'),
-    APPICONS_DIR: path.join(config.baseDir(), 'data/box/appicons')
+    APPICONS_DIR: path.join(config.baseDir(), 'data/box/appicons'),
+    MAIL_DATA_DIR: path.join(config.baseDir(), 'data/box/mail')
 };
 
