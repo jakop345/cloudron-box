@@ -13,7 +13,8 @@ exports = module.exports = {
     add: add,
     get: get,
     update: update,
-    del: del
+    del: del,
+    getAllByUserId: getAllByUserId
 };
 
 function add(req, res, next) {
@@ -64,5 +65,12 @@ function del(req, res, next) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(404, 'No such client'));
         if (error) return next(new HttpError(500, error));
         next(new HttpSuccess(204, result));
+    });
+}
+
+function getAllByUserId(req, res, next) {
+    clients.getAllWithDetailsByUserId(req.user.id, function (error, result) {
+        if (error && error.reason !== DatabaseError.NOT_FOUND) return next(new HttpError(500, error));
+        next(new HttpSuccess(200, { clients: result }));
     });
 }

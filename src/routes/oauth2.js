@@ -422,20 +422,6 @@ function scope(requestedScope) {
     ];
 }
 
-function getClients(req, res, next) {
-    debug('getClients');
-
-    clientdb.getAllWithDetails(tokendb.PREFIX_USER + req.user.id, function (error, result) {
-        if (error && error.reason !== DatabaseError.NOT_FOUND) return next(new HttpError(500, error));
-
-        result = result || [];
-
-        debug('getClients: success.', result);
-
-        next(new HttpSuccess(200, { clients: result }));
-    });
-}
-
 function getClientTokens(req, res, next) {
     assert(typeof req.params.clientId === 'string');
     assert(typeof req.user === 'object');
@@ -517,7 +503,6 @@ exports = module.exports = {
     token: token,
     library: library,
     scope: scope,
-    getClients: getClients,
     getClientTokens: getClientTokens,
     delClientTokens: delClientTokens,
     csrf: csrf

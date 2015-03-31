@@ -3,10 +3,6 @@
 'use strict';
 
 var assert = require('assert'),
-    appdb = require('./appdb.js'),
-    config = require('../config.js'),
-    constants = require('../constants.js'),
-    async = require('async'),
     database = require('./database.js'),
     DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:clientdb');
@@ -14,7 +10,7 @@ var assert = require('assert'),
 exports = module.exports = {
     get: get,
     getAll: getAll,
-    getAllWithDetails: getAllWithDetails,
+    getAllWithTokenCountByIdentifier: getAllWithTokenCountByIdentifier,
     add: add,
     del: del,
     update: update,
@@ -49,62 +45,14 @@ function getAll(callback) {
     });
 }
 
-function getAllWithDetails(identifier, callback) {
+function getAllWithTokenCountByIdentifier(identifier, callback) {
     assert(typeof identifier === 'string');
     assert(typeof callback === 'function');
 
     database.query('SELECT ' + CLIENTS_FIELDS_PREFIXED + ',COUNT(tokens.clientId) AS tokenCount FROM clients LEFT OUTER JOIN tokens ON clients.id=tokens.clientId WHERE tokens.identifier=? GROUP BY clients.id', [ identifier ], function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        callback(null, results);
 
-        // We have several types of records here
-        //   1) webadmin has an app id of 'webadmin'
-        //   2) oauth proxy records are always the app id prefixed with 'proxy-'
-        //   3) addon oauth records for apps prefixed with 'addon-'
-        //   4) external app records prefixed with 'external-'
-        //   5) normal apps on the cloudron without a prefix
-
-        var tmp = [];
-        async.each(results, function (record, callback) {
-            if (record.appId === constants.ADMIN_CLIENT_ID) {
-                record.name = constants.ADMIN_NAME;
-                record.location = constants.ADMIN_LOCATION;
-                record.type = 'webadmin';
-
-                tmp.push(record);
-
-                return callback(null);
-            }
-
-            var appId = record.appId;
-            var type = 'app';
-
-            // Handle our different types of oauth clients
-            if (record.appId.indexOf('addon-') === 0) {
-                appId = record.appId.slice('addon-'.length);
-                type = 'addon';
-            } else if (record.appId.indexOf('proxy-') === 0) {
-                appId = record.appId.slice('proxy-'.length);
-                type = 'proxy';
-            }
-
-            appdb.get(appId, function (error, result) {
-                if (error) {
-                    console.error('Failed to get app details for oauth client', result, error);
-                    return callback(null);  // ignore error so we continue listing clients
-                }
-
-                record.name = result.manifest.title + (record.appId.indexOf('proxy-') === 0 ? 'OAuth Proxy' : '');
-                record.location = result.location;
-                record.type = type;
-
-                tmp.push(record);
-
-                callback(null);
-            });
-        }, function (error) {
-            if (error) return callback(error);
-            callback(null, tmp);
-        });
     });
 }
 
