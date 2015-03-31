@@ -206,6 +206,10 @@ function restoreApp(app, callback) {
 }
 
 function backupApp(app, callback) {
+    if (!safe.fs.writeFileSync(path.join(paths.DATA_DIR, app.id + '/config.json'), JSON.stringify(app))) {
+        return callback(safe.error);
+    }
+
     addons.backupAddons(app, function (error) {
         if (error) return callback(error);
 
