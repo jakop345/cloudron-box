@@ -32,16 +32,17 @@ function add(req, res, next) {
 }
 
 function get(req, res, next) {
-    assert(typeof req.param.clientId === 'string');
+    assert(typeof req.params.clientId === 'string');
 
-    clients.get(req.param.clientId, function (error, result) {
+    clients.get(req.params.clientId, function (error, result) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(404, 'No such client'));
         if (error) return next(new HttpError(500, error));
         next(new HttpSuccess(200, result));
     });
 }
 
 function update(req, res, next) {
-    assert(typeof req.param.clientId === 'string');
+    assert(typeof req.params.clientId === 'string');
 
     var data = req.body;
 
@@ -49,7 +50,7 @@ function update(req, res, next) {
     if (typeof data.appId !== 'string' || !data.appId) return next(new HttpError(400, 'appId is required'));
     if (typeof data.redirectURI !== 'string' || !data.redirectURI) return next(new HttpError(400, 'redirectURI is required'));
 
-    clients.update(req.param.clientId, data.appId, data.redirectURI, data.scope, function (error, result) {
+    clients.update(req.params.clientId, data.appId, data.redirectURI, data.scope, function (error, result) {
         if (error) return next(new HttpError(500, error));
         next(new HttpSuccess(200, result));
     });

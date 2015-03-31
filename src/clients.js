@@ -22,9 +22,18 @@ function add(appIdentifier, redirectURI, scope, callback) {
     var id = 'cid-' + uuid.v4();
     var clientSecret = hat();
 
-    clientdb.add(id, appIdentifier, clientSecret, redirectURI, scope, function (error, result) {
+    clientdb.add(id, appIdentifier, clientSecret, redirectURI, scope, function (error) {
         if (error) return callback(error);
-        callback(null, result);
+
+        var client = {
+            id: id,
+            appId: appIdentifier,
+            clientSecret: clientSecret,
+            redirectURI: redirectURI,
+            scope: scope
+        };
+
+        callback(null, client);
     });
 }
 
@@ -33,7 +42,7 @@ function get(id, callback) {
     assert(typeof callback === 'function');
 
     clientdb.get(id, function (error, result) {
-        if (error && error.reason !== DatabaseError.NOT_FOUND) return callback(error);
+        if (error) return callback(error);
         callback(null, result);
     });
 }
