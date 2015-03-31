@@ -10,7 +10,8 @@ var assert = require('assert'),
 exports = module.exports = {
     add: add,
     get: get,
-    update: update
+    update: update,
+    del: del
 };
 
 function add(appIdentifier, redirectURI, scope, callback) {
@@ -61,5 +62,15 @@ function update(id, appIdentifier, redirectURI, callback) {
             if (error) return callback(error);
             callback(null, result);
         });
+    });
+}
+
+function del(id, callback) {
+    assert(typeof id === 'string');
+    assert(typeof callback === 'function');
+
+    clientdb.del(id, function (error, result) {
+        if (error) return callback(error);
+        callback(null, result);
     });
 }

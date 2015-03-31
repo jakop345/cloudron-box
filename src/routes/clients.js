@@ -12,7 +12,8 @@ var assert = require('assert'),
 exports = module.exports = {
     add: add,
     get: get,
-    update: update
+    update: update,
+    del: del
 };
 
 function add(req, res, next) {
@@ -53,5 +54,15 @@ function update(req, res, next) {
     clients.update(req.params.clientId, data.appId, data.redirectURI, function (error, result) {
         if (error) return next(new HttpError(500, error));
         next(new HttpSuccess(202, result));
+    });
+}
+
+function del(req, res, next) {
+    assert(typeof req.params.clientId === 'string');
+
+    clients.del(req.params.clientId, function (error, result) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(404, 'No such client'));
+        if (error) return next(new HttpError(500, error));
+        next(new HttpSuccess(204, result));
     });
 }
