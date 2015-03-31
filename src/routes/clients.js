@@ -4,6 +4,7 @@
 
 var assert = require('assert'),
     debug = require('debug')('box:routes/clients'),
+    validUrl = require('valid-url'),
     clients = require('../clients.js'),
     DatabaseError = require('../databaseerror.js'),
     HttpError = require('connect-lastmile').HttpError,
@@ -25,6 +26,7 @@ function add(req, res, next) {
     if (!data) return next(new HttpError(400, 'Cannot parse data field'));
     if (typeof data.appId !== 'string' || !data.appId) return next(new HttpError(400, 'appId is required'));
     if (typeof data.redirectURI !== 'string' || !data.redirectURI) return next(new HttpError(400, 'redirectURI is required'));
+    if (!validUrl.isWebUri(data.redirectURI)) return next(new HttpError(400, 'redirectURI must be a valid uri'));
 
     // prefix as this route only allows external apps for developers
     var appId = 'external-' + data.appId;
@@ -53,6 +55,7 @@ function update(req, res, next) {
     if (!data) return next(new HttpError(400, 'Cannot parse data field'));
     if (typeof data.appId !== 'string' || !data.appId) return next(new HttpError(400, 'appId is required'));
     if (typeof data.redirectURI !== 'string' || !data.redirectURI) return next(new HttpError(400, 'redirectURI is required'));
+    if (!validUrl.isWebUri(data.redirectURI)) return next(new HttpError(400, 'redirectURI must be a valid uri'));
 
     clients.update(req.params.clientId, data.appId, data.redirectURI, function (error, result) {
         if (error) return next(new HttpError(500, error));

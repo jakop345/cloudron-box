@@ -139,7 +139,7 @@ describe('OAuth Clients API', function () {
             });
         });
 
-        xit('fails with malformed redirectURI', function (done) {
+        it('fails with malformed redirectURI', function (done) {
             config.set('developerMode', true);
 
             superagent.post(SERVER_URL + '/api/v1/oauth/clients')
@@ -407,7 +407,7 @@ describe('OAuth Clients API', function () {
             });
         });
 
-        xit('fails with malformed redirectURI', function (done) {
+        it('fails with malformed redirectURI', function (done) {
             config.set('developerMode', true);
 
             superagent.put(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
