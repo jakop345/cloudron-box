@@ -1236,34 +1236,32 @@
       "resolved": "https://registry.npmjs.org/json/-/json-9.0.3.tgz"
     },
     "manifestformat": {
-      "version": "1.0.2",
-      "from": "https://gitlab-yellowtent.cloudron.me/yellowtent/manifestformat/repository/archive.tar.gz?ref=v1.0.2",
-      "resolved": "https://gitlab-yellowtent.cloudron.me/yellowtent/manifestformat/repository/archive.tar.gz?ref=v1.0.2",
+      "version": "1.0.3",
+      "from": "https://gitlab-yellowtent.cloudron.me/yellowtent/manifestformat/repository/archive.tar.gz?ref=v1.0.3",
+      "resolved": "https://gitlab-yellowtent.cloudron.me/yellowtent/manifestformat/repository/archive.tar.gz?ref=v1.0.3",
       "dependencies": {
         "java-packagename-regex": {
           "version": "1.0.0",
-          "from": "java-packagename-regex@*",
+          "from": "java-packagename-regex@>=1.0.0 <2.0.0",
           "resolved": "https://registry.npmjs.org/java-packagename-regex/-/java-packagename-regex-1.0.0.tgz"
         },
         "safetydance": {
           "version": "0.0.15",
-          "from": "safetydance@*",
-          "resolved": "http://registry.npmjs.org/safetydance/-/safetydance-0.0.15.tgz"
+          "from": "safetydance@0.0.15"
         },
         "semver": {
-          "version": "4.3.1",
-          "from": "semver@*",
-          "resolved": "http://registry.npmjs.org/semver/-/semver-4.3.1.tgz"
+          "version": "4.3.3",
+          "from": "semver@>=4.3.1 <5.0.0",
+          "resolved": "https://registry.npmjs.org/semver/-/semver-4.3.3.tgz"
         },
         "tv4": {
           "version": "1.1.9",
-          "from": "tv4@*",
-          "resolved": "http://registry.npmjs.org/tv4/-/tv4-1.1.9.tgz"
+          "from": "tv4@>=1.1.9 <2.0.0"
         },
         "validator": {
-          "version": "3.34.0",
-          "from": "validator@*",
-          "resolved": "http://registry.npmjs.org/validator/-/validator-3.34.0.tgz"
+          "version": "3.36.0",
+          "from": "validator@>=3.34.0 <4.0.0",
+          "resolved": "https://registry.npmjs.org/validator/-/validator-3.36.0.tgz"
         }
       }
     },
