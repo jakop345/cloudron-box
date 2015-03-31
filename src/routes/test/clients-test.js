@@ -9,9 +9,12 @@
 var async = require('async'),
     config = require('../../../config.js'),
     database = require('../../database.js'),
+    oauth2 = require('../oauth2.js'),
     expect = require('expect.js'),
+    uuid = require('node-uuid'),
     nock = require('nock'),
-    request = require('superagent'),
+    hat = require('hat'),
+    superagent = require('superagent'),
     server = require('../../server.js');
 
 var SERVER_URL = 'http://localhost:' + config.get('port');
@@ -38,7 +41,7 @@ describe('OAuth Clients API', function () {
                     var scope1 = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
                     var scope2 = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/setup/done?setupToken=somesetuptoken').reply(201, {});
 
-                    request.post(SERVER_URL + '/api/v1/cloudron/activate')
+                    superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
                            .query({ setupToken: 'somesetuptoken' })
                            .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
                            .end(function (error, result) {
@@ -62,7 +65,7 @@ describe('OAuth Clients API', function () {
         it('fails without token', function (done) {
             config.set('developerMode', true);
 
-            request.post(SERVER_URL + '/api/v1/oauth/clients')
+            superagent.post(SERVER_URL + '/api/v1/oauth/clients')
                    .send({ appId: 'someApp', redirectURI: 'http://foobar.com' })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -74,7 +77,7 @@ describe('OAuth Clients API', function () {
         it('fails if not in developerMode', function (done) {
             config.set('developerMode', false);
 
-            request.post(SERVER_URL + '/api/v1/oauth/clients')
+            superagent.post(SERVER_URL + '/api/v1/oauth/clients')
                    .query({ access_token: token })
                    .send({ appId: 'someApp', redirectURI: 'http://foobar.com' })
                    .end(function (error, result) {
@@ -87,7 +90,7 @@ describe('OAuth Clients API', function () {
         it('fails without appId', function (done) {
             config.set('developerMode', true);
 
-            request.post(SERVER_URL + '/api/v1/oauth/clients')
+            superagent.post(SERVER_URL + '/api/v1/oauth/clients')
                    .query({ access_token: token })
                    .send({ redirectURI: 'http://foobar.com' })
                    .end(function (error, result) {
@@ -100,7 +103,7 @@ describe('OAuth Clients API', function () {
         it('fails with empty appId', function (done) {
             config.set('developerMode', true);
 
-            request.post(SERVER_URL + '/api/v1/oauth/clients')
+            superagent.post(SERVER_URL + '/api/v1/oauth/clients')
                    .query({ access_token: token })
                    .send({ appId: '', redirectURI: 'http://foobar.com' })
                    .end(function (error, result) {
@@ -113,7 +116,7 @@ describe('OAuth Clients API', function () {
         it('fails without redirectURI', function (done) {
             config.set('developerMode', true);
 
-            request.post(SERVER_URL + '/api/v1/oauth/clients')
+            superagent.post(SERVER_URL + '/api/v1/oauth/clients')
                    .query({ access_token: token })
                    .send({ appId: 'someApp' })
                    .end(function (error, result) {
@@ -126,7 +129,7 @@ describe('OAuth Clients API', function () {
         it('fails with empty redirectURI', function (done) {
             config.set('developerMode', true);
 
-            request.post(SERVER_URL + '/api/v1/oauth/clients')
+            superagent.post(SERVER_URL + '/api/v1/oauth/clients')
                    .query({ access_token: token })
                    .send({ appId: 'someApp', redirectURI: '' })
                    .end(function (error, result) {
@@ -139,7 +142,7 @@ describe('OAuth Clients API', function () {
         xit('fails with malformed redirectURI', function (done) {
             config.set('developerMode', true);
 
-            request.post(SERVER_URL + '/api/v1/oauth/clients')
+            superagent.post(SERVER_URL + '/api/v1/oauth/clients')
                    .query({ access_token: token })
                    .send({ appId: 'someApp', redirectURI: 'foobar' })
                    .end(function (error, result) {
@@ -152,7 +155,7 @@ describe('OAuth Clients API', function () {
         it('succeeds', function (done) {
             config.set('developerMode', true);
 
-            request.post(SERVER_URL + '/api/v1/oauth/clients')
+            superagent.post(SERVER_URL + '/api/v1/oauth/clients')
                    .query({ access_token: token })
                    .send({ appId: 'someApp', redirectURI: 'http://foobar.com' })
                    .end(function (error, result) {
@@ -184,7 +187,7 @@ describe('OAuth Clients API', function () {
                     var scope1 = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
                     var scope2 = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/setup/done?setupToken=somesetuptoken').reply(201, {});
 
-                    request.post(SERVER_URL + '/api/v1/cloudron/activate')
+                    superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
                            .query({ setupToken: 'somesetuptoken' })
                            .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
                            .end(function (error, result) {
@@ -203,7 +206,7 @@ describe('OAuth Clients API', function () {
                 function (callback) {
                     config.set('developerMode', true);
 
-                    request.post(SERVER_URL + '/api/v1/oauth/clients')
+                    superagent.post(SERVER_URL + '/api/v1/oauth/clients')
                            .query({ access_token: token })
                            .send({ appId: CLIENT_0.appId, redirectURI: CLIENT_0.redirectURI })
                            .end(function (error, result) {
@@ -223,7 +226,7 @@ describe('OAuth Clients API', function () {
         it('fails without token', function (done) {
             config.set('developerMode', true);
 
-            request.get(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
+            superagent.get(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
@@ -234,7 +237,7 @@ describe('OAuth Clients API', function () {
         it('fails if not in developerMode', function (done) {
             config.set('developerMode', false);
 
-            request.get(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
+            superagent.get(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
                    .query({ access_token: token })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -246,7 +249,7 @@ describe('OAuth Clients API', function () {
         it('fails with unknown id', function (done) {
             config.set('developerMode', true);
 
-            request.get(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id.toUpperCase())
+            superagent.get(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id.toUpperCase())
                    .query({ access_token: token })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -258,7 +261,7 @@ describe('OAuth Clients API', function () {
         it('succeeds', function (done) {
             config.set('developerMode', true);
 
-            request.get(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
+            superagent.get(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
                    .query({ access_token: token })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -290,7 +293,7 @@ describe('OAuth Clients API', function () {
                     var scope1 = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
                     var scope2 = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/setup/done?setupToken=somesetuptoken').reply(201, {});
 
-                    request.post(SERVER_URL + '/api/v1/cloudron/activate')
+                    superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
                            .query({ setupToken: 'somesetuptoken' })
                            .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
                            .end(function (error, result) {
@@ -310,7 +313,7 @@ describe('OAuth Clients API', function () {
                 function (callback) {
                     config.set('developerMode', true);
 
-                    request.post(SERVER_URL + '/api/v1/oauth/clients')
+                    superagent.post(SERVER_URL + '/api/v1/oauth/clients')
                            .query({ access_token: token })
                            .send({ appId: CLIENT_0.appId, redirectURI: CLIENT_0.redirectURI })
                            .end(function (error, result) {
@@ -330,7 +333,7 @@ describe('OAuth Clients API', function () {
         it('fails without token', function (done) {
             config.set('developerMode', true);
 
-            request.put(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
+            superagent.put(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
                    .send({ appId: 'someApp', redirectURI: 'http://foobar.com' })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -342,7 +345,7 @@ describe('OAuth Clients API', function () {
         it('fails if not in developerMode', function (done) {
             config.set('developerMode', false);
 
-            request.put(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
+            superagent.put(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
                    .query({ access_token: token })
                    .send({ appId: CLIENT_1.appId, redirectURI: CLIENT_1.redirectURI })
                    .end(function (error, result) {
@@ -355,7 +358,7 @@ describe('OAuth Clients API', function () {
         it('fails without appId', function (done) {
             config.set('developerMode', true);
 
-            request.put(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
+            superagent.put(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
                    .query({ access_token: token })
                    .send({ redirectURI: CLIENT_1.redirectURI })
                    .end(function (error, result) {
@@ -368,7 +371,7 @@ describe('OAuth Clients API', function () {
         it('fails with empty appId', function (done) {
             config.set('developerMode', true);
 
-            request.put(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
+            superagent.put(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
                    .query({ access_token: token })
                    .send({ appId: '', redirectURI: CLIENT_1.redirectURI })
                    .end(function (error, result) {
@@ -381,7 +384,7 @@ describe('OAuth Clients API', function () {
         it('fails without redirectURI', function (done) {
             config.set('developerMode', true);
 
-            request.put(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
+            superagent.put(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
                    .query({ access_token: token })
                    .send({ appId: CLIENT_1.appId })
                    .end(function (error, result) {
@@ -394,7 +397,7 @@ describe('OAuth Clients API', function () {
         it('fails with empty redirectURI', function (done) {
             config.set('developerMode', true);
 
-            request.put(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
+            superagent.put(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
                    .query({ access_token: token })
                    .send({ appId: CLIENT_1.appId, redirectURI: '' })
                    .end(function (error, result) {
@@ -407,7 +410,7 @@ describe('OAuth Clients API', function () {
         xit('fails with malformed redirectURI', function (done) {
             config.set('developerMode', true);
 
-            request.put(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
+            superagent.put(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
                    .query({ access_token: token })
                    .send({ appId: CLIENT_1.appId, redirectURI: 'foobar' })
                    .end(function (error, result) {
@@ -420,14 +423,14 @@ describe('OAuth Clients API', function () {
         it('succeeds', function (done) {
             config.set('developerMode', true);
 
-            request.put(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
+            superagent.put(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
                    .query({ access_token: token })
                    .send({ appId: CLIENT_1.appId, redirectURI: CLIENT_1.redirectURI })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(202);
 
-                request.get(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
+                superagent.get(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
                        .query({ access_token: token })
                        .end(function (error, result) {
                     expect(error).to.be(null);
@@ -457,7 +460,7 @@ describe('OAuth Clients API', function () {
                     var scope1 = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
                     var scope2 = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/setup/done?setupToken=somesetuptoken').reply(201, {});
 
-                    request.post(SERVER_URL + '/api/v1/cloudron/activate')
+                    superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
                            .query({ setupToken: 'somesetuptoken' })
                            .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
                            .end(function (error, result) {
@@ -476,7 +479,7 @@ describe('OAuth Clients API', function () {
                 function (callback) {
                     config.set('developerMode', true);
 
-                    request.post(SERVER_URL + '/api/v1/oauth/clients')
+                    superagent.post(SERVER_URL + '/api/v1/oauth/clients')
                            .query({ access_token: token })
                            .send({ appId: CLIENT_0.appId, redirectURI: CLIENT_0.redirectURI })
                            .end(function (error, result) {
@@ -496,7 +499,7 @@ describe('OAuth Clients API', function () {
         it('fails without token', function (done) {
             config.set('developerMode', true);
 
-            request.del(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
+            superagent.del(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
@@ -507,7 +510,7 @@ describe('OAuth Clients API', function () {
         it('fails if not in developerMode', function (done) {
             config.set('developerMode', false);
 
-            request.del(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
+            superagent.del(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
                    .query({ access_token: token })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -519,7 +522,7 @@ describe('OAuth Clients API', function () {
         it('fails with unknown id', function (done) {
             config.set('developerMode', true);
 
-            request.del(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id.toUpperCase())
+            superagent.del(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id.toUpperCase())
                    .query({ access_token: token })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -531,13 +534,13 @@ describe('OAuth Clients API', function () {
         it('succeeds', function (done) {
             config.set('developerMode', true);
 
-            request.del(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
+            superagent.del(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
                    .query({ access_token: token })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(204);
 
-                request.get(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
+                superagent.get(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
                        .query({ access_token: token })
                        .end(function (error, result) {
                     expect(error).to.be(null);
@@ -545,6 +548,239 @@ describe('OAuth Clients API', function () {
 
                     done();
                });
+            });
+        });
+    });
+});
+
+describe('Clients', function () {
+    var USER_0 = {
+        userId: uuid.v4(),
+        username: 'someusername',
+        password: 'somepassword',
+        email: 'some@email.com',
+        admin: true,
+        salt: 'somesalt',
+        createdAt: (new Date()).toUTCString(),
+        modifiedAt: (new Date()).toUTCString(),
+        resetToken: hat()
+    };
+
+    // make csrf always succeed for testing
+    oauth2.csrf = function (req, res, next) {
+        req.csrfToken = function () { return hat(); };
+        next();
+    };
+
+    function setup(done) {
+        async.series([
+            server.start.bind(server),
+            database._clear.bind(null),
+            function (callback) {
+            var scope1 = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
+                var scope2 = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/setup/done?setupToken=somesetuptoken').reply(201, {});
+
+                superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
+                       .query({ setupToken: 'somesetuptoken' })
+                       .send({ username: USER_0.username, password: USER_0.password, email: USER_0.email })
+                       .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result).to.be.ok();
+                    expect(result.statusCode).to.eql(201);
+                    expect(scope1.isDone()).to.be.ok();
+                    expect(scope2.isDone()).to.be.ok();
+
+                    // stash for further use
+                    token = result.body.token;
+
+                    callback();
+                });
+            }
+        ], done);
+    }
+
+    function cleanup(done) {
+        database._clear(function (error) {
+            expect(error).to.not.be.ok();
+
+            server.stop(done);
+        });
+    }
+
+    describe('get', function () {
+        before(setup);
+        after(cleanup);
+
+        it('fails due to missing token', function (done) {
+            superagent.get(SERVER_URL + '/api/v1/oauth/clients')
+            .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(401);
+                done();
+            });
+        });
+
+        it('fails due to empty token', function (done) {
+            superagent.get(SERVER_URL + '/api/v1/oauth/clients')
+            .query({ access_token: '' })
+            .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(401);
+                done();
+            });
+        });
+
+        it('fails due to wrong token', function (done) {
+            superagent.get(SERVER_URL + '/api/v1/oauth/clients')
+            .query({ access_token: token.toUpperCase() })
+            .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(401);
+                done();
+            });
+        });
+
+        it('succeeds', function (done) {
+            superagent.get(SERVER_URL + '/api/v1/oauth/clients')
+            .query({ access_token: token })
+            .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(200);
+
+                expect(result.body.clients.length).to.eql(1);
+                expect(result.body.clients[0].tokenCount).to.eql(1);
+
+                done();
+            });
+        });
+    });
+
+    describe('get tokens by client', function () {
+        before(setup);
+        after(cleanup);
+
+        it('fails due to missing token', function (done) {
+            superagent.get(SERVER_URL + '/api/v1/oauth/clients/cid-webadmin/tokens')
+            .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(401);
+                done();
+            });
+        });
+
+        it('fails due to empty token', function (done) {
+            superagent.get(SERVER_URL + '/api/v1/oauth/clients/cid-webadmin/tokens')
+            .query({ access_token: '' })
+            .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(401);
+                done();
+            });
+        });
+
+        it('fails due to wrong token', function (done) {
+            superagent.get(SERVER_URL + '/api/v1/oauth/clients/cid-webadmin/tokens')
+            .query({ access_token: token.toUpperCase() })
+            .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(401);
+                done();
+            });
+        });
+
+        it('fails due to unkown client', function (done) {
+            superagent.get(SERVER_URL + '/api/v1/oauth/clients/CID-WEBADMIN/tokens')
+            .query({ access_token: token })
+            .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(404);
+                done();
+            });
+        });
+
+        it('succeeds', function (done) {
+            superagent.get(SERVER_URL + '/api/v1/oauth/clients/cid-webadmin/tokens')
+            .query({ access_token: token })
+            .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(200);
+
+                expect(result.body.tokens.length).to.eql(1);
+                expect(result.body.tokens[0].identifier).to.eql('user-' + USER_0.username);
+
+                done();
+            });
+        });
+    });
+
+    describe('delete tokens by client', function () {
+        before(setup);
+        after(cleanup);
+
+        it('fails due to missing token', function (done) {
+            superagent.del(SERVER_URL + '/api/v1/oauth/clients/cid-webadmin/tokens')
+            .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(401);
+                done();
+            });
+        });
+
+        it('fails due to empty token', function (done) {
+            superagent.del(SERVER_URL + '/api/v1/oauth/clients/cid-webadmin/tokens')
+            .query({ access_token: '' })
+            .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(401);
+                done();
+            });
+        });
+
+        it('fails due to wrong token', function (done) {
+            superagent.del(SERVER_URL + '/api/v1/oauth/clients/cid-webadmin/tokens')
+            .query({ access_token: token.toUpperCase() })
+            .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(401);
+                done();
+            });
+        });
+
+        it('fails due to unkown client', function (done) {
+            superagent.del(SERVER_URL + '/api/v1/oauth/clients/CID-WEBADMIN/tokens')
+            .query({ access_token: token })
+            .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(404);
+                done();
+            });
+        });
+
+        it('succeeds', function (done) {
+            superagent.get(SERVER_URL + '/api/v1/oauth/clients/cid-webadmin/tokens')
+            .query({ access_token: token })
+            .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(200);
+
+                expect(result.body.tokens.length).to.eql(1);
+                expect(result.body.tokens[0].identifier).to.eql('user-' + USER_0.username);
+
+                superagent.del(SERVER_URL + '/api/v1/oauth/clients/cid-webadmin/tokens')
+                .query({ access_token: token })
+                .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.statusCode).to.equal(204);
+
+                    // further calls with this token should not work
+                    superagent.get(SERVER_URL + '/api/v1/profile')
+                    .query({ access_token: token })
+                    .end(function (error, result) {
+                        expect(error).to.not.be.ok();
+                        expect(result.statusCode).to.equal(401);
+                        done();
+                    });
+                });
             });
         });
     });
