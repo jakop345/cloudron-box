@@ -284,13 +284,19 @@ function exec(req, res, next) {
 
     debug('Execing into app id:%s', req.params.id);
 
-    var cmd = [ '/bin/bash' ];
+    var cmd = null;
     if (req.query.cmd) {
         cmd = safe.JSON.parse(req.query.cmd);
         if (!util.isArray(cmd) && cmd.length < 1) return next(new HttpError(400, 'cmd must be array with atleast size 1'));
     }
 
-    apps.exec(req.params.id, cmd, function (error, duplexStream) {
+    var columns = req.query.columns ? parseInt(req.query.columns, 10) : null;
+    if (columns === NaN) return next(new HttpError(400, 'columns must be a number'));
+
+    var rows = req.query.rows ? parseInt(req.query.rows, 10) : null;
+    if (rows === NaN) return next(new HttpError(400, 'rows must be a number'));
+
+    apps.exec(req.params.id, { cmd: cmd, rows: rows, columns: columns }, function (error, duplexStream) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
         if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
         if (error) return next(new HttpError(500, error));

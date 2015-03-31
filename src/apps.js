@@ -511,16 +511,24 @@ function checkManifestConstraints(manifest) {
     return null;
 }
 
-function exec(appId, cmd, callback) {
+function exec(appId, options, callback) {
     assert(typeof appId === 'string');
-    assert(util.isArray(cmd) && cmd.length > 0);
+    assert(options && typeof options === 'object');
     assert(typeof callback === 'function');
+
+    var cmd = options.cmd || [ '/bin/bash' ];
+    assert(util.isArray(cmd) && cmd.length > 0);
 
     appdb.get(appId, function (error, app) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
         var container = docker.getContainer(app.containerId);
+
+        if (options.rows && options.columns) {
+            container.resize({ h: options.rows, w: options.columns }, function (error) { if (error) debug('Error resizing console', error); });
+        }
+
         var execOptions = {
             AttachStdin: true,
             AttachStdout: true,
@@ -528,6 +536,7 @@ function exec(appId, cmd, callback) {
             Tty: true,
             Cmd: cmd
         };
+
         container.exec(execOptions, function (error, exec) {
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
             var startOptions = {
