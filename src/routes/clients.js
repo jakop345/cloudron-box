@@ -15,7 +15,8 @@ exports = module.exports = {
     update: update,
     del: del,
     getAllByUserId: getAllByUserId,
-    getClientTokens: getClientTokens
+    getClientTokens: getClientTokens,
+    delClientTokens: delClientTokens
 };
 
 function add(req, res, next) {
@@ -84,5 +85,16 @@ function getClientTokens(req, res, next) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(404, 'no such client'));
         if (error) return next(new HttpError(500, error));
         next(new HttpSuccess(200, { tokens: result }));
+    });
+}
+
+function delClientTokens(req, res, next) {
+    assert(typeof req.params.clientId === 'string');
+    assert(typeof req.user === 'object');
+
+    clients.delClientTokensByUserId(req.params.clientId, req.user.id, function (error) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(404, 'no such client'));
+        if (error) return next(new HttpError(500, error));
+        next(new HttpSuccess(204));
     });
 }

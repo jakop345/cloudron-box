@@ -534,19 +534,29 @@ describe('Clients', function () {
         });
 
         it('succeeds', function (done) {
-            superagent.del(SERVER_URL + '/api/v1/oauth/clients/cid-webadmin/tokens')
+            superagent.get(SERVER_URL + '/api/v1/oauth/clients/cid-webadmin/tokens')
             .query({ access_token: token })
             .end(function (error, result) {
                 expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(204);
+                expect(result.statusCode).to.equal(200);
 
-                // further calls with this token should not work
-                superagent.get(SERVER_URL + '/api/v1/profile')
+                expect(result.body.tokens.length).to.eql(1);
+                expect(result.body.tokens[0].identifier).to.eql('user-' + USER_0.username);
+
+                superagent.del(SERVER_URL + '/api/v1/oauth/clients/cid-webadmin/tokens')
                 .query({ access_token: token })
                 .end(function (error, result) {
                     expect(error).to.not.be.ok();
-                    expect(result.statusCode).to.equal(401);
-                    done();
+                    expect(result.statusCode).to.equal(204);
+
+                    // further calls with this token should not work
+                    superagent.get(SERVER_URL + '/api/v1/profile')
+                    .query({ access_token: token })
+                    .end(function (error, result) {
+                        expect(error).to.not.be.ok();
+                        expect(result.statusCode).to.equal(401);
+                        done();
+                    });
                 });
             });
         });

@@ -422,30 +422,6 @@ function scope(requestedScope) {
     ];
 }
 
-function delClientTokens(req, res, next) {
-    assert(typeof req.params.clientId === 'string');
-    assert(typeof req.user === 'object');
-
-    debug('delClientTokens: user %s and client %s.', req.user.id, req.params.clientId);
-
-    tokendb.delByIdentifierAndClientId(tokendb.PREFIX_USER + req.user.id, req.params.clientId, function (error) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) {
-            // this can mean either that there are no tokens or the clientId is actually unknown
-            clientdb.get(req.params.clientId, function (error/*, result*/) {
-                if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(404, 'no such client'));
-                if (error) return next(new HttpError(500, error));
-                next(new HttpSuccess(204, {}));
-            });
-            return;
-        }
-        if (error) return next(new HttpError(500, error));
-
-        debug('delClientTokens: success.');
-
-        next(new HttpSuccess(204));
-    });
-}
-
 // Cross-site request forgery protection middleware for login form
 var csrf = [
     middleware.csrf(),
@@ -477,6 +453,5 @@ exports = module.exports = {
     token: token,
     library: library,
     scope: scope,
-    delClientTokens: delClientTokens,
     csrf: csrf
 };
