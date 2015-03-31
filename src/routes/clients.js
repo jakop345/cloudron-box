@@ -50,8 +50,8 @@ function update(req, res, next) {
     if (typeof data.appId !== 'string' || !data.appId) return next(new HttpError(400, 'appId is required'));
     if (typeof data.redirectURI !== 'string' || !data.redirectURI) return next(new HttpError(400, 'redirectURI is required'));
 
-    clients.update(req.params.clientId, data.appId, data.redirectURI, data.scope, function (error, result) {
+    clients.update(req.params.clientId, data.appId, data.redirectURI, function (error, result) {
         if (error) return next(new HttpError(500, error));
-        next(new HttpSuccess(200, result));
+        next(new HttpSuccess(202, result));
     });
 }

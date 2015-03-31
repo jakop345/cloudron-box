@@ -47,16 +47,19 @@ function get(id, callback) {
     });
 }
 
-function update(id, appIdentifier, clientSecret, redirectURI, scope, callback) {
+// we only allow appIdentifier and redirectURI to be updated
+function update(id, appIdentifier, redirectURI, callback) {
     assert(typeof id === 'string');
     assert(typeof appIdentifier === 'string');
-    assert(typeof clientSecret === 'string');
     assert(typeof redirectURI === 'string');
-    assert(typeof scope === 'string');
     assert(typeof callback === 'function');
 
-    clientdb.update(id, appIdentifier, clientSecret, redirectURI, scope, function (error, result) {
+    clientdb.get(id, function (error, result) {
         if (error) return callback(error);
-        callback(null, result);
+
+        clientdb.update(id, appIdentifier, result.clientSecret, redirectURI, result.scope, function (error, result) {
+            if (error) return callback(error);
+            callback(null, result);
+        });
     });
 }
