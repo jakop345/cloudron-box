@@ -103,7 +103,7 @@ gServer.exchange(oauth2orize.exchange.code(function (client, code, redirectURI, 
             if(error) return callback(error);
 
             var token = tokendb.generateToken();
-            var expires = Date.now() + 60 * 60000; // 1 hour
+            var expires = Date.now() + 24 * 60 * 60 * 1000; // 1 day
 
             tokendb.add(token, tokendb.PREFIX_USER + authCode.userId, authCode.clientId, expires, client.scope, function (error) {
                 if (error) return callback(error);
