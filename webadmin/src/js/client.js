@@ -531,10 +531,10 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         window.location.href = '/api/v1/session/logout';
     };
 
-    Client.prototype.exchangeCodeForToken = function (authCode, callback) {
+    Client.prototype.exchangeCodeForToken = function (code, callback) {
         var data = {
             grant_type: 'authorization_code',
-            code: authCode,
+            code: code,
             redirect_uri: window.location.origin,
             client_id: this._clientId,
             client_secret: this._clientSecret

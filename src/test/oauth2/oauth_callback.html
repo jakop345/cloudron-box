@@ -13,7 +13,7 @@
         function requestAccessToken(clientId) {
             var data = {
                 grant_type: 'authorization_code',
-                code: authCode,
+                code: code,
                 redirect_uri: window.location.origin,
                 client_id: clientId,
                 client_secret: 'unused'
@@ -41,7 +41,7 @@
 
     <h1> OAuth2 Test Callback </h1>
 
-    AuthCode: <b><span id="authCode"></span></b>
+    code: <b><span id="code"></span></b>
 
     <br/>
     <br/>
@@ -71,14 +71,14 @@
 
 <script>
 
-var authCode = window.location.search.slice('?authCode='.length);
+var code = window.location.search.slice('?code='.length);
 
-if (!authCode) {
-    console.error('No authCode found.');
-    document.getElementById('authCode').innerHTML = 'ERROR: failed to get auth code';
+if (!code) {
+    console.error('No code found.');
+    document.getElementById('code').innerHTML = 'ERROR: failed to get auth code';
 } else {
-    console.debug('Got authCode as result of OAuth flow.', authCode);
-    document.getElementById('authCode').innerHTML = authCode;
+    console.debug('Got code as result of OAuth flow.', code);
+    document.getElementById('code').innerHTML = code;
 }
 
 </script>

@@ -90,7 +90,7 @@ function startServer(callback) {
 
             var data = {
                 grant_type: 'authorization_code',
-                code: req.query.authCode,
+                code: req.query.code,
                 redirect_uri: req.sessionData.returnTo,
                 client_id: req.sessionData.clientId,
                 client_secret: req.sessionData.clientSecret

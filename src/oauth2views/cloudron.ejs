@@ -37,12 +37,12 @@ function endOAuth(result) {
         return;
     }
 
-    if (!result || !result.authCode) {
-        console.error('OAuth result does not contain an authCode.');
+    if (!result || !result.code) {
+        console.error('OAuth result does not contain an code.');
         return;
     }
 
-    cloudron.oauth.callback.apply(null, [result.authCode]);
+    cloudron.oauth.callback.apply(null, [result.code]);
 }
 
 function setupButton(button, resultCallback) {

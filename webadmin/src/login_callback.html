@@ -10,16 +10,16 @@
 
     var app = angular.module('Application', []);
     app.controller('MainController', ['$scope', '$http', function ($scope, $http) {
-        var authCode = window.location.search.slice('?authCode='.length);
+        var code = window.location.search.slice('?code='.length);
 
-        if (!authCode) {
-            console.error('No authCode found.');
+        if (!code) {
+            console.error('No code found.');
             window.location.href = '/';
         }
 
         var data = {
             grant_type: 'authorization_code',
-            code: authCode,
+            code: code,
             redirect_uri: window.location.origin,
             client_id: 'cid-webadmin',
             client_secret: 'secret-webadmin'
@@ -27,7 +27,7 @@
 
         $http.post('/api/v1/oauth/token?response_type=token&client_id=' + data.client_id, data)
         .success(function(data, status) {
-            if (status !== 200) return console.error('Unable to exchange authCode for an access token.', status, data);
+            if (status !== 200) return console.error('Unable to exchange code for an access token.', status, data);
 
             // the actual app picks up the access token from localStorage
             localStorage.token = data.access_token;
