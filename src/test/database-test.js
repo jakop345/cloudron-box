@@ -787,6 +787,13 @@ describe('database', function () {
             redirectURI: 'http://foo.bar',
             scope: '*'
         };
+        var CLIENT_2 = {
+            id: 'cid-2',
+            appId: 'someappid_2',
+            clientSecret: 'secret-2',
+            redirectURI: 'http://foo.bar.baz',
+            scope: 'profile,roleUser'
+        };
 
         it('add succeeds', function (done) {
             clientdb.add(CLIENT_0.id, CLIENT_0.appId, CLIENT_0.clientSecret, CLIENT_0.redirectURI, CLIENT_0.scope, function (error) {
@@ -840,6 +847,29 @@ describe('database', function () {
                 expect(result[0]).to.eql(CLIENT_0);
                 expect(result[1]).to.eql(CLIENT_1);
                 done();
+            });
+        });
+
+        it('update client fails due to unknown client id', function (done) {
+            clientdb.update(CLIENT_2.id, CLIENT_2.appId, CLIENT_2.clientSecret, CLIENT_2.redirectURI, CLIENT_2.scope, function (error) {
+                expect(error).to.be.a(DatabaseError);
+                expect(error.reason).to.equal(DatabaseError.NOT_FOUND);
+                done();
+            });
+        });
+
+        it('update client succeeds', function (done) {
+            clientdb.update(CLIENT_1.id, CLIENT_2.appId, CLIENT_2.clientSecret, CLIENT_2.redirectURI, CLIENT_2.scope, function (error) {
+                expect(error).to.be(null);
+
+                clientdb.get(CLIENT_1.id, function (error, result) {
+                    expect(error).to.be(null);
+                    expect(result.appId).to.eql(CLIENT_2.appId);
+                    expect(result.clientSecret).to.eql(CLIENT_2.clientSecret);
+                    expect(result.redirectURI).to.eql(CLIENT_2.redirectURI);
+                    expect(result.scope).to.eql(CLIENT_2.scope);
+                    done();
+                });
             });
         });
 

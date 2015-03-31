@@ -17,6 +17,7 @@ exports = module.exports = {
     getAllWithDetails: getAllWithDetails,
     add: add,
     del: del,
+    update: update,
     getByAppId: getByAppId,
     delByAppId: delByAppId,
 
@@ -55,10 +56,12 @@ function getAllWithDetails(identifier, callback) {
     database.query('SELECT ' + CLIENTS_FIELDS_PREFIXED + ',COUNT(tokens.clientId) AS tokenCount FROM clients LEFT OUTER JOIN tokens ON clients.id=tokens.clientId WHERE tokens.identifier=? GROUP BY clients.id', [ identifier ], function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
-        // We have three types of records here
+        // We have several types of records here
         //   1) webadmin has an app id of 'webadmin'
         //   2) oauth proxy records are always the app id prefixed with 'proxy-'
         //   3) addon oauth records for apps prefixed with 'addon-'
+        //   4) external app records prefixed with 'external-'
+        //   5) normal apps on the cloudron without a prefix
 
         var tmp = [];
         async.each(results, function (record, callback) {
@@ -130,6 +133,24 @@ function add(id, appId, clientSecret, redirectURI, scope, callback) {
     database.query('INSERT INTO clients (id, appId, clientSecret, redirectURI, scope) VALUES (?, ?, ?, ?, ?)', data, function (error, result) {
         if (error && error.code === 'ER_DUP_ENTRY') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
         if (error || result.affectedRows === 0) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+
+        callback(null);
+    });
+}
+
+function update(id, appId, clientSecret, redirectURI, scope, callback) {
+    assert(typeof id === 'string');
+    assert(typeof appId === 'string');
+    assert(typeof clientSecret === 'string');
+    assert(typeof redirectURI === 'string');
+    assert(typeof scope === 'string');
+    assert(typeof callback === 'function');
+
+    var data = [ appId, clientSecret, redirectURI, scope, id ];
+
+    database.query('UPDATE clients SET appId = ?, clientSecret = ?, redirectURI = ?, scope = ? WHERE id = ?', data, function (error, result) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        if (result.affectedRows !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         callback(null);
     });
