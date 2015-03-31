@@ -16,7 +16,8 @@ exports = module.exports = {
     get: get,
     update: update,
     del: del,
-    getAllWithDetailsByUserId: getAllWithDetailsByUserId
+    getAllWithDetailsByUserId: getAllWithDetailsByUserId,
+    getClientTokensByUserId: getClientTokensByUserId
 };
 
 function add(appIdentifier, redirectURI, scope, callback) {
@@ -137,5 +138,24 @@ function getAllWithDetailsByUserId(userId, callback) {
             if (error) return callback(error);
             callback(null, tmp);
         });
+    });
+}
+
+function getClientTokensByUserId(clientId, userId, callback) {
+    assert(typeof clientId === 'string');
+    assert(typeof userId === 'string');
+    assert(typeof callback === 'function');
+
+    tokendb.getByIdentifierAndClientId(tokendb.PREFIX_USER + userId, clientId, function (error, result) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) {
+            // this can mean either that there are no tokens or the clientId is actually unknown
+            clientdb.get(clientId, function (error/*, result*/) {
+                if (error) return callback(error);
+                callback(null, []);
+            });
+            return;
+        }
+        if (error) return callback(error);
+        callback(null, result || []);
     });
 }

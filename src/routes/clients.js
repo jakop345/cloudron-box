@@ -14,7 +14,8 @@ exports = module.exports = {
     get: get,
     update: update,
     del: del,
-    getAllByUserId: getAllByUserId
+    getAllByUserId: getAllByUserId,
+    getClientTokens: getClientTokens
 };
 
 function add(req, res, next) {
@@ -62,7 +63,7 @@ function del(req, res, next) {
     assert(typeof req.params.clientId === 'string');
 
     clients.del(req.params.clientId, function (error, result) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(404, 'No such client'));
+        if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(404, 'no such client'));
         if (error) return next(new HttpError(500, error));
         next(new HttpSuccess(204, result));
     });
@@ -72,5 +73,16 @@ function getAllByUserId(req, res, next) {
     clients.getAllWithDetailsByUserId(req.user.id, function (error, result) {
         if (error && error.reason !== DatabaseError.NOT_FOUND) return next(new HttpError(500, error));
         next(new HttpSuccess(200, { clients: result }));
+    });
+}
+
+function getClientTokens(req, res, next) {
+    assert(typeof req.params.clientId === 'string');
+    assert(typeof req.user === 'object');
+
+    clients.getClientTokensByUserId(req.params.clientId, req.user.id, function (error, result) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(404, 'no such client'));
+        if (error) return next(new HttpError(500, error));
+        next(new HttpSuccess(200, { tokens: result }));
     });
 }
