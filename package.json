@@ -60,6 +60,7 @@
     "superagent": "~0.21.0",
     "supererror": "^0.6.0",
     "underscore": "^1.7.0",
+    "valid-url": "^1.0.9",
     "validator": "^3.30.0"
   },
   "devDependencies": {
