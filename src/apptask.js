@@ -697,8 +697,7 @@ function restore(app, callback) {
 
         // restore addons
         updateApp.bind(null, app, { installationProgress: 'Restoring addons' }),
-        addons.updateAddons.bind(null, app, oldManifest),
-        // hack : addons.restoreAddons.bind(null, app),
+        addons.restoreAddons.bind(null, app),
 
         // create container (old containers are deleted by update script)
         updateApp.bind(null, app, { installationProgress: 'Creating container' }),

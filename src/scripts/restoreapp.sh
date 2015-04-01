@@ -14,22 +14,12 @@ fi
 
 exec 1>> "/var/log/cloudron/restoreapp.log" 2>&1
 
-readonly DATA_DIR="${HOME}/data"
-
-############ hack
-if [[ "$2" == "legacy" ]]; then
-    echo "migrate legacy app $1"
-    cp -ir $DATA_DIR/$1-legacy/* $DATA_DIR/$1
-    rm -rf $DATA_DIR/$1-legacy
-    exit 0
-fi
-############
-
 if [ $# -lt 3 ]; then
     echo "Usage: restoreapp.sh <appid> <url> <key>"
     exit 1
 fi
 
+readonly DATA_DIR="${HOME}/data"
 readonly curl="curl --fail --connect-timeout 20 --retry 10 --retry-delay 2 --max-time 2400"
 
 app_id="$1"

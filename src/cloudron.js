@@ -188,19 +188,6 @@ function getRestoreUrl(backupId, callback) {
 }
 
 function restoreApp(app, callback) {
-    // hack: remove
-    if (require('fs').existsSync(path.join(paths.DATA_DIR, app.id + '-legacy'))) {
-        debug('using legacy data');
-
-        execFile(SUDO, [ RESTORE_APP_CMD,  app.id, 'legacy' ], { }, function (error, stdout, stderr) {
-            if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, 'Error backing up : ' + stderr));
-
-            callback(null);
-        });
-
-        return;
-    }
-
     if (!app.lastBackupId) {
         debug('No existing backup to return to. Skipping %d', app.id);
         return callback(null);

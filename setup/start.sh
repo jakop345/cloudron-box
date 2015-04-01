@@ -86,30 +86,7 @@ ${USER} ALL=(root) NOPASSWD: ${BOX_SRC_DIR}/src/scripts/reloadcollectd.sh
 
 EOF
 
-set_progress "21" "Migrating data"
-if [[ -f "${DATA_DIR}/version" ]]; then
-    echo "Migrating from legacy format"
-
-    cd "${DATA_DIR}"
-
-    # move redis
-    # for redis in "$(ls -d redis-*)"; do
-    #     appname="${redis:6}"
-    #     mv $redis $appname
-    # done
-
-    for app in $(ls -d *-*); do
-        mv $app ${app}-legacy
-    done
-
-    mv box box-legacy
-    btrfs subvolume create "${DATA_DIR}/box"
-    mkdir -p "${DATA_DIR}/box/appicons"
-    mkdir -p "${DATA_DIR}/box/mail"
-    cp -ir box-legacy/* box
-fi
-
-set_progress "22" "Setting up MySQL"
+set_progress "21" "Setting up MySQL"
 mysqladmin -u root -ppassword password password # reset default root password
 mysql -u root -ppassword -e 'CREATE DATABASE IF NOT EXISTS box'
 if [[ -f "${DATA_DIR}/box/box.mysqldump" ]]; then
@@ -117,7 +94,7 @@ if [[ -f "${DATA_DIR}/box/box.mysqldump" ]]; then
     mysql -u root -ppassword box < "${DATA_DIR}/box/box.mysqldump"
 fi
 
-set_progress "25" "Migrating database"
+set_progress "25" "Migrating data"
 sudo -u "${USER}" -H bash <<EOF
 set -eu
 cd "${box_src_tmp_dir}"
@@ -180,7 +157,7 @@ readonly MYSQL_ROOT_PASSWORD='${mysql_root_password}'
 readonly MYSQL_ROOT_HOST='${docker0_ip}'
 EOF
 docker pull girish/mysql:0.4 || true # this line for dev convenience since it's already part of base image
-# rm -rf "${DATA_DIR}/mysql" ######## hack
+rm -rf "${DATA_DIR}/mysql"
 mysql_container_id=$(docker run --restart=always -d --name="mysql" \
     -h "${arg_fqdn}" \
     -v "${DATA_DIR}/mysql:/var/lib/mysql" \
@@ -194,7 +171,7 @@ cat > "${CONFIG_DIR}/addons/postgresql_vars.sh" <<EOF
 readonly POSTGRESQL_ROOT_PASSWORD='${postgresql_root_password}'
 EOF
 docker pull girish/postgresql:0.4 || true # this line for dev convenience since it's already part of base image
-# rm -rf "${DATA_DIR}/postgresql" ############### hack
+rm -rf "${DATA_DIR}/postgresql"
 postgresql_container_id=$(docker run --restart=always -d --name="postgresql" \
     -h "${arg_fqdn}" \
     -v "${DATA_DIR}/postgresql:/var/lib/postgresql" \
