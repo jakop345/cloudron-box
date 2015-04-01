@@ -240,7 +240,7 @@ set_progress "70" "Setup logrotate"
 ${script_dir}/start/setup_logrotate.sh
 
 # bookkeep the version as part of data
-echo "{ \"version\": \"${arg_version}\", \"boxVersionsUrl\": \"${arg_box_versions_url}\" }" > "${DATA_DIR}/version"
+echo "{ \"version\": \"${arg_version}\", \"boxVersionsUrl\": \"${arg_box_versions_url}\" }" > "${DATA_DIR}/box/version"
 
 set_progress "75" "Setup supervisord"
 ${script_dir}/start/setup_supervisord.sh
