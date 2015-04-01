@@ -231,6 +231,9 @@ function createContainer(app, callback) {
         var exposedPorts = {};
         var env = [];
 
+        // docker portBindings requires ports to be exposed
+        exposedPorts[manifest.httpPort + '/tcp'] = {};
+
         for (var e in portBindings) {
             var hostPort = portBindings[e];
             var containerPort = manifest.tcpPorts[e].containerPort || hostPort;
