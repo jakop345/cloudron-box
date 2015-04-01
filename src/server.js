@@ -59,7 +59,7 @@ function initializeExpressSync() {
        .use(middleware.cookieParser())
        .use(middleware.favicon(__dirname + '/../assets/favicon.ico'))
        .use(middleware.cors({ origins: [ '*' ], allowCredentials: true }))
-       .use(middleware.session({ secret: 'yellow is blue', resave: true, saveUninitialized: true }))
+       .use(middleware.session({ secret: 'yellow is blue', resave: true, saveUninitialized: true, cookie: { path: '/', httpOnly: true, secure: false, maxAge: 600000 } }))
        .use(passport.initialize())
        .use(passport.session())
        .use(router)
