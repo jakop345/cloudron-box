@@ -14,6 +14,7 @@ var assert = require('assert'),
     middleware = require('../middleware/index.js'),
     oauth2orize = require('oauth2orize'),
     passport = require('passport'),
+    util = require('util'),
     session = require('connect-ensure-login'),
     tokendb = require('../tokendb'),
     appdb = require('../appdb'),
@@ -115,6 +116,23 @@ gServer.exchange(oauth2orize.exchange.code(function (client, code, redirectURI, 
         });
     });
 }));
+
+// overwrite the session.ensureLoggedIn to not use res.redirect() due to a chrome bug not sending cookies on redirects
+session.ensureLoggedIn = function (redirectTo) {
+    assert(typeof redirectTo === 'string');
+
+    return function (req, res, next) {
+        if (!req.isAuthenticated || !req.isAuthenticated()) {
+            if (req.session) {
+                req.session.returnTo = req.originalUrl || req.url;
+            }
+
+            res.send(200, util.format('<script>window.location.href = "%s";</script>', redirectTo));
+        } else {
+            next();
+        }
+    };
+};
 
 // Main login form username and password
 function loginForm(req, res) {
