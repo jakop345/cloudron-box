@@ -73,6 +73,14 @@ $table-border-color:                        transparent !default;
     background-color: white
 }
 
+.scale {
+    transition: transform 100ms ease-out;
+}
+
+.scale:hover {
+    transform: scale(2)
+}
+
 .page-wrapper {
     padding: 0px 30px;
 }
