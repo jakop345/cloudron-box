@@ -161,7 +161,7 @@ function getBackupUrl(appId, appBackupIds, callback) {
 
     var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/backupurl';
 
-    superagent.put(url).query({ token: config.token(), boxVersion: config.version(), appId: appId, appBackupIds: appBackupIds }).end(function (error, result) {
+    superagent.put(url).query({ token: config.token() }).send({ boxVersion: config.version(), appId: appId, appBackupIds: appBackupIds }).end(function (error, result) {
         if (error) return callback(new Error('Error getting presigned backup url: ' + error.message));
 
         if (result.statusCode !== 201 || !result.body || !result.body.url) return callback(new Error('Error getting presigned backup url : ' + result.statusCode));
