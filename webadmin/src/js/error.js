@@ -20,4 +20,8 @@ app.controller('ErrorController', ['$scope', '$http', function ($scope, $http) {
 
     $scope.errorCode = search.errorCode || 0;
     $scope.errorContext = search.errorContext || '';
+
+    $scope.webServerOriginLink = function () {
+        window.location.href = $scope.webServerOrigin;
+    };
 }]);
