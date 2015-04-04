@@ -266,7 +266,7 @@ function getLogs(req, res, next) {
 
     apps.getLogs(req.params.id, function (error, logStream) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
-        if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
+        if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(412, error.message));
         if (error) return next(new HttpError(500, error));
 
         res.writeHead(200, {
