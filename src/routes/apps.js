@@ -231,13 +231,13 @@ function getLogStream(req, res, next) {
     var fromLine = req.query.fromLine ? parseInt(req.query.fromLine, 10) : -10; // we ignore last-event-id
     if (isNaN(fromLine)) return next(new HttpError(400, 'fromLine must be a valid number'));
 
-    function sse(id, data) { return 'id: ' + id + '\ndata: ' + data + '\n\n'; };
+    function sse(id, data) { return 'id: ' + id + '\ndata: ' + data + '\n\n'; }
 
     if (req.headers.accept !== 'text/event-stream') return next(new HttpError(400, 'This API call requires EventStream'));
 
     apps.getLogStream(req.params.id, fromLine, function (error, logStream) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
-        if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
+        if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(412, error.message));
         if (error) return next(new HttpError(500, error));
 
         res.writeHead(200, {

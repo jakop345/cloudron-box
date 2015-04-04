@@ -403,7 +403,7 @@ function getLogStream(appId, fromLine, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        if (app.installationState !== appdb.ISTATE_INSTALLED) return callback(new AppsError(AppsError.BAD_STATE, 'App not installed'));
+        if (app.installationState !== appdb.ISTATE_INSTALLED) return callback(new AppsError(AppsError.BAD_STATE, util.format('App is in %s state.', app.installationState)));
 
         var container = docker.getContainer(app.containerId);
         var tail = fromLine < 0 ? -fromLine : 'all';
