@@ -604,47 +604,47 @@ function install(app, callback) {
         configureNginx.bind(null, app),
 
         // register subdomain
-        updateApp.bind(null, app, { installationProgress: 'Registering subdomain' }),
+        updateApp.bind(null, app, { installationProgress: '0, Registering subdomain' }),
         registerSubdomain.bind(null, app),
 
         // verify manifest
-        updateApp.bind(null, app, { installationProgress: 'Verifying manifest' }),
+        updateApp.bind(null, app, { installationProgress: '10, Verifying manifest' }),
         verifyManifest.bind(null, app),
         downloadIcon.bind(null, app),
 
         // create proxy OAuth credentials
-        updateApp.bind(null, app, { installationProgress: 'Creating OAuth proxy credentials' }),
+        updateApp.bind(null, app, { installationProgress: '20, Creating OAuth proxy credentials' }),
         allocateOAuthProxyCredentials.bind(null, app),
 
         // allocate access token
-        updateApp.bind(null, app, { installationProgress: 'Allocate access token' }),
+        updateApp.bind(null, app, { installationProgress: '30, Allocate access token' }),
         allocateAccessToken.bind(null, app),
 
         // download the image
-        updateApp.bind(null, app, { installationProgress: 'Downloading image' }),
+        updateApp.bind(null, app, { installationProgress: '40, Downloading image' }),
         downloadImage.bind(null, app),
 
         // recreate data volume
-        updateApp.bind(null, app, { installationProgress: 'Creating volume' }),
+        updateApp.bind(null, app, { installationProgress: '50, Creating volume' }),
         deleteVolume.bind(null, app),
         createVolume.bind(null, app),
 
         // setup addons
-        updateApp.bind(null, app, { installationProgress: 'Setting up addons' }),
+        updateApp.bind(null, app, { installationProgress: '60, Setting up addons' }),
         addons.teardownAddons.bind(null, app),
         addons.setupAddons.bind(null, app),
 
         // recreate container
-        updateApp.bind(null, app, { installationProgress: 'Creating container' }),
+        updateApp.bind(null, app, { installationProgress: '70, Creating container' }),
         deleteContainer.bind(null, app),
         createContainer.bind(null, app),
 
         // add collectd profile
-        updateApp.bind(null, app, { installationProgress: 'Setting up collectd profile' }),
+        updateApp.bind(null, app, { installationProgress: '80, Setting up collectd profile' }),
         addCollectdProfile.bind(null, app),
 
         // wait until dns propagated
-        updateApp.bind(null, app, { installationProgress: 'Waiting for DNS propagation' }),
+        updateApp.bind(null, app, { installationProgress: '90, Waiting for DNS propagation' }),
         exports._waitForDnsPropagation.bind(null, app),
 
         // done!
@@ -666,53 +666,53 @@ function restore(app, callback) {
 
     async.series([
         // configure nginx
-        updateApp.bind(null, app, { installationProgress: 'Configuring nginx' }),
+        updateApp.bind(null, app, { installationProgress: '0, Configuring nginx' }),
         configureNginx.bind(null, app),
         configureNakedDomain.bind(null, app),
 
         // register subdomain
-        updateApp.bind(null, app, { installationProgress: 'Registering subdomain' }),
+        updateApp.bind(null, app, { installationProgress: '5, Registering subdomain' }),
         registerSubdomain.bind(null, app),
 
         // verify manifest
-        updateApp.bind(null, app, { installationProgress: 'Verify manifest' }),
+        updateApp.bind(null, app, { installationProgress: '10, Verify manifest' }),
         verifyManifest.bind(null, app),
         downloadIcon.bind(null, app),
 
         // setup oauth proxy
-        updateApp.bind(null, app, { installationProgress: 'Setting up OAuth proxy credentials' }),
+        updateApp.bind(null, app, { installationProgress: '15, Setting up OAuth proxy credentials' }),
         removeOAuthProxyCredentials.bind(null, app),
         allocateOAuthProxyCredentials.bind(null, app),
 
         // allocate access token
-        updateApp.bind(null, app, { installationProgress: 'Allocate access token' }),
+        updateApp.bind(null, app, { installationProgress: '20, Allocate access token' }),
         removeAccessToken.bind(null, app),
         allocateAccessToken.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Downloading last backup' }),
+        updateApp.bind(null, app, { installationProgress: '25, Downloading last backup' }),
         deleteVolume.bind(null, app),
         createVolume.bind(null, app),
         cloudron.restoreApp.bind(null, app),
 
         // download the image
-        updateApp.bind(null, app, { installationProgress: 'Downloading image' }),
+        updateApp.bind(null, app, { installationProgress: '40, Downloading image' }),
         downloadImage.bind(null, app),
 
         // restore addons
-        updateApp.bind(null, app, { installationProgress: 'Restoring addons' }),
+        updateApp.bind(null, app, { installationProgress: '60, Restoring addons' }),
         addons.restoreAddons.bind(null, app),
 
         // create container (old containers are deleted by update script)
-        updateApp.bind(null, app, { installationProgress: 'Creating container' }),
+        updateApp.bind(null, app, { installationProgress: '70, Creating container' }),
         deleteContainer.bind(null, app),
         createContainer.bind(null, app),
 
         // add collectd profile
-        updateApp.bind(null, app, { installationProgress: 'Add collectd profile' }),
+        updateApp.bind(null, app, { installationProgress: '80, Add collectd profile' }),
         addCollectdProfile.bind(null, app),
 
         // wait until dns propagated
-        updateApp.bind(null, app, { installationProgress: 'Waiting for DNS propagation' }),
+        updateApp.bind(null, app, { installationProgress: '90, Waiting for DNS propagation' }),
         exports._waitForDnsPropagation.bind(null, app),
 
         // done!
@@ -733,48 +733,48 @@ function restore(app, callback) {
 // TODO: optimize by checking if location actually changed
 function configure(app, callback) {
     async.series([
-        updateApp.bind(null, app, { installationProgress: 'Stopping app' }),
+        updateApp.bind(null, app, { installationProgress: '0, Stopping app' }),
         stopApp.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Deleting container' }),
+        updateApp.bind(null, app, { installationProgress: '5, Deleting container' }),
         deleteContainer.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Unregistering subdomain' }),
+        updateApp.bind(null, app, { installationProgress: '10, Unregistering subdomain' }),
         unregisterSubdomain.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Remove OAuth credentials' }),
+        updateApp.bind(null, app, { installationProgress: '15, Remove OAuth credentials' }),
         removeOAuthProxyCredentials.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Remove access token' }),
+        updateApp.bind(null, app, { installationProgress: '20, Remove access token' }),
         removeAccessToken.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Configuring Nginx' }),
+        updateApp.bind(null, app, { installationProgress: '25, Configuring Nginx' }),
         configureNginx.bind(null, app),
         configureNakedDomain.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Registering subdomain' }),
+        updateApp.bind(null, app, { installationProgress: '30, Registering subdomain' }),
         registerSubdomain.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Create OAuth proxy credentials' }),
+        updateApp.bind(null, app, { installationProgress: '35, Create OAuth proxy credentials' }),
         allocateOAuthProxyCredentials.bind(null, app),
 
         // allocate access token
-        updateApp.bind(null, app, { installationProgress: 'Allocate access token' }),
+        updateApp.bind(null, app, { installationProgress: '40, Allocate access token' }),
         allocateAccessToken.bind(null, app),
 
         // addons like oauth might rely on the app's fqdn
-        updateApp.bind(null, app, { installationProgress: 'Setting up addons' }),
+        updateApp.bind(null, app, { installationProgress: '50, Setting up addons' }),
         addons.setupAddons.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Creating container' }),
+        updateApp.bind(null, app, { installationProgress: '60, Creating container' }),
         createContainer.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Add collectd profile' }),
+        updateApp.bind(null, app, { installationProgress: '70, Add collectd profile' }),
         addCollectdProfile.bind(null, app),
 
         runApp.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Waiting for DNS propagation' }),
+        updateApp.bind(null, app, { installationProgress: '80, Waiting for DNS propagation' }),
         exports._waitForDnsPropagation.bind(null, app),
 
         // done!
@@ -799,29 +799,29 @@ function update(app, callback) {
     debug('Updating %s to %s', app.id, safe.query(app, 'manifest.version'));
 
     async.series([
-        updateApp.bind(null, app, { installationProgress: 'Stopping app' }),
+        updateApp.bind(null, app, { installationProgress: '0, Stopping app' }),
         stopApp.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Deleting container' }),
+        updateApp.bind(null, app, { installationProgress: '10, Deleting container' }),
         deleteContainer.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Backup and uploading app data' }),
+        updateApp.bind(null, app, { installationProgress: '20, Backup and uploading app data' }),
         cloudron.backupApp.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Verify manifest' }),
+        updateApp.bind(null, app, { installationProgress: '35, Verify manifest' }),
         verifyManifest.bind(null, app),
         downloadIcon.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Downloading image' }),
+        updateApp.bind(null, app, { installationProgress: '45, Downloading image' }),
         downloadImage.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Updating addons' }),
+        updateApp.bind(null, app, { installationProgress: '70, Updating addons' }),
         addons.updateAddons.bind(null, app, oldManifest),
 
-        updateApp.bind(null, app, { installationProgress: 'Creating container' }),
+        updateApp.bind(null, app, { installationProgress: '80, Creating container' }),
         createContainer.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Add collectd profile' }),
+        updateApp.bind(null, app, { installationProgress: '90, Add collectd profile' }),
         addCollectdProfile.bind(null, app),
 
         runApp.bind(null, app),
@@ -853,38 +853,38 @@ function uninstall(app, callback) {
             callback(null);
         },
 
-        updateApp.bind(null, app, { installationProgress: 'Unconfiguring Nginx' }),
+        updateApp.bind(null, app, { installationProgress: '0, Unconfiguring Nginx' }),
         unconfigureNginx.bind(null, app),
         unconfigureNakedDomain.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Stopping app' }),
+        updateApp.bind(null, app, { installationProgress: '10, Stopping app' }),
         stopApp.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Deleting container' }),
+        updateApp.bind(null, app, { installationProgress: '20, Deleting container' }),
         deleteContainer.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Add collectd profile' }),
+        updateApp.bind(null, app, { installationProgress: '30, Add collectd profile' }),
         removeCollectdProfile.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Deleting image' }),
+        updateApp.bind(null, app, { installationProgress: '40, Deleting image' }),
         deleteImage.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Teardown addons' }),
+        updateApp.bind(null, app, { installationProgress: '50, Teardown addons' }),
         addons.teardownAddons.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Deleting volume' }),
+        updateApp.bind(null, app, { installationProgress: '60, Deleting volume' }),
         deleteVolume.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Unregistering subdomain' }),
+        updateApp.bind(null, app, { installationProgress: '70, Unregistering subdomain' }),
         unregisterSubdomain.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Remove access token' }),
+        updateApp.bind(null, app, { installationProgress: '80, Remove access token' }),
         removeAccessToken.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Remove OAuth credentials' }),
+        updateApp.bind(null, app, { installationProgress: '85, Remove OAuth credentials' }),
         removeOAuthProxyCredentials.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: 'Cleanup manifest' }),
+        updateApp.bind(null, app, { installationProgress: '90, Cleanup manifest' }),
         removeIcon.bind(null, app),
 
         appdb.del.bind(null, app.id)

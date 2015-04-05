@@ -153,7 +153,7 @@
                             </div>
                             <div ng-show="(app.installationState | installationActive)">
                                 <div class="progress progress-striped active">
-                                    <div class="progress-bar progress-bar-success" role="progressbar" style="width: 80%"></div>
+                                    <div class="progress-bar progress-bar-success" role="progressbar" style="width: {{ app.progress }}%"></div>
                                 </div>
                             </div>
                         </div>

@@ -206,6 +206,12 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
 
             // put new app with amended title in cache
             data.manifest = { title: title };
+
+            // extract progress percentage
+            var progress = Number.parseInt(data.installationProgress.split(',')[0]);
+            if (isNaN(progress)) progress = 0;
+            data.progress = progress;
+
             that._installedApps.push(data);
 
             callback(null, data.id);
@@ -504,10 +510,18 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
                     }
                 }
 
+                var tmp = {};
+                angular.copy(app, tmp);
+
+                // extract progress percentage
+                var progress = Number.parseInt(tmp.installationProgress.split(',')[0]);
+                if (isNaN(progress)) progress = 0;
+                tmp.progress = progress;
+
                 if (found !== false) {
-                    angular.copy(app, that._installedApps[found]);
+                    angular.copy(tmp, that._installedApps[found]);
                 } else {
-                    that._installedApps.push(app);
+                    that._installedApps.push(tmp);
                 }
             });
 
