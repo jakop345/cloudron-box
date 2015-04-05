@@ -63,6 +63,10 @@ var KNOWN_ADDONS = {
         backup: backupPostgreSql,
         restore: restorePostgreSql
     },
+    mongodb: {
+        setup: setupMongoDb,
+        teardown: teardownMongoDb,
+    },
     redis: {
         setup: setupRedis,
         teardown: teardownRedis,
@@ -185,6 +189,7 @@ function getLinksSync(app) {
         case 'postgresql': links.push('postgresql:postgresql'); break;
         case 'sendmail': links.push('mail:mail'); break;
         case 'redis': links.push('redis-' + app.id + ':redis-' + app.id); break;
+        case 'mongodb': links.push('mongodb:mongodb'); break;
         default: break;
         }
     }
@@ -458,6 +463,62 @@ function restorePostgreSql(app, callback) {
         cp.stdout.pipe(process.stdout);
         cp.stderr.pipe(process.stderr);
         input.pipe(cp.stdin);
+    });
+}
+
+function setupMongoDb(app, callback) {
+    assert(typeof app === 'object');
+    assert(typeof callback === 'function');
+
+    debug('Setting up mongodb for %s', app.id);
+
+    var container = docker.getContainer('mongodb');
+    var cmd = [ '/addons/mongodb/service.sh', 'add', config.get('addons.mongodb.rootPassword'), app.id ];
+
+    container.exec({ Cmd: cmd, AttachStdout: true, AttachStderr: true }, function (error, execContainer) {
+        if (error) return callback(error);
+
+        execContainer.start(function (error, stream) {
+            if (error) return callback(error);
+
+            var stdout = new MemoryStream();
+            var stderr = new MemoryStream();
+
+            execContainer.modem.demuxStream(stream, stdout, stderr);
+            stderr.on('data', function (data) { debug(data.toString('utf8')); }); // set -e output
+
+            var chunks = [ ];
+            stdout.on('data', function (chunk) { chunks.push(chunk); });
+
+            stream.on('error', callback);
+            stream.on('end', function () {
+                var env = Buffer.concat(chunks).toString('utf8').split('\n').slice(0, -1); // remove trailing newline
+                debug('Setting mongodb addon config of %s to %j', app.id, env);
+                appdb.setAddonConfig(app.id, 'mongodb', env, callback);
+            });
+        });
+    });
+}
+
+function teardownMongoDb(app, callback) {
+    var container = docker.getContainer('mongodb');
+    var cmd = [ '/addons/mongodb/service.sh', 'remove', config.get('addons.mongodb.rootPassword'), app.id ];
+
+    debug('Tearing down mongodb for %s', app.id);
+
+    container.exec({ Cmd: cmd, AttachStdout: true, AttachStderr: true }, function (error, execContainer) {
+        if (error) return callback(error);
+
+        execContainer.start(function (error, stream) {
+            if (error) return callback(error);
+
+            var data = '';
+            stream.on('error', callback);
+            stream.on('data', function (d) { data += d.toString('utf8'); });
+            stream.on('end', function () {
+                appdb.unsetAddonConfig(app.id, 'mongodb', callback);
+            });
+        });
     });
 }
 

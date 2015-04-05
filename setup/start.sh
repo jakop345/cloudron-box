@@ -179,6 +179,20 @@ postgresql_container_id=$(docker run --restart=always -d --name="postgresql" \
     girish/postgresql:0.4)
 echo "PostgreSQL container id: ${postgresql_container_id}"
 
+set_progress "55" "Setup Mongodb addon"
+mongodb_root_password=$(pwgen -1 -s)
+cat > "${CONFIG_DIR}/addons/mongodb_vars.sh" <<EOF
+readonly MONGODB_ROOT_PASSWORD='${mongodb_root_password}'
+EOF
+docker pull girish/mongodb:0.1 || true # this line for dev convenience since it's already part of base image
+rm -rf "${DATA_DIR}/mongodb"
+mongodb_container_id=$(docker run --restart=always -d --name="mongodb" \
+    -h "${arg_fqdn}" \
+    -v "${DATA_DIR}/mongodb:/var/lib/mongodb" \
+    -v "${CONFIG_DIR}/addons/mongodb_vars.sh:/etc/mongodb_vars.sh:r" \
+    girish/mongodb:0.1)
+echo "Mongodb container id: ${mongodb_container_id}"
+
 set_progress "60" "Pulling Redis addon"
 docker pull girish/redis:0.3 || true # this line for dev convenience since it's already part of base image
 
@@ -211,6 +225,9 @@ cat > "${CONFIG_DIR}/cloudron.conf" <<CONF_END
         },
         "postgresql": {
             "rootPassword": "${postgresql_root_password}"
+        },
+        "mongodb": {
+            "rootPassword": "${mongodb_root_password}"
         }
     },
     "developerMode": ${arg_developer_mode}
