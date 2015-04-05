@@ -206,11 +206,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
 
             // put new app with amended title in cache
             data.manifest = { title: title };
-
-            // extract progress percentage
-            var progress = Number.parseInt(data.installationProgress.split(',')[0]);
-            if (isNaN(progress)) progress = 0;
-            data.progress = progress;
+            data.progress = 0;
 
             that._installedApps.push(data);
 
