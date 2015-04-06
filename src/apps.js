@@ -297,10 +297,10 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
     assert(typeof callback === 'function');
 
     var error = manifestFormat.parse(manifest);
-    if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Mainfest error: ' + error.message));
+    if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Manifest error: ' + error.message));
 
     error = checkManifestConstraints(manifest);
-    if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Mainfest cannot be installed: ' + error.message));
+    if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Manifest cannot be installed: ' + error.message));
 
     error = validateHostname(location, config.fqdn());
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
@@ -374,10 +374,10 @@ function update(appId, manifest, portBindings, callback) {
     debug('Will update app with id:%s', appId);
 
     var error = manifestFormat.parse(manifest);
-    if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Mainfest error:' + error.message));
+    if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Manifest error:' + error.message));
 
     error = checkManifestConstraints(manifest);
-    if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Mainfest cannot be installed:' + error.message));
+    if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Manifest cannot be installed:' + error.message));
 
     error = validatePortBindings(portBindings, manifest.tcpPorts);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
@@ -504,8 +504,8 @@ function checkManifestConstraints(manifest) {
         return new Error('Box version exceeds Apps maxBoxVersion');
     }
 
-    if (semver.valid(manifest.minBoxVersion) && semver.lt(manifest.minBoxVersion, config.version())) {
-        return new Error('Box version exceeds Apps maxBoxVersion');
+    if (semver.valid(manifest.minBoxVersion) && semver.gt(manifest.minBoxVersion, config.version())) {
+        return new Error('minBoxVersion exceeds Box version');
     }
 
     return null;
