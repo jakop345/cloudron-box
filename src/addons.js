@@ -66,6 +66,8 @@ var KNOWN_ADDONS = {
     mongodb: {
         setup: setupMongoDb,
         teardown: teardownMongoDb,
+        backup: backupMongoDb,
+        restore: restoreMongoDb
     },
     redis: {
         setup: setupRedis,
@@ -521,6 +523,51 @@ function teardownMongoDb(app, callback) {
         });
     });
 }
+
+function backupMongoDb(app, callback) {
+    debug('Backin up mongodb for %s', app.id);
+
+    callback = once(callback); // ChildProcess exit may or may not be called after error
+
+    var output = fs.createWriteStream(path.join(paths.DATA_DIR, app.id, 'mongodbdump'));
+    output.on('error', callback);
+
+    var cp = spawn('/usr/bin/docker', [ 'exec', 'mongodb', '/addons/mongodb/service.sh', 'backup', config.get('addons.mongodb.rootPassword'), app.id ]);
+    cp.on('error', callback);
+    cp.on('exit', function (code, signal) {
+        debug('backupMongoDb: done %s %s', code, signal);
+        if (!callback.called) callback(code ? 'backupMongoDb failed with status ' + code : null);
+    });
+
+    cp.stdout.pipe(output);
+    cp.stderr.pipe(process.stderr);
+}
+
+function restoreMongoDb(app, callback) {
+    callback = once(callback); // ChildProcess exit may or may not be called after error
+
+    setupMongoDb(app, function (error) {
+        if (error) return callback(error);
+
+        debug('restoreMongoDb: %s (%s)', app.id, app.manifest.title);
+
+        var input = fs.createReadStream(path.join(paths.DATA_DIR, app.id, 'mongodbdump'));
+        input.on('error', callback);
+
+        // cannot get this to work through docker.exec
+        var cp = spawn('/usr/bin/docker', [ 'exec', '-i', 'mongodb', '/addons/mongodb/service.sh', 'restore', config.get('addons.mongodb.rootPassword'), app.id ]);
+        cp.on('error', callback);
+        cp.on('exit', function (code, signal) {
+            debug('restoreMongoDb: done %s %s', code, signal);
+            if (!callback.called) callback(code ? 'restoreMongoDb failed with status ' + code : null);
+        });
+
+        cp.stdout.pipe(process.stdout);
+        cp.stderr.pipe(process.stderr);
+        input.pipe(cp.stdin);
+    });
+}
+
 
 function forwardRedisPort(appId, callback) {
     assert(typeof appId === 'string');
