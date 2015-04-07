@@ -173,6 +173,8 @@ function loginForm(req, res) {
             appId = result.appId.slice('addon-'.length);
         } else if (result.appId.indexOf('proxy-') === 0) {
             appId = result.appId.slice('proxy-'.length);
+        } else if (result.appId.indexOf('external-') === 0) {
+            return res.render('login', { adminOrigin: config.adminOrigin(), csrf: req.csrfToken(), applicationName: 'External Application' });
         }
 
         appdb.get(appId, function (error, result) {
