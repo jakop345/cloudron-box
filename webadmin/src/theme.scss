@@ -285,7 +285,7 @@ $table-border-color:                        transparent !default;
      height: 200px;
      background-position: center;
      background-repeat: no-repeat;
-     background-size: cover;
+     background-size: contain;
 }
 
 .modal-backdrop {
