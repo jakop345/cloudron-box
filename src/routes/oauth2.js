@@ -127,7 +127,7 @@ session.ensureLoggedIn = function (redirectTo) {
                 req.session.returnTo = req.originalUrl || req.url;
             }
 
-            res.send(200, util.format('<script>window.location.href = "%s";</script>', redirectTo));
+            res.status(200).send(util.format('<script>window.location.href = "%s";</script>', redirectTo));
         } else {
             next();
         }
