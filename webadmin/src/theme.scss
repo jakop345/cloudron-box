@@ -160,6 +160,13 @@ $table-border-color:                        transparent !default;
     box-shadown: none;
 }
 
+.app-icon {
+    min-height: 64px;
+    max-height: 64px;
+    min-width: 64px;
+    max-width: 100%;
+}
+
 // ----------------------------
 // Animations
 // ----------------------------
