@@ -12,7 +12,7 @@ if [[ $# == 1 && "$1" == "--check" ]]; then
     exit 0
 fi
 
-# always exit with status 0 regardless of whether the restart succeeded
-# this is required by tests (where neither supervisor nor nginx are running)
-/etc/init.d/collectd restart || true
+if [[ "${NODE_ENV}" == "cloudron" ]]; then
+    /etc/init.d/collectd restart
+fi
 
