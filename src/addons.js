@@ -146,7 +146,7 @@ function backupAddons(app, callback) {
     async.eachSeries(app.manifest.addons, function iterator (addon, iteratorCallback) {
         if (!(addon in KNOWN_ADDONS)) return iteratorCallback(new Error('No such addon:' + addon));
 
-        if (!KNOWN_ADDONS[addon].backup) return callback(null);
+        if (!KNOWN_ADDONS[addon].backup) return iteratorCallback(null);
 
         KNOWN_ADDONS[addon].backup(app, iteratorCallback);
     }, callback);
@@ -164,7 +164,7 @@ function restoreAddons(app, callback) {
     async.eachSeries(app.manifest.addons, function iterator (addon, iteratorCallback) {
         if (!(addon in KNOWN_ADDONS)) return iteratorCallback(new Error('No such addon:' + addon));
 
-        if (!KNOWN_ADDONS[addon].restore) return callback(null);
+        if (!KNOWN_ADDONS[addon].restore) return iteratorCallback(null);
 
         KNOWN_ADDONS[addon].restore(app, iteratorCallback);
     }, callback);
