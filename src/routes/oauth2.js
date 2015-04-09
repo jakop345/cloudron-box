@@ -20,6 +20,7 @@ var assert = require('assert'),
     appdb = require('../appdb'),
     url = require('url'),
     user = require('../user.js'),
+    UserError = user.UserError,
     hat = require('hat');
 
 // create OAuth 2.0 server
@@ -134,34 +135,37 @@ session.ensureLoggedIn = function (redirectTo) {
     };
 };
 
-// Main login form username and password
-function loginForm(req, res) {
-    if (!req.session.returnTo) {
-        return res.render('error', {
-            user: req.user,
+function sendErrorPageOrRedirect(req, res, message) {
+    assert(typeof req === 'object');
+    assert(typeof res === 'object');
+    assert(typeof message === 'string');
+
+    if (typeof req.query.returnToOnError !== 'string') {
+        res.render('error', {
             adminOrigin: config.adminOrigin(),
             message: 'Invalid login request'
         });
+    } else {
+        var u = url.parse(req.query.returnToOnError);
+        if (!u.protocol || !u.host) return res.render('error', {
+            adminOrigin: config.adminOrigin(),
+            message: 'Invalid request. returnToOnError query is not a valid URI.'
+        });
+
+        res.redirect(req.query.returnToOnError);
     }
+}
+
+// Main login form username and password
+function loginForm(req, res) {
+    if (typeof req.session.returnTo !== 'string') return sendErrorPageOrRedirect(req, res, 'Invalid login request');
 
     var u = url.parse(req.session.returnTo, true);
 
-    if (!u.query.client_id) {
-        return res.render('error', {
-            user: req.user,
-            adminOrigin: config.adminOrigin(),
-            message: 'Invalid login request'
-        });
-    }
+    if (!u.query.client_id) return sendErrorPageOrRedirect(req, res, 'Invalid login request');
 
     clientdb.get(u.query.client_id, function (error, result) {
-        if (error) {
-            return res.render('error', {
-                user: req.user,
-                adminOrigin: config.adminOrigin(),
-                message: 'Unknown OAuth client'
-            });
-        }
+        if (error) return sendErrorPageOrRedirect(req, res, 'Unknown OAuth client');
 
         if (result.appId === constants.ADMIN_CLIENT_ID) {
             return res.render('login', { adminOrigin: config.adminOrigin(), csrf: req.csrfToken(), applicationName: constants.ADMIN_NAME });
@@ -178,13 +182,7 @@ function loginForm(req, res) {
         }
 
         appdb.get(appId, function (error, result) {
-            if (error) {
-                return res.render('error', {
-                    user: req.user,
-                    adminOrigin: config.adminOrigin(),
-                    message: 'Unknown Application for those OAuth credentials'
-                });
-            }
+            if (error) return sendErrorPageOrRedirect(req, res, 'Unknown Application for those OAuth credentials');
 
             res.render('login', { adminOrigin: config.adminOrigin(), csrf: req.csrfToken(), applicationName: result.location });
         });
@@ -205,7 +203,10 @@ function passwordResetRequest(req, res, next) {
     debug('passwordResetRequest: email or username %s.', req.body.identifier);
 
     user.resetPasswordByIdentifier(req.body.identifier, function (error) {
-        if (error) console.error(error); // TODO redirect to an error page
+        if (error && error.reason !== UserError.NOT_FOUND) {
+            console.error(error);
+            return sendErrorPageOrRedirect(req, res, 'User not found');
+        }
 
         res.redirect('/api/v1/session/password/sent.html');
     });
@@ -261,7 +262,7 @@ function passwordReset(req, res, next) {
     });
 }
 
-// performs the login POST from the above form
+// performs the login POST from the login form
 var login = passport.authenticate('local', {
     successReturnToOrRedirect: '/api/v1/session/error',
     failureRedirect: '/api/v1/session/login'
@@ -298,11 +299,7 @@ var callback = [
 var error = [
     session.ensureLoggedIn('/api/v1/session/login'),
     function (req, res) {
-        res.render('error', {
-            user: req.user,
-            adminOrigin: config.adminOrigin(),
-            message: 'Invalid OAuth Client'
-        });
+        sendErrorPageOrRedirect(req, res, 'Invalid OAuth Client');
     }
 ];
 
@@ -323,15 +320,17 @@ var error = [
 
 */
 var authorization = [
-    session.ensureLoggedIn('/api/v1/session/login'),
+    // extract the returnTo origin and set as query param
+    function (req, res, next) {
+        if (!req.query.redirect_uri) return sendErrorPageOrRedirect(req, res, 'Invalid request. redirect_uri query is not set.');
+
+        session.ensureLoggedIn('/api/v1/session/login?returnToOnError=' + req.query.redirect_uri)(req, res, next);
+    },
     gServer.authorization(function (clientID, redirectURI, callback) {
         debug('authorization: client %s with callback to %s.', clientID, redirectURI);
 
         clientdb.get(clientID, function (error, client) {
-            if (error) {
-                console.error('Unkown client id %s.', clientID);
-                return callback(error);
-            }
+            if (error) return callback(error);
 
             // ignore the origin passed into form the client, but use the one from the clientdb
             var redirectPath = url.parse(redirectURI).path;
@@ -349,12 +348,7 @@ var authorization = [
         var scopes = req.oauth2.client.scope ? req.oauth2.client.scope.split(',') : ['profile','roleUser'];
 
         if (scopes.indexOf('roleAdmin') !== -1 && !req.user.admin) {
-            debug('authorization: not allowed, user needs to be admin');
-            return res.render('error', {
-                user: req.user,
-                adminOrigin: config.adminOrigin(),
-                message: 'Admin capabilities required. <a href="' + req.oauth2.client.redirectURI + '">Retry</a>'
-            });
+            return sendErrorPageOrRedirect(req, res, 'Admin capabilities required');
         }
 
         req.body.transaction_id = req.oauth2.transactionID;
@@ -448,11 +442,7 @@ var csrf = [
     function (err, req, res, next) {
         if (err.code !== 'EBADCSRFTOKEN') return next(err);
 
-        res.render('error', {
-            user: req.user,
-            adminOrigin: config.adminOrigin(),
-            message: 'Form expired'
-        });
+        sendErrorPageOrRedirect(req, res, 'Form expired');
     }
 ];
 
