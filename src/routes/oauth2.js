@@ -140,19 +140,19 @@ function sendErrorPageOrRedirect(req, res, message) {
     assert(typeof res === 'object');
     assert(typeof message === 'string');
 
-    if (typeof req.query.returnToOnError !== 'string') {
+    if (typeof req.query.returnTo !== 'string') {
         res.render('error', {
             adminOrigin: config.adminOrigin(),
-            message: 'Invalid login request'
+            message: message
         });
     } else {
-        var u = url.parse(req.query.returnToOnError);
+        var u = url.parse(req.query.returnTo);
         if (!u.protocol || !u.host) return res.render('error', {
             adminOrigin: config.adminOrigin(),
-            message: 'Invalid request. returnToOnError query is not a valid URI.'
+            message: 'Invalid request. returnTo query is not a valid URI. ' + message
         });
 
-        res.redirect(req.query.returnToOnError);
+        res.redirect(req.query.returnTo);
     }
 }
 
@@ -188,6 +188,26 @@ function loginForm(req, res) {
         });
     });
 }
+
+// performs the login POST from the login form
+function login(req, res) {
+    var returnTo = req.session.returnTo || req.query.returnTo;
+
+    passport.authenticate('local', {
+        failureRedirect: '/api/v1/session/login?returnTo=' + returnTo
+    })(req, res, function () {
+        res.redirect(returnTo);
+    });
+}
+
+// ends the current session
+function logout(req, res) {
+    req.logout();
+
+    if (req.query && req.query.redirect) res.redirect(req.query.redirect);
+    else res.redirect('/');
+}
+
 
 // Form to enter email address to send a password reset request mail
 function passwordResetRequestSite(req, res) {
@@ -262,20 +282,6 @@ function passwordReset(req, res, next) {
     });
 }
 
-// performs the login POST from the login form
-var login = passport.authenticate('local', {
-    successReturnToOrRedirect: '/api/v1/session/error',
-    failureRedirect: '/api/v1/session/login'
-});
-
-// ends the current session
-function logout(req, res) {
-    req.logout();
-
-    if (req.query && req.query.redirect) res.redirect(req.query.redirect);
-    else res.redirect('/');
-}
-
 
 /*
 
@@ -324,7 +330,7 @@ var authorization = [
     function (req, res, next) {
         if (!req.query.redirect_uri) return sendErrorPageOrRedirect(req, res, 'Invalid request. redirect_uri query is not set.');
 
-        session.ensureLoggedIn('/api/v1/session/login?returnToOnError=' + req.query.redirect_uri)(req, res, next);
+        session.ensureLoggedIn('/api/v1/session/login?returnTo=' + req.query.redirect_uri)(req, res, next);
     },
     gServer.authorization(function (clientID, redirectURI, callback) {
         debug('authorization: client %s with callback to %s.', clientID, redirectURI);

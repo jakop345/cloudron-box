@@ -7,7 +7,7 @@
 <div class="container">
     <div class="row">
         <div class="col-md-6 col-md-offset-3">
-            <form action="/api/v1/session/login" method="post">
+            <form id="loginForm" action="" method="post">
                 <input type="hidden" name="_csrf" value="<%= csrf %>"/>
                 <div class="form-group">
                     <label class="control-label" for="inputUsername">Username or Email</label>
@@ -23,5 +23,15 @@
         </div>
     </div>
 </div>
+
+<script>
+
+(function () {
+    var search = window.location.search.slice(1).split('&').map(function (item) { return item.split('='); }).reduce(function (o, k) { o[k[0]] = k[1]; return o; }, {});
+
+    document.getElementById('loginForm').action = '/api/v1/session/login?returnTo=' + search.returnTo;
+})();
+
+</script>
 
 <% include footer %>
