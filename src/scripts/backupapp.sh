@@ -12,8 +12,6 @@ if [[ $# == 1 && "$1" == "--check" ]]; then
     exit 0
 fi
 
-exec 1>> "/var/log/cloudron/backupapp.log" 2>&1
-
 if [ $# -lt 3 ]; then
     echo "Usage: backup.sh <appid> <url> <key>"
     exit 1

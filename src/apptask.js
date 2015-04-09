@@ -89,7 +89,9 @@ function execFile(tag, file, args, callback) {
     assert(util.isArray(args));
     assert(typeof callback === 'function');
 
-    child_process.execFile(file, args, { timeout: 30000 }, function (error, stdout, stderr) {
+    var options = { timeout: 0, encoding: 'utf8' };
+
+    child_process.execFile(file, args, options, function (error, stdout, stderr) {
         debug(tag + ' execFile: %s %s', file, args.join(' '));
         debug(tag + ' (stdout): %s', stdout.toString('utf8'));
         debug(tag + ' (stderr): %s', stderr.toString('utf8'));

@@ -25,10 +25,10 @@ var addons = require('./addons.js'),
     apps = require('./apps.js'),
     assert = require('assert'),
     async = require('async'),
+    child_process = require('child_process'),
+    clientdb = require('./clientdb.js'),
     config = require('../config.js'),
     debug = require('debug')('box:cloudron'),
-    clientdb = require('./clientdb.js'),
-    execFile = require('child_process').execFile,
     os = require('os'),
     path = require('path'),
     paths = require('./paths.js'),
@@ -110,6 +110,23 @@ function uninitialize(callback) {
     gCachedIp = null;
 
     callback(null);
+}
+
+function execFile(tag, file, args, callback) {
+    assert(typeof tag === 'string');
+    assert(typeof file === 'string');
+    assert(util.isArray(args));
+    assert(typeof callback === 'function');
+
+    var options = { timeout: 0, encoding: 'utf8' };
+
+    child_process.execFile(file, args, options, function (error, stdout, stderr) {
+        debug(tag + ' execFile: %s %s', file, args.join(' '));
+        debug(tag + ' (stdout): %s', stdout);
+        debug(tag + ' (stderr): %s', stderr);
+
+        callback(error);
+    });
 }
 
 function activate(username, password, email, callback) {
@@ -198,7 +215,7 @@ function restoreApp(app, callback) {
 
         debug('restoreApp: %s (%s) app url:%s', app.id, app.manifest.title, result.url);
 
-        execFile(SUDO, [ RESTORE_APP_CMD,  app.id, result.url, result.backupKey ], { }, function (error, stdout, stderr) {
+        execFile('restoreApp', SUDO, [ RESTORE_APP_CMD,  app.id, result.url, result.backupKey ], function (error, stdout, stderr) {
             if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, 'Error backing up : ' + stderr));
 
             callback(null);
@@ -219,7 +236,7 @@ function backupApp(app, callback) {
 
             debug('backupApp: %s (%s) app url:%s id:%s', app.id, app.manifest.title, result.url, result.id);
 
-            execFile(SUDO, [ BACKUP_APP_CMD,  app.id, result.url, result.backupKey ], { }, function (error, stdout, stderr) {
+            execFile('backupApp', SUDO, [ BACKUP_APP_CMD,  app.id, result.url, result.backupKey ], function (error, stdout, stderr) {
                 if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, 'Error backing up : ' + stderr));
 
                 debug('backupApp: %s (%s) successful', app.id, app.manifest.title);
@@ -238,7 +255,7 @@ function backupBox(appBackupIds, callback) {
 
         debug('backup: url %s', result.url);
 
-        execFile(SUDO, [ BACKUP_BOX_CMD,  result.url, result.backupKey ], { }, function (error) {
+        execFile('backupBox', SUDO, [ BACKUP_BOX_CMD,  result.url, result.backupKey ], function (error) {
             if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
             debug('backup: successful');
@@ -397,6 +414,7 @@ function addMailDnsRecords() {
 function setCertificate(certificate, key, callback) {
     assert(typeof certificate === 'string');
     assert(typeof key === 'string');
+    assert(typeof callback === 'function');
 
     debug('Updating certificates');
 
@@ -408,7 +426,7 @@ function setCertificate(certificate, key, callback) {
         return callback(new CloudronError(CloudronError.INTERNAL_ERROR, safe.error.message));
     }
 
-    execFile(SUDO, [ RELOAD_NGINX_CMD ], { timeout: 10000 }, function (error) {
+    execFile('setCertificate', SUDO, [ RELOAD_NGINX_CMD ], function (error) {
         if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
         return callback(null);
