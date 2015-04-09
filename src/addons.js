@@ -659,8 +659,7 @@ function teardownRedis(app, callback) {
    };
 
    container.remove(removeOptions, function (error) {
-       if (error && error.statusCode === 404) return callback(null);
-       if (error) return callback(new Error('Error removing container:' + error));
+       if (error && error.statusCode !== 404) return callback(new Error('Error removing container:' + error));
 
        vbox.unforwardFromHostToVirtualBox('redis-' + app.id);
 
