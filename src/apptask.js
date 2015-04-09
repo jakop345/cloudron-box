@@ -23,7 +23,6 @@ var addons = require('./addons.js'),
     dns = require('native-dns'),
     docker = require('./docker.js'),
     ejs = require('ejs'),
-    execFile = child_process.execFile,
     fs = require('fs'),
     hat = require('hat'),
     manifestFormat = require('manifestformat'),
@@ -84,8 +83,23 @@ function getFreePort(callback) {
     });
 }
 
+function execFile(tag, file, args, callback) {
+    assert(typeof tag === 'string');
+    assert(typeof file === 'string');
+    assert(util.isArray(args));
+    assert(typeof callback === 'function');
+
+    child_process.execFile(file, args, { timeout: 30000 }, function (error, stdout, stderr) {
+        debug(tag + ' execFile: %s %s', file, args.join(' '));
+        debug(tag + ' (stdout): %s', stdout.toString('utf8'));
+        debug(tag + ' (stderr): %s', stderr.toString('utf8'));
+
+        callback(error);
+    });
+}
+
 function reloadNginx(callback) {
-    execFile(SUDO, [ RELOAD_NGINX_CMD ], { timeout: 10000 }, callback);
+    execFile('reloadNginx', SUDO, [ RELOAD_NGINX_CMD ], callback);
 }
 
 function configureNginx(app, callback) {
@@ -314,21 +328,11 @@ function deleteImage(app, callback) {
 }
 
 function createVolume(app, callback) {
-    execFile(SUDO, [ CREATEAPPDIR_CMD, app.id ], { }, function (error, stdout, stderr) {
-        if (error) {
-            console.error('Error creating volume', error, stdout, stderr);
-            return callback(new Error('Error creating app data directory for ' + app.id + ':' + error.message));
-        }
-
-        return callback(null);
-    });
+    execFile('createVolume', SUDO, [ CREATEAPPDIR_CMD, app.id ], callback);
 }
 
 function deleteVolume(app, callback) {
-    execFile(SUDO, [ RMAPPDIR_CMD, app.id ], { }, function (error, stdout, stderr) {
-        if (error) console.error('Error removing volume', error, stdout, stderr);
-        return callback(error);
-    });
+    execFile('deleteVolume', SUDO, [ RMAPPDIR_CMD, app.id ], callback);
 }
 
 function allocateOAuthProxyCredentials(app, callback) {
@@ -390,14 +394,14 @@ function addCollectdProfile(app, callback) {
     var collectdConf = ejs.render(COLLECTD_CONFIG_EJS, { appId: app.id, containerId: app.containerId });
     fs.writeFile(path.join(paths.COLLECTD_APPCONFIG_DIR, app.id + '.conf'), collectdConf, function (error) {
         if (error) return callback(error);
-        execFile(SUDO, [ RELOAD_COLLECTD_CMD ], { timeout: 10000 }, callback);
+        execFile('addCollectdProfile', SUDO, [ RELOAD_COLLECTD_CMD ], callback);
     });
 }
 
 function removeCollectdProfile(app, callback) {
     fs.unlink(path.join(paths.COLLECTD_APPCONFIG_DIR, app.id + '.conf'), function (error, stdout, stderr) {
         if (error) console.error('Error removing collectd profile', error, stdout, stderr);
-        execFile(SUDO, [ RELOAD_COLLECTD_CMD ], { timeout: 10000 }, callback);
+        execFile('removeCollectdProfile', SUDO, [ RELOAD_COLLECTD_CMD ], callback);
     });
 }
 
