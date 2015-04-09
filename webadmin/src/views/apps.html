@@ -128,54 +128,56 @@
     </div>
 </div>
 
-<div class="row animateMeOpacity ng-hide" ng-show="installedApps.length > 0">
-    <div class="col-lg-12">
-        <h1>Installed Applications</h1>
+<div class="content">
+    <div class="row animateMeOpacity ng-hide" ng-show="installedApps.length > 0">
+        <div class="col-lg-12">
+            <h1>Installed Applications</h1>
+        </div>
     </div>
-</div>
 
-<div class="row animateMeOpacity ng-hide" ng-show="installedApps.length > 0">
-    <div class="col-sm-1 grid-item" ng-repeat="app in installedApps">
-        <div style="background-color: white;" class="highlight grid-item-content">
-            <a ng-href="{{app | applicationLink}}" target="_blank">
-                <div class="grid-item-top">
-                    <div class="row">
-                        <div class="col-xs-12 text-center" style="padding-left: 5px; padding-right: 5px;">
-                            <img ng-src="{{app.iconUrl}}" onerror="this.onerror=null;this.src='img/appicon_fallback.png'" class="app-icon"/>
-                        </div>
-                    </div>
-                    <br/>
-                    <div class="row">
-                        <div class="col-xs-12 text-left">
-                            <div style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden">{{ app.location || "App" }}</div>
-                            <div class="text-muted" style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden">
-                                {{ app.installationState | installationStateLabel }}
+    <div class="row animateMeOpacity ng-hide" ng-show="installedApps.length > 0">
+        <div class="col-sm-1 grid-item" ng-repeat="app in installedApps">
+            <div style="background-color: white;" class="highlight grid-item-content">
+                <a ng-href="{{app | applicationLink}}" target="_blank">
+                    <div class="grid-item-top">
+                        <div class="row">
+                            <div class="col-xs-12 text-center" style="padding-left: 5px; padding-right: 5px;">
+                                <img ng-src="{{app.iconUrl}}" onerror="this.onerror=null;this.src='img/appicon_fallback.png'" class="app-icon"/>
                             </div>
-                            <div ng-show="(app.installationState | installationActive)">
-                                <div class="progress progress-striped active">
-                                    <div class="progress-bar progress-bar-success" role="progressbar" style="width: {{ app.progress }}%"></div>
+                        </div>
+                        <br/>
+                        <div class="row">
+                            <div class="col-xs-12 text-left">
+                                <div style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden">{{ app.location || "App" }}</div>
+                                <div class="text-muted" style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden">
+                                    {{ app.installationState | installationStateLabel }}
+                                </div>
+                                <div ng-show="(app.installationState | installationActive)">
+                                    <div class="progress progress-striped active">
+                                        <div class="progress-bar progress-bar-success" role="progressbar" style="width: {{ app.progress }}%"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </a>
-            <div class="grid-item-bottom">
-                <div class="row">
-                    <div class="col-xs-4 text-left">
-                        <a href="" ng-click="showConfigure(app)">
-                            <i class="fa fa-wrench scale"></i>
-                        </a>
-                    </div>
-                    <div class="col-xs-4 text-center">
-                        <a href="" ng-click="showUpdate(app)" class="ng-hide animateMe" ng-show="app.updateVersion">
-                            <i class="fa fa-arrow-up text-success scale"></i>
-                        </a>
-                    </div>
-                    <div class="col-xs-4 text-right">
-                        <a href="" ng-click="showUninstall(app)">
-                            <i class="fa fa-remove scale"></i>
-                        </a>
+                </a>
+                <div class="grid-item-bottom">
+                    <div class="row">
+                        <div class="col-xs-4 text-left">
+                            <a href="" ng-click="showConfigure(app)">
+                                <i class="fa fa-wrench scale"></i>
+                            </a>
+                        </div>
+                        <div class="col-xs-4 text-center">
+                            <a href="" ng-click="showUpdate(app)" class="ng-hide animateMe" ng-show="app.updateVersion">
+                                <i class="fa fa-arrow-up text-success scale"></i>
+                            </a>
+                        </div>
+                        <div class="col-xs-4 text-right">
+                            <a href="" ng-click="showUninstall(app)">
+                                <i class="fa fa-remove scale"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
