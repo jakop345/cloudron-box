@@ -32,7 +32,7 @@ set_progress() {
     local percent="$1"
     local message="$2"
 
-    echo "==== ${message} ===="
+    echo "==== ${percent} - ${message} ===="
     (echo "{ \"update\": { \"percent\": \"${percent}\", \"message\": \"${message}\" }, \"backup\": {} }" > "${SETUP_PROGRESS_JSON}") 2> /dev/null || true # as this will fail in non-update mode
 }
 
