@@ -17,7 +17,7 @@ if [[ "${OSTYPE}" == "darwin"* ]]; then
     export PATH=$PATH:/usr/local/bin
 fi
 
-# always exit with status 0 regardless of whether the restart succeeded
-# this is required by tests (where neither supervisor nor nginx are running)
-nginx -s reload || true
+if [[ "${NODE_ENV}" == "cloudron" ]]; then
+    nginx -s reload
+fi
 
