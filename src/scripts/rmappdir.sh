@@ -21,7 +21,7 @@ if [[ "${NODE_ENV}" == "cloudron" ]]; then
     readonly app_data_dir="${HOME}/data/$1"
     if [[ -d "${app_data_dir}" ]]; then
         find "${app_data_dir}" -mindepth 1 -delete
-        btrfs subvolume delete "${app_data_dir}"
+        rm -rf "${app_data_dir}" || btrfs subvolume delete "${app_data_dir}"
     fi
 else
     readonly app_data_dir="${HOME}/.cloudron_test/data/$1"
