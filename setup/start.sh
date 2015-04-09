@@ -1,10 +1,5 @@
 #!/bin/bash
 
-# Count installer files so that we can correlate install and postinstall logs
-install_count=$(find /var/log/cloudron -name "installer*" | wc -l)
-exec > >(tee "/var/log/cloudron/start-$install_count.log")
-exec 2>&1
-
 set -eu -o pipefail
 
 echo "==== Cloudron Start ===="
