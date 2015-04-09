@@ -41,7 +41,7 @@
                             </div>
                         </div>
                         <div class="form-group" ng-class="{ 'has-error': (appInstallForm.password.$dirty && appInstallForm.password.$invalid) || (!appInstallForm.password.$dirty && appInstall.error.password) }">
-                            <label class="control-label" for="appInstallPasswordInput">Password</label>
+                            <label class="control-label" for="appInstallPasswordInput">Provide your password to confirm this action</label>
                             <input type="password" class="form-control" ng-model="appInstall.password" id="appInstallPasswordInput" name="password" ng-maxlength="512" ng-minlength="5" required>
                         </div>
                         <div class="has-error text-center" ng-show="appInstall.error.port">{{ appInstall.error.port }}</div>

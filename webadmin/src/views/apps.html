@@ -26,7 +26,7 @@
                             </div>
                         </div>
                         <div class="form-group" ng-class="{ 'has-error': (appConfigureForm.password.$dirty && appConfigureForm.password.$invalid) || (!appConfigureForm.password.$dirty && appConfigure.error.password) }">
-                            <label class="control-label" for="appConfigurePasswordInput">Password</label>
+                            <label class="control-label" for="appConfigurePasswordInput">Provide your password to confirm this action</label>
                             <input type="password" class="form-control" ng-model="appConfigure.password" id="appConfigurePasswordInput" name="password" ng-maxlength="512" ng-minlength="5" required>
                         </div>
                         <div class="has-error text-center" ng-show="appConfigure.error.port">{{ appConfigure.error.port }}</div>
@@ -69,7 +69,7 @@
                 <fieldset>
                     <form class="form-signin" role="form" name="appUninstallForm" ng-submit="doUninstall()" autocomplete="off">
                         <div class="form-group" ng-class="{ 'has-error': (!appUninstallForm.password.$dirty && appUninstall.error.password) || (appUninstallForm.password.$dirty && appUninstallForm.password.$invalid) }">
-                            <label class="control-label" for="appUninstallPasswordInput">Password</label>
+                            <label class="control-label" for="appUninstallPasswordInput">Provide your password to confirm this action</label>
                             <input type="password" class="form-control" ng-model="appUninstall.password" id="appUninstallPasswordInput" name="password" ng-maxlength="512" ng-minlength="5" required autofocus>
                         </div>
 
@@ -113,7 +113,7 @@
                             </ng-form>
                         </div>
                         <div class="form-group" ng-class="{ 'has-error': (!appUpdateForm.password.$dirty && appUpdate.error.password) || (appUpdateForm.password.$dirty && appUpdateForm.password.$invalid) }">
-                            <label class="control-label" for="inputUpdatePassword">Password</label>
+                            <label class="control-label" for="inputUpdatePassword">Provide your password to confirm this action</label>
                             <input type="password" class="form-control" ng-model="appUpdate.password" id="inputUpdatePassword" name="password" ng-maxlength="512" ng-minlength="5" required autofocus>
                         </div>
                         <input class="ng-hide" type="submit" ng-disabled="appUpdateForm.$invalid || busy"/>
