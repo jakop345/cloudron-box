@@ -37,7 +37,17 @@
 
     <center ng-show="errorCode == 1">
         <h1> <i class="fa fa-frown-o fa-fw text-danger"></i> Cloudron is not setup </h1>
-        Please use the setup link you received via mail or use the setup button <a href="" ng-click="webServerOriginLink">here</a>.
+        Please use the setup link you received via mail.
+    </center>
+
+    <center ng-show="errorCode == 2">
+        <h1> <i class="fa fa-frown-o fa-fw text-danger"></i> Setup requires a setupToken in the query </h1>
+        Please use the setup link you received via mail.
+    </center>
+
+    <center ng-show="errorCode == 3">
+        <h1> <i class="fa fa-frown-o fa-fw text-danger"></i> Setup requires an email in the query </h1>
+        Please use the setup link you received via mail.
     </center>
 
 </body>
