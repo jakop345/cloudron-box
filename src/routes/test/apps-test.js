@@ -12,6 +12,7 @@ var appdb = require('../../appdb.js'),
     async = require('async'),
     child_process = require('child_process'),
     clientdb = require('../../clientdb.js'),
+    tokendb = require('../../tokendb.js'),
     cloudron = require('../../cloudron.js'),
     config = require('../../../config.js'),
     constants = require('../../../constants.js'),
@@ -41,8 +42,10 @@ var APP_STORE_ID = 'test', APP_ID;
 var APP_LOCATION = 'appslocation';
 var APP_LOCATION_NEW = 'appslocationnew';
 var APP_MANIFEST = JSON.parse(fs.readFileSync(__dirname + '/CloudronManifest.json', 'utf8'));
-var USERNAME = 'admin', PASSWORD = 'password', EMAIL ='silly@me.com';
+var USERNAME = 'admin', PASSWORD = 'password', EMAIL ='admin@me.com';
+var USERNAME_1 = 'user', PASSWORD_1 = 'password', EMAIL_1 ='user@me.com';
 var token = null; // authentication token
+var token_1 = null;
 
 function startDockerProxy(interceptor, callback) {
     assert(typeof interceptor === 'function');
@@ -104,6 +107,22 @@ function setup(done) {
             config.set('addons.postgresql.rootPassword', 'secret');
 
             callback(null);
+        },
+        function (callback) {
+            request.post(SERVER_URL + '/api/v1/users')
+                   .query({ access_token: token })
+                   .send({ username: USERNAME_1, email: EMAIL_1 })
+                   .end(function (err, res) {
+                expect(err).to.not.be.ok();
+                expect(res.statusCode).to.equal(201);
+
+                callback(null);
+            });
+        }, function (callback) {
+            token_1 = tokendb.generateToken();
+
+            // HACK to get a token for second user (passwords are generated and the user should have gotten a password setup link...)
+            tokendb.add(token_1, tokendb.PREFIX_USER + USERNAME_1, 'test-client-id',  Date.now() + 10000, '*', callback);
         }
     ], done);
 }
@@ -260,6 +279,16 @@ describe('App API', function () {
         });
     });
 
+    it('app install fails for non admin', function (done) {
+        request.post(SERVER_URL + '/api/v1/apps/install')
+               .query({ access_token: token_1 })
+               .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: '' })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(403);
+            done(err);
+        });
+    });
+
     it('app install succeeds', function (done) {
         request.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
@@ -314,6 +343,18 @@ describe('App API', function () {
          });
     });
 
+    it('non admin can get all apps', function (done) {
+        request.get(SERVER_URL + '/api/v1/apps')
+               .query({ access_token: token_1 })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            expect(res.body.apps).to.be.an('array');
+            expect(res.body.apps[0].id).to.eql(APP_ID);
+            expect(res.body.apps[0].installationState).to.be.ok();
+            done(err);
+         });
+    });
+
     it('can get appBySubdomain', function (done) {
         request.get(SERVER_URL + '/api/v1/subdomains/' + APP_LOCATION)
                .end(function (err, res) {
@@ -355,6 +396,16 @@ describe('App API', function () {
         request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/uninstall')
             .send({ password: PASSWORD+PASSWORD })
             .query({ access_token: token })
+            .end(function (err, res) {
+            expect(res.statusCode).to.equal(403);
+            done(err);
+        });
+    });
+
+    it('non admin cannot uninstall app', function (done) {
+        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/uninstall')
+            .send({ password: PASSWORD })
+            .query({ access_token: token_1 })
             .end(function (err, res) {
             expect(res.statusCode).to.equal(403);
             done(err);
@@ -705,6 +756,15 @@ describe('App installation', function () {
         req.on('error', done);
     });
 
+    it('non admin cannot stop app', function (done) {
+        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/stop')
+            .query({ access_token: token_1 })
+            .end(function (err, res) {
+            expect(res.statusCode).to.equal(403);
+            done();
+        });
+    });
+
     it('can stop app', function (done) {
         request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/stop')
             .query({ access_token: token })
@@ -723,6 +783,15 @@ describe('App installation', function () {
                 done();
             });
         }, 2000);
+    });
+
+    it('nonadmin cannot start app', function (done) {
+        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/start')
+            .query({ access_token: token_1 })
+            .end(function (err, res) {
+            expect(res.statusCode).to.equal(403);
+            done();
+        });
     });
 
     it('can start app', function (done) {
@@ -1049,6 +1118,16 @@ describe('App installation - port bindings', function () {
               .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 } })
               .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
+            done();
+        });
+    });
+
+    it('non admin cannot reconfigure app', function (done) {
+        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
+              .query({ access_token: token_1 })
+              .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: 'roleAdmin' })
+              .end(function (err, res) {
+            expect(res.statusCode).to.equal(403);
             done();
         });
     });
