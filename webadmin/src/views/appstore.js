@@ -12,7 +12,6 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         error: {},
         app: {},
         location: '',
-        password: '',
         portBindings: {},
         accessRestriction: '',
         mediaLinks: []
@@ -22,7 +21,6 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         $scope.appInstall.app = {};
         $scope.appInstall.error = {};
         $scope.appInstall.location = '';
-        $scope.appInstall.password = '';
         $scope.appInstall.portBindings = {};
         $scope.appInstall.accessRestriction = '';
         $scope.appInstall.installFormVisible = false;
@@ -68,7 +66,6 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         $scope.appInstall.busy = true;
         $scope.appInstall.error.other = null;
         $scope.appInstall.error.location = null;
-        $scope.appInstall.error.password = null;
         $scope.appInstall.error.port = null;
 
         // only use enabled ports from portBindings
@@ -79,7 +76,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
             }
         }
 
-        Client.installApp($scope.appInstall.app.id, $scope.appInstall.app.manifest, $scope.appInstall.password, $scope.appInstall.app.title, { location: $scope.appInstall.location, portBindings: finalPortBindings, accessRestriction: $scope.appInstall.accessRestriction }, function (error) {
+        Client.installApp($scope.appInstall.app.id, $scope.appInstall.app.manifest, $scope.appInstall.app.title, { location: $scope.appInstall.location, portBindings: finalPortBindings, accessRestriction: $scope.appInstall.accessRestriction }, function (error) {
             if (error) {
                 if (error.statusCode === 409 && (error.message.indexOf('is reserved') !== -1 || error.message.indexOf('is already in use') !== -1)) {
                     $scope.appInstall.error.port = error.message;
@@ -87,10 +84,6 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
                     $scope.appInstall.error.location = 'This name is already taken.';
                     $scope.appInstallForm.location.$setPristine();
                     $('#appInstallLocationInput').focus();
-                } else if (error.statusCode === 403) {
-                    $scope.appInstall.error.password = 'Wrong password provided.';
-                    $scope.appInstall.password = '';
-                    $('#appInstallPasswordInput').focus();
                 } else {
                     $scope.appInstall.error.other = error.message;
                 }
