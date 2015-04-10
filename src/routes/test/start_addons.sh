@@ -29,7 +29,7 @@ start_mysql() {
         boot2docker ssh "sudo rm -rf /tmp/mysql_vars.sh"
         boot2docker ssh "echo \"${mysql_vars}\" > /tmp/mysql_vars.sh"
     else
-        sudo rm -rf /tmp/mysql_vars.sh
+        rm -rf /tmp/mysql_vars.sh
         echo "${mysql_vars}" > /tmp/mysql_vars.sh
     fi
 
