@@ -68,8 +68,8 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-success" ng-show="appInstall.installFormVisible" ng-click="doInstall()" ng-disabled="appInstallForm.$invalid || appInstall.busy"><i class="fa fa-spinner fa-pulse" ng-show="appInstall.busy"></i> Install</button>
-                <button type="button" class="btn btn-success" ng-show="!appInstall.installFormVisible" ng-click="showInstallForm()">Install</button>
+                <button type="button" class="btn btn-success" ng-show="appInstall.installFormVisible && user.admin" ng-click="doInstall()" ng-disabled="appInstallForm.$invalid || appInstall.busy"><i class="fa fa-spinner fa-pulse" ng-show="appInstall.busy"></i> Install</button>
+                <button type="button" class="btn btn-success" ng-show="!appInstall.installFormVisible && user.admin" ng-click="showInstallForm()">Install</button>
             </div>
         </div>
     </div>

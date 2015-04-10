@@ -1,11 +1,10 @@
 'use strict';
 
 angular.module('Application').controller('AppStoreController', ['$scope', '$location', '$timeout', 'Client', 'AppStore', function ($scope, $location, $timeout, Client, AppStore) {
-    Client.onReady(function () { if (!Client.getUserInfo().admin) $location.path('/'); });
-
     $scope.ready = false;
     $scope.apps = [];
     $scope.config = Client.getConfig();
+    $scope.user = Client.getUserInfo();
 
     $scope.appInstall = {
         busy: false,
