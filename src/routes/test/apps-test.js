@@ -160,16 +160,6 @@ describe('App API', function () {
         });
     });
 
-    it('app install fails - missing password', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/install')
-               .query({ access_token: token })
-               .end(function (err, res) {
-            expect(res.statusCode).to.equal(400);
-            expect(res.body.message).to.eql('API call requires user password');
-            done(err);
-        });
-    });
-
     it('app install fails - missing manifest', function (done) {
         request.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
@@ -220,28 +210,6 @@ describe('App API', function () {
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             expect(res.body.message).to.eql('location is required');
-            done(err);
-        });
-    });
-
-    it('app install fails - invalid password type', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/install')
-               .query({ access_token: token })
-               .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: 3.52, location: 'ninja', accessRestriction: '' })
-               .end(function (err, res) {
-            expect(res.statusCode).to.equal(400);
-            expect(res.body.message).to.eql('API call requires user password');
-            done(err);
-        });
-    });
-
-    it('app install fails - invalid password', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/install')
-               .query({ access_token: token })
-               .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD + 'x', location: 'ninja', accessRestriction: '' })
-               .end(function (err, res) {
-            expect(res.statusCode).to.equal(403);
-            expect(res.body.message).to.eql('Password incorrect');
             done(err);
         });
     });
