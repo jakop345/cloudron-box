@@ -77,7 +77,7 @@ app.controller('FinishController', ['$scope', '$location', '$timeout', 'Wizard',
         });
     }
 
-    $timeout(finish, 1000);
+    $timeout(finish, 3000);
 }]);
 
 app.controller('SetupController', ['$scope', '$location', 'Client', 'Wizard', function ($scope, $location, Client, Wizard) {

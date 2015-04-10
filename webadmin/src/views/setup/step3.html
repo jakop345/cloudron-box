@@ -1,19 +1,19 @@
 <div class="row">
     <div class="col-md-12 text-center">
-        <h1>Hi {{ wizard.username }}, what is your Email address?</h1>
+        <h1>And choose a password for your new user</h1>
     </div>
 </div>
 <div class="row">
-    <div class="col-md-12 text-center">
-        <div class="form-group" ng-class="{ 'has-error': setup_form.email.$dirty && setup_form.email.$invalid }">
-            <label class="control-label" for="inputEmail"></label>
-            <input type="email" class="form-control" ng-model="wizard.email" id="inputEmail" name="email" ng-enter="ok('/step4', setup_form.email.$invalid)" autofocus required>
+    <div class="col-md-6 col-md-offset-3 text-center">
+        <div class="form-group" ng-class="{ 'has-error': setup_form.password.$dirty && setup_form.password.$invalid }">
+            <label class="control-label" for="inputPassword"></label>
+            <input type="password" class="form-control" ng-model="wizard.password" id="inputPassword" name="password" ng-enter="ok('/step5', setup_form.password.$invalid)" ng-maxlength="512" ng-minlength="5" required autofocus>
         </div>
     </div>
 </div>
 <div class="row">
-    <div class="col-md-12 text-center">
+    <div class="col-md-6 col-md-offset-3 text-center">
         <a class="btn btn btn-outline pull-left" href="#/step2">Back</a>
-        <a class="btn btn-primary btn-outline pull-right" href="#/step4" ng-disabled="setup_form.email.$invalid">Alright</a>
+        <a class="btn btn-primary btn-outline pull-right" href="#/step4" ng-disabled="setup_form.password.$invalid">Done</a>
     </div>
 </div>
