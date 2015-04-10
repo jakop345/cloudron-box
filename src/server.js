@@ -137,18 +137,19 @@ function initializeExpressSync() {
     router.del ('/api/v1/oauth/clients/:clientId/tokens', settingsScope, routes.clients.delClientTokens);
 
     // app routes
-    router.get ('/api/v1/apps', appsScope, routes.apps.getApps);
-    router.get ('/api/v1/apps/:id', appsScope, routes.apps.getApp);
-    router.post('/api/v1/apps/:id/uninstall', appsScope, routes.user.verifyPassword, routes.apps.uninstallApp);
-    router.post('/api/v1/apps/install', appsScope, routes.user.verifyPassword, routes.apps.installApp);
-    router.post('/api/v1/apps/:id/configure', appsScope, routes.user.verifyPassword, routes.apps.configureApp);
-    router.post('/api/v1/apps/:id/update', appsScope, routes.user.verifyPassword, routes.apps.updateApp);
-    router.post('/api/v1/apps/:id/stop', appsScope, routes.apps.stopApp);
-    router.post('/api/v1/apps/:id/start', appsScope, routes.apps.startApp);
-    router.get ('/api/v1/apps/:id/icon', routes.apps.getAppIcon);
-    router.get ('/api/v1/apps/:id/logstream', appsScope, routes.apps.getLogStream);
-    router.get ('/api/v1/apps/:id/logs', appsScope, routes.apps.getLogs);
-    router.get ('/api/v1/apps/:id/exec', appsScope, routes.apps.exec);
+    router.get ('/api/v1/apps',          appsScope, routes.apps.getApps);
+    router.get ('/api/v1/apps/:id',      appsScope, routes.apps.getApp);
+    router.get ('/api/v1/apps/:id/icon', appsScope, routes.apps.getAppIcon);
+
+    router.post('/api/v1/apps/install',       appsScope, routes.user.requireAdmin, routes.user.verifyPassword, routes.apps.installApp);
+    router.post('/api/v1/apps/:id/uninstall', appsScope, routes.user.requireAdmin, routes.user.verifyPassword, routes.apps.uninstallApp);
+    router.post('/api/v1/apps/:id/configure', appsScope, routes.user.requireAdmin, routes.user.verifyPassword, routes.apps.configureApp);
+    router.post('/api/v1/apps/:id/update',    appsScope, routes.user.requireAdmin, routes.user.verifyPassword, routes.apps.updateApp);
+    router.post('/api/v1/apps/:id/stop',      appsScope, routes.user.requireAdmin, routes.apps.stopApp);
+    router.post('/api/v1/apps/:id/start',     appsScope, routes.user.requireAdmin, routes.apps.startApp);
+    router.get ('/api/v1/apps/:id/logstream', appsScope, routes.user.requireAdmin, routes.apps.getLogStream);
+    router.get ('/api/v1/apps/:id/logs',      appsScope, routes.user.requireAdmin, routes.apps.getLogs);
+    router.get ('/api/v1/apps/:id/exec',      appsScope, routes.user.requireAdmin, routes.apps.exec);
 
     // subdomain routes
     router.get ('/api/v1/subdomains/:subdomain', routes.apps.getAppBySubdomain);
