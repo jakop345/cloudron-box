@@ -58,7 +58,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
 
         $scope.appUpdate.error = {};
         $scope.appUpdate.app = {};
-        $scope.appUpdate.password = {};
+        $scope.appUpdate.password = '';
         $scope.appUpdate.manifest = {};
         $scope.appUpdate.portBindings = {};
 
