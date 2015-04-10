@@ -278,13 +278,3 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         });
     });
 }]);
-
-angular.module('Application').filter('applicationLink', function() {
-    return function(app) {
-        if (app.installationState === ISTATES.ISTATE_ERROR || app.installationState === ISTATES.ISTATE_INSTALLED) {
-            return 'https://' + app.fqdn;
-        } else {
-            return '';
-        }
-    };
-});

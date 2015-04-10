@@ -32,34 +32,47 @@ app.config(['$routeProvider', function ($routeProvider) {
 
 // keep in sync with appdb.js
 var ISTATES = {
-    ISTATE_PENDING_INSTALL: 'pending_install',
-    ISTATE_PENDING_CONFIGURE: 'pending_configure',
-    ISTATE_PENDING_UNINSTALL: 'pending_uninstall',
-    ISTATE_PENDING_RESTORE: 'pending_restore',
-    ISTATE_PENDING_UPDATE: 'pending_update',
-    ISTATE_ERROR: 'error',
-    ISTATE_INSTALLED: 'installed'
+    PENDING_INSTALL: 'pending_install',
+    PENDING_CONFIGURE: 'pending_configure',
+    PENDING_UNINSTALL: 'pending_uninstall',
+    PENDING_RESTORE: 'pending_restore',
+    PENDING_UPDATE: 'pending_update',
+    ERROR: 'error',
+    INSTALLED: 'installed'
+};
+var HSTATES = {
+    HEALTHY: 'healthy'
 };
 
 app.filter('installationActive', function() {
-    return function(inputObject) {
-        if (inputObject.installationState === ISTATES.ISTATE_ERROR) return false;
-        if (inputObject.installationState === ISTATES.ISTATE_INSTALLED) return false;
+    return function(app) {
+        if (app.installationState === ISTATES.ERROR) return false;
+        if (app.installationState === ISTATES.INSTALLED) return false;
         return true;
     };
 });
 
 app.filter('installationStateLabel', function() {
-    return function(inputObject) {
-        switch (inputObject.installationState) {
-        case ISTATES.ISTATE_PENDING_INSTALL: return 'Installing';
-        case ISTATES.ISTATE_PENDING_CONFIGURE: return 'Configuring';
-        case ISTATES.ISTATE_PENDING_UNINSTALL: return 'Uninstalling';
-        case ISTATES.ISTATE_PENDING_RESTORE: return 'Starting';
-        case ISTATES.ISTATE_PENDING_UPDATE: return 'Updating';
-        case ISTATES.ISTATE_ERROR: return 'Error';
-        case ISTATES.ISTATE_INSTALLED: return 'Running';
-        default: return inputObject.installationState;
+    return function(app) {
+        switch (app.installationState) {
+        case ISTATES.PENDING_INSTALL: return 'Installing';
+        case ISTATES.PENDING_CONFIGURE: return 'Configuring';
+        case ISTATES.PENDING_UNINSTALL: return 'Uninstalling';
+        case ISTATES.PENDING_RESTORE: return 'Starting';
+        case ISTATES.PENDING_UPDATE: return 'Updating';
+        case ISTATES.ERROR: return 'Error';
+        case ISTATES.INSTALLED: return app.health !== HSTATES.HEALTHY ? 'Starting' : 'Running';
+        default: return app.installationState;
+        }
+    };
+});
+
+app.filter('applicationLink', function() {
+    return function(app) {
+        if (app.installationState === ISTATES.INSTALLED && app.health === HSTATES.HEALTHY) {
+            return 'https://' + app.fqdn;
+        } else {
+            return '';
         }
     };
 });
