@@ -206,6 +206,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
 
             // put new app with amended title in cache
             data.manifest = { title: title };
+            data.iconUrl = that.getAppIconUrl(data);
             data.progress = 0;
 
             that._installedApps.push(data);
@@ -321,6 +322,10 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
 
     Client.prototype.getAppLogUrl = function (appId) {
         return '/api/v1/apps/' + appId + '/logs?access_token=' + this._token;
+    };
+
+    Client.prototype.getAppIconUrl = function (app) {
+        return app.iconUrl + '?access_token=' + this._token;
     };
 
     Client.prototype.setAdmin = function (username, admin, callback) {
@@ -509,6 +514,8 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
                 var tmp = {};
                 angular.copy(app, tmp);
 
+                tmp.iconUrl = that.getAppIconUrl(tmp);
+
                 // extract progress percentage
                 var progress = Number.parseInt(tmp.installationProgress.split(',')[0]);
                 if (isNaN(progress)) progress = 0;
@@ -526,7 +533,6 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
                 if (!apps.some(function (elem) { return (elem.id === that._installedApps[i].id); })) {
                     that._installedApps.splice(i, 1);
                 }
-
             }
 
             callback(null);
