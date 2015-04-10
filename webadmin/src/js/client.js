@@ -89,7 +89,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             message = error;
         }
 
-        Notification.error({ title: 'Cloudron Error', message: message, delay: 1000 });
+        Notification.error({ title: 'Cloudron Error', message: message, delay: 5000 });
     };
 
     Client.prototype.setReady = function () {
