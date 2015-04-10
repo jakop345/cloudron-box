@@ -42,16 +42,16 @@ var ISTATES = {
 };
 
 app.filter('installationActive', function() {
-    return function(input) {
-        if (input === ISTATES.ISTATE_ERROR) return false;
-        if (input === ISTATES.ISTATE_INSTALLED) return false;
+    return function(inputObject) {
+        if (inputObject.installationState === ISTATES.ISTATE_ERROR) return false;
+        if (inputObject.installationState === ISTATES.ISTATE_INSTALLED) return false;
         return true;
     };
 });
 
 app.filter('installationStateLabel', function() {
-    return function(input) {
-        switch (input) {
+    return function(inputObject) {
+        switch (inputObject.installationState) {
         case ISTATES.ISTATE_PENDING_INSTALL: return 'Installing';
         case ISTATES.ISTATE_PENDING_CONFIGURE: return 'Configuring';
         case ISTATES.ISTATE_PENDING_UNINSTALL: return 'Uninstalling';
@@ -59,7 +59,7 @@ app.filter('installationStateLabel', function() {
         case ISTATES.ISTATE_PENDING_UPDATE: return 'Updating';
         case ISTATES.ISTATE_ERROR: return 'Error';
         case ISTATES.ISTATE_INSTALLED: return 'Running';
-        default: return input;
+        default: return inputObject.installationState;
         }
     };
 });

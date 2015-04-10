@@ -152,9 +152,9 @@
                             <div class="col-xs-12 text-left">
                                 <div style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden">{{ app.location || "App" }}</div>
                                 <div class="text-muted" style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden">
-                                    {{ app.installationState | installationStateLabel }}
+                                    {{ app | installationStateLabel }}
                                 </div>
-                                <div ng-show="(app.installationState | installationActive)">
+                                <div ng-show="app | installationActive">
                                     <div class="progress progress-striped active">
                                         <div class="progress-bar progress-bar-success" role="progressbar" style="width: {{ app.progress }}%"></div>
                                     </div>
