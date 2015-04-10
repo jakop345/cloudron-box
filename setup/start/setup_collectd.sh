@@ -10,12 +10,11 @@ readonly script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 mkdir -p "${GRAPHITE_DIR}"
 
-docker pull girish/graphite:0.4 || true
 docker run --restart=always -d --name="graphite" \
     -p 127.0.0.1:2003:2003 \
     -p 127.0.0.1:2004:2004 \
     -p 127.0.0.1:8000:8000 \
-    -v "${GRAPHITE_DIR}:/app/data" girish/graphite:0.4
+    -v "${GRAPHITE_DIR}:/app/data" girish/graphite:0.1.0
 
 mkdir -p "${COLLECTD_APPCONFIG_DIR}"
 cp -r "${script_dir}/collectd/collectd.conf" "${COLLECTD_CONFIG_DIR}/collectd.conf"

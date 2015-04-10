@@ -35,18 +35,18 @@ if ! docker inspect girish/test:0.1.0 >/dev/null 2>/dev/null; then
     exit 1
 fi
 
-if ! docker inspect girish/redis:0.4 >/dev/null 2>/dev/null; then
-    echo "docker pull girish/redis:0.4 for tests to run"
+if ! docker inspect girish/redis:0.1.0 >/dev/null 2>/dev/null; then
+    echo "docker pull girish/redis:0.1.0 for tests to run"
     exit 1
 fi
 
-if ! docker inspect girish/mysql:0.4 >/dev/null 2>/dev/null; then
-    echo "docker pull girish/mysql:0.4 for tests to run"
+if ! docker inspect girish/mysql:0.1.0 >/dev/null 2>/dev/null; then
+    echo "docker pull girish/mysql:0.1.0 for tests to run"
     exit 1
 fi
 
-if ! docker inspect girish/postgresql:0.4 >/dev/null 2>/dev/null; then
-    echo "docker pull girish/postgresql:0.4 for tests to run"
+if ! docker inspect girish/postgresql:0.1.0 >/dev/null 2>/dev/null; then
+    echo "docker pull girish/postgresql:0.1.0 for tests to run"
     exit 1
 fi
 
