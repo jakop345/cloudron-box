@@ -8,6 +8,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
 
     $scope.installedApps = Client.getInstalledApps();
     $scope.config = Client.getConfig();
+    $scope.user = Client.getUserInfo();
 
     $scope.appConfigure = {
         busy: false,
