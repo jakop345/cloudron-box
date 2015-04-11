@@ -220,8 +220,8 @@ function restoreApp(app, callback) {
 
         debug('restoreApp: %s (%s) app url:%s', app.id, app.manifest.title, result.url);
 
-        execFile('restoreApp', SUDO, [ RESTORE_APP_CMD,  app.id, result.url, result.backupKey ], function (error, stdout, stderr) {
-            if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, 'Error backing up : ' + stderr));
+        execFile('restoreApp', SUDO, [ RESTORE_APP_CMD,  app.id, result.url, result.backupKey ], function (error) {
+            if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, 'Error backing up: ' + error));
 
             callback(null);
         });
@@ -241,8 +241,8 @@ function backupApp(app, callback) {
 
             debug('backupApp: %s (%s) app url:%s id:%s', app.id, app.manifest.title, result.url, result.id);
 
-            execFile('backupApp', SUDO, [ BACKUP_APP_CMD,  app.id, result.url, result.backupKey ], function (error, stdout, stderr) {
-                if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, 'Error backing up : ' + stderr));
+            execFile('backupApp', SUDO, [ BACKUP_APP_CMD,  app.id, result.url, result.backupKey ], function (error) {
+                if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, 'Error backing up: ' + error));
 
                 debug('backupApp: %s (%s) successful', app.id, app.manifest.title);
 
