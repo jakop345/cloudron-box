@@ -9,7 +9,6 @@ var appdb = require('./appdb.js'),
     DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:addons'),
     docker = require('./docker.js'),
-    execFile = child_process.execFile,
     fs = require('fs'),
     generatePassword = require('password-generator'),
     MemoryStream = require('memorystream'),
@@ -79,6 +78,25 @@ var KNOWN_ADDONS = {
 
 var SUDO = '/usr/bin/sudo',
     RMAPPDIR_CMD = path.join(__dirname, 'scripts/rmappdir.sh');
+
+function execFile(tag, file, args, callback) {
+    assert(typeof tag === 'string');
+    assert(typeof file === 'string');
+    assert(util.isArray(args));
+    assert(typeof callback === 'function');
+
+    var options = { timeout: 0, encoding: 'utf8' };
+
+    child_process.execFile(file, args, options, function (error, stdout, stderr) {
+        debug(tag + ' execFile: %s %s', file, args.join(' '));
+        debug(tag + ' (stdout): %s', stdout.toString('utf8'));
+        debug(tag + ' (stderr): %s', stderr.toString('utf8'));
+
+        if (error) debug(tag + ' code: %s, signal: %s', error.code, error.signal);
+
+        callback(error);
+    });
+}
 
 function setupAddons(app, callback) {
     assert(typeof app === 'object');
@@ -665,7 +683,7 @@ function teardownRedis(app, callback) {
 
        safe.fs.unlinkSync(paths.ADDON_CONFIG_DIR, 'redis-' + app.id + '_vars.sh');
 
-        execFile(SUDO, [ RMAPPDIR_CMD, app.id + '/redis' ], { }, function (error, stdout, stderr) {
+        execFile('teardownRedis', SUDO, [ RMAPPDIR_CMD, app.id + '/redis' ], function (error, stdout, stderr) {
             if (error) return callback(new Error('Error removing redis data:' + error));
 
             appdb.unsetAddonConfig(app.id, 'redis', callback);
