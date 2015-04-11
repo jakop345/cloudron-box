@@ -3,6 +3,7 @@
 var assert = require('assert'),
     child_process = require('child_process'),
     debug = require('debug')('shell.js'),
+    once = require('once'),
     util = require('util');
 
 exports = module.exports = {
@@ -17,19 +18,29 @@ function exec(tag, file, args, callback) {
     assert(util.isArray(args));
     assert(typeof callback === 'function');
 
-    var options = { timeout: 0, encoding: 'utf8' };
+    var callback = once(callback); // exit may or may not be called after an 'error'
 
-    child_process.execFile(file, args, options, function (error, stdout, stderr) {
-        debug(tag + ' execFile: %s %s', file, args.join(' '));
-        debug(tag + ' (stdout): %s', stdout.toString('utf8'));
-        debug(tag + ' (stderr): %s', stderr.toString('utf8'));
+    debug(tag + ' execFile: %s %s', file, args.join(' '));
 
-        if (error) debug(tag + ' code: %s, signal: %s', error.code, error.signal);
+    var cp = child_process.spawn(file, args);
+    cp.stdout.on('data', function (data) {
+        debug(tag + ' (stdout): %s', data.toString('utf8'));
+    });
 
+    cp.stderr.on('data', function (data) {
+        debug(tag + ' (stderr): %s', data.toString('utf8'));
+    });
+
+    cp.on('exit', function (code, signal) {
+        if (code || signal) debug(tag + ' code: %s, signal: %s', code, signal);
+        callback(code === 0 ? null : new Error('Exited with error'));
+    });
+
+    cp.on('error', function (error) {
+        debug(tag + ' code: %s, signal: %s', error.code, error.signal);
         callback(error);
     });
 }
-
 
 function sudo(tag, args, callback) {
     assert(typeof tag === 'string');
