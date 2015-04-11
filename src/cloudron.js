@@ -18,6 +18,8 @@ exports = module.exports = {
     getBackupUrl: getBackupUrl,
     setCertificate: setCertificate,
 
+    reboot: reboot,
+
     getIp: getIp
 };
 
@@ -46,7 +48,8 @@ var SUDO = '/usr/bin/sudo',
     BACKUP_BOX_CMD = path.join(__dirname, 'scripts/backupbox.sh'),
     RELOAD_NGINX_CMD = path.join(__dirname, 'scripts/reloadnginx.sh'),
     BACKUP_APP_CMD = path.join(__dirname, 'scripts/backupapp.sh'),
-    RESTORE_APP_CMD = path.join(__dirname, 'scripts/restoreapp.sh');
+    RESTORE_APP_CMD = path.join(__dirname, 'scripts/restoreapp.sh'),
+    REBOOT_CMD = path.join(__dirname, '../scripts/reboot.sh');
 
 var gBackupTimerId = null,
     gAddMailDnsRecordsTimerId = null,
@@ -434,3 +437,8 @@ function setCertificate(certificate, key, callback) {
         return callback(null);
     });
 }
+
+function reboot(callback) {
+    execFile('reboot', SUDO, [ REBOOT_CMD ], callback);
+}
+
