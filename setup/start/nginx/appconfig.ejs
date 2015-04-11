@@ -45,6 +45,11 @@ server {
     }
 
     location / {
+        # increase the proxy buffer sizes to not run into buffer issues (http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_buffers)
+        proxy_buffer_size       128k;
+        proxy_buffers           4 256k;
+        proxy_busy_buffers_size 256k;
+
 <% if ( isAdmin === true ) { %>
         location /api/ {
             proxy_pass   http://127.0.0.1:3000;
@@ -61,6 +66,8 @@ server {
             root   <%= sourceDir %>/webadmin/dist;
             index  index.html index.htm;
         }
+
+
 <% } else if ( accessRestriction.length > 0 ) { %>
         proxy_pass http://127.0.0.1:4000;
         proxy_set_header   X-Cloudron-Proxy-Port   <%= port %>;
