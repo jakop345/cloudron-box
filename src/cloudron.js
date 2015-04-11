@@ -36,6 +36,7 @@ var addons = require('./addons.js'),
     paths = require('./paths.js'),
     progress = require('./progress.js'),
     safe = require('safetydance'),
+    shell = require('./shell.js'),
     superagent = require('superagent'),
     tokendb = require('./tokendb.js'),
     updater = require('./updater.js'),
@@ -44,8 +45,7 @@ var addons = require('./addons.js'),
     userdb = require('./userdb.js'),
     util = require('util');
 
-var SUDO = '/usr/bin/sudo',
-    BACKUP_BOX_CMD = path.join(__dirname, 'scripts/backupbox.sh'),
+var BACKUP_BOX_CMD = path.join(__dirname, 'scripts/backupbox.sh'),
     RELOAD_NGINX_CMD = path.join(__dirname, 'scripts/reloadnginx.sh'),
     BACKUP_APP_CMD = path.join(__dirname, 'scripts/backupapp.sh'),
     RESTORE_APP_CMD = path.join(__dirname, 'scripts/restoreapp.sh'),
@@ -113,25 +113,6 @@ function uninitialize(callback) {
     gCachedIp = null;
 
     callback(null);
-}
-
-function execFile(tag, file, args, callback) {
-    assert(typeof tag === 'string');
-    assert(typeof file === 'string');
-    assert(util.isArray(args));
-    assert(typeof callback === 'function');
-
-    var options = { timeout: 0, encoding: 'utf8' };
-
-    child_process.execFile(file, args, options, function (error, stdout, stderr) {
-        debug(tag + ' execFile: %s %s', file, args.join(' '));
-        debug(tag + ' (stdout): %s', stdout);
-        debug(tag + ' (stderr): %s', stderr);
-
-        if (error) debug(tag + ' code: %s, signal: %s', error.code, error.signal);
-
-        callback(error);
-    });
 }
 
 function activate(username, password, email, callback) {
@@ -220,7 +201,7 @@ function restoreApp(app, callback) {
 
         debug('restoreApp: %s (%s) app url:%s', app.id, app.manifest.title, result.url);
 
-        execFile('restoreApp', SUDO, [ RESTORE_APP_CMD,  app.id, result.url, result.backupKey ], function (error) {
+        shell.sudo('restoreApp', [ RESTORE_APP_CMD,  app.id, result.url, result.backupKey ], function (error) {
             if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, 'Error backing up: ' + error));
 
             callback(null);
@@ -241,7 +222,7 @@ function backupApp(app, callback) {
 
             debug('backupApp: %s (%s) app url:%s id:%s', app.id, app.manifest.title, result.url, result.id);
 
-            execFile('backupApp', SUDO, [ BACKUP_APP_CMD,  app.id, result.url, result.backupKey ], function (error) {
+            shell.sudo('backupApp', [ BACKUP_APP_CMD,  app.id, result.url, result.backupKey ], function (error) {
                 if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, 'Error backing up: ' + error));
 
                 debug('backupApp: %s (%s) successful', app.id, app.manifest.title);
@@ -260,7 +241,7 @@ function backupBox(appBackupIds, callback) {
 
         debug('backup: url %s', result.url);
 
-        execFile('backupBox', SUDO, [ BACKUP_BOX_CMD,  result.url, result.backupKey ], function (error) {
+        shell.sudo('backupBox', [ BACKUP_BOX_CMD,  result.url, result.backupKey ], function (error) {
             if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
             debug('backup: successful');
@@ -431,7 +412,7 @@ function setCertificate(certificate, key, callback) {
         return callback(new CloudronError(CloudronError.INTERNAL_ERROR, safe.error.message));
     }
 
-    execFile('setCertificate', SUDO, [ RELOAD_NGINX_CMD ], function (error) {
+    shell.sudo('setCertificate', [ RELOAD_NGINX_CMD ], function (error) {
         if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
         return callback(null);
@@ -439,6 +420,6 @@ function setCertificate(certificate, key, callback) {
 }
 
 function reboot(callback) {
-    execFile('reboot', SUDO, [ REBOOT_CMD ], callback);
+    shell.sudo('reboot', [ REBOOT_CMD ], callback);
 }
 

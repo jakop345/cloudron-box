@@ -8,7 +8,6 @@ require('supererror')({ splatchError: true });
 
 var addons = require('./addons.js'),
     appdb = require('./appdb.js'),
-    tokendb = require('./tokendb.js'),
     apps = require('./apps.js'),
     assert = require('assert'),
     async = require('async'),
@@ -32,7 +31,9 @@ var addons = require('./addons.js'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
     settings = require('./settings.js'),
+    shell = require('./shell.js'),
     superagent = require('superagent'),
+    tokendb = require('./tokendb.js'),
     util = require('util'),
     uuid = require('node-uuid'),
     vbox = require('./vbox.js');
@@ -61,7 +62,6 @@ exports = module.exports = {
 
 var NGINX_APPCONFIG_EJS = fs.readFileSync(__dirname + '/../setup/start/nginx/appconfig.ejs', { encoding: 'utf8' }),
     COLLECTD_CONFIG_EJS = fs.readFileSync(__dirname + '/collectd.config.ejs', { encoding: 'utf8' }),
-    SUDO = '/usr/bin/sudo',
     RELOAD_NGINX_CMD = path.join(__dirname, 'scripts/reloadnginx.sh'),
     RELOAD_COLLECTD_CMD = path.join(__dirname, 'scripts/reloadcollectd.sh'),
     RMAPPDIR_CMD = path.join(__dirname, 'scripts/rmappdir.sh'),
@@ -83,27 +83,8 @@ function getFreePort(callback) {
     });
 }
 
-function execFile(tag, file, args, callback) {
-    assert(typeof tag === 'string');
-    assert(typeof file === 'string');
-    assert(util.isArray(args));
-    assert(typeof callback === 'function');
-
-    var options = { timeout: 0, encoding: 'utf8' };
-
-    child_process.execFile(file, args, options, function (error, stdout, stderr) {
-        debug(tag + ' execFile: %s %s', file, args.join(' '));
-        debug(tag + ' (stdout): %s', stdout.toString('utf8'));
-        debug(tag + ' (stderr): %s', stderr.toString('utf8'));
-
-        if (error) debug(tag + ' code: %s, signal: %s', error.code, error.signal);
-
-        callback(error);
-    });
-}
-
 function reloadNginx(callback) {
-    execFile('reloadNginx', SUDO, [ RELOAD_NGINX_CMD ], callback);
+    shell.sudo('reloadNginx', [ RELOAD_NGINX_CMD ], callback);
 }
 
 function configureNginx(app, callback) {
@@ -332,11 +313,11 @@ function deleteImage(app, callback) {
 }
 
 function createVolume(app, callback) {
-    execFile('createVolume', SUDO, [ CREATEAPPDIR_CMD, app.id ], callback);
+    shell.sudo('createVolume', [ CREATEAPPDIR_CMD, app.id ], callback);
 }
 
 function deleteVolume(app, callback) {
-    execFile('deleteVolume', SUDO, [ RMAPPDIR_CMD, app.id ], callback);
+    shell.sudo('deleteVolume', [ RMAPPDIR_CMD, app.id ], callback);
 }
 
 function allocateOAuthProxyCredentials(app, callback) {
@@ -398,14 +379,14 @@ function addCollectdProfile(app, callback) {
     var collectdConf = ejs.render(COLLECTD_CONFIG_EJS, { appId: app.id, containerId: app.containerId });
     fs.writeFile(path.join(paths.COLLECTD_APPCONFIG_DIR, app.id + '.conf'), collectdConf, function (error) {
         if (error) return callback(error);
-        execFile('addCollectdProfile', SUDO, [ RELOAD_COLLECTD_CMD ], callback);
+        shell.sudo('addCollectdProfile', [ RELOAD_COLLECTD_CMD ], callback);
     });
 }
 
 function removeCollectdProfile(app, callback) {
     fs.unlink(path.join(paths.COLLECTD_APPCONFIG_DIR, app.id + '.conf'), function (error, stdout, stderr) {
         if (error) console.error('Error removing collectd profile', error, stdout, stderr);
-        execFile('removeCollectdProfile', SUDO, [ RELOAD_COLLECTD_CMD ], callback);
+        shell.sudo('removeCollectdProfile', [ RELOAD_COLLECTD_CMD ], callback);
     });
 }
 
