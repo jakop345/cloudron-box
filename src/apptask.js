@@ -96,6 +96,8 @@ function execFile(tag, file, args, callback) {
         debug(tag + ' (stdout): %s', stdout.toString('utf8'));
         debug(tag + ' (stderr): %s', stderr.toString('utf8'));
 
+        if (error) debug(tag + ' code: %s, signal: %s', error.code, error.signal);
+
         callback(error);
     });
 }

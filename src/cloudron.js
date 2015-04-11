@@ -125,6 +125,8 @@ function execFile(tag, file, args, callback) {
         debug(tag + ' (stdout): %s', stdout);
         debug(tag + ' (stderr): %s', stderr);
 
+        if (error) debug(tag + ' code: %s, signal: %s', error.code, error.signal);
+
         callback(error);
     });
 }
