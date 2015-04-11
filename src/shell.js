@@ -7,7 +7,8 @@ var assert = require('assert'),
     util = require('util');
 
 exports = module.exports = {
-    sudo: sudo
+    sudo: sudo,
+    exec: exec
 };
 
 var SUDO = '/usr/bin/sudo';
@@ -33,13 +34,16 @@ function exec(tag, file, args, callback) {
 
     cp.on('exit', function (code, signal) {
         if (code || signal) debug(tag + ' code: %s, signal: %s', code, signal);
-        callback(code === 0 ? null : new Error('Exited with error'));
+
+        callback(code === 0 ? null : new Error(util.format('Exited with error %s signal %s', code, signal)));
     });
 
     cp.on('error', function (error) {
         debug(tag + ' code: %s, signal: %s', error.code, error.signal);
         callback(error);
     });
+
+    return cp;
 }
 
 function sudo(tag, args, callback) {
@@ -47,6 +51,8 @@ function sudo(tag, args, callback) {
     assert(util.isArray(args));
     assert(typeof callback === 'function');
 
-    exec(tag, SUDO, args, callback);
+    // -S makes sudo read stdin for password
+    var cp = exec(tag, SUDO, [ '-S' ].concat(args), callback);
+    cp.stdin.end();
 }
 
