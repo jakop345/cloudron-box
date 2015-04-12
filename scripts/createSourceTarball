@@ -11,14 +11,16 @@ assertNotEmpty() {
 [[ $(uname -s) == "Darwin" ]] && GNU_GETOPT="/usr/local/opt/gnu-getopt/bin/getopt" || GNU_GETOPT="getopt"
 readonly GNU_GETOPT
 
-args=$(${GNU_GETOPT} -o "" -l "revision:" -n "$0" -- "$@")
+args=$(${GNU_GETOPT} -o "" -l "revision:,keep" -n "$0" -- "$@")
 eval set -- "${args}"
 
+delete_tarball="yes"
 commitish="HEAD"
 
 while true; do
     case "$1" in
     --revision) commitish="$2"; shift 2;;
+    --keep) delete_tarball="no"; shift;;
     --) break;;
     *) echo "Unknown option $1"; exit 1;;
     esac
@@ -61,7 +63,13 @@ echo "Uploading bundle to S3"
 s3cmd --ssl --add-header=x-amz-acl:authenticated-read --access_key="${AWS_DEV_ACCESS_KEY}" --secret_key="${AWS_DEV_SECRET_KEY}" --no-mime-magic put "${bundle_file}" "s3://cloudron-dev-releases/box-${version}.tar.gz"
 
 echo "Cleaning up ${bundle_dir}"
-rm -rf "${bundle_dir}" "${bundle_file}"
+rm -rf "${bundle_dir}"
+
+if [[ "${delete_tarball}" == "no" ]]; then
+    echo "tarball preserved at ${bundle_file}"
+else
+    rm "${bundle_file}"
+fi
 
 echo "The URL for the versions file is: https://cloudron-dev-releases.s3.amazonaws.com/box-${version}.tar.gz"
 
