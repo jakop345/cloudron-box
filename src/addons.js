@@ -334,7 +334,7 @@ function backupMySql(app, callback) {
     var cp = spawn('/usr/bin/docker', [ 'exec', 'mysql', '/addons/mysql/service.sh', 'backup', config.get('addons.mysql.rootPassword'), app.id ]);
     cp.on('error', callback);
     cp.on('exit', function (code, signal) {
-        debug('backupMySql: done %s %s', code, signal);
+        debug('backupMySql: done. code:%s signal:%s', code, signal);
         if (!callback.called) callback(code ? 'backupMySql failed with status ' + code : null);
     });
 
