@@ -18,7 +18,7 @@ exports = module.exports = {
     run: run
 };
 
-var HEALTHCHECK_INTERVAL = 2 * 60 * 1000; // every 2 mins
+var HEALTHCHECK_INTERVAL = 10 * 1000; // every 10 seconds
 var UNHEALTHY_THRESHOLD = 10 * 60 * 1000; // 10 minutes
 var gLastSeen = { }; // { time, emailSent }
 
