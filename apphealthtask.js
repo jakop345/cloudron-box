@@ -12,7 +12,6 @@ var appdb = require('./src/appdb.js'),
     debug = require('debug')('box:apphealthtask'),
     docker = require('./src/docker.js'),
     mailer = require('./src/mailer.js'),
-    os = require('os'),
     superagent = require('superagent');
 
 exports = module.exports = {
