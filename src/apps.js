@@ -376,10 +376,11 @@ function configure(appId, location, portBindings, accessRestriction, callback) {
     });
 }
 
-function update(appId, manifest, portBindings, callback) {
+function update(appId, manifest, portBindings, icon, callback) {
     assert(typeof appId === 'string');
     assert(manifest && typeof manifest === 'object');
     assert(!portBindings || typeof portBindings === 'object');
+    assert(!icon || typeof icon === 'string');
     assert(typeof callback === 'function');
 
     debug('Will update app with id:%s', appId);
@@ -392,6 +393,14 @@ function update(appId, manifest, portBindings, callback) {
 
     error = validatePortBindings(portBindings, manifest.tcpPorts);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
+
+    if (icon) {
+        if (!validator.isBase64(icon)) return callback(new AppsError(AppsError.BAD_FIELD, 'icon is not base64'));
+
+        if (!safe.fs.writeFileSync(path.join(paths.APPICONS_DIR, appId + '.png'), new Buffer(icon, 'base64'))) {
+            return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error saving icon:' + safe.error.message));
+        }
+    }
 
     appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_UPDATE, { manifest: manifest, portBindings: portBindings }, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE)); // might be a bad guess
