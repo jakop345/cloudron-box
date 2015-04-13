@@ -20,6 +20,7 @@ exports = module.exports = {
 };
 
 var HEALTHCHECK_INTERVAL = 2 * 60 * 1000; // every 2 mins
+var UNHEALTHY_THRESHOLD = 10 * 60 * 1000; // 10 minutes
 var gLastSeen = { }; // { time, emailSent }
 
 function initialize(callback) {
@@ -40,8 +41,8 @@ function setHealth(app, health, callback) {
 
     if (health === appdb.HEALTH_HEALTHY || !(app.id in gLastSeen)) { // add new apps to list
         gLastSeen[app.id] = { time: now, emailSent: false };
-    } else if (Math.abs(now - gLastSeen[app.id].time) > HEALTHCHECK_INTERVAL * 5) { // not seen for 5 intervals
-        debug('app %s not seen for more than %s secs, marking as unhealthy', app.id, HEALTHCHECK_INTERVAL/1000 * 5);
+    } else if (Math.abs(now - gLastSeen[app.id].time) > UNHEALTHY_THRESHOLD) {
+        debug('app %s not seen for more than %s minutes, marking as unhealthy', app.id, UNHEALTHY_THRESHOLD/(60 * 1000));
 
         if (!gLastSeen[app.id].emailSent) {
             gLastSeen[app.id].emailSent = true;
