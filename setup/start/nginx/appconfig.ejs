@@ -39,7 +39,7 @@ server {
 
     error_page 500 502 503 504 =302 @appstatus;
     location @appstatus {
-        return 301 <%= adminOrigin %>/appstatus.html;
+        return 307 <%= adminOrigin %>/appstatus.html;
     }
 
     location / {
