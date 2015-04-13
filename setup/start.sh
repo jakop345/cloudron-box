@@ -22,7 +22,6 @@ source "${script_dir}/argparser.sh" "$@" # this injects the arg_* variables used
 
 # keep this is sync with config.js appFqdn()
 admin_fqdn=$([[ "${arg_is_custom_domain}" == "true" ]] && echo "${ADMIN_LOCATION}.${arg_fqdn}" ||  echo "${ADMIN_LOCATION}-${arg_fqdn}")
-admin_origin="https://${admin_fqdn}"
 
 set_progress() {
     local percent="$1"
@@ -112,9 +111,9 @@ cp "${script_dir}/start/nginx/nginx.conf" "${nginx_config_dir}/nginx.conf"
 cp "${script_dir}/start/nginx/mime.types" "${nginx_config_dir}/mime.types"
 # setup naked domain to use admin by default. app restoration will overwrite this config
 ${box_src_tmp_dir}/node_modules/.bin/ejs-cli -f "${script_dir}/start/nginx/appconfig.ejs" \
-    -O "{ \"vhost\": \"${arg_fqdn}\", \"isAdmin\": true, \"sourceDir\": \"${BOX_SRC_DIR}\", \"adminOrigin\": \"${admin_origin}\" }" > "${nginx_config_dir}/naked_domain.conf"
+    -O "{ \"vhost\": \"${arg_fqdn}\", \"isAdmin\": true, \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${nginx_config_dir}/naked_domain.conf"
 ${box_src_tmp_dir}/node_modules/.bin/ejs-cli -f "${script_dir}/start/nginx/appconfig.ejs" \
-    -O "{ \"vhost\": \"${admin_fqdn}\", \"isAdmin\": true, \"sourceDir\": \"${BOX_SRC_DIR}\", \"adminOrigin\": \"${admin_origin}\" }" > "${nginx_appconfig_dir}/admin.conf"
+    -O "{ \"vhost\": \"${admin_fqdn}\", \"isAdmin\": true, \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${nginx_appconfig_dir}/admin.conf"
 
 certificate_dir="${nginx_config_dir}/cert"
 mkdir -p "${certificate_dir}"
@@ -192,6 +191,7 @@ echo "Mongodb container id: ${mongodb_container_id}"
 
 set_progress "65" "Creating cloudron.conf"
 cloudron_sqlite="${DATA_DIR}/cloudron.sqlite"
+admin_origin="https://${admin_fqdn}"
 sudo -u yellowtent -H bash <<EOF
 set -eu
 echo "Creating cloudron.conf"
