@@ -37,11 +37,16 @@ find "${DATA_DIR}/box" -mindepth 1 -delete || true
 [[ ! -d "${DATA_DIR}/box" ]] && btrfs subvolume create "${DATA_DIR}/box"
 mkdir -p "${DATA_DIR}/box/appicons"
 mkdir -p "${DATA_DIR}/box/mail"
+mkdir -p "${DATA_DIR}/snapshots"
 
 mkdir -p "${CONFIG_DIR}/addons"
 mkdir -p "${CONFIG_DIR}/nginx/applications"
 mkdir -p "${CONFIG_DIR}/nginx/cert"
 mkdir -p "${CONFIG_DIR}/collectd/collectd.conf.d"
+
+# remove old snapshots. if we do want to keep this around, we will have to fix the chown -R below
+# which currently fails because these are readonly fs
+find "${DATA_DIR}/snapshots" -mindepth 1 -maxdepth 1 | xargs --no-run-if-empty btrfs subvolume delete
 
 set_progress "15" "Downloading restore data"
 if [[ -n "${arg_restore_url}" ]]; then

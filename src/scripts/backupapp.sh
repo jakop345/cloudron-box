@@ -24,7 +24,7 @@ backup_url="$2"
 backup_key="$3"
 readonly now=$(date "+%Y-%m-%dT%H:%M:%S")
 readonly app_data_dir="${DATA_DIR}/${app_id}"
-readonly app_data_snapshot="${DATA_DIR}/${app_id}-${now}"
+readonly app_data_snapshot="${DATA_DIR}/snapshots/${app_id}-${now}"
 
 btrfs subvolume snapshot -r "${app_data_dir}" "${app_data_snapshot}"
 

@@ -21,7 +21,7 @@ backup_url="$1"
 backup_key="$2"
 now=$(date "+%Y-%m-%dT%H:%M:%S")
 BOX_DATA_DIR="${HOME}/data/box"
-box_snapshot_dir="${HOME}/data/box-${now}"
+box_snapshot_dir="${HOME}/data/snapshots/box-${now}"
 
 echo "Creating MySQL dump"
 mysqldump -u root -ppassword --single-transaction --routines --triggers box > "${BOX_DATA_DIR}/box.mysqldump"
