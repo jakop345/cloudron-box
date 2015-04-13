@@ -81,12 +81,12 @@ var RMAPPDIR_CMD = path.join(__dirname, 'scripts/rmappdir.sh');
 
 function setupAddons(app, callback) {
     assert(typeof app === 'object');
-    assert(!app.manifest.addons || util.isArray(app.manifest.addons));
+    assert(!app.manifest.addons || typeof app.manifest.addons === 'object');
     assert(typeof callback === 'function');
 
     if (!app.manifest.addons) return callback(null);
 
-    async.eachSeries(app.manifest.addons, function iterator(addon, iteratorCallback) {
+    async.eachSeries(Object.keys(app.manifest.addons), function iterator(addon, iteratorCallback) {
         if (!(addon in KNOWN_ADDONS)) return iteratorCallback(new Error('No such addon:' + addon));
 
         debug('Setting up addon %s of appId:%s', addon, app.id);
@@ -101,11 +101,11 @@ function teardownAddons(app, callback) {
 
     if (!app.manifest) return callback(null);
 
-    assert(!app.manifest.addons || util.isArray(app.manifest.addons));
+    assert(!app.manifest.addons || typeof app.manifest.addons === 'object');
 
     if (!app.manifest.addons) return callback(null);
 
-    async.eachSeries(app.manifest.addons, function iterator(addon, iteratorCallback) {
+    async.eachSeries(Object.keys(app.manifest.addons), function iterator(addon, iteratorCallback) {
         if (!(addon in KNOWN_ADDONS)) return iteratorCallback(new Error('No such addon:' + addon));
 
         debug('Tearing down addon %s of appId:%s', addon, app.id);
@@ -125,7 +125,7 @@ function updateAddons(app, oldManifest, callback) {
         if (!oldManifest) return callback(null);
 
         // teardown the old addons
-        async.eachSeries(_.difference(oldManifest.addons, app.manifest.addons), function iterator(addon, iteratorCallback) {
+        async.eachSeries(_.difference(Object.keys(oldManifest.addons), Object.keys(app.manifest.addons)), function iterator(addon, iteratorCallback) {
             if (!(addon in KNOWN_ADDONS)) return iteratorCallback(new Error('No such addon:' + addon));
 
             KNOWN_ADDONS[addon].teardown(app, iteratorCallback);
@@ -135,14 +135,14 @@ function updateAddons(app, oldManifest, callback) {
 
 function backupAddons(app, callback) {
     assert(typeof app === 'object');
-    assert(!app.manifest.addons || util.isArray(app.manifest.addons));
+    assert(!app.manifest.addons || typeof app.manifest.addons === 'object');
     assert(typeof callback === 'function');
 
     debug('backupAddons: %s (%s)', app.id, app.manifest.title);
 
     if (!app.manifest.addons) return callback(null);
 
-    async.eachSeries(app.manifest.addons, function iterator (addon, iteratorCallback) {
+    async.eachSeries(Object.keys(app.manifest.addons), function iterator (addon, iteratorCallback) {
         if (!(addon in KNOWN_ADDONS)) return iteratorCallback(new Error('No such addon:' + addon));
 
         if (!KNOWN_ADDONS[addon].backup) return iteratorCallback(null);
@@ -153,14 +153,14 @@ function backupAddons(app, callback) {
 
 function restoreAddons(app, callback) {
     assert(typeof app === 'object');
-    assert(!app.manifest.addons || util.isArray(app.manifest.addons));
+    assert(!app.manifest.addons || typeof app.manifest.addons === 'object');
     assert(typeof callback === 'function');
 
     debug('restoreAddons: %s (%s)', app.id, app.manifest.title);
 
     if (!app.manifest.addons) return callback(null);
 
-    async.eachSeries(app.manifest.addons, function iterator (addon, iteratorCallback) {
+    async.eachSeries(Object.keys(app.manifest.addons), function iterator (addon, iteratorCallback) {
         if (!(addon in KNOWN_ADDONS)) return iteratorCallback(new Error('No such addon:' + addon));
 
         if (!KNOWN_ADDONS[addon].restore) return iteratorCallback(null);
@@ -178,14 +178,14 @@ function getEnvironment(appId, callback) {
 
 function getLinksSync(app) {
     assert(typeof app === 'object');
-    assert(!app.manifest.addons || util.isArray(app.manifest.addons));
+    assert(!app.manifest.addons || typeof app.manifest.addons === 'object');
 
     var links = [ ];
 
     if (!app.manifest.addons) return links;
 
-    for (var i = 0; i < app.manifest.addons.length; i++) {
-        switch (app.manifest.addons[i]) {
+    for (var addon in app.manifest.addons) {
+        switch (addon) {
         case 'mysql': links.push('mysql:mysql'); break;
         case 'postgresql': links.push('postgresql:postgresql'); break;
         case 'sendmail': links.push('mail:mail'); break;

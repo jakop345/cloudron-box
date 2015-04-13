@@ -38,12 +38,12 @@ var MANIFEST = {
       "containerPort": 7778
     }
   },
-  "addons": [
-    "oauth",
-    "redis",
-    "mysql",
-    "postgresql"
-  ]
+  "addons": {
+    "oauth": { },
+    "redis": { },
+    "mysql": { },
+    "postgresql": { }
+  }
 };
 
 var APP = {
