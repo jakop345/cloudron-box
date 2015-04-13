@@ -91,6 +91,7 @@ function getAppIcon(req, res, next) {
  * @bodyparam {string} location The subdomain where the app is to be installed
  * @bodyparam {object} portBindings map from environment variable name to (public) host port. can be null.
                        If a value in manifest.tcpPorts is missing in portBindings, the port/service is disabled
+ * @bodyparam {icon} icon Base64 encoded image
  */
 function installApp(req, res, next) {
     assert(typeof req.body === 'object');
@@ -103,13 +104,14 @@ function installApp(req, res, next) {
     if (typeof data.location !== 'string') return next(new HttpError(400, 'location is required'));
     if (('portBindings' in data) && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
     if (typeof data.accessRestriction !== 'string') return next(new HttpError(400, 'accessRestriction is required'));
+    if ('icon' in data && typeof data.icon !== 'string') return next(new HttpError(400, 'icon is not a string'));
 
     // allow tests to provide an appId for testing
     var appId = (process.env.NODE_ENV === 'test' && typeof data.appId === 'string') ? data.appId : uuid.v4();
 
     debug('Installing app id:%s storeid:%s loc:%s port:%j restrict:%s manifest:%j', appId, data.appStoreId, data.location, data.portBindings, data.accessRestriction, data.manifest);
 
-    apps.install(appId, data.appStoreId, data.manifest, data.location, data.portBindings, data.accessRestriction, function (error) {
+    apps.install(appId, data.appStoreId, data.manifest, data.location, data.portBindings, data.accessRestriction, data.icon || null, function (error) {
         if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, error.message));
         if (error && error.reason === AppsError.PORT_RESERVED) return next(new HttpError(409, 'Port ' + error.message + ' is reserved.'));
         if (error && error.reason === AppsError.PORT_CONFLICT) return next(new HttpError(409, 'Port ' + error.message + ' is already in use.'));

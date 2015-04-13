@@ -44,11 +44,13 @@ var appdb = require('./appdb.js'),
     updater = require('./updater.js'),
     fs = require('fs'),
     manifestFormat = require('manifestformat'),
+    path = require('path'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
     semver = require('semver'),
     split = require('split'),
-    util = require('util');
+    util = require('util'),
+    validator = require('validator');
 
 var gTasks = { };
 
@@ -287,13 +289,14 @@ function validateAccessRestriction(accessRestriction) {
     }
 }
 
-function install(appId, appStoreId, manifest, location, portBindings, accessRestriction, callback) {
+function install(appId, appStoreId, manifest, location, portBindings, accessRestriction, icon, callback) {
     assert(typeof appId === 'string');
     assert(typeof appStoreId === 'string');
     assert(manifest && typeof manifest === 'object');
     assert(typeof location === 'string');
     assert(!portBindings || typeof portBindings === 'object');
     assert(typeof accessRestriction === 'string');
+    assert(!icon || typeof icon === 'string');
     assert(typeof callback === 'function');
 
     var error = manifestFormat.parse(manifest);
@@ -311,7 +314,15 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
     error = validateAccessRestriction(accessRestriction);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
-    debug('Will install app with id : ' + appId);
+    if (icon) {
+        if (!validator.isBase64(icon)) return callback(new AppsError(AppsError.BAD_FIELD, 'icon is not base64'));
+
+        if (!safe.fs.writeFileSync(path.join(paths.APPICONS_DIR, appId + '.png'), new Buffer(icon, 'base64'))) {
+            return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error saving icon:' + safe.error.message));
+        }
+    }
+
+   debug('Will install app with id : ' + appId);
 
     appdb.add(appId, appStoreId, manifest, location.toLowerCase(), portBindings, accessRestriction, function (error) {
         if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(getDuplicateErrorDetails(location.toLowerCase(), portBindings, error));

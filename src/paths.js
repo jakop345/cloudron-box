@@ -17,6 +17,7 @@ exports = module.exports = {
 
     DATA_DIR: path.join(config.baseDir(), 'data'),
     BOX_DATA_DIR: path.join(config.baseDir(), 'data/box'),
+    // this is not part of appdata because an icon may be set before install
     APPICONS_DIR: path.join(config.baseDir(), 'data/box/appicons'),
     MAIL_DATA_DIR: path.join(config.baseDir(), 'data/box/mail')
 };
