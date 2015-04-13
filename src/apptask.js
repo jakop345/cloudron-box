@@ -483,6 +483,7 @@ function downloadIcon(app, callback) {
         .buffer(true)
         .end(function (error, res) {
             if (error) return callback(new Error('Error downloading icon:' + error.message));
+            if (res.status !== 200) return callback(null); // ignore error. this can also happen for apps installed with cloudron-cli
 
             if (!safe.fs.writeFileSync(path.join(paths.APPICONS_DIR, app.id + '.png'), res.body)) return callback(new Error('Error saving icon:' + safe.error.message));
 
