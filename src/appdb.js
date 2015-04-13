@@ -72,6 +72,17 @@ function postProcess(result) {
     result.manifest = safe.JSON.parse(result.manifestJson);
     delete result.manifestJson;
 
+    // remove this hack after staging cloudron has moved
+    if (result.manifest.addons) {
+        // convert addon from array to object
+        if (util.isArray(result.manifest.addons)) {
+            var addons = result.manifest.addons;
+            delete result.manifest.addons;
+            result.manifest.addons = { };
+            addons.forEach(function (addon) { result.manifest.addons[addon] = { } });
+        }
+    }
+
     assert(result.hostPorts === null || typeof result.hostPorts === 'string');
     assert(result.environmentVariables === null || typeof result.environmentVariables === 'string');
 
