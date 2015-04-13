@@ -86,13 +86,16 @@ gulp.task('js-update', function () {
 // HTML
 // --------------
 
-gulp.task('html', ['html-views', 'html-appstatus'], function () {
-    gulp.src('webadmin/src/*.html').pipe(gulp.dest('webadmin/dist'));
-    gulp.src(['webadmin/src/update.html']).pipe(gulp.dest('setup/splash/website'));
+gulp.task('html', ['html-views', 'html-update', 'html-appstatus'], function () {
+    return gulp.src('webadmin/src/*.html').pipe(gulp.dest('webadmin/dist'));
+});
+
+gulp.task('html-update', function () {
+    return gulp.src(['webadmin/src/update.html']).pipe(gulp.dest('setup/splash/website'));
 });
 
 gulp.task('html-views', function () {
-    gulp.src('webadmin/src/views/**/*.html').pipe(gulp.dest('webadmin/dist/views'));
+    return gulp.src('webadmin/src/views/**/*.html').pipe(gulp.dest('webadmin/dist/views'));
 });
 
 gulp.task('html-appstatus', ['css'], function () {
@@ -106,7 +109,7 @@ gulp.task('html-appstatus', ['css'], function () {
 // --------------
 
 gulp.task('css', [], function () {
-    gulp.src('webadmin/src/theme.scss')
+    return gulp.src('webadmin/src/theme.scss')
         .pipe(sourcemaps.init())
         .pipe(sass({ includePaths: ['node_modules/bootstrap-sass/assets/stylesheets/'] }))
         .pipe(autoprefixer())
