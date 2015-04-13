@@ -86,7 +86,7 @@ gulp.task('js-update', function () {
 // HTML
 // --------------
 
-gulp.task('html', ['html-templates', 'html-views'], function () {
+gulp.task('html', ['html-views', 'html-appstatus'], function () {
     gulp.src('webadmin/src/*.html').pipe(gulp.dest('webadmin/dist'));
     gulp.src(['webadmin/src/update.html']).pipe(gulp.dest('setup/splash/website'));
 });
@@ -95,14 +95,11 @@ gulp.task('html-views', function () {
     gulp.src('webadmin/src/views/**/*.html').pipe(gulp.dest('webadmin/dist/views'));
 });
 
-gulp.task('html-templates', function () {
-    var config = JSON.parse(fs.readFileSync('./webadmin/deploymentConfig.json'));
-
-    gulp.src('webadmin/src/*.ejs')
-        .pipe(ejs(config, { ext: '.html' }))
+gulp.task('html-appstatus', ['css'], function () {
+    return gulp.src('webadmin/src/appstatus.template')
+        .pipe(ejs({}, { ext: '.html' }))
         .pipe(gulp.dest('webadmin/dist'));
 });
-
 
 // --------------
 // CSS
@@ -132,7 +129,7 @@ gulp.task('develop', ['default'], function () {
     gulp.watch(['webadmin/src/theme.scss'], ['css']);
     gulp.watch(['webadmin/src/img/*'], ['images']);
     gulp.watch(['webadmin/src/**/*.html'], ['html']);
-    gulp.watch(['webadmin/src/*.ejs'], ['html-templates']);
+    gulp.watch(['webadmin/src/appstatus.template'], ['html-appstatus']);
     gulp.watch(['webadmin/src/views/*.html'], ['html-views']);
     gulp.watch(['webadmin/src/js/update.js'], ['js-update']);
     gulp.watch(['webadmin/src/js/error.js'], ['js-error']);
