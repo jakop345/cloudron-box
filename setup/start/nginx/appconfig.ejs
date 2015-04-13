@@ -39,7 +39,9 @@ server {
 
     error_page 500 502 503 504 =302 @appstatus;
     location @appstatus {
-        return 301 <%= adminOrigin %>/appstatus.html;
+        internal;
+        root <%= sourceDir %>/webadmin/dist;
+        rewrite ^/$ /appstatus.html break;
     }
 
     location / {
