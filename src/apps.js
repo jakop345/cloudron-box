@@ -500,13 +500,14 @@ function getBuildLogStream(appId, fromLine, callback) {
         var logStream = fs.createReadStream(path.join(paths.APP_SOURCES_DIR, app.id + '.log'));
 
         var lineCount = 0;
-        var skipLinesStream = split(function mapper(line) {
+        var beautifySkipLinesStream = split(function mapper(line) {
             if (++lineCount < fromLine) return undefined;
-            return JSON.stringify({ lineNumber: lineCount, log: line });
+            // the form is {"stream":"Step 6 : RUN npm install --production\n"}
+            return JSON.stringify({ lineNumber: lineCount, log: line.slice('{"stream":"'.length).slice(0, -'\n"}'.length) });
         });
-        skipLinesStream.close = logStream.close;
-        logStream.pipe(skipLinesStream);
-        return callback(null, skipLinesStream);
+        beautifySkipLinesStream.close = logStream.close;
+        logStream.pipe(beautifySkipLinesStream);
+        return callback(null, beautifySkipLinesStream);
     });
 }
 
@@ -522,7 +523,13 @@ function getBuildLogs(appId, callback) {
 
         var logStream = fs.createReadStream(path.join(paths.APP_SOURCES_DIR, app.id + '.log'));
 
-        return callback(null, logStream);
+        var beautifyStream = split(function mapper(line) {
+            // the form is {"stream":"Step 6 : RUN npm install --production\n"}
+            return line.slice('{"stream":"'.length).slice(0, -'\n"}'.length);
+        });
+        beautifyStream.close = logStream.close;
+        logStream.pipe(beautifyStream);
+        return callback(null, beautifyStream);
     });
 }
 
