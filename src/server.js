@@ -141,7 +141,7 @@ function initializeExpressSync() {
     router.get ('/api/v1/apps/:id',      appsScope, routes.apps.getApp);
     router.get ('/api/v1/apps/:id/icon', appsScope, routes.apps.getAppIcon);
 
-    router.post('/api/v1/apps/install',       appsScope, routes.user.requireAdmin, routes.apps.installApp);
+    router.post('/api/v1/apps/install',       appsScope, routes.user.requireAdmin, multipart, routes.apps.installApp);
     router.post('/api/v1/apps/:id/uninstall', appsScope, routes.user.requireAdmin, routes.user.verifyPassword, routes.apps.uninstallApp);
     router.post('/api/v1/apps/:id/configure', appsScope, routes.user.requireAdmin, routes.user.verifyPassword, routes.apps.configureApp);
     router.post('/api/v1/apps/:id/update',    appsScope, routes.user.requireAdmin, routes.user.verifyPassword, routes.apps.updateApp);

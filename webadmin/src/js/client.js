@@ -201,7 +201,15 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
     Client.prototype.installApp = function (id, manifest, title, config, callback) {
         var that = this;
         var data = { appStoreId: id, manifest: manifest, location: config.location, portBindings: config.portBindings, accessRestriction: config.accessRestriction };
-        $http.post('/api/v1/apps/install', data).success(function (data, status) {
+
+
+        var fd = new FormData();
+        fd.append('data', JSON.stringify(data));
+
+        $http.post('/api/v1/apps/install', fd, {
+            headers: { 'Content-Type': undefined },
+            transformRequest: angular.identity
+        }).success(function (data, status) {
             if (status !== 202 || typeof data !== 'object') return defaultErrorHandler(callback);
 
             // put new app with amended title in cache
