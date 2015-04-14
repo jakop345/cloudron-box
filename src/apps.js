@@ -318,7 +318,7 @@ function install(appId, appStoreId, sourceTarball, manifest, location, portBindi
     if (sourceTarball) {
         // uploadDir is set to app sources dir for the rename to work
         if (!safe.fs.renameSync(sourceTarball, path.join(paths.APP_SOURCES_DIR, appId + '.tar'))) {
-            return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error copying tarball:' + safe.error.message));
+            return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error renaming tarball:' + safe.error.message));
         }
     }
 
@@ -384,8 +384,9 @@ function configure(appId, location, portBindings, accessRestriction, callback) {
     });
 }
 
-function update(appId, manifest, portBindings, icon, callback) {
+function update(appId, sourceTarball, manifest, portBindings, icon, callback) {
     assert(typeof appId === 'string');
+    assert(!sourceTarball || typeof sourceTarball === 'string');
     assert(manifest && typeof manifest === 'object');
     assert(!portBindings || typeof portBindings === 'object');
     assert(!icon || typeof icon === 'string');
@@ -401,6 +402,13 @@ function update(appId, manifest, portBindings, icon, callback) {
 
     error = validatePortBindings(portBindings, manifest.tcpPorts);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
+
+    if (sourceTarball) {
+        // uploadDir is set to app sources dir for the rename to work
+        if (!safe.fs.renameSync(sourceTarball, path.join(paths.APP_SOURCES_DIR, appId + '.tar'))) {
+            return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error renaming tarball:' + safe.error.message));
+        }
+    }
 
     if (icon) {
         if (!validator.isBase64(icon)) return callback(new AppsError(AppsError.BAD_FIELD, 'icon is not base64'));

@@ -217,7 +217,9 @@ function updateApp(req, res, next) {
 
     debug('Update app id:%s to manifest:%j', req.params.id, data.manifest);
 
-    apps.update(req.params.id, data.manifest, data.portBindings, data.icon, function (error) {
+    var sourceTarball = req.files.sourceTarball ? req.files.sourceTarball.path : null;
+
+    apps.update(req.params.id, sourceTarball, data.manifest, data.portBindings, data.icon, function (error) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
         if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
