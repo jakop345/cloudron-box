@@ -499,7 +499,14 @@ function getBuildLogStream(appId, fromLine, callback) {
 
         var logStream = fs.createReadStream(path.join(paths.APP_SOURCES_DIR, app.id + '.log'));
 
-        return callback(null, logStream);
+        var lineCount = 0;
+        var skipLinesStream = split(function mapper(line) {
+            if (++lineCount < fromLine) return undefined;
+            return JSON.stringify({ lineNumber: lineCount, log: line });
+        });
+        skipLinesStream.close = logStream.close;
+        logStream.pipe(skipLinesStream);
+        return callback(null, skipLinesStream);
     });
 }
 
