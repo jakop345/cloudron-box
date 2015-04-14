@@ -32,7 +32,7 @@ function initializeExpressSync() {
     var httpServer = http.createServer(app);
 
     var QUERY_LIMIT = '10mb', // max size for json and urlencoded queries
-        FIELD_LIMIT = 2 * 1024; // max fields that can appear in multipart
+        FIELD_LIMIT = 2 * 1024 * 1024; // max fields that can appear in multipart
 
     var REQUEST_TIMEOUT = 10000; // timeout for all requests
 
