@@ -503,7 +503,7 @@ function getBuildLogStream(appId, fromLine, callback) {
         var beautifySkipLinesStream = split(function mapper(line) {
             if (++lineCount < fromLine) return undefined;
             // the form is {"stream":"Step 6 : RUN npm install --production\n"}
-            return JSON.stringify({ lineNumber: lineCount, log: line.slice('{"stream":"'.length).slice(0, -'\n"}'.length) });
+            return JSON.stringify({ lineNumber: lineCount, log: line.slice('{"stream":"'.length).slice(0, -'\\n"}'.length) });
         });
         beautifySkipLinesStream.close = logStream.close;
         logStream.pipe(beautifySkipLinesStream);
@@ -525,7 +525,7 @@ function getBuildLogs(appId, callback) {
 
         var beautifyStream = split(function mapper(line) {
             // the form is {"stream":"Step 6 : RUN npm install --production\n"}
-            return line.slice('{"stream":"'.length).slice(0, -'\n"}'.length);
+            return line.slice('{"stream":"'.length).slice(0, -'\\n"}'.length) + '\n';
         });
         beautifyStream.close = logStream.close;
         logStream.pipe(beautifyStream);
