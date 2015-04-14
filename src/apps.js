@@ -497,7 +497,7 @@ function getBuildLogStream(appId, fromLine, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        var logStream = fs.createReadStream(path.join(paths.APP_SOURCES_DIR, app.id + '.log'));
+        var logStream = fs.createReadStream(path.join(paths.APP_SOURCES_DIR, app.id + '.log'), { autoClose: false });
 
         var lineCount = 0;
         var beautifySkipLinesStream = split(function mapper(line) {
