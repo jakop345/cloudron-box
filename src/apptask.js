@@ -83,6 +83,16 @@ function getFreePort(callback) {
     });
 }
 
+function imageName(app) {
+    assert(app && typeof app === 'object');
+
+    if (!app.manifest) return '';
+
+    if (app.manifest.dockerImage) return app.manifest.dockerImage;
+
+    return 'img-' + app.id;
+}
+
 function reloadNginx(callback) {
     shell.sudo('reloadNginx', [ RELOAD_NGINX_CMD ], callback);
 }
@@ -175,6 +185,29 @@ function unconfigureNakedDomain(app, callback) {
     });
 }
 
+function buildImage(app, callback) {
+    debug('Building image (%s) for %s', imageName(app), app.id);
+
+    var tarStream = fs.createReadStream(path.join(paths.APP_SOURCES_DIR, app.id + '.tar'));
+
+    docker.buildImage(tarStream, { t: imageName(app) }, function (error, output) {
+        output.on('data', function (data) { debug(data.toString('utf8')); });
+        output.on('end', function () { callback(null); });
+        output.on('error', function (error) { callback(error); });
+    });
+}
+
+function createImage(app, callback) {
+    if (app.manifest.dockerImage) return downloadImage(app, callback);
+
+    if (app.appStoreId) {
+        // TODO: download tarball from the appstore
+        return callback(new Error('Not implemented yet'));
+    } else {
+        buildImage(app, callback);
+    }
+}
+
 function downloadImage(app, callback) {
     debug('Will download app now');
 
@@ -256,7 +289,7 @@ function createContainer(app, callback) {
                     name: app.id,
                     Hostname: config.appFqdn(app.location),
                     Tty: true,
-                    Image: manifest.dockerImage,
+                    Image: imageName(app),
                     Cmd: null,
                     Volumes: { },
                     VolumesFrom: '',
@@ -264,7 +297,7 @@ function createContainer(app, callback) {
                     ExposedPorts: exposedPorts
                 };
 
-                debug('Creating container for %s', manifest.dockerImage);
+                debug('Creating container for %s', imageName(app));
 
                 docker.createContainer(containerOptions, function (error, container) {
                     if (error) return callback(new Error('Error creating container: ' + error));
@@ -295,8 +328,8 @@ function deleteContainer(app, callback) {
 }
 
 function deleteImage(app, callback) {
-    var docker_image = app.manifest ? app.manifest.dockerImage : '';
-    var image = docker.getImage(docker_image);
+    var dockerImage = imageName(app);
+    var image = docker.getImage(dockerImage);
 
     var removeOptions = {
         force: true,
@@ -611,8 +644,8 @@ function install(app, callback) {
         allocateAccessToken.bind(null, app),
 
         // download the image
-        updateApp.bind(null, app, { installationProgress: '40, Downloading image' }),
-        downloadImage.bind(null, app),
+        updateApp.bind(null, app, { installationProgress: '40, Creating image' }),
+        createImage.bind(null, app),
 
         // recreate data volume
         updateApp.bind(null, app, { installationProgress: '50, Creating volume' }),
@@ -685,8 +718,8 @@ function restore(app, callback) {
         cloudron.restoreApp.bind(null, app),
 
         // download the image
-        updateApp.bind(null, app, { installationProgress: '40, Downloading image' }),
-        downloadImage.bind(null, app),
+        updateApp.bind(null, app, { installationProgress: '40, Creating image' }),
+        createImage.bind(null, app),
 
         // restore addons
         updateApp.bind(null, app, { installationProgress: '60, Restoring addons' }),
@@ -802,8 +835,8 @@ function update(app, callback) {
         verifyManifest.bind(null, app),
         downloadIcon.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '45, Downloading image' }),
-        downloadImage.bind(null, app),
+        updateApp.bind(null, app, { installationProgress: '45, Creating image' }),
+        createImage.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '70, Updating addons' }),
         addons.updateAddons.bind(null, app, oldManifest),
