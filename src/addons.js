@@ -122,7 +122,7 @@ function updateAddons(app, oldManifest, callback) {
     setupAddons(app, function (error) {
         if (error) return callback(error);
 
-        if (!oldManifest) return callback(null);
+        if (!oldManifest || !oldManifest.addons) return callback(null);
 
         // teardown the old addons
         async.eachSeries(_.difference(Object.keys(oldManifest.addons), Object.keys(app.manifest.addons)), function iterator(addon, iteratorCallback) {
