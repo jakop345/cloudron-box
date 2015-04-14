@@ -53,6 +53,7 @@ var appdb = require('./appdb.js'),
     semver = require('semver'),
     split = require('split'),
     util = require('util'),
+    ts = require('tail-stream'),
     validator = require('validator');
 
 var gTasks = { };
@@ -487,6 +488,14 @@ function getLogs(appId, callback) {
     });
 }
 
+function beautifyBuildLogLine(line) {
+    // the form is:
+    //      {"stream":"Step 8 : EXPOSE 7777\n"}
+    //      {"stream":" ---\u003e Using cache\n"}
+
+    return line.slice('{"stream":"'.length).slice(0, -'\\n"}'.length).replace('\\u003e', '').replace('\\u003c', '');
+}
+
 function getBuildLogStream(appId, fromLine, callback) {
     assert(typeof appId === 'string');
     assert(typeof fromLine === 'number'); // behaves like tail -n
@@ -497,17 +506,32 @@ function getBuildLogStream(appId, fromLine, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        var logStream = fs.createReadStream(path.join(paths.APP_SOURCES_DIR, app.id + '.log'), { autoClose: false });
+        var logStream = null;
+        var stat = safe.fs.statSync(path.join(paths.APP_SOURCES_DIR, app.id + '.log'));
+
+        if (!stat) return callback(new AppsError(AppsError.INTERNAL_ERROR));
+
+        var tailStreamOptions = {
+            beginAt: 0,
+            onMove: 'follow',
+            detectTruncate: true,
+            onTruncate: 'end',
+            endOnError: true
+        };
+
+        logStream = safe(function () { return ts.createReadStream(path.join(paths.APP_SOURCES_DIR, app.id + '.log'), tailStreamOptions); });
+        if (!logStream) return callback(new AppsError(AppsError.INTERNAL_ERROR, safe.error.message));
 
         var lineCount = 0;
-        var beautifySkipLinesStream = split(function mapper(line) {
+        var skipLinesStream = split(function mapper(line) {
             if (++lineCount < fromLine) return undefined;
-            // the form is {"stream":"Step 6 : RUN npm install --production\n"}
-            return JSON.stringify({ lineNumber: lineCount, log: line.slice('{"stream":"'.length).slice(0, -'\\n"}'.length) });
+            return JSON.stringify({ lineNumber: lineCount, log: beautifyBuildLogLine(line) });
         });
-        beautifySkipLinesStream.close = logStream.close;
-        logStream.pipe(beautifySkipLinesStream);
-        return callback(null, beautifySkipLinesStream);
+
+        skipLinesStream.close = function () { logStream.end(); };
+        logStream.pipe(skipLinesStream);
+
+        callback(null, skipLinesStream);
     });
 }
 
@@ -524,8 +548,7 @@ function getBuildLogs(appId, callback) {
         var logStream = fs.createReadStream(path.join(paths.APP_SOURCES_DIR, app.id + '.log'));
 
         var beautifyStream = split(function mapper(line) {
-            // the form is {"stream":"Step 6 : RUN npm install --production\n"}
-            return line.slice('{"stream":"'.length).slice(0, -'\\n"}'.length) + '\n';
+            return beautifyBuildLogLine(line) + '\n';
         });
         beautifyStream.close = logStream.close;
         logStream.pipe(beautifyStream);
