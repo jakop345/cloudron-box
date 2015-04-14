@@ -189,9 +189,13 @@ function buildImage(app, callback) {
     debug('Building image (%s) for %s', imageName(app), app.id);
 
     var tarStream = fs.createReadStream(path.join(paths.APP_SOURCES_DIR, app.id + '.tar'));
+    var buildStream = fs.createWriteStream(path.join(paths.APP_SOURCES_DIR, app.id + '.log'));
 
     docker.buildImage(tarStream, { t: imageName(app) }, function (error, output) {
-        output.on('data', function (data) { debug(data.toString('utf8')); });
+        output.on('data', function (data) {
+            debug(data.toString('utf8'));
+            buildStream.write(data.toString('uft8'));
+        });
         output.on('end', function () { callback(null); });
         output.on('error', function (error) { callback(error); });
     });
