@@ -204,9 +204,9 @@ function stopApp(req, res, next) {
 
 function updateApp(req, res, next) {
     assert(typeof req.params.id === 'string');
-    assert(typeof req.body === 'object');
+    assert(typeof req.fields === 'object');
 
-    var data = req.body;
+    var data = safe.JSON.parse(req.fields.data);
 
     if (!data) return next(new HttpError(400, 'Cannot parse data field'));
     if (!data.manifest || typeof data.manifest !== 'object') return next(new HttpError(400, 'manifest is required'));
