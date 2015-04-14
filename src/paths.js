@@ -15,6 +15,8 @@ exports = module.exports = {
 
     COLLECTD_APPCONFIG_DIR: path.join(config.baseDir(), 'configs/collectd/collectd.conf.d'),
 
+    APP_SOURCES_DIR: path.join(config.baseDir(), 'sources'),
+
     DATA_DIR: path.join(config.baseDir(), 'data'),
     BOX_DATA_DIR: path.join(config.baseDir(), 'data/box'),
     // this is not part of appdata because an icon may be set before install

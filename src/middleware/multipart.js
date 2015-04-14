@@ -15,7 +15,7 @@ module.exports = function multipart(options) {
         if (_mime(req) !== 'multipart/form-data') return res.send(400, 'Invalid content-type. Expecting multipart');
 
         var form = new multiparty.Form({
-            uploadDir: '/tmp',
+            uploadDir: options.uploadDir || '/tmp',
             keepExtensions: true,
             maxFieldsSize: options.maxFieldsSize || (2 * 1024), // only field size, not files
             limit: options.limit || '500mb', // file sizes

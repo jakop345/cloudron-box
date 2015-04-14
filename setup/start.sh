@@ -44,6 +44,8 @@ mkdir -p "${CONFIG_DIR}/nginx/applications"
 mkdir -p "${CONFIG_DIR}/nginx/cert"
 mkdir -p "${CONFIG_DIR}/collectd/collectd.conf.d"
 
+mkdir -p "${HOME}/sources"
+
 # remove old snapshots. if we do want to keep this around, we will have to fix the chown -R below
 # which currently fails because these are readonly fs
 find "${DATA_DIR}/snapshots" -mindepth 1 -maxdepth 1 | xargs --no-run-if-empty btrfs subvolume delete

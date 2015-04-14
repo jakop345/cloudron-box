@@ -17,6 +17,7 @@ var apps = require('./apps'),
     middleware = require('./middleware'),
     passport = require('passport'),
     path = require('path'),
+    paths = require('./paths.js'),
     routes = require('./routes/index.js'),
     updater = require('./updater.js');
 
@@ -68,8 +69,6 @@ function initializeExpressSync() {
     var FILE_SIZE_LIMIT = '521mb', // max file size that can be uploaded
         FILE_TIMEOUT = 60 * 1000; // increased timeout for file uploads (1 min)
 
-    var multipart = middleware.multipart({ maxFieldsSize: FIELD_LIMIT, limit: FILE_SIZE_LIMIT, timeout: FILE_TIMEOUT });
-
     // scope middleware implicitly also adds bearer token verification
     var rootScope = routes.oauth2.scope('root');
     var profileScope = routes.oauth2.scope('profile');
@@ -92,11 +91,12 @@ function initializeExpressSync() {
     router.post('/api/v1/developer/login', routes.developer.enabled, routes.developer.login);
 
     // private routes
+    var certMultipart = middleware.multipart({ maxFieldsSize: FIELD_LIMIT, limit: FILE_SIZE_LIMIT, timeout: FILE_TIMEOUT });
     router.get ('/api/v1/cloudron/config', rootScope, routes.cloudron.getConfig);
     router.post('/api/v1/cloudron/update', rootScope, routes.user.requireAdmin, routes.user.verifyPassword, routes.cloudron.update);
     router.get ('/api/v1/cloudron/reboot', rootScope, routes.cloudron.reboot);
     router.post('/api/v1/cloudron/backups', rootScope, routes.cloudron.createBackup);
-    router.post('/api/v1/cloudron/certificate', rootScope, multipart, routes.cloudron.setCertificate);
+    router.post('/api/v1/cloudron/certificate', rootScope, certMultipart, routes.cloudron.setCertificate);
     router.get ('/api/v1/cloudron/graphs', rootScope, routes.graphs.getGraphs);
 
     router.get ('/api/v1/profile', profileScope, routes.user.profile);
@@ -141,10 +141,12 @@ function initializeExpressSync() {
     router.get ('/api/v1/apps/:id',      appsScope, routes.apps.getApp);
     router.get ('/api/v1/apps/:id/icon', appsScope, routes.apps.getAppIcon);
 
-    router.post('/api/v1/apps/install',       appsScope, routes.user.requireAdmin, multipart, routes.apps.installApp);
+
+    var appMultipart = middleware.multipart({ maxFieldsSize: FIELD_LIMIT, limit: FILE_SIZE_LIMIT, timeout: FILE_TIMEOUT, uploadDir: paths.APP_SOURCES_DIR });
+    router.post('/api/v1/apps/install',       appsScope, routes.user.requireAdmin, appMultipart, routes.apps.installApp);
     router.post('/api/v1/apps/:id/uninstall', appsScope, routes.user.requireAdmin, routes.user.verifyPassword, routes.apps.uninstallApp);
     router.post('/api/v1/apps/:id/configure', appsScope, routes.user.requireAdmin, routes.user.verifyPassword, routes.apps.configureApp);
-    router.post('/api/v1/apps/:id/update',    appsScope, routes.user.requireAdmin, multipart, routes.user.verifyPassword, routes.apps.updateApp);
+    router.post('/api/v1/apps/:id/update',    appsScope, routes.user.requireAdmin, appMultipart, routes.user.verifyPassword, routes.apps.updateApp);
     router.post('/api/v1/apps/:id/stop',      appsScope, routes.user.requireAdmin, routes.apps.stopApp);
     router.post('/api/v1/apps/:id/start',     appsScope, routes.user.requireAdmin, routes.apps.startApp);
     router.get ('/api/v1/apps/:id/logstream', appsScope, routes.user.requireAdmin, routes.apps.getLogStream);

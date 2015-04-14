@@ -289,9 +289,10 @@ function validateAccessRestriction(accessRestriction) {
     }
 }
 
-function install(appId, appStoreId, manifest, location, portBindings, accessRestriction, icon, callback) {
+function install(appId, appStoreId, sourceTarball, manifest, location, portBindings, accessRestriction, icon, callback) {
     assert(typeof appId === 'string');
     assert(typeof appStoreId === 'string');
+    assert(!sourceTarball || typeof sourceTarball === 'string');
     assert(manifest && typeof manifest === 'object');
     assert(typeof location === 'string');
     assert(!portBindings || typeof portBindings === 'object');
@@ -313,6 +314,13 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
 
     error = validateAccessRestriction(accessRestriction);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
+
+    if (sourceTarball) {
+        // uploadDir is set to app sources dir for the rename to work
+        if (!safe.fs.renameSync(sourceTarball, path.join(paths.APP_SOURCES_DIR, appId + '.tar'))) {
+            return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error copying tarball:' + safe.error.message));
+        }
+    }
 
     if (icon) {
         if (!validator.isBase64(icon)) return callback(new AppsError(AppsError.BAD_FIELD, 'icon is not base64'));
