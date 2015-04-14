@@ -19,6 +19,9 @@ exports = module.exports = {
     getLogStream: getLogStream,
     getLogs: getLogs,
 
+    getBuildLogStream: getBuildLogStream,
+    getBuildLogs: getBuildLogs,
+
     start: start,
     stop: stop,
 
@@ -481,6 +484,38 @@ function getLogs(appId, callback) {
 
             return callback(null, logStream);
         });
+    });
+}
+
+function getBuildLogStream(appId, fromLine, callback) {
+    assert(typeof appId === 'string');
+    assert(typeof fromLine === 'number'); // behaves like tail -n
+    assert(typeof callback === 'function');
+
+    debug('Getting build logs for %s', appId);
+    appdb.get(appId, function (error, app) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND));
+        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+        var logStream = fs.createReadStream(path.join(paths.APP_SOURCES_DIR, app.id + '.log'));
+
+        return callback(null, logStream);
+    });
+}
+
+function getBuildLogs(appId, callback) {
+    assert(typeof appId === 'string');
+    assert(typeof callback === 'function');
+
+    debug('Getting build logs for %s', appId);
+
+    appdb.get(appId, function (error, app) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND));
+        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+        var logStream = fs.createReadStream(path.join(paths.APP_SOURCES_DIR, app.id + '.log'));
+
+        return callback(null, logStream);
     });
 }
 

@@ -242,7 +242,9 @@ function getLogStream(req, res, next) {
 
     if (req.headers.accept !== 'text/event-stream') return next(new HttpError(400, 'This API call requires EventStream'));
 
-    apps.getLogStream(req.params.id, fromLine, function (error, logStream) {
+    var func = req.params.build ? apps.getBuildLogStream : apps.getLogStream;
+
+    func(req.params.id, fromLine, function (error, logStream) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
         if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(412, error.message));
         if (error) return next(new HttpError(500, error));
@@ -271,7 +273,9 @@ function getLogs(req, res, next) {
 
     debug('Getting logs of app id:%s', req.params.id);
 
-    apps.getLogs(req.params.id, function (error, logStream) {
+    var func = req.params.build ? apps.getBuildLogs : apps.getLogs;
+
+    func(req.params.id, function logHandler(error, logStream) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
         if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(412, error.message));
         if (error) return next(new HttpError(500, error));
