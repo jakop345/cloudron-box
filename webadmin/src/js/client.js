@@ -201,15 +201,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
     Client.prototype.installApp = function (id, manifest, title, config, callback) {
         var that = this;
         var data = { appStoreId: id, manifest: manifest, location: config.location, portBindings: config.portBindings, accessRestriction: config.accessRestriction };
-
-
-        var fd = new FormData();
-        fd.append('data', JSON.stringify(data));
-
-        $http.post('/api/v1/apps/install', fd, {
-            headers: { 'Content-Type': undefined },
-            transformRequest: angular.identity
-        }).success(function (data, status) {
+        $http.post('/api/v1/apps/install', data).success(function (data, status) {
             if (status !== 202 || typeof data !== 'object') return defaultErrorHandler(callback);
 
             // put new app with amended title in cache
@@ -240,15 +232,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
     };
 
     Client.prototype.updateApp = function (id, manifest, portBindings, password, callback) {
-        var data = { manifest: manifest, portBindings: portBindings };
-        var fd = new FormData();
-        fd.append('data', JSON.stringify(data));
-        fd.append('password', password);
-
-        $http.post('/api/v1/apps/' + id + '/update', fd, {
-            headers: { 'Content-Type': undefined },
-            transformRequest: angular.identity
-        }).success(function (data, status) {
+        $http.post('/api/v1/apps/' + id + '/update', { manifest: manifest, password: password, portBindings: portBindings }).success(function (data, status) {
             if (status !== 202) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));

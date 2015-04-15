@@ -19,9 +19,6 @@ exports = module.exports = {
     getLogStream: getLogStream,
     getLogs: getLogs,
 
-    getBuildLogStream: getBuildLogStream,
-    getBuildLogs: getBuildLogs,
-
     start: start,
     stop: stop,
 
@@ -293,10 +290,9 @@ function validateAccessRestriction(accessRestriction) {
     }
 }
 
-function install(appId, appStoreId, sourceTarball, manifest, location, portBindings, accessRestriction, icon, callback) {
+function install(appId, appStoreId, manifest, location, portBindings, accessRestriction, icon, callback) {
     assert(typeof appId === 'string');
     assert(typeof appStoreId === 'string');
-    assert(!sourceTarball || typeof sourceTarball === 'string');
     assert(manifest && typeof manifest === 'object');
     assert(typeof location === 'string');
     assert(!portBindings || typeof portBindings === 'object');
@@ -318,13 +314,6 @@ function install(appId, appStoreId, sourceTarball, manifest, location, portBindi
 
     error = validateAccessRestriction(accessRestriction);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
-
-    if (sourceTarball) {
-        // uploadDir is set to app sources dir for the rename to work
-        if (!safe.fs.renameSync(sourceTarball, path.join(paths.APP_SOURCES_DIR, appId + '.tar'))) {
-            return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error renaming tarball:' + safe.error.message));
-        }
-    }
 
     if (icon) {
         if (!validator.isBase64(icon)) return callback(new AppsError(AppsError.BAD_FIELD, 'icon is not base64'));
@@ -388,9 +377,8 @@ function configure(appId, location, portBindings, accessRestriction, callback) {
     });
 }
 
-function update(appId, sourceTarball, manifest, portBindings, icon, callback) {
+function update(appId, manifest, portBindings, icon, callback) {
     assert(typeof appId === 'string');
-    assert(!sourceTarball || typeof sourceTarball === 'string');
     assert(manifest && typeof manifest === 'object');
     assert(!portBindings || typeof portBindings === 'object');
     assert(!icon || typeof icon === 'string');
@@ -406,13 +394,6 @@ function update(appId, sourceTarball, manifest, portBindings, icon, callback) {
 
     error = validatePortBindings(portBindings, manifest.tcpPorts);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
-
-    if (sourceTarball) {
-        // uploadDir is set to app sources dir for the rename to work
-        if (!safe.fs.renameSync(sourceTarball, path.join(paths.APP_SOURCES_DIR, appId + '.tar'))) {
-            return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error renaming tarball:' + safe.error.message));
-        }
-    }
 
     if (icon) {
         if (!validator.isBase64(icon)) return callback(new AppsError(AppsError.BAD_FIELD, 'icon is not base64'));
@@ -485,74 +466,6 @@ function getLogs(appId, callback) {
 
             return callback(null, logStream);
         });
-    });
-}
-
-function beautifyBuildLogLine(line) {
-    // the form is:
-    //      {"stream":"Step 8 : EXPOSE 7777\n"}
-    //      {"stream":" ---\u003e Using cache\n"}
-
-    return line.slice('{"stream":"'.length).slice(0, -'\\n"}'.length).replace('\\u003e', '').replace('\\u003c', '');
-}
-
-function getBuildLogStream(appId, fromLine, callback) {
-    assert(typeof appId === 'string');
-    assert(typeof fromLine === 'number'); // behaves like tail -n
-    assert(typeof callback === 'function');
-
-    debug('Getting build logs for %s', appId);
-    appdb.get(appId, function (error, app) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND));
-        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
-
-        var logStream = null;
-        var stat = safe.fs.statSync(path.join(paths.APP_SOURCES_DIR, app.id + '.log'));
-
-        if (!stat) return callback(new AppsError(AppsError.INTERNAL_ERROR));
-
-        var tailStreamOptions = {
-            beginAt: 0,
-            onMove: 'follow',
-            detectTruncate: true,
-            onTruncate: 'end',
-            endOnError: true
-        };
-
-        logStream = safe(function () { return ts.createReadStream(path.join(paths.APP_SOURCES_DIR, app.id + '.log'), tailStreamOptions); });
-        if (!logStream) return callback(new AppsError(AppsError.INTERNAL_ERROR, safe.error.message));
-
-        var lineCount = 0;
-        var skipLinesStream = split(function mapper(line) {
-            if (++lineCount < fromLine) return undefined;
-            return JSON.stringify({ lineNumber: lineCount, log: beautifyBuildLogLine(line) });
-        });
-
-        skipLinesStream.close = function () { logStream.end(); };
-        logStream.pipe(skipLinesStream);
-
-        callback(null, skipLinesStream);
-    });
-}
-
-function getBuildLogs(appId, callback) {
-    assert(typeof appId === 'string');
-    assert(typeof callback === 'function');
-
-    debug('Getting build logs for %s', appId);
-
-    appdb.get(appId, function (error, app) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND));
-        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
-
-        var logStream = fs.createReadStream(path.join(paths.APP_SOURCES_DIR, app.id + '.log'));
-
-        var beautifyStream = split(function mapper(line) {
-            return beautifyBuildLogLine(line) + '\n';
-        });
-        beautifyStream.close = logStream.close;
-        logStream.pipe(beautifyStream);
-        return callback(null, beautifyStream);
     });
 }
 

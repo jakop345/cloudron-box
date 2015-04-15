@@ -212,16 +212,14 @@ function removeUser(req, res, next) {
 }
 
 function verifyPassword(req, res, next) {
-    assert(typeof req.fields === 'object' || typeof req.body === 'object');
+    assert(typeof req.body === 'object');
 
     // developers are allowed to through without password
     if (req.user.tokenType === tokendb.TYPE_DEV) return next();
 
-    var password = req.fields ? req.fields.password : req.body.password;
+    if (typeof req.body.password !== 'string') return next(new HttpError(400, 'API call requires user password'));
 
-    if (typeof password !== 'string') return next(new HttpError(400, 'API call requires user password'));
-
-    user.verify(req.user.username, password, function (error) {
+    user.verify(req.user.username, req.body.password, function (error) {
         if (error && error.reason === UserError.WRONG_PASSWORD) return next(new HttpError(403, 'Password incorrect'));
         if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(403, 'Password incorrect'));
         if (error) return next(new HttpError(500, error));

@@ -9,7 +9,6 @@ readonly USER="yellowtent"
 # and the whole code will relocated to BOX_SRC_DIR by the installer. Use paths relative to script_dir or box_src_tmp_dir
 readonly BOX_SRC_DIR="/home/${USER}/box"
 readonly DATA_DIR="/home/${USER}/data"
-readonly APP_SOURCES_DIR="/home/${USER}/sources"
 readonly CONFIG_DIR="/home/${USER}/configs"
 readonly SETUP_PROGRESS_JSON="/home/yellowtent/setup/website/progress.json"
 readonly ADMIN_LOCATION="my" # keep this in sync with constants.js
@@ -44,8 +43,6 @@ mkdir -p "${CONFIG_DIR}/addons"
 mkdir -p "${CONFIG_DIR}/nginx/applications"
 mkdir -p "${CONFIG_DIR}/nginx/cert"
 mkdir -p "${CONFIG_DIR}/collectd/collectd.conf.d"
-
-mkdir -p "${APP_SOURCES_DIR}"
 
 # remove old snapshots. if we do want to keep this around, we will have to fix the chown -R below
 # which currently fails because these are readonly fs
@@ -128,7 +125,7 @@ unlink /etc/nginx 2>/dev/null || rm -rf /etc/nginx
 ln -s "${nginx_config_dir}" /etc/nginx
 
 set_progress "33" "Changing ownership of source, data, configs"
-chown "${USER}:${USER}" -R "${BOX_SRC_DIR}" "${DATA_DIR}" "${CONFIG_DIR}" "${APP_SOURCES_DIR}"
+chown "${USER}:${USER}" -R "${BOX_SRC_DIR}" "${DATA_DIR}" "${CONFIG_DIR}"
 
 set_progress "35" "Removing existing container"
 # removing containers ensures containers are launched with latest config updates

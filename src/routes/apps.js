@@ -94,9 +94,9 @@ function getAppIcon(req, res, next) {
  * @bodyparam {icon} icon Base64 encoded image
  */
 function installApp(req, res, next) {
-    assert(typeof req.fields === 'object');
+    assert(typeof req.body === 'object');
 
-    var data = safe.JSON.parse(req.fields.data);
+    var data = req.body;
 
     if (!data) return next(new HttpError(400, 'Cannot parse data field'));
     if (!data.manifest || typeof data.manifest !== 'object') return next(new HttpError(400, 'manifest is required'));
@@ -111,9 +111,7 @@ function installApp(req, res, next) {
 
     debug('Installing app id:%s storeid:%s loc:%s port:%j restrict:%s manifest:%j', appId, data.appStoreId, data.location, data.portBindings, data.accessRestriction, data.manifest);
 
-    var sourceTarball = req.files.sourceTarball ? req.files.sourceTarball.path : null;
-
-    apps.install(appId, data.appStoreId, sourceTarball, data.manifest, data.location, data.portBindings, data.accessRestriction, data.icon || null, function (error) {
+    apps.install(appId, data.appStoreId, data.manifest, data.location, data.portBindings, data.accessRestriction, data.icon || null, function (error) {
         if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, error.message));
         if (error && error.reason === AppsError.PORT_RESERVED) return next(new HttpError(409, 'Port ' + error.message + ' is reserved.'));
         if (error && error.reason === AppsError.PORT_CONFLICT) return next(new HttpError(409, 'Port ' + error.message + ' is already in use.'));
@@ -206,9 +204,9 @@ function stopApp(req, res, next) {
 
 function updateApp(req, res, next) {
     assert(typeof req.params.id === 'string');
-    assert(typeof req.fields === 'object');
+    assert(typeof req.body === 'object');
 
-    var data = safe.JSON.parse(req.fields.data);
+    var data = req.body;
 
     if (!data) return next(new HttpError(400, 'Cannot parse data field'));
     if (!data.manifest || typeof data.manifest !== 'object') return next(new HttpError(400, 'manifest is required'));
@@ -217,9 +215,7 @@ function updateApp(req, res, next) {
 
     debug('Update app id:%s to manifest:%j', req.params.id, data.manifest);
 
-    var sourceTarball = req.files.sourceTarball ? req.files.sourceTarball.path : null;
-
-    apps.update(req.params.id, sourceTarball, data.manifest, data.portBindings, data.icon, function (error) {
+    apps.update(req.params.id, data.manifest, data.portBindings, data.icon, function (error) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
         if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
@@ -242,9 +238,7 @@ function getLogStream(req, res, next) {
 
     if (req.headers.accept !== 'text/event-stream') return next(new HttpError(400, 'This API call requires EventStream'));
 
-    var func = typeof req.query.build !== 'undefined' ? apps.getBuildLogStream : apps.getLogStream;
-
-    func(req.params.id, fromLine, function (error, logStream) {
+    apps.getLogStream(req.params.id, fromLine, function (error, logStream) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
         if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(412, error.message));
         if (error) return next(new HttpError(500, error));
@@ -273,9 +267,7 @@ function getLogs(req, res, next) {
 
     debug('Getting logs of app id:%s', req.params.id);
 
-    var func = typeof req.query.build !== 'undefined' ? apps.getBuildLogs : apps.getLogs;
-
-    func(req.params.id, function logHandler(error, logStream) {
+    apps.getLogs(req.params.id, function (error, logStream) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
         if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(412, error.message));
         if (error) return next(new HttpError(500, error));

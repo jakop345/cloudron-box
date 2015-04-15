@@ -90,7 +90,7 @@ function imageName(app) {
 
     if (app.manifest.dockerImage) return app.manifest.dockerImage;
 
-    return 'img-' + app.id;
+    return 'cloudron/' + app.manifest.id + ':' + app.manifest.version;
 }
 
 function reloadNginx(callback) {
@@ -185,39 +185,10 @@ function unconfigureNakedDomain(app, callback) {
     });
 }
 
-function buildImage(app, callback) {
-    debug('Building image (%s) for %s', imageName(app), app.id);
-
-    var tarStream = fs.createReadStream(path.join(paths.APP_SOURCES_DIR, app.id + '.tar'));
-    var buildStream = fs.createWriteStream(path.join(paths.APP_SOURCES_DIR, app.id + '.log'));
-
-    docker.buildImage(tarStream, { t: imageName(app) }, function (error, output) {
-        output.on('data', function (data) {
-            debug(data.toString('utf8'));
-            buildStream.write(data.toString('utf8'));
-        });
-        output.on('end', function () { callback(null); });
-        output.on('error', function (error) { callback(error); });
-    });
-}
-
-function createImage(app, callback) {
-    if (app.manifest.dockerImage) return downloadImage(app, callback);
-
-    if (app.appStoreId) {
-        // TODO: download tarball from the appstore
-        return callback(new Error('Not implemented yet'));
-    } else {
-        buildImage(app, callback);
-    }
-}
-
 function downloadImage(app, callback) {
     debug('Will download app now');
 
-    var manifest = app.manifest;
-
-    docker.pull(manifest.dockerImage, function (err, stream) {
+    docker.pull(imageName(app), function (err, stream) {
         if (err) return callback(new Error('Error connecting to docker'));
 
         // https://github.com/dotcloud/docker/issues/1074 says each status message
@@ -237,7 +208,7 @@ function downloadImage(app, callback) {
         stream.on('end', function () {
             debug('pulled successfully');
 
-            var image = docker.getImage(manifest.dockerImage);
+            var image = docker.getImage(imageName(app));
 
             image.inspect(function (err, data) {
                 if (err) {
@@ -648,8 +619,8 @@ function install(app, callback) {
         allocateAccessToken.bind(null, app),
 
         // download the image
-        updateApp.bind(null, app, { installationProgress: '40, Creating image' }),
-        createImage.bind(null, app),
+        updateApp.bind(null, app, { installationProgress: '40, Downloading image' }),
+        downloadImage.bind(null, app),
 
         // recreate data volume
         updateApp.bind(null, app, { installationProgress: '50, Creating volume' }),
@@ -722,8 +693,8 @@ function restore(app, callback) {
         cloudron.restoreApp.bind(null, app),
 
         // download the image
-        updateApp.bind(null, app, { installationProgress: '40, Creating image' }),
-        createImage.bind(null, app),
+        updateApp.bind(null, app, { installationProgress: '40, Downloading image' }),
+        downloadImage.bind(null, app),
 
         // restore addons
         updateApp.bind(null, app, { installationProgress: '60, Restoring addons' }),
@@ -839,8 +810,8 @@ function update(app, callback) {
         verifyManifest.bind(null, app),
         downloadIcon.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '45, Creating image' }),
-        createImage.bind(null, app),
+        updateApp.bind(null, app, { installationProgress: '45, Downloading image' }),
+        downloadImage.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '70, Updating addons' }),
         addons.updateAddons.bind(null, app, oldManifest),
