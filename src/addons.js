@@ -41,16 +41,22 @@ exports = module.exports = {
     _removeOAuthCredentials: removeOAuthCredentials
 };
 
+var NOOP = function (app, callback) { return callback(); };
+
 // setup can be called multiple times for the same app (configure crash restart) and existing data must not be lost
 // teardown is destructive. app data stored with the addon is lost
 var KNOWN_ADDONS = {
     oauth: {
         setup: allocateOAuthCredentials,
-        teardown: removeOAuthCredentials
+        teardown: removeOAuthCredentials,
+        backup: NOOP,
+        restore: NOOP
     },
     sendmail: {
         setup: setupSendMail,
-        teardown: teardownSendMail
+        teardown: teardownSendMail,
+        backup: NOOP,
+        restore: NOOP
     },
     mysql: {
         setup: setupMySql,
@@ -73,7 +79,7 @@ var KNOWN_ADDONS = {
     redis: {
         setup: setupRedis,
         teardown: teardownRedis,
-        backup: null, // no backup because we store redis as part of app's volume
+        backup: NOOP, // no backup because we store redis as part of app's volume
         restore: setupRedis // same thing
     }
 };
@@ -146,8 +152,6 @@ function backupAddons(app, callback) {
     async.eachSeries(Object.keys(app.manifest.addons), function iterator (addon, iteratorCallback) {
         if (!(addon in KNOWN_ADDONS)) return iteratorCallback(new Error('No such addon:' + addon));
 
-        if (!KNOWN_ADDONS[addon].backup) return iteratorCallback(null);
-
         KNOWN_ADDONS[addon].backup(app, iteratorCallback);
     }, callback);
 }
@@ -163,8 +167,6 @@ function restoreAddons(app, callback) {
 
     async.eachSeries(Object.keys(app.manifest.addons), function iterator (addon, iteratorCallback) {
         if (!(addon in KNOWN_ADDONS)) return iteratorCallback(new Error('No such addon:' + addon));
-
-        if (!KNOWN_ADDONS[addon].restore) return iteratorCallback(null);
 
         KNOWN_ADDONS[addon].restore(app, iteratorCallback);
     }, callback);
