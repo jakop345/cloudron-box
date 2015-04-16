@@ -34,6 +34,7 @@ exports = module.exports = {
 
     getEnvironment: getEnvironment,
     getLinksSync: getLinksSync,
+    getBindsSync: getBindsSync,
 
     // exported for testing
     _allocateOAuthCredentials: allocateOAuthCredentials,
@@ -196,6 +197,20 @@ function getLinksSync(app) {
     }
 
     return links;
+}
+
+function getBindsSync(app) {
+    assert(typeof app === 'object');
+    assert(!app.manifest.addons || typeof app.manifest.addons === 'object');
+
+    var binds = [ ];
+
+    if (!app.manifest.addons) return binds;
+
+    for (var addon in app.manifest.addons) {
+    }
+
+    return binds;
 }
 
 function allocateOAuthCredentials(app, callback) {

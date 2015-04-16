@@ -409,7 +409,7 @@ function startContainer(app, callback) {
         }
 
         var startOptions = {
-            Binds: [ appDataDir + ':/app/data:rw' ],
+            Binds: [ appDataDir + ':/app/data:rw' ].concat(addons.getBindsSync(app)),
             PortBindings: dockerPortBindings,
             PublishAllPorts: false,
             Links: addons.getLinksSync(app),
