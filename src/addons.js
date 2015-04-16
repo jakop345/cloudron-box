@@ -81,6 +81,12 @@ var KNOWN_ADDONS = {
         teardown: teardownRedis,
         backup: NOOP, // no backup because we store redis as part of app's volume
         restore: setupRedis // same thing
+    },
+    _docker: {
+        setup: NOOP,
+        teardown: NOOP,
+        backup: NOOP,
+        restore: NOOP
     }
 };
 
@@ -210,6 +216,10 @@ function getBindsSync(app) {
     if (!app.manifest.addons) return binds;
 
     for (var addon in app.manifest.addons) {
+        switch (addon) {
+        case '_docker': binds.push('/var/run/docker.sock:/var/run/docker.sock:rw'); break;
+        default: break;
+        }
     }
 
     return binds;
