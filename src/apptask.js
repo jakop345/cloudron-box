@@ -83,16 +83,6 @@ function getFreePort(callback) {
     });
 }
 
-function imageName(app) {
-    assert(app && typeof app === 'object');
-
-    if (!app.manifest) return '';
-
-    if (app.manifest.dockerImage) return app.manifest.dockerImage;
-
-    return 'cloudron/' + app.manifest.id + ':' + app.manifest.version;
-}
-
 function reloadNginx(callback) {
     shell.sudo('reloadNginx', [ RELOAD_NGINX_CMD ], callback);
 }
@@ -188,7 +178,7 @@ function unconfigureNakedDomain(app, callback) {
 function downloadImage(app, callback) {
     debug('Will download app now');
 
-    docker.pull(imageName(app), function (err, stream) {
+    docker.pull(app.manifest.dockerImage, function (err, stream) {
         if (err) return callback(new Error('Error connecting to docker'));
 
         // https://github.com/dotcloud/docker/issues/1074 says each status message
@@ -208,7 +198,7 @@ function downloadImage(app, callback) {
         stream.on('end', function () {
             debug('pulled successfully');
 
-            var image = docker.getImage(imageName(app));
+            var image = docker.getImage(app.manifest.dockerImage);
 
             image.inspect(function (err, data) {
                 if (err) {
@@ -264,7 +254,7 @@ function createContainer(app, callback) {
                     name: app.id,
                     Hostname: config.appFqdn(app.location),
                     Tty: true,
-                    Image: imageName(app),
+                    Image: app.manifest.dockerImage,
                     Cmd: null,
                     Volumes: { },
                     VolumesFrom: '',
@@ -272,7 +262,7 @@ function createContainer(app, callback) {
                     ExposedPorts: exposedPorts
                 };
 
-                debug('Creating container for %s', imageName(app));
+                debug('Creating container for %s', app.manifest.dockerImage);
 
                 docker.createContainer(containerOptions, function (error, container) {
                     if (error) return callback(new Error('Error creating container: ' + error));
@@ -303,7 +293,7 @@ function deleteContainer(app, callback) {
 }
 
 function deleteImage(app, callback) {
-    var dockerImage = imageName(app);
+    var dockerImage = app.manifest.dockerImage;
     var image = docker.getImage(dockerImage);
 
     var removeOptions = {
