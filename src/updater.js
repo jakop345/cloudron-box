@@ -29,7 +29,8 @@ var INSTALLER_UPDATE_URL = 'http://127.0.0.1:2020/api/v1/installer/update';
 
 var gCheckUpdatesIntervalId = null,
     gAppUpdateInfo = null,
-    gBoxUpdateInfo = null;
+    gBoxUpdateInfo = null,
+    gMailedUser = false;
 
 function getUpdateInfo() {
     return {
@@ -115,6 +116,11 @@ function checkUpdates() {
             if (error) debug('Error checking box updates: ', error);
 
             gBoxUpdateInfo = result;
+
+            if (gBoxUpdateInfo && !gMailedUser) {
+                mailer.updatesAvailable(gBoxUpdateInfo.version, gBoxUpdateInfo.changelog);
+                gMailedUser = true;
+            }
 
             // Done we call this in an interval
         });

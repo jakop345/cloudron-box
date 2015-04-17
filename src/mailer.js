@@ -15,7 +15,8 @@ var assert = require('assert'),
     safe = require('safetydance'),
     smtpTransport = require('nodemailer-smtp-transport'),
     userdb = require('./userdb.js'),
-    util = require('util');
+    util = require('util'),
+    _ = require('underscore');
 
 exports = module.exports = {
     initialize: initialize,
@@ -120,15 +121,25 @@ function render(templateFile, params) {
     return ejs.render(safe.fs.readFileSync(path.join(MAIL_TEMPLATES_DIR, templateFile), 'utf8'), params);
 }
 
+function getAdminEmails(callback) {
+    userdb.getAllAdmins(function (error, admins) {
+        if (error) return callback(error);
+
+        var adminEmails = [ ];
+        admins.forEach(function (admin) { adminEmails.push(admin.email); });
+
+        callback(null, adminEmails);
+    });
+}
+
 function mailUserEventToAdmins(user, event) {
     assert(typeof user === 'object');
     assert(typeof event === 'string');
 
-    userdb.getAllAdmins(function (error, admins) {
+    getAdminEmails(function (error, adminEmails) {
         if (error) return console.log('Error getting admins', error);
 
-        var adminEmails = [ ];
-        admins.forEach(function (admin) { if (user.email !== admin.email) adminEmails.push(admin.email); });
+        adminEmails = _.difference(adminEmails, [ user.email ]);
 
         var mailOptions = {
             from: config.get('mailUsername'),
@@ -204,11 +215,8 @@ function appDied(app) {
 
     debug('Sending mail for app %s @ %s died', app.id, app.location);
 
-    userdb.getAllAdmins(function (error, admins) {
+    getAdminEmails(function (error, adminEmails) {
         if (error) return console.log('Error getting admins', error);
-
-        var adminEmails = [ ];
-        admins.forEach(function (admin) { adminEmails.push(admin.email); });
 
         var mailOptions = {
             from: config.get('mailUsername'),
@@ -221,6 +229,21 @@ function appDied(app) {
     });
 }
 
-function updatesAvailable() {
+function updatesAvailable(newBoxVersion, changelog) {
+    assert(typeof newBoxVersion === 'string');
+    assert(util.isArray(changelog));
+
+    getAdminEmails(function (error, adminEmails) {
+        if (error) return console.log('Error getting admins', error);
+
+         var mailOptions = {
+            from: config.get('mailUsername'),
+            to: adminEmails.join(', '),
+            subject: util.format('%s has a new update available', config.fqdn()),
+            text: render('updates_available.ejs', { fqdn: config.fqdn(), newBoxVersion: newBoxVersion, changelog: changelog, format: 'text' })
+        };
+
+        enqueue(mailOptions);
+    });
 }
 
