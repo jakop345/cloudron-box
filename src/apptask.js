@@ -71,6 +71,12 @@ function initialize(callback) {
     database.initialize(callback);
 }
 
+function debugApp(app, args) {
+    assert(app && typeof app === 'object');
+
+    debug(app.location + ' ('  + app.id + ') - ' + util.format.call(util, Array.prototype.slice.call(arguments, 1)));
+}
+
 // We expect conflicts to not happen despite closing the port (parallel app installs, app update does not reconfigure nginx etc)
 // https://tools.ietf.org/html/rfc6056#section-3.5 says linux uses random ephemeral port allocation
 function getFreePort(callback) {
@@ -95,10 +101,10 @@ function configureNginx(app, callback) {
         var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: config.appFqdn(app.location), isAdmin: false, port: freePort, accessRestriction: app.accessRestriction });
 
         var nginxConfigFilename = path.join(paths.NGINX_APPCONFIG_DIR, app.id + '.conf');
-        debug('writing config to ' + nginxConfigFilename);
+        debugApp(app, 'writing config to %s', nginxConfigFilename);
 
         if (!safe.fs.writeFileSync(nginxConfigFilename, nginxConf)) {
-            console.error('Error creating nginx config ' + safe.error);
+            debugApp(app, 'Error creating nginx config : %s', safe.error.message);
             return callback(safe.error);
         }
 
@@ -114,7 +120,7 @@ function configureNginx(app, callback) {
 function unconfigureNginx(app, callback) {
     var nginxConfigFilename = path.join(paths.NGINX_APPCONFIG_DIR, app.id + '.conf');
     if (!safe.fs.unlinkSync(nginxConfigFilename)) {
-        console.error('Error removing nginx configuration ' + safe.error);
+        debugApp(app, 'Error removing nginx configuration : %s', safe.error.message);
         return callback(null);
     }
 
@@ -136,7 +142,7 @@ function writeNginxNakedDomainConfig(app, callback) {
     }
 
     var nginxNakedDomainFilename = path.join(paths.NGINX_CONFIG_DIR, 'naked_domain.conf');
-    debug('writing naked domain config to ' + nginxNakedDomainFilename);
+    debugApp(app, 'writing naked domain config to %s', nginxNakedDomainFilename);
 
     fs.writeFile(nginxNakedDomainFilename, nginxConf, function (error) {
         if (error) return callback(error);
@@ -154,7 +160,7 @@ function configureNakedDomain(app, callback) {
 
         if (nakedDomainAppId !== app.id) return callback(null);
 
-        debug('configureNakedDomain: writing nginx config for %s', app.id);
+        debugApp(app, 'configureNakedDomain: writing nginx config');
 
         writeNginxNakedDomainConfig(app, callback);
     });
@@ -169,14 +175,14 @@ function unconfigureNakedDomain(app, callback) {
 
         if (nakedDomainAppId !== app.id) return callback(null);
 
-        debug('unconfigureNakedDomain: resetting to admin');
+        debugApp(app, 'unconfigureNakedDomain: resetting to admin');
 
         settings.setNakedDomain(constants.ADMIN_APPID, callback);
     });
 }
 
 function downloadImage(app, callback) {
-    debug('Will download app now');
+    debugApp(app, 'downloadImage %s', app.manifest.dockerImaeg);
 
     docker.pull(app.manifest.dockerImage, function (err, stream) {
         if (err) return callback(new Error('Error connecting to docker'));
@@ -185,18 +191,18 @@ function downloadImage(app, callback) {
         // is emitted as a chunk
         stream.on('data', function (chunk) {
             var data = safe.JSON.parse(chunk) || { };
-            debug('downloadImage:', JSON.stringify(data));
+            debugApp(app, 'downloadImage data: %j', data);
 
             // The information here is useless because this is per layer as opposed to per image
             if (data.status) {
-                debug('Progress: ' + data.status); // progressDetail { current, total }
+                debugApp(app, 'progress: %s', data.status); // progressDetail { current, total }
             } else if (data.error) {
-                console.error('Error detail:' + data.errorDetail.message);
+                debugApp(app, 'error detail: %s', data.errorDetail.message);
             }
         });
 
         stream.on('end', function () {
-            debug('pulled successfully');
+            debugApp(app, 'download image successfully');
 
             var image = docker.getImage(app.manifest.dockerImage);
 
@@ -213,7 +219,7 @@ function downloadImage(app, callback) {
                     return callback(new Error('Only images with entry point are allowed'));
                 }
 
-                debug('This image exposes ports: ' + JSON.stringify(data.Config.ExposedPorts));
+                debugApp(app, 'This image exposes ports: %j', data.Config.ExposedPorts);
                 return callback(null);
             });
         });
@@ -262,7 +268,7 @@ function createContainer(app, callback) {
                     ExposedPorts: exposedPorts
                 };
 
-                debug('Creating container for %s', app.manifest.dockerImage);
+                debugApp(app, 'Creating container for %s', app.manifest.dockerImage);
 
                 docker.createContainer(containerOptions, function (error, container) {
                     if (error) return callback(new Error('Error creating container: ' + error));
@@ -420,7 +426,7 @@ function startContainer(app, callback) {
         };
 
         var container = docker.getContainer(app.containerId);
-        debug('Starting container ' + container.id + ' with options: ' + JSON.stringify(startOptions));
+        debugApp(app, 'Starting container %s with options: %j', container.id, JSON.stringify(startOptions));
 
         container.start(startOptions, function (error, data) {
             if (error && error.statusCode !== 304) return callback(new Error('Error starting container:' + error));
@@ -432,7 +438,7 @@ function startContainer(app, callback) {
 
 function stopContainer(app, callback) {
     var container = docker.getContainer(app.containerId);
-    debug('Stopping container ' + container.id);
+    debugApp(app, 'Stopping container %s', container.id);
 
     var options = {
         t: 10 // wait for 10 seconds before killing it
@@ -446,12 +452,12 @@ function stopContainer(app, callback) {
             vbox.unforwardFromHostToVirtualBox(app.id + '-tcp' + containerPort);
         }
 
-        debug('Waiting for container ' + container.id);
+        debugApp(app, 'Waiting for container ' + container.id);
 
         container.wait(function (error, data) {
             if (error && (error.statusCode !== 304 && error.statusCode !== 404)) return callback(new Error('Error waiting on container:' + error));
 
-            debug('Container stopped with status code [%s]', data ? String(data.StatusCode) : '');
+            debugApp(app, 'Container stopped with status code [%s]', data ? String(data.StatusCode) : '');
 
             return callback(null);
         });
@@ -459,7 +465,7 @@ function stopContainer(app, callback) {
 }
 
 function verifyManifest(app, callback) {
-    debug('Verifying manifest for :', app.id);
+    debugApp(app, 'Verifying manifest');
 
     var manifest = app.manifest;
     var error = manifestFormat.parse(manifest);
@@ -472,7 +478,7 @@ function verifyManifest(app, callback) {
 }
 
 function downloadIcon(app, callback) {
-    debug('Downloading icon of %s@%s', app.appStoreId, app.manifest.version);
+    debugApp(app, 'Downloading icon of %s@%s', app.appStoreId, app.manifest.version);
 
     var iconUrl = config.apiServerOrigin() + '/api/v1/apps/' + app.appStoreId + '/versions/' + app.manifest.version + '/icon';
 
@@ -491,11 +497,11 @@ function downloadIcon(app, callback) {
 
 function registerSubdomain(app, callback) {
     if (config.LOCAL) {
-        debug('Skipping subdomain registration for development');
+        debugApp(app, 'Skipping subdomain registration for development');
         return callback(null);
     }
 
-    debug('Registering subdomain for ' + app.id + ' at ' + app.location);
+    debugApp(app, 'Registering subdomain');
 
     var record = { subdomain: app.location, type: 'A', value: cloudron.getIp() };
 
@@ -507,7 +513,7 @@ function registerSubdomain(app, callback) {
         .end(function (error, res) {
             if (error) return callback(error);
 
-            debug('Registered subdomain for ' + app.id + ' ' + res.status);
+            debugApp(app, 'Registered subdomain status: %s', res.status);
 
             if (res.status === 409) return callback(null); // already registered
             if (res.status !== 201) return callback(new Error(util.format('Subdomain Registration failed. %s %j', res.status, res.body)));
@@ -518,38 +524,36 @@ function registerSubdomain(app, callback) {
 
 function unregisterSubdomain(app, callback) {
     if (config.LOCAL) {
-        debug('Skipping subdomain unregistration for development');
+        debugApp(app, 'Skipping subdomain unregistration for development');
         return callback(null);
     }
 
-    debug('Unregistering subdomain for ' + app.id + ' at ' + app.location);
+    debugApp(app, 'Unregistering subdomain');
+
     superagent
         .del(config.apiServerOrigin() + '/api/v1/subdomains/' + app.dnsRecordId)
         .query({ token: config.token() })
         .end(function (error, res) {
             if (error) {
-                console.error('Error making request: ', error);
+                debugApp(app, 'Error making request: %s', error);
             } else if (res.status !== 204) {
                 console.error('Error unregistering subdomain:', res.status, res.body);
             }
 
-            updateApp(app, { dnsRecordId: null }, function (error) {
-                if (error) console.error(error);
-                callback(null);
-            });
+            updateApp(app, { dnsRecordId: null }, callback);
         });
 }
 
 function removeIcon(app, callback) {
     fs.unlink(path.join(paths.APPICONS_DIR, app.id + '.png'), function (error) {
-        if (error && error.code !== 'ENOENT') console.error(error);
+        if (error && error.code !== 'ENOENT') debugApp(app, 'cannot remove icon : %s', error);
         callback(null);
     });
 }
 
 function waitForDnsPropagation(app, callback) {
     if (!config.CLOUDRON) {
-        debug('Skipping dns propagation check for development');
+        debugApp(app, 'Skipping dns propagation check for development');
         return callback(null);
     }
 
@@ -564,7 +568,7 @@ function waitForDnsPropagation(app, callback) {
         .end(function (error, res) {
             if (error) return retry(new Error('Failed to get dns record status : ' + error.message));
 
-            debug('waitForDnsPropagation: app:%s dnsRecordId:%s status:%s', app.id, app.dnsRecordId, res.status);
+            debugApp(app, 'waitForDnsPropagation: dnsRecordId:%s status:%s', app.dnsRecordId, res.status);
 
             if (res.status !== 200) return retry(new Error(util.format('Error getting record status: %s %j', res.status, res.body)));
 
@@ -580,7 +584,7 @@ function updateApp(app, values, callback) {
         app[value] = values[value];
     }
 
-    debug(app.id + ' installationState:' + app.installationState + ' progress: ' + app.installationProgress);
+    debugApp(app, 'installationState: %s progress: %s', app.installationState, app.installationProgress);
 
     appdb.update(app.id, values, callback);
 }
@@ -636,12 +640,12 @@ function install(app, callback) {
 
         // done!
         function (callback) {
-            debug('App ' + app.id + ' installed');
+            debugApp(app, 'installed');
             updateApp(app, { installationState: appdb.ISTATE_INSTALLED, installationProgress: '' }, callback);
         }
     ], function seriesDone(error) {
         if (error) {
-            console.error('Error installing app:', error);
+            debugApp(app, 'error installing app: %s', error);
             return updateApp(app, { installationState: appdb.ISTATE_ERROR, installationProgress: error.message }, callback.bind(null, error));
         }
         callback(null);
@@ -704,12 +708,12 @@ function restore(app, callback) {
 
         // done!
         function (callback) {
-            debug('App ' + app.id + ' installed');
+            debugApp(app, 'restored');
             updateApp(app, { installationState: appdb.ISTATE_INSTALLED, installationProgress: '' }, callback);
         }
     ], function seriesDone(error) {
         if (error) {
-            console.error('Error installing app:', error);
+            debugApp(app, 'Error installing app: %s', error);
             return updateApp(app, { installationState: appdb.ISTATE_ERROR, installationProgress: error.message }, callback.bind(null, error));
         }
 
@@ -766,12 +770,12 @@ function configure(app, callback) {
 
         // done!
         function (callback) {
-            debug('App ' + app.id + ' installed');
+            debugApp(app, 'configured');
             updateApp(app, { installationState: appdb.ISTATE_INSTALLED, installationProgress: '' }, callback);
         }
     ], function seriesDone(error) {
         if (error) {
-            console.error('Error reconfiguring app:', app, error);
+            debugApp(app, 'error reconfiguring : %s', error);
             return updateApp(app, { installationState: appdb.ISTATE_ERROR, installationProgress: error.message }, callback.bind(null, error));
         }
         callback(null);
@@ -783,7 +787,7 @@ function configure(app, callback) {
 function update(app, callback) {
     var oldManifest = app.manifest; // TODO: this won't be correct all the time should we crash after download manifest
 
-    debug('Updating %s to %s', app.id, safe.query(app, 'manifest.version'));
+    debugApp(app, 'Updating to %s', safe.query(app, 'manifest.version'));
 
     async.series([
         updateApp.bind(null, app, { installationProgress: '0, Stopping app' }),
@@ -815,12 +819,12 @@ function update(app, callback) {
 
         // done!
         function (callback) {
-            debug('App ' + app.id + ' updated');
+            debugApp(app, 'updated');
             updateApp(app, { installationState: appdb.ISTATE_INSTALLED, installationProgress: '' }, callback);
         }
     ], function seriesDone(error) {
         if (error) {
-            console.error('Error updating app:', error);
+            debugApp(app, 'Error updating app: %s', error);
             return updateApp(app, { installationState: appdb.ISTATE_ERROR, installationProgress: error.message }, callback.bind(null, error));
         }
         callback(null);
@@ -828,7 +832,7 @@ function update(app, callback) {
 }
 
 function uninstall(app, callback) {
-    debug('uninstalling ' + app.id);
+    debugApp(app, 'uninstalling');
 
     // TODO: figure what happens if one of the steps fail
     async.series([
@@ -881,7 +885,7 @@ function uninstall(app, callback) {
 function runApp(app, callback) {
     startContainer(app, function (error) {
         if (error) {
-            console.error('Error starting container.', error);
+            debugApp(app, 'Error starting container : %s', error);
             return updateApp(app, { runState: appdb.RSTATE_ERROR }, callback);
         }
 
@@ -903,11 +907,12 @@ function postInstall(app, callback) {
     }
 
     if (app.runState === appdb.RSTATE_PENDING_START || app.runState === appdb.RSTATE_RUNNING) {
-        debug('Resuming app with state : %s %s', app.runState, app.id);
+        debugApp(app, 'Resuming app with state : %s', app.runState);
         return runApp(app, callback);
     }
 
-    debug('postInstall - doing nothing: %s %s', app.runState, app.id);
+    debugApp(app, 'postInstall - doing nothing: %s', app.runState);
+
     return callback(null);
 }
 
@@ -916,7 +921,7 @@ function startTask(appId, callback) {
     appdb.get(appId, function (error, app) {
         if (error) return callback(error);
 
-        debug('ISTATE:' + app.installationState + ' RSTATE:' + app.runState);
+        debugApp(app, 'startTask installationState: %s runState: %s', app.installationState, app.runState);
 
         if (app.installationState === appdb.ISTATE_PENDING_UNINSTALL) {
             return uninstall(app, callback);
@@ -947,7 +952,7 @@ function startTask(appId, callback) {
             return;
         }
 
-        console.error('Apptask launched but nothing to do.', app);
+        debugApp(app, 'Apptask launched but nothing to do.');
         return callback(null);
     });
 }
@@ -955,13 +960,13 @@ function startTask(appId, callback) {
 if (require.main === module) {
     assert(process.argv.length === 3, 'Pass the appid as argument');
 
-    debug('Apptask for ' + process.argv[2]);
+    debug('Apptask for %s', process.argv[2]);
 
     initialize(function (error) {
         if (error) throw error;
 
         startTask(process.argv[2], function (error) {
-            debug('Apptask completed for ' + process.argv[2], error);
+            debug('Apptask completed for %s %s', process.argv[2], error);
             process.exit(error ? 1 : 0);
         });
     });
