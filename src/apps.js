@@ -61,15 +61,23 @@ function initialize(callback) {
     resume(callback); // TODO: potential race here since resume is async
 }
 
-function startTask(appId) {
+function startTask(appId, maxDelay) {
     assert(typeof appId === 'string');
+    assert(!maxDelay || typeof maxDelay === 'number');
     assert(!(appId in gTasks));
 
-    gTasks[appId] = child_process.fork(__dirname + '/apptask.js', [ appId ]);
-    gTasks[appId].once('exit', function (code, signal) {
-        debug('Task completed :' + appId);
-        delete gTasks[appId];
-    });
+    maxDelay = maxDelay || 0;
+
+    // start processes with an arbitrary delay to mitigate docker issue
+    // https://github.com/docker/docker/issues/8714. this could be our bug as well
+    // because we getFreePort in apptask has a race with multiprocess
+    setTimeout(function () {
+        gTasks[appId] = child_process.fork(__dirname + '/apptask.js', [ appId ]);
+        gTasks[appId].once('exit', function (code, signal) {
+            debug('Task completed :' + appId);
+            delete gTasks[appId];
+        });
+    }, Math.floor(Math.random() * maxDelay));
 }
 
 function stopTask(appId) {
@@ -91,7 +99,7 @@ function resume(callback) {
 
         apps.forEach(function (app) {
             debug('Creating process for %s (%s) with state %s', app.location, app.id, app.installationState);
-            startTask(app.id);
+            startTask(app.id, apps.length);
         });
 
         callback(null);
