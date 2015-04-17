@@ -25,6 +25,7 @@ exports = module.exports = {
     userRemoved: userRemoved,
     adminChanged: adminChanged,
     passwordReset: passwordReset,
+    updatesAvailable: updatesAvailable,
 
     appDied: appDied
 };
@@ -218,5 +219,8 @@ function appDied(app) {
 
         enqueue(mailOptions);
     });
+}
+
+function updatesAvailable() {
 }
 

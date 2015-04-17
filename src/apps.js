@@ -90,7 +90,7 @@ function resume(callback) {
         if (error) return callback(error);
 
         apps.forEach(function (app) {
-            debug('Creating process for ' + app.id + ' with state ' + app.installationState);
+            debug('Creating process for %s (%s) with state %s', app.location, app.id, app.installationState);
             startTask(app.id);
         });
 
