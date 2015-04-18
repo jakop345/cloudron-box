@@ -12,7 +12,9 @@ module.exports = exports = {
 };
 
 var appdb = require('./appdb.js'),
+    apps = require('./apps.js'),
     assert = require('assert'),
+    async = require('async'),
     cloudron = require('./cloudron.js'),
     progress = require('./progress.js'),
     config = require('../config.js'),
@@ -28,9 +30,9 @@ var appdb = require('./appdb.js'),
 var INSTALLER_UPDATE_URL = 'http://127.0.0.1:2020/api/v1/installer/update';
 
 var gCheckUpdatesIntervalId = null,
-    gAppUpdateInfo = null,
+    gAppUpdateInfo = null, // id -> update info
     gBoxUpdateInfo = null,
-    gMailedUser = false;
+    gMailedUser =  { };
 
 function getUpdateInfo() {
     return {
@@ -40,22 +42,35 @@ function getUpdateInfo() {
 }
 
 function checkAppUpdates(callback) {
-    appdb.getAppStoreIds(function (error, appVersions) {
+    appdb.getAll(function (error, apps) { // do not use apps.getAll because that uses updater information
         if (error) return callback(error);
 
-        var appStoreIds = appVersions.map(function (appVersion) { return appVersion.appStoreId; });
+        var appUpdateInfo = { };
+        var appStoreIds = apps.map(function (app) { return app.appStoreId; });
 
         superagent
             .post(config.apiServerOrigin() + '/api/v1/appupdates')
             .send({ appIds: appStoreIds, boxVersion: config.version() })
             .timeout(10 * 1000)
             .end(function (error, result) {
+
             if (error) return callback(error);
-            if (result.statusCode !== 200) return callback(new Error('Error checking app update: ', result.statusCode, result.body.message));
 
-            debug('checkAppUpdates: %j', result.body);
+            if (result.statusCode !== 200 || !result.body.appVersions) {
+                return callback(new Error('Error checking app update: ', result.statusCode, result.body.message));
+            }
 
-            callback(null, result.body.appVersions);
+            var latestAppVersions = result.body.appVersions;
+            for (var i = 0; i < apps.length; i++) {
+                var oldVersion = apps[i].manifest.version;
+                var newVersion = latestAppVersions[apps[i].appStoreId].manifest.version;
+                if (newVersion !== oldVersion) {
+                    debug('Update available for %s (%s) from %s to %s', apps[i].location, apps[i].id, oldVersion, newVersion);
+                    appUpdateInfo[apps[i].id] = latestAppVersions[apps[i].appStoreId];
+                }
+            }
+
+            callback(null, appUpdateInfo);
         });
     });
 }
@@ -104,6 +119,27 @@ function checkBoxUpdates(callback) {
     });
 }
 
+function mailUser(callback) {
+    if (gBoxUpdateInfo && !gMailedUser['box']) {
+        mailer.boxUpdateAvailable(gBoxUpdateInfo.version, gBoxUpdateInfo.changelog);
+        gMailedUser['box'] = true;
+    }
+
+    async.eachSeries(Object.keys(gAppUpdateInfo), function iterator(id, iteratorDone) {
+        if (gMailedUser[id]) return iteratorDone();
+
+        apps.get(id, function (error, app) {
+            if (error) {
+                debug('Error getting app %s %s', id, error);
+                return iteratorDone();
+            }
+
+            mailer.appUpdateAvailable(app, gAppUpdateInfo[id]);
+            gMailedUser[id] = true;
+        });
+    }, callback);
+}
+
 function checkUpdates() {
     debug('Checking for app and box updates...');
 
@@ -117,10 +153,7 @@ function checkUpdates() {
 
             gBoxUpdateInfo = result;
 
-            if (gBoxUpdateInfo && !gMailedUser) {
-                mailer.boxUpdateAvailable(gBoxUpdateInfo.version, gBoxUpdateInfo.changelog);
-                gMailedUser = true;
-            }
+            mailUser();
 
             // Done we call this in an interval
         });

@@ -270,16 +270,7 @@ function getAll(callback) {
         apps.forEach(function (app) {
             app.iconUrl = getIconUrlSync(app);
             app.fqdn = config.appFqdn(app.location);
-            app.updateVersion = null;
-
-            updates.some(function (update) {
-                if (update.id === app.appStoreId && update.manifest.version !== app.manifest.version) {
-                    app.updateVersion = update.manifest.version;
-                    return true;
-                } else {
-                    return false;
-                }
-            });
+            app.updateVersion = updates[app.id] ? updates[app.id].manifest.version : null;
         });
 
         callback(null, apps);

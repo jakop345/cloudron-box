@@ -27,6 +27,7 @@ exports = module.exports = {
     adminChanged: adminChanged,
     passwordReset: passwordReset,
     boxUpdateAvailable: boxUpdateAvailable,
+    appUpdateAvailable: appUpdateAvailable,
 
     appDied: appDied
 };
@@ -241,6 +242,24 @@ function boxUpdateAvailable(newBoxVersion, changelog) {
             to: adminEmails.join(', '),
             subject: util.format('%s has a new update available', config.fqdn()),
             text: render('box_update_available.ejs', { fqdn: config.fqdn(), newBoxVersion: newBoxVersion, changelog: changelog, format: 'text' })
+        };
+
+        enqueue(mailOptions);
+    });
+}
+
+function appUpdateAvailable(app, updateInfo) {
+    assert(typeof app === 'object');
+    assert(typeof updateInfo === 'object');
+
+    getAdminEmails(function (error, adminEmails) {
+        if (error) return console.log('Error getting admins', error);
+
+         var mailOptions = {
+            from: config.get('mailUsername'),
+            to: adminEmails.join(', '),
+            subject: util.format('%s has a new update available', app.fqdn),
+            text: render('app_update_available.ejs', { fqdn: config.fqdn(), app: app, format: 'text' })
         };
 
         enqueue(mailOptions);
