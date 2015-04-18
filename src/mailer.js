@@ -26,7 +26,7 @@ exports = module.exports = {
     userRemoved: userRemoved,
     adminChanged: adminChanged,
     passwordReset: passwordReset,
-    updatesAvailable: updatesAvailable,
+    boxUpdateAvailable: boxUpdateAvailable,
 
     appDied: appDied
 };
@@ -229,7 +229,7 @@ function appDied(app) {
     });
 }
 
-function updatesAvailable(newBoxVersion, changelog) {
+function boxUpdateAvailable(newBoxVersion, changelog) {
     assert(typeof newBoxVersion === 'string');
     assert(util.isArray(changelog));
 
@@ -240,7 +240,7 @@ function updatesAvailable(newBoxVersion, changelog) {
             from: config.get('mailUsername'),
             to: adminEmails.join(', '),
             subject: util.format('%s has a new update available', config.fqdn()),
-            text: render('updates_available.ejs', { fqdn: config.fqdn(), newBoxVersion: newBoxVersion, changelog: changelog, format: 'text' })
+            text: render('box_update_available.ejs', { fqdn: config.fqdn(), newBoxVersion: newBoxVersion, changelog: changelog, format: 'text' })
         };
 
         enqueue(mailOptions);

@@ -118,7 +118,7 @@ function checkUpdates() {
             gBoxUpdateInfo = result;
 
             if (gBoxUpdateInfo && !gMailedUser) {
-                mailer.updatesAvailable(gBoxUpdateInfo.version, gBoxUpdateInfo.changelog);
+                mailer.boxUpdateAvailable(gBoxUpdateInfo.version, gBoxUpdateInfo.changelog);
                 gMailedUser = true;
             }
 
