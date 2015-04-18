@@ -74,8 +74,8 @@ function initialize(callback) {
 function debugApp(app, args) {
     assert(!app || typeof app === 'object');
 
-    var prefix = app ? app.location + ' ('  + app.id + ') - ' : ' (no app)';
-    debug(prefix + util.format.call(util, Array.prototype.slice.call(arguments, 1)));
+    var prefix = app ? app.location : '(no app)';
+    debug(prefix + ' ' + util.format.apply(util, Array.prototype.slice.call(arguments, 1)));
 }
 
 // We expect conflicts to not happen despite closing the port (parallel app installs, app update does not reconfigure nginx etc)
