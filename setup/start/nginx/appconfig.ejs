@@ -50,7 +50,8 @@ server {
         proxy_buffers           4 256k;
         proxy_busy_buffers_size 256k;
 
-        client_max_body_size 512m;
+        # Disable check to allow unlimited body sizes
+        client_max_body_size 0;
 
 <% if ( isAdmin === true ) { %>
         location /api/ {
