@@ -46,7 +46,8 @@ function checkAppUpdates(callback) {
         if (error) return callback(error);
 
         var appUpdateInfo = { };
-        var appStoreIds = apps.map(function (app) { return app.appStoreId; });
+        // appStoreId can be '' for dev apps
+        var appStoreIds = apps.map(function (app) { return app.appStoreId; }).filter(function (id) { return id !== ''; });
 
         superagent
             .post(config.apiServerOrigin() + '/api/v1/appupdates')
@@ -62,7 +63,10 @@ function checkAppUpdates(callback) {
 
             var latestAppVersions = result.body.appVersions;
             for (var i = 0; i < apps.length; i++) {
+                if (!(apps[i].appStoreId in latestAppVersions)) continue;
+
                 var oldVersion = apps[i].manifest.version;
+
                 var newVersion = latestAppVersions[apps[i].appStoreId].manifest.version;
                 if (newVersion !== oldVersion) {
                     debug('Update available for %s (%s) from %s to %s', apps[i].location, apps[i].id, oldVersion, newVersion);
