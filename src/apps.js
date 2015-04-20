@@ -368,7 +368,6 @@ function configure(appId, location, portBindings, accessRestriction, callback) {
             if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE));
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-            stopTask(appId);
             startTask(appId);
 
             callback(null);
@@ -406,7 +405,6 @@ function update(appId, manifest, portBindings, icon, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE)); // might be a bad guess
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        stopTask(appId);
         startTask(appId);
 
         callback(null);
@@ -478,7 +476,7 @@ function uninstall(appId, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        stopTask(appId);
+        stopTask(appId); // since uninstall is allowed from any state, kill current task
         startTask(appId);
 
         callback(null);

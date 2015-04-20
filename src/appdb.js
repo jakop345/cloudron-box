@@ -317,10 +317,19 @@ function setInstallationCommand(appId, installationState, values, callback) {
 
     values.installationState = installationState;
 
+    // Rules are:
+    // uninstall is allowed in any state
+    // restore is allowed from installed or error state
+    // update and configure are allowed only in installed state
+
     if (installationState === exports.ISTATE_PENDING_UNINSTALL) {
         updateWithConstraints(appId, values, '', callback);
+    } else if (installationState === exports.ISTATE_PENDING_RESTORE) {
+        updateWithConstraints(appId, values, 'AND (installationState = "installed" OR installationState = "error")', callback);
+    } else if (installationState === exports.ISTATE_PENDING_UPDATE || exports.ISTATE_PENDING_CONFIGURE) {
+        updateWithConstraints(appId, values, 'AND installationState = "installed"', callback);
     } else {
-        updateWithConstraints(appId, values, 'AND installationState NOT LIKE "pending_%"', callback);
+        callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, 'invalid installationState'));
     }
 }
 
