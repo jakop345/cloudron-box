@@ -30,7 +30,7 @@ var appdb = require('./appdb.js'),
 var INSTALLER_UPDATE_URL = 'http://127.0.0.1:2020/api/v1/installer/update';
 
 var gCheckUpdatesIntervalId = null,
-    gAppUpdateInfo = null, // id -> update info
+    gAppUpdateInfo = { }, // id -> update info
     gBoxUpdateInfo = null,
     gMailedUser =  { };
 
