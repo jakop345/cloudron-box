@@ -215,6 +215,14 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
+    Client.prototype.restoreApp = function (appId, password, callback) {
+        var data = { password: password };
+        $http.post('/api/v1/apps/' + appId + '/restore', data).success(function (data, status) {
+            if (status !== 202) return callback(new ClientError(status, data));
+            callback(null);
+        }).error(defaultErrorHandler(callback));
+    };
+
     Client.prototype.uninstallApp = function (appId, password, callback) {
         var data = { password: password };
         $http.post('/api/v1/apps/' + appId + '/uninstall', data).success(function (data, status) {

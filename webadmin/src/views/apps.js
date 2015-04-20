@@ -29,6 +29,13 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         password: ''
     };
 
+    $scope.appRestore = {
+        busy: false,
+        error: {},
+        app: {},
+        password: ''
+    };
+
     $scope.appUpdate = {
         busy: false,
         error: {},
@@ -129,6 +136,34 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
             $('#appConfigureModal').modal('hide');
 
             $scope.reset();
+        });
+    };
+
+    $scope.showRestore = function (app) {
+        $scope.reset();
+
+        $scope.appRestore.app = app;
+
+        $('#appRestoreModal').modal('show');
+    };
+
+    $scope.doRestore = function () {
+        $scope.appRestore.busy = true;
+        $scope.appRestore.error.password = null;
+
+        Client.restoreApp($scope.appRestore.app.id, $scope.appRestore.password, function (error) {
+            if (error && error.statusCode === 403) {
+                $scope.appRestore.password = '';
+                $scope.appRestore.error.password = true;
+                $('#appRestorePasswordInput').focus();
+            } else if (error) {
+                Client.error(error);
+            } else {
+                $('#appRestoreModal').modal('hide');
+                $scope.reset();
+            }
+
+            $scope.appRestore.busy = false;
         });
     };
 

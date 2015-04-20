@@ -44,6 +44,18 @@ var HSTATES = {
     HEALTHY: 'healthy'
 };
 
+app.filter('installError', function () {
+    return function (app) {
+        return app.installationState === ISTATES.ERROR;
+    };
+});
+
+app.filter('installSuccess', function () {
+    return function (app) {
+        return app.installationState === ISTATES.INSTALLED;
+    };
+});
+
 app.filter('installationActive', function() {
     return function(app) {
         if (app.installationState === ISTATES.ERROR) return false;

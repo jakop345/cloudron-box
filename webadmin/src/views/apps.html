@@ -59,6 +59,34 @@
     </div>
 </div>
 
+<!-- Modal restore app -->
+<div class="modal fade" id="appRestoreModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Really Restore {{ appRestore.app.location }}</h4>
+            </div>
+            <div class="modal-body">
+                <p>Restoring the app will lose all content generated since last backup of this app!</p>
+                <fieldset>
+                    <form class="form-signin" role="form" name="appRestoreForm" ng-submit="doRestore()" autocomplete="off">
+                        <div class="form-group" ng-class="{ 'has-error': (!appRestoreForm.password.$dirty && appRestore.error.password) || (appRestoreForm.password.$dirty && appRestoreForm.password.$invalid) }">
+                            <label class="control-label" for="appRestorePasswordInput">Provide your password to confirm this action</label>
+                            <input type="password" class="form-control" ng-model="appRestore.password" id="appRestorePasswordInput" name="password" ng-maxlength="512" ng-minlength="5" required autofocus>
+                        </div>
+
+                        <input class="ng-hide" type="submit" ng-disabled="appRestoreForm.$invalid || busy"/>
+                    </form>
+                </fieldset>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" ng-click="doRestore()" ng-disabled="appRestoreForm.$invalid || appRestore.busy"><i class="fa fa-spinner fa-pulse" ng-show="appRestore.busy"></i> Restore</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Modal uninstall app -->
 <div class="modal fade" id="appUninstallModal" tabindex="-1" role="dialog">
     <div class="modal-dialog">
@@ -166,12 +194,16 @@
                 <div class="grid-item-bottom" ng-show="user.admin">
                     <div class="row">
                         <div class="col-xs-4 text-left">
-                            <a href="" ng-click="showConfigure(app)">
+                            <a href="" ng-click="showRestore(app)" ng-show="(app | installError) === true">
+                                <i class="fa fa-undo scale"></i>
+                            </a>
+
+                            <a href="" ng-click="showConfigure(app)" ng-show="(app | installSuccess) == true">
                                 <i class="fa fa-wrench scale"></i>
                             </a>
                         </div>
                         <div class="col-xs-4 text-center">
-                            <a href="" ng-click="showUpdate(app)" class="ng-hide animateMe" ng-show="app.updateVersion">
+                            <a href="" ng-click="showUpdate(app)" class="ng-hide animateMe" ng-show="app.updateVersion && (app | installSuccess)">
                                 <i class="fa fa-arrow-up text-success scale"></i>
                             </a>
                         </div>
