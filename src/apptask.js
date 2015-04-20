@@ -685,15 +685,14 @@ function restore(app, callback) {
         updateApp.bind(null, app, { installationProgress: '25, Downloading last backup' }),
         deleteVolume.bind(null, app),
         createVolume.bind(null, app),
-        cloudron.restoreApp.bind(null, app),
 
         // download the image
         updateApp.bind(null, app, { installationProgress: '40, Downloading image' }),
         downloadImage.bind(null, app),
 
-        // restore addons
-        updateApp.bind(null, app, { installationProgress: '60, Restoring addons' }),
-        addons.restoreAddons.bind(null, app),
+        // restore app and addons
+        updateApp.bind(null, app, { installationProgress: '60, Restoring app and addons' }),
+        cloudron.restoreApp.bind(null, app),
 
         // create container (old containers are deleted by update script)
         updateApp.bind(null, app, { installationProgress: '70, Creating container' }),

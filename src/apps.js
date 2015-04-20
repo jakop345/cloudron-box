@@ -14,6 +14,7 @@ exports = module.exports = {
     install: install,
     configure: configure,
     uninstall: uninstall,
+    restore: restore,
     update: update,
 
     getLogStream: getLogStream,
@@ -463,6 +464,22 @@ function getLogs(appId, callback) {
 
             return callback(null, logStream);
         });
+    });
+}
+
+function restore(appId, callback) {
+    assert(typeof appId === 'string');
+    assert(typeof callback === 'function');
+
+    debug('Will restore app with id:%s', appId);
+
+    appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_RESTORE, function (error) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE)); // might be a bad guess
+        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+        startTask(appId);
+
+        callback(null);
     });
 }
 

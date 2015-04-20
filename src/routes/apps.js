@@ -23,6 +23,7 @@ exports = module.exports = {
     installApp: installApp,
     configureApp: configureApp,
     uninstallApp: uninstallApp,
+    restoreApp: restoreApp,
     updateApp: updateApp,
     getLogs: getLogs,
     getLogStream: getLogStream,
@@ -151,6 +152,21 @@ function configureApp(req, res, next) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
         if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
         if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(202, { }));
+    });
+}
+
+function restoreApp(req, res, next) {
+    assert(typeof req.params.id === 'string');
+
+    debug('Restore app id:%s', req.params.id);
+
+    apps.restore(req.params.id, function (error) {
+        if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
+        if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));
+        if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(202, { }));
