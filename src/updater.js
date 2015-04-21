@@ -196,6 +196,24 @@ function update(callback) {
     });
 }
 
+function upgrade(callback) {
+    assert(gBoxUpdateInfo.upgrade);
+
+    debug('box needs upgrade');
+
+    superagent.post(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/upgrade')
+      .query({ token: config.token() })
+      .send({ version: gBoxUpdateInfo.version })
+      .end(function (error, result) {
+        if (error) return callback(new Error('Error making upgrade request: ' + error));
+        if (result.status !== 202) return callback(new Error('Server not ready to upgrade: ' + result.body));
+
+        progress.set(progress.UPDATE, 10, 'Updating base system');
+
+        callback(null);
+    });
+}
+
 function startUpdate(callback) {
     if (!gBoxUpdateInfo) {
         debug('no box update available');
@@ -207,23 +225,7 @@ function startUpdate(callback) {
     cloudron.backup(function (error) {
         if (error) return callback(error);
 
-        if (gBoxUpdateInfo && gBoxUpdateInfo.upgrade) {
-            debug('box needs upgrade');
-
-            superagent.post(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/upgrade')
-              .query({ token: config.token() })
-              .send({ version: gBoxUpdateInfo.version })
-              .end(function (error, result) {
-                if (error) return callback(new Error('Error making upgrade request: ' + error));
-                if (result.status !== 202) return callback(new Error('Server not ready to upgrade: ' + result.body));
-
-                progress.set(progress.UPDATE, 10, 'Updating base system');
-
-                callback(null);
-            });
-
-            return;
-        }
+        if (gBoxUpdateInfo && gBoxUpdateInfo.upgrade) return upgrade(callback);
 
         // fetch a signed sourceTarballUrl
         superagent.get(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/sourcetarballurl')
