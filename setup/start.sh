@@ -40,6 +40,7 @@ find "${DATA_DIR}/box" -mindepth 1 -delete || true
 [[ ! -d "${DATA_DIR}/box" ]] && btrfs subvolume create "${DATA_DIR}/box"
 mkdir -p "${DATA_DIR}/box/appicons"
 mkdir -p "${DATA_DIR}/box/mail"
+mkdir -p "${DATA_DIR}/box/graphite"
 mkdir -p "${DATA_DIR}/snapshots"
 
 mkdir -p "${CONFIG_DIR}/addons"
@@ -111,8 +112,12 @@ if [[ -n "${existing_containers}" ]]; then
     echo "${existing_containers}" | xargs docker rm -f
 fi
 
-set_progress "45" "Setup collectd and graphite"
-${script_dir}/start/setup_collectd.sh
+set_progress "45" "Setup graphite"
+docker run --restart=always -d --name="graphite" \
+    -p 127.0.0.1:2003:2003 \
+    -p 127.0.0.1:2004:2004 \
+    -p 127.0.0.1:8000:8000 \
+    -v "${DATA_DIR}/box/graphite:/app/data" girish/graphite:0.1.0
 
 set_progress "45" "Setup mail relay"
 mail_container_id=$(docker run --restart=always -d --name="mail" \

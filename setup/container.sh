@@ -18,3 +18,12 @@ cp -r "${container_files}/supervisor/" /etc/supervisor/
 rm /etc/sudoers.d/*
 cp -r "${container_files}/sudoers" /etc/sudoers.d/yellowtent
 
+########## collectd
+rm -rf /etc/collectd
+ln -sfF "/home/yellowtent/configs/collectd" /etc/collectd
+cp -r "${container_files}/collectd.conf" "/home/yellowtent/configs/collectd/collectd.conf"
+
+########## Restart services (this is only needed since we are not a real container)
+update-rc.d -f collectd defaults
+/etc/init.d/collectd restart
+
