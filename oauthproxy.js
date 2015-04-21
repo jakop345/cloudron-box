@@ -81,7 +81,7 @@ function startServer(callback) {
         // proceed if we are authenticated
         if (req.authenticated) return next();
 
-        if (req.path === CALLBACK_URI) {
+        if (req.path === CALLBACK_URI && req.sessionData.returnTo) {
             // exchange auth code for an access token
             var query = {
                 response_type: 'token',
