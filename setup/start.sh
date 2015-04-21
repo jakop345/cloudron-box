@@ -31,7 +31,10 @@ set_progress() {
     (echo "{ \"update\": { \"percent\": \"${percent}\", \"message\": \"${message}\" }, \"backup\": {} }" > "${SETUP_PROGRESS_JSON}") 2> /dev/null || true # as this will fail in non-update mode
 }
 
-set_progress "1" "Ensuring directories"
+set_progress "1" "Create container"
+$script_dir/container.sh
+
+set_progress "10" "Ensuring directories"
 # keep these in sync with paths.js
 find "${DATA_DIR}/box" -mindepth 1 -delete || true
 [[ ! -d "${DATA_DIR}/box" ]] && btrfs subvolume create "${DATA_DIR}/box"
@@ -57,34 +60,6 @@ if [[ -n "${arg_restore_url}" ]]; then
         echo "Failed to download data, trying again"
     done
 fi
-
-set_progress "20" "Configuring Sudoers file"
-cat > /etc/sudoers.d/yellowtent <<EOF
-Defaults!${BOX_SRC_DIR}/src/scripts/createappdir.sh env_keep="HOME NODE_ENV"
-${USER} ALL=(root) NOPASSWD: ${BOX_SRC_DIR}/src/scripts/createappdir.sh
-
-Defaults!${BOX_SRC_DIR}/src/scripts/rmappdir.sh env_keep="HOME NODE_ENV"
-${USER} ALL=(root) NOPASSWD: ${BOX_SRC_DIR}/src/scripts/rmappdir.sh
-
-Defaults!${BOX_SRC_DIR}/src/scripts/reloadnginx.sh env_keep="HOME NODE_ENV"
-${USER} ALL=(root) NOPASSWD: ${BOX_SRC_DIR}/src/scripts/reloadnginx.sh
-
-Defaults!${BOX_SRC_DIR}/src/scripts/backupbox.sh env_keep="HOME NODE_ENV"
-${USER} ALL=(root) NOPASSWD: ${BOX_SRC_DIR}/src/scripts/backupbox.sh
-
-Defaults!${BOX_SRC_DIR}/src/scripts/backupapp.sh env_keep="HOME NODE_ENV"
-${USER} ALL=(root) NOPASSWD: ${BOX_SRC_DIR}/src/scripts/backupapp.sh
-
-Defaults!${BOX_SRC_DIR}/src/scripts/restoreapp.sh env_keep="HOME NODE_ENV"
-${USER} ALL=(root) NOPASSWD: ${BOX_SRC_DIR}/src/scripts/restoreapp.sh
-
-Defaults!${BOX_SRC_DIR}/src/scripts/reboot.sh env_keep="HOME NODE_ENV"
-${USER} ALL=(root) NOPASSWD: ${BOX_SRC_DIR}/src/scripts/reboot.sh
-
-Defaults!${BOX_SRC_DIR}/src/scripts/reloadcollectd.sh env_keep="HOME NODE_ENV"
-${USER} ALL=(root) NOPASSWD: ${BOX_SRC_DIR}/src/scripts/reloadcollectd.sh
-
-EOF
 
 set_progress "21" "Setting up MySQL"
 mysqladmin -u root -ppassword password password # reset default root password
@@ -246,14 +221,8 @@ ADMIN_SCOPES="root,developer,profile,users,apps,settings,roleUser"
 mysql -u root -ppassword -e "REPLACE INTO clients (id, appId, clientSecret, redirectURI, scope) VALUES (\"cid-webadmin\", \"webadmin\", \"secret-webadmin\", \"${admin_origin}\", \"\$ADMIN_SCOPES\")" box
 EOF
 
-set_progress "70" "Setup logrotate"
-${script_dir}/start/setup_logrotate.sh
-
 # bookkeep the version as part of data
 echo "{ \"version\": \"${arg_version}\", \"boxVersionsUrl\": \"${arg_box_versions_url}\" }" > "${DATA_DIR}/box/version"
-
-set_progress "75" "Setup supervisord"
-${script_dir}/start/setup_supervisord.sh
 
 set_progress "80" "Reloading supervisor"
 ${script_dir}/start/reload_supervisord.sh

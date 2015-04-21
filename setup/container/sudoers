@@ -1,0 +1,24 @@
+Defaults!/home/yellowtent/box/src/scripts/createappdir.sh env_keep="HOME NODE_ENV"
+${USER} ALL=(root) NOPASSWD: /home/yellowtent/box/src/scripts/createappdir.sh
+
+Defaults!/home/yellowtent/box/src/scripts/rmappdir.sh env_keep="HOME NODE_ENV"
+${USER} ALL=(root) NOPASSWD: /home/yellowtent/box/src/scripts/rmappdir.sh
+
+Defaults!/home/yellowtent/box/src/scripts/reloadnginx.sh env_keep="HOME NODE_ENV"
+${USER} ALL=(root) NOPASSWD: /home/yellowtent/box/src/scripts/reloadnginx.sh
+
+Defaults!/home/yellowtent/box/src/scripts/backupbox.sh env_keep="HOME NODE_ENV"
+${USER} ALL=(root) NOPASSWD: /home/yellowtent/box/src/scripts/backupbox.sh
+
+Defaults!/home/yellowtent/box/src/scripts/backupapp.sh env_keep="HOME NODE_ENV"
+${USER} ALL=(root) NOPASSWD: /home/yellowtent/box/src/scripts/backupapp.sh
+
+Defaults!/home/yellowtent/box/src/scripts/restoreapp.sh env_keep="HOME NODE_ENV"
+${USER} ALL=(root) NOPASSWD: /home/yellowtent/box/src/scripts/restoreapp.sh
+
+Defaults!/home/yellowtent/box/src/scripts/reboot.sh env_keep="HOME NODE_ENV"
+${USER} ALL=(root) NOPASSWD: /home/yellowtent/box/src/scripts/reboot.sh
+
+Defaults!/home/yellowtent/box/src/scripts/reloadcollectd.sh env_keep="HOME NODE_ENV"
+${USER} ALL=(root) NOPASSWD: /home/yellowtent/box/src/scripts/reloadcollectd.sh
+
