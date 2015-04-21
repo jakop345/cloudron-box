@@ -636,6 +636,8 @@ function install(app, callback) {
         updateApp.bind(null, app, { installationProgress: '80, Setting up collectd profile' }),
         addCollectdProfile.bind(null, app),
 
+        runApp.bind(null, app),
+
         // wait until dns propagated
         updateApp.bind(null, app, { installationProgress: '90, Waiting for DNS propagation' }),
         exports._waitForDnsPropagation.bind(null, app),
@@ -908,7 +910,7 @@ function stopApp(app, callback) {
     });
 }
 
-function postInstall(app, callback) {
+function handleRunCommand(app, callback) {
     if (app.runState === appdb.RSTATE_PENDING_STOP) {
         return stopApp(app, callback);
     }
@@ -918,7 +920,7 @@ function postInstall(app, callback) {
         return runApp(app, callback);
     }
 
-    debugApp(app, 'postInstall - doing nothing: %s', app.runState);
+    debugApp(app, 'handleRunCommand - doing nothing: %s', app.runState);
 
     return callback(null);
 }
@@ -947,16 +949,11 @@ function startTask(appId, callback) {
         }
 
         if (app.installationState === appdb.ISTATE_INSTALLED) {
-            return postInstall(app, callback);
+            return handleRunCommand(app, callback);
         }
 
         if (app.installationState === appdb.ISTATE_PENDING_INSTALL) {
-            install(app, function (error) {
-                if (error) return callback(error);
-
-                runApp(app, callback);
-            });
-            return;
+            return install(app, callback);
         }
 
         debugApp(app, 'Apptask launched but nothing to do.');
