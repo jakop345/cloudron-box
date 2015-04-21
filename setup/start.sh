@@ -73,27 +73,14 @@ NODE_ENV=cloudron DATABASE_URL=mysql://root:password@localhost/box "${box_src_tm
 EOF
 
 set_progress "30" "Setup nginx"
-nginx_config_dir="${CONFIG_DIR}/nginx"
-nginx_appconfig_dir="${CONFIG_DIR}/nginx/applications"
-
-# copy nginx config
-mkdir -p "${nginx_appconfig_dir}"
-cp "${script_dir}/start/nginx/nginx.conf" "${nginx_config_dir}/nginx.conf"
-cp "${script_dir}/start/nginx/mime.types" "${nginx_config_dir}/mime.types"
 # setup naked domain to use admin by default. app restoration will overwrite this config
 ${box_src_tmp_dir}/node_modules/.bin/ejs-cli -f "${script_dir}/start/nginx/appconfig.ejs" \
-    -O "{ \"vhost\": \"${arg_fqdn}\", \"isAdmin\": true, \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${nginx_config_dir}/naked_domain.conf"
+    -O "{ \"vhost\": \"${arg_fqdn}\", \"isAdmin\": true, \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${CONFIG_DIR}/nginx/naked_domain.conf"
 ${box_src_tmp_dir}/node_modules/.bin/ejs-cli -f "${script_dir}/start/nginx/appconfig.ejs" \
-    -O "{ \"vhost\": \"${admin_fqdn}\", \"isAdmin\": true, \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${nginx_appconfig_dir}/admin.conf"
+    -O "{ \"vhost\": \"${admin_fqdn}\", \"isAdmin\": true, \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${CONFIG_DIR}/nginx/applications/admin.conf"
 
-certificate_dir="${nginx_config_dir}/cert"
-mkdir -p "${certificate_dir}"
-echo "${arg_tls_cert}" > ${certificate_dir}/host.cert
-echo "${arg_tls_key}" > ${certificate_dir}/host.key
-
-# link nginx config to system config
-unlink /etc/nginx 2>/dev/null || rm -rf /etc/nginx
-ln -s "${nginx_config_dir}" /etc/nginx
+echo "${arg_tls_cert}" > ${CONFIG_DIR}/nginx/cert/host.cert
+echo "${arg_tls_key}" > ${CONFIG_DIR}/nginx/cert/host.key
 
 set_progress "33" "Changing ownership of source, data, configs"
 chown "${USER}:${USER}" -R "${BOX_SRC_DIR}" "${DATA_DIR}" "${CONFIG_DIR}"
