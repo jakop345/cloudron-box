@@ -707,6 +707,8 @@ function restore(app, callback) {
         updateApp.bind(null, app, { installationProgress: '80, Add collectd profile' }),
         addCollectdProfile.bind(null, app),
 
+        runApp.bind(null, app),
+
         // wait until dns propagated
         updateApp.bind(null, app, { installationProgress: '90, Waiting for DNS propagation' }),
         exports._waitForDnsPropagation.bind(null, app),
@@ -722,7 +724,7 @@ function restore(app, callback) {
             return updateApp(app, { installationState: appdb.ISTATE_ERROR, installationProgress: error.message }, callback.bind(null, error));
         }
 
-        postInstall(app, callback);
+        callback(null);
     });
 }
 
