@@ -9,6 +9,7 @@ readonly container_files="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/containe
 readonly CONFIG_DIR="/home/yellowtent/configs"
 
 ########## create config directory
+rm -rf "${CONFIG_DIR}"
 mkdir -p "${CONFIG_DIR}/addons"
 mkdir -p "${CONFIG_DIR}/nginx/applications"
 mkdir -p "${CONFIG_DIR}/nginx/cert"
