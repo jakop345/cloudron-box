@@ -2,7 +2,7 @@
 
 var assert = require('assert'),
     child_process = require('child_process'),
-    debug = require('debug')('shell.js'),
+    debug = require('debug')('box:shell.js'),
     once = require('once'),
     util = require('util');
 
