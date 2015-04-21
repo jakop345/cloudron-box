@@ -6,6 +6,14 @@ set -eu -o pipefail
 
 readonly container_files="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/container"
 
+readonly CONFIG_DIR="/home/yellowtent/configs"
+
+########## create config directory
+mkdir -p "${CONFIG_DIR}/addons"
+mkdir -p "${CONFIG_DIR}/nginx/applications"
+mkdir -p "${CONFIG_DIR}/nginx/cert"
+mkdir -p "${CONFIG_DIR}/collectd/collectd.conf.d"
+
 ########## logrotate (default ubuntu runs this daily)
 rm -rf /etc/logrotate.d/*
 cp -r "${container_files}/logrotate/" /etc/logrotate.d/
@@ -20,8 +28,8 @@ cp -r "${container_files}/sudoers" /etc/sudoers.d/yellowtent
 
 ########## collectd
 rm -rf /etc/collectd
-ln -sfF "/home/yellowtent/configs/collectd" /etc/collectd
-cp -r "${container_files}/collectd.conf" "/home/yellowtent/configs/collectd/collectd.conf"
+ln -sfF "${CONFIG_DIR}/collectd" /etc/collectd
+cp -r "${container_files}/collectd.conf" "${CONFIG_DIR}/collectd/collectd.conf"
 
 ########## Restart services (this is only needed since we are not a real container)
 update-rc.d -f collectd defaults
