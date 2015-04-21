@@ -658,22 +658,26 @@ function restore(app, callback) {
     var oldManifest = app.manifest; // TODO: this won't be correct all the time should we crash after download manifest
 
     async.series([
+        updateApp.bind(null, app, { installationProgress: '0, Stopping app and deleting container' }),
+        stopApp.bind(null, app),
+        deleteContainer.bind(null, app),
+
         // configure nginx
-        updateApp.bind(null, app, { installationProgress: '0, Configuring nginx' }),
+        updateApp.bind(null, app, { installationProgress: '10, Configuring nginx' }),
         configureNginx.bind(null, app),
         configureNakedDomain.bind(null, app),
 
         // register subdomain
-        updateApp.bind(null, app, { installationProgress: '5, Registering subdomain' }),
+        updateApp.bind(null, app, { installationProgress: '12, Registering subdomain' }),
         registerSubdomain.bind(null, app),
 
         // verify manifest
-        updateApp.bind(null, app, { installationProgress: '10, Verify manifest' }),
+        updateApp.bind(null, app, { installationProgress: '14, Verify manifest' }),
         verifyManifest.bind(null, app),
         downloadIcon.bind(null, app),
 
         // setup oauth proxy
-        updateApp.bind(null, app, { installationProgress: '15, Setting up OAuth proxy credentials' }),
+        updateApp.bind(null, app, { installationProgress: '16, Setting up OAuth proxy credentials' }),
         removeOAuthProxyCredentials.bind(null, app),
         allocateOAuthProxyCredentials.bind(null, app),
 
