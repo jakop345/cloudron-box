@@ -855,7 +855,7 @@ function uninstall(app, callback) {
         updateApp.bind(null, app, { installationProgress: '20, Deleting container' }),
         deleteContainer.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '30, Add collectd profile' }),
+        updateApp.bind(null, app, { installationProgress: '30, Remove collectd profile' }),
         removeCollectdProfile.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '40, Deleting image' }),
