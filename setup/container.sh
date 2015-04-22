@@ -19,20 +19,20 @@ mkdir -p "${CONFIG_DIR}/nginx/cert"
 
 ########## logrotate (default ubuntu runs this daily)
 rm -rf /etc/logrotate.d/*
-cp -r "${container_files}/logrotate/" /etc/logrotate.d/
+cp -r "${container_files}/logrotate/." /etc/logrotate.d/
 
 ########## supervisor
 rm -rf /etc/supervisor/*
-cp -r "${container_files}/supervisor/" /etc/supervisor/
+cp -r "${container_files}/supervisor/." /etc/supervisor/
 
 ########## sudoers
 rm /etc/sudoers.d/*
-cp -r "${container_files}/sudoers" /etc/sudoers.d/yellowtent
+cp "${container_files}/sudoers" /etc/sudoers.d/yellowtent
 
 ########## collectd
 rm -rf /etc/collectd
 ln -sfF "${CONFIG_DIR}/collectd" /etc/collectd
-cp -r "${container_files}/collectd.conf" "${CONFIG_DIR}/collectd/collectd.conf"
+cp "${container_files}/collectd.conf" "${CONFIG_DIR}/collectd/collectd.conf"
 
 ########## nginx
 cp "${container_files}/nginx/nginx.conf" "${CONFIG_DIR}/nginx/nginx.conf"
