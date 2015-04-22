@@ -34,10 +34,13 @@ $script_dir/container.sh
 set_progress "10" "Ensuring directories"
 # keep these in sync with paths.js
 [[ ! -d "${DATA_DIR}/box" ]] && btrfs subvolume create "${DATA_DIR}/box"
-mkdir -p "${DATA_DIR}/box/appicons"
-mkdir -p "${DATA_DIR}/box/mail"
-mkdir -p "${DATA_DIR}/box/graphite"
-mkdir -p "${DATA_DIR}/snapshots"
+mkdir "${DATA_DIR}/box/appicons"
+mkdir "${DATA_DIR}/box/mail"
+mkdir "${DATA_DIR}/box/graphite"
+
+mkdir "${DATA_DIR}/snapshots"
+mkdir "${DATA_DIR}/addons"
+mkdir -p "${DATA_DIR}/collectd/collectd.conf.d"
 
 # remove old snapshots. if we do want to keep this around, we will have to fix the chown -R below
 # which currently fails because these are readonly fs
@@ -71,7 +74,6 @@ NODE_ENV=cloudron DATABASE_URL=mysql://root:password@localhost/box "${BOX_SRC_DI
 EOF
 
 set_progress "28" "Setup collectd"
-mkdir -p "${DATA_DIR}/collectd/collectd.conf.d"
 cp "${script_dir}/start/collectd.conf" "${DATA_DIR}/collectd/collectd.conf"
 
 set_progress "30" "Setup nginx"
@@ -92,7 +94,7 @@ echo "${arg_tls_key}" > ${DATA_DIR}/nginx/cert/host.key
 set_progress "33" "Changing ownership of source, data, configs"
 chown "${USER}:${USER}" -R "${DATA_DIR}" "${CONFIG_DIR}"
 
-set_progress "40" "Setting up addons"
+set_progress "40" "Setting up infra"
 mysql_root_password=$(pwgen -1 -s)
 postgresql_root_password=$(pwgen -1 -s)
 mongodb_root_password=$(pwgen -1 -s)

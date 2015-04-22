@@ -10,8 +10,6 @@ mysql_root_password="$2"
 postgresql_root_password="$3"
 mongodb_root_password="$4"
 
-mkdir -p "${DATA_DIR}/addons"
-
 # removing containers ensures containers are launched with latest config updates
 # restore code in appatask does not delete old containers
 infra_version="none"
