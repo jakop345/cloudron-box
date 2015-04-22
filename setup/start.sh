@@ -96,10 +96,10 @@ set_progress "33" "Changing ownership of source, data, configs"
 chown "${USER}:${USER}" -R "${DATA_DIR}" "${CONFIG_DIR}"
 
 set_progress "40" "Setting up infra"
-mysql_root_password=$(pwgen -1 -s)
-postgresql_root_password=$(pwgen -1 -s)
-mongodb_root_password=$(pwgen -1 -s)
-${script_dir}/start/setup_infra.sh "${arg_fqdn}" "${mysql_root_password}" "${postgresql_root_password}" "${mongodb_root_password}"
+mysql_addon_root_password=$(pwgen -1 -s)
+postgresql_addon_root_password=$(pwgen -1 -s)
+mongodb_addon_root_password=$(pwgen -1 -s)
+${script_dir}/start/setup_infra.sh "${arg_fqdn}" "${mysql_addon_root_password}" "${postgresql_addon_root_password}" "${mongodb_addon_root_password}"
 
 set_progress "65" "Creating cloudron.conf"
 admin_origin="https://${admin_fqdn}"
@@ -125,13 +125,13 @@ cat > "${CONFIG_DIR}/cloudron.conf" <<CONF_END
     },
     "addons": {
         "mysql": {
-            "rootPassword": "${mysql_root_password}"
+            "rootPassword": "${mysql_addon_root_password}"
         },
         "postgresql": {
-            "rootPassword": "${postgresql_root_password}"
+            "rootPassword": "${postgresql_addon_root_password}"
         },
         "mongodb": {
-            "rootPassword": "${mongodb_root_password}"
+            "rootPassword": "${mongodb_addon_root_password}"
         }
     },
     "developerMode": ${arg_developer_mode}
