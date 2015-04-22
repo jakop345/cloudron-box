@@ -144,6 +144,7 @@ cat > "${BOX_SRC_DIR}/webadmin/dist/config.json" <<CONF_END
     "webServerOrigin": "${arg_web_server_origin}"
 }
 CONF_END
+EOF
 
 # Add webadmin oauth client
 # The domain might have changed, therefor we have to update the record
@@ -151,7 +152,6 @@ CONF_END
 echo "Add webadmin oauth cient"
 ADMIN_SCOPES="root,developer,profile,users,apps,settings,roleUser"
 mysql -u root -ppassword -e "REPLACE INTO clients (id, appId, clientSecret, redirectURI, scope) VALUES (\"cid-webadmin\", \"webadmin\", \"secret-webadmin\", \"${admin_origin}\", \"\$ADMIN_SCOPES\")" box
-EOF
 
 # bookkeep the version as part of data
 echo "{ \"version\": \"${arg_version}\", \"boxVersionsUrl\": \"${arg_box_versions_url}\" }" > "${DATA_DIR}/box/version"
