@@ -93,7 +93,7 @@ echo "${arg_tls_cert}" > ${DATA_DIR}/nginx/cert/host.cert
 echo "${arg_tls_key}" > ${DATA_DIR}/nginx/cert/host.key
 
 set_progress "33" "Changing ownership of source, data, configs"
-chown "${USER}:${USER}" -R "${BOX_SRC_DIR}" "${DATA_DIR}" "${CONFIG_DIR}"
+chown "${USER}:${USER}" -R "${DATA_DIR}" "${CONFIG_DIR}"
 
 set_progress "40" "Setting up addons"
 mysql_root_password=$(pwgen -1 -s)
