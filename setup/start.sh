@@ -5,8 +5,6 @@ set -eu -o pipefail
 echo "==== Cloudron Start ===="
 
 readonly USER="yellowtent"
-# NOTE: Do NOT use BOX_SRC_DIR for accessing code and config files. This script will be run from a temp directory
-# and the whole code will relocated to BOX_SRC_DIR by the installer. Use paths relative to script_dir or box_src_tmp_dir
 readonly BOX_SRC_DIR="/home/${USER}/box"
 readonly DATA_DIR="/home/${USER}/data"
 readonly CONFIG_DIR="/home/${USER}/configs"
@@ -16,7 +14,6 @@ readonly ADMIN_LOCATION="my" # keep this in sync with constants.js
 readonly curl="curl --fail --connect-timeout 20 --retry 10 --retry-delay 2 --max-time 2400"
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-box_src_tmp_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
 
 source "${script_dir}/argparser.sh" "$@" # this injects the arg_* variables used below
 
@@ -69,8 +66,8 @@ fi
 set_progress "25" "Migrating data"
 sudo -u "${USER}" -H bash <<EOF
 set -eu
-cd "${box_src_tmp_dir}"
-NODE_ENV=cloudron DATABASE_URL=mysql://root:password@localhost/box "${box_src_tmp_dir}/node_modules/.bin/db-migrate" up
+cd "${BOX_SRC_DIR}"
+NODE_ENV=cloudron DATABASE_URL=mysql://root:password@localhost/box "${BOX_SRC_DIR}/node_modules/.bin/db-migrate" up
 EOF
 
 set_progress "28" "Setup collectd"
@@ -83,9 +80,9 @@ mkdir -p "${DATA_DIR}/nginx/applications"
 cp "${script_dir}/start/nginx/nginx.conf" "${DATA_DIR}/nginx/nginx.conf"
 cp "${script_dir}/start/nginx/mime.types" "${DATA_DIR}/nginx/mime.types"
 
-${box_src_tmp_dir}/node_modules/.bin/ejs-cli -f "${script_dir}/start/nginx/appconfig.ejs" \
+${BOX_SRC_DIR}/node_modules/.bin/ejs-cli -f "${script_dir}/start/nginx/appconfig.ejs" \
     -O "{ \"vhost\": \"${arg_fqdn}\", \"isAdmin\": true, \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${DATA_DIR}/nginx/naked_domain.conf"
-${box_src_tmp_dir}/node_modules/.bin/ejs-cli -f "${script_dir}/start/nginx/appconfig.ejs" \
+${BOX_SRC_DIR}/node_modules/.bin/ejs-cli -f "${script_dir}/start/nginx/appconfig.ejs" \
     -O "{ \"vhost\": \"${admin_fqdn}\", \"isAdmin\": true, \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${DATA_DIR}/nginx/applications/admin.conf"
 
 mkdir -p "${DATA_DIR}/nginx/cert"
