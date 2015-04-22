@@ -33,7 +33,6 @@ ln -sfF "${DATA_DIR}/collectd" /etc/collectd
 unlink /etc/nginx 2>/dev/null || rm -rf /etc/nginx
 ln -s "${DATA_DIR}/nginx" /etc/nginx
 
-########## Restart services (this is only needed since we are not a real container)
+########## Enable services
 update-rc.d -f collectd defaults
-/etc/init.d/collectd restart
 

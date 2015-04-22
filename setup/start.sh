@@ -75,6 +75,7 @@ EOF
 
 set_progress "28" "Setup collectd"
 cp "${script_dir}/start/collectd.conf" "${DATA_DIR}/collectd/collectd.conf"
+service collectd restart
 
 set_progress "30" "Setup nginx"
 # setup naked domain to use admin by default. app restoration will overwrite this config
