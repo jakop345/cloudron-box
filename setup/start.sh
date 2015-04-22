@@ -72,15 +72,24 @@ cd "${box_src_tmp_dir}"
 NODE_ENV=cloudron DATABASE_URL=mysql://root:password@localhost/box "${box_src_tmp_dir}/node_modules/.bin/db-migrate" up
 EOF
 
+set_progress "28" "Setup collectd"
+mkdir -p "${DATA_DIR}/collectd/collectd.conf.d"
+cp "${script_dir}/start/collectd.conf" "${DATA_DIR}/collectd/collectd.conf"
+
 set_progress "30" "Setup nginx"
 # setup naked domain to use admin by default. app restoration will overwrite this config
-${box_src_tmp_dir}/node_modules/.bin/ejs-cli -f "${script_dir}/start/nginx/appconfig.ejs" \
-    -O "{ \"vhost\": \"${arg_fqdn}\", \"isAdmin\": true, \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${CONFIG_DIR}/nginx/naked_domain.conf"
-${box_src_tmp_dir}/node_modules/.bin/ejs-cli -f "${script_dir}/start/nginx/appconfig.ejs" \
-    -O "{ \"vhost\": \"${admin_fqdn}\", \"isAdmin\": true, \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${CONFIG_DIR}/nginx/applications/admin.conf"
+mkdir -p "${DATA_DIR}/nginx/applications"
+cp "${script_dir}/start/nginx/nginx.conf" "${DATA_DIR}/nginx/nginx.conf"
+cp "${script_dir}/start/nginx/mime.types" "${DATA_DIR}/nginx/mime.types"
 
-echo "${arg_tls_cert}" > ${CONFIG_DIR}/nginx/cert/host.cert
-echo "${arg_tls_key}" > ${CONFIG_DIR}/nginx/cert/host.key
+${box_src_tmp_dir}/node_modules/.bin/ejs-cli -f "${script_dir}/start/nginx/appconfig.ejs" \
+    -O "{ \"vhost\": \"${arg_fqdn}\", \"isAdmin\": true, \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${DATA_DIR}/nginx/naked_domain.conf"
+${box_src_tmp_dir}/node_modules/.bin/ejs-cli -f "${script_dir}/start/nginx/appconfig.ejs" \
+    -O "{ \"vhost\": \"${admin_fqdn}\", \"isAdmin\": true, \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${DATA_DIR}/nginx/applications/admin.conf"
+
+mkdir -p "${DATA_DIR}/nginx/cert"
+echo "${arg_tls_cert}" > ${DATA_DIR}/nginx/cert/host.cert
+echo "${arg_tls_key}" > ${DATA_DIR}/nginx/cert/host.key
 
 set_progress "33" "Changing ownership of source, data, configs"
 chown "${USER}:${USER}" -R "${BOX_SRC_DIR}" "${DATA_DIR}" "${CONFIG_DIR}"

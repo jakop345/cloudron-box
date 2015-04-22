@@ -7,13 +7,13 @@ var config = require('../config.js'),
 
 // keep these values in sync with start.sh
 exports = module.exports = {
-    NGINX_CONFIG_DIR: path.join(config.baseDir(), 'configs/nginx'),
-    NGINX_APPCONFIG_DIR: path.join(config.baseDir(), 'configs/nginx/applications'),
-    NGINX_CERT_DIR: path.join(config.baseDir(), 'configs/nginx/cert'),
+    NGINX_CONFIG_DIR: path.join(config.baseDir(), 'data/nginx'),
+    NGINX_APPCONFIG_DIR: path.join(config.baseDir(), 'data/nginx/applications'),
+    NGINX_CERT_DIR: path.join(config.baseDir(), 'data/nginx/cert'),
 
-    ADDON_CONFIG_DIR: path.join(config.baseDir(), 'configs/addons'),
+    ADDON_CONFIG_DIR: path.join(config.baseDir(), 'data/addons'),
 
-    COLLECTD_APPCONFIG_DIR: path.join(config.baseDir(), 'configs/collectd/collectd.conf.d'),
+    COLLECTD_APPCONFIG_DIR: path.join(config.baseDir(), 'data/collectd/collectd.conf.d'),
 
     DATA_DIR: path.join(config.baseDir(), 'data'),
     BOX_DATA_DIR: path.join(config.baseDir(), 'data/box'),

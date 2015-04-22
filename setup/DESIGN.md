@@ -37,8 +37,8 @@ setup_cloud.sh
     Containers are relaunched based on the CLOUD_VERSION. The script compares
     the version here with the version in the file DATA_DIR/CLOUD_VERSION.
 
-    If they match, the containers are not recreated. The apps are marked for "reuse".
-    In "reuse" state, the apptask merely generates the nginx and collectd configs.
+    If they match, the containers are not recreated and nothing is to be done.
+    nginx, collectd configs are part of data already and containers are running.
 
     If they do not match, it deletes all containers (including app containers) and starts
     them all afresh. Important thing here is that, DATA_DIR is never removed across
