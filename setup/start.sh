@@ -101,7 +101,6 @@ mongodb_root_password=$(pwgen -1 -s)
 ${script_dir}/start/setup_infra.sh "${arg_fqdn}" "${mysql_root_password}" "${postgresql_root_password}" "${mongodb_root_password}"
 
 set_progress "65" "Creating cloudron.conf"
-cloudron_sqlite="${DATA_DIR}/cloudron.sqlite"
 admin_origin="https://${admin_fqdn}"
 sudo -u yellowtent -H bash <<EOF
 set -eu
