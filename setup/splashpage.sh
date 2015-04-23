@@ -7,7 +7,8 @@ readonly SETUP_WEBSITE_DIR="/home/yellowtent/setup/website"
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly BOX_SRC_DIR="/home/yellowtent/box"
 readonly DATA_DIR="/home/yellowtent/data"
-readonly INFRA_VERSION=$(cat "${script_dir}/INFRA_VERSION")
+
+source "${script_dir}/INFRA_VERSION" # this injects INFRA_VERSION
 
 echo "Setting up nginx update page"
 

@@ -1,1 +1,6 @@
-1
+#!/bin/bash
+
+# If you change the infra version, be sure to put a warning
+# in the change log
+
+INFRA_VERSION=1

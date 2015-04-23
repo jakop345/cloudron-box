@@ -5,7 +5,7 @@ set -eu -o pipefail
 readonly DATA_DIR="/home/yellowtent/data"
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly INFRA_VERSION=$(cat "${script_dir}/../INFRA_VERSION")
+source "${script_dir}/../INFRA_VERSION" # this injects INFRA_VERSION
 
 arg_fqdn="$1"
 mysql_root_password="$2"
