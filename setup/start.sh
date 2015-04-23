@@ -20,6 +20,8 @@ source "${script_dir}/argparser.sh" "$@" # this injects the arg_* variables used
 # keep this is sync with config.js appFqdn()
 admin_fqdn=$([[ "${arg_is_custom_domain}" == "true" ]] && echo "${ADMIN_LOCATION}.${arg_fqdn}" ||  echo "${ADMIN_LOCATION}-${arg_fqdn}")
 
+readonly is_update=$([[ -d "${DATA_DIR}/box" ]] && echo "true" || echo "false")
+
 set_progress() {
     local percent="$1"
     local message="$2"
@@ -33,7 +35,7 @@ $script_dir/container.sh
 
 set_progress "10" "Ensuring directories"
 # keep these in sync with paths.js
-[[ ! -d "${DATA_DIR}/box" ]] && btrfs subvolume create "${DATA_DIR}/box"
+[[ "${is_update}" == "false" ]] && btrfs subvolume create "${DATA_DIR}/box"
 mkdir -p "${DATA_DIR}/box/appicons"
 mkdir -p "${DATA_DIR}/box/mail"
 mkdir -p "${DATA_DIR}/box/graphite"
@@ -85,10 +87,13 @@ mkdir -p "${DATA_DIR}/nginx/applications"
 cp "${script_dir}/start/nginx/nginx.conf" "${DATA_DIR}/nginx/nginx.conf"
 cp "${script_dir}/start/nginx/mime.types" "${DATA_DIR}/nginx/mime.types"
 
-${BOX_SRC_DIR}/node_modules/.bin/ejs-cli -f "${script_dir}/start/nginx/appconfig.ejs" \
-    -O "{ \"vhost\": \"${arg_fqdn}\", \"endpoint\": \"admin\", \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${DATA_DIR}/nginx/naked_domain.conf"
-${BOX_SRC_DIR}/node_modules/.bin/ejs-cli -f "${script_dir}/start/nginx/appconfig.ejs" \
-    -O "{ \"vhost\": \"${admin_fqdn}\", \"endpoint\": \"admin\", \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${DATA_DIR}/nginx/applications/admin.conf"
+if [[ "${is_update}" == "false" ]]; then
+    # for new and restore case, create admin.conf and naked domain
+    ${BOX_SRC_DIR}/node_modules/.bin/ejs-cli -f "${script_dir}/start/nginx/appconfig.ejs" \
+        -O "{ \"vhost\": \"${arg_fqdn}\", \"endpoint\": \"admin\", \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${DATA_DIR}/nginx/naked_domain.conf"
+    ${BOX_SRC_DIR}/node_modules/.bin/ejs-cli -f "${script_dir}/start/nginx/appconfig.ejs" \
+        -O "{ \"vhost\": \"${admin_fqdn}\", \"endpoint\": \"admin\", \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${DATA_DIR}/nginx/applications/admin.conf"
+fi
 
 mkdir -p "${DATA_DIR}/nginx/cert"
 echo "${arg_tls_cert}" > ${DATA_DIR}/nginx/cert/host.cert
