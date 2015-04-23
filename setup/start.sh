@@ -47,6 +47,9 @@ mkdir -p "${DATA_DIR}/collectd/collectd.conf.d"
 echo "Cleaning up snapshots"
 find "${DATA_DIR}/snapshots" -mindepth 1 -maxdepth 1 | xargs --no-run-if-empty btrfs subvolume delete
 
+mysqladmin -u root -ppassword password password # reset default root password
+mysql -u root -ppassword -e 'CREATE DATABASE IF NOT EXISTS box'
+
 if [[ -n "${arg_restore_url}" ]]; then
     set_progress "15" "Downloading restore data"
 
@@ -58,8 +61,6 @@ if [[ -n "${arg_restore_url}" ]]; then
     done
 
     set_progress "21" "Setting up MySQL"
-    mysqladmin -u root -ppassword password password # reset default root password
-    mysql -u root -ppassword -e 'CREATE DATABASE IF NOT EXISTS box'
     if [[ -f "${DATA_DIR}/box/box.mysqldump" ]]; then
         echo "Importing existing database into MySQL"
         mysql -u root -ppassword box < "${DATA_DIR}/box/box.mysqldump"
