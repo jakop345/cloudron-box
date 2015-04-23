@@ -11,8 +11,12 @@ exports = module.exports = {
     activate: activate,
     getConfig: getConfig,
     getStatus: getStatus,
+
     backup: backup,
+
+    backupBox: backupBox,
     backupApp: backupApp,
+
     restoreApp: restoreApp,
 
     getBackupUrl: getBackupUrl,
@@ -233,7 +237,7 @@ function backupApp(app, callback) {
     });
 }
 
-function backupBox(appBackupIds, callback) {
+function backupBoxWithAppBackupIds(appBackupIds, callback) {
     assert(util.isArray(appBackupIds));
 
     getBackupUrl(null /* appId */, appBackupIds, function (error, result) {
@@ -251,16 +255,26 @@ function backupBox(appBackupIds, callback) {
     });
 }
 
+function backupBox(callback) {
+    apps.getAll(function (error, allApps) {
+        if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
+
+        var appBackupIds = allApps.map(function (app) { return app.lastBackupId; });
+
+        backupBoxWithAppBackupIds(appBackupIds, callback);
+    });
+}
+
 function backup(callback) {
     callback = callback || function () { }; // callback can be empty for timer triggered backup
 
     apps.getAll(function (error, allApps) {
-        if (error) return callback(error);
+        if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
         async.mapSeries(allApps, backupApp, function appsBackedUp(error, backupIds) {
             if (error) return callback(error);
 
-            backupBox(backupIds, callback);
+            backupBoxWithAppBackupIds(backupIds, callback);
         });
     });
 }

@@ -222,7 +222,7 @@ function startUpdate(callback) {
 
     progress.set(progress.UPDATE, 5, 'Create backup');
 
-    cloudron.backup(function (error) {
+    cloudron.backupBox(function (error) {
         if (error) return callback(error);
 
         if (gBoxUpdateInfo && gBoxUpdateInfo.upgrade) return upgrade(callback);
