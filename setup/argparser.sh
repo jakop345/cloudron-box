@@ -15,12 +15,17 @@ arg_token=""
 arg_version=""
 arg_is_custom_domain="false"
 arg_developer_mode=""
+arg_retire="false"
 
 args=$(getopt -o "" -l "data:" -n "$0" -- "$@")
 eval set -- "${args}"
 
 while true; do
     case "$1" in
+    --retire)
+        arg_retire="true"
+        shift
+        ;;
     --data)
         # only read mandatory non-empty parameters here
         read -r arg_api_server_origin arg_web_server_origin arg_fqdn arg_token arg_is_custom_domain arg_box_versions_url arg_version <<EOF
@@ -38,12 +43,12 @@ EOF
 
         arg_restore_key=$(echo "$2" | $json restoreKey)
         [[ "${arg_restore_key}" == "null" ]] && arg_restore_key=""
+
+        shift 2
         ;;
     --) break;;
     *) echo "Unknown option $1"; exit 1;;
     esac
-
-    shift 2
 done
 
 echo "Parsed arguments:"
