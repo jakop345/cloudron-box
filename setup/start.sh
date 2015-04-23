@@ -34,12 +34,12 @@ $script_dir/container.sh
 set_progress "10" "Ensuring directories"
 # keep these in sync with paths.js
 [[ ! -d "${DATA_DIR}/box" ]] && btrfs subvolume create "${DATA_DIR}/box"
-mkdir "${DATA_DIR}/box/appicons"
-mkdir "${DATA_DIR}/box/mail"
-mkdir "${DATA_DIR}/box/graphite"
+mkdir -p "${DATA_DIR}/box/appicons"
+mkdir -p "${DATA_DIR}/box/mail"
+mkdir -p "${DATA_DIR}/box/graphite"
 
-mkdir "${DATA_DIR}/snapshots"
-mkdir "${DATA_DIR}/addons"
+mkdir -p "${DATA_DIR}/snapshots"
+mkdir -p "${DATA_DIR}/addons"
 mkdir -p "${DATA_DIR}/collectd/collectd.conf.d"
 
 # remove old snapshots. if we do want to keep this around, we will have to fix the chown -R below
