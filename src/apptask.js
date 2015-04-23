@@ -99,7 +99,8 @@ function configureNginx(app, callback) {
         if (error) return callback(error);
 
         var sourceDir = path.resolve(__dirname, '..');
-        var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: config.appFqdn(app.location), isAdmin: false, port: freePort, accessRestriction: app.accessRestriction });
+        var endpoint = app.accessRestriction ? 'oauthproxy' : 'app';
+        var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: config.appFqdn(app.location), port: freePort, endpoint: endpoint });
 
         var nginxConfigFilename = path.join(paths.NGINX_APPCONFIG_DIR, app.id + '.conf');
         debugApp(app, 'writing config to %s', nginxConfigFilename);
@@ -137,9 +138,10 @@ function writeNginxNakedDomainConfig(app, callback) {
     var sourceDir = path.resolve(__dirname, '..');
     var nginxConf;
     if (app === null) { // admin
-        nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: config.fqdn(), isAdmin: true });
+        nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: config.fqdn(), endpoint: 'admin' });
     } else {
-        nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: config.fqdn(), isAdmin: false, port: app.httpPort, accessRestriction: app.accessRestriction });
+        var endpoint = app.accessRestriction ? 'oauthproxy' : 'app',
+        nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: config.fqdn(), endpoint: endpoint, port: app.httpPort });
     }
 
     var nginxNakedDomainFilename = path.join(paths.NGINX_CONFIG_DIR, 'naked_domain.conf');

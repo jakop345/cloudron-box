@@ -53,7 +53,7 @@ server {
         # Disable check to allow unlimited body sizes
         client_max_body_size 0;
 
-<% if ( isAdmin === true ) { %>
+<% if ( endpoint === 'admin' ) { %>
         location /api/ {
             proxy_pass   http://127.0.0.1:3000;
             client_max_body_size 1m;
@@ -70,11 +70,10 @@ server {
             index  index.html index.htm;
         }
 
-
-<% } else if ( accessRestriction.length > 0 ) { %>
+<% } else if ( endpoint === 'oauthproxy' ) { %>
         proxy_pass http://127.0.0.1:4000;
         proxy_set_header   X-Cloudron-Proxy-Port   <%= port %>;
-<% } else { %>
+<% } else if ( endpoint === 'app' ) { %>
         proxy_pass http://127.0.0.1:<%= port %>;
 <% } %>
     }
