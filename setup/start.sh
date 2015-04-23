@@ -47,8 +47,9 @@ mkdir -p "${DATA_DIR}/collectd/collectd.conf.d"
 echo "Cleaning up snapshots"
 find "${DATA_DIR}/snapshots" -mindepth 1 -maxdepth 1 | xargs --no-run-if-empty btrfs subvolume delete
 
+readonly mysql_root_password="password"
 mysqladmin -u root -ppassword password password # reset default root password
-mysql -u root -ppassword -e 'CREATE DATABASE IF NOT EXISTS box'
+mysql -u root -p${mysql_root_password} -e 'CREATE DATABASE IF NOT EXISTS box'
 
 if [[ -n "${arg_restore_url}" ]]; then
     set_progress "15" "Downloading restore data"
@@ -63,7 +64,7 @@ if [[ -n "${arg_restore_url}" ]]; then
     set_progress "21" "Setting up MySQL"
     if [[ -f "${DATA_DIR}/box/box.mysqldump" ]]; then
         echo "Importing existing database into MySQL"
-        mysql -u root -ppassword box < "${DATA_DIR}/box/box.mysqldump"
+        mysql -u root -p${mysql_root_password} box < "${DATA_DIR}/box/box.mysqldump"
     fi
 fi
 
@@ -71,7 +72,7 @@ set_progress "25" "Migrating data"
 sudo -u "${USER}" -H bash <<EOF
 set -eu
 cd "${BOX_SRC_DIR}"
-NODE_ENV=cloudron DATABASE_URL=mysql://root:password@localhost/box "${BOX_SRC_DIR}/node_modules/.bin/db-migrate" up
+NODE_ENV=cloudron DATABASE_URL=mysql://root:${mysql_root_password}@localhost/box "${BOX_SRC_DIR}/node_modules/.bin/db-migrate" up
 EOF
 
 set_progress "28" "Setup collectd"
@@ -120,7 +121,7 @@ cat > "${CONFIG_DIR}/cloudron.conf" <<CONF_END
     "database": {
         "hostname": "localhost",
         "username": "root",
-        "password": "password",
+        "password": "${mysql_root_password}",
         "port": 3306,
         "name": "box"
     },
@@ -152,7 +153,8 @@ EOF
 # !!! This needs to be in sync with the webadmin, specifically login_callback.js
 echo "Add webadmin oauth cient"
 ADMIN_SCOPES="root,developer,profile,users,apps,settings,roleUser"
-mysql -u root -ppassword -e "REPLACE INTO clients (id, appId, clientSecret, redirectURI, scope) VALUES (\"cid-webadmin\", \"webadmin\", \"secret-webadmin\", \"${admin_origin}\", \"\$ADMIN_SCOPES\")" box
+mysql -u root -p${mysql_root_password} \
+    -e "REPLACE INTO clients (id, appId, clientSecret, redirectURI, scope) VALUES (\"cid-webadmin\", \"webadmin\", \"secret-webadmin\", \"${admin_origin}\", \"\$ADMIN_SCOPES\")" box
 
 # bookkeep the version as part of data
 echo "{ \"version\": \"${arg_version}\", \"boxVersionsUrl\": \"${arg_box_versions_url}\" }" > "${DATA_DIR}/box/version"
