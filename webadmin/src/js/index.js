@@ -85,7 +85,7 @@ app.filter('installationStateLabel', function() {
 app.filter('readyToUpdate', function () {
     return function (apps) {
         return apps.every(function (app) {
-            return (app.installationState !== ISTATES.ERROR) && (app.installationState === ISTATES.INSTALLED);
+            return (app.installationState === ISTATES.ERROR) || (app.installationState === ISTATES.INSTALLED);
         });
     };
 });
