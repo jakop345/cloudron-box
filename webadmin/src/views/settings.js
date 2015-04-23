@@ -6,10 +6,16 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     $scope.user = Client.getUserInfo();
     $scope.config = Client.getConfig();
 
+    $scope.lastBackup = new Date();
+
     $scope.developerModeChange = {
         busy: false,
         error: {},
         password: ''
+    };
+
+    $scope.createBackup = {
+        busy: false
     };
 
     function developerModeChangeReset () {
@@ -43,10 +49,42 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         });
     };
 
+    $scope.doCreateBackup = function () {
+        $scope.$parent.initialized = false;
+        $scope.createBackup.busy = true;
+
+        Client.backup(function (error) {
+            if (error) console.error(error);
+
+            $('#createBackupModal').modal('hide');
+            $scope.createBackup.busy = false;
+
+            $('#backupProgressModal').modal('show');
+
+            // TODO this does look like we should use progress.json?
+            // now start query
+            function checkIfDone() {
+                Client.version(function (error) {
+                    if (error) return window.setTimeout(checkIfDone, 1000);
+
+                    $('#backupProgressModal').modal('hide');
+                    $scope.$parent.initialized = true;
+                });
+            }
+
+            window.setTimeout(checkIfDone, 5000);
+        });
+    };
+
+
     $scope.showChangeDeveloperMode = function () {
         developerModeChangeReset();
 
         $('#developerModeChangeModal').modal('show');
+    };
+
+    $scope.showCreateBackup = function () {
+        $('#createBackupModal').modal('show');
     };
 
     Client.onReady(function () {
