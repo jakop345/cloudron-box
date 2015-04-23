@@ -121,21 +121,9 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
     };
 
     Client.prototype.setConfig = function (config) {
-        // In order to keep the angular bindings alive, set each property individually (TODO: just use angular.copy ?)
-        this._config.apiServerOrigin = config.apiServerOrigin;
-        this._config.webServerOrigin = config.webServerOrigin;
-        this._config.version = config.version;
-        this._config.fqdn = config.fqdn;
-        this._config.ip = config.ip;
-        this._config.revision = config.revision;
-        this._config.update = config.update;
-        this._config.isDev = config.isDev;
-        this._config.progress = config.progress;
-        this._config.progress = config.progress;
-        this._config.isCustomDomain = config.isCustomDomain;
-        this._config.developerMode = config.developerMode;
-
         var that = this;
+
+        angular.copy(config, this._config);
 
         this._configListener.forEach(function (callback) {
             callback(that._config);
