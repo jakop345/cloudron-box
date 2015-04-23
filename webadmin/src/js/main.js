@@ -68,29 +68,6 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
         });
     };
 
-    $scope.backup = function () {
-        $('#backupProgressModal').modal('show');
-
-        $scope.initialized = false;
-
-        Client.backup(function (error) {
-            if (error) console.error(error);
-
-            // TODO this does look like we should use progress.json?
-            // now start query
-            function checkIfDone() {
-                Client.version(function (error) {
-                    if (error) return window.setTimeout(checkIfDone, 1000);
-
-                    $('#backupProgressModal').modal('hide');
-                    $scope.initialized = true;
-                });
-            }
-
-            window.setTimeout(checkIfDone, 5000);
-        });
-    };
-
     Client.isServerFirstTime(function (error, isFirstTime) {
         if (error) return $scope.error(error);
         if (isFirstTime) return $scope.setup();
