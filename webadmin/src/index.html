@@ -128,10 +128,12 @@
 
                 <div class="collapse navbar-collapse">
                     <ul class="nav navbar-nav navbar-right">
-                        <li ng-show="config.update.box && user.admin">
-                            <a ng-href="" ng-click="showUpdateModal(update_form)" style="cursor: pointer">
-                            <span class="badge badge-success">Update available</span>
-
+                        <li ng-show="!config.update.box && user.admin">
+                            <a ng-href="" ng-show="installedApps | readyToUpdate" ng-click="showUpdateModal(update_form)" style="cursor: pointer">
+                                <span class="badge badge-success">Update available</span>
+                            </a>
+                            <a ng-href="" ng-hide="installedApps | readyToUpdate">
+                                <span class="badge">Update available. Wait for all apps to be installed.</span>
                             </a>
                         </li>
                         <li>
