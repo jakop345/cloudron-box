@@ -44,8 +44,6 @@ ${SCRIPT_DIR}/../appstore/src/scripts/generate_certificate.sh "US" "California" 
 
 # adjust the generated nginx config for local use
 ${SCRIPT_DIR}/node_modules/.bin/ejs-cli -f "${SCRIPT_DIR}/setup/start/nginx/appconfig.ejs" \
-    -O "{ \"vhost\": \"localhost\", \"isAdmin\": true, \"sourceDir\": \"${BOX_SRC_DIR}\", \"adminOrigin\": \"${admin_origin}\" }" > "${NGINX_ROOT}/naked_domain.conf"
-${SCRIPT_DIR}/node_modules/.bin/ejs-cli -f "${SCRIPT_DIR}/setup/start/nginx/appconfig.ejs" \
     -O "{ \"vhost\": \"${FQDN}\", \"isAdmin\": true, \"sourceDir\": \"${BOX_SRC_DIR}\", \"adminOrigin\": \"${admin_origin}\" }" > "${NGINX_ROOT}/applications/admin.conf"
 
 $GNU_SED -e "s/user www-data/user ${USER}/" -i "${NGINX_ROOT}/nginx.conf"
