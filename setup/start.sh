@@ -44,6 +44,9 @@ mkdir -p "${DATA_DIR}/snapshots"
 mkdir -p "${DATA_DIR}/addons"
 mkdir -p "${DATA_DIR}/collectd/collectd.conf.d"
 
+# bookkeep the version as part of data
+echo "{ \"version\": \"${arg_version}\", \"boxVersionsUrl\": \"${arg_box_versions_url}\" }" > "${DATA_DIR}/box/version"
+
 # remove old snapshots. if we do want to keep this around, we will have to fix the chown -R below
 # which currently fails because these are readonly fs
 echo "Cleaning up snapshots"
@@ -97,8 +100,8 @@ mkdir -p "${DATA_DIR}/nginx/cert"
 echo "${arg_tls_cert}" > ${DATA_DIR}/nginx/cert/host.cert
 echo "${arg_tls_key}" > ${DATA_DIR}/nginx/cert/host.key
 
-set_progress "33" "Changing ownership of source, data, configs"
-chown "${USER}:${USER}" -R "${DATA_DIR}" "${CONFIG_DIR}"
+set_progress "33" "Changing ownership"
+chown "${USER}:${USER}" -R "${DATA_DIR}/box" "${DATA_DIR}/nginx" "${DATA_DIR}/collectd"
 
 set_progress "40" "Setting up infra"
 mysql_addon_root_password=$(pwgen -1 -s)
@@ -158,9 +161,6 @@ echo "Add webadmin oauth cient"
 ADMIN_SCOPES="root,developer,profile,users,apps,settings,roleUser"
 mysql -u root -p${mysql_root_password} \
     -e "REPLACE INTO clients (id, appId, clientSecret, redirectURI, scope) VALUES (\"cid-webadmin\", \"webadmin\", \"secret-webadmin\", \"${admin_origin}\", \"\$ADMIN_SCOPES\")" box
-
-# bookkeep the version as part of data
-echo "{ \"version\": \"${arg_version}\", \"boxVersionsUrl\": \"${arg_box_versions_url}\" }" > "${DATA_DIR}/box/version"
 
 set_progress "80" "Reloading supervisor"
 # looks like restarting supervisor completely is the only way to reload it

@@ -10,7 +10,8 @@ readonly CONFIG_DIR="/home/yellowtent/configs"
 readonly DATA_DIR="/home/yellowtent/data"
 
 ########## create config directory
-rm -rf "${CONFIG_DIR}" && mkdir "${CONFIG_DIR}"
+rm -rf "${CONFIG_DIR}"
+sudo -u yellowtent mkdir "${CONFIG_DIR}"
 
 ########## logrotate (default ubuntu runs this daily)
 rm -rf /etc/logrotate.d/*
