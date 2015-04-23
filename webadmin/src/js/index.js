@@ -82,6 +82,14 @@ app.filter('installationStateLabel', function() {
     };
 });
 
+app.filter('readyToUpdate', function () {
+    return function (apps) {
+        return apps.every(function (app) {
+            return (app.installationState !== ISTATES.ERROR) && (app.installationState === ISTATES.INSTALLED);
+        });
+    };
+});
+
 app.filter('applicationLink', function() {
     return function(app) {
         if (app.installationState === ISTATES.INSTALLED && app.health === HSTATES.HEALTHY) {
