@@ -11,16 +11,20 @@ assertNotEmpty() {
 [[ $(uname -s) == "Darwin" ]] && GNU_GETOPT="/usr/local/opt/gnu-getopt/bin/getopt" || GNU_GETOPT="getopt"
 readonly GNU_GETOPT
 
-args=$(${GNU_GETOPT} -o "" -l "revision:,keep" -n "$0" -- "$@")
+args=$(${GNU_GETOPT} -o "" -l "revision:,keep,publish" -n "$0" -- "$@")
 eval set -- "${args}"
+
+readonly source_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 delete_tarball="yes"
 commitish="HEAD"
+publish="no"
 
 while true; do
     case "$1" in
     --revision) commitish="$2"; shift 2;;
     --keep) delete_tarball="no"; shift;;
+    --publish) publish="yes"; shift;;
     --) break;;
     *) echo "Unknown option $1"; exit 1;;
     esac
@@ -41,7 +45,7 @@ echo "Checking out code [${version}] into ${bundle_dir}"
 (cd "${SOURCE_DIR}" && git archive --format=tar ${version} | (cd "${bundle_dir}" && tar xf -))
 
 echo "Installing modules with dev dependencies"
-cd "${bundle_dir}" && npm install
+(cd "${bundle_dir}" && npm install)
 
 echo "Building webadmin assets"
 echo "{}" > "${bundle_dir}/webadmin/deploymentConfig.json"
@@ -56,7 +60,7 @@ echo "Installing node modules for production"
 (cd "${bundle_dir}" && npm install --production)
 
 echo "Create final tarball"
-cd "${bundle_dir}" && tar czvf "${bundle_file}" .
+(cd "${bundle_dir}" && tar czvf "${bundle_file}" .)
 
 echo "Uploading bundle to S3"
 # That special header is needed to allow access with singed urls created with different aws credentials than the ones the file got uploaded
@@ -71,5 +75,11 @@ else
     rm "${bundle_file}"
 fi
 
-echo "The URL for the versions file is: https://cloudron-dev-releases.s3.amazonaws.com/box-${version}.tar.gz"
+versions_file_url="https://cloudron-dev-releases.s3.amazonaws.com/box-${version}.tar.gz"
+echo "The URL for the versions file is: ${versions_file_url}"
+
+if [[ "${publish}" == "yes" ]]; then
+    echo "Publishing to dev"
+    ${source_dir}/../installer/release/publish.sh --code "${versions_file_url}"
+fi
 
