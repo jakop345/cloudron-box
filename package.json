@@ -10,7 +10,7 @@
     "type": "git"
   },
   "engines": [
-    "node >= 0.10.0"
+    "node >= 0.12.0"
   ],
   "bin": {
     "cloudron": "./app.js"
