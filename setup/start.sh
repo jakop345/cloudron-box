@@ -160,7 +160,7 @@ EOF
 echo "Add webadmin oauth cient"
 ADMIN_SCOPES="root,developer,profile,users,apps,settings,roleUser"
 mysql -u root -p${mysql_root_password} \
-    -e "REPLACE INTO clients (id, appId, clientSecret, redirectURI, scope) VALUES (\"cid-webadmin\", \"webadmin\", \"secret-webadmin\", \"${admin_origin}\", \"\$ADMIN_SCOPES\")" box
+    -e "REPLACE INTO clients (id, appId, clientSecret, redirectURI, scope) VALUES (\"cid-webadmin\", \"webadmin\", \"secret-webadmin\", \"${admin_origin}\", \"${ADMIN_SCOPES}\")" box
 
 set_progress "80" "Reloading supervisor"
 # looks like restarting supervisor completely is the only way to reload it
