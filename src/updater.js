@@ -147,15 +147,15 @@ function mailUser(callback) {
 function checkUpdates() {
     debug('Checking for app and box updates...');
 
-    checkAppUpdates(function (error, appUpdateInfo) {
+    checkAppUpdates(function (error, result) {
         if (error) debug('Error checking app updates: ', error);
 
-        gAppUpdateInfo = appUpdateInfo;
+        gAppUpdateInfo = error ? {} : result;
 
         checkBoxUpdates(function (error, result) {
             if (error) debug('Error checking box updates: ', error);
 
-            gBoxUpdateInfo = result;
+            gBoxUpdateInfo = error ? {} : result;
 
             mailUser();
 
