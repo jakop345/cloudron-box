@@ -104,10 +104,7 @@ set_progress "33" "Changing ownership"
 chown "${USER}:${USER}" -R "${DATA_DIR}/box" "${DATA_DIR}/nginx" "${DATA_DIR}/collectd"
 
 set_progress "40" "Setting up infra"
-mysql_addon_root_password=$(pwgen -1 -s)
-postgresql_addon_root_password=$(pwgen -1 -s)
-mongodb_addon_root_password=$(pwgen -1 -s)
-${script_dir}/start/setup_infra.sh "${arg_fqdn}" "${mysql_addon_root_password}" "${postgresql_addon_root_password}" "${mongodb_addon_root_password}"
+${script_dir}/start/setup_infra.sh "${arg_fqdn}"
 
 set_progress "65" "Creating cloudron.conf"
 admin_origin="https://${admin_fqdn}"
@@ -130,17 +127,6 @@ cat > "${CONFIG_DIR}/cloudron.conf" <<CONF_END
         "password": "${mysql_root_password}",
         "port": 3306,
         "name": "box"
-    },
-    "addons": {
-        "mysql": {
-            "rootPassword": "${mysql_addon_root_password}"
-        },
-        "postgresql": {
-            "rootPassword": "${postgresql_addon_root_password}"
-        },
-        "mongodb": {
-            "rootPassword": "${mongodb_addon_root_password}"
-        }
     },
     "developerMode": ${arg_developer_mode}
 }

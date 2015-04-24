@@ -301,7 +301,7 @@ function setupMySql(app, callback) {
     debug('Setting up mysql for %s', app.id);
 
     var container = docker.getContainer('mysql');
-    var cmd = [ '/addons/mysql/service.sh', 'add', config.get('addons.mysql.rootPassword'), app.id ];
+    var cmd = [ '/addons/mysql/service.sh', 'add', app.id ];
 
     container.exec({ Cmd: cmd, AttachStdout: true, AttachStderr: true }, function (error, execContainer) {
         if (error) return callback(error);
@@ -330,7 +330,7 @@ function setupMySql(app, callback) {
 
 function teardownMySql(app, callback) {
     var container = docker.getContainer('mysql');
-    var cmd = [ '/addons/mysql/service.sh', 'remove', config.get('addons.mysql.rootPassword'), app.id ];
+    var cmd = [ '/addons/mysql/service.sh', 'remove', app.id ];
 
     debug('Tearing down mysql for %s', app.id);
 
@@ -358,7 +358,7 @@ function backupMySql(app, callback) {
     var output = fs.createWriteStream(path.join(paths.DATA_DIR, app.id, 'mysqldump'));
     output.on('error', callback);
 
-    var cp = spawn('/usr/bin/docker', [ 'exec', 'mysql', '/addons/mysql/service.sh', 'backup', config.get('addons.mysql.rootPassword'), app.id ]);
+    var cp = spawn('/usr/bin/docker', [ 'exec', 'mysql', '/addons/mysql/service.sh', 'backup', app.id ]);
     cp.on('error', callback);
     cp.on('exit', function (code, signal) {
         debug('backupMySql: done. code:%s signal:%s', code, signal);
@@ -381,7 +381,7 @@ function restoreMySql(app, callback) {
         input.on('error', callback);
 
         // cannot get this to work through docker.exec
-        var cp = spawn('/usr/bin/docker', [ 'exec', '-i', 'mysql', '/addons/mysql/service.sh', 'restore', config.get('addons.mysql.rootPassword'), app.id ]);
+        var cp = spawn('/usr/bin/docker', [ 'exec', '-i', 'mysql', '/addons/mysql/service.sh', 'restore', app.id ]);
         cp.on('error', callback);
         cp.on('exit', function (code, signal) {
             debug('restoreMySql: done %s %s', code, signal);
@@ -401,7 +401,7 @@ function setupPostgreSql(app, callback) {
     debug('Setting up postgresql for %s', app.id);
 
     var container = docker.getContainer('postgresql');
-    var cmd = [ '/addons/postgresql/service.sh', 'add', config.get('addons.postgresql.rootPassword'), app.id ];
+    var cmd = [ '/addons/postgresql/service.sh', 'add', app.id ];
 
     container.exec({ Cmd: cmd, AttachStdout: true, AttachStderr: true }, function (error, execContainer) {
         if (error) return callback(error);
@@ -430,7 +430,7 @@ function setupPostgreSql(app, callback) {
 
 function teardownPostgreSql(app, callback) {
     var container = docker.getContainer('postgresql');
-    var cmd = [ '/addons/postgresql/service.sh', 'remove', config.get('addons.postgresql.rootPassword'), app.id ];
+    var cmd = [ '/addons/postgresql/service.sh', 'remove', app.id ];
 
     debug('Tearing down postgresql for %s', app.id);
 
@@ -458,7 +458,7 @@ function backupPostgreSql(app, callback) {
     var output = fs.createWriteStream(path.join(paths.DATA_DIR, app.id, 'postgresqldump'));
     output.on('error', callback);
 
-    var cp = spawn('/usr/bin/docker', [ 'exec', 'postgresql', '/addons/postgresql/service.sh', 'backup', config.get('addons.postgresql.rootPassword'), app.id ]);
+    var cp = spawn('/usr/bin/docker', [ 'exec', 'postgresql', '/addons/postgresql/service.sh', 'backup', app.id ]);
     cp.on('error', callback);
     cp.on('exit', function (code, signal) {
         debug('backupPostgreSql: done %s %s', code, signal);
@@ -481,7 +481,7 @@ function restorePostgreSql(app, callback) {
         input.on('error', callback);
 
         // cannot get this to work through docker.exec
-        var cp = spawn('/usr/bin/docker', [ 'exec', '-i', 'postgresql', '/addons/postgresql/service.sh', 'restore', config.get('addons.postgresql.rootPassword'), app.id ]);
+        var cp = spawn('/usr/bin/docker', [ 'exec', '-i', 'postgresql', '/addons/postgresql/service.sh', 'restore', app.id ]);
         cp.on('error', callback);
         cp.on('exit', function (code, signal) {
             debug('restorePostgreSql: done %s %s', code, signal);
@@ -501,7 +501,7 @@ function setupMongoDb(app, callback) {
     debug('Setting up mongodb for %s', app.id);
 
     var container = docker.getContainer('mongodb');
-    var cmd = [ '/addons/mongodb/service.sh', 'add', config.get('addons.mongodb.rootPassword'), app.id ];
+    var cmd = [ '/addons/mongodb/service.sh', 'add', app.id ];
 
     container.exec({ Cmd: cmd, AttachStdout: true, AttachStderr: true }, function (error, execContainer) {
         if (error) return callback(error);
@@ -530,7 +530,7 @@ function setupMongoDb(app, callback) {
 
 function teardownMongoDb(app, callback) {
     var container = docker.getContainer('mongodb');
-    var cmd = [ '/addons/mongodb/service.sh', 'remove', config.get('addons.mongodb.rootPassword'), app.id ];
+    var cmd = [ '/addons/mongodb/service.sh', 'remove', app.id ];
 
     debug('Tearing down mongodb for %s', app.id);
 
@@ -558,7 +558,7 @@ function backupMongoDb(app, callback) {
     var output = fs.createWriteStream(path.join(paths.DATA_DIR, app.id, 'mongodbdump'));
     output.on('error', callback);
 
-    var cp = spawn('/usr/bin/docker', [ 'exec', 'mongodb', '/addons/mongodb/service.sh', 'backup', config.get('addons.mongodb.rootPassword'), app.id ]);
+    var cp = spawn('/usr/bin/docker', [ 'exec', 'mongodb', '/addons/mongodb/service.sh', 'backup', app.id ]);
     cp.on('error', callback);
     cp.on('exit', function (code, signal) {
         debug('backupMongoDb: done %s %s', code, signal);
@@ -581,7 +581,7 @@ function restoreMongoDb(app, callback) {
         input.on('error', callback);
 
         // cannot get this to work through docker.exec
-        var cp = spawn('/usr/bin/docker', [ 'exec', '-i', 'mongodb', '/addons/mongodb/service.sh', 'restore', config.get('addons.mongodb.rootPassword'), app.id ]);
+        var cp = spawn('/usr/bin/docker', [ 'exec', '-i', 'mongodb', '/addons/mongodb/service.sh', 'restore', app.id ]);
         cp.on('error', callback);
         cp.on('exit', function (code, signal) {
             debug('restoreMongoDb: done %s %s', code, signal);

@@ -103,9 +103,6 @@ function setup(done) {
         child_process.exec.bind(null, __dirname + '/start_addons.sh'),
 
         function (callback) {
-            config.set('addons.mysql.rootPassword', 'secret');
-            config.set('addons.postgresql.rootPassword', 'secret');
-
             callback(null);
         },
         function (callback) {
@@ -133,14 +130,7 @@ function cleanup(done) {
 
         server.stop,
 
-        child_process.exec.bind(null, 'docker rm -f mysql; docker rm -f postgresql'),
-
-        function (callback) {
-            config.set('addons.mysql.rootPassword', null);
-            config.set('addons.postgresql.rootPassword', null);
-
-            callback();
-        }
+        child_process.exec.bind(null, 'docker rm -f mysql; docker rm -f postgresql')
     ], done);
 }
 
