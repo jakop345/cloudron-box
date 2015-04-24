@@ -17,7 +17,7 @@ arg_is_custom_domain="false"
 arg_developer_mode=""
 arg_retire="false"
 
-args=$(getopt -o "" -l "data:" -n "$0" -- "$@")
+args=$(getopt -o "" -l "data:,retire" -n "$0" -- "$@")
 eval set -- "${args}"
 
 while true; do
