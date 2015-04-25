@@ -188,7 +188,7 @@ function update(callback) {
 
     startUpdate(function (error) {
         if (error) {
-            progress.clear(progress.UPDATE);    // update failed, clear the update process
+            progress.clear(progress.UPDATE); // update failed, clear the update progress
             return callback(error);
         }
 
@@ -199,18 +199,22 @@ function update(callback) {
 function upgrade(callback) {
     assert(gBoxUpdateInfo.upgrade);
 
-    debug('box needs upgrade');
+    debug('box needs upgrade, backup box and apps');
 
-    superagent.post(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/upgrade')
-      .query({ token: config.token() })
-      .send({ version: gBoxUpdateInfo.version })
-      .end(function (error, result) {
-        if (error) return callback(new Error('Error making upgrade request: ' + error));
-        if (result.status !== 202) return callback(new Error('Server not ready to upgrade: ' + result.body));
+    cloudron.backup(function (error) {
+        if (error) return callback(error);
 
-        progress.set(progress.UPDATE, 10, 'Updating base system');
+        superagent.post(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/upgrade')
+          .query({ token: config.token() })
+          .send({ version: gBoxUpdateInfo.version })
+          .end(function (error, result) {
+            if (error) return callback(new Error('Error making upgrade request: ' + error));
+            if (result.status !== 202) return callback(new Error('Server not ready to upgrade: ' + result.body));
 
-        callback(null);
+            progress.set(progress.UPDATE, 10, 'Updating base system');
+
+            callback(null);
+        });
     });
 }
 
@@ -222,10 +226,14 @@ function startUpdate(callback) {
 
     progress.set(progress.UPDATE, 5, 'Create backup');
 
+    if (gBoxUpdateInfo && gBoxUpdateInfo.upgrade) {
+        return upgrade(callback);
+    }
+
+    debug('box needs update, backup only box but not apps');
+
     cloudron.backupBox(function (error) {
         if (error) return callback(error);
-
-        if (gBoxUpdateInfo && gBoxUpdateInfo.upgrade) return upgrade(callback);
 
         // fetch a signed sourceTarballUrl
         superagent.get(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/sourcetarballurl')
