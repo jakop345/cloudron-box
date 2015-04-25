@@ -101,7 +101,7 @@ echo "${arg_tls_cert}" > ${DATA_DIR}/nginx/cert/host.cert
 echo "${arg_tls_key}" > ${DATA_DIR}/nginx/cert/host.key
 
 set_progress "33" "Changing ownership"
-chown "${USER}:${USER}" -R "${DATA_DIR}/box" "${DATA_DIR}/nginx" "${DATA_DIR}/collectd"
+chown "${USER}:${USER}" -R "${DATA_DIR}/box" "${DATA_DIR}/nginx" "${DATA_DIR}/collectd" "${DATA_DIR}/addons"
 
 set_progress "40" "Setting up infra"
 ${script_dir}/start/setup_infra.sh "${arg_fqdn}"
