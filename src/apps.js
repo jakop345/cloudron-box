@@ -146,6 +146,7 @@ AppsError.BAD_FIELD = 'Bad Field';
 AppsError.BAD_STATE = 'Bad State';
 AppsError.PORT_RESERVED = 'Port Reserved';
 AppsError.PORT_CONFLICT = 'Port Conflict';
+AppsError.BILLING_REQUIRED = 'Billing Required';
 
 // Hostname validation comes from RFC 1123 (section 2.1)
 // Domain name validation comes from RFC 2181 (Name syntax)
@@ -302,7 +303,7 @@ function purchase(appStoreId, callback) {
 
     superagent.post(url).query({ token: config.token() }).end(function (error, res) {
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
-        // TODO check error for billing not setup
+        if (res.status === 402) return callback(new AppsError(AppsError.BILLING_REQUIRED, error));
         if (res.status !== 201 && res.status !== 200) return callback(new Error(util.format('App purchase failed. %s %j', res.status, res.body)));
 
         callback(null);

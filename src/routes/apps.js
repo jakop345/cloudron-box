@@ -117,6 +117,7 @@ function installApp(req, res, next) {
         if (error && error.reason === AppsError.PORT_RESERVED) return next(new HttpError(409, 'Port ' + error.message + ' is reserved.'));
         if (error && error.reason === AppsError.PORT_CONFLICT) return next(new HttpError(409, 'Port ' + error.message + ' is already in use.'));
         if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));
+        if (error && error.reason === AppsError.BILLING_REQUIRED) return next(new HttpError(402, 'Billing required'));
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(202, { id: appId } ));
