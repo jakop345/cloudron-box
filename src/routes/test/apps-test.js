@@ -40,6 +40,7 @@ var SERVER_URL = 'http://localhost:' + config.get('port');
 
 var APP_STORE_ID = 'test', APP_ID;
 var APP_LOCATION = 'appslocation';
+var APP_LOCATION_2 = 'appslocationtwo';
 var APP_LOCATION_NEW = 'appslocationnew';
 var APP_MANIFEST = JSON.parse(fs.readFileSync(__dirname + '/CloudronManifest.json', 'utf8'));
 var USERNAME = 'admin', PASSWORD = 'password', EMAIL ='admin@me.com';
@@ -260,7 +261,7 @@ describe('App API', function () {
         });
     });
 
-    it('app install succeeds', function (done) {
+    it('app install succeeds with purchase', function (done) {
         var fake = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(201, {});
 
         request.post(SERVER_URL + '/api/v1/apps/install')
@@ -395,6 +396,21 @@ describe('App API', function () {
             .query({ access_token: token })
             .end(function (err, res) {
             expect(res.statusCode).to.equal(202);
+            done(err);
+        });
+    });
+
+    it('app install succeeds already purchased', function (done) {
+        var fake = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(200, {});
+
+        request.post(SERVER_URL + '/api/v1/apps/install')
+               .query({ access_token: token })
+               .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION_2, portBindings: null, accessRestriction: '' })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(202);
+            expect(res.body.id).to.be.a('string');
+            APP_ID = res.body.id;
+            expect(fake.isDone()).to.be.ok();
             done(err);
         });
     });
