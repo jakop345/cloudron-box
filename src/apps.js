@@ -301,7 +301,7 @@ function purchase(appStoreId, callback) {
     var url = config.apiServerOrigin() + '/api/v1/apps/' + appStoreId + '/purchase';
 
     superagent.post(url).query({ token: config.token() }).end(function (error, res) {
-        if (error) return callback(error);
+        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
         // TODO check error for billing not setup
         if (res.status !== 201 && res.status !== 200) return callback(new Error(util.format('App purchase failed. %s %j', res.status, res.body)));
 
@@ -344,14 +344,18 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
 
     debug('Will install app with id : ' + appId);
 
-    appdb.add(appId, appStoreId, manifest, location.toLowerCase(), portBindings, accessRestriction, function (error) {
-        if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(getDuplicateErrorDetails(location.toLowerCase(), portBindings, error));
-        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+    purchase(appStoreId, function (error) {
+        if (error) return callback(error);
 
-        stopTask(appId);
-        startTask(appId);
+        appdb.add(appId, appStoreId, manifest, location.toLowerCase(), portBindings, accessRestriction, function (error) {
+            if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(getDuplicateErrorDetails(location.toLowerCase(), portBindings, error));
+            if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        callback(null);
+            stopTask(appId);
+            startTask(appId);
+
+            callback(null);
+        });
     });
 }
 

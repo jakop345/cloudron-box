@@ -247,7 +247,22 @@ describe('App API', function () {
         });
     });
 
+    it('app install fails due to purchase failure', function (done) {
+        var fake = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(401, {});
+
+        request.post(SERVER_URL + '/api/v1/apps/install')
+               .query({ access_token: token })
+               .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: '' })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(500);
+            expect(fake.isDone()).to.be.ok();
+            done(err);
+        });
+    });
+
     it('app install succeeds', function (done) {
+        var fake = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(201, {});
+
         request.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
                .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: '' })
@@ -255,16 +270,20 @@ describe('App API', function () {
             expect(res.statusCode).to.equal(202);
             expect(res.body.id).to.be.a('string');
             APP_ID = res.body.id;
+            expect(fake.isDone()).to.be.ok();
             done(err);
         });
     });
 
     it('app install fails because of conflicting location', function (done) {
+        var fake = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(201, {});
+
         request.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
                .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: '' })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(409);
+            expect(fake.isDone()).to.be.ok();
             done();
         });
     });
@@ -381,6 +400,8 @@ describe('App API', function () {
     });
 
     it('app install succeeds without password but developer token', function (done) {
+        var fake = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(201, {});
+
         config.set('developerMode', true);
 
         request.post(SERVER_URL + '/api/v1/developer/login')
@@ -400,6 +421,7 @@ describe('App API', function () {
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(202);
                 expect(res.body.id).to.be.a('string');
+                expect(fake.isDone()).to.be.ok();
                 APP_ID = res.body.id;
                 done(err);
             });
@@ -473,6 +495,8 @@ describe('App installation', function () {
     var appInfo = null;
 
     it('can install test app', function (done) {
+        var fake = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(201, {});
+
         var count = 0;
         function checkInstallStatus() {
             request.get(SERVER_URL + '/api/v1/apps/' + APP_ID)
@@ -491,6 +515,7 @@ describe('App installation', function () {
               .send({ appId: APP_ID, appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: '' })
               .end(function (err, res) {
             expect(res.statusCode).to.equal(202);
+            expect(fake.isDone()).to.be.ok();
             expect(res.body.id).to.be.a('string');
             expect(res.body.id).to.be.eql(APP_ID);
             checkInstallStatus();
@@ -896,6 +921,8 @@ describe('App installation - port bindings', function () {
     var appInfo = null;
 
     it('can install test app', function (done) {
+        var fake = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(201, {});
+
         var count = 0;
         function checkInstallStatus() {
             request.get(SERVER_URL + '/api/v1/apps/' + APP_ID)
@@ -914,6 +941,7 @@ describe('App installation - port bindings', function () {
               .send({ appId: APP_ID, appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: { ECHO_SERVER_PORT: 7171 }, accessRestriction: '' })
               .end(function (err, res) {
             expect(res.statusCode).to.equal(202);
+            expect(fake.isDone()).to.be.ok();
             expect(res.body.id).to.equal(APP_ID);
             checkInstallStatus();
         });
