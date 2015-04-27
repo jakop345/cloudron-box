@@ -303,7 +303,7 @@ function purchase(appStoreId, callback) {
 
     superagent.post(url).query({ token: config.token() }).end(function (error, res) {
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
-        if (res.status === 402) return callback(new AppsError(AppsError.BILLING_REQUIRED, error));
+        if (res.status === 402) return callback(new AppsError(AppsError.BILLING_REQUIRED));
         if (res.status !== 201 && res.status !== 200) return callback(new Error(util.format('App purchase failed. %s %j', res.status, res.body)));
 
         callback(null);
