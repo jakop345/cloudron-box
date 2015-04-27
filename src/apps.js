@@ -11,6 +11,7 @@ exports = module.exports = {
     get: get,
     getBySubdomain: getBySubdomain,
     getAll: getAll,
+    purchase: purchase,
     install: install,
     configure: configure,
     uninstall: uninstall,
@@ -50,8 +51,8 @@ var appdb = require('./appdb.js'),
     safe = require('safetydance'),
     semver = require('semver'),
     split = require('split'),
+    superagent = require('superagent'),
     util = require('util'),
-    ts = require('tail-stream'),
     validator = require('validator');
 
 var gTasks = { };
@@ -290,6 +291,24 @@ function validateAccessRestriction(accessRestriction) {
     }
 }
 
+function purchase(appStoreId, callback) {
+    assert(typeof appStoreId === 'string');
+    assert(typeof callback === 'function');
+
+    // Skip purchase if appStoreId is empty
+    if (appStoreId === '') return callback(null);
+
+    var url = config.apiServerOrigin() + '/api/v1/apps/' + appStoreId + '/purchase';
+
+    superagent.post(url).query({ token: config.token() }).end(function (error, res) {
+        if (error) return callback(error);
+        // TODO check error for billing not setup
+        if (res.status !== 201 && res.status !== 200) return callback(new Error(util.format('App purchase failed. %s %j', res.status, res.body)));
+
+        callback(null);
+    });
+}
+
 function install(appId, appStoreId, manifest, location, portBindings, accessRestriction, icon, callback) {
     assert(typeof appId === 'string');
     assert(typeof appStoreId === 'string');
@@ -323,7 +342,7 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
         }
     }
 
-   debug('Will install app with id : ' + appId);
+    debug('Will install app with id : ' + appId);
 
     appdb.add(appId, appStoreId, manifest, location.toLowerCase(), portBindings, accessRestriction, function (error) {
         if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(getDuplicateErrorDetails(location.toLowerCase(), portBindings, error));
