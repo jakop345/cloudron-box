@@ -127,32 +127,25 @@ function activate(username, password, email, callback) {
 
     debug('activating user:%s email:%s', username, email);
 
-    userdb.count(function (error, count) {
+    user.createOwner(username, password, email, function (error, userObject) {
+        if (error && error.reason === UserError.ALREADY_EXISTS) return callback(new CloudronError(CloudronError.ALREADY_PROVISIONED));
+        if (error && error.reason === UserError.BAD_USERNAME) return callback(new CloudronError(CloudronError.BAD_USERNAME));
+        if (error && error.reason === UserError.BAD_PASSWORD) return callback(new CloudronError(CloudronError.BAD_PASSWORD));
+        if (error && error.reason === UserError.BAD_EMAIL) return callback(new CloudronError(CloudronError.BAD_EMAIL));
+
         if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
-        if (count !== 0) return callback(new CloudronError(CloudronError.ALREADY_PROVISIONED));
 
-        user.create(username, password, email, true /* admin */, function (error, userObject) {
-            if (error) {
-                if (error.reason === UserError.ALREADY_EXISTS) return callback(new CloudronError(CloudronError.ALREADY_PROVISIONED));
-                if (error.reason === UserError.BAD_USERNAME) return callback(new CloudronError(CloudronError.BAD_USERNAME));
-                if (error.reason === UserError.BAD_PASSWORD) return callback(new CloudronError(CloudronError.BAD_PASSWORD));
-                if (error.reason === UserError.BAD_EMAIL) return callback(new CloudronError(CloudronError.BAD_EMAIL));
+        clientdb.getByAppId('webadmin', function (error, result) {
+            if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
-                return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
-            }
+            // Also generate a token so the admin creation can also act as a login
+            var token = tokendb.generateToken();
+            var expires = Date.now() + 24 * 60 * 60 * 1000; // 1 day
 
-            clientdb.getByAppId('webadmin', function (error, result) {
+            tokendb.add(token, tokendb.PREFIX_USER + userObject.id, result.id, expires, '*', function (error) {
                 if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
-                // Also generate a token so the admin creation can also act as a login
-                var token = tokendb.generateToken();
-                var expires = Date.now() + 24 * 60 * 60 * 1000; // 1 day
-
-                tokendb.add(token, tokendb.PREFIX_USER + userObject.id, result.id, expires, '*', function (error) {
-                    if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
-
-                    callback(null, { token: token, expires: expires });
-                });
+                callback(null, { token: token, expires: expires });
             });
         });
     });

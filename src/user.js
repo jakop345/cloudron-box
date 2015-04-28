@@ -16,7 +16,8 @@ exports = module.exports = {
     resetPasswordByIdentifier: resetPasswordByIdentifier,
     setPassword: setPassword,
     changePassword: changePassword,
-    update: updateUser
+    update: updateUser,
+    createOwner: createOwner
 };
 
 var assert = require('assert'),
@@ -355,6 +356,15 @@ function changePassword(username, oldPassword, newPassword, callback) {
         if (error) return callback(error);
 
         setPassword(user.id, newPassword, callback);
+    });
+}
+
+function createOwner(username, password, email, callback) {
+    userdb.count(function (error, count) {
+        if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+        if (count !== 0) return callback(new UserError(UserError.ALREADY_EXISTS));
+
+        createUser(username, password, email, true /* admin */, callback);
     });
 }
 
