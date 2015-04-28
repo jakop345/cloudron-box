@@ -233,7 +233,7 @@ function verifyPassword(req, res, next) {
 function requireAdmin(req, res, next) {
     assert(typeof req.user === 'object');
 
-    if (!req.user.admin) return next(new HttpError(403, 'API call requires the admin rights.'));
+    if (!req.user.admin) return next(new HttpError(403, 'API call requires admin rights.'));
 
     next();
 }
