@@ -4,8 +4,7 @@
 
 var assert = require('assert'),
     database = require('./database.js'),
-    DatabaseError = require('./databaseerror'),
-    debug = require('debug')('box:authcodedb');
+    DatabaseError = require('./databaseerror');
 
 exports = module.exports = {
     get: get,

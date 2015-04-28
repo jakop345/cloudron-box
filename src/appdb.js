@@ -6,7 +6,6 @@ var assert = require('assert'),
     async = require('async'),
     database = require('./database.js'),
     DatabaseError = require('./databaseerror'),
-    debug = require('debug')('box:appdb'),
     safe = require('safetydance'),
     util = require('util');
 
@@ -177,7 +176,7 @@ function add(id, appStoreId, manifest, location, portBindings, accessRestriction
         });
     });
 
-    database.transaction(queries, function (error, results) {
+    database.transaction(queries, function (error) {
         if (error && error.code === 'ER_DUP_ENTRY') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error.message));
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
@@ -370,7 +369,7 @@ function setAddonConfig(appId, addonId, env, callback) {
             queryArgs.push('(?, ?, ?)');
         }
 
-        database.query(query + queryArgs.join(','), args, function (error, result) {
+        database.query(query + queryArgs.join(','), args, function (error) {
             if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
             return callback(null);

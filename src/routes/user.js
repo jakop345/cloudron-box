@@ -3,7 +3,6 @@
 'use strict';
 
 var assert = require('assert'),
-    debug = require('debug')('box:routes/user'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
     user = require('../user.js'),

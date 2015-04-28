@@ -19,7 +19,7 @@ function exec(tag, file, args, callback) {
     assert(util.isArray(args));
     assert(typeof callback === 'function');
 
-    var callback = once(callback); // exit may or may not be called after an 'error'
+    callback = once(callback); // exit may or may not be called after an 'error'
 
     debug(tag + ' execFile: %s %s', file, args.join(' '));
 

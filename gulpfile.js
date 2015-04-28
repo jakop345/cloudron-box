@@ -10,8 +10,7 @@ var ejs = require('gulp-ejs'),
     sass = require('gulp-sass'),
     sourcemaps = require('gulp-sourcemaps'),
     minifyCSS = require('gulp-minify-css'),
-    autoprefixer = require('gulp-autoprefixer'),
-    fs = require('fs');
+    autoprefixer = require('gulp-autoprefixer');
 
 gulp.task('3rdparty', function () {
     gulp.src([

@@ -12,7 +12,6 @@ exports = module.exports = {
 };
 
 var assert = require('assert'),
-    debug = require('debug')('box:developer'),
     tokendb = require('./tokendb.js'),
     config = require('../config.js'),
     util = require('util');

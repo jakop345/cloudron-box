@@ -12,14 +12,12 @@ var addons = require('./addons.js'),
     assert = require('assert'),
     async = require('async'),
     clientdb = require('./clientdb.js'),
-    child_process = require('child_process'),
     cloudron = require('./cloudron.js'),
     config = require('../config.js'),
     constants = require('../constants.js'),
     database = require('./database.js'),
     DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:apptask'),
-    dns = require('native-dns'),
     docker = require('./docker.js'),
     ejs = require('ejs'),
     fs = require('fs'),
@@ -140,7 +138,7 @@ function writeNginxNakedDomainConfig(app, callback) {
     if (app === null) { // admin
         nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: config.fqdn(), endpoint: 'admin' });
     } else {
-        var endpoint = app.accessRestriction ? 'oauthproxy' : 'app',
+        var endpoint = app.accessRestriction ? 'oauthproxy' : 'app';
         nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: config.fqdn(), endpoint: endpoint, port: app.httpPort });
     }
 

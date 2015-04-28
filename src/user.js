@@ -23,7 +23,6 @@ exports = module.exports = {
 var assert = require('assert'),
     crypto = require('crypto'),
     DatabaseError = require('./databaseerror.js'),
-    debug = require('debug')('box:user'),
     mailer = require('./mailer.js'),
     hat = require('hat'),
     userdb = require('./userdb.js'),

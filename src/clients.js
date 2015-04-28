@@ -6,7 +6,6 @@ var assert = require('assert'),
     tokendb = require('./tokendb.js'),
     constants = require('../constants.js'),
     async = require('async'),
-    debug = require('debug')('box:clients'),
     clientdb = require('./clientdb.js'),
     DatabaseError = require('./databaseerror.js'),
     uuid = require('node-uuid');

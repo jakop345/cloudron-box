@@ -19,7 +19,6 @@ var appdb = require('./appdb.js'),
     safe = require('safetydance'),
     shell = require('./shell.js'),
     spawn = child_process.spawn,
-    util = require('util'),
     uuid = require('node-uuid'),
     hat = require('hat'),
     vbox = require('./vbox.js'),
@@ -237,7 +236,7 @@ function allocateOAuthCredentials(app, callback) {
 
     debug('allocateOAuthCredentials: id:%s clientSecret:%s', id, clientSecret);
 
-    clientdb.delByAppId('addon-' + appId, function (error, result) { // remove existing creds
+    clientdb.delByAppId('addon-' + appId, function (error) { // remove existing creds
         if (error && error.reason !== DatabaseError.NOT_FOUND) return callback(error);
 
         clientdb.add(id, 'addon-' + appId, clientSecret, redirectURI, scope, function (error) {

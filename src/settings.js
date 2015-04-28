@@ -5,7 +5,6 @@ var apps = require('./apps.js'),
     assert = require('assert'),
     async = require('async'),
     constants = require('../constants.js'),
-    debug = require('debug')('box:settings'),
     settingsdb = require('./settingsdb.js'),
     util = require('util');
 

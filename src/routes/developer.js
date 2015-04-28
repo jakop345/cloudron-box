@@ -4,7 +4,6 @@
 
 var developer = require('../developer.js'),
     passport = require('passport'),
-    debug = require('debug')('box:routes/developer'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess;
 

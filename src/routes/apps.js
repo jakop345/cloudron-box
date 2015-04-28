@@ -5,7 +5,6 @@
 var apps = require('../apps.js'),
     AppsError = apps.AppsError,
     assert = require('assert'),
-    config = require('../../config.js'),
     debug = require('debug')('box:routes/apps'),
     fs = require('fs'),
     HttpError = require('connect-lastmile').HttpError,
@@ -311,10 +310,10 @@ function exec(req, res, next) {
     }
 
     var columns = req.query.columns ? parseInt(req.query.columns, 10) : null;
-    if (columns === NaN) return next(new HttpError(400, 'columns must be a number'));
+    if (isNaN(columns)) return next(new HttpError(400, 'columns must be a number'));
 
     var rows = req.query.rows ? parseInt(req.query.rows, 10) : null;
-    if (rows === NaN) return next(new HttpError(400, 'rows must be a number'));
+    if (isNaN(rows)) return next(new HttpError(400, 'rows must be a number'));
 
     apps.exec(req.params.id, { cmd: cmd, rows: rows, columns: columns }, function (error, duplexStream) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));

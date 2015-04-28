@@ -3,7 +3,6 @@
 'use strict';
 
 var assert = require('assert'),
-    debug = require('debug')('box:routes/clients'),
     validUrl = require('valid-url'),
     clients = require('../clients.js'),
     DatabaseError = require('../databaseerror.js'),

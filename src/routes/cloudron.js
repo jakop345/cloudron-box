@@ -6,16 +6,13 @@ var assert = require('assert'),
     cloudron = require('../cloudron.js'),
     config = require('../../config.js'),
     progress = require('../progress.js'),
-    passport = require('passport'),
     CloudronError = cloudron.CloudronError,
     debug = require('debug')('box:routes/cloudron'),
     df = require('nodejs-disks'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
-    path = require('path'),
     superagent = require('superagent'),
     safe = require('safetydance'),
-    UserError = require('../user.js').UserError,
     updater = require('../updater.js');
 
 exports = module.exports = {
@@ -120,8 +117,6 @@ function getProgress(req, res, next) {
 }
 
 function reboot(req, res, next) {
-    debug('_reboot: execute "%s".', REBOOT_CMD);
-
     // Finish the request, to let the appstore know we triggered the restore it
     next(new HttpSuccess(202, {}));
 

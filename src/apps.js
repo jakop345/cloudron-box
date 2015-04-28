@@ -75,8 +75,8 @@ function startTask(appId, maxDelay) {
     // because we getFreePort in apptask has a race with multiprocess
     setTimeout(function () {
         gTasks[appId] = child_process.fork(__dirname + '/apptask.js', [ appId ]);
-        gTasks[appId].once('exit', function (code, signal) {
-            debug('Task completed :' + appId);
+        gTasks[appId].once('exit', function (code) {
+            debug('Task completed with %s.', code, appId);
             delete gTasks[appId];
         });
     }, Math.floor(Math.random() * maxDelay));
@@ -157,7 +157,7 @@ function validateHostname(location, fqdn) {
 
     if (RESERVED_LOCATIONS.indexOf(location) !== -1) return new Error(location + ' is reserved');
 
-    if ((location.length + 1 + /* hyphen */ + fqdn.indexOf('.')) > 63) return new Error('Hostname length cannot be greater than 63');
+    if ((location.length + 1 /*+ hyphen */ + fqdn.indexOf('.')) > 63) return new Error('Hostname length cannot be greater than 63');
     if (location.match(/^[A-Za-z0-9-]+$/) === null) return new Error('Hostname can only contain alphanumerics and hyphen');
     if (location[0] === '-' || location[location.length-1] === '-') return new Error('Hostname cannot start or end with hyphen');
     if (location.length + 1 /* hyphen */ + fqdn.length > 253) return new Error('FQDN length exceeds 253 characters');
@@ -186,7 +186,8 @@ function validatePortBindings(portBindings, tcpPorts) {
 
     if (!portBindings) return null;
 
-    for (var env in portBindings) {
+    var env;
+    for (env in portBindings) {
         if (!/^[a-zA-Z0-9_]+$/.test(env)) return new AppsError(AppsError.BAD_FIELD, env + ' is not valid environment variable');
 
         if (!Number.isInteger(portBindings[env])) return new Error(portBindings[env] + ' is not an integer');
@@ -198,7 +199,7 @@ function validatePortBindings(portBindings, tcpPorts) {
     // it is OK if there is no 1-1 mapping between values in manifest.tcpPorts and portBindings. missing values implies
     // that the user wants the service disabled
     tcpPorts = tcpPorts || { };
-    for (var env in portBindings) {
+    for (env in portBindings) {
         if (!(env in tcpPorts)) return new AppsError(AppsError.BAD_FIELD, 'Invalid portBindings ' + env);
     }
 

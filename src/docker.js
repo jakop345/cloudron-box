@@ -1,7 +1,6 @@
 'use strict';
 
-var assert = require('assert'),
-    Docker = require('dockerode'),
+var Docker = require('dockerode'),
     fs = require('fs'),
     os = require('os'),
     path = require('path'),

@@ -4,8 +4,7 @@
 
 var assert = require('assert'),
     database = require('./database.js'),
-    DatabaseError = require('./databaseerror.js'),
-    debug = require('debug')('box:clientdb');
+    DatabaseError = require('./databaseerror.js');
 
 exports = module.exports = {
     get: get,

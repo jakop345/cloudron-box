@@ -4,8 +4,7 @@
 
 var assert = require('assert'),
     database = require('./database.js'),
-    DatabaseError = require('./databaseerror'),
-    debug = require('debug')('box:settingsdb');
+    DatabaseError = require('./databaseerror');
 
 exports = module.exports = {
     getNakedDomain: getNakedDomain,
@@ -44,7 +43,7 @@ function set(key, value, callback) {
     assert(value === null || typeof value === 'string');
     assert(typeof callback === 'function');
 
-    database.query('INSERT INTO settings (name, value) VALUES (?, ?) ON DUPLICATE KEY UPDATE value=VALUES(value)', [ key, value ], function (error, result) {
+    database.query('INSERT INTO settings (name, value) VALUES (?, ?) ON DUPLICATE KEY UPDATE value=VALUES(value)', [ key, value ], function (error) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error)); // don't rely on affectedRows here since it gives 2
 
         callback(null);

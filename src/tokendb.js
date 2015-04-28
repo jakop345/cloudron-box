@@ -5,7 +5,6 @@
 var assert = require('assert'),
     database = require('./database.js'),
     DatabaseError = require('./databaseerror'),
-    debug = require('debug')('box:tokendb'),
     hat = require('hat');
 
 exports = module.exports = {

@@ -93,7 +93,7 @@ function processQueue() {
         debug('Processing mail queue of size %d', mailQueueCopy.length);
 
         async.mapSeries(mailQueueCopy, function iterator(mailOptions, callback) {
-            transport.sendMail(mailOptions, function (error, info) {
+            transport.sendMail(mailOptions, function (error) {
                 if (error) return console.error(error); // TODO: requeue?
                 debug('Email sent to ' + mailOptions.to);
             });
