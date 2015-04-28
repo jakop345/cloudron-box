@@ -84,6 +84,8 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
                     $scope.appInstall.error.location = 'This name is already taken.';
                     $scope.appInstallForm.location.$setPristine();
                     $('#appInstallLocationInput').focus();
+                } else if (error.statusCode === 402) {
+                    $scope.appInstall.error.other = 'Unable to purchase this app<br/>Please make sure your payment is setup <a href="' + $scope.config.webServerOrigin + '/console.html#/userprofile" target="_blank">here</a>';
                 } else {
                     $scope.appInstall.error.other = error.message;
                 }
