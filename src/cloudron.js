@@ -131,7 +131,6 @@ function activate(username, password, email, callback) {
         if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
         if (count !== 0) return callback(new CloudronError(CloudronError.ALREADY_PROVISIONED));
 
-
         user.create(username, password, email, true /* admin */, function (error, userObject) {
             if (error) {
                 if (error.reason === UserError.ALREADY_EXISTS) return callback(new CloudronError(CloudronError.ALREADY_PROVISIONED));

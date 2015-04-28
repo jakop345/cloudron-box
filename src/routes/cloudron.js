@@ -55,16 +55,11 @@ function activate(req, res, next) {
     debug('activate: ' + username);
 
     cloudron.activate(username, password, email, function (error, info) {
-        if (error) {
-            assert(error instanceof CloudronError);
-
-            if (error.reason === CloudronError.ALREADY_PROVISIONED) return next(new HttpError(409, 'Already setup'));
-            if (error.reason === CloudronError.BAD_USERNAME) return next(new HttpError(400, 'Bad username'));
-            if (error.reason === CloudronError.BAD_PASSWORD) return next(new HttpError(400, 'Bad password'));
-            if (error.reason === CloudronError.BAD_EMAIL) return next(new HttpError(400, 'Bad email'));
-
-            return next(new HttpError(500, error));
-        }
+        if (error && error.reason === CloudronError.ALREADY_PROVISIONED) return next(new HttpError(409, 'Already setup'));
+        if (error && error.reason === CloudronError.BAD_USERNAME) return next(new HttpError(400, 'Bad username'));
+        if (error && error.reason === CloudronError.BAD_PASSWORD) return next(new HttpError(400, 'Bad password'));
+        if (error && error.reason === CloudronError.BAD_EMAIL) return next(new HttpError(400, 'Bad email'));
+        if (error) return next(new HttpError(500, error));
 
         // skip calling the api server when running locally
         if (config.LOCAL) return next(new HttpSuccess(201, info));
