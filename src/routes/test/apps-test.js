@@ -249,7 +249,7 @@ describe('App API', function () {
     });
 
     it('app install fails due to purchase failure', function (done) {
-        var fake = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(401, {});
+        var fake = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(402, {});
 
         request.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
