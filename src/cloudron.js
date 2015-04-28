@@ -53,7 +53,8 @@ var BACKUP_BOX_CMD = path.join(__dirname, 'scripts/backupbox.sh'),
     RELOAD_NGINX_CMD = path.join(__dirname, 'scripts/reloadnginx.sh'),
     BACKUP_APP_CMD = path.join(__dirname, 'scripts/backupapp.sh'),
     RESTORE_APP_CMD = path.join(__dirname, 'scripts/restoreapp.sh'),
-    REBOOT_CMD = path.join(__dirname, '../scripts/reboot.sh');
+    REBOOT_CMD = path.join(__dirname, 'scripts/reboot.sh'),
+    SET_TIMEZONE_CMD = path.join(__dirname, 'scripts/settimezone.sh');
 
 var gBackupTimerId = null,
     gAddMailDnsRecordsTimerId = null,
@@ -119,20 +120,45 @@ function uninitialize(callback) {
     callback(null);
 }
 
-function activate(username, password, email, callback) {
+function setTimezone(ip, callback) {
+    assert(typeof ip === 'string');
+    assert(typeof callback === 'function');
+
+    debug('setTimezone ip:%s', ip);
+
+    superagent.get('http://www.telize.com/geoip/' + ip).end(function (error, result) {
+        if (error || result.statusCode !== 200) {
+            debug('Failed to get geo location', error);
+            return callback(null);
+        }
+
+        if (!result.body.timezone) {
+            debug('No timezone in geoip response');
+            return callback(null);
+        }
+
+        debug('Setting timezone to ', result.body.timezone);
+
+        shell.sudo('setTimezone', [ SET_TIMEZONE_CMD, result.body.timezone ], callback);
+    });
+}
+
+function activate(username, password, email, ip, callback) {
     assert(typeof username === 'string');
     assert(typeof password === 'string');
     assert(typeof email === 'string');
+    assert(typeof ip === 'string');
     assert(typeof callback === 'function');
 
     debug('activating user:%s email:%s', username, email);
+
+    setTimezone(ip, function () { });
 
     user.createOwner(username, password, email, function (error, userObject) {
         if (error && error.reason === UserError.ALREADY_EXISTS) return callback(new CloudronError(CloudronError.ALREADY_PROVISIONED));
         if (error && error.reason === UserError.BAD_USERNAME) return callback(new CloudronError(CloudronError.BAD_USERNAME));
         if (error && error.reason === UserError.BAD_PASSWORD) return callback(new CloudronError(CloudronError.BAD_PASSWORD));
         if (error && error.reason === UserError.BAD_EMAIL) return callback(new CloudronError(CloudronError.BAD_EMAIL));
-
         if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
         clientdb.getByAppId('webadmin', function (error, result) {

@@ -52,9 +52,10 @@ function activate(req, res, next) {
     var password = req.body.password;
     var email = req.body.email;
 
-    debug('activate: ' + username);
+    var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    debug('activate: username:%s ip:%s', username, ip);
 
-    cloudron.activate(username, password, email, function (error, info) {
+    cloudron.activate(username, password, email, ip, function (error, info) {
         if (error && error.reason === CloudronError.ALREADY_PROVISIONED) return next(new HttpError(409, 'Already setup'));
         if (error && error.reason === CloudronError.BAD_USERNAME) return next(new HttpError(400, 'Bad username'));
         if (error && error.reason === CloudronError.BAD_PASSWORD) return next(new HttpError(400, 'Bad password'));
