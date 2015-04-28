@@ -165,6 +165,25 @@
         }
       }
     },
+    "cron": {
+      "version": "1.0.9",
+      "from": "cron@*",
+      "resolved": "http://registry.npmjs.org/cron/-/cron-1.0.9.tgz",
+      "dependencies": {
+        "moment-timezone": {
+          "version": "0.3.1",
+          "from": "moment-timezone@>=0.3.0 <0.4.0",
+          "resolved": "http://registry.npmjs.org/moment-timezone/-/moment-timezone-0.3.1.tgz",
+          "dependencies": {
+            "moment": {
+              "version": "2.10.2",
+              "from": "moment@>=2.6.0",
+              "resolved": "http://registry.npmjs.org/moment/-/moment-2.10.2.tgz"
+            }
+          }
+        }
+      }
+    },
     "csurf": {
       "version": "1.7.0",
       "from": "https://registry.npmjs.org/csurf/-/csurf-1.7.0.tgz",
