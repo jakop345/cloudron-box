@@ -255,7 +255,7 @@ describe('App API', function () {
                .query({ access_token: token })
                .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: '' })
                .end(function (err, res) {
-            expect(res.statusCode).to.equal(500);
+            expect(res.statusCode).to.equal(402);
             expect(fake.isDone()).to.be.ok();
             done(err);
         });
