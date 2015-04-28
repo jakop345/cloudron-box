@@ -7,6 +7,7 @@ var apps = require('./apps'),
     async = require('async'),
     auth = require('./auth.js'),
     cloudron = require('./cloudron.js'),
+    cron = require('./cron.js'),
     developer = require('./developer.js'),
     config = require('../config.js'),
     database = require('./database.js'),
@@ -198,6 +199,7 @@ function start(callback) {
         cloudron.initialize,
         updater.initialize,
         mailer.initialize,
+        cron.initialize,
         gHttpServer.listen.bind(gHttpServer, config.get('port'), '127.0.0.1')
     ], callback);
 }
@@ -212,6 +214,7 @@ function stop(callback) {
         cloudron.uninitialize,
         updater.uninitialize,
         apps.uninitialize,
+        cron.uninitialize,
         mailer.uninitialize,
         database.uninitialize,
         gHttpServer.close.bind(gHttpServer)
