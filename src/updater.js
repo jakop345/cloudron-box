@@ -155,7 +155,7 @@ function checkUpdates() {
         checkBoxUpdates(function (error, result) {
             if (error) debug('Error checking box updates: ', error);
 
-            gBoxUpdateInfo = error ? {} : result;
+            gBoxUpdateInfo = error ? null : result;
 
             mailUser();
 
