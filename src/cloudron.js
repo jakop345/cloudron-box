@@ -22,6 +22,8 @@ exports = module.exports = {
     getBackupUrl: getBackupUrl,
     setCertificate: setCertificate,
 
+    sendHeartbeat: sendHeartbeat,
+
     reboot: reboot,
 
     getIp: getIp
@@ -55,9 +57,7 @@ var BACKUP_BOX_CMD = path.join(__dirname, 'scripts/backupbox.sh'),
     REBOOT_CMD = path.join(__dirname, 'scripts/reboot.sh'),
     SET_TIMEZONE_CMD = path.join(__dirname, 'scripts/settimezone.sh');
 
-var gBackupTimerId = null,
-    gAddMailDnsRecordsTimerId = null,
-    gGetCertificateTimerId = null,
+var gAddMailDnsRecordsTimerId = null,
     gCachedIp = null;
 
 function CloudronError(reason, errorOrMessage) {
@@ -90,11 +90,6 @@ CloudronError.BAD_PASSWORD = 'Bad password';
 function initialize(callback) {
     assert(typeof callback === 'function');
 
-    // every backup restarts the box. the setInterval is only needed should that fail for some reason
-    gBackupTimerId = setInterval(backup, 4 * 60 * 60 * 1000);
-
-    sendHeartBeat();
-
     if (process.env.NODE_ENV !== 'test') {
         addMailDnsRecords();
     }
@@ -105,14 +100,8 @@ function initialize(callback) {
 function uninitialize(callback) {
     assert(typeof callback === 'function');
 
-    clearInterval(gBackupTimerId);
-    gBackupTimerId = null;
-
     clearTimeout(gAddMailDnsRecordsTimerId);
     gAddMailDnsRecordsTimerId = null;
-
-    clearTimeout(gGetCertificateTimerId);
-    gGetCertificateTimerId = null;
 
     gCachedIp = null;
 
@@ -341,9 +330,7 @@ function getConfig(callback) {
     });
 }
 
-function sendHeartBeat() {
-    var HEARTBEAT_INTERVAL = 1000 * 60;
-
+function sendHeartbeat() {
     if (!config.apiServerOrigin()) {
         debug('No appstore server url set. Not sending heartbeat.');
         return;
@@ -359,12 +346,10 @@ function sendHeartBeat() {
     debug('Sending heartbeat ' + url);
 
     // TODO: this must be a POST
-    superagent.get(url).query({ token: config.token(), version: config.version() }).end(function (error, result) {
+    superagent.get(url).query({ token: config.token(), version: config.version() }).timeout(10000).end(function (error, result) {
         if (error) debug('Error sending heartbeat.', error);
         else if (result.statusCode !== 200) debug('Server responded to heartbeat with ' + result.statusCode);
         else debug('Heartbeat successful');
-
-        setTimeout(sendHeartBeat, HEARTBEAT_INTERVAL);
     });
 }
 
