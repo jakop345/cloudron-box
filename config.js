@@ -89,7 +89,7 @@ function initConfig() {
         data.developerMode = false;
     } else if (exports.LOCAL) {
         data.port = 3000;
-        data.apiServerOrigin = 'https://cloudron-dev.herokuapp.com';
+        data.apiServerOrigin = 'https://api.dev.cloudron.io';
         data.database = {
             hostname: 'localhost',
             username: 'root',
