@@ -7,6 +7,7 @@ module.exports = exports = {
     initialize: initialize,
     uninitialize: uninitialize,
 
+    checkUpdates: checkUpdates,
     getUpdateInfo: getUpdateInfo,
     update: update
 };
@@ -29,8 +30,7 @@ var appdb = require('./appdb.js'),
 
 var INSTALLER_UPDATE_URL = 'http://127.0.0.1:2020/api/v1/installer/update';
 
-var gCheckUpdatesIntervalId = null,
-    gAppUpdateInfo = { }, // id -> update info
+var gAppUpdateInfo = { }, // id -> update info
     gBoxUpdateInfo = null,
     gMailedUser =  { };
 
@@ -168,15 +168,11 @@ function initialize(callback) {
     assert(typeof callback === 'function');
 
     progress.clear(progress.UPDATE);
-    gCheckUpdatesIntervalId = setInterval(checkUpdates, 60 * 1000); // every minute
     callback(null);
 }
 
 function uninitialize(callback) {
     assert(typeof callback === 'function');
-
-    clearInterval(gCheckUpdatesIntervalId);
-    gCheckUpdatesIntervalId = null;
 
     callback(null);
 }

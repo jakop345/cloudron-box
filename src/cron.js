@@ -12,7 +12,8 @@ exports = module.exports = {
 };
 
 var NOOP_CALLBACK = function (error) { console.error(error); };
-var gUpdaterJob = null,
+var gAutoUpdaterJob = null,
+    gUpdateCheckerJob = null,
     gHeartbeatJob = null,
     gBackupJob = null;
 
@@ -39,7 +40,13 @@ function initialize(callback) {
         start: true
     });
 
-    gUpdaterJob = new CronJob({
+    gUpdateCheckerJob = new CronJob({
+        cronTime: '00 */1 * * * *', // every minute
+        onTick: updater.checkUpdates,
+        start: true
+    });
+
+    gAutoUpdaterJob = new CronJob({
         cronTime: '00 00 1 * * *', // everyday at 1am
         onTick: function() {
             debug('Checking if update available');
@@ -54,8 +61,11 @@ function initialize(callback) {
 function uninitialize(callback) {
     assert(typeof callback === 'function');
 
-    gUpdaterJob.stop();
-    gUpdaterJob = null;
+    gAutoUpdaterJob.stop();
+    gAutoUpdaterJob = null;
+
+    gUpdateCheckerJob.stop();
+    gUpdateCheckerJob = null;
 
     gHeartbeatJob.stop();
     gHeartbeatJob = null;
