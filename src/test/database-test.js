@@ -905,9 +905,11 @@ describe('database', function () {
             settingsdb.getAll(function (error, result) {
                 expect(error).to.be(null);
                 expect(result).to.be.an(Array);
-                expect(result.length).to.be(2);
-                expect(result[0]).to.eql({ name: 'naked_domain', value: constants.ADMIN_APPID });
-                expect(result[1]).to.eql({ name: 'somekey', value: 'somevalue' });
+                expect(result.length).to.be(3);
+                expect(result[0].name).to.be('autoupdate_pattern');
+                expect(result[0].value).to.be.ok();
+                expect(result[1]).to.eql({ name: 'naked_domain', value: constants.ADMIN_APPID });
+                expect(result[2]).to.eql({ name: 'somekey', value: 'somevalue' });
                 done();
             });
         });

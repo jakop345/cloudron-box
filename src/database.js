@@ -114,7 +114,8 @@ function clear(callback) {
         require('./authcodedb.js')._clear,
         require('./clientdb.js')._clear,
         require('./tokendb.js')._clear,
-        require('./userdb.js')._clear
+        require('./userdb.js')._clear,
+        require('./settingsdb.js')._clear
     ], callback);
 }
 

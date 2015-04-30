@@ -17,6 +17,7 @@ var appdb = require('../../appdb.js'),
     paths = require('../../paths.js'),
     request = require('superagent'),
     server = require('../../server.js'),
+    settings = require('../../settings.js'),
     sinon = require('sinon'),
     nock = require('nock'),
     userdb = require('../../userdb.js');
@@ -75,6 +76,7 @@ describe('Settings API', function () {
     before(setup);
     after(cleanup);
 
+    // naked domain
     it('can get naked domain (not set)', function (done) {
         request.get(SERVER_URL + '/api/v1/settings/naked_domain')
                .query({ access_token: token })
@@ -161,6 +163,68 @@ describe('Settings API', function () {
             expect(res.statusCode).to.equal(200);
             expect(res.body).to.eql({ appid: constants.ADMIN_APPID });
             done(err);
+        });
+    });
+
+    // auto update pattern
+    it('can get auto update pattern (default)', function (done) {
+        request.get(SERVER_URL + '/api/v1/settings/autoupdate_pattern')
+               .query({ access_token: token })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            expect(res.body.pattern).to.be.ok();
+            done(err);
+        });
+    });
+
+    it('cannot set autoupdate_pattern without pattern', function (done) {
+        request.post(SERVER_URL + '/api/v1/settings/autoupdate_pattern')
+               .query({ access_token: token })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(400);
+            done();
+        });
+    });
+
+    it('can set autoupdate_pattern', function (done) {
+        var eventPattern = null;
+        settings.events.on(settings.AUTOUPDATE_PATTERN_KEY, function (pattern) {
+            eventPattern = pattern;
+        });
+
+        request.post(SERVER_URL + '/api/v1/settings/autoupdate_pattern')
+               .query({ access_token: token })
+               .send({ pattern: '00 30 11 * * 1-5' })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            expect(eventPattern === '00 30 11 * * 1-5').to.be.ok();
+            done();
+        });
+    });
+
+    it('can set autoupdate_pattern to never', function (done) {
+        var eventPattern = null;
+        settings.events.on(settings.AUTOUPDATE_PATTERN_KEY, function (pattern) {
+            eventPattern = pattern;
+        });
+
+        request.post(SERVER_URL + '/api/v1/settings/autoupdate_pattern')
+               .query({ access_token: token })
+               .send({ pattern: 'never' })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(200);
+            expect(eventPattern).to.eql('never');
+            done();
+        });
+    });
+
+    it('cannot set invalid autoupdate_pattern', function (done) {
+        request.post(SERVER_URL + '/api/v1/settings/autoupdate_pattern')
+               .query({ access_token: token })
+               .send({ pattern: '1 3 x 5 6' })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(400);
+            done();
         });
     });
 });

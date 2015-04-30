@@ -4,6 +4,7 @@ var assert = require('assert'),
     cloudron = require('./cloudron.js'),
     CronJob = require('cron').CronJob,
     debug = require('debug')('box:cron'),
+    settings = require('./settings.js'),
     updater = require('./updater.js');
 
 exports = module.exports = {
@@ -46,22 +47,40 @@ function initialize(callback) {
         start: true
     });
 
+    settings.events.on(settings.AUTOUPDATE_PATTERN_KEY, autoupdatePatternChanged);
+
+    settings.getAutoupdatePattern(function (error, pattern) {
+        if (error) return callback(error);
+
+        autoupdatePatternChanged(pattern);
+
+        callback();
+    });
+}
+
+function autoupdatePatternChanged(pattern) {
+    assert(typeof pattern === 'string');
+
+    debug('Auto update pattern changed to %s', pattern);
+
+    if (gAutoUpdaterJob) gAutoUpdaterJob.stop();
+
+    if (pattern === 'never') return;
+
     gAutoUpdaterJob = new CronJob({
-        cronTime: '00 00 1 * * *', // everyday at 1am
+        cronTime: pattern,
         onTick: function() {
             debug('Checking if update available');
             if (updater.getUpdateInfo().box) updater.update(NOOP_CALLBACK);
         },
         start: true
     });
-
-    callback(null);
 }
 
 function uninitialize(callback) {
     assert(typeof callback === 'function');
 
-    gAutoUpdaterJob.stop();
+    if (gAutoUpdaterJob) gAutoUpdaterJob.stop();
     gAutoUpdaterJob = null;
 
     gUpdateCheckerJob.stop();

@@ -7,15 +7,10 @@ var assert = require('assert'),
     DatabaseError = require('./databaseerror');
 
 exports = module.exports = {
-    getNakedDomain: getNakedDomain,
-    setNakedDomain: setNakedDomain,
-
-    // these are for internal use, exported for testing
     get: get,
     getAll: getAll,
     set: set,
-
-    NAKED_DOMAIN_KEY: 'naked_domain'
+    _clear: clear
 };
 
 function get(key, callback) {
@@ -31,7 +26,7 @@ function get(key, callback) {
 }
 
 function getAll(callback) {
-    database.query('SELECT * FROM settings', function (error, results) {
+    database.query('SELECT * FROM settings ORDER BY name', function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         callback(null, results);
@@ -50,11 +45,8 @@ function set(key, value, callback) {
     });
 }
 
-function getNakedDomain(callback) {
-    return get(exports.NAKED_DOMAIN_KEY, callback);
-}
-
-function setNakedDomain(appid, callback) {
-    return set(exports.NAKED_DOMAIN_KEY, appid, callback);
+function clear(callback) {
+    // don't clear since we need to keep defaults
+    callback();
 }
 
