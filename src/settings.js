@@ -22,8 +22,14 @@ exports = module.exports = {
     getAutoupdatePattern: getAutoupdatePattern,
     setAutoupdatePattern: setAutoupdatePattern,
 
+    getTimeZone: getTimeZone,
+    setTimeZone: setTimeZone,
+
+    getAll: getAll,
+
     NAKED_DOMAIN_KEY: 'naked_domain',
     AUTOUPDATE_PATTERN_KEY: 'autoupdate_pattern',
+    TIME_ZONE_KEY: 'time_zone_key',
 
     events: gEvents
 };
@@ -112,6 +118,42 @@ function getAutoupdatePattern(callback) {
         if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
 
         callback(null, pattern);
+    });
+}
+
+function setTimeZone(tz, callback) {
+    assert(typeof tz === 'string');
+    assert(typeof callback === 'function');
+
+    settingsdb.set(exports.TIME_ZONE_KEY, pattern, function (error) {
+        if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
+
+        gEvents.emit(exports.TIME_ZONE_KEY, pattern);
+
+        return callback(null);
+    });
+}
+
+function getTimeZone(callback) {
+    assert(typeof callback === 'function');
+
+    settingsdb.get(exports.TIME_ZONE_KEY, function (error, pattern) {
+        if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
+
+        callback(null, pattern);
+    });
+}
+
+function getAll(callback) {
+    assert(typeof callback === 'function');
+
+    settingsdb.getAll(function (error, settings) {
+        if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
+
+        var result = { };
+        settings.forEach(function (setting) { result[settings.name] = settings.value; });
+
+        callback(null, result);
     });
 }
 
