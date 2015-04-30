@@ -107,11 +107,11 @@ function uninitialize(callback) {
     callback(null);
 }
 
-function setTimezone(ip, callback) {
+function setTimeZone(ip, callback) {
     assert(typeof ip === 'string');
     assert(typeof callback === 'function');
 
-    debug('setTimezone ip:%s', ip);
+    debug('setTimeZone ip:%s', ip);
 
     superagent.get('http://www.telize.com/geoip/' + ip).end(function (error, result) {
         if (error || result.statusCode !== 200) {
@@ -126,7 +126,7 @@ function setTimezone(ip, callback) {
 
         debug('Setting timezone to ', result.body.timezone);
 
-        settings.setTimezone(result.body.timezone, callback);
+        settings.setTimeZone(result.body.timezone, callback);
     });
 }
 
@@ -139,7 +139,7 @@ function activate(username, password, email, ip, callback) {
 
     debug('activating user:%s email:%s', username, email);
 
-    setTimezone(ip, function () { });
+    setTimeZone(ip, function () { });
 
     user.createOwner(username, password, email, function (error, userObject) {
         if (error && error.reason === UserError.ALREADY_EXISTS) return callback(new CloudronError(CloudronError.ALREADY_PROVISIONED));
