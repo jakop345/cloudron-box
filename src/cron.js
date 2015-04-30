@@ -29,32 +29,43 @@ var gAutoUpdaterJob = null,
 function initialize(callback) {
     assert(typeof callback === 'function');
 
-    gHeartbeatJob = new CronJob({
-        cronTime: '00 * * * * *', // every minute
-        onTick: cloudron.sendHeartbeat,
-        start: true
-    });
-
-    gBackupJob = new CronJob({
-        cronTime: '00 00 0,4,8,12,16,20 * * *', // every 4 hours
-        onTick: cloudron.backup,
-        start: true
-    });
-
-    gUpdateCheckerJob = new CronJob({
-        cronTime: '00 */1 * * * *', // every minute
-        onTick: updater.checkUpdates,
-        start: true
-    });
-
+    settings.events.on(settings.TIME_ZONE_KEY, recreateJobs);
     settings.events.on(settings.AUTOUPDATE_PATTERN_KEY, autoupdatePatternChanged);
 
-    settings.getAutoupdatePattern(function (error, pattern) {
-        if (error) return callback(error);
+    recreateJobs(callback);
+}
 
-        autoupdatePatternChanged(pattern);
+function recreateJobs(unusedTimeZone, callback) {
+    if (typeof unusedTimeZone === 'function') callback = unusedTimeZone;
 
-        callback();
+    settings.getAll(function (error, allSettings) {
+        if (gHeartbeatJob) gHeartbeatJob.stop();
+        gHeartbeatJob = new CronJob({
+            cronTime: '00 * * * * *', // every minute
+            onTick: cloudron.sendHeartbeat,
+            start: true,
+            timeZone: allSettings[settings.TIME_ZONE_KEY]
+        });
+
+        if (gBackupJob) gBackupJob.stop();
+        gBackupJob = new CronJob({
+            cronTime: '00 00 0,4,8,12,16,20 * * *', // every 4 hours
+            onTick: cloudron.backup,
+            start: true,
+            timeZone: allSettings[settings.TIME_ZONE_KEY]
+        });
+
+        if (gUpdateCheckerJob) gUpdateCheckerJob.stop();
+        gUpdateCheckerJob = new CronJob({
+            cronTime: '00 */1 * * * *', // every minute
+            onTick: updater.checkUpdates,
+            start: true,
+            timeZone: allSettings[settings.TIME_ZONE_KEY]
+        });
+
+        autoupdatePatternChanged(allSettings[settings.AUTOUPDATE_PATTERN_KEY]);
+
+        if (callback) callback();
     });
 }
 
@@ -73,7 +84,8 @@ function autoupdatePatternChanged(pattern) {
             debug('Checking if update available');
             if (updater.getUpdateInfo().box) updater.update(NOOP_CALLBACK);
         },
-        start: true
+        start: true,
+        timeZone: gUpdateCheckerJob.cronTime.timeZone // hack
     });
 }
 

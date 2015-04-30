@@ -54,8 +54,7 @@ var BACKUP_BOX_CMD = path.join(__dirname, 'scripts/backupbox.sh'),
     RELOAD_NGINX_CMD = path.join(__dirname, 'scripts/reloadnginx.sh'),
     BACKUP_APP_CMD = path.join(__dirname, 'scripts/backupapp.sh'),
     RESTORE_APP_CMD = path.join(__dirname, 'scripts/restoreapp.sh'),
-    REBOOT_CMD = path.join(__dirname, 'scripts/reboot.sh'),
-    SET_TIMEZONE_CMD = path.join(__dirname, 'scripts/settimezone.sh');
+    REBOOT_CMD = path.join(__dirname, 'scripts/reboot.sh');
 
 var gAddMailDnsRecordsTimerId = null,
     gCachedIp = null;
@@ -127,7 +126,7 @@ function setTimezone(ip, callback) {
 
         debug('Setting timezone to ', result.body.timezone);
 
-        shell.sudo('setTimezone', [ SET_TIMEZONE_CMD, result.body.timezone ], callback);
+        settings.setTimezone(result.body.timezone, callback);
     });
 }
 

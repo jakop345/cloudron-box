@@ -151,7 +151,7 @@ function getAll(callback) {
         if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
 
         var result = { };
-        settings.forEach(function (setting) { result[settings.name] = settings.value; });
+        settings.forEach(function (setting) { result[setting.name] = setting.value; });
 
         callback(null, result);
     });
