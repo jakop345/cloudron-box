@@ -29,7 +29,7 @@ exports = module.exports = {
 
     NAKED_DOMAIN_KEY: 'naked_domain',
     AUTOUPDATE_PATTERN_KEY: 'autoupdate_pattern',
-    TIME_ZONE_KEY: 'time_zone_key',
+    TIME_ZONE_KEY: 'time_zone',
 
     events: gEvents
 };
