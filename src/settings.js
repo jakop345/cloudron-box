@@ -125,10 +125,10 @@ function setTimeZone(tz, callback) {
     assert(typeof tz === 'string');
     assert(typeof callback === 'function');
 
-    settingsdb.set(exports.TIME_ZONE_KEY, pattern, function (error) {
+    settingsdb.set(exports.TIME_ZONE_KEY, tz, function (error) {
         if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
 
-        gEvents.emit(exports.TIME_ZONE_KEY, pattern);
+        gEvents.emit(exports.TIME_ZONE_KEY, tz);
 
         return callback(null);
     });
@@ -137,10 +137,10 @@ function setTimeZone(tz, callback) {
 function getTimeZone(callback) {
     assert(typeof callback === 'function');
 
-    settingsdb.get(exports.TIME_ZONE_KEY, function (error, pattern) {
+    settingsdb.get(exports.TIME_ZONE_KEY, function (error, tz) {
         if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
 
-        callback(null, pattern);
+        callback(null, tz);
     });
 }
 
