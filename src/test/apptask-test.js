@@ -103,24 +103,6 @@ describe('apptask', function () {
         });
     });
 
-    it('can set naked domain', function (done) {
-        apptask.writeNginxNakedDomainConfig(APP, function (error) {
-            expect(fs.existsSync(paths.NGINX_CONFIG_DIR + '/naked_domain.conf'));
-            expect(fs.readFileSync(paths.NGINX_CONFIG_DIR + '/naked_domain.conf', 'utf8').length > 10);
-            // expect(error).to.be(null); // this fails because nginx cannot be restarted
-            done();
-        });
-    });
-
-    it('can unset naked domain', function (done) {
-        apptask.writeNginxNakedDomainConfig(null, function (error) {
-            expect(fs.existsSync(paths.NGINX_CONFIG_DIR + '/naked_domain.conf'));
-            expect(fs.readFileSync(paths.NGINX_CONFIG_DIR + '/naked_domain.conf', 'utf8') === '');
-            // expect(error).to.be(null); // this fails because nginx cannot be restarted
-            done();
-        });
-    });
-
     it('create volume', function (done) {
         apptask._createVolume(APP, function (error) {
             expect(fs.existsSync(paths.DATA_DIR + '/' + APP.id + '/data')).to.be(true);

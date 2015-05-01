@@ -155,9 +155,6 @@ function initializeExpressSync() {
     router.get ('/api/v1/subdomains/:subdomain', routes.apps.getAppBySubdomain);
 
     // settings routes
-    router.get ('/api/v1/settings/naked_domain', settingsScope, routes.settings.getNakedDomain);
-    router.post('/api/v1/settings/naked_domain', settingsScope, routes.settings.setNakedDomain);
-
     router.get('/api/v1/settings/autoupdate_pattern', settingsScope, routes.settings.getAutoupdatePattern);
     router.post('/api/v1/settings/autoupdate_pattern', settingsScope, routes.settings.setAutoupdatePattern);
 

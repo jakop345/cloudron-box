@@ -36,8 +36,10 @@
                         <div class="form-group" ng-class="{ 'has-error': (appInstallForm.location.$dirty && appInstallForm.location.$invalid) || (!appInstallForm.location.$dirty && appInstall.error.location) }">
                             <label class="control-label" for="appInstallLocationInput">Location {{ appInstall.error.location }} </label>
                             <div class="input-group form-inline">
-                                <input type="text" class="form-control" ng-model="appInstall.location" id="appInstallLocationInput" name="location" required autofocus>
-                                <div class="input-group-addon">{{ config.isCustomDomain ? '.' : '-' }}{{ config.fqdn }}</div>
+                                <input type="text" class="form-control" ng-model="appInstall.location" id="appInstallLocationInput" name="location" placeholder="Leave empty to use bare domain" autofocus>
+                                <div class="input-group-addon">
+                                    {{ !appInstall.location ? '' : (config.isCustomDomain ? '.' : '-') }}{{ config.fqdn }}
+                                </div>
                             </div>
                         </div>
                         <div class="has-error text-center" ng-show="appInstall.error.port">{{ appInstall.error.port }}</div>

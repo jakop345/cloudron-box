@@ -39,7 +39,6 @@ var addons = require('./addons.js'),
 exports = module.exports = {
     initialize: initialize,
     startTask: startTask,
-    writeNginxNakedDomainConfig: writeNginxNakedDomainConfig,
 
     // exported for testing
     _getFreePort: getFreePort,
@@ -127,59 +126,6 @@ function unconfigureNginx(app, callback) {
     exports._reloadNginx(callback);
 
     vbox.unforwardFromHostToVirtualBox(app.id + '-http');
-}
-
-function writeNginxNakedDomainConfig(app, callback) {
-    assert(app === null || typeof app === 'object');
-    assert(typeof callback === 'function');
-
-    var sourceDir = path.resolve(__dirname, '..');
-    var nginxConf;
-    if (app === null) { // admin
-        nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: config.fqdn(), endpoint: 'admin' });
-    } else {
-        var endpoint = app.accessRestriction ? 'oauthproxy' : 'app';
-        nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: config.fqdn(), endpoint: endpoint, port: app.httpPort });
-    }
-
-    var nginxNakedDomainFilename = path.join(paths.NGINX_CONFIG_DIR, 'naked_domain.conf');
-    debugApp(app, 'writing naked domain config to %s', nginxNakedDomainFilename);
-
-    fs.writeFile(nginxNakedDomainFilename, nginxConf, function (error) {
-        if (error) return callback(error);
-
-        exports._reloadNginx(callback);
-    });
-}
-
-function configureNakedDomain(app, callback) {
-    assert(typeof app === 'object');
-    assert(typeof callback === 'function');
-
-    settings.getNakedDomain(function (error, nakedDomainAppId) {
-        if (error) return callback(error);
-
-        if (nakedDomainAppId !== app.id) return callback(null);
-
-        debugApp(app, 'configureNakedDomain: writing nginx config');
-
-        writeNginxNakedDomainConfig(app, callback);
-    });
-}
-
-function unconfigureNakedDomain(app, callback) {
-    assert(typeof app === 'object');
-    assert(typeof callback === 'function');
-
-    settings.getNakedDomain(function (error, nakedDomainAppId) {
-        if (error) return callback(error);
-
-        if (nakedDomainAppId !== app.id) return callback(null);
-
-        debugApp(app, 'unconfigureNakedDomain: resetting to admin');
-
-        settings.setNakedDomain(constants.ADMIN_APPID, callback);
-    });
 }
 
 function downloadImage(app, callback) {
@@ -667,7 +613,6 @@ function restore(app, callback) {
         // configure nginx
         updateApp.bind(null, app, { installationProgress: '10, Configuring nginx' }),
         configureNginx.bind(null, app),
-        configureNakedDomain.bind(null, app),
 
         // register subdomain
         updateApp.bind(null, app, { installationProgress: '12, Registering subdomain' }),
@@ -750,7 +695,6 @@ function configure(app, callback) {
 
         updateApp.bind(null, app, { installationProgress: '25, Configuring Nginx' }),
         configureNginx.bind(null, app),
-        configureNakedDomain.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '30, Registering subdomain' }),
         registerSubdomain.bind(null, app),
@@ -791,7 +735,7 @@ function configure(app, callback) {
     });
 }
 
-// nginx and naked domain configuration is skipped because app.httpPort is expected to be available
+// nginx configuration is skipped because app.httpPort is expected to be available
 // TODO: old image should probably be deleted, but what if it's used by another app instance
 function update(app, callback) {
     var oldManifest = app.manifest; // TODO: this won't be correct all the time should we crash after download manifest
@@ -845,17 +789,8 @@ function uninstall(app, callback) {
 
     // TODO: figure what happens if one of the steps fail
     async.series([
-        // unset naked domain
-        function (callback) {
-            if (config.nakedDomain !== app.id) return callback(null);
-
-            config.set('nakedDomain', null);
-            callback(null);
-        },
-
         updateApp.bind(null, app, { installationProgress: '0, Unconfiguring Nginx' }),
         unconfigureNginx.bind(null, app),
-        unconfigureNakedDomain.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '10, Stopping app' }),
         stopApp.bind(null, app),

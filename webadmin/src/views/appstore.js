@@ -76,7 +76,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
             }
         }
 
-        Client.installApp($scope.appInstall.app.id, $scope.appInstall.app.manifest, $scope.appInstall.app.title, { location: $scope.appInstall.location, portBindings: finalPortBindings, accessRestriction: $scope.appInstall.accessRestriction }, function (error) {
+        Client.installApp($scope.appInstall.app.id, $scope.appInstall.app.manifest, $scope.appInstall.app.title, { location: $scope.appInstall.location || '', portBindings: finalPortBindings, accessRestriction: $scope.appInstall.accessRestriction }, function (error) {
             if (error) {
                 if (error.statusCode === 409 && (error.message.indexOf('is reserved') !== -1 || error.message.indexOf('is already in use') !== -1)) {
                     $scope.appInstall.error.port = error.message;

@@ -274,21 +274,6 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
-    Client.prototype.getNakedDomain = function (callback) {
-        $http.get('/api/v1/settings/naked_domain')
-        .success(function (data, status) {
-            if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));
-            callback(null, data.appid);
-        }).error(defaultErrorHandler(callback));
-    };
-
-    Client.prototype.setNakedDomain = function (appid, callback) {
-        $http.post('/api/v1/settings/naked_domain', { appid: appid }).success(function (data, status) {
-            if (status !== 204) return callback(new ClientError(status));
-            callback(null);
-        }).error(defaultErrorHandler(callback));
-    };
-
     Client.prototype.getApps = function (callback) {
         $http.get('/api/v1/apps').success(function (data, status) {
             if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));

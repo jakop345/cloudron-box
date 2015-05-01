@@ -32,9 +32,6 @@ else
 
     ${BOX_SRC_DIR}/node_modules/.bin/ejs-cli -f "${script_dir}/start/nginx/appconfig.ejs" \
         -O "{ \"vhost\": \"${admin_fqdn}\", \"endpoint\": \"splash\", \"sourceDir\": \"${SETUP_WEBSITE_DIR}\" }" > "${DATA_DIR}/nginx/applications/admin.conf"
-
-    ${BOX_SRC_DIR}/node_modules/.bin/ejs-cli -f "${script_dir}/start/nginx/appconfig.ejs" \
-        -O "{ \"vhost\": \"${arg_fqdn}\", \"endpoint\": \"splash\", \"sourceDir\": \"${SETUP_WEBSITE_DIR}\" }" > "${DATA_DIR}/nginx/naked_domain.conf"
 fi
 
 echo '{ "update": { "percent": "10", "message": "Updating cloudron software" }, "backup": null }' > "${SETUP_WEBSITE_DIR}/progress.json"

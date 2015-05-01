@@ -6,19 +6,10 @@ angular.module('Application').controller('DnsController', ['$scope', '$location'
     $scope.ready = false;
     $scope.user = Client.getUserInfo();
     $scope.config = Client.getConfig();
-    $scope.nakedDomainApp = null;
     $scope.certificateFile = null;
     $scope.certificateFileName = '';
     $scope.keyFile = null;
     $scope.keyFileName = '';
-
-    $scope.setNakedDomain = function () {
-        var appid = $scope.nakedDomainApp ? $scope.nakedDomainApp.id : 'admin';
-
-        Client.setNakedDomain(appid, function (error) {
-            if (error) return console.error('Error setting naked domain', error);
-        });
-    };
 
     $scope.backup = function () {
         $('#backupProgressModal').modal('show');
@@ -87,19 +78,7 @@ angular.module('Application').controller('DnsController', ['$scope', '$location'
             if (error) console.error('Error loading app list');
             $scope.apps = apps;
 
-            Client.getNakedDomain(function (error, appid) {
-                if (error) return console.error(error);
-
-                $scope.nakedDomainApp = null;
-                for (var i = 0; i < $scope.apps.length; i++) {
-                    if ($scope.apps[i].id === appid) {
-                        $scope.nakedDomainApp = $scope.apps[i];
-                        break;
-                    }
-                }
-
-                $scope.ready = true;
-            });
+            $scope.ready = true;
         });
     });
 }]);

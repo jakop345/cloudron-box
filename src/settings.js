@@ -16,9 +16,6 @@ var gEvents = new EventEmitter();
 exports = module.exports = {
     SettingsError: SettingsError,
 
-    getNakedDomain: getNakedDomain,
-    setNakedDomain: setNakedDomain,
-
     getAutoupdatePattern: getAutoupdatePattern,
     setAutoupdatePattern: setAutoupdatePattern,
 
@@ -27,7 +24,6 @@ exports = module.exports = {
 
     getAll: getAll,
 
-    NAKED_DOMAIN_KEY: 'naked_domain',
     AUTOUPDATE_PATTERN_KEY: 'autoupdate_pattern',
     TIME_ZONE_KEY: 'time_zone',
 
@@ -57,40 +53,10 @@ SettingsError.INTERNAL_ERROR = 'Internal Error';
 SettingsError.NOT_FOUND = 'Not Found';
 SettingsError.BAD_FIELD = 'Bad Field';
 
-function getNakedDomain(callback) {
-    assert(typeof callback === 'function');
-
-    settingsdb.get(exports.NAKED_DOMAIN_KEY, function (error, nakedDomain) {
-        if (error) return callback(error);
-
-        callback(null, nakedDomain);
-    });
-}
-
 function getApp(appId, callback) {
     if (appId === constants.ADMIN_APPID) return callback(null, null);
 
     apps.get(appId, callback);
-}
-
-function setNakedDomain(appId, callback) {
-    assert(typeof appId === 'string');
-    assert(typeof callback === 'function');
-
-    var apptask = require('./apptask.js'); // TODO: here to avoid circular dep
-
-    getApp(appId, function (error, app) {
-        if (error && error.reason === AppsError.NOT_FOUND) return callback(new SettingsError(SettingsError.NOT_FOUND));
-
-        async.series([
-            apptask.writeNginxNakedDomainConfig.bind(null, app),
-            settingsdb.set.bind(null, exports.NAKED_DOMAIN_KEY, appId)
-        ], function (error) {
-            if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
-
-            callback(null);
-        });
-    });
 }
 
 function setAutoupdatePattern(pattern, callback) {

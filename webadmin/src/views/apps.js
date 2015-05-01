@@ -111,7 +111,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
             }
         }
 
-        Client.configureApp($scope.appConfigure.app.id, $scope.appConfigure.password, { location: $scope.appConfigure.location, portBindings: finalPortBindings, accessRestriction: $scope.appConfigure.accessRestriction }, function (error) {
+        Client.configureApp($scope.appConfigure.app.id, $scope.appConfigure.password, { location: $scope.appConfigure.location || '', portBindings: finalPortBindings, accessRestriction: $scope.appConfigure.accessRestriction }, function (error) {
             if (error) {
                 if (error.statusCode === 409 && (error.message.indexOf('is reserved') !== -1 || error.message.indexOf('is already in use') !== -1)) {
                     $scope.appConfigure.error.port = error.message;
