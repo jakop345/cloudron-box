@@ -685,7 +685,7 @@ function configure(app, callback) {
         deleteContainer.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '10, Unregistering subdomain' }),
-        unregisterSubdomain.bind(null, app),
+        // unregisterSubdomain.bind(null, app), // TODO: we don't have the old subdomain
 
         updateApp.bind(null, app, { installationProgress: '15, Remove OAuth credentials' }),
         removeOAuthProxyCredentials.bind(null, app),
