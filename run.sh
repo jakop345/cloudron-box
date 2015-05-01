@@ -57,7 +57,7 @@ mysql --user=root --password="" -e "REPLACE INTO clients (id, appId, clientSecre
 # start nginx
 echo "Restarting nginx..."
 
-if [[ `ps -A | grep nginx` ]]; then
+if [[ -z "$(ps -A | grep nginx)" ]]; then
 	sudo killall nginx
 	sleep 1
 fi
