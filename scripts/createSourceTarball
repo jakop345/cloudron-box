@@ -49,8 +49,18 @@ chmod "o+rx,g+rx" "${bundle_dir}" # otherwise extracted tarball director won't b
 echo "Checking out code [${version}] into ${bundle_dir}"
 (cd "${SOURCE_DIR}" && git archive --format=tar ${version} | (cd "${bundle_dir}" && tar xf -))
 
-echo "Installing modules with dev dependencies"
-(cd "${bundle_dir}" && npm install)
+if diff "${TMPDIR}/boxtarball.cache/package.json.all" "${bundle_dir}/package.json" >/dev/null 2>&1; then
+    echo "Reusing dev modules from cache"
+    cp -r "${TMPDIR}/boxtarball.cache/node_modules-all/." "${bundle_dir}/node_modules"
+else
+    echo "Installing modules with dev dependencies"
+    (cd "${bundle_dir}" && npm install)
+
+    echo "Caching dev dependencies"
+    mkdir -p "${TMPDIR}/boxtarball.cache/node_modules-all"
+    cp -r "${bundle_dir}/node_modules/." "${TMPDIR}/boxtarball.cache/node_modules-all/"
+    cp "${bundle_dir}/package.json" "${TMPDIR}/boxtarball.cache/package.json.all"
+fi
 
 echo "Building webadmin assets"
 (cd "${bundle_dir}" && gulp)
@@ -60,8 +70,18 @@ rm -rf "${bundle_dir}/node_modules/"
 rm -rf "${bundle_dir}/webadmin/src"
 rm -rf "${bundle_dir}/gulpfile.js"
 
-echo "Installing node modules for production"
-(cd "${bundle_dir}" && npm install --production)
+if diff "${TMPDIR}/boxtarball.cache/package.json.prod" "${bundle_dir}/package.json" >/dev/null 2>&1; then
+    echo "Reusing prod modules from cache"
+    cp -r "${TMPDIR}/boxtarball.cache/node_modules-prod/." "${bundle_dir}/node_modules"
+else
+    echo "Installing modules for production"
+    (cd "${bundle_dir}" && npm install)
+
+    echo "Caching prod dependencies"
+    mkdir -p "${TMPDIR}/boxtarball.cache/node_modules-prod"
+    cp -r "${bundle_dir}/node_modules" "${TMPDIR}/boxtarball.cache/node_modules-prod"
+    cp "${bundle_dir}/package.json" "${TMPDIR}/boxtarball.cache/package.json.prod"
+fi
 
 echo "Create final tarball"
 (cd "${bundle_dir}" && tar czvf "${bundle_file}" .)
