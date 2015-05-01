@@ -48,7 +48,6 @@ echo "Installing modules with dev dependencies"
 (cd "${bundle_dir}" && npm install)
 
 echo "Building webadmin assets"
-echo "{}" > "${bundle_dir}/webadmin/deploymentConfig.json"
 (cd "${bundle_dir}" && gulp)
 
 echo "Remove intermediate files required at build-time only"

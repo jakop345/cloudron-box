@@ -3,5 +3,4 @@
 .gitignore export-ignore
 /scripts export-ignore
 test export-ignore
-/webadmin/deploymentConfig.json export-ignore
 
