@@ -79,7 +79,7 @@ else
 
     echo "Caching prod dependencies"
     mkdir -p "${TMPDIR}/boxtarball.cache/node_modules-prod"
-    cp -r "${bundle_dir}/node_modules" "${TMPDIR}/boxtarball.cache/node_modules-prod"
+    cp -r "${bundle_dir}/node_modules/." "${TMPDIR}/boxtarball.cache/node_modules-prod"
     cp "${bundle_dir}/package.json" "${TMPDIR}/boxtarball.cache/package.json.prod"
 fi
 
