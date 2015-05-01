@@ -36,6 +36,11 @@ readonly TMPDIR=${TMPDIR:-/tmp} # why is this not set on mint?
 assertNotEmpty AWS_DEV_ACCESS_KEY
 assertNotEmpty AWS_DEV_SECRET_KEY
 
+if ! $(cd "${SOURCE_DIR}" && git diff --exit-code >/dev/null); then
+    echo "You have local changes, stash or commit them to proceed"
+    exit 1
+fi
+
 version=$(cd "${SOURCE_DIR}" && git rev-parse "${commitish}")
 bundle_dir=$(mktemp -d -t box 2>/dev/null || mktemp -d box-XXXXXXXXXX --tmpdir=$TMPDIR)
 bundle_file="${TMPDIR}/box-${version}.tar.gz"
