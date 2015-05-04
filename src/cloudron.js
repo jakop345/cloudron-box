@@ -277,7 +277,18 @@ function backup(callback) {
     apps.getAll(function (error, allApps) {
         if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
-        async.mapSeries(allApps, backupApp, function appsBackedUp(error, backupIds) {
+        async.mapSeries(allApps, function iterator(app, iteratorCallback) {
+            // only backup apps that are installed or pending configure. Rest of them are in some
+            // state not good for consistent backup
+            if ((app.installationState === appdb.ISTATE_INSTALLED && app.health === appdb.HEALTH_HEALTHY)
+                || app.installationState === appdb.ISTATE_PENDING_CONFIGURE) {
+                return backupApp(app, iteratorCallback);
+            }
+
+            debug('Skipping backup of app %s (istate:%s health%s). Reusing %s', app.location, app.installationState, app.health, app.lastBackupId);
+
+            return iteratorCallback(null, app.lastBackupId);
+        }, function appsBackedUp(error, backupIds) {
             if (error) return callback(error);
 
             backupBoxWithAppBackupIds(backupIds, callback);
