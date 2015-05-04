@@ -183,7 +183,8 @@ function loginForm(req, res) {
         appdb.get(appId, function (error, result) {
             if (error) return sendErrorPageOrRedirect(req, res, 'Unknown Application for those OAuth credentials');
 
-            res.render('login', { adminOrigin: config.adminOrigin(), csrf: req.csrfToken(), applicationName: result.location });
+            var applicationName = result.location || config.fqdn();
+            res.render('login', { adminOrigin: config.adminOrigin(), csrf: req.csrfToken(), applicationName: applicationName });
         });
     });
 }
