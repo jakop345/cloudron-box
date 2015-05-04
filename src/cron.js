@@ -41,7 +41,7 @@ function recreateJobs(unusedTimeZone, callback) {
     settings.getAll(function (error, allSettings) {
         if (gHeartbeatJob) gHeartbeatJob.stop();
         gHeartbeatJob = new CronJob({
-            cronTime: '00 * * * * *', // every minute
+            cronTime: '00 */1 * * * *', // every minute
             onTick: cloudron.sendHeartbeat,
             start: true,
             timeZone: allSettings[settings.TIME_ZONE_KEY]
