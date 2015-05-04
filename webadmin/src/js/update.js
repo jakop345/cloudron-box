@@ -4,13 +4,14 @@
 var app = angular.module('Application', []);
 
 app.controller('Controller', ['$scope', '$http', '$interval', function ($scope, $http, $interval) {
+    var apiOrigin = '';
 
     function loadWebadmin() {
         window.location.href = '/';
     }
 
     function fetchProgress() {
-        $http.get('/api/v1/cloudron/progress').success(function(data, status) {
+        $http.get(apiOrigin + '/api/v1/cloudron/progress').success(function(data, status) {
             if (status === 404) return; // just wait until we create the progress.json on the server side
             if (status !== 200 || typeof data !== 'object') return console.error(status, data);
             if (data.update === null) return loadWebadmin();

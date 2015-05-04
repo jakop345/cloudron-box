@@ -17,6 +17,7 @@
             window.location.href = '/';
         }
 
+        var apiOrigin = '';
         var data = {
             grant_type: 'authorization_code',
             code: code,
@@ -25,7 +26,7 @@
             client_secret: 'secret-webadmin'
         };
 
-        $http.post('/api/v1/oauth/token?response_type=token&client_id=' + data.client_id, data)
+        $http.post(apiOrigin + '/api/v1/oauth/token?response_type=token&client_id=' + data.client_id, data)
         .success(function(data, status) {
             if (status !== 200) return console.error('Unable to exchange code for an access token.', status, data);
 
