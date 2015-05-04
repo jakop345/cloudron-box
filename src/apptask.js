@@ -367,8 +367,8 @@ function startContainer(app, callback) {
             PublishAllPorts: false,
             Links: addons.getLinksSync(app),
             RestartPolicy: {
-                "Name": "on-failure",
-                "MaximumRetryCount": 100
+                "Name": "always",
+                "MaximumRetryCount": 0
             }
         };
 
