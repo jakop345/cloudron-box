@@ -84,7 +84,7 @@ else
 fi
 
 echo "Create final tarball"
-(cd "${bundle_dir}" && tar czvf "${bundle_file}" .)
+(cd "${bundle_dir}" && tar czf "${bundle_file}" .)
 
 echo "Uploading bundle to S3"
 # That special header is needed to allow access with singed urls created with different aws credentials than the ones the file got uploaded
