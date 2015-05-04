@@ -180,7 +180,7 @@
                         <br/>
                         <div class="row">
                             <div class="col-xs-12 text-left">
-                                <div style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden">{{ app.location || "App" }}</div>
+                                <div style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden">{{ app.location || app.fqdn }}</div>
                                 <div class="text-muted" style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden">
                                     {{ app | installationStateLabel }}
                                 </div>
