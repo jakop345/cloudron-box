@@ -66,7 +66,7 @@ describe('OAuth Clients API', function () {
             config.set('developerMode', true);
 
             superagent.post(SERVER_URL + '/api/v1/oauth/clients')
-                   .send({ appId: 'someApp', redirectURI: 'http://foobar.com' })
+                   .send({ appId: 'someApp', redirectURI: 'http://foobar.com', scope: 'profile,roleUser' })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
@@ -79,7 +79,7 @@ describe('OAuth Clients API', function () {
 
             superagent.post(SERVER_URL + '/api/v1/oauth/clients')
                    .query({ access_token: token })
-                   .send({ appId: 'someApp', redirectURI: 'http://foobar.com' })
+                   .send({ appId: 'someApp', redirectURI: 'http://foobar.com', scope: 'profile,roleUser' })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(412);
@@ -92,7 +92,7 @@ describe('OAuth Clients API', function () {
 
             superagent.post(SERVER_URL + '/api/v1/oauth/clients')
                    .query({ access_token: token })
-                   .send({ redirectURI: 'http://foobar.com' })
+                   .send({ redirectURI: 'http://foobar.com', scope: 'profile,roleUser' })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
@@ -105,7 +105,33 @@ describe('OAuth Clients API', function () {
 
             superagent.post(SERVER_URL + '/api/v1/oauth/clients')
                    .query({ access_token: token })
-                   .send({ appId: '', redirectURI: 'http://foobar.com' })
+                   .send({ appId: '', redirectURI: 'http://foobar.com', scope: 'profile,roleUser' })
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(400);
+                done();
+            });
+        });
+
+        it('fails without scope', function (done) {
+            config.set('developerMode', true);
+
+            superagent.post(SERVER_URL + '/api/v1/oauth/clients')
+                   .query({ access_token: token })
+                   .send({ appId: 'someApp', redirectURI: 'http://foobar.com' })
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(400);
+                done();
+            });
+        });
+
+        it('fails with empty scope', function (done) {
+            config.set('developerMode', true);
+
+            superagent.post(SERVER_URL + '/api/v1/oauth/clients')
+                   .query({ access_token: token })
+                   .send({ appId: 'someApp', redirectURI: 'http://foobar.com', scope: '' })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
@@ -118,7 +144,7 @@ describe('OAuth Clients API', function () {
 
             superagent.post(SERVER_URL + '/api/v1/oauth/clients')
                    .query({ access_token: token })
-                   .send({ appId: 'someApp' })
+                   .send({ appId: 'someApp', scope: 'profile,roleUser' })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
@@ -131,7 +157,7 @@ describe('OAuth Clients API', function () {
 
             superagent.post(SERVER_URL + '/api/v1/oauth/clients')
                    .query({ access_token: token })
-                   .send({ appId: 'someApp', redirectURI: '' })
+                   .send({ appId: 'someApp', redirectURI: '', scope: 'profile,roleUser' })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
@@ -144,7 +170,7 @@ describe('OAuth Clients API', function () {
 
             superagent.post(SERVER_URL + '/api/v1/oauth/clients')
                    .query({ access_token: token })
-                   .send({ appId: 'someApp', redirectURI: 'foobar' })
+                   .send({ appId: 'someApp', redirectURI: 'foobar', scope: 'profile,roleUser' })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
@@ -157,7 +183,7 @@ describe('OAuth Clients API', function () {
 
             superagent.post(SERVER_URL + '/api/v1/oauth/clients')
                    .query({ access_token: token })
-                   .send({ appId: 'someApp', redirectURI: 'http://foobar.com' })
+                   .send({ appId: 'someApp', redirectURI: 'http://foobar.com', scope: 'profile,roleUser' })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(201);
@@ -175,7 +201,8 @@ describe('OAuth Clients API', function () {
         var CLIENT_0 = {
             id: '',
             appId: 'someAppId-0',
-            redirectURI: 'http://some.callback0'
+            redirectURI: 'http://some.callback0',
+            scope: 'profile,roleUser'
         };
 
         before(function (done) {
@@ -208,7 +235,7 @@ describe('OAuth Clients API', function () {
 
                     superagent.post(SERVER_URL + '/api/v1/oauth/clients')
                            .query({ access_token: token })
-                           .send({ appId: CLIENT_0.appId, redirectURI: CLIENT_0.redirectURI })
+                           .send({ appId: CLIENT_0.appId, redirectURI: CLIENT_0.redirectURI, scope: CLIENT_0.scope })
                            .end(function (error, result) {
                         expect(error).to.not.be.ok();
                         expect(result.statusCode).to.equal(201);
@@ -276,12 +303,14 @@ describe('OAuth Clients API', function () {
         var CLIENT_0 = {
             id: '',
             appId: 'someAppId-0',
-            redirectURI: 'http://some.callback0'
+            redirectURI: 'http://some.callback0',
+            scope: 'profile,roleUser'
         };
         var CLIENT_1 = {
             id: '',
             appId: 'someAppId-1',
-            redirectURI: 'http://some.callback1'
+            redirectURI: 'http://some.callback1',
+            scope: 'profile,roleUser'
         };
 
         before(function (done) {
@@ -315,7 +344,7 @@ describe('OAuth Clients API', function () {
 
                     superagent.post(SERVER_URL + '/api/v1/oauth/clients')
                            .query({ access_token: token })
-                           .send({ appId: CLIENT_0.appId, redirectURI: CLIENT_0.redirectURI })
+                           .send({ appId: CLIENT_0.appId, redirectURI: CLIENT_0.redirectURI, scope: CLIENT_0.scope })
                            .end(function (error, result) {
                         expect(error).to.not.be.ok();
                         expect(result.statusCode).to.equal(201);
@@ -448,7 +477,8 @@ describe('OAuth Clients API', function () {
         var CLIENT_0 = {
             id: '',
             appId: 'someAppId-0',
-            redirectURI: 'http://some.callback0'
+            redirectURI: 'http://some.callback0',
+            scope: 'profile,roleUser'
         };
 
         before(function (done) {
@@ -481,7 +511,7 @@ describe('OAuth Clients API', function () {
 
                     superagent.post(SERVER_URL + '/api/v1/oauth/clients')
                            .query({ access_token: token })
-                           .send({ appId: CLIENT_0.appId, redirectURI: CLIENT_0.redirectURI })
+                           .send({ appId: CLIENT_0.appId, redirectURI: CLIENT_0.redirectURI, scope: CLIENT_0.scope })
                            .end(function (error, result) {
                         expect(error).to.not.be.ok();
                         expect(result.statusCode).to.equal(201);
