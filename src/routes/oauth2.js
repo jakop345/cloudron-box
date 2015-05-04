@@ -468,7 +468,6 @@ exports = module.exports = {
     authorization: authorization,
     decision: decision,
     token: token,
-    library: library,
     scope: scope,
     csrf: csrf
 };
