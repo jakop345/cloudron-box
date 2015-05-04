@@ -66,7 +66,7 @@ gServer.deserializeClient(function (id, callback) {
 gServer.grant(oauth2orize.grant.code({ scopeSeparator: ',' }, function (client, redirectURI, user, ares, callback) {
     debug('grant code:', client, redirectURI, user.id, ares);
 
-    var code = hat();
+    var code = hat(256);
     var expiresAt = Date.now() + 60 * 60000; // 1 hour
     var scopes = client.scope ? client.scope.split(',') : ['profile','roleUser'];
 

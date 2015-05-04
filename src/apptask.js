@@ -279,7 +279,7 @@ function allocateOAuthProxyCredentials(app, callback) {
 
     var appId = 'proxy-' + app.id;
     var id = 'cid-proxy-' + uuid.v4();
-    var clientSecret = hat();
+    var clientSecret = hat(256);
     var redirectURI = 'https://' + config.appFqdn(app.location);
     var scope = 'profile,' + app.accessRestriction;
 

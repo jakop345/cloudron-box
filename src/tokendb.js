@@ -32,7 +32,7 @@ exports = module.exports = {
 var TOKENS_FIELDS = [ 'accessToken', 'identifier', 'clientId', 'scope', 'expires' ].join(',');
 
 function generateToken() {
-    return hat();
+    return hat(265);
 }
 
 function get(accessToken, callback) {

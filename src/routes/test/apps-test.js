@@ -553,7 +553,7 @@ describe('App installation', function () {
             clientdb.getByAppId('addon-' + appInfo.id, function (error, client) {
                 expect(error).to.not.be.ok();
                 expect(client.id.length).to.be(46); // cid-addon- + 32 hex chars (128 bits) + 4 hyphens
-                expect(client.clientSecret.length).to.be(32); // 32 hex chars (128 bits)
+                expect(client.clientSecret.length).to.be(64); // 32 hex chars (256 bits)
                 expect(data.Config.Env).to.contain('OAUTH_CLIENT_ID=' + client.id);
                 expect(data.Config.Env).to.contain('OAUTH_CLIENT_SECRET=' + client.clientSecret);
                 done();

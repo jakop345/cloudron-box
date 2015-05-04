@@ -141,7 +141,7 @@ function createUser(username, password, email, admin, callback) {
                 salt: salt.toString('hex'),
                 createdAt: now,
                 modifiedAt: now,
-                resetToken: hat()
+                resetToken: hat(256)
             };
 
             userdb.add(user.id, user, function (error) {
@@ -299,7 +299,7 @@ function resetPasswordByIdentifier(identifier, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-        result.resetToken = hat();
+        result.resetToken = hat(256);
 
         userdb.update(result.id, result, function (error) {
             if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));

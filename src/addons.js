@@ -230,7 +230,7 @@ function allocateOAuthCredentials(app, callback) {
 
     var appId = app.id;
     var id = 'cid-addon-' + uuid.v4();
-    var clientSecret = hat();
+    var clientSecret = hat(256);
     var redirectURI = 'https://' + config.appFqdn(app.location);
     var scope = 'profile,roleUser';
 
