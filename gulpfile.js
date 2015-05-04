@@ -7,6 +7,7 @@ var ejs = require('gulp-ejs'),
     del = require('del'),
     concat = require('gulp-concat'),
     uglify = require('gulp-uglify'),
+    serve = require('gulp-serve'),
     sass = require('gulp-sass'),
     sourcemaps = require('gulp-sourcemaps'),
     minifyCSS = require('gulp-minify-css'),
@@ -127,7 +128,7 @@ gulp.task('images', function () {
 // Utilities
 // --------------
 
-gulp.task('develop', ['default'], function () {
+gulp.task('watch', ['default'], function () {
     gulp.watch(['webadmin/src/theme.scss'], ['css']);
     gulp.watch(['webadmin/src/img/*'], ['images']);
     gulp.watch(['webadmin/src/**/*.html'], ['html']);
@@ -147,3 +148,5 @@ gulp.task('clean', function (callback) {
 gulp.task('default', ['clean'], function () {
     gulp.start('html', 'js', '3rdparty', 'css', 'images');
 });
+
+gulp.task('develop', ['watch'], serve({ root: 'webadmin/dist', port: 4000 }));
