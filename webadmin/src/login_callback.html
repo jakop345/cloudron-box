@@ -2,49 +2,24 @@
 <head>
     <title> Cloudron OAuth Callback </title>
 
-    <script src="3rdparty/js/angular.min.js"></script>
-
     <script>
 
     'use strict';
 
-    var app = angular.module('Application', []);
-    app.controller('MainController', ['$scope', '$http', function ($scope, $http) {
-        var code = window.location.search.slice('?code='.length);
+    var search = decodeURIComponent(window.location.search).slice(1).split('&').map(function (item) { return item.split('='); }).reduce(function (o, k) { o[k[0]] = k[1]; return o; }, {});
 
-        if (!code) {
-            console.error('No code found.');
-            window.location.href = '/';
-        }
+    if (!search.token) {
+        console.error('No token found');
+    } else {
+        // the actual app picks up the access token from localStorage
+        localStorage.token = search.token;
 
-        var apiOrigin = '';
-        var data = {
-            grant_type: 'authorization_code',
-            code: code,
-            redirect_uri: window.location.origin,
-            client_id: 'cid-webadmin',
-            client_secret: 'secret-webadmin'
-        };
-
-        $http.post(apiOrigin + '/api/v1/oauth/token?response_type=token&client_id=' + data.client_id, data)
-        .success(function(data, status) {
-            if (status !== 200) return console.error('Unable to exchange code for an access token.', status, data);
-
-            // the actual app picks up the access token from localStorage
-            localStorage.token = data.access_token;
-
-            window.location.href = '/';
-        })
-        .error(function(data, status) {
-            console.error('Unable to exchange code for an access token.', status, data);
-        });
-    }]);
+        window.location.href = '/';
+    }
 
     </script>
 
 </head>
-
-<body ng-app="Application" ng-controller="MainController">
-
+<body>
 </body>
 </html>
