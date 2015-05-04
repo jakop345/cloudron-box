@@ -407,17 +407,6 @@ var token = [
 
 /*
 
-  Route so serve up the OAuth client side helper library
-
-*/
-function library(req, res) {
-    res.setHeader('Content-Type', 'application/javascript');
-    res.render('cloudron', { adminOrigin: config.adminOrigin() });
-}
-
-
-/*
-
   The scope middleware provides an auth middleware for routes.
 
   It is used for API routes, which are authenticated using accesstokens.
