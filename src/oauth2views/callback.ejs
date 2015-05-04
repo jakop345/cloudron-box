@@ -30,15 +30,7 @@ args.forEach(function (arg) {
 });
 
 if (code && redirectURI) {
-    // TODO for now we only support redirection
     window.location.href = redirectURI + '?code=' + code;
-
-    // if (!window.opener) {
-    //     window.location.href = redirectURI + '?code=' + code;
-    // } else {
-    //     window.opener.postMessage(JSON.stringify({ code: code}), redirectURI);
-    //     window.close();
-    // }
 } else if (redirectURI && accessToken) {
     window.location.href = redirectURI + '?token=' + accessToken;
 } else {
