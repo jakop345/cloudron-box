@@ -54,11 +54,6 @@ gServer.deserializeClient(function (id, callback) {
 });
 
 // Register supported grant types.
-//
-// OAuth 2.0 specifies a framework that allows users to grant client
-// applications limited access to their protected resources.  It does this
-// through a process of the user granting access, and the client exchanging
-// the grant for an access token.
 
 // Grant authorization codes.  The callback takes the `client` requesting
 // authorization, the `redirectURI` (which is used as a verifier in the
@@ -85,6 +80,23 @@ gServer.grant(oauth2orize.grant.code({ scopeSeparator: ',' }, function (client, 
         callback(null, code);
     });
 }));
+
+
+gServer.grant(oauth2orize.grant.token({ scopeSeparator: ',' }, function (client, user, ares, callback) {
+    debug('grant token:', client.id, user.id, ares);
+
+    var token = tokendb.generateToken();
+    var expires = Date.now() + 24 * 60 * 60 * 1000; // 1 day
+
+    tokendb.add(token, tokendb.PREFIX_USER + user.id, client.id, expires, client.scope, function (error) {
+        if (error) return callback(error);
+
+        debug('new access token for client ' + client.id + ' token ' + token);
+
+        callback(null, token);
+    });
+}));
+
 
 // Exchange authorization codes for access tokens.  The callback accepts the
 // `client`, which is exchanging `code` and any `redirectURI` from the
