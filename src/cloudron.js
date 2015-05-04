@@ -19,7 +19,6 @@ exports = module.exports = {
 
     restoreApp: restoreApp,
 
-    getBackupUrl: getBackupUrl,
     setCertificate: setCertificate,
 
     sendHeartbeat: sendHeartbeat,
