@@ -1,6 +1,7 @@
 'use strict';
 
 var assert = require('assert'),
+    util = require('util'),
     hat = require('hat'),
     appdb = require('./appdb.js'),
     tokendb = require('./tokendb.js'),
@@ -11,6 +12,8 @@ var assert = require('assert'),
     uuid = require('node-uuid');
 
 exports = module.exports = {
+    ClientsError: ClientsError,
+
     add: add,
     get: get,
     update: update,
@@ -20,11 +23,46 @@ exports = module.exports = {
     delClientTokensByUserId: delClientTokensByUserId
 };
 
+function ClientsError(reason, errorOrMessage) {
+    assert(typeof reason === 'string');
+    assert(errorOrMessage instanceof Error || typeof errorOrMessage === 'string' || typeof errorOrMessage === 'undefined');
+
+    Error.call(this);
+    Error.captureStackTrace(this, this.constructor);
+
+    this.name = this.constructor.name;
+    this.reason = reason;
+    if (typeof errorOrMessage === 'undefined') {
+        this.message = reason;
+    } else if (typeof errorOrMessage === 'string') {
+        this.message = errorOrMessage;
+    } else {
+        this.message = 'Internal error';
+        this.nestedError = errorOrMessage;
+    }
+}
+util.inherits(ClientsError, Error);
+ClientsError.INVALID_SCOPE = 'Invalid scope';
+
+function validateScope(scope) {
+    assert(typeof scope === 'string');
+
+    if (scope === '') return new ClientsError(ClientsError.INVALID_SCOPE);
+    if (scope === '*') return null;
+
+    // TODO maybe validate all individual scopes if they exist
+
+    return null;
+}
+
 function add(appIdentifier, redirectURI, scope, callback) {
     assert(typeof appIdentifier === 'string');
     assert(typeof redirectURI === 'string');
     assert(typeof scope === 'string');
     assert(typeof callback === 'function');
+
+    var error = validateScope(scope);
+    if (error) return callback(error);
 
     var id = 'cid-' + uuid.v4();
     var clientSecret = hat();

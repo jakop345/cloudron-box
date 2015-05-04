@@ -5,6 +5,7 @@
 var assert = require('assert'),
     validUrl = require('valid-url'),
     clients = require('../clients.js'),
+    ClientsError = clients.ClientsError,
     DatabaseError = require('../databaseerror.js'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess;
@@ -25,12 +26,14 @@ function add(req, res, next) {
     if (!data) return next(new HttpError(400, 'Cannot parse data field'));
     if (typeof data.appId !== 'string' || !data.appId) return next(new HttpError(400, 'appId is required'));
     if (typeof data.redirectURI !== 'string' || !data.redirectURI) return next(new HttpError(400, 'redirectURI is required'));
+    if (typeof data.scope !== 'string' || !data.scope) return next(new HttpError(400, 'scope is required'));
     if (!validUrl.isWebUri(data.redirectURI)) return next(new HttpError(400, 'redirectURI must be a valid uri'));
 
     // prefix as this route only allows external apps for developers
     var appId = 'external-' + data.appId;
 
-    clients.add(appId, data.redirectURI, 'profile,users', function (error, result) {
+    clients.add(appId, data.redirectURI, data.scope, function (error, result) {
+        if (error && error.reason === ClientsError.INVALID_SCOPE) return next(new HttpError(400, 'Invalid scope'));
         if (error) return next(new HttpError(500, error));
         next(new HttpSuccess(201, result));
     });
