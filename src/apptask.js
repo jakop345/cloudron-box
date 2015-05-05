@@ -645,7 +645,7 @@ function restore(app, callback) {
         updateApp.bind(null, app, { installationProgress: '60, Restoring app and addons' }),
         cloudron.restoreApp.bind(null, app),
 
-        // create container (old containers are deleted by update script)
+        // recreate container
         updateApp.bind(null, app, { installationProgress: '70, Creating container' }),
         deleteContainer.bind(null, app),
         createContainer.bind(null, app),
