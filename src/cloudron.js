@@ -29,6 +29,7 @@ exports = module.exports = {
 };
 
 var addons = require('./addons.js'),
+    appdb = require('./appdb.js'),
     apps = require('./apps.js'),
     assert = require('assert'),
     async = require('async'),
