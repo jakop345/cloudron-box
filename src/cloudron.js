@@ -209,7 +209,7 @@ function getRestoreUrl(backupId, callback) {
 function restoreApp(app, callback) {
     if (!app.lastBackupId) {
         debugApp(app, 'No existing backup to return to.');
-        return callback(null);
+        return addons.setupAddons(app, callback);
     }
 
    getRestoreUrl(app.lastBackupId, function (error, result) {
