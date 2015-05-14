@@ -211,7 +211,7 @@ function restoreApp(app, callback) {
         debug('restoreApp: %s (%s) app url:%s', app.id, app.manifest.title, result.url);
 
         shell.sudo('restoreApp', [ RESTORE_APP_CMD,  app.id, result.url, result.backupKey ], function (error) {
-            if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, 'Error backing up: ' + error));
+            if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, 'Error restoring: ' + error));
 
             addons.restoreAddons(app, callback);
         });
