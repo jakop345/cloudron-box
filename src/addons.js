@@ -11,6 +11,7 @@ var appdb = require('./appdb.js'),
     docker = require('./docker.js'),
     fs = require('fs'),
     generatePassword = require('password-generator'),
+    hat = require('hat'),
     MemoryStream = require('memorystream'),
     once = require('once'),
     os = require('os'),
@@ -19,8 +20,8 @@ var appdb = require('./appdb.js'),
     safe = require('safetydance'),
     shell = require('./shell.js'),
     spawn = child_process.spawn,
+    util = require('util'),
     uuid = require('node-uuid'),
-    hat = require('hat'),
     vbox = require('./vbox.js'),
     _ = require('underscore');
 
@@ -91,6 +92,13 @@ var KNOWN_ADDONS = {
 
 var RMAPPDIR_CMD = path.join(__dirname, 'scripts/rmappdir.sh');
 
+function debugApp(app, args) {
+    assert(!app || typeof app === 'object');
+
+    var prefix = app ? app.location : '(no app)';
+    debug(prefix + ' ' + util.format.apply(util, Array.prototype.slice.call(arguments, 1)));
+}
+
 function setupAddons(app, callback) {
     assert(typeof app === 'object');
     assert(!app.manifest.addons || typeof app.manifest.addons === 'object');
@@ -101,7 +109,7 @@ function setupAddons(app, callback) {
     async.eachSeries(Object.keys(app.manifest.addons), function iterator(addon, iteratorCallback) {
         if (!(addon in KNOWN_ADDONS)) return iteratorCallback(new Error('No such addon:' + addon));
 
-        debug('Setting up addon %s of appId:%s', addon, app.id);
+        debugApp(app, 'Setting up addon %s', addon);
 
         KNOWN_ADDONS[addon].setup(app, iteratorCallback);
     }, callback);
@@ -120,7 +128,7 @@ function teardownAddons(app, callback) {
     async.eachSeries(Object.keys(app.manifest.addons), function iterator(addon, iteratorCallback) {
         if (!(addon in KNOWN_ADDONS)) return iteratorCallback(new Error('No such addon:' + addon));
 
-        debug('Tearing down addon %s of appId:%s', addon, app.id);
+        debugApp(app, 'Tearing down addon %s', addon);
 
         KNOWN_ADDONS[addon].teardown(app, iteratorCallback);
     }, callback);
@@ -150,7 +158,7 @@ function backupAddons(app, callback) {
     assert(!app.manifest.addons || typeof app.manifest.addons === 'object');
     assert(typeof callback === 'function');
 
-    debug('backupAddons: %s (%s)', app.id, app.manifest.title);
+    debugApp(app, 'backupAddons');
 
     if (!app.manifest.addons) return callback(null);
 
@@ -166,7 +174,7 @@ function restoreAddons(app, callback) {
     assert(!app.manifest.addons || typeof app.manifest.addons === 'object');
     assert(typeof callback === 'function');
 
-    debug('restoreAddons: %s (%s)', app.id, app.manifest.title);
+    debugApp(app, 'restoreAddons');
 
     if (!app.manifest.addons) return callback(null);
 
@@ -234,7 +242,7 @@ function allocateOAuthCredentials(app, callback) {
     var redirectURI = 'https://' + config.appFqdn(app.location);
     var scope = 'profile,roleUser';
 
-    debug('allocateOAuthCredentials: id:%s clientSecret:%s', id, clientSecret);
+    debugApp(app, 'allocateOAuthCredentials: id:%s clientSecret:%s', id, clientSecret);
 
     clientdb.delByAppId('addon-' + appId, function (error) { // remove existing creds
         if (error && error.reason !== DatabaseError.NOT_FOUND) return callback(error);
@@ -247,7 +255,7 @@ function allocateOAuthCredentials(app, callback) {
                 'OAUTH_CLIENT_SECRET=' + clientSecret
             ];
 
-            debug('Setting oauth addon config of %s to to %j', appId, env);
+            debugApp(app, 'Setting oauth addon config to %j', env);
 
             appdb.setAddonConfig(appId, 'oauth', env, callback);
         });
@@ -258,7 +266,7 @@ function removeOAuthCredentials(app, callback) {
     assert(typeof app === 'object');
     assert(typeof callback === 'function');
 
-    debug('removeOAuthCredentials: %s', app.id);
+    debugApp(app, 'removeOAuthCredentials');
 
     clientdb.delByAppId('addon-' + app.id, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null);
@@ -279,7 +287,7 @@ function setupSendMail(app, callback) {
         'MAIL_DOMAIN=' + config.fqdn()
     ];
 
-    debug('Setting up sendmail for %s', app.id);
+    debugApp(app, 'Setting up sendmail');
 
     appdb.setAddonConfig(app.id, 'sendmail', env, callback);
 }
@@ -288,7 +296,7 @@ function teardownSendMail(app, callback) {
     assert(typeof app === 'object');
     assert(typeof callback === 'function');
 
-    debug('Tearing down sendmail for %s', app.id);
+    debugApp(app, 'Tearing down sendmail');
 
     appdb.unsetAddonConfig(app.id, 'sendmail', callback);
 }
@@ -297,7 +305,7 @@ function setupMySql(app, callback) {
     assert(typeof app === 'object');
     assert(typeof callback === 'function');
 
-    debug('Setting up mysql for %s', app.id);
+    debugApp(app, 'Setting up mysql');
 
     var container = docker.getContainer('mysql');
     var cmd = [ '/addons/mysql/service.sh', 'add', app.id ];
@@ -312,7 +320,7 @@ function setupMySql(app, callback) {
             var stderr = new MemoryStream();
 
             execContainer.modem.demuxStream(stream, stdout, stderr);
-            stderr.on('data', function (data) { debug(data.toString('utf8')); }); // set -e output
+            stderr.on('data', function (data) { debugApp(app, data.toString('utf8')); }); // set -e output
 
             var chunks = [ ];
             stdout.on('data', function (chunk) { chunks.push(chunk); });
@@ -320,7 +328,7 @@ function setupMySql(app, callback) {
             stream.on('error', callback);
             stream.on('end', function () {
                 var env = Buffer.concat(chunks).toString('utf8').split('\n').slice(0, -1); // remove trailing newline
-                debug('Setting mysql addon config of %s to %j', app.id, env);
+                debugApp(app, 'Setting mysql addon config to %j', env);
                 appdb.setAddonConfig(app.id, 'mysql', env, callback);
             });
         });
@@ -331,7 +339,7 @@ function teardownMySql(app, callback) {
     var container = docker.getContainer('mysql');
     var cmd = [ '/addons/mysql/service.sh', 'remove', app.id ];
 
-    debug('Tearing down mysql for %s', app.id);
+    debugApp(app, 'Tearing down mysql');
 
     container.exec({ Cmd: cmd, AttachStdout: true, AttachStderr: true }, function (error, execContainer) {
         if (error) return callback(error);
@@ -350,7 +358,7 @@ function teardownMySql(app, callback) {
 }
 
 function backupMySql(app, callback) {
-    debug('Backin up mysql for %s', app.id);
+    debugApp(app, 'Backing up mysql');
 
     callback = once(callback); // ChildProcess exit may or may not be called after error
 
@@ -360,7 +368,7 @@ function backupMySql(app, callback) {
     var cp = spawn('/usr/bin/docker', [ 'exec', 'mysql', '/addons/mysql/service.sh', 'backup', app.id ]);
     cp.on('error', callback);
     cp.on('exit', function (code, signal) {
-        debug('backupMySql: done. code:%s signal:%s', code, signal);
+        debugApp(app, 'backupMySql: done. code:%s signal:%s', code, signal);
         if (!callback.called) callback(code ? 'backupMySql failed with status ' + code : null);
     });
 
@@ -374,7 +382,7 @@ function restoreMySql(app, callback) {
     setupMySql(app, function (error) {
         if (error) return callback(error);
 
-        debug('restoreMySql: %s (%s)', app.id, app.manifest.title);
+        debugApp(app, 'restoreMySql');
 
         var input = fs.createReadStream(path.join(paths.DATA_DIR, app.id, 'mysqldump'));
         input.on('error', callback);
@@ -383,7 +391,7 @@ function restoreMySql(app, callback) {
         var cp = spawn('/usr/bin/docker', [ 'exec', '-i', 'mysql', '/addons/mysql/service.sh', 'restore', app.id ]);
         cp.on('error', callback);
         cp.on('exit', function (code, signal) {
-            debug('restoreMySql: done %s %s', code, signal);
+            debugApp(app, 'restoreMySql: done %s %s', code, signal);
             if (!callback.called) callback(code ? 'restoreMySql failed with status ' + code : null);
         });
 
@@ -397,7 +405,7 @@ function setupPostgreSql(app, callback) {
     assert(typeof app === 'object');
     assert(typeof callback === 'function');
 
-    debug('Setting up postgresql for %s', app.id);
+    debugApp(app, 'Setting up postgresql');
 
     var container = docker.getContainer('postgresql');
     var cmd = [ '/addons/postgresql/service.sh', 'add', app.id ];
@@ -412,7 +420,7 @@ function setupPostgreSql(app, callback) {
             var stderr = new MemoryStream();
 
             execContainer.modem.demuxStream(stream, stdout, stderr);
-            stderr.on('data', function (data) { debug(data.toString('utf8')); }); // set -e output
+            stderr.on('data', function (data) { debugApp(app, data.toString('utf8')); }); // set -e output
 
             var chunks = [ ];
             stdout.on('data', function (chunk) { chunks.push(chunk); });
@@ -420,7 +428,7 @@ function setupPostgreSql(app, callback) {
             stream.on('error', callback);
             stream.on('end', function () {
                 var env = Buffer.concat(chunks).toString('utf8').split('\n').slice(0, -1); // remove trailing newline
-                debug('Setting postgresql addon config of %s to %j', app.id, env);
+                debugApp(app, 'Setting postgresql addon config to %j', env);
                 appdb.setAddonConfig(app.id, 'postgresql', env, callback);
             });
         });
@@ -431,7 +439,7 @@ function teardownPostgreSql(app, callback) {
     var container = docker.getContainer('postgresql');
     var cmd = [ '/addons/postgresql/service.sh', 'remove', app.id ];
 
-    debug('Tearing down postgresql for %s', app.id);
+    debugApp(app, 'Tearing down postgresql');
 
     container.exec({ Cmd: cmd, AttachStdout: true, AttachStderr: true }, function (error, execContainer) {
         if (error) return callback(error);
@@ -450,7 +458,7 @@ function teardownPostgreSql(app, callback) {
 }
 
 function backupPostgreSql(app, callback) {
-    debug('Backin up postgresql for %s', app.id);
+    debugApp(app, 'Backing up postgresql');
 
     callback = once(callback); // ChildProcess exit may or may not be called after error
 
@@ -460,7 +468,7 @@ function backupPostgreSql(app, callback) {
     var cp = spawn('/usr/bin/docker', [ 'exec', 'postgresql', '/addons/postgresql/service.sh', 'backup', app.id ]);
     cp.on('error', callback);
     cp.on('exit', function (code, signal) {
-        debug('backupPostgreSql: done %s %s', code, signal);
+        debugApp(app, 'backupPostgreSql: done %s %s', code, signal);
         if (!callback.called) callback(code ? 'backupPostgreSql failed with status ' + code : null);
     });
 
@@ -474,7 +482,7 @@ function restorePostgreSql(app, callback) {
     setupPostgreSql(app, function (error) {
         if (error) return callback(error);
 
-        debug('restorePostgreSql: %s (%s)', app.id, app.manifest.title);
+        debugApp(app, 'restorePostgreSql');
 
         var input = fs.createReadStream(path.join(paths.DATA_DIR, app.id, 'postgresqldump'));
         input.on('error', callback);
@@ -483,7 +491,7 @@ function restorePostgreSql(app, callback) {
         var cp = spawn('/usr/bin/docker', [ 'exec', '-i', 'postgresql', '/addons/postgresql/service.sh', 'restore', app.id ]);
         cp.on('error', callback);
         cp.on('exit', function (code, signal) {
-            debug('restorePostgreSql: done %s %s', code, signal);
+            debugApp(app, 'restorePostgreSql: done %s %s', code, signal);
             if (!callback.called) callback(code ? 'restorePostgreSql failed with status ' + code : null);
         });
 
@@ -497,7 +505,7 @@ function setupMongoDb(app, callback) {
     assert(typeof app === 'object');
     assert(typeof callback === 'function');
 
-    debug('Setting up mongodb for %s', app.id);
+    debugApp(app, 'Setting up mongodb');
 
     var container = docker.getContainer('mongodb');
     var cmd = [ '/addons/mongodb/service.sh', 'add', app.id ];
@@ -512,7 +520,7 @@ function setupMongoDb(app, callback) {
             var stderr = new MemoryStream();
 
             execContainer.modem.demuxStream(stream, stdout, stderr);
-            stderr.on('data', function (data) { debug(data.toString('utf8')); }); // set -e output
+            stderr.on('data', function (data) { debugApp(app, data.toString('utf8')); }); // set -e output
 
             var chunks = [ ];
             stdout.on('data', function (chunk) { chunks.push(chunk); });
@@ -520,7 +528,7 @@ function setupMongoDb(app, callback) {
             stream.on('error', callback);
             stream.on('end', function () {
                 var env = Buffer.concat(chunks).toString('utf8').split('\n').slice(0, -1); // remove trailing newline
-                debug('Setting mongodb addon config of %s to %j', app.id, env);
+                debugApp(app, 'Setting mongodb addon config to %j', env);
                 appdb.setAddonConfig(app.id, 'mongodb', env, callback);
             });
         });
@@ -531,7 +539,7 @@ function teardownMongoDb(app, callback) {
     var container = docker.getContainer('mongodb');
     var cmd = [ '/addons/mongodb/service.sh', 'remove', app.id ];
 
-    debug('Tearing down mongodb for %s', app.id);
+    debugApp(app, 'Tearing down mongodb');
 
     container.exec({ Cmd: cmd, AttachStdout: true, AttachStderr: true }, function (error, execContainer) {
         if (error) return callback(error);
@@ -550,7 +558,7 @@ function teardownMongoDb(app, callback) {
 }
 
 function backupMongoDb(app, callback) {
-    debug('Backin up mongodb for %s', app.id);
+    debugApp(app, 'Backing up mongodb');
 
     callback = once(callback); // ChildProcess exit may or may not be called after error
 
@@ -560,7 +568,7 @@ function backupMongoDb(app, callback) {
     var cp = spawn('/usr/bin/docker', [ 'exec', 'mongodb', '/addons/mongodb/service.sh', 'backup', app.id ]);
     cp.on('error', callback);
     cp.on('exit', function (code, signal) {
-        debug('backupMongoDb: done %s %s', code, signal);
+        debugApp(app, 'backupMongoDb: done %s %s', code, signal);
         if (!callback.called) callback(code ? 'backupMongoDb failed with status ' + code : null);
     });
 
@@ -574,7 +582,7 @@ function restoreMongoDb(app, callback) {
     setupMongoDb(app, function (error) {
         if (error) return callback(error);
 
-        debug('restoreMongoDb: %s (%s)', app.id, app.manifest.title);
+        debugApp(app, 'restoreMongoDb');
 
         var input = fs.createReadStream(path.join(paths.DATA_DIR, app.id, 'mongodbdump'));
         input.on('error', callback);
@@ -583,7 +591,7 @@ function restoreMongoDb(app, callback) {
         var cp = spawn('/usr/bin/docker', [ 'exec', '-i', 'mongodb', '/addons/mongodb/service.sh', 'restore', app.id ]);
         cp.on('error', callback);
         cp.on('exit', function (code, signal) {
-            debug('restoreMongoDb: done %s %s', code, signal);
+            debugApp(app, 'restoreMongoDb: done %s %s', code, signal);
             if (!callback.called) callback(code ? 'restoreMongoDb failed with status ' + code : null);
         });
 
