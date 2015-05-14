@@ -906,7 +906,9 @@ if (require.main === module) {
 
         startTask(process.argv[2], function (error) {
             debug('Apptask completed for %s %s', process.argv[2], error);
-            process.exit(error ? 1 : 0);
+            // https://nodejs.org/api/process.html are exit codes used by node. apps.js uses the value below
+            // to check apptask crashes
+            process.exit(error ? 50 : 0);
         });
     });
 }

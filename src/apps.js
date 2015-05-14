@@ -57,6 +57,8 @@ var appdb = require('./appdb.js'),
 
 var gTasks = { };
 
+var NOOP_CALLBACK = function (error) { console.error(error); };
+
 function initialize(callback) {
     assert(typeof callback === 'function');
 
@@ -77,6 +79,9 @@ function startTask(appId, maxDelay) {
         gTasks[appId] = child_process.fork(__dirname + '/apptask.js', [ appId ]);
         gTasks[appId].once('exit', function (code) {
             debug('Task completed with %s.', code, appId);
+            if (code && code !== 50) { // apptask crashed
+                appdb.update(appId, { installationState: appdb.ISTATE_ERROR, installationProgress: 'Apptask crashed with code ' + code }, NOOP_CALLBACK);
+            }
             delete gTasks[appId];
         });
     }, Math.floor(Math.random() * maxDelay));
