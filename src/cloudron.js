@@ -86,6 +86,13 @@ CloudronError.BAD_USERNAME = 'Bad username';
 CloudronError.BAD_EMAIL = 'Bad email';
 CloudronError.BAD_PASSWORD = 'Bad password';
 
+function debugApp(app, args) {
+    assert(!app || typeof app === 'object');
+
+    var prefix = app ? app.location : '(no app)';
+    debug(prefix + ' ' + util.format.apply(util, Array.prototype.slice.call(arguments, 1)));
+}
+
 function initialize(callback) {
     assert(typeof callback === 'function');
 
@@ -201,14 +208,14 @@ function getRestoreUrl(backupId, callback) {
 
 function restoreApp(app, callback) {
     if (!app.lastBackupId) {
-        debug('No existing backup to return to. Skipping %d', app.id);
+        debugApp(app, 'No existing backup to return to.');
         return callback(null);
     }
 
    getRestoreUrl(app.lastBackupId, function (error, result) {
         if (error) return callback(error);
 
-        debug('restoreApp: %s (%s) app url:%s', app.id, app.manifest.title, result.url);
+        debugApp(app, 'restoreApp: restoreUrl:%s', result.url);
 
         shell.sudo('restoreApp', [ RESTORE_APP_CMD,  app.id, result.url, result.backupKey ], function (error) {
             if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, 'Error restoring: ' + error));
@@ -229,12 +236,12 @@ function backupApp(app, callback) {
         getBackupUrl(app.id, null, function (error, result) {
             if (error) return callback(error);
 
-            debug('backupApp: %s (%s) app url:%s id:%s', app.id, app.manifest.title, result.url, result.id);
+            debugApp(app, 'backupApp: backup url:%s backup id:%s', result.url, result.id);
 
             shell.sudo('backupApp', [ BACKUP_APP_CMD,  app.id, result.url, result.backupKey ], function (error) {
                 if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, 'Error backing up: ' + error));
 
-                debug('backupApp: %s (%s) successful', app.id, app.manifest.title);
+                debugApp(app, 'backupApp: successful');
 
                 apps.setLastBackupId(app.id, result.id, callback.bind(null, null, result.id));
             });
@@ -284,7 +291,7 @@ function backup(callback) {
                 return backupApp(app, iteratorCallback);
             }
 
-            debug('Skipping backup of app %s (istate:%s health%s). Reusing %s', app.location, app.installationState, app.health, app.lastBackupId);
+            debugApp(app, 'Skipping backup (istate:%s health%s). Reusing %s', app.installationState, app.health, app.lastBackupId);
 
             return iteratorCallback(null, app.lastBackupId);
         }, function appsBackedUp(error, backupIds) {
