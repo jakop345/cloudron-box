@@ -50,8 +50,8 @@ if ! docker inspect girish/postgresql:0.2.0 >/dev/null 2>/dev/null; then
     exit 1
 fi
 
-if ! docker inspect girish/mongodb:0.2.0 >/dev/null 2>/dev/null; then
-    echo "docker pull girish/mongodb:0.2.0 for tests to run"
+if ! docker inspect girish/mongodb:0.3.0 >/dev/null 2>/dev/null; then
+    echo "docker pull girish/mongodb:0.3.0 for tests to run"
     exit 1
 fi
 

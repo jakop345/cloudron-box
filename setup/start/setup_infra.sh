@@ -77,7 +77,7 @@ mongodb_container_id=$(docker run --restart=always -d --name="mongodb" \
     -h "${arg_fqdn}" \
     -v "${DATA_DIR}/mongodb:/var/lib/mongodb" \
     -v "${DATA_DIR}/addons/mongodb_vars.sh:/etc/mongodb_vars.sh:r" \
-    girish/mongodb:0.2.0)
+    girish/mongodb:0.3.0)
 echo "Mongodb container id: ${mongodb_container_id}"
 
 if [[ "${infra_version}" == "none" ]]; then
