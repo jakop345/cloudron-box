@@ -397,7 +397,7 @@ function restoreMySql(app, callback) {
 
         cp.stdout.pipe(process.stdout);
         cp.stderr.pipe(process.stderr);
-        input.pipe(cp.stdin);
+        input.pipe(cp.stdin).on('error', callback);
     });
 }
 
@@ -497,7 +497,7 @@ function restorePostgreSql(app, callback) {
 
         cp.stdout.pipe(process.stdout);
         cp.stderr.pipe(process.stderr);
-        input.pipe(cp.stdin);
+        input.pipe(cp.stdin).on('error', callback);
     });
 }
 
@@ -597,7 +597,7 @@ function restoreMongoDb(app, callback) {
 
         cp.stdout.pipe(process.stdout);
         cp.stderr.pipe(process.stderr);
-        input.pipe(cp.stdin);
+        input.pipe(cp.stdin).on('error', callback);
     });
 }
 
