@@ -593,12 +593,12 @@ describe('Clients', function () {
         salt: 'somesalt',
         createdAt: (new Date()).toUTCString(),
         modifiedAt: (new Date()).toUTCString(),
-        resetToken: hat()
+        resetToken: hat(256)
     };
 
     // make csrf always succeed for testing
     oauth2.csrf = function (req, res, next) {
-        req.csrfToken = function () { return hat(); };
+        req.csrfToken = function () { return hat(256); };
         next();
     };
 

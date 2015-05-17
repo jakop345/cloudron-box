@@ -141,12 +141,12 @@ describe('Password', function () {
         salt: 'somesalt',
         createdAt: (new Date()).toUTCString(),
         modifiedAt: (new Date()).toUTCString(),
-        resetToken: hat()
+        resetToken: hat(256)
     };
 
     // make csrf always succeed for testing
     oauth2.csrf = function (req, res, next) {
-        req.csrfToken = function () { return hat(); };
+        req.csrfToken = function () { return hat(256); };
         next();
     };
 
@@ -194,7 +194,7 @@ describe('Password', function () {
 
         it('setup fails due to invalid reset_token', function (done) {
             superagent.get(SERVER_URL + '/api/v1/session/password/setup.html')
-            .query({ reset_token: hat() })
+            .query({ reset_token: hat(256) })
             .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
@@ -224,7 +224,7 @@ describe('Password', function () {
 
         it('reset fails due to invalid reset_token', function (done) {
             superagent.get(SERVER_URL + '/api/v1/session/password/reset.html')
-            .query({ reset_token: hat() })
+            .query({ reset_token: hat(256) })
             .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
@@ -286,7 +286,7 @@ describe('Password', function () {
 
         it('fails due to missing password', function (done) {
             superagent.post(SERVER_URL + '/api/v1/session/password/reset')
-            .send({ resetToken: hat() })
+            .send({ resetToken: hat(256) })
             .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
@@ -296,7 +296,7 @@ describe('Password', function () {
 
         it('fails due to empty password', function (done) {
             superagent.post(SERVER_URL + '/api/v1/session/password/reset')
-            .send({ password: '', resetToken: hat() })
+            .send({ password: '', resetToken: hat(256) })
             .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);

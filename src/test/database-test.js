@@ -41,7 +41,7 @@ describe('database', function () {
             salt: 'morton',
             createdAt: 'sometime back',
             modifiedAt: 'now',
-            resetToken: hat()
+            resetToken: hat(256)
         };
 
         var ADMIN_0 = {

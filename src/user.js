@@ -104,7 +104,7 @@ function validateEmail(email) {
 function validateToken(token) {
     assert(typeof token === 'string');
 
-    if (token.length !== 32) return new UserError(UserError.BAD_TOKEN, 'Invalid token');
+    if (token.length !== 64) return new UserError(UserError.BAD_TOKEN, 'Invalid token'); // 256-bit hex coded token
 
     return null;
 }
