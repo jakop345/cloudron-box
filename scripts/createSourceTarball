@@ -88,7 +88,7 @@ echo "Create final tarball"
 
 echo "Uploading bundle to S3"
 # That special header is needed to allow access with singed urls created with different aws credentials than the ones the file got uploaded
-s3cmd --ssl --add-header=x-amz-acl:authenticated-read --access_key="${AWS_DEV_ACCESS_KEY}" --secret_key="${AWS_DEV_SECRET_KEY}" --no-mime-magic put "${bundle_file}" "s3://cloudron-dev-releases/box-${version}.tar.gz"
+s3cmd --ssl --add-header=x-amz-acl:authenticated-read --access_key="${AWS_DEV_ACCESS_KEY}" --secret_key="${AWS_DEV_SECRET_KEY}" --no-mime-magic put "${bundle_file}" "s3://dev-cloudron-releases/box-${version}.tar.gz"
 
 echo "Cleaning up ${bundle_dir}"
 rm -rf "${bundle_dir}"
@@ -99,7 +99,7 @@ else
     rm "${bundle_file}"
 fi
 
-versions_file_url="https://cloudron-dev-releases.s3.amazonaws.com/box-${version}.tar.gz"
+versions_file_url="https://dev-cloudron-releases.s3.amazonaws.com/box-${version}.tar.gz"
 echo "The URL for the versions file is: ${versions_file_url}"
 
 if [[ "${publish}" == "yes" ]]; then
