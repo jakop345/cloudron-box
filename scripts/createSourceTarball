@@ -104,6 +104,6 @@ echo "The URL for the versions file is: ${versions_file_url}"
 
 if [[ "${publish}" == "yes" ]]; then
     echo "Publishing to dev"
-    ${source_dir}/../installer/release/publish.sh --code "${versions_file_url}"
+    ${source_dir}/../installer/release/release create --env dev --code "${versions_file_url}"
 fi
 
