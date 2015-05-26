@@ -23,6 +23,14 @@ now=$(date "+%Y-%m-%dT%H:%M:%S")
 BOX_DATA_DIR="${HOME}/data/box"
 box_snapshot_dir="${HOME}/data/snapshots/box-${now}"
 
+echo "Creating and mount backup swap"
+swap_file="/2048MiB.backup.swap"
+[[ -f "${swap_file}" ]] && swapoff "${swap_file}"
+fallocate -l 2048m "${swap_file}"
+chmod 600 "${swap_file}"
+mkswap "${swap_file}"
+swapon "${swap_file}"
+
 echo "Creating MySQL dump"
 mysqldump -u root -ppassword --single-transaction --routines --triggers box > "${BOX_DATA_DIR}/box.mysqldump"
 
@@ -42,6 +50,9 @@ done
 
 echo "Deleting backup snapshot"
 btrfs subvolume delete "${box_snapshot_dir}"
+
+echo "Unmounting backup swap"
+[[ -f "${swap_file}" ]] && swapoff "${swap_file}"
 
 if [[ ${try} -eq 5 ]]; then
     echo "Backup failed"
