@@ -28,7 +28,7 @@ readonly app_data_snapshot="${DATA_DIR}/snapshots/${app_id}-${now}"
 
 echo "Creating and mount backup swap"
 swap_file="/2048MiB.backup.swap"
-[[ -f "${swap_file}" ]] && swapoff "${swap_file}"
+if swapon -s | grep -q "${swap_file}"; then swapoff "${swap_file}"; fi
 fallocate -l 2048m "${swap_file}"
 chmod 600 "${swap_file}"
 mkswap "${swap_file}"
