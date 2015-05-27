@@ -3,9 +3,9 @@
 set -eu
 
 readonly ADMIN_LOCATION=admin
-readonly source_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
+readonly source_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
 
-! "${source_dir}/scripts/checkInstall" && exit 1
+! "${source_dir}/src/test/checkInstall" && exit 1
 
 # create dir structure
 rm -rf $HOME/.cloudron_test
