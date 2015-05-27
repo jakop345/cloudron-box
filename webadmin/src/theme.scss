@@ -319,3 +319,31 @@ $table-border-color:                        transparent !default;
 .has-error {
     color: $brand-danger;
 }
+
+footer {
+    background-color: #EFEFEF;
+    bottom: 0;
+    width: 100%;
+    color: #555;
+    font-size: 14px;
+    padding: 5px;
+    z-index: 10000;
+    opacity: 0.5;
+    transition: all 250ms;
+}
+
+@media(min-width:767px) {
+    footer {
+        position: fixed;
+    }
+}
+
+footer:hover {
+    opacity: 1;
+}
+
+footer a {
+    color: #62bdfc;
+    padding: 10px;
+}
+
