@@ -30,24 +30,23 @@ while true; do
     esac
 done
 
-readonly SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
 readonly TMPDIR=${TMPDIR:-/tmp} # why is this not set on mint?
 
 assertNotEmpty AWS_DEV_ACCESS_KEY
 assertNotEmpty AWS_DEV_SECRET_KEY
 
-if ! $(cd "${SOURCE_DIR}" && git diff --exit-code >/dev/null); then
+if ! $(cd "${source_dir}" && git diff --exit-code >/dev/null); then
     echo "You have local changes, stash or commit them to proceed"
     exit 1
 fi
 
-version=$(cd "${SOURCE_DIR}" && git rev-parse "${commitish}")
+version=$(cd "${source_dir}" && git rev-parse "${commitish}")
 bundle_dir=$(mktemp -d -t box 2>/dev/null || mktemp -d box-XXXXXXXXXX --tmpdir=$TMPDIR)
 bundle_file="${TMPDIR}/box-${version}.tar.gz"
 
 chmod "o+rx,g+rx" "${bundle_dir}" # otherwise extracted tarball director won't be readable by others/group
 echo "Checking out code [${version}] into ${bundle_dir}"
-(cd "${SOURCE_DIR}" && git archive --format=tar ${version} | (cd "${bundle_dir}" && tar xf -))
+(cd "${source_dir}" && git archive --format=tar ${version} | (cd "${bundle_dir}" && tar xf -))
 
 if diff "${TMPDIR}/boxtarball.cache/package.json.all" "${bundle_dir}/package.json" >/dev/null 2>&1; then
     echo "Reusing dev modules from cache"
