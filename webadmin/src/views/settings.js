@@ -6,7 +6,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     $scope.user = Client.getUserInfo();
     $scope.config = Client.getConfig();
 
-    $scope.lastBackup = 'No backups';
+    $scope.lastBackup = null;
     $scope.backups = [];
 
     $scope.developerModeChange = {
@@ -97,7 +97,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
             if ($scope.backups.length > 0) {
                 $scope.lastBackup = backups[0];
             } else {
-                $scope.lastBackup = 'No backups';
+                $scope.lastBackup = null;
             }
         });
     });
