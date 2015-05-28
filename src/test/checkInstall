@@ -8,14 +8,14 @@ readonly SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 sudo -k || sudo --reset-timestamp
 
 # checks if all scripts are sudo access
-scripts=("${SOURCE_DIR}/src/scripts/rmappdir.sh" \
-         "${SOURCE_DIR}/src/scripts/createappdir.sh" \
-         "${SOURCE_DIR}/src/scripts/reloadnginx.sh" \
-         "${SOURCE_DIR}/src/scripts/backupbox.sh" \
-         "${SOURCE_DIR}/src/scripts/backupapp.sh" \
-         "${SOURCE_DIR}/src/scripts/restoreapp.sh" \
-         "${SOURCE_DIR}/src/scripts/reboot.sh" \
-         "${SOURCE_DIR}/src/scripts/reloadcollectd.sh")
+scripts=("${SOURCE_DIR}/scripts/rmappdir.sh" \
+         "${SOURCE_DIR}/scripts/createappdir.sh" \
+         "${SOURCE_DIR}/scripts/reloadnginx.sh" \
+         "${SOURCE_DIR}/scripts/backupbox.sh" \
+         "${SOURCE_DIR}/scripts/backupapp.sh" \
+         "${SOURCE_DIR}/scripts/restoreapp.sh" \
+         "${SOURCE_DIR}/scripts/reboot.sh" \
+         "${SOURCE_DIR}/scripts/reloadcollectd.sh")
 
 for script in "${scripts[@]}"; do
     if [[ $(sudo -n "${script}" --check 2>/dev/null) != "OK" ]]; then
