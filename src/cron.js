@@ -49,7 +49,7 @@ function recreateJobs(unusedTimeZone, callback) {
 
         if (gBackupJob) gBackupJob.stop();
         gBackupJob = new CronJob({
-            cronTime: '00 00 0,4,8,12,16,20 * * *', // every 4 hours
+            cronTime: '00 00 02 * * *', // 2am everyday
             onTick: cloudron.backup,
             start: true,
             timeZone: allSettings[settings.TIME_ZONE_KEY]
