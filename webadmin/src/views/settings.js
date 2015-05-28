@@ -6,7 +6,8 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     $scope.user = Client.getUserInfo();
     $scope.config = Client.getConfig();
 
-    $scope.lastBackup = new Date();
+    $scope.lastBackup = 'No backups';
+    $scope.backups = [];
 
     $scope.developerModeChange = {
         busy: false,
@@ -88,7 +89,17 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     };
 
     Client.onReady(function () {
+        Client.getBackups(function (error, backups) {
+            if (error) return console.error(error);
 
+            $scope.backups = backups;
+
+            if ($scope.backups.length > 0) {
+                $scope.lastBackup = backups[0];
+            } else {
+                $scope.lastBackup = 'No backups';
+            }
+        });
     });
 
     // setup all the dialog focus handling
