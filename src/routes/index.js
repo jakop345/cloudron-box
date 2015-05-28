@@ -8,6 +8,6 @@ exports = module.exports = {
     oauth2: require('./oauth2.js'),
     settings: require('./settings.js'),
     clients: require('./clients.js'),
+    backups: require('./backups.js'),
     user: require('./user.js')
 };
-
