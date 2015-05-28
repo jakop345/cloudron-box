@@ -19,6 +19,20 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         busy: false
     };
 
+    function fetchBackups() {
+        Client.getBackups(function (error, backups) {
+            if (error) return console.error(error);
+
+            $scope.backups = backups;
+
+            if ($scope.backups.length > 0) {
+                $scope.lastBackup = backups[0];
+            } else {
+                $scope.lastBackup = null;
+            }
+        });
+    }
+
     function developerModeChangeReset () {
         $scope.developerModeChange.error.password = null;
         $scope.developerModeChange.password = '';
@@ -68,6 +82,8 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
                 Client.version(function (error) {
                     if (error) return window.setTimeout(checkIfDone, 1000);
 
+                    fetchBackups();
+
                     $('#backupProgressModal').modal('hide');
                     $scope.$parent.initialized = true;
                 });
@@ -89,17 +105,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     };
 
     Client.onReady(function () {
-        Client.getBackups(function (error, backups) {
-            if (error) return console.error(error);
-
-            $scope.backups = backups;
-
-            if ($scope.backups.length > 0) {
-                $scope.lastBackup = backups[0];
-            } else {
-                $scope.lastBackup = null;
-            }
-        });
+        fetchBackups();
     });
 
     // setup all the dialog focus handling
