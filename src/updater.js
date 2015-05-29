@@ -21,6 +21,7 @@ var appdb = require('./appdb.js'),
     config = require('../config.js'),
     debug = require('debug')('box:updater'),
     fs = require('fs'),
+    util = require('util'),
     mailer = require('./mailer.js'),
     path = require('path'),
     paths = require('./paths.js'),
@@ -58,7 +59,7 @@ function checkAppUpdates(callback) {
             if (error) return callback(error);
 
             if (result.statusCode !== 200 || !result.body.appVersions) {
-                return callback(new Error('Error checking app update: ', result.statusCode, result.body.message));
+                return callback(new Error(util.format('Error checking app update: %s %s', result.statusCode, result.body.message)));
             }
 
             var latestAppVersions = result.body.appVersions;
@@ -87,7 +88,7 @@ function checkBoxUpdates(callback) {
         .timeout(10 * 1000)
         .end(function (error, result) {
         if (error) return callback(error);
-        if (result.status !== 200) return callback(new Error('Bad status:', result.status));
+        if (result.status !== 200) return callback(new Error(util.format('Bad status: %s %s', result.status, result.text)));
 
         var versions = safe.JSON.parse(result.text);
 
