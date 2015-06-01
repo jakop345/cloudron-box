@@ -285,14 +285,14 @@ function passwordReset(req, res, next) {
 
     debug('passwordReset: with token %s.', req.body.resetToken);
 
-    user.getByResetToken(req.body.resetToken, function (error, result) {
+    user.getByResetToken(req.body.resetToken, function (error, userObject) {
         if (error) return next(new HttpError(401, 'Invalid resetToken'));
 
         // setPassword clears the resetToken
-        user.setPassword(result.id, req.body.password, function (error) {
+        user.setPassword(userObject.id, req.body.password, function (error, result) {
             if (error) return next(new HttpError(500, error));
 
-            res.redirect(config.adminOrigin());
+            res.redirect(util.format('%s?accessToken=%s&expiresAt=%s', config.adminOrigin(), result.token, result.expiresAt));
         });
     });
 }

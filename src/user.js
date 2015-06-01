@@ -26,6 +26,8 @@ var assert = require('assert'),
     mailer = require('./mailer.js'),
     hat = require('hat'),
     userdb = require('./userdb.js'),
+    tokendb = require('./tokendb.js'),
+    clientdb = require('./clientdb.js'),
     util = require('util'),
     validator = require('validator'),
     _ = require('underscore');
@@ -336,7 +338,19 @@ function setPassword(userId, newPassword, callback) {
                 if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
                 if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-                callback(null);
+                // Also generate a token so the new user can get logged in immediately
+                clientdb.getByAppId('webadmin', function (error, result) {
+                    if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+
+                    var token = tokendb.generateToken();
+                    var expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 1 day
+
+                    tokendb.add(token, tokendb.PREFIX_USER + user.id, result.id, expiresAt, '*', function (error) {
+                        if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+
+                        callback(null, { token: token, expiresAt: expiresAt });
+                    });
+                });
             });
         });
     });
