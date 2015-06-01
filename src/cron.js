@@ -18,6 +18,8 @@ var gAutoUpdaterJob = null,
     gHeartbeatJob = null,
     gBackupJob = null;
 
+var gInitialized = false;
+
 // cron format
 // Seconds: 0-59
 // Minutes: 0-59
@@ -29,8 +31,12 @@ var gAutoUpdaterJob = null,
 function initialize(callback) {
     assert(typeof callback === 'function');
 
+    if (gInitialized) return callback();
+
     settings.events.on(settings.TIME_ZONE_KEY, recreateJobs);
     settings.events.on(settings.AUTOUPDATE_PATTERN_KEY, autoupdatePatternChanged);
+
+    gInitialized = true;
 
     recreateJobs(callback);
 }
@@ -92,6 +98,8 @@ function autoupdatePatternChanged(pattern) {
 function uninitialize(callback) {
     assert(typeof callback === 'function');
 
+    if (!gInitialized) return callback();
+
     if (gAutoUpdaterJob) gAutoUpdaterJob.stop();
     gAutoUpdaterJob = null;
 
@@ -103,6 +111,8 @@ function uninitialize(callback) {
 
     gBackupJob.stop();
     gBackupJob = null;
+
+    gInitialized = false;
 
     callback();
 }
