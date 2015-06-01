@@ -220,13 +220,14 @@ function logout(req, res) {
     else res.redirect('/');
 }
 
-
 // Form to enter email address to send a password reset request mail
+// -> GET /api/v1/session/password/resetRequest.html
 function passwordResetRequestSite(req, res) {
     res.render('password_reset_request', { adminOrigin: config.adminOrigin(), csrf: req.csrfToken() });
 }
 
 // This route is used for above form submission
+// -> POST /api/v1/session/password/resetRequest
 function passwordResetRequest(req, res, next) {
     assert(typeof req.body === 'object');
 
@@ -244,24 +245,14 @@ function passwordResetRequest(req, res, next) {
     });
 }
 
+// -> GET /api/v1/session/password/sent.html
 function passwordSentSite(req, res) {
     debug('passwordSentSite');
 
     res.render('password_reset_sent', { adminOrigin: config.adminOrigin() });
 }
 
-function passwordResetSite(req, res, next) {
-    if (!req.query.reset_token) return next(new HttpError(400, 'Missing reset_token'));
-
-    debug('passwordResetSite: with token %s.', req.query.reset_token);
-
-    user.getByResetToken(req.query.reset_token, function (error, user) {
-        if (error) return next(new HttpError(401, 'Invalid reset_token'));
-
-        res.render('password_reset', { adminOrigin: config.adminOrigin(), user: user, csrf: req.csrfToken(), resetToken: req.query.reset_token });
-    });
-}
-
+// -> GET /api/v1/session/password/setup.html
 function passwordSetupSite(req, res, next) {
     if (!req.query.reset_token) return next(new HttpError(400, 'Missing reset_token'));
 
@@ -274,6 +265,20 @@ function passwordSetupSite(req, res, next) {
     });
 }
 
+// -> GET /api/v1/session/password/reset.html
+function passwordResetSite(req, res, next) {
+    if (!req.query.reset_token) return next(new HttpError(400, 'Missing reset_token'));
+
+    debug('passwordResetSite: with token %s.', req.query.reset_token);
+
+    user.getByResetToken(req.query.reset_token, function (error, user) {
+        if (error) return next(new HttpError(401, 'Invalid reset_token'));
+
+        res.render('password_reset', { adminOrigin: config.adminOrigin(), user: user, csrf: req.csrfToken(), resetToken: req.query.reset_token });
+    });
+}
+
+// -> POST /api/v1/session/password/reset
 function passwordReset(req, res, next) {
     assert(typeof req.body === 'object');
 
