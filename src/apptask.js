@@ -14,7 +14,6 @@ var addons = require('./addons.js'),
     clientdb = require('./clientdb.js'),
     cloudron = require('./cloudron.js'),
     config = require('../config.js'),
-    constants = require('../constants.js'),
     database = require('./database.js'),
     DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:apptask'),
@@ -28,7 +27,6 @@ var addons = require('./addons.js'),
     path = require('path'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
-    settings = require('./settings.js'),
     shell = require('./shell.js'),
     superagent = require('superagent'),
     tokendb = require('./tokendb.js'),
@@ -603,8 +601,6 @@ function install(app, callback) {
 }
 
 function restore(app, callback) {
-    var oldManifest = app.manifest; // TODO: this won't be correct all the time should we crash after download manifest
-
     async.series([
         updateApp.bind(null, app, { installationProgress: '0, Stopping app and deleting container' }),
         stopApp.bind(null, app),
