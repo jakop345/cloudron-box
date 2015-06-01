@@ -46,6 +46,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
     };
 
     $scope.reset = function () {
+        // reset configure dialog
         $scope.appConfigure.error = {};
         $scope.appConfigure.app = {};
         $scope.appConfigure.location = '';
@@ -56,6 +57,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appConfigureForm.$setPristine();
         $scope.appConfigureForm.$setUntouched();
 
+        // reset uninstall dialog
         $scope.appUninstall.app = {};
         $scope.appUninstall.error = {};
         $scope.appUninstall.password = '';
@@ -63,6 +65,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appUninstallForm.$setPristine();
         $scope.appUninstallForm.$setUntouched();
 
+        // reset update dialog
         $scope.appUpdate.error = {};
         $scope.appUpdate.app = {};
         $scope.appUpdate.password = '';
@@ -71,6 +74,14 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
 
         $scope.appUpdateForm.$setPristine();
         $scope.appUpdateForm.$setUntouched();
+
+        // reset restore dialog
+        $scope.appRestore.error = {};
+        $scope.appRestore.app = {};
+        $scope.appRestore.password = '';
+
+        $scope.appRestoreForm.$setPristine();
+        $scope.appRestoreForm.$setUntouched();
     };
 
     $scope.showConfigure = function (app) {
