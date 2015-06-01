@@ -1,9 +1,7 @@
 'use strict';
 
 var apps = require('./apps.js'),
-    AppsError = apps.AppsError,
     assert = require('assert'),
-    async = require('async'),
     constants = require('../constants.js'),
     CronJob = require('cron').CronJob,
     EventEmitter = require('events').EventEmitter,
@@ -12,6 +10,9 @@ var apps = require('./apps.js'),
     util = require('util');
 
 var gEvents = new EventEmitter();
+
+// avoid noisy warnings during npm test
+gEvents.setMaxListeners(15);
 
 exports = module.exports = {
     SettingsError: SettingsError,
