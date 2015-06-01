@@ -108,10 +108,10 @@ gulp.task('html-appstatus', ['css'], function () {
 // CSS
 // --------------
 
-gulp.task('css', [], function () {
+gulp.task('css', function () {
     return gulp.src('webadmin/src/theme.scss')
         .pipe(sourcemaps.init())
-        .pipe(sass({ includePaths: ['node_modules/bootstrap-sass/assets/stylesheets/'] }))
+        .pipe(sass({ includePaths: ['node_modules/bootstrap-sass/assets/stylesheets/'] }).on('error', sass.logError))
         .pipe(autoprefixer())
         .pipe(minifyCSS())
         .pipe(sourcemaps.write())
@@ -141,12 +141,10 @@ gulp.task('watch', ['default'], function () {
     gulp.watch(['webadmin/src/3rdparty/**/*'], ['3rdparty']);
 });
 
-gulp.task('clean', function (callback) {
-    del(['webadmin/dist', 'setup/splash/website'], callback);
+gulp.task('clean', function () {
+    del.sync(['webadmin/dist', 'setup/splash/website']);
 });
 
-gulp.task('default', ['clean'], function () {
-    gulp.start('html', 'js', '3rdparty', 'css', 'images');
-});
+gulp.task('default', ['clean', 'html', 'js', '3rdparty', 'images', 'css'], function () {});
 
 gulp.task('develop', ['watch'], serve({ root: 'webadmin/dist', port: 4000 }));
