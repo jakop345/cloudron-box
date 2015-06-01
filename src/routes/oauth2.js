@@ -247,8 +247,6 @@ function passwordResetRequest(req, res, next) {
 
 // -> GET /api/v1/session/password/sent.html
 function passwordSentSite(req, res) {
-    debug('passwordSentSite');
-
     res.render('password_reset_sent', { adminOrigin: config.adminOrigin() });
 }
 
