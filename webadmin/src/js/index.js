@@ -2,6 +2,10 @@
 
 /* global angular:false */
 
+// deal with accessToken in the query, this is passed for example on password reset
+var search = decodeURIComponent(window.location.search).slice(1).split('&').map(function (item) { return item.split('='); }).reduce(function (o, k) { o[k[0]] = k[1]; return o; }, {});
+if (search.accessToken) localStorage.token = search.accessToken;
+
 // create main application module
 var app = angular.module('Application', ['ngRoute', 'ngAnimate', 'ngSanitize', 'angular-md5', 'slick', 'ui-notification']);
 
