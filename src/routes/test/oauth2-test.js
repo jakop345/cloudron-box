@@ -315,7 +315,13 @@ describe('Password', function () {
         });
 
         it('succeeds', function (done) {
-            var scope = nock(config.adminOrigin()).get('/').reply(200, {});
+            var scope = nock(config.adminOrigin())
+                .filteringPath(function (path) {
+                    path = path.replace(/accessToken=[^&]*/, 'accessToken=token');
+                    path = path.replace(/expiresAt=[^&]*/, 'expiresAt=1234');
+                    return path;
+                })
+                .get('/?accessToken=token&expiresAt=1234').reply(200, {});
 
             superagent.post(SERVER_URL + '/api/v1/session/password/reset')
             .send({ password: 'somepassword', resetToken: USER_0.resetToken })
