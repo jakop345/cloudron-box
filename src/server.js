@@ -20,6 +20,7 @@ var apps = require('./apps'),
     updater = require('./updater.js');
 
 var gHttpServer = null;
+var gInternalHttpServer = null;
 
 exports = module.exports = {
     start: start,
@@ -186,11 +187,40 @@ function initializeExpressSync() {
     return httpServer;
 }
 
+function initializeInternalExpressSync() {
+    var app = express();
+    var httpServer = http.createServer(app);
+
+    var QUERY_LIMIT = '10mb'; // max size for json and urlencoded queries
+    var REQUEST_TIMEOUT = 10000; // timeout for all requests
+
+    var json = middleware.json({ strict: true, limit: QUERY_LIMIT }), // application/json
+        urlencoded = middleware.urlencoded({ extended: false, limit: QUERY_LIMIT }); // application/x-www-form-urlencoded
+
+    app.use(middleware.morgan('dev', { immediate: false }));
+
+    var router = new express.Router();
+    router.del = router.delete; // amend router.del for readability further on
+
+    app
+       .use(middleware.timeout(REQUEST_TIMEOUT))
+       .use(json)
+       .use(urlencoded)
+       .use(router)
+       .use(middleware.lastMile());
+
+    // internal routes
+    router.post('/api/v1/backup', routes.internal.backup);
+
+    return httpServer;
+}
+
 function start(callback) {
     assert(typeof callback === 'function');
     assert(gHttpServer === null, 'Server is already up and running.');
 
     gHttpServer = initializeExpressSync();
+    gInternalHttpServer = initializeInternalExpressSync();
 
     async.series([
         auth.initialize,
@@ -200,7 +230,8 @@ function start(callback) {
         updater.initialize,
         mailer.initialize,
         cron.initialize,
-        gHttpServer.listen.bind(gHttpServer, config.get('port'), '127.0.0.1')
+        gHttpServer.listen.bind(gHttpServer, config.get('port'), '127.0.0.1'),
+        gInternalHttpServer.listen.bind(gInternalHttpServer, config.get('internalPort'), '127.0.0.1')
     ], callback);
 }
 
@@ -217,11 +248,13 @@ function stop(callback) {
         cron.uninitialize,
         mailer.uninitialize,
         database.uninitialize,
-        gHttpServer.close.bind(gHttpServer)
+        gHttpServer.close.bind(gHttpServer),
+        gInternalHttpServer.close.bind(gInternalHttpServer)
     ], function (error) {
         if (error) console.error(error);
 
         gHttpServer = null;
+        gInternalHttpServer = null;
 
         callback(null);
     });
