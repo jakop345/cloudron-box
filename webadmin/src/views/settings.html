@@ -58,15 +58,16 @@
 
 <div class="card" style="margin-bottom: 15px;" ng-show="user.admin">
     <div class="grid-item-top">
-        <div class="row" ng-show="lastBackup">
+        <div class="row">
             <div class="col-xs-6">
                 <span class="text-muted">Last Backup</span>
             </div>
             <div class="col-xs-6 text-right">
-                {{ lastBackup.creationTime | prettyDate }}
+                <span ng-show="lastBackup">{{ lastBackup.creationTime | prettyDate }}</span>
+                <span ng-hide="lastBackup">No backups have been created yet</span>
             </div>
         </div>
-        <br ng-show="lastBackup"/>
+        <br/>
         <div class="row">
             <div class="col-xs-6">
                 <span class="text-muted" ng-hide="lastBackup">No backups have been created yet</span>
