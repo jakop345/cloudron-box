@@ -2,6 +2,7 @@
 
 var apps = require('./apps.js'),
     assert = require('assert'),
+    config = require('../config.js'),
     constants = require('../constants.js'),
     CronJob = require('cron').CronJob,
     EventEmitter = require('events').EventEmitter,
@@ -11,8 +12,10 @@ var apps = require('./apps.js'),
 
 var gEvents = new EventEmitter();
 
-// avoid noisy warnings during npm test
-gEvents.setMaxListeners(15);
+if (config.TEST) {
+    // avoid noisy warnings during npm test
+    gEvents.setMaxListeners(100);
+}
 
 exports = module.exports = {
     SettingsError: SettingsError,
