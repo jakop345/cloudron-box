@@ -73,7 +73,7 @@
     </div>
 </div>
 
-<div class="content">
+<div>
     <div class="row animateMeOpacity ng-hide" ng-show="ready">
         <div class="col-lg-12">
             <h1>Available Applications</h1>
@@ -82,18 +82,14 @@
 
     <div class="row animateMeOpacity ng-hide" ng-show="ready">
         <div class="col-sm-1 appstore-item" ng-repeat="app in apps">
-            <div class="appstore-item-content highlight" style="cursor: pointer" ng-click="showInstall(app)">
-                <div class="row">
-                    <div class="col-xs-12 text-center" style="padding-left: 5px; padding-right: 5px;">
-                        <img ng-src="{{app.iconUrl}}" onerror="this.onerror=null;this.src='img/appicon_fallback.png'" class="app-icon"/>
-                    </div>
+            <div class="appstore-item-content highlight" ng-click="showInstall(app)">
+                <div class="appstore-item-content-icon col-same-height">
+                    <img ng-src="{{app.iconUrl}}" onerror="this.onerror=null;this.src='img/appicon_fallback.png'" class="app-icon"/>
                 </div>
-                <br/><br/>
-                <div class="row">
-                    <div class="col-xs-12 text-left">
-                        <div style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden">{{ app.manifest.title }}</div>
-                        <a ng-href="{{ app.manifest.website }}" target="_blank"><div style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden" class="text-muted">{{ app.manifest.website | prettyHref }}</div></a>
-                    </div>
+                <div class="appstore-item-content-description col-same-height">
+                    <h4 class="appstore-item-content-title">{{ app.manifest.title }}</h4>
+                    <div class="appstore-item-content-tagline text-muted">{{ app.manifest.tagline }}</div>
+                    <div><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star-half-o"></i><i class="fa fa-star-o"></i></div>
                 </div>
             </div>
         </div>

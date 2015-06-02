@@ -45,6 +45,27 @@ $table-border-color:                        transparent !default;
 
 @import "bootstrap";
 
+// ----------------------------
+// Bootstrap extension
+// ----------------------------
+
+.row-same-height {
+    height: 100%;
+    display: table;
+    width: 100%;
+}
+
+.col-same-height {
+    height: 100%;
+    vertical-align: middle;
+    display: table-cell;
+    float: none !important;
+}
+
+// ----------------------------
+// Main classes
+// ----------------------------
+
 .shadow {
     box-shadow:         0px 2px 5px rgba(0, 0, 0, 0.1);
 }
@@ -61,6 +82,10 @@ $table-border-color:                        transparent !default;
     max-width: 800px;
     margin: 0 auto;
 }
+
+// ----------------------------
+// Apps view
+// ----------------------------
 
 .grid-item {
     padding: 10px;
@@ -83,16 +108,44 @@ $table-border-color:                        transparent !default;
     background-color: white
 }
 
+// ----------------------------
+// Appstore view
+// ----------------------------
+
 .appstore-item {
     padding: 10px;
-    min-width: 160px;
+    width: 300px;
 }
 
 .appstore-item-content {
     background-color: white;
     box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
     border-radius: 2px;
-    padding: 10px 15px;
+    padding: 10px;
+    width: 100%;
+    cursor: pointer;
+}
+
+.appstore-item-content-title {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.appstore-item-content-tagline {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    height: 50px;
+}
+
+.appstore-item-content-icon {
+    width: 25%;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.appstore-item-content-description {
+    width: 75%;
 }
 
 .scale {
