@@ -83,6 +83,18 @@ $table-border-color:                        transparent !default;
     background-color: white
 }
 
+.appstore-item {
+    padding: 10px;
+    min-width: 160px;
+}
+
+.appstore-item-content {
+    background-color: white;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+    padding: 10px 15px;
+}
+
 .scale {
     transition: transform 100ms ease-out;
 }
