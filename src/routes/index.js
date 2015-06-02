@@ -9,5 +9,6 @@ exports = module.exports = {
     settings: require('./settings.js'),
     clients: require('./clients.js'),
     backups: require('./backups.js'),
+    internal: require('./internal.js'),
     user: require('./user.js')
 };
