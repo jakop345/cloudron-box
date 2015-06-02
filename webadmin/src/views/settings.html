@@ -57,24 +57,24 @@
 </div>
 
 <div class="card" style="margin-bottom: 15px;" ng-show="user.admin">
-    <div class="grid-item-top">
-        <div class="row">
-            <div class="col-xs-6">
-                <span class="text-muted">Last Backup</span>
-            </div>
-            <div class="col-xs-6 text-right">
-                <span ng-show="lastBackup">{{ lastBackup.creationTime | prettyDate }}</span>
-                <span ng-hide="lastBackup">No backups have been created yet</span>
+    <div class="row">
+        <div class="col-xs-6">
+            <span class="text-muted">Last Backup</span>
+        </div>
+        <div class="col-xs-6 text-right">
+            <span ng-show="lastBackup">{{ lastBackup.creationTime | prettyDate }}</span>
+            <span ng-hide="lastBackup">No backups have been created yet</span>
+        </div>
+    </div>
+    <br/>
+    <div class="row">
+        <div class="col-xs-9">
+            <div ng-show="createBackup.busy" class="progress progress-striped active animateMe">
+                <div class="progress-bar progress-bar-success" role="progressbar" style="width: 100%">Backup in progress</div>
             </div>
         </div>
-        <br/>
-        <div class="row">
-            <div class="col-xs-6">
-                <span class="text-muted" ng-hide="lastBackup">No backups have been created yet</span>
-            </div>
-            <div class="col-xs-6 text-right">
-                <button class="btn btn-outline btn-xs btn-primary" ng-click="showCreateBackup()">Create Backup</button>
-            </div>
+        <div class="col-xs-3 text-right">
+            <button class="btn btn-outline btn-xs btn-primary" ng-click="showCreateBackup()">Create Backup</button>
         </div>
     </div>
 </div>
@@ -86,24 +86,22 @@
 </div>
 
 <div class="card" style="margin-bottom: 15px;" ng-show="user.admin">
-    <div class="grid-item-top">
-        <div class="row">
-            <div class="col-xs-12">
-                The developer mode will enable additional functionality for developers. This mode allows for example the Cloudron commandline tool to control parts of the Cloudron, like installing and debugging applications.
-                <br/>
-                <br/>
-                If you are interested in application development, please visit the <a href="{{ config.webServerOrigin }}/documentation.html" target="_blank">application developer documentation</a>.
-            </div>
+    <div class="row">
+        <div class="col-xs-12">
+            The developer mode will enable additional functionality for developers. This mode allows for example the Cloudron commandline tool to control parts of the Cloudron, like installing and debugging applications.
+            <br/>
+            <br/>
+            If you are interested in application development, please visit the <a href="{{ config.webServerOrigin }}/documentation.html" target="_blank">application developer documentation</a>.
         </div>
-        <br/>
-        <div class="row">
-            <div class="col-xs-6">
-                Status
-            </div>
-            <div class="col-xs-6 text-right">
-                <a href="" class="text-danger" ng-show="config.developerMode" ng-click="showChangeDeveloperMode()">Enabled</a>
-                <a href="" ng-hide="config.developerMode" ng-click="showChangeDeveloperMode()">Disabled</a>
-            </div>
+    </div>
+    <br/>
+    <div class="row">
+        <div class="col-xs-6">
+            Status
+        </div>
+        <div class="col-xs-6 text-right">
+            <a href="" class="text-danger" ng-show="config.developerMode" ng-click="showChangeDeveloperMode()">Enabled</a>
+            <a href="" ng-hide="config.developerMode" ng-click="showChangeDeveloperMode()">Disabled</a>
         </div>
     </div>
 </div>

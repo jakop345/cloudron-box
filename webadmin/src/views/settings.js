@@ -65,16 +65,11 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     };
 
     $scope.doCreateBackup = function () {
-        $scope.$parent.initialized = false;
+        $('#createBackupModal').modal('hide');
         $scope.createBackup.busy = true;
 
         Client.backup(function (error) {
             if (error) console.error(error);
-
-            $('#createBackupModal').modal('hide');
-            $scope.createBackup.busy = false;
-
-            $('#backupProgressModal').modal('show');
 
             // TODO this does look like we should use progress.json?
             // now start query
@@ -84,8 +79,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
 
                     fetchBackups();
 
-                    $('#backupProgressModal').modal('hide');
-                    $scope.$parent.initialized = true;
+                    $scope.createBackup.busy = false;
                 });
             }
 
