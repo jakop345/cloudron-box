@@ -316,7 +316,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
     };
 
     Client.prototype.getAppIconUrl = function (app) {
-        return app.iconUrl + '?access_token=' + this._token;
+        return this.apiOrigin + app.iconUrl + '?access_token=' + this._token;
     };
 
     Client.prototype.setAdmin = function (username, admin, callback) {
