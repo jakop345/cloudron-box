@@ -14,7 +14,7 @@ function backup(req, res, next) {
     debug('trigger backup');
 
     // we always succeed to trigger a backup
-    next(new HttpSuccess(200, {}));
+    next(new HttpSuccess(202, {}));
 
     cloudron.backup(function (error) {
         if (error) console.error('backup failed.', error);
