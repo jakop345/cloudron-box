@@ -69,6 +69,7 @@ function initConfig() {
     data.version = null;
     data.isCustomDomain = false;
     data.webServerOrigin = null;
+    data.internalPort = 3001;
 
     if (exports.CLOUDRON) {
         data.port = 3000;
