@@ -67,23 +67,31 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     $scope.doCreateBackup = function () {
         $('#createBackupModal').modal('hide');
         $scope.createBackup.busy = true;
+        $scope.createBackup.percent = 100;
 
         Client.backup(function (error) {
-            if (error) console.error(error);
+            if (error) {
+                console.error(error);
+                $scope.createBackup.busy = false;
+            }
 
-            // TODO this does look like we should use progress.json?
-            // now start query
             function checkIfDone() {
-                Client.version(function (error) {
-                    if (error) return window.setTimeout(checkIfDone, 1000);
+                Client.progress(function (error, data) {
+                    if (error) return window.setTimeout(checkIfDone, 250);
 
-                    fetchBackups();
+                    // check if we are done
+                    if (!data.backup || data.backup.percent >= 100) {
+                        fetchBackups();
+                        $scope.createBackup.busy = false;
+                        return;
+                    }
 
-                    $scope.createBackup.busy = false;
+                    $scope.createBackup.percent = data.backup.percent;
+                    window.setTimeout(checkIfDone, 250);
                 });
             }
 
-            window.setTimeout(checkIfDone, 5000);
+            checkIfDone();
         });
     };
 

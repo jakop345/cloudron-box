@@ -290,6 +290,8 @@ function backup(callback) {
         progress.set(progress.BACKUP, processed, '');
 
         async.mapSeries(allApps, function iterator(app, iteratorCallback) {
+            ++processed;
+
             // only backup apps that are installed or pending configure. Rest of them are in some
             // state not good for consistent backup
             if ((app.installationState === appdb.ISTATE_INSTALLED && app.health === appdb.HEALTH_HEALTHY) || app.installationState === appdb.ISTATE_PENDING_CONFIGURE) {
