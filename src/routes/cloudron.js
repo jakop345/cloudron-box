@@ -125,11 +125,11 @@ function reboot(req, res, next) {
 
 function createBackup(req, res, next) {
     cloudron.backup(function (error) {
-        if (error && error.reason === CloudronError.APPSTORE_DOWN) return next(new HttpError(503, error));
-        if (error) return next(new HttpError(500, error));
-
-        next(new HttpSuccess(202, {}));
+        if (error) console.error('backup failed.', error);
     });
+
+    // we just schedule the backup but do not wait for the result
+    next(new HttpSuccess(202, {}));
 }
 
 function getConfig(req, res, next) {
