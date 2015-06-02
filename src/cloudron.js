@@ -284,21 +284,32 @@ function backup(callback) {
     apps.getAll(function (error, allApps) {
         if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
+        var processed = 0;
+        var step = 100/(allApps.length+1);
+
+        progress.set(progress.BACKUP, processed, '');
+
         async.mapSeries(allApps, function iterator(app, iteratorCallback) {
             // only backup apps that are installed or pending configure. Rest of them are in some
             // state not good for consistent backup
-            if ((app.installationState === appdb.ISTATE_INSTALLED && app.health === appdb.HEALTH_HEALTHY)
-                || app.installationState === appdb.ISTATE_PENDING_CONFIGURE) {
-                return backupApp(app, iteratorCallback);
+            if ((app.installationState === appdb.ISTATE_INSTALLED && app.health === appdb.HEALTH_HEALTHY) || app.installationState === appdb.ISTATE_PENDING_CONFIGURE) {
+                return backupApp(app, function (error, backupId) {
+                    progress.set(progress.BACKUP, step * processed, app.location);
+                    iteratorCallback(error, backupId);
+                });
             }
 
             debugApp(app, 'Skipping backup (istate:%s health%s). Reusing %s', app.installationState, app.health, app.lastBackupId);
+            progress.set(progress.BACKUP, step * processed, app.location);
 
             return iteratorCallback(null, app.lastBackupId);
         }, function appsBackedUp(error, backupIds) {
             if (error) return callback(error);
 
-            backupBoxWithAppBackupIds(backupIds, callback);
+            backupBoxWithAppBackupIds(backupIds, function (error) {
+                progress.set(progress.BACKUP, 100, '');
+                callback(error);
+            });
         });
     });
 }
