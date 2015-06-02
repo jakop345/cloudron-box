@@ -186,7 +186,8 @@ function validatePortBindings(portBindings, tcpPorts) {
         2003, /* graphite (lo) */
         2004, /* graphite (lo) */
         2020, /* install server */
-        3000, /* app server (lo) */
+        config.get('port'), /* app server (lo) */
+        config.get('internalPort'), /* internal app server (lo) */
         3306, /* mysql (lo) */
         8000 /* graphite (lo) */
     ];
