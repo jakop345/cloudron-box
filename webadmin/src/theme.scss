@@ -1,5 +1,5 @@
 
-$brand-primary:                             darken(#428bca, 6.5%) !default; // #337ab7
+$brand-primary:                             darken(#428bca, 6.5%) !default; // #62bdfc
 $brand-success:                             #5cb85c !default;
 $brand-info:                                #5bc0de !default;
 $brand-warning:                             #f0ad4e !default;
@@ -9,8 +9,8 @@ $body-bg:                                   #E5E5E5;
 $font-family-sans-serif:                    Roboto, Helvetica, Arial, sans-serif;
 
 $navbar-default-link-color:                 #428BCA !default;
-$navbar-default-link-hover-color:           #337ab7 !default;
-$navbar-default-link-active-color:          #337ab7 !default;
+$navbar-default-link-hover-color:           #62bdfc !default;
+$navbar-default-link-active-color:          #62bdfc !default;
 $navbar-default-brand-color:                #777 !default;
 
 $btn-default-bg:                            transparent !default;
@@ -60,6 +60,20 @@ $table-border-color:                        transparent !default;
     vertical-align: middle;
     display: table-cell;
     float: none !important;
+}
+
+.row-no-margin {
+    margin: 0;
+}
+
+.row-no-margin:before,
+.row-no-margin:after {
+    content: " ";
+    display: table;
+}
+
+.row-no-margin:after {
+    clear: both;
 }
 
 // ----------------------------
@@ -112,11 +126,6 @@ $table-border-color:                        transparent !default;
 // Appstore view
 // ----------------------------
 
-.appstore-content {
-    max-width: 900px;
-    margin: 0 auto;
-}
-
 .appstore-item {
     padding: 10px;
     width: 300px;
@@ -144,14 +153,49 @@ $table-border-color:                        transparent !default;
 }
 
 .appstore-item-content-icon {
-    width: 25%;
+    width: 100px;
+    min-width: 100px;
+    max-width: 100px;
     padding-left: 10px;
     padding-right: 10px;
 }
 
 .appstore-item-content-description {
-    width: 75%;
-    max-width: 100px;
+    width: 160px;
+    min-width: 160px;
+    max-width: 160px;
+
+}
+
+.appstore-category-link {
+    padding: 10px;
+    margin: 0;
+    color: black;
+}
+
+.appstore-category-link > a {
+    color: inherit;
+}
+
+.appstore-category-link > a:hover,
+.appstore-category-link > a:focus {
+    text-decoration: none;
+    color: inherit;
+}
+
+.appstore-category-link:hover,
+.appstore-category-link:focus {
+    background-color: $navbar-default-link-hover-color;
+    cursor: pointer;
+    color: white;
+}
+
+.appstore-item-rating {
+    color: $navbar-default-link-hover-color;
+}
+
+.appstore-search {
+    width: 200px;
 }
 
 .scale {

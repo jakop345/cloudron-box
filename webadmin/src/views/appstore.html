@@ -73,23 +73,49 @@
     </div>
 </div>
 
-<div class="appstore-content">
-    <div class="animateMeOpacity ng-hide" ng-show="ready">
-        <div class="col-lg-12">
+<div>
+    <div class="row-no-margin animateMeOpacity ng-hide" ng-show="ready">
+        <div class="col-md-2">
+        </div>
+        <div class="col-md-8">
+            <br/>
             <h1>Available Applications</h1>
+            <br/>
+        </div>
+        <div class="col-md-2">
+            <br/>
+            <div class="appstore-search">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search for...">
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" type="button"><i class="fa fa-search"></i></button>
+                    </span>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="animateMeOpacity ng-hide" ng-show="ready">
-        <div class="col-sm-1 appstore-item" ng-repeat="app in apps">
-            <div class="appstore-item-content highlight" ng-click="showInstall(app)">
-                <div class="appstore-item-content-icon col-same-height">
-                    <img ng-src="{{app.iconUrl}}" onerror="this.onerror=null;this.src='img/appicon_fallback.png'" class="app-icon"/>
-                </div>
-                <div class="appstore-item-content-description col-same-height">
-                    <h4 class="appstore-item-content-title">{{ app.manifest.title }}</h4>
-                    <div class="appstore-item-content-tagline text-muted">{{ app.manifest.tagline }}</div>
-                    <div><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star-half-o"></i><i class="fa fa-star-o"></i></div>
+    <div class="row animateMeOpacity" ng-show="ready">
+        <div class="col-md-2">
+            <h3 class="appstore-category-link"><a href="#">Office</a></h3>
+            <h3 class="appstore-category-link"><a href="#">Productivity</a></h3>
+            <h3 class="appstore-category-link"><a href="#">Games</a></h3>
+            <h3 class="appstore-category-link"><a href="#">Personal</a></h3>
+            <h3 class="appstore-category-link"><a href="#">Content</a></h3>
+        </div>
+        <div class="col-md-10">
+            <div class="row-no-margin">
+                <div class="col-sm-1 appstore-item" ng-repeat="app in apps">
+                    <div class="appstore-item-content highlight" ng-click="showInstall(app)">
+                        <div class="appstore-item-content-icon col-same-height">
+                            <img ng-src="{{app.iconUrl}}" onerror="this.onerror=null;this.src='img/appicon_fallback.png'" class="app-icon"/>
+                        </div>
+                        <div class="appstore-item-content-description col-same-height">
+                            <h4 class="appstore-item-content-title">{{ app.manifest.title }}</h4>
+                            <div class="appstore-item-content-tagline text-muted">{{ app.manifest.tagline }}</div>
+                            <div class="appstore-item-rating"><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star-half-o"></i><i class="fa fa-star-o"></i></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
