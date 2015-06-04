@@ -35,6 +35,14 @@ angular.module('Application').service('AppStore', ['$http', 'Client', function (
         });
     };
 
+    AppStore.prototype.getAppsFast = function (callback) {
+        if (Client.getConfig().apiServerOrigin === null) return callback(new AppStoreError(420, 'Enhance Your Calm'));
+
+        if (this._appsCache.length !== 0) return callback(null, this._appsCache);
+
+        this.getApps(callback);
+    };
+
     AppStore.prototype.getAppById = function (appId, callback) {
         var that = this;
 
