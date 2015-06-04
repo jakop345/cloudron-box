@@ -16,7 +16,7 @@ angular.module('Application').service('AppStore', ['$http', 'Client', function (
     }
 
     function AppStore() {
-        this._appsCache = { };
+        this._appsCache = [];
     }
 
     AppStore.prototype.getApps = function (callback) {
@@ -27,12 +27,7 @@ angular.module('Application').service('AppStore', ['$http', 'Client', function (
         $http.get(Client.getConfig().apiServerOrigin + '/api/v1/apps', { params: { boxVersion: Client.getConfig().version } }).success(function (data, status) {
             if (status !== 200) return callback(new AppStoreError(status, data));
 
-            // TODO remove old apps
-            data.apps.forEach(function (app) {
-                if (that._appsCache[app.id]) return;
-
-                that._appsCache[app.id] = app;
-            });
+            angular.copy(data.apps, that._appsCache);
 
             return callback(null, that._appsCache);
         }).error(function (data, status) {
@@ -41,13 +36,20 @@ angular.module('Application').service('AppStore', ['$http', 'Client', function (
     };
 
     AppStore.prototype.getAppById = function (appId, callback) {
-        if (appId in this._appsCache) return callback(null, this._appsCache[appId]);
-
         var that = this;
+
+        // check cache
+        for (var app in this._appsCache) {
+            if (this._appsCache[app].id === appId) return callback(null, this._appsCache[app]);
+        }
 
         this.getApps(function (error) {
             if (error) return callback(error);
-            if (appId in that._appsCache) return callback(null, that._appsCache[appId]);
+
+            // recheck cache
+            for (var app in that._appsCache) {
+                if (that._appsCache[app].id === appId) return callback(null, that._appsCache[app]);
+            }
 
             callback(new AppStoreError(404, 'Not found'));
         });
