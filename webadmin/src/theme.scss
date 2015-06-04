@@ -175,6 +175,10 @@ $table-border-color:                        transparent !default;
 
 .appstore-category-link > a {
     color: inherit;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    display: block;
 }
 
 .appstore-category-link > a:hover,
