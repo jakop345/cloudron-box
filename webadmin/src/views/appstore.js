@@ -5,6 +5,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
     $scope.apps = [];
     $scope.config = Client.getConfig();
     $scope.user = Client.getUserInfo();
+    $scope.category = '';
 
     $scope.appInstall = {
         busy: false,
@@ -17,7 +18,25 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         mediaLinks: []
     };
 
-    $scope.reset = function() {
+    $scope.showCategory = function (event) {
+        $scope.category = event.target.getAttribute('category');
+
+        AppStore.getApps(function (error, apps) {
+            if (error) return $timeout($scope.showCategory.bind(null, event), 1000);
+
+            if (!$scope.category) {
+                $scope.apps = apps;
+                return;
+            }
+
+            $scope.apps = apps.filter(function (app) {
+                if ($scope.category === 'other') return !app.manifest.category;
+                return $scope.category === app.manifest.category;
+            });
+        });
+    };
+
+    $scope.reset = function () {
         $scope.appInstall.app = {};
         $scope.appInstall.error = {};
         $scope.appInstall.location = '';
