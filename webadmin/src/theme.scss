@@ -171,26 +171,18 @@ $table-border-color:                        transparent !default;
     padding: 10px;
     margin: 0;
     color: black;
-}
-
-.appstore-category-link > a {
     color: inherit;
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
     display: block;
-}
-
-.appstore-category-link > a:hover,
-.appstore-category-link > a:focus {
-    text-decoration: none;
-    color: inherit;
+    font-size: 24px;
 }
 
 .appstore-category-link:hover,
 .appstore-category-link:focus {
+    text-decoration: none;
     background-color: $navbar-default-link-hover-color;
-    cursor: pointer;
     color: white;
 }
 
