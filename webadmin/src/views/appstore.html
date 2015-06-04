@@ -85,12 +85,14 @@
         <div class="col-md-2">
             <br/>
             <div class="appstore-search">
-                <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Search for...">
-                    <span class="input-group-btn">
-                        <button class="btn btn-default" type="button"><i class="fa fa-search"></i></button>
-                    </span>
-                </div>
+                <form ng-submit="search()">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search for..." ng-model="searchString" ng-change="search()">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="button" type="submit" ng-click="search()"><i class="fa fa-search"></i></button>
+                        </span>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
