@@ -180,7 +180,8 @@ $table-border-color:                        transparent !default;
 }
 
 .appstore-category-link:hover,
-.appstore-category-link:focus {
+.appstore-category-link:focus,
+.appstore-category-link.category-active {
     text-decoration: none;
     background-color: $navbar-default-link-hover-color;
     color: white;

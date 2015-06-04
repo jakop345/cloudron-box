@@ -6,6 +6,8 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
     $scope.config = Client.getConfig();
     $scope.user = Client.getUserInfo();
     $scope.category = '';
+    $scope.cachedCategory = ''; // used to cache the selected category while searching
+    $scope.searchString = '';
 
     $scope.appInstall = {
         busy: false,
@@ -18,21 +20,47 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         mediaLinks: []
     };
 
-    $scope.showCategory = function (event) {
-        $scope.category = event.target.getAttribute('category');
+    $scope.search = function () {
+        if (!$scope.searchString) return $scope.showCategory(null, $scope.cachedCategory);
+
+        $scope.category = '';
+
+        AppStore.getAppsFast(function (error, apps) {
+            if (error) return $timeout($scope.search, 1000);
+
+            var token = $scope.searchString.toUpperCase();
+
+            $scope.apps = apps.filter(function (app) {
+                if (app.manifest.id.toUpperCase().indexOf(token) !== -1) return true;
+                if (app.manifest.title.toUpperCase().indexOf(token) !== -1) return true;
+                if (app.manifest.tagline.toUpperCase().indexOf(token) !== -1) return true;
+                if (app.manifest.description.toUpperCase().indexOf(token) !== -1) return true;
+                return false;
+            });
+        });
+    };
+
+    $scope.showCategory = function (event, category) {
+        if (!event) $scope.category = category;
+        else $scope.category = event.target.getAttribute('category');
+
+        $scope.cachedCategory = $scope.category;
+
+        $scope.ready = false;
 
         AppStore.getApps(function (error, apps) {
             if (error) return $timeout($scope.showCategory.bind(null, event), 1000);
 
             if (!$scope.category) {
                 $scope.apps = apps;
-                return;
+            } else {
+                $scope.apps = apps.filter(function (app) {
+                    if ($scope.category === 'other') return !app.manifest.category;
+                    return $scope.category === app.manifest.category;
+                });
             }
 
-            $scope.apps = apps.filter(function (app) {
-                if ($scope.category === 'other') return !app.manifest.category;
-                return $scope.category === app.manifest.category;
-            });
+            $scope.ready = true;
         });
     };
 
