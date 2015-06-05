@@ -739,16 +739,21 @@ function update(app, callback) {
     debugApp(app, 'Updating to %s', safe.query(app, 'manifest.version'));
 
     async.series([
-        updateApp.bind(null, app, { installationProgress: '0, Stopping app' }),
+        updateApp.bind(null, app, { installationProgress: '10, Backup app' }),
+        function (done) {
+            cloudron.backupApp(app, function (error) {
+                if (error) error.backupError = true;
+                done(error);
+            });
+        },
+
+        updateApp.bind(null, app, { installationProgress: '20, Stopping app' }),
         stopApp.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '10, Deleting container' }),
+        updateApp.bind(null, app, { installationProgress: '25, Deleting container' }),
         deleteContainer.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '20, Backup and uploading app data' }),
-        cloudron.backupApp.bind(null, app),
-
-        updateApp.bind(null, app, { installationProgress: '35, Verify manifest' }),
+        updateApp.bind(null, app, { installationProgress: '30, Verify manifest' }),
         verifyManifest.bind(null, app),
         downloadIcon.bind(null, app),
 
@@ -772,7 +777,11 @@ function update(app, callback) {
             updateApp(app, { installationState: appdb.ISTATE_INSTALLED, installationProgress: '' }, callback);
         }
     ], function seriesDone(error) {
-        if (error) {
+        if (error && error.backupError) {
+            // on a backup error, just abort the update
+            debugApp(app, 'Error backing up app: %s', backupError.error);
+            return updateApp(app, { installationState: appdb.ISTATE_INSTALLED, installationProgress: '' }, callback.bind(null, error));
+        } else if (error) {
             debugApp(app, 'Error updating app: %s', error);
             return updateApp(app, { installationState: appdb.ISTATE_ERROR, installationProgress: error.message }, callback.bind(null, error));
         }
