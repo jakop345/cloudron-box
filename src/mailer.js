@@ -275,7 +275,7 @@ function sendCrashNotification(program, context) {
     var mailOptions = {
         from: config.get('mailUsername'),
         to: 'admin@cloudron.io',
-        subject: util.format('[%] %s has crashed', config.fqdn(), program),
+        subject: util.format('[%s] %s exited unexpectedly', config.fqdn(), program),
         text: render('crash_notification.ejs', { fqdn: config.fqdn(), program: program, context: context, format: 'text' })
     };
 
