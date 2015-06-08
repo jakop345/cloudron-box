@@ -29,6 +29,8 @@ exports = module.exports = {
     boxUpdateAvailable: boxUpdateAvailable,
     appUpdateAvailable: appUpdateAvailable,
 
+    sendCrashNotification: sendCrashNotification,
+
     appDied: appDied
 };
 
@@ -266,3 +268,16 @@ function appUpdateAvailable(app, updateInfo) {
     });
 }
 
+function sendCrashNotification(program, context) {
+    assert(typeof program === 'string');
+    assert(typeof context === 'string');
+
+    var mailOptions = {
+        from: config.get('mailUsername'),
+        to: 'admin@cloudron.io',
+        subject: util.format('[%] %s has crashed', config.fqdn(), program),
+        text: render('crash_notification.ejs', { fqdn: config.fqdn(), program: program, context: context, format: 'text' })
+    };
+
+    enqueue(mailOptions);
+}

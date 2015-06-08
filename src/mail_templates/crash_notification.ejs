@@ -1,0 +1,19 @@
+<%if (format === 'text') { %>
+
+Dear Cloudron Team,
+
+unfortunately the '<%= program %>' crashed unexpectedly on <%= app.fqdn %>!
+
+Please see some excerpt of the logs below.
+
+Thank you,
+Your Cloudron
+
+-------------------------------------
+
+<%= context %>
+
+<% } else { %>
+
+<% } %>
+
