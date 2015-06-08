@@ -60,6 +60,7 @@
     "split": "^0.3.3",
     "superagent": "~0.21.0",
     "supererror": "^0.6.0",
+    "supervisord-eventlistener": "^0.1.0",
     "tail-stream": "https://registry.npmjs.org/tail-stream/-/tail-stream-0.2.1.tgz",
     "underscore": "^1.7.0",
     "valid-url": "^1.0.9",
