@@ -1,3 +1,21 @@
+<!-- Modal migrate -->
+<div class="modal fade" id="migrationModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Migrate your Cloudron</h4>
+            </div>
+            <div class="modal-body">
+                Do you really want to migrate your Cloudron?<br/>
+                Your Cloudron will have a downtime of around 10 minutes, where none of you apps will be reachable.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" ng-click="doMigration()" ng-disabled="migration.busy"><i class="fa fa-spinner fa-pulse" ng-show="migration.busy"></i> Migrate</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div style="max-width: 600px; margin: 0 auto;" ng-show="user.admin">
     <div class="text-left">
@@ -16,7 +34,7 @@
             <span class="text-muted">Size:</span>
         </div>
         <div class="col-xs-6 text-right">
-            <span>...</span>
+            <span>{{currentSize}}</span>
         </div>
     </div>
     <div class="row">
@@ -24,15 +42,7 @@
             <span class="text-muted">Region:</span>
         </div>
         <div class="col-xs-6 text-right">
-            <span>...</span>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-xs-6">
-            <span class="text-muted">Zone:</span>
-        </div>
-        <div class="col-xs-6 text-right">
-            <span>...</span>
+            <span>{{currentRegion}}</span>
         </div>
     </div>
 </div>
@@ -43,12 +53,12 @@
 
         </div>
         <div class="col-xs-3 text-right">
-            <select class="form-control" id="sizeSlug" ng-model="appMigrate.sizeSlug">
+            <select class="form-control" id="sizeSlug" ng-model="migration.sizeSlug">
                 <option value="{{size.slug}}" ng-repeat="size in availableSizes">{{size.name}}</option>
             </select>
         </div>
         <div class="col-xs-3 text-right">
-            <button class="btn btn-outline btn-primary" ng-click="showMigrateConfirm()">Migrate</button>
+            <button class="btn btn-outline btn-primary" ng-click="showMigrationConfirm()">Migrate</button>
         </div>
     </div>
 </div>
