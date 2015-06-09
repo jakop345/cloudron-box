@@ -276,7 +276,7 @@ describe('Cloudron', function () {
             });
         });
 
-        it('succeeds', function (done) {
+        it('succeeds without appstore', function (done) {
             request.get(SERVER_URL + '/api/v1/cloudron/config')
                    .query({ access_token: token })
                    .end(function (error, result) {
@@ -290,9 +290,37 @@ describe('Cloudron', function () {
                 expect(result.body.update).to.be.an('object');
                 expect(result.body.version).to.eql('0.5.0');
                 expect(result.body.developerMode).to.be.a('boolean');
+                expect(result.body.size).to.eql(null);
+                expect(result.body.region).to.eql(null);
                 done();
             });
         });
+
+        it('succeeds', function (done) {
+            var scope = nock('http://localhost:6060').get('/api/v1/boxes/localhost?token=APPSTORE_TOKEN').reply(200, { box: { region: 'sfo', size: 'small' }});
+
+            request.get(SERVER_URL + '/api/v1/cloudron/config')
+                   .query({ access_token: token })
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(200);
+                expect(result.body.apiServerOrigin).to.eql('http://localhost:6060');
+                expect(result.body.webServerOrigin).to.eql(null);
+                expect(result.body.fqdn).to.eql('localhost');
+                expect(result.body.isCustomDomain).to.eql(false);
+                expect(result.body.progress).to.be.an('object');
+                expect(result.body.update).to.be.an('object');
+                expect(result.body.version).to.eql('0.5.0');
+                expect(result.body.developerMode).to.be.a('boolean');
+                expect(result.body.size).to.eql('small');
+                expect(result.body.region).to.eql('sfo');
+
+                expect(scope.isDone()).to.be.ok();
+
+                done();
+            });
+        });
+
     });
 
     describe('migrate', function () {
