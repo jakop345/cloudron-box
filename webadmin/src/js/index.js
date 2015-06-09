@@ -34,6 +34,9 @@ app.config(['$routeProvider', function ($routeProvider) {
     }).when('/settings', {
         controller: 'SettingsController',
         templateUrl: 'views/settings.html'
+    }).when('/upgrade', {
+        controller: 'UpgradeController',
+        templateUrl: 'views/upgrade.html'
     }).otherwise({ redirectTo: '/'});
 }]);
 
