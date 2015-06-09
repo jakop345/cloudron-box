@@ -129,6 +129,7 @@
                             <ul class="dropdown-menu" role="menu">
                                 <li><a href="#/account"><i class="fa fa-user fa-fw"></i> Account</a></li>
                                 <li ng-show="user.admin && config.isDev"><a href="#/dns"><i class="fa fa-wrench fa-fw"></i> DNS Management</a></li>
+                                <li ng-show="user.admin"><a href="#/upgrade"><i class="fa fa-arrow-up fa-fw"></i> Upgrade</a></li>
                                 <li ng-show="user.admin"><a href="#/settings"><i class="fa fa-wrench fa-fw"></i> Settings</a></li>
                                 <li class="divider"></li>
                                 <li><a href="" ng-click="logout($event)"><i class="fa fa-sign-out fa-fw"></i> Logout</a></li>
