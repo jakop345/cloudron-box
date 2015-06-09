@@ -75,5 +75,17 @@ angular.module('Application').service('AppStore', ['$http', 'Client', function (
             return callback(new AppStoreError(status, data));
         });
     };
+
+    AppStore.prototype.getSizes = function (callback) {
+        if (Client.getConfig().apiServerOrigin === null) return callback(new AppStoreError(420, 'Enhance Your Calm'));
+
+        $http.get(Client.getConfig().apiServerOrigin + '/api/v1/sizes').success(function (data, status) {
+            if (status !== 200) return callback(new AppStoreError(status, data));
+            return callback(null, data.sizes);
+        }).error(function (data, status) {
+            return callback(new AppStoreError(status, data));
+        });
+    };
+
     return new AppStore();
 }]);
