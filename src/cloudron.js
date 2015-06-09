@@ -24,6 +24,7 @@ exports = module.exports = {
     sendHeartbeat: sendHeartbeat,
 
     reboot: reboot,
+    migrate: migrate,
 
     getIp: getIp
 };
@@ -81,11 +82,13 @@ function CloudronError(reason, errorOrMessage) {
 util.inherits(CloudronError, Error);
 CloudronError.BAD_FIELD = 'Field error';
 CloudronError.INTERNAL_ERROR = 'Internal Error';
+CloudronError.EXTERNAL_ERROR = 'External Error';
 CloudronError.ALREADY_PROVISIONED = 'Already Provisioned';
 CloudronError.APPSTORE_DOWN = 'Appstore Down';
 CloudronError.BAD_USERNAME = 'Bad username';
 CloudronError.BAD_EMAIL = 'Bad email';
 CloudronError.BAD_PASSWORD = 'Bad password';
+CloudronError.INVALID_STATE = 'Invalid state';
 
 function debugApp(app, args) {
     assert(!app || typeof app === 'object');
@@ -468,5 +471,22 @@ function setCertificate(certificate, key, callback) {
 
 function reboot(callback) {
     shell.sudo('reboot', [ REBOOT_CMD ], callback);
+}
+
+function migrate(size, callback) {
+    assert(typeof size === 'string');
+    assert(typeof callback === 'function');
+
+    superagent
+        .post(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/migrate')
+        .query({ token: config.token() })
+        .send({ size: size })
+        .end(function (error, result) {
+            if (error) return callback(error);
+            if (result.status === 409) return callback(new CloudronError(CloudronError.INVALID_STATE));
+            if (result.status !== 202) return callback(new CloudronError(CloudronError.EXTERNAL_ERROR, util.format('%s %j', result.status, result.body)));
+
+            return callback(null);
+        });
 }
 
