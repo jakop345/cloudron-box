@@ -16,6 +16,9 @@ exports = module.exports = {
 var gActiveTasks = { },
     gPendingTasks = [ ];
 
+// Task concurrency is 1 for two reasons:
+// 1. The backup scripts (app and box) turn off swap after finish disregarding other backup processes
+// 2. apptask getFreePort has race with multiprocess
 var TASK_CONCURRENCY = 1;
 
 function initialize(callback) {
