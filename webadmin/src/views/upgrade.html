@@ -50,7 +50,9 @@
 <div class="card" style="margin-bottom: 15px;" ng-show="user.admin">
     <div class="row">
         <div class="col-xs-6">
-
+            <select class="form-control" id="restoreKey" ng-model="migration.restoreKey">
+                <option value="{{backup.restoreKey}}" ng-repeat="backup in availableBackups">{{backup.creationTime | prettyDate}}</option>
+            </select>
         </div>
         <div class="col-xs-3 text-right">
             <select class="form-control" id="sizeSlug" ng-model="migration.sizeSlug">
