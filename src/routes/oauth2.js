@@ -167,6 +167,17 @@ function sendErrorPageOrRedirect(req, res, message) {
     }
 }
 
+function sendError(req, res, message) {
+    assert(typeof req === 'object');
+    assert(typeof res === 'object');
+    assert(typeof message === 'string');
+
+    res.render('error', {
+        adminOrigin: config.adminOrigin(),
+        message: message
+    });
+}
+
 // Main login form username and password
 function loginForm(req, res) {
     if (typeof req.session.returnTo !== 'string') return sendErrorPageOrRedirect(req, res, 'Invalid login request');
@@ -176,7 +187,7 @@ function loginForm(req, res) {
     if (!u.query.client_id) return sendErrorPageOrRedirect(req, res, 'Invalid login request');
 
     clientdb.get(u.query.client_id, function (error, result) {
-        if (error) return sendErrorPageOrRedirect(req, res, 'Unknown OAuth client');
+        if (error) return sendError(req, res, 'Unknown OAuth client');
 
         if (result.appId === constants.ADMIN_CLIENT_ID) {
             return res.render('login', { adminOrigin: config.adminOrigin(), csrf: req.csrfToken(), applicationName: constants.ADMIN_NAME });
@@ -351,6 +362,7 @@ var authorization = [
         debug('authorization: client %s with callback to %s.', clientID, redirectURI);
 
         clientdb.get(clientID, function (error, client) {
+            if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
             if (error) return callback(error);
 
             // ignore the origin passed into form the client, but use the one from the clientdb
