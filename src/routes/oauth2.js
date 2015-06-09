@@ -163,7 +163,7 @@ function sendErrorPageOrRedirect(req, res, message) {
             message: 'Invalid request. returnTo query is not a valid URI. ' + message
         });
 
-        res.redirect(req.query.returnTo);
+        res.redirect(util.format('%s//%s', u.protocol, u.host));
     }
 }
 
