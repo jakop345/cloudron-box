@@ -392,6 +392,13 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
+    Client.prototype.migrate = function (size, callback) {
+        $http.post(client.apiOrigin + '/api/v1/cloudron/migrate', { size: size }).success(function(data, status) {
+            if (status !== 202 || typeof data !== 'object') return callback(new ClientError(status, data));
+            callback(null, data);
+        }).error(defaultErrorHandler(callback));
+    };
+
     Client.prototype.setCertificate = function (certificateFile, keyFile, callback) {
         console.log('will set certificate');
 
