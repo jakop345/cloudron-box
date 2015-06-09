@@ -59,6 +59,7 @@ var BACKUP_BOX_CMD = path.join(__dirname, 'scripts/backupbox.sh'),
     REBOOT_CMD = path.join(__dirname, 'scripts/reboot.sh');
 
 var gAddMailDnsRecordsTimerId = null,
+    gCloudronDetails = null,            // cached cloudron details like region,size...
     gCachedIp = null;
 
 function CloudronError(reason, errorOrMessage) {
@@ -348,20 +349,52 @@ function getStatus(callback) {
     });
 }
 
+function getCloudronDetails(callback) {
+    assert(typeof callback === 'function');
+
+    if (gCloudronDetails) return callback(null, gCloudronDetails);
+
+    superagent
+        .get(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn())
+        .query({ token: config.token() })
+        .end(function (error, result) {
+            if (error) return callback(error);
+            if (result.status !== 200) return callback(new CloudronError(CloudronError.EXTERNAL_ERROR, util.format('%s %j', result.status, result.body)));
+
+            gCloudronDetails = result.body.box;
+
+            return callback(null, gCloudronDetails);
+        });
+}
+
 function getConfig(callback) {
     assert(typeof callback === 'function');
 
-    callback(null, {
-        apiServerOrigin: config.apiServerOrigin(),
-        webServerOrigin: config.webServerOrigin(),
-        isDev: /dev/i.test(config.get('boxVersionsUrl')) || config.LOCAL,
-        fqdn: config.fqdn(),
-        ip: getIp(),
-        version: config.version(),
-        update: updater.getUpdateInfo(),
-        progress: progress.get(),
-        isCustomDomain: config.isCustomDomain(),
-        developerMode: config.developerMode()
+    getCloudronDetails(function (error, result) {
+        if (error) {
+            console.error('Failed to fetch cloudron details.', error);
+
+            // set fallback values to avoid dependency on appstore
+            result = {
+                region: result ? result.region : null,
+                size: result ? result.size : null
+            };
+        }
+
+        callback(null, {
+            apiServerOrigin: config.apiServerOrigin(),
+            webServerOrigin: config.webServerOrigin(),
+            isDev: /dev/i.test(config.get('boxVersionsUrl')) || config.LOCAL,
+            fqdn: config.fqdn(),
+            ip: getIp(),
+            version: config.version(),
+            update: updater.getUpdateInfo(),
+            progress: progress.get(),
+            isCustomDomain: config.isCustomDomain(),
+            developerMode: config.developerMode(),
+            region: result.region,
+            size: result.size
+        });
     });
 }
 
