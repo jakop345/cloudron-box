@@ -2,8 +2,7 @@
 
 'use strict';
 
-var apps = require('./apps'),
-    assert = require('assert'),
+var assert = require('assert'),
     async = require('async'),
     auth = require('./auth.js'),
     cloudron = require('./cloudron.js'),
@@ -17,6 +16,7 @@ var apps = require('./apps'),
     passport = require('passport'),
     path = require('path'),
     routes = require('./routes/index.js'),
+    taskmanager = require('./taskmanager.js'),
     updater = require('./updater.js');
 
 var gHttpServer = null;
@@ -226,7 +226,7 @@ function start(callback) {
     async.series([
         auth.initialize,
         database.initialize,
-        apps.initialize,
+        taskmanager.initialize,
         cloudron.initialize,
         updater.initialize,
         mailer.initialize,
@@ -245,7 +245,7 @@ function stop(callback) {
         auth.uninitialize,
         cloudron.uninitialize,
         updater.uninitialize,
-        apps.uninitialize,
+        taskmanager.uninitialize,
         cron.uninitialize,
         mailer.uninitialize,
         database.uninitialize,

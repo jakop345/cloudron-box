@@ -1,0 +1,86 @@
+'use strict';
+
+var appdb = require('./appdb.js'),
+    assert = require('assert'),
+    child_process = require('child_process'),
+    debug = require('debug')('box:taskmanager'),
+    _ = require('underscore'),
+
+exports = module.exports = {
+    initialize: initialize,
+    uninitialize: uninitialize,
+
+    restartAppTask: restartAppTask
+};
+
+var gActiveTasks = { },
+    gPendingTasks = [ ];
+
+var TASK_CONCURRENCY = 1;
+
+function initialize(callback) {
+    assert(typeof callback === 'function');
+
+    // resume app installs and uninstalls
+    appdb.getAll(function (error, apps) {
+        if (error) return callback(error);
+
+        apps.forEach(function (app) {
+            debug('Creating process for %s (%s) with state %s', app.location, app.id, app.installationState);
+            startAppTask(app.id);
+        });
+
+        callback(null);
+    });
+}
+
+function uninitialize(callback) {
+    assert(typeof callback === 'function');
+
+    gPendingTasks = { }; // clear this first, otherwise stopAppTask will resume them
+    for (var appId in gActiveTasks) {
+        stopAppTask(appId);
+    }
+
+    callback(null);
+}
+
+function startAppTask(appId) {
+    assert(typeof appId === 'string');
+    assert(!(appId in gActiveTasks));
+
+    if (Object.keys(gActiveTasks).length >= TASK_CONCURRENCY) {
+        debug('Reached concurrency limit, queueing task for %s', appId);
+        gPendingTasks.push(appId);
+        return;
+    }
+
+    gActiveTasks[appId] = child_process.fork(__dirname + '/apptask.js', [ appId ]);
+    gActiveTasks[appId].once('exit', function (code) {
+        debug('Task for %s completed with status %s', appId, code);
+        if (code && code !== 50) { // apptask crashed
+            appdb.update(appId, { installationState: appdb.ISTATE_ERROR, installationProgress: 'Apptask crashed with code ' + code }, NOOP_CALLBACK);
+        }
+        delete gActiveTasks[appId];
+        if (gPendingTasks.length !== 0) startAppTask(gPendingTasks.shift()); // start another pending task
+    });
+}
+
+function stopAppTask(appId) {
+    assert(typeof appId === 'string');
+
+    if (gActiveTasks[appId]) {
+        debug('stopAppTask : Killing existing task of %s with pid %s: ', appId, gActiveTasks[appId].pid);
+        gActiveTasks[appId].kill(); // this will end up calling the 'exit' handler
+        delete gActiveTasks[appId];
+    } else if (gPendingTasks.indexOf(appId) !== -1) {
+        debug('stopAppTask: Removing existing pending task : %s', appId);
+        gPendingTasks = _.without(gPendingTasks, appId);
+    }
+}
+
+function restartAppTask(appId) {
+    stopAppTask(appId);
+    startAppTask(appId);
+}
+

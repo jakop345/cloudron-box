@@ -6,8 +6,6 @@
 exports = module.exports = {
     AppsError: AppsError,
 
-    initialize: initialize,
-    uninitialize: uninitialize,
     get: get,
     getBySubdomain: getBySubdomain,
     getAll: getAll,
@@ -37,7 +35,6 @@ exports = module.exports = {
 
 var appdb = require('./appdb.js'),
     assert = require('assert'),
-    child_process = require('child_process'),
     config = require('../config.js'),
     constants = require('../constants.js'),
     DatabaseError = require('./databaseerror.js'),
@@ -52,88 +49,11 @@ var appdb = require('./appdb.js'),
     semver = require('semver'),
     split = require('split'),
     superagent = require('superagent'),
+    taskmanager = require('./taskmanager.js'),
     util = require('util'),
-    validator = require('validator'),
-    _ = require('underscore'),
-
-var gActiveTasks = { },
-    gPendingTasks = [ ];
-
-var TASK_CONCURRENCY = 1;
+    validator = require('validator');
 
 var NOOP_CALLBACK = function (error) { console.error(error); };
-
-function initialize(callback) {
-    assert(typeof callback === 'function');
-
-    resume(callback); // TODO: potential race here since resume is async
-}
-
-function startTask(appId) {
-    assert(typeof appId === 'string');
-    assert(!(appId in gActiveTasks));
-
-    if (Object.keys(gActiveTasks).length >= TASK_CONCURRENCY) {
-        debug('Reached concurrency limit, queueing task for %s', appId);
-        gPendingTasks.push(appId);
-        return;
-    }
-
-    gActiveTasks[appId] = child_process.fork(__dirname + '/apptask.js', [ appId ]);
-    gActiveTasks[appId].once('exit', function (code) {
-        debug('Task for %s completed with status %s', appId, code);
-        if (code && code !== 50) { // apptask crashed
-            appdb.update(appId, { installationState: appdb.ISTATE_ERROR, installationProgress: 'Apptask crashed with code ' + code }, NOOP_CALLBACK);
-        }
-        delete gActiveTasks[appId];
-        if (gPendingTasks.length !== 0) startTask(gPendingTasks.shift()); // start another pending task
-    });
-}
-
-function stopTask(appId) {
-    assert(typeof appId === 'string');
-
-    if (gActiveTasks[appId]) {
-        debug('stopTask : Killing existing task of %s with pid %s: ', appId, gActiveTasks[appId].pid);
-        gActiveTasks[appId].kill(); // this will end up calling the 'exit' handler
-        delete gActiveTasks[appId];
-    } else if (gPendingTasks.indexOf(appId) !== -1) {
-        debug('stopTask: Removing existing pending task : %s', appId);
-        gPendingTasks = _.without(gPendingTasks, appId);
-    }
-}
-
-function restartTask(appId) {
-    stopTask(appId);
-    startTask(appId);
-}
-
-// resume install and uninstalls
-function resume(callback) {
-    assert(typeof callback === 'function');
-
-    appdb.getAll(function (error, apps) {
-        if (error) return callback(error);
-
-        apps.forEach(function (app) {
-            debug('Creating process for %s (%s) with state %s', app.location, app.id, app.installationState);
-            startTask(app.id);
-        });
-
-        callback(null);
-    });
-}
-
-function uninitialize(callback) {
-    assert(typeof callback === 'function');
-
-    gPendingTasks = { }; // clear this first, otherwise stopTask will resume them
-    for (var appId in gActiveTasks) {
-        stopTask(appId);
-    }
-
-    callback(null);
-}
 
 // http://dustinsenos.com/articles/customErrorsInNode
 // http://code.google.com/p/v8/wiki/JavaScriptStackTraceApi
@@ -373,7 +293,7 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
             if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(getDuplicateErrorDetails(location.toLowerCase(), portBindings, error));
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-            restartTask(appId);
+            taskmanager.restartAppTask(appId);
 
             callback(null);
         });
@@ -413,7 +333,7 @@ function configure(appId, location, portBindings, accessRestriction, callback) {
             if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE));
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-            startTask(appId);
+            taskmanager.restartAppTask(appId);
 
             callback(null);
         });
@@ -450,7 +370,7 @@ function update(appId, manifest, portBindings, icon, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE)); // might be a bad guess
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        startTask(appId);
+        taskmanager.restartAppTask(appId);
 
         callback(null);
     });
@@ -521,7 +441,7 @@ function restore(appId, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE)); // might be a bad guess
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        startTask(appId);
+        taskmanager.restartAppTask(appId);
 
         callback(null);
     });
@@ -537,7 +457,7 @@ function uninstall(appId, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        restartTask(appId); // since uninstall is allowed from any state, kill current task
+        taskmanager.restartAppTask(appId); // since uninstall is allowed from any state, kill current task
 
         callback(null);
     });
@@ -553,7 +473,7 @@ function start(appId, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE)); // might be a bad guess
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        restartTask(appId);
+        taskmanager.restartAppTask(appId);
 
         callback(null);
     });
@@ -569,7 +489,7 @@ function stop(appId, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE)); // might be a bad guess
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        restartTask(appId);
+        taskmanager.restartAppTask(appId);
 
         callback(null);
     });
