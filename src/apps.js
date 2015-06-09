@@ -53,9 +53,13 @@ var appdb = require('./appdb.js'),
     split = require('split'),
     superagent = require('superagent'),
     util = require('util'),
-    validator = require('validator');
+    validator = require('validator'),
+    _ = require('underscore'),
 
-var gActiveTasks = { };
+var gActiveTasks = { },
+    gPendingTasks = [ ];
+
+var TASK_CONCURRENCY = 1;
 
 var NOOP_CALLBACK = function (error) { console.error(error); };
 
@@ -65,35 +69,37 @@ function initialize(callback) {
     resume(callback); // TODO: potential race here since resume is async
 }
 
-function startTask(appId, maxDelay) {
+function startTask(appId) {
     assert(typeof appId === 'string');
-    assert(!maxDelay || typeof maxDelay === 'number');
     assert(!(appId in gActiveTasks));
 
-    maxDelay = maxDelay || 0;
+    if (Object.keys(gActiveTasks).length >= TASK_CONCURRENCY) {
+        debug('Reached concurrency limit, queueing task for %s', appId);
+        gPendingTasks.push(appId);
+        return;
+    }
 
-    // start processes with an arbitrary delay to mitigate docker issue
-    // https://github.com/docker/docker/issues/8714. this could be our bug as well
-    // because we getFreePort in apptask has a race with multiprocess
-    setTimeout(function () {
-        gActiveTasks[appId] = child_process.fork(__dirname + '/apptask.js', [ appId ]);
-        gActiveTasks[appId].once('exit', function (code) {
-            debug('Task completed with %s.', code, appId);
-            if (code && code !== 50) { // apptask crashed
-                appdb.update(appId, { installationState: appdb.ISTATE_ERROR, installationProgress: 'Apptask crashed with code ' + code }, NOOP_CALLBACK);
-            }
-            delete gActiveTasks[appId];
-        });
-    }, Math.floor(Math.random() * maxDelay));
+    gActiveTasks[appId] = child_process.fork(__dirname + '/apptask.js', [ appId ]);
+    gActiveTasks[appId].once('exit', function (code) {
+        debug('Task for %s completed with status %s', appId, code);
+        if (code && code !== 50) { // apptask crashed
+            appdb.update(appId, { installationState: appdb.ISTATE_ERROR, installationProgress: 'Apptask crashed with code ' + code }, NOOP_CALLBACK);
+        }
+        delete gActiveTasks[appId];
+        if (gPendingTasks.length !== 0) startTask(gPendingTasks.shift()); // start another pending task
+    });
 }
 
 function stopTask(appId) {
     assert(typeof appId === 'string');
 
     if (gActiveTasks[appId]) {
-        debug('Killing existing task : ' + gActiveTasks[appId].pid);
-        gActiveTasks[appId].kill();
+        debug('stopTask : Killing existing task of %s with pid %s: ', appId, gActiveTasks[appId].pid);
+        gActiveTasks[appId].kill(); // this will end up calling the 'exit' handler
         delete gActiveTasks[appId];
+    } else if (gPendingTasks.indexOf(appId) !== -1) {
+        debug('stopTask: Removing existing pending task : %s', appId);
+        gPendingTasks = _.without(gPendingTasks, appId);
     }
 }
 
@@ -111,7 +117,7 @@ function resume(callback) {
 
         apps.forEach(function (app) {
             debug('Creating process for %s (%s) with state %s', app.location, app.id, app.installationState);
-            startTask(app.id, apps.length);
+            startTask(app.id);
         });
 
         callback(null);
@@ -121,6 +127,7 @@ function resume(callback) {
 function uninitialize(callback) {
     assert(typeof callback === 'function');
 
+    gPendingTasks = { }; // clear this first, otherwise stopTask will resume them
     for (var appId in gActiveTasks) {
         stopTask(appId);
     }
