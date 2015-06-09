@@ -294,6 +294,99 @@ describe('Cloudron', function () {
             });
         });
     });
+
+    describe('migrate', function () {
+        before(function (done) {
+            async.series([
+                setup,
+
+                function (callback) {
+                    var scope1 = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
+                    var scope2 = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/setup/done?setupToken=somesetuptoken').reply(201, {});
+
+                    config._reset();
+
+                    request.post(SERVER_URL + '/api/v1/cloudron/activate')
+                           .query({ setupToken: 'somesetuptoken' })
+                           .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
+                           .end(function (error, result) {
+                        expect(error).to.not.be.ok();
+                        expect(result).to.be.ok();
+                        expect(scope1.isDone()).to.be.ok();
+                        expect(scope2.isDone()).to.be.ok();
+
+                        // stash token for further use
+                        token = result.body.token;
+
+                        callback();
+                    });
+                },
+            ], done);
+        });
+
+        after(cleanup);
+
+        it('fails without token', function (done) {
+            request.post(SERVER_URL + '/api/v1/cloudron/migrate')
+                   .send({ size: 'small' })
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(401);
+                done();
+            });
+        });
+
+        it('fails with missing size', function (done) {
+            request.post(SERVER_URL + '/api/v1/cloudron/migrate')
+                   .send({ })
+                   .query({ access_token: token })
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(400);
+                done();
+            });
+        });
+
+        it('fails with wrong size type', function (done) {
+            request.post(SERVER_URL + '/api/v1/cloudron/migrate')
+                   .send({ size: 4 })
+                   .query({ access_token: token })
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(400);
+                done();
+            });
+        });
+
+        it('fails when in wrong state', function (done) {
+            var scope = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/migrate?token=APPSTORE_TOKEN', { size: 'small' }).reply(409, {});
+
+            request.post(SERVER_URL + '/api/v1/cloudron/migrate')
+                   .send({ size: 'small' })
+                   .query({ access_token: token })
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(409);
+                expect(scope.isDone()).to.be.ok();
+                done();
+            });
+        });
+
+
+        it('succeeds', function (done) {
+            var scope = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/migrate?token=APPSTORE_TOKEN', { size: 'small' }).reply(202, {});
+
+            request.post(SERVER_URL + '/api/v1/cloudron/migrate')
+                   .send({ size: 'small' })
+                   .query({ access_token: token })
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(202);
+                expect(scope.isDone()).to.be.ok();
+                done();
+            });
+        });
+    });
 });
 
 
