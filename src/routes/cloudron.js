@@ -25,6 +25,7 @@ exports = module.exports = {
     createBackup: createBackup,
     getConfig: getConfig,
     update: update,
+    migrate: migrate,
     setCertificate: setCertificate
 };
 
@@ -142,6 +143,17 @@ function getConfig(req, res, next) {
 
 function update(req, res, next) {
     updater.update(function (error) {
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(202, {}));
+    });
+}
+
+function migrate(req, res, next) {
+    if (typeof req.body.size !== 'string') return next(new HttpError(400, 'size must be string'));
+
+    cloudron.migrate(req.body.size, function (error) {
+        if (error && error.reason === CloudronError.INVALID_STATE) return next(new HttpError(409, error));
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(202, {}));
