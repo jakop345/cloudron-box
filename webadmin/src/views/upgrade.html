@@ -49,7 +49,12 @@
 
 <div class="card" style="margin-bottom: 15px;" ng-show="user.admin">
     <div class="row">
-        <div class="col-xs-6">
+        <div class="col-xs-3">
+            <select class="form-control" id="regionSlug" ng-model="migration.regionSlug">
+                <option value="{{region.slug}}" ng-repeat="region in availableRegions">{{region.name}}</option>
+            </select>
+        </div>
+        <div class="col-xs-3">
             <select class="form-control" id="restoreKey" ng-model="migration.restoreKey">
                 <option value="{{backup.restoreKey}}" ng-repeat="backup in availableBackups">{{backup.creationTime | prettyDate}}</option>
             </select>

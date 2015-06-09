@@ -5,11 +5,13 @@ angular.module('Application').controller('UpgradeController', ['$scope', '$locat
 
     $scope.user = Client.getUserInfo();
     $scope.config = Client.getConfig();
+    $scope.availableRegions = [];
     $scope.availableSizes = [];
     $scope.availableBackups = [];
 
     $scope.migration = {
-        sizeSlug: 'small',
+        regionSlug: '',
+        sizeSlug: '',
         restoreKey: null
     };
 
@@ -30,12 +32,22 @@ angular.module('Application').controller('UpgradeController', ['$scope', '$locat
 
             angular.copy(backups, $scope.availableBackups);
 
+            $scope.migration.restoreKey = $scope.availableBackups[0].restoreKey;
+
             AppStore.getSizes(function (error, result) {
                 if (error) return console.error(error);
 
                 angular.copy(result, $scope.availableSizes);
 
                 $scope.migration.sizeSlug = $scope.availableSizes[0].slug;
+
+                AppStore.getRegions(function (error, result) {
+                    if (error) return console.error(error);
+
+                    angular.copy(result, $scope.availableRegions);
+
+                    $scope.migration.regionSlug = $scope.availableRegions[0].slug;
+                });
             });
         });
     });
