@@ -36,3 +36,19 @@
         </div>
     </div>
 </div>
+
+<div class="card" style="margin-bottom: 15px;" ng-show="user.admin">
+    <div class="row">
+        <div class="col-xs-6">
+
+        </div>
+        <div class="col-xs-3 text-right">
+            <select class="form-control" id="sizeSlug" ng-model="appMigrate.sizeSlug">
+                <option value="{{size.slug}}" ng-repeat="size in availableSizes">{{size.name}}</option>
+            </select>
+        </div>
+        <div class="col-xs-3 text-right">
+            <button class="btn btn-outline btn-primary" ng-click="showMigrateConfirm()">Migrate</button>
+        </div>
+    </div>
+</div>
