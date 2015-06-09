@@ -17,8 +17,7 @@ function collectLogs(program, callback) {
     assert(typeof program === 'string');
     assert(typeof callback === 'function');
 
-    var logFilePath = '';
-    if (program === 'box') logFilePath = '/var/log/supervisor/box.log';
+    var logFilePath = util.format('/var/log/supervisor/%s.log', program);
 
     if (!fs.existsSync(logFilePath)) return callback(new Error(util.format('Log file %s does not exist.', logFilePath)));
 
