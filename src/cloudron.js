@@ -89,6 +89,7 @@ CloudronError.BAD_USERNAME = 'Bad username';
 CloudronError.BAD_EMAIL = 'Bad email';
 CloudronError.BAD_PASSWORD = 'Bad password';
 CloudronError.INVALID_STATE = 'Invalid state';
+CloudronError.NOT_FOUND = 'Not found';
 
 function debugApp(app, args) {
     assert(!app || typeof app === 'object');
@@ -473,17 +474,19 @@ function reboot(callback) {
     shell.sudo('reboot', [ REBOOT_CMD ], callback);
 }
 
-function migrate(size, callback) {
+function migrate(size, restoreKey, callback) {
     assert(typeof size === 'string');
+    assert(typeof restoreKey === 'string');
     assert(typeof callback === 'function');
 
     superagent
         .post(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/migrate')
         .query({ token: config.token() })
-        .send({ size: size })
+        .send({ size: size, restoreKey: restoreKey })
         .end(function (error, result) {
             if (error) return callback(error);
             if (result.status === 409) return callback(new CloudronError(CloudronError.INVALID_STATE));
+            if (result.status === 404) return callback(new CloudronError(CloudronError.NOT_FOUND));
             if (result.status !== 202) return callback(new CloudronError(CloudronError.EXTERNAL_ERROR, util.format('%s %j', result.status, result.body)));
 
             return callback(null);
