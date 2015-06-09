@@ -97,6 +97,11 @@ function stopTask(appId) {
     }
 }
 
+function restartTask(appId) {
+    stopTask(appId);
+    startTask(appId);
+}
+
 // resume install and uninstalls
 function resume(callback) {
     assert(typeof callback === 'function');
@@ -361,8 +366,7 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
             if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(getDuplicateErrorDetails(location.toLowerCase(), portBindings, error));
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-            stopTask(appId);
-            startTask(appId);
+            restartTask(appId);
 
             callback(null);
         });
@@ -526,8 +530,7 @@ function uninstall(appId, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        stopTask(appId); // since uninstall is allowed from any state, kill current task
-        startTask(appId);
+        restartTask(appId); // since uninstall is allowed from any state, kill current task
 
         callback(null);
     });
@@ -543,8 +546,7 @@ function start(appId, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE)); // might be a bad guess
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        stopTask(appId);
-        startTask(appId);
+        restartTask(appId);
 
         callback(null);
     });
@@ -560,8 +562,7 @@ function stop(appId, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE)); // might be a bad guess
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        stopTask(appId);
-        startTask(appId);
+        restartTask(appId);
 
         callback(null);
     });
