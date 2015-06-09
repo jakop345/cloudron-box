@@ -55,7 +55,7 @@ var appdb = require('./appdb.js'),
     util = require('util'),
     validator = require('validator');
 
-var gTasks = { };
+var gActiveTasks = { };
 
 var NOOP_CALLBACK = function (error) { console.error(error); };
 
@@ -68,7 +68,7 @@ function initialize(callback) {
 function startTask(appId, maxDelay) {
     assert(typeof appId === 'string');
     assert(!maxDelay || typeof maxDelay === 'number');
-    assert(!(appId in gTasks));
+    assert(!(appId in gActiveTasks));
 
     maxDelay = maxDelay || 0;
 
@@ -76,13 +76,13 @@ function startTask(appId, maxDelay) {
     // https://github.com/docker/docker/issues/8714. this could be our bug as well
     // because we getFreePort in apptask has a race with multiprocess
     setTimeout(function () {
-        gTasks[appId] = child_process.fork(__dirname + '/apptask.js', [ appId ]);
-        gTasks[appId].once('exit', function (code) {
+        gActiveTasks[appId] = child_process.fork(__dirname + '/apptask.js', [ appId ]);
+        gActiveTasks[appId].once('exit', function (code) {
             debug('Task completed with %s.', code, appId);
             if (code && code !== 50) { // apptask crashed
                 appdb.update(appId, { installationState: appdb.ISTATE_ERROR, installationProgress: 'Apptask crashed with code ' + code }, NOOP_CALLBACK);
             }
-            delete gTasks[appId];
+            delete gActiveTasks[appId];
         });
     }, Math.floor(Math.random() * maxDelay));
 }
@@ -90,10 +90,10 @@ function startTask(appId, maxDelay) {
 function stopTask(appId) {
     assert(typeof appId === 'string');
 
-    if (gTasks[appId]) {
-        debug('Killing existing task : ' + gTasks[appId].pid);
-        gTasks[appId].kill();
-        delete gTasks[appId];
+    if (gActiveTasks[appId]) {
+        debug('Killing existing task : ' + gActiveTasks[appId].pid);
+        gActiveTasks[appId].kill();
+        delete gActiveTasks[appId];
     }
 }
 
@@ -121,7 +121,7 @@ function resume(callback) {
 function uninitialize(callback) {
     assert(typeof callback === 'function');
 
-    for (var appId in gTasks) {
+    for (var appId in gActiveTasks) {
         stopTask(appId);
     }
 
