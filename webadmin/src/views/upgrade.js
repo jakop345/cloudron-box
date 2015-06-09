@@ -7,8 +7,6 @@ angular.module('Application').controller('UpgradeController', ['$scope', '$locat
     $scope.config = Client.getConfig();
     $scope.availableSizes = [];
     $scope.availableBackups = [];
-    $scope.currentSize = 'small';
-    $scope.currentRegion = 'sfo';
 
     $scope.migration = {
         sizeSlug: 'small',
