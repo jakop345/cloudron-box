@@ -30,7 +30,7 @@ while true; do
     --data)
         # only read mandatory non-empty parameters here
         read -r arg_api_server_origin arg_web_server_origin arg_fqdn arg_token arg_is_custom_domain arg_box_versions_url arg_version <<EOF
-        $(echo "$2" | $json apiServerOrigin webServerOrigin fqdn token isCustomDomain boxVersionsUrl version model | tr '\n' ' ')
+        $(echo "$2" | $json apiServerOrigin webServerOrigin fqdn token isCustomDomain boxVersionsUrl version | tr '\n' ' ')
 EOF
         # read possibly empty parameters here
         arg_tls_cert=$(echo "$2" | $json tlsCert)

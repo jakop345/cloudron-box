@@ -126,7 +126,7 @@ cat > "${CONFIG_DIR}/cloudron.conf" <<CONF_END
         "port": 3306,
         "name": "box"
     },
-    "model": ${arg_model},
+    "model": "${arg_model}",
     "developerMode": ${arg_developer_mode}
 }
 CONF_END
