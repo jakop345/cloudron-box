@@ -40,7 +40,7 @@ function initialize(callback) {
 function uninitialize(callback) {
     assert(typeof callback === 'function');
 
-    gPendingTasks = { }; // clear this first, otherwise stopAppTask will resume them
+    gPendingTasks = [ ]; // clear this first, otherwise stopAppTask will resume them
     for (var appId in gActiveTasks) {
         stopAppTask(appId);
     }
