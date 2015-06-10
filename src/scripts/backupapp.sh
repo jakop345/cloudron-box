@@ -26,13 +26,10 @@ readonly now=$(date "+%Y-%m-%dT%H:%M:%S")
 readonly app_data_dir="${DATA_DIR}/${app_id}"
 readonly app_data_snapshot="${DATA_DIR}/snapshots/${app_id}-${now}"
 
-echo "Creating and mount backup swap"
-swap_file="/2048MiB.backup.swap"
-if swapon -s | grep -q "${swap_file}"; then swapoff "${swap_file}"; fi
-fallocate -l 2048m "${swap_file}"
-chmod 600 "${swap_file}"
-mkswap "${swap_file}"
-swapon "${swap_file}"
+echo "Mount backup swap"
+backup_swap_file="/backup.swap"
+if swapon -s | grep -q "${backup_swap_file}"; then swapoff "${backup_swap_file}"; fi
+swapon "${backup_swap_file}"
 
 btrfs subvolume snapshot -r "${app_data_dir}" "${app_data_snapshot}"
 
@@ -50,7 +47,7 @@ done
 btrfs subvolume delete "${app_data_snapshot}"
 
 echo "Unmounting backup swap"
-[[ -f "${swap_file}" ]] && swapoff "${swap_file}"
+swapoff "${backup_swap_file}"
 
 if [[ ${try} -eq 5 ]]; then
     echo "Backup failed"
