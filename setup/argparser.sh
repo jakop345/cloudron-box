@@ -16,6 +16,7 @@ arg_version=""
 arg_is_custom_domain="false"
 arg_developer_mode=""
 arg_retire="false"
+arg_model=""
 
 args=$(getopt -o "" -l "data:,retire" -n "$0" -- "$@")
 eval set -- "${args}"
@@ -29,7 +30,7 @@ while true; do
     --data)
         # only read mandatory non-empty parameters here
         read -r arg_api_server_origin arg_web_server_origin arg_fqdn arg_token arg_is_custom_domain arg_box_versions_url arg_version <<EOF
-        $(echo "$2" | $json apiServerOrigin webServerOrigin fqdn token isCustomDomain boxVersionsUrl version | tr '\n' ' ')
+        $(echo "$2" | $json apiServerOrigin webServerOrigin fqdn token isCustomDomain boxVersionsUrl version model | tr '\n' ' ')
 EOF
         # read possibly empty parameters here
         arg_tls_cert=$(echo "$2" | $json tlsCert)
@@ -43,6 +44,9 @@ EOF
 
         arg_restore_key=$(echo "$2" | $json restoreKey)
         [[ "${arg_restore_key}" == "null" ]] && arg_restore_key=""
+
+        arg_model=$(echo "$2" | $json model)
+        [[ "${arg_model}" == "null" ]] && arg_model=""
 
         shift 2
         ;;
@@ -64,3 +68,4 @@ echo "custom domain: ${arg_is_custom_domain}"
 echo "tls cert: ${arg_tls_cert}"
 echo "tls key: ${arg_tls_key}"
 echo "developer mode: ${arg_developer_mode}"
+echo "model: ${arg_model}"
