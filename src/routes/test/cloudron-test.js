@@ -356,7 +356,7 @@ describe('Cloudron', function () {
 
         it('fails without token', function (done) {
             request.post(SERVER_URL + '/api/v1/cloudron/migrate')
-                   .send({ size: 'small' })
+                   .send({ size: 'small', region: 'sfo'})
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
@@ -366,7 +366,7 @@ describe('Cloudron', function () {
 
         it('fails with missing size', function (done) {
             request.post(SERVER_URL + '/api/v1/cloudron/migrate')
-                   .send({ restoreKey: 'foo' })
+                   .send({ restoreKey: 'foo', region: 'sfo' })
                    .query({ access_token: token })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -377,7 +377,30 @@ describe('Cloudron', function () {
 
         it('fails with wrong size type', function (done) {
             request.post(SERVER_URL + '/api/v1/cloudron/migrate')
-                   .send({ size: 4, restoreKey: 'foo' })
+                   .send({ size: 4, region: 'sfo', restoreKey: 'foo' })
+                   .query({ access_token: token })
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(400);
+                done();
+            });
+        });
+
+        it('fails with missing region', function (done) {
+            request.post(SERVER_URL + '/api/v1/cloudron/migrate')
+                   .send({ size: 'small', restoreKey: 'foo' })
+                   .query({ access_token: token })
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(400);
+                done();
+            });
+        });
+
+
+        it('fails with wrong region type', function (done) {
+            request.post(SERVER_URL + '/api/v1/cloudron/migrate')
+                   .send({ size: 'small', region: 4, restoreKey: 'foo' })
                    .query({ access_token: token })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -388,7 +411,7 @@ describe('Cloudron', function () {
 
         it('fails with missing restoreKey', function (done) {
             request.post(SERVER_URL + '/api/v1/cloudron/migrate')
-                   .send({ size: 'small' })
+                   .send({ size: 'small', region: 'sfo' })
                    .query({ access_token: token })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -400,7 +423,7 @@ describe('Cloudron', function () {
 
         it('fails with wrong restoreKey type', function (done) {
             request.post(SERVER_URL + '/api/v1/cloudron/migrate')
-                   .send({ size: 'small', restoreKey: 4 })
+                   .send({ size: 'small', region: 'sfo', restoreKey: 4 })
                    .query({ access_token: token })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -409,12 +432,11 @@ describe('Cloudron', function () {
             });
         });
 
-
         it('fails when in wrong state', function (done) {
-            var scope = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/migrate?token=APPSTORE_TOKEN', { size: 'small', restoreKey: 'foo' }).reply(409, {});
+            var scope = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/migrate?token=APPSTORE_TOKEN', { size: 'small', region: 'sfo', restoreKey: 'foo' }).reply(409, {});
 
             request.post(SERVER_URL + '/api/v1/cloudron/migrate')
-                   .send({ size: 'small', restoreKey: 'foo' })
+                   .send({ size: 'small', region: 'sfo', restoreKey: 'foo' })
                    .query({ access_token: token })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -426,10 +448,10 @@ describe('Cloudron', function () {
 
 
         it('succeeds', function (done) {
-            var scope = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/migrate?token=APPSTORE_TOKEN', { size: 'small', restoreKey: 'foo' }).reply(202, {});
+            var scope = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/migrate?token=APPSTORE_TOKEN', { size: 'small', region: 'sfo', restoreKey: 'foo' }).reply(202, {});
 
             request.post(SERVER_URL + '/api/v1/cloudron/migrate')
-                   .send({ size: 'small', restoreKey: 'foo' })
+                   .send({ size: 'small', region: 'sfo', restoreKey: 'foo' })
                    .query({ access_token: token })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();

@@ -151,9 +151,10 @@ function update(req, res, next) {
 
 function migrate(req, res, next) {
     if (typeof req.body.size !== 'string') return next(new HttpError(400, 'size must be string'));
+    if (typeof req.body.region !== 'string') return next(new HttpError(400, 'region must be string'));
     if (typeof req.body.restoreKey !== 'string') return next(new HttpError(400, 'restoreKey must be string'));
 
-    cloudron.migrate(req.body.size, req.body.restoreKey, function (error) {
+    cloudron.migrate(req.body.size, req.body.region, req.body.restoreKey, function (error) {
         if (error && error.reason === CloudronError.INVALID_STATE) return next(new HttpError(409, error));
         if (error && error.reason === CloudronError.NOT_FOUND) return next(new HttpError(404, error));
         if (error) return next(new HttpError(500, error));

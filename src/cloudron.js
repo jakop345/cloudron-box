@@ -507,15 +507,16 @@ function reboot(callback) {
     shell.sudo('reboot', [ REBOOT_CMD ], callback);
 }
 
-function migrate(size, restoreKey, callback) {
+function migrate(size, region, restoreKey, callback) {
     assert(typeof size === 'string');
+    assert(typeof region === 'string');
     assert(typeof restoreKey === 'string');
     assert(typeof callback === 'function');
 
     superagent
         .post(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/migrate')
         .query({ token: config.token() })
-        .send({ size: size, restoreKey: restoreKey })
+        .send({ size: size, region: region, restoreKey: restoreKey })
         .end(function (error, result) {
             if (error) return callback(error);
             if (result.status === 409) return callback(new CloudronError(CloudronError.INVALID_STATE));
