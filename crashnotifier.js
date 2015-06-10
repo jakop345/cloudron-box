@@ -13,6 +13,9 @@ var supervisor = require('supervisord-eventlistener'),
     fs = require('fs'),
     mailer = require('./src/mailer.js');
 
+var gLastNotifyTime = {};
+var gCooldownTime = 1000 * 60  * 5; // 5 min
+
 function collectLogs(program, callback) {
     assert(typeof program === 'string');
     assert(typeof callback === 'function');
@@ -34,7 +37,7 @@ function collectLogs(program, callback) {
 supervisor.on('PROCESS_STATE_EXITED', function (headers, data) {
     if (data.expected === '1') return console.error('Normal app %s exit', data.processname);
 
-    console.error('%s exited unexpectedly, send mail', data.processname);
+    console.error('%s exited unexpectedly', data.processname);
 
     collectLogs(data.processname, function (error, result) {
         if (error) {
@@ -42,7 +45,13 @@ supervisor.on('PROCESS_STATE_EXITED', function (headers, data) {
             result = util.format('Failed to collect logs.', error);
         }
 
-        mailer.sendCrashNotification(data.processname, result);
+        if (!gLastNotifyTime[data.processname] || gLastNotifyTime[data.processname] < Date.now() - gCooldownTime) {
+            console.error('Send mail.');
+            mailer.sendCrashNotification(data.processname, result);
+            gLastNotifyTime[data.processname] = Date.now();
+        } else {
+            console.error('Do not send mail, already sent one recently.');
+        }
     });
 });
 
