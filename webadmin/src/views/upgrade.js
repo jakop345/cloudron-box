@@ -20,7 +20,7 @@ angular.module('Application').controller('UpgradeController', ['$scope', '$locat
     };
 
     $scope.doMigration = function () {
-        Client.migrate($scope.migration.sizeSlug, $scope.migration.restoreKey, function (error) {
+        Client.migrate($scope.migration.sizeSlug, $scope.migration.restoreKey, $scope.migration.regionSlug, function (error) {
             if (error) return console.error(error);
             $('#migrationModal').modal('hide');
         });
@@ -31,21 +31,18 @@ angular.module('Application').controller('UpgradeController', ['$scope', '$locat
             if (error) return console.error(error);
 
             angular.copy(backups, $scope.availableBackups);
-
             $scope.migration.restoreKey = $scope.availableBackups[0].restoreKey;
 
             AppStore.getSizes(function (error, result) {
                 if (error) return console.error(error);
 
                 angular.copy(result, $scope.availableSizes);
-
                 $scope.migration.sizeSlug = $scope.availableSizes[0].slug;
 
                 AppStore.getRegions(function (error, result) {
                     if (error) return console.error(error);
 
                     angular.copy(result, $scope.availableRegions);
-
                     $scope.migration.regionSlug = $scope.availableRegions[0].slug;
                 });
             });
