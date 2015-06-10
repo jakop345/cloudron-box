@@ -2,22 +2,7 @@
 
 'use strict';
 
-var assert = require('assert'),
-    async = require('async'),
-    cloudron = require('./cloudron.js'),
-    config = require('../config.js'),
-    debug = require('debug')('box:mailer'),
-    digitalocean = require('./digitalocean.js'),
-    docker = require('./docker.js'),
-    ejs = require('ejs'),
-    nodemailer = require('nodemailer'),
-    path = require('path'),
-    safe = require('safetydance'),
-    smtpTransport = require('nodemailer-smtp-transport'),
-    userdb = require('./userdb.js'),
-    util = require('util'),
-    _ = require('underscore');
-
+// intentionally placed here
 exports = module.exports = {
     initialize: initialize,
     uninitialize: uninitialize,
@@ -33,6 +18,22 @@ exports = module.exports = {
 
     appDied: appDied
 };
+
+var assert = require('assert'),
+    async = require('async'),
+    cloudron = require('./cloudron.js'),
+    config = require('../config.js'),
+    debug = require('debug')('box:mailer'),
+    digitalocean = require('./digitalocean.js'),
+    docker = require('./docker.js'),
+    ejs = require('ejs'),
+    nodemailer = require('nodemailer'),
+    path = require('path'),
+    safe = require('safetydance'),
+    smtpTransport = require('nodemailer-smtp-transport'),
+    userdb = require('./userdb.js'),
+    util = require('util'),
+    _ = require('underscore');
 
 var MAIL_TEMPLATES_DIR = path.join(__dirname, 'mail_templates');
 
