@@ -76,14 +76,16 @@ app.filter('installationActive', function() {
 
 app.filter('installationStateLabel', function() {
     return function(app) {
+        var waiting = app.progress === 0 ? ' (Waiting)' : '';
+
         switch (app.installationState) {
-        case ISTATES.PENDING_INSTALL: return 'Installing';
-        case ISTATES.PENDING_CONFIGURE: return 'Configuring';
-        case ISTATES.PENDING_UNINSTALL: return 'Uninstalling';
-        case ISTATES.PENDING_RESTORE: return 'Starting';
-        case ISTATES.PENDING_UPDATE: return 'Updating';
+        case ISTATES.PENDING_INSTALL: return 'Installing...' + waiting;
+        case ISTATES.PENDING_CONFIGURE: return 'Configuring...' + waiting;
+        case ISTATES.PENDING_UNINSTALL: return 'Uninstalling...' + waiting;
+        case ISTATES.PENDING_RESTORE: return 'Restoring...' + waiting;
+        case ISTATES.PENDING_UPDATE: return 'Updating...' + waiting;
         case ISTATES.ERROR: return 'Error';
-        case ISTATES.INSTALLED: return app.health !== HSTATES.HEALTHY ? 'Starting' : 'Running';
+        case ISTATES.INSTALLED: return app.health !== HSTATES.HEALTHY ? 'Starting...' : 'Running';
         default: return app.installationState;
         }
     };
