@@ -421,8 +421,8 @@ describe('Cloudron', function () {
         });
 
         it('fails when in wrong state', function (done) {
-            var scope1 = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/migrate?token=APPSTORE_TOKEN', { size: 'small', region: 'sfo', restoreKey: 'somerestorekey' }).reply(409, {});
-            var scope2 = nock(config.apiServerOrigin()).put('/api/v1/boxes/' + config.fqdn() + '/backupurl?token=APPSTORE_TOKEN', { boxVersion: '0.5.0', appId: null, appBackupIds: [] }).reply(201, { url: 'http://foobar', backupKey: 'somerestorekey' });
+            var scope1 = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/migrate?token=APPSTORE_TOKEN', { size: 'small', region: 'sfo', restoreKey: 'someid' }).reply(409, {});
+            var scope2 = nock(config.apiServerOrigin()).put('/api/v1/boxes/' + config.fqdn() + '/backupurl?token=APPSTORE_TOKEN', { boxVersion: '0.5.0', appId: null, appBackupIds: [] }).reply(201, { id: 'someid', url: 'http://foobar', backupKey: 'somerestorekey' });
 
             injectShellMock();
 
@@ -443,8 +443,8 @@ describe('Cloudron', function () {
 
 
         it('succeeds', function (done) {
-            var scope1 = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/migrate?token=APPSTORE_TOKEN', { size: 'small', region: 'sfo', restoreKey: 'somerestorekey' }).reply(202, {});
-            var scope2 = nock(config.apiServerOrigin()).put('/api/v1/boxes/' + config.fqdn() + '/backupurl?token=APPSTORE_TOKEN', { boxVersion: '0.5.0', appId: null, appBackupIds: [] }).reply(201, { url: 'http://foobar', backupKey: 'somerestorekey' });
+            var scope1 = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/migrate?token=APPSTORE_TOKEN', { size: 'small', region: 'sfo', restoreKey: 'someid' }).reply(202, {});
+            var scope2 = nock(config.apiServerOrigin()).put('/api/v1/boxes/' + config.fqdn() + '/backupurl?token=APPSTORE_TOKEN', { boxVersion: '0.5.0', appId: null, appBackupIds: [] }).reply(201, { id: 'someid', url: 'http://foobar', backupKey: 'somerestorekey' });
 
             injectShellMock();
 
