@@ -16,7 +16,8 @@ var async = require('async'),
     nock = require('nock'),
     paths = require('../../paths.js'),
     request = require('superagent'),
-    server = require('../../server.js');
+    server = require('../../server.js'),
+    shell = require('../../shell.js');
 
 var SERVER_URL = 'http://localhost:' + config.get('port');
 
@@ -35,6 +36,16 @@ function cleanup(done) {
 
         server.stop(done);
     });
+}
+
+var gSudoOriginal = null;
+function injectShellMock() {
+    gSudoOriginal = shell.sudo;
+    shell.sudo = function (tag, options, callback) { callback(null); };
+}
+
+function restoreShellMock() {
+    shell.sudo = gSudoOriginal;
 }
 
 describe('Cloudron', function () {
@@ -366,7 +377,7 @@ describe('Cloudron', function () {
 
         it('fails with missing size', function (done) {
             request.post(SERVER_URL + '/api/v1/cloudron/migrate')
-                   .send({ restoreKey: 'foo', region: 'sfo' })
+                   .send({ region: 'sfo' })
                    .query({ access_token: token })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -377,7 +388,7 @@ describe('Cloudron', function () {
 
         it('fails with wrong size type', function (done) {
             request.post(SERVER_URL + '/api/v1/cloudron/migrate')
-                   .send({ size: 4, region: 'sfo', restoreKey: 'foo' })
+                   .send({ size: 4, region: 'sfo' })
                    .query({ access_token: token })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -388,7 +399,7 @@ describe('Cloudron', function () {
 
         it('fails with missing region', function (done) {
             request.post(SERVER_URL + '/api/v1/cloudron/migrate')
-                   .send({ size: 'small', restoreKey: 'foo' })
+                   .send({ size: 'small' })
                    .query({ access_token: token })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -400,30 +411,7 @@ describe('Cloudron', function () {
 
         it('fails with wrong region type', function (done) {
             request.post(SERVER_URL + '/api/v1/cloudron/migrate')
-                   .send({ size: 'small', region: 4, restoreKey: 'foo' })
-                   .query({ access_token: token })
-                   .end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(400);
-                done();
-            });
-        });
-
-        it('fails with missing restoreKey', function (done) {
-            request.post(SERVER_URL + '/api/v1/cloudron/migrate')
-                   .send({ size: 'small', region: 'sfo' })
-                   .query({ access_token: token })
-                   .end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(400);
-                done();
-            });
-        });
-
-
-        it('fails with wrong restoreKey type', function (done) {
-            request.post(SERVER_URL + '/api/v1/cloudron/migrate')
-                   .send({ size: 'small', region: 'sfo', restoreKey: 4 })
+                   .send({ size: 'small', region: 4 })
                    .query({ access_token: token })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -433,30 +421,44 @@ describe('Cloudron', function () {
         });
 
         it('fails when in wrong state', function (done) {
-            var scope = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/migrate?token=APPSTORE_TOKEN', { size: 'small', region: 'sfo', restoreKey: 'foo' }).reply(409, {});
+            var scope1 = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/migrate?token=APPSTORE_TOKEN', { size: 'small', region: 'sfo', restoreKey: 'somerestorekey' }).reply(409, {});
+            var scope2 = nock(config.apiServerOrigin()).put('/api/v1/boxes/' + config.fqdn() + '/backupurl?token=APPSTORE_TOKEN', { boxVersion: '0.5.0', appId: null, appBackupIds: [] }).reply(201, { url: 'http://foobar', backupKey: 'somerestorekey' });
+
+            injectShellMock();
 
             request.post(SERVER_URL + '/api/v1/cloudron/migrate')
-                   .send({ size: 'small', region: 'sfo', restoreKey: 'foo' })
+                   .send({ size: 'small', region: 'sfo' })
                    .query({ access_token: token })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(409);
-                expect(scope.isDone()).to.be.ok();
+                expect(scope1.isDone()).to.be.ok();
+                expect(scope2.isDone()).to.be.ok();
+
+                restoreShellMock();
+
                 done();
             });
         });
 
 
         it('succeeds', function (done) {
-            var scope = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/migrate?token=APPSTORE_TOKEN', { size: 'small', region: 'sfo', restoreKey: 'foo' }).reply(202, {});
+            var scope1 = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/migrate?token=APPSTORE_TOKEN', { size: 'small', region: 'sfo', restoreKey: 'somerestorekey' }).reply(202, {});
+            var scope2 = nock(config.apiServerOrigin()).put('/api/v1/boxes/' + config.fqdn() + '/backupurl?token=APPSTORE_TOKEN', { boxVersion: '0.5.0', appId: null, appBackupIds: [] }).reply(201, { url: 'http://foobar', backupKey: 'somerestorekey' });
+
+            injectShellMock();
 
             request.post(SERVER_URL + '/api/v1/cloudron/migrate')
-                   .send({ size: 'small', region: 'sfo', restoreKey: 'foo' })
+                   .send({ size: 'small', region: 'sfo' })
                    .query({ access_token: token })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(202);
-                expect(scope.isDone()).to.be.ok();
+                expect(scope1.isDone()).to.be.ok();
+                expect(scope2.isDone()).to.be.ok();
+
+                restoreShellMock();
+
                 done();
             });
         });
