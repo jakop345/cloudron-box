@@ -268,7 +268,7 @@ function backupBoxWithAppBackupIds(appBackupIds, callback) {
 
             debug('backup: successful');
 
-            callback(null);
+            callback(null, result.backupKey);
         });
     });
 }
@@ -507,17 +507,19 @@ function reboot(callback) {
     shell.sudo('reboot', [ REBOOT_CMD ], callback);
 }
 
-function migrate(size, region, restoreKey, callback) {
+function migrate(size, region, callback) {
     assert(typeof size === 'string');
     assert(typeof region === 'string');
-    assert(typeof restoreKey === 'string');
     assert(typeof callback === 'function');
 
-    superagent
-        .post(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/migrate')
-        .query({ token: config.token() })
-        .send({ size: size, region: region, restoreKey: restoreKey })
-        .end(function (error, result) {
+    backupBox(function (error, restoreKey) {
+        if (error) return callback(error);
+
+        superagent
+          .post(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/migrate')
+          .query({ token: config.token() })
+          .send({ size: size, region: region, restoreKey: restoreKey })
+          .end(function (error, result) {
             if (error) return callback(error);
             if (result.status === 409) return callback(new CloudronError(CloudronError.INVALID_STATE));
             if (result.status === 404) return callback(new CloudronError(CloudronError.NOT_FOUND));
@@ -525,5 +527,6 @@ function migrate(size, region, restoreKey, callback) {
 
             return callback(null);
         });
+    });
 }
 
