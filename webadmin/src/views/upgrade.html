@@ -54,17 +54,12 @@
                 <option value="{{region.slug}}" ng-repeat="region in availableRegions">{{region.name}}</option>
             </select>
         </div>
-        <div class="col-xs-3">
-            <select class="form-control" id="restoreKey" ng-model="migration.restoreKey">
-                <option value="{{backup.restoreKey}}" ng-repeat="backup in availableBackups">{{backup.creationTime | prettyDate}}</option>
-            </select>
-        </div>
         <div class="col-xs-3 text-right">
             <select class="form-control" id="sizeSlug" ng-model="migration.sizeSlug">
                 <option value="{{size.slug}}" ng-repeat="size in availableSizes">{{size.name}}</option>
             </select>
         </div>
-        <div class="col-xs-3 text-right">
+        <div class="col-xs-6 text-right">
             <button class="btn btn-outline btn-primary" ng-click="showMigrationConfirm()">Migrate</button>
         </div>
     </div>
