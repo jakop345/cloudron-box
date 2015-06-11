@@ -10,7 +10,9 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         Error.call(this);
         this.name = this.constructor.name;
         this.statusCode = statusCode;
-        if (typeof messageOrObject === 'string') {
+        if (messageOrObject === null || typeof messageOrObject === 'undefined') {
+            this.message = 'Empty message or object';
+        } else if (typeof messageOrObject === 'string') {
             this.message = messageOrObject;
         } else if (messageOrObject.message) {
             this.message = messageOrObject.message;
