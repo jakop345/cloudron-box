@@ -160,6 +160,22 @@
     </div>
 </div>
 
+<script>
+    function imageErrorHandler(elem) {
+        'use strict';
+
+        var appstoreIconUrl = elem.getAttribute('appstore-icon');
+        var fallbackIconUrl = elem.getAttribute('fallback-icon');
+
+        if (elem.src === appstoreIconUrl) {
+            elem.src = fallbackIconUrl;
+            elem.onerror = null;    // avoid retry after default icon cannot be loaded
+        } else {
+            elem.src = appstoreIconUrl;
+        }
+    }
+</script>
+
 <div class="content">
     <div class="row animateMeOpacity ng-hide" ng-show="installedApps.length > 0">
         <div class="col-lg-12">
@@ -174,7 +190,7 @@
                     <div class="grid-item-top">
                         <div class="row">
                             <div class="col-xs-12 text-center" style="padding-left: 5px; padding-right: 5px;">
-                                <img ng-src="{{app.iconUrl}}" onerror="this.onerror=null;this.src='img/appicon_fallback.png'" class="app-icon"/>
+                                <img ng-src="{{app.iconUrl}}" fallback-icon="img/appicon_fallback.png" appstore-icon="{{ app.iconUrlStore }}" onerror="imageErrorHandler(this)" class="app-icon"/>
                             </div>
                         </div>
                         <br/>

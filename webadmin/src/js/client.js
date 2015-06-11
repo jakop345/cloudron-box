@@ -197,7 +197,9 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
 
             // put new app with amended title in cache
             data.manifest = { title: title };
-            data.iconUrl = that.getAppIconUrl(data);
+            var icons = that.getAppIconUrls(data);
+            data.iconUrl = icons.cloudron;
+            data.iconUrlStore = icons.store;
             data.progress = 0;
 
             that._installedApps.push(data);
@@ -315,8 +317,11 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         return '/api/v1/apps/' + appId + '/logs?access_token=' + this._token;
     };
 
-    Client.prototype.getAppIconUrl = function (app) {
-        return this.apiOrigin + app.iconUrl + '?access_token=' + this._token;
+    Client.prototype.getAppIconUrls = function (app) {
+        return {
+            cloudron: this.apiOrigin + app.iconUrl + '?access_token=' + this._token,
+            store: this._config.apiServerOrigin + '/api/v1/apps/' + app.appStoreId + '/versions/' + app.manifest.version + '/icon'
+        };
     };
 
     Client.prototype.setAdmin = function (username, admin, callback) {
@@ -512,7 +517,9 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
                 var tmp = {};
                 angular.copy(app, tmp);
 
-                tmp.iconUrl = that.getAppIconUrl(tmp);
+                var icons = that.getAppIconUrls(tmp);
+                tmp.iconUrl = icons.cloudron;
+                tmp.iconUrlStore = icons.store;
 
                 // extract progress percentage
                 var installationProgress = tmp.installationProgress || '';
