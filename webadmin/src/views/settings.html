@@ -81,6 +81,31 @@
 
 <div style="max-width: 600px; margin: 0 auto;" ng-show="user.admin">
     <div class="text-left">
+        <h3>About</h3>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom: 15px;" ng-show="user.admin">
+    <div class="row">
+        <div class="col-xs-6">
+            <span class="text-muted">Model</span>
+        </div>
+        <div class="col-xs-6 text-right">
+            <span>{{ config.size }} - {{ config.region }}</span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6">
+            <span class="text-muted">Version</span>
+        </div>
+        <div class="col-xs-6 text-right">
+            <span>{{ config.version }}</span>
+        </div>
+    </div>
+</div>
+
+<div style="max-width: 600px; margin: 0 auto;" ng-show="user.admin">
+    <div class="text-left">
         <h3>Developer Mode</h3>
     </div>
 </div>
