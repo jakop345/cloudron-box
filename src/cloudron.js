@@ -268,7 +268,7 @@ function backupBoxWithAppBackupIds(appBackupIds, callback) {
 
             debug('backup: successful');
 
-            callback(null, result.backupKey);
+            callback(null, result.id);
         });
     });
 }
@@ -515,6 +515,8 @@ function migrate(size, region, callback) {
     backupBox(function (error, restoreKey) {
         if (error) return callback(error);
 
+        debug('migrate: size %s region %s restoreKey %s', size, region, restoreKey);
+
         superagent
           .post(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/migrate')
           .query({ token: config.token() })
@@ -529,4 +531,3 @@ function migrate(size, region, callback) {
         });
     });
 }
-
