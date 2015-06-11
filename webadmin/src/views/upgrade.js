@@ -31,7 +31,7 @@ angular.module('Application').controller('UpgradeController', ['$scope', '$locat
             if (error) return console.error(error);
 
             angular.copy(backups, $scope.availableBackups);
-            $scope.migration.restoreKey = $scope.availableBackups[0].restoreKey;
+            $scope.migration.restoreKey = $scope.availableBackups[0] ? $scope.availableBackups[0].restoreKey : null;
 
             AppStore.getSizes(function (error, result) {
                 if (error) return console.error(error);
