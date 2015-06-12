@@ -88,7 +88,7 @@ function autoupdatePatternChanged(pattern) {
         cronTime: pattern,
         onTick: function() {
             debug('Checking if update available');
-            if (updater.getUpdateInfo().box) updater.update(NOOP_CALLBACK);
+            if (updater.hasBoxUpdate()) updater.update(NOOP_CALLBACK);
         },
         start: true,
         timeZone: gUpdateCheckerJob.cronTime.timeZone // hack

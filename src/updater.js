@@ -9,7 +9,8 @@ module.exports = exports = {
 
     checkUpdates: checkUpdates,
     getUpdateInfo: getUpdateInfo,
-    update: update
+    update: update,
+    hasBoxUpdate: hasBoxUpdate
 };
 
 var appdb = require('./appdb.js'),
@@ -40,6 +41,10 @@ function getUpdateInfo() {
         apps: gAppUpdateInfo,
         box: gBoxUpdateInfo
     };
+}
+
+function hasBoxUpdate() {
+    return gBoxUpdateInfo !== null;
 }
 
 function checkAppUpdates(callback) {
