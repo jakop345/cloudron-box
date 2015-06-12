@@ -303,12 +303,13 @@ describe('Cloudron', function () {
                 expect(result.body.developerMode).to.be.a('boolean');
                 expect(result.body.size).to.eql(null);
                 expect(result.body.region).to.eql(null);
+
                 done();
             });
         });
 
         it('succeeds', function (done) {
-            var scope = nock('http://localhost:6060').get('/api/v1/boxes/localhost?token=APPSTORE_TOKEN').reply(200, { box: { region: 'sfo', size: 'small' }});
+            var scope = nock(config.apiServerOrigin()).get('/api/v1/boxes/localhost?token=' + config.token()).reply(200, { box: { region: 'sfo', size: 'small' }});
 
             request.get(SERVER_URL + '/api/v1/cloudron/config')
                    .query({ access_token: token })
