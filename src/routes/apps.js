@@ -138,12 +138,12 @@ function configureApp(req, res, next) {
 
     if (!data) return next(new HttpError(400, 'Cannot parse data field'));
     if (typeof data.location !== 'string') return next(new HttpError(400, 'location is required'));
-    if (typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
+    if (('portBindings' in data) && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
     if (typeof data.accessRestriction !== 'string') return next(new HttpError(400, 'accessRestriction is required'));
 
     debug('Configuring app id:%s location:%s bindings:%j', req.params.id, data.location, data.portBindings);
 
-    apps.configure(req.params.id, data.location, data.portBindings, data.accessRestriction, function (error) {
+    apps.configure(req.params.id, data.location, data.portBindings || null, data.accessRestriction, function (error) {
         if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, error.message));
         if (error && error.reason === AppsError.PORT_RESERVED) return next(new HttpError(409, 'Port ' + error.message + ' is reserved.'));
         if (error && error.reason === AppsError.PORT_CONFLICT) return next(new HttpError(409, 'Port ' + error.message + ' is already in use.'));
