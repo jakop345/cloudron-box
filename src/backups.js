@@ -35,8 +35,6 @@ BackupsError.EXTERNAL_ERROR = 'external error';
 function getAll(callback) {
     assert(typeof callback === 'function');
 
-    if (config.LOCAL) return callback(null, []);    // skip this when running locally
-
     var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/backups';
 
     superagent.get(url).query({ token: config.token() }).end(function (error, result) {

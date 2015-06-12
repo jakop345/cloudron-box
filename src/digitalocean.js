@@ -20,11 +20,6 @@ function checkPtrRecord(ip, fqdn, callback) {
 
     if (!ip) return callback(new Error('Network down'));
 
-    if (config.LOCAL) {
-        debug('checkPtrRecord disabled in local mode.');
-        return callback(null, true);
-    }
-
     dns.resolve4('ns1.digitalocean.com', function (error, rdnsIps) {
         if (error || rdnsIps.length === 0) return callback(new Error('Failed to query DO DNS'));
 

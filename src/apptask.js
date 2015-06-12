@@ -441,11 +441,6 @@ function downloadIcon(app, callback) {
 }
 
 function registerSubdomain(app, callback) {
-    if (config.LOCAL) {
-        debugApp(app, 'Skipping subdomain registration for development');
-        return callback(null);
-    }
-
     debugApp(app, 'Registering subdomain');
 
     var record = { subdomain: app.location, type: 'A', value: cloudron.getIp() };
@@ -468,11 +463,6 @@ function registerSubdomain(app, callback) {
 }
 
 function unregisterSubdomain(app, callback) {
-    if (config.LOCAL) {
-        debugApp(app, 'Skipping subdomain unregistration for development');
-        return callback(null);
-    }
-
     debugApp(app, 'Unregistering subdomain');
 
     superagent

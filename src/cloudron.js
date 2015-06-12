@@ -182,8 +182,6 @@ function getBackupUrl(appId, appBackupIds, callback) {
     assert(!appBackupIds || util.isArray(appBackupIds));
     assert(typeof callback === 'function');
 
-    if (config.LOCAL) return callback(null, {});    // skip this when running locally
-
     var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/backupurl';
 
     superagent.put(url).query({ token: config.token() }).send({ boxVersion: config.version(), appId: appId, appBackupIds: appBackupIds }).end(function (error, result) {
@@ -198,8 +196,6 @@ function getBackupUrl(appId, appBackupIds, callback) {
 function getRestoreUrl(backupId, callback) {
     assert(typeof backupId === 'string');
     assert(typeof callback === 'function');
-
-    if (config.LOCAL) return callback(null, {});    // skip this when running locally
 
     var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/restoreurl';
 
@@ -384,7 +380,7 @@ function getConfig(callback) {
         callback(null, {
             apiServerOrigin: config.apiServerOrigin(),
             webServerOrigin: config.webServerOrigin(),
-            isDev: /dev/i.test(config.get('boxVersionsUrl')) || config.LOCAL,
+            isDev: /dev/i.test(config.get('boxVersionsUrl')),
             fqdn: config.fqdn(),
             ip: getIp(),
             version: config.version(),
@@ -401,12 +397,6 @@ function getConfig(callback) {
 function sendHeartbeat() {
     if (!config.apiServerOrigin()) {
         debug('No appstore server url set. Not sending heartbeat.');
-        return;
-    }
-
-    // skip this when running locally
-    if (config.LOCAL) {
-        debug('No appstore server token set. Not sending heartbeat.');
         return;
     }
 
@@ -466,7 +456,6 @@ function sendMailDnsRecordsRequest(callback) {
 }
 
 function addMailDnsRecords() {
-    if (config.LOCAL) return;   // skip this when running locally
     if (config.get('mailDnsRecordIds').length !== 0) return; // already registered
 
     sendMailDnsRecordsRequest(function (error, ids) {

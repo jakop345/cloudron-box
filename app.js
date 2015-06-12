@@ -12,7 +12,7 @@ console.log('==========================================');
 console.log(' Cloudron will use the following settings ');
 console.log('==========================================');
 console.log();
-console.log(' Environment:                    ', config.CLOUDRON ? 'CLOUDRON' : (config.LOCAL ? 'LOCAL' : 'TEST'));
+console.log(' Environment:                    ', config.CLOUDRON ? 'CLOUDRON' : 'TEST');
 console.log(' Admin Origin:                   ', config.adminOrigin());
 console.log(' Appstore token:                 ', config.token());
 console.log(' Appstore API server origin:     ', config.apiServerOrigin());

@@ -76,11 +76,7 @@ function checkDns() {
 
 function processQueue() {
     docker.getContainer('mail').inspect(function (error, data) {
-        if (error) {
-            if (config.LOCAL) debug('No mail container found. This is ok in LOCAL mode.');
-            else console.error(error);
-            return;
-        }
+        if (error) return console.error(error);
 
         var mailServerIp = safe.query(data, 'NetworkSettings.IPAddress');
         if (!mailServerIp) return debug('Error querying mail server IP');
@@ -112,8 +108,6 @@ function enqueue(mailOptions) {
 
     debug('Queued mail for ' + mailOptions.from + ' to ' + mailOptions.to);
     gMailQueue.push(mailOptions);
-
-    if (config.LOCAL) debug('Print email in local mode:', mailOptions);
 
     if (gDnsReady) processQueue();
 }

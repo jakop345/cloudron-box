@@ -20,7 +20,6 @@ exports = module.exports = {
     // ifdefs to check environment
     CLOUDRON: process.env.NODE_ENV === 'cloudron',
     TEST: process.env.NODE_ENV === 'test',
-    LOCAL: process.env.NODE_ENV === 'local' || !process.env.NODE_ENV,
 
     // convenience getters
     apiServerOrigin: apiServerOrigin,
@@ -48,7 +47,6 @@ var data = { };
 function baseDir() {
     if (exports.CLOUDRON) return homeDir;
     if (exports.TEST) return path.join(homeDir, '.cloudron_test');
-    if (exports.LOCAL) return path.join(homeDir, '.cloudron');
 }
 
 var cloudronConfigFileName = path.join(baseDir(), 'configs/cloudron.conf');
@@ -88,20 +86,6 @@ function initConfig() {
         };
         data.token = 'APPSTORE_TOKEN';
         data.developerMode = false;
-    } else if (exports.LOCAL) {
-        data.port = 3000;
-        data.apiServerOrigin = 'https://api.dev.cloudron.io';
-        data.database = {
-            hostname: 'localhost',
-            username: 'root',
-            password: '',
-            port: 3306,
-            name: 'box'
-        };
-        data.version = '1.33.7';
-        data.webServerOrigin = 'http://dev.cloudron.io';
-        data.token = '';
-        data.developerMode = true;
     } else {
         assert(false, 'Unknown environment. This should not happen!');
     }
