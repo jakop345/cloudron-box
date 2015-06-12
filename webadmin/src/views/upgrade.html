@@ -17,50 +17,39 @@
     </div>
 </div>
 
-<div style="max-width: 600px; margin: 0 auto;" ng-show="user.admin">
-    <div class="text-left">
-        <h3>Upgrade</h3>
-    </div>
-</div>
-
-<div class="card" style="margin-bottom: 15px;" ng-show="user.admin">
-    <div class="row">
-        <div class="col-xs-6">
-            <h4>Current</h4>
+<div style="margin-bottom: 15px; text-align: center" ng-show="user.admin">
+    <form name="migrate_form" role="form" novalidate ng-submit="showMigrationConfirm()">
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>Choose a Model to upgrade to</h3>
+                <div class="cloudron-model-list">
+                    <div class="cloudron-model-item" ng-click="setSize(size.slug)" ng-class="{ 'cloudron-model-item-selected': size === migration.size }" ng-repeat="size in availableSizes">
+                        <img src="img/box.png" style="transform: scale({{ size.price/50.0 }});"/><br/>
+                        <h4>{{ size.name }}</h4>
+                        <h5>${{ size.price }}/mo</h5>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="col-xs-6">
-            <span class="text-muted">Size:</span>
+        <br/>
+        <div class="row">
+            <div class="form-group col-md-12">
+                <h3>Choose your Region, in case you want to relocate your Cloudron</h3>
+                <div class="region-select-map">
+                    <div class="region-select" ng-click="setRegion('sfo1')" ng-class="{ 'region-selected': migration.region.slug === 'sfo1' }" style="width: 270px; background-image: url('img/world_left.png');">
+                        <img src="img/pin.png" height="32px" width="16px" class="region-pin region-pin-left" ng-class="{ 'region-pin-selected-left': migration.region.slug === 'sfo1' }"/>
+                    </div>
+                    <div class="region-select" ng-click="setRegion('ams3')" ng-class="{ 'region-selected': migration.region.slug === 'ams3' }" style="width: 330px; background-image: url('img/world_right.png');">
+                        <img src="img/pin.png" height="32px" width="16px" class="region-pin region-pin-right" ng-class="{ 'region-pin-selected-right': migration.region.slug === 'ams3' }"/>
+                    </div>
+                </div>
+                <p>{{ migration.region.name || '&nbsp;' }}</p>
+            </div>
         </div>
-        <div class="col-xs-6 text-right">
-            <span>{{config.size}}</span>
+        <div class="row">
+            <div class="form-group col-md-12">
+                <button type="submit" class="btn btn-default" ng-disabled="migrate_form.$invalid || !migration.region || !migration.size || busy">Migrate</button>
+            </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="col-xs-6">
-            <span class="text-muted">Region:</span>
-        </div>
-        <div class="col-xs-6 text-right">
-            <span>{{config.region}}</span>
-        </div>
-    </div>
-</div>
-
-<div class="card" style="margin-bottom: 15px;" ng-show="user.admin">
-    <div class="row">
-        <div class="col-xs-3">
-            <select class="form-control" id="regionSlug" ng-model="migration.regionSlug">
-                <option value="{{region.slug}}" ng-repeat="region in availableRegions">{{region.name}}</option>
-            </select>
-        </div>
-        <div class="col-xs-3 text-right">
-            <select class="form-control" id="sizeSlug" ng-model="migration.sizeSlug">
-                <option value="{{size.slug}}" ng-repeat="size in availableSizes">{{size.name}}</option>
-            </select>
-        </div>
-        <div class="col-xs-6 text-right">
-            <button class="btn btn-outline btn-primary" ng-click="showMigrationConfirm()">Migrate</button>
-        </div>
-    </div>
+    </form>
 </div>

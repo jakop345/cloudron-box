@@ -464,3 +464,87 @@ footer a {
     padding: 10px;
 }
 
+
+// ----------------------------
+// Upgrade
+// ----------------------------
+
+.region-select-map {
+    width: 600px;
+    height: 300px;
+    display: table;
+    margin: auto;
+    cursor: pointer;
+}
+
+.region-selected {
+    opacity: 1 !important;
+}
+
+.region-select {
+    display: inline-block;
+    float: left;
+    opacity: 0.5;
+    height: 300px;
+    transition: all 250ms;
+}
+
+.region-select:hover {
+    opacity: 1;
+}
+
+.region-pin {
+    position: relative;
+    top: 0;
+    opacity: 0;
+    transition: all 250ms cubic-bezier(0.430, 0.950, 0.810, 1.280);
+}
+
+.region-pin-left {
+    left: -18px;
+}
+
+.region-pin-right {
+    left: -132px;
+}
+
+.region-pin-selected-left {
+    top: 95px;
+    opacity: 1;
+}
+
+.region-pin-selected-right {
+    top: 73px;
+    opacity: 1;
+}
+
+.cloudron-model-list {
+    display: table;
+    width: 100%;
+}
+
+.cloudron-model-item {
+    display: table-cell;
+    padding: 10px;
+    margin: auto;
+    transition: all 250ms;
+    max-width: 200px;
+    transform: scale(0.95);
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.cloudron-model-item:hover,
+.cloudron-model-item-selected {
+    background-color: rgba(255, 255, 255, 0.5);
+    color: highlight !important;
+    transform: scale(1);
+}
+
+.cloudron-model-item:hover h4,
+.cloudron-model-item:hover h5,
+.cloudron-model-item-selected h4,
+.cloudron-model-item-selected h5,  {
+    transition: all 250ms;
+    color: black;
+}

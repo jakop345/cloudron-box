@@ -9,8 +9,8 @@ angular.module('Application').controller('UpgradeController', ['$scope', '$locat
     $scope.availableSizes = [];
 
     $scope.migration = {
-        regionSlug: '',
-        sizeSlug: ''
+        region: null,
+        size: null
     };
 
     $scope.showMigrationConfirm = function () {
@@ -18,9 +18,21 @@ angular.module('Application').controller('UpgradeController', ['$scope', '$locat
     };
 
     $scope.doMigration = function () {
-        Client.migrate($scope.migration.sizeSlug, $scope.migration.regionSlug, function (error) {
+        Client.migrate($scope.migration.size.slug, $scope.migration.region.slug, function (error) {
             if (error) return console.error(error);
             $('#migrationModal').modal('hide');
+        });
+    };
+
+    $scope.setRegion = function (regionSlug) {
+        $scope.availableRegions.forEach(function (region) {
+            if (region.slug.indexOf(regionSlug) === 0) $scope.migration.region = region;
+        });
+    };
+
+    $scope.setSize = function (sizeSlug) {
+        $scope.availableSizes.forEach(function (size) {
+            if (size.slug.indexOf(sizeSlug) === 0) $scope.migration.size = size;
         });
     };
 
@@ -28,14 +40,26 @@ angular.module('Application').controller('UpgradeController', ['$scope', '$locat
         AppStore.getSizes(function (error, result) {
             if (error) return console.error(error);
 
+            // restult array is ordered by size
+            var found = false;
+            result = result.filter(function (size) {
+                if (size.slug === $scope.config.size) {
+                    $scope.setSize($scope.config.size);
+                    found = true;
+                    return true;
+                } else {
+                    return found;
+                }
+            });
             angular.copy(result, $scope.availableSizes);
-            $scope.migration.sizeSlug = $scope.availableSizes[0].slug;
 
             AppStore.getRegions(function (error, result) {
                 if (error) return console.error(error);
 
                 angular.copy(result, $scope.availableRegions);
-                $scope.migration.regionSlug = $scope.availableRegions[0].slug;
+
+                $scope.setRegion($scope.config.region);
+                $scope.setSize($scope.config.size);
             });
         });
     });
