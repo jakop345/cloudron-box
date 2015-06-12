@@ -151,6 +151,8 @@ function sendErrorPageOrRedirect(req, res, message) {
     assert(typeof res === 'object');
     assert(typeof message === 'string');
 
+    debug('sendErrorPageOrRedirect: returnTo "%s".', req.query.returnTo, message);
+
     if (typeof req.query.returnTo !== 'string') {
         res.render('error', {
             adminOrigin: config.adminOrigin(),
@@ -180,26 +182,26 @@ function sendError(req, res, message) {
 
 // Main login form username and password
 function loginForm(req, res) {
-    if (typeof req.session.returnTo !== 'string') return sendErrorPageOrRedirect(req, res, 'Invalid login request');
+    if (typeof req.session.returnTo !== 'string') return sendErrorPageOrRedirect(req, res, 'Invalid login request. No returnTo provided.');
 
     var u = url.parse(req.session.returnTo, true);
 
-    if (!u.query.client_id) return sendErrorPageOrRedirect(req, res, 'Invalid login request');
+    if (!u.query.client_id) return sendErrorPageOrRedirect(req, res, 'Invalid login request. No client_id provided.');
 
     clientdb.get(u.query.client_id, function (error, result) {
         if (error) return sendError(req, res, 'Unknown OAuth client');
 
-        if (result.appId === constants.ADMIN_CLIENT_ID) {
-            return res.render('login', { adminOrigin: config.adminOrigin(), csrf: req.csrfToken(), applicationName: constants.ADMIN_NAME });
-        }
-
-        var appId = result.appId;
         // Handle our different types of oauth clients
-        if (result.appId.indexOf('addon-') === 0) {
-            appId = result.appId.slice('addon-'.length);
-        } else if (result.appId.indexOf('proxy-') === 0) {
-            appId = result.appId.slice('proxy-'.length);
-        } else if (result.appId.indexOf('external-') === 0) {
+        var appId = result.appId;
+        if (appId === constants.ADMIN_CLIENT_ID) {
+            return res.render('login', { adminOrigin: config.adminOrigin(), csrf: req.csrfToken(), applicationName: constants.ADMIN_NAME });
+        } else if (appId === constants.TEST_CLIENT_ID) {
+            return res.render('login', { adminOrigin: config.adminOrigin(), csrf: req.csrfToken(), applicationName: constants.TEST_NAME });
+        } else if (appId.indexOf('addon-') === 0) {
+            appId = appId.slice('addon-'.length);
+        } else if (appId.indexOf('proxy-') === 0) {
+            appId = appId.slice('proxy-'.length);
+        } else if (appId.indexOf('external-') === 0) {
             return res.render('login', { adminOrigin: config.adminOrigin(), csrf: req.csrfToken(), applicationName: 'External Application' });
         }
 
