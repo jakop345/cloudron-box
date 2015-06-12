@@ -256,7 +256,7 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
     assert(typeof appStoreId === 'string');
     assert(manifest && typeof manifest === 'object');
     assert(typeof location === 'string');
-    assert(!portBindings || typeof portBindings === 'object');
+    assert(typeof portBindings === 'object');
     assert(typeof accessRestriction === 'string');
     assert(!icon || typeof icon === 'string');
     assert(typeof callback === 'function');

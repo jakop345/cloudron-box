@@ -111,7 +111,7 @@ function installApp(req, res, next) {
 
     debug('Installing app id:%s storeid:%s loc:%s port:%j restrict:%s manifest:%j', appId, data.appStoreId, data.location, data.portBindings, data.accessRestriction, data.manifest);
 
-    apps.install(appId, data.appStoreId, data.manifest, data.location, data.portBindings, data.accessRestriction, data.icon || null, function (error) {
+    apps.install(appId, data.appStoreId, data.manifest, data.location, data.portBindings || null, data.accessRestriction, data.icon || null, function (error) {
         if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, error.message));
         if (error && error.reason === AppsError.PORT_RESERVED) return next(new HttpError(409, 'Port ' + error.message + ' is reserved.'));
         if (error && error.reason === AppsError.PORT_CONFLICT) return next(new HttpError(409, 'Port ' + error.message + ' is already in use.'));
