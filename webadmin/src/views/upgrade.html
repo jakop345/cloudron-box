@@ -17,38 +17,72 @@
     </div>
 </div>
 
+<br/>
+<br/>
+
 <div style="margin-bottom: 15px; text-align: center" ng-show="user.admin">
+    <div class="row">
+        <div class="col-md-12">
+            <h3>Choose a Model to upgrade to</h3>
+        </div>
+    </div>
+    <br/>
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <div class="cloudron-model-list">
+                <div class="cloudron-model-item" ng-repeat="size in availableSizes">
+                    <div class="cloudron-model-item-content shadow" ng-class="{ 'selected': size.slug === currentSize.slug }" style="height: {{ 120 + $index * 30 }}px">
+                        <!-- <img src="img/box.png" style="transform: scale({{ size.price/50.0 }});"/><br/> -->
+                        <h3>{{ size.name }}</h3>
+                        <h5>${{ size.price }}/mo</h5>
+                        <button class="btn btn-success" ng-disabled="busy" ng-hide="size.slug === currentSize.slug" ng-click="showUpgradeConfirm(size)">Upgrade</button>
+                        <button class="btn btn-success" ng-show="size.slug === currentSize.slug" data-toggle="tooltip" data-placement="top" title="Your Current Model"><i class="fa fa-check"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <p>
+                Larger Cloudrons allow to run more apps and bring better performance to your installed services.
+            </p>
+        </div>
+    </div>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <div class="row">
+        <div class="form-group col-md-12">
+            <h3>Choose your Region, in case you want to relocate your Cloudron</h3>
+            <p>
+                The closer you are to your Cloudron, the faster the access speed will be.
+            </p>
+        </div>
+    </div>
+    <br/>
     <form name="migrate_form" role="form" novalidate ng-submit="showMigrationConfirm()">
         <div class="row">
-            <div class="col-md-8 col-md-offset-2">
-                <h3>Choose a Model to upgrade to</h3>
-                <div class="cloudron-model-list">
-                    <div class="cloudron-model-item" ng-click="setSize(size.slug)" ng-class="{ 'cloudron-model-item-selected': size === migration.size }" ng-repeat="size in availableSizes">
-                        <img src="img/box.png" style="transform: scale({{ size.price/50.0 }});"/><br/>
-                        <h4>{{ size.name }}</h4>
-                        <h5>${{ size.price }}/mo</h5>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <br/>
-        <div class="row">
             <div class="form-group col-md-12">
-                <h3>Choose your Region, in case you want to relocate your Cloudron</h3>
                 <div class="region-select-map">
                     <div class="region-select" ng-click="setRegion('sfo1')" ng-class="{ 'region-selected': migration.region.slug === 'sfo1' }" style="width: 270px; background-image: url('img/world_left.png');">
-                        <img src="img/pin.png" height="32px" width="16px" class="region-pin region-pin-left" ng-class="{ 'region-pin-selected-left': migration.region.slug === 'sfo1' }"/>
+                        <div class="region-pin region-pin-left" ng-class="{ 'region-pin-selected-left': migration.region.slug === 'sfo1' }">
+                            <img src="img/pin.png" height="32px" width="16px"/> San Francisco
+                        </div>
                     </div>
                     <div class="region-select" ng-click="setRegion('ams3')" ng-class="{ 'region-selected': migration.region.slug === 'ams3' }" style="width: 330px; background-image: url('img/world_right.png');">
-                        <img src="img/pin.png" height="32px" width="16px" class="region-pin region-pin-right" ng-class="{ 'region-pin-selected-right': migration.region.slug === 'ams3' }"/>
+                        <div class="region-pin region-pin-right" ng-class="{ 'region-pin-selected-right': migration.region.slug === 'ams3' }">
+                            <img src="img/pin.png" height="32px" width="16px"/> Amsterdam
+                        </div>
                     </div>
                 </div>
-                <p>{{ migration.region.name || '&nbsp;' }}</p>
             </div>
         </div>
         <div class="row">
             <div class="form-group col-md-12">
-                <button type="submit" class="btn btn-default" ng-disabled="migrate_form.$invalid || !migration.region || !migration.size || busy">Migrate</button>
+                <button type="submit" class="btn btn-success" ng-disabled="migrate_form.$invalid || !migration.region || !migration.size || busy">Move</button>
             </div>
         </div>
     </form>

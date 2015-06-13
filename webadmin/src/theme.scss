@@ -1,6 +1,6 @@
 
 $brand-primary:                             darken(#428bca, 6.5%) !default; // #62bdfc
-$brand-success:                             #5cb85c !default;
+$brand-success:                             #27CE65 !default;
 $brand-info:                                #5bc0de !default;
 $brand-warning:                             #f0ad4e !default;
 $brand-danger:                              #d9534f !default;
@@ -21,8 +21,8 @@ $btn-primary-bg:                            $btn-default-bg;
 $btn-primary-color:                         $brand-primary !default;
 $btn-primary-border:                        $brand-primary !default;
 
-$btn-success-bg:                            $btn-default-bg;
-$btn-success-color:                         $brand-success !default;
+//$btn-success-bg:                            $btn-default-bg;
+//$btn-success-color:                         $brand-success !default;
 $btn-success-border:                        $brand-success !default;
 
 $btn-info-bg:                               $btn-default-bg;
@@ -494,6 +494,7 @@ footer a {
 }
 
 .region-pin {
+    display: block;
     position: relative;
     top: 0;
     opacity: 0;
@@ -501,11 +502,11 @@ footer a {
 }
 
 .region-pin-left {
-    left: -18px;
+    left: 27px;
 }
 
 .region-pin-right {
-    left: -132px;
+    left: -95px;
 }
 
 .region-pin-selected-left {
@@ -527,24 +528,29 @@ footer a {
     display: table-cell;
     padding: 10px;
     margin: auto;
-    transition: all 250ms;
-    max-width: 200px;
-    transform: scale(0.95);
-    border-radius: 5px;
-    cursor: pointer;
+    vertical-align: bottom;
 }
 
-.cloudron-model-item:hover,
-.cloudron-model-item-selected {
-    background-color: rgba(255, 255, 255, 0.5);
-    color: highlight !important;
+.cloudron-model-item-content {
+    display: table-cell;
+    width: 200px;
+    transition: all 250ms;
+    transform: scale(0.95);
+    cursor: pointer;
+    margin: auto;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: rgb(177, 177, 177);
+    color: white;
+    vertical-align: bottom;
+}
+
+.cloudron-model-item-content:hover {
     transform: scale(1);
 }
 
-.cloudron-model-item:hover h4,
-.cloudron-model-item:hover h5,
-.cloudron-model-item-selected h4,
-.cloudron-model-item-selected h5,  {
+.cloudron-model-item-content:hover h4,
+.cloudron-model-item-content:hover h5  {
+    color: white;
     transition: all 250ms;
-    color: black;
 }

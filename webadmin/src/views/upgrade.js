@@ -8,9 +8,16 @@ angular.module('Application').controller('UpgradeController', ['$scope', '$locat
     $scope.availableRegions = [];
     $scope.availableSizes = [];
 
+    $scope.currentSize = null;
+
     $scope.migration = {
         region: null,
         size: null
+    };
+
+    $scope.showUpgradeConfirm = function (size) {
+        $scope.migration.size = size;
+        $('#migrationModal').modal('show');
     };
 
     $scope.showMigrationConfirm = function () {
@@ -30,12 +37,6 @@ angular.module('Application').controller('UpgradeController', ['$scope', '$locat
         });
     };
 
-    $scope.setSize = function (sizeSlug) {
-        $scope.availableSizes.forEach(function (size) {
-            if (size.slug.indexOf(sizeSlug) === 0) $scope.migration.size = size;
-        });
-    };
-
     Client.onReady(function () {
         AppStore.getSizes(function (error, result) {
             if (error) return console.error(error);
@@ -44,7 +45,8 @@ angular.module('Application').controller('UpgradeController', ['$scope', '$locat
             var found = false;
             result = result.filter(function (size) {
                 if (size.slug === $scope.config.size) {
-                    $scope.setSize($scope.config.size);
+                    $scope.currentSize = size;
+                    $scope.migration.size = size;
                     found = true;
                     return true;
                 } else {
@@ -59,8 +61,8 @@ angular.module('Application').controller('UpgradeController', ['$scope', '$locat
                 angular.copy(result, $scope.availableRegions);
 
                 $scope.setRegion($scope.config.region);
-                $scope.setSize($scope.config.size);
             });
         });
     });
+
 }]);
