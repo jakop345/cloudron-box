@@ -1104,16 +1104,6 @@ describe('App installation - port bindings', function () {
         });
     });
 
-    it('cannot reconfigure app with missing portBindings', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
-              .query({ access_token: token })
-              .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, accessRestriction: 'roleAdmin' })
-              .end(function (err, res) {
-            expect(res.statusCode).to.equal(400);
-            done();
-        });
-    });
-
     it('cannot reconfigure app with missing accessRestriction', function (done) {
         request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
               .query({ access_token: token })
