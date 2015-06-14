@@ -22,7 +22,7 @@ function getAutoupdatePattern(req, res, next) {
 }
 
 function setAutoupdatePattern(req, res, next) {
-    assert(typeof req.body === 'object');
+    assert.strictEqual(typeof req.body, 'object');
 
     if (typeof req.body.pattern !== 'string') return next(new HttpError(400, 'pattern is required'));
 

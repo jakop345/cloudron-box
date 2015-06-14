@@ -40,7 +40,7 @@ function add(req, res, next) {
 }
 
 function get(req, res, next) {
-    assert(typeof req.params.clientId === 'string');
+    assert.strictEqual(typeof req.params.clientId, 'string');
 
     clients.get(req.params.clientId, function (error, result) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(404, 'No such client'));
@@ -50,7 +50,7 @@ function get(req, res, next) {
 }
 
 function update(req, res, next) {
-    assert(typeof req.params.clientId === 'string');
+    assert.strictEqual(typeof req.params.clientId, 'string');
 
     var data = req.body;
 
@@ -66,7 +66,7 @@ function update(req, res, next) {
 }
 
 function del(req, res, next) {
-    assert(typeof req.params.clientId === 'string');
+    assert.strictEqual(typeof req.params.clientId, 'string');
 
     clients.del(req.params.clientId, function (error, result) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(404, 'no such client'));
@@ -83,8 +83,8 @@ function getAllByUserId(req, res, next) {
 }
 
 function getClientTokens(req, res, next) {
-    assert(typeof req.params.clientId === 'string');
-    assert(typeof req.user === 'object');
+    assert.strictEqual(typeof req.params.clientId, 'string');
+    assert.strictEqual(typeof req.user, 'object');
 
     clients.getClientTokensByUserId(req.params.clientId, req.user.id, function (error, result) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(404, 'no such client'));
@@ -94,8 +94,8 @@ function getClientTokens(req, res, next) {
 }
 
 function delClientTokens(req, res, next) {
-    assert(typeof req.params.clientId === 'string');
-    assert(typeof req.user === 'object');
+    assert.strictEqual(typeof req.params.clientId, 'string');
+    assert.strictEqual(typeof req.user, 'object');
 
     clients.delClientTokensByUserId(req.params.clientId, req.user.id, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(404, 'no such client'));

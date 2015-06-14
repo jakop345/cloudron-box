@@ -22,8 +22,8 @@ var progress = {
 
 function set(tag, percent, message) {
     assert(tag === exports.UPDATE || tag === exports.BACKUP);
-    assert(typeof percent === 'number');
-    assert(typeof message === 'string');
+    assert.strictEqual(typeof percent, 'number');
+    assert.strictEqual(typeof message, 'string');
 
     progress[tag] = {
         percent: percent,

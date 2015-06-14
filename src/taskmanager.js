@@ -22,7 +22,7 @@ var gActiveTasks = { },
 var TASK_CONCURRENCY = 1;
 
 function initialize(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     // resume app installs and uninstalls
     appdb.getAll(function (error, apps) {
@@ -38,7 +38,7 @@ function initialize(callback) {
 }
 
 function uninitialize(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     gPendingTasks = [ ]; // clear this first, otherwise stopAppTask will resume them
     for (var appId in gActiveTasks) {
@@ -49,7 +49,7 @@ function uninitialize(callback) {
 }
 
 function startAppTask(appId) {
-    assert(typeof appId === 'string');
+    assert.strictEqual(typeof appId, 'string');
     assert(!(appId in gActiveTasks));
 
     if (Object.keys(gActiveTasks).length >= TASK_CONCURRENCY) {
@@ -70,7 +70,7 @@ function startAppTask(appId) {
 }
 
 function stopAppTask(appId) {
-    assert(typeof appId === 'string');
+    assert.strictEqual(typeof appId, 'string');
 
     if (gActiveTasks[appId]) {
         debug('stopAppTask : Killing existing task of %s with pid %s: ', appId, gActiveTasks[appId].pid);

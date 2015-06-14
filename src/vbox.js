@@ -17,8 +17,8 @@ exports = module.exports = {
 };
 
 function forwardFromHostToVirtualBox(rulename, port) {
-    assert(typeof rulename === 'string');
-    assert(typeof port === 'number');
+    assert.strictEqual(typeof rulename, 'string');
+    assert.strictEqual(typeof port, 'number');
 
     if (os.platform() === 'darwin') {
         debug('Setting up VirtualBox port forwarding for '+ rulename + ' at ' + port);
@@ -29,7 +29,7 @@ function forwardFromHostToVirtualBox(rulename, port) {
 }
 
 function unforwardFromHostToVirtualBox(rulename) {
-    assert(typeof rulename === 'string');
+    assert.strictEqual(typeof rulename, 'string');
 
     if (os.platform() === 'darwin') {
         debug('Removing VirtualBox port forwarding for '+ rulename);

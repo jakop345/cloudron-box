@@ -64,7 +64,7 @@ var APPS_FIELDS_PREFIXED = [ 'apps.id', 'apps.appStoreId', 'apps.installationSta
 var PORT_BINDINGS_FIELDS = [ 'hostPort', 'environmentVariable', 'appId' ].join(',');
 
 function postProcess(result) {
-    assert(typeof result === 'object');
+    assert.strictEqual(typeof result, 'object');
 
     assert(result.manifestJson === null || typeof result.manifestJson === 'string');
 
@@ -87,8 +87,8 @@ function postProcess(result) {
 }
 
 function get(id, callback) {
-    assert(typeof id === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof id, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('SELECT ' + APPS_FIELDS_PREFIXED + ','
         + 'GROUP_CONCAT(CAST(appPortBindings.hostPort AS CHAR(6))) AS hostPorts, GROUP_CONCAT(appPortBindings.environmentVariable) AS environmentVariables'
@@ -103,8 +103,8 @@ function get(id, callback) {
 }
 
 function getBySubdomain(subdomain, callback) {
-    assert(typeof subdomain === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof subdomain, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('SELECT ' + APPS_FIELDS_PREFIXED + ','
         + 'GROUP_CONCAT(CAST(appPortBindings.hostPort AS CHAR(6))) AS hostPorts, GROUP_CONCAT(appPortBindings.environmentVariable) AS environmentVariables'
@@ -119,8 +119,8 @@ function getBySubdomain(subdomain, callback) {
 }
 
 function getByHttpPort(httpPort, callback) {
-    assert(typeof httpPort === 'number');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof httpPort, 'number');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('SELECT ' + APPS_FIELDS_PREFIXED + ','
         + 'GROUP_CONCAT(CAST(appPortBindings.hostPort AS CHAR(6))) AS hostPorts, GROUP_CONCAT(appPortBindings.environmentVariable) AS environmentVariables'
@@ -135,7 +135,7 @@ function getByHttpPort(httpPort, callback) {
 }
 
 function getAll(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('SELECT ' + APPS_FIELDS_PREFIXED + ','
         + 'GROUP_CONCAT(CAST(appPortBindings.hostPort AS CHAR(6))) AS hostPorts, GROUP_CONCAT(appPortBindings.environmentVariable) AS environmentVariables'
@@ -150,14 +150,14 @@ function getAll(callback) {
 }
 
 function add(id, appStoreId, manifest, location, portBindings, accessRestriction, callback) {
-    assert(typeof id === 'string');
-    assert(typeof appStoreId === 'string');
+    assert.strictEqual(typeof id, 'string');
+    assert.strictEqual(typeof appStoreId, 'string');
     assert(manifest && typeof manifest === 'object');
-    assert(typeof manifest.version === 'string');
-    assert(typeof location === 'string');
-    assert(typeof portBindings === 'object');
-    assert(typeof accessRestriction === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof manifest.version, 'string');
+    assert.strictEqual(typeof location, 'string');
+    assert.strictEqual(typeof portBindings, 'object');
+    assert.strictEqual(typeof accessRestriction, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     portBindings = portBindings || { };
 
@@ -185,8 +185,8 @@ function add(id, appStoreId, manifest, location, portBindings, accessRestriction
 }
 
 function exists(id, callback) {
-    assert(typeof id === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof id, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('SELECT 1 FROM apps WHERE id=?', [ id ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
@@ -196,8 +196,8 @@ function exists(id, callback) {
 }
 
 function getPortBindings(id, callback) {
-    assert(typeof id === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof id, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('SELECT ' + PORT_BINDINGS_FIELDS + ' FROM appPortBindings WHERE appId = ?', [ id ], function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
@@ -212,8 +212,8 @@ function getPortBindings(id, callback) {
 }
 
 function del(id, callback) {
-    assert(typeof id === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof id, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     var queries = [
         { query: 'DELETE FROM appPortBindings WHERE appId = ?', args: [ id ] },
@@ -229,7 +229,7 @@ function del(id, callback) {
 }
 
 function clear(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     async.series([
         database.query.bind(null, 'DELETE FROM appPortBindings'),
@@ -246,10 +246,10 @@ function update(id, app, callback) {
 }
 
 function updateWithConstraints(id, app, constraints, callback) {
-    assert(typeof id === 'string');
-    assert(typeof app === 'object');
-    assert(typeof constraints === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof id, 'string');
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof constraints, 'string');
+    assert.strictEqual(typeof callback, 'function');
     assert(!('portBindings' in app) || typeof app.portBindings === 'object');
 
     var queries = [ ];
@@ -291,9 +291,9 @@ function updateWithConstraints(id, app, constraints, callback) {
 
 // not sure if health should influence runState
 function setHealth(appId, health, callback) {
-    assert(typeof appId === 'string');
-    assert(typeof health === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof health, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     var values = { health: health };
 
@@ -303,15 +303,15 @@ function setHealth(appId, health, callback) {
 }
 
 function setInstallationCommand(appId, installationState, values, callback) {
-    assert(typeof appId === 'string');
-    assert(typeof installationState === 'string');
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof installationState, 'string');
 
     if (typeof values === 'function') {
         callback = values;
         values = { };
     } else {
-        assert(typeof values === 'object');
-        assert(typeof callback === 'function');
+        assert.strictEqual(typeof values, 'object');
+        assert.strictEqual(typeof callback, 'function');
     }
 
     values.installationState = installationState;
@@ -333,16 +333,16 @@ function setInstallationCommand(appId, installationState, values, callback) {
 }
 
 function setRunCommand(appId, runState, callback) {
-    assert(typeof appId === 'string');
-    assert(typeof runState === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof runState, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     var values = { runState: runState };
     updateWithConstraints(appId, values, 'AND runState NOT LIKE "pending_%" AND installationState = "installed"', callback);
 }
 
 function getAppStoreIds(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('SELECT id, appStoreId FROM apps', function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
@@ -352,10 +352,10 @@ function getAppStoreIds(callback) {
 }
 
 function setAddonConfig(appId, addonId, env, callback) {
-    assert(typeof appId === 'string');
-    assert(typeof addonId === 'string');
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof addonId, 'string');
     assert(util.isArray(env));
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     unsetAddonConfig(appId, addonId, function (error) {
         if (error) return callback(error);
@@ -378,9 +378,9 @@ function setAddonConfig(appId, addonId, env, callback) {
 }
 
 function unsetAddonConfig(appId, addonId, callback) {
-    assert(typeof appId === 'string');
-    assert(typeof addonId === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof addonId, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('DELETE FROM appAddonConfigs WHERE appId = ? AND addonId = ?', [ appId, addonId ], function (error) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
@@ -390,8 +390,8 @@ function unsetAddonConfig(appId, addonId, callback) {
 }
 
 function unsetAddonConfigByAppId(appId, callback) {
-    assert(typeof appId === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('DELETE FROM appAddonConfigs WHERE appId = ?', [ appId ], function (error) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
@@ -401,9 +401,9 @@ function unsetAddonConfigByAppId(appId, callback) {
 }
 
 function getAddonConfig(appId, addonId, callback) {
-    assert(typeof appId === 'string');
-    assert(typeof addonId === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof addonId, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('SELECT value FROM appAddonConfigs WHERE appId = ? AND addonId = ?', [ appId, addonId ], function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
@@ -416,8 +416,8 @@ function getAddonConfig(appId, addonId, callback) {
 }
 
 function getAddonConfigByAppId(appId, callback) {
-    assert(typeof appId === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('SELECT value FROM appAddonConfigs WHERE appId = ?', [ appId ], function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));

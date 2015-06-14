@@ -34,7 +34,7 @@ function generatePassword() {
 }
 
 function profile(req, res, next) {
-    assert(typeof req.user === 'object');
+    assert.strictEqual(typeof req.user, 'object');
 
     var result = {};
     result.id = req.user.id;
@@ -68,7 +68,7 @@ function profile(req, res, next) {
  * @apiError (User already exists 409) {String} message Error details
  */
 function createUser(req, res, next) {
-    assert(typeof req.body === 'object');
+    assert.strictEqual(typeof req.body, 'object');
 
     if (typeof req.body.username !== 'string') return next(new HttpError(400, 'username must be string'));
     if (typeof req.body.email !== 'string') return next(new HttpError(400, 'email must be string'));
@@ -97,8 +97,8 @@ function createUser(req, res, next) {
 }
 
 function update(req, res, next) {
-    assert(typeof req.user === 'object');
-    assert(typeof req.body === 'object');
+    assert.strictEqual(typeof req.user, 'object');
+    assert.strictEqual(typeof req.body, 'object');
 
     if (typeof req.body.email !== 'string') return next(new HttpError(400, 'email must be string'));
 
@@ -114,7 +114,7 @@ function update(req, res, next) {
 }
 
 function changeAdmin(req, res, next) {
-    assert(typeof req.body === 'object');
+    assert.strictEqual(typeof req.body, 'object');
 
     if (typeof req.body.username !== 'string') return next(new HttpError(400, 'API call requires a username.'));
     if (typeof req.body.admin !== 'boolean') return next(new HttpError(400, 'API call requires an admin setting.'));
@@ -128,8 +128,8 @@ function changeAdmin(req, res, next) {
 }
 
 function changePassword(req, res, next) {
-    assert(typeof req.body === 'object');
-    assert(typeof req.user === 'object');
+    assert.strictEqual(typeof req.body, 'object');
+    assert.strictEqual(typeof req.user, 'object');
 
     if (typeof req.body.password !== 'string') return next(new HttpError(400, 'API call requires the users old password.'));
     if (typeof req.body.newPassword !== 'string') return next(new HttpError(400, 'API call requires the users new password.'));
@@ -164,7 +164,7 @@ function listUser(req, res, next) {
  * @apiSuccess {String} email User's email address
  */
 function info(req, res, next) {
-    assert(typeof req.params.userId === 'string');
+    assert.strictEqual(typeof req.params.userId, 'string');
 
     user.get(req.params.userId, function (error, result) {
         if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'No such user'));
@@ -193,7 +193,7 @@ function info(req, res, next) {
  * @apiError (Forbidden 403) {String} message Error details
  */
 function removeUser(req, res, next) {
-    assert(typeof req.params.userId === 'string');
+    assert.strictEqual(typeof req.params.userId, 'string');
 
     // rules:
     // - admin can remove any user
@@ -211,7 +211,7 @@ function removeUser(req, res, next) {
 }
 
 function verifyPassword(req, res, next) {
-    assert(typeof req.body === 'object');
+    assert.strictEqual(typeof req.body, 'object');
 
     // developers are allowed to through without password
     if (req.user.tokenType === tokendb.TYPE_DEV) return next();
@@ -231,7 +231,7 @@ function verifyPassword(req, res, next) {
     Middleware which makes the route only accessable for the admin user.
 */
 function requireAdmin(req, res, next) {
-    assert(typeof req.user === 'object');
+    assert.strictEqual(typeof req.user, 'object');
 
     if (!req.user.admin) return next(new HttpError(403, 'API call requires admin rights.'));
 

@@ -116,7 +116,7 @@ function set(key, value) {
 }
 
 function get(key) {
-    assert(typeof key === 'string');
+    assert.strictEqual(typeof key, 'string');
 
     return safe.query(data, key);
 }
@@ -135,7 +135,7 @@ function fqdn() {
 
 // keep this in sync with start.sh admin.conf generation code
 function appFqdn(location) {
-    assert(typeof location === 'string');
+    assert.strictEqual(typeof location, 'string');
 
     if (location === '') return fqdn();
     return isCustomDomain() ? location + '.' + fqdn() : location + '-' + fqdn();

@@ -171,20 +171,20 @@ function checkUpdates() {
 }
 
 function initialize(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     progress.clear(progress.UPDATE);
     callback(null);
 }
 
 function uninitialize(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     callback(null);
 }
 
 function update(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     progress.set(progress.UPDATE, 0, 'Begin update');
 

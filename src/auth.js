@@ -24,7 +24,7 @@ exports = module.exports = {
 };
 
 function initialize(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     passport.serializeUser(function (user, callback) {
         callback(null, user.username);
@@ -132,7 +132,7 @@ function initialize(callback) {
 }
 
 function uninitialize(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     callback(null);
 }

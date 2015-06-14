@@ -58,7 +58,7 @@ var NOOP_CALLBACK = function (error) { console.error(error); };
 // http://dustinsenos.com/articles/customErrorsInNode
 // http://code.google.com/p/v8/wiki/JavaScriptStackTraceApi
 function AppsError(reason, errorOrMessage) {
-    assert(typeof reason === 'string');
+    assert.strictEqual(typeof reason, 'string');
     assert(errorOrMessage instanceof Error || typeof errorOrMessage === 'string' || typeof errorOrMessage === 'undefined');
 
     Error.call(this);
@@ -147,9 +147,9 @@ function validatePortBindings(portBindings, tcpPorts) {
 }
 
 function getDuplicateErrorDetails(location, portBindings, error) {
-    assert(typeof location === 'string');
-    assert(typeof portBindings === 'object');
-    assert(error.reason === DatabaseError.ALREADY_EXISTS);
+    assert.strictEqual(typeof location, 'string');
+    assert.strictEqual(typeof portBindings, 'object');
+    assert.strictEqual(error.reason, DatabaseError.ALREADY_EXISTS);
 
     var match = error.message.match(/ER_DUP_ENTRY: Duplicate entry '(.*)' for key/);
     if (!match) {
@@ -174,8 +174,8 @@ function getIconUrlSync(app) {
 }
 
 function get(appId, callback) {
-    assert(typeof appId === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     appdb.get(appId, function (error, app) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
@@ -189,8 +189,8 @@ function get(appId, callback) {
 }
 
 function getBySubdomain(subdomain, callback) {
-    assert(typeof subdomain === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof subdomain, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     appdb.getBySubdomain(subdomain, function (error, app) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
@@ -204,7 +204,7 @@ function getBySubdomain(subdomain, callback) {
 }
 
 function getAll(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     var updates = updater.getUpdateInfo().apps || [];
 
@@ -234,8 +234,8 @@ function validateAccessRestriction(accessRestriction) {
 }
 
 function purchase(appStoreId, callback) {
-    assert(typeof appStoreId === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof appStoreId, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     // Skip purchase if appStoreId is empty
     if (appStoreId === '') return callback(null);
@@ -252,14 +252,14 @@ function purchase(appStoreId, callback) {
 }
 
 function install(appId, appStoreId, manifest, location, portBindings, accessRestriction, icon, callback) {
-    assert(typeof appId === 'string');
-    assert(typeof appStoreId === 'string');
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof appStoreId, 'string');
     assert(manifest && typeof manifest === 'object');
-    assert(typeof location === 'string');
-    assert(typeof portBindings === 'object');
-    assert(typeof accessRestriction === 'string');
+    assert.strictEqual(typeof location, 'string');
+    assert.strictEqual(typeof portBindings, 'object');
+    assert.strictEqual(typeof accessRestriction, 'string');
     assert(!icon || typeof icon === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     var error = manifestFormat.parse(manifest);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Manifest error: ' + error.message));
@@ -301,11 +301,11 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
 }
 
 function configure(appId, location, portBindings, accessRestriction, callback) {
-    assert(typeof appId === 'string');
-    assert(typeof location === 'string');
-    assert(typeof portBindings === 'object');
-    assert(typeof accessRestriction === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof location, 'string');
+    assert.strictEqual(typeof portBindings, 'object');
+    assert.strictEqual(typeof accessRestriction, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     var error = validateHostname(location, config.fqdn());
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
@@ -341,11 +341,11 @@ function configure(appId, location, portBindings, accessRestriction, callback) {
 }
 
 function update(appId, manifest, portBindings, icon, callback) {
-    assert(typeof appId === 'string');
+    assert.strictEqual(typeof appId, 'string');
     assert(manifest && typeof manifest === 'object');
     assert(!portBindings || typeof portBindings === 'object');
     assert(!icon || typeof icon === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     debug('Will update app with id:%s', appId);
 
@@ -377,9 +377,9 @@ function update(appId, manifest, portBindings, icon, callback) {
 }
 
 function getLogStream(appId, fromLine, callback) {
-    assert(typeof appId === 'string');
-    assert(typeof fromLine === 'number'); // behaves like tail -n
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof fromLine, 'number'); // behaves like tail -n
+    assert.strictEqual(typeof callback, 'function');
 
     debug('Getting logs for %s', appId);
     appdb.get(appId, function (error, app) {
@@ -410,8 +410,8 @@ function getLogStream(appId, fromLine, callback) {
 }
 
 function getLogs(appId, callback) {
-    assert(typeof appId === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     debug('Getting logs for %s', appId);
     appdb.get(appId, function (error, app) {
@@ -432,8 +432,8 @@ function getLogs(appId, callback) {
 }
 
 function restore(appId, callback) {
-    assert(typeof appId === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     debug('Will restore app with id:%s', appId);
 
@@ -448,8 +448,8 @@ function restore(appId, callback) {
 }
 
 function uninstall(appId, callback) {
-    assert(typeof appId === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     debug('Will uninstall app with id:%s', appId);
 
@@ -464,8 +464,8 @@ function uninstall(appId, callback) {
 }
 
 function start(appId, callback) {
-    assert(typeof appId === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     debug('Will start app with id:%s', appId);
 
@@ -480,8 +480,8 @@ function start(appId, callback) {
 }
 
 function stop(appId, callback) {
-    assert(typeof appId === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     debug('Will stop app with id:%s', appId);
 
@@ -508,9 +508,9 @@ function checkManifestConstraints(manifest) {
 }
 
 function exec(appId, options, callback) {
-    assert(typeof appId === 'string');
+    assert.strictEqual(typeof appId, 'string');
     assert(options && typeof options === 'object');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     var cmd = options.cmd || [ '/bin/bash' ];
     assert(util.isArray(cmd) && cmd.length > 0);
@@ -550,9 +550,9 @@ function exec(appId, options, callback) {
 }
 
 function setLastBackupId(appId, lastBackupId, callback) {
-    assert(typeof appId === 'string');
-    assert(typeof lastBackupId === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof lastBackupId, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     appdb.update(appId, { lastBackupId: lastBackupId }, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));

@@ -39,7 +39,7 @@ var CRYPTO_KEY_LENGTH = 512; // bits
 // http://dustinsenos.com/articles/customErrorsInNode
 // http://code.google.com/p/v8/wiki/JavaScriptStackTraceApi
 function UserError(reason, errorOrMessage) {
-    assert(typeof reason === 'string');
+    assert.strictEqual(typeof reason, 'string');
     assert(errorOrMessage instanceof Error || typeof errorOrMessage === 'string' || typeof errorOrMessage === 'undefined');
 
     Error.call(this);
@@ -69,7 +69,7 @@ UserError.BAD_TOKEN = 'Bad token';
 UserError.NOT_ALLOWED = 'Not Allowed';
 
 function listUsers(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     userdb.getAll(function (error, result) {
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
@@ -79,7 +79,7 @@ function listUsers(callback) {
 }
 
 function validateUsername(username) {
-    assert(typeof username === 'string');
+    assert.strictEqual(typeof username, 'string');
 
     if (username.length <= 2) return new UserError(UserError.BAD_USERNAME, 'Username must be atleast 3 chars');
     if (username.length > 256) return new UserError(UserError.BAD_USERNAME, 'Username too long');
@@ -88,7 +88,7 @@ function validateUsername(username) {
 }
 
 function validatePassword(password) {
-    assert(typeof password === 'string');
+    assert.strictEqual(typeof password, 'string');
 
     if (password.length < 5) return new UserError(UserError.BAD_PASSWORD, 'Password must be atleast 5 chars');
 
@@ -96,7 +96,7 @@ function validatePassword(password) {
 }
 
 function validateEmail(email) {
-    assert(typeof email === 'string');
+    assert.strictEqual(typeof email, 'string');
 
     if (!validator.isEmail(email)) return new UserError(UserError.BAD_EMAIL, 'Invalid email');
 
@@ -104,7 +104,7 @@ function validateEmail(email) {
 }
 
 function validateToken(token) {
-    assert(typeof token === 'string');
+    assert.strictEqual(typeof token, 'string');
 
     if (token.length !== 64) return new UserError(UserError.BAD_TOKEN, 'Invalid token'); // 256-bit hex coded token
 
@@ -112,11 +112,11 @@ function validateToken(token) {
 }
 
 function createUser(username, password, email, admin, callback) {
-    assert(typeof username === 'string');
-    assert(typeof password === 'string');
-    assert(typeof email === 'string');
-    assert(typeof admin === 'boolean');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof username, 'string');
+    assert.strictEqual(typeof password, 'string');
+    assert.strictEqual(typeof email, 'string');
+    assert.strictEqual(typeof admin, 'boolean');
+    assert.strictEqual(typeof callback, 'function');
 
     var error = validateUsername(username);
     if (error) return callback(error);
@@ -161,9 +161,9 @@ function createUser(username, password, email, admin, callback) {
 }
 
 function verify(username, password, callback) {
-    assert(typeof username === 'string');
-    assert(typeof password === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof username, 'string');
+    assert.strictEqual(typeof password, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     userdb.get(username, function (error, user) {
         if (error && error.reason == DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
@@ -182,9 +182,9 @@ function verify(username, password, callback) {
 }
 
 function verifyWithEmail(email, password, callback) {
-    assert(typeof email === 'string');
-    assert(typeof password === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof email, 'string');
+    assert.strictEqual(typeof password, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     userdb.getByEmail(email, function (error, user) {
         if (error && error.reason == DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
@@ -203,8 +203,8 @@ function verifyWithEmail(email, password, callback) {
 }
 
 function removeUser(username, callback) {
-    assert(typeof username === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof username, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     userdb.del(username, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
@@ -217,8 +217,8 @@ function removeUser(username, callback) {
 }
 
 function getUser(userId, callback) {
-    assert(typeof userId === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof userId, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     userdb.get(userId, function (error, result) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
@@ -229,8 +229,8 @@ function getUser(userId, callback) {
 }
 
 function getByResetToken(resetToken, callback) {
-    assert(typeof resetToken === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof resetToken, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     var error = validateToken(resetToken);
     if (error) return callback(error);
@@ -244,10 +244,10 @@ function getByResetToken(resetToken, callback) {
 }
 
 function updateUser(userId, username, email, callback) {
-    assert(typeof userId === 'string');
-    assert(typeof username === 'string');
-    assert(typeof email === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof userId, 'string');
+    assert.strictEqual(typeof username, 'string');
+    assert.strictEqual(typeof email, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     var error = validateUsername(username);
     if (error) return callback(error);
@@ -263,9 +263,9 @@ function updateUser(userId, username, email, callback) {
 }
 
 function changeAdmin(username, admin, callback) {
-    assert(typeof username === 'string');
-    assert(typeof admin === 'boolean');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof username, 'string');
+    assert.strictEqual(typeof admin, 'boolean');
+    assert.strictEqual(typeof callback, 'function');
 
     getUser(username, function (error, user) {
         if (error) return callback(error);
@@ -290,8 +290,8 @@ function changeAdmin(username, admin, callback) {
 }
 
 function resetPasswordByIdentifier(identifier, callback) {
-    assert(typeof identifier === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof identifier, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     var getter;
     if (identifier.indexOf('@') === -1) getter = userdb.getByUsername;
@@ -315,9 +315,9 @@ function resetPasswordByIdentifier(identifier, callback) {
 }
 
 function setPassword(userId, newPassword, callback) {
-    assert(typeof userId === 'string');
-    assert(typeof newPassword === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof userId, 'string');
+    assert.strictEqual(typeof newPassword, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     var error = validatePassword(newPassword);
     if (error) return callback(error);
@@ -357,10 +357,10 @@ function setPassword(userId, newPassword, callback) {
 }
 
 function changePassword(username, oldPassword, newPassword, callback) {
-    assert(typeof username === 'string');
-    assert(typeof oldPassword === 'string');
-    assert(typeof newPassword === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof username, 'string');
+    assert.strictEqual(typeof oldPassword, 'string');
+    assert.strictEqual(typeof newPassword, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     var error = validatePassword(newPassword);
     if (error) return callback(error);

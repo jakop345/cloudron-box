@@ -33,8 +33,8 @@ function initialize(options, callback) {
         };
     }
 
-    assert(typeof options.connectionLimit === 'number');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof options.connectionLimit, 'number');
+    assert.strictEqual(typeof callback, 'function');
 
     if (gConnectionPool !== null) return callback(null);
 
@@ -62,8 +62,8 @@ function uninitialize(callback) {
 }
 
 function setupConnection(connection, callback) {
-    assert(typeof connection === 'object');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof connection, 'object');
+    assert.strictEqual(typeof callback, 'function');
 
     connection.on('error', console.error);
 
@@ -106,7 +106,7 @@ function reconnect(callback) {
 }
 
 function clear(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     // the clear funcs don't completely clear the db, they leave the migration code defaults
     async.series([
@@ -120,7 +120,7 @@ function clear(callback) {
 }
 
 function beginTransaction(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     gConnectionPool.getConnection(function (error, connection) {
         if (error) return callback(error);
@@ -138,7 +138,7 @@ function beginTransaction(callback) {
 }
 
 function rollback(connection, callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     connection.rollback(function (error) {
         if (error) console.error(error); // can this happen?
@@ -150,7 +150,7 @@ function rollback(connection, callback) {
 
 // FIXME: if commit fails, is it supposed to return an error ?
 function commit(connection, callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     connection.commit(function (error) {
         if (error) return rollback(connection, callback);
@@ -163,7 +163,7 @@ function commit(connection, callback) {
 function query() {
     var args = Array.prototype.slice.call(arguments);
     var callback = args[args.length - 1];
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     if (gDefaultConnection === null) return callback(new Error('No connection to database'));
 
@@ -181,7 +181,7 @@ function query() {
 
 function transaction(queries, callback) {
     assert(util.isArray(queries));
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     beginTransaction(function (error, conn) {
         if (error) return callback(error);

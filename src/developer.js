@@ -17,7 +17,7 @@ var assert = require('assert'),
     util = require('util');
 
 function DeveloperError(reason, errorOrMessage) {
-    assert(typeof reason === 'string');
+    assert.strictEqual(typeof reason, 'string');
     assert(errorOrMessage instanceof Error || typeof errorOrMessage === 'string' || typeof errorOrMessage === 'undefined');
 
     Error.call(this);
@@ -38,14 +38,14 @@ util.inherits(DeveloperError, Error);
 DeveloperError.INTERNAL_ERROR = 'Internal Error';
 
 function enabled(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     callback(null, config.developerMode());
 }
 
 function setEnabled(enabled, callback) {
-    assert(typeof enabled === 'boolean');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof enabled, 'boolean');
+    assert.strictEqual(typeof callback, 'function');
 
     config.set('developerMode', enabled);
 
@@ -53,8 +53,8 @@ function setEnabled(enabled, callback) {
 }
 
 function issueDeveloperToken(user, callback) {
-    assert(typeof user === 'object');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof user, 'object');
+    assert.strictEqual(typeof callback, 'function');
 
     var token = tokendb.generateToken();
     var expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 1 day

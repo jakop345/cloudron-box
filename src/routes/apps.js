@@ -36,7 +36,7 @@ exports = module.exports = {
  * Get installed (or scheduled to be installed) app
  */
 function getApp(req, res, next) {
-    assert(typeof req.params.id === 'string');
+    assert.strictEqual(typeof req.params.id, 'string');
 
     apps.get(req.params.id, function (error, app) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
@@ -50,7 +50,7 @@ function getApp(req, res, next) {
  * Get the app installed in the subdomain
  */
 function getAppBySubdomain(req, res, next) {
-    assert(typeof req.params.subdomain === 'string');
+    assert.strictEqual(typeof req.params.subdomain, 'string');
 
     apps.getBySubdomain(req.params.subdomain, function (error, app) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such subdomain'));
@@ -74,7 +74,7 @@ function getApps(req, res, next) {
  * Get the app icon
  */
 function getAppIcon(req, res, next) {
-    assert(typeof req.params.id === 'string');
+    assert.strictEqual(typeof req.params.id, 'string');
 
     var iconPath = paths.APPICONS_DIR + '/' + req.params.id + '.png';
     fs.exists(iconPath, function (exists) {
@@ -94,7 +94,7 @@ function getAppIcon(req, res, next) {
  * @bodyparam {icon} icon Base64 encoded image
  */
 function installApp(req, res, next) {
-    assert(typeof req.body === 'object');
+    assert.strictEqual(typeof req.body, 'object');
 
     var data = req.body;
 
@@ -131,8 +131,8 @@ function installApp(req, res, next) {
                        If a value in manifest.tcpPorts is missing in portBindings, the port/service is disabled
  */
 function configureApp(req, res, next) {
-    assert(typeof req.body === 'object');
-    assert(typeof req.params.id === 'string');
+    assert.strictEqual(typeof req.body, 'object');
+    assert.strictEqual(typeof req.params.id, 'string');
 
     var data = req.body;
 
@@ -157,7 +157,7 @@ function configureApp(req, res, next) {
 }
 
 function restoreApp(req, res, next) {
-    assert(typeof req.params.id === 'string');
+    assert.strictEqual(typeof req.params.id, 'string');
 
     debug('Restore app id:%s', req.params.id);
 
@@ -176,7 +176,7 @@ function restoreApp(req, res, next) {
  * @bodyparam {string} id The id of the app to be uninstalled
  */
 function uninstallApp(req, res, next) {
-    assert(typeof req.params.id === 'string');
+    assert.strictEqual(typeof req.params.id, 'string');
 
     debug('Uninstalling app id:%s', req.params.id);
 
@@ -189,7 +189,7 @@ function uninstallApp(req, res, next) {
 }
 
 function startApp(req, res, next) {
-    assert(typeof req.params.id === 'string');
+    assert.strictEqual(typeof req.params.id, 'string');
 
     debug('Start app id:%s', req.params.id);
 
@@ -203,7 +203,7 @@ function startApp(req, res, next) {
 }
 
 function stopApp(req, res, next) {
-    assert(typeof req.params.id === 'string');
+    assert.strictEqual(typeof req.params.id, 'string');
 
     debug('Stop app id:%s', req.params.id);
 
@@ -217,8 +217,8 @@ function stopApp(req, res, next) {
 }
 
 function updateApp(req, res, next) {
-    assert(typeof req.params.id === 'string');
-    assert(typeof req.body === 'object');
+    assert.strictEqual(typeof req.params.id, 'string');
+    assert.strictEqual(typeof req.body, 'object');
 
     var data = req.body;
 
@@ -241,7 +241,7 @@ function updateApp(req, res, next) {
 
 // this route is for streaming logs
 function getLogStream(req, res, next) {
-    assert(typeof req.params.id === 'string');
+    assert.strictEqual(typeof req.params.id, 'string');
 
     debug('Getting logstream of app id:%s', req.params.id);
 
@@ -277,7 +277,7 @@ function getLogStream(req, res, next) {
 
 // this route is for downloading logs
 function getLogs(req, res, next) {
-    assert(typeof req.params.id === 'string');
+    assert.strictEqual(typeof req.params.id, 'string');
 
     debug('Getting logs of app id:%s', req.params.id);
 
@@ -297,7 +297,7 @@ function getLogs(req, res, next) {
 }
 
 function exec(req, res, next) {
-    assert(typeof req.params.id === 'string');
+    assert.strictEqual(typeof req.params.id, 'string');
 
     debug('Execing into app id:%s', req.params.id);
 

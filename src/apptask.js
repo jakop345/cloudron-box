@@ -270,8 +270,8 @@ function deleteVolume(app, callback) {
 }
 
 function allocateOAuthProxyCredentials(app, callback) {
-    assert(typeof app === 'object');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
 
     if (!app.accessRestriction) return callback(null);
 
@@ -285,8 +285,8 @@ function allocateOAuthProxyCredentials(app, callback) {
 }
 
 function removeOAuthProxyCredentials(app, callback) {
-    assert(typeof app === 'object');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
 
     clientdb.delByAppId('proxy-' + app.id, function (error) {
         if (error && error.reason !== DatabaseError.NOT_FOUND) {
@@ -299,8 +299,8 @@ function removeOAuthProxyCredentials(app, callback) {
 }
 
 function allocateAccessToken(app, callback) {
-    assert(typeof app === 'object');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
 
     var token = tokendb.generateToken();
     var expiresAt = Number.MAX_SAFE_INTEGER;    // basically never expire
@@ -311,8 +311,8 @@ function allocateAccessToken(app, callback) {
 }
 
 function removeAccessToken(app, callback) {
-    assert(typeof app === 'object');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
 
     tokendb.delByIdentifier(tokendb.PREFIX_APP + app.id, function (error) {
         if (error && error.reason !== DatabaseError.NOT_FOUND) {
@@ -892,7 +892,7 @@ function startTask(appId, callback) {
 }
 
 if (require.main === module) {
-    assert(process.argv.length === 3, 'Pass the appid as argument');
+    assert.strictEqual(process.argv.length, 3, 'Pass the appid as argument');
 
     debug('Apptask for %s', process.argv[2]);
 

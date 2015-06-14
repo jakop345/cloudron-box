@@ -131,7 +131,7 @@ gServer.exchange(oauth2orize.exchange.code(function (client, code, redirectURI, 
 
 // overwrite the session.ensureLoggedIn to not use res.redirect() due to a chrome bug not sending cookies on redirects
 session.ensureLoggedIn = function (redirectTo) {
-    assert(typeof redirectTo === 'string');
+    assert.strictEqual(typeof redirectTo, 'string');
 
     return function (req, res, next) {
         if (!req.isAuthenticated || !req.isAuthenticated()) {
@@ -147,9 +147,9 @@ session.ensureLoggedIn = function (redirectTo) {
 };
 
 function sendErrorPageOrRedirect(req, res, message) {
-    assert(typeof req === 'object');
-    assert(typeof res === 'object');
-    assert(typeof message === 'string');
+    assert.strictEqual(typeof req, 'object');
+    assert.strictEqual(typeof res, 'object');
+    assert.strictEqual(typeof message, 'string');
 
     debug('sendErrorPageOrRedirect: returnTo "%s".', req.query.returnTo, message);
 
@@ -170,9 +170,9 @@ function sendErrorPageOrRedirect(req, res, message) {
 }
 
 function sendError(req, res, message) {
-    assert(typeof req === 'object');
-    assert(typeof res === 'object');
-    assert(typeof message === 'string');
+    assert.strictEqual(typeof req, 'object');
+    assert.strictEqual(typeof res, 'object');
+    assert.strictEqual(typeof message, 'string');
 
     res.render('error', {
         adminOrigin: config.adminOrigin(),
@@ -242,7 +242,7 @@ function passwordResetRequestSite(req, res) {
 // This route is used for above form submission
 // -> POST /api/v1/session/password/resetRequest
 function passwordResetRequest(req, res, next) {
-    assert(typeof req.body === 'object');
+    assert.strictEqual(typeof req.body, 'object');
 
     if (typeof req.body.identifier !== 'string') return next(new HttpError(400, 'Missing identifier'));
 
@@ -291,7 +291,7 @@ function passwordResetSite(req, res, next) {
 
 // -> POST /api/v1/session/password/reset
 function passwordReset(req, res, next) {
-    assert(typeof req.body === 'object');
+    assert.strictEqual(typeof req.body, 'object');
 
     if (typeof req.body.resetToken !== 'string') return next(new HttpError(400, 'Missing resetToken'));
     if (typeof req.body.password !== 'string') return next(new HttpError(400, 'Missing password'));
@@ -380,8 +380,8 @@ var authorization = [
     // Until we have OAuth scopes, skip decision dialog
     // OAuth sopes skip START
     function (req, res, next) {
-        assert(typeof req.body === 'object');
-        assert(typeof req.oauth2 === 'object');
+        assert.strictEqual(typeof req.body, 'object');
+        assert.strictEqual(typeof req.oauth2, 'object');
 
         var scopes = req.oauth2.client.scope ? req.oauth2.client.scope.split(',') : ['profile','roleUser'];
 
@@ -438,7 +438,7 @@ var token = [
 
 */
 function scope(requestedScope) {
-    assert(typeof requestedScope === 'string');
+    assert.strictEqual(typeof requestedScope, 'string');
 
     var requestedScopes = requestedScope.split(',');
     debug('scope: add routes with requested scopes', requestedScopes);

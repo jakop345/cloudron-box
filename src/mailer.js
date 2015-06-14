@@ -42,14 +42,14 @@ var gMailQueue = [ ],
     gCheckDnsTimerId = null;
 
 function initialize(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     checkDns();
     callback(null);
 }
 
 function uninitialize(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     // TODO: interrupt processQueue as well
     clearTimeout(gCheckDnsTimerId);
@@ -104,7 +104,7 @@ function processQueue() {
 }
 
 function enqueue(mailOptions) {
-    assert(typeof mailOptions === 'object');
+    assert.strictEqual(typeof mailOptions, 'object');
 
     debug('Queued mail for ' + mailOptions.from + ' to ' + mailOptions.to);
     gMailQueue.push(mailOptions);
@@ -113,8 +113,8 @@ function enqueue(mailOptions) {
 }
 
 function render(templateFile, params) {
-    assert(typeof templateFile === 'string');
-    assert(typeof params === 'object');
+    assert.strictEqual(typeof templateFile, 'string');
+    assert.strictEqual(typeof params, 'object');
 
     return ejs.render(safe.fs.readFileSync(path.join(MAIL_TEMPLATES_DIR, templateFile), 'utf8'), params);
 }
@@ -131,8 +131,8 @@ function getAdminEmails(callback) {
 }
 
 function mailUserEventToAdmins(user, event) {
-    assert(typeof user === 'object');
-    assert(typeof event === 'string');
+    assert.strictEqual(typeof user, 'object');
+    assert.strictEqual(typeof event, 'string');
 
     getAdminEmails(function (error, adminEmails) {
         if (error) return console.log('Error getting admins', error);
@@ -151,7 +151,7 @@ function mailUserEventToAdmins(user, event) {
 }
 
 function userAdded(user) {
-    assert(typeof user === 'object');
+    assert.strictEqual(typeof user, 'object');
 
     debug('Sending mail for userAdded');
 
@@ -176,7 +176,7 @@ function userAdded(user) {
 }
 
 function userRemoved(username) {
-    assert(typeof username === 'string');
+    assert.strictEqual(typeof username, 'string');
 
     debug('Sending mail for userRemoved');
 
@@ -184,7 +184,7 @@ function userRemoved(username) {
 }
 
 function adminChanged(user) {
-    assert(typeof user === 'object');
+    assert.strictEqual(typeof user, 'object');
 
     debug('Sending mail for adminChanged');
 
@@ -192,7 +192,7 @@ function adminChanged(user) {
 }
 
 function passwordReset(user) {
-    assert(typeof user === 'object');
+    assert.strictEqual(typeof user, 'object');
 
     debug('Sending mail for password reset for user %s.', user.username);
 
@@ -209,7 +209,7 @@ function passwordReset(user) {
 }
 
 function appDied(app) {
-    assert(typeof app === 'object');
+    assert.strictEqual(typeof app, 'object');
 
     debug('Sending mail for app %s @ %s died', app.id, app.location);
 
@@ -228,7 +228,7 @@ function appDied(app) {
 }
 
 function boxUpdateAvailable(newBoxVersion, changelog) {
-    assert(typeof newBoxVersion === 'string');
+    assert.strictEqual(typeof newBoxVersion, 'string');
     assert(util.isArray(changelog));
 
     getAdminEmails(function (error, adminEmails) {
@@ -246,8 +246,8 @@ function boxUpdateAvailable(newBoxVersion, changelog) {
 }
 
 function appUpdateAvailable(app, updateInfo) {
-    assert(typeof app === 'object');
-    assert(typeof updateInfo === 'object');
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof updateInfo, 'object');
 
     getAdminEmails(function (error, adminEmails) {
         if (error) return console.log('Error getting admins', error);
@@ -264,8 +264,8 @@ function appUpdateAvailable(app, updateInfo) {
 }
 
 function sendCrashNotification(program, context) {
-    assert(typeof program === 'string');
-    assert(typeof context === 'string');
+    assert.strictEqual(typeof program, 'string');
+    assert.strictEqual(typeof context, 'string');
 
     var mailOptions = {
         from: config.get('mailUsername'),

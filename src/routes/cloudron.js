@@ -39,8 +39,8 @@ exports = module.exports = {
  * @apiSuccess (Created 201) {string} token A valid access token
  */
 function activate(req, res, next) {
-    assert(typeof req.body === 'object');
-    assert(typeof req.query.setupToken === 'string');
+    assert.strictEqual(typeof req.body, 'object');
+    assert.strictEqual(typeof req.query.setupToken, 'string');
 
     if (typeof req.body.username !== 'string') return next(new HttpError(400, 'username must be string'));
     if (typeof req.body.password !== 'string') return next(new HttpError(400, 'password must be string'));
@@ -73,7 +73,7 @@ function activate(req, res, next) {
 }
 
 function setupTokenAuth(req, res, next) {
-    assert(typeof req.query === 'object');
+    assert.strictEqual(typeof req.query, 'object');
 
     if (typeof req.query.setupToken !== 'string') return next(new HttpError(400, 'no setupToken provided'));
 
@@ -159,7 +159,7 @@ function migrate(req, res, next) {
 }
 
 function setCertificate(req, res, next) {
-    assert(typeof req.files === 'object');
+    assert.strictEqual(typeof req.files, 'object');
 
     if (!req.files.certificate) return next(new HttpError(400, 'certificate must be provided'));
     var certificate = safe.fs.readFileSync(req.files.certificate.path, 'utf8');

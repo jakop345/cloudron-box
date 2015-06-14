@@ -24,7 +24,7 @@ exports = module.exports = {
 };
 
 function ClientsError(reason, errorOrMessage) {
-    assert(typeof reason === 'string');
+    assert.strictEqual(typeof reason, 'string');
     assert(errorOrMessage instanceof Error || typeof errorOrMessage === 'string' || typeof errorOrMessage === 'undefined');
 
     Error.call(this);
@@ -45,7 +45,7 @@ util.inherits(ClientsError, Error);
 ClientsError.INVALID_SCOPE = 'Invalid scope';
 
 function validateScope(scope) {
-    assert(typeof scope === 'string');
+    assert.strictEqual(typeof scope, 'string');
 
     if (scope === '') return new ClientsError(ClientsError.INVALID_SCOPE);
     if (scope === '*') return null;
@@ -56,10 +56,10 @@ function validateScope(scope) {
 }
 
 function add(appIdentifier, redirectURI, scope, callback) {
-    assert(typeof appIdentifier === 'string');
-    assert(typeof redirectURI === 'string');
-    assert(typeof scope === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof appIdentifier, 'string');
+    assert.strictEqual(typeof redirectURI, 'string');
+    assert.strictEqual(typeof scope, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     var error = validateScope(scope);
     if (error) return callback(error);
@@ -83,8 +83,8 @@ function add(appIdentifier, redirectURI, scope, callback) {
 }
 
 function get(id, callback) {
-    assert(typeof id === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof id, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     clientdb.get(id, function (error, result) {
         if (error) return callback(error);
@@ -94,10 +94,10 @@ function get(id, callback) {
 
 // we only allow appIdentifier and redirectURI to be updated
 function update(id, appIdentifier, redirectURI, callback) {
-    assert(typeof id === 'string');
-    assert(typeof appIdentifier === 'string');
-    assert(typeof redirectURI === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof id, 'string');
+    assert.strictEqual(typeof appIdentifier, 'string');
+    assert.strictEqual(typeof redirectURI, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     clientdb.get(id, function (error, result) {
         if (error) return callback(error);
@@ -110,8 +110,8 @@ function update(id, appIdentifier, redirectURI, callback) {
 }
 
 function del(id, callback) {
-    assert(typeof id === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof id, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     clientdb.del(id, function (error, result) {
         if (error) return callback(error);
@@ -120,8 +120,8 @@ function del(id, callback) {
 }
 
 function getAllWithDetailsByUserId(userId, callback) {
-    assert(typeof userId === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof userId, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     clientdb.getAllWithTokenCountByIdentifier(tokendb.PREFIX_USER + userId, function (error, results) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, []);
@@ -188,9 +188,9 @@ function getAllWithDetailsByUserId(userId, callback) {
 }
 
 function getClientTokensByUserId(clientId, userId, callback) {
-    assert(typeof clientId === 'string');
-    assert(typeof userId === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof clientId, 'string');
+    assert.strictEqual(typeof userId, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     tokendb.getByIdentifierAndClientId(tokendb.PREFIX_USER + userId, clientId, function (error, result) {
         if (error && error.reason === DatabaseError.NOT_FOUND) {
@@ -207,9 +207,9 @@ function getClientTokensByUserId(clientId, userId, callback) {
 }
 
 function delClientTokensByUserId(clientId, userId, callback) {
-    assert(typeof clientId === 'string');
-    assert(typeof userId === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof clientId, 'string');
+    assert.strictEqual(typeof userId, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     tokendb.delByIdentifierAndClientId(tokendb.PREFIX_USER + userId, clientId, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) {

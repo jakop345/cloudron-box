@@ -8,7 +8,7 @@ var assert = require('assert'),
 module.exports = exports = DatabaseError;
 
 function DatabaseError(reason, errorOrMessage) {
-    assert(typeof reason === 'string');
+    assert.strictEqual(typeof reason, 'string');
     assert(errorOrMessage instanceof Error || typeof errorOrMessage === 'string' || typeof errorOrMessage === 'undefined' || errorOrMessage === null);
 
     Error.call(this);

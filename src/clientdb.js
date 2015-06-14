@@ -23,8 +23,8 @@ var CLIENTS_FIELDS = [ 'id', 'appId', 'clientSecret', 'redirectURI', 'scope' ].j
 var CLIENTS_FIELDS_PREFIXED = [ 'clients.id', 'clients.appId', 'clients.clientSecret', 'clients.redirectURI', 'clients.scope' ].join(',');
 
 function get(id, callback) {
-    assert(typeof id === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof id, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('SELECT ' + CLIENTS_FIELDS + ' FROM clients WHERE id = ?', [ id ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
@@ -35,7 +35,7 @@ function get(id, callback) {
 }
 
 function getAll(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('SELECT ' + CLIENTS_FIELDS + ' FROM clients ORDER BY appId', function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
@@ -45,8 +45,8 @@ function getAll(callback) {
 }
 
 function getAllWithTokenCountByIdentifier(identifier, callback) {
-    assert(typeof identifier === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof identifier, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('SELECT ' + CLIENTS_FIELDS_PREFIXED + ',COUNT(tokens.clientId) AS tokenCount FROM clients LEFT OUTER JOIN tokens ON clients.id=tokens.clientId WHERE tokens.identifier=? GROUP BY clients.id', [ identifier ], function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
@@ -56,8 +56,8 @@ function getAllWithTokenCountByIdentifier(identifier, callback) {
 }
 
 function getByAppId(appId, callback) {
-    assert(typeof appId === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('SELECT ' + CLIENTS_FIELDS + ' FROM clients WHERE appId = ? LIMIT 1', [ appId ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
@@ -68,12 +68,12 @@ function getByAppId(appId, callback) {
 }
 
 function add(id, appId, clientSecret, redirectURI, scope, callback) {
-    assert(typeof id === 'string');
-    assert(typeof appId === 'string');
-    assert(typeof clientSecret === 'string');
-    assert(typeof redirectURI === 'string');
-    assert(typeof scope === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof id, 'string');
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof clientSecret, 'string');
+    assert.strictEqual(typeof redirectURI, 'string');
+    assert.strictEqual(typeof scope, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     var data = [ id, appId, clientSecret, redirectURI, scope ];
 
@@ -86,12 +86,12 @@ function add(id, appId, clientSecret, redirectURI, scope, callback) {
 }
 
 function update(id, appId, clientSecret, redirectURI, scope, callback) {
-    assert(typeof id === 'string');
-    assert(typeof appId === 'string');
-    assert(typeof clientSecret === 'string');
-    assert(typeof redirectURI === 'string');
-    assert(typeof scope === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof id, 'string');
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof clientSecret, 'string');
+    assert.strictEqual(typeof redirectURI, 'string');
+    assert.strictEqual(typeof scope, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     var data = [ appId, clientSecret, redirectURI, scope, id ];
 
@@ -104,8 +104,8 @@ function update(id, appId, clientSecret, redirectURI, scope, callback) {
 }
 
 function del(id, callback) {
-    assert(typeof id === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof id, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('DELETE FROM clients WHERE id = ?', [ id ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
@@ -116,8 +116,8 @@ function del(id, callback) {
 }
 
 function delByAppId(appId, callback) {
-    assert(typeof appId === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('DELETE FROM clients WHERE appId=?', [ appId ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
@@ -128,7 +128,7 @@ function delByAppId(appId, callback) {
 }
 
 function clear(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('DELETE FROM clients WHERE appId!="webadmin"', function (error) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));

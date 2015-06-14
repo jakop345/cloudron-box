@@ -23,7 +23,7 @@ var UNHEALTHY_THRESHOLD = 10 * 60 * 1000; // 10 minutes
 var gLastSeen = { }; // { time, emailSent }
 
 function initialize(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     async.series([
         database.initialize,
@@ -32,9 +32,9 @@ function initialize(callback) {
 }
 
 function setHealth(app, health, callback) {
-    assert(typeof app === 'object');
-    assert(typeof health === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof health, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     var now = new Date();
 

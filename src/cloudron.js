@@ -63,7 +63,7 @@ var gAddMailDnsRecordsTimerId = null,
     gCachedIp = null;
 
 function CloudronError(reason, errorOrMessage) {
-    assert(typeof reason === 'string');
+    assert.strictEqual(typeof reason, 'string');
     assert(errorOrMessage instanceof Error || typeof errorOrMessage === 'string' || typeof errorOrMessage === 'undefined');
 
     Error.call(this);
@@ -100,7 +100,7 @@ function debugApp(app, args) {
 }
 
 function initialize(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     if (process.env.NODE_ENV !== 'test') {
         addMailDnsRecords();
@@ -110,7 +110,7 @@ function initialize(callback) {
 }
 
 function uninitialize(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     clearTimeout(gAddMailDnsRecordsTimerId);
     gAddMailDnsRecordsTimerId = null;
@@ -121,8 +121,8 @@ function uninitialize(callback) {
 }
 
 function setTimeZone(ip, callback) {
-    assert(typeof ip === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof ip, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     debug('setTimeZone ip:%s', ip);
 
@@ -144,11 +144,11 @@ function setTimeZone(ip, callback) {
 }
 
 function activate(username, password, email, ip, callback) {
-    assert(typeof username === 'string');
-    assert(typeof password === 'string');
-    assert(typeof email === 'string');
-    assert(typeof ip === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof username, 'string');
+    assert.strictEqual(typeof password, 'string');
+    assert.strictEqual(typeof email, 'string');
+    assert.strictEqual(typeof ip, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     debug('activating user:%s email:%s', username, email);
 
@@ -180,7 +180,7 @@ function activate(username, password, email, ip, callback) {
 function getBackupUrl(appId, appBackupIds, callback) {
     assert(!appId || typeof appId === 'string');
     assert(!appBackupIds || util.isArray(appBackupIds));
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/backupurl';
 
@@ -194,8 +194,8 @@ function getBackupUrl(appId, appBackupIds, callback) {
 }
 
 function getRestoreUrl(backupId, callback) {
-    assert(typeof backupId === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof backupId, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/restoreurl';
 
@@ -336,7 +336,7 @@ function getIp() {
 }
 
 function getStatus(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     userdb.count(function (error, count) {
         if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
@@ -346,7 +346,7 @@ function getStatus(callback) {
 }
 
 function getCloudronDetails(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     if (gCloudronDetails) return callback(null, gCloudronDetails);
 
@@ -364,7 +364,7 @@ function getCloudronDetails(callback) {
 }
 
 function getConfig(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     getCloudronDetails(function (error, result) {
         if (error) {
@@ -412,7 +412,7 @@ function sendHeartbeat() {
 }
 
 function sendMailDnsRecordsRequest(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     var DKIM_SELECTOR = 'mail';
     var DMARC_REPORT_EMAIL = 'dmarc-report@cloudron.io';
@@ -471,9 +471,9 @@ function addMailDnsRecords() {
 }
 
 function setCertificate(certificate, key, callback) {
-    assert(typeof certificate === 'string');
-    assert(typeof key === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof certificate, 'string');
+    assert.strictEqual(typeof key, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     debug('Updating certificates');
 
@@ -497,9 +497,9 @@ function reboot(callback) {
 }
 
 function migrate(size, region, callback) {
-    assert(typeof size === 'string');
-    assert(typeof region === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof size, 'string');
+    assert.strictEqual(typeof region, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     backupBox(function (error, restoreKey) {
         if (error) return callback(error);

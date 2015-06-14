@@ -100,9 +100,9 @@ function debugApp(app, args) {
 }
 
 function setupAddons(app, callback) {
-    assert(typeof app === 'object');
+    assert.strictEqual(typeof app, 'object');
     assert(!app.manifest.addons || typeof app.manifest.addons === 'object');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     if (!app.manifest.addons) return callback(null);
 
@@ -116,8 +116,8 @@ function setupAddons(app, callback) {
 }
 
 function teardownAddons(app, callback) {
-    assert(typeof app === 'object');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
 
     if (!app.manifest) return callback(null);
 
@@ -135,9 +135,9 @@ function teardownAddons(app, callback) {
 }
 
 function updateAddons(app, oldManifest, callback) {
-    assert(typeof app === 'object');
+    assert.strictEqual(typeof app, 'object');
     assert(!oldManifest || typeof oldManifest === 'object');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     setupAddons(app, function (error) {
         if (error) return callback(error);
@@ -154,9 +154,9 @@ function updateAddons(app, oldManifest, callback) {
 }
 
 function backupAddons(app, callback) {
-    assert(typeof app === 'object');
+    assert.strictEqual(typeof app, 'object');
     assert(!app.manifest.addons || typeof app.manifest.addons === 'object');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     debugApp(app, 'backupAddons');
 
@@ -170,9 +170,9 @@ function backupAddons(app, callback) {
 }
 
 function restoreAddons(app, callback) {
-    assert(typeof app === 'object');
+    assert.strictEqual(typeof app, 'object');
     assert(!app.manifest.addons || typeof app.manifest.addons === 'object');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     debugApp(app, 'restoreAddons');
 
@@ -186,14 +186,14 @@ function restoreAddons(app, callback) {
 }
 
 function getEnvironment(appId, callback) {
-    assert(typeof appId === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     appdb.getAddonConfigByAppId(appId, callback);
 }
 
 function getLinksSync(app) {
-    assert(typeof app === 'object');
+    assert.strictEqual(typeof app, 'object');
     assert(!app.manifest.addons || typeof app.manifest.addons === 'object');
 
     var links = [ ];
@@ -215,7 +215,7 @@ function getLinksSync(app) {
 }
 
 function getBindsSync(app) {
-    assert(typeof app === 'object');
+    assert.strictEqual(typeof app, 'object');
     assert(!app.manifest.addons || typeof app.manifest.addons === 'object');
 
     var binds = [ ];
@@ -233,8 +233,8 @@ function getBindsSync(app) {
 }
 
 function allocateOAuthCredentials(app, callback) {
-    assert(typeof app === 'object');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
 
     var appId = app.id;
     var id = 'cid-addon-' + uuid.v4();
@@ -263,8 +263,8 @@ function allocateOAuthCredentials(app, callback) {
 }
 
 function removeOAuthCredentials(app, callback) {
-    assert(typeof app === 'object');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
 
     debugApp(app, 'removeOAuthCredentials');
 
@@ -277,8 +277,8 @@ function removeOAuthCredentials(app, callback) {
 }
 
 function setupSendMail(app, callback) {
-    assert(typeof app === 'object');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
 
     var env = [
         'MAIL_SMTP_SERVER=mail',
@@ -293,8 +293,8 @@ function setupSendMail(app, callback) {
 }
 
 function teardownSendMail(app, callback) {
-    assert(typeof app === 'object');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
 
     debugApp(app, 'Tearing down sendmail');
 
@@ -302,8 +302,8 @@ function teardownSendMail(app, callback) {
 }
 
 function setupMySql(app, callback) {
-    assert(typeof app === 'object');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
 
     debugApp(app, 'Setting up mysql');
 
@@ -402,8 +402,8 @@ function restoreMySql(app, callback) {
 }
 
 function setupPostgreSql(app, callback) {
-    assert(typeof app === 'object');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
 
     debugApp(app, 'Setting up postgresql');
 
@@ -502,8 +502,8 @@ function restorePostgreSql(app, callback) {
 }
 
 function setupMongoDb(app, callback) {
-    assert(typeof app === 'object');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
 
     debugApp(app, 'Setting up mongodb');
 
@@ -603,8 +603,8 @@ function restoreMongoDb(app, callback) {
 
 
 function forwardRedisPort(appId, callback) {
-    assert(typeof appId === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     docker.getContainer('redis-' + appId).inspect(function (error, data) {
         if (error) return callback(new Error('Unable to inspect container:' + error));

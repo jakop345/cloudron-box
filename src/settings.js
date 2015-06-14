@@ -35,7 +35,7 @@ exports = module.exports = {
 };
 
 function SettingsError(reason, errorOrMessage) {
-    assert(typeof reason === 'string');
+    assert.strictEqual(typeof reason, 'string');
     assert(errorOrMessage instanceof Error || typeof errorOrMessage === 'string' || typeof errorOrMessage === 'undefined');
 
     Error.call(this);
@@ -64,8 +64,8 @@ function getApp(appId, callback) {
 }
 
 function setAutoupdatePattern(pattern, callback) {
-    assert(typeof pattern === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof pattern, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     if (pattern !== 'never') { // check if pattern is valid
         var job = safeCall(function () { return new CronJob(pattern) });
@@ -82,7 +82,7 @@ function setAutoupdatePattern(pattern, callback) {
 }
 
 function getAutoupdatePattern(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     settingsdb.get(exports.AUTOUPDATE_PATTERN_KEY, function (error, pattern) {
         if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
@@ -92,8 +92,8 @@ function getAutoupdatePattern(callback) {
 }
 
 function setTimeZone(tz, callback) {
-    assert(typeof tz === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof tz, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     settingsdb.set(exports.TIME_ZONE_KEY, tz, function (error) {
         if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
@@ -105,7 +105,7 @@ function setTimeZone(tz, callback) {
 }
 
 function getTimeZone(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     settingsdb.get(exports.TIME_ZONE_KEY, function (error, tz) {
         if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
@@ -115,7 +115,7 @@ function getTimeZone(callback) {
 }
 
 function getAll(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     settingsdb.getAll(function (error, settings) {
         if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));

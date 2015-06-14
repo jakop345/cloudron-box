@@ -12,7 +12,7 @@ exports = module.exports = {
 };
 
 function BackupsError(reason, errorOrMessage) {
-    assert(typeof reason === 'string');
+    assert.strictEqual(typeof reason, 'string');
     assert(errorOrMessage instanceof Error || typeof errorOrMessage === 'string' || typeof errorOrMessage === 'undefined');
 
     Error.call(this);
@@ -33,7 +33,7 @@ util.inherits(BackupsError, Error);
 BackupsError.EXTERNAL_ERROR = 'external error';
 
 function getAll(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/backups';
 

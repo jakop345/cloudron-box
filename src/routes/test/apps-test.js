@@ -49,7 +49,7 @@ var token = null; // authentication token
 var token_1 = null;
 
 function startDockerProxy(interceptor, callback) {
-    assert(typeof interceptor === 'function');
+    assert.strictEqual(typeof interceptor, 'function');
 
     return http.createServer(function (req, res) {
         if (interceptor(req, res)) return;
@@ -1080,8 +1080,8 @@ describe('App installation - port bindings', function () {
     });
 
     function checkConfigureStatus(count, done) {
-        assert(typeof count === 'number');
-        assert(typeof done === 'function');
+        assert.strictEqual(typeof count, 'number');
+        assert.strictEqual(typeof done, 'function');
 
         request.get(SERVER_URL + '/api/v1/apps/' + APP_ID)
            .query({ access_token: token })

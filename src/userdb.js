@@ -25,8 +25,8 @@ exports = module.exports = {
 var USERS_FIELDS = [ 'id', 'username', 'email', 'password', 'salt', 'createdAt', 'modifiedAt', 'admin', 'resetToken' ].join(',');
 
 function get(userId, callback) {
-    assert(typeof userId === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof userId, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('SELECT ' + USERS_FIELDS + ' FROM users WHERE id = ?', [ userId ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
@@ -37,16 +37,16 @@ function get(userId, callback) {
 }
 
 function getByUsername(username, callback) {
-    assert(typeof username === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof username, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     // currently username is also our id
     get(username, callback);
 }
 
 function getByEmail(email, callback) {
-    assert(typeof email === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof email, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('SELECT ' + USERS_FIELDS + ' FROM users WHERE email = ?', [ email ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
@@ -57,8 +57,8 @@ function getByEmail(email, callback) {
 }
 
 function getByResetToken(resetToken, callback) {
-    assert(typeof resetToken === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof resetToken, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     if (resetToken.length === 0) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, 'Empty resetToken not allowed'));
 
@@ -71,7 +71,7 @@ function getByResetToken(resetToken, callback) {
 }
 
 function getAll(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('SELECT ' + USERS_FIELDS + ' FROM users', function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
@@ -81,7 +81,7 @@ function getAll(callback) {
 }
 
 function getAllAdmins(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('SELECT ' + USERS_FIELDS + ' FROM users WHERE admin=1', function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
@@ -91,16 +91,16 @@ function getAllAdmins(callback) {
 }
 
 function add(userId, user, callback) {
-    assert(typeof userId === 'string');
-    assert(typeof user.username === 'string');
-    assert(typeof user.password === 'string');
-    assert(typeof user.email === 'string');
-    assert(typeof user.admin === 'boolean');
-    assert(typeof user.salt === 'string');
-    assert(typeof user.createdAt === 'string');
-    assert(typeof user.modifiedAt === 'string');
-    assert(typeof user.resetToken === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof userId, 'string');
+    assert.strictEqual(typeof user.username, 'string');
+    assert.strictEqual(typeof user.password, 'string');
+    assert.strictEqual(typeof user.email, 'string');
+    assert.strictEqual(typeof user.admin, 'boolean');
+    assert.strictEqual(typeof user.salt, 'string');
+    assert.strictEqual(typeof user.createdAt, 'string');
+    assert.strictEqual(typeof user.modifiedAt, 'string');
+    assert.strictEqual(typeof user.resetToken, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     var data = [ userId, user.username, user.password, user.email, user.admin, user.salt, user.createdAt, user.modifiedAt, user.resetToken ];
     database.query('INSERT INTO users (id, username, password, email, admin, salt, createdAt, modifiedAt, resetToken) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
@@ -113,8 +113,8 @@ function add(userId, user, callback) {
 }
 
 function del(userId, callback) {
-    assert(typeof userId === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof userId, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('DELETE FROM users WHERE id = ?', [ userId ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
@@ -125,8 +125,8 @@ function del(userId, callback) {
 }
 
 function getByAccessToken(accessToken, callback) {
-    assert(typeof accessToken === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof accessToken, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     debug('getByAccessToken: ' +  accessToken);
 
@@ -147,9 +147,9 @@ function clear(callback) {
 }
 
 function update(userId, user, callback) {
-    assert(typeof userId === 'string');
-    assert(typeof user === 'object');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof userId, 'string');
+    assert.strictEqual(typeof user, 'object');
+    assert.strictEqual(typeof callback, 'function');
 
     var args = [ ];
     var fields = [ ];
@@ -168,7 +168,7 @@ function update(userId, user, callback) {
 }
 
 function count(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('SELECT COUNT(*) AS total FROM users', function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
@@ -178,7 +178,7 @@ function count(callback) {
 }
 
 function adminCount(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('SELECT COUNT(*) AS total FROM users WHERE admin=1', function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));

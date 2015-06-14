@@ -14,8 +14,8 @@ exports = module.exports = {
 };
 
 function get(key, callback) {
-    assert(typeof key === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof key, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('SELECT * FROM settings WHERE name = ?', [ key ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
@@ -34,9 +34,9 @@ function getAll(callback) {
 }
 
 function set(key, value, callback) {
-    assert(typeof key === 'string');
+    assert.strictEqual(typeof key, 'string');
     assert(value === null || typeof value === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('INSERT INTO settings (name, value) VALUES (?, ?) ON DUPLICATE KEY UPDATE value=VALUES(value)', [ key, value ], function (error) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error)); // don't rely on affectedRows here since it gives 2

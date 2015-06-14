@@ -14,10 +14,10 @@ exports = module.exports = {
 var SUDO = '/usr/bin/sudo';
 
 function exec(tag, file, args, callback) {
-    assert(typeof tag === 'string');
-    assert(typeof file === 'string');
+    assert.strictEqual(typeof tag, 'string');
+    assert.strictEqual(typeof file, 'string');
     assert(util.isArray(args));
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     callback = once(callback); // exit may or may not be called after an 'error'
 
@@ -47,9 +47,9 @@ function exec(tag, file, args, callback) {
 }
 
 function sudo(tag, args, callback) {
-    assert(typeof tag === 'string');
+    assert.strictEqual(typeof tag, 'string');
     assert(util.isArray(args));
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     // -S makes sudo read stdin for password
     var cp = exec(tag, SUDO, [ '-S' ].concat(args), callback);

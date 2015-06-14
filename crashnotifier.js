@@ -17,8 +17,8 @@ var gLastNotifyTime = {};
 var gCooldownTime = 1000 * 60  * 5; // 5 min
 
 function collectLogs(program, callback) {
-    assert(typeof program === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof program, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     var logFilePath = util.format('/var/log/supervisor/%s.log', program);
 

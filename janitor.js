@@ -18,7 +18,7 @@ exports = module.exports = {
 var TOKEN_CLEANUP_INTERVAL = 30000;
 
 function initialize(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     async.series([
         database.initialize
@@ -26,7 +26,7 @@ function initialize(callback) {
 }
 
 function cleanupExpiredTokens(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     tokendb.delExpired(function (error, result) {
         if (error) return callback(error);
@@ -38,7 +38,7 @@ function cleanupExpiredTokens(callback) {
 }
 
 function cleanupExpiredAuthCodes(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     authcodedb.delExpired(function (error, result) {
         if (error) return callback(error);

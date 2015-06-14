@@ -36,8 +36,8 @@ function generateToken() {
 }
 
 function get(accessToken, callback) {
-    assert(typeof accessToken === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof accessToken, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('SELECT ' + TOKENS_FIELDS + ' FROM tokens WHERE accessToken = ? AND expires > ?', [ accessToken, Date.now() ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
@@ -48,12 +48,12 @@ function get(accessToken, callback) {
 }
 
 function add(accessToken, identifier, clientId, expires, scope, callback) {
-    assert(typeof accessToken === 'string');
-    assert(typeof identifier === 'string');
+    assert.strictEqual(typeof accessToken, 'string');
+    assert.strictEqual(typeof identifier, 'string');
     assert(typeof clientId === 'string' || clientId === null);
-    assert(typeof expires === 'number');
-    assert(typeof scope === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof expires, 'number');
+    assert.strictEqual(typeof scope, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('INSERT INTO tokens (accessToken, identifier, clientId, expires, scope) VALUES (?, ?, ?, ?, ?)',
            [ accessToken, identifier, clientId, expires, scope ], function (error, result) {
@@ -65,8 +65,8 @@ function add(accessToken, identifier, clientId, expires, scope, callback) {
 }
 
 function del(accessToken, callback) {
-    assert(typeof accessToken === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof accessToken, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('DELETE FROM tokens WHERE accessToken = ?', [ accessToken ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
@@ -77,8 +77,8 @@ function del(accessToken, callback) {
 }
 
 function getByIdentifier(identifier, callback) {
-    assert(typeof identifier === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof identifier, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('SELECT ' + TOKENS_FIELDS + ' FROM tokens WHERE identifier = ?', [ identifier ], function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
@@ -88,8 +88,8 @@ function getByIdentifier(identifier, callback) {
 }
 
 function delByIdentifier(identifier, callback) {
-    assert(typeof identifier === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof identifier, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('DELETE FROM tokens WHERE identifier = ?', [ identifier ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
@@ -100,9 +100,9 @@ function delByIdentifier(identifier, callback) {
 }
 
 function getByIdentifierAndClientId(identifier, clientId, callback) {
-    assert(typeof identifier === 'string');
-    assert(typeof clientId === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof identifier, 'string');
+    assert.strictEqual(typeof clientId, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('SELECT ' + TOKENS_FIELDS + ' FROM tokens WHERE identifier=? AND clientId=?', [ identifier, clientId ], function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
@@ -113,9 +113,9 @@ function getByIdentifierAndClientId(identifier, clientId, callback) {
 }
 
 function delByIdentifierAndClientId(identifier, clientId, callback) {
-    assert(typeof identifier === 'string');
-    assert(typeof clientId === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof identifier, 'string');
+    assert.strictEqual(typeof clientId, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('DELETE FROM tokens WHERE identifier = ? AND clientId = ?', [ identifier, clientId ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
@@ -126,7 +126,7 @@ function delByIdentifierAndClientId(identifier, clientId, callback) {
 }
 
 function delExpired(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('DELETE FROM tokens WHERE expires <= ?', [ Date.now() ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
@@ -135,7 +135,7 @@ function delExpired(callback) {
 }
 
 function clear(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('DELETE FROM tokens', function (error) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));

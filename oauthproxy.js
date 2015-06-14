@@ -31,7 +31,7 @@ var CALLBACK_URI = '/callback';
 var PORT = 4000;
 
 function startServer(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     gHttpServer.on('error', console.error);
 
@@ -41,7 +41,7 @@ function startServer(callback) {
 
     // ensure we have a in memory store for the session to cache client information
     gApp.use(function (req, res, next) {
-        assert(typeof req.session === 'object');
+        assert.strictEqual(typeof req.session, 'object');
 
         if (!req.session.id || !gSessions[req.session.id]) {
             req.session.id = uuid.v4();
@@ -55,7 +55,7 @@ function startServer(callback) {
     });
 
     gApp.use(function verifySession(req, res, next) {
-        assert(typeof req.sessionData === 'object');
+        assert.strictEqual(typeof req.sessionData, 'object');
 
         if (!req.sessionData.accessToken) {
             req.authenticated = false;

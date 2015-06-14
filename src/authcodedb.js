@@ -18,8 +18,8 @@ exports = module.exports = {
 var AUTHCODES_FIELDS = [ 'authCode', 'userId', 'clientId', 'expiresAt' ].join(',');
 
 function get(authCode, callback) {
-    assert(typeof authCode === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof authCode, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('SELECT ' + AUTHCODES_FIELDS + ' FROM authcodes WHERE authCode = ? AND expiresAt > ?', [ authCode, Date.now() ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
@@ -30,11 +30,11 @@ function get(authCode, callback) {
 }
 
 function add(authCode, clientId, userId, expiresAt, callback) {
-    assert(typeof authCode === 'string');
-    assert(typeof clientId === 'string');
-    assert(typeof userId === 'string');
-    assert(typeof expiresAt === 'number');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof authCode, 'string');
+    assert.strictEqual(typeof clientId, 'string');
+    assert.strictEqual(typeof userId, 'string');
+    assert.strictEqual(typeof expiresAt, 'number');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('INSERT INTO authcodes (authCode, clientId, userId, expiresAt) VALUES (?, ?, ?, ?)',
             [ authCode, clientId, userId, expiresAt ], function (error, result) {
@@ -46,8 +46,8 @@ function add(authCode, clientId, userId, expiresAt, callback) {
 }
 
 function del(authCode, callback) {
-    assert(typeof authCode === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof authCode, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('DELETE FROM authcodes WHERE authCode = ?', [ authCode ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
@@ -58,7 +58,7 @@ function del(authCode, callback) {
 }
 
 function delExpired(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('DELETE FROM authcodes WHERE expiresAt <= ?', [ Date.now() ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
@@ -67,7 +67,7 @@ function delExpired(callback) {
 }
 
 function clear(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     database.query('DELETE FROM authcodes', function (error) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));

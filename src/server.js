@@ -217,8 +217,8 @@ function initializeInternalExpressSync() {
 }
 
 function start(callback) {
-    assert(typeof callback === 'function');
-    assert(gHttpServer === null, 'Server is already up and running.');
+    assert.strictEqual(typeof callback, 'function');
+    assert.strictEqual(gHttpServer, null, 'Server is already up and running.');
 
     gHttpServer = initializeExpressSync();
     gInternalHttpServer = initializeInternalExpressSync();
@@ -237,7 +237,7 @@ function start(callback) {
 }
 
 function stop(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     if (!gHttpServer) return callback(null);
 

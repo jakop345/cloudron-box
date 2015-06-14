@@ -13,8 +13,8 @@ exports = module.exports = {
 
 function checkPtrRecord(ip, fqdn, callback) {
     assert(ip === null || typeof ip === 'string');
-    assert(typeof fqdn === 'string');
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof fqdn, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     debug('checkPtrRecord: ' + ip);
 

@@ -29,7 +29,7 @@ var gInitialized = false;
 // Day of Week: 0-6
 
 function initialize(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     if (gInitialized) return callback();
 
@@ -76,7 +76,7 @@ function recreateJobs(unusedTimeZone, callback) {
 }
 
 function autoupdatePatternChanged(pattern) {
-    assert(typeof pattern === 'string');
+    assert.strictEqual(typeof pattern, 'string');
 
     debug('Auto update pattern changed to %s', pattern);
 
@@ -96,7 +96,7 @@ function autoupdatePatternChanged(pattern) {
 }
 
 function uninitialize(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     if (!gInitialized) return callback();
 
