@@ -29,7 +29,15 @@ angular.module('Application').controller('UpgradeController', ['$scope', '$locat
 
     $scope.doMigration = function () {
         Client.migrate($scope.migration.size.slug, $scope.migration.region.slug, $scope.migration.password, function (error) {
-            if (error) return console.error(error);
+            if (error && error.statusCode === 403) {
+                $scope.migration.error.password = true;
+                $scope.migration.password = '';
+                $('#upgradePasswordInput').focus();
+                return;
+            } else if (error) {
+                return console.error(error);
+            }
+
             $('#migrationModal').modal('hide');
         });
     };

@@ -10,7 +10,7 @@
                 Your Cloudron will have a downtime of around 10 minutes, where none of you apps will be reachable.
                 <br/>
                 <br/>
-                <form name="upgradeForm" class="form-signin" role="form" novalidate ng-submit="doAdd()" autocomplete="off">
+                <form name="upgradeForm" class="form-signin" role="form" novalidate ng-submit="doMigration()" autocomplete="off">
                     <fieldset>
                         <div class="form-group" ng-class="{ 'has-error': (upgradeForm.password.$dirty && upgradeForm.password.$invalid) || (!upgradeForm.password.$dirty && migration.error.password) }">
                             <label class="control-label" for="upgradePasswordInput">Provide your password to confirm this action</label>
