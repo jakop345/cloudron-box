@@ -71,7 +71,8 @@ function createUser(req, res, next) {
             id: user.id,
             username: user.username,
             email: user.email,
-            admin: user.admin
+            admin: user.admin,
+            resetToken: user.resetToken
         };
 
         next(new HttpSuccess(201, { userInfo: userInfo }));
