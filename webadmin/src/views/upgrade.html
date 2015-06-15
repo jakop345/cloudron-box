@@ -93,7 +93,7 @@
         </div>
         <div class="row">
             <div class="form-group col-md-12">
-                <button type="submit" class="btn btn-success" ng-disabled="migrate_form.$invalid || !migration.region || !migration.size || busy">Move</button>
+                <button type="submit" class="btn btn-success" ng-disabled="migrate_form.$invalid || !migration.region || !migration.size || (migration.region.slug === currentRegionSlug) || busy">Move</button>
             </div>
         </div>
     </form>

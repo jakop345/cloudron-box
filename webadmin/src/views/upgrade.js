@@ -9,6 +9,7 @@ angular.module('Application').controller('UpgradeController', ['$scope', '$locat
     $scope.availableSizes = [];
 
     $scope.currentSize = null;
+    $scope.currentRegionSlug = null;
 
     $scope.migration = {
         region: null,
@@ -62,6 +63,7 @@ angular.module('Application').controller('UpgradeController', ['$scope', '$locat
 
                 angular.copy(result, $scope.availableRegions);
 
+                $scope.currentRegionSlug = $scope.config.region;
                 $scope.setRegion($scope.config.region);
             });
         });
