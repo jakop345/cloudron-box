@@ -106,6 +106,9 @@ function initialize(callback) {
         addMailDnsRecords();
     }
 
+    // Send heartbeat once we are up and running, this speeds up the Cloudron creation, as otherwise we are bound to the cron.js settings
+    sendHeartbeat();
+
     callback(null);
 }
 
