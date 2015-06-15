@@ -111,27 +111,25 @@
         </div>
     </div>
     <br/>
-    <form name="relocationForm" role="form" novalidate ng-submit="showRelocationConfirm()">
-        <div class="row">
-            <div class="form-group col-md-12">
-                <div class="region-select-map">
-                    <div class="region-select" ng-click="setRegion('sfo1')" ng-class="{ 'region-selected': relocation.region.slug === 'sfo1' }" style="width: 270px; background-image: url('img/world_left.png');">
-                        <div class="region-pin region-pin-left" ng-class="{ 'region-pin-selected-left': relocation.region.slug === 'sfo1' }">
-                            <img src="img/pin.png" height="32px" width="16px"/> San Francisco
-                        </div>
+    <div class="row">
+        <div class="form-group col-md-12">
+            <div class="region-select-map">
+                <div class="region-select" ng-click="setRegion('sfo1')" ng-class="{ 'region-selected': relocation.region.slug === 'sfo1' }" style="width: 270px; background-image: url('img/world_left.png');">
+                    <div class="region-pin region-pin-left" ng-class="{ 'region-pin-selected-left': relocation.region.slug === 'sfo1' }">
+                        <img src="img/pin.png" height="32px" width="16px"/> San Francisco
                     </div>
-                    <div class="region-select" ng-click="setRegion('ams3')" ng-class="{ 'region-selected': relocation.region.slug === 'ams3' }" style="width: 330px; background-image: url('img/world_right.png');">
-                        <div class="region-pin region-pin-right" ng-class="{ 'region-pin-selected-right': relocation.region.slug === 'ams3' }">
-                            <img src="img/pin.png" height="32px" width="16px"/> Amsterdam
-                        </div>
+                </div>
+                <div class="region-select" ng-click="setRegion('ams3')" ng-class="{ 'region-selected': relocation.region.slug === 'ams3' }" style="width: 330px; background-image: url('img/world_right.png');">
+                    <div class="region-pin region-pin-right" ng-class="{ 'region-pin-selected-right': relocation.region.slug === 'ams3' }">
+                        <img src="img/pin.png" height="32px" width="16px"/> Amsterdam
                     </div>
                 </div>
             </div>
         </div>
-        <div class="row">
-            <div class="form-group col-md-12">
-                <button type="submit" class="btn btn-success" ng-disabled="relocationForm.$invalid || !relocation.region || !relocation.size || (relocation.region.slug === currentRegionSlug) || busy">Relocate</button>
-            </div>
+    </div>
+    <div class="row">
+        <div class="form-group col-md-12">
+            <button class="btn btn-success" ng-click="showRelocationConfirm()" ng-disabled="(relocation.region.slug === currentRegionSlug) || busy">Relocate</button>
         </div>
-    </form>
+    </div>
 </div>
