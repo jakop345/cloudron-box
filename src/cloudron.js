@@ -395,11 +395,6 @@ function getConfig(callback) {
 }
 
 function sendHeartbeat() {
-    if (!config.apiServerOrigin()) {
-        debug('No appstore server url set. Not sending heartbeat.');
-        return;
-    }
-
     var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/heartbeat';
     debug('Sending heartbeat ' + url);
 
