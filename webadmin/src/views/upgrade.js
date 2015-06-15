@@ -52,7 +52,7 @@ angular.module('Application').controller('UpgradeController', ['$scope', '$locat
         AppStore.getSizes(function (error, result) {
             if (error) return console.error(error);
 
-            // restult array is ordered by size
+            // result array is ordered by size
             var found = false;
             result = result.filter(function (size) {
                 if (size.slug === $scope.config.size) {
