@@ -376,9 +376,20 @@ describe('Cloudron', function () {
             });
         });
 
+        it('fails without password', function (done) {
+            request.post(SERVER_URL + '/api/v1/cloudron/migrate')
+                   .send({ size: 'small', region: 'sfo'})
+                   .query({ access_token: token })
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(400);
+                done();
+            });
+        });
+
         it('fails with missing size', function (done) {
             request.post(SERVER_URL + '/api/v1/cloudron/migrate')
-                   .send({ region: 'sfo' })
+                   .send({ region: 'sfo', password: PASSWORD })
                    .query({ access_token: token })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -389,7 +400,7 @@ describe('Cloudron', function () {
 
         it('fails with wrong size type', function (done) {
             request.post(SERVER_URL + '/api/v1/cloudron/migrate')
-                   .send({ size: 4, region: 'sfo' })
+                   .send({ size: 4, region: 'sfo', password: PASSWORD })
                    .query({ access_token: token })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -400,7 +411,7 @@ describe('Cloudron', function () {
 
         it('fails with missing region', function (done) {
             request.post(SERVER_URL + '/api/v1/cloudron/migrate')
-                   .send({ size: 'small' })
+                   .send({ size: 'small', password: PASSWORD })
                    .query({ access_token: token })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -412,7 +423,7 @@ describe('Cloudron', function () {
 
         it('fails with wrong region type', function (done) {
             request.post(SERVER_URL + '/api/v1/cloudron/migrate')
-                   .send({ size: 'small', region: 4 })
+                   .send({ size: 'small', region: 4, password: PASSWORD })
                    .query({ access_token: token })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -428,7 +439,7 @@ describe('Cloudron', function () {
             injectShellMock();
 
             request.post(SERVER_URL + '/api/v1/cloudron/migrate')
-                   .send({ size: 'small', region: 'sfo' })
+                   .send({ size: 'small', region: 'sfo', password: PASSWORD })
                    .query({ access_token: token })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -450,7 +461,7 @@ describe('Cloudron', function () {
             injectShellMock();
 
             request.post(SERVER_URL + '/api/v1/cloudron/migrate')
-                   .send({ size: 'small', region: 'sfo' })
+                   .send({ size: 'small', region: 'sfo', password: PASSWORD })
                    .query({ access_token: token })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
