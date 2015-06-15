@@ -12,7 +12,9 @@ angular.module('Application').controller('UpgradeController', ['$scope', '$locat
 
     $scope.migration = {
         region: null,
-        size: null
+        size: null,
+        error: {},
+        password: null
     };
 
     $scope.showUpgradeConfirm = function (size) {
@@ -25,7 +27,7 @@ angular.module('Application').controller('UpgradeController', ['$scope', '$locat
     };
 
     $scope.doMigration = function () {
-        Client.migrate($scope.migration.size.slug, $scope.migration.region.slug, function (error) {
+        Client.migrate($scope.migration.size.slug, $scope.migration.region.slug, $scope.migration.password, function (error) {
             if (error) return console.error(error);
             $('#migrationModal').modal('hide');
         });
@@ -65,4 +67,10 @@ angular.module('Application').controller('UpgradeController', ['$scope', '$locat
         });
     });
 
+    // setup all the dialog focus handling
+    ['migrationModal'].forEach(function (id) {
+        $('#' + id).on('shown.bs.modal', function () {
+            $(this).find("[autofocus]:first").focus();
+        });
+    });
 }]);

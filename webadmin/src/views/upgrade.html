@@ -8,10 +8,21 @@
             <div class="modal-body">
                 Do you really want to migrate your Cloudron?<br/>
                 Your Cloudron will have a downtime of around 10 minutes, where none of you apps will be reachable.
+                <br/>
+                <br/>
+                <form name="upgradeForm" class="form-signin" role="form" novalidate ng-submit="doAdd()" autocomplete="off">
+                    <fieldset>
+                        <div class="form-group" ng-class="{ 'has-error': (upgradeForm.password.$dirty && upgradeForm.password.$invalid) || (!upgradeForm.password.$dirty && migration.error.password) }">
+                            <label class="control-label" for="upgradePasswordInput">Provide your password to confirm this action</label>
+                            <input type="password" class="form-control" ng-model="migration.password" id="upgradePasswordInput" name="password" ng-maxlength="512" ng-minlength="5" required autofocus autocomplete="off">
+                        </div>
+                        <input class="ng-hide" type="submit" ng-disabled="upgradeForm.$invalid || migration.busy"/>
+                    </fieldset>
+                </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success" ng-click="doMigration()" ng-disabled="migration.busy"><i class="fa fa-spinner fa-pulse" ng-show="migration.busy"></i> Migrate</button>
+                <button type="button" class="btn btn-success" ng-click="doMigration()" ng-disabled="upgradeForm.$invalid || migration.busy"><i class="fa fa-spinner fa-pulse" ng-show="migration.busy"></i> Migrate</button>
             </div>
         </div>
     </div>

@@ -399,8 +399,8 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
-    Client.prototype.migrate = function (size, region, callback) {
-        $http.post(client.apiOrigin + '/api/v1/cloudron/migrate', { size: size, region: region }).success(function(data, status) {
+    Client.prototype.migrate = function (size, region, password, callback) {
+        $http.post(client.apiOrigin + '/api/v1/cloudron/migrate', { size: size, region: region, password: password }).success(function(data, status) {
             if (status !== 202 || typeof data !== 'object') return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));
