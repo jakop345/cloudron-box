@@ -48,7 +48,7 @@ describe('database', function () {
             id: 'uuid456',
             username: 'uuid456',
             password: 'secret',
-            email: 'safe@me.com',
+            email: 'safe2@me.com',
             admin: true,
             salt: 'tata',
             createdAt: 'sometime back',
