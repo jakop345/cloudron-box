@@ -50,8 +50,9 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
             $scope.useradd.busy = false;
 
             if (error && error.statusCode === 409) {
-                $scope.useradd.error.username = 'Username already taken';
+                $scope.useradd.error.username = 'Username or Email already taken';
                 $scope.useradd_form.username.$setPristine();
+                $scope.useradd_form.email.$setPristine();
                 $('#inputUserAddUsername').focus();
                 return;
             }
