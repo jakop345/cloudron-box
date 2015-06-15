@@ -1,28 +1,60 @@
-<!-- Modal migrate -->
-<div class="modal fade" id="migrationModal" tabindex="-1" role="dialog">
+<!-- Modal upgrade -->
+<div class="modal fade" id="upgradeModal" tabindex="-1" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Migrate your Cloudron</h4>
+                <h4 class="modal-title">Upgrade your Cloudron</h4>
             </div>
             <div class="modal-body">
-                Do you really want to migrate your Cloudron?<br/>
-                Your Cloudron will have a downtime of around 10 minutes, where none of you apps will be reachable.
+                Do you really want to upgrade your Cloudron?<br/>
+                <br/>
+                <span class="text-danger">Your Cloudron will have a downtime of around 10 minutes, where none of you apps will be reachable.</span>
                 <br/>
                 <br/>
-                <form name="upgradeForm" class="form-signin" role="form" novalidate ng-submit="doMigration()" autocomplete="off">
+                <form name="upgradeForm" class="form-signin" role="form" novalidate ng-submit="upgrade()" autocomplete="off">
                     <fieldset>
-                        <div class="form-group" ng-class="{ 'has-error': (upgradeForm.password.$dirty && upgradeForm.password.$invalid) || (!upgradeForm.password.$dirty && migration.error.password) }">
+                        <div class="form-group" ng-class="{ 'has-error': (upgradeForm.password.$dirty && upgradeForm.password.$invalid) || (!upgradeForm.password.$dirty && upgrade.error.password) }">
                             <label class="control-label" for="upgradePasswordInput">Provide your password to confirm this action</label>
-                            <input type="password" class="form-control" ng-model="migration.password" id="upgradePasswordInput" name="password" ng-maxlength="512" ng-minlength="5" required autofocus autocomplete="off">
+                            <input type="password" class="form-control" ng-model="upgrade.password" id="upgradePasswordInput" name="password" ng-maxlength="512" ng-minlength="5" required autofocus autocomplete="off">
                         </div>
-                        <input class="ng-hide" type="submit" ng-disabled="upgradeForm.$invalid || migration.busy"/>
+                        <input class="ng-hide" type="submit" ng-disabled="upgradeForm.$invalid || busy"/>
                     </fieldset>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success" ng-click="doMigration()" ng-disabled="upgradeForm.$invalid || migration.busy"><i class="fa fa-spinner fa-pulse" ng-show="migration.busy"></i> Migrate</button>
+                <button type="button" class="btn btn-success" ng-click="upgrade()" ng-disabled="upgradeForm.$invalid || busy"><i class="fa fa-spinner fa-pulse" ng-show="busy"></i> Upgrade</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal relocate -->
+<div class="modal fade" id="relocationModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Relocate your Cloudron</h4>
+            </div>
+            <div class="modal-body">
+                Do you really want to relocate your Cloudron from <b>{{currentRegionSlug}}</b> to <b>{{relocation.region.slug}}</b><br/>
+                <br/>
+                <span class="text-danger">Your Cloudron will have a downtime of around 10 minutes, where none of you apps will be reachable.</span>
+                <br/>
+                <br/>
+                <form name="relocateForm" class="form-signin" role="form" novalidate ng-submit="relocate()" autocomplete="off">
+                    <fieldset>
+                        <div class="form-group" ng-class="{ 'has-error': (relocateForm.password.$dirty && relocateForm.password.$invalid) || (!relocateForm.password.$dirty && relocation.error.password) }">
+                            <label class="control-label" for="relocationPasswordInput">Provide your password to confirm this action</label>
+                            <input type="password" class="form-control" ng-model="relocation.password" id="relocationPasswordInput" name="password" ng-maxlength="512" ng-minlength="5" required autofocus autocomplete="off">
+                        </div>
+                        <input class="ng-hide" type="submit" ng-disabled="relocateForm.$invalid || busy"/>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" ng-click="relocate()" ng-disabled="relocateForm.$invalid || busy"><i class="fa fa-spinner fa-pulse" ng-show="busy"></i> Relocate</button>
             </div>
         </div>
     </div>
@@ -79,17 +111,17 @@
         </div>
     </div>
     <br/>
-    <form name="migrate_form" role="form" novalidate ng-submit="showMigrationConfirm()">
+    <form name="relocationForm" role="form" novalidate ng-submit="showRelocationConfirm()">
         <div class="row">
             <div class="form-group col-md-12">
                 <div class="region-select-map">
-                    <div class="region-select" ng-click="setRegion('sfo1')" ng-class="{ 'region-selected': migration.region.slug === 'sfo1' }" style="width: 270px; background-image: url('img/world_left.png');">
-                        <div class="region-pin region-pin-left" ng-class="{ 'region-pin-selected-left': migration.region.slug === 'sfo1' }">
+                    <div class="region-select" ng-click="setRegion('sfo1')" ng-class="{ 'region-selected': relocation.region.slug === 'sfo1' }" style="width: 270px; background-image: url('img/world_left.png');">
+                        <div class="region-pin region-pin-left" ng-class="{ 'region-pin-selected-left': relocation.region.slug === 'sfo1' }">
                             <img src="img/pin.png" height="32px" width="16px"/> San Francisco
                         </div>
                     </div>
-                    <div class="region-select" ng-click="setRegion('ams3')" ng-class="{ 'region-selected': migration.region.slug === 'ams3' }" style="width: 330px; background-image: url('img/world_right.png');">
-                        <div class="region-pin region-pin-right" ng-class="{ 'region-pin-selected-right': migration.region.slug === 'ams3' }">
+                    <div class="region-select" ng-click="setRegion('ams3')" ng-class="{ 'region-selected': relocation.region.slug === 'ams3' }" style="width: 330px; background-image: url('img/world_right.png');">
+                        <div class="region-pin region-pin-right" ng-class="{ 'region-pin-selected-right': relocation.region.slug === 'ams3' }">
                             <img src="img/pin.png" height="32px" width="16px"/> Amsterdam
                         </div>
                     </div>
@@ -98,7 +130,7 @@
         </div>
         <div class="row">
             <div class="form-group col-md-12">
-                <button type="submit" class="btn btn-success" ng-disabled="migrate_form.$invalid || !migration.region || !migration.size || (migration.region.slug === currentRegionSlug) || busy">Relocate</button>
+                <button type="submit" class="btn btn-success" ng-disabled="relocationForm.$invalid || !relocation.region || !relocation.size || (relocation.region.slug === currentRegionSlug) || busy">Relocate</button>
             </div>
         </div>
     </form>

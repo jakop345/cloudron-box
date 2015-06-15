@@ -433,7 +433,8 @@ $table-border-color:                        transparent !default;
     height: auto !important;
 }
 
-.has-error {
+.has-error,
+.text-danger {
     color: $brand-danger;
 }
 

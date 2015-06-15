@@ -5,46 +5,75 @@ angular.module('Application').controller('UpgradeController', ['$scope', '$locat
 
     $scope.user = Client.getUserInfo();
     $scope.config = Client.getConfig();
+    $scope.busy = false;
     $scope.availableRegions = [];
     $scope.availableSizes = [];
 
     $scope.currentSize = null;
     $scope.currentRegionSlug = null;
 
-    $scope.migration = {
-        region: null,
+    $scope.upgrade = {
         size: null,
         error: {},
         password: null
     };
 
+    $scope.relocation = {
+        region: null,
+        error: {},
+        password: null
+    };
+
     $scope.showUpgradeConfirm = function (size) {
-        $scope.migration.size = size;
-        $('#migrationModal').modal('show');
+        $scope.upgrade.size = size;
+        $('#upgradeModal').modal('show');
     };
 
-    $scope.showMigrationConfirm = function () {
-        $('#migrationModal').modal('show');
-    };
+    $scope.upgrade = function () {
+        $scope.busy = true;
 
-    $scope.doMigration = function () {
-        Client.migrate($scope.migration.size.slug, $scope.migration.region.slug, $scope.migration.password, function (error) {
+        Client.migrate($scope.upgrade.size.slug, $scope.currentRegionSlug, $scope.upgrade.password, function (error) {
+            $scope.busy = false;
+
             if (error && error.statusCode === 403) {
-                $scope.migration.error.password = true;
-                $scope.migration.password = '';
+                $scope.upgrade.error.password = true;
+                $scope.upgrade.password = '';
                 $('#upgradePasswordInput').focus();
                 return;
             } else if (error) {
                 return console.error(error);
             }
 
-            $('#migrationModal').modal('hide');
+            $('#upgradeModal').modal('hide');
+        });
+    };
+
+    $scope.showRelocationConfirm = function () {
+        $('#relocationModal').modal('show');
+    };
+
+    $scope.relocate = function () {
+        $scope.busy = true;
+
+        Client.migrate($scope.currentSize.slug, $scope.relocation.region.slug, $scope.relocation.password, function (error) {
+            $scope.busy = false;
+
+            if (error && error.statusCode === 403) {
+                $scope.relocation.error.password = true;
+                $scope.relocation.password = '';
+                $('#relocationPasswordInput').focus();
+                return;
+            } else if (error) {
+                return console.error(error);
+            }
+
+            $('#relocationModal').modal('hide');
         });
     };
 
     $scope.setRegion = function (regionSlug) {
         $scope.availableRegions.forEach(function (region) {
-            if (region.slug.indexOf(regionSlug) === 0) $scope.migration.region = region;
+            if (region.slug.indexOf(regionSlug) === 0) $scope.relocation.region = region;
         });
     };
 
@@ -57,7 +86,6 @@ angular.module('Application').controller('UpgradeController', ['$scope', '$locat
             result = result.filter(function (size) {
                 if (size.slug === $scope.config.size) {
                     $scope.currentSize = size;
-                    $scope.migration.size = size;
                     found = true;
                     return true;
                 } else {
@@ -78,7 +106,7 @@ angular.module('Application').controller('UpgradeController', ['$scope', '$locat
     });
 
     // setup all the dialog focus handling
-    ['migrationModal'].forEach(function (id) {
+    ['upgradeModal', 'relocationModal'].forEach(function (id) {
         $('#' + id).on('shown.bs.modal', function () {
             $(this).find("[autofocus]:first").focus();
         });
