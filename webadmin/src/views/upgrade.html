@@ -32,13 +32,13 @@
 <br/>
 
 <div style="margin-bottom: 15px; text-align: center" ng-show="user.admin">
-    <div class="row">
+    <div class="row" ng-show="availableSizes.length > 1">
         <div class="col-md-12">
             <h3>Choose a Model to upgrade to</h3>
         </div>
     </div>
     <br/>
-    <div class="row">
+    <div class="row" ng-show="availableSizes.length > 1">
         <div class="col-md-6 col-md-offset-3">
             <div class="cloudron-model-list">
                 <div class="cloudron-model-item" ng-repeat="size in availableSizes">
@@ -53,11 +53,16 @@
             </div>
         </div>
     </div>
-    <div class="row">
+    <div class="row" ng-show="availableSizes.length > 1">
         <div class="col-md-12">
             <p>
                 Larger Cloudrons allow to run more apps and bring better performance to your installed services.
             </p>
+        </div>
+    </div>
+    <div class="row" ng-show="availableSizes.length <= 1">
+        <div class="col-md-12">
+            <h4>You are already using the largest available Cloudron model.</h4>
         </div>
     </div>
     <br/>
@@ -93,7 +98,7 @@
         </div>
         <div class="row">
             <div class="form-group col-md-12">
-                <button type="submit" class="btn btn-success" ng-disabled="migrate_form.$invalid || !migration.region || !migration.size || (migration.region.slug === currentRegionSlug) || busy">Move</button>
+                <button type="submit" class="btn btn-success" ng-disabled="migrate_form.$invalid || !migration.region || !migration.size || (migration.region.slug === currentRegionSlug) || busy">Relocate</button>
             </div>
         </div>
     </form>
