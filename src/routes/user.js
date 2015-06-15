@@ -49,24 +49,6 @@ function profile(req, res, next) {
     next(new HttpSuccess(200, result));
 }
 
-/**
- * @api {post} /api/v1/user/create create
- * @apiName create
- * @apiGroup user
- * @apiPermission admin
- * @apiDescription
- * Only the administrator is allowed to create a new user.
- * A normal user can create its own volumes and is able to share those with other users.
- *
- * @apiParam {string} username The new user's login name
- * @apiParam {string} email The new users's email address
- *
- * @apiSuccess (Created 201) none User successfully created
- * @apiError (Bad request 400) {Number} status Http status code
- * @apiError (Bad request 400) {String} message Error details
- * @apiError (User already exists 409) {Number} status Http status code
- * @apiError (User already exists 409) {String} message Error details
- */
 function createUser(req, res, next) {
     assert.strictEqual(typeof req.body, 'object');
 
@@ -153,16 +135,6 @@ function listUser(req, res, next) {
     });
 }
 
-/**
- * @api {get} /api/v1/user/info info
- * @apiName info
- * @apiGroup user
- * @apiDescription
- * Get user information.
- *
- * @apiSuccess {String} username Username
- * @apiSuccess {String} email User's email address
- */
 function info(req, res, next) {
     assert.strictEqual(typeof req.params.userId, 'string');
 
@@ -179,19 +151,6 @@ function info(req, res, next) {
     });
 }
 
-/**
- * @api {post} /api/v1/user/remove remove
- * @apiName remove
- * @apiGroup user
- * @apiDescription
- * The administrator can remove any user and each user can only remove himself.
- *
- * @apiParam {string} username The username of the user to be removed
- *
- * @apiSuccess none User successfully removed
- * @apiError (Forbidden 403) {Number} status Http status code
- * @apiError (Forbidden 403) {String} message Error details
- */
 function removeUser(req, res, next) {
     assert.strictEqual(typeof req.params.userId, 'string');
 
