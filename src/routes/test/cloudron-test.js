@@ -443,13 +443,18 @@ describe('Cloudron', function () {
                    .query({ access_token: token })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(409);
-                expect(scope1.isDone()).to.be.ok();
-                expect(scope2.isDone()).to.be.ok();
+                expect(result.statusCode).to.equal(202);
 
-                restoreShellMock();
+                function checkAppstoreServerCalled() {
+                    if (scope1.isDone() && scope2.isDone()) {
+                        restoreShellMock();
+                        return done();
+                    }
 
-                done();
+                    setTimeout(checkAppstoreServerCalled, 100);
+                }
+
+                checkAppstoreServerCalled();
             });
         });
 
@@ -466,12 +471,17 @@ describe('Cloudron', function () {
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(202);
-                expect(scope1.isDone()).to.be.ok();
-                expect(scope2.isDone()).to.be.ok();
 
-                restoreShellMock();
+                function checkAppstoreServerCalled() {
+                    if (scope1.isDone() && scope2.isDone()) {
+                        restoreShellMock();
+                        return done();
+                    }
 
-                done();
+                    setTimeout(checkAppstoreServerCalled, 100);
+                }
+
+                checkAppstoreServerCalled();
             });
         });
     });
