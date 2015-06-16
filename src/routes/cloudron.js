@@ -149,13 +149,15 @@ function migrate(req, res, next) {
     if (typeof req.body.size !== 'string') return next(new HttpError(400, 'size must be string'));
     if (typeof req.body.region !== 'string') return next(new HttpError(400, 'region must be string'));
 
-    cloudron.migrate(req.body.size, req.body.region, function (error) {
-        if (error && error.reason === CloudronError.INVALID_STATE) return next(new HttpError(409, error));
-        if (error && error.reason === CloudronError.NOT_FOUND) return next(new HttpError(404, error));
-        if (error) return next(new HttpError(500, error));
+    debug('Migration requested', req.body.size, req.body.region);
 
-        next(new HttpSuccess(202, {}));
+    cloudron.migrate(req.body.size, req.body.region, function (error) {
+        if (error) return console.error('Migration failed.', error);
+        debug('Migration successfully triggered');
     });
+
+    // do not wait for migrate() to callback. The migration will first do a backup, which can take very long
+    next(new HttpSuccess(202, {}));
 }
 
 function setCertificate(req, res, next) {
