@@ -41,6 +41,7 @@ function getAll(callback) {
         if (error) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, error));
         if (result.statusCode !== 200) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, result.text));
 
+        // [ { creationTime, boxVersion, restoreKey, dependsOn: [ ] } ] sorted by time (latest first)
         return callback(null, result.body.backups);
     });
 }
