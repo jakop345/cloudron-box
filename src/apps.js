@@ -521,11 +521,7 @@ function exec(appId, options, callback) {
 
         var container = docker.getContainer(app.containerId);
 
-        if (options.rows && options.columns) {
-            container.resize({ h: options.rows, w: options.columns }, function (error) { if (error) debug('Error resizing console', error); });
-        }
-
-        var execOptions = {
+       var execOptions = {
             AttachStdin: true,
             AttachStdout: true,
             AttachStderr: true,
@@ -542,6 +538,10 @@ function exec(appId, options, callback) {
             };
             exec.start(startOptions, function(error, stream) {
                 if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+                if (options.rows && options.columns) {
+                    exec.resize({ h: options.rows, w: options.columns }, function (error) { if (error) debug('Error resizing console', error); });
+                }
 
                 return callback(null, stream);
             });
