@@ -26,11 +26,6 @@ readonly now=$(date "+%Y-%m-%dT%H:%M:%S")
 readonly app_data_dir="${DATA_DIR}/${app_id}"
 readonly app_data_snapshot="${DATA_DIR}/snapshots/${app_id}-${now}"
 
-echo "Mount backup swap"
-backup_swap_file="/backup.swap"
-if swapon -s | grep -q "${backup_swap_file}"; then swapoff "${backup_swap_file}"; fi
-swapon "${backup_swap_file}"
-
 btrfs subvolume snapshot -r "${app_data_dir}" "${app_data_snapshot}"
 
 for try in `seq 1 5`; do
@@ -45,9 +40,6 @@ for try in `seq 1 5`; do
 done
 
 btrfs subvolume delete "${app_data_snapshot}"
-
-echo "Unmounting backup swap"
-swapoff "${backup_swap_file}"
 
 if [[ ${try} -eq 5 ]]; then
     echo "Backup failed"
