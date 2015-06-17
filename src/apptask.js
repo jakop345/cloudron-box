@@ -344,7 +344,6 @@ function startContainer(app, callback) {
         if (error) return callback(error);
 
         var manifest = app.manifest;
-        var appDataDir = path.join(paths.DATA_DIR, app.id, 'data');
 
         var dockerPortBindings = { };
         var isMac = os.platform() === 'darwin';
@@ -360,7 +359,7 @@ function startContainer(app, callback) {
         }
 
         var startOptions = {
-            Binds: [ appDataDir + ':/app/data:rw' ].concat(addons.getBindsSync(app)),
+            Binds: addons.getBindsSync(app),
             PortBindings: dockerPortBindings,
             PublishAllPorts: false,
             Links: addons.getLinksSync(app),

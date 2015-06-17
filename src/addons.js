@@ -82,6 +82,12 @@ var KNOWN_ADDONS = {
         backup: NOOP, // no backup because we store redis as part of app's volume
         restore: setupRedis // same thing
     },
+    localstorage: {
+        setup: NOOP, // docker creates the directory for us
+        teardown: NOOP,
+        backup: NOOP, // no backup because it's already inside app data
+        restore: NOOP
+    },
     _docker: {
         setup: NOOP,
         teardown: NOOP,
@@ -225,6 +231,7 @@ function getBindsSync(app) {
     for (var addon in app.manifest.addons) {
         switch (addon) {
         case '_docker': binds.push('/var/run/docker.sock:/var/run/docker.sock:rw'); break;
+        case 'localstorage': binds.push(path.join(paths.DATA_DIR, app.id, 'data') + ':/app/data:rw'); break;
         default: break;
         }
     }

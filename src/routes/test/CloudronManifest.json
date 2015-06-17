@@ -21,6 +21,7 @@
     "oauth": { },
     "redis": { },
     "mysql": { },
-    "postgresql": { }
+    "postgresql": { },
+    "localstorage": { }
   }
 }
