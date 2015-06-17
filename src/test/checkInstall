@@ -15,6 +15,7 @@ scripts=("${SOURCE_DIR}/scripts/rmappdir.sh" \
          "${SOURCE_DIR}/scripts/backupapp.sh" \
          "${SOURCE_DIR}/scripts/restoreapp.sh" \
          "${SOURCE_DIR}/scripts/reboot.sh" \
+         "${SOURCE_DIR}/scripts/backupswap.sh" \
          "${SOURCE_DIR}/scripts/reloadcollectd.sh")
 
 for script in "${scripts[@]}"; do
