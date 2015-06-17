@@ -56,7 +56,8 @@ var BACKUP_BOX_CMD = path.join(__dirname, 'scripts/backupbox.sh'),
     RELOAD_NGINX_CMD = path.join(__dirname, 'scripts/reloadnginx.sh'),
     BACKUP_APP_CMD = path.join(__dirname, 'scripts/backupapp.sh'),
     RESTORE_APP_CMD = path.join(__dirname, 'scripts/restoreapp.sh'),
-    REBOOT_CMD = path.join(__dirname, 'scripts/reboot.sh');
+    REBOOT_CMD = path.join(__dirname, 'scripts/reboot.sh'),
+    BACKUP_SWAP_CMD = path.join(__dirname, 'scripts/backupswap.sh');
 
 var gAddMailDnsRecordsTimerId = null,
     gCloudronDetails = null,            // cached cloudron details like region,size...
@@ -97,6 +98,15 @@ function debugApp(app, args) {
 
     var prefix = app ? app.location : '(no app)';
     debug(prefix + ' ' + util.format.apply(util, Array.prototype.slice.call(arguments, 1)));
+}
+
+function ignoreError(func) {
+    return function (callback) {
+        func(function (error) {
+            if (error) console.error('Ignored error:', error);
+            callback();
+        });
+    };
 }
 
 function initialize(callback) {
@@ -235,21 +245,22 @@ function backupApp(app, callback) {
         return callback(safe.error);
     }
 
-    addons.backupAddons(app, function (error) {
-        if (error) return callback(error);
+    getBackupUrl(app.id, null, function (error, result) {
+        if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
-        getBackupUrl(app.id, null, function (error, result) {
-            if (error) return callback(error);
+        debugApp(app, 'backupApp: backup url:%s backup id:%s', result.url, result.id);
 
-            debugApp(app, 'backupApp: backup url:%s backup id:%s', result.url, result.id);
+        async.series([
+            ignoreError(shell.sudo.bind(null, 'mountSwap', [ BACKUP_SWAP_CMD, '--on' ])),
+                        addons.backupAddons.bind(null, app),
+                        shell.sudo.bind(null, 'backupApp', [ BACKUP_APP_CMD,  app.id, result.url, result.backupKey ]),
+            ignoreError(shell.sudo.bind(null, 'mountSwap', [ BACKUP_SWAP_CMD, '--off' ])),
+        ], function (error) {
+            if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, 'Error backing up: ' + error));
 
-            shell.sudo('backupApp', [ BACKUP_APP_CMD,  app.id, result.url, result.backupKey ], function (error) {
-                if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, 'Error backing up: ' + error));
+            debugApp(app, 'backupApp: successful');
 
-                debugApp(app, 'backupApp: successful');
-
-                apps.setLastBackupId(app.id, result.id, callback.bind(null, null, result.id));
-            });
+            apps.setLastBackupId(app.id, result.id, callback.bind(null, null, result.id));
         });
     });
 }
@@ -262,7 +273,11 @@ function backupBoxWithAppBackupIds(appBackupIds, callback) {
 
         debug('backup: url %s', result.url);
 
-        shell.sudo('backupBox', [ BACKUP_BOX_CMD,  result.url, result.backupKey ], function (error) {
+        async.series([
+            ignoreError(shell.sudo.bind(null, 'mountSwap', [ BACKUP_SWAP_CMD, '--on' ])),
+                        shell.sudo.bind(null, 'backupBox', [ BACKUP_BOX_CMD, result.url, result.backupKey ]),
+            ignoreError(shell.sudo.bind(null, 'mountSwap', [ BACKUP_SWAP_CMD, '--off' ])),
+        ], function (error) {
             if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
             debug('backup: successful');
