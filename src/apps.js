@@ -262,7 +262,7 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
     assert.strictEqual(typeof callback, 'function');
 
     var error = manifestFormat.parse(manifest);
-    if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Manifest error: ' + error.message));
+    //if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Manifest error: ' + error.message));
 
     error = checkManifestConstraints(manifest);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Manifest cannot be installed: ' + error.message));
