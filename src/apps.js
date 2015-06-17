@@ -90,7 +90,7 @@ AppsError.BILLING_REQUIRED = 'Billing Required';
 // https://en.wikipedia.org/wiki/Hostname#Restrictions_on_valid_host_names
 // We are validating the validity of the location-fqdn as host name
 function validateHostname(location, fqdn) {
-    var RESERVED_LOCATIONS = [ constants.ADMIN_LOCATION ];
+    var RESERVED_LOCATIONS = [ constants.ADMIN_LOCATION, constants.API_LOCATION ];
 
     if (RESERVED_LOCATIONS.indexOf(location) !== -1) return new Error(location + ' is reserved');
 

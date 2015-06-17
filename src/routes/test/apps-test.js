@@ -205,13 +205,24 @@ describe('App API', function () {
         });
     });
 
-    it('app install fails - reserved location', function (done) {
+    it('app install fails - reserved admin location', function (done) {
         request.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
                .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: constants.ADMIN_LOCATION, accessRestriction: '' })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             expect(res.body.message).to.eql(constants.ADMIN_LOCATION + ' is reserved');
+            done(err);
+        });
+    });
+
+    it('app install fails - reserved api location', function (done) {
+        request.post(SERVER_URL + '/api/v1/apps/install')
+               .query({ access_token: token })
+               .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: constants.API_LOCATION, accessRestriction: '' })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(400);
+            expect(res.body.message).to.eql(constants.API_LOCATION + ' is reserved');
             done(err);
         });
     });
