@@ -68,30 +68,76 @@ describe('Backups API', function () {
     before(setup);
     after(cleanup);
 
-    it('cannot get backups with appstore request failing', function (done) {
-        var req = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/backups?token=APPSTORE_TOKEN').reply(401, {});
+    describe('get', function () {
+        it('cannot get backups with appstore request failing', function (done) {
+            var req = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/backups?token=APPSTORE_TOKEN').reply(401, {});
 
-        request.get(SERVER_URL + '/api/v1/backups')
-               .query({ access_token: token })
-               .end(function (err, res) {
-            expect(res.statusCode).to.equal(500);
-            expect(req.isDone()).to.be.ok();
-            done(err);
+            request.get(SERVER_URL + '/api/v1/backups')
+                   .query({ access_token: token })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(500);
+                expect(req.isDone()).to.be.ok();
+                done(err);
+            });
+        });
+
+        it('can get backups', function (done) {
+            var req = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/backups?token=APPSTORE_TOKEN').reply(200, { backups: ['foo', 'bar']});
+
+            request.get(SERVER_URL + '/api/v1/backups')
+                   .query({ access_token: token })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(200);
+                expect(req.isDone()).to.be.ok();
+                expect(res.body.backups).to.be.an(Array);
+                expect(res.body.backups[0]).to.eql('foo');
+                expect(res.body.backups[1]).to.eql('bar');
+                done(err);
+            });
         });
     });
 
-    it('can get backups', function (done) {
-        var req = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/backups?token=APPSTORE_TOKEN').reply(200, { backups: ['foo', 'bar']});
+    describe('create', function () {
+        it('fails due to mising token', function (done) {
+            request.post(SERVER_URL + '/api/v1/backups')
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(401);
+                done();
+            });
+        });
 
-        request.get(SERVER_URL + '/api/v1/backups')
-               .query({ access_token: token })
-               .end(function (err, res) {
-            expect(res.statusCode).to.equal(200);
-            expect(req.isDone()).to.be.ok();
-            expect(res.body.backups).to.be.an(Array);
-            expect(res.body.backups[0]).to.eql('foo');
-            expect(res.body.backups[1]).to.eql('bar');
-            done(err);
+        it('fails due to wrong token', function (done) {
+            request.post(SERVER_URL + '/api/v1/backups')
+                   .query({ access_token: token.toUpperCase() })
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(401);
+                done();
+            });
+        });
+
+        it('succeeds', function (done) {
+            var scope = nock(config.apiServerOrigin())
+                        .put('/api/v1/boxes/' + config.fqdn() + '/backupurl?token=APPSTORE_TOKEN', { boxVersion: '0.5.0', appId: null, appBackupIds: [null] })
+                        .reply(201, { id: 'someid', url: 'http://foobar', backupKey: 'somerestorekey' });
+
+            request.post(SERVER_URL + '/api/v1/backups')
+                   .query({ access_token: token })
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(202);
+
+                function checkAppstoreServerCalled() {
+                    if (scope.isDone()) {
+                        return done();
+                    }
+
+                    setTimeout(checkAppstoreServerCalled, 100);
+                }
+
+                checkAppstoreServerCalled();
+            });
         });
     });
 });
