@@ -22,4 +22,5 @@ yellowtent ALL=(root) NOPASSWD: /home/yellowtent/box/src/scripts/reboot.sh
 Defaults!/home/yellowtent/box/src/scripts/reloadcollectd.sh env_keep="HOME NODE_ENV"
 yellowtent ALL=(root) NOPASSWD: /home/yellowtent/box/src/scripts/reloadcollectd.sh
 
-
+Defaults!/home/yellowtent/box/src/scripts/backupswap.sh env_keep="HOME NODE_ENV"
+yellowtent ALL=(root) NOPASSWD: /home/yellowtent/box/src/scripts/backupswap.sh
