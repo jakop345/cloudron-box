@@ -288,6 +288,13 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
+    Client.prototype.backup = function (callback) {
+        $http.post(client.apiOrigin + '/api/v1/backups').success(function(data, status) {
+            if (status !== 202 || typeof data !== 'object') return callback(new ClientError(status, data));
+            callback(null, data);
+        }).error(defaultErrorHandler(callback));
+    };
+
     Client.prototype.getApps = function (callback) {
         $http.get(client.apiOrigin + '/api/v1/apps').success(function (data, status) {
             if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));
@@ -387,13 +394,6 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
 
     Client.prototype.reboot = function (callback) {
         $http.get(client.apiOrigin + '/api/v1/cloudron/reboot').success(function(data, status) {
-            if (status !== 202 || typeof data !== 'object') return callback(new ClientError(status, data));
-            callback(null, data);
-        }).error(defaultErrorHandler(callback));
-    };
-
-    Client.prototype.backup = function (callback) {
-        $http.post(client.apiOrigin + '/api/v1/cloudron/backups').success(function(data, status) {
             if (status !== 202 || typeof data !== 'object') return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));
