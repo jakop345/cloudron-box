@@ -20,14 +20,22 @@ fi
 BACKUP_SWAP_FILE="/backup.swap"
 
 if [[ "$1" == "--on" ]]; then
+    echo "Mounting backup swap"
+
     if ! swapon -s | grep -q "${BACKUP_SWAP_FILE}"; then
         swapon "${BACKUP_SWAP_FILE}"
+    else
+        echo "Backup swap already mounted"
     fi
 fi
 
 if [[ "$1" == "--off" ]]; then
+    echo "Unmounting backup swap"
+
     if swapon -s | grep -q "${BACKUP_SWAP_FILE}"; then
         swapoff "${BACKUP_SWAP_FILE}"
+    else
+        echo "Backup swap was not mounted"
     fi
 fi
 
