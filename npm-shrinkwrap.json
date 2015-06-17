@@ -1255,34 +1255,34 @@
       "resolved": "https://registry.npmjs.org/json/-/json-9.0.3.tgz"
     },
     "manifestformat": {
-      "version": "1.0.12",
-      "from": "https://gitlab-yellowtent.cloudron.me/yellowtent/manifestformat/repository/archive.tar.gz?ref=v1.0.12",
-      "resolved": "https://gitlab-yellowtent.cloudron.me/yellowtent/manifestformat/repository/archive.tar.gz?ref=v1.0.12",
+      "version": "1.2.0",
+      "from": "https://gitlab-yellowtent.cloudron.me/yellowtent/manifestformat/repository/archive.tar.gz?ref=v1.2.0",
+      "resolved": "https://gitlab-yellowtent.cloudron.me/yellowtent/manifestformat/repository/archive.tar.gz?ref=v1.2.0",
       "dependencies": {
         "java-packagename-regex": {
           "version": "1.0.0",
-          "from": "https://registry.npmjs.org/java-packagename-regex/-/java-packagename-regex-1.0.0.tgz",
+          "from": "java-packagename-regex@>=1.0.0 <2.0.0",
           "resolved": "https://registry.npmjs.org/java-packagename-regex/-/java-packagename-regex-1.0.0.tgz"
         },
         "safetydance": {
           "version": "0.0.15",
-          "from": "http://registry.npmjs.org/safetydance/-/safetydance-0.0.15.tgz",
+          "from": "safetydance@0.0.15",
           "resolved": "http://registry.npmjs.org/safetydance/-/safetydance-0.0.15.tgz"
         },
         "semver": {
           "version": "4.3.6",
-          "from": "https://registry.npmjs.org/semver/-/semver-4.3.6.tgz",
+          "from": "semver@>=4.3.1 <5.0.0",
           "resolved": "https://registry.npmjs.org/semver/-/semver-4.3.6.tgz"
         },
         "tv4": {
-          "version": "1.1.9",
-          "from": "http://registry.npmjs.org/tv4/-/tv4-1.1.9.tgz",
-          "resolved": "http://registry.npmjs.org/tv4/-/tv4-1.1.9.tgz"
+          "version": "1.1.12",
+          "from": "tv4@>=1.1.9 <2.0.0",
+          "resolved": "http://registry.npmjs.org/tv4/-/tv4-1.1.12.tgz"
         },
         "validator": {
-          "version": "3.40.0",
-          "from": "https://registry.npmjs.org/validator/-/validator-3.40.0.tgz",
-          "resolved": "https://registry.npmjs.org/validator/-/validator-3.40.0.tgz"
+          "version": "3.40.1",
+          "from": "validator@>=3.34.0 <4.0.0",
+          "resolved": "http://registry.npmjs.org/validator/-/validator-3.40.1.tgz"
         }
       }
     },
@@ -1969,12 +1969,12 @@
     },
     "supervisord-eventlistener": {
       "version": "0.1.0",
-      "from": "supervisord-eventlistener@*",
+      "from": "https://registry.npmjs.org/supervisord-eventlistener/-/supervisord-eventlistener-0.1.0.tgz",
       "resolved": "https://registry.npmjs.org/supervisord-eventlistener/-/supervisord-eventlistener-0.1.0.tgz"
     },
     "tail-stream": {
       "version": "0.2.1",
-      "from": "tail-stream@*",
+      "from": "https://registry.npmjs.org/tail-stream/-/tail-stream-0.2.1.tgz",
       "resolved": "https://registry.npmjs.org/tail-stream/-/tail-stream-0.2.1.tgz"
     },
     "underscore": {
@@ -1984,7 +1984,7 @@
     },
     "valid-url": {
       "version": "1.0.9",
-      "from": "valid-url@*",
+      "from": "https://registry.npmjs.org/valid-url/-/valid-url-1.0.9.tgz",
       "resolved": "https://registry.npmjs.org/valid-url/-/valid-url-1.0.9.tgz"
     },
     "validator": {
