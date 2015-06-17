@@ -1,6 +1,7 @@
 {
   "id": "io.cloudron.test",
   "title": "test title",
+  "author": "Testy",
   "description": "test description",
   "tagline": "test rocks",
   "website": "http://test.cloudron.io",

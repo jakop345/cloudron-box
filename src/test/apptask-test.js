@@ -21,6 +21,7 @@ var addons = require('../addons.js'),
 
 var MANIFEST = {
   "id": "io.cloudron.test",
+  "author": "The Presidents Of the United States Of America",
   "title": "test title",
   "description": "test description",
   "tagline": "test rocks",
