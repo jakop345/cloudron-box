@@ -3,12 +3,14 @@
 var assert = require('assert'),
     util = require('util'),
     config = require('../config.js'),
+    cloudron = require('./cloudron.js'),
     superagent = require('superagent');
 
 exports = module.exports = {
     BackupsError: BackupsError,
 
-    getAll: getAll
+    getAll: getAll,
+    create: create
 };
 
 function BackupsError(reason, errorOrMessage) {
@@ -44,4 +46,15 @@ function getAll(callback) {
         // [ { creationTime, boxVersion, restoreKey, dependsOn: [ ] } ] sorted by time (latest first)
         return callback(null, result.body.backups);
     });
+}
+
+function create(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    cloudron.backup(function (error) {
+        if (error) console.error('backup failed.', error);
+    });
+
+    // we just schedule the backup but do not wait for the result
+    callback(null);
 }

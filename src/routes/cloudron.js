@@ -22,7 +22,6 @@ exports = module.exports = {
     getStats: getStats,
     reboot: reboot,
     getProgress: getProgress,
-    createBackup: createBackup,
     getConfig: getConfig,
     update: update,
     migrate: migrate,
@@ -116,15 +115,6 @@ function reboot(req, res, next) {
     next(new HttpSuccess(202, {}));
 
     cloudron.reboot();
-}
-
-function createBackup(req, res, next) {
-    cloudron.backup(function (error) {
-        if (error) console.error('backup failed.', error);
-    });
-
-    // we just schedule the backup but do not wait for the result
-    next(new HttpSuccess(202, {}));
 }
 
 function getConfig(req, res, next) {
