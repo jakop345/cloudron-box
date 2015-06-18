@@ -66,7 +66,7 @@ app.filter('installSuccess', function () {
     };
 });
 
-app.filter('installationActive', function() {
+app.filter('installationActive', function () {
     return function(app) {
         if (app.installationState === ISTATES.ERROR) return false;
         if (app.installationState === ISTATES.INSTALLED) return false;
@@ -95,6 +95,14 @@ app.filter('readyToUpdate', function () {
     return function (apps) {
         return apps.every(function (app) {
             return (app.installationState === ISTATES.ERROR) || (app.installationState === ISTATES.INSTALLED);
+        });
+    };
+});
+
+app.filter('inProgressApps', function () {
+    return function (apps) {
+        return apps.filter(function (app) {
+            return app.installationState !== ISTATES.ERROR && app.installationState !== ISTATES.INSTALLED;
         });
     };
 });
