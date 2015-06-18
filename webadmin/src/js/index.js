@@ -85,7 +85,14 @@ app.filter('installationStateLabel', function() {
         case ISTATES.PENDING_RESTORE: return 'Restoring...' + waiting;
         case ISTATES.PENDING_UPDATE: return 'Updating...' + waiting;
         case ISTATES.ERROR: return 'Error';
-        case ISTATES.INSTALLED: return app.health !== HSTATES.HEALTHY ? 'Starting...' : 'Running';
+        case ISTATES.INSTALLED: {
+            if (app.runState === 'running') return app.health !== HSTATES.HEALTHY ? 'Starting...' : 'Running';
+            else if (app.runState === 'pending_start') return 'Starting...';
+            else if (app.runState === 'pending_stop') return 'Stopping...';
+            else if (app.runState === 'stopped') return 'Stopped';
+            else return app.runState;
+            break;
+        }
         default: return app.installationState;
         }
     };
