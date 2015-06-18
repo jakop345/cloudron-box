@@ -70,7 +70,10 @@ function setHealth(app, health, callback) {
 
 // callback is called with error for fatal errors and not if health check failed
 function checkAppHealth(app, callback) {
-    if (app.installationState !== appdb.ISTATE_INSTALLED || app.runState !== appdb.RSTATE_RUNNING) return callback(null);
+    if (app.installationState !== appdb.ISTATE_INSTALLED || app.runState !== appdb.RSTATE_RUNNING) {
+        debugApp(app, 'skipped. istate:%s rstate:%s', app.installationState, app.runState);
+        return callback(null);
+    }
 
     var container = docker.getContainer(app.containerId),
         manifest = app.manifest;
