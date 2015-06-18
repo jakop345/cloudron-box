@@ -9,6 +9,7 @@
 
 var supervisor = require('supervisord-eventlistener'),
     assert = require('assert'),
+    exec = require('child_process').exec,
     util = require('util'),
     fs = require('fs'),
     mailer = require('./src/mailer.js');
@@ -28,9 +29,25 @@ function collectLogs(program, callback) {
         if (error) return callback(error);
 
         var lines = data.split('\n');
-        var logLines = lines.slice(-100);
+        var boxLogLines = lines.slice(-100);
 
-        callback(null, logLines.join('\n'));
+        exec('dmesg', function (error, stdout /*, stderr */) {
+            if (error) console.error(error);
+
+            var lines = stdout.split('\n');
+            var dmesgLogLines = lines.slice(-100);
+
+            var result = '';
+            result += 'box.log\n';
+            result += '-------------------------------------\n';
+            result += boxLogLines.join('\n');
+            result += '\n\n';
+            result += 'dmesg\n';
+            result += '-------------------------------------\n';
+            result += dmesgLogLines.join('\n');
+
+            callback(null, result);
+        });
     });
 }
 
