@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS apps(
     dnsRecordId VARCHAR(512),
     accessRestriction VARCHAR(512),
     createdAt TIMESTAMP(2) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    lastBackupId VARCHAR(128),
     PRIMARY KEY(id));
 
 CREATE TABLE IF NOT EXISTS appPortBindings(
