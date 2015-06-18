@@ -210,26 +210,37 @@
                     </div>
                 </a>
                 <div class="grid-item-bottom" ng-show="user.admin">
-                    <div class="row">
-                        <div class="col-xs-4 text-left">
-                            <a href="" ng-click="showRestore(app)" ng-show="(app | installError) === true">
-                                <i class="fa fa-undo scale"></i>
-                            </a>
+                    <div class="grid-item-bottom-button">
+                        <a href="" ng-click="showRestore(app)" ng-show="app | installError">
+                            <i class="fa fa-undo scale"></i>
+                        </a>
 
-                            <a href="" ng-click="showConfigure(app)" ng-show="(app | installSuccess) == true">
-                                <i class="fa fa-wrench scale"></i>
-                            </a>
-                        </div>
-                        <div class="col-xs-4 text-center">
-                            <a href="" ng-click="showUpdate(app)" class="ng-hide animateMe" ng-show="app.updateVersion && (app | installSuccess)">
-                                <i class="fa fa-arrow-up text-success scale"></i>
-                            </a>
-                        </div>
-                        <div class="col-xs-4 text-right">
-                            <a href="" ng-click="showUninstall(app)">
-                                <i class="fa fa-remove scale"></i>
-                            </a>
-                        </div>
+                        <a href="" ng-click="showConfigure(app)" ng-show="app | installSuccess">
+                            <i class="fa fa-wrench scale"></i>
+                        </a>
+                    </div>
+                    <div class="grid-item-bottom-button">
+                        <a href="" ng-click="startApp(app)" ng-show="app.runState === 'stopped'">
+                            <i class="fa fa-play scale"></i>
+                        </a>
+
+                        <span ng-show="app.runState !== 'stopped' && app.runState !== 'running'">
+                            <i class="fa fa-refresh fa-spin"></i>
+                        </span>
+
+                        <a href="" ng-click="stopApp(app)" ng-show="app.runState === 'running'">
+                            <i class="fa fa-pause scale"></i>
+                        </a>
+                    </div>
+                    <div class="grid-item-bottom-button">
+                        <a href="" ng-click="showUpdate(app)"  ng-show="app.updateVersion && (app | installSuccess)">
+                            <i class="fa fa-arrow-up text-success scale"></i>
+                        </a>
+                    </div>
+                    <div class="grid-item-bottom-button">
+                        <a href="" ng-click="showUninstall(app)">
+                            <i class="fa fa-remove scale"></i>
+                        </a>
                     </div>
                 </div>
             </div>

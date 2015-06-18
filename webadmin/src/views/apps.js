@@ -313,6 +313,15 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         });
     };
 
+    $scope.startApp = function (app) {
+        Client.startApp(app.id, function () {});
+    };
+
+    $scope.stopApp = function (app) {
+        app.runStateBusy = true;
+        Client.stopApp(app.id, function () {});
+    };
+
     $scope.cancel = function () {
         window.history.back();
     };
