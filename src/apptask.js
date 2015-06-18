@@ -589,7 +589,13 @@ function install(app, callback) {
     });
 }
 
+// restore may be called with or without a previous backup
 function restore(app, callback) {
+    if (app.lastManifestJson) {
+        debug('Restoring from previous manifest');
+        app.manifestJson = app.lastManifestJson;
+    }
+
     async.series([
         updateApp.bind(null, app, { installationProgress: '0, Stopping app and deleting container' }),
         stopApp.bind(null, app),
@@ -618,7 +624,7 @@ function restore(app, callback) {
         removeAccessToken.bind(null, app),
         allocateAccessToken.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '25, Downloading last backup' }),
+        updateApp.bind(null, app, { installationProgress: '25, Creating volume' }),
         deleteVolume.bind(null, app),
         createVolume.bind(null, app),
 
