@@ -260,7 +260,7 @@ function backupApp(app, callback) {
 
             debugApp(app, 'backupApp: successful');
 
-            apps.setRestorePoint(app.id, result.id, app.manifestJson, callback.bind(null, null, result.id));
+            apps.setRestorePoint(app.id, result.id, app.manifest, callback.bind(null, null, result.id));
         });
     });
 }

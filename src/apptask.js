@@ -591,9 +591,9 @@ function install(app, callback) {
 
 // restore may be called with or without a previous backup
 function restore(app, callback) {
-    if (app.lastManifestJson) {
+    if (app.lastManifest) {
         debug('Restoring from previous manifest');
-        app.manifestJson = app.lastManifestJson;
+        app.manifest = app.lastManifest;
     }
 
     async.series([

@@ -549,13 +549,13 @@ function exec(appId, options, callback) {
     });
 }
 
-function setRestorePoint(appId, lastBackupId, lastManifestJson, callback) {
+function setRestorePoint(appId, lastBackupId, lastManifest, callback) {
     assert.strictEqual(typeof appId, 'string');
     assert.strictEqual(typeof lastBackupId, 'string');
-    assert.strictEqual(typeof lastManifestJson, 'string');
+    assert.strictEqual(typeof lastManifest, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    appdb.update(appId, { lastBackupId: lastBackupId, lastManifestJson: lastManifestJson }, function (error) {
+    appdb.update(appId, { lastBackupId: lastBackupId, lastManifest: lastManifest }, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 

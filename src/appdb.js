@@ -67,9 +67,12 @@ function postProcess(result) {
     assert.strictEqual(typeof result, 'object');
 
     assert(result.manifestJson === null || typeof result.manifestJson === 'string');
-
     result.manifest = safe.JSON.parse(result.manifestJson);
     delete result.manifestJson;
+
+    assert(result.lastManifestJson === null || typeof result.lastManifestJson === 'string');
+    result.lastManifest = safe.JSON.parse(result.lastManifestJson);
+    delete result.lastManifestJson;
 
     assert(result.hostPorts === null || typeof result.hostPorts === 'string');
     assert(result.environmentVariables === null || typeof result.environmentVariables === 'string');
