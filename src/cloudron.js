@@ -190,14 +190,21 @@ function activate(username, password, email, ip, callback) {
     });
 }
 
-function getBackupUrl(appId, appBackupIds, callback) {
-    assert(!appId || typeof appId === 'string');
+function getBackupUrl(app, appBackupIds, callback) {
+    assert(!app || typeof app === 'object');
     assert(!appBackupIds || util.isArray(appBackupIds));
     assert.strictEqual(typeof callback, 'function');
 
     var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/backupurl';
 
-    superagent.put(url).query({ token: config.token() }).send({ boxVersion: config.version(), appId: appId, appBackupIds: appBackupIds }).end(function (error, result) {
+    var data = {
+        boxVersion: config.version(),
+        appId: app ? app.id : null,
+        appVersion: app ? app.manifest.version : null,
+        appBackupIds: appBackupIds
+    };
+
+    superagent.put(url).query({ token: config.token() }).send(data).end(function (error, result) {
         if (error) return callback(new Error('Error getting presigned backup url: ' + error.message));
 
         if (result.statusCode !== 201 || !result.body || !result.body.url) return callback(new Error('Error getting presigned backup url : ' + result.statusCode));
@@ -245,7 +252,7 @@ function backupApp(app, callback) {
         return callback(safe.error);
     }
 
-    getBackupUrl(app.id, null, function (error, result) {
+    getBackupUrl(app, null, function (error, result) {
         if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
         debugApp(app, 'backupApp: backup url:%s backup id:%s', result.url, result.id);
@@ -268,7 +275,7 @@ function backupApp(app, callback) {
 function backupBoxWithAppBackupIds(appBackupIds, callback) {
     assert(util.isArray(appBackupIds));
 
-    getBackupUrl(null /* appId */, appBackupIds, function (error, result) {
+    getBackupUrl(null /* app */, appBackupIds, function (error, result) {
         if (error) return callback(new CloudronError(CloudronError.APPSTORE_DOWN, error.message));
 
         debug('backup: url %s', result.url);
