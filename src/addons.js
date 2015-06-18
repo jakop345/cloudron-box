@@ -225,7 +225,6 @@ function getBindsSync(app) {
     assert(!app.manifest.addons || typeof app.manifest.addons === 'object');
 
     var binds = [ ];
-    binds.push(path.join(paths.DATA_DIR, app.id, 'data') + ':/app/data:rw');
 
     if (!app.manifest.addons) return binds;
 

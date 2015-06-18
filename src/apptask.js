@@ -413,7 +413,7 @@ function verifyManifest(app, callback) {
 
     var manifest = app.manifest;
     var error = manifestFormat.parse(manifest);
-    // if (error) return callback(new Error(util.format('Manifest error: %s', error.message)));
+    if (error) return callback(new Error(util.format('Manifest error: %s', error.message)));
 
     error = apps.checkManifestConstraints(manifest);
     if (error) return callback(error);
