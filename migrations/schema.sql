@@ -50,7 +50,9 @@ CREATE TABLE IF NOT EXISTS apps(
     dnsRecordId VARCHAR(512),
     accessRestriction VARCHAR(512),
     createdAt TIMESTAMP(2) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
     lastBackupId VARCHAR(128),
+    lastManifestJson VARCHAR(2048), // used for appstore and non-appstore installs
     PRIMARY KEY(id));
 
 CREATE TABLE IF NOT EXISTS appPortBindings(

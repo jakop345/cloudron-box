@@ -55,11 +55,11 @@ exports = module.exports = {
 };
 
 var APPS_FIELDS = [ 'id', 'appStoreId', 'installationState', 'installationProgress', 'runState',
-    'health', 'containerId', 'manifestJson', 'httpPort', 'location', 'dnsRecordId', 'accessRestriction', 'lastBackupId' ].join(',');
+    'health', 'containerId', 'manifestJson', 'httpPort', 'location', 'dnsRecordId', 'accessRestriction', 'lastBackupId', 'lastManifestJson' ].join(',');
 
 var APPS_FIELDS_PREFIXED = [ 'apps.id', 'apps.appStoreId', 'apps.installationState', 'apps.installationProgress', 'apps.runState',
     'apps.health', 'apps.containerId', 'apps.manifestJson', 'apps.httpPort', 'apps.location', 'apps.dnsRecordId', 'apps.accessRestriction',
-    'apps.lastBackupId' ].join(',');
+    'apps.lastBackupId', 'apps.lastManifestJson' ].join(',');
 
 var PORT_BINDINGS_FIELDS = [ 'hostPort', 'environmentVariable', 'appId' ].join(',');
 

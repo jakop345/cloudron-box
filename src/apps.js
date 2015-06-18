@@ -26,7 +26,7 @@ exports = module.exports = {
 
     checkManifestConstraints: checkManifestConstraints,
 
-    setLastBackupId: setLastBackupId,
+    setRestorePoint: setRestorePoint,
 
     // exported for testing
     _validateHostname: validateHostname,
@@ -549,12 +549,13 @@ function exec(appId, options, callback) {
     });
 }
 
-function setLastBackupId(appId, lastBackupId, callback) {
+function setRestorePoint(appId, lastBackupId, lastManifestJson, callback) {
     assert.strictEqual(typeof appId, 'string');
     assert.strictEqual(typeof lastBackupId, 'string');
+    assert.strictEqual(typeof lastManifestJson, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    appdb.update(appId, { lastBackupId: lastBackupId }, function (error) {
+    appdb.update(appId, { lastBackupId: lastBackupId, lastManifestJson: lastManifestJson }, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
