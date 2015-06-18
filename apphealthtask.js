@@ -12,7 +12,8 @@ var appdb = require('./src/appdb.js'),
     debug = require('debug')('box:apphealthtask'),
     docker = require('./src/docker.js'),
     mailer = require('./src/mailer.js'),
-    superagent = require('superagent');
+    superagent = require('superagent'),
+    util = require('util');
 
 exports = module.exports = {
     run: run
@@ -21,6 +22,13 @@ exports = module.exports = {
 var HEALTHCHECK_INTERVAL = 10 * 1000; // every 10 seconds
 var UNHEALTHY_THRESHOLD = 10 * 60 * 1000; // 10 minutes
 var gLastSeen = { }; // { time, emailSent }
+
+function debugApp(app, args) {
+    assert(!app || typeof app === 'object');
+
+    var prefix = app ? app.location : '(no app)';
+    debug(prefix + ' ' + util.format.apply(util, Array.prototype.slice.call(arguments, 1)));
+}
 
 function initialize(callback) {
     assert.strictEqual(typeof callback, 'function');
@@ -41,7 +49,7 @@ function setHealth(app, health, callback) {
     if (health === appdb.HEALTH_HEALTHY || !(app.id in gLastSeen)) { // add new apps to list
         gLastSeen[app.id] = { time: now, emailSent: false };
     } else if (Math.abs(now - gLastSeen[app.id].time) > UNHEALTHY_THRESHOLD) {
-        debug('app %s not seen for more than %s minutes, marking as unhealthy', app.id, UNHEALTHY_THRESHOLD/(60 * 1000));
+        debugApp(app, 'marking as unhealthy since not seen for more than %s minutes', UNHEALTHY_THRESHOLD/(60 * 1000));
 
         if (!gLastSeen[app.id].emailSent) {
             gLastSeen[app.id].emailSent = true;
@@ -69,12 +77,12 @@ function checkAppHealth(app, callback) {
 
     container.inspect(function (err, data) {
         if (err || !data || !data.State) {
-            debug('Error inspecting container');
+            debugApp(app, 'Error inspecting container');
             return setHealth(app, appdb.HEALTH_ERROR, callback);
         }
 
         if (data.State.Running !== true) {
-            debug('app %s has exited', app.id);
+            debugApp(app, 'exited');
             return setHealth(app, appdb.HEALTH_DEAD, callback);
         }
 
@@ -87,10 +95,10 @@ function checkAppHealth(app, callback) {
             .end(function (error, res) {
 
             if (error || res.status >= 400) { // 2xx and 3xx are ok
-                debug('app %s is not alive : %s', app.id, error || res.status);
+                debugApp(app, 'not alive : %s', error || res.status);
                 setHealth(app, appdb.HEALTH_UNHEALTHY, callback);
             } else {
-                debug('app %s is alive', app.id);
+                debugApp(app, 'alive');
                 setHealth(app, appdb.HEALTH_HEALTHY, callback);
             }
         });
