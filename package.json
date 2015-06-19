@@ -84,7 +84,7 @@
     "hock": "~1.2.0",
     "istanbul": "*",
     "mocha": "*",
-    "nock": "^0.59.1",
+    "nock": "^2.6.0",
     "node-sass": "^3.0.0-alpha.0",
     "redis": "^0.12.1",
     "sinon": "^1.12.2"
