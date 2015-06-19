@@ -20,7 +20,7 @@ function get(req, res, next) {
 }
 
 function create(req, res, next) {
-    backups.create(function (error) {
+    backups.scheduleBackup(function (error) {
         if (error) return next(new HttpError(500, error));
        next(new HttpSuccess(202, {}));
     });

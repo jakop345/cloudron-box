@@ -11,7 +11,7 @@ exports = module.exports = {
     BackupsError: BackupsError,
 
     getAll: getAll,
-    create: create,
+    scheduleBackup: scheduleBackup,
 
     getBackupUrl: getBackupUrl,
     getRestoreUrl: getRestoreUrl
@@ -52,7 +52,7 @@ function getAll(callback) {
     });
 }
 
-function create(callback) {
+function scheduleBackup(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     cloudron.backup(function (error) {
