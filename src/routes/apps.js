@@ -5,7 +5,7 @@
 var apps = require('../apps.js'),
     AppsError = apps.AppsError,
     assert = require('assert'),
-    backups = require('./backups.js'),
+    backups = require('../backups.js'),
     debug = require('debug')('box:routes/apps'),
     fs = require('fs'),
     HttpError = require('connect-lastmile').HttpError,
