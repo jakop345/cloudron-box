@@ -203,9 +203,13 @@ function backupApp(app, callback) {
         ], function (error) {
             if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, 'Error backing up: ' + error));
 
-            debugApp(app, 'backupApp: successful');
+            debugApp(app, 'backupApp: successful id:%s', result.id);
 
-            apps.setRestorePoint(app.id, result.id, app.manifest, callback.bind(null, null, result.id));
+            apps.setRestorePoint(app.id, result.id, app.manifest, function (error) {
+                if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, 'Error backing up: ' + error));
+
+                return callback(null, result.id);
+            });
         });
     });
 }
