@@ -24,9 +24,7 @@ exports = module.exports = {
     sendHeartbeat: sendHeartbeat,
 
     reboot: reboot,
-    migrate: migrate,
-
-    getIp: getIp
+    migrate: migrate
 };
 
 var addons = require('./addons.js'),
@@ -46,6 +44,7 @@ var addons = require('./addons.js'),
     settings = require('./settings.js'),
     shell = require('./shell.js'),
     superagent = require('superagent'),
+    sysinfo = require('./sysinfo.js'),
     tokendb = require('./tokendb.js'),
     updater = require('./updater.js'),
     user = require('./user.js'),
@@ -61,8 +60,7 @@ var BACKUP_BOX_CMD = path.join(__dirname, 'scripts/backupbox.sh'),
     BACKUP_SWAP_CMD = path.join(__dirname, 'scripts/backupswap.sh');
 
 var gAddMailDnsRecordsTimerId = null,
-    gCloudronDetails = null,            // cached cloudron details like region,size...
-    gCachedIp = null;
+    gCloudronDetails = null;            // cached cloudron details like region,size...
 
 function CloudronError(reason, errorOrMessage) {
     assert.strictEqual(typeof reason, 'string');
@@ -128,8 +126,6 @@ function uninitialize(callback) {
 
     clearTimeout(gAddMailDnsRecordsTimerId);
     gAddMailDnsRecordsTimerId = null;
-
-    gCachedIp = null;
 
     callback(null);
 }
@@ -305,24 +301,6 @@ function backup(callback) {
     });
 }
 
-function getIp() {
-    if (gCachedIp) return gCachedIp;
-
-    var ifaces = os.networkInterfaces();
-    for (var dev in ifaces) {
-        if (dev.match(/^(en|eth|wlp).*/) === null) continue;
-
-        for (var i = 0; i < ifaces[dev].length; i++) {
-            if (ifaces[dev][i].family === 'IPv4') {
-                gCachedIp = ifaces[dev][i].address;
-                return gCachedIp;
-            }
-        }
-    }
-
-    return null;
-}
-
 function getStatus(callback) {
     assert.strictEqual(typeof callback, 'function');
 
@@ -370,7 +348,7 @@ function getConfig(callback) {
             webServerOrigin: config.webServerOrigin(),
             isDev: /dev/i.test(config.get('boxVersionsUrl')),
             fqdn: config.fqdn(),
-            ip: getIp(),
+            ip: sysinfo.getIp(),
             version: config.version(),
             update: updater.getUpdateInfo(),
             progress: progress.get(),
@@ -411,7 +389,7 @@ function sendMailDnsRecordsRequest(callback) {
     // note that dmarc requires special DNS records for external RUF and RUA
     var records = [
         // softfail all mails not from our IP. Note that this uses IP instead of 'a' should we use a load balancer in the future
-        { subdomain: '', type: 'TXT', value: '"v=spf1 ip4:' + getIp() + ' ~all"' },
+        { subdomain: '', type: 'TXT', value: '"v=spf1 ip4:' + sysinfo.getIp() + ' ~all"' },
         // t=s limits the domainkey to this domain and not it's subdomains
         { subdomain: DKIM_SELECTOR + '._domainkey', type: 'TXT', value: '"v=DKIM1; t=s; p=' + publicKey + '"' },
         // DMARC requires special setup if report email id is in different domain

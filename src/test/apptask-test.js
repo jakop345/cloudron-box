@@ -17,6 +17,7 @@ var addons = require('../addons.js'),
     net = require('net'),
     nock = require('nock'),
     paths = require('../paths.js'),
+    sysinfo = require('../sysinfo.js'),
     _ = require('underscore');
 
 var MANIFEST = {
@@ -199,7 +200,7 @@ describe('apptask', function () {
     it('registers subdomain', function (done) {
         nock.cleanAll();
         var scope = nock(config.apiServerOrigin())
-            .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP.location, type: 'A', value: cloudron.getIp() } ] })
+            .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP.location, type: 'A', value: sysinfo.getIp() } ] })
             .reply(201, { ids: [ APP.dnsRecordId ] });
 
         apptask._registerSubdomain(APP, function (error) {

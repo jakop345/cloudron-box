@@ -12,7 +12,6 @@ var addons = require('./addons.js'),
     assert = require('assert'),
     async = require('async'),
     clientdb = require('./clientdb.js'),
-    cloudron = require('./cloudron.js'),
     config = require('../config.js'),
     database = require('./database.js'),
     DatabaseError = require('./databaseerror.js'),
@@ -29,6 +28,7 @@ var addons = require('./addons.js'),
     safe = require('safetydance'),
     shell = require('./shell.js'),
     superagent = require('superagent'),
+    sysinfo = require('./sysinfo.js'),
     tokendb = require('./tokendb.js'),
     util = require('util'),
     uuid = require('node-uuid'),
@@ -442,7 +442,7 @@ function downloadIcon(app, callback) {
 function registerSubdomain(app, callback) {
     debugApp(app, 'Registering subdomain');
 
-    var record = { subdomain: app.location, type: 'A', value: cloudron.getIp() };
+    var record = { subdomain: app.location, type: 'A', value: sysinfo.getIp() };
 
     superagent
         .post(config.apiServerOrigin() + '/api/v1/subdomains')

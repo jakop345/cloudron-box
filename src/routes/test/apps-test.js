@@ -31,6 +31,7 @@ var appdb = require('../../appdb.js'),
     request = require('superagent'),
     safe = require('safetydance'),
     server = require('../../server.js'),
+    sysinfo = require('../../sysinfo.js'),
     url = require('url'),
     util = require('util'),
     uuid = require('node-uuid'),
@@ -498,7 +499,7 @@ describe('App installation', function () {
                 hockInstance
                     .get('/api/v1/apps/' + APP_STORE_ID + '/versions/' + APP_MANIFEST.version + '/icon')
                     .replyWithFile(200, path.resolve(__dirname, '../../../webadmin/src/img/appicon_fallback.png'))
-                    .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP_LOCATION, type: 'A', value: cloudron.getIp() } ] })
+                    .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP_LOCATION, type: 'A', value: sysinfo.getIp() } ] })
                     .reply(201, { ids: [ 'dnsrecordid' ] }, { 'Content-Type': 'application/json' })
                     .delete('/api/v1/subdomains/dnsrecordid?token=' + config.token())
                     .reply(204, { }, { 'Content-Type': 'application/json' });
@@ -918,12 +919,12 @@ describe('App installation - port bindings', function () {
                     // app install
                     .get('/api/v1/apps/' + APP_STORE_ID + '/versions/' + APP_MANIFEST.version + '/icon')
                     .replyWithFile(200, path.resolve(__dirname, '../../../webadmin/src/img/appicon_fallback.png'))
-                    .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP_LOCATION, type: 'A', value: cloudron.getIp() } ] })
+                    .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP_LOCATION, type: 'A', value: sysinfo.getIp() } ] })
                     .reply(201, { ids: [ 'dnsrecordid' ] }, { 'Content-Type': 'application/json' })
                     // app configure
                     .delete('/api/v1/subdomains/dnsrecordid?token=' + config.token())
                     .reply(204, { }, { 'Content-Type': 'application/json' })
-                    .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP_LOCATION_NEW, type: 'A', value: cloudron.getIp() } ] })
+                    .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP_LOCATION_NEW, type: 'A', value: sysinfo.getIp() } ] })
                     .reply(201, { ids: [ 'anotherdnsid' ] }, { 'Content-Type': 'application/json' })
                     // app remove
                     .delete('/api/v1/subdomains/anotherdnsid?token=' + config.token())

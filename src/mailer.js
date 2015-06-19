@@ -31,6 +31,7 @@ var assert = require('assert'),
     path = require('path'),
     safe = require('safetydance'),
     smtpTransport = require('nodemailer-smtp-transport'),
+    sysinfo = require('./sysinfo.js'),
     userdb = require('./userdb.js'),
     util = require('util'),
     _ = require('underscore');
@@ -62,7 +63,7 @@ function uninitialize(callback) {
 }
 
 function checkDns() {
-    digitalocean.checkPtrRecord(cloudron.getIp(), config.fqdn(), function (error, ok) {
+    digitalocean.checkPtrRecord(sysinfo.getIp(), config.fqdn(), function (error, ok) {
         if (error || !ok) {
             debug('PTR record not setup yet');
             gCheckDnsTimerId = setTimeout(checkDns, 10000);
