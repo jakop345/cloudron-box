@@ -20,11 +20,7 @@ exports = module.exports = {
     migrate: migrate
 };
 
-var addons = require('./addons.js'),
-    appdb = require('./appdb.js'),
-    apps = require('./apps.js'),
-    assert = require('assert'),
-    async = require('async'),
+var assert = require('assert'),
     backups = require('./backups.js'),
     clientdb = require('./clientdb.js'),
     config = require('../config.js'),
@@ -45,12 +41,8 @@ var addons = require('./addons.js'),
     userdb = require('./userdb.js'),
     util = require('util');
 
-var BACKUP_BOX_CMD = path.join(__dirname, 'scripts/backupbox.sh'),
-    RELOAD_NGINX_CMD = path.join(__dirname, 'scripts/reloadnginx.sh'),
-    BACKUP_APP_CMD = path.join(__dirname, 'scripts/backupapp.sh'),
-    RESTORE_APP_CMD = path.join(__dirname, 'scripts/restoreapp.sh'),
-    REBOOT_CMD = path.join(__dirname, 'scripts/reboot.sh'),
-    BACKUP_SWAP_CMD = path.join(__dirname, 'scripts/backupswap.sh');
+var RELOAD_NGINX_CMD = path.join(__dirname, 'scripts/reloadnginx.sh'),
+    REBOOT_CMD = path.join(__dirname, 'scripts/reboot.sh');
 
 var gAddMailDnsRecordsTimerId = null,
     gCloudronDetails = null;            // cached cloudron details like region,size...
