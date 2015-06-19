@@ -178,7 +178,7 @@ function restoreApp(app, callback) {
         debugApp(app, 'restoreApp: restoreUrl:%s', result.url);
 
         shell.sudo('restoreApp', [ RESTORE_APP_CMD,  app.id, result.url, result.backupKey ], function (error) {
-            if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, 'Error restoring: ' + error));
+            if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
             addons.restoreAddons(app, callback);
         });
@@ -201,12 +201,12 @@ function backupApp(app, callback) {
                         shell.sudo.bind(null, 'backupApp', [ BACKUP_APP_CMD,  app.id, result.url, result.backupKey ]),
             ignoreError(shell.sudo.bind(null, 'unmountSwap', [ BACKUP_SWAP_CMD, '--off' ])),
         ], function (error) {
-            if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, 'Error backing up: ' + error));
+            if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
             debugApp(app, 'backupApp: successful id:%s', result.id);
 
             apps.setRestorePoint(app.id, result.id, app.manifest, function (error) {
-                if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, 'Error backing up: ' + error));
+                if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
                 return callback(null, result.id);
             });
