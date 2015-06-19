@@ -334,9 +334,9 @@ function backup(callback) {
         }, function appsBackedUp(error, backupIds) {
             if (error) return callback(error);
 
-            backupBoxWithAppBackupIds(backupIds, function (error) {
+            backupBoxWithAppBackupIds(backupIds, function (error, restoreKey) {
                 progress.set(progress.BACKUP, 100, '');
-                callback(error);
+                callback(error, restoreKey);
             });
         });
     });
@@ -521,7 +521,7 @@ function migrate(size, region, callback) {
     assert.strictEqual(typeof region, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    backupBox(function (error, restoreKey) {
+    backup(function (error, restoreKey) {
         if (error) return callback(error);
 
         debug('migrate: size %s region %s restoreKey %s', size, region, restoreKey);
