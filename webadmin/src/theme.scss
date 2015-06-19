@@ -117,16 +117,9 @@ $table-border-color:                        transparent !default;
 }
 
 .grid-item-bottom {
-    width: 100%;
+    padding: 10px 15px;
     border-top: 1px solid #ddd;
-    background-color: white;
-    display: table;
-    padding: 10px 0;
-}
-
-.grid-item-bottom-button {
-    display: table-cell;
-    text-align: center;
+    background-color: white
 }
 
 // ----------------------------
