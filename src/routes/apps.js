@@ -5,6 +5,7 @@
 var apps = require('../apps.js'),
     AppsError = apps.AppsError,
     assert = require('assert'),
+    backups = require('./backups.js'),
     debug = require('debug')('box:routes/apps'),
     fs = require('fs'),
     HttpError = require('connect-lastmile').HttpError,
@@ -23,6 +24,7 @@ exports = module.exports = {
     configureApp: configureApp,
     uninstallApp: uninstallApp,
     restoreApp: restoreApp,
+    backupApp: backupApp,
     updateApp: updateApp,
     getLogs: getLogs,
     getLogStream: getLogStream,
@@ -170,6 +172,37 @@ function restoreApp(req, res, next) {
         next(new HttpSuccess(202, { }));
     });
 }
+
+function backupApp(req, res, next) {
+    assert.strictEqual(typeof req.params.id, 'string');
+
+    debug('Restore app id:%s', req.params.id);
+
+    backups.scheduleAppBackup(req.params.id, function (error) {
+        if (error && error.reason === BackupsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
+        if (error && error.reason === BackupsError.BAD_STATE) return next(new HttpError(409, error.message));
+        if (error && error.reason === BackupsError.EXTERNAL_ERROR) return next(new HttpError(503, error));
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(202, { }));
+    });
+}
+
+function restoreApp(req, res, next) {
+    assert.strictEqual(typeof req.params.id, 'string');
+
+    debug('Restore app id:%s', req.params.id);
+
+    apps.restore(req.params.id, function (error) {
+        if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
+        if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));
+        if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(202, { }));
+    });
+}
+
 
 /*
  * Uninstalls an app

@@ -18,6 +18,7 @@ exports = module.exports = {
 
     getAll: getAll,
     scheduleBackup: scheduleBackup,
+    scheduleAppBackup: scheduleAppBackup,
 
     getBackupUrl: getBackupUrl,
     getRestoreUrl: getRestoreUrl,
@@ -54,6 +55,8 @@ function BackupsError(reason, errorOrMessage) {
     }
 }
 util.inherits(BackupsError, Error);
+BackupsError.NOT_FOUND = 'not found';
+BackupsError.BAD_STATE = 'bad state';
 BackupsError.EXTERNAL_ERROR = 'external error';
 BackupsError.INTERNAL_ERROR = 'internal error';
 
@@ -96,6 +99,31 @@ function scheduleBackup(callback) {
 
     // we just schedule the backup but do not wait for the result
     callback(null);
+}
+
+function canBackupApp(app) {
+    // only backup apps that are installed or pending configure. Rest of them are in some
+    // state not good for consistent backup
+
+    return (app.installationState === appdb.ISTATE_INSTALLED && app.health === appdb.HEALTH_HEALTHY) || app.installationState === appdb.ISTATE_PENDING_CONFIGURE;
+}
+
+function scheduleAppBackup(appId, callback) {
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    apps.get(appId, function (error, app) {
+        if (error && error.reason === AppsError.NOT_FOUND) return callback(new BackupsError(BackupsError.NOT_FOUND));
+        if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
+
+        if (!canBackupApp(app)) return callback(new BackupsError(BackupsError.BAD_STATE, 'App not healthy'));
+
+        backupApp(app, function (error) {
+            if (error) console.error('backup failed.', error);
+        });
+
+        callback(null);
+    });
 }
 
 function getBackupUrl(app, appBackupIds, callback) {
@@ -226,9 +254,7 @@ function backup(callback) {
         async.mapSeries(allApps, function iterator(app, iteratorCallback) {
             ++processed;
 
-            // only backup apps that are installed or pending configure. Rest of them are in some
-            // state not good for consistent backup
-            if ((app.installationState === appdb.ISTATE_INSTALLED && app.health === appdb.HEALTH_HEALTHY) || app.installationState === appdb.ISTATE_PENDING_CONFIGURE) {
+            if (canBackupApp(app)) {
                 return backupApp(app, function (error, backupId) {
                     progress.set(progress.BACKUP, step * processed, app.location);
                     iteratorCallback(error, backupId);
