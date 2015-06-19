@@ -4,13 +4,17 @@ var assert = require('assert'),
     util = require('util'),
     config = require('../config.js'),
     cloudron = require('./cloudron.js'),
-    superagent = require('superagent');
+    superagent = require('superagent'),
+    util = require('util');
 
 exports = module.exports = {
     BackupsError: BackupsError,
 
     getAll: getAll,
-    create: create
+    create: create,
+
+    getBackupUrl: getBackupUrl,
+    getRestoreUrl: getRestoreUrl
 };
 
 function BackupsError(reason, errorOrMessage) {
@@ -58,3 +62,43 @@ function create(callback) {
     // we just schedule the backup but do not wait for the result
     callback(null);
 }
+
+function getBackupUrl(app, appBackupIds, callback) {
+    assert(!app || typeof app === 'object');
+    assert(!appBackupIds || util.isArray(appBackupIds));
+    assert.strictEqual(typeof callback, 'function');
+
+    var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/backupurl';
+
+    var data = {
+        boxVersion: config.version(),
+        appId: app ? app.id : null,
+        appVersion: app ? app.manifest.version : null,
+        appBackupIds: appBackupIds
+    };
+
+    superagent.put(url).query({ token: config.token() }).send(data).end(function (error, result) {
+        if (error) return callback(new Error('Error getting presigned backup url: ' + error.message));
+
+        if (result.statusCode !== 201 || !result.body || !result.body.url) return callback(new Error('Error getting presigned backup url : ' + result.statusCode));
+
+        return callback(null, result.body);
+    });
+}
+
+function getRestoreUrl(backupId, callback) {
+    assert.strictEqual(typeof backupId, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/restoreurl';
+
+    superagent.put(url).query({ token: config.token(), backupId: backupId }).end(function (error, result) {
+        if (error) return callback(new Error('Error getting presigned download url: ' + error.message));
+
+        if (result.statusCode !== 201 || !result.body || !result.body.url) return callback(new Error('Error getting presigned download url : ' + result.statusCode));
+
+        return callback(null, result.body);
+    });
+}
+
+
