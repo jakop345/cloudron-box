@@ -272,6 +272,9 @@ function updateWithConstraints(id, app, constraints, callback) {
         if (p === 'manifest') {
             fields.push('manifestJson = ?');
             values.push(JSON.stringify(app[p]));
+        } else if (p === 'lastManifest') {
+            fields.push('lastManifestJson = ?');
+            values.push(JSON.stringify(app[p]));
         } else if (p !== 'portBindings') {
             fields.push(p + ' = ?');
             values.push(app[p]);
