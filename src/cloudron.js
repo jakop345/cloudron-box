@@ -12,13 +12,6 @@ exports = module.exports = {
     getConfig: getConfig,
     getStatus: getStatus,
 
-    backup: backup,
-
-    backupBox: backupBox,
-    backupApp: backupApp,
-
-    restoreApp: restoreApp,
-
     setCertificate: setCertificate,
 
     sendHeartbeat: sendHeartbeat,
@@ -85,28 +78,11 @@ CloudronError.BAD_FIELD = 'Field error';
 CloudronError.INTERNAL_ERROR = 'Internal Error';
 CloudronError.EXTERNAL_ERROR = 'External Error';
 CloudronError.ALREADY_PROVISIONED = 'Already Provisioned';
-CloudronError.APPSTORE_DOWN = 'Appstore Down';
 CloudronError.BAD_USERNAME = 'Bad username';
 CloudronError.BAD_EMAIL = 'Bad email';
 CloudronError.BAD_PASSWORD = 'Bad password';
 CloudronError.INVALID_STATE = 'Invalid state';
 CloudronError.NOT_FOUND = 'Not found';
-
-function debugApp(app, args) {
-    assert(!app || typeof app === 'object');
-
-    var prefix = app ? app.location : '(no app)';
-    debug(prefix + ' ' + util.format.apply(util, Array.prototype.slice.call(arguments, 1)));
-}
-
-function ignoreError(func) {
-    return function (callback) {
-        func(function (error) {
-            if (error) console.error('Ignored error:', error);
-            callback();
-        });
-    };
-}
 
 function initialize(callback) {
     assert.strictEqual(typeof callback, 'function');
@@ -182,120 +158,6 @@ function activate(username, password, email, ip, callback) {
                 if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
                 callback(null, { token: token, expires: expires });
-            });
-        });
-    });
-}
-
-function restoreApp(app, callback) {
-    if (!app.lastBackupId) {
-        debugApp(app, 'No existing backup to return to. Proceeding to setup addons');
-        return addons.setupAddons(app, callback);
-    }
-
-   backups.getRestoreUrl(app.lastBackupId, function (error, result) {
-        if (error) return callback(error);
-
-        debugApp(app, 'restoreApp: restoreUrl:%s', result.url);
-
-        shell.sudo('restoreApp', [ RESTORE_APP_CMD,  app.id, result.url, result.backupKey ], function (error) {
-            if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, 'Error restoring: ' + error));
-
-            addons.restoreAddons(app, callback);
-        });
-    });
-}
-
-function backupApp(app, callback) {
-    if (!safe.fs.writeFileSync(path.join(paths.DATA_DIR, app.id + '/config.json'), JSON.stringify(app))) {
-        return callback(safe.error);
-    }
-
-    backups.getBackupUrl(app, null, function (error, result) {
-        if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
-
-        debugApp(app, 'backupApp: backup url:%s backup id:%s', result.url, result.id);
-
-        async.series([
-            ignoreError(shell.sudo.bind(null, 'mountSwap', [ BACKUP_SWAP_CMD, '--on' ])),
-                        addons.backupAddons.bind(null, app),
-                        shell.sudo.bind(null, 'backupApp', [ BACKUP_APP_CMD,  app.id, result.url, result.backupKey ]),
-            ignoreError(shell.sudo.bind(null, 'unmountSwap', [ BACKUP_SWAP_CMD, '--off' ])),
-        ], function (error) {
-            if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, 'Error backing up: ' + error));
-
-            debugApp(app, 'backupApp: successful');
-
-            apps.setRestorePoint(app.id, result.id, app.manifest, callback.bind(null, null, result.id));
-        });
-    });
-}
-
-function backupBoxWithAppBackupIds(appBackupIds, callback) {
-    assert(util.isArray(appBackupIds));
-
-    backups.getBackupUrl(null /* app */, appBackupIds, function (error, result) {
-        if (error) return callback(new CloudronError(CloudronError.APPSTORE_DOWN, error.message));
-
-        debug('backup: url %s', result.url);
-
-        async.series([
-            ignoreError(shell.sudo.bind(null, 'mountSwap', [ BACKUP_SWAP_CMD, '--on' ])),
-                        shell.sudo.bind(null, 'backupBox', [ BACKUP_BOX_CMD, result.url, result.backupKey ]),
-            ignoreError(shell.sudo.bind(null, 'unmountSwap', [ BACKUP_SWAP_CMD, '--off' ])),
-        ], function (error) {
-            if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
-
-            debug('backup: successful');
-
-            callback(null, result.id);
-        });
-    });
-}
-
-function backupBox(callback) {
-    apps.getAll(function (error, allApps) {
-        if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
-
-        var appBackupIds = allApps.map(function (app) { return app.lastBackupId; });
-
-        backupBoxWithAppBackupIds(appBackupIds, callback);
-    });
-}
-
-function backup(callback) {
-    callback = callback || function () { }; // callback can be empty for timer triggered backup
-
-    apps.getAll(function (error, allApps) {
-        if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
-
-        var processed = 0;
-        var step = 100/(allApps.length+1);
-
-        progress.set(progress.BACKUP, processed, '');
-
-        async.mapSeries(allApps, function iterator(app, iteratorCallback) {
-            ++processed;
-
-            // only backup apps that are installed or pending configure. Rest of them are in some
-            // state not good for consistent backup
-            if ((app.installationState === appdb.ISTATE_INSTALLED && app.health === appdb.HEALTH_HEALTHY) || app.installationState === appdb.ISTATE_PENDING_CONFIGURE) {
-                return backupApp(app, function (error, backupId) {
-                    progress.set(progress.BACKUP, step * processed, app.location);
-                    iteratorCallback(error, backupId);
-                });
-            }
-
-            debugApp(app, 'Skipping backup (istate:%s health%s). Reusing %s', app.installationState, app.health, app.lastBackupId);
-            progress.set(progress.BACKUP, step * processed, app.location);
-
-            return iteratorCallback(null, app.lastBackupId);
-        }, function appsBackedUp(error, backupIds) {
-            if (error) return callback(error);
-
-            backupBoxWithAppBackupIds(backupIds, function (error, restoreKey) {
-                progress.set(progress.BACKUP, 100, '');
-                callback(error, restoreKey);
             });
         });
     });
@@ -462,7 +324,7 @@ function migrate(size, region, callback) {
     assert.strictEqual(typeof region, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    backup(function (error, restoreKey) {
+    backups.backup(function (error, restoreKey) {
         if (error) return callback(error);
 
         debug('migrate: size %s region %s restoreKey %s', size, region, restoreKey);

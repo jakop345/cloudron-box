@@ -17,6 +17,7 @@ var appdb = require('./appdb.js'),
     apps = require('./apps.js'),
     assert = require('assert'),
     async = require('async'),
+    backups = require('./backups.js'),
     cloudron = require('./cloudron.js'),
     progress = require('./progress.js'),
     config = require('../config.js'),
@@ -203,7 +204,7 @@ function upgrade(callback) {
 
     debug('box needs upgrade, backup box and apps');
 
-    cloudron.backup(function (error) {
+    backups.backup(function (error) {
         if (error) return callback(error);
 
         superagent.post(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/upgrade')
@@ -234,7 +235,7 @@ function startUpdate(callback) {
 
     debug('box needs update, backup only box but not apps');
 
-    cloudron.backupBox(function (error) {
+    backups.backupBox(function (error) {
         if (error) return callback(error);
 
         // fetch a signed sourceTarballUrl

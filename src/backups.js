@@ -1,9 +1,15 @@
 'use strict';
 
-var assert = require('assert'),
-    util = require('util'),
+var addons = require('./addons.js'),
+    appdb = require('./appdb.js'),
+    apps = require('./apps.js'),
+    assert = require('assert'),
+    async = require('async'),
     config = require('../config.js'),
-    cloudron = require('./cloudron.js'),
+    debug = require('debug')('box:backups'),
+    path = require('path'),
+    progress = require('./progress.js'),
+    shell = require('./shell.js'),
     superagent = require('superagent'),
     util = require('util');
 
@@ -14,8 +20,20 @@ exports = module.exports = {
     scheduleBackup: scheduleBackup,
 
     getBackupUrl: getBackupUrl,
-    getRestoreUrl: getRestoreUrl
+    getRestoreUrl: getRestoreUrl,
+
+    backup: backup,
+
+    backupBox: backupBox,
+    backupApp: backupApp,
+
+    restoreApp: restoreApp
 };
+
+var BACKUP_BOX_CMD = path.join(__dirname, 'scripts/backupbox.sh'),
+    BACKUP_APP_CMD = path.join(__dirname, 'scripts/backupapp.sh'),
+    RESTORE_APP_CMD = path.join(__dirname, 'scripts/restoreapp.sh'),
+    BACKUP_SWAP_CMD = path.join(__dirname, 'scripts/backupswap.sh');
 
 function BackupsError(reason, errorOrMessage) {
     assert.strictEqual(typeof reason, 'string');
@@ -37,6 +55,23 @@ function BackupsError(reason, errorOrMessage) {
 }
 util.inherits(BackupsError, Error);
 BackupsError.EXTERNAL_ERROR = 'external error';
+BackupsError.INTERNAL_ERROR = 'internal error';
+
+function debugApp(app, args) {
+    assert(!app || typeof app === 'object');
+
+    var prefix = app ? app.location : '(no app)';
+    debug(prefix + ' ' + util.format.apply(util, Array.prototype.slice.call(arguments, 1)));
+}
+
+function ignoreError(func) {
+    return function (callback) {
+        func(function (error) {
+            if (error) console.error('Ignored error:', error);
+            callback();
+        });
+    };
+}
 
 function getAll(callback) {
     assert.strictEqual(typeof callback, 'function');
@@ -55,7 +90,7 @@ function getAll(callback) {
 function scheduleBackup(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    cloudron.backup(function (error) {
+    backup(function (error) {
         if (error) console.error('backup failed.', error);
     });
 
@@ -101,4 +136,117 @@ function getRestoreUrl(backupId, callback) {
     });
 }
 
+function restoreApp(app, callback) {
+    if (!app.lastBackupId) {
+        debugApp(app, 'No existing backup to return to. Proceeding to setup addons');
+        return addons.setupAddons(app, callback);
+    }
+
+   getRestoreUrl(app.lastBackupId, function (error, result) {
+        if (error) return callback(error);
+
+        debugApp(app, 'restoreApp: restoreUrl:%s', result.url);
+
+        shell.sudo('restoreApp', [ RESTORE_APP_CMD,  app.id, result.url, result.backupKey ], function (error) {
+            if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, 'Error restoring: ' + error));
+
+            addons.restoreAddons(app, callback);
+        });
+    });
+}
+
+function backupApp(app, callback) {
+    if (!safe.fs.writeFileSync(path.join(paths.DATA_DIR, app.id + '/config.json'), JSON.stringify(app))) {
+        return callback(safe.error);
+    }
+
+    getBackupUrl(app, null, function (error, result) {
+        if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
+
+        debugApp(app, 'backupApp: backup url:%s backup id:%s', result.url, result.id);
+
+        async.series([
+            ignoreError(shell.sudo.bind(null, 'mountSwap', [ BACKUP_SWAP_CMD, '--on' ])),
+                        addons.backupAddons.bind(null, app),
+                        shell.sudo.bind(null, 'backupApp', [ BACKUP_APP_CMD,  app.id, result.url, result.backupKey ]),
+            ignoreError(shell.sudo.bind(null, 'unmountSwap', [ BACKUP_SWAP_CMD, '--off' ])),
+        ], function (error) {
+            if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, 'Error backing up: ' + error));
+
+            debugApp(app, 'backupApp: successful');
+
+            apps.setRestorePoint(app.id, result.id, app.manifest, callback.bind(null, null, result.id));
+        });
+    });
+}
+
+function backupBoxWithAppBackupIds(appBackupIds, callback) {
+    assert(util.isArray(appBackupIds));
+
+    getBackupUrl(null /* app */, appBackupIds, function (error, result) {
+        if (error) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, error.message));
+
+        debug('backup: url %s', result.url);
+
+        async.series([
+            ignoreError(shell.sudo.bind(null, 'mountSwap', [ BACKUP_SWAP_CMD, '--on' ])),
+                        shell.sudo.bind(null, 'backupBox', [ BACKUP_BOX_CMD, result.url, result.backupKey ]),
+            ignoreError(shell.sudo.bind(null, 'unmountSwap', [ BACKUP_SWAP_CMD, '--off' ])),
+        ], function (error) {
+            if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
+
+            debug('backup: successful');
+
+            callback(null, result.id);
+        });
+    });
+}
+
+function backupBox(callback) {
+    apps.getAll(function (error, allApps) {
+        if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
+
+        var appBackupIds = allApps.map(function (app) { return app.lastBackupId; });
+
+        backupBoxWithAppBackupIds(appBackupIds, callback);
+    });
+}
+
+function backup(callback) {
+    callback = callback || function () { }; // callback can be empty for timer triggered backup
+
+    apps.getAll(function (error, allApps) {
+        if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
+
+        var processed = 0;
+        var step = 100/(allApps.length+1);
+
+        progress.set(progress.BACKUP, processed, '');
+
+        async.mapSeries(allApps, function iterator(app, iteratorCallback) {
+            ++processed;
+
+            // only backup apps that are installed or pending configure. Rest of them are in some
+            // state not good for consistent backup
+            if ((app.installationState === appdb.ISTATE_INSTALLED && app.health === appdb.HEALTH_HEALTHY) || app.installationState === appdb.ISTATE_PENDING_CONFIGURE) {
+                return backupApp(app, function (error, backupId) {
+                    progress.set(progress.BACKUP, step * processed, app.location);
+                    iteratorCallback(error, backupId);
+                });
+            }
+
+            debugApp(app, 'Skipping backup (istate:%s health%s). Reusing %s', app.installationState, app.health, app.lastBackupId);
+            progress.set(progress.BACKUP, step * processed, app.location);
+
+            return iteratorCallback(null, app.lastBackupId);
+        }, function appsBackedUp(error, backupIds) {
+            if (error) return callback(error);
+
+            backupBoxWithAppBackupIds(backupIds, function (error, restoreKey) {
+                progress.set(progress.BACKUP, 100, '');
+                callback(error, restoreKey);
+            });
+        });
+    });
+}
 

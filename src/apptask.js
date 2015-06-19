@@ -11,6 +11,7 @@ var addons = require('./addons.js'),
     apps = require('./apps.js'),
     assert = require('assert'),
     async = require('async'),
+    backups = require('./backups.js'),
     clientdb = require('./clientdb.js'),
     config = require('../config.js'),
     database = require('./database.js'),
@@ -634,7 +635,7 @@ function restore(app, callback) {
 
         // restore app and addons
         updateApp.bind(null, app, { installationProgress: '60, Restoring app and addons' }),
-        cloudron.restoreApp.bind(null, app),
+        backups.restoreApp.bind(null, app),
 
         // recreate container
         updateApp.bind(null, app, { installationProgress: '70, Creating container' }),
@@ -736,7 +737,7 @@ function update(app, callback) {
     async.series([
         updateApp.bind(null, app, { installationProgress: '10, Backup app' }),
         function (done) {
-            cloudron.backupApp(app, function (error) {
+            backups.backupApp(app, function (error) {
                 if (error) error.backupError = true;
                 done(error);
             });

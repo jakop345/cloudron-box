@@ -1,6 +1,7 @@
 'use strict';
 
 var assert = require('assert'),
+    backups = require('./backups.js'),
     cloudron = require('./cloudron.js'),
     CronJob = require('cron').CronJob,
     debug = require('debug')('box:cron'),
@@ -56,7 +57,7 @@ function recreateJobs(unusedTimeZone, callback) {
         if (gBackupJob) gBackupJob.stop();
         gBackupJob = new CronJob({
             cronTime: '00 00 02 * * *', // 2am everyday
-            onTick: cloudron.backup,
+            onTick: backups.backup,
             start: true,
             timeZone: allSettings[settings.TIME_ZONE_KEY]
         });
