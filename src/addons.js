@@ -294,7 +294,7 @@ function setupLdap(app, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     var env = [
-        'LDAP_SERVER=localhost',
+        'LDAP_SERVER=172.17.42.1',
         'LDAP_PORT=3002'
     ];
 
