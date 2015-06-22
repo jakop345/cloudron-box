@@ -52,6 +52,12 @@ var KNOWN_ADDONS = {
         backup: NOOP,
         restore: NOOP
     },
+    ldap: {
+        setup: setupLdap,
+        teardown: teardownLdap,
+        backup: NOOP,
+        restore: NOOP
+    },
     sendmail: {
         setup: setupSendMail,
         teardown: teardownSendMail,
@@ -281,6 +287,29 @@ function removeOAuthCredentials(app, callback) {
 
         appdb.unsetAddonConfig(app.id, 'oauth', callback);
     });
+}
+
+function setupLdap(app, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
+    var env = [
+        'LDAP_SERVER=localhost',
+        'LDAP_PORT=3002'
+    ];
+
+    debugApp(app, 'Setting up LDAP');
+
+    appdb.setAddonConfig(app.id, 'ldap', env, callback);
+}
+
+function teardownLdap(app, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
+    debugApp(app, 'Tearing down LDAP');
+
+    appdb.unsetAddonConfig(app.id, 'ldap', callback);
 }
 
 function setupSendMail(app, callback) {
