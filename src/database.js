@@ -92,6 +92,10 @@ function reconnect(callback) {
             // by design, we catch all normal errors by providing callbacks.
             // this function should be invoked only when we have no callbacks pending and we have a fatal error
             assert(error.fatal, 'Non-fatal error on connection object');
+
+            console.error('Unhandled mysql connection error.', error);
+
+            // This is most likely an issue an can cause double callbacks from reconnect()
             setTimeout(reconnect.bind(null, callback), 1000);
         });
 
