@@ -30,7 +30,7 @@ function start(callback) {
 
             result.forEach(function (entry) {
                 var tmp = {
-                    dn: 'dc=cloudron,dn=' + entry.id,
+                    dn: 'dn=' + entry.id + ',dc=cloudron',
                     attributes: {
                         objectclass: ['user'],
                         uid: entry.id,
