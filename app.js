@@ -5,6 +5,7 @@
 require('supererror')({ splatchError: true });
 
 var server = require('./src/server.js'),
+    ldap = require('./src/ldap.js'),
     config = require('./config.js');
 
 console.log();
@@ -28,6 +29,15 @@ server.start(function (err) {
     }
 
     console.log('Server listening on port ' + config.get('port'));
+
+    ldap.start(function (error) {
+        if (error) {
+            console.error('Error LDAP starting server', err);
+            process.exit(1);
+        }
+
+        console.log('LDAP server listen on port %n.', config.get('ldapPort'));
+    });
 });
 
 var NOOP_CALLBACK = function () { };

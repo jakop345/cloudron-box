@@ -1,19 +1,19 @@
 'use strict';
 
 var assert = require('assert'),
+    config = require('./src/config.js'),
     debug = require('debug')('box:ldap'),
     user = require('./user.js'),
     UserError = user.UserError,
     ldap = require('ldapjs');
 
-var PORT = 5000;
 var gServer = null;
 
 exports = module.exports = {
-    startServer: startServer
+    start: start
 };
 
-function startServer(callback) {
+function start(callback) {
     assert(typeof callback === 'function');
 
     gServer = ldap.createServer();
@@ -66,8 +66,7 @@ function startServer(callback) {
 
             res.end();
         });
-
     });
 
-    gServer.listen(PORT, callback);
+    gServer.listen(config.get('ldapPort'), callback);
 }

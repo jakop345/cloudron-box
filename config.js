@@ -68,6 +68,7 @@ function initConfig() {
     data.isCustomDomain = false;
     data.webServerOrigin = null;
     data.internalPort = 3001;
+    data.ldapPort = 3002;
 
     if (exports.CLOUDRON) {
         data.port = 3000;
