@@ -1,7 +1,7 @@
 'use strict';
 
 var assert = require('assert'),
-    config = require('./src/config.js'),
+    config = require('../config.js'),
     debug = require('debug')('box:ldap'),
     user = require('./user.js'),
     UserError = user.UserError,
