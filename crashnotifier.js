@@ -38,7 +38,7 @@ function collectLogs(program, callback) {
             var dmesgLogLines = lines.slice(-100);
 
             var result = '';
-            result += 'box.log\n';
+            result += program + '.log\n';
             result += '-------------------------------------\n';
             result += boxLogLines.join('\n');
             result += '\n\n';
