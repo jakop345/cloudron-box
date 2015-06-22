@@ -34,6 +34,7 @@
     "express-session": "^1.11.3",
     "hat": "0.0.3",
     "json": "^9.0.3",
+    "ldapjs": "^0.7.1",
     "manifestformat": "https://gitlab-yellowtent.cloudron.me/yellowtent/manifestformat/repository/archive.tar.gz?ref=v1.2.0",
     "memorystream": "^0.3.0",
     "mime": "^1.3.4",
