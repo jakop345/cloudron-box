@@ -429,7 +429,7 @@ var decision = [
 
 */
 var token = [
-    passport.authenticate(['oauth2-client-password'], { session: false }),
+    passport.authenticate(['basic', 'oauth2-client-password'], { session: false }),
     gServer.token(),
     gServer.errorHandler()
 ];
