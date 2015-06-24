@@ -18,8 +18,8 @@ function start(callback) {
 
     gServer = ldap.createServer();
 
-    gServer.search('dc=cloudron', function (req, res, next) {
-        debug('ldap search: dn %s, scope %s, filter %s', req.dn.toString(), req.scope, req.filter.toString());
+    gServer.search('dc=cloudron,ou=users', function (req, res, next) {
+        debug('ldap user search: dn %s, scope %s, filter %s', req.dn.toString(), req.scope, req.filter.toString());
 
         user.list(function (error, result){
             if (error) return next(new ldap.OperationsError(error.toString()));
@@ -32,7 +32,6 @@ function start(callback) {
                     dn: dn.toString(),
                     attributes: {
                         objectclass: ['user'],
-                        cn: entry.id,
                         uid: entry.id,
                         mail: entry.email,
                         displayname: entry.username,
@@ -42,25 +41,35 @@ function start(callback) {
 
                 if ((req.dn.equals(dn) || req.dn.parentOf(dn)) && req.filter.matches(tmp.attributes)) {
                     res.send(tmp);
-                    debug('ldap send:', tmp);
+                    debug('ldap user send:', tmp);
                 }
             });
 
-            // send admin group object
+            debug('');
+            res.end();
+        });
+    });
+
+    gServer.search('dc=cloudron,ou=groups', function (req, res, next) {
+        debug('ldap group search: dn %s, scope %s, filter %s', req.dn.toString(), req.scope, req.filter.toString());
+
+        user.list(function (error, result){
+            if (error) return next(new ldap.OperationsError(error.toString()));
+
+            // we only have an admin group
             var dn = ldap.parseDN('cn=admin,ou=groups,dc=cloudron');
 
             var tmp = {
                 dn: dn.toString(),
                 attributes: {
                     objectclass: ['group'],
-                    cn: 'admin',
-                    memberuid: result.filter(function (entry) { return entry.isAdmin; })
+                    memberuid: result.filter(function (entry) { return entry.admin; })
                 }
             };
 
             if ((req.dn.equals(dn) || req.dn.parentOf(dn)) && req.filter.matches(tmp.attributes)) {
                 res.send(tmp);
-                debug('ldap send:', tmp);
+                debug('ldap group send:', tmp);
             }
 
             debug('');
