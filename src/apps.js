@@ -367,6 +367,7 @@ function update(appId, manifest, portBindings, icon, callback) {
 
     appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_UPDATE, { manifest: manifest, portBindings: portBindings }, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE)); // might be a bad guess
+        if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(getDuplicateErrorDetails('' /* location cannot conflict */, portBindings, error));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
         taskmanager.restartAppTask(appId);

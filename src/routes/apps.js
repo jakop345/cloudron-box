@@ -266,6 +266,7 @@ function updateApp(req, res, next) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
         if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
+        if (error && error.reason === AppsError.PORT_CONFLICT) return next(new HttpError(409, 'Port ' + error.message + ' is already in use.'));
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(202, { }));
