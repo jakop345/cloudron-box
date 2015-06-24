@@ -4,6 +4,27 @@
 
 'use strict';
 
+
+exports.initialize = initialize;
+exports.startTask = startTask;
+
+// exported for testing
+exports._getFreePort = getFreePort;
+exports._configureNginx = configureNginx;
+exports._unconfigureNginx = unconfigureNginx;
+exports._createVolume = createVolume;
+exports._deleteVolume = deleteVolume;
+exports._allocateOAuthProxyCredentials = allocateOAuthProxyCredentials;
+exports._removeOAuthProxyCredentials = removeOAuthProxyCredentials;
+exports._allocateAccessToken = allocateAccessToken;
+exports._removeAccessToken = removeAccessToken;
+exports._verifyManifest = verifyManifest;
+exports._registerSubdomain = registerSubdomain;
+exports._unregisterSubdomain = unregisterSubdomain;
+exports._reloadNginx = reloadNginx;
+exports._waitForDnsPropagation = waitForDnsPropagation;
+
+
 require('supererror')({ splatchError: true });
 
 var addons = require('./addons.js'),
@@ -35,26 +56,6 @@ var addons = require('./addons.js'),
     uuid = require('node-uuid'),
     vbox = require('./vbox.js');
 
-exports = module.exports = {
-    initialize: initialize,
-    startTask: startTask,
-
-    // exported for testing
-    _getFreePort: getFreePort,
-    _configureNginx: configureNginx,
-    _unconfigureNginx: unconfigureNginx,
-    _createVolume: createVolume,
-    _deleteVolume: deleteVolume,
-    _allocateOAuthProxyCredentials: allocateOAuthProxyCredentials,
-    _removeOAuthProxyCredentials: removeOAuthProxyCredentials,
-    _allocateAccessToken: allocateAccessToken,
-    _removeAccessToken: removeAccessToken,
-    _verifyManifest: verifyManifest,
-    _registerSubdomain: registerSubdomain,
-    _unregisterSubdomain: unregisterSubdomain,
-    _reloadNginx: reloadNginx,
-    _waitForDnsPropagation: waitForDnsPropagation
-};
 
 var NGINX_APPCONFIG_EJS = fs.readFileSync(__dirname + '/../setup/start/nginx/appconfig.ejs', { encoding: 'utf8' }),
     COLLECTD_CONFIG_EJS = fs.readFileSync(__dirname + '/collectd.config.ejs', { encoding: 'utf8' }),

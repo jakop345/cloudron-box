@@ -1,11 +1,11 @@
 'use strict';
 
+
+exports.getGraphs = getGraphs;
+
+
 var middleware = require('../middleware/index.js'),
     url = require('url');
-
-exports = module.exports = {
-    getGraphs: getGraphs
-};
 
 var graphiteProxy = middleware.proxy(url.parse('http://127.0.0.1:8000'));
 

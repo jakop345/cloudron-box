@@ -1,14 +1,12 @@
 'use strict';
 
-exports = module.exports = {
-    apps: require('./apps.js'),
-    cloudron: require('./cloudron.js'),
-    developer: require('./developer.js'),
-    graphs: require('./graphs.js'),
-    oauth2: require('./oauth2.js'),
-    settings: require('./settings.js'),
-    clients: require('./clients.js'),
-    backups: require('./backups.js'),
-    internal: require('./internal.js'),
-    user: require('./user.js')
-};
+exports.apps = require('./apps.js');
+exports.cloudron = require('./cloudron.js');
+exports.developer = require('./developer.js');
+exports.graphs = require('./graphs.js');
+exports.oauth2 = require('./oauth2.js');
+exports.settings = require('./settings.js');
+exports.clients = require('./clients.js');
+exports.backups = require('./backups.js');
+exports.internal = require('./internal.js');
+exports.user = require('./user.js');

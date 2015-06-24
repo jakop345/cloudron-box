@@ -2,6 +2,11 @@
 
 'use strict';
 
+
+exports.initialize = initialize;
+exports.uninitialize = uninitialize;
+
+
 var assert = require('assert'),
     BasicStrategy = require('passport-http').BasicStrategy,
     BearerStrategy = require('passport-http-bearer').Strategy,
@@ -17,11 +22,6 @@ var assert = require('assert'),
     userdb = require('./userdb'),
     UserError = user.UserError,
     _ = require('underscore');
-
-exports = module.exports = {
-    initialize: initialize,
-    uninitialize: uninitialize
-};
 
 function initialize(callback) {
     assert.strictEqual(typeof callback, 'function');

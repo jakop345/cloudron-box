@@ -1,5 +1,10 @@
 'use strict';
 
+
+exports.initialize =  initialize;
+exports.uninitialize =  uninitialize;
+
+
 var assert = require('assert'),
     backups = require('./backups.js'),
     cloudron = require('./cloudron.js'),
@@ -7,11 +12,6 @@ var assert = require('assert'),
     debug = require('debug')('box:cron'),
     settings = require('./settings.js'),
     updater = require('./updater.js');
-
-exports = module.exports = {
-    initialize: initialize,
-    uninitialize: uninitialize
-};
 
 var NOOP_CALLBACK = function (error) { console.error(error); };
 var gAutoUpdaterJob = null,

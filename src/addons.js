@@ -1,5 +1,21 @@
 'use strict';
 
+
+exports.setupAddons = setupAddons;
+exports.teardownAddons = teardownAddons;
+exports.updateAddons = updateAddons;
+exports.backupAddons = backupAddons;
+exports.restoreAddons = restoreAddons;
+
+exports.getEnvironment = getEnvironment;
+exports.getLinksSync = getLinksSync;
+exports.getBindsSync = getBindsSync;
+
+// exported for testing
+exports._allocateOAuthCredentials = allocateOAuthCredentials;
+exports._removeOAuthCredentials = removeOAuthCredentials;
+
+
 var appdb = require('./appdb.js'),
     assert = require('assert'),
     async = require('async'),
@@ -24,22 +40,6 @@ var appdb = require('./appdb.js'),
     uuid = require('node-uuid'),
     vbox = require('./vbox.js'),
     _ = require('underscore');
-
-exports = module.exports = {
-    setupAddons: setupAddons,
-    teardownAddons: teardownAddons,
-    updateAddons: updateAddons,
-    backupAddons: backupAddons,
-    restoreAddons: restoreAddons,
-
-    getEnvironment: getEnvironment,
-    getLinksSync: getLinksSync,
-    getBindsSync: getBindsSync,
-
-    // exported for testing
-    _allocateOAuthCredentials: allocateOAuthCredentials,
-    _removeOAuthCredentials: removeOAuthCredentials
-};
 
 var NOOP = function (app, callback) { return callback(); };
 

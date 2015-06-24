@@ -1,5 +1,23 @@
 'use strict';
 
+
+exports.BackupsError = BackupsError;
+
+exports.getAll = getAll;
+
+exports.scheduleBackup = scheduleBackup;
+exports.scheduleAppBackup = scheduleAppBackup;
+
+exports.getBackupUrl = getBackupUrl;
+exports.getRestoreUrl = getRestoreUrl;
+
+exports.backup = backup;
+exports.backupBox = backupBox;
+exports.backupApp = backupApp;
+
+exports.restoreApp = restoreApp;
+
+
 var addons = require('./addons.js'),
     appdb = require('./appdb.js'),
     apps = require('./apps.js'),
@@ -14,24 +32,6 @@ var addons = require('./addons.js'),
     shell = require('./shell.js'),
     superagent = require('superagent'),
     util = require('util');
-
-exports = module.exports = {
-    BackupsError: BackupsError,
-
-    getAll: getAll,
-    scheduleBackup: scheduleBackup,
-    scheduleAppBackup: scheduleAppBackup,
-
-    getBackupUrl: getBackupUrl,
-    getRestoreUrl: getRestoreUrl,
-
-    backup: backup,
-
-    backupBox: backupBox,
-    backupApp: backupApp,
-
-    restoreApp: restoreApp
-};
 
 var BACKUP_BOX_CMD = path.join(__dirname, 'scripts/backupbox.sh'),
     BACKUP_APP_CMD = path.join(__dirname, 'scripts/backupapp.sh'),

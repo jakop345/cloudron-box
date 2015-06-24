@@ -1,38 +1,35 @@
 'use strict';
 
+
+exports.SettingsError = SettingsError;
+
+exports.getAutoupdatePattern = getAutoupdatePattern;
+exports.setAutoupdatePattern = setAutoupdatePattern;
+
+exports.getTimeZone = getTimeZone;
+exports.setTimeZone = setTimeZone;
+
+exports.getAll = getAll;
+
+exports.AUTOUPDATE_PATTERN_KEY = 'autoupdate_pattern';
+exports.TIME_ZONE_KEY = 'time_zone';
+
+exports.events = new (require('events').EventEmitter)();
+
+
 var apps = require('./apps.js'),
     assert = require('assert'),
     config = require('../config.js'),
     constants = require('../constants.js'),
     CronJob = require('cron').CronJob,
-    EventEmitter = require('events').EventEmitter,
     safeCall = require('safetydance').safeCall,
     settingsdb = require('./settingsdb.js'),
     util = require('util');
 
-var gEvents = new EventEmitter();
-
 if (config.TEST) {
     // avoid noisy warnings during npm test
-    gEvents.setMaxListeners(100);
+    exports.events.setMaxListeners(100);
 }
-
-exports = module.exports = {
-    SettingsError: SettingsError,
-
-    getAutoupdatePattern: getAutoupdatePattern,
-    setAutoupdatePattern: setAutoupdatePattern,
-
-    getTimeZone: getTimeZone,
-    setTimeZone: setTimeZone,
-
-    getAll: getAll,
-
-    AUTOUPDATE_PATTERN_KEY: 'autoupdate_pattern',
-    TIME_ZONE_KEY: 'time_zone',
-
-    events: gEvents
-};
 
 function SettingsError(reason, errorOrMessage) {
     assert.strictEqual(typeof reason, 'string');
@@ -75,7 +72,7 @@ function setAutoupdatePattern(pattern, callback) {
     settingsdb.set(exports.AUTOUPDATE_PATTERN_KEY, pattern, function (error) {
         if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
 
-        gEvents.emit(exports.AUTOUPDATE_PATTERN_KEY, pattern);
+        exports.events.emit(exports.AUTOUPDATE_PATTERN_KEY, pattern);
 
         return callback(null);
     });
@@ -98,7 +95,7 @@ function setTimeZone(tz, callback) {
     settingsdb.set(exports.TIME_ZONE_KEY, tz, function (error) {
         if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
 
-        gEvents.emit(exports.TIME_ZONE_KEY, tz);
+        exports.events.emit(exports.TIME_ZONE_KEY, tz);
 
         return callback(null);
     });

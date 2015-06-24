@@ -2,6 +2,11 @@
 
 'use strict';
 
+
+exports.start = start;
+exports.stop = stop;
+
+
 var assert = require('assert'),
     async = require('async'),
     auth = require('./auth.js'),
@@ -21,11 +26,6 @@ var assert = require('assert'),
 
 var gHttpServer = null;
 var gInternalHttpServer = null;
-
-exports = module.exports = {
-    start: start,
-    stop: stop
-};
 
 function initializeExpressSync() {
     var app = express();

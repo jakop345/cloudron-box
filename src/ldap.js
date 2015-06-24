@@ -1,5 +1,9 @@
 'use strict';
 
+
+exports.start = start;
+
+
 var assert = require('assert'),
     config = require('../config.js'),
     debug = require('debug')('box:ldap'),
@@ -8,10 +12,6 @@ var assert = require('assert'),
     ldap = require('ldapjs');
 
 var gServer = null;
-
-exports = module.exports = {
-    start: start
-};
 
 function start(callback) {
     assert(typeof callback === 'function');

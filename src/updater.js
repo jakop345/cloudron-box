@@ -2,16 +2,15 @@
 
 'use strict';
 
-// intentionally placed here because of circular dep with cloudron.js
-module.exports = exports = {
-    initialize: initialize,
-    uninitialize: uninitialize,
 
-    checkUpdates: checkUpdates,
-    getUpdateInfo: getUpdateInfo,
-    update: update,
-    hasBoxUpdate: hasBoxUpdate
-};
+exports.initialize = initialize;
+exports.uninitialize = uninitialize;
+
+exports.checkUpdates = checkUpdates;
+exports.getUpdateInfo = getUpdateInfo;
+exports.update = update;
+exports.hasBoxUpdate = hasBoxUpdate;
+
 
 var appdb = require('./appdb.js'),
     apps = require('./apps.js'),

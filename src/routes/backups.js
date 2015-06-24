@@ -2,15 +2,14 @@
 
 'use strict';
 
-var assert = require('assert'),
-    backups = require('../backups.js'),
+
+exports.get = get;
+exports.create = create;
+
+
+var backups = require('../backups.js'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess;
-
-exports = module.exports = {
-    get: get,
-    create: create
-};
 
 function get(req, res, next) {
     backups.getAll(function (error, result) {

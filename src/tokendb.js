@@ -2,32 +2,33 @@
 
 'use strict';
 
+
+exports.generateToken = generateToken;
+exports.get = get;
+exports.add = add;
+exports.del = del;
+exports.getByIdentifier = getByIdentifier;
+exports.delByIdentifier = delByIdentifier;
+exports.getByIdentifierAndClientId = getByIdentifierAndClientId;
+exports.delByIdentifierAndClientId = delByIdentifierAndClientId;
+exports.delExpired = delExpired;
+
+exports.TYPE_USER = 'user';
+exports.TYPE_DEV = 'developer';
+exports.TYPE_APP = 'appliation';
+
+exports.PREFIX_USER = 'user-';
+exports.PREFIX_DEV = 'dev-';
+exports.PREFIX_APP = 'app-';
+
+exports._clear = clear;
+
+
 var assert = require('assert'),
     database = require('./database.js'),
     DatabaseError = require('./databaseerror'),
     hat = require('hat');
 
-exports = module.exports = {
-    generateToken: generateToken,
-    get: get,
-    add: add,
-    del: del,
-    getByIdentifier: getByIdentifier,
-    delByIdentifier: delByIdentifier,
-    getByIdentifierAndClientId: getByIdentifierAndClientId,
-    delByIdentifierAndClientId: delByIdentifierAndClientId,
-    delExpired: delExpired,
-
-    TYPE_USER: 'user',
-    TYPE_DEV: 'developer',
-    TYPE_APP: 'appliation',
-
-    PREFIX_USER: 'user-',
-    PREFIX_DEV: 'dev-',
-    PREFIX_APP: 'app-',
-
-    _clear: clear
-};
 
 var TOKENS_FIELDS = [ 'accessToken', 'identifier', 'clientId', 'scope', 'expires' ].join(',');
 

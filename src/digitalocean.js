@@ -2,14 +2,13 @@
 
 'use strict';
 
+
+exports.checkPtrRecord = checkPtrRecord;
+
+
 var assert = require('assert'),
     debug = require('debug')('box:digitalocean'),
-    config = require('../config.js'),
     dns = require('native-dns');
-
-exports = module.exports = {
-    checkPtrRecord: checkPtrRecord
-};
 
 function checkPtrRecord(ip, fqdn, callback) {
     assert(ip === null || typeof ip === 'string');

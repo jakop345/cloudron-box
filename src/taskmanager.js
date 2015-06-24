@@ -1,20 +1,20 @@
 'use strict';
 
+
+exports.initialize = initialize;
+exports.uninitialize = uninitialize;
+
+exports.restartAppTask = restartAppTask;
+
+
 var appdb = require('./appdb.js'),
     assert = require('assert'),
     child_process = require('child_process'),
     debug = require('debug')('box:taskmanager'),
-    _ = require('underscore'),
+    _ = require('underscore');
 
-exports = module.exports = {
-    initialize: initialize,
-    uninitialize: uninitialize,
-
-    restartAppTask: restartAppTask
-};
-
-var gActiveTasks = { },
-    gPendingTasks = [ ];
+var gActiveTasks = { };
+var gPendingTasks = [ ];
 
 // Task concurrency is 1 for two reasons:
 // 1. The backup scripts (app and box) turn off swap after finish disregarding other backup processes

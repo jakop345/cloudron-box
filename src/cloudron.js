@@ -2,30 +2,28 @@
 
 'use strict';
 
-// intentionally placed here because of circular dep with updater
-exports = module.exports = {
-    CloudronError: CloudronError,
 
-    initialize: initialize,
-    uninitialize: uninitialize,
-    activate: activate,
-    getConfig: getConfig,
-    getStatus: getStatus,
+exports.CloudronError = CloudronError;
 
-    setCertificate: setCertificate,
+exports.initialize = initialize;
+exports.uninitialize = uninitialize;
+exports.activate = activate;
+exports.getConfig = getConfig;
+exports.getStatus = getStatus;
 
-    sendHeartbeat: sendHeartbeat,
+exports.setCertificate = setCertificate;
 
-    reboot: reboot,
-    migrate: migrate
-};
+exports.sendHeartbeat = sendHeartbeat;
+
+exports.reboot = reboot;
+exports.migrate = migrate;
+
 
 var assert = require('assert'),
     backups = require('./backups.js'),
     clientdb = require('./clientdb.js'),
     config = require('../config.js'),
     debug = require('debug')('box:cloudron'),
-    os = require('os'),
     path = require('path'),
     paths = require('./paths.js'),
     progress = require('./progress.js'),

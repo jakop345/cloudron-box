@@ -6,15 +6,16 @@
 // https://github.com/boot2docker/boot2docker/pull/93
 // https://github.com/docker/docker/issues/4007
 
+
+exports.forwardFromHostToVirtualBox = forwardFromHostToVirtualBox;
+exports.unforwardFromHostToVirtualBox = unforwardFromHostToVirtualBox;
+
+
 var assert = require('assert'),
     child_process = require('child_process'),
     debug = require('debug')('box:vbox'),
     os = require('os');
 
-exports = module.exports = {
-    forwardFromHostToVirtualBox: forwardFromHostToVirtualBox,
-    unforwardFromHostToVirtualBox: unforwardFromHostToVirtualBox
-};
 
 function forwardFromHostToVirtualBox(rulename, port) {
     assert.strictEqual(typeof rulename, 'string');

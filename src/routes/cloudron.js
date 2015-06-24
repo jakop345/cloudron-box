@@ -2,6 +2,19 @@
 
 'use strict';
 
+
+exports.activate = activate;
+exports.setupTokenAuth = setupTokenAuth;
+exports.getStatus = getStatus;
+exports.getStats = getStats;
+exports.reboot = reboot;
+exports.getProgress = getProgress;
+exports.getConfig = getConfig;
+exports.update = update;
+exports.migrate = migrate;
+exports.setCertificate = setCertificate;
+
+
 var assert = require('assert'),
     cloudron = require('../cloudron.js'),
     config = require('../../config.js'),
@@ -14,19 +27,6 @@ var assert = require('assert'),
     superagent = require('superagent'),
     safe = require('safetydance'),
     updater = require('../updater.js');
-
-exports = module.exports = {
-    activate: activate,
-    setupTokenAuth: setupTokenAuth,
-    getStatus: getStatus,
-    getStats: getStats,
-    reboot: reboot,
-    getProgress: getProgress,
-    getConfig: getConfig,
-    update: update,
-    migrate: migrate,
-    setCertificate: setCertificate
-};
 
 /**
  * Creating an admin user and activate the cloudron.

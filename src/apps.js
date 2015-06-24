@@ -2,36 +2,35 @@
 
 'use strict';
 
-// intentionally here because of circular dep between apps.js, updater.js and cloudron.js
-exports = module.exports = {
-    AppsError: AppsError,
 
-    get: get,
-    getBySubdomain: getBySubdomain,
-    getAll: getAll,
-    purchase: purchase,
-    install: install,
-    configure: configure,
-    uninstall: uninstall,
-    restore: restore,
-    update: update,
+exports.AppsError = AppsError;
 
-    getLogStream: getLogStream,
-    getLogs: getLogs,
+exports.get = get;
+exports.getBySubdomain = getBySubdomain;
+exports.getAll = getAll;
+exports.purchase = purchase;
+exports.install = install;
+exports.configure = configure;
+exports.uninstall = uninstall;
+exports.restore = restore;
+exports.update = update;
 
-    start: start,
-    stop: stop,
+exports.getLogStream = getLogStream;
+exports.getLogs = getLogs;
 
-    exec: exec,
+exports.start = start;
+exports.stop = stop;
 
-    checkManifestConstraints: checkManifestConstraints,
+exports.exec = exec;
 
-    setRestorePoint: setRestorePoint,
+exports.checkManifestConstraints = checkManifestConstraints;
 
-    // exported for testing
-    _validateHostname: validateHostname,
-    _validatePortBindings: validatePortBindings
-};
+exports.setRestorePoint = setRestorePoint;
+
+// exported for testing
+exports._validateHostname = validateHostname;
+exports._validatePortBindings = validatePortBindings;
+
 
 var appdb = require('./appdb.js'),
     assert = require('assert'),

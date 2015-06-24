@@ -2,17 +2,17 @@
 
 'use strict';
 
+
+exports.enabled = enabled;
+exports.setEnabled = setEnabled;
+exports.status = status;
+exports.login = login;
+
+
 var developer = require('../developer.js'),
     passport = require('passport'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess;
-
-exports = module.exports = {
-    enabled: enabled,
-    setEnabled: setEnabled,
-    status: status,
-    login: login
-};
 
 function enabled(req, res, next) {
     developer.enabled(function (error, enabled) {

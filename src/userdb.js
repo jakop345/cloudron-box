@@ -1,26 +1,26 @@
 'use strict';
 
+
+exports.get = get;
+exports.getByUsername = getByUsername;
+exports.getByEmail = getByEmail;
+exports.getByAccessToken = getByAccessToken;
+exports.getByResetToken = getByResetToken;
+exports.getAll = getAll;
+exports.getAllAdmins = getAllAdmins;
+exports.add = add;
+exports.del = del;
+exports.update = update;
+exports.count = count;
+exports.adminCount = adminCount;
+
+exports._clear = clear;
+
+
 var assert = require('assert'),
     database = require('./database.js'),
     debug = require('debug')('box:userdb'),
     DatabaseError = require('./databaseerror');
-
-exports = module.exports = {
-    get: get,
-    getByUsername: getByUsername,
-    getByEmail: getByEmail,
-    getByAccessToken: getByAccessToken,
-    getByResetToken: getByResetToken,
-    getAll: getAll,
-    getAllAdmins: getAllAdmins,
-    add: add,
-    del: del,
-    update: update,
-    count: count,
-    adminCount: adminCount,
-
-    _clear: clear
-};
 
 var USERS_FIELDS = [ 'id', 'username', 'email', 'password', 'salt', 'createdAt', 'modifiedAt', 'admin', 'resetToken' ].join(',');
 

@@ -2,22 +2,21 @@
 
 'use strict';
 
-// intentionally placed here
-exports = module.exports = {
-    initialize: initialize,
-    uninitialize: uninitialize,
 
-    userAdded: userAdded,
-    userRemoved: userRemoved,
-    adminChanged: adminChanged,
-    passwordReset: passwordReset,
-    boxUpdateAvailable: boxUpdateAvailable,
-    appUpdateAvailable: appUpdateAvailable,
+exports.initialize = initialize;
+exports.uninitialize = uninitialize;
 
-    sendCrashNotification: sendCrashNotification,
+exports.userAdded = userAdded;
+exports.userRemoved = userRemoved;
+exports.adminChanged = adminChanged;
+exports.passwordReset = passwordReset;
+exports.boxUpdateAvailable = boxUpdateAvailable;
+exports.appUpdateAvailable = appUpdateAvailable;
 
-    appDied: appDied
-};
+exports.sendCrashNotification = sendCrashNotification;
+
+exports.appDied = appDied;
+
 
 var assert = require('assert'),
     async = require('async'),

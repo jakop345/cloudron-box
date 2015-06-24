@@ -2,16 +2,17 @@
 
 'use strict';
 
+
+exports.set = set;
+exports.clear = clear;
+exports.get = get;
+
+exports.UPDATE = 'update';
+exports.BACKUP = 'backup';
+
+
 var assert = require('assert');
 
-exports = module.exports = {
-    set: set,
-    clear: clear,
-    get: get,
-
-    UPDATE: 'update',
-    BACKUP: 'backup'
-};
 
 // if progress.update or progress.backup are object, they will contain 'percent' and 'message' properties
 // otherwise no such operation is currently ongoing

@@ -2,10 +2,12 @@
 
 'use strict';
 
-var assert = require('assert'),
-    util = require('util');
 
 module.exports = exports = DatabaseError;
+
+
+var assert = require('assert'),
+    util = require('util');
 
 function DatabaseError(reason, errorOrMessage) {
     assert.strictEqual(typeof reason, 'string');

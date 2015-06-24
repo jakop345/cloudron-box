@@ -2,25 +2,25 @@
 
 'use strict';
 
+
+exports.profile = profile;
+exports.info = info;
+exports.update = update;
+exports.list = listUser;
+exports.create = createUser;
+exports.changePassword = changePassword;
+exports.changeAdmin = changeAdmin;
+exports.remove = removeUser;
+exports.verifyPassword = verifyPassword;
+exports.requireAdmin = requireAdmin;
+
+
 var assert = require('assert'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
     user = require('../user.js'),
     tokendb = require('../tokendb.js'),
     UserError = user.UserError;
-
-exports = module.exports = {
-    profile: profile,
-    info: info,
-    update: update,
-    list: listUser,
-    create: createUser,
-    changePassword: changePassword,
-    changeAdmin: changeAdmin,
-    remove: removeUser,
-    verifyPassword: verifyPassword,
-    requireAdmin: requireAdmin
-};
 
 // http://stackoverflow.com/questions/1497481/javascript-password-generator#1497512
 function generatePassword() {

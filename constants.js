@@ -1,16 +1,14 @@
 'use strict';
 
-exports = module.exports = {
-    // default admin installation location. keep in sync with ADMIN_LOCATION in setup/start.sh and BOX_ADMIN_LOCATION in appstore constants.js
-    ADMIN_LOCATION: 'my',
-    API_LOCATION: 'api', // this is unused but reserved for future use (#403)
-    ADMIN_NAME: 'Settings',
+ // default admin installation location. keep in sync with ADMIN_LOCATION in setup/start.sh and BOX_ADMIN_LOCATION in appstore constants.js
+exports.ADMIN_LOCATION = 'my';
+exports.API_LOCATION = 'api'; // this is unused but reserved for future use (#403)
+exports.ADMIN_NAME = 'Settings';
 
-    ADMIN_CLIENT_ID: 'webadmin', // oauth client id
-    ADMIN_APPID: 'admin', // admin appid (settingsdb)
+exports.ADMIN_CLIENT_ID = 'webadmin'; // oauth client id
+exports.ADMIN_APPID = 'admin'; // admin appid (settingsdb)
 
-    TEST_NAME: 'Test',
-    TEST_LOCATION: '',
-    TEST_CLIENT_ID: 'test',
-};
+exports.TEST_NAME = 'Test';
+exports.TEST_LOCATION = '';
+exports.TEST_CLIENT_ID = 'test';
 

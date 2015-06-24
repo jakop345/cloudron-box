@@ -2,13 +2,14 @@
 
 'use strict';
 
+
+exports.backup = backup;
+
+
 var debug = require('debug')('box:routes/internal'),
     backups = require('../backups.js'),
+    HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess;
-
-exports = module.exports = {
-    backup: backup
-};
 
 function backup(req, res, next) {
     debug('trigger backup');

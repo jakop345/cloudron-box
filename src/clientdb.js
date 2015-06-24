@@ -2,22 +2,22 @@
 
 'use strict';
 
+
+exports.get = get;
+exports.getAll = getAll;
+exports.getAllWithTokenCountByIdentifier = getAllWithTokenCountByIdentifier;
+exports.add = add;
+exports.del = del;
+exports.update = update;
+exports.getByAppId = getByAppId;
+exports.delByAppId = delByAppId;
+
+exports._clear = clear;
+
+
 var assert = require('assert'),
     database = require('./database.js'),
     DatabaseError = require('./databaseerror.js');
-
-exports = module.exports = {
-    get: get,
-    getAll: getAll,
-    getAllWithTokenCountByIdentifier: getAllWithTokenCountByIdentifier,
-    add: add,
-    del: del,
-    update: update,
-    getByAppId: getByAppId,
-    delByAppId: delByAppId,
-
-    _clear: clear
-};
 
 var CLIENTS_FIELDS = [ 'id', 'appId', 'clientSecret', 'redirectURI', 'scope' ].join(',');
 var CLIENTS_FIELDS_PREFIXED = [ 'clients.id', 'clients.appId', 'clients.clientSecret', 'clients.redirectURI', 'clients.scope' ].join(',');

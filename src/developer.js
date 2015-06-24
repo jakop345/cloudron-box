@@ -2,14 +2,13 @@
 
 'use strict';
 
-// intentionally placed here because of circular dep with updater
-exports = module.exports = {
-    DeveloperError: DeveloperError,
 
-    enabled: enabled,
-    setEnabled: setEnabled,
-    issueDeveloperToken: issueDeveloperToken
-};
+exports.DeveloperError = DeveloperError;
+
+exports.enabled = enabled;
+exports.setEnabled = setEnabled;
+exports.issueDeveloperToken = issueDeveloperToken;
+
 
 var assert = require('assert'),
     tokendb = require('./tokendb.js'),

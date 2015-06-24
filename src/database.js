@@ -2,25 +2,24 @@
 
 'use strict';
 
+
+exports.initialize = initialize;
+exports.uninitialize = uninitialize;
+exports.query = query;
+exports.transaction = transaction;
+
+exports.beginTransaction = beginTransaction;
+exports.rollback = rollback;
+exports.commit = commit;
+
+exports._clear = clear;
+
+
 var assert = require('assert'),
     async = require('async'),
     config = require('../config.js'),
     mysql = require('mysql'),
     util = require('util');
-
-exports = module.exports = {
-    initialize: initialize,
-    uninitialize: uninitialize,
-    query: query,
-    transaction: transaction,
-
-    beginTransaction: beginTransaction,
-    rollback: rollback,
-    commit: commit,
-
-    _clear: clear,
-};
-
 
 var gConnectionPool = null,
     gDefaultConnection = null;

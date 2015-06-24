@@ -2,18 +2,18 @@
 
 'use strict';
 
+
+exports.get = get;
+exports.add = add;
+exports.del = del;
+exports.delExpired = delExpired;
+
+exports._clear = clear;
+
+
 var assert = require('assert'),
     database = require('./database.js'),
     DatabaseError = require('./databaseerror');
-
-exports = module.exports = {
-    get: get,
-    add: add,
-    del: del,
-    delExpired: delExpired,
-
-    _clear: clear
-};
 
 var AUTHCODES_FIELDS = [ 'authCode', 'userId', 'clientId', 'expiresAt' ].join(',');
 

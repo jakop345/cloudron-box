@@ -1,10 +1,10 @@
 'use strict';
 
-var os = require('os');
 
-exports = module.exports = {
-    getIp: getIp
-};
+exports.getIp = getIp;
+
+
+var os = require('os');
 
 var gCachedIp = null;
 

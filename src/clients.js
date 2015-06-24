@@ -1,5 +1,17 @@
 'use strict';
 
+
+exports.ClientsError = ClientsError;
+
+exports.add = add;
+exports.get = get;
+exports.update = update;
+exports.del = del;
+exports.getAllWithDetailsByUserId = getAllWithDetailsByUserId;
+exports.getClientTokensByUserId = getClientTokensByUserId;
+exports.delClientTokensByUserId = delClientTokensByUserId;
+
+
 var assert = require('assert'),
     util = require('util'),
     hat = require('hat'),
@@ -10,18 +22,6 @@ var assert = require('assert'),
     clientdb = require('./clientdb.js'),
     DatabaseError = require('./databaseerror.js'),
     uuid = require('node-uuid');
-
-exports = module.exports = {
-    ClientsError: ClientsError,
-
-    add: add,
-    get: get,
-    update: update,
-    del: del,
-    getAllWithDetailsByUserId: getAllWithDetailsByUserId,
-    getClientTokensByUserId: getClientTokensByUserId,
-    delClientTokensByUserId: delClientTokensByUserId
-};
 
 function ClientsError(reason, errorOrMessage) {
     assert.strictEqual(typeof reason, 'string');

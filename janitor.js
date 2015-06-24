@@ -11,10 +11,6 @@ var assert = require('assert'),
     authcodedb = require('./src/authcodedb.js'),
     database = require('./src/database.js');
 
-exports = module.exports = {
-    run: run
-};
-
 var TOKEN_CLEANUP_INTERVAL = 30000;
 
 function initialize(callback) {

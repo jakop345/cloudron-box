@@ -1,15 +1,15 @@
 'use strict';
 
+
+exports.sudo = sudo;
+exports.exec = exec;
+
+
 var assert = require('assert'),
     child_process = require('child_process'),
     debug = require('debug')('box:shell.js'),
     once = require('once'),
     util = require('util');
-
-exports = module.exports = {
-    sudo: sudo,
-    exec: exec
-};
 
 var SUDO = '/usr/bin/sudo';
 

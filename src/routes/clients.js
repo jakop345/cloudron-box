@@ -2,6 +2,16 @@
 
 'use strict';
 
+
+exports.add = add;
+exports.get = get;
+exports.update = update;
+exports.del = del;
+exports.getAllByUserId = getAllByUserId;
+exports.getClientTokens = getClientTokens;
+exports.delClientTokens = delClientTokens;
+
+
 var assert = require('assert'),
     validUrl = require('valid-url'),
     clients = require('../clients.js'),
@@ -9,16 +19,6 @@ var assert = require('assert'),
     DatabaseError = require('../databaseerror.js'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess;
-
-exports = module.exports = {
-    add: add,
-    get: get,
-    update: update,
-    del: del,
-    getAllByUserId: getAllByUserId,
-    getClientTokens: getClientTokens,
-    delClientTokens: delClientTokens
-};
 
 function add(req, res, next) {
     var data = req.body;

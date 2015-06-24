@@ -2,43 +2,43 @@
 
 'use strict';
 
+
+exports.baseDir = baseDir;
+
+// values set here will be lost after a upgrade/update. use the sqlite database
+// for persistent values that need to be backed up
+exports.get = get;
+exports.set = set;
+
+// ifdefs to check environment
+exports.CLOUDRON = process.env.NODE_ENV === 'cloudron';
+exports.TEST = process.env.NODE_ENV === 'test';
+
+// convenience getters
+exports.apiServerOrigin = apiServerOrigin;
+exports.webServerOrigin = webServerOrigin;
+exports.fqdn = fqdn;
+exports.token = token;
+exports.version = version;
+exports.isCustomDomain = isCustomDomain;
+exports.database = database;
+exports.developerMode = developerMode;
+
+// these values are derived
+exports.adminOrigin = adminOrigin;
+exports.appFqdn = appFqdn;
+exports.zoneName = zoneName;
+
+// for testing resets to defaults
+exports._reset = initConfig;
+
+
 var assert = require('assert'),
     constants = require('./constants.js'),
     fs = require('fs'),
     path = require('path'),
     safe = require('safetydance'),
     _ = require('underscore');
-
-exports = module.exports = {
-    baseDir: baseDir,
-
-    // values set here will be lost after a upgrade/update. use the sqlite database
-    // for persistent values that need to be backed up
-    get: get,
-    set: set,
-
-    // ifdefs to check environment
-    CLOUDRON: process.env.NODE_ENV === 'cloudron',
-    TEST: process.env.NODE_ENV === 'test',
-
-    // convenience getters
-    apiServerOrigin: apiServerOrigin,
-    webServerOrigin: webServerOrigin,
-    fqdn: fqdn,
-    token: token,
-    version: version,
-    isCustomDomain: isCustomDomain,
-    database: database,
-    developerMode: developerMode,
-
-    // these values are derived
-    adminOrigin: adminOrigin,
-    appFqdn: appFqdn,
-    zoneName: zoneName,
-
-    // for testing resets to defaults
-    _reset: initConfig
-};
 
 var homeDir = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
 

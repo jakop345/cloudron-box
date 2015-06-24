@@ -2,16 +2,16 @@
 
 'use strict';
 
+
+exports.get = get;
+exports.getAll = getAll;
+exports.set = set;
+exports._clear = clear;
+
+
 var assert = require('assert'),
     database = require('./database.js'),
     DatabaseError = require('./databaseerror');
-
-exports = module.exports = {
-    get: get,
-    getAll: getAll,
-    set: set,
-    _clear: clear
-};
 
 function get(key, callback) {
     assert.strictEqual(typeof key, 'string');

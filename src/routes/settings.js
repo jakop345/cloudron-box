@@ -2,16 +2,16 @@
 
 'use strict';
 
+
+exports.getAutoupdatePattern = getAutoupdatePattern;
+exports.setAutoupdatePattern = setAutoupdatePattern;
+
+
 var assert = require('assert'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
     settings = require('../settings.js'),
     SettingsError = settings.SettingsError;
-
-exports = module.exports = {
-    getAutoupdatePattern: getAutoupdatePattern,
-    setAutoupdatePattern: setAutoupdatePattern
-};
 
 function getAutoupdatePattern(req, res, next) {
     settings.getAutoupdatePattern(function (error, pattern) {
