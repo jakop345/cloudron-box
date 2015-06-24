@@ -18,12 +18,8 @@ function start(callback) {
 
     gServer = ldap.createServer();
 
-    gServer.search('dc=cloudron', function(req, res, next) {
-
-        debug('--- Search ---');
-        debug('dn:     ', req.dn.toString());
-        debug('scope:  ', req.scope);
-        debug('filter: ', req.filter.toString());
+    gServer.search('dc=cloudron', function (req, res, next) {
+        debug('ldap search: dn %s, scope %s, filter %s', req.dn.toString(), req.scope, req.filter.toString());
 
         user.list(function (error, result){
             if (error) return next(new ldap.OperationsError(error.toString()));
@@ -41,8 +37,8 @@ function start(callback) {
                 };
 
                 if (req.filter.matches(tmp.attributes)) {
-                    debug('Send', tmp);
                     res.send(tmp);
+                    debug('ldap send:', tmp);
                 }
             });
 
@@ -52,8 +48,7 @@ function start(callback) {
     });
 
     gServer.bind('dc=cloudron', function(req, res, next) {
-        debug('bind DN: ' + req.dn.toString());
-        debug('bind PW: ' + req.credentials);
+        debug('ldap bind: %s', req.dn.toString());
 
         debug(req.dn, req.dn.rdns[0].dn);
 
@@ -61,8 +56,6 @@ function start(callback) {
             if (error && error.reason === UserError.NOT_FOUND) return next(new ldap.NoSuchObjectError(req.dn.toString()));
             if (error && error.reason === UserError.WRONG_PASSWORD) return next(new ldap.InvalidCredentialsError(req.dn.toString()));
             if (error) return next(new ldap.OperationsError(error));
-
-            debug('login ok', result);
 
             res.end();
         });
