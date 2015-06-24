@@ -46,7 +46,6 @@ function start(callback) {
                 }
             });
 
-            debug('');
             res.end();
         });
     });
@@ -74,7 +73,6 @@ function start(callback) {
                 debug('ldap group send:', tmp);
             }
 
-            debug('');
             res.end();
         });
     });
