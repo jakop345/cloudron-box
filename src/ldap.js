@@ -24,13 +24,15 @@ function start(callback) {
         user.list(function (error, result){
             if (error) return next(new ldap.OperationsError(error.toString()));
 
+            // send user objects
             result.forEach(function (entry) {
-                var dn = ldap.parseDN('dn=' + entry.id + ',dc=cloudron');
+                var dn = ldap.parseDN('cn=' + entry.id + ',ou=users,dc=cloudron');
 
                 var tmp = {
                     dn: dn.toString(),
                     attributes: {
                         objectclass: ['user'],
+                        cn: entry.id,
                         uid: entry.id,
                         mail: entry.email,
                         displayname: entry.username,
@@ -43,6 +45,23 @@ function start(callback) {
                     debug('ldap send:', tmp);
                 }
             });
+
+            // send admin group object
+            var dn = ldap.parseDN('cn=admin,ou=groups,dc=cloudron');
+
+            var tmp = {
+                dn: dn.toString(),
+                attributes: {
+                    objectclass: ['group'],
+                    cn: 'admin',
+                    memberuid: result.filter(function (entry) { return entry.isAdmin; })
+                }
+            };
+
+            if ((req.dn.equals(dn) || req.dn.parentOf(dn)) && req.filter.matches(tmp.attributes)) {
+                res.send(tmp);
+                debug('ldap send:', tmp);
+            }
 
             debug('');
             res.end();
