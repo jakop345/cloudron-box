@@ -25,8 +25,10 @@ function start(callback) {
             if (error) return next(new ldap.OperationsError(error.toString()));
 
             result.forEach(function (entry) {
+                var dn = ldap.parseDN('dn=' + entry.id + ',dc=cloudron');
+
                 var tmp = {
-                    dn: 'dn=' + entry.id + ',dc=cloudron',
+                    dn: dn.toString(),
                     attributes: {
                         objectclass: ['user'],
                         uid: entry.id,
@@ -36,7 +38,7 @@ function start(callback) {
                     }
                 };
 
-                if (req.filter.matches(tmp.attributes)) {
+                if ((req.dn.equals(dn) || req.dn.parentOf(dn)) && req.filter.matches(tmp.attributes)) {
                     res.send(tmp);
                     debug('ldap send:', tmp);
                 }
