@@ -18,7 +18,7 @@ function start(callback) {
 
     gServer = ldap.createServer();
 
-    gServer.search('dc=cloudron,ou=users', function (req, res, next) {
+    gServer.search('ou=users,dc=cloudron', function (req, res, next) {
         debug('ldap user search: dn %s, scope %s, filter %s', req.dn.toString(), req.scope, req.filter.toString());
 
         user.list(function (error, result){
@@ -32,6 +32,7 @@ function start(callback) {
                     dn: dn.toString(),
                     attributes: {
                         objectclass: ['user'],
+                        cn: entry.id,
                         uid: entry.id,
                         mail: entry.email,
                         displayname: entry.username,
@@ -50,7 +51,7 @@ function start(callback) {
         });
     });
 
-    gServer.search('dc=cloudron,ou=groups', function (req, res, next) {
+    gServer.search('ou=groups,dc=cloudron', function (req, res, next) {
         debug('ldap group search: dn %s, scope %s, filter %s', req.dn.toString(), req.scope, req.filter.toString());
 
         user.list(function (error, result){
@@ -63,7 +64,8 @@ function start(callback) {
                 dn: dn.toString(),
                 attributes: {
                     objectclass: ['group'],
-                    memberuid: result.filter(function (entry) { return entry.admin; })
+                    cn: 'admin',
+                    memberuid: result.filter(function (entry) { return entry.admin; }).map(function(entry) { return entry.id; })
                 }
             };
 
