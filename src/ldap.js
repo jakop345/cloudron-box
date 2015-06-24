@@ -82,9 +82,7 @@ function start(callback) {
     gServer.bind('dc=cloudron', function(req, res, next) {
         debug('ldap bind: %s', req.dn.toString());
 
-        debug(req.dn, req.dn.rdns[0].dn);
-
-        user.verify(req.dn.rdns[0].dn, req.credentials, function (error, result) {
+        user.verify(req.dn.rdns[0].cn, req.credentials, function (error, result) {
             if (error && error.reason === UserError.NOT_FOUND) return next(new ldap.NoSuchObjectError(req.dn.toString()));
             if (error && error.reason === UserError.WRONG_PASSWORD) return next(new ldap.InvalidCredentialsError(req.dn.toString()));
             if (error) return next(new ldap.OperationsError(error));
