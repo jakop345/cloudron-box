@@ -82,7 +82,7 @@ function start(callback) {
 
         if (!req.dn.rdns[0].cn) return next(new ldap.NoSuchObjectError(req.dn.toString()));
 
-        user.verify(req.dn.rdns[0].cn, req.credentials, function (error, result) {
+        user.verify(req.dn.rdns[0].cn, req.credentials || '', function (error, result) {
             if (error && error.reason === UserError.NOT_FOUND) return next(new ldap.NoSuchObjectError(req.dn.toString()));
             if (error && error.reason === UserError.WRONG_PASSWORD) return next(new ldap.InvalidCredentialsError(req.dn.toString()));
             if (error) return next(new ldap.OperationsError(error));
