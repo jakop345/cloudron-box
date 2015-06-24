@@ -297,7 +297,8 @@ function setupLdap(app, callback) {
         'LDAP_SERVER=172.17.42.1',
         'LDAP_PORT=3002',
         'LDAP_URL=ldap://172.17.42.1:3002',
-        'LDAP_USERS_BASE_DN=dc=cloudron'
+        'LDAP_USERS_BASE_DN=ou=users,dc=cloudron',
+        'LDAP_GROUPS_BASE_DN=ou=groups,dc=cloudron'
     ];
 
     debugApp(app, 'Setting up LDAP');
