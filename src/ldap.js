@@ -13,10 +13,21 @@ var assert = require('assert'),
 
 var gServer = null;
 
+var NOOP = function () {};
+
+var gLogger = {
+    trace: NOOP,
+    debug: NOOP,
+    info: debug,
+    warn: debug,
+    error: console.error,
+    fatal: console.error
+};
+
 function start(callback) {
     assert(typeof callback === 'function');
 
-    gServer = ldap.createServer();
+    gServer = ldap.createServer({ log: gLogger });
 
     gServer.search('ou=users,dc=cloudron', function (req, res, next) {
         debug('ldap user search: dn %s, scope %s, filter %s', req.dn.toString(), req.scope, req.filter.toString());
