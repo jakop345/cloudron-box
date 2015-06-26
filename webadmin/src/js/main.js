@@ -26,7 +26,12 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
     $scope.login = function () {
         var callbackURL = window.location.origin + '/login_callback.html';
         var scope = 'root,profile,apps,roleAdmin';
-        window.location.href = Client.apiOrigin + '/api/v1/oauth/dialog/authorize?response_type=token&client_id=' + Client._clientId + '&redirect_uri=' + callbackURL + '&scope=' + scope;
+
+        // generate a state id to protect agains csrf
+        var state = Math.floor((1 + Math.random()) * 0x1000000000000).toString(16).substring(1);
+        window.localStorage.oauth2State = state;
+
+        window.location.href = Client.apiOrigin + '/api/v1/oauth/dialog/authorize?response_type=token&client_id=' + Client._clientId + '&redirect_uri=' + callbackURL + '&scope=' + scope + '&state=' + state;
     };
 
     $scope.setup = function () {

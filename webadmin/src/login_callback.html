@@ -10,9 +10,14 @@
 
     if (!search.token) {
         console.error('No token found');
+    } else if (!search.state || !window.localStorage.oauth2State || search.state !== window.localStorage.oauth2State ) {
+        console.error('OAuth2 state error');
     } else {
         // the actual app picks up the access token from localStorage
         localStorage.token = search.token;
+
+        // clear oauth2 state
+        delete window.localStorage.oauth2State;
 
         window.location.href = '/';
     }
