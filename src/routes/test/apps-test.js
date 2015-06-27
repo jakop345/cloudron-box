@@ -44,6 +44,7 @@ var APP_LOCATION = 'appslocation';
 var APP_LOCATION_2 = 'appslocationtwo';
 var APP_LOCATION_NEW = 'appslocationnew';
 var APP_MANIFEST = JSON.parse(fs.readFileSync(__dirname + '/../../../../test-app/CloudronManifest.json', 'utf8'));
+APP_MANIFEST.dockerImage = 'girish/test:0.2.0';
 var USERNAME = 'admin', PASSWORD = 'password', EMAIL ='admin@me.com';
 var USERNAME_1 = 'user', PASSWORD_1 = 'password', EMAIL_1 ='user@me.com';
 var token = null; // authentication token
