@@ -31,7 +31,7 @@ docker run --restart=always -d --name="graphite" \
     -p 127.0.0.1:2003:2003 \
     -p 127.0.0.1:2004:2004 \
     -p 127.0.0.1:8000:8000 \
-    -v "${DATA_DIR}/box/graphite:/app/data" girish/graphite:0.1.0
+    -v "${DATA_DIR}/box/graphite:/app/data" cloudron/graphite:0.3.0
 
 # mail
 mail_container_id=$(docker run --restart=always -d --name="mail" \
@@ -39,7 +39,7 @@ mail_container_id=$(docker run --restart=always -d --name="mail" \
     -h "${arg_fqdn}" \
     -e "DOMAIN_NAME=${arg_fqdn}" \
     -v "${DATA_DIR}/box/mail:/app/data" \
-    girish/mail:0.1.0)
+    cloudron/mail:0.3.0)
 echo "Mail container id: ${mail_container_id}"
 
 # mysql
@@ -53,7 +53,7 @@ mysql_container_id=$(docker run --restart=always -d --name="mysql" \
     -h "${arg_fqdn}" \
     -v "${DATA_DIR}/mysql:/var/lib/mysql" \
     -v "${DATA_DIR}/addons/mysql_vars.sh:/etc/mysql/mysql_vars.sh:r" \
-    girish/mysql:0.2.0)
+    cloudron/mysql:0.3.0)
 echo "MySQL container id: ${mysql_container_id}"
 
 # postgresql
@@ -65,7 +65,7 @@ postgresql_container_id=$(docker run --restart=always -d --name="postgresql" \
     -h "${arg_fqdn}" \
     -v "${DATA_DIR}/postgresql:/var/lib/postgresql" \
     -v "${DATA_DIR}/addons/postgresql_vars.sh:/etc/postgresql/postgresql_vars.sh:r" \
-    girish/postgresql:0.2.0)
+    cloudron/postgresql:0.3.0)
 echo "PostgreSQL container id: ${postgresql_container_id}"
 
 # mongodb
@@ -77,7 +77,7 @@ mongodb_container_id=$(docker run --restart=always -d --name="mongodb" \
     -h "${arg_fqdn}" \
     -v "${DATA_DIR}/mongodb:/var/lib/mongodb" \
     -v "${DATA_DIR}/addons/mongodb_vars.sh:/etc/mongodb_vars.sh:r" \
-    girish/mongodb:0.3.0)
+    cloudron/mongodb:0.3.0)
 echo "Mongodb container id: ${mongodb_container_id}"
 
 if [[ "${infra_version}" == "none" ]]; then
