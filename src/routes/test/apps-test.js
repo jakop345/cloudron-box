@@ -133,7 +133,7 @@ function cleanup(done) {
 
         server.stop,
 
-        child_process.exec.bind(null, 'docker rm -f mysql; docker rm -f postgresql')
+        child_process.exec.bind(null, 'docker rm -f mysql; docker rm -f postgresql; docker rm -f mongodb')
     ], done);
 }
 
