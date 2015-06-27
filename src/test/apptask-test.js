@@ -30,7 +30,7 @@ var MANIFEST = {
   "contactEmail": "support@cloudron.io",
   "version": "0.1.0",
   "manifestVersion": 1,
-  "dockerImage": "girish/test:0.1.0",
+  "dockerImage": "girish/test:0.2.0",
   "healthCheckPath": "/",
   "httpPort": 7777,
   "tcpPorts": {

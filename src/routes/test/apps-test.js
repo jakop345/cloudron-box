@@ -478,12 +478,12 @@ describe('App installation', function () {
         async.series([
             function (callback) {
                 dockerProxy = startDockerProxy(function interceptor(req, res) {
-                    if (req.method === 'POST' && req.url === '/images/create?fromImage=girish%2Ftest&tag=0.1.0') {
+                    if (req.method === 'POST' && req.url === '/images/create?fromImage=girish%2Ftest&tag=0.2.0') {
                         imageCreated = true;
                         res.writeHead(200);
                         res.end();
                         return true;
-                    } else if (req.method === 'DELETE' && req.url === '/images/girish/test:0.1.0?force=true&noprune=false') {
+                    } else if (req.method === 'DELETE' && req.url === '/images/girish/test:0.2.0?force=true&noprune=false') {
                         imageDeleted = true;
                         res.writeHead(200);
                         res.end();
@@ -897,12 +897,12 @@ describe('App installation - port bindings', function () {
         async.series([
             function (callback) {
                 dockerProxy = startDockerProxy(function interceptor(req, res) {
-                    if (req.method === 'POST' && req.url === '/images/create?fromImage=girish%2Ftest&tag=0.1.0') {
+                    if (req.method === 'POST' && req.url === '/images/create?fromImage=girish%2Ftest&tag=0.2.0') {
                         imageCreated = true;
                         res.writeHead(200);
                         res.end();
                         return true;
-                    } else if (req.method === 'DELETE' && req.url === '/images/girish/test:0.1.0?force=true&noprune=false') {
+                    } else if (req.method === 'DELETE' && req.url === '/images/girish/test:0.2.0?force=true&noprune=false') {
                         imageDeleted = true;
                         res.writeHead(200);
                         res.end();
