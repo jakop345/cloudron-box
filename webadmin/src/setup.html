@@ -73,9 +73,11 @@
     <div class="main-container">
         <div class="row" ng-show="initialized && !busy && setupToken">
             <div class="col-md-8 col-md-offset-2">
-                <form role="form" name="setup_form" novalidate>
-                    <div ng-view id="ng-view"></div>
-                </form>
+                <div class="card" style="max-width: none; padding: 20px;">
+                    <form role="form" name="setup_form" novalidate>
+                        <div ng-view id="ng-view"></div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

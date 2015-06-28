@@ -1,5 +1,5 @@
 
-$brand-primary:                             darken(#428bca, 6.5%) !default; // #62bdfc
+$brand-primary:                             #2196F3 !default; // #62bdfc
 $brand-success:                             #27CE65 !default;
 $brand-info:                                #5bc0de !default;
 $brand-warning:                             #f0ad4e !default;
@@ -17,8 +17,8 @@ $btn-default-bg:                            transparent !default;
 $btn-default-color:                         #aaa !default;
 $btn-default-border:                        #aaa !default;
 
-$btn-primary-bg:                            $btn-default-bg;
-$btn-primary-color:                         $brand-primary !default;
+//$btn-primary-bg:                            $btn-default-bg;
+//$btn-primary-color:                         $brand-primary !default;
 $btn-primary-border:                        $brand-primary !default;
 
 //$btn-success-bg:                            $btn-default-bg;
@@ -39,7 +39,8 @@ $btn-danger-border:                         $brand-danger !default;
 
 $modal-content-border-color:                transparent !default;
 $modal-header-border-color:                 white !default;
-$border-radius-large:                       0 !default;
+$border-radius-large:                       2px !default;
+$border-radius-base:                        2px !default;
 
 $table-border-color:                        transparent !default;
 
@@ -570,6 +571,7 @@ footer a {
     height: 100%;
     width: 100%;
     padding: 0;
+    background: #F7F7F7;
 }
 
 .setup .main-container {
