@@ -265,7 +265,8 @@ function allocateOAuthCredentials(app, callback) {
 
             var env = [
                 'OAUTH_CLIENT_ID=' + id,
-                'OAUTH_CLIENT_SECRET=' + clientSecret
+                'OAUTH_CLIENT_SECRET=' + clientSecret,
+                'OAUTH_ORIGIN=' + config.adminOrigin()
             ];
 
             debugApp(app, 'Setting oauth addon config to %j', env);

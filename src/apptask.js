@@ -196,7 +196,6 @@ function createContainer(app, callback) {
         env.push('ADMIN_ORIGIN' + '=' + config.adminOrigin()); // ## remove
         env.push('WEBADMIN_ORIGIN' + '=' + config.adminOrigin());
         env.push('API_ORIGIN' + '=' + config.adminOrigin());
-        env.push('OAUTH_ORIGIN' + '=' + config.adminOrigin());
 
         tokendb.getByIdentifier(tokendb.PREFIX_APP + app.id, function (error, results) {
             if (error || results.length === 0) return callback(new Error('No access token found: ' + error));
