@@ -54,37 +54,31 @@
 
 </head>
 
-<body ng-app="Application" ng-controller="SetupController">
+<body class="setup" ng-app="Application" ng-controller="SetupController">
 
-    <center ng-hide="setupToken">
+    <center ng-show="!setupToken">
         <h1> <i class="fa fa-frown-o fa-fw text-danger"></i> No setup token provided. </h1>
         Please use the setup link for this cloudron.
     </center>
 
-    </br>
-    </br>
-    </br>
-    </br>
+    <div class="domain-hint animation-plop" ng-show="initialized && !busy && setupToken">
+        <center>
+            <i class="fa fa-arrow-up fa-2x text-success"></i>
+            <p class="text-muted">
+                 This is your Cloudron's domain
+            </p>
+        </center>
+    </div>
 
-    <form role="form" name="setup_form" novalidate>
-        <div class="page-wrapper ng-hide" ng-show="initialized && !busy && setupToken">
-
-            <div class="domain-hint animation-plop">
-                <center>
-                    <i class="fa fa-arrow-up fa-2x text-success"></i>
-                    <p class="text-muted">
-                         This is your Cloudron's domain
-                    </p>
-                </center>
-            </div>
-
-            <div class="row">
-                <div class="col-md-8 col-md-offset-2">
+    <div class="main-container">
+        <div class="row" ng-show="initialized && !busy && setupToken">
+            <div class="col-md-8 col-md-offset-2">
+                <form role="form" name="setup_form" novalidate>
                     <div ng-view id="ng-view"></div>
-                </div>
+                </form>
             </div>
         </div>
-    </form>
+    </div>
 
 </body>
 </html>
