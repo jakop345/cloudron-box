@@ -64,7 +64,7 @@ function recreateJobs(unusedTimeZone, callback) {
 
         if (gUpdateCheckerJob) gUpdateCheckerJob.stop();
         gUpdateCheckerJob = new CronJob({
-            cronTime: '00 */1 * * * *', // every minute
+            cronTime: '00 */10 * * * *', // every 10 minutes
             onTick: updater.checkUpdates,
             start: true,
             timeZone: allSettings[settings.TIME_ZONE_KEY]
