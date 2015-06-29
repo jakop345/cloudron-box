@@ -16,7 +16,7 @@
                                 <small ng-show="useradd_form.username.$error.maxlength">The username is too long</small>
                                 <small ng-show="!useradd_form.username.$dirty && useradd.error.username">{{ useradd.error.username }}</small>
                             </div>
-                            <input type="text" class="form-control" ng-model="useradd.username" id="inputUserAddUsername" name="username" ng-maxlength="512" ng-minlength="5" required autofocus>
+                            <input type="text" class="form-control" ng-model="useradd.username" id="inputUserAddUsername" name="username" ng-maxlength="512" ng-minlength="3" required autofocus>
                         </div>
                         <div class="form-group" ng-class="{ 'has-error': (useradd_form.email.$dirty && useradd_form.email.$invalid) || (!useradd_form.email.$dirty && useradd.error.email) }">
                             <label class="control-label" for="inputUserAddEmail">Email</label>
