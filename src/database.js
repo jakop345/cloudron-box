@@ -17,6 +17,7 @@ exports._clear = clear;
 
 var assert = require('assert'),
     async = require('async'),
+    once = require('once'),
     config = require('../config.js'),
     mysql = require('mysql'),
     util = require('util');
@@ -79,7 +80,7 @@ function setupConnection(connection, callback) {
 }
 
 function reconnect(callback) {
-    callback = callback || function () { };
+    callback = callback ? once(callback) : function () {};
 
     gConnectionPool.getConnection(function (error, connection) {
         if (error) {
