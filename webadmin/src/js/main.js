@@ -24,7 +24,7 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
     };
 
     $scope.login = function () {
-        var callbackURL = window.location.origin + '/login_callback.html';
+        var callbackURL = window.location.protocol + '//' + window.location.host + '/login_callback.html';
         var scope = 'root,profile,apps,roleAdmin';
 
         // generate a state id to protect agains csrf

@@ -559,7 +559,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         var data = {
             grant_type: 'authorization_code',
             code: code,
-            redirect_uri: window.location.origin,
+            redirect_uri: window.location.protocol + '//' + window.location.host,
             client_id: this._clientId,
             client_secret: this._clientSecret
         };
