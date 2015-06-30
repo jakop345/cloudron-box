@@ -105,9 +105,8 @@
       }
     },
     "cloudron-manifestformat": {
-      "version": "1.3.0",
-      "from": "cloudron-manifestformat@*",
-      "resolved": "https://registry.npmjs.org/cloudron-manifestformat/-/cloudron-manifestformat-1.3.0.tgz",
+      "version": "1.4.0",
+      "from": "cloudron-manifestformat@1.4.0",
       "dependencies": {
         "java-packagename-regex": {
           "version": "1.0.0",
