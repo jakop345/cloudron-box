@@ -28,12 +28,6 @@ app.config(['$routeProvider', function ($routeProvider) {
     }).when('/step3', {
         controller: 'StepController',
         templateUrl: 'views/setup/step3.html'
-    }).when('/step4', {
-        controller: 'StepController',
-        templateUrl: 'views/setup/step4.html'
-    }).when('/step5', {
-        controller: 'FinishController',
-        templateUrl: 'views/setup/step5.html'
     }).otherwise({ redirectTo: '/'});
 }]);
 
@@ -91,6 +85,8 @@ app.controller('SetupController', ['$scope', '$location', 'Client', 'Wizard', fu
 
     if (!search.email) return window.location.href = '/error.html?errorCode=3';
     Wizard.email = search.email;
+
+    Wizard.fqdn = window.location.host;
 
     Client.isServerFirstTime(function (error, isFirstTime) {
         if (error) {

@@ -1,8 +1,7 @@
 <div class="row">
     <div class="col-md-12 text-center">
-        <h1>Choose a username</h1>
+        <h1>Create an Administrator for your Cloudron</h1>
         <h4 class="">
-            This user will be an <b>Administrator</b> for your Cloudron.
             You can create more users once we are done here.
         </h4>
     </div>
@@ -11,13 +10,17 @@
 <div class="row">
     <div class="col-md-4 col-md-offset-4 text-center">
         <div class="form-group" ng-class="{ 'has-error': setup_form.username.$dirty && setup_form.username.$invalid }">
-            <!-- <label class="control-label" for="inputUsername"></label> -->
-            <input type="text" class="form-control" ng-model="wizard.username" id="inputUsername" name="username" ng-enter="ok('/step3', setup_form.username.$invalid)" ng-maxlength="512" ng-minlength="5" autofocus required>
+            <!-- <label class="control-label" for="inputUsername">Username</label> -->
+            <input type="text" class="form-control" ng-model="wizard.username" id="inputUsername" name="username" placeholder="Username" ng-maxlength="512" ng-minlength="3" autofocus required autocomplete="off">
+        </div>
+        <div class="form-group" ng-class="{ 'has-error': setup_form.password.$dirty && setup_form.password.$invalid }">
+            <!-- <label class="control-label" for="inputPassword">Password</label> -->
+            <input type="password" class="form-control" ng-model="wizard.password" id="inputPassword" name="password" placeholder="Password" ng-enter="ok('/step3', setup_form.password.$invalid)" ng-maxlength="512" ng-minlength="5" required autocomplete="off">
         </div>
     </div>
 </div>
 <div class="row">
     <div class="col-md-12 text-center">
-        <a class="btn btn-primary" href="#/step3" ng-disabled="setup_form.username.$invalid">Forward</a>
+        <a class="btn btn-primary" href="#/step3" ng-disabled="setup_form.username.$invalid">Done</a>
     </div>
 </div>
