@@ -107,7 +107,7 @@ var RMAPPDIR_CMD = path.join(__dirname, 'scripts/rmappdir.sh');
 function debugApp(app, args) {
     assert(!app || typeof app === 'object');
 
-    var prefix = app ? app.location : '(no app)';
+    var prefix = app ? (app.location || 'naked_domain') : '(no app)';
     debug(prefix + ' ' + util.format.apply(util, Array.prototype.slice.call(arguments, 1)));
 }
 
@@ -323,7 +323,7 @@ function setupSendMail(app, callback) {
     var env = [
         'MAIL_SMTP_SERVER=mail',
         'MAIL_SMTP_PORT=25',
-        'MAIL_SMTP_USERNAME=' + app.location,
+        'MAIL_SMTP_USERNAME=' + (app.location || 'nodomain'),
         'MAIL_DOMAIN=' + config.fqdn()
     ];
 
