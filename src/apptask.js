@@ -823,9 +823,10 @@ function uninstall(app, callback) {
         updateApp.bind(null, app, { installationProgress: '85, Remove OAuth credentials' }),
         removeOAuthProxyCredentials.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '90, Cleanup manifest' }),
+        updateApp.bind(null, app, { installationProgress: '90, Cleanup icon' }),
         removeIcon.bind(null, app),
 
+        updateApp.bind(null, app, { installationProgress: '95, Remove app from database' }),
         appdb.del.bind(null, app.id)
     ], callback);
 }
