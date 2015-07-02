@@ -86,7 +86,7 @@ app.controller('SetupController', ['$scope', '$location', 'Client', 'Wizard', fu
     if (!search.email) return window.location.href = '/error.html?errorCode=3';
     Wizard.email = search.email;
 
-    Wizard.fqdn = window.location.host;
+    Wizard.hostname = window.location.host.slice(3); // remove 'my-'
 
     Client.isServerFirstTime(function (error, isFirstTime) {
         if (error) {
