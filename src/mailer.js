@@ -139,7 +139,7 @@ function mailUserEventToAdmins(user, event) {
         adminEmails = _.difference(adminEmails, [ user.email ]);
 
         var mailOptions = {
-            from: config.get('mailUsername'),
+            from: config.get('adminEmail'),
             to: adminEmails.join(', '),
             subject: util.format('%s %s in Cloudron %s', user.username, event, config.fqdn()),
             text: render('user_event.ejs', { fqdn: config.fqdn(), username: user.username, email: user.email, event: event, format: 'text' }),
@@ -163,7 +163,7 @@ function userAdded(user) {
     };
 
     var mailOptions = {
-        from: config.get('mailUsername'),
+        from: config.get('adminEmail'),
         to: user.email,
         subject: util.format('Welcome to Cloudron %s', config.fqdn()),
         text: render('welcome_user.ejs', templateData)
@@ -198,7 +198,7 @@ function passwordReset(user) {
     var resetLink = config.adminOrigin() + '/api/v1/session/password/reset.html?reset_token=' + user.resetToken;
 
     var mailOptions = {
-        from: config.get('mailUsername'),
+        from: config.get('adminEmail'),
         to: user.email,
         subject: 'Password Reset Request',
         text: render('password_reset.ejs', { fqdn: config.fqdn(), username: user.username, resetLink: resetLink, format: 'text' })
@@ -216,7 +216,7 @@ function appDied(app) {
         if (error) return console.log('Error getting admins', error);
 
         var mailOptions = {
-            from: config.get('mailUsername'),
+            from: config.get('adminEmail'),
             to: adminEmails.join(', '),
             subject: util.format('App %s is down', app.location),
             text: render('app_down.ejs', { fqdn: config.fqdn(), title: app.manifest.title, appFqdn: config.appFqdn(app.location), format: 'text' })
@@ -234,7 +234,7 @@ function boxUpdateAvailable(newBoxVersion, changelog) {
         if (error) return console.log('Error getting admins', error);
 
          var mailOptions = {
-            from: config.get('mailUsername'),
+            from: config.get('adminEmail'),
             to: adminEmails.join(', '),
             subject: util.format('%s has a new update available', config.fqdn()),
             text: render('box_update_available.ejs', { fqdn: config.fqdn(), webadminUrl: config.adminOrigin(), newBoxVersion: newBoxVersion, changelog: changelog, format: 'text' })
@@ -252,7 +252,7 @@ function appUpdateAvailable(app, updateInfo) {
         if (error) return console.log('Error getting admins', error);
 
          var mailOptions = {
-            from: config.get('mailUsername'),
+            from: config.get('adminEmail'),
             to: adminEmails.join(', '),
             subject: util.format('%s has a new update available', app.fqdn),
             text: render('app_update_available.ejs', { fqdn: config.fqdn(), webadminUrl: config.adminOrigin(), app: app, format: 'text' })
@@ -267,7 +267,7 @@ function sendCrashNotification(program, context) {
     assert.strictEqual(typeof context, 'string');
 
     var mailOptions = {
-        from: config.get('mailUsername'),
+        from: config.get('adminEmail'),
         to: 'admin@cloudron.io',
         subject: util.format('[%s] %s exited unexpectedly', config.fqdn(), program),
         text: render('crash_notification.ejs', { fqdn: config.fqdn(), program: program, context: context, format: 'text' })

@@ -323,7 +323,7 @@ function setupSendMail(app, callback) {
     var env = [
         'MAIL_SMTP_SERVER=mail',
         'MAIL_SMTP_PORT=25',
-        'MAIL_SMTP_USERNAME=' + (app.location || config.get('mailUsername')),
+        'MAIL_SMTP_USERNAME=' + (app.location || app.id), // use app.id for bare domains
         'MAIL_DOMAIN=' + config.fqdn()
     ];
 
