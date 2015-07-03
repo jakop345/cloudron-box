@@ -165,6 +165,14 @@ app.filter('prettyDate', function () {
     };
 });
 
+app.filter('markdown2html', function () {
+    var converter = new showdown.Converter();
+
+    return function (text) {
+        return converter.makeHtml(text);
+    };
+});
+
 // custom directive for dynamic names in forms
 // See http://stackoverflow.com/questions/23616578/issue-registering-form-control-with-interpolated-name#answer-23617401
 app.directive('laterName', function () {                   // (2)

@@ -22,7 +22,7 @@
                         <span class="text-muted">Website:</span> <a ng-href="{{ appInstall.app.manifest.website }}" target="_blank">{{ appInstall.app.manifest.website | prettyHref }}</a><br/>
                         <span class="text-muted">Contact:</span> <a ng-href="mailto: {{ appInstall.app.manifest.contactEmail }}" target="_blank">{{ appInstall.app.manifest.contactEmail }}</a><br/>
                     </p>
-                    <p>{{appInstall.app.manifest.description}}</p>
+                    <p ng-bind-html="appInstall.app.manifest.description | markdown2html"></p>
                 </div>
                 <div class="collapse" id="collapseInstallForm" data-toggle="false">
                     <h3>Installation</h3>
