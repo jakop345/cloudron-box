@@ -17,7 +17,8 @@
                             <div ng-repeat="mediaLink in appInstall.mediaLinks" class="slick-item" style="background-image: url('{{mediaLink}}');"></div>
                         </slick>
                     </div>
-                    <p ng-bind-html="appInstall.app.manifest.description | markdown2html"></p>
+                    <p class="appstore-details-description" ng-class="{ 'expand': descriptionExpanded }" ng-bind-html="appInstall.app.manifest.description | markdown2html"></p>
+                    <a href="" ng-click="descriptionToggle()" ng-show="!descriptionExpanded">Read more...</a>
                 </div>
                 <div class="collapse" id="collapseInstallForm" data-toggle="false">
                     <h3>Installation</h3>
