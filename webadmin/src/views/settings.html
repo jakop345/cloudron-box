@@ -66,8 +66,8 @@
             <span ng-hide="lastBackup">No backups have been created yet</span>
         </div>
     </div>
-    <br/>
-    <div class="row">
+    <div class="row" ng-show="config.isDev">
+        <br/>
         <div class="col-xs-9">
             <div ng-show="createBackup.busy" class="progress progress-striped active animateMe">
                 <div class="progress-bar progress-bar-success" role="progressbar" style="width: {{ createBackup.percent }}%">Backup in progress</div>
