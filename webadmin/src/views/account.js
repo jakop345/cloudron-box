@@ -90,8 +90,8 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
             } else {
                 emailChangeReset(form);
 
-                // fetch new info in the background
-                Client.userInfo(function () {});
+                // update user info in the background
+                Client.refreshUserInfo();
 
                 $('#emailChangeModal').modal('hide');
             }

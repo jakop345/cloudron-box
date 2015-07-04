@@ -165,14 +165,8 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
     };
 
     Client.prototype.userInfo = function (callback) {
-        var that = this;
-
         $http.get(client.apiOrigin + '/api/v1/profile').success(function(data, status) {
             if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));
-
-            // cache user info
-            that.setUserInfo(data);
-
             callback(null, data);
         }).error(defaultErrorHandler(callback));
     };
@@ -482,6 +476,19 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             if (status !== 204) return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));
+    };
+
+    Client.prototype.refreshUserInfo = function (callback) {
+        var that = this;
+
+        callback = typeof callback === 'function' ? callback : function () {};
+
+        this.userInfo(function (error, result) {
+            if (error) return callback(error);
+
+            that.setUserInfo(result);
+            callback(null);
+        });
     };
 
     Client.prototype.refreshConfig = function (callback) {

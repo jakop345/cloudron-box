@@ -89,7 +89,7 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
                 // check if we are actually updateing
                 if (Client.getConfig().progress.update) window.location.href = '/update.html';
 
-                Client.userInfo(function (error, result) {
+                Client.refreshUserInfo(function (error, result) {
                     if (error) return $scope.error(error);
 
                     Client.refreshInstalledApps(function (error) {
@@ -98,10 +98,12 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
                         // kick off installed apps and config polling
                         var refreshAppsTimer = $interval(Client.refreshInstalledApps.bind(Client), 2000);
                         var refreshConfigTimer = $interval(Client.refreshConfig.bind(Client), 5000);
+                        var refreshUserInfoTimer = $interval(Client.refreshUserInfo.bind(Client), 5000);
 
                         $scope.$on('$destroy', function () {
                             $interval.cancel(refreshAppsTimer);
                             $interval.cancel(refreshConfigTimer);
+                            $interval.cancel(refreshUserInfoTimer);
                         });
 
                         // now mark the Client to be ready
