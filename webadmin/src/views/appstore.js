@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('Application').controller('AppStoreController', ['$scope', '$location', '$timeout', 'Client', 'AppStore', function ($scope, $location, $timeout, Client, AppStore) {
+angular.module('Application').controller('AppStoreController', ['$scope', '$location', '$timeout', '$routeParams', 'Client', 'AppStore', function ($scope, $location, $timeout, $routeParams, Client, AppStore) {
     $scope.ready = false;
     $scope.apps = [];
     $scope.config = Client.getConfig();
@@ -163,6 +163,13 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
             }
 
             $scope.apps = apps;
+
+            // show install app dialog immediately if an app id was passed in the query
+            if ($routeParams.appId) {
+                var found = apps.filter(function (app) { return (app.id === $routeParams.appId); });
+                if (found.length) $scope.showInstall(found[0]);
+            }
+
             $scope.ready = true;
         });
     }

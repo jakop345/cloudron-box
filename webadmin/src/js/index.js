@@ -19,6 +19,9 @@ app.config(['$routeProvider', function ($routeProvider) {
     }).when('/appstore', {
         controller: 'AppStoreController',
         templateUrl: 'views/appstore.html'
+    }).when('/appstore/:appId', {
+        controller: 'AppStoreController',
+        templateUrl: 'views/appstore.html'
     }).when('/apps', {
         controller: 'AppsController',
         templateUrl: 'views/apps.html'
