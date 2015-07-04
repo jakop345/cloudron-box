@@ -35,6 +35,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
                 if (app.manifest.id.toUpperCase().indexOf(token) !== -1) return true;
                 if (app.manifest.title.toUpperCase().indexOf(token) !== -1) return true;
                 if (app.manifest.tagline.toUpperCase().indexOf(token) !== -1) return true;
+                if (app.manifest.tags.join().toUpperCase().indexOf(token) !== -1) return true;
                 if (app.manifest.description.toUpperCase().indexOf(token) !== -1) return true;
                 return false;
             });
@@ -56,8 +57,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
                 $scope.apps = apps;
             } else {
                 $scope.apps = apps.filter(function (app) {
-                    if ($scope.category === 'other') return !app.manifest.category;
-                    return $scope.category === app.manifest.category;
+                    return app.manifest.tags.some(function (tag) { return $scope.category === tag; });
                 });
             }
 
