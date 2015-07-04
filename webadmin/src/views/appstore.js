@@ -73,6 +73,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         $scope.appInstall.accessRestriction = '';
         $scope.appInstall.installFormVisible = false;
         $scope.appInstall.mediaLinks = [];
+        $scope.descriptionExpanded = false;
         $('#collapseInstallForm').collapse('hide');
         $('#collapseMediaLinksCarousel').collapse('show');
 
