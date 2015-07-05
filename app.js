@@ -37,7 +37,7 @@ server.start(function (err) {
             process.exit(1);
         }
 
-        console.log('LDAP server listen on port %n.', config.get('ldapPort'));
+        console.log('LDAP server listen on port ' + config.get('ldapPort'));
     });
 });
 
