@@ -274,6 +274,8 @@ function backup(callback) {
         }, function appsBackedUp(error, backupIds) {
             if (error) return callback(error);
 
+            backupIds = backupIds.filter(function (id) { return id !== null; }); // remove apps that were never backed up
+
             backupBoxWithAppBackupIds(backupIds, function (error, restoreKey) {
                 progress.set(progress.BACKUP, 100, '');
                 callback(error, restoreKey);
