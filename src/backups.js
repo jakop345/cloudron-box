@@ -197,8 +197,8 @@ function backupApp(app, callback) {
 
         async.series([
             ignoreError(shell.sudo.bind(null, 'mountSwap', [ BACKUP_SWAP_CMD, '--on' ])),
-                        addons.backupAddons.bind(null, app),
-                        shell.sudo.bind(null, 'backupApp', [ BACKUP_APP_CMD,  app.id, result.url, result.backupKey ]),
+            addons.backupAddons.bind(null, app),
+            shell.sudo.bind(null, 'backupApp', [ BACKUP_APP_CMD,  app.id, result.url, result.backupKey ]),
             ignoreError(shell.sudo.bind(null, 'unmountSwap', [ BACKUP_SWAP_CMD, '--off' ])),
         ], function (error) {
             if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
