@@ -519,13 +519,17 @@ function waitForDnsPropagation(app, callback) {
 
 // updates the app object and the database
 function updateApp(app, values, callback) {
-    for (var value in values) {
-        app[value] = values[value];
-    }
-
     debugApp(app, 'installationState: %s progress: %s', app.installationState, app.installationProgress);
 
-    appdb.update(app.id, values, callback);
+    appdb.update(app.id, values, function (error) {
+        if (error) return callback(error);
+
+        for (var value in values) {
+            app[value] = values[value];
+        }
+
+        return callback(null);
+    });
 }
 
 function install(app, callback) {
