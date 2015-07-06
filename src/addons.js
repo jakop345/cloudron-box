@@ -283,8 +283,7 @@ function removeOAuthCredentials(app, callback) {
     debugApp(app, 'removeOAuthCredentials');
 
     clientdb.delByAppId('addon-' + app.id, function (error) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null);
-        if (error) console.error(error);
+        if (error && error.reason !== DatabaseError.NOT_FOUND) console.error(error);
 
         appdb.unsetAddonConfig(app.id, 'oauth', callback);
     });
