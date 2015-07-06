@@ -63,7 +63,7 @@ function checkAppUpdates(callback) {
             if (error) return callback(error);
 
             if (result.statusCode !== 200 || !result.body.appVersions) {
-                return callback(new Error(util.format('Error checking app update: %s %s', result.statusCode, result.body.message)));
+                return callback(new Error(util.format('Error checking app update: %s %s', result.statusCode, result.text)));
             }
 
             var latestAppVersions = result.body.appVersions;

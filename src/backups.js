@@ -145,7 +145,7 @@ function getBackupUrl(app, appBackupIds, callback) {
     superagent.put(url).query({ token: config.token() }).send(data).end(function (error, result) {
         if (error) return callback(new Error('Error getting presigned backup url: ' + error.message));
 
-        if (result.statusCode !== 201 || !result.body || !result.body.url) return callback(new Error('Error getting presigned backup url : ' + result.statusCode));
+        if (result.statusCode !== 201 || !result.body || !result.body.url) return callback(new Error('Error getting presigned backup url : ' + result.statusCode + ' ' + result.text));
 
         return callback(null, result.body);
     });
@@ -160,7 +160,7 @@ function getRestoreUrl(backupId, callback) {
     superagent.put(url).query({ token: config.token(), backupId: backupId }).end(function (error, result) {
         if (error) return callback(new Error('Error getting presigned download url: ' + error.message));
 
-        if (result.statusCode !== 201 || !result.body || !result.body.url) return callback(new Error('Error getting presigned download url : ' + result.statusCode));
+        if (result.statusCode !== 201 || !result.body || !result.body.url) return callback(new Error('Error getting presigned download url : ' + result.statusCode + ' ' + result.text));
 
         return callback(null, result.body);
     });

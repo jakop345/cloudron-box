@@ -219,7 +219,7 @@ function sendHeartbeat() {
     // TODO: this must be a POST
     superagent.get(url).query({ token: config.token(), version: config.version() }).timeout(10000).end(function (error, result) {
         if (error) debug('Error sending heartbeat.', error);
-        else if (result.statusCode !== 200) debug('Server responded to heartbeat with ' + result.statusCode);
+        else if (result.statusCode !== 200) debug('Server responded to heartbeat with %s %s', result.statusCode, result.text);
         else debug('Heartbeat successful');
     });
 }
