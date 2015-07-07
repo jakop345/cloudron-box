@@ -29,7 +29,7 @@ function cleanupUsers(done) {
 }
 
 function createUser(done) {
-    user.create(USERNAME, PASSWORD, EMAIL, IS_ADMIN, function (error, result) {
+    user.create(USERNAME, PASSWORD, EMAIL, IS_ADMIN, null /* invitor  */, function (error, result) {
         expect(error).to.not.be.ok();
         expect(result).to.be.ok();
         done();
@@ -57,7 +57,7 @@ describe('User', function () {
         after(cleanupUsers);
 
         it('succeeds', function (done) {
-            user.create(USERNAME, PASSWORD, EMAIL, IS_ADMIN, function (error, result) {
+            user.create(USERNAME, PASSWORD, EMAIL, IS_ADMIN, null /* invitor */, function (error, result) {
                 expect(error).not.to.be.ok();
                 expect(result).to.be.ok();
                 expect(result.username).to.equal(USERNAME);
@@ -88,7 +88,7 @@ describe('User', function () {
         });
 
         it('fails because user exists', function (done) {
-            user.create(USERNAME, PASSWORD, EMAIL, IS_ADMIN, function (error, result) {
+            user.create(USERNAME, PASSWORD, EMAIL, IS_ADMIN, null /* invitor */, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).not.to.be.ok();
                 expect(error.reason).to.equal(UserError.ALREADY_EXISTS);
@@ -98,7 +98,7 @@ describe('User', function () {
         });
 
         it('fails because password is empty', function (done) {
-            user.create(USERNAME, '', EMAIL, IS_ADMIN, function (error, result) {
+            user.create(USERNAME, '', EMAIL, IS_ADMIN, null /* invitor */, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).not.to.be.ok();
                 expect(error.reason).to.equal(UserError.BAD_PASSWORD);
@@ -284,7 +284,7 @@ describe('User', function () {
                 email: 'some@thi.ng'
             };
 
-            user.create(user1.username, user1.password, user1.email, false, function (error, result) {
+            user.create(user1.username, user1.password, user1.email, false, { username: USERNAME, email: EMAIL } /* invitor */, function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
 

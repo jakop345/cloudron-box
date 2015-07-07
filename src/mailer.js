@@ -149,8 +149,9 @@ function mailUserEventToAdmins(user, event) {
     });
 }
 
-function userAdded(user) {
+function userAdded(user, invitor) {
     assert.strictEqual(typeof user, 'object');
+    assert(typeof invitor === 'object');
 
     debug('Sending mail for userAdded');
 
@@ -159,7 +160,8 @@ function userAdded(user) {
         webadminUrl: config.adminOrigin(),
         setupLink: config.adminOrigin() + '/api/v1/session/password/setup.html?reset_token=' + user.resetToken,
         format: 'text',
-        fqdn: config.fqdn()
+        fqdn: config.fqdn(),
+        invitor: invitor
     };
 
     var mailOptions = {

@@ -111,11 +111,12 @@ function validateToken(token) {
     return null;
 }
 
-function createUser(username, password, email, admin, callback) {
+function createUser(username, password, email, admin, invitor, callback) {
     assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof password, 'string');
     assert.strictEqual(typeof email, 'string');
     assert.strictEqual(typeof admin, 'boolean');
+    assert(invitor || admin);
     assert.strictEqual(typeof callback, 'function');
 
     var error = validateUsername(username);
@@ -152,9 +153,9 @@ function createUser(username, password, email, admin, callback) {
 
                 callback(null, user);
 
-                // only send welcome mail if user is not an admin. This i only the case for the first user!
+                // only send welcome mail if user is not an admin. This is only the case for the first user!
                 // The welcome email contains a link to create a new password
-                if (!user.admin) mailer.userAdded(user);
+                if (!user.admin) mailer.userAdded(user, invitor);
             });
         });
     });
@@ -377,7 +378,7 @@ function createOwner(username, password, email, callback) {
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
         if (count !== 0) return callback(new UserError(UserError.ALREADY_EXISTS));
 
-        createUser(username, password, email, true /* admin */, callback);
+        createUser(username, password, email, true /* admin */, null /* invitor */, callback);
     });
 }
 
