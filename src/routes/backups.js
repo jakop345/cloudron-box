@@ -12,7 +12,7 @@ var backups = require('../backups.js'),
     HttpSuccess = require('connect-lastmile').HttpSuccess;
 
 function get(req, res, next) {
-    backups.getAll(function (error, result) {
+    backups.getAllPaged(1, 5, function (error, result) {
         if (error) return next(new HttpError(500, error));
         next(new HttpSuccess(200, { backups: result }));
     });

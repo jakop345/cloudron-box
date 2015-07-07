@@ -3,7 +3,7 @@
 
 exports.BackupsError = BackupsError;
 
-exports.getAll = getAll;
+exports.getAllPaged = getAllPaged;
 
 exports.scheduleBackup = scheduleBackup;
 exports.scheduleAppBackup = scheduleAppBackup;
@@ -14,6 +14,7 @@ exports.getRestoreUrl = getRestoreUrl;
 exports.backup = backup;
 exports.backupBox = backupBox;
 exports.backupApp = backupApp;
+exports.ensureBackup = ensureBackup;
 
 exports.restoreApp = restoreApp;
 
@@ -78,7 +79,9 @@ function ignoreError(func) {
     };
 }
 
-function getAll(callback) {
+function getAllPaged(page, perPage, callback) {
+    assert.strictEqual(typeof page, 'number');
+    assert.strictEqual(typeof perPage, 'number');
     assert.strictEqual(typeof callback, 'function');
 
     var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/backups';
@@ -86,6 +89,7 @@ function getAll(callback) {
     superagent.get(url).query({ token: config.token() }).end(function (error, result) {
         if (error) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, error));
         if (result.statusCode !== 200) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, result.text));
+        if (!result.body || !util.isArray(result.body.backups)) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, 'Unexpected response'));
 
         // [ { creationTime, boxVersion, restoreKey, dependsOn: [ ] } ] sorted by time (latest first)
         return callback(null, result.body.backups);
@@ -282,6 +286,24 @@ function backup(callback) {
                 callback(error, restoreKey);
             });
         });
+    });
+}
+
+function ensureBackup(callback) {
+    callback = callback || function () { };
+
+    getAllPaged(1, 1, function (error, backups) {
+        if (error) {
+            debug('Unable to list backups', error);
+            return callback(error); // no point trying to backup if appstore is down
+        }
+
+        if (backups.length !== 0 && (new Date() - new Date(backups[0].creationTime) < 23 * 60 * 60 * 1000)) { // ~1 day ago
+            debug('Previous backup was %j, no need to backup now', backups[0]);
+            return callback(null);
+        }
+
+        backup(callback);
     });
 }
 
