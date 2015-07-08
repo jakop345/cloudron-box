@@ -644,10 +644,9 @@ function restore(app, callback) {
         updateApp.bind(null, app, { installationProgress: '60, Restoring app and addons' }),
         backups.restoreApp.bind(null, app),
 
-        // recreate container
+        // create container
         updateApp.bind(null, app, { installationProgress: '70, Creating container' }),
-        deleteContainer.bind(null, app),
-        createContainer.bind(null, app),
+        createContainer.bind(null, app), // container was already deleted as first step intentionally to allow volume deletion
 
         // add collectd profile
         updateApp.bind(null, app, { installationProgress: '80, Add collectd profile' }),
