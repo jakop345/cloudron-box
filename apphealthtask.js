@@ -19,7 +19,7 @@ exports = module.exports = {
     run: run
 };
 
-var HEALTHCHECK_INTERVAL = 60 * 1000; // every minute
+var HEALTHCHECK_INTERVAL = 10 * 1000; // every 10 seconds. this needs to be small since the UI makes only healthy apps clickable
 var UNHEALTHY_THRESHOLD = 3 * 60 * 1000; // 3 minutes
 var gHealthInfo = { }; // { time, emailSent }
 

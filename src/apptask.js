@@ -586,7 +586,7 @@ function install(app, callback) {
         // done!
         function (callback) {
             debugApp(app, 'installed');
-            updateApp(app, { installationState: appdb.ISTATE_INSTALLED, installationProgress: '' }, callback);
+            updateApp(app, { installationState: appdb.ISTATE_INSTALLED, installationProgress: '', health: null }, callback);
         }
     ], function seriesDone(error) {
         if (error) {
@@ -662,7 +662,7 @@ function restore(app, callback) {
         // done!
         function (callback) {
             debugApp(app, 'restored');
-            updateApp(app, { installationState: appdb.ISTATE_INSTALLED, installationProgress: '' }, callback);
+            updateApp(app, { installationState: appdb.ISTATE_INSTALLED, installationProgress: '', health: null }, callback);
         }
     ], function seriesDone(error) {
         if (error) {
@@ -723,7 +723,7 @@ function configure(app, callback) {
         // done!
         function (callback) {
             debugApp(app, 'configured');
-            updateApp(app, { installationState: appdb.ISTATE_INSTALLED, installationProgress: '' }, callback);
+            updateApp(app, { installationState: appdb.ISTATE_INSTALLED, installationProgress: '', health: null }, callback);
         }
     ], function seriesDone(error) {
         if (error) {
@@ -777,13 +777,13 @@ function update(app, callback) {
         // done!
         function (callback) {
             debugApp(app, 'updated');
-            updateApp(app, { installationState: appdb.ISTATE_INSTALLED, installationProgress: '' }, callback);
+            updateApp(app, { installationState: appdb.ISTATE_INSTALLED, installationProgress: '', health: null }, callback);
         }
     ], function seriesDone(error) {
         if (error && error.backupError) {
             // on a backup error, just abort the update
             debugApp(app, 'Error backing up app: %s', backupError.error);
-            return updateApp(app, { installationState: appdb.ISTATE_INSTALLED, installationProgress: '' }, callback.bind(null, error));
+            return updateApp(app, { installationState: appdb.ISTATE_INSTALLED, installationProgress: '', health: null }, callback.bind(null, error));
         } else if (error) {
             debugApp(app, 'Error updating app: %s', error);
             return updateApp(app, { installationState: appdb.ISTATE_ERROR, installationProgress: error.message }, callback.bind(null, error));
