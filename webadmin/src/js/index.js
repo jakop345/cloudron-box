@@ -98,8 +98,11 @@ app.filter('installationStateLabel', function() {
         case ISTATES.PENDING_UPDATE: return 'Updating...' + waiting;
         case ISTATES.ERROR: return 'Error';
         case ISTATES.INSTALLED: {
-            if (app.runState === 'running') return app.health !== HSTATES.HEALTHY ? 'Starting...' : 'Running';
-            else if (app.runState === 'pending_start') return 'Starting...';
+            if (app.runState === 'running') {
+                if (!app.health) return 'Starting...'; // no data yet
+                if (app.health === HSTATES.HEALTHY) return 'Running';
+                return 'Not responding'; // dead/exit/unhealthy
+            } else if (app.runState === 'pending_start') return 'Starting...';
             else if (app.runState === 'pending_stop') return 'Stopping...';
             else if (app.runState === 'stopped') return 'Stopped';
             else return app.runState;
