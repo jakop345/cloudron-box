@@ -21,7 +21,7 @@ exports = module.exports = {
 
 var HEALTHCHECK_INTERVAL = 10 * 1000; // every 10 seconds
 var UNHEALTHY_THRESHOLD = 10 * 60 * 1000; // 10 minutes
-var gLastSeen = { }; // { time, emailSent }
+var gHealthInfo = { }; // { time, emailSent }
 
 function debugApp(app, args) {
     assert(!app || typeof app === 'object');
@@ -46,13 +46,13 @@ function setHealth(app, health, callback) {
 
     var now = new Date();
 
-    if (health === appdb.HEALTH_HEALTHY || !(app.id in gLastSeen)) { // add new apps to list
-        gLastSeen[app.id] = { time: now, emailSent: false };
-    } else if (Math.abs(now - gLastSeen[app.id].time) > UNHEALTHY_THRESHOLD) {
+    if (health === appdb.HEALTH_HEALTHY || !(app.id in gHealthInfo)) { // add new apps to list
+        gHealthInfo[app.id] = { time: now, emailSent: false };
+    } else if (Math.abs(now - gHealthInfo[app.id].time) > UNHEALTHY_THRESHOLD) {
         debugApp(app, 'marking as unhealthy since not seen for more than %s minutes', UNHEALTHY_THRESHOLD/(60 * 1000));
 
-        if (!gLastSeen[app.id].emailSent) {
-            gLastSeen[app.id].emailSent = true;
+        if (!gHealthInfo[app.id].emailSent) {
+            gHealthInfo[app.id].emailSent = true;
             mailer.appDied(app);
         }
     }
