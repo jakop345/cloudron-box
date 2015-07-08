@@ -54,12 +54,21 @@ var ISTATES = {
     INSTALLED: 'installed'
 };
 var HSTATES = {
-    HEALTHY: 'healthy'
+    HEALTHY: 'healthy',
+    UNHEALTHY: 'unhealthy',
+    ERROR: 'error',
+    DEAD: 'dead'
 };
 
 app.filter('installError', function () {
     return function (app) {
-        return app.installationState === ISTATES.ERROR;
+        if (app.installationState === ISTATES.ERROR) return true;
+        if (app.installationState === ISTATES.INSTALLED) {
+            // app.health can also be null to indicate insufficient data
+            if (app.health === HSTATES.UNHEALTHY || app.health === HSTATES.ERROR || app.health === HSTATES.DEAD) return true;
+        }
+
+        return false;
     };
 });
 
