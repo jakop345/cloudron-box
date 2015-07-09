@@ -225,7 +225,7 @@
                             </a>
                         </div>
                         <div class="col-xs-4 text-center">
-                            <a href="" ng-click="showUpdate(app)" class="ng-hide animateMe" ng-show="app.updateVersion && (app | installSuccess)">
+                            <a href="" ng-click="showUpdate(app)" class="ng-hide animateMe" ng-show="config.update.apps[app.id].manifest.version && config.update.apps[app.id].manifest.version !== app.manifest.version && (app | installSuccess)">
                                 <i class="fa fa-arrow-up text-success scale"></i>
                             </a>
                         </div>

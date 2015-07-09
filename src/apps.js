@@ -39,7 +39,6 @@ var appdb = require('./appdb.js'),
     DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:apps'),
     docker = require('./docker.js'),
-    updater = require('./updater.js'),
     fs = require('fs'),
     manifestFormat = require('cloudron-manifestformat'),
     path = require('path'),
@@ -205,15 +204,12 @@ function getBySubdomain(subdomain, callback) {
 function getAll(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    var updates = updater.getUpdateInfo().apps || [];
-
     appdb.getAll(function (error, apps) {
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
         apps.forEach(function (app) {
             app.iconUrl = getIconUrlSync(app);
             app.fqdn = config.appFqdn(app.location);
-            app.updateVersion = updates[app.id] ? updates[app.id].manifest.version : null;
         });
 
         callback(null, apps);
