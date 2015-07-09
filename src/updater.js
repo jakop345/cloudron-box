@@ -12,8 +12,7 @@ exports.update = update;
 exports.hasBoxUpdate = hasBoxUpdate;
 
 
-var appdb = require('./appdb.js'),
-    apps = require('./apps.js'),
+var apps = require('./apps.js'),
     assert = require('assert'),
     async = require('async'),
     backups = require('./backups.js'),
@@ -47,7 +46,7 @@ function hasBoxUpdate() {
 }
 
 function checkAppUpdates(callback) {
-    appdb.getAll(function (error, apps) { // do not use apps.getAll because that uses updater information
+    apps.getAll(function (error, apps) {
         if (error) return callback(error);
 
         var appUpdateInfo = { };
