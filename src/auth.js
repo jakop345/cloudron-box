@@ -2,10 +2,10 @@
 
 'use strict';
 
-
-exports.initialize = initialize;
-exports.uninitialize = uninitialize;
-
+exports = module.exports = {
+    initialize: initialize,
+    uninitialize: uninitialize
+};
 
 var assert = require('assert'),
     BasicStrategy = require('passport-http').BasicStrategy,

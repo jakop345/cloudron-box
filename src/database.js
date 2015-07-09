@@ -2,18 +2,18 @@
 
 'use strict';
 
+exports = module.exports = {
+    initialize: initialize,
+    uninitialize: uninitialize,
+    query: query,
+    transaction: transaction,
 
-exports.initialize = initialize;
-exports.uninitialize = uninitialize;
-exports.query = query;
-exports.transaction = transaction;
+    beginTransaction: beginTransaction,
+    rollback: rollback,
+    commit: commit,
 
-exports.beginTransaction = beginTransaction;
-exports.rollback = rollback;
-exports.commit = commit;
-
-exports._clear = clear;
-
+    _clear: clear
+};
 
 var assert = require('assert'),
     async = require('async'),

@@ -2,15 +2,15 @@
 
 'use strict';
 
-
-exports.add = add;
-exports.get = get;
-exports.update = update;
-exports.del = del;
-exports.getAllByUserId = getAllByUserId;
-exports.getClientTokens = getClientTokens;
-exports.delClientTokens = delClientTokens;
-
+exports = module.exports = {
+    add: add,
+    get: get,
+    update: update,
+    del: del,
+    getAllByUserId: getAllByUserId,
+    getClientTokens: getClientTokens,
+    delClientTokens: delClientTokens
+};
 
 var assert = require('assert'),
     validUrl = require('valid-url'),

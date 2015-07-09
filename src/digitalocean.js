@@ -2,9 +2,9 @@
 
 'use strict';
 
-
-exports.checkPtrRecord = checkPtrRecord;
-
+exports = module.exports = {
+    checkPtrRecord: checkPtrRecord
+};
 
 var assert = require('assert'),
     debug = require('debug')('box:digitalocean'),

@@ -1,8 +1,8 @@
 'use strict';
 
-
-exports.getIp = getIp;
-
+exports = module.exports = {
+    getIp: getIp
+};
 
 var os = require('os');
 

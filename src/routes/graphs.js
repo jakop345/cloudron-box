@@ -1,8 +1,8 @@
 'use strict';
 
-
-exports.getGraphs = getGraphs;
-
+exports = module.exports = {
+    getGraphs: getGraphs
+};
 
 var middleware = require('../middleware/index.js'),
     url = require('url');

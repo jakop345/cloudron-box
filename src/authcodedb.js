@@ -2,14 +2,14 @@
 
 'use strict';
 
+exports = module.exports = {
+    get: get,
+    add: add,
+    del: del,
+    delExpired: delExpired,
 
-exports.get = get;
-exports.add = add;
-exports.del = del;
-exports.delExpired = delExpired;
-
-exports._clear = clear;
-
+    _clear: clear
+};
 
 var assert = require('assert'),
     database = require('./database.js'),

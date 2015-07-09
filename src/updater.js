@@ -2,14 +2,15 @@
 
 'use strict';
 
+exports = module.exports = {
+    initialize: initialize,
+    uninitialize: uninitialize,
 
-exports.initialize = initialize;
-exports.uninitialize = uninitialize;
-
-exports.checkUpdates = checkUpdates;
-exports.getUpdateInfo = getUpdateInfo;
-exports.update = update;
-exports.autoupdate = autoupdate;
+    checkUpdates: checkUpdates,
+    getUpdateInfo: getUpdateInfo,
+    update: update,
+    autoupdate: autoupdate
+};
 
 var apps = require('./apps.js'),
     assert = require('assert'),

@@ -2,14 +2,14 @@
 
 'use strict';
 
+exports = module.exports = {
+    set: set,
+    clear: clear,
+    get: get,
 
-exports.set = set;
-exports.clear = clear;
-exports.get = get;
-
-exports.UPDATE = 'update';
-exports.BACKUP = 'backup';
-
+    UPDATE: 'update',
+    BACKUP: 'backup'
+};
 
 var assert = require('assert');
 

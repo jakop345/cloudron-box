@@ -2,18 +2,18 @@
 
 'use strict';
 
+exports = module.exports = {
+    get: get,
+    getAll: getAll,
+    getAllWithTokenCountByIdentifier: getAllWithTokenCountByIdentifier,
+    add: add,
+    del: del,
+    update: update,
+    getByAppId: getByAppId,
+    delByAppId: delByAppId,
 
-exports.get = get;
-exports.getAll = getAll;
-exports.getAllWithTokenCountByIdentifier = getAllWithTokenCountByIdentifier;
-exports.add = add;
-exports.del = del;
-exports.update = update;
-exports.getByAppId = getByAppId;
-exports.delByAppId = delByAppId;
-
-exports._clear = clear;
-
+    _clear: clear
+};
 
 var assert = require('assert'),
     database = require('./database.js'),

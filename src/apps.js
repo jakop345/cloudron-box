@@ -2,35 +2,35 @@
 
 'use strict';
 
+exports = module.exports = {
+    AppsError: AppsError,
 
-exports.AppsError = AppsError;
+    get: get,
+    getBySubdomain: getBySubdomain,
+    getAll: getAll,
+    purchase: purchase,
+    install: install,
+    configure: configure,
+    uninstall: uninstall,
+    restore: restore,
+    update: update,
 
-exports.get = get;
-exports.getBySubdomain = getBySubdomain;
-exports.getAll = getAll;
-exports.purchase = purchase;
-exports.install = install;
-exports.configure = configure;
-exports.uninstall = uninstall;
-exports.restore = restore;
-exports.update = update;
+    getLogStream: getLogStream,
+    getLogs: getLogs,
 
-exports.getLogStream = getLogStream;
-exports.getLogs = getLogs;
+    start: start,
+    stop: stop,
 
-exports.start = start;
-exports.stop = stop;
+    exec: exec,
 
-exports.exec = exec;
+    checkManifestConstraints: checkManifestConstraints,
 
-exports.checkManifestConstraints = checkManifestConstraints;
+    setRestorePoint: setRestorePoint,
 
-exports.setRestorePoint = setRestorePoint;
-
-// exported for testing
-exports._validateHostname = validateHostname;
-exports._validatePortBindings = validatePortBindings;
-
+    // exported for testing
+    _validateHostname: validateHostname,
+    _validatePortBindings: validatePortBindings
+};
 
 var appdb = require('./appdb.js'),
     assert = require('assert'),

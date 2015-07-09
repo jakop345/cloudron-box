@@ -2,10 +2,10 @@
 
 'use strict';
 
-
-exports.getAutoupdatePattern = getAutoupdatePattern;
-exports.setAutoupdatePattern = setAutoupdatePattern;
-
+exports = module.exports = {
+    getAutoupdatePattern: getAutoupdatePattern,
+    setAutoupdatePattern: setAutoupdatePattern
+};
 
 var assert = require('assert'),
     HttpError = require('connect-lastmile').HttpError,

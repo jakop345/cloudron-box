@@ -1,20 +1,20 @@
 'use strict';
 
+exports = module.exports = {
+    setupAddons: setupAddons,
+    teardownAddons: teardownAddons,
+    updateAddons: updateAddons,
+    backupAddons: backupAddons,
+    restoreAddons: restoreAddons,
 
-exports.setupAddons = setupAddons;
-exports.teardownAddons = teardownAddons;
-exports.updateAddons = updateAddons;
-exports.backupAddons = backupAddons;
-exports.restoreAddons = restoreAddons;
+    getEnvironment: getEnvironment,
+    getLinksSync: getLinksSync,
+    getBindsSync: getBindsSync,
 
-exports.getEnvironment = getEnvironment;
-exports.getLinksSync = getLinksSync;
-exports.getBindsSync = getBindsSync;
-
-// exported for testing
-exports._allocateOAuthCredentials = allocateOAuthCredentials;
-exports._removeOAuthCredentials = removeOAuthCredentials;
-
+    // exported for testing
+    _allocateOAuthCredentials: allocateOAuthCredentials,
+    _removeOAuthCredentials: removeOAuthCredentials
+};
 
 var appdb = require('./appdb.js'),
     assert = require('assert'),

@@ -2,9 +2,9 @@
 
 'use strict';
 
-
-exports.backup = backup;
-
+exports = module.exports = {
+    backup: backup
+};
 
 var debug = require('debug')('box:routes/internal'),
     backups = require('../backups.js'),

@@ -2,9 +2,10 @@
 
 'use strict';
 
-
-exports.get = get;
-exports.create = create;
+exports = module.exports = {
+    get: get,
+    create: create
+};
 
 
 var backups = require('../backups.js'),

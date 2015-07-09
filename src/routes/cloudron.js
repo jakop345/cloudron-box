@@ -2,18 +2,18 @@
 
 'use strict';
 
-
-exports.activate = activate;
-exports.setupTokenAuth = setupTokenAuth;
-exports.getStatus = getStatus;
-exports.getStats = getStats;
-exports.reboot = reboot;
-exports.getProgress = getProgress;
-exports.getConfig = getConfig;
-exports.update = update;
-exports.migrate = migrate;
-exports.setCertificate = setCertificate;
-
+exports = module.exports = {
+    activate: activate,
+    setupTokenAuth: setupTokenAuth,
+    getStatus: getStatus,
+    getStats: getStats,
+    reboot: reboot,
+    getProgress: getProgress,
+    getConfig: getConfig,
+    update: update,
+    migrate: migrate,
+    setCertificate: setCertificate
+};
 
 var assert = require('assert'),
     cloudron = require('../cloudron.js'),

@@ -2,24 +2,24 @@
 
 'use strict';
 
+exports = module.exports = {
+    getApp: getApp,
+    getAppBySubdomain: getAppBySubdomain,
+    getApps: getApps,
+    getAppIcon: getAppIcon,
+    installApp: installApp,
+    configureApp: configureApp,
+    uninstallApp: uninstallApp,
+    restoreApp: restoreApp,
+    backupApp: backupApp,
+    updateApp: updateApp,
+    getLogs: getLogs,
+    getLogStream: getLogStream,
 
-exports.getApp = getApp;
-exports.getAppBySubdomain = getAppBySubdomain;
-exports.getApps = getApps;
-exports.getAppIcon = getAppIcon;
-exports.installApp = installApp;
-exports.configureApp = configureApp;
-exports.uninstallApp = uninstallApp;
-exports.restoreApp = restoreApp;
-exports.backupApp = backupApp;
-exports.updateApp = updateApp;
-exports.getLogs = getLogs;
-exports.getLogStream = getLogStream;
-
-exports.stopApp = stopApp;
-exports.startApp = startApp;
-exports.exec = exec;
-
+    stopApp: stopApp,
+    startApp: startApp,
+    exec: exec
+};
 
 var apps = require('../apps.js'),
     AppsError = apps.AppsError,

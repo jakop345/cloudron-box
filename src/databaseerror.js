@@ -2,9 +2,7 @@
 
 'use strict';
 
-
-module.exports = exports = DatabaseError;
-
+exports = module.exports = DatabaseError;
 
 var assert = require('assert'),
     util = require('util');

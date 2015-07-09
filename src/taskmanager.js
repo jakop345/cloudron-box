@@ -1,11 +1,11 @@
 'use strict';
 
+exports = module.exports = {
+    initialize: initialize,
+    uninitialize: uninitialize,
 
-exports.initialize = initialize;
-exports.uninitialize = uninitialize;
-
-exports.restartAppTask = restartAppTask;
-
+    restartAppTask: restartAppTask
+};
 
 var appdb = require('./appdb.js'),
     assert = require('assert'),

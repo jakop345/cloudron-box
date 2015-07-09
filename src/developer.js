@@ -2,13 +2,13 @@
 
 'use strict';
 
+exports = module.exports = {
+    DeveloperError: DeveloperError,
 
-exports.DeveloperError = DeveloperError;
-
-exports.enabled = enabled;
-exports.setEnabled = setEnabled;
-exports.issueDeveloperToken = issueDeveloperToken;
-
+    enabled: enabled,
+    setEnabled: setEnabled,
+    issueDeveloperToken: issueDeveloperToken
+};
 
 var assert = require('assert'),
     tokendb = require('./tokendb.js'),

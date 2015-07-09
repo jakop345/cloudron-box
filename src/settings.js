@@ -1,21 +1,21 @@
 'use strict';
 
+exports = module.exports = {
+    SettingsError: SettingsError,
 
-exports.SettingsError = SettingsError;
+    getAutoupdatePattern: getAutoupdatePattern,
+    setAutoupdatePattern: setAutoupdatePattern,
 
-exports.getAutoupdatePattern = getAutoupdatePattern;
-exports.setAutoupdatePattern = setAutoupdatePattern;
+    getTimeZone: getTimeZone,
+    setTimeZone: setTimeZone,
 
-exports.getTimeZone = getTimeZone;
-exports.setTimeZone = setTimeZone;
+    getAll: getAll,
 
-exports.getAll = getAll;
+    AUTOUPDATE_PATTERN_KEY: 'autoupdate_pattern',
+    TIME_ZONE_KEY: 'time_zone',
 
-exports.AUTOUPDATE_PATTERN_KEY = 'autoupdate_pattern';
-exports.TIME_ZONE_KEY = 'time_zone';
-
-exports.events = new (require('events').EventEmitter)();
-
+    events: new (require('events').EventEmitter)()
+};
 
 var apps = require('./apps.js'),
     assert = require('assert'),

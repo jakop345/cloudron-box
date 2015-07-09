@@ -2,10 +2,10 @@
 
 'use strict';
 
-
-exports.start = start;
-exports.stop = stop;
-
+exports = module.exports = {
+    start: start,
+    stop: stop
+};
 
 var assert = require('assert'),
     async = require('async'),

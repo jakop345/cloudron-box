@@ -2,22 +2,22 @@
 
 'use strict';
 
+exports = module.exports = {
+    CloudronError: CloudronError,
 
-exports.CloudronError = CloudronError;
+    initialize: initialize,
+    uninitialize: uninitialize,
+    activate: activate,
+    getConfig: getConfig,
+    getStatus: getStatus,
 
-exports.initialize = initialize;
-exports.uninitialize = uninitialize;
-exports.activate = activate;
-exports.getConfig = getConfig;
-exports.getStatus = getStatus;
+    setCertificate: setCertificate,
 
-exports.setCertificate = setCertificate;
+    sendHeartbeat: sendHeartbeat,
 
-exports.sendHeartbeat = sendHeartbeat;
-
-exports.reboot = reboot;
-exports.migrate = migrate;
-
+    reboot: reboot,
+    migrate: migrate
+};
 
 var assert = require('assert'),
     backups = require('./backups.js'),

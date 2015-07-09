@@ -2,12 +2,12 @@
 
 'use strict';
 
-
-exports.enabled = enabled;
-exports.setEnabled = setEnabled;
-exports.status = status;
-exports.login = login;
-
+exports = module.exports = {
+    enabled: enabled,
+    setEnabled: setEnabled,
+    status: status,
+    login: login
+};
 
 var developer = require('../developer.js'),
     passport = require('passport'),

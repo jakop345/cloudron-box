@@ -1,8 +1,8 @@
 'use strict';
 
-
-exports.start = start;
-
+exports = module.exports = {
+    start: start
+};
 
 var assert = require('assert'),
     config = require('../config.js'),

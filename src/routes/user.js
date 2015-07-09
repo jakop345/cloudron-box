@@ -2,18 +2,18 @@
 
 'use strict';
 
-
-exports.profile = profile;
-exports.info = info;
-exports.update = update;
-exports.list = listUser;
-exports.create = createUser;
-exports.changePassword = changePassword;
-exports.changeAdmin = changeAdmin;
-exports.remove = removeUser;
-exports.verifyPassword = verifyPassword;
-exports.requireAdmin = requireAdmin;
-
+exports = module.exports = {
+    profile: profile,
+    info: info,
+    update: update,
+    list: listUser,
+    create: createUser,
+    changePassword: changePassword,
+    changeAdmin: changeAdmin,
+    remove: removeUser,
+    verifyPassword: verifyPassword,
+    requireAdmin: requireAdmin
+};
 
 var assert = require('assert'),
     HttpError = require('connect-lastmile').HttpError,

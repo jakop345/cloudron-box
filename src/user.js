@@ -2,23 +2,23 @@
 
 'use strict';
 
+exports = module.exports = {
+    UserError: UserError,
 
-exports.UserError = UserError;
-
-exports.list = listUsers;
-exports.create = createUser;
-exports.verify = verify;
-exports.verifyWithEmail = verifyWithEmail;
-exports.remove = removeUser;
-exports.get = getUser;
-exports.getByResetToken = getByResetToken;
-exports.changeAdmin = changeAdmin;
-exports.resetPasswordByIdentifier = resetPasswordByIdentifier;
-exports.setPassword = setPassword;
-exports.changePassword = changePassword;
-exports.update = updateUser;
-exports.createOwner = createOwner;
-
+    list: listUsers,
+    create: createUser,
+    verify: verify,
+    verifyWithEmail: verifyWithEmail,
+    remove: removeUser,
+    get: getUser,
+    getByResetToken: getByResetToken,
+    changeAdmin: changeAdmin,
+    resetPasswordByIdentifier: resetPasswordByIdentifier,
+    setPassword: setPassword,
+    changePassword: changePassword,
+    update: updateUser,
+    createOwner: createOwner
+};
 
 var assert = require('assert'),
     crypto = require('crypto'),

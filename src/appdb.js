@@ -2,50 +2,50 @@
 
 'use strict';
 
+exports = module.exports = {
+    get: get,
+    getBySubdomain: getBySubdomain,
+    getByHttpPort: getByHttpPort,
+    add: add,
+    exists: exists,
+    del: del,
+    update: update,
+    getAll: getAll,
+    getPortBindings: getPortBindings,
 
-exports.get = get;
-exports.getBySubdomain = getBySubdomain;
-exports.getByHttpPort = getByHttpPort;
-exports.add = add;
-exports.exists = exists;
-exports.del = del;
-exports.update = update;
-exports.getAll = getAll;
-exports.getPortBindings = getPortBindings;
+    setAddonConfig: setAddonConfig,
+    getAddonConfig: getAddonConfig,
+    getAddonConfigByAppId: getAddonConfigByAppId,
+    unsetAddonConfig: unsetAddonConfig,
+    unsetAddonConfigByAppId: unsetAddonConfigByAppId,
 
-exports.setAddonConfig = setAddonConfig;
-exports.getAddonConfig = getAddonConfig;
-exports.getAddonConfigByAppId = getAddonConfigByAppId;
-exports.unsetAddonConfig = unsetAddonConfig;
-exports.unsetAddonConfigByAppId = unsetAddonConfigByAppId;
+    setHealth: setHealth,
+    setInstallationCommand: setInstallationCommand,
+    setRunCommand: setRunCommand,
+    getAppStoreIds: getAppStoreIds,
 
-exports.setHealth = setHealth;
-exports.setInstallationCommand = setInstallationCommand;
-exports.setRunCommand = setRunCommand;
-exports.getAppStoreIds = getAppStoreIds;
+    // installation codes (keep in sync in UI)
+    ISTATE_PENDING_INSTALL: 'pending_install',
+    ISTATE_PENDING_CONFIGURE: 'pending_configure',
+    ISTATE_PENDING_UNINSTALL: 'pending_uninstall',
+    ISTATE_PENDING_RESTORE: 'pending_restore',
+    ISTATE_PENDING_UPDATE: 'pending_update',
+    ISTATE_ERROR: 'error',
+    ISTATE_INSTALLED: 'installed',
 
-// installation codes (keep in sync in UI)
-exports.ISTATE_PENDING_INSTALL = 'pending_install';
-exports.ISTATE_PENDING_CONFIGURE = 'pending_configure';
-exports.ISTATE_PENDING_UNINSTALL = 'pending_uninstall';
-exports.ISTATE_PENDING_RESTORE = 'pending_restore';
-exports.ISTATE_PENDING_UPDATE = 'pending_update';
-exports.ISTATE_ERROR = 'error';
-exports.ISTATE_INSTALLED = 'installed';
+    // run codes (keep in sync in UI)
+    RSTATE_RUNNING: 'running',
+    RSTATE_PENDING_START: 'pending_start',
+    RSTATE_PENDING_STOP: 'pending_stop',
+    RSTATE_STOPPED: 'stopped', // app stopped by use
 
-// run codes (keep in sync in UI)
-exports.RSTATE_RUNNING = 'running';
-exports.RSTATE_PENDING_START = 'pending_start';
-exports.RSTATE_PENDING_STOP = 'pending_stop';
-exports.RSTATE_STOPPED = 'stopped'; // app stopped by use
+    HEALTH_HEALTHY: 'healthy',
+    HEALTH_UNHEALTHY: 'unhealthy',
+    HEALTH_ERROR: 'error',
+    HEALTH_DEAD: 'dead',
 
-exports.HEALTH_HEALTHY = 'healthy';
-exports.HEALTH_UNHEALTHY = 'unhealthy';
-exports.HEALTH_ERROR = 'error';
-exports.HEALTH_DEAD = 'dead';
-
-exports._clear = clear;
-
+    _clear: clear
+};
 
 var assert = require('assert'),
     async = require('async'),

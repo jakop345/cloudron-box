@@ -1,9 +1,9 @@
 'use strict';
 
-
-exports.sudo = sudo;
-exports.exec = exec;
-
+exports = module.exports = {
+    sudo: sudo,
+    exec: exec
+};
 
 var assert = require('assert'),
     child_process = require('child_process'),

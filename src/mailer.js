@@ -2,21 +2,21 @@
 
 'use strict';
 
+exports = module.exports = {
+    initialize: initialize,
+    uninitialize: uninitialize,
 
-exports.initialize = initialize;
-exports.uninitialize = uninitialize;
+    userAdded: userAdded,
+    userRemoved: userRemoved,
+    adminChanged: adminChanged,
+    passwordReset: passwordReset,
+    boxUpdateAvailable: boxUpdateAvailable,
+    appUpdateAvailable: appUpdateAvailable,
 
-exports.userAdded = userAdded;
-exports.userRemoved = userRemoved;
-exports.adminChanged = adminChanged;
-exports.passwordReset = passwordReset;
-exports.boxUpdateAvailable = boxUpdateAvailable;
-exports.appUpdateAvailable = appUpdateAvailable;
+    sendCrashNotification: sendCrashNotification,
 
-exports.sendCrashNotification = sendCrashNotification;
-
-exports.appDied = appDied;
-
+    appDied: appDied
+};
 
 var assert = require('assert'),
     async = require('async'),

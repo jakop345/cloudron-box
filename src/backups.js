@@ -1,23 +1,22 @@
 'use strict';
 
+exports = module.exports = {
+    BackupsError: BackupsError,
 
-exports.BackupsError = BackupsError;
+    getAllPaged: getAllPaged,
+    scheduleBackup: scheduleBackup,
+    scheduleAppBackup: scheduleAppBackup,
 
-exports.getAllPaged = getAllPaged;
+    getBackupUrl: getBackupUrl,
+    getRestoreUrl: getRestoreUrl,
 
-exports.scheduleBackup = scheduleBackup;
-exports.scheduleAppBackup = scheduleAppBackup;
+    backup: backup,
+    backupBox: backupBox,
+    backupApp: backupApp,
+    ensureBackup: ensureBackup,
 
-exports.getBackupUrl = getBackupUrl;
-exports.getRestoreUrl = getRestoreUrl;
-
-exports.backup = backup;
-exports.backupBox = backupBox;
-exports.backupApp = backupApp;
-exports.ensureBackup = ensureBackup;
-
-exports.restoreApp = restoreApp;
-
+    restoreApp: restoreApp
+};
 
 var addons = require('./addons.js'),
     appdb = require('./appdb.js'),

@@ -1,16 +1,16 @@
 'use strict';
 
+exports = module.exports = {
+    ClientsError: ClientsError,
 
-exports.ClientsError = ClientsError;
-
-exports.add = add;
-exports.get = get;
-exports.update = update;
-exports.del = del;
-exports.getAllWithDetailsByUserId = getAllWithDetailsByUserId;
-exports.getClientTokensByUserId = getClientTokensByUserId;
-exports.delClientTokensByUserId = delClientTokensByUserId;
-
+    add: add,
+    get: get,
+    update: update,
+    del: del,
+    getAllWithDetailsByUserId: getAllWithDetailsByUserId,
+    getClientTokensByUserId: getClientTokensByUserId,
+    delClientTokensByUserId: delClientTokensByUserId
+};
 
 var assert = require('assert'),
     util = require('util'),
