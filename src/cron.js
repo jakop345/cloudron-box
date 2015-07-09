@@ -13,7 +13,6 @@ var assert = require('assert'),
     settings = require('./settings.js'),
     updater = require('./updater.js');
 
-var NOOP_CALLBACK = function (error) { console.error(error); };
 var gAutoUpdaterJob = null,
     gUpdateCheckerJob = null,
     gHeartbeatJob = null,
@@ -88,8 +87,8 @@ function autoupdatePatternChanged(pattern) {
     gAutoUpdaterJob = new CronJob({
         cronTime: pattern,
         onTick: function() {
-            debug('Checking if update available');
-            if (updater.hasBoxUpdate()) updater.update(NOOP_CALLBACK);
+            debug('Starting autoupdate');
+            updater.autoupdate();
         },
         start: true,
         timeZone: gUpdateCheckerJob.cronTime.timeZone // hack

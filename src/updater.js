@@ -9,8 +9,7 @@ exports.uninitialize = uninitialize;
 exports.checkUpdates = checkUpdates;
 exports.getUpdateInfo = getUpdateInfo;
 exports.update = update;
-exports.hasBoxUpdate = hasBoxUpdate;
-
+exports.autoupdate = autoupdate;
 
 var apps = require('./apps.js'),
     assert = require('assert'),
@@ -29,8 +28,9 @@ var apps = require('./apps.js'),
     superagent = require('superagent');
 
 var INSTALLER_UPDATE_URL = 'http://127.0.0.1:2020/api/v1/installer/update';
+var NOOP_CALLBACK = function (error) { console.error(error); };
 
-var gAppUpdateInfo = { }, // id -> update info { creationDate, manifest }
+var gAppUpdateInfo = { }, // id -> update info { creationDate, manifest, autoupdatable, portBindings }
     gBoxUpdateInfo = null,
     gMailedUser =  { };
 
@@ -43,6 +43,19 @@ function getUpdateInfo() {
 
 function hasBoxUpdate() {
     return gBoxUpdateInfo !== null;
+}
+
+function hasAutoupdatableApps() {
+    return Object.keys(gAppUpdateInfo).some(function (appId) { return gAppUpdateInfo[appId].autoupdatable; });
+}
+
+function canAutoupdateApp(app, newManifest) {
+    // TODO: maybe check the description as well?
+    for (var env in newManifest.tcpPorts) {
+        if (!(env in app.portBindings)) return false;
+    }
+
+    return true;
 }
 
 function checkAppUpdates(callback) {
@@ -71,10 +84,15 @@ function checkAppUpdates(callback) {
 
                 var oldVersion = apps[i].manifest.version;
 
-                var newVersion = latestAppVersions[apps[i].appStoreId].manifest.version;
+                var newManifest = latestAppVersions[apps[i].appStoreId].manifest;
+                var newVersion = newManifest.version;
                 if (newVersion !== oldVersion) {
-                    debug('Update available for %s (%s) from %s to %s', apps[i].location, apps[i].id, oldVersion, newVersion);
                     appUpdateInfo[apps[i].id] = latestAppVersions[apps[i].appStoreId];
+                    var autoupdatable = canAutoupdateApp(apps[i], newManifest);
+                    appUpdateInfo[apps[i].id].autoupdatable = autoupdatable;
+                    appUpdateInfo[apps[i].id].portBindings = autoupdatable ? apps[i].portBindings : null;
+                    debug('Update available for %s (%s) from %s to %s (autoupdatable: %s)',
+                          apps[i].location, apps[i].id, oldVersion, newVersion, autoupdatable);
                 }
             }
 
@@ -196,6 +214,24 @@ function update(callback) {
     });
 }
 
+function triggerAppAutoupdate(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    async.eachSeries(Object.keys(gAppUpdateInfo), function iterator(appId, iteratorDone) {
+        var appUpdateInfo = gAppUpdateInfo[appId];
+        if (!appUpdateInfo.autoupdatable) {
+            debug('Refusing to autoupdate %s', appId);
+            return iteratorDone(null);
+        }
+
+        apps.update(appId, appUpdateInfo.manifest, appUpdateInfo.portBindings, null /* icon */, function (error) {
+            if (error) debug('Error initiating autoupdate of %s', appId);
+
+            iteratorDone(null);
+        });
+    }, callback);
+}
+
 function upgrade(callback) {
     assert(gBoxUpdateInfo.upgrade);
 
@@ -278,5 +314,16 @@ function startBoxUpdate(boxUpdateInfo, callback) {
 
         // Do not add any code here. The installer script will stop the box code any instant
     });
+}
+
+
+function autoupdate() {
+    // FIXME: box update and app update must not be concurrent. also, there is no way to track completion of updates
+    // and this we need to one or the other.
+    if (hasBoxUpdate()) {
+        update(NOOP_CALLBACK);
+    } else {
+        triggerAppAutoupdate(NOOP_CALLBACK);
+    }
 }
 
