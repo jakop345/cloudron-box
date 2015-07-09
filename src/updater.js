@@ -186,7 +186,7 @@ function update(callback) {
 
     progress.set(progress.UPDATE, 0, 'Begin update');
 
-    startUpdate(function (error) {
+    startBoxUpdate(gBoxUpdateInfo, function (error) {
         if (error) {
             progress.clear(progress.UPDATE); // update failed, clear the update progress
             return callback(error);
@@ -218,15 +218,15 @@ function upgrade(callback) {
     });
 }
 
-function startUpdate(callback) {
-    if (!gBoxUpdateInfo) {
+function startBoxUpdate(boxUpdateInfo, callback) {
+    if (!boxUpdateInfo) {
         debug('no box update available');
         return callback(new Error('No update available'));
     }
 
     progress.set(progress.UPDATE, 5, 'Create backup');
 
-    if (gBoxUpdateInfo && gBoxUpdateInfo.upgrade) {
+    if (boxUpdateInfo && boxUpdateInfo.upgrade) {
         return upgrade(callback);
     }
 
@@ -237,7 +237,7 @@ function startUpdate(callback) {
 
         // fetch a signed sourceTarballUrl
         superagent.get(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/sourcetarballurl')
-          .query({ token: config.token(), boxVersion: gBoxUpdateInfo.version })
+          .query({ token: config.token(), boxVersion: boxUpdateInfo.version })
           .end(function (error, result) {
             if (error) return callback(new Error('Error fetching sourceTarballUrl: ' + error));
             if (result.status !== 200) return callback(new Error('Error fetching sourceTarballUrl status: ' + result.status));
@@ -250,7 +250,7 @@ function startUpdate(callback) {
                 // this data is opaque to the installer
                 data: {
                     boxVersionsUrl: config.get('boxVersionsUrl'),
-                    version: gBoxUpdateInfo.version,
+                    version: boxUpdateInfo.version,
                     apiServerOrigin: config.apiServerOrigin(),
                     webServerOrigin: config.webServerOrigin(),
                     fqdn: config.fqdn(),
