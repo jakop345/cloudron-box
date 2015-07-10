@@ -463,7 +463,7 @@ function restore(appId, callback) {
         var error = checkManifestConstraints(restoreConfig.manifest);
         if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Manifest cannot be installed: ' + error.message));
 
-        error = validatePortBindings(restoreConfig.portBindings, restoreConfig.manifest.tcpPorts);
+        error = validatePortBindings(restoreConfig.portBindings, restoreConfig.manifest.tcpPorts); // maybe new ports got reserved now
         if (error) return callback(error);
 
         appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_RESTORE, function (error) {
