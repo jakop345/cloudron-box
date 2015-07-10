@@ -367,23 +367,28 @@ function update(appId, manifest, portBindings, icon, callback) {
         }
     }
 
-    var values = {
-        manifest: manifest,
-        portBindings: portBindings,
-        oldConfig: {
-            manifest: manifest,
-            portBindings: app.portBindings
-        }
-    };
-
-    appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_UPDATE, values, function (error) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE)); // might be a bad guess
-        if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(getDuplicateErrorDetails('' /* location cannot conflict */, portBindings, error));
+    appdb.get(appId, function (error, app) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        taskmanager.restartAppTask(appId);
+        var values = {
+            manifest: manifest,
+            portBindings: portBindings,
+            oldConfig: {
+                manifest: manifest,
+                portBindings: app.portBindings
+            }
+        };
 
-        callback(null);
+        appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_UPDATE, values, function (error) {
+            if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE)); // might be a bad guess
+            if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(getDuplicateErrorDetails('' /* location cannot conflict */, portBindings, error));
+            if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+            taskmanager.restartAppTask(appId);
+
+            callback(null);
+        });
     });
 }
 
