@@ -20,6 +20,7 @@ var gPendingTasks = [ ];
 // 1. The backup scripts (app and box) turn off swap after finish disregarding other backup processes
 // 2. apptask getFreePort has race with multiprocess
 var TASK_CONCURRENCY = 1;
+var NOOP_CALLBACK = function (error) { console.error(error); };
 
 function initialize(callback) {
     assert.strictEqual(typeof callback, 'function');
