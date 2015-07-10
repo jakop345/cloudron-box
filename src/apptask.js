@@ -499,6 +499,8 @@ function updateApp(app, values, callback) {
 
 function install(app, callback) {
     async.series([
+        verifyManifest.bind(null, app),
+
         // configure nginx
         configureNginx.bind(null, app),
 
@@ -507,8 +509,7 @@ function install(app, callback) {
         registerSubdomain.bind(null, app),
 
         // verify manifest
-        updateApp.bind(null, app, { installationProgress: '10, Verifying manifest' }),
-        verifyManifest.bind(null, app),
+        updateApp.bind(null, app, { installationProgress: '10, Downloading icon' }),
         downloadIcon.bind(null, app),
 
         // create proxy OAuth credentials
