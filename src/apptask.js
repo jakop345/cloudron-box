@@ -501,48 +501,38 @@ function install(app, callback) {
     async.series([
         verifyManifest.bind(null, app),
 
-        // configure nginx
         configureNginx.bind(null, app),
 
-        // register subdomain
         updateApp.bind(null, app, { installationProgress: '0, Registering subdomain' }),
         registerSubdomain.bind(null, app),
 
-        // verify manifest
         updateApp.bind(null, app, { installationProgress: '10, Downloading icon' }),
         downloadIcon.bind(null, app),
 
-        // create proxy OAuth credentials
         updateApp.bind(null, app, { installationProgress: '20, Creating OAuth proxy credentials' }),
         removeOAuthProxyCredentials.bind(null, app),
         allocateOAuthProxyCredentials.bind(null, app),
 
-        // download the image
         updateApp.bind(null, app, { installationProgress: '40, Downloading image' }),
         downloadImage.bind(null, app),
 
-        // recreate data volume
         updateApp.bind(null, app, { installationProgress: '50, Creating volume' }),
         deleteVolume.bind(null, app),
         createVolume.bind(null, app),
 
-        // setup addons
         updateApp.bind(null, app, { installationProgress: '60, Setting up addons' }),
         addons.teardownAddons.bind(null, app),
         addons.setupAddons.bind(null, app),
 
-        // recreate container
         updateApp.bind(null, app, { installationProgress: '70, Creating container' }),
         deleteContainer.bind(null, app),
         createContainer.bind(null, app),
 
-        // add collectd profile
         updateApp.bind(null, app, { installationProgress: '80, Setting up collectd profile' }),
         addCollectdProfile.bind(null, app),
 
         runApp.bind(null, app),
 
-        // wait until dns propagated
         updateApp.bind(null, app, { installationProgress: '90, Waiting for DNS propagation' }),
         exports._waitForDnsPropagation.bind(null, app),
 
