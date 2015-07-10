@@ -142,20 +142,6 @@ describe('apptask', function () {
         });
     });
 
-    it('allocate access token', function (done) {
-        apptask._allocateAccessToken(APP, function (error) {
-            expect(error).to.be(null);
-            done();
-        });
-    });
-
-    it('remove access token', function (done) {
-        apptask._removeAccessToken(APP, function (error) {
-            expect(error).to.be(null);
-            done();
-        });
-    });
-
     it('barfs on empty manifest', function (done) {
         var badApp = _.extend({ }, APP);
         badApp.manifest = { };

@@ -16,8 +16,6 @@ exports = module.exports = {
     _deleteVolume: deleteVolume,
     _allocateOAuthProxyCredentials: allocateOAuthProxyCredentials,
     _removeOAuthProxyCredentials: removeOAuthProxyCredentials,
-    _allocateAccessToken: allocateAccessToken,
-    _removeAccessToken: removeAccessToken,
     _verifyManifest: verifyManifest,
     _registerSubdomain: registerSubdomain,
     _unregisterSubdomain: unregisterSubdomain,
@@ -51,7 +49,6 @@ var addons = require('./addons.js'),
     shell = require('./shell.js'),
     superagent = require('superagent'),
     sysinfo = require('./sysinfo.js'),
-    tokendb = require('./tokendb.js'),
     util = require('util'),
     uuid = require('node-uuid'),
     vbox = require('./vbox.js');
@@ -197,33 +194,27 @@ function createContainer(app, callback) {
         env.push('WEBADMIN_ORIGIN' + '=' + config.adminOrigin());
         env.push('API_ORIGIN' + '=' + config.adminOrigin());
 
-        tokendb.getByIdentifier(tokendb.PREFIX_APP + app.id, function (error, results) {
-            if (error || results.length === 0) return callback(new Error('No access token found: ' + error));
+        addons.getEnvironment(app.id, function (error, addonEnv) {
+            if (error) return callback(new Error('Error getting addon env: ' + error));
 
-            env.push('CLOUDRON_TOKEN' + '=' + results[0].accessToken);
+            var containerOptions = {
+                name: app.id,
+                Hostname: config.appFqdn(app.location),
+                Tty: true,
+                Image: app.manifest.dockerImage,
+                Cmd: null,
+                Volumes: { },
+                VolumesFrom: '',
+                Env: env.concat(addonEnv),
+                ExposedPorts: exposedPorts
+            };
 
-            addons.getEnvironment(app.id, function (error, addonEnv) {
-                if (error) return callback(new Error('Error getting addon env: ' + error));
+            debugApp(app, 'Creating container for %s', app.manifest.dockerImage);
 
-                var containerOptions = {
-                    name: app.id,
-                    Hostname: config.appFqdn(app.location),
-                    Tty: true,
-                    Image: app.manifest.dockerImage,
-                    Cmd: null,
-                    Volumes: { },
-                    VolumesFrom: '',
-                    Env: env.concat(addonEnv),
-                    ExposedPorts: exposedPorts
-                };
+            docker.createContainer(containerOptions, function (error, container) {
+                if (error) return callback(new Error('Error creating container: ' + error));
 
-                debugApp(app, 'Creating container for %s', app.manifest.dockerImage);
-
-                docker.createContainer(containerOptions, function (error, container) {
-                    if (error) return callback(new Error('Error creating container: ' + error));
-
-                    updateApp(app, { containerId: container.id }, callback);
-                });
+                updateApp(app, { containerId: container.id }, callback);
             });
         });
     });
@@ -295,32 +286,6 @@ function removeOAuthProxyCredentials(app, callback) {
     clientdb.delByAppId('proxy-' + app.id, function (error) {
         if (error && error.reason !== DatabaseError.NOT_FOUND) {
             console.error('Error removing OAuth client id', error);
-            return callback(error);
-        }
-
-        callback(null);
-    });
-}
-
-function allocateAccessToken(app, callback) {
-    assert.strictEqual(typeof app, 'object');
-    assert.strictEqual(typeof callback, 'function');
-
-    var token = tokendb.generateToken();
-    var expiresAt = Number.MAX_SAFE_INTEGER;    // basically never expire
-    var scopes = 'profile,users';               // TODO This should be put into the manifest and the user should know those
-    var clientId = '';                          // meaningless for apps so far
-
-    tokendb.add(token, tokendb.PREFIX_APP + app.id, clientId, expiresAt, scopes, callback);
-}
-
-function removeAccessToken(app, callback) {
-    assert.strictEqual(typeof app, 'object');
-    assert.strictEqual(typeof callback, 'function');
-
-    tokendb.delByIdentifier(tokendb.PREFIX_APP + app.id, function (error) {
-        if (error && error.reason !== DatabaseError.NOT_FOUND) {
-            console.error('Error removing access token', error);
             return callback(error);
         }
 
@@ -550,10 +515,6 @@ function install(app, callback) {
         updateApp.bind(null, app, { installationProgress: '20, Creating OAuth proxy credentials' }),
         allocateOAuthProxyCredentials.bind(null, app),
 
-        // allocate access token
-        updateApp.bind(null, app, { installationProgress: '30, Allocate access token' }),
-        allocateAccessToken.bind(null, app),
-
         // download the image
         updateApp.bind(null, app, { installationProgress: '40, Downloading image' }),
         downloadImage.bind(null, app),
@@ -627,11 +588,6 @@ function restore(app, callback) {
         removeOAuthProxyCredentials.bind(null, app),
         allocateOAuthProxyCredentials.bind(null, app),
 
-        // allocate access token
-        updateApp.bind(null, app, { installationProgress: '20, Allocate access token' }),
-        removeAccessToken.bind(null, app),
-        allocateAccessToken.bind(null, app),
-
         updateApp.bind(null, app, { installationProgress: '25, Creating volume' }),
         deleteVolume.bind(null, app),
         createVolume.bind(null, app),
@@ -688,9 +644,6 @@ function configure(app, callback) {
         updateApp.bind(null, app, { installationProgress: '15, Remove OAuth credentials' }),
         removeOAuthProxyCredentials.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '20, Remove access token' }),
-        removeAccessToken.bind(null, app),
-
         updateApp.bind(null, app, { installationProgress: '25, Configuring Nginx' }),
         configureNginx.bind(null, app),
 
@@ -699,10 +652,6 @@ function configure(app, callback) {
 
         updateApp.bind(null, app, { installationProgress: '35, Create OAuth proxy credentials' }),
         allocateOAuthProxyCredentials.bind(null, app),
-
-        // allocate access token
-        updateApp.bind(null, app, { installationProgress: '40, Allocate access token' }),
-        allocateAccessToken.bind(null, app),
 
         // addons like oauth might rely on the app's fqdn
         updateApp.bind(null, app, { installationProgress: '50, Setting up addons' }),
@@ -819,9 +768,6 @@ function uninstall(app, callback) {
 
         updateApp.bind(null, app, { installationProgress: '70, Unregistering subdomain' }),
         unregisterSubdomain.bind(null, app),
-
-        updateApp.bind(null, app, { installationProgress: '80, Remove access token' }),
-        removeAccessToken.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '85, Remove OAuth credentials' }),
         removeOAuthProxyCredentials.bind(null, app),
