@@ -375,7 +375,7 @@ function update(appId, manifest, portBindings, icon, callback) {
             manifest: manifest,
             portBindings: portBindings,
             oldConfig: {
-                manifest: manifest,
+                manifest: app.manifest,
                 portBindings: app.portBindings
             }
         };
