@@ -501,9 +501,10 @@ function install(app, callback) {
     async.series([
         verifyManifest.bind(null, app),
 
+        updateApp.bind(null, app, { installationProgress: '0, Configure nginx' }),
         configureNginx.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '0, Registering subdomain' }),
+        updateApp.bind(null, app, { installationProgress: '5, Registering subdomain' }),
         registerSubdomain.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '10, Downloading icon' }),
