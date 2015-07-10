@@ -4,13 +4,13 @@
 var app = angular.module('Application', []);
 
 app.controller('ErrorController', ['$scope', '$http', function ($scope, $http) {
-    $scope.webServerOriginLink = null;
+    $scope.webServerOriginLink = '/';
     $scope.errorMessage = '';
 
     // try to fetch at least config.json to get appstore url
     $http.get('config.json').success(function(data, status) {
         if (status !== 200 || typeof data !== 'object') return console.error(status, data);
-        $scope.webServerOrigin = data.webServerOrigin + '/console.html';
+        $scope.webServerOriginLink = data.webServerOrigin + '/console.html';
     }).error(function (data, status) {
         if (status === 404) console.error('No config.json found');
         else console.error(status, data);
@@ -20,8 +20,4 @@ app.controller('ErrorController', ['$scope', '$http', function ($scope, $http) {
 
     $scope.errorCode = search.errorCode || 0;
     $scope.errorContext = search.errorContext || '';
-
-    $scope.webServerOriginLink = function () {
-        window.location.href = $scope.webServerOrigin;
-    };
 }]);
