@@ -170,22 +170,19 @@ function getRestoreUrl(backupId, callback) {
 }
 
 function restoreApp(app, callback) {
-    if (!app.lastBackupId) {
-        debugApp(app, 'No existing backup to return to. Proceeding to setup addons');
-        return addons.setupAddons(app, callback);
-    }
+    assert(app.lastBackupId);
 
-   getRestoreUrl(app.lastBackupId, function (error, result) {
-        if (error) return callback(error);
+    getRestoreUrl(app.lastBackupId, function (error, result) {
+         if (error) return callback(error);
 
-        debugApp(app, 'restoreApp: restoreUrl:%s', result.url);
+         debugApp(app, 'restoreApp: restoreUrl:%s', result.url);
 
-        shell.sudo('restoreApp', [ RESTORE_APP_CMD,  app.id, result.url, result.backupKey ], function (error) {
-            if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
+         shell.sudo('restoreApp', [ RESTORE_APP_CMD,  app.id, result.url, result.backupKey ], function (error) {
+             if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
-            addons.restoreAddons(app, callback);
-        });
-    });
+             addons.restoreAddons(app, callback);
+         });
+     });
 }
 
 function backupApp(app, callback) {

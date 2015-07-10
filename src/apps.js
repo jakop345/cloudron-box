@@ -467,7 +467,20 @@ function restore(appId, callback) {
         error = validatePortBindings(restoreConfig.portBindings, restoreConfig.manifest.tcpPorts); // maybe new ports got reserved now
         if (error) return callback(error);
 
-        appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_RESTORE, function (error) {
+        // ## should probably query new location, access restriction from user
+        var values = {
+            manifest: restoreConfig.manifest,
+            portBindings: restoreConfig.portBindings,
+
+            oldConfig: {
+                location: app.location,
+                accessRestriction: app.accessRestriction,
+                portBindings: app.portBindings,
+                manifest: app.manifest
+            }
+        };
+
+        appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_RESTORE, values, function (error) {
             if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE)); // might be a bad guess
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 

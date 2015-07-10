@@ -561,67 +561,49 @@ function install(app, callback) {
     });
 }
 
-// restore may be called with or without a previous backup
+// restore is always called with a previous backup
 function restore(app, callback) {
-    if (app.lastBackupConfig) {
-        debug('Restoring from previous manifest');
-        app.manifest = app.lastBackupConfig.manifest;
-    }
+    assert(app.lastBackupId);
 
     async.series([
         updateApp.bind(null, app, { installationProgress: '0, Stopping app and deleting container' }),
         stopApp.bind(null, app),
         deleteContainer.bind(null, app),
 
-        // configure nginx
-        updateApp.bind(null, app, { installationProgress: '10, Configuring nginx' }),
-        configureNginx.bind(null, app),
+        updateApp.bind(null, app, { installationProgress: '10, Teardown addons' }),
+        addons.updateAddons.bind(null, app), // ## FIXME: ugly hack to make it remove addons from oldConfig
 
-        // register subdomain
-        updateApp.bind(null, app, { installationProgress: '12, Registering subdomain' }),
-        registerSubdomain.bind(null, app),
+        updateApp.bind(null, app, { installationProgress: '20, Deleting volume' }),
+        deleteVolume.bind(null, app),
 
-        // verify manifest
-        updateApp.bind(null, app, { installationProgress: '14, Verify manifest' }),
-        verifyManifest.bind(null, app),
+        updateApp.bind(null, app, { installationProgress: '30, Deleting image' }),
+        function (done) {
+            if (app.oldConfig.manifest.dockerImage === app.manifest.dockerImage) return done();
+
+            deleteImage(app, done);
+        },
+
+        updateApp.bind(null, app, { installationProgress: '40, Downloading icon' }),
         downloadIcon.bind(null, app),
 
-        // setup oauth proxy
-        updateApp.bind(null, app, { installationProgress: '16, Setting up OAuth proxy credentials' }),
-        removeOAuthProxyCredentials.bind(null, app),
-        allocateOAuthProxyCredentials.bind(null, app),
+        updateApp.bind(null, app, { installationProgress: '55, Downloading image' }),
+        downloadImage.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '25, Creating volume' }),
+        updateApp.bind(null, app, { installationProgress: '60, Creating volume' }),
         deleteVolume.bind(null, app),
         createVolume.bind(null, app),
 
-        // download the image
-        updateApp.bind(null, app, { installationProgress: '40, Downloading image' }),
-        downloadImage.bind(null, app),
+        updateApp.bind(null, app, { installationProgress: '65, Download backup and restore addons' }),
+        backups.restoreApp(null, app),
 
-        // restore app and addons
-        updateApp.bind(null, app, { installationProgress: '60, Restoring app and addons' }),
-        backups.restoreApp.bind(null, app),
-
-        // create container
         updateApp.bind(null, app, { installationProgress: '70, Creating container' }),
-        createContainer.bind(null, app), // container was already deleted as first step intentionally to allow volume deletion
+        deleteContainer.bind(null, app),
+        createContainer.bind(null, app),
 
-        // add collectd profile
-        updateApp.bind(null, app, { installationProgress: '80, Add collectd profile' }),
+        updateApp.bind(null, app, { installationProgress: '80, Setting up collectd profile' }),
         addCollectdProfile.bind(null, app),
 
-        runApp.bind(null, app),
-
-        // wait until dns propagated
-        updateApp.bind(null, app, { installationProgress: '90, Waiting for DNS propagation' }),
-        exports._waitForDnsPropagation.bind(null, app),
-
-        // done!
-        function (callback) {
-            debugApp(app, 'restored');
-            updateApp(app, { installationState: appdb.ISTATE_INSTALLED, installationProgress: '', health: null }, callback);
-        }
+        runApp.bind(null, app)
     ], function seriesDone(error) {
         if (error) {
             debugApp(app, 'Error installing app: %s', error);
