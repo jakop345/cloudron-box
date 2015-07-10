@@ -7,7 +7,6 @@
 'use strict';
 
 var appdb = require('../../appdb.js'),
-    apptask = require('../../apptask.js'),
     async = require('async'),
     config = require('../../../config.js'),
     constants = require('../../../constants.js'),
