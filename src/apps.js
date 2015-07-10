@@ -453,13 +453,27 @@ function restore(appId, callback) {
 
     debug('Will restore app with id:%s', appId);
 
-    appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_RESTORE, function (error) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE)); // might be a bad guess
+    appdb.get(appId, function (error, app) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        taskmanager.restartAppTask(appId);
+        var restoreConfig = app.lastBackupConfig;
 
-        callback(null);
+        // re-validate because this new box version may not accept old configs. if we restore location, it should be validated here as well
+        var error = checkManifestConstraints(restoreConfig.manifest);
+        if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Manifest cannot be installed: ' + error.message));
+
+        error = validatePortBindings(restoreConfig.portBindings, restoreConfig.manifest.tcpPorts);
+        if (error) return callback(error);
+
+        appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_RESTORE, function (error) {
+            if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE)); // might be a bad guess
+            if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+            taskmanager.restartAppTask(appId);
+
+            callback(null);
+        });
     });
 }
 
