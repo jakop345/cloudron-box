@@ -189,7 +189,14 @@ function restoreApp(app, callback) {
 }
 
 function backupApp(app, callback) {
-    if (!safe.fs.writeFileSync(path.join(paths.DATA_DIR, app.id + '/config.json'), JSON.stringify(app))) {
+    var appConfig = {
+        manifest: app.manifest,
+        location: app.location,
+        portBindings: app.portBindings,
+        accessRestriction: app.accessRestriction
+    };
+
+    if (!safe.fs.writeFileSync(path.join(paths.DATA_DIR, app.id + '/config.json'), JSON.stringify(appConfig), 'utf8')) {
         return callback(safe.error);
     }
 
