@@ -477,11 +477,12 @@ describe('database', function () {
             manifest: { version: '0.1', dockerImage: 'docker/app0', healthCheckPath: '/', httpPort: 80, title: 'app0' },
             httpPort: null,
             containerId: null,
-            portBindings: { port: '5678' },
+            portBindings: { port: 5678 },
             health: null,
             accessRestriction: '',
             lastBackupId: null,
-            lastBackupConfig: null
+            lastBackupConfig: null,
+            oldConfig: null
         };
         var APP_1 = {
             id: 'appid-1',
@@ -498,7 +499,8 @@ describe('database', function () {
             health: null,
             accessRestriction: 'roleAdmin',
             lastBackupId: null,
-            lastBackupConfig: null
+            lastBackupConfig: null,
+            oldConfig: null
         };
 
         it('add fails due to missing arguments', function () {
