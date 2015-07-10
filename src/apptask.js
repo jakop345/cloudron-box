@@ -686,7 +686,6 @@ function configure(app, callback) {
 }
 
 // nginx configuration is skipped because app.httpPort is expected to be available
-// TODO: old image should probably be deleted, but what if it's used by another app instance
 function update(app, callback) {
     debugApp(app, 'Updating to %s', safe.query(app, 'manifest.version'));
 
@@ -707,6 +706,13 @@ function update(app, callback) {
 
         updateApp.bind(null, app, { installationProgress: '25, Deleting container' }),
         deleteContainer.bind(null, app),
+
+        updateApp.bind(null, app, { installationProgress: '30, Deleting image' }),
+        function (done) {
+            if (app.oldConfig.manifest.dockerImage === app.manifest.dockerImage) return done();
+
+            deleteImage(app, done);
+        },
 
         updateApp.bind(null, app, { installationProgress: '35, Downloading icon' }),
         downloadIcon.bind(null, app),
