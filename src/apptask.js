@@ -513,6 +513,7 @@ function install(app, callback) {
 
         // create proxy OAuth credentials
         updateApp.bind(null, app, { installationProgress: '20, Creating OAuth proxy credentials' }),
+        removeOAuthProxyCredentials.bind(null, app),
         allocateOAuthProxyCredentials.bind(null, app),
 
         // download the image
