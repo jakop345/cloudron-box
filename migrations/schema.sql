@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS apps(
     createdAt TIMESTAMP(2) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     lastBackupId VARCHAR(128),
-    lastConfigJson VARCHAR(2048), // used for appstore and non-appstore installs
+    lastBackupConfigJson VARCHAR(2048), // used for appstore and non-appstore installs. it's here so it's easy to do REST validation
     PRIMARY KEY(id));
 
 CREATE TABLE IF NOT EXISTS appPortBindings(

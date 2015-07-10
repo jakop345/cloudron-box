@@ -56,11 +56,11 @@ var assert = require('assert'),
 
 var APPS_FIELDS = [ 'id', 'appStoreId', 'installationState', 'installationProgress', 'runState',
     'health', 'containerId', 'manifestJson', 'httpPort', 'location', 'dnsRecordId',
-    'accessRestriction', 'lastBackupId', 'lastConfigJson', 'oldConfigJson' ].join(',');
+    'accessRestriction', 'lastBackupId', 'lastBackupConfigJson', 'oldConfigJson' ].join(',');
 
 var APPS_FIELDS_PREFIXED = [ 'apps.id', 'apps.appStoreId', 'apps.installationState', 'apps.installationProgress', 'apps.runState',
     'apps.health', 'apps.containerId', 'apps.manifestJson', 'apps.httpPort', 'apps.location', 'apps.dnsRecordId',
-    'apps.accessRestriction', 'apps.lastBackupId', 'apps.lastConfigJson', 'apps.oldConfigJson' ].join(',');
+    'apps.accessRestriction', 'apps.lastBackupId', 'apps.lastBackupConfigJson', 'apps.oldConfigJson' ].join(',');
 
 var PORT_BINDINGS_FIELDS = [ 'hostPort', 'environmentVariable', 'appId' ].join(',');
 
@@ -71,9 +71,9 @@ function postProcess(result) {
     result.manifest = safe.JSON.parse(result.manifestJson);
     delete result.manifestJson;
 
-    assert(result.lastConfigJson === null || typeof result.lastConfigJson === 'string');
-    result.lastConfig = safe.JSON.parse(result.lastConfigJson);
-    delete result.lastConfigJson;
+    assert(result.lastBackupConfigJson === null || typeof result.lastBackupConfigJson === 'string');
+    result.lastBackupConfig = safe.JSON.parse(result.lastBackupConfigJson);
+    delete result.lastBackupConfigJson;
 
     assert(result.oldConfigJson === null || typeof result.oldConfigJson === 'string');
     result.oldConfig = safe.JSON.parse(result.oldConfigJson);
@@ -277,8 +277,8 @@ function updateWithConstraints(id, app, constraints, callback) {
         if (p === 'manifest') {
             fields.push('manifestJson = ?');
             values.push(JSON.stringify(app[p]));
-        } else if (p === 'lastConfig') {
-            fields.push('lastConfigJson = ?');
+        } else if (p === 'lastBackupConfig') {
+            fields.push('lastBackupConfigJson = ?');
             values.push(JSON.stringify(app[p]));
         } else if (p === 'oldConfig') {
             fields.push('oldConfigJson = ?');

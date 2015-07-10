@@ -481,7 +481,7 @@ describe('database', function () {
             health: null,
             accessRestriction: '',
             lastBackupId: null,
-            lastConfig: null
+            lastBackupConfig: null
         };
         var APP_1 = {
             id: 'appid-1',
@@ -498,7 +498,7 @@ describe('database', function () {
             health: null,
             accessRestriction: 'roleAdmin',
             lastBackupId: null,
-            lastConfig: null
+            lastBackupConfig: null
         };
 
         it('add fails due to missing arguments', function () {
