@@ -497,6 +497,16 @@ function updateApp(app, values, callback) {
     });
 }
 
+// Ordering is based on the following rationale:
+//   - configure nginx, icon, oauth
+//   - register subdomain.
+//          at this point, the user can visit the site and the above nginx config can show some install screen.
+//          the icon can be displayed in this nginx page and oauth proxy means the page can be protected
+//   - download image
+//   - setup volumes
+//   - setup addons (requires the above volume)
+//   - setup the container (requires image, volumes, addons)
+//   - setup collectd (requires container id)
 function install(app, callback) {
     async.series([
         verifyManifest.bind(null, app),
@@ -504,15 +514,15 @@ function install(app, callback) {
         updateApp.bind(null, app, { installationProgress: '0, Configure nginx' }),
         configureNginx.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '5, Registering subdomain' }),
-        registerSubdomain.bind(null, app),
-
         updateApp.bind(null, app, { installationProgress: '10, Downloading icon' }),
         downloadIcon.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '20, Creating OAuth proxy credentials' }),
         removeOAuthProxyCredentials.bind(null, app),
         allocateOAuthProxyCredentials.bind(null, app),
+
+        updateApp.bind(null, app, { installationProgress: '30, Registering subdomain' }),
+        registerSubdomain.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '40, Downloading image' }),
         downloadImage.bind(null, app),
@@ -640,11 +650,11 @@ function configure(app, callback) {
         updateApp.bind(null, app, { installationProgress: '25, Configuring Nginx' }),
         configureNginx.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '30, Registering subdomain' }),
-        registerSubdomain.bind(null, app),
-
-        updateApp.bind(null, app, { installationProgress: '35, Create OAuth proxy credentials' }),
+        updateApp.bind(null, app, { installationProgress: '30, Create OAuth proxy credentials' }),
         allocateOAuthProxyCredentials.bind(null, app),
+
+        updateApp.bind(null, app, { installationProgress: '35, Registering subdomain' }),
+        registerSubdomain.bind(null, app),
 
         // addons like oauth might rely on the app's fqdn
         updateApp.bind(null, app, { installationProgress: '50, Setting up addons' }),
@@ -681,6 +691,9 @@ function update(app, callback) {
     debugApp(app, 'Updating to %s', safe.query(app, 'manifest.version'));
 
     async.series([
+        updateApp.bind(null, app, { installationProgress: '0, Verify manifest' }),
+        verifyManifest.bind(null, app),
+
         updateApp.bind(null, app, { installationProgress: '10, Backup app' }),
         function (done) {
             backups.backupApp(app, function (error) {
@@ -695,8 +708,7 @@ function update(app, callback) {
         updateApp.bind(null, app, { installationProgress: '25, Deleting container' }),
         deleteContainer.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '30, Verify manifest' }),
-        verifyManifest.bind(null, app),
+        updateApp.bind(null, app, { installationProgress: '35, Downloading icon' }),
         downloadIcon.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '45, Downloading image' }),
@@ -734,10 +746,9 @@ function update(app, callback) {
 function uninstall(app, callback) {
     debugApp(app, 'uninstalling');
 
-    // TODO: figure what happens if one of the steps fail
     async.series([
-        updateApp.bind(null, app, { installationProgress: '0, Unconfiguring Nginx' }),
-        unconfigureNginx.bind(null, app),
+        updateApp.bind(null, app, { installationProgress: '0, Remove collectd profile' }),
+        removeCollectdProfile.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '10, Stopping app' }),
         stopApp.bind(null, app),
@@ -745,26 +756,26 @@ function uninstall(app, callback) {
         updateApp.bind(null, app, { installationProgress: '20, Deleting container' }),
         deleteContainer.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '30, Remove collectd profile' }),
-        removeCollectdProfile.bind(null, app),
-
-        updateApp.bind(null, app, { installationProgress: '40, Deleting image' }),
-        deleteImage.bind(null, app),
-
-        updateApp.bind(null, app, { installationProgress: '50, Teardown addons' }),
+        updateApp.bind(null, app, { installationProgress: '30, Teardown addons' }),
         addons.teardownAddons.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '60, Deleting volume' }),
+        updateApp.bind(null, app, { installationProgress: '40, Deleting volume' }),
         deleteVolume.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '70, Unregistering subdomain' }),
+        updateApp.bind(null, app, { installationProgress: '50, Deleting image' }),
+        deleteImage.bind(null, app),
+
+        updateApp.bind(null, app, { installationProgress: '60, Unregistering subdomain' }),
         unregisterSubdomain.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '85, Remove OAuth credentials' }),
+        updateApp.bind(null, app, { installationProgress: '70, Remove OAuth credentials' }),
         removeOAuthProxyCredentials.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '90, Cleanup icon' }),
+        updateApp.bind(null, app, { installationProgress: '80, Cleanup icon' }),
         removeIcon.bind(null, app),
+
+        updateApp.bind(null, app, { installationProgress: '90, Unconfiguring Nginx' }),
+        unconfigureNginx.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '95, Remove app from database' }),
         appdb.del.bind(null, app.id)
