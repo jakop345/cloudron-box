@@ -458,6 +458,7 @@ function restore(appId, callback) {
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
         var restoreConfig = app.lastBackupConfig;
+        if (!restoreConfig) return callback(new AppsError(AppsError.BAD_STATE, 'No restore point'));
 
         // re-validate because this new box version may not accept old configs. if we restore location, it should be validated here as well
         var error = checkManifestConstraints(restoreConfig.manifest);
