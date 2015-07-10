@@ -9,7 +9,8 @@ exports = module.exports = {
     checkUpdates: checkUpdates,
     getUpdateInfo: getUpdateInfo,
     update: update,
-    autoupdate: autoupdate
+    autoupdate: autoupdate,
+    hasBoxUpdate: hasBoxUpdate
 };
 
 var apps = require('./apps.js'),
