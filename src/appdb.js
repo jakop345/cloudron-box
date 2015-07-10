@@ -55,11 +55,11 @@ var assert = require('assert'),
     util = require('util');
 
 var APPS_FIELDS = [ 'id', 'appStoreId', 'installationState', 'installationProgress', 'runState',
-    'health', 'containerId', 'manifestJson', 'httpPort', 'location', 'dnsRecordId', 'accessRestriction', 'lastBackupId', 'lastManifestJson' ].join(',');
+    'health', 'containerId', 'manifestJson', 'httpPort', 'location', 'dnsRecordId', 'accessRestriction', 'lastBackupId', 'lastConfigJson' ].join(',');
 
 var APPS_FIELDS_PREFIXED = [ 'apps.id', 'apps.appStoreId', 'apps.installationState', 'apps.installationProgress', 'apps.runState',
     'apps.health', 'apps.containerId', 'apps.manifestJson', 'apps.httpPort', 'apps.location', 'apps.dnsRecordId', 'apps.accessRestriction',
-    'apps.lastBackupId', 'apps.lastManifestJson' ].join(',');
+    'apps.lastBackupId', 'apps.lastConfigJson' ].join(',');
 
 var PORT_BINDINGS_FIELDS = [ 'hostPort', 'environmentVariable', 'appId' ].join(',');
 
@@ -70,9 +70,9 @@ function postProcess(result) {
     result.manifest = safe.JSON.parse(result.manifestJson);
     delete result.manifestJson;
 
-    assert(result.lastManifestJson === null || typeof result.lastManifestJson === 'string');
-    result.lastManifest = safe.JSON.parse(result.lastManifestJson);
-    delete result.lastManifestJson;
+    assert(result.lastConfigJson === null || typeof result.lastConfigJson === 'string');
+    result.lastConfig = safe.JSON.parse(result.lastConfigJson);
+    delete result.lastConfigJson;
 
     assert(result.hostPorts === null || typeof result.hostPorts === 'string');
     assert(result.environmentVariables === null || typeof result.environmentVariables === 'string');
@@ -272,8 +272,8 @@ function updateWithConstraints(id, app, constraints, callback) {
         if (p === 'manifest') {
             fields.push('manifestJson = ?');
             values.push(JSON.stringify(app[p]));
-        } else if (p === 'lastManifest') {
-            fields.push('lastManifestJson = ?');
+        } else if (p === 'lastConfig') {
+            fields.push('lastConfigJson = ?');
             values.push(JSON.stringify(app[p]));
         } else if (p !== 'portBindings') {
             fields.push(p + ' = ?');

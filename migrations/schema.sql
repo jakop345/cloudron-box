@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS apps(
     createdAt TIMESTAMP(2) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     lastBackupId VARCHAR(128),
-    lastManifestJson VARCHAR(2048), // used for appstore and non-appstore installs
+    lastConfigJson VARCHAR(2048), // used for appstore and non-appstore installs
     PRIMARY KEY(id));
 
 CREATE TABLE IF NOT EXISTS appPortBindings(

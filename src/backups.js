@@ -215,7 +215,7 @@ function backupApp(app, callback) {
 
             debugApp(app, 'backupApp: successful id:%s', result.id);
 
-            apps.setRestorePoint(app.id, result.id, app.manifest, function (error) {
+            apps.setRestorePoint(app.id, result.id, appConfig, function (error) {
                 if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
                 return callback(null, result.id);
