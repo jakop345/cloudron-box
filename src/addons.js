@@ -153,10 +153,11 @@ function teardownAddons(app, callback) {
     }, callback);
 }
 
-function updateAddons(app, oldManifest, callback) {
+function updateAddons(app, callback) {
     assert.strictEqual(typeof app, 'object');
-    assert(!oldManifest || typeof oldManifest === 'object');
     assert.strictEqual(typeof callback, 'function');
+
+    var oldManifest = app.oldConfig ? app.oldConfig.manifest : null;
 
     setupAddons(app, function (error) {
         if (error) return callback(error);

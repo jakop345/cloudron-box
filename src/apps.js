@@ -318,7 +318,13 @@ function configure(appId, location, portBindings, accessRestriction, callback) {
         var values = {
             location: location.toLowerCase(),
             accessRestriction: accessRestriction,
-            portBindings: portBindings
+            portBindings: portBindings,
+
+            oldConfig: {
+                location: app.location,
+                accessRestriction: app.accessRestriction,
+                portBindings: app.portBindings
+            }
         };
 
         debug('Will configure app with id:%s values:%j', appId, values);
@@ -361,7 +367,16 @@ function update(appId, manifest, portBindings, icon, callback) {
         }
     }
 
-    appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_UPDATE, { manifest: manifest, portBindings: portBindings }, function (error) {
+    var values = {
+        manifest: manifest,
+        portBindings: portBindings,
+        oldConfig: {
+            manifest: manifest,
+            portBindings: app.portBindings
+        }
+    };
+
+    appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_UPDATE, values, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE)); // might be a bad guess
         if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(getDuplicateErrorDetails('' /* location cannot conflict */, portBindings, error));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));

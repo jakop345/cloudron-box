@@ -685,8 +685,6 @@ function configure(app, callback) {
 // nginx configuration is skipped because app.httpPort is expected to be available
 // TODO: old image should probably be deleted, but what if it's used by another app instance
 function update(app, callback) {
-    var oldManifest = app.manifest; // TODO: this won't be correct all the time should we crash after download manifest
-
     debugApp(app, 'Updating to %s', safe.query(app, 'manifest.version'));
 
     async.series([
@@ -712,7 +710,7 @@ function update(app, callback) {
         downloadImage.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '70, Updating addons' }),
-        addons.updateAddons.bind(null, app, oldManifest),
+        addons.updateAddons.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '80, Creating container' }),
         createContainer.bind(null, app),
