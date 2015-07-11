@@ -51,25 +51,25 @@ var KNOWN_ADDONS = {
         setup: allocateOAuthCredentials,
         teardown: removeOAuthCredentials,
         backup: NOOP,
-        restore: NOOP
+        restore: allocateOAuthCredentials
     },
     token: {
         setup: allocateAccessToken,
         teardown: removeAccessToken,
         backup: NOOP,
-        restore: NOOP
+        restore: allocateAccessToken
     },
     ldap: {
         setup: setupLdap,
         teardown: teardownLdap,
         backup: NOOP,
-        restore: NOOP
+        restore: setupLdap
     },
     sendmail: {
         setup: setupSendMail,
         teardown: teardownSendMail,
         backup: NOOP,
-        restore: NOOP
+        restore: setupSendMail
     },
     mysql: {
         setup: setupMySql,
