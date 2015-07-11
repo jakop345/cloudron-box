@@ -603,7 +603,13 @@ function restore(app, callback) {
         updateApp.bind(null, app, { installationProgress: '80, Setting up collectd profile' }),
         addCollectdProfile.bind(null, app),
 
-        runApp.bind(null, app)
+        runApp.bind(null, app),
+
+        // done!
+        function (callback) {
+            debugApp(app, 'configured');
+            updateApp(app, { installationState: appdb.ISTATE_INSTALLED, installationProgress: '', health: null }, callback);
+        }
     ], function seriesDone(error) {
         if (error) {
             debugApp(app, 'Error installing app: %s', error);
