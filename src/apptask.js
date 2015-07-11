@@ -594,7 +594,7 @@ function restore(app, callback) {
         createVolume.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '65, Download backup and restore addons' }),
-        backups.restoreApp(null, app),
+        backups.restoreApp.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '70, Creating container' }),
         deleteContainer.bind(null, app),
