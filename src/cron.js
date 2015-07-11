@@ -14,7 +14,7 @@ var assert = require('assert'),
     settings = require('./settings.js'),
     updater = require('./updater.js');
 
-var gAutoUpdaterJob = null,
+var gAutoupdaterJob = null,
     gUpdateCheckerJob = null,
     gHeartbeatJob = null,
     gBackupJob = null;
@@ -81,11 +81,11 @@ function autoupdatePatternChanged(pattern) {
 
     debug('Auto update pattern changed to %s', pattern);
 
-    if (gAutoUpdaterJob) gAutoUpdaterJob.stop();
+    if (gAutoupdaterJob) gAutoupdaterJob.stop();
 
     if (pattern === 'never') return;
 
-    gAutoUpdaterJob = new CronJob({
+    gAutoupdaterJob = new CronJob({
         cronTime: pattern,
         onTick: function() {
             debug('Starting autoupdate');
@@ -101,8 +101,8 @@ function uninitialize(callback) {
 
     if (!gInitialized) return callback();
 
-    if (gAutoUpdaterJob) gAutoUpdaterJob.stop();
-    gAutoUpdaterJob = null;
+    if (gAutoupdaterJob) gAutoupdaterJob.stop();
+    gAutoupdaterJob = null;
 
     gUpdateCheckerJob.stop();
     gUpdateCheckerJob = null;
