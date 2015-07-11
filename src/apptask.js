@@ -194,7 +194,7 @@ function createContainer(app, callback) {
         env.push('WEBADMIN_ORIGIN' + '=' + config.adminOrigin());
         env.push('API_ORIGIN' + '=' + config.adminOrigin());
 
-        addons.getEnvironment(app.id, function (error, addonEnv) {
+        addons.getEnvironment(app, function (error, addonEnv) {
             if (error) return callback(new Error('Error getting addon env: ' + error));
 
             var containerOptions = {
@@ -328,10 +328,10 @@ function startContainer(app, callback) {
         }
 
         var startOptions = {
-            Binds: addons.getBindsSync(app),
+            Binds: addons.getBindsSync(app, app.manifest),
             PortBindings: dockerPortBindings,
             PublishAllPorts: false,
-            Links: addons.getLinksSync(app),
+            Links: addons.getLinksSync(app, app.manifest),
             RestartPolicy: {
                 "Name": "always",
                 "MaximumRetryCount": 0
@@ -532,8 +532,8 @@ function install(app, callback) {
         createVolume.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '60, Setting up addons' }),
-        addons.teardownAddons.bind(null, app),
-        addons.setupAddons.bind(null, app),
+        addons.teardownAddons.bind(null, app, app.manifest),
+        addons.setupAddons.bind(null, app, app.manifest),
 
         updateApp.bind(null, app, { installationProgress: '70, Creating container' }),
         deleteContainer.bind(null, app),
@@ -571,7 +571,7 @@ function restore(app, callback) {
         deleteContainer.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '10, Teardown addons' }),
-        addons.updateAddons.bind(null, app), // ## FIXME: ugly hack to make it remove addons from oldConfig
+        addons.teardownAddons.bind(null, app, app.oldConfig.manifest),
 
         updateApp.bind(null, app, { installationProgress: '20, Deleting volume' }),
         deleteVolume.bind(null, app),
@@ -640,7 +640,7 @@ function configure(app, callback) {
 
         // addons like oauth might rely on the app's fqdn
         updateApp.bind(null, app, { installationProgress: '50, Setting up addons' }),
-        addons.setupAddons.bind(null, app),
+        addons.setupAddons.bind(null, app, app.manifest),
 
         updateApp.bind(null, app, { installationProgress: '60, Creating container' }),
         createContainer.bind(null, app),
@@ -703,7 +703,7 @@ function update(app, callback) {
         downloadImage.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '70, Updating addons' }),
-        addons.updateAddons.bind(null, app),
+        addons.updateAddons.bind(null, app, app.oldConfig.manifest, app.manifest),
 
         updateApp.bind(null, app, { installationProgress: '80, Creating container' }),
         createContainer.bind(null, app),
@@ -745,7 +745,7 @@ function uninstall(app, callback) {
         deleteContainer.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '30, Teardown addons' }),
-        addons.teardownAddons.bind(null, app),
+        addons.teardownAddons.bind(null, app, app.manifest),
 
         updateApp.bind(null, app, { installationProgress: '40, Deleting volume' }),
         deleteVolume.bind(null, app),
