@@ -53,7 +53,7 @@ http {
         location @fallback {
             internal;
             root <%= sourceDir %>/webadmin/dist;
-            rewrite ^/$ /appstatus.html break;
+            rewrite ^/$ /nakeddomain.html break;
         }
 
         return 404;
