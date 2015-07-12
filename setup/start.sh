@@ -87,8 +87,11 @@ service collectd restart
 set_progress "30" "Setup nginx"
 # setup naked domain to use admin by default. app restoration will overwrite this config
 mkdir -p "${DATA_DIR}/nginx/applications"
-cp "${script_dir}/start/nginx/nginx.conf" "${DATA_DIR}/nginx/nginx.conf"
 cp "${script_dir}/start/nginx/mime.types" "${DATA_DIR}/nginx/mime.types"
+
+# generate the main nginx config file
+${BOX_SRC_DIR}/node_modules/.bin/ejs-cli -f "${script_dir}/start/nginx/nginx.ejs" \
+    -O "{ \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${DATA_DIR}/nginx/nginx.conf"
 
 # generate these for update code paths as well to overwrite splash
 ${BOX_SRC_DIR}/node_modules/.bin/ejs-cli -f "${script_dir}/start/nginx/appconfig.ejs" \

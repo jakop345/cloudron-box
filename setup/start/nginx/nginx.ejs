@@ -49,6 +49,13 @@ http {
         ssl_certificate      cert/host.cert;
         ssl_certificate_key  cert/host.key;
 
+        error_page 404 = @fallback;
+        location @fallback {
+            internal;
+            root <%= sourceDir %>/webadmin/dist;
+            rewrite ^/$ /appstatus.html break;
+        }
+
         return 404;
     }
 
