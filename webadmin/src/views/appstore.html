@@ -10,13 +10,11 @@
                 </h3>
             </div>
             <div class="modal-body">
-                <div>
-                    <div class="collapse" id="collapseMediaLinksCarousel" data-toggle="false">
-                        <div ng-repeat="mediaLink in appInstall.mediaLinks" class="slick-item" style="background-image: url('{{mediaLink}}');" ng-show="appInstall.mediaLinks.length == 1"></div>
-                        <slick init-onload="true" current-index="0" autoplay="true" arrows="false" autoplay-speed="2000" data="appInstall.mediaLinks" ng-show="appInstall.mediaLinks.length > 1">
-                            <div ng-repeat="mediaLink in appInstall.mediaLinks" class="slick-item" style="background-image: url('{{mediaLink}}');"></div>
-                        </slick>
-                    </div>
+                <div class="collapse" id="collapseMediaLinksCarousel" data-toggle="false">
+                    <div ng-repeat="mediaLink in appInstall.mediaLinks" class="slick-item" style="background-image: url('{{mediaLink}}');" ng-show="appInstall.mediaLinks.length == 1"></div>
+                    <slick init-onload="true" current-index="0" autoplay="true" arrows="false" autoplay-speed="2000" data="appInstall.mediaLinks" ng-show="appInstall.mediaLinks.length > 1">
+                        <div ng-repeat="mediaLink in appInstall.mediaLinks" class="slick-item" style="background-image: url('{{mediaLink}}');"></div>
+                    </slick>
                     <div class="appstore-details-description" ng-class="{ 'expand': descriptionExpanded }">
                         <div ng-bind-html="appInstall.app.manifest.description | markdown2html"></div>
                         <div class="appstore-details-description-overlay" ng-show="!descriptionExpanded"></div>
