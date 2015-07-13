@@ -8,7 +8,6 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
     $scope.category = '';
     $scope.cachedCategory = ''; // used to cache the selected category while searching
     $scope.searchString = '';
-    $scope.descriptionExpanded = false;
 
     $scope.appInstall = {
         busy: false,
@@ -73,7 +72,6 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         $scope.appInstall.accessRestriction = '';
         $scope.appInstall.installFormVisible = false;
         $scope.appInstall.mediaLinks = [];
-        $scope.descriptionExpanded = false;
         $('#collapseInstallForm').collapse('hide');
         $('#collapseMediaLinksCarousel').collapse('show');
 
@@ -153,10 +151,6 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
 
             $('#appInstallModal').modal('hide');
         });
-    };
-
-    $scope.descriptionToggle = function () {
-        $scope.descriptionExpanded = !$scope.descriptionExpanded;
     };
 
     function refresh() {
