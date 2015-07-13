@@ -29,6 +29,8 @@ exports = module.exports = {
     appFqdn: appFqdn,
     zoneName: zoneName,
 
+    isDev: isDev,
+
     // for testing resets to defaults
     _reset: initConfig
 };
@@ -171,5 +173,9 @@ function database() {
 
 function developerMode() {
     return get('developerMode');
+}
+
+function isDev() {
+    return /dev/i.test(get('boxVersionsUrl'));
 }
 
