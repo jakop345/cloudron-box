@@ -11,7 +11,8 @@ var ejs = require('gulp-ejs'),
     sass = require('gulp-sass'),
     sourcemaps = require('gulp-sourcemaps'),
     minifyCSS = require('gulp-minify-css'),
-    autoprefixer = require('gulp-autoprefixer');
+    autoprefixer = require('gulp-autoprefixer'),
+    argv = require('yargs').argv;
 
 gulp.task('3rdparty', function () {
     gulp.src([
@@ -40,6 +41,19 @@ gulp.task('3rdparty', function () {
 
 gulp.task('js', ['js-index', 'js-setup', 'js-update', 'js-error'], function () {});
 
+var oauth = {
+    clientId: argv.clientId || 'cid-webadmin',
+    clientSecret: argv.clientSecret || 'unused',
+    apiOrigin: argv.apiOrigin || ''
+};
+
+console.log();
+console.log('Using OAuth credentials:');
+console.log(' ClientId:     %s', oauth.clientId);
+console.log(' ClientSecret: %s', oauth.clientSecret);
+console.log(' Cloudron API: %s', oauth.apiOrigin || 'default');
+console.log();
+
 gulp.task('js-index', function () {
     gulp.src([
         'webadmin/src/js/index.js',
@@ -48,6 +62,7 @@ gulp.task('js-index', function () {
         'webadmin/src/js/main.js',
         'webadmin/src/views/*.js'
         ])
+        .pipe(ejs({ oauth: oauth }, { ext: '.js' }))
         .pipe(sourcemaps.init())
         .pipe(concat('index.js', { newLine: ';' }))
         .pipe(uglify())
@@ -57,6 +72,7 @@ gulp.task('js-index', function () {
 
 gulp.task('js-setup', function () {
     gulp.src(['webadmin/src/js/setup.js', 'webadmin/src/js/client.js'])
+        .pipe(ejs({ oauth: oauth }, { ext: '.js' }))
         .pipe(sourcemaps.init())
         .pipe(concat('setup.js', { newLine: ';' }))
         .pipe(uglify())

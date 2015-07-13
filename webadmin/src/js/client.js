@@ -76,11 +76,9 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             developerMode: false
         };
         this._installedApps = [];
-
-        // Patch this for local development
-        this._clientId = 'cid-webadmin';
-        this._clientSecret = 'unused';
-        this.apiOrigin = '';
+        this._clientId = '<%= oauth.clientId %>';
+        this._clientSecret = '<%= oauth.clientSecret %>';
+        this.apiOrigin = '<%= oauth.apiOrigin %>';
 
         this.setToken(localStorage.token);
     }
