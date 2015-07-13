@@ -233,13 +233,15 @@ function deleteContainer(app, callback) {
     container.remove(removeOptions, function (error) {
         if (error && error.statusCode === 404) return updateApp(app, { containerId: null }, callback);
 
-        if (error) console.error('Error removing container', error);
+        if (error) debugApp(app, 'Error removing container', error);
         callback(error);
     });
 }
 
-function deleteImage(app, callback) {
-    var dockerImage = app.manifest.dockerImage;
+function deleteImage(app, manifest, callback) {
+    var dockerImage = manifest ? manifest.dockerImage : null;
+    if (!dockerImage) return callback(null);
+
     var image = docker.getImage(dockerImage);
 
     var removeOptions = {
@@ -251,7 +253,7 @@ function deleteImage(app, callback) {
         if (error && error.statusCode === 404) return callback(null);
         if (error && error.statusCode === 409) return callback(null); // another container using the image
 
-        if (error) console.error('Error removing image', error);
+        if (error) debugApp(app, 'Error removing image', error);
         callback(error);
     });
 }
@@ -285,7 +287,7 @@ function removeOAuthProxyCredentials(app, callback) {
 
     clientdb.delByAppId('proxy-' + app.id, function (error) {
         if (error && error.reason !== DatabaseError.NOT_FOUND) {
-            console.error('Error removing OAuth client id', error);
+            debugApp(app, 'Error removing OAuth client id', error);
             return callback(error);
         }
 
@@ -303,7 +305,7 @@ function addCollectdProfile(app, callback) {
 
 function removeCollectdProfile(app, callback) {
     fs.unlink(path.join(paths.COLLECTD_APPCONFIG_DIR, app.id + '.conf'), function (error, stdout, stderr) {
-        if (error) console.error('Error removing collectd profile', error, stdout, stderr);
+        if (error) debugApp(app, 'Error removing collectd profile', error, stdout, stderr);
         shell.sudo('removeCollectdProfile', [ RELOAD_COLLECTD_CMD ], callback);
     });
 }
@@ -440,7 +442,7 @@ function unregisterSubdomain(app, callback) {
             if (error) {
                 debugApp(app, 'Error making request: %s', error);
             } else if (res.status !== 204) {
-                console.error('Error unregistering subdomain:', res.status, res.body);
+                debugApp(app, 'Error unregistering subdomain:', res.status, res.body);
             }
 
             updateApp(app, { dnsRecordId: null }, callback);
@@ -580,7 +582,7 @@ function restore(app, callback) {
         function (done) {
             if (app.oldConfig.manifest.dockerImage === app.manifest.dockerImage) return done();
 
-            deleteImage(app, done);
+            deleteImage(app, app.oldConfig.manifest, done);
         },
 
         updateApp.bind(null, app, { installationProgress: '40, Downloading icon' }),
@@ -699,7 +701,7 @@ function update(app, callback) {
         function (done) {
             if (app.oldConfig.manifest.dockerImage === app.manifest.dockerImage) return done();
 
-            deleteImage(app, done);
+            deleteImage(app, app.oldConfig.manifest, done);
         },
 
         updateApp.bind(null, app, { installationProgress: '35, Downloading icon' }),
@@ -757,7 +759,7 @@ function uninstall(app, callback) {
         deleteVolume.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '50, Deleting image' }),
-        deleteImage.bind(null, app),
+        deleteImage.bind(null, app, app.manifest),
 
         updateApp.bind(null, app, { installationProgress: '60, Unregistering subdomain' }),
         unregisterSubdomain.bind(null, app),
