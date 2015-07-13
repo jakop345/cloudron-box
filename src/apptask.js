@@ -126,7 +126,7 @@ function unconfigureNginx(app, callback) {
 }
 
 function downloadImage(app, callback) {
-    debugApp(app, 'downloadImage %s', app.manifest.dockerImaeg);
+    debugApp(app, 'downloadImage %s', app.manifest.dockerImage);
 
     docker.pull(app.manifest.dockerImage, function (err, stream) {
         if (err) return callback(new Error('Error connecting to docker'));
