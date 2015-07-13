@@ -7,22 +7,11 @@
                 <h3 class="modal-title" id="appInstallModalLabel">
                     <img ng-src="{{appInstall.app.iconUrl}}" onerror="this.onerror=null;this.src='img/appicon_fallback.png'" class="app-icon"/>
                     {{ appInstall.app.manifest.title }}
+                    <button type="button" class="btn btn-xs btn-success" ng-show="!appInstall.installFormVisible && user.admin" ng-click="showInstallForm()">Install</button>
                 </h3>
             </div>
             <div class="modal-body">
-                <div class="collapse" id="collapseMediaLinksCarousel" data-toggle="false">
-                    <div ng-repeat="mediaLink in appInstall.mediaLinks" class="slick-item" style="background-image: url('{{mediaLink}}');" ng-show="appInstall.mediaLinks.length == 1"></div>
-                    <slick init-onload="true" current-index="0" autoplay="true" arrows="false" autoplay-speed="2000" data="appInstall.mediaLinks" ng-show="appInstall.mediaLinks.length > 1">
-                        <div ng-repeat="mediaLink in appInstall.mediaLinks" class="slick-item" style="background-image: url('{{mediaLink}}');"></div>
-                    </slick>
-                    <div class="appstore-details-description" ng-class="{ 'expand': descriptionExpanded }">
-                        <div ng-bind-html="appInstall.app.manifest.description | markdown2html"></div>
-                        <div class="appstore-details-description-overlay" ng-show="!descriptionExpanded"></div>
-                    </div>
-                    <a href="" ng-click="descriptionToggle()" ng-show="!descriptionExpanded">Read more...</a>
-                </div>
                 <div class="collapse" id="collapseInstallForm" data-toggle="false">
-                    <h3>Installation</h3>
                     <form class="form-signin" role="form" name="appInstallForm" ng-submit="doInstall()" autocomplete="off">
                         <div class="has-error text-center" ng-show="appInstall.error.other" ng-bind-html="appInstall.error.other"></div>
                         <div class="form-group" ng-class="{ 'has-error': (appInstallForm.location.$dirty && appInstallForm.location.$invalid) || (!appInstallForm.location.$dirty && appInstall.error.location) }">
@@ -55,11 +44,22 @@
                         <input class="ng-hide" type="submit" ng-disabled="appInstallForm.$invalid || busy"/>
                     </form>
                 </div>
+                <div class="collapse" id="collapseMediaLinksCarousel" data-toggle="false">
+                    <div ng-repeat="mediaLink in appInstall.mediaLinks" class="slick-item" style="background-image: url('{{mediaLink}}');" ng-show="appInstall.mediaLinks.length == 1"></div>
+                    <slick init-onload="true" current-index="0" autoplay="true" arrows="false" autoplay-speed="2000" data="appInstall.mediaLinks" ng-show="appInstall.mediaLinks.length > 1">
+                        <div ng-repeat="mediaLink in appInstall.mediaLinks" class="slick-item" style="background-image: url('{{mediaLink}}');"></div>
+                    </slick>
+                    <div class="appstore-details-description" ng-class="{ 'expand': descriptionExpanded }">
+                        <div ng-bind-html="appInstall.app.manifest.description | markdown2html"></div>
+                        <div class="appstore-details-description-overlay" ng-show="!descriptionExpanded"></div>
+                    </div>
+                    <a href="" ng-click="descriptionToggle()" ng-show="!descriptionExpanded">Read more...</a>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-success" ng-show="appInstall.installFormVisible && user.admin" ng-click="doInstall()" ng-disabled="appInstallForm.$invalid || appInstall.busy"><i class="fa fa-spinner fa-pulse" ng-show="appInstall.busy"></i> Install</button>
                 <button type="button" class="btn btn-success" ng-show="!appInstall.installFormVisible && user.admin" ng-click="showInstallForm()">Install</button>
+                <button type="button" class="btn btn-success" ng-show="appInstall.installFormVisible && user.admin" ng-click="doInstall()" ng-disabled="appInstallForm.$invalid || appInstall.busy"><i class="fa fa-spinner fa-pulse" ng-show="appInstall.busy"></i> Install</button>
             </div>
         </div>
     </div>
