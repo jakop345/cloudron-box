@@ -98,9 +98,9 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th style="width: 50%">User</th>
-                                <th style="width: 25%" class="text-right">Group</th>
-                                <th style="width: 25%" class="text-right">Actions</th>
+                                <th style="">User</th>
+                                <th style="width: 1px" class="text-right">Group</th>
+                                <th style="width: 200px" class="text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -110,10 +110,10 @@
                                     <span class="text-muted">{{ user.email }}</span>
                                 </td>
                                 <td class="text-right" style="vertical-align: bottom">
-                                    <span ng-show="isAdmin(user)" class="label label-danger">Admin</span>
+                                    <span ng-show="isAdmin(user)" class="label label-default">Admin</span>
                                 </td>
                                 <td class="text-right" style="vertical-align: bottom">
-                                    <span ng-show="isMe(user)" class="label label-primary">This is you!</span>
+                                    <span ng-show="isMe(user)" class="label label-success">This is you!</span>
                                     <button ng-show="!isMe(user) && userInfo.admin" ng-click="toggleAdmin(user)" class="btn btn-xs btn-default">
                                         <span ng-show="!user.admin"><i class="fa fa-plus"></i> Add Admin</span>
                                         <span ng-show="user.admin"><i class="fa fa-minus"></i> Remove Admin</span>
