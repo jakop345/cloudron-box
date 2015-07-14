@@ -185,6 +185,16 @@ html {
     font-size: 18px;
 }
 
+.appstore-install-description {
+    max-height: 250px;
+    overflow-x: none;
+    overflow-y: auto;
+}
+
+.modal-footer {
+    padding-top: 0;
+}
+
 .appstore-category-link:hover,
 .appstore-category-link:focus,
 .appstore-category-link.category-active {

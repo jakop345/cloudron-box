@@ -7,7 +7,6 @@
                 <h3 class="modal-title" id="appInstallModalLabel">
                     <img ng-src="{{appInstall.app.iconUrl}}" onerror="this.onerror=null;this.src='img/appicon_fallback.png'" class="app-icon"/>
                     {{ appInstall.app.manifest.title }}
-                    <button type="button" class="btn btn-xs btn-success" ng-show="!appInstall.installFormVisible && user.admin" ng-click="showInstallForm()">Install</button>
                 </h3>
             </div>
             <div class="modal-body">
@@ -49,7 +48,9 @@
                     <slick init-onload="true" current-index="0" autoplay="true" arrows="false" autoplay-speed="2000" data="appInstall.mediaLinks" ng-show="appInstall.mediaLinks.length > 1">
                         <div ng-repeat="mediaLink in appInstall.mediaLinks" class="slick-item" style="background-image: url('{{mediaLink}}');"></div>
                     </slick>
-                    <div ng-bind-html="appInstall.app.manifest.description | markdown2html"></div>
+                    <div class="appstore-install-description">
+                        <div ng-bind-html="appInstall.app.manifest.description | markdown2html"></div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
