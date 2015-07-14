@@ -59,7 +59,7 @@ angular.module('Application').controller('GraphsController', ['$scope', '$locati
             console.log(data);
 
             var buckets = [];
-            var timeBuckets = 4;
+            var timeBuckets = 8;
             var duration = 2 * 60 * 60;
             var timeBucketSlice = duration / timeBuckets;
             var timestampBegin = (Date.now()/1000).toFixed() - duration;  // we use seconds, not ms
@@ -79,8 +79,10 @@ angular.module('Application').controller('GraphsController', ['$scope', '$locati
                 return d.reduce(function (sum, a) { return sum + a; }, 0) / (d.length !== 0 ? d.length : 1);
             }).map(function (d) { return parseInt((d/1024/1024).toFixed(2)); });
 
+            var labels = buckets.map(function (d, index) { return (duration - (index * timeBucketSlice)) / 60 / 60 + 'h'; });
+
             var tmp = {
-                labels: ['-2h', '-1.5h', '-1h', '-0.5h', 'Now'],
+                labels: labels,
                 datasets: [{
                     label: 'Memory',
                     fillColor: "#82C4F8",
@@ -96,10 +98,10 @@ angular.module('Application').controller('GraphsController', ['$scope', '$locati
             var ctx = $('#memoryAppChart').get(0).getContext('2d');
             var myChart = new Chart(ctx);
 
-            var options = $scope.activeApp === 'system' ? {} : {
+            var options = {
                 scaleOverride: true,
                 scaleSteps: 10,
-                scaleStepWidth: 10,
+                scaleStepWidth: $scope.activeApp === 'system' ? 100 : 10,
                 scaleStartValue: 0
             };
 
