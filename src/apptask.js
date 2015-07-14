@@ -417,7 +417,9 @@ function downloadIcon(app, callback) {
 }
 
 function registerSubdomain(app, callback) {
-    debugApp(app, 'Registering subdomain');
+    debugApp(app, 'Registering subdomain location [%s]', app.location);
+
+    if (app.location === '') return callback(null); // bare domain is already registered
 
     var record = { subdomain: app.location, type: 'A', value: sysinfo.getIp() };
 
@@ -440,6 +442,8 @@ function registerSubdomain(app, callback) {
 
 function unregisterSubdomain(app, callback) {
     debugApp(app, 'Unregistering subdomain: dnsRecordId=%s', app.dnsRecordId);
+
+    if (!app.dnsRecordId || app.location === '') return callback(null); // do not unregister bare domain
 
     superagent
         .del(config.apiServerOrigin() + '/api/v1/subdomains/' + app.dnsRecordId)
