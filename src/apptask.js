@@ -579,7 +579,7 @@ function restore(app, callback) {
         deleteContainer.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '10, Teardown addons' }),
-        addons.teardownAddons.bind(null, app, app.oldConfig.manifest),
+        addons.teardownAddons.bind(null, app, app.oldConfig ? app.oldConfig.manifest : null), // backward compat
 
         updateApp.bind(null, app, { installationProgress: '20, Deleting volume' }),
         deleteVolume.bind(null, app),
