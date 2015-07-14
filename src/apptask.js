@@ -242,19 +242,25 @@ function deleteImage(app, manifest, callback) {
     var dockerImage = manifest ? manifest.dockerImage : null;
     if (!dockerImage) return callback(null);
 
-    var image = docker.getImage(dockerImage);
-
-    var removeOptions = {
-        force: true,
-        noprune: false
-    };
-
-    image.remove(removeOptions, function (error) {
+    docker.getImage(dockerImage).inspect(function (error, result) {
         if (error && error.statusCode === 404) return callback(null);
-        if (error && error.statusCode === 409) return callback(null); // another container using the image
 
-        if (error) debugApp(app, 'Error removing image', error);
-        callback(error);
+        if (error) return callback(error);
+
+        var removeOptions = {
+            force: true,
+            noprune: false
+        };
+
+        // delete image by id because docker pull pulls down all the tags and this is the only way to delete all tags
+        docker.getImage(result.Id).remove(removeOptions, function (error) {
+            if (error && error.statusCode === 404) return callback(null);
+            if (error && error.statusCode === 409) return callback(null); // another container using the image
+
+            if (error) debugApp(app, 'Error removing image', error);
+
+            callback(error);
+        });
     });
 }
 
@@ -579,11 +585,7 @@ function restore(app, callback) {
         deleteVolume.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '30, Deleting image' }),
-        function (done) {
-            if (app.oldConfig.manifest.dockerImage === app.manifest.dockerImage) return done();
-
-            deleteImage(app, app.oldConfig.manifest, done);
-        },
+        deleteImage.bind(null, app, app.oldConfig.manifest),
 
         updateApp.bind(null, app, { installationProgress: '40, Downloading icon' }),
         downloadIcon.bind(null, app),
@@ -698,11 +700,7 @@ function update(app, callback) {
         deleteContainer.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '30, Deleting image' }),
-        function (done) {
-            if (app.oldConfig.manifest.dockerImage === app.manifest.dockerImage) return done();
-
-            deleteImage(app, app.oldConfig.manifest, done);
-        },
+        deleteImage.bind(null, app, app.oldConfig.manifest),
 
         updateApp.bind(null, app, { installationProgress: '35, Downloading icon' }),
         downloadIcon.bind(null, app),
