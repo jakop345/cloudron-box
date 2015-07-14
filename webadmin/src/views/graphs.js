@@ -6,6 +6,9 @@ angular.module('Application').controller('GraphsController', ['$scope', '$locati
     Client.onReady(function () { if (!Client.getUserInfo().admin) $location.path('/'); });
 
     $scope.diskUsage = {};
+    $scope.activeApp = null;
+
+    $scope.installedApps = Client.getInstalledApps();
 
     function bytesToGigaBytes(value) {
         return (value/1024/1024/1024).toFixed(2);
@@ -43,7 +46,43 @@ angular.module('Application').controller('GraphsController', ['$scope', '$locati
         myChart.Doughnut(tmp);
     }
 
-    $scope.updateGraphs = function () {
+    $scope.setMemoryApp = function (app) {
+        Client.graphs(['averageSeries(collectd.localhost.table-' + app.id + '-memory.gauge-rss)'], '-2h', function (error, data) {
+            if (error) return console.log(error);
+
+            console.log(data);
+
+            // var buckets = [];
+            // var timestamp = Date.now() - 24 * 60 * 60;
+
+            // data.datapoints.forEach(function (d) {
+            //     if (d[1] <)
+            // })
+
+            var foo = data[0].datapoints.map(function (d) { return (d[0] || 0); });
+
+            var tmp = {
+                labels: ['-2h', '-1.5h', '-1h', '-0.5h', 'Now'],
+                datasets: [{
+                    label: 'Memory',
+                    fillColor: "#82C4F8",
+                    strokeColor: "#2196F3",
+                    pointColor: "rgba(151,187,205,1)",
+                    pointStrokeColor: "#ffffff",
+                    pointHighlightFill: "#82C4F8",
+                    pointHighlightStroke: "#82C4F8",
+                    // data: [28, 48, 40, 19, 86, 27, 90]
+                    data: foo
+                }]
+            };
+
+            var ctx = $('#memoryAppChart').get(0).getContext('2d');
+            var myChart = new Chart(ctx);
+            myChart.Line(tmp);
+        });
+    };
+
+    $scope.updateDiskGraphs = function () {
         Client.graphs([
             'averageSeries(collectd.localhost.df-loop0.df_complex-free)',
             'averageSeries(collectd.localhost.df-loop0.df_complex-reserved)',
@@ -65,5 +104,5 @@ angular.module('Application').controller('GraphsController', ['$scope', '$locati
         });
     };
 
-    Client.onReady($scope.updateGraphs);
+    Client.onReady($scope.updateDiskGraphs);
 }]);

@@ -45,4 +45,28 @@
         </div>
     </div>
 
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Memory</h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="nav nav-tabs">
+                <li ng-class="{ active: activeApp === app }" ng-repeat="app in installedApps">
+                    <a ng-click="setMemoryApp(app)" href="">{{ app.location }}</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <canvas id="memoryAppChart" width="600" height="300"></canvas>
+        </div>
+    </div>
+
 </div>
+
+<br/>
