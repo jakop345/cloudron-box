@@ -56,8 +56,6 @@ angular.module('Application').controller('GraphsController', ['$scope', '$locati
         Client.graphs([target], '-2h', function (error, data) {
             if (error) return console.log(error);
 
-            console.log(data);
-
             var buckets = [];
             var timeBuckets = 8;
             var duration = 2 * 60 * 60;
