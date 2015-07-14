@@ -1,15 +1,17 @@
 
+<div class="row">
+    <div class="col-md-12">
+        <h1>Graphs</h1>
+    </div>
+</div>
+
 <br/>
 
 <div class="graphs">
 
-    <div class="row">
-        <div class="col-md-12">
-            <h2>Disk Usage</h2>
-        </div>
-    </div>
-
-    <div class="row">
+    <div class="row shadow memory-app-container">
+        <h2>Disk Usage</h2>
+        <br/>
         <div class="col-md-4">
             <h4>Applications <span class="badge">{{ diskUsage['docker'].sum }} GB</span></h4>
             <canvas id="dockerDiskUsageChart" width="200" height="200"></canvas>
@@ -45,28 +47,30 @@
         </div>
     </div>
 
+    <br/>
+    <br/>
+
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-12 shadow memory-app-container">
             <h2>Memory</h2>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-12">
-            <ul class="nav nav-tabs">
-                <li ng-class="{ active: activeApp === app }" ng-repeat="app in installedApps">
-                    <a ng-click="setMemoryApp(app)" href="">{{ app.location }}</a>
-                </li>
-            </ul>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-12">
+            <br/>
+            <div>
+                <ul class="nav nav-tabs nav-justified">
+                    <li ng-class="{ active: activeApp === 'system' }">
+                        <a ng-click="setMemoryApp('system')" href="">System</a>
+                    </li>
+                    <li ng-class="{ active: activeApp === app }" ng-repeat="app in installedApps">
+                        <a ng-click="setMemoryApp(app)" href="">{{ app.location }}</a>
+                    </li>
+                </ul>
+            </div>
+            <br/>
             <canvas id="memoryAppChart" width="600" height="300"></canvas>
+            <p>Memory consumption over time in MB.</p>
         </div>
     </div>
 
 </div>
 
+<br/>
 <br/>

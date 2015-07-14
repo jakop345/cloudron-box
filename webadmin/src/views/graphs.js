@@ -47,19 +47,37 @@ angular.module('Application').controller('GraphsController', ['$scope', '$locati
     }
 
     $scope.setMemoryApp = function (app) {
-        Client.graphs(['averageSeries(collectd.localhost.table-' + app.id + '-memory.gauge-rss)'], '-2h', function (error, data) {
+        $scope.activeApp = app;
+
+        var target;
+        if (app === 'system') target = 'averageSeries(collectd.localhost.memory.memory-used)';
+        else target = 'averageSeries(collectd.localhost.table-' + app.id + '-memory.gauge-rss)';
+
+        Client.graphs([target], '-2h', function (error, data) {
             if (error) return console.log(error);
 
             console.log(data);
 
-            // var buckets = [];
-            // var timestamp = Date.now() - 24 * 60 * 60;
+            var buckets = [];
+            var timeBuckets = 4;
+            var duration = 2 * 60 * 60;
+            var timeBucketSlice = duration / timeBuckets;
+            var timestampBegin = (Date.now()/1000).toFixed() - duration;  // we use seconds, not ms
 
-            // data.datapoints.forEach(function (d) {
-            //     if (d[1] <)
-            // })
+            data[0].datapoints.forEach(function (d) {
+                var offset = d[1] - timestampBegin;
+                offset = offset <= 0 ? 1 : offset;
 
-            var foo = data[0].datapoints.map(function (d) { return (d[0] || 0); });
+                var bucket = parseInt((offset / timeBucketSlice).toFixed(0));
+
+                if (!buckets[bucket]) buckets[bucket] = [];
+                buckets[bucket].push(d[0]);
+            });
+
+            // now calculate the average
+            var foo = buckets.map(function (d) {
+                return d.reduce(function (sum, a) { return sum + a; }, 0) / (d.length !== 0 ? d.length : 1);
+            }).map(function (d) { return parseInt((d/1024/1024).toFixed(2)); });
 
             var tmp = {
                 labels: ['-2h', '-1.5h', '-1h', '-0.5h', 'Now'],
@@ -71,14 +89,21 @@ angular.module('Application').controller('GraphsController', ['$scope', '$locati
                     pointStrokeColor: "#ffffff",
                     pointHighlightFill: "#82C4F8",
                     pointHighlightStroke: "#82C4F8",
-                    // data: [28, 48, 40, 19, 86, 27, 90]
                     data: foo
                 }]
             };
 
             var ctx = $('#memoryAppChart').get(0).getContext('2d');
             var myChart = new Chart(ctx);
-            myChart.Line(tmp);
+
+            var options = $scope.activeApp === 'system' ? {} : {
+                scaleOverride: true,
+                scaleSteps: 10,
+                scaleStepWidth: 10,
+                scaleStartValue: 0
+            };
+
+            myChart.Line(tmp, options);
         });
     };
 
@@ -105,4 +130,5 @@ angular.module('Application').controller('GraphsController', ['$scope', '$locati
     };
 
     Client.onReady($scope.updateDiskGraphs);
+    Client.onReady($scope.setMemoryApp.bind(null, 'system'));
 }]);
