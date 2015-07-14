@@ -439,7 +439,7 @@ function registerSubdomain(app, callback) {
 }
 
 function unregisterSubdomain(app, callback) {
-    debugApp(app, 'Unregistering subdomain');
+    debugApp(app, 'Unregistering subdomain: dnsRecordId=%s', app.dnsRecordId);
 
     superagent
         .del(config.apiServerOrigin() + '/api/v1/subdomains/' + app.dnsRecordId)
@@ -569,7 +569,7 @@ function install(app, callback) {
     });
 }
 
-// restore is always called with a previous backup
+// restore is always called with a previous backup. restore is also called for upgrades and infra updates
 function restore(app, callback) {
     assert(app.lastBackupId);
 
@@ -577,6 +577,9 @@ function restore(app, callback) {
         updateApp.bind(null, app, { installationProgress: '0, Stopping app and deleting container' }),
         stopApp.bind(null, app),
         deleteContainer.bind(null, app),
+
+        updateApp.bind(null, app, { installationProgress: '5, Unregistering subdomain' }),
+        unregisterSubdomain.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '10, Teardown addons' }),
         addons.teardownAddons.bind(null, app, app.oldConfig ? app.oldConfig.manifest : null), // backward compat
@@ -589,6 +592,9 @@ function restore(app, callback) {
 
         updateApp.bind(null, app, { installationProgress: '40, Downloading icon' }),
         downloadIcon.bind(null, app),
+
+        updateApp.bind(null, app, { installationProgress: '45, Registering subdomain' }), // ip might change during upgrades
+        registerSubdomain.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '55, Downloading image' }),
         downloadImage.bind(null, app),
