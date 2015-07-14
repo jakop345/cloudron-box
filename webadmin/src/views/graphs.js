@@ -3,7 +3,7 @@
 'use strict';
 
 angular.module('Application').controller('GraphsController', ['$scope', '$location', 'Client', function ($scope, $location, Client) {
-    if (!Client.getUserInfo().admin) $location.path('/');
+    Client.onReady(function () { if (!Client.getUserInfo().admin) $location.path('/'); });
 
     $scope.activeTab = 'day';
 
@@ -155,12 +155,12 @@ angular.module('Application').controller('GraphsController', ['$scope', '$locati
 
     $scope.updateGraphs = function () {
         var activeTab = $scope.activeTab;
-       var from = '-24hours';
+        var from = '-24hours';
         switch (activeTab) {
-        case 'day': from = '-24hours'; break;
-        case 'month': from = '-1month'; break;
-        case 'year': from = '-1year'; break;
-        default: console.log('internal errror');
+            case 'day': from = '-24hours'; break;
+            case 'month': from = '-1month'; break;
+            case 'year': from = '-1year'; break;
+            default: console.log('internal errror');
         }
 
         Client.graphs([ cpuUsageTarget, networkUsageTxTarget, networkUsageRxTarget, diskUsageAppsUsedTarget, diskUsageDataUsedTarget ], from, function (error, data) {
