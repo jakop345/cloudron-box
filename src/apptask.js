@@ -585,7 +585,7 @@ function restore(app, callback) {
         deleteVolume.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '30, Deleting image' }),
-        deleteImage.bind(null, app, app.oldConfig.manifest),
+        deleteImage.bind(null, app, app.oldConfig ? app.oldConfig.manifest : null),
 
         updateApp.bind(null, app, { installationProgress: '40, Downloading icon' }),
         downloadIcon.bind(null, app),
