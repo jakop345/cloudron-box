@@ -590,23 +590,29 @@ function restore(app, callback) {
         updateApp.bind(null, app, { installationProgress: '30, Deleting image' }),
         deleteImage.bind(null, app, app.oldConfig ? app.oldConfig.manifest : null),
 
-        updateApp.bind(null, app, { installationProgress: '40, Downloading icon' }),
+        updateApp.bind(null, app, { installationProgress: '40, Configuring Nginx' }),
+        configureNginx.bind(null, app),
+
+        updateApp.bind(null, app, { installationProgress: '45, Downloading icon' }),
         downloadIcon.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '45, Registering subdomain' }), // ip might change during upgrades
+        updateApp.bind(null, app, { installationProgress: '50, Create OAuth proxy credentials' }),
+        allocateOAuthProxyCredentials.bind(null, app),
+
+        updateApp.bind(null, app, { installationProgress: '55, Registering subdomain' }), // ip might change during upgrades
         registerSubdomain.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '55, Downloading image' }),
+        updateApp.bind(null, app, { installationProgress: '60, Downloading image' }),
         downloadImage.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '60, Creating volume' }),
+        updateApp.bind(null, app, { installationProgress: '65, Creating volume' }),
         deleteVolume.bind(null, app),
         createVolume.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '65, Download backup and restore addons' }),
+        updateApp.bind(null, app, { installationProgress: '70, Download backup and restore addons' }),
         backups.restoreApp.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '70, Creating container' }),
+        updateApp.bind(null, app, { installationProgress: '75, Creating container' }),
         deleteContainer.bind(null, app),
         createContainer.bind(null, app),
 
@@ -615,9 +621,12 @@ function restore(app, callback) {
 
         runApp.bind(null, app),
 
+        updateApp.bind(null, app, { installationProgress: '90, Waiting for DNS propagation' }),
+        exports._waitForDnsPropagation.bind(null, app),
+
         // done!
         function (callback) {
-            debugApp(app, 'configured');
+            debugApp(app, 'restored');
             updateApp(app, { installationState: appdb.ISTATE_INSTALLED, installationProgress: '', health: null }, callback);
         }
     ], function seriesDone(error) {
