@@ -99,78 +99,130 @@ angular.module('Application').controller('GraphsController', ['$scope', '$locati
         networkGraph.render();
     }
 
-    function renderDisk(activeTab, appsUsedData, dataUsedData) {
-        var transformedAppsUsed = [ ], transformedDataUsed = [ ];
+    // function renderDisk(activeTab, appsUsedData, dataUsedData) {
+    //     var transformedAppsUsed = [ ], transformedDataUsed = [ ];
 
-        if (appsUsedData && appsUsedData.datapoints) {
-            transformedAppsUsed = appsUsedData.datapoints.map(function (point) { return { y: point[0], x: point[1] }; });
-        }
+    //     if (appsUsedData && appsUsedData.datapoints) {
+    //         transformedAppsUsed = appsUsedData.datapoints.map(function (point) { return { y: point[0], x: point[1] }; });
+    //     }
 
-        if (dataUsedData && dataUsedData.datapoints) {
-            transformedDataUsed = dataUsedData.datapoints.map(function (point) { return { y: point[0], x: point[1] }; });
-        }
+    //     if (dataUsedData && dataUsedData.datapoints) {
+    //         transformedDataUsed = dataUsedData.datapoints.map(function (point) { return { y: point[0], x: point[1] }; });
+    //     }
 
-        var diskGraph = new Rickshaw.Graph({
-            element: document.querySelector('#' + activeTab + 'DiskChart'),
-            renderer: 'area',
-            width: 580,
-            height: 250,
-            min: 0,
-            max: 30 * 1024 * 1024 * 1024, // 30gb
-            series: [{
-                color: 'steelblue',
-                data: transformedAppsUsed,
-                name: 'apps'
-            }, {
-                color: 'green',
-                data: transformedDataUsed,
-                name: 'data'
-            }]
-        } );
+    //     var diskGraph = new Rickshaw.Graph({
+    //         element: document.querySelector('#' + activeTab + 'DiskChart'),
+    //         renderer: 'area',
+    //         width: 580,
+    //         height: 250,
+    //         min: 0,
+    //         max: 30 * 1024 * 1024 * 1024, // 30gb
+    //         series: [{
+    //             color: 'steelblue',
+    //             data: transformedAppsUsed,
+    //             name: 'apps'
+    //         }, {
+    //             color: 'green',
+    //             data: transformedDataUsed,
+    //             name: 'data'
+    //         }]
+    //     } );
 
-        var diskXAxis = new Rickshaw.Graph.Axis.Time({ graph: diskGraph });
-        var diskYAxis = new Rickshaw.Graph.Axis.Y({
-            graph: diskGraph,
-            orientation: 'left',
-            tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
-            element: document.getElementById(activeTab + 'DiskYAxis'),
-        });
+    //     var diskXAxis = new Rickshaw.Graph.Axis.Time({ graph: diskGraph });
+    //     var diskYAxis = new Rickshaw.Graph.Axis.Y({
+    //         graph: diskGraph,
+    //         orientation: 'left',
+    //         tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
+    //         element: document.getElementById(activeTab + 'DiskYAxis'),
+    //     });
 
-        var diskHoverDetail = new Rickshaw.Graph.HoverDetail({
-            graph: diskGraph,
-            formatter: function(series, x, y) {
-                var swatch = '<span class="detail_swatch" style="background-color: ' + series.color + '"></span>';
-                var content = swatch + series.name + ": " + new Number(y/(1024 * 1024 * 1024)).toFixed(2) + 'GB<br>';
-                return content;
-            }
-        });
+    //     var diskHoverDetail = new Rickshaw.Graph.HoverDetail({
+    //         graph: diskGraph,
+    //         formatter: function(series, x, y) {
+    //             var swatch = '<span class="detail_swatch" style="background-color: ' + series.color + '"></span>';
+    //             var content = swatch + series.name + ": " + new Number(y/(1024 * 1024 * 1024)).toFixed(2) + 'GB<br>';
+    //             return content;
+    //         }
+    //     });
 
-        var diskLegend = new Rickshaw.Graph.Legend({
-            graph: diskGraph,
-            element: document.getElementById(activeTab + 'DiskLegend')
-        });
+    //     var diskLegend = new Rickshaw.Graph.Legend({
+    //         graph: diskGraph,
+    //         element: document.getElementById(activeTab + 'DiskLegend')
+    //     });
 
-        diskGraph.render();
+    //     diskGraph.render();
+    // }
+
+    $scope.diskUsage = {};
+
+    function bytesToGigaBytes(value) {
+        return (value/1024/1024/1024).toFixed(2);
+    }
+
+    function renderDisk(type, free, reserved, used) {
+        console.log(type, free, reserved, used);
+
+        $scope.diskUsage[type] = {
+            used: bytesToGigaBytes(used.datapoints[0][0]),
+            reserved: bytesToGigaBytes(reserved.datapoints[0][0]),
+            free: bytesToGigaBytes(free.datapoints[0][0]),
+            sum: bytesToGigaBytes(used.datapoints[0][0] + reserved.datapoints[0][0] + free.datapoints[0][0])
+        };
+
+        var tmp = [{
+            value: $scope.diskUsage[type].used,
+            color: "#2196F3",
+            highlight: "#82C4F8",
+            label: "Used"
+        }, {
+            value: $scope.diskUsage[type].reserved,
+            color: "#f0ad4e",
+            highlight: "#F8D9AC",
+            label: "Reserved"
+        }, {
+            value: $scope.diskUsage[type].free,
+            color:"#27CE65",
+            highlight: "#76E59F",
+            label: "Free"
+        }];
+
+        var ctx = $('#' + type + 'DiskUsageChart').get(0).getContext('2d');
+        var myChart = new Chart(ctx);
+        myChart.Doughnut(tmp);
     }
 
     $scope.updateGraphs = function () {
-        var activeTab = $scope.activeTab;
-        var from = '-24hours';
-        switch (activeTab) {
-            case 'day': from = '-24hours'; break;
-            case 'month': from = '-1month'; break;
-            case 'year': from = '-1year'; break;
-            default: console.log('internal errror');
-        }
+        // var activeTab = $scope.activeTab;
+        var from = '-1min';
+        // switch (activeTab) {
+        //     case 'day': from = '-24hours'; break;
+        //     case 'month': from = '-1month'; break;
+        //     case 'year': from = '-1year'; break;
+        //     default: console.log('internal errror');
+        // }
 
-        Client.graphs([ cpuUsageTarget, networkUsageTxTarget, networkUsageRxTarget, diskUsageAppsUsedTarget, diskUsageDataUsedTarget ], from, function (error, data) {
+        Client.graphs([
+            'averageSeries(collectd.localhost.df-loop0.df_complex-free)',
+            'averageSeries(collectd.localhost.df-loop0.df_complex-reserved)',
+            'averageSeries(collectd.localhost.df-loop0.df_complex-used)',
+
+            'averageSeries(collectd.localhost.df-loop1.df_complex-free)',
+            'averageSeries(collectd.localhost.df-loop1.df_complex-reserved)',
+            'averageSeries(collectd.localhost.df-loop1.df_complex-used)',
+
+            'averageSeries(collectd.localhost.df-vda1.df_complex-free)',
+            'averageSeries(collectd.localhost.df-vda1.df_complex-reserved)',
+            'averageSeries(collectd.localhost.df-vda1.df_complex-used)',
+        ], from, function (error, data) {
             if (error) return console.log(error);
 
-            renderCpu(activeTab, data[0]);
+            // renderCpu(activeTab, data[0]);
 
-            renderNetwork(activeTab, data[1], data[2]);
+            // renderNetwork(activeTab, data[1], data[2]);
 
-            renderDisk(activeTab, data[3], data[4]);
+            renderDisk('docker', data[0], data[1], data[2]);
+            renderDisk('box', data[3], data[4], data[5]);
+            renderDisk('cloudron', data[6], data[7], data[8]);
         });
     };
 

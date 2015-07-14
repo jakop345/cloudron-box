@@ -595,3 +595,35 @@ footer a {
     vertical-align: middle;
     width: 100%;
 }
+
+
+// ----------------------------
+// Graphs classes
+// ----------------------------
+
+$graphs-primary:        #2196F3;
+$graphs-warning:        #f0ad4e;
+$graphs-success:        #27CE65;
+
+$graphs-primary-alt:    lighten(#2196F3, 20%);
+$graphs-warning-alt:    lighten(#f0ad4e, 20%);
+$graphs-success-alt:    lighten(#27CE65, 20%);
+
+.graphs {
+    text-align: center;
+
+    .text-primary {
+        font-weight: bold;
+        color: $graphs-primary;
+    }
+
+    .text-warning {
+        font-weight: bold;
+        color: $graphs-warning;
+    }
+
+    .text-success {
+        font-weight: bold;
+        color: $graphs-success;
+    }
+}

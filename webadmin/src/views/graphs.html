@@ -1,7 +1,53 @@
 
 <br/>
 
-<div class="row">
+<div class="graphs">
+
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Disk Usage</h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <h4>Applications <span class="badge">{{ diskUsage['docker'].sum }} GB</span></h4>
+            <canvas id="dockerDiskUsageChart" width="200" height="200"></canvas>
+            <p>
+                <span class="text-success">Free {{ diskUsage['docker'].free }} GB</span>
+                &nbsp;
+                <span class="text-warning">Reserved {{ diskUsage['docker'].reserved }} GB</span>
+                &nbsp;
+                <span class="text-primary">Used {{ diskUsage['docker'].used }} GB</span>
+            </p>
+        </div>
+        <div class="col-md-4">
+            <h4>Cloudron <span class="badge">{{ diskUsage['box'].sum }} GB</span></h4>
+            <canvas id="boxDiskUsageChart" width="200" height="200"></canvas>
+            <p>
+                <span class="text-success">Free {{ diskUsage['box'].free }} GB</span>
+                &nbsp;
+                <span class="text-warning">Reserved {{ diskUsage['box'].reserved }} GB</span>
+                &nbsp;
+                <span class="text-primary">Used {{ diskUsage['box'].used }} GB</span>
+            </p>
+        </div>
+        <div class="col-md-4">
+            <h4>System (all) <span class="badge">{{ diskUsage['cloudron'].sum }} GB</span></h4>
+            <canvas id="cloudronDiskUsageChart" width="200" height="200"></canvas>
+            <p>
+                <span class="text-success">Free {{ diskUsage['cloudron'].free }} GB</span>
+                &nbsp;
+                <span class="text-warning">Reserved {{ diskUsage['cloudron'].reserved }} GB</span>
+                &nbsp;
+                <span class="text-primary">Used {{ diskUsage['cloudron'].used }} GB</span>
+            </p>
+        </div>
+    </div>
+
+</div>
+
+<!-- <div class="row">
     <div class="col-lg-12">
         <ul class="nav nav-tabs">
             <li ng-class="{ active: activeTab === 'day' }">
@@ -80,3 +126,4 @@
     </div>
 </div>
 
+ -->
