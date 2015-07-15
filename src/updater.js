@@ -5,7 +5,6 @@
 exports = module.exports = {
     checkUpdates: checkUpdates,
     getUpdateInfo: getUpdateInfo,
-    update: update,
     autoupdate: autoupdate
 };
 
@@ -13,19 +12,19 @@ var apps = require('./apps.js'),
     assert = require('assert'),
     async = require('async'),
     backups = require('./backups.js'),
-    progress = require('./progress.js'),
+    cloudron = require('./cloudron.js'),
     config = require('../config.js'),
     debug = require('debug')('box:updater'),
     fs = require('fs'),
-    util = require('util'),
     mailer = require('./mailer.js'),
     path = require('path'),
     paths = require('./paths.js'),
+    progress = require('./progress.js'),
     safe = require('safetydance'),
     semver = require('semver'),
-    superagent = require('superagent');
+    superagent = require('superagent'),
+    util = require('util');
 
-var INSTALLER_UPDATE_URL = 'http://127.0.0.1:2020/api/v1/installer/update';
 var NOOP_CALLBACK = function (error) { console.error(error); };
 
 var gAppUpdateInfo = { }, // id -> update info { creationDate, manifest }
@@ -168,111 +167,11 @@ function checkUpdates() {
     });
 }
 
-function update(callback) {
-    assert.strictEqual(typeof callback, 'function');
-
-    progress.set(progress.UPDATE, 0, 'Begin update');
-
-    startBoxUpdate(gBoxUpdateInfo, function (error) {
-        if (error) {
-            progress.clear(progress.UPDATE); // update failed, clear the update progress
-            return callback(error);
-        }
-
-        callback(null);
-    });
-}
-
-function upgrade(callback) {
-    assert(gBoxUpdateInfo.upgrade);
-
-    debug('box needs upgrade, backup box and apps');
-
-    backups.backup(function (error) {
-        if (error) return callback(error);
-
-        superagent.post(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/upgrade')
-          .query({ token: config.token() })
-          .send({ version: gBoxUpdateInfo.version })
-          .end(function (error, result) {
-            if (error) return callback(new Error('Error making upgrade request: ' + error));
-            if (result.status !== 202) return callback(new Error('Server not ready to upgrade: ' + result.body));
-
-            progress.set(progress.UPDATE, 10, 'Updating base system');
-
-            callback(null);
-        });
-    });
-}
-
-function startBoxUpdate(boxUpdateInfo, callback) {
-    if (!boxUpdateInfo) {
-        debug('no box update available');
-        return callback(new Error('No update available'));
-    }
-
-    progress.set(progress.UPDATE, 5, 'Create backup');
-
-    if (boxUpdateInfo && boxUpdateInfo.upgrade) {
-        return upgrade(callback);
-    }
-
-    debug('box needs update, backup only box but not apps');
-
-    backups.backupBox(function (error) {
-        if (error) return callback(error);
-
-        // fetch a signed sourceTarballUrl
-        superagent.get(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/sourcetarballurl')
-          .query({ token: config.token(), boxVersion: boxUpdateInfo.version })
-          .end(function (error, result) {
-            if (error) return callback(new Error('Error fetching sourceTarballUrl: ' + error));
-            if (result.status !== 200) return callback(new Error('Error fetching sourceTarballUrl status: ' + result.status));
-            if (!safe.query(result, 'body.url')) return callback(new Error('Error fetching sourceTarballUrl response: ' + result.body));
-
-            // NOTE: the args here are tied to the installer revision, box code and appstore provisioning logic
-            var args = {
-                sourceTarballUrl: result.body.url,
-
-                // this data is opaque to the installer
-                data: {
-                    boxVersionsUrl: config.get('boxVersionsUrl'),
-                    version: boxUpdateInfo.version,
-                    apiServerOrigin: config.apiServerOrigin(),
-                    webServerOrigin: config.webServerOrigin(),
-                    fqdn: config.fqdn(),
-                    token: config.token(),
-                    tlsCert: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), 'utf8'),
-                    tlsKey: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'), 'utf8'),
-                    isCustomDomain: config.isCustomDomain(),
-                    restoreUrl: null,
-                    restoreKey: null,
-                    developerMode: config.developerMode() // this survives updates but not upgrades
-                }
-            };
-
-            debug('updating box %j', args);
-
-            superagent.post(INSTALLER_UPDATE_URL).send(args).end(function (error, result) {
-                if (error) return callback(error);
-                if (result.status !== 202) return callback(new Error('Error initiating update: ' + result.body));
-
-                progress.set(progress.UPDATE, 10, 'Updating cloudron software');
-
-                callback(null);
-            });
-        });
-
-        // Do not add any code here. The installer script will stop the box code any instant
-    });
-}
-
-
 function autoupdate() {
     // FIXME: box update and app update must not be concurrent. also, there is no way to track completion of updates
     // and this we need to one or the other.
     if (gBoxUpdateInfo !== null) {
-        update(NOOP_CALLBACK);
+        cloudron.update(NOOP_CALLBACK);
     } else {
         apps.autoupdateApps(gAppUpdateInfo, NOOP_CALLBACK);
     }

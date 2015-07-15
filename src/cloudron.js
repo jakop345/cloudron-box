@@ -45,6 +45,8 @@ var assert = require('assert'),
 var RELOAD_NGINX_CMD = path.join(__dirname, 'scripts/reloadnginx.sh'),
     REBOOT_CMD = path.join(__dirname, 'scripts/reboot.sh');
 
+var INSTALLER_UPDATE_URL = 'http://127.0.0.1:2020/api/v1/installer/update';
+
 var gAddMailDnsRecordsTimerId = null,
     gCloudronDetails = null;            // cached cloudron details like region,size...
 
@@ -359,11 +361,103 @@ function migrate(size, region, callback) {
 }
 
 function update(callback) {
-    if (!updater.getUpdateInfo().box) return next(new CloudronError(CloudronError.NO_UPDATE_AVAILABLE));
+    assert.strictEqual(typeof callback, 'function');
+
+    var boxUpdateInfo = updater.getUpdateInfo().box;
+    if (!boxUpdateInfo) return next(new CloudronError(CloudronError.NO_UPDATE_AVAILABLE));
 
     var error = locker.lockForBoxUpdate();
     if (error) return next(new CloudronError(CloudronError.BAD_STATE, error.message));
 
-    updater.update(callback);
+    progress.set(progress.UPDATE, 0, 'Begin ' + (boxUpdateInfo.update ? 'upgrade': 'update'));
+
+    if (boxUpdateInfo.upgrade) {
+        return doUpgrade(boxUpdateInfo, callback);
+    }
+
+    doUpdate(boxUpdateInfo, function (error) {
+        if (error) progress.clear(progress.UPDATE); // update failed, clear the update progress
+
+        locker.unlockForBoxUpdate();
+
+        callback(error);
+    });
+}
+
+function doUpgrade(boxUpdateInfo, callback) {
+    assert(boxUpdateInfo !== null && typeof boxUpdateInfo === 'object');
+
+    progress.set(progress.UPDATE, 5, 'Create app and box backup');
+
+    backups.backup(function (error) {
+        if (error) return callback(error);
+
+        superagent.post(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/upgrade')
+          .query({ token: config.token() })
+          .send({ version: boxUpdateInfo.version })
+          .end(function (error, result) {
+            if (error) return callback(new Error('Error making upgrade request: ' + error));
+            if (result.status !== 202) return callback(new Error('Server not ready to upgrade: ' + result.body));
+
+            progress.set(progress.UPDATE, 10, 'Updating base system');
+
+            // no need to unlock since this is the last thing we ever do on this box
+
+            callback(null);
+        });
+    });
+}
+
+function doUpdate(boxUpdateInfo, callback) {
+    assert(boxUpdateInfo && typeof boxUpdateInfo === 'object');
+
+    progress.set(progress.UPDATE, 5, 'Create box backup');
+
+    backups.backupBox(function (error) {
+        if (error) return callback(error);
+
+        // fetch a signed sourceTarballUrl
+        superagent.get(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/sourcetarballurl')
+          .query({ token: config.token(), boxVersion: boxUpdateInfo.version })
+          .end(function (error, result) {
+            if (error) return callback(new Error('Error fetching sourceTarballUrl: ' + error));
+            if (result.status !== 200) return callback(new Error('Error fetching sourceTarballUrl status: ' + result.status));
+            if (!safe.query(result, 'body.url')) return callback(new Error('Error fetching sourceTarballUrl response: ' + result.body));
+
+            // NOTE: the args here are tied to the installer revision, box code and appstore provisioning logic
+            var args = {
+                sourceTarballUrl: result.body.url,
+
+                // this data is opaque to the installer
+                data: {
+                    boxVersionsUrl: config.get('boxVersionsUrl'),
+                    version: boxUpdateInfo.version,
+                    apiServerOrigin: config.apiServerOrigin(),
+                    webServerOrigin: config.webServerOrigin(),
+                    fqdn: config.fqdn(),
+                    token: config.token(),
+                    tlsCert: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), 'utf8'),
+                    tlsKey: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'), 'utf8'),
+                    isCustomDomain: config.isCustomDomain(),
+                    restoreUrl: null,
+                    restoreKey: null,
+                    developerMode: config.developerMode() // this survives updates but not upgrades
+                }
+            };
+
+            debug('updating box %j', args);
+
+            superagent.post(INSTALLER_UPDATE_URL).send(args).end(function (error, result) {
+                if (error) return callback(error);
+                if (result.status !== 202) return callback(new Error('Error initiating update: ' + result.body));
+
+                progress.set(progress.UPDATE, 10, 'Updating cloudron software');
+
+                callback(null);
+            });
+        });
+
+        // Do not add any code here. The installer script will stop the box code any instant
+    });
 }
 
