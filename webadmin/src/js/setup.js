@@ -26,8 +26,11 @@ app.config(['$routeProvider', function ($routeProvider) {
         controller: 'StepController',
         templateUrl: 'views/setup/step2.html'
     }).when('/step3', {
-        controller: 'FinishController',
+        controller: 'StepController',
         templateUrl: 'views/setup/step3.html'
+    }).when('/step4', {
+        controller: 'FinishController',
+        templateUrl: 'views/setup/step4.html'
     }).otherwise({ redirectTo: '/'});
 }]);
 
@@ -38,6 +41,7 @@ app.service('Wizard', [ function () {
         this.username = '';
         this.email = '';
         this.password = '';
+        this.name = '';
     }
 
     instance = new Wizard();
@@ -60,7 +64,7 @@ app.controller('FinishController', ['$scope', '$location', '$timeout', 'Wizard',
     $scope.wizard = Wizard;
 
     function finish() {
-        Client.createAdmin($scope.wizard.username, $scope.wizard.password, $scope.wizard.email, $scope.setupToken, function (error) {
+        Client.createAdmin($scope.wizard.username, $scope.wizard.password, $scope.wizard.email, $scope.wizard.name, $scope.setupToken, function (error) {
             if (error) {
                 console.error('Internal error', error);
                 window.location.href = '/error.html';
@@ -86,7 +90,7 @@ app.controller('SetupController', ['$scope', '$location', 'Client', 'Wizard', fu
     if (!search.email) return window.location.href = '/error.html?errorCode=3';
     Wizard.email = search.email;
 
-    Wizard.hostname = window.location.host.slice(3); // remove 'my-'
+    Wizard.hostname = window.location.host.indexOf('my-') === 0 ? window.location.host.slice(3) : window.location.host;
 
     Client.isServerFirstTime(function (error, isFirstTime) {
         if (error) {
@@ -99,9 +103,8 @@ app.controller('SetupController', ['$scope', '$location', 'Client', 'Wizard', fu
             return;
         }
 
-        if (!Wizard.username) $location.path('/step1');
+        $location.path('/step1');
 
         $scope.initialized = true;
-
     });
 }]);
