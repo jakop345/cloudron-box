@@ -1,4 +1,4 @@
-/* global:Rickshaw:true */
+/* global Chart:true */
 
 'use strict';
 
