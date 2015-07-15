@@ -17,6 +17,10 @@ angular.module('Application').controller('GraphsController', ['$scope', '$locati
         return (value/1024/1024/1024).toFixed(2);
     }
 
+    function bytesToMegaBytes(value) {
+        return (value/1024/1024).toFixed(2);
+    }
+
     // http://stackoverflow.com/questions/1484506/random-color-generator-in-javascript
     function getRandomColor() {
         var letters = '0123456789ABCDEF'.split('');
@@ -140,7 +144,7 @@ angular.module('Application').controller('GraphsController', ['$scope', '$locati
 
             $scope.memoryUsageSystem = result.map(function (data, index) {
                 return {
-                    value: data.datapoints[0][0],
+                    value: bytesToMegaBytes(data.datapoints[0][0]),
                     color: targetsInfo[index].color,
                     highlight: targetsInfo[index].color,
                     label: targetsInfo[index].label
@@ -167,7 +171,7 @@ angular.module('Application').controller('GraphsController', ['$scope', '$locati
 
             $scope.memoryUsageApps = result.map(function (data, index) {
                 return {
-                    value: data.datapoints[0][0],
+                    value: bytesToMegaBytes(data.datapoints[0][0]),
                     color: targetsInfo[index].color,
                     highlight: targetsInfo[index].color,
                     label: targetsInfo[index].label
