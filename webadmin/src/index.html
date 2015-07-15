@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="Application" ng-controller="MainController">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />
 
-    <title> Cloudron </title>
+    <title> {{config.cloudronName || 'Cloudron'}} </title>
 
     <link href="/img/favicon.png" rel="icon" type="image/png">
 
@@ -50,7 +50,7 @@
 
 </head>
 
-<body ng-app="Application" ng-controller="MainController">
+<body>
 
     <!-- Modal update -->
     <div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true">
