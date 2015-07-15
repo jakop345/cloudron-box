@@ -73,7 +73,10 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             isDev: false,
             progress: {},
             isCustomDomain: false,
-            developerMode: false
+            developerMode: false,
+            region: null,
+            size: null,
+            cloudronName: null
         };
         this._installedApps = [];
         this._clientId = '<%= oauth.clientId %>';
