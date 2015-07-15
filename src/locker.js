@@ -2,7 +2,10 @@
 
 exports = module.exports = {
     lockForBoxUpdate: lockForBoxUpdate,
-    unlockForBoxUpdate: unlockForBoxUpdate
+    unlockForBoxUpdate: unlockForBoxUpdate,
+
+    lockForFullBackup: lockForFullBackup,
+    unlockForFullBackup: unlockForFullBackup
 };
 
 function lockForBoxUpdate() {
@@ -10,6 +13,14 @@ function lockForBoxUpdate() {
 }
 
 function unlockForBoxUpdate() {
+    return null;
+}
+
+function lockForFullBackup() {
+    return null;
+}
+
+function unlockForFullBackup() {
     return null;
 }
 

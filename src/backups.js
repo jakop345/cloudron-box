@@ -4,7 +4,6 @@ exports = module.exports = {
     BackupsError: BackupsError,
 
     getAllPaged: getAllPaged,
-    scheduleBackup: scheduleBackup,
     scheduleAppBackup: scheduleAppBackup,
 
     getBackupUrl: getBackupUrl,
@@ -93,17 +92,6 @@ function getAllPaged(page, perPage, callback) {
         // [ { creationTime, boxVersion, restoreKey, dependsOn: [ ] } ] sorted by time (latest first)
         return callback(null, result.body.backups);
     });
-}
-
-function scheduleBackup(callback) {
-    assert.strictEqual(typeof callback, 'function');
-
-    backup(function (error) {
-        if (error) console.error('backup failed.', error);
-    });
-
-    // we just schedule the backup but do not wait for the result
-    callback(null);
 }
 
 function canBackupApp(app) {

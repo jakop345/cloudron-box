@@ -7,8 +7,8 @@ exports = module.exports = {
     create: create
 };
 
-
 var backups = require('../backups.js'),
+    cloudron = require('../cloudron.js'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess;
 
@@ -20,8 +20,10 @@ function get(req, res, next) {
 }
 
 function create(req, res, next) {
-    backups.scheduleBackup(function (error) {
-        if (error) return next(new HttpError(500, error));
-       next(new HttpSuccess(202, {}));
+    // don't want for backup to complete since this can take long
+    cloudron.backup(function (error) {
+        if (error) debug('Could not backup', error);
     });
+
+    next(new HttpSuccess(202, {}));
 }

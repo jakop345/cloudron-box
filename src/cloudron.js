@@ -17,7 +17,8 @@ exports = module.exports = {
 
     update: update,
     reboot: reboot,
-    migrate: migrate
+    migrate: migrate,
+    backup: backup
 };
 
 var assert = require('assert'),
@@ -458,6 +459,21 @@ function doUpdate(boxUpdateInfo, callback) {
         });
 
         // Do not add any code here. The installer script will stop the box code any instant
+    });
+}
+
+function backup(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    var error = locker.lockForFullBackup();
+    if (error) return callback(new CloudronError(CloudronError.BAD_STATE, error.message));
+
+    backup(function (error) {
+        if (error) console.error('backup failed.', error);
+
+        locker.unlockForFullBackup();
+
+        return callback(error);
     });
 }
 
