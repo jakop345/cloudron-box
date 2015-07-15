@@ -317,6 +317,7 @@ describe('Cloudron', function () {
                 expect(result.body.developerMode).to.be.a('boolean');
                 expect(result.body.size).to.eql(null);
                 expect(result.body.region).to.eql(null);
+                expect(result.body.cloudronName).to.be.a('string');
 
                 done();
             });
@@ -340,6 +341,7 @@ describe('Cloudron', function () {
                 expect(result.body.developerMode).to.be.a('boolean');
                 expect(result.body.size).to.eql('small');
                 expect(result.body.region).to.eql('sfo');
+                expect(result.body.cloudronName).to.be.a('string');
 
                 expect(scope.isDone()).to.be.ok();
 

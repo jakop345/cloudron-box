@@ -203,19 +203,24 @@ function getConfig(callback) {
             };
         }
 
-        callback(null, {
-            apiServerOrigin: config.apiServerOrigin(),
-            webServerOrigin: config.webServerOrigin(),
-            isDev: config.isDev(),
-            fqdn: config.fqdn(),
-            ip: sysinfo.getIp(),
-            version: config.version(),
-            update: updater.getUpdateInfo(),
-            progress: progress.get(),
-            isCustomDomain: config.isCustomDomain(),
-            developerMode: config.developerMode(),
-            region: result.region,
-            size: result.size
+        settings.getCloudronName(function (error, cloudronName) {
+            if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, 'Unable to get cloudron name'));
+
+            callback(null, {
+                apiServerOrigin: config.apiServerOrigin(),
+                webServerOrigin: config.webServerOrigin(),
+                isDev: config.isDev(),
+                fqdn: config.fqdn(),
+                ip: sysinfo.getIp(),
+                version: config.version(),
+                update: updater.getUpdateInfo(),
+                progress: progress.get(),
+                isCustomDomain: config.isCustomDomain(),
+                developerMode: config.developerMode(),
+                region: result.region,
+                size: result.size,
+                cloudronName: cloudronName
+            });
         });
     });
 }
