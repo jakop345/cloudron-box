@@ -183,24 +183,6 @@ function update(callback) {
     });
 }
 
-function triggerAppAutoupdate(callback) {
-    assert.strictEqual(typeof callback, 'function');
-
-    async.eachSeries(Object.keys(gAppUpdateInfo), function iterator(appId, iteratorDone) {
-        var appUpdateInfo = gAppUpdateInfo[appId];
-        if (!appUpdateInfo.autoupdatable) {
-            debug('Refusing to autoupdate %s', appId);
-            return iteratorDone(null);
-        }
-
-        apps.update(appId, appUpdateInfo.manifest, appUpdateInfo.portBindings, null /* icon */, function (error) {
-            if (error) debug('Error initiating autoupdate of %s', appId);
-
-            iteratorDone(null);
-        });
-    }, callback);
-}
-
 function upgrade(callback) {
     assert(gBoxUpdateInfo.upgrade);
 
