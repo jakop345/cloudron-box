@@ -38,10 +38,6 @@ function getUpdateInfo() {
     };
 }
 
-function hasAutoupdatableApps() {
-    return Object.keys(gAppUpdateInfo).some(function (appId) { return gAppUpdateInfo[appId].autoupdatable; });
-}
-
 function checkAppUpdates(callback) {
     apps.getAll(function (error, apps) {
         if (error) return callback(error);
