@@ -903,7 +903,7 @@ describe('App installation - port bindings', function () {
                         res.writeHead(200);
                         res.end();
                         return true;
-                    } else if (req.method === 'DELETE' && req.url === '/images/girish/test:0.2.0?force=true&noprune=false') {
+                    } else if (req.method === 'DELETE' && req.url === '/images/c7ddfc8fb7cd8a14d4d70153a199ff0c6e9b709807aeec5a7b799d60618731d1?force=true&noprune=false') {
                         imageDeleted = true;
                         res.writeHead(200);
                         res.end();
