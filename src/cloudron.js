@@ -25,6 +25,7 @@ var assert = require('assert'),
     clientdb = require('./clientdb.js'),
     config = require('../config.js'),
     debug = require('debug')('box:cloudron'),
+    locker = require('./locker.js'),
     path = require('path'),
     paths = require('./paths.js'),
     progress = require('./progress.js'),
@@ -359,6 +360,9 @@ function migrate(size, region, callback) {
 
 function update(callback) {
     if (!updater.getUpdateInfo().box) return next(new CloudronError(CloudronError.NO_UPDATE_AVAILABLE));
+
+    var error = locker.lockForBoxUpdate();
+    if (error) return next(new CloudronError(CloudronError.BAD_STATE, error.message));
 
     updater.update(callback);
 }
