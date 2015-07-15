@@ -10,6 +10,9 @@
     <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet"  type="text/css">
     <link href="//fonts.googleapis.com/css?family=Roboto:300" rel="stylesheet" type="text/css">
 
+    <!-- jQuery-->
+    <script src="3rdparty/js/jquery.min.js"></script>
+
     <style>
 
         html, body {
@@ -38,8 +41,18 @@
 
     <script>
 
-        document.addEventListener('DOMContentLoaded', function() {
-            window.document.getElementById('settingsLink').setAttribute('href', 'https://my-' + window.location.host);
+        $(function () {
+            'use strict';
+
+            var apiOrigin = 'https://my-' + window.location.host;
+            $('#settingsLink').attr('href', apiOrigin);
+
+            $.get(apiOrigin + '/api/v1/cloudron/status', function (data) {
+                if (data.cloudronName) {
+                    $('#title').text(data.cloudronName);
+                    document.title = data.cloudronName;
+                }
+            });
         });
 
     </script>
@@ -50,7 +63,7 @@
 <div class="wrapper">
     <div class="content">
         <img src="/img/logo_inverted_192.png"/>
-        <h1> Cloudron </h1>
+        <h1 id="title"> Cloudron </h1>
         <p>
             There is no app configured for this domain. If you want to put an app at this location,<br/>
             please reconfigure the app in the <a href="" id="settingsLink">settings panel</a> and leave the location empty.
