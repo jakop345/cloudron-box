@@ -102,7 +102,7 @@ gulp.task('js-update', function () {
 // HTML
 // --------------
 
-gulp.task('html', ['html-views', 'html-update', 'html-appstatus'], function () {
+gulp.task('html', ['html-views', 'html-update'], function () {
     return gulp.src('webadmin/src/*.html').pipe(gulp.dest('webadmin/dist'));
 });
 
@@ -112,12 +112,6 @@ gulp.task('html-update', function () {
 
 gulp.task('html-views', function () {
     return gulp.src('webadmin/src/views/**/*.html').pipe(gulp.dest('webadmin/dist/views'));
-});
-
-gulp.task('html-appstatus', ['css'], function () {
-    return gulp.src('webadmin/src/appstatus.template')
-        .pipe(ejs({}, { ext: '.html' }))
-        .pipe(gulp.dest('webadmin/dist'));
 });
 
 // --------------
@@ -148,7 +142,6 @@ gulp.task('watch', ['default'], function () {
     gulp.watch(['webadmin/src/*.scss'], ['css']);
     gulp.watch(['webadmin/src/img/*'], ['images']);
     gulp.watch(['webadmin/src/**/*.html'], ['html']);
-    gulp.watch(['webadmin/src/appstatus.template'], ['html-appstatus']);
     gulp.watch(['webadmin/src/views/*.html'], ['html-views']);
     gulp.watch(['webadmin/src/js/update.js'], ['js-update']);
     gulp.watch(['webadmin/src/js/error.js'], ['js-error']);
