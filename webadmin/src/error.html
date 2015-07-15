@@ -38,7 +38,7 @@
             $scope.errorMessage = '';
 
             // try to fetch at least config.json to get appstore url
-            $http.get('config.json').success(function(data, status) {
+            $http.get($scope.apiOrigin + 'config.json').success(function(data, status) {
                 if (status !== 200 || typeof data !== 'object') return console.error(status, data);
                 $scope.webServerOriginLink = data.webServerOrigin + '/console.html';
             }).error(function (data, status) {
@@ -47,7 +47,7 @@
             });
 
             // try to fetch cloudron status
-            $http.get('/api/v1/cloudron/status').success(function(data, status) {
+            $http.get($scope.apiOrigin + '/api/v1/cloudron/status').success(function(data, status) {
                 if (status !== 200 || typeof data !== 'object') return console.error(status, data);
                 $scope.cloudronName = data.cloudronName;
             }).error(function (data, status) {

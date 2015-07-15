@@ -35,7 +35,7 @@
             $scope.apiOrigin = 'https://my-' + window.location.host;
             $scope.cloudronName = 'Cloudron';
 
-            $http.get('/api/v1/cloudron/status').success(function(data, status) {
+            $http.get($scope.apiOrigin + '/api/v1/cloudron/status').success(function(data, status) {
                 if (status !== 200 || typeof data !== 'object') return console.error(status, data);
                 $scope.cloudronName = data.cloudronName;
             }).error(function (data, status) {
