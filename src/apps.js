@@ -27,6 +27,8 @@ exports = module.exports = {
 
     setRestorePoint: setRestorePoint,
 
+    autoupdateApps: autoupdateApps,
+
     // exported for testing
     _validateHostname: validateHostname,
     _validatePortBindings: validatePortBindings
@@ -34,6 +36,7 @@ exports = module.exports = {
 
 var appdb = require('./appdb.js'),
     assert = require('assert'),
+    async = require('async'),
     config = require('../config.js'),
     constants = require('../constants.js'),
     DatabaseError = require('./databaseerror.js'),
@@ -605,5 +608,35 @@ function setRestorePoint(appId, lastBackupId, lastBackupConfig, callback) {
 
         return callback(null);
     });
+}
+
+function canAutoupdateApp(app, newManifest) {
+    // TODO: maybe check the description as well?
+    for (var env in newManifest.tcpPorts) {
+        if (!(env in app.portBindings)) return false;
+   }
+
+    return true;
+}
+
+function autoupdateApps(updateInfo, callback) { // updateInfo is { appId -> { manifest } }
+    assert.strictEqual(typeof updateInfo, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
+    if (!updateInfo) return callback(null);
+
+    async.eachSeries(Object.keys(updateInfo), function iterator(appId, iteratorDone) {
+        get(appId, function (error, app) {
+            if (!canAutoupdateApp(app, updateInfo.manifest)) {
+                return iteratorDone();
+            }
+
+           update(appId, updateInfo.manifest, app.portBindings, null /* icon */, function (error) {
+                if (error) debug('Error initiating autoupdate of %s', appId);
+
+                iteratorDone(null);
+            });
+        });
+    }, callback);
 }
 

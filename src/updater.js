@@ -32,7 +32,7 @@ var apps = require('./apps.js'),
 var INSTALLER_UPDATE_URL = 'http://127.0.0.1:2020/api/v1/installer/update';
 var NOOP_CALLBACK = function (error) { console.error(error); };
 
-var gAppUpdateInfo = { }, // id -> update info { creationDate, manifest, autoupdatable, portBindings }
+var gAppUpdateInfo = { }, // id -> update info { creationDate, manifest }
     gBoxUpdateInfo = null,
     gMailedUser =  { };
 
@@ -49,15 +49,6 @@ function hasBoxUpdate() {
 
 function hasAutoupdatableApps() {
     return Object.keys(gAppUpdateInfo).some(function (appId) { return gAppUpdateInfo[appId].autoupdatable; });
-}
-
-function canAutoupdateApp(app, newManifest) {
-    // TODO: maybe check the description as well?
-    for (var env in newManifest.tcpPorts) {
-        if (!(env in app.portBindings)) return false;
-    }
-
-    return true;
 }
 
 function checkAppUpdates(callback) {
@@ -90,9 +81,6 @@ function checkAppUpdates(callback) {
                 var newVersion = newManifest.version;
                 if (newVersion !== oldVersion) {
                     appUpdateInfo[apps[i].id] = latestAppVersions[apps[i].appStoreId];
-                    var autoupdatable = canAutoupdateApp(apps[i], newManifest);
-                    appUpdateInfo[apps[i].id].autoupdatable = autoupdatable;
-                    appUpdateInfo[apps[i].id].portBindings = autoupdatable ? apps[i].portBindings : null;
                     debug('Update available for %s (%s) from %s to %s (autoupdatable: %s)',
                           apps[i].location, apps[i].id, oldVersion, newVersion, autoupdatable);
                 }
@@ -325,7 +313,7 @@ function autoupdate() {
     if (hasBoxUpdate()) {
         update(NOOP_CALLBACK);
     } else {
-        triggerAppAutoupdate(NOOP_CALLBACK);
+        apps.autoupdateApps(gAppUpdateInfo, NOOP_CALLBACK);
     }
 }
 
