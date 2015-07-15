@@ -1,36 +1,47 @@
 <!DOCTYPE html>
-<html class="status-page">
+<html ng-app="Application" ng-controller="Controller">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />
 
-    <title> Cloudron </title>
+    <title> {{cloudronName}} </title>
 
+    <!-- external fonts and CSS -->
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet"  type="text/css">
     <link href="//fonts.googleapis.com/css?family=Roboto:300" rel="stylesheet" type="text/css">
 
-    <!-- jQuery-->
-    <script src="3rdparty/js/jquery.min.js"></script>
-
     <!-- Theme CSS -->
     <link href="theme.css" rel="stylesheet" type="text/css">
 
+    <!-- jQuery-->
+    <script src="3rdparty/js/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="3rdparty/js/bootstrap.min.js"></script>
+
+    <!-- Angularjs scripts -->
+    <script src="3rdparty/js/angular.min.js"></script>
+    <script src="3rdparty/js/angular-loader.min.js"></script>
+
     <script>
 
-        $(function () {
-            'use strict';
+        'use strict';
 
-            var apiOrigin = 'https://my-' + window.location.host;
-            $('#settingsLink').attr('href', apiOrigin);
+        // create main application module
+        var app = angular.module('Application', []);
 
-            $.get(apiOrigin + '/api/v1/cloudron/status', function (data) {
-                if (data.cloudronName) {
-                    $('#title').text(data.cloudronName);
-                    document.title = data.cloudronName;
-                }
+        app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
+            $scope.apiOrigin = 'https://my-' + window.location.host;
+            $scope.cloudronName = 'Cloudron';
+
+            $http.get('/api/v1/cloudron/status').success(function(data, status) {
+                if (status !== 200 || typeof data !== 'object') return console.error(status, data);
+                $scope.cloudronName = data.cloudronName;
+            }).error(function (data, status) {
+                console.error(status, data);
             });
-        });
+        }]);
 
     </script>
 </head>
@@ -40,17 +51,15 @@
 <div class="wrapper">
     <div class="content">
         <img src="/img/logo_inverted_192.png"/>
-        <h1 id="title"> Cloudron </h1>
+        <h1> {{cloudronName}} </h1>
         <p>
             There is no app configured for this domain. If you want to put an app at this location,<br/>
-            please reconfigure the app in the <a href="" id="settingsLink">settings panel</a> and leave the location empty.
+            please reconfigure the app in the <a ng-href="{{apiOrigin}}">settings panel</a> and leave the location empty.
         </p>
-        <br/>
-        <br/>
-        <br/>
-        <br/>
-        <br/>
-        <span class="text-muted"><a href="mailto: support@cloudron.io">Contact Support</a> - Copyright &copy; Cloudron 2014-15</span>
+
+        <footer>
+            <span class="text-muted"><a href="mailto: support@cloudron.io">Contact Support</a> - Copyright &copy; Cloudron 2014-15</span>
+        </footer>
     </div>
 </div>
 

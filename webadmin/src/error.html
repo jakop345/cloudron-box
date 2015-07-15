@@ -1,14 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="Application" ng-controller="Controller">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />
 
-    <title> Cloudron Error </title>
+    <title> {{cloudronName}} Error </title>
 
-    <!-- Custom Fonts -->
+    <!-- external fonts and CSS -->
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
-    <link href="https://fonts.googleapis.com/css?family=Roboto:300" rel="stylesheet" type="text/css">
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet"  type="text/css">
+    <link href="//fonts.googleapis.com/css?family=Roboto:300" rel="stylesheet" type="text/css">
+
+    <!-- Theme CSS -->
+    <link href="theme.css" rel="stylesheet" type="text/css">
 
     <!-- jQuery-->
     <script src="3rdparty/js/jquery.min.js"></script>
@@ -20,35 +24,78 @@
     <script src="3rdparty/js/angular.min.js"></script>
     <script src="3rdparty/js/angular-loader.min.js"></script>
 
-    <!-- Error Application -->
-    <script src="js/error.js"></script>
+    <script>
 
-    <!-- Theme CSS -->
-    <link href="theme.css" rel="stylesheet" type="text/css">
+        'use strict';
+
+        // create main application module
+        var app = angular.module('Application', []);
+
+        app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
+            $scope.apiOrigin = 'https://my-' + window.location.host;
+            $scope.cloudronName = 'Cloudron';
+            $scope.webServerOriginLink = '/';
+            $scope.errorMessage = '';
+
+            // try to fetch at least config.json to get appstore url
+            $http.get('config.json').success(function(data, status) {
+                if (status !== 200 || typeof data !== 'object') return console.error(status, data);
+                $scope.webServerOriginLink = data.webServerOrigin + '/console.html';
+            }).error(function (data, status) {
+                if (status === 404) console.error('No config.json found');
+                else console.error(status, data);
+            });
+
+            // try to fetch cloudron status
+            $http.get('/api/v1/cloudron/status').success(function(data, status) {
+                if (status !== 200 || typeof data !== 'object') return console.error(status, data);
+                $scope.cloudronName = data.cloudronName;
+            }).error(function (data, status) {
+                console.error(status, data);
+            });
+
+            var search = window.location.search.slice(1).split('&').map(function (item) { return item.split('='); }).reduce(function (o, k) { o[k[0]] = k[1]; return o; }, {});
+
+            $scope.errorCode = search.errorCode || 0;
+            $scope.errorContext = search.errorContext || '';
+        }]);
+
+    </script>
 
 </head>
 
-<body ng-app="Application" ng-controller="ErrorController">
+<body class="status-page">
 
-    <center ng-show="errorCode == 0">
-        <h1> <i class="fa fa-frown-o fa-fw text-danger"></i> Something has gone wrong </h1>
-        Please check your cloudron status <a href="{{ webServerOriginLink }}">here</a>.
-    </center>
+<div class="wrapper">
+    <div class="content">
+        <img src="/img/logo_inverted_192.png"/>
+        <h1> {{cloudronName}} </h1>
 
-    <center ng-show="errorCode == 1">
-        <h1> <i class="fa fa-frown-o fa-fw text-danger"></i> Cloudron is not setup </h1>
-        Please use the setup link you received via mail.
-    </center>
+        <div ng-show="errorCode == 0">
+            <h3> <i class="fa fa-frown-o fa-fw text-danger"></i> Something has gone wrong </h3>
+            Please check your cloudron status <a href="{{ webServerOriginLink }}">here</a>.
+        </div>
 
-    <center ng-show="errorCode == 2">
-        <h1> <i class="fa fa-frown-o fa-fw text-danger"></i> Setup requires a setupToken in the query </h1>
-        Please use the setup link you received via mail.
-    </center>
+        <div ng-show="errorCode == 1">
+            <h3> <i class="fa fa-frown-o fa-fw text-danger"></i> Cloudron is not setup </h3>
+            Please use the setup link you received via mail.
+        </div>
 
-    <center ng-show="errorCode == 3">
-        <h1> <i class="fa fa-frown-o fa-fw text-danger"></i> Setup requires an email in the query </h1>
-        Please use the setup link you received via mail.
-    </center>
+        <div ng-show="errorCode == 2">
+            <h3> <i class="fa fa-frown-o fa-fw text-danger"></i> Setup requires a setupToken in the query </h3>
+            Please use the setup link you received via mail.
+        </div>
+
+        <div ng-show="errorCode == 3">
+            <h3> <i class="fa fa-frown-o fa-fw text-danger"></i> Setup requires an email in the query </h3>
+            Please use the setup link you received via mail.
+        </div>
+
+        <footer>
+            <span class="text-muted"><a href="mailto: support@cloudron.io">Contact Support</a> - Copyright &copy; Cloudron 2014-15</span>
+        </footer>
+    </div>
+</div>
 
 </body>
 </html>
