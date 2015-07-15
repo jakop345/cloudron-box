@@ -1,26 +1,68 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="Application" ng-controller="Controller">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />
 
-    <title> Cloudron App Error </title>
+    <title> {{cloudronName}} App Error </title>
 
-    <!-- Custom Fonts -->
+    <!-- external fonts and CSS -->
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet"  type="text/css">
     <link href="//fonts.googleapis.com/css?family=Roboto:300" rel="stylesheet" type="text/css">
 
     <!-- Theme CSS -->
     <link href="theme.css" rel="stylesheet" type="text/css">
 
+    <!-- jQuery-->
+    <script src="3rdparty/js/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="3rdparty/js/bootstrap.min.js"></script>
+
+    <!-- Angularjs scripts -->
+    <script src="3rdparty/js/angular.min.js"></script>
+    <script src="3rdparty/js/angular-loader.min.js"></script>
+
+    <script>
+
+        'use strict';
+
+        // create main application module
+        var app = angular.module('Application', []);
+
+        app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
+            $scope.apiOrigin = 'https://my-' + window.location.host;
+            $scope.cloudronName = 'Cloudron';
+
+            // try to fetch cloudron status
+            $http.get('/api/v1/cloudron/status').success(function(data, status) {
+                if (status !== 200 || typeof data !== 'object') return console.error(status, data);
+                $scope.cloudronName = data.cloudronName;
+            }).error(function (data, status) {
+                console.error(status, data);
+            });
+        }]);
+
+    </script>
+
 </head>
 
-<body>
+<body class="status-page">
 
-    <center>
-        <h1> <i class="fa fa-frown-o fa-fw text-danger"></i> Something has gone wrong. </h1>
+<div class="wrapper">
+    <div class="content">
+        <img src="/img/logo_inverted_192.png"/>
+        <h1> {{cloudronName}} </h1>
+
+        <h3> <i class="fa fa-frown-o fa-fw text-danger"></i> Something has gone wrong </h3>
         This app is currently not running. Please retry later.
-    </center>
+
+        <footer>
+            <span class="text-muted"><a href="mailto: support@cloudron.io">Contact Support</a> - Copyright &copy; Cloudron 2014-15</span>
+        </footer>
+    </div>
+</div>
 
 </body>
 </html>
