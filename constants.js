@@ -11,6 +11,8 @@ exports = module.exports = {
 
     TEST_NAME: 'Test',
     TEST_LOCATION: '',
-    TEST_CLIENT_ID: 'test'
+    TEST_CLIENT_ID: 'test',
+
+    CLOUDRON_DEFAULT_NAME: 'Cloudron'
 };
 
