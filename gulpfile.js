@@ -125,7 +125,7 @@ gulp.task('html-appstatus', ['css'], function () {
 // --------------
 
 gulp.task('css', function () {
-    return gulp.src('webadmin/src/theme.scss')
+    return gulp.src('webadmin/src/*.scss')
         .pipe(sourcemaps.init())
         .pipe(sass({ includePaths: ['node_modules/bootstrap-sass/assets/stylesheets/'] }).on('error', sass.logError))
         .pipe(autoprefixer())
@@ -145,7 +145,7 @@ gulp.task('images', function () {
 // --------------
 
 gulp.task('watch', ['default'], function () {
-    gulp.watch(['webadmin/src/theme.scss'], ['css']);
+    gulp.watch(['webadmin/src/*.scss'], ['css']);
     gulp.watch(['webadmin/src/img/*'], ['images']);
     gulp.watch(['webadmin/src/**/*.html'], ['html']);
     gulp.watch(['webadmin/src/appstatus.template'], ['html-appstatus']);
