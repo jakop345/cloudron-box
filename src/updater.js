@@ -3,7 +3,9 @@
 'use strict';
 
 exports = module.exports = {
-    checkUpdates: checkUpdates,
+    checkAppUpdates: checkAppUpdates,
+    checkBoxUpdate: checkBoxUpdates,
+
     getUpdateInfo: getUpdateInfo,
     autoupdate: autoupdate
 };
@@ -78,7 +80,7 @@ function checkAppUpdates(callback) {
     });
 }
 
-function checkBoxUpdates(callback) {
+function getBoxUpdates(callback) {
     var currentVersion = config.version();
 
     superagent
@@ -122,44 +124,42 @@ function checkBoxUpdates(callback) {
     });
 }
 
-function mailUser(callback) {
-    if (gBoxUpdateInfo && !gMailedUser['box']) {
-        mailer.boxUpdateAvailable(gBoxUpdateInfo.version, gBoxUpdateInfo.changelog);
-        gMailedUser['box'] = true;
-    }
+function checkAppUpdates() {
+    debug('Checking App Updates');
 
-    async.eachSeries(Object.keys(gAppUpdateInfo), function iterator(id, iteratorDone) {
-        if (gMailedUser[id]) return iteratorDone();
-
-        apps.get(id, function (error, app) {
-            if (error) {
-                debug('Error getting app %s %s', id, error);
-                return iteratorDone();
-            }
-
-            mailer.appUpdateAvailable(app, gAppUpdateInfo[id]);
-            gMailedUser[id] = true;
-        });
-    }, callback);
-}
-
-function checkUpdates() {
-    debug('Checking for app and box updates...');
-
-    checkAppUpdates(function (error, result) {
+    getAppUpdates(function (error, result) {
         if (error) debug('Error checking app updates: ', error);
 
         gAppUpdateInfo = error ? {} : result;
 
-        checkBoxUpdates(function (error, result) {
-            if (error) debug('Error checking box updates: ', error);
+        async.eachSeries(Object.keys(gAppUpdateInfo), function iterator(id, iteratorDone) {
+            if (gMailedUser[id]) return iteratorDone();
 
-            gBoxUpdateInfo = error ? null : result;
+            apps.get(id, function (error, app) {
+                if (error) {
+                    debug('Error getting app %s %s', id, error);
+                    return iteratorDone();
+                }
 
-            mailUser();
+                mailer.appUpdateAvailable(app, gAppUpdateInfo[id]);
+                gMailedUser[id] = true;
+            });
+        }, callback);
+    });
+}
 
-            // Done we call this in an interval
-        });
+function checkBoxUpdates() {
+    debug('Checking Box Updates');
+
+    getBoxUpdates(function (error, result) {
+        if (error) debug('Error checking box updates: ', error);
+
+        gBoxUpdateInfo = error ? null : result;
+
+        if (gBoxUpdateInfo && !gMailedUser['box']) {
+            mailer.boxUpdateAvailable(gBoxUpdateInfo.version, gBoxUpdateInfo.changelog);
+            gMailedUser['box'] = true;
+        }
     });
 }
 

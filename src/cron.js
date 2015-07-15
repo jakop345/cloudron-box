@@ -15,7 +15,8 @@ var assert = require('assert'),
     updater = require('./updater.js');
 
 var gAutoupdaterJob = null,
-    gUpdateCheckerJob = null,
+    gBoxUpdateCheckerJob = null,
+    gAppUpdateCheckerJob = null,
     gHeartbeatJob = null,
     gBackupJob = null;
 
@@ -62,10 +63,18 @@ function recreateJobs(unusedTimeZone, callback) {
             timeZone: allSettings[settings.TIME_ZONE_KEY]
         });
 
-        if (gUpdateCheckerJob) gUpdateCheckerJob.stop();
-        gUpdateCheckerJob = new CronJob({
+        if (gBoxUpdateCheckerJob) gBoxUpdateCheckerJob.stop();
+        gBoxUpdateCheckerJob = new CronJob({
             cronTime: '00 */10 * * * *', // every 10 minutes
-            onTick: updater.checkUpdates,
+            onTick: updater.checkBoxUpdates,
+            start: true,
+            timeZone: allSettings[settings.TIME_ZONE_KEY]
+        });
+
+        if (gAppUpdateCheckerJob) gAppUpdateCheckerJob.stop();
+        gAppUpdateCheckerJob = new CronJob({
+            cronTime: '00 */10 * * * *', // every 10 minutes
+            onTick: updater.checkAppUpdates,
             start: true,
             timeZone: allSettings[settings.TIME_ZONE_KEY]
         });
@@ -92,7 +101,7 @@ function autoupdatePatternChanged(pattern) {
             updater.autoupdate();
         },
         start: true,
-        timeZone: gUpdateCheckerJob.cronTime.timeZone // hack
+        timeZone: gBoxUpdateCheckerJob.cronTime.timeZone // hack
     });
 }
 
@@ -104,8 +113,11 @@ function uninitialize(callback) {
     if (gAutoupdaterJob) gAutoupdaterJob.stop();
     gAutoupdaterJob = null;
 
-    gUpdateCheckerJob.stop();
-    gUpdateCheckerJob = null;
+    gBoxUpdateCheckerJob.stop();
+    gBoxUpdateCheckerJob = null;
+
+    gAppUpdateCheckerJob.stop();
+    gAppUpdateCheckerJob = null;
 
     gHeartbeatJob.stop();
     gHeartbeatJob = null;
