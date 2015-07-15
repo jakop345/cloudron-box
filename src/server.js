@@ -21,8 +21,7 @@ var assert = require('assert'),
     passport = require('passport'),
     path = require('path'),
     routes = require('./routes/index.js'),
-    taskmanager = require('./taskmanager.js'),
-    updater = require('./updater.js');
+    taskmanager = require('./taskmanager.js');
 
 var gHttpServer = null;
 var gInternalHttpServer = null;
@@ -231,7 +230,6 @@ function start(callback) {
         database.initialize,
         taskmanager.initialize,
         cloudron.initialize,
-        updater.initialize,
         mailer.initialize,
         cron.initialize,
         gHttpServer.listen.bind(gHttpServer, config.get('port'), '127.0.0.1'),
@@ -247,7 +245,6 @@ function stop(callback) {
     async.series([
         auth.uninitialize,
         cloudron.uninitialize,
-        updater.uninitialize,
         taskmanager.uninitialize,
         cron.uninitialize,
         mailer.uninitialize,

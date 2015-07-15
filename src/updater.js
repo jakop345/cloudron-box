@@ -3,9 +3,6 @@
 'use strict';
 
 exports = module.exports = {
-    initialize: initialize,
-    uninitialize: uninitialize,
-
     checkUpdates: checkUpdates,
     getUpdateInfo: getUpdateInfo,
     update: update,
@@ -174,19 +171,6 @@ function checkUpdates() {
             // Done we call this in an interval
         });
     });
-}
-
-function initialize(callback) {
-    assert.strictEqual(typeof callback, 'function');
-
-    progress.clear(progress.UPDATE);
-    callback(null);
-}
-
-function uninitialize(callback) {
-    assert.strictEqual(typeof callback, 'function');
-
-    callback(null);
 }
 
 function update(callback) {
