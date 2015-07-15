@@ -74,7 +74,7 @@ CloudronError.BAD_USERNAME = 'Bad username';
 CloudronError.BAD_EMAIL = 'Bad email';
 CloudronError.BAD_PASSWORD = 'Bad password';
 CloudronError.BAD_NAME = 'Bad name';
-CloudronError.INVALID_STATE = 'Invalid state';
+CloudronError.BAD_STATE = 'Bad state';
 CloudronError.NOT_FOUND = 'Not found';
 CloudronError.NO_UPDATE_AVAILABLE = 'No update available';
 
@@ -348,7 +348,7 @@ function migrate(size, region, callback) {
           .send({ size: size, region: region, restoreKey: restoreKey })
           .end(function (error, result) {
             if (error) return callback(error);
-            if (result.status === 409) return callback(new CloudronError(CloudronError.INVALID_STATE));
+            if (result.status === 409) return callback(new CloudronError(CloudronError.BAD_STATE));
             if (result.status === 404) return callback(new CloudronError(CloudronError.NOT_FOUND));
             if (result.status !== 202) return callback(new CloudronError(CloudronError.EXTERNAL_ERROR, util.format('%s %j', result.status, result.body)));
 
