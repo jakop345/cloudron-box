@@ -155,8 +155,11 @@ angular.module('Application').controller('GraphsController', ['$scope', '$locati
             });
 
             var ctx = $('#memoryUsageSystemChart').get(0).getContext('2d');
-            var myChart = new Chart(ctx);
-            myChart.Doughnut($scope.memoryUsageSystem);
+            var chart = new Chart(ctx).Doughnut($scope.memoryUsageSystem);
+
+            $('#memoryUsageSystemChart').get(0).onclick = function (event) {
+                $scope.setMemoryApp('system');
+            };
         });
     };
 
@@ -166,7 +169,11 @@ angular.module('Application').controller('GraphsController', ['$scope', '$locati
 
         $scope.installedApps.forEach(function (app) {
             targets.push('summarize(collectd.localhost.table-' + app.id + '-memory.gauge-rss, "1min", "avg")');
-            targetsInfo.push({ label: app.location, color: getRandomColor() });
+            targetsInfo.push({
+                label: app.location,
+                color: getRandomColor(),
+                app: app
+            });
         });
 
         Client.graphs(targets, '-1min', function (error, result) {
@@ -182,8 +189,18 @@ angular.module('Application').controller('GraphsController', ['$scope', '$locati
             });
 
             var ctx = $('#memoryUsageAppsChart').get(0).getContext('2d');
-            var myChart = new Chart(ctx);
-            myChart.Doughnut($scope.memoryUsageApps);
+            var chart = new Chart(ctx).Doughnut($scope.memoryUsageApps);
+
+            $('#memoryUsageAppsChart').get(0).onclick = function (event) {
+                var activeBars = chart.getSegmentsAtEvent(event);
+
+                // dismiss non chart clicks
+                if (!activeBars || !activeBars[0]) return;
+
+                // try to find the app for this segment
+                var selectedDataInfo = targetsInfo.filter(function (info) { return info.label === activeBars[0].label; })[0];
+                if (selectedDataInfo) $scope.setMemoryApp(selectedDataInfo.app);
+            };
         });
     };
 

@@ -87,13 +87,8 @@
 
             <div class="row">
                 <div class="col-md-12">
-                    <ul class="nav nav-tabs nav-justified">
-                        <li ng-class="{ active: activeApp === 'system' }">
-                            <a ng-click="setMemoryApp('system')" href="">System</a>
-                        </li>
-                        <li ng-class="{ active: activeApp === app }" ng-repeat="app in installedApps">
-                            <a ng-click="setMemoryApp(app)" href="">{{ app.location }}</a>
-                        </li>
+                        <h4 ng-show="activeApp === 'system'">System</h4>
+                        <h4 ng-show="activeApp !== 'system'">{{ activeApp.location }}</h4>
                     </ul>
                 </div>
                 <br/>
