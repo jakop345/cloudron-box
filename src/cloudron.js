@@ -212,7 +212,7 @@ function getConfig(callback) {
         }
 
         settings.getCloudronName(function (error, cloudronName) {
-            if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, 'Unable to get cloudron name'));
+            if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
             callback(null, {
                 apiServerOrigin: config.apiServerOrigin(),
