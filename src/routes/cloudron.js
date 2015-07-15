@@ -129,7 +129,7 @@ function getConfig(req, res, next) {
 }
 
 function update(req, res, next) {
-    if (!updater.hasBoxUpdate()) return next(new HttpError(422, 'No update available'));
+    if (!updater.getUpdateInfo().box) return next(new HttpError(422, 'No update available'));
 
     updater.update(function (error) {
         if (error) return next(new HttpError(500, error));

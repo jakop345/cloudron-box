@@ -6,8 +6,7 @@ exports = module.exports = {
     checkUpdates: checkUpdates,
     getUpdateInfo: getUpdateInfo,
     update: update,
-    autoupdate: autoupdate,
-    hasBoxUpdate: hasBoxUpdate
+    autoupdate: autoupdate
 };
 
 var apps = require('./apps.js'),
@@ -38,10 +37,6 @@ function getUpdateInfo() {
         apps: gAppUpdateInfo,
         box: gBoxUpdateInfo
     };
-}
-
-function hasBoxUpdate() {
-    return gBoxUpdateInfo !== null;
 }
 
 function hasAutoupdatableApps() {
@@ -294,7 +289,7 @@ function startBoxUpdate(boxUpdateInfo, callback) {
 function autoupdate() {
     // FIXME: box update and app update must not be concurrent. also, there is no way to track completion of updates
     // and this we need to one or the other.
-    if (hasBoxUpdate()) {
+    if (gBoxUpdateInfo !== null) {
         update(NOOP_CALLBACK);
     } else {
         apps.autoupdateApps(gAppUpdateInfo, NOOP_CALLBACK);
