@@ -1,3 +1,5 @@
+/* jslint node:true */
+
 'use strict';
 
 exports = module.exports = {
@@ -21,10 +23,8 @@ exports = module.exports = {
     events: new (require('events').EventEmitter)()
 };
 
-var apps = require('./apps.js'),
-    assert = require('assert'),
+var assert = require('assert'),
     config = require('../config.js'),
-    constants = require('../constants.js'),
     CronJob = require('cron').CronJob,
     safeCall = require('safetydance').safeCall,
     settingsdb = require('./settingsdb.js'),
@@ -58,18 +58,12 @@ SettingsError.INTERNAL_ERROR = 'Internal Error';
 SettingsError.NOT_FOUND = 'Not Found';
 SettingsError.BAD_FIELD = 'Bad Field';
 
-function getApp(appId, callback) {
-    if (appId === constants.ADMIN_APPID) return callback(null, null);
-
-    apps.get(appId, callback);
-}
-
 function setAutoupdatePattern(pattern, callback) {
     assert.strictEqual(typeof pattern, 'string');
     assert.strictEqual(typeof callback, 'function');
 
     if (pattern !== 'never') { // check if pattern is valid
-        var job = safeCall(function () { return new CronJob(pattern) });
+        var job = safeCall(function () { return new CronJob(pattern); });
         if (!job) return callback(new SettingsError(SettingsError.BAD_FIELD, 'Invalid pattern'));
     }
 
