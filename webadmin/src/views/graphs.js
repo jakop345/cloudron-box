@@ -61,7 +61,7 @@ angular.module('Application').controller('GraphsController', ['$scope', '$locati
         myChart.Doughnut(tmp);
     }
 
-    $scope.setMemoryApp = function (app) {
+    $scope.setMemoryApp = function (app, color) {
         $scope.activeApp = app;
 
         var timePeriod = 2 * 60;    // in minutes
@@ -82,12 +82,12 @@ angular.module('Application').controller('GraphsController', ['$scope', '$locati
                 labels: labels,
                 datasets: [{
                     label: 'Memory',
-                    fillColor: "#82C4F8",
-                    strokeColor: "#2196F3",
-                    pointColor: "rgba(151,187,205,1)",
+                    fillColor: color || "#82C4F8",
+                    strokeColor: color || "#2196F3",
+                    pointColor: color || "rgba(151,187,205,1)",
                     pointStrokeColor: "#ffffff",
-                    pointHighlightFill: "#82C4F8",
-                    pointHighlightStroke: "#82C4F8",
+                    pointHighlightFill: color || "#82C4F8",
+                    pointHighlightStroke: color || "#82C4F8",
                     data: data
                 }]
             };
@@ -199,7 +199,7 @@ angular.module('Application').controller('GraphsController', ['$scope', '$locati
 
                 // try to find the app for this segment
                 var selectedDataInfo = targetsInfo.filter(function (info) { return info.label === activeBars[0].label; })[0];
-                if (selectedDataInfo) $scope.setMemoryApp(selectedDataInfo.app);
+                if (selectedDataInfo) $scope.setMemoryApp(selectedDataInfo.app, selectedDataInfo.color);
             };
         });
     };
