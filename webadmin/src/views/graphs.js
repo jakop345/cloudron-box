@@ -136,6 +136,9 @@ angular.module('Application').controller('GraphsController', ['$scope', '$locati
         targets.push('summarize(collectd.localhost.memory.memory-used, "1min", "avg")');
         targetsInfo.push({ label: 'System', color: '#2196F3' });
 
+        targets.push('summarize(sum(collectd.localhost.memory.memory-buffered, collectd.localhost.memory.memory-cached), "1min", "avg")');
+        targetsInfo.push({ label: 'Cached', color: '#f0ad4e' });
+
         targets.push('summarize(collectd.localhost.memory.memory-free, "1min", "avg")');
         targetsInfo.push({ label: 'Free', color: '#27CE65' });
 

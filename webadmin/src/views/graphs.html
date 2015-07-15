@@ -75,9 +75,10 @@
                     <h4>System</h4>
                     <canvas id="memoryUsageSystemChart" width="200" height="200"></canvas>
                     <p>
-                        <span class="text-success">{{ memoryUsageSystem[1].label }} {{ memoryUsageSystem[1].value }} MB</span>
-                        &nbsp;
-                        <span class="text-primary">{{ memoryUsageSystem[0].label }} {{ memoryUsageSystem[0].value }} MB</span>
+                        <span ng-repeat="data in memoryUsageSystem">
+                            <span style="color: {{data.color}};" class="memory-chart-label">{{ data.label }} {{ data.value }} MB</span>
+                            &nbsp;
+                        </span>
                     </p>
                 </div>
             </div>
