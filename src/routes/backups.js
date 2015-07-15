@@ -9,6 +9,7 @@ exports = module.exports = {
 
 var backups = require('../backups.js'),
     cloudron = require('../cloudron.js'),
+    debug = require('debug')('box:routes/backups'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess;
 

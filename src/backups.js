@@ -12,7 +12,6 @@ exports = module.exports = {
     backup: backup,
     backupBox: backupBox,
     backupApp: backupApp,
-    ensureBackup: ensureBackup,
 
     restoreApp: restoreApp
 };
@@ -277,24 +276,6 @@ function backup(callback) {
                 callback(error, restoreKey);
             });
         });
-    });
-}
-
-function ensureBackup(callback) {
-    callback = callback || function () { };
-
-    getAllPaged(1, 1, function (error, backups) {
-        if (error) {
-            debug('Unable to list backups', error);
-            return callback(error); // no point trying to backup if appstore is down
-        }
-
-        if (backups.length !== 0 && (new Date() - new Date(backups[0].creationTime) < 23 * 60 * 60 * 1000)) { // ~1 day ago
-            debug('Previous backup was %j, no need to backup now', backups[0]);
-            return callback(null);
-        }
-
-        backup(callback);
     });
 }
 

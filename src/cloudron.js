@@ -18,7 +18,8 @@ exports = module.exports = {
     update: update,
     reboot: reboot,
     migrate: migrate,
-    backup: backup
+    backup: backup,
+    ensureBackup: ensureBackup
 };
 
 var assert = require('assert'),
@@ -468,12 +469,30 @@ function backup(callback) {
     var error = locker.lockForFullBackup();
     if (error) return callback(new CloudronError(CloudronError.BAD_STATE, error.message));
 
-    backup(function (error) {
+    backups.backup(function (error) {
         if (error) console.error('backup failed.', error);
 
         locker.unlockForFullBackup();
 
         return callback(error);
+    });
+}
+
+function ensureBackup(callback) {
+    callback = callback || function () { };
+
+    backups.getAllPaged(1, 1, function (error, backups) {
+        if (error) {
+            debug('Unable to list backups', error);
+            return callback(error); // no point trying to backup if appstore is down
+        }
+
+        if (backups.length !== 0 && (new Date() - new Date(backups[0].creationTime) < 23 * 60 * 60 * 1000)) { // ~1 day ago
+            debug('Previous backup was %j, no need to backup now', backups[0]);
+            return callback(null);
+        }
+
+        backup(callback);
     });
 }
 
