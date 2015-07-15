@@ -76,7 +76,7 @@ angular.module('Application').controller('GraphsController', ['$scope', '$locati
 
             // translate the data from bytes to MB
             var data = result[0].datapoints.map(function (d) { return parseInt((d[0] / 1024 / 1024).toFixed(2)); });
-            var labels = data.map(function (d, index) { return (timePeriod - (index * timeBucketSize)) / 60 + 'h'; });
+            var labels = data.map(function (d, index) { return '-' + (timePeriod - (index * timeBucketSize)) / 60 + 'h'; });
 
             var tmp = {
                 labels: labels,
