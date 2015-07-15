@@ -627,6 +627,10 @@ $graphs-success-alt:    lighten(#27CE65, 20%);
         color: $graphs-success;
     }
 
+    .memory-chart-label {
+        font-weight: bold;
+    }
+
     .memory-app-container {
         background-color: white;
         padding: 20px;

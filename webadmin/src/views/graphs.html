@@ -50,26 +50,57 @@
     <br/>
     <br/>
 
-    <div class="row">
-        <div class="col-md-12 shadow memory-app-container">
-            <h2>Memory</h2>
-            <br/>
-            <div>
-                <ul class="nav nav-tabs nav-justified">
-                    <li ng-class="{ active: activeApp === 'system' }">
-                        <a ng-click="setMemoryApp('system')" href="">System</a>
-                    </li>
-                    <li ng-class="{ active: activeApp === app }" ng-repeat="app in installedApps">
-                        <a ng-click="setMemoryApp(app)" href="">{{ app.location }}</a>
-                    </li>
-                </ul>
+    <div class="row shadow memory-app-container">
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-12">
+                    <h2>Memory</h2>
+                </div>
             </div>
+
             <br/>
-            <canvas id="memoryAppChart" width="800" height="300"></canvas>
-            <p>Memory consumption over time in MB.</p>
+
+            <div class="row">
+                <div class="col-md-4 col-md-offset-2">
+                    <h4>Apps</h4>
+                    <canvas id="memoryUsageAppsChart" width="200" height="200"></canvas>
+                    <p>
+                        <span ng-repeat="data in memoryUsageApps">
+                            <span style="color: {{data.color}};" class="memory-chart-label">{{ data.label }} {{ data.value }} MB</span>
+                            &nbsp;
+                        </span>
+                    </p>
+                </div>
+                <div class="col-md-4">
+                    <h4>System</h4>
+                    <canvas id="memoryUsageSystemChart" width="200" height="200"></canvas>
+                    <p>
+                        <span class="text-success">{{ memoryUsageSystem[1].label }} {{ memoryUsageSystem[1].value }} MB</span>
+                        &nbsp;
+                        <span class="text-primary">{{ memoryUsageSystem[0].label }} {{ memoryUsageSystem[0].value }} MB</span>
+                    </p>
+                </div>
+            </div>
+
+            <br/>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <ul class="nav nav-tabs nav-justified">
+                        <li ng-class="{ active: activeApp === 'system' }">
+                            <a ng-click="setMemoryApp('system')" href="">System</a>
+                        </li>
+                        <li ng-class="{ active: activeApp === app }" ng-repeat="app in installedApps">
+                            <a ng-click="setMemoryApp(app)" href="">{{ app.location }}</a>
+                        </li>
+                    </ul>
+                </div>
+                <br/>
+                <canvas id="memoryAppChart" width="800" height="300"></canvas>
+                <p>Memory consumption over time in MB.</p>
+            </div>
         </div>
     </div>
-
 </div>
 
 <br/>

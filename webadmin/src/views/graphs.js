@@ -6,6 +6,8 @@ angular.module('Application').controller('GraphsController', ['$scope', '$locati
     Client.onReady(function () { if (!Client.getUserInfo().admin) $location.path('/'); });
 
     $scope.diskUsage = {};
+    $scope.memoryUsageSystem = [];
+    $scope.memoryUsageApps = [];
     $scope.activeApp = null;
     $scope.memoryChart = null;
 
@@ -15,9 +17,17 @@ angular.module('Application').controller('GraphsController', ['$scope', '$locati
         return (value/1024/1024/1024).toFixed(2);
     }
 
-    function renderDisk(type, free, reserved, used) {
-        console.log(type, free, reserved, used);
+    // http://stackoverflow.com/questions/1484506/random-color-generator-in-javascript
+    function getRandomColor() {
+        var letters = '0123456789ABCDEF'.split('');
+        var color = '#';
+        for (var i = 0; i < 6; i++ ) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
 
+    function renderDisk(type, free, reserved, used) {
         $scope.diskUsage[type] = {
             used: bytesToGigaBytes(used.datapoints[0][0]),
             reserved: bytesToGigaBytes(reserved.datapoints[0][0]),
@@ -115,6 +125,63 @@ angular.module('Application').controller('GraphsController', ['$scope', '$locati
         });
     };
 
+    $scope.updateMemorySystemChart = function () {
+        var targets = [];
+        var targetsInfo = [];
+
+        targets.push('summarize(collectd.localhost.memory.memory-used, "1min", "avg")');
+        targetsInfo.push({ label: 'System', color: '#2196F3' });
+
+        targets.push('summarize(collectd.localhost.memory.memory-free, "1min", "avg")');
+        targetsInfo.push({ label: 'Free', color: '#27CE65' });
+
+        Client.graphs(targets, '-1min', function (error, result) {
+            if (error) return console.log(error);
+
+            $scope.memoryUsageSystem = result.map(function (data, index) {
+                return {
+                    value: data.datapoints[0][0],
+                    color: targetsInfo[index].color,
+                    highlight: targetsInfo[index].color,
+                    label: targetsInfo[index].label
+                };
+            });
+
+            var ctx = $('#memoryUsageSystemChart').get(0).getContext('2d');
+            var myChart = new Chart(ctx);
+            myChart.Doughnut($scope.memoryUsageSystem);
+        });
+    };
+
+    $scope.updateMemoryAppsChart = function () {
+        var targets = [];
+        var targetsInfo = [];
+
+        $scope.installedApps.forEach(function (app) {
+            targets.push('summarize(collectd.localhost.table-' + app.id + '-memory.gauge-rss, "1min", "avg")');
+            targetsInfo.push({ label: app.location, color: getRandomColor() });
+        });
+
+        Client.graphs(targets, '-1min', function (error, result) {
+            if (error) return console.log(error);
+
+            $scope.memoryUsageApps = result.map(function (data, index) {
+                return {
+                    value: data.datapoints[0][0],
+                    color: targetsInfo[index].color,
+                    highlight: targetsInfo[index].color,
+                    label: targetsInfo[index].label
+                };
+            });
+
+            var ctx = $('#memoryUsageAppsChart').get(0).getContext('2d');
+            var myChart = new Chart(ctx);
+            myChart.Doughnut($scope.memoryUsageApps);
+        });
+    };
+
     Client.onReady($scope.updateDiskGraphs);
+    Client.onReady($scope.updateMemorySystemChart);
+    Client.onReady($scope.updateMemoryAppsChart);
     Client.onReady($scope.setMemoryApp.bind(null, 'system'));
 }]);
