@@ -158,6 +158,8 @@ function initializeExpressSync() {
     // settings routes
     router.get ('/api/v1/settings/autoupdate_pattern', settingsScope, routes.settings.getAutoupdatePattern);
     router.post('/api/v1/settings/autoupdate_pattern', settingsScope, routes.settings.setAutoupdatePattern);
+    router.get ('/api/v1/settings/cloudron_name', settingsScope, routes.settings.getCloudronName);
+    router.post('/api/v1/settings/cloudron_name', settingsScope, routes.settings.setCloudronName);
 
     // backup routes
     router.get ('/api/v1/backups', settingsScope, routes.backups.get);

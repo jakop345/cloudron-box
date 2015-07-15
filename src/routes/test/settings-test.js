@@ -75,65 +75,119 @@ describe('Settings API', function () {
     before(setup);
     after(cleanup);
 
-    // auto update pattern
-    it('can get auto update pattern (default)', function (done) {
-        request.get(SERVER_URL + '/api/v1/settings/autoupdate_pattern')
-               .query({ access_token: token })
-               .end(function (err, res) {
-            expect(res.statusCode).to.equal(200);
-            expect(res.body.pattern).to.be.ok();
-            done(err);
+    describe('autoupdate_pattern', function () {
+        it('can get auto update pattern (default)', function (done) {
+            request.get(SERVER_URL + '/api/v1/settings/autoupdate_pattern')
+                   .query({ access_token: token })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(200);
+                expect(res.body.pattern).to.be.ok();
+                done(err);
+            });
+        });
+
+        it('cannot set autoupdate_pattern without pattern', function (done) {
+            request.post(SERVER_URL + '/api/v1/settings/autoupdate_pattern')
+                   .query({ access_token: token })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(400);
+                done();
+            });
+        });
+
+        it('can set autoupdate_pattern', function (done) {
+            var eventPattern = null;
+            settings.events.on(settings.AUTOUPDATE_PATTERN_KEY, function (pattern) {
+                eventPattern = pattern;
+            });
+
+            request.post(SERVER_URL + '/api/v1/settings/autoupdate_pattern')
+                   .query({ access_token: token })
+                   .send({ pattern: '00 30 11 * * 1-5' })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(200);
+                expect(eventPattern === '00 30 11 * * 1-5').to.be.ok();
+                done();
+            });
+        });
+
+        it('can set autoupdate_pattern to never', function (done) {
+            var eventPattern = null;
+            settings.events.on(settings.AUTOUPDATE_PATTERN_KEY, function (pattern) {
+                eventPattern = pattern;
+            });
+
+            request.post(SERVER_URL + '/api/v1/settings/autoupdate_pattern')
+                   .query({ access_token: token })
+                   .send({ pattern: 'never' })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(200);
+                expect(eventPattern).to.eql('never');
+                done();
+            });
+        });
+
+        it('cannot set invalid autoupdate_pattern', function (done) {
+            request.post(SERVER_URL + '/api/v1/settings/autoupdate_pattern')
+                   .query({ access_token: token })
+                   .send({ pattern: '1 3 x 5 6' })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(400);
+                done();
+            });
         });
     });
 
-    it('cannot set autoupdate_pattern without pattern', function (done) {
-        request.post(SERVER_URL + '/api/v1/settings/autoupdate_pattern')
-               .query({ access_token: token })
-               .end(function (err, res) {
-            expect(res.statusCode).to.equal(400);
-            done();
-        });
-    });
+    describe('cloudron_name', function () {
+        var name = 'foobar';
 
-    it('can set autoupdate_pattern', function (done) {
-        var eventPattern = null;
-        settings.events.on(settings.AUTOUPDATE_PATTERN_KEY, function (pattern) {
-            eventPattern = pattern;
+        it('get default succeeds', function (done) {
+            request.get(SERVER_URL + '/api/v1/settings/cloudron_name')
+                   .query({ access_token: token })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(200);
+                expect(res.body.name).to.be.ok();
+                done(err);
+            });
         });
 
-        request.post(SERVER_URL + '/api/v1/settings/autoupdate_pattern')
-               .query({ access_token: token })
-               .send({ pattern: '00 30 11 * * 1-5' })
-               .end(function (err, res) {
-            expect(res.statusCode).to.equal(200);
-            expect(eventPattern === '00 30 11 * * 1-5').to.be.ok();
-            done();
-        });
-    });
-
-    it('can set autoupdate_pattern to never', function (done) {
-        var eventPattern = null;
-        settings.events.on(settings.AUTOUPDATE_PATTERN_KEY, function (pattern) {
-            eventPattern = pattern;
+        it('cannot set without name', function (done) {
+            request.post(SERVER_URL + '/api/v1/settings/cloudron_name')
+                   .query({ access_token: token })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(400);
+                done();
+            });
         });
 
-        request.post(SERVER_URL + '/api/v1/settings/autoupdate_pattern')
-               .query({ access_token: token })
-               .send({ pattern: 'never' })
-               .end(function (err, res) {
-            expect(res.statusCode).to.equal(200);
-            expect(eventPattern).to.eql('never');
-            done();
+        it('cannot set empty name', function (done) {
+            request.post(SERVER_URL + '/api/v1/settings/cloudron_name')
+                   .query({ access_token: token })
+                   .send({ name: '' })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(400);
+                done();
+            });
         });
-    });
 
-    it('cannot set invalid autoupdate_pattern', function (done) {
-        request.post(SERVER_URL + '/api/v1/settings/autoupdate_pattern')
-               .query({ access_token: token })
-               .send({ pattern: '1 3 x 5 6' })
-               .end(function (err, res) {
-            expect(res.statusCode).to.equal(400);
-            done();
+        it('set succeeds', function (done) {
+            request.post(SERVER_URL + '/api/v1/settings/cloudron_name')
+                   .query({ access_token: token })
+                   .send({ name: name })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(200);
+                done();
+            });
+        });
+
+        it('get succeeds', function (done) {
+            request.get(SERVER_URL + '/api/v1/settings/cloudron_name')
+                   .query({ access_token: token })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(200);
+                expect(res.body.name).to.eql(name);
+                done(err);
+            });
         });
     });
 });

@@ -4,7 +4,10 @@
 
 exports = module.exports = {
     getAutoupdatePattern: getAutoupdatePattern,
-    setAutoupdatePattern: setAutoupdatePattern
+    setAutoupdatePattern: setAutoupdatePattern,
+
+    getCloudronName: getCloudronName,
+    setCloudronName: setCloudronName
 };
 
 var assert = require('assert'),
@@ -34,3 +37,21 @@ function setAutoupdatePattern(req, res, next) {
     });
 }
 
+function setCloudronName(req, res, next) {
+    assert.strictEqual(typeof req.body, 'object');
+
+    if (typeof req.body.name !== 'string') return next(new HttpError(400, 'name is required'));
+
+    settings.setCloudronName(req.body.name, function (error) {
+        if (error && error.reason === SettingsError.BAD_FIELD) return next(new HttpError(400, 'Invalid name'));
+        if (error) return next(new HttpError(500, error));
+        next(new HttpSuccess(200));
+    });
+}
+
+function getCloudronName(req, res, next) {
+    settings.getCloudronName(function (error, name) {
+        if (error) return next(new HttpError(500, error));
+        next(new HttpSuccess(200, { name: name }));
+    });
+}

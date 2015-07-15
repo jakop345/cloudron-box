@@ -9,10 +9,14 @@ exports = module.exports = {
     getTimeZone: getTimeZone,
     setTimeZone: setTimeZone,
 
+    getCloudronName: getCloudronName,
+    setCloudronName: setCloudronName,
+
     getAll: getAll,
 
     AUTOUPDATE_PATTERN_KEY: 'autoupdate_pattern',
     TIME_ZONE_KEY: 'time_zone',
+    CLOUDRON_NAME: 'cloudron_name',
 
     events: new (require('events').EventEmitter)()
 };
@@ -108,6 +112,30 @@ function getTimeZone(callback) {
         if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
 
         callback(null, tz);
+    });
+}
+
+function getCloudronName(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    settingsdb.get(exports.CLOUDRON_NAME, function (error, name) {
+        if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
+        callback(null, name);
+    });
+}
+
+function setCloudronName(name, callback) {
+    assert.strictEqual(typeof name, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    if (!name) return callback(new SettingsError(SettingsError.BAD_FIELD));
+
+    settingsdb.set(exports.CLOUDRON_NAME, name, function (error) {
+        if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
+
+        exports.events.emit(exports.CLOUDRON_NAME, name);
+
+        return callback(null);
     });
 }
 
