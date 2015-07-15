@@ -10,6 +10,8 @@ app.directive('ngEnter', function () {
                 scope.$apply(function (){
                     scope.$eval(attrs.ngEnter);
                 });
+
+                event.preventDefault();
             }
         });
     };
@@ -51,11 +53,16 @@ app.service('Wizard', [ function () {
 app.controller('StepController', ['$scope', '$location', 'Wizard', function ($scope, $location, Wizard) {
     $scope.wizard = Wizard;
 
-    $scope.ok = function (page, bad) {
+    $scope.next = function (page, bad) {
         if (!bad) $location.path(page);
     };
 
+    $scope.focusNext = function (elemId, bad) {
+        if (!bad) $('#' + elemId).focus();
+    };
+
     $scope.$on('$viewContentLoaded', function () {
+        $('a[autofocus]').focus();
         $('input[autofocus]').focus();
     });
 }]);
