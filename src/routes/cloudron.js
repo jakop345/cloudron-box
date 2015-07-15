@@ -17,6 +17,7 @@ exports = module.exports = {
 
 var assert = require('assert'),
     cloudron = require('../cloudron.js'),
+    constants = require('../../constants.js'),
     config = require('../../config.js'),
     progress = require('../progress.js'),
     CloudronError = cloudron.CloudronError,
@@ -48,15 +49,17 @@ function activate(req, res, next) {
     var username = req.body.username;
     var password = req.body.password;
     var email = req.body.email;
+    var name = req.body.name || constants.CLOUDRON_DEFAULT_NAME;
 
     var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     debug('activate: username:%s ip:%s', username, ip);
 
-    cloudron.activate(username, password, email, ip, function (error, info) {
+    cloudron.activate(username, password, email, name, ip, function (error, info) {
         if (error && error.reason === CloudronError.ALREADY_PROVISIONED) return next(new HttpError(409, 'Already setup'));
         if (error && error.reason === CloudronError.BAD_USERNAME) return next(new HttpError(400, 'Bad username'));
         if (error && error.reason === CloudronError.BAD_PASSWORD) return next(new HttpError(400, 'Bad password'));
         if (error && error.reason === CloudronError.BAD_EMAIL) return next(new HttpError(400, 'Bad email'));
+        if (error && error.reason === CloudronError.BAD_NAME) return next(new HttpError(400, 'Bad name'));
         if (error) return next(new HttpError(500, error));
 
         // Now let the api server know we got activated

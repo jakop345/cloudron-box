@@ -107,6 +107,20 @@ describe('Cloudron', function () {
             });
         });
 
+        it('fails due to empty name', function (done) {
+            var scope = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
+
+            request.post(SERVER_URL + '/api/v1/cloudron/activate')
+                   .query({ setupToken: 'somesetuptoken' })
+                   .send({ username: 'someuser', password: '', email: 'admin@foo.bar', name: '' })
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(400);
+                expect(scope.isDone()).to.be.ok();
+                done();
+            });
+        });
+
         it('fails due to invalid email', function (done) {
             var scope = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
 
@@ -127,7 +141,7 @@ describe('Cloudron', function () {
 
             request.post(SERVER_URL + '/api/v1/cloudron/activate')
                    .query({ setupToken: 'somesetuptoken' })
-                   .send({ username: 'someuser', password: 'somepassword', email: 'admin@foo.bar' })
+                   .send({ username: 'someuser', password: 'somepassword', email: 'admin@foo.bar', name: 'tester' })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(201);

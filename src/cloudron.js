@@ -29,6 +29,7 @@ var assert = require('assert'),
     progress = require('./progress.js'),
     safe = require('safetydance'),
     settings = require('./settings.js'),
+    SettingsError = settings.SettingsError,
     shell = require('./shell.js'),
     superagent = require('superagent'),
     sysinfo = require('./sysinfo.js'),
@@ -71,6 +72,7 @@ CloudronError.ALREADY_PROVISIONED = 'Already Provisioned';
 CloudronError.BAD_USERNAME = 'Bad username';
 CloudronError.BAD_EMAIL = 'Bad email';
 CloudronError.BAD_PASSWORD = 'Bad password';
+CloudronError.BAD_NAME = 'Bad name';
 CloudronError.INVALID_STATE = 'Invalid state';
 CloudronError.NOT_FOUND = 'Not found';
 
@@ -119,35 +121,41 @@ function setTimeZone(ip, callback) {
     });
 }
 
-function activate(username, password, email, ip, callback) {
+function activate(username, password, email, name, ip, callback) {
     assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof password, 'string');
     assert.strictEqual(typeof email, 'string');
     assert.strictEqual(typeof ip, 'string');
+    assert.strictEqual(typeof name, 'string');
     assert.strictEqual(typeof callback, 'function');
 
     debug('activating user:%s email:%s', username, email);
 
     setTimeZone(ip, function () { });
 
-    user.createOwner(username, password, email, function (error, userObject) {
-        if (error && error.reason === UserError.ALREADY_EXISTS) return callback(new CloudronError(CloudronError.ALREADY_PROVISIONED));
-        if (error && error.reason === UserError.BAD_USERNAME) return callback(new CloudronError(CloudronError.BAD_USERNAME));
-        if (error && error.reason === UserError.BAD_PASSWORD) return callback(new CloudronError(CloudronError.BAD_PASSWORD));
-        if (error && error.reason === UserError.BAD_EMAIL) return callback(new CloudronError(CloudronError.BAD_EMAIL));
+    settings.setCloudronName(name, function (error) {
+        if (error && error.reason === SettingsError.BAD_FIELD) return callback(new CloudronError(CloudronError.BAD_NAME));
         if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
-        clientdb.getByAppId('webadmin', function (error, result) {
+        user.createOwner(username, password, email, function (error, userObject) {
+            if (error && error.reason === UserError.ALREADY_EXISTS) return callback(new CloudronError(CloudronError.ALREADY_PROVISIONED));
+            if (error && error.reason === UserError.BAD_USERNAME) return callback(new CloudronError(CloudronError.BAD_USERNAME));
+            if (error && error.reason === UserError.BAD_PASSWORD) return callback(new CloudronError(CloudronError.BAD_PASSWORD));
+            if (error && error.reason === UserError.BAD_EMAIL) return callback(new CloudronError(CloudronError.BAD_EMAIL));
             if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
-            // Also generate a token so the admin creation can also act as a login
-            var token = tokendb.generateToken();
-            var expires = Date.now() + 24 * 60 * 60 * 1000; // 1 day
-
-            tokendb.add(token, tokendb.PREFIX_USER + userObject.id, result.id, expires, '*', function (error) {
+            clientdb.getByAppId('webadmin', function (error, result) {
                 if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
-                callback(null, { token: token, expires: expires });
+                // Also generate a token so the admin creation can also act as a login
+                var token = tokendb.generateToken();
+                var expires = Date.now() + 24 * 60 * 60 * 1000; // 1 day
+
+                tokendb.add(token, tokendb.PREFIX_USER + userObject.id, result.id, expires, '*', function (error) {
+                    if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
+
+                    callback(null, { token: token, expires: expires });
+                });
             });
         });
     });
