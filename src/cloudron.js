@@ -167,7 +167,15 @@ function getStatus(callback) {
     userdb.count(function (error, count) {
         if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
-        callback(null, { activated: count !== 0, version: config.version() });
+        settings.getCloudronName(function (error, cloudronName) {
+            if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
+
+            callback(null, {
+                activated: count !== 0,
+                version: config.version(),
+                cloudronName: cloudronName
+            });
+        });
     });
 }
 
