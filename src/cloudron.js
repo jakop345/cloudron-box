@@ -15,6 +15,7 @@ exports = module.exports = {
 
     sendHeartbeat: sendHeartbeat,
 
+    update: update,
     reboot: reboot,
     migrate: migrate
 };
@@ -75,6 +76,7 @@ CloudronError.BAD_PASSWORD = 'Bad password';
 CloudronError.BAD_NAME = 'Bad name';
 CloudronError.INVALID_STATE = 'Invalid state';
 CloudronError.NOT_FOUND = 'Not found';
+CloudronError.NO_UPDATE_AVAILABLE = 'No update available';
 
 function initialize(callback) {
     assert.strictEqual(typeof callback, 'function');
@@ -354,3 +356,10 @@ function migrate(size, region, callback) {
         });
     });
 }
+
+function update(callback) {
+    if (!updater.getUpdateInfo().box) return next(new CloudronError(CloudronError.NO_UPDATE_AVAILABLE));
+
+    updater.update(callback);
+}
+

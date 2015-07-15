@@ -129,9 +129,9 @@ function getConfig(req, res, next) {
 }
 
 function update(req, res, next) {
-    if (!updater.getUpdateInfo().box) return next(new HttpError(422, 'No update available'));
+    cloudron.update(function (error) {
+        if (error && error.reason === CloudronError.NO_UPDATE_AVAILABLE) return next(new HttpError(422, 'No update available'));
 
-    updater.update(function (error) {
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(202, {}));
