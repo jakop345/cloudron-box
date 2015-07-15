@@ -646,16 +646,24 @@ $graphs-success-alt:    lighten(#27CE65, 20%);
 // ----------------------------
 // Error and status page classes
 // ----------------------------
-.status-wrapper {
-    display: table;
-    width: 100%;
+.status-page {
+    background-color: white;
+    padding: 0;
+    margin: 0;
     height: 100%;
-}
+    width: 100%;
 
-.status-content {
-    display: table-cell;
-    width: 100%;
-    height: 100%;
-    text-align: center;
-    vertical-align: middle;
+    .wrapper {
+        display: table;
+        width: 100%;
+        height: 100%;
+    }
+
+    .content {
+        display: table-cell;
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        vertical-align: middle;
+    }
 }
