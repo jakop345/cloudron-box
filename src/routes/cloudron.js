@@ -132,9 +132,9 @@ function update(req, res, next) {
     var boxUpdateInfo = updateChecker.getUpdateInfo().box;
     if (!boxUpdateInfo) return next(new HttpError(422, 'No update available'));
 
+    // this only initiates the update, progress can be checked via the progress route
     cloudron.update(boxUpdateInfo, function (error) {
         if (error && error.reason === CloudronError.BAD_STATE) return next(new HttpError(409, error.message));
-
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(202, {}));

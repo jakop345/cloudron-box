@@ -394,17 +394,18 @@ function update(boxUpdateInfo, callback) {
 
     progress.set(progress.UPDATE, 0, 'Begin ' + (boxUpdateInfo.update ? 'upgrade': 'update'));
 
+    // initiate the update/upgrade but do not wait for it
     if (boxUpdateInfo.upgrade) {
         doUpgrade(boxUpdateInfo, function (error) {
             locker.unlock(locker.OP_BOX_UPDATE);
-            callback(error);
         });
     } else {
         doUpdate(boxUpdateInfo, function (error) {
             locker.unlock(locker.OP_BOX_UPDATE);
-            callback(error);
         });
     }
+
+    callback(null);
 }
 
 function doUpgrade(boxUpdateInfo, callback) {
