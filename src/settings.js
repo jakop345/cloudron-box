@@ -142,11 +142,11 @@ function getCloudronAvatar(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     var filePath = path.join(config.baseDir(), constants.CLOUDRON_AVATAR_FILE);
-    var avatar = safe.fs.readFileSync(filePath, 'utf-8');
+    var avatar = safe.fs.readFileSync(filePath);
     if (avatar) return callback(null, avatar);
 
     // try default fallback
-    avatar = safe.fs.readFileSync(constants.CLOUDRON_DEFAULT_AVATAR_FILE, 'utf-8');
+    avatar = safe.fs.readFileSync(constants.CLOUDRON_DEFAULT_AVATAR_FILE);
     if (avatar) return callback(null, avatar);
 
     callback(new SettingsError(SettingsError.INTERNAL_ERROR));
