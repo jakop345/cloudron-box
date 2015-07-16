@@ -21,9 +21,9 @@ function lock(operation) {
 
     gLock.operation = operation;
     gLock.timestamp = new Date();
-    gLock.watcherId = setInterval(function () { debug('Lock unreleased %j', gLock); }, 1000 * 60 * 5);
+    gLock.watcherId = setInterval(function () { debug('Lock unreleased %s', gLock.operation); }, 1000 * 60 * 5);
 
-    debug('Acquired : %j', gLock);
+    debug('Acquired : %s', gLock.operation);
 
     return null;
 }
@@ -33,7 +33,7 @@ function unlock(operation) {
 
     if (gLock.operation !== operation) throw new Error('Mismatched unlock. Current lock is for ' + gLock.operation); // throw because this is a programming error
 
-    debug('Released : %j', gLock);
+    debug('Released : %s', gLock.operations);
 
     gLock.operation = null;
     gLock.timestamp = null;
