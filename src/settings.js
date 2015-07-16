@@ -30,6 +30,7 @@ var assert = require('assert'),
     config = require('../config.js'),
     constants = require('../constants.js'),
     CronJob = require('cron').CronJob,
+    DatabaseError = require('./databaseerror.js'),
     path = require('path'),
     safe = require('safetydance'),
     settingsdb = require('./settingsdb.js'),
@@ -118,6 +119,7 @@ function getCloudronName(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     settingsdb.get(exports.CLOUDRON_NAME, function (error, name) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, constants.CLOUDRON_DEFAULT_NAME);
         if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
         callback(null, name);
     });
