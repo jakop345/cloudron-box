@@ -13,7 +13,6 @@ exports = module.exports = {
 var apps = require('./apps.js'),
     assert = require('assert'),
     async = require('async'),
-    backups = require('./backups.js'),
     cloudron = require('./cloudron.js'),
     config = require('../config.js'),
     debug = require('debug')('box:updater'),
