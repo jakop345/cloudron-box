@@ -689,3 +689,28 @@ $graphs-success-alt:    lighten(#27CE65, 20%);
 .settings-avatar {
     cursor: pointer;
 }
+
+.settings-avatar-selector {
+    text-align: center;
+
+    .grid {
+        background-color: lightgray;
+    }
+
+    .item {
+        display: inline-block;
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+        width: 64px;
+        height: 64px;
+        margin: 5px;
+        cursor: pointer;
+        text-align: center;
+        vertical-align: middle;
+
+        &:hover {
+            background-color: white;
+        }
+    }
+}

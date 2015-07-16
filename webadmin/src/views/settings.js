@@ -8,7 +8,10 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
 
     $scope.lastBackup = null;
     $scope.backups = [];
-    $scope.avatar = null;
+    $scope.avatar = {
+        data: null,
+        url: null
+    };
 
     $scope.developerModeChange = {
         busy: false,
@@ -30,7 +33,43 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         busy: false,
         error: {},
         avatar: null,
-        avatarName: ''
+        availableAvatars: [{
+            file: null,
+            data: null,
+            url: '/img/avatars/avatar_0.png',
+        }, {
+            file: null,
+            data: null,
+            url: '/img/avatars/cloudfacegreen.png'
+        }, {
+            file: null,
+            data: null,
+            url: '/img/avatars/cloudfaceturquoise.png'
+        }, {
+            file: null,
+            data: null,
+            url: '/img/avatars/cloudglassesgreen.png'
+        }, {
+            file: null,
+            data: null,
+            url: '/img/avatars/cloudglassespink.png'
+        }, {
+            file: null,
+            data: null,
+            url: '/img/avatars/cloudglassesturquoise.png'
+        }, {
+            file: null,
+            data: null,
+            url: '/img/avatars/cloudglassesyellow.png'
+        }]
+    };
+
+    $scope.setPreviewAvatar = function (avatar) {
+        $scope.avatarChange.avatar = avatar;
+    };
+
+    $scope.showCustomAvatarSelector = function () {
+        $('#avatarFileInput').click();
     };
 
     function nameChangeReset() {
@@ -44,7 +83,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     function avatarChangeReset() {
         $scope.avatarChange.error.avatar = null;
         $scope.avatarChange.avatar = null;
-        $scope.avatarChange.avatarName = '';
+        $scope.avatarChange.busy = false;
     }
 
     function fetchBackups() {
@@ -108,20 +147,42 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         });
     };
 
+    function getBlobFromImg(img, callback) {
+        var canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+
+        canvas.toBlob(callback);
+    }
+
     $scope.doChangeAvatar = function () {
         $scope.avatarChange.error.avatar = null;
         $scope.avatarChange.busy = true;
 
-        Client.changeCloudronAvatar($scope.avatarChange.avatar, function (error) {
+        function done(error) {
             if (error) {
                 console.error('Unable to change developer mode.', error);
             } else {
+                $scope.avatar = $scope.avatarChange.avatar;
                 avatarChangeReset();
                 $('#avatarChangeModal').modal('hide');
             }
 
             $scope.avatarChange.busy = false;
-        });
+        }
+
+        if (!$scope.avatarChange.avatar.file) {
+            var img = new Image();
+            img.src = $scope.avatarChange.avatar.url;
+            $scope.avatarChange.avatar.file = getBlobFromImg(img, function (blob) {
+                Client.changeCloudronAvatar(blob, done);
+            });
+        } else {
+            Client.changeCloudronAvatar($scope.avatarChange.avatar.file, done);
+        }
     };
 
     $scope.doCreateBackup = function () {
@@ -171,24 +232,30 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
 
     $scope.showChangeAvatar = function () {
         avatarChangeReset();
-         $('#avatarFileInput').click();
+        $('#avatarChangeModal').modal('show');
     };
 
     $('#avatarFileInput').get(0).onchange = function (event) {
-        $scope.$apply(function () {
-            $scope.avatarChange.avatar = event.target.files[0];
-            $scope.avatarChange.avatarName = event.target.files[0].name;
+        var fr = new FileReader();
+        fr.onload = function () {
+            $scope.$apply(function () {
+                var tmp = {
+                    file: event.target.files[0],
+                    data: fr.result,
+                    url: null
+                };
 
-            var fr = new FileReader();
-            fr.onload = function () { $scope.avatar = fr.result; };
-            fr.readAsDataURL($scope.avatarChange.avatar);
-        });
+                $scope.avatarChange.availableAvatars.push(tmp);
+                $scope.setPreviewAvatar(tmp);
+            });
+        };
+        fr.readAsDataURL(event.target.files[0]);
     };
 
     Client.onReady(function () {
         fetchBackups();
 
-        $scope.avatar = '//my-' + $scope.config.fqdn + '/api/v1/cloudron/avatar';
+        $scope.avatar.url = '//my-' + $scope.config.fqdn + '/api/v1/cloudron/avatar';
     });
 
     // setup all the dialog focus handling
