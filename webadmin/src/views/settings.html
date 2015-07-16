@@ -32,6 +32,36 @@
     </div>
 </div>
 
+<!-- Modal change name -->
+<div class="modal fade" id="nameChangeModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Change the Cloudron Name</h4>
+            </div>
+            <div class="modal-body">
+                <form name="nameChangeForm" class="form-signin" role="form" novalidate ng-submit="doChangeName()" autocomplete="off">
+                    <fieldset>
+                        <div class="form-group" ng-class="{ 'has-error': (nameChangeForm.name.$dirty && nameChangeForm.name.$invalid) }">
+                            <label class="control-label" for="inputNameChangeName">New Cloudron Name</label>
+                            <div class="control-label" ng-show="(!nameChangeForm.name.$dirty && nameChange.error.name) || (nameChangeForm.name.$dirty && nameChangeForm.name.$invalid)">
+                                <small ng-show="nameChangeForm.name.$error.required">A valid name is required</small>
+                                <small ng-show="(nameChangeForm.name.$dirty && nameChangeForm.name.$invalid) && !nameChangeForm.name.$error.required">The name is not valid</small>
+                            </div>
+                            <input type="text" class="form-control" ng-model="nameChange.name" id="inputNameChangeName" name="name" ng-maxlength="512" ng-minlength="1" required autofocus>
+                        </div>
+                        <input class="ng-hide" type="submit" ng-disabled="nameChangeForm.$invalid"/>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" ng-click="doChangeName()" ng-disabled="nameChangeForm.$invalid || nameChange.busy"><i class="fa fa-spinner fa-pulse" ng-show="nameChange.busy"></i> Change</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Modal backup -->
 <div class="modal fade" id="createBackupModal" tabindex="-1" role="dialog">
     <div class="modal-dialog">
@@ -95,7 +125,7 @@
             <table width="100%">
                 <tr>
                     <td class="text-muted" style="vertical-align: top;">Name</td>
-                    <td class="text-right" style="vertical-align: top; white-space: nowrap;">{{ config.cloudronName }} <a href="" ng-click="showChangeEmail(emailchange_form)"><i class="fa fa-pencil text-small"></i></a></td>
+                    <td class="text-right" style="vertical-align: top; white-space: nowrap;">{{ config.cloudronName }} <a href="" ng-click="showChangeName()"><i class="fa fa-pencil text-small"></i></a></td>
                 </tr>
                 <tr>
                     <td class="text-muted" style="vertical-align: top;">Model</td>

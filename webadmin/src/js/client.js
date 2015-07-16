@@ -186,6 +186,20 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
+    Client.prototype.changeCloudronName = function (name, callback) {
+        var that = this;
+
+        var data = { name: name };
+        $http.post(client.apiOrigin + '/api/v1/settings/cloudron_name', data).success(function (data, status) {
+            if (status !== 200) return callback(new ClientError(status, data));
+
+            // will get overriden after polling for config, but ensures quick UI update
+            that._config.cloudronName = name;
+
+            callback(null);
+        }).error(defaultErrorHandler(callback));
+    };
+
     Client.prototype.installApp = function (id, manifest, title, config, callback) {
         var that = this;
         var data = { appStoreId: id, manifest: manifest, location: config.location, portBindings: config.portBindings, accessRestriction: config.accessRestriction };

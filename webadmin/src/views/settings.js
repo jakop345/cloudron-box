@@ -19,6 +19,20 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         busy: false
     };
 
+    $scope.nameChange = {
+        busy: false,
+        error: {},
+        name: ''
+    };
+
+    function nameChangeReset() {
+        $scope.nameChange.error.name = null;
+        $scope.nameChange.name = '';
+
+        $scope.nameChangeForm.$setPristine();
+        $scope.nameChangeForm.$setUntouched();
+    }
+
     function fetchBackups() {
         Client.getBackups(function (error, backups) {
             if (error) return console.error(error);
@@ -64,6 +78,22 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         });
     };
 
+    $scope.doChangeName = function () {
+        $scope.nameChange.error.name = null;
+        $scope.nameChange.busy = true;
+
+        Client.changeCloudronName($scope.nameChange.name, function (error) {
+            if (error) {
+                console.error('Unable to change developer mode.', error);
+            } else {
+                nameChangeReset();
+                $('#nameChangeModal').modal('hide');
+            }
+
+            $scope.nameChange.busy = false;
+        });
+    };
+
     $scope.doCreateBackup = function () {
         $('#createBackupModal').modal('hide');
         $scope.createBackup.busy = true;
@@ -97,8 +127,12 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
 
     $scope.showChangeDeveloperMode = function () {
         developerModeChangeReset();
-
         $('#developerModeChangeModal').modal('show');
+    };
+
+    $scope.showChangeName = function () {
+        nameChangeReset();
+        $('#nameChangeModal').modal('show');
     };
 
     $scope.showCreateBackup = function () {
@@ -110,7 +144,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     });
 
     // setup all the dialog focus handling
-    ['developerModeChangeModal'].forEach(function (id) {
+    ['developerModeChangeModal', 'nameChangeModal'].forEach(function (id) {
         $('#' + id).on('shown.bs.modal', function () {
             $(this).find("[autofocus]:first").focus();
         });
