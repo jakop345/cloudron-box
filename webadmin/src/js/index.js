@@ -50,6 +50,7 @@ var ISTATES = {
     PENDING_UNINSTALL: 'pending_uninstall',
     PENDING_RESTORE: 'pending_restore',
     PENDING_UPDATE: 'pending_update',
+    PENDING_BACKUP: 'pending_backup',
     ERROR: 'error',
     INSTALLED: 'installed'
 };
@@ -96,6 +97,7 @@ app.filter('installationStateLabel', function() {
         case ISTATES.PENDING_UNINSTALL: return 'Uninstalling...' + waiting;
         case ISTATES.PENDING_RESTORE: return 'Restoring...' + waiting;
         case ISTATES.PENDING_UPDATE: return 'Updating...' + waiting;
+        case ISTATES.PENDING_BACKUP: return 'Backing up...' + waiting;
         case ISTATES.ERROR: return 'Error';
         case ISTATES.INSTALLED: {
             if (app.runState === 'running') {
