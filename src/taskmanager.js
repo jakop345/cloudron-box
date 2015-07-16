@@ -37,6 +37,8 @@ function initialize(callback) {
 
         callback(null);
     });
+
+    locker.on('unlocked', startNextTask);
 }
 
 function uninitialize(callback) {
@@ -50,11 +52,18 @@ function uninitialize(callback) {
     callback(null);
 }
 
+function startNextTask() {
+    if (gPendingTasks.length === 0) return;
+    assert(Object.keys(gActiveTasks).length === 0); // since we allow only one task at a time
+
+    startAppTask(gPendingTasks.shift());
+}
+
 function startAppTask(appId) {
     assert.strictEqual(typeof appId, 'string');
     assert(!(appId in gActiveTasks));
 
-    var lockError = locker.lock(locker.OP_APPTASK); // ## FIXME: need to poll when the lock becomes free
+    var lockError = locker.lock(locker.OP_APPTASK);
 
     if (lockError || Object.keys(gActiveTasks).length >= TASK_CONCURRENCY) {
         debug('Reached concurrency limit, queueing task for %s', appId);
@@ -69,8 +78,7 @@ function startAppTask(appId) {
             appdb.update(appId, { installationState: appdb.ISTATE_ERROR, installationProgress: 'Apptask crashed with code ' + code }, NOOP_CALLBACK);
         }
         delete gActiveTasks[appId];
-        locker.unlock(locker.OP_APPTASK);
-        if (gPendingTasks.length !== 0) startAppTask(gPendingTasks.shift()); // start another pending task
+        locker.unlock(locker.OP_APPTASK); // unlock event will trigger next task
     });
 }
 
