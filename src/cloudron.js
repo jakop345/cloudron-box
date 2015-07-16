@@ -577,7 +577,7 @@ function backupBoxAndApps(callback) {
                     backupId = app.lastBackupId;
                 }
 
-                return iteratorCallback(null, app.lastBackupId);
+                return iteratorCallback(null, backupId);
             });
         }, function appsBackedUp(error, backupIds) {
             if (error) return callback(error);
