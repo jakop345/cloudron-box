@@ -148,12 +148,11 @@ function migrate(req, res, next) {
     debug('Migration requested', req.body.size, req.body.region);
 
     cloudron.migrate(req.body.size, req.body.region, function (error) {
-        if (error) return console.error('Migration failed.', error);
-        debug('Migration successfully triggered');
-    });
+        if (error && error.reason === CloudronError.BAD_STATE) return next(new HttpError(409, error.message));
+        if (error) return next(new HttpError(500, error));
 
-    // do not wait for migrate() to callback. The migration will first do a backup, which can take very long
-    next(new HttpSuccess(202, {}));
+        next(new HttpSuccess(202, {}));
+    });
 }
 
 function setCertificate(req, res, next) {

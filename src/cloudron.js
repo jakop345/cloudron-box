@@ -364,8 +364,24 @@ function migrate(size, region, callback) {
     assert.strictEqual(typeof region, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    backup(function (error, restoreKey) {
-        if (error) return callback(error);
+    var error = locker.lock(locker.OP_MIGRATE);
+    if (error) return callback(new CloudronError(CloudronError.BAD_STATE, error.message));
+
+    function unlock(error) {
+        if (error) {
+            debug('Failed to migrate', error);
+            locker.unlock(locker.OP_MIGRATE);
+        } else {
+            debug('Migration initiated successfully');
+            // do not unlock; cloudron is migrating
+        }
+
+        return;
+    }
+
+    // initiate the migration in the background
+    backupBoxAndApps(function (error, restoreKey) {
+        if (error) return unlock(error);
 
         debug('migrate: size %s region %s restoreKey %s', size, region, restoreKey);
 
@@ -374,14 +390,16 @@ function migrate(size, region, callback) {
           .query({ token: config.token() })
           .send({ size: size, region: region, restoreKey: restoreKey })
           .end(function (error, result) {
-            if (error) return callback(error);
-            if (result.status === 409) return callback(new CloudronError(CloudronError.BAD_STATE));
-            if (result.status === 404) return callback(new CloudronError(CloudronError.NOT_FOUND));
-            if (result.status !== 202) return callback(new CloudronError(CloudronError.EXTERNAL_ERROR, util.format('%s %j', result.status, result.body)));
+            if (error) return unlock(error);
+            if (result.status === 409) return unlock(new CloudronError(CloudronError.BAD_STATE));
+            if (result.status === 404) return unlock(new CloudronError(CloudronError.NOT_FOUND));
+            if (result.status !== 202) return unlock(new CloudronError(CloudronError.EXTERNAL_ERROR, util.format('%s %j', result.status, result.body)));
 
-            return callback(null);
+            return unlock(null);
         });
     });
+
+    callback(null);
 }
 
 function update(boxUpdateInfo, callback) {
