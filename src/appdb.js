@@ -30,6 +30,7 @@ exports = module.exports = {
     ISTATE_PENDING_UNINSTALL: 'pending_uninstall',
     ISTATE_PENDING_RESTORE: 'pending_restore',
     ISTATE_PENDING_UPDATE: 'pending_update',
+    ISTATE_PENDING_FORCE_UPDATE: 'pending_force_update',
     ISTATE_PENDING_BACKUP: 'pending_backup',
     ISTATE_ERROR: 'error',
     ISTATE_INSTALLED: 'installed',
@@ -337,7 +338,7 @@ function setInstallationCommand(appId, installationState, values, callback) {
     // restore is allowed from installed or error state
     // update and configure are allowed only in installed state
 
-    if (installationState === exports.ISTATE_PENDING_UNINSTALL) {
+    if (installationState === exports.ISTATE_PENDING_UNINSTALL || installationState === exports.ISTATE_PENDING_FORCE_UPDATE) {
         updateWithConstraints(appId, values, '', callback);
     } else if (installationState === exports.ISTATE_PENDING_RESTORE) {
         updateWithConstraints(appId, values, 'AND (installationState = "installed" OR installationState = "error")', callback);

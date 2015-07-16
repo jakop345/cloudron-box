@@ -230,10 +230,11 @@ function updateApp(req, res, next) {
     if (!data.manifest || typeof data.manifest !== 'object') return next(new HttpError(400, 'manifest is required'));
     if (('portBindings' in data) && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
     if ('icon' in data && typeof data.icon !== 'string') return next(new HttpError(400, 'icon is not a string'));
+    if ('force' in data && typeof data.force !== 'boolean') return next(new HttpError(400, 'force must be a boolean'));
 
     debug('Update app id:%s to manifest:%j', req.params.id, data.manifest);
 
-    apps.update(req.params.id, data.manifest, data.portBindings, data.icon, function (error) {
+    apps.update(req.params.id, data.force || false, data.manifest, data.portBindings, data.icon, function (error) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
         if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
