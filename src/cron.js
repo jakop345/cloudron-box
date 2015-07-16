@@ -5,7 +5,6 @@ exports = module.exports = {
     uninitialize: uninitialize
 };
 
-
 var apps = require('./apps.js'),
     assert = require('assert'),
     cloudron = require('./cloudron.js'),

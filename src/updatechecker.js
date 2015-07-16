@@ -4,7 +4,7 @@
 
 exports = module.exports = {
     checkAppUpdates: checkAppUpdates,
-    checkBoxUpdate: checkBoxUpdates,
+    checkBoxUpdates: checkBoxUpdates,
 
     getUpdateInfo: getUpdateInfo
 };
@@ -36,7 +36,7 @@ function getUpdateInfo() {
     };
 }
 
-function checkAppUpdates(callback) {
+function getAppUpdates(callback) {
     apps.getAll(function (error, apps) {
         if (error) return callback(error);
 
@@ -66,8 +66,7 @@ function checkAppUpdates(callback) {
                 var newVersion = newManifest.version;
                 if (newVersion !== oldVersion) {
                     appUpdateInfo[apps[i].id] = latestAppVersions[apps[i].appStoreId];
-                    debug('Update available for %s (%s) from %s to %s (autoupdatable: %s)',
-                          apps[i].location, apps[i].id, oldVersion, newVersion, autoupdatable);
+                    debug('Update available for %s (%s) from %s to %s', apps[i].location, apps[i].id, oldVersion, newVersion);
                 }
             }
 
@@ -140,7 +139,7 @@ function checkAppUpdates() {
                 mailer.appUpdateAvailable(app, gAppUpdateInfo[id]);
                 gMailedUser[id] = true;
             });
-        }, callback);
+        });
     });
 }
 

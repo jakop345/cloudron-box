@@ -22,13 +22,15 @@ exports = module.exports = {
     ensureBackup: ensureBackup
 };
 
-var assert = require('assert'),
+var apps = require('./apps.js'),
+    assert = require('assert'),
     async = require('async'),
     backups = require('./backups.js'),
     BackupsError = require('./backups.js').BackupsError,
     clientdb = require('./clientdb.js'),
     config = require('../config.js'),
     debug = require('debug')('box:cloudron'),
+    fs = require('fs'),
     locker = require('./locker.js'),
     path = require('path'),
     paths = require('./paths.js'),
