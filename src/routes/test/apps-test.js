@@ -7,13 +7,12 @@
 /* global after:false */
 
 var appdb = require('../../appdb.js'),
+    apps = require('../../apps.js'),
     assert = require('assert'),
     path = require('path'),
     async = require('async'),
     child_process = require('child_process'),
     clientdb = require('../../clientdb.js'),
-    tokendb = require('../../tokendb.js'),
-    cloudron = require('../../cloudron.js'),
     config = require('../../../config.js'),
     constants = require('../../../constants.js'),
     database = require('../../database.js'),
@@ -32,6 +31,7 @@ var appdb = require('../../appdb.js'),
     safe = require('safetydance'),
     server = require('../../server.js'),
     sysinfo = require('../../sysinfo.js'),
+    tokendb = require('../../tokendb.js'),
     url = require('url'),
     util = require('util'),
     uuid = require('node-uuid'),
@@ -521,7 +521,7 @@ describe('App installation', function () {
         });
     });
 
-    var appInfo = null;
+    var appResult = null /* the json response */, appEntry = null /* entry from database */;
 
     it('can install test app', function (done) {
         var fake = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(201, {});
@@ -532,7 +532,7 @@ describe('App installation', function () {
                .query({ access_token: token })
                .end(function (err, res) {
                 expect(res.statusCode).to.equal(200);
-                if (res.body.installationState === appdb.ISTATE_INSTALLED) { appInfo = res.body; return done(null); }
+                if (res.body.installationState === appdb.ISTATE_INSTALLED) { appResult = res.body; return done(null); }
                 if (res.body.installationState === appdb.ISTATE_ERROR) return done(new Error('Install error'));
                 if (++count > 50) return done(new Error('Timedout'));
                 setTimeout(checkInstallStatus, 1000);
@@ -556,14 +556,23 @@ describe('App installation', function () {
         done();
     });
 
+    it('installation - can get app', function (done) {
+        apps.get(appResult.id, function (error, app) {
+            expect(!error).to.be.ok();
+            expect(app).to.be.an('object');
+            appEntry = app;
+            done();
+        });
+    });
+
     it('installation - container created', function (done) {
-        expect(appInfo.containerId).to.be.ok();
-        docker.getContainer(appInfo.containerId).inspect(function (error, data) {
+        expect(appResult.containerId).to.be(undefined);
+        docker.getContainer(appEntry.containerId).inspect(function (error, data) {
             expect(error).to.not.be.ok();
             expect(data.Config.ExposedPorts['7777/tcp']).to.eql({ });
             expect(data.Config.Env).to.contain('ADMIN_ORIGIN=' + config.adminOrigin());
             expect(data.Config.Env).to.contain('CLOUDRON=1');
-            clientdb.getByAppId('addon-' + appInfo.id, function (error, client) {
+            clientdb.getByAppId('addon-' + appResult.id, function (error, client) {
                 expect(error).to.not.be.ok();
                 expect(client.id.length).to.be(46); // cid-addon- + 32 hex chars (128 bits) + 4 hyphens
                 expect(client.clientSecret.length).to.be(64); // 32 hex chars (256 bits)
@@ -590,8 +599,9 @@ describe('App installation', function () {
     });
 
     it('installation - is up and running', function (done) {
+        expect(appResult.httpPort).to.be(undefined);
         setTimeout(function () {
-            request.get('http://localhost:' + appInfo.httpPort + appInfo.manifest.healthCheckPath)
+            request.get('http://localhost:' + appEntry.httpPort + appResult.manifest.healthCheckPath)
                 .end(function (err, res) {
                 expect(!err).to.be.ok();
                 expect(res.statusCode).to.equal(200);
@@ -601,7 +611,7 @@ describe('App installation', function () {
     });
 
     it('installation - running container has volume mounted', function (done) {
-        docker.getContainer(appInfo.containerId).inspect(function (error, data) {
+        docker.getContainer(appEntry.containerId).inspect(function (error, data) {
             expect(error).to.not.be.ok();
             expect(data.Volumes['/app/data']).to.eql(paths.DATA_DIR + '/' + APP_ID + '/data');
             done();
@@ -626,7 +636,7 @@ describe('App installation', function () {
     });
 
     it('installation - redis addon config', function (done) {
-        docker.getContainer(appInfo.containerId).inspect(function (error, data) {
+        docker.getContainer(appEntry.containerId).inspect(function (error, data) {
             var redisUrl = null;
             data.Config.Env.forEach(function (env) { if (env.indexOf('REDIS_URL=') === 0) redisUrl = env.split('=')[1]; });
             expect(redisUrl).to.be.ok();
@@ -656,7 +666,7 @@ describe('App installation', function () {
     });
 
     it('installation - mysql addon config', function (done) {
-        var appContainer = docker.getContainer(appInfo.containerId);
+        var appContainer = docker.getContainer(appEntry.containerId);
         appContainer.inspect(function (error, data) {
             var mysqlUrl = null;
             data.Config.Env.forEach(function (env) { if (env.indexOf('MYSQL_URL=') === 0) mysqlUrl = env.split('=')[1]; });
@@ -686,7 +696,7 @@ describe('App installation', function () {
     });
 
     it('installation - postgresql addon config', function (done) {
-        var appContainer = docker.getContainer(appInfo.containerId);
+        var appContainer = docker.getContainer(appEntry.containerId);
         appContainer.inspect(function (error, data) {
             var postgresqlUrl = null;
             data.Config.Env.forEach(function (env) { if (env.indexOf('POSTGRESQL_URL=') === 0) postgresqlUrl = env.split('=')[1]; });
@@ -789,7 +799,7 @@ describe('App installation', function () {
     it('did stop the app', function (done) {
         // give the app a couple of seconds to die
         setTimeout(function () {
-            request.get('http://localhost:' + appInfo.httpPort + appInfo.manifest.healthCheckPath)
+            request.get('http://localhost:' + appEntry.httpPort + appResult.manifest.healthCheckPath)
                 .end(function (err, res) {
                 expect(err).to.be.ok();
                 done();
@@ -817,7 +827,7 @@ describe('App installation', function () {
 
     it('did start the app', function (done) {
         setTimeout(function () {
-            request.get('http://localhost:' + appInfo.httpPort + appInfo.manifest.healthCheckPath)
+            request.get('http://localhost:' + appEntry.httpPort + appResult.manifest.healthCheckPath)
                 .end(function (err, res) {
                 expect(!err).to.be.ok();
                 expect(res.statusCode).to.equal(200);
@@ -848,7 +858,7 @@ describe('App installation', function () {
     });
 
     it('uninstalled - container destroyed', function (done) {
-        docker.getContainer(appInfo.containerId).inspect(function (error, data) {
+        docker.getContainer(appEntry.containerId).inspect(function (error, data) {
             if (data) {
                 console.log('Container is still alive', data);
             }
@@ -947,7 +957,7 @@ describe('App installation - port bindings', function () {
         });
     });
 
-    var appInfo = null;
+    var appResult = null, appEntry = null;
 
     it('can install test app', function (done) {
         var fake = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(201, {});
@@ -958,7 +968,7 @@ describe('App installation - port bindings', function () {
                .query({ access_token: token })
                .end(function (err, res) {
                 expect(res.statusCode).to.equal(200);
-                if (res.body.installationState === appdb.ISTATE_INSTALLED) { appInfo = res.body; return done(null); }
+                if (res.body.installationState === appdb.ISTATE_INSTALLED) { appResult = res.body; return done(null); }
                 if (res.body.installationState === appdb.ISTATE_ERROR) return done(new Error('Install error'));
                 if (++count > 50) return done(new Error('Timedout'));
                 setTimeout(checkInstallStatus, 1000);
@@ -981,9 +991,19 @@ describe('App installation - port bindings', function () {
         done();
     });
 
+    it('installation - can get app', function (done) {
+        apps.get(appResult.id, function (error, app) {
+            expect(!error).to.be.ok();
+            expect(app).to.be.an('object');
+            appEntry = app;
+            done();
+        });
+    });
+
     it('installation - container created', function (done) {
-        expect(appInfo.containerId).to.be.ok();
-        docker.getContainer(appInfo.containerId).inspect(function (error, data) {
+        expect(appResult.containerId).to.be(undefined);
+        expect(appEntry.containerId).to.be.ok();
+        docker.getContainer(appEntry.containerId).inspect(function (error, data) {
             expect(error).to.not.be.ok();
             expect(data.Config.ExposedPorts['7777/tcp']).to.eql({ });
             expect(data.Config.Env).to.contain('ECHO_SERVER_PORT=7171');
@@ -1009,8 +1029,9 @@ describe('App installation - port bindings', function () {
 
     it('installation - http is up and running', function (done) {
         var tryCount = 20;
+        expect(appResult.httpPort).to.be(undefined);
         (function healthCheck() {
-            request.get('http://localhost:' + appInfo.httpPort + appInfo.manifest.healthCheckPath)
+            request.get('http://localhost:' + appEntry.httpPort + appResult.manifest.healthCheckPath)
                 .end(function (err, res) {
                 if (err || res.statusCode !== 200) {
                     if (--tryCount === 0) return done(new Error('Timedout'));
@@ -1034,7 +1055,7 @@ describe('App installation - port bindings', function () {
     });
 
     it('installation - running container has volume mounted', function (done) {
-        docker.getContainer(appInfo.containerId).inspect(function (error, data) {
+        docker.getContainer(appEntry.containerId).inspect(function (error, data) {
             expect(error).to.not.be.ok();
             expect(data.Volumes['/app/data']).to.eql(paths.DATA_DIR + '/' + APP_ID + '/data');
             done();
@@ -1059,7 +1080,7 @@ describe('App installation - port bindings', function () {
     });
 
     it('installation - redis addon config', function (done) {
-        docker.getContainer(appInfo.containerId).inspect(function (error, data) {
+        docker.getContainer(appEntry.containerId).inspect(function (error, data) {
             var redisUrl = null;
             data.Config.Env.forEach(function (env) { if (env.indexOf('REDIS_URL=') === 0) redisUrl = env.split('=')[1]; });
             expect(redisUrl).to.be.ok();
@@ -1100,7 +1121,7 @@ describe('App installation - port bindings', function () {
            .query({ access_token: token })
            .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
-            if (res.body.installationState === appdb.ISTATE_INSTALLED) { appInfo = res.body; expect(appInfo).to.be.ok(); return done(null); }
+            if (res.body.installationState === appdb.ISTATE_INSTALLED) { appResult = res.body; expect(appResult).to.be.ok(); return done(null); }
             if (res.body.installationState === appdb.ISTATE_ERROR) return done(new Error('Install error'));
             if (++count > 50) return done(new Error('Timedout'));
             setTimeout(checkConfigureStatus.bind(null, count, done), 1000);
@@ -1147,6 +1168,17 @@ describe('App installation - port bindings', function () {
         });
     });
 
+    it('changed container id after reconfigure', function (done) {
+        var oldContainerId = appEntry.containerId;
+        apps.get(appResult.id, function (error, app) {
+            expect(!error).to.be.ok();
+            expect(app).to.be.an('object');
+            appEntry = app;
+            expect(appEntry.containerid).to.not.be(oldContainerId);
+            done();
+        });
+    });
+
     it('port mapping works after reconfiguration', function (done) {
         setTimeout(function () {
             var client = net.connect(7172);
@@ -1174,7 +1206,7 @@ describe('App installation - port bindings', function () {
     });
 
     it('redis addon works after reconfiguration', function (done) {
-        docker.getContainer(appInfo.containerId).inspect(function (error, data) {
+        docker.getContainer(appEntry.containerId).inspect(function (error, data) {
             var redisUrl = null;
             data.Config.Env.forEach(function (env) { if (env.indexOf('REDIS_URL=') === 0) redisUrl = env.split('=')[1]; });
             expect(redisUrl).to.be.ok();
@@ -1207,6 +1239,7 @@ describe('App installation - port bindings', function () {
         request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/stop')
             .query({ access_token: token })
             .end(function (err, res) {
+                console.dir(res.text);
             expect(res.statusCode).to.equal(202);
             done();
         });
@@ -1248,7 +1281,7 @@ describe('App installation - port bindings', function () {
     });
 
     it('uninstalled - container destroyed', function (done) {
-        docker.getContainer(appInfo.containerId).inspect(function (error, data) {
+        docker.getContainer(appEntry.containerId).inspect(function (error, data) {
             expect(error).to.be.ok();
             expect(data).to.not.be.ok();
             done();

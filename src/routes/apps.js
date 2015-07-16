@@ -33,6 +33,24 @@ var apps = require('../apps.js'),
     util = require('util'),
     uuid = require('node-uuid');
 
+function removeInternalAppFields(app) {
+    return {
+        id: app.id,
+        appStoreId: app.appStoreId,
+        installationState: app.installationState,
+        installationProgress: app.installationProgress,
+        runState: app.runState,
+        health: app.health,
+        location: app.location,
+        accessRestriction: app.accessRestriction,
+        lastBackupId: app.lastBackupId,
+        manifest: app.manifest,
+        portBindings: app.portBindings,
+        iconUrl: app.iconUrl,
+        fqdn: app.fqdn
+    };
+}
+
 function getApp(req, res, next) {
     assert.strictEqual(typeof req.params.id, 'string');
 
@@ -40,7 +58,7 @@ function getApp(req, res, next) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
         if (error) return next(new HttpError(500, error));
 
-        next(new HttpSuccess(200, app));
+        next(new HttpSuccess(200, removeInternalAppFields(app)));
     });
 }
 
@@ -51,13 +69,16 @@ function getAppBySubdomain(req, res, next) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such subdomain'));
         if (error) return next(new HttpError(500, error));
 
-        next(new HttpSuccess(200, app));
+        next(new HttpSuccess(200, removeInternalAppFields(app)));
     });
 }
 
 function getApps(req, res, next) {
     apps.getAll(function (error, allApps) {
         if (error) return next(new HttpError(500, error));
+
+        allApps = allApps.map(removeInternalAppFields);
+
         next(new HttpSuccess(200, { apps: allApps }));
     });
 }
