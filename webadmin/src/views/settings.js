@@ -8,6 +8,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
 
     $scope.lastBackup = null;
     $scope.backups = [];
+    $scope.avatar = null;
 
     $scope.developerModeChange = {
         busy: false,
@@ -25,12 +26,25 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         name: ''
     };
 
+    $scope.avatarChange = {
+        busy: false,
+        error: {},
+        avatar: null,
+        avatarName: ''
+    };
+
     function nameChangeReset() {
         $scope.nameChange.error.name = null;
         $scope.nameChange.name = '';
 
         $scope.nameChangeForm.$setPristine();
         $scope.nameChangeForm.$setUntouched();
+    }
+
+    function avatarChangeReset() {
+        $scope.avatarChange.error.avatar = null;
+        $scope.avatarChange.avatar = null;
+        $scope.avatarChange.avatarName = '';
     }
 
     function fetchBackups() {
@@ -84,13 +98,29 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
 
         Client.changeCloudronName($scope.nameChange.name, function (error) {
             if (error) {
-                console.error('Unable to change developer mode.', error);
+                console.error('Unable to change name.', error);
             } else {
                 nameChangeReset();
                 $('#nameChangeModal').modal('hide');
             }
 
             $scope.nameChange.busy = false;
+        });
+    };
+
+    $scope.doChangeAvatar = function () {
+        $scope.avatarChange.error.avatar = null;
+        $scope.avatarChange.busy = true;
+
+        Client.changeCloudronName($scope.avatarChange.avatar, function (error) {
+            if (error) {
+                console.error('Unable to change developer mode.', error);
+            } else {
+                avatarChangeReset();
+                $('#avatarChangeModal').modal('hide');
+            }
+
+            $scope.avatarChange.busy = false;
         });
     };
 
@@ -139,8 +169,26 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         $('#createBackupModal').modal('show');
     };
 
+    $scope.showChangeAvatar = function () {
+        avatarChangeReset();
+         $('#avatarFileInput').click();
+    };
+
+    $('#avatarFileInput').get(0).onchange = function (event) {
+        $scope.$apply(function () {
+            $scope.avatarChange.avatar = event.target.files[0];
+            $scope.avatarChange.avatarName = event.target.files[0].name;
+
+            var fr = new FileReader();
+            fr.onload = function () { $scope.avatar = fr.result; };
+            fr.readAsDataURL($scope.avatarChange.avatar);
+        });
+    };
+
     Client.onReady(function () {
         fetchBackups();
+
+        $scope.avatar = '//my-' + $scope.config.fqdn + '/api/v1/cloudron/avatar';
     });
 
     // setup all the dialog focus handling

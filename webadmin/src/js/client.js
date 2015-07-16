@@ -200,6 +200,19 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
+    Client.prototype.changeCloudronAvatar = function (avatarFile, callback) {
+        var fd = new FormData();
+        fd.append('avatar', avatarFile);
+
+        $http.post(client.apiOrigin + '/api/v1/settings/cloudron_avatar', fd, {
+            headers: { 'Content-Type': undefined },
+            transformRequest: angular.identity
+        }).success(function(data, status) {
+            if (status !== 202) return callback(new ClientError(status, data));
+            callback(null);
+        }).error(defaultErrorHandler(callback));
+    };
+
     Client.prototype.installApp = function (id, manifest, title, config, callback) {
         var that = this;
         var data = { appStoreId: id, manifest: manifest, location: config.location, portBindings: config.portBindings, accessRestriction: config.accessRestriction };
