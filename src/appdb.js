@@ -330,6 +330,7 @@ function setInstallationCommand(appId, installationState, values, callback) {
     }
 
     values.installationState = installationState;
+    values.installationProgress = '';
 
     // Rules are:
     // uninstall is allowed in any state
