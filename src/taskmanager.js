@@ -54,7 +54,7 @@ function startAppTask(appId) {
     assert.strictEqual(typeof appId, 'string');
     assert(!(appId in gActiveTasks));
 
-    var lockError = locker.lockForAppTask(); // ## FIXME: need to poll when the lock becomes free
+    var lockError = locker.lock(locker.OP_APPTASK); // ## FIXME: need to poll when the lock becomes free
 
     if (lockError || Object.keys(gActiveTasks).length >= TASK_CONCURRENCY) {
         debug('Reached concurrency limit, queueing task for %s', appId);
@@ -69,7 +69,7 @@ function startAppTask(appId) {
             appdb.update(appId, { installationState: appdb.ISTATE_ERROR, installationProgress: 'Apptask crashed with code ' + code }, NOOP_CALLBACK);
         }
         delete gActiveTasks[appId];
-        locker.unlockForAppTask();
+        locker.unlock(locker.OP_APPTASK);
         if (gPendingTasks.length !== 0) startAppTask(gPendingTasks.shift()); // start another pending task
     });
 }

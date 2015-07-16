@@ -388,22 +388,22 @@ function update(boxUpdateInfo, callback) {
 
     if (!boxUpdateInfo) return next(null);
 
-    var error = locker.lockForBoxUpdate();
+    var error = locker.lock(locker.OP_BOX_UPDATE);
     if (error) return next(new CloudronError(CloudronError.BAD_STATE, error.message));
 
     progress.set(progress.UPDATE, 0, 'Begin ' + (boxUpdateInfo.update ? 'upgrade': 'update'));
 
     if (boxUpdateInfo.upgrade) {
-        return doUpgrade(boxUpdateInfo, callback);
+        doUpgrade(boxUpdateInfo, function (error) {
+            locker.unlock(locker.OP_BOX_UPDATE);
+            callback(error);
+        });
+    } else {
+        doUpdate(boxUpdateInfo, function (error) {
+            locker.unlock(locker.OP_BOX_UPDATE);
+            callback(error);
+        });
     }
-
-    doUpdate(boxUpdateInfo, function (error) {
-        if (error) progress.clear(progress.UPDATE); // update failed, clear the update progress
-
-        locker.unlockForBoxUpdate();
-
-        callback(error);
-    });
 }
 
 function doUpgrade(boxUpdateInfo, callback) {
@@ -486,13 +486,13 @@ function doUpdate(boxUpdateInfo, callback) {
 function backup(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    var error = locker.lockForFullBackup();
+    var error = locker.lock(locker.OP_FULL_BACKUP);
     if (error) return callback(new CloudronError(CloudronError.BAD_STATE, error.message));
 
     backupBoxAndApps(function (error) {
         if (error) console.error('backup failed.', error);
 
-        locker.unlockForFullBackup();
+        locker.unlock(locker.OP_FULL_BACKUP);
 
         return callback(error);
     });
