@@ -14,6 +14,7 @@ exports = module.exports = {
     getCloudronName: getCloudronName,
     setCloudronName: setCloudronName,
 
+    getCloudronAvatar: getCloudronAvatar,
     setCloudronAvatar: setCloudronAvatar,
 
     getAll: getAll,
@@ -137,12 +138,25 @@ function setCloudronName(name, callback) {
     });
 }
 
+function getCloudronAvatar(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    var filePath = path.join(config.baseDir(), constants.CLOUDRON_AVATAR_FILE);
+    var avatar = safe.fs.readFileSync(filePath, 'utf-8');
+    if (avatar) return callback(null, avatar);
+
+    // try default fallback
+    avatar = safe.fs.readFileSync(constants.CLOUDRON_DEFAULT_AVATAR_FILE, 'utf-8');
+    if (avatar) return callback(null, avatar);
+
+    callback(new SettingsError(SettingsError.INTERNAL_ERROR));
+}
+
 function setCloudronAvatar(avatar, callback) {
     assert.strictEqual(typeof avatar, 'string');
     assert.strictEqual(typeof callback, 'function');
 
     var filePath = path.join(config.baseDir(), constants.CLOUDRON_AVATAR_FILE);
-
     if (!safe.fs.writeFileSync(filePath, avatar)) {
         return callback(new SettingsError(SettingsError.INTERNAL_ERROR, safe.error.message));
     }

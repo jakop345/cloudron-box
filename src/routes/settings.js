@@ -75,6 +75,11 @@ function setCloudronAvatar(req, res, next) {
     });
 }
 
-function getCloudronAvatar(req, res) {
-    res.sendFile(path.join(config.baseDir(), constants.CLOUDRON_AVATAR_FILE));
+function getCloudronAvatar(req, res, next) {
+    settings.getCloudronAvatar(function (error, avatar) {
+        if (error) return next(new HttpError(500, error));
+
+        res.set('Content-Type', 'image/png');
+        res.status(200).send(avatar);
+    });
 }

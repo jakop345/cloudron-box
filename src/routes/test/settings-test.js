@@ -9,15 +9,13 @@
 var appdb = require('../../appdb.js'),
     async = require('async'),
     config = require('../../../config.js'),
-    constants = require('../../../constants.js'),
     database = require('../../database.js'),
     expect = require('expect.js'),
-    fs = require('fs'),
-    paths = require('../../paths.js'),
+    path = require('path'),
     request = require('superagent'),
     server = require('../../server.js'),
     settings = require('../../settings.js'),
-    sinon = require('sinon'),
+    fs = require('fs'),
     nock = require('nock'),
     userdb = require('../../userdb.js');
 
@@ -186,6 +184,49 @@ describe('Settings API', function () {
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(200);
                 expect(res.body.name).to.eql(name);
+                done(err);
+            });
+        });
+    });
+
+    describe('cloudron_avatar', function () {
+        var avatarFilePath = path.join(__dirname, '../../../avatar.png');
+
+        it('get default succeeds', function (done) {
+            request.get(SERVER_URL + '/api/v1/settings/cloudron_avatar')
+                   .query({ access_token: token })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(200);
+                expect(res.body).to.be.a(Buffer);
+                done(err);
+            });
+        });
+
+        it('cannot set without data', function (done) {
+            request.post(SERVER_URL + '/api/v1/settings/cloudron_avatar')
+                   .query({ access_token: token })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(400);
+                done();
+            });
+        });
+
+        it('set succeeds', function (done) {
+            request.post(SERVER_URL + '/api/v1/settings/cloudron_avatar')
+                   .query({ access_token: token })
+                   .attach('avatar', avatarFilePath)
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(202);
+                done();
+            });
+        });
+
+        it('get succeeds', function (done) {
+            request.get(SERVER_URL + '/api/v1/settings/cloudron_avatar')
+                   .query({ access_token: token })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(200);
+                expect(res.body.toString()).to.eql(fs.readFileSync(avatarFilePath, 'utf-8'));
                 done(err);
             });
         });
