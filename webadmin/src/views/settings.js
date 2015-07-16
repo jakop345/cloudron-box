@@ -95,7 +95,6 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         });
     };
 
-
     $scope.showChangeDeveloperMode = function () {
         developerModeChangeReset();
 
