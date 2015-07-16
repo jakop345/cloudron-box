@@ -112,7 +112,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         $scope.avatarChange.error.avatar = null;
         $scope.avatarChange.busy = true;
 
-        Client.changeCloudronName($scope.avatarChange.avatar, function (error) {
+        Client.changeCloudronAvatar($scope.avatarChange.avatar, function (error) {
             if (error) {
                 console.error('Unable to change developer mode.', error);
             } else {
