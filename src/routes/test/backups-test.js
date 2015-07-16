@@ -75,7 +75,7 @@ describe('Backups API', function () {
             request.get(SERVER_URL + '/api/v1/backups')
                    .query({ access_token: token })
                    .end(function (err, res) {
-                expect(res.statusCode).to.equal(500);
+                expect(res.statusCode).to.equal(503);
                 expect(req.isDone()).to.be.ok();
                 done(err);
             });
