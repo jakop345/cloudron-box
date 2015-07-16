@@ -23,7 +23,9 @@ exports = module.exports = {
 };
 
 var assert = require('assert'),
+    async = require('async'),
     backups = require('./backups.js'),
+    BackupsError = require('./backups.js').BackupsError,
     clientdb = require('./clientdb.js'),
     config = require('../config.js'),
     debug = require('debug')('box:cloudron'),
@@ -45,12 +47,30 @@ var assert = require('assert'),
     util = require('util');
 
 var RELOAD_NGINX_CMD = path.join(__dirname, 'scripts/reloadnginx.sh'),
-    REBOOT_CMD = path.join(__dirname, 'scripts/reboot.sh');
-
-var INSTALLER_UPDATE_URL = 'http://127.0.0.1:2020/api/v1/installer/update';
+    REBOOT_CMD = path.join(__dirname, 'scripts/reboot.sh'),
+    BACKUP_BOX_CMD = path.join(__dirname, 'scripts/backupbox.sh'),
+    BACKUP_SWAP_CMD = path.join(__dirname, 'scripts/backupswap.sh'),
+    INSTALLER_UPDATE_URL = 'http://127.0.0.1:2020/api/v1/installer/update';
 
 var gAddMailDnsRecordsTimerId = null,
     gCloudronDetails = null;            // cached cloudron details like region,size...
+
+function debugApp(app, args) {
+    assert(!app || typeof app === 'object');
+
+    var prefix = app ? app.location : '(no app)';
+    debug(prefix + ' ' + util.format.apply(util, Array.prototype.slice.call(arguments, 1)));
+}
+
+function ignoreError(func) {
+    return function (callback) {
+        func(function (error) {
+            if (error) console.error('Ignored error:', error);
+            callback();
+        });
+    };
+}
+
 
 function CloudronError(reason, errorOrMessage) {
     assert.strictEqual(typeof reason, 'string');
@@ -81,7 +101,6 @@ CloudronError.BAD_PASSWORD = 'Bad password';
 CloudronError.BAD_NAME = 'Bad name';
 CloudronError.BAD_STATE = 'Bad state';
 CloudronError.NOT_FOUND = 'Not found';
-CloudronError.NO_UPDATE_AVAILABLE = 'No update available';
 
 function initialize(callback) {
     assert.strictEqual(typeof callback, 'function');
@@ -342,7 +361,7 @@ function migrate(size, region, callback) {
     assert.strictEqual(typeof region, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    backups.backup(function (error, restoreKey) {
+    backup(function (error, restoreKey) {
         if (error) return callback(error);
 
         debug('migrate: size %s region %s restoreKey %s', size, region, restoreKey);
@@ -362,11 +381,10 @@ function migrate(size, region, callback) {
     });
 }
 
-function update(callback) {
+function update(boxUpdateInfo, callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    var boxUpdateInfo = updater.getUpdateInfo().box;
-    if (!boxUpdateInfo) return next(new CloudronError(CloudronError.NO_UPDATE_AVAILABLE));
+    if (!boxUpdateInfo) return next(null);
 
     var error = locker.lockForBoxUpdate();
     if (error) return next(new CloudronError(CloudronError.BAD_STATE, error.message));
@@ -391,7 +409,7 @@ function doUpgrade(boxUpdateInfo, callback) {
 
     progress.set(progress.UPDATE, 5, 'Create app and box backup');
 
-    backups.backup(function (error) {
+    backupBoxAndApps(function (error) {
         if (error) return callback(error);
 
         superagent.post(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/upgrade')
@@ -415,7 +433,7 @@ function doUpdate(boxUpdateInfo, callback) {
 
     progress.set(progress.UPDATE, 5, 'Create box backup');
 
-    backups.backupBox(function (error) {
+    backupBox(function (error) {
         if (error) return callback(error);
 
         // fetch a signed sourceTarballUrl
@@ -469,7 +487,7 @@ function backup(callback) {
     var error = locker.lockForFullBackup();
     if (error) return callback(new CloudronError(CloudronError.BAD_STATE, error.message));
 
-    backups.backup(function (error) {
+    backupBoxAndApps(function (error) {
         if (error) console.error('backup failed.', error);
 
         locker.unlockForFullBackup();
@@ -493,6 +511,79 @@ function ensureBackup(callback) {
         }
 
         backup(callback);
+    });
+}
+
+function backupBoxWithAppBackupIds(appBackupIds, callback) {
+    assert(util.isArray(appBackupIds));
+
+    backups.getBackupUrl(null /* app */, appBackupIds, function (error, result) {
+        if (error && error.reason === BackupsError.EXTERNAL_ERROR) return callback(new CloudronError(CloudronError.EXTERNAL_ERROR, error.message));
+        if (error) return callback(new CloudronError.INTERNAL_ERROR, error);
+
+        debug('backup: url %s', result.url);
+
+        async.series([
+            ignoreError(shell.sudo.bind(null, 'mountSwap', [ BACKUP_SWAP_CMD, '--on' ])),
+            shell.sudo.bind(null, 'backupBox', [ BACKUP_BOX_CMD, result.url, result.backupKey ]),
+            ignoreError(shell.sudo.bind(null, 'unmountSwap', [ BACKUP_SWAP_CMD, '--off' ])),
+        ], function (error) {
+            if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
+
+            debug('backup: successful');
+
+            callback(null, result.id);
+        });
+    });
+}
+
+// this function expects you to have a lock
+function backupBox(callback) {
+    apps.getAll(function (error, allApps) {
+        if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
+
+        var appBackupIds = allApps.map(function (app) { return app.lastBackupId; });
+        appBackupIds = appBackupIds.filter(function (id) { return id !== null }); // remove apps that were never backed up
+
+        backupBoxWithAppBackupIds(appBackupIds, callback);
+    });
+}
+
+// this function expects you to have a lock
+function backupBoxAndApps(callback) {
+    callback = callback || function () { }; // callback can be empty for timer triggered backup
+
+    apps.getAll(function (error, allApps) {
+        if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
+
+        var processed = 0;
+        var step = 100/(allApps.length+1);
+
+        progress.set(progress.BACKUP, processed, '');
+
+        async.mapSeries(allApps, function iterator(app, iteratorCallback) {
+            ++processed;
+
+            apps.backupApp(app, function (error, backupId) {
+                progress.set(progress.BACKUP, step * processed, app.location);
+
+                if (error && error.reason === AppsError.BAD_STATE) {
+                    debugApp(app, 'Skipping backup (istate:%s health%s). Reusing %s', app.installationState, app.health, app.lastBackupId);
+                    backupId = app.lastBackupId;
+                }
+
+                return iteratorCallback(null, app.lastBackupId);
+            });
+        }, function appsBackedUp(error, backupIds) {
+            if (error) return callback(error);
+
+            backupIds = backupIds.filter(function (id) { return id !== null; }); // remove apps that were never backed up
+
+            backupBoxWithAppBackupIds(backupIds, function (error, restoreKey) {
+                progress.set(progress.BACKUP, 100, '');
+                callback(error, restoreKey);
+            });
+        });
     });
 }
 

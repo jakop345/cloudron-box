@@ -30,6 +30,7 @@ exports = module.exports = {
     ISTATE_PENDING_UNINSTALL: 'pending_uninstall',
     ISTATE_PENDING_RESTORE: 'pending_restore',
     ISTATE_PENDING_UPDATE: 'pending_update',
+    ISTATE_PENDING_BACKUP: 'pending_backup',
     ISTATE_ERROR: 'error',
     ISTATE_INSTALLED: 'installed',
 
@@ -339,7 +340,7 @@ function setInstallationCommand(appId, installationState, values, callback) {
         updateWithConstraints(appId, values, '', callback);
     } else if (installationState === exports.ISTATE_PENDING_RESTORE) {
         updateWithConstraints(appId, values, 'AND (installationState = "installed" OR installationState = "error")', callback);
-    } else if (installationState === exports.ISTATE_PENDING_UPDATE || exports.ISTATE_PENDING_CONFIGURE) {
+    } else if (installationState === exports.ISTATE_PENDING_UPDATE || exports.ISTATE_PENDING_CONFIGURE || installationState == exports.ISTATE_PENDING_BACKUP) {
         updateWithConstraints(appId, values, 'AND installationState = "installed"', callback);
     } else {
         callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, 'invalid installationState'));

@@ -12,8 +12,14 @@ exports = module.exports = {
     install: install,
     configure: configure,
     uninstall: uninstall,
+
     restore: restore,
+    restoreApp: restoreApp,
+
     update: update,
+
+    backup: backup,
+    backupApp: backupApp,
 
     getLogStream: getLogStream,
     getLogs: getLogs,
@@ -34,9 +40,12 @@ exports = module.exports = {
     _validatePortBindings: validatePortBindings
 };
 
-var appdb = require('./appdb.js'),
+var addons = require('./addons.js'),
+    appdb = require('./appdb.js'),
     assert = require('assert'),
     async = require('async'),
+    backups = require('./backups.js'),
+    BackupsError = require('./backups.js').BackupsError,
     config = require('../config.js'),
     constants = require('../constants.js'),
     DatabaseError = require('./databaseerror.js'),
@@ -48,13 +57,32 @@ var appdb = require('./appdb.js'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
     semver = require('semver'),
+    shell = require('./shell.js'),
     split = require('split'),
     superagent = require('superagent'),
     taskmanager = require('./taskmanager.js'),
     util = require('util'),
     validator = require('validator');
 
-var NOOP_CALLBACK = function (error) { console.error(error); };
+var NOOP_CALLBACK = function (error) { console.error(error); },
+    BACKUP_APP_CMD = path.join(__dirname, 'scripts/backupapp.sh'),
+    BACKUP_SWAP_CMD = path.join(__dirname, 'scripts/backupswap.sh');
+
+function debugApp(app, args) {
+    assert(!app || typeof app === 'object');
+
+    var prefix = app ? app.location : '(no app)';
+    debug(prefix + ' ' + util.format.apply(util, Array.prototype.slice.call(arguments, 1)));
+}
+
+function ignoreError(func) {
+    return function (callback) {
+        func(function (error) {
+            if (error) console.error('Ignored error:', error);
+            callback();
+        });
+    };
+}
 
 // http://dustinsenos.com/articles/customErrorsInNode
 // http://code.google.com/p/v8/wiki/JavaScriptStackTraceApi
@@ -78,6 +106,7 @@ function AppsError(reason, errorOrMessage) {
 }
 util.inherits(AppsError, Error);
 AppsError.INTERNAL_ERROR = 'Internal Error';
+AppsError.EXTERNAL_ERROR = 'External Error';
 AppsError.ALREADY_EXISTS = 'Already Exists';
 AppsError.NOT_FOUND = 'Not Found';
 AppsError.BAD_FIELD = 'Bad Field';
@@ -610,18 +639,18 @@ function setRestorePoint(appId, lastBackupId, lastBackupConfig, callback) {
     });
 }
 
-function canAutoupdateApp(app, newManifest) {
-    // TODO: maybe check the description as well?
-    for (var env in newManifest.tcpPorts) {
-        if (!(env in app.portBindings)) return false;
-   }
-
-    return true;
-}
-
 function autoupdateApps(updateInfo, callback) { // updateInfo is { appId -> { manifest } }
     assert.strictEqual(typeof updateInfo, 'object');
     assert.strictEqual(typeof callback, 'function');
+
+    function canAutoupdateApp(app, newManifest) {
+        // TODO: maybe check the description as well?
+        for (var env in newManifest.tcpPorts) {
+            if (!(env in app.portBindings)) return false;
+       }
+
+        return true;
+    }
 
     if (!updateInfo) return callback(null);
 
@@ -638,5 +667,95 @@ function autoupdateApps(updateInfo, callback) { // updateInfo is { appId -> { ma
             });
         });
     }, callback);
+}
+
+function backupApp(app, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
+    function canBackupApp(app) {
+        // only backup apps that are installed or pending configure. Rest of them are in some
+        // state not good for consistent backup
+
+        return (app.installationState === appdb.ISTATE_INSTALLED && app.health === appdb.HEALTH_HEALTHY)
+                || app.installationState === appdb.ISTATE_PENDING_CONFIGURE
+                || app.installationState === appdb.ISTATE_PENDING_BACKUP
+                || app.installationState === appdb.ISTATE_PENDING_UPDATE; // called from apptask
+    }
+
+    if (!canBackupApp(app)) return callback(new AppsError(AppsError.BAD_STATE, 'App not healthy'));
+
+    var appConfig = {
+        manifest: app.manifest,
+        location: app.location,
+        portBindings: app.portBindings,
+        accessRestriction: app.accessRestriction
+    };
+
+    if (!safe.fs.writeFileSync(path.join(paths.DATA_DIR, app.id + '/config.json'), JSON.stringify(appConfig), 'utf8')) {
+        return callback(safe.error);
+    }
+
+    backups.getBackupUrl(app, null, function (error, result) {
+        if (error && error.reason === BackupsError.EXTERNAL_ERROR) return callback(new AppsError(AppsError.EXTERNAL_ERROR, error.message));
+        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+        debugApp(app, 'backupApp: backup url:%s backup id:%s', result.url, result.id);
+
+        async.series([
+            ignoreError(shell.sudo.bind(null, 'mountSwap', [ BACKUP_SWAP_CMD, '--on' ])),
+            addons.backupAddons.bind(null, app, app.manifest),
+            shell.sudo.bind(null, 'backupApp', [ BACKUP_APP_CMD,  app.id, result.url, result.backupKey ]),
+            ignoreError(shell.sudo.bind(null, 'unmountSwap', [ BACKUP_SWAP_CMD, '--off' ])),
+        ], function (error) {
+            if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+            debugApp(app, 'backupApp: successful id:%s', result.id);
+
+            setRestorePoint(app.id, result.id, appConfig, function (error) {
+                if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+                return callback(null, result.id);
+            });
+        });
+    });
+}
+
+function backup(appId, callback) {
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    get(appId, function (error, app) {
+        if (error && error.reason === AppsError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND));
+        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+        appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_BACKUP, values, function (error) {
+            if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE)); // might be a bad guess
+            if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+            taskmanager.restartAppTask(appId);
+
+            callback(null);
+        });
+    });
+}
+
+function restoreApp(app, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
+    assert(app.lastBackupId);
+
+    backups.getRestoreUrl(app.lastBackupId, function (error, result) {
+        if (error && error.reason == BackupsError.EXTERNAL_ERROR) return callback(new AppsError(AppsError.EXTERNAL_ERROR, error.message));
+        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+        debugApp(app, 'restoreApp: restoreUrl:%s', result.url);
+
+        shell.sudo('restoreApp', [ RESTORE_APP_CMD,  app.id, result.url, result.backupKey ], function (error) {
+            if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+            addons.restoreAddons(app, app.manifest, callback);
+        });
+    });
 }
 

@@ -30,7 +30,6 @@ var addons = require('./addons.js'),
     apps = require('./apps.js'),
     assert = require('assert'),
     async = require('async'),
-    backups = require('./backups.js'),
     clientdb = require('./clientdb.js'),
     config = require('../config.js'),
     database = require('./database.js'),
@@ -573,6 +572,25 @@ function install(app, callback) {
     });
 }
 
+function backup(app, callback) {
+    async.series([
+        updateApp.bind(null, app, { installationProgress: '10, Backing up' }),
+        apps.backupApp.bind(null, app),
+
+        // done!
+        function (callback) {
+            debugApp(app, 'installed');
+            updateApp(app, { installationState: appdb.ISTATE_INSTALLED, installationProgress: '' }, callback);
+        }
+    ], function seriesDone(error) {
+        if (error) {
+            debugApp(app, 'error installing app: %s', error);
+            return updateApp(app, { installationState: appdb.ISTATE_ERROR, installationProgress: error.message }, callback.bind(null, error));
+        }
+        callback(null);
+    });
+}
+
 // restore is always called with a previous backup. restore is also called for upgrades and infra updates
 function restore(app, callback) {
     assert(app.lastBackupId);
@@ -614,7 +632,7 @@ function restore(app, callback) {
         createVolume.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '70, Download backup and restore addons' }),
-        backups.restoreApp.bind(null, app),
+        apps.restoreApp.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '75, Creating container' }),
         deleteContainer.bind(null, app),
@@ -706,7 +724,7 @@ function update(app, callback) {
 
         updateApp.bind(null, app, { installationProgress: '10, Backup app' }),
         function (done) {
-            backups.backupApp(app, function (error) {
+            apps.backupApp(app, function (error) {
                 if (error) error.backupError = true;
                 done(error);
             });
@@ -850,6 +868,10 @@ function startTask(appId, callback) {
 
         if (app.installationState === appdb.ISTATE_PENDING_RESTORE) {
             return restore(app, callback);
+        }
+
+        if (app.installationState === appdb.ISTATE_PENDING_BACKUP) {
+            return backup(app, callback);
         }
 
         if (app.installationState === appdb.ISTATE_INSTALLED) {

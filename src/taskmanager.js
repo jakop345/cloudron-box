@@ -11,6 +11,7 @@ var appdb = require('./appdb.js'),
     assert = require('assert'),
     child_process = require('child_process'),
     debug = require('debug')('box:taskmanager'),
+    locker = require('./locker.js'),
     _ = require('underscore');
 
 var gActiveTasks = { };
@@ -53,7 +54,9 @@ function startAppTask(appId) {
     assert.strictEqual(typeof appId, 'string');
     assert(!(appId in gActiveTasks));
 
-    if (Object.keys(gActiveTasks).length >= TASK_CONCURRENCY) {
+    var lockError = locker.lockForAppTask(); // ## FIXME: need to poll when the lock becomes free
+
+    if (lockError || Object.keys(gActiveTasks).length >= TASK_CONCURRENCY) {
         debug('Reached concurrency limit, queueing task for %s', appId);
         gPendingTasks.push(appId);
         return;
@@ -66,6 +69,7 @@ function startAppTask(appId) {
             appdb.update(appId, { installationState: appdb.ISTATE_ERROR, installationProgress: 'Apptask crashed with code ' + code }, NOOP_CALLBACK);
         }
         delete gActiveTasks[appId];
+        locker.unlockForAppTask();
         if (gPendingTasks.length !== 0) startAppTask(gPendingTasks.shift()); // start another pending task
     });
 }

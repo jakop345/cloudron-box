@@ -6,8 +6,8 @@ exports = module.exports = {
 };
 
 
-var assert = require('assert'),
-    backups = require('./backups.js'),
+var apps = require('./apps.js'),
+    assert = require('assert'),
     cloudron = require('./cloudron.js'),
     CronJob = require('cron').CronJob,
     debug = require('debug')('box:cron'),
@@ -98,7 +98,12 @@ function autoupdatePatternChanged(pattern) {
         cronTime: pattern,
         onTick: function() {
             debug('Starting autoupdate');
-            updater.autoupdate();
+            var updateInfo = updater.getUpdateInfo();
+            if (updateInfo.box) {
+                cloudron.update(updateInfo.box, NOOP_CALLBACK);
+            } else if (updateInfo.apps) {
+                apps.autoupdateApps(updateInfo.apps, NOOP_CALLBACK);
+            }
         },
         start: true,
         timeZone: gBoxUpdateCheckerJob.cronTime.timeZone // hack

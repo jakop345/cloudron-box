@@ -5,7 +5,10 @@ exports = module.exports = {
     unlockForBoxUpdate: unlockForBoxUpdate,
 
     lockForFullBackup: lockForFullBackup,
-    unlockForFullBackup: unlockForFullBackup
+    unlockForFullBackup: unlockForFullBackup,
+
+    lockForAppTask: lockForAppTask,
+    unlockForAppTask: unlockForAppTask
 };
 
 function lockForBoxUpdate() {
@@ -21,6 +24,14 @@ function lockForFullBackup() {
 }
 
 function unlockForFullBackup() {
+    return null;
+}
+
+function lockForAppTask() {
+    return null;
+}
+
+function unlockForAppTask() {
     return null;
 }
 

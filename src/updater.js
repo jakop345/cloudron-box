@@ -6,21 +6,18 @@ exports = module.exports = {
     checkAppUpdates: checkAppUpdates,
     checkBoxUpdate: checkBoxUpdates,
 
-    getUpdateInfo: getUpdateInfo,
-    autoupdate: autoupdate
+    getUpdateInfo: getUpdateInfo
 };
 
 var apps = require('./apps.js'),
     assert = require('assert'),
     async = require('async'),
-    cloudron = require('./cloudron.js'),
     config = require('../config.js'),
     debug = require('debug')('box:updater'),
     fs = require('fs'),
     mailer = require('./mailer.js'),
     path = require('path'),
     paths = require('./paths.js'),
-    progress = require('./progress.js'),
     safe = require('safetydance'),
     semver = require('semver'),
     superagent = require('superagent'),
@@ -160,15 +157,5 @@ function checkBoxUpdates() {
             gMailedUser['box'] = true;
         }
     });
-}
-
-function autoupdate() {
-    // FIXME: box update and app update must not be concurrent. also, there is no way to track completion of updates
-    // and this we need to one or the other.
-    if (gBoxUpdateInfo !== null) {
-        cloudron.update(NOOP_CALLBACK);
-    } else {
-        apps.autoupdateApps(gAppUpdateInfo, NOOP_CALLBACK);
-    }
 }
 
