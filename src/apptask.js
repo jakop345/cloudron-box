@@ -764,7 +764,7 @@ function update(app, callback) {
     ], function seriesDone(error) {
         if (error && error.backupError) {
             // on a backup error, just abort the update
-            debugApp(app, 'Error backing up app: %s', backupError.error);
+            debugApp(app, 'Error backing up app: %s', error.backupError);
             return updateApp(app, { installationState: appdb.ISTATE_INSTALLED, installationProgress: '', health: null }, callback.bind(null, error));
         } else if (error) {
             debugApp(app, 'Error updating app: %s', error);
