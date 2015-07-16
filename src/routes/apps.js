@@ -33,9 +33,6 @@ var apps = require('../apps.js'),
     util = require('util'),
     uuid = require('node-uuid');
 
-/*
- * Get installed (or scheduled to be installed) app
- */
 function getApp(req, res, next) {
     assert.strictEqual(typeof req.params.id, 'string');
 
@@ -47,9 +44,6 @@ function getApp(req, res, next) {
     });
 }
 
-/*
- * Get the app installed in the subdomain
- */
 function getAppBySubdomain(req, res, next) {
     assert.strictEqual(typeof req.params.subdomain, 'string');
 
@@ -61,9 +55,6 @@ function getAppBySubdomain(req, res, next) {
     });
 }
 
-/*
- * Get installed (or scheduled to be installed) apps
- */
 function getApps(req, res, next) {
     apps.getAll(function (error, allApps) {
         if (error) return next(new HttpError(500, error));
@@ -71,9 +62,6 @@ function getApps(req, res, next) {
     });
 }
 
-/*
- * Get the app icon
- */
 function getAppIcon(req, res, next) {
     assert.strictEqual(typeof req.params.id, 'string');
 
@@ -292,7 +280,6 @@ function getLogStream(req, res, next) {
     });
 }
 
-// this route is for downloading logs
 function getLogs(req, res, next) {
     assert.strictEqual(typeof req.params.id, 'string');
 
