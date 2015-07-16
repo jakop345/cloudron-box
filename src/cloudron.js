@@ -23,6 +23,7 @@ exports = module.exports = {
 };
 
 var apps = require('./apps.js'),
+    AppsError = require('./apps.js').AppsError,
     assert = require('assert'),
     async = require('async'),
     backups = require('./backups.js'),
