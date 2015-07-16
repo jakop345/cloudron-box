@@ -7,12 +7,18 @@ exports = module.exports = {
     setAutoupdatePattern: setAutoupdatePattern,
 
     getCloudronName: getCloudronName,
-    setCloudronName: setCloudronName
+    setCloudronName: setCloudronName,
+
+    getCloudronAvatar: getCloudronAvatar,
+    setCloudronAvatar: setCloudronAvatar
 };
 
 var assert = require('assert'),
+    constants = require('../../constants.js'),
+    config = require('../../config.js'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
+    path = require('path'),
     settings = require('../settings.js'),
     SettingsError = settings.SettingsError;
 
@@ -54,4 +60,12 @@ function getCloudronName(req, res, next) {
         if (error) return next(new HttpError(500, error));
         next(new HttpSuccess(200, { name: name }));
     });
+}
+
+function setCloudronAvatar(req, res, next) {
+    next(new HttpSuccess(200));
+}
+
+function getCloudronAvatar(req, res) {
+    res.sendFile(path.join(config.baseDir(), constants.CLOUDRON_AVATAR_FILE));
 }

@@ -84,7 +84,7 @@ function initializeExpressSync() {
     router.post('/api/v1/cloudron/activate', routes.cloudron.setupTokenAuth, routes.cloudron.activate);
     router.get ('/api/v1/cloudron/progress', routes.cloudron.getProgress);
     router.get ('/api/v1/cloudron/status', routes.cloudron.getStatus);
-    router.get ('/api/v1/cloudron/avatar', routes.cloudron.getAvatar);
+    router.get ('/api/v1/cloudron/avatar', routes.settings.getCloudronAvatar); // this is a public alias for /api/v1/settings/cloudron_avatar
 
     // developer routes
     router.post('/api/v1/developer', developerScope, routes.user.requireAdmin, routes.user.verifyPassword, routes.developer.setEnabled);
@@ -158,8 +158,10 @@ function initializeExpressSync() {
     // settings routes
     router.get ('/api/v1/settings/autoupdate_pattern', settingsScope, routes.settings.getAutoupdatePattern);
     router.post('/api/v1/settings/autoupdate_pattern', settingsScope, routes.settings.setAutoupdatePattern);
-    router.get ('/api/v1/settings/cloudron_name', settingsScope, routes.settings.getCloudronName);
-    router.post('/api/v1/settings/cloudron_name', settingsScope, routes.settings.setCloudronName);
+    router.get ('/api/v1/settings/cloudron_name',      settingsScope, routes.settings.getCloudronName);
+    router.post('/api/v1/settings/cloudron_name',      settingsScope, routes.settings.setCloudronName);
+    router.get ('/api/v1/settings/cloudron_avatar',    settingsScope, routes.settings.getCloudronAvatar);
+    router.post('/api/v1/settings/cloudron_avatar',    settingsScope, multipart, routes.settings.setCloudronAvatar);
 
     // backup routes
     router.get ('/api/v1/backups', settingsScope, routes.backups.get);

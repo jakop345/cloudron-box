@@ -6,7 +6,6 @@ exports = module.exports = {
     activate: activate,
     setupTokenAuth: setupTokenAuth,
     getStatus: getStatus,
-    getAvatar: getAvatar,
     getStats: getStats,
     reboot: reboot,
     getProgress: getProgress,
@@ -26,7 +25,6 @@ var assert = require('assert'),
     df = require('nodejs-disks'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
-    path = require('path'),
     superagent = require('superagent'),
     safe = require('safetydance'),
     updateChecker = require('../updatechecker.js');
@@ -97,10 +95,6 @@ function getStatus(req, res, next) {
 
         next(new HttpSuccess(200, status));
     });
-}
-
-function getAvatar(req, res) {
-    res.sendFile(path.join(config.baseDir(), constants.CLOUDRON_AVATAR_FILE));
 }
 
 function getStats(req, res, next) {
