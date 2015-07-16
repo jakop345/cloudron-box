@@ -387,10 +387,10 @@ function migrate(size, region, callback) {
 function update(boxUpdateInfo, callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    if (!boxUpdateInfo) return next(null);
+    if (!boxUpdateInfo) return callback(null);
 
     var error = locker.lock(locker.OP_BOX_UPDATE);
-    if (error) return next(new CloudronError(CloudronError.BAD_STATE, error.message));
+    if (error) return callback(new CloudronError(CloudronError.BAD_STATE, error.message));
 
     progress.set(progress.UPDATE, 0, 'Begin ' + (boxUpdateInfo.update ? 'upgrade': 'update'));
 
