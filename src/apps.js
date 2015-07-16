@@ -730,7 +730,7 @@ function backup(appId, callback) {
         if (error && error.reason === AppsError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_BACKUP, values, function (error) {
+        appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_BACKUP, function (error) {
             if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE)); // might be a bad guess
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
