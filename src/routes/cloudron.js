@@ -27,7 +27,7 @@ var assert = require('assert'),
     HttpSuccess = require('connect-lastmile').HttpSuccess,
     superagent = require('superagent'),
     safe = require('safetydance'),
-    updater = require('../updater.js');
+    updateChecker = require('../updatechecker.js');
 
 /**
  * Creating an admin user and activate the cloudron.
@@ -129,7 +129,7 @@ function getConfig(req, res, next) {
 }
 
 function update(req, res, next) {
-    var boxUpdateInfo = updater.getUpdateInfo().box;
+    var boxUpdateInfo = updateChecker.getUpdateInfo().box;
     if (!boxUpdateInfo) return next(new HttpError(422, 'No update available'));
 
     cloudron.update(boxUpdateInfo, function (error) {

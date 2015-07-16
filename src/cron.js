@@ -12,7 +12,7 @@ var apps = require('./apps.js'),
     CronJob = require('cron').CronJob,
     debug = require('debug')('box:cron'),
     settings = require('./settings.js'),
-    updater = require('./updater.js');
+    updateChecker = require('./updatechecker.js');
 
 var gAutoupdaterJob = null,
     gBoxUpdateCheckerJob = null,
@@ -66,7 +66,7 @@ function recreateJobs(unusedTimeZone, callback) {
         if (gBoxUpdateCheckerJob) gBoxUpdateCheckerJob.stop();
         gBoxUpdateCheckerJob = new CronJob({
             cronTime: '00 */10 * * * *', // every 10 minutes
-            onTick: updater.checkBoxUpdates,
+            onTick: updateChecker.checkBoxUpdates,
             start: true,
             timeZone: allSettings[settings.TIME_ZONE_KEY]
         });
@@ -74,7 +74,7 @@ function recreateJobs(unusedTimeZone, callback) {
         if (gAppUpdateCheckerJob) gAppUpdateCheckerJob.stop();
         gAppUpdateCheckerJob = new CronJob({
             cronTime: '00 */10 * * * *', // every 10 minutes
-            onTick: updater.checkAppUpdates,
+            onTick: updateChecker.checkAppUpdates,
             start: true,
             timeZone: allSettings[settings.TIME_ZONE_KEY]
         });
@@ -98,7 +98,7 @@ function autoupdatePatternChanged(pattern) {
         cronTime: pattern,
         onTick: function() {
             debug('Starting autoupdate');
-            var updateInfo = updater.getUpdateInfo();
+            var updateInfo = updateChecker.getUpdateInfo();
             if (updateInfo.box) {
                 cloudron.update(updateInfo.box, NOOP_CALLBACK);
             } else if (updateInfo.apps) {
