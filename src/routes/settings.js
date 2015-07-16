@@ -19,6 +19,7 @@ var assert = require('assert'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
     path = require('path'),
+    safe = require('safetydance'),
     settings = require('../settings.js'),
     SettingsError = settings.SettingsError;
 
@@ -63,7 +64,15 @@ function getCloudronName(req, res, next) {
 }
 
 function setCloudronAvatar(req, res, next) {
-    next(new HttpSuccess(200));
+    assert.strictEqual(typeof req.files, 'object');
+
+    if (!req.files.avatar) return next(new HttpError(400, 'avatar must be provided'));
+    var avatar = safe.fs.readFileSync(req.files.avatar.path, 'utf8');
+
+    settings.setCloudronAvatar(avatar, function (error) {
+        if (error) return next(new HttpError(500, error));
+        next(new HttpSuccess(202, {}));
+    });
 }
 
 function getCloudronAvatar(req, res) {

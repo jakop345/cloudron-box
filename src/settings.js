@@ -14,6 +14,8 @@ exports = module.exports = {
     getCloudronName: getCloudronName,
     setCloudronName: setCloudronName,
 
+    setCloudronAvatar: setCloudronAvatar,
+
     getAll: getAll,
 
     AUTOUPDATE_PATTERN_KEY: 'autoupdate_pattern',
@@ -25,8 +27,10 @@ exports = module.exports = {
 
 var assert = require('assert'),
     config = require('../config.js'),
+    constants = require('../constants.js'),
     CronJob = require('cron').CronJob,
-    safeCall = require('safetydance').safeCall,
+    path = require('path'),
+    safe = require('safetydance'),
     settingsdb = require('./settingsdb.js'),
     util = require('util');
 
@@ -63,7 +67,7 @@ function setAutoupdatePattern(pattern, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     if (pattern !== 'never') { // check if pattern is valid
-        var job = safeCall(function () { return new CronJob(pattern); });
+        var job = safe.safeCall(function () { return new CronJob(pattern); });
         if (!job) return callback(new SettingsError(SettingsError.BAD_FIELD, 'Invalid pattern'));
     }
 
@@ -131,6 +135,19 @@ function setCloudronName(name, callback) {
 
         return callback(null);
     });
+}
+
+function setCloudronAvatar(avatar, callback) {
+    assert.strictEqual(typeof avatar, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    var filePath = path.join(config.baseDir(), constants.CLOUDRON_AVATAR_FILE);
+
+    if (!safe.fs.writeFileSync(filePath, avatar)) {
+        return callback(new SettingsError(SettingsError.INTERNAL_ERROR, safe.error.message));
+    }
+
+    callback(null);
 }
 
 function getAll(callback) {
