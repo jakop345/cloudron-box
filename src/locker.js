@@ -1,45 +1,53 @@
 'use strict';
 
-exports = module.exports = {
-    lock: lock,
-    unlock: unlock,
+var assert = require('assert'),
+    debug = require('debug')('box:locker'),
+    EventEmitter = require('events').EventEmitter,
+    util = require('util');
 
-    OP_BOX_UPDATE: 'box_update',
-    OP_FULL_BACKUP: 'full_backup',
-    OP_APPTASK: 'apptask'
+function Locker() {
+    this._operation = null;
+    this._timestamp = null;
+    this._watcherId = -1;
+}
+util.inherits(Locker, EventEmitter);
+
+Locker.prototype.OP_BOX_UPDATE = 'box_update';
+Locker.prototype.OP_FULL_BACKUP = 'full_backup';
+Locker.prototype.OP_APPTASK = 'apptask';
+
+Locker.prototype.lock = function (operation) {
+    assert.strictEqual(typeof operation, 'string');
+
+    if (this._operation !== null) return new Error('Already locked for ' + this._operation);
+
+    this._operation = operation;
+    this._timestamp = new Date();
+    var that = this;
+    this._watcherId = setInterval(function () { debug('Lock unreleased %s', that._operation); }, 1000 * 60 * 5);
+
+    debug('Acquired : %s', this._operation);
+
+    this.emit('locked', this._operation);
+
+    return null;
 };
 
-var assert = require('assert'),
-    debug = require('debug')('box:locker');
-
-var gLock = { operation: null, timestamp: null, watcherId: -1 };
-
-function lock(operation) {
+Locker.prototype.unlock = function (operation) {
     assert.strictEqual(typeof operation, 'string');
 
-    if (gLock.operation !== null) return new Error('Already locked for ' + gLock.operation);
+    if (this._operation !== operation) throw new Error('Mismatched unlock. Current lock is for ' + this._operation); // throw because this is a programming error
 
-    gLock.operation = operation;
-    gLock.timestamp = new Date();
-    gLock.watcherId = setInterval(function () { debug('Lock unreleased %s', gLock.operation); }, 1000 * 60 * 5);
+    debug('Released : %s', this._operation);
 
-    debug('Acquired : %s', gLock.operation);
+    this._operation = null;
+    this._timestamp = null;
+    clearInterval(this._watcherId);
+    this._watcherId = -1;
+
+    this.emit('unlocked', operation);
 
     return null;
 }
 
-function unlock(operation) {
-    assert.strictEqual(typeof operation, 'string');
-
-    if (gLock.operation !== operation) throw new Error('Mismatched unlock. Current lock is for ' + gLock.operation); // throw because this is a programming error
-
-    debug('Released : %s', gLock.operations);
-
-    gLock.operation = null;
-    gLock.timestamp = null;
-    clearInterval(gLock.watcherId);
-    gLock.watcherId = -1;
-
-    return null;
-}
-
+exports = module.exports = new Locker();
