@@ -67,7 +67,7 @@ function setCloudronAvatar(req, res, next) {
     assert.strictEqual(typeof req.files, 'object');
 
     if (!req.files.avatar) return next(new HttpError(400, 'avatar must be provided'));
-    var avatar = safe.fs.readFileSync(req.files.avatar.path, 'utf8');
+    var avatar = safe.fs.readFileSync(req.files.avatar.path);
 
     settings.setCloudronAvatar(avatar, function (error) {
         if (error) return next(new HttpError(500, error));

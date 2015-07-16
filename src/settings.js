@@ -153,7 +153,7 @@ function getCloudronAvatar(callback) {
 }
 
 function setCloudronAvatar(avatar, callback) {
-    assert.strictEqual(typeof avatar, 'string');
+    assert.strictEqual(typeof avatar, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     var filePath = path.join(config.baseDir(), constants.CLOUDRON_AVATAR_FILE);
