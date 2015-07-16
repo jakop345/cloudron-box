@@ -584,8 +584,8 @@ function backup(app, callback) {
         }
     ], function seriesDone(error) {
         if (error) {
-            debugApp(app, 'error installing app: %s', error);
-            return updateApp(app, { installationState: appdb.ISTATE_ERROR, installationProgress: error.message }, callback.bind(null, error));
+            debugApp(app, 'error backing up app: %s', error);
+            return updateApp(app, { installationState: appdb.ISTATE_INSTALLED, installationProgress: error.message }, callback.bind(null, error)); // return to installed state intentionally
         }
         callback(null);
     });
