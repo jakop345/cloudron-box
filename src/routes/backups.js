@@ -9,6 +9,7 @@ exports = module.exports = {
 
 var backups = require('../backups.js'),
     cloudron = require('../cloudron.js'),
+    CloudronError = require('../cloudron.js').CloudronError,
     debug = require('debug')('box:routes/backups'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess;
@@ -22,11 +23,12 @@ function get(req, res, next) {
 }
 
 function create(req, res, next) {
-    // don't want for backup to complete since this can take long
-    // progress can be checked up ny polling the progress api call
+    // note that cloudron.backup only waits for backup initiation and not for backup to complete
+    // backup progress can be checked up ny polling the progress api call
     cloudron.backup(function (error) {
-        if (error) debug('Could not backup', error);
-    });
+        if (error && error.reason === CloudronError.BAD_STATE) return next(new HttpError(409, error.message));
+        if (error) return next(new HttpError(500, error));
 
-    next(new HttpSuccess(202, {}));
+        next(new HttpSuccess(202, {}));
+    });
 }

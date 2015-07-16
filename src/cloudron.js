@@ -490,13 +490,14 @@ function backup(callback) {
     var error = locker.lock(locker.OP_FULL_BACKUP);
     if (error) return callback(new CloudronError(CloudronError.BAD_STATE, error.message));
 
+    // start the backup operation in the background
     backupBoxAndApps(function (error) {
         if (error) console.error('backup failed.', error);
 
         locker.unlock(locker.OP_FULL_BACKUP);
-
-        return callback(error);
     });
+
+    callback(null);
 }
 
 function ensureBackup(callback) {
