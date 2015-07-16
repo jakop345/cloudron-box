@@ -16,6 +16,7 @@ var backups = require('../backups.js'),
 
 function get(req, res, next) {
     backups.getAllPaged(1, 5, function (error, result) {
+        if (error && error.reason === BackupsError.EXTERNAL_ERROR) return next(new HttpError(503, error.message));
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(200, { backups: result }));
