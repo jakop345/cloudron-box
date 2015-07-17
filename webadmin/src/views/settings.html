@@ -78,7 +78,7 @@
 
                 <div class="grid">
                     <div class="item" ng-repeat="avatar in avatarChange.availableAvatars" style="background-image: url('{{avatar.data || avatar.url}}');" ng-click="setPreviewAvatar(avatar)"></div>
-                    <div class="item" ng-click="showCustomAvatarSelector()"><div>+</div></div>
+                    <div class="item add" ng-click="showCustomAvatarSelector()"></div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -146,7 +146,9 @@
 <div class="card" style="margin-bottom: 15px;" ng-show="user.admin">
     <div class="row">
         <div class="col-xs-4" style="min-width: 150px;">
-            <img width="128" height="128" class="settings-avatar" ng-src="{{avatar.data || avatar.url}}" ng-click="showChangeAvatar()"/>
+            <div class="settings-avatar" ng-click="showChangeAvatar()" style="background-image: url('{{avatar.data || avatar.url}}');">
+                <div class="overlay"></div>
+            </div>
         </div>
         <div class="col-xs-8">
             <table width="100%">

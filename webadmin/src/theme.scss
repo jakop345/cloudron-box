@@ -688,13 +688,30 @@ $graphs-success-alt:    lighten(#27CE65, 20%);
 
 .settings-avatar {
     cursor: pointer;
+    width: 128px;
+    height: 128px;
+
+    .overlay {
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255 ,0.3);
+        background-image: url('/img/plus.png');
+        background-repeat: no-repeat;
+        background-position: center;
+        transition: all 150ms;
+        opacity: 0;
+
+        &:hover {
+            opacity: 1;
+        }
+    }
 }
 
 .settings-avatar-selector {
     text-align: center;
 
     .grid {
-        background-color: lightgray;
+        margin-top: 20px;
     }
 
     .item {
@@ -706,11 +723,21 @@ $graphs-success-alt:    lighten(#27CE65, 20%);
         height: 64px;
         margin: 5px;
         cursor: pointer;
-        text-align: center;
-        vertical-align: middle;
+        opacity: 0.6;
+        transform: scale(1.0);
+        transition: all 150ms;
 
         &:hover {
-            background-color: white;
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        &.add {
+            background-color: $brand-primary;
+            background-image: url('/img/plus.png');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 50%;
         }
     }
 }
