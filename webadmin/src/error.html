@@ -31,8 +31,16 @@
         // create main application module
         var app = angular.module('Application', []);
 
+        // FIXME this does not work with custom domains!
+        function detectApiOrigin() {
+            var host = window.location.host;
+            var tmp = host.split('.')[0];
+            if (tmp.indexOf('-') === -1) return 'https://my-' + host;
+            else return 'https://my' + tmp.slice(tmp.indexOf('-')) + host.slice(tmp.length);
+        }
+
         app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
-            $scope.apiOrigin = 'https://my-' + window.location.host;
+            $scope.apiOrigin = detectApiOrigin();
             $scope.cloudronName = 'Cloudron';
             $scope.webServerOriginLink = '/';
             $scope.errorMessage = '';
