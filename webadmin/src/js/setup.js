@@ -168,23 +168,19 @@ app.controller('StepController', ['$scope', '$location', 'Wizard', function ($sc
 app.controller('FinishController', ['$scope', '$location', '$timeout', 'Wizard', 'Client', function ($scope, $location, $timeout, Wizard, Client) {
     $scope.wizard = Wizard;
 
-    function finish() {
-        Client.createAdmin($scope.wizard.username, $scope.wizard.password, $scope.wizard.email, $scope.wizard.name, $scope.setupToken, function (error) {
-            if (error) {
-                console.error('Internal error', error);
-                window.location.href = '/error.html';
-                return;
-            }
+    Client.createAdmin($scope.wizard.username, $scope.wizard.password, $scope.wizard.email, $scope.wizard.name, $scope.setupToken, function (error) {
+        if (error) {
+            console.error('Internal error', error);
+            window.location.href = '/error.html';
+            return;
+        }
 
-            Client.changeCloudronAvatar($scope.wizard.avatarBlob, function (error) {
-                if (error) return console.error('Unable to set avatar.', error);
+        Client.changeCloudronAvatar($scope.wizard.avatarBlob, function (error) {
+            if (error) return console.error('Unable to set avatar.', error);
 
-                window.location.href = '/';
-            });
+            window.location.href = '/';
         });
-    }
-
-    $timeout(finish, 3000);
+    });
 }]);
 
 app.controller('SetupController', ['$scope', '$location', 'Client', 'Wizard', function ($scope, $location, Client, Wizard) {
