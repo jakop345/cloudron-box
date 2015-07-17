@@ -148,12 +148,36 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     };
 
     function getBlobFromImg(img, callback) {
+        var size = 256;
+
         var canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
+        canvas.width = size;
+        canvas.height = size;
+
+        var imageDimensionRatio = img.width / img.height;
+        var canvasDimensionRatio = canvas.width / canvas.height;
+        var renderableHeight, renderableWidth, xStart, yStart;
+
+        if (imageDimensionRatio > canvasDimensionRatio) {
+            renderableHeight = canvas.height;
+            renderableWidth = img.width * (renderableHeight / img.height);
+            xStart = (canvas.width - renderableWidth) / 2;
+            yStart = 0;
+        } else if (imageDimensionRatio < canvasDimensionRatio) {
+            renderableWidth = canvas.width;
+            renderableHeight = img.height * (renderableWidth / img.width);
+            xStart = 0;
+            yStart = (canvas.height - renderableHeight) / 2;
+        } else {
+            renderableHeight = canvas.height;
+            renderableWidth = canvas.width;
+            xStart = 0;
+            yStart = 0;
+        }
 
         var ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, xStart, yStart, renderableWidth, renderableHeight);
 
         canvas.toBlob(callback);
     }
@@ -162,27 +186,20 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         $scope.avatarChange.error.avatar = null;
         $scope.avatarChange.busy = true;
 
-        function done(error) {
-            if (error) {
-                console.error('Unable to change developer mode.', error);
-            } else {
-                $scope.avatar = $scope.avatarChange.avatar;
-                avatarChangeReset();
-                $('#avatarChangeModal').modal('hide');
-            }
+        var img = document.getElementById('previewAvatar');
+        $scope.avatarChange.avatar.file = getBlobFromImg(img, function (blob) {
+            Client.changeCloudronAvatar(blob, function (error) {
+                if (error) {
+                    console.error('Unable to change developer mode.', error);
+                } else {
+                    $scope.avatar = $scope.avatarChange.avatar;
+                    avatarChangeReset();
+                    $('#avatarChangeModal').modal('hide');
+                }
 
-            $scope.avatarChange.busy = false;
-        }
-
-        if (!$scope.avatarChange.avatar.file) {
-            var img = new Image();
-            img.src = $scope.avatarChange.avatar.url;
-            $scope.avatarChange.avatar.file = getBlobFromImg(img, function (blob) {
-                Client.changeCloudronAvatar(blob, done);
+                $scope.avatarChange.busy = false;
             });
-        } else {
-            Client.changeCloudronAvatar($scope.avatarChange.avatar.file, done);
-        }
+        });
     };
 
     $scope.doCreateBackup = function () {

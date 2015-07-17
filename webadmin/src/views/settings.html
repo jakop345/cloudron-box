@@ -70,7 +70,7 @@
                 <h4 class="modal-title">Change your Cloudron Avatar</h4>
             </div>
             <div class="modal-body settings-avatar-selector">
-                <img width="128" height="128" ng-src="{{avatarChange.avatar.data || avatarChange.avatar.url || avatar.data || avatar.url}}"/>
+                <img id="previewAvatar" width="128" height="128" ng-src="{{avatarChange.avatar.data || avatarChange.avatar.url || avatar.data || avatar.url}}"/>
                 <input type="file" id="avatarFileInput" style="display: none" accept="image/png"/>
 
                 <br/>
