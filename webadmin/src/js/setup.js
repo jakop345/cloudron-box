@@ -127,6 +127,41 @@ app.controller('StepController', ['$scope', '$location', 'Wizard', function ($sc
 app.controller('FinishController', ['$scope', '$location', '$timeout', 'Wizard', 'Client', function ($scope, $location, $timeout, Wizard, Client) {
     $scope.wizard = Wizard;
 
+    function getBlobFromImg(img, callback) {
+        var size = 256;
+
+        var canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+
+        var imageDimensionRatio = img.width / img.height;
+        var canvasDimensionRatio = canvas.width / canvas.height;
+        var renderableHeight, renderableWidth, xStart, yStart;
+
+        if (imageDimensionRatio > canvasDimensionRatio) {
+            renderableHeight = canvas.height;
+            renderableWidth = img.width * (renderableHeight / img.height);
+            xStart = (canvas.width - renderableWidth) / 2;
+            yStart = 0;
+        } else if (imageDimensionRatio < canvasDimensionRatio) {
+            renderableWidth = canvas.width;
+            renderableHeight = img.height * (renderableWidth / img.width);
+            xStart = 0;
+            yStart = (canvas.height - renderableHeight) / 2;
+        } else {
+            renderableHeight = canvas.height;
+            renderableWidth = canvas.width;
+            xStart = 0;
+            yStart = 0;
+        }
+
+        var ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, xStart, yStart, renderableWidth, renderableHeight);
+
+        canvas.toBlob(callback);
+    }
+
     function finish() {
         Client.createAdmin($scope.wizard.username, $scope.wizard.password, $scope.wizard.email, $scope.wizard.name, $scope.setupToken, function (error) {
             if (error) {
@@ -135,7 +170,15 @@ app.controller('FinishController', ['$scope', '$location', '$timeout', 'Wizard',
                 return;
             }
 
-            window.location.href = '/';
+            var img = document.getElementById('previewAvatar');
+            getBlobFromImg(img, function (blob) {
+                Client.changeCloudronAvatar(blob, function (error) {
+                    if (error) return console.error('Unable to set avatar.', error);
+
+                    window.location.href = '/';
+                });
+            });
+
         });
     }
 
