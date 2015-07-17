@@ -403,6 +403,7 @@ function migrate(size, region, callback) {
 }
 
 function update(boxUpdateInfo, callback) {
+    assert.strictEqual(typeof boxUpdateInfo, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     if (!boxUpdateInfo) return callback(null);
