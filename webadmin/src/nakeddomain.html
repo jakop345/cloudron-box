@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />
 
-    <title> {{cloudronName}} </title>
+    <title> Cloudron </title>
 
     <!-- external fonts and CSS -->
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
@@ -37,7 +37,8 @@
 
             $http.get($scope.apiOrigin + '/api/v1/cloudron/status').success(function(data, status) {
                 if (status !== 200 || typeof data !== 'object') return console.error(status, data);
-                $scope.cloudronName = data.cloudronName;
+                $scope.cloudronName  = data.cloudronName;
+                document.title = $scope.cloudronName;
             }).error(function (data, status) {
                 console.error(status, data);
             });
