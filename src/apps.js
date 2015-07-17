@@ -64,8 +64,7 @@ var addons = require('./addons.js'),
     util = require('util'),
     validator = require('validator');
 
-var NOOP_CALLBACK = function (error) { console.error(error); },
-    BACKUP_APP_CMD = path.join(__dirname, 'scripts/backupapp.sh'),
+var BACKUP_APP_CMD = path.join(__dirname, 'scripts/backupapp.sh'),
     RESTORE_APP_CMD = path.join(__dirname, 'scripts/restoreapp.sh'),
     BACKUP_SWAP_CMD = path.join(__dirname, 'scripts/backupswap.sh');
 
@@ -495,7 +494,7 @@ function restore(appId, callback) {
         if (!restoreConfig) return callback(new AppsError(AppsError.BAD_STATE, 'No restore point'));
 
         // re-validate because this new box version may not accept old configs. if we restore location, it should be validated here as well
-        var error = checkManifestConstraints(restoreConfig.manifest);
+        error = checkManifestConstraints(restoreConfig.manifest);
         if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Manifest cannot be installed: ' + error.message));
 
         error = validatePortBindings(restoreConfig.portBindings, restoreConfig.manifest.tcpPorts); // maybe new ports got reserved now
