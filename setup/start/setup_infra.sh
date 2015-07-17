@@ -31,7 +31,7 @@ docker run --restart=always -d --name="graphite" \
     -p 127.0.0.1:2003:2003 \
     -p 127.0.0.1:2004:2004 \
     -p 127.0.0.1:8000:8000 \
-    -v "${DATA_DIR}/box/graphite:/app/data" cloudron/graphite:0.3.1
+    -v "${DATA_DIR}/graphite:/app/data" cloudron/graphite:0.3.1
 
 # mail
 mail_container_id=$(docker run --restart=always -d --name="mail" \
