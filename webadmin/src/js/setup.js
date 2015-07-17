@@ -73,66 +73,20 @@ app.service('Wizard', [ function () {
             data: null,
             url: '/img/avatars/cloudglassesyellow.png'
         }];
-        this.avatar = this.availableAvatars[0];
+        this.avatar = {};
+        this.avatarBlob = null;
     }
 
     Wizard.prototype.setPreviewAvatar = function (avatar) {
+        var that = this;
+
         this.avatar = avatar;
-    };
 
-    instance = new Wizard();
-    return instance;
-}]);
-
-app.controller('StepController', ['$scope', '$location', 'Wizard', function ($scope, $location, Wizard) {
-    $scope.wizard = Wizard;
-
-    $scope.next = function (page, bad) {
-        if (!bad) $location.path(page);
-    };
-
-    $scope.focusNext = function (elemId, bad) {
-        if (!bad) $('#' + elemId).focus();
-    };
-
-    $scope.$on('$viewContentLoaded', function () {
-        $('a[autofocus]').focus();
-        $('input[autofocus]').focus();
-    });
-
-    $scope.showCustomAvatarSelector = function () {
-        $('#avatarFileInput').click();
-    };
-
-    if ($('#avatarFileInput').get(0)) {
-        $('#avatarFileInput').get(0).onchange = function (event) {
-            var fr = new FileReader();
-            fr.onload = function () {
-                $scope.$apply(function () {
-                    var tmp = {
-                        file: event.target.files[0],
-                        data: fr.result,
-                        url: null
-                    };
-
-                    $scope.wizard.availableAvatars.push(tmp);
-                    $scope.wizard.setPreviewAvatar(tmp);
-                });
-            };
-            fr.readAsDataURL(event.target.files[0]);
-        };
-    }
-}]);
-
-app.controller('FinishController', ['$scope', '$location', '$timeout', 'Wizard', 'Client', function ($scope, $location, $timeout, Wizard, Client) {
-    $scope.wizard = Wizard;
-
-    function getBlobFromImg(img, callback) {
-        var size = 256;
-
+        // scale image and get the blob now
+        var img = document.getElementById('previewAvatar');
         var canvas = document.createElement('canvas');
-        canvas.width = size;
-        canvas.height = size;
+        canvas.width = 256;
+        canvas.height = 256;
 
         var imageDimensionRatio = img.width / img.height;
         var canvasDimensionRatio = canvas.width / canvas.height;
@@ -159,8 +113,60 @@ app.controller('FinishController', ['$scope', '$location', '$timeout', 'Wizard',
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(img, xStart, yStart, renderableWidth, renderableHeight);
 
-        canvas.toBlob(callback);
+        canvas.toBlob(function (blob) {
+            that.avatarBlob = blob;
+        });
+    };
+
+    instance = new Wizard();
+    return instance;
+}]);
+
+app.controller('StepController', ['$scope', '$location', 'Wizard', function ($scope, $location, Wizard) {
+    $scope.wizard = Wizard;
+
+    $scope.next = function (page, bad) {
+        if (!bad) $location.path(page);
+    };
+
+    $scope.focusNext = function (elemId, bad) {
+        if (!bad) $('#' + elemId).focus();
+    };
+
+    $scope.$on('$viewContentLoaded', function () {
+        $('a[autofocus]').focus();
+        $('input[autofocus]').focus();
+    });
+
+    $scope.showCustomAvatarSelector = function () {
+        $('#avatarFileInput').click();
+    };
+
+    // cheap way to detect if we are in avatar and name selection step
+    if ($('#previewAvatar').get(0) && $('#avatarFileInput').get(0)) {
+        $('#avatarFileInput').get(0).onchange = function (event) {
+            var fr = new FileReader();
+            fr.onload = function () {
+                $scope.$apply(function () {
+                    var tmp = {
+                        file: event.target.files[0],
+                        data: fr.result,
+                        url: null
+                    };
+
+                    $scope.wizard.availableAvatars.push(tmp);
+                    $scope.wizard.setPreviewAvatar(tmp);
+                });
+            };
+            fr.readAsDataURL(event.target.files[0]);
+        };
+
+        $scope.wizard.setPreviewAvatar($scope.wizard.availableAvatars[0]);
     }
+}]);
+
+app.controller('FinishController', ['$scope', '$location', '$timeout', 'Wizard', 'Client', function ($scope, $location, $timeout, Wizard, Client) {
+    $scope.wizard = Wizard;
 
     function finish() {
         Client.createAdmin($scope.wizard.username, $scope.wizard.password, $scope.wizard.email, $scope.wizard.name, $scope.setupToken, function (error) {
@@ -170,15 +176,11 @@ app.controller('FinishController', ['$scope', '$location', '$timeout', 'Wizard',
                 return;
             }
 
-            var img = document.getElementById('previewAvatar');
-            getBlobFromImg(img, function (blob) {
-                Client.changeCloudronAvatar(blob, function (error) {
-                    if (error) return console.error('Unable to set avatar.', error);
+            Client.changeCloudronAvatar($scope.wizard.avatarBlob, function (error) {
+                if (error) return console.error('Unable to set avatar.', error);
 
-                    window.location.href = '/';
-                });
+                window.location.href = '/';
             });
-
         });
     }
 
