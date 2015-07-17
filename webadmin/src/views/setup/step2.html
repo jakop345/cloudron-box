@@ -2,11 +2,30 @@
     <div class="col-md-12 text-center">
         <h1>Personalize your Cloudron</h1>
         <h4 class="">
-            Make it truly yours, by giving your Cloudron a name.
+            Make it truly yours, by giving your Cloudron an avatar and name.
         </h4>
     </div>
 </div>
+
 <br/>
+
+<div class="row">
+    <div class="col-md-12 settings-avatar-selector">
+        <img id="previewAvatar" width="128" height="128" ng-src="{{wizard.avatar.data || wizard.avatar.url}}"/>
+        <input type="file" id="avatarFileInput" style="display: none" accept="image/png"/>
+
+        <br/>
+        <br/>
+
+        <div class="grid">
+            <div class="item" ng-repeat="avatar in wizard.availableAvatars" style="background-image: url('{{avatar.data || avatar.url}}');" ng-click="wizard.setPreviewAvatar(avatar)"></div>
+            <div class="item add" ng-click="showCustomAvatarSelector()"></div>
+        </div>
+    </div>
+</div>
+
+<br/>
+
 <div class="row">
     <div class="col-md-4 col-md-offset-4 text-center">
         <div class="form-group" ng-class="{ 'has-error': setup_form.name.$dirty && setup_form.name.$invalid }">
@@ -15,6 +34,8 @@
         </div>
     </div>
 </div>
+
+
 <div class="row">
     <div class="col-md-12 text-center">
         <a class="btn btn-primary" href="#/step3" ng-disabled="setup_form.name.$invalid">Next</a>

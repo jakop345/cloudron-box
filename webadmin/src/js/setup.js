@@ -44,7 +44,41 @@ app.service('Wizard', [ function () {
         this.email = '';
         this.password = '';
         this.name = '';
+        this.availableAvatars = [{
+            file: null,
+            data: null,
+            url: '/img/avatars/avatar_0.png',
+        }, {
+            file: null,
+            data: null,
+            url: '/img/avatars/cloudfacegreen.png'
+        }, {
+            file: null,
+            data: null,
+            url: '/img/avatars/cloudfaceturquoise.png'
+        }, {
+            file: null,
+            data: null,
+            url: '/img/avatars/cloudglassesgreen.png'
+        }, {
+            file: null,
+            data: null,
+            url: '/img/avatars/cloudglassespink.png'
+        }, {
+            file: null,
+            data: null,
+            url: '/img/avatars/cloudglassesturquoise.png'
+        }, {
+            file: null,
+            data: null,
+            url: '/img/avatars/cloudglassesyellow.png'
+        }];
+        this.avatar = this.availableAvatars[0];
     }
+
+    Wizard.prototype.setPreviewAvatar = function (avatar) {
+        this.avatar = avatar;
+    };
 
     instance = new Wizard();
     return instance;
@@ -65,6 +99,29 @@ app.controller('StepController', ['$scope', '$location', 'Wizard', function ($sc
         $('a[autofocus]').focus();
         $('input[autofocus]').focus();
     });
+
+    $scope.showCustomAvatarSelector = function () {
+        $('#avatarFileInput').click();
+    };
+
+    if ($('#avatarFileInput').get(0)) {
+        $('#avatarFileInput').get(0).onchange = function (event) {
+            var fr = new FileReader();
+            fr.onload = function () {
+                $scope.$apply(function () {
+                    var tmp = {
+                        file: event.target.files[0],
+                        data: fr.result,
+                        url: null
+                    };
+
+                    $scope.wizard.availableAvatars.push(tmp);
+                    $scope.wizard.setPreviewAvatar(tmp);
+                });
+            };
+            fr.readAsDataURL(event.target.files[0]);
+        };
+    }
 }]);
 
 app.controller('FinishController', ['$scope', '$location', '$timeout', 'Wizard', 'Client', function ($scope, $location, $timeout, Wizard, Client) {
