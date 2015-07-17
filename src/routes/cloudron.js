@@ -6,7 +6,6 @@ exports = module.exports = {
     activate: activate,
     setupTokenAuth: setupTokenAuth,
     getStatus: getStatus,
-    getStats: getStats,
     reboot: reboot,
     getProgress: getProgress,
     getConfig: getConfig,
@@ -22,7 +21,6 @@ var assert = require('assert'),
     progress = require('../progress.js'),
     CloudronError = cloudron.CloudronError,
     debug = require('debug')('box:routes/cloudron'),
-    df = require('nodejs-disks'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
     superagent = require('superagent'),
@@ -95,18 +93,6 @@ function getStatus(req, res, next) {
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(200, status));
-    });
-}
-
-function getStats(req, res, next) {
-    df.drives(function (error, drives) {
-        if (error) return next(new HttpError(500, error));
-
-        df.drivesDetail(drives, function (err, data) {
-            if (error) return next(new HttpError(500, error));
-
-            next(new HttpSuccess(200, { drives: data }));
-        });
     });
 }
 
