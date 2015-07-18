@@ -418,8 +418,8 @@ function downloadIcon(app, callback) {
 function registerSubdomain(app, callback) {
     debugApp(app, 'Registering subdomain location [%s]', app.location);
 
-    if (app.location === '') return callback(null); // bare domain is already registered
-
+    // even though the bare domain is already registered in the appstore, we still
+    // need to register it so that we have a dnsRecordId to wait for it to complete
     var record = { subdomain: app.location, type: 'A', value: sysinfo.getIp() };
 
     superagent
@@ -442,7 +442,10 @@ function registerSubdomain(app, callback) {
 function unregisterSubdomain(app, callback) {
     debugApp(app, 'Unregistering subdomain: dnsRecordId=%s', app.dnsRecordId);
 
-    if (!app.dnsRecordId || app.location === '') return callback(null); // do not unregister bare domain
+    if (!app.dnsRecordId) return callback(null);
+
+    // do not unregister bare domain because we show a error/cloudron info page there
+    if (app.location === '') return updateApp(app, { dnsRecordId: null }, callback);
 
     superagent
         .del(config.apiServerOrigin() + '/api/v1/subdomains/' + app.dnsRecordId)
