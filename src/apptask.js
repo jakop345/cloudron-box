@@ -67,7 +67,7 @@ function initialize(callback) {
 function debugApp(app, args) {
     assert(!app || typeof app === 'object');
 
-    var prefix = app ? app.location : '(no app)';
+    var prefix = app ? (app.location || '(bare)') : '(no app)';
     debug(prefix + ' ' + util.format.apply(util, Array.prototype.slice.call(arguments, 1)));
 }
 
