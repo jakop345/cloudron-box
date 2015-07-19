@@ -14,11 +14,8 @@ exports = module.exports = {
 };
 
 var assert = require('assert'),
-    constants = require('../../constants.js'),
-    config = require('../../config.js'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
-    path = require('path'),
     safe = require('safetydance'),
     settings = require('../settings.js'),
     SettingsError = settings.SettingsError;
