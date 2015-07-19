@@ -21,20 +21,31 @@ exports = module.exports = {
 
     AUTOUPDATE_PATTERN_KEY: 'autoupdate_pattern',
     TIME_ZONE_KEY: 'time_zone',
-    CLOUDRON_NAME: 'cloudron_name',
+    CLOUDRON_NAME_KEY: 'cloudron_name',
 
     events: new (require('events').EventEmitter)()
 };
 
 var assert = require('assert'),
     config = require('../config.js'),
-    constants = require('../constants.js'),
     CronJob = require('cron').CronJob,
     DatabaseError = require('./databaseerror.js'),
-    path = require('path'),
+    paths = require('./paths.js'),
     safe = require('safetydance'),
     settingsdb = require('./settingsdb.js'),
     util = require('util');
+
+var gDefaults = (function () {
+    var tz = safe.fs.readFileSync('/etc/timezone', 'utf8');
+    tz = tz ? tz.trim() : 'America/Los_Angeles';
+
+    var result = { };
+    result[exports.AUTOUPDATE_PATTERN_KEY] = '00 00 1 * * *';
+    result[exports.TIME_ZONE_KEY] = tz;
+    result[exports.CLOUDRON_NAME_KEY] = 'Cloudron';
+
+    return result;
+})();
 
 if (config.TEST) {
     // avoid noisy warnings during npm test
@@ -86,6 +97,7 @@ function getAutoupdatePattern(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     settingsdb.get(exports.AUTOUPDATE_PATTERN_KEY, function (error, pattern) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, gDefaults[exports.AUTOUPDATE_PATTERN_KEY]);
         if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
 
         callback(null, pattern);
@@ -109,6 +121,7 @@ function getTimeZone(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     settingsdb.get(exports.TIME_ZONE_KEY, function (error, tz) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, gDefaults[exports.AUTOUPDATE_PATTERN_KEY]);
         if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
 
         callback(null, tz);
@@ -118,8 +131,8 @@ function getTimeZone(callback) {
 function getCloudronName(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    settingsdb.get(exports.CLOUDRON_NAME, function (error, name) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, constants.CLOUDRON_DEFAULT_NAME);
+    settingsdb.get(exports.CLOUDRON_NAME_KEY, function (error, name) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, gDefaults[exports.CLOUDRON_NAME_KEY]);
         if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
         callback(null, name);
     });
@@ -131,10 +144,10 @@ function setCloudronName(name, callback) {
 
     if (!name) return callback(new SettingsError(SettingsError.BAD_FIELD));
 
-    settingsdb.set(exports.CLOUDRON_NAME, name, function (error) {
+    settingsdb.set(exports.CLOUDRON_NAME_KEY, name, function (error) {
         if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
 
-        exports.events.emit(exports.CLOUDRON_NAME, name);
+        exports.events.emit(exports.CLOUDRON_NAME_KEY, name);
 
         return callback(null);
     });
@@ -143,27 +156,25 @@ function setCloudronName(name, callback) {
 function getCloudronAvatar(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    var filePath = path.join(config.baseDir(), constants.CLOUDRON_AVATAR_FILE);
-    var avatar = safe.fs.readFileSync(filePath);
+    var avatar = safe.fs.readFileSync(paths.CLOUDRON_AVATAR_FILE);
     if (avatar) return callback(null, avatar);
 
     // try default fallback
-    avatar = safe.fs.readFileSync(constants.CLOUDRON_DEFAULT_AVATAR_FILE);
+    avatar = safe.fs.readFileSync(paths.CLOUDRON_DEFAULT_AVATAR_FILE);
     if (avatar) return callback(null, avatar);
 
-    callback(new SettingsError(SettingsError.INTERNAL_ERROR));
+    callback(new SettingsError(SettingsError.INTERNAL_ERROR, safe.error));
 }
 
 function setCloudronAvatar(avatar, callback) {
-    assert.strictEqual(typeof avatar, 'object');
+    assert(util.isBuffer(avatar));
     assert.strictEqual(typeof callback, 'function');
 
-    var filePath = path.join(config.baseDir(), constants.CLOUDRON_AVATAR_FILE);
-    if (!safe.fs.writeFileSync(filePath, avatar)) {
-        return callback(new SettingsError(SettingsError.INTERNAL_ERROR, safe.error.message));
+    if (!safe.fs.writeFileSync(paths.CLOUDRON_AVATAR_FILE, avatar)) {
+        return callback(new SettingsError(SettingsError.INTERNAL_ERROR, safe.error));
     }
 
-    callback(null);
+    return callback(null);
 }
 
 function getAll(callback) {
@@ -178,4 +189,3 @@ function getAll(callback) {
         callback(null, result);
     });
 }
-

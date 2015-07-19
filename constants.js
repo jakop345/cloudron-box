@@ -11,10 +11,6 @@ exports = module.exports = {
 
     TEST_NAME: 'Test',
     TEST_LOCATION: '',
-    TEST_CLIENT_ID: 'test',
-
-    CLOUDRON_DEFAULT_NAME: 'Cloudron',
-    CLOUDRON_DEFAULT_AVATAR_FILE: __dirname + '/avatar.png',
-    CLOUDRON_AVATAR_FILE: '/data/box/avatar.png'
+    TEST_CLIENT_ID: 'test'
 };
 

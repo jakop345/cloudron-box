@@ -46,7 +46,9 @@ function set(key, value, callback) {
 }
 
 function clear(callback) {
-    // don't clear since we need to keep defaults
-    callback();
-}
+    database.query('DELETE FROM settings', function (error) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
+        callback(error);
+    });
+}
