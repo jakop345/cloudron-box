@@ -1,4 +1,4 @@
-+ /* jslint node:true */
+/* jslint node:true */
 /* global it:false */
 /* global describe:false */
 /* global after:false */
@@ -9,8 +9,7 @@
 var constants = require('../../constants.js'),
     expect = require('expect.js'),
     fs = require('fs'),
-    path = require('path'),
-    safe = require('safetydance');
+    path = require('path');
 
 var config = null;
 
