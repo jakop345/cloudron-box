@@ -8,7 +8,7 @@
 
 var appdb = require('../../appdb.js'),
     async = require('async'),
-    config = require('../../../config.js'),
+    config = require('../../config.js'),
     database = require('../../database.js'),
     expect = require('expect.js'),
     request = require('superagent'),

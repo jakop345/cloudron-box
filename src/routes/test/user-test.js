@@ -6,13 +6,13 @@
 
 'use strict';
 
-var config = require('../../../config.js'),
+var config = require('../../config.js'),
     database = require('../../database.js'),
     tokendb = require('../../tokendb.js'),
     expect = require('expect.js'),
     request = require('superagent'),
     nock = require('nock'),
-    server = require('../../../src/server.js'),
+    server = require('../../server.js'),
     userdb = require('../../userdb.js');
 
 var SERVER_URL = 'http://localhost:' + config.get('port');

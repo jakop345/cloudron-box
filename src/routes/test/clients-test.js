@@ -7,7 +7,7 @@
 /* global after:false */
 
 var async = require('async'),
-    config = require('../../../config.js'),
+    config = require('../../config.js'),
     database = require('../../database.js'),
     oauth2 = require('../oauth2.js'),
     expect = require('expect.js'),

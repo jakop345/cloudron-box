@@ -6,7 +6,7 @@ require('supererror')({ splatchError: true });
 
 var server = require('./src/server.js'),
     ldap = require('./src/ldap.js'),
-    config = require('./config.js');
+    config = require('./src/config.js');
 
 console.log();
 console.log('==========================================');

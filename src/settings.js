@@ -28,7 +28,7 @@ exports = module.exports = {
 };
 
 var assert = require('assert'),
-    config = require('../config.js'),
+    config = require('./config.js'),
     CronJob = require('cron').CronJob,
     DatabaseError = require('./databaseerror.js'),
     paths = require('./paths.js'),

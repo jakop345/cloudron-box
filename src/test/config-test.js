@@ -16,12 +16,12 @@ var config = null;
 
 describe('config', function () {
     before(function () {
-        delete require.cache[require.resolve('../../config.js')];
-        config = require('../../config.js');
+        delete require.cache[require.resolve('../config.js')];
+        config = require('../config.js');
     });
 
     after(function () {
-        delete require.cache[require.resolve('../../config.js')];
+        delete require.cache[require.resolve('../config.js')];
     });
 
     it('baseDir() is set', function (done) {

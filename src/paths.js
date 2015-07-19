@@ -2,7 +2,7 @@
 
 'use strict';
 
-var config = require('../config.js'),
+var config = require('./config.js'),
     path = require('path');
 
 // keep these values in sync with start.sh

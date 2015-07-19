@@ -20,7 +20,7 @@ exports = module.exports = {
 
 var assert = require('assert'),
     async = require('async'),
-    config = require('../config.js'),
+    config = require('./config.js'),
     debug = require('debug')('box:mailer'),
     digitalocean = require('./digitalocean.js'),
     docker = require('./docker.js'),

@@ -18,7 +18,7 @@ exports = module.exports = {
 var assert = require('assert'),
     async = require('async'),
     once = require('once'),
-    config = require('../config.js'),
+    config = require('./config.js'),
     mysql = require('mysql'),
     util = require('util');
 

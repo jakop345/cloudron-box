@@ -7,7 +7,7 @@
 'use strict';
 
 var progress = require('../progress.js'),
-    config = require('../../config.js'),
+    config = require('../config.js'),
     database = require('../database.js'),
     expect = require('expect.js'),
     nock = require('nock'),

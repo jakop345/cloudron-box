@@ -36,7 +36,7 @@ exports = module.exports = {
 };
 
 var assert = require('assert'),
-    constants = require('./constants.js'),
+    constants = require('../constants.js'),
     fs = require('fs'),
     path = require('path'),
     safe = require('safetydance'),

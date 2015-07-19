@@ -16,7 +16,7 @@ var express = require('express'),
     database = require('./src/database.js'),
     appdb = require('./src/appdb.js'),
     clientdb = require('./src/clientdb.js'),
-    config = require('./config.js'),
+    config = require('./src/config.js'),
     http = require('http');
 
 // Allow self signed certs!

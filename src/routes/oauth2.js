@@ -5,7 +5,7 @@
 var assert = require('assert'),
     authcodedb = require('../authcodedb'),
     clientdb = require('../clientdb'),
-    config = require('../../config.js'),
+    config = require('../config.js'),
     constants = require('../../constants.js'),
     DatabaseError = require('../databaseerror'),
     debug = require('debug')('box:routes/oauth2'),

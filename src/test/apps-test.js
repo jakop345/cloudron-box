@@ -10,12 +10,10 @@ var appdb = require('../appdb.js'),
     apps = require('../apps.js'),
     AppsError = apps.AppsError,
     async = require('async'),
-    config = require('../../config.js'),
+    config = require('../config.js'),
     constants = require('../../constants.js'),
     database = require('../database.js'),
-    expect = require('expect.js'),
-    safe = require('safetydance'),
-    _ = require('underscore');
+    expect = require('expect.js');
 
 describe('Apps', function () {
     var APP_0 = {

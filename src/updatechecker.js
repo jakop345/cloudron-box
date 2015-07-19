@@ -12,7 +12,7 @@ exports = module.exports = {
 var apps = require('./apps.js'),
     assert = require('assert'),
     async = require('async'),
-    config = require('../config.js'),
+    config = require('./config.js'),
     debug = require('debug')('box:updatechecker'),
     fs = require('fs'),
     mailer = require('./mailer.js'),

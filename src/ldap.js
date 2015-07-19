@@ -5,7 +5,7 @@ exports = module.exports = {
 };
 
 var assert = require('assert'),
-    config = require('../config.js'),
+    config = require('./config.js'),
     debug = require('debug')('box:ldap'),
     user = require('./user.js'),
     UserError = user.UserError,

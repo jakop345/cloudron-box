@@ -12,7 +12,7 @@ exports = module.exports = {
 
 var assert = require('assert'),
     tokendb = require('./tokendb.js'),
-    config = require('../config.js'),
+    config = require('./config.js'),
     util = require('util');
 
 function DeveloperError(reason, errorOrMessage) {
