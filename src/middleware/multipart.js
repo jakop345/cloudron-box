@@ -12,7 +12,7 @@ function _mime(req) {
 
 module.exports = function multipart(options) {
     return function (req, res, next) {
-        if (_mime(req) !== 'multipart/form-data') return res.send(400, 'Invalid content-type. Expecting multipart');
+        if (_mime(req) !== 'multipart/form-data') return res.status(400).send('Invalid content-type. Expecting multipart');
 
         var form = new multiparty.Form({
             uploadDir: '/tmp',
@@ -43,5 +43,5 @@ module.exports = function multipart(options) {
             });
         });
     };
-}
+};
 
