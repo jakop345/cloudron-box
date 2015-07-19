@@ -20,6 +20,7 @@ var assert = require('assert'),
     middleware = require('./middleware'),
     passport = require('passport'),
     path = require('path'),
+    paths = require('./paths.js'),
     routes = require('./routes/index.js'),
     taskmanager = require('./taskmanager.js');
 
@@ -56,7 +57,7 @@ function initializeExpressSync() {
        .use(json)
        .use(urlencoded)
        .use(middleware.cookieParser())
-       .use(middleware.favicon(__dirname + '/../assets/favicon.ico'))
+       .use(middleware.favicon(paths.FAVICON_FILE)) // used when serving oauth login page
        .use(middleware.cors({ origins: [ '*' ], allowCredentials: true }))
        .use(middleware.session({ secret: 'yellow is blue', resave: true, saveUninitialized: true, cookie: { path: '/', httpOnly: true, secure: false, maxAge: 600000 } }))
        .use(passport.initialize())
