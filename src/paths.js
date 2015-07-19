@@ -22,7 +22,7 @@ exports = module.exports = {
     MAIL_DATA_DIR: path.join(config.baseDir(), 'data/box/mail'),
 
     CLOUDRON_AVATAR_FILE: path.join(config.baseDir(), 'data/box/avatar.png'),
-    CLOUDRON_DEFAULT_AVATAR_FILE: path.join(__dirname + '/../avatar.png'),
+    CLOUDRON_DEFAULT_AVATAR_FILE: path.join(__dirname + '/../assets/avatar.png'),
 
     FAVICON_FILE: path.join(__dirname + '/../assets/favicon.ico')
 };
