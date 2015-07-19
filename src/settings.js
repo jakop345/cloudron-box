@@ -33,7 +33,8 @@ var assert = require('assert'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
     settingsdb = require('./settingsdb.js'),
-    util = require('util');
+    util = require('util'),
+    _ = require('underscore');
 
 var gDefaults = (function () {
     var tz = safe.fs.readFileSync('/etc/timezone', 'utf8');
@@ -183,7 +184,7 @@ function getAll(callback) {
     settingsdb.getAll(function (error, settings) {
         if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
 
-        var result = { };
+        var result = _.extend({ }, gDefaults);
         settings.forEach(function (setting) { result[setting.name] = setting.value; });
 
         callback(null, result);

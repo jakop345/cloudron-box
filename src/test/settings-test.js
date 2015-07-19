@@ -54,4 +54,13 @@ describe('Settings', function () {
             done();
         });
     });
+    it('can get all values', function (done) {
+        settings.getAll(function (error, allSettings) {
+            expect(error).to.be(null);
+            expect(allSettings[settings.TIME_ZONE_KEY]).to.be.a('string');
+            expect(allSettings[settings.AUTOUPDATE_PATTERN_KEY]).to.be.a('string');
+            expect(allSettings[settings.CLOUDRON_NAME_KEY]).to.be.a('string');
+            done();
+        });
+    });
 });
