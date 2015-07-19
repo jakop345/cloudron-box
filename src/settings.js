@@ -42,7 +42,7 @@ var gDefaults = (function () {
     tz = tz ? tz.trim() : 'America/Los_Angeles';
 
     var result = { };
-    result[exports.AUTOUPDATE_PATTERN_KEY] = '00 00 1 * * *';
+    result[exports.AUTOUPDATE_PATTERN_KEY] = '00 00 1,3,5,23 * * *';
     result[exports.TIME_ZONE_KEY] = tz;
     result[exports.CLOUDRON_NAME_KEY] = 'Cloudron';
 

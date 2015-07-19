@@ -36,7 +36,7 @@ describe('Settings', function () {
     it('can get default autoupdate_pattern', function (done) {
         settings.getAutoupdatePattern(function (error, pattern) {
             expect(error).to.be(null);
-            expect(pattern).to.be('00 00 1 * * *');
+            expect(pattern).to.be('00 00 1,3,5,23 * * *');
             done();
         });
     });
