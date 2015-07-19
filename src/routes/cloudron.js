@@ -16,7 +16,6 @@ exports = module.exports = {
 
 var assert = require('assert'),
     cloudron = require('../cloudron.js'),
-    constants = require('../../constants.js'),
     config = require('../config.js'),
     progress = require('../progress.js'),
     CloudronError = cloudron.CloudronError,

@@ -11,7 +11,7 @@ var appdb = require('../appdb.js'),
     AppsError = apps.AppsError,
     async = require('async'),
     config = require('../config.js'),
-    constants = require('../../constants.js'),
+    constants = require('../constants.js'),
     database = require('../database.js'),
     expect = require('expect.js');
 

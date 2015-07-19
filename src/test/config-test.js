@@ -6,7 +6,7 @@
 
 'use strict';
 
-var constants = require('../../constants.js'),
+var constants = require('../constants.js'),
     expect = require('expect.js'),
     fs = require('fs'),
     path = require('path');
