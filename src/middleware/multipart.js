@@ -18,7 +18,7 @@ module.exports = function multipart(options) {
             uploadDir: '/tmp',
             keepExtensions: true,
             maxFieldsSize: options.maxFieldsSize || (2 * 1024), // only field size, not files
-            limit: options.limit || '500mb', // file sizes
+            limit: options.limit || '8mb', // file sizes
             autoFiles: true
         });
 
