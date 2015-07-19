@@ -6,10 +6,8 @@
 
 'use strict';
 
-var config = require('../../config.js'),
-    database = require('../database.js'),
+var database = require('../database.js'),
     expect = require('expect.js'),
-    paths = require('../paths.js'),
     user = require('../user.js'),
     userdb = require('../userdb.js'),
     UserError = user.UserError;
