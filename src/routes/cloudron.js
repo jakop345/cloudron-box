@@ -45,11 +45,12 @@ function activate(req, res, next) {
     if (typeof req.body.username !== 'string') return next(new HttpError(400, 'username must be string'));
     if (typeof req.body.password !== 'string') return next(new HttpError(400, 'password must be string'));
     if (typeof req.body.email !== 'string') return next(new HttpError(400, 'email must be string'));
+    if ('name' in req.body && typeof req.body.name !== 'string') return next(new HttpError(400, 'name must be a string'));
 
     var username = req.body.username;
     var password = req.body.password;
     var email = req.body.email;
-    var name = req.body.name || constants.CLOUDRON_DEFAULT_NAME;
+    var name = req.body.name || null;
 
     var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     debug('activate: username:%s ip:%s', username, ip);

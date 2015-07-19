@@ -17,6 +17,7 @@ exports = module.exports = {
     getCloudronAvatar: getCloudronAvatar,
     setCloudronAvatar: setCloudronAvatar,
 
+    getDefaultSync: getDefaultSync,
     getAll: getAll,
 
     AUTOUPDATE_PATTERN_KEY: 'autoupdate_pattern',
@@ -176,6 +177,12 @@ function setCloudronAvatar(avatar, callback) {
     }
 
     return callback(null);
+}
+
+function getDefaultSync(name) {
+    assert.strictEqual(typeof name, 'string');
+
+    return gDefaults[name];
 }
 
 function getAll(callback) {

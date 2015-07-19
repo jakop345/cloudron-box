@@ -1239,7 +1239,6 @@ describe('App installation - port bindings', function () {
         request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/stop')
             .query({ access_token: token })
             .end(function (err, res) {
-                console.dir(res.text);
             expect(res.statusCode).to.equal(202);
             done();
         });

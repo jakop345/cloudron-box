@@ -155,12 +155,14 @@ function activate(username, password, email, name, ip, callback) {
     assert.strictEqual(typeof password, 'string');
     assert.strictEqual(typeof email, 'string');
     assert.strictEqual(typeof ip, 'string');
-    assert.strictEqual(typeof name, 'string');
+    assert(!name || typeof name, 'string');
     assert.strictEqual(typeof callback, 'function');
 
     debug('activating user:%s email:%s', username, email);
 
     setTimeZone(ip, function () { });
+
+    if (!name) name = settings.getDefaultSync(settings.CLOUDRON_NAME_KEY);
 
     settings.setCloudronName(name, function (error) {
         if (error && error.reason === SettingsError.BAD_FIELD) return callback(new CloudronError(CloudronError.BAD_NAME));
