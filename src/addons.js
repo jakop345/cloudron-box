@@ -687,8 +687,8 @@ function setupRedis(app, callback) {
         Tty: true,
         Image: 'cloudron/redis:0.3.0',
         Cmd: null,
-        Volumes: { },
-        VolumesFrom: ''
+        Volumes: {},
+        VolumesFrom: []
     };
 
     var isMac = os.platform() === 'darwin';

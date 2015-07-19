@@ -202,8 +202,8 @@ function createContainer(app, callback) {
                 Tty: true,
                 Image: app.manifest.dockerImage,
                 Cmd: null,
-                Volumes: { },
-                VolumesFrom: '',
+                Volumes: {},
+                VolumesFrom: [],
                 Env: env.concat(addonEnv),
                 ExposedPorts: exposedPorts
             };
