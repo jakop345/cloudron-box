@@ -1,0 +1,135 @@
+<!-- Modal upgrade -->
+<div class="modal fade" id="upgradeModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Upgrade your Cloudron</h4>
+            </div>
+            <div class="modal-body">
+                Do you really want to upgrade your Cloudron?<br/>
+                <br/>
+                <span class="text-danger">Your Cloudron will have a downtime of around 10 minutes, where none of you apps will be reachable.</span>
+                <br/>
+                <br/>
+                <form name="upgradeForm" class="form-signin" role="form" novalidate ng-submit="upgrade()" autocomplete="off">
+                    <fieldset>
+                        <div class="form-group" ng-class="{ 'has-error': (upgradeForm.password.$dirty && upgradeForm.password.$invalid) || (!upgradeForm.password.$dirty && upgrade.error.password) }">
+                            <label class="control-label" for="upgradePasswordInput">Provide your password to confirm this action</label>
+                            <input type="password" class="form-control" ng-model="upgrade.password" id="upgradePasswordInput" name="password" ng-maxlength="512" ng-minlength="5" required autofocus autocomplete="off">
+                        </div>
+                        <input class="ng-hide" type="submit" ng-disabled="upgradeForm.$invalid || busy"/>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" ng-click="upgrade()" ng-disabled="upgradeForm.$invalid || busy"><i class="fa fa-spinner fa-pulse" ng-show="busy"></i> Upgrade</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal relocate -->
+<div class="modal fade" id="relocationModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Relocate your Cloudron</h4>
+            </div>
+            <div class="modal-body">
+                Do you really want to relocate your Cloudron from <b>{{currentRegionSlug}}</b> to <b>{{relocation.region.slug}}</b><br/>
+                <br/>
+                <span class="text-danger">Your Cloudron will have a downtime of around 10 minutes, where none of you apps will be reachable.</span>
+                <br/>
+                <br/>
+                <form name="relocateForm" class="form-signin" role="form" novalidate ng-submit="relocate()" autocomplete="off">
+                    <fieldset>
+                        <div class="form-group" ng-class="{ 'has-error': (relocateForm.password.$dirty && relocateForm.password.$invalid) || (!relocateForm.password.$dirty && relocation.error.password) }">
+                            <label class="control-label" for="relocationPasswordInput">Provide your password to confirm this action</label>
+                            <input type="password" class="form-control" ng-model="relocation.password" id="relocationPasswordInput" name="password" ng-maxlength="512" ng-minlength="5" required autofocus autocomplete="off">
+                        </div>
+                        <input class="ng-hide" type="submit" ng-disabled="relocateForm.$invalid || busy"/>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" ng-click="relocate()" ng-disabled="relocateForm.$invalid || busy"><i class="fa fa-spinner fa-pulse" ng-show="busy"></i> Relocate</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<br/>
+<br/>
+
+<div style="margin-bottom: 15px; text-align: center" ng-show="user.admin">
+    <div class="row" ng-show="availableSizes.length > 1">
+        <div class="col-md-12">
+            <h3>Choose a Model to upgrade to</h3>
+        </div>
+    </div>
+    <br/>
+    <div class="row" ng-show="availableSizes.length > 1">
+        <div class="col-md-6 col-md-offset-3">
+            <div class="cloudron-model-list">
+                <div class="cloudron-model-item" ng-repeat="size in availableSizes">
+                    <div class="cloudron-model-item-content shadow" ng-class="{ 'selected': size.slug === currentSize.slug }" style="height: {{ 120 + $index * 30 }}px">
+                        <!-- <img src="img/box.png" style="transform: scale({{ size.price/50.0 }});"/><br/> -->
+                        <h3>{{ size.name }}</h3>
+                        <h5>${{ size.price }}/mo</h5>
+                        <button class="btn btn-success" ng-disabled="busy" ng-hide="size.slug === currentSize.slug" ng-click="showUpgradeConfirm(size)">Upgrade</button>
+                        <button class="btn btn-success" ng-show="size.slug === currentSize.slug" data-toggle="tooltip" data-placement="top" title="Your Current Model"><i class="fa fa-check"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" ng-show="availableSizes.length > 1">
+        <div class="col-md-12">
+            <p>
+                Larger Cloudrons allow to run more apps and bring better performance to your installed services.
+            </p>
+        </div>
+    </div>
+    <div class="row" ng-show="availableSizes.length <= 1">
+        <div class="col-md-12">
+            <h4>You are already using the largest available Cloudron model.</h4>
+        </div>
+    </div>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <div class="row">
+        <div class="form-group col-md-12">
+            <h3>Choose your Region, in case you want to relocate your Cloudron</h3>
+            <p>
+                The closer you are to your Cloudron, the faster the access speed will be.
+            </p>
+        </div>
+    </div>
+    <br/>
+    <div class="row">
+        <div class="form-group col-md-12">
+            <div class="region-select-map">
+                <div class="region-select" ng-click="setRegion('sfo1')" ng-class="{ 'region-selected': relocation.region.slug === 'sfo1' }" style="width: 270px; background-image: url('img/world_left.png');">
+                    <div class="region-pin region-pin-left" ng-class="{ 'region-pin-selected-left': relocation.region.slug === 'sfo1' }">
+                        <img src="img/pin.png" height="32px" width="16px"/> San Francisco
+                    </div>
+                </div>
+                <div class="region-select" ng-click="setRegion('ams3')" ng-class="{ 'region-selected': relocation.region.slug === 'ams3' }" style="width: 330px; background-image: url('img/world_right.png');">
+                    <div class="region-pin region-pin-right" ng-class="{ 'region-pin-selected-right': relocation.region.slug === 'ams3' }">
+                        <img src="img/pin.png" height="32px" width="16px"/> Amsterdam
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="form-group col-md-12">
+            <button class="btn btn-success" ng-click="showRelocationConfirm()" ng-disabled="(relocation.region.slug === currentRegionSlug) || busy">Relocate</button>
+        </div>
+    </div>
+</div>

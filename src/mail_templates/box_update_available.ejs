@@ -1,0 +1,20 @@
+<%if (format === 'text') { %>
+
+Dear Admin,
+
+A new version of Cloudron <%= fqdn %> is available!
+
+Please update at your convenience at <%= webadminUrl %>.
+
+Changelog:
+<% for (var i = 0; i < changelog.length; i++) { %>
+  * <%- changelog[i] %>
+<% } %>
+
+Thank you,
+Update Manager
+
+<% } else { %>
+
+<% } %>
+

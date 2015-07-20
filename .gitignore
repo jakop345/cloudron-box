@@ -1,0 +1,13 @@
+node_modules/
+coverage/
+docs/
+webadmin/dist/
+setup/splash/website/
+
+# vim swam files
+*.swp
+
+# supervisor
+supervisord.pid
+supervisord.log
+

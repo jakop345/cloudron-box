@@ -1,0 +1,6 @@
+/var/log/cloudron/*log {
+    missingok
+    notifempty
+    size 100k
+    nocompress
+}

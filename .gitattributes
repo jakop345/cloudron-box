@@ -1,0 +1,6 @@
+# Skip files when using git archive
+.gitattributes export-ignore
+.gitignore export-ignore
+/scripts export-ignore
+test export-ignore
+

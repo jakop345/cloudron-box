@@ -1,0 +1,64 @@
+user www-data;
+
+worker_processes  1;
+
+pid /run/nginx.pid;
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+
+    # the collectd config depends on this log format
+    log_format combined2 '$remote_addr - [$time_local] '
+        '"$request" $status $body_bytes_sent $request_time '
+        '"$http_referer" "$http_user_agent"';
+
+    access_log access.log combined2;
+
+    sendfile        on;
+
+    keepalive_timeout  65;
+
+    # HTTP server
+    server {
+        listen      80;
+
+        # collectd
+        location /nginx_status {
+            stub_status on;
+            access_log off;
+            allow 127.0.0.1;
+            deny all;
+        }
+
+        location / {
+            # redirect everything to HTTPS
+            return 301 https://$host$request_uri;
+        }
+    }
+
+    # We have to enable https for nginx to read in the vhost in http request
+    # and send a 404. This is a side-effect of using wildcard DNS
+    server {
+        listen 443 default_server;
+        ssl on;
+        ssl_certificate      cert/host.cert;
+        ssl_certificate_key  cert/host.key;
+
+        error_page 404 = @fallback;
+        location @fallback {
+            internal;
+            root <%= sourceDir %>/webadmin/dist;
+            rewrite ^/$ /nakeddomain.html break;
+        }
+
+        return 404;
+    }
+
+    include applications/*.conf;
+}
+

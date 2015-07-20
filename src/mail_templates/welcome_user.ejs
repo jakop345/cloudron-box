@@ -1,0 +1,24 @@
+<%if (format === 'text') { %>
+
+Dear <%= user.username %>,
+
+I am excited to welcome you to my Cloudron <%= fqdn %>!
+
+The Cloudron is our own Private Cloud. You can read more about it
+at https://www.cloudron.io.
+
+           You username is '<%= user.username %>'
+
+To get started, create your account by visiting the following page:
+<%= setupLink %>
+
+When you visit the above page, you will be prompted to enter a new password.
+After you have submitted the form, you can login using the new password.
+
+Thank you,
+<%= invitor.email %>
+
+<% } else { %>
+
+<% } %>
+

@@ -1,0 +1,115 @@
+# http://nginx.org/en/docs/http/websocket.html
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    '' close;
+}
+
+server {
+    listen       443;
+    server_name  <%= vhost %>;
+
+    ssl                  on;
+    # paths are relative to prefix and not to this file
+    ssl_certificate      cert/host.cert;
+    ssl_certificate_key  cert/host.key;
+    ssl_session_timeout  5m;
+    ssl_session_cache shared:SSL:50m;
+
+    # https://bettercrypto.org/static/applied-crypto-hardening.pdf
+    # https://mozilla.github.io/server-side-tls/ssl-config-generator/
+    # https://cipherli.st/
+    ssl_prefer_server_ciphers on;
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2; # don't use SSLv3 ref: POODLE
+    ssl_ciphers 'AES128+EECDH:AES128+EDH';
+    add_header Strict-Transport-Security "max-age=15768000; includeSubDomains";
+
+    proxy_http_version 1.1;
+    proxy_intercept_errors on;
+    proxy_read_timeout       3500;
+    proxy_connect_timeout    3250;
+
+    proxy_set_header   Host               $host;
+    proxy_set_header   X-Forwarded-For    $remote_addr;
+    proxy_set_header   X-Forwarded-Host   $host;
+    proxy_set_header   X-Forwarded-Proto  https;
+
+    # upgrade is a hop-by-hop header (http://nginx.org/en/docs/http/websocket.html)
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection $connection_upgrade;
+
+    error_page 500 502 503 504 =200 @appstatus;
+    location @appstatus {
+        internal;
+        root <%= sourceDir %>/webadmin/dist;
+        rewrite ^/$ /appstatus.html break;
+    }
+
+    location / {
+        # increase the proxy buffer sizes to not run into buffer issues (http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_buffers)
+        proxy_buffer_size       128k;
+        proxy_buffers           4 256k;
+        proxy_busy_buffers_size 256k;
+
+        # Disable check to allow unlimited body sizes
+        client_max_body_size 0;
+
+<% if ( endpoint === 'admin' ) { %>
+        location /api/ {
+            proxy_pass   http://127.0.0.1:3000;
+            client_max_body_size 1m;
+        }
+
+        # graphite paths
+        location ~ ^/(graphite|content|metrics|dashboard|render|browser|composer)/ {
+            proxy_pass   http://127.0.0.1:8000;
+            client_max_body_size 1m;
+        }
+
+        location / {
+            root   <%= sourceDir %>/webadmin/dist;
+            index  index.html index.htm;
+        }
+
+<% } else if ( endpoint === 'oauthproxy' ) { %>
+        proxy_pass http://127.0.0.1:4000;
+        proxy_set_header   X-Cloudron-Proxy-Port   <%= port %>;
+<% } else if ( endpoint === 'app' ) { %>
+        proxy_pass http://127.0.0.1:<%= port %>;
+<% } else if ( endpoint === 'splash' ) { %>
+        root   <%= sourceDir %>;
+
+        error_page 503 /update.html;
+
+        location /update.html {
+            add_header Cache-Control no-cache;
+        }
+
+        location /theme.css {
+            add_header Cache-Control no-cache;
+        }
+
+        location /3rdparty/ {
+            add_header Cache-Control no-cache;
+        }
+
+        location /js/ {
+            add_header Cache-Control no-cache;
+        }
+
+        location /progress.json {
+            add_header Cache-Control no-cache;
+        }
+
+        location /api/v1/cloudron/progress {
+            add_header Cache-Control no-cache;
+            default_type application/json;
+            alias <%= sourceDir %>/progress.json;
+        }
+
+        location / {
+            return 503;
+        }
+<% } %>
+    }
+}
+

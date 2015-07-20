@@ -1,0 +1,30 @@
+<html>
+<head>
+    <title> Cloudron OAuth Callback </title>
+
+    <script>
+
+    'use strict';
+
+    var search = decodeURIComponent(window.location.search).slice(1).split('&').map(function (item) { return item.split('='); }).reduce(function (o, k) { o[k[0]] = k[1]; return o; }, {});
+
+    if (!search.token) {
+        console.error('No token found');
+    } else if (!search.state || !window.localStorage.oauth2State || search.state !== window.localStorage.oauth2State ) {
+        console.error('OAuth2 state error');
+    } else {
+        // the actual app picks up the access token from localStorage
+        localStorage.token = search.token;
+
+        // clear oauth2 state
+        delete window.localStorage.oauth2State;
+
+        window.location.href = '/';
+    }
+
+    </script>
+
+</head>
+<body>
+</body>
+</html>

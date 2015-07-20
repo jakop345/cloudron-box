@@ -1,0 +1,19 @@
+<%if (format === 'text') { %>
+
+Dear Admin,
+
+The application titled '<%= title %>' that you installed at <%= appFqdn %>
+is not responding.
+
+This is most likely a problem in the application. Please report this issue to
+support@cloudron.io (by forwarding this email).
+
+You are receiving this email because you are an Admin of the Cloudron at <%= fqdn %>.
+
+Thank you,
+Application WatchDog
+
+<% } else { %>
+
+<% } %>
+

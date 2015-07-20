@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html ng-app="Application" ng-controller="MainController">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />
+
+    <title> Cloudron </title>
+
+    <link href="/img/favicon.png" rel="icon" type="image/png">
+
+    <!-- Custom Fonts -->
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="//fonts.googleapis.com/css?family=Roboto:300" rel="stylesheet" type="text/css">
+
+    <!-- jQuery-->
+    <script src="3rdparty/js/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="3rdparty/js/bootstrap.min.js"></script>
+
+    <!-- Slick carousel -->
+    <link rel="stylesheet" type="text/css" href="/3rdparty/slick.css"/>
+    <script type="text/javascript" src="3rdparty/js/slick.js"></script>
+
+    <!-- Additional stylesheets -->
+    <link rel="stylesheet" type="text/css" href="/3rdparty/angular-ui-notification.min.css"/>
+
+    <!-- Angularjs scripts -->
+    <script src="3rdparty/js/angular.min.js"></script>
+    <script src="3rdparty/js/angular-loader.min.js"></script>
+    <script src="3rdparty/js/angular-route.min.js"></script>
+    <script src="3rdparty/js/angular-animate.min.js"></script>
+    <script src="3rdparty/js/angular-md5.min.js"></script>
+    <script src="3rdparty/js/angular-sanitize.min.js"></script>
+    <script src="3rdparty/js/angular-slick.min.js"></script>
+    <script src="3rdparty/js/angular-ui-notification.min.js"></script>
+    <script src="3rdparty/js/autofill-event.js"></script>
+
+    <script src="3rdparty/js/Chart.js"></script>
+    <script src="3rdparty/js/ansi_up.js"></script>
+
+    <!-- Showdown (markdown converter) -->
+    <script src="3rdparty/js/showdown-1.1.0.min.js"></script>
+
+    <!-- Main Application -->
+    <script src="js/index.js"></script>
+
+    <!-- Theme CSS -->
+    <link href="theme.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+    <!-- Modal update -->
+    <div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="updateModalLabel">Really update the Cloudron?</h4>
+                </div>
+                <div class="modal-body">
+                    <div ng-hide="installedApps | readyToUpdate" class="text-danger">
+                        <b>
+                            The below apps are blocking the update, because they are in a wrong state:
+                            <ul>
+                                <li ng-repeat="app in installedApps | inProgressApps">{{app.location}}</li>
+                            </ul>
+                            Please wait for the apps actions to have finished.
+                        </b>
+                        <br/>
+                        <br/>
+                    </div>
+                    <p>This update will install version <b>{{config.update.box.version}}</b> on your Cloudron.</p>
+                    <p>Recent Changes:</p>
+                    <ul>
+                        <li ng-repeat="change in config.update.box.changelog">{{change}}</li>
+                    </ul>
+                    <br/>
+                    <fieldset>
+                        <form name="update_form" role="form" ng-submit="doUpdate()" autocomplete="off">
+                            <div class="form-group" ng-class="{ 'has-error': update_form.password.$dirty && update_form.password.$invalid }">
+                                <label class="control-label" for="inputUpdatePassword">Give your password to verify that you are performing that action</label>
+                                <div class="control-label" ng-show="(!update_form.password.$dirty && update.error.password) || (update_form.password.$dirty && update_form.password.$invalid)">
+                                    <small ng-show="update_form.password.$error.required && !update.error.password">A password is required</small>
+                                    <small ng-show="update_form.password.$error.minlength">The password is too short</small>
+                                    <small ng-show="update_form.password.$error.maxlength">The password is too long</small>
+                                    <small ng-show="update.error.password">Incorrect password</small>
+                                </div>
+                                <input type="password" class="form-control" ng-model="update.password" id="inputUpdatePassword" name="password" placeholder="Password" ng-maxlength="512" ng-minlength="5" required autofocus>
+                            </div>
+                            <input class="ng-hide" type="submit" ng-disabled="update_form.$invalid || update.busy"/>
+                        </form>
+                    </fieldset>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-danger" ng-click="doUpdate()" ng-disabled="update_form.$invalid || update.busy"><i class="fa fa-spinner fa-pulse" ng-show="update.busy"></i> Update</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="animateMe ng-hide" ng-show="initialized">
+
+        <!-- Navigation -->
+        <nav class="navbar navbar-default navbar-static-top shadow" role="navigation" style="margin-bottom: 0">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="index.html">{{config.cloudronName || 'Cloudron'}}</a>
+                </div>
+                <!-- /.navbar-header -->
+
+                <div class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav navbar-right">
+                        <li ng-show="config.update.box && user.admin">
+                            <a ng-href="" ng-click="showUpdateModal(update_form)" style="cursor: pointer">
+                                <span class="badge badge-success">Update available</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a ng-class="{ active: isActive('/apps')}" href="#/apps"><i class="fa fa-cloud-download fa-fw"></i> My Apps</a>
+                        </li>
+                        <li>
+                            <a ng-class="{ active: isActive('/appstore')}" href="#/appstore"><i class="fa fa-th-large fa-fw"></i> App Store</a>
+                        </li>
+                        <li ng-show="user.admin">
+                            <a ng-class="{ active: isActive('/users')}" href="#/users"><i class="fa fa-users fa-fw"></i> Users</a>
+                        </li>
+                        <li class="dropdown">
+                            <a href="" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><img ng-src="{{user.gravatar}}"/> {{user.username}} <span class="caret"></span></a>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a href="#/account"><i class="fa fa-user fa-fw"></i> Account</a></li>
+                                <li ng-show="user.admin && config.isDev"><a href="#/dns"><i class="fa fa-wrench fa-fw"></i> DNS Management</a></li>
+                                <li ng-show="user.admin"><a href="#/upgrade"><i class="fa fa-arrow-up fa-fw"></i> Upgrade</a></li>
+                                <li ng-show="user.admin"><a href="#/settings"><i class="fa fa-wrench fa-fw"></i> Settings</a></li>
+                                <li ng-show="user.admin"><a href="#/graphs"><i class="fa fa-bar-chart fa-fw"></i> Graphs</a></li>
+                                <li class="divider"></li>
+                                <li><a href="" ng-click="logout($event)"><i class="fa fa-sign-out fa-fw"></i> Logout</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                </div>
+            </div>
+        </nav>
+
+        <div class="page-wrapper">
+            <div ng-view id="ng-view"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center">
+        <span class="text-muted">Copyright &copy; Cloudron 2014-15</span>
+        <span class="text-muted"> {{config.version}}</span>
+    </footer>
+
+</body>
+</html>

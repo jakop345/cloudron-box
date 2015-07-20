@@ -1,0 +1,124 @@
+
+<!-- Modal install app -->
+<div class="modal fade" id="appInstallModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="appInstallModalLabel">
+                    <img ng-src="{{appInstall.app.iconUrl}}" onerror="this.onerror=null;this.src='img/appicon_fallback.png'" class="app-icon"/>
+                    {{ appInstall.app.manifest.title }}
+                </h3>
+            </div>
+            <div class="modal-body">
+                <div class="collapse" id="collapseInstallForm" data-toggle="false">
+                    <form class="form-signin" role="form" name="appInstallForm" ng-submit="doInstall()" autocomplete="off">
+                        <div class="has-error text-center" ng-show="appInstall.error.other" ng-bind-html="appInstall.error.other"></div>
+                        <div class="form-group" ng-class="{ 'has-error': (appInstallForm.location.$dirty && appInstallForm.location.$invalid) || (!appInstallForm.location.$dirty && appInstall.error.location) }">
+                            <label class="control-label" for="appInstallLocationInput">Location {{ appInstall.error.location }} </label>
+                            <div class="input-group form-inline">
+                                <input type="text" class="form-control" ng-model="appInstall.location" id="appInstallLocationInput" name="location" placeholder="Leave empty to use bare domain" autofocus>
+                                <div class="input-group-addon">
+                                    {{ !appInstall.location ? '' : (config.isCustomDomain ? '.' : '-') }}{{ config.fqdn }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="has-error text-center" ng-show="appInstall.error.port">{{ appInstall.error.port }}</div>
+                        <div ng-repeat="(env, info) in appInstall.portBindingsInfo">
+                            <ng-form name="portInfo_form">
+                                <div class="form-group" ng-class="{ 'has-error': (!appInstallForm.itemName{{$index}}.$dirty && appInstall.error.port) || (portInfo_form.itemName{{$index}}.$dirty && portInfo_form.itemName{{$index}}.$invalid) }">
+                                    <label class="control-label" for="inputPortInfo{{env}}"><input type="checkbox" ng-model="appInstall.portBindingsEnabled[env]"> {{ info.description }} ({{ hostPortMin }} - {{ hostPortMax }})</label>
+                                    <input type="number" class="form-control" ng-model="appInstall.portBindings[env]" ng-disabled="!appInstall.portBindingsEnabled[env]" id="inputPortInfo{{env}}" later-name="itemName{{$index}}" min="{{hostPortMin}}" max="{{hostPortMax}}" required>
+                                </div>
+                            </ng-form>
+                        </div>
+<!--
+                        <div class="form-group">
+                            <label class="control-label" for="accessRestriction">Access Restriction</label>
+                            <select class="form-control" id="accessRestriction" ng-model="appInstall.accessRestriction">
+                                <option value="">None</option>
+                                <option value="roleUser">Only for Cloudron Users</option>
+                            </select>
+                        </div>
+-->
+                        <input class="ng-hide" type="submit" ng-disabled="appInstallForm.$invalid || busy"/>
+                    </form>
+                </div>
+                <div class="collapse" id="collapseMediaLinksCarousel" data-toggle="false">
+                    <div ng-repeat="mediaLink in appInstall.mediaLinks" class="slick-item" style="background-image: url('{{mediaLink}}');" ng-show="appInstall.mediaLinks.length == 1"></div>
+                    <slick init-onload="true" current-index="0" autoplay="true" arrows="false" autoplay-speed="2000" data="appInstall.mediaLinks" ng-show="appInstall.mediaLinks.length > 1">
+                        <div ng-repeat="mediaLink in appInstall.mediaLinks" class="slick-item" style="background-image: url('{{mediaLink}}');"></div>
+                    </slick>
+                    <div class="appstore-install-description">
+                        <div ng-bind-html="appInstall.app.manifest.description | markdown2html"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" ng-show="!appInstall.installFormVisible && user.admin" ng-click="showInstallForm()">Install</button>
+                <button type="button" class="btn btn-success" ng-show="appInstall.installFormVisible && user.admin" ng-click="doInstall()" ng-disabled="appInstallForm.$invalid || appInstall.busy"><i class="fa fa-spinner fa-pulse" ng-show="appInstall.busy"></i> Install</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div>
+    <div class="row-no-margin">
+        <div class="col-md-2">
+        </div>
+        <div class="col-md-8 col-same-height">
+            <br/>
+            <h1>Available Applications</h1>
+            <br/>
+        </div>
+        <div class="col-md-2 col-same-height" style="float: right;">
+            <br/>
+            <div class="appstore-search">
+                <form ng-submit="search()">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search for..." ng-model="searchString" ng-change="search()">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="button" type="submit" ng-click="search()"><i class="fa fa-search"></i></button>
+                        </span>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-2">
+            <a href="" class="appstore-category-link" ng-click="showCategory($event);" ng-class="{'category-active': category === '' }" category="">All</a>
+            <a href="" class="appstore-category-link" ng-click="showCategory($event);" ng-class="{'category-active': category === 'blog' }" category="blog">Blog</a>
+            <a href="" class="appstore-category-link" ng-click="showCategory($event);" ng-class="{'category-active': category === 'chat' }" category="chat">Chat</a>
+            <a href="" class="appstore-category-link" ng-click="showCategory($event);" ng-class="{'category-active': category === 'sync' }" category="sync">Media Sync</a>
+            <a href="" class="appstore-category-link" ng-click="showCategory($event);" ng-class="{'category-active': category === 'git' }" category="git">Code Hosting</a>
+            <a href="" class="appstore-category-link" ng-click="showCategory($event);" ng-class="{'category-active': category === 'wiki' }" category="wiki">Wiki</a>
+        </div>
+        <div class="col-md-10" ng-show="ready && apps.length">
+            <div class="row-no-margin">
+                <div class="col-sm-1 appstore-item" ng-repeat="app in apps">
+                    <div class="appstore-item-content highlight" ng-click="showInstall(app)">
+                        <div class="appstore-item-content-icon col-same-height">
+                            <img ng-src="{{app.iconUrl}}" onerror="this.onerror=null;this.src='img/appicon_fallback.png'" class="app-icon"/>
+                        </div>
+                        <div class="appstore-item-content-description col-same-height">
+                            <h4 class="appstore-item-content-title">{{ app.manifest.title }}</h4>
+                            <div class="appstore-item-content-tagline text-muted">{{ app.manifest.tagline }}</div>
+                            <!-- <div class="appstore-item-rating"><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star-half-o"></i><i class="fa fa-star-o"></i></div> -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-10 animateMeOpacity loading-banner" ng-show="ready && !apps.length">
+            <h3 class="text-muted">No applications in this category</h3>
+        </div>
+        <div class="col-md-10 animateMeOpacity loading-banner" ng-show="!ready">
+            <h2><i class="fa fa-spinner fa-pulse"></i> Loading</h2>
+        </div>
+    </div>
+</div>
+
+<!-- Offset the footer -->
+<br/><br/>

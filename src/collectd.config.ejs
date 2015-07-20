@@ -1,0 +1,32 @@
+LoadPlugin "table"
+<Plugin table>
+  <Table "/sys/fs/cgroup/memory/docker/<%= containerId %>/memory.stat">
+    Instance "<%= appId %>-memory"
+    Separator " \\n"
+    <Result>
+      Type gauge
+      InstancesFrom 0
+      ValuesFrom 1
+    </Result>
+  </Table>
+
+  <Table "/sys/fs/cgroup/memory/docker/<%= containerId %>/memory.max_usage_in_bytes">
+    Instance "<%= appId %>-memory"
+    Separator "\\n"
+    <Result>
+      Type gauge
+      InstancePrefix "max_usage_in_bytes"
+      ValuesFrom 0
+    </Result>
+  </Table>
+
+  <Table "/sys/fs/cgroup/cpuacct/docker/<%= containerId %>/cpuacct.stat">
+    Instance "<%= appId %>-cpu"
+    Separator " \\n"
+    <Result>
+      Type gauge
+      InstancesFrom 0
+      ValuesFrom 1
+    </Result>
+  </Table>
+</Plugin>

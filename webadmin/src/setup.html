@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />
+
+    <title> Cloudron Setup </title>
+
+    <!-- Custom Fonts -->
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="//fonts.googleapis.com/css?family=Roboto:300" rel="stylesheet" type="text/css">
+
+    <!-- jQuery-->
+    <script src="3rdparty/js/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="3rdparty/js/bootstrap.min.js"></script>
+
+    <!-- Angularjs scripts -->
+    <script src="3rdparty/js/angular.min.js"></script>
+    <script src="3rdparty/js/angular-loader.min.js"></script>
+    <script src="3rdparty/js/angular-route.min.js"></script>
+    <script src="3rdparty/js/angular-animate.min.js"></script>
+    <script src="3rdparty/js/angular-md5.min.js"></script>
+    <script src="3rdparty/js/angular-ui-notification.min.js"></script>
+    <script src="3rdparty/js/autofill-event.js"></script>
+
+    <!-- Setup Application -->
+    <script src="js/setup.js"></script>
+
+    <!-- Theme CSS -->
+    <link href="theme.css" rel="stylesheet">
+
+</head>
+
+<body class="setup" ng-app="Application" ng-controller="SetupController">
+
+    <center ng-show="!setupToken">
+        <h1> <i class="fa fa-frown-o fa-fw text-danger"></i> No setup token provided. </h1>
+        Please use the setup link for this cloudron.
+    </center>
+
+    <div class="main-container">
+        <div class="row" ng-show="initialized && !busy && setupToken">
+            <div class="col-md-8 col-md-offset-2">
+                <div class="card" style="max-width: none; padding: 20px;">
+                    <form role="form" name="setup_form" novalidate>
+                        <div ng-view id="ng-view"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

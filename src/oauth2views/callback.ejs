@@ -1,0 +1,47 @@
+<% include header %>
+
+<script>
+
+'use strict';
+
+var code = null;
+var redirectURI = null;
+var accessToken = null;
+var tokenType = null;
+var state = null;
+
+var args = window.location.search.slice(1).split('&');
+args.forEach(function (arg) {
+    var tmp = arg.split('=');
+    if (tmp[0] === 'redirectURI') {
+        redirectURI = window.decodeURIComponent(tmp[1]);
+    } else if (tmp[0] === 'code') {
+        code = window.decodeURIComponent(tmp[1]);
+    } else if (tmp[0] === 'state') {
+        state = window.decodeURIComponent(tmp[1]);
+    }
+});
+
+args = window.location.hash.slice(1).split('&');
+args.forEach(function (arg) {
+    var tmp = arg.split('=');
+    if (tmp[0] === 'access_token') {
+        accessToken = window.decodeURIComponent(tmp[1]);
+    } else if (tmp[0] === 'token_type') {
+        tokenType = window.decodeURIComponent(tmp[1]);
+    } else if (tmp[0] === 'state') {
+        state = window.decodeURIComponent(tmp[1]);
+    }
+});
+
+if (code && redirectURI) {
+    window.location.href = redirectURI + '?code=' + code + (state ? '&state=' + state : '');
+} else if (redirectURI && accessToken) {
+    window.location.href = redirectURI + '?token=' + accessToken + (state ? '&state=' + state : '');
+} else {
+    window.location.href = '/api/v1/session/login';
+}
+
+</script>
+
+<% include footer %>;

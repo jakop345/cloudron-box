@@ -1,0 +1,243 @@
+<div class="row animateMeOpacity ng-hide" ng-show="installedApps.length === 0">
+    <div class="col-lg-6 col-lg-offset-3" style="text-align: center;">
+        <br/><br/><br/><br/>
+        <h1><i class="fa fa-cloud-download fa-fw"></i> Your Cloudron does not have any apps installed yet!</h1>
+        <br/></br>
+        <h3>How about installing some? Checkout the <a href="#/appstore">App Store</a></h3>
+    </div>
+</div>
+
+<!-- Modal configure app -->
+<div class="modal fade" id="appConfigureModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Configure {{ appConfigure.app.manifest.title }}</h4>
+            </div>
+            <div class="modal-body">
+                <fieldset>
+                    <form class="form-signin" role="form" name="appConfigureForm" ng-submit="doConfigure()" autocomplete="off">
+                        <div class="has-error text-center" ng-show="appConfigure.error.other">{{ appConfigure.error.other }}</div>
+                        <div class="form-group" ng-class="{ 'has-error': (appConfigureForm.location.$dirty && appConfigureForm.location.$invalid) || (!appConfigureForm.location.$dirty && appConfigure.error.location)  }">
+                            <label class="control-label" for="appConfigureLocationInput">Location {{ appConfigure.error.location }} </label>
+                            <div class="input-group form-inline">
+                                <input type="text" class="form-control" ng-model="appConfigure.location" id="appConfigureLocationInput" name="location" placeholder="Leave empty to use bare domain" autofocus>
+                                <div class="input-group-addon">
+                                    {{ !appConfigure.location ? '' : (config.isCustomDomain ? '.' : '-') }}{{ config.fqdn }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="has-error text-center" ng-show="appConfigure.error.port">{{ appConfigure.error.port }}</div>
+                        <div ng-repeat="(env, info) in appConfigure.portBindingsInfo">
+                            <ng-form name="portInfo_form">
+                                <div class="form-group" ng-class="{ 'has-error': (!appConfigureForm.itemName{{$index}}.$dirty && appConfigure.error.port) || (portInfo_form.itemName{{$index}}.$dirty && portInfo_form.itemName{{$index}}.$invalid) }">
+                                    <label class="control-label" for="appConfigurePortInput{{env}}"><input type="checkbox" ng-model="appConfigure.portBindingsEnabled[env]"> {{ info.description }} ({{ HOST_PORT_MIN }} - {{ HOST_PORT_MAX }})</label>
+                                    <input type="number" class="form-control" ng-model="appConfigure.portBindings[env]" ng-disabled="!appConfigure.portBindingsEnabled[env]" id="appConfigurePortInput{{env}}" later-name="itemName{{$index}}" min="{{HOST_PORT_MIN}}" max="{{HOST_PORT_MAX}}" required>
+                                </div>
+                            </ng-form>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label" for="accessRestriction">Website Visibility</label>
+                            <select class="form-control" id="accessRestriction" ng-model="appConfigure.accessRestriction">
+                                <option value="">Visible to all</option>
+                                <option value="roleUser">Visible only to Cloudron users</option>
+                            </select>
+                        </div>
+                        <br/>
+                        <br/>
+                        <div class="form-group" ng-class="{ 'has-error': (appConfigureForm.password.$dirty && appConfigureForm.password.$invalid) || (!appConfigureForm.password.$dirty && appConfigure.error.password) }">
+                            <label class="control-label" for="appConfigurePasswordInput">Provide your password to confirm this action</label>
+                            <input type="password" class="form-control" ng-model="appConfigure.password" id="appConfigurePasswordInput" name="password" ng-maxlength="512" ng-minlength="5" required>
+                        </div>
+                        <input class="ng-hide" type="submit" ng-disabled="appConfigureForm.$invalid || busy"/>
+                    </form>
+                </fieldset>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" style="float: left;" ng-click="startApp(appConfigure.app)" ng-show="appConfigure.app.runState === 'stopped' && !appConfigure.runStateBusy && !(appConfigure.app | installationActive)"><i class="fa fa-play"></i> Start</button>
+                <button type="button" class="btn btn-default" style="float: left;" ng-show="appConfigure.app.runState !== 'stopped' && appConfigure.app.runState !== 'running' || appConfigure.runStateBusy && !(appConfigure.app | installationActive)" disabled ><i class="fa fa-refresh fa-spin"></i></button>
+                <button type="button" class="btn btn-default" style="float: left;" ng-click="stopApp(appConfigure.app)" ng-show="appConfigure.app.runState === 'running' && !appConfigure.runStateBusy && !(appConfigure.app | installationActive)"><i class="fa fa-pause"></i> Stop</button>
+
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" ng-click="doConfigure()" ng-disabled="appConfigureForm.$invalid || appConfigure.busy"><i class="fa fa-spinner fa-pulse" ng-show="appConfigure.busy"></i> Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal restore app -->
+<div class="modal fade" id="appRestoreModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Really Restore {{ appRestore.app.location }}</h4>
+            </div>
+            <div class="modal-body">
+                <p>Restoring the app will lose all content generated since last backup of this app!</p>
+                <fieldset>
+                    <form class="form-signin" role="form" name="appRestoreForm" ng-submit="doRestore()" autocomplete="off">
+                        <div class="form-group" ng-class="{ 'has-error': (!appRestoreForm.password.$dirty && appRestore.error.password) || (appRestoreForm.password.$dirty && appRestoreForm.password.$invalid) }">
+                            <label class="control-label" for="appRestorePasswordInput">Provide your password to confirm this action</label>
+                            <input type="password" class="form-control" ng-model="appRestore.password" id="appRestorePasswordInput" name="password" ng-maxlength="512" ng-minlength="5" required autofocus>
+                        </div>
+
+                        <input class="ng-hide" type="submit" ng-disabled="appRestoreForm.$invalid || busy"/>
+                    </form>
+                </fieldset>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" ng-click="doRestore()" ng-disabled="appRestoreForm.$invalid || appRestore.busy"><i class="fa fa-spinner fa-pulse" ng-show="appRestore.busy"></i> Restore</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal uninstall app -->
+<div class="modal fade" id="appUninstallModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Really uninstall {{ appUninstall.app.location }}</h4>
+            </div>
+            <div class="modal-body">
+                <p>Deleting the app will also remove all content generated within this app!</p>
+                <fieldset>
+                    <form class="form-signin" role="form" name="appUninstallForm" ng-submit="doUninstall()" autocomplete="off">
+                        <div class="form-group" ng-class="{ 'has-error': (!appUninstallForm.password.$dirty && appUninstall.error.password) || (appUninstallForm.password.$dirty && appUninstallForm.password.$invalid) }">
+                            <label class="control-label" for="appUninstallPasswordInput">Provide your password to confirm this action</label>
+                            <input type="password" class="form-control" ng-model="appUninstall.password" id="appUninstallPasswordInput" name="password" ng-maxlength="512" ng-minlength="5" required autofocus>
+                        </div>
+
+                        <input class="ng-hide" type="submit" ng-disabled="appUninstallForm.$invalid || busy"/>
+                    </form>
+                </fieldset>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" ng-click="doUninstall()" ng-disabled="appUninstallForm.$invalid || appUninstall.busy"><i class="fa fa-spinner fa-pulse" ng-show="appUninstall.busy"></i> Uninstall</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal update app -->
+<div class="modal fade" id="appUpdateModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Update {{ appUpdate.app.location }}</h4>
+            </div>
+            <div class="modal-body">
+                <fieldset>
+                    <form class="form-signin" role="form" name="appUpdateForm" ng-submit="doUpdate(appUpdateForm)" autocomplete="off">
+                        <div ng-repeat="(env, info) in appUpdate.portBindingsInfo" ng-class="{ 'newPort': info.isNew }">
+                            <ng-form name="portInfo_form">
+                                <div class="form-group" ng-class="{ 'has-error': portInfo_form.itemName{{$index}}.$dirty && portInfo_form.itemName{{$index}}.$invalid }">
+                                    <label class="control-label" for="inputPortInfo{{env}}"><input type="checkbox" ng-model="appUpdate.portBindingsEnabled[env]"> <span ng-show="info.isNew">New - </span> {{ info.description }} ({{ HOST_PORT_MIN }} - {{ HOST_PORT_MAX }})</label>
+                                    <input type="number" class="form-control" ng-model="appUpdate.portBindings[env]" ng-disabled="!appUpdate.portBindingsEnabled[env]" id="inputPortInfo{{env}}" later-name="itemName{{$index}}" min="{{HOST_PORT_MIN}}" max="{{HOST_PORT_MAX}}" required>
+                                </div>
+                            </ng-form>
+                        </div>
+                        <div ng-repeat="(env, port) in appUpdate.obsoletePortBindings" class="obsoletePort">
+                            <ng-form name="obsoletePortInfo_form">
+                                <div class="form-group">
+                                    Obsolete -
+                                    <label class="control-label">{{ env }}</label>
+                                    <input type="number" class="form-control" ng-model="port" disabled>
+                                </div>
+                            </ng-form>
+                        </div>
+                        <div class="form-group" ng-class="{ 'has-error': (!appUpdateForm.password.$dirty && appUpdate.error.password) || (appUpdateForm.password.$dirty && appUpdateForm.password.$invalid) }">
+                            <label class="control-label" for="inputUpdatePassword">Provide your password to confirm this action</label>
+                            <input type="password" class="form-control" ng-model="appUpdate.password" id="inputUpdatePassword" name="password" ng-maxlength="512" ng-minlength="5" required autofocus>
+                        </div>
+                        <input class="ng-hide" type="submit" ng-disabled="appUpdateForm.$invalid || busy"/>
+                    </form>
+                </fieldset>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" ng-click="doUpdate(appUpdateForm)" ng-disabled="appUpdateForm.$invalid || appUpdate.busy"><i class="fa fa-spinner fa-pulse" ng-show="appUpdate.busy"></i> Update</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function imageErrorHandler(elem) {
+        'use strict';
+
+        var appstoreIconUrl = elem.getAttribute('appstore-icon');
+        var fallbackIconUrl = elem.getAttribute('fallback-icon');
+
+        if (elem.src === appstoreIconUrl) {
+            elem.src = fallbackIconUrl;
+            elem.onerror = null;    // avoid retry after default icon cannot be loaded
+        } else {
+            elem.src = appstoreIconUrl;
+        }
+    }
+</script>
+
+<div class="content">
+    <div class="row animateMeOpacity ng-hide" ng-show="installedApps.length > 0">
+        <div class="col-lg-12">
+            <h1>Installed Applications</h1>
+        </div>
+    </div>
+
+    <div class="row animateMeOpacity ng-hide" ng-show="installedApps.length > 0">
+        <div class="col-sm-1 grid-item" ng-repeat="app in installedApps">
+            <div style="background-color: white;" class="highlight grid-item-content">
+                <a ng-href="{{app | applicationLink}}" target="_blank">
+                    <div class="grid-item-top">
+                        <div class="row">
+                            <div class="col-xs-12 text-center" style="padding-left: 5px; padding-right: 5px;">
+                                <img ng-src="{{app.iconUrl}}" fallback-icon="img/appicon_fallback.png" appstore-icon="{{ app.iconUrlStore }}" onerror="imageErrorHandler(this)" class="app-icon"/>
+                            </div>
+                        </div>
+                        <br/>
+                        <div class="row">
+                            <div class="col-xs-12 text-left">
+                                <div style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden">{{ app.location || app.fqdn }}</div>
+                                <div class="text-muted" style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden">
+                                    {{ app | installationStateLabel }}
+                                </div>
+                                <div ng-show="app | installationActive">
+                                    <div class="progress progress-striped active">
+                                        <div class="progress-bar progress-bar-success" role="progressbar" style="width: {{ app.progress }}%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                <div class="grid-item-bottom" ng-show="user.admin">
+                    <div class="row">
+                        <div class="col-xs-4 text-left">
+                            <a href="" ng-click="showRestore(app)" ng-show="(app | installError) === true">
+                                <i class="fa fa-undo scale"></i>
+                            </a>
+
+                            <a href="" ng-click="showConfigure(app)" ng-show="(app | installSuccess) == true">
+                                <i class="fa fa-wrench scale"></i>
+                            </a>
+                        </div>
+                        <div class="col-xs-4 text-center">
+                            <!-- we check the version here because the box updater does not know when an app gets updated -->
+                            <a href="" ng-click="showUpdate(app)" class="ng-hide animateMe" ng-show="config.update.apps[app.id].manifest.version && config.update.apps[app.id].manifest.version !== app.manifest.version && (app | installSuccess)">
+                                <i class="fa fa-arrow-up text-success scale"></i>
+                            </a>
+                        </div>
+                        <div class="col-xs-4 text-right">
+                            <a href="" ng-click="showUninstall(app)">
+                                <i class="fa fa-remove scale"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
