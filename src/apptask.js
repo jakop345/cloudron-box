@@ -739,7 +739,7 @@ function update(app, callback) {
     debugApp(app, 'Updating to %s', safe.query(app, 'manifest.version'));
 
     // app does not want these addons anymore
-    var unusedAddons = _.difference(Object.keys(app.oldConfig.manifest.addons), Object.keys(app.manifest.addons));
+    var unusedAddons = _.omit(app.oldConfig.manifest.addons, Object.keys(app.manifest.addons));
 
     async.series([
         updateApp.bind(null, app, { installationProgress: '0, Verify manifest' }),
