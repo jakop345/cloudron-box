@@ -606,7 +606,10 @@ function backup(app, callback) {
 function restore(app, callback) {
     // we don't have a backup, same as re-install. this allows us to install from install failures (update failures always
     // have a backupId)
-    if (!app.lastBackupId) return install(app, callback);
+    if (!app.lastBackupId) {
+        debugApp(app, 'No lastBackupId. reinstalling');
+        return install(app, callback);
+    }
 
     async.series([
         updateApp.bind(null, app, { installationProgress: '10, Cleaning up old install' }),

@@ -124,6 +124,8 @@ function setupAddons(app, addons, callback) {
 
     if (!addons) return callback(null);
 
+    debugApp(app, 'setupAddons: Settings up %j', Object.keys(addons));
+
     async.eachSeries(Object.keys(addons), function iterator(addon, iteratorCallback) {
         if (!(addon in KNOWN_ADDONS)) return iteratorCallback(new Error('No such addon:' + addon));
 
@@ -139,6 +141,8 @@ function teardownAddons(app, addons, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     if (!addons) return callback(null);
+
+    debugApp(app, 'teardownAddons: Tearing down %j', Object.keys(addons));
 
     async.eachSeries(Object.keys(addons), function iterator(addon, iteratorCallback) {
         if (!(addon in KNOWN_ADDONS)) return iteratorCallback(new Error('No such addon:' + addon));
@@ -158,6 +162,8 @@ function backupAddons(app, addons, callback) {
 
     if (!addons) return callback(null);
 
+    debugApp(app, 'backupAddons: Backing up %j', Object.keys(addons));
+
     async.eachSeries(Object.keys(addons), function iterator (addon, iteratorCallback) {
         if (!(addon in KNOWN_ADDONS)) return iteratorCallback(new Error('No such addon:' + addon));
 
@@ -173,6 +179,8 @@ function restoreAddons(app, addons, callback) {
     debugApp(app, 'restoreAddons');
 
     if (!addons) return callback(null);
+
+    debugApp(app, 'restoreAddons: restoring %j', Object.keys(addons));
 
     async.eachSeries(Object.keys(addons), function iterator (addon, iteratorCallback) {
         if (!(addon in KNOWN_ADDONS)) return iteratorCallback(new Error('No such addon:' + addon));
