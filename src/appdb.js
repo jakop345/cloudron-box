@@ -25,15 +25,15 @@ exports = module.exports = {
     getAppStoreIds: getAppStoreIds,
 
     // installation codes (keep in sync in UI)
-    ISTATE_PENDING_INSTALL: 'pending_install',
-    ISTATE_PENDING_CONFIGURE: 'pending_configure',
-    ISTATE_PENDING_UNINSTALL: 'pending_uninstall',
-    ISTATE_PENDING_RESTORE: 'pending_restore',
-    ISTATE_PENDING_UPDATE: 'pending_update',
-    ISTATE_PENDING_FORCE_UPDATE: 'pending_force_update',
-    ISTATE_PENDING_BACKUP: 'pending_backup',
-    ISTATE_ERROR: 'error',
-    ISTATE_INSTALLED: 'installed',
+    ISTATE_PENDING_INSTALL: 'pending_install', // installs and fresh reinstalls
+    ISTATE_PENDING_CONFIGURE: 'pending_configure', // config (location, port) changes and on infra update
+    ISTATE_PENDING_UNINSTALL: 'pending_uninstall', // uninstallation
+    ISTATE_PENDING_RESTORE: 'pending_restore', // restore to previous backup or on upgrade
+    ISTATE_PENDING_UPDATE: 'pending_update', // update from installed state preserving data
+    ISTATE_PENDING_FORCE_UPDATE: 'pending_force_update', // update from any state preserving data
+    ISTATE_PENDING_BACKUP: 'pending_backup', // backup the app
+    ISTATE_ERROR: 'error', // error executing last pending_* command
+    ISTATE_INSTALLED: 'installed', // app is installed
 
     // run codes (keep in sync in UI)
     RSTATE_RUNNING: 'running',
