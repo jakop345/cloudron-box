@@ -742,7 +742,8 @@ function configure(app, callback) {
 function update(app, callback) {
     debugApp(app, 'Updating to %s', safe.query(app, 'manifest.version'));
 
-    var extraAddons = _.difference(Object.keys(app.oldConfig.manifest.addons), Object.keys(app.manifest.addons));
+    // app does not want these addons anymore
+    var unusedAddons = _.difference(Object.keys(app.oldConfig.manifest.addons), Object.keys(app.manifest.addons));
 
     async.series([
         updateApp.bind(null, app, { installationProgress: '0, Verify manifest' }),
@@ -756,14 +757,13 @@ function update(app, callback) {
             });
         },
 
-        updateApp.bind(null, app, { installationProgress: '20, Stopping app' }),
+        updateApp.bind(null, app, { installationProgress: '10, Cleaning up old install' }),
+        removeCollectdProfile.bind(null, app),
         stopApp.bind(null, app),
-
-        updateApp.bind(null, app, { installationProgress: '25, Deleting container' }),
         deleteContainer.bind(null, app),
-
-        updateApp.bind(null, app, { installationProgress: '30, Deleting image' }),
-        deleteImage.bind(null, app, app.oldConfig.manifest),
+        addons.teardownAddons.bind(null, app, unusedAddons),
+        deleteImage.bind(null, app, app.manifest), // delete image even if did not change (see df158b111f)
+        removeIcon.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '35, Downloading icon' }),
         downloadIcon.bind(null, app),
@@ -772,7 +772,6 @@ function update(app, callback) {
         downloadImage.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '70, Updating addons' }),
-        addons.teardownAddons.bind(null, app, extraAddons),
         addons.setupAddons.bind(null, app, app.manifest.addons),
 
         updateApp.bind(null, app, { installationProgress: '80, Creating container' }),
