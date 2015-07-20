@@ -73,7 +73,8 @@
                 <h4 class="modal-title">Really Restore {{ appRestore.app.location }}</h4>
             </div>
             <div class="modal-body">
-                <p>Restoring the app will lose all content generated since last backup of this app!</p>
+                <p ng-show="appRestore.app.lastBackupId !== null">Restoring the app will lose all content generated since last backup of this app!</p>
+                <p ng-show="appRestore.app.lastBackupId === null">This app was never backed up. Restoring the app will lose all content!</p>
                 <fieldset>
                     <form class="form-signin" role="form" name="appRestoreForm" ng-submit="doRestore()" autocomplete="off">
                         <div class="form-group" ng-class="{ 'has-error': (!appRestoreForm.password.$dirty && appRestore.error.password) || (appRestoreForm.password.$dirty && appRestoreForm.password.$invalid) }">
