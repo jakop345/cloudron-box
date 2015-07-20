@@ -525,14 +525,25 @@ function install(app, callback) {
     async.series([
         verifyManifest.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '0, Configure nginx' }),
+        // teardown for re-installs
+        updateApp.bind(null, app, { installationProgress: '10, Cleaning up old install' }),
+        removeCollectdProfile.bind(null, app),
+        stopApp.bind(null, app),
+        deleteContainer.bind(null, app),
+        addons.teardownAddons.bind(null, app, app.manifest.addons),
+        deleteVolume.bind(null, app),
+        unregisterSubdomain.bind(null, app),
+        removeOAuthProxyCredentials.bind(null, app),
+        removeIcon.bind(null, app),
+        unconfigureNginx.bind(null, app),
+
+        updateApp.bind(null, app, { installationProgress: '15, Configure nginx' }),
         configureNginx.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '10, Downloading icon' }),
+        updateApp.bind(null, app, { installationProgress: '20, Downloading icon' }),
         downloadIcon.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '20, Creating OAuth proxy credentials' }),
-        removeOAuthProxyCredentials.bind(null, app),
+        updateApp.bind(null, app, { installationProgress: '25, Creating OAuth proxy credentials' }),
         allocateOAuthProxyCredentials.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '30, Registering subdomain' }),
@@ -542,15 +553,12 @@ function install(app, callback) {
         downloadImage.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '50, Creating volume' }),
-        deleteVolume.bind(null, app),
         createVolume.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '60, Setting up addons' }),
-        addons.teardownAddons.bind(null, app, app.manifest.addons),
         addons.setupAddons.bind(null, app, app.manifest.addons),
 
         updateApp.bind(null, app, { installationProgress: '70, Creating container' }),
-        deleteContainer.bind(null, app),
         createContainer.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '80, Setting up collectd profile' }),
