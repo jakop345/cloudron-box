@@ -604,7 +604,8 @@ function backup(app, callback) {
 
 // restore is also called for upgrades and infra updates. note that in those cases it is possible there is no backup
 function restore(app, callback) {
-    // we don't have a backup, same as re-install
+    // we don't have a backup, same as re-install. this allows us to install from install failures (update failures always
+    // have a backupId)
     if (!app.lastBackupId) return install(app, callback);
 
     async.series([
