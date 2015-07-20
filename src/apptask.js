@@ -753,7 +753,7 @@ function update(app, callback) {
         deleteContainer.bind(null, app),
         addons.teardownAddons.bind(null, app, unusedAddons),
         deleteImage.bind(null, app, app.manifest), // delete image even if did not change (see df158b111f)
-        removeIcon.bind(null, app),
+        // removeIcon.bind(null, app), // do not remove icon, otherwise the UI breaks for a short time...
 
         function (next) {
             if (app.installationState === appdb.ISTATE_PENDING_FORCE_UPDATE) return next(null);
