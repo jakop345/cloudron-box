@@ -602,31 +602,28 @@ function backup(app, callback) {
     });
 }
 
-// restore is always called with a previous backup. restore is also called for upgrades and infra updates
+// restore is also called for upgrades and infra updates. note that in those cases it is possible there is no backup
 function restore(app, callback) {
-    assert(app.lastBackupId);
+    // we don't have a backup, same as re-install
+    if (!app.lastBackupId) return install(app, callback);
 
     async.series([
-        updateApp.bind(null, app, { installationProgress: '0, Stopping app and deleting container' }),
+        updateApp.bind(null, app, { installationProgress: '10, Cleaning up old install' }),
+        removeCollectdProfile.bind(null, app),
         stopApp.bind(null, app),
         deleteContainer.bind(null, app),
-
-        updateApp.bind(null, app, { installationProgress: '5, Unregistering subdomain' }),
-        unregisterSubdomain.bind(null, app),
-
-        updateApp.bind(null, app, { installationProgress: '10, Teardown addons' }),
-        addons.teardownAddons.bind(null, app, app.oldConfig ? app.oldConfig.manifest.addons : null), // backward compat
-
-        updateApp.bind(null, app, { installationProgress: '20, Deleting volume' }),
+         // oldConfig can be null during upgrades
+        addons.teardownAddons.bind(null, app, app.oldConfig ? app.oldConfig.manifest.addons : null),
         deleteVolume.bind(null, app),
+        deleteImage.bind(null, app, app.manifest),
+        removeOAuthProxyCredentials.bind(null, app),
+        removeIcon.bind(null, app),
+        unconfigureNginx.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '30, Deleting image' }),
-        deleteImage.bind(null, app, app.oldConfig ? app.oldConfig.manifest : null),
-
-        updateApp.bind(null, app, { installationProgress: '40, Configuring Nginx' }),
+        updateApp.bind(null, app, { installationProgress: '30, Configuring Nginx' }),
         configureNginx.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '45, Downloading icon' }),
+        updateApp.bind(null, app, { installationProgress: '40, Downloading icon' }),
         downloadIcon.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '50, Create OAuth proxy credentials' }),
@@ -639,14 +636,12 @@ function restore(app, callback) {
         downloadImage.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '65, Creating volume' }),
-        deleteVolume.bind(null, app),
         createVolume.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '70, Download backup and restore addons' }),
         apps.restoreApp.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '75, Creating container' }),
-        deleteContainer.bind(null, app),
         createContainer.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '80, Setting up collectd profile' }),
