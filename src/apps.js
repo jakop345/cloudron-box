@@ -646,6 +646,9 @@ function autoupdateApps(updateInfo, callback) { // updateInfo is { appId -> { ma
 
     function canAutoupdateApp(app, newManifest) {
         // TODO: maybe check the description as well?
+        if (!newManifest.tcpPorts && !app.portBindings) return true;
+        if (!newManifest.tcpPorts || !app.portBindings) return false;
+
         for (var env in newManifest.tcpPorts) {
             if (!(env in app.portBindings)) return false;
        }
