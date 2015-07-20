@@ -869,36 +869,21 @@ function startTask(appId, callback) {
 
         debugApp(app, 'startTask installationState: %s runState: %s', app.installationState, app.runState);
 
-        if (app.installationState === appdb.ISTATE_PENDING_UNINSTALL) {
-            return uninstall(app, callback);
+        switch (app.installationState) {
+        case appdb.ISTATE_PENDING_UNINSTALL: return uninstall(app, callback);
+        case appdb.ISTATE_PENDING_CONFIGURE: return configure(app, callback);
+        case appdb.ISTATE_PENDING_UPDATE: return update(app, callback);
+        case appdb.ISTATE_PENDING_RESTORE: return restore(app, callback);
+        case appdb.ISTATE_PENDING_BACKUP: return backup(app, callback);
+        case appdb.ISTATE_INSTALLED: return handleRunCommand(app, callback);
+        case appdb.ISTATE_PENDING_INSTALL: return install(app, callback);
+        case appdb.ISTATE_ERROR:
+            debugApp(app, 'Apptask launched with error states.');
+            return callback(null);
+        default:
+            debugApp(app, 'apptask launched with invalid command');
+            return callback(new Error('Unknown command in apptask:' + app.installationState));
         }
-
-        if (app.installationState === appdb.ISTATE_PENDING_CONFIGURE) {
-            return configure(app, callback);
-        }
-
-        if (app.installationState === appdb.ISTATE_PENDING_UPDATE) {
-            return update(app, callback);
-        }
-
-        if (app.installationState === appdb.ISTATE_PENDING_RESTORE) {
-            return restore(app, callback);
-        }
-
-        if (app.installationState === appdb.ISTATE_PENDING_BACKUP) {
-            return backup(app, callback);
-        }
-
-        if (app.installationState === appdb.ISTATE_INSTALLED) {
-            return handleRunCommand(app, callback);
-        }
-
-        if (app.installationState === appdb.ISTATE_PENDING_INSTALL) {
-            return install(app, callback);
-        }
-
-        debugApp(app, 'Apptask launched but nothing to do.');
-        return callback(null);
     });
 }
 
