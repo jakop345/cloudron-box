@@ -673,8 +673,9 @@ function autoupdateApps(updateInfo, callback) { // updateInfo is { appId -> { ma
     }, callback);
 }
 
-function backupApp(app, callback) {
+function backupApp(app, addonsToBackup, callback) {
     assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof addonsToBackup, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     function canBackupApp(app) {
@@ -708,7 +709,7 @@ function backupApp(app, callback) {
 
         async.series([
             ignoreError(shell.sudo.bind(null, 'mountSwap', [ BACKUP_SWAP_CMD, '--on' ])),
-            addons.backupAddons.bind(null, app, app.manifest.addons),
+            addons.backupAddons.bind(null, app, addonsToBackup),
             shell.sudo.bind(null, 'backupApp', [ BACKUP_APP_CMD,  app.id, result.url, result.backupKey ]),
             ignoreError(shell.sudo.bind(null, 'unmountSwap', [ BACKUP_SWAP_CMD, '--off' ])),
         ], function (error) {
@@ -744,8 +745,9 @@ function backup(appId, callback) {
     });
 }
 
-function restoreApp(app, callback) {
+function restoreApp(app, addonsToRestore, callback) {
     assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof addonsToRestore, 'object');
     assert.strictEqual(typeof callback, 'function');
     assert(app.lastBackupId);
 
@@ -758,7 +760,7 @@ function restoreApp(app, callback) {
         shell.sudo('restoreApp', [ RESTORE_APP_CMD,  app.id, result.url, result.backupKey ], function (error) {
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-            addons.restoreAddons(app, app.manifest.addons, callback);
+            addons.restoreAddons(app, addonsToRestore, callback);
         });
     });
 }
