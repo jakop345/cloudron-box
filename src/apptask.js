@@ -50,8 +50,8 @@ var addons = require('./addons.js'),
     sysinfo = require('./sysinfo.js'),
     util = require('util'),
     uuid = require('node-uuid'),
-    vbox = require('./vbox.js');
-
+    vbox = require('./vbox.js'),
+    _ = require('underscore');
 
 var NGINX_APPCONFIG_EJS = fs.readFileSync(__dirname + '/../setup/start/nginx/appconfig.ejs', { encoding: 'utf8' }),
     COLLECTD_CONFIG_EJS = fs.readFileSync(__dirname + '/collectd.config.ejs', { encoding: 'utf8' }),
@@ -721,6 +721,8 @@ function configure(app, callback) {
 function update(app, callback) {
     debugApp(app, 'Updating to %s', safe.query(app, 'manifest.version'));
 
+    var extraAddons = _.difference(Object.keys(app.oldConfig.manifest.addons), Object.keys(app.manifest.addons));
+
     async.series([
         updateApp.bind(null, app, { installationProgress: '0, Verify manifest' }),
         verifyManifest.bind(null, app),
@@ -749,7 +751,8 @@ function update(app, callback) {
         downloadImage.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '70, Updating addons' }),
-        addons.updateAddons.bind(null, app, app.oldConfig.manifest, app.manifest),
+        addons.teardownAddons.bind(null, app, extraAddons),
+        addons.setupAddons.bind(null, app, app.manifest.addons),
 
         updateApp.bind(null, app, { installationProgress: '80, Creating container' }),
         createContainer.bind(null, app),

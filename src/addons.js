@@ -3,7 +3,6 @@
 exports = module.exports = {
     setupAddons: setupAddons,
     teardownAddons: teardownAddons,
-    updateAddons: updateAddons,
     backupAddons: backupAddons,
     restoreAddons: restoreAddons,
 
@@ -148,26 +147,6 @@ function teardownAddons(app, addons, callback) {
 
         KNOWN_ADDONS[addon].teardown(app, iteratorCallback);
     }, callback);
-}
-
-function updateAddons(app, oldAddons, newAddons, callback) {
-    assert.strictEqual(typeof app, 'object');
-    assert(!oldAddons || typeof oldAddons === 'object');
-    assert(!newAddons || typeof newAddons === 'object');
-    assert.strictEqual(typeof callback, 'function');
-
-    setupAddons(app, newAddons, function (error) {
-        if (error) return callback(error);
-
-        if (!oldAddons) return callback(null);
-
-        // teardown the old addons
-        async.eachSeries(_.difference(Object.keys(oldAddons), Object.keys(newAddons)), function iterator(addon, iteratorCallback) {
-            if (!(addon in KNOWN_ADDONS)) return iteratorCallback(new Error('No such addon:' + addon));
-
-            KNOWN_ADDONS[addon].teardown(app, iteratorCallback);
-        }, callback);
-    });
 }
 
 function backupAddons(app, addons, callback) {
