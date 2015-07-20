@@ -672,20 +672,21 @@ function restore(app, callback) {
     });
 }
 
-// TODO: optimize by checking if location actually changed
+// note that configure is called after an infra update as well
 function configure(app, callback) {
+    var locationChanged = app.oldConfig.location !== app.location;
+
     async.series([
-        updateApp.bind(null, app, { installationProgress: '0, Stopping app' }),
+        updateApp.bind(null, app, { installationProgress: '10, Cleaning up old install' }),
+        removeCollectdProfile.bind(null, app),
         stopApp.bind(null, app),
-
-        updateApp.bind(null, app, { installationProgress: '5, Deleting container' }),
         deleteContainer.bind(null, app),
-
-        updateApp.bind(null, app, { installationProgress: '10, Unregistering subdomain' }),
-        unregisterSubdomain.bind(null, app),
-
-        updateApp.bind(null, app, { installationProgress: '15, Remove OAuth credentials' }),
+        function (next) {
+            if (!locationChanged) return next();
+            unregisterSubdomain(app, next);
+        },
         removeOAuthProxyCredentials.bind(null, app),
+        unconfigureNginx.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '25, Configuring Nginx' }),
         configureNginx.bind(null, app),
@@ -693,10 +694,16 @@ function configure(app, callback) {
         updateApp.bind(null, app, { installationProgress: '30, Create OAuth proxy credentials' }),
         allocateOAuthProxyCredentials.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '35, Registering subdomain' }),
-        registerSubdomain.bind(null, app),
+        function (next) {
+            if (!locationChanged) return next();
 
-        // addons like oauth might rely on the app's fqdn
+            async.series([
+                updateApp.bind(null, app, { installationProgress: '35, Registering subdomain' }),
+                registerSubdomain.bind(null, app)
+            ], next);
+        },
+
+        // re-setup addons since they rely on the app's fqdn (e.g oauth)
         updateApp.bind(null, app, { installationProgress: '50, Setting up addons' }),
         addons.setupAddons.bind(null, app, app.manifest.addons),
 
@@ -708,8 +715,14 @@ function configure(app, callback) {
 
         runApp.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '80, Waiting for DNS propagation' }),
-        exports._waitForDnsPropagation.bind(null, app),
+        function (next) {
+            if (!locationChanged) return next();
+
+            async.series([
+                updateApp.bind(null, app, { installationProgress: '80, Waiting for DNS propagation' }),
+                exports._waitForDnsPropagation.bind(null, app)
+            ], next);
+        },
 
         // done!
         function (callback) {
