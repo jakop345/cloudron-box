@@ -755,8 +755,14 @@ function update(app, callback) {
         deleteImage.bind(null, app, app.manifest), // delete image even if did not change (see df158b111f)
         removeIcon.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '20, Backup app' }),
-        apps.backupApp.bind(null, app, app.oldConfig.manifest.addons),
+        function (next) {
+            if (app.installationState === appdb.ISTATE_PENDING_FORCE_UPDATE) return next(null);
+
+            async.series([
+                updateApp.bind(null, app, { installationProgress: '20, Backup app' }),
+                apps.backupApp.bind(null, app, app.oldConfig.manifest.addons)
+            ], next);
+        },
 
         updateApp.bind(null, app, { installationProgress: '35, Downloading icon' }),
         downloadIcon.bind(null, app),
@@ -877,6 +883,7 @@ function startTask(appId, callback) {
         case appdb.ISTATE_PENDING_BACKUP: return backup(app, callback);
         case appdb.ISTATE_INSTALLED: return handleRunCommand(app, callback);
         case appdb.ISTATE_PENDING_INSTALL: return install(app, callback);
+        case appdb.ISTATE_PENDING_FORCE_UPDATE: return update(app, callback);
         case appdb.ISTATE_ERROR:
             debugApp(app, 'Apptask launched with error states.');
             return callback(null);

@@ -680,8 +680,7 @@ function backupApp(app, addonsToBackup, callback) {
 
     function canBackupApp(app) {
         // only backup apps that are installed or pending configure. Rest of them are in some
-        // state not good for consistent backup
-
+        // state not good for consistent backup (i.e addons may not have been setup completely)
         return (app.installationState === appdb.ISTATE_INSTALLED && app.health === appdb.HEALTH_HEALTHY)
                 || app.installationState === appdb.ISTATE_PENDING_CONFIGURE
                 || app.installationState === appdb.ISTATE_PENDING_BACKUP
