@@ -310,7 +310,9 @@ function addCollectdProfile(app, callback) {
 
 function removeCollectdProfile(app, callback) {
     fs.unlink(path.join(paths.COLLECTD_APPCONFIG_DIR, app.id + '.conf'), function (error, stdout, stderr) {
-        if (error) debugApp(app, 'Error removing collectd profile', error, stdout, stderr);
+        if (error && error.code !== 'ENOENT') {
+            debugApp(app, 'Error removing collectd profile', error, stdout, stderr);
+        }
         shell.sudo('removeCollectdProfile', [ RELOAD_COLLECTD_CMD ], callback);
     });
 }
