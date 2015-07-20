@@ -590,7 +590,7 @@ function backupBoxAndApps(callback) {
         async.mapSeries(allApps, function iterator(app, iteratorCallback) {
             ++processed;
 
-            apps.backupApp(app, function (error, backupId) {
+            apps.backupApp(app, app.manifest.addons, function (error, backupId) {
                 progress.set(progress.BACKUP, step * processed, app.location);
 
                 if (error && error.reason === AppsError.BAD_STATE) {

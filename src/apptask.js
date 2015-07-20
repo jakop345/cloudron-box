@@ -586,7 +586,7 @@ function install(app, callback) {
 function backup(app, callback) {
     async.series([
         updateApp.bind(null, app, { installationProgress: '10, Backing up' }),
-        apps.backupApp.bind(null, app),
+        apps.backupApp.bind(null, app, app.manifest.addons),
 
         // done!
         function (callback) {
@@ -639,7 +639,7 @@ function restore(app, callback) {
         createVolume.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '70, Download backup and restore addons' }),
-        apps.restoreApp.bind(null, app),
+        apps.restoreApp.bind(null, app, app.manifest.addons),
 
         updateApp.bind(null, app, { installationProgress: '75, Creating container' }),
         createContainer.bind(null, app),
@@ -746,7 +746,7 @@ function update(app, callback) {
 
         updateApp.bind(null, app, { installationProgress: '10, Backup app' }),
         function (done) {
-            apps.backupApp(app, function (error) {
+            apps.backupApp(app, app.oldConfig.manifest.addons, function (error) {
                 if (error) error.backupError = true;
                 done(error);
             });
