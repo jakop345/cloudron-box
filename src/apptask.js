@@ -744,14 +744,8 @@ function update(app, callback) {
         updateApp.bind(null, app, { installationProgress: '0, Verify manifest' }),
         verifyManifest.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '10, Backup app' }),
-        function (done) {
-            apps.backupApp(app, app.oldConfig.manifest.addons, function (error) {
-                if (error) error.backupError = true;
-                done(error);
-            });
-        },
-
+        // note: we cleanup first and then backup. this is done so that the app is not running should backup fail
+        // we cannot easily 'recover' from backup failures because we have to revert manfest and portBindings
         updateApp.bind(null, app, { installationProgress: '10, Cleaning up old install' }),
         removeCollectdProfile.bind(null, app),
         stopApp.bind(null, app),
@@ -759,6 +753,9 @@ function update(app, callback) {
         addons.teardownAddons.bind(null, app, unusedAddons),
         deleteImage.bind(null, app, app.manifest), // delete image even if did not change (see df158b111f)
         removeIcon.bind(null, app),
+
+        updateApp.bind(null, app, { installationProgress: '20, Backup app' }),
+        apps.backupApp.bind(null, app, app.oldConfig.manifest.addons),
 
         updateApp.bind(null, app, { installationProgress: '35, Downloading icon' }),
         downloadIcon.bind(null, app),
@@ -783,11 +780,7 @@ function update(app, callback) {
             updateApp(app, { installationState: appdb.ISTATE_INSTALLED, installationProgress: '', health: null }, callback);
         }
     ], function seriesDone(error) {
-        if (error && error.backupError) {
-            // on a backup error, just abort the update
-            debugApp(app, 'Error backing up app: %s', error.backupError);
-            return updateApp(app, { installationState: appdb.ISTATE_INSTALLED, installationProgress: '', health: null }, callback.bind(null, error));
-        } else if (error) {
+        if (error) {
             debugApp(app, 'Error updating app: %s', error);
             return updateApp(app, { installationState: appdb.ISTATE_ERROR, installationProgress: error.message }, callback.bind(null, error));
         }
