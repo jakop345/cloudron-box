@@ -335,10 +335,10 @@ function startContainer(app, callback) {
         }
 
         var startOptions = {
-            Binds: addons.getBindsSync(app, app.manifest),
+            Binds: addons.getBindsSync(app, app.manifest.addons),
             PortBindings: dockerPortBindings,
             PublishAllPorts: false,
-            Links: addons.getLinksSync(app, app.manifest),
+            Links: addons.getLinksSync(app, app.manifest.addons),
             RestartPolicy: {
                 "Name": "always",
                 "MaximumRetryCount": 0
@@ -546,8 +546,8 @@ function install(app, callback) {
         createVolume.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '60, Setting up addons' }),
-        addons.teardownAddons.bind(null, app, app.manifest),
-        addons.setupAddons.bind(null, app, app.manifest),
+        addons.teardownAddons.bind(null, app, app.manifest.addons),
+        addons.setupAddons.bind(null, app, app.manifest.addons),
 
         updateApp.bind(null, app, { installationProgress: '70, Creating container' }),
         deleteContainer.bind(null, app),
@@ -607,7 +607,7 @@ function restore(app, callback) {
         unregisterSubdomain.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '10, Teardown addons' }),
-        addons.teardownAddons.bind(null, app, app.oldConfig ? app.oldConfig.manifest : null), // backward compat
+        addons.teardownAddons.bind(null, app, app.oldConfig ? app.oldConfig.manifest.addons : null), // backward compat
 
         updateApp.bind(null, app, { installationProgress: '20, Deleting volume' }),
         deleteVolume.bind(null, app),
@@ -690,7 +690,7 @@ function configure(app, callback) {
 
         // addons like oauth might rely on the app's fqdn
         updateApp.bind(null, app, { installationProgress: '50, Setting up addons' }),
-        addons.setupAddons.bind(null, app, app.manifest),
+        addons.setupAddons.bind(null, app, app.manifest.addons),
 
         updateApp.bind(null, app, { installationProgress: '60, Creating container' }),
         createContainer.bind(null, app),
@@ -791,7 +791,7 @@ function uninstall(app, callback) {
         deleteContainer.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '30, Teardown addons' }),
-        addons.teardownAddons.bind(null, app, app.manifest),
+        addons.teardownAddons.bind(null, app, app.manifest.addons),
 
         updateApp.bind(null, app, { installationProgress: '40, Deleting volume' }),
         deleteVolume.bind(null, app),

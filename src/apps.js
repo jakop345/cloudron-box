@@ -705,7 +705,7 @@ function backupApp(app, callback) {
 
         async.series([
             ignoreError(shell.sudo.bind(null, 'mountSwap', [ BACKUP_SWAP_CMD, '--on' ])),
-            addons.backupAddons.bind(null, app, app.manifest),
+            addons.backupAddons.bind(null, app, app.manifest.addons),
             shell.sudo.bind(null, 'backupApp', [ BACKUP_APP_CMD,  app.id, result.url, result.backupKey ]),
             ignoreError(shell.sudo.bind(null, 'unmountSwap', [ BACKUP_SWAP_CMD, '--off' ])),
         ], function (error) {
@@ -755,7 +755,7 @@ function restoreApp(app, callback) {
         shell.sudo('restoreApp', [ RESTORE_APP_CMD,  app.id, result.url, result.backupKey ], function (error) {
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-            addons.restoreAddons(app, app.manifest, callback);
+            addons.restoreAddons(app, app.manifest.addons, callback);
         });
     });
 }

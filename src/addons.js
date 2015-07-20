@@ -118,15 +118,14 @@ function debugApp(app, args) {
     debug(prefix + ' ' + util.format.apply(util, Array.prototype.slice.call(arguments, 1)));
 }
 
-function setupAddons(app, manifest, callback) {
+function setupAddons(app, addons, callback) {
     assert.strictEqual(typeof app, 'object');
-    assert.strictEqual(typeof manifest, 'object');
-    assert(!manifest.addons || typeof manifest.addons === 'object');
+    assert(!addons || typeof addons === 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    if (!manifest.addons) return callback(null);
+    if (!addons) return callback(null);
 
-    async.eachSeries(Object.keys(manifest.addons), function iterator(addon, iteratorCallback) {
+    async.eachSeries(Object.keys(addons), function iterator(addon, iteratorCallback) {
         if (!(addon in KNOWN_ADDONS)) return iteratorCallback(new Error('No such addon:' + addon));
 
         debugApp(app, 'Setting up addon %s', addon);
@@ -135,18 +134,14 @@ function setupAddons(app, manifest, callback) {
     }, callback);
 }
 
-function teardownAddons(app, manifest, callback) {
+function teardownAddons(app, addons, callback) {
     assert.strictEqual(typeof app, 'object');
-    assert.strictEqual(typeof manifest, 'object');
+    assert(!addons || typeof addons === 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    if (!manifest) return callback(null);
+    if (!addons) return callback(null);
 
-    assert(!manifest.addons || typeof manifest.addons === 'object');
-
-    if (!manifest.addons) return callback(null);
-
-    async.eachSeries(Object.keys(manifest.addons), function iterator(addon, iteratorCallback) {
+    async.eachSeries(Object.keys(addons), function iterator(addon, iteratorCallback) {
         if (!(addon in KNOWN_ADDONS)) return iteratorCallback(new Error('No such addon:' + addon));
 
         debugApp(app, 'Tearing down addon %s', addon);
@@ -155,19 +150,19 @@ function teardownAddons(app, manifest, callback) {
     }, callback);
 }
 
-function updateAddons(app, oldManifest, newManifest, callback) {
+function updateAddons(app, oldAddons, newAddons, callback) {
     assert.strictEqual(typeof app, 'object');
-    assert(!oldManifest.addons || typeof oldManifest.addons === 'object');
-    assert(!newManifest.addons || typeof newManifest.addons === 'object');
+    assert(!oldAddons || typeof oldAddons === 'object');
+    assert(!newAddons || typeof newAddons === 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    setupAddons(app, newManifest, function (error) {
+    setupAddons(app, newAddons, function (error) {
         if (error) return callback(error);
 
-        if (!oldManifest || !oldManifest.addons) return callback(null);
+        if (!oldAddons) return callback(null);
 
         // teardown the old addons
-        async.eachSeries(_.difference(Object.keys(oldManifest.addons), Object.keys(newManifest.addons)), function iterator(addon, iteratorCallback) {
+        async.eachSeries(_.difference(Object.keys(oldAddons), Object.keys(newAddons)), function iterator(addon, iteratorCallback) {
             if (!(addon in KNOWN_ADDONS)) return iteratorCallback(new Error('No such addon:' + addon));
 
             KNOWN_ADDONS[addon].teardown(app, iteratorCallback);
@@ -175,32 +170,32 @@ function updateAddons(app, oldManifest, newManifest, callback) {
     });
 }
 
-function backupAddons(app, manifest, callback) {
+function backupAddons(app, addons, callback) {
     assert.strictEqual(typeof app, 'object');
-    assert(!manifest.addons || typeof manifest.addons === 'object');
+    assert(!addons || typeof addons === 'object');
     assert.strictEqual(typeof callback, 'function');
 
     debugApp(app, 'backupAddons');
 
-    if (!manifest.addons) return callback(null);
+    if (!addons) return callback(null);
 
-    async.eachSeries(Object.keys(manifest.addons), function iterator (addon, iteratorCallback) {
+    async.eachSeries(Object.keys(addons), function iterator (addon, iteratorCallback) {
         if (!(addon in KNOWN_ADDONS)) return iteratorCallback(new Error('No such addon:' + addon));
 
         KNOWN_ADDONS[addon].backup(app, iteratorCallback);
     }, callback);
 }
 
-function restoreAddons(app, manifest, callback) {
+function restoreAddons(app, addons, callback) {
     assert.strictEqual(typeof app, 'object');
-    assert(!manifest.addons || typeof manifest.addons === 'object');
+    assert(!addons || typeof addons === 'object');
     assert.strictEqual(typeof callback, 'function');
 
     debugApp(app, 'restoreAddons');
 
-    if (!manifest.addons) return callback(null);
+    if (!addons) return callback(null);
 
-    async.eachSeries(Object.keys(manifest.addons), function iterator (addon, iteratorCallback) {
+    async.eachSeries(Object.keys(addons), function iterator (addon, iteratorCallback) {
         if (!(addon in KNOWN_ADDONS)) return iteratorCallback(new Error('No such addon:' + addon));
 
         KNOWN_ADDONS[addon].restore(app, iteratorCallback);
@@ -214,16 +209,15 @@ function getEnvironment(app, callback) {
     appdb.getAddonConfigByAppId(app.id, callback);
 }
 
-function getLinksSync(app, manifest) {
+function getLinksSync(app, addons) {
     assert.strictEqual(typeof app, 'object');
-    assert.strictEqual(typeof manifest, 'object');
-    assert(!manifest.addons || typeof manifest.addons === 'object');
+    assert(!addons || typeof addons === 'object');
 
     var links = [ ];
 
-    if (!manifest.addons) return links;
+    if (!addons) return links;
 
-    for (var addon in manifest.addons) {
+    for (var addon in addons) {
         switch (addon) {
         case 'mysql': links.push('mysql:mysql'); break;
         case 'postgresql': links.push('postgresql:postgresql'); break;
@@ -237,16 +231,15 @@ function getLinksSync(app, manifest) {
     return links;
 }
 
-function getBindsSync(app, manifest) {
+function getBindsSync(app, addons) {
     assert.strictEqual(typeof app, 'object');
-    assert.strictEqual(typeof manifest, 'object');
-    assert(!manifest.addons || typeof manifest.addons === 'object');
+    assert(!addons || typeof addons === 'object');
 
     var binds = [ ];
 
-    if (!manifest.addons) return binds;
+    if (!addons) return binds;
 
-    for (var addon in manifest.addons) {
+    for (var addon in addons) {
         switch (addon) {
         case '_docker': binds.push('/var/run/docker.sock:/var/run/docker.sock:rw'); break;
         case 'localstorage': binds.push(path.join(paths.DATA_DIR, app.id, 'data') + ':/app/data:rw'); break;
