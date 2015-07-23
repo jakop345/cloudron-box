@@ -660,11 +660,11 @@ function autoupdateApps(updateInfo, callback) { // updateInfo is { appId -> { ma
 
     async.eachSeries(Object.keys(updateInfo), function iterator(appId, iteratorDone) {
         get(appId, function (error, app) {
-            if (!canAutoupdateApp(app, updateInfo.manifest)) {
+            if (!canAutoupdateApp(app, updateInfo[appId].manifest)) {
                 return iteratorDone();
             }
 
-           update(appId, updateInfo.manifest, app.portBindings, null /* icon */, function (error) {
+           update(appId, updateInfo[appId].manifest, app.portBindings, null /* icon */, function (error) {
                 if (error) debug('Error initiating autoupdate of %s', appId);
 
                 iteratorDone(null);
