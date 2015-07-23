@@ -30,6 +30,7 @@ var appdb = require('../../appdb.js'),
     request = require('superagent'),
     safe = require('safetydance'),
     server = require('../../server.js'),
+    settings = require('../../settings.js'),
     sysinfo = require('../../sysinfo.js'),
     tokendb = require('../../tokendb.js'),
     url = require('url'),
@@ -431,28 +432,30 @@ describe('App API', function () {
     it('app install succeeds without password but developer token', function (done) {
         var fake = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(201, {});
 
-        config.set('developerMode', true);
+        settings.setDeveloperMode(true, function (error) {
+            expect(error).to.be(null);
 
-        request.post(SERVER_URL + '/api/v1/developer/login')
-               .send({ username: USERNAME, password: PASSWORD })
-               .end(function (error, result) {
-            expect(error).to.not.be.ok();
-            expect(result.statusCode).to.equal(200);
-            expect(result.body.expiresAt).to.be.a('number');
-            expect(result.body.token).to.be.a('string');
+            request.post(SERVER_URL + '/api/v1/developer/login')
+                   .send({ username: USERNAME, password: PASSWORD })
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(200);
+                expect(result.body.expiresAt).to.be.a('number');
+                expect(result.body.token).to.be.a('string');
 
-            // overwrite non dev token
-            token = result.body.token;
+                // overwrite non dev token
+                token = result.body.token;
 
-            request.post(SERVER_URL + '/api/v1/apps/install')
-                   .query({ access_token: token })
-                   .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, location: APP_LOCATION+APP_LOCATION, portBindings: null, accessRestriction: '' })
-                   .end(function (err, res) {
-                expect(res.statusCode).to.equal(202);
-                expect(res.body.id).to.be.a('string');
-                expect(fake.isDone()).to.be.ok();
-                APP_ID = res.body.id;
-                done(err);
+                request.post(SERVER_URL + '/api/v1/apps/install')
+                       .query({ access_token: token })
+                       .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, location: APP_LOCATION+APP_LOCATION, portBindings: null, accessRestriction: '' })
+                       .end(function (err, res) {
+                    expect(res.statusCode).to.equal(202);
+                    expect(res.body.id).to.be.a('string');
+                    expect(fake.isDone()).to.be.ok();
+                    APP_ID = res.body.id;
+                    done(err);
+                });
             });
         });
     });
