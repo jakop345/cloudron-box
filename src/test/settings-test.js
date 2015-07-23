@@ -33,6 +33,7 @@ describe('Settings', function () {
             done();
         });
     });
+
     it('can get default autoupdate_pattern', function (done) {
         settings.getAutoupdatePattern(function (error, pattern) {
             expect(error).to.be(null);
@@ -40,6 +41,7 @@ describe('Settings', function () {
             done();
         });
     });
+
     it ('can get default cloudron name', function (done) {
         settings.getCloudronName(function (error, name) {
             expect(error).to.be(null);
@@ -47,6 +49,7 @@ describe('Settings', function () {
             done();
         });
     });
+
     it('can get default cloudron avatar', function (done) {
         settings.getCloudronAvatar(function (error, gravatar) {
             expect(error).to.be(null);
@@ -54,6 +57,30 @@ describe('Settings', function () {
             done();
         });
     });
+
+    it('can get default developer mode', function (done) {
+        settings.getDeveloperMode(function (error, enabled) {
+            expect(error).to.be(null);
+            expect(enabled).to.equal(false);
+            done();
+        });
+    });
+
+    it('can set developer mode', function (done) {
+        settings.setDeveloperMode(true, function (error) {
+            expect(error).to.be(null);
+            done();
+        });
+    });
+
+    it('can get developer mode', function (done) {
+        settings.getDeveloperMode(function (error, enabled) {
+            expect(error).to.be(null);
+            expect(enabled).to.equal(true);
+            done();
+        });
+    });
+
     it('can get all values', function (done) {
         settings.getAll(function (error, allSettings) {
             expect(error).to.be(null);
