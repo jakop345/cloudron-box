@@ -12,7 +12,8 @@ var async = require('async'),
     expect = require('expect.js'),
     nock = require('nock'),
     request = require('superagent'),
-    server = require('../../server.js');
+    server = require('../../server.js'),
+    settings = require('../../settings.js');
 
 var SERVER_URL = 'http://localhost:' + config.get('port');
 
@@ -63,37 +64,43 @@ describe('Developer API', function () {
         after(cleanup);
 
         it('fails without token', function (done) {
-            config.set('developerMode', true);
+            settings.setDeveloperMode(true, function (error) {
+                expect(error).to.be(null);
 
-            request.get(SERVER_URL + '/api/v1/developer')
-                   .end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(401);
-                done();
+                request.get(SERVER_URL + '/api/v1/developer')
+                       .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.statusCode).to.equal(401);
+                    done();
+                });
             });
         });
 
         it('succeeds (enabled)', function (done) {
-            config.set('developerMode', true);
+            settings.setDeveloperMode(true, function (error) {
+                expect(error).to.be(null);
 
-            request.get(SERVER_URL + '/api/v1/developer')
-                   .query({ access_token: token })
-                   .end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(200);
-                done();
+                request.get(SERVER_URL + '/api/v1/developer')
+                       .query({ access_token: token })
+                       .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.statusCode).to.equal(200);
+                    done();
+                });
             });
         });
 
         it('succeeds (not enabled)', function (done) {
-            config.set('developerMode', false);
+            settings.setDeveloperMode(false, function (error) {
+                expect(error).to.be(null);
 
-            request.get(SERVER_URL + '/api/v1/developer')
-                   .query({ access_token: token })
-                   .end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(412);
-                done();
+                request.get(SERVER_URL + '/api/v1/developer')
+                       .query({ access_token: token })
+                       .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.statusCode).to.equal(412);
+                    done();
+                });
             });
         });
     });
@@ -231,10 +238,10 @@ describe('Developer API', function () {
 
     describe('login', function () {
         before(function (done) {
-            config.set('developerMode', true);
-
             async.series([
                 setup,
+
+                settings.setDeveloperMode.bind(null, true),
 
                 function (callback) {
                     var scope1 = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
