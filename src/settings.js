@@ -17,12 +17,16 @@ exports = module.exports = {
     getCloudronAvatar: getCloudronAvatar,
     setCloudronAvatar: setCloudronAvatar,
 
+    getDeveloperMode: getDeveloperMode,
+    setDeveloperMode: setDeveloperMode,
+
     getDefaultSync: getDefaultSync,
     getAll: getAll,
 
     AUTOUPDATE_PATTERN_KEY: 'autoupdate_pattern',
     TIME_ZONE_KEY: 'time_zone',
     CLOUDRON_NAME_KEY: 'cloudron_name',
+    DEVELOPER_MODE_KEY: 'developer_mode',
 
     events: new (require('events').EventEmitter)()
 };
@@ -45,6 +49,7 @@ var gDefaults = (function () {
     result[exports.AUTOUPDATE_PATTERN_KEY] = '00 00 1,3,5,23 * * *';
     result[exports.TIME_ZONE_KEY] = tz;
     result[exports.CLOUDRON_NAME_KEY] = 'Cloudron';
+    result[exports.DEVELOPER_MODE_KEY] = false;
 
     return result;
 })();
@@ -177,6 +182,32 @@ function setCloudronAvatar(avatar, callback) {
     }
 
     return callback(null);
+}
+
+function getDeveloperMode(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    settingsdb.get(exports.DEVELOPER_MODE_KEY, function (error, enabled) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, gDefaults[exports.DEVELOPER_MODE_KEY]);
+        if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
+
+        // settingsdb holds string values only
+        callback(null, !!enabled);
+    });
+}
+
+function setDeveloperMode(enabled, callback) {
+    assert.strictEqual(typeof enabled, 'boolean');
+    assert.strictEqual(typeof callback, 'function');
+
+    // settingsdb takes string values only
+    settingsdb.set(exports.DEVELOPER_MODE_KEY, enabled ? 'enabled' : '', function (error) {
+        if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
+
+        exports.events.emit(exports.DEVELOPER_MODE_KEY, enabled);
+
+        return callback(null);
+    });
 }
 
 function getDefaultSync(name) {
