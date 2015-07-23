@@ -15,7 +15,8 @@ var async = require('async'),
     nock = require('nock'),
     hat = require('hat'),
     superagent = require('superagent'),
-    server = require('../../server.js');
+    server = require('../../server.js'),
+    settings = require('../../settings.js');
 
 var SERVER_URL = 'http://localhost:' + config.get('port');
 
@@ -62,137 +63,129 @@ describe('OAuth Clients API', function () {
 
         after(cleanup);
 
-        it('fails without token', function (done) {
-            config.set('developerMode', true);
+        describe('without developer mode', function () {
+            before(function (done) {
+                settings.setDeveloperMode(false, done);
+            });
 
-            superagent.post(SERVER_URL + '/api/v1/oauth/clients')
-                   .send({ appId: 'someApp', redirectURI: 'http://foobar.com', scope: 'profile,roleUser' })
-                   .end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(401);
-                done();
+            it('fails', function (done) {
+                superagent.post(SERVER_URL + '/api/v1/oauth/clients')
+                       .query({ access_token: token })
+                       .send({ appId: 'someApp', redirectURI: 'http://foobar.com', scope: 'profile,roleUser' })
+                       .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.statusCode).to.equal(412);
+                    done();
+                });
             });
         });
 
-        it('fails if not in developerMode', function (done) {
-            config.set('developerMode', false);
-
-            superagent.post(SERVER_URL + '/api/v1/oauth/clients')
-                   .query({ access_token: token })
-                   .send({ appId: 'someApp', redirectURI: 'http://foobar.com', scope: 'profile,roleUser' })
-                   .end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(412);
-                done();
+        describe('with developer mode', function () {
+            before(function (done) {
+                settings.setDeveloperMode(true, done);
             });
-        });
 
-        it('fails without appId', function (done) {
-            config.set('developerMode', true);
-
-            superagent.post(SERVER_URL + '/api/v1/oauth/clients')
-                   .query({ access_token: token })
-                   .send({ redirectURI: 'http://foobar.com', scope: 'profile,roleUser' })
-                   .end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(400);
-                done();
+            it('fails without token', function (done) {
+                superagent.post(SERVER_URL + '/api/v1/oauth/clients')
+                       .send({ appId: 'someApp', redirectURI: 'http://foobar.com', scope: 'profile,roleUser' })
+                       .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.statusCode).to.equal(401);
+                    done();
+                });
             });
-        });
 
-        it('fails with empty appId', function (done) {
-            config.set('developerMode', true);
-
-            superagent.post(SERVER_URL + '/api/v1/oauth/clients')
-                   .query({ access_token: token })
-                   .send({ appId: '', redirectURI: 'http://foobar.com', scope: 'profile,roleUser' })
-                   .end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(400);
-                done();
+            it('fails without appId', function (done) {
+                superagent.post(SERVER_URL + '/api/v1/oauth/clients')
+                       .query({ access_token: token })
+                       .send({ redirectURI: 'http://foobar.com', scope: 'profile,roleUser' })
+                       .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.statusCode).to.equal(400);
+                    done();
+                });
             });
-        });
 
-        it('fails without scope', function (done) {
-            config.set('developerMode', true);
-
-            superagent.post(SERVER_URL + '/api/v1/oauth/clients')
-                   .query({ access_token: token })
-                   .send({ appId: 'someApp', redirectURI: 'http://foobar.com' })
-                   .end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(400);
-                done();
+            it('fails with empty appId', function (done) {
+                superagent.post(SERVER_URL + '/api/v1/oauth/clients')
+                       .query({ access_token: token })
+                       .send({ appId: '', redirectURI: 'http://foobar.com', scope: 'profile,roleUser' })
+                       .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.statusCode).to.equal(400);
+                    done();
+                });
             });
-        });
 
-        it('fails with empty scope', function (done) {
-            config.set('developerMode', true);
-
-            superagent.post(SERVER_URL + '/api/v1/oauth/clients')
-                   .query({ access_token: token })
-                   .send({ appId: 'someApp', redirectURI: 'http://foobar.com', scope: '' })
-                   .end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(400);
-                done();
+            it('fails without scope', function (done) {
+                superagent.post(SERVER_URL + '/api/v1/oauth/clients')
+                       .query({ access_token: token })
+                       .send({ appId: 'someApp', redirectURI: 'http://foobar.com' })
+                       .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.statusCode).to.equal(400);
+                    done();
+                });
             });
-        });
 
-        it('fails without redirectURI', function (done) {
-            config.set('developerMode', true);
-
-            superagent.post(SERVER_URL + '/api/v1/oauth/clients')
-                   .query({ access_token: token })
-                   .send({ appId: 'someApp', scope: 'profile,roleUser' })
-                   .end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(400);
-                done();
+            it('fails with empty scope', function (done) {
+                superagent.post(SERVER_URL + '/api/v1/oauth/clients')
+                       .query({ access_token: token })
+                       .send({ appId: 'someApp', redirectURI: 'http://foobar.com', scope: '' })
+                       .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.statusCode).to.equal(400);
+                    done();
+                });
             });
-        });
 
-        it('fails with empty redirectURI', function (done) {
-            config.set('developerMode', true);
-
-            superagent.post(SERVER_URL + '/api/v1/oauth/clients')
-                   .query({ access_token: token })
-                   .send({ appId: 'someApp', redirectURI: '', scope: 'profile,roleUser' })
-                   .end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(400);
-                done();
+            it('fails without redirectURI', function (done) {
+                superagent.post(SERVER_URL + '/api/v1/oauth/clients')
+                       .query({ access_token: token })
+                       .send({ appId: 'someApp', scope: 'profile,roleUser' })
+                       .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.statusCode).to.equal(400);
+                    done();
+                });
             });
-        });
 
-        it('fails with malformed redirectURI', function (done) {
-            config.set('developerMode', true);
-
-            superagent.post(SERVER_URL + '/api/v1/oauth/clients')
-                   .query({ access_token: token })
-                   .send({ appId: 'someApp', redirectURI: 'foobar', scope: 'profile,roleUser' })
-                   .end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(400);
-                done();
+            it('fails with empty redirectURI', function (done) {
+                superagent.post(SERVER_URL + '/api/v1/oauth/clients')
+                       .query({ access_token: token })
+                       .send({ appId: 'someApp', redirectURI: '', scope: 'profile,roleUser' })
+                       .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.statusCode).to.equal(400);
+                    done();
+                });
             });
-        });
 
-        it('succeeds', function (done) {
-            config.set('developerMode', true);
+            it('fails with malformed redirectURI', function (done) {
+                superagent.post(SERVER_URL + '/api/v1/oauth/clients')
+                       .query({ access_token: token })
+                       .send({ appId: 'someApp', redirectURI: 'foobar', scope: 'profile,roleUser' })
+                       .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.statusCode).to.equal(400);
+                    done();
+                });
+            });
 
-            superagent.post(SERVER_URL + '/api/v1/oauth/clients')
-                   .query({ access_token: token })
-                   .send({ appId: 'someApp', redirectURI: 'http://foobar.com', scope: 'profile,roleUser' })
-                   .end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(201);
-                expect(result.body.id).to.be.a('string');
-                expect(result.body.appId).to.be.a('string');
-                expect(result.body.redirectURI).to.be.a('string');
-                expect(result.body.clientSecret).to.be.a('string');
-                expect(result.body.scope).to.be.a('string');
-                done();
+            it('succeeds', function (done) {
+                superagent.post(SERVER_URL + '/api/v1/oauth/clients')
+                       .query({ access_token: token })
+                       .send({ appId: 'someApp', redirectURI: 'http://foobar.com', scope: 'profile,roleUser' })
+                       .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.statusCode).to.equal(201);
+                    expect(result.body.id).to.be.a('string');
+                    expect(result.body.appId).to.be.a('string');
+                    expect(result.body.redirectURI).to.be.a('string');
+                    expect(result.body.clientSecret).to.be.a('string');
+                    expect(result.body.scope).to.be.a('string');
+                    done();
+                });
             });
         });
     });
@@ -230,9 +223,9 @@ describe('OAuth Clients API', function () {
                     });
                 },
 
-                function (callback) {
-                    config.set('developerMode', true);
+                settings.setDeveloperMode.bind(null, true),
 
+                function (callback) {
                     superagent.post(SERVER_URL + '/api/v1/oauth/clients')
                            .query({ access_token: token })
                            .send({ appId: CLIENT_0.appId, redirectURI: CLIENT_0.redirectURI, scope: CLIENT_0.scope })
@@ -250,51 +243,56 @@ describe('OAuth Clients API', function () {
 
         after(cleanup);
 
-        it('fails without token', function (done) {
-            config.set('developerMode', true);
+        describe('without developer mode', function () {
+            before(function (done) {
+                settings.setDeveloperMode(false, done);
+            });
 
-            superagent.get(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
-                   .end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(401);
-                done();
+            it('fails', function (done) {
+                superagent.get(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
+                       .query({ access_token: token })
+                       .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.statusCode).to.equal(412);
+                    done();
+                });
             });
         });
 
-        it('fails if not in developerMode', function (done) {
-            config.set('developerMode', false);
-
-            superagent.get(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
-                   .query({ access_token: token })
-                   .end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(412);
-                done();
+        describe('with developer mode', function () {
+            before(function (done) {
+                settings.setDeveloperMode(true, done);
             });
-        });
 
-        it('fails with unknown id', function (done) {
-            config.set('developerMode', true);
-
-            superagent.get(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id.toUpperCase())
-                   .query({ access_token: token })
-                   .end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(404);
-                done();
+            it('fails without token', function (done) {
+                superagent.get(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
+                       .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.statusCode).to.equal(401);
+                    done();
+                });
             });
-        });
 
-        it('succeeds', function (done) {
-            config.set('developerMode', true);
 
-            superagent.get(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
-                   .query({ access_token: token })
-                   .end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(200);
-                expect(result.body).to.eql(CLIENT_0);
-                done();
+            it('fails with unknown id', function (done) {
+                superagent.get(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id.toUpperCase())
+                       .query({ access_token: token })
+                       .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.statusCode).to.equal(404);
+                    done();
+                });
+            });
+
+            it('succeeds', function (done) {
+                superagent.get(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
+                       .query({ access_token: token })
+                       .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.statusCode).to.equal(200);
+                    expect(result.body).to.eql(CLIENT_0);
+                    done();
+                });
             });
         });
     });
@@ -339,9 +337,9 @@ describe('OAuth Clients API', function () {
                     });
                 },
 
-                function (callback) {
-                    config.set('developerMode', true);
+                settings.setDeveloperMode.bind(null, true),
 
+                function (callback) {
                     superagent.post(SERVER_URL + '/api/v1/oauth/clients')
                            .query({ access_token: token })
                            .send({ appId: CLIENT_0.appId, redirectURI: CLIENT_0.redirectURI, scope: CLIENT_0.scope })
@@ -359,116 +357,113 @@ describe('OAuth Clients API', function () {
 
         after(cleanup);
 
-        it('fails without token', function (done) {
-            config.set('developerMode', true);
-
-            superagent.put(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
-                   .send({ appId: 'someApp', redirectURI: 'http://foobar.com' })
-                   .end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(401);
-                done();
+        describe('without developer mode', function () {
+            before(function (done) {
+                settings.setDeveloperMode(false, done);
             });
-        });
 
-        it('fails if not in developerMode', function (done) {
-            config.set('developerMode', false);
-
-            superagent.put(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
-                   .query({ access_token: token })
-                   .send({ appId: CLIENT_1.appId, redirectURI: CLIENT_1.redirectURI })
-                   .end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(412);
-                done();
-            });
-        });
-
-        it('fails without appId', function (done) {
-            config.set('developerMode', true);
-
-            superagent.put(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
-                   .query({ access_token: token })
-                   .send({ redirectURI: CLIENT_1.redirectURI })
-                   .end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(400);
-                done();
-            });
-        });
-
-        it('fails with empty appId', function (done) {
-            config.set('developerMode', true);
-
-            superagent.put(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
-                   .query({ access_token: token })
-                   .send({ appId: '', redirectURI: CLIENT_1.redirectURI })
-                   .end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(400);
-                done();
-            });
-        });
-
-        it('fails without redirectURI', function (done) {
-            config.set('developerMode', true);
-
-            superagent.put(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
-                   .query({ access_token: token })
-                   .send({ appId: CLIENT_1.appId })
-                   .end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(400);
-                done();
-            });
-        });
-
-        it('fails with empty redirectURI', function (done) {
-            config.set('developerMode', true);
-
-            superagent.put(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
-                   .query({ access_token: token })
-                   .send({ appId: CLIENT_1.appId, redirectURI: '' })
-                   .end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(400);
-                done();
-            });
-        });
-
-        it('fails with malformed redirectURI', function (done) {
-            config.set('developerMode', true);
-
-            superagent.put(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
-                   .query({ access_token: token })
-                   .send({ appId: CLIENT_1.appId, redirectURI: 'foobar' })
-                   .end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(400);
-                done();
-            });
-        });
-
-        it('succeeds', function (done) {
-            config.set('developerMode', true);
-
-            superagent.put(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
-                   .query({ access_token: token })
-                   .send({ appId: CLIENT_1.appId, redirectURI: CLIENT_1.redirectURI })
-                   .end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(202);
-
-                superagent.get(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
+            it('fails', function (done) {
+                superagent.put(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
                        .query({ access_token: token })
+                       .send({ appId: CLIENT_1.appId, redirectURI: CLIENT_1.redirectURI })
                        .end(function (error, result) {
-                    expect(error).to.be(null);
-                    expect(result.statusCode).to.equal(200);
-                    expect(result.body.appId).to.equal(CLIENT_1.appId);
-                    expect(result.body.redirectURI).to.equal(CLIENT_1.redirectURI);
-
+                    expect(error).to.not.be.ok();
+                    expect(result.statusCode).to.equal(412);
                     done();
-               });
+                });
+            });
+        });
+
+        describe('with developer mode', function () {
+            before(function (done) {
+                settings.setDeveloperMode(true, done);
+            });
+
+            it('fails without token', function (done) {
+                superagent.put(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
+                       .send({ appId: 'someApp', redirectURI: 'http://foobar.com' })
+                       .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.statusCode).to.equal(401);
+                    done();
+                });
+            });
+
+
+            it('fails without appId', function (done) {
+                superagent.put(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
+                       .query({ access_token: token })
+                       .send({ redirectURI: CLIENT_1.redirectURI })
+                       .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.statusCode).to.equal(400);
+                    done();
+                });
+            });
+
+            it('fails with empty appId', function (done) {
+                superagent.put(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
+                       .query({ access_token: token })
+                       .send({ appId: '', redirectURI: CLIENT_1.redirectURI })
+                       .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.statusCode).to.equal(400);
+                    done();
+                });
+            });
+
+            it('fails without redirectURI', function (done) {
+                superagent.put(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
+                       .query({ access_token: token })
+                       .send({ appId: CLIENT_1.appId })
+                       .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.statusCode).to.equal(400);
+                    done();
+                });
+            });
+
+            it('fails with empty redirectURI', function (done) {
+                superagent.put(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
+                       .query({ access_token: token })
+                       .send({ appId: CLIENT_1.appId, redirectURI: '' })
+                       .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.statusCode).to.equal(400);
+                    done();
+                });
+            });
+
+            it('fails with malformed redirectURI', function (done) {
+                superagent.put(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
+                       .query({ access_token: token })
+                       .send({ appId: CLIENT_1.appId, redirectURI: 'foobar' })
+                       .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.statusCode).to.equal(400);
+                    done();
+                });
+            });
+
+            it('succeeds', function (done) {
+                superagent.put(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
+                       .query({ access_token: token })
+                       .send({ appId: CLIENT_1.appId, redirectURI: CLIENT_1.redirectURI })
+                       .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.statusCode).to.equal(202);
+
+                    superagent.get(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
+                           .query({ access_token: token })
+                           .end(function (error, result) {
+                        expect(error).to.be(null);
+                        expect(result.statusCode).to.equal(200);
+                        expect(result.body.appId).to.equal(CLIENT_1.appId);
+                        expect(result.body.redirectURI).to.equal(CLIENT_1.redirectURI);
+
+                        done();
+                   });
+                });
             });
         });
     });
@@ -506,9 +501,9 @@ describe('OAuth Clients API', function () {
                     });
                 },
 
-                function (callback) {
-                    config.set('developerMode', true);
+                settings.setDeveloperMode.bind(null, true),
 
+                function (callback) {
                     superagent.post(SERVER_URL + '/api/v1/oauth/clients')
                            .query({ access_token: token })
                            .send({ appId: CLIENT_0.appId, redirectURI: CLIENT_0.redirectURI, scope: CLIENT_0.scope })
@@ -526,58 +521,63 @@ describe('OAuth Clients API', function () {
 
         after(cleanup);
 
-        it('fails without token', function (done) {
-            config.set('developerMode', true);
-
-            superagent.del(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
-                   .end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(401);
-                done();
+        describe('without developer mode', function () {
+            before(function (done) {
+                settings.setDeveloperMode(false, done);
             });
-        });
 
-        it('fails if not in developerMode', function (done) {
-            config.set('developerMode', false);
-
-            superagent.del(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
-                   .query({ access_token: token })
-                   .end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(412);
-                done();
-            });
-        });
-
-        it('fails with unknown id', function (done) {
-            config.set('developerMode', true);
-
-            superagent.del(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id.toUpperCase())
-                   .query({ access_token: token })
-                   .end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(404);
-                done();
-            });
-        });
-
-        it('succeeds', function (done) {
-            config.set('developerMode', true);
-
-            superagent.del(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
-                   .query({ access_token: token })
-                   .end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(204);
-
-                superagent.get(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
+            it('fails', function (done) {
+                superagent.del(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
                        .query({ access_token: token })
                        .end(function (error, result) {
-                    expect(error).to.be(null);
-                    expect(result.statusCode).to.equal(404);
-
+                    expect(error).to.not.be.ok();
+                    expect(result.statusCode).to.equal(412);
                     done();
-               });
+                });
+            });
+        });
+
+        describe('with developer mode', function () {
+            before(function (done) {
+                settings.setDeveloperMode(true, done);
+            });
+
+            it('fails without token', function (done) {
+                superagent.del(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
+                       .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.statusCode).to.equal(401);
+                    done();
+                });
+            });
+
+
+            it('fails with unknown id', function (done) {
+                superagent.del(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id.toUpperCase())
+                       .query({ access_token: token })
+                       .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.statusCode).to.equal(404);
+                    done();
+                });
+            });
+
+            it('succeeds', function (done) {
+                superagent.del(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
+                       .query({ access_token: token })
+                       .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.statusCode).to.equal(204);
+
+                    superagent.get(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
+                           .query({ access_token: token })
+                           .end(function (error, result) {
+                        expect(error).to.be(null);
+                        expect(result.statusCode).to.equal(404);
+
+                        done();
+                   });
+                });
             });
         });
     });
