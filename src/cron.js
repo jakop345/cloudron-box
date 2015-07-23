@@ -21,7 +21,7 @@ var gAutoupdaterJob = null,
 
 var gInitialized = false;
 
-var NOOP_CALLBACK = function (error) { console.error(error); };
+var NOOP_CALLBACK = function (error) { if (error) console.error(error); };
 
 // cron format
 // Seconds: 0-59
