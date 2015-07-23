@@ -12,7 +12,7 @@ exports = module.exports = {
 
 var assert = require('assert'),
     tokendb = require('./tokendb.js'),
-    config = require('./config.js'),
+    settings = require('./settings.js'),
     util = require('util');
 
 function DeveloperError(reason, errorOrMessage) {
@@ -39,16 +39,20 @@ DeveloperError.INTERNAL_ERROR = 'Internal Error';
 function enabled(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    callback(null, config.developerMode());
+    settings.getDeveloperMode(function (error, enabled) {
+        if (error) return callback(new DeveloperError(DeveloperError.INTERNAL_ERROR, error));
+        callback(null, enabled);
+    });
 }
 
 function setEnabled(enabled, callback) {
     assert.strictEqual(typeof enabled, 'boolean');
     assert.strictEqual(typeof callback, 'function');
 
-    config.set('developerMode', enabled);
-
-    callback(null);
+    settings.setDeveloperMode(enabled, function (error) {
+        if (error) return callback(new DeveloperError(DeveloperError.INTERNAL_ERROR, error));
+        callback(null);
+    });
 }
 
 function issueDeveloperToken(user, callback) {

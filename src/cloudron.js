@@ -231,6 +231,7 @@ function getCloudronDetails(callback) {
 function getConfig(callback) {
     assert.strictEqual(typeof callback, 'function');
 
+    // TODO avoid pyramid of awesomeness with async
     getCloudronDetails(function (error, result) {
         if (error) {
             console.error('Failed to fetch cloudron details.', error);
@@ -245,20 +246,24 @@ function getConfig(callback) {
         settings.getCloudronName(function (error, cloudronName) {
             if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
-            callback(null, {
-                apiServerOrigin: config.apiServerOrigin(),
-                webServerOrigin: config.webServerOrigin(),
-                isDev: config.isDev(),
-                fqdn: config.fqdn(),
-                ip: sysinfo.getIp(),
-                version: config.version(),
-                update: updateChecker.getUpdateInfo(),
-                progress: progress.get(),
-                isCustomDomain: config.isCustomDomain(),
-                developerMode: config.developerMode(),
-                region: result.region,
-                size: result.size,
-                cloudronName: cloudronName
+            settings.getDeveloperMode(function (error, developerMode) {
+                if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
+
+                callback(null, {
+                    apiServerOrigin: config.apiServerOrigin(),
+                    webServerOrigin: config.webServerOrigin(),
+                    isDev: config.isDev(),
+                    fqdn: config.fqdn(),
+                    ip: sysinfo.getIp(),
+                    version: config.version(),
+                    update: updateChecker.getUpdateInfo(),
+                    progress: progress.get(),
+                    isCustomDomain: config.isCustomDomain(),
+                    developerMode: developerMode,
+                    region: result.region,
+                    size: result.size,
+                    cloudronName: cloudronName
+                });
             });
         });
     });
@@ -486,7 +491,7 @@ function doUpdate(boxUpdateInfo, callback) {
                     isCustomDomain: config.isCustomDomain(),
                     restoreUrl: null,
                     restoreKey: null,
-                    developerMode: config.developerMode() // this survives updates but not upgrades
+                    developerMode: false // TODO we now use settingsdb to store that, remove later, check argparser.sh!!
                 }
             };
 
