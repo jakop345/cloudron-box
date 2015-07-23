@@ -76,6 +76,9 @@ function getCloudronAvatar(req, res, next) {
     settings.getCloudronAvatar(function (error, avatar) {
         if (error) return next(new HttpError(500, error));
 
+        // avoid caching the avatar on the client to see avatar changes immediately
+        res.set('Cache-Control', 'no-cache');
+
         res.set('Content-Type', 'image/png');
         res.status(200).send(avatar);
     });
