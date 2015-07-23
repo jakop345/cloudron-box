@@ -17,6 +17,9 @@ http {
         '"$request" $status $body_bytes_sent $request_time '
         '"$http_referer" "$http_user_agent"';
 
+    # required for long host names
+    server_names_hash_bucket_size: 64;
+
     access_log access.log combined2;
 
     sendfile        on;
