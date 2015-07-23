@@ -490,8 +490,7 @@ function doUpdate(boxUpdateInfo, callback) {
                     tlsKey: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'), 'utf8'),
                     isCustomDomain: config.isCustomDomain(),
                     restoreUrl: null,
-                    restoreKey: null,
-                    developerMode: false // TODO we now use settingsdb to store that, remove later, check argparser.sh!!
+                    restoreKey: null
                 }
             };
 
