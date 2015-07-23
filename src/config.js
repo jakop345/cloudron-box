@@ -22,7 +22,6 @@ exports = module.exports = {
     version: version,
     isCustomDomain: isCustomDomain,
     database: database,
-    developerMode: developerMode,
 
     // these values are derived
     adminOrigin: adminOrigin,
@@ -76,7 +75,6 @@ function initConfig() {
         data.port = 3000;
         data.apiServerOrigin = null;
         data.database = null;
-        data.developerMode = false;
     } else if (exports.TEST) {
         data.port = 5454;
         data.apiServerOrigin = 'http://localhost:6060'; // hock doesn't support https
@@ -88,7 +86,6 @@ function initConfig() {
             name: 'boxtest'
         };
         data.token = 'APPSTORE_TOKEN';
-        data.developerMode = false;
     } else {
         assert(false, 'Unknown environment. This should not happen!');
     }
@@ -169,10 +166,6 @@ function zoneName() {
 
 function database() {
     return get('database');
-}
-
-function developerMode() {
-    return get('developerMode');
 }
 
 function isDev() {
