@@ -43,7 +43,7 @@ function initializeExpressSync() {
     app.set('view options', { layout: true, debug: true });
     app.set('view engine', 'ejs');
 
-    if (process.env.NODE_ENV === 'test') {
+    if (process.env.BOX_ENV === 'test') {
        app.use(express.static(path.join(__dirname, '/../webadmin')));
     } else {
         app.use(middleware.morgan('dev', { immediate: false }));

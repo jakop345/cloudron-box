@@ -108,7 +108,7 @@ CloudronError.NOT_FOUND = 'Not found';
 function initialize(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    if (process.env.NODE_ENV !== 'test') {
+    if (process.env.BOX_ENV !== 'test') {
         addMailDnsRecords();
     }
 

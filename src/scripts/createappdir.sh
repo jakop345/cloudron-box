@@ -17,7 +17,7 @@ if [[ "$1" == "--check" ]]; then
     exit 0
 fi
 
-if [[ "${NODE_ENV}" == "cloudron" ]]; then
+if [[ "${BOX_ENV}" == "cloudron" ]]; then
     readonly app_data_dir="${HOME}/data/$1"
     btrfs subvolume create "${app_data_dir}"
     mkdir -p "${app_data_dir}/data"

@@ -10,7 +10,7 @@ exports = module.exports = (function () {
     var docker;
     var options = connectOptions(); // the real docker
 
-    if (process.env.NODE_ENV === 'test') {
+    if (process.env.BOX_ENV === 'test') {
         // test code runs a docker proxy on this port
         docker = new Docker({ host: 'http://localhost', port: 5687 });
     } else {

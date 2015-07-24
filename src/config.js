@@ -11,8 +11,8 @@ exports = module.exports = {
     set: set,
 
     // ifdefs to check environment
-    CLOUDRON: process.env.NODE_ENV === 'cloudron',
-    TEST: process.env.NODE_ENV === 'test',
+    CLOUDRON: process.env.BOX_ENV === 'cloudron',
+    TEST: process.env.BOX_ENV === 'test',
 
     // convenience getters
     apiServerOrigin: apiServerOrigin,

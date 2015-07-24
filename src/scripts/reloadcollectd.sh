@@ -12,7 +12,7 @@ if [[ $# == 1 && "$1" == "--check" ]]; then
     exit 0
 fi
 
-if [[ "${NODE_ENV}" == "cloudron" ]]; then
+if [[ "${BOX_ENV}" == "cloudron" ]]; then
     /etc/init.d/collectd restart
 fi
 
