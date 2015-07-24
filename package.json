@@ -92,9 +92,9 @@
     "yargs": "^3.15.0"
   },
   "scripts": {
-    "migrate_local": "NODE_ENV=local DATABASE_URL=mysql://root:@localhost/box node_modules/.bin/db-migrate up",
-    "migrate_test": "NODE_ENV=test DATABASE_URL=mysql://root:@localhost/boxtest node_modules/.bin/db-migrate up",
-    "test": "npm run migrate_test && src/test/setupTest && NODE_ENV=test ./node_modules/istanbul/lib/cli.js test $1 ./node_modules/mocha/bin/_mocha -- -R spec ./src/test ./src/routes/test",
+    "migrate_local": "DATABASE_URL=mysql://root:@localhost/box node_modules/.bin/db-migrate up",
+    "migrate_test": "BOX_ENV=test DATABASE_URL=mysql://root:@localhost/boxtest node_modules/.bin/db-migrate up",
+    "test": "npm run migrate_test && src/test/setupTest && BOX_ENV=test ./node_modules/istanbul/lib/cli.js test $1 ./node_modules/mocha/bin/_mocha -- -R spec ./src/test ./src/routes/test",
     "postmerge": "/bin/true",
     "precommit": "/bin/true",
     "prepush": "npm test",

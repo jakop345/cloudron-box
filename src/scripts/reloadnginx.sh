@@ -17,7 +17,7 @@ if [[ "${OSTYPE}" == "darwin"* ]]; then
     export PATH=$PATH:/usr/local/bin
 fi
 
-if [[ "${NODE_ENV}" == "cloudron" ]]; then
+if [[ "${BOX_ENV}" == "cloudron" ]]; then
     nginx -s reload
 fi
 

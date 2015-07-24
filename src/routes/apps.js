@@ -117,7 +117,7 @@ function installApp(req, res, next) {
     if ('icon' in data && typeof data.icon !== 'string') return next(new HttpError(400, 'icon is not a string'));
 
     // allow tests to provide an appId for testing
-    var appId = (process.env.NODE_ENV === 'test' && typeof data.appId === 'string') ? data.appId : uuid.v4();
+    var appId = (process.env.BOX_ENV === 'test' && typeof data.appId === 'string') ? data.appId : uuid.v4();
 
     debug('Installing app id:%s storeid:%s loc:%s port:%j restrict:%s manifest:%j', appId, data.appStoreId, data.location, data.portBindings, data.accessRestriction, data.manifest);
 

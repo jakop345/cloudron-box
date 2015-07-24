@@ -77,7 +77,7 @@ set_progress "25" "Migrating data"
 sudo -u "${USER}" -H bash <<EOF
 set -eu
 cd "${BOX_SRC_DIR}"
-NODE_ENV=cloudron DATABASE_URL=mysql://root:${mysql_root_password}@localhost/box "${BOX_SRC_DIR}/node_modules/.bin/db-migrate" up
+BOX_ENV=cloudron DATABASE_URL=mysql://root:${mysql_root_password}@localhost/box "${BOX_SRC_DIR}/node_modules/.bin/db-migrate" up
 EOF
 
 set_progress "28" "Setup collectd"
