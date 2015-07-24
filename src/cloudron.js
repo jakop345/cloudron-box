@@ -595,10 +595,10 @@ function backupBoxAndApps(callback) {
             ++processed;
 
             apps.backupApp(app, app.manifest.addons, function (error, backupId) {
-                progress.set(progress.BACKUP, step * processed, app.location);
+                progress.set(progress.BACKUP, step * processed, 'Backing up app at ' + app.location);
 
                 if (error && error.reason === AppsError.BAD_STATE) {
-                    debugApp(app, 'Skipping backup (istate:%s health%s). Reusing %s', app.installationState, app.health, app.lastBackupId);
+                    debugApp(app, 'Skipping backup (istate:%s health:%s). using lastBackupId:%s', app.installationState, app.health, app.lastBackupId);
                     backupId = app.lastBackupId;
                 }
 
