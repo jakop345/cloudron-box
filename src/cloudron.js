@@ -573,7 +573,7 @@ function backupBox(callback) {
         if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
         var appBackupIds = allApps.map(function (app) { return app.lastBackupId; });
-        appBackupIds = appBackupIds.filter(function (id) { return id !== null }); // remove apps that were never backed up
+        appBackupIds = appBackupIds.filter(function (id) { return id !== null; }); // remove apps that were never backed up
 
         backupBoxWithAppBackupIds(appBackupIds, callback);
     });
