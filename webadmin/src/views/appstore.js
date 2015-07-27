@@ -25,11 +25,17 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         AppStore.getApps(function (error, apps) {
             if (error) return callback(error);
 
+            // ensure we have a tags property for further use
+            apps.forEach(function (app) {
+                if (!app.manifest.tags) app.manifest.tags = [];
+            });
+
             Client.getNonApprovedApps(function (error, result) {
                 if (error) return callback(error);
 
                 // add testing tag to the manifest for UI and search reasons
                 result.forEach(function (app) {
+                    if (!app.manifest.tags) app.manifest.tags = [];
                     app.manifest.tags.push('testing');
                 });
 
