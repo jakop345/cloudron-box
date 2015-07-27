@@ -80,6 +80,6 @@ function getNonApprovedApps(callback) {
         if (error) return callback(new DeveloperError(DeveloperError.INTERNAL_ERROR, error));
         if (result.status !== 200) return callback(new DeveloperError(DeveloperError.INTERNAL_ERROR, util.format('App listing failed. %s %j', result.status, result.body)));
 
-        callback(null, result.apps);
+        callback(null, result.body.apps || []);
     });
 }
