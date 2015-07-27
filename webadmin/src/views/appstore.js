@@ -162,15 +162,22 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
                 return $timeout(refresh, 1000);
             }
 
-            $scope.apps = apps;
+            Client.getNonApprovedApps(function (error, result) {
+                if (error) {
+                    console.error(error);
+                    return $timeout(refresh, 1000);
+                }
 
-            // show install app dialog immediately if an app id was passed in the query
-            if ($routeParams.appId) {
-                var found = apps.filter(function (app) { return (app.id === $routeParams.appId); });
-                if (found.length) $scope.showInstall(found[0]);
-            }
+                $scope.apps = apps.concat(result);
 
-            $scope.ready = true;
+                // show install app dialog immediately if an app id was passed in the query
+                if ($routeParams.appId) {
+                    var found = apps.filter(function (app) { return (app.id === $routeParams.appId); });
+                    if (found.length) $scope.showInstall(found[0]);
+                }
+
+                $scope.ready = true;
+            });
         });
     }
 
