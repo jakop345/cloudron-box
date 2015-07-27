@@ -20,6 +20,25 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         mediaLinks: []
     };
 
+
+    function getAppList(callback) {
+        AppStore.getApps(function (error, apps) {
+            if (error) return callback(error);
+
+            Client.getNonApprovedApps(function (error, result) {
+                if (error) return callback(error);
+
+                // add testing tag to the manifest for UI and search reasons
+                result.forEach(function (app) {
+                    app.manifest.tags.push('testing');
+                });
+
+                callback(null, apps.concat(result));
+            });
+        });
+    }
+
+    // TODO does not support testing apps in search
     $scope.search = function () {
         if (!$scope.searchString) return $scope.showCategory(null, $scope.cachedCategory);
 
@@ -49,7 +68,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
 
         $scope.ready = false;
 
-        AppStore.getApps(function (error, apps) {
+        getAppList(function (error, apps) {
             if (error) return $timeout($scope.showCategory.bind(null, event), 1000);
 
             if (!$scope.category) {
@@ -156,28 +175,21 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
     function refresh() {
         $scope.ready = false;
 
-        AppStore.getApps(function (error, apps) {
+        getAppList(function (error, apps) {
             if (error) {
                 console.error(error);
                 return $timeout(refresh, 1000);
             }
 
-            Client.getNonApprovedApps(function (error, result) {
-                if (error) {
-                    console.error(error);
-                    return $timeout(refresh, 1000);
-                }
+            $scope.apps = apps;
 
-                $scope.apps = apps.concat(result);
+            // show install app dialog immediately if an app id was passed in the query
+            if ($routeParams.appId) {
+                var found = apps.filter(function (app) { return (app.id === $routeParams.appId); });
+                if (found.length) $scope.showInstall(found[0]);
+            }
 
-                // show install app dialog immediately if an app id was passed in the query
-                if ($routeParams.appId) {
-                    var found = apps.filter(function (app) { return (app.id === $routeParams.appId); });
-                    if (found.length) $scope.showInstall(found[0]);
-                }
-
-                $scope.ready = true;
-            });
+            $scope.ready = true;
         });
     }
 

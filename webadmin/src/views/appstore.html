@@ -94,11 +94,13 @@
             <a href="" class="appstore-category-link" ng-click="showCategory($event);" ng-class="{'category-active': category === 'sync' }" category="sync">Media Sync</a>
             <a href="" class="appstore-category-link" ng-click="showCategory($event);" ng-class="{'category-active': category === 'git' }" category="git">Code Hosting</a>
             <a href="" class="appstore-category-link" ng-click="showCategory($event);" ng-class="{'category-active': category === 'wiki' }" category="wiki">Wiki</a>
+            <br/>
+            <a href="" class="appstore-category-link" ng-click="showCategory($event);" ng-class="{'category-active': category === 'testing' }" category="testing" ng-show="config.developerMode">Testing</a>
         </div>
         <div class="col-md-10" ng-show="ready && apps.length">
             <div class="row-no-margin">
                 <div class="col-sm-1 appstore-item" ng-repeat="app in apps">
-                    <div class="appstore-item-content highlight" ng-click="showInstall(app)">
+                    <div class="appstore-item-content highlight" ng-click="showInstall(app)" ng-class="{ 'appstore-item-content-testing': app.publishState === 'testing' }">
                         <div class="appstore-item-content-icon col-same-height">
                             <img ng-src="{{app.iconUrl}}" onerror="this.onerror=null;this.src='img/appicon_fallback.png'" class="app-icon"/>
                         </div>
