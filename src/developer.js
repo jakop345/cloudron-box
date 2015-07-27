@@ -7,12 +7,15 @@ exports = module.exports = {
 
     enabled: enabled,
     setEnabled: setEnabled,
-    issueDeveloperToken: issueDeveloperToken
+    issueDeveloperToken: issueDeveloperToken,
+    getNonApprovedApps: getNonApprovedApps
 };
 
 var assert = require('assert'),
+    config = require('./config.js'),
     tokendb = require('./tokendb.js'),
     settings = require('./settings.js'),
+    superagent = require('superagent'),
     util = require('util');
 
 function DeveloperError(reason, errorOrMessage) {
@@ -66,5 +69,17 @@ function issueDeveloperToken(user, callback) {
         if (error) return callback(new DeveloperError(DeveloperError.INTERNAL_ERROR, error));
 
         callback(null, { token: token, expiresAt: expiresAt });
+    });
+}
+
+function getNonApprovedApps(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/apps';
+    superagent.get(url).query({ token: config.token(), boxVersion: config.version() }).end(function (error, result) {
+        if (error) return callback(new DeveloperError(DeveloperError.INTERNAL_ERROR, error));
+        if (result.status !== 200) return callback(new DeveloperError(DeveloperError.INTERNAL_ERROR, util.format('App listing failed. %s %j', result.status, result.body)));
+
+        callback(null, result.apps);
     });
 }
