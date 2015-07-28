@@ -37,11 +37,9 @@ server {
     proxy_set_header Upgrade $http_upgrade;
     proxy_set_header Connection $connection_upgrade;
 
-    error_page 500 502 503 504 =200 @appstatus;
+    error_page 500 502 503 504 @appstatus;
     location @appstatus {
-        internal;
-        root <%= sourceDir %>/webadmin/dist;
-        rewrite ^/$ /appstatus.html break;
+        return 307 <%= adminOrigin %>/appstatus.html?referrer=https://$host$request_uri;
     }
 
     location / {

@@ -93,7 +93,7 @@ function configureNginx(app, callback) {
 
         var sourceDir = path.resolve(__dirname, '..');
         var endpoint = app.accessRestriction ? 'oauthproxy' : 'app';
-        var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, vhost: config.appFqdn(app.location), port: freePort, endpoint: endpoint });
+        var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, adminOrigin: config.adminOrigin(), vhost: config.appFqdn(app.location), port: freePort, endpoint: endpoint });
 
         var nginxConfigFilename = path.join(paths.NGINX_APPCONFIG_DIR, app.id + '.conf');
         debugApp(app, 'writing config to %s', nginxConfigFilename);
