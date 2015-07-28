@@ -156,8 +156,14 @@ html {
     cursor: pointer;
 }
 
+.appstore-item-badge-testing {
+    position: absolute;
+    right: 15px;
+    top: 15px;
+}
+
 .appstore-item-content-testing {
-    background-color: rgb(201, 201, 201);
+    background-color: #E6E6E6;
     background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
     background-size: 64px 64px;
 }
@@ -255,6 +261,10 @@ html {
 
 .badge-success {
     background-color: #5CB85C;
+}
+
+.badge-danger {
+    background-color: $brand-danger;
 }
 
 .progress {

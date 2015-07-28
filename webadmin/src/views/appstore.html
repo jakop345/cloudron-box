@@ -5,7 +5,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <img ng-src="{{appInstall.app.iconUrl}}" onerror="this.onerror=null;this.src='img/appicon_fallback.png'" class="app-icon"/>
-                <h3 class="appstore-install-title">{{ appInstall.app.manifest.title }}</h3>
+                <h3 class="appstore-install-title">{{ appInstall.app.manifest.title }} <span class="badge badge-danger" ng-show="appInstall.app.publishState === 'testing'">Testing</span></h3>
                 <br/>
                 <span class="appstore-install-meta">{{ appInstall.app.manifest.author }}</span>
                 <br/>
@@ -103,6 +103,7 @@
             <div class="row-no-margin">
                 <div class="col-sm-1 appstore-item" ng-repeat="app in apps">
                     <div class="appstore-item-content highlight" ng-click="showInstall(app)" ng-class="{ 'appstore-item-content-testing': app.publishState === 'testing' }">
+                        <span class="badge badge-danger appstore-item-badge-testing" ng-show="app.publishState === 'testing'">Testing</span>
                         <div class="appstore-item-content-icon col-same-height">
                             <img ng-src="{{app.iconUrl}}" onerror="this.onerror=null;this.src='img/appicon_fallback.png'" class="app-icon"/>
                         </div>
