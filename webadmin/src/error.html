@@ -40,6 +40,7 @@
 
         app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
             $scope.apiOrigin = detectApiOrigin();
+            $scope.cloudronAvatar = $scope.apiOrigin + '/api/v1/cloudron/avatar';
             $scope.cloudronName = 'Cloudron';
             $scope.webServerOriginLink = '/';
             $scope.errorMessage = '';
@@ -76,7 +77,7 @@
 
 <div class="wrapper">
     <div class="content">
-        <img src="/img/logo_inverted_192.png"/>
+        <img ng-src="{{ cloudronAvatar || '/img/logo_inverted_192.png' }}"/>
         <h1> {{cloudronName}} </h1>
 
         <div ng-show="errorCode == 0">
