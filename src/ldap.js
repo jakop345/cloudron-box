@@ -43,11 +43,13 @@ function start(callback) {
                     dn: dn.toString(),
                     attributes: {
                         objectclass: ['user'],
+                        objectcategory: 'person',
                         cn: entry.id,
                         uid: entry.id,
                         mail: entry.email,
                         displayname: entry.username,
-                        username: entry.username
+                        username: entry.username,
+                        samaccountname: entry.username      // to support ActiveDirectory clients
                     }
                 };
 
