@@ -422,10 +422,14 @@ function update(boxUpdateInfo, callback) {
     // initiate the update/upgrade but do not wait for it
     if (boxUpdateInfo.upgrade) {
         doUpgrade(boxUpdateInfo, function (error) {
+            if (error) debug('Upgrade failed with error: %s', error);
+
             locker.unlock(locker.OP_BOX_UPDATE);
         });
     } else {
         doUpdate(boxUpdateInfo, function (error) {
+            if (error) debug('Update failed with error: %s', error);
+
             locker.unlock(locker.OP_BOX_UPDATE);
         });
     }
