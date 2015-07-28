@@ -210,6 +210,16 @@ html {
     padding-top: 0;
 }
 
+.appstore-install-title {
+    display: inline-block;
+    margin: 5px 10px;
+}
+
+.appstore-install-meta {
+    margin-left: 10px;
+    color: $text-muted;
+}
+
 .appstore-category-link:hover,
 .appstore-category-link:focus,
 .appstore-category-link.category-active {
@@ -323,10 +333,11 @@ html {
 }
 
 .app-icon {
-    min-height: 64px;
-    max-height: 64px;
-    min-width: 64px;
+    min-height: 80px;
+    max-height: 80px;
+    min-width: 80px;
     max-width: 100%;
+    float: left;
 }
 
 // ----------------------------
