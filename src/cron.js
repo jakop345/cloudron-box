@@ -98,12 +98,15 @@ function autoupdatePatternChanged(pattern) {
     gAutoupdaterJob = new CronJob({
         cronTime: pattern,
         onTick: function() {
-            debug('Starting autoupdate');
             var updateInfo = updateChecker.getUpdateInfo();
             if (updateInfo.box) {
+                debug('Starting autoupdate to %j', updateInfo.box);
                 cloudron.update(updateInfo.box, NOOP_CALLBACK);
             } else if (updateInfo.apps) {
+                debug('Starting app update to %j', updateInfo.apps);
                 apps.autoupdateApps(updateInfo.apps, NOOP_CALLBACK);
+            } else {
+                debug('No auto updates available');
             }
         },
         start: true,
