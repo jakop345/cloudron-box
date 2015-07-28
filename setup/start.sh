@@ -19,6 +19,7 @@ source "${script_dir}/argparser.sh" "$@" # this injects the arg_* variables used
 
 # keep this is sync with config.js appFqdn()
 admin_fqdn=$([[ "${arg_is_custom_domain}" == "true" ]] && echo "${ADMIN_LOCATION}.${arg_fqdn}" ||  echo "${ADMIN_LOCATION}-${arg_fqdn}")
+admin_origin="https://${admin_fqdn}"
 
 readonly is_update=$([[ -d "${DATA_DIR}/box" ]] && echo "true" || echo "false")
 
@@ -95,7 +96,7 @@ ${BOX_SRC_DIR}/node_modules/.bin/ejs-cli -f "${script_dir}/start/nginx/nginx.ejs
 
 # generate these for update code paths as well to overwrite splash
 ${BOX_SRC_DIR}/node_modules/.bin/ejs-cli -f "${script_dir}/start/nginx/appconfig.ejs" \
-    -O "{ \"vhost\": \"${admin_fqdn}\", \"endpoint\": \"admin\", \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${DATA_DIR}/nginx/applications/admin.conf"
+    -O "{ \"vhost\": \"${admin_fqdn}\", \"adminOrigin\": \"${admin_origin}\", \"endpoint\": \"admin\", \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${DATA_DIR}/nginx/applications/admin.conf"
 
 mkdir -p "${DATA_DIR}/nginx/cert"
 echo "${arg_tls_cert}" > ${DATA_DIR}/nginx/cert/host.cert
@@ -108,7 +109,6 @@ set_progress "40" "Setting up infra"
 ${script_dir}/start/setup_infra.sh "${arg_fqdn}"
 
 set_progress "65" "Creating cloudron.conf"
-admin_origin="https://${admin_fqdn}"
 sudo -u yellowtent -H bash <<EOF
 set -eu
 echo "Creating cloudron.conf"
