@@ -40,6 +40,7 @@
 
         app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
             $scope.apiOrigin = detectApiOrigin();
+            $scope.cloudronAvatar = $scope.apiOrigin + '/api/v1/cloudron/avatar';
             $scope.cloudronName = 'Cloudron';
 
             $http.get($scope.apiOrigin + '/api/v1/cloudron/status').success(function(data, status) {
@@ -58,7 +59,7 @@
 
 <div class="wrapper">
     <div class="content">
-        <img src="/img/logo_inverted_192.png"/>
+        <img ng-src="{{ cloudronAvatar || '/img/logo_inverted_192.png' }}"/>
         <h1> {{cloudronName}} </h1>
         <p>
             There is no app configured for this domain. If you want to put an app at this location,<br/>
