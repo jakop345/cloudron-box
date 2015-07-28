@@ -421,16 +421,18 @@ function update(boxUpdateInfo, callback) {
     if (boxUpdateInfo.upgrade) {
         debug('Starting upgrade');
         doUpgrade(boxUpdateInfo, function (error) {
-            if (error) debug('Upgrade failed with error: %s', error);
-
-            locker.unlock(locker.OP_BOX_UPDATE);
+            if (error) {
+                debug('Upgrade failed with error: %s', error);
+                locker.unlock(locker.OP_BOX_UPDATE);
+            }
         });
     } else {
         debug('Starting update');
         doUpdate(boxUpdateInfo, function (error) {
-            if (error) debug('Update failed with error: %s', error);
-
-            locker.unlock(locker.OP_BOX_UPDATE);
+            if (error) {
+                debug('Update failed with error: %s', error);
+                locker.unlock(locker.OP_BOX_UPDATE);
+            }
         });
     }
 
