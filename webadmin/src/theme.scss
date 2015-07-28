@@ -107,6 +107,12 @@ html {
     padding: 5px 15px;
 }
 
+.navbar-nav > li > a {
+    @media(min-width:768px) {
+        padding: 13px 15px;
+    }
+}
+
 // ----------------------------
 // Apps view
 // ----------------------------
