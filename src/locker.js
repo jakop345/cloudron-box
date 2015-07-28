@@ -50,6 +50,6 @@ Locker.prototype.unlock = function (operation) {
     this.emit('unlocked', operation);
 
     return null;
-}
+};
 
 exports = module.exports = new Locker();
