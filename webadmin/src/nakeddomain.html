@@ -59,7 +59,7 @@
 
 <div class="wrapper">
     <div class="content">
-        <img ng-src="{{ cloudronAvatar || '/img/logo_inverted_192.png' }}"/>
+        <img ng-src="{{ cloudronAvatar || '/img/logo_inverted_192.png' }}" onerror="this.src = '/img/logo_inverted_192.png'"/>
         <h1> {{cloudronName}} </h1>
         <p>
             There is no app configured for this domain. If you want to put an app at this location,<br/>
