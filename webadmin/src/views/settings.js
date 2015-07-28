@@ -192,9 +192,8 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
                 if (error) {
                     console.error('Unable to change developer mode.', error);
                 } else {
-                    $scope.avatar = $scope.avatarChange.avatar;
-                    avatarChangeReset();
-                    $('#avatarChangeModal').modal('hide');
+                    // Do soft reload, since the browser will not update the avatar URLs in the UI
+                    window.location.reload();
                 }
 
                 $scope.avatarChange.busy = false;
