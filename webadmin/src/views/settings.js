@@ -219,6 +219,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
 
                     // check if we are done
                     if (!data.backup || data.backup.percent >= 100) {
+                        if (data.backup && data.backup.message) console.error('Backup message: ' + data.backup.message); // backup error message
                         fetchBackups();
                         $scope.createBackup.busy = false;
                         return;
