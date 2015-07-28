@@ -39,8 +39,11 @@
         }
 
         app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
+            var search = decodeURIComponent(window.location.search).slice(1).split('&').map(function (item) { return item.split('='); }).reduce(function (o, k) { o[k[0]] = k[1]; return o; }, {});
+
             $scope.apiOrigin = detectApiOrigin();
             $scope.cloudronName = 'Cloudron';
+            $scope.referrer = search.referrer || null;
 
             // try to fetch cloudron status
             $http.get($scope.apiOrigin + '/api/v1/cloudron/status').success(function(data, status) {
@@ -64,7 +67,7 @@
         <h1> {{cloudronName}} </h1>
 
         <h3> <i class="fa fa-frown-o fa-fw text-danger"></i> Something has gone wrong </h3>
-        This app is currently not running. Please retry later.
+        This app is currently not running. <a href="{{ referrer }}">Please retry later</a>.
 
         <footer>
             <span class="text-muted"><a href="mailto: support@cloudron.io">Contact Support</a> - Copyright &copy; Cloudron 2014-15</span>
