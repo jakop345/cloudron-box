@@ -20,7 +20,8 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     };
 
     $scope.createBackup = {
-        busy: false
+        busy: false,
+        percent: 100
     };
 
     $scope.nameChange = {
