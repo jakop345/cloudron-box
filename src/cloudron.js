@@ -421,20 +421,14 @@ function update(boxUpdateInfo, callback) {
     if (boxUpdateInfo.upgrade) {
         debug('Starting upgrade');
         doUpgrade(boxUpdateInfo, function (error) {
-            if (error) {
-                debug('Upgrade failed with error: %s', error);
-                progress.clear(progress.UPDATE);
-            }
+            if (error) debug('Upgrade failed with error: %s', error);
 
             locker.unlock(locker.OP_BOX_UPDATE);
         });
     } else {
         debug('Starting update');
         doUpdate(boxUpdateInfo, function (error) {
-            if (error) {
-                debug('Update failed with error: %s', error);
-                progress.clear(progress.UPDATE);
-            }
+            if (error) debug('Update failed with error: %s', error);
 
             locker.unlock(locker.OP_BOX_UPDATE);
         });
@@ -446,6 +440,11 @@ function update(boxUpdateInfo, callback) {
 function doUpgrade(boxUpdateInfo, callback) {
     assert(boxUpdateInfo !== null && typeof boxUpdateInfo === 'object');
 
+    function upgradeError(e) {
+        progress.set(progress.UPDATE, 100, e.message);
+        callback(e);
+    }
+
     progress.set(progress.UPDATE, 5, 'Create app and box backup for upgrade');
 
     backupBoxAndApps(function (error) {
@@ -455,8 +454,8 @@ function doUpgrade(boxUpdateInfo, callback) {
           .query({ token: config.token() })
           .send({ version: boxUpdateInfo.version })
           .end(function (error, result) {
-            if (error) return callback(new Error('Error making upgrade request: ' + error));
-            if (result.status !== 202) return callback(new Error('Server not ready to upgrade: ' + result.body));
+            if (error) return upgradeError(new Error('Error making upgrade request: ' + error));
+            if (result.status !== 202) return upgradeError(new Error('Server not ready to upgrade: ' + result.body));
 
             progress.set(progress.UPDATE, 10, 'Updating base system');
 
@@ -470,6 +469,11 @@ function doUpgrade(boxUpdateInfo, callback) {
 function doUpdate(boxUpdateInfo, callback) {
     assert(boxUpdateInfo && typeof boxUpdateInfo === 'object');
 
+    function upgradeError(e) {
+        progress.set(progress.UPDATE, 100, e.message);
+        callback(e);
+    }
+
     progress.set(progress.UPDATE, 5, 'Create box backup for update');
 
     backupBox(function (error) {
@@ -479,9 +483,9 @@ function doUpdate(boxUpdateInfo, callback) {
         superagent.get(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/sourcetarballurl')
           .query({ token: config.token(), boxVersion: boxUpdateInfo.version })
           .end(function (error, result) {
-            if (error) return callback(new Error('Error fetching sourceTarballUrl: ' + error));
-            if (result.status !== 200) return callback(new Error('Error fetching sourceTarballUrl status: ' + result.status));
-            if (!safe.query(result, 'body.url')) return callback(new Error('Error fetching sourceTarballUrl response: ' + result.body));
+            if (error) return upgradeError(new Error('Error fetching sourceTarballUrl: ' + error));
+            if (result.status !== 200) return upgradeError(new Error('Error fetching sourceTarballUrl status: ' + result.status));
+            if (!safe.query(result, 'body.url')) return upgradeError(new Error('Error fetching sourceTarballUrl response: ' + result.body));
 
             // NOTE: the args here are tied to the installer revision, box code and appstore provisioning logic
             var args = {
@@ -614,12 +618,15 @@ function backupBoxAndApps(callback) {
                 return iteratorCallback(null, backupId);
             });
         }, function appsBackedUp(error, backupIds) {
-            if (error) return callback(error);
+            if (error) {
+                progress.set(progress.BACKUP, 100, error.message);
+                return callback(error);
+            }
 
             backupIds = backupIds.filter(function (id) { return id !== null; }); // remove apps that were never backed up
 
             backupBoxWithAppBackupIds(backupIds, function (error, restoreKey) {
-                progress.set(progress.BACKUP, 100, '');
+                progress.set(progress.BACKUP, 100, error ? error.message : '');
                 callback(error, restoreKey);
             });
         });
