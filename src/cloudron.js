@@ -417,18 +417,24 @@ function update(boxUpdateInfo, callback) {
     var error = locker.lock(locker.OP_BOX_UPDATE);
     if (error) return callback(new CloudronError(CloudronError.BAD_STATE, error.message));
 
-    progress.set(progress.UPDATE, 0, 'Begin ' + (boxUpdateInfo.update ? 'upgrade': 'update'));
-
     // initiate the update/upgrade but do not wait for it
     if (boxUpdateInfo.upgrade) {
+        debug('Starting upgrade');
         doUpgrade(boxUpdateInfo, function (error) {
-            if (error) debug('Upgrade failed with error: %s', error);
+            if (error) {
+                debug('Upgrade failed with error: %s', error);
+                progress.clear(progress.UPDATE);
+            }
 
             locker.unlock(locker.OP_BOX_UPDATE);
         });
     } else {
+        debug('Starting update');
         doUpdate(boxUpdateInfo, function (error) {
-            if (error) debug('Update failed with error: %s', error);
+            if (error) {
+                debug('Update failed with error: %s', error);
+                progress.clear(progress.UPDATE);
+            }
 
             locker.unlock(locker.OP_BOX_UPDATE);
         });
@@ -440,7 +446,7 @@ function update(boxUpdateInfo, callback) {
 function doUpgrade(boxUpdateInfo, callback) {
     assert(boxUpdateInfo !== null && typeof boxUpdateInfo === 'object');
 
-    progress.set(progress.UPDATE, 5, 'Create app and box backup');
+    progress.set(progress.UPDATE, 5, 'Create app and box backup for upgrade');
 
     backupBoxAndApps(function (error) {
         if (error) return callback(error);
@@ -464,7 +470,7 @@ function doUpgrade(boxUpdateInfo, callback) {
 function doUpdate(boxUpdateInfo, callback) {
     assert(boxUpdateInfo && typeof boxUpdateInfo === 'object');
 
-    progress.set(progress.UPDATE, 5, 'Create box backup');
+    progress.set(progress.UPDATE, 5, 'Create box backup for update');
 
     backupBox(function (error) {
         if (error) return callback(error);
