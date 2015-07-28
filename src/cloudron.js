@@ -493,19 +493,19 @@ function doUpdate(boxUpdateInfo, callback) {
             var args = {
                 sourceTarballUrl: result.body.url,
 
-                // this data is opaque to the installer
+                // IMPORTANT: if you change this, fix up argparser.sh as well. keep these sorted for readability
                 data: {
-                    boxVersionsUrl: config.get('boxVersionsUrl'),
-                    version: boxUpdateInfo.version,
                     apiServerOrigin: config.apiServerOrigin(),
-                    webServerOrigin: config.webServerOrigin(),
+                    boxVersionsUrl: config.get('boxVersionsUrl'),
                     fqdn: config.fqdn(),
-                    token: config.token(),
-                    tlsCert: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), 'utf8'),
-                    tlsKey: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'), 'utf8'),
                     isCustomDomain: config.isCustomDomain(),
+                    restoreKey: null,
                     restoreUrl: null,
-                    restoreKey: null
+                    tlsKey: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'), 'utf8'),
+                    tlsCert: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), 'utf8'),
+                    token: config.token(),
+                    version: boxUpdateInfo.version,
+                    webServerOrigin: config.webServerOrigin()
                 }
             };
 
