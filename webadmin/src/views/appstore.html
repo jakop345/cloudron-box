@@ -4,10 +4,12 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title" id="appInstallModalLabel">
-                    <img ng-src="{{appInstall.app.iconUrl}}" onerror="this.onerror=null;this.src='img/appicon_fallback.png'" class="app-icon"/>
-                    {{ appInstall.app.manifest.title }}
-                </h3>
+                <img ng-src="{{appInstall.app.iconUrl}}" onerror="this.onerror=null;this.src='img/appicon_fallback.png'" class="app-icon"/>
+                <h3 class="appstore-install-title">{{ appInstall.app.manifest.title }}</h3>
+                <br/>
+                <span class="appstore-install-meta">{{ appInstall.app.manifest.author }}</span>
+                <br/>
+                <span class="appstore-install-meta">{{ appInstall.app.manifest.version }}</span>
             </div>
             <div class="modal-body">
                 <div class="collapse" id="collapseInstallForm" data-toggle="false">
