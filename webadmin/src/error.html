@@ -30,23 +30,13 @@
         // create main application module
         var app = angular.module('Application', []);
 
-        // FIXME this does not work with custom domains!
-        function detectApiOrigin() {
-            var host = window.location.host;
-            var tmp = host.split('.')[0];
-            if (tmp.indexOf('-') === -1) return 'https://my-' + host;
-            else return 'https://my' + tmp.slice(tmp.indexOf('-')) + host.slice(tmp.length);
-        }
-
         app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
-            $scope.apiOrigin = detectApiOrigin();
-            $scope.cloudronAvatar = $scope.apiOrigin + '/api/v1/cloudron/avatar';
             $scope.cloudronName = 'Cloudron';
             $scope.webServerOriginLink = '/';
             $scope.errorMessage = '';
 
             // try to fetch at least config.json to get appstore url
-            $http.get($scope.apiOrigin + '/config.json').success(function(data, status) {
+            $http.get('/config.json').success(function(data, status) {
                 if (status !== 200 || typeof data !== 'object') return console.error(status, data);
                 $scope.webServerOriginLink = data.webServerOrigin + '/console.html';
             }).error(function (data, status) {
@@ -55,7 +45,7 @@
             });
 
             // try to fetch cloudron status
-            $http.get($scope.apiOrigin + '/api/v1/cloudron/status').success(function(data, status) {
+            $http.get('/api/v1/cloudron/status').success(function(data, status) {
                 if (status !== 200 || typeof data !== 'object') return console.error(status, data);
                 $scope.cloudronName  = data.cloudronName;
                 document.title = $scope.cloudronName + ' Error';
@@ -77,7 +67,7 @@
 
 <div class="wrapper">
     <div class="content">
-        <img ng-src="{{ cloudronAvatar || '/img/logo_inverted_192.png' }}" onerror="this.src = '/img/logo_inverted_192.png'"/>
+        <img src="/api/v1/cloudron/avatar" onerror="this.src = '/img/logo_inverted_192.png'"/>
         <h1> {{cloudronName}} </h1>
 
         <div ng-show="errorCode == 0">
