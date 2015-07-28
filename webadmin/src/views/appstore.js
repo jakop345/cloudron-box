@@ -130,8 +130,6 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
             $scope.appInstall.portBindings[env] = $scope.appInstall.app.manifest.tcpPorts[env].defaultValue || 0;
             $scope.appInstall.portBindingsEnabled[env] = true;
         }
-
-
     };
 
     $scope.doInstall = function () {
@@ -191,8 +189,12 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
 
             // show install app dialog immediately if an app id was passed in the query
             if ($routeParams.appId) {
-                var found = apps.filter(function (app) { return (app.id === $routeParams.appId); });
-                if (found.length) $scope.showInstall(found[0]);
+                var found = apps.filter(function (app) {
+                    return (app.id === $routeParams.appId) && ($routeParams.version ? $routeParams.version === app.manifest.version : true);
+                });
+                if (found.length) {
+                    $scope.showInstall(found[0]);
+                }
             }
 
             $scope.ready = true;
