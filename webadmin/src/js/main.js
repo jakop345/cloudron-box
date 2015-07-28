@@ -86,8 +86,8 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
                 if (error && error.statusCode === 401) return $scope.login();
                 if (error) return $scope.error(error);
 
-                // check if we are actually updateing
-                if (Client.getConfig().progress.update) window.location.href = '/update.html';
+                // check if we are actually updating
+                if (Client.getConfig().progress.update && Client.getConfig().progress.update.percent < 100) window.location.href = '/update.html';
 
                 Client.refreshUserInfo(function (error, result) {
                     if (error) return $scope.error(error);
@@ -122,7 +122,7 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
 
     // wait till the view has loaded until showing a modal dialog
     Client.onConfig(function (config) {
-        if (config.progress.update) {
+        if (config.progress.update && config.progress.update.percent < 100) {
             window.location.href = '/update.html';
         }
 
