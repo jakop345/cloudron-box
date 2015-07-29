@@ -450,7 +450,7 @@ function doUpgrade(boxUpdateInfo, callback) {
     progress.set(progress.UPDATE, 5, 'Create app and box backup for upgrade');
 
     backupBoxAndApps(function (error) {
-        if (error) return callback(error);
+        if (error) return upgradeError(error);
 
         superagent.post(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/upgrade')
           .query({ token: config.token() })
@@ -479,7 +479,7 @@ function doUpdate(boxUpdateInfo, callback) {
     progress.set(progress.UPDATE, 5, 'Create box backup for update');
 
     backupBox(function (error) {
-        if (error) return callback(error);
+        if (error) return upgradeError(error);
 
         // fetch a signed sourceTarballUrl
         superagent.get(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/sourcetarballurl')
@@ -512,8 +512,8 @@ function doUpdate(boxUpdateInfo, callback) {
             debug('updating box %j', args);
 
             superagent.post(INSTALLER_UPDATE_URL).send(args).end(function (error, result) {
-                if (error) return callback(error);
-                if (result.status !== 202) return callback(new Error('Error initiating update: ' + result.body));
+                if (error) return upgradeError(error);
+                if (result.status !== 202) return upgradeError(new Error('Error initiating update: ' + result.body));
 
                 progress.set(progress.UPDATE, 10, 'Updating cloudron software');
 
