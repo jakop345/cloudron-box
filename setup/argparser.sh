@@ -8,7 +8,6 @@ arg_api_server_origin=""
 arg_box_versions_url=""
 arg_fqdn=""
 arg_is_custom_domain="false"
-arg_model=""
 arg_restore_key=""
 arg_restore_url=""
 arg_retire="false"
@@ -42,9 +41,6 @@ EOF
         arg_restore_key=$(echo "$2" | $json restoreKey)
         [[ "${arg_restore_key}" == "null" ]] && arg_restore_key=""
 
-        arg_model=$(echo "$2" | $json model)
-        [[ "${arg_model}" == "null" ]] && arg_model=""
-
         shift 2
         ;;
     --) break;;
@@ -57,7 +53,6 @@ echo "api server: ${arg_api_server_origin}"
 echo "box versions url: ${arg_box_versions_url}"
 echo "fqdn: ${arg_fqdn}"
 echo "custom domain: ${arg_is_custom_domain}"
-echo "model: ${arg_model}"
 echo "restore key: ${arg_restore_key}"
 echo "restore url: ${arg_restore_url}"
 echo "tls cert: ${arg_tls_cert}"
@@ -65,4 +60,3 @@ echo "tls key: ${arg_tls_key}"
 echo "token: ${arg_token}"
 echo "version: ${arg_version}"
 echo "web server: ${arg_web_server_origin}"
-
