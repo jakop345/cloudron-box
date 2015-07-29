@@ -33,13 +33,19 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="updateProgressModalLabel">Update in progress...</h4>
+                    <h4 class="modal-title">{{title}}</h4>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" ng-show="!error">
                     <div class="progress progress-striped active">
-                        <div class="progress-bar progress-bar-success" role="progressbar" id="updateProgressBar" style="width: 0%"></div>
+                        <div class="progress-bar progress-bar-success" role="progressbar" style="width: {{percent}}%"></div>
                     </div>
-                    <span id="updateProgressMessage"></span>
+                    <span>{{message}}</span>
+                </div>
+                <div class="modal-body" ng-show="error">
+                    <span>{{message}}</span>
+                </div>
+                <div class="modal-footer" ng-show="error">
+                    <button type="button" class="btn btn-primary" ng-click="loadWebadmin()">Ok</button>
                 </div>
             </div>
         </div>
