@@ -41,27 +41,51 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         }, {
             file: null,
             data: null,
-            url: '/img/avatars/cloudfacegreen.png'
+            url: '/img/avatars/rubber-duck.png'
         }, {
             file: null,
             data: null,
-            url: '/img/avatars/cloudfaceturquoise.png'
+            url: '/img/avatars/carrot.png'
         }, {
             file: null,
             data: null,
-            url: '/img/avatars/cloudglassesgreen.png'
+            url: '/img/avatars/cup.png'
         }, {
             file: null,
             data: null,
-            url: '/img/avatars/cloudglassespink.png'
+            url: '/img/avatars/football.png'
         }, {
             file: null,
             data: null,
-            url: '/img/avatars/cloudglassesturquoise.png'
+            url: '/img/avatars/owl.png'
         }, {
             file: null,
             data: null,
-            url: '/img/avatars/cloudglassesyellow.png'
+            url: '/img/avatars/space-rocket.png'
+        }, {
+            file: null,
+            data: null,
+            url: '/img/avatars/armchair.png'
+        }, {
+            file: null,
+            data: null,
+            url: '/img/avatars/cap.png'
+        }, {
+            file: null,
+            data: null,
+            url: '/img/avatars/pan.png'
+        }, {
+            file: null,
+            data: null,
+            url: '/img/avatars/meat.png'
+        }, {
+            file: null,
+            data: null,
+            url: '/img/avatars/umbrella.png'
+        }, {
+            file: null,
+            data: null,
+            url: '/img/avatars/jar.png'
         }]
     };
 
