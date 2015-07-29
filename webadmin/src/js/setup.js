@@ -181,9 +181,15 @@ app.controller('StepController', ['$scope', '$location', 'Wizard', function ($sc
             };
             fr.readAsDataURL(event.target.files[0]);
         };
-
-        $scope.wizard.setPreviewAvatar($scope.wizard.availableAvatars[0]);
     }
+
+    // ensure image got loaded before setting the preview avatar
+    var image = document.createElement('img');
+    image.onload = function() {
+        $scope.$apply(function () { $scope.wizard.setPreviewAvatar($scope.wizard.availableAvatars[0]); });
+        image = null;
+    };
+    image.src = $scope.wizard.availableAvatars[0].data || $scope.wizard.availableAvatars[0].url;
 }]);
 
 app.controller('FinishController', ['$scope', '$location', '$timeout', 'Wizard', 'Client', function ($scope, $location, $timeout, Wizard, Client) {
