@@ -32,7 +32,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
                         return callback(new ClientError(status, data));
                     }
 
-                    if (result.update) window.location.href = '/update.html';
+                    if (result.update && result.update.percent !== -1) window.location.href = '/update.html';
                     else callback(new ClientError(status, data));
                 }, function (data, status) {
                     client.error(data);
