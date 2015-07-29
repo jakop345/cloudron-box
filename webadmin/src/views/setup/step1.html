@@ -1,8 +1,47 @@
-<center>
-    <h1>Welcome to your Cloudron!</h1>
-    <br/>
-    <h3 class="">Let's personalize it a bit before you can install apps.</h3>
-    <br/>
-    <br/>
-    <a class="btn btn-primary" href="#/step2" autofocus>Next</a>
-</center>
+<div class="row">
+    <div class="col-md-12 text-center">
+        <h1>Welcome to your Cloudron!</h1>
+        <hr/>
+        <h3 class="">
+                Pick a name and avatar
+        </h3>
+    </div>
+</div>
+
+<br/>
+
+<div class="row">
+    <div class="col-md-4 col-md-offset-4 text-center">
+        <div class="form-group" ng-class="{ 'has-error': setup_form.name.$dirty && setup_form.name.$invalid }">
+            <!-- <label class="control-label" for="inputName">Name</label> -->
+            <input type="text" class="form-control" ng-model="wizard.name" id="inputName" name="name" placeholder="Name" ng-enter="next('/step3', setup_form.name.$invalid)" ng-maxlength="512" ng-minlength="1" autofocus required autocomplete="off">
+        </div>
+    </div>
+</div>
+
+
+<br/>
+
+<div class="row">
+    <div class="col-md-12 settings-avatar-selector">
+        <img id="previewAvatar" width="128" height="128" ng-src="{{wizard.avatar.data || wizard.avatar.url}}"/>
+        <input type="file" id="avatarFileInput" style="display: none" accept="image/png"/>
+
+        <br/>
+
+        <div class="grid">
+            <div class="item" ng-repeat="avatar in wizard.availableAvatars" style="background-image: url('{{avatar.data || avatar.url}}');" ng-click="wizard.setPreviewAvatar(avatar)"></div>
+            <div class="item add" ng-click="showCustomAvatarSelector()"></div>
+        </div>
+    </div>
+</div>
+
+<br/>
+<br/>
+
+
+<div class="row">
+    <div class="col-md-12 text-center">
+        <a class="btn btn-primary" href="#/step2" ng-disabled="setup_form.name.$invalid">Next</a>
+    </div>
+</div>

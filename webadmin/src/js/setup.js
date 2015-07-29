@@ -28,11 +28,8 @@ app.config(['$routeProvider', function ($routeProvider) {
         controller: 'StepController',
         templateUrl: 'views/setup/step2.html'
     }).when('/step3', {
-        controller: 'StepController',
-        templateUrl: 'views/setup/step3.html'
-    }).when('/step4', {
         controller: 'FinishController',
-        templateUrl: 'views/setup/step4.html'
+        templateUrl: 'views/setup/step3.html'
     }).otherwise({ redirectTo: '/'});
 }]);
 
