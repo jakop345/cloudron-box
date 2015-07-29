@@ -471,7 +471,7 @@ function doUpgrade(boxUpdateInfo, callback) {
 function doUpdate(boxUpdateInfo, callback) {
     assert(boxUpdateInfo && typeof boxUpdateInfo === 'object');
 
-    function upgradeError(e) {
+    function updateError(e) {
         progress.set(progress.UPDATE, 100, e.message);
         callback(e);
     }
@@ -479,15 +479,15 @@ function doUpdate(boxUpdateInfo, callback) {
     progress.set(progress.UPDATE, 5, 'Create box backup for update');
 
     backupBox(function (error) {
-        if (error) return upgradeError(error);
+        if (error) return updateError(error);
 
         // fetch a signed sourceTarballUrl
         superagent.get(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/sourcetarballurl')
           .query({ token: config.token(), boxVersion: boxUpdateInfo.version })
           .end(function (error, result) {
-            if (error) return upgradeError(new Error('Error fetching sourceTarballUrl: ' + error));
-            if (result.status !== 200) return upgradeError(new Error('Error fetching sourceTarballUrl status: ' + result.status));
-            if (!safe.query(result, 'body.url')) return upgradeError(new Error('Error fetching sourceTarballUrl response: ' + result.body));
+            if (error) return updateError(new Error('Error fetching sourceTarballUrl: ' + error));
+            if (result.status !== 200) return updateError(new Error('Error fetching sourceTarballUrl status: ' + result.status));
+            if (!safe.query(result, 'body.url')) return updateError(new Error('Error fetching sourceTarballUrl response: ' + result.body));
 
             // NOTE: the args here are tied to the installer revision, box code and appstore provisioning logic
             var args = {
@@ -512,8 +512,8 @@ function doUpdate(boxUpdateInfo, callback) {
             debug('updating box %j', args);
 
             superagent.post(INSTALLER_UPDATE_URL).send(args).end(function (error, result) {
-                if (error) return upgradeError(error);
-                if (result.status !== 202) return upgradeError(new Error('Error initiating update: ' + result.body));
+                if (error) return updateError(error);
+                if (result.status !== 202) return updateError(new Error('Error initiating update: ' + result.body));
 
                 progress.set(progress.UPDATE, 10, 'Updating cloudron software');
 
