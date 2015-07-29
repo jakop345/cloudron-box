@@ -21,6 +21,7 @@ var progress = {
     backup: null
 };
 
+// We use -1 for percentage to indicate errors
 function set(tag, percent, message) {
     assert(tag === exports.UPDATE || tag === exports.BACKUP);
     assert.strictEqual(typeof percent, 'number');

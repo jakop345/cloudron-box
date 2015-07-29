@@ -443,7 +443,7 @@ function doUpgrade(boxUpdateInfo, callback) {
     assert(boxUpdateInfo !== null && typeof boxUpdateInfo === 'object');
 
     function upgradeError(e) {
-        progress.set(progress.UPDATE, 100, e.message);
+        progress.set(progress.UPDATE, -1, e.message);
         callback(e);
     }
 
@@ -472,7 +472,7 @@ function doUpdate(boxUpdateInfo, callback) {
     assert(boxUpdateInfo && typeof boxUpdateInfo === 'object');
 
     function updateError(e) {
-        progress.set(progress.UPDATE, 100, e.message);
+        progress.set(progress.UPDATE, -1, e.message);
         callback(e);
     }
 
