@@ -181,16 +181,17 @@ app.controller('StepController', ['$scope', '$location', 'Wizard', function ($sc
             };
             fr.readAsDataURL(event.target.files[0]);
         };
+
+        // ensure image got loaded before setting the preview avatar
+        var image = document.createElement('img');
+        var randomIndex = Math.floor(Math.random() * $scope.wizard.availableAvatars.length);
+        image.onload = function() {
+            $scope.$apply(function () { $scope.wizard.setPreviewAvatar($scope.wizard.availableAvatars[randomIndex]); });
+            image = null;
+        };
+        image.src = $scope.wizard.availableAvatars[randomIndex].data || $scope.wizard.availableAvatars[randomIndex].url;
     }
 
-    // ensure image got loaded before setting the preview avatar
-    var image = document.createElement('img');
-    var randomIndex = Math.floor(Math.random() * $scope.wizard.availableAvatars.length);
-    image.onload = function() {
-        $scope.$apply(function () { $scope.wizard.setPreviewAvatar($scope.wizard.availableAvatars[randomIndex]); });
-        image = null;
-    };
-    image.src = $scope.wizard.availableAvatars[randomIndex].data || $scope.wizard.availableAvatars[randomIndex].url;
 }]);
 
 app.controller('FinishController', ['$scope', '$location', '$timeout', 'Wizard', 'Client', function ($scope, $location, $timeout, Wizard, Client) {
