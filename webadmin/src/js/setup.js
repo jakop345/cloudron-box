@@ -103,8 +103,9 @@ app.service('Wizard', [ function () {
 
         this.avatar = avatar;
 
-        // scale image and get the blob now
-        var img = document.getElementById('previewAvatar');
+        // scale image and get the blob now. do not use the previewAvatar element here because it is not updated yet
+        var img = document.createElement('img');
+        img.src = avatar.data || avatar.url;
         var canvas = document.createElement('canvas');
         canvas.width = 256;
         canvas.height = 256;
@@ -143,7 +144,7 @@ app.service('Wizard', [ function () {
     return instance;
 }]);
 
-app.controller('StepController', ['$scope', '$location', 'Wizard', function ($scope, $location, Wizard) {
+app.controller('StepController', ['$scope', '$route', '$location', 'Wizard', function ($scope, $route, $location, Wizard) {
     $scope.wizard = Wizard;
 
     $scope.next = function (page, bad) {
@@ -164,7 +165,7 @@ app.controller('StepController', ['$scope', '$location', 'Wizard', function ($sc
     };
 
     // cheap way to detect if we are in avatar and name selection step
-    if ($('#previewAvatar').get(0) && $('#avatarFileInput').get(0)) {
+    if ($route.current.templateUrl === 'views/setup/step1.html') {
         $('#avatarFileInput').get(0).onchange = function (event) {
             var fr = new FileReader();
             fr.onload = function () {
