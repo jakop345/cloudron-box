@@ -8,10 +8,10 @@
 //         !! Do not set DEBUG
 
 var supervisor = require('supervisord-eventlistener'),
+    safe = require('safetydance'),
     assert = require('assert'),
     exec = require('child_process').exec,
     util = require('util'),
-    fs = require('fs'),
     mailer = require('./src/mailer.js');
 
 var gLastNotifyTime = {};
@@ -23,31 +23,36 @@ function collectLogs(program, callback) {
 
     var logFilePath = util.format('/var/log/supervisor/%s.log', program);
 
-    if (!fs.existsSync(logFilePath)) return callback(new Error(util.format('Log file %s does not exist.', logFilePath)));
+    var boxLogData = safe.fs.readFileSync(logFilePath, 'utf-8');
+    if (boxLogData === null) return callback(safe.error);
+    var boxLogLines = boxLogData.split('\n').slice(-100);
 
-    fs.readFile(logFilePath, 'utf-8', function (error, data) {
-        if (error) return callback(error);
+    var dockerLogPath = '/var/log/upstart/docker.log';
 
-        var lines = data.split('\n');
-        var boxLogLines = lines.slice(-100);
+    var dockerLogData = safe.fs.readFileSync(dockerLogPath, 'utf-8');
+    if (dockerLogData === null) return callback(safe.error);
+    var dockerLogLines = dockerLogData.split('\n').slice(-100);
 
-        exec('dmesg', function (error, stdout /*, stderr */) {
-            if (error) console.error(error);
+    exec('dmesg', function (error, stdout /*, stderr */) {
+        if (error) console.error(error);
 
-            var lines = stdout.split('\n');
-            var dmesgLogLines = lines.slice(-100);
+        var lines = stdout.split('\n');
+        var dmesgLogLines = lines.slice(-100);
 
-            var result = '';
-            result += program + '.log\n';
-            result += '-------------------------------------\n';
-            result += boxLogLines.join('\n');
-            result += '\n\n';
-            result += 'dmesg\n';
-            result += '-------------------------------------\n';
-            result += dmesgLogLines.join('\n');
+        var result = '';
+        result += program + '.log\n';
+        result += '-------------------------------------\n';
+        result += boxLogLines.join('\n');
+        result += '\n\n';
+        result += 'dmesg\n';
+        result += '-------------------------------------\n';
+        result += dmesgLogLines.join('\n');
+        result += '\n\n';
+        result += 'docker\n';
+        result += '-------------------------------------\n';
+        result += dockerLogLines.join('\n');
 
-            callback(null, result);
-        });
+        callback(null, result);
     });
 }
 
