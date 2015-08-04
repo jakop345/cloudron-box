@@ -37,6 +37,9 @@ app.config(['$routeProvider', function ($routeProvider) {
     }).when('/settings', {
         controller: 'SettingsController',
         templateUrl: 'views/settings.html'
+    }).when('/support', {
+        controller: 'SupportController',
+        templateUrl: 'views/support.html'
     }).when('/upgrade', {
         controller: 'UpgradeController',
         templateUrl: 'views/upgrade.html'
