@@ -214,7 +214,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         AppStore.getManifest(app.appStoreId, function (error, manifest) {
             if (error) return console.error(error);
 
-            $scope.appUpdate.manifest = manifest;
+            $scope.appUpdate.manifest = angular.copy(manifest);
 
             // ensure we always operate on objects here
             app.portBindings = app.portBindings || {};
