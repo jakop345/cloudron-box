@@ -282,12 +282,11 @@ function sendCrashNotification(program, context) {
     enqueue(mailOptions);
 }
 
-function sendFeedback(user, type, subject, description, callback) {
+function sendFeedback(user, type, subject, description) {
     assert.strictEqual(typeof user, 'object');
     assert.strictEqual(typeof type, 'string');
     assert.strictEqual(typeof subject, 'string');
     assert.strictEqual(typeof description, 'string');
-    assert.strictEqual(typeof callback, 'function');
 
     assert(type === exports.FEEDBACK_TYPE_TICKET || type === exports.FEEDBACK_TYPE_FEEDBACK);
 
