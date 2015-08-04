@@ -27,16 +27,16 @@
                     We would love to hear any ideas, feature requests and overall feedback from your side.
                     <br/>
                     <br/>
-                    <form ng-submit="submitFeedback()">
-                        <div class="form-group">
-                            <!-- <label for="feedbackSubject">Feedback</label> -->
-                            <input type="text" class="form-control" id="feedbackSubject" ng-model="feedback.subject" placeholder="Enter your idea">
+                    <form name="feedbackForm" ng-submit="submitFeedback()">
+                        <div class="form-group" ng-class="{ 'has-error': (feedbackForm.subject.$dirty && feedbackForm.subject.$invalid) }">
+                            <input type="text" class="form-control" name="subject" placeholder="Enter your idea" ng-model="feedback.subject" ng-maxlength="512" ng-minlength="1" required>
                         </div>
-                        <div class="form-group">
-                            <!-- <label for="feedbackDescription">Your Idea</label> -->
-                            <textarea class="form-control" id="feedbackDescription" rows="3" ng-model="feedback.description" placeholder="Describe your idea"></textarea>
+                        <div class="form-group" ng-class="{ 'has-error': (feedbackForm.description.$dirty && feedbackForm.description.$invalid) }">
+                            <textarea class="form-control" name="description" rows="3" placeholder="Describe your idea" ng-model="feedback.description" ng-minlength="1" required></textarea>
                         </div>
-                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <button type="submit" class="btn btn-primary" ng-disabled="feedbackForm.$invalid || feedback.busy"><i class="fa fa-spinner fa-pulse" ng-show="feedback.busy"></i> Submit</button>
+                        <span ng-show="feedback.error" class="text-danger text-bold">{{feedback.error}}</span>
+                        <span ng-show="feedback.success" class="text-success text-bold">Thank You!</span>
                     </form>
                 </div>
             </div>
@@ -53,19 +53,23 @@
                     If you found any issue or bugs, let us know, we will resolve that for you as soon as possible.
                     <br/>
                     <br/>
-                    <form ng-submit="submitTicket()">
-                        <div class="form-group">
-                            <!-- <label for="feedbackSubject">Feedback</label> -->
-                            <input type="text" class="form-control" id="feedbackSubject" ng-model="ticket.subject" placeholder="Enter your issue">
+                    <form name="ticketForm" ng-submit="submitTicket()">
+                        <div class="form-group" ng-class="{ 'has-error': (ticketForm.subject.$dirty && ticketForm.subject.$invalid) }">
+                            <input type="text" class="form-control" name="subject" placeholder="Enter your issue" ng-model="ticket.subject" ng-maxlength="512" ng-minlength="1" required>
                         </div>
-                        <div class="form-group">
-                            <!-- <label for="feedbackDescription">Your Idea</label> -->
-                            <textarea class="form-control" id="feedbackDescription" rows="3" ng-model="ticket.description" placeholder="Describe your issue"></textarea>
+                        <div class="form-group" ng-class="{ 'has-error': (ticketForm.description.$dirty && ticketForm.description.$invalid) }">
+                            <textarea class="form-control" name="description" rows="3" placeholder="Describe your issue" ng-model="ticket.description" ng-minlength="1" required></textarea>
                         </div>
-                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <button type="submit" class="btn btn-primary" ng-disabled="ticketForm.$invalid || ticket.busy"><i class="fa fa-spinner fa-pulse" ng-show="ticket.busy"></i> Submit</button>
+                        <span ng-show="ticket.error" class="text-danger text-bold">{{ticket.error}}</span>
+                        <span ng-show="ticket.success" class="text-success text-bold">Thank You!</span>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<br/>
+<br/>
+<br/>
