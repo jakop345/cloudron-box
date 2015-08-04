@@ -292,7 +292,7 @@ function sendFeedback(user, type, subject, description) {
 
     var mailOptions = {
         from: config.get('adminEmail'),
-        to: 'johannes@cloudron.io',
+        to: 'support@cloudron.io',
         subject: util.format('[%s] %s - %s', type, config.fqdn(), subject),
         text: render('feedback.ejs', { fqdn: config.fqdn(), type: type, user: user, subject: subject, description: description, format: 'text'})
     };
