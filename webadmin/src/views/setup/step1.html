@@ -23,7 +23,7 @@
     <div class="col-md-4 col-md-offset-4 text-center">
         <div class="form-group" ng-class="{ 'has-error': setup_form.name.$dirty && setup_form.name.$invalid }">
             <!-- <label class="control-label" for="inputName">Name</label> -->
-            <input type="text" class="form-control" ng-model="wizard.name" id="inputName" name="name" placeholder="Name" ng-enter="next('/step3', setup_form.name.$invalid)" ng-maxlength="512" ng-minlength="1" autofocus required autocomplete="off">
+            <input type="text" class="form-control" ng-model="wizard.name" id="inputName" name="name" placeholder="Name" ng-enter="next('/step2', setup_form.name.$invalid)" ng-maxlength="512" ng-minlength="1" autofocus required autocomplete="off">
         </div>
     </div>
 </div>
