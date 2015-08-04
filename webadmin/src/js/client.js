@@ -469,6 +469,32 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
+    Client.prototype.feedback = function (subject, description, callback) {
+        var data = {
+            type: 'feedback',
+            subject: subject,
+            description: description
+        };
+
+        $http.post(client.apiOrigin + '/api/v1/cloudron/feedback', data).success(function (data, status) {
+            if (status !== 201) return callback(new ClientError(status, data));
+            callback(null);
+        }).error(defaultErrorHandler(callback));
+    };
+
+    Client.prototype.ticket = function (subject, description, callback) {
+        var data = {
+            type: 'ticket',
+            subject: subject,
+            description: description
+        };
+
+        $http.post(client.apiOrigin + '/api/v1/cloudron/feedback', data).success(function (data, status) {
+            if (status !== 201) return callback(new ClientError(status, data));
+            callback(null);
+        }).error(defaultErrorHandler(callback));
+    };
+
     Client.prototype.createUser = function (username, email, callback) {
         var data = {
             username: username,
