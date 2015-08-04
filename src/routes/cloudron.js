@@ -163,9 +163,9 @@ function setCertificate(req, res, next) {
 function feedback(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
 
-    if (typeof req.body.type !== 'string') return next(new HttpError(400, 'type must be either "ticket" or "feedback"'));
-    if (typeof req.body.subject !== 'string') return next(new HttpError(400, 'subject must be string'));
-    if (typeof req.body.description !== 'string') return next(new HttpError(400, 'description must be string'));
+    if (req.body.type !== mailer.FEEDBACK_TYPE_FEEDBACK && req.body.type !== mailer.FEEDBACK_TYPE_TICKET) return next(new HttpError(400, 'type must be either "ticket" or "feedback"'));
+    if (typeof req.body.subject !== 'string' || !req.body.subject) return next(new HttpError(400, 'subject must be string'));
+    if (typeof req.body.description !== 'string' || !req.body.description) return next(new HttpError(400, 'description must be string'));
 
     mailer.sendFeedback(req.user, req.body.type, req.body.subject, req.body.description);
 

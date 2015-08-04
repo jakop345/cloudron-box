@@ -26,6 +26,7 @@ var token = null; // authentication token
 
 var server;
 function setup(done) {
+    nock.cleanAll();
     config.set('version', '0.5.0');
     server.start(done);
 }
@@ -498,6 +499,147 @@ describe('Cloudron', function () {
                 }
 
                 checkAppstoreServerCalled();
+            });
+        });
+    });
+
+    describe('feedback', function () {
+        before(function (done) {
+            async.series([
+                setup,
+
+                function (callback) {
+                    var scope1 = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
+                    var scope2 = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/setup/done?setupToken=somesetuptoken').reply(201, {});
+
+                    config._reset();
+
+                    request.post(SERVER_URL + '/api/v1/cloudron/activate')
+                           .query({ setupToken: 'somesetuptoken' })
+                           .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
+                           .end(function (error, result) {
+                        expect(error).to.not.be.ok();
+                        expect(result).to.be.ok();
+                        expect(scope1.isDone()).to.be.ok();
+                        expect(scope2.isDone()).to.be.ok();
+
+                        // stash token for further use
+                        token = result.body.token;
+
+                        callback();
+                    });
+                },
+            ], done);
+        });
+
+        after(cleanup);
+
+        it('fails without token', function (done) {
+            request.post(SERVER_URL + '/api/v1/cloudron/feedback')
+                   .send({ type: 'ticket', subject: 'some subject', description: 'some description' })
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(401);
+                done();
+            });
+        });
+
+        it('fails without type', function (done) {
+            request.post(SERVER_URL + '/api/v1/cloudron/feedback')
+                   .send({ subject: 'some subject', description: 'some description' })
+                   .query({ access_token: token })
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(400);
+                done();
+            });
+        });
+
+        it('fails with empty type', function (done) {
+            request.post(SERVER_URL + '/api/v1/cloudron/feedback')
+                   .send({ type: '', subject: 'some subject', description: 'some description' })
+                   .query({ access_token: token })
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(400);
+                done();
+            });
+        });
+
+        it('fails with unknown type', function (done) {
+            request.post(SERVER_URL + '/api/v1/cloudron/feedback')
+                   .send({ type: 'foobar', subject: 'some subject', description: 'some description' })
+                   .query({ access_token: token })
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(400);
+                done();
+            });
+        });
+
+        it('succeeds with ticket type', function (done) {
+            request.post(SERVER_URL + '/api/v1/cloudron/feedback')
+                   .send({ type: 'ticket', subject: 'some subject', description: 'some description' })
+                   .query({ access_token: token })
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(201);
+                done();
+            });
+        });
+
+        it('fails without description', function (done) {
+            request.post(SERVER_URL + '/api/v1/cloudron/feedback')
+                   .send({ type: 'ticket', subject: 'some subject' })
+                   .query({ access_token: token })
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(400);
+                done();
+            });
+        });
+
+        it('fails with empty subject', function (done) {
+            request.post(SERVER_URL + '/api/v1/cloudron/feedback')
+                   .send({ type: 'ticket', subject: '', description: 'some description' })
+                   .query({ access_token: token })
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(400);
+                done();
+            });
+        });
+
+        it('fails with empty description', function (done) {
+            request.post(SERVER_URL + '/api/v1/cloudron/feedback')
+                   .send({ type: 'ticket', subject: 'some subject', description: '' })
+                   .query({ access_token: token })
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(400);
+                done();
+            });
+        });
+
+        it('succeeds with feedback type', function (done) {
+            request.post(SERVER_URL + '/api/v1/cloudron/feedback')
+                   .send({ type: 'feedback', subject: 'some subject', description: 'some description' })
+                   .query({ access_token: token })
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(201);
+                done();
+            });
+        });
+
+        it('fails without subject', function (done) {
+            request.post(SERVER_URL + '/api/v1/cloudron/feedback')
+                   .send({ type: 'ticket', description: 'some description' })
+                   .query({ access_token: token })
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(400);
+                done();
             });
         });
     });
