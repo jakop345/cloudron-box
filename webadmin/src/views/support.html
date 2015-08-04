@@ -27,14 +27,14 @@
                     We would love to hear any ideas, feature requests and overall feedback from your side.
                     <br/>
                     <br/>
-                    <form>
+                    <form ng-submit="submitFeedback()">
                         <div class="form-group">
                             <!-- <label for="feedbackSubject">Feedback</label> -->
-                            <input type="email" class="form-control" id="feedbackSubject" placeholder="Enter your idea">
+                            <input type="text" class="form-control" id="feedbackSubject" ng-model="feedback.subject" placeholder="Enter your idea">
                         </div>
                         <div class="form-group">
                             <!-- <label for="feedbackDescription">Your Idea</label> -->
-                            <textarea class="form-control" id="feedbackDescription" rows="3" placeholder="Describe your idea"></textarea>
+                            <textarea class="form-control" id="feedbackDescription" rows="3" ng-model="feedback.description" placeholder="Describe your idea"></textarea>
                         </div>
                         <button type="submit" class="btn btn-primary">Submit</button>
                     </form>
@@ -53,14 +53,14 @@
                     If you found any issue or bugs, let us know, we will resolve that for you as soon as possible.
                     <br/>
                     <br/>
-                    <form>
+                    <form ng-submit="submitTicket()">
                         <div class="form-group">
                             <!-- <label for="feedbackSubject">Feedback</label> -->
-                            <input type="email" class="form-control" id="feedbackSubject" placeholder="Enter your issue">
+                            <input type="text" class="form-control" id="feedbackSubject" ng-model="ticket.subject" placeholder="Enter your issue">
                         </div>
                         <div class="form-group">
                             <!-- <label for="feedbackDescription">Your Idea</label> -->
-                            <textarea class="form-control" id="feedbackDescription" rows="3" placeholder="Describe your issue"></textarea>
+                            <textarea class="form-control" id="feedbackDescription" rows="3" ng-model="ticket.description" placeholder="Describe your issue"></textarea>
                         </div>
                         <button type="submit" class="btn btn-primary">Submit</button>
                     </form>
