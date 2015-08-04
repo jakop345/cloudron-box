@@ -295,7 +295,7 @@ function sendFeedback(user, type, subject, description, callback) {
         from: config.get('adminEmail'),
         to: 'johannes@cloudron.io',
         subject: util.format('[%s] %s - %s', type, config.fqdn(), subject),
-        text: render('feedback.ejs', { fqdn: config.fqdn(), adminEmail: config.get('adminEmail'), type: type, user: user, subject: subject, description: description, format: 'text'})
+        text: render('feedback.ejs', { fqdn: config.fqdn(), type: type, user: user, subject: subject, description: description, format: 'text'})
     };
 
     enqueue(mailOptions);
