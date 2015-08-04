@@ -167,8 +167,7 @@ function feedback(req, res, next) {
     if (typeof req.body.subject !== 'string') return next(new HttpError(400, 'subject must be string'));
     if (typeof req.body.description !== 'string') return next(new HttpError(400, 'description must be string'));
 
-    mailer.sendFeedback(req.user, req.body.type, req.body.subject, req.body.description, function (error) {
-        if (error) return next(new HttpError(500, error));
-        next(new HttpSuccess(201, {}));
-    });
+    mailer.sendFeedback(req.user, req.body.type, req.body.subject, req.body.description);
+
+    next(new HttpSuccess(201, {}));
 }
