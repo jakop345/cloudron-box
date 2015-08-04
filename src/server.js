@@ -102,6 +102,9 @@ function initializeExpressSync() {
     router.post('/api/v1/cloudron/certificate', rootScope, multipart, routes.cloudron.setCertificate);
     router.get ('/api/v1/cloudron/graphs', rootScope, routes.graphs.getGraphs);
 
+    // feedback
+    router.post('/api/v1/cloudron/feedback', usersScope, routes.cloudron.feedback);
+
     router.get ('/api/v1/profile', profileScope, routes.user.profile);
 
     router.get ('/api/v1/users', usersScope, routes.user.list);

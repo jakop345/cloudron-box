@@ -11,7 +11,8 @@ exports = module.exports = {
     getConfig: getConfig,
     update: update,
     migrate: migrate,
-    setCertificate: setCertificate
+    setCertificate: setCertificate,
+    feedback: feedback
 };
 
 var assert = require('assert'),
@@ -155,5 +156,18 @@ function setCertificate(req, res, next) {
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(202, {}));
+    });
+}
+
+function feedback(req, res, next) {
+    assert.strictEqual(typeof req.user, 'object');
+
+    if (typeof req.body.type !== 'string') return next(new HttpError(400, 'type must be either "ticket" or "feedback"'));
+    if (typeof req.body.subject !== 'string') return next(new HttpError(400, 'subject must be string'));
+    if (typeof req.body.description !== 'string') return next(new HttpError(400, 'description must be string'));
+
+    cloudron.feedback(req.user, req.body.type, req.body.subject, req.body.description, function (error) {
+        if (error) return next(new HttpError(500, error));
+        next(new HttpSuccess(201, {}));
     });
 }

@@ -15,7 +15,11 @@ exports = module.exports = {
 
     sendCrashNotification: sendCrashNotification,
 
-    appDied: appDied
+    appDied: appDied,
+
+    FEEDBACK_TYPE_FEEDBACK: 'feedback',
+    FEEDBACK_TYPE_TICKET: 'ticket',
+    sendFeedback: sendFeedback
 };
 
 var assert = require('assert'),
@@ -273,6 +277,25 @@ function sendCrashNotification(program, context) {
         to: 'admin@cloudron.io',
         subject: util.format('[%s] %s exited unexpectedly', config.fqdn(), program),
         text: render('crash_notification.ejs', { fqdn: config.fqdn(), program: program, context: context, format: 'text' })
+    };
+
+    enqueue(mailOptions);
+}
+
+function sendFeedback(user, type, subject, description, callback) {
+    assert.strictEqual(typeof user, 'object');
+    assert.strictEqual(typeof type, 'string');
+    assert.strictEqual(typeof subject, 'string');
+    assert.strictEqual(typeof description, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    assert(type === exports.FEEDBACK_TYPE_TICKET || type === exports.FEEDBACK_TYPE_FEEDBACK);
+
+    var mailOptions = {
+        from: config.get('adminEmail'),
+        to: 'johannes@cloudron.io',
+        subject: util.format('[%s] %s - %s', type, config.fqdn(), subject),
+        text: render('feedback.ejs', { fqdn: config.fqdn(), adminEmail: config.get('adminEmail'), type: type, user: user, subject: subject, description: description})
     };
 
     enqueue(mailOptions);
