@@ -1,0 +1,118 @@
+#!/bin/bash
+
+set -eu
+
+assertNotEmpty() {
+    : "${!1:? "$1 is not set."}"
+}
+
+# Only GNU getopt supports long options. OS X comes bundled with the BSD getopt
+# brew install gnu-getopt to get the GNU getopt on OS X
+[[ $(uname -s) == "Darwin" ]] && GNU_GETOPT="/usr/local/opt/gnu-getopt/bin/getopt" || GNU_GETOPT="getopt"
+readonly GNU_GETOPT
+
+args=$(${GNU_GETOPT} -o "" -l "revision:,output:,publish,no-upload" -n "$0" -- "$@")
+eval set -- "${args}"
+
+readonly script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+readonly box_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../box" && pwd)"
+
+delete_bundle="yes"
+commitish="HEAD"
+publish="no"
+upload="yes"
+bundle_file=""
+
+while true; do
+    case "$1" in
+    --revision) commitish="$2"; shift 2;;
+    --output) bundle_file="$2"; delete_bundle="no"; shift 2;;
+    --no-upload) upload="no"; shift;;
+    --publish) publish="yes"; shift;;
+    --) break;;
+    *) echo "Unknown option $1"; exit 1;;
+    esac
+done
+
+if [[ "${upload}" == "no" && "${publish}" == "yes" ]]; then
+    echo "Cannot publish without uploading"
+    exit 1
+fi
+
+readonly TMPDIR=${TMPDIR:-/tmp} # why is this not set on mint?
+
+assertNotEmpty AWS_DEV_ACCESS_KEY
+assertNotEmpty AWS_DEV_SECRET_KEY
+
+if ! $(cd "${box_dir}" && git diff --exit-code >/dev/null); then
+    echo "You have local changes, stash or commit them to proceed"
+    exit 1
+fi
+
+version=$(cd "${box_dir}" && git rev-parse "${commitish}")
+bundle_dir=$(mktemp -d -t box 2>/dev/null || mktemp -d box-XXXXXXXXXX --tmpdir=$TMPDIR)
+[[ -z "$bundle_file" ]] && bundle_file="${TMPDIR}/box-${version}.tar.gz"
+
+chmod "o+rx,g+rx" "${bundle_dir}" # otherwise extracted tarball director won't be readable by others/group
+echo "Checking out code [${version}] into ${bundle_dir}"
+(cd "${box_dir}" && git archive --format=tar ${version} | (cd "${bundle_dir}" && tar xf -))
+
+if diff "${TMPDIR}/boxtarball.cache/package.json.all" "${bundle_dir}/package.json" >/dev/null 2>&1; then
+    echo "Reusing dev modules from cache"
+    cp -r "${TMPDIR}/boxtarball.cache/node_modules-all/." "${bundle_dir}/node_modules"
+else
+    echo "Installing modules with dev dependencies"
+    (cd "${bundle_dir}" && npm install)
+
+    echo "Caching dev dependencies"
+    mkdir -p "${TMPDIR}/boxtarball.cache/node_modules-all"
+    rsync -a --delete "${bundle_dir}/node_modules/" "${TMPDIR}/boxtarball.cache/node_modules-all/"
+    cp "${bundle_dir}/package.json" "${TMPDIR}/boxtarball.cache/package.json.all"
+fi
+
+echo "Building webadmin assets"
+(cd "${bundle_dir}" && gulp)
+
+echo "Remove intermediate files required at build-time only"
+rm -rf "${bundle_dir}/node_modules/"
+rm -rf "${bundle_dir}/webadmin/src"
+rm -rf "${bundle_dir}/gulpfile.js"
+
+if diff "${TMPDIR}/boxtarball.cache/package.json.prod" "${bundle_dir}/package.json" >/dev/null 2>&1; then
+    echo "Reusing prod modules from cache"
+    cp -r "${TMPDIR}/boxtarball.cache/node_modules-prod/." "${bundle_dir}/node_modules"
+else
+    echo "Installing modules for production"
+    (cd "${bundle_dir}" && npm install --production)
+
+    echo "Caching prod dependencies"
+    mkdir -p "${TMPDIR}/boxtarball.cache/node_modules-prod"
+    rsync -a --delete "${bundle_dir}/node_modules/" "${TMPDIR}/boxtarball.cache/node_modules-prod/"
+    cp "${bundle_dir}/package.json" "${TMPDIR}/boxtarball.cache/package.json.prod"
+fi
+
+echo "Create final tarball"
+(cd "${bundle_dir}" && tar czf "${bundle_file}" .)
+echo "Cleaning up ${bundle_dir}"
+rm -rf "${bundle_dir}"
+
+if [[ "${upload}" == "yes" ]]; then
+    echo "Uploading bundle to S3"
+    # That special header is needed to allow access with singed urls created with different aws credentials than the ones the file got uploaded
+    s3cmd --ssl --add-header=x-amz-acl:authenticated-read --access_key="${AWS_DEV_ACCESS_KEY}" --secret_key="${AWS_DEV_SECRET_KEY}" --no-mime-magic put "${bundle_file}" "s3://dev-cloudron-releases/box-${version}.tar.gz"
+
+    versions_file_url="https://dev-cloudron-releases.s3.amazonaws.com/box-${version}.tar.gz"
+    echo "The URL for the versions file is: ${versions_file_url}"
+
+    if [[ "${publish}" == "yes" ]]; then
+        echo "Publishing to dev"
+        ${script_dir}/release/release create --env dev --code "${versions_file_url}"
+    fi
+fi
+
+if [[ "${delete_bundle}" == "no" ]]; then
+    echo "Tarball preserved at ${bundle_file}"
+else
+    rm "${bundle_file}"
+fi
+

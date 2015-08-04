@@ -1,0 +1,85 @@
+[0.0.1]
+- Hot Chocolate
+
+[0.0.2]
+- Hotfix appstore ui in webadim
+
+[0.0.3]
+- Tall Pike
+
+[0.0.4]
+- This will be 0.0.4 changes
+
+[0.0.5]
+- App install/configure route fixes
+
+[0.0.6]
+- Not sure what happenned here
+
+[0.0.7]
+- resetToken is now sent as part of create user
+- Same as 0.0.7 which got released by mistake
+
+[0.0.8]
+- Manifest changes
+
+[0.0.9]
+- Fix app restore
+- Fix backup issues
+
+[0.0.10]
+- Unknown orchestra
+
+[0.0.11]
+- Add ldap addon
+
+[0.0.12]
+- Support OAuth2 state
+
+[0.0.13]
+- Use docker image from cloudron repository
+
+[0.0.14]
+- Improve setup flow
+
+[0.0.15]
+- Improved Appstore view
+
+[0.0.16]
+- Improved Backup approach
+
+[0.0.17]
+- Upgrade testing
+- App auto updates
+- Usage graphs
+
+[0.0.18]
+- Rework backups and updates
+
+[0.0.19]
+- Graphite fixes
+- Avatar and Cloudron name support
+
+[0.0.20]
+- Apptask fixes
+- Chrome related fixes
+
+[0.0.21]
+- Increase nginx hostname size to 64
+
+[0.0.22]
+- Testing the e2e tests
+
+[0.0.23]
+- Better error status page
+- Fix updater and backup progress reporting
+- New avatar set
+- Improved setup wizard
+
+[0.0.24]
+- Hotfix the ldap support
+
+[0.0.25]
+- Add support page
+- Really fix ldap issues
+

@@ -1,0 +1,8 @@
+# following files are skipped when exporting using git archive
+/release export-ignore
+/images export-ignore
+/admin export-ignore
+test export-ignore
+.gitattributes export-ignore
+.gitignore export-ignore
+

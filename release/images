@@ -1,0 +1,216 @@
+#!/usr/bin/env node
+
+'use strict';
+
+require('supererror')({ splatchError: true });
+
+var superagent = require('superagent'),
+    async = require('async'),
+    yesno = require('yesno'),
+    p = require('commander');
+
+var DIGITALOCEAN = 'https://api.digitalocean.com/v2';
+
+p.version('0.0.1')
+    .option('-l, --list', 'List images (default if neither --list or --cleanup provided')
+    .option('--cleanup', 'Delete images, which are not part of an release')
+    .option('-a, --all', 'Images from all environments (default if no argument provided)')
+    .option('-d, --development', 'Images from development')
+    .option('-s, --staging', 'Images from staging')
+    .option('-p, --production', 'Images from production')
+    .parse(process.argv);
+
+if (p.list || !p.cleanup) {
+    p.list = true;
+}
+
+if (p.all || !(p.development || p.staging || p.production)) {
+    p.development = true;
+    p.staging = true;
+    p.production = true;
+}
+
+function deleteImage(image, token, callback) {
+    var url = DIGITALOCEAN + '/images/' + image.id;
+
+    console.log('Deleting image %s ...', image.name);
+
+    superagent.del(url).set('Authorization', 'Bearer ' + token).end(function (error, result) {
+        if (error || result.error) return callback(error || result.error);
+
+        callback(null);
+    });
+}
+
+function listImages(token, callback) {
+    var images = [];
+    var nextPage = null;
+
+    async.doWhilst(function (callback) {
+        var url = DIGITALOCEAN + '/images?private=true';
+
+        superagent.get(url).set('Authorization', 'Bearer ' + token).end(function (error, result) {
+            if (error || result.error) return callback(error || result.error);
+
+            nextPage = (result.body.links && result.body.links.pages && nextPage !== result.body.links.pages.next) ? result.body.links.pages.next : null;
+            images = images.concat(result.body.images);
+
+            callback(null);
+        });
+    }, function () { return !!nextPage; }, function (error) {
+        if (error) return callback(error);
+        callback(null, images);
+    });
+}
+
+function printEnvironment(tag, items, releases, callback) {
+    console.log('');
+    console.log('%s:', tag);
+    console.log('');
+
+    var imageRegExp = new RegExp('box-(?:dev|staging|prod)-[0-9,a-f]{7}-[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{6}');
+
+    items.forEach(function (item) {
+        if (!imageRegExp.test(item.name)) return;
+
+        var releaseNumber = [];
+        for (var release in releases) {
+            if (releases.hasOwnProperty(release)) {
+                if (releases[release].imageId === item.id) {
+                    releaseNumber.push(release);
+                }
+            }
+        }
+
+        console.log('  %s : %s  %s\t[%s]', item.id, item.name, releaseNumber.length ? releaseNumber.join(', ') : '      ', item.regions);
+    });
+
+    console.log('');
+
+    callback(null);
+}
+
+function cleanupEnvironment(env, tag, items, releases, callback) {
+    console.log('');
+    console.log('Cleanup images on %s:', tag);
+
+    var imagesToCleanup = [];
+
+    var imageRegExp = new RegExp('box-(?:dev|staging|prod)-[0-9,a-f]{7}-[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{6}');
+
+    items.forEach(function (item) {
+        if (!imageRegExp.test(item.name)) return;
+
+        for (var release in releases) {
+            if (releases.hasOwnProperty(release)) {
+                if (releases[release].imageId === item.id) {
+                    return;
+                }
+            }
+        }
+
+        // we reached here so no release found
+        imagesToCleanup.push(item);
+    });
+
+    if (imagesToCleanup.length === 0) {
+        console.log('All images belong to a release.');
+        return callback(null);
+    }
+
+    imagesToCleanup.forEach(function (item) {
+        console.log('  %s : %s [%s]', item.id, item.name, item.regions);
+    });
+
+    console.log('');
+
+    yesno.ask('Do you want to delete those images? [y/N]', false, function (ok) {
+        if (ok) {
+            async.each(imagesToCleanup, function (image, callback) {
+                deleteImage(image, process.env[env], callback);
+            }, callback);
+            return;
+        }
+
+        callback(null);
+    });
+}
+
+
+function handleListEnvironment(active, env, tag, releaseUrl) {
+    return function (callback) {
+        if (!active) return callback(null);
+        if (!process.env[env]) {
+            console.log('%s not set. Skipping %s.', env, tag);
+            return callback(null);
+        }
+
+        listImages(process.env[env], function (error, result) {
+            if (error) return callback(error);
+
+            var images = result;
+            superagent.get(releaseUrl).end(function (error, result) {
+                if (error || result.error) return callback(error || result.error);
+
+                // we get it as text
+                var releases = JSON.parse(result.text);
+
+                printEnvironment(tag, images, releases, callback);
+            });
+        });
+    };
+}
+
+function handleCleanupEnvironment(active, env, tag, releaseUrl) {
+    return function (callback) {
+        if (!active) return callback(null);
+        if (!process.env[env]) {
+            console.log('%s not set. Skipping %s.', env, tag);
+            return callback(null);
+        }
+
+        listImages(process.env[env], function (error, result) {
+            if (error) return callback(error);
+
+            var images = result;
+            superagent.get(releaseUrl).end(function (error, result) {
+                if (error || result.error) return callback(error || result.error);
+
+                // we get it as text
+                var releases = JSON.parse(result.text);
+
+                cleanupEnvironment(env, tag, images, releases, callback);
+            });
+        });
+    };
+}
+
+if (p.list) {
+    async.series([
+        handleListEnvironment(p.development, 'DIGITAL_OCEAN_TOKEN_DEV', 'Development', 'https://s3.amazonaws.com/dev-cloudron-releases/versions.json'),
+        handleListEnvironment(p.staging, 'DIGITAL_OCEAN_TOKEN_STAGING', 'Staging', 'https://s3.amazonaws.com/staging-cloudron-releases/versions.json'),
+        handleListEnvironment(p.production, 'DIGITAL_OCEAN_TOKEN_PROD', 'Production', 'https://s3.amazonaws.com/prod-cloudron-releases/versions.json')
+    ], function (error) {
+        if (error) {
+            console.log(error);
+            process.exit(1);
+        }
+
+        process.exit(0);
+    });
+}
+
+if (p.cleanup) {
+    async.series([
+        handleCleanupEnvironment(p.development, 'DIGITAL_OCEAN_TOKEN_DEV', 'Development', 'https://s3.amazonaws.com/dev-cloudron-releases/versions.json'),
+        handleCleanupEnvironment(p.staging, 'DIGITAL_OCEAN_TOKEN_STAGING', 'Staging', 'https://s3.amazonaws.com/staging-cloudron-releases/versions.json'),
+        handleCleanupEnvironment(p.production, 'DIGITAL_OCEAN_TOKEN_PROD', 'Production', 'https://s3.amazonaws.com/prod-cloudron-releases/versions.json')
+    ], function (error) {
+        if (error) {
+            console.log(error);
+            process.exit(1);
+        }
+
+        process.exit(0);
+    });
+}

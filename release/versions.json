@@ -1,0 +1,418 @@
+{
+  "0.0.1": {
+    "sourceTarballUrl": "https://s3.amazonaws.com/cloudron-releases/box-5b369d2b78605140be63c8c2dc3e4af1ea6ae17b.tar.gz",
+    "imageId": 10504128,
+    "imageName": "box-e5d4524-2015-02-06-172850",
+    "changelog": [
+      "Hot Chocolate"
+    ],
+    "upgrade": false,
+    "date": "Fri Feb  6 17:25:45 UTC 2015",
+    "next": "0.0.2"
+  },
+  "0.0.2": {
+    "sourceTarballUrl": "https://s3.amazonaws.com/cloudron-releases/box-f2b6340c32c29e5e265abcd7044433d68ac0024c.tar.gz",
+    "imageId": 10504128,
+    "imageName": "box-e5d4524-2015-02-06-172850",
+    "changelog": [
+      "Hotfix appstore ui in webadim"
+    ],
+    "upgrade": false,
+    "date": "Fri Feb  6 19:13:26 UTC 2015",
+    "next": "0.0.3"
+  },
+  "0.0.3": {
+    "sourceTarballUrl": "https://s3.amazonaws.com/staging-cloudron-releases/box-20e43bdf9c6cf40d3412c59750bc43e834ec39d3.tar.gz",
+    "imageId": 10621904,
+    "imageName": "box-8c16ea0-2015-02-12-154005",
+    "changelog": [
+      "Tall Pike"
+    ],
+    "upgrade": true,
+    "date": "Fri Feb 13 00:40:22 UTC 2015",
+    "next": "0.0.4"
+  },
+  "0.0.4": {
+    "sourceTarballUrl": "https://staging-cloudron-releases.s3.amazonaws.com/box-20e43bdf9c6cf40d3412c59750bc43e834ec39d3.tar.gz",
+    "imageId": 10624164,
+    "imageName": "box-0ec7efa-2015-02-12-181028",
+    "changelog": [
+      "Ghost release"
+    ],
+    "upgrade": false,
+    "date": "Tue Feb 17 18:03:31 UTC 2015",
+    "next": "0.0.5"
+  },
+  "0.0.5": {
+    "sourceTarballUrl": "https://staging-cloudron-releases.s3.amazonaws.com/box-94383e98591934b648713eccfa67a3f7bbaf659b.tar.gz",
+    "imageId": 10694830,
+    "imageName": "box-24cfd4d-2015-02-18-140547",
+    "changelog": [
+      "Banana Smoothie"
+    ],
+    "upgrade": true,
+    "date": "Thu Feb 19 00:13:35 UTC 2015",
+    "next": "0.0.6"
+  },
+  "0.0.6": {
+    "sourceTarballUrl": "https://staging-cloudron-releases.s3.amazonaws.com/box-00dbdddce752d454a6a37b3b15eff9f24b0d8882.tar.gz",
+    "imageId": 10787693,
+    "imageName": "box-d7e153f-2015-02-25-192418",
+    "changelog": [
+      "Chai Latte"
+    ],
+    "upgrade": true,
+    "date": "Thu Feb 26 04:19:48 UTC 2015",
+    "next": "0.0.7"
+  },
+  "0.0.7": {
+    "sourceTarballUrl": "https://staging-cloudron-releases.s3.amazonaws.com/box-00dbdddce752d454a6a37b3b15eff9f24b0d8882.tar.gz",
+    "imageId": 10787693,
+    "imageName": "box-d7e153f-2015-02-25-192418",
+    "changelog": [
+      "Rerelease for updating SSL certificates"
+    ],
+    "upgrade": true,
+    "date": "Fri Feb 27 07:49:36 UTC 2015",
+    "next": "0.0.8"
+  },
+  "0.0.8": {
+    "sourceTarballUrl": "https://staging-cloudron-releases.s3.amazonaws.com/box-0b5b4535de027a0abccd823b75b4937ec4926d6c.tar.gz",
+    "imageId": 10881993,
+    "imageName": "box-3ad90f0-2015-03-04-155817",
+    "changelog": [
+      "Orange Pekoe",
+      "It's all coming together!"
+    ],
+    "upgrade": true,
+    "date": "Thu Mar  5 00:23:34 UTC 2015",
+    "next": "0.0.9"
+  },
+  "0.0.9": {
+    "sourceTarballUrl": "https://staging-cloudron-releases.s3.amazonaws.com/box-bbe982f14f861b39636ab37072d4e3b3c44a55ac.tar.gz",
+    "imageId": 10881993,
+    "imageName": "box-3ad90f0-2015-03-04-155817",
+    "changelog": [
+      "Kashayam"
+    ],
+    "upgrade": false,
+    "date": "Mon Mar  9 23:21:42 UTC 2015",
+    "next": "0.0.10"
+  },
+  "0.0.10": {
+    "sourceTarballUrl": "https://staging-cloudron-releases.s3.amazonaws.com/box-5aac5bd56fe8b917b198bdf7ec4b4bbe231e292c.tar.gz",
+    "imageId": 10881993,
+    "imageName": "box-3ad90f0-2015-03-04-155817",
+    "changelog": [
+      "Hot fix for GitLab"
+    ],
+    "upgrade": false,
+    "date": "Tue Mar 10 02:40:53 UTC 2015",
+    "next": "0.0.11"
+  },
+  "0.0.11": {
+    "sourceTarballUrl": "https://staging-cloudron-releases.s3.amazonaws.com/box-b50692fc670ef6ab1bd35d14076cf20fa48cf002.tar.gz",
+    "imageId": 10881993,
+    "imageName": "box-3ad90f0-2015-03-04-155817",
+    "changelog": [
+      "Fix app updates"
+    ],
+    "upgrade": false,
+    "date": "Tue Mar 10 18:44:55 UTC 2015",
+    "next": "0.0.12"
+  },
+  "0.0.12": {
+    "sourceTarballUrl": "https://staging-cloudron-releases.s3.amazonaws.com/box-062f94b335e8b57caf9ec4780402f023297fc1b7.tar.gz",
+    "imageId": 11055383,
+    "imageName": "box-4e04584-2015-03-17-161439",
+    "changelog": [
+      "Port binding fixes"
+    ],
+    "upgrade": true,
+    "date": "Tue Mar 17 23:35:01 UTC 2015",
+    "author": "Girish Ramakrishnan <girish@forwardbias.in>",
+    "next": "0.0.13"
+  },
+  "0.0.13": {
+    "sourceTarballUrl": "https://staging-cloudron-releases.s3.amazonaws.com/box-ab0f9f691192c735825bb8aa04c1d246b22b067b.tar.gz",
+    "imageId": 11055383,
+    "imageName": "box-4e04584-2015-03-17-161439",
+    "changelog": [
+      "Implement App ids"
+    ],
+    "upgrade": false,
+    "date": "Mon Mar 23 02:50:53 UTC 2015",
+    "author": "Girish Ramakrishnan <girish@forwardbias.in>",
+    "next": "0.0.14"
+  },
+  "0.0.14": {
+    "sourceTarballUrl": "https://staging-cloudron-releases.s3.amazonaws.com/box-4cabe44e998be028a86293827c58685f66ae2412.tar.gz",
+    "imageId": 11055383,
+    "imageName": "box-4e04584-2015-03-17-161439",
+    "changelog": [
+      "Fix App updates"
+    ],
+    "upgrade": false,
+    "date": "Mon Mar 23 04:50:42 UTC 2015",
+    "author": "Girish Ramakrishnan <girish@forwardbias.in>",
+    "next": "0.0.15"
+  },
+  "0.0.15": {
+    "sourceTarballUrl": "https://staging-cloudron-releases.s3.amazonaws.com/box-d19af1ff6aa47cf2053b9e279078e0421579be57.tar.gz",
+    "imageId": 11055383,
+    "imageName": "box-4e04584-2015-03-17-161439",
+    "changelog": [
+      "Fix manifest format"
+    ],
+    "upgrade": false,
+    "date": "Mon Mar 23 05:53:05 UTC 2015",
+    "author": "Girish Ramakrishnan <girish@forwardbias.in>",
+    "next": "0.0.16"
+  },
+  "0.0.16": {
+    "sourceTarballUrl": "https://staging-cloudron-releases.s3.amazonaws.com/box-d19af1ff6aa47cf2053b9e279078e0421579be57.tar.gz",
+    "imageId": 11162711,
+    "imageName": "box-e34c6ce-2015-03-25-121127",
+    "changelog": [
+      "Image upgrade with newer addons"
+    ],
+    "upgrade": false,
+    "date": "Wed Mar 25 19:33:45 UTC 2015",
+    "author": "Girish Ramakrishnan <girish@forwardbias.in>",
+    "next": "0.0.17"
+  },
+  "0.0.17": {
+    "sourceTarballUrl": "https://staging-cloudron-releases.s3.amazonaws.com/box-5c1fb62adb35fc311565eb6495dc2985cfc6dc3d.tar.gz",
+    "imageId": 11162711,
+    "imageName": "box-e34c6ce-2015-03-25-121127",
+    "changelog": [
+      "Subdomain API changes"
+    ],
+    "upgrade": false,
+    "date": "Wed Mar 25 19:41:28 UTC 2015",
+    "author": "Girish Ramakrishnan <girish@forwardbias.in>",
+    "next": "0.0.18"
+  },
+  "0.0.18": {
+    "sourceTarballUrl": "https://staging-cloudron-releases.s3.amazonaws.com/box-d609c0b3052422813a03a68403c4def47f2ffcba.tar.gz",
+    "imageId": 11162711,
+    "imageName": "box-e34c6ce-2015-03-25-121127",
+    "changelog": [
+      "Reorg app data"
+    ],
+    "upgrade": false,
+    "date": "Wed Mar 25 20:41:25 UTC 2015",
+    "author": "Girish Ramakrishnan <girish@forwardbias.in>",
+    "next": "0.0.19"
+  },
+  "0.0.19": {
+    "sourceTarballUrl": "https://staging-cloudron-releases.s3.amazonaws.com/box-9b38e9a6f2e2abad725fedd4f78323619661ed55.tar.gz",
+    "imageId": 11162711,
+    "imageName": "box-e34c6ce-2015-03-25-121127",
+    "changelog": [
+      "Delegate app dir creation"
+    ],
+    "upgrade": false,
+    "date": "Thu Mar 26 03:10:53 UTC 2015",
+    "author": "Girish Ramakrishnan <girish@forwardbias.in>",
+    "next": "0.0.20"
+  },
+  "0.0.20": {
+    "sourceTarballUrl": "https://staging-cloudron-releases.s3.amazonaws.com/box-b1381263d3e243eb986d4d9cbf7d2853171941bf.tar.gz",
+    "imageId": 11162711,
+    "imageName": "box-e34c6ce-2015-03-25-121127",
+    "changelog": [
+      "Change backup strategy"
+    ],
+    "upgrade": false,
+    "date": "Wed Apr  1 08:18:50 UTC 2015",
+    "author": "Girish Ramakrishnan <girish@forwardbias.in>",
+    "next": "0.0.21"
+  },
+  "0.0.21": {
+    "sourceTarballUrl": "https://staging-cloudron-releases.s3.amazonaws.com/box-0db08cf3efc8345f90d41203cc18f747f42499fa.tar.gz",
+    "imageId": 11162711,
+    "imageName": "box-e34c6ce-2015-03-25-121127",
+    "changelog": [
+      "Remove hacks for backup migration"
+    ],
+    "upgrade": false,
+    "date": "Wed Apr  1 08:38:52 UTC 2015",
+    "author": "Girish Ramakrishnan <girish@forwardbias.in>",
+    "next": "0.0.22"
+  },
+  "0.0.22": {
+    "sourceTarballUrl": "https://staging-cloudron-releases.s3.amazonaws.com/box-9cbaef5b41df6a9f5c597448427fe706d2fb0221.tar.gz",
+    "imageId": 11282641,
+    "imageName": "box-28a9001-2015-04-02-193801",
+    "changelog": [
+      "Backup fixes"
+    ],
+    "upgrade": true,
+    "date": "Fri Apr  3 02:58:35 UTC 2015",
+    "author": "Girish Ramakrishnan <girish@forwardbias.in>",
+    "next": "0.0.23"
+  },
+  "0.0.23": {
+    "sourceTarballUrl": "https://staging-cloudron-releases.s3.amazonaws.com/box-038ae04f9edbe5727931eace1a62b083c6cebd79.tar.gz",
+    "imageId": 11384175,
+    "imageName": "box-1c48a4b-2015-04-09-231714",
+    "changelog": [
+      "Polish, polish, polish"
+    ],
+    "upgrade": true,
+    "date": "Fri Apr 10 06:46:56 UTC 2015",
+    "author": "Girish Ramakrishnan <girish@forwardbias.in>",
+    "next": "0.0.24"
+  },
+  "0.0.24": {
+    "sourceTarballUrl": "https://staging-cloudron-releases.s3.amazonaws.com/box-a168846a056e03f5804cc7b0de8bf9438aa0a4a5.tar.gz",
+    "imageId": 11390303,
+    "imageName": "box-94f1086-2015-04-10-174805",
+    "changelog": [
+      "Upgrade all apps and containers"
+    ],
+    "upgrade": true,
+    "date": "Sat Apr 11 01:10:31 UTC 2015",
+    "author": "Girish Ramakrishnan <girish@forwardbias.in>",
+    "next": "0.0.25"
+  },
+  "0.0.25": {
+    "sourceTarballUrl": "https://staging-cloudron-releases.s3.amazonaws.com/box-0a82fcb15f060aa53c1ec0f767d3e56f707416aa.tar.gz",
+    "imageId": 11390303,
+    "imageName": "box-94f1086-2015-04-10-174805",
+    "changelog": [
+      "Fix backup creation issue caused by execFile buffer overflow"
+    ],
+    "upgrade": false,
+    "date": "Mon Apr 13 05:00:04 UTC 2015",
+    "author": "Girish Ramakrishnan <girish@forwardbias.in>",
+    "next": "0.0.26"
+  },
+  "0.0.26": {
+    "sourceTarballUrl": "https://staging-cloudron-releases.s3.amazonaws.com/box-d8ac0330e8c9821c5094d7ba985cbece963489c1.tar.gz",
+    "imageId": 11390303,
+    "imageName": "box-94f1086-2015-04-10-174805",
+    "changelog": [
+      "Update manifestformat"
+    ],
+    "upgrade": false,
+    "date": "Mon Apr 13 19:54:17 UTC 2015",
+    "author": "Girish Ramakrishnan <girish@forwardbias.in>",
+    "next": "0.0.27"
+  },
+  "0.0.27": {
+    "sourceTarballUrl": "https://staging-cloudron-releases.s3.amazonaws.com/box-c9b7d9a0181911fce6cbc79f5cc965affa2ab2ae.tar.gz",
+    "imageId": 11390303,
+    "imageName": "box-94f1086-2015-04-10-174805",
+    "changelog": [
+      "_docker",
+      "Rickshaw inclusion"
+    ],
+    "upgrade": false,
+    "date": "Fri Apr 17 16:37:25 UTC 2015",
+    "author": "Girish Ramakrishnan <girish@forwardbias.in>",
+    "next": "0.0.28"
+  },
+  "0.0.28": {
+    "sourceTarballUrl": "https://staging-cloudron-releases.s3.amazonaws.com/box-c9b7d9a0181911fce6cbc79f5cc965affa2ab2ae.tar.gz",
+    "imageId": 11463691,
+    "imageName": "box-f620aed-2015-04-17-090956",
+    "changelog": [
+      "docker image cleanup"
+    ],
+    "upgrade": true,
+    "date": "Fri Apr 17 16:40:53 UTC 2015",
+    "author": "Girish Ramakrishnan <girish@forwardbias.in>",
+    "next": "0.0.29"
+  },
+  "0.0.29": {
+    "sourceTarballUrl": "https://staging-cloudron-releases.s3.amazonaws.com/box-b22136f11b0b7f51f718aad18904725a6f5c95db.tar.gz",
+    "imageId": 11463691,
+    "imageName": "box-f620aed-2015-04-17-090956",
+    "changelog": [
+      "Fix app states"
+    ],
+    "upgrade": false,
+    "date": "Tue Apr 21 17:27:00 UTC 2015",
+    "author": "Girish Ramakrishnan <girish@forwardbias.in>",
+    "next": "0.0.30"
+  },
+  "0.0.30": {
+    "sourceTarballUrl": "https://staging-cloudron-releases.s3.amazonaws.com/box-73de1a7c4e422e4f320b8e8c336e06b48eee1241.tar.gz",
+    "imageId": 11535902,
+    "imageName": "box-abaa2f6-2015-04-22-115250",
+    "changelog": [
+      "Fix nginx and collectd configuration setup",
+      "Foundation for updating box without app restart"
+    ],
+    "upgrade": true,
+    "date": "Wed Apr 22 21:44:00 UTC 2015",
+    "author": "Girish Ramakrishnan <girish@forwardbias.in>",
+    "next": "0.0.31"
+  },
+  "0.0.31": {
+    "sourceTarballUrl": "https://staging-cloudron-releases.s3.amazonaws.com/box-a36d6d864f8905706b94bf7f0c3e50ae0ae857f4.tar.gz",
+    "imageId": 11535902,
+    "imageName": "box-abaa2f6-2015-04-22-115250",
+    "changelog": [
+      "Do not restart apps for box update"
+    ],
+    "upgrade": false,
+    "date": "Thu Apr 23 02:51:43 UTC 2015",
+    "author": "Girish Ramakrishnan <girish@forwardbias.in>",
+    "next": "0.0.32"
+  },
+  "0.0.32": {
+    "sourceTarballUrl": "https://staging-cloudron-releases.s3.amazonaws.com/box-69f9bee6777db74416530aba09541243d215194e.tar.gz",
+    "imageId": 11535902,
+    "imageName": "box-abaa2f6-2015-04-22-115250",
+    "changelog": [
+      "Fix nginx templating",
+      "Implement infrastructure versioning"
+    ],
+    "upgrade": false,
+    "date": "Fri Apr 24 18:21:42 UTC 2015",
+    "author": "Girish Ramakrishnan <girish@forwardbias.in>",
+    "next": "0.0.33"
+  },
+  "0.0.33": {
+    "sourceTarballUrl": "https://staging-cloudron-releases.s3.amazonaws.com/box-11aecac6fde56f2289d711e4dee60baa1ccf4d00.tar.gz",
+    "imageId": 11567620,
+    "imageName": "box-e877472-2015-04-24-160626",
+    "changelog": [
+      "Fix bug in retire",
+      "Fix non-infra upgrade"
+    ],
+    "upgrade": true,
+    "date": "Sat Apr 25 01:43:44 UTC 2015",
+    "author": "Girish Ramakrishnan <girish@forwardbias.in>",
+    "next": "0.0.34"
+  },
+  "0.0.34": {
+    "sourceTarballUrl": "https://staging-cloudron-releases.s3.amazonaws.com/box-88bbe86000066eb264c2fa00a55d3b9ddd3e50dd.tar.gz",
+    "imageId": 11567620,
+    "imageName": "box-e877472-2015-04-24-160626",
+    "changelog": [
+      "Fix addons ownership",
+      "Fix backup for upgrades"
+    ],
+    "upgrade": false,
+    "date": "Sat Apr 25 03:34:48 UTC 2015",
+    "author": "Girish Ramakrishnan <girish@forwardbias.in>",
+    "next": "0.0.35"
+  },
+  "0.0.35": {
+    "sourceTarballUrl": "https://staging-cloudron-releases.s3.amazonaws.com/box-7b7df404b7e7463853d440ba07becceac49c1888.tar.gz",
+    "imageId": 11876727,
+    "imageName": "box-cc1f57c-2015-05-15-200507",
+    "changelog": [
+      "Change restart policy of containers to always",
+      "WARNING! This is an upgrade your cloudron will restart"
+    ],
+    "upgrade": true,
+    "date": "Fri May 15 17:17:40 UTC 2015",
+    "author": "Girish Ramakrishnan <girish@forwardbias.in>",
+    "next": null
+  }
+}

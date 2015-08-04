@@ -1,0 +1,591 @@
+#!/usr/bin/env node
+
+'use strict';
+
+require('supererror')({ splatchError: true });
+require('colors');
+
+var superagent = require('superagent'),
+    async = require('async'),
+    safe = require('safetydance'),
+    AWS = require('aws-sdk'),
+    yesno = require('yesno'),
+    Table = require('easy-table'),
+    program = require('commander'),
+    semver = require('semver'),
+    util = require('util'),
+    versionsFormat = require('./versionsformat.js'),
+    execSync = require('child_process').execSync,
+    parseChangelog = require('./parsechangelog.js').parse,
+    url = require('url'),
+    path = require('path'),
+    postmark = require('postmark')(process.env.POSTMARK_API_KEY_TOOLS),
+    assert = require('assert');
+
+var DIGITALOCEAN = 'https://api.digitalocean.com/v2';
+
+var ENVIRONMENTS = {
+    'dev': {
+        tag: 'dev',
+        url: 'https://s3.amazonaws.com/dev-cloudron-releases/versions.json',
+        accessKeyId: process.env.AWS_DEV_ACCESS_KEY,
+        secretAccessKey: process.env.AWS_DEV_SECRET_KEY,
+        releasesBucket: 'dev-cloudron-releases',
+        digitalOceanToken: process.env.DIGITAL_OCEAN_TOKEN_DEV
+    },
+    'staging': {
+        tag: 'staging',
+        url: 'https://s3.amazonaws.com/staging-cloudron-releases/versions.json',
+        accessKeyId: process.env.AWS_STAGING_ACCESS_KEY,
+        secretAccessKey: process.env.AWS_STAGING_SECRET_KEY,
+        releasesBucket: 'staging-cloudron-releases',
+        digitalOceanToken: process.env.DIGITAL_OCEAN_TOKEN_STAGING
+    },
+    'prod': {
+        tag: 'prod',
+        url: 'https://s3.amazonaws.com/prod-cloudron-releases/versions.json',
+        accessKeyId: process.env.AWS_PROD_ACCESS_KEY,
+        secretAccessKey: process.env.AWS_PROD_SECRET_KEY,
+        releasesBucket: 'prod-cloudron-releases',
+        digitalOceanToken: process.env.DIGITAL_OCEAN_TOKEN_PROD
+    }
+};
+
+function exit(error) {
+    if (error) console.error(error.message ? error.message.red : error);
+
+    process.exit(error ? 1 : 0);
+}
+
+function notifyAdmins(env, releases, callback) {
+    console.log('Notifying admins about new release'.gray);
+
+    var sortedVersions = Object.keys(releases).sort(semver.compare);
+    var oldVersion = sortedVersions[sortedVersions.length - 2],
+        newVersion = sortedVersions[sortedVersions.length - 1];
+
+    var oldImageRef = releases[oldVersion].imageName.match('box-(prod|staging|dev)-([0-9a-z.]+)-.*')[2],
+        newImageRef = releases[newVersion].imageName.match('box-(prod|staging|dev)-([0-9a-z.]+)-.*')[2];
+
+    var imageLogs = execSync(util.format('git log %s..%s --format=oneline', oldImageRef, newImageRef), { cwd: __dirname }).toString('utf8'),
+        imageStat = execSync(util.format('git diff --stat %s..%s', oldImageRef, newImageRef), { cwd: __dirname }).toString('utf8');
+
+    var oldBoxRef = url.parse(releases[oldVersion].sourceTarballUrl).path.match('/box-(.*).tar.gz')[1],
+        newBoxRef = url.parse(releases[newVersion].sourceTarballUrl).path.match('/box-(.*).tar.gz')[1];
+
+    var boxRepo = path.resolve(__dirname, '../../box');
+
+    var boxLogs = execSync(util.format('git log %s..%s --format=oneline', oldBoxRef, newBoxRef), { cwd: boxRepo }).toString('utf8'),
+        boxStat = execSync(util.format('git diff --stat %s..%s', oldBoxRef, newBoxRef), { cwd: boxRepo }).toString('utf8');
+
+    var textBody = util.format(
+        'A new box release was pushed by %s.\n\n' +
+        'Image Changes\n' +
+        '-----------------\n' +
+        '%s\n\n%s\n\n' +
+        'Box Changes\n' +
+        '-----------\n' +
+        '%s\n\n%s\n\n' +
+        'Changelog\n' +
+        '---------\n' +
+        '%s\n\n' +
+        'Release json\n' +
+        '------------\n' +
+        '%s\n\n' +
+        'Regards,\n' +
+        'Release team\n',
+        releases[newVersion].author, imageLogs, imageStat, boxLogs, boxStat,
+        releases[newVersion].changelog, JSON.stringify(releases[newVersion], null, 4));
+
+    postmark.send({
+        'From': 'no-reply@cloudron.io',
+        'To': 'admin@cloudron.io',
+        'Subject': util.format('[%s] New box release %s', env.tag, newVersion),
+        'TextBody': textBody,
+        'Tag': 'Important'
+    }, callback);
+}
+
+function verifyAndUpload(env, releases, callback) {
+    assert.strictEqual(typeof env, 'object');
+    assert.strictEqual(typeof releases, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
+    var s3 = new AWS.S3({
+        accessKeyId: env.accessKeyId,
+        secretAccessKey: env.secretAccessKey
+    });
+
+    var error = versionsFormat.verify(releases);
+    if (error) return callback(error);
+
+    s3.putObject({
+        Bucket: env.releasesBucket,
+        Key: 'versions.json',
+        ACL: 'public-read',
+        Body: JSON.stringify(releases, null, 4),
+        ContentType: 'application/json'
+    }, function (error, data) {
+        if (error) return callback(error);
+
+        console.log('Uploaded'.green);
+
+        callback(null);
+    });
+}
+
+function newRelease(options) {
+    var env = ENVIRONMENTS[options.env];
+    if (!env) exit(new Error(util.format('Unknown environment %s', options.env)));
+
+    if (!options.file) exit(new Error('--file is required'));
+
+    var contents = safe.fs.readFileSync(options.file, 'utf8');
+    if (!contents) exit(safe.error);
+
+    var releases = safe.JSON.parse(contents);
+    if (!releases) exit(new Error(options.file + ' has invalid json :' + safe.error.message));
+
+    verifyAndUpload(env, releases, exit);
+}
+
+function createRelease(options) {
+    var env = ENVIRONMENTS[options.env];
+    if (!env) exit(new Error(util.format('Unknown environment %s', options.env)));
+
+    if (env.tag === 'prod') {
+        if (options.revert || options.rerelease || options.revert) return exit(new Error('operation is not allowed in prod'));
+    }
+
+    if (!options.rerelease && !options.revert) {
+        if (!options.code && !options.image) exit(new Error('--code or --image is required'));
+    }
+
+    if (options.image && !parseInt(options.image, 10)) exit('image must be a number');
+    if (options.code && !safe.url.parse(options.code)) exit('code must be a valid url');
+
+    var username = execSync('git config user.name').toString('utf8').trim();
+    var email = execSync('git config user.email').toString('utf8').trim();
+
+    superagent.get(env.url).end(function (error, result) {
+        if (error || result.error) return exit(error || result.error);
+
+        var releases = result.type === 'application/json' ? result.body : safe.JSON.parse(result.text);
+
+        if (!releases) exit(new Error('versions.json is not valid JSON'));
+
+        var sortedVersions = Object.keys(releases).sort(semver.rcompare);
+        var lastVersion = sortedVersions[0];
+
+        if (options.revert) {
+            var secondLastVersion = sortedVersions[1];
+
+            releases[secondLastVersion].next = null;
+            delete releases[lastVersion];
+
+            console.log('Reverting %s'.gray, lastVersion);
+            return verifyAndUpload(env, releases, exit);
+        }
+
+        var newVersion = options.amend ? lastVersion : semver.inc(lastVersion, 'patch');
+        releases[lastVersion].next = newVersion;
+
+        var newImageId = options.image ? parseInt(options.image, 10) : releases[lastVersion].imageId;
+        var sourceTarballUrl = options.code || releases[lastVersion].sourceTarballUrl;
+        var upgrade = options.upgrade || (releases[lastVersion].imageId !== newImageId);
+
+        // check if we have a changelog otherwise
+        var changelog = parseChangelog(newVersion);
+        if (changelog.length === 0) console.log('No changelog for version %s found.'.yellow, newVersion.bold);
+
+        var url = DIGITALOCEAN + '/images/' + newImageId;
+        superagent.get(url).set('Authorization', 'Bearer ' + env.digitalOceanToken).end(function (error, result) {
+            if (error || result.error) return exit(error || result.error);
+
+            releases[newVersion] = {
+                sourceTarballUrl: sourceTarballUrl,
+                imageId: newImageId,
+                imageName: result.body.image.name,
+                changelog: changelog,
+                upgrade: upgrade,
+                date: (new Date()).toString(),
+                author: username + ' <' + email + '>',
+                next: null
+            };
+
+            verifyAndUpload(env, releases, function (error) {
+                if (error) return exit(error);
+
+                console.log('%s : %s', newVersion, JSON.stringify(releases[newVersion], null, 4));
+
+                exit();
+            });
+        });
+    });
+}
+
+function listRelease(options) {
+    var env = ENVIRONMENTS[options.env];
+    if (!env) exit(new Error(util.format('Unknown environment %s', options.env)));
+
+    var raw = !!options.raw;
+
+    superagent.get(env.url).end(function (error, result) {
+        if (error || result.error) return exit(error || result.error);
+
+        if (raw) {
+            console.log(JSON.stringify(result.body, null, 4));
+            exit(null);
+        }
+
+        console.log('');
+        console.log('%s:'.gray, env.tag);
+        console.log('');
+
+        if (result.type !== 'application/json') {
+            console.log('The content type of the release file is %s. It should be application/json something might have gone wrong!'.red, result.type);
+            console.log('Trying to parse it anyway...');
+            console.log('');
+            result.body = safe.JSON.parse(result.text);
+            if (!result.body) {
+                console.log('Release file is not valid JSON!'.red);
+                exit();
+            }
+        }
+
+        if (Object.keys(result.body).length === 0) {
+            console.log('No releases');
+            exit(null);
+        }
+
+        var t = new Table();
+
+        for (var release in result.body) {
+            t.cell('Release', release);
+            t.cell('Image ID', result.body[release].imageId + (result.body[release].upgrade ? '*' : ''));
+            t.cell('Image Name', result.body[release].imageName);
+            t.cell('Date', result.body[release].date);
+            t.cell('Author', result.body[release].author);
+            t.cell('Next', result.body[release].next);
+            t.cell('Source', result.body[release].sourceTarballUrl.slice(result.body[release].sourceTarballUrl.lastIndexOf('/') + 1));
+            t.newRow();
+        }
+
+        console.log(t.toString());
+
+        exit(null);
+    });
+}
+
+function touchRelease(options, callback) {
+    var env = ENVIRONMENTS[options.env];
+    if (!env) exit(new Error(util.format('Unknown environment %s', options.env)));
+
+    superagent.get(env.url).end(function (error, result) {
+        if (error || result.error) return exit(error || result.error);
+
+        var latestVersion = Object.keys(result.body).sort(semver.rcompare)[0];
+        result.body[latestVersion].date = (new Date()).toString();
+
+        verifyAndUpload(env, result.body, exit);
+    });
+}
+
+function listImages(token, callback) {
+    var images = [];
+    var nextPage = DIGITALOCEAN + '/images?private=true';
+
+    async.doWhilst(function (callback) {
+        superagent.get(nextPage).set('Authorization', 'Bearer ' + token).end(function (error, result) {
+            if (error || result.error) return callback(error || result.error);
+
+            nextPage = (result.body.links && result.body.links.pages && nextPage !== result.body.links.pages.next) ? result.body.links.pages.next : null;
+            images = images.concat(result.body.images);
+
+            callback(null);
+        });
+    }, function () { return !!nextPage; }, function (error) {
+        if (error) return callback(error);
+        callback(null, images);
+    });
+}
+
+function sync(options) {
+    var destEnv = ENVIRONMENTS[options.env];
+    if (!destEnv) exit(new Error(util.format('Unknown environment %s', options.env)));
+
+    var sourceEnv;
+
+    if (destEnv.tag === 'staging') sourceEnv = ENVIRONMENTS['prod'];
+    else if (destEnv.tag === 'dev') sourceEnv = ENVIRONMENTS['staging'];
+    else exit('Unable to determine source environment to sync from');
+
+    console.log('Syncing %s to %s', sourceEnv.tag.cyan.bold, destEnv.tag.cyan.bold);
+
+    var S3 = new AWS.S3({
+        accessKeyId: destEnv.accessKeyId,
+        secretAccessKey: destEnv.secretAccessKey
+    });
+
+    superagent.get(sourceEnv.url).end(function (error, result) {
+        if (error || result.error) exit(error || result.error);
+
+        var sourceReleases = result.body;
+        var destReleases = {};
+
+        var params = {
+            Bucket: destEnv.releasesBucket,
+            Prefix: 'box-'
+        };
+
+        S3.listObjects(params, function(error, data) {
+            if (error) exit(error);
+
+            var devSourceTarballs = data.Contents;
+
+            listImages(destEnv.digitalOceanToken, function (error, images) {
+                if (error) exit(error);
+
+                for (var release in sourceReleases) {
+                    var match = sourceReleases[release].imageName.match(/box-(?:prod|staging|dev)-(.*)-\d\d\d\d-\d\d-\d\d/);
+                    if (!match || !match[1]) exit('Unable to parse image name %s of release %s.', sourceReleases[release].imageName, release);
+
+                    var sourceImageRevision = match[1];
+
+                    // find a suitable image and sourceTarballUrl on dev
+                    var suitableImage = null;
+                    var suitableSourceTarball = null;
+
+                    images.forEach(function (image) {
+                        if (image.name.indexOf(util.format('box-%s-%s', destEnv.tag, sourceImageRevision)) === 0) {
+                            suitableImage = image;
+                        }
+                    });
+
+                    devSourceTarballs.forEach(function (tarball) {
+                        if (sourceReleases[release].sourceTarballUrl.indexOf(tarball.Key) !== -1) {
+                            suitableSourceTarball = 'https://' + destEnv.releasesBucket + '.s3.amazonaws.com/' + tarball.Key;
+                        }
+                    });
+
+                    if (!suitableImage) {
+                        console.log('Unable to find a suitable image on %s for release %s.', destEnv.tag, release);
+                        console.log('Required image revision is %s', sourceImageRevision);
+                        process.exit(1);
+                    }
+
+                    if (!suitableSourceTarball) {
+                        console.log('Unable to find a suitable source tarball on %s for release %s.', destEnv.tag, release);
+                        console.log('Required source tarball is %s', sourceReleases[release].sourceTarballUrl.slice(sourceReleases[release].sourceTarballUrl.lastIndexOf('/') + 1));
+                        process.exit(1);
+                    }
+
+                    destReleases[release] = {
+                        sourceTarballUrl: suitableSourceTarball,
+                        imageId: suitableImage.id,
+                        imageName: suitableImage.name,
+                        changelog: sourceReleases[release].changelog,
+                        upgrade: sourceReleases[release].upgrade,
+                        date: sourceReleases[release].date,
+                        author: sourceReleases[release].author,
+                        next: sourceReleases[release].next
+                    };
+                }
+
+                console.log('Potential %s release file:', destEnv.tag);
+                console.log('');
+                console.log(destReleases);
+                console.log('');
+
+                yesno.ask('Do you want to upload that release file? [y/N]', false, function (ok) {
+                    if (!ok) process.exit(1);
+
+                    var params = {
+                        Bucket: destEnv.releasesBucket,
+                        Key: 'versions.json',
+                        ACL: 'public-read',
+                        Body: JSON.stringify(destReleases, null, 4),
+                        ContentType: 'application/json'
+                    };
+
+                    S3.putObject(params, function(error, data) {
+                        if (error) {
+                            console.error(error);
+                            process.exit(1);
+                        }
+
+                        console.log('Upload successful.');
+                        process.exit(0);
+                    });
+                });
+            });
+        });
+    });
+}
+
+function getImageByRevision(env, revision, callback) {
+    assert.strictEqual(typeof revision, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    var url = DIGITALOCEAN + '/images?per_page=100';
+    superagent.get(url).set('Authorization', 'Bearer ' + env.digitalOceanToken).end(function (error, result) {
+        if (error || result.error) return exit(error || result.error);
+
+        var images = result.body.images;
+        for (var i = 0; i < images.length; i++) {
+            if (images[i].name.indexOf('box-' + env.tag + '-' + revision) === 0) return callback(null, images[i]);
+        }
+
+        callback(new Error('No image for ' + revision));
+    });
+}
+
+function stage(fromEnv, toEnv) {
+    var username = execSync('git config user.name').toString('utf8').trim();
+    var email = execSync('git config user.email').toString('utf8').trim();
+
+    console.log('Staging from %s -> %s'.gray, fromEnv.tag, toEnv.tag);
+
+    superagent.get(fromEnv.url).end(function (error, result) {
+        if (error || result.error) return exit(error || result.error);
+
+        var fromReleases = result.type === 'application/json' ? result.body : safe.JSON.parse(result.text);
+        if (!fromReleases) exit(new Error('versions.json is not valid JSON'));
+
+        superagent.get(toEnv.url).end(function (error, result) {
+            if (error || result.error) return exit(error || result.error);
+
+            var toReleases = result.type === 'application/json' ? result.body : safe.JSON.parse(result.text);
+            if (!toReleases) exit(new Error('versions.json is not valid JSON'));
+
+            var latestFromVersion = Object.keys(fromReleases).sort(semver.rcompare)[0];
+            var latestToVersion = Object.keys(toReleases).sort(semver.rcompare)[0];
+            var nextVersion = semver.inc(latestToVersion, 'patch');
+
+             console.log('Releasing version %s to %s'.gray, nextVersion, toEnv.tag);
+
+            // check if we even have a new version to stage
+            if (latestFromVersion === latestToVersion) exit(util.format('No new version on %s to stage.', fromEnv.tag));
+
+            // check if we have a changelog
+            var changelog = parseChangelog(nextVersion);
+            if (changelog.length === 0) exit(new Error('No changelog found for version ' + nextVersion));
+
+            var latestFromImageName = fromReleases[latestFromVersion].imageName;
+            var latestFromImageRevision = new RegExp('box-' + fromEnv.tag + '-([a-z,0-9.]+)-.*').exec(latestFromImageName)[1];
+
+            if (!latestFromImageRevision) exit('Unable to determine image revision');
+
+            getImageByRevision(toEnv, latestFromImageRevision, function (error, toImage) {
+                if (error) return exit(error);
+
+                var sourceTarballName = url.parse(fromReleases[latestFromVersion].sourceTarballUrl).pathname.substr(1);
+                var upgrade = toReleases[latestToVersion].imageId !== toImage.id;
+
+                console.log('Copying source code tarball %s to %s'.gray, sourceTarballName, toEnv.tag);
+
+                var cmd = util.format(
+                    's3cmd get -v --ssl --access_key="%s" --secret_key="%s" "s3://%s/%s" - ' +
+                    ' | s3cmd put -v --ssl --add-header=x-amz-acl:authenticated-read --access_key="%s" --secret_key="%s" - "s3://%s/%s"',
+                    fromEnv.accessKeyId, fromEnv.secretAccessKey, fromEnv.releasesBucket, sourceTarballName,
+                    toEnv.accessKeyId, toEnv.secretAccessKey, toEnv.releasesBucket, sourceTarballName
+                );
+
+                execSync(cmd, { stdio: [ null, process.stdout, process.stderr ] } );
+
+                toReleases[latestToVersion].next = nextVersion;
+                toReleases[nextVersion] = {
+                    imageId: toImage.id,
+                    imageName: toImage.name,
+                    changelog: changelog,
+                    upgrade: upgrade,
+                    date: (new Date()).toString(),
+                    sourceTarballUrl: 'https://' + toEnv.releasesBucket + '.s3.amazonaws.com/' + sourceTarballName,
+                    author: username + ' <' + email + '>',
+                    next: null
+                };
+
+                verifyAndUpload(toEnv, toReleases, function (error) {
+                    if (error) return exit(error);
+
+                    console.log('%s : %s', nextVersion, JSON.stringify(toReleases[nextVersion], null, 4));
+
+                    notifyAdmins(toEnv, toReleases, exit);
+                });
+            });
+        });
+    });
+}
+
+program.version('0.0.1');
+
+program.command('create')
+    .option('--env <dev/staging/prod>', 'Environment (dev/staging/prod)', 'dev')
+    .option('--code <tarball>', 'Source code url')
+    .option('--image <imageid>', 'Image id')
+    .option('--changelog <changelog>', 'Changelog')
+    .option('--upgrade', 'Set the upgrade flag')
+    .description('Create a new release')
+    .action(createRelease);
+
+program.command('revert')
+    .option('--env <dev/staging/prod>', 'Environment (dev/staging/prod)', 'dev')
+    .description('Revert the last release. Use with care')
+    .action(function (options) { options.revert = true; createRelease(options); });
+
+program.command('new')
+    .option('--env <dev/staging/prod>', 'Environment (dev/staging/prod)', 'dev')
+    .option('--file <file>', 'Upload file as versions.json')
+    .description('Upload a new versions.json')
+    .action(newRelease);
+
+program.command('amend')
+    .option('--env <dev/staging/prod>', 'Environment (dev/staging/prod)', 'dev')
+    .option('--code <tarball>', 'Source code url')
+    .option('--image <imageid>', 'Image id')
+    .option('--changelog <changelog>', 'Changelog')
+    .option('--upgrade', 'Set the upgrade flag')
+    .description('Amend last release. Use with care')
+    .action(function (options) { options.amend = true; createRelease(options); });
+
+program.command('rerelease')
+    .option('--env <dev/staging/prod>', 'Environment (dev/staging/prod)', 'dev')
+    .description('Make a new release, same as the last release')
+    .action(function (options) { options.rerelease = true; createRelease(options); });
+
+program.command('list')
+    .option('--raw', 'Show raw json')
+    .option('--env <dev/staging/prod>', 'Environment (dev/staging/prod)', 'dev')
+    .description('List the releases file')
+    .action(listRelease);
+
+program.command('sync')
+    .option('--env <dev/staging>', 'Environment (dev/staging)', 'dev')
+    .description('Sync the specified env with the parent env (prod -> staging or staging -> dev)')
+    .action(sync);
+
+program.command('stage')
+    .description('Stage latest dev version to staging')
+    .action(stage.bind(null, ENVIRONMENTS['dev'], ENVIRONMENTS['staging']));
+
+program.command('touch')
+    .option('--env <dev/staging/prod>', 'Environment (dev/staging/prod)', 'dev')
+    .description('Touch the releases file')
+    .action(touchRelease);
+
+program.command('publish')
+    .description('Publish latest staging version to production')
+    .action(stage.bind(null, ENVIRONMENTS['staging'], ENVIRONMENTS['prod']));
+
+program.parse(process.argv);
+
+if (!process.argv.slice(2).length) {
+    program.outputHelp();
+} else { // https://github.com/tj/commander.js/issues/338
+    var knownCommand = program.commands.some(function (command) { return command._name === process.argv[2]; });
+    if (!knownCommand) {
+        console.error('Unknown command: ' + process.argv[2]);
+        process.exit(1);
+    }
+}
+
