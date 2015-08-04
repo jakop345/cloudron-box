@@ -19,8 +19,7 @@ exports = module.exports = {
     reboot: reboot,
     migrate: migrate,
     backup: backup,
-    ensureBackup: ensureBackup
-};
+    ensureBackup: ensureBackup};
 
 var apps = require('./apps.js'),
     AppsError = require('./apps.js').AppsError,
@@ -33,6 +32,7 @@ var apps = require('./apps.js'),
     debug = require('debug')('box:cloudron'),
     fs = require('fs'),
     locker = require('./locker.js'),
+    mailer = require('./mailer.js'),
     path = require('path'),
     paths = require('./paths.js'),
     progress = require('./progress.js'),
@@ -634,4 +634,3 @@ function backupBoxAndApps(callback) {
         });
     });
 }
-
