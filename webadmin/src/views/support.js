@@ -2,11 +2,11 @@
 
 angular.module('Application').controller('SupportController', ['$scope', '$location', 'Client', function ($scope, $location, Client) {
 
-    $scope.busy = false;
 
     $scope.feedback = {
         error: null,
         success: false,
+        busy: false,
         subject: '',
         description: ''
     };
@@ -14,12 +14,29 @@ angular.module('Application').controller('SupportController', ['$scope', '$locat
     $scope.ticket = {
         error: null,
         success: false,
+        busy: false,
         subject: '',
         description: ''
     };
 
+    function resetFeedback() {
+        $scope.feedback.subject = '';
+        $scope.feedback.description = '';
+
+        $scope.feedbackForm.$setUntouched();
+        $scope.feedbackForm.$setPristine();
+    }
+
+    function resetTicket() {
+        $scope.ticket.subject = '';
+        $scope.ticket.description = '';
+
+        $scope.ticketForm.$setUntouched();
+        $scope.ticketForm.$setPristine();
+    }
+
     $scope.submitFeedback = function () {
-        $scope.busy = true;
+        $scope.feedback.busy = true;
         $scope.feedback.success = false;
         $scope.feedback.error = null;
 
@@ -28,14 +45,15 @@ angular.module('Application').controller('SupportController', ['$scope', '$locat
                 $scope.feedback.error = error;
             } else {
                 $scope.feedback.success = true;
+                resetFeedback();
             }
 
-            $scope.busy = false;
+            $scope.feedback.busy = false;
         });
     };
 
     $scope.submitTicket = function () {
-        $scope.busy = true;
+        $scope.ticket.busy = true;
         $scope.ticket.success = false;
         $scope.ticket.error = null;
 
@@ -44,9 +62,10 @@ angular.module('Application').controller('SupportController', ['$scope', '$locat
                 $scope.ticket.error = error;
             } else {
                 $scope.ticket.success = true;
+                resetTicket();
             }
 
-            $scope.busy = false;
+            $scope.ticket.busy = false;
         });
     };
 }]);
