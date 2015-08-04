@@ -19,6 +19,7 @@ var assert = require('assert'),
     cloudron = require('../cloudron.js'),
     config = require('../config.js'),
     progress = require('../progress.js'),
+    mailer = require('../mailer.js'),
     CloudronError = cloudron.CloudronError,
     debug = require('debug')('box:routes/cloudron'),
     HttpError = require('connect-lastmile').HttpError,
@@ -166,7 +167,7 @@ function feedback(req, res, next) {
     if (typeof req.body.subject !== 'string') return next(new HttpError(400, 'subject must be string'));
     if (typeof req.body.description !== 'string') return next(new HttpError(400, 'description must be string'));
 
-    cloudron.feedback(req.user, req.body.type, req.body.subject, req.body.description, function (error) {
+    mailer.sendFeedback(req.user, req.body.type, req.body.subject, req.body.description, function (error) {
         if (error) return next(new HttpError(500, error));
         next(new HttpSuccess(201, {}));
     });
