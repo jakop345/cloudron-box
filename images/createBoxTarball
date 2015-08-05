@@ -83,7 +83,7 @@ if diff "${TMPDIR}/boxtarball.cache/npm-shrinkwrap.json.prod" "${bundle_dir}/npm
     cp -r "${TMPDIR}/boxtarball.cache/node_modules-prod/." "${bundle_dir}/node_modules"
 else
     echo "Installing modules for production"
-    (cd "${bundle_dir}" && npm install --production)
+    (cd "${bundle_dir}" && npm install --production --no-optional)
 
     echo "Caching prod dependencies"
     mkdir -p "${TMPDIR}/boxtarball.cache/node_modules-prod"
