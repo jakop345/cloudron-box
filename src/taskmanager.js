@@ -54,7 +54,7 @@ function uninitialize(callback) {
 
 function startNextTask() {
     if (gPendingTasks.length === 0) return;
-    assert(Object.keys(gActiveTasks).length === 0); // since we allow only one task at a time
+    assert.strictEqual(Object.keys(gActiveTasks).length, 0); // since we allow only one task at a time
 
     startAppTask(gPendingTasks.shift());
 }
