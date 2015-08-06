@@ -43,6 +43,7 @@
                                 <option value="roleUser">Visible only to Cloudron users</option>
                             </select>
                         </div>
+                        <a ng-show="!!appConfigure.app.manifest.configurePath" ng-href="https://{{ appConfigure.app.location }}{{ !appConfigure.app.location ? '' : (config.isCustomDomain ? '.' : '-') }}{{ config.fqdn }}/{{ appConfigure.app.manifest.configurePath }}" target="_blank">Application Specific Settings</a>
                         <br/>
                         <br/>
                         <div class="form-group" ng-class="{ 'has-error': (appConfigureForm.password.$dirty && appConfigureForm.password.$invalid) || (!appConfigureForm.password.$dirty && appConfigure.error.password) }">
