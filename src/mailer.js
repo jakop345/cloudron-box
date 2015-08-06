@@ -19,6 +19,7 @@ exports = module.exports = {
 
     FEEDBACK_TYPE_FEEDBACK: 'feedback',
     FEEDBACK_TYPE_TICKET: 'ticket',
+    FEEDBACK_TYPE_APP: 'app',
     sendFeedback: sendFeedback
 };
 
@@ -288,7 +289,7 @@ function sendFeedback(user, type, subject, description) {
     assert.strictEqual(typeof subject, 'string');
     assert.strictEqual(typeof description, 'string');
 
-    assert(type === exports.FEEDBACK_TYPE_TICKET || type === exports.FEEDBACK_TYPE_FEEDBACK);
+    assert(type === exports.FEEDBACK_TYPE_TICKET || type === exports.FEEDBACK_TYPE_FEEDBACK || type === exports.FEEDBACK_TYPE_APP);
 
     var mailOptions = {
         from: config.get('adminEmail'),

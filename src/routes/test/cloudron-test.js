@@ -588,6 +588,17 @@ describe('Cloudron', function () {
             });
         });
 
+        it('succeeds with app type', function (done) {
+            request.post(SERVER_URL + '/api/v1/cloudron/feedback')
+                   .send({ type: 'app', subject: 'some subject', description: 'some description' })
+                   .query({ access_token: token })
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(201);
+                done();
+            });
+        });
+
         it('fails without description', function (done) {
             request.post(SERVER_URL + '/api/v1/cloudron/feedback')
                    .send({ type: 'ticket', subject: 'some subject' })

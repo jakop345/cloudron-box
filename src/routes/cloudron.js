@@ -163,7 +163,7 @@ function setCertificate(req, res, next) {
 function feedback(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
 
-    if (req.body.type !== mailer.FEEDBACK_TYPE_FEEDBACK && req.body.type !== mailer.FEEDBACK_TYPE_TICKET) return next(new HttpError(400, 'type must be either "ticket" or "feedback"'));
+    if (req.body.type !== mailer.FEEDBACK_TYPE_FEEDBACK && req.body.type !== mailer.FEEDBACK_TYPE_TICKET && req.body.type !== mailer.FEEDBACK_TYPE_APP) return next(new HttpError(400, 'type must be either "ticket", "feedback" or "app"'));
     if (typeof req.body.subject !== 'string' || !req.body.subject) return next(new HttpError(400, 'subject must be string'));
     if (typeof req.body.description !== 'string' || !req.body.description) return next(new HttpError(400, 'description must be string'));
 
