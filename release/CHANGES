@@ -83,3 +83,6 @@
 - Add support page
 - Really fix ldap issues
 
+[0.0.26]
+- Add configurePath support
+
