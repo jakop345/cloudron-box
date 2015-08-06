@@ -21,6 +21,38 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
     };
 
 
+    $scope.feedback = {
+        error: null,
+        success: false,
+        subject: 'App feedback',
+        description: '',
+        type: 'app'
+    };
+
+    function resetFeedback() {
+        $scope.feedback.description = '';
+
+        $scope.feedbackForm.$setUntouched();
+        $scope.feedbackForm.$setPristine();
+    }
+
+    $scope.submitFeedback = function () {
+        $scope.feedback.busy = true;
+        $scope.feedback.success = false;
+        $scope.feedback.error = null;
+
+        Client.feedback($scope.feedback.type, $scope.feedback.subject, $scope.feedback.description, function (error) {
+            if (error) {
+                $scope.feedback.error = error;
+            } else {
+                $scope.feedback.success = true;
+                resetFeedback();
+            }
+
+            $scope.feedback.busy = false;
+        });
+    };
+
     function getAppList(callback) {
         AppStore.getApps(function (error, apps) {
             if (error) return callback(error);

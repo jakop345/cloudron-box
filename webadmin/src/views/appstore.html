@@ -98,6 +98,24 @@
             <a href="" class="appstore-category-link" ng-click="showCategory($event);" ng-class="{'category-active': category === 'wiki' }" category="wiki">Wiki</a>
             <br/>
             <a href="" class="appstore-category-link" ng-click="showCategory($event);" ng-class="{'category-active': category === 'testing' }" category="testing" ng-show="config.developerMode">Testing</a>
+            <br/>
+            <br/>
+            <br/>
+            <div class="appstore-category-missing shadow">
+                <div ng-show="!feedback.success">
+                    <form name="feedbackForm" ng-submit="submitFeedback()">
+                        <p>
+                            Missing an app? Let us know.
+                        </p>
+                        <textarea class="form-control" cols="3" ng-model="feedback.description" ng-minlength="1" required placeholder="Name, Category, Links ..."></textarea>
+                        <div ng-show="feedback.error" class="text-danger text-bold">{{feedback.error}}</div>
+                        <button class="btn btn-success" type="submit" ng-disabled="feedbackForm.$invalid || feedback.busy"><i class="fa fa-fw fa-paper-plane"></i> Submit</button>
+                    </form>
+                </div>
+                <div ng-show="feedback.success" class="text-success text-bold">
+                    Thank You!
+                </div>
+            </div>
         </div>
         <div class="col-md-10" ng-show="ready && apps.length">
             <div class="row-no-margin">
