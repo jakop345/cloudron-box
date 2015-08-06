@@ -53,6 +53,10 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         });
     };
 
+    $scope.activateFeedbackForm = function () {
+        $('#feedbackDescriptionTextarea').focus();
+    };
+
     function getAppList(callback) {
         AppStore.getApps(function (error, apps) {
             if (error) return callback(error);

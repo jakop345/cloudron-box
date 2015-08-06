@@ -107,7 +107,7 @@
                         <p>
                             Missing an app? Let us know.
                         </p>
-                        <textarea class="form-control" cols="3" ng-model="feedback.description" ng-minlength="1" required placeholder="Name, Category, Links ..."></textarea>
+                        <textarea class="form-control" id="feedbackDescriptionTextarea" cols="3" ng-model="feedback.description" ng-minlength="1" required placeholder="Name, Category, Links ..."></textarea>
                         <div ng-show="feedback.error" class="text-danger text-bold">{{feedback.error}}</div>
                         <button class="btn btn-success" type="submit" ng-disabled="feedbackForm.$invalid || feedback.busy"><i class="fa fa-fw fa-paper-plane"></i> Submit</button>
                     </form>
@@ -135,7 +135,8 @@
             </div>
         </div>
         <div class="col-md-10 animateMeOpacity loading-banner" ng-show="ready && !apps.length">
-            <h3 class="text-muted">No applications in this category</h3>
+            <h3 class="text-muted">No applications in this category.</h3>
+            <a href="" ng-click="activateFeedbackForm()"><h3>Let us know if you miss something.</h3></a>
         </div>
         <div class="col-md-10 animateMeOpacity loading-banner" ng-show="!ready">
             <h2><i class="fa fa-spinner fa-pulse"></i> Loading</h2>
