@@ -77,7 +77,7 @@
                     <div class="cloudron-model-item-content shadow" ng-class="{ 'selected': size.slug === currentSize.slug }" style="height: {{ 120 + $index * 30 }}px">
                         <!-- <img src="img/box.png" style="transform: scale({{ size.price/50.0 }});"/><br/> -->
                         <h3>{{ size.name }}</h3>
-                        <h5>${{ size.price }}/mo</h5>
+                        <h5>${{ (size.price/100).toFixed() }}/mo</h5>
                         <button class="btn btn-success" ng-disabled="busy" ng-hide="size.slug === currentSize.slug" ng-click="showUpgradeConfirm(size)">Upgrade</button>
                         <button class="btn btn-success" ng-show="size.slug === currentSize.slug" data-toggle="tooltip" data-placement="top" title="Your Current Model"><i class="fa fa-check"></i></button>
                     </div>
