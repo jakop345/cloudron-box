@@ -573,7 +573,8 @@ describe('App installation', function () {
         docker.getContainer(appEntry.containerId).inspect(function (error, data) {
             expect(error).to.not.be.ok();
             expect(data.Config.ExposedPorts['7777/tcp']).to.eql({ });
-            expect(data.Config.Env).to.contain('ADMIN_ORIGIN=' + config.adminOrigin());
+            expect(data.Config.Env).to.contain('WEBADMIN_ORIGIN=' + config.adminOrigin());
+            expect(data.Config.Env).to.contain('API_ORIGIN=' + config.adminOrigin());
             expect(data.Config.Env).to.contain('CLOUDRON=1');
             clientdb.getByAppId('addon-' + appResult.id, function (error, client) {
                 expect(error).to.not.be.ok();

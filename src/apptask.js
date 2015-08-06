@@ -189,7 +189,6 @@ function createContainer(app, callback) {
         }
 
         env.push('CLOUDRON=1');
-        env.push('ADMIN_ORIGIN' + '=' + config.adminOrigin()); // ## remove
         env.push('WEBADMIN_ORIGIN' + '=' + config.adminOrigin());
         env.push('API_ORIGIN' + '=' + config.adminOrigin());
 
