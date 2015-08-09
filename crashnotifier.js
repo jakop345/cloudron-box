@@ -7,53 +7,23 @@
 //         !! No console.log() allowed
 //         !! Do not set DEBUG
 
-var supervisor = require('supervisord-eventlistener'),
+var assert = require('assert'),
+    mailer = require('./src/mailer.js'),
     safe = require('safetydance'),
-    assert = require('assert'),
-    exec = require('child_process').exec,
-    util = require('util'),
-    mailer = require('./src/mailer.js');
+    supervisor = require('supervisord-eventlistener'),
+    path = require('path'),
+    util = require('util');
 
 var gLastNotifyTime = {};
 var gCooldownTime = 1000 * 60  * 5; // 5 min
+var COLLECT_LOGS_CMD = path.join(__dirname, 'src/scripts/collectlogs.sh');
 
 function collectLogs(program, callback) {
     assert.strictEqual(typeof program, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    var logFilePath = util.format('/var/log/supervisor/%s.log', program);
-
-    var boxLogData = safe.fs.readFileSync(logFilePath, 'utf-8');
-    if (boxLogData === null) return callback(safe.error);
-    var boxLogLines = boxLogData.split('\n').slice(-100);
-
-    var dockerLogPath = '/var/log/upstart/docker.log';
-
-    var dockerLogData = safe.fs.readFileSync(dockerLogPath, 'utf-8');
-    if (dockerLogData === null) return callback(safe.error);
-    var dockerLogLines = dockerLogData.split('\n').slice(-100);
-
-    exec('dmesg', function (error, stdout /*, stderr */) {
-        if (error) console.error(error);
-
-        var lines = stdout.split('\n');
-        var dmesgLogLines = lines.slice(-100);
-
-        var result = '';
-        result += program + '.log\n';
-        result += '-------------------------------------\n';
-        result += boxLogLines.join('\n');
-        result += '\n\n';
-        result += 'dmesg\n';
-        result += '-------------------------------------\n';
-        result += dmesgLogLines.join('\n');
-        result += '\n\n';
-        result += 'docker\n';
-        result += '-------------------------------------\n';
-        result += dockerLogLines.join('\n');
-
-        callback(null, result);
-    });
+    var logs = safe.child_process.execSync('sudo ' + COLLECT_LOGS_CMD + ' ' + program, { encoding: 'utf8' });
+    callback(null, logs);
 }
 
 supervisor.on('PROCESS_STATE_EXITED', function (headers, data) {
