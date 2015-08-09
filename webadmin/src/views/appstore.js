@@ -46,11 +46,16 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
                 $scope.feedback.error = error;
             } else {
                 $scope.feedback.success = true;
+                $('#feedbackModal').modal('hide');
                 resetFeedback();
             }
 
             $scope.feedback.busy = false;
         });
+    };
+
+    $scope.showFeedbackModal = function () {
+        $('#feedbackModal').modal('show');
     };
 
     $scope.activateFeedbackForm = function () {
@@ -240,7 +245,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
     refresh();
 
     // setup all the dialog focus handling
-    ['appInstallModal'].forEach(function (id) {
+    ['appInstallModal', 'feedbackModal'].forEach(function (id) {
         $('#' + id).on('shown.bs.modal', function () {
             $(this).find("[autofocus]:first").focus();
         });

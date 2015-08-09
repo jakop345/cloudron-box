@@ -64,6 +64,30 @@
     </div>
 </div>
 
+<!-- Modal feedback -->
+<div class="modal fade" id="feedbackModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">App Feedback</h4>
+            </div>
+            <div class="modal-body">
+                <fieldset>
+                    <form name="feedbackForm" ng-submit="submitFeedback()">
+                        <div ng-show="feedback.error" class="text-danger text-bold">{{feedback.error}}</div>
+                        <textarea class="form-control" id="feedbackDescriptionTextarea" cols="3" ng-model="feedback.description" ng-minlength="1" required placeholder="Name, Category, Links ..." autofocus></textarea>
+                        <input class="ng-hide" type="submit" ng-disabled="feedbackForm.$invalid || feedback.busy"/>
+                    </form>
+                </fieldset>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" ng-click="submitFeedback()" ng-disabled="feedbackForm.$invalid || feedback.busy"><i class="fa fa-fw fa-paper-plane"></i> Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div>
     <div class="row-no-margin">
         <div class="col-md-2">
@@ -101,21 +125,7 @@
             <br/>
             <br/>
             <br/>
-            <div class="appstore-category-missing shadow">
-                <div ng-show="!feedback.success">
-                    <form name="feedbackForm" ng-submit="submitFeedback()">
-                        <p>
-                            Missing an app? Let us know.
-                        </p>
-                        <textarea class="form-control" id="feedbackDescriptionTextarea" cols="3" ng-model="feedback.description" ng-minlength="1" required placeholder="Name, Category, Links ..."></textarea>
-                        <div ng-show="feedback.error" class="text-danger text-bold">{{feedback.error}}</div>
-                        <button class="btn btn-success" type="submit" ng-disabled="feedbackForm.$invalid || feedback.busy"><i class="fa fa-fw fa-paper-plane"></i> Submit</button>
-                    </form>
-                </div>
-                <div ng-show="feedback.success" class="text-success text-bold">
-                    Thank You!
-                </div>
-            </div>
+            <a href="" ng-click="showFeedbackModal()">Missing an app? Let us know.</a>
         </div>
         <div class="col-md-10" ng-show="ready && apps.length">
             <div class="row-no-margin">
