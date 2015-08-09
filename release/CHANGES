@@ -86,3 +86,6 @@
 [0.0.26]
 - Add configurePath support
 
+[0.0.27]
+- Improved log collector
+
