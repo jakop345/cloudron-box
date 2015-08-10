@@ -25,7 +25,7 @@ function create_droplet() {
     local box_size="$3"
     local image_region="$4"
 
-    local ubuntu_image_slug="ubuntu-14-10-x64"
+    local ubuntu_image_slug="ubuntu-15-04-x64" # id=12658446
 
     local data="{\"name\":\"${box_name}\",\"size\":\"${box_size}\",\"region\":\"${image_region}\",\"image\":\"${ubuntu_image_slug}\",\"ssh_keys\":[ \"${ssh_key_id}\" ],\"backups\":false}"
 
