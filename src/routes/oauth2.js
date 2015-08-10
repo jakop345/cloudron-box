@@ -188,11 +188,12 @@ function loginForm(req, res) {
     var u = url.parse(req.session.returnTo, true);
     if (!u.query.client_id) return sendErrorPageOrRedirect(req, res, 'Invalid login request. No client_id provided.');
 
-    function render(applicationName) {
+    function render(applicationName, applicationLogo) {
         res.render('login', {
             adminOrigin: config.adminOrigin(),
             csrf: req.csrfToken(),
             applicationName: applicationName,
+            applicationLogo: applicationLogo,
             error: req.query.error || null
         });
     }
@@ -203,11 +204,11 @@ function loginForm(req, res) {
         // Handle our different types of oauth clients
         var appId = result.appId;
         if (appId === constants.ADMIN_CLIENT_ID) {
-            return render(constants.ADMIN_NAME);
+            return render(constants.ADMIN_NAME, '/api/v1/cloudron/avatar');
         } else if (appId === constants.TEST_CLIENT_ID) {
-            return render(constants.TEST_NAME);
+            return render(constants.TEST_NAME, '/api/v1/cloudron/avatar');
         } else if (appId.indexOf('external-') === 0) {
-            return render('External Application');
+            return render('External Application', '/api/v1/cloudron/avatar');
         } else if (appId.indexOf('addon-') === 0) {
             appId = appId.slice('addon-'.length);
         } else if (appId.indexOf('proxy-') === 0) {
@@ -218,7 +219,7 @@ function loginForm(req, res) {
             if (error) return sendErrorPageOrRedirect(req, res, 'Unknown Application for those OAuth credentials');
 
             var applicationName = result.location || config.fqdn();
-            render(applicationName);
+            render(applicationName, '/api/v1/cloudron/avatar');
         });
     });
 }
