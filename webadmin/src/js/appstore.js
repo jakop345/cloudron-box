@@ -63,6 +63,17 @@ angular.module('Application').service('AppStore', ['$http', 'Client', function (
         });
     };
 
+    AppStore.prototype.getAppByIdAndVersion = function (appId, version, callback) {
+        if (Client.getConfig().apiServerOrigin === null) return callback(new AppStoreError(420, 'Enhance Your Calm'));
+
+        $http.get(Client.getConfig().apiServerOrigin + '/api/v1/apps/' + appId + '/versions/' + version).success(function (data, status) {
+            if (status !== 200) return callback(new AppStoreError(status, data));
+            return callback(null, data);
+        }).error(function (data, status) {
+            return callback(new AppStoreError(status, data));
+        });
+    };
+
     AppStore.prototype.getManifest = function (appId, callback) {
         if (Client.getConfig().apiServerOrigin === null) return callback(new AppStoreError(420, 'Enhance Your Calm'));
 
