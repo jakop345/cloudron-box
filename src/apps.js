@@ -675,7 +675,7 @@ function autoupdateApps(updateInfo, callback) { // updateInfo is { appId -> { ma
 
 function backupApp(app, addonsToBackup, callback) {
     assert.strictEqual(typeof app, 'object');
-    assert.strictEqual(typeof addonsToBackup, 'object');
+    assert(!addonsToBackup || typeof addonsToBackup, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     function canBackupApp(app) {
