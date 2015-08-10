@@ -16,6 +16,7 @@ var assert = require('assert'),
     querystring = require('querystring'),
     util = require('util'),
     session = require('connect-ensure-login'),
+    settings = require('../settings.js'),
     tokendb = require('../tokendb'),
     appdb = require('../appdb'),
     url = require('url'),
@@ -188,38 +189,47 @@ function loginForm(req, res) {
     var u = url.parse(req.session.returnTo, true);
     if (!u.query.client_id) return sendErrorPageOrRedirect(req, res, 'Invalid login request. No client_id provided.');
 
+    var cloudronName = '';
+
     function render(applicationName, applicationLogo) {
         res.render('login', {
             adminOrigin: config.adminOrigin(),
             csrf: req.csrfToken(),
+            cloudronName: cloudronName,
             applicationName: applicationName,
             applicationLogo: applicationLogo,
             error: req.query.error || null
         });
     }
 
-    clientdb.get(u.query.client_id, function (error, result) {
-        if (error) return sendError(req, res, 'Unknown OAuth client');
+    settings.getCloudronName(function (error, name) {
+        if (error) return sendError(req, res, 'Internal Error');
 
-        // Handle our different types of oauth clients
-        var appId = result.appId;
-        if (appId === constants.ADMIN_CLIENT_ID) {
-            return render(constants.ADMIN_NAME, '/api/v1/cloudron/avatar');
-        } else if (appId === constants.TEST_CLIENT_ID) {
-            return render(constants.TEST_NAME, '/api/v1/cloudron/avatar');
-        } else if (appId.indexOf('external-') === 0) {
-            return render('External Application', '/api/v1/cloudron/avatar');
-        } else if (appId.indexOf('addon-') === 0) {
-            appId = appId.slice('addon-'.length);
-        } else if (appId.indexOf('proxy-') === 0) {
-            appId = appId.slice('proxy-'.length);
-        }
+        cloudronName = name;
 
-        appdb.get(appId, function (error, result) {
-            if (error) return sendErrorPageOrRedirect(req, res, 'Unknown Application for those OAuth credentials');
+        clientdb.get(u.query.client_id, function (error, result) {
+            if (error) return sendError(req, res, 'Unknown OAuth client');
 
-            var applicationName = result.location || config.fqdn();
-            render(applicationName, '/api/v1/cloudron/avatar');
+            // Handle our different types of oauth clients
+            var appId = result.appId;
+            if (appId === constants.ADMIN_CLIENT_ID) {
+                return render(constants.ADMIN_NAME, '/api/v1/cloudron/avatar');
+            } else if (appId === constants.TEST_CLIENT_ID) {
+                return render(constants.TEST_NAME, '/api/v1/cloudron/avatar');
+            } else if (appId.indexOf('external-') === 0) {
+                return render('External Application', '/api/v1/cloudron/avatar');
+            } else if (appId.indexOf('addon-') === 0) {
+                appId = appId.slice('addon-'.length);
+            } else if (appId.indexOf('proxy-') === 0) {
+                appId = appId.slice('proxy-'.length);
+            }
+
+            appdb.get(appId, function (error, result) {
+                if (error) return sendErrorPageOrRedirect(req, res, 'Unknown Application for those OAuth credentials');
+
+                var applicationName = result.location || config.fqdn();
+                render(applicationName, '/api/v1/cloudron/avatar');
+            });
         });
     });
 }
