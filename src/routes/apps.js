@@ -119,9 +119,6 @@ function installApp(req, res, next) {
     // allow tests to provide an appId for testing
     var appId = (process.env.BOX_ENV === 'test' && typeof data.appId === 'string') ? data.appId : uuid.v4();
 
-    // addons is optional
-    data.manifest.addons = data.manifest.addons || {};
-
     debug('Installing app id:%s storeid:%s loc:%s port:%j restrict:%s manifest:%j', appId, data.appStoreId, data.location, data.portBindings, data.accessRestriction, data.manifest);
 
     apps.install(appId, data.appStoreId, data.manifest, data.location, data.portBindings || null, data.accessRestriction, data.icon || null, function (error) {
@@ -255,9 +252,6 @@ function updateApp(req, res, next) {
     if (('portBindings' in data) && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
     if ('icon' in data && typeof data.icon !== 'string') return next(new HttpError(400, 'icon is not a string'));
     if ('force' in data && typeof data.force !== 'boolean') return next(new HttpError(400, 'force must be a boolean'));
-
-    // addons is optional
-    data.manifest.addons = data.manifest.addons || {};
 
     debug('Update app id:%s to manifest:%j', req.params.id, data.manifest);
 
