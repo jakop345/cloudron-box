@@ -89,3 +89,7 @@
 [0.0.27]
 - Improved log collector
 
+[0.0.28]
+- Improve app feedback
+- Restyle login page
+- Some bugfixes
