@@ -675,17 +675,19 @@ footer a {
     padding: 0;
     background: #F7F7F7;
 
-    .main-container {
-        height: 100%;
-        width: 100%;
-        display: table;
+    h1 {
+        margin-top: 0;
     }
 
-    .main-container>.row {
-        display: table-cell;
-        text-align: center;
-        vertical-align: middle;
-        width: 100%;
+    .card {
+        max-width: none;
+        padding: 20px;
+        text-align: left;
+        margin-top: 15px;
+
+        @media(min-width:768px) {
+            margin-top: 20%;
+        }
     }
 }
 
