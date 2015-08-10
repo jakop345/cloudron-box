@@ -20,6 +20,10 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         mediaLinks: []
     };
 
+    $scope.appNotFound = {
+        appId: '',
+        version: ''
+    };
 
     $scope.feedback = {
         error: null,
@@ -169,6 +173,13 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         }
     };
 
+    $scope.showAppNotFound = function (appId, version) {
+        $scope.appNotFound.appId = appId;
+        $scope.appNotFound.version = version;
+
+        $('#appNotFoundModal').modal('show');
+    };
+
     $scope.doInstall = function () {
         $scope.appInstall.busy = true;
         $scope.appInstall.error.other = null;
@@ -226,11 +237,26 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
 
             // show install app dialog immediately if an app id was passed in the query
             if ($routeParams.appId) {
-                var found = apps.filter(function (app) {
-                    return (app.id === $routeParams.appId) && ($routeParams.version ? $routeParams.version === app.manifest.version : true);
-                });
-                if (found.length) {
-                    $scope.showInstall(found[0]);
+                if ($routeParams.version) {
+                    AppStore.getAppByIdAndVersion($routeParams.appId, $routeParams.version, function (error, result) {
+                        if (error) {
+                            $scope.showAppNotFound($routeParams.appId, $routeParams.version);
+                            console.error(error);
+                            return;
+                        }
+
+                        $scope.showInstall(result);
+                    });
+                } else {
+                    var found = apps.filter(function (app) {
+                        return (app.id === $routeParams.appId) && ($routeParams.version ? $routeParams.version === app.manifest.version : true);
+                    });
+
+                    if (found.length) {
+                        $scope.showInstall(found[0]);
+                    } else {
+                        $scope.showAppNotFound($routeParams.appId, null);
+                    }
                 }
             }
 

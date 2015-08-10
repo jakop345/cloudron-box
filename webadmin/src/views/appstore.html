@@ -88,6 +88,23 @@
     </div>
 </div>
 
+<!-- Modal app not found -->
+<div class="modal fade" id="appNotFoundModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">App not found</h4>
+            </div>
+            <div class="modal-body">
+                There is no such app <b>{{ appNotFound.appId }}</b><span ng-show="appNotFound.version"> with version <b>{{ appNotFound.version }}</b></span>.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div>
     <div class="row-no-margin">
         <div class="col-md-2">
