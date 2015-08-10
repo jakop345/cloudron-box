@@ -666,6 +666,31 @@ footer a {
 
 
 // ----------------------------
+// Oauth classes
+// ----------------------------
+
+.oauth {
+    height: 100%;
+    width: 100%;
+    padding: 0;
+    background: #F7F7F7;
+
+    .main-container {
+        height: 100%;
+        width: 100%;
+        display: table;
+    }
+
+    .main-container>.row {
+        display: table-cell;
+        text-align: center;
+        vertical-align: middle;
+        width: 100%;
+    }
+}
+
+
+// ----------------------------
 // Graphs classes
 // ----------------------------
 
