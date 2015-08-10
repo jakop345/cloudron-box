@@ -90,7 +90,7 @@ apt-get -y install lxc-docker-1.5.0
 ln -sf /usr/bin/docker.io /usr/local/bin/docker
 
 if [ ! -f "${DOCKER_DATA_FILE}" ]; then
-    service docker stop
+    systemctl stop docker
     if aufs_mounts=$(grep 'aufs' /proc/mounts | awk '{print$2}' | sort -r); then
         umount -l "${aufs_mounts}"
     fi
@@ -106,7 +106,7 @@ if [ ! -f "${DOCKER_DATA_FILE}" ]; then
     echo 'DOCKER_OPTS="-s btrfs"' >> /etc/default/docker
     mount "${DOCKER_DATA_FILE}"
 
-    service docker start
+    systemctl start docker
     # give docker sometime to start up and create iptables rules
     sleep 10
 fi
@@ -205,7 +205,7 @@ case "\$1" in
 
         # this is a hack to fix ordering of iptables-restore and docker startup
         iptables-restore < /etc/iptables/rules.v4
-        service docker restart
+        systemctl restart docker
 
         DEBUG="installer*,connect-lastmile" "\${FOREVER}" start -a -l "\${FOREVER_LOG}" -o "\${INSTALLER_LOG}" -e "\${INSTALLER_LOG}" "${INSTALLER_SOURCE_DIR}/src/server.js"
         ;;
