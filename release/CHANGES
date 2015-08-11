@@ -92,4 +92,7 @@
 [0.0.28]
 - Improve app feedback
 - Restyle login page
-- Some bugfixes
+
+[0.0.29]
+- Update to ubuntu 15.04
+
