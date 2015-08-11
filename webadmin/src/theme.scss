@@ -120,6 +120,14 @@ html {
 .grid-item {
     padding: 10px;
     min-width: 200px;
+    overflow: hidden;
+}
+
+.grid-item:hover .grid-item-bottom {
+    @media(min-width:768px) {
+        opacity: 1;
+        right: 10px;
+    }
 }
 
 .grid-item-content {
@@ -132,10 +140,32 @@ html {
     padding: 10px 15px;
 }
 
-.grid-item-bottom {
+.grid-item-bottom-mobile {
     padding: 10px 15px;
     border-top: 1px solid #ddd;
-    background-color: white
+    background-color: white;
+
+    @media(min-width:768px) {
+        display: none;
+    }
+}
+
+.grid-item-bottom {
+    display: none;
+    padding: 10px 15px;
+    border-top: 1px solid #ddd;
+    background-color: white;
+
+    @media(min-width:768px) {
+        display: block;
+        position: absolute;
+        top: 0;
+        right: -10px;
+        opacity: 0;
+        background-color: transparent;
+
+        transition: all 250ms;
+    }
 }
 
 // ----------------------------
