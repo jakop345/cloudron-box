@@ -54,7 +54,7 @@
                     </form>
                 </fieldset>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer ">
                 <button type="button" class="btn btn-default" style="float: left;" ng-click="startApp(appConfigure.app)" ng-show="appConfigure.app.runState === 'stopped' && !appConfigure.runStateBusy && !(appConfigure.app | installationActive)"><i class="fa fa-play"></i> Start</button>
                 <button type="button" class="btn btn-default" style="float: left;" ng-show="appConfigure.app.runState !== 'stopped' && appConfigure.app.runState !== 'running' || appConfigure.runStateBusy && !(appConfigure.app | installationActive)" disabled ><i class="fa fa-refresh fa-spin"></i></button>
                 <button type="button" class="btn btn-default" style="float: left;" ng-click="stopApp(appConfigure.app)" ng-show="appConfigure.app.runState === 'running' && !appConfigure.runStateBusy && !(appConfigure.app | installationActive)"><i class="fa fa-pause"></i> Stop</button>
@@ -214,31 +214,53 @@
                             </div>
                         </div>
                     </div>
-                </a>
-                <div class="grid-item-bottom" ng-show="user.admin">
-                    <div class="row">
-                        <div class="col-xs-4 text-left">
-                            <a href="" ng-click="showRestore(app)" ng-show="(app | installError) === true">
-                                <i class="fa fa-undo scale"></i>
-                            </a>
+                    <div class="grid-item-bottom-mobile" ng-show="user.admin">
+                        <div class="row">
+                            <div class="col-xs-4 text-left">
+                                <a href="" ng-click="showRestore(app)" ng-show="(app | installError) === true">
+                                    <i class="fa fa-undo scale"></i>
+                                </a>
 
-                            <a href="" ng-click="showConfigure(app)" ng-show="(app | installSuccess) == true">
-                                <i class="fa fa-wrench scale"></i>
-                            </a>
-                        </div>
-                        <div class="col-xs-4 text-center">
-                            <!-- we check the version here because the box updater does not know when an app gets updated -->
-                            <a href="" ng-click="showUpdate(app)" class="ng-hide animateMe" ng-show="config.update.apps[app.id].manifest.version && config.update.apps[app.id].manifest.version !== app.manifest.version && (app | installSuccess)">
-                                <i class="fa fa-arrow-up text-success scale"></i>
-                            </a>
-                        </div>
-                        <div class="col-xs-4 text-right">
-                            <a href="" ng-click="showUninstall(app)">
-                                <i class="fa fa-remove scale"></i>
-                            </a>
+                                <a href="" ng-click="showConfigure(app)" ng-show="(app | installSuccess) == true">
+                                    <i class="fa fa-wrench scale"></i>
+                                </a>
+                            </div>
+                            <div class="col-xs-4 text-center">
+                                <!-- we check the version here because the box updater does not know when an app gets updated -->
+                                <a href="" ng-click="showUpdate(app)" class="ng-hide animateMe" ng-show="config.update.apps[app.id].manifest.version && config.update.apps[app.id].manifest.version !== app.manifest.version && (app | installSuccess)">
+                                    <i class="fa fa-arrow-up text-success scale"></i>
+                                </a>
+                            </div>
+                            <div class="col-xs-4 text-right">
+                                <a href="" ng-click="showUninstall(app)">
+                                    <i class="fa fa-remove scale"></i>
+                                </a>
+                            </div>
                         </div>
                     </div>
-                </div>
+                    <div class="grid-item-bottom" ng-show="user.admin">
+                        <br/>
+
+                        <div>
+                            <a href="" ng-click="showUninstall(app)"><i class="fa fa-remove scale"></i></a>
+                        </div>
+
+                        <div ng-show="(app | installError) === true">
+                            <a href="" ng-click="showRestore(app)"><i class="fa fa-undo scale"></i></a>
+                        </div>
+
+                        <div ng-show="(app | installSuccess) == true">
+                            <a href="" ng-click="showConfigure(app)"><i class="fa fa-wrench scale"></i></a>
+                        </div>
+
+                        <!-- we check the version here because the box updater does not know when an app gets updated -->
+                        <div ng-show="config.update.apps[app.id].manifest.version && config.update.apps[app.id].manifest.version !== app.manifest.version && (app | installSuccess)">
+                            <a href="" ng-click="showUpdate(app)"><i class="fa fa-arrow-up text-success scale"></i></a>
+                        </div>
+
+                        <br/>
+                    </div>
+                </a>
             </div>
         </div>
     </div>
