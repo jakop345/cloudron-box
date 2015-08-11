@@ -96,3 +96,6 @@
 [0.0.29]
 - Update to ubuntu 15.04
 
+[0.0.30]
+- Move to docker 1.7
+
