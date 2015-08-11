@@ -204,7 +204,8 @@ function createContainer(app, callback) {
                 Volumes: {},
                 VolumesFrom: [],
                 Env: env.concat(addonEnv),
-                ExposedPorts: exposedPorts
+                ExposedPorts: exposedPorts,
+                CpuShares: 512 // relative to 1024 for system processes
             };
 
             debugApp(app, 'Creating container for %s', app.manifest.dockerImage);
