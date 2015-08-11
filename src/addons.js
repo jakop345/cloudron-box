@@ -675,7 +675,7 @@ function setupRedis(app, callback) {
 
     var startOptions = {
         Binds: [
-            redisVarsFile + ':/etc/redis/redis_vars.sh:r',
+            redisVarsFile + ':/etc/redis/redis_vars.sh:ro',
             redisDataDir + ':/var/lib/redis:rw'
         ],
         // On Mac (boot2docker), we have to export the port to external world for port forwarding from Mac to work
