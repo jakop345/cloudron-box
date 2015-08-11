@@ -140,6 +140,13 @@ html {
     padding: 10px 15px;
 }
 
+.grid-item-top-title {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    font-size: 24px;
+}
+
 .grid-item-bottom-mobile {
     padding: 10px 15px;
     border-top: 1px solid #ddd;
