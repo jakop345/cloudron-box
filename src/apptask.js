@@ -673,7 +673,7 @@ function restore(app, callback) {
 
 // note that configure is called after an infra update as well
 function configure(app, callback) {
-    var locationChanged = app.oldConfig.location !== app.location;
+    var locationChanged = app.oldConfig ? app.oldConfig.location !== app.location : true;
 
     async.series([
         updateApp.bind(null, app, { installationProgress: '10, Cleaning up old install' }),
