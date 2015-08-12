@@ -76,7 +76,7 @@ describe('Ldap', function () {
         });
     });
 
-    describe('search', function () {
+    describe('search users', function () {
         it ('fails for non existing tree', function (done) {
             var client = ldap.createClient({ url: 'ldap://127.0.0.1:' + config.get('ldapPort') });
 
@@ -168,6 +168,93 @@ describe('Ldap', function () {
                     expect(entries.length).to.equal(1);
                     expect(entries[0].username).to.equal(USER_0.username);
                     expect(entries[0].memberof.length).to.equal(2);
+                    done();
+                });
+            });
+        });
+    });
+
+    describe('search groups', function () {
+        it ('succeeds with basic filter', function (done) {
+            var client = ldap.createClient({ url: 'ldap://127.0.0.1:' + config.get('ldapPort') });
+
+            var opts = {
+                filter: 'objectclass=group'
+            };
+
+            client.search('ou=groups,dc=cloudron', opts, function (error, result) {
+                expect(error).to.be(null);
+                expect(result).to.be.an(EventEmitter);
+
+                var entries = [];
+
+                result.on('searchEntry', function (entry) { entries.push(entry.object); });
+                result.on('error', done);
+                result.on('end', function (result) {
+                    expect(result.status).to.equal(0);
+                    expect(entries.length).to.equal(2);
+                    expect(entries[0].cn).to.equal('users');
+                    expect(entries[0].memberuid.length).to.equal(2);
+                    expect(entries[0].memberuid[0]).to.equal(USER_0.username);
+                    expect(entries[0].memberuid[1]).to.equal(USER_1.username);
+                    expect(entries[1].cn).to.equal('admins');
+                    // if only one entry, the array becomes a string :-/
+                    expect(entries[1].memberuid).to.equal(USER_0.username);
+                    done();
+                });
+            });
+        });
+
+        it ('succeeds with cn wildcard filter', function (done) {
+            var client = ldap.createClient({ url: 'ldap://127.0.0.1:' + config.get('ldapPort') });
+
+            var opts = {
+                filter: '&(objectclass=group)(cn=*)'
+            };
+
+            client.search('ou=groups,dc=cloudron', opts, function (error, result) {
+                expect(error).to.be(null);
+                expect(result).to.be.an(EventEmitter);
+
+                var entries = [];
+
+                result.on('searchEntry', function (entry) { entries.push(entry.object); });
+                result.on('error', done);
+                result.on('end', function (result) {
+                    expect(result.status).to.equal(0);
+                    expect(entries.length).to.equal(2);
+                    expect(entries[0].cn).to.equal('users');
+                    expect(entries[0].memberuid.length).to.equal(2);
+                    expect(entries[0].memberuid[0]).to.equal(USER_0.username);
+                    expect(entries[0].memberuid[1]).to.equal(USER_1.username);
+                    expect(entries[1].cn).to.equal('admins');
+                    // if only one entry, the array becomes a string :-/
+                    expect(entries[1].memberuid).to.equal(USER_0.username);
+                    done();
+                });
+            });
+        });
+
+        it('succeeds with memberuid filter', function (done) {
+            var client = ldap.createClient({ url: 'ldap://127.0.0.1:' + config.get('ldapPort') });
+
+            var opts = {
+                filter: '&(objectclass=group)(memberuid=' + USER_1.username + ')'
+            };
+
+            client.search('ou=groups,dc=cloudron', opts, function (error, result) {
+                expect(error).to.be(null);
+                expect(result).to.be.an(EventEmitter);
+
+                var entries = [];
+
+                result.on('searchEntry', function (entry) { entries.push(entry.object); });
+                result.on('error', done);
+                result.on('end', function (result) {
+                    expect(result.status).to.equal(0);
+                    expect(entries.length).to.equal(1);
+                    expect(entries[0].cn).to.equal('users');
+                    expect(entries[0].memberuid.length).to.equal(2);
                     done();
                 });
             });

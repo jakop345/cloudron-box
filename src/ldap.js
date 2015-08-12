@@ -76,22 +76,32 @@ function start(callback) {
         user.list(function (error, result){
             if (error) return next(new ldap.OperationsError(error.toString()));
 
-            // we only have an admin group
-            var dn = ldap.parseDN('cn=admin,ou=groups,dc=cloudron');
+            var groups = [{
+                name: 'users',
+                admin: false
+            }, {
+                name: 'admins',
+                admin: true
+            }];
 
-            var tmp = {
-                dn: dn.toString(),
-                attributes: {
-                    objectclass: ['group'],
-                    cn: 'admin',
-                    memberuid: result.filter(function (entry) { return entry.admin; }).map(function(entry) { return entry.id; })
+            groups.forEach(function (group) {
+                var dn = ldap.parseDN('cn=' + group.name + ',ou=groups,dc=cloudron');
+                var members = group.admin ? result.filter(function (entry) { return entry.admin; }) : result;
+
+                var tmp = {
+                    dn: dn.toString(),
+                    attributes: {
+                        objectclass: ['group'],
+                        cn: group.name,
+                        memberuid: members.map(function(entry) { return entry.id; })
+                    }
+                };
+
+                if ((req.dn.equals(dn) || req.dn.parentOf(dn)) && req.filter.matches(tmp.attributes)) {
+                    res.send(tmp);
+                    debug('ldap group send:', tmp);
                 }
-            };
-
-            if ((req.dn.equals(dn) || req.dn.parentOf(dn)) && req.filter.matches(tmp.attributes)) {
-                res.send(tmp);
-                debug('ldap group send:', tmp);
-            }
+            });
 
             res.end();
         });
