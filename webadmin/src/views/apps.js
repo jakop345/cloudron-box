@@ -334,7 +334,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
     };
 
     // setup all the dialog focus handling
-    ['appConfigureModal', 'appUninstallModal', 'appUpdateModal'].forEach(function (id) {
+    ['appConfigureModal', 'appUninstallModal', 'appUpdateModal', 'appRestoreModal'].forEach(function (id) {
         $('#' + id).on('shown.bs.modal', function () {
             $(this).find("[autofocus]:first").focus();
         });
