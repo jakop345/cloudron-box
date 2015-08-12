@@ -209,6 +209,7 @@
                                 <div class="text-muted" style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden">
                                     {{ app | installationStateLabel }}
                                 </div>
+                                <br ng-hide="app | installationActive"/>
                                 <div ng-show="app | installationActive">
                                     <div class="progress progress-striped active">
                                         <div class="progress-bar progress-bar-success" role="progressbar" style="width: {{ app.progress }}%"></div>
