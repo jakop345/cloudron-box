@@ -24,6 +24,9 @@ var gLogger = {
     fatal: console.error
 };
 
+var GROUP_USERS_DN = 'cn=users,ou=groups,dc=cloudron';
+var GROUP_ADMINS_DN = 'cn=admin,ou=groups,dc=cloudron';
+
 function start(callback) {
     assert(typeof callback === 'function');
 
@@ -39,6 +42,9 @@ function start(callback) {
             result.forEach(function (entry) {
                 var dn = ldap.parseDN('cn=' + entry.id + ',ou=users,dc=cloudron');
 
+                var groups = [ GROUP_USERS_DN ];
+                if (entry.admin) groups.push(GROUP_ADMINS_DN);
+
                 var tmp = {
                     dn: dn.toString(),
                     attributes: {
@@ -49,7 +55,8 @@ function start(callback) {
                         mail: entry.email,
                         displayname: entry.username,
                         username: entry.username,
-                        samaccountname: entry.username      // to support ActiveDirectory clients
+                        samaccountname: entry.username,      // to support ActiveDirectory clients
+                        memberof: groups
                     }
                 };
 
