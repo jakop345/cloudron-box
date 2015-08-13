@@ -37,23 +37,23 @@ if ! docker inspect girish/test:0.2.0 >/dev/null 2>/dev/null; then
     exit 1
 fi
 
-if ! docker inspect cloudron/redis:0.3.0 >/dev/null 2>/dev/null; then
-    echo "docker pull cloudron/redis:0.3.0 for tests to run"
+if ! docker inspect cloudron/redis:0.3.1 >/dev/null 2>/dev/null; then
+    echo "docker pull cloudron/redis:0.3.1 for tests to run"
     exit 1
 fi
 
-if ! docker inspect cloudron/mysql:0.3.0 >/dev/null 2>/dev/null; then
-    echo "docker pull cloudron/mysql:0.3.0 for tests to run"
+if ! docker inspect cloudron/mysql:0.3.1 >/dev/null 2>/dev/null; then
+    echo "docker pull cloudron/mysql:0.3.1 for tests to run"
     exit 1
 fi
 
-if ! docker inspect cloudron/postgresql:0.3.0 >/dev/null 2>/dev/null; then
-    echo "docker pull cloudron/postgresql:0.3.0 for tests to run"
+if ! docker inspect cloudron/postgresql:0.3.1 >/dev/null 2>/dev/null; then
+    echo "docker pull cloudron/postgresql:0.3.1 for tests to run"
     exit 1
 fi
 
-if ! docker inspect cloudron/mongodb:0.3.0 >/dev/null 2>/dev/null; then
-    echo "docker pull cloudron/mongodb:0.3.0 for tests to run"
+if ! docker inspect cloudron/mongodb:0.3.1 >/dev/null 2>/dev/null; then
+    echo "docker pull cloudron/mongodb:0.3.1 for tests to run"
     exit 1
 fi
 

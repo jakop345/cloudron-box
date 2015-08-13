@@ -20,7 +20,7 @@ start_postgresql() {
 
     docker rm -f postgresql 2>/dev/null 1>&2 || true
 
-    docker run -dtP --name=postgresql -v "${postgresqldatadir}:/var/lib/postgresql" -v /tmp/postgresql_vars.sh:/etc/postgresql/postgresql_vars.sh cloudron/postgresql:0.3.0 >/dev/null
+    docker run -dtP --name=postgresql -v "${postgresqldatadir}:/var/lib/postgresql" -v /tmp/postgresql_vars.sh:/etc/postgresql/postgresql_vars.sh cloudron/postgresql:0.3.1 >/dev/null
 }
 
 start_mysql() {
@@ -36,7 +36,7 @@ start_mysql() {
 
     docker rm -f mysql 2>/dev/null 1>&2 || true
 
-    docker run -dP --name=mysql -v "${mysqldatadir}:/var/lib/mysql" -v /tmp/mysql_vars.sh:/etc/mysql/mysql_vars.sh cloudron/mysql:0.3.0 >/dev/null
+    docker run -dP --name=mysql -v "${mysqldatadir}:/var/lib/mysql" -v /tmp/mysql_vars.sh:/etc/mysql/mysql_vars.sh cloudron/mysql:0.3.1 >/dev/null
 }
 
 start_mongodb() {
@@ -52,7 +52,7 @@ start_mongodb() {
 
     docker rm -f mongodb 2>/dev/null 1>&2 || true
 
-    docker run -dP --name=mongodb -v "${mongodbdatadir}:/var/lib/mongodb" -v /tmp/mongodb_vars.sh:/etc/mongodb_vars.sh cloudron/mongodb:0.3.0 >/dev/null
+    docker run -dP --name=mongodb -v "${mongodbdatadir}:/var/lib/mongodb" -v /tmp/mongodb_vars.sh:/etc/mongodb_vars.sh cloudron/mongodb:0.3.1 >/dev/null
 }
 
 start_mysql

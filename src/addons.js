@@ -665,7 +665,7 @@ function setupRedis(app, callback) {
         name: 'redis-' + app.id,
         Hostname: config.appFqdn(app.location),
         Tty: true,
-        Image: 'cloudron/redis:0.3.0',
+        Image: 'cloudron/redis:0.3.1',
         Cmd: null,
         Volumes: {},
         VolumesFrom: []
