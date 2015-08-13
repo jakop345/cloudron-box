@@ -2,22 +2,24 @@
 
 set -eu
 
-readonly SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+readonly SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+
+source ${SOURCE_DIR}/setup/INFRA_VERSION
 
 # reset sudo timestamp to avoid wrong success
 sudo -k || sudo --reset-timestamp
 
 # checks if all scripts are sudo access
-scripts=("${SOURCE_DIR}/scripts/rmappdir.sh" \
-         "${SOURCE_DIR}/scripts/createappdir.sh" \
-         "${SOURCE_DIR}/scripts/reloadnginx.sh" \
-         "${SOURCE_DIR}/scripts/backupbox.sh" \
-         "${SOURCE_DIR}/scripts/backupapp.sh" \
-         "${SOURCE_DIR}/scripts/restoreapp.sh" \
-         "${SOURCE_DIR}/scripts/reboot.sh" \
-         "${SOURCE_DIR}/scripts/backupswap.sh" \
-         "${SOURCE_DIR}/scripts/collectlogs.sh" \
-         "${SOURCE_DIR}/scripts/reloadcollectd.sh")
+scripts=("${SOURCE_DIR}/src/scripts/rmappdir.sh" \
+         "${SOURCE_DIR}/src/scripts/createappdir.sh" \
+         "${SOURCE_DIR}/src/scripts/reloadnginx.sh" \
+         "${SOURCE_DIR}/src/scripts/backupbox.sh" \
+         "${SOURCE_DIR}/src/scripts/backupapp.sh" \
+         "${SOURCE_DIR}/src/scripts/restoreapp.sh" \
+         "${SOURCE_DIR}/src/scripts/reboot.sh" \
+         "${SOURCE_DIR}/src/scripts/backupswap.sh" \
+         "${SOURCE_DIR}/src/scripts/collectlogs.sh" \
+         "${SOURCE_DIR}/src/scripts/reloadcollectd.sh")
 
 for script in "${scripts[@]}"; do
     if [[ $(sudo -n "${script}" --check 2>/dev/null) != "OK" ]]; then
@@ -37,23 +39,23 @@ if ! docker inspect girish/test:0.2.0 >/dev/null 2>/dev/null; then
     exit 1
 fi
 
-if ! docker inspect cloudron/redis:0.3.1 >/dev/null 2>/dev/null; then
-    echo "docker pull cloudron/redis:0.3.1 for tests to run"
+if ! docker inspect "${REDIS_IMAGE}" >/dev/null 2>/dev/null; then
+    echo "docker pull ${REDIS_IMAGE} for tests to run"
     exit 1
 fi
 
-if ! docker inspect cloudron/mysql:0.3.1 >/dev/null 2>/dev/null; then
-    echo "docker pull cloudron/mysql:0.3.1 for tests to run"
+if ! docker inspect "${MYSQL_IMAGE}" >/dev/null 2>/dev/null; then
+    echo "docker pull ${MYSQL_IMAGE} for tests to run"
     exit 1
 fi
 
-if ! docker inspect cloudron/postgresql:0.3.1 >/dev/null 2>/dev/null; then
-    echo "docker pull cloudron/postgresql:0.3.1 for tests to run"
+if ! docker inspect "${POSTGRESQL_IMAGE}" >/dev/null 2>/dev/null; then
+    echo "docker pull ${POSTGRESQL_IMAGE} for tests to run"
     exit 1
 fi
 
-if ! docker inspect cloudron/mongodb:0.3.1 >/dev/null 2>/dev/null; then
-    echo "docker pull cloudron/mongodb:0.3.1 for tests to run"
+if ! docker inspect "${MONGODB_IMAGE}" >/dev/null 2>/dev/null; then
+    echo "docker pull ${MONGODB_IMAGE} for tests to run"
     exit 1
 fi
 
