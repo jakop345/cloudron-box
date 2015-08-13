@@ -34,6 +34,10 @@ ln -sfF "${DATA_DIR}/collectd" /etc/collectd
 unlink /etc/nginx 2>/dev/null || rm -rf /etc/nginx
 ln -s "${DATA_DIR}/nginx" /etc/nginx
 
+########## mysql
+cp "${container_files}/mysql.cnf" /etc/mysql/mysql.cnf
+service mysql restart
+
 ########## Enable services
 update-rc.d -f collectd defaults
 

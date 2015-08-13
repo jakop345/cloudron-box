@@ -1,0 +1,8 @@
+!includedir /etc/mysql/conf.d/
+!includedir /etc/mysql/mysql.conf.d/
+
+# http://bugs.mysql.com/bug.php?id=68514
+[mysqld]
+performance_schema=OFF
+max_connection=50
+
