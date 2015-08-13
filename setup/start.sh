@@ -56,6 +56,9 @@ echo "{ \"version\": \"${arg_version}\", \"boxVersionsUrl\": \"${arg_box_version
 echo "Cleaning up snapshots"
 find "${DATA_DIR}/snapshots" -mindepth 1 -maxdepth 1 | xargs --no-run-if-empty btrfs subvolume delete
 
+# restart mysql to make sure it has latest config
+service mysql restart
+
 readonly mysql_root_password="password"
 mysqladmin -u root -ppassword password password # reset default root password
 mysql -u root -p${mysql_root_password} -e 'CREATE DATABASE IF NOT EXISTS box'
