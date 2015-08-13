@@ -28,6 +28,7 @@ cp "${container_files}/sudoers" /etc/sudoers.d/yellowtent
 ########## collectd
 rm -rf /etc/collectd
 ln -sfF "${DATA_DIR}/collectd" /etc/collectd
+service collectd restart
 
 ########## nginx
 # link nginx config to system config
