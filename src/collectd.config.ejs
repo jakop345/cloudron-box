@@ -1,6 +1,6 @@
 LoadPlugin "table"
 <Plugin table>
-  <Table "/sys/fs/cgroup/memory/docker/<%= containerId %>/memory.stat">
+  <Table "/sys/fs/cgroup/memory/system.slice/docker-<%= containerId %>.scope/memory.stat">
     Instance "<%= appId %>-memory"
     Separator " \\n"
     <Result>
@@ -10,7 +10,7 @@ LoadPlugin "table"
     </Result>
   </Table>
 
-  <Table "/sys/fs/cgroup/memory/docker/<%= containerId %>/memory.max_usage_in_bytes">
+  <Table "/sys/fs/cgroup/memory/system.slice/docker-<%= containerId %>.scope/memory.max_usage_in_bytes">
     Instance "<%= appId %>-memory"
     Separator "\\n"
     <Result>
@@ -20,7 +20,7 @@ LoadPlugin "table"
     </Result>
   </Table>
 
-  <Table "/sys/fs/cgroup/cpuacct/docker/<%= containerId %>/cpuacct.stat">
+  <Table "/sys/fs/cgroup/cpuacct/system.slice/docker-<%= containerId %>.scope/cpuacct.stat">
     Instance "<%= appId %>-cpu"
     Separator " \\n"
     <Result>
