@@ -103,3 +103,7 @@
 - WARNING: This update restarts your containers
 - System processes are prioritized over apps
 - Add ldap group support
+
+[0.0.32]
+- MySQL addon update
+
