@@ -5,6 +5,7 @@
 
 INFRA_VERSION=5
 
+BASE_IMAGE=cloudron/base:0.3.1
 MYSQL_IMAGE=cloudron/mysql:0.3.1
 POSTGRESQL_IMAGE=cloudron/postgresql:0.3.1
 MONGODB_IMAGE=cloudron/mongodb:0.3.1
