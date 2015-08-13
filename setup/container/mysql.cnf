@@ -5,4 +5,6 @@
 [mysqld]
 performance_schema=OFF
 max_connection=50
+max_connection=5
+thread_cache_size=5
 
