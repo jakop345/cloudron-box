@@ -4,3 +4,11 @@
 # in the change log
 
 INFRA_VERSION=5
+
+MYSQL_IMAGE=cloudron/mysql:0.3.1
+POSTGRESQL_IMAGE=cloudron/postgresql:0.3.1
+MONGODB_IMAGE=cloudron/mongodb:0.3.1
+REDIS_IMAGE=cloudron/redis:0.3.1 # if you change this, fix src/addons.js as well
+MAIL_IMAGE=cloudron/mail:0.3.1
+GRAPHITE_IMAGE=cloudron/graphite:0.3.1
+
