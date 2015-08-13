@@ -28,7 +28,6 @@ cp "${container_files}/sudoers" /etc/sudoers.d/yellowtent
 ########## collectd
 rm -rf /etc/collectd
 ln -sfF "${DATA_DIR}/collectd" /etc/collectd
-service collectd restart
 
 ########## nginx
 # link nginx config to system config
@@ -37,7 +36,6 @@ ln -s "${DATA_DIR}/nginx" /etc/nginx
 
 ########## mysql
 cp "${container_files}/mysql.cnf" /etc/mysql/mysql.cnf
-service mysql restart
 
 ########## Enable services
 update-rc.d -f collectd defaults
