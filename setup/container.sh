@@ -28,6 +28,10 @@ cp "${container_files}/sudoers" /etc/sudoers.d/yellowtent
 ########## collectd
 rm -rf /etc/collectd
 ln -sfF "${DATA_DIR}/collectd" /etc/collectd
+# collectd 5.4.1 has some bug where we simply cannot get it to create df-vda1
+mkdir -p "${DATA_DIR}/graphite/whisper/collectd/localhost/"
+vda1_id=$(blkid -s UUID -o value /dev/vda1)
+ln -sfF "df-disk_by-uuid_${vda1_id}" "${DATA_DIR}/graphite/whisper/collectd/localhost/df-vda1"
 
 ########## nginx
 # link nginx config to system config
