@@ -11,6 +11,9 @@ readonly INSTALLER_REVISION="$1"
 readonly DOCKER_DATA_FILE="/root/docker_data.img"
 readonly USER_HOME_FILE="/root/user_home.img"
 
+readonly SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SOURCE_DIR}/INFRA_VERSION"
+
 echo "==== Create User ${USER} ===="
 if ! id "${USER}"; then
     useradd "${USER}" -m
@@ -117,25 +120,25 @@ mkdir /etc/iptables && iptables-save > /etc/iptables/rules.v4
 # now add the user to the docker group
 usermod "${USER}" -a -G docker
 echo "=== Pulling base docker images ==="
-docker pull cloudron/base:0.3.1
+docker pull "${BASE_IMAGE}"
 
 echo "=== Pulling mysql addon image ==="
-docker pull cloudron/mysql:0.3.1
+docker pull "${MYSQL_IMAGE}"
 
 echo "=== Pulling postgresql addon image ==="
-docker pull cloudron/postgresql:0.3.1
+docker pull "${POSTGRESQL_IMAGE}"
 
 echo "=== Pulling redis addon image ==="
-docker pull cloudron/redis:0.3.1
+docker pull "${REDIS_IMAGE}"
 
 echo "=== Pulling mongodb addon image ==="
-docker pull cloudron/mongodb:0.3.1
+docker pull "${MONGODB_IMAGE}"
 
 echo "=== Pulling graphite docker images ==="
-docker pull cloudron/graphite:0.3.1
+docker pull "${GRAPHITE_IMAGE}"
 
 echo "=== Pulling mail relay ==="
-docker pull cloudron/mail:0.3.1
+docker pull "${MAIL_IMAGE}"
 
 echo "==== Install nginx ===="
 apt-get -y install nginx-full

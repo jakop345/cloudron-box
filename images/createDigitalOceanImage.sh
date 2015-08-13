@@ -138,6 +138,9 @@ while true; do
     sleep 30
 done
 
+echo "Copying INFRA_VERSION"
+scp -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i "${ssh_keys}" "${SCRIPT_DIR}/../../box/setup/INFRA_VERSION" root@${droplet_ip}:.
+
 echo "Copying installer source"
 cd "${INSTALLER_DIR}"
 git archive --format=tar HEAD | ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i "${ssh_keys}" "root@${droplet_ip}" "cat - > /root/installer.tar"
