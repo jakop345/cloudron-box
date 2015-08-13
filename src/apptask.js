@@ -201,11 +201,8 @@ function createContainer(app, callback) {
                 Tty: true,
                 Image: app.manifest.dockerImage,
                 Cmd: null,
-                Volumes: {},
-                VolumesFrom: [],
                 Env: env.concat(addonEnv),
-                ExposedPorts: exposedPorts,
-                CpuShares: 512 // relative to 1024 for system processes
+                ExposedPorts: exposedPorts
             };
 
             debugApp(app, 'Creating container for %s', app.manifest.dockerImage);
@@ -342,7 +339,8 @@ function startContainer(app, callback) {
             RestartPolicy: {
                 "Name": "always",
                 "MaximumRetryCount": 0
-            }
+            },
+            CpuShares: 512 // relative to 1024 for system processes
         };
 
         var container = docker.getContainer(app.containerId);
