@@ -27,11 +27,13 @@ if [[ -n "${existing_containers}" ]]; then
 fi
 
 # graphite
-docker run --restart=always -d --name="graphite" \
+graphite_container_id=$(docker run --restart=always -d --name="graphite" \
     -p 127.0.0.1:2003:2003 \
     -p 127.0.0.1:2004:2004 \
     -p 127.0.0.1:8000:8000 \
-    -v "${DATA_DIR}/graphite:/app/data" "${GRAPHITE_IMAGE}"
+    -v "${DATA_DIR}/graphite:/app/data" \
+    "${GRAPHITE_IMAGE}")
+echo "Graphite container id: ${graphite_container_id}"
 
 # mail
 mail_container_id=$(docker run --restart=always -d --name="mail" \
