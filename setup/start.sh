@@ -89,6 +89,10 @@ EOF
 
 set_progress "28" "Setup collectd"
 cp "${script_dir}/start/collectd.conf" "${DATA_DIR}/collectd/collectd.conf"
+# collectd 5.4.1 has some bug where we simply cannot get it to create df-vda1
+mkdir -p "${DATA_DIR}/graphite/whisper/collectd/localhost/"
+vda1_id=$(blkid -s UUID -o value /dev/vda1)
+ln -sfF "df-disk_by-uuid_${vda1_id}" "${DATA_DIR}/graphite/whisper/collectd/localhost/df-vda1"
 service collectd restart
 
 set_progress "30" "Setup nginx"

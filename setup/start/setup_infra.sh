@@ -32,10 +32,6 @@ docker run --restart=always -d --name="graphite" \
     -p 127.0.0.1:2004:2004 \
     -p 127.0.0.1:8000:8000 \
     -v "${DATA_DIR}/graphite:/app/data" "${GRAPHITE_IMAGE}"
-# collectd 5.4.1 has some bug where we simply cannot get it to create df-vda1
-mkdir -p "${DATA_DIR}/graphite/whisper/collectd/localhost/"
-vda1_id=$(blkid -s UUID -o value /dev/vda1)
-ln -sfF "df-disk_by-uuid_${vda1_id}" "${DATA_DIR}/graphite/whisper/collectd/localhost/df-vda1"
 
 # mail
 mail_container_id=$(docker run --restart=always -d --name="mail" \
