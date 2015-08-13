@@ -67,7 +67,7 @@ function notifyAdmins(env, releases, callback) {
     var oldImageRef = releases[oldVersion].imageName.match('box-(prod|staging|dev)-([0-9a-z.]+)-.*')[2],
         newImageRef = releases[newVersion].imageName.match('box-(prod|staging|dev)-([0-9a-z.]+)-.*')[2];
 
-    var imageLogs = execSync(util.format('git log %s..%s --format=oneline', oldImageRef, newImageRef), { cwd: __dirname }).toString('utf8'),
+    var imageLogs = execSync(util.format('git fetch && git log %s..%s --format=oneline', oldImageRef, newImageRef), { cwd: __dirname }).toString('utf8'),
         imageStat = execSync(util.format('git diff --stat %s..%s', oldImageRef, newImageRef), { cwd: __dirname }).toString('utf8');
 
     var oldBoxRef = url.parse(releases[oldVersion].sourceTarballUrl).path.match('/box-(.*).tar.gz')[1],
@@ -75,7 +75,7 @@ function notifyAdmins(env, releases, callback) {
 
     var boxRepo = path.resolve(__dirname, '../../box');
 
-    var boxLogs = execSync(util.format('git log %s..%s --format=oneline', oldBoxRef, newBoxRef), { cwd: boxRepo }).toString('utf8'),
+    var boxLogs = execSync(util.format('git fetch && git log %s..%s --format=oneline', oldBoxRef, newBoxRef), { cwd: boxRepo }).toString('utf8'),
         boxStat = execSync(util.format('git diff --stat %s..%s', oldBoxRef, newBoxRef), { cwd: boxRepo }).toString('utf8');
 
     var textBody = util.format(
