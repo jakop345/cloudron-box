@@ -107,3 +107,7 @@
 [0.0.32]
 - MySQL addon update
 
+[0.0.33]
+- Fix graphs
+- Fix MySQL 5.6 memory usage
+
