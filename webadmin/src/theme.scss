@@ -195,8 +195,8 @@ html {
 
 .appstore-item-badge-testing {
     position: absolute;
-    right: 15px;
-    top: 15px;
+    right: 0;
+    top: 2px;
 }
 
 .appstore-item-content-testing {
@@ -328,6 +328,10 @@ html {
 
 .badge-success {
     background-color: #5CB85C;
+}
+
+.badge-warning {
+    background-color: #EFBD48;
 }
 
 .badge-danger {
