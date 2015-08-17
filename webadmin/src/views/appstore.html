@@ -147,8 +147,9 @@
         <div class="col-md-10" ng-show="ready && apps.length">
             <div class="row-no-margin">
                 <div class="col-sm-1 appstore-item" ng-repeat="app in apps">
-                    <div class="appstore-item-content highlight" ng-click="showInstall(app)" ng-class="{ 'appstore-item-content-testing': app.publishState === 'testing' }">
+                    <div class="appstore-item-content highlight" ng-click="showInstall(app)" ng-class="{ 'appstore-item-content-testing': (app.publishState === 'testing' || app.publishState === 'pending_approval') }">
                         <span class="badge badge-danger appstore-item-badge-testing" ng-show="app.publishState === 'testing'">Testing</span>
+                        <span class="badge badge-warning appstore-item-badge-testing" ng-show="app.publishState === 'pending_approval'">Pending Approval</span>
                         <div class="appstore-item-content-icon col-same-height">
                             <img ng-src="{{app.iconUrl}}" onerror="this.onerror=null;this.src='img/appicon_fallback.png'" class="app-icon"/>
                         </div>
