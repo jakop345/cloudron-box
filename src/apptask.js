@@ -671,6 +671,7 @@ function restore(app, callback) {
 
 // note that configure is called after an infra update as well
 function configure(app, callback) {
+    // oldConfig can be null during an infra update
     var locationChanged = app.oldConfig ? app.oldConfig.location !== app.location : true;
 
     async.series([
