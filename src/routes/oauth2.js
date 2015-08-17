@@ -171,17 +171,6 @@ function sendErrorPageOrRedirect(req, res, message) {
     }
 }
 
-function sendError(req, res, message) {
-    assert.strictEqual(typeof req, 'object');
-    assert.strictEqual(typeof res, 'object');
-    assert.strictEqual(typeof message, 'string');
-
-    res.render('error', {
-        adminOrigin: config.adminOrigin(),
-        message: message
-    });
-}
-
 // Main login form username and password
 function loginForm(req, res) {
     if (typeof req.session.returnTo !== 'string') return sendErrorPageOrRedirect(req, res, 'Invalid login request. No returnTo provided.');
@@ -203,12 +192,12 @@ function loginForm(req, res) {
     }
 
     settings.getCloudronName(function (error, name) {
-        if (error) return sendError(req, res, 'Internal Error');
+        if (error) return sendErrorPageOrRedirect(req, res, 'Internal Error');
 
         cloudronName = name;
 
         clientdb.get(u.query.client_id, function (error, result) {
-            if (error) return sendError(req, res, 'Unknown OAuth client');
+            if (error) return sendErrorPageOrRedirect(req, res, 'Unknown OAuth client');
 
             // Handle our different types of oauth clients
             var appId = result.appId;
