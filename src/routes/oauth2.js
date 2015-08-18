@@ -171,6 +171,8 @@ function sendErrorPageOrRedirect(req, res, message) {
     }
 }
 
+// use this instead of sendErrorPageOrRedirect(), in case we have a returnTo provided in the query, to avoid login loops
+// This usually happens when the OAuth client ID is wrong
 function sendError(req, res, message) {
     assert.strictEqual(typeof req, 'object');
     assert.strictEqual(typeof res, 'object');
