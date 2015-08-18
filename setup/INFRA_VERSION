@@ -7,7 +7,7 @@ INFRA_VERSION=8
 
 # WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
 # These constants are used in the installer script as well
-BASE_IMAGE=cloudron/base:0.3.1
+BASE_IMAGE=cloudron/base:0.3.3
 MYSQL_IMAGE=cloudron/mysql:0.3.2
 POSTGRESQL_IMAGE=cloudron/postgresql:0.3.1
 MONGODB_IMAGE=cloudron/mongodb:0.3.1
