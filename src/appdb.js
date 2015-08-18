@@ -335,6 +335,7 @@ function setInstallationCommand(appId, installationState, values, callback) {
 
     // Rules are:
     // uninstall is allowed in any state
+    // force update is allowed in any state including pending_uninstall! (for better or worse)
     // restore is allowed from installed or error state
     // update and configure are allowed only in installed state
 
