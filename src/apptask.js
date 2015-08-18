@@ -355,6 +355,11 @@ function startContainer(app, callback) {
 }
 
 function stopContainer(app, callback) {
+    if (!app.containerId) {
+        debugApp(app, 'No previous container to stop');
+        return callback();
+    }
+
     var container = docker.getContainer(app.containerId);
     debugApp(app, 'Stopping container %s', container.id);
 
