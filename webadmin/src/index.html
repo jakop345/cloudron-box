@@ -81,7 +81,7 @@
                         <li ng-repeat="change in config.update.box.changelog">{{change}}</li>
                     </ul>
                     <br/>
-                    <fieldset>
+                    <fieldset ng-show="installedApps | readyToUpdate">
                         <form name="update_form" role="form" ng-submit="doUpdate()" autocomplete="off">
                             <div class="form-group" ng-class="{ 'has-error': update_form.password.$dirty && update_form.password.$invalid }">
                                 <label class="control-label" for="inputUpdatePassword">Give your password to verify that you are performing that action</label>
@@ -93,13 +93,13 @@
                                 </div>
                                 <input type="password" class="form-control" ng-model="update.password" id="inputUpdatePassword" name="password" placeholder="Password" ng-maxlength="512" ng-minlength="5" required autofocus>
                             </div>
-                            <input class="ng-hide" type="submit" ng-disabled="update_form.$invalid || update.busy"/>
+                            <input class="ng-hide" type="submit" ng-disabled="update_form.$invalid || (installedApps | readyToUpdate) || update.busy"/>
                         </form>
                     </fieldset>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-danger" ng-click="doUpdate()" ng-disabled="update_form.$invalid || update.busy"><i class="fa fa-spinner fa-pulse" ng-show="update.busy"></i> Update</button>
+                    <button type="button" class="btn btn-danger" ng-click="doUpdate()" ng-disabled="update_form.$invalid || update.busy" ng-show="installedApps | readyToUpdate"><i class="fa fa-spinner fa-pulse" ng-show="update.busy"></i> Update</button>
                 </div>
             </div>
         </div>
