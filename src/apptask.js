@@ -754,7 +754,7 @@ function update(app, callback) {
         stopApp.bind(null, app),
         deleteContainer.bind(null, app),
         addons.teardownAddons.bind(null, app, unusedAddons),
-        deleteImage.bind(null, app, app.manifest), // delete image even if did not change (see df158b111f)
+        deleteImage.bind(null, app, app.oldConfig.manifest), // delete old image even if did not change (see df158b111f)
         // removeIcon.bind(null, app), // do not remove icon, otherwise the UI breaks for a short time...
 
         function (next) {
