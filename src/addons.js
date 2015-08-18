@@ -38,8 +38,7 @@ var appdb = require('./appdb.js'),
     tokendb = require('./tokendb.js'),
     util = require('util'),
     uuid = require('node-uuid'),
-    vbox = require('./vbox.js'),
-    _ = require('underscore');
+    vbox = require('./vbox.js');
 
 var NOOP = function (app, callback) { return callback(); };
 
