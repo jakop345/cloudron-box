@@ -25,7 +25,7 @@ var gLogger = {
 };
 
 var GROUP_USERS_DN = 'cn=users,ou=groups,dc=cloudron';
-var GROUP_ADMINS_DN = 'cn=admin,ou=groups,dc=cloudron';
+var GROUP_ADMINS_DN = 'cn=admins,ou=groups,dc=cloudron';
 
 function start(callback) {
     assert(typeof callback === 'function');
