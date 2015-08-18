@@ -532,7 +532,7 @@ function install(app, callback) {
         deleteVolume.bind(null, app),
         unregisterSubdomain.bind(null, app),
         removeOAuthProxyCredentials.bind(null, app),
-        removeIcon.bind(null, app),
+        // removeIcon.bind(null, app), // do not remove icon for non-appstore installs
         unconfigureNginx.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '15, Configure nginx' }),
