@@ -490,28 +490,30 @@ function restore(appId, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        var restoreConfig = app.lastBackupConfig;
-        if (!restoreConfig) return callback(new AppsError(AppsError.BAD_STATE, 'No restore point'));
+        // restore without a backup is the same as re-install
+        var restoreConfig = app.lastBackupConfig, values = { };
+        if (restoreConfig) {
+            // re-validate because this new box version may not accept old configs.
+            // if we restore location, it should be validated here as well
+            error = checkManifestConstraints(restoreConfig.manifest);
+            if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Manifest cannot be installed: ' + error.message));
 
-        // re-validate because this new box version may not accept old configs. if we restore location, it should be validated here as well
-        error = checkManifestConstraints(restoreConfig.manifest);
-        if (error) return callback(new AppsError(AppsError.BAD_FIELD, 'Manifest cannot be installed: ' + error.message));
+            error = validatePortBindings(restoreConfig.portBindings, restoreConfig.manifest.tcpPorts); // maybe new ports got reserved now
+            if (error) return callback(error);
 
-        error = validatePortBindings(restoreConfig.portBindings, restoreConfig.manifest.tcpPorts); // maybe new ports got reserved now
-        if (error) return callback(error);
+            // ## should probably query new location, access restriction from user
+            values = {
+                manifest: restoreConfig.manifest,
+                portBindings: restoreConfig.portBindings,
 
-        // ## should probably query new location, access restriction from user
-        var values = {
-            manifest: restoreConfig.manifest,
-            portBindings: restoreConfig.portBindings,
-
-            oldConfig: {
-                location: app.location,
-                accessRestriction: app.accessRestriction,
-                portBindings: app.portBindings,
-                manifest: app.manifest
-            }
-        };
+                oldConfig: {
+                    location: app.location,
+                    accessRestriction: app.accessRestriction,
+                    portBindings: app.portBindings,
+                    manifest: app.manifest
+                }
+            };
+        }
 
         appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_RESTORE, values, function (error) {
             if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE)); // might be a bad guess
