@@ -575,6 +575,8 @@ function stop(appId, callback) {
 }
 
 function checkManifestConstraints(manifest) {
+    if (!manifest.dockerImage) return new Error('Missing dockerImage'); // dockerImage is optional in manifest
+
     if (semver.valid(manifest.maxBoxVersion) && semver.gt(config.version(), manifest.maxBoxVersion)) {
         return new Error('Box version exceeds Apps maxBoxVersion');
     }
