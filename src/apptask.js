@@ -248,7 +248,7 @@ function deleteImage(app, manifest, callback) {
             noprune: false
         };
 
-        // delete image by id because docker pull pulls down all the tags and this is the only way to delete all tags
+         // delete image by id because 'docker pull' pulls down all the tags and this is the only way to delete all tags
         docker.getImage(result.Id).remove(removeOptions, function (error) {
             if (error && error.statusCode === 404) return callback(null);
             if (error && error.statusCode === 409) return callback(null); // another container using the image
@@ -622,7 +622,11 @@ function restore(app, callback) {
          // oldConfig can be null during upgrades
         addons.teardownAddons.bind(null, app, app.oldConfig ? app.oldConfig.manifest.addons : null),
         deleteVolume.bind(null, app),
-        deleteImage.bind(null, app, app.manifest),
+        function deleteImageIfChanged(done) {
+             if (app.oldConfig.manifest.dockerImage === app.manifest.dockerImage) return done();
+
+             deleteImage(app, app.oldConfig.manifest, done);
+        },
         removeOAuthProxyCredentials.bind(null, app),
         removeIcon.bind(null, app),
         unconfigureNginx.bind(null, app),
@@ -759,7 +763,11 @@ function update(app, callback) {
         stopApp.bind(null, app),
         deleteContainer.bind(null, app),
         addons.teardownAddons.bind(null, app, unusedAddons),
-        deleteImage.bind(null, app, app.oldConfig.manifest), // delete old image even if did not change (see df158b111f)
+        function deleteImageIfChanged(done) {
+             if (app.oldConfig.manifest.dockerImage === app.manifest.dockerImage) return done();
+
+             deleteImage(app, app.oldConfig.manifest, done);
+        },
         // removeIcon.bind(null, app), // do not remove icon, otherwise the UI breaks for a short time...
 
         function (next) {
