@@ -114,3 +114,5 @@
 [0.0.34]
 - Correctly mark apps pending for approval
 
+[0.0.35]
+- Fix ldap admin group username
