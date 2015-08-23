@@ -93,7 +93,7 @@
                                 </div>
                                 <input type="password" class="form-control" ng-model="update.password" id="inputUpdatePassword" name="password" placeholder="Password" ng-maxlength="512" ng-minlength="5" required autofocus>
                             </div>
-                            <input class="ng-hide" type="submit" ng-disabled="update_form.$invalid || (installedApps | readyToUpdate) || update.busy"/>
+                            <input class="ng-hide" type="submit" ng-disabled="update_form.$invalid || update.busy"/>
                         </form>
                     </fieldset>
                 </div>
