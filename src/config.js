@@ -30,6 +30,8 @@ exports = module.exports = {
 
     isDev: isDev,
 
+    backupKey: backupKey,
+
     // for testing resets to defaults
     _reset: initConfig
 };
@@ -70,6 +72,7 @@ function initConfig() {
     data.webServerOrigin = null;
     data.internalPort = 3001;
     data.ldapPort = 3002;
+    data.backupKey = 'backupKey';
 
     if (exports.CLOUDRON) {
         data.port = 3000;
@@ -172,3 +175,6 @@ function isDev() {
     return /dev/i.test(get('boxVersionsUrl'));
 }
 
+function backupKey() {
+    return get('backupKey');
+}
