@@ -56,9 +56,11 @@ function getAWSCredentials(callback) {
             return callback(null, result.body.credentials);
         });
     } else {
-        // return credentials from config.js
-        callback(new AWSError(AWSError.MISSING_CREDENTIALS));
+        if (!config.aws().accessKeyId || !config.aws().secretAccessKey) return callback(new AWSError(AWSError.MISSING_CREDENTIALS));
+
+        callback(null, {
+            accessKeyId: config.aws().accessKeyId,
+            secretAccessKey: config.aws().secretAccessKey
+        });
     }
 }
-
-
