@@ -25,6 +25,7 @@ var apps = require('./apps.js'),
     AppsError = require('./apps.js').AppsError,
     assert = require('assert'),
     async = require('async'),
+    aws = require('./aws.js'),
     backups = require('./backups.js'),
     BackupsError = require('./backups.js').BackupsError,
     clientdb = require('./clientdb.js'),
@@ -46,7 +47,8 @@ var apps = require('./apps.js'),
     user = require('./user.js'),
     UserError = user.UserError,
     userdb = require('./userdb.js'),
-    util = require('util');
+    util = require('util'),
+    webhooks = require('./webhooks.js');
 
 var RELOAD_NGINX_CMD = path.join(__dirname, 'scripts/reloadnginx.sh'),
     REBOOT_CMD = path.join(__dirname, 'scripts/reboot.sh'),
@@ -544,22 +546,29 @@ function ensureBackup(callback) {
 function backupBoxWithAppBackupIds(appBackupIds, callback) {
     assert(util.isArray(appBackupIds));
 
-    backups.getBackupUrl(null /* app */, appBackupIds, function (error, result) {
-        if (error && error.reason === BackupsError.EXTERNAL_ERROR) return callback(new CloudronError(CloudronError.EXTERNAL_ERROR, error.message));
-        if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
+    aws.getAWSCredentials(function (error, credentials) {
+        if (error) return callback(error);
 
-        debug('backup: url %s', result.url);
-
-        async.series([
-            ignoreError(shell.sudo.bind(null, 'mountSwap', [ BACKUP_SWAP_CMD, '--on' ])),
-            shell.sudo.bind(null, 'backupBox', [ BACKUP_BOX_CMD, result.url, result.backupKey ]),
-            ignoreError(shell.sudo.bind(null, 'unmountSwap', [ BACKUP_SWAP_CMD, '--off' ])),
-        ], function (error) {
+        backups.getBackupUrl(null /* app */, appBackupIds, function (error, result) {
+            if (error && error.reason === BackupsError.EXTERNAL_ERROR) return callback(new CloudronError(CloudronError.EXTERNAL_ERROR, error.message));
             if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
-            debug('backup: successful');
+            debug('backup: url %s', result.url);
 
-            callback(null, result.id);
+            async.series([
+                ignoreError(shell.sudo.bind(null, 'mountSwap', [ BACKUP_SWAP_CMD, '--on' ])),
+                shell.sudo.bind(null, 'backupBox', [ BACKUP_BOX_CMD, result.url, result.backupKey, credentials.accessKeyId, credentials.secretAccessKey ]),
+                ignoreError(shell.sudo.bind(null, 'unmountSwap', [ BACKUP_SWAP_CMD, '--off' ])),
+            ], function (error) {
+                if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
+
+                debug('backup: successful');
+
+                webhooks.backupDone(result.id, null /* app */, appBackupIds, function (error) {
+                    if (error) return callback(error);
+                    callback(null, result.id);
+                });
+            });
         });
     });
 }
