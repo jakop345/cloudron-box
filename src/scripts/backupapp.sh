@@ -13,7 +13,7 @@ if [[ $# == 1 && "$1" == "--check" ]]; then
 fi
 
 if [ $# -lt 3 ]; then
-    echo "Usage: backup.sh <appid> <url> <key>"
+    echo "Usage: backupapp.sh <appid> <url> <key>"
     exit 1
 fi
 
