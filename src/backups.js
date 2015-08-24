@@ -59,22 +59,16 @@ function getBackupUrl(app, appBackupIds, callback) {
     assert(!appBackupIds || util.isArray(appBackupIds));
     assert.strictEqual(typeof callback, 'function');
 
-    var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/backupurl';
-
-    var data = {
-        boxVersion: config.version(),
-        appId: app ? app.id : null,
-        appVersion: app ? app.manifest.version : null,
-        appBackupIds: appBackupIds
+    // TODO get the bucket information form config.js and construct the url
+    var obj = {
+        id: util.format('backup_%s-v%s.tar.gz', (new Date()).toISOString(), config.version()),
+        url: 'https://' + config.aws().backupBucket + '/todo_keypath',
+        backupKey: config.backupKey
     };
 
-    superagent.put(url).query({ token: config.token() }).send(data).end(function (error, result) {
-        if (error) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, error));
-        if (result.statusCode !== 201) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, result.text));
-        if (!result.body || !result.body.url) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, 'Unexpected response'));
+    debug('getBackupUrl: ', obj);
 
-        return callback(null, result.body);
-    });
+    callback(null, obj);
 }
 
 function getRestoreUrl(backupId, callback) {
