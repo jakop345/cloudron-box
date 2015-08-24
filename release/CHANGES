@@ -116,3 +116,8 @@
 
 [0.0.35]
 - Fix ldap admin group username
+
+[0.0.36]
+- Fix restore without backup
+- Optimize image deletion during updates
+
