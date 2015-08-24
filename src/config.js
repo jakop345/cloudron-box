@@ -31,6 +31,7 @@ exports = module.exports = {
     isDev: isDev,
 
     backupKey: backupKey,
+    aws: aws,
 
     // for testing resets to defaults
     _reset: initConfig
@@ -73,6 +74,11 @@ function initConfig() {
     data.internalPort = 3001;
     data.ldapPort = 3002;
     data.backupKey = 'backupKey';
+    data.aws = {
+        backupBucket: 'backupBucketbucket',
+        accessKeyId: 'accessKeyId',
+        secretAccessKey: 'secretAccessKey'
+    };
 
     if (exports.CLOUDRON) {
         data.port = 3000;
@@ -177,4 +183,8 @@ function isDev() {
 
 function backupKey() {
     return get('backupKey');
+}
+
+function aws() {
+    return get('aws');
 }
