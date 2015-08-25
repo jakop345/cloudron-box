@@ -5,10 +5,14 @@
 exports = module.exports = {
     AWSError: AWSError,
 
-    getAWSCredentials: getAWSCredentials
+    getAWSCredentials: getAWSCredentials,
+
+    getSignedUploadUrl: getSignedUploadUrl,
+    getSignedDownloadUrl: getSignedDownloadUrl
 };
 
 var assert = require('assert'),
+    AWS = require('aws-sdk'),
     config = require('./config.js'),
     debug = require('debug')('box:aws'),
     superagent = require('superagent'),
@@ -63,4 +67,52 @@ function getAWSCredentials(callback) {
             secretAccessKey: config.aws().secretAccessKey
         });
     }
+}
+
+function getSignedUploadUrl(filename, callback) {
+    assert.strictEqual(typeof filename, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    debug('getSignedUploadUrl()');
+
+    getAWSCredentials(function (error, credentials) {
+        if (error) return callback(error);
+
+        var s3 = new AWS.S3(credentials);
+
+        var params = {
+            Bucket: config.aws().backupBucket,
+            Key: config.aws().backupPrefix + '/' + filename,
+            Expires: 60 * 30 /* 30 minutes */
+        };
+
+        s3.getSignedUrl('putObject', params, function (error, url) {
+            if (error) return callback(error);
+            callback(null, url);
+        });
+    });
+}
+
+function getSignedDownloadUrl(filename, callback) {
+    assert.strictEqual(typeof filename, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    debug('getSignedDownloadUrl()');
+
+    getAWSCredentials(function (error, credentials) {
+        if (error) return callback(error);
+
+        var s3 = new AWS.S3(credentials);
+
+        var params = {
+            Bucket: config.aws().backupBucket,
+            Key: config.aws().backupPrefix + '/' + filename,
+            Expires: 60 * 30 /* 30 minutes */
+        };
+
+        s3.getSignedUrl('getObject', params, function (error, url) {
+            if (error) return callback(error);
+            callback(null, url);
+        });
+    });
 }
