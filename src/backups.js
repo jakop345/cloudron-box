@@ -10,6 +10,7 @@ exports = module.exports = {
 };
 
 var assert = require('assert'),
+    aws = require('./aws.js'),
     config = require('./config.js'),
     debug = require('debug')('box:backups'),
     superagent = require('superagent'),
@@ -59,16 +60,21 @@ function getBackupUrl(app, appBackupIds, callback) {
     assert(!appBackupIds || util.isArray(appBackupIds));
     assert.strictEqual(typeof callback, 'function');
 
-    // TODO get the bucket information form config.js and construct the url
-    var obj = {
-        id: util.format('backup_%s-v%s.tar.gz', (new Date()).toISOString(), config.version()),
-        url: 'https://' + config.aws().backupBucket + '/todo_keypath',
-        backupKey: config.backupKey
-    };
+    var filename = util.format('backup_%s-v%s.tar.gz', (new Date()).toISOString(), config.version());
 
-    debug('getBackupUrl: ', obj);
+    aws.getSignedUploadUrl(filename, function (error, url) {
+        if (error) return callback(error);
 
-    callback(null, obj);
+        var obj = {
+            id: filename,
+            url: url,
+            backupKey: config.backupKey
+        };
+
+        debug('getBackupUrl: ', obj);
+
+        callback(null, obj);
+    });
 }
 
 function getRestoreUrl(backupId, callback) {
