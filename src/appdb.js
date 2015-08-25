@@ -35,12 +35,13 @@ exports = module.exports = {
     ISTATE_ERROR: 'error', // error executing last pending_* command
     ISTATE_INSTALLED: 'installed', // app is installed
 
-    // run codes (keep in sync in UI)
     RSTATE_RUNNING: 'running',
     RSTATE_PENDING_START: 'pending_start',
     RSTATE_PENDING_STOP: 'pending_stop',
     RSTATE_STOPPED: 'stopped', // app stopped by use
+    RSTATE_ERROR: 'error',
 
+    // run codes (keep in sync in UI)
     HEALTH_HEALTHY: 'healthy',
     HEALTH_UNHEALTHY: 'unhealthy',
     HEALTH_ERROR: 'error',
