@@ -12,8 +12,8 @@ if [[ $# == 1 && "$1" == "--check" ]]; then
     exit 0
 fi
 
-if [ $# -lt 3 ]; then
-    echo "Usage: backupbox.sh <url> <key> <aws sessiontoken>"
+if [ $# -lt 2 ]; then
+    echo "Usage: backupbox.sh <url> <key> [aws session token]"
     exit 1
 fi
 
@@ -33,9 +33,17 @@ btrfs subvolume snapshot -r "${BOX_DATA_DIR}" "${box_snapshot_dir}"
 for try in `seq 1 5`; do
     echo "Uploading backup to ${backup_url} (try ${try})"
     error_log=$(mktemp)
+
+    headers=("-H" "Content-Type:")
+
+    # federated tokens in CaaS case need session token
+    if [ ! -z "$session_token" ]; then
+        headers=(${headers[@]} "-H" "x-amz-security-token: ${session_token}")
+    fi
+
     if tar -cvzf - -C "${box_snapshot_dir}" . \
            | openssl aes-256-cbc -e -pass "pass:${backup_key}" \
-           | curl --fail -H "Content-Type:" -X PUT -H "x-amz-security-token: ${session_token}" --data-binary @- "${backup_url}" 2>"${error_log}"; then
+           | curl --fail -X PUT ${headers[@]} --data-binary @- "${backup_url}" 2>"${error_log}"; then
         break
     fi
     cat "${error_log}" && rm "${error_log}"
