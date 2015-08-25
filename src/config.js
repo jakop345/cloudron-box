@@ -76,6 +76,7 @@ function initConfig() {
     data.backupKey = 'backupKey';
     data.aws = {
         backupBucket: 'backupBucketbucket',
+        backupPrefix: 'backups',
         accessKeyId: 'accessKeyId',
         secretAccessKey: 'secretAccessKey'
     };
