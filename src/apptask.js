@@ -331,10 +331,12 @@ function startContainer(app, callback) {
             vbox.forwardFromHostToVirtualBox(app.id + '-tcp' + containerPort, hostPort);
         }
 
+        var memoryLimit = manifest.memoryLimit || 1024 * 1024 * 200; // 200mb by default
+
         var startOptions = {
             Binds: addons.getBindsSync(app, app.manifest.addons),
-            Memory: 1024 * 1024 * 100,
-            MemorySwap: 1024 * 1024 * 200, // Memory + Swap
+            Memory: memoryLimit / 2,
+            MemorySwap: memoryLimit, // Memory + Swap
             PortBindings: dockerPortBindings,
             PublishAllPorts: false,
             Links: addons.getLinksSync(app, app.manifest.addons),
