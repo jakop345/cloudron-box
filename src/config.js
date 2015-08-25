@@ -75,10 +75,10 @@ function initConfig() {
     data.ldapPort = 3002;
     data.backupKey = 'backupKey';
     data.aws = {
-        backupBucket: 'backupBucketbucket',
+        backupBucket: 'dev-cloudron-backups',
         backupPrefix: 'backups',
-        accessKeyId: 'accessKeyId',
-        secretAccessKey: 'secretAccessKey'
+        accessKeyId: null,
+        secretAccessKey: null
     };
 
     if (exports.CLOUDRON) {
