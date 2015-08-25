@@ -25,6 +25,7 @@ function backupDone(filename, app, appBackupIds, callback) {
         var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/backupDone';
         var data = {
             boxVersion: config.version(),
+            restoreKey: filename,
             appId: app ? app.id : null,
             appVersion: app ? app.manifest.version : null,
             appBackupIds: appBackupIds
