@@ -333,6 +333,8 @@ function startContainer(app, callback) {
 
         var startOptions = {
             Binds: addons.getBindsSync(app, app.manifest.addons),
+            Memory: 1024 * 1024 * 100,
+            MemorySwap: 1024 * 1024 * 200, // Memory + Swap
             PortBindings: dockerPortBindings,
             PublishAllPorts: false,
             Links: addons.getLinksSync(app, app.manifest.addons),
