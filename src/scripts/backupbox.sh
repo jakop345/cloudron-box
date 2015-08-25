@@ -12,13 +12,14 @@ if [[ $# == 1 && "$1" == "--check" ]]; then
     exit 0
 fi
 
-if [ $# -lt 2 ]; then
-    echo "Usage: backupbox.sh <url> <key>"
+if [ $# -lt 3 ]; then
+    echo "Usage: backupbox.sh <url> <key> <aws sessiontoken>"
     exit 1
 fi
 
 backup_url="$1"
 backup_key="$2"
+session_token="$3"
 now=$(date "+%Y-%m-%dT%H:%M:%S")
 BOX_DATA_DIR="${HOME}/data/box"
 box_snapshot_dir="${HOME}/data/snapshots/box-${now}"
@@ -34,7 +35,7 @@ for try in `seq 1 5`; do
     error_log=$(mktemp)
     if tar -cvzf - -C "${box_snapshot_dir}" . \
            | openssl aes-256-cbc -e -pass "pass:${backup_key}" \
-           | curl --fail -H "Content-Type:" -X PUT --data-binary @- "${backup_url}" 2>"${error_log}"; then
+           | curl --fail -H "Content-Type:" -X PUT -H "x-amz-security-token: ${session_token}" --data-binary @- "${backup_url}" 2>"${error_log}"; then
         break
     fi
     cat "${error_log}" && rm "${error_log}"

@@ -60,7 +60,8 @@ function getAWSCredentials(callback) {
             return callback(null, {
                 accessKeyId: result.body.credentials.AccessKeyId,
                 secretAccessKey: result.body.credentials.SecretAccessKey,
-                region: 'us-east-1',
+                sessionToken: result.body.credentials.SessionToken,
+                region: 'us-east-1'
             });
         });
     } else {
@@ -68,7 +69,8 @@ function getAWSCredentials(callback) {
 
         callback(null, {
             accessKeyId: config.aws().accessKeyId,
-            secretAccessKey: config.aws().secretAccessKey
+            secretAccessKey: config.aws().secretAccessKey,
+            region: 'us-east-1'
         });
     }
 }
@@ -92,7 +94,10 @@ function getSignedUploadUrl(filename, callback) {
 
         s3.getSignedUrl('putObject', params, function (error, url) {
             if (error) return callback(error);
-            callback(null, url);
+            callback(null, {
+                url: url,
+                sessionToken: credentials.sessionToken
+            });
         });
     });
 }
