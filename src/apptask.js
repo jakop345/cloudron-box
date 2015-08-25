@@ -627,7 +627,7 @@ function restore(app, callback) {
         addons.teardownAddons.bind(null, app, app.oldConfig ? app.oldConfig.manifest.addons : null),
         deleteVolume.bind(null, app),
         function deleteImageIfChanged(done) {
-             if (app.oldConfig.manifest.dockerImage === app.manifest.dockerImage) return done();
+             if (app.oldConfig && (app.oldConfig.manifest.dockerImage === app.manifest.dockerImage)) return done();
 
              deleteImage(app, app.oldConfig.manifest, done);
         },
