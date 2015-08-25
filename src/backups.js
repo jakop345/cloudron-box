@@ -60,7 +60,12 @@ function getBackupUrl(app, appBackupIds, callback) {
     assert(!appBackupIds || util.isArray(appBackupIds));
     assert.strictEqual(typeof callback, 'function');
 
-    var filename = util.format('backup_%s-v%s.tar.gz', (new Date()).toISOString(), config.version());
+    var filename = '';
+    if (app) {
+        filename = util.format('appbackup_%s_%s-v%s.tar.gz', app.id, (new Date()).toISOString(), app.manifest.version);
+    } else {
+        filename = util.format('backup_%s-v%s.tar.gz', (new Date()).toISOString(), config.version());
+    }
 
     aws.getSignedUploadUrl(filename, function (error, result) {
         if (error) return callback(error);
