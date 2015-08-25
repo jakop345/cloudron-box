@@ -668,7 +668,7 @@ function autoupdateApps(updateInfo, callback) { // updateInfo is { appId -> { ma
                 return iteratorDone();
             }
 
-           update(appId, updateInfo[appId].manifest, app.portBindings, null /* icon */, function (error) {
+           update(appId, false /* force */, updateInfo[appId].manifest, app.portBindings, null /* icon */, function (error) {
                 if (error) debug('Error initiating autoupdate of %s', appId);
 
                 iteratorDone(null);
