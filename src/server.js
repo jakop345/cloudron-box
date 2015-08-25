@@ -50,18 +50,28 @@ function checkData(data) {
     }
 }
 
-function provision(req, res, next) {
+function update(req, res, next) {
     assert.strictEqual(typeof req.body, 'object');
 
     if (typeof req.body.sourceTarballUrl !== 'string') return next(new HttpError(400, 'No sourceTarballUrl provided'));
 
-    if (!req.body.data || typeof req.body.data !== 'object') return next(new HttpError(400, 'No data provided'));
+    debug('provision: received from box %j', req.body);
 
-    checkData(req.body.data);
+    superagent.get('http://169.254.169.254/metadata/v1.json').end(function (error, result) {
+        if (error || result.statusCode !== 200) {
+            console.error('Error getting metadata', error);
+            return;
+        }
 
-    debug('provision: received from appstore %j', req.body);
+        var userData = JSON.parse(result.body.user_data);
+        userData.sourceTarballUrl = req.body.sourceTarballUrl;
 
-    next(new HttpSuccess(202, { }));
+        installer.provision(userData, function (error) {
+            if (error) console.error(error);
+        });
+
+        next(new HttpSuccess(202, { }));
+    });
 }
 
 function retire(req, res, next) {
@@ -138,7 +148,7 @@ function startUpdateServer(callback) {
        .use(router)
        .use(lastMile());
 
-    router.post('/api/v1/installer/update', provision);
+    router.post('/api/v1/installer/update', update);
 
     gHttpServer = http.createServer(app);
     gHttpServer.on('error', console.error);
@@ -211,6 +221,7 @@ function start(callback) {
 
     debug('starting');
 
+    // FIXME: this should only happen once
     superagent.get('http://169.254.169.254/metadata/v1.json').end(function (error, result) {
         if (error || result.statusCode !== 200) {
             console.error('Error getting metadata', error);
