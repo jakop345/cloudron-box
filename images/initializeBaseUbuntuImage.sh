@@ -114,6 +114,9 @@ if [ ! -f "${DOCKER_DATA_FILE}" ]; then
     sleep 10
 fi
 
+# Disable forwarding to metadata route from containers
+iptables -I FORWARD -d 169.254.169.254 -j DROP
+
 # ubuntu will restore iptables from this file automatically. this is here so that docker's chain is saved to this file
 mkdir /etc/iptables && iptables-save > /etc/iptables/rules.v4
 
