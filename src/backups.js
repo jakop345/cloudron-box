@@ -62,12 +62,13 @@ function getBackupUrl(app, appBackupIds, callback) {
 
     var filename = util.format('backup_%s-v%s.tar.gz', (new Date()).toISOString(), config.version());
 
-    aws.getSignedUploadUrl(filename, function (error, url) {
+    aws.getSignedUploadUrl(filename, function (error, result) {
         if (error) return callback(error);
 
         var obj = {
             id: filename,
-            url: url,
+            url: result.url,
+            sessionToken: result.sessionToken,
             backupKey: config.backupKey
         };
 

@@ -554,7 +554,7 @@ function backupBoxWithAppBackupIds(appBackupIds, callback) {
 
         async.series([
             ignoreError(shell.sudo.bind(null, 'mountSwap', [ BACKUP_SWAP_CMD, '--on' ])),
-            shell.sudo.bind(null, 'backupBox', [ BACKUP_BOX_CMD, result.url, result.backupKey ]),
+            shell.sudo.bind(null, 'backupBox', [ BACKUP_BOX_CMD, result.url, result.backupKey, result.sessionToken ]),
             ignoreError(shell.sudo.bind(null, 'unmountSwap', [ BACKUP_SWAP_CMD, '--off' ])),
         ], function (error) {
             if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
