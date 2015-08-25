@@ -4,8 +4,7 @@
 
 'use strict';
 
-var announce = require('./announce.js'),
-    assert = require('assert'),
+var assert = require('assert'),
     async = require('async'),
     debug = require('debug')('installer:server'),
     express = require('express'),
@@ -61,8 +60,6 @@ function provision(req, res, next) {
     checkData(req.body.data);
 
     debug('provision: received from appstore %j', req.body);
-
-    announce.stop(function () { });
 
     next(new HttpSuccess(202, { }));
 }
@@ -228,7 +225,6 @@ function start(callback) {
         debug('Using apiServerOrigin from metadata: %s', apiServerOrigin);
 
         async.series([
-            announce.start.bind(null, apiServerOrigin),
             startUpdateServer,
             startProvisionServer,
             installer.provision.bind(null, userData)
@@ -240,7 +236,6 @@ function stop(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     async.series([
-        announce.stop,
         stopUpdateServer,
         stopProvisionServer
     ], callback);

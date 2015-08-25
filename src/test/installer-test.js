@@ -108,33 +108,6 @@ describe('Server', function () {
         });
     });
 
-    describe('provision - announce', function () {
-        var failingGet = null;
-
-        before(function (done) {
-            process.env.ANNOUNCE_INTERVAL = 20;
-
-            var scope = nock(APPSERVER_ORIGIN);
-            failingGet = scope.get('/api/v1/boxes/' + FQDN + '/announce');
-            failingGet.times(5).reply(502);
-
-            server.start(done);
-        });
-
-        after(function (done) {
-            process.env.ANNOUNCE_INTERVAL = 60000;
-            // failingGet.removeInterceptor({ hostname: 'appserver' });
-            server.stop(done);
-        });
-
-        it('sends announce request repeatedly', function (done) {
-            setTimeout(function () {
-                expect(failingGet.counter).to.be.below(6); // counter is nock update
-                done();
-            }, 100);
-        });
-    });
-
     describe('provision - restore', function () {
         var data = {
             sourceTarballUrl: 'https://sourceTarballUrl',
