@@ -121,7 +121,5 @@
 - Fix restore without backup
 - Optimize image deletion during updates
 - Add memory accounting
-
-[0.0.37]
 - Restrict access to metadata from containers
 
