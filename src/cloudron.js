@@ -546,28 +546,24 @@ function ensureBackup(callback) {
 function backupBoxWithAppBackupIds(appBackupIds, callback) {
     assert(util.isArray(appBackupIds));
 
-    aws.getAWSCredentials(function (error, credentials) {
-        if (error) return callback(error);
+    backups.getBackupUrl(null /* app */, appBackupIds, function (error, result) {
+        if (error && error.reason === BackupsError.EXTERNAL_ERROR) return callback(new CloudronError(CloudronError.EXTERNAL_ERROR, error.message));
+        if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
-        backups.getBackupUrl(null /* app */, appBackupIds, function (error, result) {
-            if (error && error.reason === BackupsError.EXTERNAL_ERROR) return callback(new CloudronError(CloudronError.EXTERNAL_ERROR, error.message));
+        debug('backup: url %s', result.url);
+
+        async.series([
+            ignoreError(shell.sudo.bind(null, 'mountSwap', [ BACKUP_SWAP_CMD, '--on' ])),
+            shell.sudo.bind(null, 'backupBox', [ BACKUP_BOX_CMD, result.url, result.backupKey ]),
+            ignoreError(shell.sudo.bind(null, 'unmountSwap', [ BACKUP_SWAP_CMD, '--off' ])),
+        ], function (error) {
             if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
-            debug('backup: url %s', result.url);
+            debug('backup: successful');
 
-            async.series([
-                ignoreError(shell.sudo.bind(null, 'mountSwap', [ BACKUP_SWAP_CMD, '--on' ])),
-                shell.sudo.bind(null, 'backupBox', [ BACKUP_BOX_CMD, result.url, result.backupKey, credentials.accessKeyId, credentials.secretAccessKey ]),
-                ignoreError(shell.sudo.bind(null, 'unmountSwap', [ BACKUP_SWAP_CMD, '--off' ])),
-            ], function (error) {
-                if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
-
-                debug('backup: successful');
-
-                webhooks.backupDone(result.id, null /* app */, appBackupIds, function (error) {
-                    if (error) return callback(error);
-                    callback(null, result.id);
-                });
+            webhooks.backupDone(result.id, null /* app */, appBackupIds, function (error) {
+                if (error) return callback(error);
+                callback(null, result.id);
             });
         });
     });
