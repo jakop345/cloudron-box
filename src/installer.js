@@ -12,8 +12,6 @@ exports = module.exports = {
     InstallerError: InstallerError,
 
     provision: provision,
-    restore: restore,
-    update: update,
     retire: retire
 };
 
@@ -32,14 +30,6 @@ function InstallerError(reason, info) {
 util.inherits(InstallerError, Error);
 InstallerError.INTERNAL_ERROR = 1;
 InstallerError.ALREADY_PROVISIONED = 2;
-
-function update(args, callback) {
-    provision(args, callback);
-}
-
-function restore(args, callback) {
-    provision(args, callback);
-}
 
 function spawn(tag, cmd, args, callback) {
     assert.strictEqual(typeof tag, 'string');

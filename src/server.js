@@ -51,26 +51,6 @@ function checkData(data) {
     }
 }
 
-function restore(req, res, next) {
-    assert.strictEqual(typeof req.body, 'object');
-
-    if (typeof req.body.sourceTarballUrl !== 'string') return next(new HttpError(400, 'No sourceTarballUrl provided'));
-
-    if (!req.body.data || typeof req.body.data !== 'object') return next(new HttpError(400, 'No data provided'));
-
-    checkData(req.body.data);
-
-    debug('restore: received from appstore %j', req.body);
-
-    installer.restore(req.body, function (error) {
-        if (error) console.error(error);
-    });
-
-    announce.stop(function () { });
-
-    next(new HttpSuccess(202, { }));
-}
-
 function provision(req, res, next) {
     assert.strictEqual(typeof req.body, 'object');
 
@@ -82,29 +62,7 @@ function provision(req, res, next) {
 
     debug('provision: received from appstore %j', req.body);
 
-    installer.provision(req.body, function (error) {
-        if (error) console.error(error);
-    });
-
     announce.stop(function () { });
-
-    next(new HttpSuccess(202, { }));
-}
-
-function update(req, res, next) {
-    assert.strictEqual(typeof req.body, 'object');
-
-    if (typeof req.body.sourceTarballUrl !== 'string') return next(new HttpError(400, 'No sourceTarballUrl provided'));
-
-    if (!req.body.data || typeof req.body.data !== 'object') return next(new HttpError(400, 'No data provided'));
-
-    checkData(req.body.data);
-
-    debug('update: started');
-
-    installer.update(req.body, function (error) {
-        if (error) console.error(error);
-    });
 
     next(new HttpSuccess(202, { }));
 }
@@ -183,7 +141,7 @@ function startUpdateServer(callback) {
        .use(router)
        .use(lastMile());
 
-    router.post('/api/v1/installer/update', update);
+    router.post('/api/v1/installer/update', provision);
 
     gHttpServer = http.createServer(app);
     gHttpServer.on('error', console.error);
@@ -207,11 +165,11 @@ function startProvisionServer(callback) {
        .use(lastMile());
 
     router.post('/api/v1/installer/provision', provision);
-    router.post('/api/v1/installer/restore', restore);
+    router.post('/api/v1/installer/restore', provision);
     router.post('/api/v1/installer/retire', retire);
     router.get ('/api/v1/installer/logs', logs);
     router.post('/api/v1/installer/backup', backup);
-    router.post('/api/v1/installer/update', update);
+    router.post('/api/v1/installer/update', provision);
 
     var caPath = path.join(__dirname, process.env.NODE_ENV === 'test' ? '../../keys/installer_ca' : 'certs');
     var certPath = path.join(__dirname, process.env.NODE_ENV === 'test' ? '../../keys/installer' : 'certs');
@@ -265,13 +223,15 @@ function start(callback) {
             return;
         }
 
-        var apiServerOrigin = JSON.parse(result.body.user_data).apiServerOrigin;
+        var userData = JSON.parse(result.body.user_data);
+        var apiServerOrigin = userData.apiServerOrigin;
         debug('Using apiServerOrigin from metadata: %s', apiServerOrigin);
 
         async.series([
             announce.start.bind(null, apiServerOrigin),
             startUpdateServer,
-            startProvisionServer
+            startProvisionServer,
+            installer.provision.bind(null, userData)
         ], callback);
     });
 }
