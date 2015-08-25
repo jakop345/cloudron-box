@@ -7,6 +7,28 @@
       "from": "https://registry.npmjs.org/async/-/async-1.2.1.tgz",
       "resolved": "https://registry.npmjs.org/async/-/async-1.2.1.tgz"
     },
+    "aws-sdk": {
+      "version": "2.1.46",
+      "from": "aws-sdk@*",
+      "resolved": "https://registry.npmjs.org/aws-sdk/-/aws-sdk-2.1.46.tgz",
+      "dependencies": {
+        "sax": {
+          "version": "0.5.3",
+          "from": "sax@0.5.3",
+          "resolved": "http://registry.npmjs.org/sax/-/sax-0.5.3.tgz"
+        },
+        "xml2js": {
+          "version": "0.2.8",
+          "from": "xml2js@0.2.8",
+          "resolved": "https://registry.npmjs.org/xml2js/-/xml2js-0.2.8.tgz"
+        },
+        "xmlbuilder": {
+          "version": "0.4.2",
+          "from": "xmlbuilder@0.4.2",
+          "resolved": "https://registry.npmjs.org/xmlbuilder/-/xmlbuilder-0.4.2.tgz"
+        }
+      }
+    },
     "body-parser": {
       "version": "1.13.1",
       "from": "https://registry.npmjs.org/body-parser/-/body-parser-1.13.1.tgz",
@@ -106,22 +128,22 @@
     },
     "cloudron-manifestformat": {
       "version": "1.7.0",
-      "from": "cloudron-manifestformat@1.7.0",
+      "from": "https://registry.npmjs.org/cloudron-manifestformat/-/cloudron-manifestformat-1.7.0.tgz",
       "resolved": "https://registry.npmjs.org/cloudron-manifestformat/-/cloudron-manifestformat-1.7.0.tgz",
       "dependencies": {
         "java-packagename-regex": {
           "version": "1.0.0",
-          "from": "java-packagename-regex@>=1.0.0 <2.0.0",
+          "from": "https://registry.npmjs.org/java-packagename-regex/-/java-packagename-regex-1.0.0.tgz",
           "resolved": "https://registry.npmjs.org/java-packagename-regex/-/java-packagename-regex-1.0.0.tgz"
         },
         "safetydance": {
           "version": "0.0.15",
-          "from": "safetydance@0.0.15",
+          "from": "http://registry.npmjs.org/safetydance/-/safetydance-0.0.15.tgz",
           "resolved": "http://registry.npmjs.org/safetydance/-/safetydance-0.0.15.tgz"
         },
         "tv4": {
           "version": "1.2.3",
-          "from": "tv4@>=1.1.9 <2.0.0",
+          "from": "https://registry.npmjs.org/tv4/-/tv4-1.2.3.tgz",
           "resolved": "https://registry.npmjs.org/tv4/-/tv4-1.2.3.tgz"
         }
       }
@@ -1708,19 +1730,7 @@
         "bunyan": {
           "version": "0.22.1",
           "from": "https://registry.npmjs.org/bunyan/-/bunyan-0.22.1.tgz",
-          "resolved": "https://registry.npmjs.org/bunyan/-/bunyan-0.22.1.tgz",
-          "dependencies": {
-            "mv": {
-              "version": "0.0.5",
-              "from": "mv@0.0.5",
-              "resolved": "https://registry.npmjs.org/mv/-/mv-0.0.5.tgz"
-            },
-            "dtrace-provider": {
-              "version": "0.2.8",
-              "from": "dtrace-provider@0.2.8",
-              "resolved": "https://registry.npmjs.org/dtrace-provider/-/dtrace-provider-0.2.8.tgz"
-            }
-          }
+          "resolved": "https://registry.npmjs.org/bunyan/-/bunyan-0.22.1.tgz"
         },
         "nopt": {
           "version": "2.1.1",
