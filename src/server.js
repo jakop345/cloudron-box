@@ -218,8 +218,6 @@ function start(callback) {
         }
 
         var userData = JSON.parse(result.body.user_data);
-        var apiServerOrigin = userData.apiServerOrigin;
-        debug('Using apiServerOrigin from metadata: %s', apiServerOrigin);
 
         async.series([
             startUpdateServer,
