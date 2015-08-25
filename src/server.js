@@ -161,12 +161,9 @@ function startProvisionServer(callback) {
        .use(router)
        .use(lastMile());
 
-    router.post('/api/v1/installer/provision', provision);
-    router.post('/api/v1/installer/restore', provision);
     router.post('/api/v1/installer/retire', retire);
     router.get ('/api/v1/installer/logs', logs);
     router.post('/api/v1/installer/backup', backup);
-    router.post('/api/v1/installer/update', provision);
 
     var caPath = path.join(__dirname, process.env.NODE_ENV === 'test' ? '../../keys/installer_ca' : 'certs');
     var certPath = path.join(__dirname, process.env.NODE_ENV === 'test' ? '../../keys/installer' : 'certs');
