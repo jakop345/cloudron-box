@@ -98,7 +98,7 @@ angular.module('Application').controller('GraphsController', ['$scope', '$locati
             var options = {
                 scaleOverride: true,
                 scaleSteps: 10,
-                scaleStepWidth: $scope.activeApp === 'system' ? 100 : 10,
+                scaleStepWidth: $scope.activeApp === 'system' ? 200 : 20,
                 scaleStartValue: 0
             };
 
