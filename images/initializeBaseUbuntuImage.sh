@@ -117,6 +117,10 @@ fi
 # ubuntu will restore iptables from this file automatically. this is here so that docker's chain is saved to this file
 mkdir /etc/iptables && iptables-save > /etc/iptables/rules.v4
 
+echo "=== Enable memory accounting =="
+sed -e 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="cgroup_enable=memory swapaccount=1"/' -i /etc/default/grub
+update-grub
+
 # now add the user to the docker group
 usermod "${USER}" -a -G docker
 echo "=== Pulling base docker images ==="
@@ -173,8 +177,8 @@ if [[ ! -f "${USER_HOME_FILE}" ]]; then
 fi
 
 echo "=== Install tmpreaper ==="
-sudo apt-get install -y tmpreaper
-sudo sed -e 's/SHOWWARNING=true/# SHOWWARNING=true/' -i /etc/tmpreaper.conf
+apt-get install -y tmpreaper
+sed -e 's/SHOWWARNING=true/# SHOWWARNING=true/' -i /etc/tmpreaper.conf
 
 echo "==== Extracting installer source ===="
 rm -rf "${INSTALLER_SOURCE_DIR}" && mkdir -p "${INSTALLER_SOURCE_DIR}"
