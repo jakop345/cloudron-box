@@ -55,9 +55,13 @@ function getAWSCredentials(callback) {
             if (result.statusCode !== 201) return callback(new Error(result.text));
             if (!result.body) return callback(new Error('Unexpected response'));
 
-            debug('getAWSCredentials()', result.body);
+            debug('getAWSCredentials()', result.body.credentials);
 
-            return callback(null, result.body.credentials);
+            return callback(null, {
+                accessKeyId: result.body.credentials.AccessKeyId,
+                secretAccessKey: result.body.credentials.SecretAccessKey,
+                region: 'us-east-1',
+            });
         });
     } else {
         if (!config.aws().accessKeyId || !config.aws().secretAccessKey) return callback(new AWSError(AWSError.MISSING_CREDENTIALS));
