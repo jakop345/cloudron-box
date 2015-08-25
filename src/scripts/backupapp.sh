@@ -13,7 +13,7 @@ if [[ $# == 1 && "$1" == "--check" ]]; then
 fi
 
 if [ $# -lt 3 ]; then
-    echo "Usage: backupapp.sh <appid> <url> <key>"
+    echo "Usage: backupapp.sh <appid> <url> <key> [aws session token]"
     exit 1
 fi
 
@@ -22,6 +22,7 @@ readonly DATA_DIR="${HOME}/data"
 app_id="$1"
 backup_url="$2"
 backup_key="$3"
+session_token="$4"
 readonly now=$(date "+%Y-%m-%dT%H:%M:%S")
 readonly app_data_dir="${DATA_DIR}/${app_id}"
 readonly app_data_snapshot="${DATA_DIR}/snapshots/${app_id}-${now}"
@@ -31,9 +32,17 @@ btrfs subvolume snapshot -r "${app_data_dir}" "${app_data_snapshot}"
 for try in `seq 1 5`; do
     echo "Uploading backup to ${backup_url} (try ${try})"
     error_log=$(mktemp)
+
+    headers=("-H" "Content-Type:")
+
+    # federated tokens in CaaS case need session token
+    if [ ! -z "$session_token" ]; then
+        headers=(${headers[@]} "-H" "x-amz-security-token: ${session_token}")
+    fi
+
     if tar -cvzf - -C "${app_data_snapshot}" . \
            | openssl aes-256-cbc -e -pass "pass:${backup_key}" \
-           | curl --fail -H "Content-Type:" -X PUT --data-binary @- "${backup_url}" 2>"${error_log}"; then
+           | curl --fail -X PUT ${headers[@]} --data-binary @- "${backup_url}" 2>"${error_log}"; then
         break
     fi
     cat "${error_log}" && rm "${error_log}"
