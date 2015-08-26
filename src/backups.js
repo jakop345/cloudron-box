@@ -82,17 +82,23 @@ function getBackupUrl(app, callback) {
     });
 }
 
+// backupId is the s3 filename. appbackup_%s_%s-v%s.tar.gz
 function getRestoreUrl(backupId, callback) {
     assert.strictEqual(typeof backupId, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/restoreurl';
-    // FIXME get it locally
-    superagent.put(url).query({ token: config.token(), backupId: backupId }).end(function (error, result) {
-        if (error) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, error));
-        if (result.statusCode !== 201) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, result.text));
-        if (!result.body || !result.body.url) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, 'Unexpected response'));
+    aws.getSignedDownloadUrl(backupId, function (error, result) {
+        if (error) return callback(error);
 
-        return callback(null, result.body);
+        var obj = {
+            id: backupId,
+            url: result.url,
+            sessionToken: result.sessionToken,
+            backupKey: config.backupKey()
+        };
+
+        debug('getRestoreUrl: ', obj);
+
+        callback(null, obj);
     });
 }
