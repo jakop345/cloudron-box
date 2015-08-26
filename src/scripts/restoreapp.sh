@@ -13,7 +13,7 @@ if [[ $# == 1 && "$1" == "--check" ]]; then
 fi
 
 if [ $# -lt 3 ]; then
-    echo "Usage: restoreapp.sh <appid> <url> <key>"
+    echo "Usage: restoreapp.sh <appid> <url> <key> [aws session token]"
     exit 1
 fi
 
@@ -23,6 +23,7 @@ readonly curl="curl --fail --connect-timeout 20 --retry 10 --retry-delay 2 --max
 app_id="$1"
 restore_url="$2"
 restore_key="$3"
+session_token="$4"
 
 echo "Downloading backup: ${restore_url} and key: ${restore_key}"
 
@@ -30,7 +31,14 @@ for try in `seq 1 5`; do
     echo "Download backup from ${restore_url} (try ${try})"
     error_log=$(mktemp)
 
-    if $curl -L "${restore_url}" \
+    headers=()
+
+    # federated tokens in CaaS case need session token
+    if [ ! -z "$session_token" ]; then
+        headers=(${headers[@]} "-H" "x-amz-security-token: ${session_token}")
+    fi
+
+    if $curl -L ${headers[@]} "${restore_url}" \
         | openssl aes-256-cbc -d -pass "pass:${restore_key}" \
         | tar -zxf - -C "${DATA_DIR}/${app_id}" 2>"${error_log}"; then
         chown -R yellowtent:yellowtent "${DATA_DIR}/${app_id}"
