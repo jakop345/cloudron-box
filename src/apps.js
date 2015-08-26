@@ -760,7 +760,7 @@ function restoreApp(app, addonsToRestore, callback) {
 
         debugApp(app, 'restoreApp: restoreUrl:%s', result.url);
 
-        shell.sudo('restoreApp', [ RESTORE_APP_CMD,  app.id, result.url, result.backupKey ], function (error) {
+        shell.sudo('restoreApp', [ RESTORE_APP_CMD,  app.id, result.url, result.backupKey, result.sessionToken ], function (error) {
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
             addons.restoreAddons(app, addonsToRestore, callback);
