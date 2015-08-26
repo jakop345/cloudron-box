@@ -490,6 +490,7 @@ function doUpdate(boxUpdateInfo, callback) {
             if (!safe.query(result, 'body.url')) return updateError(new Error('Error fetching sourceTarballUrl response: ' + result.body));
 
             var args = {
+                version: boxUpdateInfo.version,
                 sourceTarballUrl: result.body.url
             };
 
