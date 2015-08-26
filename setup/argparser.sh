@@ -16,6 +16,7 @@ arg_tls_key=""
 arg_token=""
 arg_version=""
 arg_web_server_origin=""
+arg_aws=""
 
 args=$(getopt -o "" -l "data:,retire" -n "$0" -- "$@")
 eval set -- "${args}"
@@ -40,6 +41,9 @@ EOF
 
         arg_restore_key=$(echo "$2" | $json restoreKey)
         [[ "${arg_restore_key}" == "null" ]] && arg_restore_key=""
+
+        arg_aws=$(echo "$2" | $json aws)
+        [[ "${arg_aws}" == "null" ]] && arg_aws=""
 
         shift 2
         ;;

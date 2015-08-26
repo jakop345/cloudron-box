@@ -75,10 +75,10 @@ function initConfig() {
     data.ldapPort = 3002;
     data.backupKey = 'backupKey';
     data.aws = {
-        backupBucket: 'dev-cloudron-backups',   // FIXME this should be set to the correct bucket in CaaS
-        backupPrefix: 'backups',                // FIXME this should be set to boxId for CaaS
-        accessKeyId: null,
-        secretAccessKey: null
+        backupBucket: null,
+        backupPrefix: null,
+        accessKeyId: null,      // selfhosting only
+        secretAccessKey: null   // selfhosting only
     };
 
     if (exports.CLOUDRON) {
