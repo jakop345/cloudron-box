@@ -55,9 +55,8 @@ function getAllPaged(page, perPage, callback) {
     });
 }
 
-function getBackupUrl(app, appBackupIds, callback) {
+function getBackupUrl(app, callback) {
     assert(!app || typeof app === 'object');
-    assert(!appBackupIds || util.isArray(appBackupIds));
     assert.strictEqual(typeof callback, 'function');
 
     var filename = '';
@@ -88,7 +87,7 @@ function getRestoreUrl(backupId, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/restoreurl';
-
+    // FIXME get it locally
     superagent.put(url).query({ token: config.token(), backupId: backupId }).end(function (error, result) {
         if (error) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, error));
         if (result.statusCode !== 201) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, result.text));
@@ -97,5 +96,3 @@ function getRestoreUrl(backupId, callback) {
         return callback(null, result.body);
     });
 }
-
-
