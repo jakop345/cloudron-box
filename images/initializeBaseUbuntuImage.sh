@@ -201,7 +201,7 @@ echo "==== Make the user own his home ===="
 chown "${USER}:${USER}" -R "/home/${USER}"
 
 echo "==== Install installer systemd script ===="
-cat > /etc/systemd/user/cloudron-installer.service <<EOF
+cat > /etc/systemd/system/cloudron-installer.service <<EOF
 [Unit]
 Description=Cloudron Installer
 Type=idle
