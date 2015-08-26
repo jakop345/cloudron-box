@@ -489,9 +489,24 @@ function doUpdate(boxUpdateInfo, callback) {
             if (result.status !== 200) return updateError(new Error('Error fetching sourceTarballUrl status: ' + result.status));
             if (!safe.query(result, 'body.url')) return updateError(new Error('Error fetching sourceTarballUrl response: ' + result.body));
 
+            // NOTE: the args here are tied to the installer revision, box code and appstore provisioning logic
             var args = {
-                version: boxUpdateInfo.version,
-                sourceTarballUrl: result.body.url
+                sourceTarballUrl: result.body.url,
+
+                // this data is opaque to the installer
+                data: {
+                    boxVersionsUrl: config.get('boxVersionsUrl'),
+                    version: boxUpdateInfo.version,
+                    apiServerOrigin: config.apiServerOrigin(),
+                    webServerOrigin: config.webServerOrigin(),
+                    fqdn: config.fqdn(),
+                    token: config.token(),
+                    tlsCert: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), 'utf8'),
+                    tlsKey: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'), 'utf8'),
+                    isCustomDomain: config.isCustomDomain(),
+                    restoreUrl: null,
+                    restoreKey: null
+                }
             };
 
             debug('updating box %j', args);
