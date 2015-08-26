@@ -209,9 +209,6 @@ Type=idle
 [Service]
 ExecStart="${INSTALLER_SOURCE_DIR}/src/server.js"
 Environment="DEBUG=installer*,connect-lastmile"
-# hack to fix race between iptables-restore and docker
-ExecStart=/bin/bash -c "iptables-restore < /etc/iptables/rules.v4"
-ExecStart=systemctl restart docker
 KillMode=process
 Restart=on-failure
 
