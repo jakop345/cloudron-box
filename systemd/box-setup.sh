@@ -2,6 +2,7 @@
 
 set -eu -o pipefail
 
+readonly USER_HOME="/home/yellowtent"
 readonly APPS_SWAP_FILE="/apps.swap"
 readonly BACKUP_SWAP_FILE="/backup.swap" # used when doing app backups
 readonly USER_HOME_FILE="/root/user_home.img"
