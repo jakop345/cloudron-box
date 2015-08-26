@@ -91,6 +91,7 @@ apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8
 apt-get update
 apt-get -y install lxc-docker-1.7.0
 ln -sf /usr/bin/docker.io /usr/local/bin/docker
+systemctl enable docker
 
 if [ ! -f "${DOCKER_DATA_FILE}" ]; then
     systemctl stop docker
@@ -199,7 +200,7 @@ cd "${INSTALLER_SOURCE_DIR}" && npm install --production
 echo "==== Make the user own his home ===="
 chown "${USER}:${USER}" -R "/home/${USER}"
 
-echo "==== Install systemd script ===="
+echo "==== Install installer systemd script ===="
 cat > /etc/systemd/user/cloudron-installer.service <<EOF
 [Unit]
 Description=Cloudron Installer
@@ -218,8 +219,25 @@ Restart=on-failure
 WantedBy=multi-user.target
 Alias=installer.service
 EOF
-
 systemctl enable cloudron-installer
+
+# Restore iptables before docker
+echo "==== Install iptables-restore systemd script ===="
+cat > /etc/systemd/system/iptables-restore.service <<EOF
+[Unit]
+Description=IPTables Restore
+Before=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/sbin/iptables-restore /etc/iptables/rules.v4
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl enable iptables-restore
 
 sync
 
