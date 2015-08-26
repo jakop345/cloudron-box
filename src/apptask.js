@@ -46,6 +46,7 @@ var addons = require('./addons.js'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
     shell = require('./shell.js'),
+    subdomains = require('./subdomains.js'),
     superagent = require('superagent'),
     sysinfo = require('./sysinfo.js'),
     util = require('util'),
@@ -429,43 +430,27 @@ function registerSubdomain(app, callback) {
     // need to register it so that we have a dnsRecordId to wait for it to complete
     var record = { subdomain: app.location, type: 'A', value: sysinfo.getIp() };
 
-    superagent
-        .post(config.apiServerOrigin() + '/api/v1/subdomains')
-        .set('Accept', 'application/json')
-        .query({ token: config.token() })
-        .send({ records: [ record ] })
-        .end(function (error, res) {
-            if (error) return callback(error);
+    subdomains.add(record, function (error) {
+        if (error) return callback(error);
 
-            debugApp(app, 'Registered subdomain status: %s', res.status);
+        debugApp(app, 'Registered subdomain.');
 
-            if (res.status === 409) return callback(null); // already registered
-            if (res.status !== 201) return callback(new Error(util.format('Subdomain Registration failed. %s %j', res.status, res.body)));
-
-            updateApp(app, { dnsRecordId: res.body.ids[0] }, callback);
-        });
+        callback(null);
+    });
 }
 
 function unregisterSubdomain(app, callback) {
-    debugApp(app, 'Unregistering subdomain: dnsRecordId=%s', app.dnsRecordId);
-
-    if (!app.dnsRecordId) return callback(null);
+    debugApp(app, 'Unregistering subdomain: %s', app.location);
 
     // do not unregister bare domain because we show a error/cloudron info page there
-    if (app.location === '') return updateApp(app, { dnsRecordId: null }, callback);
+    if (app.location === '') return callback(null);
 
-    superagent
-        .del(config.apiServerOrigin() + '/api/v1/subdomains/' + app.dnsRecordId)
-        .query({ token: config.token() })
-        .end(function (error, res) {
-            if (error) {
-                debugApp(app, 'Error making request: %s', error);
-            } else if (res.status !== 204) {
-                debugApp(app, 'Error unregistering subdomain:', res.status, res.body);
-            }
+    var record = { subdomain: app.location, type: 'A', value: sysinfo.getIp() };
+    subdomains.remove(record, function (error) {
+        if (error) debugApp(app, 'Error unregistering subdomain: %s', error);
 
-            updateApp(app, { dnsRecordId: null }, callback);
-        });
+        updateApp(app, { dnsRecordId: null }, callback);
+    });
 }
 
 function removeIcon(app, callback) {
@@ -486,21 +471,16 @@ function waitForDnsPropagation(app, callback) {
         setTimeout(waitForDnsPropagation.bind(null, app, callback), 5000);
     }
 
-    superagent
-        .get(config.apiServerOrigin() + '/api/v1/subdomains/' + app.dnsRecordId + '/status')
-        .set('Accept', 'application/json')
-        .query({ token: config.token() })
-        .end(function (error, res) {
-            if (error) return retry(new Error('Failed to get dns record status : ' + error.message));
+    var record = { subdomain: app.location, type: 'A', value: sysinfo.getIp() };
+    subdomains.status(record, function (error, result) {
+        if (error) return retry(new Error('Failed to get dns record status : ' + error.message));
 
-            debugApp(app, 'waitForDnsPropagation: dnsRecordId:%s status:%s', app.dnsRecordId, res.status);
+        debugApp(app, 'waitForDnsPropagation: dnsRecordId:%s status:%s', app.dnsRecordId, result);
 
-            if (res.status !== 200) return retry(new Error(util.format('Error getting record status: %s %j', res.status, res.body)));
+        if (result !== 'done') return retry(new Error(util.format('app:%s not ready yet: %s', app.id, result)));
 
-            if (res.body.status !== 'done') return retry(new Error(util.format('app:%s not ready yet: %s', app.id, res.body.status)));
-
-            callback(null);
-        });
+        callback(null);
+    });
 }
 
 // updates the app object and the database

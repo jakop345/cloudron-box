@@ -25,7 +25,6 @@ var apps = require('./apps.js'),
     AppsError = require('./apps.js').AppsError,
     assert = require('assert'),
     async = require('async'),
-    aws = require('./aws.js'),
     backups = require('./backups.js'),
     BackupsError = require('./backups.js').BackupsError,
     clientdb = require('./clientdb.js'),
@@ -40,6 +39,7 @@ var apps = require('./apps.js'),
     settings = require('./settings.js'),
     SettingsError = settings.SettingsError,
     shell = require('./shell.js'),
+    subdomains = require('./subdomains.js'),
     superagent = require('superagent'),
     sysinfo = require('./sysinfo.js'),
     tokendb = require('./tokendb.js'),
@@ -306,22 +306,10 @@ function sendMailDnsRecordsRequest(callback) {
 
     debug('sendMailDnsRecords request:%s', JSON.stringify(records));
 
-    superagent
-        .post(config.apiServerOrigin() + '/api/v1/subdomains')
-        .set('Accept', 'application/json')
-        .query({ token: config.token() })
-        .send({ records: records })
-        .end(function (error, res) {
-            if (error) return callback(error);
-
-            debug('sendMailDnsRecords status: %s', res.status);
-
-            if (res.status === 409) return callback(null); // already registered
-
-            if (res.status !== 201) return callback(new Error(util.format('Failed to add Mail DNS records: %s %j', res.status, res.body)));
-
-            return callback(null, res.body.ids);
-        });
+    subdomains.addMany(records, function (error, result) {
+        if (error) return callback(error);
+        callback(null, result);
+    });
 }
 
 function addMailDnsRecords() {
@@ -335,6 +323,7 @@ function addMailDnsRecords() {
         }
 
         debug('Added Mail DNS records successfully');
+
         config.set('mailDnsRecordIds', ids);
     });
 }
