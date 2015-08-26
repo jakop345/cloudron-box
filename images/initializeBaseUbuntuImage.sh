@@ -232,6 +232,7 @@ Requires=docker.service
 [Service]
 Type=oneshot
 ExecStart=/sbin/iptables-restore /etc/iptables/rules.v4
+RemainAfterExit=yes
 
 [Install]
 WantedBy=multi-user.target
