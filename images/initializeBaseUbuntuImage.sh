@@ -84,7 +84,7 @@ fi
 rm -rf /var/lib/docker
 
 echo "=== Setup btrfs for preloading docker images ==="
-fallocate -l "4096m" "${USER_DATA_FILE}"
+fallocate -l "8192m" "${USER_DATA_FILE}" # 8gb start
 mkfs.btrfs -L UserHome "${USER_DATA_FILE}"
 echo "${USER_DATA_FILE} ${USER_DATA_DIR} btrfs loop,nosuid 0 0" >> /etc/fstab
 mkdir -p "${USER_DATA_DIR}" && mount "${USER_DATA_FILE}"
