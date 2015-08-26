@@ -23,23 +23,6 @@ echo "=== Yellowtent base image preparation (installer revision - ${INSTALLER_RE
 
 export DEBIAN_FRONTEND=noninteractive
 
-# Allocate two sets of swap files - one for general app usage and another for backup
-# The backup swap is setup for swap on the fly by the backup scripts
-echo "=== Setup swap file ==="
-apps_swap_file="/apps.swap"
-[[ -f "${apps_swap_file}" ]] && swapoff "${apps_swap_file}"
-fallocate -l 1024m "${apps_swap_file}"
-chmod 600 "${apps_swap_file}"
-mkswap "${apps_swap_file}"
-swapon "${apps_swap_file}"
-echo "${apps_swap_file}  none  swap  sw  0 0" >> /etc/fstab
-
-backup_swap_file="/backup.swap"
-[[ -f "${backup_swap_file}" ]] && swapoff "${backup_swap_file}"
-fallocate -l 1024m "${backup_swap_file}"
-chmod 600 "${backup_swap_file}"
-mkswap "${backup_swap_file}"
-
 echo "==== Install project dependencies ===="
 apt-get update
 
@@ -224,7 +207,6 @@ cat > /etc/systemd/system/iptables-restore.service <<EOF
 [Unit]
 Description=IPTables Restore
 Before=docker.service
-Requires=docker.service
 
 [Service]
 Type=oneshot
@@ -237,5 +219,22 @@ EOF
 
 systemctl enable iptables-restore
 
-sync
+# Allocate swap files
+echo "==== Install iptables-restore systemd script ===="
+cat > /etc/systemd/system/allocate-swap.service <<EOF
+[Unit]
+Description=Swap Allocator
+Before=docker.service
 
+[Service]
+Type=oneshot
+ExecStart="${INSTALLER_SOURCE_DIR}/systemd/allocate-swap.sh"
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl enable allocate-swap
+
+sync
