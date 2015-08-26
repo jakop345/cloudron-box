@@ -8,8 +8,6 @@ readonly DATA_DIR="${USER_HOME}/data"
 readonly APPDATA="${DATA_DIR}/appdata"
 readonly INSTALLER_SOURCE_DIR="${USER_HOME}/installer"
 readonly INSTALLER_REVISION="$1"
-readonly DOCKER_DATA_FILE="/root/docker_data.img"
-readonly USER_HOME_FILE="/root/user_home.img"
 
 readonly SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SOURCE_DIR}/INFRA_VERSION"
@@ -67,6 +65,9 @@ iptables -A INPUT -j LOGGING # last rule in INPUT chain
 iptables -A LOGGING -m limit --limit 2/min -j LOG --log-prefix "IPTables Packet Dropped: " --log-level 7
 iptables -A LOGGING -j DROP
 
+echo "==== Install btrfs tools"
+apt-get -y install btrfs-tools
+
 echo "==== Install docker ===="
 # see http://idolstarastronomer.com/painless-docker.html
 echo deb https://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list
@@ -75,28 +76,10 @@ apt-get update
 apt-get -y install lxc-docker-1.7.0
 ln -sf /usr/bin/docker.io /usr/local/bin/docker
 systemctl enable docker
+systemctl start docker
 
-if [ ! -f "${DOCKER_DATA_FILE}" ]; then
-    systemctl stop docker
-    if aufs_mounts=$(grep 'aufs' /proc/mounts | awk '{print$2}' | sort -r); then
-        umount -l "${aufs_mounts}"
-    fi
-    rm -rf /var/lib/docker
-    mkdir /var/lib/docker
-
-    # create a separate 12GB fs for docker images
-    # dd if=/dev/zero of=/root/docker_data.img bs=1M count=12000
-    apt-get -y install btrfs-tools
-    truncate -s 12G "${DOCKER_DATA_FILE}"
-    mkfs.btrfs -L DockerData "${DOCKER_DATA_FILE}"
-    echo "${DOCKER_DATA_FILE} /var/lib/docker btrfs loop,nosuid 0 0" >> /etc/fstab
-    echo 'DOCKER_OPTS="-s btrfs"' >> /etc/default/docker
-    mount "${DOCKER_DATA_FILE}"
-
-    systemctl start docker
-    # give docker sometime to start up and create iptables rules
-    sleep 10
-fi
+# give docker sometime to start up and create iptables rules
+sleep 10
 
 # Disable forwarding to metadata route from containers
 iptables -I FORWARD -d 169.254.169.254 -j DROP
@@ -152,16 +135,6 @@ apt-get -y install supervisor
 echo "==== Install collectd ==="
 apt-get install -y collectd collectd-utils
 update-rc.d -f collectd remove
-
-echo "==== Seting up btrfs user home ==="
-if [[ ! -f "${USER_HOME_FILE}" ]]; then
-    # create a separate 12GB fs for data
-    truncate -s 12G "${USER_HOME_FILE}"
-    mkfs.btrfs -L UserHome "${USER_HOME_FILE}"
-    echo "${USER_HOME_FILE} ${USER_HOME} btrfs loop,nosuid 0 0" >> /etc/fstab
-    mount "${USER_HOME_FILE}"
-    btrfs subvolume create "${USER_HOME}/data"
-fi
 
 echo "=== Install tmpreaper ==="
 apt-get install -y tmpreaper
@@ -221,20 +194,20 @@ systemctl enable iptables-restore
 
 # Allocate swap files
 echo "==== Install iptables-restore systemd script ===="
-cat > /etc/systemd/system/allocate-swap.service <<EOF
+cat > /etc/systemd/system/box-setup.service <<EOF
 [Unit]
-Description=Swap Allocator
+Description=Box Setup
 Before=docker.service
 
 [Service]
 Type=oneshot
-ExecStart="${INSTALLER_SOURCE_DIR}/systemd/allocate-swap.sh"
+ExecStart="${INSTALLER_SOURCE_DIR}/systemd/box-setup.sh"
 RemainAfterExit=yes
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
-systemctl enable allocate-swap
+systemctl enable box-setup
 
 sync
