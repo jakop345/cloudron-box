@@ -9,17 +9,19 @@ readonly DOCKER_DATA_FILE="/root/docker_data.img"
 
 # all sizes are in mb
 readonly physical_memory=$(free -m | awk '/Mem:/ { print $2 }')
+readonly swap_size="${physical_memory}"
 readonly app_count=$((${physical_memory} / 200)) # estimated app count
 readonly docker_data_size=$((6 * 1024 + app_count * 500)) # 6gb base + 500m for each app
 readonly disk_size_gb=$(fdisk -l /dev/vda1 | grep 'Disk /dev/vda1' | awk '{ print $3 }')
 readonly disk_size=$((disk_size_gb * 1024))
 readonly backup_swap_size=1024
+readonly system_size=2048 # 2 gigs for system libs
 
 # Allocate two sets of swap files - one for general app usage and another for backup
 # The backup swap is setup for swap on the fly by the backup scripts
 if [[ ! -f "${APPS_SWAP_FILE}" ]]; then
-    echo "Creating Apps swap file of size ${physical_memory}M"
-    fallocate -l "${physical_memory}m" "${APPS_SWAP_FILE}"
+    echo "Creating Apps swap file of size ${swap_size}M"
+    fallocate -l "${swap_size}m" "${APPS_SWAP_FILE}"
     chmod 600 "${APPS_SWAP_FILE}"
     mkswap "${APPS_SWAP_FILE}"
     swapon "${APPS_SWAP_FILE}"
@@ -55,7 +57,7 @@ else
 fi
 
 if [[ ! -f "${USER_HOME_FILE}" ]]; then
-    home_data_size=$((disk_size - 2048 - docker_data_size - physical_memory - backup_swap_size))
+    home_data_size=$((disk_size - system_size - docker_data_size - swap_size - backup_swap_size))
     echo "Setting up btrfs user home of size ${home_data_size}M"
     fallocate -l "${home_data_size}m" "${USER_HOME_FILE}"
     mkfs.btrfs -L UserHome "${USER_HOME_FILE}"
