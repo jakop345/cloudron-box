@@ -4,8 +4,6 @@ set -euv -o pipefail
 
 readonly USER=yellowtent
 readonly USER_HOME="/home/${USER}"
-readonly DATA_DIR="${USER_HOME}/data"
-readonly APPDATA="${DATA_DIR}/appdata"
 readonly INSTALLER_SOURCE_DIR="${USER_HOME}/installer"
 readonly INSTALLER_REVISION="$1"
 readonly USER_DATA_FILE="/root/user_data.img"
@@ -90,7 +88,8 @@ fallocate -l "4096m" "${USER_DATA_FILE}"
 mkfs.btrfs -L UserHome "${USER_DATA_FILE}"
 echo "${USER_DATA_FILE} ${USER_DATA_DIR} btrfs loop,nosuid 0 0" >> /etc/fstab
 mkdir -p "${USER_DATA_DIR}" && mount "${USER_DATA_FILE}"
-echo "DOCKER_OPTS=\"-s btrfs -g ${DATA_DIR}/docker\"" >> /etc/default/docker
+mkdir -p "${USER_DATA_DIR}/docker"
+echo "DOCKER_OPTS=\"-s btrfs -g ${USER_DATA_DIR}/docker\"" >> /etc/default/docker
 systemctl enable docker
 
 # give docker sometime to start up and create iptables rules
