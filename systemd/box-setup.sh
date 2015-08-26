@@ -15,7 +15,7 @@ readonly docker_data_size=$((6 * 1024 + app_count * 500)) # 6gb base + 500m for 
 readonly disk_size_gb=$(fdisk -l /dev/vda1 | grep 'Disk /dev/vda1' | awk '{ print $3 }')
 readonly disk_size=$((disk_size_gb * 1024))
 readonly backup_swap_size=1024
-readonly system_size=2048 # 2 gigs for system libs
+readonly system_size=5120 # 5 gigs for system libs and tmp
 
 # Allocate two sets of swap files - one for general app usage and another for backup
 # The backup swap is setup for swap on the fly by the backup scripts
