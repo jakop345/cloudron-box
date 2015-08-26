@@ -123,3 +123,6 @@
 - Add memory accounting
 - Restrict access to metadata from containers
 
+[0.0.37]
+- Prepare for Selfhosting 1. part
+- Use userData instead of provisioning calls
