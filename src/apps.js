@@ -704,7 +704,7 @@ function backupApp(app, addonsToBackup, callback) {
         return callback(safe.error);
     }
 
-    backups.getBackupUrl(app, null, function (error, result) {
+    backups.getBackupUrl(app, function (error, result) {
         if (error && error.reason === BackupsError.EXTERNAL_ERROR) return callback(new AppsError(AppsError.EXTERNAL_ERROR, error.message));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
