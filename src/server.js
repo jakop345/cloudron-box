@@ -53,7 +53,8 @@ function checkData(data) {
 function update(req, res, next) {
     assert.strictEqual(typeof req.body, 'object');
 
-    if (typeof req.body.sourceTarballUrl !== 'string') return next(new HttpError(400, 'No sourceTarballUrl provided'));
+    if (!req.body.sourceTarballUrl || typeof req.body.sourceTarballUrl !== 'string') return next(new HttpError(400, 'No sourceTarballUrl provided'));
+    if (!req.body.data || typeof req.body.data !== 'object') return next(new HttpError(400, 'No data provided'));
 
     debug('provision: received from box %j', req.body);
 
