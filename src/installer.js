@@ -78,7 +78,7 @@ function provision(args, callback) {
 
     var pargs = [ INSTALLER_CMD ];
     pargs.push('--sourcetarballurl', args.sourceTarballUrl);
-    pargs.push('--data', JSON.stringify(args));
+    pargs.push('--data', JSON.stringify(args.data));
 
     debug('provision: calling with args %j', pargs);
 
