@@ -167,9 +167,7 @@ apt-get install -y nodejs
 
 echo "=== Rebuilding npm packages ==="
 cd "${INSTALLER_SOURCE_DIR}" && npm install --production
-
-echo "==== Make the user own his home ===="
-chown "${USER}:${USER}" -R "/home/${USER}"
+chown "${USER}:${USER}" -R "${INSTALLER_SOURCE_DIR}"
 
 echo "==== Install installer systemd script ===="
 cat > /etc/systemd/system/cloudron-installer.service <<EOF
