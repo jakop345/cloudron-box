@@ -138,7 +138,8 @@ cat > "${CONFIG_DIR}/cloudron.conf" <<CONF_END
         "password": "${mysql_root_password}",
         "port": 3306,
         "name": "box"
-    }
+    },
+    "aws": ${arg_aws}
 }
 CONF_END
 
