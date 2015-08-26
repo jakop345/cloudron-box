@@ -39,14 +39,11 @@ else
     echo "Backups Swap file already exists"
 fi
 
-if [[ ! -f "${USER_DATA_FILE}" ]]; then
-    home_data_size=$((disk_size - system_size - swap_size - backup_swap_size))
-    echo "Resizing up btrfs user data to size ${home_data_size}M"
-    umount "${USER_DATA_DIR}"
-    fallocate -l "${home_data_size}m" "${USER_DATA_FILE}" # does not overwrite existing data
-    mount "${USER_DATA_FILE}"
-    btrfs filesystem resize max "${USER_DATA_DIR}"
-else
-    echo "Home is already btrfs"
-fi
+echo "Resizing data volume"
+home_data_size=$((disk_size - system_size - swap_size - backup_swap_size))
+echo "Resizing up btrfs user data to size ${home_data_size}M"
+umount "${USER_DATA_DIR}"
+fallocate -l "${home_data_size}m" "${USER_DATA_FILE}" # does not overwrite existing data
+mount "${USER_DATA_FILE}"
+btrfs filesystem resize max "${USER_DATA_DIR}"
 
