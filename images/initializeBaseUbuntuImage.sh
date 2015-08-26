@@ -199,41 +199,27 @@ cd "${INSTALLER_SOURCE_DIR}" && npm install --production
 echo "==== Make the user own his home ===="
 chown "${USER}:${USER}" -R "/home/${USER}"
 
-echo "==== Install init script ===="
-cat > /etc/init.d/cloudron-bootstrap <<EOF
-#!/bin/bash
+echo "==== Install systemd script ===="
+cat > /etc/systemd/user/cloudron-installer.service <<EOF
+[Unit]
+Description=Cloudron Installer
+Type=idle
 
-set -eu
+[Service]
+ExecStart="${INSTALLER_SOURCE_DIR}/src/server.js"
+Environment="DEBUG=installer*,connect-lastmile"
+# hack to fix race between iptables-restore and docker
+ExecStart=/bin/bash -c "iptables-restore < /etc/iptables/rules.v4"
+ExecStart=systemctl restart docker
+KillMode=process
+Restart=on-failure
 
-readonly FOREVER="${INSTALLER_SOURCE_DIR}/node_modules/.bin/forever"
-readonly INSTALLER_LOG="/var/log/cloudron/installserver.log"
-readonly FOREVER_LOG="/var/log/cloudron/forever.log"
-
-case "\$1" in
-    start)
-        mkdir -p /var/log/cloudron
-
-        # this is a hack to fix ordering of iptables-restore and docker startup
-        iptables-restore < /etc/iptables/rules.v4
-        systemctl restart docker
-
-        DEBUG="installer*,connect-lastmile" "\${FOREVER}" start -a -l "\${FOREVER_LOG}" -o "\${INSTALLER_LOG}" -e "\${INSTALLER_LOG}" "${INSTALLER_SOURCE_DIR}/src/server.js"
-        ;;
-    restart|reload|force-reload)
-        "\${FOREVER}" restart "${INSTALLER_SOURCE_DIR}/src/server.js"
-        ;;
-    stop)
-        "\${FOREVER}" stop "${INSTALLER_SOURCE_DIR}/src/server.js"
-        ;;
-    *)
-        echo "Usage: \$0 start|stop|restart" >&2
-        exit 3
-        ;;
-esac
+[Install]
+WantedBy=multi-user.target
+Alias=installer.service
 EOF
 
-chmod +x /etc/init.d/cloudron-bootstrap
-update-rc.d cloudron-bootstrap defaults 99
+systemctl enable cloudron-installer
 
 sync
 

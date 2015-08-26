@@ -18,7 +18,6 @@
     "connect-lastmile": "0.0.10",
     "debug": "^2.1.1",
     "express": "^4.11.2",
-    "forever": "^0.14.1",
     "json": "^9.0.3",
     "morgan": "^1.5.1",
     "proxy-middleware": "^0.11.0",
