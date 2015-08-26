@@ -8,6 +8,8 @@ readonly DATA_DIR="${USER_HOME}/data"
 readonly APPDATA="${DATA_DIR}/appdata"
 readonly INSTALLER_SOURCE_DIR="${USER_HOME}/installer"
 readonly INSTALLER_REVISION="$1"
+readonly USER_DATA_FILE="/root/user_data.img"
+readonly USER_DATA_DIR="/home/yellowtent/data"
 
 readonly SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SOURCE_DIR}/INFRA_VERSION"
@@ -75,10 +77,24 @@ apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8
 apt-get update
 apt-get -y install lxc-docker-1.7.0
 ln -sf /usr/bin/docker.io /usr/local/bin/docker
+
+echo "=== Remove existing aufs mounts ==="
+systemctl stop docker
+if aufs_mounts=$(grep 'aufs' /proc/mounts | awk '{ print $2 }' | sort -r); then
+    umount -l "${aufs_mounts}"
+fi
+rm -rf /var/lib/docker
+
+echo "=== Setup btrfs for preloading docker images ==="
+fallocate -l "4096m" "${USER_DATA_FILE}"
+mkfs.btrfs -L UserHome "${USER_DATA_FILE}"
+echo "${USER_DATA_FILE} ${USER_DATA_DIR} btrfs loop,nosuid 0 0" >> /etc/fstab
+mkdir -p "${USER_DATA_DIR}" && mount "${USER_DATA_FILE}"
+echo "DOCKER_OPTS=\"-s btrfs -g ${DATA_DIR}/docker\"" >> /etc/default/docker
 systemctl enable docker
-systemctl start docker
 
 # give docker sometime to start up and create iptables rules
+systemctl start docker
 sleep 10
 
 # Disable forwarding to metadata route from containers
@@ -193,7 +209,7 @@ EOF
 systemctl enable iptables-restore
 
 # Allocate swap files
-echo "==== Install iptables-restore systemd script ===="
+echo "==== Install box-setup systemd script ===="
 cat > /etc/systemd/system/box-setup.service <<EOF
 [Unit]
 Description=Box Setup
