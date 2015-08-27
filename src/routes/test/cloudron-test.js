@@ -450,8 +450,18 @@ describe('Cloudron', function () {
         });
 
         it('fails when in wrong state', function (done) {
-            var scope1 = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/migrate?token=APPSTORE_TOKEN', { size: 'small', region: 'sfo', restoreKey: 'someid' }).reply(409, {});
-            var scope2 = nock(config.apiServerOrigin()).put('/api/v1/boxes/' + config.fqdn() + '/backupurl?token=APPSTORE_TOKEN', { boxVersion: '0.5.0', appId: null, appVersion: null, appBackupIds: [] }).reply(201, { id: 'someid', url: 'http://foobar', backupKey: 'somerestorekey' });
+            var scope2 = nock(config.apiServerOrigin())
+                    .get('/api/v1/boxes/' + config.fqdn() + '/awscredentials?token=APPSTORE_TOKEN')
+                    .reply(201, { credentials: { accessKeyId: 'accessKeyId', secretAccessKey: 'secretAccessKey', sessionToken: 'sessionToken' } });
+
+            var scope3 = nock(config.apiServerOrigin())
+                    .filteringRequestBody(function () { return false; })
+                    .post('/api/v1/boxes/' + config.fqdn() + '/backupDone?token=APPSTORE_TOKEN')
+                    .reply(200, { id: 'someid' });
+
+            var scope1 = nock(config.apiServerOrigin())
+                .filteringRequestBody(function () { return false; })
+                .post('/api/v1/boxes/' + config.fqdn() + '/migrate?token=APPSTORE_TOKEN', { }).reply(409, {});
 
             injectShellMock();
 
@@ -463,7 +473,7 @@ describe('Cloudron', function () {
                 expect(result.statusCode).to.equal(202);
 
                 function checkAppstoreServerCalled() {
-                    if (scope1.isDone() && scope2.isDone()) {
+                    if (scope1.isDone() && scope2.isDone() && scope3.isDone()) {
                         restoreShellMock();
                         return done();
                     }
