@@ -17,6 +17,10 @@ readonly disk_size=$((disk_size_gb * 1024))
 readonly backup_swap_size=1024
 readonly system_size=5120 # 5 gigs for system libs, installer, box code and tmp
 
+echo "Physical memory: ${physical_memory}"
+echo "Estimated app count: ${app_count}"
+echo "Disk size: ${disk_size}"
+
 # Allocate two sets of swap files - one for general app usage and another for backup
 # The backup swap is setup for swap on the fly by the backup scripts
 if [[ ! -f "${APPS_SWAP_FILE}" ]]; then
