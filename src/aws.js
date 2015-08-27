@@ -53,7 +53,7 @@ function getAWSCredentials(callback) {
         superagent.get(url).query({ token: config.token() }).end(function (error, result) {
             if (error) return callback(error);
             if (result.statusCode !== 201) return callback(new Error(result.text));
-            if (!result.body) return callback(new Error('Unexpected response'));
+            if (!result.body || !result.body.credentials) return callback(new Error('Unexpected response'));
 
             debug('getAWSCredentials()', result.body.credentials);
 
