@@ -38,7 +38,7 @@ for try in `seq 1 5`; do
         headers=(${headers[@]} "-H" "x-amz-security-token: ${session_token}")
     fi
 
-    if $curl -L ${headers[@]} "${restore_url}" \
+    if $curl -L "${headers[@]}" "${restore_url}" \
         | openssl aes-256-cbc -d -pass "pass:${restore_key}" \
         | tar -zxf - -C "${DATA_DIR}/${app_id}" 2>"${error_log}"; then
         chown -R yellowtent:yellowtent "${DATA_DIR}/${app_id}"
