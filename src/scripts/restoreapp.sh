@@ -34,7 +34,7 @@ for try in `seq 1 5`; do
     headers=()
 
     # federated tokens in CaaS case need session token
-    if [ ! -z "$session_token" ]; then
+    if [[ ! -z "${session_token}" ]]; then
         headers=(${headers[@]} "-H" "x-amz-security-token: ${session_token}")
     fi
 
