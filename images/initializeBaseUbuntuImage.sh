@@ -211,6 +211,7 @@ cat > /etc/systemd/system/box-setup.service <<EOF
 [Unit]
 Description=Box Setup
 Before=docker.service
+After=do-resize.service
 
 [Service]
 Type=oneshot
