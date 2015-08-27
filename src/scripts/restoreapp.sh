@@ -31,7 +31,7 @@ for try in `seq 1 5`; do
     echo "Download backup from ${restore_url} (try ${try})"
     error_log=$(mktemp)
 
-    headers=()
+    headers=("") # empty element required (http://stackoverflow.com/questions/7577052/bash-empty-array-expansion-with-set-u)
 
     # federated tokens in CaaS case need session token
     if [[ ! -z "${session_token}" ]]; then
