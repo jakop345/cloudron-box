@@ -119,7 +119,7 @@ describe('Backups API', function () {
 
         it('succeeds', function (done) {
             var scope = nock(config.apiServerOrigin())
-                        .put('/api/v1/boxes/' + config.fqdn() + '/backupurl?token=APPSTORE_TOKEN', { boxVersion: '0.5.0', appId: null, appVersion: null, appBackupIds: [] })
+                        .get('/api/v1/boxes/' + config.fqdn() + '/awscredentials?token=APPSTORE_TOKEN')
                         .reply(201, { id: 'someid', url: 'http://foobar', backupKey: 'somerestorekey' });
 
             request.post(SERVER_URL + '/api/v1/backups')
