@@ -92,13 +92,9 @@ function getSignedUploadUrl(filename, callback) {
             Expires: 60 * 30 /* 30 minutes */
         };
 
-        s3.getSignedUrl('putObject', params, function (error, url) {
-            if (error) return callback(error);
-            callback(null, {
-                url: url,
-                sessionToken: credentials.sessionToken
-            });
-        });
+        var url = s3.getSignedUrl('putObject', params);
+
+        callback(null, { url : url, sessionToken: credentials.sessionToken });
     });
 }
 
@@ -119,9 +115,8 @@ function getSignedDownloadUrl(filename, callback) {
             Expires: 60 * 30 /* 30 minutes */
         };
 
-        s3.getSignedUrl('getObject', params, function (error, url) {
-            if (error) return callback(error);
-            callback(null, url);
-        });
+        var url = s3.getSignedUrl('getObject', params);
+
+        callback(null, { url: url, sessionToken: credentials.sessionToken });
     });
 }
