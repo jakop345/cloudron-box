@@ -58,21 +58,11 @@ function update(req, res, next) {
 
     debug('provision: received from box %j', req.body);
 
-    superagent.get('http://169.254.169.254/metadata/v1.json').end(function (error, result) {
-        if (error || result.statusCode !== 200) {
-            console.error('Error getting metadata', error);
-            return;
-        }
-
-        var userData = JSON.parse(result.body.user_data);
-        userData.sourceTarballUrl = req.body.sourceTarballUrl;
-
-        installer.provision(userData, function (error) {
-            if (error) console.error(error);
-        });
-
-        next(new HttpSuccess(202, { }));
+    installer.provision(req.body, function (error) {
+        if (error) console.error(error);
     });
+
+    next(new HttpSuccess(202, { }));
 }
 
 function retire(req, res, next) {
