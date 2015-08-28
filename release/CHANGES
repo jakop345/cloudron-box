@@ -126,3 +126,7 @@
 [0.0.37]
 - Prepare for Selfhosting 1. part
 - Use userData instead of provisioning calls
+
+[0.0.38]
+- Account for Ext4 reserved block when partitioning disk
+
