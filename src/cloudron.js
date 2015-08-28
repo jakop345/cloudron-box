@@ -505,7 +505,8 @@ function doUpdate(boxUpdateInfo, callback) {
                     tlsKey: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'), 'utf8'),
                     isCustomDomain: config.isCustomDomain(),
                     restoreUrl: null,
-                    restoreKey: null
+                    restoreKey: null,
+                    aws: config.aws()
                 }
             };
 
