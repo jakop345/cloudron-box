@@ -140,7 +140,7 @@ cat > "${CONFIG_DIR}/cloudron.conf" <<CONF_END
         "name": "box"
     },
     "backupKey": "${arg_backup_key}",
-    "aws": ${arg_aws}
+    "aws": "${arg_aws}"
 }
 CONF_END
 
