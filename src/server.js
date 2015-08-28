@@ -30,26 +30,6 @@ exports = module.exports = {
 var gHttpsServer = null, // provision server; used for install/restore
     gHttpServer = null; // update server; used for updates
 
-// 'data' is opaque. the following code exists to help debugging
-function checkData(data) {
-    assert.strictEqual(typeof data, 'object');
-
-    if (typeof data.token !== 'string') console.error('No token provided');
-    if (typeof data.apiServerOrigin !== 'string') console.error('No apiServerOrigin provided');
-    if (typeof data.webServerOrigin !== 'string') console.error('No webServerOrigin provided');
-    if (typeof data.fqdn !== 'string') console.error('No fqdn provided');
-    if (typeof data.tlsCert !== 'string') console.error('No TLS cert provided');
-    if (typeof data.tlsKey !== 'string') console.error('No TLS key provided');
-    if (typeof data.isCustomDomain !== 'boolean') console.error('No isCustomDomain provided');
-    if (typeof data.version !== 'string') console.error('No version provided');
-    if (typeof data.sourceTarballUrl !== 'string') console.error('No sourceTarballUrl provided');
-
-    if ('restoreUrl' in data) {
-        if (typeof data.restoreUrl !== 'string') console.error('No restoreUrl provided');
-        if (typeof data.restoreKey !== 'string') console.error('No restoreKey provided');
-    }
-}
-
 function update(req, res, next) {
     assert.strictEqual(typeof req.body, 'object');
 
