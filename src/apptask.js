@@ -439,13 +439,13 @@ function registerSubdomain(app, callback) {
     });
 }
 
-function unregisterSubdomain(app, callback) {
-    debugApp(app, 'Unregistering subdomain: %s', app.location);
+function unregisterSubdomain(app, location, callback) {
+    debugApp(app, 'Unregistering subdomain: %s', location);
 
     // do not unregister bare domain because we show a error/cloudron info page there
-    if (app.location === '') return callback(null);
+    if (location === '') return callback(null);
 
-    var record = { subdomain: app.location, type: 'A', value: sysinfo.getIp() };
+    var record = { subdomain: location, type: 'A', value: sysinfo.getIp() };
     subdomains.remove(record, function (error) {
         if (error) debugApp(app, 'Error unregistering subdomain: %s', error);
 
@@ -518,7 +518,7 @@ function install(app, callback) {
         deleteContainer.bind(null, app),
         addons.teardownAddons.bind(null, app, app.manifest.addons),
         deleteVolume.bind(null, app),
-        unregisterSubdomain.bind(null, app),
+        unregisterSubdomain.bind(null, app, app.location),
         removeOAuthProxyCredentials.bind(null, app),
         // removeIcon.bind(null, app), // do not remove icon for non-appstore installs
         unconfigureNginx.bind(null, app),
@@ -663,17 +663,15 @@ function restore(app, callback) {
 
 // note that configure is called after an infra update as well
 function configure(app, callback) {
-    // oldConfig can be null during an infra update
-    var locationChanged = app.oldConfig ? app.oldConfig.location !== app.location : true;
-
     async.series([
         updateApp.bind(null, app, { installationProgress: '10, Cleaning up old install' }),
         removeCollectdProfile.bind(null, app),
         stopApp.bind(null, app),
         deleteContainer.bind(null, app),
         function (next) {
-            if (!locationChanged) return next();
-            unregisterSubdomain(app, next);
+            // oldConfig can be null during an infra update
+            if (!app.oldConfig || app.oldConfig.location === app.location) return next();
+            unregisterSubdomain(app, app.oldConfig.location, next);
         },
         removeOAuthProxyCredentials.bind(null, app),
         unconfigureNginx.bind(null, app),
@@ -684,14 +682,8 @@ function configure(app, callback) {
         updateApp.bind(null, app, { installationProgress: '30, Create OAuth proxy credentials' }),
         allocateOAuthProxyCredentials.bind(null, app),
 
-        function (next) {
-            if (!locationChanged) return next();
-
-            async.series([
-                updateApp.bind(null, app, { installationProgress: '35, Registering subdomain' }),
-                registerSubdomain.bind(null, app)
-            ], next);
-        },
+        updateApp.bind(null, app, { installationProgress: '35, Registering subdomain' }),
+        registerSubdomain.bind(null, app),
 
         // re-setup addons since they rely on the app's fqdn (e.g oauth)
         updateApp.bind(null, app, { installationProgress: '50, Setting up addons' }),
@@ -816,7 +808,7 @@ function uninstall(app, callback) {
         deleteImage.bind(null, app, app.manifest),
 
         updateApp.bind(null, app, { installationProgress: '60, Unregistering subdomain' }),
-        unregisterSubdomain.bind(null, app),
+        unregisterSubdomain.bind(null, app, app.location),
 
         updateApp.bind(null, app, { installationProgress: '70, Remove OAuth credentials' }),
         removeOAuthProxyCredentials.bind(null, app),
