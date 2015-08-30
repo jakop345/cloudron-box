@@ -164,7 +164,7 @@ function addSubdomain(zoneName, subdomain, type, value, callback) {
     getZoneByName(zoneName, function (error, zone) {
         if (error) return callback(error);
 
-        var fqdn = subdomain === '' ? zoneName : (subdomain + '.' + zoneName);
+        var fqdn = config.appFqdn(subdomain);
         var params = {
             ChangeBatch: {
                 Changes: [{
@@ -215,7 +215,7 @@ function delSubdomain(zoneName, subdomain, type, value, callback) {
     getZoneByName(zoneName, function (error, zone) {
         if (error) return callback(error);
 
-        var fqdn = subdomain === '' ? zoneName : (subdomain + '.' + zoneName);
+        var fqdn = config.appFqdn(subdomain);
         var resourceRecordSet = {
             Name: fqdn,
             Type: type,
