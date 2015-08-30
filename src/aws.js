@@ -139,12 +139,13 @@ function getZoneByName(zoneName, callback) {
         route53.listHostedZones({}, function (error, result) {
             if (error) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, new Error(error)));
 
-            debug('getZoneByName: found zones', result.HostedZones);
             var zone = result.HostedZones.filter(function (zone) {
                 return zone.Name.slice(0, -1) === zoneName;     // aws zone name contains a '.' at the end
             })[0];
 
             if (!zone) return callback(new SubdomainError(SubdomainError.NOT_FOUND, 'no such zone'));
+
+            debug('getZoneByName: found zone', zone);
 
             callback(null, zone);
         });
