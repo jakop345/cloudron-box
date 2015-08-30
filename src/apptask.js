@@ -61,8 +61,6 @@ var NGINX_APPCONFIG_EJS = fs.readFileSync(__dirname + '/../setup/start/nginx/app
     RMAPPDIR_CMD = path.join(__dirname, 'scripts/rmappdir.sh'),
     CREATEAPPDIR_CMD = path.join(__dirname, 'scripts/createappdir.sh');
 
-var gDnsRecordChangeId = null;
-
 function initialize(callback) {
     database.initialize(callback);
 }
@@ -435,11 +433,9 @@ function registerSubdomain(app, callback) {
     subdomains.add(record, function (error, changeId) {
         if (error) return callback(error);
 
-        gDnsRecordChangeId = changeId;
-
         debugApp(app, 'Registered subdomain.');
 
-        callback(null);
+        updateApp(app, { dnsRecordId: changeId }, callback);
     });
 }
 
@@ -475,7 +471,7 @@ function waitForDnsPropagation(app, callback) {
         setTimeout(waitForDnsPropagation.bind(null, app, callback), 5000);
     }
 
-    subdomains.status(gDnsRecordChangeId, function (error, result) {
+    subdomains.status(app.dnsRecordId, function (error, result) {
         if (error) return retry(new Error('Failed to get dns record status : ' + error.message));
 
         debugApp(app, 'waitForDnsPropagation: dnsRecordId:%s status:%s', app.dnsRecordId, result);
