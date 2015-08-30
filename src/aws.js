@@ -180,7 +180,7 @@ function addSubdomain(zoneName, subdomain, type, value, callback) {
                     }
                 }]
             },
-            HostedZoneId: zone.id
+            HostedZoneId: zone.Id
         };
 
         getAWSCredentials(function (error, credentials) {
@@ -233,7 +233,7 @@ function delSubdomain(zoneName, subdomain, type, value, callback) {
                     ResourceRecordSet: resourceRecordSet
                 }]
             },
-            HostedZoneId: zone.id
+            HostedZoneId: zone.Id
         };
 
         getAWSCredentials(function (error, credentials) {
