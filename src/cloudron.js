@@ -57,6 +57,7 @@ var RELOAD_NGINX_CMD = path.join(__dirname, 'scripts/reloadnginx.sh'),
     INSTALLER_UPDATE_URL = 'http://127.0.0.1:2020/api/v1/installer/update';
 
 var gAddMailDnsRecordsTimerId = null,
+    gAddAdminDnsRecordTimerId = null,
     gCloudronDetails = null;            // cached cloudron details like region,size...
 
 function debugApp(app, args) {
@@ -111,10 +112,8 @@ function initialize(callback) {
 
     if (process.env.BOX_ENV !== 'test') {
         addMailDnsRecords();
+        addAdminDnsRecord();
     }
-
-    // Send heartbeat once we are up and running, this speeds up the Cloudron creation, as otherwise we are bound to the cron.js settings
-    sendHeartbeat();
 
     callback(null);
 }
@@ -124,6 +123,9 @@ function uninitialize(callback) {
 
     clearTimeout(gAddMailDnsRecordsTimerId);
     gAddMailDnsRecordsTimerId = null;
+
+    clearTimeout(gAddAdminDnsRecordTimerId);
+    gAddAdminDnsRecordTimerId = null;
 
     callback(null);
 }
@@ -271,6 +273,9 @@ function getConfig(callback) {
 }
 
 function sendHeartbeat() {
+    // Only send heartbeats after the admin dns record is synced to give appstore a chance to know that fact
+    if (!config.get('adminDnsInSync')) return;
+
     var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/heartbeat';
 
     superagent.post(url).query({ token: config.token(), version: config.version() }).timeout(10000).end(function (error, result) {
@@ -325,6 +330,45 @@ function addMailDnsRecords() {
         debug('Added Mail DNS records successfully');
 
         config.set('mailDnsRecordIds', ids);
+    });
+}
+
+function addAdminDnsRecord() {
+    if (config.get('adminDnsInSync')) return sendHeartbeat(); // already registered send heartbeat
+
+    var record = { subdomain: 'my', type: 'A', value: sysinfo.getIp() };
+
+    debug('addAdminDnsRecord:', record);
+
+    subdomains.add(record, function (error, changeId) {
+        if (error) {
+            console.error('Admin DNS record addition failed', error);
+            gAddAdminDnsRecordTimerId = setTimeout(addAdminDnsRecord, 10000);
+            return;
+        }
+
+        function checkIfInSync() {
+            debug('Check if admin DNS record is in sync.');
+
+            subdomains.status(changeId, function (error, result) {
+                if (error) console.error('Failed to check if admin DNS record is in sync.', error);
+
+                // retry if needed
+                if (error || result !== 'done') {
+                    gAddAdminDnsRecordTimerId = setTimeout(checkIfInSync, 5000);
+                    return;
+                }
+
+                config.set('adminDnsInSync', true);
+
+                // send heartbeat once after the admin dns record is done
+                sendHeartbeat();
+
+                debug('checkAdminDnsRecord: done');
+            });
+        }
+
+        checkIfInSync();
     });
 }
 
