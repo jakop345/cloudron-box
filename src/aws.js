@@ -50,8 +50,6 @@ AWSError.MISSING_CREDENTIALS = 'Missing AWS credentials';
 function getAWSCredentials(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    debug('getAWSCredentials()');
-
     // CaaS
     if (config.token()) {
         var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/awscredentials';
@@ -59,8 +57,6 @@ function getAWSCredentials(callback) {
             if (error) return callback(error);
             if (result.statusCode !== 201) return callback(new Error(result.text));
             if (!result.body || !result.body.credentials) return callback(new Error('Unexpected response'));
-
-            debug('getAWSCredentials()', result.body.credentials);
 
             return callback(null, {
                 accessKeyId: result.body.credentials.AccessKeyId,
