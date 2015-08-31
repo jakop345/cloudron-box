@@ -6,7 +6,7 @@ var assert = require('assert'),
     async = require('async'),
     aws = require('./aws.js'),
     config = require('./config.js'),
-    debug = require('debug')('server:subdomains'),
+    debug = require('debug')('box:subdomains'),
     util = require('util'),
     SubdomainError = require('./subdomainerror.js');
 
