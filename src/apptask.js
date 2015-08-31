@@ -697,14 +697,8 @@ function configure(app, callback) {
 
         runApp.bind(null, app),
 
-        function (next) {
-            if (!locationChanged) return next();
-
-            async.series([
-                updateApp.bind(null, app, { installationProgress: '80, Waiting for DNS propagation' }),
-                exports._waitForDnsPropagation.bind(null, app)
-            ], next);
-        },
+        updateApp.bind(null, app, { installationProgress: '80, Waiting for DNS propagation' }),
+        exports._waitForDnsPropagation.bind(null, app),
 
         // done!
         function (callback) {
