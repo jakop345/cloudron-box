@@ -19,6 +19,9 @@ module.exports = exports = {
 
 function add(record, callback) {
     assert.strictEqual(typeof record, 'object');
+    assert.strictEqual(typeof record.subdomain, 'string');
+    assert.strictEqual(typeof record.type, 'string');
+    assert.strictEqual(typeof record.value, 'string');
     assert.strictEqual(typeof callback, 'function');
 
     debug('add: ', record);
