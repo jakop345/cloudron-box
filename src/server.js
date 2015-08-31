@@ -30,6 +30,21 @@ exports = module.exports = {
 var gHttpsServer = null, // provision server; used for install/restore
     gHttpServer = null; // update server; used for updates
 
+function provision(callback) {
+    if (fs.existsSync('/home/yellowtent/configs/cloudron.conf')) return callback(null); // already provisioned
+
+    superagent.get('http://169.254.169.254/metadata/v1.json').end(function (error, result) {
+        if (error || result.statusCode !== 200) {
+            console.error('Error getting metadata', error);
+            return;
+        }
+
+        var userData = JSON.parse(result.body.user_data);
+
+        installer.provision(userData, callback);
+    });
+}
+
 function update(req, res, next) {
     assert.strictEqual(typeof req.body, 'object');
 
@@ -192,21 +207,11 @@ function start(callback) {
 
     debug('starting');
 
-    // FIXME: this should only happen once
-    superagent.get('http://169.254.169.254/metadata/v1.json').end(function (error, result) {
-        if (error || result.statusCode !== 200) {
-            console.error('Error getting metadata', error);
-            return;
-        }
-
-        var userData = JSON.parse(result.body.user_data);
-
-        async.series([
-            startUpdateServer,
-            startProvisionServer,
-            installer.provision.bind(null, userData)
-        ], callback);
-    });
+    async.series([
+        startUpdateServer,
+        startProvisionServer,
+        provision
+    ], callback);
 }
 
 function stop(callback) {
