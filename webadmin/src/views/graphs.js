@@ -33,8 +33,7 @@ angular.module('Application').controller('GraphsController', ['$scope', '$locati
 
     function renderDisk(type, free, reserved, used) {
         $scope.diskUsage[type] = {
-            used: bytesToGigaBytes(used.datapoints[0][0]),
-            reserved: bytesToGigaBytes(reserved.datapoints[0][0]),
+            used: bytesToGigaBytes(used.datapoints[0][0] + reserved.datapoints[0][0]),
             free: bytesToGigaBytes(free.datapoints[0][0]),
             sum: bytesToGigaBytes(used.datapoints[0][0] + reserved.datapoints[0][0] + free.datapoints[0][0])
         };
@@ -44,11 +43,6 @@ angular.module('Application').controller('GraphsController', ['$scope', '$locati
             color: "#2196F3",
             highlight: "#82C4F8",
             label: "Used"
-        }, {
-            value: $scope.diskUsage[type].reserved,
-            color: "#f0ad4e",
-            highlight: "#F8D9AC",
-            label: "Reserved"
         }, {
             value: $scope.diskUsage[type].free,
             color:"#27CE65",
