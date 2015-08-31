@@ -96,6 +96,7 @@ function initConfig() {
             name: 'boxtest'
         };
         data.token = 'APPSTORE_TOKEN';
+        data.aws.backupBucket = 'testbucket';
     } else {
         assert(false, 'Unknown environment. This should not happen!');
     }
@@ -108,6 +109,9 @@ function initConfig() {
 
     saveSync();
 }
+
+// cleanup any old config file we have for tests
+if (exports.TEST) safe.fs.unlinkSync(cloudronConfigFileName);
 
 initConfig();
 
