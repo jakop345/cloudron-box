@@ -35,9 +35,20 @@ function addMany(records, callback) {
 
     debug('addMany: ', records);
 
+    var changeIds = [];
+
     async.eachSeries(function (record, callback) {
-        add(record, callback);
-    }, callback);
+        add(record, function (error, changeId) {
+            if (error) return callback(error);
+
+            changeIds.push(changeId);
+
+            callback(null);
+        });
+    }, function (error) {
+        if (error) return callback(error);
+        callback(null, changeIds);
+    });
 }
 
 function remove(record, callback) {
