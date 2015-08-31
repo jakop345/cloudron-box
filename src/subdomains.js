@@ -40,7 +40,7 @@ function addMany(records, callback) {
 
     var changeIds = [];
 
-    async.eachSeries(function (record, callback) {
+    async.eachSeries(records, function (record, callback) {
         add(record, function (error, changeId) {
             if (error) return callback(error);
 
