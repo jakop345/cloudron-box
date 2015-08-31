@@ -56,8 +56,7 @@ var RELOAD_NGINX_CMD = path.join(__dirname, 'scripts/reloadnginx.sh'),
     BACKUP_SWAP_CMD = path.join(__dirname, 'scripts/backupswap.sh'),
     INSTALLER_UPDATE_URL = 'http://127.0.0.1:2020/api/v1/installer/update';
 
-var gAddMailDnsRecordsTimerId = null,
-    gAddAdminDnsRecordTimerId = null,
+var gAddDnsRecordsTimerId = null,
     gCloudronDetails = null;            // cached cloudron details like region,size...
 
 function debugApp(app, args) {
@@ -111,8 +110,7 @@ function initialize(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     if (process.env.BOX_ENV !== 'test') {
-        addMailDnsRecords();
-        addAdminDnsRecord();
+        addDnsRecords();
     }
 
     callback(null);
@@ -121,11 +119,8 @@ function initialize(callback) {
 function uninitialize(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    clearTimeout(gAddMailDnsRecordsTimerId);
-    gAddMailDnsRecordsTimerId = null;
-
-    clearTimeout(gAddAdminDnsRecordTimerId);
-    gAddAdminDnsRecordTimerId = null;
+    clearTimeout(gAddDnsRecordsTimerId);
+    gAddDnsRecordsTimerId = null;
 
     callback(null);
 }
@@ -274,7 +269,7 @@ function getConfig(callback) {
 
 function sendHeartbeat() {
     // Only send heartbeats after the admin dns record is synced to give appstore a chance to know that fact
-    if (!config.get('adminDnsInSync')) return;
+    if (!config.get('dnsInSync')) return;
 
     var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/heartbeat';
 
@@ -285,8 +280,8 @@ function sendHeartbeat() {
     });
 }
 
-function sendMailDnsRecordsRequest(callback) {
-    assert.strictEqual(typeof callback, 'function');
+function addDnsRecords() {
+    if (config.get('dnsInSync')) return sendHeartbeat(); // already registered send heartbeat
 
     var DKIM_SELECTOR = 'mail';
     var DMARC_REPORT_EMAIL = 'dmarc-report@cloudron.io';
@@ -294,13 +289,20 @@ function sendMailDnsRecordsRequest(callback) {
     var dkimPublicKeyFile = path.join(paths.MAIL_DATA_DIR, 'dkim/' + config.fqdn() + '/public');
     var publicKey = safe.fs.readFileSync(dkimPublicKeyFile, 'utf8');
 
-    if (publicKey === null) return callback(new Error('Error reading dkim public key'));
+    if (publicKey === null) {
+        console.error('Error reading dkim public key. Stop DNS setup.');
+        return;
+    }
 
     // remove header, footer and new lines
     publicKey = publicKey.split('\n').slice(1, -2).join('');
 
     // note that dmarc requires special DNS records for external RUF and RUA
     var records = [
+        // naked domain
+        { subdomain: '', type: 'A', value: sysinfo.getIp() },
+        // webadmin domain
+        { subdomain: 'my', type: 'A', value: sysinfo.getIp() },
         // softfail all mails not from our IP. Note that this uses IP instead of 'a' should we use a load balancer in the future
         { subdomain: '', type: 'TXT', value: '"v=spf1 ip4:' + sysinfo.getIp() + ' ~all"' },
         // t=s limits the domainkey to this domain and not it's subdomains
@@ -309,62 +311,43 @@ function sendMailDnsRecordsRequest(callback) {
         { subdomain: '_dmarc', type: 'TXT', value: '"v=DMARC1; p=none; pct=100; rua=mailto:' + DMARC_REPORT_EMAIL + '; ruf=' + DMARC_REPORT_EMAIL + '"' }
     ];
 
-    debug('sendMailDnsRecords request:%s', JSON.stringify(records));
+    debug('addDnsRecords:', records);
 
-    subdomains.addMany(records, function (error, result) {
-        if (error) return callback(error);
-        callback(null, result);
-    });
-}
-
-function addMailDnsRecords() {
-    if (config.get('mailDnsRecordIds').length !== 0) return; // already registered
-
-    sendMailDnsRecordsRequest(function (error, ids) {
-        if (error) {
-            console.error('Mail DNS record addition failed', error);
-            gAddMailDnsRecordsTimerId = setTimeout(addMailDnsRecords, 30000);
-            return;
-        }
-
-        debug('Added Mail DNS records successfully');
-
-        config.set('mailDnsRecordIds', ids);
-    });
-}
-
-function addAdminDnsRecord() {
-    if (config.get('adminDnsInSync')) return sendHeartbeat(); // already registered send heartbeat
-
-    var record = { subdomain: 'my', type: 'A', value: sysinfo.getIp() };
-
-    debug('addAdminDnsRecord:', record);
-
-    subdomains.add(record, function (error, changeId) {
+    subdomains.addMany(records, function (error, changeIds) {
         if (error) {
             console.error('Admin DNS record addition failed', error);
-            gAddAdminDnsRecordTimerId = setTimeout(addAdminDnsRecord, 10000);
+            gAddDnsRecordsTimerId = setTimeout(addDnsRecords, 10000);
             return;
         }
 
         function checkIfInSync() {
-            debug('Check if admin DNS record is in sync.');
+            debug('addDnsRecords: Check if admin DNS record is in sync.');
 
-            subdomains.status(changeId, function (error, result) {
-                if (error) console.error('Failed to check if admin DNS record is in sync.', error);
+            var allDone = true;
+
+            async.each(changeIds, function (changeId, callback) {
+                subdomains.status(changeId, function (error, result) {
+                    if (error) return callback(new Error('Failed to check if admin DNS record is in sync.', error));
+
+                    if (result !== 'done') allDone = false;
+
+                    callback(null);
+                });
+            }, function (error) {
+                if (error) console.error(error);
 
                 // retry if needed
-                if (error || result !== 'done') {
-                    gAddAdminDnsRecordTimerId = setTimeout(checkIfInSync, 5000);
+                if (error || !allDone) {
+                    gAddDnsRecordsTimerId = setTimeout(checkIfInSync, 5000);
                     return;
                 }
 
                 config.set('adminDnsInSync', true);
 
-                // send heartbeat once after the admin dns record is done
+                // send heartbeat after the dns records are done
                 sendHeartbeat();
 
-                debug('checkAdminDnsRecord: done');
+                debug('addDnsRecords: done');
             });
         }
 
