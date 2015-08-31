@@ -133,3 +133,8 @@
 [0.0.39]
 - Move subdomain management to the cloudron
 
+[0.0.40]
+- Add journal limit
+- Fix reprovisioning on reboot
+- Fix subdomain management during startup
+
