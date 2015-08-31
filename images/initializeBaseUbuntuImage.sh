@@ -21,10 +21,8 @@ echo "=== Yellowtent base image preparation (installer revision - ${INSTALLER_RE
 
 export DEBIAN_FRONTEND=noninteractive
 
-echo "==== Install project dependencies ===="
-apt-get update
-
 echo "=== Upgrade ==="
+apt-get update
 apt-get upgrade -y
 
 # Setup firewall before everything. Atleast docker 1.5 creates it's own chain and the -X below will remove it
@@ -223,5 +221,8 @@ WantedBy=multi-user.target
 EOF
 
 systemctl enable box-setup
+
+# Configure systemd
+sed -e "s/^#SystemMaxUse=/SystemMaxUse=100M/" -i /etc/systemd/journald.conf
 
 sync
