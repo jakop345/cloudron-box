@@ -425,7 +425,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
     };
 
     Client.prototype.reboot = function (callback) {
-        $http.get(client.apiOrigin + '/api/v1/cloudron/reboot').success(function(data, status) {
+        $http.post(client.apiOrigin + '/api/v1/cloudron/reboot', { }).success(function(data, status) {
             if (status !== 202 || typeof data !== 'object') return callback(new ClientError(status, data));
             callback(null, data);
         }).error(defaultErrorHandler(callback));
