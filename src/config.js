@@ -80,6 +80,7 @@ function initConfig() {
         accessKeyId: null,      // selfhosting only
         secretAccessKey: null   // selfhosting only
     };
+    data.dnsInSync = false;
 
     if (exports.CLOUDRON) {
         data.port = 3000;

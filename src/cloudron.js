@@ -342,7 +342,7 @@ function addDnsRecords() {
                     return;
                 }
 
-                config.set('adminDnsInSync', true);
+                config.set('dnsInSync', true);
 
                 // send heartbeat after the dns records are done
                 sendHeartbeat();
