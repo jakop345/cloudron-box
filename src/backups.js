@@ -94,7 +94,7 @@ function getRestoreUrl(backupId, callback) {
             id: backupId,
             url: result.url,
             sessionToken: result.sessionToken,
-            backupKey: config.get('restoredFromUrl') && config.get('restoredFromUrl').indexOf('v0.0.39') > 0 ? '' : config.backupKey()
+            backupKey: config.backupKey()
         };
 
         debug('getRestoreUrl: ', obj);
