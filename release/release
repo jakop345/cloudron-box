@@ -480,7 +480,7 @@ function stage(fromEnv, toEnv) {
                 if (error) return exit(error);
 
                 var sourceTarballName = url.parse(fromReleases[latestFromVersion].sourceTarballUrl).pathname.substr(1);
-                var upgrade = toReleases[latestToVersion].imageId !== toImage.id;
+                var upgrade = fromReleases[latestFromVersion].upgrade;
 
                 console.log('Copying source code tarball %s to %s'.gray, sourceTarballName, toEnv.tag);
 
