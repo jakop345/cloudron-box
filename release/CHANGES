@@ -138,3 +138,5 @@
 - Fix reprovisioning on reboot
 - Fix subdomain management during startup
 
+[0.0.41]
+- Finally bring things to a sane state
