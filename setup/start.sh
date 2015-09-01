@@ -140,6 +140,7 @@ cat > "${CONFIG_DIR}/cloudron.conf" <<CONF_END
         "port": 3306,
         "name": "box"
     },
+    "restoredFromUrl": "${arg_restore_url}",
     "backupKey": "${arg_backup_key}",
     "aws": ${arg_aws}
 }
