@@ -140,3 +140,7 @@
 
 [0.0.41]
 - Finally bring things to a sane state
+
+[0.0.42]
+- Parallel apptask
+
