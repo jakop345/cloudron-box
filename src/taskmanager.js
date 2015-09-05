@@ -17,10 +17,7 @@ var appdb = require('./appdb.js'),
 var gActiveTasks = { };
 var gPendingTasks = [ ];
 
-// Task concurrency is 1 for two reasons:
-// 1. The backup scripts (app and box) turn off swap after finish disregarding other backup processes
-// 2. apptask getFreePort has race with multiprocess
-var TASK_CONCURRENCY = 1;
+var TASK_CONCURRENCY = 5;
 var NOOP_CALLBACK = function (error) { console.error(error); };
 
 function initialize(callback) {
@@ -54,7 +51,8 @@ function uninitialize(callback) {
 
 function startNextTask() {
     if (gPendingTasks.length === 0) return;
-    assert.strictEqual(Object.keys(gActiveTasks).length, 0); // since we allow only one task at a time
+
+    assert(Object.keys(gActiveTasks).length < TASK_CONCURRENCY);
 
     startAppTask(gPendingTasks.shift());
 }
@@ -63,7 +61,7 @@ function startAppTask(appId) {
     assert.strictEqual(typeof appId, 'string');
     assert(!(appId in gActiveTasks));
 
-    var lockError = locker.lock(locker.OP_APPTASK);
+    var lockError = locker.recursiveLock(locker.OP_APPTASK);
 
     if (lockError || Object.keys(gActiveTasks).length >= TASK_CONCURRENCY) {
         debug('Reached concurrency limit, queueing task for %s', appId);
