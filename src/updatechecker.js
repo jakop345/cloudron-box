@@ -10,20 +10,14 @@ exports = module.exports = {
 };
 
 var apps = require('./apps.js'),
-    assert = require('assert'),
     async = require('async'),
     config = require('./config.js'),
     debug = require('debug')('box:updatechecker'),
-    fs = require('fs'),
     mailer = require('./mailer.js'),
-    path = require('path'),
-    paths = require('./paths.js'),
     safe = require('safetydance'),
     semver = require('semver'),
     superagent = require('superagent'),
     util = require('util');
-
-var NOOP_CALLBACK = function (error) { console.error(error); };
 
 var gAppUpdateInfo = { }, // id -> update info { creationDate, manifest }
     gBoxUpdateInfo = null,
@@ -157,4 +151,3 @@ function checkBoxUpdates() {
         }
     });
 }
-
