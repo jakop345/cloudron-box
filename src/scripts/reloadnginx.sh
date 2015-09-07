@@ -12,12 +12,6 @@ if [[ $# == 1 && "$1" == "--check" ]]; then
     exit 0
 fi
 
-if [[ "${OSTYPE}" == "darwin"* ]]; then
-    # On Mac, brew installs supervisor in /usr/local/bin
-    export PATH=$PATH:/usr/local/bin
-fi
-
 if [[ "${BOX_ENV}" == "cloudron" ]]; then
     nginx -s reload
 fi
-

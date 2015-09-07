@@ -1,7 +1,0 @@
-/var/log/supervisor/*log {
-    missingok
-    copytruncate
-    notifempty
-    size 100k
-    nocompress
-}

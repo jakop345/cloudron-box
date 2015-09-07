@@ -21,7 +21,7 @@ readonly program_name=$1
 
 echo "${program_name}.log"
 echo "-------------------"
-tail --lines=100 /var/log/supervisor/${program_name}.log
+journalctl -u ${program_name} -n 100
 echo
 echo
 echo "dmesg"
@@ -31,7 +31,7 @@ echo
 echo
 echo "docker"
 echo "------"
-tail --lines=100 /var/log/upstart/docker.log
+journalctl -u docker -n 50
 echo
 echo
 

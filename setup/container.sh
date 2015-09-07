@@ -13,13 +13,10 @@ readonly DATA_DIR="/home/yellowtent/data"
 rm -rf "${CONFIG_DIR}"
 sudo -u yellowtent mkdir "${CONFIG_DIR}"
 
-########## logrotate (default ubuntu runs this daily)
-rm -rf /etc/logrotate.d/*
-cp -r "${container_files}/logrotate/." /etc/logrotate.d/
-
-########## supervisor
-rm -rf /etc/supervisor/*
-cp -r "${container_files}/supervisor/." /etc/supervisor/
+########## systemd
+cp -r "${container_files}/systemd/." /etc/systemd/system/
+systemctl daemon-reload
+systemctl enable cloudron.target
 
 ########## sudoers
 rm /etc/sudoers.d/*
