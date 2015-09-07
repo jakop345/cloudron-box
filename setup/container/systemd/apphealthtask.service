@@ -13,4 +13,4 @@ KillMode=process
 User=yellowtent
 Group=yellowtent
 Restart=on-failure
-
+MemoryLimit=50M
