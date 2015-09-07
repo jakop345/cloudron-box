@@ -142,9 +142,6 @@ apt-get -y install mysql-server
 echo "==== Install pwgen ===="
 apt-get -y install pwgen
 
-echo "==== Install supervisor ===="
-apt-get -y install supervisor
-
 echo "==== Install collectd ==="
 apt-get install -y collectd collectd-utils
 update-rc.d -f collectd remove
