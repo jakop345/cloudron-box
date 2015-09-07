@@ -168,9 +168,9 @@ echo "==== Install installer systemd script ===="
 cat > /etc/systemd/system/cloudron-installer.service <<EOF
 [Unit]
 Description=Cloudron Installer
-Type=idle
 
 [Service]
+Type=idle
 ExecStart="${INSTALLER_SOURCE_DIR}/src/server.js"
 Environment="DEBUG=installer*,connect-lastmile"
 KillMode=process
