@@ -4,10 +4,6 @@ docs/
 webadmin/dist/
 setup/splash/website/
 
-# vim swam files
+# vim swap files
 *.swp
-
-# supervisor
-supervisord.pid
-supervisord.log
 

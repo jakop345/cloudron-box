@@ -166,22 +166,10 @@ ADMIN_SCOPES="root,developer,profile,users,apps,settings,roleUser"
 mysql -u root -p${mysql_root_password} \
     -e "REPLACE INTO clients (id, appId, clientSecret, redirectURI, scope) VALUES (\"cid-test\", \"test\", \"secret-test\", \"http://127.0.0.1:5000\", \"${ADMIN_SCOPES}\")" box
 
-set_progress "80" "Reloading supervisor"
-# looks like restarting supervisor completely is the only way to reload it
-service supervisor stop || true
+set_progress "80" "Starting Cloudron"
+systemctl start cloudron.target
 
-echo -n "Waiting for supervisord to stop"
-while test -e "/var/run/supervisord.pid" && kill -0 `cat /var/run/supervisord.pid`; do
-    echo -n "."
-    sleep 1
-done
-echo ""
-
-echo "Starting supervisor"
-
-service supervisor start
-
-sleep 2 # give supervisor sometime to start the processes
+sleep 2 # give systemd sometime to start the processes
 
 set_progress "85" "Reloading nginx"
 nginx -s reload

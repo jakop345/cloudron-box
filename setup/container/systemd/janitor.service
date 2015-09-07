@@ -1,0 +1,16 @@
+[Unit]
+Description=Cloudron Janitor
+OnFailure=crashnotifier@%n.service
+StopWhenUnneeded=true
+
+[Service]
+Type=idle
+WorkingDirectory=/home/yellowtent/box
+Restart=always
+ExecStart="/home/yellowtent/box/janitor.js"
+Environment="HOME=/home/yellowtent" "USER=yellowtent" "DEBUG=box*,connect-lastmile" "BOX_ENV=cloudron" "NODE_ENV=production"
+KillMode=process
+User=yellowtent
+Group=yellowtent
+Restart=on-failure
+

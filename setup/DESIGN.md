@@ -16,7 +16,7 @@ and replace it with a new one for an update.
 
 Because we do not package things as Docker yet, we should be careful
 about the code here. We have to expect remains of an older setup code.
-For example, older supervisor or nginx configs might be around.
+For example, older systemd or nginx configs might be around.
 
 The config directory is _part_ of the container and is not a VOLUME.
 Which is to say that the files will be nuked from one update to the next.
@@ -40,7 +40,7 @@ version (see below) or the mysql/postgresql data etc.
 
   * It then setups up the cloud infra (setup_infra.sh) and creates cloudron.conf.
 
-  * supervisor is then started
+  * box services are then started
 
 setup_infra.sh
 This setups containers like graphite, mail and the addons containers.
