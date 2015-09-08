@@ -3,10 +3,6 @@
 'use strict';
 
 exports = module.exports = {
-    AWSError: AWSError,
-
-    getAWSCredentials: getAWSCredentials,
-
     getSignedUploadUrl: getSignedUploadUrl,
     getSignedDownloadUrl: getSignedDownloadUrl,
 
@@ -20,32 +16,7 @@ var assert = require('assert'),
     config = require('./config.js'),
     debug = require('debug')('box:aws'),
     SubdomainError = require('./subdomainerror.js'),
-    superagent = require('superagent'),
-    util = require('util');
-
-// http://dustinsenos.com/articles/customErrorsInNode
-// http://code.google.com/p/v8/wiki/JavaScriptStackTraceApi
-function AWSError(reason, errorOrMessage) {
-    assert.strictEqual(typeof reason, 'string');
-    assert(errorOrMessage instanceof Error || typeof errorOrMessage === 'string' || typeof errorOrMessage === 'undefined');
-
-    Error.call(this);
-    Error.captureStackTrace(this, this.constructor);
-
-    this.name = this.constructor.name;
-    this.reason = reason;
-    if (typeof errorOrMessage === 'undefined') {
-        this.message = reason;
-    } else if (typeof errorOrMessage === 'string') {
-        this.message = errorOrMessage;
-    } else {
-        this.message = 'Internal error';
-        this.nestedError = errorOrMessage;
-    }
-}
-util.inherits(AWSError, Error);
-AWSError.INTERNAL_ERROR = 'Internal Error';
-AWSError.MISSING_CREDENTIALS = 'Missing AWS credentials';
+    superagent = require('superagent');
 
 function getAWSCredentials(callback) {
     assert.strictEqual(typeof callback, 'function');
@@ -66,7 +37,7 @@ function getAWSCredentials(callback) {
             });
         });
     } else {
-        if (!config.aws().accessKeyId || !config.aws().secretAccessKey) return callback(new AWSError(AWSError.MISSING_CREDENTIALS));
+        if (!config.aws().accessKeyId || !config.aws().secretAccessKey) return callback(new SubdomainError(SubdomainError.MISSING_CREDENTIALS));
 
         callback(null, {
             accessKeyId: config.aws().accessKeyId,
