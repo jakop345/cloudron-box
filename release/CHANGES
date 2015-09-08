@@ -144,3 +144,6 @@
 [0.0.42]
 - Parallel apptask
 
+[0.0.43]
+- Move to systemd
+
