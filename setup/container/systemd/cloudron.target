@@ -2,8 +2,7 @@
 Description=Cloudron Smart Cloud
 Documentation=https://cloudron.io/documentation.html
 StopWhenUnneeded=true
-Requires=multi-user.target
-Wants=apphealthtask.service box.service janitor.service oauthproxy.service
+Requires=apphealthtask.service box.service janitor.service oauthproxy.service
 After=apphealthtask.service box.service janitor.service oauthproxy.service
 # AllowIsolate=yes
 
