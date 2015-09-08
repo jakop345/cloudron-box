@@ -61,10 +61,16 @@ function startAppTask(appId) {
     assert.strictEqual(typeof appId, 'string');
     assert(!(appId in gActiveTasks));
 
+    if (Object.keys(gActiveTasks).length >= TASK_CONCURRENCY) {
+        debug('Reached concurrency limit, queueing task for %s', appId);
+        gPendingTasks.push(appId);
+        return;
+    }
+
     var lockError = locker.recursiveLock(locker.OP_APPTASK);
 
-    if (lockError || Object.keys(gActiveTasks).length >= TASK_CONCURRENCY) {
-        debug('Reached concurrency limit, queueing task for %s', appId);
+    if (lockError) {
+        debug('Locked for another operation, queueing task for %s', appId);
         gPendingTasks.push(appId);
         return;
     }
