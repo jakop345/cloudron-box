@@ -28,6 +28,8 @@ function initialize(callback) {
         if (error) return callback(error);
 
         apps.forEach(function (app) {
+            if (app.installationState === appdb.ISTATE_INSTALLED && app.runState === appdb.RSTATE_RUNNING) return;
+
             debug('Creating process for %s (%s) with state %s', app.location, app.id, app.installationState);
             startAppTask(app.id);
         });
