@@ -46,6 +46,7 @@ var addons = require('./addons.js'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
     shell = require('./shell.js'),
+    SubdomainError = require('./subdomainerror.js'),
     subdomains = require('./subdomains.js'),
     superagent = require('superagent'),
     sysinfo = require('./sysinfo.js'),
@@ -424,29 +425,43 @@ function downloadIcon(app, callback) {
 }
 
 function registerSubdomain(app, callback) {
-    debugApp(app, 'Registering subdomain location [%s]', app.location);
-
     // even though the bare domain is already registered in the appstore, we still
     // need to register it so that we have a dnsRecordId to wait for it to complete
     var record = { subdomain: app.location, type: 'A', value: sysinfo.getIp() };
 
-    subdomains.add(record, function (error, changeId) {
-        if (error) return callback(error);
+    async.retry({ times: 30, interval: 5000 }, function (retryCallback) {
+        debugApp(app, 'Registering subdomain location [%s]', app.location);
 
-        debugApp(app, 'Registered subdomain.');
+        subdomains.add(record, function (error, changeId) {
+            if (error && error.reason === SubdomainError.STILL_BUSY) return retryCallback(error); // try again
 
-        updateApp(app, { dnsRecordId: changeId }, callback);
+            retryCallback(null, error || changeId);
+        });
+    }, function (error, result) {
+        if (error || result instanceof Error) return callback(error || result);
+
+        updateApp(app, { dnsRecordId: result }, callback);
     });
 }
 
 function unregisterSubdomain(app, location, callback) {
-    debugApp(app, 'Unregistering subdomain: %s', location);
-
     // do not unregister bare domain because we show a error/cloudron info page there
-    if (location === '') return callback(null);
+    if (location === '') {
+        debugApp(app, 'Skip unregister of empty subdomain');
+        return callback(null);
+    }
 
     var record = { subdomain: location, type: 'A', value: sysinfo.getIp() };
-    subdomains.remove(record, function (error) {
+
+    async.retry({ times: 30, interval: 5000 }, function (retryCallback) {
+        debugApp(app, 'Unregistering subdomain: %s', location);
+
+        subdomains.remove(record, function (error) {
+            if (error && error.reason === SubdomainError.STILL_BUSY) return retryCallback(error); // try again
+
+            retryCallback(null);
+        });
+    }, function (error) {
         if (error) debugApp(app, 'Error unregistering subdomain: %s', error);
 
         updateApp(app, { dnsRecordId: null }, callback);
