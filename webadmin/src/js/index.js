@@ -96,13 +96,13 @@ app.filter('installationStateLabel', function() {
         var waiting = app.progress === 0 ? ' (Waiting)' : '';
 
         switch (app.installationState) {
-        case ISTATES.PENDING_INSTALL: return 'Installing...' + waiting;
-        case ISTATES.PENDING_CONFIGURE: return 'Configuring...' + waiting;
-        case ISTATES.PENDING_UNINSTALL: return 'Uninstalling...' + waiting;
-        case ISTATES.PENDING_RESTORE: return 'Restoring...' + waiting;
-        case ISTATES.PENDING_UPDATE: return 'Updating...' + waiting;
-        case ISTATES.PENDING_FORCE_UPDATE: return 'Updating...' + waiting;
-        case ISTATES.PENDING_BACKUP: return 'Backing up...' + waiting;
+        case ISTATES.PENDING_INSTALL: return 'Installing' + waiting;
+        case ISTATES.PENDING_CONFIGURE: return 'Configuring' + waiting;
+        case ISTATES.PENDING_UNINSTALL: return 'Uninstalling' + waiting;
+        case ISTATES.PENDING_RESTORE: return 'Restoring' + waiting;
+        case ISTATES.PENDING_UPDATE: return 'Updating' + waiting;
+        case ISTATES.PENDING_FORCE_UPDATE: return 'Updating' + waiting;
+        case ISTATES.PENDING_BACKUP: return 'Backing up' + waiting;
         case ISTATES.ERROR: return 'Error';
         case ISTATES.INSTALLED: {
             if (app.runState === 'running') {
