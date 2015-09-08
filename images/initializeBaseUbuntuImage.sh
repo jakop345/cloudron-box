@@ -178,7 +178,6 @@ Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
-Alias=installer.service
 EOF
 systemctl enable cloudron-installer
 
