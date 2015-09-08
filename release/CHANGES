@@ -147,3 +147,6 @@
 [0.0.43]
 - Move to systemd
 
+[0.0.44]
+- Fix apptask concurrency bug
+
