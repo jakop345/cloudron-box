@@ -203,17 +203,17 @@ function verifyWithEmail(email, password, callback) {
     });
 }
 
-function removeUser(username, callback) {
-    assert.strictEqual(typeof username, 'string');
+function removeUser(userId, callback) {
+    assert.strictEqual(typeof userId, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    userdb.del(username, function (error) {
+    userdb.del(userId, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
         callback(null);
 
-        mailer.userRemoved(username);
+        mailer.userRemoved(userId);
     });
 }
 
