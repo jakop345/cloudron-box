@@ -19,14 +19,13 @@ function collectLogs(program, callback) {
 }
 
 function sendCrashNotification(processName) {
-    console.error('%s exited unexpectedly', processName);
-
     collectLogs(processName, function (error, result) {
         if (error) {
             console.error('Failed to collect logs.', error);
             result = util.format('Failed to collect logs.', error);
         }
 
+        console.log('Sending crash notification email for', processName);
         mailer.sendCrashNotification(processName, result);
     });
 }
@@ -34,9 +33,15 @@ function sendCrashNotification(processName) {
 function main() {
     if (process.argv.length !== 3) return console.error('Usage: crashnotifier.js <processName>');
 
-    mailer.initialize(function () {
-        sendCrashNotification(process.argv[2]);
+    var processName = process.argv[2];
+    console.log('Started crash notifier for', processName);
+
+    mailer.initialize(function (error) {
+        if (error) return console.error(error);
+
+        sendCrashNotification(processName);
     });
 }
 
 main();
+
