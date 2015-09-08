@@ -150,3 +150,5 @@
 [0.0.44]
 - Fix apptask concurrency bug
 
+[0.0.45]
+- Retry subdomain registration
