@@ -37,3 +37,4 @@ SubdomainError.BAD_FIELD = 'Bad Field';
 SubdomainError.BAD_STATE = 'Bad State';
 SubdomainError.INVALID_ZONE_NAME = 'Invalid domain name';
 SubdomainError.INVALID_TASK = 'Invalid task';
+SubdomainError.MISSING_CREDENTIALS = 'Missing credentials';
