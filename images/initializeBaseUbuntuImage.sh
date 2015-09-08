@@ -200,6 +200,7 @@ EOF
 systemctl enable iptables-restore
 
 # Allocate swap files
+# https://bbs.archlinux.org/viewtopic.php?id=194792 ensures this runs after do-resize.service
 echo "==== Install box-setup systemd script ===="
 cat > /etc/systemd/system/box-setup.service <<EOF
 [Unit]
