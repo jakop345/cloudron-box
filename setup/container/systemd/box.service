@@ -13,4 +13,5 @@ KillMode=process
 User=yellowtent
 Group=yellowtent
 MemoryLimit=200M
+TimeoutStopSec=5s
 
