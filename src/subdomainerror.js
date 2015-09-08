@@ -28,13 +28,6 @@ function SubdomainError(reason, errorOrMessage) {
 util.inherits(SubdomainError, Error);
 
 SubdomainError.NOT_FOUND = 'No such domain';
-SubdomainError.INTERNAL_ERROR = 'Internal error';
 SubdomainError.EXTERNAL_ERROR = 'External error';
 SubdomainError.STILL_BUSY = 'Still busy';
-SubdomainError.FAILED_TOO_OFTEN = 'Failed too often';
-SubdomainError.ALREADY_EXISTS = 'Domain already exists';
-SubdomainError.BAD_FIELD = 'Bad Field';
-SubdomainError.BAD_STATE = 'Bad State';
-SubdomainError.INVALID_ZONE_NAME = 'Invalid domain name';
-SubdomainError.INVALID_TASK = 'Invalid task';
 SubdomainError.MISSING_CREDENTIALS = 'Missing credentials';
