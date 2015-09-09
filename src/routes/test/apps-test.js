@@ -147,10 +147,19 @@ describe('App API', function () {
     var dockerProxy;
 
     before(function (done) {
-        dockerProxy = startDockerProxy(function interceptor() { return false; }, function () {
+        dockerProxy = startDockerProxy(function interceptor(req, res) {
+            if (req.method === 'DELETE' && req.url === '/images/c7ddfc8fb7cd8a14d4d70153a199ff0c6e9b709807aeec5a7b799d60618731d1?force=true&noprune=false') {
+                res.writeHead(200);
+                res.end();
+                return true;
+            }
+
+            return false;
+        }, function () {
             setup(done);
         });
     });
+
     after(function (done) {
         APP_ID = null;
         cleanup(function () {
