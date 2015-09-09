@@ -82,6 +82,7 @@
     "gulp-uglify": "^1.1.0",
     "hock": "~1.2.0",
     "istanbul": "*",
+    "js2xmlparser": "^1.0.0",
     "mocha": "*",
     "nock": "^2.6.0",
     "node-sass": "^3.0.0-alpha.0",
