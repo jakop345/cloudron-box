@@ -165,9 +165,9 @@ function addSubdomain(zoneName, subdomain, type, value, callback) {
             var route53 = new AWS.Route53(credentials);
             route53.changeResourceRecordSets(params, function(error, result) {
                 if (error && error.code === 'PriorRequestNotComplete') {
-                    return callback(new SubdomainError(SubdomainError.STILL_BUSY, new Error(error)));
+                    return callback(new SubdomainError(SubdomainError.STILL_BUSY, error.message));
                 } else if (error) {
-                    return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, new Error(error)));
+                    return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, error.message));
                 }
 
                 debug('addSubdomain: success. changeInfoId:%j', result);
