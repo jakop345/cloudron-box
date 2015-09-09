@@ -186,7 +186,7 @@ describe('apptask', function () {
     xit('registers subdomain', function (done) {
         nock.cleanAll();
         var scope = nock(config.apiServerOrigin())
-            .get('/api/v1/boxes/' + config.fqdn() + '/awscredentials?token=APPSTORE_TOKEN')
+            .post('/api/v1/boxes/' + config.fqdn() + '/awscredentials?token=APPSTORE_TOKEN')
             .reply(201, { credentials: { AccessKeyId: 'accessKeyId', SecretAccessKey: 'secretAccessKey', SessionToken: 'sessionToken' } })
             .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP.location, type: 'A', value: sysinfo.getIp() } ] })
             .reply(201, { ids: [ APP.dnsRecordId ] });
