@@ -119,8 +119,8 @@ describe('Backups API', function () {
 
         it('succeeds', function (done) {
             var scope = nock(config.apiServerOrigin())
-                        .get('/api/v1/boxes/' + config.fqdn() + '/awscredentials?token=APPSTORE_TOKEN')
-                        .reply(201, { accessKeyId: 'accessKeyId', secretAccessKey: 'secretAccessKey', sessionToken: 'sessionToken' });
+                        .post('/api/v1/boxes/' + config.fqdn() + '/awscredentials?token=APPSTORE_TOKEN')
+                        .reply(201, { credentials: { AccessKeyId: 'accessKeyId', SecretAccessKey: 'secretAccessKey', SessionToken: 'sessionToken' } });
 
             request.post(SERVER_URL + '/api/v1/backups')
                    .query({ access_token: token })

@@ -451,8 +451,8 @@ describe('Cloudron', function () {
 
         it('fails when in wrong state', function (done) {
             var scope2 = nock(config.apiServerOrigin())
-                    .get('/api/v1/boxes/' + config.fqdn() + '/awscredentials?token=APPSTORE_TOKEN')
-                    .reply(201, { credentials: { accessKeyId: 'accessKeyId', secretAccessKey: 'secretAccessKey', sessionToken: 'sessionToken' } });
+                    .post('/api/v1/boxes/' + config.fqdn() + '/awscredentials?token=APPSTORE_TOKEN')
+                    .reply(201, { credentials: { AccessKeyId: 'accessKeyId', SecretAccessKey: 'secretAccessKey', SessionToken: 'sessionToken' } });
 
             var scope3 = nock(config.apiServerOrigin())
                     .filteringRequestBody(function () { return false; })
