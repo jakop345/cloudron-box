@@ -22,6 +22,7 @@ var appdb = require('../../appdb.js'),
     hock = require('hock'),
     http = require('http'),
     https = require('https'),
+    js2xml = require('js2xmlparser'),
     net = require('net'),
     nock = require('nock'),
     os = require('os'),
@@ -31,7 +32,6 @@ var appdb = require('../../appdb.js'),
     safe = require('safetydance'),
     server = require('../../server.js'),
     settings = require('../../settings.js'),
-    sysinfo = require('../../sysinfo.js'),
     tokendb = require('../../tokendb.js'),
     url = require('url'),
     util = require('util'),
@@ -50,6 +50,21 @@ var USERNAME = 'admin', PASSWORD = 'password', EMAIL ='admin@me.com';
 var USERNAME_1 = 'user', PASSWORD_1 = 'password', EMAIL_1 ='user@me.com';
 var token = null; // authentication token
 var token_1 = null;
+
+ var awsHostedZones = {
+     HostedZones: [{
+         Id: '/hostedzone/ZONEID',
+         Name: 'localhost.',
+         CallerReference: '305AFD59-9D73-4502-B020-F4E6F889CB30',
+         ResourceRecordSetCount: 2,
+         ChangeInfo: {
+             Id: '/change/CKRTFJA0ANHXB',
+             Status: 'INSYNC'
+         }
+     }],
+    IsTruncated: false,
+    MaxItems: '100'
+ };
 
 function startDockerProxy(interceptor, callback) {
     assert.strictEqual(typeof interceptor, 'function');
@@ -131,12 +146,11 @@ function setup(done) {
 }
 
 function cleanup(done) {
+    // db is not cleaned up here since it's too late to call it after server.stop. if called before server.stop taskmanager apptasks are unhappy :/
     async.series([
         server.stop,
 
         function (callback) { setTimeout(callback, 2000); }, // give taskmanager tasks couple of seconds to finish
-
-        database._clear,
 
         child_process.exec.bind(null, 'docker rm -f mysql; docker rm -f postgresql; docker rm -f mongodb')
     ], done);
@@ -486,7 +500,8 @@ describe('App API', function () {
 describe('App installation', function () {
     this.timeout(50000);
 
-    var hockInstance = hock.createHock({ throwOnUnmatched: false }), hockServer, dockerProxy;
+    var apiHockInstance = hock.createHock({ throwOnUnmatched: false }), apiHockServer, dockerProxy;
+    var awsHockInstance = hock.createHock({ throwOnUnmatched: false }), awsHockServer;
     var imageDeleted = false, imageCreated = false;
 
     before(function (done) {
@@ -513,28 +528,42 @@ describe('App installation', function () {
             setup,
 
             function (callback) {
-                hockInstance
+                apiHockInstance
                     .get('/api/v1/apps/' + APP_STORE_ID + '/versions/' + APP_MANIFEST.version + '/icon')
                     .replyWithFile(200, path.resolve(__dirname, '../../../webadmin/src/img/appicon_fallback.png'))
-                    .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP_LOCATION, type: 'A', value: sysinfo.getIp() } ] })
-                    .reply(201, { ids: [ 'dnsrecordid' ] }, { 'Content-Type': 'application/json' })
-                    .delete('/api/v1/subdomains/dnsrecordid?token=' + config.token())
-                    .reply(204, { }, { 'Content-Type': 'application/json' });
+                    .post('/api/v1/boxes/' + config.fqdn() + '/awscredentials?token=APPSTORE_TOKEN')
+                    .max(Infinity)
+                    .reply(201, { credentials: { AccessKeyId: 'accessKeyId', SecretAccessKey: 'secretAccessKey', SessionToken: 'sessionToken' } }, { 'Content-Type': 'application/json' });
 
                 var port = parseInt(url.parse(config.apiServerOrigin()).port, 10);
-                hockServer = http.createServer(hockInstance.handler).listen(port, callback);
+                apiHockServer = http.createServer(apiHockInstance.handler).listen(port, callback);
+            },
+
+            function (callback) {
+                awsHockInstance
+                    .get('/2013-04-01/hostedzone')
+                    .max(Infinity)
+                    .reply(200, js2xml('ListHostedZonesResponse', awsHostedZones, { arrayMap: { HostedZones: 'HostedZone'} }), { 'Content-Type': 'application/xml' })
+                    .filteringRequestBody(function (unusedBody) { return ''; }) // strip out body
+                    .post('/2013-04-01/hostedzone/ZONEID/rrset/')
+                    .max(Infinity)
+                    .reply(200, js2xml('ChangeResourceRecordSetsResponse', { ChangeInfo: { Id: 'dnsrecordid', Status: 'INSYNC' } }), { 'Content-Type': 'application/xml' });
+
+                var port = parseInt(url.parse(config.aws().endpoint).port, 10);
+                awsHockServer = http.createServer(awsHockInstance.handler).listen(port, callback);
             }
         ], done);
     });
 
     after(function (done) {
         APP_ID = null;
-        cleanup(function (error) {
-            if (error) return done(error);
-            hockServer.close(function () {
-                dockerProxy.close(done);
-            });
-        });
+
+        async.series([
+            cleanup,
+            apiHockServer.close.bind(apiHockServer),
+            awsHockServer.close.bind(awsHockServer),
+            dockerProxy.close.bind(dockerProxy)
+        ], done);
     });
 
     var appResult = null /* the json response */, appEntry = null /* entry from database */;
@@ -895,9 +924,13 @@ describe('App installation', function () {
     });
 
     it('uninstalled - unregistered subdomain', function (done) {
-        hockInstance.done(function (error) { // checks if all the hockServer APIs were called
+        apiHockInstance.done(function (error) { // checks if all the apiHockServer APIs were called
             expect(!error).to.be.ok();
-            done();
+
+            awsHockInstance.done(function (error) {
+                expect(!error).to.be.ok();
+                done();
+            });
         });
     });
 
@@ -917,7 +950,8 @@ describe('App installation', function () {
 describe('App installation - port bindings', function () {
     this.timeout(50000);
 
-    var hockInstance = hock.createHock({ throwOnUnmatched: false }), hockServer, dockerProxy;
+    var apiHockInstance = hock.createHock({ throwOnUnmatched: false }), apiHockServer, dockerProxy;
+    var awsHockInstance = hock.createHock({ throwOnUnmatched: false }), awsHockServer;
     var imageDeleted = false, imageCreated = false;
 
     before(function (done) {
@@ -943,35 +977,41 @@ describe('App installation - port bindings', function () {
             setup,
 
             function (callback) {
-                hockInstance
-                    // app install
+                apiHockInstance
                     .get('/api/v1/apps/' + APP_STORE_ID + '/versions/' + APP_MANIFEST.version + '/icon')
                     .replyWithFile(200, path.resolve(__dirname, '../../../webadmin/src/img/appicon_fallback.png'))
-                    .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP_LOCATION, type: 'A', value: sysinfo.getIp() } ] })
-                    .reply(201, { ids: [ 'dnsrecordid' ] }, { 'Content-Type': 'application/json' })
-                    // app configure
-                    .delete('/api/v1/subdomains/dnsrecordid?token=' + config.token())
-                    .reply(204, { }, { 'Content-Type': 'application/json' })
-                    .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP_LOCATION_NEW, type: 'A', value: sysinfo.getIp() } ] })
-                    .reply(201, { ids: [ 'anotherdnsid' ] }, { 'Content-Type': 'application/json' })
-                    // app remove
-                    .delete('/api/v1/subdomains/anotherdnsid?token=' + config.token())
-                    .reply(204, { }, { 'Content-Type': 'application/json' });
+                    .post('/api/v1/boxes/' + config.fqdn() + '/awscredentials?token=APPSTORE_TOKEN')
+                    .max(Infinity)
+                    .reply(201, { credentials: { AccessKeyId: 'accessKeyId', SecretAccessKey: 'secretAccessKey', SessionToken: 'sessionToken' } }, { 'Content-Type': 'application/json' });
 
                 var port = parseInt(url.parse(config.apiServerOrigin()).port, 10);
-                hockServer = http.createServer(hockInstance.handler).listen(port, callback);
+                apiHockServer = http.createServer(apiHockInstance.handler).listen(port, callback);
+            },
+
+            function (callback) {
+                awsHockInstance
+                    .get('/2013-04-01/hostedzone')
+                    .max(Infinity)
+                    .reply(200, js2xml('ListHostedZonesResponse', awsHostedZones, { arrayMap: { HostedZones: 'HostedZone'} }), { 'Content-Type': 'application/xml' })
+                    .filteringRequestBody(function (unusedBody) { return ''; }) // strip out body
+                    .post('/2013-04-01/hostedzone/ZONEID/rrset/')
+                    .max(Infinity)
+                    .reply(200, js2xml('ChangeResourceRecordSetsResponse', { ChangeInfo: { Id: 'dnsrecordid', Status: 'INSYNC' } }), { 'Content-Type': 'application/xml' });
+
+                var port = parseInt(url.parse(config.aws().endpoint).port, 10);
+                awsHockServer = http.createServer(awsHockInstance.handler).listen(port, callback);
             }
         ], done);
     });
 
     after(function (done) {
         APP_ID = null;
-        cleanup(function (error) {
-            if (error) return done(error);
-            hockServer.close(function () {
-                dockerProxy.close(done);
-            });
-        });
+        async.series([
+            cleanup,
+            apiHockServer.close.bind(apiHockServer),
+            awsHockServer.close.bind(awsHockServer),
+            dockerProxy.close.bind(dockerProxy)
+        ], done);
     });
 
     var appResult = null, appEntry = null;
@@ -1315,9 +1355,13 @@ describe('App installation - port bindings', function () {
     });
 
     it('uninstalled - unregistered subdomain', function (done) {
-        hockInstance.done(function (error) { // checks if all the hockServer APIs were called
+        apiHockInstance.done(function (error) { // checks if all the apiHockServer APIs were called
             expect(!error).to.be.ok();
-            done();
+
+            awsHockInstance.done(function (error) {
+                expect(!error).to.be.ok();
+                done();
+            });
         });
     });
 
