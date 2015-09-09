@@ -98,6 +98,7 @@ function initConfig() {
         };
         data.token = 'APPSTORE_TOKEN';
         data.aws.backupBucket = 'testbucket';
+        data.aws.backupPrefix = 'testprefix';
     } else {
         assert(false, 'Unknown environment. This should not happen!');
     }
