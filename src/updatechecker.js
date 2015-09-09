@@ -132,6 +132,7 @@ function checkAppUpdates() {
 
                 mailer.appUpdateAvailable(app, gAppUpdateInfo[id]);
                 gMailedUser[id] = true;
+                iteratorDone();
             });
         });
     });
