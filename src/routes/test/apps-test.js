@@ -107,9 +107,6 @@ function setup(done) {
         child_process.exec.bind(null, __dirname + '/start_addons.sh'),
 
         function (callback) {
-            callback(null);
-        },
-        function (callback) {
             request.post(SERVER_URL + '/api/v1/users')
                    .query({ access_token: token })
                    .send({ username: USERNAME_1, email: EMAIL_1 })
