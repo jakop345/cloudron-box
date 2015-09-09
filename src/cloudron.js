@@ -511,18 +511,19 @@ function doUpdate(boxUpdateInfo, callback) {
 
                 // this data is opaque to the installer
                 data: {
-                    boxVersionsUrl: config.get('boxVersionsUrl'),
-                    version: boxUpdateInfo.version,
                     apiServerOrigin: config.apiServerOrigin(),
-                    webServerOrigin: config.webServerOrigin(),
+                    aws: config.aws(),
+                    backupKey: config.backupKey(),
+                    boxVersionsUrl: config.get('boxVersionsUrl'),
                     fqdn: config.fqdn(),
-                    token: config.token(),
-                    tlsCert: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), 'utf8'),
-                    tlsKey: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'), 'utf8'),
                     isCustomDomain: config.isCustomDomain(),
                     restoreUrl: null,
                     restoreKey: null,
-                    aws: config.aws()
+                    token: config.token(),
+                    tlsCert: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), 'utf8'),
+                    tlsKey: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'), 'utf8'),
+                    version: boxUpdateInfo.version,
+                    webServerOrigin: config.webServerOrigin()
                 }
             };
 
