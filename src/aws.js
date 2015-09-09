@@ -51,7 +51,7 @@ function getSignedUploadUrl(filename, callback) {
     assert.strictEqual(typeof filename, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    debug('getSignedUploadUrl()');
+    debug('getSignedUploadUrl: %s', filename);
 
     getAWSCredentials(function (error, credentials) {
         if (error) return callback(error);
@@ -74,7 +74,7 @@ function getSignedDownloadUrl(filename, callback) {
     assert.strictEqual(typeof filename, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    debug('getSignedDownloadUrl()');
+    debug('getSignedDownloadUrl: %s', filename);
 
     getAWSCredentials(function (error, credentials) {
         if (error) return callback(error);
