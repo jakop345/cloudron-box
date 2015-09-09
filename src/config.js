@@ -99,6 +99,7 @@ function initConfig() {
         data.token = 'APPSTORE_TOKEN';
         data.aws.backupBucket = 'testbucket';
         data.aws.backupPrefix = 'testprefix';
+        data.aws.endpoint = 'http://localhost:5353';
     } else {
         assert(false, 'Unknown environment. This should not happen!');
     }
