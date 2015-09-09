@@ -1,6 +1,5 @@
 /* jslint node:true */
 /* global it:false */
-/* global xit:false */
 /* global describe:false */
 /* global before:false */
 /* global after:false */
@@ -14,13 +13,10 @@ var addons = require('../addons.js'),
     database = require('../database.js'),
     expect = require('expect.js'),
     fs = require('fs'),
-    hock = require('hock'),
-    http = require('http'),
     js2xml = require('js2xmlparser'),
     net = require('net'),
     nock = require('nock'),
     paths = require('../paths.js'),
-    sysinfo = require('../sysinfo.js'),
     _ = require('underscore');
 
 var MANIFEST = {
