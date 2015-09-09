@@ -29,21 +29,29 @@ function getAWSCredentials(callback) {
             if (result.statusCode !== 201) return callback(new Error(result.text));
             if (!result.body || !result.body.credentials) return callback(new Error('Unexpected response'));
 
-            return callback(null, {
+            var credentials = {
                 accessKeyId: result.body.credentials.AccessKeyId,
                 secretAccessKey: result.body.credentials.SecretAccessKey,
                 sessionToken: result.body.credentials.SessionToken,
                 region: 'us-east-1'
-            });
+            };
+
+            if (config.aws().endpoint) credentials.endpoint = new AWS.Endpoint(config.aws().endpoint);
+
+            callback(null, credentials);
         });
     } else {
         if (!config.aws().accessKeyId || !config.aws().secretAccessKey) return callback(new SubdomainError(SubdomainError.MISSING_CREDENTIALS));
 
-        callback(null, {
+        var credentials = {
             accessKeyId: config.aws().accessKeyId,
             secretAccessKey: config.aws().secretAccessKey,
             region: 'us-east-1'
-        });
+        };
+
+        if (config.aws().endpoint) credentials.endpoint = new AWS.Endpoint(config.aws().endpoint);
+
+        callback(null, credentials);
     }
 }
 
