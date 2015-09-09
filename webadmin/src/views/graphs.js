@@ -92,7 +92,7 @@ angular.module('Application').controller('GraphsController', ['$scope', '$locati
             var options = {
                 scaleOverride: true,
                 scaleSteps: 10,
-                scaleStepWidth: $scope.activeApp === 'system' ? 200 : 60,
+                scaleStepWidth: $scope.activeApp === 'system' ? 200 : ($scope.activeApp.manifest.memoryLimit ? parseInt($scope.activeApp.manifest.memoryLimit/10000000,10) : 20),
                 scaleStartValue: 0
             };
 
