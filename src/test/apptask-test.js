@@ -14,6 +14,9 @@ var addons = require('../addons.js'),
     database = require('../database.js'),
     expect = require('expect.js'),
     fs = require('fs'),
+    hock = require('hock'),
+    http = require('http'),
+    js2xml = require('js2xmlparser'),
     net = require('net'),
     nock = require('nock'),
     paths = require('../paths.js'),
@@ -61,6 +64,21 @@ var APP = {
     accessRestriction: '',
     dnsRecordId: 'someDnsRecordId'
 };
+
+ var awsHostedZones = {
+     HostedZones: [{
+         Id: '/hostedzone/ZONEID',
+         Name: 'localhost.',
+         CallerReference: '305AFD59-9D73-4502-B020-F4E6F889CB30',
+         ResourceRecordSetCount: 2,
+         ChangeInfo: {
+             Id: '/change/CKRTFJA0ANHXB',
+             Status: 'INSYNC'
+         }
+     }],
+    IsTruncated: false,
+    MaxItems: '100'
+ };
 
 describe('apptask', function () {
     before(function (done) {
@@ -183,17 +201,23 @@ describe('apptask', function () {
         });
     });
 
-    xit('registers subdomain', function (done) {
+    it('registers subdomain', function (done) {
         nock.cleanAll();
         var scope = nock(config.apiServerOrigin())
             .post('/api/v1/boxes/' + config.fqdn() + '/awscredentials?token=APPSTORE_TOKEN')
-            .reply(201, { credentials: { AccessKeyId: 'accessKeyId', SecretAccessKey: 'secretAccessKey', SessionToken: 'sessionToken' } })
-            .post('/api/v1/subdomains?token=' + config.token(), { records: [ { subdomain: APP.location, type: 'A', value: sysinfo.getIp() } ] })
-            .reply(201, { ids: [ APP.dnsRecordId ] });
+            .times(2)
+            .reply(201, { credentials: { AccessKeyId: 'accessKeyId', SecretAccessKey: 'secretAccessKey', SessionToken: 'sessionToken' } });
+
+        var awsScope = nock(config.aws().endpoint)
+            .get('/2013-04-01/hostedzone')
+            .reply(200, js2xml('ListHostedZonesResponse', awsHostedZones, { arrayMap: { HostedZones: 'HostedZone'} }))
+            .post('/2013-04-01/hostedzone/ZONEID/rrset/')
+            .reply(200, js2xml('ChangeResourceRecordSetsResponse', { ChangeInfo: { Id: 'RRID', Status: 'INSYNC' } }));
 
         apptask._registerSubdomain(APP, function (error) {
             expect(error).to.be(null);
             expect(scope.isDone()).to.be.ok();
+            expect(awsScope.isDone()).to.be.ok();
             done();
         });
     });
