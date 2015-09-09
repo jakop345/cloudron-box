@@ -79,9 +79,11 @@ function startDockerProxy(interceptor, callback) {
 
 function setup(done) {
     async.series([
-        server.start.bind(server),
-
+        // first clear, then start server. otherwise, taskmanager spins up tasks for obsolete appIds
+        database.initialize,
         database._clear,
+
+        server.start.bind(server),
 
         function (callback) {
             var scope1 = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
@@ -104,7 +106,10 @@ function setup(done) {
             });
         },
 
-        child_process.exec.bind(null, __dirname + '/start_addons.sh'),
+        function (callback) {
+            console.log('Starting addons, this can take 10 seconds');
+            child_process.exec(__dirname + '/start_addons.sh', callback);
+        },
 
         function (callback) {
             request.post(SERVER_URL + '/api/v1/users')
@@ -127,9 +132,9 @@ function setup(done) {
 
 function cleanup(done) {
     async.series([
-        database._clear,
-
         server.stop,
+
+        database._clear,
 
         child_process.exec.bind(null, 'docker rm -f mysql; docker rm -f postgresql; docker rm -f mongodb')
     ], done);
