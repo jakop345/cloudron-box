@@ -455,13 +455,15 @@ describe('Cloudron', function () {
                     .reply(201, { credentials: { AccessKeyId: 'accessKeyId', SecretAccessKey: 'secretAccessKey', SessionToken: 'sessionToken' } });
 
             var scope3 = nock(config.apiServerOrigin())
-                    .filteringRequestBody(function () { return false; })
-                    .post('/api/v1/boxes/' + config.fqdn() + '/backupDone?token=APPSTORE_TOKEN')
+                    .post('/api/v1/boxes/' + config.fqdn() + '/backupDone?token=APPSTORE_TOKEN', function (body) { 
+                        return body.boxVersion && body.restoreKey && !body.appId && !body.appVersion && body.appBackupIds.length === 0;
+                    })
                     .reply(200, { id: 'someid' });
 
             var scope1 = nock(config.apiServerOrigin())
-                .filteringRequestBody(function () { return false; })
-                .post('/api/v1/boxes/' + config.fqdn() + '/migrate?token=APPSTORE_TOKEN', { }).reply(409, {});
+                .post('/api/v1/boxes/' + config.fqdn() + '/migrate?token=APPSTORE_TOKEN', function (body) {
+                    return body.size && body.region && body.restoreKey;
+                }).reply(409, {});
 
             injectShellMock();
 
@@ -487,8 +489,19 @@ describe('Cloudron', function () {
 
 
         it('succeeds', function (done) {
-            var scope1 = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/migrate?token=APPSTORE_TOKEN', { size: 'small', region: 'sfo', restoreKey: 'someid' }).reply(202, {});
-            var scope2 = nock(config.apiServerOrigin()).put('/api/v1/boxes/' + config.fqdn() + '/backupurl?token=APPSTORE_TOKEN', { boxVersion: '0.5.0', appId: null, appVersion: null, appBackupIds: [] }).reply(201, { id: 'someid', url: 'http://foobar', backupKey: 'somerestorekey' });
+            var scope1 = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/migrate?token=APPSTORE_TOKEN', function (body) {
+                return body.size && body.region && body.restoreKey;
+            }).reply(202, {});
+
+            var scope2 = nock(config.apiServerOrigin())
+                    .post('/api/v1/boxes/' + config.fqdn() + '/backupDone?token=APPSTORE_TOKEN', function (body) { 
+                        return body.boxVersion && body.restoreKey && !body.appId && !body.appVersion && body.appBackupIds.length === 0;
+                    })
+                    .reply(200, { id: 'someid' });
+
+            var scope3 = nock(config.apiServerOrigin())
+                    .post('/api/v1/boxes/' + config.fqdn() + '/awscredentials?token=APPSTORE_TOKEN')
+                    .reply(201, { credentials: { AccessKeyId: 'accessKeyId', SecretAccessKey: 'secretAccessKey', SessionToken: 'sessionToken' } });
 
             injectShellMock();
 
@@ -500,7 +513,7 @@ describe('Cloudron', function () {
                 expect(result.statusCode).to.equal(202);
 
                 function checkAppstoreServerCalled() {
-                    if (scope1.isDone() && scope2.isDone()) {
+                    if (scope1.isDone() && scope2.isDone() && scope3.isDone()) {
                         restoreShellMock();
                         return done();
                     }
