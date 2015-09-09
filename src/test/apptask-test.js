@@ -222,15 +222,23 @@ describe('apptask', function () {
         });
     });
 
-    xit('unregisters subdomain', function (done) {
+    it('unregisters subdomain', function (done) {
         nock.cleanAll();
         var scope = nock(config.apiServerOrigin())
-            .delete('/api/v1/subdomains/' + APP.dnsRecordId + '?token=' + config.token())
-            .reply(204, {});
+            .post('/api/v1/boxes/' + config.fqdn() + '/awscredentials?token=APPSTORE_TOKEN')
+            .times(2)
+            .reply(201, { credentials: { AccessKeyId: 'accessKeyId', SecretAccessKey: 'secretAccessKey', SessionToken: 'sessionToken' } });
 
-        apptask._unregisterSubdomain(APP, function (error) {
+        var awsScope = nock(config.aws().endpoint)
+            .get('/2013-04-01/hostedzone')
+            .reply(200, js2xml('ListHostedZonesResponse', awsHostedZones, { arrayMap: { HostedZones: 'HostedZone'} }))
+            .post('/2013-04-01/hostedzone/ZONEID/rrset/')
+            .reply(200, js2xml('ChangeResourceRecordSetsResponse', { ChangeInfo: { Id: 'RRID', Status: 'INSYNC' } }));
+
+        apptask._unregisterSubdomain(APP, APP.location, function (error) {
             expect(error).to.be(null);
             expect(scope.isDone()).to.be.ok();
+            expect(awsScope.isDone()).to.be.ok();
             done();
         });
     });
