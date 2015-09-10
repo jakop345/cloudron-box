@@ -12,4 +12,4 @@ Environment="HOME=/home/yellowtent" "USER=yellowtent" "DEBUG=box*,connect-lastmi
 KillMode=process
 User=yellowtent
 Group=yellowtent
-
+MemoryLimit=50M
