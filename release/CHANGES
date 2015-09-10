@@ -162,3 +162,7 @@
 [0.0.48]
 - Styling fixes
 - Improved session handling
+
+[0.0.49]
+- Fix app autoupdate logic
+
