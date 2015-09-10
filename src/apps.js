@@ -140,11 +140,11 @@ function validatePortBindings(portBindings, tcpPorts) {
     // these ports are reserved even if we listen only on 127.0.0.1 because we setup HostIp to be 127.0.0.1
     // for custom tcp ports
     var RESERVED_PORTS = [
-        22, /* ssh */
         25, /* smtp */
         53, /* dns */
         80, /* http */
         443, /* https */
+        919, /* ssh */
         2003, /* graphite (lo) */
         2004, /* graphite (lo) */
         2020, /* install server */
