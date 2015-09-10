@@ -156,3 +156,6 @@
 [0.0.46]
 - Fix app update email notification
 
+[0.0.47]
+- Ensure box code quits within 5 seconds
+
