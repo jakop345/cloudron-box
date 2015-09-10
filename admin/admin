@@ -209,7 +209,7 @@ function sshExec(ip, cmds) {
     var sshClient = new SshClient();
     sshClient.connect({
         host: ip,
-        port: 22,
+        port: 919,
         username: 'root',
         privateKey: fs.readFileSync(privateKey)
     });

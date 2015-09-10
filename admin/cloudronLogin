@@ -14,4 +14,4 @@ if [[ ! -f "${ssh_keys}" ]]; then
     exit 1
 fi
 
-ssh root@$1 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o ConnectTimeout=10 -i "${ssh_keys}"
+ssh root@$1 -p 919 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o ConnectTimeout=10 -i "${ssh_keys}"

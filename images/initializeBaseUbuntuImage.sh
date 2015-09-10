@@ -39,7 +39,7 @@ iptables -P OUTPUT ACCEPT
 # NOTE: keep these in sync with src/apps.js validatePortBindings
 # allow ssh, http, https, ping, dns
 iptables -I INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
-iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+iptables -A INPUT -p tcp --dport 919 -j ACCEPT # ssh
 iptables -A INPUT -p tcp -m tcp -m multiport --dports 80,443,886 -j ACCEPT
 iptables -A INPUT -p icmp --icmp-type echo-request -j ACCEPT
 iptables -A INPUT -p icmp --icmp-type echo-reply -j ACCEPT
@@ -62,6 +62,9 @@ iptables -N LOGGING # new chain
 iptables -A INPUT -j LOGGING # last rule in INPUT chain
 iptables -A LOGGING -m limit --limit 2/min -j LOG --log-prefix "IPTables Packet Dropped: " --log-level 7
 iptables -A LOGGING -j DROP
+
+echo "==== Move ssh to port 919 ==="
+sed -i "s/^Port .*/Port 919/" /etc/ssh/sshd_config
 
 echo "==== Install btrfs tools"
 apt-get -y install btrfs-tools

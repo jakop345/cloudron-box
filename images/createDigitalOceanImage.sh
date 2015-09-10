@@ -145,22 +145,15 @@ echo "Copying installer source"
 cd "${INSTALLER_DIR}"
 git archive --format=tar HEAD | ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i "${ssh_keys}" "root@${droplet_ip}" "cat - > /root/installer.tar"
 
+echo "Copy over certs"
+scp -r -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i "${ssh_keys}" "${INSTALLER_DIR}/../keys/installer/" "root@${droplet_ip}:/home/yellowtent/installer/src/certs/"
+scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i "${ssh_keys}" "${INSTALLER_DIR}/../keys/installer_ca/ca.crt" "root@${droplet_ip}:/home/yellowtent/installer/src/certs/"
+
 echo "Executing init script"
 if ! ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i "${ssh_keys}" "root@${droplet_ip}" "/bin/bash /root/initializeBaseUbuntuImage.sh ${installer_revision}"; then
     echo "Init script failed"
     exit 1
 fi
-
-echo "Copy over certs"
-scp -r -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i "${ssh_keys}" "${INSTALLER_DIR}/../keys/installer/" "root@${droplet_ip}:/home/yellowtent/installer/src/certs/"
-scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i "${ssh_keys}" "${INSTALLER_DIR}/../keys/installer_ca/ca.crt" "root@${droplet_ip}:/home/yellowtent/installer/src/certs/"
-
-echo "Shutting down droplet with id : ${droplet_id}"
-ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i "${ssh_keys}" "root@${droplet_ip}" "shutdown -f now" || true # shutdown sometimes terminates ssh connection immediately making this command fail
-
-# wait 10 secs for actual shutdown
-echo "Waiting for 10 seconds for droplet to shutdown"
-sleep 30
 
 echo "Powering off droplet"
 power_off_droplet "${droplet_id}"
