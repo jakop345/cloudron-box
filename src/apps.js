@@ -649,27 +649,38 @@ function autoupdateApps(updateInfo, callback) { // updateInfo is { appId -> { ma
     assert.strictEqual(typeof callback, 'function');
 
     function canAutoupdateApp(app, newManifest) {
-        // TODO: maybe check the description as well?
-        if (!newManifest.tcpPorts && !app.portBindings) return true;
-        if (!newManifest.tcpPorts || !app.portBindings) return false;
+        var tcpPorts = newManifest.tcpPorts || { };
+        var portBindings = app.portBindings; // this is never null
 
-        for (var env in newManifest.tcpPorts) {
-            if (!(env in app.portBindings)) return false;
-       }
+        if (Object.keys(tcpPorts).length === 0 && Object.keys(portBindings).length === 0) return null;
+        if (Object.keys(tcpPorts).length === 0) return new Error('tcpPorts is now empty but portBindings is not');
+        if (Object.keys(portBindings).length === 0) return new Error('portBindings is now empty but tcpPorts is not');
 
-        return true;
+        for (var env in tcpPorts) {
+            if (!(env in portBindings)) return new Error(env + ' is required from user');
+        }
+
+        // it's fine if one or more keys got removed
+        return null;
     }
 
     if (!updateInfo) return callback(null);
 
     async.eachSeries(Object.keys(updateInfo), function iterator(appId, iteratorDone) {
         get(appId, function (error, app) {
-            if (!canAutoupdateApp(app, updateInfo[appId].manifest)) {
+            if (error) {
+                debug('Cannot autoupdate app %s : %s', appId, error.message);
+                return iteratorDone();
+           }
+
+            error = canAutoupdateApp(app, updateInfo[appId].manifest);
+            if (error) {
+                debug('app %s requires manual update. %s', appId, error.message);
                 return iteratorDone();
             }
 
            update(appId, false /* force */, updateInfo[appId].manifest, app.portBindings, null /* icon */, function (error) {
-                if (error) debug('Error initiating autoupdate of %s', appId);
+                if (error) debug('Error initiating autoupdate of %s. %s', appId, error.message);
 
                 iteratorDone(null);
             });
