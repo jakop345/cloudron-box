@@ -23,7 +23,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
 
     function defaultErrorHandler(callback) {
         return function (data, status) {
-            if (status === 401) return client.logout();
+            if (status === 401) return client.login();
             if (status === 503) {
                 // this could indicate a update/upgrade/restore/migration
                 client.progress(function (error, result) {
@@ -605,12 +605,27 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         });
     };
 
+    Client.prototype.login = function () {
+        this.setToken(null);
+        this._userInfo = {};
+
+        var callbackURL = window.location.protocol + '//' + window.location.host + '/login_callback.html';
+        var scope = 'root,profile,apps,roleAdmin';
+
+        // generate a state id to protect agains csrf
+        var state = Math.floor((1 + Math.random()) * 0x1000000000000).toString(16).substring(1);
+        window.localStorage.oauth2State = state;
+
+        window.location.href = this.apiOrigin + '/api/v1/oauth/dialog/authorize?response_type=token&client_id=' + this._clientId + '&redirect_uri=' + callbackURL + '&scope=' + scope + '&state=' + state;
+    };
+
     Client.prototype.logout = function () {
         this.setToken(null);
         this._userInfo = {};
 
         // logout from OAuth session
-        window.location.href = client.apiOrigin + '/api/v1/session/logout';
+        var origin = window.location.protocol + "//" + window.location.host;
+        window.location.href = this.apiOrigin + '/api/v1/session/logout?redirect=' + origin;
     };
 
     Client.prototype.exchangeCodeForToken = function (code, callback) {
