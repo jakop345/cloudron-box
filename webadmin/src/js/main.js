@@ -23,17 +23,6 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
         Client.logout();
     };
 
-    $scope.login = function () {
-        var callbackURL = window.location.protocol + '//' + window.location.host + '/login_callback.html';
-        var scope = 'root,profile,apps,roleAdmin';
-
-        // generate a state id to protect agains csrf
-        var state = Math.floor((1 + Math.random()) * 0x1000000000000).toString(16).substring(1);
-        window.localStorage.oauth2State = state;
-
-        window.location.href = Client.apiOrigin + '/api/v1/oauth/dialog/authorize?response_type=token&client_id=' + Client._clientId + '&redirect_uri=' + callbackURL + '&scope=' + scope + '&state=' + state;
-    };
-
     $scope.setup = function () {
         window.location.href = '/error.html?errorCode=1';
     };
@@ -78,51 +67,43 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
         if (error) return $scope.error(error);
         if (isFirstTime) return $scope.setup();
 
-        // we use the config request as an indicator if the token is still valid
-        // TODO we should probably attach such a handler for each request, as the token can get invalid
-        // at any time!
-        if (localStorage.token) {
-            Client.refreshConfig(function (error) {
-                if (error && error.statusCode === 401) return $scope.login();
+        Client.refreshConfig(function (error) {
+            if (error) return $scope.error(error);
+
+            // check version and force reload if needed
+            if (!localStorage.version) {
+                localStorage.version = Client.getConfig().version;
+            } else if (localStorage.version !== Client.getConfig().version) {
+                localStorage.version = Client.getConfig().version;
+                window.location.reload(true);
+            }
+
+            Client.refreshUserInfo(function (error, result) {
                 if (error) return $scope.error(error);
 
-                // check version and force reload if needed
-                if (!localStorage.version) {
-                    localStorage.version = Client.getConfig().version;
-                } else if (localStorage.version !== Client.getConfig().version) {
-                    localStorage.version = Client.getConfig().version;
-                    window.location.reload(true);
-                }
-
-                Client.refreshUserInfo(function (error, result) {
+                Client.refreshInstalledApps(function (error) {
                     if (error) return $scope.error(error);
 
-                    Client.refreshInstalledApps(function (error) {
-                        if (error) return $scope.error(error);
+                    // kick off installed apps and config polling
+                    var refreshAppsTimer = $interval(Client.refreshInstalledApps.bind(Client), 2000);
+                    var refreshConfigTimer = $interval(Client.refreshConfig.bind(Client), 5000);
+                    var refreshUserInfoTimer = $interval(Client.refreshUserInfo.bind(Client), 5000);
 
-                        // kick off installed apps and config polling
-                        var refreshAppsTimer = $interval(Client.refreshInstalledApps.bind(Client), 2000);
-                        var refreshConfigTimer = $interval(Client.refreshConfig.bind(Client), 5000);
-                        var refreshUserInfoTimer = $interval(Client.refreshUserInfo.bind(Client), 5000);
-
-                        $scope.$on('$destroy', function () {
-                            $interval.cancel(refreshAppsTimer);
-                            $interval.cancel(refreshConfigTimer);
-                            $interval.cancel(refreshUserInfoTimer);
-                        });
-
-                        // now mark the Client to be ready
-                        Client.setReady();
-
-                        $scope.config = Client.getConfig();
-
-                        $scope.initialized = true;
+                    $scope.$on('$destroy', function () {
+                        $interval.cancel(refreshAppsTimer);
+                        $interval.cancel(refreshConfigTimer);
+                        $interval.cancel(refreshUserInfoTimer);
                     });
+
+                    // now mark the Client to be ready
+                    Client.setReady();
+
+                    $scope.config = Client.getConfig();
+
+                    $scope.initialized = true;
                 });
             });
-        } else {
-            $scope.login();
-        }
+        });
     });
 
     // wait till the view has loaded until showing a modal dialog
