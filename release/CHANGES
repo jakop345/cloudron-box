@@ -159,3 +159,6 @@
 [0.0.47]
 - Ensure box code quits within 5 seconds
 
+[0.0.48]
+- Styling fixes
+- Improved session handling
