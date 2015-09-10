@@ -86,6 +86,14 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
                 if (error && error.statusCode === 401) return $scope.login();
                 if (error) return $scope.error(error);
 
+                // check version and force reload if needed
+                if (!localStorage.version) {
+                    localStorage.version = Client.getConfig().version;
+                } else if (localStorage.version !== Client.getConfig().version) {
+                    localStorage.version = Client.getConfig().version;
+                    window.location.reload(true);
+                }
+
                 Client.refreshUserInfo(function (error, result) {
                     if (error) return $scope.error(error);
 
