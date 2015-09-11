@@ -246,7 +246,7 @@ function sshExec(ip, cmds) {
 
 function hotfixCloudron(ip, code) {
     var CMDS = [
-        { cmd: 'systemd stop cloudron.target' },
+        { cmd: 'systemctl stop cloudron.target' },
         { cmd: 'rm -rf /home/yellowtent/box/* /home/yellowtent/box/.*' },
         { cmd: 'tar zxf - -C /home/yellowtent/box', stdin: fs.createReadStream(code) },
         { cmd: 'cd /home/yellowtent/box && npm rebuild' },
