@@ -11,8 +11,6 @@ var assert = require('assert'),
     authcodedb = require('./src/authcodedb.js'),
     database = require('./src/database.js');
 
-var TOKEN_CLEANUP_INTERVAL = 30000;
-
 function initialize(callback) {
     assert.strictEqual(typeof callback, 'function');
 
@@ -52,7 +50,7 @@ function run() {
         cleanupExpiredAuthCodes(function (error) {
             if (error) console.error(error);
 
-            setTimeout(run, TOKEN_CLEANUP_INTERVAL);
+            process.exit(0);
         });
     });
 }
