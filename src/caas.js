@@ -24,9 +24,15 @@ function addSubdomain(zoneName, subdomain, type, value, callback) {
 
     debug('addSubdomain: ' + subdomain + ' for domain ' + zoneName + ' with value ' + value);
 
+    var data = {
+        type: type,
+        value: value
+    };
+
     superagent
         .post(config.apiServerOrigin() + '/api/v1/domains/' + config.appFqdn(subdomain))
         .query({ token: config.token() })
+        .send(data)
         .end(function (error, result) {
             if (error) return callback(error);
             if (result.status !== 201) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, util.format('%s %j', result.status, result.body)));

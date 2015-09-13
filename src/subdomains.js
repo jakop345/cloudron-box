@@ -5,6 +5,7 @@
 var assert = require('assert'),
     async = require('async'),
     aws = require('./aws.js'),
+    caas = require('./caas.js'),
     config = require('./config.js'),
     debug = require('debug')('box:subdomains'),
     util = require('util'),
@@ -26,7 +27,8 @@ function add(record, callback) {
 
     debug('add: ', record);
 
-    aws.addSubdomain(config.zoneName(), record.subdomain, record.type, record.value, function (error, changeId) {
+    var api = config.token() ? caas : aws;
+    api.addSubdomain(config.zoneName(), record.subdomain, record.type, record.value, function (error, changeId) {
         if (error) return callback(error);
         callback(null, changeId);
     });
@@ -60,7 +62,8 @@ function remove(record, callback) {
 
     debug('remove: ', record);
 
-    aws.delSubdomain(config.zoneName(), record.subdomain, record.type, record.value, function (error) {
+    var api = config.token() ? caas : aws;
+    api.delSubdomain(config.zoneName(), record.subdomain, record.type, record.value, function (error) {
         if (error && error.reason !== SubdomainError.NOT_FOUND) return callback(error);
 
         debug('deleteSubdomain: successfully deleted subdomain from aws.');
@@ -75,7 +78,8 @@ function status(changeId, callback) {
 
     debug('status: ', changeId);
 
-    aws.getChangeStatus(changeId, function (error, status) {
+    var api = config.token() ? caas : aws;
+    api.getChangeStatus(changeId, function (error, status) {
         if (error) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, error));
         callback(null, status === 'INSYNC' ? 'done' : 'pending');
     });
