@@ -50,9 +50,15 @@ function delSubdomain(zoneName, subdomain, type, value, callback) {
 
     debug('delSubdomain: %s for domain %s.', subdomain, zoneName);
 
+    var data = {
+        type: type,
+        value: value
+    };
+
     superagent
         .del(config.apiServerOrigin() + '/api/v1/domains/' + config.appFqdn(subdomain))
         .query({ token: config.token() })
+        .send(data)
         .end(function (error, result) {
             if (error) return callback(error);
             if (result.status !== 204) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, util.format('%s %j', result.status, result.body)));
