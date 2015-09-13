@@ -18,6 +18,12 @@ module.exports = exports = {
     status: status
 };
 
+// choose which subdomain backend we use
+// for test purpose we use aws
+function api() {
+    return config.token() && !config.TEST ? caas : aws;
+}
+
 function add(record, callback) {
     assert.strictEqual(typeof record, 'object');
     assert.strictEqual(typeof record.subdomain, 'string');
@@ -27,8 +33,7 @@ function add(record, callback) {
 
     debug('add: ', record);
 
-    var api = config.token() ? caas : aws;
-    api.addSubdomain(config.zoneName(), record.subdomain, record.type, record.value, function (error, changeId) {
+    api().addSubdomain(config.zoneName(), record.subdomain, record.type, record.value, function (error, changeId) {
         if (error) return callback(error);
         callback(null, changeId);
     });
@@ -62,8 +67,7 @@ function remove(record, callback) {
 
     debug('remove: ', record);
 
-    var api = config.token() ? caas : aws;
-    api.delSubdomain(config.zoneName(), record.subdomain, record.type, record.value, function (error) {
+    api().delSubdomain(config.zoneName(), record.subdomain, record.type, record.value, function (error) {
         if (error && error.reason !== SubdomainError.NOT_FOUND) return callback(error);
 
         debug('deleteSubdomain: successfully deleted subdomain from aws.');
@@ -78,8 +82,7 @@ function status(changeId, callback) {
 
     debug('status: ', changeId);
 
-    var api = config.token() ? caas : aws;
-    api.getChangeStatus(changeId, function (error, status) {
+    api().getChangeStatus(changeId, function (error, status) {
         if (error) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, error));
         callback(null, status === 'INSYNC' ? 'done' : 'pending');
     });
