@@ -28,6 +28,8 @@ fi
 
 # graphite
 graphite_container_id=$(docker run --restart=always -d --name="graphite" \
+    -m 75m \
+    --memory-swap 150m \
     -p 127.0.0.1:2003:2003 \
     -p 127.0.0.1:2004:2004 \
     -p 127.0.0.1:8000:8000 \
@@ -37,6 +39,8 @@ echo "Graphite container id: ${graphite_container_id}"
 
 # mail
 mail_container_id=$(docker run --restart=always -d --name="mail" \
+    -m 75m \
+    --memory-swap 150m \
     -p 127.0.0.1:25:25 \
     -h "${arg_fqdn}" \
     -e "DOMAIN_NAME=${arg_fqdn}" \
@@ -52,6 +56,8 @@ readonly MYSQL_ROOT_PASSWORD='${mysql_addon_root_password}'
 readonly MYSQL_ROOT_HOST='${docker0_ip}'
 EOF
 mysql_container_id=$(docker run --restart=always -d --name="mysql" \
+    -m 100m \
+    --memory-swap 200m \
     -h "${arg_fqdn}" \
     -v "${DATA_DIR}/mysql:/var/lib/mysql" \
     -v "${DATA_DIR}/addons/mysql_vars.sh:/etc/mysql/mysql_vars.sh:ro" \
@@ -64,6 +70,8 @@ cat > "${DATA_DIR}/addons/postgresql_vars.sh" <<EOF
 readonly POSTGRESQL_ROOT_PASSWORD='${postgresql_addon_root_password}'
 EOF
 postgresql_container_id=$(docker run --restart=always -d --name="postgresql" \
+    -m 100m \
+    --memory-swap 200m \
     -h "${arg_fqdn}" \
     -v "${DATA_DIR}/postgresql:/var/lib/postgresql" \
     -v "${DATA_DIR}/addons/postgresql_vars.sh:/etc/postgresql/postgresql_vars.sh:ro" \
@@ -76,6 +84,8 @@ cat > "${DATA_DIR}/addons/mongodb_vars.sh" <<EOF
 readonly MONGODB_ROOT_PASSWORD='${mongodb_addon_root_password}'
 EOF
 mongodb_container_id=$(docker run --restart=always -d --name="mongodb" \
+    -m 100m \
+    --memory-swap 200m \
     -h "${arg_fqdn}" \
     -v "${DATA_DIR}/mongodb:/var/lib/mongodb" \
     -v "${DATA_DIR}/addons/mongodb_vars.sh:/etc/mongodb_vars.sh:ro" \

@@ -677,6 +677,8 @@ function setupRedis(app, callback) {
             redisVarsFile + ':/etc/redis/redis_vars.sh:ro',
             redisDataDir + ':/var/lib/redis:rw'
         ],
+        Memory: 1024 * 1024 * 75, // 100mb
+        MemorySwap: 1024 * 1024 * 75 * 2, // 150mb
         // On Mac (boot2docker), we have to export the port to external world for port forwarding from Mac to work
         // On linux, export to localhost only for testing purposes and not for the app itself
         PortBindings: {
