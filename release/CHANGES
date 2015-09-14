@@ -166,3 +166,5 @@
 [0.0.49]
 - Fix app autoupdate logic
 
+[0.0.50]
+- Use domainmanagement via CaaS
