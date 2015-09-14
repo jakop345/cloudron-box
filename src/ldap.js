@@ -1,7 +1,8 @@
 'use strict';
 
 exports = module.exports = {
-    start: start
+    start: start,
+    stop: stop
 };
 
 var assert = require('assert'),
@@ -28,7 +29,7 @@ var GROUP_USERS_DN = 'cn=users,ou=groups,dc=cloudron';
 var GROUP_ADMINS_DN = 'cn=admins,ou=groups,dc=cloudron';
 
 function start(callback) {
-    assert(typeof callback === 'function');
+    assert.strictEqual(typeof callback === 'function');
 
     gServer = ldap.createServer({ log: gLogger });
 
@@ -122,4 +123,12 @@ function start(callback) {
     });
 
     gServer.listen(config.get('ldapPort'), callback);
+}
+
+function stop(callback) {
+    assert.strictEqual(typeof callback === 'function');
+
+    gServer.close();
+
+    callback();
 }
