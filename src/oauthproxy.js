@@ -7,10 +7,10 @@ exports = module.exports = {
 
 require('supererror')({ splatchError: true });
 
-var appdb = require('./src/appdb.js'),
+var appdb = require('./appdb.js'),
     assert = require('assert'),
-    clientdb = require('./src/clientdb.js'),
-    config = require('./src/config.js'),
+    clientdb = require('./clientdb.js'),
+    config = require('./config.js'),
     debug = require('debug')('box:proxy'),
     express = require('express'),
     http = require('http'),
