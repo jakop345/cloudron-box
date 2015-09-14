@@ -40,10 +40,12 @@ var NOOP_CALLBACK = function () { };
 
 process.on('SIGINT', function () {
     server.stop(NOOP_CALLBACK);
+    ldap.stop(NOOP_CALLBACK);
     setTimeout(process.exit.bind(process), 3000);
 });
 
 process.on('SIGTERM', function () {
     server.stop(NOOP_CALLBACK);
+    ldap.stop(NOOP_CALLBACK);
     setTimeout(process.exit.bind(process), 3000);
 });
