@@ -168,3 +168,7 @@
 
 [0.0.50]
 - Use domainmanagement via CaaS
+
+[0.0.51]
+- Fix memory management
+
