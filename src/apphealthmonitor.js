@@ -4,39 +4,29 @@
 
 require('supererror')({ splatchError: true });
 
-var appdb = require('./src/appdb.js'),
+var appdb = require('./appdb.js'),
     assert = require('assert'),
     async = require('async'),
-    database = require('./src/database.js'),
-    DatabaseError = require('./src/databaseerror.js'),
-    debug = require('debug')('box:apphealthtask'),
-    docker = require('./src/docker.js'),
-    mailer = require('./src/mailer.js'),
+    DatabaseError = require('./databaseerror.js'),
+    debug = require('debug')('box:apphealthmonitor'),
+    docker = require('./docker.js'),
+    mailer = require('./mailer.js'),
     superagent = require('superagent'),
     util = require('util');
 
 exports = module.exports = {
-    run: run
+    start: start
 };
 
 var HEALTHCHECK_INTERVAL = 10 * 1000; // every 10 seconds. this needs to be small since the UI makes only healthy apps clickable
 var UNHEALTHY_THRESHOLD = 3 * 60 * 1000; // 3 minutes
 var gHealthInfo = { }; // { time, emailSent }
 
-function debugApp(app, args) {
+function debugApp(app) {
     assert(!app || typeof app === 'object');
 
     var prefix = app ? app.location : '(no app)';
     debug(prefix + ' ' + util.format.apply(util, Array.prototype.slice.call(arguments, 1)));
-}
-
-function initialize(callback) {
-    assert.strictEqual(typeof callback, 'function');
-
-    async.series([
-        database.initialize,
-        mailer.initialize
-    ], callback);
 }
 
 function setHealth(app, health, callback) {
@@ -134,14 +124,10 @@ function run() {
     });
 }
 
-if (require.main === module) {
-    initialize(function (error) {
-        if (error) {
-            console.error('apphealth task exiting with error', error);
-            process.exit(1);
-        }
+function start(callback) {
+    assert.strictEqual(typeof callback, 'function');
 
-        run();
-    });
+    debug('Starting apphealthmonitor');
+    run();
+    callback();
 }
-

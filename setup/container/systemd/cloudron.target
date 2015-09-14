@@ -2,8 +2,8 @@
 Description=Cloudron Smart Cloud
 Documentation=https://cloudron.io/documentation.html
 StopWhenUnneeded=true
-Requires=apphealthtask.service box.service janitor.timer oauthproxy.service
-After=apphealthtask.service box.service janitor.timer oauthproxy.service
+Requires=box.service janitor.timer oauthproxy.service
+After=box.service janitor.timer oauthproxy.service
 # AllowIsolate=yes
 
 [Install]
