@@ -8,7 +8,8 @@ var appHealthMonitor = require('./src/apphealthmonitor.js'),
     async = require('async'),
     config = require('./src/config.js'),
     ldap = require('./src/ldap.js'),
-    server = require('./src/server.js');   
+    oauthproxy = require('./src/oauthproxy.js'),
+    server = require('./src/server.js');
 
 console.log();
 console.log('==========================================');
@@ -28,7 +29,8 @@ console.log();
 async.series([
     server.start,
     ldap.start,
-    appHealthMonitor.start
+    appHealthMonitor.start,
+    oauthproxy.start.bind(null, 4000 /* port */)
 ], function (error) {
     if (error) {
         console.error('Error starting server', error);
@@ -41,11 +43,13 @@ var NOOP_CALLBACK = function () { };
 process.on('SIGINT', function () {
     server.stop(NOOP_CALLBACK);
     ldap.stop(NOOP_CALLBACK);
+    oauthproxy.stop(NOOP_CALLBACK);
     setTimeout(process.exit.bind(process), 3000);
 });
 
 process.on('SIGTERM', function () {
     server.stop(NOOP_CALLBACK);
     ldap.stop(NOOP_CALLBACK);
+    oauthproxy.stop(NOOP_CALLBACK);
     setTimeout(process.exit.bind(process), 3000);
 });
