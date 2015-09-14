@@ -1,7 +1,5 @@
 'use strict';
 
-require('supererror')({ splatchError: true });
-
 var appdb = require('./appdb.js'),
     assert = require('assert'),
     async = require('async'),
