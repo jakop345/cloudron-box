@@ -5,8 +5,6 @@ exports = module.exports = {
     stop: stop
 };
 
-require('supererror')({ splatchError: true });
-
 var appdb = require('./appdb.js'),
     assert = require('assert'),
     clientdb = require('./clientdb.js'),
