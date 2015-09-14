@@ -15,12 +15,14 @@ var appdb = require('./appdb.js'),
     util = require('util');
 
 exports = module.exports = {
-    start: start
+    start: start,
+    stop: stop
 };
 
 var HEALTHCHECK_INTERVAL = 10 * 1000; // every 10 seconds. this needs to be small since the UI makes only healthy apps clickable
 var UNHEALTHY_THRESHOLD = 3 * 60 * 1000; // 3 minutes
 var gHealthInfo = { }; // { time, emailSent }
+var gRunTimeout = null;
 
 function debugApp(app) {
     assert(!app || typeof app === 'object');
@@ -120,7 +122,7 @@ function run() {
     processApps(function (error) {
         if (error) console.error(error);
 
-        setTimeout(run, HEALTHCHECK_INTERVAL);
+        gRunTimeout = setTimeout(run, HEALTHCHECK_INTERVAL);
     });
 }
 
@@ -129,5 +131,12 @@ function start(callback) {
 
     debug('Starting apphealthmonitor');
     run();
+    callback();
+}
+
+function stop(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    clearTimeout(gRunTimeout);
     callback();
 }
