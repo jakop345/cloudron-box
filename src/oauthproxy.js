@@ -1,15 +1,16 @@
-#!/usr/bin/env node
-
 'use strict';
+
+exports = module.exports = {
+    start: start,
+    stop: stop
+};
 
 require('supererror')({ splatchError: true });
 
 var appdb = require('./src/appdb.js'),
     assert = require('assert'),
-    async = require('async'),
     clientdb = require('./src/clientdb.js'),
     config = require('./src/config.js'),
-    database = require('./src/database.js'),
     debug = require('debug')('box:proxy'),
     express = require('express'),
     http = require('http'),
@@ -182,14 +183,8 @@ function start(port, callback) {
     gHttpServer.listen(port, callback);
 }
 
-async.series([
-    database.initialize,
-    start.bind(null, 3000)
-], function (error) {
-    if (error) {
-        console.error('Failed to start proxy server.', error);
-        process.exit(1);
-    }
+function stop(callback) {
+    assert.strictEqual(typeof callback, 'function');
 
-    console.log('Proxy server listening...');
-});
+    gHttpServer.close(callback);
+}
