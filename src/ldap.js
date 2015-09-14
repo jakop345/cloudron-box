@@ -29,7 +29,7 @@ var GROUP_USERS_DN = 'cn=users,ou=groups,dc=cloudron';
 var GROUP_ADMINS_DN = 'cn=admins,ou=groups,dc=cloudron';
 
 function start(callback) {
-    assert.strictEqual(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     gServer = ldap.createServer({ log: gLogger });
 
@@ -126,7 +126,7 @@ function start(callback) {
 }
 
 function stop(callback) {
-    assert.strictEqual(typeof callback === 'function');
+    assert.strictEqual(typeof callback, 'function');
 
     gServer.close();
 
