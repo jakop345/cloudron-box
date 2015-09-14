@@ -4,31 +4,29 @@
 
 require('supererror')({ splatchError: true });
 
-var express = require('express'),
-    url = require('url'),
-    uuid = require('node-uuid'),
-    async = require('async'),
-    superagent = require('superagent'),
+var appdb = require('./src/appdb.js'),
     assert = require('assert'),
-    debug = require('debug')('box:proxy'),
-    proxy = require('proxy-middleware'),
-    session = require('cookie-session'),
-    database = require('./src/database.js'),
-    appdb = require('./src/appdb.js'),
+    async = require('async'),
     clientdb = require('./src/clientdb.js'),
     config = require('./src/config.js'),
-    http = require('http');
+    database = require('./src/database.js'),
+    debug = require('debug')('box:proxy'),
+    express = require('express'),
+    http = require('http'),
+    proxy = require('proxy-middleware'),
+    session = require('cookie-session'),
+    superagent = require('superagent'),
+    url = require('url'),
+    uuid = require('node-uuid');
 
 // Allow self signed certs!
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 var gSessions = {};
 var gProxyMiddlewareCache = {};
-var gApp = express();
-var gHttpServer = http.createServer(gApp);
+var gHttpServer = null;
 
 var CALLBACK_URI = '/callback';
-var PORT = 4000;
 
 function attachSessionData(req, res, next) {
     assert.strictEqual(typeof req.session, 'object');
@@ -159,24 +157,34 @@ function forwardRequestToApp(req, res, next) {
     proxyMiddleware(req, res, next);
 }
 
-function startServer(callback) {
-    assert.strictEqual(typeof callback, 'function');
+function initializeServer() {
+    var app = express();
+    var httpServer = http.createServer(app);
 
-    gHttpServer.on('error', console.error);
+    httpServer.on('error', console.error);
 
-    gApp
+    app
         .use(session({ keys: ['blue', 'cheese', 'is', 'something'] }))
         .use(attachSessionData)
         .use(verifySession)
         .use(authenticate)
         .use(forwardRequestToApp);
 
-    gHttpServer.listen(PORT, callback);
+    return httpServer;
+}
+
+function start(port, callback) {
+    assert.strictEqual(typeof port, 'number');
+    assert.strictEqual(typeof callback, 'function');
+
+    gHttpServer = initializeServer();
+
+    gHttpServer.listen(port, callback);
 }
 
 async.series([
     database.initialize,
-    startServer
+    start.bind(null, 3000)
 ], function (error) {
     if (error) {
         console.error('Failed to start proxy server.', error);
