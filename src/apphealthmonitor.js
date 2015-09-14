@@ -19,6 +19,7 @@ var HEALTHCHECK_INTERVAL = 10 * 1000; // every 10 seconds. this needs to be smal
 var UNHEALTHY_THRESHOLD = 3 * 60 * 1000; // 3 minutes
 var gHealthInfo = { }; // { time, emailSent }
 var gRunTimeout = null;
+var gDockerEventStream = null;
 
 function debugApp(app) {
     assert(!app || typeof app === 'object');
@@ -122,11 +123,42 @@ function run() {
     });
 }
 
+function processDockerEvents() {
+    docker.getEvents({ filters: JSON.stringify({ event: [ 'oom' ] }) }, function (error, stream) {
+        if (error) return console.error(error);
+
+        debug('Listening for docker events');
+        gDockerEventStream = stream;
+
+        stream.setEncoding('utf8');
+        stream.on('data', function (data) {
+            var ev = JSON.parse(data);
+            debug('app container ' + ev.id + ' crashed');
+            mailer.sendCrashNotification(ev.id, data);
+        });
+
+        stream.on('error', function (error) {
+            console.error('Error reading docker events', error);
+            gDockerEventStream = null; // will reconnect in 'run'
+        });
+
+        stream.on('end', function () {
+            console.error('Docke event stream ended');
+            gDockerEventStream = null; // will reconnect in 'run'
+            stream.end();
+        });
+    });
+}
+
 function start(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     debug('Starting apphealthmonitor');
+
+    if (!gDockerEventStream) processDockerEvents();
+
     run();
+
     callback();
 }
 
@@ -134,5 +166,7 @@ function stop(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     clearTimeout(gRunTimeout);
+    gDockerEventStream.end();
+
     callback();
 }
