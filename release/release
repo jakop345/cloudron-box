@@ -290,11 +290,11 @@ function listRelease(options) {
         for (var release in result.body) {
             t.cell('Release', release);
             t.cell('Image ID', result.body[release].imageId + (result.body[release].upgrade ? '*' : ''));
-            t.cell('Image Name', result.body[release].imageName);
+            t.cell('Image Name', result.body[release].imageName.match(/box-dev-([\w]+)-.*/)[1]);
             t.cell('Date', result.body[release].date);
-            t.cell('Author', result.body[release].author);
+            t.cell('Author', result.body[release].author.split(' ')[0]);
             t.cell('Next', result.body[release].next);
-            t.cell('Source', result.body[release].sourceTarballUrl.slice(result.body[release].sourceTarballUrl.lastIndexOf('/') + 1));
+            t.cell('Source', result.body[release].sourceTarballUrl.match(/\/box-(.*).tar.gz/)[1].slice(0, 7));
             t.newRow();
         }
 
