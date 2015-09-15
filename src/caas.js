@@ -35,6 +35,7 @@ function addSubdomain(zoneName, subdomain, type, value, callback) {
         .send(data)
         .end(function (error, result) {
             if (error) return callback(error);
+            if (result.status === 420) return callback(new SubdomainError(SubdomainError.STILL_BUSY, error.message));
             if (result.status !== 201) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, util.format('%s %j', result.status, result.body)));
 
             return callback(null, result.body.changeId);
@@ -61,6 +62,7 @@ function delSubdomain(zoneName, subdomain, type, value, callback) {
         .send(data)
         .end(function (error, result) {
             if (error) return callback(error);
+            if (result.status === 420) return callback(new SubdomainError(SubdomainError.STILL_BUSY, error.message));
             if (result.status !== 204) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, util.format('%s %j', result.status, result.body)));
 
             return callback(null);
