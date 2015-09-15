@@ -21,7 +21,8 @@ var assert = require('assert'),
     url = require('url'),
     util = require('util'),
     versionsFormat = require('./versionsformat.js'),
-    yesno = require('yesno');
+    yesno = require('yesno'),
+    _ = require('underscore');
 
 var DIGITALOCEAN = 'https://api.digitalocean.com/v2';
 
@@ -56,6 +57,20 @@ function exit(error) {
     if (error) console.error(error.message ? error.message.red : error);
 
     process.exit(error ? 1 : 0);
+}
+
+function stripUnreachable(releases) {
+    var reachableVersions = [ ];
+    var curVersion = '0.0.1';
+
+    while (true) {
+        reachableVersions.push(curVersion);
+        var nextVersion = releases[curVersion].next;
+        if (!nextVersion) break;
+        curVersion = nextVersion;
+    }
+
+    return _.pick(releases, reachableVersions);
 }
 
 function notifyAdmins(env, releases, callback) {
@@ -154,7 +169,6 @@ function edit(options) {
     var env = ENVIRONMENTS[options.env];
     if (!env) exit(new Error(util.format('Unknown environment %s', options.env)));
 
-console.log('Getting ', env.url);
     superagent.get(env.url).end(function (error, result) {
         if (error || result.error) return exit(error || result.error);
 
@@ -201,6 +215,9 @@ function createRelease(options) {
 
         if (!releases) exit(new Error('versions.json is not valid JSON'));
 
+        var strippedReleases = stripUnreachable(releases);
+        var lastReachableVersion = Object.keys(strippedReleases).sort(semver.rcompare)[0];
+
         var sortedVersions = Object.keys(releases).sort(semver.rcompare);
         var lastVersion = sortedVersions[0];
 
@@ -215,11 +232,11 @@ function createRelease(options) {
         }
 
         var newVersion = options.amend ? lastVersion : semver.inc(lastVersion, 'patch');
-        releases[lastVersion].next = newVersion;
+        releases[lastReachableVersion].next = newVersion;
 
-        var newImageId = options.image ? parseInt(options.image, 10) : releases[lastVersion].imageId;
-        var sourceTarballUrl = options.code || releases[lastVersion].sourceTarballUrl;
-        var upgrade = options.upgrade || (releases[lastVersion].imageId !== newImageId);
+        var newImageId = options.image ? parseInt(options.image, 10) : releases[lastReachableVersion].imageId;
+        var sourceTarballUrl = options.code || releases[lastReachableVersion].sourceTarballUrl;
+        var upgrade = options.upgrade || (releases[lastReachableVersion].imageId !== newImageId);
 
         // check if we have a changelog otherwise
         var changelog = parseChangelog(newVersion);
@@ -311,7 +328,9 @@ function touchRelease(options, callback) {
     superagent.get(env.url).end(function (error, result) {
         if (error || result.error) return exit(error || result.error);
 
-        var latestVersion = Object.keys(result.body).sort(semver.rcompare)[0];
+        var strippedReleases = stripUnreachable(result.body);
+
+        var latestVersion = Object.keys(strippedReleases).sort(semver.rcompare)[0];
         result.body[latestVersion].date = (new Date()).toString();
 
         verifyAndUpload(env, result.body, exit);
@@ -485,8 +504,11 @@ function stage(fromEnv, toEnv) {
             var toReleases = result.type === 'application/json' ? result.body : safe.JSON.parse(result.text);
             if (!toReleases) exit(new Error('versions.json is not valid JSON'));
 
-            var latestFromVersion = Object.keys(fromReleases).sort(semver.rcompare)[0];
-            var latestToVersion = Object.keys(toReleases).sort(semver.rcompare)[0];
+            var strippedFromReleases = stripUnreachable(fromReleases);
+            var strippedToReleases = stripUnreachable(toReleases);
+
+            var latestFromVersion = Object.keys(strippedFromReleases).sort(semver.rcompare)[0];
+            var latestToVersion = Object.keys(strippedToReleases).sort(semver.rcompare)[0];
             var nextVersion = semver.inc(latestToVersion, 'patch');
 
              console.log('Releasing version %s to %s'.gray, nextVersion, toEnv.tag);

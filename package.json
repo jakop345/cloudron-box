@@ -40,6 +40,7 @@
     "semver": "^4.3.0",
     "ssh2": "^0.4.6",
     "supererror": "^0.6.0",
+    "underscore": "^1.8.3",
     "yesno": "0.0.1"
   },
   "scripts": {
