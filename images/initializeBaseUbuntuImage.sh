@@ -220,6 +220,8 @@ EOF
 systemctl enable box-setup
 
 # Configure systemd
-sed -e "s/^#SystemMaxUse=/SystemMaxUse=100M/" -i /etc/systemd/journald.conf
+sed -e "s/^#SystemMaxUse=/SystemMaxUse=100M/" \
+    -e "s/^#ForwardToSyslog=/ForwardToSyslog=no/" \
+    -i /etc/systemd/journald.conf
 
 sync
