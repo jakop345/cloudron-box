@@ -123,6 +123,12 @@ function run() {
     });
 }
 
+/*
+    OOM can be tested using stress tool like so:
+        docker run -ti -m 100M cloudron/base:0.3.3 /bin/bash
+        apt-get update && apt-get install stress
+        stress --vm 1 --vm-bytes 200M --vm-hang 0
+*/
 function processDockerEvents() {
     // note that for some reason, the callback is called only on the first event
     debug('Listening for docker events');
