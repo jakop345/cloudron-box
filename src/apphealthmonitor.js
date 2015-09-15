@@ -134,7 +134,13 @@ function processDockerEvents() {
         stream.on('data', function (data) {
             var ev = JSON.parse(data);
             debug('app container ' + ev.id + ' crashed');
-            mailer.sendCrashNotification(ev.id, data);
+            appdb.getByContainerId(ev.id, function (error, app) {
+                var program = error || !app.appStoreId ? ev.id : app.appStoreId;
+                var context = JSON.stringify(ev);
+                if (app) context = context + '\n\n' + JSON.stringify(app, null, 4) + '\n';
+
+                mailer.sendCrashNotification(program, context); // app can be null if it's an addon crash
+            });
         });
 
         stream.on('error', function (error) {
