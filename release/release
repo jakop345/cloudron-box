@@ -5,22 +5,23 @@
 require('supererror')({ splatchError: true });
 require('colors');
 
-var superagent = require('superagent'),
+var assert = require('assert'),
     async = require('async'),
-    safe = require('safetydance'),
     AWS = require('aws-sdk'),
-    yesno = require('yesno'),
-    Table = require('easy-table'),
-    program = require('commander'),
-    semver = require('semver'),
-    util = require('util'),
-    versionsFormat = require('./versionsformat.js'),
     execSync = require('child_process').execSync,
+    os = require('os'),
     parseChangelog = require('./parsechangelog.js').parse,
-    url = require('url'),
     path = require('path'),
     postmark = require('postmark')(process.env.POSTMARK_API_KEY_TOOLS),
-    assert = require('assert');
+    program = require('commander'),
+    safe = require('safetydance'),
+    semver = require('semver'),
+    superagent = require('superagent'),
+    Table = require('easy-table'),
+    url = require('url'),
+    util = require('util'),
+    versionsFormat = require('./versionsformat.js'),
+    yesno = require('yesno');
 
 var DIGITALOCEAN = 'https://api.digitalocean.com/v2';
 
@@ -147,6 +148,32 @@ function newRelease(options) {
     if (!releases) exit(new Error(options.file + ' has invalid json :' + safe.error.message));
 
     verifyAndUpload(env, releases, exit);
+}
+
+function edit(options) {
+    var env = ENVIRONMENTS[options.env];
+    if (!env) exit(new Error(util.format('Unknown environment %s', options.env)));
+
+console.log('Getting ', env.url);
+    superagent.get(env.url).end(function (error, result) {
+        if (error || result.error) return exit(error || result.error);
+
+        var oldContents = result.type === 'application/json' ? JSON.stringify(result.body, null, 4) : result.text;
+        var tmpfile = path.join(os.tmpdir(), 'versions.json');
+        safe.fs.writeFileSync(tmpfile, oldContents);
+
+        var editor = require('child_process').spawn(process.env.EDITOR || 'vim', [tmpfile], {stdio: 'inherit'});
+        editor.on('error', exit);
+        editor.on('exit', function () {
+            var newContents = safe.fs.readFileSync(tmpfile, 'utf8');
+            if (!newContents || newContents.trim().length === 0 || newContents === oldContents) return exit('Unchanged');
+
+            var releases = safe.JSON.parse(newContents);
+            if (!releases) exit(new Error(options.file + ' has invalid json :' + safe.error.message));
+
+            verifyAndUpload(env, releases, exit);
+        });
+    });
 }
 
 function createRelease(options) {
@@ -519,26 +546,6 @@ function stage(fromEnv, toEnv) {
 
 program.version('0.0.1');
 
-program.command('create')
-    .option('--env <dev/staging/prod>', 'Environment (dev/staging/prod)', 'dev')
-    .option('--code <tarball>', 'Source code url')
-    .option('--image <imageid>', 'Image id')
-    .option('--changelog <changelog>', 'Changelog')
-    .option('--upgrade', 'Set the upgrade flag')
-    .description('Create a new release')
-    .action(createRelease);
-
-program.command('revert')
-    .option('--env <dev/staging/prod>', 'Environment (dev/staging/prod)', 'dev')
-    .description('Revert the last release. Use with care')
-    .action(function (options) { options.revert = true; createRelease(options); });
-
-program.command('new')
-    .option('--env <dev/staging/prod>', 'Environment (dev/staging/prod)', 'dev')
-    .option('--file <file>', 'Upload file as versions.json')
-    .description('Upload a new versions.json')
-    .action(newRelease);
-
 program.command('amend')
     .option('--env <dev/staging/prod>', 'Environment (dev/staging/prod)', 'dev')
     .option('--code <tarball>', 'Source code url')
@@ -548,10 +555,19 @@ program.command('amend')
     .description('Amend last release. Use with care')
     .action(function (options) { options.amend = true; createRelease(options); });
 
-program.command('rerelease')
+program.command('create')
     .option('--env <dev/staging/prod>', 'Environment (dev/staging/prod)', 'dev')
-    .description('Make a new release, same as the last release')
-    .action(function (options) { options.rerelease = true; createRelease(options); });
+    .option('--code <tarball>', 'Source code url')
+    .option('--image <imageid>', 'Image id')
+    .option('--changelog <changelog>', 'Changelog')
+    .option('--upgrade', 'Set the upgrade flag')
+    .description('Create a new release')
+    .action(createRelease);
+
+program.command('edit')
+    .option('--env <dev/staging/prod>', 'Environment (dev/staging/prod)', 'dev')
+    .description('Edit and upload versions.json')
+    .action(edit);
 
 program.command('list')
     .option('--raw', 'Show raw json')
@@ -559,23 +575,39 @@ program.command('list')
     .description('List the releases file')
     .action(listRelease);
 
-program.command('sync')
-    .option('--env <dev/staging>', 'Environment (dev/staging)', 'dev')
-    .description('Sync the specified env with the parent env (prod -> staging or staging -> dev)')
-    .action(sync);
+program.command('new')
+    .option('--env <dev/staging/prod>', 'Environment (dev/staging/prod)', 'dev')
+    .option('--file <file>', 'Upload file as versions.json')
+    .description('Upload a new versions.json')
+    .action(newRelease);
+
+program.command('publish')
+    .description('Publish latest staging version to production')
+    .action(stage.bind(null, ENVIRONMENTS['staging'], ENVIRONMENTS['prod']));
+
+program.command('rerelease')
+    .option('--env <dev/staging/prod>', 'Environment (dev/staging/prod)', 'dev')
+    .description('Make a new release, same as the last release')
+    .action(function (options) { options.rerelease = true; createRelease(options); });
+
+program.command('revert')
+    .option('--env <dev/staging/prod>', 'Environment (dev/staging/prod)', 'dev')
+    .description('Revert the last release. Use with care')
+    .action(function (options) { options.revert = true; createRelease(options); });
 
 program.command('stage')
     .description('Stage latest dev version to staging')
     .action(stage.bind(null, ENVIRONMENTS['dev'], ENVIRONMENTS['staging']));
 
+program.command('sync')
+    .option('--env <dev/staging>', 'Environment (dev/staging)', 'dev')
+    .description('Sync the specified env with the parent env (prod -> staging or staging -> dev)')
+    .action(sync);
+
 program.command('touch')
     .option('--env <dev/staging/prod>', 'Environment (dev/staging/prod)', 'dev')
     .description('Touch the releases file')
     .action(touchRelease);
-
-program.command('publish')
-    .description('Publish latest staging version to production')
-    .action(stage.bind(null, ENVIRONMENTS['staging'], ENVIRONMENTS['prod']));
 
 program.parse(process.argv);
 
