@@ -433,7 +433,7 @@ function registerSubdomain(app, callback) {
         debugApp(app, 'Registering subdomain location [%s]', app.location);
 
         subdomains.add(record, function (error, changeId) {
-            if (error && error.reason === SubdomainError.STILL_BUSY) return retryCallback(error); // try again
+            if (error && (error.reason === SubdomainError.STILL_BUSY || error.reason === SubdomainError.EXTERNAL_ERROR)) return retryCallback(error); // try again
 
             retryCallback(null, error || changeId);
         });
@@ -457,9 +457,9 @@ function unregisterSubdomain(app, location, callback) {
         debugApp(app, 'Unregistering subdomain: %s', location);
 
         subdomains.remove(record, function (error) {
-            if (error && error.reason === SubdomainError.STILL_BUSY) return retryCallback(error); // try again
+            if (error && (error.reason === SubdomainError.STILL_BUSY || error.reason === SubdomainError.EXTERNAL_ERROR))return retryCallback(error); // try again
 
-            retryCallback(null);
+            retryCallback(error);
         });
     }, function (error) {
         if (error) debugApp(app, 'Error unregistering subdomain: %s', error);
