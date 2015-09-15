@@ -172,3 +172,6 @@
 [0.0.51]
 - Fix memory management
 
+[0.0.52]
+- Restrict addons memory
+- Get nofication about container OOMs
