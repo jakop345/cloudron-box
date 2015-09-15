@@ -124,16 +124,17 @@ function run() {
 }
 
 function processDockerEvents() {
+    // note that for some reason, the callback is called only on the first event
+    debug('Listening for docker events');
     docker.getEvents({ filters: JSON.stringify({ event: [ 'oom' ] }) }, function (error, stream) {
         if (error) return console.error(error);
 
-        debug('Listening for docker events');
         gDockerEventStream = stream;
 
         stream.setEncoding('utf8');
         stream.on('data', function (data) {
             var ev = JSON.parse(data);
-            debug('app container ' + ev.id + ' crashed');
+            debug('Container ' + ev.id + ' went OOM');
             appdb.getByContainerId(ev.id, function (error, app) {
                 var program = error || !app.appStoreId ? ev.id : app.appStoreId;
                 var context = JSON.stringify(ev);
@@ -145,12 +146,12 @@ function processDockerEvents() {
 
         stream.on('error', function (error) {
             console.error('Error reading docker events', error);
-            gDockerEventStream = null; // will reconnect in 'run'
+            gDockerEventStream = null; // TODO: reconnect?
         });
 
         stream.on('end', function () {
             console.error('Docke event stream ended');
-            gDockerEventStream = null; // will reconnect in 'run'
+            gDockerEventStream = null; // TODO: reconnect?
             stream.end();
         });
     });
@@ -161,7 +162,7 @@ function start(callback) {
 
     debug('Starting apphealthmonitor');
 
-    if (!gDockerEventStream) processDockerEvents();
+    processDockerEvents();
 
     run();
 
