@@ -97,7 +97,7 @@ function getRestoreUrl(backupId, callback) {
             backupKey: config.backupKey()
         };
 
-        debug('getRestoreUrl: ', obj);
+        debug('getRestoreUrl: id:%s url:%s sessionToken:%s backupKey:%s', obj.id, obj.url, obj.sessionToken, obj.backupKey);
 
         callback(null, obj);
     });
