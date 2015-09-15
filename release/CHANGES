@@ -178,6 +178,6 @@
 
 [0.0.53]
 - Restrict addons memory
-- Get nofication about container OOMs
+- Get notification about container OOMs
 - Add retry to subdomain logic
 
