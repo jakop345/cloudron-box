@@ -302,10 +302,12 @@ function listRelease(options) {
             exit(null);
         }
 
+        var strippedReleases = stripUnreachable(result.body);
+
         var t = new Table();
 
         for (var release in result.body) {
-            t.cell('Release', release);
+            t.cell('Release', release in strippedReleases ? release.white : release.gray);
             t.cell('Image ID', result.body[release].imageId + (result.body[release].upgrade ? '*' : ''));
             t.cell('Image Name', result.body[release].imageName.match(/box-(prod|staging|dev)-([\w]+)-.*/)[2]);
             t.cell('Date', result.body[release].date);
