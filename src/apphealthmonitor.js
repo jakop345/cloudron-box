@@ -140,6 +140,7 @@ function processDockerEvents() {
                 var context = JSON.stringify(ev);
                 if (app) context = context + '\n\n' + JSON.stringify(app, null, 4) + '\n';
 
+                debug('OOM Context: %s', context);
                 mailer.sendCrashNotification(program, context); // app can be null if it's an addon crash
             });
         });
