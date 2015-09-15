@@ -506,14 +506,11 @@ function stage(fromEnv, toEnv) {
             var toReleases = result.type === 'application/json' ? result.body : safe.JSON.parse(result.text);
             if (!toReleases) exit(new Error('versions.json is not valid JSON'));
 
-            var strippedFromReleases = stripUnreachable(fromReleases);
-            var strippedToReleases = stripUnreachable(toReleases);
-
-            var latestFromVersion = Object.keys(strippedFromReleases).sort(semver.rcompare)[0];
-            var latestToVersion = Object.keys(strippedToReleases).sort(semver.rcompare)[0];
+            var latestFromVersion = Object.keys(fromReleases).sort(semver.rcompare)[0];
+            var latestToVersion = Object.keys(toReleases).sort(semver.rcompare)[0];
             var nextVersion = semver.inc(latestToVersion, 'patch');
 
-             console.log('Releasing version %s to %s'.gray, nextVersion, toEnv.tag);
+             console.log('Releasing version %s to %s'.gray, nextVersion , toEnv.tag);
 
             // check if we even have a new version to stage
             if (latestFromVersion === latestToVersion) exit(util.format('No new version on %s to stage.', fromEnv.tag));
@@ -522,7 +519,9 @@ function stage(fromEnv, toEnv) {
             var changelog = parseChangelog(nextVersion);
             if (changelog.length === 0) exit(new Error('No changelog found for version ' + nextVersion));
 
-            var latestFromImageName = fromReleases[latestFromVersion].imageName;
+            var strippedFromReleases = stripUnreachable(fromReleases);
+            var latestReachableFromVersion = Object.keys(strippedFromReleases).sort(semver.rcompare)[0];
+            var latestFromImageName = fromReleases[latestReachableFromVersion].imageName;
             var latestFromImageRevision = new RegExp('box-' + fromEnv.tag + '-([a-z,0-9.]+)-.*').exec(latestFromImageName)[1];
 
             if (!latestFromImageRevision) exit('Unable to determine image revision');
@@ -530,8 +529,8 @@ function stage(fromEnv, toEnv) {
             getImageByRevision(toEnv, latestFromImageRevision, function (error, toImage) {
                 if (error) return exit(error);
 
-                var sourceTarballName = url.parse(fromReleases[latestFromVersion].sourceTarballUrl).pathname.substr(1);
-                var upgrade = fromReleases[latestFromVersion].upgrade;
+                var sourceTarballName = url.parse(fromReleases[latestReachableFromVersion].sourceTarballUrl).pathname.substr(1);
+                var upgrade = fromReleases[latestReachableFromVersion].upgrade;
 
                 console.log('Copying source code tarball %s to %s'.gray, sourceTarballName, toEnv.tag);
 
@@ -544,7 +543,9 @@ function stage(fromEnv, toEnv) {
 
                 execSync(cmd, { stdio: [ null, process.stdout, process.stderr ] } );
 
-                toReleases[latestToVersion].next = nextVersion;
+                var strippedToReleases = stripUnreachable(toReleases);
+                var latestReachableToVersion = Object.keys(strippedToReleases).sort(semver.rcompare)[0];
+                toReleases[latestReachableToVersion].next = nextVersion;
                 toReleases[nextVersion] = {
                     imageId: toImage.id,
                     imageName: toImage.name,
