@@ -80,8 +80,6 @@ function status(changeId, callback) {
     assert.strictEqual(typeof changeId, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    debug('status: ', changeId);
-
     api().getChangeStatus(changeId, function (error, status) {
         if (error) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, error));
         callback(null, status === 'INSYNC' ? 'done' : 'pending');
