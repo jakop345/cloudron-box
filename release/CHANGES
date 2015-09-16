@@ -181,3 +181,6 @@
 - Get notification about container OOMs
 - Add retry to subdomain logic
 
+[0.0.54]
+- OAuth Proxy now uses internal port forwarding
+
