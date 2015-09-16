@@ -429,7 +429,7 @@ function registerSubdomain(app, callback) {
     // need to register it so that we have a dnsRecordId to wait for it to complete
     var record = { subdomain: app.location, type: 'A', value: sysinfo.getIp() };
 
-    async.retry({ times: 30, interval: 5000 }, function (retryCallback) {
+    async.retry({ times: 200, interval: 5000 }, function (retryCallback) {
         debugApp(app, 'Registering subdomain location [%s]', app.location);
 
         subdomains.add(record, function (error, changeId) {
