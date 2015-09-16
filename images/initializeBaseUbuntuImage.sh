@@ -219,8 +219,7 @@ EOF
 
 systemctl enable box-setup
 
-# Configure journald logging
-systemctl disable rsyslog.service
+# Configure systemd
 sed -e "s/^#SystemMaxUse=/SystemMaxUse=100M/" \
     -e "s/^#ForwardToSyslog=/ForwardToSyslog=no/" \
     -i /etc/systemd/journald.conf
