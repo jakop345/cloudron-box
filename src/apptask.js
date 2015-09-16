@@ -684,8 +684,8 @@ function configure(app, callback) {
         stopApp.bind(null, app),
         deleteContainer.bind(null, app),
         function (next) {
-            // oldConfig can be null during an infra update
-            if (!app.oldConfig || app.oldConfig.location === app.location) return next();
+            // oldConfig can be null during an infra update. location can be null when infra updated for an updated app
+            if (!app.oldConfig || !app.oldConfig.location || app.oldConfig.location === app.location) return next();
             unregisterSubdomain(app, app.oldConfig.location, next);
         },
         removeOAuthProxyCredentials.bind(null, app),
