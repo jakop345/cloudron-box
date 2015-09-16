@@ -42,12 +42,9 @@ var assert = require('assert'),
     _ = require('underscore');
 
 var gDefaults = (function () {
-    var tz = safe.fs.readFileSync('/etc/timezone', 'utf8');
-    tz = tz ? tz.trim() : 'America/Los_Angeles';
-
     var result = { };
     result[exports.AUTOUPDATE_PATTERN_KEY] = '00 00 1,3,5,23 * * *';
-    result[exports.TIME_ZONE_KEY] = tz;
+    result[exports.TIME_ZONE_KEY] = config.defaultTimezone();
     result[exports.CLOUDRON_NAME_KEY] = 'Cloudron';
     result[exports.DEVELOPER_MODE_KEY] = false;
 

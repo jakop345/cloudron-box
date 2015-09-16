@@ -23,6 +23,8 @@ exports = module.exports = {
     isCustomDomain: isCustomDomain,
     database: database,
 
+    defaultTimezone: defaultTimezone,
+
     // these values are derived
     adminOrigin: adminOrigin,
     internalAdminOrigin: internalAdminOrigin,
@@ -83,6 +85,7 @@ function initConfig() {
         secretAccessKey: null   // selfhosting only
     };
     data.dnsInSync = false;
+    data.timezone = 'America/Los_Angeles';
 
     if (exports.CLOUDRON) {
         data.port = 3000;
@@ -201,4 +204,8 @@ function backupKey() {
 
 function aws() {
     return get('aws');
+}
+
+function defaultTimezone() {
+    return get('timezone');
 }
