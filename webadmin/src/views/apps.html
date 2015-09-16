@@ -247,26 +247,26 @@
                         <br/>
 
                         <div>
-                            <a href="" ng-click="showUninstall(app)"><i class="fa fa-remove scale"></i></a>
+                            <a href="" ng-click="showUninstall(app)" title="Uninstall App"><i class="fa fa-remove scale"></i></a>
                         </div>
 
                         <div ng-show="(app | installError) === true">
-                            <a href="" ng-click="showRestore(app)"><i class="fa fa-undo scale"></i></a>
+                            <a href="" ng-click="showRestore(app)" title="Restore App"><i class="fa fa-undo scale"></i></a>
                         </div>
 
                         <div ng-show="(app | installSuccess) == true">
-                            <a href="" ng-click="showConfigure(app)"><i class="fa fa-wrench scale"></i></a>
+                            <a href="" ng-click="showConfigure(app)" title="Configure App"><i class="fa fa-wrench scale"></i></a>
                         </div>
 
                         <!-- we check the version here because the box updater does not know when an app gets updated -->
                         <div ng-show="config.update.apps[app.id].manifest.version && config.update.apps[app.id].manifest.version !== app.manifest.version && (app | installSuccess)">
-                            <a href="" ng-click="showUpdate(app)"><i class="fa fa-arrow-up text-success scale"></i></a>
+                            <a href="" ng-click="showUpdate(app)" title="Update Available"><i class="fa fa-arrow-up text-success scale"></i></a>
                         </div>
 
                         <br/>
                     </div>
                     <div class="app-update-badge" ng-show="config.update.apps[app.id].manifest.version && config.update.apps[app.id].manifest.version !== app.manifest.version && (app | installSuccess)">
-                        <a href="" ng-click="showUpdate(app)"><i class="fa fa-asterisk fa-2x text-success scale"></i></a>
+                        <a href="" ng-click="showUpdate(app)" title="Update Available"><i class="fa fa-asterisk fa-2x text-success scale"></i></a>
                     </div>
                 </a>
             </div>
