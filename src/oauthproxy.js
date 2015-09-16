@@ -18,9 +18,6 @@ var appdb = require('./appdb.js'),
     url = require('url'),
     uuid = require('node-uuid');
 
-// Allow self signed certs!
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-
 var gSessions = {};
 var gProxyMiddlewareCache = {};
 var gHttpServer = null;
@@ -49,7 +46,11 @@ function verifySession(req, res, next) {
         return next();
     }
 
-    superagent.get(config.adminOrigin() + '/api/v1/profile').query({ access_token: req.sessionData.accessToken}).end(function (error, result) {
+    // use http admin origin so that it works with self-signed certs
+    superagent
+        .get(config.internalAdminOrigin() + '/api/v1/profile')
+        .query({ access_token: req.sessionData.accessToken})
+        .end(function (error, result) {
         if (error) {
             console.error(error);
             req.authenticated = false;
@@ -83,7 +84,11 @@ function authenticate(req, res, next) {
             client_secret: req.sessionData.clientSecret
         };
 
-        superagent.post(config.adminOrigin() + '/api/v1/oauth/token').query(query).send(data).end(function (error, result) {
+        // use http admin origin so that it works with self-signed certs
+        superagent
+            .post(config.internalAdminOrigin() + '/api/v1/oauth/token')
+            .query(query).send(data)
+            .end(function (error, result) {
             if (error) {
                 console.error(error);
                 return res.send(500, 'Unable to contact the oauth server.');

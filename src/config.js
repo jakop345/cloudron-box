@@ -25,6 +25,7 @@ exports = module.exports = {
 
     // these values are derived
     adminOrigin: adminOrigin,
+    internalAdminOrigin: internalAdminOrigin,
     appFqdn: appFqdn,
     zoneName: zoneName,
 
@@ -161,6 +162,10 @@ function appFqdn(location) {
 
 function adminOrigin() {
     return 'https://' + appFqdn(constants.ADMIN_LOCATION);
+}
+
+function internalAdminOrigin() {
+    return 'http://127.0.0.1:' + get('port');
 }
 
 function token() {
