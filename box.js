@@ -30,7 +30,7 @@ async.series([
     server.start,
     ldap.start,
     appHealthMonitor.start,
-    oauthproxy.start.bind(null, 4000 /* port */)
+    oauthproxy.start
 ], function (error) {
     if (error) {
         console.error('Error starting server', error);
