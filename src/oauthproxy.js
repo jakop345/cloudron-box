@@ -172,13 +172,12 @@ function initializeServer() {
     return httpServer;
 }
 
-function start(port, callback) {
-    assert.strictEqual(typeof port, 'number');
+function start(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     gHttpServer = initializeServer();
 
-    gHttpServer.listen(port, callback);
+    gHttpServer.listen(config.get('oauthProxyPort'), callback);
 }
 
 function stop(callback) {
