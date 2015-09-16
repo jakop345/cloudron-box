@@ -76,7 +76,7 @@ function getBackupUrl(app, callback) {
             backupKey: config.backupKey()
         };
 
-        debug('getBackupUrl: ', obj);
+        debug('getBackupUrl: id:%s url:%s sessionToken:%s backupKey:%s', obj.id, obj.url, obj.sessionToken, obj.backupKey);
 
         callback(null, obj);
     });
