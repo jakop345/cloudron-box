@@ -225,3 +225,8 @@ sed -e "s/^#SystemMaxUse=/SystemMaxUse=100M/" \
     -i /etc/systemd/journald.conf
 
 sync
+
+# Configure time
+sed -e 's/^#NTP=/NTP=0.ubuntu.pool.ntp.org 1.ubuntu.pool.ntp.org 2.ubuntu.pool.ntp.org 3.ubuntu.pool.ntp.org/' -i /etc/systemd/timesyncd.conf
+timedatectl set-ntp 1
+timedatectl set-timezone UTC
