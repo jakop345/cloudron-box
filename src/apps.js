@@ -150,6 +150,8 @@ function validatePortBindings(portBindings, tcpPorts) {
         2020, /* install server */
         config.get('port'), /* app server (lo) */
         config.get('internalPort'), /* internal app server (lo) */
+        config.get('ldapPort'), /* ldap server (lo) */
+        config.get('oauthProxyPort'), /* oauth proxy server (lo) */
         3306, /* mysql (lo) */
         8000 /* graphite (lo) */
     ];
