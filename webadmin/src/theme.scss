@@ -120,7 +120,6 @@ html {
 .grid-item {
     padding: 10px;
     min-width: 200px;
-    overflow: hidden;
 }
 
 .grid-item:hover .grid-item-bottom {
@@ -173,6 +172,12 @@ html {
 
         transition: all 250ms;
     }
+}
+
+.app-update-badge {
+    position: absolute;
+    right: 0;
+    top: 0;
 }
 
 // ----------------------------
@@ -352,23 +357,6 @@ html {
 
 .card-large {
     max-width: 800px;
-}
-
-.app-update-badge {
-    font-size: $font-size-h4;
-    position: absolute;
-    left: 2px;
-    top: 2px;
-    width: $font-size-h4 + 6px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
-    background-color: transparent;
-}
-
-.app-update-badge:hover {
-    width: inherit;
-    background-color: #5CB85C;
 }
 
 .text-success {
