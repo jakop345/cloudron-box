@@ -116,7 +116,7 @@ function hotfixCloudron(ip, code) {
     sshExec(ip, CMDS);
 }
 
-function hotfix(options) {
+function hotfix(ip, options) {
     var code;
 
     if (!options.code) {
@@ -128,7 +128,7 @@ function hotfix(options) {
         code = options.code;
     }
 
-    hotfixCloudron(options.ip, code);
+    hotfixCloudron(ip, code);
 }
 
 function ssh(ip) {
@@ -148,8 +148,8 @@ function ssh(ip) {
     process.stdin.resume();
 }
 
-function backup(options) {
-    triggerBackup(options.ip);
+function backup(ip) {
+    triggerBackup(ip);
 }
 
 // entry point
@@ -161,13 +161,11 @@ program.command('ssh')
 
 program.command('hotfix')
     .description('Hotfix a cloudron')
-    .option('--ip <value>', 'Cloudron IP')
     .option('--code <code>', 'Code tarball')
     .action(hotfix);
 
 program.command('backup')
     .description('Backup a cloudron')
-    .option('--ip <value>', 'Cloudron IP')
     .action(backup);
 
 program.parse(process.argv);
