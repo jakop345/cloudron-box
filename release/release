@@ -252,7 +252,7 @@ function createRelease(options) {
                 imageName: result.body.image.name,
                 changelog: changelog,
                 upgrade: upgrade,
-                date: (new Date()).toString(),
+                date: (new Date()).toISOString(),
                 author: username + ' <' + email + '>',
                 next: null
             };
@@ -333,7 +333,7 @@ function touchRelease(options, callback) {
         var strippedReleases = stripUnreachable(result.body);
 
         var latestVersion = Object.keys(strippedReleases).sort(semver.rcompare)[0];
-        result.body[latestVersion].date = (new Date()).toString();
+        result.body[latestVersion].date = (new Date()).toISOString();
 
         verifyAndUpload(env, result.body, exit);
     });
@@ -551,7 +551,7 @@ function stage(fromEnv, toEnv) {
                     imageName: toImage.name,
                     changelog: changelog,
                     upgrade: upgrade,
-                    date: (new Date()).toString(),
+                    date: (new Date()).toISOString(),
                     sourceTarballUrl: 'https://' + toEnv.releasesBucket + '.s3.amazonaws.com/' + sourceTarballName,
                     author: username + ' <' + email + '>',
                     next: null
