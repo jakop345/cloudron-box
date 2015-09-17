@@ -20,25 +20,31 @@ function verify(versionsJson) {
     var sortedVersions = Object.keys(versionsJson).sort(semver.compare);
     for (var i = 0; i < sortedVersions.length; i++) {
         var version = sortedVersions[i];
-        if (typeof versionsJson[version].imageId !== 'number') return new Error('version ' + version + ' does not have proper imageId');
+        var versionInfo = versionsJson[version];
 
-        if (typeof versionsJson[version].imageName !== 'string' || !versionsJson[version].imageName.length) return new Error('version ' + version + ' does not have proper imageName');
+        if (typeof versionInfo.imageId !== 'number') return new Error('version ' + version + ' does not have proper imageId');
 
-        if ('changeLog' in versionsJson[version] && !util.isArray(versionsJson[version].changeLog)) return new Error('version ' + version + ' does not have proper changeLog');
+        if (typeof versionInfo.imageName !== 'string' || !versionInfo.imageName.length) return new Error('version ' + version + ' does not have proper imageName');
 
-        if (typeof versionsJson[version].date !== 'string' || ((new Date(versionsJson[version].date)).toString() === 'Invalid Date')) return new Error('invalid date or missing date');
+        if ('changeLog' in versionsJson[version] && !util.isArray(versionInfo.changeLog)) return new Error('version ' + version + ' does not have proper changeLog');
 
-        if (versionsJson[version].next !== null && typeof versionsJson[version].next !== 'string') return new Error('version ' + version + ' does not have proper next');
+        if (typeof versionInfo.date !== 'string' || ((new Date(versionInfo.date)).toString() === 'Invalid Date')) return new Error('invalid date or missing date');
 
-        if (typeof versionsJson[version].sourceTarballUrl !== 'string') return new Error('version ' + version + ' does not have proper sourceTarballUrl');
+        if (versionInfo.next !== null) {
+            if (typeof versionInfo.next !== 'string') return new Error('version ' + version + ' does not have "string" next');
+            if (!semver.valid(versionInfo.next)) return new Error('version ' + version + ' has non-semver next');
+            if (!(versionInfo.next in versionsJson)) return new Error('version ' + version + ' points to non-existent version');
+        }
 
-        if ('author' in versionsJson[version] && typeof versionsJson[version].author !== 'string') return new Error('author must be a string');
+        if (typeof versionInfo.sourceTarballUrl !== 'string') return new Error('version ' + version + ' does not have proper sourceTarballUrl');
 
-        var tarballUrl = url.parse(versionsJson[version].sourceTarballUrl);
+        if ('author' in versionsJson[version] && typeof versionInfo.author !== 'string') return new Error('author must be a string');
+
+        var tarballUrl = url.parse(versionInfo.sourceTarballUrl);
         if (tarballUrl.protocol !== 'https:') return new Error('sourceTarballUrl must be https');
         if (!/.tar.gz$/.test(tarballUrl.path)) return new Error('sourceTarballUrl must be tar.gz');
 
-        var nextVersion = versionsJson[version].next;
+        var nextVersion = versionInfo.next;
         // despite having the 'next' field, the appstore code currently relies on all versions being sorted based on semver.compare (see boxversions.js)
         if (nextVersion && semver.gt(version, nextVersion)) return new Error('next version cannot be less than current @' + version);
     }
