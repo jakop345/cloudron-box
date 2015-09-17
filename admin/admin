@@ -4,7 +4,6 @@
 
 var assert = require('assert'),
     async = require('async'),
-    crypto = require('crypto'),
     execSync = require('child_process').execSync,
     fs = require('fs'),
     https = require('https'),
@@ -29,26 +28,6 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 function exit(error) {
     if (error) console.log(error);
     process.exit(error ? 1 : 0);
-}
-
-function loginToCloudron(ip) {
-    assert.strictEqual(typeof ip, 'string');
-
-    console.log('Ssh into %s'.bold, ip.cyan);
-
-    var ssh = spawn('ssh', util.format(SSH, ip, sshKeyPath).split(' '));
-    ssh.on('exit', exit);
-    ssh.on('error', exit);
-
-    process.stdin.setEncoding('utf8');
-    process.stdin.setRawMode(true);
-
-    process.stdin.pipe(ssh.stdin);
-    ssh.stdout.pipe(process.stdout);
-    ssh.stderr.pipe(process.stderr);
-
-    process.stdin.resume();
-
 }
 
 function logsFromCloudron(ip, fileName, tail) {
@@ -184,8 +163,21 @@ function hotfix(options) {
     hotfixCloudron(options.ip, code);
 }
 
-function login(options) {
-    loginToCloudron(options.ip);
+function ssh(ip) {
+    console.log('Ssh into %s'.bold, ip.cyan);
+
+    var sshClient = spawn('ssh', util.format(SSH, ip, sshKeyPath).split(' '));
+    sshClient.on('exit', exit);
+    sshClient.on('error', exit);
+
+    process.stdin.setEncoding('utf8');
+    process.stdin.setRawMode(true);
+
+    process.stdin.pipe(sshClient.stdin);
+    sshClient.stdout.pipe(process.stdout);
+    sshClient.stderr.pipe(process.stderr);
+
+    process.stdin.resume();
 }
 
 function logs(options) {
@@ -205,10 +197,9 @@ function backup(options) {
 // entry point
 program.version('0.1.0');
 
-program.command('login')
-    .description('Login to cloudron')
-    .option('--ip <value>', 'Cloudron IP')
-    .action(login);
+program.command('ssh')
+    .description('SSH to cloudron')
+    .action(ssh);
 
 program.command('logs')
     .description('Fetch logs by filename')
