@@ -13,6 +13,7 @@ var assert = require('assert'),
     readlineSync = require('readline-sync'),
     spawn = require('child_process').spawn,
     SshClient = require('ssh2').Client,
+    superagent = require('superagent'),
     util = require('util');
 
 require('colors');
@@ -30,8 +31,9 @@ function exit(error) {
     process.exit(error ? 1 : 0);
 }
 
-function triggerBackup(ip) {
+function triggerBackup(ip, callback) {
     assert.strictEqual(typeof ip, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     console.log('Trigger backup on %s'.bold, ip.cyan);
 
@@ -53,8 +55,12 @@ function triggerBackup(ip) {
         });
     });
 
+    req.on('end', function () {
+        callback();
+    });
+
     req.on('error', function (error) {
-        exit(error);
+        callback(error);
     });
 
     req.end();
@@ -148,8 +154,20 @@ function ssh(ip) {
     process.stdin.resume();
 }
 
+function waitForBackup(ip) {
+    superagent.get('https://' + ip + '/api/v1/cloudron/progress').get(function (error, result) {
+        if (error) return exit(error);
+
+        console.dir(result);
+    });
+}
+
 function backup(ip) {
-    triggerBackup(ip);
+    triggerBackup(ip, function (error) {
+        if (error) return exit(error);
+
+        setTimeout(waitForBackup.bind(null, ip), 3000);
+    });
 }
 
 // entry point
