@@ -591,8 +591,8 @@ describe('Clients', function () {
         email: 'some@email.com',
         admin: true,
         salt: 'somesalt',
-        createdAt: (new Date()).toUTCString(),
-        modifiedAt: (new Date()).toUTCString(),
+        createdAt: (new Date()).toISOString(),
+        modifiedAt: (new Date()).toISOString(),
         resetToken: hat(256)
     };
 
