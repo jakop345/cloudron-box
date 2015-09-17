@@ -22,8 +22,7 @@
     "morgan": "^1.5.1",
     "proxy-middleware": "^0.11.0",
     "safetydance": "0.0.16",
-    "superagent": "^0.21.0",
-    "tail-stream": "^0.2.1"
+    "superagent": "^0.21.0"
   },
   "devDependencies": {
     "aws-sdk": "^2.1.10",

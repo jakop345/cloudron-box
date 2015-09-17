@@ -436,11 +436,6 @@
           }
         }
       }
-    },
-    "tail-stream": {
-      "version": "0.2.1",
-      "from": "http://registry.npmjs.org/tail-stream/-/tail-stream-0.2.1.tgz",
-      "resolved": "http://registry.npmjs.org/tail-stream/-/tail-stream-0.2.1.tgz"
     }
   }
 }
