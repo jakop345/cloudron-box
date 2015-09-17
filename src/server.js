@@ -18,9 +18,7 @@ var assert = require('assert'),
     lastMile = require('connect-lastmile'),
     morgan = require('morgan'),
     path = require('path'),
-    safe = require('safetydance'),
-    superagent = require('superagent'),
-    ts = require('tail-stream');
+    superagent = require('superagent');
 
 exports = module.exports = {
     start: start,
