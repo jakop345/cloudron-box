@@ -184,3 +184,6 @@
 [0.0.54]
 - OAuth Proxy now uses internal port forwarding
 
+[0.0.55]
+- Setup cloudron timezone based on droplet region
+
