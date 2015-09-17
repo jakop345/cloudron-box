@@ -77,39 +77,6 @@ function retire(req, res, next) {
     next(new HttpSuccess(202, {}));
 }
 
-function logs(req, res, next) {
-    if (!req.query.filename) return next(new HttpError(400, 'No filename provided'));
-    var tail = req.query.tail === 'true';
-    var stream = null;
-
-    var stat = safe.fs.statSync(req.query.filename);
-
-    if (!stat) return res.status(404).send('Not found');
-
-    if (tail) {
-        var tailStreamOptions = {
-            beginAt: 'end',
-            onMove: 'follow',
-            detectTruncate: true,
-            onTruncate: 'end',
-            endOnError: true
-        };
-
-        stream = safe(function () { return ts.createReadStream(req.query.filename, tailStreamOptions); });
-        stream.destroy = stream.end; // tail-stream closes it's watchers with this special API
-    } else {
-        stream = fs.createReadStream(req.query.filename);
-        res.set('content-length', stat.size);
-    }
-
-    if (!stream) return res.status(404).send(safe.error.message);
-
-    stream.on('error', function (error) { res.write(error.message); res.end(); });
-    res.on('close', function () { stream.destroy(); });
-    res.status(200);
-    stream.pipe(res);
-}
-
 function backup(req, res, next) {
     // !! below port has to be in sync with box/config.js internalPort
     superagent.post('http://127.0.0.1:3001/api/v1/backup').end(function (error, result) {
@@ -158,7 +125,6 @@ function startProvisionServer(callback) {
        .use(lastMile());
 
     router.post('/api/v1/installer/retire', retire);
-    router.get ('/api/v1/installer/logs', logs);
     router.post('/api/v1/installer/backup', backup);
 
     var caPath = path.join(__dirname, process.env.NODE_ENV === 'test' ? '../../keys/installer_ca' : 'certs');

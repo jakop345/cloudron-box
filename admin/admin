@@ -30,38 +30,6 @@ function exit(error) {
     process.exit(error ? 1 : 0);
 }
 
-function logsFromCloudron(ip, fileName, tail) {
-    assert.strictEqual(typeof ip, 'string');
-    assert.strictEqual(typeof fileName, 'string');
-    assert.strictEqual(typeof tail, 'boolean');
-
-    console.log('Fetching logs from'.bold, ip.cyan);
-
-    var options = {
-        hostname: ip,
-        port: 886,
-        path: util.format('/api/v1/installer/logs?filename=%s&tail=%s', fileName, tail),
-        method: 'GET',
-        key: fs.readFileSync(path.join(__dirname, '../../keys/installer/server.key')),
-        cert: fs.readFileSync(path.join(__dirname, '../../keys/installer/server.crt')),
-        ca: fs.readFileSync(path.join(__dirname, '../../keys/installer_ca/ca.crt')),
-        rejectUnauthorized: false
-    };
-
-    var req = https.request(options, function (res) {
-        res.setEncoding('utf8');
-        res.on('data', function (chunk) {
-            process.stdout.write(chunk);
-        });
-    });
-
-    req.on('error', function (error) {
-        exit(error);
-    });
-
-    req.end();
-}
-
 function triggerBackup(ip) {
     assert.strictEqual(typeof ip, 'string');
 
@@ -180,16 +148,6 @@ function ssh(ip) {
     process.stdin.resume();
 }
 
-function logs(options) {
-    var fileName =  '/var/log/supervisor/box.log';
-
-    if (options.installer) fileName = '/var/log/cloudron/installserver.log';
-    if (options.nginxAccess) fileName = '/var/log/nginx/access.log';
-    if (options.nginxError) fileName = '/var/log/nginx/error.log';
-
-    logsFromCloudron(options.ip, fileName, !!options.tail);
-}
-
 function backup(options) {
     triggerBackup(options.ip);
 }
@@ -200,16 +158,6 @@ program.version('0.1.0');
 program.command('ssh')
     .description('SSH to cloudron')
     .action(ssh);
-
-program.command('logs')
-    .description('Fetch logs by filename')
-    .option('--ip <value>', 'Cloudron IP')
-    .option('-f, --tail', 'tail the logs')
-    .option('--installer', 'installer logs')
-    .option('--nginx-error', 'nginx error logs')
-    .option('--nginx-access', 'nginx access logs')
-    .option('--box', 'box logs [default]')
-    .action(logs);
 
 program.command('hotfix')
     .description('Hotfix a cloudron')
