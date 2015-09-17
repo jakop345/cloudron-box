@@ -7,6 +7,7 @@ exports = module.exports = {
 };
 
 var cloudron = require('../cloudron.js'),
+    CloudronError = require('../cloudron.js').CloudronError,
     debug = require('debug')('box:routes/internal'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess;
@@ -14,10 +15,12 @@ var cloudron = require('../cloudron.js'),
 function backup(req, res, next) {
     debug('trigger backup');
 
+    // note that cloudron.backup only waits for backup initiation and not for backup to complete
+    // backup progress can be checked up ny polling the progress api call
     cloudron.backup(function (error) {
-        if (error) debug('Internal route backup failed', error);
-    });
+        if (error && error.reason === CloudronError.BAD_STATE) return next(new HttpError(409, error.message));
+        if (error) return next(new HttpError(500, error));
 
-    // we always succeed to trigger a backup
-    next(new HttpSuccess(202, {}));
+        next(new HttpSuccess(202, {}));
+    });
 }
