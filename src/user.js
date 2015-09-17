@@ -134,7 +134,7 @@ function createUser(username, password, email, admin, invitor, callback) {
         crypto.pbkdf2(password, salt, CRYPTO_ITERATIONS, CRYPTO_KEY_LENGTH, function (error, derivedKey) {
             if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-            var now = (new Date()).toUTCString();
+            var now = (new Date()).toISOString();
             var user = {
                 id: username,
                 username: username,
@@ -331,7 +331,7 @@ function setPassword(userId, newPassword, callback) {
         crypto.pbkdf2(newPassword, saltBuffer, CRYPTO_ITERATIONS, CRYPTO_KEY_LENGTH, function (error, derivedKey) {
             if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-            user.modifiedAt = (new Date()).toUTCString();
+            user.modifiedAt = (new Date()).toISOString();
             user.password = new Buffer(derivedKey, 'binary').toString('hex');
             user.resetToken = '';
 
