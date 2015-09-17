@@ -14,16 +14,12 @@ var assert = require('assert'),
     readlineSync = require('readline-sync'),
     spawn = require('child_process').spawn,
     SshClient = require('ssh2').Client,
-    superagent = require('superagent'),
     util = require('util');
 
 require('colors');
 
 var SSH = 'root@%s -tt -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o ConnectTimeout=10 -i %s';
 var sshKeyPath = path.join(process.env.HOME, '/.ssh/id_rsa_yellowtent');
-
-if (!process.env['DIGITAL_OCEAN_TOKEN_DEV']) exit('Missing env variable DIGITAL_OCEAN_TOKEN_DEV');
-if (!process.env['DIGITAL_OCEAN_TOKEN_STAGING']) exit('Missing env variable DIGITAL_OCEAN_TOKEN_STAGING');
 
 if (!fs.existsSync(sshKeyPath)) exit('Unable to find ssh key path. Searching for ' + sshKeyPath);
 
@@ -33,91 +29,6 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 function exit(error) {
     if (error) console.log(error);
     process.exit(error ? 1 : 0);
-}
-
-function getDroplets(token, callback) {
-    assert.strictEqual(typeof token, 'string');
-    assert.strictEqual(typeof callback, 'function');
-
-    var droplets = [];
-    var nextPage = null;
-
-    async.doWhilst(function (callback) {
-        var url = nextPage ? nextPage : 'https://api.digitalocean.com/v2/droplets';
-
-        superagent.get(url).set('Authorization', 'Bearer ' + token).end(function (error, result) {
-            if (error) return callback(error.message);
-            if (result.statusCode === 403) return callback('Invalid Digitalocean credentials');
-            if (result.statusCode !== 200) return callback(util.format('Unable to get droplet list. %s - %s', result.statusCode, result.text));
-
-            nextPage = (result.body.links && result.body.links.pages) ? result.body.links.pages.next : null;
-            droplets = droplets.concat(result.body.droplets);
-
-            callback(null);
-        });
-    }, function () { return !!nextPage; }, function (error) {
-        if (error) return callback(error);
-        callback(null, droplets);
-    });
-}
-
-function selectCloudron(action) {
-    assert.strictEqual(typeof action, 'function');
-
-    var dropletsDev = [];
-    var dropletsStaging = [];
-    var dropletsProd = [];
-
-    console.log('Getting droplet lists from dev and staging...');
-
-    getDroplets(process.env['DIGITAL_OCEAN_TOKEN_DEV'], function (error, result) {
-        if (error) exit(error);
-
-        dropletsDev = result;
-
-        getDroplets(process.env['DIGITAL_OCEAN_TOKEN_STAGING'], function (error, result) {
-            if (error) exit(error);
-
-            dropletsStaging = result;
-
-            getDroplets(process.env['DIGITAL_OCEAN_TOKEN_PROD'], function (error, result) {
-                if (error) exit(error);
-
-                dropletsProd = result;
-
-                console.log();
-                console.log('Available Droplets on dev:'.bold);
-                dropletsDev.forEach(function (droplet, index) {
-                    console.log('\t(%s)\t%s %s', index, droplet.name.cyan, droplet.networks.v4[0].ip_address);
-                });
-
-                console.log();
-                console.log('Available Droplets on staging:'.bold);
-                dropletsStaging.forEach(function (droplet, index) {
-                    console.log('\t(%s)\t%s %s', dropletsDev.length + index, droplet.name.cyan, droplet.networks.v4[0].ip_address);
-                });
-
-                console.log();
-                console.log('Available Droplets on prod:'.bold);
-                dropletsProd.forEach(function (droplet, index) {
-                    console.log('\t(%s)\t%s %s', dropletsDev.length + dropletsStaging.length + index, droplet.name.cyan, droplet.networks.v4[0].ip_address);
-                });
-
-                console.log();
-
-                var droplets = dropletsDev.concat(dropletsStaging).concat(dropletsProd);
-
-                var index = -1;
-                while (true) {
-                    index = parseInt(readlineSync.question('Choose cloudron [0-' + (droplets.length-1) + ']: ', {}));
-                    if (isNaN(index) || index < 0 || index > droplets.length-1) console.log('Invalid selection'.red);
-                    else break;
-                }
-
-                action(droplets[index].networks.v4[0].ip_address);
-            });
-        });
-    });
 }
 
 function loginToCloudron(ip) {
@@ -270,16 +181,11 @@ function hotfix(options) {
         code = options.code;
     }
 
-    if (!options.ip) {
-        selectCloudron(function (ip) { hotfixCloudron(ip, code); });
-    } else {
-        hotfixCloudron(options.ip, code);
-    }
+    hotfixCloudron(options.ip, code);
 }
 
 function login(options) {
-    if (!options.ip) selectCloudron(loginToCloudron);
-    else loginToCloudron(options.ip);
+    loginToCloudron(options.ip);
 }
 
 function logs(options) {
@@ -289,13 +195,11 @@ function logs(options) {
     if (options.nginxAccess) fileName = '/var/log/nginx/access.log';
     if (options.nginxError) fileName = '/var/log/nginx/error.log';
 
-    if (!options.ip) selectCloudron(function (ip) { logsFromCloudron(ip, fileName, !!options.tail); });
-    else logsFromCloudron(options.ip, fileName, !!options.tail);
+    logsFromCloudron(options.ip, fileName, !!options.tail);
 }
 
 function backup(options) {
-    if (!options.ip) selectCloudron(triggerBackup);
-    else triggerBackup(options.ip);
+    triggerBackup(options.ip);
 }
 
 // entry point
