@@ -199,6 +199,7 @@ function initializeExpressSync() {
     return httpServer;
 }
 
+// provides hooks for the 'installer'
 function initializeInternalExpressSync() {
     var app = express();
     var httpServer = http.createServer(app);
