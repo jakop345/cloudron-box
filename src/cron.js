@@ -112,7 +112,7 @@ function autoupdatePatternChanged(pattern) {
             }
         },
         start: true,
-        timeZone: gBoxUpdateCheckerJob.cronTime.timeZone // hack
+        timeZone: gBoxUpdateCheckerJob.cronTime.zone // hack
     });
 }
 
