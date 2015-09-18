@@ -158,7 +158,7 @@ function activate(username, password, email, name, ip, callback) {
 
     debug('activating user:%s email:%s', username, email);
 
-    setTimeZone(ip, function () { });
+    setTimeZone(ip, function () { }); // TODO: get this from user
 
     if (!name) name = settings.getDefaultSync(settings.CLOUDRON_NAME_KEY);
 

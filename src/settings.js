@@ -44,7 +44,7 @@ var assert = require('assert'),
 var gDefaults = (function () {
     var result = { };
     result[exports.AUTOUPDATE_PATTERN_KEY] = '00 00 1,3,5,23 * * *';
-    result[exports.TIME_ZONE_KEY] = config.defaultTimezone();
+    result[exports.TIME_ZONE_KEY] = 'America/Los_Angeles';
     result[exports.CLOUDRON_NAME_KEY] = 'Cloudron';
     result[exports.DEVELOPER_MODE_KEY] = false;
 
