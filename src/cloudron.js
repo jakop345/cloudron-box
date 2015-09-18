@@ -138,7 +138,7 @@ function setTimeZone(ip, callback) {
         }
 
         if (!result.body.timezone) {
-            debug('No timezone in geoip response');
+            debug('No timezone in geoip response : %j', result.body);
             return callback(null);
         }
 
