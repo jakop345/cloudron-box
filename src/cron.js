@@ -48,6 +48,8 @@ function recreateJobs(unusedTimeZone, callback) {
     if (typeof unusedTimeZone === 'function') callback = unusedTimeZone;
 
     settings.getAll(function (error, allSettings) {
+        debug('Creating jobs with timezone %s', allSettings[settings.TIME_ZONE_KEY]);
+
         if (gHeartbeatJob) gHeartbeatJob.stop();
         gHeartbeatJob = new CronJob({
             cronTime: '00 */1 * * * *', // every minute
