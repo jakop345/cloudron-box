@@ -158,7 +158,7 @@ function activate(username, password, email, name, ip, callback) {
 
     debug('activating user:%s email:%s', username, email);
 
-    setTimeZone(ip, function () { }); // TODO: get this from user
+    setTimeZone(ip, function () { }); // TODO: get this from user. note that timezone is detected based on the browser location and not the cloudron region
 
     if (!name) name = settings.getDefaultSync(settings.CLOUDRON_NAME_KEY);
 
