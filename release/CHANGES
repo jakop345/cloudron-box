@@ -187,3 +187,6 @@
 [0.0.55]
 - Setup cloudron timezone based on droplet region
 
+[0.0.56]
+- Use correct timezone in updater
+
