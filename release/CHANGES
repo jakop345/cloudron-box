@@ -190,3 +190,6 @@
 [0.0.56]
 - Use correct timezone in updater
 
+[0.0.57]
+- Fix systemd logging issues
+
