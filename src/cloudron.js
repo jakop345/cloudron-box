@@ -636,12 +636,12 @@ function backupBoxAndApps(callback) {
             apps.backupApp(app, app.manifest.addons, function (error, backupId) {
                 progress.set(progress.BACKUP, step * processed, 'Backed up app at ' + app.location);
 
-                if (error && error.reason === AppsError.BAD_STATE) {
-                    debugApp(app, 'Skipping backup (istate:%s health:%s). using lastBackupId:%s', app.installationState, app.health, app.lastBackupId);
-                    backupId = app.lastBackupId;
+                if (error && error.reason !== AppsError.BAD_STATE) {
+                    debugApp(app, 'Unable to backup', error);
+                    return iteratorCallback(error);
                 }
 
-                return iteratorCallback(null, backupId);
+                iteratorCallback(null, backupId || null); // clear backupId if is in BAD_STATE and never backed up
             });
         }, function appsBackedUp(error, backupIds) {
             if (error) {
@@ -649,7 +649,7 @@ function backupBoxAndApps(callback) {
                 return callback(error);
             }
 
-            backupIds = backupIds.filter(function (id) { return id !== null; }); // remove apps that were never backed up
+            backupIds = backupIds.filter(function (id) { return id !== null; }); // remove apps in bad state that were never backed up
 
             backupBoxWithAppBackupIds(backupIds, function (error, restoreKey) {
                 progress.set(progress.BACKUP, 100, error ? error.message : '');
