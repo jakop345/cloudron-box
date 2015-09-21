@@ -193,3 +193,6 @@
 [0.0.57]
 - Fix systemd logging issues
 
+[0.0.58]
+- Ensure backups of failed apps are retained across archival cycles
+
