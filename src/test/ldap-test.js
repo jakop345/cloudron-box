@@ -6,8 +6,6 @@
 
 'use strict';
 
-require('supererror', { splatchError: true});
-
 var database = require('../database.js'),
     expect = require('expect.js'),
     EventEmitter = require('events').EventEmitter,
