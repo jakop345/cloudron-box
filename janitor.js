@@ -4,6 +4,12 @@
 
 require('supererror')({ splatchError: true });
 
+// remove timestamp from debug() based output
+require('debug').formatArgs = function formatArgs() {
+    arguments[0] = this.namespace + ' ' + arguments[0];
+    return arguments;
+};
+
 var assert = require('assert'),
     debug = require('debug')('box:janitor'),
     async = require('async'),

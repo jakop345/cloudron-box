@@ -4,6 +4,12 @@
 
 require('supererror')({ splatchError: true });
 
+// remove timestamp from debug() based output
+require('debug').formatArgs = function formatArgs() {
+    arguments[0] = this.namespace + ' ' + arguments[0];
+    return arguments;
+};
+
 var appHealthMonitor = require('./src/apphealthmonitor.js'),
     async = require('async'),
     config = require('./src/config.js'),
