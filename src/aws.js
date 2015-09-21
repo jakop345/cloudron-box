@@ -8,7 +8,9 @@ exports = module.exports = {
 
     addSubdomain: addSubdomain,
     delSubdomain: delSubdomain,
-    getChangeStatus: getChangeStatus
+    getChangeStatus: getChangeStatus,
+
+    copyObject: copyObject
 };
 
 var assert = require('assert'),
@@ -256,6 +258,29 @@ function getChangeStatus(changeId, callback) {
             if (error) return callback(error);
 
             callback(null, result.ChangeInfo.Status);
+        });
+    });
+}
+
+function copyObject(from, to, callback) {
+    assert.strictEqual(typeof from, 'string');
+    assert.strictEqual(typeof to, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    getAWSCredentials(function (error, credentials) {
+        if (error) return callback(error);
+
+        var params = {
+            Bucket: config.aws().backupBucket, // target bucket
+            Key: config.aws().backupPrefix + '/' + to, // target file
+            CopySource: config.aws().backupBucket + '/' + config.aws().backupPrefix + '/' + from, // source
+        };
+
+        var s3 = new AWS.S3(credentials);
+        s3.copyObject(params, function (error) {
+            if (error) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, new Error(error)));
+
+            callback(null);
         });
     });
 }
