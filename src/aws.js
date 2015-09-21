@@ -277,10 +277,6 @@ function copyObject(from, to, callback) {
         };
 
         var s3 = new AWS.S3(credentials);
-        s3.copyObject(params, function (error) {
-            if (error) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, new Error(error)));
-
-            callback(null);
-        });
+        s3.copyObject(params, callback);
     });
 }

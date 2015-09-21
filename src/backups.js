@@ -6,7 +6,9 @@ exports = module.exports = {
     getAllPaged: getAllPaged,
 
     getBackupUrl: getBackupUrl,
-    getRestoreUrl: getRestoreUrl
+    getRestoreUrl: getRestoreUrl,
+
+    copyLastBackup: copyLastBackup
 };
 
 var assert = require('assert'),
@@ -100,5 +102,17 @@ function getRestoreUrl(backupId, callback) {
         debug('getRestoreUrl: id:%s url:%s sessionToken:%s backupKey:%s', obj.id, obj.url, obj.sessionToken, obj.backupKey);
 
         callback(null, obj);
+    });
+}
+
+function copyLastBackup(app, callback) {
+    assert(app && typeof app === 'object');
+    assert.strictEqual(typeof callback, 'function');
+
+    var toFilename = util.format('appbackup_%s_%s-v%s.tar.gz', app.id, (new Date()).toISOString(), app.manifest.version);
+    aws.copyObject(app.lastBackupId, toFilename, function (error) {
+        if (error) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, error));
+
+        return callback(null, toFilename);
     });
 }
