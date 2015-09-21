@@ -26,6 +26,10 @@ cp "${container_files}/sudoers" /etc/sudoers.d/yellowtent
 rm -rf /etc/collectd
 ln -sfF "${DATA_DIR}/collectd" /etc/collectd
 
+########## apparmor docker profile
+cp "${container_files}/docker-cloudron-app.apparmor" /etc/apparmor.d/docker-cloudron-app
+systemctl restart apparmor
+
 ########## nginx
 # link nginx config to system config
 unlink /etc/nginx 2>/dev/null || rm -rf /etc/nginx
