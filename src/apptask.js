@@ -352,7 +352,8 @@ function startContainer(app, callback) {
                 "Name": "always",
                 "MaximumRetryCount": 0
             },
-            CpuShares: 512 // relative to 1024 for system processes
+            CpuShares: 512, // relative to 1024 for system processes
+            SecurityOpt: config.CLOUDRON ? [ "apparmor:docker-cloudron-app" ] : null // profile available only on cloudron
         };
 
         var container = docker.getContainer(app.containerId);
