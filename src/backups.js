@@ -107,7 +107,7 @@ function getRestoreUrl(backupId, callback) {
 
 function copyLastBackup(app, callback) {
     assert(app && typeof app === 'object');
-    assert.strictEqual(app.lastBackupId, 'string');
+    assert.strictEqual(typeof app.lastBackupId, 'string');
     assert.strictEqual(typeof callback, 'function');
 
     var toFilename = util.format('appbackup_%s_%s-v%s.tar.gz', app.id, (new Date()).toISOString(), app.manifest.version);
