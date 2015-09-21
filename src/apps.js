@@ -690,32 +690,32 @@ function autoupdateApps(updateInfo, callback) { // updateInfo is { appId -> { ma
     }, callback);
 }
 
-function backupApp(app, addonsToBackup, callback) {
+function canBackupApp(app) {
+    // only backup apps that are installed or pending configure. Rest of them are in some
+    // state not good for consistent backup (i.e addons may not have been setup completely)
+    return (app.installationState === appdb.ISTATE_INSTALLED && app.health === appdb.HEALTH_HEALTHY) ||
+            app.installationState === appdb.ISTATE_PENDING_CONFIGURE ||
+            app.installationState === appdb.ISTATE_PENDING_BACKUP ||
+            app.installationState === appdb.ISTATE_PENDING_UPDATE; // called from apptask
+}
+
+// set the 'creation' date of lastBackup so that the backup persists across time based archival rules
+// s3 does not allow changing creation time, so copying the last backup is easy way out for now
+function reuseOldBackup(app, callback) {
+    assert.strictEqual(typeof app.lastBackupId, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    backups.copyLastBackup(app, function (error, newBackupId) {
+        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+        callback(null, newBackupId);
+    });
+}
+
+function createNewBackup(app, addonsToBackup, callback) {
     assert.strictEqual(typeof app, 'object');
     assert(!addonsToBackup || typeof addonsToBackup, 'object');
     assert.strictEqual(typeof callback, 'function');
-
-    function canBackupApp(app) {
-        // only backup apps that are installed or pending configure. Rest of them are in some
-        // state not good for consistent backup (i.e addons may not have been setup completely)
-        return (app.installationState === appdb.ISTATE_INSTALLED && app.health === appdb.HEALTH_HEALTHY) ||
-                app.installationState === appdb.ISTATE_PENDING_CONFIGURE ||
-                app.installationState === appdb.ISTATE_PENDING_BACKUP ||
-                app.installationState === appdb.ISTATE_PENDING_UPDATE; // called from apptask
-    }
-
-    if (!canBackupApp(app)) return callback(new AppsError(AppsError.BAD_STATE, 'App not healthy'));
-
-    var appConfig = {
-        manifest: app.manifest,
-        location: app.location,
-        portBindings: app.portBindings,
-        accessRestriction: app.accessRestriction
-    };
-
-    if (!safe.fs.writeFileSync(path.join(paths.DATA_DIR, app.id + '/config.json'), JSON.stringify(appConfig), 'utf8')) {
-        return callback(safe.error);
-    }
 
     backups.getBackupUrl(app, function (error, result) {
         if (error && error.reason === BackupsError.EXTERNAL_ERROR) return callback(new AppsError(AppsError.EXTERNAL_ERROR, error.message));
@@ -731,13 +731,48 @@ function backupApp(app, addonsToBackup, callback) {
         ], function (error) {
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-            debugApp(app, 'backupApp: successful id:%s', result.id);
+            callback(null, result.id);
+        });
+    });
+}
 
-            setRestorePoint(app.id, result.id, appConfig, function (error) {
-                if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+function backupApp(app, addonsToBackup, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert(!addonsToBackup || typeof addonsToBackup, 'object');
+    assert.strictEqual(typeof callback, 'function');
 
-                return callback(null, result.id);
-            });
+    var appConfig = null, backupFunction;
+
+    if (!canBackupApp(app)) {
+        debugApp(app, 'backupApp: cannot backup app. lastBackupId: %s', app.lastBackupId);
+
+        if (!app.lastBackupId) return callback(new AppsError(AppsError.BAD_STATE, 'App not healthy and never backed up previously'));
+
+        appConfig = app.lastBackupConfig;
+        backupFunction = reuseOldBackup.bind(null, app);
+    } else {
+        appConfig = {
+            manifest: app.manifest,
+            location: app.location,
+            portBindings: app.portBindings,
+            accessRestriction: app.accessRestriction
+        };
+        backupFunction = createNewBackup.bind(null, app, addonsToBackup);
+
+        if (!safe.fs.writeFileSync(path.join(paths.DATA_DIR, app.id + '/config.json'), JSON.stringify(appConfig), 'utf8')) {
+            return callback(safe.error);
+        }
+    }
+
+    backupFunction(function (error, backupId) {
+        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+        debugApp(app, 'backupApp: successful id:%s', backupId);
+
+        setRestorePoint(app.id, backupId, appConfig, function (error) {
+            if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+            return callback(null, backupId);
         });
     });
 }
