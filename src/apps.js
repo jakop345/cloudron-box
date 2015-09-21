@@ -708,6 +708,8 @@ function reuseOldBackup(app, callback) {
     backups.copyLastBackup(app, function (error, newBackupId) {
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
+        debugApp(app, 'reuseOldBackup: reused old backup %s as %s', app.lastBackupId, newBackupId);
+
         callback(null, newBackupId);
     });
 }
@@ -744,9 +746,10 @@ function backupApp(app, addonsToBackup, callback) {
     var appConfig = null, backupFunction;
 
     if (!canBackupApp(app)) {
-        debugApp(app, 'backupApp: cannot backup app. lastBackupId: %s', app.lastBackupId);
-
-        if (!app.lastBackupId) return callback(new AppsError(AppsError.BAD_STATE, 'App not healthy and never backed up previously'));
+        if (!app.lastBackupId) {
+            debugApp(app, 'backupApp: cannot backup app');
+            return callback(new AppsError(AppsError.BAD_STATE, 'App not healthy and never backed up previously'));
+        }
 
         appConfig = app.lastBackupConfig;
         backupFunction = reuseOldBackup.bind(null, app);
