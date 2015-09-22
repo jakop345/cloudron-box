@@ -199,3 +199,6 @@
 [0.0.59]
 - Installer API fixes
 
+[0.0.60]
+- Do full box backup on updates
+
