@@ -196,3 +196,6 @@
 [0.0.58]
 - Ensure backups of failed apps are retained across archival cycles
 
+[0.0.59]
+- Installer API fixes
+
