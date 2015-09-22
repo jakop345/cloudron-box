@@ -14,14 +14,23 @@ var apps = require('./apps.js'),
     config = require('./config.js'),
     debug = require('debug')('box:updatechecker'),
     mailer = require('./mailer.js'),
+    paths = require('./paths.js'),
     safe = require('safetydance'),
     semver = require('semver'),
     superagent = require('superagent'),
     util = require('util');
 
 var gAppUpdateInfo = { }, // id -> update info { creationDate, manifest }
-    gBoxUpdateInfo = null,
-    gMailedUser =  { };
+    gBoxUpdateInfo = null;
+
+function loadState() {
+    var state = safe.JSON.parse(safe.fs.readFileSync(paths.UPDATE_CHECKER_FILE, 'utf8'));
+    return state || { };
+}
+
+function saveState(mailedUser) {
+    safe.fs.writeFileSync(paths.UPDATE_CHECKER_FILE, JSON.stringify(mailedUser, null, 4), 'utf8');
+}
 
 function getUpdateInfo() {
     return {
@@ -116,13 +125,15 @@ function getBoxUpdates(callback) {
 function checkAppUpdates() {
     debug('Checking App Updates');
 
+    var state = loadState();
+
     getAppUpdates(function (error, result) {
         if (error) debug('Error checking app updates: ', error);
 
         gAppUpdateInfo = error ? {} : result;
 
         async.eachSeries(Object.keys(gAppUpdateInfo), function iterator(id, iteratorDone) {
-            if (gMailedUser[id]) return iteratorDone();
+            if (state[id]) return iteratorDone();
 
             apps.get(id, function (error, app) {
                 if (error) {
@@ -131,9 +142,11 @@ function checkAppUpdates() {
                 }
 
                 mailer.appUpdateAvailable(app, gAppUpdateInfo[id]);
-                gMailedUser[id] = true;
+                state[id] = true;
                 iteratorDone();
             });
+        }, function () {
+            saveState(state);
         });
     });
 }
@@ -141,14 +154,17 @@ function checkAppUpdates() {
 function checkBoxUpdates() {
     debug('Checking Box Updates');
 
+    var state = loadState();
+
     getBoxUpdates(function (error, result) {
         if (error) debug('Error checking box updates: ', error);
 
         gBoxUpdateInfo = error ? null : result;
 
-        if (gBoxUpdateInfo && !gMailedUser['box']) {
+        if (gBoxUpdateInfo && !state['box']) {
             mailer.boxUpdateAvailable(gBoxUpdateInfo.version, gBoxUpdateInfo.changelog);
-            gMailedUser['box'] = true;
+            state['box'] = true;
+            saveState(state);
         }
     });
 }
