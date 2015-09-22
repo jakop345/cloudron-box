@@ -202,3 +202,6 @@
 [0.0.60]
 - Do full box backup on updates
 
+[0.0.61]
+- Track update notifications to inform admin only once
+
