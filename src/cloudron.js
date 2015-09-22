@@ -463,7 +463,7 @@ function doUpgrade(boxUpdateInfo, callback) {
         callback(e);
     }
 
-    progress.set(progress.UPDATE, 5, 'Create app and box backup for upgrade');
+    progress.set(progress.UPDATE, 5, 'Backing up for upgrade');
 
     backupBoxAndApps(function (error) {
         if (error) return upgradeError(error);
@@ -492,7 +492,7 @@ function doUpdate(boxUpdateInfo, callback) {
         callback(e);
     }
 
-    progress.set(progress.UPDATE, 5, 'Create box backup for update');
+    progress.set(progress.UPDATE, 5, 'Backing up for update');
 
     backupBoxAndApps(function (error) {
         if (error) return updateError(error);
