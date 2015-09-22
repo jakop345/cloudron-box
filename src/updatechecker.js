@@ -133,7 +133,7 @@ function checkAppUpdates() {
         gAppUpdateInfo = error ? {} : result;
 
         async.eachSeries(Object.keys(gAppUpdateInfo), function iterator(id, iteratorDone) {
-            if (state[id]) return iteratorDone();
+            if (state[id] === gAppUpdateInfo[id].manifest.version) return iteratorDone();
 
             apps.get(id, function (error, app) {
                 if (error) {
@@ -142,7 +142,7 @@ function checkAppUpdates() {
                 }
 
                 mailer.appUpdateAvailable(app, gAppUpdateInfo[id]);
-                state[id] = true;
+                state[id] = gAppUpdateInfo[id].manifest.version;
                 iteratorDone();
             });
         }, function () {
@@ -161,9 +161,9 @@ function checkBoxUpdates() {
 
         gBoxUpdateInfo = error ? null : result;
 
-        if (gBoxUpdateInfo && !state['box']) {
+        if (gBoxUpdateInfo && state.box.version !== gBoxUpdateInfo.version) {
             mailer.boxUpdateAvailable(gBoxUpdateInfo.version, gBoxUpdateInfo.changelog);
-            state['box'] = true;
+            state.box = gBoxUpdateInfo.version;
             saveState(state);
         }
     });
