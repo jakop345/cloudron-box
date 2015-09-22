@@ -313,22 +313,6 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         });
     };
 
-    $scope.startApp = function (app) {
-        $scope.appConfigure.runStateBusy = true;
-        app.runState = 'pending_start';   // we assume we will end up there
-        Client.startApp(app.id, function () {
-            $scope.appConfigure.runStateBusy = false;
-        });
-    };
-
-    $scope.stopApp = function (app) {
-        $scope.appConfigure.runStateBusy = true;
-        app.runState = 'pending_stop';   // we assume we will end up there
-        Client.stopApp(app.id, function () {
-            $scope.appConfigure.runStateBusy = false;
-        });
-    };
-
     $scope.cancel = function () {
         window.history.back();
     };
