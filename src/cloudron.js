@@ -494,7 +494,7 @@ function doUpdate(boxUpdateInfo, callback) {
 
     progress.set(progress.UPDATE, 5, 'Create box backup for update');
 
-    backupBox(function (error) {
+    backupBoxAndApps(function (error) {
         if (error) return updateError(error);
 
         // fetch a signed sourceTarballUrl
