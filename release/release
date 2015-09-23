@@ -584,7 +584,7 @@ program.command('create')
     .option('--image <imageid>', 'Image id')
     .option('--changelog <changelog>', 'Changelog')
     .option('--upgrade', 'Set the upgrade flag')
-    .option('--version <version>', 'Create the specified version')
+    .option('--version <version>', 'Create the specified version', null)
     .description('Create a new release')
     .action(createRelease);
 
@@ -607,7 +607,7 @@ program.command('new')
 
 program.command('publish')
     .description('Publish latest staging version to production')
-    .option('--version <version>', 'Version to publish')
+    .option('--version <version>', 'Version to publish', null)
     .action(function (options) { stage(ENVIRONMENTS['staging'], ENVIRONMENTS['prod'], options.version); });
 
 program.command('rerelease')
@@ -622,7 +622,7 @@ program.command('revert')
 
 program.command('stage')
     .description('Stage latest dev version to staging')
-    .option('--version <version>', 'Version to publish')
+    .option('--version <version>', 'Version to publish', null)
     .action(function (options) { stage(ENVIRONMENTS['dev'], ENVIRONMENTS['staging'], options.version); });
 
 program.command('sync')
