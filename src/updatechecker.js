@@ -161,7 +161,7 @@ function checkBoxUpdates() {
 
         gBoxUpdateInfo = error ? null : result;
 
-        if (gBoxUpdateInfo && state.box.version !== gBoxUpdateInfo.version) {
+        if (gBoxUpdateInfo && state.box !== gBoxUpdateInfo.version) {
             mailer.boxUpdateAvailable(gBoxUpdateInfo.version, gBoxUpdateInfo.changelog);
             state.box = gBoxUpdateInfo.version;
             saveState(state);
