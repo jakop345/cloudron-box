@@ -125,7 +125,8 @@ function getBoxUpdates(callback) {
 function checkAppUpdates() {
     debug('Checking App Updates');
 
-    var state = loadState();
+    var oldState = loadState();
+    var newState = { box: oldState.box }; // creaee new state so that old app ids are removed
 
     getAppUpdates(function (error, result) {
         if (error) debug('Error checking app updates: ', error);
@@ -133,7 +134,9 @@ function checkAppUpdates() {
         gAppUpdateInfo = error ? {} : result;
 
         async.eachSeries(Object.keys(gAppUpdateInfo), function iterator(id, iteratorDone) {
-            if (state[id] === gAppUpdateInfo[id].manifest.version) {
+            newState[id] = gAppUpdateInfo[id].manifest.version;
+
+            if (oldState[id] === gAppUpdateInfo[id].manifest.version) {
                 debug('Skipping notification of app update %s since user was already notified', id);
                 return iteratorDone();
             }
@@ -145,11 +148,10 @@ function checkAppUpdates() {
                 }
 
                 mailer.appUpdateAvailable(app, gAppUpdateInfo[id]);
-                state[id] = gAppUpdateInfo[id].manifest.version;
                 iteratorDone();
             });
         }, function () {
-            saveState(state);
+            saveState(newState);
         });
     });
 }
