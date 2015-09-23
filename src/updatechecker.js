@@ -133,7 +133,10 @@ function checkAppUpdates() {
         gAppUpdateInfo = error ? {} : result;
 
         async.eachSeries(Object.keys(gAppUpdateInfo), function iterator(id, iteratorDone) {
-            if (state[id] === gAppUpdateInfo[id].manifest.version) return iteratorDone();
+            if (state[id] === gAppUpdateInfo[id].manifest.version) {
+                debug('Skipping notification of app update %s since user was already notified', id);
+                return iteratorDone();
+            }
 
             apps.get(id, function (error, app) {
                 if (error) {
@@ -165,6 +168,8 @@ function checkBoxUpdates() {
             mailer.boxUpdateAvailable(gBoxUpdateInfo.version, gBoxUpdateInfo.changelog);
             state.box = gBoxUpdateInfo.version;
             saveState(state);
+        } else {
+            debug('Skipping notification of box update as user was already notified');
         }
     });
 }
