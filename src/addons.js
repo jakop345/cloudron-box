@@ -289,7 +289,9 @@ function setupLdap(app, callback) {
         'LDAP_PORT=3002',
         'LDAP_URL=ldap://172.17.42.1:3002',
         'LDAP_USERS_BASE_DN=ou=users,dc=cloudron',
-        'LDAP_GROUPS_BASE_DN=ou=groups,dc=cloudron'
+        'LDAP_GROUPS_BASE_DN=ou=groups,dc=cloudron',
+        'LDAP_BIND_DN=cn='+ app.id + ',ou=apps,dc=cloudron',
+        'LDAP_BIND_PASSWORD=' + hat(256) // this is ignored
     ];
 
     debugApp(app, 'Setting up LDAP');
