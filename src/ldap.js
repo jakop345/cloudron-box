@@ -63,7 +63,6 @@ function start(callback) {
 
                 if ((req.dn.equals(dn) || req.dn.parentOf(dn)) && req.filter.matches(tmp.attributes)) {
                     res.send(tmp);
-                    debug('ldap user send:', tmp);
                 }
             });
 
@@ -100,7 +99,6 @@ function start(callback) {
 
                 if ((req.dn.equals(dn) || req.dn.parentOf(dn)) && req.filter.matches(tmp.attributes)) {
                     res.send(tmp);
-                    debug('ldap group send:', tmp);
                 }
             });
 
@@ -108,8 +106,14 @@ function start(callback) {
         });
     });
 
-    gServer.bind('dc=cloudron', function(req, res, next) {
-        debug('ldap bind: %s', req.dn.toString());
+    gServer.bind('ou=apps,dc=cloudron', function(req, res, next) {
+        // TODO: validate password
+        debug('ldap application bind: %s', req.dn.toString());
+        res.end();
+    });
+
+    gServer.bind('ou=users,dc=cloudron', function(req, res, next) {
+        debug('ldap user bind: %s', req.dn.toString());
 
         if (!req.dn.rdns[0].cn) return next(new ldap.NoSuchObjectError(req.dn.toString()));
 
