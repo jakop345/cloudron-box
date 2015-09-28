@@ -323,31 +323,23 @@ function addDnsRecords() {
         function checkIfInSync() {
             debug('addDnsRecords: Check if admin DNS record is in sync.');
 
-            var allDone = true;
-
-            async.each(changeIds, function (changeId, callback) {
+            async.eachSeries(changeIds, function (changeId, callback) {
                 subdomains.status(changeId, function (error, result) {
                     if (error) return callback(new Error('Failed to check if admin DNS record is in sync.', error));
 
-                    if (result !== 'done') allDone = false;
+                    if (result !== 'done') return callback(new Error(changeId + ' is not in sync. result:' + result));
 
                     callback(null);
                 });
             }, function (error) {
-                if (error) console.error(error);
-
-                // retry if needed
-                if (error || !allDone) {
+                if (error) {
+                    console.error(error);
                     gAddDnsRecordsTimerId = setTimeout(checkIfInSync, 5000);
                     return;
                 }
-
-                config.set('dnsInSync', true);
-
-                // send heartbeat after the dns records are done
-                sendHeartbeat();
-
                 debug('addDnsRecords: done');
+                config.set('dnsInSync', true);
+                sendHeartbeat(); // send heartbeat after the dns records are done
             });
         }
 
