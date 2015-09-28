@@ -22,7 +22,9 @@ function addSubdomain(zoneName, subdomain, type, value, callback) {
     assert.strictEqual(typeof value, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    debug('addSubdomain: ' + subdomain + ' for domain ' + zoneName + ' with value ' + value);
+    var fqdn = subdomain !== '' && type === 'TXT' ? subdomain + '.' + zoneName : config.appFqdn(subdomain);
+
+    debug('addSubdomain: zoneName: %s subdomain: %s type: %s value: %s fqdn: %s', zoneName, subdomain, type, value, fqdn);
 
     var data = {
         type: type,
@@ -30,7 +32,7 @@ function addSubdomain(zoneName, subdomain, type, value, callback) {
     };
 
     superagent
-        .post(config.apiServerOrigin() + '/api/v1/domains/' + config.appFqdn(subdomain))
+        .post(config.apiServerOrigin() + '/api/v1/domains/' + fqdn)
         .query({ token: config.token() })
         .send(data)
         .end(function (error, result) {
