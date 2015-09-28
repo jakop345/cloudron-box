@@ -79,7 +79,7 @@ function backup(req, res, next) {
     // !! below port has to be in sync with box/config.js internalPort
     superagent.post('http://127.0.0.1:3001/api/v1/backup').end(function (error, result) {
         if (error) return next(new HttpError(500, error));
-        if (result.statusCode !== 202) return next(new HttpError(500, 'trigger backup failed with ' + result.statusCode));
+        if (result.statusCode !== 202) return next(new HttpError(result.statusCode, 'trigger backup failed with ' + result.body.message));
         next(new HttpSuccess(202, {}));
     });
 }
