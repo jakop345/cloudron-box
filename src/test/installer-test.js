@@ -108,62 +108,6 @@ describe('Server', function () {
         });
     });
 
-    describe('logs', function () {
-        before(function (done) {
-            process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; // TODO: use a installer ca signed cert instead
-            server.start(done);
-        });
-
-        after(function (done) {
-            server.stop(done);
-            delete process.env.NODE_TLS_REJECT_UNAUTHORIZED;
-        });
-
-        it('needs filename', function (done) {
-            request.get(EXTERNAL_SERVER_URL + '/api/v1/installer/logs').end(function (error, result) {
-                expect(!error).to.be.ok();
-                expect(result.statusCode).to.equal(400);
-                done();
-            });
-        });
-
-        it('returns stream for valid file', function (done) {
-            request.get(EXTERNAL_SERVER_URL + '/api/v1/installer/logs?filename=' + __filename).end(function (error, result) {
-                expect(!error).to.be.ok();
-                expect(result.headers['content-length']).to.be('' + fs.statSync(__filename).size);
-                expect(result.statusCode).to.equal(200);
-                done();
-            });
-        });
-
-        it('returns tail stream for valid file', function (done) {
-            var tailFile = path.join(os.tmpdir(), 'test-tail');
-            fs.writeFileSync(tailFile, 'line 1\n');
-
-            var res = request.get(EXTERNAL_SERVER_URL + '/api/v1/installer/logs?tail=true&filename=' + tailFile).end(function (error, result) {
-                expect(!error).to.be.ok();
-                expect(result.headers['transfer-encoding']).to.be('chunked');
-                expect(result.statusCode).to.equal(200);
-
-                fs.unlinkSync(tailFile);
-
-                done();
-            });
-
-            // push some new log lines to trigger request.get() callback
-            setTimeout(function () { fs.appendFileSync(tailFile, 'line 2\n'); }, 100);
-            setTimeout(res.abort.bind(res), 200);
-        });
-
-        it('returns 404 for missing file', function (done) {
-            request.get(EXTERNAL_SERVER_URL + '/api/v1/installer/logs?filename=/tmp/randomtotally').end(function (error, result) {
-                expect(!error).to.be.ok();
-                expect(result.statusCode).to.equal(404);
-                done();
-            });
-        });
-    });
-
     describe('retire', function () {
         var data = {
             data: {
