@@ -19,7 +19,8 @@ exports = module.exports = {
     reboot: reboot,
     migrate: migrate,
     backup: backup,
-    ensureBackup: ensureBackup};
+    ensureBackup: ensureBackup
+};
 
 var apps = require('./apps.js'),
     AppsError = require('./apps.js').AppsError,
@@ -465,7 +466,7 @@ function doUpgrade(boxUpdateInfo, callback) {
           .send({ version: boxUpdateInfo.version })
           .end(function (error, result) {
             if (error) return upgradeError(new Error('Error making upgrade request: ' + error));
-            if (result.status !== 202) return upgradeError(new Error('Server not ready to upgrade: ' + result.body));
+            if (result.status !== 202) return upgradeError(new Error('Server not ready to upgrade: ' + JSON.stringify(result.body)));
 
             progress.set(progress.UPDATE, 10, 'Updating base system');
 
@@ -495,7 +496,7 @@ function doUpdate(boxUpdateInfo, callback) {
           .end(function (error, result) {
             if (error) return updateError(new Error('Error fetching sourceTarballUrl: ' + error));
             if (result.status !== 200) return updateError(new Error('Error fetching sourceTarballUrl status: ' + result.status));
-            if (!safe.query(result, 'body.url')) return updateError(new Error('Error fetching sourceTarballUrl response: ' + result.body));
+            if (!safe.query(result, 'body.url')) return updateError(new Error('Error fetching sourceTarballUrl response: ' + JSON.stringify(result.body)));
 
             // NOTE: the args here are tied to the installer revision, box code and appstore provisioning logic
             var args = {
@@ -523,7 +524,7 @@ function doUpdate(boxUpdateInfo, callback) {
 
             superagent.post(INSTALLER_UPDATE_URL).send(args).end(function (error, result) {
                 if (error) return updateError(error);
-                if (result.status !== 202) return updateError(new Error('Error initiating update: ' + result.body));
+                if (result.status !== 202) return updateError(new Error('Error initiating update: ' + JSON.stringify(result.body)));
 
                 progress.set(progress.UPDATE, 10, 'Updating cloudron software');
 
