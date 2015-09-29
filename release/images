@@ -43,12 +43,10 @@ function deleteImage(image, token, callback) {
 
 function getImages(token, callback) {
     var images = [];
-    var nextPage = null;
+    var nextPage = DIGITALOCEAN + '/images?private=true';
 
     async.doWhilst(function (callback) {
-        var url = DIGITALOCEAN + '/images?private=true';
-
-        superagent.get(url).set('Authorization', 'Bearer ' + token).end(function (error, result) {
+        superagent.get(nextPage).set('Authorization', 'Bearer ' + token).end(function (error, result) {
             if (error || result.error) return callback(error || result.error);
 
             nextPage = (result.body.links && result.body.links.pages && nextPage !== result.body.links.pages.next) ? result.body.links.pages.next : null;
@@ -58,6 +56,7 @@ function getImages(token, callback) {
         });
     }, function () { return !!nextPage; }, function (error) {
         if (error) return callback(error);
+
         callback(null, images);
     });
 }
