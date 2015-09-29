@@ -211,3 +211,7 @@
 [0.0.63]
 - Fix creation of TXT records
 
+[0.0.64]
+- Stop apps in a retired cloudron
+- Retry downloading application on failure
+
