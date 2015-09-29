@@ -40,12 +40,17 @@ var appdb = require('../../appdb.js'),
 
 var SERVER_URL = 'http://localhost:' + config.get('port');
 
+// Test image information
+var TEST_IMAGE_REPO = 'cloudron/test';
+var TEST_IMAGE_TAG = '2.0.0';
+var TEST_IMAGE_ID = '9cf80309693a47d548adbe8b994085b46a9559c4df157926d4b123c649c424cb';
+
 var APP_STORE_ID = 'test', APP_ID;
 var APP_LOCATION = 'appslocation';
 var APP_LOCATION_2 = 'appslocationtwo';
 var APP_LOCATION_NEW = 'appslocationnew';
 var APP_MANIFEST = JSON.parse(fs.readFileSync(__dirname + '/../../../../test-app/CloudronManifest.json', 'utf8'));
-APP_MANIFEST.dockerImage = 'cloudron/test:2.0.0';
+APP_MANIFEST.dockerImage = TEST_IMAGE_REPO + ':' + TEST_IMAGE_TAG;
 var USERNAME = 'admin', PASSWORD = 'password', EMAIL ='admin@me.com';
 var USERNAME_1 = 'user', PASSWORD_1 = 'password', EMAIL_1 ='user@me.com';
 var token = null; // authentication token
@@ -162,7 +167,7 @@ describe('App API', function () {
 
     before(function (done) {
         dockerProxy = startDockerProxy(function interceptor(req, res) {
-            if (req.method === 'DELETE' && req.url === '/images/c7ddfc8fb7cd8a14d4d70153a199ff0c6e9b709807aeec5a7b799d60618731d1?force=true&noprune=false') {
+            if (req.method === 'DELETE' && req.url === '/images/' + TEST_IMAGE_ID + '?force=true&noprune=false') {
                 res.writeHead(200);
                 res.end();
                 return true;
@@ -510,12 +515,12 @@ describe('App installation', function () {
         async.series([
             function (callback) {
                 dockerProxy = startDockerProxy(function interceptor(req, res) {
-                    if (req.method === 'POST' && req.url === '/images/create?fromImage=girish%2Ftest&tag=0.2.0') {
+                    if (req.method === 'POST' && req.url === '/images/create?fromImage=' + encodeURIComponent(TEST_IMAGE_REPO) + '&tag=' + TEST_IMAGE_TAG) {
                         imageCreated = true;
                         res.writeHead(200);
                         res.end();
                         return true;
-                    } else if (req.method === 'DELETE' && req.url === '/images/c7ddfc8fb7cd8a14d4d70153a199ff0c6e9b709807aeec5a7b799d60618731d1?force=true&noprune=false') {
+                    } else if (req.method === 'DELETE' && req.url === '/images/' + TEST_IMAGE_ID + '?force=true&noprune=false') {
                         imageDeleted = true;
                         res.writeHead(200);
                         res.end();
@@ -959,12 +964,12 @@ describe('App installation - port bindings', function () {
         async.series([
             function (callback) {
                 dockerProxy = startDockerProxy(function interceptor(req, res) {
-                    if (req.method === 'POST' && req.url === '/images/create?fromImage=girish%2Ftest&tag=0.2.0') {
+                    if (req.method === 'POST' && req.url === '/images/create?fromImage=' + encodeURIComponent(TEST_IMAGE_REPO) + '&tag=' + TEST_IMAGE_TAG) {
                         imageCreated = true;
                         res.writeHead(200);
                         res.end();
                         return true;
-                    } else if (req.method === 'DELETE' && req.url === '/images/c7ddfc8fb7cd8a14d4d70153a199ff0c6e9b709807aeec5a7b799d60618731d1?force=true&noprune=false') {
+                    } else if (req.method === 'DELETE' && req.url === '/images/' + TEST_IMAGE_ID + '?force=true&noprune=false') {
                         imageDeleted = true;
                         res.writeHead(200);
                         res.end();
