@@ -208,3 +208,6 @@
 [0.0.62]
 - Export bind dn and password from LDAP addon
 
+[0.0.63]
+- Fix creation of TXT records
+
