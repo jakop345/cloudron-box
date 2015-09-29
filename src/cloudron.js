@@ -466,7 +466,7 @@ function doUpgrade(boxUpdateInfo, callback) {
           .send({ version: boxUpdateInfo.version })
           .end(function (error, result) {
             if (error) return upgradeError(new Error('Error making upgrade request: ' + error));
-            if (result.status !== 202) return upgradeError(new Error('Server not ready to upgrade: ' + JSON.stringify(result.body)));
+            if (result.status !== 202) return upgradeError(new Error(util.format('Server not ready to upgrade. statusCode: %s body: %j', result.status, result.body)));
 
             progress.set(progress.UPDATE, 10, 'Updating base system');
 
