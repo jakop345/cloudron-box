@@ -48,6 +48,8 @@ function uninitialize(callback) {
         stopAppTask(appId);
     }
 
+    locker.removeListener('unlocked', startNextTask);
+
     callback(null);
 }
 
