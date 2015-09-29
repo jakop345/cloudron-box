@@ -22,7 +22,7 @@ function addSubdomain(zoneName, subdomain, type, value, callback) {
     assert.strictEqual(typeof value, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    var fqdn = subdomain !== '' && type === 'TXT' ? subdomain + '.' + zoneName : config.appFqdn(subdomain);
+    var fqdn = subdomain !== '' && type === 'TXT' ? subdomain + '.' + config.fqdn() : config.appFqdn(subdomain);
 
     debug('addSubdomain: zoneName: %s subdomain: %s type: %s value: %s fqdn: %s', zoneName, subdomain, type, value, fqdn);
 
