@@ -24,3 +24,7 @@ done
 echo "Setting up splash screen"
 "${BOX_SRC_DIR}/setup/splashpage.sh" --retire --data "${arg_data}" # show splash
 "${BOX_SRC_DIR}/setup/stop.sh" # stop the cloudron code
+
+systemctl stop docker # stop the apps
+systemctl stop cloudron-installer # stop the installer
+
