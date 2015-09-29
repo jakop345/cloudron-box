@@ -132,11 +132,9 @@ function unconfigureNginx(app, callback) {
     vbox.unforwardFromHostToVirtualBox(app.id + '-http');
 }
 
-function downloadImage(app, callback) {
-    debugApp(app, 'downloadImage %s', app.manifest.dockerImage);
-
+function pullImage(app, callback) {
     docker.pull(app.manifest.dockerImage, function (err, stream) {
-        if (err) return callback(new Error('Error connecting to docker'));
+        if (err) return callback(new Error('Error connecting to docker. statusCode: %s' + err.statusCode));
 
         // https://github.com/dotcloud/docker/issues/1074 says each status message
         // is emitted as a chunk
@@ -158,23 +156,28 @@ function downloadImage(app, callback) {
             var image = docker.getImage(app.manifest.dockerImage);
 
             image.inspect(function (err, data) {
-                if (err) {
-                    return callback(new Error('Error inspecting image:' + err.message));
-                }
-
-                if (!data || !data.Config) {
-                    return callback(new Error('Missing Config in image:' + JSON.stringify(data, null, 4)));
-                }
-
-                if (!data.Config.Entrypoint && !data.Config.Cmd) {
-                    return callback(new Error('Only images with entry point are allowed'));
-                }
+                if (err) return callback(new Error('Error inspecting image:' + err.message));
+                if (!data || !data.Config) return callback(new Error('Missing Config in image:' + JSON.stringify(data, null, 4)));
+                if (!data.Config.Entrypoint && !data.Config.Cmd) return callback(new Error('Only images with entry point are allowed'));
 
                 debugApp(app, 'This image exposes ports: %j', data.Config.ExposedPorts);
-                return callback(null);
+
+                callback(null);
             });
         });
     });
+}
+
+function downloadImage(app, callback) {
+    debugApp(app, 'downloadImage %s', app.manifest.dockerImage);
+
+    var attempt = 1;
+
+    async.retry({ times: 5, interval: 15000 }, function (retryCallback) {
+        debugApp(app, 'Downloading image. attempt: %s', attempt++);
+
+        pullImage(app, retryCallback);
+    }, callback);
 }
 
 function createContainer(app, callback) {
