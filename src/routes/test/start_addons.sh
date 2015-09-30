@@ -14,7 +14,7 @@ root_password=secret
 start_postgresql() {
     postgresql_vars="POSTGRESQL_ROOT_PASSWORD=${root_password}; POSTGRESQL_ROOT_HOST=172.17.0.0/255.255.0.0"
 
-    if which boot2docker >/dev/null; then
+    if which boot2docker >/dev/null 2>&1; then
         boot2docker ssh "sudo rm -rf /tmp/postgresql_vars.sh"
         boot2docker ssh "echo \"${postgresql_vars}\" > /tmp/postgresql_vars.sh"
     else
@@ -30,7 +30,7 @@ start_postgresql() {
 start_mysql() {
     local mysql_vars="MYSQL_ROOT_PASSWORD=${root_password}; MYSQL_ROOT_HOST=172.17.0.0/255.255.0.0"
 
-    if which boot2docker >/dev/null; then
+    if which boot2docker >/dev/null 2>&1; then
         boot2docker ssh "sudo rm -rf /tmp/mysql_vars.sh"
         boot2docker ssh "echo \"${mysql_vars}\" > /tmp/mysql_vars.sh"
     else
@@ -46,7 +46,7 @@ start_mysql() {
 start_mongodb() {
     local mongodb_vars="MONGODB_ROOT_PASSWORD=${root_password}"
 
-    if which boot2docker >/dev/null; then
+    if which boot2docker >/dev/null 2>&1; then
         boot2docker ssh "sudo rm -rf /tmp/mongodb_vars.sh"
         boot2docker ssh "echo \"${mongodb_vars}\" > /tmp/mongodb_vars.sh"
     else
