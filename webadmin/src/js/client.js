@@ -616,6 +616,9 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         var state = Math.floor((1 + Math.random()) * 0x1000000000000).toString(16).substring(1);
         window.localStorage.oauth2State = state;
 
+        // stash for further use in login_callback
+        window.localStorage.returnTo = '/' + window.location.hash;
+
         window.location.href = this.apiOrigin + '/api/v1/oauth/dialog/authorize?response_type=token&client_id=' + this._clientId + '&redirect_uri=' + callbackURL + '&scope=' + scope + '&state=' + state;
     };
 
