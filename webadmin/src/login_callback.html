@@ -19,7 +19,10 @@
         // clear oauth2 state
         delete window.localStorage.oauth2State;
 
-        if (window.localStorage.returnTo) window.location.href = window.localStorage.returnTo;
+        var returnTo = window.localStorage.returnTo;
+        delete window.localStorage.returnTo;
+
+        if (returnTo) window.location.href = returnTo;
         else window.location.href = '/';
     }
 
