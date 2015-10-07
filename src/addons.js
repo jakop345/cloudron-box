@@ -35,7 +35,6 @@ var appdb = require('./appdb.js'),
     safe = require('safetydance'),
     shell = require('./shell.js'),
     spawn = child_process.spawn,
-    tokendb = require('./tokendb.js'),
     util = require('util'),
     uuid = require('node-uuid'),
     vbox = require('./vbox.js');
@@ -50,12 +49,6 @@ var KNOWN_ADDONS = {
         teardown: removeOAuthCredentials,
         backup: NOOP,
         restore: allocateOAuthCredentials
-    },
-    token: {
-        setup: allocateAccessToken,
-        teardown: removeAccessToken,
-        backup: NOOP,
-        restore: allocateAccessToken
     },
     ldap: {
         setup: setupLdap,
@@ -739,41 +732,3 @@ function teardownRedis(app, callback) {
         });
    });
 }
-
-function allocateAccessToken(app, callback) {
-    assert.strictEqual(typeof app, 'object');
-    assert.strictEqual(typeof callback, 'function');
-
-    var token = tokendb.generateToken();
-    var expiresAt = Number.MAX_SAFE_INTEGER;    // basically never expire
-    var scopes = 'profile,users';               // TODO This should be put into the manifest and the user should know those
-    var clientId = '';                          // meaningless for apps so far
-
-   tokendb.delByIdentifier(tokendb.PREFIX_APP + app.id, function (error) {
-        if (error && error.reason !== DatabaseError.NOT_FOUND) return callback(error);
-
-        tokendb.add(token, tokendb.PREFIX_APP + app.id, clientId, expiresAt, scopes, function (error) {
-            if (error) return callback(error);
-
-            var env = [
-                'CLOUDRON_TOKEN=' + token
-            ];
-
-            debugApp(app, 'Setting token addon config to %j', env);
-
-            appdb.setAddonConfig(appId, 'token', env, callback);
-        });
-    });
-}
-
-function removeAccessToken(app, callback) {
-    assert.strictEqual(typeof app, 'object');
-    assert.strictEqual(typeof callback, 'function');
-
-    tokendb.delByIdentifier(tokendb.PREFIX_APP + app.id, function (error) {
-        if (error && error.reason !== DatabaseError.NOT_FOUND) console.error(error);
-
-        appdb.unsetAddonConfig(app.id, 'token', callback);
-    });
-}
-
