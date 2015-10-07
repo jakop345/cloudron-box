@@ -11,8 +11,8 @@ exports = module.exports = {
     getBindsSync: getBindsSync,
 
     // exported for testing
-    _allocateOAuthCredentials: allocateOAuthCredentials,
-    _removeOAuthCredentials: removeOAuthCredentials
+    _setupOauth: setupOauth,
+    _teardownOauth: teardownOauth
 };
 
 var appdb = require('./appdb.js'),
@@ -45,10 +45,10 @@ var NOOP = function (app, callback) { return callback(); };
 // teardown is destructive. app data stored with the addon is lost
 var KNOWN_ADDONS = {
     oauth: {
-        setup: allocateOAuthCredentials,
-        teardown: removeOAuthCredentials,
+        setup: setupOauth,
+        teardown: teardownOauth,
         backup: NOOP,
-        restore: allocateOAuthCredentials
+        restore: setupOauth
     },
     ldap: {
         setup: setupLdap,
@@ -229,7 +229,7 @@ function getBindsSync(app, addons) {
     return binds;
 }
 
-function allocateOAuthCredentials(app, callback) {
+function setupOauth(app, callback) {
     assert.strictEqual(typeof app, 'object');
     assert.strictEqual(typeof callback, 'function');
 
@@ -239,7 +239,7 @@ function allocateOAuthCredentials(app, callback) {
     var redirectURI = 'https://' + config.appFqdn(app.location);
     var scope = 'profile,roleUser';
 
-    debugApp(app, 'allocateOAuthCredentials: id:%s clientSecret:%s', id, clientSecret);
+    debugApp(app, 'setupOauth: id:%s clientSecret:%s', id, clientSecret);
 
     clientdb.delByAppId('addon-' + appId, function (error) { // remove existing creds
         if (error && error.reason !== DatabaseError.NOT_FOUND) return callback(error);
@@ -260,11 +260,11 @@ function allocateOAuthCredentials(app, callback) {
     });
 }
 
-function removeOAuthCredentials(app, callback) {
+function teardownOauth(app, callback) {
     assert.strictEqual(typeof app, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    debugApp(app, 'removeOAuthCredentials');
+    debugApp(app, 'teardownOauth');
 
     clientdb.delByAppId('addon-' + app.id, function (error) {
         if (error && error.reason !== DatabaseError.NOT_FOUND) console.error(error);
