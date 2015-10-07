@@ -39,7 +39,7 @@ var appdb = require('./appdb.js'),
     uuid = require('node-uuid'),
     vbox = require('./vbox.js');
 
-var NOOP = function (app, callback) { return callback(); };
+var NOOP = function (app, options, callback) { return callback(); };
 
 // setup can be called multiple times for the same app (configure crash restart) and existing data must not be lost
 // teardown is destructive. app data stored with the addon is lost
@@ -121,9 +121,9 @@ function setupAddons(app, addons, callback) {
     async.eachSeries(Object.keys(addons), function iterator(addon, iteratorCallback) {
         if (!(addon in KNOWN_ADDONS)) return iteratorCallback(new Error('No such addon:' + addon));
 
-        debugApp(app, 'Setting up addon %s', addon);
+        debugApp(app, 'Setting up addon %s with options %j', addon, addons[addon]);
 
-        KNOWN_ADDONS[addon].setup(app, iteratorCallback);
+        KNOWN_ADDONS[addon].setup(app, addons[addon], iteratorCallback);
     }, callback);
 }
 
@@ -139,9 +139,9 @@ function teardownAddons(app, addons, callback) {
     async.eachSeries(Object.keys(addons), function iterator(addon, iteratorCallback) {
         if (!(addon in KNOWN_ADDONS)) return iteratorCallback(new Error('No such addon:' + addon));
 
-        debugApp(app, 'Tearing down addon %s', addon);
+        debugApp(app, 'Tearing down addon %s with options %j', addon, addons[addon]);
 
-        KNOWN_ADDONS[addon].teardown(app, iteratorCallback);
+        KNOWN_ADDONS[addon].teardown(app, addons[addon], iteratorCallback);
     }, callback);
 }
 
@@ -159,7 +159,7 @@ function backupAddons(app, addons, callback) {
     async.eachSeries(Object.keys(addons), function iterator (addon, iteratorCallback) {
         if (!(addon in KNOWN_ADDONS)) return iteratorCallback(new Error('No such addon:' + addon));
 
-        KNOWN_ADDONS[addon].backup(app, iteratorCallback);
+        KNOWN_ADDONS[addon].backup(app, addons[addon], iteratorCallback);
     }, callback);
 }
 
@@ -177,7 +177,7 @@ function restoreAddons(app, addons, callback) {
     async.eachSeries(Object.keys(addons), function iterator (addon, iteratorCallback) {
         if (!(addon in KNOWN_ADDONS)) return iteratorCallback(new Error('No such addon:' + addon));
 
-        KNOWN_ADDONS[addon].restore(app, iteratorCallback);
+        KNOWN_ADDONS[addon].restore(app, addons[addon], iteratorCallback);
     }, callback);
 }
 
@@ -229,8 +229,9 @@ function getBindsSync(app, addons) {
     return binds;
 }
 
-function setupOauth(app, callback) {
+function setupOauth(app, options, callback) {
     assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     var appId = app.id;
@@ -260,8 +261,9 @@ function setupOauth(app, callback) {
     });
 }
 
-function teardownOauth(app, callback) {
+function teardownOauth(app, options, callback) {
     assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     debugApp(app, 'teardownOauth');
@@ -273,8 +275,9 @@ function teardownOauth(app, callback) {
     });
 }
 
-function setupLdap(app, callback) {
+function setupLdap(app, options, callback) {
     assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     var env = [
@@ -292,8 +295,9 @@ function setupLdap(app, callback) {
     appdb.setAddonConfig(app.id, 'ldap', env, callback);
 }
 
-function teardownLdap(app, callback) {
+function teardownLdap(app, options, callback) {
     assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     debugApp(app, 'Tearing down LDAP');
@@ -301,8 +305,9 @@ function teardownLdap(app, callback) {
     appdb.unsetAddonConfig(app.id, 'ldap', callback);
 }
 
-function setupSendMail(app, callback) {
+function setupSendMail(app, options, callback) {
     assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     var env = [
@@ -317,8 +322,9 @@ function setupSendMail(app, callback) {
     appdb.setAddonConfig(app.id, 'sendmail', env, callback);
 }
 
-function teardownSendMail(app, callback) {
+function teardownSendMail(app, options, callback) {
     assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     debugApp(app, 'Tearing down sendmail');
@@ -326,8 +332,9 @@ function teardownSendMail(app, callback) {
     appdb.unsetAddonConfig(app.id, 'sendmail', callback);
 }
 
-function setupMySql(app, callback) {
+function setupMySql(app, options, callback) {
     assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     debugApp(app, 'Setting up mysql');
@@ -360,7 +367,11 @@ function setupMySql(app, callback) {
     });
 }
 
-function teardownMySql(app, callback) {
+function teardownMySql(app, options, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof options, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
     var container = docker.getContainer('mysql');
     var cmd = [ '/addons/mysql/service.sh', 'remove', app.id ];
 
@@ -382,7 +393,7 @@ function teardownMySql(app, callback) {
     });
 }
 
-function backupMySql(app, callback) {
+function backupMySql(app, options, callback) {
     debugApp(app, 'Backing up mysql');
 
     callback = once(callback); // ChildProcess exit may or may not be called after error
@@ -401,7 +412,7 @@ function backupMySql(app, callback) {
     cp.stderr.pipe(process.stderr);
 }
 
-function restoreMySql(app, callback) {
+function restoreMySql(app, options, callback) {
     callback = once(callback); // ChildProcess exit may or may not be called after error
 
     setupMySql(app, function (error) {
@@ -426,8 +437,9 @@ function restoreMySql(app, callback) {
     });
 }
 
-function setupPostgreSql(app, callback) {
+function setupPostgreSql(app, options, callback) {
     assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     debugApp(app, 'Setting up postgresql');
@@ -460,7 +472,11 @@ function setupPostgreSql(app, callback) {
     });
 }
 
-function teardownPostgreSql(app, callback) {
+function teardownPostgreSql(app, options, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof options, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
     var container = docker.getContainer('postgresql');
     var cmd = [ '/addons/postgresql/service.sh', 'remove', app.id ];
 
@@ -482,7 +498,7 @@ function teardownPostgreSql(app, callback) {
     });
 }
 
-function backupPostgreSql(app, callback) {
+function backupPostgreSql(app, options, callback) {
     debugApp(app, 'Backing up postgresql');
 
     callback = once(callback); // ChildProcess exit may or may not be called after error
@@ -501,7 +517,7 @@ function backupPostgreSql(app, callback) {
     cp.stderr.pipe(process.stderr);
 }
 
-function restorePostgreSql(app, callback) {
+function restorePostgreSql(app, options, callback) {
     callback = once(callback); // ChildProcess exit may or may not be called after error
 
     setupPostgreSql(app, function (error) {
@@ -526,8 +542,9 @@ function restorePostgreSql(app, callback) {
     });
 }
 
-function setupMongoDb(app, callback) {
+function setupMongoDb(app, options, callback) {
     assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     debugApp(app, 'Setting up mongodb');
@@ -560,7 +577,11 @@ function setupMongoDb(app, callback) {
     });
 }
 
-function teardownMongoDb(app, callback) {
+function teardownMongoDb(app, options, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof options, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
     var container = docker.getContainer('mongodb');
     var cmd = [ '/addons/mongodb/service.sh', 'remove', app.id ];
 
@@ -582,7 +603,7 @@ function teardownMongoDb(app, callback) {
     });
 }
 
-function backupMongoDb(app, callback) {
+function backupMongoDb(app, options, callback) {
     debugApp(app, 'Backing up mongodb');
 
     callback = once(callback); // ChildProcess exit may or may not be called after error
@@ -601,7 +622,7 @@ function backupMongoDb(app, callback) {
     cp.stderr.pipe(process.stderr);
 }
 
-function restoreMongoDb(app, callback) {
+function restoreMongoDb(app, options, callback) {
     callback = once(callback); // ChildProcess exit may or may not be called after error
 
     setupMongoDb(app, function (error) {
@@ -644,7 +665,11 @@ function forwardRedisPort(appId, callback) {
 }
 
 // Ensures that app's addon redis container is running. Can be called when named container already exists/running
-function setupRedis(app, callback) {
+function setupRedis(app, options, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof options, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
     var redisPassword = generatePassword(64, false /* memorable */);
     var redisVarsFile = path.join(paths.ADDON_CONFIG_DIR, 'redis-' + app.id + '_vars.sh');
     var redisDataDir = path.join(paths.DATA_DIR, app.id + '/redis');
@@ -710,7 +735,11 @@ function setupRedis(app, callback) {
     });
 }
 
-function teardownRedis(app, callback) {
+function teardownRedis(app, options, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof options, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
    var container = docker.getContainer('redis-' + app.id);
 
    var removeOptions = {

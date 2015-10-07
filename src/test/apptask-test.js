@@ -136,21 +136,21 @@ describe('apptask', function () {
     });
 
     it('allocate OAuth credentials', function (done) {
-        addons._setupOauth(APP, function (error) {
+        addons._setupOauth(APP, {}, function (error) {
             expect(error).to.be(null);
             done();
         });
     });
 
     it('remove OAuth credentials', function (done) {
-        addons._teardownOauth(APP, function (error) {
+        addons._teardownOauth(APP, {}, function (error) {
             expect(error).to.be(null);
             done();
         });
     });
 
     it('remove OAuth credentials twice succeeds', function (done) {
-        addons._teardownOauth(APP, function (error) {
+        addons._teardownOauth(APP, {}, function (error) {
             expect(!error).to.be.ok();
             done();
         });
