@@ -818,4 +818,3 @@ function restoreApp(app, addonsToRestore, callback) {
         });
     });
 }
-

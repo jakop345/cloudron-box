@@ -51,6 +51,7 @@ var addons = require('./addons.js'),
     path = require('path'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
+    semver = require('semver'),
     shell = require('./shell.js'),
     SubdomainError = require('./subdomainerror.js'),
     subdomains = require('./subdomains.js'),
@@ -77,6 +78,14 @@ function debugApp(app, args) {
 
     var prefix = app ? (app.location || '(bare)') : '(no app)';
     debug(prefix + ' ' + util.format.apply(util, Array.prototype.slice.call(arguments, 1)));
+}
+
+function targetBoxVersion(manifest) {
+    if ('targetBoxVersion' in manifest) return manifest.targetBoxVersion;
+
+    if ('minBoxVersion' in manifest) return manifest.minBoxVersion;
+
+    return '0.0.1';
 }
 
 // We expect conflicts to not happen despite closing the port (parallel app installs, app update does not reconfigure nginx etc)
@@ -355,7 +364,7 @@ function startContainer(app, callback) {
             MemorySwap: memoryLimit, // Memory + Swap
             PortBindings: dockerPortBindings,
             PublishAllPorts: false,
-            ReadonlyRootfs: true, // see also Volumes in startContainer
+            ReadonlyRootfs: semver.gte(targetBoxVersion(app.manifest), '0.0.66'), // see also Volumes in startContainer
             Links: addons.getLinksSync(app, app.manifest.addons),
             RestartPolicy: {
                 "Name": "always",
