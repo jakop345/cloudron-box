@@ -218,3 +218,6 @@
 [0.0.65]
 - Do not send crash mails for apps in development
 
+[0.0.66]
+- Readonly application and addon containers
+
