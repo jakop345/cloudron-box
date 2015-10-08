@@ -60,7 +60,9 @@ start_mongodb() {
 
     docker rm -f mongodb 2>/dev/null 1>&2 || true
 
-    docker run -dP --name=mongodb -v "${mongodbdatadir}:/var/lib/mongodb" -v /tmp/mongodb_vars.sh:/etc/mongodb_vars.sh "${MONGODB_IMAGE}" >/dev/null
+    docker run -dP --name=mongodb -v "${mongodbdatadir}:/var/lib/mongodb" \
+        --read-only -v /tmp -v /run -v /var/log \
+        -v /tmp/mongodb_vars.sh:/etc/mongodb_vars.sh "${MONGODB_IMAGE}" >/dev/null
 }
 
 start_mysql
