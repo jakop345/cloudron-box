@@ -215,3 +215,6 @@
 - Stop apps in a retired cloudron
 - Retry downloading application on failure
 
+[0.0.65]
+- Do not send crash mails for apps in development
+
