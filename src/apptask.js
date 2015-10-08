@@ -213,7 +213,12 @@ function createContainer(app, callback) {
                 Image: app.manifest.dockerImage,
                 Cmd: null,
                 Env: env.concat(addonEnv),
-                ExposedPorts: exposedPorts
+                ExposedPorts: exposedPorts,
+                Volumes: { // see also ReadonlyRootfs
+                    '/tmp': {},
+                    '/run': {},
+                    '/var/log': {}
+                }
             };
 
             debugApp(app, 'Creating container for %s', app.manifest.dockerImage);
@@ -234,7 +239,7 @@ function deleteContainer(app, callback) {
 
     var removeOptions = {
         force: true, // kill container if it's running
-        v: false // removes volumes associated with the container
+        v: true // removes volumes associated with the container (but not host mounts)
     };
 
     container.remove(removeOptions, function (error) {
@@ -350,6 +355,7 @@ function startContainer(app, callback) {
             MemorySwap: memoryLimit, // Memory + Swap
             PortBindings: dockerPortBindings,
             PublishAllPorts: false,
+            ReadonlyRootfs: true, // see also Volumes in startContainer
             Links: addons.getLinksSync(app, app.manifest.addons),
             RestartPolicy: {
                 "Name": "always",
