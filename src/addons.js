@@ -684,9 +684,13 @@ function setupRedis(app, options, callback) {
         name: 'redis-' + app.id,
         Hostname: config.appFqdn(app.location),
         Tty: true,
-        Image: 'cloudron/redis:0.4.0', // if you change this, fix setup/INFRA_VERSION as well
+        Image: 'cloudron/redis:0.5.0', // if you change this, fix setup/INFRA_VERSION as well
         Cmd: null,
-        Volumes: {},
+        Volumes: {
+            '/tmp': {},
+            '/run': {},
+            '/var/log': {}
+        },
         VolumesFrom: []
     };
 
@@ -704,6 +708,7 @@ function setupRedis(app, options, callback) {
         PortBindings: {
             '6379/tcp': [{ HostPort: '0', HostIp: isMac ? '0.0.0.0' : '127.0.0.1' }]
         },
+        ReadonlyRootfs: true,
         RestartPolicy: {
             'Name': 'always',
             'MaximumRetryCount': 0
