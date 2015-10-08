@@ -46,7 +46,7 @@ function setHealth(app, health, callback) {
 
         debugApp(app, 'marking as unhealthy since not seen for more than %s minutes', UNHEALTHY_THRESHOLD/(60 * 1000));
 
-        mailer.appDied(app);
+        if (app.appStoreId !== '') mailer.appDied(app); // do not send mails for dev apps
         gHealthInfo[app.id].emailSent = true;
     } else {
         debugApp(app, 'waiting for sometime to update the app health');
@@ -147,7 +147,9 @@ function processDockerEvents() {
                 if (app) context = context + '\n\n' + JSON.stringify(app, null, 4) + '\n';
 
                 debug('OOM Context: %s', context);
-                mailer.sendCrashNotification(program, context); // app can be null if it's an addon crash
+
+                // do not send mails for dev apps
+                if (app.appStoreId !== '') mailer.sendCrashNotification(program, context); // app can be null if it's an addon crash
             });
         });
 
