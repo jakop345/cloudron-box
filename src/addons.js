@@ -415,7 +415,7 @@ function backupMySql(app, options, callback) {
 function restoreMySql(app, options, callback) {
     callback = once(callback); // ChildProcess exit may or may not be called after error
 
-    setupMySql(app, function (error) {
+    setupMySql(app, options, function (error) {
         if (error) return callback(error);
 
         debugApp(app, 'restoreMySql');
@@ -520,7 +520,7 @@ function backupPostgreSql(app, options, callback) {
 function restorePostgreSql(app, options, callback) {
     callback = once(callback); // ChildProcess exit may or may not be called after error
 
-    setupPostgreSql(app, function (error) {
+    setupPostgreSql(app, options, function (error) {
         if (error) return callback(error);
 
         debugApp(app, 'restorePostgreSql');
@@ -625,7 +625,7 @@ function backupMongoDb(app, options, callback) {
 function restoreMongoDb(app, options, callback) {
     callback = once(callback); // ChildProcess exit may or may not be called after error
 
-    setupMongoDb(app, function (error) {
+    setupMongoDb(app, options, function (error) {
         if (error) return callback(error);
 
         debugApp(app, 'restoreMongoDb');
