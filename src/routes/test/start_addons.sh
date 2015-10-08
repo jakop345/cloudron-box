@@ -42,7 +42,9 @@ start_mysql() {
 
     docker rm -f mysql 2>/dev/null 1>&2 || true
 
-    docker run -dP --name=mysql -v "${mysqldatadir}:/var/lib/mysql" -v /tmp/mysql_vars.sh:/etc/mysql/mysql_vars.sh "${MYSQL_IMAGE}" >/dev/null
+    docker run -dP --name=mysql -v "${mysqldatadir}:/var/lib/mysql" \
+        --read-only -v /tmp -v /run -v /var/log \
+        -v /tmp/mysql_vars.sh:/etc/mysql/mysql_vars.sh "${MYSQL_IMAGE}" >/dev/null
 }
 
 start_mongodb() {
