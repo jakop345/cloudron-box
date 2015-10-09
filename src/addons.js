@@ -50,6 +50,12 @@ var KNOWN_ADDONS = {
         backup: NOOP,
         restore: setupOauth
     },
+    simpleauth: {
+        setup: setupSimpleAuth,
+        teardown: teardownSimpleAuth,
+        backup: NOOP,
+        restore: setupSimpleAuth
+    },
     ldap: {
         setup: setupLdap,
         teardown: teardownLdap,
@@ -272,6 +278,48 @@ function teardownOauth(app, options, callback) {
         if (error && error.reason !== DatabaseError.NOT_FOUND) console.error(error);
 
         appdb.unsetAddonConfig(app.id, 'oauth', callback);
+    });
+}
+
+function setupSimpleAuth(app, options, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof options, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
+    var appId = app.id;
+    var id = 'cid-addon-simpleauth-' + uuid.v4();
+    var scope = 'profile,roleUser';
+
+    debugApp(app, 'setupSimpleAuth: id:%s', id);
+
+    clientdb.delByAppId('addon-simpleauth-' + appId, function (error) { // remove existing creds
+        if (error && error.reason !== DatabaseError.NOT_FOUND) return callback(error);
+
+        clientdb.add(id, 'addon-simpleauth-' + appId, '', '', scope, function (error) {
+            if (error) return callback(error);
+
+            var env = [
+                'SIMPLE_AUTH_CLIENT_ID=' + id
+            ];
+
+            debugApp(app, 'Setting simple auth addon config to %j', env);
+
+            appdb.setAddonConfig(appId, 'simpleauth', env, callback);
+        });
+    });
+}
+
+function teardownSimpleAuth(app, options, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof options, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
+    debugApp(app, 'teardownSimpleAuth');
+
+    clientdb.delByAppId('addon-simpleauth-' + app.id, function (error) {
+        if (error && error.reason !== DatabaseError.NOT_FOUND) console.error(error);
+
+        appdb.unsetAddonConfig(app.id, 'simpleauth', callback);
     });
 }
 
