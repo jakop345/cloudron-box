@@ -10,6 +10,8 @@ exports = module.exports = {
 var assert = require('assert'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
+    ClientsError = require('../clients.js').ClientsError,
+    UserError = require('../user.js').UserError,
     simpleauth = require('../simpleauth.js');
 
 function login(req, res, next) {
@@ -20,6 +22,9 @@ function login(req, res, next) {
     if (typeof req.body.password !== 'string') return next(new HttpError(400, 'password is required'));
 
     simpleauth.login(req.body.clientId, req.body.username, req.body.password, function (error, result) {
+        if (error && error.reason === ClientsError.NOT_FOUND) return next(new HttpError(401, 'Unknown client'));
+        if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(401, 'Forbidden'));
+        if (error && error.reason === UserError.WRONG_PASSWORD) return next(new HttpError(401, 'Forbidden'));
         if (error) return next(new HttpError(500, error));
 
         var tmp = {
