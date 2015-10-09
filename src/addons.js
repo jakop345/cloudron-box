@@ -299,7 +299,8 @@ function setupSimpleAuth(app, options, callback) {
             if (error) return callback(error);
 
             var env = [
-                'SIMPLE_AUTH_CLIENT_ID=' + id
+                'SIMPLE_AUTH_CLIENT_ID=' + id,
+                'SIMPLE_AUTH_ORIGIN=' + config.adminOrigin()
             ];
 
             debugApp(app, 'Setting simple auth addon config to %j', env);
