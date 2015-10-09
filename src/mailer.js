@@ -93,7 +93,7 @@ function processQueue() {
         var mailQueueCopy = gMailQueue;
         gMailQueue = [ ];
 
-        debug('Processing mail queue of size %d (through %s:25)', mailQueueCopy.length, mailServerIp);
+        debug('Processing mail queue of size %d (through %s:2500)', mailQueueCopy.length, mailServerIp);
 
         async.mapSeries(mailQueueCopy, function iterator(mailOptions, callback) {
             transport.sendMail(mailOptions, function (error) {
