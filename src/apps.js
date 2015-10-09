@@ -691,11 +691,11 @@ function autoupdateApps(updateInfo, callback) { // updateInfo is { appId -> { ma
 }
 
 function canBackupApp(app) {
-    // only backup apps that are installed or pending configure. Rest of them are in some
+    // only backup apps that are installed or pending configure or called from apptask. Rest of them are in some
     // state not good for consistent backup (i.e addons may not have been setup completely)
     return (app.installationState === appdb.ISTATE_INSTALLED && app.health === appdb.HEALTH_HEALTHY) ||
             app.installationState === appdb.ISTATE_PENDING_CONFIGURE ||
-            app.installationState === appdb.ISTATE_PENDING_BACKUP ||
+            app.installationState === appdb.ISTATE_PENDING_BACKUP ||  // called from apptask
             app.installationState === appdb.ISTATE_PENDING_UPDATE; // called from apptask
 }
 
