@@ -9,7 +9,7 @@ var assert = require('assert'),
     debug = require('debug')('box:simpleauth'),
     user = require('./user.js'),
     tokendb = require('./tokendb.js'),
-    clientdb = require('./clientdb.js');
+    clients = require('./clients.js');
 
 function login(clientId, username, password, callback) {
     assert.strictEqual(typeof clientId, 'string');
@@ -19,7 +19,7 @@ function login(clientId, username, password, callback) {
 
     debug('login: client %s and user %s', clientId, username);
 
-    clientdb.get(clientId, function (error, clientObject) {
+    clients.get(clientId, function (error, clientObject) {
         if (error) return callback(error);
 
         user.verify(username, password, function (error, userObject) {
