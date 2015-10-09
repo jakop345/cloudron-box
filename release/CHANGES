@@ -221,3 +221,6 @@
 [0.0.66]
 - Readonly application and addon containers
 
+[0.0.67]
+- Fix email notifications
+
