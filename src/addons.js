@@ -241,17 +241,17 @@ function setupOauth(app, options, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     var appId = app.id;
-    var id = 'cid-addon-' + uuid.v4();
+    var id = 'cid-addon-oauth-' + uuid.v4();
     var clientSecret = hat(256);
     var redirectURI = 'https://' + config.appFqdn(app.location);
     var scope = 'profile,roleUser';
 
     debugApp(app, 'setupOauth: id:%s clientSecret:%s', id, clientSecret);
 
-    clientdb.delByAppId('addon-' + appId, function (error) { // remove existing creds
+    clientdb.delByAppId('addon-oauth-' + appId, function (error) { // remove existing creds
         if (error && error.reason !== DatabaseError.NOT_FOUND) return callback(error);
 
-        clientdb.add(id, 'addon-' + appId, clientSecret, redirectURI, scope, function (error) {
+        clientdb.add(id, 'addon-oauth-' + appId, clientSecret, redirectURI, scope, function (error) {
             if (error) return callback(error);
 
             var env = [
@@ -274,7 +274,7 @@ function teardownOauth(app, options, callback) {
 
     debugApp(app, 'teardownOauth');
 
-    clientdb.delByAppId('addon-' + app.id, function (error) {
+    clientdb.delByAppId('addon-oauth-' + app.id, function (error) {
         if (error && error.reason !== DatabaseError.NOT_FOUND) console.error(error);
 
         appdb.unsetAddonConfig(app.id, 'oauth', callback);
