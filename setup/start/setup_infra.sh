@@ -42,7 +42,7 @@ echo "Graphite container id: ${graphite_container_id}"
 mail_container_id=$(docker run --restart=always -d --name="mail" \
     -m 75m \
     --memory-swap 150m \
-    -p 127.0.0.1:25:25 \
+    -p 127.0.0.1:2500:25 \
     -h "${arg_fqdn}" \
     -e "DOMAIN_NAME=${arg_fqdn}" \
     -v "${DATA_DIR}/box/mail:/app/data" \
