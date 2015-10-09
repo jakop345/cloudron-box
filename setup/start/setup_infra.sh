@@ -97,7 +97,7 @@ mongodb_container_id=$(docker run --restart=always -d --name="mongodb" \
 echo "Mongodb container id: ${mongodb_container_id}"
 
 if [[ "${infra_version}" == "none" ]]; then
-    # if no existing infra was found (for new and restoring cloudons), download app backups
+    # if no existing infra was found (for new, upgraded and restored cloudons), download app backups
     echo "Marking installed apps for restore"
     mysql -u root -ppassword -e 'UPDATE apps SET installationState = "pending_restore" WHERE installationState = "installed"' box
 else
