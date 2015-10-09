@@ -53,6 +53,9 @@ CREATE TABLE IF NOT EXISTS apps(
 
     lastBackupId VARCHAR(128),
     lastBackupConfigJson VARCHAR(2048), // used for appstore and non-appstore installs. it's here so it's easy to do REST validation
+
+    oldConfigJson VARCHAR(2048), // used to pass old config for apptask
+
     PRIMARY KEY(id));
 
 CREATE TABLE IF NOT EXISTS appPortBindings(
