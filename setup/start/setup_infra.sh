@@ -38,11 +38,10 @@ graphite_container_id=$(docker run --restart=always -d --name="graphite" \
     "${GRAPHITE_IMAGE}")
 echo "Graphite container id: ${graphite_container_id}"
 
-# mail (the port 25 is used by the box code mailer.js. apps use linking and MAIL_SMTP_PORT (2500) in addons.js)
+# mail (MAIL_SMTP_PORT is 2500 in addons.js. used in mailer.js as well)
 mail_container_id=$(docker run --restart=always -d --name="mail" \
     -m 75m \
     --memory-swap 150m \
-    -p 127.0.0.1:25:2500 \
     -h "${arg_fqdn}" \
     -e "DOMAIN_NAME=${arg_fqdn}" \
     -v "${DATA_DIR}/box/mail:/app/data" \
