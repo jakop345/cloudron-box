@@ -96,13 +96,14 @@ mongodb_container_id=$(docker run --restart=always -d --name="mongodb" \
     "${MONGODB_IMAGE}")
 echo "Mongodb container id: ${mongodb_container_id}"
 
+# only touch apps in installed state. any other state is just resumed by the taskmanager
 if [[ "${infra_version}" == "none" ]]; then
     # if no existing infra was found (for new, upgraded and restored cloudons), download app backups
     echo "Marking installed apps for restore"
-    mysql -u root -ppassword -e 'UPDATE apps SET installationState = "pending_restore" WHERE installationState = "installed"' box
+    mysql -u root -ppassword -e 'UPDATE apps SET installationState = "pending_restore", oldConfigJson = NULL WHERE installationState = "installed"' box
 else
     # if existing infra was found, just mark apps for reconfiguration
-    mysql -u root -ppassword -e 'UPDATE apps SET installationState = "pending_configure" WHERE installationState = "installed"' box
+    mysql -u root -ppassword -e 'UPDATE apps SET installationState = "pending_configure", oldConfigJson = NULL  WHERE installationState = "installed"' box
 fi
 
 echo -n "${INFRA_VERSION}" > "${DATA_DIR}/INFRA_VERSION"
