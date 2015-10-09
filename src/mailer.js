@@ -87,7 +87,7 @@ function processQueue() {
 
         var transport = nodemailer.createTransport(smtpTransport({
             host: mailServerIp,
-            port: 25 // this value comes from setup_infra.sh mail port binding
+            port: 2500 // this value comes from mail container
         }));
 
         var mailQueueCopy = gMailQueue;
