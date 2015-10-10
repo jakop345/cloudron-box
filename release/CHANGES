@@ -225,3 +225,6 @@
 - Fix email notifications
 - Fix bug when restoring from certain backups
 
+[0.0.68]
+- Update graphite image
+
