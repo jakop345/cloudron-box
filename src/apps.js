@@ -152,6 +152,7 @@ function validatePortBindings(portBindings, tcpPorts) {
         config.get('internalPort'), /* internal app server (lo) */
         config.get('ldapPort'), /* ldap server (lo) */
         config.get('oauthProxyPort'), /* oauth proxy server (lo) */
+        config.get('simpleAuthPort'), /* simple auth server (lo) */
         3306, /* mysql (lo) */
         8000 /* graphite (lo) */
     ];

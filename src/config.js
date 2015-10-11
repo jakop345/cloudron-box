@@ -75,6 +75,7 @@ function initConfig() {
     data.internalPort = 3001;
     data.ldapPort = 3002;
     data.oauthProxyPort = 3003;
+    data.simpleAuthPort = 3004;
     data.backupKey = 'backupKey';
     data.aws = {
         backupBucket: null,
