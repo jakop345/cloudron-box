@@ -159,7 +159,7 @@ echo "==== Install nodejs ===="
 apt-get install -y curl
 curl -sL https://deb.nodesource.com/setup_0.12 | bash -
 apt-get install -y nodejs
-apt-get install -y python	# Install python which is required for npm rebuild
+apt-get install -y python2.7	# Install python which is required for npm rebuild
 
 echo "=== Rebuilding npm packages ==="
 cd "${INSTALLER_SOURCE_DIR}" && npm install --production
