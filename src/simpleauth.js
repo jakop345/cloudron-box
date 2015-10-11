@@ -116,6 +116,7 @@ function initializeExpressSync() {
     router.get ('/api/v1/logout', logout);
 
     app
+        .use(middleware.morgan('dev', { immediate: false }))
         .use(middleware.timeout(10000))
         .use(json)
         .use(router)
@@ -128,7 +129,7 @@ function start(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     gHttpServer = initializeExpressSync();
-    gHttpServer.listen(config.get('simpleAuthPort'), '127.0.0.1', callback);
+    gHttpServer.listen(config.get('simpleAuthPort'), '0.0.0.0', callback);
 }
 
 function stop(callback) {
