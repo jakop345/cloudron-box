@@ -90,11 +90,12 @@ function login(req, res, next) {
 }
 
 function logout(req, res, next) {
-    assert.strictEqual(typeof req.body, 'object');
+    assert.strictEqual(typeof req.query, 'object');
 
-    if (typeof req.body.accessToken !== 'string') return next(new HttpError(400, 'accessToken required'));
+    if (typeof req.query.access_token !== 'string') return next(new HttpError(400, 'access_token in query required'));
 
-    logoutLogic(req.body.accessToken, function (error) {
+    logoutLogic(req.query.access_token, function (error) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(401, 'Forbidden'));
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(200, {}));
@@ -117,7 +118,8 @@ function initializeExpressSync() {
     app
         .use(middleware.timeout(10000))
         .use(json)
-        .use(router);
+        .use(router)
+        .use(middleware.lastMile());
 
     return httpServer;
 }
