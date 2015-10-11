@@ -26,7 +26,6 @@ var CLIENT = {
     redirectURI: '',
     scope: 'user,profile'
 };
-var token = null;
 
 var server;
 function setup(done) {
@@ -48,9 +47,6 @@ function setup(done) {
                 expect(result.statusCode).to.eql(201);
                 expect(scope1.isDone()).to.be.ok();
                 expect(scope2.isDone()).to.be.ok();
-
-                // stash token for further use
-                token = result.body.token;
 
                 callback();
             });
@@ -198,7 +194,76 @@ describe('SimpleAuth API', function () {
                 expect(result.body.user.username).to.be.a('string');
                 expect(result.body.user.email).to.be.a('string');
                 expect(result.body.user.admin).to.be.a('boolean');
+
+                request.get(SERVER_URL + '/api/v1/profile')
+                .query({ access_token: result.body.accessToken })
+                .end(function (error, result) {
+                    expect(error).to.be(null);
+                    expect(result.body).to.be.an('object');
+                    expect(result.body.username).to.eql(USERNAME);
+
+                    done();
+                });
+            });
+        });
+    });
+
+    describe('logout', function () {
+        var accessToken;
+
+        before(function (done) {
+            var body = {
+                clientId: CLIENT.id,
+                username: USERNAME,
+                password: PASSWORD
+            };
+
+            request.post(SERVER_URL + '/api/v1/simpleauth/login')
+            .send(body)
+            .end(function (error, result) {
+                expect(error).to.be(null);
+                expect(result.statusCode).to.equal(201);
+
+                accessToken = result.body.accessToken;
+
                 done();
+            });
+        });
+
+        it('fails without access_token', function (done) {
+            request.get(SERVER_URL + '/api/v1/simpleauth/logout')
+            .end(function (error, result) {
+                expect(error).to.be(null);
+                expect(result.statusCode).to.equal(401);
+                done();
+            });
+        });
+
+        it('fails with unkonwn access_token', function (done) {
+            request.get(SERVER_URL + '/api/v1/simpleauth/logout')
+            .query({ access_token: accessToken+accessToken })
+            .end(function (error, result) {
+                expect(error).to.be(null);
+                expect(result.statusCode).to.equal(401);
+                done();
+            });
+        });
+
+        it('succeeds', function (done) {
+            request.get(SERVER_URL + '/api/v1/simpleauth/logout')
+            .query({ access_token: accessToken })
+            .end(function (error, result) {
+                expect(error).to.be(null);
+                expect(result.statusCode).to.equal(200);
+
+                request.get(SERVER_URL + '/api/v1/profile')
+                .query({ access_token: accessToken })
+                .end(function (error, result) {
+                    expect(error).to.be(null);
+                    expect(result.statusCode).to.equal(401);
+
+                    done();
+                });
             });
         });
     });

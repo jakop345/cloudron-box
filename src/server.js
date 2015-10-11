@@ -143,7 +143,7 @@ function initializeExpressSync() {
 
     // basic auth
     router.post('/api/v1/simpleauth/login', routes.simpleauth.login);
-    router.get ('/api/v1/simpleauth/logout', routes.simpleauth.logout);
+    router.get ('/api/v1/simpleauth/logout', profileScope, routes.simpleauth.logout);
 
     // app routes
     router.get ('/api/v1/apps',          appsScope, routes.apps.getApps);
