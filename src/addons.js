@@ -333,8 +333,8 @@ function setupLdap(app, options, callback) {
 
     var env = [
         'LDAP_SERVER=172.17.42.1',
-        'LDAP_PORT=3002',
-        'LDAP_URL=ldap://172.17.42.1:3002',
+        'LDAP_PORT=' + config.get('ldapPort'),
+        'LDAP_URL=ldap://172.17.42.1:' + config.get('ldapPort'),
         'LDAP_USERS_BASE_DN=ou=users,dc=cloudron',
         'LDAP_GROUPS_BASE_DN=ou=groups,dc=cloudron',
         'LDAP_BIND_DN=cn='+ app.id + ',ou=apps,dc=cloudron',
