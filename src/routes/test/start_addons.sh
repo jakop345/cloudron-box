@@ -65,9 +65,20 @@ start_mongodb() {
         -v /tmp/mongodb_vars.sh:/etc/mongodb_vars.sh "${MONGODB_IMAGE}" >/dev/null
 }
 
+start_mail() {
+    local mongodb_vars="MONGODB_ROOT_PASSWORD=${root_password}"
+
+    docker rm -f mail 2>/dev/null 1>&2 || true
+
+    docker run -dP --name=mail -e DOMAIN_NAME="localhost" \
+        --read-only -v /tmp -v /run -v /var/log \
+        -v /tmp/maildata:/app/data "${MAIL_IMAGE}" >/dev/null
+}
+
 start_mysql
 start_postgresql
 start_mongodb
+start_mail
 
 echo -n "Waiting for addons to start"
 for i in {1..10}; do
