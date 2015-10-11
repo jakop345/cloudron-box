@@ -35,7 +35,7 @@ for script in "${scripts[@]}"; do
 done
 
 if ! docker inspect cloudron/test:3.0.0 >/dev/null 2>/dev/null; then
-    echo "docker pull cloudron/test:2.0.1 for tests to run"
+    echo "docker pull cloudron/test:3.0.0 for tests to run"
     exit 1
 fi
 
