@@ -228,3 +228,5 @@
 [0.0.68]
 - Update graphite image
 
+[0.0.69]
+- Add simpleauth addon support
