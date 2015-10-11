@@ -715,6 +715,24 @@ function forwardRedisPort(appId, callback) {
     });
 }
 
+function stopAndRemoveRedis(container, callback) {
+    function ignoreError(func) {
+        return function (callback) {
+            func(function (error) {
+                if (error) debug('stopAndRemoveRedis: Ignored error:', error);
+                callback();
+            });
+        };
+    }
+
+    // stopping redis with SIGTERM makes it commit the database to disk
+    async.series([
+        ignoreError(container.stop.bind(container, { t: 10 })),
+        ignoreError(container.wait.bind(container)),
+        ignoreError(container.remove.bind(container, { force: true, v: true }))
+    ], callback);
+}
+
 // Ensures that app's addon redis container is running. Can be called when named container already exists/running
 function setupRedis(app, options, callback) {
     assert.strictEqual(typeof app, 'object');
@@ -774,7 +792,7 @@ function setupRedis(app, options, callback) {
     ];
 
     var redisContainer = docker.getContainer(createOptions.name);
-    redisContainer.remove({ force: true, v: true }, function (ignoredError) {
+    stopAndRemoveRedis(redisContainer, function () {
         docker.createContainer(createOptions, function (error) {
             if (error && error.statusCode !== 409) return callback(error); // if not already created
 
