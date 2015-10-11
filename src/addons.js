@@ -50,6 +50,12 @@ var KNOWN_ADDONS = {
         backup: NOOP,
         restore: setupOauth
     },
+    simpleauth: {
+        setup: setupSimpleAuth,
+        teardown: teardownSimpleAuth,
+        backup: NOOP,
+        restore: setupSimpleAuth
+    },
     ldap: {
         setup: setupLdap,
         teardown: teardownLdap,
@@ -235,17 +241,17 @@ function setupOauth(app, options, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     var appId = app.id;
-    var id = 'cid-addon-' + uuid.v4();
+    var id = 'cid-addon-oauth-' + uuid.v4();
     var clientSecret = hat(256);
     var redirectURI = 'https://' + config.appFqdn(app.location);
     var scope = 'profile,roleUser';
 
     debugApp(app, 'setupOauth: id:%s clientSecret:%s', id, clientSecret);
 
-    clientdb.delByAppId('addon-' + appId, function (error) { // remove existing creds
+    clientdb.delByAppId('addon-oauth-' + appId, function (error) { // remove existing creds
         if (error && error.reason !== DatabaseError.NOT_FOUND) return callback(error);
 
-        clientdb.add(id, 'addon-' + appId, clientSecret, redirectURI, scope, function (error) {
+        clientdb.add(id, 'addon-oauth-' + appId, clientSecret, redirectURI, scope, function (error) {
             if (error) return callback(error);
 
             var env = [
@@ -268,10 +274,55 @@ function teardownOauth(app, options, callback) {
 
     debugApp(app, 'teardownOauth');
 
-    clientdb.delByAppId('addon-' + app.id, function (error) {
+    clientdb.delByAppId('addon-oauth-' + app.id, function (error) {
         if (error && error.reason !== DatabaseError.NOT_FOUND) console.error(error);
 
         appdb.unsetAddonConfig(app.id, 'oauth', callback);
+    });
+}
+
+function setupSimpleAuth(app, options, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof options, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
+    var appId = app.id;
+    var id = 'cid-addon-simpleauth-' + uuid.v4();
+    var scope = 'profile,roleUser';
+
+    debugApp(app, 'setupSimpleAuth: id:%s', id);
+
+    clientdb.delByAppId('addon-simpleauth-' + appId, function (error) { // remove existing creds
+        if (error && error.reason !== DatabaseError.NOT_FOUND) return callback(error);
+
+        clientdb.add(id, 'addon-simpleauth-' + appId, '', '', scope, function (error) {
+            if (error) return callback(error);
+
+            var env = [
+                'SIMPLE_AUTH_SERVER=172.17.42.1',
+                'SIMPLE_AUTH_PORT=' + config.get('simpleAuthPort'),
+                'SIMPLE_AUTH_URL=http://172.17.42.1:' + config.get('simpleAuthPort'),
+                'SIMPLE_AUTH_CLIENT_ID=' + id
+            ];
+
+            debugApp(app, 'Setting simple auth addon config to %j', env);
+
+            appdb.setAddonConfig(appId, 'simpleauth', env, callback);
+        });
+    });
+}
+
+function teardownSimpleAuth(app, options, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof options, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
+    debugApp(app, 'teardownSimpleAuth');
+
+    clientdb.delByAppId('addon-simpleauth-' + app.id, function (error) {
+        if (error && error.reason !== DatabaseError.NOT_FOUND) console.error(error);
+
+        appdb.unsetAddonConfig(app.id, 'simpleauth', callback);
     });
 }
 
@@ -282,8 +333,8 @@ function setupLdap(app, options, callback) {
 
     var env = [
         'LDAP_SERVER=172.17.42.1',
-        'LDAP_PORT=3002',
-        'LDAP_URL=ldap://172.17.42.1:3002',
+        'LDAP_PORT=' + config.get('ldapPort'),
+        'LDAP_URL=ldap://172.17.42.1:' + config.get('ldapPort'),
         'LDAP_USERS_BASE_DN=ou=users,dc=cloudron',
         'LDAP_GROUPS_BASE_DN=ou=groups,dc=cloudron',
         'LDAP_BIND_DN=cn='+ app.id + ',ou=apps,dc=cloudron',

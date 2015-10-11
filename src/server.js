@@ -43,11 +43,7 @@ function initializeExpressSync() {
     app.set('view options', { layout: true, debug: true });
     app.set('view engine', 'ejs');
 
-    if (process.env.BOX_ENV === 'test') {
-       app.use(express.static(path.join(__dirname, '/../webadmin')));
-    } else {
-        app.use(middleware.morgan('dev', { immediate: false }));
-    }
+    if (process.env.BOX_ENV !== 'test') app.use(middleware.morgan('Box :method :url :status :response-time ms - :res[content-length]', { immediate: false }));
 
     var router = new express.Router();
     router.del = router.delete; // amend router.del for readability further on
@@ -210,7 +206,7 @@ function initializeInternalExpressSync() {
     var json = middleware.json({ strict: true, limit: QUERY_LIMIT }), // application/json
         urlencoded = middleware.urlencoded({ extended: false, limit: QUERY_LIMIT }); // application/x-www-form-urlencoded
 
-    app.use(middleware.morgan('dev', { immediate: false }));
+    if (process.env.BOX_ENV !== 'test') app.use(middleware.morgan('Box Internal :method :url :status :response-time ms - :res[content-length]', { immediate: false }));
 
     var router = new express.Router();
     router.del = router.delete; // amend router.del for readability further on
