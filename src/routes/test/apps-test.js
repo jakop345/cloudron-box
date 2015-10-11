@@ -157,7 +157,7 @@ function cleanup(done) {
 
         function (callback) { setTimeout(callback, 2000); }, // give taskmanager tasks couple of seconds to finish
 
-        child_process.exec.bind(null, 'docker rm -f mysql; docker rm -f postgresql; docker rm -f mongodb')
+        child_process.exec.bind(null, 'docker rm -f mysql; docker rm -f postgresql; docker rm -f mongodb; docker rm -f mail')
     ], done);
 }
 
