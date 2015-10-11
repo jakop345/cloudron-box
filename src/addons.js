@@ -299,8 +299,10 @@ function setupSimpleAuth(app, options, callback) {
             if (error) return callback(error);
 
             var env = [
-                'SIMPLE_AUTH_CLIENT_ID=' + id,
-                'SIMPLE_AUTH_ORIGIN=' + config.adminOrigin()
+                'SIMPLE_AUTH_SERVER=172.17.42.1',
+                'SIMPLE_AUTH_PORT=' + config.get('simpleAuthPort'),
+                'SIMPLE_AUTH_URL=http://172.17.42.1:' + config.get('simpleAuthPort'),
+                'SIMPLE_AUTH_CLIENT_ID=' + id
             ];
 
             debugApp(app, 'Setting simple auth addon config to %j', env);
