@@ -42,8 +42,8 @@ var SERVER_URL = 'http://localhost:' + config.get('port');
 
 // Test image information
 var TEST_IMAGE_REPO = 'cloudron/test';
-var TEST_IMAGE_TAG = '3.0.0';
-var TEST_IMAGE_ID = '791889dc2637d91f2cc282932b7c2328c2d684fa3f829a3badba7f30679cf1e1';
+var TEST_IMAGE_TAG = '5.0.0';
+var TEST_IMAGE_ID = 'c47a9a596ec9256fd0000b9e3520f941ac46f0a6b17e298d26cc6badf745c99c';
 
 var APP_STORE_ID = 'test', APP_ID;
 var APP_LOCATION = 'appslocation';
