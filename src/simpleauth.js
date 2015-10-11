@@ -116,8 +116,8 @@ function initializeExpressSync() {
     router.get ('/api/v1/logout', logout);
 
     app
-        .use(middleware.morgan('dev', { immediate: false }))
         .use(middleware.timeout(10000))
+        .use(middleware.morgan('SimpleAuth :method :url :status :response-time ms - :res[content-length]', { immediate: false }))
         .use(json)
         .use(router)
         .use(middleware.lastMile());
