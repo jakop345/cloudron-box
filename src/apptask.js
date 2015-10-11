@@ -524,7 +524,7 @@ function waitForDnsPropagation(app, callback) {
 
 // updates the app object and the database
 function updateApp(app, values, callback) {
-    debugApp(app, 'installationState: %s progress: %s', app.installationState, app.installationProgress);
+    debugApp(app, 'updating app with values: %j', values);
 
     appdb.update(app.id, values, function (error) {
         if (error) return callback(error);
