@@ -115,9 +115,10 @@ function initializeExpressSync() {
     router.post('/api/v1/login', login);
     router.get ('/api/v1/logout', logout);
 
+    if (process.env.BOX_ENV !== 'test') app.use(middleware.morgan('SimpleAuth :method :url :status :response-time ms - :res[content-length]', { immediate: false }));
+
     app
         .use(middleware.timeout(10000))
-        .use(middleware.morgan('SimpleAuth :method :url :status :response-time ms - :res[content-length]', { immediate: false }))
         .use(json)
         .use(router)
         .use(middleware.lastMile());
