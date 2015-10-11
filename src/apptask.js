@@ -860,10 +860,7 @@ function uninstall(app, callback) {
 
 function runApp(app, callback) {
     startContainer(app, function (error) {
-        if (error) {
-            debugApp(app, 'Error starting container : %s', error);
-            return updateApp(app, { runState: appdb.RSTATE_ERROR }, callback);
-        }
+        if (error) return callback(error);
 
         updateApp(app, { runState: appdb.RSTATE_RUNNING }, callback);
     });
