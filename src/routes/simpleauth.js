@@ -42,7 +42,9 @@ function login(req, res, next) {
 }
 
 function logout(req, res, next) {
-    simpleauth.logout(function (error) {
+    assert.strictEqual(typeof req.user, 'object');
+
+    simpleauth.logout(req.accessToken, function (error) {
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(200, {}));
