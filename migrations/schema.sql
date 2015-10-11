@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS tokens(
 
 CREATE TABLE IF NOT EXISTS clients(
     id VARCHAR(128) NOT NULL UNIQUE,
-    appId VARCHAR(128) NOT NULL,
+    appId VARCHAR(128) NOT NULL,                // this is for the form <type>-appId to allow easy clearing of tokens of a type
     clientSecret VARCHAR(512) NOT NULL,
     redirectURI VARCHAR(512) NOT NULL,
     scope VARCHAR(512) NOT NULL,
