@@ -141,10 +141,6 @@ function initializeExpressSync() {
     router.get ('/api/v1/oauth/clients/:clientId/tokens', settingsScope, routes.clients.getClientTokens);
     router.del ('/api/v1/oauth/clients/:clientId/tokens', settingsScope, routes.clients.delClientTokens);
 
-    // basic auth
-    router.post('/api/v1/simpleauth/login', routes.simpleauth.login);
-    router.get ('/api/v1/simpleauth/logout', profileScope, routes.simpleauth.logout);
-
     // app routes
     router.get ('/api/v1/apps',          appsScope, routes.apps.getApps);
     router.get ('/api/v1/apps/:id',      appsScope, routes.apps.getApp);
