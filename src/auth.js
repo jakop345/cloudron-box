@@ -92,7 +92,7 @@ function initialize(callback) {
         });
     }));
 
-    passport.use(new BearerStrategy({ passReqToCallback: true }, function (req, accessToken, callback) {
+    passport.use(new BearerStrategy(function (accessToken, callback) {
         tokendb.get(accessToken, function (error, token) {
             if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
             if (error) return callback(error);
@@ -115,9 +115,6 @@ function initialize(callback) {
                 // legacy tokens assuming a user access token
                 tokenType = tokendb.TYPE_USER;
             }
-
-            // attach accessToken to req for further use
-            req.accessToken = accessToken;
 
             userdb.get(token.identifier, function (error, user) {
                 if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
