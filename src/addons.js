@@ -774,7 +774,7 @@ function setupRedis(app, options, callback) {
     ];
 
     var redisContainer = docker.getContainer(createOptions.name);
-    redisContainer.remove({ force: true, v: false }, function (ignoredError) {
+    redisContainer.remove({ force: true, v: true }, function (ignoredError) {
         docker.createContainer(createOptions, function (error) {
             if (error && error.statusCode !== 409) return callback(error); // if not already created
 
@@ -800,7 +800,7 @@ function teardownRedis(app, options, callback) {
 
    var removeOptions = {
        force: true, // kill container if it's running
-       v: false // removes volumes associated with the container
+       v: true // removes volumes associated with the container
    };
 
    container.remove(removeOptions, function (error) {
