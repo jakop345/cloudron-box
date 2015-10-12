@@ -146,10 +146,6 @@ echo "==== Install collectd ==="
 apt-get install -y collectd collectd-utils
 update-rc.d -f collectd remove
 
-echo "=== Install tmpreaper ==="
-apt-get install -y tmpreaper
-sed -e 's/SHOWWARNING=true/# SHOWWARNING=true/' -i /etc/tmpreaper.conf
-
 echo "==== Extracting installer source ===="
 rm -rf "${INSTALLER_SOURCE_DIR}" && mkdir -p "${INSTALLER_SOURCE_DIR}"
 tar xvf /root/installer.tar -C "${INSTALLER_SOURCE_DIR}" && rm /root/installer.tar
