@@ -148,6 +148,21 @@ session.ensureLoggedIn = function (redirectTo) {
     };
 };
 
+function renderTemplate(res, template, data) {
+    assert.strictEqual(typeof res, 'object');
+    assert.strictEqual(typeof template, 'string');
+    assert.strictEqual(typeof data, 'object');
+
+    settings.getCloudronName(function (error, cloudronName) {
+        if (error) console.error(error);
+
+        // amend details which the header expects
+        data.cloudronName = cloudronName || 'Cloudron';
+
+        res.render(template, data);
+    });
+}
+
 function sendErrorPageOrRedirect(req, res, message) {
     assert.strictEqual(typeof req, 'object');
     assert.strictEqual(typeof res, 'object');
@@ -156,16 +171,19 @@ function sendErrorPageOrRedirect(req, res, message) {
     debug('sendErrorPageOrRedirect: returnTo "%s".', req.query.returnTo, message);
 
     if (typeof req.query.returnTo !== 'string') {
-        res.render('error', {
+        renderTemplate(res, 'error', {
             adminOrigin: config.adminOrigin(),
             message: message
         });
     } else {
         var u = url.parse(req.query.returnTo);
-        if (!u.protocol || !u.host) return res.render('error', {
-            adminOrigin: config.adminOrigin(),
-            message: 'Invalid request. returnTo query is not a valid URI. ' + message
-        });
+        if (!u.protocol || !u.host) {
+            renderTemplate(res, 'error', {
+                adminOrigin: config.adminOrigin(),
+                message: 'Invalid request. returnTo query is not a valid URI. ' + message
+            });
+            return;
+        }
 
         res.redirect(util.format('%s//%s', u.protocol, u.host));
     }
@@ -178,7 +196,7 @@ function sendError(req, res, message) {
     assert.strictEqual(typeof res, 'object');
     assert.strictEqual(typeof message, 'string');
 
-    res.render('error', {
+    renderTemplate(res, 'error', {
         adminOrigin: config.adminOrigin(),
         message: message
     });
@@ -191,49 +209,40 @@ function loginForm(req, res) {
     var u = url.parse(req.session.returnTo, true);
     if (!u.query.client_id) return sendErrorPageOrRedirect(req, res, 'Invalid login request. No client_id provided.');
 
-    var cloudronName = '';
-
     function render(applicationName, applicationLogo) {
-        res.render('login', {
+        renderTemplate(res, 'login', {
             adminOrigin: config.adminOrigin(),
             csrf: req.csrfToken(),
-            cloudronName: cloudronName,
             applicationName: applicationName,
             applicationLogo: applicationLogo,
             error: req.query.error || null
         });
     }
 
-    settings.getCloudronName(function (error, name) {
-        if (error) return sendError(req, res, 'Internal Error');
+    clientdb.get(u.query.client_id, function (error, result) {
+        if (error) return sendError(req, res, 'Unknown OAuth client');
 
-        cloudronName = name;
+        // Handle our different types of oauth clients
+        var appId = result.appId;
+        if (appId === constants.ADMIN_CLIENT_ID) {
+            return render(constants.ADMIN_NAME, '/api/v1/cloudron/avatar');
+        } else if (appId === constants.TEST_CLIENT_ID) {
+            return render(constants.TEST_NAME, '/api/v1/cloudron/avatar');
+        } else if (appId.indexOf('external-') === 0) {
+            return render('External Application', '/api/v1/cloudron/avatar');
+        } else if (appId.indexOf('addon-oauth') === 0) {
+            appId = appId.slice('addon-oauth'.length);
+        } else if (appId.indexOf('addon-simpleauth') === 0) {
+            appId = appId.slice('addon-simpleauth'.length);
+        } else if (appId.indexOf('proxy-') === 0) {
+            appId = appId.slice('proxy-'.length);
+        }
 
-        clientdb.get(u.query.client_id, function (error, result) {
-            if (error) return sendError(req, res, 'Unknown OAuth client');
+        appdb.get(appId, function (error, result) {
+            if (error) return sendErrorPageOrRedirect(req, res, 'Unknown Application for those OAuth credentials');
 
-            // Handle our different types of oauth clients
-            var appId = result.appId;
-            if (appId === constants.ADMIN_CLIENT_ID) {
-                return render(constants.ADMIN_NAME, '/api/v1/cloudron/avatar');
-            } else if (appId === constants.TEST_CLIENT_ID) {
-                return render(constants.TEST_NAME, '/api/v1/cloudron/avatar');
-            } else if (appId.indexOf('external-') === 0) {
-                return render('External Application', '/api/v1/cloudron/avatar');
-            } else if (appId.indexOf('addon-oauth') === 0) {
-                appId = appId.slice('addon-oauth'.length);
-            } else if (appId.indexOf('addon-simpleauth') === 0) {
-                appId = appId.slice('addon-simpleauth'.length);
-            } else if (appId.indexOf('proxy-') === 0) {
-                appId = appId.slice('proxy-'.length);
-            }
-
-            appdb.get(appId, function (error, result) {
-                if (error) return sendErrorPageOrRedirect(req, res, 'Unknown Application for those OAuth credentials');
-
-                var applicationName = result.location || config.fqdn();
-                render(applicationName, '/api/v1/apps/' + result.id + '/icon');
-            });
+            var applicationName = result.location || config.fqdn();
+            render(applicationName, '/api/v1/apps/' + result.id + '/icon');
         });
     });
 }
@@ -261,7 +270,7 @@ function logout(req, res) {
 // Form to enter email address to send a password reset request mail
 // -> GET /api/v1/session/password/resetRequest.html
 function passwordResetRequestSite(req, res) {
-    res.render('password_reset_request', { adminOrigin: config.adminOrigin(), csrf: req.csrfToken() });
+    renderTemplate(res, 'password_reset_request', { adminOrigin: config.adminOrigin(), csrf: req.csrfToken() });
 }
 
 // This route is used for above form submission
@@ -285,7 +294,7 @@ function passwordResetRequest(req, res, next) {
 
 // -> GET /api/v1/session/password/sent.html
 function passwordSentSite(req, res) {
-    res.render('password_reset_sent', { adminOrigin: config.adminOrigin() });
+    renderTemplate(res, 'password_reset_sent', { adminOrigin: config.adminOrigin() });
 }
 
 // -> GET /api/v1/session/password/setup.html
@@ -297,7 +306,12 @@ function passwordSetupSite(req, res, next) {
     user.getByResetToken(req.query.reset_token, function (error, user) {
         if (error) return next(new HttpError(401, 'Invalid reset_token'));
 
-        res.render('password_setup', { adminOrigin: config.adminOrigin(), user: user, csrf: req.csrfToken(), resetToken: req.query.reset_token });
+        renderTemplate(res, 'password_setup', {
+            adminOrigin: config.adminOrigin(),
+            user: user,
+            csrf: req.csrfToken(),
+            resetToken: req.query.reset_token
+        });
     });
 }
 
@@ -310,7 +324,12 @@ function passwordResetSite(req, res, next) {
     user.getByResetToken(req.query.reset_token, function (error, user) {
         if (error) return next(new HttpError(401, 'Invalid reset_token'));
 
-        res.render('password_reset', { adminOrigin: config.adminOrigin(), user: user, csrf: req.csrfToken(), resetToken: req.query.reset_token });
+        renderTemplate(res, 'password_reset', {
+            adminOrigin: config.adminOrigin(),
+            user: user,
+            csrf: req.csrfToken(),
+            resetToken: req.query.reset_token
+        });
     });
 }
 
@@ -345,7 +364,7 @@ var callback = [
     session.ensureLoggedIn('/api/v1/session/login'),
     function (req, res) {
         debug('callback: with callback server ' + req.query.redirectURI);
-        res.render('callback', { adminOrigin: config.adminOrigin(), callbackServer: req.query.redirectURI });
+        renderTemplate(res, 'callback', { adminOrigin: config.adminOrigin(), callbackServer: req.query.redirectURI });
     }
 ];
 
