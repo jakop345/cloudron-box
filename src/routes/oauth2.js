@@ -232,7 +232,7 @@ function loginForm(req, res) {
                 if (error) return sendErrorPageOrRedirect(req, res, 'Unknown Application for those OAuth credentials');
 
                 var applicationName = result.location || config.fqdn();
-                render(applicationName, '/api/v1/cloudron/avatar');
+                render(applicationName, '/api/v1/apps/' + result.id + '/icon');
             });
         });
     });
