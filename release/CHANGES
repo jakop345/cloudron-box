@@ -229,3 +229,5 @@
 - Update graphite image
 - Add simpleauth addon support
 
+[0.0.69]
+- Support newer manifest format
