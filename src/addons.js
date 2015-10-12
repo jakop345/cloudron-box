@@ -89,7 +89,7 @@ var KNOWN_ADDONS = {
     redis: {
         setup: setupRedis,
         teardown: teardownRedis,
-        backup: NOOP, // no backup because we store redis as part of app's volume
+        backup: backupRedis,
         restore: setupRedis // same thing
     },
     localstorage: {
@@ -755,7 +755,7 @@ function setupRedis(app, options, callback) {
         name: 'redis-' + app.id,
         Hostname: config.appFqdn(app.location),
         Tty: true,
-        Image: 'cloudron/redis:0.6.0', // if you change this, fix setup/INFRA_VERSION as well
+        Image: 'cloudron/redis:0.6.1', // if you change this, fix setup/INFRA_VERSION as well
         Cmd: null,
         Volumes: {
             '/tmp': {},
@@ -836,4 +836,20 @@ function teardownRedis(app, options, callback) {
             appdb.unsetAddonConfig(app.id, 'redis', callback);
         });
    });
+}
+
+function backupRedis(app, options, callback) {
+    debugApp(app, 'Backing up redis');
+
+    callback = once(callback); // ChildProcess exit may or may not be called after error
+
+    var cp = spawn('/usr/bin/docker', [ 'exec', 'redis-' + app.id, '/addons/redis/service.sh', 'backup' ]);
+    cp.on('error', callback);
+    cp.on('exit', function (code, signal) {
+        debugApp(app, 'backupRedis: done. code:%s signal:%s', code, signal);
+        if (!callback.called) callback(code ? 'backupRedis failed with status ' + code : null);
+    });
+
+    cp.stdout.pipe(process.stdout);
+    cp.stderr.pipe(process.stderr);
 }
