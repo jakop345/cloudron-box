@@ -248,6 +248,7 @@ function setupOauth(app, options, callback) {
 
     debugApp(app, 'setupOauth: id:%s clientSecret:%s', id, clientSecret);
 
+    // ensure 'addon-oauth-' is in sync with oauth.js
     clientdb.delByAppId('addon-oauth-' + appId, function (error) { // remove existing creds
         if (error && error.reason !== DatabaseError.NOT_FOUND) return callback(error);
 
@@ -292,6 +293,7 @@ function setupSimpleAuth(app, options, callback) {
 
     debugApp(app, 'setupSimpleAuth: id:%s', id);
 
+    // ensure 'addon-simpleauth-' is in sync with oauth.js
     clientdb.delByAppId('addon-simpleauth-' + appId, function (error) { // remove existing creds
         if (error && error.reason !== DatabaseError.NOT_FOUND) return callback(error);
 
