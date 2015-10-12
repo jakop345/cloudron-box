@@ -535,16 +535,20 @@ function stage(fromEnv, toEnv, stageVersion) {
 
                 var sourceTarballName = url.parse(fromReleases[latestReachableFromVersion].sourceTarballUrl).pathname.substr(1);
                 var upgrade = fromReleases[latestReachableFromVersion].upgrade;
+                var tmpFile = '/tmp/' + sourceTarballName;
 
                 console.log('Copying source code tarball %s to %s'.gray, sourceTarballName, toEnv.tag);
 
-                var cmd = util.format(
-                    's3cmd get -v --ssl --access_key="%s" --secret_key="%s" "s3://%s/%s" - ' +
-                    ' | s3cmd put -v --ssl --add-header=x-amz-acl:authenticated-read --access_key="%s" --secret_key="%s" - "s3://%s/%s"',
-                    fromEnv.accessKeyId, fromEnv.secretAccessKey, fromEnv.releasesBucket, sourceTarballName,
-                    toEnv.accessKeyId, toEnv.secretAccessKey, toEnv.releasesBucket, sourceTarballName
+                console.log('Fetching source code tarball...'.gray);
+                var cmd = util.format('s3cmd get --force -v --ssl --access_key="%s" --secret_key="%s" "s3://%s/%s" %s',
+                    fromEnv.accessKeyId, fromEnv.secretAccessKey, fromEnv.releasesBucket, sourceTarballName, tmpFile
                 );
+                execSync(cmd, { stdio: [ null, process.stdout, process.stderr ] } );
 
+                console.log('Uploading source code tarball...'.gray);
+                cmd = util.format('s3cmd put -v --ssl --add-header=x-amz-acl:authenticated-read --access_key="%s" --secret_key="%s" %s "s3://%s/%s"',
+                    toEnv.accessKeyId, toEnv.secretAccessKey, tmpFile, toEnv.releasesBucket, sourceTarballName
+                );
                 execSync(cmd, { stdio: [ null, process.stdout, process.stderr ] } );
 
                 var strippedToReleases = stripUnreachable(toReleases);
@@ -560,6 +564,8 @@ function stage(fromEnv, toEnv, stageVersion) {
                     author: username + ' <' + email + '>',
                     next: null
                 };
+
+                safe.fs.unlinkSync(tmpFile);
 
                 verifyAndUpload(toEnv, toReleases, function (error) {
                     if (error) return exit(error);
