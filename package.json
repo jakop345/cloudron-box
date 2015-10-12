@@ -25,11 +25,16 @@
     "superagent": "^0.21.0"
   },
   "devDependencies": {
+    "async": "https://registry.npmjs.org/async/-/async-0.9.0.tgz",
+    "commander": "^2.8.1",
     "expect.js": "^0.3.1",
     "istanbul": "^0.3.5",
     "lodash": "^3.2.0",
     "mocha": "^2.1.0",
-    "nock": "^0.59.1"
+    "nock": "^0.59.1",
+    "superagent": "https://registry.npmjs.org/superagent/-/superagent-0.21.0.tgz",
+    "supererror": "^0.7.0",
+    "yesno": "0.0.1"
   },
   "scripts": {
     "test": "NODE_ENV=test ./node_modules/istanbul/lib/cli.js test $1 ./node_modules/mocha/bin/_mocha -- -R spec ./src/test",
