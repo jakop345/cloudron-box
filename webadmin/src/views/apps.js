@@ -19,7 +19,8 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         portBindings: {},
         portBindingsEnabled: {},
         portBindingsInfo: {},
-        accessRestriction: ''
+        accessRestriction: '',
+        oauthProxy: false
     };
 
     $scope.appUninstall = {
@@ -53,6 +54,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appConfigure.password = '';
         $scope.appConfigure.portBindings = {};
         $scope.appConfigure.accessRestriction = '';
+        $scope.appConfigure.oauthProxy = false;
 
         $scope.appConfigureForm.$setPristine();
         $scope.appConfigureForm.$setUntouched();
@@ -90,6 +92,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appConfigure.app = app;
         $scope.appConfigure.location = app.location;
         $scope.appConfigure.accessRestriction = app.accessRestriction;
+        $scope.appConfigure.oauthProxy = app.oauthProxy;
         $scope.appConfigure.portBindingsInfo = app.manifest.tcpPorts || {}; // Portbinding map only for information
         $scope.appConfigure.portBindings = {};                              // This is the actual model holding the env:port pair
         $scope.appConfigure.portBindingsEnabled = {};                       // This is the actual model holding the enabled/disabled flag
@@ -122,7 +125,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
             }
         }
 
-        Client.configureApp($scope.appConfigure.app.id, $scope.appConfigure.password, { location: $scope.appConfigure.location || '', portBindings: finalPortBindings, accessRestriction: $scope.appConfigure.accessRestriction }, function (error) {
+        Client.configureApp($scope.appConfigure.app.id, $scope.appConfigure.password, { location: $scope.appConfigure.location || '', portBindings: finalPortBindings, accessRestriction: $scope.appConfigure.accessRestriction, oauthProxy: $scope.appConfigure.oauthProxy }, function (error) {
             if (error) {
                 if (error.statusCode === 409 && (error.message.indexOf('is reserved') !== -1 || error.message.indexOf('is already in use') !== -1)) {
                     $scope.appConfigure.error.port = error.message;

@@ -38,10 +38,16 @@
                         </div>
                         <div class="form-group">
                             <label class="control-label" for="accessRestriction">Website Visibility</label>
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" ng-model="appConfigure.oauthProxy"> Cloudron users only
+                                </label>
+                            </div>
+<!--                             <label class="control-label" for="accessRestriction">Website Visibility</label>
                             <select class="form-control" id="accessRestriction" ng-model="appConfigure.accessRestriction">
                                 <option value="">Visible to all</option>
                                 <option value="roleUser">Visible only to Cloudron users</option>
-                            </select>
+                            </select> -->
                         </div>
                         <a ng-show="!!appConfigure.app.manifest.configurePath" ng-href="https://{{ appConfigure.app.location }}{{ !appConfigure.app.location ? '' : (config.isCustomDomain ? '.' : '-') }}{{ config.fqdn }}/{{ appConfigure.app.manifest.configurePath }}" target="_blank">Application Specific Settings</a>
                         <br/>
