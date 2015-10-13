@@ -155,7 +155,7 @@ function pullImage(app, callback) {
             if (data.status) {
                 // debugApp(app, 'progress: %s', data.status); // progressDetail { current, total }
             } else if (data.error) {
-                debugApp(app, 'error detail: %s', data.errorDetail.message);
+                debugApp(app, 'pullImage error detail: %s', data.errorDetail.message);
             }
         });
 
@@ -173,6 +173,12 @@ function pullImage(app, callback) {
 
                 callback(null);
             });
+        });
+
+        stream.on('error', function (error) {
+            debugApp(app, 'pullImage error : %j', error);
+
+            callback(error);
         });
     });
 }
