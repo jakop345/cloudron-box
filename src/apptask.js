@@ -149,11 +149,11 @@ function pullImage(app, callback) {
         // is emitted as a chunk
         stream.on('data', function (chunk) {
             var data = safe.JSON.parse(chunk) || { };
-            debugApp(app, 'downloadImage data: %j', data);
+            debugApp(app, 'pullImage data: %j', data);
 
             // The information here is useless because this is per layer as opposed to per image
             if (data.status) {
-                debugApp(app, 'progress: %s', data.status); // progressDetail { current, total }
+                // debugApp(app, 'progress: %s', data.status); // progressDetail { current, total }
             } else if (data.error) {
                 debugApp(app, 'error detail: %s', data.errorDetail.message);
             }
