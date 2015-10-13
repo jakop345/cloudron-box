@@ -49,6 +49,7 @@ CREATE TABLE IF NOT EXISTS apps(
     location VARCHAR(128) NOT NULL UNIQUE,
     dnsRecordId VARCHAR(512),
     accessRestriction VARCHAR(512),
+    oauthProxy BOOLEAN DEFAULT 0,
     createdAt TIMESTAMP(2) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     lastBackupId VARCHAR(128),
