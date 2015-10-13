@@ -87,7 +87,7 @@ mkfs.btrfs -L UserHome "${USER_DATA_FILE}"
 echo "${USER_DATA_FILE} ${USER_DATA_DIR} btrfs loop,nosuid 0 0" >> /etc/fstab
 mkdir -p "${USER_DATA_DIR}" && mount "${USER_DATA_FILE}"
 mkdir -p "${USER_DATA_DIR}/docker"
-sed -e "s,ExecStart=.*,ExecStart=/usr/bin/docker -d -H fd:// -s btrfs -g ${USER_DATA_DIR}/docker," -i /lib/systemd/system/docker.service
+sed -e "s,ExecStart=.*,ExecStart=/usr/bin/docker -d -H fd:// -s btrfs -g ${USER_DATA_DIR}/docker --log-driver=json-file --log-opt max-file=4 --log-opt max-size=5m," -i /lib/systemd/system/docker.service
 systemctl enable docker
 
 # give docker sometime to start up and create iptables rules
