@@ -36,14 +36,15 @@ describe('Apps', function () {
         containerId: null,
         portBindings: { PORT: 5678 },
         healthy: null,
-        accessRestriction: ''
+        accessRestriction: '',
+        oauthProxy: false
     };
 
     before(function (done) {
         async.series([
             database.initialize,
             database._clear,
-            appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction)
+            appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, APP_0.oauthProxy)
         ], done);
     });
 
