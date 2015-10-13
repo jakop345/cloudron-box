@@ -85,7 +85,7 @@ function login(req, res, next) {
             }
         };
 
-        next(new HttpSuccess(201, tmp));
+        next(new HttpSuccess(200, tmp));
     });
 }
 
