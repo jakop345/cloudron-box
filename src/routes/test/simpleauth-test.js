@@ -18,7 +18,7 @@ var clientdb = require('../../clientdb.js'),
     userdb = require('../../userdb.js');
 
 var SERVER_URL = 'http://localhost:' + config.get('port');
-var SIMPLE_AUTH_URL = 'http://localhost:' + config.get('simpleAuthPort');
+var SIMPLE_AUTH_ORIGIN = 'http://localhost:' + config.get('simpleAuthPort');
 
 var USERNAME = 'admin', PASSWORD = 'password', EMAIL ='silly@me.com';
 var CLIENT = {
@@ -77,7 +77,7 @@ describe('SimpleAuth API', function () {
         it('cannot login without clientId', function (done) {
             var body = {};
 
-            request.post(SIMPLE_AUTH_URL + '/api/v1/login')
+            request.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
             .send(body)
             .end(function (error, result) {
                 expect(error).to.be(null);
@@ -91,7 +91,7 @@ describe('SimpleAuth API', function () {
                 clientId: 'someclientid'
             };
 
-            request.post(SIMPLE_AUTH_URL + '/api/v1/login')
+            request.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
             .send(body)
             .end(function (error, result) {
                 expect(error).to.be(null);
@@ -106,7 +106,7 @@ describe('SimpleAuth API', function () {
                 username: USERNAME
             };
 
-            request.post(SIMPLE_AUTH_URL + '/api/v1/login')
+            request.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
             .send(body)
             .end(function (error, result) {
                 expect(error).to.be(null);
@@ -122,7 +122,7 @@ describe('SimpleAuth API', function () {
                 password: PASSWORD
             };
 
-            request.post(SIMPLE_AUTH_URL + '/api/v1/login')
+            request.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
             .send(body)
             .end(function (error, result) {
                 expect(error).to.be(null);
@@ -138,7 +138,7 @@ describe('SimpleAuth API', function () {
                 password: PASSWORD
             };
 
-            request.post(SIMPLE_AUTH_URL + '/api/v1/login')
+            request.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
             .send(body)
             .end(function (error, result) {
                 expect(error).to.be(null);
@@ -154,7 +154,7 @@ describe('SimpleAuth API', function () {
                 password: ''
             };
 
-            request.post(SIMPLE_AUTH_URL + '/api/v1/login')
+            request.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
             .send(body)
             .end(function (error, result) {
                 expect(error).to.be(null);
@@ -170,7 +170,7 @@ describe('SimpleAuth API', function () {
                 password: PASSWORD+PASSWORD
             };
 
-            request.post(SIMPLE_AUTH_URL + '/api/v1/login')
+            request.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
             .send(body)
             .end(function (error, result) {
                 expect(error).to.be(null);
@@ -186,7 +186,7 @@ describe('SimpleAuth API', function () {
                 password: PASSWORD
             };
 
-            request.post(SIMPLE_AUTH_URL + '/api/v1/login')
+            request.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
             .send(body)
             .end(function (error, result) {
                 expect(error).to.be(null);
@@ -221,7 +221,7 @@ describe('SimpleAuth API', function () {
                 password: PASSWORD
             };
 
-            request.post(SIMPLE_AUTH_URL + '/api/v1/login')
+            request.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
             .send(body)
             .end(function (error, result) {
                 expect(error).to.be(null);
@@ -234,7 +234,7 @@ describe('SimpleAuth API', function () {
         });
 
         it('fails without access_token', function (done) {
-            request.get(SIMPLE_AUTH_URL + '/api/v1/logout')
+            request.get(SIMPLE_AUTH_ORIGIN + '/api/v1/logout')
             .end(function (error, result) {
                 expect(error).to.be(null);
                 expect(result.statusCode).to.equal(400);
@@ -243,7 +243,7 @@ describe('SimpleAuth API', function () {
         });
 
         it('fails with unkonwn access_token', function (done) {
-            request.get(SIMPLE_AUTH_URL + '/api/v1/logout')
+            request.get(SIMPLE_AUTH_ORIGIN + '/api/v1/logout')
             .query({ access_token: accessToken+accessToken })
             .end(function (error, result) {
                 expect(error).to.be(null);
@@ -253,7 +253,7 @@ describe('SimpleAuth API', function () {
         });
 
         it('succeeds', function (done) {
-            request.get(SIMPLE_AUTH_URL + '/api/v1/logout')
+            request.get(SIMPLE_AUTH_ORIGIN + '/api/v1/logout')
             .query({ access_token: accessToken })
             .end(function (error, result) {
                 expect(error).to.be(null);
