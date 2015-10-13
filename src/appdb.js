@@ -95,6 +95,8 @@ function postProcess(result) {
     for (var i = 0; i < environmentVariables.length; i++) {
         result.portBindings[environmentVariables[i]] = parseInt(hostPorts[i], 10);
     }
+
+    result.oauthProxy = !!result.oauthProxy;
 }
 
 function get(id, callback) {
