@@ -81,8 +81,8 @@ start_mongodb
 start_mail
 
 echo -n "Waiting for addons to start"
-for i in {1..10}; do
-   echo -n "."
+for i in {1..20}; do
+    echo -n "."
     sleep 1
 done
 echo ""
