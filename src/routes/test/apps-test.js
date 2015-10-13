@@ -675,7 +675,14 @@ describe('App installation', function () {
     it('installation - running container has volume mounted', function (done) {
         docker.getContainer(appEntry.containerId).inspect(function (error, data) {
             expect(error).to.not.be.ok();
-            expect(data.Volumes['/app/data']).to.eql(paths.DATA_DIR + '/' + APP_ID + '/data');
+
+            // support newer docker versions
+            if (data.Volumes) {
+                expect(data.Volumes['/app/data']).to.eql(paths.DATA_DIR + '/' + APP_ID + '/data');
+            } else {
+                expect(data.Mounts.filter(function (mount) { return mount.Destination === '/app/data'; })[0].Source).to.eql(paths.DATA_DIR + '/' + APP_ID + '/data');
+            }
+
             done();
         });
     });
@@ -1130,7 +1137,14 @@ describe('App installation - port bindings', function () {
     it('installation - running container has volume mounted', function (done) {
         docker.getContainer(appEntry.containerId).inspect(function (error, data) {
             expect(error).to.not.be.ok();
-            expect(data.Volumes['/app/data']).to.eql(paths.DATA_DIR + '/' + APP_ID + '/data');
+
+            // support newer docker versions
+            if (data.Volumes) {
+                expect(data.Volumes['/app/data']).to.eql(paths.DATA_DIR + '/' + APP_ID + '/data');
+            } else {
+                expect(data.Mounts.filter(function (mount) { return mount.Destination === '/app/data'; })[0].Source).to.eql(paths.DATA_DIR + '/' + APP_ID + '/data');
+            }
+
             done();
         });
     });
