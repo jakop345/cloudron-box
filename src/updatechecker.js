@@ -81,6 +81,9 @@ function getAppUpdates(callback) {
 function getBoxUpdates(callback) {
     var currentVersion = config.version();
 
+    // do not crash if boxVersionsUrl is not set
+    if (!config.get('boxVersionsUrl')) return callback(null, null);
+
     superagent
         .get(config.get('boxVersionsUrl'))
         .timeout(10 * 1000)
