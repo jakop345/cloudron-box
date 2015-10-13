@@ -190,7 +190,7 @@ describe('SimpleAuth API', function () {
             .send(body)
             .end(function (error, result) {
                 expect(error).to.be(null);
-                expect(result.statusCode).to.equal(201);
+                expect(result.statusCode).to.equal(200);
                 expect(result.body.accessToken).to.be.a('string');
                 expect(result.body.user).to.be.an('object');
                 expect(result.body.user.id).to.be.a('string');
@@ -225,7 +225,7 @@ describe('SimpleAuth API', function () {
             .send(body)
             .end(function (error, result) {
                 expect(error).to.be(null);
-                expect(result.statusCode).to.equal(201);
+                expect(result.statusCode).to.equal(200);
 
                 accessToken = result.body.accessToken;
 
