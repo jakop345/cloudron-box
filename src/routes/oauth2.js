@@ -230,10 +230,10 @@ function loginForm(req, res) {
             return render(constants.TEST_NAME, '/api/v1/cloudron/avatar');
         } else if (appId.indexOf('external-') === 0) {
             return render('External Application', '/api/v1/cloudron/avatar');
-        } else if (appId.indexOf('addon-oauth') === 0) {
-            appId = appId.slice('addon-oauth'.length);
-        } else if (appId.indexOf('addon-simpleauth') === 0) {
-            appId = appId.slice('addon-simpleauth'.length);
+        } else if (appId.indexOf('addon-oauth-') === 0) {
+            appId = appId.slice('addon-oauth-'.length);
+        } else if (appId.indexOf('addon-simpleauth-') === 0) {
+            appId = appId.slice('addon-simpleauth-'.length);
         } else if (appId.indexOf('proxy-') === 0) {
             appId = appId.slice('proxy-'.length);
         }
