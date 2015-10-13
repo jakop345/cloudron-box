@@ -479,6 +479,7 @@ describe('database', function () {
             portBindings: { port: 5678 },
             health: null,
             accessRestriction: '',
+            oauthProxy: false,
             lastBackupId: null,
             lastBackupConfig: null,
             oldConfig: null
@@ -497,6 +498,7 @@ describe('database', function () {
             portBindings: { },
             health: null,
             accessRestriction: 'roleAdmin',
+            oauthProxy: true,
             lastBackupId: null,
             lastBackupConfig: null,
             oldConfig: null
@@ -516,7 +518,7 @@ describe('database', function () {
         });
 
         it('add succeeds', function (done) {
-            appdb.add(APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, function (error) {
+            appdb.add(APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, APP_0.oauthProxy, function (error) {
                 expect(error).to.be(null);
                 done();
             });
@@ -540,7 +542,7 @@ describe('database', function () {
         });
 
         it('add of same app fails', function (done) {
-            appdb.add(APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, [ ], APP_0.accessRestriction, function (error) {
+            appdb.add(APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, [ ], APP_0.accessRestriction, APP_0.oauthProxy, function (error) {
                 expect(error).to.be.a(DatabaseError);
                 expect(error.reason).to.be(DatabaseError.ALREADY_EXISTS);
                 done();
@@ -569,10 +571,20 @@ describe('database', function () {
             APP_0.installationState = 'some-other-status';
             APP_0.location = 'some-other-location';
             APP_0.manifest.version = '0.2';
-            APP_0.accessRestriction = true;
+            APP_0.accessRestriction = '';
+            APP_0.oauthProxy = true;
             APP_0.httpPort = 1337;
 
-            appdb.update(APP_0.id, { installationState: APP_0.installationState, location: APP_0.location, manifest: APP_0.manifest, accessRestriction: APP_0.accessRestriction, httpPort: APP_0.httpPort }, function (error) {
+            var data = {
+                installationState: APP_0.installationState,
+                location: APP_0.location,
+                manifest: APP_0.manifest,
+                accessRestriction: APP_0.accessRestriction,
+                oauthProxy: APP_0.oauthProxy,
+                httpPort: APP_0.httpPort
+            };
+
+            appdb.update(APP_0.id, data, function (error) {
                 expect(error).to.be(null);
 
                 appdb.get(APP_0.id, function (error, result) {
@@ -602,7 +614,7 @@ describe('database', function () {
         });
 
         it('add second app succeeds', function (done) {
-            appdb.add(APP_1.id, APP_1.appStoreId, APP_1.manifest, APP_1.location, [ ], APP_1.accessRestriction, function (error) {
+            appdb.add(APP_1.id, APP_1.appStoreId, APP_1.manifest, APP_1.location, [ ], APP_1.accessRestriction, APP_0.oauthProxy, function (error) {
                 expect(error).to.be(null);
                 done();
             });
