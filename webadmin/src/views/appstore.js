@@ -17,6 +17,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         location: '',
         portBindings: {},
         accessRestriction: '',
+        oauthProxy: false,
         mediaLinks: []
     };
 
@@ -136,6 +137,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         $scope.appInstall.location = '';
         $scope.appInstall.portBindings = {};
         $scope.appInstall.accessRestriction = '';
+        $scope.appInstall.oauthProxy = false;
         $scope.appInstall.installFormVisible = false;
         $scope.appInstall.mediaLinks = [];
         $('#collapseInstallForm').collapse('hide');
@@ -165,6 +167,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         $scope.appInstall.portBindings = {};                            // This is the actual model holding the env:port pair
         $scope.appInstall.portBindingsEnabled = {};                     // This is the actual model holding the enabled/disabled flag
         $scope.appInstall.accessRestriction = app.accessRestriction || '';
+        $scope.appInstall.oauthProxy = app.oauthProxy || false;
 
         // set default ports
         for (var env in $scope.appInstall.app.manifest.tcpPorts) {
@@ -194,7 +197,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
             }
         }
 
-        Client.installApp($scope.appInstall.app.id, $scope.appInstall.app.manifest, $scope.appInstall.app.title, { location: $scope.appInstall.location || '', portBindings: finalPortBindings, accessRestriction: $scope.appInstall.accessRestriction }, function (error) {
+        Client.installApp($scope.appInstall.app.id, $scope.appInstall.app.manifest, $scope.appInstall.app.title, { location: $scope.appInstall.location || '', portBindings: finalPortBindings, accessRestriction: $scope.appInstall.accessRestriction, oauthProxy: $scope.appInstall.oauthProxy }, function (error) {
             if (error) {
                 if (error.statusCode === 409 && (error.message.indexOf('is reserved') !== -1 || error.message.indexOf('is already in use') !== -1)) {
                     $scope.appInstall.error.port = error.message;
