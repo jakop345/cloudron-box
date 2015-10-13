@@ -421,29 +421,11 @@ var authorization = [
             callback(null, client, '/api/v1/session/callback?redirectURI=' + url.resolve(redirectOrigin, redirectPath));
         });
     }),
-    // Until we have OAuth scopes, skip decision dialog
-    // OAuth sopes skip START
-    function (req, res, next) {
-        assert.strictEqual(typeof req.body, 'object');
-        assert.strictEqual(typeof req.oauth2, 'object');
-
-        var scopes = req.oauth2.client.scope ? req.oauth2.client.scope.split(',') : ['profile','roleUser'];
-
-        if (scopes.indexOf('roleAdmin') !== -1 && !req.user.admin) {
-            return sendErrorPageOrRedirect(req, res, 'Admin capabilities required');
-        }
-
-        req.body.transaction_id = req.oauth2.transactionID;
-        next();
-    },
-    gServer.decision(function(req, done) {
-        debug('decision: with scope', req.oauth2.req.scope);
-        return done(null, { scope: req.oauth2.req.scope });
+    // we do not have a decision dialog, no need to load the transaction
+    gServer.decision({ loadTransaction: false }, function (req, done) {
+        debug('decision: with scope', req.oauth2.client.scope);
+        return done(null, { scope: req.oauth2.client.scope });
     })
-    // OAuth sopes skip END
-    // function (req, res) {
-    //     res.render('dialog', { transactionID: req.oauth2.transactionID, user: req.user, client: req.oauth2.client, csrf: req.csrfToken() });
-    // }
 ];
 
 // this triggers the above grant middleware and handles the user's decision if he accepts the access
