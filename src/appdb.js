@@ -59,11 +59,11 @@ var assert = require('assert'),
 
 var APPS_FIELDS = [ 'id', 'appStoreId', 'installationState', 'installationProgress', 'runState',
     'health', 'containerId', 'manifestJson', 'httpPort', 'location', 'dnsRecordId',
-    'accessRestriction', 'lastBackupId', 'lastBackupConfigJson', 'oldConfigJson' ].join(',');
+    'accessRestriction', 'lastBackupId', 'lastBackupConfigJson', 'oldConfigJson', 'oauthProxy' ].join(',');
 
 var APPS_FIELDS_PREFIXED = [ 'apps.id', 'apps.appStoreId', 'apps.installationState', 'apps.installationProgress', 'apps.runState',
     'apps.health', 'apps.containerId', 'apps.manifestJson', 'apps.httpPort', 'apps.location', 'apps.dnsRecordId',
-    'apps.accessRestriction', 'apps.lastBackupId', 'apps.lastBackupConfigJson', 'apps.oldConfigJson' ].join(',');
+    'apps.accessRestriction', 'apps.lastBackupId', 'apps.lastBackupConfigJson', 'apps.oldConfigJson', 'apps.oauthProxy' ].join(',');
 
 var PORT_BINDINGS_FIELDS = [ 'hostPort', 'environmentVariable', 'appId' ].join(',');
 
@@ -176,7 +176,7 @@ function getAll(callback) {
     });
 }
 
-function add(id, appStoreId, manifest, location, portBindings, accessRestriction, callback) {
+function add(id, appStoreId, manifest, location, portBindings, accessRestriction, oauthProxy, callback) {
     assert.strictEqual(typeof id, 'string');
     assert.strictEqual(typeof appStoreId, 'string');
     assert(manifest && typeof manifest === 'object');
@@ -184,6 +184,7 @@ function add(id, appStoreId, manifest, location, portBindings, accessRestriction
     assert.strictEqual(typeof location, 'string');
     assert.strictEqual(typeof portBindings, 'object');
     assert.strictEqual(typeof accessRestriction, 'string');
+    assert.strictEqual(typeof oauthProxy, 'boolean');
     assert.strictEqual(typeof callback, 'function');
 
     portBindings = portBindings || { };
@@ -192,8 +193,8 @@ function add(id, appStoreId, manifest, location, portBindings, accessRestriction
 
     var queries = [ ];
     queries.push({
-        query: 'INSERT INTO apps (id, appStoreId, manifestJson, installationState, location, accessRestriction) VALUES (?, ?, ?, ?, ?, ?)',
-        args: [ id, appStoreId, manifestJson, exports.ISTATE_PENDING_INSTALL, location, accessRestriction ]
+        query: 'INSERT INTO apps (id, appStoreId, manifestJson, installationState, location, accessRestriction, oauthProxy) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        args: [ id, appStoreId, manifestJson, exports.ISTATE_PENDING_INSTALL, location, accessRestriction, oauthProxy ]
     });
 
     Object.keys(portBindings).forEach(function (env) {
