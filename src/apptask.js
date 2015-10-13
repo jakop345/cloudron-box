@@ -191,7 +191,11 @@ function downloadImage(app, callback) {
     async.retry({ times: 5, interval: 15000 }, function (retryCallback) {
         debugApp(app, 'Downloading image. attempt: %s', attempt++);
 
-        pullImage(app, retryCallback);
+        pullImage(app, function (error) {
+            if (error) console.error(error);
+
+            retryCallback(error);
+        });
     }, callback);
 }
 
