@@ -428,12 +428,6 @@ var authorization = [
     })
 ];
 
-// this triggers the above grant middleware and handles the user's decision if he accepts the access
-var decision = [
-    session.ensureLoggedIn('/api/v1/session/login'),
-    gServer.decision()
-];
-
 
 /*
 
@@ -512,7 +506,6 @@ exports = module.exports = {
     passwordSetupSite: passwordSetupSite,
     passwordReset: passwordReset,
     authorization: authorization,
-    decision: decision,
     token: token,
     scope: scope,
     csrf: csrf
