@@ -58,6 +58,7 @@ var APP = {
     httpPort: 4567,
     portBindings: null,
     accessRestriction: '',
+    oauthProxy: false,
     dnsRecordId: 'someDnsRecordId'
 };
 
@@ -81,7 +82,7 @@ describe('apptask', function () {
         config.set('version', '0.5.0');
         database.initialize(function (error) {
             expect(error).to.be(null);
-            appdb.add(APP.id, APP.appStoreId, APP.manifest, APP.location, APP.portBindings, APP.accessRestriction, done);
+            appdb.add(APP.id, APP.appStoreId, APP.manifest, APP.location, APP.portBindings, APP.accessRestriction, APP.oauthProxy, done);
         });
     });
 
