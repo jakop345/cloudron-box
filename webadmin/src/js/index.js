@@ -143,16 +143,6 @@ app.filter('applicationLink', function() {
     };
 });
 
-app.filter('accessRestrictionLabel', function() {
-    return function (input) {
-        if (input === '') return 'public';
-        if (input === 'roleUser') return 'private';
-        if (input === 'roleAdmin') return 'private (Admins only)';
-
-        return input;
-    };
-});
-
 app.filter('prettyHref', function () {
     return function (input) {
         if (!input) return input;
