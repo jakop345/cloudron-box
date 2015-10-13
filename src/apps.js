@@ -281,13 +281,14 @@ function purchase(appStoreId, callback) {
     });
 }
 
-function install(appId, appStoreId, manifest, location, portBindings, accessRestriction, icon, callback) {
+function install(appId, appStoreId, manifest, location, portBindings, accessRestriction, oauthProxy, icon, callback) {
     assert.strictEqual(typeof appId, 'string');
     assert.strictEqual(typeof appStoreId, 'string');
     assert(manifest && typeof manifest === 'object');
     assert.strictEqual(typeof location, 'string');
     assert.strictEqual(typeof portBindings, 'object');
     assert.strictEqual(typeof accessRestriction, 'string');
+    assert.strictEqual(typeof oauthProxy, 'boolean');
     assert(!icon || typeof icon === 'string');
     assert.strictEqual(typeof callback, 'function');
 
@@ -319,7 +320,7 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
     purchase(appStoreId, function (error) {
         if (error) return callback(error);
 
-        appdb.add(appId, appStoreId, manifest, location.toLowerCase(), portBindings, accessRestriction, function (error) {
+        appdb.add(appId, appStoreId, manifest, location.toLowerCase(), portBindings, accessRestriction, oauthProxy, function (error) {
             if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(getDuplicateErrorDetails(location.toLowerCase(), portBindings, error));
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
@@ -330,11 +331,12 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
     });
 }
 
-function configure(appId, location, portBindings, accessRestriction, callback) {
+function configure(appId, location, portBindings, accessRestriction, oauthProxy, callback) {
     assert.strictEqual(typeof appId, 'string');
     assert.strictEqual(typeof location, 'string');
     assert.strictEqual(typeof portBindings, 'object');
     assert.strictEqual(typeof accessRestriction, 'string');
+    assert.strictEqual(typeof oauthProxy, 'boolean');
     assert.strictEqual(typeof callback, 'function');
 
     var error = validateHostname(location, config.fqdn());
@@ -353,12 +355,14 @@ function configure(appId, location, portBindings, accessRestriction, callback) {
         var values = {
             location: location.toLowerCase(),
             accessRestriction: accessRestriction,
+            oauthProxy: oauthProxy,
             portBindings: portBindings,
 
             oldConfig: {
                 location: app.location,
                 accessRestriction: app.accessRestriction,
-                portBindings: app.portBindings
+                portBindings: app.portBindings,
+                oauthProxy: app.oauthProxy
             }
         };
 
@@ -512,6 +516,7 @@ function restore(appId, callback) {
                 oldConfig: {
                     location: app.location,
                     accessRestriction: app.accessRestriction,
+                    oauthProxy: app.oauthProxy,
                     portBindings: app.portBindings,
                     manifest: app.manifest
                 }
@@ -759,7 +764,8 @@ function backupApp(app, addonsToBackup, callback) {
             manifest: app.manifest,
             location: app.location,
             portBindings: app.portBindings,
-            accessRestriction: app.accessRestriction
+            accessRestriction: app.accessRestriction,
+            oauthProxy: app.oauthProxy
         };
         backupFunction = createNewBackup.bind(null, app, addonsToBackup);
 

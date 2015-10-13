@@ -43,6 +43,7 @@ function removeInternalAppFields(app) {
         health: app.health,
         location: app.location,
         accessRestriction: app.accessRestriction,
+        oauthProxy: app.oauthProxy,
         lastBackupId: app.lastBackupId,
         manifest: app.manifest,
         portBindings: app.portBindings,
@@ -114,14 +115,15 @@ function installApp(req, res, next) {
     if (typeof data.location !== 'string') return next(new HttpError(400, 'location is required'));
     if (('portBindings' in data) && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
     if (typeof data.accessRestriction !== 'string') return next(new HttpError(400, 'accessRestriction is required'));
+    if (typeof data.oauthProxy !== 'boolean') return next(new HttpError(400, 'oauthProxy must be a boolean'));
     if ('icon' in data && typeof data.icon !== 'string') return next(new HttpError(400, 'icon is not a string'));
 
     // allow tests to provide an appId for testing
     var appId = (process.env.BOX_ENV === 'test' && typeof data.appId === 'string') ? data.appId : uuid.v4();
 
-    debug('Installing app id:%s storeid:%s loc:%s port:%j restrict:%s manifest:%j', appId, data.appStoreId, data.location, data.portBindings, data.accessRestriction, data.manifest);
+    debug('Installing app id:%s storeid:%s loc:%s port:%j restrict:%s oauthproxy:%s manifest:%j', appId, data.appStoreId, data.location, data.portBindings, data.accessRestriction, data.oauthProxy, data.manifest);
 
-    apps.install(appId, data.appStoreId, data.manifest, data.location, data.portBindings || null, data.accessRestriction, data.icon || null, function (error) {
+    apps.install(appId, data.appStoreId, data.manifest, data.location, data.portBindings || null, data.accessRestriction, data.oauthProxy, data.icon || null, function (error) {
         if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, error.message));
         if (error && error.reason === AppsError.PORT_RESERVED) return next(new HttpError(409, 'Port ' + error.message + ' is reserved.'));
         if (error && error.reason === AppsError.PORT_CONFLICT) return next(new HttpError(409, 'Port ' + error.message + ' is already in use.'));
@@ -150,10 +152,11 @@ function configureApp(req, res, next) {
     if (typeof data.location !== 'string') return next(new HttpError(400, 'location is required'));
     if (('portBindings' in data) && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
     if (typeof data.accessRestriction !== 'string') return next(new HttpError(400, 'accessRestriction is required'));
+    if (typeof data.oauthProxy !== 'boolean') return next(new HttpError(400, 'oauthProxy must be a boolean'));
 
     debug('Configuring app id:%s location:%s bindings:%j', req.params.id, data.location, data.portBindings);
 
-    apps.configure(req.params.id, data.location, data.portBindings || null, data.accessRestriction, function (error) {
+    apps.configure(req.params.id, data.location, data.portBindings || null, data.accessRestriction, data.oauthProxy, function (error) {
         if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, error.message));
         if (error && error.reason === AppsError.PORT_RESERVED) return next(new HttpError(409, 'Port ' + error.message + ' is reserved.'));
         if (error && error.reason === AppsError.PORT_CONFLICT) return next(new HttpError(409, 'Port ' + error.message + ' is already in use.'));

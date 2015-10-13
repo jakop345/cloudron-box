@@ -109,7 +109,7 @@ function configureNginx(app, callback) {
         if (error) return callback(error);
 
         var sourceDir = path.resolve(__dirname, '..');
-        var endpoint = app.accessRestriction ? 'oauthproxy' : 'app';
+        var endpoint = app.oauthProxy ? 'oauthproxy' : 'app';
         var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, adminOrigin: config.adminOrigin(), vhost: config.appFqdn(app.location), port: freePort, endpoint: endpoint });
 
         var nginxConfigFilename = path.join(paths.NGINX_APPCONFIG_DIR, app.id + '.conf');
@@ -303,13 +303,13 @@ function allocateOAuthProxyCredentials(app, callback) {
     assert.strictEqual(typeof app, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    if (!app.accessRestriction) return callback(null);
+    if (!app.oauthProxy) return callback(null);
 
     var appId = 'proxy-' + app.id;
     var id = 'cid-proxy-' + uuid.v4();
     var clientSecret = hat(256);
     var redirectURI = 'https://' + config.appFqdn(app.location);
-    var scope = 'profile,' + app.accessRestriction;
+    var scope = 'profile,roleUser';
 
     clientdb.add(id, appId, clientSecret, redirectURI, scope, callback);
 }
