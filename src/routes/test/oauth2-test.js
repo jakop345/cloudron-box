@@ -546,6 +546,28 @@ describe('OAuth2', function () {
                     });
                 });
             });
+
+            it('succeeds with email', function (done) {
+                startAuthorizationFlow(function (jar) {
+                    var url = SERVER_URL + '/api/v1/session/login?returnTo=' + CLIENT_2.redirectURI;
+                    var data = {
+                        username: USER_0.email,
+                        password: USER_0.password
+                    };
+
+                    request.post({ url: url, jar: jar, form: data }, function (error, response, body) {
+                        expect(error).to.not.be.ok();
+                        expect(response.statusCode).to.eql(302);
+
+                        var tmp = urlParse(response.headers.location, true);
+                        expect(tmp.query.redirect_uri).to.eql(CLIENT_2.redirectURI);
+                        expect(tmp.query.client_id).to.eql(CLIENT_2.id);
+                        expect(tmp.query.response_type).to.eql('code');
+
+                        done();
+                    });
+                });
+            });
         });
     });
 });
