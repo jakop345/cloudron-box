@@ -1,7 +1,6 @@
 'use strict';
 
 exports = module.exports = {
-    contentType: require('./contentType'),
     cookieParser: require('cookie-parser'),
     cors: require('./cors'),
     csrf: require('csurf'),
