@@ -40,7 +40,7 @@ for container in $containers; do
         logrotate_config=$(mktemp)
         { echo "$logrotate_template" | LOG_VOLUME="$logdir" envsubst; } > "${logrotate_config}"
 
-        logrotate -f "${logrotate_config}"
+        logrotate "${logrotate_config}" # -f is not required since we are size based
 
         find "${logdir}" -mindepth 3 -maxdepth 3 -type d -exec rm -rf {}  + # since we logrotate only till depth 3
 
