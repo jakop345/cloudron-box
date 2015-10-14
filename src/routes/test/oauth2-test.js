@@ -284,8 +284,29 @@ describe('OAuth2', function () {
                 });
             });
 
-            it('succeeds', function (done) {
+            it('fails for unkown grant type', function (done) {
+                superagent.get(SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=http://someredirect&client_id=someclientid&response_type=foobar')
+                .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.text.indexOf('<!-- error tester -->')).to.not.equal(-1);
+                    expect(result.text.indexOf('Invalid request. Only token and code response types are supported.')).to.not.equal(-1);
+                    expect(result.statusCode).to.equal(200);
+                    done();
+                });
+            });
+
+            it('succeeds for grant type code', function (done) {
                 superagent.get(SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=http://someredirect&client_id=someclientid&response_type=code')
+                .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.text).to.eql('<script>window.location.href = "/api/v1/session/login?returnTo=http://someredirect";</script>');
+                    expect(result.statusCode).to.equal(200);
+                    done();
+                });
+            });
+
+            it('succeeds for grant type token', function (done) {
+                superagent.get(SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=http://someredirect&client_id=someclientid&response_type=token')
                 .end(function (error, result) {
                     expect(error).to.not.be.ok();
                     expect(result.text).to.eql('<script>window.location.href = "/api/v1/session/login?returnTo=http://someredirect";</script>');
