@@ -365,19 +365,6 @@ var callback = [
 
 /*
 
-  This indicates a missing OAuth client session or invalid client ID
-
-*/
-var error = [
-    session.ensureLoggedIn('/api/v1/session/login'),
-    function (req, res) {
-        sendErrorPageOrRedirect(req, res, 'Invalid OAuth Client');
-    }
-];
-
-
-/*
-
   The authorization endpoint is the entry point for an OAuth login.
 
   Each app would start OAuth by redirecting the user to:
@@ -492,7 +479,6 @@ exports = module.exports = {
     login: login,
     logout: logout,
     callback: callback,
-    error: error,
     passwordResetRequestSite: passwordResetRequestSite,
     passwordResetRequest: passwordResetRequest,
     passwordSentSite: passwordSentSite,
