@@ -169,7 +169,7 @@ function sendError(req, res, message) {
     });
 }
 
-// Main login form username and password
+// -> GET /api/v1/session/login
 function loginForm(req, res) {
     if (typeof req.session.returnTo !== 'string') return sendErrorPageOrRedirect(req, res, 'Invalid login request. No returnTo provided.');
 
@@ -212,7 +212,7 @@ function loginForm(req, res) {
     });
 }
 
-// performs the login POST from the login form
+// -> POST /api/v1/session/login
 function login(req, res) {
     var returnTo = req.session.returnTo || req.query.returnTo;
 
@@ -226,7 +226,7 @@ function login(req, res) {
     });
 }
 
-// ends the current session
+// -> GET /api/v1/session/logout
 function logout(req, res) {
     req.logout();
 
@@ -322,11 +322,9 @@ function passwordReset(req, res, next) {
 }
 
 
-/*
-
-  The callback page takes the redirectURI and the authCode and redirects the browser accordingly
-
-*/
+// The callback page takes the redirectURI and the authCode and redirects the browser accordingly
+//
+// -> GET /api/v1/session/callback
 var callback = [
     session.ensureLoggedIn('/api/v1/session/login'),
     function (req, res) {
@@ -336,23 +334,17 @@ var callback = [
 ];
 
 
-/*
-
-  The authorization endpoint is the entry point for an OAuth login.
-
-  Each app would start OAuth by redirecting the user to:
-
-    /api/v1/oauth/dialog/authorize?response_type=code&client_id=<clientId>&redirect_uri=<callbackURL>&scope=<ignored>
-
-  - First, this will ensure the user is logged in.
-  - Then in normal OAuth it would ask the user for permissions to the scopes, which we will do on app installation
-  - Then it will redirect the browser to the given <callbackURL> containing the authcode in the query
-
-  Scopes are set by the app during installation, the ones given on OAuth transaction start are simply ignored.
-
-*/
+// The authorization endpoint is the entry point for an OAuth login.
+//
+// Each app would start OAuth by redirecting the user to:
+//
+//    /api/v1/oauth/dialog/authorize?response_type=code&client_id=<clientId>&redirect_uri=<callbackURL>&scope=<ignored>
+//
+//  - First, this will ensure the user is logged in.
+//  - Then it will redirect the browser to the given <callbackURL> containing the authcode in the query
+//
+// -> GET /api/v1/oauth/dialog/authorize
 var authorization = [
-    // extract the returnTo origin and set as query param
     function (req, res, next) {
         if (!req.query.redirect_uri) return sendErrorPageOrRedirect(req, res, 'Invalid request. redirect_uri query param is not set.');
         if (!req.query.client_id) return sendErrorPageOrRedirect(req, res, 'Invalid request. client_id query param is not set.');
@@ -381,15 +373,13 @@ var authorization = [
 ];
 
 
-/*
-
-  The token endpoint allows an OAuth client to exchange an authcode with an accesstoken.
-
-  Authcodes are obtained using the authorization endpoint. The route is authenticated by
-  providing a Basic auth with clientID as username and clientSecret as password.
-  An authcode is only good for one such exchange to an accesstoken.
-
-*/
+//  The token endpoint allows an OAuth client to exchange an authcode with an accesstoken.
+//
+//  Authcodes are obtained using the authorization endpoint. The route is authenticated by
+//  providing a Basic auth with clientID as username and clientSecret as password.
+//  An authcode is only good for one such exchange to an accesstoken.
+//
+// -> POST /api/v1/oauth/token
 var token = [
     passport.authenticate(['basic', 'oauth2-client-password'], { session: false }),
     gServer.token(),
@@ -397,18 +387,15 @@ var token = [
 ];
 
 
-/*
-
-  The scope middleware provides an auth middleware for routes.
-
-  It is used for API routes, which are authenticated using accesstokens.
-  Those accesstokens carry OAuth scopes and the middleware takes the required
-  scope as an argument and will verify the accesstoken against it.
-
-  See server.js:
-    var profileScope = routes.oauth2.scope('profile');
-
-*/
+//  The scope middleware provides an auth middleware for routes.
+//
+//  It is used for API routes, which are authenticated using accesstokens.
+//  Those accesstokens carry OAuth scopes and the middleware takes the required
+//  scope as an argument and will verify the accesstoken against it.
+//
+//  See server.js:
+//    var profileScope = routes.oauth2.scope('profile');
+//
 function scope(requestedScope) {
     assert.strictEqual(typeof requestedScope, 'string');
 
