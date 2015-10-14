@@ -64,18 +64,13 @@ gServer.deserializeClient(function (id, callback) {
 // the application.  The application issues a code, which is bound to these
 // values, and will be exchanged for an access token.
 
-// we use , (comma) as scope separator
 gServer.grant(oauth2orize.grant.code({ scopeSeparator: ',' }, function (client, redirectURI, user, ares, callback) {
     debug('grant code:', client, redirectURI, user.id, ares);
 
     var code = hat(256);
     var expiresAt = Date.now() + 60 * 60000; // 1 hour
-    var scopes = client.scope ? client.scope.split(',') : ['profile','roleUser'];
 
-    if (scopes.indexOf('roleAdmin') !== -1 && !user.admin) {
-        debug('grant code: not allowed, you need to be admin');
-        return callback(new Error('Admin capabilities required'));
-    }
+    // TODO check groups/users here
 
     authcodedb.add(code, client.id, user.username, expiresAt, function (error) {
         if (error) return callback(error);
