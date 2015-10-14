@@ -30,6 +30,9 @@ ln -sfF "${DATA_DIR}/collectd" /etc/collectd
 cp "${container_files}/docker-cloudron-app.apparmor" /etc/apparmor.d/docker-cloudron-app
 systemctl restart apparmor
 
+########## docker janitor
+cp "${container_files}/docker_janitor" /usr/sbin/docker_janitor
+
 ########## nginx
 # link nginx config to system config
 unlink /etc/nginx 2>/dev/null || rm -rf /etc/nginx
