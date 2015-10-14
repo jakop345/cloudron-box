@@ -8,14 +8,18 @@
 
 var expect = require('expect.js'),
     uuid = require('node-uuid'),
+    async = require('async'),
     hat = require('hat'),
     nock = require('nock'),
     HttpError = require('connect-lastmile').HttpError,
     oauth2 = require('../oauth2.js'),
     server = require('../../server.js'),
     database = require('../../database.js'),
+    clientdb = require('../../clientdb.js'),
     userdb = require('../../userdb.js'),
+    appdb = require('../../appdb.js'),
     config = require('../../config.js'),
+    request = require('request'),
     superagent = require('superagent'),
     passport = require('passport');
 
@@ -140,6 +144,53 @@ describe('OAuth2', function () {
             resetToken: hat(256)
         };
 
+        var APP_0 = {
+            id: 'app0',
+            appStoreId: '',
+            manifest: { version: '0.1.0' },
+            location: 'test',
+            portBindings: {},
+            accessRestriction: '',
+            oauthProxy: true
+        };
+
+        // unknown app
+        var CLIENT_0 = {
+            id: 'cid-client0',
+            appId: 'appid-app0',
+            clientSecret: 'secret0',
+            redirectURI: 'http://redirect0',
+            scope: 'profile'
+        };
+
+        // unknown app through addon
+        var CLIENT_1 = {
+            id: 'cid-client1',
+            appId: 'addon-oauth-appid-app1',
+            clientSecret: 'secret1',
+            redirectURI: 'http://redirect1',
+            scope: 'profile'
+        };
+
+        // known app
+        var CLIENT_2 = {
+            id: 'cid-client2',
+            appId: APP_0.id,
+            clientSecret: 'secret2',
+            redirectURI: 'http://redirect2',
+            scope: 'profile'
+        };
+
+        // known app through addon
+        var CLIENT_3 = {
+            id: 'cid-client3',
+            appId: 'addon-oauth-' + APP_0.id,
+            clientSecret: 'secret3',
+            redirectURI: 'http://redirect1',
+            scope: 'profile'
+        };
+
+
         // make csrf always succeed for testing
         oauth2.csrf = function (req, res, next) {
             req.csrfToken = function () { return hat(256); };
@@ -147,14 +198,16 @@ describe('OAuth2', function () {
         };
 
         function setup(done) {
-            server.start(function (error) {
-                expect(error).to.not.be.ok();
-                database._clear(function (error) {
-                    expect(error).to.not.be.ok();
-
-                    userdb.add(USER_0.userId, USER_0, done);
-                });
-            });
+            async.series([
+                server.start,
+                database._clear,
+                userdb.add.bind(null, USER_0.userId, USER_0),
+                clientdb.add.bind(null, CLIENT_0.id, CLIENT_0.appId, CLIENT_0.clientSecret, CLIENT_0.redirectURI, CLIENT_0.scope),
+                clientdb.add.bind(null, CLIENT_1.id, CLIENT_1.appId, CLIENT_1.clientSecret, CLIENT_1.redirectURI, CLIENT_1.scope),
+                clientdb.add.bind(null, CLIENT_2.id, CLIENT_2.appId, CLIENT_2.clientSecret, CLIENT_2.redirectURI, CLIENT_2.scope),
+                clientdb.add.bind(null, CLIENT_3.id, CLIENT_3.appId, CLIENT_3.clientSecret, CLIENT_3.redirectURI, CLIENT_3.scope),
+                appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, APP_0.oauthProxy)
+            ], done);
         }
 
         function cleanup(done) {
@@ -202,14 +255,126 @@ describe('OAuth2', function () {
                 });
             });
 
-            it('fails due to missing redirect_uri param', function (done) {
+            it('succeeds', function (done) {
                 superagent.get(SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=http://someredirect&client_id=someclientid&response_type=code')
                 .end(function (error, result) {
                     expect(error).to.not.be.ok();
-                    console.log(result.text)
                     expect(result.text).to.eql('<script>window.location.href = "/api/v1/session/login?returnTo=http://someredirect";</script>');
                     expect(result.statusCode).to.equal(200);
                     done();
+                });
+            });
+        });
+
+        describe('loginForm', function () {
+            before(setup);
+            after(cleanup);
+
+            it('fails without prior authentication call and not returnTo query', function (done) {
+                superagent.get(SERVER_URL + '/api/v1/session/login')
+                .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.text.indexOf('<!-- error tester -->')).to.not.equal(-1);
+                    expect(result.text.indexOf('Invalid login request. No returnTo provided.')).to.not.equal(-1);
+                    expect(result.statusCode).to.equal(200);
+
+                    done();
+                });
+            });
+
+            it('redirects without prior authentication call', function (done) {
+                superagent.get(SERVER_URL + '/api/v1/session/login?returnTo=http://someredirect')
+                .redirects(0)
+                .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.statusCode).to.equal(302);
+                    expect(result.headers.location).to.eql('http://someredirect');
+
+                    done();
+                });
+            });
+
+            it('fails due to unknown oauth client', function (done) {
+                request.get(SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=http://someredirect&client_id=someclientid&response_type=code', { jar: true }, function (error, response, body) {
+                    expect(error).to.not.be.ok();
+                    expect(body).to.eql('<script>window.location.href = "/api/v1/session/login?returnTo=http://someredirect";</script>');
+
+                    request.get(SERVER_URL + '/api/v1/session/login?returnTo=http://someredirect', { jar: true }, function (error, response, body) {
+                        expect(error).to.not.be.ok();
+                        expect(response.statusCode).to.eql(200);
+                        expect(body.indexOf('<!-- error tester -->')).to.not.equal(-1);
+                        expect(body.indexOf('Unknown OAuth client')).to.not.equal(-1);
+
+                        done();
+                    });
+                });
+            });
+
+            it('fails due to unknown app', function (done) {
+                var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_0.redirectURI + '&client_id=' + CLIENT_0.id + '&response_type=code';
+                request.get(url, { jar: true }, function (error, response, body) {
+                    expect(error).to.not.be.ok();
+                    expect(response.statusCode).to.eql(200);
+                    expect(body).to.eql('<script>window.location.href = "/api/v1/session/login?returnTo=' + CLIENT_0.redirectURI + '";</script>');
+
+                    request.get(SERVER_URL + '/api/v1/session/login?returnTo=' + CLIENT_0.redirectURI, { jar: true, followRedirect: false }, function (error, response, body) {
+                        expect(error).to.not.be.ok();
+                        expect(response.statusCode).to.eql(302);
+                        expect(response.headers.location).to.eql(CLIENT_0.redirectURI);
+
+                        done();
+                    });
+                });
+            });
+
+            it('fails due to unknown app for addon', function (done) {
+                var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_1.redirectURI + '&client_id=' + CLIENT_1.id + '&response_type=code';
+                request.get(url, { jar: true }, function (error, response, body) {
+                    expect(error).to.not.be.ok();
+                    expect(response.statusCode).to.eql(200);
+                    expect(body).to.eql('<script>window.location.href = "/api/v1/session/login?returnTo=' + CLIENT_1.redirectURI + '";</script>');
+
+                    request.get(SERVER_URL + '/api/v1/session/login?returnTo=' + CLIENT_1.redirectURI, { jar: true, followRedirect: false }, function (error, response, body) {
+                        expect(error).to.not.be.ok();
+                        expect(response.statusCode).to.eql(302);
+                        expect(response.headers.location).to.eql(CLIENT_1.redirectURI);
+
+                        done();
+                    });
+                });
+            });
+
+            it('fails due to known app', function (done) {
+                var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_2.redirectURI + '&client_id=' + CLIENT_2.id + '&response_type=code';
+                request.get(url, { jar: true }, function (error, response, body) {
+                    expect(error).to.not.be.ok();
+                    expect(response.statusCode).to.eql(200);
+                    expect(body).to.eql('<script>window.location.href = "/api/v1/session/login?returnTo=' + CLIENT_2.redirectURI + '";</script>');
+
+                    request.get(SERVER_URL + '/api/v1/session/login?returnTo=' + CLIENT_2.redirectURI, { jar: true, followRedirect: false }, function (error, response, body) {
+                        expect(error).to.not.be.ok();
+                        expect(response.statusCode).to.eql(200);
+                        expect(body.indexOf('<!-- login tester -->')).to.not.equal(-1);
+
+                        done();
+                    });
+                });
+            });
+
+            it('fails due to known app for addon', function (done) {
+                var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_3.redirectURI + '&client_id=' + CLIENT_3.id + '&response_type=code';
+                request.get(url, { jar: true }, function (error, response, body) {
+                    expect(error).to.not.be.ok();
+                    expect(response.statusCode).to.eql(200);
+                    expect(body).to.eql('<script>window.location.href = "/api/v1/session/login?returnTo=' + CLIENT_3.redirectURI + '";</script>');
+
+                    request.get(SERVER_URL + '/api/v1/session/login?returnTo=' + CLIENT_3.redirectURI, { jar: true, followRedirect: false }, function (error, response, body) {
+                        expect(error).to.not.be.ok();
+                        expect(response.statusCode).to.eql(200);
+                        expect(body.indexOf('<!-- login tester -->')).to.not.equal(-1);
+
+                        done();
+                    });
                 });
             });
         });
