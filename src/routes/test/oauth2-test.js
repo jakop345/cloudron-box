@@ -680,6 +680,46 @@ describe('OAuth2', function () {
                     });
                 });
             });
+
+            it('fails after logout', function (done) {
+                startAuthorizationFlow('token', function (jar) {
+
+                    request.get(SERVER_URL + '/api/v1/session/logout', { jar: jar, followRedirect: false }, function (error, response, body) {
+                        expect(error).to.not.be.ok();
+                        expect(response.statusCode).to.eql(302);
+                        expect(response.headers.location).to.eql('/');
+
+                        var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_2.redirectURI + '&client_id=' + CLIENT_2.id + '&response_type=token';
+                        request.get(url, { jar: jar }, function (error, response, body) {
+                            expect(error).to.not.be.ok();
+                            expect(response.statusCode).to.eql(200);
+                            expect(body).to.eql('<script>window.location.href = "/api/v1/session/login?returnTo=' + CLIENT_2.redirectURI + '";</script>');
+
+                            done();
+                        });
+                    });
+                });
+            });
+
+            it('fails after logout width redirect', function (done) {
+                startAuthorizationFlow('token', function (jar) {
+
+                    request.get(SERVER_URL + '/api/v1/session/logout', { jar: jar, followRedirect: false, qs: { redirect: 'http://foobar' } }, function (error, response, body) {
+                        expect(error).to.not.be.ok();
+                        expect(response.statusCode).to.eql(302);
+                        expect(response.headers.location).to.eql('http://foobar');
+
+                        var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_2.redirectURI + '&client_id=' + CLIENT_2.id + '&response_type=token';
+                        request.get(url, { jar: jar }, function (error, response, body) {
+                            expect(error).to.not.be.ok();
+                            expect(response.statusCode).to.eql(200);
+                            expect(body).to.eql('<script>window.location.href = "/api/v1/session/login?returnTo=' + CLIENT_2.redirectURI + '";</script>');
+
+                            done();
+                        });
+                    });
+                });
+            });
         });
     });
 });
