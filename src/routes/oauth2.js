@@ -173,11 +173,10 @@ function sendErrorPageOrRedirect(req, res, message) {
     } else {
         var u = url.parse(req.query.returnTo);
         if (!u.protocol || !u.host) {
-            renderTemplate(res, 'error', {
+            return renderTemplate(res, 'error', {
                 adminOrigin: config.adminOrigin(),
                 message: 'Invalid request. returnTo query is not a valid URI. ' + message
             });
-            return;
         }
 
         res.redirect(util.format('%s//%s', u.protocol, u.host));
