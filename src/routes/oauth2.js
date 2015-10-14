@@ -249,6 +249,8 @@ function loginForm(req, res) {
 function login(req, res) {
     var returnTo = req.session.returnTo || req.query.returnTo;
 
+    debug('handle login: returnTo %s', returnTo, req.body, req.query);
+
     var failureQuery = querystring.stringify({ error: 'Invalid username or password', returnTo: returnTo });
     passport.authenticate('local', {
         failureRedirect: '/api/v1/session/login?' + failureQuery
