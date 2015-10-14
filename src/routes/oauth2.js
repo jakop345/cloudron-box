@@ -375,7 +375,7 @@ var authorization = [
 
         session.ensureLoggedIn('/api/v1/session/login?returnTo=' + req.query.redirect_uri)(req, res, next);
     },
-    gServer.authorization(function (clientId, redirectURI, callback) {
+    gServer.authorization({}, function (clientId, redirectURI, callback) {
         debug('authorization: client %s with callback to %s.', clientId, redirectURI);
 
         clientdb.get(clientId, function (error, client) {
@@ -388,11 +388,9 @@ var authorization = [
 
             callback(null, client, '/api/v1/session/callback?redirectURI=' + url.resolve(redirectOrigin, redirectPath));
         });
-    }),
-    // we do not have a decision dialog, no need to load the transaction
-    gServer.decision({ loadTransaction: false }, function (req, done) {
-        debug('decision: with scope', req.oauth2.client.scope);
-        return done(null, { scope: req.oauth2.client.scope });
+    }, function (client, user, done) {
+        // This allows us to skip decision dialog
+        return done (null, true);
     })
 ];
 
