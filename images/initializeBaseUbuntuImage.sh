@@ -146,6 +146,11 @@ echo "==== Install collectd ==="
 apt-get install -y collectd collectd-utils
 update-rc.d -f collectd remove
 
+# this simply makes it explicit that we run logrotate via cron. it's already part of base ubuntu
+echo "==== Install logrotate ==="
+apt-get install -y cron logrotate
+systemctl enable cron
+
 echo "==== Extracting installer source ===="
 rm -rf "${INSTALLER_SOURCE_DIR}" && mkdir -p "${INSTALLER_SOURCE_DIR}"
 tar xvf /root/installer.tar -C "${INSTALLER_SOURCE_DIR}" && rm /root/installer.tar
