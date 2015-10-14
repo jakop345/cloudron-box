@@ -10,6 +10,7 @@ var expect = require('expect.js'),
     uuid = require('node-uuid'),
     async = require('async'),
     hat = require('hat'),
+    urlParse = require('url').parse,
     nock = require('nock'),
     HttpError = require('connect-lastmile').HttpError,
     oauth2 = require('../oauth2.js'),
@@ -17,6 +18,7 @@ var expect = require('expect.js'),
     database = require('../../database.js'),
     clientdb = require('../../clientdb.js'),
     userdb = require('../../userdb.js'),
+    user = require('../../user.js'),
     appdb = require('../../appdb.js'),
     config = require('../../config.js'),
     request = require('request'),
@@ -26,20 +28,21 @@ var expect = require('expect.js'),
 var SERVER_URL = 'http://localhost:' + config.get('port');
 
 describe('OAuth2', function () {
-    var passportAuthenticateSave = null;
-
-    before(function () {
-        passportAuthenticateSave = passport.authenticate;
-        passport.authenticate = function () {
-            return function (req, res, next) { next(); };
-        };
-    });
-
-    after(function () {
-        passport.authenticate = passportAuthenticateSave;
-    });
 
     describe('scopes middleware', function () {
+        var passportAuthenticateSave = null;
+
+        before(function () {
+            passportAuthenticateSave = passport.authenticate;
+            passport.authenticate = function () {
+                return function (req, res, next) { next(); };
+            };
+        });
+
+        after(function () {
+            passport.authenticate = passportAuthenticateSave;
+        });
+
         it('fails due to missing authInfo', function (done) {
             var mw = oauth2.scope('admin')[1];
             var req = {};
@@ -133,7 +136,7 @@ describe('OAuth2', function () {
 
     describe('flow', function () {
         var USER_0 = {
-            userId: uuid.v4(),
+            id: uuid.v4(),
             username: 'someusername',
             password: 'somepassword',
             email: 'some@email.com',
@@ -219,7 +222,13 @@ describe('OAuth2', function () {
             async.series([
                 server.start,
                 database._clear,
-                userdb.add.bind(null, USER_0.userId, USER_0),
+                function (callback) {
+                    user.create(USER_0.username, USER_0.password, USER_0.email, true, '', function (error, userObject) {
+                        USER_0.id = userObject.id;
+
+                        callback(error);
+                    });
+                },
                 clientdb.add.bind(null, CLIENT_0.id, CLIENT_0.appId, CLIENT_0.clientSecret, CLIENT_0.redirectURI, CLIENT_0.scope),
                 clientdb.add.bind(null, CLIENT_1.id, CLIENT_1.appId, CLIENT_1.clientSecret, CLIENT_1.redirectURI, CLIENT_1.scope),
                 clientdb.add.bind(null, CLIENT_2.id, CLIENT_2.appId, CLIENT_2.clientSecret, CLIENT_2.redirectURI, CLIENT_2.scope),
@@ -426,6 +435,112 @@ describe('OAuth2', function () {
                         expect(error).to.not.be.ok();
                         expect(response.statusCode).to.eql(200);
                         expect(body.indexOf('<!-- login tester -->')).to.not.equal(-1);
+
+                        done();
+                    });
+                });
+            });
+        });
+
+        describe('loginForm submit', function () {
+            before(setup);
+            after(cleanup);
+
+            function startAuthorizationFlow(callback) {
+                var jar = request.jar();
+                var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_2.redirectURI + '&client_id=' + CLIENT_2.id + '&response_type=code';
+
+                request.get(url, { jar: jar }, function (error, response, body) {
+                    expect(error).to.not.be.ok();
+                    expect(response.statusCode).to.eql(200);
+                    expect(body).to.eql('<script>window.location.href = "/api/v1/session/login?returnTo=' + CLIENT_2.redirectURI + '";</script>');
+
+                    request.get(SERVER_URL + '/api/v1/session/login?returnTo=' + CLIENT_2.redirectURI, { jar: jar, followRedirect: false }, function (error, response, body) {
+                        expect(error).to.not.be.ok();
+                        expect(response.statusCode).to.eql(200);
+                        expect(body.indexOf('<!-- login tester -->')).to.not.equal(-1);
+
+                        callback(jar);
+                    });
+                });
+            }
+
+            it('fails due to missing credentials', function (done) {
+                startAuthorizationFlow(function (jar) {
+                    var url = SERVER_URL + '/api/v1/session/login?returnTo=' + CLIENT_2.redirectURI;
+                    var data = {};
+
+                    request.post({ url: url, jar: jar, form: data }, function (error, response, body) {
+                        expect(error).to.not.be.ok();
+                        expect(response.statusCode).to.eql(302);
+
+                        var tmp = urlParse(response.headers.location, true);
+                        expect(tmp.query.error).to.eql('Invalid username or password');
+                        expect(tmp.query.returnTo).to.eql('/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_2.redirectURI + '&client_id=' + CLIENT_2.id + '&response_type=code');
+
+                        done();
+                    });
+                });
+            });
+
+            it('fails due to wrong username', function (done) {
+                startAuthorizationFlow(function (jar) {
+                    var url = SERVER_URL + '/api/v1/session/login?returnTo=' + CLIENT_2.redirectURI;
+                    var data = {
+                        username: 'foobar',
+                        password: USER_0.password
+                    };
+
+                    request.post({ url: url, jar: jar, form: data }, function (error, response, body) {
+                        expect(error).to.not.be.ok();
+                        expect(response.statusCode).to.eql(302);
+
+                        var tmp = urlParse(response.headers.location, true);
+                        expect(tmp.query.error).to.eql('Invalid username or password');
+                        expect(tmp.query.returnTo).to.eql('/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_2.redirectURI + '&client_id=' + CLIENT_2.id + '&response_type=code');
+
+                        done();
+                    });
+                });
+            });
+
+            it('fails due to wrong password', function (done) {
+                startAuthorizationFlow(function (jar) {
+                    var url = SERVER_URL + '/api/v1/session/login?returnTo=' + CLIENT_2.redirectURI;
+                    var data = {
+                        username: USER_0.username,
+                        password: 'password'
+                    };
+
+                    request.post({ url: url, jar: jar, form: data }, function (error, response, body) {
+                        expect(error).to.not.be.ok();
+                        expect(response.statusCode).to.eql(302);
+
+                        var tmp = urlParse(response.headers.location, true);
+                        expect(tmp.query.error).to.eql('Invalid username or password');
+                        expect(tmp.query.returnTo).to.eql('/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_2.redirectURI + '&client_id=' + CLIENT_2.id + '&response_type=code');
+
+                        done();
+                    });
+                });
+            });
+
+            it('succeeds with username', function (done) {
+                startAuthorizationFlow(function (jar) {
+                    var url = SERVER_URL + '/api/v1/session/login?returnTo=' + CLIENT_2.redirectURI;
+                    var data = {
+                        username: USER_0.username,
+                        password: USER_0.password
+                    };
+
+                    request.post({ url: url, jar: jar, form: data }, function (error, response, body) {
+                        expect(error).to.not.be.ok();
+                        expect(response.statusCode).to.eql(302);
+
+                        var tmp = urlParse(response.headers.location, true);
+                        expect(tmp.query.redirect_uri).to.eql(CLIENT_2.redirectURI);
+                        expect(tmp.query.client_id).to.eql(CLIENT_2.id);
+                        expect(tmp.query.response_type).to.eql('code');
 
                         done();
                     });
