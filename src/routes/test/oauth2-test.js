@@ -127,6 +127,93 @@ describe('OAuth2', function () {
         });
     });
 
+    describe('flow', function () {
+        var USER_0 = {
+            userId: uuid.v4(),
+            username: 'someusername',
+            password: 'somepassword',
+            email: 'some@email.com',
+            admin: true,
+            salt: 'somesalt',
+            createdAt: (new Date()).toUTCString(),
+            modifiedAt: (new Date()).toUTCString(),
+            resetToken: hat(256)
+        };
+
+        // make csrf always succeed for testing
+        oauth2.csrf = function (req, res, next) {
+            req.csrfToken = function () { return hat(256); };
+            next();
+        };
+
+        function setup(done) {
+            server.start(function (error) {
+                expect(error).to.not.be.ok();
+                database._clear(function (error) {
+                    expect(error).to.not.be.ok();
+
+                    userdb.add(USER_0.userId, USER_0, done);
+                });
+            });
+        }
+
+        function cleanup(done) {
+            database._clear(function (error) {
+                expect(error).to.not.be.ok();
+
+                server.stop(done);
+            });
+        }
+
+        describe('authorization', function () {
+            before(setup);
+            after(cleanup);
+
+            it('fails due to missing redirect_uri param', function (done) {
+                superagent.get(SERVER_URL + '/api/v1/oauth/dialog/authorize')
+                .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.text.indexOf('<!-- error tester -->')).to.not.equal(-1);
+                    expect(result.text.indexOf('Invalid request. redirect_uri query param is not set.')).to.not.equal(-1);
+                    expect(result.statusCode).to.equal(200);
+                    done();
+                });
+            });
+
+            it('fails due to missing redirect_uri param', function (done) {
+                superagent.get(SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=http://someredirect')
+                .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.text.indexOf('<!-- error tester -->')).to.not.equal(-1);
+                    expect(result.text.indexOf('Invalid request. client_id query param is not set.')).to.not.equal(-1);
+                    expect(result.statusCode).to.equal(200);
+                    done();
+                });
+            });
+
+            it('fails due to missing response_type param', function (done) {
+                superagent.get(SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=http://someredirect&client_id=someclientid')
+                .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.text.indexOf('<!-- error tester -->')).to.not.equal(-1);
+                    expect(result.text.indexOf('Invalid request. response_type query param is not set.')).to.not.equal(-1);
+                    expect(result.statusCode).to.equal(200);
+                    done();
+                });
+            });
+
+            it('fails due to missing redirect_uri param', function (done) {
+                superagent.get(SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=http://someredirect&client_id=someclientid&response_type=code')
+                .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    console.log(result.text)
+                    expect(result.text).to.eql('<script>window.location.href = "/api/v1/session/login?returnTo=http://someredirect";</script>');
+                    expect(result.statusCode).to.equal(200);
+                    done();
+                });
+            });
+        });
+    });
 });
 
 describe('Password', function () {
@@ -332,3 +419,4 @@ describe('Password', function () {
         });
     });
 });
+
