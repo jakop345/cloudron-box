@@ -15,6 +15,7 @@ var expect = require('expect.js'),
     HttpError = require('connect-lastmile').HttpError,
     oauth2 = require('../oauth2.js'),
     server = require('../../server.js'),
+    querystring = require('querystring'),
     database = require('../../database.js'),
     clientdb = require('../../clientdb.js'),
     userdb = require('../../userdb.js'),
@@ -262,7 +263,7 @@ describe('OAuth2', function () {
                 });
             });
 
-            it('fails due to missing redirect_uri param', function (done) {
+            it('fails due to missing client_id param', function (done) {
                 superagent.get(SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=http://someredirect')
                 .end(function (error, result) {
                     expect(error).to.not.be.ok();
@@ -339,6 +340,19 @@ describe('OAuth2', function () {
                     expect(error).to.not.be.ok();
                     expect(result.statusCode).to.equal(302);
                     expect(result.headers.location).to.eql('http://someredirect');
+
+                    done();
+                });
+            });
+
+            it('fails due to unknown missing client_id', function (done) {
+                superagent.get(SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=http://someredirect&response_type=code')
+                .redirects(0)
+                .end(function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result.text.indexOf('<!-- error tester -->')).to.not.equal(-1);
+                    expect(result.text.indexOf('Invalid request. client_id query param is not set.')).to.not.equal(-1);
+                    expect(result.statusCode).to.equal(200);
 
                     done();
                 });
@@ -589,36 +603,80 @@ describe('OAuth2', function () {
                     });
                 });
             });
+        });
 
-            it('subsqeuent logins go through directly due to session', function (done) {
-                startAuthorizationFlow(function (jar) {
-                    var url = SERVER_URL + '/api/v1/session/login?returnTo=' + CLIENT_2.redirectURI;
-                    var data = {
-                        username: USER_0.username,
-                        password: USER_0.password
-                    };
+        describe('authorization with valid session', function () {
+            before(setup);
+            after(cleanup);
 
-                    request.post({ url: url, jar: jar, form: data }, function (error, response, body) {
+            function startAuthorizationFlow(grant, callback) {
+                var jar = request.jar();
+                var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_2.redirectURI + '&client_id=' + CLIENT_2.id + '&response_type=' + grant;
+
+                request.get(url, { jar: jar }, function (error, response, body) {
+                    expect(error).to.not.be.ok();
+                    expect(response.statusCode).to.eql(200);
+                    expect(body).to.eql('<script>window.location.href = "/api/v1/session/login?returnTo=' + CLIENT_2.redirectURI + '";</script>');
+
+                    request.get(SERVER_URL + '/api/v1/session/login?returnTo=' + CLIENT_2.redirectURI, { jar: jar, followRedirect: false }, function (error, response, body) {
                         expect(error).to.not.be.ok();
-                        expect(response.statusCode).to.eql(302);
+                        expect(response.statusCode).to.eql(200);
+                        expect(body.indexOf('<!-- login tester -->')).to.not.equal(-1);
 
-                        var tmp = urlParse(response.headers.location, true);
-                        expect(tmp.query.redirect_uri).to.eql(CLIENT_2.redirectURI);
-                        expect(tmp.query.client_id).to.eql(CLIENT_2.id);
-                        expect(tmp.query.response_type).to.eql('code');
+                        var url = SERVER_URL + '/api/v1/session/login?returnTo=' + CLIENT_2.redirectURI;
+                        var data = {
+                            username: USER_0.username,
+                            password: USER_0.password
+                        };
 
-                        var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_2.redirectURI + '&client_id=' + CLIENT_2.id + '&response_type=code';
-
-                        request.get(url, { jar: jar, followRedirect: false }, function (error, response, body) {
+                        request.post({ url: url, jar: jar, form: data }, function (error, response, body) {
                             expect(error).to.not.be.ok();
                             expect(response.statusCode).to.eql(302);
 
                             var tmp = urlParse(response.headers.location, true);
-                            expect(tmp.query.redirectURI).to.eql(CLIENT_2.redirectURI + '/');
-                            expect(tmp.query.code).to.be.a('string');
+                            expect(tmp.query.redirect_uri).to.eql(CLIENT_2.redirectURI);
+                            expect(tmp.query.client_id).to.eql(CLIENT_2.id);
+                            expect(tmp.query.response_type).to.eql(grant);
 
-                            done();
+                            callback(jar);
                         });
+                    });
+                });
+            }
+
+            it('succeeds for grant type code', function (done) {
+                startAuthorizationFlow('code', function (jar) {
+                    var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_2.redirectURI + '&client_id=' + CLIENT_2.id + '&response_type=code';
+
+                    request.get(url, { jar: jar, followRedirect: false }, function (error, response, body) {
+                        expect(error).to.not.be.ok();
+                        expect(response.statusCode).to.eql(302);
+
+                        var tmp = urlParse(response.headers.location, true);
+                        expect(tmp.query.redirectURI).to.eql(CLIENT_2.redirectURI + '/');
+                        expect(tmp.query.code).to.be.a('string');
+
+                        done();
+                    });
+                });
+            });
+
+            it('succeeds for grant type token', function (done) {
+                startAuthorizationFlow('token', function (jar) {
+                    var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_2.redirectURI + '&client_id=' + CLIENT_2.id + '&response_type=token';
+
+                    request.get(url, { jar: jar, followRedirect: false }, function (error, response, body) {
+                        expect(error).to.not.be.ok();
+                        expect(response.statusCode).to.eql(302);
+
+                        var tmp = urlParse(response.headers.location, true);
+                        expect(tmp.query.redirectURI).to.eql(CLIENT_2.redirectURI + '/');
+
+                        var foo = querystring.parse(tmp.hash.slice(1)); // remove #
+                        expect(foo.access_token).to.be.a('string');
+                        expect(foo.token_type).to.eql('Bearer');
+
+                        done();
                     });
                 });
             });
