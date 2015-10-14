@@ -1,0 +1,50 @@
+#!/bin/bash
+
+set -eu -o pipefail
+
+# this config matches the docker log-file configuration
+# logrotate ignores daily/monthly etc with size directive
+readonly logrotate_template=$(cat <<"EOF"
+    "$LOG_VOLUME/*" "$LOG_VOLUME/*/*" "$LOG_VOLUME/*/*/*" {
+        missingok
+        rotate 4
+        size 5M
+        nocompress
+        copytruncate
+        notifempty
+        create
+        su
+        maxage 7
+    }
+EOF
+)
+
+readonly containers=$(docker ps -qa)
+
+for container in $containers; do
+    echo "Cleaning up $container"
+
+    if tmpdir=$(docker inspect --format='{{index .Volumes "/tmp"}}' $container); then
+        echo -e "\tRemoving old files from $tmpdir"
+
+        if [[ $tmpdir == /home/yellowtent/data/docker/volumes/* ]]; then
+            find $tmpdir -mtime +10 -exec rm -rf {} + # 10 days max. note we cannot use atime because this is not a tmpfs
+        else
+            echo -e "\tInternal error in script. /tmp is mounted at unexpected location $tmpdir"
+        fi
+    fi
+
+    if logdir=$(docker inspect --format='{{index .Volumes "/var/log"}}' $container); then
+        echo -e "\tLogrotate files under $logdir"
+
+        logrotate_config=$(mktemp)
+        { echo "$logrotate_template" | LOG_VOLUME="$logdir" envsubst; } > "${logrotate_config}"
+
+        logrotate -f "${logrotate_config}"
+
+        find "${logdir}" -mindepth 3 -maxdepth 3 -type d -exec rm -rf {}  + # since we logrotate only till depth 3
+
+        rm "${logrotate_config}"
+    fi
+done
+
