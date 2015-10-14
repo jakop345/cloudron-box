@@ -190,6 +190,24 @@ describe('OAuth2', function () {
             scope: 'profile'
         };
 
+        // unknown app through proxy
+        var CLIENT_4 = {
+            id: 'cid-client4',
+            appId: 'addon-oauth-appid-app4',
+            clientSecret: 'secret4',
+            redirectURI: 'http://redirect4',
+            scope: 'profile'
+        };
+
+        // known app through proxy
+        var CLIENT_5 = {
+            id: 'cid-client5',
+            appId: 'addon-oauth-' + APP_0.id,
+            clientSecret: 'secret5',
+            redirectURI: 'http://redirect5',
+            scope: 'profile'
+        };
+
 
         // make csrf always succeed for testing
         oauth2.csrf = function (req, res, next) {
@@ -206,6 +224,8 @@ describe('OAuth2', function () {
                 clientdb.add.bind(null, CLIENT_1.id, CLIENT_1.appId, CLIENT_1.clientSecret, CLIENT_1.redirectURI, CLIENT_1.scope),
                 clientdb.add.bind(null, CLIENT_2.id, CLIENT_2.appId, CLIENT_2.clientSecret, CLIENT_2.redirectURI, CLIENT_2.scope),
                 clientdb.add.bind(null, CLIENT_3.id, CLIENT_3.appId, CLIENT_3.clientSecret, CLIENT_3.redirectURI, CLIENT_3.scope),
+                clientdb.add.bind(null, CLIENT_4.id, CLIENT_4.appId, CLIENT_4.clientSecret, CLIENT_4.redirectURI, CLIENT_4.scope),
+                clientdb.add.bind(null, CLIENT_5.id, CLIENT_5.appId, CLIENT_5.clientSecret, CLIENT_5.redirectURI, CLIENT_5.scope),
                 appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, APP_0.oauthProxy)
             ], done);
         }
@@ -344,7 +364,7 @@ describe('OAuth2', function () {
                 });
             });
 
-            it('fails due to known app', function (done) {
+            it('succeeds for known app', function (done) {
                 var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_2.redirectURI + '&client_id=' + CLIENT_2.id + '&response_type=code';
                 request.get(url, { jar: true }, function (error, response, body) {
                     expect(error).to.not.be.ok();
@@ -361,7 +381,7 @@ describe('OAuth2', function () {
                 });
             });
 
-            it('fails due to known app for addon', function (done) {
+            it('succeeds for known app for addon', function (done) {
                 var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_3.redirectURI + '&client_id=' + CLIENT_3.id + '&response_type=code';
                 request.get(url, { jar: true }, function (error, response, body) {
                     expect(error).to.not.be.ok();
@@ -369,6 +389,40 @@ describe('OAuth2', function () {
                     expect(body).to.eql('<script>window.location.href = "/api/v1/session/login?returnTo=' + CLIENT_3.redirectURI + '";</script>');
 
                     request.get(SERVER_URL + '/api/v1/session/login?returnTo=' + CLIENT_3.redirectURI, { jar: true, followRedirect: false }, function (error, response, body) {
+                        expect(error).to.not.be.ok();
+                        expect(response.statusCode).to.eql(200);
+                        expect(body.indexOf('<!-- login tester -->')).to.not.equal(-1);
+
+                        done();
+                    });
+                });
+            });
+
+            it('fails due to unknown app for proxy', function (done) {
+                var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_4.redirectURI + '&client_id=' + CLIENT_4.id + '&response_type=code';
+                request.get(url, { jar: true }, function (error, response, body) {
+                    expect(error).to.not.be.ok();
+                    expect(response.statusCode).to.eql(200);
+                    expect(body).to.eql('<script>window.location.href = "/api/v1/session/login?returnTo=' + CLIENT_4.redirectURI + '";</script>');
+
+                    request.get(SERVER_URL + '/api/v1/session/login?returnTo=' + CLIENT_4.redirectURI, { jar: true, followRedirect: false }, function (error, response, body) {
+                        expect(error).to.not.be.ok();
+                        expect(response.statusCode).to.eql(302);
+                        expect(response.headers.location).to.eql(CLIENT_4.redirectURI);
+
+                        done();
+                    });
+                });
+            });
+
+            it('succeeds for known app for proxy', function (done) {
+                var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_5.redirectURI + '&client_id=' + CLIENT_5.id + '&response_type=code';
+                request.get(url, { jar: true }, function (error, response, body) {
+                    expect(error).to.not.be.ok();
+                    expect(response.statusCode).to.eql(200);
+                    expect(body).to.eql('<script>window.location.href = "/api/v1/session/login?returnTo=' + CLIENT_5.redirectURI + '";</script>');
+
+                    request.get(SERVER_URL + '/api/v1/session/login?returnTo=' + CLIENT_5.redirectURI, { jar: true, followRedirect: false }, function (error, response, body) {
                         expect(error).to.not.be.ok();
                         expect(response.statusCode).to.eql(200);
                         expect(body.indexOf('<!-- login tester -->')).to.not.equal(-1);
