@@ -27,33 +27,20 @@ var assert = require('assert'),
 // create OAuth 2.0 server
 var gServer = oauth2orize.createServer();
 
+
 // Register serialialization and deserialization functions.
 //
-// When a client redirects a user to user authorization endpoint, an
-// authorization transaction is initiated.  To complete the transaction, the
-// user must authenticate and approve the authorization request.  Because this
-// may involve multiple HTTP request/response exchanges, the transaction is
-// stored in the session.
-//
-// An application must supply serialization functions, which determine how the
-// client object is serialized into the session.  Typically this will be a
-// simple matter of serializing the client's ID, and deserializing by finding
-// the client by ID from the database.
+// The client id is stored in the session and can thus be retrieved for each
+// step in the oauth flow transaction, which involves multiple http requests.
 
 gServer.serializeClient(function (client, callback) {
-    debug('server serialize:', client);
-
     return callback(null, client.id);
 });
 
 gServer.deserializeClient(function (id, callback) {
-    debug('server deserialize:', id);
-
-    clientdb.get(id, function (error, client) {
-        if (error) { return callback(error); }
-        return callback(null, client);
-    });
+    clientdb.get(id, callback);
 });
+
 
 // Register supported grant types.
 
@@ -388,10 +375,10 @@ var authorization = [
 
         session.ensureLoggedIn('/api/v1/session/login?returnTo=' + req.query.redirect_uri)(req, res, next);
     },
-    gServer.authorization(function (clientID, redirectURI, callback) {
-        debug('authorization: client %s with callback to %s.', clientID, redirectURI);
+    gServer.authorization(function (clientId, redirectURI, callback) {
+        debug('authorization: client %s with callback to %s.', clientId, redirectURI);
 
-        clientdb.get(clientID, function (error, client) {
+        clientdb.get(clientId, function (error, client) {
             if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, false);
             if (error) return callback(error);
 
