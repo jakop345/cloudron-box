@@ -793,6 +793,275 @@ describe('OAuth2', function () {
                 });
             });
         });
+
+        describe('token exchange', function () {
+            before(setup);
+            after(cleanup);
+
+            function startAuthorizationFlow(grant, callback) {
+                var jar = request.jar();
+                var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_2.redirectURI + '&client_id=' + CLIENT_2.id + '&response_type=' + grant;
+
+                request.get(url, { jar: jar }, function (error, response, body) {
+                    expect(error).to.not.be.ok();
+                    expect(response.statusCode).to.eql(200);
+                    expect(body).to.eql('<script>window.location.href = "/api/v1/session/login?returnTo=' + CLIENT_2.redirectURI + '";</script>');
+
+                    request.get(SERVER_URL + '/api/v1/session/login?returnTo=' + CLIENT_2.redirectURI, { jar: jar, followRedirect: false }, function (error, response, body) {
+                        expect(error).to.not.be.ok();
+                        expect(response.statusCode).to.eql(200);
+                        expect(body.indexOf('<!-- login tester -->')).to.not.equal(-1);
+
+                        var url = SERVER_URL + '/api/v1/session/login?returnTo=' + CLIENT_2.redirectURI;
+                        var data = {
+                            username: USER_0.username,
+                            password: USER_0.password
+                        };
+
+                        request.post({ url: url, jar: jar, form: data }, function (error, response, body) {
+                            expect(error).to.not.be.ok();
+                            expect(response.statusCode).to.eql(302);
+
+                            var tmp = urlParse(response.headers.location, true);
+                            expect(tmp.query.redirect_uri).to.eql(CLIENT_2.redirectURI);
+                            expect(tmp.query.client_id).to.eql(CLIENT_2.id);
+                            expect(tmp.query.response_type).to.eql(grant);
+
+                            callback(jar);
+                        });
+                    });
+                });
+            }
+
+            it('fails due to missing credentials', function (done) {
+                startAuthorizationFlow('code', function (jar) {
+                    var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_2.redirectURI + '&client_id=' + CLIENT_2.id + '&response_type=code';
+
+                    request.get(url, { jar: jar, followRedirect: false }, function (error, response, body) {
+                        expect(error).to.not.be.ok();
+                        expect(response.statusCode).to.eql(302);
+
+                        var tmp = urlParse(response.headers.location, true);
+                        expect(tmp.pathname).to.eql('/api/v1/session/callback');
+                        expect(tmp.query.redirectURI).to.eql(CLIENT_2.redirectURI + '/');
+                        expect(tmp.query.code).to.be.a('string');
+
+                        request.post(SERVER_URL + '/api/v1/oauth/token', { jar: jar }, function (error, response, body) {
+                            expect(error).to.not.be.ok();
+                            expect(response.statusCode).to.eql(401);
+
+                            done();
+                        });
+                    });
+                });
+            });
+
+            it('fails due to missing client_id', function (done) {
+                startAuthorizationFlow('code', function (jar) {
+                    var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_2.redirectURI + '&client_id=' + CLIENT_2.id + '&response_type=code';
+
+                    request.get(url, { jar: jar, followRedirect: false }, function (error, response, body) {
+                        expect(error).to.not.be.ok();
+                        expect(response.statusCode).to.eql(302);
+
+                        var tmp = urlParse(response.headers.location, true);
+                        expect(tmp.pathname).to.eql('/api/v1/session/callback');
+                        expect(tmp.query.redirectURI).to.eql(CLIENT_2.redirectURI + '/');
+                        expect(tmp.query.code).to.be.a('string');
+
+                        var data = {
+                            grant_type: 'authorization_code',
+                            code: tmp.query.code,
+                            // client_id: CLIENT_2.id,
+                            client_secret: CLIENT_2.clientSecret
+                        };
+
+                        request.post(SERVER_URL + '/api/v1/oauth/token', { jar: jar, json: data }, function (error, response, body) {
+                            expect(error).to.not.be.ok();
+                            expect(response.statusCode).to.eql(401);
+                            done();
+                        });
+                    });
+                });
+            });
+
+            it('fails due to missing grant_type', function (done) {
+                startAuthorizationFlow('code', function (jar) {
+                    var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_2.redirectURI + '&client_id=' + CLIENT_2.id + '&response_type=code';
+
+                    request.get(url, { jar: jar, followRedirect: false }, function (error, response, body) {
+                        expect(error).to.not.be.ok();
+                        expect(response.statusCode).to.eql(302);
+
+                        var tmp = urlParse(response.headers.location, true);
+                        expect(tmp.pathname).to.eql('/api/v1/session/callback');
+                        expect(tmp.query.redirectURI).to.eql(CLIENT_2.redirectURI + '/');
+                        expect(tmp.query.code).to.be.a('string');
+
+                        var data = {
+                            // grant_type: 'authorization_code',
+                            code: tmp.query.code,
+                            client_id: CLIENT_2.id,
+                            client_secret: CLIENT_2.clientSecret
+                        };
+
+                        request.post(SERVER_URL + '/api/v1/oauth/token', { jar: jar, json: data }, function (error, response, body) {
+                            expect(error).to.not.be.ok();
+                            expect(response.statusCode).to.eql(501);
+                            done();
+                        });
+                    });
+                });
+            });
+
+            it('fails due to missing code', function (done) {
+                startAuthorizationFlow('code', function (jar) {
+                    var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_2.redirectURI + '&client_id=' + CLIENT_2.id + '&response_type=code';
+
+                    request.get(url, { jar: jar, followRedirect: false }, function (error, response, body) {
+                        expect(error).to.not.be.ok();
+                        expect(response.statusCode).to.eql(302);
+
+                        var tmp = urlParse(response.headers.location, true);
+                        expect(tmp.pathname).to.eql('/api/v1/session/callback');
+                        expect(tmp.query.redirectURI).to.eql(CLIENT_2.redirectURI + '/');
+                        expect(tmp.query.code).to.be.a('string');
+
+                        var data = {
+                            grant_type: 'authorization_code',
+                            // code: tmp.query.code,
+                            client_id: CLIENT_2.id,
+                            client_secret: CLIENT_2.clientSecret
+                        };
+
+                        request.post(SERVER_URL + '/api/v1/oauth/token', { jar: jar, json: data }, function (error, response, body) {
+                            expect(error).to.not.be.ok();
+                            expect(response.statusCode).to.eql(400);
+                            done();
+                        });
+                    });
+                });
+            });
+
+            it('fails due to missing client_secret', function (done) {
+                startAuthorizationFlow('code', function (jar) {
+                    var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_2.redirectURI + '&client_id=' + CLIENT_2.id + '&response_type=code';
+
+                    request.get(url, { jar: jar, followRedirect: false }, function (error, response, body) {
+                        expect(error).to.not.be.ok();
+                        expect(response.statusCode).to.eql(302);
+
+                        var tmp = urlParse(response.headers.location, true);
+                        expect(tmp.pathname).to.eql('/api/v1/session/callback');
+                        expect(tmp.query.redirectURI).to.eql(CLIENT_2.redirectURI + '/');
+                        expect(tmp.query.code).to.be.a('string');
+
+                        var data = {
+                            grant_type: 'authorization_code',
+                            code: tmp.query.code,
+                            client_id: CLIENT_2.id,
+                            // client_secret: CLIENT_2.clientSecret
+                        };
+
+                        request.post(SERVER_URL + '/api/v1/oauth/token', { jar: jar, json: data }, function (error, response, body) {
+                            expect(error).to.not.be.ok();
+                            expect(response.statusCode).to.eql(401);
+                            done();
+                        });
+                    });
+                });
+            });
+
+            it('fails due to wrong client_secret', function (done) {
+                startAuthorizationFlow('code', function (jar) {
+                    var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_2.redirectURI + '&client_id=' + CLIENT_2.id + '&response_type=code';
+
+                    request.get(url, { jar: jar, followRedirect: false }, function (error, response, body) {
+                        expect(error).to.not.be.ok();
+                        expect(response.statusCode).to.eql(302);
+
+                        var tmp = urlParse(response.headers.location, true);
+                        expect(tmp.pathname).to.eql('/api/v1/session/callback');
+                        expect(tmp.query.redirectURI).to.eql(CLIENT_2.redirectURI + '/');
+                        expect(tmp.query.code).to.be.a('string');
+
+                        var data = {
+                            grant_type: 'authorization_code',
+                            code: tmp.query.code,
+                            client_id: CLIENT_2.id,
+                            client_secret: CLIENT_2.clientSecret+CLIENT_2.clientSecret
+                        };
+
+                        request.post(SERVER_URL + '/api/v1/oauth/token', { jar: jar, json: data }, function (error, response, body) {
+                            expect(error).to.not.be.ok();
+                            expect(response.statusCode).to.eql(401);
+                            done();
+                        });
+                    });
+                });
+            });
+
+            it('fails due to wrong client_id', function (done) {
+                startAuthorizationFlow('code', function (jar) {
+                    var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_2.redirectURI + '&client_id=' + CLIENT_2.id + '&response_type=code';
+
+                    request.get(url, { jar: jar, followRedirect: false }, function (error, response, body) {
+                        expect(error).to.not.be.ok();
+                        expect(response.statusCode).to.eql(302);
+
+                        var tmp = urlParse(response.headers.location, true);
+                        expect(tmp.pathname).to.eql('/api/v1/session/callback');
+                        expect(tmp.query.redirectURI).to.eql(CLIENT_2.redirectURI + '/');
+                        expect(tmp.query.code).to.be.a('string');
+
+                        var data = {
+                            grant_type: 'authorization_code',
+                            code: tmp.query.code,
+                            client_id: CLIENT_2.id+CLIENT_2.id,
+                            client_secret: CLIENT_2.clientSecret
+                        };
+
+                        request.post(SERVER_URL + '/api/v1/oauth/token', { jar: jar, json: data }, function (error, response, body) {
+                            expect(error).to.not.be.ok();
+                            expect(response.statusCode).to.eql(401);
+                            done();
+                        });
+                    });
+                });
+            });
+
+            it('succeeds', function (done) {
+                startAuthorizationFlow('code', function (jar) {
+                    var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_2.redirectURI + '&client_id=' + CLIENT_2.id + '&response_type=code';
+
+                    request.get(url, { jar: jar, followRedirect: false }, function (error, response, body) {
+                        expect(error).to.not.be.ok();
+                        expect(response.statusCode).to.eql(302);
+
+                        var tmp = urlParse(response.headers.location, true);
+                        expect(tmp.pathname).to.eql('/api/v1/session/callback');
+                        expect(tmp.query.redirectURI).to.eql(CLIENT_2.redirectURI + '/');
+                        expect(tmp.query.code).to.be.a('string');
+
+                        var data = {
+                            grant_type: 'authorization_code',
+                            code: tmp.query.code,
+                            client_id: CLIENT_2.id,
+                            client_secret: CLIENT_2.clientSecret
+                        };
+
+                        request.post(SERVER_URL + '/api/v1/oauth/token', { jar: jar, json: data }, function (error, response, body) {
+                            expect(error).to.not.be.ok();
+                            expect(response.statusCode).to.eql(200);
+                            expect(body.access_token).to.be.a('string');
+                            expect(body.token_type).to.eql('Bearer');
+
+                            done();
+                        });
+                    });
+                });
+            });
+        });
     });
 });
 
