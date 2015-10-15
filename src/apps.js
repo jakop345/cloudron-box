@@ -37,7 +37,8 @@ exports = module.exports = {
 
     // exported for testing
     _validateHostname: validateHostname,
-    _validatePortBindings: validatePortBindings
+    _validatePortBindings: validatePortBindings,
+    _validateAccessRestriction: validateAccessRestriction
 };
 
 var addons = require('./addons.js'),
@@ -179,6 +180,21 @@ function validatePortBindings(portBindings, tcpPorts) {
     return null;
 }
 
+function validateAccessRestriction(accessRestriction) {
+    assert.strictEqual(typeof accessRestriction, 'string');
+
+    function validator(entry) {
+        if (entry === '') return true;
+        if (entry.indexOf('user-') === 0 && entry.length > 'user-'.length) return true;
+        return false;
+    }
+
+    var entries = accessRestriction.split(',').map(function (e) { return e.trim(); });
+    if (!entries.every(validator)) return new Error('Invalid accessRestriction');
+
+    return null;
+}
+
 function getDuplicateErrorDetails(location, portBindings, error) {
     assert.strictEqual(typeof location, 'string');
     assert.strictEqual(typeof portBindings, 'object');
@@ -249,18 +265,6 @@ function getAll(callback) {
 
         callback(null, apps);
     });
-}
-
-function validateAccessRestriction(accessRestriction) {
-    // TODO: make the values below enumerations in the oauth code
-    switch (accessRestriction) {
-    case '':
-    case 'roleUser':
-    case 'roleAdmin':
-        return null;
-    default:
-        return new Error('Invalid accessRestriction');
-    }
 }
 
 function purchase(appStoreId, callback) {
