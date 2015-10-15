@@ -158,5 +158,39 @@ describe('Apps', function () {
             });
         });
     });
+
+    describe('validateAccessRestriction', function () {
+        it('allows empty input', function () {
+            expect(apps._validateAccessRestriction('')).to.eql(null);
+        });
+
+        it('allows single user input', function () {
+            expect(apps._validateAccessRestriction('user-someuserid')).to.eql(null);
+        });
+
+        it('does not allow single user input with no prefix', function () {
+            expect(apps._validateAccessRestriction('someuserid')).to.be.an(Error);
+        });
+
+        it('does not allow single user input with unkown prefix', function () {
+            expect(apps._validateAccessRestriction('foobar-someuserid')).to.be.an(Error);
+        });
+
+        it('allows multi user input', function () {
+            expect(apps._validateAccessRestriction('user-someuserid,user-someuserid1,user-someuserid2,user-someuserid3')).to.eql(null);
+        });
+
+        it('allows multi user input with whitespace', function () {
+            expect(apps._validateAccessRestriction('user-someuserid ,user-someuserid1     ,user-someuserid2 , user-someuserid3')).to.eql(null);
+        });
+
+        it('does not allow multi user input with no prefix', function () {
+            expect(apps._validateAccessRestriction('user-someuserid,someuserid1,user-someuserid2,user-someuserid3')).to.be.an(Error);
+        });
+
+        it('does not allow multi user input with unkown prefix', function () {
+            expect(apps._validateAccessRestriction('user-someuserid,user-someuserid1,user-someuserid2,foo-someuserid3')).to.be.an(Error);
+        });
+    });
 });
 
