@@ -158,6 +158,26 @@ describe('OAuth2', function () {
             oauthProxy: true
         };
 
+        var APP_1 = {
+            id: 'app1',
+            appStoreId: '',
+            manifest: { version: '0.1.0' },
+            location: 'test1',
+            portBindings: {},
+            accessRestriction: 'user-foobar',
+            oauthProxy: true
+        };
+
+        var APP_2 = {
+            id: 'app2',
+            appStoreId: '',
+            manifest: { version: '0.1.0' },
+            location: 'test2',
+            portBindings: {},
+            accessRestriction: 'user-' + USER_0.id,
+            oauthProxy: true
+        };
+
         // unknown app
         var CLIENT_0 = {
             id: 'cid-client0',
@@ -212,6 +232,23 @@ describe('OAuth2', function () {
             scope: 'profile'
         };
 
+        // app with accessRestriction not allowing user
+        var CLIENT_6 = {
+            id: 'cid-client6',
+            appId: APP_1.id,
+            clientSecret: 'secret6',
+            redirectURI: 'http://redirect6',
+            scope: 'profile'
+        };
+
+        // app with accessRestriction allowing user
+        var CLIENT_7 = {
+            id: 'cid-client7',
+            appId: APP_2.id,
+            clientSecret: 'secret7',
+            redirectURI: 'http://redirect7',
+            scope: 'profile'
+        };
 
         // make csrf always succeed for testing
         oauth2.csrf = function (req, res, next) {
@@ -223,20 +260,28 @@ describe('OAuth2', function () {
             async.series([
                 server.start,
                 database._clear,
-                function (callback) {
-                    user.create(USER_0.username, USER_0.password, USER_0.email, true, '', function (error, userObject) {
-                        USER_0.id = userObject.id;
-
-                        callback(error);
-                    });
-                },
                 clientdb.add.bind(null, CLIENT_0.id, CLIENT_0.appId, CLIENT_0.clientSecret, CLIENT_0.redirectURI, CLIENT_0.scope),
                 clientdb.add.bind(null, CLIENT_1.id, CLIENT_1.appId, CLIENT_1.clientSecret, CLIENT_1.redirectURI, CLIENT_1.scope),
                 clientdb.add.bind(null, CLIENT_2.id, CLIENT_2.appId, CLIENT_2.clientSecret, CLIENT_2.redirectURI, CLIENT_2.scope),
                 clientdb.add.bind(null, CLIENT_3.id, CLIENT_3.appId, CLIENT_3.clientSecret, CLIENT_3.redirectURI, CLIENT_3.scope),
                 clientdb.add.bind(null, CLIENT_4.id, CLIENT_4.appId, CLIENT_4.clientSecret, CLIENT_4.redirectURI, CLIENT_4.scope),
                 clientdb.add.bind(null, CLIENT_5.id, CLIENT_5.appId, CLIENT_5.clientSecret, CLIENT_5.redirectURI, CLIENT_5.scope),
-                appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, APP_0.oauthProxy)
+                clientdb.add.bind(null, CLIENT_6.id, CLIENT_6.appId, CLIENT_6.clientSecret, CLIENT_6.redirectURI, CLIENT_6.scope),
+                clientdb.add.bind(null, CLIENT_7.id, CLIENT_7.appId, CLIENT_7.clientSecret, CLIENT_7.redirectURI, CLIENT_7.scope),
+                appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, APP_0.oauthProxy),
+                appdb.add.bind(null, APP_1.id, APP_1.appStoreId, APP_1.manifest, APP_1.location, APP_1.portBindings, APP_1.accessRestriction, APP_1.oauthProxy),
+                appdb.add.bind(null, APP_2.id, APP_2.appStoreId, APP_2.manifest, APP_2.location, APP_2.portBindings, APP_2.accessRestriction, APP_2.oauthProxy),
+                function (callback) {
+                    user.create(USER_0.username, USER_0.password, USER_0.email, true, '', function (error, userObject) {
+                        expect(error).to.not.be.ok();
+
+                        // update the global objects to reflect the new user id
+                        USER_0.id = userObject.id;
+                        APP_2.accessRestriction = 'user-foobar,user-' + userObject.id;
+
+                        appdb.update(APP_2.id, APP_2, callback);
+                    });
+                },
             ], done);
         }
 
@@ -481,16 +526,16 @@ describe('OAuth2', function () {
             before(setup);
             after(cleanup);
 
-            function startAuthorizationFlow(callback) {
+            function startAuthorizationFlow(client, callback) {
                 var jar = request.jar();
-                var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_2.redirectURI + '&client_id=' + CLIENT_2.id + '&response_type=code';
+                var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + client.redirectURI + '&client_id=' + client.id + '&response_type=code';
 
                 request.get(url, { jar: jar }, function (error, response, body) {
                     expect(error).to.not.be.ok();
                     expect(response.statusCode).to.eql(200);
-                    expect(body).to.eql('<script>window.location.href = "/api/v1/session/login?returnTo=' + CLIENT_2.redirectURI + '";</script>');
+                    expect(body).to.eql('<script>window.location.href = "/api/v1/session/login?returnTo=' + client.redirectURI + '";</script>');
 
-                    request.get(SERVER_URL + '/api/v1/session/login?returnTo=' + CLIENT_2.redirectURI, { jar: jar, followRedirect: false }, function (error, response, body) {
+                    request.get(SERVER_URL + '/api/v1/session/login?returnTo=' + client.redirectURI, { jar: jar, followRedirect: false }, function (error, response, body) {
                         expect(error).to.not.be.ok();
                         expect(response.statusCode).to.eql(200);
                         expect(body.indexOf('<!-- login tester -->')).to.not.equal(-1);
@@ -501,7 +546,7 @@ describe('OAuth2', function () {
             }
 
             it('fails due to missing credentials', function (done) {
-                startAuthorizationFlow(function (jar) {
+                startAuthorizationFlow(CLIENT_2, function (jar) {
                     var url = SERVER_URL + '/api/v1/session/login?returnTo=' + CLIENT_2.redirectURI;
                     var data = {};
 
@@ -519,7 +564,7 @@ describe('OAuth2', function () {
             });
 
             it('fails due to wrong username', function (done) {
-                startAuthorizationFlow(function (jar) {
+                startAuthorizationFlow(CLIENT_2, function (jar) {
                     var url = SERVER_URL + '/api/v1/session/login?returnTo=' + CLIENT_2.redirectURI;
                     var data = {
                         username: 'foobar',
@@ -540,7 +585,7 @@ describe('OAuth2', function () {
             });
 
             it('fails due to wrong password', function (done) {
-                startAuthorizationFlow(function (jar) {
+                startAuthorizationFlow(CLIENT_2, function (jar) {
                     var url = SERVER_URL + '/api/v1/session/login?returnTo=' + CLIENT_2.redirectURI;
                     var data = {
                         username: USER_0.username,
@@ -561,7 +606,7 @@ describe('OAuth2', function () {
             });
 
             it('succeeds with username', function (done) {
-                startAuthorizationFlow(function (jar) {
+                startAuthorizationFlow(CLIENT_2, function (jar) {
                     var url = SERVER_URL + '/api/v1/session/login?returnTo=' + CLIENT_2.redirectURI;
                     var data = {
                         username: USER_0.username,
@@ -583,7 +628,7 @@ describe('OAuth2', function () {
             });
 
             it('succeeds with email', function (done) {
-                startAuthorizationFlow(function (jar) {
+                startAuthorizationFlow(CLIENT_2, function (jar) {
                     var url = SERVER_URL + '/api/v1/session/login?returnTo=' + CLIENT_2.redirectURI;
                     var data = {
                         username: USER_0.email,
@@ -609,21 +654,21 @@ describe('OAuth2', function () {
             before(setup);
             after(cleanup);
 
-            function startAuthorizationFlow(grant, callback) {
+            function startAuthorizationFlow(client, grant, callback) {
                 var jar = request.jar();
-                var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_2.redirectURI + '&client_id=' + CLIENT_2.id + '&response_type=' + grant;
+                var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + client.redirectURI + '&client_id=' + client.id + '&response_type=' + grant;
 
                 request.get(url, { jar: jar }, function (error, response, body) {
                     expect(error).to.not.be.ok();
                     expect(response.statusCode).to.eql(200);
-                    expect(body).to.eql('<script>window.location.href = "/api/v1/session/login?returnTo=' + CLIENT_2.redirectURI + '";</script>');
+                    expect(body).to.eql('<script>window.location.href = "/api/v1/session/login?returnTo=' + client.redirectURI + '";</script>');
 
-                    request.get(SERVER_URL + '/api/v1/session/login?returnTo=' + CLIENT_2.redirectURI, { jar: jar, followRedirect: false }, function (error, response, body) {
+                    request.get(SERVER_URL + '/api/v1/session/login?returnTo=' + client.redirectURI, { jar: jar, followRedirect: false }, function (error, response, body) {
                         expect(error).to.not.be.ok();
                         expect(response.statusCode).to.eql(200);
                         expect(body.indexOf('<!-- login tester -->')).to.not.equal(-1);
 
-                        var url = SERVER_URL + '/api/v1/session/login?returnTo=' + CLIENT_2.redirectURI;
+                        var url = SERVER_URL + '/api/v1/session/login?returnTo=' + client.redirectURI;
                         var data = {
                             username: USER_0.username,
                             password: USER_0.password
@@ -634,8 +679,8 @@ describe('OAuth2', function () {
                             expect(response.statusCode).to.eql(302);
 
                             var tmp = urlParse(response.headers.location, true);
-                            expect(tmp.query.redirect_uri).to.eql(CLIENT_2.redirectURI);
-                            expect(tmp.query.client_id).to.eql(CLIENT_2.id);
+                            expect(tmp.query.redirect_uri).to.eql(client.redirectURI);
+                            expect(tmp.query.client_id).to.eql(client.id);
                             expect(tmp.query.response_type).to.eql(grant);
 
                             callback(jar);
@@ -645,7 +690,7 @@ describe('OAuth2', function () {
             }
 
             it('succeeds for grant type code', function (done) {
-                startAuthorizationFlow('code', function (jar) {
+                startAuthorizationFlow(CLIENT_2, 'code', function (jar) {
                     var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_2.redirectURI + '&client_id=' + CLIENT_2.id + '&response_type=code';
 
                     request.get(url, { jar: jar, followRedirect: false }, function (error, response, body) {
@@ -662,7 +707,7 @@ describe('OAuth2', function () {
             });
 
             it('succeeds for grant type token', function (done) {
-                startAuthorizationFlow('token', function (jar) {
+                startAuthorizationFlow(CLIENT_2, 'token', function (jar) {
                     var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_2.redirectURI + '&client_id=' + CLIENT_2.id + '&response_type=token';
 
                     request.get(url, { jar: jar, followRedirect: false }, function (error, response, body) {
@@ -681,8 +726,75 @@ describe('OAuth2', function () {
                 });
             });
 
+            it('fails for grant type code due to accessRestriction', function (done) {
+                startAuthorizationFlow(CLIENT_6, 'code', function (jar) {
+                    var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_6.redirectURI + '&client_id=' + CLIENT_6.id + '&response_type=code';
+
+                    request.get(url, { jar: jar, followRedirect: false }, function (error, response, body) {
+                        expect(error).to.not.be.ok();
+                        expect(response.statusCode).to.eql(200);
+                        expect(body.indexOf('<!-- error tester -->')).to.not.equal(-1);
+                        expect(body.indexOf('No access to this app.')).to.not.equal(-1);
+
+                        done();
+                    });
+                });
+            });
+
+            it('succeeds for grant type code with accessRestriction', function (done) {
+                startAuthorizationFlow(CLIENT_7, 'code', function (jar) {
+                    var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_7.redirectURI + '&client_id=' + CLIENT_7.id + '&response_type=code';
+
+                    request.get(url, { jar: jar, followRedirect: false }, function (error, response, body) {
+                        expect(error).to.not.be.ok();
+                        expect(response.statusCode).to.eql(302);
+
+                        var tmp = urlParse(response.headers.location, true);
+                        expect(tmp.query.redirectURI).to.eql(CLIENT_7.redirectURI + '/');
+                        expect(tmp.query.code).to.be.a('string');
+
+                        done();
+                    });
+                });
+            });
+
+            it('fails for grant type token due to accessRestriction', function (done) {
+                startAuthorizationFlow(CLIENT_6, 'token', function (jar) {
+                    var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_6.redirectURI + '&client_id=' + CLIENT_6.id + '&response_type=token';
+
+                    request.get(url, { jar: jar, followRedirect: false }, function (error, response, body) {
+                        expect(error).to.not.be.ok();
+                        expect(response.statusCode).to.eql(200);
+                        expect(body.indexOf('<!-- error tester -->')).to.not.equal(-1);
+                        expect(body.indexOf('No access to this app.')).to.not.equal(-1);
+
+                        done();
+                    });
+                });
+            });
+
+            it('succeeds for grant type token', function (done) {
+                startAuthorizationFlow(CLIENT_7, 'token', function (jar) {
+                    var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_7.redirectURI + '&client_id=' + CLIENT_7.id + '&response_type=token';
+
+                    request.get(url, { jar: jar, followRedirect: false }, function (error, response, body) {
+                        expect(error).to.not.be.ok();
+                        expect(response.statusCode).to.eql(302);
+
+                        var tmp = urlParse(response.headers.location, true);
+                        expect(tmp.query.redirectURI).to.eql(CLIENT_7.redirectURI + '/');
+
+                        var foo = querystring.parse(tmp.hash.slice(1)); // remove #
+                        expect(foo.access_token).to.be.a('string');
+                        expect(foo.token_type).to.eql('Bearer');
+
+                        done();
+                    });
+                });
+            });
+
             it('fails after logout', function (done) {
-                startAuthorizationFlow('token', function (jar) {
+                startAuthorizationFlow(CLIENT_2, 'token', function (jar) {
 
                     request.get(SERVER_URL + '/api/v1/session/logout', { jar: jar, followRedirect: false }, function (error, response, body) {
                         expect(error).to.not.be.ok();
@@ -702,7 +814,7 @@ describe('OAuth2', function () {
             });
 
             it('fails after logout width redirect', function (done) {
-                startAuthorizationFlow('token', function (jar) {
+                startAuthorizationFlow(CLIENT_2, 'token', function (jar) {
 
                     request.get(SERVER_URL + '/api/v1/session/logout', { jar: jar, followRedirect: false, qs: { redirect: 'http://foobar' } }, function (error, response, body) {
                         expect(error).to.not.be.ok();
