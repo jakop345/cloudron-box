@@ -43,6 +43,16 @@ describe('SimpleAuth API', function () {
         oauthProxy: true
     };
 
+    var APP_2 = {
+        id: 'app2',
+        appStoreId: '',
+        manifest: { version: '0.1.0' },
+        location: 'test2',
+        portBindings: {},
+        accessRestriction: '',
+        oauthProxy: true
+    };
+
     var CLIENT_0 = {
         id: 'someclientid',
         appId: 'someappid',
@@ -62,7 +72,15 @@ describe('SimpleAuth API', function () {
     var CLIENT_2 = {
         id: 'someclientid2',
         appId: APP_1.id,
-        clientSecret: 'someclientsecret1',
+        clientSecret: 'someclientsecret2',
+        redirectURI: '',
+        scope: 'user,profile'
+    };
+
+    var CLIENT_3 = {
+        id: 'someclientid3',
+        appId: APP_2.id,
+        clientSecret: 'someclientsecret3',
         redirectURI: '',
         scope: 'user,profile'
     };
@@ -95,8 +113,10 @@ describe('SimpleAuth API', function () {
             clientdb.add.bind(null, CLIENT_0.id, CLIENT_0.appId, CLIENT_0.clientSecret, CLIENT_0.redirectURI, CLIENT_0.scope),
             clientdb.add.bind(null, CLIENT_1.id, CLIENT_1.appId, CLIENT_1.clientSecret, CLIENT_1.redirectURI, CLIENT_1.scope),
             clientdb.add.bind(null, CLIENT_2.id, CLIENT_2.appId, CLIENT_2.clientSecret, CLIENT_2.redirectURI, CLIENT_2.scope),
+            clientdb.add.bind(null, CLIENT_3.id, CLIENT_3.appId, CLIENT_3.clientSecret, CLIENT_3.redirectURI, CLIENT_3.scope),
             appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, APP_0.oauthProxy),
-            appdb.add.bind(null, APP_1.id, APP_1.appStoreId, APP_1.manifest, APP_1.location, APP_1.portBindings, APP_1.accessRestriction, APP_1.oauthProxy)
+            appdb.add.bind(null, APP_1.id, APP_1.appStoreId, APP_1.manifest, APP_1.location, APP_1.portBindings, APP_1.accessRestriction, APP_1.oauthProxy),
+            appdb.add.bind(null, APP_2.id, APP_2.appStoreId, APP_2.manifest, APP_2.location, APP_2.portBindings, APP_2.accessRestriction, APP_2.oauthProxy)
         ], done);
     });
 
@@ -214,9 +234,41 @@ describe('SimpleAuth API', function () {
             });
         });
 
-        it('succeeds', function (done) {
+        it('fails for unkown app', function (done) {
             var body = {
                 clientId: CLIENT_0.id,
+                username: USERNAME,
+                password: PASSWORD
+            };
+
+            request.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
+            .send(body)
+            .end(function (error, result) {
+                expect(error).to.be(null);
+                expect(result.statusCode).to.equal(401);
+                done();
+            });
+        });
+
+        it('fails for disallowed app', function (done) {
+            var body = {
+                clientId: CLIENT_1.id,
+                username: USERNAME,
+                password: PASSWORD
+            };
+
+            request.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
+            .send(body)
+            .end(function (error, result) {
+                expect(error).to.be(null);
+                expect(result.statusCode).to.equal(401);
+                done();
+            });
+        });
+
+        it('succeeds for allowed app', function (done) {
+            var body = {
+                clientId: CLIENT_2.id,
                 username: USERNAME,
                 password: PASSWORD
             };
@@ -245,25 +297,9 @@ describe('SimpleAuth API', function () {
             });
         });
 
-        xit('cannot login for disallowed app', function (done) {
+        it('succeeds for app without accessRestriction', function (done) {
             var body = {
-                clientId: CLIENT_1.id,
-                username: USERNAME,
-                password: PASSWORD
-            };
-
-            request.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
-            .send(body)
-            .end(function (error, result) {
-                expect(error).to.be(null);
-                expect(result.statusCode).to.equal(401);
-                done();
-            });
-        });
-
-        xit('can login for allowed app', function (done) {
-            var body = {
-                clientId: CLIENT_2.id,
+                clientId: CLIENT_3.id,
                 username: USERNAME,
                 password: PASSWORD
             };
@@ -298,7 +334,7 @@ describe('SimpleAuth API', function () {
 
         before(function (done) {
             var body = {
-                clientId: CLIENT_0.id,
+                clientId: CLIENT_3.id,
                 username: USERNAME,
                 password: PASSWORD
             };
