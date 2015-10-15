@@ -34,7 +34,7 @@ graphite_container_id=$(docker run --restart=always -d --name="graphite" \
     -p 127.0.0.1:2004:2004 \
     -p 127.0.0.1:8000:8000 \
     -v "${DATA_DIR}/graphite:/app/data" \
-    --read-only -v /tmp -v /run -v /var/log \
+    --read-only -v /tmp -v /run \
     "${GRAPHITE_IMAGE}")
 echo "Graphite container id: ${graphite_container_id}"
 
@@ -45,7 +45,7 @@ mail_container_id=$(docker run --restart=always -d --name="mail" \
     -h "${arg_fqdn}" \
     -e "DOMAIN_NAME=${arg_fqdn}" \
     -v "${DATA_DIR}/box/mail:/app/data" \
-    --read-only -v /tmp -v /run -v /var/log \
+    --read-only -v /tmp -v /run \
     "${MAIL_IMAGE}")
 echo "Mail container id: ${mail_container_id}"
 
@@ -62,7 +62,7 @@ mysql_container_id=$(docker run --restart=always -d --name="mysql" \
     -h "${arg_fqdn}" \
     -v "${DATA_DIR}/mysql:/var/lib/mysql" \
     -v "${DATA_DIR}/addons/mysql_vars.sh:/etc/mysql/mysql_vars.sh:ro" \
-    --read-only -v /tmp -v /run -v /var/log \
+    --read-only -v /tmp -v /run \
     "${MYSQL_IMAGE}")
 echo "MySQL container id: ${mysql_container_id}"
 
@@ -77,7 +77,7 @@ postgresql_container_id=$(docker run --restart=always -d --name="postgresql" \
     -h "${arg_fqdn}" \
     -v "${DATA_DIR}/postgresql:/var/lib/postgresql" \
     -v "${DATA_DIR}/addons/postgresql_vars.sh:/etc/postgresql/postgresql_vars.sh:ro" \
-    --read-only -v /tmp -v /run -v /var/log \
+    --read-only -v /tmp -v /run \
     "${POSTGRESQL_IMAGE}")
 echo "PostgreSQL container id: ${postgresql_container_id}"
 
@@ -92,7 +92,7 @@ mongodb_container_id=$(docker run --restart=always -d --name="mongodb" \
     -h "${arg_fqdn}" \
     -v "${DATA_DIR}/mongodb:/var/lib/mongodb" \
     -v "${DATA_DIR}/addons/mongodb_vars.sh:/etc/mongodb_vars.sh:ro" \
-    --read-only -v /tmp -v /run -v /var/log \
+    --read-only -v /tmp -v /run \
     "${MONGODB_IMAGE}")
 echo "Mongodb container id: ${mongodb_container_id}"
 
@@ -107,4 +107,3 @@ else
 fi
 
 echo -n "${INFRA_VERSION}" > "${DATA_DIR}/INFRA_VERSION"
-

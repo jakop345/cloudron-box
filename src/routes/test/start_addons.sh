@@ -25,7 +25,7 @@ start_postgresql() {
     docker rm -f postgresql 2>/dev/null 1>&2 || true
 
     docker run -dtP --name=postgresql -v "${postgresqldatadir}:/var/lib/postgresql" \
-         --read-only -v /tmp -v /run -v /var/log \
+         --read-only -v /tmp -v /run \
         -v /tmp/postgresql_vars.sh:/etc/postgresql/postgresql_vars.sh "${POSTGRESQL_IMAGE}" >/dev/null
 }
 
@@ -43,7 +43,7 @@ start_mysql() {
     docker rm -f mysql 2>/dev/null 1>&2 || true
 
     docker run -dP --name=mysql -v "${mysqldatadir}:/var/lib/mysql" \
-        --read-only -v /tmp -v /run -v /var/log \
+        --read-only -v /tmp -v /run \
         -v /tmp/mysql_vars.sh:/etc/mysql/mysql_vars.sh "${MYSQL_IMAGE}" >/dev/null
 }
 
@@ -61,7 +61,7 @@ start_mongodb() {
     docker rm -f mongodb 2>/dev/null 1>&2 || true
 
     docker run -dP --name=mongodb -v "${mongodbdatadir}:/var/lib/mongodb" \
-        --read-only -v /tmp -v /run -v /var/log \
+        --read-only -v /tmp -v /run \
         -v /tmp/mongodb_vars.sh:/etc/mongodb_vars.sh "${MONGODB_IMAGE}" >/dev/null
 }
 
@@ -71,7 +71,7 @@ start_mail() {
     docker rm -f mail 2>/dev/null 1>&2 || true
 
     docker run -dP --name=mail -e DOMAIN_NAME="localhost" \
-        --read-only -v /tmp -v /run -v /var/log \
+        --read-only -v /tmp -v /run \
         -v /tmp/maildata:/app/data "${MAIL_IMAGE}" >/dev/null
 }
 
