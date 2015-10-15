@@ -197,7 +197,7 @@ describe('OAuth2', function () {
         // unknown app through proxy
         var CLIENT_4 = {
             id: 'cid-client4',
-            appId: 'addon-oauth-appid-app4',
+            appId: 'proxy-appid-app4',
             clientSecret: 'secret4',
             redirectURI: 'http://redirect4',
             scope: 'profile'
@@ -206,7 +206,7 @@ describe('OAuth2', function () {
         // known app through proxy
         var CLIENT_5 = {
             id: 'cid-client5',
-            appId: 'addon-oauth-' + APP_0.id,
+            appId: 'proxy-' + APP_0.id,
             clientSecret: 'secret5',
             redirectURI: 'http://redirect5',
             scope: 'profile'
