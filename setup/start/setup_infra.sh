@@ -37,7 +37,9 @@ graphite_container_id=$(docker run --restart=always -d --name="graphite" \
     --read-only -v /tmp -v /run \
     "${GRAPHITE_IMAGE}")
 echo "Graphite container id: ${graphite_container_id}"
-docker images "${GRAPHITE_REPO}" | tail -n +2 | awk '{ print $1 ":" $2 }' | grep -v "${GRAPHITE_IMAGE}" | xargs --no-run-if-empty docker rmi
+if docker images "${GRAPHITE_REPO}" | tail -n +2 | awk '{ print $1 ":" $2 }' | grep -v "${GRAPHITE_IMAGE}" | xargs --no-run-if-empty docker rmi; then
+    echo "Removed old graphite images"
+fi
 
 # mail (MAIL_SMTP_PORT is 2500 in addons.js. used in mailer.js as well)
 mail_container_id=$(docker run --restart=always -d --name="mail" \
@@ -49,7 +51,9 @@ mail_container_id=$(docker run --restart=always -d --name="mail" \
     --read-only -v /tmp -v /run \
     "${MAIL_IMAGE}")
 echo "Mail container id: ${mail_container_id}"
-docker images "${MAIL_REPO}" | tail -n +2 | awk '{ print $1 ":" $2 }' | grep -v "${MAIL_IMAGE}" | xargs --no-run-if-empty docker rmi
+if docker images "${MAIL_REPO}" | tail -n +2 | awk '{ print $1 ":" $2 }' | grep -v "${MAIL_IMAGE}" | xargs --no-run-if-empty docker rmi; then
+    echo "Removed old mail images"
+fi
 
 # mysql
 mysql_addon_root_password=$(pwgen -1 -s)
@@ -67,7 +71,9 @@ mysql_container_id=$(docker run --restart=always -d --name="mysql" \
     --read-only -v /tmp -v /run \
     "${MYSQL_IMAGE}")
 echo "MySQL container id: ${mysql_container_id}"
-docker images "${MYSQL_REPO}" | tail -n +2 | awk '{ print $1 ":" $2 }' | grep -v "${MYSQL_IMAGE}" | xargs --no-run-if-empty docker rmi
+if docker images "${MYSQL_REPO}" | tail -n +2 | awk '{ print $1 ":" $2 }' | grep -v "${MYSQL_IMAGE}" | xargs --no-run-if-empty docker rmi; then
+    echo "Removed old mysql images"
+fi
 
 # postgresql
 postgresql_addon_root_password=$(pwgen -1 -s)
@@ -83,7 +89,9 @@ postgresql_container_id=$(docker run --restart=always -d --name="postgresql" \
     --read-only -v /tmp -v /run \
     "${POSTGRESQL_IMAGE}")
 echo "PostgreSQL container id: ${postgresql_container_id}"
-docker images "${POSTGRESQL_REPO}" | tail -n +2 | awk '{ print $1 ":" $2 }' | grep -v "${POSTGRESQL_IMAGE}" | xargs --no-run-if-empty docker rmi
+if docker images "${POSTGRESQL_REPO}" | tail -n +2 | awk '{ print $1 ":" $2 }' | grep -v "${POSTGRESQL_IMAGE}" | xargs --no-run-if-empty docker rmi; then
+    echo "Removed old postgresql images"
+fi
 
 # mongodb
 mongodb_addon_root_password=$(pwgen -1 -s)
@@ -99,7 +107,14 @@ mongodb_container_id=$(docker run --restart=always -d --name="mongodb" \
     --read-only -v /tmp -v /run \
     "${MONGODB_IMAGE}")
 echo "Mongodb container id: ${mongodb_container_id}"
-docker images "${MONGODB_REPO}" | tail -n +2 | awk '{ print $1 ":" $2 }' | grep -v "${MONGODB_IMAGE}" | xargs --no-run-if-empty docker rmi
+if docker images "${MONGODB_REPO}" | tail -n +2 | awk '{ print $1 ":" $2 }' | grep -v "${MONGODB_IMAGE}" | xargs --no-run-if-empty docker rmi; then
+    echo "Removed old mongodb images"
+fi
+
+# redis
+if docker images "${REDIS_REPO}" | tail -n +2 | awk '{ print $1 ":" $2 }' | grep -v "${REDIS_IMAGE}" | xargs --no-run-if-empty docker rmi; then
+    echo "Removed old redis images"
+fi
 
 # only touch apps in installed state. any other state is just resumed by the taskmanager
 if [[ "${infra_version}" == "none" ]]; then
