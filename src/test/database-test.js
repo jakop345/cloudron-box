@@ -497,7 +497,7 @@ describe('database', function () {
             containerId: null,
             portBindings: { },
             health: null,
-            accessRestriction: 'roleAdmin',
+            accessRestriction: '',
             oauthProxy: true,
             lastBackupId: null,
             lastBackupConfig: null,
