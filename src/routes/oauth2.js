@@ -3,6 +3,7 @@
 'use strict';
 
 var assert = require('assert'),
+    apps = require('../apps'),
     authcodedb = require('../authcodedb'),
     clientdb = require('../clientdb'),
     config = require('../config.js'),
@@ -380,10 +381,19 @@ var authorization = [
 
             callback(null, client, '/api/v1/session/callback?redirectURI=' + url.resolve(redirectOrigin, redirectPath));
         });
-    }, function (client, user, done) {
-        // This allows us to skip decision dialog
-        return done (null, true);
-    })
+    }),
+    function (req, res, next) {
+        debug('authorization: check accessPermissions');
+
+        appdb.get(req.oauth2.client.appId, function (error, appObject) {
+            if (error) return sendErrorPageOrRedirect(req, res, 'Invalid request. Unknown app for this client_id.');
+
+            if (!apps.hasAccessTo(appObject, req.oauth2.user)) return sendErrorPageOrRedirect(req, res, 'No access to this app.');
+
+            next();
+        });
+    },
+    gServer.decision({ loadTransaction: false })
 ];
 
 
