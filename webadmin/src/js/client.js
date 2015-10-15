@@ -610,7 +610,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         this._userInfo = {};
 
         var callbackURL = window.location.protocol + '//' + window.location.host + '/login_callback.html';
-        var scope = 'root,profile,apps,roleUser';
+        var scope = 'root,profile,apps';
 
         // generate a state id to protect agains csrf
         var state = Math.floor((1 + Math.random()) * 0x1000000000000).toString(16).substring(1);

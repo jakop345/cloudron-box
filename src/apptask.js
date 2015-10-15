@@ -315,7 +315,7 @@ function allocateOAuthProxyCredentials(app, callback) {
     var id = 'cid-proxy-' + uuid.v4();
     var clientSecret = hat(256);
     var redirectURI = 'https://' + config.appFqdn(app.location);
-    var scope = 'profile,roleUser';
+    var scope = 'profile';
 
     clientdb.add(id, appId, clientSecret, redirectURI, scope, callback);
 }

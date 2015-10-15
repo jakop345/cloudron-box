@@ -807,7 +807,7 @@ describe('database', function () {
             appId: 'someappid_2',
             clientSecret: 'secret-2',
             redirectURI: 'http://foo.bar.baz',
-            scope: 'profile,roleUser'
+            scope: 'profile'
         };
 
         it('add succeeds', function (done) {

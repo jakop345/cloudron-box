@@ -244,7 +244,7 @@ function setupOauth(app, options, callback) {
     var id = 'cid-addon-oauth-' + uuid.v4();
     var clientSecret = hat(256);
     var redirectURI = 'https://' + config.appFqdn(app.location);
-    var scope = 'profile,roleUser';
+    var scope = 'profile';
 
     debugApp(app, 'setupOauth: id:%s clientSecret:%s', id, clientSecret);
 
@@ -289,7 +289,7 @@ function setupSimpleAuth(app, options, callback) {
 
     var appId = app.id;
     var id = 'cid-addon-simpleauth-' + uuid.v4();
-    var scope = 'profile,roleUser';
+    var scope = 'profile';
 
     debugApp(app, 'setupSimpleAuth: id:%s', id);
 
