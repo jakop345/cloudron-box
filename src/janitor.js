@@ -87,7 +87,7 @@ function cleanupTmpVolume(containerId, callback) {
 }
 
 function cleanupDockerVolumes(callback) {
-    assert.strictEqual(typeof callback, 'function');
+    assert(!callback || typeof callback === 'function'); // callback is null when called from cronjob
 
     debug('Cleaning up docker volumes');
 
