@@ -5,7 +5,6 @@
 exports = module.exports = {
     add: add,
     get: get,
-    update: update,
     del: del,
     getAllByUserId: getAllByUserId,
     getClientTokens: getClientTokens,
@@ -46,22 +45,6 @@ function get(req, res, next) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(404, 'No such client'));
         if (error) return next(new HttpError(500, error));
         next(new HttpSuccess(200, result));
-    });
-}
-
-function update(req, res, next) {
-    assert.strictEqual(typeof req.params.clientId, 'string');
-
-    var data = req.body;
-
-    if (!data) return next(new HttpError(400, 'Cannot parse data field'));
-    if (typeof data.appId !== 'string' || !data.appId) return next(new HttpError(400, 'appId is required'));
-    if (typeof data.redirectURI !== 'string' || !data.redirectURI) return next(new HttpError(400, 'redirectURI is required'));
-    if (!validUrl.isWebUri(data.redirectURI)) return next(new HttpError(400, 'redirectURI must be a valid uri'));
-
-    clients.update(req.params.clientId, data.appId, data.redirectURI, function (error, result) {
-        if (error) return next(new HttpError(500, error));
-        next(new HttpSuccess(202, result));
     });
 }
 
