@@ -182,6 +182,7 @@ describe('OAuth2', function () {
         var CLIENT_0 = {
             id: 'cid-client0',
             appId: 'appid-app0',
+            type: clientdb.TYPE_OAUTH,
             clientSecret: 'secret0',
             redirectURI: 'http://redirect0',
             scope: 'profile'
@@ -190,7 +191,8 @@ describe('OAuth2', function () {
         // unknown app through addon
         var CLIENT_1 = {
             id: 'cid-client1',
-            appId: 'addon-oauth-appid-app1',
+            appId: 'appid-app1',
+            type: clientdb.TYPE_OAUTH,
             clientSecret: 'secret1',
             redirectURI: 'http://redirect1',
             scope: 'profile'
@@ -200,6 +202,7 @@ describe('OAuth2', function () {
         var CLIENT_2 = {
             id: 'cid-client2',
             appId: APP_0.id,
+            type: clientdb.TYPE_OAUTH,
             clientSecret: 'secret2',
             redirectURI: 'http://redirect2',
             scope: 'profile'
@@ -208,7 +211,8 @@ describe('OAuth2', function () {
         // known app through addon
         var CLIENT_3 = {
             id: 'cid-client3',
-            appId: 'addon-oauth-' + APP_0.id,
+            appId: APP_0.id,
+            type: clientdb.TYPE_OAUTH,
             clientSecret: 'secret3',
             redirectURI: 'http://redirect1',
             scope: 'profile'
@@ -217,7 +221,8 @@ describe('OAuth2', function () {
         // unknown app through proxy
         var CLIENT_4 = {
             id: 'cid-client4',
-            appId: 'proxy-appid-app4',
+            appId: 'appid-app4',
+            type: clientdb.TYPE_PROXY,
             clientSecret: 'secret4',
             redirectURI: 'http://redirect4',
             scope: 'profile'
@@ -226,7 +231,8 @@ describe('OAuth2', function () {
         // known app through proxy
         var CLIENT_5 = {
             id: 'cid-client5',
-            appId: 'proxy-' + APP_0.id,
+            appId: APP_0.id,
+            type: clientdb.TYPE_PROXY,
             clientSecret: 'secret5',
             redirectURI: 'http://redirect5',
             scope: 'profile'
@@ -236,6 +242,7 @@ describe('OAuth2', function () {
         var CLIENT_6 = {
             id: 'cid-client6',
             appId: APP_1.id,
+            type: clientdb.TYPE_SIMPLE_AUTH,
             clientSecret: 'secret6',
             redirectURI: 'http://redirect6',
             scope: 'profile'
@@ -245,6 +252,7 @@ describe('OAuth2', function () {
         var CLIENT_7 = {
             id: 'cid-client7',
             appId: APP_2.id,
+            type: clientdb.TYPE_SIMPLE_AUTH,
             clientSecret: 'secret7',
             redirectURI: 'http://redirect7',
             scope: 'profile'
@@ -260,14 +268,14 @@ describe('OAuth2', function () {
             async.series([
                 server.start,
                 database._clear,
-                clientdb.add.bind(null, CLIENT_0.id, CLIENT_0.appId, CLIENT_0.clientSecret, CLIENT_0.redirectURI, CLIENT_0.scope),
-                clientdb.add.bind(null, CLIENT_1.id, CLIENT_1.appId, CLIENT_1.clientSecret, CLIENT_1.redirectURI, CLIENT_1.scope),
-                clientdb.add.bind(null, CLIENT_2.id, CLIENT_2.appId, CLIENT_2.clientSecret, CLIENT_2.redirectURI, CLIENT_2.scope),
-                clientdb.add.bind(null, CLIENT_3.id, CLIENT_3.appId, CLIENT_3.clientSecret, CLIENT_3.redirectURI, CLIENT_3.scope),
-                clientdb.add.bind(null, CLIENT_4.id, CLIENT_4.appId, CLIENT_4.clientSecret, CLIENT_4.redirectURI, CLIENT_4.scope),
-                clientdb.add.bind(null, CLIENT_5.id, CLIENT_5.appId, CLIENT_5.clientSecret, CLIENT_5.redirectURI, CLIENT_5.scope),
-                clientdb.add.bind(null, CLIENT_6.id, CLIENT_6.appId, CLIENT_6.clientSecret, CLIENT_6.redirectURI, CLIENT_6.scope),
-                clientdb.add.bind(null, CLIENT_7.id, CLIENT_7.appId, CLIENT_7.clientSecret, CLIENT_7.redirectURI, CLIENT_7.scope),
+                clientdb.add.bind(null, CLIENT_0.id, CLIENT_0.appId, CLIENT_0.type, CLIENT_0.clientSecret, CLIENT_0.redirectURI, CLIENT_0.scope),
+                clientdb.add.bind(null, CLIENT_1.id, CLIENT_1.appId, CLIENT_1.type, CLIENT_1.clientSecret, CLIENT_1.redirectURI, CLIENT_1.scope),
+                clientdb.add.bind(null, CLIENT_2.id, CLIENT_2.appId, CLIENT_2.type, CLIENT_2.clientSecret, CLIENT_2.redirectURI, CLIENT_2.scope),
+                clientdb.add.bind(null, CLIENT_3.id, CLIENT_3.appId, CLIENT_3.type, CLIENT_3.clientSecret, CLIENT_3.redirectURI, CLIENT_3.scope),
+                clientdb.add.bind(null, CLIENT_4.id, CLIENT_4.appId, CLIENT_4.type, CLIENT_4.clientSecret, CLIENT_4.redirectURI, CLIENT_4.scope),
+                clientdb.add.bind(null, CLIENT_5.id, CLIENT_5.appId, CLIENT_5.type, CLIENT_5.clientSecret, CLIENT_5.redirectURI, CLIENT_5.scope),
+                clientdb.add.bind(null, CLIENT_6.id, CLIENT_6.appId, CLIENT_6.type, CLIENT_6.clientSecret, CLIENT_6.redirectURI, CLIENT_6.scope),
+                clientdb.add.bind(null, CLIENT_7.id, CLIENT_7.appId, CLIENT_7.type, CLIENT_7.clientSecret, CLIENT_7.redirectURI, CLIENT_7.scope),
                 appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, APP_0.oauthProxy),
                 appdb.add.bind(null, APP_1.id, APP_1.appStoreId, APP_1.manifest, APP_1.location, APP_1.portBindings, APP_1.accessRestriction, APP_1.oauthProxy),
                 appdb.add.bind(null, APP_2.id, APP_2.appStoreId, APP_2.manifest, APP_2.location, APP_2.portBindings, APP_2.accessRestriction, APP_2.oauthProxy),

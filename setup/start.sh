@@ -159,12 +159,12 @@ EOF
 echo "Add webadmin oauth cient"
 ADMIN_SCOPES="root,developer,profile,users,apps,settings"
 mysql -u root -p${mysql_root_password} \
-    -e "REPLACE INTO clients (id, appId, clientSecret, redirectURI, scope) VALUES (\"cid-webadmin\", \"webadmin\", \"secret-webadmin\", \"${admin_origin}\", \"${ADMIN_SCOPES}\")" box
+    -e "REPLACE INTO clients (id, appId, type, clientSecret, redirectURI, scope) VALUES (\"cid-webadmin\", \"webadmin\", \"admin\", \"secret-webadmin\", \"${admin_origin}\", \"${ADMIN_SCOPES}\")" box
 
 echo "Add localhost test oauth client"
 ADMIN_SCOPES="root,developer,profile,users,apps,settings"
 mysql -u root -p${mysql_root_password} \
-    -e "REPLACE INTO clients (id, appId, clientSecret, redirectURI, scope) VALUES (\"cid-test\", \"test\", \"secret-test\", \"http://127.0.0.1:5000\", \"${ADMIN_SCOPES}\")" box
+    -e "REPLACE INTO clients (id, appId, type, clientSecret, redirectURI, scope) VALUES (\"cid-test\", \"test\", \"test\", \"secret-test\", \"http://127.0.0.1:5000\", \"${ADMIN_SCOPES}\")" box
 
 set_progress "80" "Starting Cloudron"
 systemctl start cloudron.target

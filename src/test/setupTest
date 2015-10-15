@@ -16,5 +16,5 @@ mkdir -p data/appdata data/box/appicons data/mail data/nginx/cert data/nginx/app
 webadmin_scopes="root,profile,users,apps,settings"
 webadmin_origin="https://${ADMIN_LOCATION}-localhost"
 mysql --user=root --password="" \
-    -e "REPLACE INTO clients (id, appId, clientSecret, redirectURI, scope) VALUES (\"cid-webadmin\", \"webadmin\", \"secret-webadmin\", \"${webadmin_origin}\", \"${webadmin_scopes}\")" boxtest
+    -e "REPLACE INTO clients (id, appId, type, clientSecret, redirectURI, scope) VALUES (\"cid-webadmin\", \"webadmin\", \"admin\", \"secret-webadmin\", \"${webadmin_origin}\", \"${webadmin_scopes}\")" boxtest
 

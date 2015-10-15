@@ -340,7 +340,7 @@ function setPassword(userId, newPassword, callback) {
                 if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
                 // Also generate a token so the new user can get logged in immediately
-                clientdb.getByAppId('webadmin', function (error, result) {
+                clientdb.getByAppIdAndType('webadmin', clientdb.TYPE_ADMIN, function (error, result) {
                     if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
                     var token = tokendb.generateToken();

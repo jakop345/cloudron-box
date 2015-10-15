@@ -121,7 +121,7 @@ function authenticate(req, res, next) {
                 return res.send(500, 'Unknown app.');
             }
 
-            clientdb.getByAppId('proxy-' + result.id, function (error, result) {
+            clientdb.getByAppId(result.id, clientdb.TYPE_PROXY, function (error, result) {
                 if (error) {
                     console.error('Unkonwn OAuth client.', error);
                     return res.send(500, 'Unknown OAuth client.');

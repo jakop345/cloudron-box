@@ -54,8 +54,9 @@ function validateScope(scope) {
     return null;
 }
 
-function add(appId, redirectURI, scope, callback) {
+function add(appId, type, redirectURI, scope, callback) {
     assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof type, 'string');
     assert.strictEqual(typeof redirectURI, 'string');
     assert.strictEqual(typeof scope, 'string');
     assert.strictEqual(typeof callback, 'function');
@@ -66,12 +67,13 @@ function add(appId, redirectURI, scope, callback) {
     var id = 'cid-' + uuid.v4();
     var clientSecret = hat(256);
 
-    clientdb.add(id, appId, clientSecret, redirectURI, scope, function (error) {
+    clientdb.add(id, appId, type, clientSecret, redirectURI, scope, function (error) {
         if (error) return callback(error);
 
         var client = {
             id: id,
             appId: appId,
+            type: type,
             clientSecret: clientSecret,
             redirectURI: redirectURI,
             scope: scope

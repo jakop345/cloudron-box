@@ -205,21 +205,14 @@ function loginForm(req, res) {
     clientdb.get(u.query.client_id, function (error, result) {
         if (error) return sendError(req, res, 'Unknown OAuth client');
 
-        // Handle our different types of oauth clients
-        var appId = result.appId;
-        if (appId === constants.ADMIN_CLIENT_ID) {
-            return render(constants.ADMIN_NAME, '/api/v1/cloudron/avatar');
-        } else if (appId === constants.TEST_CLIENT_ID) {
-            return render(constants.TEST_NAME, '/api/v1/cloudron/avatar');
-        } else if (appId.indexOf('external-') === 0) {
-            return render('External Application', '/api/v1/cloudron/avatar');
-        } else if (appId.indexOf('addon-oauth-') === 0) {
-            appId = appId.slice('addon-oauth-'.length);
-        } else if (appId.indexOf('proxy-') === 0) {
-            appId = appId.slice('proxy-'.length);
+        switch (result.type) {
+        case clientdb.TYPE_ADMIN: return render(constants.ADMIN_NAME, '/api/v1/cloudron/avatar');
+        case clientdb.TYPE_TEST: return render(constants.TEST_NAME, '/api/v1/cloudron/avatar');
+        case clientdb.TYPE_EXTERNAL: return render('External Application', '/api/v1/cloudron/avatar');
+        default: break;
         }
 
-        appdb.get(appId, function (error, result) {
+        appdb.get(result.appId, function (error, result) {
             if (error) return sendErrorPageOrRedirect(req, res, 'Unknown Application for those OAuth credentials');
 
             var applicationName = result.location || config.fqdn();
