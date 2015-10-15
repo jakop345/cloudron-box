@@ -14,6 +14,7 @@ rm -rf "${CONFIG_DIR}"
 sudo -u yellowtent mkdir "${CONFIG_DIR}"
 
 ########## systemd
+rm /etc/systemd/system/janitor.*
 cp -r "${container_files}/systemd/." /etc/systemd/system/
 systemctl daemon-reload
 systemctl enable cloudron.target

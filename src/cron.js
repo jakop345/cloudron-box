@@ -10,6 +10,7 @@ var apps = require('./apps.js'),
     cloudron = require('./cloudron.js'),
     CronJob = require('cron').CronJob,
     debug = require('debug')('box:cron'),
+    janitor = require('./janitor.js'),
     settings = require('./settings.js'),
     updateChecker = require('./updatechecker.js');
 
@@ -17,7 +18,8 @@ var gAutoupdaterJob = null,
     gBoxUpdateCheckerJob = null,
     gAppUpdateCheckerJob = null,
     gHeartbeatJob = null,
-    gBackupJob = null;
+    gBackupJob = null,
+    gCleanupTokensJob = null;
 
 var gInitialized = false;
 
@@ -82,6 +84,14 @@ function recreateJobs(unusedTimeZone, callback) {
             timeZone: allSettings[settings.TIME_ZONE_KEY]
         });
 
+        if (gCleanupTokensJob) gCleanupTokensJob.stop();
+        gCleanupTokensJob = new CronJob({
+            cronTime: '00 */30 * * * *', // every 30 minutes
+            onTick: janitor.cleanupTokens,
+            start: true,
+            timeZone: allSettings[settings.TIME_ZONE_KEY]
+        });
+
         autoupdatePatternChanged(allSettings[settings.AUTOUPDATE_PATTERN_KEY]);
 
         if (callback) callback();
@@ -135,6 +145,9 @@ function uninitialize(callback) {
 
     gBackupJob.stop();
     gBackupJob = null;
+
+    gCleanupTokensJob.stop();
+    gCleanupTokensJob = null;
 
     gInitialized = false;
 
