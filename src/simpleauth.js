@@ -8,6 +8,8 @@ exports = module.exports = {
 var assert = require('assert'),
     debug = require('debug')('box:simpleauth'),
     user = require('./user.js'),
+    apps = require('./apps.js'),
+    AppsError = apps.AppsError,
     tokendb = require('./tokendb.js'),
     clients = require('./clients.js'),
     config = require('./config.js'),
@@ -36,15 +38,21 @@ function loginLogic(clientId, username, password, callback) {
         user.verify(username, password, function (error, userObject) {
             if (error) return callback(error);
 
-            var accessToken = tokendb.generateToken();
-            var expires = Date.now() + 24 * 60 * 60 * 1000; // 1 day
-
-            tokendb.add(accessToken, tokendb.PREFIX_USER + userObject.id, clientId, expires, clientObject.scope, function (error) {
+            apps.get(clientObject.appId, function (error, appObject) {
                 if (error) return callback(error);
 
-                debug('login: new access token for client %s and user %s: %s', clientId, username, accessToken);
+                if (!apps.hasAccessTo(appObject, userObject)) return callback(new AppsError(AppsError.ACCESS_DENIED));
 
-                callback(null, { accessToken: accessToken, user: userObject });
+                var accessToken = tokendb.generateToken();
+                var expires = Date.now() + 24 * 60 * 60 * 1000; // 1 day
+
+                tokendb.add(accessToken, tokendb.PREFIX_USER + userObject.id, clientId, expires, clientObject.scope, function (error) {
+                    if (error) return callback(error);
+
+                    debug('login: new access token for client %s and user %s: %s', clientId, username, accessToken);
+
+                    callback(null, { accessToken: accessToken, user: userObject });
+                });
             });
         });
     });
@@ -72,7 +80,9 @@ function login(req, res, next) {
     loginLogic(req.body.clientId, req.body.username, req.body.password, function (error, result) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(401, 'Unknown client'));
         if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(401, 'Forbidden'));
+        if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(401, 'Unkown app'));
         if (error && error.reason === UserError.WRONG_PASSWORD) return next(new HttpError(401, 'Forbidden'));
+        if (error && error.reason === AppsError.ACCESS_DENIED) return next(new HttpError(401, 'Forbidden'));
         if (error) return next(new HttpError(500, error));
 
         var tmp = {
