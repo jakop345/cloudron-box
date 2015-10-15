@@ -53,15 +53,16 @@ gServer.deserializeClient(function (id, callback) {
 // values, and will be exchanged for an access token.
 
 gServer.grant(oauth2orize.grant.code({ scopeSeparator: ',' }, function (client, redirectURI, user, ares, callback) {
-    debug('grant code:', client, redirectURI, user.id, ares);
+    debug('grant code:', client.id, redirectURI, user.id, ares);
 
     var code = hat(256);
     var expiresAt = Date.now() + 60 * 60000; // 1 hour
 
-    // TODO check groups/users here
-
     authcodedb.add(code, client.id, user.username, expiresAt, function (error) {
         if (error) return callback(error);
+
+        debug('grant code: new auth code for client %s code %s', client.id, code);
+
         callback(null, code);
     });
 }));
@@ -76,7 +77,7 @@ gServer.grant(oauth2orize.grant.token({ scopeSeparator: ',' }, function (client,
     tokendb.add(token, tokendb.PREFIX_USER + user.id, client.id, expires, client.scope, function (error) {
         if (error) return callback(error);
 
-        debug('new access token for client ' + client.id + ' token ' + token);
+        debug('grant token: new access token for client %s token %s', client.id, token);
 
         callback(null, token);
     });
@@ -106,7 +107,7 @@ gServer.exchange(oauth2orize.exchange.code(function (client, code, redirectURI, 
             tokendb.add(token, tokendb.PREFIX_USER + authCode.userId, authCode.clientId, expires, client.scope, function (error) {
                 if (error) return callback(error);
 
-                debug('new access token for client ' + client.id + ' token ' + token);
+                debug('exchange: new access token for client %s token %s', client.id, token);
 
                 callback(null, token);
             });
@@ -151,7 +152,7 @@ function sendErrorPageOrRedirect(req, res, message) {
     assert.strictEqual(typeof res, 'object');
     assert.strictEqual(typeof message, 'string');
 
-    debug('sendErrorPageOrRedirect: returnTo "%s".', req.query.returnTo, message);
+    debug('sendErrorPageOrRedirect: returnTo %s.', req.query.returnTo, message);
 
     if (typeof req.query.returnTo !== 'string') {
         renderTemplate(res, 'error', {
@@ -231,8 +232,6 @@ function loginForm(req, res) {
 function login(req, res) {
     var returnTo = req.session.returnTo || req.query.returnTo;
 
-    debug('handle login: returnTo %s', returnTo, req.body, req.query);
-
     var failureQuery = querystring.stringify({ error: 'Invalid username or password', returnTo: returnTo });
     passport.authenticate('local', {
         failureRedirect: '/api/v1/session/login?' + failureQuery
@@ -283,8 +282,6 @@ function passwordSentSite(req, res) {
 function passwordSetupSite(req, res, next) {
     if (!req.query.reset_token) return next(new HttpError(400, 'Missing reset_token'));
 
-    debug('passwordSetupSite: with token %s.', req.query.reset_token);
-
     user.getByResetToken(req.query.reset_token, function (error, user) {
         if (error) return next(new HttpError(401, 'Invalid reset_token'));
 
@@ -300,8 +297,6 @@ function passwordSetupSite(req, res, next) {
 // -> GET /api/v1/session/password/reset.html
 function passwordResetSite(req, res, next) {
     if (!req.query.reset_token) return next(new HttpError(400, 'Missing reset_token'));
-
-    debug('passwordResetSite: with token %s.', req.query.reset_token);
 
     user.getByResetToken(req.query.reset_token, function (error, user) {
         if (error) return next(new HttpError(401, 'Invalid reset_token'));
@@ -343,7 +338,6 @@ function passwordReset(req, res, next) {
 var callback = [
     session.ensureLoggedIn('/api/v1/session/login'),
     function (req, res) {
-        debug('callback: with callback server ' + req.query.redirectURI);
         renderTemplate(res, 'callback', { adminOrigin: config.adminOrigin(), callbackServer: req.query.redirectURI });
     }
 ];
@@ -383,8 +377,6 @@ var authorization = [
         });
     }),
     function (req, res, next) {
-        debug('authorization: check accessPermissions');
-
         appdb.get(req.oauth2.client.appId, function (error, appObject) {
             if (error) return sendErrorPageOrRedirect(req, res, 'Invalid request. Unknown app for this client_id.');
 
