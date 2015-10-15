@@ -28,6 +28,20 @@ var assert = require('assert'),
 var gServer = oauth2orize.createServer();
 
 
+// Register serialialization and deserialization functions.
+//
+// The client id is stored in the session and can thus be retrieved for each
+// step in the oauth flow transaction, which involves multiple http requests.
+
+gServer.serializeClient(function (client, callback) {
+    return callback(null, client.id);
+});
+
+gServer.deserializeClient(function (id, callback) {
+    clientdb.get(id, callback);
+});
+
+
 // Register supported grant types.
 
 // Grant authorization codes.  The callback takes the `client` requesting
