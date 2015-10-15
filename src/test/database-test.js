@@ -865,29 +865,6 @@ describe('database', function () {
             });
         });
 
-        it('update client fails due to unknown client id', function (done) {
-            clientdb.update(CLIENT_2.id, CLIENT_2.appId, CLIENT_2.clientSecret, CLIENT_2.redirectURI, CLIENT_2.scope, function (error) {
-                expect(error).to.be.a(DatabaseError);
-                expect(error.reason).to.equal(DatabaseError.NOT_FOUND);
-                done();
-            });
-        });
-
-        it('update client succeeds', function (done) {
-            clientdb.update(CLIENT_1.id, CLIENT_2.appId, CLIENT_2.clientSecret, CLIENT_2.redirectURI, CLIENT_2.scope, function (error) {
-                expect(error).to.be(null);
-
-                clientdb.get(CLIENT_1.id, function (error, result) {
-                    expect(error).to.be(null);
-                    expect(result.appId).to.eql(CLIENT_2.appId);
-                    expect(result.clientSecret).to.eql(CLIENT_2.clientSecret);
-                    expect(result.redirectURI).to.eql(CLIENT_2.redirectURI);
-                    expect(result.scope).to.eql(CLIENT_2.scope);
-                    done();
-                });
-            });
-        });
-
         it('delByAppId succeeds', function (done) {
             clientdb.delByAppId(CLIENT_0.appId, function (error) {
                 expect(error).to.be(null);

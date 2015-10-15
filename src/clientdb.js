@@ -8,7 +8,6 @@ exports = module.exports = {
     getAllWithTokenCountByIdentifier: getAllWithTokenCountByIdentifier,
     add: add,
     del: del,
-    update: update,
     getByAppId: getByAppId,
     delByAppId: delByAppId,
 
@@ -80,24 +79,6 @@ function add(id, appId, clientSecret, redirectURI, scope, callback) {
     database.query('INSERT INTO clients (id, appId, clientSecret, redirectURI, scope) VALUES (?, ?, ?, ?, ?)', data, function (error, result) {
         if (error && error.code === 'ER_DUP_ENTRY') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS));
         if (error || result.affectedRows === 0) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
-
-        callback(null);
-    });
-}
-
-function update(id, appId, clientSecret, redirectURI, scope, callback) {
-    assert.strictEqual(typeof id, 'string');
-    assert.strictEqual(typeof appId, 'string');
-    assert.strictEqual(typeof clientSecret, 'string');
-    assert.strictEqual(typeof redirectURI, 'string');
-    assert.strictEqual(typeof scope, 'string');
-    assert.strictEqual(typeof callback, 'function');
-
-    var data = [ appId, clientSecret, redirectURI, scope, id ];
-
-    database.query('UPDATE clients SET appId = ?, clientSecret = ?, redirectURI = ?, scope = ? WHERE id = ?', data, function (error, result) {
-        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
-        if (result.affectedRows !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         callback(null);
     });

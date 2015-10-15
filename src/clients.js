@@ -5,7 +5,6 @@ exports = module.exports = {
 
     add: add,
     get: get,
-    update: update,
     del: del,
     getAllWithDetailsByUserId: getAllWithDetailsByUserId,
     getClientTokensByUserId: getClientTokensByUserId,
@@ -89,23 +88,6 @@ function get(id, callback) {
     clientdb.get(id, function (error, result) {
         if (error) return callback(error);
         callback(null, result);
-    });
-}
-
-// we only allow appIdentifier and redirectURI to be updated
-function update(id, appId, redirectURI, callback) {
-    assert.strictEqual(typeof id, 'string');
-    assert.strictEqual(typeof appId, 'string');
-    assert.strictEqual(typeof redirectURI, 'string');
-    assert.strictEqual(typeof callback, 'function');
-
-    clientdb.get(id, function (error, result) {
-        if (error) return callback(error);
-
-        clientdb.update(id, appId, result.clientSecret, redirectURI, result.scope, function (error, result) {
-            if (error) return callback(error);
-            callback(null, result);
-        });
     });
 }
 
