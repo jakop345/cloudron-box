@@ -47,7 +47,7 @@ function cleanupExpiredAuthCodes(callback) {
 }
 
 function cleanupTokens(callback) {
-    assert.strictEqual(typeof callback, 'function');
+    assert(!callback || typeof callback === 'function'); // callback is null when called from cronjob
 
     debug('Cleaning up expired tokens');
 
