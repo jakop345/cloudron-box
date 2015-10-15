@@ -57,25 +57,19 @@ function cleanupTokens(callback) {
     ], callback);
 }
 
-function cleanupTmpVolume(containerId, callback) {
-    assert.strictEqual(typeof containerId, 'string');
+function cleanupTmpVolume(containerInfo, callback) {
+    assert.strictEqual(typeof containerInfo, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     var cmd = 'find /tmp -mtime +10 -exec rm -rf {} +'.split(' '); // 10 days old
 
-    debug('cleanupTmpVolume %s', containerId);
+    debug('cleanupTmpVolume %j', containerInfo.Names);
 
-    docker.getContainer(containerId).exec({ Cmd: cmd, AttachStdout: true, AttachStderr: true, Tty: false }, function (error, execContainer) {
-        if (error) {
-            debug('Failed to exec container : %s', error.message);
-            return callback(); // intentionally ignore error
-        }
+    docker.getContainer(containerInfo.Id).exec({ Cmd: cmd, AttachStdout: true, AttachStderr: true, Tty: false }, function (error, execContainer) {
+        if (error) return callback(new Error('Failed to exec container : ' + error.message));
 
         execContainer.start(function(err, stream) {
-            if (error) {
-                debug('Failed to start exec container : %s', error.message);
-                return callback(); // intentionally ignore error
-            }
+            if (error) return callback(new Error('Failed to start exec container : ' + error.message));
 
             stream.on('error', callback);
             stream.on('end', callback);
@@ -94,8 +88,12 @@ function cleanupDockerVolumes(callback) {
     docker.listContainers(function (error, containers) {
         if (error) return callback(error);
 
-        async.eachSeries(containers, function (containerInfo, iteratorDone) {
-            cleanupTmpVolume(containerInfo.Id, iteratorDone);
+        async.eachSeries(containers, function (container, iteratorDone) {
+            cleanupTmpVolume(container, function (error) {
+                if (error) debug('Error cleaning tmp: %s', error);
+
+                iteratorDone(); // intentionally ignore error
+            });
         }, callback);
     });
 }
