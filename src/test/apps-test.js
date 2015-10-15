@@ -192,5 +192,27 @@ describe('Apps', function () {
             expect(apps._validateAccessRestriction('user-someuserid,user-someuserid1,user-someuserid2,foo-someuserid3')).to.be.an(Error);
         });
     });
+
+    describe('hasAccessTo', function () {
+        it('returns true for unrestricted access', function () {
+            expect(apps.hasAccessTo({ accessRestriction: '' }, { id: 'someuser' })).to.equal(true);
+        });
+
+        it('returns true for allowed user', function () {
+            expect(apps.hasAccessTo({ accessRestriction: 'user-someuser' }, { id: 'someuser' })).to.equal(true);
+        });
+
+        it('returns true for allowed user with multiple allowed', function () {
+            expect(apps.hasAccessTo({ accessRestriction: 'user-foo,user-someuser, user-anotheruser' }, { id: 'someuser' })).to.equal(true);
+        });
+
+        it('returns false for not allowed user', function () {
+            expect(apps.hasAccessTo({ accessRestriction: 'user-foo' }, { id: 'someuser' })).to.equal(false);
+        });
+
+        it('returns false for not allowed user with multiple allowed', function () {
+            expect(apps.hasAccessTo({ accessRestriction: 'user-foo, user-anotheruser' }, { id: 'someuser' })).to.equal(false);
+        });
+    });
 });
 
