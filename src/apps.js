@@ -117,6 +117,7 @@ AppsError.BAD_STATE = 'Bad State';
 AppsError.PORT_RESERVED = 'Port Reserved';
 AppsError.PORT_CONFLICT = 'Port Conflict';
 AppsError.BILLING_REQUIRED = 'Billing Required';
+AppsError.ACCESS_DENIED = 'Access denied';
 
 // Hostname validation comes from RFC 1123 (section 2.1)
 // Domain name validation comes from RFC 2181 (Name syntax)
