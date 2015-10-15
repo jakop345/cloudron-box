@@ -14,13 +14,13 @@ rm -rf "${CONFIG_DIR}"
 sudo -u yellowtent mkdir "${CONFIG_DIR}"
 
 ########## systemd
-rm /etc/systemd/system/janitor.*
+rm -f /etc/systemd/system/janitor.*
 cp -r "${container_files}/systemd/." /etc/systemd/system/
 systemctl daemon-reload
 systemctl enable cloudron.target
 
 ########## sudoers
-rm /etc/sudoers.d/*
+rm -f /etc/sudoers.d/*
 cp "${container_files}/sudoers" /etc/sudoers.d/yellowtent
 
 ########## collectd
