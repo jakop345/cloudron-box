@@ -235,10 +235,12 @@ function createContainer(app, callback) {
                 ExposedPorts: exposedPorts,
                 Volumes: { // see also ReadonlyRootfs
                     '/tmp': {},
-                    '/run': {},
-                    '/var/log': {}
+                    '/run': {}
                 }
             };
+
+            // older versions wanted a writable /var/log
+            if (semver.lte(targetBoxVersion(app.manifest), '0.0.71')) containerOptions.Volumes['/var/log'] = {};
 
             debugApp(app, 'Creating container for %s', app.manifest.dockerImage);
 

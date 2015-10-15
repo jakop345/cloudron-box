@@ -2,8 +2,8 @@
 Description=Cloudron Smart Cloud
 Documentation=https://cloudron.io/documentation.html
 StopWhenUnneeded=true
-Requires=box.service docker_janitor.timer
-After=box.service docker_janitor.timer
+Requires=box.service
+After=box.service
 # AllowIsolate=yes
 
 [Install]
