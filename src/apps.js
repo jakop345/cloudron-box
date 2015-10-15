@@ -5,6 +5,8 @@
 exports = module.exports = {
     AppsError: AppsError,
 
+    hasAccessTo: hasAccessTo,
+
     get: get,
     getBySubdomain: getBySubdomain,
     getAll: getAll,
@@ -220,6 +222,20 @@ function getDuplicateErrorDetails(location, portBindings, error) {
 function getIconUrlSync(app) {
     var iconPath = paths.APPICONS_DIR + '/' + app.id + '.png';
     return fs.existsSync(iconPath) ? '/api/v1/apps/' + app.id + '/icon' : null;
+}
+
+function hasAccessTo(app, user) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof user, 'object');
+
+    function validator(entry) {
+        if (entry.indexOf('user-') === 0 && entry.slice('user-'.length) === user.id) return true;
+        return false;
+    }
+
+    if (app.accessRestriction === '') return true;
+
+    return app.accessRestriction.split(',').some(validator);
 }
 
 function get(appId, callback) {
