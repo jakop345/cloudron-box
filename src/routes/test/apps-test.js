@@ -1218,7 +1218,7 @@ describe('App installation - port bindings', function () {
     it('cannot reconfigure app with missing location', function (done) {
         request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
               .query({ access_token: token })
-              .send({ appId: APP_ID, password: PASSWORD, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: 'roleAdmin', oauthProxy: true })
+              .send({ appId: APP_ID, password: PASSWORD, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: '', oauthProxy: true })
               .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             done();
@@ -1248,7 +1248,7 @@ describe('App installation - port bindings', function () {
     it('non admin cannot reconfigure app', function (done) {
         request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
               .query({ access_token: token_1 })
-              .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: 'roleAdmin', oauthProxy: true })
+              .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: '', oauthProxy: true })
               .end(function (err, res) {
             expect(res.statusCode).to.equal(403);
             done();

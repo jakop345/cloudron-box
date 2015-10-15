@@ -13,7 +13,7 @@ mkdir -p $HOME/.cloudron_test
 cd $HOME/.cloudron_test
 mkdir -p data/appdata data/box/appicons data/mail data/nginx/cert data/nginx/applications data/collectd/collectd.conf.d data/addons configs
 
-webadmin_scopes="root,profile,users,apps,settings,roleAdmin"
+webadmin_scopes="root,profile,users,apps,settings"
 webadmin_origin="https://${ADMIN_LOCATION}-localhost"
 mysql --user=root --password="" \
     -e "REPLACE INTO clients (id, appId, clientSecret, redirectURI, scope) VALUES (\"cid-webadmin\", \"webadmin\", \"secret-webadmin\", \"${webadmin_origin}\", \"${webadmin_scopes}\")" boxtest
