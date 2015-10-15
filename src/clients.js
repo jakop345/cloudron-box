@@ -55,8 +55,8 @@ function validateScope(scope) {
     return null;
 }
 
-function add(appIdentifier, redirectURI, scope, callback) {
-    assert.strictEqual(typeof appIdentifier, 'string');
+function add(appId, redirectURI, scope, callback) {
+    assert.strictEqual(typeof appId, 'string');
     assert.strictEqual(typeof redirectURI, 'string');
     assert.strictEqual(typeof scope, 'string');
     assert.strictEqual(typeof callback, 'function');
@@ -67,12 +67,12 @@ function add(appIdentifier, redirectURI, scope, callback) {
     var id = 'cid-' + uuid.v4();
     var clientSecret = hat(256);
 
-    clientdb.add(id, appIdentifier, clientSecret, redirectURI, scope, function (error) {
+    clientdb.add(id, appId, clientSecret, redirectURI, scope, function (error) {
         if (error) return callback(error);
 
         var client = {
             id: id,
-            appId: appIdentifier,
+            appId: appId,
             clientSecret: clientSecret,
             redirectURI: redirectURI,
             scope: scope
@@ -93,16 +93,16 @@ function get(id, callback) {
 }
 
 // we only allow appIdentifier and redirectURI to be updated
-function update(id, appIdentifier, redirectURI, callback) {
+function update(id, appId, redirectURI, callback) {
     assert.strictEqual(typeof id, 'string');
-    assert.strictEqual(typeof appIdentifier, 'string');
+    assert.strictEqual(typeof appId, 'string');
     assert.strictEqual(typeof redirectURI, 'string');
     assert.strictEqual(typeof callback, 'function');
 
     clientdb.get(id, function (error, result) {
         if (error) return callback(error);
 
-        clientdb.update(id, appIdentifier, result.clientSecret, redirectURI, result.scope, function (error, result) {
+        clientdb.update(id, appId, result.clientSecret, redirectURI, result.scope, function (error, result) {
             if (error) return callback(error);
             callback(null, result);
         });
