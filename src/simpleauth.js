@@ -5,22 +5,21 @@ exports = module.exports = {
     stop: stop
 };
 
-var assert = require('assert'),
-    debug = require('debug')('box:simpleauth'),
-    user = require('./user.js'),
-    apps = require('./apps.js'),
+var apps = require('./apps.js'),
     AppsError = apps.AppsError,
-    tokendb = require('./tokendb.js'),
+    assert = require('assert'),
     clients = require('./clients.js'),
     config = require('./config.js'),
-    debug = require('debug')('box:proxy'),
-    middleware = require('./middleware'),
+    DatabaseError = require('./databaseerror.js'),
+    debug = require('debug')('box:src/simpleauth'),
     express = require('express'),
+    http = require('http'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
-    DatabaseError = require('./databaseerror.js'),
-    UserError = require('./user.js').UserError,
-    http = require('http');
+    middleware = require('./middleware'),
+    tokendb = require('./tokendb.js'),
+    user = require('./user.js'),
+    UserError = require('./user.js').UserError;
 
 var gHttpServer = null;
 
