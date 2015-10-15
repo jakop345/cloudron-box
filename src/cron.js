@@ -19,7 +19,8 @@ var gAutoupdaterJob = null,
     gAppUpdateCheckerJob = null,
     gHeartbeatJob = null,
     gBackupJob = null,
-    gCleanupTokensJob = null;
+    gCleanupTokensJob = null,
+    gDockerVolumeCleanerJob = null;
 
 var gInitialized = false;
 
@@ -92,6 +93,14 @@ function recreateJobs(unusedTimeZone, callback) {
             timeZone: allSettings[settings.TIME_ZONE_KEY]
         });
 
+        if (gDockerVolumeCleanerJob) gDockerVolumeCleanerJob.stop();
+        gDockerVolumeCleanerJob = new CronJob({
+            cronTime: '00 00 */12 * * *', // every 12 hours
+            onTick: janitor.cleanupDockerVolumes,
+            start: true,
+            timeZone: allSettings[settings.TIME_ZONE_KEY]
+        });
+
         autoupdatePatternChanged(allSettings[settings.AUTOUPDATE_PATTERN_KEY]);
 
         if (callback) callback();
@@ -148,6 +157,9 @@ function uninitialize(callback) {
 
     gCleanupTokensJob.stop();
     gCleanupTokensJob = null;
+
+    gDockerVolumeCleanerJob.stop();
+    gDockerVolumeCleanerJob = null;
 
     gInitialized = false;
 
