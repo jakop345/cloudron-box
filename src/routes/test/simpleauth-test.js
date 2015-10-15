@@ -56,6 +56,7 @@ describe('SimpleAuth API', function () {
     var CLIENT_0 = {
         id: 'someclientid',
         appId: 'someappid',
+        type: clientdb.TYPE_SIMPLE_AUTH,
         clientSecret: 'someclientsecret',
         redirectURI: '',
         scope: 'user,profile'
@@ -64,6 +65,7 @@ describe('SimpleAuth API', function () {
     var CLIENT_1 = {
         id: 'someclientid1',
         appId: APP_0.id,
+        type: clientdb.TYPE_SIMPLE_AUTH,
         clientSecret: 'someclientsecret1',
         redirectURI: '',
         scope: 'user,profile'
@@ -72,6 +74,7 @@ describe('SimpleAuth API', function () {
     var CLIENT_2 = {
         id: 'someclientid2',
         appId: APP_1.id,
+        type: clientdb.TYPE_SIMPLE_AUTH,
         clientSecret: 'someclientsecret2',
         redirectURI: '',
         scope: 'user,profile'
@@ -80,6 +83,7 @@ describe('SimpleAuth API', function () {
     var CLIENT_3 = {
         id: 'someclientid3',
         appId: APP_2.id,
+        type: clientdb.TYPE_SIMPLE_AUTH,
         clientSecret: 'someclientsecret3',
         redirectURI: '',
         scope: 'user,profile'
@@ -110,10 +114,10 @@ describe('SimpleAuth API', function () {
                 });
             },
 
-            clientdb.add.bind(null, CLIENT_0.id, CLIENT_0.appId, CLIENT_0.clientSecret, CLIENT_0.redirectURI, CLIENT_0.scope),
-            clientdb.add.bind(null, CLIENT_1.id, CLIENT_1.appId, CLIENT_1.clientSecret, CLIENT_1.redirectURI, CLIENT_1.scope),
-            clientdb.add.bind(null, CLIENT_2.id, CLIENT_2.appId, CLIENT_2.clientSecret, CLIENT_2.redirectURI, CLIENT_2.scope),
-            clientdb.add.bind(null, CLIENT_3.id, CLIENT_3.appId, CLIENT_3.clientSecret, CLIENT_3.redirectURI, CLIENT_3.scope),
+            clientdb.add.bind(null, CLIENT_0.id, CLIENT_0.appId, CLIENT_0.type, CLIENT_0.clientSecret, CLIENT_0.redirectURI, CLIENT_0.scope),
+            clientdb.add.bind(null, CLIENT_1.id, CLIENT_1.appId, CLIENT_1.type, CLIENT_1.clientSecret, CLIENT_1.redirectURI, CLIENT_1.scope),
+            clientdb.add.bind(null, CLIENT_2.id, CLIENT_2.appId, CLIENT_2.type, CLIENT_2.clientSecret, CLIENT_2.redirectURI, CLIENT_2.scope),
+            clientdb.add.bind(null, CLIENT_3.id, CLIENT_3.appId, CLIENT_3.type, CLIENT_3.clientSecret, CLIENT_3.redirectURI, CLIENT_3.scope),
             appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, APP_0.oauthProxy),
             appdb.add.bind(null, APP_1.id, APP_1.appStoreId, APP_1.manifest, APP_1.location, APP_1.portBindings, APP_1.accessRestriction, APP_1.oauthProxy),
             appdb.add.bind(null, APP_2.id, APP_2.appStoreId, APP_2.manifest, APP_2.location, APP_2.portBindings, APP_2.accessRestriction, APP_2.oauthProxy)

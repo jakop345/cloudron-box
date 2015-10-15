@@ -29,8 +29,9 @@ CREATE TABLE IF NOT EXISTS tokens(
     PRIMARY KEY(accessToken));
 
 CREATE TABLE IF NOT EXISTS clients(
-    id VARCHAR(128) NOT NULL UNIQUE,
-    appId VARCHAR(128) NOT NULL,                // this is for the form <type>-appId to allow easy clearing of tokens of a type
+    id VARCHAR(128) NOT NULL UNIQUE, // prefixed with cid- to identify token easily in auth routes
+    appId VARCHAR(128) NOT NULL,
+    type VARCHAR(16) NOT NULL,
     clientSecret VARCHAR(512) NOT NULL,
     redirectURI VARCHAR(512) NOT NULL,
     scope VARCHAR(512) NOT NULL,

@@ -311,20 +311,19 @@ function allocateOAuthProxyCredentials(app, callback) {
 
     if (!app.oauthProxy) return callback(null);
 
-    var appId = 'proxy-' + app.id;
-    var id = 'cid-proxy-' + uuid.v4();
+    var id = 'cid-' + uuid.v4();
     var clientSecret = hat(256);
     var redirectURI = 'https://' + config.appFqdn(app.location);
     var scope = 'profile';
 
-    clientdb.add(id, appId, clientSecret, redirectURI, scope, callback);
+    clientdb.add(id, app.id, clientdb.TYPE_PROXY, clientSecret, redirectURI, scope, callback);
 }
 
 function removeOAuthProxyCredentials(app, callback) {
     assert.strictEqual(typeof app, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    clientdb.delByAppId('proxy-' + app.id, function (error) {
+    clientdb.delByAppIdAndType(app.id, clientdb.TYPE_PROXY, function (error) {
         if (error && error.reason !== DatabaseError.NOT_FOUND) {
             debugApp(app, 'Error removing OAuth client id', error);
             return callback(error);

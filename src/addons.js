@@ -241,18 +241,17 @@ function setupOauth(app, options, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     var appId = app.id;
-    var id = 'cid-addon-oauth-' + uuid.v4();
+    var id = 'cid-' + uuid.v4();
     var clientSecret = hat(256);
     var redirectURI = 'https://' + config.appFqdn(app.location);
     var scope = 'profile';
 
     debugApp(app, 'setupOauth: id:%s clientSecret:%s', id, clientSecret);
 
-    // ensure 'addon-oauth-' is in sync with oauth.js
-    clientdb.delByAppId('addon-oauth-' + appId, function (error) { // remove existing creds
+    clientdb.delByAppIdAndType(appId, clientdb.TYPE_OAUTH, function (error) { // remove existing creds
         if (error && error.reason !== DatabaseError.NOT_FOUND) return callback(error);
 
-        clientdb.add(id, 'addon-oauth-' + appId, clientSecret, redirectURI, scope, function (error) {
+        clientdb.add(id, appId, clientdb.TYPE_OAUTH, clientSecret, redirectURI, scope, function (error) {
             if (error) return callback(error);
 
             var env = [
@@ -275,7 +274,7 @@ function teardownOauth(app, options, callback) {
 
     debugApp(app, 'teardownOauth');
 
-    clientdb.delByAppId('addon-oauth-' + app.id, function (error) {
+    clientdb.delByAppIdAndType(app.id, clientdb.TYPE_OAUTH, function (error) {
         if (error && error.reason !== DatabaseError.NOT_FOUND) console.error(error);
 
         appdb.unsetAddonConfig(app.id, 'oauth', callback);
@@ -288,16 +287,15 @@ function setupSimpleAuth(app, options, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     var appId = app.id;
-    var id = 'cid-addon-simpleauth-' + uuid.v4();
+    var id = 'cid-' + uuid.v4();
     var scope = 'profile';
 
     debugApp(app, 'setupSimpleAuth: id:%s', id);
 
-    // ensure 'addon-simpleauth-' is in sync with oauth.js
-    clientdb.delByAppId('addon-simpleauth-' + appId, function (error) { // remove existing creds
+    clientdb.delByAppIdAndType(app.id, clientdb.TYPE_SIMPLE_AUTH, function (error) { // remove existing creds
         if (error && error.reason !== DatabaseError.NOT_FOUND) return callback(error);
 
-        clientdb.add(id, 'addon-simpleauth-' + appId, '', '', scope, function (error) {
+        clientdb.add(id, appId, clientdb.TYPE_SIMPLE_AUTH, '', '', scope, function (error) {
             if (error) return callback(error);
 
             var env = [
@@ -322,7 +320,7 @@ function teardownSimpleAuth(app, options, callback) {
 
     debugApp(app, 'teardownSimpleAuth');
 
-    clientdb.delByAppId('addon-simpleauth-' + app.id, function (error) {
+    clientdb.delByAppIdAndType(app.id, clientdb.TYPE_SIMPLE_AUTH, function (error) {
         if (error && error.reason !== DatabaseError.NOT_FOUND) console.error(error);
 
         appdb.unsetAddonConfig(app.id, 'simpleauth', callback);

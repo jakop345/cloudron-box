@@ -790,6 +790,7 @@ describe('database', function () {
         var CLIENT_0 = {
             id: 'cid-0',
             appId: 'someappid_0',
+            type: clientdb.TYPE_OAUTH,
             clientSecret: 'secret-0',
             redirectURI: 'http://foo.bar',
             scope: '*'
@@ -798,23 +799,17 @@ describe('database', function () {
         var CLIENT_1 = {
             id: 'cid-1',
             appId: 'someappid_1',
+            type: clientdb.TYPE_OAUTH,
             clientSecret: 'secret-',
             redirectURI: 'http://foo.bar',
             scope: '*'
         };
-        var CLIENT_2 = {
-            id: 'cid-2',
-            appId: 'someappid_2',
-            clientSecret: 'secret-2',
-            redirectURI: 'http://foo.bar.baz',
-            scope: 'profile'
-        };
 
         it('add succeeds', function (done) {
-            clientdb.add(CLIENT_0.id, CLIENT_0.appId, CLIENT_0.clientSecret, CLIENT_0.redirectURI, CLIENT_0.scope, function (error) {
+            clientdb.add(CLIENT_0.id, CLIENT_0.appId, CLIENT_0.type, CLIENT_0.clientSecret, CLIENT_0.redirectURI, CLIENT_0.scope, function (error) {
                 expect(error).to.be(null);
 
-                clientdb.add(CLIENT_1.id, CLIENT_1.appId, CLIENT_1.clientSecret, CLIENT_1.redirectURI, CLIENT_1.scope, function (error) {
+                clientdb.add(CLIENT_1.id, CLIENT_1.appId, CLIENT_0.type, CLIENT_1.clientSecret, CLIENT_1.redirectURI, CLIENT_1.scope, function (error) {
                     expect(error).to.be(null);
                     done();
                 });
@@ -822,7 +817,7 @@ describe('database', function () {
         });
 
         it('add same client id fails', function (done) {
-            clientdb.add(CLIENT_0.id, CLIENT_0.appId, CLIENT_0.clientSecret, CLIENT_0.redirectURI, CLIENT_0.scope, function (error) {
+            clientdb.add(CLIENT_0.id, CLIENT_0.appId, CLIENT_0.type, CLIENT_0.clientSecret, CLIENT_0.redirectURI, CLIENT_0.scope, function (error) {
                 expect(error).to.be.a(DatabaseError);
                 expect(error.reason).to.equal(DatabaseError.ALREADY_EXISTS);
                 done();
@@ -839,6 +834,14 @@ describe('database', function () {
 
         it('getByAppId succeeds', function (done) {
             clientdb.getByAppId(CLIENT_0.appId, function (error, result) {
+                expect(error).to.be(null);
+                expect(result).to.eql(CLIENT_0);
+                done();
+            });
+        });
+
+        it('getByAppIdAndType succeeds', function (done) {
+            clientdb.getByAppIdAndType(CLIENT_0.appId, CLIENT_0.type, function (error, result) {
                 expect(error).to.be(null);
                 expect(result).to.eql(CLIENT_0);
                 done();
@@ -862,6 +865,19 @@ describe('database', function () {
                 expect(result[0]).to.eql(CLIENT_0);
                 expect(result[1]).to.eql(CLIENT_1);
                 done();
+            });
+        });
+
+        it('delByAppIdAndType succeeds', function (done) {
+            clientdb.delByAppIdAndType(CLIENT_1.appId, CLIENT_1.type, function (error) {
+                expect(error).to.be(null);
+
+                clientdb.getByAppIdAndType(CLIENT_1.appId, CLIENT_1.type, function (error, result) {
+                    expect(error).to.be.a(DatabaseError);
+                    expect(error.reason).to.equal(DatabaseError.NOT_FOUND);
+                    expect(result).to.not.be.ok();
+                    done();
+                });
             });
         });
 
