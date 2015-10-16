@@ -152,7 +152,7 @@
                                 <h4 class="text-muted">Credentials</h4>
                                 <p>Permissions: <b>{{ client.scope }}</b></p>
                                 <p>Client ID: <b>{{ client.id }}</b></p>
-                                <p>Client Secret: <b>{{ client.clientSecret }}</b></p>
+                                <p ng-show="client.clientSecret">Client Secret: <b>{{ client.clientSecret }}</b></p>
                             </div>
                         </div>
                     </div>
