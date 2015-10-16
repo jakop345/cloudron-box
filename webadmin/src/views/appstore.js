@@ -16,7 +16,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         app: {},
         location: '',
         portBindings: {},
-        accessRestriction: '',
+        accessRestriction: null,
         oauthProxy: false,
         mediaLinks: []
     };
@@ -136,7 +136,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         $scope.appInstall.error = {};
         $scope.appInstall.location = '';
         $scope.appInstall.portBindings = {};
-        $scope.appInstall.accessRestriction = '';
+        $scope.appInstall.accessRestriction = null;
         $scope.appInstall.oauthProxy = false;
         $scope.appInstall.installFormVisible = false;
         $scope.appInstall.mediaLinks = [];
@@ -166,8 +166,8 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         $scope.appInstall.portBindingsInfo = $scope.appInstall.app.manifest.tcpPorts || {};   // Portbinding map only for information
         $scope.appInstall.portBindings = {};                            // This is the actual model holding the env:port pair
         $scope.appInstall.portBindingsEnabled = {};                     // This is the actual model holding the enabled/disabled flag
-        $scope.appInstall.accessRestriction = app.accessRestriction || '';
-        $scope.appInstall.oauthProxy = app.oauthProxy || false;
+        $scope.appInstall.accessRestriction = null;
+        $scope.appInstall.oauthProxy = false;
 
         // set default ports
         for (var env in $scope.appInstall.app.manifest.tcpPorts) {
