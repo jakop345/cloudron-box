@@ -401,11 +401,12 @@ function configure(appId, location, portBindings, accessRestriction, oauthProxy,
     });
 }
 
-function update(appId, force, manifest, portBindings, icon, callback) {
+function update(appId, force, manifest, portBindings, accessRestriction, icon, callback) {
     assert.strictEqual(typeof appId, 'string');
     assert.strictEqual(typeof force, 'boolean');
     assert(manifest && typeof manifest === 'object');
     assert(!portBindings || typeof portBindings === 'object');
+    assert(accessRestriction === null || typeof accessRestriction === 'string');
     assert(!icon || typeof icon === 'string');
     assert.strictEqual(typeof callback, 'function');
 
@@ -419,6 +420,11 @@ function update(appId, force, manifest, portBindings, icon, callback) {
 
     error = validatePortBindings(portBindings, manifest.tcpPorts);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
+
+    if (accessRestriction !== null) {
+        error = validateAccessRestriction(accessRestriction);
+        if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
+    }
 
     if (icon) {
         if (!validator.isBase64(icon)) return callback(new AppsError(AppsError.BAD_FIELD, 'icon is not base64'));
@@ -435,9 +441,12 @@ function update(appId, force, manifest, portBindings, icon, callback) {
         var values = {
             manifest: manifest,
             portBindings: portBindings,
+            accessRestriction: accessRestriction === null ? app.accessRestriction : accessRestriction,
             oldConfig: {
                 manifest: app.manifest,
-                portBindings: app.portBindings
+                portBindings: app.portBindings,
+                accessRestriction: app.accessRestriction,
+                oauthProxy: app.oauthProxy
             }
         };
 
