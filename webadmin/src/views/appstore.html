@@ -33,15 +33,12 @@
                                 </div>
                             </ng-form>
                         </div>
-<!--
-                        <div class="form-group">
-                            <label class="control-label" for="accessRestriction">Access Restriction</label>
-                            <select class="form-control" id="accessRestriction" ng-model="appInstall.accessRestriction">
-                                <option value="">None</option>
-                                <option value="roleUser">Only for Cloudron Users</option>
+                        <div class="form-group" ng-show="appInstall.app.manifest.singleUser">
+                            <label class="control-label" for="accessRestriction">User</label>
+                            <select class="form-control" id="accessRestriction" ng-model="appInstall.accessRestriction" ng-required="appInstall.app.manifest.singleUser">
+                                <option ng-repeat="user in users" value="{{user.id}}">{{user.username}} - {{user.email}}</option>
                             </select>
                         </div>
--->
                         <input class="ng-hide" type="submit" ng-disabled="appInstallForm.$invalid || busy"/>
                     </form>
                 </div>

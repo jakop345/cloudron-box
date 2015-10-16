@@ -324,6 +324,13 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
+    Client.prototype.getUsers = function (callback) {
+        $http.get(client.apiOrigin + '/api/v1/users').success(function (data, status) {
+            if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));
+            callback(null, data.users);
+        }).error(defaultErrorHandler(callback));
+    };
+
     Client.prototype.getNonApprovedApps = function (callback) {
         if (!this._config.developerMode) return callback(null, []);
 

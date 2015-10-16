@@ -5,6 +5,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
     $scope.apps = [];
     $scope.config = Client.getConfig();
     $scope.user = Client.getUserInfo();
+    $scope.users = [];
     $scope.category = '';
     $scope.cachedCategory = ''; // used to cache the selected category while searching
     $scope.searchString = '';
@@ -161,12 +162,14 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         angular.copy(app, $scope.appInstall.app);
         $('#appInstallModal').modal('show');
 
+        console.log(app)
+
         $scope.appInstall.mediaLinks = $scope.appInstall.app.manifest.mediaLinks || [];
         $scope.appInstall.location = app.location;
         $scope.appInstall.portBindingsInfo = $scope.appInstall.app.manifest.tcpPorts || {};   // Portbinding map only for information
         $scope.appInstall.portBindings = {};                            // This is the actual model holding the env:port pair
         $scope.appInstall.portBindingsEnabled = {};                     // This is the actual model holding the enabled/disabled flag
-        $scope.appInstall.accessRestriction = null;
+        $scope.appInstall.accessRestriction = app.accessRestriction ? app.accessRestriction.users[0] : null;
         $scope.appInstall.oauthProxy = false;
 
         // set default ports
@@ -197,7 +200,12 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
             }
         }
 
-        Client.installApp($scope.appInstall.app.id, $scope.appInstall.app.manifest, $scope.appInstall.app.title, { location: $scope.appInstall.location || '', portBindings: finalPortBindings, accessRestriction: $scope.appInstall.accessRestriction, oauthProxy: $scope.appInstall.oauthProxy }, function (error) {
+        // translate to accessRestriction object
+        var accessRestriction = $scope.appInstall.app.manifest.singleUser ? {
+            users: [ $scope.appInstall.accessRestriction ]
+        } : null;
+
+        Client.installApp($scope.appInstall.app.id, $scope.appInstall.app.manifest, $scope.appInstall.app.title, { location: $scope.appInstall.location || '', portBindings: finalPortBindings, accessRestriction: accessRestriction, oauthProxy: $scope.appInstall.oauthProxy }, function (error) {
             if (error) {
                 if (error.statusCode === 409 && (error.message.indexOf('is reserved') !== -1 || error.message.indexOf('is already in use') !== -1)) {
                     $scope.appInstall.error.port = error.message;
@@ -230,40 +238,49 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
     function refresh() {
         $scope.ready = false;
 
-        getAppList(function (error, apps) {
+        Client.getUsers(function (error, users) {
             if (error) {
                 console.error(error);
                 return $timeout(refresh, 1000);
             }
 
-            $scope.apps = apps;
+            $scope.users = users;
 
-            // show install app dialog immediately if an app id was passed in the query
-            if ($routeParams.appId) {
-                if ($routeParams.version) {
-                    AppStore.getAppByIdAndVersion($routeParams.appId, $routeParams.version, function (error, result) {
-                        if (error) {
-                            $scope.showAppNotFound($routeParams.appId, $routeParams.version);
-                            console.error(error);
-                            return;
-                        }
+            getAppList(function (error, apps) {
+                if (error) {
+                    console.error(error);
+                    return $timeout(refresh, 1000);
+                }
 
-                        $scope.showInstall(result);
-                    });
-                } else {
-                    var found = apps.filter(function (app) {
-                        return (app.id === $routeParams.appId) && ($routeParams.version ? $routeParams.version === app.manifest.version : true);
-                    });
+                $scope.apps = apps;
 
-                    if (found.length) {
-                        $scope.showInstall(found[0]);
+                // show install app dialog immediately if an app id was passed in the query
+                if ($routeParams.appId) {
+                    if ($routeParams.version) {
+                        AppStore.getAppByIdAndVersion($routeParams.appId, $routeParams.version, function (error, result) {
+                            if (error) {
+                                $scope.showAppNotFound($routeParams.appId, $routeParams.version);
+                                console.error(error);
+                                return;
+                            }
+
+                            $scope.showInstall(result);
+                        });
                     } else {
-                        $scope.showAppNotFound($routeParams.appId, null);
+                        var found = apps.filter(function (app) {
+                            return (app.id === $routeParams.appId) && ($routeParams.version ? $routeParams.version === app.manifest.version : true);
+                        });
+
+                        if (found.length) {
+                            $scope.showInstall(found[0]);
+                        } else {
+                            $scope.showAppNotFound($routeParams.appId, null);
+                        }
                     }
                 }
-            }
 
-            $scope.ready = true;
+                $scope.ready = true;
+            });
         });
     }
 
