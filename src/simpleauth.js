@@ -8,7 +8,9 @@ exports = module.exports = {
 var apps = require('./apps.js'),
     AppsError = apps.AppsError,
     assert = require('assert'),
+    clientdb = require('./clientdb.js'),
     clients = require('./clients.js'),
+    ClientsError = clients.ClientsError,
     config = require('./config.js'),
     DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:src/simpleauth'),
@@ -33,6 +35,9 @@ function loginLogic(clientId, username, password, callback) {
 
     clients.get(clientId, function (error, clientObject) {
         if (error) return callback(error);
+
+        // only allow simple auth clients
+        if (clientObject.type !== clientdb.TYPE_SIMPLE_AUTH) return callback(new ClientsError(ClientsError.INVALID_CLIENT));
 
         user.verify(username, password, function (error, userObject) {
             if (error) return callback(error);
@@ -78,6 +83,7 @@ function login(req, res, next) {
 
     loginLogic(req.body.clientId, req.body.username, req.body.password, function (error, result) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return next(new HttpError(401, 'Unknown client'));
+        if (error && error.reason === ClientsError.INVALID_CLIENT) return next(new HttpError(401, 'Unkown client'));
         if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(401, 'Forbidden'));
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(401, 'Unkown app'));
         if (error && error.reason === UserError.WRONG_PASSWORD) return next(new HttpError(401, 'Forbidden'));

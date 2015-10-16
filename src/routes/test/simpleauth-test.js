@@ -89,6 +89,15 @@ describe('SimpleAuth API', function () {
         scope: 'user,profile'
     };
 
+    var CLIENT_4 = {
+        id: 'someclientid4',
+        appId: APP_2.id,
+        type: clientdb.TYPE_OAUTH,
+        clientSecret: 'someclientsecret4',
+        redirectURI: '',
+        scope: 'user,profile'
+    };
+
     before(function (done) {
         async.series([
             server.start.bind(server),
@@ -118,6 +127,7 @@ describe('SimpleAuth API', function () {
             clientdb.add.bind(null, CLIENT_1.id, CLIENT_1.appId, CLIENT_1.type, CLIENT_1.clientSecret, CLIENT_1.redirectURI, CLIENT_1.scope),
             clientdb.add.bind(null, CLIENT_2.id, CLIENT_2.appId, CLIENT_2.type, CLIENT_2.clientSecret, CLIENT_2.redirectURI, CLIENT_2.scope),
             clientdb.add.bind(null, CLIENT_3.id, CLIENT_3.appId, CLIENT_3.type, CLIENT_3.clientSecret, CLIENT_3.redirectURI, CLIENT_3.scope),
+            clientdb.add.bind(null, CLIENT_4.id, CLIENT_4.appId, CLIENT_4.type, CLIENT_4.clientSecret, CLIENT_4.redirectURI, CLIENT_4.scope),
             appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, APP_0.oauthProxy),
             appdb.add.bind(null, APP_1.id, APP_1.appStoreId, APP_1.manifest, APP_1.location, APP_1.portBindings, APP_1.accessRestriction, APP_1.oauthProxy),
             appdb.add.bind(null, APP_2.id, APP_2.appStoreId, APP_2.manifest, APP_2.location, APP_2.portBindings, APP_2.accessRestriction, APP_2.oauthProxy)
@@ -329,6 +339,22 @@ describe('SimpleAuth API', function () {
 
                     done();
                 });
+            });
+        });
+
+        it('fails for wrong client credentials', function (done) {
+            var body = {
+                clientId: CLIENT_4.id,
+                username: USERNAME,
+                password: PASSWORD
+            };
+
+            request.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
+            .send(body)
+            .end(function (error, result) {
+                expect(error).to.be(null);
+                expect(result.statusCode).to.equal(401);
+                done();
             });
         });
     });

@@ -25,7 +25,7 @@ start_postgresql() {
     docker rm -f postgresql 2>/dev/null 1>&2 || true
 
     docker run -dtP --name=postgresql -v "${postgresqldatadir}:/var/lib/postgresql" \
-         --read-only -v /tmp -v /run \
+        --read-only -v /tmp -v /run \
         -v /tmp/postgresql_vars.sh:/etc/postgresql/postgresql_vars.sh "${POSTGRESQL_IMAGE}" >/dev/null
 }
 
