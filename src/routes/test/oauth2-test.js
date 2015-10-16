@@ -242,7 +242,7 @@ describe('OAuth2', function () {
         var CLIENT_6 = {
             id: 'cid-client6',
             appId: APP_1.id,
-            type: clientdb.TYPE_SIMPLE_AUTH,
+            type: clientdb.TYPE_OAUTH,
             clientSecret: 'secret6',
             redirectURI: 'http://redirect6',
             scope: 'profile'
@@ -252,9 +252,19 @@ describe('OAuth2', function () {
         var CLIENT_7 = {
             id: 'cid-client7',
             appId: APP_2.id,
-            type: clientdb.TYPE_SIMPLE_AUTH,
+            type: clientdb.TYPE_OAUTH,
             clientSecret: 'secret7',
             redirectURI: 'http://redirect7',
+            scope: 'profile'
+        };
+
+        // simple auth client
+        var CLIENT_8 = {
+            id: 'cid-client8',
+            appId: APP_2.id,
+            type: clientdb.TYPE_SIMPLE_AUTH,
+            clientSecret: 'secret8',
+            redirectURI: 'http://redirect8',
             scope: 'profile'
         };
 
@@ -276,6 +286,7 @@ describe('OAuth2', function () {
                 clientdb.add.bind(null, CLIENT_5.id, CLIENT_5.appId, CLIENT_5.type, CLIENT_5.clientSecret, CLIENT_5.redirectURI, CLIENT_5.scope),
                 clientdb.add.bind(null, CLIENT_6.id, CLIENT_6.appId, CLIENT_6.type, CLIENT_6.clientSecret, CLIENT_6.redirectURI, CLIENT_6.scope),
                 clientdb.add.bind(null, CLIENT_7.id, CLIENT_7.appId, CLIENT_7.type, CLIENT_7.clientSecret, CLIENT_7.redirectURI, CLIENT_7.scope),
+                clientdb.add.bind(null, CLIENT_8.id, CLIENT_8.appId, CLIENT_8.type, CLIENT_8.clientSecret, CLIENT_8.redirectURI, CLIENT_8.scope),
                 appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, APP_0.oauthProxy),
                 appdb.add.bind(null, APP_1.id, APP_1.appStoreId, APP_1.manifest, APP_1.location, APP_1.portBindings, APP_1.accessRestriction, APP_1.oauthProxy),
                 appdb.add.bind(null, APP_2.id, APP_2.appStoreId, APP_2.manifest, APP_2.location, APP_2.portBindings, APP_2.accessRestriction, APP_2.oauthProxy),
@@ -528,6 +539,24 @@ describe('OAuth2', function () {
                     });
                 });
             });
+
+            it('fails when using simple auth credentials', function (done) {
+                var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_8.redirectURI + '&client_id=' + CLIENT_8.id + '&response_type=code';
+                request.get(url, { jar: true }, function (error, response, body) {
+                    expect(error).to.not.be.ok();
+                    expect(response.statusCode).to.eql(200);
+                    expect(body).to.eql('<script>window.location.href = "/api/v1/session/login?returnTo=' + CLIENT_8.redirectURI + '";</script>');
+
+                    request.get(SERVER_URL + '/api/v1/session/login?returnTo=' + CLIENT_8.redirectURI, { jar: true, followRedirect: false }, function (error, response, body) {
+                        expect(error).to.not.be.ok();
+                        expect(response.statusCode).to.eql(200);
+                        expect(body.indexOf('<!-- error tester -->')).to.not.equal(-1);
+                        expect(body.indexOf('Unknown OAuth client')).to.not.equal(-1);
+
+                        done();
+                    });
+                });
+            });
         });
 
         describe('loginForm submit', function () {
@@ -749,6 +778,21 @@ describe('OAuth2', function () {
                 });
             });
 
+            it('fails for grant type code due to simple auth credentials', function (done) {
+                startAuthorizationFlow(CLIENT_7, 'code', function (jar) {
+                    var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_8.redirectURI + '&client_id=' + CLIENT_8.id + '&response_type=code';
+
+                    request.get(url, { jar: jar, followRedirect: false }, function (error, response, body) {
+                        expect(error).to.not.be.ok();
+                        expect(response.statusCode).to.eql(200);
+                        expect(body.indexOf('<!-- error tester -->')).to.not.equal(-1);
+                        expect(body.indexOf('Unkonwn OAuth client.')).to.not.equal(-1);
+
+                        done();
+                    });
+                });
+            });
+
             it('succeeds for grant type code with accessRestriction', function (done) {
                 startAuthorizationFlow(CLIENT_7, 'code', function (jar) {
                     var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_7.redirectURI + '&client_id=' + CLIENT_7.id + '&response_type=code';
@@ -775,6 +819,21 @@ describe('OAuth2', function () {
                         expect(response.statusCode).to.eql(200);
                         expect(body.indexOf('<!-- error tester -->')).to.not.equal(-1);
                         expect(body.indexOf('No access to this app.')).to.not.equal(-1);
+
+                        done();
+                    });
+                });
+            });
+
+            it('fails for grant type token due to simple auth credentials', function (done) {
+                startAuthorizationFlow(CLIENT_7, 'token', function (jar) {
+                    var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_8.redirectURI + '&client_id=' + CLIENT_8.id + '&response_type=token';
+
+                    request.get(url, { jar: jar, followRedirect: false }, function (error, response, body) {
+                        expect(error).to.not.be.ok();
+                        expect(response.statusCode).to.eql(200);
+                        expect(body.indexOf('<!-- error tester -->')).to.not.equal(-1);
+                        expect(body.indexOf('Unkonwn OAuth client.')).to.not.equal(-1);
 
                         done();
                     });
