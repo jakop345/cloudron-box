@@ -208,7 +208,7 @@ function loginForm(req, res) {
         switch (result.type) {
             case clientdb.TYPE_ADMIN: return render(constants.ADMIN_NAME, '/api/v1/cloudron/avatar');
             case clientdb.TYPE_EXTERNAL: return render('External Application', '/api/v1/cloudron/avatar');
-            case clientdb.TYPE_SIMPLE_AUTH: return sendError(req, res, 'Unkown OAuth client');
+            case clientdb.TYPE_SIMPLE_AUTH: return sendError(req, res, 'Unknown OAuth client');
             default: break;
         }
 
@@ -375,7 +375,7 @@ var authorization = [
 
         if (type === clientdb.TYPE_ADMIN) return next();
         if (type === clientdb.TYPE_EXTERNAL) return next();
-        if (type === clientdb.TYPE_SIMPLE_AUTH) return sendError(req, res, 'Invalid request. Unkonwn OAuth client.');
+        if (type === clientdb.TYPE_SIMPLE_AUTH) return sendError(req, res, 'Unkonwn OAuth client.');
 
         appdb.get(req.oauth2.client.appId, function (error, appObject) {
             if (error) return sendErrorPageOrRedirect(req, res, 'Invalid request. Unknown app for this client_id.');
