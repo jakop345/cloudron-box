@@ -121,7 +121,7 @@ function installApp(req, res, next) {
     // allow tests to provide an appId for testing
     var appId = (process.env.BOX_ENV === 'test' && typeof data.appId === 'string') ? data.appId : uuid.v4();
 
-    debug('Installing app id:%s storeid:%s loc:%s port:%j restrict:%s oauthproxy:%s manifest:%j', appId, data.appStoreId, data.location, data.portBindings, data.accessRestriction, data.oauthProxy, data.manifest);
+    debug('Installing app id:%s storeid:%s loc:%s port:%j accessRestriction:%s oauthproxy:%s manifest:%j', appId, data.appStoreId, data.location, data.portBindings, data.accessRestriction, data.oauthProxy, data.manifest);
 
     apps.install(appId, data.appStoreId, data.manifest, data.location, data.portBindings || null, data.accessRestriction, data.oauthProxy, data.icon || null, function (error) {
         if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, error.message));
@@ -154,7 +154,7 @@ function configureApp(req, res, next) {
     if (typeof data.accessRestriction !== 'string') return next(new HttpError(400, 'accessRestriction is required'));
     if (typeof data.oauthProxy !== 'boolean') return next(new HttpError(400, 'oauthProxy must be a boolean'));
 
-    debug('Configuring app id:%s location:%s bindings:%j', req.params.id, data.location, data.portBindings);
+    debug('Configuring app id:%s location:%s bindings:%j accessRestriction:%s oauthProxy:%s', req.params.id, data.location, data.portBindings, data.accessRestriction, data.oauthProxy);
 
     apps.configure(req.params.id, data.location, data.portBindings || null, data.accessRestriction, data.oauthProxy, function (error) {
         if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, error.message));
