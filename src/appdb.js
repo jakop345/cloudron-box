@@ -57,10 +57,6 @@ var assert = require('assert'),
     safe = require('safetydance'),
     util = require('util');
 
-var APPS_FIELDS = [ 'id', 'appStoreId', 'installationState', 'installationProgress', 'runState',
-    'health', 'containerId', 'manifestJson', 'httpPort', 'location', 'dnsRecordId',
-    'accessRestriction', 'lastBackupId', 'lastBackupConfigJson', 'oldConfigJson', 'oauthProxy' ].join(',');
-
 var APPS_FIELDS_PREFIXED = [ 'apps.id', 'apps.appStoreId', 'apps.installationState', 'apps.installationProgress', 'apps.runState',
     'apps.health', 'apps.containerId', 'apps.manifestJson', 'apps.httpPort', 'apps.location', 'apps.dnsRecordId',
     'apps.accessRestriction', 'apps.lastBackupId', 'apps.lastBackupConfigJson', 'apps.oldConfigJson', 'apps.oauthProxy' ].join(',');
