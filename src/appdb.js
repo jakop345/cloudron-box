@@ -59,7 +59,7 @@ var assert = require('assert'),
 
 var APPS_FIELDS_PREFIXED = [ 'apps.id', 'apps.appStoreId', 'apps.installationState', 'apps.installationProgress', 'apps.runState',
     'apps.health', 'apps.containerId', 'apps.manifestJson', 'apps.httpPort', 'apps.location', 'apps.dnsRecordId',
-    'apps.accessRestriction', 'apps.lastBackupId', 'apps.lastBackupConfigJson', 'apps.oldConfigJson', 'apps.oauthProxy' ].join(',');
+    'apps.accessRestrictionJson', 'apps.lastBackupId', 'apps.lastBackupConfigJson', 'apps.oldConfigJson', 'apps.oauthProxy' ].join(',');
 
 var PORT_BINDINGS_FIELDS = [ 'hostPort', 'environmentVariable', 'appId' ].join(',');
 
@@ -93,6 +93,11 @@ function postProcess(result) {
     }
 
     result.oauthProxy = !!result.oauthProxy;
+
+    assert(result.accessRestrictionJson === null || typeof result.accessRestrictionJson === 'string');
+    result.accessRestriction = safe.JSON.parse(result.accessRestrictionJson);
+    if (result.accessRestriction && !result.accessRestriction.users) result.accessRestriction.users = [];
+    delete result.accessRestrictionJson;
 }
 
 function get(id, callback) {
@@ -181,18 +186,19 @@ function add(id, appStoreId, manifest, location, portBindings, accessRestriction
     assert.strictEqual(typeof manifest.version, 'string');
     assert.strictEqual(typeof location, 'string');
     assert.strictEqual(typeof portBindings, 'object');
-    assert.strictEqual(typeof accessRestriction, 'string');
+    assert.strictEqual(typeof accessRestriction, 'object');
     assert.strictEqual(typeof oauthProxy, 'boolean');
     assert.strictEqual(typeof callback, 'function');
 
     portBindings = portBindings || { };
 
     var manifestJson = JSON.stringify(manifest);
+    var accessRestrictionJson = JSON.stringify(accessRestriction);
 
     var queries = [ ];
     queries.push({
-        query: 'INSERT INTO apps (id, appStoreId, manifestJson, installationState, location, accessRestriction, oauthProxy) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        args: [ id, appStoreId, manifestJson, exports.ISTATE_PENDING_INSTALL, location, accessRestriction, oauthProxy ]
+        query: 'INSERT INTO apps (id, appStoreId, manifestJson, installationState, location, accessRestrictionJson, oauthProxy) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        args: [ id, appStoreId, manifestJson, exports.ISTATE_PENDING_INSTALL, location, accessRestrictionJson, oauthProxy ]
     });
 
     Object.keys(portBindings).forEach(function (env) {
@@ -300,6 +306,9 @@ function updateWithConstraints(id, app, constraints, callback) {
             values.push(JSON.stringify(app[p]));
         } else if (p === 'oldConfig') {
             fields.push('oldConfigJson = ?');
+            values.push(JSON.stringify(app[p]));
+        } else if (p === 'accessRestriction') {
+            fields.push('accessRestrictionJson = ?');
             values.push(JSON.stringify(app[p]));
         } else if (p !== 'portBindings') {
             fields.push(p + ' = ?');
