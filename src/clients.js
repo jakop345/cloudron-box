@@ -42,6 +42,7 @@ function ClientsError(reason, errorOrMessage) {
 }
 util.inherits(ClientsError, Error);
 ClientsError.INVALID_SCOPE = 'Invalid scope';
+ClientsError.INVALID_CLIENT = 'Invalid client';
 
 function validateScope(scope) {
     assert.strictEqual(typeof scope, 'string');
