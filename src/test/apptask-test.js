@@ -57,7 +57,7 @@ var APP = {
     containerId: null,
     httpPort: 4567,
     portBindings: null,
-    accessRestriction: '',
+    accessRestriction: null,
     oauthProxy: false,
     dnsRecordId: 'someDnsRecordId'
 };

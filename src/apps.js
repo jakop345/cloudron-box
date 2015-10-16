@@ -188,7 +188,8 @@ function validateAccessRestriction(accessRestriction) {
 
     if (accessRestriction === null) return null;
 
-    if (!accessRestriction.users) return new Error('Users property required');
+    if (!accessRestriction.users || !Array.isArray(accessRestriction.users)) return new Error('users array property required');
+    if (accessRestriction.users.length === 0) return new Error('users array cannot be empty');
     if (!accessRestriction.users.every(function (e) { return typeof e === 'string'; })) return new Error('All users have to be strings');
 
     return null;
