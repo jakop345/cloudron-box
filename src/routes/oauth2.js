@@ -206,10 +206,10 @@ function loginForm(req, res) {
         if (error) return sendError(req, res, 'Unknown OAuth client');
 
         switch (result.type) {
-        case clientdb.TYPE_ADMIN: return render(constants.ADMIN_NAME, '/api/v1/cloudron/avatar');
-        case clientdb.TYPE_TEST: return render(constants.TEST_NAME, '/api/v1/cloudron/avatar');
-        case clientdb.TYPE_EXTERNAL: return render('External Application', '/api/v1/cloudron/avatar');
-        default: break;
+            case clientdb.TYPE_ADMIN: return render(constants.ADMIN_NAME, '/api/v1/cloudron/avatar');
+            case clientdb.TYPE_TEST: return render(constants.TEST_NAME, '/api/v1/cloudron/avatar');
+            case clientdb.TYPE_EXTERNAL: return render('External Application', '/api/v1/cloudron/avatar');
+            default: break;
         }
 
         appdb.get(result.appId, function (error, result) {
