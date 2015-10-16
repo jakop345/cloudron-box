@@ -7,10 +7,6 @@ exports = module.exports = {
     ADMIN_NAME: 'Settings',
 
     ADMIN_CLIENT_ID: 'webadmin', // oauth client id
-    ADMIN_APPID: 'admin', // admin appid (settingsdb)
-
-    TEST_NAME: 'Test',
-    TEST_LOCATION: '',
-    TEST_CLIENT_ID: 'test'
+    ADMIN_APPID: 'admin' // admin appid (settingsdb)
 };
 

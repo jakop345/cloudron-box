@@ -128,14 +128,6 @@ function getAllWithDetailsByUserId(userId, callback) {
                 tmp.push(record);
 
                 return callback(null);
-            } else if (record.appId === constants.TEST_CLIENT_ID) {
-                record.name = constants.TEST_NAME;
-                record.location = constants.TEST_LOCATION;
-                record.type = 'test';
-
-                tmp.push(record);
-
-                return callback(null);
             }
 
             var appId = record.appId;

@@ -20,7 +20,6 @@ exports = module.exports = {
     TYPE_OAUTH: 'addon-oauth',
     TYPE_SIMPLE_AUTH: 'addon-simpleauth',
     TYPE_PROXY: 'addon-proxy',
-    TYPE_TEST: 'test',
     TYPE_ADMIN: 'admin'
 };
 

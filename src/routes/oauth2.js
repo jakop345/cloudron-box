@@ -207,7 +207,6 @@ function loginForm(req, res) {
 
         switch (result.type) {
             case clientdb.TYPE_ADMIN: return render(constants.ADMIN_NAME, '/api/v1/cloudron/avatar');
-            case clientdb.TYPE_TEST: return render(constants.TEST_NAME, '/api/v1/cloudron/avatar');
             case clientdb.TYPE_EXTERNAL: return render('External Application', '/api/v1/cloudron/avatar');
             default: break;
         }
@@ -375,7 +374,6 @@ var authorization = [
 
         // TODO find a smarter way to test these
         if (appId === constants.ADMIN_CLIENT_ID) return next();
-        if (appId === constants.TEST_CLIENT_ID) return next();
         if (appId.indexOf('external-') === 0) return next();
         if (appId.indexOf('addon-oauth-') === 0) appId = appId.slice('addon-oauth-'.length);
         if (appId.indexOf('proxy-') === 0) appId = appId.slice('proxy-'.length);
