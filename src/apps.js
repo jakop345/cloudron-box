@@ -118,6 +118,7 @@ AppsError.PORT_RESERVED = 'Port Reserved';
 AppsError.PORT_CONFLICT = 'Port Conflict';
 AppsError.BILLING_REQUIRED = 'Billing Required';
 AppsError.ACCESS_DENIED = 'Access denied';
+AppsError.USER_REQUIRED = 'User required';
 
 // Hostname validation comes from RFC 1123 (section 2.1)
 // Domain name validation comes from RFC 2181 (Name syntax)
@@ -318,6 +319,10 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
 
     error = validateAccessRestriction(accessRestriction);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
+
+    // singleUser mode requires accessRestriction to contain exactly one user
+    if (manifest.singleUser && accessRestriction === null) return callback(new AppsError(AppsError.USER_REQUIRED));
+    if (manifest.singleUser && accessRestriction.users.length !== 1) return callback(new AppsError(AppsError.USER_REQUIRED));
 
     if (icon) {
         if (!validator.isBase64(icon)) return callback(new AppsError(AppsError.BAD_FIELD, 'icon is not base64'));

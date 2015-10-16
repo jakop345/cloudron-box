@@ -49,8 +49,14 @@ var APP_STORE_ID = 'test', APP_ID;
 var APP_LOCATION = 'appslocation';
 var APP_LOCATION_2 = 'appslocationtwo';
 var APP_LOCATION_NEW = 'appslocationnew';
+
 var APP_MANIFEST = JSON.parse(fs.readFileSync(__dirname + '/../../../../test-app/CloudronManifest.json', 'utf8'));
 APP_MANIFEST.dockerImage = TEST_IMAGE_REPO + ':' + TEST_IMAGE_TAG;
+
+var APP_MANIFEST_1 = JSON.parse(fs.readFileSync(__dirname + '/../../../../test-app/CloudronManifest.json', 'utf8'));
+APP_MANIFEST_1.dockerImage = TEST_IMAGE_REPO + ':' + TEST_IMAGE_TAG;
+APP_MANIFEST_1.singleUser = true;
+
 var USERNAME = 'admin', PASSWORD = 'password', EMAIL ='admin@me.com';
 var USERNAME_1 = 'user', PASSWORD_1 = 'password', EMAIL_1 ='user@me.com';
 var token = null; // authentication token
@@ -291,6 +297,28 @@ describe('App API', function () {
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             expect(res.body.message).to.eql('accessRestriction is required');
+            done(err);
+        });
+    });
+
+    it('app install fails - accessRestriction no users not allowed', function (done) {
+        request.post(SERVER_URL + '/api/v1/apps/install')
+               .query({ access_token: token })
+               .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST_1, password: PASSWORD, location: APP_LOCATION, portBindings: {}, accessRestriction: null, oauthProxy: false })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(400);
+            expect(res.body.message).to.eql('accessRestriction must specify one user');
+            done(err);
+        });
+    });
+
+    it('app install fails - accessRestriction too many users not allowed', function (done) {
+        request.post(SERVER_URL + '/api/v1/apps/install')
+               .query({ access_token: token })
+               .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST_1, password: PASSWORD, location: APP_LOCATION, portBindings: {}, accessRestriction: { users: [ 'one', 'two' ] }, oauthProxy: false })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(400);
+            expect(res.body.message).to.eql('accessRestriction must specify one user');
             done(err);
         });
     });
