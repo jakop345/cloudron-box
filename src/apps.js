@@ -184,16 +184,12 @@ function validatePortBindings(portBindings, tcpPorts) {
 }
 
 function validateAccessRestriction(accessRestriction) {
-    assert.strictEqual(typeof accessRestriction, 'string');
+    assert.strictEqual(typeof accessRestriction, 'object');
 
-    function validator(entry) {
-        if (entry === '') return true;
-        if (entry.indexOf('user-') === 0 && entry.length > 'user-'.length) return true;
-        return false;
-    }
+    if (accessRestriction === null) return null;
 
-    var entries = accessRestriction.split(',').map(function (e) { return e.trim(); });
-    if (!entries.every(validator)) return new Error('Invalid accessRestriction');
+    if (!accessRestriction.users) return new Error('Users property required');
+    if (!accessRestriction.users.every(function (e) { return typeof e === 'string'; })) return new Error('All users have to be strings');
 
     return null;
 }
@@ -229,14 +225,8 @@ function hasAccessTo(app, user) {
     assert.strictEqual(typeof app, 'object');
     assert.strictEqual(typeof user, 'object');
 
-    function validator(entry) {
-        if (entry.indexOf('user-') === 0 && entry.slice('user-'.length) === user.id) return true;
-        return false;
-    }
-
-    if (app.accessRestriction === '') return true;
-
-    return app.accessRestriction.split(',').some(validator);
+    if (app.accessRestriction === null) return true;
+    return app.accessRestriction.users.some(function (e) { return e === user.id; });
 }
 
 function get(appId, callback) {
@@ -308,7 +298,7 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
     assert(manifest && typeof manifest === 'object');
     assert.strictEqual(typeof location, 'string');
     assert.strictEqual(typeof portBindings, 'object');
-    assert.strictEqual(typeof accessRestriction, 'string');
+    assert.strictEqual(typeof accessRestriction, 'object');
     assert.strictEqual(typeof oauthProxy, 'boolean');
     assert(!icon || typeof icon === 'string');
     assert.strictEqual(typeof callback, 'function');
@@ -356,7 +346,7 @@ function configure(appId, location, portBindings, accessRestriction, oauthProxy,
     assert.strictEqual(typeof appId, 'string');
     assert.strictEqual(typeof location, 'string');
     assert.strictEqual(typeof portBindings, 'object');
-    assert.strictEqual(typeof accessRestriction, 'string');
+    assert.strictEqual(typeof accessRestriction, 'object');
     assert.strictEqual(typeof oauthProxy, 'boolean');
     assert.strictEqual(typeof callback, 'function');
 
@@ -401,12 +391,11 @@ function configure(appId, location, portBindings, accessRestriction, oauthProxy,
     });
 }
 
-function update(appId, force, manifest, portBindings, accessRestriction, icon, callback) {
+function update(appId, force, manifest, portBindings, icon, callback) {
     assert.strictEqual(typeof appId, 'string');
     assert.strictEqual(typeof force, 'boolean');
     assert(manifest && typeof manifest === 'object');
     assert(!portBindings || typeof portBindings === 'object');
-    assert(accessRestriction === null || typeof accessRestriction === 'string');
     assert(!icon || typeof icon === 'string');
     assert.strictEqual(typeof callback, 'function');
 
@@ -420,11 +409,6 @@ function update(appId, force, manifest, portBindings, accessRestriction, icon, c
 
     error = validatePortBindings(portBindings, manifest.tcpPorts);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
-
-    if (accessRestriction !== null) {
-        error = validateAccessRestriction(accessRestriction);
-        if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
-    }
 
     if (icon) {
         if (!validator.isBase64(icon)) return callback(new AppsError(AppsError.BAD_FIELD, 'icon is not base64'));
@@ -441,7 +425,6 @@ function update(appId, force, manifest, portBindings, accessRestriction, icon, c
         var values = {
             manifest: manifest,
             portBindings: portBindings,
-            accessRestriction: accessRestriction === null ? app.accessRestriction : accessRestriction,
             oldConfig: {
                 manifest: app.manifest,
                 portBindings: app.portBindings,

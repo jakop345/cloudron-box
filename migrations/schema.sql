@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS apps(
     httpPort INTEGER,                        // this is the nginx proxy port and not manifest.httpPort
     location VARCHAR(128) NOT NULL UNIQUE,
     dnsRecordId VARCHAR(512),
-    accessRestriction VARCHAR(512),
+    accessRestrictionJson VARCHAR(2048),
     oauthProxy BOOLEAN DEFAULT 0,
     createdAt TIMESTAMP(2) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 

@@ -114,14 +114,14 @@ function installApp(req, res, next) {
     if (typeof data.appStoreId !== 'string') return next(new HttpError(400, 'appStoreId is required'));
     if (typeof data.location !== 'string') return next(new HttpError(400, 'location is required'));
     if (('portBindings' in data) && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
-    if (typeof data.accessRestriction !== 'string') return next(new HttpError(400, 'accessRestriction is required'));
+    if (typeof data.accessRestriction !== 'object') return next(new HttpError(400, 'accessRestriction is required'));
     if (typeof data.oauthProxy !== 'boolean') return next(new HttpError(400, 'oauthProxy must be a boolean'));
     if ('icon' in data && typeof data.icon !== 'string') return next(new HttpError(400, 'icon is not a string'));
 
     // allow tests to provide an appId for testing
     var appId = (process.env.BOX_ENV === 'test' && typeof data.appId === 'string') ? data.appId : uuid.v4();
 
-    debug('Installing app id:%s storeid:%s loc:%s port:%j accessRestriction:%s oauthproxy:%s manifest:%j', appId, data.appStoreId, data.location, data.portBindings, data.accessRestriction, data.oauthProxy, data.manifest);
+    debug('Installing app id:%s storeid:%s loc:%s port:%j accessRestriction:%j oauthproxy:%s manifest:%j', appId, data.appStoreId, data.location, data.portBindings, data.accessRestriction, data.oauthProxy, data.manifest);
 
     apps.install(appId, data.appStoreId, data.manifest, data.location, data.portBindings || null, data.accessRestriction, data.oauthProxy, data.icon || null, function (error) {
         if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, error.message));
@@ -151,10 +151,10 @@ function configureApp(req, res, next) {
     if (!data) return next(new HttpError(400, 'Cannot parse data field'));
     if (typeof data.location !== 'string') return next(new HttpError(400, 'location is required'));
     if (('portBindings' in data) && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
-    if (typeof data.accessRestriction !== 'string') return next(new HttpError(400, 'accessRestriction is required'));
+    if (typeof data.accessRestriction !== 'object') return next(new HttpError(400, 'accessRestriction is required'));
     if (typeof data.oauthProxy !== 'boolean') return next(new HttpError(400, 'oauthProxy must be a boolean'));
 
-    debug('Configuring app id:%s location:%s bindings:%j accessRestriction:%s oauthProxy:%s', req.params.id, data.location, data.portBindings, data.accessRestriction, data.oauthProxy);
+    debug('Configuring app id:%s location:%s bindings:%j accessRestriction:%j oauthProxy:%s', req.params.id, data.location, data.portBindings, data.accessRestriction, data.oauthProxy);
 
     apps.configure(req.params.id, data.location, data.portBindings || null, data.accessRestriction, data.oauthProxy, function (error) {
         if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, error.message));
@@ -253,13 +253,12 @@ function updateApp(req, res, next) {
     if (!data) return next(new HttpError(400, 'Cannot parse data field'));
     if (!data.manifest || typeof data.manifest !== 'object') return next(new HttpError(400, 'manifest is required'));
     if (('portBindings' in data) && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
-    if (data.accessRestriction !== null && typeof data.accessRestriction !== 'string') return next(new HttpError(400, 'accessRestriction is required'));
     if ('icon' in data && typeof data.icon !== 'string') return next(new HttpError(400, 'icon is not a string'));
     if ('force' in data && typeof data.force !== 'boolean') return next(new HttpError(400, 'force must be a boolean'));
 
-    debug('Update app id:%s to manifest:%j with portBindings:%j accessRestriction:%s', req.params.id, data.manifest, data.portBindings, data.accessRestriction);
+    debug('Update app id:%s to manifest:%j with portBindings:%j', req.params.id, data.manifest, data.portBindings);
 
-    apps.update(req.params.id, data.force || false, data.manifest, data.portBindings, data.accessRestriction, data.icon, function (error) {
+    apps.update(req.params.id, data.force || false, data.manifest, data.portBindings, data.icon, function (error) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
         if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
