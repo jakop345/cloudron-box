@@ -29,7 +29,7 @@ describe('SimpleAuth API', function () {
         manifest: { version: '0.1.0' },
         location: 'test0',
         portBindings: {},
-        accessRestriction: 'user-foobar,user-someone',
+        accessRestriction: { users: [ 'foobar', 'someone'] },
         oauthProxy: true
     };
 
@@ -39,7 +39,7 @@ describe('SimpleAuth API', function () {
         manifest: { version: '0.1.0' },
         location: 'test1',
         portBindings: {},
-        accessRestriction: 'user-foobar,user-' + USERNAME + ',user-someone',
+        accessRestriction: { users: [ 'foobar', USERNAME, 'someone' ] },
         oauthProxy: true
     };
 
@@ -49,7 +49,7 @@ describe('SimpleAuth API', function () {
         manifest: { version: '0.1.0' },
         location: 'test2',
         portBindings: {},
-        accessRestriction: '',
+        accessRestriction: null,
         oauthProxy: true
     };
 

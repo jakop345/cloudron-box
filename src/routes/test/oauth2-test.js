@@ -154,7 +154,7 @@ describe('OAuth2', function () {
             manifest: { version: '0.1.0' },
             location: 'test',
             portBindings: {},
-            accessRestriction: '',
+            accessRestriction: null,
             oauthProxy: true
         };
 
@@ -164,7 +164,7 @@ describe('OAuth2', function () {
             manifest: { version: '0.1.0' },
             location: 'test1',
             portBindings: {},
-            accessRestriction: 'user-foobar',
+            accessRestriction: { users: [ 'foobar' ] },
             oauthProxy: true
         };
 
@@ -174,7 +174,7 @@ describe('OAuth2', function () {
             manifest: { version: '0.1.0' },
             location: 'test2',
             portBindings: {},
-            accessRestriction: 'user-' + USER_0.id,
+            accessRestriction: { users: [ USER_0.id ] },
             oauthProxy: true
         };
 
@@ -296,7 +296,7 @@ describe('OAuth2', function () {
 
                         // update the global objects to reflect the new user id
                         USER_0.id = userObject.id;
-                        APP_2.accessRestriction = 'user-foobar,user-' + userObject.id;
+                        APP_2.accessRestriction = { users: [ 'foobar', userObject.id ] };
 
                         appdb.update(APP_2.id, APP_2, callback);
                     });

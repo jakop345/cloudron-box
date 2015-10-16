@@ -36,7 +36,7 @@ describe('Apps', function () {
         containerId: null,
         portBindings: { PORT: 5678 },
         healthy: null,
-        accessRestriction: '',
+        accessRestriction: null,
         oauthProxy: false
     };
 
@@ -160,59 +160,46 @@ describe('Apps', function () {
     });
 
     describe('validateAccessRestriction', function () {
-        it('allows empty input', function () {
-            expect(apps._validateAccessRestriction('')).to.eql(null);
+        it('allows null input', function () {
+            expect(apps._validateAccessRestriction(null)).to.eql(null);
+        });
+
+        it('does not allow wrong user type', function () {
+            expect(apps._validateAccessRestriction({ users: {} })).to.be.an(Error);
+        });
+
+        it('does not allow no user input', function () {
+            expect(apps._validateAccessRestriction({ users: [] })).to.be.an(Error);
         });
 
         it('allows single user input', function () {
-            expect(apps._validateAccessRestriction('user-someuserid')).to.eql(null);
-        });
-
-        it('does not allow single user input with no prefix', function () {
-            expect(apps._validateAccessRestriction('someuserid')).to.be.an(Error);
-        });
-
-        it('does not allow single user input with unkown prefix', function () {
-            expect(apps._validateAccessRestriction('foobar-someuserid')).to.be.an(Error);
+            expect(apps._validateAccessRestriction({ users: [ 'someuserid' ] })).to.eql(null);
         });
 
         it('allows multi user input', function () {
-            expect(apps._validateAccessRestriction('user-someuserid,user-someuserid1,user-someuserid2,user-someuserid3')).to.eql(null);
-        });
-
-        it('allows multi user input with whitespace', function () {
-            expect(apps._validateAccessRestriction('user-someuserid ,user-someuserid1     ,user-someuserid2 , user-someuserid3')).to.eql(null);
-        });
-
-        it('does not allow multi user input with no prefix', function () {
-            expect(apps._validateAccessRestriction('user-someuserid,someuserid1,user-someuserid2,user-someuserid3')).to.be.an(Error);
-        });
-
-        it('does not allow multi user input with unkown prefix', function () {
-            expect(apps._validateAccessRestriction('user-someuserid,user-someuserid1,user-someuserid2,foo-someuserid3')).to.be.an(Error);
+            expect(apps._validateAccessRestriction({ users: [ 'someuserid', 'someuserid1', 'someuserid2', 'someuserid3' ] })).to.eql(null);
         });
     });
 
     describe('hasAccessTo', function () {
         it('returns true for unrestricted access', function () {
-            expect(apps.hasAccessTo({ accessRestriction: '' }, { id: 'someuser' })).to.equal(true);
+            expect(apps.hasAccessTo({ accessRestriction: null }, { id: 'someuser' })).to.equal(true);
         });
 
         it('returns true for allowed user', function () {
-            expect(apps.hasAccessTo({ accessRestriction: 'user-someuser' }, { id: 'someuser' })).to.equal(true);
+            expect(apps.hasAccessTo({ accessRestriction: { users: [ 'someuser' ] } }, { id: 'someuser' })).to.equal(true);
         });
 
         it('returns true for allowed user with multiple allowed', function () {
-            expect(apps.hasAccessTo({ accessRestriction: 'user-foo,user-someuser, user-anotheruser' }, { id: 'someuser' })).to.equal(true);
+            expect(apps.hasAccessTo({ accessRestriction: { users: [ 'foo', 'someuser', 'anotheruser' ] } }, { id: 'someuser' })).to.equal(true);
         });
 
         it('returns false for not allowed user', function () {
-            expect(apps.hasAccessTo({ accessRestriction: 'user-foo' }, { id: 'someuser' })).to.equal(false);
+            expect(apps.hasAccessTo({ accessRestriction: { users: [ 'foo' ] } }, { id: 'someuser' })).to.equal(false);
         });
 
         it('returns false for not allowed user with multiple allowed', function () {
-            expect(apps.hasAccessTo({ accessRestriction: 'user-foo, user-anotheruser' }, { id: 'someuser' })).to.equal(false);
+            expect(apps.hasAccessTo({ accessRestriction: { users: [ 'foo', 'anotheruser' ] } }, { id: 'someuser' })).to.equal(false);
         });
     });
 });
-
