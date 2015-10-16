@@ -19,7 +19,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         portBindings: {},
         portBindingsEnabled: {},
         portBindingsInfo: {},
-        accessRestriction: '',
+        accessRestriction: null,
         oauthProxy: false
     };
 
@@ -53,7 +53,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appConfigure.location = '';
         $scope.appConfigure.password = '';
         $scope.appConfigure.portBindings = {};
-        $scope.appConfigure.accessRestriction = '';
+        $scope.appConfigure.accessRestriction = null;
         $scope.appConfigure.oauthProxy = false;
 
         $scope.appConfigureForm.$setPristine();
@@ -91,7 +91,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
 
         $scope.appConfigure.app = app;
         $scope.appConfigure.location = app.location;
-        $scope.appConfigure.accessRestriction = app.accessRestriction;
+        $scope.appConfigure.accessRestriction = app.accessRestriction || null;
         $scope.appConfigure.oauthProxy = app.oauthProxy;
         $scope.appConfigure.portBindingsInfo = app.manifest.tcpPorts || {}; // Portbinding map only for information
         $scope.appConfigure.portBindings = {};                              // This is the actual model holding the env:port pair
