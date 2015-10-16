@@ -370,15 +370,12 @@ var authorization = [
     }),
     function (req, res, next) {
         // Handle our different types of oauth clients
-        var appId = req.oauth2.client.appId;
+        var type = req.oauth2.client.type;
 
-        // TODO find a smarter way to test these
-        if (appId === constants.ADMIN_CLIENT_ID) return next();
-        if (appId.indexOf('external-') === 0) return next();
-        if (appId.indexOf('addon-oauth-') === 0) appId = appId.slice('addon-oauth-'.length);
-        if (appId.indexOf('proxy-') === 0) appId = appId.slice('proxy-'.length);
+        if (type === clientdb.TYPE_ADMIN) return next();
+        if (type === clientdb.TYPE_EXTERNAL) return next();
 
-        appdb.get(appId, function (error, appObject) {
+        appdb.get(req.oauth2.client.appId, function (error, appObject) {
             if (error) return sendErrorPageOrRedirect(req, res, 'Invalid request. Unknown app for this client_id.');
 
             if (!apps.hasAccessTo(appObject, req.oauth2.user)) return sendErrorPageOrRedirect(req, res, 'No access to this app.');
