@@ -112,46 +112,29 @@ function getAllWithDetailsByUserId(userId, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, []);
         if (error) return callback(error);
 
-        // We have several types of records here
-        //   1) webadmin has an app id of 'webadmin'
-        //   2) oauth proxy records are always the app id prefixed with 'proxy-'
-        //   3) addon oauth records for apps prefixed with 'addon-'
-        //   4) external app records prefixed with 'external-'
-        //   5) normal apps on the cloudron without a prefix
-
         var tmp = [];
         async.each(results, function (record, callback) {
-            if (record.appId === constants.ADMIN_CLIENT_ID) {
+            if (record.type === clientdb.TYPE_ADMIN) {
                 record.name = constants.ADMIN_NAME;
                 record.location = constants.ADMIN_LOCATION;
-                record.type = 'webadmin';
 
                 tmp.push(record);
 
                 return callback(null);
             }
 
-            var appId = record.appId;
-            var type = 'app';
-
-            // Handle our different types of oauth clients
-            if (record.appId.indexOf('addon-') === 0) {
-                appId = record.appId.slice('addon-'.length);
-                type = 'addon';
-            } else if (record.appId.indexOf('proxy-') === 0) {
-                appId = record.appId.slice('proxy-'.length);
-                type = 'proxy';
-            }
-
-            appdb.get(appId, function (error, result) {
+            appdb.get(record.appId, function (error, result) {
                 if (error) {
                     console.error('Failed to get app details for oauth client', result, error);
                     return callback(null);  // ignore error so we continue listing clients
                 }
 
-                record.name = result.manifest.title + (record.appId.indexOf('proxy-') === 0 ? 'OAuth Proxy' : '');
+                if (record.type === clientdb.TYPE_PROXY) record.name = result.manifest.title + ' Website Proxy';
+                if (record.type === clientdb.TYPE_OAUTH) record.name = result.manifest.title + ' OAuth';
+                if (record.type === clientdb.TYPE_SIMPLE_AUTH) record.name = result.manifest.title + ' Simple Auth';
+                if (record.type === clientdb.TYPE_EXTERNAL) record.name = result.manifest.title + ' external';
+
                 record.location = result.location;
-                record.type = type;
 
                 tmp.push(record);
 
