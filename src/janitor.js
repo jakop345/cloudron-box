@@ -12,6 +12,8 @@ exports = module.exports = {
     cleanupDockerVolumes: cleanupDockerVolumes
 };
 
+var NOOP_CALLBACK = function () { };
+
 function ignoreError(func) {
     return function (callback) {
         func(function (error) {
@@ -82,6 +84,8 @@ function cleanupTmpVolume(containerInfo, callback) {
 
 function cleanupDockerVolumes(callback) {
     assert(!callback || typeof callback === 'function'); // callback is null when called from cronjob
+
+    callback = callback || NOOP_CALLBACK;
 
     debug('Cleaning up docker volumes');
 
