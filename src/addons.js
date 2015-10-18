@@ -90,6 +90,12 @@ var KNOWN_ADDONS = {
         backup: NOOP,
         restore: setupSendMail
     },
+    scheduler: {
+        setup: NOOP,
+        teardown: NOOP,
+        backup: NOOP,
+        restore: NOOP
+    },
     simpleauth: {
         setup: setupSimpleAuth,
         teardown: teardownSimpleAuth,
