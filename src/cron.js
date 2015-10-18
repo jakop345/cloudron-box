@@ -11,6 +11,7 @@ var apps = require('./apps.js'),
     CronJob = require('cron').CronJob,
     debug = require('debug')('box:cron'),
     janitor = require('./janitor.js'),
+    scheduler = require('./scheduler.js'),
     settings = require('./settings.js'),
     updateChecker = require('./updatechecker.js');
 
@@ -20,7 +21,8 @@ var gAutoupdaterJob = null,
     gHeartbeatJob = null,
     gBackupJob = null,
     gCleanupTokensJob = null,
-    gDockerVolumeCleanerJob = null;
+    gDockerVolumeCleanerJob = null,
+    gSchedulerSyncJob = null;
 
 var gInitialized = false;
 
@@ -101,6 +103,14 @@ function recreateJobs(unusedTimeZone, callback) {
             timeZone: allSettings[settings.TIME_ZONE_KEY]
         });
 
+        if (gSchedulerSyncJob) gSchedulerSyncJob.stop();
+        gSchedulerSyncJob = new CronJob({
+            cronTime: '00 */10 * * * *', // every 10 minutes
+            onTick: scheduler.sync,
+            start: true,
+            timeZone: allSettings[settings.TIME_ZONE_KEY]
+        });
+
         autoupdatePatternChanged(allSettings[settings.AUTOUPDATE_PATTERN_KEY]);
 
         if (callback) callback();
@@ -161,8 +171,10 @@ function uninitialize(callback) {
     gDockerVolumeCleanerJob.stop();
     gDockerVolumeCleanerJob = null;
 
+    gSchedulerSyncJob.stop();
+    gSchedulerSyncJob = null;
+
     gInitialized = false;
 
     callback();
 }
-
