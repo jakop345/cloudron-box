@@ -44,41 +44,17 @@ var NOOP = function (app, options, callback) { return callback(); };
 // setup can be called multiple times for the same app (configure crash restart) and existing data must not be lost
 // teardown is destructive. app data stored with the addon is lost
 var KNOWN_ADDONS = {
-    oauth: {
-        setup: setupOauth,
-        teardown: teardownOauth,
-        backup: NOOP,
-        restore: setupOauth
-    },
-    simpleauth: {
-        setup: setupSimpleAuth,
-        teardown: teardownSimpleAuth,
-        backup: NOOP,
-        restore: setupSimpleAuth
-    },
     ldap: {
         setup: setupLdap,
         teardown: teardownLdap,
         backup: NOOP,
         restore: setupLdap
     },
-    sendmail: {
-        setup: setupSendMail,
-        teardown: teardownSendMail,
-        backup: NOOP,
-        restore: setupSendMail
-    },
-    mysql: {
-        setup: setupMySql,
-        teardown: teardownMySql,
-        backup: backupMySql,
-        restore: restoreMySql,
-    },
-    postgresql: {
-        setup: setupPostgreSql,
-        teardown: teardownPostgreSql,
-        backup: backupPostgreSql,
-        restore: restorePostgreSql
+    localstorage: {
+        setup: NOOP, // docker creates the directory for us
+        teardown: NOOP,
+        backup: NOOP, // no backup because it's already inside app data
+        restore: NOOP
     },
     mongodb: {
         setup: setupMongoDb,
@@ -86,17 +62,41 @@ var KNOWN_ADDONS = {
         backup: backupMongoDb,
         restore: restoreMongoDb
     },
+    mysql: {
+        setup: setupMySql,
+        teardown: teardownMySql,
+        backup: backupMySql,
+        restore: restoreMySql,
+    },
+    oauth: {
+        setup: setupOauth,
+        teardown: teardownOauth,
+        backup: NOOP,
+        restore: setupOauth
+    },
+    postgresql: {
+        setup: setupPostgreSql,
+        teardown: teardownPostgreSql,
+        backup: backupPostgreSql,
+        restore: restorePostgreSql
+    },
     redis: {
         setup: setupRedis,
         teardown: teardownRedis,
         backup: backupRedis,
         restore: setupRedis // same thing
     },
-    localstorage: {
-        setup: NOOP, // docker creates the directory for us
-        teardown: NOOP,
-        backup: NOOP, // no backup because it's already inside app data
-        restore: NOOP
+    sendmail: {
+        setup: setupSendMail,
+        teardown: teardownSendMail,
+        backup: NOOP,
+        restore: setupSendMail
+    },
+    simpleauth: {
+        setup: setupSimpleAuth,
+        teardown: teardownSimpleAuth,
+        backup: NOOP,
+        restore: setupSimpleAuth
     },
     _docker: {
         setup: NOOP,
