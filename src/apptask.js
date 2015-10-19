@@ -135,179 +135,23 @@ function unconfigureNginx(app, callback) {
     exports._reloadNginx(callback);
 }
 
-function pullImage(app, callback) {
-    docker.connection.pull(app.manifest.dockerImage, function (err, stream) {
-        if (err) return callback(new Error('Error connecting to docker. statusCode: %s' + err.statusCode));
-
-        // https://github.com/dotcloud/docker/issues/1074 says each status message
-        // is emitted as a chunk
-        stream.on('data', function (chunk) {
-            var data = safe.JSON.parse(chunk) || { };
-            debugApp(app, 'pullImage data: %j', data);
-
-            // The information here is useless because this is per layer as opposed to per image
-            if (data.status) {
-                // debugApp(app, 'progress: %s', data.status); // progressDetail { current, total }
-            } else if (data.error) {
-                debugApp(app, 'pullImage error detail: %s', data.errorDetail.message);
-            }
-        });
-
-        stream.on('end', function () {
-            debugApp(app, 'download image successfully');
-
-            var image = docker.connection.getImage(app.manifest.dockerImage);
-
-            image.inspect(function (err, data) {
-                if (err) return callback(new Error('Error inspecting image:' + err.message));
-                if (!data || !data.Config) return callback(new Error('Missing Config in image:' + JSON.stringify(data, null, 4)));
-                if (!data.Config.Entrypoint && !data.Config.Cmd) return callback(new Error('Only images with entry point are allowed'));
-
-                debugApp(app, 'This image exposes ports: %j', data.Config.ExposedPorts);
-
-                callback(null);
-            });
-        });
-
-        stream.on('error', function (error) {
-            debugApp(app, 'pullImage error : %j', error);
-
-            callback(error);
-        });
-    });
-}
-
-function downloadImage(app, callback) {
-    debugApp(app, 'downloadImage %s', app.manifest.dockerImage);
-
-    var attempt = 1;
-
-    async.retry({ times: 5, interval: 15000 }, function (retryCallback) {
-        debugApp(app, 'Downloading image. attempt: %s', attempt++);
-
-        pullImage(app, function (error) {
-            if (error) console.error(error);
-
-            retryCallback(error);
-        });
-    }, callback);
-}
-
 function createContainer(app, callback) {
-    appdb.getPortBindings(app.id, function (error, portBindings) {
-        if (error) return callback(error);
+    addons.getEnvironment(app, function (error, addonEnv) {
+        if (error) return callback(new Error('Error getting addon env: ' + error));
 
-        var manifest = app.manifest;
-        var exposedPorts = {}, dockerPortBindings = { };
-        var env = [];
+        docker.createContainer(app, addonEnv, function (error, container) {
+            if (error) return callback(new Error('Error creating container: ' + error));
 
-        // docker portBindings requires ports to be exposed
-        exposedPorts[manifest.httpPort + '/tcp'] = {};
-        dockerPortBindings[manifest.httpPort + '/tcp'] = [ { HostIp: '127.0.0.1', HostPort: app.httpPort + '' } ];
-
-        for (var e in portBindings) {
-            var hostPort = portBindings[e];
-            var containerPort = manifest.tcpPorts[e].containerPort || hostPort;
-
-            exposedPorts[containerPort + '/tcp'] = {};
-            env.push(e + '=' + hostPort);
-
-            dockerPortBindings[containerPort + '/tcp'] = [ { HostIp: '0.0.0.0', HostPort: hostPort + '' } ];
-        }
-
-        env.push('CLOUDRON=1');
-        env.push('WEBADMIN_ORIGIN' + '=' + config.adminOrigin());
-        env.push('API_ORIGIN' + '=' + config.adminOrigin());
-
-        addons.getEnvironment(app, function (error, addonEnv) {
-            if (error) return callback(new Error('Error getting addon env: ' + error));
-
-            var memoryLimit = manifest.memoryLimit || 1024 * 1024 * 200; // 200mb by default
-
-            var containerOptions = {
-                name: app.id,
-                Hostname: config.appFqdn(app.location),
-                Tty: true,
-                Image: app.manifest.dockerImage,
-                Cmd: null,
-                Env: env.concat(addonEnv),
-                ExposedPorts: exposedPorts,
-                Volumes: { // see also ReadonlyRootfs
-                    '/tmp': {},
-                    '/run': {}
-                },
-                HostConfig: {
-                    Binds: addons.getBindsSync(app, app.manifest.addons),
-                    Memory: memoryLimit / 2,
-                    MemorySwap: memoryLimit, // Memory + Swap
-                    PortBindings: dockerPortBindings,
-                    PublishAllPorts: false,
-                    ReadonlyRootfs: semver.gte(targetBoxVersion(app.manifest), '0.0.66'), // see also Volumes in startContainer
-                    Links: addons.getLinksSync(app, app.manifest.addons),
-                    RestartPolicy: {
-                        "Name": "always",
-                        "MaximumRetryCount": 0
-                    },
-                    CpuShares: 512, // relative to 1024 for system processes
-                    SecurityOpt: config.CLOUDRON ? [ "apparmor:docker-cloudron-app" ] : null // profile available only on cloudron
-                }
-            };
-
-            // older versions wanted a writable /var/log
-            if (semver.lte(targetBoxVersion(app.manifest), '0.0.71')) containerOptions.Volumes['/var/log'] = {};
-
-            debugApp(app, 'Creating container for %s with options: %j', app.manifest.dockerImage, containerOptions);
-
-            docker.connection.createContainer(containerOptions, function (error, container) {
-                if (error) return callback(new Error('Error creating container: ' + error));
-
-                updateApp(app, { containerId: container.id }, callback);
-            });
+            updateApp(app, { containerId: container.id }, callback);
         });
     });
 }
 
 function deleteContainer(app, callback) {
-    if (app.containerId === null) return callback(null);
+    docker.deleteContainer(app, function (error) {
+        if (error) return callback(new Error('Error deleting container: ' + error));
 
-    var container = docker.connection.getContainer(app.containerId);
-
-    var removeOptions = {
-        force: true, // kill container if it's running
-        v: true // removes volumes associated with the container (but not host mounts)
-    };
-
-    container.remove(removeOptions, function (error) {
-        if (error && error.statusCode === 404) return updateApp(app, { containerId: null }, callback);
-
-        if (error) debugApp(app, 'Error removing container', error);
-        callback(error);
-    });
-}
-
-function deleteImage(app, manifest, callback) {
-    var dockerImage = manifest ? manifest.dockerImage : null;
-    if (!dockerImage) return callback(null);
-
-    docker.connection.getImage(dockerImage).inspect(function (error, result) {
-        if (error && error.statusCode === 404) return callback(null);
-
-        if (error) return callback(error);
-
-        var removeOptions = {
-            force: true,
-            noprune: false
-        };
-
-         // delete image by id because 'docker pull' pulls down all the tags and this is the only way to delete all tags
-        docker.connection.getImage(result.Id).remove(removeOptions, function (error) {
-            if (error && error.statusCode === 404) return callback(null);
-            if (error && error.statusCode === 409) return callback(null); // another container using the image
-
-            if (error) debugApp(app, 'Error removing image', error);
-
-            callback(error);
-        });
+        updateApp(app, { containerId: null }, callback);
     });
 }
 
@@ -359,45 +203,6 @@ function removeCollectdProfile(app, callback) {
     fs.unlink(path.join(paths.COLLECTD_APPCONFIG_DIR, app.id + '.conf'), function (error) {
         if (error && error.code !== 'ENOENT') debugApp(app, 'Error removing collectd profile', error);
         shell.sudo('removeCollectdProfile', [ RELOAD_COLLECTD_CMD ], callback);
-    });
-}
-
-function startContainer(app, callback) {
-    var container = docker.connection.getContainer(app.containerId);
-    debugApp(app, 'Starting container %s', container.id);
-
-    container.start(function (error) {
-        if (error && error.statusCode !== 304) return callback(new Error('Error starting container:' + error));
-
-        return callback(null);
-    });
-}
-
-function stopContainer(app, callback) {
-    if (!app.containerId) {
-        debugApp(app, 'No previous container to stop');
-        return callback();
-    }
-
-    var container = docker.connection.getContainer(app.containerId);
-    debugApp(app, 'Stopping container %s', container.id);
-
-    var options = {
-        t: 10 // wait for 10 seconds before killing it
-    };
-
-    container.stop(options, function (error) {
-        if (error && (error.statusCode !== 304 && error.statusCode !== 404)) return callback(new Error('Error stopping container:' + error));
-
-        debugApp(app, 'Waiting for container ' + container.id);
-
-        container.wait(function (error, data) {
-            if (error && (error.statusCode !== 304 && error.statusCode !== 404)) return callback(new Error('Error waiting on container:' + error));
-
-            debugApp(app, 'Container stopped with status code [%s]', data ? String(data.StatusCode) : '');
-
-            return callback(null);
-        });
     });
 }
 
@@ -559,7 +364,7 @@ function install(app, callback) {
         registerSubdomain.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '40, Downloading image' }),
-        downloadImage.bind(null, app),
+        docker.downloadImage.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '50, Creating volume' }),
         createVolume.bind(null, app),
@@ -631,7 +436,7 @@ function restore(app, callback) {
         function deleteImageIfChanged(done) {
              if (!app.oldConfig || (app.oldConfig.manifest.dockerImage === app.manifest.dockerImage)) return done();
 
-             deleteImage(app, app.oldConfig.manifest, done);
+             docker.deleteImage(app, app.oldConfig.manifest, done);
         },
         removeOAuthProxyCredentials.bind(null, app),
         removeIcon.bind(null, app),
@@ -650,7 +455,7 @@ function restore(app, callback) {
         registerSubdomain.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '60, Downloading image' }),
-        downloadImage.bind(null, app),
+        docker.downloadImage.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '65, Creating volume' }),
         createVolume.bind(null, app),
@@ -758,7 +563,7 @@ function update(app, callback) {
         function deleteImageIfChanged(done) {
              if (app.oldConfig.manifest.dockerImage === app.manifest.dockerImage) return done();
 
-             deleteImage(app, app.oldConfig.manifest, done);
+             docker.deleteImage(app, app.oldConfig.manifest, done);
         },
         // removeIcon.bind(null, app), // do not remove icon, otherwise the UI breaks for a short time...
 
@@ -775,7 +580,7 @@ function update(app, callback) {
         downloadIcon.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '45, Downloading image' }),
-        downloadImage.bind(null, app),
+        docker.downloadImage.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '70, Updating addons' }),
         addons.setupAddons.bind(null, app, app.manifest.addons),
@@ -822,7 +627,7 @@ function uninstall(app, callback) {
         deleteVolume.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '50, Deleting image' }),
-        deleteImage.bind(null, app, app.manifest),
+        docker.deleteImage.bind(null, app, app.manifest),
 
         updateApp.bind(null, app, { installationProgress: '60, Unregistering subdomain' }),
         unregisterSubdomain.bind(null, app, app.location),
@@ -842,7 +647,7 @@ function uninstall(app, callback) {
 }
 
 function runApp(app, callback) {
-    startContainer(app, function (error) {
+    docker.startContainer(app, function (error) {
         if (error) return callback(error);
 
         updateApp(app, { runState: appdb.RSTATE_RUNNING }, callback);
@@ -850,7 +655,7 @@ function runApp(app, callback) {
 }
 
 function stopApp(app, callback) {
-    stopContainer(app, function (error) {
+    docker.stopContainer(app, function (error) {
         if (error) return callback(error);
 
         updateApp(app, { runState: appdb.RSTATE_STOPPED }, callback);
