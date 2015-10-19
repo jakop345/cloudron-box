@@ -51,59 +51,59 @@ function targetBoxVersion(manifest) {
     return '0.0.1';
 }
 
-function pullImage(app, callback) {
+function pullImage(manifest, callback) {
     var docker = exports.connection;
 
-    docker.pull(app.manifest.dockerImage, function (err, stream) {
+    docker.pull(manifest.dockerImage, function (err, stream) {
         if (err) return callback(new Error('Error connecting to docker. statusCode: %s' + err.statusCode));
 
         // https://github.com/dotcloud/docker/issues/1074 says each status message
         // is emitted as a chunk
         stream.on('data', function (chunk) {
             var data = safe.JSON.parse(chunk) || { };
-            debugApp(app, 'pullImage data: %j', data);
+            debug('pullImage data: %j', data);
 
             // The information here is useless because this is per layer as opposed to per image
             if (data.status) {
                 // debugApp(app, 'progress: %s', data.status); // progressDetail { current, total }
             } else if (data.error) {
-                debugApp(app, 'pullImage error detail: %s', data.errorDetail.message);
+                debug('pullImage error detail: %s', data.errorDetail.message);
             }
         });
 
         stream.on('end', function () {
-            debugApp(app, 'download image successfully');
+            debug('downloaded image %s successfully', manifest.dockerImage);
 
-            var image = docker.getImage(app.manifest.dockerImage);
+            var image = docker.getImage(manifest.dockerImage);
 
             image.inspect(function (err, data) {
                 if (err) return callback(new Error('Error inspecting image:' + err.message));
                 if (!data || !data.Config) return callback(new Error('Missing Config in image:' + JSON.stringify(data, null, 4)));
                 if (!data.Config.Entrypoint && !data.Config.Cmd) return callback(new Error('Only images with entry point are allowed'));
 
-                debugApp(app, 'This image exposes ports: %j', data.Config.ExposedPorts);
+                debug('This image exposes ports: %j', data.Config.ExposedPorts);
 
                 callback(null);
             });
         });
 
         stream.on('error', function (error) {
-            debugApp(app, 'pullImage error : %j', error);
+            debug('error pulling image %s : %j', manifest.dockerImage, error);
 
             callback(error);
         });
     });
 }
 
-function downloadImage(app, callback) {
-    debugApp(app, 'downloadImage %s', app.manifest.dockerImage);
+function downloadImage(manifest, callback) {
+    debug('downloadImage %s', manifest.dockerImage);
 
     var attempt = 1;
 
     async.retry({ times: 5, interval: 15000 }, function (retryCallback) {
-        debugApp(app, 'Downloading image. attempt: %s', attempt++);
+        debug('Downloading image. attempt: %s', attempt++);
 
-        pullImage(app, function (error) {
+        pullImage(manifest, function (error) {
             if (error) console.error(error);
 
             retryCallback(error);
