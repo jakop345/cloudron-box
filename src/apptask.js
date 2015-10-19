@@ -136,14 +136,10 @@ function unconfigureNginx(app, callback) {
 }
 
 function createContainer(app, callback) {
-    addons.getEnvironment(app, function (error, addonEnv) {
-        if (error) return callback(new Error('Error getting addon env: ' + error));
+    docker.createContainer(app, function (error, container) {
+        if (error) return callback(new Error('Error creating container: ' + error));
 
-        docker.createContainer(app, addonEnv, function (error, container) {
-            if (error) return callback(new Error('Error creating container: ' + error));
-
-            updateApp(app, { containerId: container.id }, callback);
-        });
+        updateApp(app, { containerId: container.id }, callback);
     });
 }
 
