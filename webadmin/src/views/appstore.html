@@ -35,6 +35,7 @@
                         </div>
                         <div class="form-group" ng-show="appInstall.app.manifest.singleUser">
                             <label class="control-label" for="accessRestriction">User</label>
+                            <p>This is a single user application.</p>
                             <select class="form-control" id="accessRestriction" ng-model="appInstall.accessRestriction" ng-required="appInstall.app.manifest.singleUser">
                                 <option ng-repeat="user in users" value="{{user.id}}">{{user.username}} - {{user.email}}</option>
                             </select>
