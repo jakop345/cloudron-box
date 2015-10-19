@@ -162,6 +162,10 @@ function createContainer(app, callback) {
                 '/tmp': {},
                 '/run': {}
             },
+            Labels: {
+                "location": app.location,
+                "appId": app.id
+            },
             HostConfig: {
                 Binds: addons.getBindsSync(app, app.manifest.addons),
                 Memory: memoryLimit / 2,
