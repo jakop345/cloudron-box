@@ -59,7 +59,6 @@ var addons = require('./addons.js'),
     sysinfo = require('./sysinfo.js'),
     util = require('util'),
     uuid = require('node-uuid'),
-    vbox = require('./vbox.js'),
     _ = require('underscore');
 
 var NGINX_APPCONFIG_EJS = fs.readFileSync(__dirname + '/../setup/start/nginx/appconfig.ejs', { encoding: 'utf8' }),
@@ -124,8 +123,6 @@ function configureNginx(app, callback) {
             exports._reloadNginx,
             updateApp.bind(null, app, { httpPort: freePort })
         ], callback);
-
-        vbox.forwardFromHostToVirtualBox(app.id + '-http', freePort);
     });
 }
 
@@ -137,8 +134,6 @@ function unconfigureNginx(app, callback) {
     }
 
     exports._reloadNginx(callback);
-
-    vbox.unforwardFromHostToVirtualBox(app.id + '-http');
 }
 
 function pullImage(app, callback) {
@@ -203,18 +198,13 @@ function createContainer(app, callback) {
     appdb.getPortBindings(app.id, function (error, portBindings) {
         if (error) return callback(error);
 
-        var isMac = os.platform() === 'darwin';
-
         var manifest = app.manifest;
         var exposedPorts = {}, dockerPortBindings = { };
         var env = [];
 
         // docker portBindings requires ports to be exposed
         exposedPorts[manifest.httpPort + '/tcp'] = {};
-
-        // On Mac (boot2docker), we have to export the port to external world for port forwarding from Mac to work
-        dockerPortBindings[manifest.httpPort + '/tcp'] = [ { HostIp: isMac ? '0.0.0.0' : '127.0.0.1', HostPort: app.httpPort + '' } ];
-
+        dockerPortBindings[manifest.httpPort + '/tcp'] = [ { HostIp: '127.0.0.1', HostPort: app.httpPort + '' } ];
 
         for (var e in portBindings) {
             var hostPort = portBindings[e];
@@ -224,7 +214,6 @@ function createContainer(app, callback) {
             env.push(e + '=' + hostPort);
 
             dockerPortBindings[containerPort + '/tcp'] = [ { HostIp: '0.0.0.0', HostPort: hostPort + '' } ];
-            vbox.forwardFromHostToVirtualBox(app.id + '-tcp' + containerPort, hostPort);
         }
 
         env.push('CLOUDRON=1');
@@ -400,11 +389,6 @@ function stopContainer(app, callback) {
 
     container.stop(options, function (error) {
         if (error && (error.statusCode !== 304 && error.statusCode !== 404)) return callback(new Error('Error stopping container:' + error));
-
-        var tcpPorts = safe.query(app, 'manifest.tcpPorts', { });
-        for (var containerPort in tcpPorts) {
-            vbox.unforwardFromHostToVirtualBox(app.id + '-tcp' + containerPort);
-        }
 
         debugApp(app, 'Waiting for container ' + container.id);
 

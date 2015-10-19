@@ -758,10 +758,7 @@ describe('App installation', function () {
 
             expect(urlp.hostname).to.be('redis-' + APP_ID);
 
-            var isMac = os.platform() === 'darwin';
-            var client =
-                isMac ? redis.createClient(parseInt(exportedRedisPort, 10), '127.0.0.1', { auth_pass: password })
-                      : redis.createClient(parseInt(urlp.port, 10), redisIp, { auth_pass: password });
+            var client = redis.createClient(parseInt(urlp.port, 10), redisIp, { auth_pass: password });
             client.on('error', done);
             client.set('key', 'value');
             client.get('key', function (err, reply) {
@@ -1221,10 +1218,7 @@ describe('App installation - port bindings', function () {
             expect(data.Config.Env).to.contain('REDIS_PASSWORD=' + password);
 
             function checkRedis() {
-                var isMac = os.platform() === 'darwin';
-                var client =
-                    isMac ? redis.createClient(parseInt(exportedRedisPort, 10), '127.0.0.1', { auth_pass: password })
-                          : redis.createClient(parseInt(urlp.port, 10), redisIp, { auth_pass: password });
+                var client = redis.createClient(parseInt(urlp.port, 10), redisIp, { auth_pass: password });
                 client.on('error', done);
                 client.set('key', 'value');
                 client.get('key', function (err, reply) {
@@ -1356,10 +1350,7 @@ describe('App installation - port bindings', function () {
             expect(data.Config.Env).to.contain('REDIS_HOST=redis-' + APP_ID);
             expect(data.Config.Env).to.contain('REDIS_PASSWORD=' + password);
 
-            var isMac = os.platform() === 'darwin';
-            var client =
-                isMac ? redis.createClient(parseInt(exportedRedisPort, 10), '127.0.0.1', { auth_pass: password })
-                      : redis.createClient(parseInt(urlp.port, 10), redisIp, { auth_pass: password });
+            var client = redis.createClient(parseInt(urlp.port, 10), redisIp, { auth_pass: password });
             client.on('error', done);
             client.set('key', 'value');
             client.get('key', function (err, reply) {
