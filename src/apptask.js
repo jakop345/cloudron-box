@@ -364,7 +364,7 @@ function install(app, callback) {
         registerSubdomain.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '40, Downloading image' }),
-        docker.downloadImage.bind(null, app),
+        docker.downloadImage.bind(null, app.manifest),
 
         updateApp.bind(null, app, { installationProgress: '50, Creating volume' }),
         createVolume.bind(null, app),
@@ -455,7 +455,7 @@ function restore(app, callback) {
         registerSubdomain.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '60, Downloading image' }),
-        docker.downloadImage.bind(null, app),
+        docker.downloadImage.bind(null, app.manifest),
 
         updateApp.bind(null, app, { installationProgress: '65, Creating volume' }),
         createVolume.bind(null, app),
@@ -580,7 +580,7 @@ function update(app, callback) {
         downloadIcon.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '45, Downloading image' }),
-        docker.downloadImage.bind(null, app),
+        docker.downloadImage.bind(null, app.manifest),
 
         updateApp.bind(null, app, { installationProgress: '70, Updating addons' }),
         addons.setupAddons.bind(null, app, app.manifest.addons),
