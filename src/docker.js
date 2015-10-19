@@ -39,4 +39,3 @@ function connectOptions() {
         key: fs.readFileSync(path.join(DOCKER_CERT_PATH, 'key.pem'))
     };
 }
-

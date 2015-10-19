@@ -203,19 +203,28 @@ function createContainer(app, callback) {
     appdb.getPortBindings(app.id, function (error, portBindings) {
         if (error) return callback(error);
 
+        var isMac = os.platform() === 'darwin';
+
         var manifest = app.manifest;
-        var exposedPorts = {};
+        var exposedPorts = {}, dockerPortBindings = { };
         var env = [];
 
         // docker portBindings requires ports to be exposed
         exposedPorts[manifest.httpPort + '/tcp'] = {};
 
+        // On Mac (boot2docker), we have to export the port to external world for port forwarding from Mac to work
+        dockerPortBindings[manifest.httpPort + '/tcp'] = [ { HostIp: isMac ? '0.0.0.0' : '127.0.0.1', HostPort: app.httpPort + '' } ];
+
+
         for (var e in portBindings) {
             var hostPort = portBindings[e];
             var containerPort = manifest.tcpPorts[e].containerPort || hostPort;
-            exposedPorts[containerPort + '/tcp'] = {};
 
+            exposedPorts[containerPort + '/tcp'] = {};
             env.push(e + '=' + hostPort);
+
+            dockerPortBindings[containerPort + '/tcp'] = [ { HostIp: '0.0.0.0', HostPort: hostPort + '' } ];
+            vbox.forwardFromHostToVirtualBox(app.id + '-tcp' + containerPort, hostPort);
         }
 
         env.push('CLOUDRON=1');
@@ -224,6 +233,8 @@ function createContainer(app, callback) {
 
         addons.getEnvironment(app, function (error, addonEnv) {
             if (error) return callback(new Error('Error getting addon env: ' + error));
+
+            var memoryLimit = manifest.memoryLimit || 1024 * 1024 * 200; // 200mb by default
 
             var containerOptions = {
                 name: app.id,
@@ -236,13 +247,28 @@ function createContainer(app, callback) {
                 Volumes: { // see also ReadonlyRootfs
                     '/tmp': {},
                     '/run': {}
+                },
+                HostConfig: {
+                    Binds: addons.getBindsSync(app, app.manifest.addons),
+                    Memory: memoryLimit / 2,
+                    MemorySwap: memoryLimit, // Memory + Swap
+                    PortBindings: dockerPortBindings,
+                    PublishAllPorts: false,
+                    ReadonlyRootfs: semver.gte(targetBoxVersion(app.manifest), '0.0.66'), // see also Volumes in startContainer
+                    Links: addons.getLinksSync(app, app.manifest.addons),
+                    RestartPolicy: {
+                        "Name": "always",
+                        "MaximumRetryCount": 0
+                    },
+                    CpuShares: 512, // relative to 1024 for system processes
+                    SecurityOpt: config.CLOUDRON ? [ "apparmor:docker-cloudron-app" ] : null // profile available only on cloudron
                 }
             };
 
             // older versions wanted a writable /var/log
             if (semver.lte(targetBoxVersion(app.manifest), '0.0.71')) containerOptions.Volumes['/var/log'] = {};
 
-            debugApp(app, 'Creating container for %s', app.manifest.dockerImage);
+            debugApp(app, 'Creating container for %s with options: %j', app.manifest.dockerImage, containerOptions);
 
             docker.createContainer(containerOptions, function (error, container) {
                 if (error) return callback(new Error('Error creating container: ' + error));
@@ -349,50 +375,13 @@ function removeCollectdProfile(app, callback) {
 }
 
 function startContainer(app, callback) {
-    appdb.getPortBindings(app.id, function (error, portBindings) {
-        if (error) return callback(error);
+    var container = docker.getContainer(app.containerId);
+    debugApp(app, 'Starting container %s', container.id);
 
-        var manifest = app.manifest;
+    container.start(function (error) {
+        if (error && error.statusCode !== 304) return callback(new Error('Error starting container:' + error));
 
-        var dockerPortBindings = { };
-        var isMac = os.platform() === 'darwin';
-
-        // On Mac (boot2docker), we have to export the port to external world for port forwarding from Mac to work
-        dockerPortBindings[manifest.httpPort + '/tcp'] = [ { HostIp: isMac ? '0.0.0.0' : '127.0.0.1', HostPort: app.httpPort + '' } ];
-
-        for (var env in portBindings) {
-            var hostPort = portBindings[env];
-            var containerPort = manifest.tcpPorts[env].containerPort || hostPort;
-            dockerPortBindings[containerPort + '/tcp'] = [ { HostIp: '0.0.0.0', HostPort: hostPort + '' } ];
-            vbox.forwardFromHostToVirtualBox(app.id + '-tcp' + containerPort, hostPort);
-        }
-
-        var memoryLimit = manifest.memoryLimit || 1024 * 1024 * 200; // 200mb by default
-
-        var startOptions = {
-            Binds: addons.getBindsSync(app, app.manifest.addons),
-            Memory: memoryLimit / 2,
-            MemorySwap: memoryLimit, // Memory + Swap
-            PortBindings: dockerPortBindings,
-            PublishAllPorts: false,
-            ReadonlyRootfs: semver.gte(targetBoxVersion(app.manifest), '0.0.66'), // see also Volumes in startContainer
-            Links: addons.getLinksSync(app, app.manifest.addons),
-            RestartPolicy: {
-                "Name": "always",
-                "MaximumRetryCount": 0
-            },
-            CpuShares: 512, // relative to 1024 for system processes
-            SecurityOpt: config.CLOUDRON ? [ "apparmor:docker-cloudron-app" ] : null // profile available only on cloudron
-        };
-
-        var container = docker.getContainer(app.containerId);
-        debugApp(app, 'Starting container %s with options: %j', container.id, JSON.stringify(startOptions));
-
-        container.start(startOptions, function (error, data) {
-            if (error && error.statusCode !== 304) return callback(new Error('Error starting container:' + error));
-
-            return callback(null);
-        });
+        return callback(null);
     });
 }
 
