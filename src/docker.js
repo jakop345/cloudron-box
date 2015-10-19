@@ -96,6 +96,9 @@ function pullImage(manifest, callback) {
 }
 
 function downloadImage(manifest, callback) {
+    assert.strictEqual(typeof manifest, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
     debug('downloadImage %s', manifest.dockerImage);
 
     var attempt = 1;
@@ -182,6 +185,9 @@ function createContainer(app, env, callback) {
 }
 
 function startContainer(containerId, callback) {
+    assert.strictEqual(typeof containerId, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
     var docker = exports.connection;
 
     var container = docker.getContainer(containerId);
@@ -195,6 +201,9 @@ function startContainer(containerId, callback) {
 }
 
 function stopContainer(containerId, callback) {
+    assert(!containerId || typeof containerId === 'string');
+    assert.strictEqual(typeof callback, 'function');
+
     if (!containerId) {
         debug('No previous container to stop');
         return callback();
@@ -224,6 +233,9 @@ function stopContainer(containerId, callback) {
 }
 
 function deleteContainer(containerId, callback) {
+    assert(!containerId || typeof containerId === 'string');
+    assert.strictEqual(typeof callback, 'function');
+
     if (containerId === null) return callback(null);
 
     var docker = exports.connection;
@@ -244,6 +256,9 @@ function deleteContainer(containerId, callback) {
 }
 
 function deleteImage(manifest, callback) {
+    assert(!manifest || typeof manifest === 'object');
+    assert.strictEqual(typeof callback, 'function');
+
     var dockerImage = manifest ? manifest.dockerImage : null;
     if (!dockerImage) return callback(null);
 
