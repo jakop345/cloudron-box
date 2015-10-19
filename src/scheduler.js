@@ -14,7 +14,7 @@ var appdb = require('./appdb.js'),
 
 var NOOP_CALLBACK = function (error) { if (error) console.error(error); };
 
-var gTasks = { }; // appId -> { task, jobs -> { execContainer, job } }
+var gTasks = { }; // appId -> { task, jobs -> { execContainer, cronJob } }
 
 function sync(callback) {
     assert(!callback || typeof callback === 'function');
@@ -42,7 +42,7 @@ function stopJobs(appId) {
     debug('stopJobs for %s', appId);
 
     for (var job in gTasks[appId].jobs) {
-        job.job.stop();
+        job.cronJob.stop();
     }
 
     delete gTasks[appId];
@@ -64,7 +64,7 @@ function startJobs(appId, tasks) {
             start: true
         });
 
-        gTasks[appId].jobs[taskName] = { job: job };
+        gTasks[appId].jobs[taskName] = { cronJob: job };
     });
 }
 
