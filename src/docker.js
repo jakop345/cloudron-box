@@ -114,8 +114,9 @@ function downloadImage(manifest, callback) {
     }, callback);
 }
 
-function createContainer(app, callback) {
+function createContainer(app, cmd, callback) {
     assert.strictEqual(typeof app, 'object');
+    assert(!cmd || util.isArray(cmd));
     assert.strictEqual(typeof callback, 'function');
 
     var docker = exports.connection;
@@ -155,7 +156,7 @@ function createContainer(app, callback) {
             Hostname: config.appFqdn(app.location),
             Tty: true,
             Image: app.manifest.dockerImage,
-            Cmd: null,
+            Cmd: cmd,
             Env: stdEnv.concat(addonEnv).concat(portEnv),
             ExposedPorts: exposedPorts,
             Volumes: { // see also ReadonlyRootfs
@@ -180,7 +181,8 @@ function createContainer(app, callback) {
                 },
                 CpuShares: 512, // relative to 1024 for system processes
                 SecurityOpt: config.CLOUDRON ? [ "apparmor:docker-cloudron-app" ] : null // profile available only on cloudron
-            }
+            },
+            VolumesFrom: app.containerId ? [ app.containerId ] : null
         };
 
         // older versions wanted a writable /var/log
