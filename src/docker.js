@@ -114,9 +114,8 @@ function downloadImage(manifest, callback) {
     }, callback);
 }
 
-function createContainer(app, env, callback) {
+function createContainer(app, callback) {
     assert.strictEqual(typeof app, 'object');
-    assert(util.isArray(env));
     assert.strictEqual(typeof callback, 'function');
 
     var docker = exports.connection;
@@ -135,53 +134,58 @@ function createContainer(app, env, callback) {
     // On Mac (boot2docker), we have to export the port to external world for port forwarding from Mac to work
     dockerPortBindings[manifest.httpPort + '/tcp'] = [ { HostIp: '127.0.0.1', HostPort: app.httpPort + '' } ];
 
+    var portEnv = [];
     for (var e in app.portBindings) {
         var hostPort = app.portBindings[e];
         var containerPort = manifest.tcpPorts[e].containerPort || hostPort;
 
         exposedPorts[containerPort + '/tcp'] = {};
-        env.push(e + '=' + hostPort);
+        portEnv.push(e + '=' + hostPort);
 
         dockerPortBindings[containerPort + '/tcp'] = [ { HostIp: '0.0.0.0', HostPort: hostPort + '' } ];
     }
 
     var memoryLimit = manifest.memoryLimit || 1024 * 1024 * 200; // 200mb by default
 
-    var containerOptions = {
-        name: app.id,
-        Hostname: config.appFqdn(app.location),
-        Tty: true,
-        Image: app.manifest.dockerImage,
-        Cmd: null,
-        Env: stdEnv.concat(env),
-        ExposedPorts: exposedPorts,
-        Volumes: { // see also ReadonlyRootfs
-            '/tmp': {},
-            '/run': {}
-        },
-        HostConfig: {
-            Binds: addons.getBindsSync(app, app.manifest.addons),
-            Memory: memoryLimit / 2,
-            MemorySwap: memoryLimit, // Memory + Swap
-            PortBindings: dockerPortBindings,
-            PublishAllPorts: false,
-            ReadonlyRootfs: semver.gte(targetBoxVersion(app.manifest), '0.0.66'), // see also Volumes in startContainer
-            Links: addons.getLinksSync(app, app.manifest.addons),
-            RestartPolicy: {
-                "Name": "always",
-                "MaximumRetryCount": 0
+    addons.getEnvironment(app, function (error, addonEnv) {
+        if (error) return callback(new Error('Error getting addon environment : ' + error));
+
+        var containerOptions = {
+            name: app.id,
+            Hostname: config.appFqdn(app.location),
+            Tty: true,
+            Image: app.manifest.dockerImage,
+            Cmd: null,
+            Env: stdEnv.concat(addonEnv).concat(portEnv),
+            ExposedPorts: exposedPorts,
+            Volumes: { // see also ReadonlyRootfs
+                '/tmp': {},
+                '/run': {}
             },
-            CpuShares: 512, // relative to 1024 for system processes
-            SecurityOpt: config.CLOUDRON ? [ "apparmor:docker-cloudron-app" ] : null // profile available only on cloudron
-        }
-    };
+            HostConfig: {
+                Binds: addons.getBindsSync(app, app.manifest.addons),
+                Memory: memoryLimit / 2,
+                MemorySwap: memoryLimit, // Memory + Swap
+                PortBindings: dockerPortBindings,
+                PublishAllPorts: false,
+                ReadonlyRootfs: semver.gte(targetBoxVersion(app.manifest), '0.0.66'), // see also Volumes in startContainer
+                Links: addons.getLinksSync(app, app.manifest.addons),
+                RestartPolicy: {
+                    "Name": "always",
+                    "MaximumRetryCount": 0
+                },
+                CpuShares: 512, // relative to 1024 for system processes
+                SecurityOpt: config.CLOUDRON ? [ "apparmor:docker-cloudron-app" ] : null // profile available only on cloudron
+            }
+        };
 
-    // older versions wanted a writable /var/log
-    if (semver.lte(targetBoxVersion(app.manifest), '0.0.71')) containerOptions.Volumes['/var/log'] = {};
+        // older versions wanted a writable /var/log
+        if (semver.lte(targetBoxVersion(app.manifest), '0.0.71')) containerOptions.Volumes['/var/log'] = {};
 
-    debugApp(app, 'Creating container for %s with options: %j', app.manifest.dockerImage, containerOptions);
+        debugApp(app, 'Creating container for %s with options: %j', app.manifest.dockerImage, containerOptions);
 
-    docker.createContainer(containerOptions, callback);
+        docker.createContainer(containerOptions, callback);
+    });
 }
 
 function startContainer(containerId, callback) {
