@@ -14,7 +14,7 @@ var appdb = require('./appdb.js'),
 
 var NOOP_CALLBACK = function (error) { if (error) console.error(error); };
 
-var gTasks = { }; // appId -> { task, jobs -> { execContainer, cronJob } }
+var gTasks = { }; // appId -> { tasksConfig (manifest), jobs -> { execContainer, cronJob } }
 
 function sync(callback) {
     assert(!callback || typeof callback === 'function');
@@ -48,13 +48,13 @@ function stopJobs(appId) {
     delete gTasks[appId];
 }
 
-function startJobs(appId, tasks) {
-    gTasks[appId] = { tasks: tasks, jobs: { } };
+function startJobs(appId, tasksConfig) {
+    gTasks[appId] = { tasksConfig: tasksConfig, jobs: { } };
 
     debug('startJobs for %s', appId);
 
-    Object.keys(tasks).forEach(function (taskName) {
-        var task = tasks[taskName];
+    Object.keys(tasksConfig).forEach(function (taskName) {
+        var task = tasksConfig[taskName];
 
         debug('scheduling task %s/%s @ 00 %s : %s', appId, taskName, task.schedule, task.command);
 
@@ -68,20 +68,20 @@ function startJobs(appId, tasks) {
     });
 }
 
-function resetTasks(appId, tasks) {
+function resetTasks(appId, tasksConfig) {
     assert.strictEqual(typeof appId, 'string');
-    assert.strictEqual(typeof tasks, 'object');
+    assert.strictEqual(typeof tasksConfig, 'object');
 
     // cleanup existing state
     if (appId in gTasks) {
-        if (_.isEqual(gTasks[appId].tasks, tasks)) return; // nothing changed
+        if (_.isEqual(gTasks[appId].tasksConfig, tasksConfig)) return; // nothing changed
 
         stopJobs(appId);
     }
 
-    if (!tasks) return;
+    if (!tasksConfig) return;
 
-    startJobs(appId, tasks);
+    startJobs(appId, tasksConfig);
 }
 
 function runTask(appId, taskName, task, callback) {
