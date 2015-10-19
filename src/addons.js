@@ -36,8 +36,7 @@ var appdb = require('./appdb.js'),
     shell = require('./shell.js'),
     spawn = child_process.spawn,
     util = require('util'),
-    uuid = require('node-uuid'),
-    vbox = require('./vbox.js');
+    uuid = require('node-uuid');
 
 var NOOP = function (app, options, callback) { return callback(); };
 
@@ -710,8 +709,6 @@ function forwardRedisPort(appId, callback) {
         var redisPort = parseInt(safe.query(data, 'NetworkSettings.Ports.6379/tcp[0].HostPort'), 10);
         if (!Number.isInteger(redisPort)) return callback(new Error('Unable to get container port mapping'));
 
-        vbox.forwardFromHostToVirtualBox('redis-' + appId, redisPort);
-
         return callback(null);
     });
 }
@@ -763,8 +760,6 @@ function setupRedis(app, options, callback) {
         VolumesFrom: []
     };
 
-    var isMac = os.platform() === 'darwin';
-
     var startOptions = {
         Binds: [
             redisVarsFile + ':/etc/redis/redis_vars.sh:ro',
@@ -772,10 +767,8 @@ function setupRedis(app, options, callback) {
         ],
         Memory: 1024 * 1024 * 75, // 100mb
         MemorySwap: 1024 * 1024 * 75 * 2, // 150mb
-        // On Mac (boot2docker), we have to export the port to external world for port forwarding from Mac to work
-        // On linux, export to localhost only for testing purposes and not for the app itself
         PortBindings: {
-            '6379/tcp': [{ HostPort: '0', HostIp: isMac ? '0.0.0.0' : '127.0.0.1' }]
+            '6379/tcp': [{ HostPort: '0', HostIp: '127.0.0.1' }]
         },
         ReadonlyRootfs: true,
         RestartPolicy: {
@@ -823,8 +816,6 @@ function teardownRedis(app, options, callback) {
 
    container.remove(removeOptions, function (error) {
        if (error && error.statusCode !== 404) return callback(new Error('Error removing container:' + error));
-
-       vbox.unforwardFromHostToVirtualBox('redis-' + app.id);
 
        safe.fs.unlinkSync(paths.ADDON_CONFIG_DIR, 'redis-' + app.id + '_vars.sh');
 
