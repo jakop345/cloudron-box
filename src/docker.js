@@ -181,28 +181,28 @@ function createContainer(app, env, callback) {
     docker.createContainer(containerOptions, callback);
 }
 
-function startContainer(app, callback) {
+function startContainer(containerId, callback) {
     var docker = exports.connection;
 
-    var container = docker.getContainer(app.containerId);
-    debugApp(app, 'Starting container %s', container.id);
+    var container = docker.getContainer(containerId);
+    debug('Starting container %s', containerId);
 
     container.start(function (error) {
-        if (error && error.statusCode !== 304) return callback(new Error('Error starting container:' + error));
+        if (error && error.statusCode !== 304) return callback(new Error('Error starting container :' + error));
 
         return callback(null);
     });
 }
 
-function stopContainer(app, callback) {
-    if (!app.containerId) {
-        debugApp(app, 'No previous container to stop');
+function stopContainer(containerId, callback) {
+    if (!containerId) {
+        debug('No previous container to stop');
         return callback();
     }
 
     var docker = exports.connection;
-    var container = docker.getContainer(app.containerId);
-    debugApp(app, 'Stopping container %s', container.id);
+    var container = docker.getContainer(containerId);
+    debug('Stopping container %s', containerId);
 
     var options = {
         t: 10 // wait for 10 seconds before killing it
@@ -211,23 +211,23 @@ function stopContainer(app, callback) {
     container.stop(options, function (error) {
         if (error && (error.statusCode !== 304 && error.statusCode !== 404)) return callback(new Error('Error stopping container:' + error));
 
-        debugApp(app, 'Waiting for container ' + container.id);
+        debug('Waiting for container ' + containerId);
 
         container.wait(function (error, data) {
             if (error && (error.statusCode !== 304 && error.statusCode !== 404)) return callback(new Error('Error waiting on container:' + error));
 
-            debugApp(app, 'Container stopped with status code [%s]', data ? String(data.StatusCode) : '');
+            debug('Container %s stopped with status code [%s]', containerId, data ? String(data.StatusCode) : '');
 
             return callback(null);
         });
     });
 }
 
-function deleteContainer(app, callback) {
-    if (app.containerId === null) return callback(null);
+function deleteContainer(containerId, callback) {
+    if (containerId === null) return callback(null);
 
     var docker = exports.connection;
-    var container = docker.getContainer(app.containerId);
+    var container = docker.getContainer(containerId);
 
     var removeOptions = {
         force: true, // kill container if it's running
@@ -237,12 +237,13 @@ function deleteContainer(app, callback) {
     container.remove(removeOptions, function (error) {
         if (error && error.statusCode === 404) return callback(null);
 
-        if (error) debugApp(app, 'Error removing container', error);
+        if (error) debug('Error removing container %s : %j', containerId, error);
+
         callback(error);
     });
 }
 
-function deleteImage(app, manifest, callback) {
+function deleteImage(manifest, callback) {
     var dockerImage = manifest ? manifest.dockerImage : null;
     if (!dockerImage) return callback(null);
 
@@ -263,7 +264,7 @@ function deleteImage(app, manifest, callback) {
             if (error && error.statusCode === 404) return callback(null);
             if (error && error.statusCode === 409) return callback(null); // another container using the image
 
-            if (error) debugApp(app, 'Error removing image', error);
+            if (error) debug('Error removing image %s : %j', dockerImage, error);
 
             callback(error);
         });

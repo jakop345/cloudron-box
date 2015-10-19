@@ -148,7 +148,7 @@ function createContainer(app, callback) {
 }
 
 function deleteContainer(app, callback) {
-    docker.deleteContainer(app, function (error) {
+    docker.deleteContainer(app.containerId, function (error) {
         if (error) return callback(new Error('Error deleting container: ' + error));
 
         updateApp(app, { containerId: null }, callback);
@@ -436,7 +436,7 @@ function restore(app, callback) {
         function deleteImageIfChanged(done) {
              if (!app.oldConfig || (app.oldConfig.manifest.dockerImage === app.manifest.dockerImage)) return done();
 
-             docker.deleteImage(app, app.oldConfig.manifest, done);
+             docker.deleteImage(app.oldConfig.manifest, done);
         },
         removeOAuthProxyCredentials.bind(null, app),
         removeIcon.bind(null, app),
@@ -563,7 +563,7 @@ function update(app, callback) {
         function deleteImageIfChanged(done) {
              if (app.oldConfig.manifest.dockerImage === app.manifest.dockerImage) return done();
 
-             docker.deleteImage(app, app.oldConfig.manifest, done);
+             docker.deleteImage(app.oldConfig.manifest, done);
         },
         // removeIcon.bind(null, app), // do not remove icon, otherwise the UI breaks for a short time...
 
@@ -627,7 +627,7 @@ function uninstall(app, callback) {
         deleteVolume.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '50, Deleting image' }),
-        docker.deleteImage.bind(null, app, app.manifest),
+        docker.deleteImage.bind(null, app.manifest),
 
         updateApp.bind(null, app, { installationProgress: '60, Unregistering subdomain' }),
         unregisterSubdomain.bind(null, app, app.location),
@@ -647,7 +647,7 @@ function uninstall(app, callback) {
 }
 
 function runApp(app, callback) {
-    docker.startContainer(app, function (error) {
+    docker.startContainer(app.containerId, function (error) {
         if (error) return callback(error);
 
         updateApp(app, { runState: appdb.RSTATE_RUNNING }, callback);
@@ -655,7 +655,7 @@ function runApp(app, callback) {
 }
 
 function stopApp(app, callback) {
-    docker.stopContainer(app, function (error) {
+    docker.stopContainer(app.containerId, function (error) {
         if (error) return callback(error);
 
         updateApp(app, { runState: appdb.RSTATE_STOPPED }, callback);
