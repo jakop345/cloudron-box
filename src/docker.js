@@ -2,9 +2,9 @@
 
 var Docker = require('dockerode');
 
-var gConnection = connectionInstance();
-
-exports = module.exports = gConnection;
+exports = module.exports = {
+    connection: connectionInstance()
+};
 
 function connectionInstance() {
     var docker;
