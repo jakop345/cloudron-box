@@ -41,7 +41,7 @@ var addons = require('./addons.js'),
     database = require('./database.js'),
     DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:apptask'),
-    docker = require('./docker.js').connection,
+    docker = require('./docker.js'),
     ejs = require('ejs'),
     fs = require('fs'),
     hat = require('hat'),
@@ -136,7 +136,7 @@ function unconfigureNginx(app, callback) {
 }
 
 function pullImage(app, callback) {
-    docker.pull(app.manifest.dockerImage, function (err, stream) {
+    docker.connection.pull(app.manifest.dockerImage, function (err, stream) {
         if (err) return callback(new Error('Error connecting to docker. statusCode: %s' + err.statusCode));
 
         // https://github.com/dotcloud/docker/issues/1074 says each status message
@@ -156,7 +156,7 @@ function pullImage(app, callback) {
         stream.on('end', function () {
             debugApp(app, 'download image successfully');
 
-            var image = docker.getImage(app.manifest.dockerImage);
+            var image = docker.connection.getImage(app.manifest.dockerImage);
 
             image.inspect(function (err, data) {
                 if (err) return callback(new Error('Error inspecting image:' + err.message));
@@ -258,7 +258,7 @@ function createContainer(app, callback) {
 
             debugApp(app, 'Creating container for %s with options: %j', app.manifest.dockerImage, containerOptions);
 
-            docker.createContainer(containerOptions, function (error, container) {
+            docker.connection.createContainer(containerOptions, function (error, container) {
                 if (error) return callback(new Error('Error creating container: ' + error));
 
                 updateApp(app, { containerId: container.id }, callback);
@@ -270,7 +270,7 @@ function createContainer(app, callback) {
 function deleteContainer(app, callback) {
     if (app.containerId === null) return callback(null);
 
-    var container = docker.getContainer(app.containerId);
+    var container = docker.connection.getContainer(app.containerId);
 
     var removeOptions = {
         force: true, // kill container if it's running
@@ -289,7 +289,7 @@ function deleteImage(app, manifest, callback) {
     var dockerImage = manifest ? manifest.dockerImage : null;
     if (!dockerImage) return callback(null);
 
-    docker.getImage(dockerImage).inspect(function (error, result) {
+    docker.connection.getImage(dockerImage).inspect(function (error, result) {
         if (error && error.statusCode === 404) return callback(null);
 
         if (error) return callback(error);
@@ -300,7 +300,7 @@ function deleteImage(app, manifest, callback) {
         };
 
          // delete image by id because 'docker pull' pulls down all the tags and this is the only way to delete all tags
-        docker.getImage(result.Id).remove(removeOptions, function (error) {
+        docker.connection.getImage(result.Id).remove(removeOptions, function (error) {
             if (error && error.statusCode === 404) return callback(null);
             if (error && error.statusCode === 409) return callback(null); // another container using the image
 
@@ -363,7 +363,7 @@ function removeCollectdProfile(app, callback) {
 }
 
 function startContainer(app, callback) {
-    var container = docker.getContainer(app.containerId);
+    var container = docker.connection.getContainer(app.containerId);
     debugApp(app, 'Starting container %s', container.id);
 
     container.start(function (error) {
@@ -379,7 +379,7 @@ function stopContainer(app, callback) {
         return callback();
     }
 
-    var container = docker.getContainer(app.containerId);
+    var container = docker.connection.getContainer(app.containerId);
     debugApp(app, 'Stopping container %s', container.id);
 
     var options = {
