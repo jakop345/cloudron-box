@@ -16,6 +16,7 @@ exports = module.exports = {
     createContainer: createContainer,
     startContainer: startContainer,
     stopContainer: stopContainer,
+    stopContainers: stopContainers,
     deleteContainer: deleteContainer,
     deleteImage: deleteImage,
     deleteContainers: deleteContainers
@@ -285,6 +286,23 @@ function deleteContainers(appId, callback) {
 
         async.eachSeries(containers, function (container, iteratorDone) {
             deleteContainer(container.Id, iteratorDone);
+        }, callback);
+    });
+}
+
+function stopContainers(appId, callback) {
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    var docker = exports.connection;
+
+    debug('stopping containers of %s', appId);
+
+    docker.listContainers({ all: 1, filters: JSON.stringify({ label: [ 'appId=' + appId ] }) }, function (error, containers) {
+        if (error) return callback(error);
+
+        async.eachSeries(containers, function (container, iteratorDone) {
+            stopContainer(container.Id, iteratorDone);
         }, callback);
     });
 }
