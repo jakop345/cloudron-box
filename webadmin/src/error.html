@@ -31,7 +31,6 @@
         var app = angular.module('Application', []);
 
         app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
-            $scope.cloudronName = 'Cloudron';
             $scope.webServerOriginLink = '/';
             $scope.errorMessage = '';
 
@@ -42,15 +41,6 @@
             }).error(function (data, status) {
                 if (status === 404) console.error('No config.json found');
                 else console.error(status, data);
-            });
-
-            // try to fetch cloudron status
-            $http.get('/api/v1/cloudron/status').success(function(data, status) {
-                if (status !== 200 || typeof data !== 'object') return console.error(status, data);
-                $scope.cloudronName  = data.cloudronName;
-                document.title = $scope.cloudronName + ' Error';
-            }).error(function (data, status) {
-                console.error(status, data);
             });
 
             var search = window.location.search.slice(1).split('&').map(function (item) { return item.split('='); }).reduce(function (o, k) { o[k[0]] = k[1]; return o; }, {});
@@ -68,7 +58,7 @@
 <div class="wrapper">
     <div class="content">
         <img src="/api/v1/cloudron/avatar" onerror="this.src = '/img/logo_inverted_192.png'"/>
-        <h1> {{cloudronName}} </h1>
+        <h1> Cloudron </h1>
 
         <div ng-show="errorCode == 0">
             <h3> <i class="fa fa-frown-o fa-fw text-danger"></i> Something has gone wrong </h3>
