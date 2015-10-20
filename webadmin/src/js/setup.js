@@ -40,7 +40,6 @@ app.service('Wizard', [ function () {
         this.username = '';
         this.email = '';
         this.password = '';
-        this.name = '';
         this.availableAvatars = [{
             file: null,
             data: null,
@@ -198,7 +197,7 @@ app.controller('StepController', ['$scope', '$route', '$location', 'Wizard', fun
 app.controller('FinishController', ['$scope', '$location', '$timeout', 'Wizard', 'Client', function ($scope, $location, $timeout, Wizard, Client) {
     $scope.wizard = Wizard;
 
-    Client.createAdmin($scope.wizard.username, $scope.wizard.password, $scope.wizard.email, $scope.wizard.name, $scope.setupToken, function (error) {
+    Client.createAdmin($scope.wizard.username, $scope.wizard.password, $scope.wizard.email, $scope.setupToken, function (error) {
         if (error) {
             console.error('Internal error', error);
             window.location.href = '/error.html';
