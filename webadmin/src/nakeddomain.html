@@ -38,18 +38,9 @@
             else return 'https://my' + tmp.slice(tmp.indexOf('-')) + host.slice(tmp.length);
         }
 
-        app.controller('Controller', ['$scope', '$http', function ($scope, $http) {
+        app.controller('Controller', ['$scope', function ($scope) {
             $scope.apiOrigin = detectApiOrigin();
             $scope.cloudronAvatar = $scope.apiOrigin + '/api/v1/cloudron/avatar';
-            $scope.cloudronName = 'Cloudron';
-
-            $http.get($scope.apiOrigin + '/api/v1/cloudron/status').success(function(data, status) {
-                if (status !== 200 || typeof data !== 'object') return console.error(status, data);
-                $scope.cloudronName  = data.cloudronName;
-                document.title = $scope.cloudronName;
-            }).error(function (data, status) {
-                console.error(status, data);
-            });
         }]);
 
     </script>
@@ -60,7 +51,7 @@
 <div class="wrapper">
     <div class="content">
         <img ng-src="{{ cloudronAvatar || '/img/logo_inverted_192.png' }}" onerror="this.src = '/img/logo_inverted_192.png'"/>
-        <h1> {{cloudronName}} </h1>
+        <h1> Cloudron </h1>
         <p>
             There is no app configured for this domain. If you want to put an app at this location,<br/>
             please reconfigure the app in the <a ng-href="{{apiOrigin}}">settings panel</a> and leave the location empty.
