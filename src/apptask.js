@@ -657,7 +657,7 @@ function runApp(app, callback) {
 }
 
 function stopApp(app, callback) {
-    docker.stopContainer(app.containerId, function (error) {
+    docker.stopContainers(app.id, function (error) {
         if (error) return callback(error);
 
         updateApp(app, { runState: appdb.RSTATE_STOPPED }, callback);
