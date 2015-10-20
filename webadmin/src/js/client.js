@@ -368,12 +368,11 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
-    Client.prototype.createAdmin = function (username, password, email, name, setupToken, callback) {
+    Client.prototype.createAdmin = function (username, password, email, setupToken, callback) {
         var payload = {
             username: username,
             password: password,
-            email: email,
-            name: name
+            email: email
         };
 
         var that = this;
