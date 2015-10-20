@@ -191,7 +191,7 @@ function createSubcontainer(app, cmd, callback) {
         // older versions wanted a writable /var/log
         if (semver.lte(targetBoxVersion(app.manifest), '0.0.71')) containerOptions.Volumes['/var/log'] = {};
 
-        debugApp(app, 'Creating container for %s with options: %j', app.manifest.dockerImage, containerOptions);
+        debugApp(app, 'Creating container for %s', app.manifest.dockerImage);
 
         docker.createContainer(containerOptions, callback);
     });
