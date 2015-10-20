@@ -51,7 +51,9 @@ function sync(callback) {
 
             // start tasks of new apps
             allApps.forEach(function (app) {
-                state[app.id] = resetAppState(app.id, state[app.id] || null, app.manifest.addons.scheduler || null);
+                var newAppState = resetAppState(app.id, state[app.id] || null, app.manifest.addons.scheduler || null);
+
+                if (newAppState) state[app.id] = newAppState; else delete state[app.id];
             });
 
             saveState(state);
@@ -73,14 +75,14 @@ function stopJobs(appId, appState, callback) {
 }
 
 function createCronJobs(appId, tasksConfig) {
-    debug('creating cron jobs for %s', appId);
+    debug('creating cron jobs for app %s', appId);
 
     var jobs = { };
 
     Object.keys(tasksConfig).forEach(function (taskName) {
         var task = tasksConfig[taskName];
 
-        debug('scheduling task %s/%s @ 00 %s : %s', appId, taskName, task.schedule, task.command);
+        debug('scheduling task for %s/%s @ 00 %s : %s', appId, taskName, task.schedule, task.command);
 
         var cronJob = new CronJob({
             cronTime: '00 ' + task.schedule, // at this point, the pattern has been validated
@@ -120,7 +122,11 @@ function killTask(containerId, callback) {
     async.series([
         docker.stopContainer.bind(null, containerId),
         docker.deleteContainer.bind(null, containerId)
-    ], callback);
+    ], function (error) {
+        if (error) debug('Failed to kill task with containerId %s : %s', containerId, error.message);
+
+        callback(error);
+    });
 }
 
 function doTask(appId, taskName, callback) {
@@ -133,11 +139,6 @@ function doTask(appId, taskName, callback) {
     var state = loadState();
     var job = state[appId].jobs[taskName];
 
-    if (job.containerId) {
-        debug('task %s/%s is already running. killing it');
-        return killTask(job.containerId, callback);
-    }
-
     apps.get(appId, function (error, app) {
         if (error) return callback(error);
 
@@ -146,14 +147,20 @@ function doTask(appId, taskName, callback) {
             return callback();
         }
 
-        debug('task %s/%s starting', app.id, taskName);
+        if (job.containerId) debug('task %s/%s is already running. killing it');
 
-        docker.createSubcontainer(app, [ '/bin/sh', '-c', state[appId].tasksConfig[taskName].command ], function (error, container) {
-            job.containerId = container.id;
+        killTask(job.containerId, function (error) {
+            if (error) return callback(error);
 
-            saveState(state);
+            debug('task %s/%s starting', app.id, taskName);
 
-            docker.startContainer(container.id, callback);
+            docker.createSubcontainer(app, [ '/bin/sh', '-c', state[appId].tasksConfig[taskName].command ], function (error, container) {
+                job.containerId = container.id;
+
+                saveState(state);
+
+                docker.startContainer(container.id, callback);
+            });
         });
     });
 }
