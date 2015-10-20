@@ -153,7 +153,6 @@ function createSubcontainer(app, cmd, callback) {
         if (error) return callback(new Error('Error getting addon environment : ' + error));
 
         var containerOptions = {
-            name: app.id,
             Hostname: config.appFqdn(app.location),
             Tty: true,
             Image: app.manifest.dockerImage,
