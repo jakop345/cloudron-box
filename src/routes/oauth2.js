@@ -137,14 +137,7 @@ function renderTemplate(res, template, data) {
     assert.strictEqual(typeof template, 'string');
     assert.strictEqual(typeof data, 'object');
 
-    settings.getCloudronName(function (error, cloudronName) {
-        if (error) console.error(error);
-
-        // amend details which the header expects
-        data.cloudronName = cloudronName || 'Cloudron';
-
-        res.render(template, data);
-    });
+    res.render(template, data);
 }
 
 function sendErrorPageOrRedirect(req, res, message) {
