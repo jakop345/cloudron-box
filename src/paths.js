@@ -12,6 +12,7 @@ exports = module.exports = {
     NGINX_CERT_DIR: path.join(config.baseDir(), 'data/nginx/cert'),
 
     ADDON_CONFIG_DIR: path.join(config.baseDir(), 'data/addons'),
+    SCHEDULER_FILE: path.join(config.baseDir(), 'data/addons/scheduler.json'),
 
     COLLECTD_APPCONFIG_DIR: path.join(config.baseDir(), 'data/collectd/collectd.conf.d'),
 
