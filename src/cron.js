@@ -105,7 +105,7 @@ function recreateJobs(unusedTimeZone, callback) {
 
         if (gSchedulerSyncJob) gSchedulerSyncJob.stop();
         gSchedulerSyncJob = new CronJob({
-            cronTime: '00 */10 * * * *', // every 10 minutes
+            cronTime: '00 */1 * * * *', // every 1 minutes
             onTick: scheduler.sync,
             start: true,
             timeZone: allSettings[settings.TIME_ZONE_KEY]
