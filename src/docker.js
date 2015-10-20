@@ -135,7 +135,6 @@ function createSubcontainer(app, cmd, callback) {
     // docker portBindings requires ports to be exposed
     exposedPorts[manifest.httpPort + '/tcp'] = {};
 
-    // On Mac (boot2docker), we have to export the port to external world for port forwarding from Mac to work
     dockerPortBindings[manifest.httpPort + '/tcp'] = [ { HostIp: '127.0.0.1', HostPort: app.httpPort + '' } ];
 
     var portEnv = [];
@@ -160,7 +159,7 @@ function createSubcontainer(app, cmd, callback) {
             Image: app.manifest.dockerImage,
             Cmd: cmd,
             Env: stdEnv.concat(addonEnv).concat(portEnv),
-            ExposedPorts: exposedPorts,
+            ExposedPorts: isSubcontainer ? { } : exposedPorts,
             Volumes: { // see also ReadonlyRootfs
                 '/tmp': {},
                 '/run': {}
@@ -174,7 +173,7 @@ function createSubcontainer(app, cmd, callback) {
                 Binds: addons.getBindsSync(app, app.manifest.addons),
                 Memory: memoryLimit / 2,
                 MemorySwap: memoryLimit, // Memory + Swap
-                PortBindings: dockerPortBindings,
+                PortBindings: isSubcontainer ? { } : dockerPortBindings,
                 PublishAllPorts: false,
                 ReadonlyRootfs: semver.gte(targetBoxVersion(app.manifest), '0.0.66'), // see also Volumes in startContainer
                 Links: addons.getLinksSync(app, app.manifest.addons),
