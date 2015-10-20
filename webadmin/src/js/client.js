@@ -75,8 +75,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             isCustomDomain: false,
             developerMode: false,
             region: null,
-            size: null,
-            cloudronName: null
+            size: null
         };
         this._installedApps = [];
         this._clientId = '<%= oauth.clientId %>';
@@ -181,20 +180,6 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
 
             // will get overriden after polling for config, but ensures quick UI update
             that._config.developerMode = enabled;
-
-            callback(null);
-        }).error(defaultErrorHandler(callback));
-    };
-
-    Client.prototype.changeCloudronName = function (name, callback) {
-        var that = this;
-
-        var data = { name: name };
-        $http.post(client.apiOrigin + '/api/v1/settings/cloudron_name', data).success(function (data, status) {
-            if (status !== 200) return callback(new ClientError(status, data));
-
-            // will get overriden after polling for config, but ensures quick UI update
-            that._config.cloudronName = name;
 
             callback(null);
         }).error(defaultErrorHandler(callback));
