@@ -89,7 +89,7 @@ function cleanupDockerVolumes(callback) {
 
     debug('Cleaning up docker volumes');
 
-    docker.listContainers(function (error, containers) {
+    docker.listContainers({ all: 0 }, function (error, containers) {
         if (error) return callback(error);
 
         async.eachSeries(containers, function (container, iteratorDone) {
