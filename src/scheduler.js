@@ -18,12 +18,10 @@ var appdb = require('./appdb.js'),
 var NOOP_CALLBACK = function (error) { if (error) console.error(error); };
 
 // appId -> { schedulerConfig (manifest), cronjobs, containerIds }
-var gState = null; // null indicates that we will load state on first sync
-
-function loadState() {
+var gState = (function loadState() {
     var state = safe.JSON.parse(safe.fs.readFileSync(paths.SCHEDULER_FILE, 'utf8'));
     return state || { };
-}
+})();
 
 function saveState(state) {
     // do not save cronJobs
@@ -44,8 +42,6 @@ function sync(callback) {
 
     debug('Syncing');
 
-    if (gState === null) gState = loadState();
-
     apps.getAll(function (error, allApps) {
         if (error) return callback(error);
 
@@ -53,7 +49,7 @@ function sync(callback) {
         var allAppIds = allApps.map(function (app) { return app.id; });
         var removedAppIds = _.difference(Object.keys(gState), allAppIds);
         async.eachSeries(removedAppIds, function (appId, iteratorDone) {
-            stopJobs(appId, gState[appId], iteratorDone);
+            stopJobs(appId, gState[appId], true /* killContainers */, iteratorDone);
         }, function (error) {
             if (error) debug('Error stopping jobs : %j', error);
 
@@ -65,9 +61,13 @@ function sync(callback) {
                 var schedulerConfig = app.manifest.addons.scheduler || null;
 
                 if (!appState && !schedulerConfig) return iteratorDone(); // nothing changed
-                if (appState && _.isEqual(appState.schedulerConfig, schedulerConfig)) return iteratorDone(); // nothing changed
 
-                stopJobs(app.id, appState, function (error) {
+                if (appState && _.isEqual(appState.schedulerConfig, schedulerConfig) && appState.cronJobs) {
+                    return iteratorDone(); // nothing changed
+                }
+
+                var killContainers = !appState.cronJobs; // keep the old containers on 'startup'
+                stopJobs(app.id, appState, killContainers, function (error) {
                     if (error) debug('Error stopping jobs for %s : %s', app.id, error.message);
 
                     if (!schedulerConfig) {
@@ -92,7 +92,7 @@ function sync(callback) {
     });
 }
 
-function killTask(containerId, callback) {
+function killContainer(containerId, callback) {
     if (!containerId) return callback();
 
     async.series([
@@ -105,8 +105,9 @@ function killTask(containerId, callback) {
     });
 }
 
-function stopJobs(appId, appState, callback) {
+function stopJobs(appId, appState, killContainers, callback) {
     assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof killContainers, 'boolean');
     assert.strictEqual(typeof appState, 'object');
 
     debug('stopJobs for %s', appId);
@@ -114,9 +115,13 @@ function stopJobs(appId, appState, callback) {
     if (!appState) return callback();
 
     async.eachSeries(Object.keys(appState.schedulerConfig), function (taskName, iteratorDone) {
-        if (appState.cronJobs[taskName]) appState.cronJobs[taskName].stop(); // could be null across restarts
+        if (appState.cronJobs && appState.cronJobs[taskName]) {  // could be null across restarts
+            appState.cronJobs[taskName].stop();
+        }
 
-        killTask(appState.containerIds[taskName], iteratorDone);
+        if (!killContainers) return iteratorDone();
+
+        killContainer(appState.containerIds[taskName], iteratorDone);
     }, callback);
 }
 
@@ -166,7 +171,7 @@ function doTask(appId, taskName, callback) {
 
         if (appState.containerIds[taskName]) debug('task %s/%s is already running. killing it', appId, taskName);
 
-        killTask(appState.containerIds[taskName], function (error) {
+        killContainer(appState.containerIds[taskName], function (error) {
             if (error) return callback(error);
 
             debug('Creating createSubcontainer for %s/%s : %s', app.id, taskName, gState[appId].schedulerConfig[taskName].command);
