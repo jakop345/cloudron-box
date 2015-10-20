@@ -19,7 +19,8 @@ exports = module.exports = {
     stopContainers: stopContainers,
     deleteContainer: deleteContainer,
     deleteImage: deleteImage,
-    deleteContainers: deleteContainers
+    deleteContainers: deleteContainers,
+    createSubcontainer: createSubcontainer
 };
 
 function connectionInstance() {
