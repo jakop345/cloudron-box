@@ -44,22 +44,19 @@ function activate(req, res, next) {
     if (typeof req.body.username !== 'string') return next(new HttpError(400, 'username must be string'));
     if (typeof req.body.password !== 'string') return next(new HttpError(400, 'password must be string'));
     if (typeof req.body.email !== 'string') return next(new HttpError(400, 'email must be string'));
-    if ('name' in req.body && typeof req.body.name !== 'string') return next(new HttpError(400, 'name must be a string'));
 
     var username = req.body.username;
     var password = req.body.password;
     var email = req.body.email;
-    var name = req.body.name || null;
 
     var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     debug('activate: username:%s ip:%s', username, ip);
 
-    cloudron.activate(username, password, email, name, ip, function (error, info) {
+    cloudron.activate(username, password, email, ip, function (error, info) {
         if (error && error.reason === CloudronError.ALREADY_PROVISIONED) return next(new HttpError(409, 'Already setup'));
         if (error && error.reason === CloudronError.BAD_USERNAME) return next(new HttpError(400, 'Bad username'));
         if (error && error.reason === CloudronError.BAD_PASSWORD) return next(new HttpError(400, 'Bad password'));
         if (error && error.reason === CloudronError.BAD_EMAIL) return next(new HttpError(400, 'Bad email'));
-        if (error && error.reason === CloudronError.BAD_NAME) return next(new HttpError(400, 'Bad name'));
         if (error) return next(new HttpError(500, error));
 
         // Now let the api server know we got activated
