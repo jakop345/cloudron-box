@@ -121,9 +121,10 @@ function stopJobs(appId, appState, callback) {
 }
 
 function createCronJobs(appId, schedulerConfig) {
-    debug('creating cron jobs for app %s', appId);
+    assert.strictEqual(typeof appId, 'string');
+    assert(schedulerConfig && typeof schedulerConfig === 'object');
 
-    if (!schedulerConfig) return null;
+    debug('creating cron jobs for app %s', appId);
 
     var jobs = { };
 
