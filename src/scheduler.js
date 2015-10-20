@@ -66,7 +66,7 @@ function sync(callback) {
                     return iteratorDone(); // nothing changed
                 }
 
-                var killContainers = !appState.cronJobs; // keep the old containers on 'startup'
+                var killContainers = appState && !appState.cronJobs; // keep the old containers on 'startup'
                 stopJobs(app.id, appState, killContainers, function (error) {
                     if (error) debug('Error stopping jobs for %s : %s', app.id, error.message);
 
