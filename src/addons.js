@@ -762,23 +762,22 @@ function setupRedis(app, options, callback) {
             '/tmp': {},
             '/run': {}
         },
-        VolumesFrom: []
-    };
-
-    var startOptions = {
-        Binds: [
-            redisVarsFile + ':/etc/redis/redis_vars.sh:ro',
-            redisDataDir + ':/var/lib/redis:rw'
-        ],
-        Memory: 1024 * 1024 * 75, // 100mb
-        MemorySwap: 1024 * 1024 * 75 * 2, // 150mb
-        PortBindings: {
-            '6379/tcp': [{ HostPort: '0', HostIp: '127.0.0.1' }]
-        },
-        ReadonlyRootfs: true,
-        RestartPolicy: {
-            'Name': 'always',
-            'MaximumRetryCount': 0
+        VolumesFrom: [],
+        HostConfig: {
+            Binds: [
+                redisVarsFile + ':/etc/redis/redis_vars.sh:ro',
+                redisDataDir + ':/var/lib/redis:rw'
+            ],
+            Memory: 1024 * 1024 * 75, // 100mb
+            MemorySwap: 1024 * 1024 * 75 * 2, // 150mb
+            PortBindings: {
+                '6379/tcp': [{ HostPort: '0', HostIp: '127.0.0.1' }]
+            },
+            ReadonlyRootfs: true,
+            RestartPolicy: {
+                'Name': 'always',
+                'MaximumRetryCount': 0
+            }
         }
     };
 
@@ -794,7 +793,7 @@ function setupRedis(app, options, callback) {
         docker.createContainer(createOptions, function (error) {
             if (error && error.statusCode !== 409) return callback(error); // if not already created
 
-            redisContainer.start(startOptions, function (error) {
+            redisContainer.start(function (error) {
                 if (error && error.statusCode !== 304) return callback(error); // if not already running
 
                 appdb.setAddonConfig(app.id, 'redis', env, function (error) {
