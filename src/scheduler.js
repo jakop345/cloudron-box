@@ -8,6 +8,7 @@ var appdb = require('./appdb.js'),
     apps = require('./apps.js'),
     assert = require('assert'),
     async = require('async'),
+    config = require('./config.js'),
     CronJob = require('cron').CronJob,
     debug = require('debug')('box:src/scheduler'),
     docker = require('./docker.js'),
@@ -137,10 +138,12 @@ function createCronJobs(appId, schedulerConfig) {
     Object.keys(schedulerConfig).forEach(function (taskName) {
         var task = schedulerConfig[taskName];
 
-        debug('scheduling task for %s/%s @ 00 %s : %s', appId, taskName, task.schedule, task.command);
+        var cronTime = (config.TEST ? '*/5 ' : '00 ') + task.schedule; // time ticks faster in tests
+
+        debug('scheduling task for %s/%s @ %s : %s', appId, taskName, cronTime, task.command);
 
         var cronJob = new CronJob({
-            cronTime: '00 ' + task.schedule, // at this point, the pattern has been validated
+            cronTime: cronTime, // at this point, the pattern has been validated
             onTick: doTask.bind(null, appId, taskName),
             start: true
         });

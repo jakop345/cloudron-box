@@ -8,6 +8,7 @@ exports = module.exports = {
 var apps = require('./apps.js'),
     assert = require('assert'),
     cloudron = require('./cloudron.js'),
+    config = require('./config.js'),
     CronJob = require('cron').CronJob,
     debug = require('debug')('box:cron'),
     janitor = require('./janitor.js'),
@@ -105,7 +106,7 @@ function recreateJobs(unusedTimeZone, callback) {
 
         if (gSchedulerSyncJob) gSchedulerSyncJob.stop();
         gSchedulerSyncJob = new CronJob({
-            cronTime: '00 */1 * * * *', // every 1 minutes
+            cronTime: config.TEST ? '*/10 * * * * *' : '00 */1 * * * *', // every minute
             onTick: scheduler.sync,
             start: true,
             timeZone: allSettings[settings.TIME_ZONE_KEY]

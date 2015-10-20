@@ -829,6 +829,14 @@ describe('App installation', function () {
         });
     });
 
+    it('installation - scheduler', function (done) {
+        async.retry({ times: 100, interval: 1000 }, function (retryCallback) {
+            if (fs.existsSync(paths.DATA_DIR + '/' + APP_ID + '/data/every_minute.env')) return retryCallback();
+
+            retryCallback(new Error('not run yet'));
+        }, done);
+    });
+
     it('logs - stdout and stderr', function (done) {
         request.get(SERVER_URL + '/api/v1/apps/' + APP_ID + '/logs')
             .query({ access_token: token })
@@ -1359,6 +1367,16 @@ describe('App installation - port bindings', function () {
                 done();
             });
         });
+    });
+
+    it('scheduler works after reconfiguration', function (done) {
+        async.retry({ times: 100, interval: 1000 }, function (callback) {
+            var data = safe.fs.readFileSync(paths.DATA_DIR + '/' + APP_ID + '/data/every_minute.env', 'utf8');
+
+            if (data && data.indexOf('ECHO_SERVER_PORT=7172') !== -1) return callback();
+
+            callback(new Error('not run yet'));
+        }, done);
     });
 
     it('can stop app', function (done) {
