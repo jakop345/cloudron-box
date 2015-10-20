@@ -173,7 +173,7 @@ function doTask(appId, taskName, callback) {
             return callback();
         }
 
-        if (appState.containerIds[taskName]) debug('task %s/%s is already running. killing it', appId, taskName);
+        if (appState.containerIds[taskName]) debug('task %s/%s has existing container %s. killing it', appId, taskName, appState.containerIds[taskName]);
 
         killContainer(appState.containerIds[taskName], function (error) {
             if (error) return callback(error);
