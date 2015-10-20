@@ -151,7 +151,7 @@ describe('OAuth2', function () {
         var APP_0 = {
             id: 'app0',
             appStoreId: '',
-            manifest: { version: '0.1.0' },
+            manifest: { version: '0.1.0', addons: { } },
             location: 'test',
             portBindings: {},
             accessRestriction: null,
@@ -161,7 +161,7 @@ describe('OAuth2', function () {
         var APP_1 = {
             id: 'app1',
             appStoreId: '',
-            manifest: { version: '0.1.0' },
+            manifest: { version: '0.1.0', addons: { } },
             location: 'test1',
             portBindings: {},
             accessRestriction: { users: [ 'foobar' ] },
@@ -171,7 +171,7 @@ describe('OAuth2', function () {
         var APP_2 = {
             id: 'app2',
             appStoreId: '',
-            manifest: { version: '0.1.0' },
+            manifest: { version: '0.1.0', addons: { } },
             location: 'test2',
             portBindings: {},
             accessRestriction: { users: [ USER_0.id ] },
