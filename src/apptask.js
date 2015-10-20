@@ -138,6 +138,8 @@ function unconfigureNginx(app, callback) {
 function createContainer(app, callback) {
     assert(!app.containerId); // otherwise, it will trigger volumeFrom
 
+    debugApp(app, 'creating container');
+
     docker.createContainer(app, function (error, container) {
         if (error) return callback(new Error('Error creating container: ' + error));
 
@@ -145,8 +147,10 @@ function createContainer(app, callback) {
     });
 }
 
-function deleteContainer(app, callback) {
-    docker.deleteContainer(app.containerId, function (error) {
+function deleteContainers(app, callback) {
+    debugApp(app, 'deleting containers');
+
+    docker.deleteContainers(app.id, function (error) {
         if (error) return callback(new Error('Error deleting container: ' + error));
 
         updateApp(app, { containerId: null }, callback);
@@ -341,7 +345,7 @@ function install(app, callback) {
         updateApp.bind(null, app, { installationProgress: '10, Cleaning up old install' }),
         removeCollectdProfile.bind(null, app),
         stopApp.bind(null, app),
-        deleteContainer.bind(null, app),
+        deleteContainers.bind(null, app),
         addons.teardownAddons.bind(null, app, app.manifest.addons),
         deleteVolume.bind(null, app),
         unregisterSubdomain.bind(null, app, app.location),
@@ -427,7 +431,7 @@ function restore(app, callback) {
         updateApp.bind(null, app, { installationProgress: '10, Cleaning up old install' }),
         removeCollectdProfile.bind(null, app),
         stopApp.bind(null, app),
-        deleteContainer.bind(null, app),
+        deleteContainers.bind(null, app),
          // oldConfig can be null during upgrades
         addons.teardownAddons.bind(null, app, app.oldConfig ? app.oldConfig.manifest.addons : null),
         deleteVolume.bind(null, app),
@@ -493,7 +497,7 @@ function configure(app, callback) {
         updateApp.bind(null, app, { installationProgress: '10, Cleaning up old install' }),
         removeCollectdProfile.bind(null, app),
         stopApp.bind(null, app),
-        deleteContainer.bind(null, app),
+        deleteContainers.bind(null, app),
         function (next) {
             // oldConfig can be null during an infra update
             if (!app.oldConfig || app.oldConfig.location === app.location) return next();
@@ -556,7 +560,7 @@ function update(app, callback) {
         updateApp.bind(null, app, { installationProgress: '10, Cleaning up old install' }),
         removeCollectdProfile.bind(null, app),
         stopApp.bind(null, app),
-        deleteContainer.bind(null, app),
+        deleteContainers.bind(null, app),
         addons.teardownAddons.bind(null, app, unusedAddons),
         function deleteImageIfChanged(done) {
              if (app.oldConfig.manifest.dockerImage === app.manifest.dockerImage) return done();
@@ -616,7 +620,7 @@ function uninstall(app, callback) {
         stopApp.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '20, Deleting container' }),
-        deleteContainer.bind(null, app),
+        deleteContainers.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '30, Teardown addons' }),
         addons.teardownAddons.bind(null, app, app.manifest.addons),
