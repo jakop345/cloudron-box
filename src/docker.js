@@ -122,7 +122,8 @@ function createSubcontainer(app, cmd, callback) {
     assert(!cmd || util.isArray(cmd));
     assert.strictEqual(typeof callback, 'function');
 
-    var docker = exports.connection, isSubcontainer = !!cmd;
+    var docker = exports.connection,
+        isAppContainer = !cmd;
 
     var manifest = app.manifest;
     var exposedPorts = {}, dockerPortBindings = { };
@@ -155,11 +156,11 @@ function createSubcontainer(app, cmd, callback) {
 
         var containerOptions = {
             Hostname: config.appFqdn(app.location),
-            Tty: true,
+            Tty: isAppContainer,
             Image: app.manifest.dockerImage,
             Cmd: cmd,
             Env: stdEnv.concat(addonEnv).concat(portEnv),
-            ExposedPorts: isSubcontainer ? { } : exposedPorts,
+            ExposedPorts: isAppContainer ? exposedPorts : { },
             Volumes: { // see also ReadonlyRootfs
                 '/tmp': {},
                 '/run': {}
@@ -167,24 +168,24 @@ function createSubcontainer(app, cmd, callback) {
             Labels: {
                 "location": app.location,
                 "appId": app.id,
-                "isSubcontainer": String(isSubcontainer)
+                "isSubcontainer": String(!isAppContainer)
             },
             HostConfig: {
                 Binds: addons.getBindsSync(app, app.manifest.addons),
                 Memory: memoryLimit / 2,
                 MemorySwap: memoryLimit, // Memory + Swap
-                PortBindings: isSubcontainer ? { } : dockerPortBindings,
+                PortBindings: isAppContainer ? dockerPortBindings : { },
                 PublishAllPorts: false,
                 ReadonlyRootfs: semver.gte(targetBoxVersion(app.manifest), '0.0.66'), // see also Volumes in startContainer
                 Links: addons.getLinksSync(app, app.manifest.addons),
                 RestartPolicy: {
-                    "Name": "always",
+                    "Name": isAppContainer ? "always" : "no",
                     "MaximumRetryCount": 0
                 },
                 CpuShares: 512, // relative to 1024 for system processes
                 SecurityOpt: config.CLOUDRON ? [ "apparmor:docker-cloudron-app" ] : null // profile available only on cloudron
             },
-            VolumesFrom: isSubcontainer ? [ app.containerId ] : []
+            VolumesFrom: isAppContainer ? [ ] : [ app.containerId ]
         };
 
         // older versions wanted a writable /var/log
