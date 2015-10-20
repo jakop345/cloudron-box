@@ -138,7 +138,7 @@ function unconfigureNginx(app, callback) {
 function createContainer(app, callback) {
     assert(!app.containerId); // otherwise, it will trigger volumeFrom
 
-    docker.createContainer(app, null /* command */, function (error, container) {
+    docker.createContainer(app, function (error, container) {
         if (error) return callback(new Error('Error creating container: ' + error));
 
         updateApp(app, { containerId: container.id }, callback);

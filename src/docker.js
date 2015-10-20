@@ -114,12 +114,12 @@ function downloadImage(manifest, callback) {
     }, callback);
 }
 
-function createContainer(app, cmd, callback) {
+function createSubcontainer(app, cmd, callback) {
     assert.strictEqual(typeof app, 'object');
     assert(!cmd || util.isArray(cmd));
     assert.strictEqual(typeof callback, 'function');
 
-    var docker = exports.connection;
+    var docker = exports.connection, isSubcontainer = !!cmd;
 
     var manifest = app.manifest;
     var exposedPorts = {}, dockerPortBindings = { };
@@ -165,7 +165,8 @@ function createContainer(app, cmd, callback) {
             },
             Labels: {
                 "location": app.location,
-                "appId": app.id
+                "appId": app.id,
+                "isSubcontainer": String(isSubcontainer)
             },
             HostConfig: {
                 Binds: addons.getBindsSync(app, app.manifest.addons),
@@ -182,7 +183,7 @@ function createContainer(app, cmd, callback) {
                 CpuShares: 512, // relative to 1024 for system processes
                 SecurityOpt: config.CLOUDRON ? [ "apparmor:docker-cloudron-app" ] : null // profile available only on cloudron
             },
-            VolumesFrom: app.containerId ? [ app.containerId ] : null
+            VolumesFrom: isSubcontainer ? [ app.containerId ] : []
         };
 
         // older versions wanted a writable /var/log
@@ -192,6 +193,10 @@ function createContainer(app, cmd, callback) {
 
         docker.createContainer(containerOptions, callback);
     });
+}
+
+function createContainer(app, callback) {
+    createSubcontainer(app, null, callback);
 }
 
 function startContainer(containerId, callback) {
