@@ -26,7 +26,15 @@ function loadState() {
 }
 
 function saveState(state) {
-    safe.fs.writeFileSync(paths.SCHEDULER_FILE, JSON.stringify(_.omit(state, 'cronJobs'), null, 4), 'utf8');
+    // do not save cronJobs
+    var safeState = { };
+    for (var appId in state) {
+        safeState[appId] = {
+            schedulerConfig: state[appId].schedulerConfig,
+            containerIds: state[appId].containerIds
+        };
+    }
+    safe.fs.writeFileSync(paths.SCHEDULER_FILE, JSON.stringify(safeState, null, 4), 'utf8');
 }
 
 function sync(callback) {
@@ -145,6 +153,8 @@ function doTask(appId, taskName, callback) {
 
     var appState = gState[appId];
 
+    debug('Executing task %s/%s', appId, taskName);
+
     apps.get(appId, function (error, app) {
         if (error) return callback(error);
 
@@ -153,12 +163,12 @@ function doTask(appId, taskName, callback) {
             return callback();
         }
 
-        if (appState.containerIds[taskName]) debug('task %s/%s is already running. killing it');
+        if (appState.containerIds[taskName]) debug('task %s/%s is already running. killing it', appId, taskName);
 
         killTask(appState.containerIds[taskName], function (error) {
             if (error) return callback(error);
 
-            debug('task %s/%s starting', app.id, taskName);
+            debug('Creating createSubcontainer for %s/%s : %s', app.id, taskName, gState[appId].schedulerConfig[taskName].command);
 
             docker.createSubcontainer(app, [ '/bin/sh', '-c', gState[appId].schedulerConfig[taskName].command ], function (error, container) {
                 appState.containerIds[taskName] = container.id;
