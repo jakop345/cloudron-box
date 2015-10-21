@@ -261,7 +261,7 @@ function getConfig(callback) {
 
 function sendHeartbeat() {
     // Only send heartbeats after the admin dns record is synced to give appstore a chance to know that fact
-    if (!config.get('dnsInSync')) return;
+    if (!config.dnsInSync()) return;
 
     var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/heartbeat';
 
@@ -273,7 +273,7 @@ function sendHeartbeat() {
 }
 
 function addDnsRecords() {
-    if (config.get('dnsInSync')) return sendHeartbeat(); // already registered send heartbeat
+    if (config.dnsInSync()) return sendHeartbeat(); // already registered send heartbeat
 
     var DKIM_SELECTOR = 'mail';
     var DMARC_REPORT_EMAIL = 'dmarc-report@cloudron.io';
@@ -330,7 +330,7 @@ function addDnsRecords() {
                     return;
                 }
                 debug('addDnsRecords: done');
-                config.set('dnsInSync', true);
+                config.setDnsInSync('DNS is in sync for ip ' + sysinfo.getIp());
                 sendHeartbeat(); // send heartbeat after the dns records are done
             });
         }
