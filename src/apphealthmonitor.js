@@ -159,9 +159,8 @@ function processDockerEvents() {
         });
 
         stream.on('end', function () {
-            console.error('Docke event stream ended');
+            console.error('Docker event stream ended');
             gDockerEventStream = null; // TODO: reconnect?
-            stream.end();
         });
     });
 }
