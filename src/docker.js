@@ -183,9 +183,9 @@ function createSubcontainer(app, cmd, callback) {
                     "MaximumRetryCount": 0
                 },
                 CpuShares: 512, // relative to 1024 for system processes
+                VolumesFrom: isAppContainer ? null : [ app.containerId + ":rw" ],
                 SecurityOpt: config.CLOUDRON ? [ "apparmor:docker-cloudron-app" ] : null // profile available only on cloudron
-            },
-            VolumesFrom: isAppContainer ? [ ] : [ app.containerId ]
+            }
         };
 
         // older versions wanted a writable /var/log
