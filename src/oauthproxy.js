@@ -9,12 +9,14 @@ var appdb = require('./appdb.js'),
     assert = require('assert'),
     clientdb = require('./clientdb.js'),
     config = require('./config.js'),
+    DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:proxy'),
     express = require('express'),
     http = require('http'),
     proxy = require('proxy-middleware'),
     session = require('cookie-session'),
     superagent = require('superagent'),
+    tokendb = require('./tokendb.js'),
     url = require('url'),
     uuid = require('node-uuid');
 
@@ -24,13 +26,20 @@ var gHttpServer = null;
 
 var CALLBACK_URI = '/callback';
 
+function clearSession(req) {
+    delete gSessions[req.session.id];
+
+    req.session.id = uuid.v4();
+    gSessions[req.session.id] = {};
+
+    req.sessionData = gSessions[req.session.id];
+
+}
+
 function attachSessionData(req, res, next) {
     assert.strictEqual(typeof req.session, 'object');
 
-    if (!req.session.id || !gSessions[req.session.id]) {
-        req.session.id = uuid.v4();
-        gSessions[req.session.id] = {};
-    }
+    if (!req.session.id || !gSessions[req.session.id]) clearSession(req);
 
     // attach the session data to the requeset
     req.sessionData = gSessions[req.session.id];
@@ -46,22 +55,10 @@ function verifySession(req, res, next) {
         return next();
     }
 
-    // use http admin origin so that it works with self-signed certs
-    superagent
-        .get(config.internalAdminOrigin() + '/api/v1/profile')
-        .query({ access_token: req.sessionData.accessToken})
-        .end(function (error, result) {
-        if (error) {
-            console.error(error);
-            req.authenticated = false;
-        } else if (result.statusCode !== 200) {
-            // clear session
-            delete gSessions[req.session.id];
-
-            req.session.id = uuid.v4();
-            gSessions[req.session.id] = {};
-            req.sessionData = gSessions[req.session.id];
-
+    tokendb.get(req.sessionData.accessToken, function (error, token) {
+        if (error)  {
+            if (error.reason !== DatabaseError.NOT_FOUND) console.error(error);
+            clearSession(req);
             req.authenticated = false;
         } else {
             req.authenticated = true;
