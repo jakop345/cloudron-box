@@ -325,7 +325,7 @@ function addDnsRecords() {
                 });
             }, function (error) {
                 if (error) {
-                    console.error(error);
+                    debug(error.message);
                     gAddDnsRecordsTimerId = setTimeout(checkIfInSync, 5000);
                     return;
                 }
