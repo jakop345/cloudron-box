@@ -28,6 +28,17 @@ describe('config', function () {
         done();
     });
 
+    it('dnsInSync() is unset', function (done) {
+        expect(config.dnsInSync()).to.not.be.ok();
+        done();
+    });
+
+    it('dnsInSync() is set', function (done) {
+        config.setDnsInSync();
+        expect(config.dnsInSync()).to.be.ok();
+        done();
+    });
+
     it('cloudron.conf generated automatically', function (done) {
         expect(fs.existsSync(path.join(config.baseDir(), 'configs/cloudron.conf'))).to.be.ok();
         done();
