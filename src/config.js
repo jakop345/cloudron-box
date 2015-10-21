@@ -57,14 +57,13 @@ function baseDir() {
 }
 
 var cloudronConfigFileName = path.join(baseDir(), 'configs/cloudron.conf');
-var cloudronDnsInSyncFilePath = path.join(baseDir(), 'dns_in_sync');
 
 function dnsInSync() {
-    return !!safe.fs.statSync(cloudronDnsInSyncFilePath);
+    return !!safe.fs.statSync(require('./paths.js').DNS_IN_SYNC_FILE);
 }
 
 function setDnsInSync(content) {
-    safe.fs.writeFileSync(cloudronDnsInSyncFilePath, content || 'if this file exists, dns is in sync');
+    safe.fs.writeFileSync(require('./paths.js').DNS_IN_SYNC_FILE, content || 'if this file exists, dns is in sync');
 }
 
 function saveSync() {

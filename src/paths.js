@@ -14,6 +14,8 @@ exports = module.exports = {
     ADDON_CONFIG_DIR: path.join(config.baseDir(), 'data/addons'),
     SCHEDULER_FILE: path.join(config.baseDir(), 'data/addons/scheduler.json'),
 
+    DNS_IN_SYNC_FILE: path.join(config.baseDir(), 'data/dns_in_sync'),
+
     COLLECTD_APPCONFIG_DIR: path.join(config.baseDir(), 'data/collectd/collectd.conf.d'),
 
     DATA_DIR: path.join(config.baseDir(), 'data'),
