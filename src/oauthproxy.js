@@ -55,7 +55,13 @@ function verifySession(req, res, next) {
             console.error(error);
             req.authenticated = false;
         } else if (result.statusCode !== 200) {
-            req.sessionData.accessToken = null;
+            // clear session
+            delete gSessions[req.session.id];
+
+            req.session.id = uuid.v4();
+            gSessions[req.session.id] = {};
+            req.sessionData = gSessions[req.session.id];
+
             req.authenticated = false;
         } else {
             req.authenticated = true;
