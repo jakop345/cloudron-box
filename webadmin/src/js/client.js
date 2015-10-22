@@ -6,6 +6,9 @@
 angular.module('Application').service('Client', ['$http', 'md5', 'Notification', function ($http, md5, Notification) {
     var client = null;
 
+    // Keep this in sync with docs and docker.js
+    var DEFAULT_MEMORY_LIMIT = 1024 * 1024 * 200;
+
     function ClientError(statusCode, messageOrObject) {
         Error.call(this);
         this.name = this.constructor.name;
@@ -75,7 +78,8 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             isCustomDomain: false,
             developerMode: false,
             region: null,
-            size: null
+            size: null,
+            memory: 0
         };
         this._installedApps = [];
         this._clientId = '<%= oauth.clientId %>';
@@ -639,7 +643,11 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
     };
 
     Client.prototype.enoughResourcesAvailable = function (app) {
-        return true;
+        var needed = app.manifest.memoryLimit || DEFAULT_MEMORY_LIMIT;
+        var used = this.getInstalledApps().reduce(function (prev, cur) { return prev + (cur.manifest.memoryLimit || DEFAULT_MEMORY_LIMIT); }, 0);
+        var available = (this.getConfig().memory || 0) - used;
+
+        return (available - needed) > 0;
     };
 
     client = new Client();
