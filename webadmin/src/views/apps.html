@@ -42,11 +42,10 @@
                         </div>
                         <div class="form-group">
                             <label class="control-label" for="oauthProxy">Website Visibility</label>
-                            <div class="checkbox">
-                                <label>
-                                    <input type="checkbox" id="oauthProxy" ng-model="appConfigure.oauthProxy"> Cloudron users only
-                                </label>
-                            </div>
+                            <select class="form-control" id="oauthProxy" ng-model="appConfigure.oauthProxy">
+                                <option value="">Visible to all</option>
+                                <option value="1">Visible only to Cloudron users</option>
+                            </select>
                         </div>
                         <a ng-show="!!appConfigure.app.manifest.configurePath" ng-href="https://{{ appConfigure.app.location }}{{ !appConfigure.app.location ? '' : (config.isCustomDomain ? '.' : '-') }}{{ config.fqdn }}/{{ appConfigure.app.manifest.configurePath }}" target="_blank">Application Specific Settings</a>
                         <br/>

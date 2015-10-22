@@ -19,7 +19,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         portBindings: {},
         portBindingsEnabled: {},
         portBindingsInfo: {},
-        oauthProxy: false
+        oauthProxy: ''
     };
 
     $scope.appUninstall = {
@@ -52,7 +52,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appConfigure.location = '';
         $scope.appConfigure.password = '';
         $scope.appConfigure.portBindings = {};
-        $scope.appConfigure.oauthProxy = false;
+        $scope.appConfigure.oauthProxy = '';
 
         $scope.appConfigureForm.$setPristine();
         $scope.appConfigureForm.$setUntouched();
@@ -89,7 +89,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
 
         $scope.appConfigure.app = app;
         $scope.appConfigure.location = app.location;
-        $scope.appConfigure.oauthProxy = app.oauthProxy;
+        $scope.appConfigure.oauthProxy = app.oauthProxy ? '1' : '';
         $scope.appConfigure.portBindingsInfo = app.manifest.tcpPorts || {}; // Portbinding map only for information
         $scope.appConfigure.portBindings = {};                              // This is the actual model holding the env:port pair
         $scope.appConfigure.portBindingsEnabled = {};                       // This is the actual model holding the enabled/disabled flag
@@ -125,7 +125,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         var data = {
             location: $scope.appConfigure.location || '',
             portBindings: finalPortBindings,
-            oauthProxy: $scope.appConfigure.oauthProxy,
+            oauthProxy: !!$scope.appConfigure.oauthProxy,
             accessRestriction: $scope.appConfigure.app.accessRestriction
         };
 
