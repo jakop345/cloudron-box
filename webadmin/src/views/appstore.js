@@ -140,8 +140,10 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         $scope.appInstall.accessRestriction = null;
         $scope.appInstall.oauthProxy = false;
         $scope.appInstall.installFormVisible = false;
+        $scope.appInstall.resourceConstraintVisible = false;
         $scope.appInstall.mediaLinks = [];
         $('#collapseInstallForm').collapse('hide');
+        $('#collapseResourceConstraint').collapse('hide');
         $('#collapseMediaLinksCarousel').collapse('show');
 
         $scope.appInstallForm.$setPristine();
@@ -149,10 +151,16 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
     };
 
     $scope.showInstallForm = function () {
-        $scope.appInstall.installFormVisible = true;
-        $('#collapseMediaLinksCarousel').collapse('hide');
-        $('#collapseInstallForm').collapse('show');
-        $('#appInstallLocationInput').focus();
+        if (Client.enoughResourcesAvailable($scope.appInstall.app)) {
+            $scope.appInstall.installFormVisible = true;
+            $('#collapseMediaLinksCarousel').collapse('hide');
+            $('#collapseInstallForm').collapse('show');
+            $('#appInstallLocationInput').focus();
+        } else {
+            $scope.appInstall.resourceConstraintVisible = true;
+            $('#collapseMediaLinksCarousel').collapse('hide');
+            $('#collapseResourceConstraint').collapse('show');
+        }
     };
 
     $scope.showInstall = function (app) {

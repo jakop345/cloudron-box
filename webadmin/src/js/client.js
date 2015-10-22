@@ -638,6 +638,10 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
+    Client.prototype.enoughResourcesAvailable = function (app) {
+        return true;
+    };
+
     client = new Client();
     return client;
 }]);
