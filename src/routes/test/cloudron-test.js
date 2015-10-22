@@ -318,6 +318,7 @@ describe('Cloudron', function () {
                 expect(result.body.developerMode).to.be.a('boolean');
                 expect(result.body.size).to.eql(null);
                 expect(result.body.region).to.eql(null);
+                expect(result.body.memory).to.eql(0);
                 expect(result.body.cloudronName).to.be.a('string');
 
                 done();
@@ -325,7 +326,7 @@ describe('Cloudron', function () {
         });
 
         it('succeeds', function (done) {
-            var scope = nock(config.apiServerOrigin()).get('/api/v1/boxes/localhost?token=' + config.token()).reply(200, { box: { region: 'sfo', size: 'small' }});
+            var scope = nock(config.apiServerOrigin()).get('/api/v1/boxes/localhost?token=' + config.token()).reply(200, { box: { region: 'sfo', size: '1gb' }});
 
             request.get(SERVER_URL + '/api/v1/cloudron/config')
                    .query({ access_token: token })
@@ -340,8 +341,9 @@ describe('Cloudron', function () {
                 expect(result.body.update).to.be.an('object');
                 expect(result.body.version).to.eql('0.5.0');
                 expect(result.body.developerMode).to.be.a('boolean');
-                expect(result.body.size).to.eql('small');
+                expect(result.body.size).to.eql('1gb');
                 expect(result.body.region).to.eql('sfo');
+                expect(result.body.memory).to.eql(1073741824);
                 expect(result.body.cloudronName).to.be.a('string');
 
                 expect(scope.isDone()).to.be.ok();
@@ -455,7 +457,7 @@ describe('Cloudron', function () {
                     .reply(201, { credentials: { AccessKeyId: 'accessKeyId', SecretAccessKey: 'secretAccessKey', SessionToken: 'sessionToken' } });
 
             var scope3 = nock(config.apiServerOrigin())
-                    .post('/api/v1/boxes/' + config.fqdn() + '/backupDone?token=APPSTORE_TOKEN', function (body) { 
+                    .post('/api/v1/boxes/' + config.fqdn() + '/backupDone?token=APPSTORE_TOKEN', function (body) {
                         return body.boxVersion && body.restoreKey && !body.appId && !body.appVersion && body.appBackupIds.length === 0;
                     })
                     .reply(200, { id: 'someid' });
@@ -494,7 +496,7 @@ describe('Cloudron', function () {
             }).reply(202, {});
 
             var scope2 = nock(config.apiServerOrigin())
-                    .post('/api/v1/boxes/' + config.fqdn() + '/backupDone?token=APPSTORE_TOKEN', function (body) { 
+                    .post('/api/v1/boxes/' + config.fqdn() + '/backupDone?token=APPSTORE_TOKEN', function (body) {
                         return body.boxVersion && body.restoreKey && !body.appId && !body.appVersion && body.appBackupIds.length === 0;
                     })
                     .reply(200, { id: 'someid' });
