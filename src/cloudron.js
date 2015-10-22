@@ -28,6 +28,7 @@ var apps = require('./apps.js'),
     async = require('async'),
     backups = require('./backups.js'),
     BackupsError = require('./backups.js').BackupsError,
+    bytes = require('bytes'),
     clientdb = require('./clientdb.js'),
     config = require('./config.js'),
     debug = require('debug')('box:cloudron'),
@@ -221,7 +222,6 @@ function getCloudronDetails(callback) {
 function getConfig(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    // TODO avoid pyramid of awesomeness with async
     getCloudronDetails(function (error, result) {
         if (error) {
             console.error('Failed to fetch cloudron details.', error);
@@ -232,6 +232,10 @@ function getConfig(callback) {
                 size: result ? result.size : null
             };
         }
+
+        // We rely at the moment on the size being specified in 512mb,1gb,...
+        // TODO provide that number from the appstore
+        var memory = bytes(result.size) || 0;
 
         settings.getCloudronName(function (error, cloudronName) {
             if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
@@ -252,6 +256,7 @@ function getConfig(callback) {
                     developerMode: developerMode,
                     region: result.region,
                     size: result.size,
+                    memory: memory,
                     cloudronName: cloudronName
                 });
             });
