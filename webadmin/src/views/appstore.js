@@ -162,8 +162,6 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         angular.copy(app, $scope.appInstall.app);
         $('#appInstallModal').modal('show');
 
-        console.log(app)
-
         $scope.appInstall.mediaLinks = $scope.appInstall.app.manifest.mediaLinks || [];
         $scope.appInstall.location = app.location;
         $scope.appInstall.portBindingsInfo = $scope.appInstall.app.manifest.tcpPorts || {};   // Portbinding map only for information
