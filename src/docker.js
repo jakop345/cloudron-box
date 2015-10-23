@@ -129,8 +129,10 @@ function createSubcontainer(app, cmd, callback) {
     var exposedPorts = {}, dockerPortBindings = { };
     var stdEnv = [
         'CLOUDRON=1',
-        'WEBADMIN_ORIGIN' + '=' + config.adminOrigin(),
-        'API_ORIGIN' + '=' + config.adminOrigin()
+        'WEBADMIN_ORIGIN=' + config.adminOrigin(),
+        'API_ORIGIN=' + config.adminOrigin(),
+        'APP_ORIGIN=https://' + config.appFqdn(app.location),
+        'APP_DOMAIN=' + config.appFqdn(app.location)
     ];
 
     // docker portBindings requires ports to be exposed
@@ -155,7 +157,8 @@ function createSubcontainer(app, cmd, callback) {
         if (error) return callback(new Error('Error getting addon environment : ' + error));
 
         var containerOptions = {
-            Hostname: config.appFqdn(app.location),
+            // do _not_ set hostname to app fqdn. doing so sets up the dns name to look up the internal docker ip. this makes curl from within container fail
+            Hostname: semver.gte(targetBoxVersion(app.manifest), '0.0.77') ? app.location : config.appFqdn(app.location),
             Tty: isAppContainer,
             Image: app.manifest.dockerImage,
             Cmd: cmd,
