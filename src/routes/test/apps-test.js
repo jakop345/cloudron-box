@@ -672,6 +672,9 @@ describe('App installation', function () {
             expect(data.Config.Env).to.contain('WEBADMIN_ORIGIN=' + config.adminOrigin());
             expect(data.Config.Env).to.contain('API_ORIGIN=' + config.adminOrigin());
             expect(data.Config.Env).to.contain('CLOUDRON=1');
+            expect(data.Config.Env).to.contain('APP_ORIGIN=https://' + config.appFqdn(APP_LOCATION));
+            expect(data.Config.Env).to.contain('APP_DOMAIN=' + config.appFqdn(APP_LOCATION));
+            expect(data.Config.Hostname).to.be(APP_LOCATION);
             clientdb.getByAppIdAndType(appResult.id, clientdb.TYPE_OAUTH, function (error, client) {
                 expect(error).to.not.be.ok();
                 expect(client.id.length).to.be(40); // cid- + 32 hex chars (128 bits) + 4 hyphens
