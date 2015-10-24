@@ -754,7 +754,7 @@ function setupRedis(app, options, callback) {
 
     var createOptions = {
         name: 'redis-' + app.id,
-        Hostname: config.appFqdn(app.location),
+        Hostname: 'redis-' + app.location,
         Tty: true,
         Image: 'cloudron/redis:0.7.0', // if you change this, fix setup/INFRA_VERSION as well
         Cmd: null,
