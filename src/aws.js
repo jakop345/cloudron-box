@@ -20,7 +20,44 @@ var assert = require('assert'),
     SubdomainError = require('./subdomainerror.js'),
     superagent = require('superagent');
 
-function getAWSCredentials(callback) {
+function getDnsCredentials(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    // CaaS
+    if (config.token()) {
+        var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/awscredentials';
+        superagent.post(url).query({ token: config.token() }).end(function (error, result) {
+            if (error) return callback(error);
+            if (result.statusCode !== 201) return callback(new Error(result.text));
+            if (!result.body || !result.body.credentials) return callback(new Error('Unexpected response'));
+
+            var credentials = {
+                accessKeyId: result.body.credentials.AccessKeyId,
+                secretAccessKey: result.body.credentials.SecretAccessKey,
+                sessionToken: result.body.credentials.SessionToken,
+                region: 'us-east-1'
+            };
+
+            if (config.aws().endpoint) credentials.endpoint = new AWS.Endpoint(config.aws().endpoint);
+
+            callback(null, credentials);
+        });
+    } else {
+        if (!config.aws().accessKeyId || !config.aws().secretAccessKey) return callback(new SubdomainError(SubdomainError.MISSING_CREDENTIALS));
+
+        var credentials = {
+            accessKeyId: config.aws().accessKeyId,
+            secretAccessKey: config.aws().secretAccessKey,
+            region: 'us-east-1'
+        };
+
+        if (config.aws().endpoint) credentials.endpoint = new AWS.Endpoint(config.aws().endpoint);
+
+        callback(null, credentials);
+    }
+}
+
+function getBackupCredentials(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     // CaaS
@@ -63,7 +100,7 @@ function getSignedUploadUrl(filename, callback) {
 
     debug('getSignedUploadUrl: %s', filename);
 
-    getAWSCredentials(function (error, credentials) {
+    getBackupCredentials(function (error, credentials) {
         if (error) return callback(error);
 
         var s3 = new AWS.S3(credentials);
@@ -86,7 +123,7 @@ function getSignedDownloadUrl(filename, callback) {
 
     debug('getSignedDownloadUrl: %s', filename);
 
-    getAWSCredentials(function (error, credentials) {
+    getBackupCredentials(function (error, credentials) {
         if (error) return callback(error);
 
         var s3 = new AWS.S3(credentials);
@@ -109,7 +146,7 @@ function getZoneByName(zoneName, callback) {
 
     debug('getZoneByName: %s', zoneName);
 
-    getAWSCredentials(function (error, credentials) {
+    getDnsCredentials(function (error, credentials) {
         if (error) return callback(error);
 
         var route53 = new AWS.Route53(credentials);
@@ -161,7 +198,7 @@ function addSubdomain(zoneName, subdomain, type, value, callback) {
             HostedZoneId: zone.Id
         };
 
-        getAWSCredentials(function (error, credentials) {
+        getDnsCredentials(function (error, credentials) {
             if (error) return callback(error);
 
             var route53 = new AWS.Route53(credentials);
@@ -214,7 +251,7 @@ function delSubdomain(zoneName, subdomain, type, value, callback) {
             HostedZoneId: zone.Id
         };
 
-        getAWSCredentials(function (error, credentials) {
+        getDnsCredentials(function (error, credentials) {
             if (error) return callback(error);
 
             var route53 = new AWS.Route53(credentials);
@@ -250,7 +287,7 @@ function getChangeStatus(changeId, callback) {
 
     if (changeId === '') return callback(null, 'INSYNC');
 
-    getAWSCredentials(function (error, credentials) {
+    getDnsCredentials(function (error, credentials) {
         if (error) return callback(error);
 
         var route53 = new AWS.Route53(credentials);
@@ -267,7 +304,7 @@ function copyObject(from, to, callback) {
     assert.strictEqual(typeof to, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    getAWSCredentials(function (error, credentials) {
+    getBackupCredentials(function (error, credentials) {
         if (error) return callback(error);
 
         var params = {
