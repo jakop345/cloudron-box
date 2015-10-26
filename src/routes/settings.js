@@ -10,7 +10,10 @@ exports = module.exports = {
     setCloudronName: setCloudronName,
 
     getCloudronAvatar: getCloudronAvatar,
-    setCloudronAvatar: setCloudronAvatar
+    setCloudronAvatar: setCloudronAvatar,
+
+    getDnsConfig: getDnsConfig,
+    setDnsConfig: setDnsConfig
 };
 
 var assert = require('assert'),
@@ -81,5 +84,28 @@ function getCloudronAvatar(req, res, next) {
 
         res.set('Content-Type', 'image/png');
         res.status(200).send(avatar);
+    });
+}
+
+function getDnsConfig(req, res, next) {
+    settings.getDnsConfig(function (error, config) {
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(200, config));
+    });
+}
+
+function setDnsConfig(req, res, next) {
+    assert.strictEqual(typeof req.body, 'object');
+
+    if (req.body.provider !== 'route53') return next(new HttpError(400, 'provider is required'));
+    if (typeof req.body.accessKeyId !== 'string') return next(new HttpError(400, 'accessKeyId is required'));
+    if (typeof req.body.secretAccessKey !== 'string') return next(new HttpError(400, 'secretAccessKey is required'));
+
+    settings.setDnsConfig(req.body, function (error) {
+        if (error && error.reason === SettingsError.BAD_FIELD) return next(new HttpError(400, error.message));
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(200));
     });
 }

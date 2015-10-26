@@ -30,7 +30,7 @@ exports = module.exports = {
     TIME_ZONE_KEY: 'time_zone',
     CLOUDRON_NAME_KEY: 'cloudron_name',
     DEVELOPER_MODE_KEY: 'developer_mode',
-    DNS_CREDENTIALS_KEY: 'dns_credentials',
+    DNS_CONFIG_KEY: 'dns_config',
 
     events: new (require('events').EventEmitter)()
 };
@@ -51,6 +51,7 @@ var gDefaults = (function () {
     result[exports.TIME_ZONE_KEY] = 'America/Los_Angeles';
     result[exports.CLOUDRON_NAME_KEY] = 'Cloudron';
     result[exports.DEVELOPER_MODE_KEY] = false;
+    result[exports.DNS_CONFIG_KEY] = { };
 
     return result;
 })();
@@ -214,8 +215,8 @@ function setDeveloperMode(enabled, callback) {
 function getDnsConfig(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    settingsdb.get(exports.DNS_CREDENTIALS_KEY, function (error, value) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new SettingsError(SettingsError.NOT_FOUND));
+    settingsdb.get(exports.DNS_CONFIG_KEY, function (error, value) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, gDefaults[exports.DNS_CONFIG_KEY]);
         if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
 
         callback(null, JSON.parse(value)); // accessKeyId, secretAccessKey, region
@@ -226,6 +227,10 @@ function setDnsConfig(dnsConfig, callback) {
     assert.strictEqual(typeof dnsConfig, 'object');
     assert.strictEqual(typeof callback, 'function');
 
+    if (dnsConfig.provider !== 'route53') return callback(new SettingsError(SettingsError.BAD_FIELD, 'provider must be route53'));
+    if (dnsConfig.accessKeyId === '') return callback(new SettingsError(SettingsError.BAD_FIELD, 'accessKeyId must not be empty'));
+    if (dnsConfig.secretAccessKey === '') return callback(new SettingsError(SettingsError.BAD_FIELD, 'secretAccessKey must not be empty'));
+
     var credentials = {
         provider: dnsConfig.provider,
         accessKeyId: dnsConfig.accessKeyId,
@@ -233,7 +238,7 @@ function setDnsConfig(dnsConfig, callback) {
         region: dnsConfig.region || 'us-east-1'
     };
 
-    settingsdb.set(exports.DNS_CREDENTIALS_KEY, JSON.stringify(credentials), function (error) {
+    settingsdb.set(exports.DNS_CONFIG_KEY, JSON.stringify(credentials), function (error) {
         if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
 
         callback(null);

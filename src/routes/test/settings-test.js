@@ -229,5 +229,46 @@ describe('Settings API', function () {
             });
         });
     });
+
+    describe('dns_config', function () {
+        it('get dns_config fails', function (done) {
+            request.get(SERVER_URL + '/api/v1/settings/dns_config')
+                   .query({ access_token: token })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(200);
+                expect(res.body).to.eql({});
+                done(err);
+            });
+        });
+
+        it('cannot set without data', function (done) {
+            request.post(SERVER_URL + '/api/v1/settings/dns_config')
+                   .query({ access_token: token })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(400);
+                done();
+            });
+        });
+
+        it('set succeeds', function (done) {
+            request.post(SERVER_URL + '/api/v1/settings/dns_config')
+                   .query({ access_token: token })
+                   .send({ provider: 'route53', accessKeyId: 'accessKey', secretAccessKey: 'secretAccessKey' })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(200);
+                done();
+            });
+        });
+
+        it('get succeeds', function (done) {
+            request.get(SERVER_URL + '/api/v1/settings/dns_config')
+                   .query({ access_token: token })
+                   .end(function (err, res) {
+                expect(res.statusCode).to.equal(200);
+                expect(res.body).to.eql({ provider: 'route53', accessKeyId: 'accessKey', secretAccessKey: 'secretAccessKey', region: 'us-east-1' });
+                done(err);
+            });
+        });
+    });
 });
 
