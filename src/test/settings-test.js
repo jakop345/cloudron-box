@@ -81,6 +81,24 @@ describe('Settings', function () {
         });
     });
 
+    it('can set dns config', function (done) {
+        settings.setDnsConfig({ provider: 'route53', accessKeyId: 'accessKeyId', secretAccessKey: 'secretAccessKey' }, function (error) {
+            expect(error).to.be(null);
+            done();
+        });
+    });
+
+    it('can get dns config', function (done) {
+        settings.getDnsConfig(function (error, dnsConfig) {
+            expect(error).to.be(null);
+            expect(dnsConfig.provider).to.be('route53');
+            expect(dnsConfig.accessKeyId).to.be('accessKeyId');
+            expect(dnsConfig.secretAccessKey).to.be('secretAccessKey');
+            expect(dnsConfig.region).to.be('us-east-1');
+            done();
+        });
+    });
+
     it('can get all values', function (done) {
         settings.getAll(function (error, allSettings) {
             expect(error).to.be(null);
