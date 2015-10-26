@@ -20,6 +20,9 @@ exports = module.exports = {
     getDeveloperMode: getDeveloperMode,
     setDeveloperMode: setDeveloperMode,
 
+    getDnsConfig: getDnsConfig,
+    setDnsConfig: setDnsConfig,
+
     getDefaultSync: getDefaultSync,
     getAll: getAll,
 
@@ -27,6 +30,7 @@ exports = module.exports = {
     TIME_ZONE_KEY: 'time_zone',
     CLOUDRON_NAME_KEY: 'cloudron_name',
     DEVELOPER_MODE_KEY: 'developer_mode',
+    DNS_CREDENTIALS_KEY: 'dns_credentials',
 
     events: new (require('events').EventEmitter)()
 };
@@ -204,6 +208,35 @@ function setDeveloperMode(enabled, callback) {
         exports.events.emit(exports.DEVELOPER_MODE_KEY, enabled);
 
         return callback(null);
+    });
+}
+
+function getDnsConfig(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    settingsdb.get(exports.DNS_CREDENTIALS_KEY, function (error, value) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new SettingsError(SettingsError.NOT_FOUND));
+        if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
+
+        callback(null, JSON.parse(value)); // accessKeyId, secretAccessKey, region
+    });
+}
+
+function setDnsConfig(dnsConfig, callback) {
+    assert.strictEqual(typeof dnsConfig, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
+    var credentials = {
+        provider: dnsConfig.provider,
+        accessKeyId: dnsConfig.accessKeyId,
+        secretAccessKey: dnsConfig.secretAccessKey,
+        region: dnsConfig.region || 'us-east-1'
+    };
+
+    settingsdb.set(exports.DNS_CREDENTIALS_KEY, JSON.stringify(credentials), function (error) {
+        if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
+
+        callback(null);
     });
 }
 
