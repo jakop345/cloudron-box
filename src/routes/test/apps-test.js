@@ -604,6 +604,8 @@ describe('App installation', function () {
                 apiHockServer = http.createServer(apiHockInstance.handler).listen(port, callback);
             },
 
+            settings.setDnsConfig.bind(null, { provider: 'route53', accessKeyId: 'accessKeyId', secretAccessKey: 'secretAccessKey', endpoint: 'http://localhost:5353' }),
+
             function (callback) {
                 awsHockInstance
                     .get('/2013-04-01/hostedzone')
@@ -614,8 +616,7 @@ describe('App installation', function () {
                     .max(Infinity)
                     .reply(200, js2xml('ChangeResourceRecordSetsResponse', { ChangeInfo: { Id: 'dnsrecordid', Status: 'INSYNC' } }), { 'Content-Type': 'application/xml' });
 
-                var port = parseInt(url.parse(config.aws().endpoint).port, 10);
-                awsHockServer = http.createServer(awsHockInstance.handler).listen(port, callback);
+                awsHockServer = http.createServer(awsHockInstance.handler).listen(5353, callback);
             }
         ], done);
     });
@@ -1068,6 +1069,8 @@ describe('App installation - port bindings', function () {
                 apiHockServer = http.createServer(apiHockInstance.handler).listen(port, callback);
             },
 
+            settings.setDnsConfig.bind(null, { provider: 'route53', accessKeyId: 'accessKeyId', secretAccessKey: 'secretAccessKey', endpoint: 'http://localhost:5353' }),
+
             function (callback) {
                 awsHockInstance
                     .get('/2013-04-01/hostedzone')
@@ -1078,8 +1081,7 @@ describe('App installation - port bindings', function () {
                     .max(Infinity)
                     .reply(200, js2xml('ChangeResourceRecordSetsResponse', { ChangeInfo: { Id: 'dnsrecordid', Status: 'INSYNC' } }), { 'Content-Type': 'application/xml' });
 
-                var port = parseInt(url.parse(config.aws().endpoint).port, 10);
-                awsHockServer = http.createServer(awsHockInstance.handler).listen(port, callback);
+                awsHockServer = http.createServer(awsHockInstance.handler).listen(5353, callback);
             }
         ], done);
     });
