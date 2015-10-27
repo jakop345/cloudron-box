@@ -17,44 +17,26 @@ var assert = require('assert'),
     AWS = require('aws-sdk'),
     config = require('./config.js'),
     debug = require('debug')('box:aws'),
+    settings = require('./settings.js'),
     SubdomainError = require('./subdomainerror.js'),
     superagent = require('superagent');
 
 function getDnsCredentials(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    // CaaS
-    if (config.token()) {
-        var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/awscredentials';
-        superagent.post(url).query({ token: config.token() }).end(function (error, result) {
-            if (error) return callback(error);
-            if (result.statusCode !== 201) return callback(new Error(result.text));
-            if (!result.body || !result.body.credentials) return callback(new Error('Unexpected response'));
-
-            var credentials = {
-                accessKeyId: result.body.credentials.AccessKeyId,
-                secretAccessKey: result.body.credentials.SecretAccessKey,
-                sessionToken: result.body.credentials.SessionToken,
-                region: 'us-east-1'
-            };
-
-            if (config.aws().endpoint) credentials.endpoint = new AWS.Endpoint(config.aws().endpoint);
-
-            callback(null, credentials);
-        });
-    } else {
-        if (!config.aws().accessKeyId || !config.aws().secretAccessKey) return callback(new SubdomainError(SubdomainError.MISSING_CREDENTIALS));
+    settings.getDnsConfig(function (error, dnsConfig) {
+        if (error) return callback(new SubdomainError(SubdomainError.INTERNAL_ERROR, error));
 
         var credentials = {
-            accessKeyId: config.aws().accessKeyId,
-            secretAccessKey: config.aws().secretAccessKey,
-            region: 'us-east-1'
+            accessKeyId: dnsConfig.accessKeyId,
+            secretAccessKey: dnsConfig.secretAccessKey,
+            region: dnsConfig.region
         };
 
-        if (config.aws().endpoint) credentials.endpoint = new AWS.Endpoint(config.aws().endpoint);
+        if (dnsConfig.endpoint) credentials.endpoint = new AWS.Endpoint(dnsConfig.endpoint);
 
         callback(null, credentials);
-    }
+    });
 }
 
 function getBackupCredentials(callback) {
