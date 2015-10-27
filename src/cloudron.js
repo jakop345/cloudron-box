@@ -19,6 +19,8 @@ exports = module.exports = {
     backup: backup,
     ensureBackup: ensureBackup,
 
+    isActivatedSync: isActivatedSync,
+
     events: new (require('events').EventEmitter)(),
 
     EVENT_ACTIVATED: 'activated'
@@ -59,7 +61,8 @@ var REBOOT_CMD = path.join(__dirname, 'scripts/reboot.sh'),
     INSTALLER_UPDATE_URL = 'http://127.0.0.1:2020/api/v1/installer/update';
 
 var gAddDnsRecordsTimerId = null,
-    gCloudronDetails = null;            // cached cloudron details like region,size...
+    gCloudronDetails = null,             // cached cloudron details like region,size...
+    gIsActivated = false;                // cached activation state so that return value is synchronous
 
 function debugApp(app, args) {
     assert(!app || typeof app === 'object');
@@ -114,7 +117,15 @@ function initialize(callback) {
         exports.events.on(exports.EVENT_ACTIVATED, addDnsRecords);
     }
 
-    callback(null);
+    userdb.count(function (error, count) {
+        if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
+
+        gIsActivated = count !== 0;
+
+        if (gIsActivated && process.env.BOX_ENV !== 'test') addDnsRecords();
+
+        callback(null);
+    });
 }
 
 function uninitialize(callback) {
@@ -124,6 +135,10 @@ function uninitialize(callback) {
     gAddDnsRecordsTimerId = null;
 
     callback(null);
+}
+
+function isActivatedSync() {
+    return gIsActivated;
 }
 
 function setTimeZone(ip, callback) {
@@ -177,6 +192,7 @@ function activate(username, password, email, ip, callback) {
             tokendb.add(token, tokendb.PREFIX_USER + userObject.id, result.id, expires, '*', function (error) {
                 if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
+                gIsActivated = true;
                 exports.events.emit(exports.EVENT_ACTIVATED);
 
                 callback(null, { token: token, expires: expires });
