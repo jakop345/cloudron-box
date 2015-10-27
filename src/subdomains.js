@@ -21,7 +21,7 @@ module.exports = exports = {
 // choose which subdomain backend we use
 // for test purpose we use aws
 function api() {
-    return config.token() && !config.TEST ? caas : aws;
+    return config.isCustomDomain() && !config.TEST ? aws : caas;
 }
 
 function add(record, callback) {
