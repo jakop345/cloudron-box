@@ -61,7 +61,10 @@ var USERNAME_1 = 'user', PASSWORD_1 = 'password', EMAIL_1 ='user@me.com';
 var token = null; // authentication token
 var token_1 = null;
 
- var awsHostedZones = {
+var TEST_CRT_FILEPATH = null;
+var TEST_KEY_FILEPATH = null;
+
+var awsHostedZones = {
      HostedZones: [{
          Id: '/hostedzone/ZONEID',
          Name: 'localhost.',
@@ -129,6 +132,14 @@ function setup(done) {
 
                 callback();
             });
+        },
+
+        function (callback) {
+            // keep in sync with script
+            TEST_CRT_FILEPATH = '/tmp/test.crt';
+            TEST_KEY_FILEPATH = '/tmp/test.key';
+
+            child_process.exec(__dirname + '/create_test_certificate.sh', callback);
         },
 
         function (callback) {
@@ -1288,6 +1299,26 @@ describe('App installation - port bindings', function () {
         });
     });
 
+    it('cannot reconfigure app with only the cert, no key', function (done) {
+        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
+              .query({ access_token: token })
+              .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, oauthProxy: true, cert: fs.readFileSync(TEST_CRT_FILEPATH) })
+              .end(function (err, res) {
+            expect(res.statusCode).to.equal(400);
+            done();
+        });
+    });
+
+    it('cannot reconfigure app with only the key, no cert', function (done) {
+        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
+              .query({ access_token: token })
+              .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, oauthProxy: true, key: fs.readFileSync(TEST_KEY_FILEPATH) })
+              .end(function (err, res) {
+            expect(res.statusCode).to.equal(400);
+            done();
+        });
+    });
+
     it('non admin cannot reconfigure app', function (done) {
         request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
               .query({ access_token: token_1 })
@@ -1380,6 +1411,16 @@ describe('App installation - port bindings', function () {
 
             callback(new Error('not run yet'));
         }, done);
+    });
+
+    it('can reconfigure app with custom certificate', function (done) {
+        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
+              .query({ access_token: token })
+              .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, oauthProxy: true, cert: fs.readFileSync(TEST_CRT_FILEPATH), key: fs.readFileSync(TEST_KEY_FILEPATH) })
+              .end(function (err, res) {
+            expect(res.statusCode).to.equal(202);
+            checkConfigureStatus(0, done);
+        });
     });
 
     it('can stop app', function (done) {
