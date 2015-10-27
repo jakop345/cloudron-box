@@ -56,7 +56,7 @@ function initialize(callback) {
 
     gInitialized = true;
 
-    callback();
+    if (cloudron.isActivatedSync()) recreateJobs(callback); else callback();
 }
 
 function recreateJobs(unusedTimeZone, callback) {
