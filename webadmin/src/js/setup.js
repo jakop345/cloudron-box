@@ -28,8 +28,11 @@ app.config(['$routeProvider', function ($routeProvider) {
         controller: 'StepController',
         templateUrl: 'views/setup/step2.html'
     }).when('/step3', {
-        controller: 'FinishController',
+        controller: 'CustomDomainController',
         templateUrl: 'views/setup/step3.html'
+    }).when('/step4', {
+        controller: 'FinishController',
+        templateUrl: 'views/setup/step4.html'
     }).otherwise({ redirectTo: '/'});
 }]);
 
@@ -95,6 +98,7 @@ app.service('Wizard', [ function () {
         }];
         this.avatar = {};
         this.avatarBlob = null;
+        this.dnsConfig = null;
     }
 
     Wizard.prototype.setPreviewAvatar = function (avatar) {
@@ -194,6 +198,13 @@ app.controller('StepController', ['$scope', '$route', '$location', 'Wizard', fun
 
 }]);
 
+app.controller('CustomDomainController', [ '$scope', 'Wizard', function ($scope, Wizard) {
+    $scope.wizard = Wizard;
+
+    
+    if (Wizard.dnsConfig === null) $location.path('/step4'); // not using custom domain
+}]);
+
 app.controller('FinishController', ['$scope', '$location', '$timeout', 'Wizard', 'Client', function ($scope, $location, $timeout, Wizard, Client) {
     $scope.wizard = Wizard;
 
@@ -207,7 +218,11 @@ app.controller('FinishController', ['$scope', '$location', '$timeout', 'Wizard',
         Client.changeCloudronAvatar($scope.wizard.avatarBlob, function (error) {
             if (error) return console.error('Unable to set avatar.', error);
 
-            window.location.href = '/';
+            Client.setDnsConfig($scope.wizard.dnsConfig, function (error) {
+                if (error) return console.error('Unable to set dns config.', error);
+
+                window.location.href = '/';
+            });
         });
     });
 }]);
@@ -223,6 +238,14 @@ app.controller('SetupController', ['$scope', '$location', 'Client', 'Wizard', fu
 
     if (!search.email) return window.location.href = '/error.html?errorCode=3';
     Wizard.email = search.email;
+
+    if (search.customDomain === 'true') {
+        Wizard.dnsConfig = {
+            provider: 'route53',
+            accessKeyId: null,
+            secretAccessKey: null
+        };
+    }
 
     Wizard.hostname = window.location.host.indexOf('my-') === 0 ? window.location.host.slice(3) : window.location.host;
 
