@@ -41,7 +41,7 @@ var SERVER_URL = 'http://localhost:' + config.get('port');
 
 // Test image information
 var TEST_IMAGE_REPO = 'cloudron/test';
-var TEST_IMAGE_TAG = '9.0.0';
+var TEST_IMAGE_TAG = '10.0.0';
 var TEST_IMAGE_ID = child_process.execSync('docker inspect --format={{.Id}} ' + TEST_IMAGE_REPO + ':' + TEST_IMAGE_TAG).toString('utf8').trim();
 
 var APP_STORE_ID = 'test', APP_ID;
