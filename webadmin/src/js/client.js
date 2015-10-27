@@ -434,8 +434,6 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
     };
 
     Client.prototype.setCertificate = function (certificateFile, keyFile, callback) {
-        console.log('will set certificate');
-
         var fd = new FormData();
         fd.append('certificate', certificateFile);
         fd.append('key', keyFile);
