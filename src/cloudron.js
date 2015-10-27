@@ -17,7 +17,11 @@ exports = module.exports = {
     reboot: reboot,
     migrate: migrate,
     backup: backup,
-    ensureBackup: ensureBackup
+    ensureBackup: ensureBackup,
+
+    events: new (require('events').EventEmitter)(),
+
+    EVENT_ACTIVATED: 'activated'
 };
 
 var apps = require('./apps.js'),
@@ -73,7 +77,6 @@ function ignoreError(func) {
     };
 }
 
-
 function CloudronError(reason, errorOrMessage) {
     assert.strictEqual(typeof reason, 'string');
     assert(errorOrMessage instanceof Error || typeof errorOrMessage === 'string' || typeof errorOrMessage === 'undefined');
@@ -108,7 +111,7 @@ function initialize(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     if (process.env.BOX_ENV !== 'test') {
-        addDnsRecords();
+        exports.events.on(exports.EVENT_ACTIVATED, addDnsRecords);
     }
 
     callback(null);
@@ -173,6 +176,8 @@ function activate(username, password, email, ip, callback) {
 
             tokendb.add(token, tokendb.PREFIX_USER + userObject.id, result.id, expires, '*', function (error) {
                 if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
+
+                exports.events.emit(exports.EVENT_ACTIVATED);
 
                 callback(null, { token: token, expires: expires });
             });
