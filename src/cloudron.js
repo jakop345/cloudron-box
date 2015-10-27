@@ -115,6 +115,7 @@ function initialize(callback) {
 
     if (process.env.BOX_ENV !== 'test') {
         exports.events.on(exports.EVENT_ACTIVATED, addDnsRecords);
+        exports.events.on(exports.EVENT_ACTIVATED, sendHeartbeat); // optmization for not waiting till the next 1-min
     }
 
     userdb.count(function (error, count) {
@@ -296,8 +297,6 @@ function sendHeartbeat() {
 }
 
 function addDnsRecords() {
-    if (config.dnsInSync()) return sendHeartbeat(); // already registered send heartbeat
-
     var DKIM_SELECTOR = 'mail';
     var DMARC_REPORT_EMAIL = 'dmarc-report@cloudron.io';
 
@@ -354,7 +353,6 @@ function addDnsRecords() {
                 }
                 debug('addDnsRecords: done');
                 config.setDnsInSync('DNS is in sync for ip ' + sysinfo.getIp());
-                sendHeartbeat(); // send heartbeat after the dns records are done
             });
         }
 
