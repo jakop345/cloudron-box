@@ -119,6 +119,7 @@ AppsError.PORT_CONFLICT = 'Port Conflict';
 AppsError.BILLING_REQUIRED = 'Billing Required';
 AppsError.ACCESS_DENIED = 'Access denied';
 AppsError.USER_REQUIRED = 'User required';
+AppsError.BAD_CERTIFICATE = 'Invalid certificate';
 
 // Hostname validation comes from RFC 1123 (section 2.1)
 // Domain name validation comes from RFC 2181 (Name syntax)
@@ -193,6 +194,18 @@ function validateAccessRestriction(accessRestriction) {
     if (accessRestriction.users.length === 0) return new Error('users array cannot be empty');
     if (!accessRestriction.users.every(function (e) { return typeof e === 'string'; })) return new Error('All users have to be strings');
 
+    return null;
+}
+
+function validateCertificate(cert, key) {
+    assert(cert === null || typeof cert === 'string');
+    assert(key === null || typeof key === 'string');
+
+    if (cert === null && key === null) return null;
+    if (cert === null && !key) return new Error('missing key');
+    if (!cert && key === null) return new Error('missing cert');
+
+    // TODO more actual cert validation
     return null;
 }
 
@@ -348,12 +361,14 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
     });
 }
 
-function configure(appId, location, portBindings, accessRestriction, oauthProxy, callback) {
+function configure(appId, location, portBindings, accessRestriction, oauthProxy, cert, key, callback) {
     assert.strictEqual(typeof appId, 'string');
     assert.strictEqual(typeof location, 'string');
     assert.strictEqual(typeof portBindings, 'object');
     assert.strictEqual(typeof accessRestriction, 'object');
     assert.strictEqual(typeof oauthProxy, 'boolean');
+    assert(cert === null || typeof cert === 'string');
+    assert(key === null || typeof key === 'string');
     assert.strictEqual(typeof callback, 'function');
 
     var error = validateHostname(location, config.fqdn());
@@ -361,6 +376,9 @@ function configure(appId, location, portBindings, accessRestriction, oauthProxy,
 
     error = validateAccessRestriction(accessRestriction);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
+
+    error = validateCertificate(cert, key);
+    if (error) return callback(new AppsError(AppsError.BAD_CERTIFICATE, error.message));
 
     appdb.get(appId, function (error, app) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));

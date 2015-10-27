@@ -159,13 +159,14 @@ function configureApp(req, res, next) {
 
     debug('Configuring app id:%s location:%s bindings:%j accessRestriction:%j oauthProxy:%s', req.params.id, data.location, data.portBindings, data.accessRestriction, data.oauthProxy);
 
-    apps.configure(req.params.id, data.location, data.portBindings || null, data.accessRestriction, data.oauthProxy, function (error) {
+    apps.configure(req.params.id, data.location, data.portBindings || null, data.accessRestriction, data.oauthProxy, data.cert || null, data.key || null, function (error) {
         if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, error.message));
         if (error && error.reason === AppsError.PORT_RESERVED) return next(new HttpError(409, 'Port ' + error.message + ' is reserved.'));
         if (error && error.reason === AppsError.PORT_CONFLICT) return next(new HttpError(409, 'Port ' + error.message + ' is already in use.'));
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
         if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
         if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));
+        if (error && error.reason === AppsError.BAD_CERTIFICATE) return next(new HttpError(400, error.message));
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(202, { }));
