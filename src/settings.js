@@ -235,7 +235,8 @@ function setDnsConfig(dnsConfig, callback) {
         provider: dnsConfig.provider,
         accessKeyId: dnsConfig.accessKeyId,
         secretAccessKey: dnsConfig.secretAccessKey,
-        region: dnsConfig.region || 'us-east-1'
+        region: dnsConfig.region || 'us-east-1',
+        endpoint: dnsConfig.endpoint || null
     };
 
     settingsdb.set(exports.DNS_CONFIG_KEY, JSON.stringify(credentials), function (error) {
