@@ -19,7 +19,11 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         portBindings: {},
         portBindingsEnabled: {},
         portBindingsInfo: {},
-        oauthProxy: ''
+        oauthProxy: '',
+        certificateFile: null,
+        certificateFileName: '',
+        keyFile: null,
+        keyFileName: ''
     };
 
     $scope.appUninstall = {
@@ -51,8 +55,13 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appConfigure.app = {};
         $scope.appConfigure.location = '';
         $scope.appConfigure.password = '';
-        $scope.appConfigure.portBindings = {};
+        $scope.appConfigure.portBindings = {};          // This is the actual model holding the env:port pair
+        $scope.appConfigure.portBindingsEnabled = {};   // This is the actual model holding the enabled/disabled flag
         $scope.appConfigure.oauthProxy = '';
+        $scope.appConfigure.certificateFile = null;
+        $scope.appConfigure.certificateFileName = '';
+        $scope.appConfigure.keyFile = null;
+        $scope.appConfigure.keyFileName = '';
 
         $scope.appConfigureForm.$setPristine();
         $scope.appConfigureForm.$setUntouched();
@@ -84,15 +93,47 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appRestoreForm.$setUntouched();
     };
 
+    $scope.certificateFile = null;
+    $scope.certificateFileName = '';
+    $scope.keyFile = null;
+    $scope.keyFileName = '';
+
+    document.getElementById('appConfigureCertificateFileInput').onchange = function (event) {
+        $scope.$apply(function () {
+            $scope.appConfigure.certificateFile = null;
+            $scope.appConfigure.certificateFileName = event.target.files[0].name;
+
+            var reader = new FileReader();
+            reader.onload = function (result) {
+                if (!result.target || !result.target.result) return console.error('Unable to read local file');
+                $scope.appConfigure.certificateFile = result.target.result;
+            };
+            reader.readAsText(event.target.files[0]);
+        });
+    };
+
+    document.getElementById('appConfigureKeyFileInput').onchange = function (event) {
+        $scope.$apply(function () {
+            $scope.appConfigure.keyFile = null;
+            $scope.appConfigure.keyFileName = event.target.files[0].name;
+
+            var reader = new FileReader();
+            reader.onload = function (result) {
+                if (!result.target || !result.target.result) return console.error('Unable to read local file');
+                $scope.appConfigure.keyFile = result.target.result;
+            };
+            reader.readAsText(event.target.files[0]);
+        });
+    };
+
     $scope.showConfigure = function (app) {
         $scope.reset();
 
+        // fill relevant info from the app
         $scope.appConfigure.app = app;
         $scope.appConfigure.location = app.location;
         $scope.appConfigure.oauthProxy = app.oauthProxy ? '1' : '';
         $scope.appConfigure.portBindingsInfo = app.manifest.tcpPorts || {}; // Portbinding map only for information
-        $scope.appConfigure.portBindings = {};                              // This is the actual model holding the env:port pair
-        $scope.appConfigure.portBindingsEnabled = {};                       // This is the actual model holding the enabled/disabled flag
 
         // fill the portBinding structures. There might be holes in the app.portBindings, which signalizes a disabled port
         for (var env in $scope.appConfigure.portBindingsInfo) {
@@ -126,7 +167,9 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
             location: $scope.appConfigure.location || '',
             portBindings: finalPortBindings,
             oauthProxy: !!$scope.appConfigure.oauthProxy,
-            accessRestriction: $scope.appConfigure.app.accessRestriction
+            accessRestriction: $scope.appConfigure.app.accessRestriction,
+            cert: $scope.appConfigure.certificateFile,
+            key: $scope.appConfigure.keyFile,
         };
 
         Client.configureApp($scope.appConfigure.app.id, $scope.appConfigure.password, data, function (error) {
