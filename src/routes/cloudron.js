@@ -11,7 +11,6 @@ exports = module.exports = {
     getConfig: getConfig,
     update: update,
     migrate: migrate,
-    setCertificate: setCertificate,
     feedback: feedback
 };
 
@@ -25,7 +24,6 @@ var assert = require('assert'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
     superagent = require('superagent'),
-    safe = require('safetydance'),
     updateChecker = require('../updatechecker.js');
 
 /**
@@ -134,23 +132,6 @@ function migrate(req, res, next) {
 
     cloudron.migrate(req.body.size, req.body.region, function (error) {
         if (error && error.reason === CloudronError.BAD_STATE) return next(new HttpError(409, error.message));
-        if (error) return next(new HttpError(500, error));
-
-        next(new HttpSuccess(202, {}));
-    });
-}
-
-function setCertificate(req, res, next) {
-    assert.strictEqual(typeof req.files, 'object');
-
-    if (!req.files.certificate) return next(new HttpError(400, 'certificate must be provided'));
-    var certificate = safe.fs.readFileSync(req.files.certificate.path, 'utf8');
-
-    if (!req.files.key) return next(new HttpError(400, 'key must be provided'));
-    var key = safe.fs.readFileSync(req.files.key.path, 'utf8');
-
-    cloudron.setCertificate(certificate, key, function (error) {
-        if (error && error.reason === CloudronError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(202, {}));

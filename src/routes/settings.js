@@ -13,7 +13,9 @@ exports = module.exports = {
     setCloudronAvatar: setCloudronAvatar,
 
     getDnsConfig: getDnsConfig,
-    setDnsConfig: setDnsConfig
+    setDnsConfig: setDnsConfig,
+
+    setCertificate: setCertificate
 };
 
 var assert = require('assert'),
@@ -107,5 +109,21 @@ function setDnsConfig(req, res, next) {
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(200));
+    });
+}
+
+function setCertificate(req, res, next) {
+    assert.strictEqual(typeof req.files, 'object');
+
+    if (!req.files.certificate) return next(new HttpError(400, 'certificate must be provided'));
+    var certificate = safe.fs.readFileSync(req.files.certificate.path, 'utf8');
+
+    if (!req.files.key) return next(new HttpError(400, 'key must be provided'));
+    var key = safe.fs.readFileSync(req.files.key.path, 'utf8');
+
+    settings.setCertificate(certificate, key, function (error) {
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(202, {}));
     });
 }

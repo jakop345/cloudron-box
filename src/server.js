@@ -95,7 +95,6 @@ function initializeExpressSync() {
     router.post('/api/v1/cloudron/update', rootScope, routes.user.requireAdmin, routes.user.verifyPassword, routes.cloudron.update);
     router.post('/api/v1/cloudron/reboot', rootScope, routes.cloudron.reboot);
     router.post('/api/v1/cloudron/migrate', rootScope, routes.user.requireAdmin, routes.user.verifyPassword, routes.cloudron.migrate);
-    router.post('/api/v1/cloudron/certificate', rootScope, multipart, routes.cloudron.setCertificate);
     router.get ('/api/v1/cloudron/graphs', rootScope, routes.graphs.getGraphs);
 
     // feedback
@@ -163,6 +162,7 @@ function initializeExpressSync() {
     router.post('/api/v1/settings/cloudron_avatar',    settingsScope, multipart, routes.settings.setCloudronAvatar);
     router.get ('/api/v1/settings/dns_config',         settingsScope, routes.settings.getDnsConfig);
     router.post('/api/v1/settings/dns_config',         settingsScope, routes.settings.setDnsConfig);
+    router.post('/api/v1/settings/certificate',        settingsScope, multipart, routes.settings.setCertificate);
 
     // backup routes
     router.get ('/api/v1/backups', settingsScope, routes.backups.get);
