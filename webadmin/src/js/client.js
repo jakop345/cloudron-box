@@ -448,7 +448,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         fd.append('certificate', certificateFile);
         fd.append('key', keyFile);
 
-        $http.post(client.apiOrigin + '/api/v1/cloudron/certificate', fd, {
+        $http.post(client.apiOrigin + '/api/v1/settings/certificate', fd, {
             headers: { 'Content-Type': undefined },
             transformRequest: angular.identity
         }).success(function(data, status) {
