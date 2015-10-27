@@ -595,10 +595,7 @@ describe('App installation', function () {
             function (callback) {
                 apiHockInstance
                     .get('/api/v1/apps/' + APP_STORE_ID + '/versions/' + APP_MANIFEST.version + '/icon')
-                    .replyWithFile(200, path.resolve(__dirname, '../../../webadmin/src/img/appicon_fallback.png'))
-                    .post('/api/v1/boxes/' + config.fqdn() + '/awscredentials?token=APPSTORE_TOKEN')
-                    .max(Infinity)
-                    .reply(201, { credentials: { AccessKeyId: 'accessKeyId', SecretAccessKey: 'secretAccessKey', SessionToken: 'sessionToken' } }, { 'Content-Type': 'application/json' });
+                    .replyWithFile(200, path.resolve(__dirname, '../../../webadmin/src/img/appicon_fallback.png'));
 
                 var port = parseInt(url.parse(config.apiServerOrigin()).port, 10);
                 apiHockServer = http.createServer(apiHockInstance.handler).listen(port, callback);
@@ -1060,10 +1057,7 @@ describe('App installation - port bindings', function () {
             function (callback) {
                 apiHockInstance
                     .get('/api/v1/apps/' + APP_STORE_ID + '/versions/' + APP_MANIFEST.version + '/icon')
-                    .replyWithFile(200, path.resolve(__dirname, '../../../webadmin/src/img/appicon_fallback.png'))
-                    .post('/api/v1/boxes/' + config.fqdn() + '/awscredentials?token=APPSTORE_TOKEN')
-                    .max(Infinity)
-                    .reply(201, { credentials: { AccessKeyId: 'accessKeyId', SecretAccessKey: 'secretAccessKey', SessionToken: 'sessionToken' } }, { 'Content-Type': 'application/json' });
+                    .replyWithFile(200, path.resolve(__dirname, '../../../webadmin/src/img/appicon_fallback.png'));
 
                 var port = parseInt(url.parse(config.apiServerOrigin()).port, 10);
                 apiHockServer = http.createServer(apiHockInstance.handler).listen(port, callback);
