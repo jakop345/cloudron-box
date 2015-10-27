@@ -83,6 +83,37 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         }]
     };
 
+    $scope.certificateFile = null;
+    $scope.certificateFileName = '';
+    $scope.keyFile = null;
+    $scope.keyFileName = '';
+
+    document.getElementById('certificateFileInput').onchange = function (event) {
+        $scope.$apply(function () {
+            $scope.certificateFile = event.target.files[0];
+            $scope.certificateFileName = event.target.files[0].name;
+        });
+    };
+
+    document.getElementById('keyFileInput').onchange = function (event) {
+        $scope.$apply(function () {
+            $scope.keyFile = event.target.files[0];
+            $scope.keyFileName = event.target.files[0].name;
+        });
+    };
+
+    $scope.setCertificate = function () {
+        if (!$scope.certificateFile) return console.log('Certificate not set');
+        if (!$scope.keyFile) return console.log('Key not set');
+
+        Client.setCertificate($scope.certificateFile, $scope.keyFile, function (error) {
+            if (error) return console.error(error);
+
+            // give nginx reconfigure some time and then force reload
+            window.setTimeout(window.location.reload.bind(window.location, true), 5000);
+        });
+    };
+
     $scope.setPreviewAvatar = function (avatar) {
         $scope.avatarChange.avatar = avatar;
     };
