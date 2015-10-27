@@ -3,6 +3,7 @@
 set -eu
 
 readonly SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+readonly TEST_IMAGE="cloudron/test:10.0.0"
 
 source ${SOURCE_DIR}/setup/INFRA_VERSION
 
@@ -34,8 +35,8 @@ for script in "${scripts[@]}"; do
     fi
 done
 
-if ! docker inspect cloudron/test:9.0.0 >/dev/null 2>/dev/null; then
-    echo "docker pull cloudron/test:8.0.0 for tests to run"
+if ! docker inspect "${TEST_IMAGE}" >/dev/null 2>/dev/null; then
+    echo "docker pull "${TEST_IMAGE}" for tests to run"
     exit 1
 fi
 
