@@ -297,6 +297,11 @@ function sendHeartbeat() {
 }
 
 function addDnsRecords() {
+    if (config.isCustomDomain()) {
+        debug('addDnsRecords: Skip adding dns records for custom domain');
+        return;
+    }
+
     var DKIM_SELECTOR = 'mail';
     var DMARC_REPORT_EMAIL = 'dmarc-report@cloudron.io';
 
