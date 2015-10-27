@@ -26,6 +26,8 @@ exports = module.exports = {
     getDefaultSync: getDefaultSync,
     getAll: getAll,
 
+    setCertificate: setCertificate,
+
     AUTOUPDATE_PATTERN_KEY: 'autoupdate_pattern',
     TIME_ZONE_KEY: 'time_zone',
     CLOUDRON_NAME_KEY: 'cloudron_name',
@@ -39,9 +41,11 @@ var assert = require('assert'),
     config = require('./config.js'),
     CronJob = require('cron').CronJob,
     DatabaseError = require('./databaseerror.js'),
+    path = require('path'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
     settingsdb = require('./settingsdb.js'),
+    shell = require('./shell.js'),
     util = require('util'),
     _ = require('underscore');
 
@@ -55,6 +59,8 @@ var gDefaults = (function () {
 
     return result;
 })();
+
+var RELOAD_NGINX_CMD = path.join(__dirname, 'scripts/reloadnginx.sh');
 
 if (config.TEST) {
     // avoid noisy warnings during npm test
@@ -262,5 +268,25 @@ function getAll(callback) {
         settings.forEach(function (setting) { result[setting.name] = setting.value; });
 
         callback(null, result);
+    });
+}
+
+function setCertificate(certificate, key, callback) {
+    assert.strictEqual(typeof certificate, 'string');
+    assert.strictEqual(typeof key, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    if (!safe.fs.writeFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), certificate)) {
+        return callback(new SettingsError(SettingsError.INTERNAL_ERROR, safe.error.message));
+    }
+
+    if (!safe.fs.writeFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'), key)) {
+        return callback(new SettingsError(SettingsError.INTERNAL_ERROR, safe.error.message));
+    }
+
+    shell.sudo('setCertificate', [ RELOAD_NGINX_CMD ], function (error) {
+        if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
+
+        return callback(null);
     });
 }

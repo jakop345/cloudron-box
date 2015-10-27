@@ -11,6 +11,7 @@ var appdb = require('../../appdb.js'),
     config = require('../../config.js'),
     database = require('../../database.js'),
     expect = require('expect.js'),
+    path = require('path'),
     paths = require('../../paths.js'),
     request = require('superagent'),
     server = require('../../server.js'),
@@ -268,6 +269,76 @@ describe('Settings API', function () {
                 expect(res.body).to.eql({ provider: 'route53', accessKeyId: 'accessKey', secretAccessKey: 'secretAccessKey', region: 'us-east-1', endpoint: null });
                 done(err);
             });
+        });
+    });
+
+    describe('Certificates API', function () {
+        var certFile, keyFile;
+
+        before(function () {
+            certFile = '/tmp/host.cert';
+            fs.writeFileSync(certFile, 'test certificate');
+
+            keyFile = '/tmp/host.key';
+            fs.writeFileSync(keyFile, 'test key');
+        });
+
+        after(function () {
+            fs.unlinkSync(certFile);
+            fs.unlinkSync(keyFile);
+        });
+
+        it('cannot set certificate without token', function (done) {
+            request.post(SERVER_URL + '/api/v1/settings/certificate')
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(401);
+                done();
+            });
+        });
+
+        it('cannot set certificate without certificate', function (done) {
+            request.post(SERVER_URL + '/api/v1/settings/certificate')
+                   .query({ access_token: token })
+                   .attach('key', keyFile, 'key')
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(400);
+                done();
+            });
+        });
+
+        it('cannot set certificate without key', function (done) {
+            request.post(SERVER_URL + '/api/v1/settings/certificate')
+                   .query({ access_token: token })
+                   .attach('certificate', certFile, 'certificate')
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(400);
+                done();
+            });
+        });
+
+        it('can set certificate', function (done) {
+            request.post(SERVER_URL + '/api/v1/settings/certificate')
+                   .query({ access_token: token })
+                   .attach('key', keyFile, 'key')
+                   .attach('certificate', certFile, 'certificate')
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(202);
+                done();
+            });
+        });
+
+        it('did set the certificate', function (done) {
+            var cert = fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'));
+            expect(cert).to.eql(fs.readFileSync(certFile));
+
+            var key = fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'));
+            expect(key).to.eql(fs.readFileSync(keyFile));
+
+            done();
         });
     });
 });

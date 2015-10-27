@@ -11,8 +11,6 @@ exports = module.exports = {
     getConfig: getConfig,
     getStatus: getStatus,
 
-    setCertificate: setCertificate,
-
     sendHeartbeat: sendHeartbeat,
 
     update: update,
@@ -51,8 +49,7 @@ var apps = require('./apps.js'),
     util = require('util'),
     webhooks = require('./webhooks.js');
 
-var RELOAD_NGINX_CMD = path.join(__dirname, 'scripts/reloadnginx.sh'),
-    REBOOT_CMD = path.join(__dirname, 'scripts/reboot.sh'),
+var REBOOT_CMD = path.join(__dirname, 'scripts/reboot.sh'),
     BACKUP_BOX_CMD = path.join(__dirname, 'scripts/backupbox.sh'),
     BACKUP_SWAP_CMD = path.join(__dirname, 'scripts/backupswap.sh'),
     INSTALLER_UPDATE_URL = 'http://127.0.0.1:2020/api/v1/installer/update';
@@ -341,28 +338,6 @@ function addDnsRecords() {
         }
 
         checkIfInSync();
-    });
-}
-
-function setCertificate(certificate, key, callback) {
-    assert.strictEqual(typeof certificate, 'string');
-    assert.strictEqual(typeof key, 'string');
-    assert.strictEqual(typeof callback, 'function');
-
-    debug('Updating certificates');
-
-    if (!safe.fs.writeFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), certificate)) {
-        return callback(new CloudronError(CloudronError.INTERNAL_ERROR, safe.error.message));
-    }
-
-    if (!safe.fs.writeFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'), key)) {
-        return callback(new CloudronError(CloudronError.INTERNAL_ERROR, safe.error.message));
-    }
-
-    shell.sudo('setCertificate', [ RELOAD_NGINX_CMD ], function (error) {
-        if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
-
-        return callback(null);
     });
 }
 
