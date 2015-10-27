@@ -9,6 +9,7 @@
 var addons = require('../addons.js'),
     appdb = require('../appdb.js'),
     apptask = require('../apptask.js'),
+    async = require('async'),
     config = require('../config.js'),
     database = require('../database.js'),
     expect = require('expect.js'),
@@ -17,6 +18,7 @@ var addons = require('../addons.js'),
     net = require('net'),
     nock = require('nock'),
     paths = require('../paths.js'),
+    settings = require('../settings.js'),
     _ = require('underscore');
 
 var MANIFEST = {
@@ -80,10 +82,11 @@ var APP = {
 describe('apptask', function () {
     before(function (done) {
         config.set('version', '0.5.0');
-        database.initialize(function (error) {
-            expect(error).to.be(null);
-            appdb.add(APP.id, APP.appStoreId, APP.manifest, APP.location, APP.portBindings, APP.accessRestriction, APP.oauthProxy, done);
-        });
+        async.series([
+            database.initialize,
+            appdb.add.bind(null, APP.id, APP.appStoreId, APP.manifest, APP.location, APP.portBindings, APP.accessRestriction, APP.oauthProxy),
+            settings.setDnsConfig.bind(null, { provider: 'route53', accessKeyId: 'accessKeyId', secretAccessKey: 'secretAccessKey', endpoint: 'http://localhost:5353' })
+        ], done);
     });
 
     after(function (done) {
@@ -200,12 +203,8 @@ describe('apptask', function () {
 
     it('registers subdomain', function (done) {
         nock.cleanAll();
-        var scope = nock(config.apiServerOrigin())
-            .post('/api/v1/boxes/' + config.fqdn() + '/awscredentials?token=APPSTORE_TOKEN')
-            .times(2)
-            .reply(201, { credentials: { AccessKeyId: 'accessKeyId', SecretAccessKey: 'secretAccessKey', SessionToken: 'sessionToken' } });
 
-        var awsScope = nock(config.aws().endpoint)
+        var awsScope = nock('http://localhost:5353')
             .get('/2013-04-01/hostedzone')
             .reply(200, js2xml('ListHostedZonesResponse', awsHostedZones, { arrayMap: { HostedZones: 'HostedZone'} }))
             .post('/2013-04-01/hostedzone/ZONEID/rrset/')
@@ -213,7 +212,6 @@ describe('apptask', function () {
 
         apptask._registerSubdomain(APP, function (error) {
             expect(error).to.be(null);
-            expect(scope.isDone()).to.be.ok();
             expect(awsScope.isDone()).to.be.ok();
             done();
         });
@@ -221,10 +219,6 @@ describe('apptask', function () {
 
     it('unregisters subdomain', function (done) {
         nock.cleanAll();
-        var scope = nock(config.apiServerOrigin())
-            .post('/api/v1/boxes/' + config.fqdn() + '/awscredentials?token=APPSTORE_TOKEN')
-            .times(2)
-            .reply(201, { credentials: { AccessKeyId: 'accessKeyId', SecretAccessKey: 'secretAccessKey', SessionToken: 'sessionToken' } });
 
         var awsScope = nock(config.aws().endpoint)
             .get('/2013-04-01/hostedzone')
@@ -234,7 +228,6 @@ describe('apptask', function () {
 
         apptask._unregisterSubdomain(APP, APP.location, function (error) {
             expect(error).to.be(null);
-            expect(scope.isDone()).to.be.ok();
             expect(awsScope.isDone()).to.be.ok();
             done();
         });
