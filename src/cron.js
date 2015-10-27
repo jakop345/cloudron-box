@@ -45,9 +45,11 @@ function initialize(callback) {
     settings.events.on(settings.TIME_ZONE_KEY, recreateJobs);
     settings.events.on(settings.AUTOUPDATE_PATTERN_KEY, autoupdatePatternChanged);
 
+    cloudron.events.on(cloudron.EVENT_ACTIVATED, recreateJobs);
+
     gInitialized = true;
 
-    recreateJobs(callback);
+    callback();
 }
 
 function recreateJobs(unusedTimeZone, callback) {
