@@ -284,9 +284,6 @@ function getConfig(callback) {
 }
 
 function sendHeartbeat() {
-    // Only send heartbeats after the admin dns record is synced to give appstore a chance to know that fact
-    if (!config.dnsInSync()) return;
-
     var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/heartbeat';
 
     superagent.post(url).query({ token: config.token(), version: config.version() }).timeout(10000).end(function (error, result) {
