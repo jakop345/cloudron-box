@@ -143,6 +143,47 @@
     </div>
 </div>
 
+<div style="max-width: 600px; margin: 0 auto;" ng-show="user.admin && config.isCustomDomain">
+    <div class="text-left">
+        <h3>Default Certificates</h3>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom: 15px;" ng-show="user.admin && config.isCustomDomain">
+    <div class="row">
+        <div class="col-md-12">
+            These certificates have to be wildcard certificates and will be used for all apps, which were not configured to use a specific certificate.
+            <br/>
+            <br/>
+            <form name="certificateForm" ng-submit="submitCertificate()">
+                <fieldset>
+                    <div class="form-group" ng-class="{ 'has-error': false }">
+                        <label class="control-label" for="certificateCertInput">Certificate</label>
+                        <div class="input-group">
+                            <input type="file" id="certificateFileInput" style="display:none"/>
+                            <input type="text" class="form-control" ng-model="certificateFileName" id="certificateCertInput" name="certificate" onclick="getElementById('certificateFileInput').click();" style="cursor: pointer;" required>
+                            <span class="input-group-addon">
+                                <i class="fa fa-upload" onclick="getElementById('certificateFileInput').click();"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="form-group" ng-class="{ 'has-error': false }">
+                        <label class="control-label" for="certificateCertInput">Key</label>
+                        <div class="input-group">
+                            <input type="file" id="keyFileInput" style="display:none"/>
+                            <input type="text" class="form-control" ng-model="keyFileName" id="certificateKeyInput" name="key" onclick="getElementById('keyFileInput').click();" style="cursor: pointer;" required>
+                            <span class="input-group-addon">
+                                <i class="fa fa-upload" onclick="getElementById('keyFileInput').click();"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-outline btn-success pull-right" ng-click="setCertificate()">Upload Certificate</button>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+</div>
+
 <div style="max-width: 600px; margin: 0 auto;" ng-show="user.admin">
     <div class="text-left">
         <h3>Developer Mode</h3>
