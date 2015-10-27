@@ -205,7 +205,7 @@ app.controller('CustomDomainController', [ '$scope', '$location', 'Wizard', func
     if (Wizard.dnsConfig === null) $location.path('/step4'); // not using custom domain
 }]);
 
-app.controller('FinishController', ['$scope', '$location', '$timeout', 'Wizard', 'Client', function ($scope, $location, $timeout, Wizard, Client) {
+app.controller('FinishController', ['$scope', '$location', 'Wizard', 'Client', function ($scope, $location, Wizard, Client) {
     $scope.wizard = Wizard;
 
     Client.createAdmin($scope.wizard.username, $scope.wizard.password, $scope.wizard.email, $scope.setupToken, function (error) {
@@ -246,8 +246,6 @@ app.controller('SetupController', ['$scope', '$location', 'Client', 'Wizard', fu
             secretAccessKey: null
         };
     }
-
-    Wizard.hostname = window.location.host.indexOf('my-') === 0 ? window.location.host.slice(3) : window.location.host;
 
     Client.isServerFirstTime(function (error, isFirstTime) {
         if (error) {
