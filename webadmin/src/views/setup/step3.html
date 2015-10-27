@@ -1,8 +1,27 @@
-<center>
-    <h1>All done!</h1>
-    <br/>
-    <br/>
-    <i class="fa fa-spinner fa-pulse fa-5x"></i>
-    <br/>
-    <br/>
-</center>
+<div class="row">
+    <div class="col-md-12 text-center">
+        <h1>Custom domain configuration</h1>
+        <h4 class="">
+            Provide <a href="https://aws.amazon.com/route53/">Route53</a> access keys here.
+        </h4>
+    </div>
+</div>
+<br/>
+<br/>
+<div class="row">
+    <div class="col-md-4 col-md-offset-4 text-center">
+        <div class="form-group" ng-class="{ 'has-error': setup_form.accessKeyId.$dirty && setup_form.accessKeyId.$invalid }">
+            <!-- <label class="control-label" for="inputUsername">Username</label> -->
+            <input type="text" class="form-control" ng-model="wizard.dnsConfig.accessKeyId" id="inputAccessKeyId" name="accessKeyId" placeholder="Access Key Id" ng-enter="focusNext('inputSecretAccessKey', setup_form.secretAccessKey.$invalid)" ng-maxlength="512" ng-minlength="3" autofocus required autocomplete="off">
+        </div>
+        <div class="form-group" ng-class="{ 'has-error': setup_form.secretAccessKey.$dirty && setup_form.secretAccessKey.$invalid }">
+            <!-- <label class="control-label" for="inputPassword">Password</label> -->
+            <input type="text" class="form-control" ng-model="wizard.dnsConfig.secretAccessKey" id="inputSecretAccessKey" name="secretAccessKey" placeholder="Secret Access Key" ng-enter="next('/step4', setup_form.secretAccessKey.$invalid)" ng-maxlength="512" ng-minlength="3" required autocomplete="off">
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12 text-center">
+        <a class="btn btn-primary" href="#/step4" ng-disabled="setup_form.secretAccessKey.$invalid">Done</a>
+    </div>
+</div>
