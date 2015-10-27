@@ -25,9 +25,6 @@ app.config(['$routeProvider', function ($routeProvider) {
     }).when('/apps', {
         controller: 'AppsController',
         templateUrl: 'views/apps.html'
-    }).when('/dns', {
-        controller: 'DnsController',
-        templateUrl: 'views/dns.html'
     }).when('/account', {
         controller: 'AccountController',
         templateUrl: 'views/account.html'
