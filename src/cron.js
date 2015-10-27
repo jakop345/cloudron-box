@@ -154,25 +154,25 @@ function uninitialize(callback) {
     if (gAutoupdaterJob) gAutoupdaterJob.stop();
     gAutoupdaterJob = null;
 
-    gBoxUpdateCheckerJob.stop();
+    if (gBoxUpdateCheckerJob) gBoxUpdateCheckerJob.stop();
     gBoxUpdateCheckerJob = null;
 
-    gAppUpdateCheckerJob.stop();
+    if (gAppUpdateCheckerJob) gAppUpdateCheckerJob.stop();
     gAppUpdateCheckerJob = null;
 
-    gHeartbeatJob.stop();
+    if (gHeartbeatJob) gHeartbeatJob.stop();
     gHeartbeatJob = null;
 
-    gBackupJob.stop();
+    if (gBackupJob) gBackupJob.stop();
     gBackupJob = null;
 
-    gCleanupTokensJob.stop();
+    if (gCleanupTokensJob) gCleanupTokensJob.stop();
     gCleanupTokensJob = null;
 
-    gDockerVolumeCleanerJob.stop();
+    if (gDockerVolumeCleanerJob) gDockerVolumeCleanerJob.stop();
     gDockerVolumeCleanerJob = null;
 
-    gSchedulerSyncJob.stop();
+    if (gSchedulerSyncJob) gSchedulerSyncJob.stop();
     gSchedulerSyncJob = null;
 
     gInitialized = false;
