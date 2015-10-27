@@ -198,7 +198,7 @@ app.controller('StepController', ['$scope', '$route', '$location', 'Wizard', fun
 
 }]);
 
-app.controller('CustomDomainController', [ '$scope', 'Wizard', function ($scope, Wizard) {
+app.controller('CustomDomainController', [ '$scope', '$location', 'Wizard', function ($scope, $location, Wizard) {
     $scope.wizard = Wizard;
 
     
