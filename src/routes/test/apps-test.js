@@ -1298,7 +1298,7 @@ describe('App installation - port bindings', function () {
     it('cannot reconfigure app with only the cert, no key', function (done) {
         request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
               .query({ access_token: token })
-              .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, oauthProxy: true, cert: fs.readFileSync(TEST_CRT_FILEPATH) })
+              .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, oauthProxy: true, cert: fs.readFileSync(TEST_CRT_FILEPATH, 'utf-8') })
               .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             done();
@@ -1308,7 +1308,7 @@ describe('App installation - port bindings', function () {
     it('cannot reconfigure app with only the key, no cert', function (done) {
         request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
               .query({ access_token: token })
-              .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, oauthProxy: true, key: fs.readFileSync(TEST_KEY_FILEPATH) })
+              .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, oauthProxy: true, key: fs.readFileSync(TEST_KEY_FILEPATH, 'utf-8') })
               .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             done();
@@ -1318,7 +1318,7 @@ describe('App installation - port bindings', function () {
     it('cannot reconfigure app with cert not bein a string', function (done) {
         request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
               .query({ access_token: token })
-              .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, oauthProxy: true, cert: 1234, key: fs.readFileSync(TEST_KEY_FILEPATH) })
+              .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, oauthProxy: true, cert: 1234, key: fs.readFileSync(TEST_KEY_FILEPATH, 'utf-8') })
               .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             done();
@@ -1328,7 +1328,7 @@ describe('App installation - port bindings', function () {
     it('cannot reconfigure app with key not bein a string', function (done) {
         request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
               .query({ access_token: token })
-              .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, oauthProxy: true, cert: fs.readFileSync(TEST_CRT_FILEPATH), key: 1234 })
+              .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, oauthProxy: true, cert: fs.readFileSync(TEST_CRT_FILEPATH, 'utf-8'), key: 1234 })
               .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             done();
@@ -1432,7 +1432,7 @@ describe('App installation - port bindings', function () {
     it('can reconfigure app with custom certificate', function (done) {
         request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
               .query({ access_token: token })
-              .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, oauthProxy: true, cert: fs.readFileSync(TEST_CRT_FILEPATH), key: fs.readFileSync(TEST_KEY_FILEPATH) })
+              .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, oauthProxy: true, cert: fs.readFileSync(TEST_CRT_FILEPATH, 'utf-8'), key: fs.readFileSync(TEST_KEY_FILEPATH, 'utf-8') })
               .end(function (err, res) {
             expect(res.statusCode).to.equal(202);
             checkConfigureStatus(0, done);
