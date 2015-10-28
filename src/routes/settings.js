@@ -119,6 +119,7 @@ function setCertificate(req, res, next) {
     if (!req.body.key || typeof req.body.key !== 'string') return next(new HttpError(400, 'key must be a string'));
 
     settings.setCertificate(req.body.cert, req.body.key, function (error) {
+        if (error && error.reason === SettingsError.INVALID_CERT) return next(new HttpError(400, 'cert not applicable'))
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(202, {}));
