@@ -117,18 +117,23 @@ function installApp(req, res, next) {
     if (typeof data.accessRestriction !== 'object') return next(new HttpError(400, 'accessRestriction is required'));
     if (typeof data.oauthProxy !== 'boolean') return next(new HttpError(400, 'oauthProxy must be a boolean'));
     if ('icon' in data && typeof data.icon !== 'string') return next(new HttpError(400, 'icon is not a string'));
+    if (data.cert && typeof data.cert !== 'string') return next(new HttpError(400, 'cert must be a string'));
+    if (data.key && typeof data.key !== 'string') return next(new HttpError(400, 'key must be a string'));
+    if (data.cert && !data.key) return next(new HttpError(400, 'key must be provided'));
+    if (!data.cert && data.key) return next(new HttpError(400, 'cert must be provided'));
 
     // allow tests to provide an appId for testing
     var appId = (process.env.BOX_ENV === 'test' && typeof data.appId === 'string') ? data.appId : uuid.v4();
 
     debug('Installing app id:%s storeid:%s loc:%s port:%j accessRestriction:%j oauthproxy:%s manifest:%j', appId, data.appStoreId, data.location, data.portBindings, data.accessRestriction, data.oauthProxy, data.manifest);
 
-    apps.install(appId, data.appStoreId, data.manifest, data.location, data.portBindings || null, data.accessRestriction, data.oauthProxy, data.icon || null, function (error) {
+    apps.install(appId, data.appStoreId, data.manifest, data.location, data.portBindings || null, data.accessRestriction, data.oauthProxy, data.icon || null, data.cert || null, data.key || null, function (error) {
         if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, error.message));
         if (error && error.reason === AppsError.PORT_RESERVED) return next(new HttpError(409, 'Port ' + error.message + ' is reserved.'));
         if (error && error.reason === AppsError.PORT_CONFLICT) return next(new HttpError(409, 'Port ' + error.message + ' is already in use.'));
         if (error && error.reason === AppsError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error && error.reason === AppsError.BILLING_REQUIRED) return next(new HttpError(402, 'Billing required'));
+        if (error && error.reason === AppsError.BAD_CERTIFICATE) return next(new HttpError(400, error.message));
         if (error && error.reason === AppsError.USER_REQUIRED) return next(new HttpError(400, 'accessRestriction must specify one user'));
         if (error) return next(new HttpError(500, error));
 

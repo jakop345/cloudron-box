@@ -296,7 +296,7 @@ function purchase(appStoreId, callback) {
     });
 }
 
-function install(appId, appStoreId, manifest, location, portBindings, accessRestriction, oauthProxy, icon, callback) {
+function install(appId, appStoreId, manifest, location, portBindings, accessRestriction, oauthProxy, icon, cert, key, callback) {
     assert.strictEqual(typeof appId, 'string');
     assert.strictEqual(typeof appStoreId, 'string');
     assert(manifest && typeof manifest === 'object');
@@ -305,6 +305,8 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
     assert.strictEqual(typeof accessRestriction, 'object');
     assert.strictEqual(typeof oauthProxy, 'boolean');
     assert(!icon || typeof icon === 'string');
+    assert(cert === null || typeof cert === 'string');
+    assert(key === null || typeof key === 'string');
     assert.strictEqual(typeof callback, 'function');
 
     var error = manifestFormat.parse(manifest);
@@ -334,6 +336,9 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
         }
     }
 
+    error = settings.validateCertificate(cert, key, config.appFqdn(location));
+    if (error) return callback(new AppsError(AppsError.BAD_CERTIFICATE, error.message));
+
     debug('Will install app with id : ' + appId);
 
     purchase(appStoreId, function (error) {
@@ -342,6 +347,12 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
         appdb.add(appId, appStoreId, manifest, location.toLowerCase(), portBindings, accessRestriction, oauthProxy, function (error) {
             if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(getDuplicateErrorDetails(location.toLowerCase(), portBindings, error));
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+            // save cert to data/box/certs
+            if (cert && key) {
+                if (!safe.fs.writeFileSync(path.join(paths.APP_CERTS_DIR, config.appFqdn(location) + '.cert'), cert)) return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error saving cert: ' + safe.error.message));
+                if (!safe.fs.writeFileSync(path.join(paths.APP_CERTS_DIR, config.appFqdn(location) + '.key'), key)) return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error saving key: ' + safe.error.message));
+            }
 
             taskmanager.restartAppTask(appId);
 
