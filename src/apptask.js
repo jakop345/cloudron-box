@@ -263,12 +263,12 @@ function unregisterSubdomain(app, location, callback) {
         debugApp(app, 'Unregistering subdomain: %s', location);
 
         subdomains.remove(record, function (error) {
-            if (error && (error.reason === SubdomainError.STILL_BUSY || error.reason === SubdomainError.EXTERNAL_ERROR))return retryCallback(error); // try again
+            if (error && (error.reason === SubdomainError.STILL_BUSY || error.reason === SubdomainError.EXTERNAL_ERROR)) return retryCallback(error); // try again
 
-            retryCallback(error);
+            retryCallback(null, error);
         });
-    }, function (error) {
-        if (error) debugApp(app, 'Error unregistering subdomain: %s', error);
+    }, function (error, result) {
+        if (error || result instanceof Error) return callback(error || result);
 
         updateApp(app, { dnsRecordId: null }, callback);
     });
