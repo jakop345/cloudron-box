@@ -321,8 +321,8 @@ function addDnsRecords(callback) {
         { subdomain: '', type: 'A', value: sysinfo.getIp() },
         // webadmin domain
         { subdomain: 'my', type: 'A', value: sysinfo.getIp() },
-        // softfail all mails not from our IP. Note that this uses IP instead of 'a' should we use a load balancer in the future
-        { subdomain: '', type: 'TXT', value: '"v=spf1 ip4:' + sysinfo.getIp() + ' ~all"' },
+        // softfail all mails not from our domain
+        { subdomain: '', type: 'TXT', value: '"v=spf1 a:' + config.fqdn() + ' ~all"' },
         // t=s limits the domainkey to this domain and not it's subdomains
         { subdomain: DKIM_SELECTOR + '._domainkey', type: 'TXT', value: '"v=DKIM1; t=s; p=' + publicKey + '"' },
         // DMARC requires special setup if report email id is in different domain
