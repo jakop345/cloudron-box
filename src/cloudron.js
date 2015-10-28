@@ -60,6 +60,8 @@ var REBOOT_CMD = path.join(__dirname, 'scripts/reboot.sh'),
     BACKUP_SWAP_CMD = path.join(__dirname, 'scripts/backupswap.sh'),
     INSTALLER_UPDATE_URL = 'http://127.0.0.1:2020/api/v1/installer/update';
 
+var NOOP_CALLBACK = function (error) { if (error) console.error(error); };
+
 var gAddDnsRecordsTimerId = null,
     gCloudronDetails = null,             // cached cloudron details like region,size...
     gIsActivated = false;                // cached activation state so that return value is synchronous
@@ -114,7 +116,7 @@ function initialize(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     if (process.env.BOX_ENV !== 'test') {
-        exports.events.on(exports.EVENT_ACTIVATED, addDnsRecords);
+        addDnsRecords(sendHeartbeat);
     }
 
     userdb.count(function (error, count) {
@@ -122,7 +124,7 @@ function initialize(callback) {
 
         gIsActivated = count !== 0;
 
-        if (gIsActivated && process.env.BOX_ENV !== 'test') addDnsRecords();
+        if (gIsActivated) exports.events.emit(exports.EVENT_ACTIVATED);
 
         callback(null);
     });
@@ -292,11 +294,10 @@ function sendHeartbeat() {
     });
 }
 
-function addDnsRecords() {
-    if (config.isCustomDomain()) {
-        debug('addDnsRecords: Skip adding dns records for custom domain');
-        return;
-    }
+function addDnsRecords(callback) {
+    callback = callback || NOOP_CALLBACK;
+
+    if (config.isCustomDomain()) return callback();
 
     var DKIM_SELECTOR = 'mail';
     var DMARC_REPORT_EMAIL = 'dmarc-report@cloudron.io';
@@ -306,7 +307,7 @@ function addDnsRecords() {
 
     if (publicKey === null) {
         console.error('Error reading dkim public key. Stop DNS setup.');
-        return;
+        return callback(new Error('Error reading dkim public key'));
     }
 
     // remove header, footer and new lines
@@ -331,20 +332,20 @@ function addDnsRecords() {
     subdomains.addMany(records, function (error, changeIds) {
         if (error) {
             console.error('Admin DNS record addition failed', error);
-            gAddDnsRecordsTimerId = setTimeout(addDnsRecords, 10000);
+            gAddDnsRecordsTimerId = setTimeout(addDnsRecords.bind(null, callback), 10000);
             return;
         }
 
         function checkIfInSync() {
             debug('addDnsRecords: Check if admin DNS record is in sync.');
 
-            async.eachSeries(changeIds, function (changeId, callback) {
+            async.eachSeries(changeIds, function (changeId, iteratorCallback) {
                 subdomains.status(changeId, function (error, result) {
-                    if (error) return callback(new Error('Failed to check if admin DNS record is in sync.', error));
+                    if (error) return iteratorCallback(new Error('Failed to check if admin DNS record is in sync.', error));
 
-                    if (result !== 'done') return callback(new Error(changeId + ' is not in sync. result:' + result));
+                    if (result !== 'done') return iteratorCallback(new Error(changeId + ' is not in sync. result:' + result));
 
-                    callback(null);
+                    iteratorCallback(null);
                 });
             }, function (error) {
                 if (error) {
@@ -354,6 +355,7 @@ function addDnsRecords() {
                 }
                 debug('addDnsRecords: done');
                 config.setDnsInSync('DNS is in sync for ip ' + sysinfo.getIp());
+                callback();
             });
         }
 
