@@ -28,6 +28,7 @@ var assert = require('assert'),
     config = require('./config.js'),
     debug = require('debug')('box:mailer'),
     digitalocean = require('./digitalocean.js'),
+    dns = require('dns'),
     docker = require('./docker.js').connection,
     ejs = require('ejs'),
     nodemailer = require('nodemailer'),
@@ -66,14 +67,30 @@ function uninitialize(callback) {
 }
 
 function checkDns() {
-    digitalocean.checkPtrRecord(sysinfo.getIp(), config.fqdn(), function (error, ok) {
-        if (error || !ok) {
-            debug('PTR record not setup yet');
-            gCheckDnsTimerId = setTimeout(checkDns, 10000);
+    dns.resolveTxt(config.fqdn(), function (error, records) {
+        if (error) {
+            debug('checkDns: DNS error looking up TXT records for %s', config.fqdn(), error);
+            gCheckDnsTimerId = setTimeout(checkDns, 60000);
             return;
         }
 
-        gDnsReady = true;
+        var allowedToSendMail = false;
+
+        for (var i = 0; i < records.length; i++) {
+            var value = records[i][0];
+            if (value.indexOf('v=spf1 ') !== 0) continue; // not SPF
+
+            allowedToSendMail = value.indexOf('a:' + config.fqdn()) !== 0;
+            break; // only one SPF record can exist (https://support.google.com/a/answer/4568483?hl=en)
+        }
+
+        if (!allowedToSendMail) {
+            debug('checkDns: SPF records disallow sending email from cloudron. %j', records);
+            gCheckDnsTimerId = setTimeout(checkDns, 60000);
+            return;
+        }
+
+        debug('checkDns: commencing mail processing');
         processQueue();
     });
 }
