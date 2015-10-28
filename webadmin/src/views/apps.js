@@ -184,6 +184,12 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
                     $scope.appConfigure.error.password = 'Wrong password provided.';
                     $scope.appConfigure.password = '';
                     $('#appConfigurePasswordInput').focus();
+                } else if (error.statusCode === 400 && error.message.indexOf('cert is not valid') !== -1 ) {
+                    $scope.appConfigure.error.cert = error.message;
+                    $scope.appConfigure.certificateFileName = '';
+                    $scope.appConfigure.certificateFile = null;
+                    $scope.appConfigure.keyFileName = '';
+                    $scope.appConfigure.keyFile = null;
                 } else {
                     $scope.appConfigure.error.other = error.message;
                 }

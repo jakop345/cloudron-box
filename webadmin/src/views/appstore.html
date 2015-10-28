@@ -24,6 +24,7 @@
                                 </div>
                             </div>
                         </div>
+
                         <div class="has-error text-center" ng-show="appInstall.error.port">{{ appInstall.error.port }}</div>
                         <div ng-repeat="(env, info) in appInstall.portBindingsInfo">
                             <ng-form name="portInfo_form">
@@ -33,6 +34,7 @@
                                 </div>
                             </ng-form>
                         </div>
+
                         <div class="form-group" ng-show="appInstall.app.manifest.singleUser">
                             <label class="control-label" for="accessRestriction">User</label>
                             <p>This is a single user application.</p>
@@ -40,6 +42,31 @@
                                 <option ng-repeat="user in users" value="{{user.id}}">{{user.username}} - {{user.email}}</option>
                             </select>
                         </div>
+
+
+                        <br/>
+
+                        <div class="form-group" ng-class="{ 'has-error': false }" ng-show="config.isCustomDomain">
+                            <label class="control-label" for="appInstallCertificateInput">Certificate</label>
+                            <div class="input-group">
+                                <input type="file" id="appInstallCertificateFileInput" style="display:none"/>
+                                <input type="text" class="form-control" ng-model="appInstall.certificateFileName" id="appInstallCertificateInput" name="certificate" onclick="getElementById('appInstallCertificateFileInput').click();" style="cursor: pointer;">
+                                <span class="input-group-addon">
+                                    <i class="fa fa-upload" onclick="getElementById('appInstallCertificateFileInput').click();"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="form-group" ng-class="{ 'has-error': false }" ng-show="config.isCustomDomain">
+                            <label class="control-label" for="appInstallKeyInput">Private Key</label>
+                            <div class="input-group">
+                                <input type="file" id="appInstallKeyFileInput" style="display:none"/>
+                                <input type="text" class="form-control" ng-model="appInstall.keyFileName" id="appInstallKeyInput" name="key" onclick="getElementById('appInstallKeyFileInput').click();" style="cursor: pointer;">
+                                <span class="input-group-addon">
+                                    <i class="fa fa-upload" onclick="getElementById('appInstallKeyFileInput').click();"></i>
+                                </span>
+                            </div>
+                        </div>
+
                         <input class="ng-hide" type="submit" ng-disabled="appInstallForm.$invalid || busy"/>
                     </form>
                 </div>
