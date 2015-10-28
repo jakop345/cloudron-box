@@ -100,8 +100,8 @@ function configureNginx(app, callback) {
         var sourceDir = path.resolve(__dirname, '..');
         var endpoint = app.oauthProxy ? 'oauthproxy' : 'app';
         var vhost = config.appFqdn(app.location);
-        var certFilePath = safe.statSync(path.join(paths.APP_CERTS_DIR, vhost + '.cert')) ? path.join(paths.APP_CERTS_DIR, vhost + '.cert') : 'cert/host.cert';
-        var keyFilePath = safe.statSync(path.join(paths.APP_CERTS_DIR, vhost + '.key')) ? path.join(paths.APP_CERTS_DIR, vhost + '.key') : 'cert/host.key';
+        var certFilePath = safe.fs.statSync(path.join(paths.APP_CERTS_DIR, vhost + '.cert')) ? path.join(paths.APP_CERTS_DIR, vhost + '.cert') : 'cert/host.cert';
+        var keyFilePath = safe.fs.statSync(path.join(paths.APP_CERTS_DIR, vhost + '.key')) ? path.join(paths.APP_CERTS_DIR, vhost + '.key') : 'cert/host.key';
 
         var data = {
             sourceDir: sourceDir,
