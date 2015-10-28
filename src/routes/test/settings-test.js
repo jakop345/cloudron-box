@@ -8,6 +8,7 @@
 
 var appdb = require('../../appdb.js'),
     async = require('async'),
+    child_process = require('child_process'),
     config = require('../../config.js'),
     database = require('../../database.js'),
     expect = require('expect.js'),
@@ -273,19 +274,20 @@ describe('Settings API', function () {
     });
 
     describe('Certificates API', function () {
-        var certFile, keyFile;
+        var TEST_CRT_FILEPATH = null;
+        var TEST_KEY_FILEPATH = null;
 
-        before(function () {
-            certFile = '/tmp/host.cert';
-            fs.writeFileSync(certFile, 'test certificate');
+        before(function (done) {
+            // keep in sync with script
+            TEST_CRT_FILEPATH = '/tmp/test.crt';
+            TEST_KEY_FILEPATH = '/tmp/test.key';
 
-            keyFile = '/tmp/host.key';
-            fs.writeFileSync(keyFile, 'test key');
+            child_process.exec(__dirname + '/create_test_certificate.sh', done);
         });
 
         after(function () {
-            fs.unlinkSync(certFile);
-            fs.unlinkSync(keyFile);
+            fs.unlinkSync(TEST_CRT_FILEPATH);
+            fs.unlinkSync(TEST_KEY_FILEPATH);
         });
 
         it('cannot set certificate without token', function (done) {
@@ -300,7 +302,7 @@ describe('Settings API', function () {
         it('cannot set certificate without certificate', function (done) {
             request.post(SERVER_URL + '/api/v1/settings/certificate')
                    .query({ access_token: token })
-                   .attach('key', keyFile, 'key')
+                   .send({ key: fs.readFileSync(TEST_KEY_FILEPATH, 'utf-8') })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
@@ -311,7 +313,29 @@ describe('Settings API', function () {
         it('cannot set certificate without key', function (done) {
             request.post(SERVER_URL + '/api/v1/settings/certificate')
                    .query({ access_token: token })
-                   .attach('certificate', certFile, 'certificate')
+                   .send({ cert: fs.readFileSync(TEST_CRT_FILEPATH, 'utf-8') })
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(400);
+                done();
+            });
+        });
+
+        it('cannot set certificate with cert not being a string', function (done) {
+            request.post(SERVER_URL + '/api/v1/settings/certificate')
+                   .query({ access_token: token })
+                   .send({ cert: 1234, key: fs.readFileSync(TEST_KEY_FILEPATH, 'utf-8') })
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(400);
+                done();
+            });
+        });
+
+        it('cannot set certificate with key not being a string', function (done) {
+            request.post(SERVER_URL + '/api/v1/settings/certificate')
+                   .query({ access_token: token })
+                   .send({ cert: fs.readFileSync(TEST_CRT_FILEPATH, 'utf-8'), key: true })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
@@ -322,8 +346,7 @@ describe('Settings API', function () {
         it('can set certificate', function (done) {
             request.post(SERVER_URL + '/api/v1/settings/certificate')
                    .query({ access_token: token })
-                   .attach('key', keyFile, 'key')
-                   .attach('certificate', certFile, 'certificate')
+                   .send({ cert: fs.readFileSync(TEST_CRT_FILEPATH, 'utf-8'), key: fs.readFileSync(TEST_KEY_FILEPATH, 'utf-8') })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(202);
@@ -333,10 +356,10 @@ describe('Settings API', function () {
 
         it('did set the certificate', function (done) {
             var cert = fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'));
-            expect(cert).to.eql(fs.readFileSync(certFile));
+            expect(cert).to.eql(fs.readFileSync(TEST_CRT_FILEPATH));
 
             var key = fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'));
-            expect(key).to.eql(fs.readFileSync(keyFile));
+            expect(key).to.eql(fs.readFileSync(TEST_KEY_FILEPATH));
 
             done();
         });

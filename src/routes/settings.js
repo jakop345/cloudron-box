@@ -113,15 +113,12 @@ function setDnsConfig(req, res, next) {
 }
 
 function setCertificate(req, res, next) {
-    assert.strictEqual(typeof req.files, 'object');
+    assert.strictEqual(typeof req.body, 'object');
 
-    if (!req.files.certificate) return next(new HttpError(400, 'certificate must be provided'));
-    var certificate = safe.fs.readFileSync(req.files.certificate.path, 'utf8');
+    if (!req.body.cert || typeof req.body.cert !== 'string') return next(new HttpError(400, 'cert must be a string'));
+    if (!req.body.key || typeof req.body.key !== 'string') return next(new HttpError(400, 'key must be a string'));
 
-    if (!req.files.key) return next(new HttpError(400, 'key must be provided'));
-    var key = safe.fs.readFileSync(req.files.key.path, 'utf8');
-
-    settings.setCertificate(certificate, key, function (error) {
+    settings.setCertificate(req.body.cert, req.body.key, function (error) {
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(202, {}));
