@@ -9,17 +9,21 @@
 var constants = require('../constants.js'),
     expect = require('expect.js'),
     fs = require('fs'),
-    path = require('path');
+    path = require('path'),
+    paths = require('../paths.js'),
+    safe = require('safetydance');
 
 var config = null;
 
 describe('config', function () {
     before(function () {
+        safe.fs.unlinkSync(paths.DNS_IN_SYNC_FILE);
         delete require.cache[require.resolve('../config.js')];
         config = require('../config.js');
     });
 
     after(function () {
+        safe.fs.unlinkSync(paths.DNS_IN_SYNC_FILE);
         delete require.cache[require.resolve('../config.js')];
     });
 
