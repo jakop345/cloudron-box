@@ -50,22 +50,21 @@
 
                         <br/>
 
+                        <label class="control-label" for="appConfigureCertificateInput">Certificate (optional)</label>
                         <div class="has-error text-center" ng-show="appConfigure.error.cert">{{ appConfigure.error.cert }}</div>
                         <div class="form-group" ng-class="{ 'has-error': !appConfigureForm.certificate.$dirty && appConfigure.error.cert }" ng-show="config.isCustomDomain">
-                            <label class="control-label" for="appConfigureCertificateInput">Certificate (optional)</label>
                             <div class="input-group">
                                 <input type="file" id="appConfigureCertificateFileInput" style="display:none"/>
-                                <input type="text" class="form-control" ng-model="appConfigure.certificateFileName" id="appConfigureCertificateInput" name="certificate" onclick="getElementById('appConfigureCertificateFileInput').click();" style="cursor: pointer;" ng-required="appConfigure.keyFileName">
+                                <input type="text" class="form-control" placeholder="Certificate" ng-model="appConfigure.certificateFileName" id="appConfigureCertificateInput" name="certificate" onclick="getElementById('appConfigureCertificateFileInput').click();" style="cursor: pointer;" ng-required="appConfigure.keyFileName">
                                 <span class="input-group-addon">
                                     <i class="fa fa-upload" onclick="getElementById('appConfigureCertificateFileInput').click();"></i>
                                 </span>
                             </div>
                         </div>
                         <div class="form-group" ng-class="{ 'has-error': !appConfigureForm.key.$dirty && appConfigure.error.cert }" ng-show="config.isCustomDomain">
-                            <label class="control-label" for="appConfigureKeyInput">Private Key (optional)</label>
                             <div class="input-group">
                                 <input type="file" id="appConfigureKeyFileInput" style="display:none"/>
-                                <input type="text" class="form-control" ng-model="appConfigure.keyFileName" id="appConfigureKeyInput" name="key" onclick="getElementById('appConfigureKeyFileInput').click();" style="cursor: pointer;" ng-required="appConfigure.certificateFileName">
+                                <input type="text" class="form-control" placeholder="Key" ng-model="appConfigure.keyFileName" id="appConfigureKeyInput" name="key" onclick="getElementById('appConfigureKeyFileInput').click();" style="cursor: pointer;" ng-required="appConfigure.certificateFileName">
                                 <span class="input-group-addon">
                                     <i class="fa fa-upload" onclick="getElementById('appConfigureKeyFileInput').click();"></i>
                                 </span>
