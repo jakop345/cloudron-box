@@ -38,6 +38,7 @@ set_progress "10" "Ensuring directories"
 # keep these in sync with paths.js
 [[ "${is_update}" == "false" ]] && btrfs subvolume create "${DATA_DIR}/box"
 mkdir -p "${DATA_DIR}/box/appicons"
+mkdir -p "${DATA_DIR}/box/certs"
 mkdir -p "${DATA_DIR}/box/mail"
 mkdir -p "${DATA_DIR}/graphite"
 
