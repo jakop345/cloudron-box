@@ -154,6 +154,8 @@ function configureApp(req, res, next) {
     if (('portBindings' in data) && typeof data.portBindings !== 'object') return next(new HttpError(400, 'portBindings must be an object'));
     if (typeof data.accessRestriction !== 'object') return next(new HttpError(400, 'accessRestriction is required'));
     if (typeof data.oauthProxy !== 'boolean') return next(new HttpError(400, 'oauthProxy must be a boolean'));
+    if (data.cert && typeof data.cert !== 'string') return next(new HttpError(400, 'cert must be a string'));
+    if (data.key && typeof data.key !== 'string') return next(new HttpError(400, 'key must be a string'));
     if (data.cert && !data.key) return next(new HttpError(400, 'key must be provided'));
     if (!data.cert && data.key) return next(new HttpError(400, 'cert must be provided'));
 
