@@ -90,7 +90,7 @@ function checkDns() {
             return;
         }
 
-        debug('checkDns: commencing mail processing');
+        debug('checkDns: SPF check passed. commencing mail processing');
         processQueue();
     });
 }
