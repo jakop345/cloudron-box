@@ -26,6 +26,7 @@ exports = module.exports = {
     getDefaultSync: getDefaultSync,
     getAll: getAll,
 
+    validateCertificate: validateCertificate,
     setCertificate: setCertificate,
 
     AUTOUPDATE_PATTERN_KEY: 'autoupdate_pattern',
@@ -47,6 +48,7 @@ var assert = require('assert'),
     settingsdb = require('./settingsdb.js'),
     shell = require('./shell.js'),
     util = require('util'),
+    x509 = require('x509'),
     _ = require('underscore');
 
 var gDefaults = (function () {
@@ -89,6 +91,7 @@ util.inherits(SettingsError, Error);
 SettingsError.INTERNAL_ERROR = 'Internal Error';
 SettingsError.NOT_FOUND = 'Not Found';
 SettingsError.BAD_FIELD = 'Bad Field';
+SettingsError.INVALID_CERT = 'Invalid certificate';
 
 function setAutoupdatePattern(pattern, callback) {
     assert.strictEqual(typeof pattern, 'string');
@@ -271,12 +274,53 @@ function getAll(callback) {
     });
 }
 
-function setCertificate(certificate, key, callback) {
-    assert.strictEqual(typeof certificate, 'string');
+function validateCertificate(cert, key, fqdn) {
+    assert(cert === null || typeof cert === 'string');
+    assert(key === null || typeof key === 'string');
+    assert.strictEqual(typeof fqdn, 'string');
+
+    if (cert === null && key === null) return null;
+    if (!cert && key) return new Error('missing cert');
+    if (cert && !key) return new Error('missing key');
+
+    var content;
+    try {
+        content = x509.parseCert(cert);
+    } catch (e) {
+        return new Error('invalid cert');
+    }
+
+    // check expiration
+    if (content.notAfter < new Date()) return new Error('cert expired');
+
+    function matchesDomain(domain) {
+        if (domain === fqdn) return true;
+        if (domain.indexOf('*') === 0 && domain.slice(2) === fqdn.slice(fqdn.indexOf('.') + 1)) return true;
+
+        return false;
+    }
+
+    // check domain
+    var domains = content.altNames.concat(content.subject.commonName);
+    if (!domains.some(matchesDomain)) return new Error('cert is not valid for this domain');
+
+    // http://httpd.apache.org/docs/2.0/ssl/ssl_faq.html#verify
+    var certModulus = safe.child_process.execSync('openssl x509 -noout -modulus', { encoding: 'utf8', input: cert });
+    var keyModulus = safe.child_process.execSync('openssl rsa -noout -modulus', { encoding: 'utf8', input: key });
+    if (certModulus !== keyModulus) return new Error('key does not match the cert');
+
+    return null;
+}
+
+function setCertificate(cert, key, callback) {
+    assert.strictEqual(typeof cert, 'string');
     assert.strictEqual(typeof key, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    if (!safe.fs.writeFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), certificate)) {
+    var error = validateCertificate(cert, key, '*.' + config.fqdn());
+    if (error) return callback(new SettingsError(SettingsError.INVALID_CERT, error.message));
+
+    if (!safe.fs.writeFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), cert)) {
         return callback(new SettingsError(SettingsError.INTERNAL_ERROR, safe.error.message));
     }
 

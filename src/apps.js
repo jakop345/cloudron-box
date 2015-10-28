@@ -40,8 +40,7 @@ exports = module.exports = {
     // exported for testing
     _validateHostname: validateHostname,
     _validatePortBindings: validatePortBindings,
-    _validateAccessRestriction: validateAccessRestriction,
-    _validateCertificate: validateCertificate
+    _validateAccessRestriction: validateAccessRestriction
 };
 
 var addons = require('./addons.js'),
@@ -60,14 +59,14 @@ var addons = require('./addons.js'),
     path = require('path'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
+    settings = require('./settings.js'),
     semver = require('semver'),
     shell = require('./shell.js'),
     split = require('split'),
     superagent = require('superagent'),
     taskmanager = require('./taskmanager.js'),
     util = require('util'),
-    validator = require('validator'),
-    x509 = require('x509');
+    validator = require('validator');
 
 var BACKUP_APP_CMD = path.join(__dirname, 'scripts/backupapp.sh'),
     RESTORE_APP_CMD = path.join(__dirname, 'scripts/restoreapp.sh'),
@@ -195,44 +194,6 @@ function validateAccessRestriction(accessRestriction) {
     if (!accessRestriction.users || !Array.isArray(accessRestriction.users)) return new Error('users array property required');
     if (accessRestriction.users.length === 0) return new Error('users array cannot be empty');
     if (!accessRestriction.users.every(function (e) { return typeof e === 'string'; })) return new Error('All users have to be strings');
-
-    return null;
-}
-
-function validateCertificate(cert, key, fqdn) {
-    assert(cert === null || typeof cert === 'string');
-    assert(key === null || typeof key === 'string');
-    assert.strictEqual(typeof fqdn, 'string');
-
-    if (cert === null && key === null) return null;
-    if (!cert && key) return new Error('missing cert');
-    if (cert && !key) return new Error('missing key');
-
-    var content;
-    try {
-        content = x509.parseCert(cert);
-    } catch (e) {
-        return new Error('invalid cert');
-    }
-
-    // check expiration
-    if (content.notAfter < new Date()) return new Error('cert expired');
-
-    function matchesDomain(domain) {
-        if (domain === fqdn) return true;
-        if (domain.indexOf('*') === 0 && domain.slice(2) === fqdn.slice(fqdn.indexOf('.') + 1)) return true;
-
-        return false;
-    }
-
-    // check domain
-    var domains = content.altNames.concat(content.subject.commonName);
-    if (!domains.some(matchesDomain)) return new Error('cert is not valid for this domain');
-
-    // http://httpd.apache.org/docs/2.0/ssl/ssl_faq.html#verify
-    var certModulus = safe.child_process.execSync('openssl x509 -noout -modulus', { encoding: 'utf8', input: cert });
-    var keyModulus = safe.child_process.execSync('openssl rsa -noout -modulus', { encoding: 'utf8', input: key });
-    if (certModulus !== keyModulus) return new Error('key does not match the cert');
 
     return null;
 }
@@ -405,7 +366,7 @@ function configure(appId, location, portBindings, accessRestriction, oauthProxy,
     error = validateAccessRestriction(accessRestriction);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
-    error = validateCertificate(cert, key, config.appFqdn(location));
+    error = settings.validateCertificate(cert, key, config.appFqdn(location));
     if (error) return callback(new AppsError(AppsError.BAD_CERTIFICATE, error.message));
 
     appdb.get(appId, function (error, app) {
