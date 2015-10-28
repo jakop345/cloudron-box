@@ -197,9 +197,10 @@ function validateAccessRestriction(accessRestriction) {
     return null;
 }
 
-function validateCertificate(cert, key) {
+function validateCertificate(cert, key, fqdn) {
     assert(cert === null || typeof cert === 'string');
     assert(key === null || typeof key === 'string');
+    assert.strictEqual(typeof fqdn, 'string');
 
     if (cert === null && key === null) return null;
     if (cert === null && !key) return new Error('missing key');
@@ -377,7 +378,7 @@ function configure(appId, location, portBindings, accessRestriction, oauthProxy,
     error = validateAccessRestriction(accessRestriction);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
-    error = validateCertificate(cert, key);
+    error = validateCertificate(cert, key, config.appFqdn(location));
     if (error) return callback(new AppsError(AppsError.BAD_CERTIFICATE, error.message));
 
     appdb.get(appId, function (error, app) {
@@ -389,8 +390,8 @@ function configure(appId, location, portBindings, accessRestriction, oauthProxy,
 
         // save cert to data/box/certs
         if (cert && key) {
-            if (!safe.fs.writeFileSync(path.join(paths.APP_CERT_DIR, location + '.crt'), cert)) return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error saving cert: ' + safe.error.message));
-            if (!safe.fs.writeFileSync(path.join(paths.APP_CERT_DIR, location + '.key'), key)) return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error saving key: ' + safe.error.message));
+            if (!safe.fs.writeFileSync(path.join(paths.APP_CERT_DIR, config.appFqdn(location) + '.crt'), cert)) return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error saving cert: ' + safe.error.message));
+            if (!safe.fs.writeFileSync(path.join(paths.APP_CERT_DIR, config.appFqdn(location) + '.key'), key)) return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error saving key: ' + safe.error.message));
         }
 
         var values = {
