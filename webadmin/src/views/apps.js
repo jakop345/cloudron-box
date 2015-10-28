@@ -93,11 +93,6 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appRestoreForm.$setUntouched();
     };
 
-    $scope.certificateFile = null;
-    $scope.certificateFileName = '';
-    $scope.keyFile = null;
-    $scope.keyFileName = '';
-
     document.getElementById('appConfigureCertificateFileInput').onchange = function (event) {
         $scope.$apply(function () {
             $scope.appConfigure.certificateFile = null;
