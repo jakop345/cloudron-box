@@ -212,7 +212,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         $scope.appInstall.portBindingsInfo = $scope.appInstall.app.manifest.tcpPorts || {};   // Portbinding map only for information
         $scope.appInstall.portBindings = {};                            // This is the actual model holding the env:port pair
         $scope.appInstall.portBindingsEnabled = {};                     // This is the actual model holding the enabled/disabled flag
-        $scope.appInstall.accessRestriction = app.accessRestriction ? app.accessRestriction.users[0] : null;
+        $scope.appInstall.accessRestriction = app.accessRestriction ? app.accessRestriction.users[0] : $scope.user;
         $scope.appInstall.oauthProxy = false;
 
         // set default ports
@@ -245,7 +245,7 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
 
         // translate to accessRestriction object
         var accessRestriction = $scope.appInstall.app.manifest.singleUser ? {
-            users: [ $scope.appInstall.accessRestriction ]
+            users: [ $scope.appInstall.accessRestriction.id ]
         } : null;
 
         var data = {
@@ -253,8 +253,8 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
             portBindings: finalPortBindings,
             accessRestriction: accessRestriction,
             oauthProxy: $scope.appInstall.oauthProxy,
-            cert: $scope.appConfigure.certificateFile,
-            key: $scope.appConfigure.keyFile,
+            cert: $scope.appInstall.certificateFile,
+            key: $scope.appInstall.keyFile,
         };
 
         Client.installApp($scope.appInstall.app.id, $scope.appInstall.app.manifest, $scope.appInstall.app.title, data, function (error) {
