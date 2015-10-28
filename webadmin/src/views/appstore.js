@@ -19,7 +19,11 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         portBindings: {},
         accessRestriction: null,
         oauthProxy: false,
-        mediaLinks: []
+        mediaLinks: [],
+        certificateFile: null,
+        certificateFileName: '',
+        keyFile: null,
+        keyFileName: ''
     };
 
     $scope.appNotFound = {
@@ -142,6 +146,11 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         $scope.appInstall.installFormVisible = false;
         $scope.appInstall.resourceConstraintVisible = false;
         $scope.appInstall.mediaLinks = [];
+        $scope.appInstall.certificateFile = null;
+        $scope.appInstall.certificateFileName = '';
+        $scope.appInstall.keyFile = null;
+        $scope.appInstall.keyFileName = '';
+
         $('#collapseInstallForm').collapse('hide');
         $('#collapseResourceConstraint').collapse('hide');
         $('#collapseMediaLinksCarousel').collapse('show');
@@ -161,6 +170,34 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
             $('#collapseMediaLinksCarousel').collapse('hide');
             $('#collapseResourceConstraint').collapse('show');
         }
+    };
+
+    document.getElementById('appInstallCertificateFileInput').onchange = function (event) {
+        $scope.$apply(function () {
+            $scope.appInstall.certificateFile = null;
+            $scope.appInstall.certificateFileName = event.target.files[0].name;
+
+            var reader = new FileReader();
+            reader.onload = function (result) {
+                if (!result.target || !result.target.result) return console.error('Unable to read local file');
+                $scope.appInstall.certificateFile = result.target.result;
+            };
+            reader.readAsText(event.target.files[0]);
+        });
+    };
+
+    document.getElementById('appInstallKeyFileInput').onchange = function (event) {
+        $scope.$apply(function () {
+            $scope.appInstall.keyFile = null;
+            $scope.appInstall.keyFileName = event.target.files[0].name;
+
+            var reader = new FileReader();
+            reader.onload = function (result) {
+                if (!result.target || !result.target.result) return console.error('Unable to read local file');
+                $scope.appInstall.keyFile = result.target.result;
+            };
+            reader.readAsText(event.target.files[0]);
+        });
     };
 
     $scope.showInstall = function (app) {
@@ -211,7 +248,16 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
             users: [ $scope.appInstall.accessRestriction ]
         } : null;
 
-        Client.installApp($scope.appInstall.app.id, $scope.appInstall.app.manifest, $scope.appInstall.app.title, { location: $scope.appInstall.location || '', portBindings: finalPortBindings, accessRestriction: accessRestriction, oauthProxy: $scope.appInstall.oauthProxy }, function (error) {
+        var data = {
+            location: $scope.appInstall.location || '',
+            portBindings: finalPortBindings,
+            accessRestriction: accessRestriction,
+            oauthProxy: $scope.appInstall.oauthProxy,
+            cert: $scope.appConfigure.certificateFile,
+            key: $scope.appConfigure.keyFile,
+        };
+
+        Client.installApp($scope.appInstall.app.id, $scope.appInstall.app.manifest, $scope.appInstall.app.title, data, function (error) {
             if (error) {
                 if (error.statusCode === 409 && (error.message.indexOf('is reserved') !== -1 || error.message.indexOf('is already in use') !== -1)) {
                     $scope.appInstall.error.port = error.message;

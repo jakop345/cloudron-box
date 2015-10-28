@@ -204,7 +204,17 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
 
     Client.prototype.installApp = function (id, manifest, title, config, callback) {
         var that = this;
-        var data = { appStoreId: id, manifest: manifest, location: config.location, portBindings: config.portBindings, accessRestriction: config.accessRestriction, oauthProxy: config.oauthProxy };
+        var data = {
+            appStoreId: id,
+            manifest: manifest,
+            location: config.location,
+            portBindings: config.portBindings,
+            accessRestriction: config.accessRestriction,
+            oauthProxy: config.oauthProxy,
+            cert: config.cert,
+            key: config.key
+        };
+
         $http.post(client.apiOrigin + '/api/v1/apps/install', data).success(function (data, status) {
             if (status !== 202 || typeof data !== 'object') return defaultErrorHandler(callback);
 
