@@ -390,7 +390,7 @@ function configure(appId, location, portBindings, accessRestriction, oauthProxy,
 
         // save cert to data/box/certs
         if (cert && key) {
-            if (!safe.fs.writeFileSync(path.join(paths.APP_CERT_DIR, config.appFqdn(location) + '.crt'), cert)) return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error saving cert: ' + safe.error.message));
+            if (!safe.fs.writeFileSync(path.join(paths.APP_CERT_DIR, config.appFqdn(location) + '.cert'), cert)) return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error saving cert: ' + safe.error.message));
             if (!safe.fs.writeFileSync(path.join(paths.APP_CERT_DIR, config.appFqdn(location) + '.key'), key)) return callback(new AppsError(AppsError.INTERNAL_ERROR, 'Error saving key: ' + safe.error.message));
         }
 
