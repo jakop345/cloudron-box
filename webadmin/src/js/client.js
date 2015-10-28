@@ -61,6 +61,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         this._configListener = [];
         this._readyListener = [];
         this._userInfo = {
+            id: null,
             username: null,
             email: null,
             admin: false
@@ -122,6 +123,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
 
     Client.prototype.setUserInfo = function (userInfo) {
         // In order to keep the angular bindings alive, set each property individually
+        this._userInfo.id = userInfo.id;
         this._userInfo.username = userInfo.username;
         this._userInfo.email = userInfo.email;
         this._userInfo.admin = !!userInfo.admin;
