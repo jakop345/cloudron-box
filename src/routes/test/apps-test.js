@@ -61,9 +61,6 @@ var USERNAME_1 = 'user', PASSWORD_1 = 'password', EMAIL_1 ='user@me.com';
 var token = null; // authentication token
 var token_1 = null;
 
-var TEST_CRT_FILEPATH = null;
-var TEST_KEY_FILEPATH = null;
-
 var awsHostedZones = {
      HostedZones: [{
          Id: '/hostedzone/ZONEID',
@@ -132,14 +129,6 @@ function setup(done) {
 
                 callback();
             });
-        },
-
-        function (callback) {
-            // keep in sync with script
-            TEST_CRT_FILEPATH = '/tmp/test.crt';
-            TEST_KEY_FILEPATH = '/tmp/test.key';
-
-            child_process.exec(__dirname + '/create_test_certificate.sh', callback);
         },
 
         function (callback) {
@@ -1032,8 +1021,15 @@ describe('App installation - port bindings', function () {
     var awsHockInstance = hock.createHock({ throwOnUnmatched: false }), awsHockServer;
     var imageDeleted = false, imageCreated = false;
 
+    // *.foobar.com
+    var validCert1 = '-----BEGIN CERTIFICATE-----\nMIIBvjCCAWgCCQCg957GWuHtbzANBgkqhkiG9w0BAQsFADBmMQswCQYDVQQGEwJE\nRTEPMA0GA1UECAwGQmVybGluMQ8wDQYDVQQHDAZCZXJsaW4xEDAOBgNVBAoMB05l\nYnVsb24xDDAKBgNVBAsMA0NUTzEVMBMGA1UEAwwMKi5mb29iYXIuY29tMB4XDTE1\nMTAyODEzMDI1MFoXDTE2MTAyNzEzMDI1MFowZjELMAkGA1UEBhMCREUxDzANBgNV\nBAgMBkJlcmxpbjEPMA0GA1UEBwwGQmVybGluMRAwDgYDVQQKDAdOZWJ1bG9uMQww\nCgYDVQQLDANDVE8xFTATBgNVBAMMDCouZm9vYmFyLmNvbTBcMA0GCSqGSIb3DQEB\nAQUAA0sAMEgCQQC0FKf07ZWMcABFlZw+GzXK9EiZrlJ1lpnu64RhN99z7MXRr8cF\nnZVgY3jgatuyR5s3WdzUvye2eJ0rNicl2EZJAgMBAAEwDQYJKoZIhvcNAQELBQAD\nQQAw4bteMZAeJWl2wgNLw+wTwAH96E0jyxwreCnT5AxJLmgimyQ0XOF4FsssdRFj\nxD9WA+rktelBodJyPeTDNhIh\n-----END CERTIFICATE-----';
+    var validKey1 = '-----BEGIN RSA PRIVATE KEY-----\nMIIBOQIBAAJBALQUp/TtlYxwAEWVnD4bNcr0SJmuUnWWme7rhGE333PsxdGvxwWd\nlWBjeOBq27JHmzdZ3NS/J7Z4nSs2JyXYRkkCAwEAAQJALV2eykcoC48TonQEPmkg\nbhaIS57syw67jMLsQImQ02UABKzqHPEKLXPOZhZPS9hsC/hGIehwiYCXMUlrl+WF\nAQIhAOntBI6qaecNjAAVG7UbZclMuHROUONmZUF1KNq6VyV5AiEAxRLkfHWy52CM\njOQrX347edZ30f4QczvugXwsyuU9A1ECIGlGZ8Sk4OBA8n6fAUcyO06qnmCJVlHg\npTUeOvKk5c9RAiBs28+8dCNbrbhVhx/yQr9FwNM0+ttJW/yWJ+pyNQhr0QIgJTT6\nxwCWYOtbioyt7B9l+ENy3AMSO3Uq+xmIKkvItK4=\n-----END RSA PRIVATE KEY-----';
+
     before(function (done) {
+        config.set('fqdn', 'test.foobar.com');
+
         APP_ID = uuid.v4();
+
         async.series([
             function (callback) {
                 dockerProxy = startDockerProxy(function interceptor(req, res) {
@@ -1298,7 +1294,7 @@ describe('App installation - port bindings', function () {
     it('cannot reconfigure app with only the cert, no key', function (done) {
         request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
               .query({ access_token: token })
-              .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, oauthProxy: true, cert: fs.readFileSync(TEST_CRT_FILEPATH, 'utf-8') })
+              .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, oauthProxy: true, cert: validCert1 })
               .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             done();
@@ -1308,7 +1304,7 @@ describe('App installation - port bindings', function () {
     it('cannot reconfigure app with only the key, no cert', function (done) {
         request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
               .query({ access_token: token })
-              .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, oauthProxy: true, key: fs.readFileSync(TEST_KEY_FILEPATH, 'utf-8') })
+              .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, oauthProxy: true, key: validKey1 })
               .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             done();
@@ -1318,7 +1314,7 @@ describe('App installation - port bindings', function () {
     it('cannot reconfigure app with cert not bein a string', function (done) {
         request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
               .query({ access_token: token })
-              .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, oauthProxy: true, cert: 1234, key: fs.readFileSync(TEST_KEY_FILEPATH, 'utf-8') })
+              .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, oauthProxy: true, cert: 1234, key: validKey1 })
               .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             done();
@@ -1328,7 +1324,7 @@ describe('App installation - port bindings', function () {
     it('cannot reconfigure app with key not bein a string', function (done) {
         request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
               .query({ access_token: token })
-              .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, oauthProxy: true, cert: fs.readFileSync(TEST_CRT_FILEPATH, 'utf-8'), key: 1234 })
+              .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, oauthProxy: true, cert: validCert1, key: 1234 })
               .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             done();
@@ -1432,8 +1428,9 @@ describe('App installation - port bindings', function () {
     it('can reconfigure app with custom certificate', function (done) {
         request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
               .query({ access_token: token })
-              .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, oauthProxy: true, cert: fs.readFileSync(TEST_CRT_FILEPATH, 'utf-8'), key: fs.readFileSync(TEST_KEY_FILEPATH, 'utf-8') })
+              .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, oauthProxy: true, cert: validCert1, key: validKey1 })
               .end(function (err, res) {
+                console.log('---', res.text, res.body)
             expect(res.statusCode).to.equal(202);
             checkConfigureStatus(0, done);
         });
