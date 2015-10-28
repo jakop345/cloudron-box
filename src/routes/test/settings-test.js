@@ -8,7 +8,6 @@
 
 var appdb = require('../../appdb.js'),
     async = require('async'),
-    child_process = require('child_process'),
     config = require('../../config.js'),
     database = require('../../database.js'),
     expect = require('expect.js'),
@@ -28,6 +27,8 @@ var token = null;
 
 var server;
 function setup(done) {
+    config.set('fqdn', 'foobar.com');
+
     async.series([
         server.start.bind(server),
 
@@ -274,21 +275,13 @@ describe('Settings API', function () {
     });
 
     describe('Certificates API', function () {
-        var TEST_CRT_FILEPATH = null;
-        var TEST_KEY_FILEPATH = null;
+        // foobar.com
+        var validCert0 = '-----BEGIN CERTIFICATE-----\nMIIBujCCAWQCCQCjLyTKzAJ4FDANBgkqhkiG9w0BAQsFADBkMQswCQYDVQQGEwJE\nRTEPMA0GA1UECAwGQmVybGluMQ8wDQYDVQQHDAZCZXJsaW4xEDAOBgNVBAoMB05l\nYnVsb24xDDAKBgNVBAsMA0NUTzETMBEGA1UEAwwKZm9vYmFyLmNvbTAeFw0xNTEw\nMjgxMjM5MjZaFw0xNjEwMjcxMjM5MjZaMGQxCzAJBgNVBAYTAkRFMQ8wDQYDVQQI\nDAZCZXJsaW4xDzANBgNVBAcMBkJlcmxpbjEQMA4GA1UECgwHTmVidWxvbjEMMAoG\nA1UECwwDQ1RPMRMwEQYDVQQDDApmb29iYXIuY29tMFwwDQYJKoZIhvcNAQEBBQAD\nSwAwSAJBAMeYofgwHeNVmGkGe0gj4dnX2ciifDi7X2K/oVHp7mxuHjGMSYP9Z7b6\n+mu0IMf4OedwXStHBeO8mwjKxZmE7p8CAwEAATANBgkqhkiG9w0BAQsFAANBAJI7\nFUUHXjR63UFk8pgxp0c7hEGqj4VWWGsmo8oZnnX8jGVmQDKbk8o3MtDujfqupmMR\nMo7tSAFlG7zkm3GYhpw=\n-----END CERTIFICATE-----';
+        var validKey0 = '-----BEGIN RSA PRIVATE KEY-----\nMIIBOwIBAAJBAMeYofgwHeNVmGkGe0gj4dnX2ciifDi7X2K/oVHp7mxuHjGMSYP9\nZ7b6+mu0IMf4OedwXStHBeO8mwjKxZmE7p8CAwEAAQJBAJS59Sb8o6i8JT9NJxvQ\nMQCkSJGqEaosZJ0uccSZ7aE48v+H7HiPzXAueitohcEif2Wp1EZ1RbRMURhznNiZ\neLECIQDxxqhakO6wc7H68zmpRXJ5ZxGUNbM24AMtpONAtEw9iwIhANNWtp6P74OV\ntvfOmtubbqw768fmGskFCOcp5oF8oF29AiBkTAf9AhCyjFwyAYJTEScq67HkLN66\njfVjkvpfFixmfwIgI+xldmZ5DCDyzQSthg7RrS0yUvRmMS1N6h1RNUl96PECIQDl\nit4lFcytbqNo1PuBZvzQE+plCjiJqXHYo3WCst1Jbg==\n-----END RSA PRIVATE KEY-----';
 
-        before(function (done) {
-            // keep in sync with script
-            TEST_CRT_FILEPATH = '/tmp/test.crt';
-            TEST_KEY_FILEPATH = '/tmp/test.key';
-
-            child_process.exec(__dirname + '/create_test_certificate.sh', done);
-        });
-
-        after(function () {
-            fs.unlinkSync(TEST_CRT_FILEPATH);
-            fs.unlinkSync(TEST_KEY_FILEPATH);
-        });
+        // *.foobar.com
+        var validCert1 = '-----BEGIN CERTIFICATE-----\nMIIBvjCCAWgCCQCg957GWuHtbzANBgkqhkiG9w0BAQsFADBmMQswCQYDVQQGEwJE\nRTEPMA0GA1UECAwGQmVybGluMQ8wDQYDVQQHDAZCZXJsaW4xEDAOBgNVBAoMB05l\nYnVsb24xDDAKBgNVBAsMA0NUTzEVMBMGA1UEAwwMKi5mb29iYXIuY29tMB4XDTE1\nMTAyODEzMDI1MFoXDTE2MTAyNzEzMDI1MFowZjELMAkGA1UEBhMCREUxDzANBgNV\nBAgMBkJlcmxpbjEPMA0GA1UEBwwGQmVybGluMRAwDgYDVQQKDAdOZWJ1bG9uMQww\nCgYDVQQLDANDVE8xFTATBgNVBAMMDCouZm9vYmFyLmNvbTBcMA0GCSqGSIb3DQEB\nAQUAA0sAMEgCQQC0FKf07ZWMcABFlZw+GzXK9EiZrlJ1lpnu64RhN99z7MXRr8cF\nnZVgY3jgatuyR5s3WdzUvye2eJ0rNicl2EZJAgMBAAEwDQYJKoZIhvcNAQELBQAD\nQQAw4bteMZAeJWl2wgNLw+wTwAH96E0jyxwreCnT5AxJLmgimyQ0XOF4FsssdRFj\nxD9WA+rktelBodJyPeTDNhIh\n-----END CERTIFICATE-----';
+        var validKey1 = '-----BEGIN RSA PRIVATE KEY-----\nMIIBOQIBAAJBALQUp/TtlYxwAEWVnD4bNcr0SJmuUnWWme7rhGE333PsxdGvxwWd\nlWBjeOBq27JHmzdZ3NS/J7Z4nSs2JyXYRkkCAwEAAQJALV2eykcoC48TonQEPmkg\nbhaIS57syw67jMLsQImQ02UABKzqHPEKLXPOZhZPS9hsC/hGIehwiYCXMUlrl+WF\nAQIhAOntBI6qaecNjAAVG7UbZclMuHROUONmZUF1KNq6VyV5AiEAxRLkfHWy52CM\njOQrX347edZ30f4QczvugXwsyuU9A1ECIGlGZ8Sk4OBA8n6fAUcyO06qnmCJVlHg\npTUeOvKk5c9RAiBs28+8dCNbrbhVhx/yQr9FwNM0+ttJW/yWJ+pyNQhr0QIgJTT6\nxwCWYOtbioyt7B9l+ENy3AMSO3Uq+xmIKkvItK4=\n-----END RSA PRIVATE KEY-----';
 
         it('cannot set certificate without token', function (done) {
             request.post(SERVER_URL + '/api/v1/settings/certificate')
@@ -302,7 +295,7 @@ describe('Settings API', function () {
         it('cannot set certificate without certificate', function (done) {
             request.post(SERVER_URL + '/api/v1/settings/certificate')
                    .query({ access_token: token })
-                   .send({ key: fs.readFileSync(TEST_KEY_FILEPATH, 'utf-8') })
+                   .send({ key: validKey1 })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
@@ -313,7 +306,7 @@ describe('Settings API', function () {
         it('cannot set certificate without key', function (done) {
             request.post(SERVER_URL + '/api/v1/settings/certificate')
                    .query({ access_token: token })
-                   .send({ cert: fs.readFileSync(TEST_CRT_FILEPATH, 'utf-8') })
+                   .send({ cert: validCert1 })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
@@ -324,7 +317,7 @@ describe('Settings API', function () {
         it('cannot set certificate with cert not being a string', function (done) {
             request.post(SERVER_URL + '/api/v1/settings/certificate')
                    .query({ access_token: token })
-                   .send({ cert: 1234, key: fs.readFileSync(TEST_KEY_FILEPATH, 'utf-8') })
+                   .send({ cert: 1234, key: validKey1 })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
@@ -335,7 +328,18 @@ describe('Settings API', function () {
         it('cannot set certificate with key not being a string', function (done) {
             request.post(SERVER_URL + '/api/v1/settings/certificate')
                    .query({ access_token: token })
-                   .send({ cert: fs.readFileSync(TEST_CRT_FILEPATH, 'utf-8'), key: true })
+                   .send({ cert: validCert1, key: true })
+                   .end(function (error, result) {
+                expect(error).to.not.be.ok();
+                expect(result.statusCode).to.equal(400);
+                done();
+            });
+        });
+
+        it('cannot set non wildcard certificate', function (done) {
+            request.post(SERVER_URL + '/api/v1/settings/certificate')
+                   .query({ access_token: token })
+                   .send({ cert: validCert0, key: validKey0 })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
@@ -346,7 +350,7 @@ describe('Settings API', function () {
         it('can set certificate', function (done) {
             request.post(SERVER_URL + '/api/v1/settings/certificate')
                    .query({ access_token: token })
-                   .send({ cert: fs.readFileSync(TEST_CRT_FILEPATH, 'utf-8'), key: fs.readFileSync(TEST_KEY_FILEPATH, 'utf-8') })
+                   .send({ cert: validCert1, key: validKey1 })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(202);
@@ -355,11 +359,11 @@ describe('Settings API', function () {
         });
 
         it('did set the certificate', function (done) {
-            var cert = fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'));
-            expect(cert).to.eql(fs.readFileSync(TEST_CRT_FILEPATH));
+            var cert = fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), 'utf-8');
+            expect(cert).to.eql(validCert1);
 
-            var key = fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'));
-            expect(key).to.eql(fs.readFileSync(TEST_KEY_FILEPATH));
+            var key = fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'), 'utf-8');
+            expect(key).to.eql(validKey1);
 
             done();
         });
