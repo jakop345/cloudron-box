@@ -46,15 +46,6 @@ function initialize(callback) {
     settings.events.on(settings.AUTOUPDATE_PATTERN_KEY, autoupdatePatternChanged);
 
     cloudron.events.on(cloudron.EVENT_ACTIVATED, recreateJobs);
-    cloudron.events.on(cloudron.EVENT_ACTIVATED, cloudron.sendHeartbeat);
-
-    // send heartbeats regardless of activation
-    cloudron.sendHeartbeat();
-    gHeartbeatJob = new CronJob({
-        cronTime: '00 */1 * * * *', // every minute
-        onTick: cloudron.sendHeartbeat,
-        start: true
-    });
 
     gInitialized = true;
 
@@ -70,6 +61,14 @@ function recreateJobs(unusedTimeZone, callback) {
 
     settings.getAll(function (error, allSettings) {
         debug('Creating jobs with timezone %s', allSettings[settings.TIME_ZONE_KEY]);
+
+        if (gHeartbeatJob) gBackupJob.stop();
+        gHeartbeatJob = new CronJob({
+            cronTime: '00 */1 * * * *', // every minute
+            onTick: cloudron.sendHeartbeat,
+            start: true,
+            timeZone: allSettings[settings.TIME_ZONE_KEY]
+        });
 
         if (gBackupJob) gBackupJob.stop();
         gBackupJob = new CronJob({
