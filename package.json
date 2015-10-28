@@ -62,7 +62,8 @@
     "tail-stream": "https://registry.npmjs.org/tail-stream/-/tail-stream-0.2.1.tgz",
     "underscore": "^1.7.0",
     "valid-url": "^1.0.9",
-    "validator": "^3.30.0"
+    "validator": "^3.30.0",
+    "x509": "^0.2.2"
   },
   "devDependencies": {
     "apidoc": "*",

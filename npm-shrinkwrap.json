@@ -1918,48 +1918,6 @@
         }
       }
     },
-    "node-sass": {
-      "version": "3.3.3",
-      "from": "node-sass@>=3.0.0-alpha.0 <4.0.0",
-      "resolved": "https://registry.npmjs.org/node-sass/-/node-sass-3.3.3.tgz",
-      "dependencies": {
-        "ansi-styles": {
-          "version": "2.1.0",
-          "from": "ansi-styles@>=2.1.0 <3.0.0",
-          "resolved": "https://registry.npmjs.org/ansi-styles/-/ansi-styles-2.1.0.tgz"
-        },
-        "chalk": {
-          "version": "1.1.1",
-          "from": "chalk@>=1.1.1 <2.0.0",
-          "resolved": "https://registry.npmjs.org/chalk/-/chalk-1.1.1.tgz"
-        },
-        "get-stdin": {
-          "version": "4.0.1",
-          "from": "get-stdin@>=4.0.1 <5.0.0",
-          "resolved": "https://registry.npmjs.org/get-stdin/-/get-stdin-4.0.1.tgz"
-        },
-        "glob": {
-          "version": "5.0.15",
-          "from": "glob@>=5.0.14 <6.0.0",
-          "resolved": "https://registry.npmjs.org/glob/-/glob-5.0.15.tgz"
-        },
-        "minimatch": {
-          "version": "3.0.0",
-          "from": "minimatch@>=2.0.0 <3.0.0||>=3.0.0 <4.0.0",
-          "resolved": "https://registry.npmjs.org/minimatch/-/minimatch-3.0.0.tgz"
-        },
-        "nan": {
-          "version": "2.1.0",
-          "from": "nan@>=2.0.8 <3.0.0",
-          "resolved": "https://registry.npmjs.org/nan/-/nan-2.1.0.tgz"
-        },
-        "strip-ansi": {
-          "version": "3.0.0",
-          "from": "strip-ansi@>=3.0.0 <4.0.0",
-          "resolved": "https://registry.npmjs.org/strip-ansi/-/strip-ansi-3.0.0.tgz"
-        }
-      }
-    },
     "node-uuid": {
       "version": "1.4.3",
       "from": "node-uuid@>=1.4.3 <2.0.0",
@@ -3724,6 +3682,18 @@
       "version": "1.5.8",
       "from": "wrench@>=1.5.8 <1.6.0",
       "resolved": "https://registry.npmjs.org/wrench/-/wrench-1.5.8.tgz"
+    },
+    "x509": {
+      "version": "0.2.2",
+      "from": "x509@*",
+      "resolved": "https://registry.npmjs.org/x509/-/x509-0.2.2.tgz",
+      "dependencies": {
+        "nan": {
+          "version": "2.0.9",
+          "from": "nan@2.0.9",
+          "resolved": "https://registry.npmjs.org/nan/-/nan-2.0.9.tgz"
+        }
+      }
     },
     "xtend": {
       "version": "4.0.0",
