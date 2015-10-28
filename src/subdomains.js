@@ -4,8 +4,8 @@
 
 var assert = require('assert'),
     async = require('async'),
-    aws = require('./aws.js'),
-    caas = require('./caas.js'),
+    route53 = require('./dns/route53.js'),
+    caas = require('./dns/caas.js'),
     config = require('./config.js'),
     debug = require('debug')('box:subdomains'),
     util = require('util'),
@@ -18,10 +18,9 @@ module.exports = exports = {
     status: status
 };
 
-// choose which subdomain backend we use
-// for test purpose we use aws
+// choose which subdomain backend we use for test purpose we use route53
 function api() {
-    return config.isCustomDomain() || config.TEST ? aws : caas;
+    return config.isCustomDomain() || config.TEST ? route53 : caas;
 }
 
 function add(record, callback) {
