@@ -99,7 +99,20 @@ function configureNginx(app, callback) {
 
         var sourceDir = path.resolve(__dirname, '..');
         var endpoint = app.oauthProxy ? 'oauthproxy' : 'app';
-        var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, { sourceDir: sourceDir, adminOrigin: config.adminOrigin(), vhost: config.appFqdn(app.location), port: freePort, endpoint: endpoint });
+        var vhost = config.appFqdn(app.location);
+        var certFilePath = safe.statSync(path.join(paths.APP_CERTS_DIR, vhost + '.cert')) ? path.join(paths.APP_CERTS_DIR, vhost + '.cert') : 'cert/host.cert';
+        var keyFilePath = safe.statSync(path.join(paths.APP_CERTS_DIR, vhost + '.key')) ? path.join(paths.APP_CERTS_DIR, vhost + '.key') : 'cert/host.key';
+
+        var data = {
+            sourceDir: sourceDir,
+            adminOrigin: config.adminOrigin(),
+            vhost: vhost,
+            port: freePort,
+            endpoint: endpoint,
+            certFilePath: certFilePath,
+            keyFilePath: keyFilePath
+        };
+        var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, data);
 
         var nginxConfigFilename = path.join(paths.NGINX_APPCONFIG_DIR, app.id + '.conf');
         debugApp(app, 'writing config to %s', nginxConfigFilename);
