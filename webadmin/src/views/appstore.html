@@ -45,22 +45,21 @@
 
                         <br/>
 
+                        <label class="control-label" for="appInstallCertificateInput">Certificate (optional)</label>
                         <div class="has-error text-center" ng-show="appInstall.error.cert">{{ appInstall.error.cert }}</div>
                         <div class="form-group" ng-class="{ 'has-error': !appInstallForm.certificate.$dirty && appInstall.error.cert }" ng-show="config.isCustomDomain">
-                            <label class="control-label" for="appInstallCertificateInput">Certificate (optional)</label>
                             <div class="input-group">
                                 <input type="file" id="appInstallCertificateFileInput" style="display:none"/>
-                                <input type="text" class="form-control" ng-model="appInstall.certificateFileName" id="appInstallCertificateInput" name="certificate" onclick="getElementById('appInstallCertificateFileInput').click();" style="cursor: pointer;" ng-required="appInstall.keyFileName">
+                                <input type="text" class="form-control" placeholder="Certificate" ng-model="appInstall.certificateFileName" id="appInstallCertificateInput" name="certificate" onclick="getElementById('appInstallCertificateFileInput').click();" style="cursor: pointer;" ng-required="appInstall.keyFileName">
                                 <span class="input-group-addon">
                                     <i class="fa fa-upload" onclick="getElementById('appInstallCertificateFileInput').click();"></i>
                                 </span>
                             </div>
                         </div>
                         <div class="form-group" ng-class="{ 'has-error': !appInstallForm.key.$dirty && appInstall.error.cert }" ng-show="config.isCustomDomain">
-                            <label class="control-label" for="appInstallKeyInput">Private Key (optional)</label>
                             <div class="input-group">
                                 <input type="file" id="appInstallKeyFileInput" style="display:none"/>
-                                <input type="text" class="form-control" ng-model="appInstall.keyFileName" id="appInstallKeyInput" name="key" onclick="getElementById('appInstallKeyFileInput').click();" style="cursor: pointer;" ng-required="appInstall.certificateFileName">
+                                <input type="text" class="form-control" placeholder="Key" ng-model="appInstall.keyFileName" id="appInstallKeyInput" name="key" onclick="getElementById('appInstallKeyFileInput').click();" style="cursor: pointer;" ng-required="appInstall.certificateFileName">
                                 <span class="input-group-addon">
                                     <i class="fa fa-upload" onclick="getElementById('appInstallKeyFileInput').click();"></i>
                                 </span>
