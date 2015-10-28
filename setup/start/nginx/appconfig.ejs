@@ -10,8 +10,8 @@ server {
 
     ssl                  on;
     # paths are relative to prefix and not to this file
-    ssl_certificate      cert/host.cert;
-    ssl_certificate_key  cert/host.key;
+    ssl_certificate      <%= certFilePath %>;
+    ssl_certificate_key  <%= keyFilePath %>;
     ssl_session_timeout  5m;
     ssl_session_cache shared:SSL:50m;
 
