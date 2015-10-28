@@ -301,7 +301,7 @@ function addDnsRecords(callback) {
 
     if (config.isCustomDomain()) return callback();
 
-    var DKIM_SELECTOR = 'mail';
+    var DKIM_SELECTOR = 'cloudron';
     var DMARC_REPORT_EMAIL = 'dmarc-report@cloudron.io';
 
     var dkimPublicKeyFile = path.join(paths.MAIL_DATA_DIR, 'dkim/' + config.fqdn() + '/public');
