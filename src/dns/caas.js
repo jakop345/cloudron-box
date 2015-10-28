@@ -9,9 +9,9 @@ exports = module.exports = {
 };
 
 var assert = require('assert'),
-    config = require('./config.js'),
-    debug = require('debug')('box:caas'),
-    SubdomainError = require('./subdomainerror.js'),
+    config = require('../config.js'),
+    debug = require('debug')('box:dns/caas'),
+    SubdomainError = require('../subdomainerror.js'),
     superagent = require('superagent'),
     util = require('util');
 
