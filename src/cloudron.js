@@ -115,7 +115,6 @@ function initialize(callback) {
 
     if (process.env.BOX_ENV !== 'test') {
         exports.events.on(exports.EVENT_ACTIVATED, addDnsRecords);
-        exports.events.on(exports.EVENT_ACTIVATED, sendHeartbeat); // optmization for not waiting till the next 1-min
     }
 
     userdb.count(function (error, count) {
