@@ -195,7 +195,9 @@ function activate(username, password, email, ip, callback) {
                 if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
                 gIsActivated = true;
-                exports.events.emit(exports.EVENT_ACTIVATED);
+
+                // EE API is sync. do not keep the REST API reponse waiting
+                process.nextTick(function () { exports.events.emit(exports.EVENT_ACTIVATED); });
 
                 callback(null, { token: token, expires: expires });
             });
