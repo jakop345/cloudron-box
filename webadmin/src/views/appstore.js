@@ -267,6 +267,12 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
                     $('#appInstallLocationInput').focus();
                 } else if (error.statusCode === 402) {
                     $scope.appInstall.error.other = 'Unable to purchase this app<br/>Please make sure your payment is setup <a href="' + $scope.config.webServerOrigin + '/console.html#/userprofile" target="_blank">here</a>';
+                } else if (error.statusCode === 400 && error.message.indexOf('cert') !== -1 ) {
+                    $scope.appInstall.error.cert = error.message;
+                    $scope.appInstall.certificateFileName = '';
+                    $scope.appInstall.certificateFile = null;
+                    $scope.appInstall.keyFileName = '';
+                    $scope.appInstall.keyFile = null;
                 } else {
                     $scope.appInstall.error.other = error.message;
                 }
