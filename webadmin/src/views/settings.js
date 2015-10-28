@@ -90,22 +90,33 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
 
     document.getElementById('certificateFileInput').onchange = function (event) {
         $scope.$apply(function () {
-            $scope.certificateFile = event.target.files[0];
+            $scope.certificateFile = null;
             $scope.certificateFileName = event.target.files[0].name;
+
+            var reader = new FileReader();
+            reader.onload = function (result) {
+                if (!result.target || !result.target.result) return console.error('Unable to read local file');
+                $scope.certificateFile = result.target.result;
+            };
+            reader.readAsText(event.target.files[0]);
         });
     };
 
     document.getElementById('keyFileInput').onchange = function (event) {
         $scope.$apply(function () {
-            $scope.keyFile = event.target.files[0];
+            $scope.keyFile = null;
             $scope.keyFileName = event.target.files[0].name;
+
+            var reader = new FileReader();
+            reader.onload = function (result) {
+                if (!result.target || !result.target.result) return console.error('Unable to read local file');
+                $scope.keyFile = result.target.result;
+            };
+            reader.readAsText(event.target.files[0]);
         });
     };
 
     $scope.setCertificate = function () {
-        if (!$scope.certificateFile) return console.log('Certificate not set');
-        if (!$scope.keyFile) return console.log('Key not set');
-
         Client.setCertificate($scope.certificateFile, $scope.keyFile, function (error) {
             if (error) return console.error(error);
 

@@ -451,14 +451,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
     };
 
     Client.prototype.setCertificate = function (certificateFile, keyFile, callback) {
-        var fd = new FormData();
-        fd.append('certificate', certificateFile);
-        fd.append('key', keyFile);
-
-        $http.post(client.apiOrigin + '/api/v1/settings/certificate', fd, {
-            headers: { 'Content-Type': undefined },
-            transformRequest: angular.identity
-        }).success(function(data, status) {
+        $http.post(client.apiOrigin + '/api/v1/settings/certificate', { cert: certificateFile, key: keyFile }).success(function(data, status) {
             if (status !== 202) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
