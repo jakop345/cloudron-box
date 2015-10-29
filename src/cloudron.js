@@ -115,9 +115,7 @@ CloudronError.NOT_FOUND = 'Not found';
 function initialize(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    if (process.env.BOX_ENV !== 'test') {
-        addDnsRecords(sendHeartbeat);
-    }
+    exports.events.on(exports.EVENT_ACTIVATED, addDnsRecords);
 
     userdb.count(function (error, count) {
         if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
@@ -338,30 +336,8 @@ function addDnsRecords(callback) {
             return;
         }
 
-        function checkIfInSync() {
-            debug('addDnsRecords: Check if admin DNS record is in sync.');
-
-            async.eachSeries(changeIds, function (changeId, iteratorCallback) {
-                subdomains.status(changeId, function (error, result) {
-                    if (error) return iteratorCallback(new Error('Failed to check if admin DNS record is in sync.', error));
-
-                    if (result !== 'done') return iteratorCallback(new Error(changeId + ' is not in sync. result:' + result));
-
-                    iteratorCallback(null);
-                });
-            }, function (error) {
-                if (error) {
-                    debug(error.message);
-                    gAddDnsRecordsTimerId = setTimeout(checkIfInSync, 5000);
-                    return;
-                }
-                debug('addDnsRecords: done');
-                config.setDnsInSync('DNS is in sync for ip ' + sysinfo.getIp());
-                callback();
-            });
-        }
-
-        checkIfInSync();
+        debug('added DNS records with changeIds: %j', changeIds);
+        callback();
     });
 }
 
