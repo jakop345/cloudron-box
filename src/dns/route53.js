@@ -5,6 +5,7 @@
 exports = module.exports = {
     addSubdomain: addSubdomain,
     delSubdomain: delSubdomain,
+    updateSubdomain: updateSubdomain,
     getChangeStatus: getChangeStatus
 };
 
@@ -108,6 +109,16 @@ function addSubdomain(zoneName, subdomain, type, value, callback) {
             });
         });
     });
+}
+
+function updateSubdomain(zoneName, subdomain, type, value, callback) {
+    assert.strictEqual(typeof zoneName, 'string');
+    assert.strictEqual(typeof subdomain, 'string');
+    assert.strictEqual(typeof type, 'string');
+    assert.strictEqual(typeof value, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    addSubdomain(zoneName, subdomain, type, value, callback);
 }
 
 function delSubdomain(zoneName, subdomain, type, value, callback) {
