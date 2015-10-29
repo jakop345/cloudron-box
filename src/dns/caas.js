@@ -5,6 +5,7 @@
 exports = module.exports = {
     addSubdomain: addSubdomain,
     delSubdomain: delSubdomain,
+    updateSubdomain: updateSubdomain,
     getChangeStatus: getChangeStatus
 };
 
@@ -42,6 +43,42 @@ function addSubdomain(zoneName, subdomain, type, value, callback) {
 
             return callback(null, result.body.changeId);
         });
+}
+
+
+function getSubdomain(zoneName, subdomain, type, callback) {
+    assert.strictEqual(typeof zoneName, 'string');
+    assert.strictEqual(typeof subdomain, 'string');
+    assert.strictEqual(typeof type, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    var fqdn = subdomain !== '' && type === 'TXT' ? subdomain + '.' + config.fqdn() : config.appFqdn(subdomain);
+
+    debug('getSubdomain: zoneName: %s subdomain: %s type: %s fqdn: %s', zoneName, subdomain, type, fqdn);
+
+    superagent
+        .get(config.apiServerOrigin() + '/api/v1/domains/' + fqdn)
+        .query({ token: config.token(), type: type })
+        .end(function (error, result) {
+            if (error) return callback(error);
+            if (result.status !== 200) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, util.format('%s %j', result.status, result.body)));
+
+            return callback(null, result.body.values);
+        });
+}
+
+function updateSubdomain(zoneName, subdomain, type, value, callback) {
+    assert.strictEqual(typeof zoneName, 'string');
+    assert.strictEqual(typeof subdomain, 'string');
+    assert.strictEqual(typeof type, 'string');
+    assert.strictEqual(typeof value, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    getSubdomain(zoneName, subdomain, type, function (error, values) {
+        if (values[0] === value) return callback();
+
+        addSubdomain(zoneName, subdomain, type, value, callback);
+    });
 }
 
 function delSubdomain(zoneName, subdomain, type, value, callback) {
