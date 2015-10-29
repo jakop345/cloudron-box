@@ -13,7 +13,6 @@ var assert = require('assert'),
 
 module.exports = exports = {
     add: add,
-    addMany: addMany,
     remove: remove,
     status: status,
     update: update
@@ -36,28 +35,6 @@ function add(record, callback) {
     api().addSubdomain(config.zoneName(), record.subdomain, record.type, record.value, function (error, changeId) {
         if (error) return callback(error);
         callback(null, changeId);
-    });
-}
-
-function addMany(records, callback) {
-    assert(util.isArray(records));
-    assert.strictEqual(typeof callback, 'function');
-
-    debug('addMany: ', records);
-
-    var changeIds = [];
-
-    async.eachSeries(records, function (record, callback) {
-        add(record, function (error, changeId) {
-            if (error) return callback(error);
-
-            changeIds.push(changeId);
-
-            callback(null);
-        });
-    }, function (error) {
-        if (error) return callback(error);
-        callback(null, changeIds);
     });
 }
 
