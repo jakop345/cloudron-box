@@ -84,6 +84,9 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     };
 
     $scope.defaultCert = {
+        error: null,
+        success: false,
+        busy: false,
         certificateFile: null,
         certificateFileName: '',
         keyFile: null,
@@ -91,6 +94,9 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     };
 
     $scope.adminCert = {
+        error: null,
+        success: false,
+        busy: false,
         certificateFile: null,
         certificateFileName: '',
         keyFile: null,
@@ -119,14 +125,40 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     document.getElementById('adminKeyFileInput').onchange = readFileLocally($scope.adminCert, 'keyFile', 'keyFileName');
 
     $scope.setDefaultCert = function () {
+        $scope.defaultCert.busy = true;
+        $scope.defaultCert.error = null;
+        $scope.defaultCert.success = false;
+
         Client.setCertificate($scope.defaultCert.certificateFile, $scope.defaultCert.keyFile, function (error) {
-            if (error) return console.error(error);
+            if (error) {
+                $scope.defaultCert.error = error.message;
+                console.error(error);
+            } else {
+                $scope.defaultCert.success = true;
+                $scope.defaultCert.certificateFileName = '';
+                $scope.defaultCert.keyFileName = '';
+            }
+
+            $scope.defaultCert.busy = false;
         });
     };
 
     $scope.setAdminCert = function () {
+        $scope.adminCert.busy = true;
+        $scope.adminCert.error = null;
+        $scope.adminCert.success = false;
+
         Client.setAdminCertificate($scope.adminCert.certificateFile, $scope.adminCert.keyFile, function (error) {
-            if (error) return console.error(error);
+            if (error) {
+                $scope.adminCert.error = error.message;
+                console.error(error);
+            } else {
+                $scope.adminCert.success = true;
+                $scope.adminCert.certificateFileName = '';
+                $scope.adminCert.keyFileName = '';
+            }
+
+            $scope.adminCert.busy = false;
         });
     };
 
