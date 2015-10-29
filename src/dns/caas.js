@@ -6,7 +6,8 @@ exports = module.exports = {
     addSubdomain: addSubdomain,
     delSubdomain: delSubdomain,
     updateSubdomain: updateSubdomain,
-    getChangeStatus: getChangeStatus
+    getChangeStatus: getChangeStatus,
+    getSubdomain: getSubdomain
 };
 
 var assert = require('assert'),

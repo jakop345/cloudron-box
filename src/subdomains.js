@@ -15,7 +15,8 @@ module.exports = exports = {
     add: add,
     remove: remove,
     status: status,
-    update: update
+    update: update,
+    get: get
 };
 
 // choose which subdomain backend we use for test purpose we use route53
@@ -35,6 +36,18 @@ function add(record, callback) {
     api().addSubdomain(config.zoneName(), record.subdomain, record.type, record.value, function (error, changeId) {
         if (error) return callback(error);
         callback(null, changeId);
+    });
+}
+
+function get(subdomain, type, callback) {
+    assert.strictEqual(typeof subdomain, 'string');
+    assert.strictEqual(typeof type, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    api().getSubdomain(config.zoneName(), subdomain, type, function (error, values) {
+        if (error) return callback(error);
+
+        callback(null, values);
     });
 }
 
