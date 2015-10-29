@@ -304,7 +304,7 @@ function addDnsRecords(callback) {
     var publicKey = safe.fs.readFileSync(dkimPublicKeyFile, 'utf8');
 
     if (publicKey === null) {
-        console.error('Error reading dkim public key. Stop DNS setup.');
+        debug('Error reading dkim public key', safe.error);
         return callback(new Error('Error reading dkim public key'));
     }
 
