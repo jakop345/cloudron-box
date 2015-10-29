@@ -101,9 +101,7 @@ function getDnsConfig(req, res, next) {
 function setDnsConfig(req, res, next) {
     assert.strictEqual(typeof req.body, 'object');
 
-    if (req.body.provider !== 'route53') return next(new HttpError(400, 'provider is required'));
-    if (typeof req.body.accessKeyId !== 'string') return next(new HttpError(400, 'accessKeyId is required'));
-    if (typeof req.body.secretAccessKey !== 'string') return next(new HttpError(400, 'secretAccessKey is required'));
+    if (typeof req.body.provider !== 'string') return next(new HttpError(400, 'provider is required'));
 
     settings.setDnsConfig(req.body, function (error) {
         if (error && error.reason === SettingsError.BAD_FIELD) return next(new HttpError(400, error.message));

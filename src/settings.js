@@ -241,17 +241,26 @@ function setDnsConfig(dnsConfig, callback) {
     assert.strictEqual(typeof dnsConfig, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    if (dnsConfig.provider !== 'route53') return callback(new SettingsError(SettingsError.BAD_FIELD, 'provider must be route53'));
-    if (dnsConfig.accessKeyId === '') return callback(new SettingsError(SettingsError.BAD_FIELD, 'accessKeyId must not be empty'));
-    if (dnsConfig.secretAccessKey === '') return callback(new SettingsError(SettingsError.BAD_FIELD, 'secretAccessKey must not be empty'));
+    var credentials;
 
-    var credentials = {
-        provider: dnsConfig.provider,
-        accessKeyId: dnsConfig.accessKeyId,
-        secretAccessKey: dnsConfig.secretAccessKey,
-        region: dnsConfig.region || 'us-east-1',
-        endpoint: dnsConfig.endpoint || null
-    };
+    if (dnsConfig.provider === 'route53') {
+        if (typeof dnsConfig.accessKeyId !== 'string') return callback(new SettingsError(SettingsError.BAD_FIELD, 'accessKeyId must not a string'));
+        if (typeof dnsConfig.secretAccessKey !== 'string') return callback(new SettingsError(SettingsError.BAD_FIELD, 'secretAccessKey must not be a string'));
+
+        credentials = {
+            provider: dnsConfig.provider,
+            accessKeyId: dnsConfig.accessKeyId,
+            secretAccessKey: dnsConfig.secretAccessKey,
+            region: dnsConfig.region || 'us-east-1',
+            endpoint: dnsConfig.endpoint || null
+        };
+    } else if (dnsConfig.provider === 'caas') {
+        credentials = {
+            provider: dnsConfig.provider
+        };
+    } else {
+        return callback(new SettingsError(SettingsError.BAD_FIELD, 'provider must be route53 or caas'));
+    }
 
     settingsdb.set(exports.DNS_CONFIG_KEY, JSON.stringify(credentials), function (error) {
         if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
