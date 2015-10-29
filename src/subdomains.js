@@ -15,7 +15,8 @@ module.exports = exports = {
     add: add,
     addMany: addMany,
     remove: remove,
-    status: status
+    status: status,
+    update: update
 };
 
 // choose which subdomain backend we use for test purpose we use route53
@@ -60,6 +61,21 @@ function addMany(records, callback) {
     });
 }
 
+function update(record, callback) {
+    assert.strictEqual(typeof record, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
+    debug('update: ', record);
+
+    api().updateSubdomain(config.zoneName(), record.subdomain, record.type, record.value, function (error) {
+        if (error) return callback(error);
+
+        debug('updateSubdomain: successfully updated subdomain %j', record);
+
+        callback(null);
+    });
+}
+
 function remove(record, callback) {
     assert.strictEqual(typeof record, 'object');
     assert.strictEqual(typeof callback, 'function');
@@ -69,7 +85,7 @@ function remove(record, callback) {
     api().delSubdomain(config.zoneName(), record.subdomain, record.type, record.value, function (error) {
         if (error && error.reason !== SubdomainError.NOT_FOUND) return callback(error);
 
-        debug('deleteSubdomain: successfully deleted subdomain from aws.');
+        debug('deleteSubdomain: successfully deleted %j', record);
 
         callback(null);
     });
