@@ -265,6 +265,8 @@ function setDnsConfig(dnsConfig, callback) {
     settingsdb.set(exports.DNS_CONFIG_KEY, JSON.stringify(credentials), function (error) {
         if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
 
+        exports.events.emit(exports.DNS_CONFIG_KEY, dnsConfig);
+
         callback(null);
     });
 }
