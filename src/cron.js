@@ -25,8 +25,6 @@ var gAutoupdaterJob = null,
     gDockerVolumeCleanerJob = null,
     gSchedulerSyncJob = null;
 
-var gInitialized = false;
-
 var NOOP_CALLBACK = function (error) { if (error) console.error(error); };
 
 // cron format
@@ -40,14 +38,10 @@ var NOOP_CALLBACK = function (error) { if (error) console.error(error); };
 function initialize(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    if (gInitialized) return callback();
-
     settings.events.on(settings.TIME_ZONE_KEY, recreateJobs);
     settings.events.on(settings.AUTOUPDATE_PATTERN_KEY, autoupdatePatternChanged);
 
     cloudron.events.on(cloudron.EVENT_ACTIVATED, recreateJobs);
-
-    gInitialized = true;
 
     if (cloudron.isActivatedSync()) {
         recreateJobs(callback);
@@ -155,8 +149,6 @@ function autoupdatePatternChanged(pattern) {
 function uninitialize(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    if (!gInitialized) return callback();
-
     if (gAutoupdaterJob) gAutoupdaterJob.stop();
     gAutoupdaterJob = null;
 
@@ -180,8 +172,6 @@ function uninitialize(callback) {
 
     if (gSchedulerSyncJob) gSchedulerSyncJob.stop();
     gSchedulerSyncJob = null;
-
-    gInitialized = false;
 
     callback();
 }
