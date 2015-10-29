@@ -60,7 +60,7 @@ var REBOOT_CMD = path.join(__dirname, 'scripts/reboot.sh'),
     BACKUP_SWAP_CMD = path.join(__dirname, 'scripts/backupswap.sh'),
     INSTALLER_UPDATE_URL = 'http://127.0.0.1:2020/api/v1/installer/update';
 
-var NOOP_CALLBACK = function (error) { if (error) console.error(error); };
+var NOOP_CALLBACK = function (error) { if (error) debug(error); };
 
 var gAddDnsRecordsTimerId = null,
     gCloudronDetails = null,             // cached cloudron details like region,size...
