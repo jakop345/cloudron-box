@@ -163,6 +163,7 @@ function initializeExpressSync() {
     router.get ('/api/v1/settings/dns_config',         settingsScope, routes.settings.getDnsConfig);
     router.post('/api/v1/settings/dns_config',         settingsScope, routes.settings.setDnsConfig);
     router.post('/api/v1/settings/certificate',        settingsScope, routes.settings.setCertificate);
+    router.post('/api/v1/settings/admin_certificate',  settingsScope, routes.settings.setAdminCertificate);
 
     // backup routes
     router.get ('/api/v1/backups', settingsScope, routes.backups.get);
