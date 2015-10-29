@@ -122,6 +122,8 @@ function initialize(callback) {
 
         gIsActivated = count !== 0;
 
+        if (gIsActivated) addDnsRecords(); // reboot/restore/upgrade
+
         callback(null);
     });
 }
