@@ -97,7 +97,6 @@ function checkAppHealth(app, callback) {
                 debugApp(app, 'not alive : %s', error || res.status);
                 setHealth(app, appdb.HEALTH_UNHEALTHY, callback);
             } else {
-                debugApp(app, 'alive');
                 setHealth(app, appdb.HEALTH_HEALTHY, callback);
             }
         });
@@ -110,6 +109,9 @@ function processApps(callback) {
 
         async.each(apps, checkAppHealth, function (error) {
             if (error) console.error(error);
+
+            debug('apps alive: ', apps.map(function (a) { return a.location; }).join(', '));
+
             callback(null);
         });
     });
