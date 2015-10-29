@@ -337,7 +337,10 @@ function getSpfRecord(callback) {
 function addDnsRecords(callback) {
     callback = callback || NOOP_CALLBACK;
 
-    if (gUpdatingDns) return callback();
+    if (gUpdatingDns) {
+        debug('addDnsRecords: dns update already in progress');
+        return callback();
+    }
     gUpdatingDns = true;
 
     var DKIM_SELECTOR = 'cloudron';
@@ -363,7 +366,7 @@ function addDnsRecords(callback) {
         records.push(dmarcRecord);
     }
 
-    debug('addDnsRecords:', records);
+    debug('addDnsRecords: %j', records);
 
     async.retry({ times: 10, interval: 20000 }, function (retryCallback) {
         getSpfRecord(function (error, spfRecord) {
