@@ -469,6 +469,13 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
+    Client.prototype.setAdminCertificate = function (certificateFile, keyFile, callback) {
+        $http.post(client.apiOrigin + '/api/v1/settings/admin_certificate', { cert: certificateFile, key: keyFile }).success(function(data, status) {
+            if (status !== 202) return callback(new ClientError(status, data));
+            callback(null);
+        }).error(defaultErrorHandler(callback));
+    };
+
     Client.prototype.graphs = function (targets, from, callback) {
         var config = {
             params: {
