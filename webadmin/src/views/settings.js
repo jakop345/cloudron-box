@@ -5,6 +5,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
 
     $scope.user = Client.getUserInfo();
     $scope.config = Client.getConfig();
+    $scope.dnsConfig = {};
 
     $scope.lastBackup = null;
     $scope.backups = [];
@@ -107,6 +108,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         error: null,
         success: false,
         busy: false,
+        formVisible: false,
         accessKeyId: '',
         secretAccessKey: '',
         provider: 'route53'
@@ -185,8 +187,15 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
                 $scope.dnsCredentials.error = error.message;
             } else {
                 $scope.dnsCredentials.success = true;
+
+                $scope.dnsConfig.accessKeyId = $scope.dnsCredentials.accessKeyId;
+                $scope.dnsConfig.secretAccessKey = $scope.dnsCredentials.secretAccessKey;
+
                 $scope.dnsCredentials.accessKeyId = '';
                 $scope.dnsCredentials.secretAccessKey = '';
+
+                $('#collapseDnsCredentialsForm').collapse('hide');
+                $scope.dnsCredentials.formVisible = false;
             }
 
             $scope.dnsCredentials.busy = false;
@@ -338,6 +347,20 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         });
     };
 
+    $scope.showDnsCredentialsForm = function () {
+        $scope.dnsCredentials.busy = false;
+        $scope.dnsCredentials.success = false;
+        $scope.dnsCredentials.error = null;
+        $scope.dnsCredentials.accessKeyId = '';
+        $scope.dnsCredentials.secretAccessKey = '';
+        $scope.dnsCredentialsForm.$setPristine();
+        $scope.dnsCredentialsForm.$setUntouched();
+
+        $scope.dnsCredentials.formVisible = true;
+        $('#collapseDnsCredentialsForm').collapse('show');
+        $('#dnsCredentialsAccessKeyId').focus();
+    };
+
     $scope.showChangeDeveloperMode = function () {
         developerModeChangeReset();
         $('#developerModeChangeModal').modal('show');
@@ -373,6 +396,12 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         fetchBackups();
 
         $scope.avatar.url = '//my-' + $scope.config.fqdn + '/api/v1/cloudron/avatar';
+
+        Client.getDnsConfig(function (error, result) {
+            if (error) return console.error(error);
+
+            $scope.dnsConfig = result;
+        });
     });
 
     // setup all the dialog focus handling
