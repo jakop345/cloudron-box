@@ -234,8 +234,8 @@ function start(callback) {
     async.series([
         auth.initialize,
         database.initialize,
+        cloudron.initialize, // keep this here because it reads activation state that others depend on
         taskmanager.initialize,
-        cloudron.initialize,
         mailer.initialize,
         cron.initialize,
         gHttpServer.listen.bind(gHttpServer, config.get('port'), '127.0.0.1'),
