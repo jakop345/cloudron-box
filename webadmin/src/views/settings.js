@@ -83,45 +83,50 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         }]
     };
 
-    $scope.certificateFile = null;
-    $scope.certificateFileName = '';
-    $scope.keyFile = null;
-    $scope.keyFileName = '';
-
-    document.getElementById('certificateFileInput').onchange = function (event) {
-        $scope.$apply(function () {
-            $scope.certificateFile = null;
-            $scope.certificateFileName = event.target.files[0].name;
-
-            var reader = new FileReader();
-            reader.onload = function (result) {
-                if (!result.target || !result.target.result) return console.error('Unable to read local file');
-                $scope.certificateFile = result.target.result;
-            };
-            reader.readAsText(event.target.files[0]);
-        });
+    $scope.defaultCert = {
+        certificateFile: null,
+        certificateFileName: '',
+        keyFile: null,
+        keyFileName: ''
     };
 
-    document.getElementById('keyFileInput').onchange = function (event) {
-        $scope.$apply(function () {
-            $scope.keyFile = null;
-            $scope.keyFileName = event.target.files[0].name;
-
-            var reader = new FileReader();
-            reader.onload = function (result) {
-                if (!result.target || !result.target.result) return console.error('Unable to read local file');
-                $scope.keyFile = result.target.result;
-            };
-            reader.readAsText(event.target.files[0]);
-        });
+    $scope.adminCert = {
+        certificateFile: null,
+        certificateFileName: '',
+        keyFile: null,
+        keyFileName: ''
     };
 
-    $scope.setCertificate = function () {
-        Client.setCertificate($scope.certificateFile, $scope.keyFile, function (error) {
+    function readFileLocally(obj, file, fileName) {
+        return function (event) {
+            $scope.$apply(function () {
+                obj[file] = null;
+                obj[fileName] = event.target.files[0].name;
+
+                var reader = new FileReader();
+                reader.onload = function (result) {
+                    if (!result.target || !result.target.result) return console.error('Unable to read local file');
+                    obj[file] = result.target.result;
+                };
+                reader.readAsText(event.target.files[0]);
+            });
+        };
+    }
+
+    document.getElementById('defaultCertFileInput').onchange = readFileLocally($scope.defaultCert, 'certificateFile', 'certificateFileName');
+    document.getElementById('defaultKeyFileInput').onchange = readFileLocally($scope.defaultCert, 'keyFile', 'keyFileName');
+    document.getElementById('adminCertFileInput').onchange = readFileLocally($scope.adminCert, 'certificateFile', 'certificateFileName');
+    document.getElementById('adminKeyFileInput').onchange = readFileLocally($scope.adminCert, 'keyFile', 'keyFileName');
+
+    $scope.setDefaultCert = function () {
+        Client.setCertificate($scope.defaultCert.certificateFile, $scope.defaultCert.keyFile, function (error) {
             if (error) return console.error(error);
+        });
+    };
 
-            // give nginx reconfigure some time and then force reload
-            window.setTimeout(window.location.reload.bind(window.location, true), 5000);
+    $scope.setAdminCert = function () {
+        Client.setAdminCertificate($scope.adminCert.certificateFile, $scope.adminCert.keyFile, function (error) {
+            if (error) return console.error(error);
         });
     };
 
