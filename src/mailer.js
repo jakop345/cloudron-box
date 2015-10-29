@@ -25,6 +25,7 @@ exports = module.exports = {
 
 var assert = require('assert'),
     async = require('async'),
+    cloudron = require('./cloudron.js'),
     config = require('./config.js'),
     debug = require('debug')('box:mailer'),
     dns = require('dns'),
@@ -47,7 +48,12 @@ var gMailQueue = [ ],
 function initialize(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    checkDns();
+    if (cloudron.isActivatedSync()) {
+        checkDns();
+    } else {
+        cloudron.events.on(cloudron.EVENT_ACTIVATED, checkDns);
+    }
+
     callback(null);
 }
 
