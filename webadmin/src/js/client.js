@@ -321,6 +321,13 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
+    Client.prototype.getDnsConfig = function (callback) {
+         $http.get(client.apiOrigin + '/api/v1/settings/dns_config').success(function(data, status) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null, data);
+        }).error(defaultErrorHandler(callback));
+    };
+
     Client.prototype.getBackups = function (callback) {
         $http.get(client.apiOrigin + '/api/v1/backups').success(function (data, status) {
             if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));
