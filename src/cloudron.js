@@ -129,9 +129,6 @@ function initialize(callback) {
 function uninitialize(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    clearTimeout(gAddDnsRecordsTimerId);
-    gAddDnsRecordsTimerId = null;
-
     callback(null);
 }
 
