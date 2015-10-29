@@ -64,7 +64,7 @@ var NOOP_CALLBACK = function (error) { if (error) console.error(error); };
 
 var gAddDnsRecordsTimerId = null,
     gCloudronDetails = null,             // cached cloudron details like region,size...
-    gIsActivated = false;                // cached activation state so that return value is synchronous
+    gIsActivated = null;                // cached activation state so that return value is synchronous. null means we are not initialized yet
 
 function debugApp(app, args) {
     assert(!app || typeof app === 'object');
@@ -140,7 +140,7 @@ function uninitialize(callback) {
 }
 
 function isActivatedSync() {
-    return gIsActivated;
+    return gIsActivated === true;
 }
 
 function setTimeZone(ip, callback) {
