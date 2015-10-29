@@ -44,8 +44,8 @@
 
                         <br/>
 
-                        <label class="control-label" for="appInstallCertificateInput">Certificate (optional)</label>
-                        <div class="has-error text-center" ng-show="appInstall.error.cert">{{ appInstall.error.cert }}</div>
+                        <label class="control-label" for="appInstallCertificateInput" ng-show="config.isCustomDomain">Certificate (optional)</label>
+                        <div class="has-error text-center" ng-show="appInstall.error.cert && config.isCustomDomain">{{ appInstall.error.cert }}</div>
                         <div class="form-group" ng-class="{ 'has-error': !appInstallForm.certificate.$dirty && appInstall.error.cert }" ng-show="config.isCustomDomain">
                             <div class="input-group">
                                 <input type="file" id="appInstallCertificateFileInput" style="display:none"/>
