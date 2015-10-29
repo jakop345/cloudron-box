@@ -110,7 +110,7 @@ function processApps(callback) {
         async.each(apps, checkAppHealth, function (error) {
             if (error) console.error(error);
 
-            debug('apps alive: ', apps.map(function (a) { return a.location; }).join(', '));
+            debug('apps alive: [%s]', apps.map(function (a) { return a.location; }).join(', '));
 
             callback(null);
         });
