@@ -15,7 +15,8 @@ exports = module.exports = {
     getDnsConfig: getDnsConfig,
     setDnsConfig: setDnsConfig,
 
-    setCertificate: setCertificate
+    setCertificate: setCertificate,
+    setAdminCertificate: setAdminCertificate
 };
 
 var assert = require('assert'),
@@ -112,6 +113,7 @@ function setDnsConfig(req, res, next) {
     });
 }
 
+// default fallback cert
 function setCertificate(req, res, next) {
     assert.strictEqual(typeof req.body, 'object');
 
@@ -119,7 +121,22 @@ function setCertificate(req, res, next) {
     if (!req.body.key || typeof req.body.key !== 'string') return next(new HttpError(400, 'key must be a string'));
 
     settings.setCertificate(req.body.cert, req.body.key, function (error) {
-        if (error && error.reason === SettingsError.INVALID_CERT) return next(new HttpError(400, 'cert not applicable'))
+        if (error && error.reason === SettingsError.INVALID_CERT) return next(new HttpError(400, 'cert not applicable'));
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(202, {}));
+    });
+}
+
+// only webadmin cert, until it can be treated just like a normal app
+function setAdminCertificate(req, res, next) {
+    assert.strictEqual(typeof req.body, 'object');
+
+    if (!req.body.cert || typeof req.body.cert !== 'string') return next(new HttpError(400, 'cert must be a string'));
+    if (!req.body.key || typeof req.body.key !== 'string') return next(new HttpError(400, 'key must be a string'));
+
+    settings.setAdminCertificate(req.body.cert, req.body.key, function (error) {
+        if (error && error.reason === SettingsError.INVALID_CERT) return next(new HttpError(400, 'cert not applicable'));
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(202, {}));

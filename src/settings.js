@@ -28,6 +28,7 @@ exports = module.exports = {
 
     validateCertificate: validateCertificate,
     setCertificate: setCertificate,
+    setAdminCertificate: setAdminCertificate,
 
     AUTOUPDATE_PATTERN_KEY: 'autoupdate_pattern',
     TIME_ZONE_KEY: 'time_zone',
@@ -40,8 +41,11 @@ exports = module.exports = {
 
 var assert = require('assert'),
     config = require('./config.js'),
+    constants = require('./constants.js'),
     CronJob = require('cron').CronJob,
     DatabaseError = require('./databaseerror.js'),
+    ejs = require('ejs'),
+    fs = require('fs'),
     path = require('path'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
@@ -62,7 +66,8 @@ var gDefaults = (function () {
     return result;
 })();
 
-var RELOAD_NGINX_CMD = path.join(__dirname, 'scripts/reloadnginx.sh');
+var NGINX_APPCONFIG_EJS = fs.readFileSync(__dirname + '/../setup/start/nginx/appconfig.ejs', { encoding: 'utf8' }),
+    RELOAD_NGINX_CMD = path.join(__dirname, 'scripts/reloadnginx.sh');
 
 if (config.TEST) {
     // avoid noisy warnings during npm test
@@ -329,6 +334,43 @@ function setCertificate(cert, key, callback) {
     }
 
     shell.sudo('setCertificate', [ RELOAD_NGINX_CMD ], function (error) {
+        if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
+
+        return callback(null);
+    });
+}
+
+function setAdminCertificate(cert, key, callback) {
+    assert.strictEqual(typeof cert, 'string');
+    assert.strictEqual(typeof key, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    var sourceDir = path.resolve(__dirname, '..');
+    var endpoint = 'admin';
+    var vhost = config.appFqdn(constants.ADMIN_LOCATION);
+    var certFilePath = path.join(paths.APP_CERTS_DIR, 'admin.cert');
+    var keyFilePath = path.join(paths.APP_CERTS_DIR, 'admin.key');
+
+    var error = validateCertificate(cert, key, vhost);
+    if (error) return callback(new SettingsError(SettingsError.INVALID_CERT, error.message));
+
+    if (!safe.fs.writeFileSync(certFilePath, cert)) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, safe.error.message));
+    if (!safe.fs.writeFileSync(keyFilePath, key)) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, safe.error.message));
+
+    var data = {
+        sourceDir: sourceDir,
+        adminOrigin: config.adminOrigin(),
+        vhost: vhost,
+        endpoint: endpoint,
+        certFilePath: certFilePath,
+        keyFilePath: keyFilePath
+    };
+    var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, data);
+    var nginxConfigFilename = path.join(paths.NGINX_APPCONFIG_DIR, 'admin.conf');
+
+    if (!safe.fs.writeFileSync(nginxConfigFilename, nginxConf)) return callback(safe.error);
+
+    shell.sudo('setAdminCertificate', [ RELOAD_NGINX_CMD ], function (error) {
         if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
 
         return callback(null);
