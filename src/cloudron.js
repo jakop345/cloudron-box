@@ -309,13 +309,13 @@ function readDkimPublicKeySync() {
 function getSpfRecord(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    subdomains.get('', 'TXT', function (error, currentTxtRecords) {
+    subdomains.get('', 'TXT', function (error, txtRecords) {
         if (error) return callback(error);
 
         var i, validSpf, spfRecord =  { subdomain: '', type: 'TXT', value: null };
 
-        for (i = 0; i < currentTxtRecords.length; i++) {
-            var value = currentTxtRecords[i][0];
+        for (i = 0; i < txtRecords.length; i++) {
+            var value = txtRecords[i][0];
             if (value.indexOf('"v=spf1 ') !== 0) continue; // not SPF
 
             validSpf = value.indexOf('a:' + config.fqdn()) !== 0;
@@ -324,10 +324,10 @@ function getSpfRecord(callback) {
 
         if (validSpf) return callback(null, null);
 
-        if (i == currentTxtRecords.length) {
+        if (i == txtRecords.length) {
             spfRecord.value = '"v=spf1 a:' + config.fqdn() + ' ~all"';
         } else {
-             spfRecord.value = '"v=spf1 a:' + config.fqdn() + currentTxtRecords[i][0].slice('"v=spf1"'.length);
+            spfRecord.value = '"v=spf1 a:' + config.fqdn() + txtRecords[i][0].slice('"v=spf1"'.length);
         }
 
         return callback(null, spfRecord);
