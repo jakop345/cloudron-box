@@ -41,7 +41,6 @@ function initialize(callback) {
     settings.events.on(settings.TIME_ZONE_KEY, recreateJobs);
     settings.events.on(settings.AUTOUPDATE_PATTERN_KEY, autoupdatePatternChanged);
 
-    if (gHeartbeatJob) gBackupJob.stop();
     gHeartbeatJob = new CronJob({
         cronTime: '00 */1 * * * *', // every minute
         onTick: cloudron.sendHeartbeat,
