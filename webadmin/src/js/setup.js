@@ -202,7 +202,7 @@ app.controller('CustomDomainController', [ '$scope', '$location', 'Wizard', func
     $scope.wizard = Wizard;
 
     
-    if (Wizard.dnsConfig === null) $location.path('/step4'); // not using custom domain
+    if (Wizard.dnsConfig.provider === 'caas') $location.path('/step4'); // not using custom domain
 }]);
 
 app.controller('FinishController', ['$scope', '$location', 'Wizard', 'Client', function ($scope, $location, Wizard, Client) {
@@ -217,11 +217,6 @@ app.controller('FinishController', ['$scope', '$location', 'Wizard', 'Client', f
 
         Client.changeCloudronAvatar($scope.wizard.avatarBlob, function (error) {
             if (error) return console.error('Unable to set avatar.', error);
-
-            if ($scope.wizard.dnsConfig === null) {
-                window.location.href = '/';
-                return;
-            }
 
             Client.setDnsConfig($scope.wizard.dnsConfig, function (error) {
                 if (error) return console.error('Unable to set dns config.', error);
@@ -249,6 +244,10 @@ app.controller('SetupController', ['$scope', '$location', 'Client', 'Wizard', fu
             provider: 'route53',
             accessKeyId: null,
             secretAccessKey: null
+        };
+    } else {
+        Wizard.dnsConfig = {
+            provider: 'caas'
         };
     }
 
