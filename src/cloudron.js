@@ -122,8 +122,6 @@ function initialize(callback) {
 
         gIsActivated = count !== 0;
 
-        if (gIsActivated) exports.events.emit(exports.EVENT_ACTIVATED);
-
         callback(null);
     });
 }
