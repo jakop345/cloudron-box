@@ -156,25 +156,27 @@
                 <fieldset>
                     <label class="control-label" for="defaultCertInput">Fallback Certificate</label>
                     <p>This certificate has to be wildcard certificates and will be used for all apps, which were not configured to use a specific certificate.</p>
-                    <div class="form-group" ng-class="{ 'has-error': false }">
+                    <div class="has-error text-center" ng-show="defaultCert.error">{{ defaultCert.error }}</div>
+                    <div class="text-success text-center" ng-show="defaultCert.success"><b>Upload successful</b></div>
+                    <div class="form-group" ng-class="{ 'has-error': (!defaultCert.cert.$dirty && defaultCert.error) }">
                         <div class="input-group">
                             <input type="file" id="defaultCertFileInput" style="display:none"/>
-                            <input type="text" class="form-control" placeholder="Certificate" ng-model="defaultCert.certificateFileName" id="defaultCertInput" name="certificate" onclick="getElementById('defaultCertFileInput').click();" style="cursor: pointer;" required>
+                            <input type="text" class="form-control" placeholder="Certificate" ng-model="defaultCert.certificateFileName" id="defaultCertInput" name="cert" onclick="getElementById('defaultCertFileInput').click();" style="cursor: pointer;" ng-disabled="defaultCert.busy" required>
                             <span class="input-group-addon">
                                 <i class="fa fa-upload" onclick="getElementById('defaultCertFileInput').click();"></i>
                             </span>
                         </div>
                     </div>
-                    <div class="form-group" ng-class="{ 'has-error': false }">
+                    <div class="form-group" ng-class="{ 'has-error': (!defaultCert.key.$dirty && defaultCert.error) }">
                         <div class="input-group">
                             <input type="file" id="defaultKeyFileInput" style="display:none"/>
-                            <input type="text" class="form-control" placeholder="Key" ng-model="defaultCert.keyFileName" id="defaultKeyInput" name="key" onclick="getElementById('defaultKeyFileInput').click();" style="cursor: pointer;" required>
+                            <input type="text" class="form-control" placeholder="Key" ng-model="defaultCert.keyFileName" id="defaultKeyInput" name="key" onclick="getElementById('defaultKeyFileInput').click();" style="cursor: pointer;" ng-disabled="defaultCert.busy" required>
                             <span class="input-group-addon">
                                 <i class="fa fa-upload" onclick="getElementById('defaultKeyFileInput').click();"></i>
                             </span>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-outline btn-success pull-right">Upload</button>
+                    <button type="submit" class="btn btn-outline btn-success pull-right" ng-disabled="defaultCertForm.$invalid || busy"><i class="fa fa-spinner fa-pulse" ng-show="defaultCert.busy"></i> Upload</button>
                 </fieldset>
             </form>
         </div>
@@ -185,25 +187,27 @@
                 <fieldset>
                     <label class="control-label" for="adminCertInput">Settings Certificate</label>
                     <p>This certificate will be used for this Settings application.</p>
-                    <div class="form-group" ng-class="{ 'has-error': false }">
+                    <div class="has-error text-center" ng-show="adminCert.error">{{ adminCert.error }}</div>
+                    <div class="text-success text-center" ng-show="adminCert.success"><b>Upload successful</b></div>
+                    <div class="form-group" ng-class="{ 'has-error': (!adminCert.cert.$dirty && adminCert.error) }">
                         <div class="input-group">
                             <input type="file" id="adminCertFileInput" style="display:none"/>
-                            <input type="text" class="form-control" placeholder="Certificate" ng-model="adminCert.certificateFileName" id="adminCertInput" name="certificate" onclick="getElementById('adminCertFileInput').click();" style="cursor: pointer;" required>
+                            <input type="text" class="form-control" placeholder="Certificate" ng-model="adminCert.certificateFileName" id="adminCertInput" name="cert" onclick="getElementById('adminCertFileInput').click();" style="cursor: pointer;" ng-disabled="adminCert.busy" required>
                             <span class="input-group-addon">
                                 <i class="fa fa-upload" onclick="getElementById('adminCertFileInput').click();"></i>
                             </span>
                         </div>
                     </div>
-                    <div class="form-group" ng-class="{ 'has-error': false }">
+                    <div class="form-group" ng-class="{ 'has-error': (!adminCert.key.$dirty && adminCert.error) }">
                         <div class="input-group">
                             <input type="file" id="adminKeyFileInput" style="display:none"/>
-                            <input type="text" class="form-control" placeholder="Key" ng-model="adminCert.keyFileName" id="adminKeyInput" name="key" onclick="getElementById('adminKeyFileInput').click();" style="cursor: pointer;" required>
+                            <input type="text" class="form-control" placeholder="Key" ng-model="adminCert.keyFileName" id="adminKeyInput" name="key" onclick="getElementById('adminKeyFileInput').click();" style="cursor: pointer;" ng-disabled="adminCert.busy" required>
                             <span class="input-group-addon">
                                 <i class="fa fa-upload" onclick="getElementById('adminKeyFileInput').click();"></i>
                             </span>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-outline btn-success pull-right">Upload</button>
+                    <button type="submit" class="btn btn-outline btn-success pull-right" ng-disabled="adminCertForm.$invalid || busy"><i class="fa fa-spinner fa-pulse" ng-show="adminCert.busy"></i> Upload</button>
                 </fieldset>
             </form>
         </div>
