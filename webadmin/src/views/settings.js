@@ -103,6 +103,15 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         keyFileName: ''
     };
 
+    $scope.dnsCredentials = {
+        error: null,
+        success: false,
+        busy: false,
+        accessKeyId: '',
+        secretAccessKey: '',
+        provider: 'route53'
+    };
+
     function readFileLocally(obj, file, fileName) {
         return function (event) {
             $scope.$apply(function () {
@@ -132,7 +141,6 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         Client.setCertificate($scope.defaultCert.certificateFile, $scope.defaultCert.keyFile, function (error) {
             if (error) {
                 $scope.defaultCert.error = error.message;
-                console.error(error);
             } else {
                 $scope.defaultCert.success = true;
                 $scope.defaultCert.certificateFileName = '';
@@ -151,7 +159,6 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
         Client.setAdminCertificate($scope.adminCert.certificateFile, $scope.adminCert.keyFile, function (error) {
             if (error) {
                 $scope.adminCert.error = error.message;
-                console.error(error);
             } else {
                 $scope.adminCert.success = true;
                 $scope.adminCert.certificateFileName = '';
@@ -159,6 +166,30 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
             }
 
             $scope.adminCert.busy = false;
+        });
+    };
+
+    $scope.setDnsCredentials = function () {
+        $scope.dnsCredentials.busy = true;
+        $scope.dnsCredentials.error = null;
+        $scope.dnsCredentials.success = false;
+
+        var data = {
+            provider: $scope.dnsCredentials.provider,
+            accessKeyId: $scope.dnsCredentials.accessKeyId,
+            secretAccessKey: $scope.dnsCredentials.secretAccessKey
+        };
+
+        Client.setDnsConfig(data, function (error) {
+            if (error) {
+                $scope.dnsCredentials.error = error.message;
+            } else {
+                $scope.dnsCredentials.success = true;
+                $scope.dnsCredentials.accessKeyId = '';
+                $scope.dnsCredentials.secretAccessKey = '';
+            }
+
+            $scope.dnsCredentials.busy = false;
         });
     };
 
