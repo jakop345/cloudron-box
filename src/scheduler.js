@@ -16,7 +16,7 @@ var appdb = require('./appdb.js'),
     safe = require('safetydance'),
     _ = require('underscore');
 
-var NOOP_CALLBACK = function (error) { if (error) console.error(error); };
+var NOOP_CALLBACK = function (error) { if (error) debug('Unhandled error: ', error); };
 
 // appId -> { schedulerConfig (manifest), cronjobs, containerIds }
 var gState = (function loadState() {
