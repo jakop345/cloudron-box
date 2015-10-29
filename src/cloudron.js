@@ -62,7 +62,7 @@ var REBOOT_CMD = path.join(__dirname, 'scripts/reboot.sh'),
 
 var NOOP_CALLBACK = function (error) { if (error) debug(error); };
 
-var gAddDnsRecordsTimerId = null,
+var gUpdatingDns = false,                // flag for dns update reentrancy
     gCloudronDetails = null,             // cached cloudron details like region,size...
     gIsActivated = null;                // cached activation state so that return value is synchronous. null means we are not initialized yet
 
@@ -115,7 +115,7 @@ CloudronError.NOT_FOUND = 'Not found';
 function initialize(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    exports.events.on(exports.EVENT_ACTIVATED, addDnsRecords);
+    settings.events.on(settings.DNS_CONFIG_KEY, addDnsRecords);
 
     userdb.count(function (error, count) {
         if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
@@ -292,50 +292,91 @@ function sendHeartbeat() {
     });
 }
 
-function addDnsRecords(callback) {
-    callback = callback || NOOP_CALLBACK;
-
-    if (config.isCustomDomain()) return callback();
-
-    var DKIM_SELECTOR = 'cloudron';
-    var DMARC_REPORT_EMAIL = 'dmarc-report@cloudron.io';
-
+function readDkimPublicKeySync() {
     var dkimPublicKeyFile = path.join(paths.MAIL_DATA_DIR, 'dkim/' + config.fqdn() + '/public');
     var publicKey = safe.fs.readFileSync(dkimPublicKeyFile, 'utf8');
 
     if (publicKey === null) {
-        debug('Error reading dkim public key', safe.error);
-        return callback(new Error('Error reading dkim public key'));
+        debug('Error reading dkim public key.', safe.error);
+        return null;
     }
 
     // remove header, footer and new lines
     publicKey = publicKey.split('\n').slice(1, -2).join('');
 
-    // note that dmarc requires special DNS records for external RUF and RUA
-    var records = [
-        // naked domain
-        { subdomain: '', type: 'A', value: sysinfo.getIp() },
-        // webadmin domain
-        { subdomain: 'my', type: 'A', value: sysinfo.getIp() },
-        // softfail all mails not from our domain
-        { subdomain: '', type: 'TXT', value: '"v=spf1 a:' + config.fqdn() + ' ~all"' },
-        // t=s limits the domainkey to this domain and not it's subdomains
-        { subdomain: DKIM_SELECTOR + '._domainkey', type: 'TXT', value: '"v=DKIM1; t=s; p=' + publicKey + '"' },
-        // DMARC requires special setup if report email id is in different domain
-        { subdomain: '_dmarc', type: 'TXT', value: '"v=DMARC1; p=none; pct=100; rua=mailto:' + DMARC_REPORT_EMAIL + '; ruf=' + DMARC_REPORT_EMAIL + '"' }
-    ];
+    return publicKey;
+}
+
+function getSpfRecord(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    subdomains.get('', 'TXT', function (error, currentTxtRecords) {
+        if (error) return callback(error);
+
+        var i, validSpf, spfRecord =  { subdomain: '', type: 'TXT', value: null };
+
+        for (i = 0; i < currentTxtRecords.length; i++) {
+            var value = currentTxtRecords[i][0];
+            if (value.indexOf('"v=spf1 ') !== 0) continue; // not SPF
+
+            validSpf = value.indexOf('a:' + config.fqdn()) !== 0;
+            break;
+        }
+
+        if (validSpf) return callback(null, null);
+
+        if (i == currentTxtRecords.length) {
+            spfRecord.value = '"v=spf1 a:' + config.fqdn() + ' ~all"';
+        } else {
+             spfRecord.value = '"v=spf1 a:' + config.fqdn() + currentTxtRecords[i][0].slice('"v=spf1"'.length);
+        }
+
+        return callback(null, spfRecord);
+    });
+}
+
+function addDnsRecords(callback) {
+    callback = callback || NOOP_CALLBACK;
+
+    if (gUpdatingDns) return callback();
+    gUpdatingDns = true;
+
+    var DKIM_SELECTOR = 'cloudron';
+    var DMARC_REPORT_EMAIL = 'dmarc-report@cloudron.io';
+
+    var dkimKey = readDkimPublicKeySync();
+    if (!dkimKey) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, new Error('internal error failed to read dkim public key')));
+
+    var nakedDomainRecord = { subdomain: '', type: 'A', value: sysinfo.getIp() };
+    var webadminRecord = { subdomain: 'my', type: 'A', value: sysinfo.getIp() };
+    // t=s limits the domainkey to this domain and not it's subdomains
+    var dkimRecord = { subdomain: DKIM_SELECTOR + '._domainkey', type: 'TXT', value: '"v=DKIM1; t=s; p=' + dkimKey + '"' };
+    // DMARC requires special setup if report email id is in different domain
+    var dmarcRecord = { subdomain: '_dmarc', type: 'TXT', value: '"v=DMARC1; p=none; pct=100; rua=mailto:' + DMARC_REPORT_EMAIL + '; ruf=' + DMARC_REPORT_EMAIL + '"' };
+
+    var records = [ ];
+    if (config.isCustomDomain()) {
+        records.push(webadminRecord);
+    } else {
+        records.push(nakedDomainRecord);
+        records.push(webadminRecord);
+        records.push(dkimRecord);
+        records.push(dmarcRecord);
+    }
 
     debug('addDnsRecords:', records);
 
-    subdomains.addMany(records, function (error, changeIds) {
-        if (error) {
-            console.error('Admin DNS record addition failed', error);
-            gAddDnsRecordsTimerId = setTimeout(addDnsRecords.bind(null, callback), 10000);
-            return;
-        }
+    async.retry({ times: 10, interval: 20000 }, function (retryCallback) {
+        getSpfRecord(function (error, spfRecord) {
+            if (error) return retryCallback(error);
 
-        debug('added DNS records with changeIds: %j', changeIds);
-        callback();
+            if (spfRecord) records.push(spfRecord);
+
+            async.eachSeries(records, subdomains.update, retryCallback);
+        });
+    }, function (error) {
+        gUpdatingDns = false;
+        callback(error);
     });
 }
 
