@@ -75,6 +75,8 @@ function updateSubdomain(zoneName, subdomain, type, value, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     getSubdomain(zoneName, subdomain, type, function (error, values) {
+        if (error) return callback(error);
+
         if (values[0] === value) return callback();
 
         addSubdomain(zoneName, subdomain, type, value, callback);
