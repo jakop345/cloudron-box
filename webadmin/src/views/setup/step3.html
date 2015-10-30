@@ -22,6 +22,6 @@
 </div>
 <div class="row">
     <div class="col-md-12 text-center">
-        <a class="btn btn-primary" href="#/step4" ng-disabled="setup_form.secretAccessKey.$invalid">Done</a>
+        <button class="btn btn-primary"  ng-click="next('/step4', setup_form.accessKeyId.$invalid || setup_form.secretAccessKey.$invalid)" ng-disabled="setup_form.accessKeyId.$invalid || setup_form.secretAccessKey.$invalid">Done</button>
     </div>
 </div>
