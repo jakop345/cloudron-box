@@ -112,10 +112,9 @@ function checkDns() {
         var allowedToSendMail = false;
 
         for (var i = 0; i < records.length; i++) {
-            var value = records[i][0];
-            if (value.indexOf('v=spf1 ') !== 0) continue; // not SPF
+            if (records[i].indexOf('v=spf1 ') !== 0) continue; // not SPF
 
-            allowedToSendMail = value.indexOf('a:' + config.fqdn()) !== 0;
+            allowedToSendMail = records[i].indexOf('a:' + config.fqdn()) !== -1;
             break; // only one SPF record can exist (https://support.google.com/a/answer/4568483?hl=en)
         }
 
