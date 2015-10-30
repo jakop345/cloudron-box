@@ -3,12 +3,10 @@
 'use strict';
 
 var assert = require('assert'),
-    async = require('async'),
-    route53 = require('./dns/route53.js'),
     caas = require('./dns/caas.js'),
     config = require('./config.js'),
     debug = require('debug')('box:subdomains'),
-    util = require('util'),
+    route53 = require('./dns/route53.js'),
     SubdomainError = require('./subdomainerror.js');
 
 module.exports = exports = {
