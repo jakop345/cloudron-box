@@ -246,12 +246,10 @@ function downloadIcon(app, callback) {
 function registerSubdomain(app, callback) {
     // even though the bare domain is already registered in the appstore, we still
     // need to register it so that we have a dnsRecordId to wait for it to complete
-    var record = { subdomain: app.location, type: 'A', value: sysinfo.getIp() };
-
     async.retry({ times: 200, interval: 5000 }, function (retryCallback) {
         debugApp(app, 'Registering subdomain location [%s]', app.location);
 
-        subdomains.add(record, function (error, changeId) {
+        subdomains.add(app.location, 'A', [ sysinfo.getIp() ], function (error, changeId) {
             if (error && (error.reason === SubdomainError.STILL_BUSY || error.reason === SubdomainError.EXTERNAL_ERROR)) return retryCallback(error); // try again
 
             retryCallback(null, error || changeId);
