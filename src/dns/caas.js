@@ -7,7 +7,7 @@ exports = module.exports = {
     delSubdomain: delSubdomain,
     updateSubdomain: updateSubdomain,
     getChangeStatus: getChangeStatus,
-    getSubdomain: getSubdomain
+    get: get
 };
 
 var assert = require('assert'),
@@ -46,7 +46,7 @@ function add(zoneName, subdomain, type, values, callback) {
         });
 }
 
-function getSubdomain(zoneName, subdomain, type, callback) {
+function get(zoneName, subdomain, type, callback) {
     assert.strictEqual(typeof zoneName, 'string');
     assert.strictEqual(typeof subdomain, 'string');
     assert.strictEqual(typeof type, 'string');
@@ -74,12 +74,12 @@ function updateSubdomain(zoneName, subdomain, type, value, callback) {
     assert.strictEqual(typeof value, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    getSubdomain(zoneName, subdomain, type, function (error, values) {
+    get(zoneName, subdomain, type, function (error, values) {
         if (error) return callback(error);
 
         if (values[0] === value) return callback();
 
-        addSubdomain(zoneName, subdomain, type, value, callback);
+        add(zoneName, subdomain, type, value, callback);
     });
 }
 
