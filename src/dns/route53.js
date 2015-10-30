@@ -3,7 +3,7 @@
 'use strict';
 
 exports = module.exports = {
-    addSubdomain: addSubdomain,
+    add: add,
     delSubdomain: delSubdomain,
     updateSubdomain: updateSubdomain,
     getChangeStatus: getChangeStatus
@@ -14,7 +14,8 @@ var assert = require('assert'),
     config = require('../config.js'),
     debug = require('debug')('box:dns/route53'),
     settings = require('../settings.js'),
-    SubdomainError = require('../subdomainerror.js');
+    SubdomainError = require('../subdomainerror.js'),
+    util = require('util');
 
 function getDnsCredentials(callback) {
     assert.strictEqual(typeof callback, 'function');
@@ -60,16 +61,14 @@ function getZoneByName(zoneName, callback) {
     });
 }
 
-function addSubdomain(zoneName, subdomain, type, value, callback) {
+function add(zoneName, subdomain, type, values, callback) {
     assert.strictEqual(typeof zoneName, 'string');
     assert.strictEqual(typeof subdomain, 'string');
     assert.strictEqual(typeof type, 'string');
-    assert.strictEqual(typeof value, 'string');
+    assert(util.isArray(values));
     assert.strictEqual(typeof callback, 'function');
 
-    debug('addSubdomain: ' + subdomain + ' for domain ' + zoneName + ' with value ' + value);
-
-    var values = [ value ];
+    debug('add: %s for zone %s of type %s with values %j', subdomain, zoneName, type, values);
 
     getZoneByName(zoneName, function (error, zone) {
         if (error) return callback(error);

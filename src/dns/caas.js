@@ -3,7 +3,7 @@
 'use strict';
 
 exports = module.exports = {
-    addSubdomain: addSubdomain,
+    add: add,
     delSubdomain: delSubdomain,
     updateSubdomain: updateSubdomain,
     getChangeStatus: getChangeStatus,
@@ -17,20 +17,20 @@ var assert = require('assert'),
     superagent = require('superagent'),
     util = require('util');
 
-function addSubdomain(zoneName, subdomain, type, value, callback) {
+function add(zoneName, subdomain, type, values, callback) {
     assert.strictEqual(typeof zoneName, 'string');
     assert.strictEqual(typeof subdomain, 'string');
     assert.strictEqual(typeof type, 'string');
-    assert.strictEqual(typeof value, 'string');
+    assert(util.isArray(values));
     assert.strictEqual(typeof callback, 'function');
 
     var fqdn = subdomain !== '' && type === 'TXT' ? subdomain + '.' + config.fqdn() : config.appFqdn(subdomain);
 
-    debug('addSubdomain: zoneName: %s subdomain: %s type: %s value: %s fqdn: %s', zoneName, subdomain, type, value, fqdn);
+    debug('add: %s for zone %s of type %s with values %j', subdomain, zoneName, type, values);
 
     var data = {
         type: type,
-        values: [ value ]
+        values: values
     };
 
     superagent
@@ -45,7 +45,6 @@ function addSubdomain(zoneName, subdomain, type, value, callback) {
             return callback(null, result.body.changeId);
         });
 }
-
 
 function getSubdomain(zoneName, subdomain, type, callback) {
     assert.strictEqual(typeof zoneName, 'string');

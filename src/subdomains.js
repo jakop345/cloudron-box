@@ -7,7 +7,8 @@ var assert = require('assert'),
     config = require('./config.js'),
     debug = require('debug')('box:subdomains'),
     route53 = require('./dns/route53.js'),
-    SubdomainError = require('./subdomainerror.js');
+    SubdomainError = require('./subdomainerror.js'),
+    util = require('util');
 
 module.exports = exports = {
     add: add,
@@ -22,16 +23,13 @@ function api() {
     return config.isCustomDomain() || config.TEST ? route53 : caas;
 }
 
-function add(record, callback) {
-    assert.strictEqual(typeof record, 'object');
-    assert.strictEqual(typeof record.subdomain, 'string');
-    assert.strictEqual(typeof record.type, 'string');
-    assert.strictEqual(typeof record.value, 'string');
+function add(subdomain, type, values, callback) {
+    assert.strictEqual(typeof subdomain, 'string');
+    assert.strictEqual(typeof type, 'string');
+    assert(util.isArray(values));
     assert.strictEqual(typeof callback, 'function');
 
-    debug('add: ', record);
-
-    api().addSubdomain(config.zoneName(), record.subdomain, record.type, record.value, function (error, changeId) {
+    api().add(config.zoneName(), subdomain, type, values, function (error, changeId) {
         if (error) return callback(error);
         callback(null, changeId);
     });
