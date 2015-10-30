@@ -13,7 +13,7 @@ module.exports = exports = {
     add: add,
     remove: remove,
     status: status,
-    update: update,
+    update: update, // unlike add, this fetches latest value, compares and adds if necessary. atomicity depends on backend
     get: get
 };
 
