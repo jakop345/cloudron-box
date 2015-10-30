@@ -69,10 +69,14 @@ function addSubdomain(zoneName, subdomain, type, value, callback) {
 
     debug('addSubdomain: ' + subdomain + ' for domain ' + zoneName + ' with value ' + value);
 
+    var values = [ value ];
+
     getZoneByName(zoneName, function (error, zone) {
         if (error) return callback(error);
 
         var fqdn = config.appFqdn(subdomain);
+        var records = values.map(function (v) { return { Value: v }; });
+
         var params = {
             ChangeBatch: {
                 Changes: [{
@@ -80,9 +84,7 @@ function addSubdomain(zoneName, subdomain, type, value, callback) {
                     ResourceRecordSet: {
                         Type: type,
                         Name: fqdn,
-                        ResourceRecords: [{
-                            Value: value
-                        }],
+                        ResourceRecords: records,
                         Weight: 0,
                         SetIdentifier: fqdn,
                         TTL: 1
@@ -130,16 +132,18 @@ function delSubdomain(zoneName, subdomain, type, value, callback) {
 
     debug('delSubdomain: %s for domain %s.', subdomain, zoneName);
 
+    var values = [ value ];
+
     getZoneByName(zoneName, function (error, zone) {
         if (error) return callback(error);
 
         var fqdn = config.appFqdn(subdomain);
+        var records = values.map(function (v) { return { Value: v }; });
+
         var resourceRecordSet = {
             Name: fqdn,
             Type: type,
-            ResourceRecords: [{
-                Value: value
-            }],
+            ResourceRecords: records,
             Weight: 0,
             SetIdentifier: fqdn,
             TTL: 1
