@@ -40,7 +40,7 @@ function get(subdomain, type, callback) {
     assert.strictEqual(typeof type, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    api().getSubdomain(config.zoneName(), subdomain, type, function (error, values) {
+    api().get(config.zoneName(), subdomain, type, function (error, values) {
         if (error) return callback(error);
 
         callback(null, values);
