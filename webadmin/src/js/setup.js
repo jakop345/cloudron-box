@@ -28,7 +28,7 @@ app.config(['$routeProvider', function ($routeProvider) {
         controller: 'StepController',
         templateUrl: 'views/setup/step2.html'
     }).when('/step3', {
-        controller: 'CustomDomainController',
+        controller: 'StepController',
         templateUrl: 'views/setup/step3.html'
     }).when('/step4', {
         controller: 'FinishController',
@@ -194,15 +194,10 @@ app.controller('StepController', ['$scope', '$route', '$location', 'Wizard', fun
             image = null;
         };
         image.src = $scope.wizard.availableAvatars[randomIndex].data || $scope.wizard.availableAvatars[randomIndex].url;
+    } else if ($route.current.templateUrl === 'views/setup/step3.html' && Wizard.dnsConfig.provider === 'caas') {
+        $location.path('/step4'); // not using custom domain
     }
 
-}]);
-
-app.controller('CustomDomainController', [ '$scope', '$location', 'Wizard', function ($scope, $location, Wizard) {
-    $scope.wizard = Wizard;
-
-    
-    if (Wizard.dnsConfig.provider === 'caas') $location.path('/step4'); // not using custom domain
 }]);
 
 app.controller('FinishController', ['$scope', '$location', 'Wizard', 'Client', function ($scope, $location, Wizard, Client) {
@@ -247,7 +242,9 @@ app.controller('SetupController', ['$scope', '$location', 'Client', 'Wizard', fu
         };
     } else {
         Wizard.dnsConfig = {
-            provider: 'caas'
+            provider: 'caas',
+            accessKeyId: '',
+            secretAccessKey: ''
         };
     }
 
