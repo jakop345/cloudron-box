@@ -12,7 +12,7 @@
     <div class="col-md-4 col-md-offset-4 text-center">
         <div class="form-group" ng-class="{ 'has-error': setup_form.accessKeyId.$dirty && setup_form.accessKeyId.$invalid }">
             <!-- <label class="control-label" for="inputUsername">Username</label> -->
-            <input type="text" class="form-control" ng-model="wizard.dnsConfig.accessKeyId" id="inputAccessKeyId" name="accessKeyId" placeholder="Access Key Id" ng-enter="focusNext('inputSecretAccessKey', setup_form.secretAccessKey.$invalid)" ng-maxlength="512" ng-minlength="3" autofocus required autocomplete="off">
+            <input type="text" class="form-control" ng-model="wizard.dnsConfig.accessKeyId" id="inputAccessKeyId" name="accessKeyId" placeholder="Access Key Id" ng-enter="focusNext('inputSecretAccessKey', setup_form.accessKeyId.$invalid)" ng-maxlength="512" ng-minlength="3" autofocus required autocomplete="off">
         </div>
         <div class="form-group" ng-class="{ 'has-error': setup_form.secretAccessKey.$dirty && setup_form.secretAccessKey.$invalid }">
             <!-- <label class="control-label" for="inputPassword">Password</label> -->
