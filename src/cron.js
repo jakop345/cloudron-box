@@ -46,6 +46,7 @@ function initialize(callback) {
         onTick: cloudron.sendHeartbeat,
         start: true
     });
+    cloudron.sendHeartbeat(); // latest unpublished version of CronJob has runOnInit
 
     if (cloudron.isActivatedSync()) {
         recreateJobs(callback);
