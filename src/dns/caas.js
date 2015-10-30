@@ -30,7 +30,7 @@ function addSubdomain(zoneName, subdomain, type, value, callback) {
 
     var data = {
         type: type,
-        value: value
+        values: [ value ]
     };
 
     superagent
@@ -95,7 +95,7 @@ function delSubdomain(zoneName, subdomain, type, value, callback) {
 
     var data = {
         type: type,
-        value: value
+        values: [ value ]
     };
 
     superagent
