@@ -1430,7 +1430,6 @@ describe('App installation - port bindings', function () {
               .query({ access_token: token })
               .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, oauthProxy: true, cert: validCert1, key: validKey1 })
               .end(function (err, res) {
-                console.log('---', res.text, res.body)
             expect(res.statusCode).to.equal(202);
             checkConfigureStatus(0, done);
         });
