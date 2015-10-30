@@ -22,6 +22,6 @@
 </div>
 <div class="row">
     <div class="col-md-12 text-center">
-        <a class="btn btn-primary" href="#/step3" ng-disabled="setup_form.username.$invalid">Done</a>
+        <button class="btn btn-primary" ng-click="next('/step3', setup_form.username.$invalid || setup_form.password.$invalid)" ng-disabled="setup_form.username.$invalid || setup_form.password.$invalid">Done</button>
     </div>
 </div>
