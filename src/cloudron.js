@@ -115,7 +115,7 @@ CloudronError.NOT_FOUND = 'Not found';
 function initialize(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    settings.events.on(settings.DNS_CONFIG_KEY, addDnsRecords);
+    settings.events.on(settings.DNS_CONFIG_KEY, function() { addDnsRecords(); });
 
     userdb.count(function (error, count) {
         if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
@@ -336,6 +336,8 @@ function getSpfRecord(callback) {
 
 function addDnsRecords(callback) {
     callback = callback || NOOP_CALLBACK;
+
+    if (process.env.BOX_ENV === 'test') return callback();
 
     if (gUpdatingDns) {
         debug('addDnsRecords: dns update already in progress');
