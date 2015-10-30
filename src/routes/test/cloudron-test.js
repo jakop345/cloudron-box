@@ -10,11 +10,7 @@ var async = require('async'),
     config = require('../../config.js'),
     database = require('../../database.js'),
     expect = require('expect.js'),
-    fs = require('fs'),
-    os = require('os'),
-    path = require('path'),
     nock = require('nock'),
-    paths = require('../../paths.js'),
     request = require('superagent'),
     server = require('../../server.js'),
     shell = require('../../shell.js');
@@ -28,6 +24,7 @@ var server;
 function setup(done) {
     nock.cleanAll();
     config.set('version', '0.5.0');
+    config.set('fqdn', 'localhost');
     server.start(done);
 }
 
@@ -215,11 +212,11 @@ describe('Cloudron', function () {
                 expect(result.statusCode).to.equal(200);
                 expect(result.body.apiServerOrigin).to.eql('http://localhost:6060');
                 expect(result.body.webServerOrigin).to.eql(null);
-                expect(result.body.fqdn).to.eql('localhost');
+                expect(result.body.fqdn).to.eql(config.fqdn());
                 expect(result.body.isCustomDomain).to.eql(false);
                 expect(result.body.progress).to.be.an('object');
                 expect(result.body.update).to.be.an('object');
-                expect(result.body.version).to.eql('0.5.0');
+                expect(result.body.version).to.eql(config.version());
                 expect(result.body.developerMode).to.be.a('boolean');
                 expect(result.body.size).to.eql(null);
                 expect(result.body.region).to.eql(null);
@@ -240,11 +237,11 @@ describe('Cloudron', function () {
                 expect(result.statusCode).to.equal(200);
                 expect(result.body.apiServerOrigin).to.eql('http://localhost:6060');
                 expect(result.body.webServerOrigin).to.eql(null);
-                expect(result.body.fqdn).to.eql('localhost');
+                expect(result.body.fqdn).to.eql(config.fqdn());
                 expect(result.body.isCustomDomain).to.eql(false);
                 expect(result.body.progress).to.be.an('object');
                 expect(result.body.update).to.be.an('object');
-                expect(result.body.version).to.eql('0.5.0');
+                expect(result.body.version).to.eql(config.version());
                 expect(result.body.developerMode).to.be.a('boolean');
                 expect(result.body.size).to.eql('1gb');
                 expect(result.body.region).to.eql('sfo');
