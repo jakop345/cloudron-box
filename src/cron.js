@@ -146,6 +146,8 @@ function autoupdatePatternChanged(pattern) {
 function uninitialize(callback) {
     assert.strictEqual(typeof callback, 'function');
 
+    cloudron.events.removeListener(cloudron.EVENT_ACTIVATED, recreateJobs);
+
     if (gAutoupdaterJob) gAutoupdaterJob.stop();
     gAutoupdaterJob = null;
 

@@ -60,6 +60,8 @@ function initialize(callback) {
 function uninitialize(callback) {
     assert.strictEqual(typeof callback, 'function');
 
+    cloudron.events.removeListener(cloudron.EVENT_ACTIVATED, checkDns);
+
     // TODO: interrupt processQueue as well
     clearTimeout(gCheckDnsTimerId);
     gCheckDnsTimerId = null;
