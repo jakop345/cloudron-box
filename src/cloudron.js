@@ -306,13 +306,13 @@ function readDkimPublicKeySync() {
     return publicKey;
 }
 
-function getSpfRecord(callback) {
+function txtRecordsWithSpf(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     subdomains.get('', 'TXT', function (error, txtRecords) {
         if (error) return callback(error);
 
-        var i, validSpf, spfRecord =  { subdomain: '', type: 'TXT', values: null };
+        var i, validSpf;
 
         for (i = 0; i < txtRecords.length; i++) {
             var value = txtRecords[i][0];
@@ -371,10 +371,10 @@ function addDnsRecords(callback) {
     debug('addDnsRecords: %j', records);
 
     async.retry({ times: 10, interval: 20000 }, function (retryCallback) {
-        getSpfRecord(function (error, spfRecord) {
+        txtRecordsWithSpf(function (error, txtRecords) {
             if (error) return retryCallback(error);
 
-            if (spfRecord) records.push(spfRecord);
+            if (txtRecords) records.push({ subdomain: '', type: 'TXT', values: txtRecords });
 
             debug('addDnsRecords: will update %j', records);
 
