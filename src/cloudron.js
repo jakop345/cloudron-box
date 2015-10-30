@@ -371,13 +371,14 @@ function addDnsRecords(callback) {
     debug('addDnsRecords: %j', records);
 
     async.retry({ times: 10, interval: 20000 }, function (retryCallback) {
-        getSpfRecord(function (error, spfRecord) {
-            if (error) return retryCallback(error);
+        // getSpfRecord(function (error, spfRecord) {
+        //     if (error) return retryCallback(error);
 
-            if (spfRecord) records.push(spfRecord);
+        //     if (spfRecord) records.push(spfRecord);
 
-            async.eachSeries(records, subdomains.update, retryCallback);
-        });
+        //     async.eachSeries(records, subdomains.update, retryCallback);
+        // });
+        async.eachSeries(records, subdomains.update, retryCallback);
     }, function (error) {
         gUpdatingDns = false;
         callback(error);
