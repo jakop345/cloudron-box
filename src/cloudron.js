@@ -312,7 +312,7 @@ function getSpfRecord(callback) {
     subdomains.get('', 'TXT', function (error, txtRecords) {
         if (error) return callback(error);
 
-        var i, validSpf, spfRecord =  { subdomain: '', type: 'TXT', value: null };
+        var i, validSpf, spfRecord =  { subdomain: '', type: 'TXT', values: null };
 
         for (i = 0; i < txtRecords.length; i++) {
             var value = txtRecords[i][0];
@@ -325,12 +325,12 @@ function getSpfRecord(callback) {
         if (validSpf) return callback(null, null);
 
         if (i == txtRecords.length) {
-            spfRecord.value = '"v=spf1 a:' + config.fqdn() + ' ~all"';
+            txtRecords[i] = '"v=spf1 a:' + config.fqdn() + ' ~all"';
         } else {
-            spfRecord.value = '"v=spf1 a:' + config.fqdn() + txtRecords[i][0].slice('"v=spf1"'.length);
+            txtRecords[i] = '"v=spf1 a:' + config.fqdn() + txtRecords[i][0].slice('"v=spf1"'.length);
         }
 
-        return callback(null, spfRecord);
+        return callback(null, txtRecords);
     });
 }
 
@@ -351,12 +351,12 @@ function addDnsRecords(callback) {
     var dkimKey = readDkimPublicKeySync();
     if (!dkimKey) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, new Error('internal error failed to read dkim public key')));
 
-    var nakedDomainRecord = { subdomain: '', type: 'A', value: sysinfo.getIp() };
-    var webadminRecord = { subdomain: 'my', type: 'A', value: sysinfo.getIp() };
+    var nakedDomainRecord = { subdomain: '', type: 'A', values: [ sysinfo.getIp() ] };
+    var webadminRecord = { subdomain: 'my', type: 'A', values: [ sysinfo.getIp() ] };
     // t=s limits the domainkey to this domain and not it's subdomains
-    var dkimRecord = { subdomain: DKIM_SELECTOR + '._domainkey', type: 'TXT', value: '"v=DKIM1; t=s; p=' + dkimKey + '"' };
+    var dkimRecord = { subdomain: DKIM_SELECTOR + '._domainkey', type: 'TXT', values: [ '"v=DKIM1; t=s; p=' + dkimKey + '"' ] };
     // DMARC requires special setup if report email id is in different domain
-    var dmarcRecord = { subdomain: '_dmarc', type: 'TXT', value: '"v=DMARC1; p=none; pct=100; rua=mailto:' + DMARC_REPORT_EMAIL + '; ruf=' + DMARC_REPORT_EMAIL + '"' };
+    var dmarcRecord = { subdomain: '_dmarc', type: 'TXT', values: [ '"v=DMARC1; p=none; pct=100; rua=mailto:' + DMARC_REPORT_EMAIL + '; ruf=' + DMARC_REPORT_EMAIL + '"' ] };
 
     var records = [ ];
     if (config.isCustomDomain()) {
@@ -378,7 +378,9 @@ function addDnsRecords(callback) {
 
         //     async.eachSeries(records, subdomains.update, retryCallback);
         // });
-        async.eachSeries(records, subdomains.update, retryCallback);
+        async.eachSeries(records, function (record, iteratorCallback) {
+            subdomains.update(record.subdomain, record.type, record.values, iteratorCallback);
+        }, retryCallback);
     }, function (error) {
         gUpdatingDns = false;
         callback(error);
