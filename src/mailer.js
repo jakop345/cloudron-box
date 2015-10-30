@@ -28,7 +28,7 @@ var assert = require('assert'),
     cloudron = require('./cloudron.js'),
     config = require('./config.js'),
     debug = require('debug')('box:mailer'),
-    dns = require('dns'),
+    dns = require('native-dns'),
     docker = require('./docker.js').connection,
     ejs = require('ejs'),
     nodemailer = require('nodemailer'),
@@ -72,8 +72,37 @@ function uninitialize(callback) {
     callback(null);
 }
 
+function getTxtRecords(callback) {
+    dns.resolveNs(config.zoneName(), function (error, nameservers) {
+        if (error || !nameservers) return callback(error || new Error('Unable to get nameservers'));
+
+        var nameserver = nameservers[0];
+
+        dns.resolve4(nameserver, function (error, nsIps) {
+            if (error || !nsIps || nsIps.length === 0) return callback(error);
+
+            var req = dns.Request({
+                question: dns.Question({ name: config.fqdn(), type: 'TXT' }),
+                server: { address: nsIps[0] },
+                timeout: 5000
+            });
+
+            req.on('timeout', function () { return callback(new Error('ETIMEOUT')); });
+
+            req.on('message', function (error, message) {
+                if (error || !message.answer || message.answer.length === 0) return callback(null, null);
+
+                var records = message.answer.map(function (a) { return a.data[0]; });
+                callback(null, records);
+            });
+
+            req.send();
+        });
+    });
+}
+
 function checkDns() {
-    dns.resolveTxt(config.fqdn(), function (error, records) {
+    getTxtRecords(function (error, records) {
         if (error) {
             debug('checkDns: DNS error looking up TXT records for %s', config.fqdn(), error);
             gCheckDnsTimerId = setTimeout(checkDns, 60000);
