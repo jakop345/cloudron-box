@@ -244,8 +244,8 @@ function setDnsConfig(dnsConfig, callback) {
     var credentials;
 
     if (dnsConfig.provider === 'route53') {
-        if (typeof dnsConfig.accessKeyId !== 'string') return callback(new SettingsError(SettingsError.BAD_FIELD, 'accessKeyId must not a string'));
-        if (typeof dnsConfig.secretAccessKey !== 'string') return callback(new SettingsError(SettingsError.BAD_FIELD, 'secretAccessKey must not be a string'));
+        if (typeof dnsConfig.accessKeyId !== 'string') return callback(new SettingsError(SettingsError.BAD_FIELD, 'accessKeyId must be a string'));
+        if (typeof dnsConfig.secretAccessKey !== 'string') return callback(new SettingsError(SettingsError.BAD_FIELD, 'secretAccessKey must be a string'));
 
         credentials = {
             provider: dnsConfig.provider,
