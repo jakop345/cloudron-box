@@ -62,16 +62,13 @@ function update(record, callback) {
     });
 }
 
-function remove(record, callback) {
-    assert.strictEqual(typeof record, 'object');
-    assert.strictEqual(typeof callback, 'function');
+function remove(subdomain, type, values, callback) {
+    assert.strictEqual(typeof subdomain, 'string');
+    assert.strictEqual(typeof type, 'string');
+    assert(util.isArray(values));
 
-    debug('remove: ', record);
-
-    api().delSubdomain(config.zoneName(), record.subdomain, record.type, record.value, function (error) {
+    api().del(config.zoneName(), subdomain, type, values, function (error) {
         if (error && error.reason !== SubdomainError.NOT_FOUND) return callback(error);
-
-        debug('deleteSubdomain: successfully deleted %j', record);
 
         callback(null);
     });
