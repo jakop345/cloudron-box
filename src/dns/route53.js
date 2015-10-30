@@ -6,7 +6,7 @@ exports = module.exports = {
     add: add,
     get: get,
     del: del,
-    updateSubdomain: updateSubdomain,
+    update: update,
     getChangeStatus: getChangeStatus
 };
 
@@ -16,7 +16,8 @@ var assert = require('assert'),
     debug = require('debug')('box:dns/route53'),
     settings = require('../settings.js'),
     SubdomainError = require('../subdomainerror.js'),
-    util = require('util');
+    util = require('util'),
+    _ = require('underscore');
 
 function getDnsCredentials(callback) {
     assert.strictEqual(typeof callback, 'function');
@@ -113,14 +114,20 @@ function add(zoneName, subdomain, type, values, callback) {
     });
 }
 
-function updateSubdomain(zoneName, subdomain, type, value, callback) {
+function update(zoneName, subdomain, type, values, callback) {
     assert.strictEqual(typeof zoneName, 'string');
     assert.strictEqual(typeof subdomain, 'string');
     assert.strictEqual(typeof type, 'string');
-    assert.strictEqual(typeof value, 'string');
+    assert(util.isArray(values));
     assert.strictEqual(typeof callback, 'function');
 
-    add(zoneName, subdomain, type, value, callback);
+    get(zoneName, subdomain, type, function (error, result) {
+        if (error) return callback(error);
+
+        if (_.isEqual(values, result)) return callback();
+
+        add(zoneName, subdomain, type, values, callback);
+    });
 }
 
 function get(zoneName, subdomain, type, callback) {

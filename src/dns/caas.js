@@ -5,7 +5,7 @@
 exports = module.exports = {
     add: add,
     del: del,
-    updateSubdomain: updateSubdomain,
+    update: update,
     getChangeStatus: getChangeStatus,
     get: get
 };
@@ -15,7 +15,8 @@ var assert = require('assert'),
     debug = require('debug')('box:dns/caas'),
     SubdomainError = require('../subdomainerror.js'),
     superagent = require('superagent'),
-    util = require('util');
+    util = require('util'),
+    _ = require('underscore');
 
 function add(zoneName, subdomain, type, values, callback) {
     assert.strictEqual(typeof zoneName, 'string');
@@ -67,19 +68,19 @@ function get(zoneName, subdomain, type, callback) {
         });
 }
 
-function updateSubdomain(zoneName, subdomain, type, value, callback) {
+function update(zoneName, subdomain, type, values, callback) {
     assert.strictEqual(typeof zoneName, 'string');
     assert.strictEqual(typeof subdomain, 'string');
     assert.strictEqual(typeof type, 'string');
-    assert.strictEqual(typeof value, 'string');
+    assert(util.isArray(values));
     assert.strictEqual(typeof callback, 'function');
 
-    get(zoneName, subdomain, type, function (error, values) {
+    get(zoneName, subdomain, type, function (error, result) {
         if (error) return callback(error);
 
-        if (values[0] === value) return callback();
+        if (_.isEqual(values, result)) return callback();
 
-        add(zoneName, subdomain, type, value, callback);
+        add(zoneName, subdomain, type, values, callback);
     });
 }
 

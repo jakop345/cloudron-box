@@ -5,7 +5,6 @@
 var assert = require('assert'),
     caas = require('./dns/caas.js'),
     config = require('./config.js'),
-    debug = require('debug')('box:subdomains'),
     route53 = require('./dns/route53.js'),
     SubdomainError = require('./subdomainerror.js'),
     util = require('util');
@@ -47,16 +46,14 @@ function get(subdomain, type, callback) {
     });
 }
 
-function update(record, callback) {
-    assert.strictEqual(typeof record, 'object');
+function update(subdomain, type, values, callback) {
+    assert.strictEqual(typeof subdomain, 'string');
+    assert.strictEqual(typeof type, 'string');
+    assert(util.isArray(values));
     assert.strictEqual(typeof callback, 'function');
 
-    debug('update: ', record);
-
-    api().updateSubdomain(config.zoneName(), record.subdomain, record.type, record.value, function (error) {
+    api().update(config.zoneName(), subdomain, type, values, function (error) {
         if (error) return callback(error);
-
-        debug('updateSubdomain: successfully updated subdomain %j', record);
 
         callback(null);
     });
@@ -66,6 +63,7 @@ function remove(subdomain, type, values, callback) {
     assert.strictEqual(typeof subdomain, 'string');
     assert.strictEqual(typeof type, 'string');
     assert(util.isArray(values));
+    assert.strictEqual(typeof callback, 'function');
 
     api().del(config.zoneName(), subdomain, type, values, function (error) {
         if (error && error.reason !== SubdomainError.NOT_FOUND) return callback(error);
