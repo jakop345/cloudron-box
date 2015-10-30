@@ -315,10 +315,9 @@ function txtRecordsWithSpf(callback) {
         var i, validSpf;
 
         for (i = 0; i < txtRecords.length; i++) {
-            var value = txtRecords[i][0];
-            if (value.indexOf('"v=spf1 ') !== 0) continue; // not SPF
+            if (txtRecords[i].indexOf('"v=spf1 ') !== 0) continue; // not SPF
 
-            validSpf = value.indexOf('a:' + config.fqdn()) !== 0;
+            validSpf = txtRecords[i].indexOf('a:' + config.fqdn()) !== 0;
             break;
         }
 
@@ -327,7 +326,7 @@ function txtRecordsWithSpf(callback) {
         if (i == txtRecords.length) {
             txtRecords[i] = '"v=spf1 a:' + config.fqdn() + ' ~all"';
         } else {
-            txtRecords[i] = '"v=spf1 a:' + config.fqdn() + txtRecords[i][0].slice('"v=spf1"'.length);
+            txtRecords[i] = '"v=spf1 a:' + config.fqdn() + txtRecords[i].slice('"v=spf1"'.length);
         }
 
         return callback(null, txtRecords);
