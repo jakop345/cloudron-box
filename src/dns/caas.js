@@ -4,7 +4,7 @@
 
 exports = module.exports = {
     add: add,
-    delSubdomain: delSubdomain,
+    del: del,
     updateSubdomain: updateSubdomain,
     getChangeStatus: getChangeStatus,
     get: get
@@ -54,7 +54,7 @@ function get(zoneName, subdomain, type, callback) {
 
     var fqdn = subdomain !== '' && type === 'TXT' ? subdomain + '.' + config.fqdn() : config.appFqdn(subdomain);
 
-    debug('getSubdomain: zoneName: %s subdomain: %s type: %s fqdn: %s', zoneName, subdomain, type, fqdn);
+    debug('get: zoneName: %s subdomain: %s type: %s fqdn: %s', zoneName, subdomain, type, fqdn);
 
     superagent
         .get(config.apiServerOrigin() + '/api/v1/domains/' + fqdn)
@@ -83,18 +83,18 @@ function updateSubdomain(zoneName, subdomain, type, value, callback) {
     });
 }
 
-function delSubdomain(zoneName, subdomain, type, value, callback) {
+function del(zoneName, subdomain, type, values, callback) {
     assert.strictEqual(typeof zoneName, 'string');
     assert.strictEqual(typeof subdomain, 'string');
     assert.strictEqual(typeof type, 'string');
-    assert.strictEqual(typeof value, 'string');
+    assert(util.isArray(values));
     assert.strictEqual(typeof callback, 'function');
 
-    debug('delSubdomain: %s for domain %s.', subdomain, zoneName);
+    debug('add: %s for zone %s of type %s with values %j', subdomain, zoneName, type, values);
 
     var data = {
         type: type,
-        values: [ value ]
+        values: values
     };
 
     superagent

@@ -268,12 +268,10 @@ function unregisterSubdomain(app, location, callback) {
         return callback(null);
     }
 
-    var record = { subdomain: location, type: 'A', value: sysinfo.getIp() };
-
     async.retry({ times: 30, interval: 5000 }, function (retryCallback) {
         debugApp(app, 'Unregistering subdomain: %s', location);
 
-        subdomains.remove(record, function (error) {
+        subdomains.remove(location, 'A', [ sysinfo.getIp() ], function (error) {
             if (error && (error.reason === SubdomainError.STILL_BUSY || error.reason === SubdomainError.EXTERNAL_ERROR)) return retryCallback(error); // try again
 
             retryCallback(null, error);

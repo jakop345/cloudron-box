@@ -5,7 +5,7 @@
 exports = module.exports = {
     add: add,
     get: get,
-    delSubdomain: delSubdomain,
+    del: del,
     updateSubdomain: updateSubdomain,
     getChangeStatus: getChangeStatus
 };
@@ -155,16 +155,14 @@ function get(zoneName, subdomain, type, callback) {
     });
 }
 
-function delSubdomain(zoneName, subdomain, type, value, callback) {
+function del(zoneName, subdomain, type, values, callback) {
     assert.strictEqual(typeof zoneName, 'string');
     assert.strictEqual(typeof subdomain, 'string');
     assert.strictEqual(typeof type, 'string');
-    assert.strictEqual(typeof value, 'string');
+    assert(util.isArray(values));
     assert.strictEqual(typeof callback, 'function');
 
-    debug('delSubdomain: %s for domain %s.', subdomain, zoneName);
-
-    var values = [ value ];
+    debug('add: %s for zone %s of type %s with values %j', subdomain, zoneName, type, values);
 
     getZoneByName(zoneName, function (error, zone) {
         if (error) return callback(error);
