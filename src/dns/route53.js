@@ -4,6 +4,7 @@
 
 exports = module.exports = {
     add: add,
+    get: get,
     delSubdomain: delSubdomain,
     updateSubdomain: updateSubdomain,
     getChangeStatus: getChangeStatus
@@ -119,7 +120,39 @@ function updateSubdomain(zoneName, subdomain, type, value, callback) {
     assert.strictEqual(typeof value, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    addSubdomain(zoneName, subdomain, type, value, callback);
+    add(zoneName, subdomain, type, value, callback);
+}
+
+function get(zoneName, subdomain, type, callback) {
+    assert.strictEqual(typeof zoneName, 'string');
+    assert.strictEqual(typeof subdomain, 'string');
+    assert.strictEqual(typeof type, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    getZoneByName(zoneName, function (error, zone) {
+        if (error) return callback(error);
+
+        var params = {
+            HostedZoneId: zone.id,
+            MaxItems: '1',
+            StartRecordName: subdomain + '.' + zoneName + '.',
+            StartRecordType: type
+        };
+
+        getDnsCredentials(function (error, credentials) {
+            if (error) return callback(error);
+
+            var route53 = new AWS.Route53(credentials);
+            route53.listResourceRecordSets(params, function (error, result) {
+                if (error) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, new Error(error)));
+                if (result.ResourceRecordSets.length === 0) return callback(null, [ ]);
+
+                var values = result.ResourceRecordSets[0].ResourceRecords.map(function (record) { return record.Value; });
+
+                callback(null, values);
+            });
+        });
+    });
 }
 
 function delSubdomain(zoneName, subdomain, type, value, callback) {
