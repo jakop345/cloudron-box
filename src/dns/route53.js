@@ -142,7 +142,7 @@ function get(zoneName, subdomain, type, callback) {
         var params = {
             HostedZoneId: zone.id,
             MaxItems: '1',
-            StartRecordName: subdomain + '.' + zoneName + '.',
+            StartRecordName: (subdomain ? subdomain + '.' : '') + zoneName + '.',
             StartRecordType: type
         };
 
@@ -153,6 +153,7 @@ function get(zoneName, subdomain, type, callback) {
             route53.listResourceRecordSets(params, function (error, result) {
                 if (error) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, new Error(error)));
                 if (result.ResourceRecordSets.length === 0) return callback(null, [ ]);
+                if (result.ResourceRecordSets[0].Name !== params.StartRecordName && result.ResourceRecordSets[0].Type !== params.StartRecordType) return callback(null, [ ]);
 
                 var values = result.ResourceRecordSets[0].ResourceRecords.map(function (record) { return record.Value; });
 
