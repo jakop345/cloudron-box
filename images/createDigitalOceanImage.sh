@@ -65,19 +65,8 @@ fi
 function get_pretty_revision() {
     local git_rev="$1"
     local sha1=$(git rev-parse --short "${git_rev}" 2>/dev/null)
-    local name=$(git name-rev --name-only --tags "${sha1}" 2>/dev/null)
 
-    if [[ -z "${name}" ]]; then
-        echo "Unable to resolve $1"
-        exit 1
-    fi
-
-    # fallback to sha1 if we cannot find a tag
-    if [[ "${name}" == "undefined" ]]; then
-        echo "${sha1}"
-    else
-        echo "${name}"
-    fi
+    echo "${sha1}"
 }
 
 now=$(date "+%Y-%m-%d-%H%M%S")
