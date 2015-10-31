@@ -312,12 +312,14 @@ function txtRecordsWithSpf(callback) {
     subdomains.get('', 'TXT', function (error, txtRecords) {
         if (error) return callback(error);
 
+        debug('txtRecordsWithSpf: current txt records - %j', txtRecords);
+
         var i, validSpf;
 
         for (i = 0; i < txtRecords.length; i++) {
             if (txtRecords[i].indexOf('"v=spf1 ') !== 0) continue; // not SPF
 
-            validSpf = txtRecords[i].indexOf('a:' + config.fqdn()) !== 0;
+            validSpf = txtRecords[i].indexOf(' a:' + config.fqdn() + ' ') !== -1;
             break;
         }
 
@@ -383,6 +385,9 @@ function addDnsRecords(callback) {
         });
     }, function (error) {
         gUpdatingDns = false;
+
+        debug('addDnsRecords: done updating records with error:', error);
+
         callback(error);
     });
 }
