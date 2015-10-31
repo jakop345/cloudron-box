@@ -41,8 +41,6 @@ function getZoneByName(zoneName, callback) {
     assert.strictEqual(typeof zoneName, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    debug('getZoneByName: %s', zoneName);
-
     getDnsCredentials(function (error, credentials) {
         if (error) return callback(error);
 
@@ -55,8 +53,6 @@ function getZoneByName(zoneName, callback) {
             })[0];
 
             if (!zone) return callback(new SubdomainError(SubdomainError.NOT_FOUND, 'no such zone'));
-
-            debug('getZoneByName: found zone', zone);
 
             callback(null, zone);
         });
@@ -140,7 +136,7 @@ function get(zoneName, subdomain, type, callback) {
         if (error) return callback(error);
 
         var params = {
-            HostedZoneId: zone.id,
+            HostedZoneId: zone.Id,
             MaxItems: '1',
             StartRecordName: (subdomain ? subdomain + '.' : '') + zoneName + '.',
             StartRecordType: type
@@ -218,8 +214,6 @@ function del(zoneName, subdomain, type, values, callback) {
                     debug('delSubdomain: error', error);
                     return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, new Error(error)));
                 }
-
-                debug('delSubdomain: success');
 
                 callback(null);
             });
