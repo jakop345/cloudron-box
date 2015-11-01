@@ -39,8 +39,7 @@ iptables -P OUTPUT ACCEPT
 # NOTE: keep these in sync with src/apps.js validatePortBindings
 # allow ssh, http, https, ping, dns
 iptables -I INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
-iptables -A INPUT -p tcp --dport 22 -j ACCEPT
-iptables -A INPUT -p tcp -m tcp -m multiport --dports 80,443,886 -j ACCEPT
+iptables -A INPUT -p tcp -m tcp -m multiport --dports 80,202,443,886 -j ACCEPT
 iptables -A INPUT -p icmp --icmp-type echo-request -j ACCEPT
 iptables -A INPUT -p icmp --icmp-type echo-reply -j ACCEPT
 iptables -A INPUT -p udp --sport 53 -j ACCEPT
@@ -63,7 +62,7 @@ iptables -A INPUT -j LOGGING # last rule in INPUT chain
 iptables -A LOGGING -m limit --limit 2/min -j LOG --log-prefix "IPTables Packet Dropped: " --log-level 7
 iptables -A LOGGING -j DROP
 
-echo "==== Install btrfs tools"
+echo "==== Install btrfs tools ==="
 apt-get -y install btrfs-tools
 
 echo "==== Install docker ===="
@@ -232,3 +231,16 @@ sync
 sed -e 's/^#NTP=/NTP=0.ubuntu.pool.ntp.org 1.ubuntu.pool.ntp.org 2.ubuntu.pool.ntp.org 3.ubuntu.pool.ntp.org/' -i /etc/systemd/timesyncd.conf
 timedatectl set-ntp 1
 timedatectl set-timezone UTC
+
+echo "==== Install ssh ==="
+apt-get -y install openssh-server
+# https://stackoverflow.com/questions/4348166/using-with-sed on why ? must be escaped
+sed -e 's/^#\?Port .*/Port 202/g' \
+    -e 's/^#\?PermitRootLogin .*/PermitRootLogin without-password/g' \
+    -e 's/^#\?PermitEmptyPasswords .*/PermitEmptyPasswords no/g' \
+    -e 's/^#\?PasswordAuthentication .*/PasswordAuthentication no/g' \
+    -i /etc/ssh/sshd_config
+
+ # required so we can connect to this machine since port 22 is blocked by iptables by now
+systemctl reload sshd
+

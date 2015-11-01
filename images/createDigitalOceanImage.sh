@@ -11,6 +11,12 @@ readonly INSTALLER_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
 readonly JSON="${INSTALLER_DIR}/node_modules/.bin/json"
 readonly ssh_keys="${HOME}/.ssh/id_rsa_yellowtent"
 
+readonly scp202="scp -P 202 -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${ssh_keys}"
+readonly scp22="scp -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${ssh_keys}"
+
+readonly ssh202="ssh -p 202 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${ssh_keys}"
+readonly ssh22="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${ssh_keys}"
+
 installer_revision=$(git rev-parse HEAD)
 box_size="512mb"
 image_regions=(sfo1 ams3)
@@ -120,7 +126,7 @@ done
 
 while true; do
     echo "Trying to copy init script to droplet"
-    if scp -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i "${ssh_keys}" "${SCRIPT_DIR}/initializeBaseUbuntuImage.sh" root@${droplet_ip}:.; then
+    if $scp22 "${SCRIPT_DIR}/initializeBaseUbuntuImage.sh" root@${droplet_ip}:.; then
         break
     fi
     echo "Timedout, trying again in 30 seconds"
@@ -128,24 +134,24 @@ while true; do
 done
 
 echo "Copying INFRA_VERSION"
-scp -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i "${ssh_keys}" "${SCRIPT_DIR}/../../box/setup/INFRA_VERSION" root@${droplet_ip}:.
+$scp22 "${SCRIPT_DIR}/../../box/setup/INFRA_VERSION" root@${droplet_ip}:.
 
 echo "Copying installer source"
 cd "${INSTALLER_DIR}"
-git archive --format=tar HEAD | ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i "${ssh_keys}" "root@${droplet_ip}" "cat - > /root/installer.tar"
+git archive --format=tar HEAD | $ssh22 "root@${droplet_ip}" "cat - > /root/installer.tar"
 
 echo "Executing init script"
-if ! ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i "${ssh_keys}" "root@${droplet_ip}" "/bin/bash /root/initializeBaseUbuntuImage.sh ${installer_revision}"; then
+if ! $ssh22 "root@${droplet_ip}" "/bin/bash /root/initializeBaseUbuntuImage.sh ${installer_revision}"; then
     echo "Init script failed"
     exit 1
 fi
 
 echo "Copy over certs"
-scp -r -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i "${ssh_keys}" "${INSTALLER_DIR}/../keys/installer/" "root@${droplet_ip}:/home/yellowtent/installer/src/certs/"
-scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i "${ssh_keys}" "${INSTALLER_DIR}/../keys/installer_ca/ca.crt" "root@${droplet_ip}:/home/yellowtent/installer/src/certs/"
+$scp202 -r "${INSTALLER_DIR}/../keys/installer/" "root@${droplet_ip}:/home/yellowtent/installer/src/certs/"
+$scp202 "${INSTALLER_DIR}/../keys/installer_ca/ca.crt" "root@${droplet_ip}:/home/yellowtent/installer/src/certs/"
 
 echo "Shutting down droplet with id : ${droplet_id}"
-ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i "${ssh_keys}" "root@${droplet_ip}" "shutdown -f now" || true # shutdown sometimes terminates ssh connection immediately making this command fail
+$ssh202 "root@${droplet_ip}" "shutdown -f now" || true # shutdown sometimes terminates ssh connection immediately making this command fail
 
 # wait 10 secs for actual shutdown
 echo "Waiting for 10 seconds for droplet to shutdown"
