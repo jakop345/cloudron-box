@@ -9,6 +9,7 @@ exports = module.exports = {
     getEnvironment: getEnvironment,
     getLinksSync: getLinksSync,
     getBindsSync: getBindsSync,
+    getContainerNamesSync: getContainerNamesSync,
 
     // exported for testing
     _setupOauth: setupOauth,
@@ -237,6 +238,27 @@ function getBindsSync(app, addons) {
     }
 
     return binds;
+}
+
+function getContainerNamesSync(app, addons) {
+    assert.strictEqual(typeof app, 'object');
+    assert(!addons || typeof addons === 'object');
+
+    var names = [ ];
+
+    if (!addons) return names;
+
+    for (var addon in addons) {
+        switch (addon) {
+        case 'scheduler':
+            // names here depend on how scheduler.js creates containers
+            names = names.concat(Object.keys(addons.scheduler).map(function (taskName) { return app.id + '-' + taskName; }));
+            break;
+        default: break;
+        }
+    }
+
+    return names;
 }
 
 function setupOauth(app, options, callback) {

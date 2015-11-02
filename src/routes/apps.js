@@ -286,14 +286,14 @@ function getLogStream(req, res, next) {
 
     debug('Getting logstream of app id:%s', req.params.id);
 
-    var fromLine = req.query.fromLine ? parseInt(req.query.fromLine, 10) : -10; // we ignore last-event-id
-    if (isNaN(fromLine)) return next(new HttpError(400, 'fromLine must be a valid number'));
+    var lines = req.query.lines ? parseInt(req.query.lines, 10) : -10; // we ignore last-event-id
+    if (isNaN(lines)) return next(new HttpError(400, 'lines must be a valid number'));
 
     function sse(id, data) { return 'id: ' + id + '\ndata: ' + data + '\n\n'; }
 
     if (req.headers.accept !== 'text/event-stream') return next(new HttpError(400, 'This API call requires EventStream'));
 
-    apps.getLogStream(req.params.id, fromLine, function (error, logStream) {
+    apps.getLogs(req.params.id, lines, true /* follow */, function (error, logStream) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
         if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(412, error.message));
         if (error) return next(new HttpError(500, error));
@@ -309,7 +309,7 @@ function getLogStream(req, res, next) {
         res.on('close', logStream.close);
         logStream.on('data', function (data) {
             var obj = JSON.parse(data);
-            res.write(sse(obj.lineNumber, JSON.stringify(obj)));
+            res.write(sse(obj.timestamp, JSON.stringify(obj))); // send timestamp as id
         });
         logStream.on('end', res.end.bind(res));
         logStream.on('error', res.end.bind(res, null));
@@ -319,9 +319,12 @@ function getLogStream(req, res, next) {
 function getLogs(req, res, next) {
     assert.strictEqual(typeof req.params.id, 'string');
 
+    var lines = req.query.lines ? parseInt(req.query.lines, 10) : 100;
+    if (isNaN(lines)) return next(new HttpError(400, 'lines must be a number'));
+
     debug('Getting logs of app id:%s', req.params.id);
 
-    apps.getLogs(req.params.id, function (error, logStream) {
+    apps.getLogs(req.params.id, lines, false /* follow */, function (error, logStream) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
         if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(412, error.message));
         if (error) return next(new HttpError(500, error));
