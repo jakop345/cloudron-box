@@ -309,7 +309,7 @@ function getLogStream(req, res, next) {
         res.on('close', logStream.close);
         logStream.on('data', function (data) {
             var obj = JSON.parse(data);
-            res.write(sse(obj.timestamp, JSON.stringify(obj))); // send timestamp as id
+            res.write(sse(obj.monotonicTimestamp, JSON.stringify(obj))); // send timestamp as id
         });
         logStream.on('end', res.end.bind(res));
         logStream.on('error', res.end.bind(res, null));
