@@ -506,7 +506,12 @@ function getLogs(appId, lines, follow, callback) {
             if (!obj) return undefined;
 
             var source = obj.CONTAINER_NAME.slice(app.id.length + 1);
-            return JSON.stringify({ timestamp: obj.__REALTIME_TIMESTAMP, message: obj.MESSAGE, source: source || 'main' });
+            return JSON.stringify({
+                realtimeTimestamp: obj.__REALTIME_TIMESTAMP,
+                monotonicTimestamp: obj.__MONOTONIC_TIMESTAMP,
+                message: obj.MESSAGE,
+                source: source || 'main'
+            });
         });
 
         transformStream.close = cp.kill.bind(cp, 'SIGKILL'); // closing stream kills the child process
