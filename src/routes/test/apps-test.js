@@ -838,7 +838,7 @@ describe('App installation', function () {
         }, done);
     });
 
-    it('logs - stdout and stderr', function (done) {
+    xit('logs - stdout and stderr', function (done) {
         request.get(SERVER_URL + '/api/v1/apps/' + APP_ID + '/logs')
             .query({ access_token: token })
             .end(function (err, res) {
@@ -852,7 +852,7 @@ describe('App installation', function () {
         });
     });
 
-    it('logStream - requires event-stream accept header', function (done) {
+    xit('logStream - requires event-stream accept header', function (done) {
         request.get(SERVER_URL + '/api/v1/apps/' + APP_ID + '/logstream')
             .query({ access_token: token, fromLine: 0 })
             .end(function (err, res) {
@@ -862,7 +862,7 @@ describe('App installation', function () {
     });
 
 
-    it('logStream - stream logs', function (done) {
+    xit('logStream - stream logs', function (done) {
         var options = {
             port: config.get('port'), host: 'localhost', path: '/api/v1/apps/' + APP_ID + '/logstream?access_token=' + token,
             headers: { 'Accept': 'text/event-stream', 'Connection': 'keep-alive' }
