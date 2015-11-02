@@ -23,7 +23,6 @@ exports = module.exports = {
     backup: backup,
     backupApp: backupApp,
 
-    getLogStream: getLogStream,
     getLogs: getLogs,
 
     start: start,
@@ -62,6 +61,7 @@ var addons = require('./addons.js'),
     settings = require('./settings.js'),
     semver = require('semver'),
     shell = require('./shell.js'),
+    spawn = require('child_process').spawn,
     split = require('split'),
     superagent = require('superagent'),
     taskmanager = require('./taskmanager.js'),
@@ -475,58 +475,45 @@ function update(appId, force, manifest, portBindings, icon, callback) {
     });
 }
 
-function getLogStream(appId, fromLine, callback) {
-    assert.strictEqual(typeof appId, 'string');
-    assert.strictEqual(typeof fromLine, 'number'); // behaves like tail -n
-    assert.strictEqual(typeof callback, 'function');
+function appLogFilter(app) {
+    var names = [ app.id ].concat(addons.getContainerNamesSync(app, app.addons));
 
-    debug('Getting logs for %s', appId);
-    appdb.get(appId, function (error, app) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND));
-        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
-
-        if (app.installationState !== appdb.ISTATE_INSTALLED) return callback(new AppsError(AppsError.BAD_STATE, util.format('App is in %s state.', app.installationState)));
-
-        var container = docker.getContainer(app.containerId);
-        var tail = fromLine < 0 ? -fromLine : 'all';
-
-        // note: cannot access docker file directly because it needs root access
-        container.logs({ stdout: true, stderr: true, follow: true, timestamps: true, tail: tail }, function (error, logStream) {
-            if (error && error.statusCode === 404) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
-            if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
-
-            var lineCount = 0;
-            var skipLinesStream = split(function mapper(line) {
-                if (++lineCount < fromLine) return undefined;
-                var timestamp = line.substr(0, line.indexOf(' ')); // sometimes this has square brackets around it
-                return JSON.stringify({ lineNumber: lineCount, timestamp: timestamp.replace(/[[\]]/g,''), log: line.substr(timestamp.length + 1) });
-            });
-            skipLinesStream.close = logStream.req.abort;
-            logStream.pipe(skipLinesStream);
-            return callback(null, skipLinesStream);
-        });
-    });
+    return names.map(function (name) { return 'CONTAINER_NAME=' + name; });
 }
 
-function getLogs(appId, callback) {
+function getLogs(appId, lines, follow, callback) {
     assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof lines, 'number');
+    assert.strictEqual(typeof follow, 'boolean');
     assert.strictEqual(typeof callback, 'function');
 
     debug('Getting logs for %s', appId);
+
     appdb.get(appId, function (error, app) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
         if (app.installationState !== appdb.ISTATE_INSTALLED) return callback(new AppsError(AppsError.BAD_STATE, util.format('App is in %s state.', app.installationState)));
 
-        var container = docker.getContainer(app.containerId);
-        // note: cannot access docker file directly because it needs root access
-        container.logs({ stdout: true, stderr: true, follow: false, timestamps: true, tail: 'all' }, function (error, logStream) {
-            if (error && error.statusCode === 404) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
-            if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+        var args = [ '--output=json', '--no-pager', '--lines=' + lines ];
+        if (follow) args.push('--follow');
+        args = args.concat(appLogFilter(app));
 
-            return callback(null, logStream);
+        var cp = spawn('/bin/journalctl', args);
+
+        var transformStream = split(function mapper(line) {
+            var obj = safe.JSON.parse(line);
+            if (!obj) return undefined;
+
+            var source = obj.CONTAINER_NAME.slice(app.id.length + 1);
+            return JSON.stringify({ timestamp: obj.__REALTIME_TIMESTAMP, message: obj.MESSAGE, source: source || 'main' });
         });
+
+        transformStream.close = cp.kill.bind(cp, 'SIGKILL'); // closing stream kills the child process
+
+        cp.stdout.pipe(transformStream);
+
+        return callback(null, transformStream);
     });
 }
 
