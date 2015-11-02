@@ -232,6 +232,10 @@ sed -e 's/^#NTP=/NTP=0.ubuntu.pool.ntp.org 1.ubuntu.pool.ntp.org 2.ubuntu.pool.n
 timedatectl set-ntp 1
 timedatectl set-timezone UTC
 
+# Give user access to system logs
+usermod -a -G systemd-journal ${USER}
+setfacl -n -m u:${USER}:r /var/log/journal/*/system.journal
+
 echo "==== Install ssh ==="
 apt-get -y install openssh-server
 # https://stackoverflow.com/questions/4348166/using-with-sed on why ? must be escaped
