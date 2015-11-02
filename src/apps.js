@@ -476,7 +476,7 @@ function update(appId, force, manifest, portBindings, icon, callback) {
 }
 
 function appLogFilter(app) {
-    var names = [ app.id ].concat(addons.getContainerNamesSync(app, app.addons));
+    var names = [ app.id ].concat(addons.getContainerNamesSync(app, app.manifest.addons));
 
     return names.map(function (name) { return 'CONTAINER_NAME=' + name; });
 }
