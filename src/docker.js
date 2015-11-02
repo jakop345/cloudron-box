@@ -158,9 +158,9 @@ function createSubcontainer(app, name, cmd, callback) {
         if (error) return callback(new Error('Error getting addon environment : ' + error));
 
         var containerOptions = {
+            name: name, // used for filtering logs
             // do _not_ set hostname to app fqdn. doing so sets up the dns name to look up the internal docker ip. this makes curl from within container fail
             Hostname: semver.gte(targetBoxVersion(app.manifest), '0.0.77') ? app.location : config.appFqdn(app.location),
-            Name: name, // used for filtering logs
             Tty: isAppContainer,
             Image: app.manifest.dockerImage,
             Cmd: cmd,
