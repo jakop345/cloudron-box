@@ -180,7 +180,7 @@ function doTask(appId, taskName, callback) {
 
             debug('Creating createSubcontainer for %s/%s : %s', app.id, taskName, gState[appId].schedulerConfig[taskName].command);
 
-            docker.createSubcontainer(app, [ '/bin/sh', '-c', gState[appId].schedulerConfig[taskName].command ], function (error, container) {
+            docker.createSubcontainer(app, app.id + '-' + taskName, [ '/bin/sh', '-c', gState[appId].schedulerConfig[taskName].command ], function (error, container) {
                 appState.containerIds[taskName] = container.id;
 
                 saveState(gState);
