@@ -115,7 +115,7 @@ CloudronError.NOT_FOUND = 'Not found';
 function initialize(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    settings.events.on(settings.DNS_CONFIG_KEY, function() { addDnsRecords(); });
+    settings.events.on(settings.DNS_CONFIG_KEY, addDnsRecords);
 
     userdb.count(function (error, count) {
         if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
@@ -130,6 +130,8 @@ function initialize(callback) {
 
 function uninitialize(callback) {
     assert.strictEqual(typeof callback, 'function');
+
+    settings.events.removeListener(settings.DNS_CONFIG_KEY, addDnsRecords);
 
     callback(null);
 }
@@ -335,8 +337,8 @@ function txtRecordsWithSpf(callback) {
     });
 }
 
-function addDnsRecords(callback) {
-    callback = callback || NOOP_CALLBACK;
+function addDnsRecords() {
+    var callback = NOOP_CALLBACK;
 
     if (process.env.BOX_ENV === 'test') return callback();
 
