@@ -19,7 +19,7 @@ var gActiveTasks = { };
 var gPendingTasks = [ ];
 
 var TASK_CONCURRENCY = 5;
-var NOOP_CALLBACK = function (error) { console.error(error); };
+var NOOP_CALLBACK = function (error) { if (error) console.error(error); };
 
 function initialize(callback) {
     assert.strictEqual(typeof callback, 'function');
