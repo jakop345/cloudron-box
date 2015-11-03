@@ -23,21 +23,9 @@ var NOOP_CALLBACK = function (error) { console.error(error); };
 function initialize(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    // resume app installs and uninstalls
-    appdb.getAll(function (error, apps) {
-        if (error) return callback(error);
-
-        apps.forEach(function (app) {
-            if (app.installationState === appdb.ISTATE_INSTALLED && app.runState === appdb.RSTATE_RUNNING) return;
-
-            debug('Creating process for %s (%s) with state %s', app.location, app.id, app.installationState);
-            startAppTask(app.id);
-        });
-
-        callback(null);
-    });
-
     locker.on('unlocked', startNextTask);
+
+    resumeTasks(callback);
 }
 
 function uninitialize(callback) {
@@ -51,6 +39,23 @@ function uninitialize(callback) {
     locker.removeListener('unlocked', startNextTask);
 
     callback(null);
+}
+
+
+// resume app installs and uninstalls
+function resumeTasks(callback) {
+    appdb.getAll(function (error, apps) {
+        if (error) return callback(error);
+
+        apps.forEach(function (app) {
+            if (app.installationState === appdb.ISTATE_INSTALLED && app.runState === appdb.RSTATE_RUNNING) return;
+
+            debug('Creating process for %s (%s) with state %s', app.location, app.id, app.installationState);
+            startAppTask(app.id);
+        });
+
+        callback(null);
+    });
 }
 
 function startNextTask() {
