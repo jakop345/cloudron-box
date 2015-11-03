@@ -43,6 +43,7 @@ function uninitialize(callback) {
         stopAppTask(appId);
     }
 
+    cloudron.events.removeListener(cloudron.EVENT_ACTIVATED, resumeTasks);
     locker.removeListener('unlocked', startNextTask);
 
     callback(null);

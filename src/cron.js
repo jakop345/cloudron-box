@@ -149,6 +149,9 @@ function uninitialize(callback) {
 
     cloudron.events.removeListener(cloudron.EVENT_ACTIVATED, recreateJobs);
 
+    settings.events.removeListener(settings.TIME_ZONE_KEY, recreateJobs);
+    settings.events.removeListener(settings.AUTOUPDATE_PATTERN_KEY, autoupdatePatternChanged);
+
     if (gAutoupdaterJob) gAutoupdaterJob.stop();
     gAutoupdaterJob = null;
 
