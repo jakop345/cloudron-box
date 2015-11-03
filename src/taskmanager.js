@@ -10,6 +10,7 @@ exports = module.exports = {
 var appdb = require('./appdb.js'),
     assert = require('assert'),
     child_process = require('child_process'),
+    cloudron = require('./cloudron.js'),
     debug = require('debug')('box:taskmanager'),
     locker = require('./locker.js'),
     _ = require('underscore');
@@ -25,7 +26,13 @@ function initialize(callback) {
 
     locker.on('unlocked', startNextTask);
 
-    resumeTasks(callback);
+    if (cloudron.isActivatedSync()) {
+        resumeTasks();
+    } else {
+        cloudron.events.on(cloudron.EVENT_ACTIVATED, resumeTasks);
+    }
+
+    callback();
 }
 
 function uninitialize(callback) {
@@ -44,6 +51,8 @@ function uninitialize(callback) {
 
 // resume app installs and uninstalls
 function resumeTasks(callback) {
+    callback = callback || NOOP_CALLBACK;
+
     appdb.getAll(function (error, apps) {
         if (error) return callback(error);
 
