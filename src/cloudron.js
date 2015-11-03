@@ -19,11 +19,12 @@ exports = module.exports = {
     backup: backup,
     ensureBackup: ensureBackup,
 
-    isActivatedSync: isActivatedSync,
+    isConfiguredSync: isConfiguredSync,
 
     events: new (require('events').EventEmitter)(),
 
-    EVENT_ACTIVATED: 'activated'
+    EVENT_ACTIVATED: 'activated',
+    EVENT_CONFIGURED: 'configured'
 };
 
 var apps = require('./apps.js'),
@@ -64,7 +65,7 @@ var NOOP_CALLBACK = function (error) { if (error) debug(error); };
 
 var gUpdatingDns = false,                // flag for dns update reentrancy
     gCloudronDetails = null,             // cached cloudron details like region,size...
-    gIsActivated = null;                // cached activation state so that return value is synchronous. null means we are not initialized yet
+    gIsConfigured = null;                // cached configured state so that return value is synchronous. null means we are not initialized yet
 
 function debugApp(app, args) {
     assert(!app || typeof app === 'object');
@@ -115,29 +116,57 @@ CloudronError.NOT_FOUND = 'Not found';
 function initialize(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    settings.events.on(settings.DNS_CONFIG_KEY, addDnsRecords);
+    exports.events.on(exports.EVENT_CONFIGURED, addDnsRecords);
 
-    userdb.count(function (error, count) {
-        if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
-
-        gIsActivated = count !== 0;
-
-        if (gIsActivated) addDnsRecords(); // reboot/restore/upgrade
-
-        callback(null);
-    });
+    syncConfigState(callback);
 }
 
 function uninitialize(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    settings.events.removeListener(settings.DNS_CONFIG_KEY, addDnsRecords);
+    exports.events.removeListener(exports.EVENT_CONFIGURED, addDnsRecords);
 
     callback(null);
 }
 
-function isActivatedSync() {
-    return gIsActivated === true;
+function isConfiguredSync() {
+    return gIsConfigured === true;
+}
+
+function isConfigured(callback) {
+    // set of rules to see if we have the configs required for cloudron to function
+    // note this checks for missing configs and not invalid configs
+
+    settings.getDnsConfig(function (error, dnsConfig) {
+        if (error) return callback(error);
+
+        if (!dnsConfig) return callback(null, false);
+
+        var isConfigured = (config.isCustomDomain() && dnsConfig.provider === 'route53') ||
+                        (!config.isCustomDomain() && dnsConfig.provider === 'caas');
+
+        callback(null, isConfigured);
+    });
+}
+
+function syncConfigState(callback) {
+    assert(!gIsConfigured);
+
+    callback = callback || NOOP_CALLBACK;
+
+    isConfigured(function (error, configured) {
+        if (error) return callback(error);
+
+        if (configured) {
+            exports.events.emit(exports.EVENT_CONFIGURED);
+        } else {
+            settings.events.once(settings.DNS_CONFIG_KEY, function () { syncConfigState(); }); // check again later
+        }
+
+        gIsConfigured = configured;
+
+        callback();
+    });
 }
 
 function setTimeZone(ip, callback) {
@@ -190,8 +219,6 @@ function activate(username, password, email, ip, callback) {
 
             tokendb.add(token, tokendb.PREFIX_USER + userObject.id, result.id, expires, '*', function (error) {
                 if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
-
-                gIsActivated = true;
 
                 // EE API is sync. do not keep the REST API reponse waiting
                 process.nextTick(function () { exports.events.emit(exports.EVENT_ACTIVATED); });

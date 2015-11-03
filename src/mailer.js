@@ -48,10 +48,10 @@ var gMailQueue = [ ],
 function initialize(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    if (cloudron.isActivatedSync()) {
+    if (cloudron.isConfiguredSync()) {
         checkDns();
     } else {
-        cloudron.events.on(cloudron.EVENT_ACTIVATED, checkDns);
+        cloudron.events.on(cloudron.EVENT_CONFIGURED, checkDns);
     }
 
     callback(null);
@@ -60,7 +60,7 @@ function initialize(callback) {
 function uninitialize(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    cloudron.events.removeListener(cloudron.EVENT_ACTIVATED, checkDns);
+    cloudron.events.removeListener(cloudron.EVENT_CONFIGURED, checkDns);
 
     // TODO: interrupt processQueue as well
     clearTimeout(gCheckDnsTimerId);

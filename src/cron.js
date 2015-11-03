@@ -39,7 +39,6 @@ function initialize(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     settings.events.on(settings.TIME_ZONE_KEY, recreateJobs);
-    settings.events.on(settings.AUTOUPDATE_PATTERN_KEY, autoupdatePatternChanged);
 
     gHeartbeatJob = new CronJob({
         cronTime: '00 */1 * * * *', // every minute
@@ -48,7 +47,7 @@ function initialize(callback) {
     });
     cloudron.sendHeartbeat(); // latest unpublished version of CronJob has runOnInit
 
-    if (cloudron.isActivatedSync()) {
+    if (cloudron.isConfiguredSync()) {
         recreateJobs(callback);
     } else {
         cloudron.events.on(cloudron.EVENT_ACTIVATED, recreateJobs);
@@ -110,6 +109,8 @@ function recreateJobs(unusedTimeZone, callback) {
             timeZone: allSettings[settings.TIME_ZONE_KEY]
         });
 
+        settings.events.removeListener(settings.AUTOUPDATE_PATTERN_KEY, autoupdatePatternChanged);
+        settings.events.on(settings.AUTOUPDATE_PATTERN_KEY, autoupdatePatternChanged);
         autoupdatePatternChanged(allSettings[settings.AUTOUPDATE_PATTERN_KEY]);
 
         if (callback) callback();
@@ -118,6 +119,7 @@ function recreateJobs(unusedTimeZone, callback) {
 
 function autoupdatePatternChanged(pattern) {
     assert.strictEqual(typeof pattern, 'string');
+    assert(gBoxUpdateCheckerJob);
 
     debug('Auto update pattern changed to %s', pattern);
 

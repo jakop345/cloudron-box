@@ -26,10 +26,10 @@ function initialize(callback) {
 
     locker.on('unlocked', startNextTask);
 
-    if (cloudron.isActivatedSync()) {
+    if (cloudron.isConfiguredSync()) {
         resumeTasks();
     } else {
-        cloudron.events.on(cloudron.EVENT_ACTIVATED, resumeTasks);
+        cloudron.events.on(cloudron.EVENT_CONFIGURED, resumeTasks);
     }
 
     callback();
@@ -43,7 +43,7 @@ function uninitialize(callback) {
         stopAppTask(appId);
     }
 
-    cloudron.events.removeListener(cloudron.EVENT_ACTIVATED, resumeTasks);
+    cloudron.events.removeListener(cloudron.EVENT_CONFIGURED, resumeTasks);
     locker.removeListener('unlocked', startNextTask);
 
     callback(null);
