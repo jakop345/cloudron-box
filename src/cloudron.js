@@ -145,15 +145,7 @@ function isConfigured(callback) {
         var isConfigured = (config.isCustomDomain() && dnsConfig.provider === 'route53') ||
                         (!config.isCustomDomain() && dnsConfig.provider === 'caas');
 
-        // fallback for old caas cloudrons
-        if (!isConfigured && !config.isCustomDomain() && !dnsConfig.provider) {
-            settings.setDnsConfig({ provider: 'caas' }, function (error) {
-                if (error) return callback(error);
-                callback(null, true);
-            });
-        } else {
-            callback(null, isConfigured);
-        }
+        callback(null, isConfigured);
     });
 }
 
