@@ -359,7 +359,7 @@ function txtRecordsWithSpf(callback) {
         if (i == txtRecords.length) {
             txtRecords[i] = '"v=spf1 a:' + config.fqdn() + ' ~all"';
         } else {
-            txtRecords[i] = '"v=spf1 a:' + config.fqdn() + txtRecords[i].slice('"v=spf1"'.length);
+            txtRecords[i] = '"v=spf1 a:' + config.fqdn() + ' ' + txtRecords[i].slice('"v=spf1 '.length);
         }
 
         return callback(null, txtRecords);
