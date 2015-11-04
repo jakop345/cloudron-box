@@ -155,6 +155,14 @@ cat > "${BOX_SRC_DIR}/webadmin/dist/config.json" <<CONF_END
 CONF_END
 EOF
 
+# Add DNS Configuration
+if [[ ! -z "${arg_dns_config}" ]]; then
+    echo "Add DNS Config"
+
+    mysql -u root -p${mysql_root_password} \
+        -e "REPLACE INTO settings (name, value) VALUES (\"dns_config\", '$arg_dns_config')" box
+fi
+
 # Add webadmin oauth client
 # The domain might have changed, therefor we have to update the record
 # !!! This needs to be in sync with the webadmin, specifically login_callback.js
