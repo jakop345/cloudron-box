@@ -412,7 +412,11 @@ function addDnsRecords() {
 
             async.eachSeries(records, function (record, iteratorCallback) {
                 subdomains.update(record.subdomain, record.type, record.values, iteratorCallback);
-            }, retryCallback);
+            }, function (error) {
+                if (error) debug('addDnsRecords: failed to update : %s. will retry', error);
+
+                retryCallback(error);
+            });
         });
     }, function (error) {
         gUpdatingDns = false;
