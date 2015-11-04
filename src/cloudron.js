@@ -157,6 +157,8 @@ function syncConfigState(callback) {
     isConfigured(function (error, configured) {
         if (error) return callback(error);
 
+        debug('syncConfigState: configured = %s', configured);
+
         if (configured) {
             exports.events.emit(exports.EVENT_CONFIGURED);
         } else {

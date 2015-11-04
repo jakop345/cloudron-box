@@ -38,8 +38,6 @@ var NOOP_CALLBACK = function (error) { if (error) console.error(error); };
 function initialize(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    settings.events.on(settings.TIME_ZONE_KEY, recreateJobs);
-
     gHeartbeatJob = new CronJob({
         cronTime: '00 */1 * * * *', // every minute
         onTick: cloudron.sendHeartbeat,
@@ -112,6 +110,9 @@ function recreateJobs(unusedTimeZone, callback) {
         settings.events.removeListener(settings.AUTOUPDATE_PATTERN_KEY, autoupdatePatternChanged);
         settings.events.on(settings.AUTOUPDATE_PATTERN_KEY, autoupdatePatternChanged);
         autoupdatePatternChanged(allSettings[settings.AUTOUPDATE_PATTERN_KEY]);
+
+        settings.events.removeListener(settings.TIME_ZONE_KEY, recreateJobs);
+        settings.events.on(settings.TIME_ZONE_KEY, recreateJobs);
 
         if (callback) callback();
     });
