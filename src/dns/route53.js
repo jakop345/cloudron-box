@@ -82,8 +82,6 @@ function add(zoneName, subdomain, type, values, callback) {
                         Type: type,
                         Name: fqdn,
                         ResourceRecords: records,
-                        Weight: 0,
-                        SetIdentifier: fqdn,
                         TTL: 1
                     }
                 }]
@@ -178,8 +176,6 @@ function del(zoneName, subdomain, type, values, callback) {
             Name: fqdn,
             Type: type,
             ResourceRecords: records,
-            Weight: 0,
-            SetIdentifier: fqdn,
             TTL: 1
         };
 
