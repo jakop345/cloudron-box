@@ -263,7 +263,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     Client.onReady(function () {
         fetchBackups();
 
-        $scope.avatar.url = '//my-' + $scope.config.fqdn + '/api/v1/cloudron/avatar';
+        $scope.avatar.url = ($scope.config.isCustomDomain ? '//my.' : '//my-') + $scope.config.fqdn + '/api/v1/cloudron/avatar';
     });
 
     // setup all the dialog focus handling
