@@ -215,7 +215,7 @@ describe('Settings API', function () {
         it('set succeeds', function (done) {
             request.post(SERVER_URL + '/api/v1/settings/cloudron_avatar')
                    .query({ access_token: token })
-                   .attach('avatar', paths.FAVICON_FILE)
+                   .attach('avatar', paths.CLOUDRON_DEFAULT_AVATAR_FILE)
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(202);
                 done();
@@ -227,7 +227,7 @@ describe('Settings API', function () {
                    .query({ access_token: token })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(200);
-                expect(res.body.toString()).to.eql(fs.readFileSync(paths.FAVICON_FILE, 'utf-8'));
+                expect(res.body.toString()).to.eql(fs.readFileSync(paths.CLOUDRON_DEFAULT_AVATAR_FILE, 'utf-8'));
                 done(err);
             });
         });
