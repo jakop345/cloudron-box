@@ -75,7 +75,6 @@ function initConfig() {
     data.fqdn = 'localhost';
 
     data.token = null;
-    data.mailServer = null;
     data.adminEmail = null;
     data.mailDnsRecordIds = [ ];
     data.boxVersionsUrl = null;
