@@ -100,8 +100,6 @@ function add(zoneName, subdomain, type, values, callback) {
                     return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, error.message));
                 }
 
-                debug('addSubdomain: success. changeInfoId:%j', result);
-
                 callback(null, result.ChangeInfo.Id);
             });
         });
@@ -163,8 +161,6 @@ function del(zoneName, subdomain, type, values, callback) {
     assert.strictEqual(typeof type, 'string');
     assert(util.isArray(values));
     assert.strictEqual(typeof callback, 'function');
-
-    debug('add: %s for zone %s of type %s with values %j', subdomain, zoneName, type, values);
 
     getZoneByName(zoneName, function (error, zone) {
         if (error) return callback(error);
