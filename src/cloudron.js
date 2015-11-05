@@ -393,6 +393,7 @@ function addDnsRecords() {
     var records = [ ];
     if (config.isCustomDomain()) {
         records.push(webadminRecord);
+        records.push(dkimRecord);
     } else {
         records.push(nakedDomainRecord);
         records.push(webadminRecord);
