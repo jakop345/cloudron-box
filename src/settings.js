@@ -318,7 +318,7 @@ function validateCertificate(cert, key, fqdn) {
 
     // check domain
     var domains = content.altNames.concat(content.subject.commonName);
-    if (!domains.some(matchesDomain)) return new Error('cert is not valid for this domain');
+    if (!domains.some(matchesDomain)) return new Error(util.format('cert is not valid for this domain. Expecting %s in %j', fqdn, domains));
 
     // http://httpd.apache.org/docs/2.0/ssl/ssl_faq.html#verify
     var certModulus = safe.child_process.execSync('openssl x509 -noout -modulus', { encoding: 'utf8', input: cert });
