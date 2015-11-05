@@ -6,6 +6,55 @@
 
 <div style="max-width: 600px; margin: 0 auto;" ng-show="user.admin && config.isCustomDomain">
     <div class="text-left">
+        <h3>DNS Credentials</h3>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom: 15px;" ng-show="user.admin && config.isCustomDomain">
+    <div class="row">
+        <div class="col-md-12">
+            <p>Currently only Amazon <a href="https://aws.amazon.com/route53/">Route53</a> is supported. Let us know if you require a different DNS provider <a href="#/support">here</a>.</p>
+
+            <table width="100%">
+                <tr>
+                    <td class="text-muted" style="vertical-align: top;">Access Key Id</td>
+                    <td class="text-right" style="vertical-align: top; white-space: nowrap;">{{ dnsConfig.accessKeyId }}</td>
+                </tr>
+                <tr>
+                    <td class="text-muted" style="vertical-align: top;">Secret Access Key</td>
+                    <td class="text-right" style="vertical-align: top; white-space: nowrap;"><i>hidden</i></td>
+                </tr>
+                <tr>
+                    <td class="text-muted" style="vertical-align: top;"></td>
+                    <td class="text-right" style="vertical-align: top;"><span class="text-success" ng-show="dnsCredentials.success"><b>Done</b></span> &nbsp; &nbsp; <button class="btn btn-outline btn-xs btn-primary" ng-show="!dnsCredentials.formVisible" ng-click="showDnsCredentialsForm()">Change</button></td>
+                </tr>
+            </table>
+
+            <div class="collapse" id="collapseDnsCredentialsForm" data-toggle="false">
+                <p>The security credentials have to be valid for full Route53 access.</p>
+                <form name="dnsCredentialsForm" ng-submit="setDnsCredentials()">
+                    <fieldset>
+                        <div class="has-error text-center" ng-show="dnsCredentials.error">{{ dnsCredentials.error }}</div>
+
+                        <div class="form-group" ng-class="{ 'has-error': false }">
+                            <label class="control-label" for="dnsCredentialsAccessKeyId">Access Key Id</label>
+                            <input type="text" class="form-control" ng-model="dnsCredentials.accessKeyId" id="dnsCredentialsAccessKeyId" name="accessKeyId" ng-disabled="dnsCredentials.busy" ng-minlength="16" ng-maxlength="32" required>
+                        </div>
+                        <div class="form-group" ng-class="{ 'has-error': false }">
+                            <label class="control-label" for="dnsCredentialsSecretAccessKey">Secret Access Key</label>
+                            <input type="text" class="form-control" ng-model="dnsCredentials.secretAccessKey" id="dnsCredentialsSecretAccessKey" name="secretAccessKey" ng-disabled="dnsCredentials.busy" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-outline btn-success pull-right" ng-disabled="dnsCredentialsForm.$invalid || busy"><i class="fa fa-spinner fa-pulse" ng-show="dnsCredentials.busy"></i> Save</button>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+    </div>
+ </div>
+
+<div style="max-width: 600px; margin: 0 auto;" ng-show="user.admin && config.isCustomDomain">
+    <div class="text-left">
         <h3>SSL Certificates</h3>
     </div>
 </div>
@@ -74,52 +123,3 @@
         </div>
     </div>
 </div>
-
-<div style="max-width: 600px; margin: 0 auto;" ng-show="user.admin && config.isCustomDomain">
-    <div class="text-left">
-        <h3>DNS Credentials</h3>
-    </div>
-</div>
-
-<div class="card" style="margin-bottom: 15px;" ng-show="user.admin && config.isCustomDomain">
-    <div class="row">
-        <div class="col-md-12">
-            <p>Currently only Amazon <a href="https://aws.amazon.com/route53/">Route53</a> is supported. Let us know if you require a different DNS provider <a href="#/support">here</a>.</p>
-
-            <table width="100%">
-                <tr>
-                    <td class="text-muted" style="vertical-align: top;">Access Key Id</td>
-                    <td class="text-right" style="vertical-align: top; white-space: nowrap;">{{ dnsConfig.accessKeyId }}</td>
-                </tr>
-                <tr>
-                    <td class="text-muted" style="vertical-align: top;">Secret Access Key</td>
-                    <td class="text-right" style="vertical-align: top; white-space: nowrap;"><i>hidden</i></td>
-                </tr>
-                <tr>
-                    <td class="text-muted" style="vertical-align: top;"></td>
-                    <td class="text-right" style="vertical-align: top;"><span class="text-success" ng-show="dnsCredentials.success"><b>Done</b></span> &nbsp; &nbsp; <button class="btn btn-outline btn-xs btn-primary" ng-show="!dnsCredentials.formVisible" ng-click="showDnsCredentialsForm()">Change</button></td>
-                </tr>
-            </table>
-
-            <div class="collapse" id="collapseDnsCredentialsForm" data-toggle="false">
-                <p>The security credentials have to be valid for full Route53 access.</p>
-                <form name="dnsCredentialsForm" ng-submit="setDnsCredentials()">
-                    <fieldset>
-                        <div class="has-error text-center" ng-show="dnsCredentials.error">{{ dnsCredentials.error }}</div>
-
-                        <div class="form-group" ng-class="{ 'has-error': false }">
-                            <label class="control-label" for="dnsCredentialsAccessKeyId">Access Key Id</label>
-                            <input type="text" class="form-control" ng-model="dnsCredentials.accessKeyId" id="dnsCredentialsAccessKeyId" name="accessKeyId" ng-disabled="dnsCredentials.busy" ng-minlength="16" ng-maxlength="32" required>
-                        </div>
-                        <div class="form-group" ng-class="{ 'has-error': false }">
-                            <label class="control-label" for="dnsCredentialsSecretAccessKey">Secret Access Key</label>
-                            <input type="text" class="form-control" ng-model="dnsCredentials.secretAccessKey" id="dnsCredentialsSecretAccessKey" name="secretAccessKey" ng-disabled="dnsCredentials.busy" required>
-                        </div>
-
-                        <button type="submit" class="btn btn-outline btn-success pull-right" ng-disabled="dnsCredentialsForm.$invalid || busy"><i class="fa fa-spinner fa-pulse" ng-show="dnsCredentials.busy"></i> Save</button>
-                    </fieldset>
-                </form>
-            </div>
-        </div>
-    </div>
- </div>
