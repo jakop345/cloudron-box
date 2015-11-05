@@ -87,6 +87,34 @@
 
 <div style="max-width: 600px; margin: 0 auto;" ng-show="user.admin">
     <div class="text-left">
+        <h3>About</h3>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom: 15px;" ng-show="user.admin">
+    <div class="row">
+        <div class="col-xs-4" style="min-width: 150px;">
+            <div class="settings-avatar" ng-click="showChangeAvatar()" style="background-image: url('{{avatar.data || avatar.url}}');">
+                <div class="overlay"></div>
+            </div>
+        </div>
+        <div class="col-xs-8">
+            <table width="100%">
+                <tr>
+                    <td class="text-muted" style="vertical-align: top;">Model</td>
+                    <td class="text-right" style="vertical-align: top; white-space: nowrap;">{{ config.size }} - {{ config.region }}</td>
+                </tr>
+                <tr>
+                    <td class="text-muted" style="vertical-align: top;">Version</td>
+                    <td class="text-right" style="vertical-align: top; white-space: nowrap;">{{ config.version }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div style="max-width: 600px; margin: 0 auto;" ng-show="user.admin">
+    <div class="text-left">
         <h3>Backups</h3>
     </div>
 </div>
@@ -111,34 +139,6 @@
         </div>
         <div class="col-xs-3 text-right">
             <button class="btn btn-outline btn-xs btn-primary" ng-click="showCreateBackup()" ng-disabled="createBackup.busy">Create Backup</button>
-        </div>
-    </div>
-</div>
-
-<div style="max-width: 600px; margin: 0 auto;" ng-show="user.admin">
-    <div class="text-left">
-        <h3>About</h3>
-    </div>
-</div>
-
-<div class="card" style="margin-bottom: 15px;" ng-show="user.admin">
-    <div class="row">
-        <div class="col-xs-4" style="min-width: 150px;">
-            <div class="settings-avatar" ng-click="showChangeAvatar()" style="background-image: url('{{avatar.data || avatar.url}}');">
-                <div class="overlay"></div>
-            </div>
-        </div>
-        <div class="col-xs-8">
-            <table width="100%">
-                <tr>
-                    <td class="text-muted" style="vertical-align: top;">Model</td>
-                    <td class="text-right" style="vertical-align: top; white-space: nowrap;">{{ config.size }} - {{ config.region }}</td>
-                </tr>
-                <tr>
-                    <td class="text-muted" style="vertical-align: top;">Version</td>
-                    <td class="text-right" style="vertical-align: top; white-space: nowrap;">{{ config.version }}</td>
-                </tr>
-            </table>
         </div>
     </div>
 </div>
