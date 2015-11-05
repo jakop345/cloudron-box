@@ -150,8 +150,24 @@ app.service('Wizard', [ function () {
 app.controller('StepController', ['$scope', '$route', '$location', 'Wizard', function ($scope, $route, $location, Wizard) {
     $scope.wizard = Wizard;
 
-    $scope.next = function (page, bad) {
-        if (!bad) $location.path(page);
+    $scope.next = function (bad) {
+        if (bad) return;
+
+        var current = $location.path();
+        var next = '';
+
+        if (current === '/step1') {
+            next = '/step2';
+        } else if (current === '/step2') {
+            if (Wizard.dnsConfig.provider === 'caas') next = '/step4';
+            else next = '/step3';
+        } else if (current === '/step3') {
+            next = '/step4';
+        } else {
+            next = '/step1';
+        }
+
+        $location.path(next);
     };
 
     $scope.focusNext = function (elemId, bad) {
