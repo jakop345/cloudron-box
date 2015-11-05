@@ -16,12 +16,12 @@
         </div>
         <div class="form-group" ng-class="{ 'has-error': setup_form.secretAccessKey.$dirty && setup_form.secretAccessKey.$invalid }">
             <!-- <label class="control-label" for="inputPassword">Password</label> -->
-            <input type="text" class="form-control" ng-model="wizard.dnsConfig.secretAccessKey" id="inputSecretAccessKey" name="secretAccessKey" placeholder="Secret Access Key" ng-enter="next('/step4', setup_form.secretAccessKey.$invalid)" ng-maxlength="512" ng-minlength="3" required autocomplete="off">
+            <input type="text" class="form-control" ng-model="wizard.dnsConfig.secretAccessKey" id="inputSecretAccessKey" name="secretAccessKey" placeholder="Secret Access Key" ng-enter="next(setup_form.secretAccessKey.$invalid)" ng-maxlength="512" ng-minlength="3" required autocomplete="off">
         </div>
     </div>
 </div>
 <div class="row">
     <div class="col-md-12 text-center">
-        <button class="btn btn-primary"  ng-click="next('/step4', setup_form.accessKeyId.$invalid || setup_form.secretAccessKey.$invalid)" ng-disabled="setup_form.accessKeyId.$invalid || setup_form.secretAccessKey.$invalid">Done</button>
+        <button class="btn btn-primary"  ng-click="next(setup_form.accessKeyId.$invalid || setup_form.secretAccessKey.$invalid)" ng-disabled="setup_form.accessKeyId.$invalid || setup_form.secretAccessKey.$invalid">Done</button>
     </div>
 </div>
