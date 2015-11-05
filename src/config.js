@@ -76,7 +76,6 @@ function initConfig() {
 
     data.token = null;
     data.adminEmail = null;
-    data.mailDnsRecordIds = [ ];
     data.boxVersionsUrl = null;
     data.version = null;
     data.isCustomDomain = false;
