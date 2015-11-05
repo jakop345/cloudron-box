@@ -303,7 +303,7 @@ function validateCertificate(cert, key, fqdn) {
     try {
         content = x509.parseCert(cert);
     } catch (e) {
-        return new Error('invalid cert');
+        return new Error('invalid cert: ' + e.message);
     }
 
     // check expiration
