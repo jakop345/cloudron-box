@@ -87,6 +87,9 @@ angular.module('Application').controller('CertsController', ['$scope', '$locatio
             }
 
             $scope.adminCert.busy = false;
+
+            // attempt to reload to make the browser get the new certs
+            window.location.reload(true);
         });
     };
 
@@ -115,6 +118,9 @@ angular.module('Application').controller('CertsController', ['$scope', '$locatio
 
                 $('#collapseDnsCredentialsForm').collapse('hide');
                 $scope.dnsCredentials.formVisible = false;
+
+                // attempt to reload to make the browser get the new certs
+                window.location.reload(true);
             }
 
             $scope.dnsCredentials.busy = false;
