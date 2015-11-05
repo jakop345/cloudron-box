@@ -125,11 +125,14 @@ function checkDns() {
         }
 
         debug('checkDns: SPF check passed. commencing mail processing');
+        gDnsReady = true;
         processQueue();
     });
 }
 
 function processQueue() {
+    assert(gDnsReady);
+
     docker.getContainer('mail').inspect(function (error, data) {
         if (error) return console.error(error);
 
