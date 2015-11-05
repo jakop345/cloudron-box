@@ -290,6 +290,8 @@ function getAll(callback) {
     });
 }
 
+// note: https://tools.ietf.org/html/rfc4346#section-7.4.2 (certificate_list) requires that the
+// servers certificate appears first (and not the intermediate cert)
 function validateCertificate(cert, key, fqdn) {
     assert(cert === null || typeof cert === 'string');
     assert(key === null || typeof key === 'string');
