@@ -41,6 +41,11 @@ BackupsError.EXTERNAL_ERROR = 'external error';
 BackupsError.INTERNAL_ERROR = 'internal error';
 BackupsError.MISSING_CREDENTIALS = 'missing credentials';
 
+// choose which storage backend we use for test purpose we use s3
+function api() {
+    return aws;
+}
+
 function getAllPaged(page, perPage, callback) {
     assert.strictEqual(typeof page, 'number');
     assert.strictEqual(typeof perPage, 'number');
@@ -69,7 +74,7 @@ function getBackupUrl(app, callback) {
         filename = util.format('backup_%s-v%s.tar.gz', (new Date()).toISOString(), config.version());
     }
 
-    aws.getSignedUploadUrl(filename, function (error, result) {
+    api().getSignedUploadUrl(filename, function (error, result) {
         if (error) return callback(error);
 
         var obj = {
@@ -90,7 +95,7 @@ function getRestoreUrl(backupId, callback) {
     assert.strictEqual(typeof backupId, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    aws.getSignedDownloadUrl(backupId, function (error, result) {
+    api().getSignedDownloadUrl(backupId, function (error, result) {
         if (error) return callback(error);
 
         var obj = {
@@ -112,7 +117,7 @@ function copyLastBackup(app, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     var toFilename = util.format('appbackup_%s_%s-v%s.tar.gz', app.id, (new Date()).toISOString(), app.manifest.version);
-    aws.copyObject(app.lastBackupId, toFilename, function (error) {
+    api().copyObject(app.lastBackupId, toFilename, function (error) {
         if (error) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, error));
 
         return callback(null, toFilename);
