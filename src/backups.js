@@ -39,6 +39,7 @@ function BackupsError(reason, errorOrMessage) {
 util.inherits(BackupsError, Error);
 BackupsError.EXTERNAL_ERROR = 'external error';
 BackupsError.INTERNAL_ERROR = 'internal error';
+BackupsError.MISSING_CREDENTIALS = 'missing credentials';
 
 function getAllPaged(page, perPage, callback) {
     assert.strictEqual(typeof page, 'number');
