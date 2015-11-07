@@ -13,7 +13,7 @@ var assert = require('assert'),
     AWS = require('aws-sdk'),
     config = require('./config.js'),
     debug = require('debug')('box:aws'),
-    SubdomainError = require('./subdomains.js').SubdomainError,
+    BackupError = require('./backups.js').BackupError,
     superagent = require('superagent');
 
 function getBackupCredentials(callback) {
@@ -39,7 +39,7 @@ function getBackupCredentials(callback) {
             callback(null, credentials);
         });
     } else {
-        if (!config.aws().accessKeyId || !config.aws().secretAccessKey) return callback(new SubdomainError(SubdomainError.MISSING_CREDENTIALS));
+        if (!config.aws().accessKeyId || !config.aws().secretAccessKey) return callback(new BackupError(BackupError.MISSING_CREDENTIALS));
 
         var credentials = {
             accessKeyId: config.aws().accessKeyId,
