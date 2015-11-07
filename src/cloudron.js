@@ -578,7 +578,8 @@ function doUpdate(boxUpdateInfo, callback) {
                         key: null
                     },
                     backupConfig: {
-                        provider: 's3',
+                        provider: 'caas',
+                        token: config.token(),
                         key: config.backupKey(),
                         region: config.aws().region,
                         bucket: config.aws().backupBucket,
