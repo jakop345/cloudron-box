@@ -11,53 +11,27 @@ exports = module.exports = {
 
 var assert = require('assert'),
     AWS = require('aws-sdk'),
-    config = require('./config.js'),
-    debug = require('debug')('box:aws'),
-    BackupError = require('./backups.js').BackupError,
-    superagent = require('superagent');
+    config = require('../config.js');
 
 function getBackupCredentials(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    // CaaS
-    if (config.token()) {
-        var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/awscredentials';
-        superagent.post(url).query({ token: config.token() }).end(function (error, result) {
-            if (error) return callback(error);
-            if (result.statusCode !== 201) return callback(new Error(result.text));
-            if (!result.body || !result.body.credentials) return callback(new Error('Unexpected response'));
+    if (!config.aws().accessKeyId || !config.aws().secretAccessKey) return callback(new Error('missing credentials'));
 
-            var credentials = {
-                accessKeyId: result.body.credentials.AccessKeyId,
-                secretAccessKey: result.body.credentials.SecretAccessKey,
-                sessionToken: result.body.credentials.SessionToken,
-                region: 'us-east-1'
-            };
+    var credentials = {
+        accessKeyId: config.aws().accessKeyId,
+        secretAccessKey: config.aws().secretAccessKey,
+        region: 'us-east-1'
+    };
 
-            if (config.aws().endpoint) credentials.endpoint = new AWS.Endpoint(config.aws().endpoint);
+    if (config.aws().endpoint) credentials.endpoint = new AWS.Endpoint(config.aws().endpoint);
 
-            callback(null, credentials);
-        });
-    } else {
-        if (!config.aws().accessKeyId || !config.aws().secretAccessKey) return callback(new BackupError(BackupError.MISSING_CREDENTIALS));
-
-        var credentials = {
-            accessKeyId: config.aws().accessKeyId,
-            secretAccessKey: config.aws().secretAccessKey,
-            region: 'us-east-1'
-        };
-
-        if (config.aws().endpoint) credentials.endpoint = new AWS.Endpoint(config.aws().endpoint);
-
-        callback(null, credentials);
-    }
+    callback(null, credentials);
 }
 
 function getSignedUploadUrl(filename, callback) {
     assert.strictEqual(typeof filename, 'string');
     assert.strictEqual(typeof callback, 'function');
-
-    debug('getSignedUploadUrl: %s', filename);
 
     getBackupCredentials(function (error, credentials) {
         if (error) return callback(error);
@@ -79,8 +53,6 @@ function getSignedUploadUrl(filename, callback) {
 function getSignedDownloadUrl(filename, callback) {
     assert.strictEqual(typeof filename, 'string');
     assert.strictEqual(typeof callback, 'function');
-
-    debug('getSignedDownloadUrl: %s', filename);
 
     getBackupCredentials(function (error, credentials) {
         if (error) return callback(error);

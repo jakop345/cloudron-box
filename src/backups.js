@@ -12,9 +12,10 @@ exports = module.exports = {
 };
 
 var assert = require('assert'),
-    aws = require('./aws.js'),
+    caas = require('./storage/caas.js'),
     config = require('./config.js'),
     debug = require('debug')('box:backups'),
+    s3 = require('./storage/s3.js'),
     superagent = require('superagent'),
     util = require('util');
 
@@ -43,7 +44,7 @@ BackupsError.MISSING_CREDENTIALS = 'missing credentials';
 
 // choose which storage backend we use for test purpose we use s3
 function api() {
-    return aws;
+    return config.token() ? caas : s3;
 }
 
 function getAllPaged(page, perPage, callback) {
