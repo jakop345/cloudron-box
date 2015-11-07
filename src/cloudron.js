@@ -562,19 +562,35 @@ function doUpdate(boxUpdateInfo, callback) {
 
                 // this data is opaque to the installer
                 data: {
-                    apiServerOrigin: config.apiServerOrigin(),
-                    aws: config.aws(),
-                    backupKey: config.backupKey(),
-                    boxVersionsUrl: config.get('boxVersionsUrl'),
-                    fqdn: config.fqdn(),
-                    isCustomDomain: config.isCustomDomain(),
-                    restoreUrl: null,
-                    restoreKey: null,
                     token: config.token(),
+                    apiServerOrigin: config.apiServerOrigin(),
+                    webServerOrigin: config.webServerOrigin(),
+                    fqdn: config.fqdn(),
                     tlsCert: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), 'utf8'),
                     tlsKey: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'), 'utf8'),
+                    isCustomDomain: config.isCustomDomain(),
+
                     version: boxUpdateInfo.version,
-                    webServerOrigin: config.webServerOrigin()
+                    boxVersionsUrl: config.get('boxVersionsUrl'),
+
+                    restore: {
+                        url: null,
+                        key: null
+                    },
+                    backupConfig: {
+                        provider: 's3',
+                        key: config.backupKey(),
+                        region: config.aws().region,
+                        bucket: config.aws().backupBucket,
+                        prefix: config.aws().backupPrefix
+                    },
+
+                    // legacy
+                    restoreUrl: null,
+                    restoreKey: null,
+                    aws: config.aws(),
+                    backupKey: config.backupKey()
+
                 }
             };
 
