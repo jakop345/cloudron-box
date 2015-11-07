@@ -15,7 +15,7 @@ var assert = require('assert'),
     config = require('../config.js'),
     debug = require('debug')('box:dns/route53'),
     settings = require('../settings.js'),
-    SubdomainError = require('../subdomainerror.js'),
+    SubdomainError = require('../subdomains.js').SubdomainError,
     util = require('util'),
     _ = require('underscore');
 

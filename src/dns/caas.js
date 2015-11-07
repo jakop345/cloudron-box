@@ -13,7 +13,7 @@ exports = module.exports = {
 var assert = require('assert'),
     config = require('../config.js'),
     debug = require('debug')('box:dns/caas'),
-    SubdomainError = require('../subdomainerror.js'),
+    SubdomainError = require('../subdomains.js').SubdomainError,
     superagent = require('superagent'),
     util = require('util'),
     _ = require('underscore');

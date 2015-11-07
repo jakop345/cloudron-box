@@ -2,20 +2,46 @@
 
 'use strict';
 
-var assert = require('assert'),
-    caas = require('./dns/caas.js'),
-    config = require('./config.js'),
-    route53 = require('./dns/route53.js'),
-    SubdomainError = require('./subdomainerror.js'),
-    util = require('util');
-
 module.exports = exports = {
     add: add,
     remove: remove,
     status: status,
     update: update, // unlike add, this fetches latest value, compares and adds if necessary. atomicity depends on backend
-    get: get
+    get: get,
+
+    SubdomainError: SubdomainError
 };
+
+var assert = require('assert'),
+    caas = require('./dns/caas.js'),
+    config = require('./config.js'),
+    route53 = require('./dns/route53.js'),
+    util = require('util');
+
+function SubdomainError(reason, errorOrMessage) {
+    assert.strictEqual(typeof reason, 'string');
+    assert(errorOrMessage instanceof Error || typeof errorOrMessage === 'string' || typeof errorOrMessage === 'undefined');
+
+    Error.call(this);
+    Error.captureStackTrace(this, this.constructor);
+
+    this.name = this.constructor.name;
+    this.reason = reason;
+    if (typeof errorOrMessage === 'undefined') {
+        this.message = reason;
+    } else if (typeof errorOrMessage === 'string') {
+        this.message = errorOrMessage;
+    } else {
+        this.message = 'Internal error';
+        this.nestedError = errorOrMessage;
+    }
+}
+util.inherits(SubdomainError, Error);
+
+SubdomainError.NOT_FOUND = 'No such domain';
+SubdomainError.EXTERNAL_ERROR = 'External error';
+SubdomainError.STILL_BUSY = 'Still busy';
+SubdomainError.MISSING_CREDENTIALS = 'Missing credentials';
 
 // choose which subdomain backend we use for test purpose we use route53
 function api() {

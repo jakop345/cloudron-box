@@ -13,7 +13,7 @@ var assert = require('assert'),
     AWS = require('aws-sdk'),
     config = require('./config.js'),
     debug = require('debug')('box:aws'),
-    SubdomainError = require('./subdomainerror.js'),
+    SubdomainError = require('./subdomains.js').SubdomainError,
     superagent = require('superagent');
 
 function getBackupCredentials(callback) {
