@@ -56,7 +56,7 @@ function setup(done) {
         },
 
         function createSettings(callback) {
-            settings.setBackupConfig({ provider: 'caas', token: 'APPSTORE_TOKEN' }, callback);
+            settings.setBackupConfig({ provider: 'caas', token: 'BACKUP_TOKEN' }, callback);
         }
     ], done);
 }
@@ -75,7 +75,7 @@ describe('Backups API', function () {
 
     describe('get', function () {
         it('cannot get backups with appstore request failing', function (done) {
-            var req = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/backups?token=APPSTORE_TOKEN').reply(401, {});
+            var req = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/backups?token=BACKUP_TOKEN').reply(401, {});
 
             request.get(SERVER_URL + '/api/v1/backups')
                    .query({ access_token: token })
@@ -87,7 +87,7 @@ describe('Backups API', function () {
         });
 
         it('can get backups', function (done) {
-            var req = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/backups?token=APPSTORE_TOKEN').reply(200, { backups: ['foo', 'bar']});
+            var req = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/backups?token=BACKUP_TOKEN').reply(200, { backups: ['foo', 'bar']});
 
             request.get(SERVER_URL + '/api/v1/backups')
                    .query({ access_token: token })
@@ -124,7 +124,7 @@ describe('Backups API', function () {
 
         it('succeeds', function (done) {
             var scope = nock(config.apiServerOrigin())
-                        .post('/api/v1/boxes/' + config.fqdn() + '/awscredentials?token=APPSTORE_TOKEN')
+                        .post('/api/v1/boxes/' + config.fqdn() + '/awscredentials?token=BACKUP_TOKEN')
                         .reply(201, { credentials: { AccessKeyId: 'accessKeyId', SecretAccessKey: 'secretAccessKey', SessionToken: 'sessionToken' } });
 
             request.post(SERVER_URL + '/api/v1/backups')
