@@ -16,6 +16,7 @@ var assert = require('assert'),
     config = require('./config.js'),
     debug = require('debug')('box:backups'),
     s3 = require('./storage/s3.js'),
+    settings = require('./settings.js'),
     superagent = require('superagent'),
     util = require('util');
 
@@ -43,8 +44,12 @@ BackupsError.INTERNAL_ERROR = 'internal error';
 BackupsError.MISSING_CREDENTIALS = 'missing credentials';
 
 // choose which storage backend we use for test purpose we use s3
-function api() {
-    return config.token() ? caas : s3;
+function api(provider) {
+    switch (provider) {
+        case 'caas': return caas;
+        case 's3': return s3;
+        default: return null
+    }
 }
 
 function getAllPaged(page, perPage, callback) {
@@ -54,13 +59,17 @@ function getAllPaged(page, perPage, callback) {
 
     var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/backups';
 
-    superagent.get(url).query({ token: config.token() }).end(function (error, result) {
-        if (error) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, error));
-        if (result.statusCode !== 200) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, result.text));
-        if (!result.body || !util.isArray(result.body.backups)) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, 'Unexpected response'));
+    settings.getBackupConfig(function (error, backupConfig) {
+        if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
-        // [ { creationTime, boxVersion, restoreKey, dependsOn: [ ] } ] sorted by time (latest first)
-        return callback(null, result.body.backups);
+        superagent.get(url).query({ token: backupConfig.token }).end(function (error, result) {
+            if (error) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, error));
+            if (result.statusCode !== 200) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, result.text));
+            if (!result.body || !util.isArray(result.body.backups)) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, 'Unexpected response'));
+
+            // [ { creationTime, boxVersion, restoreKey, dependsOn: [ ] } ] sorted by time (latest first)
+            return callback(null, result.body.backups);
+        });
     });
 }
 
@@ -75,19 +84,23 @@ function getBackupUrl(app, callback) {
         filename = util.format('backup_%s-v%s.tar.gz', (new Date()).toISOString(), config.version());
     }
 
-    api().getSignedUploadUrl(filename, function (error, result) {
-        if (error) return callback(error);
+    settings.getBackupConfig(function (error, backupConfig) {
+        if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
-        var obj = {
-            id: filename,
-            url: result.url,
-            sessionToken: result.sessionToken,
-            backupKey: config.backupKey()
-        };
+        api(backupConfig.provider).getSignedUploadUrl(backupConfig, filename, function (error, result) {
+            if (error) return callback(error);
 
-        debug('getBackupUrl: id:%s url:%s sessionToken:%s backupKey:%s', obj.id, obj.url, obj.sessionToken, obj.backupKey);
+            var obj = {
+                id: filename,
+                url: result.url,
+                sessionToken: result.sessionToken,
+                backupKey: backupConfig.key
+            };
 
-        callback(null, obj);
+            debug('getBackupUrl: id:%s url:%s sessionToken:%s backupKey:%s', obj.id, obj.url, obj.sessionToken, obj.backupKey);
+
+            callback(null, obj);
+        });
     });
 }
 
@@ -96,19 +109,23 @@ function getRestoreUrl(backupId, callback) {
     assert.strictEqual(typeof backupId, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    api().getSignedDownloadUrl(backupId, function (error, result) {
-        if (error) return callback(error);
+    settings.getBackupConfig(function (error, backupConfig) {
+        if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
-        var obj = {
-            id: backupId,
-            url: result.url,
-            sessionToken: result.sessionToken,
-            backupKey: config.backupKey()
-        };
+        api(backupConfig.provider).getSignedDownloadUrl(backupConfig, backupId, function (error, result) {
+            if (error) return callback(error);
 
-        debug('getRestoreUrl: id:%s url:%s sessionToken:%s backupKey:%s', obj.id, obj.url, obj.sessionToken, obj.backupKey);
+            var obj = {
+                id: backupId,
+                url: result.url,
+                sessionToken: result.sessionToken,
+                backupKey: backupConfig.key
+            };
 
-        callback(null, obj);
+            debug('getRestoreUrl: id:%s url:%s sessionToken:%s backupKey:%s', obj.id, obj.url, obj.sessionToken, obj.backupKey);
+
+            callback(null, obj);
+        });
     });
 }
 
@@ -118,9 +135,14 @@ function copyLastBackup(app, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     var toFilename = util.format('appbackup_%s_%s-v%s.tar.gz', app.id, (new Date()).toISOString(), app.manifest.version);
-    api().copyObject(app.lastBackupId, toFilename, function (error) {
-        if (error) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, error));
 
-        return callback(null, toFilename);
+    settings.getBackupConfig(function (error, backupConfig) {
+        if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
+
+        api(backupConfig.provider).copyObject(backupConfig, app.lastBackupId, toFilename, function (error) {
+            if (error) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, error));
+
+            return callback(null, toFilename);
+        });
     });
 }
