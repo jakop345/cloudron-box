@@ -13,34 +13,36 @@ var assert = require('assert'),
     AWS = require('aws-sdk'),
     config = require('../config.js');
 
-function getBackupCredentials(callback) {
+function getBackupCredentials(backupConfig, callback) {
+    assert.strictEqual(typeof backupConfig, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    if (!config.aws().accessKeyId || !config.aws().secretAccessKey) return callback(new Error('missing credentials'));
+    assert(backupConfig.accessKeyId && backupConfig.secretAccessKey);
 
     var credentials = {
-        accessKeyId: config.aws().accessKeyId,
-        secretAccessKey: config.aws().secretAccessKey,
+        accessKeyId: backupConfig.accessKeyId,
+        secretAccessKey: backupConfig.secretAccessKey,
         region: 'us-east-1'
     };
 
-    if (config.aws().endpoint) credentials.endpoint = new AWS.Endpoint(config.aws().endpoint);
+    if (backupConfig.endpoint) credentials.endpoint = new AWS.Endpoint(backupConfig.endpoint);
 
     callback(null, credentials);
 }
 
-function getSignedUploadUrl(filename, callback) {
+function getSignedUploadUrl(backupConfig, filename, callback) {
+    assert.strictEqual(typeof backupConfig, 'object');
     assert.strictEqual(typeof filename, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    getBackupCredentials(function (error, credentials) {
+    getBackupCredentials(backupConfig, function (error, credentials) {
         if (error) return callback(error);
 
         var s3 = new AWS.S3(credentials);
 
         var params = {
-            Bucket: config.aws().backupBucket,
-            Key: config.aws().backupPrefix + '/' + filename,
+            Bucket: backupConfig.bucket,
+            Key: backupConfig.prefix + '/' + filename,
             Expires: 60 * 30 /* 30 minutes */
         };
 
@@ -50,18 +52,19 @@ function getSignedUploadUrl(filename, callback) {
     });
 }
 
-function getSignedDownloadUrl(filename, callback) {
+function getSignedDownloadUrl(backupConfig, filename, callback) {
+    assert.strictEqual(typeof backupConfig, 'object');
     assert.strictEqual(typeof filename, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    getBackupCredentials(function (error, credentials) {
+    getBackupCredentials(backupConfig, function (error, credentials) {
         if (error) return callback(error);
 
         var s3 = new AWS.S3(credentials);
 
         var params = {
-            Bucket: config.aws().backupBucket,
-            Key: config.aws().backupPrefix + '/' + filename,
+            Bucket: backupConfig.bucket,
+            Key: backupConfig.prefix + '/' + filename,
             Expires: 60 * 30 /* 30 minutes */
         };
 
@@ -71,18 +74,19 @@ function getSignedDownloadUrl(filename, callback) {
     });
 }
 
-function copyObject(from, to, callback) {
+function copyObject(backupConfig, from, to, callback) {
+    assert.strictEqual(typeof backupConfig, 'object');
     assert.strictEqual(typeof from, 'string');
     assert.strictEqual(typeof to, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    getBackupCredentials(function (error, credentials) {
+    getBackupCredentials(backupConfig, function (error, credentials) {
         if (error) return callback(error);
 
         var params = {
-            Bucket: config.aws().backupBucket, // target bucket
-            Key: config.aws().backupPrefix + '/' + to, // target file
-            CopySource: config.aws().backupBucket + '/' + config.aws().backupPrefix + '/' + from, // source
+            Bucket: backupConfig.bucket, // target bucket
+            Key: backupConfig.prefix + '/' + to, // target file
+            CopySource: backupConfig.bucket + '/' + backupConfig.prefix + '/' + from, // source
         };
 
         var s3 = new AWS.S3(credentials);

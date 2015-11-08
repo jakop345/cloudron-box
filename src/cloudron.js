@@ -573,15 +573,6 @@ function doUpdate(boxUpdateInfo, callback) {
                     version: boxUpdateInfo.version,
                     boxVersionsUrl: config.get('boxVersionsUrl'),
 
-                    backupConfig: {
-                        provider: 'caas',
-                        token: config.token(),
-                        key: config.backupKey(),
-                        region: config.aws().region,
-                        bucket: config.aws().backupBucket,
-                        prefix: config.aws().backupPrefix
-                    },
-
                     // legacy
                     aws: config.aws(),
                     backupKey: config.backupKey()
