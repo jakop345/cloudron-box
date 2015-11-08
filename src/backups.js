@@ -17,7 +17,6 @@ var assert = require('assert'),
     debug = require('debug')('box:backups'),
     s3 = require('./storage/s3.js'),
     settings = require('./settings.js'),
-    superagent = require('superagent'),
     util = require('util');
 
 function BackupsError(reason, errorOrMessage) {
@@ -48,7 +47,7 @@ function api(provider) {
     switch (provider) {
         case 'caas': return caas;
         case 's3': return s3;
-        default: return null
+        default: return null;
     }
 }
 
@@ -57,18 +56,13 @@ function getAllPaged(page, perPage, callback) {
     assert.strictEqual(typeof perPage, 'number');
     assert.strictEqual(typeof callback, 'function');
 
-    var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/backups';
-
     settings.getBackupConfig(function (error, backupConfig) {
         if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
-        superagent.get(url).query({ token: backupConfig.token }).end(function (error, result) {
+        api(backupConfig.provider).getAllPaged(backupConfig, page, perPage, function (error, backups) {
             if (error) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, error));
-            if (result.statusCode !== 200) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, result.text));
-            if (!result.body || !util.isArray(result.body.backups)) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, 'Unexpected response'));
 
-            // [ { creationTime, boxVersion, restoreKey, dependsOn: [ ] } ] sorted by time (latest first)
-            return callback(null, result.body.backups);
+            return callback(null, backups); // [ { creationTime, boxVersion, restoreKey, dependsOn: [ ] } ] sorted by time (latest first
         });
     });
 }
