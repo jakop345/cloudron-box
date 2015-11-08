@@ -220,7 +220,7 @@ describe('apptask', function () {
     it('unregisters subdomain', function (done) {
         nock.cleanAll();
 
-        var awsScope = nock(config.aws().endpoint)
+        var awsScope = nock('http://localhost:5353')
             .get('/2013-04-01/hostedzone')
             .reply(200, js2xml('ListHostedZonesResponse', awsHostedZones, { arrayMap: { HostedZones: 'HostedZone'} }))
             .post('/2013-04-01/hostedzone/ZONEID/rrset/')
