@@ -23,6 +23,9 @@ exports = module.exports = {
     getDnsConfig: getDnsConfig,
     setDnsConfig: setDnsConfig,
 
+    getBackupConfig: getBackupConfig,
+    setBackupConfig: setBackupConfig,
+
     getDefaultSync: getDefaultSync,
     getAll: getAll,
 
@@ -35,6 +38,7 @@ exports = module.exports = {
     CLOUDRON_NAME_KEY: 'cloudron_name',
     DEVELOPER_MODE_KEY: 'developer_mode',
     DNS_CONFIG_KEY: 'dns_config',
+    BACKUP_CONFIG_KEY: 'backup_config',
 
     events: new (require('events').EventEmitter)()
 };
@@ -62,6 +66,7 @@ var gDefaults = (function () {
     result[exports.CLOUDRON_NAME_KEY] = 'Cloudron';
     result[exports.DEVELOPER_MODE_KEY] = false;
     result[exports.DNS_CONFIG_KEY] = { };
+    result[exports.BACKUP_CONFIG_KEY] = { };
 
     return result;
 })();
@@ -266,6 +271,34 @@ function setDnsConfig(dnsConfig, callback) {
         if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
 
         exports.events.emit(exports.DNS_CONFIG_KEY, dnsConfig);
+
+        callback(null);
+    });
+}
+
+function getBackupConfig(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    settingsdb.get(exports.BACKUP_CONFIG_KEY, function (error, value) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, gDefaults[exports.BACKUP_CONFIG_KEY]);
+        if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
+
+        callback(null, JSON.parse(value)); // provider, token, key, region, prefix, bucket
+    });
+}
+
+function setBackupConfig(backupConfig, callback) {
+    assert.strictEqual(typeof backupConfig, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
+    if (backupConfig.provider !== 'caas') {
+        return callback(new SettingsError(SettingsError.BAD_FIELD, 'provider must be caas'));
+    }
+
+    settingsdb.set(exports.BACKUP_CONFIG_KEY, JSON.stringify(backupConfig), function (error) {
+        if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
+
+        exports.events.emit(exports.BACKUP_CONFIG_KEY, backupConfig);
 
         callback(null);
     });
