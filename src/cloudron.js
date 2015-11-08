@@ -571,11 +571,7 @@ function doUpdate(boxUpdateInfo, callback) {
                     isCustomDomain: config.isCustomDomain(),
 
                     version: boxUpdateInfo.version,
-                    boxVersionsUrl: config.get('boxVersionsUrl'),
-
-                    // legacy
-                    aws: config.aws(),
-                    backupKey: config.backupKey()
+                    boxVersionsUrl: config.get('boxVersionsUrl')
                 }
             };
 
