@@ -6,12 +6,12 @@ exports = module.exports = {
     getSignedUploadUrl: getSignedUploadUrl,
     getSignedDownloadUrl: getSignedDownloadUrl,
 
-    copyObject: copyObject
+    copyObject: copyObject,
+    getAllPaged: getAllPaged
 };
 
 var assert = require('assert'),
-    AWS = require('aws-sdk'),
-    config = require('../config.js');
+    AWS = require('aws-sdk');
 
 function getBackupCredentials(backupConfig, callback) {
     assert.strictEqual(typeof backupConfig, 'object');
@@ -28,6 +28,15 @@ function getBackupCredentials(backupConfig, callback) {
     if (backupConfig.endpoint) credentials.endpoint = new AWS.Endpoint(backupConfig.endpoint);
 
     callback(null, credentials);
+}
+
+function getAllPaged(backupConfig, page, perPage, callback) {
+    assert.strictEqual(typeof backupConfig, 'object');
+    assert.strictEqual(typeof page, 'number');
+    assert.strictEqual(typeof perPage, 'number');
+    assert.strictEqual(typeof callback, 'function');
+
+    return callback(new Error('Not implemented yet'));
 }
 
 function getSignedUploadUrl(backupConfig, filename, callback) {

@@ -6,13 +6,16 @@ exports = module.exports = {
     getSignedUploadUrl: getSignedUploadUrl,
     getSignedDownloadUrl: getSignedDownloadUrl,
 
-    copyObject: copyObject
+    copyObject: copyObject,
+
+    getAllPaged: getAllPaged
 };
 
 var assert = require('assert'),
     AWS = require('aws-sdk'),
     config = require('../config.js'),
-    superagent = require('superagent');
+    superagent = require('superagent'),
+    util = require('util');
 
 function getBackupCredentials(backupConfig, callback) {
     assert.strictEqual(typeof backupConfig, 'object');
@@ -35,6 +38,23 @@ function getBackupCredentials(backupConfig, callback) {
         if (backupConfig.endpoint) credentials.endpoint = new AWS.Endpoint(backupConfig.endpoint);
 
         callback(null, credentials);
+    });
+}
+
+function getAllPaged(backupConfig, page, perPage, callback) {
+    assert.strictEqual(typeof backupConfig, 'object');
+    assert.strictEqual(typeof page, 'number');
+    assert.strictEqual(typeof perPage, 'number');
+    assert.strictEqual(typeof callback, 'function');
+
+    var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/backups';
+    superagent.get(url).query({ token: backupConfig.token }).end(function (error, result) {
+        if (error) return callback(error);
+        if (result.statusCode !== 200) return callback(new Error(result.text));
+        if (!result.body || !util.isArray(result.body.backups)) return callback(new Error('Unexpected response'));
+
+        // [ { creationTime, boxVersion, restoreKey, dependsOn: [ ] } ] sorted by time (latest first)
+        return callback(null, result.body.backups);
     });
 }
 
