@@ -38,10 +38,10 @@ EOF
         arg_tls_cert=$(echo "$2" | $json tlsCert)
         arg_tls_key=$(echo "$2" | $json tlsKey)
 
-        arg_restore_url=$(echo "$2" | $json restoreUrl)
+        arg_restore_url=$(echo "$2" | $json restore.url)
         [[ "${arg_restore_url}" == "null" ]] && arg_restore_url=""
 
-        arg_restore_key=$(echo "$2" | $json restoreKey)
+        arg_restore_key=$(echo "$2" | $json restore.key)
         [[ "${arg_restore_key}" == "null" ]] && arg_restore_key=""
 
         arg_backup_key=$(echo "$2" | $json backupKey)

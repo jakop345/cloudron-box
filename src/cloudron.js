@@ -573,10 +573,6 @@ function doUpdate(boxUpdateInfo, callback) {
                     version: boxUpdateInfo.version,
                     boxVersionsUrl: config.get('boxVersionsUrl'),
 
-                    restore: {
-                        url: null,
-                        key: null
-                    },
                     backupConfig: {
                         provider: 'caas',
                         token: config.token(),
@@ -587,11 +583,8 @@ function doUpdate(boxUpdateInfo, callback) {
                     },
 
                     // legacy
-                    restoreUrl: null,
-                    restoreKey: null,
                     aws: config.aws(),
                     backupKey: config.backupKey()
-
                 }
             };
 
