@@ -100,6 +100,22 @@ describe('Settings', function () {
             });
         });
 
+        it('can set backup config', function (done) {
+            settings.setBackupConfig({ provider: 'caas', token: 'TOKEN' }, function (error) {
+                expect(error).to.be(null);
+                done();
+            });
+        });
+
+        it('can get backup config', function (done) {
+            settings.getBackupConfig(function (error, dnsConfig) {
+                expect(error).to.be(null);
+                expect(dnsConfig.provider).to.be('caas');
+                expect(dnsConfig.token).to.be('TOKEN');
+                done();
+            });
+        });
+
         it('can get all values', function (done) {
             settings.getAll(function (error, allSettings) {
                 expect(error).to.be(null);
