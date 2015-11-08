@@ -155,6 +155,14 @@ cat > "${BOX_SRC_DIR}/webadmin/dist/config.json" <<CONF_END
 CONF_END
 EOF
 
+# Add Backup Configuration
+if [[ ! -z "${arg_backup_config}" ]]; then
+    echo "Add Backup Config"
+
+    mysql -u root -p${mysql_root_password} \
+        -e "REPLACE INTO settings (name, value) VALUES (\"backup_config\", '$arg_backup_config')" box
+fi
+
 # Add DNS Configuration
 if [[ ! -z "${arg_dns_config}" ]]; then
     echo "Add DNS Config"
