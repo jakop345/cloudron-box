@@ -33,9 +33,6 @@ exports = module.exports = {
 
     isDev: isDev,
 
-    backupKey: backupKey,
-    aws: aws,
-
     // for testing resets to defaults
     _reset: initConfig
 };
@@ -84,13 +81,6 @@ function initConfig() {
     data.ldapPort = 3002;
     data.oauthProxyPort = 3003;
     data.simpleAuthPort = 3004;
-    data.backupKey = 'backupKey';
-    data.aws = {
-        backupBucket: null,
-        backupPrefix: null,
-        accessKeyId: null,      // selfhosting only
-        secretAccessKey: null   // selfhosting only
-    };
 
     if (exports.CLOUDRON) {
         data.port = 3000;
@@ -107,9 +97,6 @@ function initConfig() {
             name: 'boxtest'
         };
         data.token = 'APPSTORE_TOKEN';
-        data.aws.backupBucket = 'testbucket';
-        data.aws.backupPrefix = 'testprefix';
-        data.aws.endpoint = 'http://localhost:5353';
     } else {
         assert(false, 'Unknown environment. This should not happen!');
     }
@@ -201,12 +188,4 @@ function database() {
 
 function isDev() {
     return /dev/i.test(get('boxVersionsUrl'));
-}
-
-function backupKey() {
-    return get('backupKey');
-}
-
-function aws() {
-    return get('aws');
 }
