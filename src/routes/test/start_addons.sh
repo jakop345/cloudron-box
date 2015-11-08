@@ -66,8 +66,6 @@ start_mongodb() {
 }
 
 start_mail() {
-    local mongodb_vars="MONGODB_ROOT_PASSWORD=${root_password}"
-
     docker rm -f mail 2>/dev/null 1>&2 || true
 
     docker run -dP --name=mail -e DOMAIN_NAME="localhost" \
