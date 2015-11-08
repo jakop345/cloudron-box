@@ -13,6 +13,7 @@ var appdb = require('../../appdb.js'),
     expect = require('expect.js'),
     request = require('superagent'),
     server = require('../../server.js'),
+    settings = require('../../settings.js'),
     nock = require('nock'),
     userdb = require('../../userdb.js');
 
@@ -52,6 +53,10 @@ function setup(done) {
         function addApp(callback) {
             var manifest = { version: '0.0.1', manifestVersion: 1, dockerImage: 'foo', healthCheckPath: '/', httpPort: 3, title: 'ok', addons: { } };
             appdb.add('appid', 'appStoreId', manifest, 'location', [ ] /* portBindings */, null /* accessRestriction */, false /* oauthProxy */, callback);
+        },
+
+        function createSettings(callback) {
+            settings.setBackupConfig({ provider: 'caas', token: 'APPSTORE_TOKEN' }, callback);
         }
     ], done);
 }
