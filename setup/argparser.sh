@@ -18,6 +18,7 @@ arg_version=""
 arg_web_server_origin=""
 arg_backup_key=""
 arg_aws=""
+arg_backup_config=""
 arg_dns_config=""
 
 args=$(getopt -o "" -l "data:,retire" -n "$0" -- "$@")
@@ -49,6 +50,9 @@ EOF
 
         arg_aws=$(echo "$2" | $json aws)
         [[ "${arg_aws}" == "null" ]] && arg_aws=""
+
+        arg_backup_config=$(echo "$2" | $json backupConfig)
+        [[ "${arg_backup_config}" == "null" ]] && arg_backup_config=""
 
         arg_dns_config=$(echo "$2" | $json dnsConfig)
         [[ "${arg_dns_config}" == "null" ]] && arg_dns_config=""
