@@ -65,7 +65,7 @@ function add(subdomain, type, values, callback) {
     settings.getDnsConfig(function (error, dnsConfig) {
         if (error) return callback(new SubdomainError(SubdomainError.INTERNAL_ERROR, error));
 
-        api(dnsConfig.provider).add(config.zoneName(), subdomain, type, values, function (error, changeId) {
+        api(dnsConfig.provider).add(dnsConfig, config.zoneName(), subdomain, type, values, function (error, changeId) {
             if (error) return callback(error);
             callback(null, changeId);
         });
@@ -80,7 +80,7 @@ function get(subdomain, type, callback) {
     settings.getDnsConfig(function (error, dnsConfig) {
         if (error) return callback(new SubdomainError(SubdomainError.INTERNAL_ERROR, error));
 
-        api(dnsConfig.provider).get(config.zoneName(), subdomain, type, function (error, values) {
+        api(dnsConfig.provider).get(dnsConfig, config.zoneName(), subdomain, type, function (error, values) {
             if (error) return callback(error);
 
             callback(null, values);
@@ -97,7 +97,7 @@ function update(subdomain, type, values, callback) {
     settings.getDnsConfig(function (error, dnsConfig) {
         if (error) return callback(new SubdomainError(SubdomainError.INTERNAL_ERROR, error));
 
-        api(dnsConfig.provider).update(config.zoneName(), subdomain, type, values, function (error) {
+        api(dnsConfig.provider).update(dnsConfig, config.zoneName(), subdomain, type, values, function (error) {
             if (error) return callback(error);
 
             callback(null);
@@ -114,7 +114,7 @@ function remove(subdomain, type, values, callback) {
     settings.getDnsConfig(function (error, dnsConfig) {
         if (error) return callback(new SubdomainError(SubdomainError.INTERNAL_ERROR, error));
 
-        api(dnsConfig.provider).del(config.zoneName(), subdomain, type, values, function (error) {
+        api(dnsConfig.provider).del(dnsConfig, config.zoneName(), subdomain, type, values, function (error) {
             if (error && error.reason !== SubdomainError.NOT_FOUND) return callback(error);
 
             callback(null);
@@ -129,7 +129,7 @@ function status(changeId, callback) {
     settings.getDnsConfig(function (error, dnsConfig) {
         if (error) return callback(new SubdomainError(SubdomainError.INTERNAL_ERROR, error));
 
-        api(dnsConfig.provider).getChangeStatus(changeId, function (error, status) {
+        api(dnsConfig.provider).getChangeStatus(dnsConfig, changeId, function (error, status) {
             if (error) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, error));
             callback(null, status === 'INSYNC' ? 'done' : 'pending');
         });

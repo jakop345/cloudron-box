@@ -18,7 +18,8 @@ var assert = require('assert'),
     util = require('util'),
     _ = require('underscore');
 
-function add(zoneName, subdomain, type, values, callback) {
+function add(dnsConfig, zoneName, subdomain, type, values, callback) {
+    assert.strictEqual(typeof dnsConfig, 'object');
     assert.strictEqual(typeof zoneName, 'string');
     assert.strictEqual(typeof subdomain, 'string');
     assert.strictEqual(typeof type, 'string');
@@ -36,7 +37,7 @@ function add(zoneName, subdomain, type, values, callback) {
 
     superagent
         .post(config.apiServerOrigin() + '/api/v1/domains/' + fqdn)
-        .query({ token: config.token() })
+        .query({ token: dnsConfig.token() })
         .send(data)
         .end(function (error, result) {
             if (error) return callback(error);
@@ -47,7 +48,8 @@ function add(zoneName, subdomain, type, values, callback) {
         });
 }
 
-function get(zoneName, subdomain, type, callback) {
+function get(dnsConfig, zoneName, subdomain, type, callback) {
+    assert.strictEqual(typeof dnsConfig, 'object');
     assert.strictEqual(typeof zoneName, 'string');
     assert.strictEqual(typeof subdomain, 'string');
     assert.strictEqual(typeof type, 'string');
@@ -59,7 +61,7 @@ function get(zoneName, subdomain, type, callback) {
 
     superagent
         .get(config.apiServerOrigin() + '/api/v1/domains/' + fqdn)
-        .query({ token: config.token(), type: type })
+        .query({ token: dnsConfig.token(), type: type })
         .end(function (error, result) {
             if (error) return callback(error);
             if (result.status !== 200) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, util.format('%s %j', result.status, result.body)));
@@ -68,7 +70,8 @@ function get(zoneName, subdomain, type, callback) {
         });
 }
 
-function update(zoneName, subdomain, type, values, callback) {
+function update(dnsConfig, zoneName, subdomain, type, values, callback) {
+    assert.strictEqual(typeof dnsConfig, 'object');
     assert.strictEqual(typeof zoneName, 'string');
     assert.strictEqual(typeof subdomain, 'string');
     assert.strictEqual(typeof type, 'string');
@@ -84,7 +87,8 @@ function update(zoneName, subdomain, type, values, callback) {
     });
 }
 
-function del(zoneName, subdomain, type, values, callback) {
+function del(dnsConfig, zoneName, subdomain, type, values, callback) {
+    assert.strictEqual(typeof dnsConfig, 'object');
     assert.strictEqual(typeof zoneName, 'string');
     assert.strictEqual(typeof subdomain, 'string');
     assert.strictEqual(typeof type, 'string');
@@ -100,7 +104,7 @@ function del(zoneName, subdomain, type, values, callback) {
 
     superagent
         .del(config.apiServerOrigin() + '/api/v1/domains/' + config.appFqdn(subdomain))
-        .query({ token: config.token() })
+        .query({ token: dnsConfig.token() })
         .send(data)
         .end(function (error, result) {
             if (error) return callback(error);
@@ -112,7 +116,8 @@ function del(zoneName, subdomain, type, values, callback) {
         });
 }
 
-function getChangeStatus(changeId, callback) {
+function getChangeStatus(dnsConfig, changeId, callback) {
+    assert.strictEqual(typeof dnsConfig, 'object');
     assert.strictEqual(typeof changeId, 'string');
     assert.strictEqual(typeof callback, 'function');
 
@@ -120,7 +125,7 @@ function getChangeStatus(changeId, callback) {
 
     superagent
         .get(config.apiServerOrigin() + '/api/v1/domains/' + config.fqdn() + '/status/' + changeId)
-        .query({ token: config.token() })
+        .query({ token: dnsConfig.token() })
         .end(function (error, result) {
             if (error) return callback(error);
             if (result.status !== 200) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, util.format('%s %j', result.status, result.body)));
