@@ -103,12 +103,12 @@ function update(dnsConfig, zoneName, subdomain, type, values, callback) {
     assert(util.isArray(values));
     assert.strictEqual(typeof callback, 'function');
 
-    get(zoneName, subdomain, type, function (error, result) {
+    get(dnsConfig, zoneName, subdomain, type, function (error, result) {
         if (error) return callback(error);
 
         if (_.isEqual(values, result)) return callback();
 
-        add(zoneName, subdomain, type, values, callback);
+        add(dnsConfig, zoneName, subdomain, type, values, callback);
     });
 }
 
