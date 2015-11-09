@@ -37,7 +37,7 @@ function add(dnsConfig, zoneName, subdomain, type, values, callback) {
 
     superagent
         .post(config.apiServerOrigin() + '/api/v1/domains/' + fqdn)
-        .query({ token: dnsConfig.token() })
+        .query({ token: dnsConfig.token })
         .send(data)
         .end(function (error, result) {
             if (error) return callback(error);
@@ -61,7 +61,7 @@ function get(dnsConfig, zoneName, subdomain, type, callback) {
 
     superagent
         .get(config.apiServerOrigin() + '/api/v1/domains/' + fqdn)
-        .query({ token: dnsConfig.token(), type: type })
+        .query({ token: dnsConfig.token, type: type })
         .end(function (error, result) {
             if (error) return callback(error);
             if (result.status !== 200) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, util.format('%s %j', result.status, result.body)));
@@ -104,7 +104,7 @@ function del(dnsConfig, zoneName, subdomain, type, values, callback) {
 
     superagent
         .del(config.apiServerOrigin() + '/api/v1/domains/' + config.appFqdn(subdomain))
-        .query({ token: dnsConfig.token() })
+        .query({ token: dnsConfig.token })
         .send(data)
         .end(function (error, result) {
             if (error) return callback(error);
@@ -125,7 +125,7 @@ function getChangeStatus(dnsConfig, changeId, callback) {
 
     superagent
         .get(config.apiServerOrigin() + '/api/v1/domains/' + config.fqdn() + '/status/' + changeId)
-        .query({ token: dnsConfig.token() })
+        .query({ token: dnsConfig.token })
         .end(function (error, result) {
             if (error) return callback(error);
             if (result.status !== 200) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, util.format('%s %j', result.status, result.body)));
