@@ -16,6 +16,7 @@ var assert = require('assert'),
     caas = require('./dns/caas.js'),
     config = require('./config.js'),
     route53 = require('./dns/route53.js'),
+    settings = require('./settings.js'),
     util = require('util');
 
 function SubdomainError(reason, errorOrMessage) {
@@ -42,10 +43,17 @@ SubdomainError.NOT_FOUND = 'No such domain';
 SubdomainError.EXTERNAL_ERROR = 'External error';
 SubdomainError.STILL_BUSY = 'Still busy';
 SubdomainError.MISSING_CREDENTIALS = 'Missing credentials';
+SubdomainError.INTERNAL_ERROR = 'Missing credentials';
 
 // choose which subdomain backend we use for test purpose we use route53
-function api() {
-    return config.isCustomDomain() || config.TEST ? route53 : caas;
+function api(provider) {
+    assert.strictEqual(typeof provider, 'string');
+
+    switch (provider) {
+        case 'caas': return caas;
+        case 'route53': return route53;
+        default: return null;
+    }
 }
 
 function add(subdomain, type, values, callback) {
@@ -54,9 +62,13 @@ function add(subdomain, type, values, callback) {
     assert(util.isArray(values));
     assert.strictEqual(typeof callback, 'function');
 
-    api().add(config.zoneName(), subdomain, type, values, function (error, changeId) {
-        if (error) return callback(error);
-        callback(null, changeId);
+    settings.getDnsConfig(function (error, dnsConfig) {
+        if (error) return callback(new SubdomainError(SubdomainError.INTERNAL_ERROR, error));
+
+        api(dnsConfig.provider).add(config.zoneName(), subdomain, type, values, function (error, changeId) {
+            if (error) return callback(error);
+            callback(null, changeId);
+        });
     });
 }
 
@@ -65,10 +77,14 @@ function get(subdomain, type, callback) {
     assert.strictEqual(typeof type, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    api().get(config.zoneName(), subdomain, type, function (error, values) {
-        if (error) return callback(error);
+    settings.getDnsConfig(function (error, dnsConfig) {
+        if (error) return callback(new SubdomainError(SubdomainError.INTERNAL_ERROR, error));
 
-        callback(null, values);
+        api(dnsConfig.provider).get(config.zoneName(), subdomain, type, function (error, values) {
+            if (error) return callback(error);
+
+            callback(null, values);
+        });
     });
 }
 
@@ -78,10 +94,14 @@ function update(subdomain, type, values, callback) {
     assert(util.isArray(values));
     assert.strictEqual(typeof callback, 'function');
 
-    api().update(config.zoneName(), subdomain, type, values, function (error) {
-        if (error) return callback(error);
+    settings.getDnsConfig(function (error, dnsConfig) {
+        if (error) return callback(new SubdomainError(SubdomainError.INTERNAL_ERROR, error));
 
-        callback(null);
+        api(dnsConfig.provider).update(config.zoneName(), subdomain, type, values, function (error) {
+            if (error) return callback(error);
+
+            callback(null);
+        });
     });
 }
 
@@ -91,10 +111,14 @@ function remove(subdomain, type, values, callback) {
     assert(util.isArray(values));
     assert.strictEqual(typeof callback, 'function');
 
-    api().del(config.zoneName(), subdomain, type, values, function (error) {
-        if (error && error.reason !== SubdomainError.NOT_FOUND) return callback(error);
+    settings.getDnsConfig(function (error, dnsConfig) {
+        if (error) return callback(new SubdomainError(SubdomainError.INTERNAL_ERROR, error));
 
-        callback(null);
+        api(dnsConfig.provider).del(config.zoneName(), subdomain, type, values, function (error) {
+            if (error && error.reason !== SubdomainError.NOT_FOUND) return callback(error);
+
+            callback(null);
+        });
     });
 }
 
@@ -102,8 +126,12 @@ function status(changeId, callback) {
     assert.strictEqual(typeof changeId, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    api().getChangeStatus(changeId, function (error, status) {
-        if (error) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, error));
-        callback(null, status === 'INSYNC' ? 'done' : 'pending');
+    settings.getDnsConfig(function (error, dnsConfig) {
+        if (error) return callback(new SubdomainError(SubdomainError.INTERNAL_ERROR, error));
+
+        api(dnsConfig.provider).getChangeStatus(changeId, function (error, status) {
+            if (error) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, error));
+            callback(null, status === 'INSYNC' ? 'done' : 'pending');
+        });
     });
 }
