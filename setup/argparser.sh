@@ -16,8 +16,6 @@ arg_tls_key=""
 arg_token=""
 arg_version=""
 arg_web_server_origin=""
-arg_backup_key=""
-arg_aws=""
 arg_backup_config=""
 arg_dns_config=""
 
@@ -44,12 +42,6 @@ EOF
 
         arg_restore_key=$(echo "$2" | $json restore.key)
         [[ "${arg_restore_key}" == "null" ]] && arg_restore_key=""
-
-        arg_backup_key=$(echo "$2" | $json backupKey)
-        [[ "${arg_backup_key}" == "null" ]] && arg_backup_key=""
-
-        arg_aws=$(echo "$2" | $json aws)
-        [[ "${arg_aws}" == "null" ]] && arg_aws=""
 
         arg_backup_config=$(echo "$2" | $json backupConfig)
         [[ "${arg_backup_config}" == "null" ]] && arg_backup_config=""

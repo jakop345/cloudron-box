@@ -124,7 +124,6 @@ set_progress "65" "Creating cloudron.conf"
 sudo -u yellowtent -H bash <<EOF
 set -eu
 echo "Creating cloudron.conf"
-# note that arg_aws is a javascript object and intentionally unquoted below
 cat > "${CONFIG_DIR}/cloudron.conf" <<CONF_END
 {
     "version": "${arg_version}",
@@ -141,9 +140,7 @@ cat > "${CONFIG_DIR}/cloudron.conf" <<CONF_END
         "password": "${mysql_root_password}",
         "port": 3306,
         "name": "box"
-    },
-    "backupKey": "${arg_backup_key}",
-    "aws": ${arg_aws}
+    }
 }
 CONF_END
 
