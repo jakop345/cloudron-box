@@ -14,52 +14,45 @@ var assert = require('assert'),
     AWS = require('aws-sdk'),
     config = require('../config.js'),
     debug = require('debug')('box:dns/route53'),
-    settings = require('../settings.js'),
     SubdomainError = require('../subdomains.js').SubdomainError,
     util = require('util'),
     _ = require('underscore');
 
-function getDnsCredentials(callback) {
-    assert.strictEqual(typeof callback, 'function');
+function getDnsCredentials(dnsConfig) {
+    assert.strictEqual(typeof dnsConfig, 'object');
 
-    settings.getDnsConfig(function (error, dnsConfig) {
-        if (error) return callback(new SubdomainError(SubdomainError.INTERNAL_ERROR, error));
+    var credentials = {
+        accessKeyId: dnsConfig.accessKeyId,
+        secretAccessKey: dnsConfig.secretAccessKey,
+        region: dnsConfig.region
+    };
 
-        var credentials = {
-            accessKeyId: dnsConfig.accessKeyId,
-            secretAccessKey: dnsConfig.secretAccessKey,
-            region: dnsConfig.region
-        };
+    if (dnsConfig.endpoint) credentials.endpoint = new AWS.Endpoint(dnsConfig.endpoint);
 
-        if (dnsConfig.endpoint) credentials.endpoint = new AWS.Endpoint(dnsConfig.endpoint);
-
-        callback(null, credentials);
-    });
+    return credentials;
 }
 
-function getZoneByName(zoneName, callback) {
+function getZoneByName(dnsConfig, zoneName, callback) {
+    assert.strictEqual(typeof dnsConfig, 'object');
     assert.strictEqual(typeof zoneName, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    getDnsCredentials(function (error, credentials) {
-        if (error) return callback(error);
+    var route53 = new AWS.Route53(getDnsCredentials(dnsConfig));
+    route53.listHostedZones({}, function (error, result) {
+        if (error) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, new Error(error)));
 
-        var route53 = new AWS.Route53(credentials);
-        route53.listHostedZones({}, function (error, result) {
-            if (error) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, new Error(error)));
+        var zone = result.HostedZones.filter(function (zone) {
+            return zone.Name.slice(0, -1) === zoneName;     // aws zone name contains a '.' at the end
+        })[0];
 
-            var zone = result.HostedZones.filter(function (zone) {
-                return zone.Name.slice(0, -1) === zoneName;     // aws zone name contains a '.' at the end
-            })[0];
+        if (!zone) return callback(new SubdomainError(SubdomainError.NOT_FOUND, 'no such zone'));
 
-            if (!zone) return callback(new SubdomainError(SubdomainError.NOT_FOUND, 'no such zone'));
-
-            callback(null, zone);
-        });
+        callback(null, zone);
     });
 }
 
-function add(zoneName, subdomain, type, values, callback) {
+function add(dnsConfig, zoneName, subdomain, type, values, callback) {
+    assert.strictEqual(typeof dnsConfig, 'object');
     assert.strictEqual(typeof zoneName, 'string');
     assert.strictEqual(typeof subdomain, 'string');
     assert.strictEqual(typeof type, 'string');
@@ -68,7 +61,7 @@ function add(zoneName, subdomain, type, values, callback) {
 
     debug('add: %s for zone %s of type %s with values %j', subdomain, zoneName, type, values);
 
-    getZoneByName(zoneName, function (error, zone) {
+    getZoneByName(dnsConfig, zoneName, function (error, zone) {
         if (error) return callback(error);
 
         var fqdn = config.appFqdn(subdomain);
@@ -89,24 +82,21 @@ function add(zoneName, subdomain, type, values, callback) {
             HostedZoneId: zone.Id
         };
 
-        getDnsCredentials(function (error, credentials) {
-            if (error) return callback(error);
+        var route53 = new AWS.Route53(getDnsCredentials(dnsConfig));
+        route53.changeResourceRecordSets(params, function(error, result) {
+            if (error && error.code === 'PriorRequestNotComplete') {
+                return callback(new SubdomainError(SubdomainError.STILL_BUSY, error.message));
+            } else if (error) {
+                return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, error.message));
+            }
 
-            var route53 = new AWS.Route53(credentials);
-            route53.changeResourceRecordSets(params, function(error, result) {
-                if (error && error.code === 'PriorRequestNotComplete') {
-                    return callback(new SubdomainError(SubdomainError.STILL_BUSY, error.message));
-                } else if (error) {
-                    return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, error.message));
-                }
-
-                callback(null, result.ChangeInfo.Id);
-            });
+            callback(null, result.ChangeInfo.Id);
         });
     });
 }
 
-function update(zoneName, subdomain, type, values, callback) {
+function update(dnsConfig, zoneName, subdomain, type, values, callback) {
+    assert.strictEqual(typeof dnsConfig, 'object');
     assert.strictEqual(typeof zoneName, 'string');
     assert.strictEqual(typeof subdomain, 'string');
     assert.strictEqual(typeof type, 'string');
@@ -122,13 +112,14 @@ function update(zoneName, subdomain, type, values, callback) {
     });
 }
 
-function get(zoneName, subdomain, type, callback) {
+function get(dnsConfig, zoneName, subdomain, type, callback) {
+    assert.strictEqual(typeof dnsConfig, 'object');
     assert.strictEqual(typeof zoneName, 'string');
     assert.strictEqual(typeof subdomain, 'string');
     assert.strictEqual(typeof type, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    getZoneByName(zoneName, function (error, zone) {
+    getZoneByName(dnsConfig, zoneName, function (error, zone) {
         if (error) return callback(error);
 
         var params = {
@@ -138,31 +129,28 @@ function get(zoneName, subdomain, type, callback) {
             StartRecordType: type
         };
 
-        getDnsCredentials(function (error, credentials) {
-            if (error) return callback(error);
+        var route53 = new AWS.Route53(getDnsCredentials(dnsConfig));
+        route53.listResourceRecordSets(params, function (error, result) {
+            if (error) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, new Error(error)));
+            if (result.ResourceRecordSets.length === 0) return callback(null, [ ]);
+            if (result.ResourceRecordSets[0].Name !== params.StartRecordName && result.ResourceRecordSets[0].Type !== params.StartRecordType) return callback(null, [ ]);
 
-            var route53 = new AWS.Route53(credentials);
-            route53.listResourceRecordSets(params, function (error, result) {
-                if (error) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, new Error(error)));
-                if (result.ResourceRecordSets.length === 0) return callback(null, [ ]);
-                if (result.ResourceRecordSets[0].Name !== params.StartRecordName && result.ResourceRecordSets[0].Type !== params.StartRecordType) return callback(null, [ ]);
+            var values = result.ResourceRecordSets[0].ResourceRecords.map(function (record) { return record.Value; });
 
-                var values = result.ResourceRecordSets[0].ResourceRecords.map(function (record) { return record.Value; });
-
-                callback(null, values);
-            });
+            callback(null, values);
         });
     });
 }
 
-function del(zoneName, subdomain, type, values, callback) {
+function del(dnsConfig, zoneName, subdomain, type, values, callback) {
+    assert.strictEqual(typeof dnsConfig, 'object');
     assert.strictEqual(typeof zoneName, 'string');
     assert.strictEqual(typeof subdomain, 'string');
     assert.strictEqual(typeof type, 'string');
     assert(util.isArray(values));
     assert.strictEqual(typeof callback, 'function');
 
-    getZoneByName(zoneName, function (error, zone) {
+    getZoneByName(dnsConfig, zoneName, function (error, zone) {
         if (error) return callback(error);
 
         var fqdn = config.appFqdn(subdomain);
@@ -185,48 +173,42 @@ function del(zoneName, subdomain, type, values, callback) {
             HostedZoneId: zone.Id
         };
 
-        getDnsCredentials(function (error, credentials) {
-            if (error) return callback(error);
+        var route53 = new AWS.Route53(getDnsCredentials(dnsConfig));
+        route53.changeResourceRecordSets(params, function(error, result) {
+            if (error && error.message && error.message.indexOf('it was not found') !== -1) {
+                debug('delSubdomain: resource record set not found.', error);
+                return callback(new SubdomainError(SubdomainError.NOT_FOUND, new Error(error)));
+            } else if (error && error.code === 'NoSuchHostedZone') {
+                debug('delSubdomain: hosted zone not found.', error);
+                return callback(new SubdomainError(SubdomainError.NOT_FOUND, new Error(error)));
+            } else if (error && error.code === 'PriorRequestNotComplete') {
+                debug('delSubdomain: resource is still busy', error);
+                return callback(new SubdomainError(SubdomainError.STILL_BUSY, new Error(error)));
+            } else if (error && error.code === 'InvalidChangeBatch') {
+                debug('delSubdomain: invalid change batch. No such record to be deleted.');
+                return callback(new SubdomainError(SubdomainError.NOT_FOUND, new Error(error)));
+            } else if (error) {
+                debug('delSubdomain: error', error);
+                return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, new Error(error)));
+            }
 
-            var route53 = new AWS.Route53(credentials);
-            route53.changeResourceRecordSets(params, function(error, result) {
-                if (error && error.message && error.message.indexOf('it was not found') !== -1) {
-                    debug('delSubdomain: resource record set not found.', error);
-                    return callback(new SubdomainError(SubdomainError.NOT_FOUND, new Error(error)));
-                } else if (error && error.code === 'NoSuchHostedZone') {
-                    debug('delSubdomain: hosted zone not found.', error);
-                    return callback(new SubdomainError(SubdomainError.NOT_FOUND, new Error(error)));
-                } else if (error && error.code === 'PriorRequestNotComplete') {
-                    debug('delSubdomain: resource is still busy', error);
-                    return callback(new SubdomainError(SubdomainError.STILL_BUSY, new Error(error)));
-                } else if (error && error.code === 'InvalidChangeBatch') {
-                    debug('delSubdomain: invalid change batch. No such record to be deleted.');
-                    return callback(new SubdomainError(SubdomainError.NOT_FOUND, new Error(error)));
-                } else if (error) {
-                    debug('delSubdomain: error', error);
-                    return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, new Error(error)));
-                }
-
-                callback(null);
-            });
+            callback(null);
         });
     });
 }
 
-function getChangeStatus(changeId, callback) {
+function getChangeStatus(dnsConfig, changeId, callback) {
+    assert.strictEqual(typeof dnsConfig, 'object');
     assert.strictEqual(typeof changeId, 'string');
     assert.strictEqual(typeof callback, 'function');
 
     if (changeId === '') return callback(null, 'INSYNC');
 
-    getDnsCredentials(function (error, credentials) {
+    var route53 = new AWS.Route53(getDnsCredentials(dnsConfig));
+    route53.getChange({ Id: changeId }, function (error, result) {
         if (error) return callback(error);
 
-        var route53 = new AWS.Route53(credentials);
-        route53.getChange({ Id: changeId }, function (error, result) {
-            if (error) return callback(error);
-
-            callback(null, result.ChangeInfo.Status);
-        });
+        callback(null, result.ChangeInfo.Status);
     });
 }
+
