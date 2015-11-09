@@ -229,6 +229,11 @@ app.controller('FinishController', ['$scope', '$location', 'Wizard', 'Client', f
         Client.changeCloudronAvatar($scope.wizard.avatarBlob, function (error) {
             if (error) return console.error('Unable to set avatar.', error);
 
+            if ($scope.wizard.dnsConfig === null) {
+                window.location.href = '/';
+                return;
+            }
+
             Client.setDnsConfig($scope.wizard.dnsConfig, function (error) {
                 if (error) return console.error('Unable to set dns config.', error);
 
@@ -255,12 +260,6 @@ app.controller('SetupController', ['$scope', '$location', 'Client', 'Wizard', fu
             provider: 'route53',
             accessKeyId: null,
             secretAccessKey: null
-        };
-    } else {
-        Wizard.dnsConfig = {
-            provider: 'caas',
-            accessKeyId: '',
-            secretAccessKey: ''
         };
     }
 
