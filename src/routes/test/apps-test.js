@@ -146,12 +146,16 @@ function setup(done) {
 
                 callback(null);
             });
-        }, function (callback) {
+        },
+
+        function (callback) {
             token_1 = tokendb.generateToken();
 
             // HACK to get a token for second user (passwords are generated and the user should have gotten a password setup link...)
             tokendb.add(token_1, tokendb.PREFIX_USER + USERNAME_1, 'test-client-id',  Date.now() + 100000, '*', callback);
-        }
+        },
+
+        settings.setDnsConfig.bind(null, { provider: 'route53', accessKeyId: 'accessKeyId', secretAccessKey: 'secretAccessKey', endpoint: 'http://localhost:5353' }),
     ], done);
 }
 
@@ -589,8 +593,6 @@ describe('App installation', function () {
                 var port = parseInt(url.parse(config.apiServerOrigin()).port, 10);
                 apiHockServer = http.createServer(apiHockInstance.handler).listen(port, callback);
             },
-
-            settings.setDnsConfig.bind(null, { provider: 'route53', accessKeyId: 'accessKeyId', secretAccessKey: 'secretAccessKey', endpoint: 'http://localhost:5353' }),
 
             function (callback) {
                 awsHockInstance
