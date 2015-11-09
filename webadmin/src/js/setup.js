@@ -159,7 +159,7 @@ app.controller('StepController', ['$scope', '$route', '$location', 'Wizard', fun
         if (current === '/step1') {
             next = '/step2';
         } else if (current === '/step2') {
-            if (Wizard.dnsConfig.provider === 'caas') next = '/step4';
+            if (Wizard.dnsConfig === null) next = '/step4';
             else next = '/step3';
         } else if (current === '/step3') {
             next = '/step4';
@@ -210,7 +210,7 @@ app.controller('StepController', ['$scope', '$route', '$location', 'Wizard', fun
             image = null;
         };
         image.src = $scope.wizard.availableAvatars[randomIndex].data || $scope.wizard.availableAvatars[randomIndex].url;
-    } else if ($route.current.templateUrl === 'views/setup/step3.html' && Wizard.dnsConfig.provider === 'caas') {
+    } else if ($route.current.templateUrl === 'views/setup/step3.html' && Wizard.dnsConfig === null) {
         $location.path('/step4'); // not using custom domain
     }
 
