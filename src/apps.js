@@ -52,7 +52,7 @@ var addons = require('./addons.js'),
     constants = require('./constants.js'),
     DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:apps'),
-    docker = require('./docker.js').connection,
+    docker = require('./docker.js'),
     fs = require('fs'),
     manifestFormat = require('cloudron-manifestformat'),
     path = require('path'),
@@ -71,6 +71,8 @@ var addons = require('./addons.js'),
 var BACKUP_APP_CMD = path.join(__dirname, 'scripts/backupapp.sh'),
     RESTORE_APP_CMD = path.join(__dirname, 'scripts/restoreapp.sh'),
     BACKUP_SWAP_CMD = path.join(__dirname, 'scripts/backupswap.sh');
+
+var NOOP_CALLBACK = function (error) { if (error) debug(error); };
 
 function debugApp(app, args) {
     assert(!app || typeof app === 'object');
@@ -643,31 +645,38 @@ function exec(appId, options, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        var container = docker.getContainer(app.containerId);
-
-       var execOptions = {
+       var createOptions = {
             AttachStdin: true,
             AttachStdout: true,
             AttachStderr: true,
-            Tty: true,
-            Cmd: cmd
+            OpenStdin: true,
+            StdinOnce: false,
+            Tty: true
         };
 
-        container.exec(execOptions, function (error, exec) {
+        docker.createSubcontainer(app, app.id + '-exec-' + Date.now(), cmd, createOptions, function (error, container) {
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
-            var startOptions = {
-                Detach: false,
-                Tty: true,
-                stdin: true // this is a dockerode option that enabled openStdin in the modem
-            };
-            exec.start(startOptions, function(error, stream) {
+
+            container.attach({ stream: true, stdin: true, stdout: true, stderr: true }, function (error, stream) {
                 if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-                if (options.rows && options.columns) {
-                    exec.resize({ h: options.rows, w: options.columns }, function (error) { if (error) debug('Error resizing console', error); });
-                }
+                docker.startContainer(container.id, function (error) {
+                    if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-                return callback(null, stream);
+                    if (options.rows && options.columns) {
+                        container.resize({ h: options.rows, w: options.columns }, NOOP_CALLBACK);
+                    }
+
+                    container.wait(function (error) {
+                        if (error) debug('Error waiting on container', error);
+
+                        debug('exec: container finished', container.id);
+
+                        docker.deleteContainer(container.id, NOOP_CALLBACK);
+                    });
+
+                    return callback(null, stream);
+                });
             });
         });
     });
