@@ -511,7 +511,7 @@ function getLogs(appId, lines, follow, callback) {
                 monotonicTimestamp: obj.__MONOTONIC_TIMESTAMP,
                 message: obj.MESSAGE,
                 source: source || 'main'
-            });
+            }) + '\n';
         });
 
         transformStream.close = cp.kill.bind(cp, 'SIGKILL'); // closing stream kills the child process
