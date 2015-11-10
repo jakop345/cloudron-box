@@ -15,6 +15,9 @@ exports = module.exports = {
     getDnsConfig: getDnsConfig,
     setDnsConfig: setDnsConfig,
 
+    getBackupConfig: getBackupConfig,
+    setBackupConfig: setBackupConfig,
+
     setCertificate: setCertificate,
     setAdminCertificate: setAdminCertificate
 };
@@ -104,6 +107,27 @@ function setDnsConfig(req, res, next) {
     if (typeof req.body.provider !== 'string') return next(new HttpError(400, 'provider is required'));
 
     settings.setDnsConfig(req.body, function (error) {
+        if (error && error.reason === SettingsError.BAD_FIELD) return next(new HttpError(400, error.message));
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(200));
+    });
+}
+
+function getBackupConfig(req, res, next) {
+    settings.getBackupConfig(function (error, config) {
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(200, config));
+    });
+}
+
+function setBackupConfig(req, res, next) {
+    assert.strictEqual(typeof req.body, 'object');
+
+    if (typeof req.body.provider !== 'string') return next(new HttpError(400, 'provider is required'));
+
+    settings.setBackupConfig(req.body, function (error) {
         if (error && error.reason === SettingsError.BAD_FIELD) return next(new HttpError(400, error.message));
         if (error) return next(new HttpError(500, error));
 
