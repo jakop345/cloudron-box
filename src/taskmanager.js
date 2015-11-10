@@ -95,8 +95,12 @@ function startAppTask(appId) {
     }
 
     gActiveTasks[appId] = child_process.fork(__dirname + '/apptask.js', [ appId ]);
+
+    var pid = gActiveTasks[appId].pid;
+    debug('Started task of %s pid: %s', appId, pid);
+
     gActiveTasks[appId].once('exit', function (code) {
-        debug('Task for %s completed with status %s', appId, code);
+        debug('Task for %s pid %s completed with status %s', appId, pid, code);
         if (code && code !== 50) { // apptask crashed
             appdb.update(appId, { installationState: appdb.ISTATE_ERROR, installationProgress: 'Apptask crashed with code ' + code }, NOOP_CALLBACK);
         }
@@ -109,12 +113,14 @@ function stopAppTask(appId) {
     assert.strictEqual(typeof appId, 'string');
 
     if (gActiveTasks[appId]) {
-        debug('stopAppTask : Killing existing task of %s with pid %s: ', appId, gActiveTasks[appId].pid);
+        debug('stopAppTask : Killing existing task of %s with pid %s', appId, gActiveTasks[appId].pid);
         gActiveTasks[appId].kill(); // this will end up calling the 'exit' handler
         delete gActiveTasks[appId];
     } else if (gPendingTasks.indexOf(appId) !== -1) {
-        debug('stopAppTask: Removing existing pending task : %s', appId);
+        debug('stopAppTask: Removing pending task : %s', appId);
         gPendingTasks = _.without(gPendingTasks, appId);
+    } else {
+        debug('stopAppTask: no task for %s to be stopped', appId);
     }
 }
 
