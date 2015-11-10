@@ -56,7 +56,7 @@ function setup(done) {
         },
 
         function createSettings(callback) {
-            settings.setBackupConfig({ provider: 'caas', token: 'BACKUP_TOKEN' }, callback);
+            settings.setBackupConfig({ provider: 'caas', token: 'BACKUP_TOKEN', bucket: 'Bucket', prefix: 'Prefix' }, callback);
         }
     ], done);
 }
@@ -146,4 +146,3 @@ describe('Backups API', function () {
         });
     });
 });
-
