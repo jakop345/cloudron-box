@@ -8,7 +8,8 @@ var addons = require('./addons.js'),
     Docker = require('dockerode'),
     safe = require('safetydance'),
     semver = require('semver'),
-    util = require('util');
+    util = require('util'),
+    _ = require('underscore');
 
 exports = module.exports = {
     connection: connectionInstance(),
@@ -117,10 +118,11 @@ function downloadImage(manifest, callback) {
     }, callback);
 }
 
-function createSubcontainer(app, name, cmd, callback) {
+function createSubcontainer(app, name, cmd, options, callback) {
     assert.strictEqual(typeof app, 'object');
     assert.strictEqual(typeof name, 'string');
     assert(!cmd || util.isArray(cmd));
+    assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     var docker = exports.connection,
@@ -192,18 +194,19 @@ function createSubcontainer(app, name, cmd, callback) {
                 SecurityOpt: config.CLOUDRON ? [ "apparmor:docker-cloudron-app" ] : null // profile available only on cloudron
             }
         };
+        containerOptions = _.extend(containerOptions, options);
 
         // older versions wanted a writable /var/log
         if (semver.lte(targetBoxVersion(app.manifest), '0.0.71')) containerOptions.Volumes['/var/log'] = {};
 
-        debugApp(app, 'Creating container for %s', app.manifest.dockerImage);
+        debugApp(app, 'Creating container for %s with options %j', app.manifest.dockerImage, containerOptions);
 
         docker.createContainer(containerOptions, callback);
     });
 }
 
 function createContainer(app, callback) {
-    createSubcontainer(app, app.id /* name */, null /* cmd */, callback);
+    createSubcontainer(app, app.id /* name */, null /* cmd */, { } /* options */, callback);
 }
 
 function startContainer(containerId, callback) {
