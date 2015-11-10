@@ -274,7 +274,7 @@ function getConfig(callback) {
 
     getCloudronDetails(function (error, result) {
         if (error) {
-            console.error('Failed to fetch cloudron details.', error);
+            debug('Failed to fetch cloudron details.', error);
 
             // set fallback values to avoid dependency on appstore
             result = {
