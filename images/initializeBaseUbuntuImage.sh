@@ -100,7 +100,7 @@ iptables -I FORWARD -d 169.254.169.254 -j DROP
 mkdir /etc/iptables && iptables-save > /etc/iptables/rules.v4
 
 echo "=== Enable memory accounting =="
-sed -e 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="cgroup_enable=memory swapaccount=1"/' -i /etc/default/grub
+sed -e 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="cgroup_enable=memory swapaccount=1 panic_on_oops=1 panic=5"/' -i /etc/default/grub
 update-grub
 
 # now add the user to the docker group
