@@ -20,7 +20,6 @@ var assert = require('assert'),
     middleware = require('./middleware'),
     passport = require('passport'),
     path = require('path'),
-    paths = require('./paths.js'),
     routes = require('./routes/index.js'),
     taskmanager = require('./taskmanager.js');
 
