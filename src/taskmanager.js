@@ -9,6 +9,7 @@ exports = module.exports = {
 
 var appdb = require('./appdb.js'),
     assert = require('assert'),
+    async = require('async'),
     child_process = require('child_process'),
     cloudron = require('./cloudron.js'),
     debug = require('debug')('box:taskmanager'),
@@ -39,14 +40,11 @@ function uninitialize(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     gPendingTasks = [ ]; // clear this first, otherwise stopAppTask will resume them
-    for (var appId in gActiveTasks) {
-        stopAppTask(appId);
-    }
 
     cloudron.events.removeListener(cloudron.EVENT_CONFIGURED, resumeTasks);
     locker.removeListener('unlocked', startNextTask);
 
-    callback(null);
+    async.eachSeries(Object.keys(gActiveTasks), stopAppTask, callback);
 }
 
 
@@ -109,23 +107,32 @@ function startAppTask(appId) {
     });
 }
 
-function stopAppTask(appId) {
+function stopAppTask(appId, callback) {
     assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof callback, 'function');
 
     if (gActiveTasks[appId]) {
         debug('stopAppTask : Killing existing task of %s with pid %s', appId, gActiveTasks[appId].pid);
+        gActiveTasks[appId].once('exit', function () { callback(); });
         gActiveTasks[appId].kill(); // this will end up calling the 'exit' handler
-        delete gActiveTasks[appId];
-    } else if (gPendingTasks.indexOf(appId) !== -1) {
+        return;
+    }
+
+    if (gPendingTasks.indexOf(appId) !== -1) {
         debug('stopAppTask: Removing pending task : %s', appId);
         gPendingTasks = _.without(gPendingTasks, appId);
     } else {
         debug('stopAppTask: no task for %s to be stopped', appId);
     }
+
+    callback();
 }
 
-function restartAppTask(appId) {
-    stopAppTask(appId);
-    startAppTask(appId);
-}
+function restartAppTask(appId, callback) {
+    callback = callback || NOOP_CALLBACK;
 
+    async.series([
+        stopAppTask.bind(null, appId),
+        startAppTask.bind(null, appId)
+    ], callback);
+}
