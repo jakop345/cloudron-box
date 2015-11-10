@@ -36,12 +36,7 @@ function main() {
     var processName = process.argv[2];
     console.log('Started crash notifier for', processName);
 
-    mailer.initialize(function (error) {
-        if (error) return console.error(error);
-
-        sendCrashNotification(processName);
-    });
+    sendCrashNotification(processName);
 }
 
 main();
-

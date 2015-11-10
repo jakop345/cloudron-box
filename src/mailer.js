@@ -133,6 +133,15 @@ function checkDns() {
 function processQueue() {
     assert(gDnsReady);
 
+    sendMails(gMailQueue);
+    gMailQueue = [ ];
+}
+
+// note : this function should NOT access the database. it is called by the crashnotifier
+// which does not initialize mailer or the databse
+function sendMails(queue) {
+    assert(util.isArray(queue));
+
     docker.getContainer('mail').inspect(function (error, data) {
         if (error) return console.error(error);
 
@@ -144,12 +153,9 @@ function processQueue() {
             port: 2500 // this value comes from mail container
         }));
 
-        var mailQueueCopy = gMailQueue;
-        gMailQueue = [ ];
+        debug('Processing mail queue of size %d (through %s:2500)', queue.length, mailServerIp);
 
-        debug('Processing mail queue of size %d (through %s:2500)', mailQueueCopy.length, mailServerIp);
-
-        async.mapSeries(mailQueueCopy, function iterator(mailOptions, callback) {
+        async.mapSeries(queue, function iterator(mailOptions, callback) {
             transport.sendMail(mailOptions, function (error) {
                 if (error) return console.error(error); // TODO: requeue?
                 debug('Email sent to ' + mailOptions.to);
@@ -323,6 +329,8 @@ function appUpdateAvailable(app, updateInfo) {
     });
 }
 
+// this function bypasses the queue intentionally. it is also expected to work without the mailer module initialized
+// crashnotifier should be able to send mail when there is no db
 function sendCrashNotification(program, context) {
     assert.strictEqual(typeof program, 'string');
     assert.strictEqual(typeof context, 'string');
@@ -334,7 +342,7 @@ function sendCrashNotification(program, context) {
         text: render('crash_notification.ejs', { fqdn: config.fqdn(), program: program, context: context, format: 'text' })
     };
 
-    enqueue(mailOptions);
+    sendMails([ mailOptions ]);
 }
 
 function sendFeedback(user, type, subject, description) {
