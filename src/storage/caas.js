@@ -63,6 +63,8 @@ function getSignedUploadUrl(backupConfig, filename, callback) {
     assert.strictEqual(typeof filename, 'string');
     assert.strictEqual(typeof callback, 'function');
 
+    if (!backupConfig.bucket || !backupConfig.prefix) return new Error('Invalid configuration'); // prevent error in s3
+
     getBackupCredentials(backupConfig, function (error, credentials) {
         if (error) return callback(error);
 
@@ -84,6 +86,8 @@ function getSignedDownloadUrl(backupConfig, filename, callback) {
     assert.strictEqual(typeof backupConfig, 'object');
     assert.strictEqual(typeof filename, 'string');
     assert.strictEqual(typeof callback, 'function');
+
+    if (!backupConfig.bucket || !backupConfig.prefix) return new Error('Invalid configuration'); // prevent error in s3
 
     getBackupCredentials(backupConfig, function (error, credentials) {
         if (error) return callback(error);
@@ -107,6 +111,8 @@ function copyObject(backupConfig, from, to, callback) {
     assert.strictEqual(typeof from, 'string');
     assert.strictEqual(typeof to, 'string');
     assert.strictEqual(typeof callback, 'function');
+
+    if (!backupConfig.bucket || !backupConfig.prefix) return new Error('Invalid configuration'); // prevent error in s3
 
     getBackupCredentials(backupConfig, function (error, credentials) {
         if (error) return callback(error);
