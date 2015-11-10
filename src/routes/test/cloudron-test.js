@@ -282,6 +282,19 @@ describe('Cloudron', function () {
                         callback();
                     });
                 },
+
+                function setupBackupConfig(callback) {
+                    request.post(SERVER_URL + '/api/v1/settings/backup_config')
+                           .send({ provider: 'caas', token: 'BACKUP_TOKEN', bucket: 'Bucket', prefix: 'Prefix' })
+                           .query({ access_token: token })
+                           .end(function (error, result) {
+                        expect(error).to.not.be.ok();
+                        expect(result.statusCode).to.equal(200);
+
+                        callback();
+                    });
+                }
+
             ], done);
         });
 
@@ -341,7 +354,6 @@ describe('Cloudron', function () {
             });
         });
 
-
         it('fails with wrong region type', function (done) {
             request.post(SERVER_URL + '/api/v1/cloudron/migrate')
                    .send({ size: 'small', region: 4, password: PASSWORD })
@@ -355,7 +367,7 @@ describe('Cloudron', function () {
 
         it('fails when in wrong state', function (done) {
             var scope2 = nock(config.apiServerOrigin())
-                    .post('/api/v1/boxes/' + config.fqdn() + '/awscredentials?token=APPSTORE_TOKEN')
+                    .post('/api/v1/boxes/' + config.fqdn() + '/awscredentials?token=BACKUP_TOKEN')
                     .reply(201, { credentials: { AccessKeyId: 'accessKeyId', SecretAccessKey: 'secretAccessKey', SessionToken: 'sessionToken' } });
 
             var scope3 = nock(config.apiServerOrigin())
@@ -391,7 +403,6 @@ describe('Cloudron', function () {
             });
         });
 
-
         it('succeeds', function (done) {
             var scope1 = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/migrate?token=APPSTORE_TOKEN', function (body) {
                 return body.size && body.region && body.restoreKey;
@@ -404,7 +415,7 @@ describe('Cloudron', function () {
                     .reply(200, { id: 'someid' });
 
             var scope3 = nock(config.apiServerOrigin())
-                    .post('/api/v1/boxes/' + config.fqdn() + '/awscredentials?token=APPSTORE_TOKEN')
+                    .post('/api/v1/boxes/' + config.fqdn() + '/awscredentials?token=BACKUP_TOKEN')
                     .reply(201, { credentials: { AccessKeyId: 'accessKeyId', SecretAccessKey: 'secretAccessKey', SessionToken: 'sessionToken' } });
 
             injectShellMock();

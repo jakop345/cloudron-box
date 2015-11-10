@@ -160,6 +160,8 @@ function initializeExpressSync() {
     router.post('/api/v1/settings/cloudron_avatar',    settingsScope, multipart, routes.settings.setCloudronAvatar);
     router.get ('/api/v1/settings/dns_config',         settingsScope, routes.settings.getDnsConfig);
     router.post('/api/v1/settings/dns_config',         settingsScope, routes.settings.setDnsConfig);
+    router.get ('/api/v1/settings/backup_config',      settingsScope, routes.settings.getBackupConfig);
+    router.post('/api/v1/settings/backup_config',      settingsScope, routes.settings.setBackupConfig);
     router.post('/api/v1/settings/certificate',        settingsScope, routes.settings.setCertificate);
     router.post('/api/v1/settings/admin_certificate',  settingsScope, routes.settings.setAdminCertificate);
 
