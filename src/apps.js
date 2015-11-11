@@ -55,6 +55,7 @@ var addons = require('./addons.js'),
     docker = require('./docker.js'),
     fs = require('fs'),
     manifestFormat = require('cloudron-manifestformat'),
+    once = require('once'),
     path = require('path'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
@@ -667,15 +668,19 @@ function exec(appId, options, callback) {
                         container.resize({ h: options.rows, w: options.columns }, NOOP_CALLBACK);
                     }
 
+                    var deleteContainer = once(docker.deleteContainer.bind(null, container.id, NOOP_CALLBACK));
+
                     container.wait(function (error) {
                         if (error) debug('Error waiting on container', error);
 
                         debug('exec: container finished', container.id);
 
-                        docker.deleteContainer(container.id, NOOP_CALLBACK);
+                        deleteContainer();
                     });
 
-                    return callback(null, stream);
+                    stream.close = deleteContainer;
+
+                    callback(null, stream);
                 });
             });
         });

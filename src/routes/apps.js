@@ -368,6 +368,8 @@ function exec(req, res, next) {
 
         duplexStream.pipe(res.socket);
         res.socket.pipe(duplexStream);
+
+        res.on('close', duplexStream.close);
     });
 }
 
