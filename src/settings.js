@@ -371,6 +371,10 @@ function setCertificate(cert, key, callback) {
     var error = validateCertificate(cert, key, '*.' + config.fqdn());
     if (error) return callback(new SettingsError(SettingsError.INVALID_CERT, error.message));
 
+    // backup the certs
+    if (!safe.fs.writeFileSync(path.join(paths.APP_CERTS_DIR, 'host.cert'), cert)) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, safe.error.message));
+    if (!safe.fs.writeFileSync(path.join(paths.APP_CERTS_DIR, 'host.key'), key)) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, safe.error.message));
+
     if (!safe.fs.writeFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), cert)) {
         return callback(new SettingsError(SettingsError.INTERNAL_ERROR, safe.error.message));
     }
