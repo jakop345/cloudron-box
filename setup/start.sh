@@ -106,14 +106,14 @@ ${BOX_SRC_DIR}/node_modules/.bin/ejs-cli -f "${script_dir}/start/nginx/nginx.ejs
     -O "{ \"sourceDir\": \"${BOX_SRC_DIR}\" }" > "${DATA_DIR}/nginx/nginx.conf"
 
 # generate these for update code paths as well to overwrite splash
-admin_cert="cert/host.cert"
-admin_key="cert/host.key"
+admin_cert_file="cert/host.cert"
+admin_key_file="cert/host.key"
 if [[ -f "${DATA_DIR}/box/certs/admin.cert" && -f "${DATA_DIR}/box/certs/admin.key" ]]; then
-    admin_cert="${DATA_DIR}/box/certs/admin.cert"
-    admin_key="${DATA_DIR}/box/certs/admin.key"
+    admin_cert_file="${DATA_DIR}/box/certs/admin.cert"
+    admin_key_file="${DATA_DIR}/box/certs/admin.key"
 fi
 ${BOX_SRC_DIR}/node_modules/.bin/ejs-cli -f "${script_dir}/start/nginx/appconfig.ejs" \
-    -O "{ \"vhost\": \"${admin_fqdn}\", \"adminOrigin\": \"${admin_origin}\", \"endpoint\": \"admin\", \"sourceDir\": \"${BOX_SRC_DIR}\", \"certFilePath\": \"${admin_cert}\", \"keyFilePath\": \"${admin_key}\" }" > "${DATA_DIR}/nginx/applications/admin.conf"
+    -O "{ \"vhost\": \"${admin_fqdn}\", \"adminOrigin\": \"${admin_origin}\", \"endpoint\": \"admin\", \"sourceDir\": \"${BOX_SRC_DIR}\", \"certFilePath\": \"${admin_cert_file}\", \"keyFilePath\": \"${admin_key_file}\" }" > "${DATA_DIR}/nginx/applications/admin.conf"
 
 mkdir -p "${DATA_DIR}/nginx/cert"
 if [[ -f "${DATA_DIR}/box/certs/host.cert" && -f "${DATA_DIR}/box/certs/host.key" ]]; then
