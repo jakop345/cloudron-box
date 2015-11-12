@@ -160,6 +160,7 @@ apt-get install -y curl
 mkdir -p /usr/local/node-4.2.2
 curl -sL https://nodejs.org/dist/v4.2.2/node-v4.2.2-linux-x64.tar.gz | tar zxvf - --strip-components=1 -C /usr/local/node-4.2.2
 ln -s /usr/local/bin/node-4.2.2/bin/node /usr/bin/node
+ln -s /usr/local/bin/node-4.2.2/bin/npm /usr/bin/npm
 apt-get install -y python	# Install python which is required for npm rebuild
 
 echo "=== Rebuilding npm packages ==="
