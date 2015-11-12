@@ -65,18 +65,17 @@ function pullImage(manifest, callback) {
         // is emitted as a chunk
         stream.on('data', function (chunk) {
             var data = safe.JSON.parse(chunk) || { };
-            debug('pullImage data: %j', data);
+            debug('pullImage %s: %j', manifest.id, data);
 
             // The information here is useless because this is per layer as opposed to per image
             if (data.status) {
-                // debugApp(app, 'progress: %s', data.status); // progressDetail { current, total }
             } else if (data.error) {
-                debug('pullImage error detail: %s', data.errorDetail.message);
+                debug('pullImage error %s: %s', manifest.id, data.errorDetail.message);
             }
         });
 
         stream.on('end', function () {
-            debug('downloaded image %s successfully', manifest.dockerImage);
+            debug('downloaded image %s of %s successfully', manifest.dockerImage, manifest.id);
 
             var image = docker.getImage(manifest.dockerImage);
 
@@ -85,14 +84,14 @@ function pullImage(manifest, callback) {
                 if (!data || !data.Config) return callback(new Error('Missing Config in image:' + JSON.stringify(data, null, 4)));
                 if (!data.Config.Entrypoint && !data.Config.Cmd) return callback(new Error('Only images with entry point are allowed'));
 
-                debug('This image exposes ports: %j', data.Config.ExposedPorts);
+                debug('This image of %s exposes ports: %j', manifest.id data.Config.ExposedPorts);
 
                 callback(null);
             });
         });
 
         stream.on('error', function (error) {
-            debug('error pulling image %s : %j', manifest.dockerImage, error);
+            debug('error pulling image %s of %s: %j', manifest.dockerImage, manifest.id, error);
 
             callback(error);
         });
@@ -103,12 +102,12 @@ function downloadImage(manifest, callback) {
     assert.strictEqual(typeof manifest, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    debug('downloadImage %s', manifest.dockerImage);
+    debug('downloadImage %s %s', manifest.id, manifest.dockerImage);
 
     var attempt = 1;
 
     async.retry({ times: 5, interval: 15000 }, function (retryCallback) {
-        debug('Downloading image. attempt: %s', attempt++);
+        debug('Downloading image %s %s. attempt: %s', manifest.id, manifest.dockerImage, attempt++);
 
         pullImage(manifest, function (error) {
             if (error) console.error(error);
