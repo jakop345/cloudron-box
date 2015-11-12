@@ -116,8 +116,13 @@ ${BOX_SRC_DIR}/node_modules/.bin/ejs-cli -f "${script_dir}/start/nginx/appconfig
     -O "{ \"vhost\": \"${admin_fqdn}\", \"adminOrigin\": \"${admin_origin}\", \"endpoint\": \"admin\", \"sourceDir\": \"${BOX_SRC_DIR}\", \"certFilePath\": \"${admin_cert}\", \"keyFilePath\": \"${admin_key}\" }" > "${DATA_DIR}/nginx/applications/admin.conf"
 
 mkdir -p "${DATA_DIR}/nginx/cert"
-echo "${arg_tls_cert}" > ${DATA_DIR}/nginx/cert/host.cert
-echo "${arg_tls_key}" > ${DATA_DIR}/nginx/cert/host.key
+if [[ -f "${DATA_DIR}/box/certs/host.cert" && -f "${DATA_DIR}/box/certs/host.key" ]]; then
+    cp "${DATA_DIR}/box/certs/host.cert" "${DATA_DIR}/nginx/cert/host.cert"
+    cp "${DATA_DIR}/box/certs/host.key" "${DATA_DIR}/nginx/cert/host.key"
+else
+    echo "${arg_tls_cert}" > "${DATA_DIR}/nginx/cert/host.cert"
+    echo "${arg_tls_key}" > "${DATA_DIR}/nginx/cert/host.key"
+fi
 
 set_progress "33" "Changing ownership"
 chown "${USER}:${USER}" -R "${DATA_DIR}/box" "${DATA_DIR}/nginx" "${DATA_DIR}/collectd" "${DATA_DIR}/addons"
