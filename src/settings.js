@@ -375,13 +375,9 @@ function setCertificate(cert, key, callback) {
     if (!safe.fs.writeFileSync(path.join(paths.APP_CERTS_DIR, 'host.cert'), cert)) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, safe.error.message));
     if (!safe.fs.writeFileSync(path.join(paths.APP_CERTS_DIR, 'host.key'), key)) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, safe.error.message));
 
-    if (!safe.fs.writeFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), cert)) {
-        return callback(new SettingsError(SettingsError.INTERNAL_ERROR, safe.error.message));
-    }
-
-    if (!safe.fs.writeFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'), key)) {
-        return callback(new SettingsError(SettingsError.INTERNAL_ERROR, safe.error.message));
-    }
+    // copy over fallback cert
+    if (!safe.fs.writeFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), cert)) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, safe.error.message));
+    if (!safe.fs.writeFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'), key)) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, safe.error.message));
 
     shell.sudo('setCertificate', [ RELOAD_NGINX_CMD ], function (error) {
         if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
