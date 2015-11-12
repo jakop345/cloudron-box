@@ -159,7 +159,7 @@ echo "==== Install nodejs ===="
 apt-get install -y curl
 # Cannot use anything above 4.1.1 - https://github.com/nodejs/node/issues/3803
 mkdir -p /usr/local/node-4.1.1
-curl -sL https://nodejs.org/dist/v4.1.1/node-v4.2.2-linux-x64.tar.gz | tar zxvf - --strip-components=1 -C /usr/local/node-4.2.2
+curl -sL https://nodejs.org/dist/v4.1.1/node-v4.1.1-linux-x64.tar.gz | tar zxvf - --strip-components=1 -C /usr/local/node-4.1.1
 ln -s /usr/local/node-4.1.1/bin/node /usr/bin/node
 ln -s /usr/local/node-4.1.1/bin/npm /usr/bin/npm
 apt-get install -y python	# Install python which is required for npm rebuild
