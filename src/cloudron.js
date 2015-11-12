@@ -572,6 +572,21 @@ function doUpdate(boxUpdateInfo, callback) {
                     tlsKey: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'), 'utf8'),
                     isCustomDomain: config.isCustomDomain(),
 
+                    appstore: {
+                        token: config.token(),
+                        apiServerOrigin: config.apiServerOrigin()
+                    },
+                    caas: {
+                        token: config.token(),
+                        apiServerOrigin: config.apiServerOrigin(),
+                        webServerOrigin: config.webServerOrigin()
+                    },
+                    tlsConfig: {
+                        provider: 'caas',
+                        cert: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), 'utf8'),
+                        key: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'), 'utf8'),
+                    },
+
                     version: boxUpdateInfo.version,
                     boxVersionsUrl: config.get('boxVersionsUrl')
                 }
