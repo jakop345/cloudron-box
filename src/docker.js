@@ -106,7 +106,7 @@ function downloadImage(manifest, callback) {
 
     var attempt = 1;
 
-    async.retry({ times: 5, interval: 15000 }, function (retryCallback) {
+    async.retry({ times: 10, interval: 15000 }, function (retryCallback) {
         debug('Downloading image %s %s. attempt: %s', manifest.id, manifest.dockerImage, attempt++);
 
         pullImage(manifest, function (error) {
