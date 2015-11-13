@@ -110,7 +110,7 @@ function processApps(callback) {
         async.each(apps, checkAppHealth, function (error) {
             if (error) console.error(error);
 
-            var alive =apps
+            var alive = apps
                 .filter(function (a) { return a.installationState === appdb.ISTATE_INSTALLED && a.runState === appdb.RSTATE_RUNNING && a.health === appdb.HEALTH_HEALTHY; })
                 .map(function (a) { return a.location; }).join(', ');
 
