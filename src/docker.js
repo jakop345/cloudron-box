@@ -84,7 +84,7 @@ function pullImage(manifest, callback) {
                 if (!data || !data.Config) return callback(new Error('Missing Config in image:' + JSON.stringify(data, null, 4)));
                 if (!data.Config.Entrypoint && !data.Config.Cmd) return callback(new Error('Only images with entry point are allowed'));
 
-                debug('This image of %s exposes ports: %j', manifest.id data.Config.ExposedPorts);
+                debug('This image of %s exposes ports: %j', manifest.id, data.Config.ExposedPorts);
 
                 callback(null);
             });
