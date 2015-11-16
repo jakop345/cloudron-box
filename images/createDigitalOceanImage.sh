@@ -147,8 +147,10 @@ if ! $ssh22 "root@${droplet_ip}" "/bin/bash /root/initializeBaseUbuntuImage.sh $
 fi
 
 echo "Copy over certs"
-$scp202 -r "${INSTALLER_DIR}/../keys/installer/" "root@${droplet_ip}:/home/yellowtent/installer/src/certs/"
-$scp202 "${INSTALLER_DIR}/../keys/installer_ca/ca.crt" "root@${droplet_ip}:/home/yellowtent/installer/src/certs/"
+cd "${SCRIPT_DIR}/../../secrets"
+blackbox_cat installer/server.crt.gpg | $ssh202 "root@${droplet_ip}" "cat - > /home/yellowtent/installer/src/certs/server.crt"
+blackbox_cat installer/server.key.gpg | $ssh202 "root@${droplet_ip}" "cat - > /home/yellowtent/installer/src/certs/server.key"
+blackbox_cat installer_ca/ca.crt.gpg  | $ssh202 "root@${droplet_ip}" "cat - > /home/yellowtent/installer/src/certs/ca.crt"
 
 echo "Shutting down droplet with id : ${droplet_id}"
 $ssh202 "root@${droplet_ip}" "shutdown -f now" || true # shutdown sometimes terminates ssh connection immediately making this command fail
