@@ -9,13 +9,6 @@ assertNotEmpty() {
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly INSTALLER_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
 readonly JSON="${INSTALLER_DIR}/node_modules/.bin/json"
-readonly ssh_keys="${HOME}/.ssh/id_rsa_yellowtent"
-
-readonly scp202="scp -P 202 -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${ssh_keys}"
-readonly scp22="scp -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${ssh_keys}"
-
-readonly ssh202="ssh -p 202 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${ssh_keys}"
-readonly ssh22="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${ssh_keys}"
 
 installer_revision=$(git rev-parse HEAD)
 box_size="512mb"
@@ -63,8 +56,15 @@ else
 fi
 source "${SCRIPT_DIR}/digitalOceanFunctions.sh"
 
+readonly ssh_keys="${HOME}/.ssh/id_rsa_caas_${deploy_env}"
+readonly scp202="scp -P 202 -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${ssh_keys}"
+readonly scp22="scp -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${ssh_keys}"
+
+readonly ssh202="ssh -p 202 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${ssh_keys}"
+readonly ssh22="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${ssh_keys}"
+
 if [[ ! -f "${ssh_keys}" ]]; then
-    echo "yellowtent ssh key is missing"
+    echo "caas ssh key is missing (pick it up from secrets repo)"
     exit 1
 fi
 
