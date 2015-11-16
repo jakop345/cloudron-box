@@ -57,11 +57,11 @@ fi
 source "${SCRIPT_DIR}/digitalOceanFunctions.sh"
 
 readonly ssh_keys="${HOME}/.ssh/id_rsa_caas_${deploy_env}"
-readonly scp202="scp -P 202 -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${ssh_keys}"
-readonly scp22="scp -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${ssh_keys}"
+readonly scp202="scp -P 202  -o IdentitiesOnly=yes' -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${ssh_keys}"
+readonly scp22="scp -o IdentitiesOnly=yes -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${ssh_keys}"
 
-readonly ssh202="ssh -p 202 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${ssh_keys}"
-readonly ssh22="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${ssh_keys}"
+readonly ssh202="ssh -p 202 -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${ssh_keys}"
+readonly ssh22="ssh -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${ssh_keys}"
 
 if [[ ! -f "${ssh_keys}" ]]; then
     echo "caas ssh key is missing at ${ssh_keys} (pick it up from secrets repo)"
