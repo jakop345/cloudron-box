@@ -115,8 +115,8 @@ function startProvisionServer(callback) {
 
     router.post('/api/v1/installer/retire', retire);
 
-    var caPath = path.join(__dirname, process.env.NODE_ENV === 'test' ? '../../keys/installer_ca' : 'certs');
-    var certPath = path.join(__dirname, process.env.NODE_ENV === 'test' ? '../../keys/installer' : 'certs');
+    var caPath = path.join(__dirname, process.env.NODE_ENV === 'test' ? 'test/certs' : 'certs');
+    var certPath = path.join(__dirname, process.env.NODE_ENV === 'test' ? 'test/certs' : 'certs');
 
     var options = {
         key: fs.readFileSync(path.join(certPath, 'server.key')),
