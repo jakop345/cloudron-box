@@ -64,7 +64,7 @@ readonly ssh202="ssh -p 202 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChec
 readonly ssh22="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${ssh_keys}"
 
 if [[ ! -f "${ssh_keys}" ]]; then
-    echo "caas ssh key is missing (pick it up from secrets repo)"
+    echo "caas ssh key is missing at ${ssh_keys} (pick it up from secrets repo)"
     exit 1
 fi
 
