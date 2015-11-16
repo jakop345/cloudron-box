@@ -83,15 +83,15 @@ if [[ -z "${box_name}" ]]; then
     box_name="box-${deploy_env}-${pretty_revision}-${now}" # remove slashes
 
     # create a new droplet if no name given
-    yellowtent_ssh_key_id=$(get_ssh_key_id "yellowtent")
-    if [[ -z "${yellowtent_ssh_key_id}" ]]; then
-        echo "Could not query yellowtent ssh key"
+    caas_ssh_key_id=$(get_ssh_key_id "caas")
+    if [[ -z "${caas_ssh_key_id}" ]]; then
+        echo "Could not query caas ssh key"
         exit 1
     fi
-    echo "Detected yellowtent ssh key id: ${yellowtent_ssh_key_id}" # 124654 for yellowtent key
+    echo "Detected yellowtent ssh key id: ${caas_ssh_key_id}"
 
     echo "Creating Droplet with name [${box_name}] at [${image_regions[0]}] with size [${box_size}]"
-    droplet_id=$(create_droplet ${yellowtent_ssh_key_id} ${box_name} ${box_size} ${image_regions[0]})
+    droplet_id=$(create_droplet ${caas_ssh_key_id} ${box_name} ${box_size} ${image_regions[0]})
     if [[ -z "${droplet_id}" ]]; then
         echo "Failed to create droplet"
         exit 1
