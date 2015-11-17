@@ -88,7 +88,7 @@ if [[ -z "${box_name}" ]]; then
         echo "Could not query caas ssh key"
         exit 1
     fi
-    echo "Detected yellowtent ssh key id: ${caas_ssh_key_id}"
+    echo "Detected caas ssh key id: ${caas_ssh_key_id}"
 
     echo "Creating Droplet with name [${box_name}] at [${image_regions[0]}] with size [${box_size}]"
     droplet_id=$(create_droplet ${caas_ssh_key_id} ${box_name} ${box_size} ${image_regions[0]})
