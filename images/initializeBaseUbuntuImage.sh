@@ -24,6 +24,7 @@ export DEBIAN_FRONTEND=noninteractive
 echo "=== Upgrade ==="
 apt-get update
 apt-get upgrade -y
+apt-get install -y curl
 
 # Setup firewall before everything. Atleast docker 1.5 creates it's own chain and the -X below will remove it
 # Do NOT use iptables-persistent because it's startup ordering conflicts with docker
@@ -66,30 +67,50 @@ echo "==== Install btrfs tools ==="
 apt-get -y install btrfs-tools
 
 echo "==== Install docker ===="
-# see http://idolstarastronomer.com/painless-docker.html
-echo deb https://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list
-apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9
-apt-get update
-apt-get -y install lxc-docker-1.7.0
-ln -sf /usr/bin/docker.io /usr/local/bin/docker
+# install docker from binary to pin it to a specific version. the current debian repo does not allow pinning
+curl https://get.docker.com/builds/Linux/x86_64/docker-1.8.3 > /usr/bin/docker
+chmod +x /usr/bin/docker
+groupadd docker
+cat > /etc/systemd/system/docker.socket <<EOF
+[Unit]
+Description=Docker Socket for the API
+PartOf=docker.service
 
-echo "=== Remove existing aufs mounts ==="
-systemctl stop docker
-if aufs_mounts=$(grep 'aufs' /proc/mounts | awk '{ print $2 }' | sort -r); then
-    umount -l "${aufs_mounts}"
-fi
-rm -rf /var/lib/docker
+[Socket]
+ListenStream=/var/run/docker.sock
+SocketMode=0660
+SocketUser=root
+SocketGroup=docker
 
-echo "=== Setup btrfs for preloading docker images ==="
+[Install]
+WantedBy=sockets.target
+EOF
+cat > /etc/systemd/system/docker.service <<EOF
+[Unit]
+Description=Docker Application Container Engine
+After=network.target docker.socket
+Requires=docker.socket
+
+[Service]
+ExecStart=/usr/bin/docker -d -H fd:// -s btrfs -g /home/yellowtent/data/docker --log-driver=journald
+MountFlags=slave
+LimitNOFILE=1048576
+LimitNPROC=1048576
+LimitCORE=infinity
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+echo "=== Setup btrfs docker data ==="
 fallocate -l "8192m" "${USER_DATA_FILE}" # 8gb start
 mkfs.btrfs -L UserHome "${USER_DATA_FILE}"
 echo "${USER_DATA_FILE} ${USER_DATA_DIR} btrfs loop,nosuid 0 0" >> /etc/fstab
 mkdir -p "${USER_DATA_DIR}" && mount "${USER_DATA_FILE}"
 mkdir -p "${USER_DATA_DIR}/docker"
-sed -e "s,ExecStart=.*,ExecStart=/usr/bin/docker -d -H fd:// -s btrfs -g ${USER_DATA_DIR}/docker --log-driver=journald," -i /lib/systemd/system/docker.service
-systemctl enable docker
 
 # give docker sometime to start up and create iptables rules
+systemctl enable docker
 systemctl start docker
 sleep 10
 
@@ -156,7 +177,6 @@ tar xvf /root/installer.tar -C "${INSTALLER_SOURCE_DIR}" && rm /root/installer.t
 echo "${INSTALLER_REVISION}" > "${INSTALLER_SOURCE_DIR}/REVISION"
 
 echo "==== Install nodejs ===="
-apt-get install -y curl
 # Cannot use anything above 4.1.1 - https://github.com/nodejs/node/issues/3803
 mkdir -p /usr/local/node-4.1.1
 curl -sL https://nodejs.org/dist/v4.1.1/node-v4.1.1-linux-x64.tar.gz | tar zxvf - --strip-components=1 -C /usr/local/node-4.1.1
@@ -200,7 +220,6 @@ RemainAfterExit=yes
 [Install]
 WantedBy=multi-user.target
 EOF
-
 systemctl enable iptables-restore
 
 # Allocate swap files
@@ -250,4 +269,3 @@ sed -e 's/^#\?Port .*/Port 202/g' \
 
  # required so we can connect to this machine since port 22 is blocked by iptables by now
 systemctl reload sshd
-
