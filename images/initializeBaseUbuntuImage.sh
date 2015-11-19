@@ -26,7 +26,7 @@ apt-get update
 apt-get upgrade -y
 apt-get install -y curl
 
-# Setup firewall before everything. Atleast docker 1.5 creates it's own chain and the -X below will remove it
+# Setup firewall before everything. docker creates it's own chain and the -X below will remove it
 # Do NOT use iptables-persistent because it's startup ordering conflicts with docker
 echo "=== Setting up firewall ==="
 # clear tables and set default policy
@@ -68,7 +68,7 @@ apt-get -y install btrfs-tools
 
 echo "==== Install docker ===="
 # install docker from binary to pin it to a specific version. the current debian repo does not allow pinning
-curl https://get.docker.com/builds/Linux/x86_64/docker-1.8.3 > /usr/bin/docker
+curl https://get.docker.com/builds/Linux/x86_64/docker-1.9.0 > /usr/bin/docker
 chmod +x /usr/bin/docker
 groupadd docker
 cat > /etc/systemd/system/docker.socket <<EOF
