@@ -325,10 +325,10 @@ function setupSimpleAuth(app, options, callback) {
             if (error) return callback(error);
 
             var env = [
-                'SIMPLE_AUTH_SERVER=172.17.42.1',
+                'SIMPLE_AUTH_SERVER=172.17.0.1',
                 'SIMPLE_AUTH_PORT=' + config.get('simpleAuthPort'),
-                'SIMPLE_AUTH_URL=http://172.17.42.1:' + config.get('simpleAuthPort'), // obsolete, remove
-                'SIMPLE_AUTH_ORIGIN=http://172.17.42.1:' + config.get('simpleAuthPort'),
+                'SIMPLE_AUTH_URL=http://172.17.0.1:' + config.get('simpleAuthPort'), // obsolete, remove
+                'SIMPLE_AUTH_ORIGIN=http://172.17.0.1:' + config.get('simpleAuthPort'),
                 'SIMPLE_AUTH_CLIENT_ID=' + id
             ];
 
@@ -359,9 +359,9 @@ function setupLdap(app, options, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     var env = [
-        'LDAP_SERVER=172.17.42.1',
+        'LDAP_SERVER=172.17.0.1',
         'LDAP_PORT=' + config.get('ldapPort'),
-        'LDAP_URL=ldap://172.17.42.1:' + config.get('ldapPort'),
+        'LDAP_URL=ldap://172.17.0.1:' + config.get('ldapPort'),
         'LDAP_USERS_BASE_DN=ou=users,dc=cloudron',
         'LDAP_GROUPS_BASE_DN=ou=groups,dc=cloudron',
         'LDAP_BIND_DN=cn='+ app.id + ',ou=apps,dc=cloudron',
