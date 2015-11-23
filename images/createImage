@@ -8,7 +8,7 @@ assertNotEmpty() {
 
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly INSTALLER_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
-readonly JSON="${INSTALLER_DIR}/node_modules/.bin/json"
+export JSON="${INSTALLER_DIR}/node_modules/.bin/json"
 
 provider="digitalocean"
 installer_revision=$(git rev-parse HEAD)
@@ -43,21 +43,21 @@ while true; do
 done
 
 if [[ "${provider}" == "digitalocean" ]]; then
-    # set DO token, picked up by digitalOceanFunctions.sh
     if [[ "${deploy_env}" == "staging" ]]; then
         assertNotEmpty DIGITAL_OCEAN_TOKEN_STAGING
-        readonly DIGITAL_OCEAN_TOKEN="${DIGITAL_OCEAN_TOKEN_STAGING}"
+        export DIGITAL_OCEAN_TOKEN="${DIGITAL_OCEAN_TOKEN_STAGING}"
     elif [[ "${deploy_env}" == "dev" ]]; then
         assertNotEmpty DIGITAL_OCEAN_TOKEN_DEV
-        readonly DIGITAL_OCEAN_TOKEN="${DIGITAL_OCEAN_TOKEN_DEV}"
+        export DIGITAL_OCEAN_TOKEN="${DIGITAL_OCEAN_TOKEN_DEV}"
     elif [[ "${deploy_env}" == "prod" ]]; then
         assertNotEmpty DIGITAL_OCEAN_TOKEN_PROD
-        readonly DIGITAL_OCEAN_TOKEN="${DIGITAL_OCEAN_TOKEN_PROD}"
+        export DIGITAL_OCEAN_TOKEN="${DIGITAL_OCEAN_TOKEN_PROD}"
     else
         echo "No such env ${deploy_env}."
         exit 1
     fi
-    source "${SCRIPT_DIR}/digitalOceanFunctions.sh"
+
+    vps="${SCRIPT_DIR}/digitalocean.sh"
 else
     echo "Unknown provider : ${provider}"
     exit 1
@@ -90,7 +90,7 @@ if [[ -z "${box_name}" ]]; then
     box_name="box-${deploy_env}-${pretty_revision}-${now}" # remove slashes
 
     # create a new server if no name given
-    caas_ssh_key_id=$(get_ssh_key_id "caas")
+    caas_ssh_key_id=$($vps get_ssh_key_id "caas")
     if [[ -z "${caas_ssh_key_id}" ]]; then
         echo "Could not query caas ssh key"
         exit 1
@@ -98,7 +98,7 @@ if [[ -z "${box_name}" ]]; then
     echo "Detected caas ssh key id: ${caas_ssh_key_id}"
 
     echo "Creating Server with name [${box_name}] at [${image_regions[0]}] with size [${box_size}]"
-    server_id=$(create_droplet ${caas_ssh_key_id} ${box_name} ${box_size} ${image_regions[0]})
+    server_id=$($vps create_droplet ${caas_ssh_key_id} ${box_name} ${box_size} ${image_regions[0]})
     if [[ -z "${server_id}" ]]; then
         echo "Failed to create server"
         exit 1
@@ -113,16 +113,16 @@ if [[ -z "${box_name}" ]]; then
     done
     echo ""
 else
-    server_id=$(get_droplet_id "${box_name}")
+    server_id=$($vps get_droplet_id "${box_name}")
     echo "Reusing server with id: ${server_id}"
 
-    power_on_droplet "${server_id}"
+    $vps power_on_droplet "${server_id}"
 fi
 
 # Query DO until we get an IP
 while true; do
     echo "Trying to get the server IP"
-    server_ip=$(get_droplet_ip "${server_id}")
+    server_ip=$($vps get_droplet_ip "${server_id}")
     if [[ "${server_ip}" != "" ]]; then
         echo "Server IP : [${server_ip}]"
         break
@@ -167,18 +167,18 @@ echo "Waiting for 10 seconds for server to shutdown"
 sleep 30
 
 echo "Powering off server"
-power_off_droplet "${server_id}"
+$vps power_off_droplet "${server_id}"
 
 snapshot_name="box-${deploy_env}-${pretty_revision}-${now}"
 echo "Snapshotting as ${snapshot_name}"
-snapshot_droplet "${server_id}" "${snapshot_name}"
+$vps snapshot_droplet "${server_id}" "${snapshot_name}"
 
-image_id=$(get_image_id "${snapshot_name}")
+image_id=$($vps get_image_id "${snapshot_name}")
 echo "Image id is ${image_id}"
 
 if [[ "${destroy_server}" == "yes" ]]; then
     echo "Destroying server"
-    destroy_droplet "${server_id}"
+    $vps destroy_droplet "${server_id}"
 else
     echo "Skipping server destroy"
 fi
@@ -187,7 +187,7 @@ echo "Transferring image to other regions"
 xfer_events=()
 # skip the first region, as the image was created there
 for image_region in ${image_regions[@]:1}; do
-    xfer_event=$(transfer_image ${image_id} ${image_region})
+    xfer_event=$($vps transfer_image ${image_id} ${image_region})
     echo "Image transfer to ${image_region} initiated. Event id: ${xfer_event}"
     xfer_events+=("${xfer_event}")
     sleep 1
@@ -196,7 +196,7 @@ done
 echo "Image transfer initiated, but they will take some time to get transferred."
 
 for xfer_event in ${xfer_events[@]}; do
-    wait_for_image_event "${image_id}" "${xfer_event}"
+    $vps wait_for_image_event "${image_id}" "${xfer_event}"
 done
 
 echo "Done."

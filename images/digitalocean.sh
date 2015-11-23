@@ -159,3 +159,52 @@ function wait_for_image_event() {
     echo ""
 }
 
+if [[ $# -lt 1 ]]; then
+    echo "<command> <params...>"
+fi
+
+case $1 in
+get_ssh_key_id)
+    get_ssh_key_id "${@:2}"
+    ;;
+
+create_droplet)
+    create_droplet "${@:2}"
+    ;;
+
+get_droplet_id)
+    get_droplet_id "${@:2}"
+    ;;
+
+get_droplet_ip)
+    get_droplet_ip "${@:2}"
+    ;;
+
+power_on_droplet)
+    power_on_droplet "${@:2}"
+    ;;
+
+power_off_droplet)
+    power_off_droplet "${@:2}"
+    ;;
+
+snapshot_droplet)
+    snapshot_droplet "${@:2}"
+    ;;
+
+destroy_droplet)
+    destroy_droplet "${@:2}"
+    ;;
+
+wait_for_image_event)
+    wait_for_image_event "${@:2}"
+    ;;
+
+transfer_image)
+    transfer_image "${@:2}"
+    ;;
+
+*)
+    echo "Unknown command $1"
+    exit 1
+esac
