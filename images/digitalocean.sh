@@ -173,6 +173,25 @@ function wait_for_image_event() {
     debug ""
 }
 
+function transfer_image_to_all_regions() {
+    local image_id="$1"
+
+    xfer_events=()
+    image_regions=(ams3) ## sfo1 is where the image is created
+    for image_region in ${image_regions[@]}; do
+        xfer_event=$(transfer_image ${image_id} ${image_region})
+        echo "Image transfer to ${image_region} initiated. Event id: ${xfer_event}"
+        xfer_events+=("${xfer_event}")
+        sleep 1
+    done
+
+    echo "Image transfer initiated, but they will take some time to get transferred."
+
+    for xfer_event in ${xfer_events[@]}; do
+        $vps wait_for_image_event "${image_id}" "${xfer_event}"
+    done
+}
+
 if [[ $# -lt 1 ]]; then
     debug "<command> <params...>"
     exit 1
@@ -211,12 +230,8 @@ destroy)
     destroy_droplet "${@:2}"
     ;;
 
-wait_for_image_event)
-    wait_for_image_event "${@:2}"
-    ;;
-
-transfer_image)
-    transfer_image "${@:2}"
+transfer_image_to_all_regions)
+    transfer_image_to_all_regions "${@:2}"
     ;;
 
 *)

@@ -189,21 +189,7 @@ else
     echo "Skipping server destroy"
 fi
 
-echo "Transferring image to other regions"
-xfer_events=()
-image_regions=(sfo1 ams3) # remove this
-# skip the first region, as the image was created there
-for image_region in ${image_regions[@]:1}; do
-    xfer_event=$($vps transfer_image ${image_id} ${image_region})
-    echo "Image transfer to ${image_region} initiated. Event id: ${xfer_event}"
-    xfer_events+=("${xfer_event}")
-    sleep 1
-done
-
-echo "Image transfer initiated, but they will take some time to get transferred."
-
-for xfer_event in ${xfer_events[@]}; do
-    $vps wait_for_image_event "${image_id}" "${xfer_event}"
-done
+echo "Transferring image ${image_id} to other regions"
+$vps transer_image_to_all_regions "${image_id}"
 
 echo "Done."
