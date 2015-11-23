@@ -4,7 +4,8 @@
 
 require('colors');
 
-var request = require('superagent-sync');
+var request = require('superagent-sync'),
+    sleep = require('sleep').sleep;
 
 function exit(error, result) {
 	if (error) console.error(error.message.red);
@@ -105,6 +106,23 @@ function powerOff(id, callback) {
     callback(null);
 }
 
+function waitForSnapshot(id) {
+    var res = request.post('https://api.vultr.com/v1/snapshot/list')
+        .query({ api_key : gApiToken })
+        .end();
+
+    if (res.statusCode !== 200) {
+        console.error('Invalid statusCode waiting for snapshot');
+        return false;
+    }
+
+    if (res.body[id].status === 'complete') return true;
+
+    console.error('snapshot not complete : ' + res.body[id].status);
+
+    return false;
+}
+
 function snapshot(id, name, callback) {
     var res = request.post('https://api.vultr.com/v1/snapshot/create')
         .query({ api_key : gApiToken })
@@ -113,6 +131,11 @@ function snapshot(id, name, callback) {
         .end();
 
     if (res.statusCode !== 200) return callback(new Error('Invalid statusCode powering off'));
+
+    for (var i = 0; i < 200; i++) {
+        if (waitForSnapshot(res.body.SNAPSHOTID)) break;
+        sleep(10);
+    }
 
     callback(null, res.body.SNAPSHOTID);
 }
