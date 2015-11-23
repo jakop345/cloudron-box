@@ -26,8 +26,8 @@ function get_ssh_key_id() {
 function create_droplet() {
     local ssh_key_id="$1"
     local box_name="$2"
-    local image_region="$3"
 
+    local image_region="sfo1"
     local ubuntu_image_slug="ubuntu-15-04-x64" # id=12658446
     local box_size="512mb"
 

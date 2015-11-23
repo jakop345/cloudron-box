@@ -12,7 +12,6 @@ export JSON="${INSTALLER_DIR}/node_modules/.bin/json"
 
 provider="digitalocean"
 installer_revision=$(git rev-parse HEAD)
-image_regions=(sfo1 ams3)
 box_name=""
 server_id=""
 server_ip=""
@@ -31,7 +30,6 @@ while true; do
     case "$1" in
     --env) deploy_env="$2"; shift 2;;
     --revision) installer_revision="$2"; shift 2;;
-    --regions) image_regions=("$2"); shift 2;; # parse as whitespace separated array
     --provider) provider="$2"; shift 2;;
     --box) box_name="$2"; destroy_server="no"; shift 2;;
     --no-destroy) destroy_server="no"; shift 2;;
@@ -98,8 +96,8 @@ if [[ -z "${box_name}" ]]; then
     fi
     echo "Detected caas ssh key id: ${caas_ssh_key_id}"
 
-    echo "Creating Server with name [${box_name}] at [${image_regions[0]}]"
-    server_id=$($vps create ${caas_ssh_key_id} ${box_name} ${image_regions[0]})
+    echo "Creating Server with name [${box_name}]"
+    server_id=$($vps create ${caas_ssh_key_id} ${box_name})
     if [[ -z "${server_id}" ]]; then
         echo "Failed to create server"
         exit 1
@@ -186,6 +184,7 @@ fi
 
 echo "Transferring image to other regions"
 xfer_events=()
+image_regions=(sfo1 ams3) # remove this
 # skip the first region, as the image was created there
 for image_region in ${image_regions[@]:1}; do
     xfer_event=$($vps transfer_image ${image_id} ${image_region})
