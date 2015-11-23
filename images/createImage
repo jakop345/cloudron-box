@@ -190,6 +190,6 @@ else
 fi
 
 echo "Transferring image ${image_id} to other regions"
-$vps transer_image_to_all_regions "${image_id}"
+$vps transfer_image_to_all_regions "${image_id}"
 
 echo "Done."
