@@ -23,7 +23,7 @@ deploy_env="dev"
 [[ $(uname -s) == "Darwin" ]] && GNU_GETOPT="/usr/local/opt/gnu-getopt/bin/getopt" || GNU_GETOPT="getopt"
 readonly GNU_GETOPT
 
-args=$(${GNU_GETOPT} -o "" -l "provider:,revision:,regions:,size:,box:,no-destroy,env:" -n "$0" -- "$@")
+args=$(${GNU_GETOPT} -o "" -l "provider:,revision:,regions:,size:,name:,no-destroy,env:" -n "$0" -- "$@")
 eval set -- "${args}"
 
 while true; do
@@ -31,7 +31,7 @@ while true; do
     --env) deploy_env="$2"; shift 2;;
     --revision) installer_revision="$2"; shift 2;;
     --provider) provider="$2"; shift 2;;
-    --box) box_name="$2"; destroy_server="no"; shift 2;;
+    --name) box_name="$2"; destroy_server="no"; shift 2;;
     --no-destroy) destroy_server="no"; shift 2;;
     --) break;;
     *) echo "Unknown option $1"; exit 1;;
@@ -118,7 +118,7 @@ else
     $vps power_on "${server_id}"
 fi
 
-# Query DO until we get an IP
+# Query until we get an IP
 while true; do
     echo "Trying to get the server IP"
     server_ip=$($vps get_ip "${server_id}")
