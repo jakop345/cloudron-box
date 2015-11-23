@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eux -o pipefail
+set -eu -o pipefail
 
 assertNotEmpty() {
     : "${!1:? "$1 is not set."}"
@@ -58,6 +58,9 @@ if [[ "${provider}" == "digitalocean" ]]; then
     fi
 
     vps="${SCRIPT_DIR}/digitalocean.sh"
+elif [[ "${provider}" == "vultr" ]]; then
+    export VULTR_TOKEN="${VULTR_TOKEN}"
+    vps="${SCRIPT_DIR}/vultr.js"
 else
     echo "Unknown provider : ${provider}"
     exit 1

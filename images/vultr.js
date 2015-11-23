@@ -13,32 +13,31 @@ function exit(error, result) {
 	process.exit(error ? 1 : 0);
 }
 
-var gApiToken = process.env.API_TOKEN;
-if (!gApiToken) exit('Script requires API_TOKEN env to be set');
+var gApiToken = process.env.VULTR_TOKEN;
+if (!gApiToken) exit(new Error('Script requires VULTR_TOKEN env to be set'));
 
 if (process.argv.length < 3) {
-	exit('Usage: vultr <cmd> <args...>');
+	exit(new Error('Usage: vultr <cmd> <args...>'));
 }
 
-function getSshKeyId(keyName) {
-    request.get('https://api.vultr.com/v1/sshkey/list')
+function getSshKeyId(keyName, callback) {
+    var res = request.get('https://api.vultr.com/v1/sshkey/list')
         .query({ api_key : gApiToken })
-        .end(function (error, res) {
+        .end();
 
-        if (error) exit(error);
+    if (res.statusCode !== 200) exit(new Error('Invalid response'));
 
-        var allKeys = Object.keys(res.body);
-        for (var i = 0; i < allKeys.length; i++) {
-            if (keyName === allKeys[i]) exit(null, res.body[keyName].key);
-        }
+    var allKeyIds = Object.keys(res.body);
+    for (var i = 0; i < allKeyIds.length; i++) {
+        if (keyName === res.body[allKeyIds[i]].name) return callback(null, allKeyIds[i]); // also SSHKEYID
+    }
 
-        exit(new Error('key not found'));
-    });
+    callback(new Error('key not found'));
 }
 
 switch (process.argv[2]) {
 case 'get_ssh_key_id':
-    getSshKeyId(process.argv[3]);
+    getSshKeyId(process.argv[3], exit);
     break;
 
 case 'create':
