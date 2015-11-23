@@ -255,6 +255,7 @@ timedatectl set-ntp 1
 timedatectl set-timezone UTC
 
 # Give user access to system logs
+apt-get -y install acl
 usermod -a -G systemd-journal ${USER}
 setfacl -n -m u:${USER}:r /var/log/journal/*/system.journal
 
