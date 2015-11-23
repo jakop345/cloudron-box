@@ -98,7 +98,7 @@ if [[ -z "${box_name}" ]]; then
     echo "Detected caas ssh key id: ${caas_ssh_key_id}"
 
     echo "Creating Server with name [${box_name}] at [${image_regions[0]}] with size [${box_size}]"
-    server_id=$($vps create_droplet ${caas_ssh_key_id} ${box_name} ${box_size} ${image_regions[0]})
+    server_id=$($vps create ${caas_ssh_key_id} ${box_name} ${box_size} ${image_regions[0]})
     if [[ -z "${server_id}" ]]; then
         echo "Failed to create server"
         exit 1
@@ -113,16 +113,16 @@ if [[ -z "${box_name}" ]]; then
     done
     echo ""
 else
-    server_id=$($vps get_droplet_id "${box_name}")
+    server_id=$($vps get_id "${box_name}")
     echo "Reusing server with id: ${server_id}"
 
-    $vps power_on_droplet "${server_id}"
+    $vps power_on "${server_id}"
 fi
 
 # Query DO until we get an IP
 while true; do
     echo "Trying to get the server IP"
-    server_ip=$($vps get_droplet_ip "${server_id}")
+    server_ip=$($vps get_ip "${server_id}")
     if [[ "${server_ip}" != "" ]]; then
         echo "Server IP : [${server_ip}]"
         break
@@ -167,18 +167,18 @@ echo "Waiting for 10 seconds for server to shutdown"
 sleep 30
 
 echo "Powering off server"
-$vps power_off_droplet "${server_id}"
+$vps power_off "${server_id}"
 
 snapshot_name="box-${deploy_env}-${pretty_revision}-${now}"
 echo "Snapshotting as ${snapshot_name}"
-$vps snapshot_droplet "${server_id}" "${snapshot_name}"
+$vps snapshot "${server_id}" "${snapshot_name}"
 
 image_id=$($vps get_image_id "${snapshot_name}")
 echo "Image id is ${image_id}"
 
 if [[ "${destroy_server}" == "yes" ]]; then
     echo "Destroying server"
-    $vps destroy_droplet "${server_id}"
+    $vps destroy "${server_id}"
 else
     echo "Skipping server destroy"
 fi
@@ -200,4 +200,3 @@ for xfer_event in ${xfer_events[@]}; do
 done
 
 echo "Done."
-

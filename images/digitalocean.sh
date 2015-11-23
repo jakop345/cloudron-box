@@ -168,31 +168,31 @@ get_ssh_key_id)
     get_ssh_key_id "${@:2}"
     ;;
 
-create_droplet)
+create)
     create_droplet "${@:2}"
     ;;
 
-get_droplet_id)
+get_id)
     get_droplet_id "${@:2}"
     ;;
 
-get_droplet_ip)
+get_ip)
     get_droplet_ip "${@:2}"
     ;;
 
-power_on_droplet)
+power_on)
     power_on_droplet "${@:2}"
     ;;
 
-power_off_droplet)
+power_off)
     power_off_droplet "${@:2}"
     ;;
 
-snapshot_droplet)
+snapshot)
     snapshot_droplet "${@:2}"
     ;;
 
-destroy_droplet)
+destroy)
     destroy_droplet "${@:2}"
     ;;
 
