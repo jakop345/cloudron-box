@@ -38,6 +38,7 @@ while true; do
     esac
 done
 
+echo "Creating image using ${provider}"
 if [[ "${provider}" == "digitalocean" ]]; then
     if [[ "${deploy_env}" == "staging" ]]; then
         assertNotEmpty DIGITAL_OCEAN_TOKEN_STAGING
