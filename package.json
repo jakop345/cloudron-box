@@ -25,12 +25,14 @@
     "superagent": "^0.21.0"
   },
   "devDependencies": {
+    "colors": "^1.1.2",
     "commander": "^2.8.1",
     "expect.js": "^0.3.1",
     "istanbul": "^0.3.5",
     "lodash": "^3.2.0",
     "mocha": "^2.1.0",
     "nock": "^0.59.1",
+    "superagent-sync": "^0.2.0",
     "supererror": "^0.7.0",
     "yesno": "0.0.1"
   },
