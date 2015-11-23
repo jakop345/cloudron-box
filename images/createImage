@@ -173,16 +173,10 @@ fi
 
 snapshot_name="box-${deploy_env}-${pretty_revision}-${now}"
 echo "Snapshotting as ${snapshot_name}"
-if ! $vps snapshot "${server_id}" "${snapshot_name}"; then
-    echo "Could not snapshot"
+if ! image_id=$($vps snapshot "${server_id}" "${snapshot_name}"); then
+    echo "Could not snapshot and get image id"
     exit 1
 fi
-
-if ! image_id=$($vps get_image_id "${snapshot_name}"); then
-    echo "Could not get image id"
-    exit 1
-fi
-echo "Image id is ${image_id}"
 
 if [[ "${destroy_server}" == "yes" ]]; then
     echo "Destroying server"
