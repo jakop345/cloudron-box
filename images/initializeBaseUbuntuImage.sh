@@ -257,6 +257,9 @@ timedatectl set-timezone UTC
 # Give user access to system logs
 apt-get -y install acl
 usermod -a -G systemd-journal ${USER}
+mkdir -p /var/log/journal  # in some images, this directory is not created making system log to /run/systemd instead
+chown root:systemd-journal /var/log/journal
+systemctl restart systemd-journald
 setfacl -n -m u:${USER}:r /var/log/journal/*/system.journal
 
 echo "==== Install ssh ==="
