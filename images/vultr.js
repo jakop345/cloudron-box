@@ -185,11 +185,8 @@ case 'destroy':
     destroy(process.argv[3], exit);
     break;
 
-case 'wait_for_image_event':
-
-case 'transfer_image':
-    exit(new Error('Unimplemented command:' + process.argv[2]));
-
+case 'transfer_image_to_all_regions':
+    // nothing to do?
     break;
 
 default:
