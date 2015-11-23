@@ -14,9 +14,9 @@ installer_revision=$(git rev-parse HEAD)
 box_size="512mb"
 image_regions=(sfo1 ams3)
 box_name=""
-droplet_id=""
-droplet_ip=""
-destroy_droplet="yes"
+server_id=""
+server_ip=""
+destroy_server="yes"
 deploy_env="dev"
 
 # Only GNU getopt supports long options. OS X comes bundled with the BSD getopt
@@ -33,8 +33,8 @@ while true; do
     --revision) installer_revision="$2"; shift 2;;
     --regions) image_regions=("$2"); shift 2;; # parse as whitespace separated array
     --size) box_size="$2"; shift 2;;
-    --box) box_name="$2"; destroy_droplet="no"; shift 2;;
-    --no-destroy) destroy_droplet="no"; shift 2;;
+    --box) box_name="$2"; destroy_server="no"; shift 2;;
+    --no-destroy) destroy_server="no"; shift 2;;
     --) break;;
     *) echo "Unknown option $1"; exit 1;;
     esac
@@ -82,7 +82,7 @@ if [[ -z "${box_name}" ]]; then
     # if you change this, change the regexp is appstore/janitor.js
     box_name="box-${deploy_env}-${pretty_revision}-${now}" # remove slashes
 
-    # create a new droplet if no name given
+    # create a new server if no name given
     caas_ssh_key_id=$(get_ssh_key_id "caas")
     if [[ -z "${caas_ssh_key_id}" ]]; then
         echo "Could not query caas ssh key"
@@ -90,34 +90,34 @@ if [[ -z "${box_name}" ]]; then
     fi
     echo "Detected caas ssh key id: ${caas_ssh_key_id}"
 
-    echo "Creating Droplet with name [${box_name}] at [${image_regions[0]}] with size [${box_size}]"
-    droplet_id=$(create_droplet ${caas_ssh_key_id} ${box_name} ${box_size} ${image_regions[0]})
-    if [[ -z "${droplet_id}" ]]; then
-        echo "Failed to create droplet"
+    echo "Creating Server with name [${box_name}] at [${image_regions[0]}] with size [${box_size}]"
+    server_id=$(create_droplet ${caas_ssh_key_id} ${box_name} ${box_size} ${image_regions[0]})
+    if [[ -z "${server_id}" ]]; then
+        echo "Failed to create server"
         exit 1
     fi
-    echo "Created droplet with id: ${droplet_id}"
+    echo "Created server with id: ${server_id}"
 
     # If we run scripts overenthusiastically without the wait, setup script randomly fails
-    echo -n "Waiting 120 seconds for droplet creation"
+    echo -n "Waiting 120 seconds for server creation"
     for i in $(seq 1 24); do
         echo -n "."
         sleep 5
     done
     echo ""
 else
-    droplet_id=$(get_droplet_id "${box_name}")
-    echo "Reusing droplet with id: ${droplet_id}"
+    server_id=$(get_droplet_id "${box_name}")
+    echo "Reusing server with id: ${server_id}"
 
-    power_on_droplet "${droplet_id}"
+    power_on_droplet "${server_id}"
 fi
 
 # Query DO until we get an IP
 while true; do
-    echo "Trying to get the droplet IP"
-    droplet_ip=$(get_droplet_ip "${droplet_id}")
-    if [[ "${droplet_ip}" != "" ]]; then
-        echo "Droplet IP : [${droplet_ip}]"
+    echo "Trying to get the server IP"
+    server_ip=$(get_droplet_ip "${server_id}")
+    if [[ "${server_ip}" != "" ]]; then
+        echo "Server IP : [${server_ip}]"
         break
     fi
     echo "Timedout, trying again in 10 seconds"
@@ -125,8 +125,8 @@ while true; do
 done
 
 while true; do
-    echo "Trying to copy init script to droplet"
-    if $scp22 "${SCRIPT_DIR}/initializeBaseUbuntuImage.sh" root@${droplet_ip}:.; then
+    echo "Trying to copy init script to server"
+    if $scp22 "${SCRIPT_DIR}/initializeBaseUbuntuImage.sh" root@${server_ip}:.; then
         break
     fi
     echo "Timedout, trying again in 30 seconds"
@@ -134,46 +134,46 @@ while true; do
 done
 
 echo "Copying INFRA_VERSION"
-$scp22 "${SCRIPT_DIR}/../../box/setup/INFRA_VERSION" root@${droplet_ip}:.
+$scp22 "${SCRIPT_DIR}/../../box/setup/INFRA_VERSION" root@${server_ip}:.
 
 echo "Copying installer source"
 cd "${INSTALLER_DIR}"
-git archive --format=tar HEAD | $ssh22 "root@${droplet_ip}" "cat - > /root/installer.tar"
+git archive --format=tar HEAD | $ssh22 "root@${server_ip}" "cat - > /root/installer.tar"
 
 echo "Executing init script"
-if ! $ssh22 "root@${droplet_ip}" "/bin/bash /root/initializeBaseUbuntuImage.sh ${installer_revision}"; then
+if ! $ssh22 "root@${server_ip}" "/bin/bash /root/initializeBaseUbuntuImage.sh ${installer_revision}"; then
     echo "Init script failed"
     exit 1
 fi
 
 echo "Copy over certs"
 cd "${SCRIPT_DIR}/../../secrets"
-blackbox_cat installer/server.crt.gpg | $ssh202 "root@${droplet_ip}" "cat - > /home/yellowtent/installer/src/certs/server.crt"
-blackbox_cat installer/server.key.gpg | $ssh202 "root@${droplet_ip}" "cat - > /home/yellowtent/installer/src/certs/server.key"
-blackbox_cat installer_ca/ca.crt.gpg  | $ssh202 "root@${droplet_ip}" "cat - > /home/yellowtent/installer/src/certs/ca.crt"
+blackbox_cat installer/server.crt.gpg | $ssh202 "root@${server_ip}" "cat - > /home/yellowtent/installer/src/certs/server.crt"
+blackbox_cat installer/server.key.gpg | $ssh202 "root@${server_ip}" "cat - > /home/yellowtent/installer/src/certs/server.key"
+blackbox_cat installer_ca/ca.crt.gpg  | $ssh202 "root@${server_ip}" "cat - > /home/yellowtent/installer/src/certs/ca.crt"
 
-echo "Shutting down droplet with id : ${droplet_id}"
-$ssh202 "root@${droplet_ip}" "shutdown -f now" || true # shutdown sometimes terminates ssh connection immediately making this command fail
+echo "Shutting down server with id : ${server_id}"
+$ssh202 "root@${server_ip}" "shutdown -f now" || true # shutdown sometimes terminates ssh connection immediately making this command fail
 
 # wait 10 secs for actual shutdown
-echo "Waiting for 10 seconds for droplet to shutdown"
+echo "Waiting for 10 seconds for server to shutdown"
 sleep 30
 
-echo "Powering off droplet"
-power_off_droplet "${droplet_id}"
+echo "Powering off server"
+power_off_droplet "${server_id}"
 
 snapshot_name="box-${deploy_env}-${pretty_revision}-${now}"
 echo "Snapshotting as ${snapshot_name}"
-snapshot_droplet "${droplet_id}" "${snapshot_name}"
+snapshot_droplet "${server_id}" "${snapshot_name}"
 
 image_id=$(get_image_id "${snapshot_name}")
 echo "Image id is ${image_id}"
 
-if [[ "${destroy_droplet}" == "yes" ]]; then
-    echo "Destroying droplet"
-    destroy_droplet "${droplet_id}"
+if [[ "${destroy_server}" == "yes" ]]; then
+    echo "Destroying server"
+    destroy_droplet "${server_id}"
 else
-    echo "Skipping droplet destroy"
+    echo "Skipping server destroy"
 fi
 
 echo "Transferring image to other regions"
