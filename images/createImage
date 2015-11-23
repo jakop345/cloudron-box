@@ -12,7 +12,6 @@ export JSON="${INSTALLER_DIR}/node_modules/.bin/json"
 
 provider="digitalocean"
 installer_revision=$(git rev-parse HEAD)
-box_size="512mb"
 image_regions=(sfo1 ams3)
 box_name=""
 server_id=""
@@ -33,7 +32,6 @@ while true; do
     --env) deploy_env="$2"; shift 2;;
     --revision) installer_revision="$2"; shift 2;;
     --regions) image_regions=("$2"); shift 2;; # parse as whitespace separated array
-    --size) box_size="$2"; shift 2;;
     --provider) provider="$2"; shift 2;;
     --box) box_name="$2"; destroy_server="no"; shift 2;;
     --no-destroy) destroy_server="no"; shift 2;;
@@ -100,8 +98,8 @@ if [[ -z "${box_name}" ]]; then
     fi
     echo "Detected caas ssh key id: ${caas_ssh_key_id}"
 
-    echo "Creating Server with name [${box_name}] at [${image_regions[0]}] with size [${box_size}]"
-    server_id=$($vps create ${caas_ssh_key_id} ${box_name} ${box_size} ${image_regions[0]})
+    echo "Creating Server with name [${box_name}] at [${image_regions[0]}]"
+    server_id=$($vps create ${caas_ssh_key_id} ${box_name} ${image_regions[0]})
     if [[ -z "${server_id}" ]]; then
         echo "Failed to create server"
         exit 1
