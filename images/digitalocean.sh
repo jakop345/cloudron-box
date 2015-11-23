@@ -200,6 +200,10 @@ wait_for_image_event)
     wait_for_image_event "${@:2}"
     ;;
 
+get_image_id)
+    get_image_id "${@:2}"
+    ;;
+
 transfer_image)
     transfer_image "${@:2}"
     ;;
