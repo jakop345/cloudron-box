@@ -52,16 +52,83 @@ function create(keyId, name, callback) {
 }
 
 function getIp(id, callback){
-    var res = request.post('https://api.vultr.com/v1/server/list')
-        .query({ api_key : gApiToken })
+    console.error('getting the ip of ', id);
+
+    var res = request.get('https://api.vultr.com/v1/server/list')
+        .query({ api_key : gApiToken, SUBID: id })
         .end();
 
-    var info = res.body[id];
+    if (res.statusCode !== 200) return callback(new Error('Invalid statusCode querying IP'));
+
+    var info = res.body;
     if (!info) return callback(new Error('Invalid response querying IP'));
 
     if (info.power_status !== 'running' || info.server_state !== 'ok' || info.status !== 'active') return callback(new Error('Server is not up yet'));
 
     return callback(null, info.main_ip);
+}
+
+function getId(name, callback) {
+    var res = request.get('https://api.vultr.com/v1/server/list')
+        .query({ api_key : gApiToken })
+        .end();
+
+    if (res.statusCode !== 200) return callback(new Error('Invalid statusCode querying id'));
+
+    var serverIds = Object.keys(res.body);
+    for (var i = 0; i < serverIds.length; i++) {
+        if (res.body[serverIds[i]].label === name) return callback(null, serverIds[0]);
+    }
+
+    callback(new Error('no server with id found'));
+}
+
+function powerOn(id, callback) {
+    var res = request.post('https://api.vultr.com/v1/server/start')
+        .query({ api_key : gApiToken })
+        .type('form')
+        .send({ SUBID: id })
+        .end();
+
+    if (res.statusCode !== 200) return callback(new Error('Invalid statusCode powering on'));
+
+    callback(null);
+}
+
+function powerOff(id, callback) {
+    var res = request.post('https://api.vultr.com/v1/server/halt')
+        .query({ api_key : gApiToken })
+        .type('form')
+        .send({ SUBID: id })
+        .end();
+
+    if (res.statusCode !== 200) return callback(new Error('Invalid statusCode powering off'));
+
+    callback(null);
+}
+
+function snapshot(id, name, callback) {
+    var res = request.post('https://api.vultr.com/v1/snapshot/create')
+        .query({ api_key : gApiToken })
+        .type('form')
+        .send({ SUBID: id, description: name })
+        .end();
+
+    if (res.statusCode !== 200) return callback(new Error('Invalid statusCode powering off'));
+
+    callback(null, res.body.SNAPSHOTID);
+}
+
+function destroy(id, callback) {
+    var res = request.post('https://api.vultr.com/v1/server/destroy')
+        .query({ api_key : gApiToken })
+        .type('form')
+        .send({ SUBID: id })
+        .end();
+
+    if (res.statusCode !== 200) return callback(new Error('Invalid statusCode powering off'));
+
+    callback();
 }
 
 switch (process.argv[2]) {
@@ -78,15 +145,24 @@ case 'get_ip':
     break;
 
 case 'get_id':
-
+    getId(process.argv[3], exit);
+    break;
 
 case 'power_on':
+    powerOn(process.argv[3], exit);
+    break;
 
 case 'power_off':
+    powerOff(process.argv[3], exit);
+    break;
 
 case 'snapshot':
+    snapshot(process.argv[3], process.argv[4], exit);
+    break;
 
 case 'destroy':
+    destroy(process.argv[3], exit);
+    break;
 
 case 'wait_for_image_event':
 
