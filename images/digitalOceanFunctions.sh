@@ -142,25 +142,6 @@ function get_image_id() {
     fi
 }
 
-function get_image_id_by_revision() {
-    local revision="$1"
-    local image_id=""
-
-    image_id=$($CURL "https://api.digitalocean.com/v2/images?per_page=100" \
-       | $JSON images \
-       | $JSON -c "this.name.indexOf(\"box-${revision}\") === 0" 0.id)
-
-    if [[ -n "${image_id}" ]]; then
-        echo "${image_id}"
-    fi
-}
-
-function get_image_name() {
-    local image_id="$1"
-    $CURL "https://api.digitalocean.com/v2/images/${image_id}?per_page=100" \
-        | $JSON image.name
-}
-
 function wait_for_image_event() {
     local image_id="$1"
     local event_id="$2"
