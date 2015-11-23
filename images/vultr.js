@@ -107,7 +107,7 @@ function powerOff(id, callback) {
 }
 
 function waitForSnapshot(id) {
-    var res = request.post('https://api.vultr.com/v1/snapshot/list')
+    var res = request.get('https://api.vultr.com/v1/snapshot/list')
         .query({ api_key : gApiToken })
         .end();
 
