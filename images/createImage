@@ -89,16 +89,14 @@ if [[ -z "${box_name}" ]]; then
     box_name="box-${deploy_env}-${pretty_revision}-${now}" # remove slashes
 
     # create a new server if no name given
-    caas_ssh_key_id=$($vps get_ssh_key_id "caas")
-    if [[ -z "${caas_ssh_key_id}" ]]; then
+    if ! caas_ssh_key_id=$($vps get_ssh_key_id "caas"); then
         echo "Could not query caas ssh key"
         exit 1
     fi
     echo "Detected caas ssh key id: ${caas_ssh_key_id}"
 
     echo "Creating Server with name [${box_name}]"
-    server_id=$($vps create ${caas_ssh_key_id} ${box_name})
-    if [[ -z "${server_id}" ]]; then
+    if ! server_id=$($vps create ${caas_ssh_key_id} ${box_name}); then
         echo "Failed to create server"
         exit 1
     fi
@@ -112,7 +110,10 @@ if [[ -z "${box_name}" ]]; then
     done
     echo ""
 else
-    server_id=$($vps get_id "${box_name}")
+    if ! server_id=$($vps get_id "${box_name}"); then
+        echo "Could not determine id from name"
+        exit 1
+    fi
     echo "Reusing server with id: ${server_id}"
 
     $vps power_on "${server_id}"
@@ -121,8 +122,7 @@ fi
 # Query until we get an IP
 while true; do
     echo "Trying to get the server IP"
-    server_ip=$($vps get_ip "${server_id}")
-    if [[ "${server_ip}" != "" ]]; then
+    if server_ip=$($vps get_ip "${server_id}"); then
         echo "Server IP : [${server_ip}]"
         break
     fi
@@ -166,18 +166,30 @@ echo "Waiting for 10 seconds for server to shutdown"
 sleep 30
 
 echo "Powering off server"
-$vps power_off "${server_id}"
+if ! $vps power_off "${server_id}"; then
+    echo "Could not power off server"
+    exit 1
+fi
 
 snapshot_name="box-${deploy_env}-${pretty_revision}-${now}"
 echo "Snapshotting as ${snapshot_name}"
-$vps snapshot "${server_id}" "${snapshot_name}"
+if ! $vps snapshot "${server_id}" "${snapshot_name}"; then
+    echo "Could not snapshot"
+    exit 1
+fi
 
-image_id=$($vps get_image_id "${snapshot_name}")
+if ! image_id=$($vps get_image_id "${snapshot_name}"); then
+    echo "Could not get image id"
+    exit 1
+fi
 echo "Image id is ${image_id}"
 
 if [[ "${destroy_server}" == "yes" ]]; then
     echo "Destroying server"
-    $vps destroy "${server_id}"
+    if ! $vps destroy "${server_id}"; then
+        echo "Could not destroy server"
+        exit 1
+    fi
 else
     echo "Skipping server destroy"
 fi

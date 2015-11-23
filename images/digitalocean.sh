@@ -17,10 +17,12 @@ function debug() {
 }
 
 function get_ssh_key_id() {
-    $CURL "https://api.digitalocean.com/v2/account/keys" \
+    id=$($CURL "https://api.digitalocean.com/v2/account/keys" \
         | $JSON ssh_keys \
         | $JSON -c "this.name === \"$1\"" \
-        | $JSON 0.id
+        | $JSON 0.id)
+    [[ -z "$id" ]] && exit 1
+    echo "$id"
 }
 
 function create_droplet() {
@@ -33,17 +35,23 @@ function create_droplet() {
 
     local data="{\"name\":\"${box_name}\",\"size\":\"${box_size}\",\"region\":\"${image_region}\",\"image\":\"${ubuntu_image_slug}\",\"ssh_keys\":[ \"${ssh_key_id}\" ],\"backups\":false}"
 
-    $CURL -X POST -H 'Content-Type: application/json' -d "${data}" "https://api.digitalocean.com/v2/droplets" | $JSON droplet.id
+    id=$($CURL -X POST -H 'Content-Type: application/json' -d "${data}" "https://api.digitalocean.com/v2/droplets" | $JSON droplet.id)
+    [[ -z "$id" ]] && exit 1
+    echo "$id"
 }
 
 function get_droplet_ip() {
     local droplet_id="$1"
-    $CURL "https://api.digitalocean.com/v2/droplets/${droplet_id}" | $JSON "droplet.networks.v4[0].ip_address"
+    ip=$($CURL "https://api.digitalocean.com/v2/droplets/${droplet_id}" | $JSON "droplet.networks.v4[0].ip_address")
+    [[ -z "$ip" ]] && exit 1
+    echo "$ip"
 }
 
 function get_droplet_id() {
     local droplet_name="$1"
-    $CURL "https://api.digitalocean.com/v2/droplets?per_page=100" | $JSON "droplets" | $JSON -c "this.name === '${droplet_name}'" | $JSON "[0].id"
+    id=$($CURL "https://api.digitalocean.com/v2/droplets?per_page=100" | $JSON "droplets" | $JSON -c "this.name === '${droplet_name}'" | $JSON "[0].id")
+    [[ -z "$id" ]] && exit 1
+    echo "$id"  
 }
 
 function power_off_droplet() {

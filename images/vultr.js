@@ -38,7 +38,7 @@ function getSshKeyId(keyName, callback) {
 function create(keyId, name, callback) {
     var regionId = 5; // LA (https://api.vultr.com/v1/regions/list)
     var planId = 29;  // 768MB RAM (https://api.vultr.com/v1/regions/list)
-    var osid = 191; // Ubuntu 15.04 x64 (see https://api.vultr.com/v1/os/list)
+    var osid = 191; // Ubuntu 15.04 x64 (see https://api.vultr.com/v1/os/list). 15.04 has some systemd issue
 
     var res = request.post('https://api.vultr.com/v1/server/create')
         .query({ api_key : gApiToken })
@@ -51,9 +51,7 @@ function create(keyId, name, callback) {
     return callback(null, res.body.SUBID);
 }
 
-function getIp(id, callback){
-    console.error('getting the ip of ', id);
-
+function getIp(id, callback) {
     var res = request.get('https://api.vultr.com/v1/server/list')
         .query({ api_key : gApiToken, SUBID: id })
         .end();
