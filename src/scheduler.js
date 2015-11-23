@@ -182,6 +182,8 @@ function doTask(appId, taskName, callback) {
 
             // NOTE: if you change container name here, fix addons.js to return correct container names
             docker.createSubcontainer(app, app.id + '-' + taskName, [ '/bin/sh', '-c', gState[appId].schedulerConfig[taskName].command ], { } /* options */, function (error, container) {
+                if (error) return callback(error);
+
                 appState.containerIds[taskName] = container.id;
 
                 saveState(gState);
