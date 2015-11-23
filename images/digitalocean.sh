@@ -12,6 +12,10 @@ fi
 
 readonly CURL="curl -s -u ${DIGITAL_OCEAN_TOKEN}:"
 
+function debug() {
+    echo "$@" >&2
+}
+
 function get_ssh_key_id() {
     $CURL "https://api.digitalocean.com/v2/account/keys" \
         | $JSON ssh_keys \
@@ -49,23 +53,23 @@ function power_off_droplet() {
     local event_id=`echo "${response}" | $JSON action.id`
 
     if [[ -z "${event_id}" ]]; then
-        echo "Got no event id, assuming already powered off."
-        echo "Response: ${response}"
+        debug "Got no event id, assuming already powered off."
+        debug "Response: ${response}"
         return
     fi
 
-    echo "Powered off droplet. Event id: ${event_id}"
-    echo -n "Waiting for droplet to power off"
+    debug "Powered off droplet. Event id: ${event_id}"
+    debug -n "Waiting for droplet to power off"
 
     while true; do
         local event_status=`$CURL "https://api.digitalocean.com/v2/droplets/${droplet_id}/actions/${event_id}" | $JSON action.status`
         if [[ "${event_status}" == "completed" ]]; then
             break
         fi
-        echo -n "."
+        debug -n "."
         sleep 10
     done
-    echo ""
+    debug ""
 }
 
 function power_on_droplet() {
@@ -73,24 +77,24 @@ function power_on_droplet() {
     local data='{"type":"power_on"}'
     local event_id=`$CURL -X POST -H 'Content-Type: application/json' -d "${data}" "https://api.digitalocean.com/v2/droplets/${droplet_id}/actions" | $JSON action.id`
 
-    echo "Powered on droplet. Event id: ${event_id}"
+    debug "Powered on droplet. Event id: ${event_id}"
 
     if [[ -z "${event_id}" ]]; then
-        echo "Got no event id, assuming already powered on"
+        debug "Got no event id, assuming already powered on"
         return
     fi
 
-    echo -n "Waiting for droplet to power on"
+    debug -n "Waiting for droplet to power on"
 
     while true; do
         local event_status=`$CURL "https://api.digitalocean.com/v2/droplets/${droplet_id}/actions/${event_id}" | $JSON action.status`
         if [[ "${event_status}" == "completed" ]]; then
             break
         fi
-        echo -n "."
+        debug -n "."
         sleep 10
     done
-    echo ""
+    debug ""
 }
 
 function snapshot_droplet() {
@@ -99,26 +103,26 @@ function snapshot_droplet() {
     local data="{\"type\":\"snapshot\",\"name\":\"${snapshot_name}\"}"
     local event_id=`$CURL -X POST -H 'Content-Type: application/json' -d "${data}" "https://api.digitalocean.com/v2/droplets/${droplet_id}/actions" | $JSON action.id`
 
-    echo "Droplet snapshotted as ${snapshot_name}. Event id: ${event_id}"
-    echo -n "Waiting for snapshot to complete"
+    debug "Droplet snapshotted as ${snapshot_name}. Event id: ${event_id}"
+    debug -n "Waiting for snapshot to complete"
 
     while true; do
         local event_status=`$CURL "https://api.digitalocean.com/v2/droplets/${droplet_id}/actions/${event_id}" | $JSON action.status`
         if [[ "${event_status}" == "completed" ]]; then
             break
         fi
-        echo -n "."
+        debug -n "."
         sleep 10
     done
-    echo ""
+    debug ""
 }
 
 function destroy_droplet() {
     local droplet_id="$1"
     # TODO: check for 204 status
     $CURL -X DELETE "https://api.digitalocean.com/v2/droplets/${droplet_id}"
-    echo "Droplet destroyed"
-    echo ""
+    debug "Droplet destroyed"
+    debug ""
 }
 
 function transfer_image() {
@@ -146,21 +150,22 @@ function wait_for_image_event() {
     local image_id="$1"
     local event_id="$2"
 
-    echo -n "Waiting for ${event_id}"
+    debug -n "Waiting for ${event_id}"
 
     while true; do
         local event_status=`$CURL "https://api.digitalocean.com/v2/images/${image_id}/actions/${event_id}" | $JSON action.status`
         if [[ "${event_status}" == "completed" ]]; then
             break
         fi
-        echo -n "."
+        debug -n "."
         sleep 10
     done
-    echo ""
+    debug ""
 }
 
 if [[ $# -lt 1 ]]; then
-    echo "<command> <params...>"
+    debug "<command> <params...>"
+    exit 1
 fi
 
 case $1 in
