@@ -359,7 +359,7 @@ var authorization = [
             var redirectPath = url.parse(redirectURI).path;
             var redirectOrigin = client.redirectURI;
 
-            callback(null, client, '/api/v1/session/callback?redirectURI=' + url.resolve(redirectOrigin, redirectPath));
+            callback(null, client, '/api/v1/session/callback?redirectURI=' + encodeURIComponent(url.resolve(redirectOrigin, redirectPath)));
         });
     }),
     function (req, res, next) {
