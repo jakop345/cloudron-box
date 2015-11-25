@@ -176,7 +176,7 @@ function validatePortBindings(portBindings, tcpPorts) {
         if (!Number.isInteger(portBindings[env])) return new Error(portBindings[env] + ' is not an integer');
         if (portBindings[env] <= 0 || portBindings[env] > 65535) return new Error(portBindings[env] + ' is out of range');
 
-        if (RESERVED_PORTS.indexOf(portBindings[env]) !== -1) return new AppsError(AppsError.PORT_RESERVED, + portBindings[env]);
+        if (RESERVED_PORTS.indexOf(portBindings[env]) !== -1) return new AppsError(AppsError.PORT_RESERVED, String(portBindings[env]));
     }
 
     // it is OK if there is no 1-1 mapping between values in manifest.tcpPorts and portBindings. missing values implies
