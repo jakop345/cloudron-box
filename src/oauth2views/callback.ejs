@@ -35,9 +35,9 @@ args.forEach(function (arg) {
 });
 
 if (code && redirectURI) {
-    window.location.href = redirectURI + '?code=' + code + (state ? '&state=' + state : '');
+    window.location.href = redirectURI + (redirectURI.indexOf('?') !== -1 ? '&' : '?') + 'code=' + code + (state ? '&state=' + state : '');
 } else if (redirectURI && accessToken) {
-    window.location.href = redirectURI + '?token=' + accessToken + (state ? '&state=' + state : '');
+    window.location.href = redirectURI + (redirectURI.indexOf('?') !== -1 ? '&' : '?') + 'token=' + accessToken + (state ? '&state=' + state : '');
 } else {
     window.location.href = '/api/v1/session/login';
 }
