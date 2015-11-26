@@ -492,7 +492,7 @@ function update(boxUpdateInfo, callback) {
         debug('Starting upgrade');
         doUpgrade(boxUpdateInfo, function (error) {
             if (error) {
-                debug('Upgrade failed with error: %s', error);
+                console.error('Upgrade failed with error:', error);
                 locker.unlock(locker.OP_BOX_UPDATE);
             }
         });
@@ -500,7 +500,7 @@ function update(boxUpdateInfo, callback) {
         debug('Starting update');
         doUpdate(boxUpdateInfo, function (error) {
             if (error) {
-                debug('Update failed with error: %s', error);
+                console.error('Update failed with error:', error);
                 locker.unlock(locker.OP_BOX_UPDATE);
             }
         });
