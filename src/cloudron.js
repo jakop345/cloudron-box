@@ -700,12 +700,12 @@ function backupBoxAndApps(callback) {
             ++processed;
 
             apps.backupApp(app, app.manifest.addons, function (error, backupId) {
-                progress.set(progress.BACKUP, step * processed, 'Backed up app at ' + app.location);
-
                 if (error && error.reason !== AppsError.BAD_STATE) {
                     debugApp(app, 'Unable to backup', error);
                     return iteratorCallback(error);
                 }
+
+                progress.set(progress.BACKUP, step * processed, 'Backed up app at ' + app.location);
 
                 iteratorCallback(null, backupId || null); // clear backupId if is in BAD_STATE and never backed up
             });
