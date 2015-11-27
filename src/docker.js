@@ -190,6 +190,7 @@ function createSubcontainer(app, name, cmd, options, callback) {
                 },
                 CpuShares: 512, // relative to 1024 for system processes
                 VolumesFrom: isAppContainer ? null : [ app.containerId + ":rw" ],
+                NetworkMode: isAppContainer ? 'default' : ('container:' + app.containerId), // share network namespace with parent
                 SecurityOpt: config.CLOUDRON ? [ "apparmor:docker-cloudron-app" ] : null // profile available only on cloudron
             }
         };
