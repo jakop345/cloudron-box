@@ -126,6 +126,8 @@ function clear(callback) {
 function beginTransaction(callback) {
     assert.strictEqual(typeof callback, 'function');
 
+    if (gConnectionPool === null) return callback(new Error('No database connection pool.'));
+
     gConnectionPool.getConnection(function (error, connection) {
         if (error) return callback(error);
 
