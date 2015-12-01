@@ -154,6 +154,9 @@ function createSubcontainer(app, name, cmd, options, callback) {
     }
 
     var memoryLimit = manifest.memoryLimit || 1024 * 1024 * 200; // 200mb by default
+    // for subcontainers, this should ideally be false. but docker does not allow network sharing if the app container is not running
+    // this means cloudron exec does not work
+    var isolatedNetworkNs = true;
 
     addons.getEnvironment(app, function (error, addonEnv) {
         if (error) return callback(new Error('Error getting addon environment : ' + error));
@@ -162,7 +165,7 @@ function createSubcontainer(app, name, cmd, options, callback) {
             name: name, // used for filtering logs
             // do _not_ set hostname to app fqdn. doing so sets up the dns name to look up the internal docker ip. this makes curl from within container fail
             // for subcontainers, this should not be set because we already share the network namespace with app container
-            Hostname: isAppContainer ? (semver.gte(targetBoxVersion(app.manifest), '0.0.77') ? app.location : config.appFqdn(app.location)) : null,
+            Hostname: isolatedNetworkNs ? (semver.gte(targetBoxVersion(app.manifest), '0.0.77') ? app.location : config.appFqdn(app.location)) : null,
             Tty: isAppContainer,
             Image: app.manifest.dockerImage,
             Cmd: cmd,
@@ -190,8 +193,8 @@ function createSubcontainer(app, name, cmd, options, callback) {
                 },
                 CpuShares: 512, // relative to 1024 for system processes
                 VolumesFrom: isAppContainer ? null : [ app.containerId + ":rw" ],
-                NetworkMode: isAppContainer ? 'default' : ('container:' + app.containerId), // share network namespace with parent
-                Links: isAppContainer ? addons.getLinksSync(app, app.manifest.addons) : null, // links is redundant with --net=container
+                NetworkMode: isolatedNetworkNs ? 'default' : ('container:' + app.containerId), // share network namespace with parent
+                Links: isolatedNetworkNs ? addons.getLinksSync(app, app.manifest.addons) : null, // links is redundant with --net=container
                 SecurityOpt: config.CLOUDRON ? [ "apparmor:docker-cloudron-app" ] : null // profile available only on cloudron
             }
         };
