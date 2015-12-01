@@ -184,7 +184,6 @@ function createSubcontainer(app, name, cmd, options, callback) {
                 PortBindings: isAppContainer ? dockerPortBindings : { },
                 PublishAllPorts: false,
                 ReadonlyRootfs: semver.gte(targetBoxVersion(app.manifest), '0.0.66'), // see also Volumes in startContainer
-                Links: addons.getLinksSync(app, app.manifest.addons),
                 RestartPolicy: {
                     "Name": isAppContainer ? "always" : "no",
                     "MaximumRetryCount": 0
@@ -192,6 +191,7 @@ function createSubcontainer(app, name, cmd, options, callback) {
                 CpuShares: 512, // relative to 1024 for system processes
                 VolumesFrom: isAppContainer ? null : [ app.containerId + ":rw" ],
                 NetworkMode: isAppContainer ? 'default' : ('container:' + app.containerId), // share network namespace with parent
+                Links: isAppContainer ? addons.getLinksSync(app, app.manifest.addons) : null, // links is redundant with --net=container
                 SecurityOpt: config.CLOUDRON ? [ "apparmor:docker-cloudron-app" ] : null // profile available only on cloudron
             }
         };
