@@ -165,7 +165,7 @@ function createSubcontainer(app, name, cmd, options, callback) {
             name: name, // used for filtering logs
             // do _not_ set hostname to app fqdn. doing so sets up the dns name to look up the internal docker ip. this makes curl from within container fail
             // for subcontainers, this should not be set because we already share the network namespace with app container
-            Hostname: isolatedNetworkNs ? (semver.gte(targetBoxVersion(app.manifest), '0.0.77') ? app.location : config.appFqdn(app.location)) : null,
+            Hostname: isolatedNetworkNs ? app.location : null,
             Tty: isAppContainer,
             Image: app.manifest.dockerImage,
             Cmd: cmd,
@@ -186,7 +186,7 @@ function createSubcontainer(app, name, cmd, options, callback) {
                 MemorySwap: memoryLimit, // Memory + Swap
                 PortBindings: isAppContainer ? dockerPortBindings : { },
                 PublishAllPorts: false,
-                ReadonlyRootfs: semver.gte(targetBoxVersion(app.manifest), '0.0.66'), // see also Volumes in startContainer
+                ReadonlyRootfs: true, // see also Volumes in startContainer
                 RestartPolicy: {
                     "Name": isAppContainer ? "always" : "no",
                     "MaximumRetryCount": 0
@@ -199,9 +199,6 @@ function createSubcontainer(app, name, cmd, options, callback) {
             }
         };
         containerOptions = _.extend(containerOptions, options);
-
-        // older versions wanted a writable /var/log
-        if (semver.lte(targetBoxVersion(app.manifest), '0.0.71')) containerOptions.Volumes['/var/log'] = {};
 
         debugApp(app, 'Creating container for %s with options %j', app.manifest.dockerImage, containerOptions);
 
