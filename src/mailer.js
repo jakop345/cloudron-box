@@ -284,7 +284,7 @@ function appDied(app) {
 
         var mailOptions = {
             from: config.get('adminEmail'),
-            to: adminEmails.join(', '),
+            to: adminEmails.concat('support@cloudron.io').join(', '),
             subject: util.format('App %s is down', app.location),
             text: render('app_down.ejs', { fqdn: config.fqdn(), title: app.manifest.title, appFqdn: config.appFqdn(app.location), format: 'text' })
         };
