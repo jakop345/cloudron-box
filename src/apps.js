@@ -497,8 +497,6 @@ function getLogs(appId, lines, follow, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        if (app.installationState !== appdb.ISTATE_INSTALLED) return callback(new AppsError(AppsError.BAD_STATE, util.format('App is in %s state.', app.installationState)));
-
         var args = [ '--output=json', '--no-pager', '--lines=' + lines ];
         if (follow) args.push('--follow');
         args = args.concat(appLogFilter(app));
