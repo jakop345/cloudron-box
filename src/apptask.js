@@ -339,6 +339,7 @@ function install(app, callback) {
 
         // teardown for re-installs
         updateApp.bind(null, app, { installationProgress: '10, Cleaning up old install' }),
+        unconfigureNginx.bind(null, app),
         removeCollectdProfile.bind(null, app),
         stopApp.bind(null, app),
         deleteContainers.bind(null, app),
@@ -347,11 +348,8 @@ function install(app, callback) {
         unregisterSubdomain.bind(null, app, app.location),
         removeOAuthProxyCredentials.bind(null, app),
         // removeIcon.bind(null, app), // do not remove icon for non-appstore installs
-        unconfigureNginx.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '15, Configure nginx' }),
         reserveHttpPort.bind(null, app),
-        configureNginx.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '20, Downloading icon' }),
         downloadIcon.bind(null, app),
@@ -381,6 +379,9 @@ function install(app, callback) {
 
         updateApp.bind(null, app, { installationProgress: '90, Waiting for DNS propagation' }),
         exports._waitForDnsPropagation.bind(null, app),
+
+        updateApp.bind(null, app, { installationProgress: '95, Configure nginx' }),
+        configureNginx.bind(null, app),
 
         // done!
         function (callback) {
@@ -426,6 +427,7 @@ function restore(app, callback) {
 
     async.series([
         updateApp.bind(null, app, { installationProgress: '10, Cleaning up old install' }),
+        unconfigureNginx.bind(null, app),
         removeCollectdProfile.bind(null, app),
         stopApp.bind(null, app),
         deleteContainers.bind(null, app),
@@ -439,11 +441,8 @@ function restore(app, callback) {
         },
         removeOAuthProxyCredentials.bind(null, app),
         removeIcon.bind(null, app),
-        unconfigureNginx.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '30, Configuring Nginx' }),
         reserveHttpPort.bind(null, app),
-        configureNginx.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '40, Downloading icon' }),
         downloadIcon.bind(null, app),
@@ -474,6 +473,9 @@ function restore(app, callback) {
         updateApp.bind(null, app, { installationProgress: '90, Waiting for DNS propagation' }),
         exports._waitForDnsPropagation.bind(null, app),
 
+        updateApp.bind(null, app, { installationProgress: '95, Configuring Nginx' }),
+        configureNginx.bind(null, app),
+
         // done!
         function (callback) {
             debugApp(app, 'restored');
@@ -493,6 +495,7 @@ function restore(app, callback) {
 function configure(app, callback) {
     async.series([
         updateApp.bind(null, app, { installationProgress: '10, Cleaning up old install' }),
+        unconfigureNginx.bind(null, app),
         removeCollectdProfile.bind(null, app),
         stopApp.bind(null, app),
         deleteContainers.bind(null, app),
@@ -502,11 +505,8 @@ function configure(app, callback) {
             unregisterSubdomain(app, app.oldConfig.location, next);
         },
         removeOAuthProxyCredentials.bind(null, app),
-        unconfigureNginx.bind(null, app),
 
-        updateApp.bind(null, app, { installationProgress: '25, Configuring Nginx' }),
         reserveHttpPort.bind(null, app),
-        configureNginx.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '30, Create OAuth proxy credentials' }),
         allocateOAuthProxyCredentials.bind(null, app),
@@ -528,6 +528,9 @@ function configure(app, callback) {
 
         updateApp.bind(null, app, { installationProgress: '80, Waiting for DNS propagation' }),
         exports._waitForDnsPropagation.bind(null, app),
+
+        updateApp.bind(null, app, { installationProgress: '90, Configuring Nginx' }),
+        configureNginx.bind(null, app),
 
         // done!
         function (callback) {
@@ -722,4 +725,3 @@ if (require.main === module) {
         });
     });
 }
-
