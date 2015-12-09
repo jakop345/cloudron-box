@@ -4,6 +4,7 @@
 
 var assert = require('assert'),
     async = require('async'),
+    config = require('./config.js'),
     crypto = require('crypto'),
     debug = require('debug')('acme'),
     execSync = require('child_process').execSync,
@@ -274,7 +275,7 @@ function getCertificate(domain, callback) {
 
     var privateKeyPem = fs.readFileSync('account.key');
 
-    var email = 'girish@cloudron.io';
+    var email = 'admin@' + config.fqdn();
 
     registerUser(privateKeyPem, email, function (error) {
         if (error && error.reason !== AcmeError.ALREADY_EXISTS) return callback(error);
