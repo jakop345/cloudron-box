@@ -48,6 +48,7 @@ mkdir -p "${DATA_DIR}/mongodb"
 mkdir -p "${DATA_DIR}/snapshots"
 mkdir -p "${DATA_DIR}/addons"
 mkdir -p "${DATA_DIR}/collectd/collectd.conf.d"
+mkdir -p "${DATA_DIR}/acme"
 
 # bookkeep the version as part of data
 echo "{ \"version\": \"${arg_version}\", \"boxVersionsUrl\": \"${arg_box_versions_url}\" }" > "${DATA_DIR}/box/version"
@@ -125,7 +126,7 @@ else
 fi
 
 set_progress "33" "Changing ownership"
-chown "${USER}:${USER}" -R "${DATA_DIR}/box" "${DATA_DIR}/nginx" "${DATA_DIR}/collectd" "${DATA_DIR}/addons"
+chown "${USER}:${USER}" -R "${DATA_DIR}/box" "${DATA_DIR}/nginx" "${DATA_DIR}/collectd" "${DATA_DIR}/addons" "${DATA_DIR}/acme"
 chown "${USER}:${USER}" "${DATA_DIR}"
 
 set_progress "40" "Setting up infra"

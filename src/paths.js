@@ -28,5 +28,7 @@ exports = module.exports = {
     CLOUDRON_AVATAR_FILE: path.join(config.baseDir(), 'data/box/avatar.png'),
     CLOUDRON_DEFAULT_AVATAR_FILE: path.join(__dirname + '/../assets/avatar.png'),
 
-    UPDATE_CHECKER_FILE: path.join(config.baseDir(), 'data/box/updatechecker.json')
+    UPDATE_CHECKER_FILE: path.join(config.baseDir(), 'data/box/updatechecker.json'),
+
+    ACME_CHALLENGES_DIR: path.join(config.baseDir(), 'data/acme')
 };

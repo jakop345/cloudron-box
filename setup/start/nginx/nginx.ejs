@@ -38,6 +38,11 @@ http {
             deny all;
         }
 
+        # acme challenges
+        location /.well-known/acme-challenge/ {
+            alias /home/yellowtent/data/acme/;
+        }
+
         location / {
             # redirect everything to HTTPS
             return 301 https://$host$request_uri;

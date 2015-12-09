@@ -9,6 +9,7 @@ var assert = require('assert'),
     execSync = require('child_process').execSync,
     fs = require('fs'),
     path = require('path'),
+    paths = require('./paths.js'),
     superagent = require('superagent'),
     urlBase64Encode = require('url-base64-node').escape,
     ursa = require('ursa'),
@@ -17,7 +18,6 @@ var assert = require('assert'),
 
 var CA_STAGING = 'https://acme-v01.api.letsencrypt.org',
     CA_STAGING = 'https://acme-staging.api.letsencrypt.org/',
-    ACME_CHALLENGE_PATH = '/var/www/letsencrypt/.well-known/acme-challenge',
     LE_AGREEMENT = 'https://letsencrypt.org/documents/LE-SA-v1.0.1-July-27-2015.pdf';
 
 exports = module.exports = {
@@ -185,9 +185,9 @@ function prepareHttpChallenge(privateKeyPem, challenge, callback) {
     var thumbprint = urlBase64Encode(shasum.digest('base64'));
     var keyAuthorization = token + '.' + thumbprint;
 
-    debug('prepareHttpChallenge: writing %s to %s', keyAuthorization, path.join(ACME_CHALLENGE_PATH, token));
+    debug('prepareHttpChallenge: writing %s to %s', keyAuthorization, path.join(paths.ACME_CHALLENGES_DIR, token));
 
-    fs.writeFile(path.join(ACME_CHALLENGE_PATH, token), token + '.' + thumbprint, function (error) {
+    fs.writeFile(path.join(paths.ACME_CHALLENGES_DIR, token), token + '.' + thumbprint, function (error) {
         if (error) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, error));
 
         callback();
@@ -201,7 +201,7 @@ function notifyChallenge(privateKeyPem, challenge, callback) {
 
     debug('notifyChallenge: %s was met', challenge.uri);
 
-    var keyAuthorization = fs.readFileSync(path.join(ACME_CHALLENGE_PATH, challenge.token), 'utf8');
+    var keyAuthorization = fs.readFileSync(path.join(paths.ACME_CHALLENGES_DIR, challenge.token), 'utf8');
 
     var payload = {
         resource: 'challenge',
