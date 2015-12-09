@@ -269,13 +269,11 @@ function signCertificate(privateKeyPem, certificateDer, callback) {
     });
 }
 
-function getCertificate(domain, callback) {
+function acmeFlow(domain, email, privateKeyPem, callback) {
     assert.strictEqual(typeof domain, 'string');
+    assert.strictEqual(typeof email, 'string');
+    assert(util.isBuffer(privateKeyPem));
     assert.strictEqual(typeof callback, 'function');
-
-    var privateKeyPem = fs.readFileSync('account.key');
-
-    var email = 'admin@' + config.fqdn();
 
     registerUser(privateKeyPem, email, function (error) {
         if (error && error.reason !== AcmeError.ALREADY_EXISTS) return callback(error);
@@ -308,6 +306,21 @@ function getCertificate(domain, callback) {
             });
         });
     });
+}
+
+function getCertificate(domain, callback) {
+    var email = 'admin@' + config.fqdn();
+    var privateKeyPem;
+
+    if (!fs.existsSync(paths.ACME_ACCOUNT_KEY_FILE)) {
+        debug('getCertificate: generating acme account key on first run');
+        privateKeyPem = execSync('openssl genrsa 4096');
+        fs.writeFileSync(paths.ACME_ACCOUNT_KEY_FILE, privateKeyPem);
+    } else {
+        privateKeyPem = fs.readFileSync(paths.ACME_ACCOUNT_KEY_FILE);
+    }
+
+    acmeFlow(domain, email, privateKeyPem, callback);
 }
 
 getCertificate('foobar.girish.in', function (error, cert) {
