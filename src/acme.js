@@ -296,11 +296,15 @@ function acmeFlow(domain, email, privateKeyPem, callback) {
                     waitForChallenge(challenge, function (error) {
                         if (error) return callback(error);
 
-                        var cmd = util.format('openssl req -nodes -newkey rsa:4096 -keyout server.key -outform DER -subj /CN=%s', domain);
+                        var serverKey = execSync('openssl genrsa 4096');
+                        var certificateDer = execSync(util.format('openssl req -nodes -outform DER -subj /CN=%s', domain), { stdio: [ serverKey, null, null ] });
 
-                        var certificateDer = execSync(cmd);
+                        signCertificate(privateKeyPem, certificateDer, function (error, certificateDer) {
+                            if (error) return callback(error);
+                            var certificatePem = execSync('openssl x509 -inform DER -outform PEM', { stdio: [ certificateDer, null, null ] });
 
-                        signCertificate(privateKeyPem, certificateDer, callback);
+                            callback(null, serverKey, certificatePem);
+                        });
                     });
                 });
             });
@@ -323,8 +327,8 @@ function getCertificate(domain, callback) {
     acmeFlow(domain, email, privateKeyPem, callback);
 }
 
-getCertificate('foobar.girish.in', function (error, cert) {
+getCertificate('foobar.girish.in', function (error, key, cert) {
     console.dir(error);
+    console.dir(key);
     console.dir(cert);
-    fs.writeFileSync('server.der', cert);
 });
