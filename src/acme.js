@@ -195,12 +195,12 @@ function prepareHttpChallenge(privateKeyPem, challenge, callback) {
     });
 }
 
-function notifyChallenge(privateKeyPem, challenge, callback) {
+function notifyChallengeReady(privateKeyPem, challenge, callback) {
     assert(util.isBuffer(privateKeyPem));
     assert.strictEqual(typeof challenge, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    debug('notifyChallenge: %s was met', challenge.uri);
+    debug('notifyChallengeReady: %s was met', challenge.uri);
 
     var keyAuthorization = fs.readFileSync(path.join(paths.ACME_CHALLENGES_DIR, challenge.token), 'utf8');
 
@@ -290,7 +290,7 @@ function acmeFlow(domain, email, privateKeyPem, callback) {
             prepareHttpChallenge(privateKeyPem, challenge, function (error) {
                 if (error) return callback(error);
 
-                notifyChallenge(privateKeyPem, challenge, function (error) {
+                notifyChallengeReady(privateKeyPem, challenge, function (error) {
                     if (error) return callback(error);
 
                     waitForChallenge(challenge, function (error) {
