@@ -9,7 +9,7 @@ exports = module.exports = {
     startTask: startTask,
 
     // exported for testing
-    _getFreePort: getFreePort,
+    _reserveHttpPort: reserveHttpPort,
     _configureNginx: configureNginx,
     _unconfigureNginx: unconfigureNginx,
     _createVolume: createVolume,
@@ -77,14 +77,17 @@ function debugApp(app, args) {
     debug(prefix + ' ' + util.format.apply(util, Array.prototype.slice.call(arguments, 1)));
 }
 
-// We expect conflicts to not happen despite closing the port (parallel app installs, app update does not reconfigure nginx etc)
-// https://tools.ietf.org/html/rfc6056#section-3.5 says linux uses random ephemeral port allocation
-function getFreePort(callback) {
+function reserveHttpPort(app, callback) {
     var server = net.createServer();
     server.listen(0, function () {
         var port = server.address().port;
-        server.close(function () {
-            return callback(null, port);
+        updateApp(app, { httpPort: port }, function (error) {
+            if (error) {
+                server.close();
+                return callback(error);
+            }
+
+            server.close(callback);
         });
     });
 }
@@ -94,39 +97,32 @@ function reloadNginx(callback) {
 }
 
 function configureNginx(app, callback) {
-    getFreePort(function (error, freePort) {
-        if (error) return callback(error);
+    var sourceDir = path.resolve(__dirname, '..');
+    var endpoint = app.oauthProxy ? 'oauthproxy' : 'app';
+    var vhost = config.appFqdn(app.location);
+    var certFilePath = safe.fs.statSync(path.join(paths.APP_CERTS_DIR, vhost + '.cert')) ? path.join(paths.APP_CERTS_DIR, vhost + '.cert') : 'cert/host.cert';
+    var keyFilePath = safe.fs.statSync(path.join(paths.APP_CERTS_DIR, vhost + '.key')) ? path.join(paths.APP_CERTS_DIR, vhost + '.key') : 'cert/host.key';
 
-        var sourceDir = path.resolve(__dirname, '..');
-        var endpoint = app.oauthProxy ? 'oauthproxy' : 'app';
-        var vhost = config.appFqdn(app.location);
-        var certFilePath = safe.fs.statSync(path.join(paths.APP_CERTS_DIR, vhost + '.cert')) ? path.join(paths.APP_CERTS_DIR, vhost + '.cert') : 'cert/host.cert';
-        var keyFilePath = safe.fs.statSync(path.join(paths.APP_CERTS_DIR, vhost + '.key')) ? path.join(paths.APP_CERTS_DIR, vhost + '.key') : 'cert/host.key';
+    var data = {
+        sourceDir: sourceDir,
+        adminOrigin: config.adminOrigin(),
+        vhost: vhost,
+        port: app.httpPort,
+        endpoint: endpoint,
+        certFilePath: certFilePath,
+        keyFilePath: keyFilePath
+    };
+    var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, data);
 
-        var data = {
-            sourceDir: sourceDir,
-            adminOrigin: config.adminOrigin(),
-            vhost: vhost,
-            port: freePort,
-            endpoint: endpoint,
-            certFilePath: certFilePath,
-            keyFilePath: keyFilePath
-        };
-        var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, data);
+    var nginxConfigFilename = path.join(paths.NGINX_APPCONFIG_DIR, app.id + '.conf');
+    debugApp(app, 'writing config to %s', nginxConfigFilename);
 
-        var nginxConfigFilename = path.join(paths.NGINX_APPCONFIG_DIR, app.id + '.conf');
-        debugApp(app, 'writing config to %s', nginxConfigFilename);
+    if (!safe.fs.writeFileSync(nginxConfigFilename, nginxConf)) {
+        debugApp(app, 'Error creating nginx config : %s', safe.error.message);
+        return callback(safe.error);
+    }
 
-        if (!safe.fs.writeFileSync(nginxConfigFilename, nginxConf)) {
-            debugApp(app, 'Error creating nginx config : %s', safe.error.message);
-            return callback(safe.error);
-        }
-
-        async.series([
-            exports._reloadNginx,
-            updateApp.bind(null, app, { httpPort: freePort })
-        ], callback);
-    });
+    exports._reloadNginx(callback);
 }
 
 function unconfigureNginx(app, callback) {
@@ -354,6 +350,7 @@ function install(app, callback) {
         unconfigureNginx.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '15, Configure nginx' }),
+        reserveHttpPort.bind(null, app),
         configureNginx.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '20, Downloading icon' }),
@@ -445,6 +442,7 @@ function restore(app, callback) {
         unconfigureNginx.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '30, Configuring Nginx' }),
+        reserveHttpPort.bind(null, app),
         configureNginx.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '40, Downloading icon' }),
@@ -507,6 +505,7 @@ function configure(app, callback) {
         unconfigureNginx.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '25, Configuring Nginx' }),
+        reserveHttpPort.bind(null, app),
         configureNginx.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '30, Create OAuth proxy credentials' }),
