@@ -109,7 +109,7 @@ function sendSignedRequest(url, accountKeyPem, payload, callback) {
             signature: signature64
         };
 
-        superagent.post(url).set('Content-Type', 'application/x-www-form-urlencoded').send(JSON.stringify(data)).buffer().end(function (error, res) {
+        superagent.post(url).set('Content-Type', 'application/x-www-form-urlencoded').send(JSON.stringify(data)).end(function (error, res) {
             if (error && !error.response) return callback(error); // network errors
 
             callback(null, res);
@@ -267,9 +267,20 @@ function signCertificate(accountKeyPem, csrDer, callback) {
 
         if (!('location' in result.headers)) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, 'Missing location in downloadCertificate'));
 
-        debug('signCertificate: certificate is available at %s', result.headers['location']);
+        var certificateLocation = result.headers.location;
+        debug('signCertificate: certificate is available at %s', certificateLocation);
 
-        callback(null, result.text);
+        superagent.get(certificateLocation).buffer().parse(function (res, done) {
+            var data = [ ];
+            res.on('data', function(chunk) { data.push(chunk); });
+            res.on('end', function () { res.text = Buffer.concat(data); done(); });
+        }).end(function (error, result) {
+            if (error && !error.response) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, 'Network error when downloading certificate'));
+            if (result.statusCode === 202) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, 'Retry not implemented yet'));
+            if (result.statusCode !== 200) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, util.format('Failed to get cert. Expecting 200, got %s %s', result.statusCode, result.text)));
+
+            callback(null, result.text);
+        });
     });
 }
 
@@ -295,7 +306,7 @@ function downloadCertificate(accountKeyPem, domain, outdir, callback) {
         if (error) return callback(error);
 
         safe.fs.writeFileSync(path.join(outdir, domain + '.der'), certificateDer);
-        debug('downloadCertificate: cert der file saved ');
+        debug('downloadCertificate: cert der file saved');
 
         var certificatePem = execSync('openssl x509 -inform DER -outform PEM', { input: certificateDer }); // this is really just base64 encoding with header
         if (!certificatePem) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
@@ -304,7 +315,7 @@ function downloadCertificate(accountKeyPem, domain, outdir, callback) {
         if (!chainPem) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
 
         var certificateFile = path.join(outdir, domain + '.cert');
-        var fullChainPem = Buffer.concat(certificatePem, chainPem);
+        var fullChainPem = Buffer.concat([certificatePem, chainPem]);
         if (!safe.fs.writeFileSync(certificateFile, fullChainPem)) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
 
         callback();
