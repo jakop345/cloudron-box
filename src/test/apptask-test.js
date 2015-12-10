@@ -97,12 +97,12 @@ describe('apptask', function () {
         apptask.initialize(done);
     });
 
-    it('free port', function (done) {
-        apptask._getFreePort(function (error, port) {
-            expect(error).to.be(null);
-            expect(port).to.be.a('number');
-            var client = net.connect(port);
-            client.on('connect', function () { done(new Error('Port is not free:' + port)); });
+    it('reserve port', function (done) {
+        apptask._reserveHttpPort(APP, function (error) {
+            expect(error).to.not.be.ok();
+            expect(APP.httpPort).to.be.a('number');
+            var client = net.connect(APP.httpPort);
+            client.on('connect', function () { done(new Error('Port is not free:' + APP.httpPort)); });
             client.on('error', function (error) { done(); });
         });
     });
