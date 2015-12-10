@@ -250,14 +250,14 @@ function waitForChallenge(challenge, callback) {
 }
 
 // https://community.letsencrypt.org/t/public-beta-rate-limits/4772 for rate limits
-function signCertificate(accountKeyPem, certificateDer, callback) {
+function signCertificate(accountKeyPem, csrDer, callback) {
     assert(util.isBuffer(accountKeyPem));
-    assert(util.isBuffer(certificateDer));
+    assert(util.isBuffer(csrDer));
     assert.strictEqual(typeof callback, 'function');
 
     var payload = {
         resource: 'new-cert',
-        csr: b64(certificateDer)
+        csr: b64(csrDer)
     };
 
     debug('signCertificate: signing %s', payload.csr);
@@ -267,16 +267,51 @@ function signCertificate(accountKeyPem, certificateDer, callback) {
         if (result.statusCode !== 201) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, util.format('Failed to sign certificate. Expecting 201, got %s %s', result.statusCode, result.text)));
 
         // TODO: result.body can be empty in which case it has to be polled for from this location
-        debug('signCertificate: certificate is available at ', result.headers['location']);
+        debug('signCertificate: certificate is available at (latest) %s and (stable) %s', result.headers['location'], result.headers['content-location']);
 
         callback(null, result.text);
     });
 }
 
-function acmeFlow(domain, email, accountKeyPem, callback) {
+function downloadCertificate(accountKeyPem, domain, outdir, callback) {
+    assert(util.isBuffer(accountKeyPem));
+    assert.strictEqual(typeof domain, 'string');
+    assert.strictEqual(typeof outdir, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    var execSync = safe.child_process.execSync;
+
+    var privateKeyFile = path.join(outdir, domain + '.key');
+    var key = execSync('openssl genrsa 4096');
+    if (!key) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
+    if (!safe.fs.writeFileSync(privateKeyFile, key)) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
+
+    debug('downloadCertificate: key file saved at %s', privateKeyFile);
+
+    var csrDer = execSync(util.format('openssl req -new -key %s -outform DER -subj /CN=%s', privateKeyFile, domain));
+    if (!csrDer) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
+
+    signCertificate(accountKeyPem, csrDer, function (error, certificateDer) {
+        if (error) return callback(error);
+
+        safe.fs.writeFileSync(path.join(outdir, domain + '.der'), certificateDer);
+        debug('downloadCertificate: cert der file saved ');
+
+        var certificatePem = execSync('openssl x509 -inform DER -outform PEM', { input: certificateDer }); // this is really just base64 encoding with header
+        if (!certificatePem) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
+
+        var certificateFile = path.join(outdir, domain + '.cert');
+        if (!safe.fs.writeFileSync(certificateFile, certificatePem)) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
+
+        callback();
+    });
+}
+
+function acmeFlow(domain, email, accountKeyPem, outdir, callback) {
     assert.strictEqual(typeof domain, 'string');
     assert.strictEqual(typeof email, 'string');
     assert(util.isBuffer(accountKeyPem));
+    assert.strictEqual(typeof outdir, 'string');
     assert.strictEqual(typeof callback, 'function');
 
     registerUser(accountKeyPem, email, function (error) {
@@ -285,43 +320,23 @@ function acmeFlow(domain, email, accountKeyPem, callback) {
         registerDomain(accountKeyPem, domain, function (error, result) {
             if (error) return callback(error);
 
-            debug('getCertificate: challenges: %j', result);
+            debug('acmeFlow: challenges: %j', result);
 
             var httpChallenges = result.challenges.filter(function(x) { return x.type === 'http-01'; });
             if (httpChallenges.length === 0) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, 'no http challenges'));
             var challenge = httpChallenges[0];
 
-            prepareHttpChallenge(accountKeyPem, challenge, function (error) {
-                if (error) return callback(error);
-
-                notifyChallengeReady(accountKeyPem, challenge, function (error) {
-                    if (error) return callback(error);
-
-                    waitForChallenge(challenge, function (error) {
-                        if (error) return callback(error);
-
-                        var serverKey = safe.execSync('openssl genrsa 4096');
-                        if (!serverKey) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
-
-                        var certificateDer = safe.execSync(util.format('openssl req -nodes -outform DER -subj /CN=%s', domain), { stdio: [ serverKey, null, null ] });
-                        if (!certificateDer) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
-
-                        signCertificate(accountKeyPem, certificateDer, function (error, certificateDer) {
-                            if (error) return callback(error);
-
-                            var certificatePem = safe.execSync('openssl x509 -inform DER -outform PEM', { stdio: [ certificateDer, null, null ] });
-                            if (!certificatePem) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
-
-                            callback(null, serverKey, certificatePem);
-                        });
-                    });
-                });
-            });
+            async.series([
+                prepareHttpChallenge.bind(null, accountKeyPem, challenge),
+                notifyChallengeReady.bind(null, accountKeyPem, challenge),
+                waitForChallenge.bind(null, challenge),
+                downloadCertificate.bind(null, accountKeyPem, domain, outdir)
+            ], callback);
         });
     });
 }
 
-function getCertificate(domain, callback) {
+function getCertificate(domain, outdir, callback) {
     var email = 'admin@' + config.fqdn();
     var accountKeyPem;
 
@@ -335,11 +350,9 @@ function getCertificate(domain, callback) {
         accountKeyPem = fs.readFileSync(paths.ACME_ACCOUNT_KEY_FILE);
     }
 
-    acmeFlow(domain, email, accountKeyPem, callback);
+    acmeFlow(domain, email, accountKeyPem, outdir, callback);
 }
 
-getCertificate('foobar.girish.in', function (error, key, cert) {
+getCertificate('my.girish.in', process.cwd(), function (error) {
     console.dir(error);
-    console.dir(key);
-    console.dir(cert);
 });
