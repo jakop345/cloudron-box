@@ -367,7 +367,3 @@ function getCertificate(domain, outdir, callback) {
 
     acmeFlow(domain, email, accountKeyPem, outdir, callback);
 }
-
-getCertificate('my.girish.in', process.cwd(), function (error) {
-    console.dir(error);
-});
