@@ -12,12 +12,11 @@ var assert = require('assert'),
     path = require('path'),
     paths = require('./paths.js'),
     superagent = require('superagent'),
-    urlBase64Encode = require('url-base64-node').escape,
     ursa = require('ursa'),
     util = require('util'),
     _ = require('underscore');
 
-var CA_STAGING = 'https://acme-v01.api.letsencrypt.org',
+var CA_PROD = 'https://acme-v01.api.letsencrypt.org',
     CA_STAGING = 'https://acme-staging.api.letsencrypt.org/',
     LE_AGREEMENT = 'https://letsencrypt.org/documents/LE-SA-v1.0.1-July-27-2015.pdf';
 
@@ -64,6 +63,10 @@ function getNonce(callback) {
 }
 
 // urlsafe base64 encoding (jose)
+function urlBase64Encode(string) {
+    return string.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+
 function b64(str) {
     var buf = util.isBuffer(str) ? str : new Buffer(str);
    return urlBase64Encode(buf.toString('base64'));
