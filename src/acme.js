@@ -11,6 +11,7 @@ var assert = require('assert'),
     fs = require('fs'),
     path = require('path'),
     paths = require('./paths.js'),
+    safe = require('safetydance'),
     superagent = require('superagent'),
     ursa = require('ursa'),
     util = require('util'),
@@ -299,12 +300,17 @@ function acmeFlow(domain, email, privateKeyPem, callback) {
                     waitForChallenge(challenge, function (error) {
                         if (error) return callback(error);
 
-                        var serverKey = execSync('openssl genrsa 4096');
-                        var certificateDer = execSync(util.format('openssl req -nodes -outform DER -subj /CN=%s', domain), { stdio: [ serverKey, null, null ] });
+                        var serverKey = safe.execSync('openssl genrsa 4096');
+                        if (!serverKey) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
+
+                        var certificateDer = safe.execSync(util.format('openssl req -nodes -outform DER -subj /CN=%s', domain), { stdio: [ serverKey, null, null ] });
+                        if (!certificateDer) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
 
                         signCertificate(privateKeyPem, certificateDer, function (error, certificateDer) {
                             if (error) return callback(error);
-                            var certificatePem = execSync('openssl x509 -inform DER -outform PEM', { stdio: [ certificateDer, null, null ] });
+
+                            var certificatePem = safe.execSync('openssl x509 -inform DER -outform PEM', { stdio: [ certificateDer, null, null ] });
+                            if (!certificatePem) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
 
                             callback(null, serverKey, certificatePem);
                         });
@@ -321,8 +327,10 @@ function getCertificate(domain, callback) {
 
     if (!fs.existsSync(paths.ACME_ACCOUNT_KEY_FILE)) {
         debug('getCertificate: generating acme account key on first run');
-        privateKeyPem = execSync('openssl genrsa 4096');
-        fs.writeFileSync(paths.ACME_ACCOUNT_KEY_FILE, privateKeyPem);
+        privateKeyPem = safe.execSync('openssl genrsa 4096');
+        if (!privateKeyPem) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
+
+        safe.fs.writeFileSync(paths.ACME_ACCOUNT_KEY_FILE, privateKeyPem);
     } else {
         privateKeyPem = fs.readFileSync(paths.ACME_ACCOUNT_KEY_FILE);
     }
