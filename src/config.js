@@ -28,6 +28,7 @@ exports = module.exports = {
     // these values are derived
     adminOrigin: adminOrigin,
     internalAdminOrigin: internalAdminOrigin,
+    adminFqdn: adminFqdn,
     appFqdn: appFqdn,
     zoneName: zoneName,
 
@@ -153,6 +154,10 @@ function appFqdn(location) {
 
     if (location === '') return fqdn();
     return isCustomDomain() ? location + '.' + fqdn() : location + '-' + fqdn();
+}
+
+function adminFqdn() {
+    return appFqdn(constants.ADMIN_LOCATION);
 }
 
 function adminOrigin() {
