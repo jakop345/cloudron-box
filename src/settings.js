@@ -394,8 +394,8 @@ function setAdminCertificate(cert, key, callback) {
     var sourceDir = path.resolve(__dirname, '..');
     var endpoint = 'admin';
     var vhost = config.appFqdn(constants.ADMIN_LOCATION);
-    var certFilePath = path.join(paths.APP_CERTS_DIR, 'admin.cert');
-    var keyFilePath = path.join(paths.APP_CERTS_DIR, 'admin.key');
+    var certFilePath = path.join(paths.APP_CERTS_DIR, vhost + '.cert');
+    var keyFilePath = path.join(paths.APP_CERTS_DIR, vhost + '.key');
 
     var error = validateCertificate(cert, key, vhost);
     if (error) return callback(new SettingsError(SettingsError.INVALID_CERT, error.message));
