@@ -26,7 +26,6 @@ console.log();
 console.log(' Environment:                    ', config.CLOUDRON ? 'CLOUDRON' : 'TEST');
 console.log(' Version:                        ', config.version());
 console.log(' Admin Origin:                   ', config.adminOrigin());
-console.log(' Appstore token:                 ', config.token());
 console.log(' Appstore API server origin:     ', config.apiServerOrigin());
 console.log(' Appstore Web server origin:     ', config.webServerOrigin());
 console.log();
