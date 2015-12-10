@@ -103,11 +103,16 @@ cp "${script_dir}/start/nginx/nginx.conf" "${DATA_DIR}/nginx/nginx.conf"
 cp "${script_dir}/start/nginx/mime.types" "${DATA_DIR}/nginx/mime.types"
 
 # generate these for update code paths as well to overwrite splash
-admin_cert_file="cert/host.cert"
-admin_key_file="cert/host.key"
+admin_cert_file="${DATA_DIR}/nginx/cert/host.cert"
+admin_key_file="${DATA_DIR}/nginx/cert/host.key"
+# backward compatibility
 if [[ -f "${DATA_DIR}/box/certs/admin.cert" && -f "${DATA_DIR}/box/certs/admin.key" ]]; then
-    admin_cert_file="${DATA_DIR}/box/certs/admin.cert"
-    admin_key_file="${DATA_DIR}/box/certs/admin.key"
+    mv "${DATA_DIR}/box/certs/admin.cert" "${DATA_DIR}/box/certs/${admin_fqdn}.cert"
+    mv "${DATA_DIR}/box/certs/admin.key" "${DATA_DIR}/box/certs/${admin_fqdn}.key"
+fi
+if [[ -f "${DATA_DIR}/box/certs/${admin_fqdn}.cert" && -f "${DATA_DIR}/box/certs/${admin_fqdn}.key" ]]; then
+    admin_cert_file="${DATA_DIR}/box/certs/${admin_fqdn}.cert"
+    admin_key_file="${DATA_DIR}/box/certs/${admin_fqdn}.key"
 fi
 ${BOX_SRC_DIR}/node_modules/.bin/ejs-cli -f "${script_dir}/start/nginx/appconfig.ejs" \
     -O "{ \"vhost\": \"${admin_fqdn}\", \"adminOrigin\": \"${admin_origin}\", \"endpoint\": \"admin\", \"sourceDir\": \"${BOX_SRC_DIR}\", \"certFilePath\": \"${admin_cert_file}\", \"keyFilePath\": \"${admin_key_file}\" }" > "${DATA_DIR}/nginx/applications/admin.conf"
