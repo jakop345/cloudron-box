@@ -10,6 +10,7 @@ exports = module.exports = {
 var assert = require('assert'),
     async = require('async'),
     auth = require('./auth.js'),
+    certificateManager = require('./certificatemanager.js'),
     cloudron = require('./cloudron.js'),
     cron = require('./cron.js'),
     config = require('./config.js'),
@@ -234,6 +235,7 @@ function start(callback) {
     async.series([
         auth.initialize,
         database.initialize,
+        certificateManager.initialize,
         cloudron.initialize, // keep this here because it reads activation state that others depend on
         taskmanager.initialize,
         mailer.initialize,
@@ -254,6 +256,7 @@ function stop(callback) {
         taskmanager.uninitialize,
         cron.uninitialize,
         mailer.uninitialize,
+        certificateManager.initialize,
         database.uninitialize,
         gHttpServer.close.bind(gHttpServer),
         gInternalHttpServer.close.bind(gInternalHttpServer)
