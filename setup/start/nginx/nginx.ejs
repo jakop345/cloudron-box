@@ -40,6 +40,7 @@ http {
 
         # acme challenges
         location /.well-known/acme-challenge/ {
+            default_type text/plain;
             alias /home/yellowtent/data/acme/;
         }
 
