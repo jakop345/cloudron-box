@@ -7,7 +7,6 @@ var assert = require('assert'),
     config = require('./config.js'),
     crypto = require('crypto'),
     debug = require('debug')('acme'),
-    execSync = require('child_process').execSync,
     fs = require('fs'),
     path = require('path'),
     paths = require('./paths.js'),
@@ -266,8 +265,9 @@ function signCertificate(accountKeyPem, csrDer, callback) {
         if (error) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, 'Network error when signing certificate: ' + error.message));
         if (result.statusCode !== 201) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, util.format('Failed to sign certificate. Expecting 201, got %s %s', result.statusCode, result.text)));
 
-        // TODO: result.body can be empty in which case it has to be polled for from this location
-        debug('signCertificate: certificate is available at (latest) %s and (stable) %s', result.headers['location'], result.headers['content-location']);
+        if (!('location' in result.headers)) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, 'Missing location in downloadCertificate'));
+
+        debug('signCertificate: certificate is available at %s', result.headers['location']);
 
         callback(null, result.text);
     });
