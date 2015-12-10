@@ -7,6 +7,7 @@ exports = module.exports = {
 
 var apps = require('./apps.js'),
     assert = require('assert'),
+    certificateManager = require('./certificatemanager.js'),
     cloudron = require('./cloudron.js'),
     config = require('./config.js'),
     CronJob = require('cron').CronJob,
@@ -23,7 +24,8 @@ var gAutoupdaterJob = null,
     gBackupJob = null,
     gCleanupTokensJob = null,
     gDockerVolumeCleanerJob = null,
-    gSchedulerSyncJob = null;
+    gSchedulerSyncJob = null,
+    gCertificateRenewJob = null;
 
 var NOOP_CALLBACK = function (error) { if (error) console.error(error); };
 
@@ -107,6 +109,14 @@ function recreateJobs(unusedTimeZone, callback) {
             timeZone: allSettings[settings.TIME_ZONE_KEY]
         });
 
+        if (gCertificateRenewJob) gCertificateRenewJob.stop();
+        gCertificateRenewJob = new CronJob({
+            cronTime: '00 00 */12 * * *', // every 12 hours
+            onTick: certificateManager.autoRenew,
+            start: true,
+            timeZone: allSettings[settings.TIME_ZONE_KEY]
+        });
+
         settings.events.removeListener(settings.AUTOUPDATE_PATTERN_KEY, autoupdatePatternChanged);
         settings.events.on(settings.AUTOUPDATE_PATTERN_KEY, autoupdatePatternChanged);
         autoupdatePatternChanged(allSettings[settings.AUTOUPDATE_PATTERN_KEY]);
@@ -178,6 +188,9 @@ function uninitialize(callback) {
 
     if (gSchedulerSyncJob) gSchedulerSyncJob.stop();
     gSchedulerSyncJob = null;
+
+    if (gCertificateRenewJob) gCertificateRenewJob.stop();
+    gCertificateRenewJob = null;
 
     callback();
 }
