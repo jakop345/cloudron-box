@@ -14,9 +14,9 @@ var appHealthMonitor = require('./src/apphealthmonitor.js'),
     async = require('async'),
     config = require('./src/config.js'),
     ldap = require('./src/ldap.js'),
-    simpleauth = require('./src/simpleauth.js'),
     oauthproxy = require('./src/oauthproxy.js'),
-    server = require('./src/server.js');
+    server = require('./src/server.js'),
+    simpleauth = require('./src/simpleauth.js');
 
 console.log();
 console.log('==========================================');
