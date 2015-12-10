@@ -300,8 +300,12 @@ function downloadCertificate(accountKeyPem, domain, outdir, callback) {
         var certificatePem = execSync('openssl x509 -inform DER -outform PEM', { input: certificateDer }); // this is really just base64 encoding with header
         if (!certificatePem) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
 
+        var chainPem = safe.fs.readFileSync(__dirname + '/cert/lets-encrypt-x1-cross-signed.pem.txt');
+        if (!chainPem) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
+
         var certificateFile = path.join(outdir, domain + '.cert');
-        if (!safe.fs.writeFileSync(certificateFile, certificatePem)) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
+        var fullChainPem = Buffer.concat(certificatePem, chainPem);
+        if (!safe.fs.writeFileSync(certificateFile, fullChainPem)) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
 
         callback();
     });
