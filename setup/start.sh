@@ -98,7 +98,6 @@ ln -sfF "df-disk_by-uuid_${vda1_id}" "${DATA_DIR}/graphite/whisper/collectd/loca
 service collectd restart
 
 set_progress "30" "Setup nginx"
-# setup naked domain to use admin by default. app restoration will overwrite this config
 mkdir -p "${DATA_DIR}/nginx/applications"
 cp "${script_dir}/start/nginx/nginx.conf" "${DATA_DIR}/nginx/nginx.conf"
 cp "${script_dir}/start/nginx/mime.types" "${DATA_DIR}/nginx/mime.types"
