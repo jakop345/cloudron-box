@@ -5,7 +5,7 @@
 var acme = require('./cert/acme.js'),
     assert = require('assert'),
     config = require('./config.js'),
-    debug = require('debug')('src/certificatemanager'),
+    debug = require('debug')('src/certificates'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
     sysinfo = require('./sysinfo.js'),

@@ -7,7 +7,7 @@ exports = module.exports = {
 
 var apps = require('./apps.js'),
     assert = require('assert'),
-    certificateManager = require('./certificatemanager.js'),
+    certificates = require('./certificates.js'),
     cloudron = require('./cloudron.js'),
     config = require('./config.js'),
     CronJob = require('cron').CronJob,
@@ -112,7 +112,7 @@ function recreateJobs(unusedTimeZone, callback) {
         if (gCertificateRenewJob) gCertificateRenewJob.stop();
         gCertificateRenewJob = new CronJob({
             cronTime: '00 00 */12 * * *', // every 12 hours
-            onTick: certificateManager.autoRenew,
+            onTick: certificates.autoRenew,
             start: true,
             timeZone: allSettings[settings.TIME_ZONE_KEY]
         });
