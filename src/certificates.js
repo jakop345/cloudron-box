@@ -24,6 +24,7 @@ exports = module.exports = {
     setAdminCertificate: setAdminCertificate,
     CertificatesError: CertificatesError,
     validateCertificate: validateCertificate,
+    ensureCertificate: ensureCertificate
 };
 
 function CertificatesError(reason, errorOrMessage) {
@@ -165,5 +166,28 @@ function setAdminCertificate(cert, key, callback) {
         if (error) return callback(new CertificatesError(CertificatesError.INTERNAL_ERROR, error));
 
         return callback(null);
+    });
+}
+
+function ensureCertificate(domain, callback) {
+    assert.strictEqual(typeof domain, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    if (!config.isCustomDomain()) {
+        // currently, we don't allow uploading certs for non-custom domain
+        return callback(null, 'cert/host.cert', 'cert/host.key');
+    }
+
+    var certFilePath = path.join(paths.APP_CERTS_DIR, domain + '.cert');
+    var keyFilePath = path.join(paths.APP_CERTS_DIR, domain + '.key');
+
+    if (fs.existsSync(certFilePath)) return callback(null, certFilePath, keyFilePath); // TODO: check if cert needs renewal
+
+    debug('Using le-acme to get certificate');
+
+    acme.getCertificate(domain, paths.APP_CERTS_DIR, function (error) { // TODO: Should use backend
+        if (error) return callback(error);
+
+        callback(null, certFilePath, keyFilePath);
     });
 }
