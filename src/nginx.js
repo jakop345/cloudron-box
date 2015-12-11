@@ -2,7 +2,8 @@
 
 'use strict';
 
-var config = require('./config.js'),
+var assert = require('assert'),
+    config = require('./config.js'),
     debug = require('debug')('src/nginx.js'),
     ejs = require('ejs'),
     fs = require('fs'),
@@ -22,6 +23,10 @@ var NGINX_APPCONFIG_EJS = fs.readFileSync(__dirname + '/../setup/start/nginx/app
     RELOAD_NGINX_CMD = path.join(__dirname, 'scripts/reloadnginx.sh');
 
 function configureAdmin(certFilePath, keyFilePath, callback) {
+    assert.strictEqual(typeof certFilePath, 'string');
+    assert.strictEqual(typeof keyFilePath, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
     var data = {
         sourceDir: path.resolve(__dirname, '..'),
         adminOrigin: config.adminOrigin(),
@@ -39,6 +44,11 @@ function configureAdmin(certFilePath, keyFilePath, callback) {
 }
 
 function configureApp(app, certFilePath, keyFilePath, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof certFilePath, 'string');
+    assert.strictEqual(typeof keyFilePath, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
     var sourceDir = path.resolve(__dirname, '..');
     var endpoint = app.oauthProxy ? 'oauthproxy' : 'app';
     var vhost = config.appFqdn(app.location);
@@ -66,6 +76,9 @@ function configureApp(app, certFilePath, keyFilePath, callback) {
 }
 
 function unconfigureApp(app, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
     var nginxConfigFilename = path.join(paths.NGINX_APPCONFIG_DIR, app.id + '.conf');
     if (!safe.fs.unlinkSync(nginxConfigFilename)) {
         debug('Error removing nginx configuration of "%s": %s', app.location, safe.error.message);
