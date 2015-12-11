@@ -53,7 +53,7 @@ function waitForDns(domain, ip, zoneName, options, callback) {
 
     var defaultOptions = {
         retryInterval: 5000,
-        retries: 6 * 10
+        retries: Infinity
     };
 
     if (typeof options === 'function') {
@@ -64,7 +64,7 @@ function waitForDns(domain, ip, zoneName, options, callback) {
         assert.strictEqual(typeof callback, 'function');
     }
 
-    debug('waitForDNS: domain %s to be %s.', domain, ip);
+    debug('waitForDNS: domain %s to be %s in zone %s.', domain, ip, zoneName);
 
     attempt(function (attempts) {
         var callback = this; // gross
