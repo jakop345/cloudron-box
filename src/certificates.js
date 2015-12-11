@@ -7,14 +7,14 @@ var acme = require('./cert/acme.js'),
     config = require('./config.js'),
     constants = require('./constants.js'),
     debug = require('debug')('src/certificates'),
-    ejs = require('ejs'),
     fs = require('fs'),
+    nginx = require('./nginx.js'),
     path = require('path'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
-    shell = require('./shell.js'),
     sysinfo = require('./sysinfo.js'),
     util = require('util'),
+    waitForDns = require('./waitfordns.js'),
     x509 = require('x509');
 
 exports = module.exports = {
@@ -49,19 +49,21 @@ util.inherits(CertificatesError, Error);
 CertificatesError.INTERNAL_ERROR = 'Internal Error';
 CertificatesError.INVALID_CERT = 'Invalid certificate';
 
-var NGINX_APPCONFIG_EJS = fs.readFileSync(__dirname + '/../setup/start/nginx/appconfig.ejs', { encoding: 'utf8' }),
-    RELOAD_NGINX_CMD = path.join(__dirname, 'scripts/reloadnginx.sh');
-
 function installAdminCertificate(callback) {
     if (!config.isCustomDomain()) return callback();
 
-    callback();
-    // TODO: check if dns is in sync first!
+    waitForDns(config.adminFqdn(), sysinfo.getIp(), config.fqdn(), function (error) {
+        if (error) return callback(error); // this cannot happen because we retry forever
 
-    // acme.getCertificate(config.adminFqdn(), paths.APP_CERTS_DIR, function (error) {
-        // copy to nginx cert dir
-        // reload nginx
-    // });
+        ensureCertificate(config.adminFqdn(), function (error, certFilePath, keyFilePath) {
+            if (error) {
+                debug('Error obtaining certificate %s. Proceed anyway', error.message);
+                return callback();
+            }
+
+            nginx.configureAdmin(certFilePath, keyFilePath, callback);
+        });
+    });
 }
 
 function autoRenew() {
@@ -124,7 +126,7 @@ function setFallbackCertificate(cert, key, callback) {
     if (!safe.fs.writeFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), cert)) return callback(new CertificatesError(CertificatesError.INTERNAL_ERROR, safe.error.message));
     if (!safe.fs.writeFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'), key)) return callback(new CertificatesError(CertificatesError.INTERNAL_ERROR, safe.error.message));
 
-    shell.sudo('setCertificate', [ RELOAD_NGINX_CMD ], function (error) {
+    nginx.reload(function (error) {
         if (error) return callback(new CertificatesError(CertificatesError.INTERNAL_ERROR, error));
 
         return callback(null);
@@ -136,8 +138,6 @@ function setAdminCertificate(cert, key, callback) {
     assert.strictEqual(typeof key, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    var sourceDir = path.resolve(__dirname, '..');
-    var endpoint = 'admin';
     var vhost = config.appFqdn(constants.ADMIN_LOCATION);
     var certFilePath = path.join(paths.APP_CERTS_DIR, vhost + '.cert');
     var keyFilePath = path.join(paths.APP_CERTS_DIR, vhost + '.key');
@@ -149,24 +149,7 @@ function setAdminCertificate(cert, key, callback) {
     if (!safe.fs.writeFileSync(certFilePath, cert)) return callback(new CertificatesError(CertificatesError.INTERNAL_ERROR, safe.error.message));
     if (!safe.fs.writeFileSync(keyFilePath, key)) return callback(new CertificatesError(CertificatesError.INTERNAL_ERROR, safe.error.message));
 
-    var data = {
-        sourceDir: sourceDir,
-        adminOrigin: config.adminOrigin(),
-        vhost: vhost,
-        endpoint: endpoint,
-        certFilePath: certFilePath,
-        keyFilePath: keyFilePath
-    };
-    var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, data);
-    var nginxConfigFilename = path.join(paths.NGINX_APPCONFIG_DIR, 'admin.conf');
-
-    if (!safe.fs.writeFileSync(nginxConfigFilename, nginxConf)) return callback(safe.error);
-
-    shell.sudo('setAdminCertificate', [ RELOAD_NGINX_CMD ], function (error) {
-        if (error) return callback(new CertificatesError(CertificatesError.INTERNAL_ERROR, error));
-
-        return callback(null);
-    });
+    nginx.configureAdmin(certFilePath, keyFilePath, callback);
 }
 
 function ensureCertificate(domain, callback) {
