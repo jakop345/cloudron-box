@@ -19,6 +19,28 @@ exports = module.exports = {
     validateCertificate: validateCertificate
 };
 
+function CertificatesError(reason, errorOrMessage) {
+    assert.strictEqual(typeof reason, 'string');
+    assert(errorOrMessage instanceof Error || typeof errorOrMessage === 'string' || typeof errorOrMessage === 'undefined');
+
+    Error.call(this);
+    Error.captureStackTrace(this, this.constructor);
+
+    this.name = this.constructor.name;
+    this.reason = reason;
+    if (typeof errorOrMessage === 'undefined') {
+        this.message = reason;
+    } else if (typeof errorOrMessage === 'string') {
+        this.message = errorOrMessage;
+    } else {
+        this.message = 'Internal error';
+        this.nestedError = errorOrMessage;
+    }
+}
+util.inherits(CertificatesError, Error);
+CertificatesError.INTERNAL_ERROR = 'Internal Error';
+CertificatesError.INVALID_CERT = 'Invalid certificate';
+
 function initialize(callback) {
     if (!config.isCustomDomain()) return callback();
 
