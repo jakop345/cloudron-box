@@ -36,6 +36,7 @@ var addons = require('./addons.js'),
     apps = require('./apps.js'),
     assert = require('assert'),
     async = require('async'),
+    certificates = require('./certificates.js'),
     clientdb = require('./clientdb.js'),
     config = require('./config.js'),
     database = require('./database.js'),
@@ -100,29 +101,31 @@ function configureNginx(app, callback) {
     var sourceDir = path.resolve(__dirname, '..');
     var endpoint = app.oauthProxy ? 'oauthproxy' : 'app';
     var vhost = config.appFqdn(app.location);
-    var certFilePath = safe.fs.statSync(path.join(paths.APP_CERTS_DIR, vhost + '.cert')) ? path.join(paths.APP_CERTS_DIR, vhost + '.cert') : 'cert/host.cert';
-    var keyFilePath = safe.fs.statSync(path.join(paths.APP_CERTS_DIR, vhost + '.key')) ? path.join(paths.APP_CERTS_DIR, vhost + '.key') : 'cert/host.key';
 
-    var data = {
-        sourceDir: sourceDir,
-        adminOrigin: config.adminOrigin(),
-        vhost: vhost,
-        port: app.httpPort,
-        endpoint: endpoint,
-        certFilePath: certFilePath,
-        keyFilePath: keyFilePath
-    };
-    var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, data);
+    certificates.ensureCertificate(vhost, function (error, certFilePath, keyFilePath) {
+        if (error) return callback(error);
 
-    var nginxConfigFilename = path.join(paths.NGINX_APPCONFIG_DIR, app.id + '.conf');
-    debugApp(app, 'writing config to %s', nginxConfigFilename);
+        var data = {
+            sourceDir: sourceDir,
+            adminOrigin: config.adminOrigin(),
+            vhost: vhost,
+            port: app.httpPort,
+            endpoint: endpoint,
+            certFilePath: certFilePath,
+            keyFilePath: keyFilePath
+        };
+        var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, data);
 
-    if (!safe.fs.writeFileSync(nginxConfigFilename, nginxConf)) {
-        debugApp(app, 'Error creating nginx config : %s', safe.error.message);
-        return callback(safe.error);
-    }
+        var nginxConfigFilename = path.join(paths.NGINX_APPCONFIG_DIR, app.id + '.conf');
+        debugApp(app, 'writing config to %s', nginxConfigFilename);
 
-    exports._reloadNginx(callback);
+        if (!safe.fs.writeFileSync(nginxConfigFilename, nginxConf)) {
+            debugApp(app, 'Error creating nginx config : %s', safe.error.message);
+            return callback(safe.error);
+        }
+
+        exports._reloadNginx(callback);
+    });
 }
 
 function unconfigureNginx(app, callback) {
