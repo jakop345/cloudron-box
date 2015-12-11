@@ -20,7 +20,7 @@ var acme = require('./cert/acme.js'),
 exports = module.exports = {
     installAdminCertificate: installAdminCertificate,
     autoRenew: autoRenew,
-    setAppCertificate: setAppCertificate,
+    setFallbackCertificate: setFallbackCertificate,
     setAdminCertificate: setAdminCertificate,
     CertificatesError: CertificatesError,
     validateCertificate: validateCertificate,
@@ -107,7 +107,7 @@ function validateCertificate(cert, key, fqdn) {
     return null;
 }
 
-function setAppCertificate(cert, key, callback) {
+function setFallbackCertificate(cert, key, callback) {
     assert.strictEqual(typeof cert, 'string');
     assert.strictEqual(typeof key, 'string');
     assert.strictEqual(typeof callback, 'function');

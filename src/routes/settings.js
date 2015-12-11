@@ -144,7 +144,7 @@ function setCertificate(req, res, next) {
     if (!req.body.cert || typeof req.body.cert !== 'string') return next(new HttpError(400, 'cert must be a string'));
     if (!req.body.key || typeof req.body.key !== 'string') return next(new HttpError(400, 'key must be a string'));
 
-    certificates.setAppCertificate(req.body.cert, req.body.key, function (error) {
+    certificates.setFallbackCertificate(req.body.cert, req.body.key, function (error) {
         if (error && error.reason === CertificatesError.INVALID_CERT) return next(new HttpError(400, error.message));
         if (error) return next(new HttpError(500, error));
 
