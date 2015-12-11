@@ -23,6 +23,8 @@ exports = module.exports = {
 };
 
 var assert = require('assert'),
+    certificates = require('../certificates.js'),
+    CertificatesError = require('../certificates.js').CertificatesError,
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
     safe = require('safetydance'),
@@ -142,8 +144,8 @@ function setCertificate(req, res, next) {
     if (!req.body.cert || typeof req.body.cert !== 'string') return next(new HttpError(400, 'cert must be a string'));
     if (!req.body.key || typeof req.body.key !== 'string') return next(new HttpError(400, 'key must be a string'));
 
-    settings.setCertificate(req.body.cert, req.body.key, function (error) {
-        if (error && error.reason === SettingsError.INVALID_CERT) return next(new HttpError(400, error.message));
+    certificates.setAppCertificate(req.body.cert, req.body.key, function (error) {
+        if (error && error.reason === CertificatesError.INVALID_CERT) return next(new HttpError(400, error.message));
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(202, {}));
@@ -157,8 +159,8 @@ function setAdminCertificate(req, res, next) {
     if (!req.body.cert || typeof req.body.cert !== 'string') return next(new HttpError(400, 'cert must be a string'));
     if (!req.body.key || typeof req.body.key !== 'string') return next(new HttpError(400, 'key must be a string'));
 
-    settings.setAdminCertificate(req.body.cert, req.body.key, function (error) {
-        if (error && error.reason === SettingsError.INVALID_CERT) return next(new HttpError(400, error.message));
+    certificates.setAdminCertificate(req.body.cert, req.body.key, function (error) {
+        if (error && error.reason === CertificatesError.INVALID_CERT) return next(new HttpError(400, error.message));
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(202, {}));
