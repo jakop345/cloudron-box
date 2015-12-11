@@ -29,7 +29,6 @@ exports = module.exports = {
     getDefaultSync: getDefaultSync,
     getAll: getAll,
 
-    validateCertificate: validateCertificate,
     setCertificate: setCertificate,
     setAdminCertificate: setAdminCertificate,
 
@@ -44,6 +43,7 @@ exports = module.exports = {
 };
 
 var assert = require('assert'),
+    certificateManager = require('./certificatemanager.js'),
     config = require('./config.js'),
     constants = require('./constants.js'),
     CronJob = require('cron').CronJob,
@@ -56,7 +56,6 @@ var assert = require('assert'),
     settingsdb = require('./settingsdb.js'),
     shell = require('./shell.js'),
     util = require('util'),
-    x509 = require('x509'),
     _ = require('underscore');
 
 var gDefaults = (function () {
@@ -323,52 +322,12 @@ function getAll(callback) {
     });
 }
 
-// note: https://tools.ietf.org/html/rfc4346#section-7.4.2 (certificate_list) requires that the
-// servers certificate appears first (and not the intermediate cert)
-function validateCertificate(cert, key, fqdn) {
-    assert(cert === null || typeof cert === 'string');
-    assert(key === null || typeof key === 'string');
-    assert.strictEqual(typeof fqdn, 'string');
-
-    if (cert === null && key === null) return null;
-    if (!cert && key) return new Error('missing cert');
-    if (cert && !key) return new Error('missing key');
-
-    var content;
-    try {
-        content = x509.parseCert(cert);
-    } catch (e) {
-        return new Error('invalid cert: ' + e.message);
-    }
-
-    // check expiration
-    if (content.notAfter < new Date()) return new Error('cert expired');
-
-    function matchesDomain(domain) {
-        if (domain === fqdn) return true;
-        if (domain.indexOf('*') === 0 && domain.slice(2) === fqdn.slice(fqdn.indexOf('.') + 1)) return true;
-
-        return false;
-    }
-
-    // check domain
-    var domains = content.altNames.concat(content.subject.commonName);
-    if (!domains.some(matchesDomain)) return new Error(util.format('cert is not valid for this domain. Expecting %s in %j', fqdn, domains));
-
-    // http://httpd.apache.org/docs/2.0/ssl/ssl_faq.html#verify
-    var certModulus = safe.child_process.execSync('openssl x509 -noout -modulus', { encoding: 'utf8', input: cert });
-    var keyModulus = safe.child_process.execSync('openssl rsa -noout -modulus', { encoding: 'utf8', input: key });
-    if (certModulus !== keyModulus) return new Error('key does not match the cert');
-
-    return null;
-}
-
 function setCertificate(cert, key, callback) {
     assert.strictEqual(typeof cert, 'string');
     assert.strictEqual(typeof key, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    var error = validateCertificate(cert, key, '*.' + config.fqdn());
+    var error = certificateManager.validateCertificate(cert, key, '*.' + config.fqdn());
     if (error) return callback(new SettingsError(SettingsError.INVALID_CERT, error.message));
 
     // backup the cert
@@ -397,7 +356,7 @@ function setAdminCertificate(cert, key, callback) {
     var certFilePath = path.join(paths.APP_CERTS_DIR, vhost + '.cert');
     var keyFilePath = path.join(paths.APP_CERTS_DIR, vhost + '.key');
 
-    var error = validateCertificate(cert, key, vhost);
+    var error = certificateManager.validateCertificate(cert, key, vhost);
     if (error) return callback(new SettingsError(SettingsError.INVALID_CERT, error.message));
 
     // backup the cert

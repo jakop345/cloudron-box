@@ -48,6 +48,7 @@ var addons = require('./addons.js'),
     async = require('async'),
     backups = require('./backups.js'),
     BackupsError = require('./backups.js').BackupsError,
+    certificateManager = require('./certificatemanager.js'),
     config = require('./config.js'),
     constants = require('./constants.js'),
     DatabaseError = require('./databaseerror.js'),
@@ -59,7 +60,6 @@ var addons = require('./addons.js'),
     path = require('path'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
-    settings = require('./settings.js'),
     semver = require('semver'),
     shell = require('./shell.js'),
     spawn = require('child_process').spawn,
@@ -340,7 +340,7 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
         }
     }
 
-    error = settings.validateCertificate(cert, key, config.appFqdn(location));
+    error = certificateManager.validateCertificate(cert, key, config.appFqdn(location));
     if (error) return callback(new AppsError(AppsError.BAD_CERTIFICATE, error.message));
 
     debug('Will install app with id : ' + appId);
@@ -381,7 +381,7 @@ function configure(appId, location, portBindings, accessRestriction, oauthProxy,
     error = validateAccessRestriction(accessRestriction);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
-    error = settings.validateCertificate(cert, key, config.appFqdn(location));
+    error = certificateManager.validateCertificate(cert, key, config.appFqdn(location));
     if (error) return callback(new AppsError(AppsError.BAD_CERTIFICATE, error.message));
 
     appdb.get(appId, function (error, app) {
