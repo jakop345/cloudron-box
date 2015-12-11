@@ -19,7 +19,6 @@ exports = module.exports = {
     _verifyManifest: verifyManifest,
     _registerSubdomain: registerSubdomain,
     _unregisterSubdomain: unregisterSubdomain,
-    _reloadNginx: reloadNginx,
     _waitForDnsPropagation: waitForDnsPropagation
 };
 
@@ -48,6 +47,7 @@ var addons = require('./addons.js'),
     hat = require('hat'),
     manifestFormat = require('cloudron-manifestformat'),
     net = require('net'),
+    nginx = require('./nginx.js'),
     path = require('path'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
@@ -60,9 +60,7 @@ var addons = require('./addons.js'),
     uuid = require('node-uuid'),
     _ = require('underscore');
 
-var NGINX_APPCONFIG_EJS = fs.readFileSync(__dirname + '/../setup/start/nginx/appconfig.ejs', { encoding: 'utf8' }),
-    COLLECTD_CONFIG_EJS = fs.readFileSync(__dirname + '/collectd.config.ejs', { encoding: 'utf8' }),
-    RELOAD_NGINX_CMD = path.join(__dirname, 'scripts/reloadnginx.sh'),
+var COLLECTD_CONFIG_EJS = fs.readFileSync(__dirname + '/collectd.config.ejs', { encoding: 'utf8' }),
     RELOAD_COLLECTD_CMD = path.join(__dirname, 'scripts/reloadcollectd.sh'),
     RMAPPDIR_CMD = path.join(__dirname, 'scripts/rmappdir.sh'),
     CREATEAPPDIR_CMD = path.join(__dirname, 'scripts/createappdir.sh');
@@ -93,49 +91,19 @@ function reserveHttpPort(app, callback) {
     });
 }
 
-function reloadNginx(callback) {
-    shell.sudo('reloadNginx', [ RELOAD_NGINX_CMD ], callback);
-}
-
-function configureNginx(app, callback) {
-    var sourceDir = path.resolve(__dirname, '..');
-    var endpoint = app.oauthProxy ? 'oauthproxy' : 'app';
+function configureNginx(app, callback) {    
     var vhost = config.appFqdn(app.location);
 
     certificates.ensureCertificate(vhost, function (error, certFilePath, keyFilePath) {
         if (error) return callback(error);
 
-        var data = {
-            sourceDir: sourceDir,
-            adminOrigin: config.adminOrigin(),
-            vhost: vhost,
-            port: app.httpPort,
-            endpoint: endpoint,
-            certFilePath: certFilePath,
-            keyFilePath: keyFilePath
-        };
-        var nginxConf = ejs.render(NGINX_APPCONFIG_EJS, data);
-
-        var nginxConfigFilename = path.join(paths.NGINX_APPCONFIG_DIR, app.id + '.conf');
-        debugApp(app, 'writing config to %s', nginxConfigFilename);
-
-        if (!safe.fs.writeFileSync(nginxConfigFilename, nginxConf)) {
-            debugApp(app, 'Error creating nginx config : %s', safe.error.message);
-            return callback(safe.error);
-        }
-
-        exports._reloadNginx(callback);
+        nginx.configureApp(app, certFilePath, keyFilePath, callback);
     });
 }
 
 function unconfigureNginx(app, callback) {
-    var nginxConfigFilename = path.join(paths.NGINX_APPCONFIG_DIR, app.id + '.conf');
-    if (!safe.fs.unlinkSync(nginxConfigFilename)) {
-        debugApp(app, 'Error removing nginx configuration : %s', safe.error.message);
-        return callback(null);
-    }
-
-    exports._reloadNginx(callback);
+    // TODO: maybe revoke the cert
+    nginx.unconfigureApp(app, callback);
 }
 
 function createContainer(app, callback) {
