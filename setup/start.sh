@@ -105,11 +105,6 @@ cp "${script_dir}/start/nginx/mime.types" "${DATA_DIR}/nginx/mime.types"
 # generate these for update code paths as well to overwrite splash
 admin_cert_file="${DATA_DIR}/nginx/cert/host.cert"
 admin_key_file="${DATA_DIR}/nginx/cert/host.key"
-# backward compatibility
-if [[ -f "${DATA_DIR}/box/certs/admin.cert" && -f "${DATA_DIR}/box/certs/admin.key" ]]; then
-    mv "${DATA_DIR}/box/certs/admin.cert" "${DATA_DIR}/box/certs/${admin_fqdn}.cert"
-    mv "${DATA_DIR}/box/certs/admin.key" "${DATA_DIR}/box/certs/${admin_fqdn}.key"
-fi
 if [[ -f "${DATA_DIR}/box/certs/${admin_fqdn}.cert" && -f "${DATA_DIR}/box/certs/${admin_fqdn}.key" ]]; then
     admin_cert_file="${DATA_DIR}/box/certs/${admin_fqdn}.cert"
     admin_key_file="${DATA_DIR}/box/certs/${admin_fqdn}.key"
