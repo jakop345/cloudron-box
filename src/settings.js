@@ -43,7 +43,7 @@ exports = module.exports = {
 };
 
 var assert = require('assert'),
-    certificateManager = require('./certificatemanager.js'),
+    certificates = require('./certificates.js'),
     config = require('./config.js'),
     constants = require('./constants.js'),
     CronJob = require('cron').CronJob,
@@ -327,7 +327,7 @@ function setCertificate(cert, key, callback) {
     assert.strictEqual(typeof key, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    var error = certificateManager.validateCertificate(cert, key, '*.' + config.fqdn());
+    var error = certificates.validateCertificate(cert, key, '*.' + config.fqdn());
     if (error) return callback(new SettingsError(SettingsError.INVALID_CERT, error.message));
 
     // backup the cert
@@ -356,7 +356,7 @@ function setAdminCertificate(cert, key, callback) {
     var certFilePath = path.join(paths.APP_CERTS_DIR, vhost + '.cert');
     var keyFilePath = path.join(paths.APP_CERTS_DIR, vhost + '.key');
 
-    var error = certificateManager.validateCertificate(cert, key, vhost);
+    var error = certificates.validateCertificate(cert, key, vhost);
     if (error) return callback(new SettingsError(SettingsError.INVALID_CERT, error.message));
 
     // backup the cert

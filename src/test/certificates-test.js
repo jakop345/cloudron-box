@@ -6,10 +6,10 @@
 
 'use strict';
 
-var certificateManager = require('../certificatemanager.js'),
+var certificates = require('../certificates.js'),
     expect = require('expect.js');
 
-describe('CertificateManager', function () {
+describe('Certificates', function () {
     describe('validateCertificate', function () {
         /*
           Generate these with:
@@ -31,60 +31,60 @@ describe('CertificateManager', function () {
         var validKey2 = '-----BEGIN RSA PRIVATE KEY-----\nMIIBOQIBAAJBAMO1Flv1aEHj79pfdpd13J7WXssNZwYh8ZNWsWcAumrjltv83wP/\n04O37+Kuaip1dZ/+9SIjAIXnhXKX6IGOa08CAwEAAQJAUPD3Y2cXDJFaJQXwhWnw\nqhzdLbvITUgCor5rNr+dWhE2MopGPpRHiabA1PeWEPx8CfblyTZGd8KUR/2W1c0r\naQIhAP4ZxB3+uhuzzMfyRrn/khr12pFn/FCIDbwnDbyUxLrTAiEAxSuVOFs+Mupt\nYCz/pPrDCx3eid0wyXRObbkLHOxJiBUCIBTp5fxaBNNW3xnt1OhmIo5Zgd3J4zh1\nmjvMMxM8Y1zFAiAxOP0qsZSoj1+41+MGY9fXaaCJ2F96m3+M4tpEYTTGNQIgdESZ\nz+hzHBeYVbWJpIR8uaNkx7wveUF90FpipXyeTsA=\n-----END RSA PRIVATE KEY-----';
 
         it('allows both null', function () {
-            expect(certificateManager.validateCertificate(null, null, 'foobar.com')).to.be(null);
+            expect(certificates.validateCertificate(null, null, 'foobar.com')).to.be(null);
         });
 
         it('does not allow only cert', function () {
-            expect(certificateManager.validateCertificate('cert', null, 'foobar.com')).to.be.an(Error);
+            expect(certificates.validateCertificate('cert', null, 'foobar.com')).to.be.an(Error);
         });
 
         it('does not allow only key', function () {
-            expect(certificateManager.validateCertificate(null, 'key', 'foobar.com')).to.be.an(Error);
+            expect(certificates.validateCertificate(null, 'key', 'foobar.com')).to.be.an(Error);
         });
 
         it('does not allow empty string for cert', function () {
-            expect(certificateManager.validateCertificate('', 'key', 'foobar.com')).to.be.an(Error);
+            expect(certificates.validateCertificate('', 'key', 'foobar.com')).to.be.an(Error);
         });
 
         it('does not allow empty string for key', function () {
-            expect(certificateManager.validateCertificate('cert', '', 'foobar.com')).to.be.an(Error);
+            expect(certificates.validateCertificate('cert', '', 'foobar.com')).to.be.an(Error);
         });
 
         it('does not allow invalid cert', function () {
-            expect(certificateManager.validateCertificate('someinvalidcert', validKey0, 'foobar.com')).to.be.an(Error);
+            expect(certificates.validateCertificate('someinvalidcert', validKey0, 'foobar.com')).to.be.an(Error);
         });
 
         it('does not allow invalid key', function () {
-            expect(certificateManager.validateCertificate(validCert0, 'invalidkey', 'foobar.com')).to.be.an(Error);
+            expect(certificates.validateCertificate(validCert0, 'invalidkey', 'foobar.com')).to.be.an(Error);
         });
 
         it('does not allow cert without matching domain', function () {
-            expect(certificateManager.validateCertificate(validCert0, validKey0, 'cloudron.io')).to.be.an(Error);
+            expect(certificates.validateCertificate(validCert0, validKey0, 'cloudron.io')).to.be.an(Error);
         });
 
         it('allows valid cert with matching domain', function () {
-            expect(certificateManager.validateCertificate(validCert0, validKey0, 'foobar.com')).to.be(null);
+            expect(certificates.validateCertificate(validCert0, validKey0, 'foobar.com')).to.be(null);
         });
 
         it('allows valid cert with matching domain (wildcard)', function () {
-            expect(certificateManager.validateCertificate(validCert1, validKey1, 'abc.foobar.com')).to.be(null);
+            expect(certificates.validateCertificate(validCert1, validKey1, 'abc.foobar.com')).to.be(null);
         });
 
         it('does now allow cert without matching domain (wildcard)', function () {
-            expect(certificateManager.validateCertificate(validCert1, validKey1, 'foobar.com')).to.be.an(Error);
-            expect(certificateManager.validateCertificate(validCert1, validKey1, 'bar.abc.foobar.com')).to.be.an(Error);
+            expect(certificates.validateCertificate(validCert1, validKey1, 'foobar.com')).to.be.an(Error);
+            expect(certificates.validateCertificate(validCert1, validKey1, 'bar.abc.foobar.com')).to.be.an(Error);
         });
 
         it('allows valid cert with matching domain (subdomain)', function () {
-            expect(certificateManager.validateCertificate(validCert2, validKey2, 'baz.foobar.com')).to.be(null);
+            expect(certificates.validateCertificate(validCert2, validKey2, 'baz.foobar.com')).to.be(null);
         });
 
         it('does not allow cert without matching domain (subdomain)', function () {
-            expect(certificateManager.validateCertificate(validCert0, validKey0, 'baz.foobar.com')).to.be.an(Error);
+            expect(certificates.validateCertificate(validCert0, validKey0, 'baz.foobar.com')).to.be.an(Error);
         });
 
         it('does not allow invalid cert/key tuple', function () {
-            expect(certificateManager.validateCertificate(validCert0, validKey1, 'foobar.com')).to.be.an(Error);
+            expect(certificates.validateCertificate(validCert0, validKey1, 'foobar.com')).to.be.an(Error);
         });
     });
 });
