@@ -18,8 +18,7 @@ var acme = require('./cert/acme.js'),
     x509 = require('x509');
 
 exports = module.exports = {
-    initialize: initialize,
-    uninitialize: uninitialize,
+    installAdminCertificate: installAdminCertificate,
     autoRenew: autoRenew,
     setAppCertificate: setAppCertificate,
     setAdminCertificate: setAdminCertificate,
@@ -52,7 +51,7 @@ CertificatesError.INVALID_CERT = 'Invalid certificate';
 var NGINX_APPCONFIG_EJS = fs.readFileSync(__dirname + '/../setup/start/nginx/appconfig.ejs', { encoding: 'utf8' }),
     RELOAD_NGINX_CMD = path.join(__dirname, 'scripts/reloadnginx.sh');
 
-function initialize(callback) {
+function installAdminCertificate(callback) {
     if (!config.isCustomDomain()) return callback();
 
     callback();
@@ -62,10 +61,6 @@ function initialize(callback) {
         // copy to nginx cert dir
         // reload nginx
     // });
-}
-
-function uninitialize(callback) {
-    callback();
 }
 
 function autoRenew() {

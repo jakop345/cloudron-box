@@ -235,7 +235,7 @@ function start(callback) {
     async.series([
         auth.initialize,
         database.initialize,
-        certificates.initialize,
+        certificates.installAdminCertificate,
         cloudron.initialize, // keep this here because it reads activation state that others depend on
         taskmanager.initialize,
         mailer.initialize,
@@ -256,7 +256,6 @@ function stop(callback) {
         taskmanager.uninitialize,
         cron.uninitialize,
         mailer.uninitialize,
-        certificates.initialize,
         database.uninitialize,
         gHttpServer.close.bind(gHttpServer),
         gInternalHttpServer.close.bind(gInternalHttpServer)
