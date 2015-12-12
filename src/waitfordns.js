@@ -7,7 +7,7 @@ exports = module.exports = waitForDns;
 var assert = require('assert'),
     async = require('async'),
     attempt = require('attempt'),
-    debug = require('debug')('src/waitfordns.js'),
+    debug = require('debug')('box:src/waitfordns'),
     dns = require('native-dns');
 
 // the first arg to callback is not an error argument; this is required for async.every

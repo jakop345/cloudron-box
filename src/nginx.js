@@ -4,7 +4,7 @@
 
 var assert = require('assert'),
     config = require('./config.js'),
-    debug = require('debug')('src/nginx.js'),
+    debug = require('debug')('box:src/nginx'),
     ejs = require('ejs'),
     fs = require('fs'),
     path = require('path'),
