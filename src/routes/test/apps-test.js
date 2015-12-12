@@ -156,6 +156,7 @@ function setup(done) {
         },
 
         settings.setDnsConfig.bind(null, { provider: 'route53', accessKeyId: 'accessKeyId', secretAccessKey: 'secretAccessKey', endpoint: 'http://localhost:5353' }),
+        settings.setTlsConfig.bind(null, { provider: 'caas' }),
         settings.setBackupConfig.bind(null, { provider: 'caas', token: 'BACKUP_TOKEN', bucket: 'Bucket', prefix: 'Prefix' })
     ], done);
 }
@@ -1063,6 +1064,8 @@ describe('App installation - port bindings', function () {
             },
 
             settings.setDnsConfig.bind(null, { provider: 'route53', accessKeyId: 'accessKeyId', secretAccessKey: 'secretAccessKey', endpoint: 'http://localhost:5353' }),
+
+            settings.setTlsConfig.bind(null, { provider: 'caas' }),
 
             function (callback) {
                 awsHockInstance
