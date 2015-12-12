@@ -13,5 +13,3 @@ KillMode=process
 User=yellowtent
 Group=yellowtent
 MemoryLimit=50M
-StartLimitInterval=1
-StartLimitBurst=600
