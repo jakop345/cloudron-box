@@ -37,7 +37,7 @@ exports = module.exports = {
     DEVELOPER_MODE_KEY: 'developer_mode',
     DNS_CONFIG_KEY: 'dns_config',
     BACKUP_CONFIG_KEY: 'backup_config',
-    TLS_CONFIG: 'tls_config',
+    TLS_CONFIG_KEY: 'tls_config',
 
     events: new (require('events').EventEmitter)()
 };
