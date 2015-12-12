@@ -35,6 +35,7 @@ exports = module.exports = {
     DEVELOPER_MODE_KEY: 'developer_mode',
     DNS_CONFIG_KEY: 'dns_config',
     BACKUP_CONFIG_KEY: 'backup_config',
+    TLS_CONFIG: 'tls_config',
 
     events: new (require('events').EventEmitter)()
 };
@@ -57,6 +58,7 @@ var gDefaults = (function () {
     result[exports.DEVELOPER_MODE_KEY] = false;
     result[exports.DNS_CONFIG_KEY] = { };
     result[exports.BACKUP_CONFIG_KEY] = { };
+    result[exports.TLS_CONFIG_KEY] = { };
 
     return result;
 })();
@@ -259,6 +261,17 @@ function setDnsConfig(dnsConfig, callback) {
         exports.events.emit(exports.DNS_CONFIG_KEY, dnsConfig);
 
         callback(null);
+    });
+}
+
+function getTlsConfig(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    settingsdb.get(exports.TLS_CONFIG_KEY, function (error, value) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, gDefaults[exports.TLS_CONFIG_KEY]);
+        if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
+
+        callback(null, JSON.parse(value)); // provider
     });
 }
 

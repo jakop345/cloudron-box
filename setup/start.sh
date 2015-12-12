@@ -176,6 +176,14 @@ if [[ ! -z "${arg_dns_config}" ]]; then
         -e "REPLACE INTO settings (name, value) VALUES (\"dns_config\", '$arg_dns_config')" box
 fi
 
+# Add TLS Configuration
+if [[ ! -z "${arg_tls_config}" ]]; then
+    echo "Add TLS Config"
+
+    mysql -u root -p${mysql_root_password} \
+        -e "REPLACE INTO settings (name, value) VALUES (\"tls_config\", '$arg_dns_config')" box
+fi
+
 # Add webadmin oauth client
 # The domain might have changed, therefor we have to update the record
 # !!! This needs to be in sync with the webadmin, specifically login_callback.js

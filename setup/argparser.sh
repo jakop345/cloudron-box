@@ -11,6 +11,7 @@ arg_is_custom_domain="false"
 arg_restore_key=""
 arg_restore_url=""
 arg_retire="false"
+arg_tls_config=""
 arg_tls_cert=""
 arg_tls_key=""
 arg_token=""
@@ -36,6 +37,9 @@ EOF
         # read possibly empty parameters here
         arg_tls_cert=$(echo "$2" | $json tlsCert)
         arg_tls_key=$(echo "$2" | $json tlsKey)
+
+        arg_tls_config=$(echo "$2" | $json tlsConfig)
+        [[ "${arg_tls_config}" == "null" ]] && arg_tls_config=""
 
         arg_restore_url=$(echo "$2" | $json restore.url)
         [[ "${arg_restore_url}" == "null" ]] && arg_restore_url=""
