@@ -177,12 +177,13 @@ if [[ ! -z "${arg_dns_config}" ]]; then
 fi
 
 # Add TLS Configuration
-if [[ ! -z "${arg_tls_config}" ]]; then
-    echo "Add TLS Config"
-
-    mysql -u root -p${mysql_root_password} \
-        -e "REPLACE INTO settings (name, value) VALUES (\"tls_config\", '$arg_tls_config')" box
-fi
+# Enable in next release because the previous version sends the certs as well
+# if [[ ! -z "${arg_tls_config}" ]]; then
+#     echo "Add TLS Config"
+# 
+#     mysql -u root -p${mysql_root_password} \
+#         -e "REPLACE INTO settings (name, value) VALUES (\"tls_config\", '$arg_tls_config')" box
+# fi
 
 # Add webadmin oauth client
 # The domain might have changed, therefor we have to update the record
