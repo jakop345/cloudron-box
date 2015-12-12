@@ -12,6 +12,7 @@ var acme = require('./cert/acme.js'),
     path = require('path'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
+    settings = require('./settings.js'),
     sysinfo = require('./sysinfo.js'),
     util = require('util'),
     waitForDns = require('./waitfordns.js'),
@@ -50,18 +51,22 @@ CertificatesError.INTERNAL_ERROR = 'Internal Error';
 CertificatesError.INVALID_CERT = 'Invalid certificate';
 
 function installAdminCertificate(callback) {
-    if (!config.isCustomDomain()) return callback();
+    settings.getTlsConfig(function (error, tlsConfig) {
+        if (error) return callback(error);
 
-    waitForDns(config.adminFqdn(), sysinfo.getIp(), config.fqdn(), function (error) {
-        if (error) return callback(error); // this cannot happen because we retry forever
+        if (tlsConfig.provider === 'caas') return callback();
 
-        ensureCertificate(config.adminFqdn(), function (error, certFilePath, keyFilePath) {
-            if (error) {
-                debug('Error obtaining certificate %s. Proceed anyway', error.message);
-                return callback();
-            }
+        waitForDns(config.adminFqdn(), sysinfo.getIp(), config.fqdn(), function (error) {
+            if (error) return callback(error); // this cannot happen because we retry forever
 
-            nginx.configureAdmin(certFilePath, keyFilePath, callback);
+            ensureCertificate(config.adminFqdn(), function (error, certFilePath, keyFilePath) {
+                if (error) {
+                    debug('Error obtaining certificate %s. Proceed anyway', error.message);
+                    return callback();
+                }
+
+                nginx.configureAdmin(certFilePath, keyFilePath, callback);
+            });
         });
     });
 }
@@ -156,21 +161,22 @@ function ensureCertificate(domain, callback) {
     assert.strictEqual(typeof domain, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    if (!config.isCustomDomain()) {
-        // currently, we don't allow uploading certs for non-custom domain
-        return callback(null, 'cert/host.cert', 'cert/host.key');
-    }
-
-    var certFilePath = path.join(paths.APP_CERTS_DIR, domain + '.cert');
-    var keyFilePath = path.join(paths.APP_CERTS_DIR, domain + '.key');
-
-    if (fs.existsSync(certFilePath)) return callback(null, certFilePath, keyFilePath); // TODO: check if cert needs renewal
-
-    debug('Using le-acme to get certificate');
-
-    acme.getCertificate(domain, paths.APP_CERTS_DIR, function (error) { // TODO: Should use backend
+    settings.getTlsConfig(function (error, tlsConfig) {
         if (error) return callback(error);
 
-        callback(null, certFilePath, keyFilePath);
+        if (tlsConfig.provider === 'caas') return callback(null, 'cert/host.cert', 'cert/host.key');
+
+        var certFilePath = path.join(paths.APP_CERTS_DIR, domain + '.cert');
+        var keyFilePath = path.join(paths.APP_CERTS_DIR, domain + '.key');
+
+        if (fs.existsSync(certFilePath)) return callback(null, certFilePath, keyFilePath); // TODO: check if cert needs renewal
+
+        debug('Using le-acme to get certificate');
+
+        acme.getCertificate(domain, paths.APP_CERTS_DIR, function (error) { // TODO: Should use backend
+            if (error) return callback(error);
+
+            callback(null, certFilePath, keyFilePath);
+        });
     });
 }
