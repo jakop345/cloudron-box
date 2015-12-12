@@ -582,10 +582,6 @@ function doUpdate(boxUpdateInfo, callback) {
                         apiServerOrigin: config.apiServerOrigin(),
                         webServerOrigin: config.webServerOrigin()
                     },
-                    // remove this after update
-                    tlsConfig: {
-                        provider: 'caas'
-                    },
 
                     version: boxUpdateInfo.version,
                     boxVersionsUrl: config.get('boxVersionsUrl')
