@@ -27,6 +27,7 @@ exports = module.exports = {
     setBackupConfig: setBackupConfig,
 
     getTlsConfig: getTlsConfig,
+    setTlsConfig: setTlsConfig,
 
     getDefaultSync: getDefaultSync,
     getAll: getAll,
@@ -60,7 +61,7 @@ var gDefaults = (function () {
     result[exports.DEVELOPER_MODE_KEY] = false;
     result[exports.DNS_CONFIG_KEY] = { };
     result[exports.BACKUP_CONFIG_KEY] = { };
-    result[exports.TLS_CONFIG_KEY] = { };
+    result[exports.TLS_CONFIG_KEY] = { provider: 'caas' };
 
     return result;
 })();
@@ -274,6 +275,23 @@ function getTlsConfig(callback) {
         if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
 
         callback(null, JSON.parse(value)); // provider
+    });
+}
+
+function setTlsConfig(tlsConfig, callback) {
+    assert.strictEqual(typeof tlsConfig, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
+    if (tlsConfig.provider !== 'caas' && tlsConfig.provider.indexOf('le-') !== 0) {
+        return callback(new SettingsError(SettingsError.BAD_FIELD, 'provider must be caas or le-*'));
+    }
+
+    settingsdb.set(exports.TLS_CONFIG_KEY, JSON.stringify(tlsConfig), function (error) {
+        if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
+
+        exports.events.emit(exports.TLS_CONFIG_KEY, tlsConfig);
+
+        callback(null);
     });
 }
 
