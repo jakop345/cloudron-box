@@ -582,10 +582,9 @@ function doUpdate(boxUpdateInfo, callback) {
                         apiServerOrigin: config.apiServerOrigin(),
                         webServerOrigin: config.webServerOrigin()
                     },
+                    // remove this after update
                     tlsConfig: {
-                        provider: 'caas',
-                        cert: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), 'utf8'),
-                        key: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'), 'utf8'),
+                        provider: 'caas'
                     },
 
                     version: boxUpdateInfo.version,
