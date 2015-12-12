@@ -181,7 +181,7 @@ if [[ ! -z "${arg_tls_config}" ]]; then
     echo "Add TLS Config"
 
     mysql -u root -p${mysql_root_password} \
-        -e "REPLACE INTO settings (name, value) VALUES (\"tls_config\", '$arg_dns_config')" box
+        -e "REPLACE INTO settings (name, value) VALUES (\"tls_config\", '$arg_tls_config')" box
 fi
 
 # Add webadmin oauth client
