@@ -26,6 +26,8 @@ exports = module.exports = {
     getBackupConfig: getBackupConfig,
     setBackupConfig: setBackupConfig,
 
+    getTlsConfig: getTlsConfig,
+
     getDefaultSync: getDefaultSync,
     getAll: getAll,
 
