@@ -357,7 +357,7 @@ function getCertificate(domain, outdir, callback) {
 
     if (!fs.existsSync(paths.ACME_ACCOUNT_KEY_FILE)) {
         debug('getCertificate: generating acme account key on first run');
-        accountKeyPem = safe.execSync('openssl genrsa 4096');
+        accountKeyPem = safe.child_process.execSync('openssl genrsa 4096');
         if (!accountKeyPem) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
 
         safe.fs.writeFileSync(paths.ACME_ACCOUNT_KEY_FILE, accountKeyPem);
