@@ -267,25 +267,11 @@ function signCertificate(accountKeyPem, csrDer, callback) {
 
         if (!('location' in result.headers)) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, 'Missing location in downloadCertificate'));
 
-        var certificateLocation = result.headers.location;
-        debug('signCertificate: certificate is available at %s', certificateLocation);
-
-        superagent.get(certificateLocation).buffer().parse(function (res, done) {
-            var data = [ ];
-            res.on('data', function(chunk) { data.push(chunk); });
-            res.on('end', function () { res.text = Buffer.concat(data); done(); });
-        }).end(function (error, result) {
-            if (error && !error.response) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, 'Network error when downloading certificate'));
-            if (result.statusCode === 202) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, 'Retry not implemented yet'));
-            if (result.statusCode !== 200) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, util.format('Failed to get cert. Expecting 200, got %s %s', result.statusCode, result.text)));
-
-            callback(null, result.text);
-        });
+        return callback(null, result.headers.location);
     });
 }
 
-function downloadCertificate(accountKeyPem, domain, outdir, callback) {
-    assert(util.isBuffer(accountKeyPem));
+function createKeyAndCsr(domain, outdir, callback) {
     assert.strictEqual(typeof domain, 'string');
     assert.strictEqual(typeof outdir, 'string');
     assert.strictEqual(typeof callback, 'function');
@@ -297,13 +283,35 @@ function downloadCertificate(accountKeyPem, domain, outdir, callback) {
     if (!key) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
     if (!safe.fs.writeFileSync(privateKeyFile, key)) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
 
-    debug('downloadCertificate: key file saved at %s', privateKeyFile);
+    debug('createKeyAndCsr: key file saved at %s', privateKeyFile);
 
     var csrDer = execSync(util.format('openssl req -new -key %s -outform DER -subj /CN=%s', privateKeyFile, domain));
     if (!csrDer) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
+    var csrFile = path.join(outdir, domain + '.csr');
+    if (!safe.fs.writeFileSync(csrFile, csrFile)) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
 
-    signCertificate(accountKeyPem, csrDer, function (error, certificateDer) {
-        if (error) return callback(error);
+    debug('createKeyAndCsr: csr file (DER) saved at %s', csrFile);
+
+    callback(null, csrDer);
+}
+
+function downloadCertificate(domain, outdir, certUrl, callback) {
+    assert.strictEqual(typeof domain, 'string');
+    assert.strictEqual(typeof outdir, 'string');
+    assert.strictEqual(typeof certUrl, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    superagent.get(certUrl).buffer().parse(function (res, done) {
+        var data = [ ];
+        res.on('data', function(chunk) { data.push(chunk); });
+        res.on('end', function () { res.text = Buffer.concat(data); done(); });
+    }).end(function (error, result) {
+        if (error && !error.response) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, 'Network error when downloading certificate'));
+        if (result.statusCode === 202) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, 'Retry not implemented yet'));
+        if (result.statusCode !== 200) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, util.format('Failed to get cert. Expecting 200, got %s %s', result.statusCode, result.text)));
+
+        var certificateDer = result.text;
+        var execSync = safe.child_process.execSync;
 
         safe.fs.writeFileSync(path.join(outdir, domain + '.der'), certificateDer);
         debug('downloadCertificate: cert der file saved');
@@ -343,11 +351,13 @@ function acmeFlow(domain, email, accountKeyPem, outdir, callback) {
             if (httpChallenges.length === 0) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, 'no http challenges'));
             var challenge = httpChallenges[0];
 
-            async.series([
+            async.waterfall([
                 prepareHttpChallenge.bind(null, accountKeyPem, challenge),
                 notifyChallengeReady.bind(null, accountKeyPem, challenge),
                 waitForChallenge.bind(null, challenge),
-                downloadCertificate.bind(null, accountKeyPem, domain, outdir)
+                createKeyAndCsr.bind(null, domain, outdir),
+                signCertificate.bind(null, accountKeyPem),
+                downloadCertificate.bind(null, domain, outdir)
             ], callback);
         });
     });
