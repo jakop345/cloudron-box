@@ -318,6 +318,8 @@ function downloadCertificate(accountKeyPem, domain, outdir, callback) {
         var fullChainPem = Buffer.concat([certificatePem, chainPem]);
         if (!safe.fs.writeFileSync(certificateFile, fullChainPem)) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
 
+        debug('downloadCertificate: cert file saved at %s', certificateFile);
+
         callback();
     });
 }

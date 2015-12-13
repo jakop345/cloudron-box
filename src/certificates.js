@@ -164,14 +164,20 @@ function ensureCertificate(domain, callback) {
     settings.getTlsConfig(function (error, tlsConfig) {
         if (error) return callback(error);
 
-        if (tlsConfig.provider === 'caas') return callback(null, 'cert/host.cert', 'cert/host.key');
+        if (tlsConfig.provider === 'caas') {
+            debug('ensureCertificate: %s caas provider. using fallback certificate', domain);
+            return callback(null, 'cert/host.cert', 'cert/host.key');
+        }
 
         var certFilePath = path.join(paths.APP_CERTS_DIR, domain + '.cert');
         var keyFilePath = path.join(paths.APP_CERTS_DIR, domain + '.key');
 
-        if (fs.existsSync(certFilePath)) return callback(null, certFilePath, keyFilePath); // TODO: check if cert needs renewal
+        if (fs.existsSync(certFilePath) && fs.existsSync(keyFilePath)) {
+            debug('ensureCertificate: %s. certificate already exists at %s', domain, certFilePath);
+            return callback(null, certFilePath, keyFilePath); // TODO: check if cert needs renewal
+        }
 
-        debug('Using le-acme to get certificate');
+        debug('Using le-acme to get certificate for %s', domain);
 
         acme.getCertificate(domain, paths.APP_CERTS_DIR, function (error) { // TODO: Should use backend
             if (error) return callback(error);
