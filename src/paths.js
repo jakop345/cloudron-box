@@ -31,5 +31,5 @@ exports = module.exports = {
     UPDATE_CHECKER_FILE: path.join(config.baseDir(), 'data/box/updatechecker.json'),
 
     ACME_CHALLENGES_DIR: path.join(config.baseDir(), 'data/acme'),
-    ACME_ACCOUNT_KEY_FILE: path.join(config.baseDir(), 'data/box/acme.key')
+    ACME_ACCOUNT_KEY_FILE: path.join(config.baseDir(), 'data/box/acme/acme.key')
 };
