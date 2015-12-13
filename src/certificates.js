@@ -61,7 +61,7 @@ function installAdminCertificate(callback) {
 
             ensureCertificate(config.adminFqdn(), function (error, certFilePath, keyFilePath) {
                 if (error) {
-                    debug('Error obtaining certificate %s. Proceed anyway', error.message);
+                    debug('Error obtaining certificate. Proceed anyway', error);
                     return callback();
                 }
 
