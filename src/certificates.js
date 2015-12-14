@@ -88,7 +88,7 @@ function installAdminCertificate(callback) {
 function needsRenewalSync(certFilePath) {
     var result = safe.child_process.execSync('openssl x509 -checkend %s -in %s', 60 * 60 * 24 * 5, certFilePath);
 
-    return result !== null;
+    return result === null; // command errored
 }
 
 function autoRenew(callback) {
