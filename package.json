@@ -54,7 +54,7 @@
     "passport-oauth2-client-password": "^0.1.2",
     "password-generator": "^1.0.0",
     "proxy-middleware": "^0.13.0",
-    "safetydance": "0.0.19",
+    "safetydance": "^0.1.0",
     "semver": "^4.3.6",
     "serve-favicon": "^2.2.0",
     "split": "^1.0.0",
