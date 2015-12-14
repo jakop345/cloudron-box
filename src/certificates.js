@@ -4,6 +4,7 @@
 
 var acme = require('./cert/acme.js'),
     assert = require('assert'),
+    async = require('async'),
     caas = require('./cert/caas.js'),
     config = require('./config.js'),
     constants = require('./constants.js'),
@@ -29,6 +30,8 @@ exports = module.exports = {
     ensureCertificate: ensureCertificate
 };
 
+var NOOP_CALLBACK = function (error) { if (error) debug(error); };
+
 function CertificatesError(reason, errorOrMessage) {
     assert.strictEqual(typeof reason, 'string');
     assert(errorOrMessage instanceof Error || typeof errorOrMessage === 'string' || typeof errorOrMessage === 'undefined');
@@ -50,6 +53,16 @@ function CertificatesError(reason, errorOrMessage) {
 util.inherits(CertificatesError, Error);
 CertificatesError.INTERNAL_ERROR = 'Internal Error';
 CertificatesError.INVALID_CERT = 'Invalid certificate';
+
+function getApi(callback) {
+    settings.getTlsConfig(function (error, tlsConfig) {
+        if (error) return callback(error);
+
+        var api = tlsConfig.provider === 'caas' ? caas : acme;
+
+        callback(null, api);
+    });
+}
 
 function installAdminCertificate(callback) {
     settings.getTlsConfig(function (error, tlsConfig) {
@@ -162,10 +175,8 @@ function ensureCertificate(domain, callback) {
     assert.strictEqual(typeof domain, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    settings.getTlsConfig(function (error, tlsConfig) {
+    getApi(function (error, api) {
         if (error) return callback(error);
-
-        var api = tlsConfig.provider === 'caas' ? caas : acme;
 
         // check if user uploaded a specific cert. ideally, we should not mix user certs and automatic certs as we do here...
         var userCertFilePath = path.join(paths.APP_CERTS_DIR, domain + '.cert');
@@ -176,7 +187,7 @@ function ensureCertificate(domain, callback) {
             return callback(null, userCertFilePath, userKeyFilePath); // TODO: check if cert needs renewal
         }
 
-        debug('Using %s to get certificate for %s', tlsConfig.provider, domain);
+        debug('ensureCertificate: getting certificate for %s', domain);
 
         api.getCertificate(domain, function (error, certFilePath, keyFilePath) {
             if (error) return callback(error);
