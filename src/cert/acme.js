@@ -252,10 +252,13 @@ function waitForChallenge(challenge, callback) {
 }
 
 // https://community.letsencrypt.org/t/public-beta-rate-limits/4772 for rate limits
-function signCertificate(accountKeyPem, csrDer, callback) {
+function signCertificate(accountKeyPem, domain, csrDer, callback) {
     assert(util.isBuffer(accountKeyPem));
+    assert.strictEqual(typeof domain, 'string');
     assert(util.isBuffer(csrDer));
     assert.strictEqual(typeof callback, 'function');
+
+    var outdir = paths.APP_CERTS_DIR;
 
     var payload = {
         resource: 'new-cert',
@@ -268,7 +271,11 @@ function signCertificate(accountKeyPem, csrDer, callback) {
         if (error) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, 'Network error when signing certificate: ' + error.message));
         if (result.statusCode !== 201) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, util.format('Failed to sign certificate. Expecting 201, got %s %s', result.statusCode, result.text)));
 
-        if (!('location' in result.headers)) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, 'Missing location in downloadCertificate'));
+        var certUrl = result.headers.location;
+
+        if (!certUrl) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, 'Missing location in downloadCertificate'));
+
+        safe.fs.writeFileSync(path.join(outdir, domain + '.url'), certUrl, 'utf8'); // for renewal
 
         return callback(null, result.headers.location);
     });
@@ -361,7 +368,7 @@ function acmeFlow(domain, email, accountKeyPem, callback) {
                 notifyChallengeReady.bind(null, accountKeyPem, challenge),
                 waitForChallenge.bind(null, challenge),
                 createKeyAndCsr.bind(null, domain),
-                signCertificate.bind(null, accountKeyPem),
+                signCertificate.bind(null, accountKeyPem, domain),
                 downloadCertificate.bind(null, domain)
             ], function (error) {
                 if (error) return callback(error);
