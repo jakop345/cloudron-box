@@ -343,13 +343,24 @@ function downloadCertificate(domain, certUrl, callback) {
     });
 }
 
-function acmeFlow(domain, email, accountKeyPem, callback) {
+function acmeFlow(domain, callback) {
     assert.strictEqual(typeof domain, 'string');
-    assert.strictEqual(typeof email, 'string');
-    assert(util.isBuffer(accountKeyPem));
     assert.strictEqual(typeof callback, 'function');
 
     var outdir = paths.APP_CERTS_DIR;
+
+    var email = 'admin@' + config.fqdn();
+    var accountKeyPem;
+
+    if (!fs.existsSync(paths.ACME_ACCOUNT_KEY_FILE)) {
+        debug('getCertificate: generating acme account key on first run');
+        accountKeyPem = safe.child_process.execSync('openssl genrsa 4096');
+        if (!accountKeyPem) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
+
+        safe.fs.writeFileSync(paths.ACME_ACCOUNT_KEY_FILE, accountKeyPem);
+    } else {
+        accountKeyPem = fs.readFileSync(paths.ACME_ACCOUNT_KEY_FILE);
+    }
 
     registerUser(accountKeyPem, email, function (error) {
         if (error && error.reason !== AcmeError.ALREADY_EXISTS) return callback(error);
@@ -383,18 +394,5 @@ function getCertificate(domain, callback) {
     assert.strictEqual(typeof domain, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    var email = 'admin@' + config.fqdn();
-    var accountKeyPem;
-
-    if (!fs.existsSync(paths.ACME_ACCOUNT_KEY_FILE)) {
-        debug('getCertificate: generating acme account key on first run');
-        accountKeyPem = safe.child_process.execSync('openssl genrsa 4096');
-        if (!accountKeyPem) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
-
-        safe.fs.writeFileSync(paths.ACME_ACCOUNT_KEY_FILE, accountKeyPem);
-    } else {
-        accountKeyPem = fs.readFileSync(paths.ACME_ACCOUNT_KEY_FILE);
-    }
-
-    acmeFlow(domain, email, accountKeyPem, callback);
+    acmeFlow(domain, callback);
 }
