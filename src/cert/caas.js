@@ -7,9 +7,8 @@ exports = module.exports = {
 var assert = require('assert'),
 	debug = require('debug')('box:cert/caas.js');
 
-function getCertificate(domain, outdir, callback) {
+function getCertificate(domain, callback) {
 	assert.strictEqual(typeof domain, 'string');
-	assert.strictEqual(typeof outdir, 'string');
 	assert.strictEqual(typeof callback, 'function');
 
     debug('getCertificate: using fallback certificate', domain);
