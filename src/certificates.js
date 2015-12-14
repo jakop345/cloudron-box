@@ -177,7 +177,7 @@ function ensureCertificate(domain, callback) {
 
         debug('Using le-acme to get certificate for %s', domain);
 
-        api.getCertificate(domain, paths.APP_CERTS_DIR, function (error) { // TODO: Should use backend
+        api.getCertificate(domain, paths.APP_CERTS_DIR, function (error) {
             if (error) return callback(error);
 
             callback(null, certFilePath, keyFilePath);
