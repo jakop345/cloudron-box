@@ -347,8 +347,6 @@ function acmeFlow(domain, callback) {
     assert.strictEqual(typeof domain, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    var outdir = paths.APP_CERTS_DIR;
-
     var email = 'admin@' + config.fqdn();
     var accountKeyPem;
 
@@ -381,11 +379,7 @@ function acmeFlow(domain, callback) {
                 createKeyAndCsr.bind(null, domain),
                 signCertificate.bind(null, accountKeyPem, domain),
                 downloadCertificate.bind(null, domain)
-            ], function (error) {
-                if (error) return callback(error);
-
-                callback(null, path.join(outdir, domain + '.cert'), path.join(outdir, domain + '.key'));
-            });
+            ], callback);
         });
     });
 }
@@ -396,12 +390,18 @@ function getCertificate(domain, callback) {
 
     var outdir = paths.APP_CERTS_DIR;
     var certUrl = safe.fs.readFileSync(path.join(outdir, domain + '.url'), 'utf8');
+    var certificateGetter;
     if (certUrl) {
         debug('getCertificate: renewing existing cert for %s from %s', domain, certUrl);
-        return downloadCertificate(domain, certUrl, callback);
+        certificateGetter = downloadCertificate.bind(null, domain, certUrl);
+    } else {
+        debug('getCertificate: start acme flow for %s', domain);
+        certificateGetter = acmeFlow.bind(null, domain);
     }
 
-    debug('getCertificate: start acme flow for %s', domain);
+    certificateGetter(function (error) {
+        if (error) return callback(error);
 
-    acmeFlow(domain, callback);
+        callback(null, path.join(outdir, domain + '.cert'), path.join(outdir, domain + '.key'));
+    });
 }
