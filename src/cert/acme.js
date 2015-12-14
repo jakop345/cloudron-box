@@ -394,5 +394,14 @@ function getCertificate(domain, callback) {
     assert.strictEqual(typeof domain, 'string');
     assert.strictEqual(typeof callback, 'function');
 
+    var outdir = paths.APP_CERTS_DIR;
+    var certUrl = safe.fs.readFileSync(path.join(outdir, domain + '.url'), 'utf8');
+    if (certUrl) {
+        debug('getCertificate: renewing existing cert for %s from %s', domain, certUrl);
+        return downloadCertificate(domain, certUrl, callback);
+    }
+
+    debug('getCertificate: start acme flow for %s', domain);
+
     acmeFlow(domain, callback);
 }
