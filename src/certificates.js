@@ -85,6 +85,12 @@ function installAdminCertificate(callback) {
     });
 }
 
+function needsRenewalSync(certFilePath) {
+    var result = safe.child_process.execSync('openssl x509 -checkend %s -in %s', 60 * 60 * 24 * 5, certFilePath);
+
+    return result !== null;
+}
+
 function autoRenew() {
     debug('will automatically renew certs');
 }
@@ -175,24 +181,23 @@ function ensureCertificate(domain, callback) {
     assert.strictEqual(typeof domain, 'string');
     assert.strictEqual(typeof callback, 'function');
 
+    // check if user uploaded a specific cert. ideally, we should not mix user certs and automatic certs as we do here...
+    var userCertFilePath = path.join(paths.APP_CERTS_DIR, domain + '.cert');
+    var userKeyFilePath = path.join(paths.APP_CERTS_DIR, domain + '.key');
+
+    if (fs.existsSync(userCertFilePath) && fs.existsSync(userKeyFilePath)) {
+        debug('ensureCertificate: %s. certificate already exists at %s', domain, userKeyFilePath);
+
+        if (!needsRenewalSync(userCertFilePath)) return callback(null, userCertFilePath, userKeyFilePath);
+
+        debug('ensureCertificate: %s cert require renewal', domain);
+    }
+
     getApi(function (error, api) {
         if (error) return callback(error);
 
-        // check if user uploaded a specific cert. ideally, we should not mix user certs and automatic certs as we do here...
-        var userCertFilePath = path.join(paths.APP_CERTS_DIR, domain + '.cert');
-        var userKeyFilePath = path.join(paths.APP_CERTS_DIR, domain + '.key');
-
-        if (fs.existsSync(userCertFilePath) && fs.existsSync(userKeyFilePath)) {
-            debug('ensureCertificate: %s. certificate already exists at %s', domain, userKeyFilePath);
-            return callback(null, userCertFilePath, userKeyFilePath); // TODO: check if cert needs renewal
-        }
-
         debug('ensureCertificate: getting certificate for %s', domain);
 
-        api.getCertificate(domain, function (error, certFilePath, keyFilePath) {
-            if (error) return callback(error);
-
-            callback(null, certFilePath, keyFilePath);
-        });
+        api.getCertificate(domain, callback);
     });
 }
