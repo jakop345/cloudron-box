@@ -4,6 +4,7 @@
 
 var acme = require('./cert/acme.js'),
     assert = require('assert'),
+    caas = require('./cert/caas.js'),
     config = require('./config.js'),
     constants = require('./constants.js'),
     debug = require('debug')('box:src/certificates'),
@@ -164,10 +165,7 @@ function ensureCertificate(domain, callback) {
     settings.getTlsConfig(function (error, tlsConfig) {
         if (error) return callback(error);
 
-        if (tlsConfig.provider === 'caas') {
-            debug('ensureCertificate: %s caas provider. using fallback certificate', domain);
-            return callback(null, 'cert/host.cert', 'cert/host.key');
-        }
+        var api = tlsConfig.provider === 'caas' ? caas : acme;
 
         var certFilePath = path.join(paths.APP_CERTS_DIR, domain + '.cert');
         var keyFilePath = path.join(paths.APP_CERTS_DIR, domain + '.key');
@@ -179,7 +177,7 @@ function ensureCertificate(domain, callback) {
 
         debug('Using le-acme to get certificate for %s', domain);
 
-        acme.getCertificate(domain, paths.APP_CERTS_DIR, function (error) { // TODO: Should use backend
+        api.getCertificate(domain, paths.APP_CERTS_DIR, function (error) { // TODO: Should use backend
             if (error) return callback(error);
 
             callback(null, certFilePath, keyFilePath);
