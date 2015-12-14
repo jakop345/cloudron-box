@@ -361,7 +361,11 @@ function acmeFlow(domain, email, accountKeyPem, outdir, callback) {
                 createKeyAndCsr.bind(null, domain, outdir),
                 signCertificate.bind(null, accountKeyPem),
                 downloadCertificate.bind(null, domain, outdir)
-            ], callback);
+            ], function (error) {
+                if (error) return callback(error);
+
+                callback(null, path.join(outdir, domain + '.cert'), path.join(outdir, domain + '.key'));
+            });
         });
     });
 }
