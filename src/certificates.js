@@ -167,17 +167,18 @@ function ensureCertificate(domain, callback) {
 
         var api = tlsConfig.provider === 'caas' ? caas : acme;
 
-        var certFilePath = path.join(paths.APP_CERTS_DIR, domain + '.cert');
-        var keyFilePath = path.join(paths.APP_CERTS_DIR, domain + '.key');
+        // check if user uploaded a specific cert. ideally, we should not mix user certs and automatic certs as we do here...
+        var userCertFilePath = path.join(paths.APP_CERTS_DIR, domain + '.cert');
+        var userKeyFilePath = path.join(paths.APP_CERTS_DIR, domain + '.key');
 
-        if (fs.existsSync(certFilePath) && fs.existsSync(keyFilePath)) {
-            debug('ensureCertificate: %s. certificate already exists at %s', domain, certFilePath);
-            return callback(null, certFilePath, keyFilePath); // TODO: check if cert needs renewal
+        if (fs.existsSync(userCertFilePath) && fs.existsSync(userKeyFilePath)) {
+            debug('ensureCertificate: %s. certificate already exists at %s', domain, userKeyFilePath);
+            return callback(null, userCertFilePath, userKeyFilePath); // TODO: check if cert needs renewal
         }
 
         debug('Using %s to get certificate for %s', tlsConfig.provider, domain);
 
-        api.getCertificate(domain, paths.APP_CERTS_DIR, function (error) {
+        api.getCertificate(domain, paths.APP_CERTS_DIR, function (error, certFilePath, keyFilePath) {
             if (error) return callback(error);
 
             callback(null, certFilePath, keyFilePath);
