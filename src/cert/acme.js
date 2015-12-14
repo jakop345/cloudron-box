@@ -245,7 +245,10 @@ function waitForChallenge(challenge, callback) {
             else if (result.body.status === 'valid') return retryCallback();
             else return retryCallback(new AcmeError(AcmeError.EXTERNAL_ERROR, 'Unexpected status: ' + result.body.status));
         });
-    }, callback);
+    }, function retryFinished(error) {
+        // async.retry will pass 'undefined' as second arg making it unusable with async.waterfall()
+        callback(error);
+    });
 }
 
 // https://community.letsencrypt.org/t/public-beta-rate-limits/4772 for rate limits
