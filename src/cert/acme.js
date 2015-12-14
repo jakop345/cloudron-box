@@ -265,7 +265,7 @@ function signCertificate(accountKeyPem, domain, csrDer, callback) {
         csr: b64(csrDer)
     };
 
-    debug('signCertificate: signing %s', payload.csr);
+    debug('signCertificate: sending new-cert request');
 
     sendSignedRequest(CA_STAGING + '/acme/new-cert', accountKeyPem, JSON.stringify(payload), function (error, result) {
         if (error) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, 'Network error when signing certificate: ' + error.message));
