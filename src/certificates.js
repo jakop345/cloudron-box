@@ -91,8 +91,36 @@ function needsRenewalSync(certFilePath) {
     return result !== null;
 }
 
-function autoRenew() {
-    debug('will automatically renew certs');
+function autoRenew(callback) {
+    debug('autoRenew: Checking certificates for renewal');
+    callback = callback || NOOP_CALLBACK;
+
+    var filenames = safe.fs.readdirSync(paths.APP_CERTS_DIR);
+    if (!filenames) {
+        debug('autoRenew: Error getting filenames: %s', safe.error.message);
+        return;
+    }
+
+    var certs = filenames.filter(function (f) {
+        return f.match(/\.cert$/) !== null && needsRenewalSync(path.join(paths.APP_CERTS_DIR, f));
+    });
+
+    debug('autoRenew: %j needs to be renewed', certs);
+
+    getApi(function (error, api) {
+        if (error) return callback(error);
+
+        async.eachSeries(certs, function iterator(cert, iteratorCallback) {
+            var domain = cert.match(/^(.*)\.cert$/)[1];
+            if (domain === 'host') return iteratorCallback(); // cannot renew fallback cert
+
+            api.getCertificate(domain, function (error) {
+                if (error) debug('autoRenew: could not renew cert for %s', domain, error);
+
+                iteratorCallback(); // move on to next cert
+            });
+        });
+    });
 }
 
 // note: https://tools.ietf.org/html/rfc4346#section-7.4.2 (certificate_list) requires that the
