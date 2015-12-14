@@ -274,11 +274,11 @@ function signCertificate(accountKeyPem, csrDer, callback) {
     });
 }
 
-function createKeyAndCsr(domain, outdir, callback) {
+function createKeyAndCsr(domain, callback) {
     assert.strictEqual(typeof domain, 'string');
-    assert.strictEqual(typeof outdir, 'string');
     assert.strictEqual(typeof callback, 'function');
 
+    var outdir = paths.APP_CERTS_DIR;
     var execSync = safe.child_process.execSync;
 
     var privateKeyFile = path.join(outdir, domain + '.key');
@@ -298,11 +298,12 @@ function createKeyAndCsr(domain, outdir, callback) {
     callback(null, csrDer);
 }
 
-function downloadCertificate(domain, outdir, certUrl, callback) {
+function downloadCertificate(domain, certUrl, callback) {
     assert.strictEqual(typeof domain, 'string');
-    assert.strictEqual(typeof outdir, 'string');
     assert.strictEqual(typeof certUrl, 'string');
     assert.strictEqual(typeof callback, 'function');
+
+    var outdir = paths.APP_CERTS_DIR;
 
     superagent.get(certUrl).buffer().parse(function (res, done) {
         var data = [ ];
@@ -335,12 +336,13 @@ function downloadCertificate(domain, outdir, certUrl, callback) {
     });
 }
 
-function acmeFlow(domain, email, accountKeyPem, outdir, callback) {
+function acmeFlow(domain, email, accountKeyPem, callback) {
     assert.strictEqual(typeof domain, 'string');
     assert.strictEqual(typeof email, 'string');
     assert(util.isBuffer(accountKeyPem));
-    assert.strictEqual(typeof outdir, 'string');
     assert.strictEqual(typeof callback, 'function');
+
+    var outdir = paths.APP_CERTS_DIR;
 
     registerUser(accountKeyPem, email, function (error) {
         if (error && error.reason !== AcmeError.ALREADY_EXISTS) return callback(error);
@@ -358,9 +360,9 @@ function acmeFlow(domain, email, accountKeyPem, outdir, callback) {
                 prepareHttpChallenge.bind(null, accountKeyPem, challenge),
                 notifyChallengeReady.bind(null, accountKeyPem, challenge),
                 waitForChallenge.bind(null, challenge),
-                createKeyAndCsr.bind(null, domain, outdir),
+                createKeyAndCsr.bind(null, domain),
                 signCertificate.bind(null, accountKeyPem),
-                downloadCertificate.bind(null, domain, outdir)
+                downloadCertificate.bind(null, domain)
             ], function (error) {
                 if (error) return callback(error);
 
@@ -370,7 +372,10 @@ function acmeFlow(domain, email, accountKeyPem, outdir, callback) {
     });
 }
 
-function getCertificate(domain, outdir, callback) {
+function getCertificate(domain, callback) {
+    assert.strictEqual(typeof domain, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
     var email = 'admin@' + config.fqdn();
     var accountKeyPem;
 
@@ -384,5 +389,5 @@ function getCertificate(domain, outdir, callback) {
         accountKeyPem = fs.readFileSync(paths.ACME_ACCOUNT_KEY_FILE);
     }
 
-    acmeFlow(domain, email, accountKeyPem, outdir, callback);
+    acmeFlow(domain, email, accountKeyPem, callback);
 }

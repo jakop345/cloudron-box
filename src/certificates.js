@@ -178,7 +178,7 @@ function ensureCertificate(domain, callback) {
 
         debug('Using %s to get certificate for %s', tlsConfig.provider, domain);
 
-        api.getCertificate(domain, paths.APP_CERTS_DIR, function (error, certFilePath, keyFilePath) {
+        api.getCertificate(domain, function (error, certFilePath, keyFilePath) {
             if (error) return callback(error);
 
             callback(null, certFilePath, keyFilePath);
