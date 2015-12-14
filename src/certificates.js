@@ -175,7 +175,7 @@ function ensureCertificate(domain, callback) {
             return callback(null, certFilePath, keyFilePath); // TODO: check if cert needs renewal
         }
 
-        debug('Using le-acme to get certificate for %s', domain);
+        debug('Using %s to get certificate for %s', tlsConfig.provider, domain);
 
         api.getCertificate(domain, paths.APP_CERTS_DIR, function (error) {
             if (error) return callback(error);
