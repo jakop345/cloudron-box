@@ -348,7 +348,11 @@ function acmeFlow(domain, callback) {
     assert.strictEqual(typeof domain, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    var email = 'admin@' + config.fqdn();
+    // registering user with an email requires A or MX record (https://github.com/letsencrypt/boulder/issues/1197)
+    // we cannot use admin@fqdn because the user might not have set it up.
+    // we cannot use owner email because we don't have it yet (the admin cert is fetched before activation)
+    // one option is to update the owner email when a second cert is requested (https://github.com/ietf-wg-acme/acme/issues/30)
+    var email = 'admin@cloudron.io';
     var accountKeyPem;
 
     if (!fs.existsSync(paths.ACME_ACCOUNT_KEY_FILE)) {
@@ -358,6 +362,7 @@ function acmeFlow(domain, callback) {
 
         safe.fs.writeFileSync(paths.ACME_ACCOUNT_KEY_FILE, accountKeyPem);
     } else {
+        debug('getCertificate: using existing acme account key');
         accountKeyPem = fs.readFileSync(paths.ACME_ACCOUNT_KEY_FILE);
     }
 
