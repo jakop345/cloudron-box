@@ -92,7 +92,7 @@ After=network.target docker.socket
 Requires=docker.socket
 
 [Service]
-ExecStart=/usr/bin/docker -d -H fd:// -s btrfs -g /home/yellowtent/data/docker --log-driver=journald
+ExecStart=/usr/bin/docker -d -H fd:// -s btrfs -g /home/yellowtent/data/docker --log-driver=journald --exec-opt native.cgroupdriver=cgroupfs
 MountFlags=slave
 LimitNOFILE=1048576
 LimitNPROC=1048576
