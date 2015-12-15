@@ -40,9 +40,9 @@ function add(dnsConfig, zoneName, subdomain, type, values, callback) {
         .query({ token: dnsConfig.token })
         .send(data)
         .end(function (error, result) {
-            if (error) return callback(error);
-            if (result.status === 420) return callback(new SubdomainError(SubdomainError.STILL_BUSY));
-            if (result.status !== 201) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, util.format('%s %j', result.status, result.body)));
+            if (error && !error.response) return callback(error);
+            if (result.statusCode === 420) return callback(new SubdomainError(SubdomainError.STILL_BUSY));
+            if (result.statusCode !== 201) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, util.format('%s %j', result.statusCode, result.body)));
 
             return callback(null, result.body.changeId);
         });
@@ -63,8 +63,8 @@ function get(dnsConfig, zoneName, subdomain, type, callback) {
         .get(config.apiServerOrigin() + '/api/v1/domains/' + fqdn)
         .query({ token: dnsConfig.token, type: type })
         .end(function (error, result) {
-            if (error) return callback(error);
-            if (result.status !== 200) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, util.format('%s %j', result.status, result.body)));
+            if (error && !error.response) return callback(error);
+            if (result.statusCode !== 200) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, util.format('%s %j', result.statusCode, result.body)));
 
             return callback(null, result.body.values);
         });
@@ -107,10 +107,10 @@ function del(dnsConfig, zoneName, subdomain, type, values, callback) {
         .query({ token: dnsConfig.token })
         .send(data)
         .end(function (error, result) {
-            if (error) return callback(error);
-            if (result.status === 420) return callback(new SubdomainError(SubdomainError.STILL_BUSY));
-            if (result.status === 404) return callback(new SubdomainError(SubdomainError.NOT_FOUND));
-            if (result.status !== 204) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, util.format('%s %j', result.status, result.body)));
+            if (error && !error.response) return callback(error);
+            if (result.statusCode === 420) return callback(new SubdomainError(SubdomainError.STILL_BUSY));
+            if (result.statusCode === 404) return callback(new SubdomainError(SubdomainError.NOT_FOUND));
+            if (result.statusCode !== 204) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, util.format('%s %j', result.statusCode, result.body)));
 
             return callback(null);
         });
@@ -127,8 +127,8 @@ function getChangeStatus(dnsConfig, changeId, callback) {
         .get(config.apiServerOrigin() + '/api/v1/domains/' + config.fqdn() + '/status/' + changeId)
         .query({ token: dnsConfig.token })
         .end(function (error, result) {
-            if (error) return callback(error);
-            if (result.status !== 200) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, util.format('%s %j', result.status, result.body)));
+            if (error && !error.response) return callback(error);
+            if (result.statusCode !== 200) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, util.format('%s %j', result.statusCode, result.body)));
 
             return callback(null, result.body.status);
         });

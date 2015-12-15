@@ -32,7 +32,7 @@ function backupDone(filename, app, appBackupIds, callback) {
         };
 
         superagent.post(url).send(data).query({ token: config.token() }).end(function (error, result) {
-            if (error) return callback(error);
+            if (error && !error.response) return callback(error);
             if (result.statusCode !== 200) return callback(new Error(result.text));
             if (!result.body) return callback(new Error('Unexpected response'));
 

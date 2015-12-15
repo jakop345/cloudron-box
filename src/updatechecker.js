@@ -53,7 +53,7 @@ function getAppUpdates(callback) {
             .timeout(10 * 1000)
             .end(function (error, result) {
 
-            if (error) return callback(error);
+            if (error && !error.response) return callback(error);
 
             if (result.statusCode !== 200 || !result.body.appVersions) {
                 return callback(new Error(util.format('Error checking app update: %s %s', result.statusCode, result.text)));
@@ -88,8 +88,8 @@ function getBoxUpdates(callback) {
         .get(config.get('boxVersionsUrl'))
         .timeout(10 * 1000)
         .end(function (error, result) {
-        if (error) return callback(error);
-        if (result.status !== 200) return callback(new Error(util.format('Bad status: %s %s', result.status, result.text)));
+        if (error && !error.response) return callback(error);
+        if (result.statusCode !== 200) return callback(new Error(util.format('Bad status: %s %s', result.statusCode, result.text)));
 
         var versions = safe.JSON.parse(result.text);
 

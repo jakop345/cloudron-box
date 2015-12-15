@@ -11,7 +11,7 @@ var appdb = require('../../appdb.js'),
     config = require('../../config.js'),
     database = require('../../database.js'),
     expect = require('expect.js'),
-    request = require('superagent'),
+    superagent = require('superagent'),
     server = require('../../server.js'),
     settings = require('../../settings.js'),
     nock = require('nock'),
@@ -33,11 +33,10 @@ function setup(done) {
             var scope1 = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
             var scope2 = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/setup/done?setupToken=somesetuptoken').reply(201, {});
 
-            request.post(SERVER_URL + '/api/v1/cloudron/activate')
+            superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
                    .query({ setupToken: 'somesetuptoken' })
                    .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
                 expect(result.statusCode).to.eql(201);
                 expect(scope1.isDone()).to.be.ok();
@@ -74,22 +73,22 @@ describe('Backups API', function () {
     after(cleanup);
 
     describe('get', function () {
-        it('cannot get backups with appstore request failing', function (done) {
+        it('cannot get backups with appstore superagent failing', function (done) {
             var req = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/backups?token=BACKUP_TOKEN').reply(401, {});
 
-            request.get(SERVER_URL + '/api/v1/backups')
+            superagent.get(SERVER_URL + '/api/v1/backups')
                    .query({ access_token: token })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(503);
                 expect(req.isDone()).to.be.ok();
-                done(err);
+                done();
             });
         });
 
         it('can get backups', function (done) {
             var req = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/backups?token=BACKUP_TOKEN').reply(200, { backups: ['foo', 'bar']});
 
-            request.get(SERVER_URL + '/api/v1/backups')
+            superagent.get(SERVER_URL + '/api/v1/backups')
                    .query({ access_token: token })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(200);
@@ -97,26 +96,24 @@ describe('Backups API', function () {
                 expect(res.body.backups).to.be.an(Array);
                 expect(res.body.backups[0]).to.eql('foo');
                 expect(res.body.backups[1]).to.eql('bar');
-                done(err);
+                done();
             });
         });
     });
 
     describe('create', function () {
         it('fails due to mising token', function (done) {
-            request.post(SERVER_URL + '/api/v1/backups')
+            superagent.post(SERVER_URL + '/api/v1/backups')
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
                 done();
             });
         });
 
         it('fails due to wrong token', function (done) {
-            request.post(SERVER_URL + '/api/v1/backups')
+            superagent.post(SERVER_URL + '/api/v1/backups')
                    .query({ access_token: token.toUpperCase() })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
                 done();
             });
@@ -127,10 +124,9 @@ describe('Backups API', function () {
                         .post('/api/v1/boxes/' + config.fqdn() + '/awscredentials?token=BACKUP_TOKEN')
                         .reply(201, { credentials: { AccessKeyId: 'accessKeyId', SecretAccessKey: 'secretAccessKey', SessionToken: 'sessionToken' } });
 
-            request.post(SERVER_URL + '/api/v1/backups')
+            superagent.post(SERVER_URL + '/api/v1/backups')
                    .query({ access_token: token })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(202);
 
                 function checkAppstoreServerCalled() {

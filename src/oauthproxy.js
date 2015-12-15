@@ -92,7 +92,7 @@ function authenticate(req, res, next) {
             .post(config.internalAdminOrigin() + '/api/v1/oauth/token')
             .query(query).send(data)
             .end(function (error, result) {
-            if (error) {
+            if (error && !error.response) {
                 console.error(error);
                 return res.send(500, 'Unable to contact the oauth server.');
             }

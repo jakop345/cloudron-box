@@ -291,10 +291,10 @@ function purchase(appStoreId, callback) {
     var url = config.apiServerOrigin() + '/api/v1/apps/' + appStoreId + '/purchase';
 
     superagent.post(url).query({ token: config.token() }).end(function (error, res) {
-        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
-        if (res.status === 402) return callback(new AppsError(AppsError.BILLING_REQUIRED));
-        if (res.status === 404) return callback(new AppsError(AppsError.NOT_FOUND));
-        if (res.status !== 201 && res.status !== 200) return callback(new Error(util.format('App purchase failed. %s %j', res.status, res.body)));
+        if (error && !error.response) return callback(new AppsError(AppsError.EXTERNAL_ERROR, error));
+        if (res.statusCode === 402) return callback(new AppsError(AppsError.BILLING_REQUIRED));
+        if (res.statusCode === 404) return callback(new AppsError(AppsError.NOT_FOUND));
+        if (res.statusCode !== 201 && res.statusCode !== 200) return callback(new Error(util.format('App purchase failed. %s %j', res.status, res.body)));
 
         callback(null);
     });

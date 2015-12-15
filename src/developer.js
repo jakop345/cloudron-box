@@ -38,6 +38,7 @@ function DeveloperError(reason, errorOrMessage) {
 }
 util.inherits(DeveloperError, Error);
 DeveloperError.INTERNAL_ERROR = 'Internal Error';
+DeveloperError.EXTERNAL_ERROR = 'External Error';
 
 function enabled(callback) {
     assert.strictEqual(typeof callback, 'function');
@@ -77,8 +78,8 @@ function getNonApprovedApps(callback) {
 
     var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/apps';
     superagent.get(url).query({ token: config.token(), boxVersion: config.version() }).end(function (error, result) {
-        if (error) return callback(new DeveloperError(DeveloperError.INTERNAL_ERROR, error));
-        if (result.status !== 200) return callback(new DeveloperError(DeveloperError.INTERNAL_ERROR, util.format('App listing failed. %s %j', result.status, result.body)));
+        if (error && !error.response) return callback(new DeveloperError(DeveloperError.EXTERNAL_ERROR, error));
+        if (result.statusCode !== 200) return callback(new DeveloperError(DeveloperError.EXTERNAL_ERROR, util.format('App listing failed. %s %j', result.status, result.body)));
 
         callback(null, result.body.apps || []);
     });

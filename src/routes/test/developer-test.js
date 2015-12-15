@@ -11,7 +11,7 @@ var async = require('async'),
     database = require('../../database.js'),
     expect = require('expect.js'),
     nock = require('nock'),
-    request = require('superagent'),
+    superagent = require('superagent'),
     server = require('../../server.js'),
     settings = require('../../settings.js');
 
@@ -43,11 +43,10 @@ describe('Developer API', function () {
                     var scope1 = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
                     var scope2 = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/setup/done?setupToken=somesetuptoken').reply(201, {});
 
-                    request.post(SERVER_URL + '/api/v1/cloudron/activate')
+                    superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
                            .query({ setupToken: 'somesetuptoken' })
                            .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
                            .end(function (error, result) {
-                        expect(error).to.not.be.ok();
                         expect(result).to.be.ok();
                         expect(scope1.isDone()).to.be.ok();
                         expect(scope2.isDone()).to.be.ok();
@@ -67,9 +66,8 @@ describe('Developer API', function () {
             settings.setDeveloperMode(true, function (error) {
                 expect(error).to.be(null);
 
-                request.get(SERVER_URL + '/api/v1/developer')
+                superagent.get(SERVER_URL + '/api/v1/developer')
                        .end(function (error, result) {
-                    expect(error).to.not.be.ok();
                     expect(result.statusCode).to.equal(401);
                     done();
                 });
@@ -80,10 +78,9 @@ describe('Developer API', function () {
             settings.setDeveloperMode(true, function (error) {
                 expect(error).to.be(null);
 
-                request.get(SERVER_URL + '/api/v1/developer')
+                superagent.get(SERVER_URL + '/api/v1/developer')
                        .query({ access_token: token })
                        .end(function (error, result) {
-                    expect(error).to.not.be.ok();
                     expect(result.statusCode).to.equal(200);
                     done();
                 });
@@ -94,10 +91,9 @@ describe('Developer API', function () {
             settings.setDeveloperMode(false, function (error) {
                 expect(error).to.be(null);
 
-                request.get(SERVER_URL + '/api/v1/developer')
+                superagent.get(SERVER_URL + '/api/v1/developer')
                        .query({ access_token: token })
                        .end(function (error, result) {
-                    expect(error).to.not.be.ok();
                     expect(result.statusCode).to.equal(412);
                     done();
                 });
@@ -114,11 +110,10 @@ describe('Developer API', function () {
                     var scope1 = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
                     var scope2 = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/setup/done?setupToken=somesetuptoken').reply(201, {});
 
-                    request.post(SERVER_URL + '/api/v1/cloudron/activate')
+                    superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
                            .query({ setupToken: 'somesetuptoken' })
                            .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
                            .end(function (error, result) {
-                        expect(error).to.not.be.ok();
                         expect(result).to.be.ok();
                         expect(scope1.isDone()).to.be.ok();
                         expect(scope2.isDone()).to.be.ok();
@@ -135,82 +130,74 @@ describe('Developer API', function () {
         after(cleanup);
 
         it('fails without token', function (done) {
-            request.post(SERVER_URL + '/api/v1/developer')
+            superagent.post(SERVER_URL + '/api/v1/developer')
                    .send({ enabled: true })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
                 done();
             });
         });
 
         it('fails due to missing password', function (done) {
-            request.post(SERVER_URL + '/api/v1/developer')
+            superagent.post(SERVER_URL + '/api/v1/developer')
                    .query({ access_token: token })
                    .send({ enabled: true })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
                 done();
             });
         });
 
         it('fails due to empty password', function (done) {
-            request.post(SERVER_URL + '/api/v1/developer')
+            superagent.post(SERVER_URL + '/api/v1/developer')
                    .query({ access_token: token })
                    .send({ password: '', enabled: true })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(403);
                 done();
             });
         });
 
         it('fails due to wrong password', function (done) {
-            request.post(SERVER_URL + '/api/v1/developer')
+            superagent.post(SERVER_URL + '/api/v1/developer')
                    .query({ access_token: token })
                    .send({ password: PASSWORD.toUpperCase(), enabled: true })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(403);
                 done();
             });
         });
 
         it('fails due to missing enabled property', function (done) {
-            request.post(SERVER_URL + '/api/v1/developer')
+            superagent.post(SERVER_URL + '/api/v1/developer')
                    .query({ access_token: token })
                    .send({ password: PASSWORD })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
                 done();
             });
         });
 
         it('fails due to wrong enabled property type', function (done) {
-            request.post(SERVER_URL + '/api/v1/developer')
+            superagent.post(SERVER_URL + '/api/v1/developer')
                    .query({ access_token: token })
                    .send({ password: PASSWORD, enabled: 'true' })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
                 done();
             });
         });
 
         it('succeeds enabling', function (done) {
-            request.post(SERVER_URL + '/api/v1/developer')
+            superagent.post(SERVER_URL + '/api/v1/developer')
                    .query({ access_token: token })
                    .send({ password: PASSWORD, enabled: true })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(200);
 
-                request.get(SERVER_URL + '/api/v1/developer')
+                superagent.get(SERVER_URL + '/api/v1/developer')
                        .query({ access_token: token })
                        .end(function (error, result) {
-                    expect(error).to.not.be.ok();
                     expect(result.statusCode).to.equal(200);
                     done();
                 });
@@ -218,17 +205,15 @@ describe('Developer API', function () {
         });
 
         it('succeeds disabling', function (done) {
-            request.post(SERVER_URL + '/api/v1/developer')
+            superagent.post(SERVER_URL + '/api/v1/developer')
                    .query({ access_token: token })
                    .send({ password: PASSWORD, enabled: false })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(200);
 
-                request.get(SERVER_URL + '/api/v1/developer')
+                superagent.get(SERVER_URL + '/api/v1/developer')
                        .query({ access_token: token })
                        .end(function (error, result) {
-                    expect(error).to.not.be.ok();
                     expect(result.statusCode).to.equal(412);
                     done();
                 });
@@ -247,11 +232,10 @@ describe('Developer API', function () {
                     var scope1 = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
                     var scope2 = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/setup/done?setupToken=somesetuptoken').reply(201, {});
 
-                    request.post(SERVER_URL + '/api/v1/cloudron/activate')
+                    superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
                            .query({ setupToken: 'somesetuptoken' })
                            .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
                            .end(function (error, result) {
-                        expect(error).to.not.be.ok();
                         expect(result).to.be.ok();
                         expect(scope1.isDone()).to.be.ok();
                         expect(scope2.isDone()).to.be.ok();
@@ -268,79 +252,71 @@ describe('Developer API', function () {
         after(cleanup);
 
         it('fails without body', function (done) {
-            request.post(SERVER_URL + '/api/v1/developer/login')
+            superagent.post(SERVER_URL + '/api/v1/developer/login')
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
                 done();
             });
         });
 
         it('fails without username', function (done) {
-            request.post(SERVER_URL + '/api/v1/developer/login')
+            superagent.post(SERVER_URL + '/api/v1/developer/login')
                    .send({ password: PASSWORD })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
                 done();
             });
         });
 
         it('fails without password', function (done) {
-            request.post(SERVER_URL + '/api/v1/developer/login')
+            superagent.post(SERVER_URL + '/api/v1/developer/login')
                    .send({ username: USERNAME })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
                 done();
             });
         });
 
         it('fails with empty username', function (done) {
-            request.post(SERVER_URL + '/api/v1/developer/login')
+            superagent.post(SERVER_URL + '/api/v1/developer/login')
                    .send({ username: '', password: PASSWORD })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
                 done();
             });
         });
 
         it('fails with empty password', function (done) {
-            request.post(SERVER_URL + '/api/v1/developer/login')
+            superagent.post(SERVER_URL + '/api/v1/developer/login')
                    .send({ username: USERNAME, password: '' })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
                 done();
             });
         });
 
         it('fails with unknown username', function (done) {
-            request.post(SERVER_URL + '/api/v1/developer/login')
+            superagent.post(SERVER_URL + '/api/v1/developer/login')
                    .send({ username: USERNAME.toUpperCase(), password: PASSWORD })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
                 done();
             });
         });
 
         it('fails with wrong password', function (done) {
-            request.post(SERVER_URL + '/api/v1/developer/login')
+            superagent.post(SERVER_URL + '/api/v1/developer/login')
                    .send({ username: USERNAME, password: PASSWORD.toUpperCase() })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
                 done();
             });
         });
 
         it('with username succeeds', function (done) {
-            request.post(SERVER_URL + '/api/v1/developer/login')
+            superagent.post(SERVER_URL + '/api/v1/developer/login')
                    .send({ username: USERNAME, password: PASSWORD })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(200);
                 expect(result.body.expiresAt).to.be.a('number');
                 expect(result.body.token).to.be.a('string');
@@ -349,10 +325,9 @@ describe('Developer API', function () {
         });
 
         it('with email succeeds', function (done) {
-            request.post(SERVER_URL + '/api/v1/developer/login')
+            superagent.post(SERVER_URL + '/api/v1/developer/login')
                    .send({ username: EMAIL, password: PASSWORD })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(200);
                 expect(result.body.expiresAt).to.be.a('number');
                 expect(result.body.token).to.be.a('string');

@@ -27,7 +27,7 @@ var appdb = require('../../appdb.js'),
     nock = require('nock'),
     paths = require('../../paths.js'),
     redis = require('redis'),
-    request = require('superagent'),
+    superagent = require('superagent'),
     safe = require('safetydance'),
     server = require('../../server.js'),
     settings = require('../../settings.js'),
@@ -114,11 +114,10 @@ function setup(done) {
             var scope1 = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
             var scope2 = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/setup/done?setupToken=somesetuptoken').reply(201, {});
 
-            request.post(SERVER_URL + '/api/v1/cloudron/activate')
+            superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
                    .query({ setupToken: 'somesetuptoken' })
                    .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
                 expect(result.statusCode).to.eql(201);
                 expect(scope1.isDone()).to.be.ok();
@@ -137,11 +136,10 @@ function setup(done) {
         },
 
         function (callback) {
-            request.post(SERVER_URL + '/api/v1/users')
+            superagent.post(SERVER_URL + '/api/v1/users')
                    .query({ access_token: token })
                    .send({ username: USERNAME_1, email: EMAIL_1 })
                    .end(function (err, res) {
-                expect(err).to.not.be.ok();
                 expect(res.statusCode).to.equal(201);
 
                 callback(null);
@@ -198,174 +196,174 @@ describe('App API', function () {
     });
 
     it('app install fails - missing manifest', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/install')
+        superagent.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
                .send({ appStoreId: APP_STORE_ID, password: PASSWORD })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             expect(res.body.message).to.eql('manifest is required');
-            done(err);
+            done();
         });
     });
 
     it('app install fails - missing appId', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/install')
+        superagent.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
                .send({ manifest: APP_MANIFEST, password: PASSWORD })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             expect(res.body.message).to.eql('appStoreId is required');
-            done(err);
+            done();
         });
     });
 
     it('app install fails - invalid json', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/install')
+        superagent.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
                .send('garbage')
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
-            done(err);
+            done();
         });
     });
 
     it('app install fails - invalid location', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/install')
+        superagent.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
                .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: '!awesome', accessRestriction: null, oauthProxy: false })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             expect(res.body.message).to.eql('Hostname can only contain alphanumerics and hyphen');
-            done(err);
+            done();
         });
     });
 
     it('app install fails - invalid location type', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/install')
+        superagent.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
                .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: 42, accessRestriction: null, oauthProxy: false })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             expect(res.body.message).to.eql('location is required');
-            done(err);
+            done();
         });
     });
 
     it('app install fails - reserved admin location', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/install')
+        superagent.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
                .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: constants.ADMIN_LOCATION, accessRestriction: null, oauthProxy: false })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             expect(res.body.message).to.eql(constants.ADMIN_LOCATION + ' is reserved');
-            done(err);
+            done();
         });
     });
 
     it('app install fails - reserved api location', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/install')
+        superagent.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
                .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: constants.API_LOCATION, accessRestriction: null, oauthProxy: true })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             expect(res.body.message).to.eql(constants.API_LOCATION + ' is reserved');
-            done(err);
+            done();
         });
     });
 
     it('app install fails - portBindings must be object', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/install')
+        superagent.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
                .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: 23, accessRestriction: null, oauthProxy: false })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             expect(res.body.message).to.eql('portBindings must be an object');
-            done(err);
+            done();
         });
     });
 
     it('app install fails - accessRestriction is required', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/install')
+        superagent.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
                .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: {}, oauthProxy: false })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             expect(res.body.message).to.eql('accessRestriction is required');
-            done(err);
+            done();
         });
     });
 
     it('app install fails - accessRestriction type is wrong', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/install')
+        superagent.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
                .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: {}, accessRestriction: '', oauthProxy: false })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             expect(res.body.message).to.eql('accessRestriction is required');
-            done(err);
+            done();
         });
     });
 
     it('app install fails - accessRestriction no users not allowed', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/install')
+        superagent.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
                .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST_1, password: PASSWORD, location: APP_LOCATION, portBindings: {}, accessRestriction: null, oauthProxy: false })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             expect(res.body.message).to.eql('accessRestriction must specify one user');
-            done(err);
+            done();
         });
     });
 
     it('app install fails - accessRestriction too many users not allowed', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/install')
+        superagent.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
                .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST_1, password: PASSWORD, location: APP_LOCATION, portBindings: {}, accessRestriction: { users: [ 'one', 'two' ] }, oauthProxy: false })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             expect(res.body.message).to.eql('accessRestriction must specify one user');
-            done(err);
+            done();
         });
     });
 
     it('app install fails - oauthProxy is required', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/install')
+        superagent.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
                .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: {}, accessRestriction: null })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
             expect(res.body.message).to.eql('oauthProxy must be a boolean');
-            done(err);
+            done();
         });
     });
 
     it('app install fails for non admin', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/install')
+        superagent.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token_1 })
                .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: null, oauthProxy: false })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(403);
-            done(err);
+            done();
         });
     });
 
     it('app install fails due to purchase failure', function (done) {
         var fake = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(402, {});
 
-        request.post(SERVER_URL + '/api/v1/apps/install')
+        superagent.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
                .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: null, oauthProxy: false })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(402);
             expect(fake.isDone()).to.be.ok();
-            done(err);
+            done();
         });
     });
 
     it('app install succeeds with purchase', function (done) {
         var fake = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(201, {});
 
-        request.post(SERVER_URL + '/api/v1/apps/install')
+        superagent.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
                .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: null, oauthProxy: false })
                .end(function (err, res) {
@@ -373,14 +371,14 @@ describe('App API', function () {
             expect(res.body.id).to.be.a('string');
             APP_ID = res.body.id;
             expect(fake.isDone()).to.be.ok();
-            done(err);
+            done();
         });
     });
 
     it('app install fails because of conflicting location', function (done) {
         var fake = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(201, {});
 
-        request.post(SERVER_URL + '/api/v1/apps/install')
+        superagent.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
                .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: null, oauthProxy: false })
                .end(function (err, res) {
@@ -391,120 +389,120 @@ describe('App API', function () {
     });
 
     it('can get app status', function (done) {
-        request.get(SERVER_URL + '/api/v1/apps/' + APP_ID)
+        superagent.get(SERVER_URL + '/api/v1/apps/' + APP_ID)
                .query({ access_token: token })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
             expect(res.body.id).to.eql(APP_ID);
             expect(res.body.installationState).to.be.ok();
-            done(err);
+            done();
          });
     });
 
     it('cannot get invalid app status', function (done) {
-        request.get(SERVER_URL + '/api/v1/apps/kubachi')
+        superagent.get(SERVER_URL + '/api/v1/apps/kubachi')
                .query({ access_token: token })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(404);
-            done(err);
+            done();
          });
     });
 
     it('can get all apps', function (done) {
-        request.get(SERVER_URL + '/api/v1/apps')
+        superagent.get(SERVER_URL + '/api/v1/apps')
                .query({ access_token: token })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
             expect(res.body.apps).to.be.an('array');
             expect(res.body.apps[0].id).to.eql(APP_ID);
             expect(res.body.apps[0].installationState).to.be.ok();
-            done(err);
+            done();
          });
     });
 
     it('non admin can get all apps', function (done) {
-        request.get(SERVER_URL + '/api/v1/apps')
+        superagent.get(SERVER_URL + '/api/v1/apps')
                .query({ access_token: token_1 })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
             expect(res.body.apps).to.be.an('array');
             expect(res.body.apps[0].id).to.eql(APP_ID);
             expect(res.body.apps[0].installationState).to.be.ok();
-            done(err);
+            done();
          });
     });
 
     it('can get appBySubdomain', function (done) {
-        request.get(SERVER_URL + '/api/v1/subdomains/' + APP_LOCATION)
+        superagent.get(SERVER_URL + '/api/v1/subdomains/' + APP_LOCATION)
                .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
             expect(res.body.id).to.eql(APP_ID);
             expect(res.body.installationState).to.be.ok();
-            done(err);
+            done();
         });
     });
 
     it('cannot get invalid app by Subdomain', function (done) {
-        request.get(SERVER_URL + '/api/v1/subdomains/tikaloma')
+        superagent.get(SERVER_URL + '/api/v1/subdomains/tikaloma')
                .end(function (err, res) {
             expect(res.statusCode).to.equal(404);
-            done(err);
+            done();
         });
     });
 
     it('cannot uninstall invalid app', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/whatever/uninstall')
+        superagent.post(SERVER_URL + '/api/v1/apps/whatever/uninstall')
             .send({ password: PASSWORD })
             .query({ access_token: token })
             .end(function (err, res) {
             expect(res.statusCode).to.equal(404);
-            done(err);
+            done();
         });
     });
 
     it('cannot uninstall app without password', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/uninstall')
+        superagent.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/uninstall')
             .query({ access_token: token })
             .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
-            done(err);
+            done();
         });
     });
 
     it('cannot uninstall app with wrong password', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/uninstall')
+        superagent.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/uninstall')
             .send({ password: PASSWORD+PASSWORD })
             .query({ access_token: token })
             .end(function (err, res) {
             expect(res.statusCode).to.equal(403);
-            done(err);
+            done();
         });
     });
 
     it('non admin cannot uninstall app', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/uninstall')
+        superagent.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/uninstall')
             .send({ password: PASSWORD })
             .query({ access_token: token_1 })
             .end(function (err, res) {
             expect(res.statusCode).to.equal(403);
-            done(err);
+            done();
         });
     });
 
     it('can uninstall app', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/uninstall')
+        superagent.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/uninstall')
             .send({ password: PASSWORD })
             .query({ access_token: token })
             .end(function (err, res) {
             expect(res.statusCode).to.equal(202);
-            done(err);
+            done();
         });
     });
 
     it('app install succeeds already purchased', function (done) {
         var fake = nock(config.apiServerOrigin()).post('/api/v1/apps/test/purchase?token=APPSTORE_TOKEN').reply(200, {});
 
-        request.post(SERVER_URL + '/api/v1/apps/install')
+        superagent.post(SERVER_URL + '/api/v1/apps/install')
                .query({ access_token: token })
                .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION_2, portBindings: null, accessRestriction: null, oauthProxy: false })
                .end(function (err, res) {
@@ -512,7 +510,7 @@ describe('App API', function () {
             expect(res.body.id).to.be.a('string');
             APP_ID = res.body.id;
             expect(fake.isDone()).to.be.ok();
-            done(err);
+            done();
         });
     });
 
@@ -522,7 +520,7 @@ describe('App API', function () {
         settings.setDeveloperMode(true, function (error) {
             expect(error).to.be(null);
 
-            request.post(SERVER_URL + '/api/v1/developer/login')
+            superagent.post(SERVER_URL + '/api/v1/developer/login')
                    .send({ username: USERNAME, password: PASSWORD })
                    .end(function (error, result) {
                 expect(error).to.not.be.ok();
@@ -533,7 +531,7 @@ describe('App API', function () {
                 // overwrite non dev token
                 token = result.body.token;
 
-                request.post(SERVER_URL + '/api/v1/apps/install')
+                superagent.post(SERVER_URL + '/api/v1/apps/install')
                        .query({ access_token: token })
                        .send({ appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, location: APP_LOCATION+APP_LOCATION, portBindings: null, accessRestriction: null, oauthProxy: false })
                        .end(function (err, res) {
@@ -541,18 +539,18 @@ describe('App API', function () {
                     expect(res.body.id).to.be.a('string');
                     expect(fake.isDone()).to.be.ok();
                     APP_ID = res.body.id;
-                    done(err);
+                    done();
                 });
             });
         });
     });
 
     it('can uninstall app without password but developer token', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/uninstall')
+        superagent.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/uninstall')
             .query({ access_token: token })
             .end(function (err, res) {
             expect(res.statusCode).to.equal(202);
-            done(err);
+            done();
         });
     });
 });
@@ -629,7 +627,7 @@ describe('App installation', function () {
 
         var count = 0;
         function checkInstallStatus() {
-            request.get(SERVER_URL + '/api/v1/apps/' + APP_ID)
+            superagent.get(SERVER_URL + '/api/v1/apps/' + APP_ID)
                .query({ access_token: token })
                .end(function (err, res) {
                 expect(res.statusCode).to.equal(200);
@@ -640,7 +638,7 @@ describe('App installation', function () {
             });
         }
 
-        request.post(SERVER_URL + '/api/v1/apps/install')
+        superagent.post(SERVER_URL + '/api/v1/apps/install')
               .query({ access_token: token })
               .send({ appId: APP_ID, appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: null, accessRestriction: null, oauthProxy: false })
               .end(function (err, res) {
@@ -706,7 +704,7 @@ describe('App installation', function () {
     it('installation - is up and running', function (done) {
         expect(appResult.httpPort).to.be(undefined);
         setTimeout(function () {
-            request.get('http://localhost:' + appEntry.httpPort + appResult.manifest.healthCheckPath)
+            superagent.get('http://localhost:' + appEntry.httpPort + appResult.manifest.healthCheckPath)
                 .end(function (err, res) {
                 expect(!err).to.be.ok();
                 expect(res.statusCode).to.equal(200);
@@ -843,7 +841,7 @@ describe('App installation', function () {
     });
 
     xit('logs - stdout and stderr', function (done) {
-        request.get(SERVER_URL + '/api/v1/apps/' + APP_ID + '/logs')
+        superagent.get(SERVER_URL + '/api/v1/apps/' + APP_ID + '/logs')
             .query({ access_token: token })
             .end(function (err, res) {
             var data = '';
@@ -857,7 +855,7 @@ describe('App installation', function () {
     });
 
     xit('logStream - requires event-stream accept header', function (done) {
-        request.get(SERVER_URL + '/api/v1/apps/' + APP_ID + '/logstream')
+        superagent.get(SERVER_URL + '/api/v1/apps/' + APP_ID + '/logstream')
             .query({ access_token: token, fromLine: 0 })
             .end(function (err, res) {
             expect(res.statusCode).to.be(400);
@@ -896,7 +894,7 @@ describe('App installation', function () {
     });
 
     it('non admin cannot stop app', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/stop')
+        superagent.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/stop')
             .query({ access_token: token_1 })
             .end(function (err, res) {
             expect(res.statusCode).to.equal(403);
@@ -905,7 +903,7 @@ describe('App installation', function () {
     });
 
     it('can stop app', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/stop')
+        superagent.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/stop')
             .query({ access_token: token })
             .end(function (err, res) {
             expect(res.statusCode).to.equal(202);
@@ -916,7 +914,7 @@ describe('App installation', function () {
     it('did stop the app', function (done) {
         // give the app a couple of seconds to die
         setTimeout(function () {
-            request.get('http://localhost:' + appEntry.httpPort + appResult.manifest.healthCheckPath)
+            superagent.get('http://localhost:' + appEntry.httpPort + appResult.manifest.healthCheckPath)
                 .end(function (err, res) {
                 expect(err).to.be.ok();
                 done();
@@ -925,7 +923,7 @@ describe('App installation', function () {
     });
 
     it('nonadmin cannot start app', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/start')
+        superagent.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/start')
             .query({ access_token: token_1 })
             .end(function (err, res) {
             expect(res.statusCode).to.equal(403);
@@ -934,7 +932,7 @@ describe('App installation', function () {
     });
 
     it('can start app', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/start')
+        superagent.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/start')
             .query({ access_token: token })
             .end(function (err, res) {
             expect(res.statusCode).to.equal(202);
@@ -944,7 +942,7 @@ describe('App installation', function () {
 
     it('did start the app', function (done) {
         setTimeout(function () {
-            request.get('http://localhost:' + appEntry.httpPort + appResult.manifest.healthCheckPath)
+            superagent.get('http://localhost:' + appEntry.httpPort + appResult.manifest.healthCheckPath)
                 .end(function (err, res) {
                 expect(!err).to.be.ok();
                 expect(res.statusCode).to.equal(200);
@@ -956,7 +954,7 @@ describe('App installation', function () {
     it('can uninstall app', function (done) {
         var count = 0;
         function checkUninstallStatus() {
-            request.get(SERVER_URL + '/api/v1/apps/' + APP_ID)
+            superagent.get(SERVER_URL + '/api/v1/apps/' + APP_ID)
                .query({ access_token: token })
                .end(function (err, res) {
                 if (res.statusCode === 404) return done(null);
@@ -965,7 +963,7 @@ describe('App installation', function () {
             });
         }
 
-        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/uninstall')
+        superagent.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/uninstall')
             .send({ password: PASSWORD })
             .query({ access_token: token })
             .end(function (err, res) {
@@ -1099,7 +1097,7 @@ describe('App installation - port bindings', function () {
 
         var count = 0;
         function checkInstallStatus() {
-            request.get(SERVER_URL + '/api/v1/apps/' + APP_ID)
+            superagent.get(SERVER_URL + '/api/v1/apps/' + APP_ID)
                .query({ access_token: token })
                .end(function (err, res) {
                 expect(res.statusCode).to.equal(200);
@@ -1110,7 +1108,7 @@ describe('App installation - port bindings', function () {
             });
         }
 
-        request.post(SERVER_URL + '/api/v1/apps/install')
+        superagent.post(SERVER_URL + '/api/v1/apps/install')
               .query({ access_token: token })
               .send({ appId: APP_ID, appStoreId: APP_STORE_ID, manifest: APP_MANIFEST, password: PASSWORD, location: APP_LOCATION, portBindings: { ECHO_SERVER_PORT: 7171 }, accessRestriction: null, oauthProxy: false })
               .end(function (err, res) {
@@ -1166,7 +1164,7 @@ describe('App installation - port bindings', function () {
         var tryCount = 20;
         expect(appResult.httpPort).to.be(undefined);
         (function healthCheck() {
-            request.get('http://localhost:' + appEntry.httpPort + appResult.manifest.healthCheckPath)
+            superagent.get('http://localhost:' + appEntry.httpPort + appResult.manifest.healthCheckPath)
                 .end(function (err, res) {
                 if (err || res.statusCode !== 200) {
                     if (--tryCount === 0) return done(new Error('Timedout'));
@@ -1256,7 +1254,7 @@ describe('App installation - port bindings', function () {
         assert.strictEqual(typeof count, 'number');
         assert.strictEqual(typeof done, 'function');
 
-        request.get(SERVER_URL + '/api/v1/apps/' + APP_ID)
+        superagent.get(SERVER_URL + '/api/v1/apps/' + APP_ID)
            .query({ access_token: token })
            .end(function (err, res) {
             expect(res.statusCode).to.equal(200);
@@ -1268,7 +1266,7 @@ describe('App installation - port bindings', function () {
     }
 
     it('cannot reconfigure app with missing location', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
+        superagent.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
               .query({ access_token: token })
               .send({ appId: APP_ID, password: PASSWORD, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, oauthProxy: true })
               .end(function (err, res) {
@@ -1278,7 +1276,7 @@ describe('App installation - port bindings', function () {
     });
 
     it('cannot reconfigure app with missing accessRestriction', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
+        superagent.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
               .query({ access_token: token })
               .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, oauthProxy: false })
               .end(function (err, res) {
@@ -1288,7 +1286,7 @@ describe('App installation - port bindings', function () {
     });
 
     it('cannot reconfigure app with missing oauthProxy', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
+        superagent.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
               .query({ access_token: token })
               .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null })
               .end(function (err, res) {
@@ -1298,7 +1296,7 @@ describe('App installation - port bindings', function () {
     });
 
     it('cannot reconfigure app with only the cert, no key', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
+        superagent.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
               .query({ access_token: token })
               .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, oauthProxy: true, cert: validCert1 })
               .end(function (err, res) {
@@ -1308,7 +1306,7 @@ describe('App installation - port bindings', function () {
     });
 
     it('cannot reconfigure app with only the key, no cert', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
+        superagent.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
               .query({ access_token: token })
               .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, oauthProxy: true, key: validKey1 })
               .end(function (err, res) {
@@ -1318,7 +1316,7 @@ describe('App installation - port bindings', function () {
     });
 
     it('cannot reconfigure app with cert not bein a string', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
+        superagent.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
               .query({ access_token: token })
               .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, oauthProxy: true, cert: 1234, key: validKey1 })
               .end(function (err, res) {
@@ -1328,7 +1326,7 @@ describe('App installation - port bindings', function () {
     });
 
     it('cannot reconfigure app with key not bein a string', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
+        superagent.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
               .query({ access_token: token })
               .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, oauthProxy: true, cert: validCert1, key: 1234 })
               .end(function (err, res) {
@@ -1338,7 +1336,7 @@ describe('App installation - port bindings', function () {
     });
 
     it('non admin cannot reconfigure app', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
+        superagent.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
               .query({ access_token: token_1 })
               .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, oauthProxy: true })
               .end(function (err, res) {
@@ -1348,7 +1346,7 @@ describe('App installation - port bindings', function () {
     });
 
     it('can reconfigure app', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
+        superagent.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
               .query({ access_token: token })
               .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, oauthProxy: true })
               .end(function (err, res) {
@@ -1432,7 +1430,7 @@ describe('App installation - port bindings', function () {
     });
 
     it('can reconfigure app with custom certificate', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
+        superagent.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/configure')
               .query({ access_token: token })
               .send({ appId: APP_ID, password: PASSWORD, location: APP_LOCATION_NEW, portBindings: { ECHO_SERVER_PORT: 7172 }, accessRestriction: null, oauthProxy: true, cert: validCert1, key: validKey1 })
               .end(function (err, res) {
@@ -1442,7 +1440,7 @@ describe('App installation - port bindings', function () {
     });
 
     it('can stop app', function (done) {
-        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/stop')
+        superagent.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/stop')
             .query({ access_token: token })
             .end(function (err, res) {
             expect(res.statusCode).to.equal(202);
@@ -1467,7 +1465,7 @@ describe('App installation - port bindings', function () {
     it('can uninstall app', function (done) {
         var count = 0;
         function checkUninstallStatus() {
-            request.get(SERVER_URL + '/api/v1/apps/' + APP_ID)
+            superagent.get(SERVER_URL + '/api/v1/apps/' + APP_ID)
                .query({ access_token: token })
                .end(function (err, res) {
                 if (res.statusCode === 404) return done(null);
@@ -1476,7 +1474,7 @@ describe('App installation - port bindings', function () {
             });
         }
 
-        request.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/uninstall')
+        superagent.post(SERVER_URL + '/api/v1/apps/' + APP_ID + '/uninstall')
             .send({ password: PASSWORD })
             .query({ access_token: token })
             .end(function (err, res) {

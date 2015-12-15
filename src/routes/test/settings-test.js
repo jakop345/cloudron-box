@@ -13,7 +13,7 @@ var appdb = require('../../appdb.js'),
     expect = require('expect.js'),
     path = require('path'),
     paths = require('../../paths.js'),
-    request = require('superagent'),
+    superagent = require('superagent'),
     server = require('../../server.js'),
     settings = require('../../settings.js'),
     fs = require('fs'),
@@ -38,11 +38,10 @@ function setup(done) {
             var scope1 = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
             var scope2 = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/setup/done?setupToken=somesetuptoken').reply(201, {});
 
-            request.post(SERVER_URL + '/api/v1/cloudron/activate')
+            superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
                    .query({ setupToken: 'somesetuptoken' })
                    .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
                 expect(result.statusCode).to.eql(201);
                 expect(scope1.isDone()).to.be.ok();
@@ -78,17 +77,17 @@ describe('Settings API', function () {
 
     describe('autoupdate_pattern', function () {
         it('can get auto update pattern (default)', function (done) {
-            request.get(SERVER_URL + '/api/v1/settings/autoupdate_pattern')
+            superagent.get(SERVER_URL + '/api/v1/settings/autoupdate_pattern')
                    .query({ access_token: token })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(200);
                 expect(res.body.pattern).to.be.ok();
-                done(err);
+                done();
             });
         });
 
         it('cannot set autoupdate_pattern without pattern', function (done) {
-            request.post(SERVER_URL + '/api/v1/settings/autoupdate_pattern')
+            superagent.post(SERVER_URL + '/api/v1/settings/autoupdate_pattern')
                    .query({ access_token: token })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(400);
@@ -102,7 +101,7 @@ describe('Settings API', function () {
                 eventPattern = pattern;
             });
 
-            request.post(SERVER_URL + '/api/v1/settings/autoupdate_pattern')
+            superagent.post(SERVER_URL + '/api/v1/settings/autoupdate_pattern')
                    .query({ access_token: token })
                    .send({ pattern: '00 30 11 * * 1-5' })
                    .end(function (err, res) {
@@ -118,7 +117,7 @@ describe('Settings API', function () {
                 eventPattern = pattern;
             });
 
-            request.post(SERVER_URL + '/api/v1/settings/autoupdate_pattern')
+            superagent.post(SERVER_URL + '/api/v1/settings/autoupdate_pattern')
                    .query({ access_token: token })
                    .send({ pattern: 'never' })
                    .end(function (err, res) {
@@ -129,7 +128,7 @@ describe('Settings API', function () {
         });
 
         it('cannot set invalid autoupdate_pattern', function (done) {
-            request.post(SERVER_URL + '/api/v1/settings/autoupdate_pattern')
+            superagent.post(SERVER_URL + '/api/v1/settings/autoupdate_pattern')
                    .query({ access_token: token })
                    .send({ pattern: '1 3 x 5 6' })
                    .end(function (err, res) {
@@ -143,17 +142,17 @@ describe('Settings API', function () {
         var name = 'foobar';
 
         it('get default succeeds', function (done) {
-            request.get(SERVER_URL + '/api/v1/settings/cloudron_name')
+            superagent.get(SERVER_URL + '/api/v1/settings/cloudron_name')
                    .query({ access_token: token })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(200);
                 expect(res.body.name).to.be.ok();
-                done(err);
+                done();
             });
         });
 
         it('cannot set without name', function (done) {
-            request.post(SERVER_URL + '/api/v1/settings/cloudron_name')
+            superagent.post(SERVER_URL + '/api/v1/settings/cloudron_name')
                    .query({ access_token: token })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(400);
@@ -162,7 +161,7 @@ describe('Settings API', function () {
         });
 
         it('cannot set empty name', function (done) {
-            request.post(SERVER_URL + '/api/v1/settings/cloudron_name')
+            superagent.post(SERVER_URL + '/api/v1/settings/cloudron_name')
                    .query({ access_token: token })
                    .send({ name: '' })
                    .end(function (err, res) {
@@ -172,7 +171,7 @@ describe('Settings API', function () {
         });
 
         it('set succeeds', function (done) {
-            request.post(SERVER_URL + '/api/v1/settings/cloudron_name')
+            superagent.post(SERVER_URL + '/api/v1/settings/cloudron_name')
                    .query({ access_token: token })
                    .send({ name: name })
                    .end(function (err, res) {
@@ -182,29 +181,29 @@ describe('Settings API', function () {
         });
 
         it('get succeeds', function (done) {
-            request.get(SERVER_URL + '/api/v1/settings/cloudron_name')
+            superagent.get(SERVER_URL + '/api/v1/settings/cloudron_name')
                    .query({ access_token: token })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(200);
                 expect(res.body.name).to.eql(name);
-                done(err);
+                done();
             });
         });
     });
 
     describe('cloudron_avatar', function () {
         it('get default succeeds', function (done) {
-            request.get(SERVER_URL + '/api/v1/settings/cloudron_avatar')
+            superagent.get(SERVER_URL + '/api/v1/settings/cloudron_avatar')
                    .query({ access_token: token })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(200);
                 expect(res.body).to.be.a(Buffer);
-                done(err);
+                done();
             });
         });
 
         it('cannot set without data', function (done) {
-            request.post(SERVER_URL + '/api/v1/settings/cloudron_avatar')
+            superagent.post(SERVER_URL + '/api/v1/settings/cloudron_avatar')
                    .query({ access_token: token })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(400);
@@ -213,7 +212,7 @@ describe('Settings API', function () {
         });
 
         it('set succeeds', function (done) {
-            request.post(SERVER_URL + '/api/v1/settings/cloudron_avatar')
+            superagent.post(SERVER_URL + '/api/v1/settings/cloudron_avatar')
                    .query({ access_token: token })
                    .attach('avatar', paths.CLOUDRON_DEFAULT_AVATAR_FILE)
                    .end(function (err, res) {
@@ -223,7 +222,7 @@ describe('Settings API', function () {
         });
 
         it('get succeeds', function (done) {
-            request.get(SERVER_URL + '/api/v1/settings/cloudron_avatar')
+            superagent.get(SERVER_URL + '/api/v1/settings/cloudron_avatar')
                    .query({ access_token: token })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(200);
@@ -235,17 +234,17 @@ describe('Settings API', function () {
 
     describe('dns_config', function () {
         it('get dns_config fails', function (done) {
-            request.get(SERVER_URL + '/api/v1/settings/dns_config')
+            superagent.get(SERVER_URL + '/api/v1/settings/dns_config')
                    .query({ access_token: token })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(200);
                 expect(res.body).to.eql({});
-                done(err);
+                done();
             });
         });
 
         it('cannot set without data', function (done) {
-            request.post(SERVER_URL + '/api/v1/settings/dns_config')
+            superagent.post(SERVER_URL + '/api/v1/settings/dns_config')
                    .query({ access_token: token })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(400);
@@ -254,7 +253,7 @@ describe('Settings API', function () {
         });
 
         it('set succeeds', function (done) {
-            request.post(SERVER_URL + '/api/v1/settings/dns_config')
+            superagent.post(SERVER_URL + '/api/v1/settings/dns_config')
                    .query({ access_token: token })
                    .send({ provider: 'route53', accessKeyId: 'accessKey', secretAccessKey: 'secretAccessKey' })
                    .end(function (err, res) {
@@ -264,12 +263,12 @@ describe('Settings API', function () {
         });
 
         it('get succeeds', function (done) {
-            request.get(SERVER_URL + '/api/v1/settings/dns_config')
+            superagent.get(SERVER_URL + '/api/v1/settings/dns_config')
                    .query({ access_token: token })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(200);
                 expect(res.body).to.eql({ provider: 'route53', accessKeyId: 'accessKey', secretAccessKey: 'secretAccessKey', region: 'us-east-1', endpoint: null });
-                done(err);
+                done();
             });
         });
     });
@@ -284,75 +283,68 @@ describe('Settings API', function () {
         var validKey1 = '-----BEGIN RSA PRIVATE KEY-----\nMIIBOQIBAAJBALQUp/TtlYxwAEWVnD4bNcr0SJmuUnWWme7rhGE333PsxdGvxwWd\nlWBjeOBq27JHmzdZ3NS/J7Z4nSs2JyXYRkkCAwEAAQJALV2eykcoC48TonQEPmkg\nbhaIS57syw67jMLsQImQ02UABKzqHPEKLXPOZhZPS9hsC/hGIehwiYCXMUlrl+WF\nAQIhAOntBI6qaecNjAAVG7UbZclMuHROUONmZUF1KNq6VyV5AiEAxRLkfHWy52CM\njOQrX347edZ30f4QczvugXwsyuU9A1ECIGlGZ8Sk4OBA8n6fAUcyO06qnmCJVlHg\npTUeOvKk5c9RAiBs28+8dCNbrbhVhx/yQr9FwNM0+ttJW/yWJ+pyNQhr0QIgJTT6\nxwCWYOtbioyt7B9l+ENy3AMSO3Uq+xmIKkvItK4=\n-----END RSA PRIVATE KEY-----';
 
         it('cannot set certificate without token', function (done) {
-            request.post(SERVER_URL + '/api/v1/settings/certificate')
+            superagent.post(SERVER_URL + '/api/v1/settings/certificate')
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
                 done();
             });
         });
 
         it('cannot set certificate without certificate', function (done) {
-            request.post(SERVER_URL + '/api/v1/settings/certificate')
+            superagent.post(SERVER_URL + '/api/v1/settings/certificate')
                    .query({ access_token: token })
                    .send({ key: validKey1 })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
                 done();
             });
         });
 
         it('cannot set certificate without key', function (done) {
-            request.post(SERVER_URL + '/api/v1/settings/certificate')
+            superagent.post(SERVER_URL + '/api/v1/settings/certificate')
                    .query({ access_token: token })
                    .send({ cert: validCert1 })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
                 done();
             });
         });
 
         it('cannot set certificate with cert not being a string', function (done) {
-            request.post(SERVER_URL + '/api/v1/settings/certificate')
+            superagent.post(SERVER_URL + '/api/v1/settings/certificate')
                    .query({ access_token: token })
                    .send({ cert: 1234, key: validKey1 })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
                 done();
             });
         });
 
         it('cannot set certificate with key not being a string', function (done) {
-            request.post(SERVER_URL + '/api/v1/settings/certificate')
+            superagent.post(SERVER_URL + '/api/v1/settings/certificate')
                    .query({ access_token: token })
                    .send({ cert: validCert1, key: true })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
                 done();
             });
         });
 
         it('cannot set non wildcard certificate', function (done) {
-            request.post(SERVER_URL + '/api/v1/settings/certificate')
+            superagent.post(SERVER_URL + '/api/v1/settings/certificate')
                    .query({ access_token: token })
                    .send({ cert: validCert0, key: validKey0 })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
                 done();
             });
         });
 
         it('can set certificate', function (done) {
-            request.post(SERVER_URL + '/api/v1/settings/certificate')
+            superagent.post(SERVER_URL + '/api/v1/settings/certificate')
                    .query({ access_token: token })
                    .send({ cert: validCert1, key: validKey1 })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(202);
                 done();
             });
