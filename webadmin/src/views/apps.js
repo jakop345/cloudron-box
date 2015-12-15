@@ -1,4 +1,5 @@
 /* global ISTATES:false */
+/* global HSTATES:false */
 
 'use strict';
 
@@ -38,6 +39,10 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         error: {},
         app: {},
         password: ''
+    };
+
+    $scope.appError = {
+        app: {}
     };
 
     $scope.appUpdate = {
@@ -207,6 +212,8 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appError.app = app;
 
         $('#appErrorModal').modal('show');
+
+        return false; // prevent propagation and default
     };
 
     $scope.showRestore = function (app) {
