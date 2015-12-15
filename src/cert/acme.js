@@ -18,6 +18,7 @@ var assert = require('assert'),
 
 var CA_PROD = 'https://acme-v01.api.letsencrypt.org',
     CA_STAGING = 'https://acme-staging.api.letsencrypt.org',
+    CA_ORIGIN = CA_PROD,
     LE_AGREEMENT = 'https://letsencrypt.org/documents/LE-SA-v1.0.1-July-27-2015.pdf';
 
 exports = module.exports = {
@@ -54,7 +55,7 @@ AcmeError.FORBIDDEN = 'Forbidden';
 // https://community.letsencrypt.org/t/list-of-client-implementations/2103
 
 function getNonce(callback) {
-    superagent.get(CA_PROD + '/directory', function (error, response) {
+    superagent.get(CA_ORIGIN + '/directory', function (error, response) {
         if (error) return callback(error);
         if (response.statusCode !== 200) return callback(new Error('Invalid response code when fetching nonce : ' + response.statusCode));
 
@@ -130,7 +131,7 @@ function registerUser(accountKeyPem, email, callback) {
 
     debug('registerUser: %s', email);
 
-    sendSignedRequest(CA_PROD + '/acme/new-reg', accountKeyPem, JSON.stringify(payload), function (error, result) {
+    sendSignedRequest(CA_ORIGIN + '/acme/new-reg', accountKeyPem, JSON.stringify(payload), function (error, result) {
         if (error) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, 'Network error when registering user: ' + error.message));
         if (result.statusCode === 409) return callback(new AcmeError(AcmeError.ALREADY_EXISTS, result.body.detail));
         if (result.statusCode !== 201) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, util.format('Failed to register user. Expecting 201, got %s %s', result.statusCode, result.text)));
@@ -156,7 +157,7 @@ function registerDomain(accountKeyPem, domain, callback) {
 
     debug('registerDomain: %s', domain);
 
-    sendSignedRequest(CA_PROD + '/acme/new-authz', accountKeyPem, JSON.stringify(payload), function (error, result) {
+    sendSignedRequest(CA_ORIGIN + '/acme/new-authz', accountKeyPem, JSON.stringify(payload), function (error, result) {
         if (error) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, 'Network error when registering domain: ' + error.message));
         if (result.statusCode === 403) return callback(new AcmeError(AcmeError.FORBIDDEN, result.body.detail));
         if (result.statusCode !== 201) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, util.format('Failed to register user. Expecting 201, got %s %s', result.statusCode, result.text)));
@@ -267,7 +268,7 @@ function signCertificate(accountKeyPem, domain, csrDer, callback) {
 
     debug('signCertificate: sending new-cert request');
 
-    sendSignedRequest(CA_PROD + '/acme/new-cert', accountKeyPem, JSON.stringify(payload), function (error, result) {
+    sendSignedRequest(CA_ORIGIN + '/acme/new-cert', accountKeyPem, JSON.stringify(payload), function (error, result) {
         if (error) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, 'Network error when signing certificate: ' + error.message));
         if (result.statusCode !== 201) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, util.format('Failed to sign certificate. Expecting 201, got %s %s', result.statusCode, result.text)));
 
