@@ -40,6 +40,7 @@ set_progress "10" "Ensuring directories"
 mkdir -p "${DATA_DIR}/box/appicons"
 mkdir -p "${DATA_DIR}/box/certs"
 mkdir -p "${DATA_DIR}/box/mail"
+mkdir -p "${DATA_DIR}/box/acme" # acme keys
 mkdir -p "${DATA_DIR}/graphite"
 
 mkdir -p "${DATA_DIR}/mysql"
@@ -48,7 +49,7 @@ mkdir -p "${DATA_DIR}/mongodb"
 mkdir -p "${DATA_DIR}/snapshots"
 mkdir -p "${DATA_DIR}/addons"
 mkdir -p "${DATA_DIR}/collectd/collectd.conf.d"
-mkdir -p "${DATA_DIR}/acme"
+mkdir -p "${DATA_DIR}/acme" # acme challenges
 
 # bookkeep the version as part of data
 echo "{ \"version\": \"${arg_version}\", \"boxVersionsUrl\": \"${arg_box_versions_url}\" }" > "${DATA_DIR}/box/version"
