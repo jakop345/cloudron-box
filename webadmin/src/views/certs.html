@@ -65,7 +65,7 @@
             <form name="defaultCertForm" ng-submit="setDefaultCert()">
                 <fieldset>
                     <label class="control-label" for="defaultCertInput">Fallback Certificate</label>
-                    <p>This certificate has to be wildcard certificates and will be used for all apps, which were not configured to use a specific certificate.</p>
+                    <p>A wildcard certificate that will be used for apps installed without a specific certificate.</p>
                     <div class="has-error text-center" ng-show="defaultCert.error">{{ defaultCert.error }}</div>
                     <div class="text-success text-center" ng-show="defaultCert.success"><b>Upload successful</b></div>
                     <div class="form-group" ng-class="{ 'has-error': (!defaultCert.cert.$dirty && defaultCert.error) }">
