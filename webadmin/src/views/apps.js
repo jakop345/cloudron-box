@@ -201,6 +201,14 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         });
     };
 
+    $scope.showError = function (app) {
+        $scope.reset();
+
+        $scope.appError.app = app;
+
+        $('#appErrorModal').modal('show');
+    };
+
     $scope.showRestore = function (app) {
         $scope.reset();
 
