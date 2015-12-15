@@ -95,7 +95,7 @@ function checkAppHealth(app, callback) {
             if (error && !error.response) {
                 debugApp(app, 'not alive (network error): %s', error.message);
                 setHealth(app, appdb.HEALTH_UNHEALTHY, callback);
-            } if (res.statusCode >= 400) { // 2xx and 3xx are ok
+            } else if (res.statusCode >= 400) { // 2xx and 3xx are ok
                 debugApp(app, 'not alive : %s', error || res.status);
                 setHealth(app, appdb.HEALTH_UNHEALTHY, callback);
             } else {
