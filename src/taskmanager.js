@@ -97,10 +97,11 @@ function startAppTask(appId) {
     var pid = gActiveTasks[appId].pid;
     debug('Started task of %s pid: %s', appId, pid);
 
-    gActiveTasks[appId].once('exit', function (code) {
+    gActiveTasks[appId].once('exit', function (code, signal) {
         debug('Task for %s pid %s completed with status %s', appId, pid, code);
-        if (code && code !== 50) { // apptask crashed
-            appdb.update(appId, { installationState: appdb.ISTATE_ERROR, installationProgress: 'Apptask crashed with code ' + code }, NOOP_CALLBACK);
+        if (code === null /* signal */ || (code !== 0 && code !== 50)) { // apptask crashed
+            debug('Apptask crashed with code %s and signal %s', code, signal);
+            appdb.update(appId, { installationState: appdb.ISTATE_ERROR, installationProgress: 'Apptask crashed with code ' + code + ' and signal ' + signal }, NOOP_CALLBACK);
         }
         delete gActiveTasks[appId];
         locker.unlock(locker.OP_APPTASK); // unlock event will trigger next task
