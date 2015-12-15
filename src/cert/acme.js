@@ -17,7 +17,7 @@ var assert = require('assert'),
     _ = require('underscore');
 
 var CA_PROD = 'https://acme-v01.api.letsencrypt.org',
-    CA_STAGING = 'https://acme-staging.api.letsencrypt.org/',
+    CA_STAGING = 'https://acme-staging.api.letsencrypt.org',
     LE_AGREEMENT = 'https://letsencrypt.org/documents/LE-SA-v1.0.1-July-27-2015.pdf';
 
 exports = module.exports = {
@@ -94,7 +94,7 @@ function sendSignedRequest(url, accountKeyPem, payload, callback) {
     getNonce(function (error, nonce) {
         if (error) return callback(error);
 
-        debug('Using nonce %s', nonce);
+        debug('sendSignedRequest: using nonce %s for url %s', nonce, url);
 
         var protected64 = b64(JSON.stringify(_.extend({ }, header, { nonce: nonce })));
 
