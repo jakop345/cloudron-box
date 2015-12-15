@@ -52,7 +52,7 @@
     "passport-http-bearer": "^1.0.1",
     "passport-local": "^1.0.0",
     "passport-oauth2-client-password": "^0.1.2",
-    "password-generator": "^1.0.0",
+    "password-generator": "^2.0.2",
     "proxy-middleware": "^0.13.0",
     "safetydance": "^0.1.0",
     "semver": "^4.3.6",
@@ -64,7 +64,7 @@
     "underscore": "^1.7.0",
     "ursa": "^0.9.1",
     "valid-url": "^1.0.9",
-    "validator": "^3.30.0",
+    "validator": "^4.4.0",
     "x509": "^0.2.2"
   },
   "devDependencies": {
@@ -85,7 +85,7 @@
     "istanbul": "*",
     "js2xmlparser": "^1.0.0",
     "mocha": "*",
-    "nock": "^2.6.0",
+    "nock": "^3.4.0",
     "node-sass": "^3.0.0-alpha.0",
     "redis": "^0.12.1",
     "request": "^2.65.0",
