@@ -74,7 +74,7 @@ function installAdminCertificate(callback) {
             if (error) return callback(error); // this cannot happen because we retry forever
 
             ensureCertificate(config.adminFqdn(), function (error, certFilePath, keyFilePath) {
-                if (error) {
+                if (error) { // currently, this can never happen
                     debug('Error obtaining certificate. Proceed anyway', error);
                     return callback();
                 }
@@ -226,6 +226,10 @@ function ensureCertificate(domain, callback) {
 
         debug('ensureCertificate: getting certificate for %s', domain);
 
-        api.getCertificate(domain, callback);
+        api.getCertificate(domain, function (error, certFilePath, keyFilePath) {
+            if (error) return callback(null, 'cert/host.cert', 'cert/host.key'); // use fallback certs
+
+            callback(null, certFilePath, keyFilePath);
+        });
     });
 }
