@@ -46,7 +46,6 @@ describe('OAuth Clients API', function () {
                            .query({ setupToken: 'somesetuptoken' })
                            .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
                            .end(function (error, result) {
-                        expect(error).to.not.be.ok();
                         expect(result).to.be.ok();
                         expect(result.statusCode).to.equal(201);
                         expect(scope1.isDone()).to.be.ok();
@@ -73,7 +72,6 @@ describe('OAuth Clients API', function () {
                        .query({ access_token: token })
                        .send({ appId: 'someApp', redirectURI: 'http://foobar.com', scope: 'profile' })
                        .end(function (error, result) {
-                    expect(error).to.not.be.ok();
                     expect(result.statusCode).to.equal(412);
                     done();
                 });
@@ -89,7 +87,6 @@ describe('OAuth Clients API', function () {
                 superagent.post(SERVER_URL + '/api/v1/oauth/clients')
                        .send({ appId: 'someApp', redirectURI: 'http://foobar.com', scope: 'profile' })
                        .end(function (error, result) {
-                    expect(error).to.not.be.ok();
                     expect(result.statusCode).to.equal(401);
                     done();
                 });
@@ -100,7 +97,6 @@ describe('OAuth Clients API', function () {
                        .query({ access_token: token })
                        .send({ redirectURI: 'http://foobar.com', scope: 'profile' })
                        .end(function (error, result) {
-                    expect(error).to.not.be.ok();
                     expect(result.statusCode).to.equal(400);
                     done();
                 });
@@ -111,7 +107,6 @@ describe('OAuth Clients API', function () {
                        .query({ access_token: token })
                        .send({ appId: '', redirectURI: 'http://foobar.com', scope: 'profile' })
                        .end(function (error, result) {
-                    expect(error).to.not.be.ok();
                     expect(result.statusCode).to.equal(400);
                     done();
                 });
@@ -122,7 +117,6 @@ describe('OAuth Clients API', function () {
                        .query({ access_token: token })
                        .send({ appId: 'someApp', redirectURI: 'http://foobar.com' })
                        .end(function (error, result) {
-                    expect(error).to.not.be.ok();
                     expect(result.statusCode).to.equal(400);
                     done();
                 });
@@ -133,7 +127,6 @@ describe('OAuth Clients API', function () {
                        .query({ access_token: token })
                        .send({ appId: 'someApp', redirectURI: 'http://foobar.com', scope: '' })
                        .end(function (error, result) {
-                    expect(error).to.not.be.ok();
                     expect(result.statusCode).to.equal(400);
                     done();
                 });
@@ -144,7 +137,6 @@ describe('OAuth Clients API', function () {
                        .query({ access_token: token })
                        .send({ appId: 'someApp', scope: 'profile' })
                        .end(function (error, result) {
-                    expect(error).to.not.be.ok();
                     expect(result.statusCode).to.equal(400);
                     done();
                 });
@@ -155,7 +147,6 @@ describe('OAuth Clients API', function () {
                        .query({ access_token: token })
                        .send({ appId: 'someApp', redirectURI: '', scope: 'profile' })
                        .end(function (error, result) {
-                    expect(error).to.not.be.ok();
                     expect(result.statusCode).to.equal(400);
                     done();
                 });
@@ -166,7 +157,6 @@ describe('OAuth Clients API', function () {
                        .query({ access_token: token })
                        .send({ appId: 'someApp', redirectURI: 'foobar', scope: 'profile' })
                        .end(function (error, result) {
-                    expect(error).to.not.be.ok();
                     expect(result.statusCode).to.equal(400);
                     done();
                 });
@@ -177,7 +167,6 @@ describe('OAuth Clients API', function () {
                        .query({ access_token: token })
                        .send({ appId: 'someApp', redirectURI: 'http://foobar.com', scope: 'profile' })
                        .end(function (error, result) {
-                    expect(error).to.not.be.ok();
                     expect(result.statusCode).to.equal(201);
                     expect(result.body.id).to.be.a('string');
                     expect(result.body.appId).to.be.a('string');
@@ -211,7 +200,6 @@ describe('OAuth Clients API', function () {
                            .query({ setupToken: 'somesetuptoken' })
                            .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
                            .end(function (error, result) {
-                        expect(error).to.not.be.ok();
                         expect(result).to.be.ok();
                         expect(scope1.isDone()).to.be.ok();
                         expect(scope2.isDone()).to.be.ok();
@@ -230,7 +218,6 @@ describe('OAuth Clients API', function () {
                            .query({ access_token: token })
                            .send({ appId: CLIENT_0.appId, redirectURI: CLIENT_0.redirectURI, scope: CLIENT_0.scope })
                            .end(function (error, result) {
-                        expect(error).to.not.be.ok();
                         expect(result.statusCode).to.equal(201);
 
                         CLIENT_0 = result.body;
@@ -252,7 +239,6 @@ describe('OAuth Clients API', function () {
                 superagent.get(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
                        .query({ access_token: token })
                        .end(function (error, result) {
-                    expect(error).to.not.be.ok();
                     expect(result.statusCode).to.equal(412);
                     done();
                 });
@@ -267,7 +253,6 @@ describe('OAuth Clients API', function () {
             it('fails without token', function (done) {
                 superagent.get(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
                        .end(function (error, result) {
-                    expect(error).to.not.be.ok();
                     expect(result.statusCode).to.equal(401);
                     done();
                 });
@@ -278,7 +263,6 @@ describe('OAuth Clients API', function () {
                 superagent.get(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id.toUpperCase())
                        .query({ access_token: token })
                        .end(function (error, result) {
-                    expect(error).to.not.be.ok();
                     expect(result.statusCode).to.equal(404);
                     done();
                 });
@@ -288,7 +272,6 @@ describe('OAuth Clients API', function () {
                 superagent.get(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
                        .query({ access_token: token })
                        .end(function (error, result) {
-                    expect(error).to.not.be.ok();
                     expect(result.statusCode).to.equal(200);
                     expect(result.body).to.eql(CLIENT_0);
                     done();
@@ -318,7 +301,6 @@ describe('OAuth Clients API', function () {
                            .query({ setupToken: 'somesetuptoken' })
                            .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
                            .end(function (error, result) {
-                        expect(error).to.not.be.ok();
                         expect(result).to.be.ok();
                         expect(scope1.isDone()).to.be.ok();
                         expect(scope2.isDone()).to.be.ok();
@@ -337,7 +319,6 @@ describe('OAuth Clients API', function () {
                            .query({ access_token: token })
                            .send({ appId: CLIENT_0.appId, redirectURI: CLIENT_0.redirectURI, scope: CLIENT_0.scope })
                            .end(function (error, result) {
-                        expect(error).to.not.be.ok();
                         expect(result.statusCode).to.equal(201);
 
                         CLIENT_0 = result.body;
@@ -359,7 +340,6 @@ describe('OAuth Clients API', function () {
                 superagent.del(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
                        .query({ access_token: token })
                        .end(function (error, result) {
-                    expect(error).to.not.be.ok();
                     expect(result.statusCode).to.equal(412);
                     done();
                 });
@@ -374,7 +354,6 @@ describe('OAuth Clients API', function () {
             it('fails without token', function (done) {
                 superagent.del(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
                        .end(function (error, result) {
-                    expect(error).to.not.be.ok();
                     expect(result.statusCode).to.equal(401);
                     done();
                 });
@@ -385,7 +364,6 @@ describe('OAuth Clients API', function () {
                 superagent.del(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id.toUpperCase())
                        .query({ access_token: token })
                        .end(function (error, result) {
-                    expect(error).to.not.be.ok();
                     expect(result.statusCode).to.equal(404);
                     done();
                 });
@@ -395,13 +373,11 @@ describe('OAuth Clients API', function () {
                 superagent.del(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
                        .query({ access_token: token })
                        .end(function (error, result) {
-                    expect(error).to.not.be.ok();
                     expect(result.statusCode).to.equal(204);
 
                     superagent.get(SERVER_URL + '/api/v1/oauth/clients/' + CLIENT_0.id)
                            .query({ access_token: token })
                            .end(function (error, result) {
-                        expect(error).to.be(null);
                         expect(result.statusCode).to.equal(404);
 
                         done();
@@ -443,7 +419,6 @@ describe('Clients', function () {
                        .query({ setupToken: 'somesetuptoken' })
                        .send({ username: USER_0.username, password: USER_0.password, email: USER_0.email })
                        .end(function (error, result) {
-                    expect(error).to.not.be.ok();
                     expect(result).to.be.ok();
                     expect(result.statusCode).to.eql(201);
                     expect(scope1.isDone()).to.be.ok();
@@ -473,7 +448,6 @@ describe('Clients', function () {
         it('fails due to missing token', function (done) {
             superagent.get(SERVER_URL + '/api/v1/oauth/clients')
             .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
                 done();
             });
@@ -483,7 +457,6 @@ describe('Clients', function () {
             superagent.get(SERVER_URL + '/api/v1/oauth/clients')
             .query({ access_token: '' })
             .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
                 done();
             });
@@ -493,7 +466,6 @@ describe('Clients', function () {
             superagent.get(SERVER_URL + '/api/v1/oauth/clients')
             .query({ access_token: token.toUpperCase() })
             .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
                 done();
             });
@@ -503,7 +475,6 @@ describe('Clients', function () {
             superagent.get(SERVER_URL + '/api/v1/oauth/clients')
             .query({ access_token: token })
             .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(200);
 
                 expect(result.body.clients.length).to.eql(1);
@@ -521,7 +492,6 @@ describe('Clients', function () {
         it('fails due to missing token', function (done) {
             superagent.get(SERVER_URL + '/api/v1/oauth/clients/cid-webadmin/tokens')
             .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
                 done();
             });
@@ -531,7 +501,6 @@ describe('Clients', function () {
             superagent.get(SERVER_URL + '/api/v1/oauth/clients/cid-webadmin/tokens')
             .query({ access_token: '' })
             .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
                 done();
             });
@@ -541,7 +510,6 @@ describe('Clients', function () {
             superagent.get(SERVER_URL + '/api/v1/oauth/clients/cid-webadmin/tokens')
             .query({ access_token: token.toUpperCase() })
             .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
                 done();
             });
@@ -551,7 +519,6 @@ describe('Clients', function () {
             superagent.get(SERVER_URL + '/api/v1/oauth/clients/CID-WEBADMIN/tokens')
             .query({ access_token: token })
             .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(404);
                 done();
             });
@@ -561,7 +528,6 @@ describe('Clients', function () {
             superagent.get(SERVER_URL + '/api/v1/oauth/clients/cid-webadmin/tokens')
             .query({ access_token: token })
             .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(200);
 
                 expect(result.body.tokens.length).to.eql(1);
@@ -579,7 +545,6 @@ describe('Clients', function () {
         it('fails due to missing token', function (done) {
             superagent.del(SERVER_URL + '/api/v1/oauth/clients/cid-webadmin/tokens')
             .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
                 done();
             });
@@ -589,7 +554,6 @@ describe('Clients', function () {
             superagent.del(SERVER_URL + '/api/v1/oauth/clients/cid-webadmin/tokens')
             .query({ access_token: '' })
             .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
                 done();
             });
@@ -599,7 +563,6 @@ describe('Clients', function () {
             superagent.del(SERVER_URL + '/api/v1/oauth/clients/cid-webadmin/tokens')
             .query({ access_token: token.toUpperCase() })
             .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
                 done();
             });
@@ -609,7 +572,6 @@ describe('Clients', function () {
             superagent.del(SERVER_URL + '/api/v1/oauth/clients/CID-WEBADMIN/tokens')
             .query({ access_token: token })
             .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(404);
                 done();
             });
@@ -619,7 +581,6 @@ describe('Clients', function () {
             superagent.get(SERVER_URL + '/api/v1/oauth/clients/cid-webadmin/tokens')
             .query({ access_token: token })
             .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(200);
 
                 expect(result.body.tokens.length).to.eql(1);
@@ -628,14 +589,12 @@ describe('Clients', function () {
                 superagent.del(SERVER_URL + '/api/v1/oauth/clients/cid-webadmin/tokens')
                 .query({ access_token: token })
                 .end(function (error, result) {
-                    expect(error).to.not.be.ok();
                     expect(result.statusCode).to.equal(204);
 
                     // further calls with this token should not work
                     superagent.get(SERVER_URL + '/api/v1/profile')
                     .query({ access_token: token })
                     .end(function (error, result) {
-                        expect(error).to.not.be.ok();
                         expect(result.statusCode).to.equal(401);
                         done();
                     });

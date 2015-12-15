@@ -12,7 +12,7 @@ var clientdb = require('../../clientdb.js'),
     config = require('../../config.js'),
     database = require('../../database.js'),
     expect = require('expect.js'),
-    request = require('superagent'),
+    superagent = require('superagent'),
     server = require('../../server.js'),
     simpleauth = require('../../simpleauth.js'),
     nock = require('nock');
@@ -109,7 +109,7 @@ describe('SimpleAuth API', function () {
                 var scope1 = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
                 var scope2 = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/setup/done?setupToken=somesetuptoken').reply(201, {});
 
-                request.post(SERVER_URL + '/api/v1/cloudron/activate')
+                superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
                        .query({ setupToken: 'somesetuptoken' })
                        .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
                        .end(function (error, result) {
@@ -146,10 +146,9 @@ describe('SimpleAuth API', function () {
         it('cannot login without clientId', function (done) {
             var body = {};
 
-            request.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
+            superagent.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
             .send(body)
             .end(function (error, result) {
-                expect(error).to.be(null);
                 expect(result.statusCode).to.equal(400);
                 done();
             });
@@ -160,10 +159,9 @@ describe('SimpleAuth API', function () {
                 clientId: 'someclientid'
             };
 
-            request.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
+            superagent.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
             .send(body)
             .end(function (error, result) {
-                expect(error).to.be(null);
                 expect(result.statusCode).to.equal(400);
                 done();
             });
@@ -175,10 +173,9 @@ describe('SimpleAuth API', function () {
                 username: USERNAME
             };
 
-            request.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
+            superagent.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
             .send(body)
             .end(function (error, result) {
-                expect(error).to.be(null);
                 expect(result.statusCode).to.equal(400);
                 done();
             });
@@ -191,10 +188,9 @@ describe('SimpleAuth API', function () {
                 password: PASSWORD
             };
 
-            request.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
+            superagent.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
             .send(body)
             .end(function (error, result) {
-                expect(error).to.be(null);
                 expect(result.statusCode).to.equal(401);
                 done();
             });
@@ -207,10 +203,9 @@ describe('SimpleAuth API', function () {
                 password: PASSWORD
             };
 
-            request.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
+            superagent.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
             .send(body)
             .end(function (error, result) {
-                expect(error).to.be(null);
                 expect(result.statusCode).to.equal(401);
                 done();
             });
@@ -223,10 +218,9 @@ describe('SimpleAuth API', function () {
                 password: ''
             };
 
-            request.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
+            superagent.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
             .send(body)
             .end(function (error, result) {
-                expect(error).to.be(null);
                 expect(result.statusCode).to.equal(401);
                 done();
             });
@@ -239,10 +233,9 @@ describe('SimpleAuth API', function () {
                 password: PASSWORD+PASSWORD
             };
 
-            request.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
+            superagent.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
             .send(body)
             .end(function (error, result) {
-                expect(error).to.be(null);
                 expect(result.statusCode).to.equal(401);
                 done();
             });
@@ -255,10 +248,9 @@ describe('SimpleAuth API', function () {
                 password: PASSWORD
             };
 
-            request.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
+            superagent.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
             .send(body)
             .end(function (error, result) {
-                expect(error).to.be(null);
                 expect(result.statusCode).to.equal(401);
                 done();
             });
@@ -271,10 +263,9 @@ describe('SimpleAuth API', function () {
                 password: PASSWORD
             };
 
-            request.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
+            superagent.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
             .send(body)
             .end(function (error, result) {
-                expect(error).to.be(null);
                 expect(result.statusCode).to.equal(401);
                 done();
             });
@@ -287,7 +278,7 @@ describe('SimpleAuth API', function () {
                 password: PASSWORD
             };
 
-            request.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
+            superagent.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
             .send(body)
             .end(function (error, result) {
                 expect(error).to.be(null);
@@ -299,7 +290,7 @@ describe('SimpleAuth API', function () {
                 expect(result.body.user.email).to.be.a('string');
                 expect(result.body.user.admin).to.be.a('boolean');
 
-                request.get(SERVER_URL + '/api/v1/profile')
+                superagent.get(SERVER_URL + '/api/v1/profile')
                 .query({ access_token: result.body.accessToken })
                 .end(function (error, result) {
                     expect(error).to.be(null);
@@ -318,7 +309,7 @@ describe('SimpleAuth API', function () {
                 password: PASSWORD
             };
 
-            request.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
+            superagent.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
             .send(body)
             .end(function (error, result) {
                 expect(error).to.be(null);
@@ -330,7 +321,7 @@ describe('SimpleAuth API', function () {
                 expect(result.body.user.email).to.be.a('string');
                 expect(result.body.user.admin).to.be.a('boolean');
 
-                request.get(SERVER_URL + '/api/v1/profile')
+                superagent.get(SERVER_URL + '/api/v1/profile')
                 .query({ access_token: result.body.accessToken })
                 .end(function (error, result) {
                     expect(error).to.be(null);
@@ -349,10 +340,9 @@ describe('SimpleAuth API', function () {
                 password: PASSWORD
             };
 
-            request.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
+            superagent.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
             .send(body)
             .end(function (error, result) {
-                expect(error).to.be(null);
                 expect(result.statusCode).to.equal(401);
                 done();
             });
@@ -369,7 +359,7 @@ describe('SimpleAuth API', function () {
                 password: PASSWORD
             };
 
-            request.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
+            superagent.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
             .send(body)
             .end(function (error, result) {
                 expect(error).to.be(null);
@@ -382,35 +372,32 @@ describe('SimpleAuth API', function () {
         });
 
         it('fails without access_token', function (done) {
-            request.get(SIMPLE_AUTH_ORIGIN + '/api/v1/logout')
+            superagent.get(SIMPLE_AUTH_ORIGIN + '/api/v1/logout')
             .end(function (error, result) {
-                expect(error).to.be(null);
                 expect(result.statusCode).to.equal(400);
                 done();
             });
         });
 
         it('fails with unkonwn access_token', function (done) {
-            request.get(SIMPLE_AUTH_ORIGIN + '/api/v1/logout')
+            superagent.get(SIMPLE_AUTH_ORIGIN + '/api/v1/logout')
             .query({ access_token: accessToken+accessToken })
             .end(function (error, result) {
-                expect(error).to.be(null);
                 expect(result.statusCode).to.equal(401);
                 done();
             });
         });
 
         it('succeeds', function (done) {
-            request.get(SIMPLE_AUTH_ORIGIN + '/api/v1/logout')
+            superagent.get(SIMPLE_AUTH_ORIGIN + '/api/v1/logout')
             .query({ access_token: accessToken })
             .end(function (error, result) {
                 expect(error).to.be(null);
                 expect(result.statusCode).to.equal(200);
 
-                request.get(SERVER_URL + '/api/v1/profile')
+                superagent.get(SERVER_URL + '/api/v1/profile')
                 .query({ access_token: accessToken })
                 .end(function (error, result) {
-                    expect(error).to.be(null);
                     expect(result.statusCode).to.equal(401);
 
                     done();

@@ -24,7 +24,7 @@ function getBackupCredentials(backupConfig, callback) {
 
     var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/awscredentials';
     superagent.post(url).query({ token: backupConfig.token }).end(function (error, result) {
-        if (error) return callback(error);
+        if (error && !error.response) return callback(error);
         if (result.statusCode !== 201) return callback(new Error(result.text));
         if (!result.body || !result.body.credentials) return callback(new Error('Unexpected response'));
 
@@ -49,7 +49,7 @@ function getAllPaged(backupConfig, page, perPage, callback) {
 
     var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/backups';
     superagent.get(url).query({ token: backupConfig.token }).end(function (error, result) {
-        if (error) return callback(error);
+        if (error && !error.response) return callback(error);
         if (result.statusCode !== 200) return callback(new Error(result.text));
         if (!result.body || !util.isArray(result.body.backups)) return callback(new Error('Unexpected response'));
 

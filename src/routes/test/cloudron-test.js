@@ -11,7 +11,7 @@ var async = require('async'),
     database = require('../../database.js'),
     expect = require('expect.js'),
     nock = require('nock'),
-    request = require('superagent'),
+    superagent = require('superagent'),
     server = require('../../server.js'),
     shell = require('../../shell.js');
 
@@ -54,10 +54,9 @@ describe('Cloudron', function () {
         after(cleanup);
 
         it('fails due to missing setupToken', function (done) {
-            request.post(SERVER_URL + '/api/v1/cloudron/activate')
+            superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
                    .send({ username: '', password: 'somepassword', email: 'admin@foo.bar' })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
                 done();
             });
@@ -66,11 +65,10 @@ describe('Cloudron', function () {
         it('fails due to empty username', function (done) {
             var scope = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
 
-            request.post(SERVER_URL + '/api/v1/cloudron/activate')
+            superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
                    .query({ setupToken: 'somesetuptoken' })
                    .send({ username: '', password: 'somepassword', email: 'admin@foo.bar' })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
                 expect(scope.isDone()).to.be.ok();
                 done();
@@ -80,11 +78,10 @@ describe('Cloudron', function () {
         it('fails due to empty password', function (done) {
             var scope = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
 
-            request.post(SERVER_URL + '/api/v1/cloudron/activate')
+            superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
                    .query({ setupToken: 'somesetuptoken' })
                    .send({ username: 'someuser', password: '', email: 'admin@foo.bar' })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
                 expect(scope.isDone()).to.be.ok();
                 done();
@@ -94,11 +91,10 @@ describe('Cloudron', function () {
         it('fails due to empty email', function (done) {
             var scope = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
 
-            request.post(SERVER_URL + '/api/v1/cloudron/activate')
+            superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
                    .query({ setupToken: 'somesetuptoken' })
                    .send({ username: 'someuser', password: 'somepassword', email: '' })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
                 expect(scope.isDone()).to.be.ok();
                 done();
@@ -108,11 +104,10 @@ describe('Cloudron', function () {
         it('fails due to empty name', function (done) {
             var scope = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
 
-            request.post(SERVER_URL + '/api/v1/cloudron/activate')
+            superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
                    .query({ setupToken: 'somesetuptoken' })
                    .send({ username: 'someuser', password: '', email: 'admin@foo.bar', name: '' })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
                 expect(scope.isDone()).to.be.ok();
                 done();
@@ -122,11 +117,10 @@ describe('Cloudron', function () {
         it('fails due to invalid email', function (done) {
             var scope = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
 
-            request.post(SERVER_URL + '/api/v1/cloudron/activate')
+            superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
                    .query({ setupToken: 'somesetuptoken' })
                    .send({ username: 'someuser', password: 'somepassword', email: 'invalidemail' })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
                 expect(scope.isDone()).to.be.ok();
                 done();
@@ -137,11 +131,10 @@ describe('Cloudron', function () {
             var scope1 = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
             var scope2 = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/setup/done?setupToken=somesetuptoken').reply(201, {});
 
-            request.post(SERVER_URL + '/api/v1/cloudron/activate')
+            superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
                    .query({ setupToken: 'somesetuptoken' })
                    .send({ username: 'someuser', password: 'somepassword', email: 'admin@foo.bar', name: 'tester' })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(201);
                 expect(scope1.isDone()).to.be.ok();
                 expect(scope2.isDone()).to.be.ok();
@@ -152,11 +145,10 @@ describe('Cloudron', function () {
         it('fails the second time', function (done) {
             var scope = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
 
-            request.post(SERVER_URL + '/api/v1/cloudron/activate')
+            superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
                    .query({ setupToken: 'somesetuptoken' })
                    .send({ username: 'someuser', password: 'somepassword', email: 'admin@foo.bar' })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(409);
                 expect(scope.isDone()).to.be.ok();
                 done();
@@ -175,11 +167,10 @@ describe('Cloudron', function () {
 
                     config._reset();
 
-                    request.post(SERVER_URL + '/api/v1/cloudron/activate')
+                    superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
                            .query({ setupToken: 'somesetuptoken' })
                            .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
                            .end(function (error, result) {
-                        expect(error).to.not.be.ok();
                         expect(result).to.be.ok();
                         expect(scope1.isDone()).to.be.ok();
                         expect(scope2.isDone()).to.be.ok();
@@ -196,19 +187,17 @@ describe('Cloudron', function () {
         after(cleanup);
 
         it('cannot get without token', function (done) {
-            request.get(SERVER_URL + '/api/v1/cloudron/config')
+            superagent.get(SERVER_URL + '/api/v1/cloudron/config')
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
                 done();
             });
         });
 
         it('succeeds without appstore', function (done) {
-            request.get(SERVER_URL + '/api/v1/cloudron/config')
+            superagent.get(SERVER_URL + '/api/v1/cloudron/config')
                    .query({ access_token: token })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(200);
                 expect(result.body.apiServerOrigin).to.eql('http://localhost:6060');
                 expect(result.body.webServerOrigin).to.eql(null);
@@ -230,10 +219,9 @@ describe('Cloudron', function () {
         it('succeeds', function (done) {
             var scope = nock(config.apiServerOrigin()).get('/api/v1/boxes/localhost?token=' + config.token()).reply(200, { box: { region: 'sfo', size: '1gb' }});
 
-            request.get(SERVER_URL + '/api/v1/cloudron/config')
+            superagent.get(SERVER_URL + '/api/v1/cloudron/config')
                    .query({ access_token: token })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(200);
                 expect(result.body.apiServerOrigin).to.eql('http://localhost:6060');
                 expect(result.body.webServerOrigin).to.eql(null);
@@ -267,11 +255,10 @@ describe('Cloudron', function () {
 
                     config._reset();
 
-                    request.post(SERVER_URL + '/api/v1/cloudron/activate')
+                    superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
                            .query({ setupToken: 'somesetuptoken' })
                            .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
                            .end(function (error, result) {
-                        expect(error).to.not.be.ok();
                         expect(result).to.be.ok();
                         expect(scope1.isDone()).to.be.ok();
                         expect(scope2.isDone()).to.be.ok();
@@ -284,11 +271,10 @@ describe('Cloudron', function () {
                 },
 
                 function setupBackupConfig(callback) {
-                    request.post(SERVER_URL + '/api/v1/settings/backup_config')
+                    superagent.post(SERVER_URL + '/api/v1/settings/backup_config')
                            .send({ provider: 'caas', token: 'BACKUP_TOKEN', bucket: 'Bucket', prefix: 'Prefix' })
                            .query({ access_token: token })
                            .end(function (error, result) {
-                        expect(error).to.not.be.ok();
                         expect(result.statusCode).to.equal(200);
 
                         callback();
@@ -301,65 +287,59 @@ describe('Cloudron', function () {
         after(cleanup);
 
         it('fails without token', function (done) {
-            request.post(SERVER_URL + '/api/v1/cloudron/migrate')
+            superagent.post(SERVER_URL + '/api/v1/cloudron/migrate')
                    .send({ size: 'small', region: 'sfo'})
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
                 done();
             });
         });
 
         it('fails without password', function (done) {
-            request.post(SERVER_URL + '/api/v1/cloudron/migrate')
+            superagent.post(SERVER_URL + '/api/v1/cloudron/migrate')
                    .send({ size: 'small', region: 'sfo'})
                    .query({ access_token: token })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
                 done();
             });
         });
 
         it('fails with missing size', function (done) {
-            request.post(SERVER_URL + '/api/v1/cloudron/migrate')
+            superagent.post(SERVER_URL + '/api/v1/cloudron/migrate')
                    .send({ region: 'sfo', password: PASSWORD })
                    .query({ access_token: token })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
                 done();
             });
         });
 
         it('fails with wrong size type', function (done) {
-            request.post(SERVER_URL + '/api/v1/cloudron/migrate')
+            superagent.post(SERVER_URL + '/api/v1/cloudron/migrate')
                    .send({ size: 4, region: 'sfo', password: PASSWORD })
                    .query({ access_token: token })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
                 done();
             });
         });
 
         it('fails with missing region', function (done) {
-            request.post(SERVER_URL + '/api/v1/cloudron/migrate')
+            superagent.post(SERVER_URL + '/api/v1/cloudron/migrate')
                    .send({ size: 'small', password: PASSWORD })
                    .query({ access_token: token })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
                 done();
             });
         });
 
         it('fails with wrong region type', function (done) {
-            request.post(SERVER_URL + '/api/v1/cloudron/migrate')
+            superagent.post(SERVER_URL + '/api/v1/cloudron/migrate')
                    .send({ size: 'small', region: 4, password: PASSWORD })
                    .query({ access_token: token })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
                 done();
             });
@@ -383,11 +363,10 @@ describe('Cloudron', function () {
 
             injectShellMock();
 
-            request.post(SERVER_URL + '/api/v1/cloudron/migrate')
+            superagent.post(SERVER_URL + '/api/v1/cloudron/migrate')
                    .send({ size: 'small', region: 'sfo', password: PASSWORD })
                    .query({ access_token: token })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(202);
 
                 function checkAppstoreServerCalled() {
@@ -420,11 +399,10 @@ describe('Cloudron', function () {
 
             injectShellMock();
 
-            request.post(SERVER_URL + '/api/v1/cloudron/migrate')
+            superagent.post(SERVER_URL + '/api/v1/cloudron/migrate')
                    .send({ size: 'small', region: 'sfo', password: PASSWORD })
                    .query({ access_token: token })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(202);
 
                 function checkAppstoreServerCalled() {
@@ -452,11 +430,10 @@ describe('Cloudron', function () {
 
                     config._reset();
 
-                    request.post(SERVER_URL + '/api/v1/cloudron/activate')
+                    superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
                            .query({ setupToken: 'somesetuptoken' })
                            .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
                            .end(function (error, result) {
-                        expect(error).to.not.be.ok();
                         expect(result).to.be.ok();
                         expect(scope1.isDone()).to.be.ok();
                         expect(scope2.isDone()).to.be.ok();
@@ -473,125 +450,112 @@ describe('Cloudron', function () {
         after(cleanup);
 
         it('fails without token', function (done) {
-            request.post(SERVER_URL + '/api/v1/cloudron/feedback')
+            superagent.post(SERVER_URL + '/api/v1/cloudron/feedback')
                    .send({ type: 'ticket', subject: 'some subject', description: 'some description' })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
                 done();
             });
         });
 
         it('fails without type', function (done) {
-            request.post(SERVER_URL + '/api/v1/cloudron/feedback')
+            superagent.post(SERVER_URL + '/api/v1/cloudron/feedback')
                    .send({ subject: 'some subject', description: 'some description' })
                    .query({ access_token: token })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
                 done();
             });
         });
 
         it('fails with empty type', function (done) {
-            request.post(SERVER_URL + '/api/v1/cloudron/feedback')
+            superagent.post(SERVER_URL + '/api/v1/cloudron/feedback')
                    .send({ type: '', subject: 'some subject', description: 'some description' })
                    .query({ access_token: token })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
                 done();
             });
         });
 
         it('fails with unknown type', function (done) {
-            request.post(SERVER_URL + '/api/v1/cloudron/feedback')
+            superagent.post(SERVER_URL + '/api/v1/cloudron/feedback')
                    .send({ type: 'foobar', subject: 'some subject', description: 'some description' })
                    .query({ access_token: token })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
                 done();
             });
         });
 
         it('succeeds with ticket type', function (done) {
-            request.post(SERVER_URL + '/api/v1/cloudron/feedback')
+            superagent.post(SERVER_URL + '/api/v1/cloudron/feedback')
                    .send({ type: 'ticket', subject: 'some subject', description: 'some description' })
                    .query({ access_token: token })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(201);
                 done();
             });
         });
 
         it('succeeds with app type', function (done) {
-            request.post(SERVER_URL + '/api/v1/cloudron/feedback')
+            superagent.post(SERVER_URL + '/api/v1/cloudron/feedback')
                    .send({ type: 'app', subject: 'some subject', description: 'some description' })
                    .query({ access_token: token })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(201);
                 done();
             });
         });
 
         it('fails without description', function (done) {
-            request.post(SERVER_URL + '/api/v1/cloudron/feedback')
+            superagent.post(SERVER_URL + '/api/v1/cloudron/feedback')
                    .send({ type: 'ticket', subject: 'some subject' })
                    .query({ access_token: token })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
                 done();
             });
         });
 
         it('fails with empty subject', function (done) {
-            request.post(SERVER_URL + '/api/v1/cloudron/feedback')
+            superagent.post(SERVER_URL + '/api/v1/cloudron/feedback')
                    .send({ type: 'ticket', subject: '', description: 'some description' })
                    .query({ access_token: token })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
                 done();
             });
         });
 
         it('fails with empty description', function (done) {
-            request.post(SERVER_URL + '/api/v1/cloudron/feedback')
+            superagent.post(SERVER_URL + '/api/v1/cloudron/feedback')
                    .send({ type: 'ticket', subject: 'some subject', description: '' })
                    .query({ access_token: token })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
                 done();
             });
         });
 
         it('succeeds with feedback type', function (done) {
-            request.post(SERVER_URL + '/api/v1/cloudron/feedback')
+            superagent.post(SERVER_URL + '/api/v1/cloudron/feedback')
                    .send({ type: 'feedback', subject: 'some subject', description: 'some description' })
                    .query({ access_token: token })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(201);
                 done();
             });
         });
 
         it('fails without subject', function (done) {
-            request.post(SERVER_URL + '/api/v1/cloudron/feedback')
+            superagent.post(SERVER_URL + '/api/v1/cloudron/feedback')
                    .send({ type: 'ticket', description: 'some description' })
                    .query({ access_token: token })
                    .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
                 done();
             });
         });
     });
 });
-
-

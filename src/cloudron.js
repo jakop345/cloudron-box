@@ -178,7 +178,7 @@ function setTimeZone(ip, callback) {
     debug('setTimeZone ip:%s', ip);
 
     superagent.get('http://www.telize.com/geoip/' + ip).end(function (error, result) {
-        if (error || result.statusCode !== 200) {
+        if ((error && !error.response) || result.statusCode !== 200) {
             debug('Failed to get geo location', error);
             return callback(null);
         }
@@ -260,8 +260,8 @@ function getCloudronDetails(callback) {
         .get(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn())
         .query({ token: config.token() })
         .end(function (error, result) {
-            if (error) return callback(error);
-            if (result.status !== 200) return callback(new CloudronError(CloudronError.EXTERNAL_ERROR, util.format('%s %j', result.status, result.body)));
+            if (error && !error.response) return callback(error);
+            if (result.statusCode !== 200) return callback(new CloudronError(CloudronError.EXTERNAL_ERROR, util.format('%s %j', result.status, result.body)));
 
             gCloudronDetails = result.body.box;
 
@@ -318,7 +318,7 @@ function sendHeartbeat() {
     var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/heartbeat';
 
     superagent.post(url).query({ token: config.token(), version: config.version() }).timeout(10000).end(function (error, result) {
-        if (error) debug('Error sending heartbeat.', error);
+        if (error && !error.response) debug('Network error sending heartbeat.', error);
         else if (result.statusCode !== 200) debug('Server responded to heartbeat with %s %s', result.statusCode, result.text);
         else debug('Heartbeat sent to %s', url);
     });
@@ -466,10 +466,10 @@ function migrate(size, region, callback) {
           .query({ token: config.token() })
           .send({ size: size, region: region, restoreKey: restoreKey })
           .end(function (error, result) {
-            if (error) return unlock(error);
-            if (result.status === 409) return unlock(new CloudronError(CloudronError.BAD_STATE));
-            if (result.status === 404) return unlock(new CloudronError(CloudronError.NOT_FOUND));
-            if (result.status !== 202) return unlock(new CloudronError(CloudronError.EXTERNAL_ERROR, util.format('%s %j', result.status, result.body)));
+            if (error && !error.response) return unlock(error);
+            if (result.statusCode === 409) return unlock(new CloudronError(CloudronError.BAD_STATE));
+            if (result.statusCode === 404) return unlock(new CloudronError(CloudronError.NOT_FOUND));
+            if (result.statusCode !== 202) return unlock(new CloudronError(CloudronError.EXTERNAL_ERROR, util.format('%s %j', result.status, result.body)));
 
             return unlock(null);
         });
@@ -526,8 +526,8 @@ function doUpgrade(boxUpdateInfo, callback) {
           .query({ token: config.token() })
           .send({ version: boxUpdateInfo.version })
           .end(function (error, result) {
-            if (error) return upgradeError(new Error('Error making upgrade request: ' + error));
-            if (result.status !== 202) return upgradeError(new Error(util.format('Server not ready to upgrade. statusCode: %s body: %j', result.status, result.body)));
+            if (error && !error.response) return upgradeError(new Error('Network error making upgrade request: ' + error));
+            if (result.statusCode !== 202) return upgradeError(new Error(util.format('Server not ready to upgrade. statusCode: %s body: %j', result.status, result.body)));
 
             progress.set(progress.UPDATE, 10, 'Updating base system');
 
@@ -555,8 +555,8 @@ function doUpdate(boxUpdateInfo, callback) {
         superagent.get(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/sourcetarballurl')
           .query({ token: config.token(), boxVersion: boxUpdateInfo.version })
           .end(function (error, result) {
-            if (error) return updateError(new Error('Error fetching sourceTarballUrl: ' + error));
-            if (result.status !== 200) return updateError(new Error('Error fetching sourceTarballUrl status: ' + result.status));
+            if (error && !error.response) return updateError(new Error('Network error fetching sourceTarballUrl: ' + error));
+            if (result.statusCode !== 200) return updateError(new Error('Error fetching sourceTarballUrl status: ' + result.statusCode));
             if (!safe.query(result, 'body.url')) return updateError(new Error('Error fetching sourceTarballUrl response: ' + JSON.stringify(result.body)));
 
             // NOTE: the args here are tied to the installer revision, box code and appstore provisioning logic
@@ -591,8 +591,8 @@ function doUpdate(boxUpdateInfo, callback) {
             debug('updating box %j', args);
 
             superagent.post(INSTALLER_UPDATE_URL).send(args).end(function (error, result) {
-                if (error) return updateError(error);
-                if (result.status !== 202) return updateError(new Error('Error initiating update: ' + JSON.stringify(result.body)));
+                if (error && !error.response) return updateError(error);
+                if (result.statusCode !== 202) return updateError(new Error('Error initiating update: ' + JSON.stringify(result.body)));
 
                 progress.set(progress.UPDATE, 10, 'Updating cloudron software');
 

@@ -59,7 +59,7 @@ function activate(req, res, next) {
 
         // Now let the api server know we got activated
         superagent.post(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/setup/done').query({ setupToken:req.query.setupToken }).end(function (error, result) {
-            if (error) return next(new HttpError(500, error));
+            if (error && !error.response) return next(new HttpError(500, error));
             if (result.statusCode === 403) return next(new HttpError(403, 'Invalid token'));
             if (result.statusCode === 409) return next(new HttpError(409, 'Already setup'));
             if (result.statusCode !== 201) return next(new HttpError(500, result.text ? result.text.message : 'Internal error'));
@@ -75,7 +75,7 @@ function setupTokenAuth(req, res, next) {
     if (typeof req.query.setupToken !== 'string') return next(new HttpError(400, 'no setupToken provided'));
 
     superagent.get(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/setup/verify').query({ setupToken:req.query.setupToken }).end(function (error, result) {
-        if (error) return next(new HttpError(500, error));
+        if (error && !error.response) return next(new HttpError(500, error));
         if (result.statusCode === 403) return next(new HttpError(403, 'Invalid token'));
         if (result.statusCode === 409) return next(new HttpError(409, 'Already setup'));
         if (result.statusCode !== 200) return next(new HttpError(500, result.text ? result.text.message : 'Internal error'));

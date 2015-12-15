@@ -92,8 +92,10 @@ function checkAppHealth(app, callback) {
             .redirects(0)
             .timeout(HEALTHCHECK_INTERVAL)
             .end(function (error, res) {
-
-            if (error || res.status >= 400) { // 2xx and 3xx are ok
+            if (error && !error.response) {
+                debugApp(app, 'not alive (network error): %s', error.message);
+                setHealth(app, appdb.HEALTH_UNHEALTHY, callback);
+            } if (res.statusCode >= 400) { // 2xx and 3xx are ok
                 debugApp(app, 'not alive : %s', error || res.status);
                 setHealth(app, appdb.HEALTH_UNHEALTHY, callback);
             } else {

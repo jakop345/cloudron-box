@@ -319,7 +319,6 @@ describe('OAuth2', function () {
             it('fails due to missing redirect_uri param', function (done) {
                 superagent.get(SERVER_URL + '/api/v1/oauth/dialog/authorize')
                 .end(function (error, result) {
-                    expect(error).to.not.be.ok();
                     expect(result.text.indexOf('<!-- error tester -->')).to.not.equal(-1);
                     expect(result.text.indexOf('Invalid request. redirect_uri query param is not set.')).to.not.equal(-1);
                     expect(result.statusCode).to.equal(200);
@@ -330,7 +329,6 @@ describe('OAuth2', function () {
             it('fails due to missing client_id param', function (done) {
                 superagent.get(SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=http://someredirect')
                 .end(function (error, result) {
-                    expect(error).to.not.be.ok();
                     expect(result.text.indexOf('<!-- error tester -->')).to.not.equal(-1);
                     expect(result.text.indexOf('Invalid request. client_id query param is not set.')).to.not.equal(-1);
                     expect(result.statusCode).to.equal(200);
@@ -341,7 +339,6 @@ describe('OAuth2', function () {
             it('fails due to missing response_type param', function (done) {
                 superagent.get(SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=http://someredirect&client_id=someclientid')
                 .end(function (error, result) {
-                    expect(error).to.not.be.ok();
                     expect(result.text.indexOf('<!-- error tester -->')).to.not.equal(-1);
                     expect(result.text.indexOf('Invalid request. response_type query param is not set.')).to.not.equal(-1);
                     expect(result.statusCode).to.equal(200);
@@ -352,7 +349,6 @@ describe('OAuth2', function () {
             it('fails for unkown grant type', function (done) {
                 superagent.get(SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=http://someredirect&client_id=someclientid&response_type=foobar')
                 .end(function (error, result) {
-                    expect(error).to.not.be.ok();
                     expect(result.text.indexOf('<!-- error tester -->')).to.not.equal(-1);
                     expect(result.text.indexOf('Invalid request. Only token and code response types are supported.')).to.not.equal(-1);
                     expect(result.statusCode).to.equal(200);
@@ -363,7 +359,6 @@ describe('OAuth2', function () {
             it('succeeds for grant type code', function (done) {
                 superagent.get(SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=http://someredirect&client_id=someclientid&response_type=code')
                 .end(function (error, result) {
-                    expect(error).to.not.be.ok();
                     expect(result.text).to.eql('<script>window.location.href = "/api/v1/session/login?returnTo=http://someredirect";</script>');
                     expect(result.statusCode).to.equal(200);
                     done();
@@ -373,7 +368,6 @@ describe('OAuth2', function () {
             it('succeeds for grant type token', function (done) {
                 superagent.get(SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=http://someredirect&client_id=someclientid&response_type=token')
                 .end(function (error, result) {
-                    expect(error).to.not.be.ok();
                     expect(result.text).to.eql('<script>window.location.href = "/api/v1/session/login?returnTo=http://someredirect";</script>');
                     expect(result.statusCode).to.equal(200);
                     done();
@@ -388,7 +382,6 @@ describe('OAuth2', function () {
             it('fails without prior authentication call and not returnTo query', function (done) {
                 superagent.get(SERVER_URL + '/api/v1/session/login')
                 .end(function (error, result) {
-                    expect(error).to.not.be.ok();
                     expect(result.text.indexOf('<!-- error tester -->')).to.not.equal(-1);
                     expect(result.text.indexOf('Invalid login request. No returnTo provided.')).to.not.equal(-1);
                     expect(result.statusCode).to.equal(200);
@@ -401,7 +394,6 @@ describe('OAuth2', function () {
                 superagent.get(SERVER_URL + '/api/v1/session/login?returnTo=http://someredirect')
                 .redirects(0)
                 .end(function (error, result) {
-                    expect(error).to.not.be.ok();
                     expect(result.statusCode).to.equal(302);
                     expect(result.headers.location).to.eql('http://someredirect');
 
@@ -413,7 +405,6 @@ describe('OAuth2', function () {
                 superagent.get(SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=http://someredirect&response_type=code')
                 .redirects(0)
                 .end(function (error, result) {
-                    expect(error).to.not.be.ok();
                     expect(result.text.indexOf('<!-- error tester -->')).to.not.equal(-1);
                     expect(result.text.indexOf('Invalid request. client_id query param is not set.')).to.not.equal(-1);
                     expect(result.statusCode).to.equal(200);
@@ -1289,7 +1280,6 @@ describe('Password', function () {
         it('reset request succeeds', function (done) {
             superagent.get(SERVER_URL + '/api/v1/session/password/resetRequest.html')
             .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.text.indexOf('<!-- tester -->')).to.not.equal(-1);
                 expect(result.statusCode).to.equal(200);
                 done();
@@ -1299,7 +1289,6 @@ describe('Password', function () {
         it('setup fails due to missing reset_token', function (done) {
             superagent.get(SERVER_URL + '/api/v1/session/password/setup.html')
             .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
                 done();
             });
@@ -1309,7 +1298,6 @@ describe('Password', function () {
             superagent.get(SERVER_URL + '/api/v1/session/password/setup.html')
             .query({ reset_token: hat(256) })
             .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
                 done();
             });
@@ -1319,7 +1307,6 @@ describe('Password', function () {
             superagent.get(SERVER_URL + '/api/v1/session/password/setup.html')
             .query({ reset_token: USER_0.resetToken })
             .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(200);
                 expect(result.text.indexOf('<!-- tester -->')).to.not.equal(-1);
                 done();
@@ -1329,7 +1316,6 @@ describe('Password', function () {
         it('reset fails due to missing reset_token', function (done) {
             superagent.get(SERVER_URL + '/api/v1/session/password/reset.html')
             .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
                 done();
             });
@@ -1339,7 +1325,6 @@ describe('Password', function () {
             superagent.get(SERVER_URL + '/api/v1/session/password/reset.html')
             .query({ reset_token: hat(256) })
             .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
                 done();
             });
@@ -1349,7 +1334,6 @@ describe('Password', function () {
             superagent.get(SERVER_URL + '/api/v1/session/password/reset.html')
             .query({ reset_token: USER_0.resetToken })
             .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.text.indexOf('<!-- tester -->')).to.not.equal(-1);
                 expect(result.statusCode).to.equal(200);
                 done();
@@ -1359,7 +1343,6 @@ describe('Password', function () {
         it('sent succeeds', function (done) {
             superagent.get(SERVER_URL + '/api/v1/session/password/sent.html')
             .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.text.indexOf('<!-- tester -->')).to.not.equal(-1);
                 expect(result.statusCode).to.equal(200);
                 done();
@@ -1375,7 +1358,6 @@ describe('Password', function () {
             superagent.post(SERVER_URL + '/api/v1/session/password/resetRequest')
             .send({ identifier: USER_0.email })
             .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.text.indexOf('<!-- tester -->')).to.not.equal(-1);
                 expect(result.statusCode).to.equal(200);
                 done();
@@ -1391,7 +1373,6 @@ describe('Password', function () {
             superagent.post(SERVER_URL + '/api/v1/session/password/reset')
             .send({ password: 'somepassword' })
             .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
                 done();
             });
@@ -1401,7 +1382,6 @@ describe('Password', function () {
             superagent.post(SERVER_URL + '/api/v1/session/password/reset')
             .send({ resetToken: hat(256) })
             .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(400);
                 done();
             });
@@ -1411,7 +1391,6 @@ describe('Password', function () {
             superagent.post(SERVER_URL + '/api/v1/session/password/reset')
             .send({ password: '', resetToken: hat(256) })
             .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
                 done();
             });
@@ -1421,7 +1400,6 @@ describe('Password', function () {
             superagent.post(SERVER_URL + '/api/v1/session/password/reset')
             .send({ password: '', resetToken: '' })
             .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(401);
                 done();
             });
@@ -1439,7 +1417,6 @@ describe('Password', function () {
             superagent.post(SERVER_URL + '/api/v1/session/password/reset')
             .send({ password: 'somepassword', resetToken: USER_0.resetToken })
             .end(function (error, result) {
-                expect(error).to.not.be.ok();
                 expect(scope.isDone()).to.be.ok();
                 expect(result.statusCode).to.equal(200);
                 done();

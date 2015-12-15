@@ -11,7 +11,7 @@ var progress = require('../progress.js'),
     database = require('../database.js'),
     expect = require('expect.js'),
     nock = require('nock'),
-    request = require('superagent'),
+    superagent = require('superagent'),
     server = require('../server.js');
 
 var SERVER_URL = 'http://localhost:' + config.get('port');
@@ -46,7 +46,7 @@ describe('Server', function () {
         });
 
         it('is reachable', function (done) {
-            request.get(SERVER_URL + '/api/v1/cloudron/status', function (err, res) {
+            superagent.get(SERVER_URL + '/api/v1/cloudron/status', function (err, res) {
                 expect(res.statusCode).to.equal(200);
                 done(err);
             });
@@ -79,32 +79,32 @@ describe('Server', function () {
             });
         });
 
-        it('random bad requests', function (done) {
-            request.get(SERVER_URL + '/random', function (err, res) {
-                expect(err).to.not.be.ok();
+        it('random bad superagents', function (done) {
+            superagent.get(SERVER_URL + '/random', function (err, res) {
+                expect(err).to.be.ok();
                 expect(res.statusCode).to.equal(404);
-                done(err);
+                done();
             });
         });
 
         it('version', function (done) {
-            request.get(SERVER_URL + '/api/v1/cloudron/status', function (err, res) {
+            superagent.get(SERVER_URL + '/api/v1/cloudron/status', function (err, res) {
                 expect(err).to.not.be.ok();
                 expect(res.statusCode).to.equal(200);
                 expect(res.body.version).to.equal('0.5.0');
-                done(err);
+                done();
             });
         });
 
         it('status route is GET', function (done) {
-            request.post(SERVER_URL + '/api/v1/cloudron/status')
+            superagent.post(SERVER_URL + '/api/v1/cloudron/status')
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(404);
 
-                request.get(SERVER_URL + '/api/v1/cloudron/status')
+                superagent.get(SERVER_URL + '/api/v1/cloudron/status')
                        .end(function (err, res) {
                     expect(res.statusCode).to.equal(200);
-                    done(err);
+                    done();
                 });
             });
         });
@@ -122,18 +122,16 @@ describe('Server', function () {
         });
 
         it('config fails due missing token', function (done) {
-            request.get(SERVER_URL + '/api/v1/cloudron/config', function (err, res) {
-                expect(err).to.not.be.ok();
+            superagent.get(SERVER_URL + '/api/v1/cloudron/config', function (err, res) {
                 expect(res.statusCode).to.equal(401);
-                done(err);
+                done();
             });
         });
 
         it('config fails due wrong token', function (done) {
-            request.get(SERVER_URL + '/api/v1/cloudron/config').query({ access_token: 'somewrongtoken' }).end(function (err, res) {
-                expect(err).to.not.be.ok();
+            superagent.get(SERVER_URL + '/api/v1/cloudron/config').query({ access_token: 'somewrongtoken' }).end(function (err, res) {
                 expect(res.statusCode).to.equal(401);
-                done(err);
+                done();
             });
         });
     });
@@ -150,8 +148,7 @@ describe('Server', function () {
         });
 
         it('succeeds with no progress', function (done) {
-            request.get(SERVER_URL + '/api/v1/cloudron/progress', function (error, result) {
-                expect(error).to.not.be.ok();
+            superagent.get(SERVER_URL + '/api/v1/cloudron/progress', function (error, result) {
                 expect(result.statusCode).to.equal(200);
                 expect(result.body.update).to.be(null);
                 expect(result.body.backup).to.be(null);
@@ -162,8 +159,7 @@ describe('Server', function () {
         it('succeeds with update progress', function (done) {
             progress.set(progress.UPDATE, 13, 'This is some status string');
 
-            request.get(SERVER_URL + '/api/v1/cloudron/progress', function (error, result) {
-                expect(error).to.not.be.ok();
+            superagent.get(SERVER_URL + '/api/v1/cloudron/progress', function (error, result) {
                 expect(result.statusCode).to.equal(200);
                 expect(result.body.update).to.be.an('object');
                 expect(result.body.update.percent).to.be.a('number');
@@ -179,8 +175,7 @@ describe('Server', function () {
         it('succeeds with no progress after clearing the update', function (done) {
             progress.clear(progress.UPDATE);
 
-            request.get(SERVER_URL + '/api/v1/cloudron/progress', function (error, result) {
-                expect(error).to.not.be.ok();
+            superagent.get(SERVER_URL + '/api/v1/cloudron/progress', function (error, result) {
                 expect(result.statusCode).to.equal(200);
                 expect(result.body.update).to.be(null);
                 expect(result.body.backup).to.be(null);
@@ -211,8 +206,9 @@ describe('Server', function () {
         });
 
         it('is not reachable anymore', function (done) {
-            request.get(SERVER_URL + '/api/v1/cloudron/status', function (error, result) {
+            superagent.get(SERVER_URL + '/api/v1/cloudron/status', function (error, result) {
                 expect(error).to.not.be(null);
+                expect(!error.response).to.be.ok();
                 done();
             });
         });
@@ -226,15 +222,15 @@ describe('Server', function () {
         });
 
         it('responds to OPTIONS', function (done) {
-            request('OPTIONS', SERVER_URL + '/api/v1/cloudron/status')
+            superagent('OPTIONS', SERVER_URL + '/api/v1/cloudron/status')
                 .set('Access-Control-Request-Method', 'GET')
-                .set('Access-Control-Request-Headers', 'accept, origin, x-requested-with')
+                .set('Access-Control-Request-Headers', 'accept, origin, x-superagented-with')
                 .set('Origin', 'http://localhost')
-                .end(function (res) {
+                .end(function (error, res) {
                 expect(res.headers['access-control-allow-methods']).to.be('GET, PUT, DELETE, POST, OPTIONS');
                 expect(res.headers['access-control-allow-credentials']).to.be('true');
-                expect(res.headers['access-control-allow-headers']).to.be('accept, origin, x-requested-with'); // mirrored from request
-                expect(res.headers['access-control-allow-origin']).to.be('http://localhost'); // mirrors from request
+                expect(res.headers['access-control-allow-headers']).to.be('accept, origin, x-superagented-with'); // mirrored from superagent
+                expect(res.headers['access-control-allow-origin']).to.be('http://localhost'); // mirrors from superagent
                 done();
             });
         });
