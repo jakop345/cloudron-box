@@ -6,6 +6,7 @@ var acme = require('./cert/acme.js'),
     assert = require('assert'),
     async = require('async'),
     caas = require('./cert/caas.js'),
+    cloudron = require('./cloudron.js'),
     config = require('./config.js'),
     constants = require('./constants.js'),
     debug = require('debug')('box:src/certificates'),
@@ -65,6 +66,8 @@ function getApi(callback) {
 }
 
 function installAdminCertificate(callback) {
+    if (cloudron.isConfiguredSync()) return callback();
+
     settings.getTlsConfig(function (error, tlsConfig) {
         if (error) return callback(error);
 
