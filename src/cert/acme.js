@@ -270,6 +270,7 @@ function signCertificate(accountKeyPem, domain, csrDer, callback) {
 
     sendSignedRequest(CA_ORIGIN + '/acme/new-cert', accountKeyPem, JSON.stringify(payload), function (error, result) {
         if (error) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, 'Network error when signing certificate: ' + error.message));
+        // 429 means we reached the cert limit for this domain
         if (result.statusCode !== 201) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, util.format('Failed to sign certificate. Expecting 201, got %s %s', result.statusCode, result.text)));
 
         var certUrl = result.headers.location;
