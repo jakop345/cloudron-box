@@ -230,7 +230,10 @@ function ensureCertificate(domain, callback) {
         debug('ensureCertificate: getting certificate for %s', domain);
 
         api.getCertificate(domain, function (error, certFilePath, keyFilePath) {
-            if (error) return callback(null, 'cert/host.cert', 'cert/host.key'); // use fallback certs
+            if (error) {
+                debug('ensureCertificate: could not get certificate. using fallback certs', error);
+                return callback(null, 'cert/host.cert', 'cert/host.key'); // use fallback certs
+            }
 
             callback(null, certFilePath, keyFilePath);
         });
