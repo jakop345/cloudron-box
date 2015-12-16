@@ -68,7 +68,7 @@ apt-get -y install btrfs-tools
 
 echo "==== Install docker ===="
 # install docker from binary to pin it to a specific version. the current debian repo does not allow pinning
-curl https://get.docker.com/builds/Linux/x86_64/docker-1.9.0 > /usr/bin/docker
+curl https://get.docker.com/builds/Linux/x86_64/docker-1.9.1 > /usr/bin/docker
 chmod +x /usr/bin/docker
 groupadd docker
 cat > /etc/systemd/system/docker.socket <<EOF
