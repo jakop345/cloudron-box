@@ -4,7 +4,6 @@
 
 var assert = require('assert'),
     async = require('async'),
-    config = require('../config.js'),
     crypto = require('crypto'),
     debug = require('debug')('box:cert/acme'),
     fs = require('fs'),
