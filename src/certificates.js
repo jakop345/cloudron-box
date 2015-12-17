@@ -61,7 +61,10 @@ function getApi(callback) {
 
         var api = tlsConfig.provider === 'caas' ? caas : acme;
 
-        callback(null, api);
+        var options = { };
+        options.prod = tlsConfig.provider.match(/.*-prod/ !== null);
+
+        callback(null, api, options);
     });
 }
 
@@ -110,14 +113,14 @@ function autoRenew(callback) {
 
     debug('autoRenew: %j needs to be renewed', certs);
 
-    getApi(function (error, api) {
+    getApi(function (error, api, apiOptions) {
         if (error) return callback(error);
 
         async.eachSeries(certs, function iterator(cert, iteratorCallback) {
             var domain = cert.match(/^(.*)\.cert$/)[1];
             if (domain === 'host') return iteratorCallback(); // cannot renew fallback cert
 
-            api.getCertificate(domain, function (error) {
+            api.getCertificate(domain, apiOptions, function (error) {
                 if (error) debug('autoRenew: could not renew cert for %s', domain, error);
 
                 iteratorCallback(); // move on to next cert
@@ -224,12 +227,12 @@ function ensureCertificate(domain, callback) {
         debug('ensureCertificate: %s cert require renewal', domain);
     }
 
-    getApi(function (error, api) {
+    getApi(function (error, api, apiOptions) {
         if (error) return callback(error);
 
         debug('ensureCertificate: getting certificate for %s', domain);
 
-        api.getCertificate(domain, function (error, certFilePath, keyFilePath) {
+        api.getCertificate(domain, apiOptions, function (error, certFilePath, keyFilePath) {
             if (error) {
                 debug('ensureCertificate: could not get certificate. using fallback certs', error);
                 return callback(null, 'cert/host.cert', 'cert/host.key'); // use fallback certs
