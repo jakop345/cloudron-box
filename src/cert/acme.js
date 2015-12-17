@@ -392,23 +392,20 @@ Acme.prototype.acmeFlow = function (domain, callback) {
     });
 };
 
-function getCertificate(domain, options, callback) {
+Acme.prototype.getCertificate = function (domain, callback) {
     assert.strictEqual(typeof domain, 'string');
-    assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     var outdir = paths.APP_CERTS_DIR;
     var certUrl = safe.fs.readFileSync(path.join(outdir, domain + '.url'), 'utf8');
     var certificateGetter;
 
-    var acme = new Acme(options || { });
-
     if (certUrl) {
         debug('getCertificate: renewing existing cert for %s from %s', domain, certUrl);
-        certificateGetter = acme.downloadCertificate.bind(acme, domain, certUrl);
+        certificateGetter = this.downloadCertificate.bind(this, domain, certUrl);
     } else {
         debug('getCertificate: start acme flow for %s', domain);
-        certificateGetter = acme.acmeFlow.bind(acme, domain);
+        certificateGetter = this.acmeFlow.bind(this, domain);
     }
 
     certificateGetter(function (error) {
@@ -416,4 +413,13 @@ function getCertificate(domain, options, callback) {
 
         callback(null, path.join(outdir, domain + '.cert'), path.join(outdir, domain + '.key'));
     });
+};
+
+function getCertificate(domain, options, callback) {
+    assert.strictEqual(typeof domain, 'string');
+    assert.strictEqual(typeof options, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
+    var acme = new Acme(options || { });
+    acme.getCertificate(domain, callback);
 }
