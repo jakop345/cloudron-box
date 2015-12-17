@@ -17,7 +17,6 @@ var assert = require('assert'),
 
 var CA_PROD = 'https://acme-v01.api.letsencrypt.org',
     CA_STAGING = 'https://acme-staging.api.letsencrypt.org',
-    CA_ORIGIN = CA_PROD,
     LE_AGREEMENT = 'https://letsencrypt.org/documents/LE-SA-v1.0.1-July-27-2015.pdf';
 
 exports = module.exports = {
@@ -53,14 +52,20 @@ AcmeError.FORBIDDEN = 'Forbidden';
 // https://www.ietf.org/proceedings/92/slides/slides-92-acme-1.pdf
 // https://community.letsencrypt.org/t/list-of-client-implementations/2103
 
-function getNonce(callback) {
-    superagent.get(CA_ORIGIN + '/directory', function (error, response) {
+function Acme(options) {
+    assert.strictEqual(typeof options, 'object');
+
+    this.caOrigin = options.prod ? CA_PROD : CA_STAGING;
+}
+
+Acme.prototype.getNonce = function (callback) {
+    superagent.get(this.caOrigin + '/directory', function (error, response) {
         if (error) return callback(error);
         if (response.statusCode !== 200) return callback(new Error('Invalid response code when fetching nonce : ' + response.statusCode));
 
         return callback(null, response.headers['Replay-Nonce'.toLowerCase()]);
     });
-}
+};
 
 // urlsafe base64 encoding (jose)
 function urlBase64Encode(string) {
@@ -72,7 +77,7 @@ function b64(str) {
    return urlBase64Encode(buf.toString('base64'));
 }
 
-function sendSignedRequest(url, accountKeyPem, payload, callback) {
+Acme.prototype.sendSignedRequest = function (url, accountKeyPem, payload, callback) {
     assert.strictEqual(typeof url, 'string');
     assert(util.isBuffer(accountKeyPem));
     assert.strictEqual(typeof payload, 'string');
@@ -91,7 +96,7 @@ function sendSignedRequest(url, accountKeyPem, payload, callback) {
  
     var payload64 = b64(payload);
 
-    getNonce(function (error, nonce) {
+    this.getNonce(function (error, nonce) {
         if (error) return callback(error);
 
         debug('sendSignedRequest: using nonce %s for url %s', nonce, url);
@@ -115,9 +120,9 @@ function sendSignedRequest(url, accountKeyPem, payload, callback) {
             callback(null, res);
         });
     });
-}
+};
 
-function registerUser(accountKeyPem, email, callback) {
+Acme.prototype.registerUser = function (accountKeyPem, email, callback) {
     assert(util.isBuffer(accountKeyPem));
     assert.strictEqual(typeof email, 'string');
     assert.strictEqual(typeof callback, 'function');
@@ -130,7 +135,7 @@ function registerUser(accountKeyPem, email, callback) {
 
     debug('registerUser: %s', email);
 
-    sendSignedRequest(CA_ORIGIN + '/acme/new-reg', accountKeyPem, JSON.stringify(payload), function (error, result) {
+    this.sendSignedRequest(this.caOrigin + '/acme/new-reg', accountKeyPem, JSON.stringify(payload), function (error, result) {
         if (error) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, 'Network error when registering user: ' + error.message));
         if (result.statusCode === 409) return callback(new AcmeError(AcmeError.ALREADY_EXISTS, result.body.detail));
         if (result.statusCode !== 201) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, util.format('Failed to register user. Expecting 201, got %s %s', result.statusCode, result.text)));
@@ -139,9 +144,9 @@ function registerUser(accountKeyPem, email, callback) {
 
         callback();
     });
-}
+};
 
-function registerDomain(accountKeyPem, domain, callback) {
+Acme.prototype.registerDomain = function (accountKeyPem, domain, callback) {
     assert(util.isBuffer(accountKeyPem));
     assert.strictEqual(typeof domain, 'string');
     assert.strictEqual(typeof callback, 'function');
@@ -156,7 +161,7 @@ function registerDomain(accountKeyPem, domain, callback) {
 
     debug('registerDomain: %s', domain);
 
-    sendSignedRequest(CA_ORIGIN + '/acme/new-authz', accountKeyPem, JSON.stringify(payload), function (error, result) {
+    this.sendSignedRequest(this.caOrigin + '/acme/new-authz', accountKeyPem, JSON.stringify(payload), function (error, result) {
         if (error) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, 'Network error when registering domain: ' + error.message));
         if (result.statusCode === 403) return callback(new AcmeError(AcmeError.FORBIDDEN, result.body.detail));
         if (result.statusCode !== 201) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, util.format('Failed to register user. Expecting 201, got %s %s', result.statusCode, result.text)));
@@ -165,9 +170,9 @@ function registerDomain(accountKeyPem, domain, callback) {
 
         callback(null, result.body);
     });
-}
+};
 
-function prepareHttpChallenge(accountKeyPem, challenge, callback) {
+Acme.prototype.prepareHttpChallenge = function (accountKeyPem, challenge, callback) {
     assert(util.isBuffer(accountKeyPem));
     assert.strictEqual(typeof challenge, 'object');
     assert.strictEqual(typeof callback, 'function');
@@ -196,9 +201,9 @@ function prepareHttpChallenge(accountKeyPem, challenge, callback) {
 
         callback();
     });
-}
+};
 
-function notifyChallengeReady(accountKeyPem, challenge, callback) {
+Acme.prototype.notifyChallengeReady = function (accountKeyPem, challenge, callback) {
     assert(util.isBuffer(accountKeyPem));
     assert.strictEqual(typeof challenge, 'object');
     assert.strictEqual(typeof callback, 'function');
@@ -212,15 +217,15 @@ function notifyChallengeReady(accountKeyPem, challenge, callback) {
         keyAuthorization: keyAuthorization
     };
 
-    sendSignedRequest(challenge.uri, accountKeyPem, JSON.stringify(payload), function (error, result) {
+    this.sendSignedRequest(challenge.uri, accountKeyPem, JSON.stringify(payload), function (error, result) {
         if (error) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, 'Network error when notifying challenge: ' + error.message));
         if (result.statusCode !== 202) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, util.format('Failed to notify challenge. Expecting 202, got %s %s', result.statusCode, result.text)));
 
         callback();
     });
-}
+};
 
-function waitForChallenge(challenge, callback) {
+Acme.prototype.waitForChallenge = function (challenge, callback) {
     assert.strictEqual(typeof challenge, 'object');
     assert.strictEqual(typeof callback, 'function');
 
@@ -249,10 +254,10 @@ function waitForChallenge(challenge, callback) {
         // async.retry will pass 'undefined' as second arg making it unusable with async.waterfall()
         callback(error);
     });
-}
+};
 
 // https://community.letsencrypt.org/t/public-beta-rate-limits/4772 for rate limits
-function signCertificate(accountKeyPem, domain, csrDer, callback) {
+Acme.prototype.signCertificate = function (accountKeyPem, domain, csrDer, callback) {
     assert(util.isBuffer(accountKeyPem));
     assert.strictEqual(typeof domain, 'string');
     assert(util.isBuffer(csrDer));
@@ -267,7 +272,7 @@ function signCertificate(accountKeyPem, domain, csrDer, callback) {
 
     debug('signCertificate: sending new-cert request');
 
-    sendSignedRequest(CA_ORIGIN + '/acme/new-cert', accountKeyPem, JSON.stringify(payload), function (error, result) {
+    this.sendSignedRequest(this.caOrigin + '/acme/new-cert', accountKeyPem, JSON.stringify(payload), function (error, result) {
         if (error) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, 'Network error when signing certificate: ' + error.message));
         // 429 means we reached the cert limit for this domain
         if (result.statusCode !== 201) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, util.format('Failed to sign certificate. Expecting 201, got %s %s', result.statusCode, result.text)));
@@ -280,9 +285,9 @@ function signCertificate(accountKeyPem, domain, csrDer, callback) {
 
         return callback(null, result.headers.location);
     });
-}
+};
 
-function createKeyAndCsr(domain, callback) {
+Acme.prototype.createKeyAndCsr = function (domain, callback) {
     assert.strictEqual(typeof domain, 'string');
     assert.strictEqual(typeof callback, 'function');
 
@@ -304,9 +309,9 @@ function createKeyAndCsr(domain, callback) {
     debug('createKeyAndCsr: csr file (DER) saved at %s', csrFile);
 
     callback(null, csrDer);
-}
+};
 
-function downloadCertificate(domain, certUrl, callback) {
+Acme.prototype.downloadCertificate = function (domain, certUrl, callback) {
     assert.strictEqual(typeof domain, 'string');
     assert.strictEqual(typeof certUrl, 'string');
     assert.strictEqual(typeof callback, 'function');
@@ -342,9 +347,9 @@ function downloadCertificate(domain, certUrl, callback) {
 
         callback();
     });
-}
+};
 
-function acmeFlow(domain, callback) {
+Acme.prototype.acmeFlow = function (domain, callback) {
     assert.strictEqual(typeof domain, 'string');
     assert.strictEqual(typeof callback, 'function');
 
@@ -366,10 +371,11 @@ function acmeFlow(domain, callback) {
         accountKeyPem = fs.readFileSync(paths.ACME_ACCOUNT_KEY_FILE);
     }
 
-    registerUser(accountKeyPem, email, function (error) {
+    var that = this;
+    that.registerUser(accountKeyPem, email, function (error) {
         if (error && error.reason !== AcmeError.ALREADY_EXISTS) return callback(error);
 
-        registerDomain(accountKeyPem, domain, function (error, result) {
+        that.registerDomain(accountKeyPem, domain, function (error, result) {
             if (error) return callback(error);
 
             debug('acmeFlow: challenges: %j', result);
@@ -379,30 +385,40 @@ function acmeFlow(domain, callback) {
             var challenge = httpChallenges[0];
 
             async.waterfall([
-                prepareHttpChallenge.bind(null, accountKeyPem, challenge),
-                notifyChallengeReady.bind(null, accountKeyPem, challenge),
-                waitForChallenge.bind(null, challenge),
-                createKeyAndCsr.bind(null, domain),
-                signCertificate.bind(null, accountKeyPem, domain),
-                downloadCertificate.bind(null, domain)
+                that.prepareHttpChallenge.bind(that, accountKeyPem, challenge),
+                that.notifyChallengeReady.bind(that, accountKeyPem, challenge),
+                that.waitForChallenge.bind(that, challenge),
+                that.createKeyAndCsr.bind(that, domain),
+                that.signCertificate.bind(that, accountKeyPem, domain),
+                that.downloadCertificate.bind(that, domain)
             ], callback);
         });
     });
-}
+};
 
-function getCertificate(domain, callback) {
+function getCertificate(domain, options, callback) {
     assert.strictEqual(typeof domain, 'string');
-    assert.strictEqual(typeof callback, 'function');
+
+    if (typeof options === 'function') {
+        callback = options;
+        options = { };
+    } else {
+        assert.strictEqual(typeof options, 'object');
+        assert.strictEqual(typeof callback, 'function');
+    }
 
     var outdir = paths.APP_CERTS_DIR;
     var certUrl = safe.fs.readFileSync(path.join(outdir, domain + '.url'), 'utf8');
     var certificateGetter;
+
+    var acme = new Acme(options || { });
+
     if (certUrl) {
         debug('getCertificate: renewing existing cert for %s from %s', domain, certUrl);
-        certificateGetter = downloadCertificate.bind(null, domain, certUrl);
+        certificateGetter = acme.downloadCertificate.bind(acme, domain, certUrl);
     } else {
         debug('getCertificate: start acme flow for %s', domain);
-        certificateGetter = acmeFlow.bind(null, domain);
+        certificateGetter = acme.acmeFlow.bind(acme, domain);
     }
 
     certificateGetter(function (error) {
