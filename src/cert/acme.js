@@ -398,14 +398,8 @@ Acme.prototype.acmeFlow = function (domain, callback) {
 
 function getCertificate(domain, options, callback) {
     assert.strictEqual(typeof domain, 'string');
-
-    if (typeof options === 'function') {
-        callback = options;
-        options = { };
-    } else {
-        assert.strictEqual(typeof options, 'object');
-        assert.strictEqual(typeof callback, 'function');
-    }
+    assert.strictEqual(typeof options, 'object');
+    assert.strictEqual(typeof callback, 'function');
 
     var outdir = paths.APP_CERTS_DIR;
     var certUrl = safe.fs.readFileSync(path.join(outdir, domain + '.url'), 'utf8');
