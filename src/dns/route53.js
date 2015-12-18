@@ -176,19 +176,19 @@ function del(dnsConfig, zoneName, subdomain, type, values, callback) {
         var route53 = new AWS.Route53(getDnsCredentials(dnsConfig));
         route53.changeResourceRecordSets(params, function(error, result) {
             if (error && error.message && error.message.indexOf('it was not found') !== -1) {
-                debug('delSubdomain: resource record set not found.', error);
+                debug('del: resource record set not found.', error);
                 return callback(new SubdomainError(SubdomainError.NOT_FOUND, new Error(error)));
             } else if (error && error.code === 'NoSuchHostedZone') {
-                debug('delSubdomain: hosted zone not found.', error);
+                debug('del: hosted zone not found.', error);
                 return callback(new SubdomainError(SubdomainError.NOT_FOUND, new Error(error)));
             } else if (error && error.code === 'PriorRequestNotComplete') {
-                debug('delSubdomain: resource is still busy', error);
+                debug('del: resource is still busy', error);
                 return callback(new SubdomainError(SubdomainError.STILL_BUSY, new Error(error)));
             } else if (error && error.code === 'InvalidChangeBatch') {
-                debug('delSubdomain: invalid change batch. No such record to be deleted.');
+                debug('del: invalid change batch. No such record to be deleted.');
                 return callback(new SubdomainError(SubdomainError.NOT_FOUND, new Error(error)));
             } else if (error) {
-                debug('delSubdomain: error', error);
+                debug('del: error', error);
                 return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, new Error(error)));
             }
 
