@@ -179,7 +179,7 @@ function setTimeZone(ip, callback) {
 
     superagent.get('http://www.telize.com/geoip/' + ip).end(function (error, result) {
         if ((error && !error.response) || result.statusCode !== 200) {
-            debug('Failed to get geo location', error);
+            debug('Failed to get geo location: %s', error.message);
             return callback(null);
         }
 

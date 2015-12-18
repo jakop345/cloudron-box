@@ -404,7 +404,7 @@ Acme.prototype.getCertificate = function (domain, callback) {
         debug('getCertificate: renewing existing cert for %s from %s', domain, certUrl);
         certificateGetter = this.downloadCertificate.bind(this, domain, certUrl);
     } else {
-        debug('getCertificate: start acme flow for %s', domain);
+        debug('getCertificate: start acme flow for %s from %s', domain, this.caOrigin);
         certificateGetter = this.acmeFlow.bind(this, domain);
     }
 
