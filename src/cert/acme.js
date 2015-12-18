@@ -57,6 +57,8 @@ function Acme(options) {
 
     this.caOrigin = options.prod ? CA_PROD : CA_STAGING;
     this.accountKeyPem = null; // Buffer
+
+    this.chainPem = options.prod ? safe.fs.readFileSync(__dirname + '/lets-encrypt-x1-cross-signed.pem.txt') : new Buffer('');
 }
 
 Acme.prototype.getNonce = function (callback) {
@@ -314,6 +316,7 @@ Acme.prototype.downloadCertificate = function (domain, certUrl, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     var outdir = paths.APP_CERTS_DIR;
+    var that = this;
 
     superagent.get(certUrl).buffer().parse(function (res, done) {
         var data = [ ];
@@ -333,11 +336,8 @@ Acme.prototype.downloadCertificate = function (domain, certUrl, callback) {
         var certificatePem = execSync('openssl x509 -inform DER -outform PEM', { input: certificateDer }); // this is really just base64 encoding with header
         if (!certificatePem) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
 
-        var chainPem = safe.fs.readFileSync(__dirname + '/lets-encrypt-x1-cross-signed.pem.txt');
-        if (!chainPem) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
-
         var certificateFile = path.join(outdir, domain + '.cert');
-        var fullChainPem = Buffer.concat([certificatePem, chainPem]);
+        var fullChainPem = Buffer.concat([certificatePem, that.chainPem]);
         if (!safe.fs.writeFileSync(certificateFile, fullChainPem)) return callback(new AcmeError(AcmeError.INTERNAL_ERROR, safe.error));
 
         debug('downloadCertificate: cert file saved at %s', certificateFile);
