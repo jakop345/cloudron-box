@@ -120,6 +120,8 @@ function autoRenew(callback) {
             var domain = cert.match(/^(.*)\.cert$/)[1];
             if (domain === 'host') return iteratorCallback(); // cannot renew fallback cert
 
+            debug('autoRenew: renewing cert for %s with options %j', domain, apiOptions);
+
             api.getCertificate(domain, apiOptions, function (error) {
                 if (error) debug('autoRenew: could not renew cert for %s', domain, error);
 
@@ -230,7 +232,7 @@ function ensureCertificate(domain, callback) {
     getApi(function (error, api, apiOptions) {
         if (error) return callback(error);
 
-        debug('ensureCertificate: getting certificate for %s', domain);
+        debug('ensureCertificate: getting certificate for %s with options %j', domain, options);
 
         api.getCertificate(domain, apiOptions, function (error, certFilePath, keyFilePath) {
             if (error) {
