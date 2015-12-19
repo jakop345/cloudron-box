@@ -62,7 +62,7 @@ function getApi(callback) {
         var api = tlsConfig.provider === 'caas' ? caas : acme;
 
         var options = { };
-        options.prod = tlsConfig.provider.match(/.*-prod/ !== null);
+        options.prod = tlsConfig.provider.match(/.*-prod/) !== null;
 
         callback(null, api, options);
     });
