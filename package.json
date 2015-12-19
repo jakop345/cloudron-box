@@ -1,0 +1,15 @@
+{
+  "name": "cloudron-installer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@gitlab.smartserver.io:6000/yellowtent/cloudron-installer.git"
+  },
+  "author": "",
+  "license": "ISC"
+}
