@@ -22,7 +22,7 @@ readonly installer_code_file="${HOME}/installer.tar"
 readonly image_initialize_url="https://s3.amazonaws.com/cloudron-selfhosting/initializeBaseUbuntuImage.sh"
 readonly image_initialize_file="${HOME}/initializeBaseUbuntuImage.sh"
 
-readonly latest_box_url="https://s3.amazonaws.com/cloudron-selfhosting/"
+readonly latest_box_url="https://s3.amazonaws.com/cloudron-selfhosting"
 readonly latest_version_url="https://s3.amazonaws.com/cloudron-selfhosting/latest.version"
 
 readonly box_code_file="${HOME}/cloudron.tar.gz"
