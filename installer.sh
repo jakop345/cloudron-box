@@ -75,7 +75,7 @@ cat > /root/provision.json <<EOF
         "isCustomDomain": true,
         "boxVersionsUrl": "https://s3.amazonaws.com/dev-cloudron-releases/versions.json",
         "version": "${version}"
-    },
+    }
 }
 EOF
 
