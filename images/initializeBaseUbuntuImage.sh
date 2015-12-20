@@ -201,7 +201,7 @@ chown "${USER}:${USER}" -R "${INSTALLER_SOURCE_DIR}"
 
 echo "==== Install installer systemd script ===="
 selfhostEnv=""
-if [ ${SELFHOSTED} == 1]; then
+if [ ${SELFHOSTED} == 1 ]; then
     selfhostEnv="SELFHOSTED=true"
 fi
 
