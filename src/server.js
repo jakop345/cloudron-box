@@ -26,12 +26,13 @@ exports = module.exports = {
 };
 
 var PROVISION_CONFIG_FILE = '/root/provision.json';
+var CLOUDRON_CONFIG_FILE = '/home/yellowtent/configs/cloudron.conf';
 
 var gHttpsServer = null, // provision server; used for install/restore
     gHttpServer = null; // update server; used for updates
 
 function provisionCaaS(callback) {
-    if (fs.existsSync('/home/yellowtent/configs/cloudron.conf')) return callback(null); // already provisioned
+    if (fs.existsSync(CLOUDRON_CONFIG_FILE)) return callback(null); // already provisioned
 
     superagent.get('http://169.254.169.254/metadata/v1.json').end(function (error, result) {
         if (error || result.statusCode !== 200) {
@@ -46,7 +47,7 @@ function provisionCaaS(callback) {
 }
 
 function provisionSelfhost(callback) {
-    if (fs.existsSync('/home/yellowtent/configs/cloudron.conf')) return callback(null); // already provisioned
+    if (fs.existsSync(CLOUDRON_CONFIG_FILE)) return callback(null); // already provisioned
 
     if (!fs.existsSync(PROVISION_CONFIG_FILE)) {
         console.error('No provisioning data found at %s', PROVISION_CONFIG_FILE);
