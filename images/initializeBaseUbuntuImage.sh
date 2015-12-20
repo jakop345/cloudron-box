@@ -200,10 +200,9 @@ cd "${INSTALLER_SOURCE_DIR}" && npm install --production
 chown "${USER}:${USER}" -R "${INSTALLER_SOURCE_DIR}"
 
 echo "==== Install installer systemd script ===="
+selfhostEnv=""
 if [ ${SELFHOSTED} == 1]; then
-    $selfhostEnv="SELFHOSTED=true"
-else
-    $selfhostEnv=""
+    selfhostEnv="SELFHOSTED=true"
 fi
 
 cat > /etc/systemd/system/cloudron-installer.service <<EOF
