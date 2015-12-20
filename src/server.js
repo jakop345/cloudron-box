@@ -25,10 +25,12 @@ exports = module.exports = {
     stop: stop
 };
 
+var PROVISION_CONFIG_FILE = '/root/provision.json';
+
 var gHttpsServer = null, // provision server; used for install/restore
     gHttpServer = null; // update server; used for updates
 
-function provision(callback) {
+function provisionCaaS(callback) {
     if (fs.existsSync('/home/yellowtent/configs/cloudron.conf')) return callback(null); // already provisioned
 
     superagent.get('http://169.254.169.254/metadata/v1.json').end(function (error, result) {
@@ -41,6 +43,19 @@ function provision(callback) {
 
         installer.provision(userData, callback);
     });
+}
+
+function provisionSelfhost(callback) {
+    if (fs.existsSync('/home/yellowtent/configs/cloudron.conf')) return callback(null); // already provisioned
+
+    if (!fs.existsSync(PROVISION_CONFIG_FILE)) {
+        console.error('No provisioning data found at %s', PROVISION_CONFIG_FILE);
+        return;
+    }
+
+    var userData = require(PROVISION_CONFIG_FILE);
+
+    installer.provision(userData, callback);
 }
 
 function update(req, res, next) {
@@ -159,13 +174,26 @@ function stopUpdateServer(callback) {
 function start(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    debug('starting');
+    var actions;
 
-    async.series([
-        startUpdateServer,
-        startProvisionServer,
-        provision
-    ], callback);
+    if (process.env.SELFHOSTED) {
+        debug('Starting Installer in selfhost mode');
+
+        actions = [
+            startUpdateServer,
+            provisionSelfhost
+        ];
+    } else {
+        debug('Starting Installer in managed mode');
+
+        actions = [
+            startUpdateServer,
+            startProvisionServer,
+            provisionCaaS
+        ];
+    }
+
+    async.series(actions, callback);
 }
 
 function stop(callback) {
