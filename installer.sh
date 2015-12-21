@@ -7,8 +7,8 @@ echo "======== Cloudron Installer ========"
 echo ""
 
 if [ $# -lt 1 ]; then
-	echo "Usage: ./installer.sh <fqdn>"
-	exit 1
+    echo "Usage: ./installer.sh <fqdn>"
+    exit 1
 fi
 
 readonly fqdn="${1}"
@@ -26,6 +26,8 @@ readonly latest_box_url="https://s3.amazonaws.com/cloudron-selfhosting"
 readonly latest_version_url="https://s3.amazonaws.com/cloudron-selfhosting/latest.version"
 
 readonly box_code_file="${HOME}/cloudron.tar.gz"
+
+readonly certificate_folder="/tmp/certificates"
 
 echo "[INFO] ensure minimal dependencies ..."
 apt-get update
@@ -48,6 +50,12 @@ echo ""
 
 echo "[INFO] Fetching Ubuntu initializing script ..."
 curl "${image_initialize_url}" -o "${image_initialize_file}"
+echo ""
+
+echo "[INFO] Generating certificates ..."
+/bin/bash generate_certificate.sh "US" "California" "San Francisco" "Cloudron Company" "Cloudron" "${fqdn}" "cert@cloudron.io" "${certificate_folder}"
+tls_cert=$(sed ':a;N;$!ba;s/\n/\\n/g' "${certificate_folder}/host.cert")
+tls_key=$(sed ':a;N;$!ba;s/\n/\\n/g' "${certificate_folder}/host.key")
 echo ""
 
 echo "[INFO] Retrieving latest version ..."
@@ -74,7 +82,9 @@ cat > /root/provision.json <<EOF
         "token": null,
         "isCustomDomain": true,
         "boxVersionsUrl": "https://s3.amazonaws.com/dev-cloudron-releases/versions.json",
-        "version": "${version}"
+        "version": "${version}",
+        "tlsCert": "${tls_cert}",
+        "tlsKey": "${tls_key}"
     }
 }
 EOF
