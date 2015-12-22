@@ -13,9 +13,6 @@ fi
 
 readonly fqdn="${1}"
 
-readonly infra_version_url="https://s3.amazonaws.com/cloudron-selfhosting/INFRA_VERSION"
-readonly infra_version_file="${HOME}/INFRA_VERSION"
-
 readonly installer_code_url="https://s3.amazonaws.com/cloudron-selfhosting/installer.tar"
 readonly installer_code_file="${HOME}/installer.tar"
 
@@ -35,14 +32,9 @@ apt-get install -y curl
 echo ""
 
 echo "[INFO] Cleanup old files ..."
-rm -rf "${infra_version_file}"
 rm -rf "${installer_code_file}"
 rm -rf "${image_initialize_file}"
 rm -rf "${box_code_file}"
-
-echo "[INFO] Fetching INFRA_VERSION ..."
-curl "${infra_version_url}" -o "${infra_version_file}"
-echo ""
 
 echo "[INFO] Fetching installer code ..."
 curl "${installer_code_url}" -o "${installer_code_file}"
@@ -89,6 +81,10 @@ cat > /root/provision.json <<EOF
 }
 EOF
 
-echo "Finished!"
-echo "[WARNING] You have to reboot your server before taking it into use!"
+echo "[INFO] Reloading systemd daemon ..."
+systemctl daemon-reload
 echo ""
+
+echo "[FINISHED] Now starting Cloudron init jobs ..."
+systemctl start cloudron-installer.service
+journalctl -u cloudron-installer.service -f
