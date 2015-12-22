@@ -232,7 +232,7 @@ function ensureCertificate(domain, callback) {
     getApi(function (error, api, apiOptions) {
         if (error) return callback(error);
 
-        debug('ensureCertificate: getting certificate for %s with options %j', domain, options);
+        debug('ensureCertificate: getting certificate for %s with options %j', domain, apiOptions);
 
         api.getCertificate(domain, apiOptions, function (error, certFilePath, keyFilePath) {
             if (error) {
