@@ -85,6 +85,12 @@ echo "[INFO] Reloading systemd daemon ..."
 systemctl daemon-reload
 echo ""
 
+echo "[INFO] Kick docker ..."
+systemctl restart docker
+echo ""
+
 echo "[FINISHED] Now starting Cloudron init jobs ..."
-systemctl start cloudron-installer.service
+systemctl start box-setup
+sleep 10 && sync
+systemctl start cloudron-installer
 journalctl -u cloudron-installer.service -f
