@@ -51,7 +51,7 @@ function sync(callback) {
                     return iteratorDone(); // nothing changed
                 }
 
-                debug('sync: app %s changed', app.id);
+                debug('sync: app %s is new or changed', app.id);
                 stopJobs(app.id, appState, function (error) {
                     if (error) debug('Error stopping jobs for %s : %s', app.id, error.message);
 
@@ -68,8 +68,6 @@ function sync(callback) {
                     iteratorDone();
                 });
             });
-
-            debug('Done syncing');
         });
     });
 }
