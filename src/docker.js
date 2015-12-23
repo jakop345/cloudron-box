@@ -17,8 +17,10 @@ exports = module.exports = {
     createContainer: createContainer,
     startContainer: startContainer,
     stopContainer: stopContainer,
+    stopContainerByName: stopContainer,
     stopContainers: stopContainers,
     deleteContainer: deleteContainer,
+    deleteContainerByName: deleteContainer,
     deleteImage: deleteImage,
     deleteContainers: deleteContainers,
     createSubcontainer: createSubcontainer
