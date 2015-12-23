@@ -11,7 +11,12 @@ readonly USER_DATA_FILE="/root/user_data.img"
 readonly USER_DATA_DIR="/home/yellowtent/data"
 
 readonly SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SOURCE_DIR}/INFRA_VERSION"
+
+if [ -f "${SOURCE_DIR}/INFRA_VERSION" ]; then
+    source "${SOURCE_DIR}/INFRA_VERSION"
+else
+    echo "No INFRA_VERSION found, skip pulling docker images"
+fi
 
 if [ ${SELFHOSTED} == 0 ]; then
     echo "!! Initializing Ubuntu image for CaaS"
@@ -137,26 +142,31 @@ update-grub
 
 # now add the user to the docker group
 usermod "${USER}" -a -G docker
-echo "=== Pulling base docker images ==="
-docker pull "${BASE_IMAGE}"
 
-echo "=== Pulling mysql addon image ==="
-docker pull "${MYSQL_IMAGE}"
+if [ -z $(echo "${INFRA_VERSION}") ]; then
+    echo "Skip pulling base docker images"
+else
+    echo "=== Pulling base docker images ==="
+    docker pull "${BASE_IMAGE}"
 
-echo "=== Pulling postgresql addon image ==="
-docker pull "${POSTGRESQL_IMAGE}"
+    echo "=== Pulling mysql addon image ==="
+    docker pull "${MYSQL_IMAGE}"
 
-echo "=== Pulling redis addon image ==="
-docker pull "${REDIS_IMAGE}"
+    echo "=== Pulling postgresql addon image ==="
+    docker pull "${POSTGRESQL_IMAGE}"
 
-echo "=== Pulling mongodb addon image ==="
-docker pull "${MONGODB_IMAGE}"
+    echo "=== Pulling redis addon image ==="
+    docker pull "${REDIS_IMAGE}"
 
-echo "=== Pulling graphite docker images ==="
-docker pull "${GRAPHITE_IMAGE}"
+    echo "=== Pulling mongodb addon image ==="
+    docker pull "${MONGODB_IMAGE}"
 
-echo "=== Pulling mail relay ==="
-docker pull "${MAIL_IMAGE}"
+    echo "=== Pulling graphite docker images ==="
+    docker pull "${GRAPHITE_IMAGE}"
+
+    echo "=== Pulling mail relay ==="
+    docker pull "${MAIL_IMAGE}"
+fi
 
 echo "==== Install nginx ===="
 apt-get -y install nginx-full
