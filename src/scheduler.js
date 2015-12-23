@@ -18,7 +18,7 @@ var appdb = require('./appdb.js'),
 
 var NOOP_CALLBACK = function (error) { if (error) debug('Unhandled error: ', error); };
 
-// appId -> { schedulerConfig (manifest), cronjobs, containerIds }
+// appId -> { schedulerConfig (manifest), cronjobs }
 var gState = (function loadState() {
     var state = safe.JSON.parse(safe.fs.readFileSync(paths.SCHEDULER_FILE, 'utf8'));
     return state || { };
@@ -29,8 +29,7 @@ function saveState(state) {
     var safeState = { };
     for (var appId in state) {
         safeState[appId] = {
-            schedulerConfig: state[appId].schedulerConfig,
-            containerIds: state[appId].containerIds
+            schedulerConfig: state[appId].schedulerConfig
         };
     }
     safe.fs.writeFileSync(paths.SCHEDULER_FILE, JSON.stringify(safeState, null, 4), 'utf8');
@@ -78,8 +77,7 @@ function sync(callback) {
 
                     gState[app.id] = {
                         schedulerConfig: schedulerConfig,
-                        cronJobs: createCronJobs(app.id, schedulerConfig),
-                        containerIds: { }
+                        cronJobs: createCronJobs(app.id, schedulerConfig)
                     };
 
                     saveState(gState);
@@ -162,8 +160,6 @@ function doTask(appId, taskName, callback) {
 
     callback = callback || NOOP_CALLBACK;
 
-    var appState = gState[appId];
-
     debug('Executing task %s/%s', appId, taskName);
 
     apps.get(appId, function (error, app) {
@@ -173,8 +169,6 @@ function doTask(appId, taskName, callback) {
             debug('task %s skipped. app %s is not installed/running', taskName, app.id);
             return callback();
         }
-
-        if (appState.containerIds[taskName]) debug('task %s/%s has existing container %s. killing it', appId, taskName, appState.containerIds[taskName]);
 
         var containerName = app.id + '-' + taskName;
 
@@ -186,8 +180,6 @@ function doTask(appId, taskName, callback) {
             // NOTE: if you change container name here, fix addons.js to return correct container names
             docker.createSubcontainer(app, containerName, [ '/bin/sh', '-c', gState[appId].schedulerConfig[taskName].command ], { } /* options */, function (error, container) {
                 if (error) return callback(error);
-
-                appState.containerIds[taskName] = container.id;
 
                 saveState(gState);
 
