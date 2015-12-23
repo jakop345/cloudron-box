@@ -126,6 +126,7 @@ mkdir -p "${USER_DATA_DIR}" && mount "${USER_DATA_FILE}"
 mkdir -p "${USER_DATA_DIR}/docker"
 
 # give docker sometime to start up and create iptables rules
+systemctl daemon-reload
 systemctl enable docker
 systemctl start docker
 sleep 10
@@ -229,7 +230,6 @@ Restart=on-failure
 [Install]
 WantedBy=multi-user.target
 EOF
-systemctl enable cloudron-installer
 
 # Restore iptables before docker
 echo "==== Install iptables-restore systemd script ===="
@@ -246,7 +246,6 @@ RemainAfterExit=yes
 [Install]
 WantedBy=multi-user.target
 EOF
-systemctl enable iptables-restore
 
 # Allocate swap files
 # https://bbs.archlinux.org/viewtopic.php?id=194792 ensures this runs after do-resize.service
@@ -266,6 +265,9 @@ RemainAfterExit=yes
 WantedBy=multi-user.target
 EOF
 
+systemctl daemon-reload
+systemctl enable cloudron-installer
+systemctl enable iptables-restore
 systemctl enable box-setup
 
 # Configure systemd
