@@ -31,7 +31,7 @@ function sync(callback) {
 
         var allAppIds = allApps.map(function (app) { return app.id; });
         var removedAppIds = _.difference(Object.keys(gState), allAppIds);
-        debug('sync: stopping jobs of removed apps %j', removedAppIds);
+        if (removedAppIds.length !== 0) debug('sync: stopping jobs of removed apps %j', removedAppIds);
 
         async.eachSeries(removedAppIds, function (appId, iteratorDone) {
             stopJobs(appId, gState[appId], iteratorDone);
@@ -40,7 +40,7 @@ function sync(callback) {
 
             gState = _.omit(gState, removedAppIds);
 
-            debug('sync: checking apps %j', allApps);
+            debug('sync: checking apps %j', allAppIds);
             async.eachSeries(allApps, function (app, iteratorDone) {
                 var appState = gState[app.id] || null;
                 var schedulerConfig = app.manifest.addons.scheduler || null;
