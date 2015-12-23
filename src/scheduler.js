@@ -12,28 +12,12 @@ var appdb = require('./appdb.js'),
     CronJob = require('cron').CronJob,
     debug = require('debug')('box:src/scheduler'),
     docker = require('./docker.js'),
-    paths = require('./paths.js'),
-    safe = require('safetydance'),
     _ = require('underscore');
 
 var NOOP_CALLBACK = function (error) { if (error) debug('Unhandled error: ', error); };
 
 // appId -> { schedulerConfig (manifest), cronjobs }
-var gState = (function loadState() {
-    var state = safe.JSON.parse(safe.fs.readFileSync(paths.SCHEDULER_FILE, 'utf8'));
-    return state || { };
-})();
-
-function saveState(state) {
-    // do not save cronJobs
-    var safeState = { };
-    for (var appId in state) {
-        safeState[appId] = {
-            schedulerConfig: state[appId].schedulerConfig
-        };
-    }
-    safe.fs.writeFileSync(paths.SCHEDULER_FILE, JSON.stringify(safeState, null, 4), 'utf8');
-}
+var gState = { };
 
 function sync(callback) {
     assert(!callback || typeof callback === 'function');
@@ -45,17 +29,18 @@ function sync(callback) {
     apps.getAll(function (error, allApps) {
         if (error) return callback(error);
 
-        // stop tasks of apps that went away
         var allAppIds = allApps.map(function (app) { return app.id; });
         var removedAppIds = _.difference(Object.keys(gState), allAppIds);
+        debug('sync: stopping jobs of removed apps %j', removedAppIds);
+
         async.eachSeries(removedAppIds, function (appId, iteratorDone) {
-            stopJobs(appId, gState[appId], true /* killContainers */, iteratorDone);
+            stopJobs(appId, gState[appId], iteratorDone);
         }, function (error) {
-            if (error) debug('Error stopping jobs : %j', error);
+            if (error) debug('Error stopping jobs of removed apps', error);
 
             gState = _.omit(gState, removedAppIds);
 
-            // start tasks of new apps
+            debug('sync: checking apps %j', allApps);
             async.eachSeries(allApps, function (app, iteratorDone) {
                 var appState = gState[app.id] || null;
                 var schedulerConfig = app.manifest.addons.scheduler || null;
@@ -66,8 +51,8 @@ function sync(callback) {
                     return iteratorDone(); // nothing changed
                 }
 
-                var killContainers = appState && !appState.cronJobs ? true : false; // keep the old containers on 'startup'
-                stopJobs(app.id, appState, killContainers, function (error) {
+                debug('sync: app %s changed', app.id);
+                stopJobs(app.id, appState, function (error) {
                     if (error) debug('Error stopping jobs for %s : %s', app.id, error.message);
 
                     if (!schedulerConfig) {
@@ -79,8 +64,6 @@ function sync(callback) {
                         schedulerConfig: schedulerConfig,
                         cronJobs: createCronJobs(app.id, schedulerConfig)
                     };
-
-                    saveState(gState);
 
                     iteratorDone();
                 });
@@ -104,10 +87,9 @@ function killContainer(containerName, callback) {
     });
 }
 
-function stopJobs(appId, appState, killContainers, callback) {
+function stopJobs(appId, appState, callback) {
     assert.strictEqual(typeof appId, 'string');
     assert.strictEqual(typeof appState, 'object');
-    assert.strictEqual(typeof killContainers, 'boolean');
     assert.strictEqual(typeof callback, 'function');
 
     debug('stopJobs for %s', appId);
@@ -118,8 +100,6 @@ function stopJobs(appId, appState, killContainers, callback) {
         if (appState.cronJobs && appState.cronJobs[taskName]) {  // could be null across restarts
             appState.cronJobs[taskName].stop();
         }
-
-        if (!killContainers) return iteratorDone();
 
         var containerName = appId + '-' + taskName;
         killContainer(containerName, iteratorDone);
@@ -180,8 +160,6 @@ function doTask(appId, taskName, callback) {
             // NOTE: if you change container name here, fix addons.js to return correct container names
             docker.createSubcontainer(app, containerName, [ '/bin/sh', '-c', gState[appId].schedulerConfig[taskName].command ], { } /* options */, function (error, container) {
                 if (error) return callback(error);
-
-                saveState(gState);
 
                 docker.startContainer(container.id, callback);
             });
