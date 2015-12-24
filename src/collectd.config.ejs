@@ -20,7 +20,7 @@ LoadPlugin "table"
     </Result>
   </Table>
 
-  <Table "/sys/fs/cgroup/cpuacct/docker/<%= containerId %>/cpuacct.stat">
+  <Table "/sys/fs/cgroup/cpuacct/system.slice/docker/<%= containerId %>/cpuacct.stat">
     Instance "<%= appId %>-cpu"
     Separator " \\n"
     <Result>
