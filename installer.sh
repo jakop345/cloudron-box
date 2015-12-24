@@ -24,7 +24,7 @@ readonly latest_version_url="https://s3.amazonaws.com/cloudron-selfhosting/lates
 
 readonly box_code_file="${HOME}/cloudron.tar.gz"
 
-readonly certificate_folder="/tmp/certificates"
+readonly cert_folder="/tmp/certificates"
 
 echo "[INFO] ensure minimal dependencies ..."
 apt-get update
@@ -45,9 +45,45 @@ curl "${image_initialize_url}" -o "${image_initialize_file}"
 echo ""
 
 echo "[INFO] Generating certificates ..."
-/bin/bash generate_certificate.sh "US" "California" "San Francisco" "Cloudron Company" "Cloudron" "${fqdn}" "cert@cloudron.io" "${certificate_folder}"
-tls_cert=$(sed ':a;N;$!ba;s/\n/\\n/g' "${certificate_folder}/host.cert")
-tls_key=$(sed ':a;N;$!ba;s/\n/\\n/g' "${certificate_folder}/host.key")
+rm -rf "${cert_folder}"
+mkdir -p "${cert_folder}"
+
+cat > "${cert_folder}/CONFIG" <<EOF
+[ req ]
+default_bits           = 1024
+default_keyfile        = keyfile.pem
+distinguished_name     = req_distinguished_name
+prompt                 = no
+req_extensions         = v3_req
+
+[ req_distinguished_name ]
+C                      = DE
+ST                     = Berlin
+L                      = Berlin
+O                      = Cloudron UG
+OU                     = Cloudron
+CN                     = ${fqdn}
+emailAddress           = cert@cloudron.io
+
+[ v3_req ]
+# Extensions to add to a certificate request
+basicConstraints = CA:FALSE
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1 = ${fqdn}
+DNS.2 = *.${fqdn}
+EOF
+
+# generate cert files
+openssl genrsa 2048 > "${cert_folder}/host.key"
+openssl req -new -out "${cert_folder}/host.csr" -key "${cert_folder}/host.key" -config "${cert_folder}/CONFIG"
+openssl x509 -req -days 3650 -in "${cert_folder}/host.csr" -signkey "${cert_folder}/host.key" -out "${cert_folder}/host.cert" -extensions v3_req -extfile "${cert_folder}/CONFIG"
+
+# make them json compatible, by collapsing to one line
+tls_cert=$(sed ':a;N;$!ba;s/\n/\\n/g' "${cert_folder}/host.cert")
+tls_key=$(sed ':a;N;$!ba;s/\n/\\n/g' "${cert_folder}/host.key")
 echo ""
 
 echo "[INFO] Retrieving latest version ..."
