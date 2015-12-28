@@ -54,7 +54,7 @@ function targetBoxVersion(manifest) {
 
     if ('minBoxVersion' in manifest) return manifest.minBoxVersion;
 
-    return '0.0.1';
+    return '99999.99999.99999'; // compatible with the latest version
 }
 
 function pullImage(manifest, callback) {
