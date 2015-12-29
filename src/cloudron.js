@@ -256,6 +256,15 @@ function getCloudronDetails(callback) {
 
     if (gCloudronDetails) return callback(null, gCloudronDetails);
 
+    if (!config.token()) {
+        gCloudronDetails = {
+            region: null,
+            size: null
+        };
+
+        return callback(null, gCloudronDetails);
+    }
+
     superagent
         .get(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn())
         .query({ token: config.token() })
@@ -316,8 +325,9 @@ function getConfig(callback) {
 }
 
 function sendHeartbeat() {
-    var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/heartbeat';
+    if (!config.token()) return;
 
+    var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/heartbeat';
     superagent.post(url).query({ token: config.token(), version: config.version() }).timeout(10000).end(function (error, result) {
         if (error && !error.response) debug('Network error sending heartbeat.', error);
         else if (result.statusCode !== 200) debug('Server responded to heartbeat with %s %s', result.statusCode, result.text);
