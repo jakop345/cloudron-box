@@ -67,9 +67,9 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
         });
     };
 
-    Client.isServerFirstTime(function (error, isFirstTime) {
+    Client.getStatus(function (error, status) {
         if (error) return $scope.error(error);
-        if (isFirstTime) return $scope.setup();
+        if (!status.activated) return $scope.setup();
 
         Client.refreshConfig(function (error) {
             if (error) return $scope.error(error);
