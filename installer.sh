@@ -112,7 +112,8 @@ cat > /root/provision.json <<EOF
         "boxVersionsUrl": "https://s3.amazonaws.com/dev-cloudron-releases/versions.json",
         "version": "${version}",
         "tlsCert": "${tls_cert}",
-        "tlsKey": "${tls_key}"
+        "tlsKey": "${tls_key}",
+        "provider": null
     }
 }
 EOF
@@ -121,12 +122,13 @@ echo "[INFO] Reloading systemd daemon ..."
 systemctl daemon-reload
 echo ""
 
-echo "[INFO] Kick docker ..."
+echo "[INFO] Restart docker ..."
 systemctl restart docker
 echo ""
 
 echo "[FINISHED] Now starting Cloudron init jobs ..."
 systemctl start box-setup
-sleep 10 && sync
+# give the fs some time to do the volumes
+sleep 5 && sync
 systemctl start cloudron-installer
 journalctl -u cloudron-installer.service -f
