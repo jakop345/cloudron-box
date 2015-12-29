@@ -43,6 +43,8 @@ app.service('Wizard', [ function () {
         this.username = '';
         this.email = '';
         this.password = '';
+        this.setupToken = null;
+        this.provider = null;
         this.availableAvatars = [{
             file: null,
             data: null,
@@ -222,9 +224,8 @@ app.controller('StepController', ['$scope', '$route', '$location', 'Wizard', fun
 
 app.controller('FinishController', ['$scope', '$location', 'Wizard', 'Client', function ($scope, $location, Wizard, Client) {
     $scope.wizard = Wizard;
-    $scope.setupToken = null;
 
-    Client.createAdmin($scope.wizard.username, $scope.wizard.password, $scope.wizard.email, $scope.setupToken, function (error) {
+    Client.createAdmin(Wizard.username, Wizard.password, Wizard.email, Wizard.setupToken, function (error) {
         if (error) {
             console.error('Internal error', error);
             window.location.href = '/error.html';
@@ -280,12 +281,15 @@ app.controller('SetupController', ['$scope', '$location', 'Client', 'Wizard', fu
                 Wizard.dnsConfig = null;
             }
 
-            $scope.setupToken = search.setupToken;
+            Wizard.setupToken = search.setupToken;
+            Wizard.provider = status.provider;
             Wizard.email = search.email;
 
             // angular ng-attr is only false when 'undefined'
             Wizard.requireEmail = search.email || undefined;
         }
+
+        Wizard.provider = status.provider;
 
         $location.path('/step1');
 
