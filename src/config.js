@@ -17,6 +17,7 @@ exports = module.exports = {
     TEST: process.env.BOX_ENV === 'test',
 
     // convenience getters
+    provider: provider,
     apiServerOrigin: apiServerOrigin,
     webServerOrigin: webServerOrigin,
     fqdn: fqdn,
@@ -82,6 +83,7 @@ function initConfig() {
     data.ldapPort = 3002;
     data.oauthProxyPort = 3003;
     data.simpleAuthPort = 3004;
+    data.provider = 'caas';
 
     if (exports.CLOUDRON) {
         data.port = 3000;
@@ -193,4 +195,8 @@ function database() {
 
 function isDev() {
     return /dev/i.test(get('boxVersionsUrl'));
+}
+
+function provider() {
+    return get('provider');
 }
