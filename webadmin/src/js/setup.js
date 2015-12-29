@@ -98,7 +98,11 @@ app.service('Wizard', [ function () {
         }];
         this.avatar = {};
         this.avatarBlob = null;
-        this.dnsConfig = null;
+        this.dnsConfig = {
+            provider: 'route53',
+            accessKeyId: null,
+            secretAccessKey: null
+        };
     }
 
     Wizard.prototype.setPreviewAvatar = function (avatar) {
@@ -260,25 +264,23 @@ app.controller('SetupController', ['$scope', '$location', 'Client', 'Wizard', fu
             return;
         }
 
-        if (!search.setupToken) {
-            window.location.href = '/error.html?errorCode=2';
-            return;
-        }
+        if (status.provider === 'caas') {
+            if (!search.setupToken) {
+                window.location.href = '/error.html?errorCode=2';
+                return;
+            }
 
-        if (!search.email) {
-            window.location.href = '/error.html?errorCode=3';
-            return;
-        }
+            if (!search.email) {
+                window.location.href = '/error.html?errorCode=3';
+                return;
+            }
 
-        $scope.setupToken = search.setupToken;
-        Wizard.email = search.email;
+            if (search.customDomain !== 'true') {
+                Wizard.dnsConfig = null;
+            }
 
-        if (search.customDomain === 'true') {
-            Wizard.dnsConfig = {
-                provider: 'route53',
-                accessKeyId: null,
-                secretAccessKey: null
-            };
+            $scope.setupToken = search.setupToken;
+            Wizard.email = search.email;
         }
 
         $location.path('/step1');
