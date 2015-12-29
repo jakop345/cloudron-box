@@ -222,6 +222,7 @@ app.controller('StepController', ['$scope', '$route', '$location', 'Wizard', fun
 
 app.controller('FinishController', ['$scope', '$location', 'Wizard', 'Client', function ($scope, $location, Wizard, Client) {
     $scope.wizard = Wizard;
+    $scope.setupToken = null;
 
     Client.createAdmin($scope.wizard.username, $scope.wizard.password, $scope.wizard.email, $scope.setupToken, function (error) {
         if (error) {
@@ -281,6 +282,9 @@ app.controller('SetupController', ['$scope', '$location', 'Client', 'Wizard', fu
 
             $scope.setupToken = search.setupToken;
             Wizard.email = search.email;
+
+            // angular ng-attr is only false when 'undefined'
+            Wizard.requireEmail = search.email || undefined;
         }
 
         $location.path('/step1');

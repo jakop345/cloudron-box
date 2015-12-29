@@ -10,6 +10,10 @@
 <br/>
 <div class="row">
     <div class="col-md-4 col-md-offset-4 text-center">
+        <div ng-hide="wizard.emailPreset" class="form-group" ng-class="{ 'has-error': setup_form.email.$dirty && setup_form.email.$invalid }">
+            <!-- <label class="control-label" for="inputUsername">Username</label> -->
+            <input type="email" class="form-control" ng-model="wizard.email" id="inputEmail" name="email" placeholder="Email" ng-enter="focusNext('inputUsername', setup_form.email.$invalid)" ng-attr-autofocus="{{wizard.requireEmail}}" required autocomplete="off">
+        </div>
         <div class="form-group" ng-class="{ 'has-error': setup_form.username.$dirty && setup_form.username.$invalid }">
             <!-- <label class="control-label" for="inputUsername">Username</label> -->
             <input type="text" class="form-control" ng-model="wizard.username" id="inputUsername" name="username" placeholder="Username" ng-enter="focusNext('inputPassword', setup_form.username.$invalid)" ng-maxlength="512" ng-minlength="3" autofocus required autocomplete="off">
