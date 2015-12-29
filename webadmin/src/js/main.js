@@ -23,8 +23,12 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
         Client.logout();
     };
 
-    $scope.setup = function () {
-        window.location.href = '/error.html?errorCode=1';
+    $scope.setup = function (provider) {
+        if (provider === 'caas') {
+            window.location.href = '/error.html?errorCode=1';
+        } else {
+            window.location.href = '/setup.html';
+        }
     };
 
     $scope.error = function (error) {
