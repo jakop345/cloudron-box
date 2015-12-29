@@ -287,9 +287,6 @@ function getConfig(callback) {
         // TODO provide that number from the appstore
         var memory = bytes(result.size) || 0;
 
-        // FIXME we should have a separate flag to indicate caas
-        var provider = result.region === null ? null : 'caas';
-
         settings.getCloudronName(function (error, cloudronName) {
             if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
@@ -310,7 +307,7 @@ function getConfig(callback) {
                     region: result.region,
                     size: result.size,
                     memory: memory,
-                    provider: provider,
+                    provider: config.provider(),
                     cloudronName: cloudronName
                 });
             });
