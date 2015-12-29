@@ -107,13 +107,13 @@ cat > /root/provision.json <<EOF
         "apiServerOrigin": "https://api.dev.cloudron.io",
         "webServerOrigin": "https://dev.cloudron.io",
         "fqdn": "${fqdn}",
-        "token": null,
+        "token": "",
         "isCustomDomain": true,
         "boxVersionsUrl": "https://s3.amazonaws.com/dev-cloudron-releases/versions.json",
         "version": "${version}",
         "tlsCert": "${tls_cert}",
         "tlsKey": "${tls_key}",
-        "provider": null
+        "provider": ""
     }
 }
 EOF
