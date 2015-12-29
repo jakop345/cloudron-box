@@ -249,29 +249,36 @@ app.controller('SetupController', ['$scope', '$location', 'Client', 'Wizard', fu
     // Stupid angular location provider either wants html5 location mode or not, do the query parsing on my own
     var search = decodeURIComponent(window.location.search).slice(1).split('&').map(function (item) { return item.split('='); }).reduce(function (o, k) { o[k[0]] = k[1]; return o; }, {});
 
-    if (!search.setupToken) return window.location.href = '/error.html?errorCode=2';
-    $scope.setupToken = search.setupToken;
-
-    if (!search.email) return window.location.href = '/error.html?errorCode=3';
-    Wizard.email = search.email;
-
-    if (search.customDomain === 'true') {
-        Wizard.dnsConfig = {
-            provider: 'route53',
-            accessKeyId: null,
-            secretAccessKey: null
-        };
-    }
-
-    Client.isServerFirstTime(function (error, isFirstTime) {
+    Client.getStatus(function (error, status) {
         if (error) {
             window.location.href = '/error.html';
             return;
         }
 
-        if (!isFirstTime) {
+        if (status.activated) {
             window.location.href = '/';
             return;
+        }
+
+        if (!search.setupToken) {
+            window.location.href = '/error.html?errorCode=2';
+            return;
+        }
+
+        if (!search.email) {
+            window.location.href = '/error.html?errorCode=3';
+            return;
+        }
+
+        $scope.setupToken = search.setupToken;
+        Wizard.email = search.email;
+
+        if (search.customDomain === 'true') {
+            Wizard.dnsConfig = {
+                provider: 'route53',
+                accessKeyId: null,
+                secretAccessKey: null
+            };
         }
 
         $location.path('/step1');

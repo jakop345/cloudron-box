@@ -307,13 +307,6 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
-    Client.prototype.isServerFirstTime = function (callback) {
-        $http.get(client.apiOrigin + '/api/v1/cloudron/status').success(function(data, status) {
-            if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));
-            callback(null, !data.activated);
-        }).error(defaultErrorHandler(callback));
-    };
-
     Client.prototype.getStatus = function (callback) {
         $http.get(client.apiOrigin + '/api/v1/cloudron/status').success(function(data, status) {
             if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));
