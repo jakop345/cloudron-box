@@ -211,9 +211,9 @@ cd "${INSTALLER_SOURCE_DIR}" && npm install --production
 chown "${USER}:${USER}" -R "${INSTALLER_SOURCE_DIR}"
 
 echo "==== Install installer systemd script ===="
-selfhostEnv=""
+provisionEnv="digitalocean"
 if [ ${SELFHOSTED} == 1 ]; then
-    selfhostEnv="SELFHOSTED=true"
+    provisionEnv="PROVISION=local"
 fi
 
 cat > /etc/systemd/system/cloudron-installer.service <<EOF
@@ -223,7 +223,7 @@ Description=Cloudron Installer
 [Service]
 Type=idle
 ExecStart="${INSTALLER_SOURCE_DIR}/src/server.js"
-Environment="DEBUG=installer*,connect-lastmile" ${selfhostEnv}
+Environment="DEBUG=installer*,connect-lastmile" ${provisionEnv}
 KillMode=process
 Restart=on-failure
 

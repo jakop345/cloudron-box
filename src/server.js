@@ -31,7 +31,7 @@ var CLOUDRON_CONFIG_FILE = '/home/yellowtent/configs/cloudron.conf';
 var gHttpsServer = null, // provision server; used for install/restore
     gHttpServer = null; // update server; used for updates
 
-function provisionCaaS(callback) {
+function provisionDigitalOcean(callback) {
     if (fs.existsSync(CLOUDRON_CONFIG_FILE)) return callback(null); // already provisioned
 
     superagent.get('http://169.254.169.254/metadata/v1.json').end(function (error, result) {
@@ -46,7 +46,7 @@ function provisionCaaS(callback) {
     });
 }
 
-function provisionSelfhost(callback) {
+function provisionLocal(callback) {
     if (fs.existsSync(CLOUDRON_CONFIG_FILE)) return callback(null); // already provisioned
 
     if (!fs.existsSync(PROVISION_CONFIG_FILE)) {
@@ -177,20 +177,20 @@ function start(callback) {
 
     var actions;
 
-    if (process.env.SELFHOSTED) {
+    if (process.env.PROVISION === 'local') {
         debug('Starting Installer in selfhost mode');
 
         actions = [
             startUpdateServer,
-            provisionSelfhost
+            provisionLocal
         ];
-    } else {
+    } else {    // current fallback, should be 'digitalocean' eventually
         debug('Starting Installer in managed mode');
 
         actions = [
             startUpdateServer,
             startProvisionServer,
-            provisionCaaS
+            provisionDigitalOcean
         ];
     }
 
