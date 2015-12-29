@@ -65,7 +65,7 @@ function activate(req, res, next) {
             if (error && !error.response) return next(new HttpError(500, error));
             if (result.statusCode === 403) return next(new HttpError(403, 'Invalid token'));
             if (result.statusCode === 409) return next(new HttpError(409, 'Already setup'));
-            if (result.statusCode !== 201) return next(new HttpError(500, result.text ? result.text.message : 'Internal error'));
+            if (result.statusCode !== 201) return next(new HttpError(500, result.text || 'Internal error'));
 
             next(new HttpSuccess(201, info));
         });
@@ -84,7 +84,7 @@ function setupTokenAuth(req, res, next) {
         if (error && !error.response) return next(new HttpError(500, error));
         if (result.statusCode === 403) return next(new HttpError(403, 'Invalid token'));
         if (result.statusCode === 409) return next(new HttpError(409, 'Already setup'));
-        if (result.statusCode !== 200) return next(new HttpError(500, result.text ? result.text.message : 'Internal error'));
+        if (result.statusCode !== 200) return next(new HttpError(500, result.text || 'Internal error'));
 
         next();
     });
