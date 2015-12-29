@@ -72,6 +72,9 @@ function activate(req, res, next) {
 function setupTokenAuth(req, res, next) {
     assert.strictEqual(typeof req.query, 'object');
 
+    // skip setupToken auth for non caas case
+    if (config.provider() !== 'caas') return next();
+
     if (typeof req.query.setupToken !== 'string') return next(new HttpError(400, 'no setupToken provided'));
 
     superagent.get(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/setup/verify').query({ setupToken:req.query.setupToken }).end(function (error, result) {
