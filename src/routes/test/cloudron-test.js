@@ -62,6 +62,19 @@ describe('Cloudron', function () {
             });
         });
 
+        it('fails due to internal server error on appstore side', function (done) {
+            var scope = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(500, { message: 'this is wrong' });
+
+            superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
+                   .query({ setupToken: 'somesetuptoken' })
+                   .send({ username: 'someuser', password: 'somepassword', email: 'admin@foo.bar' })
+                   .end(function (error, result) {
+                expect(result.statusCode).to.equal(500);
+                expect(scope.isDone()).to.be.ok();
+                done();
+            });
+        });
+
         it('fails due to empty username', function (done) {
             var scope = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
 
