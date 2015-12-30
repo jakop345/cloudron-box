@@ -100,11 +100,7 @@ app.service('Wizard', [ function () {
         }];
         this.avatar = {};
         this.avatarBlob = null;
-        this.dnsConfig = {
-            provider: 'route53',
-            accessKeyId: null,
-            secretAccessKey: null
-        };
+        this.dnsConfig = null;
     }
 
     Wizard.prototype.setPreviewAvatar = function (avatar) {
@@ -277,8 +273,12 @@ app.controller('SetupController', ['$scope', '$location', 'Client', 'Wizard', fu
                 return;
             }
 
-            if (search.customDomain !== 'true') {
-                Wizard.dnsConfig = null;
+            if (search.customDomain === 'true') {
+                Wizard.dnsConfig = {
+                    provider: 'route53',
+                    accessKeyId: null,
+                    secretAccessKey: null
+                };
             }
 
             Wizard.setupToken = search.setupToken;
