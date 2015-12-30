@@ -64,6 +64,8 @@ function getAllPaged(backupConfig, page, perPage, callback) {
                 };
             });
 
+            results.sort(function (a, b) { return a.creationTime < b.creationTime; });
+
             return callback(null, results);
         });
     });
