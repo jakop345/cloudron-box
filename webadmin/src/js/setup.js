@@ -282,13 +282,10 @@ app.controller('SetupController', ['$scope', '$location', 'Client', 'Wizard', fu
             }
 
             Wizard.setupToken = search.setupToken;
-            Wizard.provider = status.provider;
-            Wizard.email = search.email;
-
-            // angular ng-attr is only false when 'undefined'
-            Wizard.requireEmail = search.email || undefined;
         }
 
+        Wizard.email = search.email;
+        Wizard.requireEmail = !search.email;
         Wizard.provider = status.provider;
 
         $location.path('/step1');
