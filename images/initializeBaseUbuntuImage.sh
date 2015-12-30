@@ -6,11 +6,23 @@ readonly USER=yellowtent
 readonly USER_HOME="/home/${USER}"
 readonly INSTALLER_SOURCE_DIR="${USER_HOME}/installer"
 readonly INSTALLER_REVISION="$1"
+readonly SELFHOSTED=$(( $# > 1 ? 1 : 0 ))
 readonly USER_DATA_FILE="/root/user_data.img"
 readonly USER_DATA_DIR="/home/yellowtent/data"
 
 readonly SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SOURCE_DIR}/INFRA_VERSION"
+
+if [ -f "${SOURCE_DIR}/INFRA_VERSION" ]; then
+    source "${SOURCE_DIR}/INFRA_VERSION"
+else
+    echo "No INFRA_VERSION found, skip pulling docker images"
+fi
+
+if [ ${SELFHOSTED} == 0 ]; then
+    echo "!! Initializing Ubuntu image for CaaS"
+else
+    echo "!! Initializing Ubuntu image for Selfhosting"
+fi
 
 echo "==== Create User ${USER} ===="
 if ! id "${USER}"; then
@@ -40,7 +52,11 @@ iptables -P OUTPUT ACCEPT
 # NOTE: keep these in sync with src/apps.js validatePortBindings
 # allow ssh, http, https, ping, dns
 iptables -I INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
-iptables -A INPUT -p tcp -m tcp -m multiport --dports 80,202,443,886 -j ACCEPT
+if [ ${SELFHOSTED} == 0 ]; then
+    iptables -A INPUT -p tcp -m tcp -m multiport --dports 80,202,443,886 -j ACCEPT
+else
+    iptables -A INPUT -p tcp -m tcp -m multiport --dports 80,22,443,886 -j ACCEPT
+fi
 iptables -A INPUT -p icmp --icmp-type echo-request -j ACCEPT
 iptables -A INPUT -p icmp --icmp-type echo-reply -j ACCEPT
 iptables -A INPUT -p udp --sport 53 -j ACCEPT
@@ -110,6 +126,7 @@ mkdir -p "${USER_DATA_DIR}" && mount "${USER_DATA_FILE}"
 mkdir -p "${USER_DATA_DIR}/docker"
 
 # give docker sometime to start up and create iptables rules
+systemctl daemon-reload
 systemctl enable docker
 systemctl start docker
 sleep 10
@@ -126,26 +143,31 @@ update-grub
 
 # now add the user to the docker group
 usermod "${USER}" -a -G docker
-echo "=== Pulling base docker images ==="
-docker pull "${BASE_IMAGE}"
 
-echo "=== Pulling mysql addon image ==="
-docker pull "${MYSQL_IMAGE}"
+if [ -z $(echo "${INFRA_VERSION}") ]; then
+    echo "Skip pulling base docker images"
+else
+    echo "=== Pulling base docker images ==="
+    docker pull "${BASE_IMAGE}"
 
-echo "=== Pulling postgresql addon image ==="
-docker pull "${POSTGRESQL_IMAGE}"
+    echo "=== Pulling mysql addon image ==="
+    docker pull "${MYSQL_IMAGE}"
 
-echo "=== Pulling redis addon image ==="
-docker pull "${REDIS_IMAGE}"
+    echo "=== Pulling postgresql addon image ==="
+    docker pull "${POSTGRESQL_IMAGE}"
 
-echo "=== Pulling mongodb addon image ==="
-docker pull "${MONGODB_IMAGE}"
+    echo "=== Pulling redis addon image ==="
+    docker pull "${REDIS_IMAGE}"
 
-echo "=== Pulling graphite docker images ==="
-docker pull "${GRAPHITE_IMAGE}"
+    echo "=== Pulling mongodb addon image ==="
+    docker pull "${MONGODB_IMAGE}"
 
-echo "=== Pulling mail relay ==="
-docker pull "${MAIL_IMAGE}"
+    echo "=== Pulling graphite docker images ==="
+    docker pull "${GRAPHITE_IMAGE}"
+
+    echo "=== Pulling mail relay ==="
+    docker pull "${MAIL_IMAGE}"
+fi
 
 echo "==== Install nginx ===="
 apt-get -y install nginx-full
@@ -182,13 +204,18 @@ mkdir -p /usr/local/node-4.1.1
 curl -sL https://nodejs.org/dist/v4.1.1/node-v4.1.1-linux-x64.tar.gz | tar zxvf - --strip-components=1 -C /usr/local/node-4.1.1
 ln -s /usr/local/node-4.1.1/bin/node /usr/bin/node
 ln -s /usr/local/node-4.1.1/bin/npm /usr/bin/npm
-apt-get install -y python	# Install python which is required for npm rebuild
+apt-get install -y python   # Install python which is required for npm rebuild
 
 echo "=== Rebuilding npm packages ==="
 cd "${INSTALLER_SOURCE_DIR}" && npm install --production
 chown "${USER}:${USER}" -R "${INSTALLER_SOURCE_DIR}"
 
 echo "==== Install installer systemd script ===="
+provisionEnv="digitalocean"
+if [ ${SELFHOSTED} == 1 ]; then
+    provisionEnv="PROVISION=local"
+fi
+
 cat > /etc/systemd/system/cloudron-installer.service <<EOF
 [Unit]
 Description=Cloudron Installer
@@ -196,14 +223,13 @@ Description=Cloudron Installer
 [Service]
 Type=idle
 ExecStart="${INSTALLER_SOURCE_DIR}/src/server.js"
-Environment="DEBUG=installer*,connect-lastmile"
+Environment="DEBUG=installer*,connect-lastmile" ${provisionEnv}
 KillMode=process
 Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
 EOF
-systemctl enable cloudron-installer
 
 # Restore iptables before docker
 echo "==== Install iptables-restore systemd script ===="
@@ -220,7 +246,6 @@ RemainAfterExit=yes
 [Install]
 WantedBy=multi-user.target
 EOF
-systemctl enable iptables-restore
 
 # Allocate swap files
 # https://bbs.archlinux.org/viewtopic.php?id=194792 ensures this runs after do-resize.service
@@ -240,6 +265,9 @@ RemainAfterExit=yes
 WantedBy=multi-user.target
 EOF
 
+systemctl daemon-reload
+systemctl enable cloudron-installer
+systemctl enable iptables-restore
 systemctl enable box-setup
 
 # Configure systemd
@@ -262,14 +290,16 @@ chown root:systemd-journal /var/log/journal
 systemctl restart systemd-journald
 setfacl -n -m u:${USER}:r /var/log/journal/*/system.journal
 
-echo "==== Install ssh ==="
-apt-get -y install openssh-server
-# https://stackoverflow.com/questions/4348166/using-with-sed on why ? must be escaped
-sed -e 's/^#\?Port .*/Port 202/g' \
-    -e 's/^#\?PermitRootLogin .*/PermitRootLogin without-password/g' \
-    -e 's/^#\?PermitEmptyPasswords .*/PermitEmptyPasswords no/g' \
-    -e 's/^#\?PasswordAuthentication .*/PasswordAuthentication no/g' \
-    -i /etc/ssh/sshd_config
+if [ ${SELFHOSTED} == 0 ]; then
+    echo "==== Install ssh ==="
+    apt-get -y install openssh-server
+    # https://stackoverflow.com/questions/4348166/using-with-sed on why ? must be escaped
+    sed -e 's/^#\?Port .*/Port 202/g' \
+        -e 's/^#\?PermitRootLogin .*/PermitRootLogin without-password/g' \
+        -e 's/^#\?PermitEmptyPasswords .*/PermitEmptyPasswords no/g' \
+        -e 's/^#\?PasswordAuthentication .*/PasswordAuthentication no/g' \
+        -i /etc/ssh/sshd_config
 
- # required so we can connect to this machine since port 22 is blocked by iptables by now
-systemctl reload sshd
+    # required so we can connect to this machine since port 22 is blocked by iptables by now
+    systemctl reload sshd
+fi

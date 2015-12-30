@@ -25,11 +25,14 @@ exports = module.exports = {
     stop: stop
 };
 
+var PROVISION_CONFIG_FILE = '/root/provision.json';
+var CLOUDRON_CONFIG_FILE = '/home/yellowtent/configs/cloudron.conf';
+
 var gHttpsServer = null, // provision server; used for install/restore
     gHttpServer = null; // update server; used for updates
 
-function provision(callback) {
-    if (fs.existsSync('/home/yellowtent/configs/cloudron.conf')) return callback(null); // already provisioned
+function provisionDigitalOcean(callback) {
+    if (fs.existsSync(CLOUDRON_CONFIG_FILE)) return callback(null); // already provisioned
 
     superagent.get('http://169.254.169.254/metadata/v1.json').end(function (error, result) {
         if (error || result.statusCode !== 200) {
@@ -41,6 +44,19 @@ function provision(callback) {
 
         installer.provision(userData, callback);
     });
+}
+
+function provisionLocal(callback) {
+    if (fs.existsSync(CLOUDRON_CONFIG_FILE)) return callback(null); // already provisioned
+
+    if (!fs.existsSync(PROVISION_CONFIG_FILE)) {
+        console.error('No provisioning data found at %s', PROVISION_CONFIG_FILE);
+        return;
+    }
+
+    var userData = require(PROVISION_CONFIG_FILE);
+
+    installer.provision(userData, callback);
 }
 
 function update(req, res, next) {
@@ -159,13 +175,26 @@ function stopUpdateServer(callback) {
 function start(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    debug('starting');
+    var actions;
 
-    async.series([
-        startUpdateServer,
-        startProvisionServer,
-        provision
-    ], callback);
+    if (process.env.PROVISION === 'local') {
+        debug('Starting Installer in selfhost mode');
+
+        actions = [
+            startUpdateServer,
+            provisionLocal
+        ];
+    } else {    // current fallback, should be 'digitalocean' eventually
+        debug('Starting Installer in managed mode');
+
+        actions = [
+            startUpdateServer,
+            startProvisionServer,
+            provisionDigitalOcean
+        ];
+    }
+
+    async.series(actions, callback);
 }
 
 function stop(callback) {
