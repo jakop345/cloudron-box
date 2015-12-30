@@ -6,12 +6,16 @@ echo ""
 echo "======== Cloudron Installer ========"
 echo ""
 
-if [ $# -lt 1 ]; then
-    echo "Usage: ./installer.sh <fqdn>"
+if [ $# -lt 5 ]; then
+    echo "Usage: ./installer.sh <fqdn> <aws key id> <aws key secret> <bucket> <region>"
     exit 1
 fi
 
 readonly fqdn="${1}"
+readonly aws_access_key_id="${2}"
+readonly aws_access_key_secret="${3}"
+readonly aws_backup_bucket="${4}"
+readonly aws_region="${5}"
 
 readonly installer_code_url="https://s3.amazonaws.com/cloudron-selfhosting/installer.tar"
 readonly installer_code_file="${HOME}/installer.tar"
@@ -113,7 +117,20 @@ cat > /root/provision.json <<EOF
         "version": "${version}",
         "tlsCert": "${tls_cert}",
         "tlsKey": "${tls_key}",
-        "provider": ""
+        "provider": "",
+        "backupConfig": {
+            "provider": "s3",
+            "accessKeyId": "${aws_access_key_id}",
+            "secretAccessKey": "${aws_access_key_secret}",
+            "bucket": "${aws_backup_bucket}",
+            "prefix": "backups"
+        },
+        "dnsConfig": {
+            "provider": "route53",
+            "accessKeyId": "${aws_access_key_id}",
+            "secretAccessKey": "${aws_access_key_secret}",
+            "region": "${aws_region}"
+        }
     }
 }
 EOF
