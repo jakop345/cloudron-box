@@ -51,16 +51,9 @@ function getAllPaged(backupConfig, page, perPage, callback) {
             if (error) return callback(error);
 
             var results = data.Contents.map(function (backup) {
-                var key = backup.Key.slice(backupConfig.prefix.length + 1);
-
-                // This depends on the backups.js format of backup names :-(
-                var version = key.slice(key.lastIndexOf('-') + 2, -7);
-
                 return {
                     creationTime: backup.LastModified,
-                    boxVersion: version,
-                    restoreKey: key,
-                    dependsOn: []               // FIXME we have no information here
+                    restoreKey: backup.Key.slice(backupConfig.prefix.length + 1)
                 };
             });
 
