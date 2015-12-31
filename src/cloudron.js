@@ -33,12 +33,12 @@ var apps = require('./apps.js'),
     async = require('async'),
     backups = require('./backups.js'),
     BackupsError = require('./backups.js').BackupsError,
-    bytes = require('bytes'),
     clientdb = require('./clientdb.js'),
     config = require('./config.js'),
     debug = require('debug')('box:cloudron'),
     fs = require('fs'),
     locker = require('./locker.js'),
+    os = require('os'),
     path = require('path'),
     paths = require('./paths.js'),
     progress = require('./progress.js'),
@@ -256,6 +256,15 @@ function getCloudronDetails(callback) {
 
     if (gCloudronDetails) return callback(null, gCloudronDetails);
 
+    if (!config.token()) {
+        gCloudronDetails = {
+            region: null,
+            size: null
+        };
+
+        return callback(null, gCloudronDetails);
+    }
+
     superagent
         .get(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn())
         .query({ token: config.token() })
@@ -283,10 +292,6 @@ function getConfig(callback) {
             };
         }
 
-        // We rely at the moment on the size being specified in 512mb,1gb,...
-        // TODO provide that number from the appstore
-        var memory = bytes(result.size) || 0;
-
         settings.getCloudronName(function (error, cloudronName) {
             if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
@@ -306,7 +311,8 @@ function getConfig(callback) {
                     developerMode: developerMode,
                     region: result.region,
                     size: result.size,
-                    memory: memory,
+                    memory: os.totalmem(),
+                    provider: config.provider(),
                     cloudronName: cloudronName
                 });
             });
@@ -315,8 +321,9 @@ function getConfig(callback) {
 }
 
 function sendHeartbeat() {
-    var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/heartbeat';
+    if (!config.token()) return;
 
+    var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/heartbeat';
     superagent.post(url).query({ token: config.token(), version: config.version() }).timeout(10000).end(function (error, result) {
         if (error && !error.response) debug('Network error sending heartbeat.', error);
         else if (result.statusCode !== 200) debug('Server responded to heartbeat with %s %s', result.statusCode, result.text);

@@ -36,7 +36,32 @@ function getAllPaged(backupConfig, page, perPage, callback) {
     assert.strictEqual(typeof perPage, 'number');
     assert.strictEqual(typeof callback, 'function');
 
-    return callback(new Error('Not implemented yet'));
+    getBackupCredentials(backupConfig, function (error, credentials) {
+        if (error) return callback(error);
+
+        var s3 = new AWS.S3(credentials);
+
+        var params = {
+            Bucket: backupConfig.bucket,
+            EncodingType: 'url',
+            Prefix: backupConfig.prefix + '/backup_'
+        };
+
+        s3.listObjects(params, function (error, data) {
+            if (error) return callback(error);
+
+            var results = data.Contents.map(function (backup) {
+                return {
+                    creationTime: backup.LastModified,
+                    restoreKey: backup.Key.slice(backupConfig.prefix.length + 1)
+                };
+            });
+
+            results.sort(function (a, b) { return a.creationTime < b.creationTime; });
+
+            return callback(null, results);
+        });
+    });
 }
 
 function getSignedUploadUrl(backupConfig, filename, callback) {

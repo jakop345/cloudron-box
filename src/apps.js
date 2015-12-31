@@ -288,6 +288,9 @@ function purchase(appStoreId, callback) {
     // Skip purchase if appStoreId is empty
     if (appStoreId === '') return callback(null);
 
+    // Skip if we don't have an appstore token
+    if (config.token() === '') return callback(null);
+
     var url = config.apiServerOrigin() + '/api/v1/apps/' + appStoreId + '/purchase';
 
     superagent.post(url).query({ token: config.token() }).end(function (error, res) {

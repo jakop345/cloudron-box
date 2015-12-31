@@ -23,8 +23,12 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
         Client.logout();
     };
 
-    $scope.setup = function () {
-        window.location.href = '/error.html?errorCode=1';
+    $scope.setup = function (provider) {
+        if (provider === 'caas') {
+            window.location.href = '/error.html?errorCode=1';
+        } else {
+            window.location.href = '/setup.html';
+        }
     };
 
     $scope.error = function (error) {
@@ -63,9 +67,9 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
         });
     };
 
-    Client.isServerFirstTime(function (error, isFirstTime) {
+    Client.getStatus(function (error, status) {
         if (error) return $scope.error(error);
-        if (isFirstTime) return $scope.setup();
+        if (!status.activated) return $scope.setup();
 
         Client.refreshConfig(function (error) {
             if (error) return $scope.error(error);
