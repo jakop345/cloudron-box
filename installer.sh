@@ -18,10 +18,8 @@ readonly aws_backup_bucket="${4}"
 readonly aws_region="${5}"
 
 readonly installer_code_url="https://s3.amazonaws.com/cloudron-selfhosting/installer.tar"
-readonly installer_code_file="${HOME}/installer.tar"
-
-readonly image_initialize_url="https://s3.amazonaws.com/cloudron-selfhosting/initializeBaseUbuntuImage.sh"
-readonly image_initialize_file="${HOME}/initializeBaseUbuntuImage.sh"
+readonly installer_code_file="/root/installer.tar"
+readonly INSTALLER_TMP_DIR="/tmp/installer"
 
 readonly latest_box_url="https://s3.amazonaws.com/cloudron-selfhosting"
 readonly latest_version_url="https://s3.amazonaws.com/cloudron-selfhosting/latest.version"
@@ -37,15 +35,10 @@ echo ""
 
 echo "[INFO] Cleanup old files ..."
 rm -rf "${installer_code_file}"
-rm -rf "${image_initialize_file}"
 rm -rf "${box_code_file}"
 
 echo "[INFO] Fetching installer code ..."
 curl "${installer_code_url}" -o "${installer_code_file}"
-echo ""
-
-echo "[INFO] Fetching Ubuntu initializing script ..."
-curl "${image_initialize_url}" -o "${image_initialize_file}"
 echo ""
 
 echo "[INFO] Generating certificates ..."
@@ -99,8 +92,13 @@ echo "[INFO] Fetching latest code ..."
 curl "${latest_box_url}/${version}.tar.gz" -o "${box_code_file}"
 echo ""
 
+echo "[INFO] Extracting installer code ..."
+rm -rf "${INSTALLER_TMP_DIR}" && mkdir -p "${INSTALLER_TMP_DIR}"
+tar xvf /root/installer.tar -C "${INSTALLER_TMP_DIR}"
+echo ""
+
 echo "[INFO] Running Ubuntu initializing script ..."
-/bin/bash "${image_initialize_file}" 0123456789abcdef selfhosting
+/bin/bash "${INSTALLER_TMP_DIR}/images/initializeBaseUbuntuImage.sh" 0123456789abcdef selfhosting
 echo ""
 
 echo "Creating initial provisioning config ..."
