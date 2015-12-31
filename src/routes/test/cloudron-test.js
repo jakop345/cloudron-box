@@ -11,6 +11,7 @@ var async = require('async'),
     database = require('../../database.js'),
     expect = require('expect.js'),
     nock = require('nock'),
+    os = require('os'),
     superagent = require('superagent'),
     server = require('../../server.js'),
     shell = require('../../shell.js');
@@ -222,7 +223,7 @@ describe('Cloudron', function () {
                 expect(result.body.developerMode).to.be.a('boolean');
                 expect(result.body.size).to.eql(null);
                 expect(result.body.region).to.eql(null);
-                expect(result.body.memory).to.eql(0);
+                expect(result.body.memory).to.eql(os.totalmem());
                 expect(result.body.cloudronName).to.be.a('string');
 
                 done();
@@ -246,7 +247,7 @@ describe('Cloudron', function () {
                 expect(result.body.developerMode).to.be.a('boolean');
                 expect(result.body.size).to.eql('1gb');
                 expect(result.body.region).to.eql('sfo');
-                expect(result.body.memory).to.eql(1073741824);
+                expect(result.body.memory).to.eql(os.totalmem());
                 expect(result.body.cloudronName).to.be.a('string');
 
                 expect(scope.isDone()).to.be.ok();
