@@ -130,6 +130,9 @@ cat > /root/provision.json <<EOF
             "accessKeyId": "${aws_access_key_id}",
             "secretAccessKey": "${aws_access_key_secret}",
             "region": "${aws_region}"
+        },
+        "tlsConfig": {
+            "provider": "letsencrypt-dev"
         }
     }
 }
