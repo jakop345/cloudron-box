@@ -11,17 +11,18 @@
 <div class="row">
     <div class="col-md-4 col-md-offset-4 text-center">
         <div class="form-group" ng-class="{ 'has-error': setup_form.username.$dirty && setup_form.username.$invalid }">
-            <!-- <label class="control-label" for="inputUsername">Username</label> -->
-            <input type="text" class="form-control" ng-model="wizard.username" id="inputUsername" name="username" placeholder="Username" ng-enter="focusNext('inputPassword', setup_form.username.$invalid)" ng-maxlength="512" ng-minlength="3" autofocus required autocomplete="off">
+            <input type="text" class="form-control" ng-model="wizard.username" id="inputUsername" name="username" placeholder="Username" ng-enter="focusNext(wizard.requireEmail ? 'inputEmail' : 'inputPassword', setup_form.username.$invalid)" ng-maxlength="512" ng-minlength="3" autofocus required autocomplete="off">
+        </div>
+        <div ng-show="wizard.requireEmail" class="form-group" ng-class="{ 'has-error': setup_form.email.$dirty && setup_form.email.$invalid }">
+            <input type="email" class="form-control" ng-model="wizard.email" id="inputEmail" name="email" placeholder="Email" ng-enter="focusNext('inputPassword', setup_form.email.$invalid)" required autocomplete="off">
         </div>
         <div class="form-group" ng-class="{ 'has-error': setup_form.password.$dirty && setup_form.password.$invalid }">
-            <!-- <label class="control-label" for="inputPassword">Password</label> -->
-            <input type="password" class="form-control" ng-model="wizard.password" id="inputPassword" name="password" placeholder="Password" ng-enter="next(setup_form.password.$invalid)" ng-maxlength="512" ng-minlength="5" required autocomplete="off">
+            <input type="password" class="form-control" ng-model="wizard.password" id="inputPassword" name="password" placeholder="Password" ng-enter="next(setup_form.username.$invalid || setup_form.password.$invalid || setup_form.email.$invalid)" ng-maxlength="512" ng-minlength="5" required autocomplete="off">
         </div>
     </div>
 </div>
 <div class="row">
     <div class="col-md-12 text-center">
-        <button class="btn btn-primary" ng-click="next(setup_form.username.$invalid || setup_form.password.$invalid)" ng-disabled="setup_form.username.$invalid || setup_form.password.$invalid">Done</button>
+        <button class="btn btn-primary" ng-click="next(setup_form.username.$invalid || setup_form.password.$invalid || setup_form.email.$invalid)" ng-disabled="setup_form.username.$invalid || setup_form.password.$invalid">Done</button>
     </div>
 </div>

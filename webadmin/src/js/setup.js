@@ -43,6 +43,8 @@ app.service('Wizard', [ function () {
         this.username = '';
         this.email = '';
         this.password = '';
+        this.setupToken = null;
+        this.provider = null;
         this.availableAvatars = [{
             file: null,
             data: null,
@@ -219,7 +221,7 @@ app.controller('StepController', ['$scope', '$route', '$location', 'Wizard', fun
 app.controller('FinishController', ['$scope', '$location', 'Wizard', 'Client', function ($scope, $location, Wizard, Client) {
     $scope.wizard = Wizard;
 
-    Client.createAdmin($scope.wizard.username, $scope.wizard.password, $scope.wizard.email, $scope.setupToken, function (error) {
+    Client.createAdmin(Wizard.username, Wizard.password, Wizard.email, Wizard.setupToken, function (error) {
         if (error) {
             console.error('Internal error', error);
             window.location.href = '/error.html';
@@ -249,30 +251,42 @@ app.controller('SetupController', ['$scope', '$location', 'Client', 'Wizard', fu
     // Stupid angular location provider either wants html5 location mode or not, do the query parsing on my own
     var search = decodeURIComponent(window.location.search).slice(1).split('&').map(function (item) { return item.split('='); }).reduce(function (o, k) { o[k[0]] = k[1]; return o; }, {});
 
-    if (!search.setupToken) return window.location.href = '/error.html?errorCode=2';
-    $scope.setupToken = search.setupToken;
-
-    if (!search.email) return window.location.href = '/error.html?errorCode=3';
-    Wizard.email = search.email;
-
-    if (search.customDomain === 'true') {
-        Wizard.dnsConfig = {
-            provider: 'route53',
-            accessKeyId: null,
-            secretAccessKey: null
-        };
-    }
-
-    Client.isServerFirstTime(function (error, isFirstTime) {
+    Client.getStatus(function (error, status) {
         if (error) {
             window.location.href = '/error.html';
             return;
         }
 
-        if (!isFirstTime) {
+        if (status.activated) {
             window.location.href = '/';
             return;
         }
+
+        if (status.provider === 'caas') {
+            if (!search.setupToken) {
+                window.location.href = '/error.html?errorCode=2';
+                return;
+            }
+
+            if (!search.email) {
+                window.location.href = '/error.html?errorCode=3';
+                return;
+            }
+
+            if (search.customDomain === 'true') {
+                Wizard.dnsConfig = {
+                    provider: 'route53',
+                    accessKeyId: null,
+                    secretAccessKey: null
+                };
+            }
+
+            Wizard.setupToken = search.setupToken;
+        }
+
+        Wizard.email = search.email;
+        Wizard.requireEmail = !search.email;
+        Wizard.provider = status.provider;
 
         $location.path('/step1');
 

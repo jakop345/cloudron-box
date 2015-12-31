@@ -57,12 +57,15 @@ function activate(req, res, next) {
         if (error && error.reason === CloudronError.BAD_EMAIL) return next(new HttpError(400, 'Bad email'));
         if (error) return next(new HttpError(500, error));
 
+        // only in caas case do we have to notify the api server about activation
+        if (config.provider() !== 'caas') return next(new HttpSuccess(201, info));
+
         // Now let the api server know we got activated
-        superagent.post(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/setup/done').query({ setupToken:req.query.setupToken }).end(function (error, result) {
+        superagent.post(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/setup/done').query({ setupToken: req.query.setupToken }).end(function (error, result) {
             if (error && !error.response) return next(new HttpError(500, error));
             if (result.statusCode === 403) return next(new HttpError(403, 'Invalid token'));
             if (result.statusCode === 409) return next(new HttpError(409, 'Already setup'));
-            if (result.statusCode !== 201) return next(new HttpError(500, result.text ? result.text.message : 'Internal error'));
+            if (result.statusCode !== 201) return next(new HttpError(500, result.text || 'Internal error'));
 
             next(new HttpSuccess(201, info));
         });
@@ -72,13 +75,16 @@ function activate(req, res, next) {
 function setupTokenAuth(req, res, next) {
     assert.strictEqual(typeof req.query, 'object');
 
+    // skip setupToken auth for non caas case
+    if (config.provider() !== 'caas') return next();
+
     if (typeof req.query.setupToken !== 'string') return next(new HttpError(400, 'no setupToken provided'));
 
     superagent.get(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/setup/verify').query({ setupToken:req.query.setupToken }).end(function (error, result) {
         if (error && !error.response) return next(new HttpError(500, error));
         if (result.statusCode === 403) return next(new HttpError(403, 'Invalid token'));
         if (result.statusCode === 409) return next(new HttpError(409, 'Already setup'));
-        if (result.statusCode !== 200) return next(new HttpError(500, result.text ? result.text.message : 'Internal error'));
+        if (result.statusCode !== 200) return next(new HttpError(500, result.text || 'Internal error'));
 
         next();
     });

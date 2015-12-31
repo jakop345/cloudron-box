@@ -62,7 +62,7 @@ function getAllPaged(page, perPage, callback) {
         api(backupConfig.provider).getAllPaged(backupConfig, page, perPage, function (error, backups) {
             if (error) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, error));
 
-            return callback(null, backups); // [ { creationTime, boxVersion, restoreKey, dependsOn: [ ] } ] sorted by time (latest first
+            return callback(null, backups); // [ { creationTime, restoreKey } ] sorted by time (latest first
         });
     });
 }

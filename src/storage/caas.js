@@ -53,7 +53,6 @@ function getAllPaged(backupConfig, page, perPage, callback) {
         if (result.statusCode !== 200) return callback(new Error(result.text));
         if (!result.body || !util.isArray(result.body.backups)) return callback(new Error('Unexpected response'));
 
-        // [ { creationTime, boxVersion, restoreKey, dependsOn: [ ] } ] sorted by time (latest first)
         return callback(null, result.body.backups);
     });
 }
