@@ -21,7 +21,7 @@ readonly program_name=$1
 
 echo "${program_name}.log"
 echo "-------------------"
-journalctl --no-pager -u ${program_name} -n 100
+journalctl --all --no-pager -u ${program_name} -n 100
 echo
 echo
 echo "dmesg"
@@ -31,7 +31,7 @@ echo
 echo
 echo "docker"
 echo "------"
-journalctl --no-pager -u docker -n 50
+journalctl --all --no-pager -u docker -n 50
 echo
 echo
 
