@@ -13,6 +13,7 @@ exports = module.exports = {
 
 var assert = require('assert'),
     config = require('./config.js'),
+    debug = require('debug')('box:developer'),
     tokendb = require('./tokendb.js'),
     settings = require('./settings.js'),
     superagent = require('superagent'),
@@ -79,6 +80,10 @@ function getNonApprovedApps(callback) {
     var url = config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/apps';
     superagent.get(url).query({ token: config.token(), boxVersion: config.version() }).end(function (error, result) {
         if (error && !error.response) return callback(new DeveloperError(DeveloperError.EXTERNAL_ERROR, error));
+        if (result.statusCode === 401) {
+            debug('Failed to list apps in development. Appstore token invalid or missing. Returning empty list.', result.body);
+            return callback(null, []);
+        }
         if (result.statusCode !== 200) return callback(new DeveloperError(DeveloperError.EXTERNAL_ERROR, util.format('App listing failed. %s %j', result.status, result.body)));
 
         callback(null, result.body.apps || []);
