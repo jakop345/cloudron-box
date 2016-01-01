@@ -108,7 +108,7 @@ After=network.target docker.socket
 Requires=docker.socket
 
 [Service]
-ExecStart=/usr/bin/docker daemon -H fd:// -s btrfs -g /home/yellowtent/data/docker --log-driver=journald --exec-opt native.cgroupdriver=cgroupfs
+ExecStart=/usr/bin/docker daemon -H fd:// --log-driver=journald --exec-opt native.cgroupdriver=cgroupfs
 MountFlags=slave
 LimitNOFILE=1048576
 LimitNPROC=1048576
@@ -123,7 +123,6 @@ fallocate -l "8192m" "${USER_DATA_FILE}" # 8gb start
 mkfs.btrfs -L UserHome "${USER_DATA_FILE}"
 echo "${USER_DATA_FILE} ${USER_DATA_DIR} btrfs loop,nosuid 0 0" >> /etc/fstab
 mkdir -p "${USER_DATA_DIR}" && mount "${USER_DATA_FILE}"
-mkdir -p "${USER_DATA_DIR}/docker"
 
 # give docker sometime to start up and create iptables rules
 systemctl daemon-reload
