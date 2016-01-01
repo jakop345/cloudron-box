@@ -15,7 +15,8 @@ readonly app_count=$((${physical_memory} / 200)) # estimated app count
 readonly disk_size_gb=$(fdisk -l /dev/vda1 | grep 'Disk /dev/vda1' | awk '{ print $3 }')
 readonly disk_size=$((disk_size_gb * 1024))
 readonly backup_swap_size=1024
-readonly system_size=5120 # 5 gigs for system libs, installer, box code and tmp
+# readonly system_size=5120 # 5 gigs for system libs, installer, box code and tmp
+readonly system_size=10240 # 10 gigs for system libs, apps images, installer, box code and tmp
 readonly ext4_reserved=$((disk_size * 5 / 100)) # this can be changes using tune2fs -m percent /dev/vda1
 
 echo "Physical memory: ${physical_memory}"
