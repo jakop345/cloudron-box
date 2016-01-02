@@ -76,7 +76,7 @@ function retire(args, callback) {
 }
 
 function ensureVersion(args, callback) {
-    assert.strictEqual(typeof args, 'Object');
+    assert.strictEqual(typeof args, 'object');
     assert.strictEqual(typeof callback, 'function');
 
     if (args.sourceTarballUrl) return callback(null, args.sourceTarballUrl);
