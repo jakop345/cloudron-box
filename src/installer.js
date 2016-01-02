@@ -108,6 +108,8 @@ function provision(args, callback) {
     assert.strictEqual(typeof args, 'object');
     assert.strictEqual(typeof callback, 'function');
 
+    if (process.env.NODE_ENV === 'test') return callback(null);
+
     ensureVersion(args, function (error, result) {
         if (error) return callback(error);
 
@@ -116,8 +118,6 @@ function provision(args, callback) {
         pargs.push('--data', JSON.stringify(result.data));
 
         debug('provision: calling with args %j', pargs);
-
-        if (process.env.NODE_ENV === 'test') return callback(null);
 
         // sudo is required for update()
         spawn('provision', SUDO, pargs, callback);
