@@ -11,34 +11,27 @@ if [ $# -lt 5 ]; then
     exit 1
 fi
 
+# commandline arguments
 readonly fqdn="${1}"
 readonly aws_access_key_id="${2}"
 readonly aws_access_key_secret="${3}"
 readonly aws_backup_bucket="${4}"
 readonly aws_region="${5}"
 
+# environment specific urls
+readonly api_server_origin="https://api.dev.cloudron.io"
+readonly web_server_origin="https://dev.cloudron.io"
+readonly versions_url="https://s3.amazonaws.com/dev-cloudron-releases/versions.json"
 readonly installer_code_url="https://s3.amazonaws.com/cloudron-selfhosting/installer.tar"
+
+# runtime consts
 readonly installer_code_file="/root/installer.tar"
-readonly INSTALLER_TMP_DIR="/tmp/installer"
-
-readonly latest_box_url="https://s3.amazonaws.com/cloudron-selfhosting"
-readonly latest_version_url="https://s3.amazonaws.com/cloudron-selfhosting/latest.version"
-
-readonly box_code_file="${HOME}/cloudron.tar.gz"
-
+readonly installer_tmp_dir="/tmp/installer"
 readonly cert_folder="/tmp/certificates"
 
 echo "[INFO] ensure minimal dependencies ..."
 apt-get update
 apt-get install -y curl
-echo ""
-
-echo "[INFO] Cleanup old files ..."
-rm -rf "${installer_code_file}"
-rm -rf "${box_code_file}"
-
-echo "[INFO] Fetching installer code ..."
-curl "${installer_code_url}" -o "${installer_code_file}"
 echo ""
 
 echo "[INFO] Generating certificates ..."
@@ -83,36 +76,27 @@ tls_cert=$(sed ':a;N;$!ba;s/\n/\\n/g' "${cert_folder}/host.cert")
 tls_key=$(sed ':a;N;$!ba;s/\n/\\n/g' "${cert_folder}/host.key")
 echo ""
 
-echo "[INFO] Retrieving latest version ..."
-readonly version=$(curl "${latest_version_url}")
-echo "Using version ${version}"
+echo "[INFO] Fetching installer code ..."
+curl "${installer_code_url}" -o "${installer_code_file}"
 echo ""
 
-echo "[INFO] Fetching latest code ..."
-curl "${latest_box_url}/${version}.tar.gz" -o "${box_code_file}"
-echo ""
-
-echo "[INFO] Extracting installer code ..."
-rm -rf "${INSTALLER_TMP_DIR}" && mkdir -p "${INSTALLER_TMP_DIR}"
-tar xvf /root/installer.tar -C "${INSTALLER_TMP_DIR}"
-echo ""
-
-echo "[INFO] Running Ubuntu initializing script ..."
-/bin/bash "${INSTALLER_TMP_DIR}/images/initializeBaseUbuntuImage.sh" 0123456789abcdef selfhosting
+echo "[INFO] Extracting installer code to ${installer_tmp_dir} ..."
+rm -rf "${installer_tmp_dir}" && mkdir -p "${installer_tmp_dir}"
+tar xvf /root/installer.tar -C "${installer_tmp_dir}"
 echo ""
 
 echo "Creating initial provisioning config ..."
 cat > /root/provision.json <<EOF
 {
-    "sourceTarballUrl": "${latest_box_url}/${version}.tar.gz",
+    "sourceTarballUrl": "",
     "data": {
-        "apiServerOrigin": "https://api.dev.cloudron.io",
-        "webServerOrigin": "https://dev.cloudron.io",
+        "apiServerOrigin": "${api_server_origin}",
+        "webServerOrigin": "${web_server_origin}",
         "fqdn": "${fqdn}",
         "token": "",
         "isCustomDomain": true,
-        "boxVersionsUrl": "https://s3.amazonaws.com/dev-cloudron-releases/versions.json",
-        "version": "${version}",
+        "boxVersionsUrl": "${versions_url}",
+        "version": "",
         "tlsCert": "${tls_cert}",
         "tlsKey": "${tls_key}",
         "provider": "",
@@ -136,6 +120,10 @@ cat > /root/provision.json <<EOF
 }
 EOF
 
+echo "[INFO] Running Ubuntu initializing script ..."
+/bin/bash "${installer_tmp_dir}/images/initializeBaseUbuntuImage.sh" 0123456789abcdef selfhosting
+echo ""
+
 echo "[INFO] Reloading systemd daemon ..."
 systemctl daemon-reload
 echo ""
@@ -146,7 +134,8 @@ echo ""
 
 echo "[FINISHED] Now starting Cloudron init jobs ..."
 systemctl start box-setup
-# give the fs some time to do the volumes
+
+# TODO this is only for convenience we should probably just let the user do a restart
 sleep 5 && sync
 systemctl start cloudron-installer
 journalctl -u cloudron-installer.service -f
