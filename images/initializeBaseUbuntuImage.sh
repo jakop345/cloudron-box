@@ -128,7 +128,6 @@ mkdir -p "${USER_DATA_DIR}" && mount "${USER_DATA_FILE}"
 systemctl daemon-reload
 systemctl enable docker
 systemctl start docker
-sleep 10
 
 # Disable forwarding to metadata route from containers
 iptables -I FORWARD -d 169.254.169.254 -j DROP
