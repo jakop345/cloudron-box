@@ -8,17 +8,27 @@ readonly BACKUP_SWAP_FILE="/backup.swap" # used when doing app backups
 readonly USER_DATA_FILE="/root/user_data.img"
 readonly USER_DATA_DIR="/home/yellowtent/data"
 
+# detect device
+if [[ -b "/dev/vda1" ]]; then
+    disk_device="/dev/vda1"
+fi
+
+if [[ -b "/dev/xvda1" ]]; then
+    disk_device="/dev/xvda1"
+fi
+
 # all sizes are in mb
 readonly physical_memory=$(free -m | awk '/Mem:/ { print $2 }')
 readonly swap_size="${physical_memory}"
 readonly app_count=$((${physical_memory} / 200)) # estimated app count
-readonly disk_size_gb=$(fdisk -l /dev/vda1 | grep 'Disk /dev/vda1' | awk '{ print $3 }')
+readonly disk_size_gb=$(fdisk -l ${disk_device} | grep "Disk ${disk_device}" | awk '{ print $3 }')
 readonly disk_size=$((disk_size_gb * 1024))
 readonly backup_swap_size=1024
 # readonly system_size=5120 # 5 gigs for system libs, installer, box code and tmp
 readonly system_size=10240 # 10 gigs for system libs, apps images, installer, box code and tmp
 readonly ext4_reserved=$((disk_size * 5 / 100)) # this can be changes using tune2fs -m percent /dev/vda1
 
+echo "Disk device: ${disk_device}"
 echo "Physical memory: ${physical_memory}"
 echo "Estimated app count: ${app_count}"
 echo "Disk size: ${disk_size}"
