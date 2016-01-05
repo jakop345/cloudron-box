@@ -66,13 +66,6 @@ iptables -A INPUT -s 172.17.0.0/16 -j ACCEPT # required to accept any connection
 iptables -A INPUT -i lo -j ACCEPT
 iptables -A OUTPUT -o lo -j ACCEPT
 
-# The ec2 sysinfo backend needs access to that and runs with user yellowtent
-if [ ${SELFHOSTED} == 0 ]; then
-    # disable metadata access to non-root on caas
-    # modprobe ipt_owner
-    iptables -A OUTPUT -m owner ! --uid-owner root -d 169.254.169.254 -j DROP
-fi
-
 # prevent DoS
 # iptables -A INPUT -p tcp --dport 80 -m limit --limit 25/minute --limit-burst 100 -j ACCEPT
 
