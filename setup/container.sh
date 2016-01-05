@@ -20,7 +20,7 @@ systemctl daemon-reload
 systemctl enable cloudron.target
 
 ########## sudoers
-rm -f /etc/sudoers.d/*
+rm -f /etc/sudoers.d/sudoers
 cp "${container_files}/sudoers" /etc/sudoers.d/yellowtent
 
 ########## collectd
