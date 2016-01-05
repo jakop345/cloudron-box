@@ -298,22 +298,26 @@ function getConfig(callback) {
             settings.getDeveloperMode(function (error, developerMode) {
                 if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
-                callback(null, {
-                    apiServerOrigin: config.apiServerOrigin(),
-                    webServerOrigin: config.webServerOrigin(),
-                    isDev: config.isDev(),
-                    fqdn: config.fqdn(),
-                    ip: sysinfo.getIp(),
-                    version: config.version(),
-                    update: updateChecker.getUpdateInfo(),
-                    progress: progress.get(),
-                    isCustomDomain: config.isCustomDomain(),
-                    developerMode: developerMode,
-                    region: result.region,
-                    size: result.size,
-                    memory: os.totalmem(),
-                    provider: config.provider(),
-                    cloudronName: cloudronName
+                sysinfo.getIp(function (error, ip) {
+                    if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
+
+                    callback(null, {
+                        apiServerOrigin: config.apiServerOrigin(),
+                        webServerOrigin: config.webServerOrigin(),
+                        isDev: config.isDev(),
+                        fqdn: config.fqdn(),
+                        ip: ip,
+                        version: config.version(),
+                        update: updateChecker.getUpdateInfo(),
+                        progress: progress.get(),
+                        isCustomDomain: config.isCustomDomain(),
+                        developerMode: developerMode,
+                        region: result.region,
+                        size: result.size,
+                        memory: os.totalmem(),
+                        provider: config.provider(),
+                        cloudronName: cloudronName
+                    });
                 });
             });
         });
@@ -392,49 +396,53 @@ function addDnsRecords() {
     var dkimKey = readDkimPublicKeySync();
     if (!dkimKey) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, new Error('internal error failed to read dkim public key')));
 
-    var nakedDomainRecord = { subdomain: '', type: 'A', values: [ sysinfo.getIp() ] };
-    var webadminRecord = { subdomain: 'my', type: 'A', values: [ sysinfo.getIp() ] };
-    // t=s limits the domainkey to this domain and not it's subdomains
-    var dkimRecord = { subdomain: DKIM_SELECTOR + '._domainkey', type: 'TXT', values: [ '"v=DKIM1; t=s; p=' + dkimKey + '"' ] };
-    // DMARC requires special setup if report email id is in different domain
-    var dmarcRecord = { subdomain: '_dmarc', type: 'TXT', values: [ '"v=DMARC1; p=none; pct=100; rua=mailto:' + DMARC_REPORT_EMAIL + '; ruf=' + DMARC_REPORT_EMAIL + '"' ] };
+    sysinfo.getIp(function (error, ip) {
+        if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
 
-    var records = [ ];
-    if (config.isCustomDomain()) {
-        records.push(webadminRecord);
-        records.push(dkimRecord);
-    } else {
-        records.push(nakedDomainRecord);
-        records.push(webadminRecord);
-        records.push(dkimRecord);
-        records.push(dmarcRecord);
-    }
+        var nakedDomainRecord = { subdomain: '', type: 'A', values: [ ip ] };
+        var webadminRecord = { subdomain: 'my', type: 'A', values: [ ip ] };
+        // t=s limits the domainkey to this domain and not it's subdomains
+        var dkimRecord = { subdomain: DKIM_SELECTOR + '._domainkey', type: 'TXT', values: [ '"v=DKIM1; t=s; p=' + dkimKey + '"' ] };
+        // DMARC requires special setup if report email id is in different domain
+        var dmarcRecord = { subdomain: '_dmarc', type: 'TXT', values: [ '"v=DMARC1; p=none; pct=100; rua=mailto:' + DMARC_REPORT_EMAIL + '; ruf=' + DMARC_REPORT_EMAIL + '"' ] };
 
-    debug('addDnsRecords: %j', records);
+        var records = [ ];
+        if (config.isCustomDomain()) {
+            records.push(webadminRecord);
+            records.push(dkimRecord);
+        } else {
+            records.push(nakedDomainRecord);
+            records.push(webadminRecord);
+            records.push(dkimRecord);
+            records.push(dmarcRecord);
+        }
 
-    async.retry({ times: 10, interval: 20000 }, function (retryCallback) {
-        txtRecordsWithSpf(function (error, txtRecords) {
-            if (error) return retryCallback(error);
+        debug('addDnsRecords: %j', records);
 
-            if (txtRecords) records.push({ subdomain: '', type: 'TXT', values: txtRecords });
+        async.retry({ times: 10, interval: 20000 }, function (retryCallback) {
+            txtRecordsWithSpf(function (error, txtRecords) {
+                if (error) return retryCallback(error);
 
-            debug('addDnsRecords: will update %j', records);
+                if (txtRecords) records.push({ subdomain: '', type: 'TXT', values: txtRecords });
 
-            async.mapSeries(records, function (record, iteratorCallback) {
-                subdomains.update(record.subdomain, record.type, record.values, iteratorCallback);
-            }, function (error, changeIds) {
-                if (error) debug('addDnsRecords: failed to update : %s. will retry', error);
-                else debug('addDnsRecords: records %j added with changeIds %j', records, changeIds);
+                debug('addDnsRecords: will update %j', records);
 
-                retryCallback(error);
+                async.mapSeries(records, function (record, iteratorCallback) {
+                    subdomains.update(record.subdomain, record.type, record.values, iteratorCallback);
+                }, function (error, changeIds) {
+                    if (error) debug('addDnsRecords: failed to update : %s. will retry', error);
+                    else debug('addDnsRecords: records %j added with changeIds %j', records, changeIds);
+
+                    retryCallback(error);
+                });
             });
+        }, function (error) {
+            gUpdatingDns = false;
+
+            debug('addDnsRecords: done updating records with error:', error);
+
+            callback(error);
         });
-    }, function (error) {
-        gUpdatingDns = false;
-
-        debug('addDnsRecords: done updating records with error:', error);
-
-        callback(error);
     });
 }
 
