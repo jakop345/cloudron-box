@@ -182,7 +182,11 @@ echo "==== Install pwgen ===="
 apt-get -y install pwgen
 
 echo "==== Install collectd ==="
-apt-get install -y collectd collectd-utils
+if ! apt-get install -y collectd collectd-utils; then
+    # FQDNLookup is true in default debian config. The box code has a custom collectd.conf that fixes this
+    echo "Failed to install collectd. Presumably because of http://mailman.verplant.org/pipermail/collectd/2015-March/006491.html"
+    sed -e 's/^FQDNLookup true/FQDNLookup false/' -i /etc/collectd/collectd.conf
+fi
 update-rc.d -f collectd remove
 
 # this simply makes it explicit that we run logrotate via cron. it's already part of base ubuntu
