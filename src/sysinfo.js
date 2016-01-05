@@ -1,28 +1,62 @@
+/* jslint node:true */
+
 'use strict';
 
+var assert = require('assert'),
+    caas = require('./sysinfo/caas.js'),
+    config = require('./config.js'),
+    ec2 = require('./sysinfo/ec2.js'),
+    util = require('util');
+
 exports = module.exports = {
+    SysInfoError: SysInfoError,
+
     getIp: getIp
 };
 
-var os = require('os');
-
 var gCachedIp = null;
 
-function getIp() {
-    if (gCachedIp) return gCachedIp;
+function SysInfoError(reason, errorOrMessage) {
+    assert.strictEqual(typeof reason, 'string');
+    assert(errorOrMessage instanceof Error || typeof errorOrMessage === 'string' || typeof errorOrMessage === 'undefined');
 
-    var ifaces = os.networkInterfaces();
-    for (var dev in ifaces) {
-        if (dev.match(/^(en|eth|wlp).*/) === null) continue;
+    Error.call(this);
+    Error.captureStackTrace(this, this.constructor);
 
-        for (var i = 0; i < ifaces[dev].length; i++) {
-            if (ifaces[dev][i].family === 'IPv4') {
-                gCachedIp = ifaces[dev][i].address;
-                return gCachedIp;
-            }
-        }
+    this.name = this.constructor.name;
+    this.reason = reason;
+    if (typeof errorOrMessage === 'undefined') {
+        this.message = reason;
+    } else if (typeof errorOrMessage === 'string') {
+        this.message = errorOrMessage;
+    } else {
+        this.message = 'Internal error';
+        this.nestedError = errorOrMessage;
     }
+}
+util.inherits(SysInfoError, Error);
+SysInfoError.INTERNAL_ERROR = 'Internal Error';
 
-    return null;
+function getApi(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    var api = config.provider() === 'caas' ? caas : ec2;
+
+    var options = {};
+
+    callback(null, api, options);
 }
 
+function getIp(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    if (gCachedIp) return callback(null, gCachedIp);
+
+    getApi(function (error, ip) {
+        if (error) return callback(error);
+
+        gCachedIp = ip;
+
+        callback(null, gCachedIp);
+    });
+}
