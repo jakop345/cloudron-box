@@ -127,10 +127,13 @@ mkfs.btrfs -L UserHome "${USER_DATA_FILE}"
 echo "${USER_DATA_FILE} ${USER_DATA_DIR} btrfs loop,nosuid 0 0" >> /etc/fstab
 mkdir -p "${USER_DATA_DIR}" && mount "${USER_DATA_FILE}"
 
-# give docker sometime to start up and create iptables rules
 systemctl daemon-reload
 systemctl enable docker
 systemctl start docker
+
+# give docker sometime to start up and create iptables rules
+# those rules come in after docker has started, and we want to wait for them to be sure iptables-save has all of them
+sleep 10
 
 # Disable forwarding to metadata route from containers
 iptables -I FORWARD -d 169.254.169.254 -j DROP
