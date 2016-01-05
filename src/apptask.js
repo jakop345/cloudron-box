@@ -248,20 +248,24 @@ function registerSubdomain(app, callback) {
     assert.strictEqual(typeof app, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    // even though the bare domain is already registered in the appstore, we still
-    // need to register it so that we have a dnsRecordId to wait for it to complete
-    async.retry({ times: 200, interval: 5000 }, function (retryCallback) {
-        debugApp(app, 'Registering subdomain location [%s]', app.location);
+    sysinfo.getIp(function (error, ip) {
+        if (error) return callback(error);
 
-        subdomains.add(app.location, 'A', [ sysinfo.getIp() ], function (error, changeId) {
-            if (error && (error.reason === SubdomainError.STILL_BUSY || error.reason === SubdomainError.EXTERNAL_ERROR)) return retryCallback(error); // try again
+        // even though the bare domain is already registered in the appstore, we still
+        // need to register it so that we have a dnsRecordId to wait for it to complete
+        async.retry({ times: 200, interval: 5000 }, function (retryCallback) {
+            debugApp(app, 'Registering subdomain location [%s]', app.location);
 
-            retryCallback(null, error || changeId);
+            subdomains.add(app.location, 'A', [ ip ], function (error, changeId) {
+                if (error && (error.reason === SubdomainError.STILL_BUSY || error.reason === SubdomainError.EXTERNAL_ERROR)) return retryCallback(error); // try again
+
+                retryCallback(null, error || changeId);
+            });
+        }, function (error, result) {
+            if (error || result instanceof Error) return callback(error || result);
+
+            updateApp(app, { dnsRecordId: result }, callback);
         });
-    }, function (error, result) {
-        if (error || result instanceof Error) return callback(error || result);
-
-        updateApp(app, { dnsRecordId: result }, callback);
     });
 }
 
@@ -276,18 +280,22 @@ function unregisterSubdomain(app, location, callback) {
         return callback(null);
     }
 
-    async.retry({ times: 30, interval: 5000 }, function (retryCallback) {
-        debugApp(app, 'Unregistering subdomain: %s', location);
+    sysinfo.getIp(function (error, ip) {
+        if (error) return callback(error);
 
-        subdomains.remove(location, 'A', [ sysinfo.getIp() ], function (error) {
-            if (error && (error.reason === SubdomainError.STILL_BUSY || error.reason === SubdomainError.EXTERNAL_ERROR)) return retryCallback(error); // try again
+        async.retry({ times: 30, interval: 5000 }, function (retryCallback) {
+            debugApp(app, 'Unregistering subdomain: %s', location);
 
-            retryCallback(null, error);
+            subdomains.remove(location, 'A', [ ip ], function (error) {
+                if (error && (error.reason === SubdomainError.STILL_BUSY || error.reason === SubdomainError.EXTERNAL_ERROR)) return retryCallback(error); // try again
+
+                retryCallback(null, error);
+            });
+        }, function (error, result) {
+            if (error || result instanceof Error) return callback(error || result);
+
+            updateApp(app, { dnsRecordId: null }, callback);
         });
-    }, function (error, result) {
-        if (error || result instanceof Error) return callback(error || result);
-
-        updateApp(app, { dnsRecordId: null }, callback);
     });
 }
 
