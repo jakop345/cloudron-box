@@ -19,7 +19,7 @@ arg_version=""
 arg_web_server_origin=""
 arg_backup_config=""
 arg_dns_config=""
-arg_provider="caas"
+arg_provider=""
 
 args=$(getopt -o "" -l "data:,retire" -n "$0" -- "$@")
 eval set -- "${args}"
