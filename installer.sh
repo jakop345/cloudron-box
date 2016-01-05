@@ -7,7 +7,7 @@ echo "======== Cloudron Installer ========"
 echo ""
 
 if [ $# -lt 4 ]; then
-    echo "Usage: ./installer.sh <fqdn> <aws key id> <aws key secret> <bucket>"
+    echo "Usage: ./installer.sh <fqdn> <aws key id> <aws key secret> <bucket> <provider>"
     exit 1
 fi
 
@@ -16,6 +16,7 @@ readonly fqdn="${1}"
 readonly aws_access_key_id="${2}"
 readonly aws_access_key_secret="${3}"
 readonly aws_backup_bucket="${4}"
+readonly provider="${5}"
 
 # environment specific urls
 readonly api_server_origin="https://api.dev.cloudron.io"
@@ -98,7 +99,7 @@ cat > /root/provision.json <<EOF
         "version": "",
         "tlsCert": "${tls_cert}",
         "tlsKey": "${tls_key}",
-        "provider": "",
+        "provider": "${provider}",
         "backupConfig": {
             "provider": "s3",
             "accessKeyId": "${aws_access_key_id}",
