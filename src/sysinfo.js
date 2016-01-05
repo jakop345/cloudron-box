@@ -40,11 +40,9 @@ SysInfoError.INTERNAL_ERROR = 'Internal Error';
 function getApi(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    var api = config.provider() === 'caas' ? caas : ec2;
+    var api = config.provider() === '' ? caas : ec2;
 
-    var options = {};
-
-    callback(null, api, options);
+    callback(null, api);
 }
 
 function getIp(callback) {
@@ -52,11 +50,15 @@ function getIp(callback) {
 
     if (gCachedIp) return callback(null, gCachedIp);
 
-    getApi(function (error, ip) {
+    getApi(function (error, api) {
         if (error) return callback(error);
 
-        gCachedIp = ip;
+        api.getIp(function (error, ip) {
+            if (error) return callback(error);
 
-        callback(null, gCachedIp);
+            gCachedIp = ip;
+
+            callback(null, gCachedIp);
+        });
     });
 }
