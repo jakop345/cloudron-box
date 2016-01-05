@@ -76,16 +76,20 @@ function installAdminCertificate(callback) {
 
         if (tlsConfig.provider === 'caas') return callback();
 
-        waitForDns(config.adminFqdn(), sysinfo.getIp(), config.fqdn(), function (error) {
-            if (error) return callback(error); // this cannot happen because we retry forever
+        sysinfo.getIp(function (error, ip) {
+            if (error) return callback(error);
 
-            ensureCertificate(config.adminFqdn(), function (error, certFilePath, keyFilePath) {
-                if (error) { // currently, this can never happen
-                    debug('Error obtaining certificate. Proceed anyway', error);
-                    return callback();
-                }
+            waitForDns(config.adminFqdn(), ip, config.fqdn(), function (error) {
+                if (error) return callback(error); // this cannot happen because we retry forever
 
-                nginx.configureAdmin(certFilePath, keyFilePath, callback);
+                ensureCertificate(config.adminFqdn(), function (error, certFilePath, keyFilePath) {
+                    if (error) { // currently, this can never happen
+                        debug('Error obtaining certificate. Proceed anyway', error);
+                        return callback();
+                    }
+
+                    nginx.configureAdmin(certFilePath, keyFilePath, callback);
+                });
             });
         });
     });
