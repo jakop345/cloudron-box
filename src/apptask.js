@@ -66,17 +66,22 @@ var COLLECTD_CONFIG_EJS = fs.readFileSync(__dirname + '/collectd.config.ejs', { 
     CREATEAPPDIR_CMD = path.join(__dirname, 'scripts/createappdir.sh');
 
 function initialize(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
     database.initialize(callback);
 }
 
-function debugApp(app, args) {
-    assert(!app || typeof app === 'object');
+function debugApp(app) {
+    assert.strictEqual(typeof app, 'object');
 
     var prefix = app ? (app.location || '(bare)') : '(no app)';
     debug(prefix + ' ' + util.format.apply(util, Array.prototype.slice.call(arguments, 1)));
 }
 
 function reserveHttpPort(app, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
     var server = net.createServer();
     server.listen(0, function () {
         var port = server.address().port;
@@ -91,7 +96,10 @@ function reserveHttpPort(app, callback) {
     });
 }
 
-function configureNginx(app, callback) {    
+function configureNginx(app, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
     var vhost = config.appFqdn(app.location);
 
     certificates.ensureCertificate(vhost, function (error, certFilePath, keyFilePath) {
@@ -102,11 +110,16 @@ function configureNginx(app, callback) {
 }
 
 function unconfigureNginx(app, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
     // TODO: maybe revoke the cert
     nginx.unconfigureApp(app, callback);
 }
 
 function createContainer(app, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
     assert(!app.containerId); // otherwise, it will trigger volumeFrom
 
     debugApp(app, 'creating container');
@@ -119,6 +132,9 @@ function createContainer(app, callback) {
 }
 
 function deleteContainers(app, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
     debugApp(app, 'deleting containers');
 
     docker.deleteContainers(app.id, function (error) {
@@ -129,10 +145,16 @@ function deleteContainers(app, callback) {
 }
 
 function createVolume(app, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
     shell.sudo('createVolume', [ CREATEAPPDIR_CMD, app.id ], callback);
 }
 
 function deleteVolume(app, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
     shell.sudo('deleteVolume', [ RMAPPDIR_CMD, app.id ], callback);
 }
 
@@ -165,6 +187,9 @@ function removeOAuthProxyCredentials(app, callback) {
 }
 
 function addCollectdProfile(app, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
     var collectdConf = ejs.render(COLLECTD_CONFIG_EJS, { appId: app.id, containerId: app.containerId });
     fs.writeFile(path.join(paths.COLLECTD_APPCONFIG_DIR, app.id + '.conf'), collectdConf, function (error) {
         if (error) return callback(error);
@@ -173,6 +198,9 @@ function addCollectdProfile(app, callback) {
 }
 
 function removeCollectdProfile(app, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
     fs.unlink(path.join(paths.COLLECTD_APPCONFIG_DIR, app.id + '.conf'), function (error) {
         if (error && error.code !== 'ENOENT') debugApp(app, 'Error removing collectd profile', error);
         shell.sudo('removeCollectdProfile', [ RELOAD_COLLECTD_CMD ], callback);
@@ -180,6 +208,9 @@ function removeCollectdProfile(app, callback) {
 }
 
 function verifyManifest(app, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
     debugApp(app, 'Verifying manifest');
 
     var manifest = app.manifest;
@@ -193,6 +224,9 @@ function verifyManifest(app, callback) {
 }
 
 function downloadIcon(app, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
     debugApp(app, 'Downloading icon of %s@%s', app.appStoreId, app.manifest.version);
 
     var iconUrl = config.apiServerOrigin() + '/api/v1/apps/' + app.appStoreId + '/versions/' + app.manifest.version + '/icon';
@@ -211,6 +245,9 @@ function downloadIcon(app, callback) {
 }
 
 function registerSubdomain(app, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
     // even though the bare domain is already registered in the appstore, we still
     // need to register it so that we have a dnsRecordId to wait for it to complete
     async.retry({ times: 200, interval: 5000 }, function (retryCallback) {
@@ -229,6 +266,10 @@ function registerSubdomain(app, callback) {
 }
 
 function unregisterSubdomain(app, location, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof location, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
     // do not unregister bare domain because we show a error/cloudron info page there
     if (location === '') {
         debugApp(app, 'Skip unregister of empty subdomain');
@@ -251,6 +292,9 @@ function unregisterSubdomain(app, location, callback) {
 }
 
 function removeIcon(app, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
     fs.unlink(path.join(paths.APPICONS_DIR, app.id + '.png'), function (error) {
         if (error && error.code !== 'ENOENT') debugApp(app, 'cannot remove icon : %s', error);
         callback(null);
@@ -258,6 +302,9 @@ function removeIcon(app, callback) {
 }
 
 function waitForDnsPropagation(app, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
     if (!config.CLOUDRON) {
         debugApp(app, 'Skipping dns propagation check for development');
         return callback(null);
@@ -281,6 +328,10 @@ function waitForDnsPropagation(app, callback) {
 
 // updates the app object and the database
 function updateApp(app, values, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof values, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
     debugApp(app, 'updating app with values: %j', values);
 
     appdb.update(app.id, values, function (error) {
@@ -305,6 +356,9 @@ function updateApp(app, values, callback) {
 //   - setup the container (requires image, volumes, addons)
 //   - setup collectd (requires container id)
 function install(app, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
     async.series([
         verifyManifest.bind(null, app),
 
@@ -369,6 +423,9 @@ function install(app, callback) {
 }
 
 function backup(app, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
     async.series([
         updateApp.bind(null, app, { installationProgress: '10, Backing up' }),
         apps.backupApp.bind(null, app, app.manifest.addons),
@@ -389,6 +446,9 @@ function backup(app, callback) {
 
 // restore is also called for upgrades and infra updates. note that in those cases it is possible there is no backup
 function restore(app, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
     // we don't have a backup, same as re-install. this allows us to install from install failures (update failures always
     // have a backupId)
     if (!app.lastBackupId) {
@@ -464,6 +524,9 @@ function restore(app, callback) {
 
 // note that configure is called after an infra update as well
 function configure(app, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
     async.series([
         updateApp.bind(null, app, { installationProgress: '10, Cleaning up old install' }),
         unconfigureNginx.bind(null, app),
@@ -519,6 +582,9 @@ function configure(app, callback) {
 
 // nginx configuration is skipped because app.httpPort is expected to be available
 function update(app, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
     debugApp(app, 'Updating to %s', safe.query(app, 'manifest.version'));
 
     // app does not want these addons anymore
@@ -583,6 +649,9 @@ function update(app, callback) {
 }
 
 function uninstall(app, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
     debugApp(app, 'uninstalling');
 
     async.series([
@@ -622,6 +691,9 @@ function uninstall(app, callback) {
 }
 
 function runApp(app, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
     docker.startContainer(app.containerId, function (error) {
         if (error) return callback(error);
 
@@ -630,6 +702,9 @@ function runApp(app, callback) {
 }
 
 function stopApp(app, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
     docker.stopContainers(app.id, function (error) {
         if (error) return callback(error);
 
@@ -638,6 +713,9 @@ function stopApp(app, callback) {
 }
 
 function handleRunCommand(app, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
     if (app.runState === appdb.RSTATE_PENDING_STOP) {
         return stopApp(app, callback);
     }
@@ -653,6 +731,9 @@ function handleRunCommand(app, callback) {
 }
 
 function startTask(appId, callback) {
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
     // determine what to do
     appdb.get(appId, function (error, app) {
         if (error) return callback(error);
