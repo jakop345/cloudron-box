@@ -6,8 +6,8 @@ echo ""
 echo "======== Cloudron Installer ========"
 echo ""
 
-if [ $# -lt 5 ]; then
-    echo "Usage: ./installer.sh <fqdn> <aws key id> <aws key secret> <bucket> <region>"
+if [ $# -lt 4 ]; then
+    echo "Usage: ./installer.sh <fqdn> <aws key id> <aws key secret> <bucket>"
     exit 1
 fi
 
@@ -16,7 +16,6 @@ readonly fqdn="${1}"
 readonly aws_access_key_id="${2}"
 readonly aws_access_key_secret="${3}"
 readonly aws_backup_bucket="${4}"
-readonly aws_region="${5}"
 
 # environment specific urls
 readonly api_server_origin="https://api.dev.cloudron.io"
@@ -110,8 +109,7 @@ cat > /root/provision.json <<EOF
         "dnsConfig": {
             "provider": "route53",
             "accessKeyId": "${aws_access_key_id}",
-            "secretAccessKey": "${aws_access_key_secret}",
-            "region": "${aws_region}"
+            "secretAccessKey": "${aws_access_key_secret}"
         },
         "tlsConfig": {
             "provider": "letsencrypt-dev"
