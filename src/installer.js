@@ -79,7 +79,7 @@ function ensureVersion(args, callback) {
     assert.strictEqual(typeof args, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    if (args.sourceTarballUrl) return callback(null, args.sourceTarballUrl);
+    if (args.sourceTarballUrl) return callback(null, args);
 
     if (!args.data.boxVersionsUrl) return callback(new Error('No boxVersionsUrl specified'));
 
