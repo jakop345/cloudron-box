@@ -13,6 +13,7 @@ var expect = require('expect.js'),
     os = require('os'),
     request = require('superagent'),
     server = require('../server.js'),
+    installer = require('../installer.js'),
     _ = require('lodash');
 
 var EXTERNAL_SERVER_URL = 'https://localhost:4443';
@@ -143,6 +144,73 @@ describe('Server', function () {
             request.post(EXTERNAL_SERVER_URL + '/api/v1/installer/retire').send(data).end(function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result.statusCode).to.equal(202);
+                done();
+            });
+        });
+    });
+
+    describe('ensureVersion', function () {
+        before(function () {
+            process.env.NODE_ENV = undefined;
+        });
+
+        after(function () {
+            process.env.NODE_ENV = 'test';
+        });
+
+        it ('fails without data', function (done) {
+            installer._ensureVersion({}, function (error) {
+                expect(error).to.be.an(Error);
+                done();
+            });
+        });
+
+        it ('fails without boxVersionsUrl', function (done) {
+            installer._ensureVersion({ data: {}}, function (error) {
+                expect(error).to.be.an(Error);
+                done();
+            });
+        });
+
+        it ('succeeds with sourceTarballUrl', function (done) {
+            var data = {
+                sourceTarballUrl: 'sometarballurl',
+                data: {
+                    boxVersionsUrl: 'http://foobar/versions.json'
+                }
+            };
+
+            installer._ensureVersion(data, function (error, result) {
+                expect(error).to.equal(null);
+                expect(result).to.eql(data);
+                done();
+            });
+        });
+
+        it ('succeeds without sourceTarballUrl', function (done) {
+            var versions = {
+                '0.1.0': {
+                    sourceTarballUrl: 'sometarballurl1'
+                },
+                '0.2.0': {
+                    sourceTarballUrl: 'sometarballurl2'
+                }
+            };
+
+            var scope = nock('http://foobar')
+                .get('/versions.json')
+                .reply(200, JSON.stringify(versions), { 'Content-Type': 'application/json' });
+
+            var data = {
+                data: {
+                    boxVersionsUrl: 'http://foobar/versions.json'
+                }
+            };
+
+            installer._ensureVersion(data, function (error, result) {
+                expect(error).to.equal(null);
+                expect(result.sourceTarballUrl).to.equal(versions['0.2.0'].sourceTarballUrl);
+                expect(result.data.boxVersionsUrl).to.equal(data.data.boxVersionsUrl);
                 done();
             });
         });

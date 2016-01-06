@@ -15,7 +15,9 @@ exports = module.exports = {
     InstallerError: InstallerError,
 
     provision: provision,
-    retire: retire
+    retire: retire,
+
+    _ensureVersion: ensureVersion
 };
 
 var INSTALLER_CMD = path.join(__dirname, 'scripts/installer.sh'),
@@ -79,9 +81,9 @@ function ensureVersion(args, callback) {
     assert.strictEqual(typeof args, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    if (args.sourceTarballUrl) return callback(null, args);
+    if (!args.data || !args.data.boxVersionsUrl) return callback(new Error('No boxVersionsUrl specified'));
 
-    if (!args.data.boxVersionsUrl) return callback(new Error('No boxVersionsUrl specified'));
+    if (args.sourceTarballUrl) return callback(null, args);
 
     superagent.get(args.data.boxVersionsUrl).end(function (error, result) {
         if (error && !error.response) return callback(error);
