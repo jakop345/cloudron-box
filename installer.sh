@@ -29,6 +29,23 @@ readonly installer_code_file="/root/installer.tar"
 readonly installer_tmp_dir="/tmp/installer"
 readonly cert_folder="/tmp/certificates"
 
+# check for fqdn in /ets/hosts
+echo "[INFO] checking for hostname entry"
+readonly hostentry_found=$(grep "${fqdn}" /etc/hosts || true)
+if [[ -z $hostentry_found ]]; then
+    echo "[WARNING] No entry for ${fqdn} found in /etc/hosts"
+    echo "Adding an entry ..."
+
+    cat >> /etc/hosts <<EOF
+
+# The following line was added by the Cloudron installer script
+127.0.1.1 ${fqdn} ${fqdn}
+EOF
+else
+    echo "Valid hostname entry found in /etc/hosts"
+fi
+echo ""
+
 echo "[INFO] ensure minimal dependencies ..."
 apt-get update
 apt-get install -y curl
