@@ -40,9 +40,13 @@ SysInfoError.INTERNAL_ERROR = 'Internal Error';
 function getApi(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    var api = config.provider() === '' ? caas : ec2;
-
-    callback(null, api);
+    switch (config.provider()) {
+        case '': return callback(null, caas);   // current fallback for caas
+        case 'caas': return callback(null, caas);
+        case 'digitalocean': return callback(null, caas);
+        case 'ec2': return callback(null, ec2);
+        default: return callback(new Error('Unkown provider ' + config.provider()));
+    }
 }
 
 function getIp(callback) {
