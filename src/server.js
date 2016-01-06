@@ -37,7 +37,7 @@ function provisionDigitalOcean(callback) {
     superagent.get('http://169.254.169.254/metadata/v1.json').end(function (error, result) {
         if (error || result.statusCode !== 200) {
             console.error('Error getting metadata', error);
-            return;
+            return callback(new Error('Error getting metadata'));
         }
 
         var userData = JSON.parse(result.body.user_data);
@@ -51,7 +51,7 @@ function provisionLocal(callback) {
 
     if (!fs.existsSync(PROVISION_CONFIG_FILE)) {
         console.error('No provisioning data found at %s', PROVISION_CONFIG_FILE);
-        return;
+        return callback(new Error('No provisioning data found'));
     }
 
     var userData = require(PROVISION_CONFIG_FILE);
