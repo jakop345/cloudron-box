@@ -212,7 +212,7 @@ cd "${INSTALLER_SOURCE_DIR}" && npm install --production
 chown "${USER}:${USER}" -R "${INSTALLER_SOURCE_DIR}"
 
 echo "==== Install installer systemd script ===="
-provisionEnv="digitalocean"
+provisionEnv="PROVISION=digitalocean"
 if [ ${SELFHOSTED} == 1 ]; then
     provisionEnv="PROVISION=local"
 fi

@@ -184,7 +184,7 @@ function start(callback) {
             startUpdateServer,
             provisionLocal
         ];
-    } else {    // current fallback, should be 'digitalocean' eventually
+    } else {    // current fallback, should be 'digitalocean' eventually, see initializeBaseUbuntuImage.sh
         debug('Starting Installer in managed mode');
 
         actions = [
