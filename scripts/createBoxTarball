@@ -14,8 +14,8 @@ readonly GNU_GETOPT
 args=$(${GNU_GETOPT} -o "" -l "revision:,output:,publish,no-upload" -n "$0" -- "$@")
 eval set -- "${args}"
 
-readonly release_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../release" && pwd)"
-readonly box_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+readonly RELEASE_TOOL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../release" && pwd)"
+readonly SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 delete_bundle="yes"
 commitish="HEAD"
@@ -44,18 +44,18 @@ readonly TMPDIR=${TMPDIR:-/tmp} # why is this not set on mint?
 assertNotEmpty AWS_DEV_ACCESS_KEY
 assertNotEmpty AWS_DEV_SECRET_KEY
 
-if ! $(cd "${box_dir}" && git diff --exit-code >/dev/null); then
+if ! $(cd "${SOURCE_DIR}" && git diff --exit-code >/dev/null); then
     echo "You have local changes, stash or commit them to proceed"
     exit 1
 fi
 
-version=$(cd "${box_dir}" && git rev-parse "${commitish}")
+version=$(cd "${SOURCE_DIR}" && git rev-parse "${commitish}")
 bundle_dir=$(mktemp -d -t box 2>/dev/null || mktemp -d box-XXXXXXXXXX --tmpdir=$TMPDIR)
 [[ -z "$bundle_file" ]] && bundle_file="${TMPDIR}/box-${version}.tar.gz"
 
 chmod "o+rx,g+rx" "${bundle_dir}" # otherwise extracted tarball director won't be readable by others/group
 echo "Checking out code [${version}] into ${bundle_dir}"
-(cd "${box_dir}" && git archive --format=tar ${version} | (cd "${bundle_dir}" && tar xf -))
+(cd "${SOURCE_DIR}" && git archive --format=tar ${version} | (cd "${bundle_dir}" && tar xf -))
 
 if diff "${TMPDIR}/boxtarball.cache/npm-shrinkwrap.json.all" "${bundle_dir}/npm-shrinkwrap.json" >/dev/null 2>&1; then
     echo "Reusing dev modules from cache"
@@ -106,7 +106,7 @@ if [[ "${upload}" == "yes" ]]; then
 
     if [[ "${publish}" == "yes" ]]; then
         echo "Publishing to dev"
-        ${release_dir}/release create --env dev --code "${versions_file_url}"
+        ${RELEASE_TOOL_DIR}/release create --env dev --code "${versions_file_url}"
     fi
 fi
 
