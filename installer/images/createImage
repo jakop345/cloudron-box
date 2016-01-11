@@ -1,0 +1,195 @@
+#!/bin/bash
+
+set -eu -o pipefail
+
+assertNotEmpty() {
+    : "${!1:? "$1 is not set."}"
+}
+
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly INSTALLER_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
+export JSON="${INSTALLER_DIR}/node_modules/.bin/json"
+
+provider="digitalocean"
+installer_revision=$(git rev-parse HEAD)
+box_name=""
+server_id=""
+server_ip=""
+destroy_server="yes"
+deploy_env="dev"
+
+# Only GNU getopt supports long options. OS X comes bundled with the BSD getopt
+# brew install gnu-getopt to get the GNU getopt on OS X
+[[ $(uname -s) == "Darwin" ]] && GNU_GETOPT="/usr/local/opt/gnu-getopt/bin/getopt" || GNU_GETOPT="getopt"
+readonly GNU_GETOPT
+
+args=$(${GNU_GETOPT} -o "" -l "provider:,revision:,regions:,size:,name:,no-destroy,env:" -n "$0" -- "$@")
+eval set -- "${args}"
+
+while true; do
+    case "$1" in
+    --env) deploy_env="$2"; shift 2;;
+    --revision) installer_revision="$2"; shift 2;;
+    --provider) provider="$2"; shift 2;;
+    --name) box_name="$2"; destroy_server="no"; shift 2;;
+    --no-destroy) destroy_server="no"; shift 2;;
+    --) break;;
+    *) echo "Unknown option $1"; exit 1;;
+    esac
+done
+
+echo "Creating image using ${provider}"
+if [[ "${provider}" == "digitalocean" ]]; then
+    if [[ "${deploy_env}" == "staging" ]]; then
+        assertNotEmpty DIGITAL_OCEAN_TOKEN_STAGING
+        export DIGITAL_OCEAN_TOKEN="${DIGITAL_OCEAN_TOKEN_STAGING}"
+    elif [[ "${deploy_env}" == "dev" ]]; then
+        assertNotEmpty DIGITAL_OCEAN_TOKEN_DEV
+        export DIGITAL_OCEAN_TOKEN="${DIGITAL_OCEAN_TOKEN_DEV}"
+    elif [[ "${deploy_env}" == "prod" ]]; then
+        assertNotEmpty DIGITAL_OCEAN_TOKEN_PROD
+        export DIGITAL_OCEAN_TOKEN="${DIGITAL_OCEAN_TOKEN_PROD}"
+    else
+        echo "No such env ${deploy_env}."
+        exit 1
+    fi
+
+    vps="${SCRIPT_DIR}/digitalocean.sh"
+elif [[ "${provider}" == "vultr" ]]; then
+    export VULTR_TOKEN="${VULTR_TOKEN}"
+    vps="${SCRIPT_DIR}/vultr.js"
+else
+    echo "Unknown provider : ${provider}"
+    exit 1
+fi
+
+readonly ssh_keys="${HOME}/.ssh/id_rsa_caas_${deploy_env}"
+readonly scp202="scp -P 202 -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${ssh_keys}"
+readonly scp22="scp -o ConnectTimeout=10 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${ssh_keys}"
+
+readonly ssh202="ssh -p 202 -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${ssh_keys}"
+readonly ssh22="ssh -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${ssh_keys}"
+
+if [[ ! -f "${ssh_keys}" ]]; then
+    echo "caas ssh key is missing at ${ssh_keys} (pick it up from secrets repo)"
+    exit 1
+fi
+
+function get_pretty_revision() {
+    local git_rev="$1"
+    local sha1=$(git rev-parse --short "${git_rev}" 2>/dev/null)
+
+    echo "${sha1}"
+}
+
+now=$(date "+%Y-%m-%d-%H%M%S")
+pretty_revision=$(get_pretty_revision "${installer_revision}")
+
+if [[ -z "${box_name}" ]]; then
+    # if you change this, change the regexp is appstore/janitor.js
+    box_name="box-${deploy_env}-${pretty_revision}-${now}" # remove slashes
+
+    # create a new server if no name given
+    if ! caas_ssh_key_id=$($vps get_ssh_key_id "caas"); then
+        echo "Could not query caas ssh key"
+        exit 1
+    fi
+    echo "Detected caas ssh key id: ${caas_ssh_key_id}"
+
+    echo "Creating Server with name [${box_name}]"
+    if ! server_id=$($vps create ${caas_ssh_key_id} ${box_name}); then
+        echo "Failed to create server"
+        exit 1
+    fi
+    echo "Created server with id: ${server_id}"
+
+    # If we run scripts overenthusiastically without the wait, setup script randomly fails
+    echo -n "Waiting 120 seconds for server creation"
+    for i in $(seq 1 24); do
+        echo -n "."
+        sleep 5
+    done
+    echo ""
+else
+    if ! server_id=$($vps get_id "${box_name}"); then
+        echo "Could not determine id from name"
+        exit 1
+    fi
+    echo "Reusing server with id: ${server_id}"
+
+    $vps power_on "${server_id}"
+fi
+
+# Query until we get an IP
+while true; do
+    echo "Trying to get the server IP"
+    if server_ip=$($vps get_ip "${server_id}"); then
+        echo "Server IP : [${server_ip}]"
+        break
+    fi
+    echo "Timedout, trying again in 10 seconds"
+    sleep 10
+done
+
+while true; do
+    echo "Trying to copy init script to server"
+    if $scp22 "${SCRIPT_DIR}/initializeBaseUbuntuImage.sh" root@${server_ip}:.; then
+        break
+    fi
+    echo "Timedout, trying again in 30 seconds"
+    sleep 30
+done
+
+echo "Copying INFRA_VERSION"
+$scp22 "${SCRIPT_DIR}/../../box/setup/INFRA_VERSION" root@${server_ip}:.
+
+echo "Copying installer source"
+cd "${INSTALLER_DIR}"
+git archive --format=tar HEAD | $ssh22 "root@${server_ip}" "cat - > /root/installer.tar"
+
+echo "Executing init script"
+if ! $ssh22 "root@${server_ip}" "/bin/bash /root/initializeBaseUbuntuImage.sh ${installer_revision}"; then
+    echo "Init script failed"
+    exit 1
+fi
+
+echo "Copy over certs"
+cd "${SCRIPT_DIR}/../../secrets"
+blackbox_cat installer/server.crt.gpg | $ssh202 "root@${server_ip}" "cat - > /home/yellowtent/installer/src/certs/server.crt"
+blackbox_cat installer/server.key.gpg | $ssh202 "root@${server_ip}" "cat - > /home/yellowtent/installer/src/certs/server.key"
+blackbox_cat installer_ca/ca.crt.gpg  | $ssh202 "root@${server_ip}" "cat - > /home/yellowtent/installer/src/certs/ca.crt"
+
+echo "Shutting down server with id : ${server_id}"
+$ssh202 "root@${server_ip}" "shutdown -f now" || true # shutdown sometimes terminates ssh connection immediately making this command fail
+
+# wait 10 secs for actual shutdown
+echo "Waiting for 10 seconds for server to shutdown"
+sleep 30
+
+echo "Powering off server"
+if ! $vps power_off "${server_id}"; then
+    echo "Could not power off server"
+    exit 1
+fi
+
+snapshot_name="box-${deploy_env}-${pretty_revision}-${now}"
+echo "Snapshotting as ${snapshot_name}"
+if ! image_id=$($vps snapshot "${server_id}" "${snapshot_name}"); then
+    echo "Could not snapshot and get image id"
+    exit 1
+fi
+
+if [[ "${destroy_server}" == "yes" ]]; then
+    echo "Destroying server"
+    if ! $vps destroy "${server_id}"; then
+        echo "Could not destroy server"
+        exit 1
+    fi
+else
+    echo "Skipping server destroy"
+fi
+
+echo "Transferring image ${image_id} to other regions"
+$vps transfer_image_to_all_regions "${image_id}"
+
+echo "Done."

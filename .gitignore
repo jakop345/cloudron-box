@@ -3,7 +3,9 @@ coverage/
 docs/
 webadmin/dist/
 setup/splash/website/
+installer/src/certs/server.key
 
 # vim swap files
 *.swp
+
 
