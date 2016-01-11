@@ -7,7 +7,7 @@ echo "======== Cloudron Installer ========"
 echo ""
 
 if [ $# -lt 4 ]; then
-    echo "Usage: ./installer.sh <fqdn> <aws key id> <aws key secret> <bucket> <provider>"
+    echo "Usage: ./installer.sh <fqdn> <aws key id> <aws key secret> <bucket> <provider> <revision>"
     exit 1
 fi
 
@@ -17,16 +17,18 @@ readonly aws_access_key_id="${2}"
 readonly aws_access_key_secret="${3}"
 readonly aws_backup_bucket="${4}"
 readonly provider="${5}"
+readonly revision="${6}"
 
 # environment specific urls
 readonly api_server_origin="https://api.dev.cloudron.io"
 readonly web_server_origin="https://dev.cloudron.io"
+readonly release_bucket_url="https://s3.amazonaws.com/dev-cloudron-releases"
 readonly versions_url="https://s3.amazonaws.com/dev-cloudron-releases/versions.json"
-readonly installer_code_url="https://s3.amazonaws.com/cloudron-selfhosting/installer.tar"
+readonly installer_code_url="${release_bucket_url}/box-${revision}.tar.gz"
 
 # runtime consts
-readonly installer_code_file="/root/installer.tar"
-readonly installer_tmp_dir="/tmp/installer"
+readonly installer_code_file="/root/box.tar.gz"
+readonly installer_tmp_dir="/tmp/box"
 readonly cert_folder="/tmp/certificates"
 
 # check for fqdn in /ets/hosts
@@ -99,7 +101,7 @@ echo ""
 
 echo "[INFO] Extracting installer code to ${installer_tmp_dir} ..."
 rm -rf "${installer_tmp_dir}" && mkdir -p "${installer_tmp_dir}"
-tar xvf /root/installer.tar -C "${installer_tmp_dir}"
+tar xvf "${installer_code_file}" -C "${installer_tmp_dir}"
 echo ""
 
 echo "Creating initial provisioning config ..."
@@ -137,7 +139,7 @@ cat > /root/provision.json <<EOF
 EOF
 
 echo "[INFO] Running Ubuntu initializing script ..."
-/bin/bash "${installer_tmp_dir}/images/initializeBaseUbuntuImage.sh" 0123456789abcdef selfhosting
+/bin/bash "${installer_tmp_dir}/installer/images/initializeBaseUbuntuImage.sh" "${revision}" selfhosting
 echo ""
 
 echo "[INFO] Reloading systemd daemon ..."
