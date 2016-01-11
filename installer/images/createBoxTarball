@@ -14,8 +14,8 @@ readonly GNU_GETOPT
 args=$(${GNU_GETOPT} -o "" -l "revision:,output:,publish,no-upload" -n "$0" -- "$@")
 eval set -- "${args}"
 
-readonly script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-readonly box_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../box" && pwd)"
+readonly release_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../release" && pwd)"
+readonly box_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 delete_bundle="yes"
 commitish="HEAD"
@@ -106,7 +106,7 @@ if [[ "${upload}" == "yes" ]]; then
 
     if [[ "${publish}" == "yes" ]]; then
         echo "Publishing to dev"
-        ${script_dir}/release/release create --env dev --code "${versions_file_url}"
+        ${release_dir}/release create --env dev --code "${versions_file_url}"
     fi
 fi
 
