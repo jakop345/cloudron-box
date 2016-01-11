@@ -31,6 +31,12 @@ fi
 
 echo "=== Yellowtent base image preparation (installer revision - ${INSTALLER_REVISION}) ==="
 
+echo "=== Prepare installer source ==="
+rm -rf "${INSTALLER_SOURCE_DIR}" && mkdir -p "${INSTALLER_SOURCE_DIR}"
+# tar xvf /root/box.tar.gz -C /tmp/box && rm /root/box.tar.gz
+cp -rf /tmp/box/installer "${INSTALLER_SOURCE_DIR}"
+echo "${INSTALLER_REVISION}" > "${INSTALLER_SOURCE_DIR}/REVISION"
+
 export DEBIAN_FRONTEND=noninteractive
 
 echo "=== Upgrade ==="
@@ -193,11 +199,6 @@ update-rc.d -f collectd remove
 echo "==== Install logrotate ==="
 apt-get install -y cron logrotate
 systemctl enable cron
-
-echo "==== Extracting installer source ===="
-rm -rf "${INSTALLER_SOURCE_DIR}" && mkdir -p "${INSTALLER_SOURCE_DIR}"
-tar xvf /root/installer.tar -C "${INSTALLER_SOURCE_DIR}" && rm /root/installer.tar
-echo "${INSTALLER_REVISION}" > "${INSTALLER_SOURCE_DIR}/REVISION"
 
 echo "==== Install nodejs ===="
 # Cannot use anything above 4.1.1 - https://github.com/nodejs/node/issues/3803

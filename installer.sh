@@ -27,7 +27,7 @@ readonly versions_url="https://s3.amazonaws.com/dev-cloudron-releases/versions.j
 readonly installer_code_url="${release_bucket_url}/box-${revision}.tar.gz"
 
 # runtime consts
-readonly installer_code_file="/root/box.tar.gz"
+readonly installer_code_file="/tmp/box.tar.gz"
 readonly installer_tmp_dir="/tmp/box"
 readonly cert_folder="/tmp/certificates"
 
