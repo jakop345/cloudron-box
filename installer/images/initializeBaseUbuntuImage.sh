@@ -33,8 +33,9 @@ echo "=== Yellowtent base image preparation (installer revision - ${INSTALLER_RE
 
 echo "=== Prepare installer source ==="
 rm -rf "${INSTALLER_SOURCE_DIR}" && mkdir -p "${INSTALLER_SOURCE_DIR}"
+rm -rf /tmp/box && mkdir -p /tmp/box
 tar xvf /tmp/box.tar.gz -C /tmp/box && rm /tmp/box.tar.gz
-cp -rf /tmp/box/installer "${INSTALLER_SOURCE_DIR}"
+cp -rf /tmp/box/installer/* "${INSTALLER_SOURCE_DIR}"
 echo "${INSTALLER_REVISION}" > "${INSTALLER_SOURCE_DIR}/REVISION"
 
 export DEBIAN_FRONTEND=noninteractive
