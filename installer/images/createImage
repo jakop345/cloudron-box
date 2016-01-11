@@ -7,8 +7,8 @@ assertNotEmpty() {
 }
 
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly INSTALLER_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
-export JSON="${INSTALLER_DIR}/node_modules/.bin/json"
+readonly BOX_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"/.. && pwd)"
+export JSON="${BOX_DIR}/installer/node_modules/.bin/json"
 
 provider="digitalocean"
 installer_revision=$(git rev-parse HEAD)
@@ -141,11 +141,12 @@ while true; do
 done
 
 echo "Copying INFRA_VERSION"
-$scp22 "${SCRIPT_DIR}/../../box/setup/INFRA_VERSION" root@${server_ip}:.
+$scp22 "${SCRIPT_DIR}/../../setup/INFRA_VERSION" root@${server_ip}:.
 
-echo "Copying installer source"
-cd "${INSTALLER_DIR}"
-git archive --format=tar HEAD | $ssh22 "root@${server_ip}" "cat - > /root/installer.tar"
+echo "Copying box source"
+cd "${BOX_DIR}/.."
+git archive --format=tar HEAD | $ssh22 "root@${server_ip}" "cat - > /tmp/box.tar.gz"
+cd "${BOX_DIR}"
 
 echo "Executing init script"
 if ! $ssh22 "root@${server_ip}" "/bin/bash /root/initializeBaseUbuntuImage.sh ${installer_revision}"; then
@@ -154,7 +155,7 @@ if ! $ssh22 "root@${server_ip}" "/bin/bash /root/initializeBaseUbuntuImage.sh ${
 fi
 
 echo "Copy over certs"
-cd "${SCRIPT_DIR}/../../secrets"
+cd "${SCRIPT_DIR}/../../../secrets"
 blackbox_cat installer/server.crt.gpg | $ssh202 "root@${server_ip}" "cat - > /home/yellowtent/installer/src/certs/server.crt"
 blackbox_cat installer/server.key.gpg | $ssh202 "root@${server_ip}" "cat - > /home/yellowtent/installer/src/certs/server.key"
 blackbox_cat installer_ca/ca.crt.gpg  | $ssh202 "root@${server_ip}" "cat - > /home/yellowtent/installer/src/certs/ca.crt"
