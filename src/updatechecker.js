@@ -116,7 +116,8 @@ function getBoxUpdates(callback) {
             callback(null, {
                 version: nextVersion,
                 changelog: nextVersionInfo.changelog,
-                upgrade: nextVersionInfo.upgrade
+                upgrade: nextVersionInfo.upgrade,
+                sourceTarballUrl: nextVersionInfo.sourceTarballUrl
             });
         } else {
             debug('no new version available.');
