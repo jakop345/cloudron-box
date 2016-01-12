@@ -566,53 +566,44 @@ function doUpdate(boxUpdateInfo, callback) {
     backupBoxAndApps(function (error) {
         if (error) return updateError(error);
 
-        // fetch a signed sourceTarballUrl
-        superagent.get(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/sourcetarballurl')
-          .query({ token: config.token(), boxVersion: boxUpdateInfo.version })
-          .end(function (error, result) {
-            if (error && !error.response) return updateError(new Error('Network error fetching sourceTarballUrl: ' + error));
-            if (result.statusCode !== 200) return updateError(new Error('Error fetching sourceTarballUrl status: ' + result.statusCode));
-            if (!safe.query(result, 'body.url')) return updateError(new Error('Error fetching sourceTarballUrl response: ' + JSON.stringify(result.body)));
+        // NOTE: the args here are tied to the installer revision, box code and appstore provisioning logic
+        var args = {
+            sourceTarballUrl: boxUpdateInfo.sourceTarballUrl,
 
-            // NOTE: the args here are tied to the installer revision, box code and appstore provisioning logic
-            var args = {
-                sourceTarballUrl: result.body.url,
+            // this data is opaque to the installer
+            data: {
+                token: config.token(),
+                apiServerOrigin: config.apiServerOrigin(),
+                webServerOrigin: config.webServerOrigin(),
+                fqdn: config.fqdn(),
+                tlsCert: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), 'utf8'),
+                tlsKey: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'), 'utf8'),
+                isCustomDomain: config.isCustomDomain(),
 
-                // this data is opaque to the installer
-                data: {
+                appstore: {
+                    token: config.token(),
+                    apiServerOrigin: config.apiServerOrigin()
+                },
+                caas: {
                     token: config.token(),
                     apiServerOrigin: config.apiServerOrigin(),
-                    webServerOrigin: config.webServerOrigin(),
-                    fqdn: config.fqdn(),
-                    tlsCert: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.cert'), 'utf8'),
-                    tlsKey: fs.readFileSync(path.join(paths.NGINX_CERT_DIR, 'host.key'), 'utf8'),
-                    isCustomDomain: config.isCustomDomain(),
+                    webServerOrigin: config.webServerOrigin()
+                },
 
-                    appstore: {
-                        token: config.token(),
-                        apiServerOrigin: config.apiServerOrigin()
-                    },
-                    caas: {
-                        token: config.token(),
-                        apiServerOrigin: config.apiServerOrigin(),
-                        webServerOrigin: config.webServerOrigin()
-                    },
+                version: boxUpdateInfo.version,
+                boxVersionsUrl: config.get('boxVersionsUrl')
+            }
+        };
 
-                    version: boxUpdateInfo.version,
-                    boxVersionsUrl: config.get('boxVersionsUrl')
-                }
-            };
+        debug('updating box %j', args);
 
-            debug('updating box %j', args);
+        superagent.post(INSTALLER_UPDATE_URL).send(args).end(function (error, result) {
+            if (error && !error.response) return updateError(error);
+            if (result.statusCode !== 202) return updateError(new Error('Error initiating update: ' + JSON.stringify(result.body)));
 
-            superagent.post(INSTALLER_UPDATE_URL).send(args).end(function (error, result) {
-                if (error && !error.response) return updateError(error);
-                if (result.statusCode !== 202) return updateError(new Error('Error initiating update: ' + JSON.stringify(result.body)));
+            progress.set(progress.UPDATE, 10, 'Updating cloudron software');
 
-                progress.set(progress.UPDATE, 10, 'Updating cloudron software');
-
-                callback(null);
-            });
+            callback(null);
         });
 
         // Do not add any code here. The installer script will stop the box code any instant
