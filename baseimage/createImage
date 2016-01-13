@@ -54,7 +54,7 @@ if [[ "${provider}" == "digitalocean" ]]; then
         exit 1
     fi
 
-    vps="${SCRIPT_DIR}/digitalocean.sh"
+    vps="/bin/bash ${SCRIPT_DIR}/digitalocean.sh"
 else
     echo "Unknown provider : ${provider}"
     exit 1
