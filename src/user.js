@@ -17,7 +17,8 @@ exports = module.exports = {
     setPassword: setPassword,
     changePassword: changePassword,
     update: updateUser,
-    createOwner: createOwner
+    createOwner: createOwner,
+    getOwner: getOwner
 };
 
 var assert = require('assert'),
@@ -382,3 +383,11 @@ function createOwner(username, password, email, callback) {
     });
 }
 
+function getOwner(callback) {
+    userdb.getOwner(function (error, owner) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
+        if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+
+        return callback(null, owner);
+    });
+}

@@ -6,6 +6,7 @@ exports = module.exports = {
     getByEmail: getByEmail,
     getByAccessToken: getByAccessToken,
     getByResetToken: getByResetToken,
+    getOwner: getOwner,
     getAll: getAll,
     getAllAdmins: getAllAdmins,
     add: add,
@@ -49,6 +50,18 @@ function getByEmail(email, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     database.query('SELECT ' + USERS_FIELDS + ' FROM users WHERE email = ?', [ email ], function (error, result) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
+
+        callback(null, result[0]);
+    });
+}
+
+function getOwner(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    // the first created user it the admin
+    database.query('SELECT ' + USERS_FIELDS + ' FROM users WHERE admin=1 ORDER BY createdAt LIMIT 1', function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 

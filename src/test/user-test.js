@@ -106,6 +106,30 @@ describe('User', function () {
         });
     });
 
+    describe('getOwner', function() {
+        before(cleanupUsers);
+        after(cleanupUsers);
+
+        it('fails because there is no owner', function (done) {
+            user.getOwner(function (error) {
+                expect(error.reason).to.be(UserError.NOT_FOUND);
+                done();
+            });
+        });
+
+        it('succeeds', function (done) {
+            createUser(function (error) {
+                if (error) return done(error);
+
+                user.getOwner(function (error, owner) {
+                    expect(error).to.be(null);
+                    expect(owner.email).to.be(EMAIL);
+                    done();
+                });
+            });
+        });
+    });
+
     describe('verify', function () {
         before(createUser);
         after(cleanupUsers);
