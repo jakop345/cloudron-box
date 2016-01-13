@@ -176,7 +176,12 @@ app.filter('prettyDate', function () {
 });
 
 app.filter('markdown2html', function () {
-    var converter = new showdown.Converter();
+    var converter = new showdown.Converter({
+        extensions: ['targetblank'],
+        simplifiedAutoLink: true,
+        strikethrough: true,
+        tables: true
+    });
 
     return function (text) {
         return converter.makeHtml(text);
