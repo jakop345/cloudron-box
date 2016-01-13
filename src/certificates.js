@@ -17,6 +17,7 @@ var acme = require('./cert/acme.js'),
     safe = require('safetydance'),
     settings = require('./settings.js'),
     sysinfo = require('./sysinfo.js'),
+    user = require('./user.js'),
     util = require('util'),
     waitForDns = require('./waitfordns.js'),
     x509 = require('x509');
@@ -63,14 +64,16 @@ function getApi(callback) {
 
         var options = { };
         options.prod = tlsConfig.provider.match(/.*-prod/) !== null;
+
         // registering user with an email requires A or MX record (https://github.com/letsencrypt/boulder/issues/1197)
         // we cannot use admin@fqdn because the user might not have set it up.
-        // we cannot use owner email because we don't have it yet (the admin cert is fetched before activation)
-        // one option is to update the owner email when a second cert is requested (https://github.com/ietf-wg-acme/acme/issues/30)
+        // we simply update the account with the latest email we have each time when getting letsencrypt certs
+        // https://github.com/ietf-wg-acme/acme/issues/30
+        user.getOwner(function (error, owner) {
+            options.email = error ? 'admin@cloudron.io' : owner.email; // can error if not activated yet
 
-        options.email = 'admin@cloudron.io';
-
-        callback(null, api, options);
+            callback(null, api, options);
+        });
     });
 }
 
