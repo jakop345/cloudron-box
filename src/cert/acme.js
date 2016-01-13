@@ -138,11 +138,12 @@ Acme.prototype.updateContact = function (registrationUri, callback) {
         agreement: LE_AGREEMENT
     };
 
+    var that = this;
     this.sendSignedRequest(registrationUri, JSON.stringify(payload), function (error, result) {
         if (error) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, 'Network error when registering user: ' + error.message));
         if (result.statusCode !== 200) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, util.format('Failed to update contact. Expecting 200, got %s %s', result.statusCode, result.text)));
 
-        debug('updateContact: contact of user updated to %s', this.email);
+        debug('updateContact: contact of user updated to %s', that.email);
 
         callback();
     });
@@ -165,7 +166,7 @@ Acme.prototype.registerUser = function (callback) {
         if (result.statusCode === 409) return that.updateContact(result.headers.location, callback); // already exists
         if (result.statusCode !== 201) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, util.format('Failed to register user. Expecting 201, got %s %s', result.statusCode, result.text)));
 
-        debug('registerUser: registered user %s', this.email);
+        debug('registerUser: registered user %s', that.email);
 
         callback(null);
     });
