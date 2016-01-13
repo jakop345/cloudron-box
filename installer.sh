@@ -139,7 +139,7 @@ cat > /root/provision.json <<EOF
 EOF
 
 echo "[INFO] Running Ubuntu initializing script ..."
-/bin/bash "${installer_tmp_dir}/scripts/initializeBaseUbuntuImage.sh" "${revision}" selfhosting
+/bin/bash "${installer_tmp_dir}/baseimage/initializeBaseUbuntuImage.sh" "${revision}" selfhosting
 echo ""
 
 echo "[INFO] Reloading systemd daemon ..."
