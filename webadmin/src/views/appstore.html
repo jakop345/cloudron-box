@@ -44,6 +44,7 @@
 
                         <br/>
 
+                        <div class="hide">
                         <label class="control-label" for="appInstallCertificateInput" ng-show="config.isCustomDomain">Certificate (optional)</label>
                         <div class="has-error text-center" ng-show="appInstall.error.cert && config.isCustomDomain">{{ appInstall.error.cert }}</div>
                         <div class="form-group" ng-class="{ 'has-error': !appInstallForm.certificate.$dirty && appInstall.error.cert }" ng-show="config.isCustomDomain">
@@ -63,6 +64,7 @@
                                     <i class="fa fa-upload" onclick="getElementById('appInstallKeyFileInput').click();"></i>
                                 </span>
                             </div>
+                        </div>
                         </div>
 
                         <input class="ng-hide" type="submit" ng-disabled="appInstallForm.$invalid || busy"/>
