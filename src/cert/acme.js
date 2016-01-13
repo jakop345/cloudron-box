@@ -57,7 +57,7 @@ function Acme(options) {
 
     this.caOrigin = options.prod ? CA_PROD : CA_STAGING;
     this.accountKeyPem = null; // Buffer
-
+    this.email = options.email;
     this.chainPem = options.prod ? safe.fs.readFileSync(__dirname + '/lets-encrypt-x1-cross-signed.pem.txt') : new Buffer('');
 }
 
@@ -125,24 +125,23 @@ Acme.prototype.sendSignedRequest = function (url, payload, callback) {
     });
 };
 
-Acme.prototype.registerUser = function (email, callback) {
-    assert.strictEqual(typeof email, 'string');
+Acme.prototype.registerUser = function (callback) {
     assert.strictEqual(typeof callback, 'function');
 
     var payload = {
         resource: 'new-reg',
-        contact: [ 'mailto:' + email ],
+        contact: [ 'mailto:' + this.email ],
         agreement: LE_AGREEMENT
     };
 
-    debug('registerUser: %s', email);
+    debug('registerUser: %s', this.email);
 
     this.sendSignedRequest(this.caOrigin + '/acme/new-reg', JSON.stringify(payload), function (error, result) {
         if (error) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, 'Network error when registering user: ' + error.message));
         if (result.statusCode === 409) return callback(new AcmeError(AcmeError.ALREADY_EXISTS, result.body.detail));
         if (result.statusCode !== 201) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, util.format('Failed to register user. Expecting 201, got %s %s', result.statusCode, result.text)));
 
-        debug('registerUser: registered user %s', email);
+        debug('registerUser: registered user %s', this.email);
 
         callback();
     });
@@ -350,12 +349,6 @@ Acme.prototype.acmeFlow = function (domain, callback) {
     assert.strictEqual(typeof domain, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    // registering user with an email requires A or MX record (https://github.com/letsencrypt/boulder/issues/1197)
-    // we cannot use admin@fqdn because the user might not have set it up.
-    // we cannot use owner email because we don't have it yet (the admin cert is fetched before activation)
-    // one option is to update the owner email when a second cert is requested (https://github.com/ietf-wg-acme/acme/issues/30)
-    var email = 'admin@cloudron.io';
-
     if (!fs.existsSync(paths.ACME_ACCOUNT_KEY_FILE)) {
         debug('getCertificate: generating acme account key on first run');
         this.accountKeyPem = safe.child_process.execSync('openssl genrsa 4096');
@@ -368,7 +361,7 @@ Acme.prototype.acmeFlow = function (domain, callback) {
     }
 
     var that = this;
-    that.registerUser(email, function (error) {
+    this.registerUser(function (error) {
         if (error && error.reason !== AcmeError.ALREADY_EXISTS) return callback(error);
 
         that.registerDomain(domain, function (error, result) {

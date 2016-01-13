@@ -63,6 +63,12 @@ function getApi(callback) {
 
         var options = { };
         options.prod = tlsConfig.provider.match(/.*-prod/) !== null;
+        // registering user with an email requires A or MX record (https://github.com/letsencrypt/boulder/issues/1197)
+        // we cannot use admin@fqdn because the user might not have set it up.
+        // we cannot use owner email because we don't have it yet (the admin cert is fetched before activation)
+        // one option is to update the owner email when a second cert is requested (https://github.com/ietf-wg-acme/acme/issues/30)
+
+        options.email = 'admin@cloudron.io';
 
         callback(null, api, options);
     });
