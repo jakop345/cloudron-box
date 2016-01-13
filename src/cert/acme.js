@@ -125,6 +125,29 @@ Acme.prototype.sendSignedRequest = function (url, payload, callback) {
     });
 };
 
+Acme.prototype.updateContact = function (registrationUri, callback) {
+    assert.strictEqual(typeof registrationUri, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    debug('updateContact: %s %s', registrationUri, this.email);
+
+    // https://github.com/ietf-wg-acme/acme/issues/30
+    var payload = {
+        resource: 'reg',
+        contact: [ 'mailto:' + this.email ],
+        agreement: LE_AGREEMENT
+    };
+
+    this.sendSignedRequest(registrationUri, JSON.stringify(payload), function (error, result) {
+        if (error) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, 'Network error when registering user: ' + error.message));
+        if (result.statusCode !== 200) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, util.format('Failed to update contact. Expecting 200, got %s %s', result.statusCode, result.text)));
+
+        debug('updateContact: contact of user updated to %s', this.email);
+
+        callback();
+    });
+};
+
 Acme.prototype.registerUser = function (callback) {
     assert.strictEqual(typeof callback, 'function');
 
@@ -136,14 +159,15 @@ Acme.prototype.registerUser = function (callback) {
 
     debug('registerUser: %s', this.email);
 
+    var that = this;
     this.sendSignedRequest(this.caOrigin + '/acme/new-reg', JSON.stringify(payload), function (error, result) {
         if (error) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, 'Network error when registering user: ' + error.message));
-        if (result.statusCode === 409) return callback(new AcmeError(AcmeError.ALREADY_EXISTS, result.body.detail));
+        if (result.statusCode === 409) return that.updateContact(result.headers.location, callback); // already exists
         if (result.statusCode !== 201) return callback(new AcmeError(AcmeError.EXTERNAL_ERROR, util.format('Failed to register user. Expecting 201, got %s %s', result.statusCode, result.text)));
 
         debug('registerUser: registered user %s', this.email);
 
-        callback();
+        callback(null);
     });
 };
 
@@ -362,7 +386,7 @@ Acme.prototype.acmeFlow = function (domain, callback) {
 
     var that = this;
     this.registerUser(function (error) {
-        if (error && error.reason !== AcmeError.ALREADY_EXISTS) return callback(error);
+        if (error) return callback(error);
 
         that.registerDomain(domain, function (error, result) {
             if (error) return callback(error);
