@@ -67,7 +67,7 @@ function getAppUpdates(callback) {
 
                 var newManifest = latestAppVersions[apps[i].appStoreId].manifest;
                 var newVersion = newManifest.version;
-                if (newVersion !== oldVersion) {
+                if (semver.gt(newVersion, oldVersion)) {
                     appUpdateInfo[apps[i].id] = latestAppVersions[apps[i].appStoreId];
                     debug('Update available for %s (%s) from %s to %s', apps[i].location, apps[i].id, oldVersion, newVersion);
                 }
