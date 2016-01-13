@@ -280,7 +280,7 @@
 - Add DKIM keys for custom domains
 
 [0.1.3]
-- Storage backend 
+- Storage backend
 
 [0.1.4]
 - CaaS Backup configuration fix
@@ -359,3 +359,5 @@
 [0.5.7]
 - Move app images off the btrfs subvolume
 
+[0.6.0]
+- Consolidate code repositories
