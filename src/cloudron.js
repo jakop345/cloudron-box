@@ -245,6 +245,7 @@ function getStatus(callback) {
                 version: config.version(),
                 boxVersionsUrl: config.get('boxVersionsUrl'),
                 apiServerOrigin: config.apiServerOrigin(), // used by CaaS tool
+                provider: config.provider(),
                 cloudronName: cloudronName
             });
         });
