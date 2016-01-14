@@ -878,3 +878,22 @@ $graphs-success-alt:    lighten(#27CE65, 20%);
         margin-bottom: 20px;
     }
 }
+
+
+
+.ui-notification {
+    cursor: auto;
+
+    & a {
+        color: white;
+
+        &:hover {
+            color: white;
+            text-decoration: underline;
+        }
+    }
+
+    &:hover {
+        opacity: 1;
+    }
+}
