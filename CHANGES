@@ -361,3 +361,10 @@
 
 [0.6.0]
 - Consolidate code repositories
+
+[0.6.1]
+- Use no-reply as email from address for apps in naked domains
+- Update Lets Encrypt account with owner email when available
+- Fix email templates to indicate auto update
+- Add notification UI
+
