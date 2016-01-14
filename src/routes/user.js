@@ -16,22 +16,12 @@ exports = module.exports = {
 };
 
 var assert = require('assert'),
+    generatePassword = require('password-generator'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
     user = require('../user.js'),
     tokendb = require('../tokendb.js'),
     UserError = user.UserError;
-
-// http://stackoverflow.com/questions/1497481/javascript-password-generator#1497512
-function generatePassword() {
-    var length = 8,
-        charset = 'abcdefghijklnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
-        retVal = '';
-    for (var i = 0, n = charset.length; i < length; ++i) {
-        retVal += charset.charAt(Math.floor(Math.random() * n));
-    }
-    return retVal;
-}
 
 function profile(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
@@ -56,7 +46,7 @@ function createUser(req, res, next) {
     if (typeof req.body.email !== 'string') return next(new HttpError(400, 'email must be string'));
 
     var username = req.body.username;
-    var password = generatePassword();
+    var password = generatePassword(8, true /* memorable */);
     var email = req.body.email;
 
     user.create(username, password, email, false /* admin */, req.user /* creator */, function (error, user) {
