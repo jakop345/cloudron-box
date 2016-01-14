@@ -38,13 +38,13 @@
 
 <body class="setup" ng-app="Application" ng-controller="SetupController">
 
-    <center ng-show="wizard.provider === 'caas' && !setupToken">
+    <center ng-show="wizard.provider === 'caas' && !wizard.setupToken">
         <h1> <i class="fa fa-frown-o fa-fw text-danger"></i> No setup token provided. </h1>
         Please use the setup link for this cloudron.
     </center>
 
     <div class="main-container">
-        <div class="row" ng-show="initialized && !busy && !(wizard.provider === 'caas' && !setupToken)">
+        <div class="row" ng-show="initialized && !busy && !(wizard.provider === 'caas' && !wizard.setupToken)">
             <div class="col-md-8 col-md-offset-2">
                 <div class="card" style="max-width: none; padding: 20px;">
                     <form role="form" name="setup_form" novalidate>
