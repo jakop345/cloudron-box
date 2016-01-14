@@ -388,10 +388,12 @@ function setupSendMail(app, options, callback) {
     assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
+    var username = app.location ? app.location + '-app' : 'no-reply'; // use no-reply for bare domains
+
     var env = [
         'MAIL_SMTP_SERVER=mail',
         'MAIL_SMTP_PORT=2500', // if you change this, change the mail container
-        'MAIL_SMTP_USERNAME=' + (app.location || app.id) + '-app', // use app.id for bare domains
+        'MAIL_SMTP_USERNAME=' + username,
         'MAIL_DOMAIN=' + config.fqdn()
     ];
 
