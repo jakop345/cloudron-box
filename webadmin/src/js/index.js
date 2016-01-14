@@ -15,7 +15,8 @@ app.config(['NotificationProvider', function (NotificationProvider) {
     NotificationProvider.setOptions({
         delay: 10000,
         startTop: 60,
-        positionX: 'left'
+        positionX: 'left',
+        templateUrl: 'templates/notification.html'
     });
 }]);
 
