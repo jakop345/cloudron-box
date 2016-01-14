@@ -102,12 +102,21 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         Notification.error({ title: 'Cloudron Error', message: message });
     };
 
+    /*
+
+    Example usage with an action:
+
+     var actionScope = $scope.$new(true);
+     actionScope.action = '/#/certs';
+
+     Client.notify('title', 'message', true, actionScope);
+
+    */
     Client.prototype.notify = function (title, message, delay, actionScope) {
         var options = { title: title, message: message, delay: delay};
 
         if (actionScope) {
             if (typeof actionScope.action !== 'string') throw('an actionScope has to have an action url');
-
             options.scope = actionScope;
         }
 
