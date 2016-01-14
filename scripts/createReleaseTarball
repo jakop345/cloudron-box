@@ -49,6 +49,11 @@ if ! $(cd "${SOURCE_DIR}" && git diff --exit-code >/dev/null); then
     exit 1
 fi
 
+if [[ "$(node --version)" != "v4.1.1" ]]; then
+    echo "This script requires node 4.1.1"
+    exit 1
+fi
+
 version=$(cd "${SOURCE_DIR}" && git rev-parse "${commitish}")
 bundle_dir=$(mktemp -d -t box 2>/dev/null || mktemp -d box-XXXXXXXXXX --tmpdir=$TMPDIR)
 [[ -z "$bundle_file" ]] && bundle_file="${TMPDIR}/box-${version}.tar.gz"
