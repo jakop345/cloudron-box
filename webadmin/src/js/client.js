@@ -102,8 +102,16 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         Notification.error({ title: 'Cloudron Error', message: message });
     };
 
-    Client.prototype.notify = function (title, message, delay) {
-        Notification.error({ title: title, message: message, delay: delay });
+    Client.prototype.notify = function (title, message, delay, actionScope) {
+        var options = { title: title, message: message, delay: delay};
+
+        if (actionScope) {
+            if (typeof actionScope.action !== 'string') throw('an actionScope has to have an action url');
+
+            options.scope = actionScope;
+        }
+
+        Notification.error(options);
     };
 
     Client.prototype.setReady = function () {
