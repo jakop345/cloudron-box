@@ -764,7 +764,7 @@ function setupRedis(app, options, callback) {
     assert.strictEqual(typeof options, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    var redisPassword = generatePassword(64, false /* memorable */);
+    var redisPassword = generatePassword(64, false /* memorable */, /[\w\d_]/); // ensure no / in password for being sed friendly (and be uri friendly)
     var redisVarsFile = path.join(paths.ADDON_CONFIG_DIR, 'redis-' + app.id + '_vars.sh');
     var redisDataDir = path.join(paths.DATA_DIR, app.id + '/redis');
 
