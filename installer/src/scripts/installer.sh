@@ -40,7 +40,12 @@ while true; do
     echo "Failed to download source tarball, trying again"
     sleep 5
 done
-(cd "${box_src_tmp_dir}" && npm rebuild)
+while true; do
+    # for reasons unknown, the dtrace package will fail. but rebuilding second time will work
+    if cd "${box_src_tmp_dir}" && npm rebuild; then break; fi
+    echo "Failed to rebuild, trying again"
+    sleep 5
+done
 
 if [[ "${is_update}" == "yes" ]]; then
     echo "Setting up update splash screen"
