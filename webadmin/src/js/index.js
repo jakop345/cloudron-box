@@ -7,8 +7,17 @@
 var search = decodeURIComponent(window.location.search).slice(1).split('&').map(function (item) { return item.split('='); }).reduce(function (o, k) { o[k[0]] = k[1]; return o; }, {});
 if (search.accessToken) localStorage.token = search.accessToken;
 
+
 // create main application module
 var app = angular.module('Application', ['ngRoute', 'ngAnimate', 'ngSanitize', 'angular-md5', 'slick', 'ui-notification']);
+
+app.config(['NotificationProvider', function (NotificationProvider) {
+    NotificationProvider.setOptions({
+        delay: 10000,
+        startTop: 60,
+        positionX: 'left'
+    });
+}]);
 
 // setup all major application routes
 app.config(['$routeProvider', function ($routeProvider) {
