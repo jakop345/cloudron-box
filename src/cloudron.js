@@ -505,6 +505,9 @@ function update(boxUpdateInfo, callback) {
     var error = locker.lock(locker.OP_BOX_UPDATE);
     if (error) return callback(new CloudronError(CloudronError.BAD_STATE, error.message));
 
+    // ensure tools can 'wait' on progress
+    progress.set(progress.UPDATE, 0, 'Starting');
+
     // initiate the update/upgrade but do not wait for it
     if (boxUpdateInfo.upgrade) {
         debug('Starting upgrade');
@@ -629,8 +632,8 @@ function backup(callback) {
     var error = locker.lock(locker.OP_FULL_BACKUP);
     if (error) return callback(new CloudronError(CloudronError.BAD_STATE, error.message));
 
-    // clearing backup ensures tools can 'wait' on progress
-    progress.clear(progress.BACKUP);
+    // ensure tools can 'wait' on progress
+    progress.set(progress.BACKUP, 0, 'Starting');
 
     // start the backup operation in the background
     backupBoxAndApps(function (error) {
