@@ -3,7 +3,8 @@
 'use strict';
 
 exports = module.exports = {
-    backup: backup
+    backup: backup,
+    update: update
 };
 
 var cloudron = require('../cloudron.js'),
@@ -13,7 +14,7 @@ var cloudron = require('../cloudron.js'),
     HttpSuccess = require('connect-lastmile').HttpSuccess;
 
 function backup(req, res, next) {
-    debug('trigger backup');
+    debug('triggering backup');
 
     // note that cloudron.backup only waits for backup initiation and not for backup to complete
     // backup progress can be checked up ny polling the progress api call
@@ -24,3 +25,17 @@ function backup(req, res, next) {
         next(new HttpSuccess(202, {}));
     });
 }
+
+function update(req, res, next) {
+    debug('triggering update');
+
+    // this only initiates the update, progress can be checked via the progress route
+    cloudron.updateToLatest(function (error) {
+        if (error && error.reason === CloudronError.ALREADY_UPTODATE) return next(new HttpError(422, error.message));
+        if (error && error.reason === CloudronError.BAD_STATE) return next(new HttpError(409, error.message));
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(202, {}));
+    });
+}
+

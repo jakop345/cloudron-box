@@ -221,6 +221,7 @@ function initializeInternalExpressSync() {
 
     // internal routes
     router.post('/api/v1/backup', routes.internal.backup);
+    router.post('/api/v1/update', routes.internal.update);
 
     return httpServer;
 }

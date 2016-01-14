@@ -13,6 +13,7 @@ exports = module.exports = {
 
     sendHeartbeat: sendHeartbeat,
 
+    updateToLatest: updateToLatest,
     update: update,
     reboot: reboot,
     migrate: migrate,
@@ -111,6 +112,7 @@ CloudronError.BAD_EMAIL = 'Bad email';
 CloudronError.BAD_PASSWORD = 'Bad password';
 CloudronError.BAD_NAME = 'Bad name';
 CloudronError.BAD_STATE = 'Bad state';
+CloudronError.ALREADY_UPTODATE = 'No Update Available';
 CloudronError.NOT_FOUND = 'Not found';
 
 function initialize(callback) {
@@ -523,6 +525,16 @@ function update(boxUpdateInfo, callback) {
     }
 
     callback(null);
+}
+
+
+function updateToLatest(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    var boxUpdateInfo = updateChecker.getUpdateInfo().box;
+    if (!boxUpdateInfo) return callback(new CloudronError(CloudronError.ALREADY_UPTODATE, 'No update available'));
+
+    update(boxUpdateInfo, callback);
 }
 
 function doUpgrade(boxUpdateInfo, callback) {

@@ -23,8 +23,7 @@ var assert = require('assert'),
     debug = require('debug')('box:routes/cloudron'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
-    superagent = require('superagent'),
-    updateChecker = require('../updatechecker.js');
+    superagent = require('superagent');
 
 /**
  * Creating an admin user and activate the cloudron.
@@ -118,11 +117,9 @@ function getConfig(req, res, next) {
 }
 
 function update(req, res, next) {
-    var boxUpdateInfo = updateChecker.getUpdateInfo().box;
-    if (!boxUpdateInfo) return next(new HttpError(422, 'No update available'));
-
     // this only initiates the update, progress can be checked via the progress route
-    cloudron.update(boxUpdateInfo, function (error) {
+    cloudron.updateToLatest(function (error) {
+        if (error && error.reason === CloudronError.ALREADY_UPTODATE) return next(new HttpError(422, error.message));
         if (error && error.reason === CloudronError.BAD_STATE) return next(new HttpError(409, error.message));
         if (error) return next(new HttpError(500, error));
 
