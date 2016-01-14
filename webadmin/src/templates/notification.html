@@ -1,0 +1,7 @@
+<div class="ui-notification">
+    <h3 ng-show="title" ng-bind-html="title"></h3>
+    <div class="message">
+    	<a href="{{action}}" ng-show="action" ng-bind-html="message"></a>
+    	<span ng-hide="action" ng-bind-html="message"></span>
+    </div>
+</div>
