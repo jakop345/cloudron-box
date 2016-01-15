@@ -159,7 +159,7 @@ function createSubcontainer(app, name, cmd, options, callback) {
     var memoryLimit = manifest.memoryLimit || (developmentMode ? 0 : 1024 * 1024 * 200); // 200mb by default
     // for subcontainers, this should ideally be false. but docker does not allow network sharing if the app container is not running
     // this means cloudron exec does not work
-    var isolatedNetworkNs = true;
+    var isolatedNetworkNs = isAppContainer || !developmentMode;
 
     addons.getEnvironment(app, function (error, addonEnv) {
         if (error) return callback(new Error('Error getting addon environment : ' + error));
@@ -171,7 +171,7 @@ function createSubcontainer(app, name, cmd, options, callback) {
             Hostname: isolatedNetworkNs ? (semver.gte(targetBoxVersion(app.manifest), '0.0.77') ? app.location : config.appFqdn(app.location)) : null,
             Tty: isAppContainer,
             Image: app.manifest.dockerImage,
-            Cmd: cmd,
+            Cmd: (isAppContainer && developmentMode) ? 'echo Development mode enabled. Use cloudron exec && sleep infinity'.split(' ') : cmd,
             Env: stdEnv.concat(addonEnv).concat(portEnv),
             ExposedPorts: isAppContainer ? exposedPorts : { },
             Volumes: { // see also ReadonlyRootfs
