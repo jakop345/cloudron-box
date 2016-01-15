@@ -13,6 +13,7 @@ exports = module.exports = {
     get: getUser,
     getByResetToken: getByResetToken,
     changeAdmin: changeAdmin,
+    getAllAdmins: getAllAdmins,
     resetPasswordByIdentifier: resetPasswordByIdentifier,
     setPassword: setPassword,
     changePassword: changePassword,
@@ -288,6 +289,15 @@ function changeAdmin(username, admin, callback) {
                 mailer.adminChanged(user);
             });
         });
+    });
+}
+
+function getAllAdmins(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    userdb.getAllAdmins(function (error, admins) {
+        if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+        callback(null, admins);
     });
 }
 
