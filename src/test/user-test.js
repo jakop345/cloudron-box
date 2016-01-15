@@ -325,6 +325,45 @@ describe('User', function () {
         });
     });
 
+    describe('get admins', function () {
+        before(createUser);
+        after(cleanupUsers);
+
+        it('succeeds for one admins', function (done) {
+            user.getAllAdmins(function (error, admins) {
+                expect(error).to.eql(null);
+                expect(admins.length).to.equal(1);
+                expect(admins[0].username).to.equal(USERNAME);
+                done();
+            });
+        });
+
+        it('succeeds for two admins', function (done) {
+            var user1 = {
+                username: 'seconduser',
+                password: 'foobar',
+                email: 'some@thi.ng'
+            };
+
+            user.create(user1.username, user1.password, user1.email, false, { username: USERNAME, email: EMAIL } /* invitor */, function (error, result) {
+                expect(error).to.eql(null);
+                expect(result).to.be.ok();
+
+                user.changeAdmin(user1.username, true, function (error) {
+                    expect(error).to.eql(null);
+
+                    user.getAllAdmins(function (error, admins) {
+                        expect(error).to.eql(null);
+                        expect(admins.length).to.equal(2);
+                        expect(admins[0].username).to.equal(USERNAME);
+                        expect(admins[1].username).to.equal(user1.username);
+                        done();
+                    });
+                });
+            });
+        });
+    });
+
     describe('password change', function () {
         before(createUser);
         after(cleanupUsers);
