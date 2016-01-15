@@ -35,7 +35,7 @@ var assert = require('assert'),
     path = require('path'),
     safe = require('safetydance'),
     smtpTransport = require('nodemailer-smtp-transport'),
-    userdb = require('./userdb.js'),
+    users = require('./user.js'),
     util = require('util'),
     _ = require('underscore');
 
@@ -184,7 +184,7 @@ function render(templateFile, params) {
 }
 
 function getAdminEmails(callback) {
-    userdb.getAllAdmins(function (error, admins) {
+    users.getAllAdmins(function (error, admins) {
         if (error) return callback(error);
 
         var adminEmails = [ ];
