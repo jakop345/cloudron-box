@@ -130,6 +130,7 @@ function createSubcontainer(app, name, cmd, options, callback) {
         isAppContainer = !cmd;
 
     var manifest = app.manifest;
+    var developmentMode = !!manifest.developmentMode;
     var exposedPorts = {}, dockerPortBindings = { };
     var stdEnv = [
         'CLOUDRON=1',
@@ -155,7 +156,7 @@ function createSubcontainer(app, name, cmd, options, callback) {
         dockerPortBindings[containerPort + '/tcp'] = [ { HostIp: '0.0.0.0', HostPort: hostPort + '' } ];
     }
 
-    var memoryLimit = manifest.memoryLimit || 1024 * 1024 * 200; // 200mb by default
+    var memoryLimit = manifest.memoryLimit || (developmentMode ? 0 : 1024 * 1024 * 200); // 200mb by default
     // for subcontainers, this should ideally be false. but docker does not allow network sharing if the app container is not running
     // this means cloudron exec does not work
     var isolatedNetworkNs = true;
@@ -188,7 +189,7 @@ function createSubcontainer(app, name, cmd, options, callback) {
                 MemorySwap: memoryLimit, // Memory + Swap
                 PortBindings: isAppContainer ? dockerPortBindings : { },
                 PublishAllPorts: false,
-                ReadonlyRootfs: semver.gte(targetBoxVersion(app.manifest), '0.0.66'), // see also Volumes in startContainer
+                ReadonlyRootfs: !developmentMode, // see also Volumes in startContainer
                 RestartPolicy: {
                     "Name": isAppContainer ? "always" : "no",
                     "MaximumRetryCount": 0
@@ -201,9 +202,6 @@ function createSubcontainer(app, name, cmd, options, callback) {
             }
         };
         containerOptions = _.extend(containerOptions, options);
-
-        // older versions wanted a writable /var/log
-        if (semver.lte(targetBoxVersion(app.manifest), '0.0.71')) containerOptions.Volumes['/var/log'] = {};
 
         debugApp(app, 'Creating container for %s with options %j', app.manifest.dockerImage, containerOptions);
 
