@@ -648,42 +648,31 @@ function exec(appId, options, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-       var createOptions = {
+        var container = docker.connection.getContainer(app.containerId);
+
+       var execOptions = {
             AttachStdin: true,
             AttachStdout: true,
             AttachStderr: true,
-            OpenStdin: true,
-            StdinOnce: false,
-            Tty: true
+            Tty: true,
+            Cmd: cmd
         };
 
-        docker.createSubcontainer(app, app.id + '-exec-' + Date.now(), cmd, createOptions, function (error, container) {
+        container.exec(execOptions, function (error, exec) {
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
-
-            container.attach({ stream: true, stdin: true, stdout: true, stderr: true }, function (error, stream) {
+            var startOptions = {
+                Detach: false,
+                Tty: true,
+                stdin: true // this is a dockerode option that enabled openStdin in the modem
+            };
+            exec.start(startOptions, function(error, stream) {
                 if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-                docker.startContainer(container.id, function (error) {
-                    if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+                if (options.rows && options.columns) {
+                    exec.resize({ h: options.rows, w: options.columns }, function (error) { if (error) debug('Error resizing console', error); });
+                }
 
-                    if (options.rows && options.columns) {
-                        container.resize({ h: options.rows, w: options.columns }, NOOP_CALLBACK);
-                    }
-
-                    var deleteContainer = once(docker.deleteContainer.bind(null, container.id, NOOP_CALLBACK));
-
-                    container.wait(function (error) {
-                        if (error) debug('Error waiting on container', error);
-
-                        debug('exec: container finished', container.id);
-
-                        deleteContainer();
-                    });
-
-                    stream.close = deleteContainer;
-
-                    callback(null, stream);
-                });
+                return callback(null, stream);
             });
         });
     });
