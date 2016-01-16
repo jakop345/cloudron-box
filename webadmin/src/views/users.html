@@ -8,6 +8,7 @@
             <div class="modal-body">
                 <form name="useradd_form" class="form-signin" role="form" novalidate ng-submit="doAdd()" autocomplete="off">
                     <fieldset>
+                        <input type="password" style="display: none;">
                         <div class="form-group" ng-class="{ 'has-error': (useradd_form.username.$dirty && useradd_form.username.$invalid) || (!useradd_form.username.$dirty && useradd.error.username) }">
                             <label class="control-label" for="inputUserAddUsername">Username</label>
                             <div class="control-label" ng-show="(!useradd_form.username.$dirty && useradd.error.username) || (useradd_form.username.$dirty && useradd_form.username.$invalid) || (!useradd_form.username.$dirty && useradd.error.username)">
@@ -47,8 +48,9 @@
                 <h4 class="modal-title" id="userRemoveModalLabel">Delete user {{ userremove.userInfo.username }}</h4>
             </div>
             <div class="modal-body">
-                <fieldset>
-                    <form name="userremove_form" class="form-user-delete" role="form" ng-submit="doUserRemove()" name="userDeleteConfirm" autocomplete="off">
+                <form name="userremove_form" class="form-user-delete" role="form" ng-submit="doUserRemove()" name="userDeleteConfirm" autocomplete="off">
+                    <fieldset>
+                        <input type="password" style="display: none;">
                         <div class="form-group" ng-class="{ 'has-error': (userremove_form.username.$dirty && userremove_form.username.$invalid) || (!userremove_form.username.$dirty && userremove.error.username) }">
                             <label class="control-label" for="inputUserRemoveUsername">Just to be sure you really want to delete this user, please type the user's name</label>
                             <div class="control-label" ng-show="(!userremove_form.username.$dirty && userremove.error.username) || (userremove_form.username.$dirty && userremove_form.username.$invalid)">
@@ -68,8 +70,8 @@
                             <input type="password" class="form-control" ng-model="userremove.password" id="inputUserRemovePassword" name="password" placeholder="Password" ng-maxlength="512" ng-minlength="5" required>
                         </div>
                         <input class="hide" type="submit"/>
-                    </form>
-                </fieldset>
+                    </fieldset>
+                </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
