@@ -368,3 +368,7 @@
 - Fix email templates to indicate auto update
 - Add notification UI
 
+[0.6.2]
+- Fix `cloudron exec` container to have same namespaces as app
+- Add developmentMode to manifest
+
