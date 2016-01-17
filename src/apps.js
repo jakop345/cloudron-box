@@ -828,9 +828,9 @@ function backup(appId, callback) {
     assert.strictEqual(typeof appId, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    get(appId, function (error, app) {
-        if (error && error.reason === AppsError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND));
+    appdb.exists(appId, function (error, exists) {
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+        if (!exists) return callback(new AppsError(AppsError.NOT_FOUND));
 
         appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_BACKUP, function (error) {
             if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.BAD_STATE)); // might be a bad guess
