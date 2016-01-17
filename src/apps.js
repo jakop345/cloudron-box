@@ -56,7 +56,6 @@ var addons = require('./addons.js'),
     docker = require('./docker.js'),
     fs = require('fs'),
     manifestFormat = require('cloudron-manifestformat'),
-    once = require('once'),
     path = require('path'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
@@ -72,8 +71,6 @@ var addons = require('./addons.js'),
 var BACKUP_APP_CMD = path.join(__dirname, 'scripts/backupapp.sh'),
     RESTORE_APP_CMD = path.join(__dirname, 'scripts/restoreapp.sh'),
     BACKUP_SWAP_CMD = path.join(__dirname, 'scripts/backupswap.sh');
-
-var NOOP_CALLBACK = function (error) { if (error) debug(error); };
 
 function debugApp(app, args) {
     assert(!app || typeof app === 'object');
