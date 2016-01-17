@@ -846,13 +846,14 @@ function backup(appId, callback) {
     });
 }
 
-function restoreApp(app, addonsToRestore, callback) {
+function restoreApp(app, addonsToRestore, backupId, callback) {
     assert.strictEqual(typeof app, 'object');
     assert.strictEqual(typeof addonsToRestore, 'object');
+    assert.strictEqual(typeof backupId, 'string');
     assert.strictEqual(typeof callback, 'function');
     assert(app.lastBackupId);
 
-    backups.getRestoreUrl(app.lastBackupId, function (error, result) {
+    backups.getRestoreUrl(backupId, function (error, result) {
         if (error && error.reason == BackupsError.EXTERNAL_ERROR) return callback(new AppsError(AppsError.EXTERNAL_ERROR, error.message));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 

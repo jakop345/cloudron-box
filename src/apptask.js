@@ -464,6 +464,8 @@ function restore(app, callback) {
         return install(app, callback);
     }
 
+    var backupId = app.lastBackupId;
+
     async.series([
         updateApp.bind(null, app, { installationProgress: '10, Cleaning up old install' }),
         unconfigureNginx.bind(null, app),
@@ -499,7 +501,7 @@ function restore(app, callback) {
         createVolume.bind(null, app),
 
         updateApp.bind(null, app, { installationProgress: '70, Download backup and restore addons' }),
-        apps.restoreApp.bind(null, app, app.manifest.addons),
+        apps.restoreApp.bind(null, app, app.manifest.addons, backupId),
 
         updateApp.bind(null, app, { installationProgress: '75, Creating container' }),
         createContainer.bind(null, app),
