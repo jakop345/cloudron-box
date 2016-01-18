@@ -8,6 +8,7 @@
 
 var database = require('../database.js'),
     expect = require('expect.js'),
+    mailer = require('../mailer.js'),
     user = require('../user.js'),
     userdb = require('../userdb.js'),
     UserError = user.UserError;
@@ -38,12 +39,26 @@ function setup(done) {
     // ensure data/config/mount paths
     database.initialize(function (error) {
         expect(error).to.be(null);
+
+        mailer._clearMailQueue();
+
         done();
     });
 }
 
 function cleanup(done) {
+    mailer._clearMailQueue();
+
     database._clear(done);
+}
+
+function checkMails(number, done) {
+    // mails are enqueued async
+    setTimeout(function () {
+        expect(mailer._getMailQueue().length).to.equal(number);
+        mailer._clearMailQueue();
+        done();
+    }, 500);
 }
 
 describe('User', function () {
@@ -54,14 +69,14 @@ describe('User', function () {
         before(cleanupUsers);
         after(cleanupUsers);
 
-        it('succeeds', function (done) {
-            user.create(USERNAME, PASSWORD, EMAIL, IS_ADMIN, null /* invitor */, false, function (error, result) {
+        it('succeeds and attempts to send invite', function (done) {
+            user.create(USERNAME, PASSWORD, EMAIL, IS_ADMIN, null /* invitor */, true, function (error, result) {
                 expect(error).not.to.be.ok();
                 expect(result).to.be.ok();
                 expect(result.username).to.equal(USERNAME);
                 expect(result.email).to.equal(EMAIL);
 
-                done();
+                checkMails(2, done);
             });
         });
 
@@ -315,7 +330,8 @@ describe('User', function () {
 
                 user.changeAdmin(user1.username, true, function (error) {
                     expect(error).to.not.be.ok();
-                    done();
+
+                    checkMails(1, done);
                 });
             });
         });
@@ -323,7 +339,8 @@ describe('User', function () {
         it('succeeds to remove admin flag of first user', function (done) {
             user.changeAdmin(USERNAME, false, function (error) {
                 expect(error).to.not.be.ok();
-                done();
+
+                checkMails(1, done);
             });
         });
     });
@@ -360,7 +377,8 @@ describe('User', function () {
                         expect(admins.length).to.equal(2);
                         expect(admins[0].username).to.equal(USERNAME);
                         expect(admins[1].username).to.equal(user1.username);
-                        done();
+
+                        checkMails(1, done);
                     });
                 });
             });
@@ -453,14 +471,14 @@ describe('User', function () {
         it('succeeds with email', function (done) {
             user.resetPasswordByIdentifier(EMAIL, function (error) {
                 expect(error).to.not.be.ok();
-                done();
+                checkMails(1, done);
             });
         });
 
         it('succeeds with username', function (done) {
             user.resetPasswordByIdentifier(USERNAME, function (error) {
                 expect(error).to.not.be.ok();
-                done();
+                checkMails(1, done);
             });
         });
     });
