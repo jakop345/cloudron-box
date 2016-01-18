@@ -15,8 +15,12 @@ To get started, create your account by visiting the following page:
 When you visit the above page, you will be prompted to enter a new password.
 After you have submitted the form, you can login using the new password.
 
+<% if (invitor && invitor.email) { %>
 Thank you,
 <%= invitor.email %>
+<% } else { %>
+Thank you
+<% } %>
 
 <% } else { %>
 
