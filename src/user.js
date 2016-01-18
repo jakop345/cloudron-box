@@ -157,7 +157,9 @@ function createUser(username, password, email, admin, invitor, sendInvite, callb
 
                 callback(null, user);
 
-                if (sendInvite) mailer.userAdded(user, invitor);
+                // do not send email for admins (this can only be the case for the owner)
+                if (!admin) mailer.userAdded(user);
+                if (sendInvite) mailer.sendInvite(user, invitor);
             });
         });
     });
@@ -416,7 +418,7 @@ function sendInvite(userId, callback) {
             if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
             if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-            mailer.userAdded(userObject, null);
+            mailer.sendInvite(userObject, null);
 
             callback(null);
         });

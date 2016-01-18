@@ -13,6 +13,7 @@ exports = module.exports = {
     boxUpdateAvailable: boxUpdateAvailable,
     appUpdateAvailable: appUpdateAvailable,
 
+    sendInvite: sendInvite,
     sendCrashNotification: sendCrashNotification,
 
     appDied: appDied,
@@ -173,6 +174,9 @@ function sendMails(queue) {
 function enqueue(mailOptions) {
     assert.strictEqual(typeof mailOptions, 'object');
 
+    if (!mailOptions.from) console.error('from is missing');
+    if (!mailOptions.to) console.error('to is missing');
+
     debug('Queued mail for ' + mailOptions.from + ' to ' + mailOptions.to);
     gMailQueue.push(mailOptions);
 
@@ -217,11 +221,11 @@ function mailUserEventToAdmins(user, event) {
     });
 }
 
-function userAdded(user, invitor) {
+function sendInvite(user, invitor) {
     assert.strictEqual(typeof user, 'object');
     assert(typeof invitor === 'object');
 
-    debug('Sending mail for userAdded');
+    debug('Sending invite mail');
 
     var templateData = {
         user: user,
@@ -240,6 +244,12 @@ function userAdded(user, invitor) {
     };
 
     enqueue(mailOptions);
+}
+
+function userAdded(user) {
+    assert.strictEqual(typeof user, 'object');
+
+    debug('Sending mail for userAdded');
 
     mailUserEventToAdmins(user, 'was added');
 }

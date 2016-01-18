@@ -81,7 +81,8 @@ describe('User', function () {
                 expect(result.username).to.equal(USERNAME);
                 expect(result.email).to.equal(EMAIL);
 
-                checkMails(2, done);
+                // first user is owner, do not send mail to admins
+                checkMails(1, done);
             });
         });
 
@@ -336,7 +337,8 @@ describe('User', function () {
                 user.changeAdmin(user1.username, true, function (error) {
                     expect(error).to.not.be.ok();
 
-                    checkMails(1, done);
+                    // one mail for user creation, one mail for admin change
+                    checkMails(2, done);
                 });
             });
         });
@@ -383,7 +385,8 @@ describe('User', function () {
                         expect(admins[0].username).to.equal(USERNAME);
                         expect(admins[1].username).to.equal(user1.username);
 
-                        checkMails(1, done);
+                        // one mail for user creation one mail for admin change
+                        checkMails(2, done);
                     });
                 });
             });
@@ -504,7 +507,7 @@ describe('User', function () {
         it('succeeds', function (done) {
             user.sendInvite(userObject.id, function (error) {
                 expect(error).to.eql(null);
-                checkMails(2, done);
+                checkMails(1, done);
             });
         });
     });

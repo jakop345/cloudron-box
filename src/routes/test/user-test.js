@@ -266,7 +266,7 @@ describe('User API', function () {
                .end(function (err, res) {
             expect(err).to.not.be.ok();
             expect(res.statusCode).to.equal(200);
-            checkMails(2, done);
+            checkMails(1, done);
         });
     });
 
