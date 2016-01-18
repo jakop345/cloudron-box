@@ -112,15 +112,20 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
      Client.notify('title', 'message', true, actionScope);
 
     */
-    Client.prototype.notify = function (title, message, delay, actionScope) {
-        var options = { title: title, message: message, delay: delay};
+    Client.prototype.notify = function (title, message, persitent, type, actionScope) {
+        var options = { title: title, message: message};
+
+        if (persitent) options.delay = 'never'; // any non Number means never timeout
 
         if (actionScope) {
             if (typeof actionScope.action !== 'string') throw('an actionScope has to have an action url');
             options.scope = actionScope;
         }
 
-        Notification.error(options);
+        if (type === 'error') Notification.error(options);
+        else if (type === 'success') Notification.success(options);
+        else if (type === 'info') Notification.info(options);
+        else throw('Invalid notification type "' + type + '"');
     };
 
     Client.prototype.setReady = function () {

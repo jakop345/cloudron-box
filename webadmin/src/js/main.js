@@ -114,7 +114,7 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
                             if (result.provider === 'route53' && (!result.accessKeyId || !result.secretAccessKey)) {
                                 var actionScope = $scope.$new(true);
                                 actionScope.action = '/#/certs';
-                                Client.notify('Missing AWS credentials', 'Please provide AWS credentials, click here to add them.', true, actionScope);
+                                Client.notify('Missing AWS credentials', 'Please provide AWS credentials, click here to add them.', true, 'error', actionScope);
                             }
                         });
                     }
