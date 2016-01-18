@@ -105,7 +105,7 @@
                             <tr>
                                 <th style="">User</th>
                                 <th style="width: 1px" class="text-right">Group</th>
-                                <th style="width: 200px" class="text-right">Actions</th>
+                                <th style="width: 300px" class="text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -123,6 +123,7 @@
                                         <span ng-show="!user.admin"><i class="fa fa-plus"></i> Add Admin</span>
                                         <span ng-show="user.admin"><i class="fa fa-minus"></i> Remove Admin</span>
                                     </button>
+                                    <button ng-show="!isMe(user) && userInfo.admin" class="btn btn-xs btn-default" ng-click="sendInvite(user)"><i class="fa fa-paper-plane-o"></i> Send Invite</button>
                                     <button ng-show="!isMe(user) && userInfo.admin" class="btn btn-xs btn-danger" ng-click="showUserRemove(user)"><i class="fa fa-trash-o"></i> Delete</button>
                                 </td>
                             </tr>

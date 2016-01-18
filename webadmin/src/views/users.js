@@ -39,6 +39,14 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         });
     };
 
+    $scope.sendInvite = function (user) {
+        Client.sendInvite(user.username, function (error) {
+            if (error) return console.error(error);
+
+            Client.notify('', 'Invitation was successfully sent to ' + user.email + '.', false, 'success');
+        });
+    };
+
     $scope.doAdd = function () {
         $scope.useradd.busy = true;
 
