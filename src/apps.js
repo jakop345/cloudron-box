@@ -651,7 +651,7 @@ function exec(appId, options, callback) {
             AttachStdin: true,
             AttachStdout: true,
             AttachStderr: true,
-            Tty: true,
+            Tty: options.tty,
             Cmd: cmd
         };
 
@@ -659,7 +659,7 @@ function exec(appId, options, callback) {
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
             var startOptions = {
                 Detach: false,
-                Tty: true,
+                Tty: options.tty,
                 stdin: true // this is a dockerode option that enabled openStdin in the modem
             };
             exec.start(startOptions, function(error, stream) {

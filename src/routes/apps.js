@@ -357,7 +357,9 @@ function exec(req, res, next) {
     var rows = req.query.rows ? parseInt(req.query.rows, 10) : null;
     if (isNaN(rows)) return next(new HttpError(400, 'rows must be a number'));
 
-    apps.exec(req.params.id, { cmd: cmd, rows: rows, columns: columns }, function (error, duplexStream) {
+    var tty = req.query.tty === 'true' ? true : false;
+
+    apps.exec(req.params.id, { cmd: cmd, rows: rows, columns: columns, tty: tty }, function (error, duplexStream) {
         if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
         if (error && error.reason === AppsError.BAD_STATE) return next(new HttpError(409, error.message));
         if (error) return next(new HttpError(500, error));
