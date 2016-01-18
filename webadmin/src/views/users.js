@@ -98,7 +98,13 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
     $scope.showUserRemove = function (userInfo) {
         $scope.userremove.error.username = null;
         $scope.userremove.error.password = null;
+        $scope.userremove.username = '';
+        $scope.userremove.password = '';
         $scope.userremove.userInfo = userInfo;
+
+        $scope.userremove_form.$setPristine();
+        $scope.userremove_form.$setUntouched();
+
         $('#userRemoveModal').modal('show');
     };
 
