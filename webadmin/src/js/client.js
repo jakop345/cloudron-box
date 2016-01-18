@@ -411,10 +411,6 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         return source;
     };
 
-    Client.prototype.getAppLogUrl = function (appId) {
-        return '/api/v1/apps/' + appId + '/logs?access_token=' + this._token;
-    };
-
     Client.prototype.getAppIconUrls = function (app) {
         return {
             cloudron: this.apiOrigin + app.iconUrl + '?access_token=' + this._token,
