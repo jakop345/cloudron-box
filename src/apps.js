@@ -650,7 +650,7 @@ function exec(appId, options, callback) {
        var execOptions = {
             AttachStdin: true,
             AttachStdout: true,
-            AttachStderr: true,
+            AttachStderr: false,
             Tty: options.tty,
             Cmd: cmd
         };
