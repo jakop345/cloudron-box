@@ -156,8 +156,6 @@ function createUser(username, password, email, admin, invitor, sendInvite, callb
 
                 callback(null, user);
 
-                // only send welcome mail if user is not an admin. This is only the case for the first user!
-                // The welcome email contains a link to create a new password
                 if (sendInvite) mailer.userAdded(user, invitor);
             });
         });
