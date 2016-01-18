@@ -138,7 +138,7 @@ function setup(done) {
         function (callback) {
             superagent.post(SERVER_URL + '/api/v1/users')
                    .query({ access_token: token })
-                   .send({ username: USERNAME_1, email: EMAIL_1 })
+                   .send({ username: USERNAME_1, email: EMAIL_1, invite: false })
                    .end(function (err, res) {
                 expect(res.statusCode).to.equal(201);
 

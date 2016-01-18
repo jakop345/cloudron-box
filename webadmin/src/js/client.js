@@ -544,7 +544,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         var data = {
             username: username,
             email: email,
-            invite: sendInvite
+            invite: !!sendInvite
         };
 
         $http.post(client.apiOrigin + '/api/v1/users', data).success(function(data, status) {

@@ -45,12 +45,14 @@ function createUser(req, res, next) {
 
     if (typeof req.body.username !== 'string') return next(new HttpError(400, 'username must be string'));
     if (typeof req.body.email !== 'string') return next(new HttpError(400, 'email must be string'));
+    if (typeof req.body.invite !== 'boolean') return next(new HttpError(400, 'invite must be boolean'));
 
     var username = req.body.username;
     var password = generatePassword(8, true /* memorable */);
     var email = req.body.email;
+    var sendInvite = req.body.invite;
 
-    user.create(username, password, email, false /* admin */, req.user /* creator */, true /* sendInvite */, function (error, user) {
+    user.create(username, password, email, false /* admin */, req.user /* creator */, sendInvite, function (error, user) {
         if (error && error.reason === UserError.BAD_USERNAME) return next(new HttpError(400, 'Invalid username'));
         if (error && error.reason === UserError.BAD_EMAIL) return next(new HttpError(400, 'Invalid email'));
         if (error && error.reason === UserError.BAD_PASSWORD) return next(new HttpError(400, 'Invalid password'));

@@ -232,7 +232,7 @@ describe('User API', function () {
 
         superagent.post(SERVER_URL + '/api/v1/users')
                .query({ access_token: token })
-               .send({ username: USERNAME_1, email: EMAIL_1 })
+               .send({ username: USERNAME_1, email: EMAIL_1, invite: true })
                .end(function (err, res) {
             expect(err).to.not.be.ok();
             expect(res.statusCode).to.equal(201);
@@ -341,21 +341,36 @@ describe('User API', function () {
         });
     });
 
-    it('create second and third user', function (done) {
+    it('create user missing invite fails', function (done) {
         superagent.post(SERVER_URL + '/api/v1/users')
                .query({ access_token: token })
                .send({ username: USERNAME_2, email: EMAIL_2 })
+               .end(function (error, result) {
+            expect(result.statusCode).to.equal(400);
+            done();
+        });
+    });
+
+    it('create second and third user', function (done) {
+        mailer._clearMailQueue();
+
+        superagent.post(SERVER_URL + '/api/v1/users')
+               .query({ access_token: token })
+               .send({ username: USERNAME_2, email: EMAIL_2, invite: false })
                .end(function (error, res) {
             expect(res.statusCode).to.equal(201);
 
             superagent.post(SERVER_URL + '/api/v1/users')
                    .query({ access_token: token })
-                   .send({ username: USERNAME_3, email: EMAIL_3 })
+                   .send({ username: USERNAME_3, email: EMAIL_3, invite: true })
                    .end(function (error, res) {
                 expect(res.statusCode).to.equal(201);
 
-                // HACK to get a token for second user (passwords are generated and the user should have gotten a password setup link...)
-                tokendb.add(token_2, tokendb.PREFIX_USER + USERNAME_2, 'test-client-id',  Date.now() + 10000, '*', done);
+                // one mail for first user creation, two mails for second user creation (see 'invite' flag)
+                checkMails(3, function () {
+                    // HACK to get a token for second user (passwords are generated and the user should have gotten a password setup link...)
+                    tokendb.add(token_2, tokendb.PREFIX_USER + USERNAME_2, 'test-client-id',  Date.now() + 10000, '*', done);
+                });
             });
         });
     });
@@ -376,7 +391,7 @@ describe('User API', function () {
     it('create user with same username should fail', function (done) {
         superagent.post(SERVER_URL + '/api/v1/users')
                .query({ access_token: token })
-               .send({ username: USERNAME_2, email: EMAIL })
+               .send({ username: USERNAME_2, email: EMAIL, invite: false })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(409);
             done();
