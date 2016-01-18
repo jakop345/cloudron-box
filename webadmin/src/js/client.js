@@ -422,6 +422,13 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         };
     };
 
+    Client.prototype.sendInvite = function (username, callback) {
+        $http.post(client.apiOrigin + '/api/v1/users/' + username + '/invite', {}).success(function (data, status) {
+            if (status !== 200) return callback(new ClientError(status, data));
+            callback(null);
+        }).error(defaultErrorHandler(callback));
+    };
+
     Client.prototype.setAdmin = function (username, admin, callback) {
         var payload = {
             username: username,
