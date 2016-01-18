@@ -372,3 +372,5 @@
 - Fix `cloudron exec` container to have same namespaces as app
 - Add developmentMode to manifest
 
+[0.6.3]
+- Make sending invite for new users optional
