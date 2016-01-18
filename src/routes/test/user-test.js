@@ -10,6 +10,7 @@ var config = require('../../config.js'),
     database = require('../../database.js'),
     tokendb = require('../../tokendb.js'),
     expect = require('expect.js'),
+    mailer = require('../../mailer.js'),
     superagent = require('superagent'),
     nock = require('nock'),
     server = require('../../server.js'),
@@ -26,6 +27,9 @@ var server;
 function setup(done) {
     server.start(function (error) {
         expect(!error).to.be.ok();
+
+        mailer._clearMailQueue();
+
         userdb._clear(done);
     });
 }
@@ -34,8 +38,19 @@ function cleanup(done) {
     database._clear(function (error) {
         expect(!error).to.be.ok();
 
+        mailer._clearMailQueue();
+
         server.stop(done);
     });
+}
+
+function checkMails(number, done) {
+    // mails are enqueued async
+    setTimeout(function () {
+        expect(mailer._getMailQueue().length).to.equal(number);
+        mailer._clearMailQueue();
+        done();
+    }, 500);
 }
 
 describe('User API', function () {
@@ -213,6 +228,8 @@ describe('User API', function () {
     });
 
     it('create second user succeeds', function (done) {
+        mailer._clearMailQueue();
+
         superagent.post(SERVER_URL + '/api/v1/users')
                .query({ access_token: token })
                .send({ username: USERNAME_1, email: EMAIL_1 })
@@ -220,8 +237,36 @@ describe('User API', function () {
             expect(err).to.not.be.ok();
             expect(res.statusCode).to.equal(201);
 
-            // HACK to get a token for second user (passwords are generated and the user should have gotten a password setup link...)
-            tokendb.add(token_1, tokendb.PREFIX_USER + USERNAME_1, 'test-client-id',  Date.now() + 10000, '*', done);
+            checkMails(2, function () {
+              // HACK to get a token for second user (passwords are generated and the user should have gotten a password setup link...)
+              tokendb.add(token_1, tokendb.PREFIX_USER + USERNAME_1, 'test-client-id',  Date.now() + 10000, '*', done);
+            });
+        });
+    });
+
+    it('reinvite unknown user fails', function (done) {
+        mailer._clearMailQueue();
+
+        superagent.post(SERVER_URL + '/api/v1/users/' + USERNAME_1+USERNAME_1 + '/invite')
+               .query({ access_token: token })
+               .send({})
+               .end(function (err, res) {
+            expect(err).to.be.an(Error);
+            expect(res.statusCode).to.equal(404);
+            checkMails(0, done);
+        });
+    });
+
+    it('reinvite second user succeeds', function (done) {
+        mailer._clearMailQueue();
+
+        superagent.post(SERVER_URL + '/api/v1/users/' + USERNAME_1 + '/invite')
+               .query({ access_token: token })
+               .send({})
+               .end(function (err, res) {
+            expect(err).to.not.be.ok();
+            expect(res.statusCode).to.equal(200);
+            checkMails(2, done);
         });
     });
 

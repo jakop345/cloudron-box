@@ -12,7 +12,8 @@ exports = module.exports = {
     changeAdmin: changeAdmin,
     remove: removeUser,
     verifyPassword: verifyPassword,
-    requireAdmin: requireAdmin
+    requireAdmin: requireAdmin,
+    sendInvite: sendInvite
 };
 
 var assert = require('assert'),
@@ -188,3 +189,13 @@ function requireAdmin(req, res, next) {
     next();
 }
 
+function sendInvite(req, res, next) {
+    assert.strictEqual(typeof req.params.userId, 'string');
+
+    user.sendInvite(req.params.userId, function (error) {
+        if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'User not found'));
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(200, {}));
+    });
+}

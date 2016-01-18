@@ -108,6 +108,7 @@ function initializeExpressSync() {
     router.del ('/api/v1/users/:userId', usersScope, routes.user.requireAdmin, routes.user.verifyPassword, routes.user.remove);
     router.post('/api/v1/users/:userId/password', usersScope, routes.user.changePassword); // changePassword verifies password
     router.post('/api/v1/users/:userId/admin', usersScope, routes.user.requireAdmin, routes.user.changeAdmin);
+    router.post('/api/v1/users/:userId/invite', usersScope, routes.user.requireAdmin, routes.user.sendInvite);
 
     // form based login routes used by oauth2 frame
     router.get ('/api/v1/session/login', csrf, routes.oauth2.loginForm);
