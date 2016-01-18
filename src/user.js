@@ -19,7 +19,8 @@ exports = module.exports = {
     changePassword: changePassword,
     update: updateUser,
     createOwner: createOwner,
-    getOwner: getOwner
+    getOwner: getOwner,
+    sendInvite: sendInvite
 };
 
 var assert = require('assert'),
@@ -398,5 +399,26 @@ function getOwner(callback) {
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
         return callback(null, owner);
+    });
+}
+
+function sendInvite(userId, callback) {
+    assert.strictEqual(typeof userId, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    userdb.get(userId, function (error, userObject) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
+        if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+
+        userObject.resetToken = hat(256);
+
+        userdb.update(userId, userObject, function (error) {
+            if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
+            if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+
+            mailer.userAdded(userObject, null);
+
+            callback(null);
+        });
     });
 }

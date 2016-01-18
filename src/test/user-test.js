@@ -20,9 +20,11 @@ var EMAIL_NEW = 'nobodynew@no.body';
 var PASSWORD = 'foobar';
 var NEW_PASSWORD = 'somenewpassword';
 var IS_ADMIN = true;
+var userObject = null;
 
 function cleanupUsers(done) {
     userdb._clear(function () {
+        mailer._clearMailQueue();
         done();
     });
 }
@@ -31,6 +33,9 @@ function createUser(done) {
     user.create(USERNAME, PASSWORD, EMAIL, IS_ADMIN, null /* invitor  */, false, function (error, result) {
         expect(error).to.not.be.ok();
         expect(result).to.be.ok();
+
+        userObject = result;
+
         done();
     });
 }
@@ -479,6 +484,27 @@ describe('User', function () {
             user.resetPasswordByIdentifier(USERNAME, function (error) {
                 expect(error).to.not.be.ok();
                 checkMails(1, done);
+            });
+        });
+    });
+
+    describe('send invite', function () {
+        before(createUser);
+        after(cleanupUsers);
+
+        it('fails for unknown user', function (done) {
+            user.sendInvite('unknown user', function (error) {
+                expect(error).to.be.a(UserError);
+                expect(error.reason).to.equal(UserError.NOT_FOUND);
+
+                checkMails(0, done);
+            });
+        });
+
+        it('succeeds', function (done) {
+            user.sendInvite(userObject.id, function (error) {
+                expect(error).to.eql(null);
+                checkMails(2, done);
             });
         });
     });
