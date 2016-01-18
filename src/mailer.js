@@ -20,7 +20,10 @@ exports = module.exports = {
     FEEDBACK_TYPE_FEEDBACK: 'feedback',
     FEEDBACK_TYPE_TICKET: 'ticket',
     FEEDBACK_TYPE_APP: 'app',
-    sendFeedback: sendFeedback
+    sendFeedback: sendFeedback,
+
+    _getMailQueue: _getMailQueue,
+    _clearMailQueue: _clearMailQueue
 };
 
 var assert = require('assert'),
@@ -361,4 +364,12 @@ function sendFeedback(user, type, subject, description) {
     };
 
     enqueue(mailOptions);
+}
+
+function _getMailQueue() {
+    return gMailQueue;
+}
+
+function _clearMailQueue() {
+    gMailQueue = [];
 }
