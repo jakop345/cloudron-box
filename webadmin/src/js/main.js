@@ -4,6 +4,7 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
     $scope.initialized = false;
     $scope.user = Client.getUserInfo();
     $scope.installedApps = Client.getInstalledApps();
+    $scope.cloudronAvatar = Client.apiOrigin + '/api/v1/cloudron/avatar';
     $scope.config = {};
 
     $scope.update = {
@@ -81,6 +82,7 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
                 localStorage.version = Client.getConfig().version;
                 window.location.reload(true);
             }
+
 
             Client.refreshUserInfo(function (error, result) {
                 if (error) return $scope.error(error);
