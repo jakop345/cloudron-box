@@ -34,7 +34,7 @@ function initializeExpressSync() {
     var QUERY_LIMIT = '10mb', // max size for json and urlencoded queries
         FIELD_LIMIT = 2 * 1024 * 1024; // max fields that can appear in multipart
 
-    var REQUEST_TIMEOUT = 10000; // timeout for all requests
+    var REQUEST_TIMEOUT = 10000; // timeout for all requests (see also setTimeout on the httpServer)
 
     var json = middleware.json({ strict: true, limit: QUERY_LIMIT }), // application/json
         urlencoded = middleware.urlencoded({ extended: false, limit: QUERY_LIMIT }); // application/x-www-form-urlencoded
@@ -170,6 +170,9 @@ function initializeExpressSync() {
     // backup routes
     router.get ('/api/v1/backups', settingsScope, routes.backups.get);
     router.post('/api/v1/backups', settingsScope, routes.backups.create);
+
+    // disable server timeout. we use the timeout middleware to handle timeouts on a route level
+    httpServer.setTimeout(0);
 
     // upgrade handler
     httpServer.on('upgrade', function (req, socket, head) {
