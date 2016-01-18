@@ -28,6 +28,11 @@
                             </div>
                             <input type="email" class="form-control" ng-model="useradd.email" id="inputUserAddEmail" name="email" required>
                         </div>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" ng-model="useradd.sendInvite" id="inputUserAddSendInvite"> Send invite
+                            </label>
+                        </div>
                         <input class="ng-hide" type="submit" ng-disabled="useradd_form.$invalid || useradd.alreadyTaken === username"/>
                     </fieldset>
                 </form>

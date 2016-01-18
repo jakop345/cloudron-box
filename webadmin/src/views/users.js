@@ -20,7 +20,8 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         alreadyTaken: false,
         error: {},
         username: '',
-        email: ''
+        email: '',
+        sendInvite: true
     };
 
     $scope.isMe = function (user) {
@@ -54,7 +55,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         $scope.useradd.error.username = null;
         $scope.useradd.error.email = null;
 
-        Client.createUser($scope.useradd.username, $scope.useradd.email, function (error) {
+        Client.createUser($scope.useradd.username, $scope.useradd.email, $scope.useradd.sendInvite, function (error) {
             $scope.useradd.busy = false;
 
             if (error && error.statusCode === 409) {
