@@ -407,7 +407,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
     };
 
     Client.prototype.getAppLogStream = function (appId) {
-        var source = new EventSource('/api/v1/apps/' + appId + '/logstream');
+        var source = new EventSource(client.apiOrigin + '/api/v1/apps/' + appId + '/logstream');
         return source;
     };
 
@@ -561,7 +561,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             password: password
         };
 
-        $http({ method: 'DELETE', url: '/api/v1/users/' + userId, data: data, headers: { 'Content-Type': 'application/json' }}).success(function(data, status) {
+        $http({ method: 'DELETE', url: client.apiOrigin + '/api/v1/users/' + userId, data: data, headers: { 'Content-Type': 'application/json' }}).success(function(data, status) {
             if (status !== 204) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
