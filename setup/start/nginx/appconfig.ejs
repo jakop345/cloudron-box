@@ -58,6 +58,11 @@ server {
             client_max_body_size 1m;
         }
 
+        location ~ ^/api/v1/apps/.*/exec$ {
+            proxy_pass   http://127.0.0.1:3000;
+            proxy_read_timeout 30m;
+        }
+
         # graphite paths
         location ~ ^/(graphite|content|metrics|dashboard|render|browser|composer)/ {
             proxy_pass   http://127.0.0.1:8000;
