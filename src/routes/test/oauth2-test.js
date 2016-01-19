@@ -1245,7 +1245,8 @@ describe('Password', function () {
         salt: 'somesalt',
         createdAt: (new Date()).toUTCString(),
         modifiedAt: (new Date()).toUTCString(),
-        resetToken: hat(256)
+        resetToken: hat(256),
+        displayName: ''
     };
 
     // make csrf always succeed for testing
