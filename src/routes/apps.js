@@ -15,6 +15,7 @@ exports = module.exports = {
     updateApp: updateApp,
     getLogs: getLogs,
     getLogStream: getLogStream,
+    listBackups: listBackups,
 
     stopApp: stopApp,
     startApp: startApp,
@@ -371,5 +372,16 @@ function exec(req, res, next) {
 
         duplexStream.pipe(res.socket);
         res.socket.pipe(duplexStream);
+    });
+}
+
+function listBackups(req, res, next) {
+    assert.strictEqual(typeof req.params.id, 'string');
+
+    apps.listBackups(function (error, result) {
+        if (error && error.reason === AppsError.NOT_FOUND) return next(new HttpError(404, 'No such app'));
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(200, { backups: result }));
     });
 }
