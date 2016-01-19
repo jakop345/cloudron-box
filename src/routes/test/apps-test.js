@@ -941,14 +941,17 @@ describe('App installation', function () {
     });
 
     it('did start the app', function (done) {
-        setTimeout(function () {
+        var count = 0;
+        function checkStartState() {
             superagent.get('http://localhost:' + appEntry.httpPort + appResult.manifest.healthCheckPath)
                 .end(function (err, res) {
-                expect(!err).to.be.ok();
-                expect(res.statusCode).to.equal(200);
-                done();
+                if (res && res.statusCode === 200) return done();
+                if (++count > 50) return done(new Error('Timedout'));
+                setTimeout(checkStartState, 500);
             });
-        }, 2000); // give some time for docker to settle
+        }
+
+        checkStartState();
     });
 
     it('can uninstall app', function (done) {
