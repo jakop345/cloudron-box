@@ -39,7 +39,7 @@ gulp.task('3rdparty', function () {
 // JavaScript
 // --------------
 
-gulp.task('js', ['js-index', 'js-setup', 'js-update', 'js-error'], function () {});
+gulp.task('js', ['js-index', 'js-setup', 'js-update'], function () {});
 
 var oauth = {
     clientId: argv.clientId || 'cid-webadmin',
