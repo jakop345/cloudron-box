@@ -53,7 +53,8 @@ function getAllPaged(backupConfig, page, perPage, callback) {
             var results = data.Contents.map(function (backup) {
                 return {
                     creationTime: backup.LastModified,
-                    restoreKey: backup.Key.slice(backupConfig.prefix.length + 1)
+                    restoreKey: backup.Key.slice(backupConfig.prefix.length + 1),
+                    dependsOn: [] // FIXME empty dependsOn is wrong and version property is missing!!
                 };
             });
 
