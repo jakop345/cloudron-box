@@ -171,7 +171,7 @@ function createSubcontainer(app, name, cmd, options, callback) {
             Hostname: isolatedNetworkNs ? (semver.gte(targetBoxVersion(app.manifest), '0.0.77') ? app.location : config.appFqdn(app.location)) : null,
             Tty: isAppContainer,
             Image: app.manifest.dockerImage,
-            Cmd: (isAppContainer && developmentMode) ? [ '/bin/sleep', 'infinity' ] : cmd,
+            Cmd: (isAppContainer && developmentMode) ? [ '/bin/bash', '-c', 'echo "Development mode. Use cloudron exec to debug. Sleeping" && sleep infinity' ] : cmd,
             Env: stdEnv.concat(addonEnv).concat(portEnv),
             ExposedPorts: isAppContainer ? exposedPorts : { },
             Volumes: { // see also ReadonlyRootfs
