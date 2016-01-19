@@ -22,6 +22,7 @@ exports = module.exports = {
 
     backup: backup,
     backupApp: backupApp,
+    listBackups: listBackups,
 
     getLogs: getLogs,
 
@@ -860,6 +861,34 @@ function restoreApp(app, addonsToRestore, backupId, callback) {
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
             addons.restoreAddons(app, addonsToRestore, callback);
+        });
+    });
+}
+
+function listBackups(appId, callback) {
+    assert.strictEqual(typeof appId, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    appdb.exists(appId, function (error, exists) {
+        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+        if (!exists) return callback(new AppsError(AppsError.NOT_FOUND));
+
+        // TODO pagination is not implemented in the backend yet
+        backups.getAllPaged(0, 1000, function (error, result) {
+            if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+            var appBackups = [];
+
+            result.forEach(function (backup) {
+                appBackups = appBackups.concat(backup.dependsOn.filter(function (d) {
+                    return d.indexOf('appbackup_' + appId) === 0;
+                }));
+            });
+
+            // alphabetic should be sufficient
+            appBackups.sort();
+
+            callback(null, appBackups);
         });
     });
 }
