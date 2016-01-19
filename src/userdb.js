@@ -23,7 +23,7 @@ var assert = require('assert'),
     debug = require('debug')('box:userdb'),
     DatabaseError = require('./databaseerror');
 
-var USERS_FIELDS = [ 'id', 'username', 'email', 'password', 'salt', 'createdAt', 'modifiedAt', 'admin', 'resetToken' ].join(',');
+var USERS_FIELDS = [ 'id', 'username', 'email', 'password', 'salt', 'createdAt', 'modifiedAt', 'admin', 'resetToken', 'displayName' ].join(',');
 
 function get(userId, callback) {
     assert.strictEqual(typeof userId, 'string');
@@ -113,10 +113,11 @@ function add(userId, user, callback) {
     assert.strictEqual(typeof user.createdAt, 'string');
     assert.strictEqual(typeof user.modifiedAt, 'string');
     assert.strictEqual(typeof user.resetToken, 'string');
+    assert.strictEqual(typeof user.displayName, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    var data = [ userId, user.username, user.password, user.email, user.admin, user.salt, user.createdAt, user.modifiedAt, user.resetToken ];
-    database.query('INSERT INTO users (id, username, password, email, admin, salt, createdAt, modifiedAt, resetToken) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    var data = [ userId, user.username, user.password, user.email, user.admin, user.salt, user.createdAt, user.modifiedAt, user.resetToken, user.displayName ];
+    database.query('INSERT INTO users (id, username, password, email, admin, salt, createdAt, modifiedAt, resetToken, displayName) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
            data, function (error, result) {
         if (error && error.code === 'ER_DUP_ENTRY') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
         if (error || result.affectedRows !== 1) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
@@ -199,4 +200,3 @@ function adminCount(callback) {
         return callback(null, result[0].total);
     });
 }
-

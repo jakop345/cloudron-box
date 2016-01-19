@@ -40,7 +40,8 @@ describe('database', function () {
             salt: 'morton',
             createdAt: 'sometime back',
             modifiedAt: 'now',
-            resetToken: hat(256)
+            resetToken: hat(256),
+            displayName: ''
         };
 
         var ADMIN_0 = {
@@ -52,7 +53,8 @@ describe('database', function () {
             salt: 'tata',
             createdAt: 'sometime back',
             modifiedAt: 'now',
-            resetToken: ''
+            resetToken: '',
+            displayName: 'Herbert Heidelberg'
         };
 
         it('can add user', function (done) {
@@ -154,10 +156,11 @@ describe('database', function () {
         });
 
         it('can update the user', function (done) {
-            userdb.update(USER_0.id, { email: 'some@thing.com' }, function (error) {
+            userdb.update(USER_0.id, { email: 'some@thing.com', displayName: 'Heiter' }, function (error) {
                 expect(error).to.not.be.ok();
                 userdb.get(USER_0.id, function (error, user) {
                     expect(user.email).to.equal('some@thing.com');
+                    expect(user.displayName).to.equal('Heiter');
                     done();
                 });
             });
