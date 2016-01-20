@@ -115,12 +115,12 @@ describe('Cloudron', function () {
             });
         });
 
-        it('fails due to empty name', function (done) {
+        it('fails due to wrong displayName type', function (done) {
             var scope = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
 
             superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
                    .query({ setupToken: 'somesetuptoken' })
-                   .send({ username: 'someuser', password: 'ADSF?#asd546', email: 'admin@foo.bar', name: '' })
+                   .send({ username: 'someuser', password: 'ADSF?#asd546', email: 'admin@foo.bar', displayName: 1234 })
                    .end(function (error, result) {
                 expect(result.statusCode).to.equal(400);
                 expect(scope.isDone()).to.be.ok();
@@ -147,7 +147,7 @@ describe('Cloudron', function () {
 
             superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
                    .query({ setupToken: 'somesetuptoken' })
-                   .send({ username: 'someuser', password: 'ADSF#asd546', email: 'admin@foo.bar', name: 'tester' })
+                   .send({ username: 'someuser', password: 'ADSF#asd546', email: 'admin@foo.bar', displayName: 'tester' })
                    .end(function (error, result) {
                 expect(result.statusCode).to.equal(201);
                 expect(scope1.isDone()).to.be.ok();
