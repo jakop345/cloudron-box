@@ -374,3 +374,8 @@
 
 [0.6.3]
 - Make sending invite for new users optional
+
+[0.6.4]
+- Add support for display names
+- Send invite links to admins for user setup
+- Enforce stronger passwords
