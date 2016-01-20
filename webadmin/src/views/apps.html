@@ -40,15 +40,14 @@
                             <label class="control-label">User</label>
                             <p>This is a single user application. Access is granted to <b>{{appConfigure.app.accessRestriction.users[0]}}</b>.</p>
                         </div>
-                        <div class="form-group">
+                        <!-- Not sure if oauthproxy makes any sense with singleuser apps, it certainly looks strange in the UI, so we hide it for now -->
+                        <div class="form-group" ng-hide="appConfigure.app.manifest.singleUser">
                             <label class="control-label" for="oauthProxy">Website Visibility</label>
                             <select class="form-control" id="oauthProxy" ng-model="appConfigure.oauthProxy">
                                 <option value="">Visible to all</option>
                                 <option value="1">Visible only to Cloudron users</option>
                             </select>
                         </div>
-
-                        <br/>
 
                         <div class="hide">
                         <label class="control-label" for="appConfigureCertificateInput" ng-show="config.isCustomDomain">Certificate (optional)</label>
