@@ -86,7 +86,9 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         this._clientId = '<%= oauth.clientId %>';
         this._clientSecret = '<%= oauth.clientSecret %>';
         this.apiOrigin = '<%= oauth.apiOrigin %>';
-        this.avatar = this.apiOrigin + '/api/v1/cloudron/avatar?' + String(Math.random()).slice(2);
+        this.avatar = '';
+
+        this.resetAvatar();
 
         this.setToken(localStorage.token);
     }
@@ -146,6 +148,15 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
     Client.prototype.onConfig = function (callback) {
         this._configListener.push(callback);
         callback(this._config);
+    };
+
+    Client.prototype.resetAvatar = function () {
+        this.avatar = this.apiOrigin + '/api/v1/cloudron/avatar?' + String(Math.random()).slice(2);
+
+        var favicon = $('#favicon');
+
+        console.log('rseet favicon', favicon)
+        if (favicon) favicon.attr('href', this.avatar);
     };
 
     Client.prototype.setUserInfo = function (userInfo) {
