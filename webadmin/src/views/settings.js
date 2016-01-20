@@ -185,8 +185,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
                 if (error) {
                     console.error('Unable to change developer mode.', error);
                 } else {
-                    Client.avatar = Client.apiOrigin + '/api/v1/cloudron/avatar?' + String(Math.random()).slice(2);
-                    console.log('set new avatar', Client.avatar)
+                    Client.resetAvatar();
                 }
 
                 $('#avatarChangeModal').modal('hide');
