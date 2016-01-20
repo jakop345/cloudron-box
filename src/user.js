@@ -96,7 +96,7 @@ function validateUsername(username) {
 function validatePassword(password) {
     assert.strictEqual(typeof password, 'string');
 
-    if(!password.value.match(gPasswordTestRegExp)) return new UserError(UserError.BAD_PASSWORD, 'Password must be 8-20 character with at least one uppercase, one numeric and one special character');
+    if(!password.match(gPasswordTestRegExp)) return new UserError(UserError.BAD_PASSWORD, 'Password must be 8-20 character with at least one uppercase, one numeric and one special character');
 
     return null;
 }
