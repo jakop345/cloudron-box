@@ -8,7 +8,8 @@ You are receiving this email because you are an Admin of the Cloudron at <%= fqd
 
 <% if (inviteLink) { %>
 This user was not invited immediately, he has to get invited manually later, using the "send invite" button in the admin panel.
-To perform any configuration on behalf of the user, please follow the invitation link <%= inviteLink %>
+To perform any configuration on behalf of the user, please use this link
+<%= inviteLink %>
 It allows to setup a temporary password, which the user will be able to override, once he gets invited.
 This link will become invalid as soon as the user was invited.
 <% } %>
