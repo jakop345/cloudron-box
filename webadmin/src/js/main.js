@@ -4,8 +4,8 @@ angular.module('Application').controller('MainController', ['$scope', '$route', 
     $scope.initialized = false;
     $scope.user = Client.getUserInfo();
     $scope.installedApps = Client.getInstalledApps();
-    $scope.cloudronAvatar = Client.apiOrigin + '/api/v1/cloudron/avatar';
     $scope.config = {};
+    $scope.client = Client;
 
     $scope.update = {
         busy: false,

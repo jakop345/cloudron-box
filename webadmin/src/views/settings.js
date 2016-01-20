@@ -1,18 +1,15 @@
 'use strict';
 
-angular.module('Application').controller('SettingsController', ['$scope', '$location', 'Client', function ($scope, $location, Client) {
+angular.module('Application').controller('SettingsController', ['$scope', '$location', '$rootScope', 'Client', function ($scope, $location, $rootScope, Client) {
     Client.onReady(function () { if (!Client.getUserInfo().admin) $location.path('/'); });
 
+    $scope.client = Client;
     $scope.user = Client.getUserInfo();
     $scope.config = Client.getConfig();
     $scope.dnsConfig = {};
 
     $scope.lastBackup = null;
     $scope.backups = [];
-    $scope.avatar = {
-        data: null,
-        url: null
-    };
 
     $scope.developerModeChange = {
         busy: false,
@@ -188,11 +185,12 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
                 if (error) {
                     console.error('Unable to change developer mode.', error);
                 } else {
-                    // Do soft reload, since the browser will not update the avatar URLs in the UI
-                    window.location.reload();
+                    Client.avatar = Client.apiOrigin + '/api/v1/cloudron/avatar?' + String(Math.random()).slice(2);
+                    console.log('set new avatar', Client.avatar)
                 }
 
-                $scope.avatarChange.busy = false;
+                $('#avatarChangeModal').modal('hide');
+                avatarChangeReset();
             });
         });
     };
@@ -263,7 +261,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
     Client.onReady(function () {
         fetchBackups();
 
-        $scope.avatar.url = ($scope.config.isCustomDomain ? '//my.' : '//my-') + $scope.config.fqdn + '/api/v1/cloudron/avatar';
+        // $scope.avatar.url = ($scope.config.isCustomDomain ? '//my.' : '//my-') + $scope.config.fqdn + '/api/v1/cloudron/avatar';
     });
 
     // setup all the dialog focus handling
