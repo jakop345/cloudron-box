@@ -243,7 +243,7 @@
                     <div class="grid-item-top">
                         <div class="row">
                             <div class="col-xs-12 text-center" style="padding-left: 5px; padding-right: 5px;">
-                                <img ng-src="{{app.iconUrl}}" fallback-icon="img/appicon_fallback.png" appstore-icon="{{ app.iconUrlStore }}" onerror="imageErrorHandler(this)" class="app-icon"/>
+                                <img ng-src="{{app.iconUrl || 'img/appicon_fallback.png'}}" fallback-icon="img/appicon_fallback.png" appstore-icon="{{ app.iconUrlStore }}" onerror="imageErrorHandler(this)" class="app-icon"/>
                             </div>
                         </div>
                         <br/>
