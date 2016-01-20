@@ -413,8 +413,8 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
 
     Client.prototype.getAppIconUrls = function (app) {
         return {
-            cloudron: this.apiOrigin + app.iconUrl + '?access_token=' + this._token,
-            store: this._config.apiServerOrigin + '/api/v1/apps/' + app.appStoreId + '/versions/' + app.manifest.version + '/icon'
+            cloudron: app.iconUrl ? (this.apiOrigin + app.iconUrl + '?access_token=' + this._token) : null,
+            store: app.appStoreId ? (this._config.apiServerOrigin + '/api/v1/apps/' + app.appStoreId + '/versions/' + app.manifest.version + '/icon') : null
         };
     };
 
