@@ -127,7 +127,7 @@ function createUser(username, password, email, displayName, admin, invitor, send
     if (error) return callback(error);
 
     error = validatePassword(password);
-    if (error) return callback(error);
+    if (error) return callback(new UserError(UserError.BAD_PASSWORD, error.message));
 
     error = validateEmail(email);
     if (error) return callback(error);
@@ -338,7 +338,7 @@ function setPassword(userId, newPassword, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     var error = validatePassword(newPassword);
-    if (error) return callback(error);
+    if (error) return callback(new UserError(UserError.BAD_PASSWORD, error.message));
 
     userdb.get(userId, function (error, user) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
@@ -381,7 +381,7 @@ function changePassword(username, oldPassword, newPassword, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     var error = validatePassword(newPassword);
-    if (error) return callback(error);
+    if (error) return callback(new UserError(UserError.BAD_PASSWORD, error.message));
 
     verify(username, oldPassword, function (error, user) {
         if (error) return callback(error);
