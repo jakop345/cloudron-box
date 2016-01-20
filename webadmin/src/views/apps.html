@@ -300,7 +300,7 @@
                     </div>
 
                     <!-- we check the version here because the box updater does not know when an app gets updated -->
-                    <div class="app-update-badge" ng-show="config.update.apps[app.id].manifest.version && (app | installSuccess)">
+                    <div class="app-update-badge" ng-show="config.update.apps[app.id].manifest.version && config.update.apps[app.id].manifest.version !== app.manifest.version && (app | installSuccess)">
                         <a href="" ng-click="showUpdate(app)" title="Update Available"><i class="fa fa-asterisk fa-2x text-success scale"></i></a>
                     </div>
                 </a>
