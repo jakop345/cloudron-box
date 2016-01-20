@@ -31,6 +31,7 @@ var assert = require('assert'),
     userdb = require('./userdb.js'),
     tokendb = require('./tokendb.js'),
     clientdb = require('./clientdb.js'),
+    validatePassword = require('./password.js').validate,
     util = require('util'),
     validator = require('validator'),
     _ = require('underscore');
@@ -71,9 +72,6 @@ UserError.BAD_PASSWORD = 'Bad password';
 UserError.BAD_TOKEN = 'Bad token';
 UserError.NOT_ALLOWED = 'Not Allowed';
 
-// http://www.w3resource.com/javascript/form/example4-javascript-form-validation-password.html
-var gPasswordTestRegExp = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,20}$/;
-
 function listUsers(callback) {
     assert.strictEqual(typeof callback, 'function');
 
@@ -89,14 +87,6 @@ function validateUsername(username) {
 
     if (username.length <= 2) return new UserError(UserError.BAD_USERNAME, 'Username must be atleast 3 chars');
     if (username.length > 256) return new UserError(UserError.BAD_USERNAME, 'Username too long');
-
-    return null;
-}
-
-function validatePassword(password) {
-    assert.strictEqual(typeof password, 'string');
-
-    if(!password.match(gPasswordTestRegExp)) return new UserError(UserError.BAD_PASSWORD, 'Password must be 8-20 character with at least one uppercase, one numeric and one special character');
 
     return null;
 }
