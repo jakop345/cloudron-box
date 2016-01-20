@@ -287,6 +287,7 @@ app.controller('SetupController', ['$scope', '$location', 'Client', 'Wizard', fu
         }
 
         Wizard.email = search.email;
+        Wizard.displayName = search.displayName;
         Wizard.requireEmail = !search.email;
         Wizard.provider = status.provider;
 
