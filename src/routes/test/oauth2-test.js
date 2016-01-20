@@ -139,7 +139,7 @@ describe('OAuth2', function () {
         var USER_0 = {
             id: uuid.v4(),
             username: 'someusername',
-            password: 'somepassword',
+            password: '@#45Strongpassword',
             email: 'some@email.com',
             admin: true,
             salt: 'somesalt',
@@ -1417,7 +1417,7 @@ describe('Password', function () {
                 .get('/?accessToken=token&expiresAt=1234').reply(200, {});
 
             superagent.post(SERVER_URL + '/api/v1/session/password/reset')
-            .send({ password: 'somepassword', resetToken: USER_0.resetToken })
+            .send({ password: 'ASF23$%somepassword', resetToken: USER_0.resetToken })
             .end(function (error, result) {
                 expect(scope.isDone()).to.be.ok();
                 expect(result.statusCode).to.equal(200);

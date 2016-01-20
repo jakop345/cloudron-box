@@ -21,7 +21,7 @@ describe('SimpleAuth API', function () {
     var SERVER_URL = 'http://localhost:' + config.get('port');
     var SIMPLE_AUTH_ORIGIN = 'http://localhost:' + config.get('simpleAuthPort');
 
-    var USERNAME = 'admin', PASSWORD = 'password', EMAIL ='silly@me.com';
+    var USERNAME = 'admin', PASSWORD = 'Foobar?1337', EMAIL ='silly@me.com';
 
     var APP_0 = {
         id: 'app0',

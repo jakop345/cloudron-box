@@ -56,8 +56,8 @@ var APP_MANIFEST_1 = JSON.parse(fs.readFileSync(__dirname + '/../../../../test-a
 APP_MANIFEST_1.dockerImage = TEST_IMAGE_REPO + ':' + TEST_IMAGE_TAG;
 APP_MANIFEST_1.singleUser = true;
 
-var USERNAME = 'admin', PASSWORD = 'password', EMAIL ='admin@me.com';
-var USERNAME_1 = 'user', PASSWORD_1 = 'password', EMAIL_1 ='user@me.com';
+var USERNAME = 'admin', PASSWORD = 'Foobar?1337', EMAIL ='admin@me.com';
+var USERNAME_1 = 'user', PASSWORD_1 = 'Foobar?1338', EMAIL_1 ='user@me.com';
 var token = null; // authentication token
 var token_1 = null;
 

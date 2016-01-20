@@ -18,7 +18,7 @@ var config = require('../../config.js'),
 
 var SERVER_URL = 'http://localhost:' + config.get('port');
 
-var USERNAME_0 = 'admin', PASSWORD = 'password', EMAIL = 'silly@me.com', EMAIL_0_NEW = 'stupid@me.com';
+var USERNAME_0 = 'admin', PASSWORD = 'Foobar?1337', EMAIL = 'silly@me.com', EMAIL_0_NEW = 'stupid@me.com';
 var USERNAME_1 = 'userTheFirst', EMAIL_1 = 'tao@zen.mac';
 var USERNAME_2 = 'userTheSecond', EMAIL_2 = 'user@foo.bar';
 var USERNAME_3 = 'userTheThird', EMAIL_3 = 'user3@foo.bar';
@@ -553,7 +553,7 @@ describe('User API', function () {
     it('change password fails due to wrong password', function (done) {
         superagent.post(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/password')
                .query({ access_token: token })
-               .send({ password: 'some wrong password', newPassword: 'newpassword' })
+               .send({ password: 'some wrong password', newPassword: 'MOre#$%34' })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(403);
             done();
@@ -573,7 +573,7 @@ describe('User API', function () {
     it('change password succeeds', function (done) {
         superagent.post(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/password')
                .query({ access_token: token })
-               .send({ password: PASSWORD, newPassword: 'new_password' })
+               .send({ password: PASSWORD, newPassword: 'MOre#$%34' })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(204);
             done();

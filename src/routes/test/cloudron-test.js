@@ -18,7 +18,7 @@ var async = require('async'),
 
 var SERVER_URL = 'http://localhost:' + config.get('port');
 
-var USERNAME = 'admin', PASSWORD = 'password', EMAIL ='silly@me.com';
+var USERNAME = 'admin', PASSWORD = 'Foobar?1337', EMAIL ='silly@me.com';
 var token = null; // authentication token
 
 var server;
@@ -68,7 +68,7 @@ describe('Cloudron', function () {
 
             superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
                    .query({ setupToken: 'somesetuptoken' })
-                   .send({ username: 'someuser', password: 'somepassword', email: 'admin@foo.bar' })
+                   .send({ username: 'someuser', password: 'strong#A3asdf', email: 'admin@foo.bar' })
                    .end(function (error, result) {
                 expect(result.statusCode).to.equal(500);
                 expect(scope.isDone()).to.be.ok();
@@ -81,7 +81,7 @@ describe('Cloudron', function () {
 
             superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
                    .query({ setupToken: 'somesetuptoken' })
-                   .send({ username: '', password: 'somepassword', email: 'admin@foo.bar' })
+                   .send({ username: '', password: 'ADSFsdf$%436', email: 'admin@foo.bar' })
                    .end(function (error, result) {
                 expect(result.statusCode).to.equal(400);
                 expect(scope.isDone()).to.be.ok();
@@ -107,7 +107,7 @@ describe('Cloudron', function () {
 
             superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
                    .query({ setupToken: 'somesetuptoken' })
-                   .send({ username: 'someuser', password: 'somepassword', email: '' })
+                   .send({ username: 'someuser', password: 'ADSF#asd546', email: '' })
                    .end(function (error, result) {
                 expect(result.statusCode).to.equal(400);
                 expect(scope.isDone()).to.be.ok();
@@ -120,7 +120,7 @@ describe('Cloudron', function () {
 
             superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
                    .query({ setupToken: 'somesetuptoken' })
-                   .send({ username: 'someuser', password: '', email: 'admin@foo.bar', name: '' })
+                   .send({ username: 'someuser', password: 'ADSF?#asd546', email: 'admin@foo.bar', name: '' })
                    .end(function (error, result) {
                 expect(result.statusCode).to.equal(400);
                 expect(scope.isDone()).to.be.ok();
@@ -133,7 +133,7 @@ describe('Cloudron', function () {
 
             superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
                    .query({ setupToken: 'somesetuptoken' })
-                   .send({ username: 'someuser', password: 'somepassword', email: 'invalidemail' })
+                   .send({ username: 'someuser', password: 'ADSF#asd546', email: 'invalidemail' })
                    .end(function (error, result) {
                 expect(result.statusCode).to.equal(400);
                 expect(scope.isDone()).to.be.ok();
@@ -147,7 +147,7 @@ describe('Cloudron', function () {
 
             superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
                    .query({ setupToken: 'somesetuptoken' })
-                   .send({ username: 'someuser', password: 'somepassword', email: 'admin@foo.bar', name: 'tester' })
+                   .send({ username: 'someuser', password: 'ADSF#asd546', email: 'admin@foo.bar', name: 'tester' })
                    .end(function (error, result) {
                 expect(result.statusCode).to.equal(201);
                 expect(scope1.isDone()).to.be.ok();
@@ -161,7 +161,7 @@ describe('Cloudron', function () {
 
             superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
                    .query({ setupToken: 'somesetuptoken' })
-                   .send({ username: 'someuser', password: 'somepassword', email: 'admin@foo.bar' })
+                   .send({ username: 'someuser', password: 'ADSF#asd546', email: 'admin@foo.bar' })
                    .end(function (error, result) {
                 expect(result.statusCode).to.equal(409);
                 expect(scope.isDone()).to.be.ok();
