@@ -169,7 +169,7 @@ function createUser(username, password, email, displayName, admin, invitor, send
                 callback(null, user);
 
                 // WARNING do not send email for admins (this can only be the case for the owner, the first user creation during activation)
-                if (!admin) mailer.userAdded(user);
+                if (!admin) mailer.userAdded(user, sendInvite);
                 if (sendInvite) mailer.sendInvite(user, invitor);
             });
         });

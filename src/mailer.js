@@ -246,12 +246,28 @@ function sendInvite(user, invitor) {
     enqueue(mailOptions);
 }
 
-function userAdded(user) {
+function userAdded(user, inviteSent) {
     assert.strictEqual(typeof user, 'object');
+    assert.strictEqual(typeof inviteSent, 'boolean');
 
-    debug('Sending mail for userAdded');
+    debug('Sending mail for userAdded %s including invite link', inviteSent ? 'not' : '');
 
-    mailUserEventToAdmins(user, 'was added');
+    getAdminEmails(function (error, adminEmails) {
+        if (error) return console.log('Error getting admins', error);
+
+        adminEmails = _.difference(adminEmails, [ user.email ]);
+
+        var inviteLink = inviteSent ? null : config.adminOrigin() + '/api/v1/session/password/setup.html?reset_token=' + user.resetToken;
+
+        var mailOptions = {
+            from: config.get('adminEmail'),
+            to: adminEmails.join(', '),
+            subject: util.format('%s %s in Cloudron %s', user.username, event, config.fqdn()),
+            text: render('user_added.ejs', { fqdn: config.fqdn(), username: user.username, email: user.email, event: event, inviteLink: inviteLink, format: 'text' }),
+        };
+
+        enqueue(mailOptions);
+    });
 }
 
 function userRemoved(username) {
