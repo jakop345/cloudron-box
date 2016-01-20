@@ -21,6 +21,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         error: {},
         username: '',
         email: '',
+        displayName: '',
         sendInvite: true
     };
 
@@ -54,14 +55,16 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         $scope.useradd.alreadyTaken = false;
         $scope.useradd.error.username = null;
         $scope.useradd.error.email = null;
+        $scope.useradd.error.displayName = null;
 
-        Client.createUser($scope.useradd.username, $scope.useradd.email, $scope.useradd.sendInvite, function (error) {
+        Client.createUser($scope.useradd.username, $scope.useradd.email, $scope.useradd.displayName, $scope.useradd.sendInvite, function (error) {
             $scope.useradd.busy = false;
 
             if (error && error.statusCode === 409) {
                 $scope.useradd.error.username = 'Username or Email already taken';
                 $scope.useradd_form.username.$setPristine();
                 $scope.useradd_form.email.$setPristine();
+                $scope.useradd_form.displayName.$setPristine();
                 $('#inputUserAddUsername').focus();
                 return;
             }
@@ -76,6 +79,12 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
                     $scope.useradd.error.usernameAttempted = $scope.useradd.username;
                     $scope.useradd_form.username.$setPristine();
                     $('#inputUserAddUsername').focus();
+                } else if (error.message.indexOf('displayName') !== -1) {
+                    $scope.useradd.error.displayName = 'Invalid Name';
+                    $scope.useradd.error.displayNameAttempted = $scope.useradd.displayName;
+                    $scope.useradd_form.displayName.$setPristine();
+                    $('#inputUserAddDisplayName').focus();
+
                 } else {
                     console.error('Unable to create user.', error.statusCode, error.message);
                 }
@@ -86,6 +95,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
             $scope.useradd.error = {};
             $scope.useradd.username = '';
             $scope.useradd.email = '';
+            $scope.useradd.displayName = '';
 
             $scope.useradd_form.$setUntouched();
             $scope.useradd_form.$setPristine();

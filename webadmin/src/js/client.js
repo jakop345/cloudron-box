@@ -541,10 +541,11 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
-    Client.prototype.createUser = function (username, email, sendInvite, callback) {
+    Client.prototype.createUser = function (username, email, displayName, sendInvite, callback) {
         var data = {
             username: username,
             email: email,
+            displayName: displayName,
             invite: !!sendInvite
         };
 

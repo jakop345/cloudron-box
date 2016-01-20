@@ -28,6 +28,17 @@
                             </div>
                             <input type="email" class="form-control" ng-model="useradd.email" id="inputUserAddEmail" name="email" required>
                         </div>
+
+                        <div class="form-group" ng-class="{ 'has-error': (useradd_form.displayName.$dirty && useradd_form.displayName.$invalid) || (!useradd_form.displayName.$dirty && useradd.error.displayName) }">
+                            <label class="control-label" for="inputUserAddDisplayName">Full Name</label>
+                            <div class="control-label" ng-show="(!useradd_form.displayName.$dirty && useradd.error.displayName) || (useradd_form.displayname.$dirty && useradd_form.displayName.$invalid) || (!useradd_form.displayName.$dirty && useradd.error.displayName)">
+                                <small ng-show="useradd_form.displayName.$error.required">A Name is required</small>
+                                <small ng-show="useradd_form.displayName.$error.displayName">This is not a valid Name</small>
+                                <small ng-show="!useradd_form.displayName.$dirty && useradd.error.displayName">{{ useradd.error.displayName }}</small>
+                            </div>
+                            <input type="text" class="form-control" ng-model="useradd.displayName" id="inputUserAddDisplayName" name="email" required>
+                        </div>
+
                         <div class="checkbox">
                             <label>
                                 <input type="checkbox" ng-model="useradd.sendInvite" id="inputUserAddSendInvite"> Send invite
