@@ -41,7 +41,7 @@ function activate(req, res, next) {
     if (typeof req.body.username !== 'string') return next(new HttpError(400, 'username must be string'));
     if (typeof req.body.password !== 'string') return next(new HttpError(400, 'password must be string'));
     if (typeof req.body.email !== 'string') return next(new HttpError(400, 'email must be string'));
-    if ('displayName' in req.body && typeof req.body.displayName !== 'string') return next(new HttpError(400, 'email must be string'));
+    if ('displayName' in req.body && typeof req.body.displayName !== 'string') return next(new HttpError(400, 'displayName must be string'));
 
     var username = req.body.username;
     var password = req.body.password;
