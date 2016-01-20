@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS users(
     createdAt VARCHAR(512) NOT NULL,
     modifiedAt VARCHAR(512) NOT NULL,
     admin INTEGER NOT NULL,
-    displayName VARCHAR(512),
+    displayName VARCHAR(512) DEFAULT '',
     PRIMARY KEY(id));
 
 CREATE TABLE IF NOT EXISTS tokens(
