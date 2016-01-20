@@ -54,7 +54,7 @@ function start(callback) {
                         cn: entry.id,
                         uid: entry.id,
                         mail: entry.email,
-                        displayname: entry.username,
+                        displayname: entry.displayName || entry.username,
                         username: entry.username,
                         samaccountname: entry.username,      // to support ActiveDirectory clients
                         memberof: groups
