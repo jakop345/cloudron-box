@@ -17,8 +17,8 @@ var USERNAME = 'nobody';
 var USERNAME_NEW = 'nobodynew';
 var EMAIL = 'nobody@no.body';
 var EMAIL_NEW = 'nobodynew@no.body';
-var PASSWORD = 'foobar';
-var NEW_PASSWORD = 'somenewpassword';
+var PASSWORD = 'sTrOnG#$34134';
+var NEW_PASSWORD = 'oTHER@#$235';
 var IS_ADMIN = true;
 var DISPLAY_NAME = 'Nobody cares';
 var userObject = null;
@@ -74,6 +74,46 @@ describe('User', function () {
     describe('create', function() {
         before(cleanupUsers);
         after(cleanupUsers);
+
+        it('fails due to short password', function (done) {
+            user.create(USERNAME, 'Fo$%23', EMAIL, DISPLAY_NAME, IS_ADMIN, null, true, function (error, result) {
+                expect(error).to.be.ok();
+                expect(result).to.not.be.ok();
+                expect(error.reason).to.equal(UserError.BAD_PASSWORD);
+
+                done();
+            });
+        });
+
+        it('fails due to missing upper case password', function (done) {
+            user.create(USERNAME, 'thisiseightch%$234arslong', EMAIL, DISPLAY_NAME, IS_ADMIN, null, true, function (error, result) {
+                expect(error).to.be.ok();
+                expect(result).to.not.be.ok();
+                expect(error.reason).to.equal(UserError.BAD_PASSWORD);
+
+                done();
+            });
+        });
+
+        it('fails due to missing numerics in password', function (done) {
+            user.create(USERNAME, 'foobaRASDF%', EMAIL, DISPLAY_NAME, IS_ADMIN, null, true, function (error, result) {
+                expect(error).to.be.ok();
+                expect(result).to.not.be.ok();
+                expect(error.reason).to.equal(UserError.BAD_PASSWORD);
+
+                done();
+            });
+        });
+
+        it('fails due to missing special chars in password', function (done) {
+            user.create(USERNAME, 'foobaRASDF23423', EMAIL, DISPLAY_NAME, IS_ADMIN, null, true, function (error, result) {
+                expect(error).to.be.ok();
+                expect(result).to.not.be.ok();
+                expect(error.reason).to.equal(UserError.BAD_PASSWORD);
+
+                done();
+            });
+        });
 
         it('succeeds and attempts to send invite', function (done) {
             user.create(USERNAME, PASSWORD, EMAIL, DISPLAY_NAME, IS_ADMIN, null /* invitor */, true, function (error, result) {
@@ -327,7 +367,7 @@ describe('User', function () {
         it('make second user admin succeeds', function (done) {
             var user1 = {
                 username: 'seconduser',
-                password: 'foobar',
+                password: 'ASDFkljsf#$^%2354',
                 email: 'some@thi.ng'
             };
 
@@ -369,7 +409,7 @@ describe('User', function () {
         it('succeeds for two admins', function (done) {
             var user1 = {
                 username: 'seconduser',
-                password: 'foobar',
+                password: 'Adfasdkjf#$%43',
                 email: 'some@thi.ng'
             };
 
