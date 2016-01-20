@@ -20,6 +20,7 @@ var EMAIL_NEW = 'nobodynew@no.body';
 var PASSWORD = 'foobar';
 var NEW_PASSWORD = 'somenewpassword';
 var IS_ADMIN = true;
+var DISPLAY_NAME = 'Nobody cares';
 var userObject = null;
 
 function cleanupUsers(done) {
@@ -30,7 +31,7 @@ function cleanupUsers(done) {
 }
 
 function createUser(done) {
-    user.create(USERNAME, PASSWORD, EMAIL, IS_ADMIN, null /* invitor  */, false, function (error, result) {
+    user.create(USERNAME, PASSWORD, EMAIL, DISPLAY_NAME, IS_ADMIN, null /* invitor  */, false, function (error, result) {
         expect(error).to.not.be.ok();
         expect(result).to.be.ok();
 
@@ -75,7 +76,7 @@ describe('User', function () {
         after(cleanupUsers);
 
         it('succeeds and attempts to send invite', function (done) {
-            user.create(USERNAME, PASSWORD, EMAIL, IS_ADMIN, null /* invitor */, true, function (error, result) {
+            user.create(USERNAME, PASSWORD, EMAIL, DISPLAY_NAME, IS_ADMIN, null /* invitor */, true, function (error, result) {
                 expect(error).not.to.be.ok();
                 expect(result).to.be.ok();
                 expect(result.username).to.equal(USERNAME);
@@ -110,7 +111,7 @@ describe('User', function () {
         });
 
         it('fails because user exists', function (done) {
-            user.create(USERNAME, PASSWORD, EMAIL, IS_ADMIN, null /* invitor */, false, function (error, result) {
+            user.create(USERNAME, PASSWORD, EMAIL, DISPLAY_NAME, IS_ADMIN, null /* invitor */, false, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).not.to.be.ok();
                 expect(error.reason).to.equal(UserError.ALREADY_EXISTS);
@@ -120,7 +121,7 @@ describe('User', function () {
         });
 
         it('fails because password is empty', function (done) {
-            user.create(USERNAME, '', EMAIL, IS_ADMIN, null /* invitor */, false, function (error, result) {
+            user.create(USERNAME, '', EMAIL, DISPLAY_NAME, IS_ADMIN, null /* invitor */, false, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).not.to.be.ok();
                 expect(error.reason).to.equal(UserError.BAD_PASSWORD);
@@ -330,7 +331,7 @@ describe('User', function () {
                 email: 'some@thi.ng'
             };
 
-            user.create(user1.username, user1.password, user1.email, false, { username: USERNAME, email: EMAIL } /* invitor */, false, function (error, result) {
+            user.create(user1.username, user1.password, user1.email, DISPLAY_NAME, false, { username: USERNAME, email: EMAIL } /* invitor */, false, function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
 
@@ -372,7 +373,7 @@ describe('User', function () {
                 email: 'some@thi.ng'
             };
 
-            user.create(user1.username, user1.password, user1.email, false, { username: USERNAME, email: EMAIL } /* invitor */, false, function (error, result) {
+            user.create(user1.username, user1.password, user1.email, DISPLAY_NAME, false, { username: USERNAME, email: EMAIL } /* invitor */, false, function (error, result) {
                 expect(error).to.eql(null);
                 expect(result).to.be.ok();
 

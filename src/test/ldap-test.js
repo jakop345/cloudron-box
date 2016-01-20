@@ -18,13 +18,15 @@ var database = require('../database.js'),
 var USER_0 = {
     username: 'foobar0',
     password: 'password0',
-    email: 'foo0@bar.com'
+    email: 'foo0@bar.com',
+    displayName: 'Bob bobson'
 };
 
 var USER_1 = {
     username: 'foobar1',
     password: 'password1',
-    email: 'foo1@bar.com'
+    email: 'foo1@bar.com',
+    displayName: 'Jesus'
 };
 
 function setup(done) {
@@ -32,8 +34,8 @@ function setup(done) {
         database.initialize.bind(null),
         database._clear.bind(null),
         ldapServer.start.bind(null),
-        user.create.bind(null, USER_0.username, USER_0.password, USER_0.email, true, null, false),
-        user.create.bind(null, USER_1.username, USER_1.password, USER_1.email, false, USER_0, false)
+        user.create.bind(null, USER_0.username, USER_0.password, USER_0.email, USER_0.displayName, true, null, false),
+        user.create.bind(null, USER_1.username, USER_1.password, USER_1.email, USER_0.displayName, false, USER_0, false)
     ], done);
 }
 

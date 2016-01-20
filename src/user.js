@@ -114,10 +114,17 @@ function validateToken(token) {
     return null;
 }
 
-function createUser(username, password, email, admin, invitor, sendInvite, callback) {
+function validateDisplayName(name) {
+    assert.strictEqual(typeof name, 'string');
+
+    return null;
+}
+
+function createUser(username, password, email, displayName, admin, invitor, sendInvite, callback) {
     assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof password, 'string');
     assert.strictEqual(typeof email, 'string');
+    assert.strictEqual(typeof displayName, 'string');
     assert.strictEqual(typeof admin, 'boolean');
     assert(invitor || admin);
     assert.strictEqual(typeof sendInvite, 'boolean');
@@ -130,6 +137,9 @@ function createUser(username, password, email, admin, invitor, sendInvite, callb
     if (error) return callback(error);
 
     error = validateEmail(email);
+    if (error) return callback(error);
+
+    error = validateDisplayName(displayName);
     if (error) return callback(error);
 
     crypto.randomBytes(CRYPTO_SALT_SIZE, function (error, salt) {
@@ -149,7 +159,7 @@ function createUser(username, password, email, admin, invitor, sendInvite, callb
                 createdAt: now,
                 modifiedAt: now,
                 resetToken: hat(256),
-                displayName: ''
+                displayName: displayName
             };
 
             userdb.add(user.id, user, function (error) {
@@ -387,12 +397,12 @@ function changePassword(username, oldPassword, newPassword, callback) {
     });
 }
 
-function createOwner(username, password, email, callback) {
+function createOwner(username, password, email, displayName, callback) {
     userdb.count(function (error, count) {
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
         if (count !== 0) return callback(new UserError(UserError.ALREADY_EXISTS));
 
-        createUser(username, password, email, true /* admin */, null /* invitor */, false /* sendInvite */, callback);
+        createUser(username, password, email, displayName, true /* admin */, null /* invitor */, false /* sendInvite */, callback);
     });
 }
 

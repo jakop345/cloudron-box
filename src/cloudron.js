@@ -196,10 +196,11 @@ function setTimeZone(ip, callback) {
     });
 }
 
-function activate(username, password, email, ip, callback) {
+function activate(username, password, email, displayName, ip, callback) {
     assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof password, 'string');
     assert.strictEqual(typeof email, 'string');
+    assert.strictEqual(typeof displayName, 'string');
     assert.strictEqual(typeof ip, 'string');
     assert.strictEqual(typeof callback, 'function');
 
@@ -207,7 +208,7 @@ function activate(username, password, email, ip, callback) {
 
     setTimeZone(ip, function () { }); // TODO: get this from user. note that timezone is detected based on the browser location and not the cloudron region
 
-    user.createOwner(username, password, email, function (error, userObject) {
+    user.createOwner(username, password, email, displayName, function (error, userObject) {
         if (error && error.reason === UserError.ALREADY_EXISTS) return callback(new CloudronError(CloudronError.ALREADY_PROVISIONED));
         if (error && error.reason === UserError.BAD_USERNAME) return callback(new CloudronError(CloudronError.BAD_USERNAME));
         if (error && error.reason === UserError.BAD_PASSWORD) return callback(new CloudronError(CloudronError.BAD_PASSWORD));
