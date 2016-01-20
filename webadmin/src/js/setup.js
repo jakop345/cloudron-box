@@ -43,6 +43,7 @@ app.service('Wizard', [ function () {
         this.username = '';
         this.email = '';
         this.password = '';
+        this.displayName = '';
         this.setupToken = null;
         this.provider = null;
         this.availableAvatars = [{
@@ -221,7 +222,7 @@ app.controller('StepController', ['$scope', '$route', '$location', 'Wizard', fun
 app.controller('FinishController', ['$scope', '$location', 'Wizard', 'Client', function ($scope, $location, Wizard, Client) {
     $scope.wizard = Wizard;
 
-    Client.createAdmin(Wizard.username, Wizard.password, Wizard.email, Wizard.setupToken, function (error) {
+    Client.createAdmin(Wizard.username, Wizard.password, Wizard.email, Wizard.displayName, Wizard.setupToken, function (error) {
         if (error) {
             console.error('Internal error', error);
             window.location.href = '/error.html';
