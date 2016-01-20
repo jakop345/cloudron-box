@@ -1240,7 +1240,7 @@ describe('Password', function () {
     var USER_0 = {
         userId: uuid.v4(),
         username: 'someusername',
-        password: 'somepassword',
+        password: 'passWord%1234',
         email: 'some@email.com',
         admin: true,
         salt: 'somesalt',

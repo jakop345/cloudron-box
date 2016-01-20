@@ -17,14 +17,14 @@ var database = require('../database.js'),
 
 var USER_0 = {
     username: 'foobar0',
-    password: 'password0',
+    password: 'Foobar?1234',
     email: 'foo0@bar.com',
     displayName: 'Bob bobson'
 };
 
 var USER_1 = {
     username: 'foobar1',
-    password: 'password1',
+    password: 'Foobar?12345',
     email: 'foo1@bar.com',
     displayName: 'Jesus'
 };
