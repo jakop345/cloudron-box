@@ -17,10 +17,10 @@
             <input type="email" class="form-control" ng-model="wizard.email" id="inputEmail" name="email" placeholder="Email" ng-enter="focusNext('inputPassword', setup_form.email.$invalid)" required autocomplete="off">
         </div>
         <div class="form-group" ng-class="{ 'has-error': setup_form.password.$dirty && setup_form.password.$invalid }">
+            <input type="password" class="form-control" ng-model="wizard.password" id="inputPassword" name="password" placeholder="Password" ng-enter="next(setup_form.username.$invalid || setup_form.password.$invalid || setup_form.email.$invalid)" ng-pattern="/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,30}$/" required autocomplete="off">
             <div class="control-label" ng-show="setup_form.password.$dirty && setup_form.password.$invalid">
                 <small ng-show="setup_form.password.$dirty && setup_form.password.$invalid">Password must be 8-30 character with at least one uppercase, one numeric and one special character</small>
             </div>
-            <input type="password" class="form-control" ng-model="wizard.password" id="inputPassword" name="password" placeholder="Password" ng-enter="next(setup_form.username.$invalid || setup_form.password.$invalid || setup_form.email.$invalid)" ng-pattern="/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,30}$/" required autocomplete="off">
         </div>
     </div>
 </div>
