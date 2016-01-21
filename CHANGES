@@ -379,3 +379,6 @@
 - Add support for display names
 - Send invite links to admins for user setup
 - Enforce stronger passwords
+
+[0.6.5]
+- Finalize stronger password requirement
