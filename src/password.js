@@ -13,6 +13,7 @@ var assert = require('assert'),
     generatePassword = require('password-generator');
 
 // http://www.w3resource.com/javascript/form/example4-javascript-form-validation-password.html
+// WARNING!!! if this is changed, the UI parts in the setup and account view have to be adjusted!
 var gPasswordTestRegExp = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,30}$/;
 
 var UPPERCASE_RE = /([A-Z])/g;
