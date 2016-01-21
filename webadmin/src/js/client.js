@@ -154,8 +154,6 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         this.avatar = this.apiOrigin + '/api/v1/cloudron/avatar?' + String(Math.random()).slice(2);
 
         var favicon = $('#favicon');
-
-        console.log('rseet favicon', favicon)
         if (favicon) favicon.attr('href', this.avatar);
     };
 
