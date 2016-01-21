@@ -233,6 +233,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
             if (error && error.statusCode === 403) {
                 $scope.appRestore.password = '';
                 $scope.appRestore.error.password = true;
+                $scope.appRestoreForm.password.$setPristine();
                 $('#appRestorePasswordInput').focus();
             } else if (error) {
                 Client.error(error);

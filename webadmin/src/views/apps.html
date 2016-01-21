@@ -110,9 +110,13 @@
                 <p ng-show="appRestore.app.lastBackupId === null">This app was never backed up. Restoring the app will lose all content!</p>
                 <fieldset>
                     <form class="form-signin" role="form" name="appRestoreForm" ng-submit="doRestore()" autocomplete="off">
-                        <div class="form-group" ng-class="{ 'has-error': (!appRestoreForm.password.$dirty && appRestore.error.password) || (appRestoreForm.password.$dirty && appRestoreForm.password.$invalid) }">
+                        <div class="form-group" ng-class="{ 'has-error': (appRestoreForm.password.$dirty && appRestoreForm.password.$invalid) || (!appRestoreForm.password.$dirty && appRestore.error.password) }">
                             <label class="control-label" for="appRestorePasswordInput">Provide your password to confirm this action</label>
-                            <input type="password" class="form-control" ng-model="appRestore.password" id="appRestorePasswordInput" name="password" ng-maxlength="30" ng-minlength="8" required autofocus>
+                            <div class="control-label" ng-show="(appRestoreForm.password.$dirty && appRestoreForm.password.$invalid) || (!appRestoreForm.password.$dirty && appRestore.error.password)">
+                                <small ng-show=" appRestoreForm.password.$dirty && appRestoreForm.password.$invalid">Password required</small>
+                                <small ng-show="!appRestoreForm.password.$dirty && appRestore.error.password">Wrong password</small>
+                            </div>
+                            <input type="password" class="form-control" ng-model="appRestore.password" id="appRestorePasswordInput" name="password" required autofocus>
                         </div>
 
                         <input class="ng-hide" type="submit" ng-disabled="appRestoreForm.$invalid || busy"/>
