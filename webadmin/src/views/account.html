@@ -13,30 +13,24 @@
                             <div class="control-label" ng-show="(!passwordchange_form.password.$dirty && passwordchange.error.password) || (passwordchange_form.password.$dirty && passwordchange_form.password.$invalid)">
                                 <small ng-show="!passwordchange_form.password.$dirty && passwordchange.error.password">Invalid pasword</small>
                                 <small ng-show="passwordchange_form.password.$dirty && passwordchange_form.password.$error.required">A password is required</small>
-                                <small ng-show="passwordchange_form.password.$error.minlength">The password is too short</small>
-                                <small ng-show="passwordchange_form.password.$error.maxlength">The password is too long</small>
                             </div>
-                            <input type="password" class="form-control" ng-model="passwordchange.password" id="inputPasswordChangePassword" name="password" ng-maxlength="30" ng-minlength="8" required autofocus>
+                            <input type="password" class="form-control" ng-model="passwordchange.password" id="inputPasswordChangePassword" name="password" required autofocus>
                         </div>
                         <div class="form-group" ng-class="{ 'has-error': (!passwordchange_form.newPassword.$dirty && passwordchange.error.newPassword) || (passwordchange_form.newPassword.$dirty && passwordchange_form.newPassword.$invalid) }">
                             <label class="control-label" for="inputPasswordChangeNewPassword">New Password</label>
                             <div class="control-label" ng-show="(!passwordchange_form.newPassword.$dirty && passwordchange.error.newPassword) || (passwordchange_form.newPassword.$dirty && passwordchange_form.newPassword.$invalid)">
-                                <small ng-show="passwordchange.error.newPassword">{{ passwordchange.error.newPassword }}<br/><br/></small>
-                                <small ng-show="passwordchange_form.newPassword.$dirty && passwordchange_form.newPassword.$error.required">A password is required</small>
-                                <small ng-show="passwordchange_form.newPassword.$error.minlength">The password is too short</small>
-                                <small ng-show="passwordchange_form.newPassword.$error.maxlength">The password is too long</small>
+                                <small ng-show="!passwordchange_form.newPassword.$dirty && passwordchange.error.newPassword">{{ passwordchange.error.newPassword }}<br/><br/></small>
+                                <small ng-show=" passwordchange_form.newPassword.$dirty && passwordchange_form.newPassword.$invalid">Password must be 8-30 character with at least one uppercase, one numeric and one special character</small>
                             </div>
-                            <input type="password" class="form-control" ng-model="passwordchange.newPassword" id="inputPasswordChangeNewPassword" name="newPassword" ng-maxlength="30" ng-minlength="8" required autofocus>
+                            <input type="password" class="form-control" ng-model="passwordchange.newPassword" id="inputPasswordChangeNewPassword" name="newPassword" ng-pattern="/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,30}$/" required autofocus>
                         </div>
-                        <div class="form-group" ng-class="{ 'has-error': (!passwordchange_form.newPassword.$dirty && passwordchange.error.newPassword) || (!passwordchange_form.newPasswordRepeat.$dirty && passwordchange.error.newPasswordRepeat) || (passwordchange_form.newPasswordRepeat.$dirty && passwordchange_form.newPasswordRepeat.$invalid) || (passwordchange_form.newPasswordRepeat.$dirty && passwordchange.newPassword !== passwordchange.newPasswordRepeat) }">
+                        <div class="form-group" ng-class="{ 'has-error': (!passwordchange_form.newPassword.$dirty && passwordchange.error.newPassword) || (passwordchange_form.newPasswordRepeat.$dirty && passwordchange_form.newPasswordRepeat.$error.required) || (passwordchange_form.newPasswordRepeat.$dirty && passwordchange.newPassword !== passwordchange.newPasswordRepeat) }">
                             <label class="control-label" for="inputPasswordChangeNewPasswordRepeat">Repeat New Password</label>
-                            <div class="control-label" ng-show="(!passwordchange_form.newPassword.$dirty && passwordchange.error.newPassword) || (!passwordchange_form.newPasswordRepeat.$dirty && passwordchange.error.newPasswordRepeat) || (passwordchange_form.newPasswordRepeat.$dirty && passwordchange_form.newPasswordRepeat.$invalid) || (passwordchange_form.newPasswordRepeat.$dirty && passwordchange.newPassword !== passwordchange.newPasswordRepeat)">
+                            <div class="control-label" ng-show="(!passwordchange_form.newPassword.$dirty && passwordchange.error.newPassword) || (passwordchange_form.newPasswordRepeat.$dirty && passwordchange_form.newPasswordRepeat.$error.required) || (passwordchange_form.newPasswordRepeat.$dirty && passwordchange.newPassword !== passwordchange.newPasswordRepeat)">
                                 <small ng-show="passwordchange_form.newPasswordRepeat.$dirty && passwordchange_form.newPasswordRepeat.$error.required">A password is required</small>
-                                <small ng-show="passwordchange_form.newPasswordRepeat.$error.minlength">The password is too short</small>
-                                <small ng-show="passwordchange_form.newPasswordRepeat.$error.maxlength">The password is too long</small>
-                                <small ng-show="passwordchange_form.newPasswordRepeat.$dirty && passwordchange.newPassword !== passwordchange.newPasswordRepeat">Passwords don't match</small>
+                                <small ng-show="passwordchange_form.newPasswordRepeat.$dirty && passwordchange.newPassword !== passwordchange.newPasswordRepeat && passwordchange.newPasswordRepeat">Passwords don't match</small>
                             </div>
-                            <input type="password" class="form-control" ng-model="passwordchange.newPasswordRepeat" id="inputPasswordChangeNewPasswordRepeat" name="newPasswordRepeat" ng-maxlength="30" ng-minlength="8" required autofocus>
+                            <input type="password" class="form-control" ng-model="passwordchange.newPasswordRepeat" id="inputPasswordChangeNewPasswordRepeat" name="newPasswordRepeat" required autofocus>
                         </div>
                         <input class="ng-hide" type="submit" ng-disabled="passwordchange_form.$invalid"/>
                     </fieldset>
