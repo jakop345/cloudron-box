@@ -329,24 +329,20 @@ function deleteImage(manifest, callback) {
 
     var docker = exports.connection;
 
-    docker.getImage(dockerImage).inspect(function (error, result) {
+    var removeOptions = {
+        force: false, // might be shared with another instance of this app
+        noprune: false // delete untagged parents
+    };
+
+    // registry v1 used to pull down all *tags*. this meant that deleting image by tag was not enough (since that
+    // just removes the tag). we used to remove the image by id. this is not required anymore because aliases are
+    // not created anymore after https://github.com/docker/docker/pull/10571
+    docker.getImage(dockerImage).remove(removeOptions, function (error) {
         if (error && error.statusCode === 404) return callback(null);
+        if (error && error.statusCode === 409) return callback(null); // another container using the image
 
-        if (error) return callback(error);
+        if (error) debug('Error removing image %s : %j', dockerImage, error);
 
-        var removeOptions = {
-            force: true,
-            noprune: false
-        };
-
-         // delete image by id because 'docker pull' pulls down all the tags and this is the only way to delete all tags
-        docker.getImage(result.Id).remove(removeOptions, function (error) {
-            if (error && error.statusCode === 404) return callback(null);
-            if (error && error.statusCode === 409) return callback(null); // another container using the image
-
-            if (error) debug('Error removing image %s : %j', dockerImage, error);
-
-            callback(error);
-        });
+        callback(error);
     });
 }

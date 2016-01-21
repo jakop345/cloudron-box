@@ -42,7 +42,8 @@ var SERVER_URL = 'http://localhost:' + config.get('port');
 // Test image information
 var TEST_IMAGE_REPO = 'cloudron/test';
 var TEST_IMAGE_TAG = '10.0.0';
-var TEST_IMAGE_ID = child_process.execSync('docker inspect --format={{.Id}} ' + TEST_IMAGE_REPO + ':' + TEST_IMAGE_TAG).toString('utf8').trim();
+var TEST_IMAGE = TEST_IMAGE_REPO + ':' + TEST_IMAGE_TAG;
+var TEST_IMAGE_ID = child_process.execSync('docker inspect --format={{.Id}} ' + TEST_IMAGE).toString('utf8').trim();
 
 var APP_STORE_ID = 'test', APP_ID;
 var APP_LOCATION = 'appslocation';
@@ -50,10 +51,10 @@ var APP_LOCATION_2 = 'appslocationtwo';
 var APP_LOCATION_NEW = 'appslocationnew';
 
 var APP_MANIFEST = JSON.parse(fs.readFileSync(__dirname + '/../../../../test-app/CloudronManifest.json', 'utf8'));
-APP_MANIFEST.dockerImage = TEST_IMAGE_REPO + ':' + TEST_IMAGE_TAG;
+APP_MANIFEST.dockerImage = TEST_IMAGE;
 
 var APP_MANIFEST_1 = JSON.parse(fs.readFileSync(__dirname + '/../../../../test-app/CloudronManifest.json', 'utf8'));
-APP_MANIFEST_1.dockerImage = TEST_IMAGE_REPO + ':' + TEST_IMAGE_TAG;
+APP_MANIFEST_1.dockerImage = TEST_IMAGE;
 APP_MANIFEST_1.singleUser = true;
 
 var USERNAME = 'admin', PASSWORD = 'Foobar?1337', EMAIL ='admin@me.com';
@@ -176,7 +177,7 @@ describe('App API', function () {
 
     before(function (done) {
         dockerProxy = startDockerProxy(function interceptor(req, res) {
-            if (req.method === 'DELETE' && req.url === '/images/' + TEST_IMAGE_ID + '?force=true&noprune=false') {
+            if (req.method === 'DELETE' && req.url === '/images/' + TEST_IMAGE + '?force=false&noprune=false') {
                 res.writeHead(200);
                 res.end();
                 return true;
@@ -573,7 +574,7 @@ describe('App installation', function () {
                         res.writeHead(200);
                         res.end();
                         return true;
-                    } else if (req.method === 'DELETE' && req.url === '/images/' + TEST_IMAGE_ID + '?force=true&noprune=false') {
+                    } else if (req.method === 'DELETE' && req.url === '/images/' + TEST_IMAGE + '?force=false&noprune=false') {
                         imageDeleted = true;
                         res.writeHead(200);
                         res.end();
@@ -1043,7 +1044,7 @@ describe('App installation - port bindings', function () {
                         res.writeHead(200);
                         res.end();
                         return true;
-                    } else if (req.method === 'DELETE' && req.url === '/images/' + TEST_IMAGE_ID + '?force=true&noprune=false') {
+                    } else if (req.method === 'DELETE' && req.url === '/images/' + TEST_IMAGE + '?force=false&noprune=false') {
                         imageDeleted = true;
                         res.writeHead(200);
                         res.end();
