@@ -60,6 +60,14 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
                     $scope.passwordchange.error.password = true;
                     $scope.passwordchange.password = '';
                     $('#inputPasswordChangePassword').focus();
+                    $scope.passwordchange_form.password.$setPristine();
+                } else if (error.statusCode === 400) {
+                    $scope.passwordchange.error.newPassword = error.message;
+                    $scope.passwordchange.newPassword = '';
+                    $scope.passwordchange.newPasswordRepeat = '';
+                    $scope.passwordchange_form.newPassword.$setPristine();
+                    $scope.passwordchange_form.newPasswordRepeat.$setPristine();
+                    $('#inputPasswordChangeNewPassword').focus();
                 } else {
                     console.error('Unable to change password.', error);
                 }
