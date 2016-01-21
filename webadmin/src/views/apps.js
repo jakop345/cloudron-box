@@ -181,8 +181,9 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
                     $scope.appConfigureForm.location.$setPristine();
                     $('#appConfigureLocationInput').focus();
                 } else if (error.statusCode === 403) {
-                    $scope.appConfigure.error.password = 'Wrong password provided.';
+                    $scope.appConfigure.error.password = true;
                     $scope.appConfigure.password = '';
+                    $scope.appConfigureForm.password.$setPristine();
                     $('#appConfigurePasswordInput').focus();
                 } else if (error.statusCode === 400 && error.message.indexOf('cert') !== -1 ) {
                     $scope.appConfigure.error.cert = error.message;
