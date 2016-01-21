@@ -11,7 +11,7 @@
                         <div class="form-group" ng-class="{ 'has-error': (!passwordchange_form.password.$dirty && passwordchange.error.password) || (passwordchange_form.password.$dirty && passwordchange_form.password.$invalid) }">
                             <label class="control-label" for="inputPasswordChangePassword">Current Password</label>
                             <div class="control-label" ng-show="(!passwordchange_form.password.$dirty && passwordchange.error.password) || (passwordchange_form.password.$dirty && passwordchange_form.password.$invalid)">
-                                <small ng-show="!passwordchange_form.password.$dirty && passwordchange.error.password">Invalid pasword</small>
+                                <small ng-show="!passwordchange_form.password.$dirty && passwordchange.error.password">Wrong password</small>
                                 <small ng-show="passwordchange_form.password.$dirty && passwordchange_form.password.$error.required">A password is required</small>
                             </div>
                             <input type="password" class="form-control" ng-model="passwordchange.password" id="inputPasswordChangePassword" name="password" required autofocus>

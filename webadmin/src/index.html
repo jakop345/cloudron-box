@@ -90,7 +90,7 @@
                                     <label class="control-label" for="inputUpdatePassword">Give your password to verify that you are performing that action</label>
                                     <div class="control-label" ng-show="(update_form.password.$dirty && update_form.password.$invalid) || (!update_form.password.$dirty && update.error.password)">
                                         <small ng-show=" update_form.password.$dirty && update_form.password.$invalid">Password required</small>
-                                        <small ng-show="!update_form.password.$dirty && update.error.password">Invalid password</small>
+                                        <small ng-show="!update_form.password.$dirty && update.error.password">Wrong password</small>
                                     </div>
                                     <input type="password" class="form-control" ng-model="update.password" id="inputUpdatePassword" name="password" placeholder="Password" required autofocus>
                                 </div>

@@ -15,7 +15,7 @@
                                 <small ng-show="developerModeChangeForm.password.$error.required">A password is required</small>
                                 <small ng-show="developerModeChangeForm.password.$error.minlength">The password is too short</small>
                                 <small ng-show="developerModeChangeForm.password.$error.maxlength">The password is too long</small>
-                                <small ng-show="developerModeChangeForm.password.$dirty && developerModeChange.error.password">Invalid pasword</small>
+                                <small ng-show="developerModeChangeForm.password.$dirty && developerModeChange.error.password">Wrong password</small>
                             </div>
                             <input type="password" class="form-control" ng-model="developerModeChange.password" id="inputDeveloperModeChangePassword" name="password" ng-maxlength="30" ng-minlength="8" required autofocus>
                         </div>
