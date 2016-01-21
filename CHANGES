@@ -382,3 +382,7 @@
 
 [0.6.5]
 - Finalize stronger password requirement
+
+[0.6.6]
+- Do not remove docker images when in use by another container
+
