@@ -150,14 +150,16 @@ function sendErrorPageOrRedirect(req, res, message) {
     if (typeof req.query.returnTo !== 'string') {
         renderTemplate(res, 'error', {
             adminOrigin: config.adminOrigin(),
-            message: message
+            message: message,
+            title: 'Cloudron Error'
         });
     } else {
         var u = url.parse(req.query.returnTo);
         if (!u.protocol || !u.host) {
             return renderTemplate(res, 'error', {
                 adminOrigin: config.adminOrigin(),
-                message: 'Invalid request. returnTo query is not a valid URI. ' + message
+                message: 'Invalid request. returnTo query is not a valid URI. ' + message,
+                title: 'Cloudron Error'
             });
         }
 
@@ -174,7 +176,8 @@ function sendError(req, res, message) {
 
     renderTemplate(res, 'error', {
         adminOrigin: config.adminOrigin(),
-        message: message
+        message: message,
+        title: 'Cloudron Error'
     });
 }
 
@@ -191,7 +194,8 @@ function loginForm(req, res) {
             csrf: req.csrfToken(),
             applicationName: applicationName,
             applicationLogo: applicationLogo,
-            error: req.query.error || null
+            error: req.query.error || null,
+            title: applicationName + ' Login'
         });
     }
 
@@ -237,7 +241,7 @@ function logout(req, res) {
 // Form to enter email address to send a password reset request mail
 // -> GET /api/v1/session/password/resetRequest.html
 function passwordResetRequestSite(req, res) {
-    renderTemplate(res, 'password_reset_request', { adminOrigin: config.adminOrigin(), csrf: req.csrfToken() });
+    renderTemplate(res, 'password_reset_request', { adminOrigin: config.adminOrigin(), csrf: req.csrfToken(), title: 'Cloudron Password Reset' });
 }
 
 // This route is used for above form submission
@@ -261,7 +265,7 @@ function passwordResetRequest(req, res, next) {
 
 // -> GET /api/v1/session/password/sent.html
 function passwordSentSite(req, res) {
-    renderTemplate(res, 'password_reset_sent', { adminOrigin: config.adminOrigin() });
+    renderTemplate(res, 'password_reset_sent', { adminOrigin: config.adminOrigin(), title: 'Cloudron Password Reset' });
 }
 
 // -> GET /api/v1/session/password/setup.html
@@ -275,7 +279,8 @@ function passwordSetupSite(req, res, next) {
             adminOrigin: config.adminOrigin(),
             user: user,
             csrf: req.csrfToken(),
-            resetToken: req.query.reset_token
+            resetToken: req.query.reset_token,
+            title: 'Cloudron Password Setup'
         });
     });
 }
@@ -291,7 +296,8 @@ function passwordResetSite(req, res, next) {
             adminOrigin: config.adminOrigin(),
             user: user,
             csrf: req.csrfToken(),
-            resetToken: req.query.reset_token
+            resetToken: req.query.reset_token,
+            title: 'Cloudron Password Reset'
         });
     });
 }
