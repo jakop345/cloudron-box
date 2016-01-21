@@ -9,15 +9,13 @@
             <div class="modal-body">
                 <form name="developerModeChangeForm" class="form-signin" role="form" novalidate ng-submit="doChangeDeveloperMode(developerModeChangeForm)" autocomplete="off">
                     <fieldset>
-                        <div class="form-group" ng-class="{ 'has-error': (developerModeChangeForm.password.$dirty && developerModeChangeForm.password.$invalid)}">
+                        <div class="form-group" ng-class="{ 'has-error': (!developerModeChangeForm.password.$dirty && developerModeChange.error.password) || (developerModeChangeForm.password.$dirty && developerModeChangeForm.password.$invalid) }">
                             <label class="control-label" for="inputDeveloperModeChangePassword">Give your password to verify that you are performing that action</label>
                             <div class="control-label" ng-show="(!developerModeChangeForm.password.$dirty && developerModeChange.error.password) || (developerModeChangeForm.password.$dirty && developerModeChangeForm.password.$invalid)">
-                                <small ng-show="developerModeChangeForm.password.$error.required">A password is required</small>
-                                <small ng-show="developerModeChangeForm.password.$error.minlength">The password is too short</small>
-                                <small ng-show="developerModeChangeForm.password.$error.maxlength">The password is too long</small>
-                                <small ng-show="developerModeChangeForm.password.$dirty && developerModeChange.error.password">Wrong password</small>
+                                <small ng-show=" developerModeChangeForm.password.$dirty && developerModeChangeForm.password.$invalid">A password is required</small>
+                                <small ng-show="!developerModeChangeForm.password.$dirty && developerModeChange.error.password">Wrong password</small>
                             </div>
-                            <input type="password" class="form-control" ng-model="developerModeChange.password" id="inputDeveloperModeChangePassword" name="password" ng-maxlength="30" ng-minlength="8" required autofocus>
+                            <input type="password" class="form-control" ng-model="developerModeChange.password" id="inputDeveloperModeChangePassword" name="password" required autofocus>
                         </div>
                         <input class="ng-hide" type="submit" ng-disabled="developerModeChangeForm.$invalid"/>
                     </fieldset>

@@ -126,6 +126,7 @@ angular.module('Application').controller('SettingsController', ['$scope', '$loca
                 if (error.statusCode === 403) {
                     $scope.developerModeChange.error.password = true;
                     $scope.developerModeChange.password = '';
+                    $scope.developerModeChangeForm.password.$setPristine();
                     $('#inputDeveloperModeChangePassword').focus();
                 } else {
                     console.error('Unable to change developer mode.', error);
