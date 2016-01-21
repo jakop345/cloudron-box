@@ -80,7 +80,7 @@
                         <br/>
                         <div class="form-group" ng-class="{ 'has-error': (appConfigureForm.password.$dirty && appConfigureForm.password.$invalid) || (!appConfigureForm.password.$dirty && appConfigure.error.password) }">
                             <label class="control-label" for="appConfigurePasswordInput">Provide your password to confirm this action</label>
-                            <input type="password" class="form-control" ng-model="appConfigure.password" id="appConfigurePasswordInput" name="password" ng-maxlength="512" ng-minlength="5" required>
+                            <input type="password" class="form-control" ng-model="appConfigure.password" id="appConfigurePasswordInput" name="password" ng-maxlength="30" ng-minlength="8" required>
                         </div>
                         <input class="ng-hide" type="submit" ng-disabled="appConfigureForm.$invalid || busy"/>
                     </form>
@@ -108,7 +108,7 @@
                     <form class="form-signin" role="form" name="appRestoreForm" ng-submit="doRestore()" autocomplete="off">
                         <div class="form-group" ng-class="{ 'has-error': (!appRestoreForm.password.$dirty && appRestore.error.password) || (appRestoreForm.password.$dirty && appRestoreForm.password.$invalid) }">
                             <label class="control-label" for="appRestorePasswordInput">Provide your password to confirm this action</label>
-                            <input type="password" class="form-control" ng-model="appRestore.password" id="appRestorePasswordInput" name="password" ng-maxlength="512" ng-minlength="5" required autofocus>
+                            <input type="password" class="form-control" ng-model="appRestore.password" id="appRestorePasswordInput" name="password" ng-maxlength="30" ng-minlength="8" required autofocus>
                         </div>
 
                         <input class="ng-hide" type="submit" ng-disabled="appRestoreForm.$invalid || busy"/>
@@ -154,7 +154,7 @@
                     <form class="form-signin" role="form" name="appUninstallForm" ng-submit="doUninstall()" autocomplete="off">
                         <div class="form-group" ng-class="{ 'has-error': (!appUninstallForm.password.$dirty && appUninstall.error.password) || (appUninstallForm.password.$dirty && appUninstallForm.password.$invalid) }">
                             <label class="control-label" for="appUninstallPasswordInput">Provide your password to confirm this action</label>
-                            <input type="password" class="form-control" ng-model="appUninstall.password" id="appUninstallPasswordInput" name="password" ng-maxlength="512" ng-minlength="5" required autofocus>
+                            <input type="password" class="form-control" ng-model="appUninstall.password" id="appUninstallPasswordInput" name="password" ng-maxlength="30" ng-minlength="8" required autofocus>
                         </div>
 
                         <input class="ng-hide" type="submit" ng-disabled="appUninstallForm.$invalid || busy"/>
@@ -198,7 +198,7 @@
                         </div>
                         <div class="form-group" ng-class="{ 'has-error': (!appUpdateForm.password.$dirty && appUpdate.error.password) || (appUpdateForm.password.$dirty && appUpdateForm.password.$invalid) }">
                             <label class="control-label" for="inputUpdatePassword">Provide your password to confirm this action</label>
-                            <input type="password" class="form-control" ng-model="appUpdate.password" id="inputUpdatePassword" name="password" ng-maxlength="512" ng-minlength="5" required autofocus>
+                            <input type="password" class="form-control" ng-model="appUpdate.password" id="inputUpdatePassword" name="password" ng-maxlength="30" ng-minlength="8" required autofocus>
                         </div>
                         <input class="ng-hide" type="submit" ng-disabled="appUpdateForm.$invalid || busy"/>
                     </form>

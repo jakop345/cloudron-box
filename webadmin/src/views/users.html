@@ -83,7 +83,7 @@
                                 <small ng-show="userremove_form.password.$error.maxlength">The password is too long</small>
                                 <small ng-show="!useradd_form.email.$dirty && userremove.error.password">{{ userremove.error.password }}</small>
                             </div>
-                            <input type="password" class="form-control" ng-model="userremove.password" id="inputUserRemovePassword" name="password" placeholder="Password" ng-maxlength="512" ng-minlength="5" required>
+                            <input type="password" class="form-control" ng-model="userremove.password" id="inputUserRemovePassword" name="password" placeholder="Password" ng-maxlength="30" ng-minlength="8" required>
                         </div>
                         <input class="hide" type="submit"/>
                     </fieldset>
