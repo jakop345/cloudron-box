@@ -68,15 +68,13 @@
                             </div>
                             <input type="email" class="form-control" ng-model="emailchange.email" id="inputEmailChangeEmail" name="email" ng-maxlength="512" ng-minlength="5" required autofocus>
                         </div>
-                        <div class="form-group" ng-class="{ 'has-error': (emailchange_form.password.$dirty && emailchange_form.password.$invalid)}">
+                        <div class="form-group" ng-class="{ 'has-error': (emailchange_form.password.$dirty && emailchange_form.password.$invalid) || (!emailchange_form.password.$dirty && emailchange.error.password) }">
                             <label class="control-label" for="inputEmailChangePassword">Password</label>
-                            <div class="control-label" ng-show="(!emailchange_form.password.$dirty && emailchange.error.password) || (emailchange_form.password.$dirty && emailchange_form.password.$invalid)">
-                                <small ng-show="emailchange_form.password.$error.required">A password is required</small>
-                                <small ng-show="emailchange_form.password.$error.minlength">The password is too short</small>
-                                <small ng-show="emailchange_form.password.$error.maxlength">The password is too long</small>
-                                <small ng-show="emailchange_form.password.$dirty && emailchange.error.password">Invalid pasword</small>
+                            <div class="control-label" ng-show="(emailchange_form.password.$dirty && emailchange_form.password.$invalid) || (!emailchange_form.password.$dirty && emailchange.error.password)">
+                                <small ng-show=" emailchange_form.password.$dirty && emailchange_form.password.$invalid">Password must be 8-30 character with at least one uppercase, one numeric and one special character</small>
+                                <small ng-show="!emailchange_form.password.$dirty && emailchange.error.password">Invalid pasword</small>
                             </div>
-                            <input type="password" class="form-control" ng-model="emailchange.password" id="inputEmailChangePassword" name="password" ng-maxlength="30" ng-minlength="8" required autofocus>
+                            <input type="password" class="form-control" ng-model="emailchange.password" id="inputEmailChangePassword" name="password" ng-pattern="/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,30}$/" required autofocus>
                         </div>
                         <input class="ng-hide" type="submit" ng-disabled="emailchange_form.$invalid"/>
                     </fieldset>

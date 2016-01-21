@@ -91,6 +91,7 @@ angular.module('Application').controller('AccountController', ['$scope', '$locat
                 if (error.statusCode === 403) {
                     $scope.emailchange.error.password = true;
                     $scope.emailchange.password = '';
+                    $scope.emailchange_form.password.$setPristine();
                     $('#inputEmailChangePassword').focus();
                 } else {
                     console.error('Unable to change email.', error);
