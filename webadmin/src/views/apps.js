@@ -262,6 +262,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
             if (error && error.statusCode === 403) {
                 $scope.appUninstall.password = '';
                 $scope.appUninstall.error.password = true;
+                $scope.appUninstallForm.password.$setPristine();
                 $('#appUninstallPasswordInput').focus();
             } else if (error) {
                 Client.error(error);

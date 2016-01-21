@@ -160,9 +160,13 @@
                 <p>Deleting the app will also remove all content generated within this app!</p>
                 <fieldset>
                     <form class="form-signin" role="form" name="appUninstallForm" ng-submit="doUninstall()" autocomplete="off">
-                        <div class="form-group" ng-class="{ 'has-error': (!appUninstallForm.password.$dirty && appUninstall.error.password) || (appUninstallForm.password.$dirty && appUninstallForm.password.$invalid) }">
+                        <div class="form-group" ng-class="{ 'has-error': (appUninstallForm.password.$dirty && appUninstallForm.password.$invalid) || (!appUninstallForm.password.$dirty && appUninstall.error.password) }">
                             <label class="control-label" for="appUninstallPasswordInput">Provide your password to confirm this action</label>
-                            <input type="password" class="form-control" ng-model="appUninstall.password" id="appUninstallPasswordInput" name="password" ng-maxlength="30" ng-minlength="8" required autofocus>
+                            <div class="control-label" ng-show="(appUninstallForm.password.$dirty && appUninstallForm.password.$invalid) || (!appUninstallForm.password.$dirty && appUninstall.error.password)">
+                                <small ng-show=" appUninstallForm.password.$dirty && appUninstallForm.password.$invalid">Password required</small>
+                                <small ng-show="!appUninstallForm.password.$dirty && appUninstall.error.password">Wrong password</small>
+                            </div>
+                            <input type="password" class="form-control" ng-model="appUninstall.password" id="appUninstallPasswordInput" name="password" required autofocus>
                         </div>
 
                         <input class="ng-hide" type="submit" ng-disabled="appUninstallForm.$invalid || busy"/>
