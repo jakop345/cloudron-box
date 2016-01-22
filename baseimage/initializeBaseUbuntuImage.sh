@@ -279,6 +279,11 @@ sed -e "s/^#SystemMaxUse=.*$/SystemMaxUse=100M/" \
     -e "s/^#ForwardToSyslog=.*$/ForwardToSyslog=no/" \
     -i /etc/systemd/journald.conf
 
+# When rotating logs, systemd kills journald too soon sometimes
+# See https://github.com/systemd/systemd/issues/1353 (this is upstream default)
+sed -e "s/^WatchdogSec=.*$/WatchdogSec=3min/" \
+    -i /lib/systemd/system/systemd-journald.service
+
 sync
 
 # Configure time
