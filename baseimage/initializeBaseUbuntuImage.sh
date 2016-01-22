@@ -12,6 +12,13 @@ readonly USER_DATA_DIR="/home/yellowtent/data"
 
 readonly SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+function die {
+    echo $1
+    exit 1
+}
+
+[[ "$(systemd --version 2>&1)" == *"systemd 225"* ]] || die "Expecting systemd to be 225"
+
 if [ -f "${SOURCE_DIR}/INFRA_VERSION" ]; then
     source "${SOURCE_DIR}/INFRA_VERSION"
 else
@@ -175,15 +182,16 @@ fi
 
 echo "==== Install nginx ===="
 apt-get -y install nginx-full
+[[ "$(nginx -v 2>&1)" == *"nginx/1.9."* ]] || die "Expecting nginx version to be 1.9.x"
 
 echo "==== Install build-essential ===="
 apt-get -y install build-essential rcconf
-
 
 echo "==== Install mysql ===="
 debconf-set-selections <<< 'mysql-server mysql-server/root_password password password'
 debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password password'
 apt-get -y install mysql-server
+[[ "$(mysqld --version 2>&1)" == *"5.6."* ]] || die "Expecting nginx version to be 5.6.x"
 
 echo "==== Install pwgen ===="
 apt-get -y install pwgen
@@ -208,6 +216,7 @@ curl -sL https://nodejs.org/dist/v4.1.1/node-v4.1.1-linux-x64.tar.gz | tar zxvf 
 ln -s /usr/local/node-4.1.1/bin/node /usr/bin/node
 ln -s /usr/local/node-4.1.1/bin/npm /usr/bin/npm
 apt-get install -y python   # Install python which is required for npm rebuild
+[[ "$(python --version 2>&1)" == "Python 2.7."* ]] || die "Expecting python version to be 2.7.x"
 
 echo "=== Rebuilding npm packages ==="
 cd "${INSTALLER_SOURCE_DIR}" && npm install --production
