@@ -383,6 +383,9 @@
 [0.6.5]
 - Finalize stronger password requirement
 
-[0.6.6]
+[0.7.0]
+- Upgrade to 15.10
 - Do not remove docker images when in use by another container
+- Fix sporadic error when reconfiguring apps
+- Handle journald crashes gracefully
 
