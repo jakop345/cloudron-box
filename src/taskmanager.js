@@ -92,6 +92,7 @@ function startAppTask(appId) {
         return;
     }
 
+    // when parent process dies, apptask processes are killed because KillMode=control-group in systemd unit file
     gActiveTasks[appId] = child_process.fork(__dirname + '/apptask.js', [ appId ]);
 
     var pid = gActiveTasks[appId].pid;

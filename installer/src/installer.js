@@ -36,6 +36,7 @@ util.inherits(InstallerError, Error);
 InstallerError.INTERNAL_ERROR = 1;
 InstallerError.ALREADY_PROVISIONED = 2;
 
+// system until file has KillMode=control-group to bring down child processes
 function spawn(tag, cmd, args, callback) {
     assert.strictEqual(typeof tag, 'string');
     assert.strictEqual(typeof cmd, 'string');

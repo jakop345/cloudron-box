@@ -9,7 +9,8 @@ WorkingDirectory=/home/yellowtent/box
 Restart=always
 ExecStart=/usr/bin/node --max_old_space_size=150 /home/yellowtent/box/box.js
 Environment="HOME=/home/yellowtent" "USER=yellowtent" "DEBUG=box*,connect-lastmile" "BOX_ENV=cloudron" "NODE_ENV=production"
-KillMode=process
+; kill apptask processes as well
+KillMode=control-group
 User=yellowtent
 Group=yellowtent
 MemoryLimit=200M
