@@ -103,9 +103,9 @@ angular.module('Application').controller('GraphsController', ['$scope', '$locati
 
     $scope.updateDiskGraphs = function () {
         Client.graphs([
-            'averageSeries(collectd.localhost.df-loop0.df_complex-free)',
-            'averageSeries(collectd.localhost.df-loop0.df_complex-reserved)',
-            'averageSeries(collectd.localhost.df-loop0.df_complex-used)'
+            'averageSeries(collectd.localhost.df-loop1.df_complex-free)',
+            'averageSeries(collectd.localhost.df-loop1.df_complex-reserved)',
+            'averageSeries(collectd.localhost.df-loop1.df_complex-used)'
         ], '-1min', function (error, data) {
             if (error) return console.log(error);
 
