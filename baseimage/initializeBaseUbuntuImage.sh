@@ -268,7 +268,7 @@ echo "==== Install box-setup systemd script ===="
 cat > /etc/systemd/system/box-setup.service <<EOF
 [Unit]
 Description=Box Setup
-Before=docker.service umount.target
+Before=docker.service umount.target collectd.service
 After=do-resize.service
 
 [Service]
