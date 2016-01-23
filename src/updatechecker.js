@@ -196,7 +196,7 @@ function checkBoxUpdates(callback) {
             var isPrerelease = semver.parse(updateInfo.version).prerelease.length !== 0;
 
             if (isPrerelease && !updateConfig.prerelease) {
-                debug('Skipping update %s since this box does not want prereleases', gBoxUpdateInfo.version);
+                debug('Skipping update %s since this box does not want prereleases', updateInfo.version);
                 return callback();
             }
 
