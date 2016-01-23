@@ -130,7 +130,7 @@ function checkAppUpdates() {
     debug('Checking App Updates');
 
     var oldState = loadState();
-    var newState = { box: oldState.box }; // creaee new state so that old app ids are removed
+    var newState = { box: oldState.box }; // create new state so that old app ids are removed
 
     getAppUpdates(function (error, result) {
         if (error) debug('Error checking app updates: ', error);
