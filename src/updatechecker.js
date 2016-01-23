@@ -134,6 +134,8 @@ function checkAppUpdates(callback) {
 
     debug('Checking App Updates');
 
+    gAppUpdateInfo = { };
+
     getAppUpdates(function (error, updateInfo) {
         if (error) return callback(error);
 
@@ -142,8 +144,6 @@ function checkAppUpdates(callback) {
 
             var oldState = loadState();
             var newState = { box: oldState.box }; // create new state so that old app ids are removed
-
-            gAppUpdateInfo = { };
 
             async.eachSeries(Object.keys(updateInfo), function iterator(id, iteratorDone) {
                 var isPrerelease = semver.parse(updateInfo[id].manifest.version).prerelease.length !== 0;
@@ -184,6 +184,8 @@ function checkBoxUpdates(callback) {
     callback = callback || NOOP_CALLBACK; // null when called from a timer task
 
     debug('Checking Box Updates');
+
+    gBoxUpdateInfo = null;
 
     getBoxUpdates(function (error, updateInfo) {
         if (error || !updateInfo) return callback(error);
