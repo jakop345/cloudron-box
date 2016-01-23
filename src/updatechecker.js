@@ -172,10 +172,10 @@ function checkBoxUpdates(callback) {
     debug('Checking Box Updates');
 
     getBoxUpdates(function (error, updateInfo) {
-        if (error) return callback(error);
+        if (error || !updateInfo) return callback(error);
 
         settings.getUpdateConfig(function (error, updateConfig) {
-            if (error || !updateInfo) return callback(error);
+            if (error) return callback(error);
 
             var isPrerelease = semver.parse(updateInfo.version).prerelease.length !== 0;
 
