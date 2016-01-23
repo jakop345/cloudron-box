@@ -134,34 +134,48 @@ function checkAppUpdates(callback) {
 
     debug('Checking App Updates');
 
-    var oldState = loadState();
-    var newState = { box: oldState.box }; // create new state so that old app ids are removed
-
-    getAppUpdates(function (error, result) {
+    getAppUpdates(function (error, updateInfo) {
         if (error) return callback(error);
 
-        gAppUpdateInfo = error ? {} : result;
+        settings.getUpdateConfig(function (error, updateConfig) {
+            if (error) return callback(error);
 
-        async.eachSeries(Object.keys(gAppUpdateInfo), function iterator(id, iteratorDone) {
-            newState[id] = gAppUpdateInfo[id].manifest.version;
+            var oldState = loadState();
+            var newState = { box: oldState.box }; // create new state so that old app ids are removed
 
-            if (oldState[id] === gAppUpdateInfo[id].manifest.version) {
-                debug('Skipping notification of app update %s since user was already notified', id);
-                return iteratorDone();
-            }
+            gAppUpdateInfo = { };
 
-            apps.get(id, function (error, app) {
-                if (error) {
-                    debug('Error getting app %s %s', id, error);
+            async.eachSeries(Object.keys(updateInfo), function iterator(id, iteratorDone) {
+                var isPrerelease = semver.parse(updateInfo[id].manifest.version).prerelease.length !== 0;
+
+                if (isPrerelease && !updateConfig.prerelease) {
+                    debug('Skipping update %s of app %s as this box does not want prereleases', gBoxUpdateInfo.version, id);
                     return iteratorDone();
                 }
 
-                mailer.appUpdateAvailable(app, gAppUpdateInfo[id]);
-                iteratorDone();
+                gAppUpdateInfo[id] = updateInfo[id];
+
+                // decide whether to send email
+                newState[id] = updateInfo[id].manifest.version;
+
+                if (oldState[id] === updateInfo[id].manifest.version) {
+                    debug('Skipping notification of app update %s since user was already notified', id);
+                    return iteratorDone();
+                }
+
+                apps.get(id, function (error, app) {
+                    if (error) {
+                        debug('Error getting app %s %s', id, error);
+                        return iteratorDone();
+                    }
+
+                    mailer.appUpdateAvailable(app, updateInfo[id]);
+                    iteratorDone();
+                });
+            }, function () {
+                saveState(newState);
+                callback();
             });
-        }, function () {
-            saveState(newState);
-            callback();
         });
     });
 }
