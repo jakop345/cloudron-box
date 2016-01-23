@@ -22,6 +22,8 @@ exports = module.exports = {
 
     isConfiguredSync: isConfiguredSync,
 
+    checkDiskSpace: checkDiskSpace,
+
     events: new (require('events').EventEmitter)(),
 
     EVENT_ACTIVATED: 'activated',
@@ -37,8 +39,10 @@ var apps = require('./apps.js'),
     clientdb = require('./clientdb.js'),
     config = require('./config.js'),
     debug = require('debug')('box:cloudron'),
+    df = require('node-df'),
     fs = require('fs'),
     locker = require('./locker.js'),
+    mailer = require('./mailer.js'),
     os = require('os'),
     path = require('path'),
     paths = require('./paths.js'),
@@ -740,5 +744,30 @@ function backupBoxAndApps(callback) {
                 callback(error, restoreKey);
             });
         });
+    });
+}
+
+function checkDiskSpace(callback) {
+    callback = callback || function () { }; // callback can be empty for timer triggered check
+
+    debug('Checking disk space');
+
+    df(function (error, entries) {
+        if (error) {
+            debug('df error %s', error.message);
+            mailer.outOfDiskSpace(error.message);
+            return callback();
+        }
+
+        var oos = entries.some(function (entry) {
+            return (entry.mount === paths.DATA_DIR && entry.capacity >= 0.90) ||
+                   (entry.mount === '/' && entry.capacity >= 0.95);
+        });
+
+        debug('Disk space checked. ok: %s', !oos);
+
+        if (oos) mailer.outOfDiskSpace(JSON.stringify(entries, null, 4));
+
+        callback();
     });
 }

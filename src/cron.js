@@ -25,7 +25,8 @@ var gAutoupdaterJob = null,
     gCleanupTokensJob = null,
     gDockerVolumeCleanerJob = null,
     gSchedulerSyncJob = null,
-    gCertificateRenewJob = null;
+    gCertificateRenewJob = null,
+    gCheckDiskSpaceJob = null;
 
 var NOOP_CALLBACK = function (error) { if (error) console.error(error); };
 
@@ -65,6 +66,14 @@ function recreateJobs(unusedTimeZone, callback) {
         gBackupJob = new CronJob({
             cronTime: '00 00 */4 * * *', // every 4 hours
             onTick: cloudron.ensureBackup,
+            start: true,
+            timeZone: allSettings[settings.TIME_ZONE_KEY]
+        });
+
+        if (gCheckDiskSpaceJob) gCheckDiskSpaceJob.stop();
+        gCheckDiskSpaceJob = new CronJob({
+            cronTime: '00 30 */4 * * *', // every 4 hours
+            onTick: cloudron.checkDiskSpace,
             start: true,
             timeZone: allSettings[settings.TIME_ZONE_KEY]
         });

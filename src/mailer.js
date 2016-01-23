@@ -18,6 +18,8 @@ exports = module.exports = {
 
     appDied: appDied,
 
+    outOfDiskSpace: outOfDiskSpace,
+
     FEEDBACK_TYPE_FEEDBACK: 'feedback',
     FEEDBACK_TYPE_TICKET: 'ticket',
     FEEDBACK_TYPE_APP: 'app',
@@ -356,6 +358,19 @@ function appUpdateAvailable(app, updateInfo) {
 
         enqueue(mailOptions);
     });
+}
+
+function outOfDiskSpace(message) {
+    assert.strictEqual(typeof message, 'string');
+
+    var mailOptions = {
+        from: config.get('adminEmail'),
+        to: 'admin@cloudron.io',
+        subject: util.format('[%s] Out of disk space alert', config.fqdn()),
+        text: render('out_of_disk_space.ejs', { fqdn: config.fqdn(), message: message, format: 'text' })
+    };
+
+    sendMails([ mailOptions ]);
 }
 
 // this function bypasses the queue intentionally. it is also expected to work without the mailer module initialized

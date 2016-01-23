@@ -1,0 +1,19 @@
+<%if (format === 'text') { %>
+
+Dear Cloudron Team,
+
+<%= fqdn %> is running out of disk space.
+
+Please see some excerpts of the logs below.
+
+Thank you,
+Your Cloudron
+
+-------------------------------------
+
+<%- message %>
+
+<% } else { %>
+
+<% } %>
+

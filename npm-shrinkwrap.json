@@ -2030,6 +2030,11 @@
         }
       }
     },
+    "node-df": {
+      "version": "0.1.1",
+      "from": "node-df@*",
+      "resolved": "https://registry.npmjs.org/node-df/-/node-df-0.1.1.tgz"
+    },
     "node-uuid": {
       "version": "1.4.7",
       "from": "https://registry.npmjs.org/node-uuid/-/node-uuid-1.4.7.tgz",
