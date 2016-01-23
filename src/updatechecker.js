@@ -129,14 +129,16 @@ function getBoxUpdates(callback) {
     });
 }
 
-function checkAppUpdates() {
+function checkAppUpdates(callback) {
+    callback = callback || NOOP_CALLBACK; // null when called from a timer task
+
     debug('Checking App Updates');
 
     var oldState = loadState();
     var newState = { box: oldState.box }; // create new state so that old app ids are removed
 
     getAppUpdates(function (error, result) {
-        if (error) debug('Error checking app updates: ', error);
+        if (error) return callback(error);
 
         gAppUpdateInfo = error ? {} : result;
 
@@ -159,6 +161,7 @@ function checkAppUpdates() {
             });
         }, function () {
             saveState(newState);
+            callback();
         });
     });
 }
