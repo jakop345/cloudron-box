@@ -66,6 +66,7 @@ var gDefaults = (function () {
     result[exports.DNS_CONFIG_KEY] = { };
     result[exports.BACKUP_CONFIG_KEY] = { };
     result[exports.TLS_CONFIG_KEY] = { provider: 'caas' };
+    result[exports.UPDATE_CONFIG_KEY] = { prerelease: false };
 
     return result;
 })();
