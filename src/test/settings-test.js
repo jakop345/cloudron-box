@@ -123,10 +123,25 @@ describe('Settings', function () {
         });
 
         it('can get backup config', function (done) {
-            settings.getBackupConfig(function (error, dnsConfig) {
+            settings.getBackupConfig(function (error, backupConfig) {
                 expect(error).to.be(null);
-                expect(dnsConfig.provider).to.be('caas');
-                expect(dnsConfig.token).to.be('TOKEN');
+                expect(backupConfig.provider).to.be('caas');
+                expect(backupConfig.token).to.be('TOKEN');
+                done();
+            });
+        });
+
+        it('can set backup config', function (done) {
+            settings.setUpdateConfig({ prerelease: true }, function (error) {
+                expect(error).to.be(null);
+                done();
+            });
+        });
+
+        it('can get backup config', function (done) {
+            settings.getUpdateConfig(function (error, updateConfig) {
+                expect(error).to.be(null);
+                expect(updateConfig.prerelease).to.be(true);
                 done();
             });
         });

@@ -29,6 +29,9 @@ exports = module.exports = {
     getTlsConfig: getTlsConfig,
     setTlsConfig: setTlsConfig,
 
+    getUpdateConfig: getUpdateConfig,
+    setUpdateConfig: setUpdateConfig,
+
     getDefaultSync: getDefaultSync,
     getAll: getAll,
 
@@ -39,6 +42,7 @@ exports = module.exports = {
     DNS_CONFIG_KEY: 'dns_config',
     BACKUP_CONFIG_KEY: 'backup_config',
     TLS_CONFIG_KEY: 'tls_config',
+    UPDATE_CONFIG_KEY: 'update_config',
 
     events: new (require('events').EventEmitter)()
 };
@@ -318,6 +322,30 @@ function setBackupConfig(backupConfig, callback) {
         if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
 
         exports.events.emit(exports.BACKUP_CONFIG_KEY, backupConfig);
+
+        callback(null);
+    });
+}
+
+function getUpdateConfig(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    settingsdb.get(exports.UPDATE_CONFIG_KEY, function (error, value) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(null, gDefaults[exports.UPDATE_CONFIG_KEY]);
+        if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
+
+        callback(null, JSON.parse(value)); // { prerelease }
+    });
+}
+
+function setUpdateConfig(updateConfig, callback) {
+    assert.strictEqual(typeof updateConfig, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
+    settingsdb.set(exports.UPDATE_CONFIG_KEY, JSON.stringify(updateConfig), function (error) {
+        if (error) return callback(new SettingsError(SettingsError.INTERNAL_ERROR, error));
+
+        exports.events.emit(exports.UPDATE_CONFIG_KEY, updateConfig);
 
         callback(null);
     });
