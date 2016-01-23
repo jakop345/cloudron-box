@@ -214,6 +214,8 @@ function checkBoxUpdates(callback) {
             state.box = updateInfo.version;
 
             saveState(state);
+
+            callback();
         });
     });
 }
