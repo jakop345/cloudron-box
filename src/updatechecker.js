@@ -17,11 +17,14 @@ var apps = require('./apps.js'),
     paths = require('./paths.js'),
     safe = require('safetydance'),
     semver = require('semver'),
+    settings = require('./settings.js'),
     superagent = require('superagent'),
     util = require('util');
 
 var gAppUpdateInfo = { }, // id -> update info { creationDate, manifest }
     gBoxUpdateInfo = null;
+
+var NOOP_CALLBACK = function (error) { if (error) debug(error); };
 
 function loadState() {
     var state = safe.JSON.parse(safe.fs.readFileSync(paths.UPDATE_CHECKER_FILE, 'utf8'));
@@ -160,22 +163,38 @@ function checkAppUpdates() {
     });
 }
 
-function checkBoxUpdates() {
+function checkBoxUpdates(callback) {
+    callback = callback || NOOP_CALLBACK; // null when called from a timer task
+
     debug('Checking Box Updates');
 
-    var state = loadState();
+    getBoxUpdates(function (error, updateInfo) {
+        if (error) return callback(error);
 
-    getBoxUpdates(function (error, result) {
-        if (error) debug('Error checking box updates: ', error);
+        settings.getUpdateConfig(function (error, updateConfig) {
+            if (error || !updateInfo) return callback(error);
 
-        gBoxUpdateInfo = error ? null : result;
+            var isPrerelease = semver.parse(updateInfo.version).prerelease.length !== 0;
 
-        if (gBoxUpdateInfo && state.box !== gBoxUpdateInfo.version) {
-            mailer.boxUpdateAvailable(gBoxUpdateInfo.version, gBoxUpdateInfo.changelog);
-            state.box = gBoxUpdateInfo.version;
+            if (isPrerelease && !updateConfig.prerelease) {
+                debug('Skipping update %s since this box does not want prereleases', gBoxUpdateInfo.version);
+                return callback();
+            }
+
+            gBoxUpdateInfo = updateInfo;
+
+            // decide whether to send email
+            var state = loadState();
+
+            if (state.box === gBoxUpdateInfo.version) {
+                debug('Skipping notification of box update as user was already notified');
+                return callback();
+            }
+
+            mailer.boxUpdateAvailable(updateInfo.version, updateInfo.changelog);
+            state.box = updateInfo.version;
+
             saveState(state);
-        } else {
-            debug('Skipping notification of box update as user was already notified');
-        }
+        });
     });
 }
