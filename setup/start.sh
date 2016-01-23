@@ -174,6 +174,14 @@ if [[ ! -z "${arg_dns_config}" ]]; then
         -e "REPLACE INTO settings (name, value) VALUES (\"dns_config\", '$arg_dns_config')" box
 fi
 
+# Add Update Configuration
+if [[ ! -z "${arg_update_config}" ]]; then
+    echo "Add Update Config"
+
+    mysql -u root -p${mysql_root_password} \
+        -e "REPLACE INTO settings (name, value) VALUES (\"update_config\", '$arg_update_config')" box
+fi
+
 # Add TLS Configuration
 if [[ ! -z "${arg_tls_config}" ]]; then
     echo "Add TLS Config"
