@@ -71,6 +71,7 @@
   "devDependencies": {
     "apidoc": "*",
     "bootstrap-sass": "^3.3.3",
+    "deep-extend": "^0.4.1",
     "del": "^1.1.1",
     "expect.js": "*",
     "gulp": "^3.8.11",
