@@ -61,8 +61,7 @@ describe('updatechecker - checkBoxUpdates', function () {
         config.set('version', '1.0.0');
         config.set('boxVersionsUrl', 'http://localhost:4444/release.json')
         async.series([
-            database.initialize,
-            settings.setTlsConfig.bind(null, { provider: 'caas' })
+            database.initialize
         ], done);
     });
 
@@ -170,6 +169,116 @@ describe('updatechecker - checkBoxUpdates', function () {
         updatechecker.checkBoxUpdates(function (error) {
             expect(error).to.be.ok();
             expect(updatechecker.getUpdateInfo().box).to.be(null);
+            done();
+        });
+    });
+});
+
+describe('updatechecker - checkAppUpdates', function () {
+    var APP_0 = {
+        id: 'appid-0',
+        appStoreId: 'io.cloudron.app',
+        installationState: appdb.ISTATE_PENDING_INSTALL,
+        installationProgress: null,
+        runState: null,
+        location: 'some-location-0',
+        manifest: {
+            version: '1.0.0', dockerImage: 'docker/app0', healthCheckPath: '/', httpPort: 80, title: 'app0',
+            tcpPorts: {
+                PORT: {
+                    description: 'this is a port that i expose',
+                    containerPort: '1234'
+                }
+            }
+        },
+        httpPort: null,
+        containerId: null,
+        portBindings: { PORT: 5678 },
+        healthy: null,
+        accessRestriction: null,
+        oauthProxy: false
+    };
+
+    before(function (done) {
+        config.set('version', '1.0.0');
+        config.set('apiServerOrigin', 'http://localhost:4444');
+        async.series([
+            database.initialize,
+            database._clear,
+            appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, APP_0.oauthProxy)
+        ], done);
+    });
+
+    after(function (done) {
+        database._clear(done);
+    });
+
+    it('no updates', function (done) {
+        nock.cleanAll();
+
+        var scope = nock('http://localhost:4444')
+            .post('/api/v1/appupdates')
+            .reply(200, { appVersions: { 'io.cloudron.app': { manifest: { version: '1.0.0' } } } });
+
+        updatechecker.checkAppUpdates(function (error) {
+            expect(!error).to.be.ok();
+            expect(updatechecker.getUpdateInfo().apps).to.eql({});
+            done();
+        });
+    });
+
+    it('bad response', function (done) {
+        nock.cleanAll();
+
+        var scope = nock('http://localhost:4444')
+            .post('/api/v1/appupdates')
+            .reply(500, { appVersions: { 'io.cloudron.app': { manifest: { version: '1.0.0' } } } });
+
+        updatechecker.checkAppUpdates(function (error) {
+            expect(error).to.be.ok();
+            expect(updatechecker.getUpdateInfo().apps).to.eql({});
+            done();
+        });
+    });
+
+    it('missing info', function (done) {
+        nock.cleanAll();
+
+        var scope = nock('http://localhost:4444')
+            .post('/api/v1/appupdates')
+            .reply(200, { appVersions: { 'io.cloudron.app2': { manifest: { version: '1.0.0' } } } });
+
+        updatechecker.checkAppUpdates(function (error) {
+            expect(!error).to.be.ok();
+            expect(updatechecker.getUpdateInfo().apps).to.eql({});
+            done();
+        });
+    });
+
+    it('offers new version', function (done) {
+        nock.cleanAll();
+
+        var scope = nock('http://localhost:4444')
+            .post('/api/v1/appupdates')
+            .reply(200, { appVersions: { 'io.cloudron.app': { manifest: { version: '2.0.0' } } } });
+
+        updatechecker.checkAppUpdates(function (error) {
+            expect(!error).to.be.ok();
+            expect(updatechecker.getUpdateInfo().apps).to.eql({ 'appid-0': { manifest: { version: '2.0.0' } } });
+            done();
+        });
+    });
+
+    it('does not offer old version', function (done) {
+        nock.cleanAll();
+
+        var scope = nock('http://localhost:4444')
+            .post('/api/v1/appupdates')
+            .reply(200, { appVersions: { 'io.cloudron.app': { manifest: { version: '0.1.0' } } } });
+
+        updatechecker.checkAppUpdates(function (error) {
+            expect(!error).to.be.ok();
+            expect(updatechecker.getUpdateInfo().apps).to.eql({ });
             done();
         });
     });
