@@ -97,6 +97,35 @@
     </div>
 </div>
 
+<!-- Modal edit user -->
+<div class="modal fade" id="userEditModal" tabindex="-1" role="dialog" aria-labelledby="userEditModalLabel" aria-hidden="true" style="text-align: left;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="userEditModalLabel">Edit user {{ useredit.userInfo.username }}</h4>
+            </div>
+            <div class="modal-body">
+                <form name="useredit_form" class="form-user-delete" role="form" ng-submit="doUseredit()" autocomplete="off">
+                    <fieldset>
+                        <div class="form-group" ng-class="{ 'has-error': (useredit_form.displayName.$dirty && useredit_form.displayName.$invalid) || (!useredit_form.displayName.$dirty && useredit.error.displayName) }">
+                            <label class="control-label" for="inputUsereditDisplayName">Full Name</label>
+                            <div class="control-label" ng-show="(!useredit_form.displayName.$dirty && useredit.error.displayName) || (useredit_form.displayName.$dirty && useredit_form.displayName.$invalid)">
+                                <small ng-show="useredit_form.error.displayName">Invalid name</small>
+                            </div>
+                            <input type="text" class="form-control" ng-model="useredit.displayName" id="inputUsereditDisplayName" name="displayName" placeholder="Full Name" autofocus>
+                        </div>
+                        <input class="hide" type="submit"/>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" ng-click="doUserEdit()" ng-disabled="useredit_form.$invalid || useredit.busy"><i class="fa fa-spinner fa-pulse" ng-show="useredit.busy"></i> Edit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="content">
 
     <br/>
@@ -140,6 +169,7 @@
                                         <span ng-show="user.admin"><i class="fa fa-minus"></i> Remove Admin</span>
                                     </button>
                                     <button ng-show="!isMe(user) && userInfo.admin" class="btn btn-xs btn-default" ng-click="sendInvite(user)"><i class="fa fa-paper-plane-o"></i> Send Invite</button>
+                                    <button ng-show="isMe(user) || userInfo.admin" class="btn btn-xs btn-default" ng-click="showUserEdit(user)"><i class="fa fa-pencil"></i> Edit</button>
                                     <button ng-show="!isMe(user) && userInfo.admin" class="btn btn-xs btn-danger" ng-click="showUserRemove(user)"><i class="fa fa-trash-o"></i> Delete</button>
                                 </td>
                             </tr>
