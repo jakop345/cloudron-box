@@ -23,6 +23,7 @@ exports = module.exports = {
     fqdn: fqdn,
     token: token,
     version: version,
+    setVersion: setVersion,
     isCustomDomain: isCustomDomain,
     database: database,
 
@@ -177,6 +178,10 @@ function token() {
 
 function version() {
     return get('version');
+}
+
+function setVersion(version) {
+    set('version', version);
 }
 
 function isCustomDomain() {
