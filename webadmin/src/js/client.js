@@ -573,7 +573,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         };
 
         $http.put(client.apiOrigin + '/api/v1/users/' + user.id, data).success(function(data, status) {
-            if (status !== 204 || typeof data !== 'object') return callback(new ClientError(status, data));
+            if (status !== 204) return callback(new ClientError(status, data));
             callback(null);
         }).error(defaultErrorHandler(callback));
     };
