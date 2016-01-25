@@ -165,10 +165,10 @@
                                 <td class="text-right" style="vertical-align: bottom">
                                     <span ng-show="isMe(user)" class="label label-success">This is you!</span>
                                     <button ng-show="!isMe(user) && userInfo.admin" ng-click="toggleAdmin(user)" class="btn btn-xs btn-default">
-                                        <span ng-show="!user.admin"><i class="fa fa-plus"></i> Add Admin</span>
-                                        <span ng-show="user.admin"><i class="fa fa-minus"></i> Remove Admin</span>
+                                        <span ng-show="!user.admin"><i class="fa fa-plus"></i> Admin</span>
+                                        <span ng-show="user.admin"><i class="fa fa-minus"></i> Admin</span>
                                     </button>
-                                    <button ng-show="!isMe(user) && userInfo.admin" class="btn btn-xs btn-default" ng-click="sendInvite(user)"><i class="fa fa-paper-plane-o"></i> Send Invite</button>
+                                    <button ng-show="!isMe(user) && userInfo.admin" class="btn btn-xs btn-default" ng-click="sendInvite(user)"><i class="fa fa-paper-plane-o"></i> Invite</button>
                                     <button ng-show="isMe(user) || userInfo.admin" class="btn btn-xs btn-default" ng-click="showUserEdit(user)"><i class="fa fa-pencil"></i> Edit</button>
                                     <button ng-show="!isMe(user) && userInfo.admin" class="btn btn-xs btn-danger" ng-click="showUserRemove(user)"><i class="fa fa-trash-o"></i> Delete</button>
                                 </td>
