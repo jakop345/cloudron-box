@@ -293,7 +293,42 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
         });
     };
 
-    function refresh() {
+    $scope.gotoApp = function (app) {
+        $location.path('/appstore/' + app.manifest.id, false).search({ version : app.manifest.version });
+    };
+
+    function hashChangeListener() {
+        var appId = $location.path().slice('/appstore/'.length);
+        var version = $location.search().version;
+
+        if (appId) {
+            if (version) {
+                AppStore.getAppByIdAndVersion(appId, version, function (error, result) {
+                    if (error) {
+                        $scope.showAppNotFound(appId, version);
+                        console.error(error);
+                        return;
+                    }
+
+                    $scope.showInstall(result);
+                });
+            } else {
+                var found = $scope.apps.filter(function (app) {
+                    return (app.id === appId) && (version ? version === app.manifest.version : true);
+                });
+
+                if (found.length) {
+                    $scope.showInstall(found[0]);
+                } else {
+                    $scope.showAppNotFound(appId, null);
+                }
+            }
+        } else {
+            $scope.reset();
+        }
+    }
+
+    (function refresh() {
         $scope.ready = false;
 
         Client.getUsers(function (error, users) {
@@ -313,36 +348,22 @@ angular.module('Application').controller('AppStoreController', ['$scope', '$loca
                 $scope.apps = apps;
 
                 // show install app dialog immediately if an app id was passed in the query
-                if ($routeParams.appId) {
-                    if ($routeParams.version) {
-                        AppStore.getAppByIdAndVersion($routeParams.appId, $routeParams.version, function (error, result) {
-                            if (error) {
-                                $scope.showAppNotFound($routeParams.appId, $routeParams.version);
-                                console.error(error);
-                                return;
-                            }
-
-                            $scope.showInstall(result);
-                        });
-                    } else {
-                        var found = apps.filter(function (app) {
-                            return (app.id === $routeParams.appId) && ($routeParams.version ? $routeParams.version === app.manifest.version : true);
-                        });
-
-                        if (found.length) {
-                            $scope.showInstall(found[0]);
-                        } else {
-                            $scope.showAppNotFound($routeParams.appId, null);
-                        }
-                    }
-                }
+                hashChangeListener();
 
                 $scope.ready = true;
             });
         });
-    }
+    })();
 
-    refresh();
+    $('#appInstallModal').on('hide.bs.modal', function () {
+        $location.path('/appstore', false).search({ version: undefined });
+    });
+
+    window.addEventListener('hashchange', hashChangeListener);
+
+    $scope.$on('$destroy', function handler() {
+        window.removeEventListener('hashchange', hashChangeListener);
+    });
 
     // setup all the dialog focus handling
     ['appInstallModal', 'feedbackModal'].forEach(function (id) {
