@@ -35,6 +35,7 @@ function profile(req, res, next) {
         result.username = req.user.username;
         result.email = req.user.email;
         result.admin = req.user.admin;
+        result.displayName = req.user.displayName;
     }
 
     next(new HttpSuccess(200, result));
@@ -79,10 +80,11 @@ function update(req, res, next) {
     assert.strictEqual(typeof req.body, 'object');
 
     if (typeof req.body.email !== 'string') return next(new HttpError(400, 'email must be string'));
+    if ('displayName' in req.body && typeof req.body.displayName !== 'string') return next(new HttpError(400, 'displayName must be string'));
 
     if (req.user.tokenType !== tokendb.TYPE_USER) return next(new HttpError(403, 'Token type not allowed'));
 
-    user.update(req.user.id, req.user.username, req.body.email, function (error) {
+    user.update(req.user.id, req.user.username, req.body.email, req.body.displayName || req.user.displayName, function (error) {
         if (error && error.reason === UserError.BAD_EMAIL) return next(new HttpError(400, error.message));
         if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'User not found'));
         if (error) return next(new HttpError(500, error));
@@ -142,7 +144,8 @@ function info(req, res, next) {
             id: result.id,
             username: result.username,
             email: result.email,
-            admin: result.admin
+            admin: result.admin,
+            displayName: result.displayName
         }));
     });
 }
