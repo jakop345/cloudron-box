@@ -129,7 +129,41 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
     };
 
     $scope.doUserEdit = function () {
+        $scope.useredit.error.displayName = null;
+        $scope.useredit.error.email = null;
+        $scope.useredit.error.password = null;
+        $scope.useredit.busy = true;
 
+        var data = {
+            id: $scope.useredit.userInfo.id,
+            email: $scope.useredit.email,
+            displayName: $scope.useredit.displayName
+        };
+
+        Client.updateUser(data, $scope.useredit.password, function (error) {
+            $scope.useredit.busy = false;
+
+            if (error && error.statusCode === 403) {
+                $scope.useredit.error.password = 'Incorrect password';
+                $scope.useredit.password = '';
+                $scope.useredit_form.password.$setPristine();
+                $('#inputUserEditPassword').focus();
+                return;
+            }
+            if (error) return console.error('Unable to update user:', error);
+
+            $scope.useredit.userInfo = {};
+            $scope.useredit.email = '';
+            $scope.useredit.displayName = '';
+            $scope.useredit.password = '';
+
+            $scope.useredit_form.$setPristine();
+            $scope.useredit_form.$setUntouched();
+
+            refresh();
+
+            $('#userEditModal').modal('hide');
+        });
     };
 
     $scope.showUserRemove = function (userInfo) {
