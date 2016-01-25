@@ -356,6 +356,22 @@ describe('User', function () {
                 });
             });
         });
+
+        it('succeeds with same data', function (done) {
+            user.update(USERNAME, USERNAME_NEW, EMAIL_NEW, DISPLAY_NAME_NEW, function (error) {
+                expect(error).to.not.be.ok();
+
+                user.get(USERNAME, function (error, result) {
+                    expect(error).to.not.be.ok();
+                    expect(result).to.be.ok();
+                    expect(result.email).to.equal(EMAIL_NEW);
+                    expect(result.username).to.equal(USERNAME_NEW);
+                    expect(result.displayName).to.equal(DISPLAY_NAME_NEW);
+
+                    done();
+                });
+            });
+        });
     });
 
     describe('admin change', function () {

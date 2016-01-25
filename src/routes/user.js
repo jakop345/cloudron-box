@@ -76,6 +76,7 @@ function createUser(req, res, next) {
 }
 
 function update(req, res, next) {
+    assert.strictEqual(typeof req.params.userId, 'string');
     assert.strictEqual(typeof req.user, 'object');
     assert.strictEqual(typeof req.body, 'object');
 
@@ -84,12 +85,17 @@ function update(req, res, next) {
 
     if (req.user.tokenType !== tokendb.TYPE_USER) return next(new HttpError(403, 'Token type not allowed'));
 
-    user.update(req.user.id, req.user.username, req.body.email || req.user.email, req.body.displayName || req.user.displayName, function (error) {
-        if (error && error.reason === UserError.BAD_EMAIL) return next(new HttpError(400, error.message));
-        if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'User not found'));
+    user.get(req.params.userId, function (error, result) {
+        if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'No such user'));
         if (error) return next(new HttpError(500, error));
 
-        next(new HttpSuccess(204));
+        user.update(req.params.userId, result.username, req.body.email || result.email, req.body.displayName || result.displayName, function (error) {
+            if (error && error.reason === UserError.BAD_EMAIL) return next(new HttpError(400, error.message));
+            if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'User not found'));
+            if (error) return next(new HttpError(500, error));
+
+            next(new HttpSuccess(204));
+        });
     });
 }
 
