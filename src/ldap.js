@@ -115,9 +115,11 @@ function start(callback) {
     gServer.bind('ou=users,dc=cloudron', function(req, res, next) {
         debug('ldap user bind: %s', req.dn.toString());
 
-        if (!req.dn.rdns[0].cn) return next(new ldap.NoSuchObjectError(req.dn.toString()));
+        // extract the common name which might have different attribute names
+        var commonName = req.dn.rdns[0][Object.keys(req.dn.rdns[0])[0]];
+        if (!commonName) return next(new ldap.NoSuchObjectError(req.dn.toString()));
 
-        user.verify(req.dn.rdns[0].cn, req.credentials || '', function (error, result) {
+        user.verify(commonName, req.credentials || '', function (error, result) {
             if (error && error.reason === UserError.NOT_FOUND) return next(new ldap.NoSuchObjectError(req.dn.toString()));
             if (error && error.reason === UserError.WRONG_PASSWORD) return next(new ldap.InvalidCredentialsError(req.dn.toString()));
             if (error) return next(new ldap.OperationsError(error));
