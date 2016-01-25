@@ -252,10 +252,11 @@ function getByResetToken(resetToken, callback) {
     });
 }
 
-function updateUser(userId, username, email, callback) {
+function updateUser(userId, username, email, displayName, callback) {
     assert.strictEqual(typeof userId, 'string');
     assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof email, 'string');
+    assert.strictEqual(typeof displayName, 'string');
     assert.strictEqual(typeof callback, 'function');
 
     var error = validateUsername(username);
@@ -264,7 +265,7 @@ function updateUser(userId, username, email, callback) {
     error = validateEmail(email);
     if (error) return callback(error);
 
-    userdb.update(userId, { username: username, email: email }, function (error) {
+    userdb.update(userId, { username: username, email: email, displayName: displayName }, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND, error));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
         callback(null);
