@@ -107,12 +107,30 @@
             <div class="modal-body">
                 <form name="useredit_form" class="form-user-delete" role="form" ng-submit="doUseredit()" autocomplete="off">
                     <fieldset>
+                        <input type="password" style="display: none;">
                         <div class="form-group" ng-class="{ 'has-error': (useredit_form.displayName.$dirty && useredit_form.displayName.$invalid) || (!useredit_form.displayName.$dirty && useredit.error.displayName) }">
                             <label class="control-label" for="inputUsereditDisplayName">Full Name</label>
                             <div class="control-label" ng-show="(!useredit_form.displayName.$dirty && useredit.error.displayName) || (useredit_form.displayName.$dirty && useredit_form.displayName.$invalid)">
                                 <small ng-show="useredit_form.error.displayName">Invalid name</small>
                             </div>
                             <input type="text" class="form-control" ng-model="useredit.displayName" id="inputUsereditDisplayName" name="displayName" placeholder="Full Name" autofocus>
+                        </div>
+                        <div class="form-group" ng-class="{ 'has-error': (useredit_form.email.$dirty && useredit_form.email.$invalid) || (!useredit_form.email.$dirty && useredit.error.email) }">
+                            <label class="control-label" for="inputUserEditEmail">Email</label>
+                            <div class="control-label" ng-show="(!useredit_form.email.$dirty && useredit.error.email) || (useredit_form.email.$dirty && useredit_form.email.$invalid) || (!useredit_form.email.$dirty && useredit.error.email)">
+                                <small ng-show="useredit_form.email.$error.required">An email is required</small>
+                                <small ng-show="useredit_form.email.$error.email">This is not a valid email</small>
+                                <small ng-show="!useredit_form.email.$dirty && useredit.error.email">{{ useredit.error.email }}</small>
+                            </div>
+                            <input type="email" class="form-control" ng-model="useredit.email" id="inputUserEditEmail" name="email" required>
+                        </div>
+                        <div class="form-group" ng-class="{ 'has-error': (useredit_form.password.$dirty && useredit_form.password.$invalid) || (!useredit_form.password.$dirty && useredit.error.password)}">
+                            <label class="control-label" for="inputusereditPassword">Give your password to verify that you are performing that action</label>
+                            <div class="control-label" ng-show="(!useredit_form.password.$dirty && useredit.error.password) || (useredit_form.password.$dirty && useredit_form.password.$invalid)">
+                                <small ng-show="useredit_form.password.$error.required && !useredit.error.password">A password is required</small>
+                                <small ng-show="!useredit_form.password.$dirty && useredit.error.password">{{ useredit.error.password }}</small>
+                            </div>
+                            <input type="password" class="form-control" ng-model="useredit.password" id="inputUserRemovePassword" name="password" placeholder="Password" required>
                         </div>
                         <input class="hide" type="submit"/>
                     </fieldset>

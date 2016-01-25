@@ -25,6 +25,15 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         sendInvite: true
     };
 
+    $scope.useredit = {
+        busy: false,
+        error: {},
+        userInfo: {},
+        email: '',
+        displayName: '',
+        password: ''
+    };
+
     $scope.isMe = function (user) {
         return user.username === Client.getUserInfo().username;
     };
@@ -104,6 +113,23 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
 
             $('#userAddModal').modal('hide');
         });
+    };
+
+    $scope.showUserEdit = function (userInfo) {
+        $scope.useredit.error.displayName = null;
+        $scope.useredit.error.email = null;
+        $scope.useredit.displayName = userInfo.displayName;
+        $scope.useredit.email = userInfo.email;
+        $scope.useredit.userInfo = userInfo;
+
+        $scope.useredit_form.$setPristine();
+        $scope.useredit_form.$setUntouched();
+
+        $('#userEditModal').modal('show');
+    };
+
+    $scope.doUserEdit = function () {
+
     };
 
     $scope.showUserRemove = function (userInfo) {
