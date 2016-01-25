@@ -22,7 +22,7 @@ var apps = require('./apps.js'),
     util = require('util');
 
 var gAppUpdateInfo = { }, // id -> update info { creationDate, manifest }
-    gBoxUpdateInfo = null;
+    gBoxUpdateInfo = null; // { version, changelog, upgrade, sourceTarballUrl }
 
 var NOOP_CALLBACK = function (error) { if (error) debug(error); };
 
