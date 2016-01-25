@@ -78,7 +78,7 @@ function listUsers(callback) {
     userdb.getAll(function (error, result) {
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-        return callback(null, result.map(function (obj) { return _.pick(obj, 'id', 'username', 'email', 'admin'); }));
+        return callback(null, result.map(function (obj) { return _.pick(obj, 'id', 'username', 'email', 'admin', 'displayName'); }));
     });
 }
 
