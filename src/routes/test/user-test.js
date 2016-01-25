@@ -520,6 +520,16 @@ describe('User API', function () {
         });
     });
 
+    it('change user succeeds without email nor displayName', function (done) {
+        superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME_0)
+               .query({ access_token: token })
+               .send({ password: PASSWORD })
+               .end(function (error, result) {
+            expect(result.statusCode).to.equal(204);
+            done();
+        });
+    });
+
     it('change email succeeds', function (done) {
         superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME_0)
                .query({ access_token: token })
@@ -544,7 +554,7 @@ describe('User API', function () {
     it('change displayName succeeds', function (done) {
         superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME_0)
                .query({ access_token: token })
-               .send({ password: PASSWORD, email: EMAIL_0_NEW, displayName: DISPLAY_NAME_0_NEW })
+               .send({ password: PASSWORD, displayName: DISPLAY_NAME_0_NEW })
                .end(function (error, result) {
             expect(result.statusCode).to.equal(204);
 
