@@ -48,6 +48,12 @@ describe('config', function () {
         done();
     });
 
+    it('can get and set version', function (done) {
+        config.setVersion('1.2.3');
+        expect(config.version()).to.be('1.2.3');
+        done();
+    });
+
     it('did set default values', function () {
         expect(config.isCustomDomain()).to.equal(false);
         expect(config.fqdn()).to.equal('localhost');
