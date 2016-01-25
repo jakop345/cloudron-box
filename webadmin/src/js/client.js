@@ -474,19 +474,6 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
-    Client.prototype.updateUser = function (user, password, callback) {
-        var data = {
-            password: password,
-            email: user.email,
-            displayName: user.displayName
-        };
-
-        $http.put(client.apiOrigin + '/api/v1/users/' + user.id, data).success(function(data, status) {
-            if (status !== 204 || typeof data !== 'object') return callback(new ClientError(status, data));
-            callback(null);
-        }).error(defaultErrorHandler(callback));
-    };
-
     Client.prototype.getOAuthClients = function (callback) {
         $http.get(client.apiOrigin + '/api/v1/oauth/clients').success(function(data, status) {
             if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));
@@ -575,6 +562,19 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         $http.post(client.apiOrigin + '/api/v1/users', data).success(function(data, status) {
             if (status !== 201 || typeof data !== 'object') return callback(new ClientError(status, data));
             callback(null, data);
+        }).error(defaultErrorHandler(callback));
+    };
+
+    Client.prototype.updateUser = function (user, password, callback) {
+        var data = {
+            password: password,
+            email: user.email,
+            displayName: user.displayName
+        };
+
+        $http.put(client.apiOrigin + '/api/v1/users/' + user.id, data).success(function(data, status) {
+            if (status !== 204 || typeof data !== 'object') return callback(new ClientError(status, data));
+            callback(null);
         }).error(defaultErrorHandler(callback));
     };
 
