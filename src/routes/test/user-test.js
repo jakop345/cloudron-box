@@ -18,7 +18,7 @@ var config = require('../../config.js'),
 
 var SERVER_URL = 'http://localhost:' + config.get('port');
 
-var USERNAME_0 = 'admin', PASSWORD = 'Foobar?1337', EMAIL = 'silly@me.com', EMAIL_0_NEW = 'stupid@me.com';
+var USERNAME_0 = 'admin', PASSWORD = 'Foobar?1337', EMAIL = 'silly@me.com', EMAIL_0_NEW = 'stupid@me.com', DISPLAY_NAME_0_NEW = 'New Name';
 var USERNAME_1 = 'userTheFirst', EMAIL_1 = 'tao@zen.mac';
 var USERNAME_2 = 'userTheSecond', EMAIL_2 = 'user@foo.bar';
 var USERNAME_3 = 'userTheThird', EMAIL_3 = 'user3@foo.bar';
@@ -203,6 +203,7 @@ describe('User API', function () {
             expect(res.body.username).to.equal(USERNAME_0);
             expect(res.body.email).to.equal(EMAIL);
             expect(res.body.admin).to.be.ok();
+            expect(res.body.displayName).to.be.a('string');
             expect(res.body.password).to.not.be.ok();
             expect(res.body.salt).to.not.be.ok();
             done();
@@ -525,7 +526,39 @@ describe('User API', function () {
                .send({ password: PASSWORD, email: EMAIL_0_NEW })
                .end(function (error, result) {
             expect(result.statusCode).to.equal(204);
-            done(error);
+
+            superagent.get(SERVER_URL + '/api/v1/users/' + USERNAME_0)
+                  .query({ access_token: token })
+                  .end(function (err, res) {
+                expect(res.statusCode).to.equal(200);
+                expect(res.body.username).to.equal(USERNAME_0);
+                expect(res.body.email).to.equal(EMAIL_0_NEW);
+                expect(res.body.admin).to.be.ok();
+                expect(res.body.displayName).to.equal('');
+
+                done();
+            });
+        });
+    });
+
+    it('change displayName succeeds', function (done) {
+        superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME_0)
+               .query({ access_token: token })
+               .send({ password: PASSWORD, email: EMAIL_0_NEW, displayName: DISPLAY_NAME_0_NEW })
+               .end(function (error, result) {
+            expect(result.statusCode).to.equal(204);
+
+            superagent.get(SERVER_URL + '/api/v1/users/' + USERNAME_0)
+                  .query({ access_token: token })
+                  .end(function (err, res) {
+                expect(res.statusCode).to.equal(200);
+                expect(res.body.username).to.equal(USERNAME_0);
+                expect(res.body.email).to.equal(EMAIL_0_NEW);
+                expect(res.body.admin).to.be.ok();
+                expect(res.body.displayName).to.equal(DISPLAY_NAME_0_NEW);
+
+                done();
+            });
         });
     });
 

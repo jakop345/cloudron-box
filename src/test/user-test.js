@@ -21,6 +21,7 @@ var PASSWORD = 'sTrOnG#$34134';
 var NEW_PASSWORD = 'oTHER@#$235';
 var IS_ADMIN = true;
 var DISPLAY_NAME = 'Nobody cares';
+var DISPLAY_NAME_NEW = 'Somone cares';
 var userObject = null;
 
 function cleanupUsers(done) {
@@ -300,6 +301,9 @@ describe('User', function () {
             user.get(USERNAME, function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
+                expect(result.email).to.equal(EMAIL);
+                expect(result.username).to.equal(USERNAME);
+                expect(result.displayName).to.equal(DISPLAY_NAME);
 
                 done();
             });
@@ -311,7 +315,7 @@ describe('User', function () {
         after(cleanupUsers);
 
         it('fails due to unknown userid', function (done) {
-            user.update(USERNAME+USERNAME, USERNAME_NEW, EMAIL_NEW, function (error) {
+            user.update(USERNAME+USERNAME, USERNAME_NEW, EMAIL_NEW, DISPLAY_NAME_NEW, function (error) {
                 expect(error).to.be.a(UserError);
                 expect(error.reason).to.equal(UserError.NOT_FOUND);
 
@@ -320,7 +324,7 @@ describe('User', function () {
         });
 
         it('fails due to invalid username', function (done) {
-            user.update(USERNAME, '', EMAIL_NEW, function (error) {
+            user.update(USERNAME, '', EMAIL_NEW, DISPLAY_NAME_NEW, function (error) {
                 expect(error).to.be.a(UserError);
                 expect(error.reason).to.equal(UserError.BAD_USERNAME);
 
@@ -329,7 +333,7 @@ describe('User', function () {
         });
 
         it('fails due to invalid email', function (done) {
-            user.update(USERNAME, USERNAME_NEW, 'brokenemailaddress', function (error) {
+            user.update(USERNAME, USERNAME_NEW, 'brokenemailaddress', DISPLAY_NAME_NEW, function (error) {
                 expect(error).to.be.a(UserError);
                 expect(error.reason).to.equal(UserError.BAD_EMAIL);
 
@@ -338,7 +342,7 @@ describe('User', function () {
         });
 
         it('succeeds', function (done) {
-            user.update(USERNAME, USERNAME_NEW, EMAIL_NEW, function (error) {
+            user.update(USERNAME, USERNAME_NEW, EMAIL_NEW, DISPLAY_NAME_NEW, function (error) {
                 expect(error).to.not.be.ok();
 
                 user.get(USERNAME, function (error, result) {
@@ -346,6 +350,7 @@ describe('User', function () {
                     expect(result).to.be.ok();
                     expect(result.email).to.equal(EMAIL_NEW);
                     expect(result.username).to.equal(USERNAME_NEW);
+                    expect(result.displayName).to.equal(DISPLAY_NAME_NEW);
 
                     done();
                 });
