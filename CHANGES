@@ -389,3 +389,8 @@
 - Fix sporadic error when reconfiguring apps
 - Handle journald crashes gracefully
 
+[0.7.1]
+- Allow admins to edit users
+- Fix graphs
+- Support more LDAP cases
+- Allow appstore deep linking
