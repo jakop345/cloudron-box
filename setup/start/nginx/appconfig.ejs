@@ -64,10 +64,10 @@ server {
         }
 
         # graphite paths
-        location ~ ^/(graphite|content|metrics|dashboard|render|browser|composer)/ {
-            proxy_pass   http://127.0.0.1:8000;
-            client_max_body_size 1m;
-        }
+        # location ~ ^/(graphite|content|metrics|dashboard|render|browser|composer)/ {
+        #     proxy_pass   http://127.0.0.1:8000;
+        #     client_max_body_size 1m;
+        # }
 
         location / {
             root   <%= sourceDir %>/webadmin/dist;
