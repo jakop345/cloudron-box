@@ -18,6 +18,7 @@ exports = module.exports = {
     reboot: reboot,
     migrate: migrate,
     backup: backup,
+    retire: retire,
     ensureBackup: ensureBackup,
 
     isConfiguredSync: isConfiguredSync,
@@ -64,7 +65,8 @@ var apps = require('./apps.js'),
 var REBOOT_CMD = path.join(__dirname, 'scripts/reboot.sh'),
     BACKUP_BOX_CMD = path.join(__dirname, 'scripts/backupbox.sh'),
     BACKUP_SWAP_CMD = path.join(__dirname, 'scripts/backupswap.sh'),
-    INSTALLER_UPDATE_URL = 'http://127.0.0.1:2020/api/v1/installer/update';
+    INSTALLER_UPDATE_URL = 'http://127.0.0.1:2020/api/v1/installer/update',
+    RETIRE_CMD = path.join(__dirname, 'scripts/retire.sh');
 
 var NOOP_CALLBACK = function (error) { if (error) debug(error); };
 
@@ -584,7 +586,7 @@ function doUpgrade(boxUpdateInfo, callback) {
 
             // no need to unlock since this is the last thing we ever do on this box
 
-            callback(null);
+            retire(callback);
         });
     });
 }
@@ -787,3 +789,6 @@ function checkDiskSpace(callback) {
     });
 }
 
+function retire(callback) {
+    shell.sudo('retire', [ RETIRE_CMD ], callback);
+}
