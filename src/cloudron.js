@@ -517,7 +517,7 @@ function update(boxUpdateInfo, callback) {
     if (config.version().match(/[-+]/) !== null && config.version().replace(/[-+].*/, '') === boxUpdateInfo.version) {
         debug('Starting short-circuit from prerelease version %s to release version %s', config.version(), boxUpdateInfo.version);
         config.setVersion(boxUpdateInfo.version);
-        progress.set(progress.UPDATE, 100, '');
+        progress.clear(progress.UPDATE);
         locker.unlock(locker.OP_BOX_UPDATE);
     } else if (boxUpdateInfo.upgrade) {
         debug('Starting upgrade');
