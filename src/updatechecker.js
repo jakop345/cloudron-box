@@ -6,7 +6,8 @@ exports = module.exports = {
     checkAppUpdates: checkAppUpdates,
     checkBoxUpdates: checkBoxUpdates,
 
-    getUpdateInfo: getUpdateInfo
+    getUpdateInfo: getUpdateInfo,
+    resetUpdateInfo: resetUpdateInfo
 };
 
 var apps = require('./apps.js'),
@@ -40,6 +41,11 @@ function getUpdateInfo() {
         apps: gAppUpdateInfo,
         box: gBoxUpdateInfo
     };
+}
+
+function resetUpdateInfo() {
+    gAppUpdateInfo = { };
+    gBoxUpdateInfo = null;
 }
 
 function getAppUpdates(callback) {
