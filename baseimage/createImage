@@ -150,12 +150,6 @@ if ! $ssh22 "root@${server_ip}" "/bin/bash /root/initializeBaseUbuntuImage.sh ${
     exit 1
 fi
 
-echo "Copy over certs"
-cd "${SCRIPT_DIR}/../../secrets"
-blackbox_cat installer/server.crt.gpg | $ssh202 "root@${server_ip}" "cat - > /home/yellowtent/installer/src/certs/server.crt"
-blackbox_cat installer/server.key.gpg | $ssh202 "root@${server_ip}" "cat - > /home/yellowtent/installer/src/certs/server.key"
-blackbox_cat installer_ca/ca.crt.gpg  | $ssh202 "root@${server_ip}" "cat - > /home/yellowtent/installer/src/certs/ca.crt"
-
 echo "Shutting down server with id : ${server_id}"
 $ssh202 "root@${server_ip}" "shutdown -f now" || true # shutdown sometimes terminates ssh connection immediately making this command fail
 
