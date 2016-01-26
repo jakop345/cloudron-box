@@ -556,7 +556,7 @@ function doShortCircuitUpdate(boxUpdateInfo, callback) {
     debug('Starting short-circuit from prerelease version %s to release version %s', config.version(), boxUpdateInfo.version);
     config.setVersion(boxUpdateInfo.version);
     progress.clear(progress.UPDATE);
-    updatechecker.resetUpdateInfo();
+    updateChecker.resetUpdateInfo();
     callback();
 }
 
