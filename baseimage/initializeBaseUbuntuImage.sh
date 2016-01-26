@@ -238,7 +238,7 @@ BindsTo=systemd-journald.service
 Type=idle
 ExecStart="${INSTALLER_SOURCE_DIR}/src/server.js"
 Environment="DEBUG=installer*,connect-lastmile" ${provisionEnv}
-; kill any child (installer.sh, retire.sh) as well
+; kill any child (installer.sh) as well
 KillMode=control-group
 Restart=on-failure
 
