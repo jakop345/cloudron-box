@@ -58,6 +58,18 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         });
     };
 
+    $scope.showUserAdd = function () {
+        $scope.useradd.error = {};
+        $scope.useradd.username = '';
+        $scope.useradd.email = '';
+        $scope.useradd.displayName = '';
+
+        $scope.useradd_form.$setUntouched();
+        $scope.useradd_form.$setPristine();
+
+        $('#userAddModal').modal('show');
+    };
+
     $scope.doAdd = function () {
         $scope.useradd.busy = true;
 
