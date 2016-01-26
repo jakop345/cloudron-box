@@ -585,8 +585,8 @@ function doUpgrade(boxUpdateInfo, callback) {
             progress.set(progress.UPDATE, 10, 'Updating base system');
 
             // no need to unlock since this is the last thing we ever do on this box
-
-            retire(callback);
+            callback();
+            retire();
         });
     });
 }
@@ -668,7 +668,7 @@ function backup(callback) {
 }
 
 function ensureBackup(callback) {
-    callback = callback || function () { };
+    callback = callback || NOOP_CALLBACK;
 
     backups.getAllPaged(1, 1, function (error, backups) {
         if (error) {
@@ -725,7 +725,7 @@ function backupBox(callback) {
 
 // this function expects you to have a lock
 function backupBoxAndApps(callback) {
-    callback = callback || function () { }; // callback can be empty for timer triggered backup
+    callback = callback || NOOP_CALLBACK;
 
     apps.getAll(function (error, allApps) {
         if (error) return callback(new CloudronError(CloudronError.INTERNAL_ERROR, error));
@@ -765,7 +765,7 @@ function backupBoxAndApps(callback) {
 }
 
 function checkDiskSpace(callback) {
-    callback = callback || function () { }; // callback can be empty for timer triggered check
+    callback = callback || NOOP_CALLBACK;
 
     debug('Checking disk space');
 
@@ -790,6 +790,8 @@ function checkDiskSpace(callback) {
 }
 
 function retire(callback) {
+    callback = callback || NOOP_CALLBACK;
+
     var data = {
         isCustomDomain: config.isCustomDomain(),
         fqdn: config.fqdn()
