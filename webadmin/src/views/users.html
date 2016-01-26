@@ -79,11 +79,9 @@
                             <label class="control-label" for="inputUserRemovePassword">Give your password to verify that you are performing that action</label>
                             <div class="control-label" ng-show="(!userremove_form.password.$dirty && userremove.error.password) || (userremove_form.password.$dirty && userremove_form.password.$invalid)">
                                 <small ng-show="userremove_form.password.$error.required && !userremove.error.password">A password is required</small>
-                                <small ng-show="userremove_form.password.$error.minlength">The password is too short</small>
-                                <small ng-show="userremove_form.password.$error.maxlength">The password is too long</small>
                                 <small ng-show="!useradd_form.email.$dirty && userremove.error.password">{{ userremove.error.password }}</small>
                             </div>
-                            <input type="password" class="form-control" ng-model="userremove.password" id="inputUserRemovePassword" name="password" placeholder="Password" ng-maxlength="30" ng-minlength="8" required>
+                            <input type="password" class="form-control" ng-model="userremove.password" id="inputUserRemovePassword" name="password" placeholder="Password" required>
                         </div>
                         <input class="hide" type="submit"/>
                     </fieldset>
