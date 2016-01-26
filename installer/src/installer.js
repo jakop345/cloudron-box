@@ -15,13 +15,11 @@ exports = module.exports = {
     InstallerError: InstallerError,
 
     provision: provision,
-    retire: retire,
 
     _ensureVersion: ensureVersion
 };
 
 var INSTALLER_CMD = path.join(__dirname, 'scripts/installer.sh'),
-    RETIRE_CMD = path.join(__dirname, 'scripts/retire.sh'),
     SUDO = '/usr/bin/sudo';
 
 function InstallerError(reason, info) {
@@ -61,21 +59,6 @@ function spawn(tag, cmd, args, callback) {
 
         callback(null);
     });
-}
-
-function retire(args, callback) {
-    assert.strictEqual(typeof args, 'object');
-    assert.strictEqual(typeof callback, 'function');
-
-    var pargs = [ RETIRE_CMD ];
-    pargs.push('--data', JSON.stringify(args.data));
-
-    debug('retire: calling with args %j', pargs);
-
-    if (process.env.NODE_ENV === 'test') return callback(null);
-
-    // sudo is required for retire()
-    spawn('retire', SUDO, pargs, callback);
 }
 
 function ensureVersion(args, callback) {

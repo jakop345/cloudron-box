@@ -109,46 +109,6 @@ describe('Server', function () {
         });
     });
 
-    describe('retire', function () {
-        var data = {
-            data: {
-                tlsKey: 'key',
-                tlsCert: 'cert'
-            }
-        };
-
-        before(function (done) {
-            process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; // TODO: use a installer ca signed cert instead
-            server.start(done);
-        });
-
-        after(function (done) {
-            server.stop(done);
-            delete process.env.NODE_TLS_REJECT_UNAUTHORIZED;
-        });
-
-        Object.keys(data).forEach(function (key) {
-            it('fails due to missing ' + key, function (done) {
-                var dataCopy = _.merge({ }, data);
-                delete dataCopy[key];
-
-                request.post(EXTERNAL_SERVER_URL + '/api/v1/installer/retire').send(dataCopy).end(function (error, result) {
-                    expect(error).to.not.be.ok();
-                    expect(result.statusCode).to.equal(400);
-                    done();
-                });
-            });
-        });
-
-        it('succeeds', function (done) {
-            request.post(EXTERNAL_SERVER_URL + '/api/v1/installer/retire').send(data).end(function (error, result) {
-                expect(error).to.not.be.ok();
-                expect(result.statusCode).to.equal(202);
-                done();
-            });
-        });
-    });
-
     describe('ensureVersion', function () {
         before(function () {
             process.env.NODE_ENV = undefined;
