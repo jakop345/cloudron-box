@@ -11,13 +11,11 @@ var assert = require('assert'),
     fs = require('fs'),
     http = require('http'),
     HttpError = require('connect-lastmile').HttpError,
-    https = require('https'),
     HttpSuccess = require('connect-lastmile').HttpSuccess,
     installer = require('./installer.js'),
     json = require('body-parser').json,
     lastMile = require('connect-lastmile'),
     morgan = require('morgan'),
-    path = require('path'),
     superagent = require('superagent');
 
 exports = module.exports = {
@@ -28,8 +26,7 @@ exports = module.exports = {
 var PROVISION_CONFIG_FILE = '/root/provision.json';
 var CLOUDRON_CONFIG_FILE = '/home/yellowtent/configs/cloudron.conf';
 
-var gHttpsServer = null, // provision server; used for install/restore
-    gHttpServer = null; // update server; used for updates
+var gHttpServer = null; // update server; used for updates
 
 function provisionDigitalOcean(callback) {
     if (fs.existsSync(CLOUDRON_CONFIG_FILE)) return callback(null); // already provisioned
@@ -74,23 +71,6 @@ function update(req, res, next) {
     next(new HttpSuccess(202, { }));
 }
 
-function retire(req, res, next) {
-    assert.strictEqual(typeof req.body, 'object');
-
-    if (!req.body.data || typeof req.body.data !== 'object') return next(new HttpError(400, 'No data provided'));
-
-    if (typeof req.body.data.tlsCert !== 'string') console.error('No TLS cert provided');
-    if (typeof req.body.data.tlsKey !== 'string') console.error('No TLS key provided');
-
-    debug('retire: received from appstore %j', req.body);
-
-    installer.retire(req.body, function (error) {
-        if (error) console.error(error);
-    });
-
-    next(new HttpSuccess(202, {}));
-}
-
 function startUpdateServer(callback) {
     assert.strictEqual(typeof callback, 'function');
 
@@ -112,53 +92,6 @@ function startUpdateServer(callback) {
     gHttpServer.on('error', console.error);
 
     gHttpServer.listen(2020, '127.0.0.1', callback);
-}
-
-function startProvisionServer(callback) {
-    assert.strictEqual(typeof callback, 'function');
-
-    debug('Starting provision server');
-
-    var app = express();
-
-    var router = new express.Router();
-
-    if (process.env.NODE_ENV !== 'test') app.use(morgan('dev', { immediate: false }));
-
-    app.use(json({ strict: true }))
-       .use(router)
-       .use(lastMile());
-
-    router.post('/api/v1/installer/retire', retire);
-
-    var caPath = path.join(__dirname, process.env.NODE_ENV === 'test' ? 'test/certs' : 'certs');
-    var certPath = path.join(__dirname, process.env.NODE_ENV === 'test' ? 'test/certs' : 'certs');
-
-    var options = {
-        key: fs.readFileSync(path.join(certPath, 'server.key')),
-        cert: fs.readFileSync(path.join(certPath, 'server.crt')),
-        ca: fs.readFileSync(path.join(caPath, 'ca.crt')),
-
-        // request cert from client and only allow from our CA
-        requestCert: true,
-        rejectUnauthorized: process.env.NODE_TLS_REJECT_UNAUTHORIZED !== '0' // this is set in the tests
-    };
-
-    gHttpsServer = https.createServer(options, app);
-    gHttpsServer.on('error', console.error);
-
-    gHttpsServer.listen(process.env.NODE_ENV === 'test' ? 4443 : 886, '0.0.0.0', callback);
-}
-
-function stopProvisionServer(callback) {
-    assert.strictEqual(typeof callback, 'function');
-
-    debug('Stopping provision server');
-
-    if (!gHttpsServer) return callback(null);
-
-    gHttpsServer.close(callback);
-    gHttpsServer = null;
 }
 
 function stopUpdateServer(callback) {
@@ -189,7 +122,6 @@ function start(callback) {
 
         actions = [
             startUpdateServer,
-            startProvisionServer,
             provisionDigitalOcean
         ];
     }
@@ -201,8 +133,7 @@ function stop(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     async.series([
-        stopUpdateServer,
-        stopProvisionServer
+        stopUpdateServer
     ], callback);
 }
 
