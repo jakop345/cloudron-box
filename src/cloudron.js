@@ -790,5 +790,10 @@ function checkDiskSpace(callback) {
 }
 
 function retire(callback) {
-    shell.sudo('retire', [ RETIRE_CMD ], callback);
+    var data = {
+        isCustomDomain: config.isCustomDomain(),
+        fqdn: config.fqdn()
+    };
+    shell.sudo('retire', [ RETIRE_CMD, JSON.stringify(data) ], callback);
 }
+
