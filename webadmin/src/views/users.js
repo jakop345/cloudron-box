@@ -144,7 +144,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
             $scope.useredit.busy = false;
 
             if (error && error.statusCode === 403) {
-                $scope.useredit.error.password = 'Incorrect password';
+                $scope.useredit.error.password = 'Wrong password';
                 $scope.useredit.password = '';
                 $scope.useredit_form.password.$setPristine();
                 $('#inputUserEditPassword').focus();
@@ -196,7 +196,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
             $scope.userremove.busy = false;
 
             if (error && error.statusCode === 403) {
-                $scope.userremove.error.password = 'Incorrect password';
+                $scope.userremove.error.password = 'Wrong password';
                 $scope.userremove.password = '';
                 $scope.userremove_form.password.$setPristine();
                 $('#inputUserRemovePassword').focus();
