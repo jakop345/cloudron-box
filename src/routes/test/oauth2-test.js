@@ -1407,6 +1407,15 @@ describe('Password', function () {
             });
         });
 
+        it('fails due to weak password', function (done) {
+            superagent.post(SERVER_URL + '/api/v1/session/password/reset')
+            .send({ password: 'foobar', resetToken: USER_0.resetToken })
+            .end(function (error, result) {
+                expect(result.statusCode).to.equal(406);
+                done();
+            });
+        });
+
         it('succeeds', function (done) {
             var scope = nock(config.adminOrigin())
                 .filteringPath(function (path) {
