@@ -514,7 +514,7 @@ function update(boxUpdateInfo, callback) {
     progress.set(progress.UPDATE, 0, 'Starting');
 
     // initiate the update/upgrade but do not wait for it
-    if (config.version().match(/[-+]/) !== null && (config.version() === boxUpdateInfo.version.replace(/[-+].*/, ''))) {
+    if (config.version().match(/[-+]/) !== null && config.version().replace(/[-+].*/, '') === boxUpdateInfo.version) {
         debug('Starting short-circuit from prerelease version %s to release version %s', config.version(), boxUpdateInfo.version);
         config.setVersion(boxUpdateInfo.version);
         progress.set(progress.UPDATE, 100, '');
