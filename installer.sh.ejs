@@ -20,10 +20,15 @@ readonly provider="${5}"
 readonly revision="${6}"
 
 # environment specific urls
-readonly api_server_origin="https://api.dev.cloudron.io"
-readonly web_server_origin="https://dev.cloudron.io"
-readonly release_bucket_url="https://s3.amazonaws.com/dev-cloudron-releases"
-readonly versions_url="https://s3.amazonaws.com/dev-cloudron-releases/versions.json"
+<% if (env === 'prod') { %>
+readonly api_server_origin="https://api.cloudron.io"
+readonly web_server_origin="https://cloudron.io"
+<% } else { %>
+readonly api_server_origin="https://api.<%= env %>.cloudron.io"
+readonly web_server_origin="https://<%= env %>.cloudron.io"
+<% } %>
+readonly release_bucket_url="https://s3.amazonaws.com/<%= env %>-cloudron-releases"
+readonly versions_url="https://s3.amazonaws.com/<%= env %>-cloudron-releases/versions.json"
 readonly installer_code_url="${release_bucket_url}/box-${revision}.tar.gz"
 
 # runtime consts
@@ -132,7 +137,7 @@ cat > /root/provision.json <<EOF
             "secretAccessKey": "${aws_access_key_secret}"
         },
         "tlsConfig": {
-            "provider": "letsencrypt-dev"
+            "provider": "letsencrypt-<%= env %>"
         }
     }
 }
