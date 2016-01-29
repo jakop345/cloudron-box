@@ -176,8 +176,8 @@ function sendMails(queue) {
 function enqueue(mailOptions) {
     assert.strictEqual(typeof mailOptions, 'object');
 
-    if (!mailOptions.from) console.error('from is missing');
-    if (!mailOptions.to) console.error('to is missing');
+    if (!mailOptions.from) console.error('sender address is missing');
+    if (!mailOptions.to) console.error('recipient address is missing');
 
     debug('Queued mail for ' + mailOptions.from + ' to ' + mailOptions.to);
     gMailQueue.push(mailOptions);
