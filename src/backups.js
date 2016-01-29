@@ -114,8 +114,7 @@ function getAppBackupConfigUrl(app, callback) {
             var obj = {
                 id: filename,
                 url: result.url,
-                sessionToken: result.sessionToken,
-                backupKey: backupConfig.key
+                sessionToken: result.sessionToken
             };
 
             debug('getAppBackupConfigUrl: id:%s url:%s sessionToken:%s backupKey:%s', obj.id, obj.url, obj.sessionToken, obj.backupKey);
@@ -155,15 +154,23 @@ function copyLastBackup(app, callback) {
     assert.strictEqual(typeof app.lastBackupId, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    var toFilename = util.format('appbackup_%s_%s-v%s.tar.gz', app.id, (new Date()).toISOString(), app.manifest.version);
+    var toFilenameArchive = util.format('appbackup_%s_%s-v%s.tar.gz', app.id, (new Date()).toISOString(), app.manifest.version);
+    var toFilenameConfig = util.format('appbackup_%s_%s-v%s.json', app.id, (new Date()).toISOString(), app.manifest.version);
 
     settings.getBackupConfig(function (error, backupConfig) {
         if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
 
-        api(backupConfig.provider).copyObject(backupConfig, app.lastBackupId, toFilename, function (error) {
+        api(backupConfig.provider).copyObject(backupConfig, app.lastBackupId, toFilenameArchive, function (error) {
             if (error) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, error));
 
-            return callback(null, toFilename);
+            // TODO change that logic by adjusting app.lastBackupId to not contain the file type
+            var configFileId = app.lastBackupId.slice(0, -'.tar.gz'.length) + '.json';
+
+            api(backupConfig.provider).copyObject(backupConfig, configFileId, toFilenameConfig, function (error) {
+                if (error) return callback(new BackupsError(BackupsError.EXTERNAL_ERROR, error));
+
+                return callback(null, toFilenameArchive);
+            });
         });
     });
 }
