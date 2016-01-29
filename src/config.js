@@ -37,7 +37,7 @@ exports = module.exports = {
     isDev: isDev,
 
     // for testing resets to defaults
-    _reset: initConfig
+    _reset: _reset
 };
 
 var assert = require('assert'),
@@ -68,6 +68,12 @@ function setDnsInSync(content) {
 
 function saveSync() {
     fs.writeFileSync(cloudronConfigFileName, JSON.stringify(data, null, 4)); // functions are ignored by JSON.stringify
+}
+
+function _reset () {
+    safe.fs.unlinkSync(cloudronConfigFileName);
+
+    initConfig();
 }
 
 function initConfig() {
