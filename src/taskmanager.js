@@ -4,7 +4,10 @@ exports = module.exports = {
     initialize: initialize,
     uninitialize: uninitialize,
 
-    restartAppTask: restartAppTask
+    restartAppTask: restartAppTask,
+
+    stopPendingTasks: stopPendingTasks,
+    waitForPendingTasks: waitForPendingTasks
 };
 
 var appdb = require('./appdb.js'),
@@ -47,6 +50,24 @@ function uninitialize(callback) {
     async.eachSeries(Object.keys(gActiveTasks), stopAppTask, callback);
 }
 
+function stopPendingTasks(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    gPendingTasks = [];
+
+    async.eachSeries(Object.keys(gActiveTasks), stopAppTask, callback);
+}
+
+function waitForPendingTasks(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    function checkTasks() {
+        if (Object.keys(gActiveTasks).length === 0 && gPendingTasks.length === 0) return callback();
+        setTimeout(checkTasks, 1000);
+    }
+
+    checkTasks();
+}
 
 // resume app installs and uninstalls
 function resumeTasks(callback) {
