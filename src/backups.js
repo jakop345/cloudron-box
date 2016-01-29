@@ -6,6 +6,7 @@ exports = module.exports = {
     getAllPaged: getAllPaged,
 
     getBackupUrl: getBackupUrl,
+    getAppBackupConfigUrl: getAppBackupConfigUrl,
     getRestoreUrl: getRestoreUrl,
 
     copyLastBackup: copyLastBackup
@@ -92,6 +93,32 @@ function getBackupUrl(app, callback) {
             };
 
             debug('getBackupUrl: id:%s url:%s sessionToken:%s backupKey:%s', obj.id, obj.url, obj.sessionToken, obj.backupKey);
+
+            callback(null, obj);
+        });
+    });
+}
+
+function getAppBackupConfigUrl(app, callback) {
+    assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof callback, 'function');
+
+    var filename = util.format('appbackup_%s_%s-v%s.json', app.id, (new Date()).toISOString(), app.manifest.version);
+
+    settings.getBackupConfig(function (error, backupConfig) {
+        if (error) return callback(new BackupsError(BackupsError.INTERNAL_ERROR, error));
+
+        api(backupConfig.provider).getSignedUploadUrl(backupConfig, filename, function (error, result) {
+            if (error) return callback(error);
+
+            var obj = {
+                id: filename,
+                url: result.url,
+                sessionToken: result.sessionToken,
+                backupKey: backupConfig.key
+            };
+
+            debug('getAppBackupConfigUrl: id:%s url:%s sessionToken:%s backupKey:%s', obj.id, obj.url, obj.sessionToken, obj.backupKey);
 
             callback(null, obj);
         });
