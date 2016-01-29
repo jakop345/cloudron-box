@@ -12,8 +12,8 @@ if [[ $# == 1 && "$1" == "--check" ]]; then
     exit 0
 fi
 
-if [ $# -lt 3 ]; then
-    echo "Usage: backupapp.sh <appid> <url> <key> [aws session token]"
+if [ $# -lt 4 ]; then
+    echo "Usage: backupapp.sh <appid> <url> <url> <key> [aws session token]"
     exit 1
 fi
 
@@ -21,8 +21,9 @@ readonly DATA_DIR="${HOME}/data"
 
 app_id="$1"
 backup_url="$2"
-backup_key="$3"
-session_token="$4"
+backup_config_url="$3"
+backup_key="$4"
+session_token="$5"
 readonly now=$(date "+%Y-%m-%dT%H:%M:%S")
 readonly app_data_dir="${DATA_DIR}/${app_id}"
 readonly app_data_snapshot="${DATA_DIR}/snapshots/${app_id}-${now}"
@@ -48,10 +49,33 @@ for try in `seq 1 5`; do
     cat "${error_log}" && rm "${error_log}"
 done
 
+if [[ ${try} -eq 5 ]]; then
+    echo "Backup failed uploading backup tarball"
+    exit 1
+else
+
+for try in `seq 1 5`; do
+    echo "Uploading config.json to ${backup_config_url} (try ${try})"
+    error_log=$(mktemp)
+
+    headers=("-H" "Content-Type:")
+
+    # federated tokens in CaaS case need session token
+    if [ ! -z "$session_token" ]; then
+        headers=(${headers[@]} "-H" "x-amz-security-token: ${session_token}")
+    fi
+
+    if cat "${app_data_snapshot}/config.json" \
+           | curl --fail -X PUT ${headers[@]} --data @- "${backup_config_url}" 2>"${error_log}"; then
+        break
+    fi
+    cat "${error_log}" && rm "${error_log}"
+done
+
 btrfs subvolume delete "${app_data_snapshot}"
 
 if [[ ${try} -eq 5 ]]; then
-    echo "Backup failed"
+    echo "Backup failed uploading config.json"
     exit 1
 else
     echo "Backup successful"
