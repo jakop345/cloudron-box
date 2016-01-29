@@ -77,7 +77,7 @@ function getSignedUploadUrl(backupConfig, filename, callback) {
 
         var url = s3.getSignedUrl('putObject', params);
 
-        callback(null, { url : url, sessionToken: credentials.sessionToken });
+        callback(null, { url: url, sessionToken: credentials.sessionToken });
     });
 }
 
