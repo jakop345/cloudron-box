@@ -150,7 +150,7 @@ function getRestoreUrl(backupId, callback) {
 }
 
 function copyLastBackup(app, callback) {
-    assert(app && typeof app === 'object');
+    assert.strictEqual(typeof app, 'object');
     assert.strictEqual(typeof app.lastBackupId, 'string');
     assert.strictEqual(typeof callback, 'function');
 
