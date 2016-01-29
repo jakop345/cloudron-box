@@ -16,7 +16,6 @@ exports = module.exports = {
     updateToLatest: updateToLatest,
     update: update,
     reboot: reboot,
-    migrate: migrate,
     backup: backup,
     retire: retire,
     ensureBackup: ensureBackup,
@@ -458,49 +457,6 @@ function addDnsRecords() {
 
 function reboot(callback) {
     shell.sudo('reboot', [ REBOOT_CMD ], callback);
-}
-
-function migrate(size, region, callback) {
-    assert.strictEqual(typeof size, 'string');
-    assert.strictEqual(typeof region, 'string');
-    assert.strictEqual(typeof callback, 'function');
-
-    var error = locker.lock(locker.OP_MIGRATE);
-    if (error) return callback(new CloudronError(CloudronError.BAD_STATE, error.message));
-
-    function unlock(error) {
-        if (error) {
-            debug('Failed to migrate', error);
-            locker.unlock(locker.OP_MIGRATE);
-        } else {
-            debug('Migration initiated successfully');
-            // do not unlock; cloudron is migrating
-        }
-
-        return;
-    }
-
-    // initiate the migration in the background
-    backupBoxAndApps(function (error, restoreKey) {
-        if (error) return unlock(error);
-
-        debug('migrate: size %s region %s restoreKey %s', size, region, restoreKey);
-
-        superagent
-          .post(config.apiServerOrigin() + '/api/v1/boxes/' + config.fqdn() + '/migrate')
-          .query({ token: config.token() })
-          .send({ size: size, region: region, restoreKey: restoreKey })
-          .end(function (error, result) {
-            if (error && !error.response) return unlock(error);
-            if (result.statusCode === 409) return unlock(new CloudronError(CloudronError.BAD_STATE));
-            if (result.statusCode === 404) return unlock(new CloudronError(CloudronError.NOT_FOUND));
-            if (result.statusCode !== 202) return unlock(new CloudronError(CloudronError.EXTERNAL_ERROR, util.format('%s %j', result.status, result.body)));
-
-            return unlock(null);
-        });
-    });
-
-    callback(null);
 }
 
 function update(boxUpdateInfo, callback) {

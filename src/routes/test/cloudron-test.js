@@ -24,14 +24,16 @@ var token = null; // authentication token
 var server;
 function setup(done) {
     nock.cleanAll();
+    config._reset();
     config.set('version', '0.5.0');
-    config.set('fqdn', 'localhost');
     server.start(done);
 }
 
 function cleanup(done) {
     database._clear(function (error) {
         expect(error).to.not.be.ok();
+
+        config._reset();
 
         server.stop(done);
     });
@@ -256,181 +258,6 @@ describe('Cloudron', function () {
             });
         });
 
-    });
-
-    describe('migrate', function () {
-        before(function (done) {
-            async.series([
-                setup,
-
-                function (callback) {
-                    var scope1 = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
-                    var scope2 = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/setup/done?setupToken=somesetuptoken').reply(201, {});
-
-                    config._reset();
-
-                    superagent.post(SERVER_URL + '/api/v1/cloudron/activate')
-                           .query({ setupToken: 'somesetuptoken' })
-                           .send({ username: USERNAME, password: PASSWORD, email: EMAIL })
-                           .end(function (error, result) {
-                        expect(result).to.be.ok();
-                        expect(scope1.isDone()).to.be.ok();
-                        expect(scope2.isDone()).to.be.ok();
-
-                        // stash token for further use
-                        token = result.body.token;
-
-                        callback();
-                    });
-                },
-
-                function setupBackupConfig(callback) {
-                    superagent.post(SERVER_URL + '/api/v1/settings/backup_config')
-                           .send({ provider: 'caas', token: 'BACKUP_TOKEN', bucket: 'Bucket', prefix: 'Prefix' })
-                           .query({ access_token: token })
-                           .end(function (error, result) {
-                        expect(result.statusCode).to.equal(200);
-
-                        callback();
-                    });
-                }
-
-            ], done);
-        });
-
-        after(cleanup);
-
-        it('fails without token', function (done) {
-            superagent.post(SERVER_URL + '/api/v1/cloudron/migrate')
-                   .send({ size: 'small', region: 'sfo'})
-                   .end(function (error, result) {
-                expect(result.statusCode).to.equal(401);
-                done();
-            });
-        });
-
-        it('fails without password', function (done) {
-            superagent.post(SERVER_URL + '/api/v1/cloudron/migrate')
-                   .send({ size: 'small', region: 'sfo'})
-                   .query({ access_token: token })
-                   .end(function (error, result) {
-                expect(result.statusCode).to.equal(400);
-                done();
-            });
-        });
-
-        it('fails with missing size', function (done) {
-            superagent.post(SERVER_URL + '/api/v1/cloudron/migrate')
-                   .send({ region: 'sfo', password: PASSWORD })
-                   .query({ access_token: token })
-                   .end(function (error, result) {
-                expect(result.statusCode).to.equal(400);
-                done();
-            });
-        });
-
-        it('fails with wrong size type', function (done) {
-            superagent.post(SERVER_URL + '/api/v1/cloudron/migrate')
-                   .send({ size: 4, region: 'sfo', password: PASSWORD })
-                   .query({ access_token: token })
-                   .end(function (error, result) {
-                expect(result.statusCode).to.equal(400);
-                done();
-            });
-        });
-
-        it('fails with missing region', function (done) {
-            superagent.post(SERVER_URL + '/api/v1/cloudron/migrate')
-                   .send({ size: 'small', password: PASSWORD })
-                   .query({ access_token: token })
-                   .end(function (error, result) {
-                expect(result.statusCode).to.equal(400);
-                done();
-            });
-        });
-
-        it('fails with wrong region type', function (done) {
-            superagent.post(SERVER_URL + '/api/v1/cloudron/migrate')
-                   .send({ size: 'small', region: 4, password: PASSWORD })
-                   .query({ access_token: token })
-                   .end(function (error, result) {
-                expect(result.statusCode).to.equal(400);
-                done();
-            });
-        });
-
-        it('fails when in wrong state', function (done) {
-            var scope2 = nock(config.apiServerOrigin())
-                    .post('/api/v1/boxes/' + config.fqdn() + '/awscredentials?token=BACKUP_TOKEN')
-                    .reply(201, { credentials: { AccessKeyId: 'accessKeyId', SecretAccessKey: 'secretAccessKey', SessionToken: 'sessionToken' } });
-
-            var scope3 = nock(config.apiServerOrigin())
-                    .post('/api/v1/boxes/' + config.fqdn() + '/backupDone?token=APPSTORE_TOKEN', function (body) {
-                        return body.boxVersion && body.restoreKey && !body.appId && !body.appVersion && body.appBackupIds.length === 0;
-                    })
-                    .reply(200, { id: 'someid' });
-
-            var scope1 = nock(config.apiServerOrigin())
-                .post('/api/v1/boxes/' + config.fqdn() + '/migrate?token=APPSTORE_TOKEN', function (body) {
-                    return body.size && body.region && body.restoreKey;
-                }).reply(409, {});
-
-            injectShellMock();
-
-            superagent.post(SERVER_URL + '/api/v1/cloudron/migrate')
-                   .send({ size: 'small', region: 'sfo', password: PASSWORD })
-                   .query({ access_token: token })
-                   .end(function (error, result) {
-                expect(result.statusCode).to.equal(202);
-
-                function checkAppstoreServerCalled() {
-                    if (scope1.isDone() && scope2.isDone() && scope3.isDone()) {
-                        restoreShellMock();
-                        return done();
-                    }
-
-                    setTimeout(checkAppstoreServerCalled, 100);
-                }
-
-                checkAppstoreServerCalled();
-            });
-        });
-
-        it('succeeds', function (done) {
-            var scope1 = nock(config.apiServerOrigin()).post('/api/v1/boxes/' + config.fqdn() + '/migrate?token=APPSTORE_TOKEN', function (body) {
-                return body.size && body.region && body.restoreKey;
-            }).reply(202, {});
-
-            var scope2 = nock(config.apiServerOrigin())
-                    .post('/api/v1/boxes/' + config.fqdn() + '/backupDone?token=APPSTORE_TOKEN', function (body) {
-                        return body.boxVersion && body.restoreKey && !body.appId && !body.appVersion && body.appBackupIds.length === 0;
-                    })
-                    .reply(200, { id: 'someid' });
-
-            var scope3 = nock(config.apiServerOrigin())
-                    .post('/api/v1/boxes/' + config.fqdn() + '/awscredentials?token=BACKUP_TOKEN')
-                    .reply(201, { credentials: { AccessKeyId: 'accessKeyId', SecretAccessKey: 'secretAccessKey', SessionToken: 'sessionToken' } });
-
-            injectShellMock();
-
-            superagent.post(SERVER_URL + '/api/v1/cloudron/migrate')
-                   .send({ size: 'small', region: 'sfo', password: PASSWORD })
-                   .query({ access_token: token })
-                   .end(function (error, result) {
-                expect(result.statusCode).to.equal(202);
-
-                function checkAppstoreServerCalled() {
-                    if (scope1.isDone() && scope2.isDone() && scope3.isDone()) {
-                        restoreShellMock();
-                        return done();
-                    }
-
-                    setTimeout(checkAppstoreServerCalled, 100);
-                }
-
-                checkAppstoreServerCalled();
-            });
-        });
     });
 
     describe('feedback', function () {
