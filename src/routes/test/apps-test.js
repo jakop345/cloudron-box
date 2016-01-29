@@ -104,6 +104,8 @@ function startDockerProxy(interceptor, callback) {
 }
 
 function setup(done) {
+    config._reset();
+
     async.series([
         // first clear, then start server. otherwise, taskmanager spins up tasks for obsolete appIds
         database.initialize,
@@ -165,7 +167,12 @@ function cleanup(done) {
     async.series([
         server.stop,
 
-        function (callback) { setTimeout(callback, 2000); }, // give taskmanager tasks couple of seconds to finish
+        function (callback) {
+            config._reset();
+
+            // give taskmanager tasks couple of seconds to finish
+            setTimeout(callback, 2000);
+        },
 
         child_process.exec.bind(null, 'docker rm -f mysql; docker rm -f postgresql; docker rm -f mongodb; docker rm -f mail')
     ], done);
