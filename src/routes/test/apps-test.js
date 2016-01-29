@@ -920,14 +920,19 @@ describe('Apps', function () {
         });
 
         it('did stop the app', function (done) {
-            // give the app a couple of seconds to die
-            setTimeout(function () {
-                superagent.get('http://localhost:' + appEntry.httpPort + appResult.manifest.healthCheckPath)
-                    .end(function (err, res) {
-                    expect(err).to.be.ok();
-                    done();
+            function waitForAppToDie() {
+                superagent.get('http://localhost:' + appEntry.httpPort + appResult.manifest.healthCheckPath).end(function (err, res) {
+                    if (!err || err.code !== 'ECONNREFUSED') return setTimeout(waitForAppToDie, 500);
+
+                    // wait for app status to be updated
+                    superagent.get(SERVER_URL + '/api/v1/apps/' + APP_ID).query({ access_token: token_1 }).end(function (error, result) {
+                        if (error || result.statusCode !== 200 || result.body.runState !== 'stopped') return setTimeout(waitForAppToDie, 500);
+                        done();
+                    });
                 });
-            }, 2000);
+            }
+
+            waitForAppToDie();
         });
 
         it('nonadmin cannot start app', function (done) {
@@ -1041,12 +1046,16 @@ describe('Apps', function () {
             imageDeleted = false;
             imageCreated = false;
 
-            config.set('fqdn', 'test.foobar.com');
 
             APP_ID = uuid.v4();
 
             async.series([
                 setup,
+
+                function (callback) {
+                    config.set('fqdn', 'test.foobar.com');
+                    callback();
+                },
 
                 function (callback) {
                     apiHockInstance
@@ -1445,16 +1454,32 @@ describe('Apps', function () {
 
         // osx: if this test is failing, it is probably because of a stray port binding in boot2docker
         it('did stop the app', function (done) {
-            setTimeout(function () {
+            var timer1, timer2;
+
+            function finished() {
+                clearTimeout(timer1);
+                clearTimeout(timer2);
+
+                if (done) done();
+
+                // avoid double callbacks
+                done = null;
+            }
+
+            function waitForAppToDie() {
                 var client = net.connect(7171);
                 client.setTimeout(2000);
-                client.on('connect', function () { done(new Error('Got connected')); });
-                client.on('timeout', function () { done(); });
-                client.on('error', function (error) { done(); });
-                client.on('data', function (data) {
-                    done(new Error('Expected connection to fail!'));
+                client.on('connect', function () {
+                    timer1 = setTimeout(waitForAppToDie, 1000);
                 });
-            }, 3000); // give the app some time to die
+                client.on('timeout', function () { finished(); });
+                client.on('error', function (error) { finished(); });
+                client.on('data', function (data) {
+                    timer2 = setTimeout(waitForAppToDie, 1000);
+                });
+            }
+
+            waitForAppToDie();
         });
 
         it('can uninstall app', function (done) {
