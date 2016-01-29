@@ -52,7 +52,7 @@ done
 if [[ ${try} -eq 5 ]]; then
     echo "Backup failed uploading backup tarball"
     exit 1
-else
+fi
 
 for try in `seq 1 5`; do
     echo "Uploading config.json to ${backup_config_url} (try ${try})"
@@ -80,4 +80,3 @@ if [[ ${try} -eq 5 ]]; then
 else
     echo "Backup successful"
 fi
-
