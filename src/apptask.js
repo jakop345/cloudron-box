@@ -598,6 +598,7 @@ function update(app, callback) {
     debugApp(app, 'Updating to %s', safe.query(app, 'manifest.version'));
 
     // app does not want these addons anymore
+    // FIXME: this does not handle option changes (like multipleDatabases)
     var unusedAddons = _.omit(app.oldConfig.manifest.addons, Object.keys(app.manifest.addons));
 
     async.series([

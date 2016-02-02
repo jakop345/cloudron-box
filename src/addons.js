@@ -420,7 +420,7 @@ function setupMySql(app, options, callback) {
     debugApp(app, 'Setting up mysql');
 
     var container = docker.getContainer('mysql');
-    var cmd = [ '/addons/mysql/service.sh', 'add', app.id ];
+    var cmd = [ '/addons/mysql/service.sh', options.multipleDatabases ? 'add-prefix' : 'add', app.id ];
 
     container.exec({ Cmd: cmd, AttachStdout: true, AttachStderr: true }, function (error, execContainer) {
         if (error) return callback(error);
@@ -453,7 +453,7 @@ function teardownMySql(app, options, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     var container = docker.getContainer('mysql');
-    var cmd = [ '/addons/mysql/service.sh', 'remove', app.id ];
+    var cmd = [ '/addons/mysql/service.sh', options.multipleDatabases ? 'remove-prefix' : 'remove', app.id ];
 
     debugApp(app, 'Tearing down mysql');
 
@@ -481,7 +481,7 @@ function backupMySql(app, options, callback) {
     var output = fs.createWriteStream(path.join(paths.DATA_DIR, app.id, 'mysqldump'));
     output.on('error', callback);
 
-    var cp = spawn('/usr/bin/docker', [ 'exec', 'mysql', '/addons/mysql/service.sh', 'backup', app.id ]);
+    var cp = spawn('/usr/bin/docker', [ 'exec', 'mysql', '/addons/mysql/service.sh', options.multipleDatabases ? 'backup-prefix' : 'backup', app.id ]);
     cp.on('error', callback);
     cp.on('exit', function (code, signal) {
         debugApp(app, 'backupMySql: done. code:%s signal:%s', code, signal);
@@ -504,7 +504,7 @@ function restoreMySql(app, options, callback) {
         input.on('error', callback);
 
         // cannot get this to work through docker.exec
-        var cp = spawn('/usr/bin/docker', [ 'exec', '-i', 'mysql', '/addons/mysql/service.sh', 'restore', app.id ]);
+        var cp = spawn('/usr/bin/docker', [ 'exec', '-i', 'mysql', '/addons/mysql/service.sh', options.multipleDatabases ? 'restore-prefix' : 'restore', app.id ]);
         cp.on('error', callback);
         cp.on('exit', function (code, signal) {
             debugApp(app, 'restoreMySql: done %s %s', code, signal);
