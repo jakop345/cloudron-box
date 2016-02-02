@@ -400,3 +400,6 @@
 - Improved box update management using prereleases
 - Less aggressive disk space checks
 
+[0.8.0]
+- MySQL addon : multiple database support
+
