@@ -403,3 +403,7 @@
 [0.8.0]
 - MySQL addon : multiple database support
 
+[0.8.1]
+- Set Host HTTP header when querying healthCheckPath
+- Show application Changelog in app update emails
+
