@@ -52,6 +52,14 @@
                             </select>
                         </div>
 
+                        <div class="form-group" ng-hide="true">
+                            <label class="control-label" for="memoryUsage">Maximum Memory Usage</label>
+                            <br/><br/>
+                            <div style="padding: 0 10px;">
+                                <slider id="memoryUsage" ng-model="appConfigure.memoryUsage" min="0" step="10" max="100" tooltip="always" ticks="memoryTicks" ticks-snap-bounds="30"></slider>
+                            </div>
+                        </div>
+
                         <div class="hide">
                         <label class="control-label" for="appConfigureCertificateInput" ng-show="config.isCustomDomain">Certificate (optional)</label>
                         <div class="has-error text-center" ng-show="appConfigure.error.cert && config.isCustomDomain">{{ appConfigure.error.cert }}</div>

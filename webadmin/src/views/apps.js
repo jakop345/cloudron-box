@@ -11,6 +11,8 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
     $scope.config = Client.getConfig();
     $scope.user = Client.getUserInfo();
 
+    $scope.memoryTicks = [128, 256, 512, 1024, 2048];
+
     $scope.appConfigure = {
         busy: false,
         error: {},
