@@ -189,11 +189,8 @@
                 <h4 class="modal-title">Update {{ appUpdate.app.location }}</h4>
             </div>
             <div class="modal-body">
-                <p>New version: <b>{{ appUpdate.manifest.version}}</b></p>
-                <p>Recent Changes:</p>
-                <ul>
-                    <li ng-repeat="change in appUpdate.manifest.changelog">{{change}}</li>
-                </ul>
+                <p>Recent Changes for new version <b>{{ appUpdate.manifest.version}}</b>:</p>
+                <pre>{{ appUpdate.manifest.changelog }}</pre>
                 <br/>
                 <fieldset>
                     <form class="form-signin" role="form" name="appUpdateForm" ng-submit="doUpdate(appUpdateForm)" autocomplete="off">
