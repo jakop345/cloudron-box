@@ -353,7 +353,7 @@ function appUpdateAvailable(app, updateInfo) {
             from: config.get('adminEmail'),
             to: adminEmails.join(', '),
             subject: util.format('%s has a new update available', app.fqdn),
-            text: render('app_update_available.ejs', { fqdn: config.fqdn(), webadminUrl: config.adminOrigin(), app: app, format: 'text' })
+            text: render('app_update_available.ejs', { fqdn: config.fqdn(), webadminUrl: config.adminOrigin(), app: app, updateInfo: updateInfo, format: 'text' })
         };
 
         enqueue(mailOptions);

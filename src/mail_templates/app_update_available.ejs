@@ -2,9 +2,12 @@
 
 Dear Admin,
 
-A new version of the app '<%= app.manifest.title %>' installed at <%= app.fqdn %> is available!
+A new version <%= updateInfo.manifest.version %> of the app '<%= app.manifest.title %>' installed at <%= app.fqdn %> is available!
 
 The app will update automatically tonight. Alternately, update immediately at <%= webadminUrl %>.
+
+Changes:
+<%= updateInfo.manifest.changelog %>
 
 Thank you,
 your Cloudron
