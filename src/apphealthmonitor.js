@@ -3,6 +3,7 @@
 var appdb = require('./appdb.js'),
     assert = require('assert'),
     async = require('async'),
+    config = require('./config.js'),
     DatabaseError = require('./databaseerror.js'),
     debug = require('debug')('box:apphealthmonitor'),
     docker = require('./docker.js').connection,
@@ -89,6 +90,7 @@ function checkAppHealth(app, callback) {
         var healthCheckUrl = 'http://127.0.0.1:' + app.httpPort + manifest.healthCheckPath;
         superagent
             .get(healthCheckUrl)
+            .set('Host', config.appFqdn(app.location)) // required for some apache configs with rewrite rules
             .redirects(0)
             .timeout(HEALTHCHECK_INTERVAL)
             .end(function (error, res) {
