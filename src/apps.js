@@ -356,6 +356,8 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
     error = validateAccessRestriction(accessRestriction);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
+    var memoryLimit = manifest.memoryLimit || 268435456; // 265mb
+
     // singleUser mode requires accessRestriction to contain exactly one user
     if (manifest.singleUser && accessRestriction === null) return callback(new AppsError(AppsError.USER_REQUIRED));
     if (manifest.singleUser && accessRestriction.users.length !== 1) return callback(new AppsError(AppsError.USER_REQUIRED));
@@ -376,7 +378,7 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
     purchase(appStoreId, function (error) {
         if (error) return callback(error);
 
-        appdb.add(appId, appStoreId, manifest, location.toLowerCase(), portBindings, accessRestriction, oauthProxy, function (error) {
+        appdb.add(appId, appStoreId, manifest, location.toLowerCase(), portBindings, accessRestriction, oauthProxy, memoryLimit, function (error) {
             if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(getDuplicateErrorDetails(location.toLowerCase(), portBindings, error));
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
