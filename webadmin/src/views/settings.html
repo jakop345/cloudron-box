@@ -3,8 +3,8 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title" ng-hide="config.developerMode">Enable Developer Mode</h4>
-                <h4 class="modal-title" ng-show="config.developerMode">Disable Developer Mode</h4>
+                <h4 class="modal-title" ng-hide="config.developerMode">Enable CLI Mode</h4>
+                <h4 class="modal-title" ng-show="config.developerMode">Disable CLI Mode</h4>
             </div>
             <div class="modal-body">
                 <form name="developerModeChangeForm" class="form-signin" role="form" novalidate ng-submit="doChangeDeveloperMode(developerModeChangeForm)" autocomplete="off">
@@ -143,17 +143,17 @@
 
 <div style="max-width: 600px; margin: 0 auto;" ng-show="user.admin">
     <div class="text-left">
-        <h3>Developer Mode</h3>
+        <h3>Command Line Interface</h3>
     </div>
 </div>
 
 <div class="card" style="margin-bottom: 15px;" ng-show="user.admin">
     <div class="row">
         <div class="col-xs-12">
-            The developer mode will enable additional functionality for developers. This mode allows for example the Cloudron commandline tool to control parts of the Cloudron, like installing and debugging applications.
+            Turning this on allows the <a href="https://cloudron.io/references/cli.html" target="_blank">CLI tool</a> to control this Cloudron. The CLI tool can be used to install, configure, inspect and backup applications.
             <br/>
             <br/>
-            If you are interested in application development, please visit the <a href="{{ config.webServerOrigin }}/documentation.html" target="_blank">application developer documentation</a>.
+            Writing applications for the Cloudron is simple and fun! If you are a developer, please visit the <a href="{{ config.webServerOrigin }}/documentation.html" target="_blank">application development documentation</a>.
         </div>
     </div>
     <br/>
