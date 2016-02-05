@@ -605,9 +605,14 @@ function update(app, callback) {
         updateApp.bind(null, app, { installationProgress: '0, Verify manifest' }),
         verifyManifest.bind(null, app),
 
+        // download new image before app is stopped. this is so we can reduce downtime
+        // and also not remove the 'common' layers when the old image is deleted
+        updateApp.bind(null, app, { installationProgress: '15, Downloading image' }),
+        docker.downloadImage.bind(null, app.manifest),
+
         // note: we cleanup first and then backup. this is done so that the app is not running should backup fail
         // we cannot easily 'recover' from backup failures because we have to revert manfest and portBindings
-        updateApp.bind(null, app, { installationProgress: '10, Cleaning up old install' }),
+        updateApp.bind(null, app, { installationProgress: '25, Cleaning up old install' }),
         removeCollectdProfile.bind(null, app),
         stopApp.bind(null, app),
         deleteContainers.bind(null, app),
@@ -623,16 +628,13 @@ function update(app, callback) {
             if (app.installationState === appdb.ISTATE_PENDING_FORCE_UPDATE) return next(null);
 
             async.series([
-                updateApp.bind(null, app, { installationProgress: '20, Backup app' }),
+                updateApp.bind(null, app, { installationProgress: '30, Backup app' }),
                 apps.backupApp.bind(null, app, app.oldConfig.manifest.addons)
             ], next);
         },
 
-        updateApp.bind(null, app, { installationProgress: '35, Downloading icon' }),
+        updateApp.bind(null, app, { installationProgress: '45, Downloading icon' }),
         downloadIcon.bind(null, app),
-
-        updateApp.bind(null, app, { installationProgress: '45, Downloading image' }),
-        docker.downloadImage.bind(null, app.manifest),
 
         updateApp.bind(null, app, { installationProgress: '70, Updating addons' }),
         addons.setupAddons.bind(null, app, app.manifest.addons),
