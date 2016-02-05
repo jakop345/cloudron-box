@@ -356,7 +356,7 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
     error = validateAccessRestriction(accessRestriction);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
-    var memoryLimit = manifest.memoryLimit || 268435456; // 265mb
+    var memoryLimit = manifest.memoryLimit <= 268435456 ? 268435456 : manifest.memoryLimit; // 256mb
 
     // singleUser mode requires accessRestriction to contain exactly one user
     if (manifest.singleUser && accessRestriction === null) return callback(new AppsError(AppsError.USER_REQUIRED));

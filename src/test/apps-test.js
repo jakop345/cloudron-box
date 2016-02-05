@@ -126,6 +126,7 @@ describe('Apps', function () {
                 expect(app).to.be.ok();
                 expect(app.iconUrl).to.be(null);
                 expect(app.fqdn).to.eql(APP_0.location + '-' + config.fqdn());
+                expect(app.memoryLimit).to.eql(0);
                 done();
             });
         });
