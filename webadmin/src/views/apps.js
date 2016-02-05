@@ -11,7 +11,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
     $scope.config = Client.getConfig();
     $scope.user = Client.getUserInfo();
 
-    $scope.memoryTicks = [128, 256, 512, 1024, 2048];
+    $scope.memoryTicks = [256, 512, 1024, 2048, 4096];
 
     $scope.appConfigure = {
         busy: false,
@@ -26,7 +26,8 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         certificateFile: null,
         certificateFileName: '',
         keyFile: null,
-        keyFileName: ''
+        keyFileName: '',
+        memoryLimit: 256
     };
 
     $scope.appUninstall = {
