@@ -59,7 +59,7 @@ var assert = require('assert'),
 
 var APPS_FIELDS_PREFIXED = [ 'apps.id', 'apps.appStoreId', 'apps.installationState', 'apps.installationProgress', 'apps.runState',
     'apps.health', 'apps.containerId', 'apps.manifestJson', 'apps.httpPort', 'apps.location', 'apps.dnsRecordId',
-    'apps.accessRestrictionJson', 'apps.lastBackupId', 'apps.lastBackupConfigJson', 'apps.oldConfigJson', 'apps.oauthProxy' ].join(',');
+    'apps.accessRestrictionJson', 'apps.lastBackupId', 'apps.lastBackupConfigJson', 'apps.oldConfigJson', 'apps.oauthProxy', 'apps.memoryLimit' ].join(',');
 
 var PORT_BINDINGS_FIELDS = [ 'hostPort', 'environmentVariable', 'appId' ].join(',');
 
@@ -179,7 +179,7 @@ function getAll(callback) {
     });
 }
 
-function add(id, appStoreId, manifest, location, portBindings, accessRestriction, oauthProxy, callback) {
+function add(id, appStoreId, manifest, location, portBindings, accessRestriction, oauthProxy, memoryLimit, callback) {
     assert.strictEqual(typeof id, 'string');
     assert.strictEqual(typeof appStoreId, 'string');
     assert(manifest && typeof manifest === 'object');
@@ -188,6 +188,7 @@ function add(id, appStoreId, manifest, location, portBindings, accessRestriction
     assert.strictEqual(typeof portBindings, 'object');
     assert.strictEqual(typeof accessRestriction, 'object');
     assert.strictEqual(typeof oauthProxy, 'boolean');
+    assert.strictEqual(typeof memoryLimit, 'number');
     assert.strictEqual(typeof callback, 'function');
 
     portBindings = portBindings || { };
@@ -197,8 +198,8 @@ function add(id, appStoreId, manifest, location, portBindings, accessRestriction
 
     var queries = [ ];
     queries.push({
-        query: 'INSERT INTO apps (id, appStoreId, manifestJson, installationState, location, accessRestrictionJson, oauthProxy) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        args: [ id, appStoreId, manifestJson, exports.ISTATE_PENDING_INSTALL, location, accessRestrictionJson, oauthProxy ]
+        query: 'INSERT INTO apps (id, appStoreId, manifestJson, installationState, location, accessRestrictionJson, oauthProxy, memoryLimit) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        args: [ id, appStoreId, manifestJson, exports.ISTATE_PENDING_INSTALL, location, accessRestrictionJson, oauthProxy, memoryLimit ]
     });
 
     Object.keys(portBindings).forEach(function (env) {
