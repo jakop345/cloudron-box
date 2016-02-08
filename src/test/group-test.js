@@ -136,9 +136,25 @@ describe('Group membership', function () {
         });
     });
 
+    it('isMember returns false', function (done) {
+        groups.isMember(GROUP_ID, USER_0.id, function (error, member) {
+            expect(error).to.be(null);
+            expect(member).to.be(false);
+            done();
+        });
+    });
+
     it('can add member', function (done) {
         groups.addMember(GROUP_ID, USER_0.id, function (error) {
             expect(error).to.be(null);
+            done();
+        });
+    });
+
+    it('isMember returns true', function (done) {
+        groups.isMember(GROUP_ID, USER_0.id, function (error, member) {
+            expect(error).to.be(null);
+            expect(member).to.be(true);
             done();
         });
     });

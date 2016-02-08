@@ -9,6 +9,7 @@ exports = module.exports = {
     getMembers: getMembers,
     addMember: addMember,
     removeMember: removeMember,
+    isMember: isMember,
 
     _clear: clear
 };
@@ -114,5 +115,17 @@ function removeMember(groupId, userId, callback) {
         if (result.affectedRows !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         callback(null);
+    });
+}
+
+function isMember(groupId, userId, callback) {
+    assert.strictEqual(typeof groupId, 'string');
+    assert.strictEqual(typeof userId, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    database.query('SELECT 1 FROM groupMembers WHERE groupId=? AND userId=?', [ groupId, userId ], function (error, result) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+
+        callback(null, result.length !== 0);
     });
 }

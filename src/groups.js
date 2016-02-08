@@ -11,7 +11,8 @@ exports = module.exports = {
 
     getMembers: getMembers,
     addMember: addMember,
-    removeMember: removeMember
+    removeMember: removeMember,
+    isMember: isMember
 };
 
 var assert = require('assert'),
@@ -132,5 +133,18 @@ function removeMember(groupId, userId, callback) {
         if (error) return callback(new GroupError(GroupError.INTERNAL_ERROR, error));
 
         return callback(null);
+    });
+}
+
+function isMember(groupId, userId, callback) {
+    assert.strictEqual(typeof groupId, 'string');
+    assert.strictEqual(typeof userId, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    groupdb.isMember(groupId, userId, function (error, result) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new GroupError(GroupError.NOT_FOUND));
+        if (error) return callback(new GroupError(GroupError.INTERNAL_ERROR, error));
+
+        return callback(null, result);
     });
 }
