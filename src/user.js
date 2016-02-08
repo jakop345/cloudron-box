@@ -27,6 +27,7 @@ var assert = require('assert'),
     clientdb = require('./clientdb.js'),
     crypto = require('crypto'),
     DatabaseError = require('./databaseerror.js'),
+    groups = require('./groups.js'),
     hat = require('hat'),
     mailer = require('./mailer.js'),
     tokendb = require('./tokendb.js'),
@@ -78,7 +79,7 @@ function listUsers(callback) {
     userdb.getAll(function (error, result) {
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-        return callback(null, result.map(function (obj) { return _.pick(obj, 'id', 'username', 'email', 'admin', 'displayName'); }));
+        return callback(null, result.map(function (obj) { return _.pick(obj, 'id', 'username', 'email', 'displayName'); }));
     });
 }
 
@@ -113,13 +114,12 @@ function validateDisplayName(name) {
     return null;
 }
 
-function createUser(username, password, email, displayName, admin, invitor, sendInvite, callback) {
+function createUser(username, password, email, displayName, invitor, sendInvite, callback) {
     assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof password, 'string');
     assert.strictEqual(typeof email, 'string');
     assert.strictEqual(typeof displayName, 'string');
-    assert.strictEqual(typeof admin, 'boolean');
-    assert(invitor || admin);
+    assert(invitor);
     assert.strictEqual(typeof sendInvite, 'boolean');
     assert.strictEqual(typeof callback, 'function');
 
@@ -147,7 +147,6 @@ function createUser(username, password, email, displayName, admin, invitor, send
                 username: username,
                 email: email,
                 password: new Buffer(derivedKey, 'binary').toString('hex'),
-                admin: admin,
                 salt: salt.toString('hex'),
                 createdAt: now,
                 modifiedAt: now,
@@ -161,8 +160,6 @@ function createUser(username, password, email, displayName, admin, invitor, send
 
                 callback(null, user);
 
-                // WARNING do not send email for admins (this can only be the case for the owner, the first user creation during activation)
-                if (!admin) mailer.userAdded(user, sendInvite);
                 if (sendInvite) mailer.sendInvite(user, invitor);
             });
         });
@@ -396,7 +393,15 @@ function createOwner(username, password, email, displayName, callback) {
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
         if (count !== 0) return callback(new UserError(UserError.ALREADY_EXISTS));
 
-        createUser(username, password, email, displayName, true /* admin */, null /* invitor */, false /* sendInvite */, callback);
+        createUser(username, password, email, displayName, null /* invitor */, false /* sendInvite */, function (error) {
+            if (error) return callback(error);
+
+            groups.addMember(groups.ADMIN_GROUP_ID, username, function (error) {
+                if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+
+                callback();
+            });
+        });
     });
 }
 

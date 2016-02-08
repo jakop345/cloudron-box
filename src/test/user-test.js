@@ -31,8 +31,8 @@ function cleanupUsers(done) {
     });
 }
 
-function createUser(done) {
-    user.create(USERNAME, PASSWORD, EMAIL, DISPLAY_NAME, IS_ADMIN, null /* invitor  */, false, function (error, result) {
+function createOwner(done) {
+    user.createOwner(USERNAME, PASSWORD, EMAIL, DISPLAY_NAME, function (error, result) {
         expect(error).to.not.be.ok();
         expect(result).to.be.ok();
 
@@ -184,7 +184,7 @@ describe('User', function () {
         });
 
         it('succeeds', function (done) {
-            createUser(function (error) {
+            createOwner(function (error) {
                 if (error) return done(error);
 
                 user.getOwner(function (error, owner) {
@@ -197,7 +197,7 @@ describe('User', function () {
     });
 
     describe('verify', function () {
-        before(createUser);
+        before(createOwner);
         after(cleanupUsers);
 
         it('fails due to non existing username', function (done) {
@@ -241,7 +241,7 @@ describe('User', function () {
     });
 
     describe('verifyWithEmail', function () {
-        before(createUser);
+        before(createOwner);
         after(cleanupUsers);
 
         it('fails due to non existing user', function (done) {
@@ -285,7 +285,7 @@ describe('User', function () {
     });
 
     describe('retrieving', function () {
-        before(createUser);
+        before(createOwner);
         after(cleanupUsers);
 
         it('fails due to non existing user', function (done) {
@@ -311,7 +311,7 @@ describe('User', function () {
     });
 
     describe('update', function () {
-        before(createUser);
+        before(createOwner);
         after(cleanupUsers);
 
         it('fails due to unknown userid', function (done) {
@@ -375,7 +375,7 @@ describe('User', function () {
     });
 
     describe('admin change', function () {
-        before(createUser);
+        before(createOwner);
         after(cleanupUsers);
 
         it('fails to remove admin flag of only admin', function (done) {
@@ -415,7 +415,7 @@ describe('User', function () {
     });
 
     describe('get admins', function () {
-        before(createUser);
+        before(createOwner);
         after(cleanupUsers);
 
         it('succeeds for one admins', function (done) {
@@ -456,7 +456,7 @@ describe('User', function () {
     });
 
     describe('password change', function () {
-        before(createUser);
+        before(createOwner);
         after(cleanupUsers);
 
         it('fails due to wrong arumgent count', function () {
@@ -519,7 +519,7 @@ describe('User', function () {
     });
 
     describe('resetPasswordByIdentifier', function () {
-        before(createUser);
+        before(createOwner);
         after(cleanupUsers);
 
         it('fails due to unkown email', function (done) {
@@ -554,7 +554,7 @@ describe('User', function () {
     });
 
     describe('send invite', function () {
-        before(createUser);
+        before(createOwner);
         after(cleanupUsers);
 
         it('fails for unknown user', function (done) {
