@@ -34,7 +34,7 @@ function add(id, name, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     var data = [ id, name ];
-    database.query('INSERT INTO groupd (id, name) VALUES (?, ?)',
+    database.query('INSERT INTO groups (id, name) VALUES (?, ?)',
            data, function (error, result) {
         if (error && error.code === 'ER_DUP_ENTRY') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
         if (error || result.affectedRows !== 1) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));

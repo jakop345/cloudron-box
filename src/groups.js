@@ -12,6 +12,8 @@ exports = module.exports = {
 
 var assert = require('assert'),
     DatabaseError = require('./databaseerror.js'),
+    groupdb = require('./groupdb.js'),
+    util = require('util'),
     uuid = require('node-uuid'),
     _ = require('underscore');
 
@@ -45,7 +47,7 @@ function validateGroupname(name) {
     assert.strictEqual(typeof name, 'string');
 
     if (name.length <= 2) return new GroupError(GroupError.BAD_NAME, 'name must be atleast 3 chars');
-    if (name.length > 256) return new GroupError(GroupError.BAD_NAME, 'name too long');
+    if (name.length >= 255) return new GroupError(GroupError.BAD_NAME, 'name too long');
 
     return null;
 }
@@ -58,8 +60,8 @@ function create(name, callback) {
     if (error) return callback(error);
 
     groupdb.add(uuid.v4(), name, function (error) {
-        if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new GroupError(UserError.ALREADY_EXISTS));
-        if (error) return callback(new UserError(GroupError.INTERNAL_ERROR, error));
+        if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new GroupError(GroupError.ALREADY_EXISTS));
+        if (error) return callback(new GroupError(GroupError.INTERNAL_ERROR, error));
 
         callback(null);
     });
@@ -70,8 +72,8 @@ function remove(id, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     groupdb.del(id, function (error) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
-        if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new GroupError(GroupError.NOT_FOUND));
+        if (error) return callback(new GroupError(GroupError.INTERNAL_ERROR, error));
 
         callback(null);
     });
@@ -82,8 +84,8 @@ function get(id, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     groupdb.get(id, function (error, result) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
-        if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new GroupError(GroupError.NOT_FOUND));
+        if (error) return callback(new GroupError(GroupError.INTERNAL_ERROR, error));
 
         return callback(null, result);
     });
