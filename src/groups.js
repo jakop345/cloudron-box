@@ -12,7 +12,9 @@ exports = module.exports = {
     getMembers: getMembers,
     addMember: addMember,
     removeMember: removeMember,
-    isMember: isMember
+    isMember: isMember,
+
+    ADMIN_GROUP_ID: 'gid:admin' // see db migration code
 };
 
 var assert = require('assert'),
