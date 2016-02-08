@@ -26,6 +26,12 @@ CREATE TABLE IF NOT EXISTS groups(
     username VARCHAR(254) NOT NULL UNIQUE,
     PRIMARY KEY(id));
 
+CREATE TABLE IF NOT EXISTS groupMembers(
+    groupId VARCHAR(128) NOT NULL,
+    userId VARCHAR(128) NOT NULL,
+    FOREIGN KEY(groupId) REFERENCES groups(id),
+    FOREIGN KEY(userId) REFERENCES users(id));
+
 CREATE TABLE IF NOT EXISTS tokens(
     accessToken VARCHAR(128) NOT NULL UNIQUE,
     identifier VARCHAR(128) NOT NULL,
