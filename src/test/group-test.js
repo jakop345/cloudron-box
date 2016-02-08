@@ -46,6 +46,13 @@ describe('Groups', function () {
         });
     });
 
+    it('cannot create group - bad name', function (done) {
+        groups.create('bad:name', function (error) {
+            expect(error.reason).to.be(GroupError.BAD_NAME);
+            done();
+        });
+    });
+
     it('can create valid group', function (done) {
         groups.create(GROUP_NAME, function (error) {
             expect(error).to.be(null);

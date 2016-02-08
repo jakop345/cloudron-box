@@ -48,6 +48,8 @@ function validateGroupname(name) {
     if (name.length <= 2) return new GroupError(GroupError.BAD_NAME, 'name must be atleast 3 chars');
     if (name.length >= 200) return new GroupError(GroupError.BAD_NAME, 'name too long');
 
+    if (!/^[A-Za-z0-9_-]*$/.test(name)) return new GroupError(GroupError.BAD_NAME, 'name can only have A-Za-z0-9_-');
+
     return null;
 }
 
