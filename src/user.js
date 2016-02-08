@@ -24,15 +24,15 @@ exports = module.exports = {
 };
 
 var assert = require('assert'),
+    clientdb = require('./clientdb.js'),
     crypto = require('crypto'),
     DatabaseError = require('./databaseerror.js'),
-    mailer = require('./mailer.js'),
     hat = require('hat'),
-    userdb = require('./userdb.js'),
+    mailer = require('./mailer.js'),
     tokendb = require('./tokendb.js'),
-    clientdb = require('./clientdb.js'),
-    validatePassword = require('./password.js').validate,
+    userdb = require('./userdb.js'),
     util = require('util'),
+    validatePassword = require('./password.js').validate,
     validator = require('validator'),
     _ = require('underscore');
 
