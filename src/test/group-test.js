@@ -12,12 +12,15 @@ var database = require('../database.js'),
     groupdb = require('../groupdb.js'),
     GroupError = groups.GroupError;
 
+var GROUP_NAME = 'administrators',
+    GROUP_ID = GROUP_NAME;
+
 function setup(done) {
     // ensure data/config/mount paths
     database.initialize(function (error) {
         expect(error).to.be(null);
 
-        done();
+        database._clear(done);
     });
 }
 
@@ -44,7 +47,36 @@ describe('Groups', function () {
     });
 
     it('can create valid group', function (done) {
-        groups.create('administrators', function (error) {
+        groups.create(GROUP_NAME, function (error) {
+            expect(error).to.be(null);
+            done();
+        });
+    });
+
+    it('cannot get invalid group', function (done) {
+        groups.get('sometrandom', function (error) {
+            expect(error.reason).to.be(GroupError.NOT_FOUND);
+            done();
+        });
+    });
+
+    it('can get valid group', function (done) {
+        groups.get(GROUP_ID, function (error, group) {
+            expect(error).to.be(null);
+            expect(group.name).to.equal(GROUP_NAME);
+            done();
+        });
+    });
+
+    it('cannot delete invalid group', function (done) {
+        groups.remove('random', function (error) {
+            expect(error.reason).to.be(GroupError.NOT_FOUND);
+            done();
+        });
+    });
+
+    it('can delete valid group', function (done) {
+        groups.remove(GROUP_ID, function (error) {
             expect(error).to.be(null);
             done();
         });

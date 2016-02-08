@@ -14,7 +14,6 @@ var assert = require('assert'),
     DatabaseError = require('./databaseerror.js'),
     groupdb = require('./groupdb.js'),
     util = require('util'),
-    uuid = require('node-uuid'),
     _ = require('underscore');
 
 // http://dustinsenos.com/articles/customErrorsInNode
@@ -59,7 +58,7 @@ function create(name, callback) {
     var error = validateGroupname(name);
     if (error) return callback(error);
 
-    groupdb.add(uuid.v4(), name, function (error) {
+    groupdb.add(name /* id */, name, function (error) {
         if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new GroupError(GroupError.ALREADY_EXISTS));
         if (error) return callback(new GroupError(GroupError.INTERNAL_ERROR, error));
 
