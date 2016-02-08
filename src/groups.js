@@ -46,7 +46,7 @@ function validateGroupname(name) {
     assert.strictEqual(typeof name, 'string');
 
     if (name.length <= 2) return new GroupError(GroupError.BAD_NAME, 'name must be atleast 3 chars');
-    if (name.length >= 255) return new GroupError(GroupError.BAD_NAME, 'name too long');
+    if (name.length >= 200) return new GroupError(GroupError.BAD_NAME, 'name too long');
 
     return null;
 }
@@ -58,7 +58,7 @@ function create(name, callback) {
     var error = validateGroupname(name);
     if (error) return callback(error);
 
-    groupdb.add(name /* id */, name, function (error) {
+    groupdb.add('gid:' + name /* id */, name, function (error) {
         if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new GroupError(GroupError.ALREADY_EXISTS));
         if (error) return callback(new GroupError(GroupError.INTERNAL_ERROR, error));
 
