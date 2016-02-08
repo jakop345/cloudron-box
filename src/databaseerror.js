@@ -30,3 +30,4 @@ DatabaseError.INTERNAL_ERROR = 'Internal error';
 DatabaseError.ALREADY_EXISTS = 'Entry already exist';
 DatabaseError.NOT_FOUND = 'Record not found';
 DatabaseError.BAD_FIELD = 'Invalid field';
+DatabaseError.IN_USE = 'In Use';

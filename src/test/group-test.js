@@ -6,11 +6,13 @@
 
 'use strict';
 
-var database = require('../database.js'),
+var async = require('async'),
+    database = require('../database.js'),
     expect = require('expect.js'),
     groups = require('../groups.js'),
-    groupdb = require('../groupdb.js'),
-    GroupError = groups.GroupError;
+    GroupError = groups.GroupError,
+    hat = require('hat'),
+    userdb = require('../userdb.js');
 
 var GROUP_NAME = 'administrators',
     GROUP_ID = 'gid:' + GROUP_NAME;
@@ -60,6 +62,13 @@ describe('Groups', function () {
         });
     });
 
+    it('cannot add existing group', function (done) {
+        groups.create(GROUP_NAME, function (error) {
+            expect(error.reason).to.be(GroupError.ALREADY_EXISTS);
+            done();
+        });
+    });
+
     it('cannot get invalid group', function (done) {
         groups.get('sometrandom', function (error) {
             expect(error.reason).to.be(GroupError.NOT_FOUND);
@@ -83,6 +92,110 @@ describe('Groups', function () {
     });
 
     it('can delete valid group', function (done) {
+        groups.remove(GROUP_ID, function (error) {
+            expect(error).to.be(null);
+            done();
+        });
+    });
+});
+
+describe('Group membership', function () {
+    var USER_0 = {
+        id: 'uuid213',
+        username: 'uuid213',
+        password: 'secret',
+        email: 'safe@me.com',
+        admin: false,
+        salt: 'morton',
+        createdAt: 'sometime back',
+        modifiedAt: 'now',
+        resetToken: hat(256),
+        displayName: ''
+    };
+
+    before(function (done) {
+        async.series([
+            setup,
+            groups.create.bind(null, GROUP_NAME),
+            userdb.add.bind(null, USER_0.id, USER_0)
+        ], done);
+    });
+    after(cleanup);
+
+    it('cannot add non-existent user', function (done) {
+        groups.addMember(GROUP_ID, 'randomuser', function (error) {
+            expect(error.reason).to.be(GroupError.NOT_FOUND);
+            done();
+        });
+    });
+
+    it('cannot add non-existent group', function (done) {
+        groups.addMember('randomgroup', USER_0.id, function (error) {
+            expect(error.reason).to.be(GroupError.NOT_FOUND);
+            done();
+        });
+    });
+
+    it('can add member', function (done) {
+        groups.addMember(GROUP_ID, USER_0.id, function (error) {
+            expect(error).to.be(null);
+            done();
+        });
+    });
+
+    it('can get members', function (done) {
+        groups.getMembers(GROUP_ID, function (error, result) {
+            expect(error).to.be(null);
+            expect(result.length).to.be(1);
+            expect(result[0]).to.be(USER_0.id);
+            done();
+        });
+    });
+
+    it('cannot get members of non-existent group', function (done) {
+        groups.getMembers('randomgroup', function (error, result) {
+            expect(result.length).to.be(0); // currently, we cannot differentiate invalid groups and empty groups
+            done();
+        });
+    });
+
+    it('cannot remove non-existent user', function (done) {
+        groups.removeMember(GROUP_ID, 'randomuser', function (error) {
+            expect(error.reason).to.be(GroupError.NOT_FOUND);
+            done();
+        });
+    });
+
+    it('cannot remove non-existent group', function (done) {
+        groups.removeMember('randomgroup', USER_0.id, function (error) {
+            expect(error.reason).to.be(GroupError.NOT_FOUND);
+            done();
+        });
+    });
+
+    it('cannot remove group with member', function (done) {
+        groups.remove(GROUP_ID, function (error) {
+            expect(error.reason).to.be(GroupError.NOT_EMPTY);
+            done();
+        });
+    });
+
+    it('can remove member', function (done) {
+        groups.removeMember(GROUP_ID, USER_0.id, function (error) {
+            expect(error).to.be(null);
+            done();
+        });
+    });
+
+    it('has no members', function (done) {
+        groups.getMembers(GROUP_ID, function (error, result) {
+            expect(error).to.be(null);
+            expect(result.length).to.be(0);
+            done();
+        });
+    });
+
+    it('can remove group with no members', function (done) {
         groups.remove(GROUP_ID, function (error) {
             expect(error).to.be(null);
             done();

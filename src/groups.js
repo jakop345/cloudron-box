@@ -7,14 +7,17 @@ exports = module.exports = {
 
     create: create,
     remove: remove,
-    get: get
+    get: get,
+
+    getMembers: getMembers,
+    addMember: addMember,
+    removeMember: removeMember
 };
 
 var assert = require('assert'),
     DatabaseError = require('./databaseerror.js'),
     groupdb = require('./groupdb.js'),
-    util = require('util'),
-    _ = require('underscore');
+    util = require('util');
 
 // http://dustinsenos.com/articles/customErrorsInNode
 // http://code.google.com/p/v8/wiki/JavaScriptStackTraceApi
@@ -41,6 +44,7 @@ GroupError.INTERNAL_ERROR = 'Internal Error';
 GroupError.ALREADY_EXISTS = 'Already Exists';
 GroupError.NOT_FOUND = 'Not Found';
 GroupError.BAD_NAME = 'Bad name';
+GroupError.NOT_EMPTY = 'Not Empty';
 
 function validateGroupname(name) {
     assert.strictEqual(typeof name, 'string');
@@ -74,6 +78,7 @@ function remove(id, callback) {
 
     groupdb.del(id, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new GroupError(GroupError.NOT_FOUND));
+        if (error && error.reason === DatabaseError.IN_USE) return callback(new GroupError(GroupError.NOT_EMPTY));
         if (error) return callback(new GroupError(GroupError.INTERNAL_ERROR, error));
 
         callback(null);
@@ -92,3 +97,40 @@ function get(id, callback) {
     });
 }
 
+function getMembers(groupId, callback) {
+    assert.strictEqual(typeof groupId, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    groupdb.getMembers(groupId, function (error, result) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new GroupError(GroupError.NOT_FOUND));
+        if (error) return callback(new GroupError(GroupError.INTERNAL_ERROR, error));
+
+        return callback(null, result);
+    });
+}
+
+function addMember(groupId, userId, callback) {
+    assert.strictEqual(typeof groupId, 'string');
+    assert.strictEqual(typeof userId, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    groupdb.addMember(groupId, userId, function (error) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new GroupError(GroupError.NOT_FOUND));
+        if (error) return callback(new GroupError(GroupError.INTERNAL_ERROR, error));
+
+        return callback(null);
+    });
+}
+
+function removeMember(groupId, userId, callback) {
+    assert.strictEqual(typeof groupId, 'string');
+    assert.strictEqual(typeof userId, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    groupdb.removeMember(groupId, userId, function (error) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new GroupError(GroupError.NOT_FOUND));
+        if (error) return callback(new GroupError(GroupError.INTERNAL_ERROR, error));
+
+        return callback(null);
+    });
+}
