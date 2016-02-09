@@ -283,14 +283,14 @@ function changeAdmin(username, admin, callback) {
             // protect from a system where there is no admin left
             if (result.length <= 1 && !admin) return callback(new UserError(UserError.NOT_ALLOWED, 'Only admin'));
 
-            user.admin = admin;
+            var func = admin ? groups.addMember : groups.removeMember;
 
-            userdb.update(username, user, function (error) {
+            func(groups.ADMIN_GROUP_ID, user.id, function (error) {
                 if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
                 callback(null);
 
-                mailer.adminChanged(user);
+                mailer.adminChanged(user, admin);
             });
         });
     });
@@ -393,13 +393,13 @@ function createOwner(username, password, email, displayName, callback) {
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
         if (count !== 0) return callback(new UserError(UserError.ALREADY_EXISTS));
 
-        createUser(username, password, email, displayName, null /* invitor */, false /* sendInvite */, function (error) {
+        createUser(username, password, email, displayName, null /* invitor */, false /* sendInvite */, function (error, user) {
             if (error) return callback(error);
 
-            groups.addMember(groups.ADMIN_GROUP_ID, username, function (error) {
+            groups.addMember(groups.ADMIN_GROUP_ID, user.id, function (error) {
                 if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-                callback();
+                callback(null, user);
             });
         });
     });

@@ -280,12 +280,13 @@ function userRemoved(username) {
     mailUserEventToAdmins({ username: username }, 'was removed');
 }
 
-function adminChanged(user) {
+function adminChanged(user, admin) {
     assert.strictEqual(typeof user, 'object');
+    assert.strictEqual(typeof admin, 'boolean');
 
     debug('Sending mail for adminChanged');
 
-    mailUserEventToAdmins(user, user.admin ? 'is now an admin' : 'is no more an admin');
+    mailUserEventToAdmins(user, admin ? 'is now an admin' : 'is no more an admin');
 }
 
 function passwordReset(user) {
@@ -411,6 +412,8 @@ function _getMailQueue() {
     return gMailQueue;
 }
 
-function _clearMailQueue() {
+function _clearMailQueue(callback) {
     gMailQueue = [];
+
+    if (callback) callback();
 }
