@@ -222,7 +222,7 @@ function removeUser(userId, callback) {
 function listUsers(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    userdb.getAll(function (error, result) {
+    userdb.getAllWithGroupIds(function (error, result) {
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
         var allUsers = result.map(function (obj) {

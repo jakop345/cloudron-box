@@ -29,7 +29,6 @@ var userObject = null;
 function cleanupUsers(done) {
     async.series([
         groupdb._clear,
-        database.query.bind(null, 'INSERT INTO groups (id, name) VALUES (?, ?)', [ groups.ADMIN_GROUP_ID, 'admin' ]),
         userdb._clear,
         mailer._clearMailQueue
     ], done);

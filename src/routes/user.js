@@ -18,6 +18,7 @@ exports = module.exports = {
 
 var assert = require('assert'),
     generatePassword = require('../password.js').generate,
+    groups = require('../groups.js'),
     HttpError = require('connect-lastmile').HttpError,
     HttpSuccess = require('connect-lastmile').HttpSuccess,
     user = require('../user.js'),
@@ -146,13 +147,17 @@ function info(req, res, next) {
         if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'No such user'));
         if (error) return next(new HttpError(500, error));
 
-        next(new HttpSuccess(200, {
-            id: result.id,
-            username: result.username,
-            email: result.email,
-            admin: result.admin,
-            displayName: result.displayName
-        }));
+        groups.isMember(groups.ADMIN_GROUP_ID, req.params.userId, function (error, isAdmin) {
+            if (error) return next(new HttpError(500, error));
+
+            next(new HttpSuccess(200, {
+                id: result.id,
+                username: result.username,
+                email: result.email,
+                admin: isAdmin,
+                displayName: result.displayName
+            }));
+        });
     });
 }
 
@@ -200,9 +205,15 @@ function verifyPassword(req, res, next) {
 function requireAdmin(req, res, next) {
     assert.strictEqual(typeof req.user, 'object');
 
-    if (!req.user.admin) return next(new HttpError(403, 'API call requires admin rights.'));
+    groups.isMember(groups.ADMIN_GROUP_ID, req.user.id, function (error, isAdmin) {
+        if (error) return next(new HttpError(500, error));
 
-    next();
+        if (!isAdmin) return next(new HttpError(403, 'API call requires admin rights.'));
+
+        req.user.admin = true;
+
+        next();
+    });
 }
 
 function sendInvite(req, res, next) {

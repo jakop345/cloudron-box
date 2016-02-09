@@ -16,7 +16,8 @@ var appdb = require('../appdb.js'),
     async = require('async'),
     settingsdb = require('../settingsdb.js'),
     tokendb = require('../tokendb.js'),
-    userdb = require('../userdb.js');
+    userdb = require('../userdb.js'),
+    _ = require('underscore');
 
 describe('database', function () {
     before(function (done) {
@@ -118,12 +119,16 @@ describe('database', function () {
             });
         });
 
-        it('can get all', function (done) {
-            userdb.getAll(function (error, all) {
+        it('can get all with group ids', function (done) {
+            userdb.getAllWithGroupIds(function (error, all) {
                 expect(error).to.not.be.ok();
                 expect(all.length).to.equal(2);
-                expect(all[0]).to.eql(USER_0);
-                expect(all[1]).to.eql(USER_1);
+                var user0Copy = _.extend({}, USER_0);
+                user0Copy.groupIds = [ ];
+                expect(all[0]).to.eql(user0Copy);
+                var user1Copy = _.extend({}, USER_1);
+                user1Copy.groupIds = [ ];
+                expect(all[1]).to.eql(user1Copy);
                 done();
             });
         });

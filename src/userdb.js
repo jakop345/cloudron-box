@@ -7,7 +7,7 @@ exports = module.exports = {
     getByAccessToken: getByAccessToken,
     getByResetToken: getByResetToken,
     getOwner: getOwner,
-    getAll: getAll,
+    getAllWithGroupIds: getAllWithGroupIds,
     getAllAdmins: getAllAdmins,
     add: add,
     del: del,
@@ -84,7 +84,7 @@ function getByResetToken(resetToken, callback) {
     });
 }
 
-function getAll(callback) {
+function getAllWithGroupIds(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     database.query('SELECT ' + USERS_FIELDS + ',GROUP_CONCAT(groupMembers.groupId) AS groupIds ' +

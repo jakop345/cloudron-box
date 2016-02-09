@@ -292,7 +292,7 @@ describe('OAuth2', function () {
                 appdb.add.bind(null, APP_1.id, APP_1.appStoreId, APP_1.manifest, APP_1.location, APP_1.portBindings, APP_1.accessRestriction, APP_1.oauthProxy),
                 appdb.add.bind(null, APP_2.id, APP_2.appStoreId, APP_2.manifest, APP_2.location, APP_2.portBindings, APP_2.accessRestriction, APP_2.oauthProxy),
                 function (callback) {
-                    user.create(USER_0.username, USER_0.password, USER_0.email, USER_0.displayName, true, '', false, function (error, userObject) {
+                    user.create(USER_0.username, USER_0.password, USER_0.email, USER_0.displayName, function (error, userObject) {
                         expect(error).to.not.be.ok();
 
                         // update the global objects to reflect the new user id

@@ -15,18 +15,20 @@ var database = require('../database.js'),
     ldapServer = require('../ldap.js'),
     ldap = require('ldapjs');
 
+// owner
 var USER_0 = {
-    username: 'foobar0',
-    password: 'Foobar?1234',
-    email: 'foo0@bar.com',
-    displayName: 'Bob bobson'
+    username: 'username0',
+    password: 'Username0pass?1234',
+    email: 'user0@email.com',
+    displayName: 'User 0'
 };
 
+// normal user
 var USER_1 = {
-    username: 'foobar1',
-    password: 'Foobar?12345',
-    email: 'foo1@bar.com',
-    displayName: 'Jesus'
+    username: 'username1',
+    password: 'Username1pass?12345',
+    email: 'user1@email.com',
+    displayName: 'User 1'
 };
 
 function setup(done) {
@@ -34,7 +36,7 @@ function setup(done) {
         database.initialize.bind(null),
         database._clear.bind(null),
         ldapServer.start.bind(null),
-        user.create.bind(null, USER_0.username, USER_0.password, USER_0.email, USER_0.displayName),
+        user.createOwner.bind(null, USER_0.username, USER_0.password, USER_0.email, USER_0.displayName),
         user.create.bind(null, USER_1.username, USER_1.password, USER_1.email, USER_0.displayName, { invitor: USER_0 })
     ], done);
 }
@@ -81,7 +83,7 @@ describe('Ldap', function () {
             var client = ldap.createClient({ url: 'ldap://127.0.0.1:' + config.get('ldapPort') });
 
             var opts = {
-                filter: '(&(l=Seattle)(email=*@foo.com))'
+                filter: '(&(l=Seattle)(email=*@email.com))'
             };
 
             client.search('o=example', opts, function (error, result) {
@@ -127,7 +129,7 @@ describe('Ldap', function () {
             var client = ldap.createClient({ url: 'ldap://127.0.0.1:' + config.get('ldapPort') });
 
             var opts = {
-                filter: '&(objectcategory=person)(username=foobar*)'
+                filter: '&(objectcategory=person)(username=username*)'
             };
 
             client.search('ou=users,dc=cloudron', opts, function (error, result) {
