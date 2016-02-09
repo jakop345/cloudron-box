@@ -21,7 +21,8 @@ exports = module.exports = {
 var assert = require('assert'),
     database = require('./database.js'),
     debug = require('debug')('box:userdb'),
-    DatabaseError = require('./databaseerror');
+    DatabaseError = require('./databaseerror'),
+    groups = require('./groups.js');
 
 var USERS_FIELDS = [ 'id', 'username', 'email', 'password', 'salt', 'createdAt', 'modifiedAt', 'admin', 'resetToken', 'displayName' ].join(',');
 
@@ -96,7 +97,8 @@ function getAll(callback) {
 function getAllAdmins(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    database.query('SELECT ' + USERS_FIELDS + ' FROM users WHERE admin=1', function (error, results) {
+    database.query('SELECT ' + USERS_FIELDS + ' FROM users, groupMembers WHERE groupMembers.groupId = ? AND users.id = groupMembers.userId',
+            [ groups.ADMIN_GROUP_ID ], function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         callback(null, results);
