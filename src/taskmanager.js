@@ -19,6 +19,7 @@ var appdb = require('./appdb.js'),
     cloudron = require('./cloudron.js'),
     debug = require('debug')('box:taskmanager'),
     locker = require('./locker.js'),
+    util = require('util'),
     _ = require('underscore');
 
 var gActiveTasks = { };
@@ -82,7 +83,7 @@ function resumeTasks(callback) {
             if (app.installationState === appdb.ISTATE_INSTALLED && app.runState === appdb.RSTATE_RUNNING) return;
 
             debug('Creating process for %s (%s) with state %s', app.location, app.id, app.installationState);
-            startAppTask(app.id);
+            startAppTask(app.id, NOOP_CALLBACK);
         });
 
         callback(null);
@@ -94,17 +95,21 @@ function startNextTask() {
 
     assert(Object.keys(gActiveTasks).length < TASK_CONCURRENCY);
 
-    startAppTask(gPendingTasks.shift());
+    startAppTask(gPendingTasks.shift(), NOOP_CALLBACK);
 }
 
-function startAppTask(appId) {
+function startAppTask(appId, callback) {
     assert.strictEqual(typeof appId, 'string');
-    assert(!(appId in gActiveTasks));
+    assert.strictEqual(typeof callback, 'function');
+
+    if (appId in gActiveTasks) {
+        return callback(new Error(util.format('Task for %s is already active', appId)));
+    }
 
     if (Object.keys(gActiveTasks).length >= TASK_CONCURRENCY) {
         debug('Reached concurrency limit, queueing task for %s', appId);
         gPendingTasks.push(appId);
-        return;
+        return callback();
     }
 
     var lockError = locker.recursiveLock(locker.OP_APPTASK);
@@ -112,7 +117,7 @@ function startAppTask(appId) {
     if (lockError) {
         debug('Locked for another operation, queueing task for %s', appId);
         gPendingTasks.push(appId);
-        return;
+        return callback();
     }
 
     // when parent process dies, apptask processes are killed because KillMode=control-group in systemd unit file
@@ -130,6 +135,8 @@ function startAppTask(appId) {
         delete gActiveTasks[appId];
         locker.unlock(locker.OP_APPTASK); // unlock event will trigger next task
     });
+
+    callback();
 }
 
 function stopAppTask(appId, callback) {

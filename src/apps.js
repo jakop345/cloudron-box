@@ -583,9 +583,7 @@ function uninstall(appId, callback) {
             if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-            taskmanager.startAppTask(appId); // since uninstall is allowed from any state, kill current task
-
-            callback(null);
+            taskmanager.startAppTask(appId, callback);
         });
     });
 }
