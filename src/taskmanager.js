@@ -137,7 +137,7 @@ function stopAppTask(appId, callback) {
     if (gActiveTasks[appId]) {
         debug('stopAppTask : Killing existing task of %s with pid %s', appId, gActiveTasks[appId].pid);
         gActiveTasks[appId].once('exit', function () { callback(); });
-        gActiveTasks[appId].kill(); // this will end up calling the 'exit' handler
+        gActiveTasks[appId].kill('SIGKILL'); // this will end up calling the 'exit' handler
         return;
     }
 
