@@ -58,6 +58,7 @@ function remove(req, res, next) {
 
     groups.remove(req.params.groupId, function (error) {
         if (error && error.reason === GroupError.NOT_FOUND) return next(new HttpError(404, 'Group not found'));
+        if (error && error.reason === GroupError.NOT_EMPTY) return next(new HttpError(409, 'Group not empty'));
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(204));
