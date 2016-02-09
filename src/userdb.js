@@ -13,7 +13,6 @@ exports = module.exports = {
     del: del,
     update: update,
     count: count,
-    adminCount: adminCount,
 
     _clear: clear
 };
@@ -24,7 +23,7 @@ var assert = require('assert'),
     DatabaseError = require('./databaseerror'),
     groups = require('./groups.js');
 
-var USERS_FIELDS = [ 'id', 'username', 'email', 'password', 'salt', 'createdAt', 'modifiedAt', 'admin', 'resetToken', 'displayName' ].join(',');
+var USERS_FIELDS = [ 'id', 'username', 'email', 'password', 'salt', 'createdAt', 'modifiedAt', 'resetToken', 'displayName' ].join(',');
 
 function get(userId, callback) {
     assert.strictEqual(typeof userId, 'string');
@@ -62,7 +61,8 @@ function getOwner(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     // the first created user it the admin
-    database.query('SELECT ' + USERS_FIELDS + ' FROM users WHERE admin=1 ORDER BY createdAt LIMIT 1', function (error, result) {
+    database.query('SELECT ' + USERS_FIELDS + ' FROM users, groupMembers WHERE groupMembers.groupId = ? AND users.id = groupMembers.userId ORDER BY createdAt LIMIT 1',
+            [ groups.ADMIN_GROUP_ID ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
@@ -110,7 +110,6 @@ function add(userId, user, callback) {
     assert.strictEqual(typeof user.username, 'string');
     assert.strictEqual(typeof user.password, 'string');
     assert.strictEqual(typeof user.email, 'string');
-    assert.strictEqual(typeof user.admin, 'boolean');
     assert.strictEqual(typeof user.salt, 'string');
     assert.strictEqual(typeof user.createdAt, 'string');
     assert.strictEqual(typeof user.modifiedAt, 'string');
@@ -118,8 +117,8 @@ function add(userId, user, callback) {
     assert.strictEqual(typeof user.displayName, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    var data = [ userId, user.username, user.password, user.email, user.admin, user.salt, user.createdAt, user.modifiedAt, user.resetToken, user.displayName ];
-    database.query('INSERT INTO users (id, username, password, email, admin, salt, createdAt, modifiedAt, resetToken, displayName) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    var data = [ userId, user.username, user.password, user.email, user.salt, user.createdAt, user.modifiedAt, user.resetToken, user.displayName ];
+    database.query('INSERT INTO users (id, username, password, email, salt, createdAt, modifiedAt, resetToken, displayName) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
            data, function (error, result) {
         if (error && error.code === 'ER_DUP_ENTRY') return callback(new DatabaseError(DatabaseError.ALREADY_EXISTS, error));
         if (error || result.affectedRows !== 1) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
@@ -187,16 +186,6 @@ function count(callback) {
     assert.strictEqual(typeof callback, 'function');
 
     database.query('SELECT COUNT(*) AS total FROM users', function (error, result) {
-        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
-
-        return callback(null, result[0].total);
-    });
-}
-
-function adminCount(callback) {
-    assert.strictEqual(typeof callback, 'function');
-
-    database.query('SELECT COUNT(*) AS total FROM users WHERE admin=1', function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
         return callback(null, result[0].total);

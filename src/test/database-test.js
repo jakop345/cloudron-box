@@ -147,15 +147,7 @@ describe('database', function () {
             });
         });
 
-        it('counts the admin users', function (done) {
-            userdb.adminCount(function (error, count) {
-                expect(error).to.not.be.ok();
-                expect(count).to.equal(1);
-                done();
-            });
-        });
-
-        it('can update the user', function (done) {
+       it('can update the user', function (done) {
             userdb.update(USER_0.id, { email: 'some@thing.com', displayName: 'Heiter' }, function (error) {
                 expect(error).to.not.be.ok();
                 userdb.get(USER_0.id, function (error, user) {
