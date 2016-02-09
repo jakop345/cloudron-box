@@ -27,7 +27,7 @@ function setup(done) {
     async.series([
         server.start.bind(server),
 
-        userdb._clear,
+        database._clear,
 
         function createAdmin(callback) {
             var scope1 = nock(config.apiServerOrigin()).get('/api/v1/boxes/' + config.fqdn() + '/setup/verify?setupToken=somesetuptoken').reply(200, {});
