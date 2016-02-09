@@ -53,11 +53,14 @@ GroupError.NOT_EMPTY = 'Not Empty';
 
 function validateGroupname(name) {
     assert.strictEqual(typeof name, 'string');
+    var RESERVED = [ 'admins', 'users' ]; // ldap code uses 'users' pseudo group
 
     if (name.length <= 2) return new GroupError(GroupError.BAD_NAME, 'name must be atleast 3 chars');
     if (name.length >= 200) return new GroupError(GroupError.BAD_NAME, 'name too long');
 
     if (!/^[A-Za-z0-9_-]*$/.test(name)) return new GroupError(GroupError.BAD_NAME, 'name can only have A-Za-z0-9_-');
+
+    if (RESERVED.indexOf(name) !== -1) return new GroupError(GroupError.BAD_NAME, 'name is reserved');
 
     return null;
 }
