@@ -76,7 +76,7 @@ function clear(callback) {
     database.query('DELETE FROM groupMembers', function (error) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
-        database.query('DELETE FROM groups WHERE id != ?', [ 'gid:admin' ], function (error) {
+        database.query('DELETE FROM groups WHERE id != ?', [ 'admin' ], function (error) {
             if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
 
             callback(error);

@@ -15,7 +15,7 @@ var async = require('async'),
     userdb = require('../userdb.js');
 
 var GROUP_NAME = 'administrators',
-    GROUP_ID = 'gid:' + GROUP_NAME;
+    GROUP_ID = GROUP_NAME;
 
 function setup(done) {
     // ensure data/config/mount paths

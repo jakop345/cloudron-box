@@ -16,7 +16,7 @@ exports = module.exports = {
 
     getGroups: getGroups,
 
-    ADMIN_GROUP_ID: 'gid:admin' // see db migration code
+    ADMIN_GROUP_ID: 'admin' // see db migration code and groupdb._clear
 };
 
 var assert = require('assert'),
@@ -72,7 +72,7 @@ function create(name, callback) {
     var error = validateGroupname(name);
     if (error) return callback(error);
 
-    groupdb.add('gid:' + name /* id */, name, function (error) {
+    groupdb.add(name /* id */, name, function (error) {
         if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new GroupError(GroupError.ALREADY_EXISTS));
         if (error) return callback(new GroupError(GroupError.INTERNAL_ERROR, error));
 

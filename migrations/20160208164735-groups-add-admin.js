@@ -3,7 +3,7 @@
 var dbm = global.dbm || require('db-migrate');
 var async = require('async');
 
-var ADMIN_GROUP_ID = 'gid:admin'; // see groups.js
+var ADMIN_GROUP_ID = 'admin'; // see groups.js
 
 exports.up = function(db, callback) {
 	async.series([
