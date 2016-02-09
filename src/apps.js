@@ -56,6 +56,7 @@ var addons = require('./addons.js'),
     debug = require('debug')('box:apps'),
     docker = require('./docker.js'),
     fs = require('fs'),
+    groups = require('./groups.js'),
     manifestFormat = require('cloudron-manifestformat'),
     path = require('path'),
     paths = require('./paths.js'),
@@ -192,9 +193,21 @@ function validateAccessRestriction(accessRestriction) {
 
     if (accessRestriction === null) return null;
 
-    if (!accessRestriction.users || !Array.isArray(accessRestriction.users)) return new Error('users array property required');
-    if (accessRestriction.users.length === 0) return new Error('users array cannot be empty');
-    if (!accessRestriction.users.every(function (e) { return typeof e === 'string'; })) return new Error('All users have to be strings');
+    var noUsers = true, noGroups = true;
+
+    if (accessRestriction.users) {
+        if (!Array.isArray(accessRestriction.users)) return new Error('users array property required');
+        if (!accessRestriction.users.every(function (e) { return typeof e === 'string'; })) return new Error('All users have to be strings');
+        noUsers = accessRestriction.users.length === 0;
+    }
+
+    if (accessRestriction.groups) {
+        if (!Array.isArray(accessRestriction.groups)) return new Error('groups array property required');
+        if (!accessRestriction.groups.every(function (e) { return typeof e === 'string'; })) return new Error('All groups have to be strings');
+        noGroups = accessRestriction.groups.length === 0;
+    }
+
+    if (noUsers && noGroups) return new Error('users and groups array cannot both be empty');
 
     return null;
 }
@@ -233,7 +246,19 @@ function hasAccessTo(app, user, callback) {
 
     if (app.accessRestriction === null) return callback(null, true);
 
-    callback(null, app.accessRestriction.users.some(function (e) { return e === user.id; }));
+    // check user access
+    if (app.accessRestriction.users.some(function (e) { return e === user.id; })) return callback(null, true);
+
+    // check group access
+    if (!app.accessRestriction.groups) return callback(null, false);
+
+    async.some(app.accessRestriction.groups, function (groupId, iteratorDone) {
+        groups.isMember(groupId, user.id, function (error, member) {
+            iteratorDone(!error && member); // async.some does not take error argument in callback
+        });
+    }, function (result) {
+        callback(null, result);
+    });
 }
 
 function get(appId, callback) {
