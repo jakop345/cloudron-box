@@ -119,7 +119,7 @@ function createUser(username, password, email, displayName, invitor, sendInvite,
     assert.strictEqual(typeof password, 'string');
     assert.strictEqual(typeof email, 'string');
     assert.strictEqual(typeof displayName, 'string');
-    assert(invitor);
+    assert.strictEqual(typeof invitor, 'object'); // null is ok
     assert.strictEqual(typeof sendInvite, 'boolean');
     assert.strictEqual(typeof callback, 'function');
 
