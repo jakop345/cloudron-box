@@ -2,6 +2,7 @@
 
 exports = module.exports = {
     get: get,
+    getAll: getAll,
     add: add,
     del: del,
     count: count,
@@ -31,6 +32,16 @@ function get(groupId, callback) {
         if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         callback(null, result[0]);
+    });
+}
+
+function getAll(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    database.query('SELECT ' + GROUPS_FIELDS + ' FROM groups', function (error, result) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+
+        callback(null, result);
     });
 }
 

@@ -8,6 +8,7 @@ exports = module.exports = {
     create: create,
     remove: remove,
     get: get,
+    getAll: getAll,
 
     getMembers: getMembers,
     addMember: addMember,
@@ -76,7 +77,7 @@ function create(name, callback) {
         if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(new GroupError(GroupError.ALREADY_EXISTS));
         if (error) return callback(new GroupError(GroupError.INTERNAL_ERROR, error));
 
-        callback(null);
+        callback(null, { id: name, name: name });
     });
 }
 
@@ -99,6 +100,16 @@ function get(id, callback) {
 
     groupdb.get(id, function (error, result) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new GroupError(GroupError.NOT_FOUND));
+        if (error) return callback(new GroupError(GroupError.INTERNAL_ERROR, error));
+
+        return callback(null, result);
+    });
+}
+
+function getAll(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    groupdb.getAll(function (error, result) {
         if (error) return callback(new GroupError(GroupError.INTERNAL_ERROR, error));
 
         return callback(null, result);
