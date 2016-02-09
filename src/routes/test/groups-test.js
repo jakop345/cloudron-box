@@ -11,6 +11,7 @@ var appdb = require('../../appdb.js'),
     config = require('../../config.js'),
     database = require('../../database.js'),
     expect = require('expect.js'),
+    groups = require('../../groups.js'),
     superagent = require('superagent'),
     server = require('../../server.js'),
     settings = require('../../settings.js'),
@@ -164,6 +165,45 @@ describe('Groups API', function () {
                   .query({ access_token: token })
                   .end(function (error, result) {
                 expect(result.statusCode).to.equal(409);
+                done();
+            });
+        });
+    });
+
+    describe('Set groups', function () {
+        before(function (done) {
+            async.series([
+                groups.create.bind(null, 'group0'),
+                groups.create.bind(null, 'group1')
+            ], done);
+        });
+
+        it('cannot add user to invalid group', function (done) {
+            superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME + '/set_groups')
+                  .query({ access_token: token })
+                  .send({ groupIds: [ 'admin', 'something' ]})
+                  .end(function (error, result) {
+                expect(result.statusCode).to.equal(404);
+                done();
+            });
+        });
+
+        it('can add user to valid group', function (done) {
+            superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME + '/set_groups')
+                  .query({ access_token: token })
+                  .send({ groupIds: [ 'admin', 'group0', 'group1' ]})
+                  .end(function (error, result) {
+                expect(result.statusCode).to.equal(204);
+                done();
+            });
+        });
+
+        it('can remove last user from admin', function (done) {
+            superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME + '/set_groups')
+                  .query({ access_token: token })
+                  .send({ groupIds: [ 'group0', 'group1' ]})
+                  .end(function (error, result) {
+                expect(result.statusCode).to.equal(403); // not allowed
                 done();
             });
         });

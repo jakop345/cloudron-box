@@ -14,6 +14,7 @@ exports = module.exports = {
     isMember: isMember,
 
     getGroups: getGroups,
+    setGroups: setGroups,
 
     _clear: clear
 };
@@ -115,6 +116,9 @@ function clear(callback) {
 }
 
 function getMembers(groupId, callback) {
+    assert.strictEqual(typeof groupId, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
     database.query('SELECT userId FROM groupMembers WHERE groupId=?', [ groupId ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         // if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND)); // need to differentiate group with no members and invalid groupId
@@ -124,11 +128,33 @@ function getMembers(groupId, callback) {
 }
 
 function getGroups(userId, callback) {
-    database.query('SELECT userId FROM groupMembers WHERE userId=?', [ userId ], function (error, result) {
+    assert.strictEqual(typeof userId, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    database.query('SELECT groupId FROM groupMembers WHERE userId=? ORDER BY groupId', [ userId ], function (error, result) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
         // if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND)); // need to differentiate group with no members and invalid groupId
 
         callback(error, result.map(function (r) { return r.groupId; }));
+    });
+}
+
+function setGroups(userId, groupIds, callback) {
+    assert.strictEqual(typeof userId, 'string');
+    assert(Array.isArray(groupIds));
+    assert.strictEqual(typeof callback, 'function');
+
+    var queries = [ ];
+    queries.push({ query: 'DELETE from groupMembers WHERE userId = ?', args: [ userId ] });
+    groupIds.forEach(function (gid) {
+        queries.push({ query: 'INSERT INTO groupMembers (groupId, userId) VALUES (? , ?)', args: [ gid, userId ] });
+    });
+
+    database.transaction(queries, function (error) {
+        if (error && error.code === 'ER_NO_REFERENCED_ROW_2') return callback(new DatabaseError(DatabaseError.NOT_FOUND, error.message));
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+
+        callback(null);
     });
 }
 

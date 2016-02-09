@@ -20,7 +20,8 @@ exports = module.exports = {
     update: updateUser,
     createOwner: createOwner,
     getOwner: getOwner,
-    sendInvite: sendInvite
+    sendInvite: sendInvite,
+    setGroups: setGroups
 };
 
 var assert = require('assert'),
@@ -28,6 +29,7 @@ var assert = require('assert'),
     crypto = require('crypto'),
     DatabaseError = require('./databaseerror.js'),
     groups = require('./groups.js'),
+    GroupError = groups.GroupError,
     hat = require('hat'),
     mailer = require('./mailer.js'),
     tokendb = require('./tokendb.js'),
@@ -310,6 +312,28 @@ function changeAdmin(username, admin, callback) {
 
                 mailer.adminChanged(user, admin);
             });
+        });
+    });
+}
+
+function setGroups(userId, groupIds, callback) {
+    assert.strictEqual(typeof userId, 'string');
+    assert(Array.isArray(groupIds));
+    assert.strictEqual(typeof callback, 'function');
+
+    userdb.getAllAdmins(function (error, result) {
+        if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+
+        // protect from a system where there is no admin left
+        if (result.length <= 1 && result[0].id === userId && groupIds.indexOf(groups.ADMIN_GROUP_ID) === -1) {
+            return callback(new UserError(UserError.NOT_ALLOWED, 'Only admin'));
+        }
+
+        groups.setGroups(userId, groupIds, function (error) {
+            if (error && error.reason === GroupError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND, 'One or more groups not found'));
+            if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+
+            callback();
         });
     });
 }

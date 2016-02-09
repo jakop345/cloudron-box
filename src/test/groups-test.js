@@ -17,6 +17,22 @@ var async = require('async'),
 var GROUP0_NAME = 'administrators',
     GROUP0_ID = GROUP0_NAME;
 
+var GROUP1_NAME = 'externs',
+    GROUP1_ID = GROUP1_NAME;
+
+var USER_0 = {
+    id: 'uuid213',
+    username: 'uuid213',
+    password: 'secret',
+    email: 'safe@me.com',
+    admin: false,
+    salt: 'morton',
+    createdAt: 'sometime back',
+    modifiedAt: 'now',
+    resetToken: hat(256),
+    displayName: ''
+};
+
 function setup(done) {
     // ensure data/config/mount paths
     database.initialize(function (error) {
@@ -50,6 +66,13 @@ describe('Groups', function () {
 
     it('cannot create group - bad name', function (done) {
         groups.create('bad:name', function (error) {
+            expect(error.reason).to.be(GroupError.BAD_NAME);
+            done();
+        });
+    });
+
+    it('cannot create group - reserved', function (done) {
+        groups.create('users', function (error) {
             expect(error.reason).to.be(GroupError.BAD_NAME);
             done();
         });
@@ -100,19 +123,6 @@ describe('Groups', function () {
 });
 
 describe('Group membership', function () {
-    var USER_0 = {
-        id: 'uuid213',
-        username: 'uuid213',
-        password: 'secret',
-        email: 'safe@me.com',
-        admin: false,
-        salt: 'morton',
-        createdAt: 'sometime back',
-        modifiedAt: 'now',
-        resetToken: hat(256),
-        displayName: ''
-    };
-
     before(function (done) {
         async.series([
             setup,
@@ -215,6 +225,45 @@ describe('Group membership', function () {
         groups.remove(GROUP0_ID, function (error) {
             expect(error).to.be(null);
             done();
+        });
+    });
+});
+
+describe('Set user groups', function () {
+    before(function (done) {
+        async.series([
+            setup,
+            groups.create.bind(null, GROUP0_NAME),
+            groups.create.bind(null, GROUP1_NAME),
+            userdb.add.bind(null, USER_0.id, USER_0)
+        ], done);
+    });
+    after(cleanup);
+
+    it('can set user to single group', function (done) {
+        groups.setGroups(USER_0.id, [ GROUP0_ID ], function (error) {
+            expect(error).to.be(null);
+
+            groups.getGroups(USER_0.id, function (error, groupIds) {
+                expect(error).to.be(null);
+                expect(groupIds.length).to.be(1);
+                expect(groupIds[0]).to.be(GROUP0_ID);
+                done();
+            });
+        });
+    });
+
+    it('can set user to multiple groups', function (done) {
+        groups.setGroups(USER_0.id, [ GROUP0_ID, GROUP1_ID ], function (error) {
+            expect(error).to.be(null);
+
+            groups.getGroups(USER_0.id, function (error, groupIds) {
+                expect(error).to.be(null);
+                expect(groupIds.length).to.be(2);
+                expect(groupIds[0]).to.be(GROUP0_ID);
+                expect(groupIds[1]).to.be(GROUP1_ID);
+                done();
+            });
         });
     });
 });

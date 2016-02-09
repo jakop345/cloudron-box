@@ -17,6 +17,7 @@ exports = module.exports = {
     isMember: isMember,
 
     getGroups: getGroups,
+    setGroups: setGroups,
 
     ADMIN_GROUP_ID: 'admin' // see db migration code and groupdb._clear
 };
@@ -146,6 +147,19 @@ function getGroups(userId, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     groupdb.getGroups(userId, function (error, result) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new GroupError(GroupError.NOT_FOUND));
+        if (error) return callback(new GroupError(GroupError.INTERNAL_ERROR, error));
+
+        return callback(null, result);
+    });
+}
+
+function setGroups(userId, groupIds, callback) {
+    assert.strictEqual(typeof userId, 'string');
+    assert(Array.isArray(groupIds));
+    assert.strictEqual(typeof callback, 'function');
+
+    groupdb.setGroups(userId, groupIds, function (error, result) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new GroupError(GroupError.NOT_FOUND));
         if (error) return callback(new GroupError(GroupError.INTERNAL_ERROR, error));
 

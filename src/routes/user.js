@@ -13,7 +13,8 @@ exports = module.exports = {
     remove: removeUser,
     verifyPassword: verifyPassword,
     requireAdmin: requireAdmin,
-    sendInvite: sendInvite
+    sendInvite: sendInvite,
+    setGroups: setGroups
 };
 
 var assert = require('assert'),
@@ -224,5 +225,20 @@ function sendInvite(req, res, next) {
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(200, {}));
+    });
+}
+
+function setGroups(req, res, next) {
+    assert.strictEqual(typeof req.body, 'object');
+    assert.strictEqual(typeof req.params.userId, 'string');
+
+    if (!Array.isArray(req.body.groupIds)) return next(new HttpError(400, 'API call requires a groups array.'));
+
+    user.setGroups(req.params.userId, req.body.groupIds, function (error) {
+        if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'One or more groups not found'));
+        if (error && error.reason === UserError.NOT_ALLOWED) return next(new HttpError(403, 'Last admin'));
+        if (error) return next(new HttpError(500, error));
+
+        next(new HttpSuccess(204));
     });
 }
