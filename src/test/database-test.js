@@ -36,7 +36,6 @@ describe('database', function () {
             username: 'uuid213',
             password: 'secret',
             email: 'safe@me.com',
-            admin: false,
             salt: 'morton',
             createdAt: 'sometime back',
             modifiedAt: 'now',
@@ -44,12 +43,11 @@ describe('database', function () {
             displayName: ''
         };
 
-        var ADMIN_0 = {
+        var USER_1 = {
             id: 'uuid456',
             username: 'uuid456',
             password: 'secret',
             email: 'safe2@me.com',
-            admin: true,
             salt: 'tata',
             createdAt: 'sometime back',
             modifiedAt: 'now',
@@ -64,8 +62,8 @@ describe('database', function () {
             });
         });
 
-        it('can add admin user', function (done) {
-            userdb.add(ADMIN_0.id, ADMIN_0, function (error) {
+        it('can add another user', function (done) {
+            userdb.add(USER_1.id, USER_1, function (error) {
                 expect(!error).to.be.ok();
                 done();
             });
@@ -125,7 +123,7 @@ describe('database', function () {
                 expect(error).to.not.be.ok();
                 expect(all.length).to.equal(2);
                 expect(all[0]).to.eql(USER_0);
-                expect(all[1]).to.eql(ADMIN_0);
+                expect(all[1]).to.eql(USER_1);
                 done();
             });
         });
@@ -133,8 +131,7 @@ describe('database', function () {
         it('can get all admins', function (done) {
             userdb.getAllAdmins(function (error, all) {
                 expect(error).to.not.be.ok();
-                expect(all.length).to.equal(1);
-                expect(all[0]).to.eql(ADMIN_0);
+                expect(all.length).to.equal(0);
                 done();
             });
         });
