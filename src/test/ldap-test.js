@@ -34,8 +34,8 @@ function setup(done) {
         database.initialize.bind(null),
         database._clear.bind(null),
         ldapServer.start.bind(null),
-        user.create.bind(null, USER_0.username, USER_0.password, USER_0.email, USER_0.displayName, true, null, false),
-        user.create.bind(null, USER_1.username, USER_1.password, USER_1.email, USER_0.displayName, false, USER_0, false)
+        user.create.bind(null, USER_0.username, USER_0.password, USER_0.email, USER_0.displayName, null, false),
+        user.create.bind(null, USER_1.username, USER_1.password, USER_1.email, USER_0.displayName, USER_0, false)
     ], done);
 }
 
