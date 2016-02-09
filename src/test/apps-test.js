@@ -182,24 +182,44 @@ describe('Apps', function () {
     });
 
     describe('hasAccessTo', function () {
-        it('returns true for unrestricted access', function () {
-            expect(apps.hasAccessTo({ accessRestriction: null }, { id: 'someuser' })).to.equal(true);
+        it('returns true for unrestricted access', function (done) {
+            apps.hasAccessTo({ accessRestriction: null }, { id: 'someuser' }, function (error, access) {
+                expect(error).to.be(null);
+                expect(access).to.be(true);
+                done();
+            });
         });
 
-        it('returns true for allowed user', function () {
-            expect(apps.hasAccessTo({ accessRestriction: { users: [ 'someuser' ] } }, { id: 'someuser' })).to.equal(true);
+        it('returns true for allowed user', function (done) {
+            apps.hasAccessTo({ accessRestriction: { users: [ 'someuser' ] } }, { id: 'someuser' }, function (error, access) {
+                expect(error).to.be(null);
+                expect(access).to.be(true);
+                done();
+            });
         });
 
-        it('returns true for allowed user with multiple allowed', function () {
-            expect(apps.hasAccessTo({ accessRestriction: { users: [ 'foo', 'someuser', 'anotheruser' ] } }, { id: 'someuser' })).to.equal(true);
+        it('returns true for allowed user with multiple allowed', function (done) {
+            apps.hasAccessTo({ accessRestriction: { users: [ 'foo', 'someuser', 'anotheruser' ] } }, { id: 'someuser' }, function (error, access) {
+                expect(error).to.be(null);
+                expect(access).to.be(true);
+                done();
+            });
         });
 
-        it('returns false for not allowed user', function () {
-            expect(apps.hasAccessTo({ accessRestriction: { users: [ 'foo' ] } }, { id: 'someuser' })).to.equal(false);
+        it('returns false for not allowed user', function (done) {
+            apps.hasAccessTo({ accessRestriction: { users: [ 'foo' ] } }, { id: 'someuser' }, function (error, access) {
+                expect(error).to.be(null);
+                expect(access).to.be(false);
+                done();
+            });
         });
 
-        it('returns false for not allowed user with multiple allowed', function () {
-            expect(apps.hasAccessTo({ accessRestriction: { users: [ 'foo', 'anotheruser' ] } }, { id: 'someuser' })).to.equal(false);
+        it('returns false for not allowed user with multiple allowed', function (done) {
+            apps.hasAccessTo({ accessRestriction: { users: [ 'foo', 'anotheruser' ] } }, { id: 'someuser' }, function (error, access) {
+                expect(error).to.be(null);
+                expect(access).to.be(false);
+                done();
+            });
         });
     });
 });

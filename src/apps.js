@@ -226,12 +226,14 @@ function getIconUrlSync(app) {
     return fs.existsSync(iconPath) ? '/api/v1/apps/' + app.id + '/icon' : null;
 }
 
-function hasAccessTo(app, user) {
+function hasAccessTo(app, user, callback) {
     assert.strictEqual(typeof app, 'object');
     assert.strictEqual(typeof user, 'object');
+    assert.strictEqual(typeof callback, 'function');
 
-    if (app.accessRestriction === null) return true;
-    return app.accessRestriction.users.some(function (e) { return e === user.id; });
+    if (app.accessRestriction === null) return callback(null, true);
+
+    callback(null, app.accessRestriction.users.some(function (e) { return e === user.id; }));
 }
 
 function get(appId, callback) {

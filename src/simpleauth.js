@@ -45,17 +45,20 @@ function loginLogic(clientId, username, password, callback) {
             apps.get(clientObject.appId, function (error, appObject) {
                 if (error) return callback(error);
 
-                if (!apps.hasAccessTo(appObject, userObject)) return callback(new AppsError(AppsError.ACCESS_DENIED));
-
-                var accessToken = tokendb.generateToken();
-                var expires = Date.now() + 24 * 60 * 60 * 1000; // 1 day
-
-                tokendb.add(accessToken, tokendb.PREFIX_USER + userObject.id, clientId, expires, clientObject.scope, function (error) {
+                apps.hasAccessTo(appObject, userObject, function (error, access) {
                     if (error) return callback(error);
+                    if (!access) return callback(new AppsError(AppsError.ACCESS_DENIED));
 
-                    debug('login: new access token for client %s and user %s: %s', clientId, username, accessToken);
+                    var accessToken = tokendb.generateToken();
+                    var expires = Date.now() + 24 * 60 * 60 * 1000; // 1 day
 
-                    callback(null, { accessToken: accessToken, user: userObject });
+                    tokendb.add(accessToken, tokendb.PREFIX_USER + userObject.id, clientId, expires, clientObject.scope, function (error) {
+                        if (error) return callback(error);
+
+                        debug('login: new access token for client %s and user %s: %s', clientId, username, accessToken);
+
+                        callback(null, { accessToken: accessToken, user: userObject });
+                    });
                 });
             });
         });

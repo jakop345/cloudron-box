@@ -380,9 +380,12 @@ var authorization = [
         appdb.get(req.oauth2.client.appId, function (error, appObject) {
             if (error) return sendErrorPageOrRedirect(req, res, 'Invalid request. Unknown app for this client_id.');
 
-            if (!apps.hasAccessTo(appObject, req.oauth2.user)) return sendErrorPageOrRedirect(req, res, 'No access to this app.');
+            apps.hasAccessTo(appObject, req.oauth2.user, function (error, access) {
+                if (error) return sendError(req, res, 'Internal error');
+                if (!access) return sendErrorPageOrRedirect(req, res, 'No access to this app.');
 
-            next();
+                next();
+            });
         });
     },
     gServer.decision({ loadTransaction: false })
