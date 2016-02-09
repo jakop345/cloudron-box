@@ -82,7 +82,7 @@ describe('User', function () {
         after(cleanupUsers);
 
         it('fails due to short password', function (done) {
-            user.create(USERNAME, 'Fo$%23', EMAIL, DISPLAY_NAME, null, true, function (error, result) {
+            user.create(USERNAME, 'Fo$%23', EMAIL, DISPLAY_NAME, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
                 expect(error.reason).to.equal(UserError.BAD_PASSWORD);
@@ -92,7 +92,7 @@ describe('User', function () {
         });
 
         it('fails due to missing upper case password', function (done) {
-            user.create(USERNAME, 'thisiseightch%$234arslong', EMAIL, DISPLAY_NAME, null, true, function (error, result) {
+            user.create(USERNAME, 'thisiseightch%$234arslong', EMAIL, DISPLAY_NAME, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
                 expect(error.reason).to.equal(UserError.BAD_PASSWORD);
@@ -102,7 +102,7 @@ describe('User', function () {
         });
 
         it('fails due to missing numerics in password', function (done) {
-            user.create(USERNAME, 'foobaRASDF%', EMAIL, DISPLAY_NAME, null, true, function (error, result) {
+            user.create(USERNAME, 'foobaRASDF%', EMAIL, DISPLAY_NAME, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
                 expect(error.reason).to.equal(UserError.BAD_PASSWORD);
@@ -112,7 +112,7 @@ describe('User', function () {
         });
 
         it('fails due to missing special chars in password', function (done) {
-            user.create(USERNAME, 'foobaRASDF23423', EMAIL, DISPLAY_NAME, null, true, function (error, result) {
+            user.create(USERNAME, 'foobaRASDF23423', EMAIL, DISPLAY_NAME, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).to.not.be.ok();
                 expect(error.reason).to.equal(UserError.BAD_PASSWORD);
@@ -122,7 +122,7 @@ describe('User', function () {
         });
 
         it('succeeds and attempts to send invite', function (done) {
-            user.create(USERNAME, PASSWORD, EMAIL, DISPLAY_NAME, null /* invitor */, true, function (error, result) {
+            user.createOwner(USERNAME, PASSWORD, EMAIL, DISPLAY_NAME, function (error, result) {
                 expect(error).not.to.be.ok();
                 expect(result).to.be.ok();
                 expect(result.username).to.equal(USERNAME);
@@ -157,7 +157,7 @@ describe('User', function () {
         });
 
         it('fails because user exists', function (done) {
-            user.create(USERNAME, PASSWORD, EMAIL, DISPLAY_NAME, null /* invitor */, false, function (error, result) {
+            user.create(USERNAME, PASSWORD, EMAIL, DISPLAY_NAME, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).not.to.be.ok();
                 expect(error.reason).to.equal(UserError.ALREADY_EXISTS);
@@ -167,7 +167,7 @@ describe('User', function () {
         });
 
         it('fails because password is empty', function (done) {
-            user.create(USERNAME, '', EMAIL, DISPLAY_NAME, null /* invitor */, false, function (error, result) {
+            user.create(USERNAME, '', EMAIL, DISPLAY_NAME, function (error, result) {
                 expect(error).to.be.ok();
                 expect(result).not.to.be.ok();
                 expect(error.reason).to.equal(UserError.BAD_PASSWORD);
@@ -397,7 +397,8 @@ describe('User', function () {
                 email: 'some@thi.ng'
             };
 
-            user.create(user1.username, user1.password, user1.email, DISPLAY_NAME, { username: USERNAME, email: EMAIL } /* invitor */, false, function (error, result) {
+            var invitor = { username: USERNAME, email: EMAIL };
+            user.create(user1.username, user1.password, user1.email, DISPLAY_NAME, { invitor: invitor }, function (error, result) {
                 expect(error).to.not.be.ok();
                 expect(result).to.be.ok();
 
@@ -439,7 +440,8 @@ describe('User', function () {
                 email: 'some@thi.ng'
             };
 
-            user.create(user1.username, user1.password, user1.email, DISPLAY_NAME, { username: USERNAME, email: EMAIL } /* invitor */, false, function (error, result) {
+            var invitor = { username: USERNAME, email: EMAIL };
+            user.create(user1.username, user1.password, user1.email, DISPLAY_NAME, { invitor: invitor }, function (error, result) {
                 expect(error).to.eql(null);
                 expect(result).to.be.ok();
 

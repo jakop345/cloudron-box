@@ -114,14 +114,20 @@ function validateDisplayName(name) {
     return null;
 }
 
-function createUser(username, password, email, displayName, invitor, sendInvite, callback) {
+function createUser(username, password, email, displayName, options, callback) {
     assert.strictEqual(typeof username, 'string');
     assert.strictEqual(typeof password, 'string');
     assert.strictEqual(typeof email, 'string');
     assert.strictEqual(typeof displayName, 'string');
-    assert.strictEqual(typeof invitor, 'object'); // null is ok
-    assert.strictEqual(typeof sendInvite, 'boolean');
-    assert.strictEqual(typeof callback, 'function');
+
+    if (typeof options === 'function') {
+        callback = options;
+        options = null;
+    }
+
+    var invitor = options ? options.invitor : null,
+        sendInvite = options ? options.sendInvite : false,
+        owner = options ? options.owner : false;
 
     var error = validateUsername(username);
     if (error) return callback(error);
@@ -160,7 +166,7 @@ function createUser(username, password, email, displayName, invitor, sendInvite,
 
                 callback(null, user);
 
-                mailer.userAdded(user, sendInvite);
+                if (!owner) mailer.userAdded(user, sendInvite);
                 if (sendInvite) mailer.sendInvite(user, invitor);
             });
         });
@@ -400,7 +406,7 @@ function createOwner(username, password, email, displayName, callback) {
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
         if (count !== 0) return callback(new UserError(UserError.ALREADY_EXISTS));
 
-        createUser(username, password, email, displayName, null /* invitor */, false /* sendInvite */, function (error, user) {
+        createUser(username, password, email, displayName, { owner: true }, function (error, user) {
             if (error) return callback(error);
 
             groups.addMember(groups.ADMIN_GROUP_ID, user.id, function (error) {

@@ -55,7 +55,7 @@ function createUser(req, res, next) {
     var sendInvite = req.body.invite;
     var displayName = req.body.displayName || '';
 
-    user.create(username, password, email, displayName, req.user /* creator */, sendInvite, function (error, user) {
+    user.create(username, password, email, displayName, { invitor: req.user, sendInvite: sendInvite }, function (error, user) {
         if (error && error.reason === UserError.BAD_USERNAME) return next(new HttpError(400, 'Invalid username'));
         if (error && error.reason === UserError.BAD_EMAIL) return next(new HttpError(400, 'Invalid email'));
         if (error && error.reason === UserError.BAD_PASSWORD) return next(new HttpError(400, 'Invalid password'));
