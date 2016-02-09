@@ -73,16 +73,6 @@ UserError.BAD_PASSWORD = 'Bad password';
 UserError.BAD_TOKEN = 'Bad token';
 UserError.NOT_ALLOWED = 'Not Allowed';
 
-function listUsers(callback) {
-    assert.strictEqual(typeof callback, 'function');
-
-    userdb.getAll(function (error, result) {
-        if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
-
-        return callback(null, result.map(function (obj) { return _.pick(obj, 'id', 'username', 'email', 'displayName', 'groupIds'); }));
-    });
-}
-
 function validateUsername(username) {
     assert.strictEqual(typeof username, 'string');
 
@@ -226,6 +216,21 @@ function removeUser(userId, callback) {
         callback(null);
 
         mailer.userRemoved(userId);
+    });
+}
+
+function listUsers(callback) {
+    assert.strictEqual(typeof callback, 'function');
+
+    userdb.getAll(function (error, result) {
+        if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+
+        var allUsers = result.map(function (obj) {
+            var u = _.pick(obj, 'id', 'username', 'email', 'displayName', 'groupIds'); 
+            u.admin = u.groupIds.indexOf(groups.ADMIN_GROUP_ID) !== -1;
+            return u;
+        });
+        return callback(null, allUsers);
     });
 }
 
