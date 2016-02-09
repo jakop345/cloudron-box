@@ -8,6 +8,7 @@ exports = module.exports = {
     create: create,
     remove: remove,
     get: get,
+    getWithMembers: getWithMembers,
     getAll: getAll,
 
     getMembers: getMembers,
@@ -99,6 +100,18 @@ function get(id, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     groupdb.get(id, function (error, result) {
+        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new GroupError(GroupError.NOT_FOUND));
+        if (error) return callback(new GroupError(GroupError.INTERNAL_ERROR, error));
+
+        return callback(null, result);
+    });
+}
+
+function getWithMembers(id, callback) {
+    assert.strictEqual(typeof id, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    groupdb.getWithMembers(id, function (error, result) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new GroupError(GroupError.NOT_FOUND));
         if (error) return callback(new GroupError(GroupError.INTERNAL_ERROR, error));
 

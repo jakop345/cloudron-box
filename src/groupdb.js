@@ -2,6 +2,7 @@
 
 exports = module.exports = {
     get: get,
+    getWithMembers: getWithMembers,
     getAll: getAll,
     add: add,
     del: del,
@@ -32,6 +33,24 @@ function get(groupId, callback) {
         if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         callback(null, result[0]);
+    });
+}
+
+function getWithMembers(groupId, callback) {
+    assert.strictEqual(typeof groupId, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    database.query('SELECT ' + GROUPS_FIELDS + ',GROUP_CONCAT(groupMembers.userId) AS userIds ' +
+                    ' FROM groups LEFT OUTER JOIN groupMembers ON groups.id = groupMembers.groupId ' +
+                    ' WHERE groups.id = ? ' +
+                    ' GROUP BY groups.id', [ groupId ], function (error, results) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        if (results.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
+
+        var result = results[0];
+        result.userIds = result.userIds ? result.userIds.split(',') : [ ];
+
+        callback(null, result);
     });
 }
 

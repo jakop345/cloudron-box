@@ -38,7 +38,7 @@ function create(req, res, next) {
 function get(req, res, next) {
     assert.strictEqual(typeof req.params.groupId, 'string');
 
-    groups.get(req.params.groupId, function (error, result) {
+    groups.getWithMembers(req.params.groupId, function (error, result) {
         if (error && error.reason === GroupError.NOT_FOUND) return next(new HttpError(404, 'No such group'));
         if (error) return next(new HttpError(500, error));
 
@@ -47,8 +47,9 @@ function get(req, res, next) {
 }
 
 function list(req, res, next) {
-    groups.list(function (error, result) {
+    groups.getAll(function (error, result) {
         if (error) return next(new HttpError(500, error));
+
         next(new HttpSuccess(200, { groups: result }));
     });
 }
