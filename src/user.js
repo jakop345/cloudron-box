@@ -230,7 +230,13 @@ function getUser(userId, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-        return callback(null, result);
+        groups.getGroups(userId, function (error, groupIds) {
+            if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
+
+            result.groupIds = groupIds;
+
+            return callback(null, result);
+        });
     });
 }
 

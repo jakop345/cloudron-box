@@ -11,6 +11,8 @@ exports = module.exports = {
     removeMember: removeMember,
     isMember: isMember,
 
+    getGroups: getGroups,
+
     _clear: clear
 };
 
@@ -88,6 +90,15 @@ function getMembers(groupId, callback) {
         // if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND)); // need to differentiate group with no members and invalid groupId
 
         callback(error, result.map(function (r) { return r.userId; }));
+    });
+}
+
+function getGroups(userId, callback) {
+    database.query('SELECT userId FROM groupMembers WHERE userId=?', [ userId ], function (error, result) {
+        if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        // if (result.length === 0) return callback(new DatabaseError(DatabaseError.NOT_FOUND)); // need to differentiate group with no members and invalid groupId
+
+        callback(error, result.map(function (r) { return r.groupId; }));
     });
 }
 
