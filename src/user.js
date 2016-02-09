@@ -160,6 +160,7 @@ function createUser(username, password, email, displayName, invitor, sendInvite,
 
                 callback(null, user);
 
+                mailer.userAdded(user, sendInvite);
                 if (sendInvite) mailer.sendInvite(user, invitor);
             });
         });
