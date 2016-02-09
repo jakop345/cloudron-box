@@ -29,6 +29,7 @@ var userObject = null;
 function cleanupUsers(done) {
     async.series([
         groupdb._clear,
+        database.query.bind(null, 'INSERT INTO groups (id, name) VALUES (?, ?)', [ groups.ADMIN_GROUP_ID, 'admin' ]),
         userdb._clear,
         mailer._clearMailQueue
     ], done);
@@ -48,14 +49,11 @@ function createOwner(done) {
 }
 
 function setup(done) {
-    // ensure data/config/mount paths
-    database.initialize(function (error) {
-        expect(error).to.be(null);
-
-        mailer._clearMailQueue();
-
-        done();
-    });
+    async.series([
+        database.initialize,
+        database._clear,
+        mailer._clearMailQueue
+    ], done);
 }
 
 function cleanup(done) {
@@ -129,7 +127,7 @@ describe('User', function () {
                 expect(result.email).to.equal(EMAIL);
 
                 // first user is owner, do not send mail to admins
-                checkMails(1, done);
+                checkMails(0, done);
             });
         });
 

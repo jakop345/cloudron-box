@@ -125,9 +125,9 @@ function createUser(username, password, email, displayName, options, callback) {
         options = null;
     }
 
-    var invitor = options ? options.invitor : null,
-        sendInvite = options ? options.sendInvite : false,
-        owner = options ? options.owner : false;
+    var invitor = options && options.invitor ? options.invitor : null,
+        sendInvite = options && options.sendInvite ? true : false,
+        owner = options && options.owner ? true : false;
 
     var error = validateUsername(username);
     if (error) return callback(error);
