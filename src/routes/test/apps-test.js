@@ -1489,8 +1489,8 @@ describe('Apps', function () {
                    .query({ access_token: token })
                    .end(function (err, res) {
                     if (res.statusCode === 404) return done(null);
-                    if (++count > 20) return done(new Error('Timedout'));
-                    setTimeout(checkUninstallStatus, 400);
+                    if (++count > 50) return done(new Error('Timedout'));
+                    setTimeout(checkUninstallStatus, 1000);
                 });
             }
 

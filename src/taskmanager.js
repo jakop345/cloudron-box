@@ -4,6 +4,8 @@ exports = module.exports = {
     initialize: initialize,
     uninitialize: uninitialize,
 
+    stopAppTask: stopAppTask,
+    startAppTask: startAppTask,
     restartAppTask: restartAppTask,
 
     stopPendingTasks: stopPendingTasks,

@@ -763,7 +763,7 @@ function startTask(appId, callback) {
         case appdb.ISTATE_PENDING_INSTALL: return install(app, callback);
         case appdb.ISTATE_PENDING_FORCE_UPDATE: return update(app, callback);
         case appdb.ISTATE_ERROR:
-            debugApp(app, 'Apptask launched with error states.');
+            debugApp(app, 'Internal error. apptask launched with error status.');
             return callback(null);
         default:
             debugApp(app, 'apptask launched with invalid command');

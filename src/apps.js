@@ -578,13 +578,15 @@ function uninstall(appId, callback) {
 
     debug('Will uninstall app with id:%s', appId);
 
-    appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_UNINSTALL, function (error) {
-        if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
-        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+    taskmanager.stopAppTask(appId, function () {
+        appdb.setInstallationCommand(appId, appdb.ISTATE_PENDING_UNINSTALL, function (error) {
+            if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
+            if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
-        taskmanager.restartAppTask(appId); // since uninstall is allowed from any state, kill current task
+            taskmanager.startAppTask(appId); // since uninstall is allowed from any state, kill current task
 
-        callback(null);
+            callback(null);
+        });
     });
 }
 
