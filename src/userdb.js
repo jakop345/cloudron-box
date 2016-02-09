@@ -87,8 +87,14 @@ function getByResetToken(resetToken, callback) {
 function getAll(callback) {
     assert.strictEqual(typeof callback, 'function');
 
-    database.query('SELECT ' + USERS_FIELDS + ' FROM users', function (error, results) {
+    database.query('SELECT ' + USERS_FIELDS + ',GROUP_CONCAT(groupMembers.groupId) AS groupIds ' +
+                    ' FROM users LEFT OUTER JOIN groupMembers ON users.id = groupMembers.userId ' +
+                    ' GROUP BY users.id', function (error, results) {
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+
+        results.forEach(function (result) {
+            result.groupIds = result.groupIds ? result.groupIds.split(',') : [ ];
+        });
 
         callback(null, results);
     });
