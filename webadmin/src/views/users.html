@@ -64,7 +64,7 @@
                 <h4 class="modal-title" id="userRemoveModalLabel">Delete user {{ userremove.userInfo.username }}</h4>
             </div>
             <div class="modal-body">
-                <form name="userremove_form" class="form-user-delete" role="form" ng-submit="doUserRemove()" name="userDeleteConfirm" autocomplete="off">
+                <form name="userremove_form" role="form" ng-submit="doUserRemove()" name="userDeleteConfirm" autocomplete="off">
                     <fieldset>
                         <input type="password" style="display: none;">
                         <div class="form-group" ng-class="{ 'has-error': (userremove_form.username.$dirty && userremove_form.username.$invalid) || (!userremove_form.username.$dirty && userremove.error.username) }">
@@ -103,7 +103,7 @@
                 <h4 class="modal-title" id="userEditModalLabel">Edit user {{ useredit.userInfo.username }}</h4>
             </div>
             <div class="modal-body">
-                <form name="useredit_form" class="form-user-delete" role="form" ng-submit="doUserEdit()" autocomplete="off">
+                <form name="useredit_form" role="form" ng-submit="doUserEdit()" autocomplete="off">
                     <fieldset>
                         <input type="password" style="display: none;">
                         <div class="form-group" ng-class="{ 'has-error': (useredit_form.displayName.$dirty && useredit_form.displayName.$invalid) || (!useredit_form.displayName.$dirty && useredit.error.displayName) }">
