@@ -141,7 +141,6 @@ describe('OAuth2', function () {
             username: 'someusername',
             password: '@#45Strongpassword',
             email: 'some@email.com',
-            admin: true,
             salt: 'somesalt',
             createdAt: (new Date()).toUTCString(),
             modifiedAt: (new Date()).toUTCString(),
@@ -176,6 +175,16 @@ describe('OAuth2', function () {
             location: 'test2',
             portBindings: {},
             accessRestriction: { users: [ USER_0.id ] },
+            oauthProxy: true
+        };
+
+        var APP_3 = {
+            id: 'app3',
+            appStoreId: '',
+            manifest: { version: '0.1.0', addons: { } },
+            location: 'test3',
+            portBindings: {},
+            accessRestriction: { groups: [ 'admin' ] },
             oauthProxy: true
         };
 
@@ -269,6 +278,16 @@ describe('OAuth2', function () {
             scope: 'profile'
         };
 
+        // app with accessRestriction allowing group
+        var CLIENT_9 = {
+            id: 'cid-client9',
+            appId: APP_3.id,
+            type: clientdb.TYPE_OAUTH,
+            clientSecret: 'secret9',
+            redirectURI: 'http://redirect9',
+            scope: 'profile'
+        };
+
         // make csrf always succeed for testing
         oauth2.csrf = function (req, res, next) {
             req.csrfToken = function () { return hat(256); };
@@ -288,9 +307,11 @@ describe('OAuth2', function () {
                 clientdb.add.bind(null, CLIENT_6.id, CLIENT_6.appId, CLIENT_6.type, CLIENT_6.clientSecret, CLIENT_6.redirectURI, CLIENT_6.scope),
                 clientdb.add.bind(null, CLIENT_7.id, CLIENT_7.appId, CLIENT_7.type, CLIENT_7.clientSecret, CLIENT_7.redirectURI, CLIENT_7.scope),
                 clientdb.add.bind(null, CLIENT_8.id, CLIENT_8.appId, CLIENT_8.type, CLIENT_8.clientSecret, CLIENT_8.redirectURI, CLIENT_8.scope),
+                clientdb.add.bind(null, CLIENT_9.id, CLIENT_9.appId, CLIENT_9.type, CLIENT_9.clientSecret, CLIENT_9.redirectURI, CLIENT_9.scope),
                 appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, APP_0.oauthProxy),
                 appdb.add.bind(null, APP_1.id, APP_1.appStoreId, APP_1.manifest, APP_1.location, APP_1.portBindings, APP_1.accessRestriction, APP_1.oauthProxy),
                 appdb.add.bind(null, APP_2.id, APP_2.appStoreId, APP_2.manifest, APP_2.location, APP_2.portBindings, APP_2.accessRestriction, APP_2.oauthProxy),
+                appdb.add.bind(null, APP_3.id, APP_3.appStoreId, APP_3.manifest, APP_3.location, APP_3.portBindings, APP_3.accessRestriction, APP_3.oauthProxy),
                 function (callback) {
                     user.create(USER_0.username, USER_0.password, USER_0.email, USER_0.displayName, function (error, userObject) {
                         expect(error).to.not.be.ok();
@@ -796,6 +817,22 @@ describe('OAuth2', function () {
                         var tmp = urlParse(response.headers.location, true);
                         expect(tmp.query.redirectURI).to.eql(CLIENT_7.redirectURI + '/');
                         expect(tmp.query.code).to.be.a('string');
+
+                        done();
+                    });
+                });
+            });
+
+            it('fails for grant type code with accessRestriction (group)', function (done) { // USER_0 is not an admin
+                startAuthorizationFlow(CLIENT_9, 'code', function (jar) {
+                    var url = SERVER_URL + '/api/v1/oauth/dialog/authorize?redirect_uri=' + CLIENT_9.redirectURI + '&client_id=' + CLIENT_9.id + '&response_type=code';
+
+                    request.get(url, { jar: jar, followRedirect: false }, function (error, response, body) {
+                        expect(error).to.not.be.ok();
+                        expect(response.statusCode).to.eql(200);
+                        console.log(body);
+                        expect(body.indexOf('<!-- error tester -->')).to.not.equal(-1);
+                        expect(body.indexOf('No access to this app.')).to.not.equal(-1);
 
                         done();
                     });
