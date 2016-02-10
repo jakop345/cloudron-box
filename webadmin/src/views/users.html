@@ -125,7 +125,9 @@
                         <div class="form-group">
                             <label class="control-label" for="inputUserEditGroups">Groups</label>
                             <div>
-                                <button class="btn btn-default" type="button" ng-repeat="group in groups" ng-click="userEditToggleGroup(group);" ng-class="{ 'btn-primary': (useredit.groupIds.indexOf(group.id) !== -1) }">{{ group.name }}</button>
+                                <span ng-repeat="group in groups">
+                                    <button class="btn btn-default" type="button" ng-click="userEditToggleGroup(group);" ng-class="{ 'btn-primary': (useredit.groupIds.indexOf(group.id) !== -1) }">{{ group.name }}</button>
+                                </span>
                             </div>
                         </div>
                         <div class="form-group" ng-class="{ 'has-error': (useredit_form.password.$dirty && useredit_form.password.$invalid) || (!useredit_form.password.$dirty && useredit.error.password)}">
