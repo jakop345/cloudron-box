@@ -35,6 +35,12 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         password: ''
     };
 
+    $scope.groupadd = {
+        busy: false,
+        error: {},
+        name: ''
+    };
+
     $scope.isMe = function (user) {
         return user.username === Client.getUserInfo().username;
     };
@@ -57,6 +63,16 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
 
             Client.notify('', 'Invitation was successfully sent to ' + user.email + '.', false, 'success');
         });
+    };
+
+    $scope.showGroupAdd = function () {
+        $scope.groupadd.error = {};
+        $scope.groupadd.name = '';
+
+        $scope.groupAddForm.$setUntouched();
+        $scope.groupAddForm.$setPristine();
+
+        $('#groupAddModal').modal('show');
     };
 
     $scope.showUserAdd = function () {
