@@ -110,7 +110,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
                 if (error) return console.error('Unable to remove group.', error.statusCode, error.message);
 
                 refresh();
-                $('groupRemoveModal').modal('hide');
+                $('#groupRemoveModal').modal('hide');
             });
         }
     };
