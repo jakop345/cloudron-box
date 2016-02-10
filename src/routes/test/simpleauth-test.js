@@ -53,6 +53,16 @@ describe('SimpleAuth API', function () {
         oauthProxy: true
     };
 
+    var APP_3 = {
+        id: 'app3',
+        appStoreId: '',
+        manifest: { version: '0.1.0', addons: { } },
+        location: 'test3',
+        portBindings: {},
+        accessRestriction: { groups: [ 'admin' ] },
+        oauthProxy: true
+    };
+
     var CLIENT_0 = {
         id: 'someclientid',
         appId: 'someappid',
@@ -98,6 +108,15 @@ describe('SimpleAuth API', function () {
         scope: 'user,profile'
     };
 
+    var CLIENT_5 = {
+        id: 'someclientid5',
+        appId: APP_3.id,
+        type: clientdb.TYPE_SIMPLE_AUTH,
+        clientSecret: 'someclientsecret5',
+        redirectURI: '',
+        scope: 'user,profile'
+    };
+
     before(function (done) {
         async.series([
             server.start.bind(server),
@@ -128,9 +147,11 @@ describe('SimpleAuth API', function () {
             clientdb.add.bind(null, CLIENT_2.id, CLIENT_2.appId, CLIENT_2.type, CLIENT_2.clientSecret, CLIENT_2.redirectURI, CLIENT_2.scope),
             clientdb.add.bind(null, CLIENT_3.id, CLIENT_3.appId, CLIENT_3.type, CLIENT_3.clientSecret, CLIENT_3.redirectURI, CLIENT_3.scope),
             clientdb.add.bind(null, CLIENT_4.id, CLIENT_4.appId, CLIENT_4.type, CLIENT_4.clientSecret, CLIENT_4.redirectURI, CLIENT_4.scope),
+            clientdb.add.bind(null, CLIENT_5.id, CLIENT_5.appId, CLIENT_5.type, CLIENT_5.clientSecret, CLIENT_5.redirectURI, CLIENT_5.scope),
             appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, APP_0.oauthProxy),
             appdb.add.bind(null, APP_1.id, APP_1.appStoreId, APP_1.manifest, APP_1.location, APP_1.portBindings, APP_1.accessRestriction, APP_1.oauthProxy),
-            appdb.add.bind(null, APP_2.id, APP_2.appStoreId, APP_2.manifest, APP_2.location, APP_2.portBindings, APP_2.accessRestriction, APP_2.oauthProxy)
+            appdb.add.bind(null, APP_2.id, APP_2.appStoreId, APP_2.manifest, APP_2.location, APP_2.portBindings, APP_2.accessRestriction, APP_2.oauthProxy),
+            appdb.add.bind(null, APP_3.id, APP_3.appStoreId, APP_3.manifest, APP_3.location, APP_3.portBindings, APP_3.accessRestriction, APP_3.oauthProxy)
         ], done);
     });
 
@@ -305,6 +326,37 @@ describe('SimpleAuth API', function () {
         it('succeeds for app without accessRestriction', function (done) {
             var body = {
                 clientId: CLIENT_3.id,
+                username: USERNAME,
+                password: PASSWORD
+            };
+
+            superagent.post(SIMPLE_AUTH_ORIGIN + '/api/v1/login')
+            .send(body)
+            .end(function (error, result) {
+                expect(error).to.be(null);
+                expect(result.statusCode).to.equal(200);
+                expect(result.body.accessToken).to.be.a('string');
+                expect(result.body.user).to.be.an('object');
+                expect(result.body.user.id).to.be.a('string');
+                expect(result.body.user.username).to.be.a('string');
+                expect(result.body.user.email).to.be.a('string');
+                expect(result.body.user.admin).to.be.a('boolean');
+
+                superagent.get(SERVER_URL + '/api/v1/profile')
+                .query({ access_token: result.body.accessToken })
+                .end(function (error, result) {
+                    expect(error).to.be(null);
+                    expect(result.body).to.be.an('object');
+                    expect(result.body.username).to.eql(USERNAME);
+
+                    done();
+                });
+            });
+        });
+
+        it('succeeds for app with group accessRestriction', function (done) {
+            var body = {
+                clientId: CLIENT_5.id,
                 username: USERNAME,
                 password: PASSWORD
             };
