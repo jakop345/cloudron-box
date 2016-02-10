@@ -122,6 +122,12 @@
                             </div>
                             <input type="email" class="form-control" ng-model="useredit.email" id="inputUserEditEmail" name="email" required>
                         </div>
+                        <div class="form-group">
+                            <label class="control-label" for="inputUserEditGroups">Groups</label>
+                            <div>
+                                <button class="btn btn-default" data-toggle="button" ng-repeat="group in groups" ng-click="userEditToggleGroup(group);">{{ group.name }}</button>
+                            </div>
+                        </div>
                         <div class="form-group" ng-class="{ 'has-error': (useredit_form.password.$dirty && useredit_form.password.$invalid) || (!useredit_form.password.$dirty && useredit.error.password)}">
                             <label class="control-label" for="inputusereditPassword">Give your password to verify that you are performing that action</label>
                             <div class="control-label" ng-show="(!useredit_form.password.$dirty && useredit.error.password) || (useredit_form.password.$dirty && useredit_form.password.$invalid)">
@@ -182,7 +188,6 @@
                                 <td class="text-right" style="vertical-align: bottom">
                                     <button ng-show="!isMe(user) && userInfo.admin" class="btn btn-xs btn-danger" ng-click="showUserRemove(user)" title="Remove User"><i class="fa fa-trash-o"></i></button>
                                     <button ng-show="!isMe(user) && userInfo.admin" class="btn btn-xs btn-default" ng-click="sendInvite(user)" title="Send Invite"><i class="fa fa-paper-plane-o"></i></button>
-                                    <button ng-show="userInfo.admin" class="btn btn-xs btn-default" ng-click="manageUserGroups(user)" title="Manage Groups"><i class="fa fa-group"></i></button>
                                     <button ng-show="userInfo.admin" class="btn btn-xs btn-default" ng-click="showUserEdit(user)" title="Edit User Profile"><i class="fa fa-pencil"></i></button>
                                 </td>
                             </tr>

@@ -5,6 +5,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
 
     $scope.ready = false;
     $scope.users = [];
+    $scope.groups = [];
     $scope.userInfo = Client.getUserInfo();
 
     $scope.userremove = {
@@ -134,6 +135,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         $scope.useredit.displayName = userInfo.displayName;
         $scope.useredit.email = userInfo.email;
         $scope.useredit.userInfo = userInfo;
+        $scope.useredit.groups = userInfo.groupIds;
 
         $scope.useredit_form.$setPristine();
         $scope.useredit_form.$setUntouched();
@@ -231,11 +233,17 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
     };
 
     function refresh() {
-        Client.listUsers(function (error, result) {
-            if (error) return console.error('Unable to get user listing.', error);
+        Client.getGroups(function (error, result) {
+            if (error) return console.error('Unable to get group listing.', error);
 
-            $scope.users = result.users;
-            $scope.ready = true;
+            $scope.groups = result;
+
+            Client.listUsers(function (error, result) {
+                if (error) return console.error('Unable to get user listing.', error);
+
+                $scope.users = result.users;
+                $scope.ready = true;
+            });
         });
     }
 
