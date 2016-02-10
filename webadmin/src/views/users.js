@@ -135,12 +135,21 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         $scope.useredit.displayName = userInfo.displayName;
         $scope.useredit.email = userInfo.email;
         $scope.useredit.userInfo = userInfo;
-        $scope.useredit.groups = userInfo.groupIds;
+        $scope.useredit.groupIds = angular.copy(userInfo.groupIds);
 
         $scope.useredit_form.$setPristine();
         $scope.useredit_form.$setUntouched();
 
         $('#userEditModal').modal('show');
+    };
+
+    $scope.userEditToggleGroup = function (group) {
+        var pos = $scope.useredit.groupIds.indexOf(group.id);
+        if (pos === -1) {
+            $scope.useredit.groupIds.push(group.id);
+        } else {
+            $scope.useredit.groupIds.splice(pos, 1);
+        }
     };
 
     $scope.doUserEdit = function () {
