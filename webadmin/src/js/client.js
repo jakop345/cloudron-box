@@ -399,6 +399,13 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
+    Client.prototype.setGroups = function (userId, groupIds, callback) {
+        $http.get(client.apiOrigin + '/api/v1/users/' + userId + '/set_groups').success(function (data, status) {
+            if (status !== 200 || typeof data !== 'object') return callback(new ClientError(status, data));
+            callback(null);
+        }).error(defaultErrorHandler(callback));
+    };
+
     Client.prototype.getNonApprovedApps = function (callback) {
         if (!this._config.developerMode) return callback(null, []);
 
