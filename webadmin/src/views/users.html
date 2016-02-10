@@ -167,12 +167,41 @@
                         </div>
                         <input type="text" class="form-control" ng-model="groupAdd.name" id="groupAddName" name="name" ng-maxlength="200" ng-minlength="2" required autofocus>
                     </div>
-                    <input class="ng-hide" type="submit" ng-disabled="groupAddForm.$invalid || groupAdd.busy"/>
+                    <input class="hide" type="submit" ng-disabled="groupAddForm.$invalid || groupAdd.busy"/>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-success" ng-click="groupAdd.submit()" ng-disabled="groupAddForm.$invalid || groupAdd.busy"><i class="fa fa-spinner fa-pulse" ng-show="groupAdd.busy"></i> Add Group</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal remove group -->
+<div class="modal fade" id="groupRemoveModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Delete group {{ groupRemove.name }}</h4>
+            </div>
+            <div class="modal-body">
+                <form name="groupRemoveForm" role="form" novalidate ng-submit="groupRemove.submit()" autocomplete="off">
+                    <input type="password" style="display: none;">
+                    <div class="form-group" ng-class="{ 'has-error': (groupRemoveForm.password.$dirty && groupRemoveForm.password.$invalid) || (!groupRemoveForm.password.$dirty && groupRemove.error.password)}">
+                        <label class="control-label" for="groupRemovePasswordInput">Give your password to verify that you are performing that action</label>
+                        <div class="control-label" ng-show="(!groupRemoveForm.password.$dirty && groupRemove.error.password) || (groupRemoveForm.password.$dirty && groupRemoveForm.password.$invalid)">
+                            <small ng-show="groupRemoveForm.password.$error.required && !groupRemove.error.password">A password is required</small>
+                            <small ng-show="!groupRemoveForm.password.$dirty && groupRemove.error.password">{{ groupRemove.error.password }}</small>
+                        </div>
+                        <input type="password" class="form-control" ng-model="groupRemove.password" id="groupRemovePasswordInput" name="password" placeholder="Password" required>
+                    </div>
+                    <input class="hide" type="submit" ng-disabled="groupRemoveForm.$invalid || groupRemove.busy"/>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" ng-click="groupRemove.submit()" ng-disabled="groupRemoveForm.$invalid || groupRemove.busy"><i class="fa fa-spinner fa-pulse" ng-show="groupRemove.busy"></i> Delete</button>
             </div>
         </div>
     </div>
@@ -258,8 +287,8 @@
                                     {{ group.name }}
                                 </td>
                                 <td class="text-right" style="vertical-align: bottom">
-                                    <button ng-show="userInfo.admin" class="btn btn-xs btn-danger" ng-click="showGroupRemove(user)" title="Remove Group"><i class="fa fa-trash-o"></i></button>
-                                    <button ng-show="userInfo.admin" class="btn btn-xs btn-default" ng-click="showGroupEdit(user)" title="Edit Group"><i class="fa fa-pencil"></i></button>
+                                    <button ng-show="userInfo.admin" class="btn btn-xs btn-danger" ng-click="groupRemove.show(group)" title="Remove Group"><i class="fa fa-trash-o"></i></button>
+                                    <button ng-show="userInfo.admin" class="btn btn-xs btn-default" ng-click="groupEdit.show(group)" title="Edit Group"><i class="fa fa-pencil"></i></button>
                                 </td>
                             </tr>
                         </tbody>

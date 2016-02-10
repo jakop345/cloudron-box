@@ -54,7 +54,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
 
         submit: function () {
             $scope.groupAdd.busy = true;
-            $scope.groupAdd.error.name = null;
+            $scope.groupAdd.error = {};
 
             Client.createGroup($scope.groupAdd.name, function (error) {
                 $scope.groupAdd.busy = false;
@@ -69,6 +69,41 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
 
                 refresh();
                 $('#groupAddModal').modal('hide');
+            });
+        }
+    };
+
+    $scope.groupRemove = {
+        busy: false,
+        error: {},
+        group: null,
+        password: '',
+
+        show: function (group) {
+            $scope.groupRemove.busy = false;
+
+            $scope.groupRemove.error = {};
+            $scope.groupRemove.password = '';
+
+            $scope.groupRemove.group = angular.copy(group);
+
+            $scope.groupRemoveForm.$setUntouched();
+            $scope.groupRemoveForm.$setPristine();
+
+            $('#groupRemoveModal').modal('show');
+        },
+
+        submit: function () {
+            $scope.groupRemove.busy = true;
+            $scope.groupRemove.error = {};
+
+            Client.removeGroup($scope.groupRemove.group.id, $scope.groupRemove.password, function (error) {
+                $scope.groupRemove.busy = false;
+
+                if (error) return console.error('Unable to remove group.', error.statusCode, error.message);
+
+                refresh();
+                $('groupRemoveModal').modal('hide');
             });
         }
     };
@@ -303,7 +338,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
     refresh();
 
     // setup all the dialog focus handling
-    ['userAddModal', 'userRemoveModal', 'userEditModal', 'groupAddModal'].forEach(function (id) {
+    ['userAddModal', 'userRemoveModal', 'userEditModal', 'groupAddModal', 'groupRemoveModal'].forEach(function (id) {
         $('#' + id).on('shown.bs.modal', function () {
             $(this).find("[autofocus]:first").focus();
         });
