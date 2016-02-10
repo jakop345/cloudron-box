@@ -10,7 +10,7 @@ var ejs = require('gulp-ejs'),
     serve = require('gulp-serve'),
     sass = require('gulp-sass'),
     sourcemaps = require('gulp-sourcemaps'),
-    minifyCSS = require('gulp-minify-css'),
+    cssnano = require('gulp-cssnano'),
     autoprefixer = require('gulp-autoprefixer'),
     argv = require('yargs').argv;
 
@@ -119,7 +119,7 @@ gulp.task('css', function () {
         .pipe(sourcemaps.init())
         .pipe(sass({ includePaths: ['node_modules/bootstrap-sass/assets/stylesheets/'] }).on('error', sass.logError))
         .pipe(autoprefixer())
-        .pipe(minifyCSS())
+        .pipe(cssnano())
         .pipe(sourcemaps.write())
         .pipe(gulp.dest('webadmin/dist'))
         .pipe(gulp.dest('setup/splash/website'));
