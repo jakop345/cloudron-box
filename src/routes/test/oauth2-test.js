@@ -799,7 +799,7 @@ describe('OAuth2', function () {
                         expect(error).to.not.be.ok();
                         expect(response.statusCode).to.eql(200);
                         expect(body.indexOf('<!-- error tester -->')).to.not.equal(-1);
-                        expect(body.indexOf('Unkonwn OAuth client.')).to.not.equal(-1);
+                        expect(body.indexOf('Unknown OAuth client.')).to.not.equal(-1);
 
                         done();
                     });
@@ -862,7 +862,7 @@ describe('OAuth2', function () {
                         expect(error).to.not.be.ok();
                         expect(response.statusCode).to.eql(200);
                         expect(body.indexOf('<!-- error tester -->')).to.not.equal(-1);
-                        expect(body.indexOf('Unkonwn OAuth client.')).to.not.equal(-1);
+                        expect(body.indexOf('Unknown OAuth client.')).to.not.equal(-1);
 
                         done();
                     });

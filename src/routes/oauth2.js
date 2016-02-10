@@ -375,7 +375,7 @@ var authorization = [
 
         if (type === clientdb.TYPE_ADMIN) return next();
         if (type === clientdb.TYPE_EXTERNAL) return next();
-        if (type === clientdb.TYPE_SIMPLE_AUTH) return sendError(req, res, 'Unkonwn OAuth client.');
+        if (type === clientdb.TYPE_SIMPLE_AUTH) return sendError(req, res, 'Unknown OAuth client.');
 
         appdb.get(req.oauth2.client.appId, function (error, appObject) {
             if (error) return sendErrorPageOrRedirect(req, res, 'Invalid request. Unknown app for this client_id.');
