@@ -406,6 +406,17 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
+    Client.prototype.createGroup = function (name, callback) {
+        var data = {
+            name: name
+        };
+
+        $http.post(client.apiOrigin + '/api/v1/groups', data).success(function(data, status) {
+            if (status !== 201 || typeof data !== 'object') return callback(new ClientError(status, data));
+            callback(null, data);
+        }).error(defaultErrorHandler(callback));
+    };
+
     Client.prototype.getNonApprovedApps = function (callback) {
         if (!this._config.developerMode) return callback(null, []);
 
