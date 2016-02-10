@@ -130,6 +130,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
     };
 
     $scope.showUserEdit = function (userInfo) {
+        $scope.useredit.error.password = null;
         $scope.useredit.error.displayName = null;
         $scope.useredit.error.email = null;
         $scope.useredit.displayName = userInfo.displayName;
