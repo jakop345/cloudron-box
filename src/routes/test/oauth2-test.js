@@ -188,7 +188,8 @@ describe('OAuth2', function () {
             location: 'test3',
             portBindings: {},
             accessRestriction: { groups: [ 'someothergroup', 'admin', 'anothergroup' ] },
-            oauthProxy: true
+            oauthProxy: true,
+            memoryLimit: 0
         };
 
         // unknown app
@@ -314,7 +315,7 @@ describe('OAuth2', function () {
                 appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, APP_0.oauthProxy, APP_0.memoryLimit),
                 appdb.add.bind(null, APP_1.id, APP_1.appStoreId, APP_1.manifest, APP_1.location, APP_1.portBindings, APP_1.accessRestriction, APP_1.oauthProxy, APP_1.memoryLimit),
                 appdb.add.bind(null, APP_2.id, APP_2.appStoreId, APP_2.manifest, APP_2.location, APP_2.portBindings, APP_2.accessRestriction, APP_2.oauthProxy, APP_2.memoryLimit),
-                appdb.add.bind(null, APP_3.id, APP_3.appStoreId, APP_3.manifest, APP_3.location, APP_3.portBindings, APP_3.accessRestriction, APP_3.oauthProxy),
+                appdb.add.bind(null, APP_3.id, APP_3.appStoreId, APP_3.manifest, APP_3.location, APP_3.portBindings, APP_3.accessRestriction, APP_3.oauthProxy, APP_3.memoryLimit),
                 function (callback) {
                     user.create(USER_0.username, USER_0.password, USER_0.email, USER_0.displayName, function (error, userObject) {
                         expect(error).to.not.be.ok();
