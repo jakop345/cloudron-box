@@ -14,8 +14,8 @@ var async = require('async'),
     hat = require('hat'),
     userdb = require('../userdb.js');
 
-var GROUP_NAME = 'administrators',
-    GROUP_ID = GROUP_NAME;
+var GROUP0_NAME = 'administrators',
+    GROUP0_ID = GROUP0_NAME;
 
 function setup(done) {
     // ensure data/config/mount paths
@@ -56,14 +56,14 @@ describe('Groups', function () {
     });
 
     it('can create valid group', function (done) {
-        groups.create(GROUP_NAME, function (error) {
+        groups.create(GROUP0_NAME, function (error) {
             expect(error).to.be(null);
             done();
         });
     });
 
     it('cannot add existing group', function (done) {
-        groups.create(GROUP_NAME, function (error) {
+        groups.create(GROUP0_NAME, function (error) {
             expect(error.reason).to.be(GroupError.ALREADY_EXISTS);
             done();
         });
@@ -77,9 +77,9 @@ describe('Groups', function () {
     });
 
     it('can get valid group', function (done) {
-        groups.get(GROUP_ID, function (error, group) {
+        groups.get(GROUP0_ID, function (error, group) {
             expect(error).to.be(null);
-            expect(group.name).to.equal(GROUP_NAME);
+            expect(group.name).to.equal(GROUP0_NAME);
             done();
         });
     });
@@ -92,7 +92,7 @@ describe('Groups', function () {
     });
 
     it('can delete valid group', function (done) {
-        groups.remove(GROUP_ID, function (error) {
+        groups.remove(GROUP0_ID, function (error) {
             expect(error).to.be(null);
             done();
         });
@@ -116,14 +116,14 @@ describe('Group membership', function () {
     before(function (done) {
         async.series([
             setup,
-            groups.create.bind(null, GROUP_NAME),
+            groups.create.bind(null, GROUP0_NAME),
             userdb.add.bind(null, USER_0.id, USER_0)
         ], done);
     });
     after(cleanup);
 
     it('cannot add non-existent user', function (done) {
-        groups.addMember(GROUP_ID, 'randomuser', function (error) {
+        groups.addMember(GROUP0_ID, 'randomuser', function (error) {
             expect(error.reason).to.be(GroupError.NOT_FOUND);
             done();
         });
@@ -137,7 +137,7 @@ describe('Group membership', function () {
     });
 
     it('isMember returns false', function (done) {
-        groups.isMember(GROUP_ID, USER_0.id, function (error, member) {
+        groups.isMember(GROUP0_ID, USER_0.id, function (error, member) {
             expect(error).to.be(null);
             expect(member).to.be(false);
             done();
@@ -145,14 +145,14 @@ describe('Group membership', function () {
     });
 
     it('can add member', function (done) {
-        groups.addMember(GROUP_ID, USER_0.id, function (error) {
+        groups.addMember(GROUP0_ID, USER_0.id, function (error) {
             expect(error).to.be(null);
             done();
         });
     });
 
     it('isMember returns true', function (done) {
-        groups.isMember(GROUP_ID, USER_0.id, function (error, member) {
+        groups.isMember(GROUP0_ID, USER_0.id, function (error, member) {
             expect(error).to.be(null);
             expect(member).to.be(true);
             done();
@@ -160,7 +160,7 @@ describe('Group membership', function () {
     });
 
     it('can get members', function (done) {
-        groups.getMembers(GROUP_ID, function (error, result) {
+        groups.getMembers(GROUP0_ID, function (error, result) {
             expect(error).to.be(null);
             expect(result.length).to.be(1);
             expect(result[0]).to.be(USER_0.id);
@@ -176,7 +176,7 @@ describe('Group membership', function () {
     });
 
     it('cannot remove non-existent user', function (done) {
-        groups.removeMember(GROUP_ID, 'randomuser', function (error) {
+        groups.removeMember(GROUP0_ID, 'randomuser', function (error) {
             expect(error.reason).to.be(GroupError.NOT_FOUND);
             done();
         });
@@ -190,21 +190,21 @@ describe('Group membership', function () {
     });
 
     it('cannot remove group with member', function (done) {
-        groups.remove(GROUP_ID, function (error) {
+        groups.remove(GROUP0_ID, function (error) {
             expect(error.reason).to.be(GroupError.NOT_EMPTY);
             done();
         });
     });
 
     it('can remove member', function (done) {
-        groups.removeMember(GROUP_ID, USER_0.id, function (error) {
+        groups.removeMember(GROUP0_ID, USER_0.id, function (error) {
             expect(error).to.be(null);
             done();
         });
     });
 
     it('has no members', function (done) {
-        groups.getMembers(GROUP_ID, function (error, result) {
+        groups.getMembers(GROUP0_ID, function (error, result) {
             expect(error).to.be(null);
             expect(result.length).to.be(0);
             done();
@@ -212,7 +212,7 @@ describe('Group membership', function () {
     });
 
     it('can remove group with no members', function (done) {
-        groups.remove(GROUP_ID, function (error) {
+        groups.remove(GROUP0_ID, function (error) {
             expect(error).to.be(null);
             done();
         });
