@@ -38,7 +38,43 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
     $scope.groupadd = {
         busy: false,
         error: {},
-        name: ''
+        name: '',
+
+        reset: function () {
+            $scope.groupadd.busy = false;
+
+            $scope.groupadd.error = {};
+            $scope.groupadd.name = '';
+
+            $scope.groupAddForm.$setUntouched();
+            $scope.groupAddForm.$setPristine();
+        },
+
+        show: function () {
+            $scope.groupadd.reset();
+            $('#groupAddModal').modal('show');
+        },
+
+        submit: function () {
+            $scope.groupadd.busy = true;
+            $scope.groupadd.error.name = null;
+
+            Client.createGroup($scope.groupadd.name, function (error) {
+                if (error && error.statusCode === 409) {
+                    $scope.groupadd.error.name = 'Name already taken';
+                    $scope.groupAddForm.name.$setPristine();
+                    $('#groupAddName').focus();
+                    return;
+                }
+                if (error) return console.error('Unable to create group.', error.statusCode, error.message);
+
+                $('#groupAddModal').modal('hide');
+
+                refresh();
+
+                $scope.groupadd.reset();
+            });
+        }
     };
 
     $scope.isMe = function (user) {
@@ -63,16 +99,6 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
 
             Client.notify('', 'Invitation was successfully sent to ' + user.email + '.', false, 'success');
         });
-    };
-
-    $scope.showGroupAdd = function () {
-        $scope.groupadd.error = {};
-        $scope.groupadd.name = '';
-
-        $scope.groupAddForm.$setUntouched();
-        $scope.groupAddForm.$setPristine();
-
-        $('#groupAddModal').modal('show');
     };
 
     $scope.showUserAdd = function () {
