@@ -247,9 +247,9 @@
                                     <span ng-repeat="groupId in user.groupIds" class="label label-default">{{ groupId }}</span>
                                 </td>
                                 <td class="text-right" style="vertical-align: bottom">
-                                    <button ng-show="!isMe(user) && userInfo.admin" class="btn btn-xs btn-default" ng-click="sendInvite(user)" title="Send Invite"><i class="fa fa-paper-plane-o"></i></button>
-                                    <button ng-show="userInfo.admin" class="btn btn-xs btn-default" ng-click="showUserEdit(user)" title="Edit User Profile"><i class="fa fa-pencil"></i></button>
-                                    <button ng-show="!isMe(user) && userInfo.admin" class="btn btn-xs btn-danger" ng-click="showUserRemove(user)" title="Remove User"><i class="fa fa-trash-o"></i></button>
+                                    <button ng-show="!isMe(user)" class="btn btn-xs btn-default" ng-click="sendInvite(user)" title="Send Invite"><i class="fa fa-paper-plane-o"></i></button>
+                                    <button class="btn btn-xs btn-default" ng-click="showUserEdit(user)" title="Edit User Profile"><i class="fa fa-pencil"></i></button>
+                                    <button ng-show="!isMe(user)" class="btn btn-xs btn-danger" ng-click="showUserRemove(user)" title="Remove User"><i class="fa fa-trash-o"></i></button>
                                 </td>
                             </tr>
                         </tbody>
@@ -289,7 +289,7 @@
                                     {{ group.name }}
                                 </td>
                                 <td class="text-right" style="vertical-align: bottom">
-                                    <button ng-show="userInfo.admin" class="btn btn-xs btn-danger" ng-click="groupRemove.show(group)" title="Remove Group"><i class="fa fa-trash-o"></i></button>
+                                    <button class="btn btn-xs btn-danger" ng-click="groupRemove.show(group)" title="Remove Group"><i class="fa fa-trash-o"></i></button>
                                 </td>
                             </tr>
                         </tbody>
