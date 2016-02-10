@@ -221,5 +221,22 @@ describe('Apps', function () {
                 done();
             });
         });
+
+        it('returns false for no group or user', function (done) {
+            apps.hasAccessTo({ accessRestriction: { users: [ ], groups: [ ] } }, { id: 'someuser' }, function (error, access) {
+                expect(error).to.be(null);
+                expect(access).to.be(false);
+                done();
+            });
+        });
+
+        it('returns false for invalid group or user', function (done) {
+            apps.hasAccessTo({ accessRestriction: { users: [ ], groups: [ 'nop' ] } }, { id: 'someuser' }, function (error, access) {
+                expect(error).to.be(null);
+                expect(access).to.be(false);
+                done();
+            });
+        });
+
     });
 });
