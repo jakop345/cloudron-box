@@ -26,7 +26,5 @@ exports.up = function(db, callback) {
 };
 
 exports.down = function(db, callback) {
-	async.series([
-		db.runSql.bind(db, 'DROP TABLE groupMembers')
-	], callback);
+    callback();
 };
