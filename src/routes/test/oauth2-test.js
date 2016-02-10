@@ -184,7 +184,7 @@ describe('OAuth2', function () {
             manifest: { version: '0.1.0', addons: { } },
             location: 'test3',
             portBindings: {},
-            accessRestriction: { groups: [ 'admin' ] },
+            accessRestriction: { groups: [ 'someothergroup', 'admin', 'anothergroup' ] },
             oauthProxy: true
         };
 
