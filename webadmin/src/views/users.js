@@ -35,16 +35,16 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         password: ''
     };
 
-    $scope.groupadd = {
+    $scope.groupAdd = {
         busy: false,
         error: {},
         name: '',
 
         show: function () {
-            $scope.groupadd.busy = false;
+            $scope.groupAdd.busy = false;
 
-            $scope.groupadd.error = {};
-            $scope.groupadd.name = '';
+            $scope.groupAdd.error = {};
+            $scope.groupAdd.name = '';
 
             $scope.groupAddForm.$setUntouched();
             $scope.groupAddForm.$setPristine();
@@ -53,14 +53,14 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         },
 
         submit: function () {
-            $scope.groupadd.busy = true;
-            $scope.groupadd.error.name = null;
+            $scope.groupAdd.busy = true;
+            $scope.groupAdd.error.name = null;
 
-            Client.createGroup($scope.groupadd.name, function (error) {
-                $scope.groupadd.busy = false;
+            Client.createGroup($scope.groupAdd.name, function (error) {
+                $scope.groupAdd.busy = false;
 
                 if (error && error.statusCode === 409) {
-                    $scope.groupadd.error.name = 'Name already taken';
+                    $scope.groupAdd.error.name = 'Name already taken';
                     $scope.groupAddForm.name.$setPristine();
                     $('#groupAddName').focus();
                     return;

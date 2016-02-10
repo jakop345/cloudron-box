@@ -156,23 +156,23 @@
                 <h4 class="modal-title">Add Group</h4>
             </div>
             <div class="modal-body">
-                <form name="groupAddForm" role="form" novalidate ng-submit="groupadd.submit()" autocomplete="off">
-                    <div class="form-group" ng-class="{ 'has-error': (groupAddForm.name.$dirty && groupAddForm.name.$invalid) || (!groupAddForm.name.$dirty && groupadd.error.name) }">
+                <form name="groupAddForm" role="form" novalidate ng-submit="groupAdd.submit()" autocomplete="off">
+                    <div class="form-group" ng-class="{ 'has-error': (groupAddForm.name.$dirty && groupAddForm.name.$invalid) || (!groupAddForm.name.$dirty && groupAdd.error.name) }">
                         <label class="control-label" for="groupAddName">Name</label>
-                        <div class="control-label" ng-show="(!groupAddForm.name.$dirty && groupadd.error.name) || (groupAddForm.name.$dirty && groupAddForm.name.$invalid) || (!groupAddForm.name.$dirty && groupadd.error.name)">
+                        <div class="control-label" ng-show="(!groupAddForm.name.$dirty && groupAdd.error.name) || (groupAddForm.name.$dirty && groupAddForm.name.$invalid) || (!groupAddForm.name.$dirty && groupAdd.error.name)">
                             <small ng-show="groupAddForm.name.$error.required">A name is required</small>
                             <small ng-show="groupAddForm.name.$error.minlength">The name is too short</small>
                             <small ng-show="groupAddForm.name.$error.maxlength">The name is too long</small>
-                            <small ng-show="!groupAddForm.name.$dirty && groupadd.error.name">{{ groupadd.error.name }}</small>
+                            <small ng-show="!groupAddForm.name.$dirty && groupAdd.error.name">{{ groupAdd.error.name }}</small>
                         </div>
-                        <input type="text" class="form-control" ng-model="groupadd.name" id="groupAddName" name="name" ng-maxlength="200" ng-minlength="2" required autofocus>
+                        <input type="text" class="form-control" ng-model="groupAdd.name" id="groupAddName" name="name" ng-maxlength="200" ng-minlength="2" required autofocus>
                     </div>
-                    <input class="ng-hide" type="submit" ng-disabled="groupAddForm.$invalid || groupadd.busy"/>
+                    <input class="ng-hide" type="submit" ng-disabled="groupAddForm.$invalid || groupAdd.busy"/>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success" ng-click="groupadd.submit()" ng-disabled="groupAddForm.$invalid || groupadd.busy"><i class="fa fa-spinner fa-pulse" ng-show="groupadd.busy"></i> Add Group</button>
+                <button type="button" class="btn btn-success" ng-click="groupAdd.submit()" ng-disabled="groupAddForm.$invalid || groupAdd.busy"><i class="fa fa-spinner fa-pulse" ng-show="groupAdd.busy"></i> Add Group</button>
             </div>
         </div>
     </div>
@@ -232,7 +232,7 @@
 
     <div>
         <div class="text-left">
-            <h1>Groups <button class="btn btn-primary btn-outline pull-right" ng-click="groupadd.show()"><i class="fa fa-plus"></i> New Group</button></h1>
+            <h1>Groups <button class="btn btn-primary btn-outline pull-right" ng-click="groupAdd.show()"><i class="fa fa-plus"></i> New Group</button></h1>
         </div>
     </div>
 
