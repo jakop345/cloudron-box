@@ -7,7 +7,7 @@ readonly DATA_DIR=/home/yellowtent/data
 
 readonly script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly json="${script_dir}/../../node_modules/.bin/json"
-readonly curl="curl --fail --connect-timeout 20 --retry 10 --retry-delay 2 --max-time 180"
+readonly curl="curl --fail --connect-timeout 20 --retry 10 --retry-delay 2 --max-time 300"
 
 readonly is_update=$([[ -d "${BOX_SRC_DIR}" ]] && echo "yes" || echo "no")
 
