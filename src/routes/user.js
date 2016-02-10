@@ -36,11 +36,18 @@ function profile(req, res, next) {
     if (req.user.tokenType === tokendb.TYPE_USER || req.user.tokenType === tokendb.TYPE_DEV) {
         result.username = req.user.username;
         result.email = req.user.email;
-        result.admin = req.user.admin;
         result.displayName = req.user.displayName;
-    }
 
-    next(new HttpSuccess(200, result));
+        groups.isMember(groups.ADMIN_GROUP_ID, req.user.id, function (error, isAdmin) {
+            if (error) return next(new HttpError(500, error));
+
+            result.admin = isAdmin;
+
+            next(new HttpSuccess(200, result));
+        });
+    } else {
+        next(new HttpSuccess(200, result));
+    }
 }
 
 function createUser(req, res, next) {
