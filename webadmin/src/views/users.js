@@ -100,6 +100,13 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
             Client.removeGroup($scope.groupRemove.group.id, $scope.groupRemove.password, function (error) {
                 $scope.groupRemove.busy = false;
 
+                if (error && error.statusCode === 403) {
+                    $scope.groupRemove.error.password = 'Wrong password';
+                    $scope.groupRemove.password = '';
+                    $scope.groupRemoveForm.password.$setPristine();
+                    $('#groupRemovePasswordInput').focus();
+                    return;
+                }
                 if (error) return console.error('Unable to remove group.', error.statusCode, error.message);
 
                 refresh();

@@ -417,6 +417,17 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         }).error(defaultErrorHandler(callback));
     };
 
+    Client.prototype.removeGroup = function (groupId, password, callback) {
+        var data = {
+            password: password
+        };
+
+        $http({ method: 'DELETE', url: client.apiOrigin + '/api/v1/groups/' + groupId, data: data, headers: { 'Content-Type': 'application/json' }}).success(function(data, status) {
+            if (status !== 204) return callback(new ClientError(status, data));
+            callback(null, data);
+        }).error(defaultErrorHandler(callback));
+    };
+
     Client.prototype.getNonApprovedApps = function (callback) {
         if (!this._config.developerMode) return callback(null, []);
 

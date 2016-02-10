@@ -194,7 +194,7 @@
                             <small ng-show="groupRemoveForm.password.$error.required && !groupRemove.error.password">A password is required</small>
                             <small ng-show="!groupRemoveForm.password.$dirty && groupRemove.error.password">{{ groupRemove.error.password }}</small>
                         </div>
-                        <input type="password" class="form-control" ng-model="groupRemove.password" id="groupRemovePasswordInput" name="password" placeholder="Password" required>
+                        <input type="password" class="form-control" ng-model="groupRemove.password" id="groupRemovePasswordInput" name="password" placeholder="Password" required autofocus>
                     </div>
                     <input class="hide" type="submit" ng-disabled="groupRemoveForm.$invalid || groupRemove.busy"/>
                 </form>
