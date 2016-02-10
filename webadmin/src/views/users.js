@@ -176,17 +176,22 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
             }
             if (error) return console.error('Unable to update user:', error);
 
-            $scope.useredit.userInfo = {};
-            $scope.useredit.email = '';
-            $scope.useredit.displayName = '';
-            $scope.useredit.password = '';
+            Client.setGroups(data.id, $scope.useredit.groupIds, function (error) {
+                if (error) return console.error('Unable to update groups for user:', error);
 
-            $scope.useredit_form.$setPristine();
-            $scope.useredit_form.$setUntouched();
+                $scope.useredit.userInfo = {};
+                $scope.useredit.email = '';
+                $scope.useredit.displayName = '';
+                $scope.useredit.password = '';
+                $scope.useredit.groupIds = [];
 
-            refresh();
+                $scope.useredit_form.$setPristine();
+                $scope.useredit_form.$setUntouched();
 
-            $('#userEditModal').modal('hide');
+                refresh();
+
+                $('#userEditModal').modal('hide');
+            });
         });
     };
 
