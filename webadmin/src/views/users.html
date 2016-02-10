@@ -233,7 +233,7 @@
                             <tr>
                                 <th style="">User</th>
                                 <th style="width: 1px" class="text-right">Groups</th>
-                                <th style="width: 300px" class="text-right">Actions</th>
+                                <th style="width: 150px" class="text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -244,7 +244,7 @@
                                     <span ng-show="isMe(user)" class="label label-success">This is you!</span>
                                 </td>
                                 <td class="text-right" style="vertical-align: bottom">
-                                    <span ng-show="isAdmin(user)" class="label label-default">Admin</span>
+                                    <span ng-repeat="groupId in user.groupIds" class="label label-default">{{ groupId }}</span>
                                 </td>
                                 <td class="text-right" style="vertical-align: bottom">
                                     <button ng-show="!isMe(user) && userInfo.admin" class="btn btn-xs btn-default" ng-click="sendInvite(user)" title="Send Invite"><i class="fa fa-paper-plane-o"></i></button>
