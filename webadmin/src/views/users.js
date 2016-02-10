@@ -40,7 +40,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         error: {},
         name: '',
 
-        reset: function () {
+        show: function () {
             $scope.groupadd.busy = false;
 
             $scope.groupadd.error = {};
@@ -48,10 +48,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
 
             $scope.groupAddForm.$setUntouched();
             $scope.groupAddForm.$setPristine();
-        },
 
-        show: function () {
-            $scope.groupadd.reset();
             $('#groupAddModal').modal('show');
         },
 
@@ -60,6 +57,8 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
             $scope.groupadd.error.name = null;
 
             Client.createGroup($scope.groupadd.name, function (error) {
+                $scope.groupadd.busy = false;
+
                 if (error && error.statusCode === 409) {
                     $scope.groupadd.error.name = 'Name already taken';
                     $scope.groupAddForm.name.$setPristine();
@@ -68,11 +67,8 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
                 }
                 if (error) return console.error('Unable to create group.', error.statusCode, error.message);
 
-                $('#groupAddModal').modal('hide');
-
                 refresh();
-
-                $scope.groupadd.reset();
+                $('#groupAddModal').modal('hide');
             });
         }
     };
