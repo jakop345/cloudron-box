@@ -246,18 +246,22 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         };
 
         Client.updateUser(data, $scope.useredit.password, function (error) {
-            $scope.useredit.busy = false;
-
             if (error && error.statusCode === 403) {
+                $scope.useredit.busy = false;
                 $scope.useredit.error.password = 'Wrong password';
                 $scope.useredit.password = '';
                 $scope.useredit_form.password.$setPristine();
                 $('#inputUserEditPassword').focus();
                 return;
             }
-            if (error) return console.error('Unable to update user:', error);
+            if (error) {
+                $scope.useredit.busy = false;
+                return console.error('Unable to update user:', error);
+            }
 
             Client.setGroups(data.id, $scope.useredit.groupIds, function (error) {
+                $scope.useredit.busy = false;
+
                 if (error) return console.error('Unable to update groups for user:', error);
 
                 $scope.useredit.userInfo = {};
