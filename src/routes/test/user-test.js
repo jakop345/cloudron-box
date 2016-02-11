@@ -10,6 +10,7 @@ var config = require('../../config.js'),
     database = require('../../database.js'),
     tokendb = require('../../tokendb.js'),
     expect = require('expect.js'),
+    groups = require('../../groups.js'),
     mailer = require('../../mailer.js'),
     superagent = require('superagent'),
     nock = require('nock'),
@@ -271,6 +272,24 @@ describe('User API', function () {
         });
     });
 
+    it('set second user as admin succeeds', function (done) {
+        superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME_1 + '/set_groups')
+               .query({ access_token: token })
+               .send({ groupIds: [ groups.ADMIN_GROUP_ID ] })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(204);
+
+            superagent.get(SERVER_URL + '/api/v1/users/' + USERNAME_1)
+               .query({ access_token: token })
+               .end(function (err, res) {
+                expect(res.statusCode).to.equal(200);
+                expect(res.body.admin).to.equal(true);
+
+                done();
+            });
+        });
+    });
+
     it('remove itself from admins fails', function (done) {
         superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/set_groups')
                .query({ access_token: token })
@@ -278,6 +297,24 @@ describe('User API', function () {
                .end(function (err, res) {
             expect(res.statusCode).to.equal(403);
             done();
+        });
+    });
+
+    it('remove second user as admin succeeds', function (done) {
+        superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME_1 + '/set_groups')
+               .query({ access_token: token })
+               .send({ groupIds: [] })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(204);
+
+            superagent.get(SERVER_URL + '/api/v1/users/' + USERNAME_1)
+               .query({ access_token: token })
+               .end(function (err, res) {
+                expect(res.statusCode).to.equal(200);
+                expect(res.body.admin).to.equal(false);
+
+                done();
+            });
         });
     });
 
