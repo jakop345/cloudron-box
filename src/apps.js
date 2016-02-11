@@ -212,6 +212,23 @@ function validateAccessRestriction(accessRestriction) {
     return null;
 }
 
+function validateMemoryLimit(manifest, memoryLimit) {
+    assert.strictEqual(typeof manifest, 'object');
+    assert.strictEqual(typeof memoryLimit, 'number');
+
+    var min = manifest.memoryLimit || (256 * 1024 * 1024);
+    var max = (4096 * 1024 * 1024);
+
+    // allow 0, which indicates that it is not set, the one from the manifest will be choosen but we don't commit any user value
+    // this is needed so an app update can change the value in the manifest, and if not set by the user, the new value should be used
+    if (memoryLimit === 0) return null;
+
+    if (memoryLimit < min) return new Error('memoryLimit too small');
+    if (memoryLimit > max) return new Error('memoryLimit too large');
+
+    return null;
+}
+
 function getDuplicateErrorDetails(location, portBindings, error) {
     assert.strictEqual(typeof location, 'string');
     assert.strictEqual(typeof portBindings, 'object');
@@ -357,7 +374,8 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
     error = validateAccessRestriction(accessRestriction);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
-    // TODO to what extent do we need to validate the memoryLimit?
+    error = validateMemoryLimit(manifest, memoryLimit);
+    if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
     // singleUser mode requires accessRestriction to contain exactly one user
     if (manifest.singleUser && accessRestriction === null) return callback(new AppsError(AppsError.USER_REQUIRED));
@@ -421,6 +439,9 @@ function configure(appId, location, portBindings, accessRestriction, oauthProxy,
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
         error = validatePortBindings(portBindings, app.manifest.tcpPorts);
+        if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
+
+        error = validateMemoryLimit(app.manifest, memoryLimit);
         if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
         // save cert to data/box/certs
