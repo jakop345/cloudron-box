@@ -294,7 +294,8 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             accessRestriction: config.accessRestriction,
             oauthProxy: config.oauthProxy,
             cert: config.cert,
-            key: config.key
+            key: config.key,
+            memoryLimit: config.memoryLimit
         };
 
         $http.post(client.apiOrigin + '/api/v1/apps/' + id + '/configure', data).success(function (data, status) {

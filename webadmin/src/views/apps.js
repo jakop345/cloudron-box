@@ -9,7 +9,13 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
     $scope.user = Client.getUserInfo();
     $scope.groups = [];
 
-    $scope.memoryTicks = [256, 512, 1024, 2048, 4096];
+    $scope.memoryTicks = [
+        256 * 1024 * 1024,
+        512 * 1024 * 1024,
+        1024 * 1024 * 1024,
+        2048 * 1024 * 1024,
+        4096 * 1024 * 1024
+    ];
 
     $scope.appConfigure = {
         busy: false,
@@ -25,7 +31,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         certificateFileName: '',
         keyFile: null,
         keyFileName: '',
-        memoryLimit: 256,
+        memoryLimit: $scope.memoryTicks[0],
         accessRestrictionOption: '',
         accessRestriction: { users: [], groups: [] }
     };
@@ -70,7 +76,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appConfigure.certificateFileName = '';
         $scope.appConfigure.keyFile = null;
         $scope.appConfigure.keyFileName = '';
-        $scope.appConfigure.memoryLimit = 256;
+        $scope.appConfigure.memoryLimit = $scope.memoryTicks[0];
         $scope.appConfigure.accessRestrictionOption = '';
         $scope.appConfigure.accessRestriction = { users: [], groups: [] };
 
@@ -187,6 +193,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
             accessRestriction: !$scope.appConfigure.accessRestrictionOption ? null : $scope.appConfigure.accessRestriction,
             cert: $scope.appConfigure.certificateFile,
             key: $scope.appConfigure.keyFile,
+            memoryLimit: $scope.appConfigure.memoryLimit
         };
 
         Client.configureApp($scope.appConfigure.app.id, $scope.appConfigure.password, data, function (error) {
