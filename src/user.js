@@ -293,20 +293,11 @@ function setGroups(userId, groupIds, callback) {
     assert(Array.isArray(groupIds));
     assert.strictEqual(typeof callback, 'function');
 
-    userdb.getAllAdmins(function (error, result) {
+    groups.setGroups(userId, groupIds, function (error) {
+        if (error && error.reason === GroupError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND, 'One or more groups not found'));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
-        // protect from a system where there is no admin left
-        if (result.length <= 1 && result[0].id === userId && groupIds.indexOf(groups.ADMIN_GROUP_ID) === -1) {
-            return callback(new UserError(UserError.NOT_ALLOWED, 'Only admin'));
-        }
-
-        groups.setGroups(userId, groupIds, function (error) {
-            if (error && error.reason === GroupError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND, 'One or more groups not found'));
-            if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
-
-            callback();
-        });
+        callback();
     });
 }
 
