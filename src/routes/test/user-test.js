@@ -271,57 +271,6 @@ describe('User API', function () {
         });
     });
 
-    it('set second user as admin succeeds', function (done) {
-        // TODO is USERNAME_1 in body and url redundant?
-        superagent.post(SERVER_URL + '/api/v1/users/' + USERNAME_1 + '/admin')
-               .query({ access_token: token })
-               .send({ username: USERNAME_1, admin: true })
-               .end(function (err, res) {
-            expect(res.statusCode).to.equal(204);
-            done();
-        });
-    });
-
-    it('remove first user from admins succeeds', function (done) {
-        superagent.post(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/admin')
-               .query({ access_token: token_1 })
-               .send({ username: USERNAME_0, admin: false })
-               .end(function (err, res) {
-            expect(res.statusCode).to.equal(204);
-            done();
-        });
-    });
-
-    it('remove second user by first, now normal, user fails', function (done) {
-        superagent.del(SERVER_URL + '/api/v1/users/' + USERNAME_1)
-               .query({ access_token: token })
-               .send({ password: PASSWORD })
-               .end(function (err, res) {
-            expect(res.statusCode).to.equal(403);
-            done();
-        });
-    });
-
-    it('remove second user from admins and thus last admin fails', function (done) {
-        superagent.post(SERVER_URL + '/api/v1/users/' + USERNAME_1 + '/admin')
-               .query({ access_token: token_1 })
-               .send({ username: USERNAME_1, admin: false })
-               .end(function (err, res) {
-            expect(res.statusCode).to.equal(403);
-            done();
-        });
-    });
-
-    it('reset first user as admin succeeds', function (done) {
-        superagent.post(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/admin')
-               .query({ access_token: token_1 })
-               .send({ username: USERNAME_0, admin: true })
-               .end(function (err, res) {
-            expect(res.statusCode).to.equal(204);
-            done();
-        });
-    });
-
     it('create user missing username fails', function (done) {
         superagent.post(SERVER_URL + '/api/v1/users')
                .query({ access_token: token })
