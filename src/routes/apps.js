@@ -49,7 +49,8 @@ function removeInternalAppFields(app) {
         manifest: app.manifest,
         portBindings: app.portBindings,
         iconUrl: app.iconUrl,
-        fqdn: app.fqdn
+        fqdn: app.fqdn,
+        memoryLimit: app.memoryLimit
     };
 }
 
@@ -122,13 +123,14 @@ function installApp(req, res, next) {
     if (data.key && typeof data.key !== 'string') return next(new HttpError(400, 'key must be a string'));
     if (data.cert && !data.key) return next(new HttpError(400, 'key must be provided'));
     if (!data.cert && data.key) return next(new HttpError(400, 'cert must be provided'));
+    if ('memoryLimit' in data && typeof data.memoryLimit !== 'number') return next(new HttpError(400, 'memoryLimit is not a number'));
 
     // allow tests to provide an appId for testing
     var appId = (process.env.BOX_ENV === 'test' && typeof data.appId === 'string') ? data.appId : uuid.v4();
 
-    debug('Installing app id:%s storeid:%s loc:%s port:%j accessRestriction:%j oauthproxy:%s manifest:%j', appId, data.appStoreId, data.location, data.portBindings, data.accessRestriction, data.oauthProxy, data.manifest);
+    debug('Installing app id:%s storeid:%s loc:%s port:%j accessRestriction:%j oauthproxy:%s memoryLimit:%s manifest:%j', appId, data.appStoreId, data.location, data.portBindings, data.accessRestriction, data.oauthProxy, data.memoryLimit, data.manifest);
 
-    apps.install(appId, data.appStoreId, data.manifest, data.location, data.portBindings || null, data.accessRestriction, data.oauthProxy, data.icon || null, data.cert || null, data.key || null, function (error) {
+    apps.install(appId, data.appStoreId, data.manifest, data.location, data.portBindings || null, data.accessRestriction, data.oauthProxy, data.icon || null, data.cert || null, data.key || null, data.memoryLimit || 0, function (error) {
         if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, error.message));
         if (error && error.reason === AppsError.PORT_RESERVED) return next(new HttpError(409, 'Port ' + error.message + ' is reserved.'));
         if (error && error.reason === AppsError.PORT_CONFLICT) return next(new HttpError(409, 'Port ' + error.message + ' is already in use.'));
@@ -165,10 +167,11 @@ function configureApp(req, res, next) {
     if (data.key && typeof data.key !== 'string') return next(new HttpError(400, 'key must be a string'));
     if (data.cert && !data.key) return next(new HttpError(400, 'key must be provided'));
     if (!data.cert && data.key) return next(new HttpError(400, 'cert must be provided'));
+    if ('memoryLimit' in data && typeof data.memoryLimit !== 'number') return next(new HttpError(400, 'memoryLimit is not a number'));
 
-    debug('Configuring app id:%s location:%s bindings:%j accessRestriction:%j oauthProxy:%s', req.params.id, data.location, data.portBindings, data.accessRestriction, data.oauthProxy);
+    debug('Configuring app id:%s location:%s bindings:%j accessRestriction:%j memoryLimit:%s oauthProxy:%s', req.params.id, data.location, data.portBindings, data.accessRestriction, data.oauthProxy, data.memoryLimit);
 
-    apps.configure(req.params.id, data.location, data.portBindings || null, data.accessRestriction, data.oauthProxy, data.cert || null, data.key || null, function (error) {
+    apps.configure(req.params.id, data.location, data.portBindings || null, data.accessRestriction, data.oauthProxy, data.cert || null, data.key || null, data.memoryLimit || 0, function (error) {
         if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, error.message));
         if (error && error.reason === AppsError.PORT_RESERVED) return next(new HttpError(409, 'Port ' + error.message + ' is reserved.'));
         if (error && error.reason === AppsError.PORT_CONFLICT) return next(new HttpError(409, 'Port ' + error.message + ' is already in use.'));

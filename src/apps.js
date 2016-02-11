@@ -328,7 +328,7 @@ function purchase(appStoreId, callback) {
     });
 }
 
-function install(appId, appStoreId, manifest, location, portBindings, accessRestriction, oauthProxy, icon, cert, key, callback) {
+function install(appId, appStoreId, manifest, location, portBindings, accessRestriction, oauthProxy, icon, cert, key, memoryLimit, callback) {
     assert.strictEqual(typeof appId, 'string');
     assert.strictEqual(typeof appStoreId, 'string');
     assert(manifest && typeof manifest === 'object');
@@ -339,6 +339,7 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
     assert(!icon || typeof icon === 'string');
     assert(cert === null || typeof cert === 'string');
     assert(key === null || typeof key === 'string');
+    assert.strictEqual(typeof memoryLimit, 'number');
     assert.strictEqual(typeof callback, 'function');
 
     var error = manifestFormat.parse(manifest);
@@ -356,7 +357,7 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
     error = validateAccessRestriction(accessRestriction);
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
-    var memoryLimit = (!manifest.memoryLimit || manifest.memoryLimit <= 268435456) ? 268435456 : manifest.memoryLimit; // 256mb
+    // TODO to what extent do we need to validate the memoryLimit?
 
     // singleUser mode requires accessRestriction to contain exactly one user
     if (manifest.singleUser && accessRestriction === null) return callback(new AppsError(AppsError.USER_REQUIRED));
@@ -395,7 +396,7 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
     });
 }
 
-function configure(appId, location, portBindings, accessRestriction, oauthProxy, cert, key, callback) {
+function configure(appId, location, portBindings, accessRestriction, oauthProxy, cert, key, memoryLimit, callback) {
     assert.strictEqual(typeof appId, 'string');
     assert.strictEqual(typeof location, 'string');
     assert.strictEqual(typeof portBindings, 'object');
@@ -403,6 +404,7 @@ function configure(appId, location, portBindings, accessRestriction, oauthProxy,
     assert.strictEqual(typeof oauthProxy, 'boolean');
     assert(cert === null || typeof cert === 'string');
     assert(key === null || typeof key === 'string');
+    assert.strictEqual(typeof memoryLimit, 'number');
     assert.strictEqual(typeof callback, 'function');
 
     var error = validateHostname(location, config.fqdn());
@@ -432,12 +434,14 @@ function configure(appId, location, portBindings, accessRestriction, oauthProxy,
             accessRestriction: accessRestriction,
             oauthProxy: oauthProxy,
             portBindings: portBindings,
+            memoryLimit: memoryLimit,
 
             oldConfig: {
                 location: app.location,
                 accessRestriction: app.accessRestriction,
                 portBindings: app.portBindings,
-                oauthProxy: app.oauthProxy
+                oauthProxy: app.oauthProxy,
+                memoryLimit: app.memoryLimit
             }
         };
 
