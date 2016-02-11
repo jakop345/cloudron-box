@@ -70,6 +70,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appConfigure.certificateFileName = '';
         $scope.appConfigure.keyFile = null;
         $scope.appConfigure.keyFileName = '';
+        $scope.appConfigure.memoryLimit = 256;
         $scope.appConfigure.accessRestrictionOption = '';
         $scope.appConfigure.accessRestriction = { users: [], groups: [] };
 
@@ -149,6 +150,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appConfigure.portBindingsInfo = app.manifest.tcpPorts || {}; // Portbinding map only for information
         $scope.appConfigure.accessRestrictionOption = app.accessRestriction ? 'restricted' : '';
         $scope.appConfigure.accessRestriction = app.accessRestriction || { users: [], groups: [] };
+        $scope.appConfigure.memoryUsage = app.memoryUsage || 256;
 
         // fill the portBinding structures. There might be holes in the app.portBindings, which signalizes a disabled port
         for (var env in $scope.appConfigure.portBindingsInfo) {

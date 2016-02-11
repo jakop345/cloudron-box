@@ -73,10 +73,10 @@
                         </div>
 
                         <div class="form-group" ng-hide="true">
-                            <label class="control-label" for="memoryUsage">Maximum Memory Usage in Megabytes</label>
-                            <br/><br/>
+                            <label class="control-label" for="memoryUsage">Maximum Memory Usage: <b>{{ appConfigure.memoryUsage }} MB</b></label>
+                            <br/>
                             <div style="padding: 0 10px;">
-                                <slider id="memoryUsage" ng-model="appConfigure.memoryUsage" min="0" step="8" max="100" tooltip="always" ticks="memoryTicks" ticks-snap-bounds="30"></slider>
+                                <slider id="memoryUsage" ng-model="appConfigure.memoryUsage" min="0" step="32" max="100" tooltip="hide" ticks="memoryTicks" ticks-snap-bounds="64"></slider>
                             </div>
                         </div>
 
