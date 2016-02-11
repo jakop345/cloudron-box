@@ -159,11 +159,11 @@ function setGroups(userId, groupIds, callback) {
     assert(Array.isArray(groupIds));
     assert.strictEqual(typeof callback, 'function');
 
-    groupdb.setGroups(userId, groupIds, function (error, result) {
+    groupdb.setGroups(userId, groupIds, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new GroupError(GroupError.NOT_FOUND));
         if (error) return callback(new GroupError(GroupError.INTERNAL_ERROR, error));
 
-        return callback(null, result);
+        return callback(null);
     });
 }
 
