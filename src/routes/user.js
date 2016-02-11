@@ -235,7 +235,6 @@ function setGroups(req, res, next) {
 
     user.setGroups(req.params.userId, req.body.groupIds, function (error) {
         if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'One or more groups not found'));
-        if (error && error.reason === UserError.NOT_ALLOWED) return next(new HttpError(403, 'Last admin'));
         if (error) return next(new HttpError(500, error));
 
         next(new HttpSuccess(204));

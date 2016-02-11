@@ -72,7 +72,6 @@ UserError.BAD_USERNAME = 'Bad username';
 UserError.BAD_EMAIL = 'Bad email';
 UserError.BAD_PASSWORD = 'Bad password';
 UserError.BAD_TOKEN = 'Bad token';
-UserError.NOT_ALLOWED = 'Not Allowed';
 
 function validateUsername(username) {
     assert.strictEqual(typeof username, 'string');
