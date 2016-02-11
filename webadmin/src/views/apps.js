@@ -1,6 +1,3 @@
-/* global ISTATES:false */
-/* global HSTATES:false */
-
 'use strict';
 
 angular.module('Application').controller('AppsController', ['$scope', '$location', 'Client', 'AppStore', function ($scope, $location, Client, AppStore) {
