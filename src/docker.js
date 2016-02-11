@@ -156,7 +156,14 @@ function createSubcontainer(app, name, cmd, options, callback) {
         dockerPortBindings[containerPort + '/tcp'] = [ { HostIp: '0.0.0.0', HostPort: hostPort + '' } ];
     }
 
-    var memoryLimit = developmentMode ? 0 : (app.memoryLimit || manifest.memoryLimit || (1024 * 1024 * 256)); // 256mb by default
+    // first check db record, then manifest
+    var memoryLimit = app.memoryLimit || manifest.memoryLimit;
+
+    // ensure we never go below minimum
+    memoryLimit = memoryLimit < (1024 * 1024 * 256) ? (1024 * 1024 * 256) : memoryLimit; // 256mb by default
+
+    // developerMode does not restrict memory usage
+    memoryLimit = developmentMode ? 0 : memoryLimit;
 
     // for subcontainers, this should ideally be false. but docker does not allow network sharing if the app container is not running
     // this means cloudron exec does not work
