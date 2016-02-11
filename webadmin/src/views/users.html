@@ -120,7 +120,10 @@
                     <div class="form-group">
                         <label class="control-label">Groups</label>
                         <div>
-                            <span ng-repeat="group in groups">
+                            <span ng-show="useredit.userInfo.id === userInfo.id">
+                                <button class="btn btn-default btn-primary" type="button" ng-click="showBubble($event)" data-toggle="tooltip" data-trigger="manual" title="Removing yourself from admin group is not allowed">Admin</button>
+                            </span>
+                            <span ng-repeat="group in groups" ng-hide="useredit.userInfo.id === userInfo.id && group.id === 'admin'">
                                 <button class="btn btn-default" type="button" ng-click="userEditToggleGroup(group);" ng-class="{ 'btn-primary': (useredit.groupIds.indexOf(group.id) !== -1) }">{{ group.name }}</button>
                             </span>
                         </div>

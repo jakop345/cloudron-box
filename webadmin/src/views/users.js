@@ -35,6 +35,14 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         password: ''
     };
 
+    $scope.showBubble = function ($event) {
+        $($event.target).tooltip('show');
+
+        setTimeout(function () {
+            $($event.target).tooltip('hide');
+        }, 2000);
+    };
+
     $scope.groupAdd = {
         busy: false,
         error: {},
