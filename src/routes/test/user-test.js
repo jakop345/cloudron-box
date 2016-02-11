@@ -31,7 +31,11 @@ function setup(done) {
 
         mailer._clearMailQueue();
 
-        userdb._clear(done);
+        userdb._clear(function (error) {
+            expect(error).to.eql(null);
+
+            groups.create('somegroupid', done);
+        });
     });
 }
 
@@ -300,10 +304,10 @@ describe('User API', function () {
         });
     });
 
-    it('remove second user as admin succeeds', function (done) {
+    it('remove second user from admins succeeds', function (done) {
         superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME_1 + '/set_groups')
                .query({ access_token: token })
-               .send({ groupIds: [] })
+               .send({ groupIds: [ 'somegroupid' ] })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(204);
 
@@ -428,7 +432,7 @@ describe('User API', function () {
     });
 
     it('admin cannot remove normal user without giving a password', function (done) {
-        superagent.del(SERVER_URL + '/api/v1/users/' + USERNAME_3)
+        superagent.del(SERVER_URL + '/api/v1/users/' + USERNAME_1)
                .query({ access_token: token })
                .end(function (err, res) {
             expect(res.statusCode).to.equal(400);
@@ -437,7 +441,7 @@ describe('User API', function () {
     });
 
     it('admin cannot remove normal user with empty password', function (done) {
-        superagent.del(SERVER_URL + '/api/v1/users/' + USERNAME_3)
+        superagent.del(SERVER_URL + '/api/v1/users/' + USERNAME_1)
                .query({ access_token: token })
                .send({ password: '' })
                .end(function (err, res) {
@@ -447,7 +451,7 @@ describe('User API', function () {
     });
 
     it('admin cannot remove normal user with giving wrong password', function (done) {
-        superagent.del(SERVER_URL + '/api/v1/users/' + USERNAME_3)
+        superagent.del(SERVER_URL + '/api/v1/users/' + USERNAME_1)
                .query({ access_token: token })
                .send({ password: PASSWORD + PASSWORD })
                .end(function (err, res) {
@@ -457,7 +461,7 @@ describe('User API', function () {
     });
 
     it('admin removes normal user', function (done) {
-        superagent.del(SERVER_URL + '/api/v1/users/' + USERNAME_3)
+        superagent.del(SERVER_URL + '/api/v1/users/' + USERNAME_1)
                .query({ access_token: token })
                .send({ password: PASSWORD })
                .end(function (err, res) {

@@ -137,9 +137,14 @@ function del(userId, callback) {
     assert.strictEqual(typeof userId, 'string');
     assert.strictEqual(typeof callback, 'function');
 
-    database.query('DELETE FROM users WHERE id = ?', [ userId ], function (error, result) {
+    // also cleanup the groupMembers table
+    var queries = [];
+    queries.push({ query: 'DELETE from groupMembers WHERE userId = ?', args: [ userId ] });
+    queries.push({ query: 'DELETE FROM users WHERE id = ?', args: [ userId ] });
+
+    database.transaction(queries, function (error) {
+        if (error && error.code === 'ER_NO_REFERENCED_ROW_2') return callback(new DatabaseError(DatabaseError.NOT_FOUND, error.message));
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
-        if (result.affectedRows !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND));
 
         callback(error);
     });
