@@ -10,6 +10,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
     $scope.installedApps = Client.getInstalledApps();
     $scope.config = Client.getConfig();
     $scope.user = Client.getUserInfo();
+    $scope.groups = [];
 
     $scope.memoryTicks = [256, 512, 1024, 2048, 4096];
 
@@ -27,7 +28,9 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         certificateFileName: '',
         keyFile: null,
         keyFileName: '',
-        memoryLimit: 256
+        memoryLimit: 256,
+        accessRestrictionOption: '',
+        accessRestriction: { users: [], groups: [] }
     };
 
     $scope.appUninstall = {
@@ -70,6 +73,8 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appConfigure.certificateFileName = '';
         $scope.appConfigure.keyFile = null;
         $scope.appConfigure.keyFileName = '';
+        $scope.appConfigure.accessRestrictionOption = '';
+        $scope.appConfigure.accessRestriction = { users: [], groups: [] };
 
         $scope.appConfigureForm.$setPristine();
         $scope.appConfigureForm.$setUntouched();
@@ -129,6 +134,14 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         });
     };
 
+    $scope.appConfigureToggleGroup = function (group) {
+        var groups = $scope.appConfigure.accessRestriction.groups;
+        var pos = groups.indexOf(group.id);
+
+        if (pos === -1) groups.push(group.id);
+        else groups.splice(pos, 1);
+    };
+
     $scope.showConfigure = function (app) {
         $scope.reset();
 
@@ -137,6 +150,8 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appConfigure.location = app.location;
         $scope.appConfigure.oauthProxy = app.oauthProxy ? '1' : '';
         $scope.appConfigure.portBindingsInfo = app.manifest.tcpPorts || {}; // Portbinding map only for information
+        $scope.appConfigure.accessRestrictionOption = app.accessRestriction ? 'restricted' : '';
+        $scope.appConfigure.accessRestriction = app.accessRestriction || { users: [], groups: [] };
 
         // fill the portBinding structures. There might be holes in the app.portBindings, which signalizes a disabled port
         for (var env in $scope.appConfigure.portBindingsInfo) {
@@ -170,7 +185,7 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
             location: $scope.appConfigure.location || '',
             portBindings: finalPortBindings,
             oauthProxy: !!$scope.appConfigure.oauthProxy,
-            accessRestriction: $scope.appConfigure.app.accessRestriction,
+            accessRestriction: !$scope.appConfigure.accessRestrictionOption ? null : $scope.appConfigure.accessRestriction,
             cert: $scope.appConfigure.certificateFile,
             key: $scope.appConfigure.keyFile,
         };
@@ -388,6 +403,11 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
     $scope.cancel = function () {
         window.history.back();
     };
+
+    Client.getGroups(function (error, result) {
+        if (error) return console.error('Unable to get group listing.', error);
+        $scope.groups = result;
+    });
 
     // setup all the dialog focus handling
     ['appConfigureModal', 'appUninstallModal', 'appUpdateModal', 'appRestoreModal'].forEach(function (id) {

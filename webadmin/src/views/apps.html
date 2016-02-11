@@ -43,6 +43,26 @@
                                 Access is granted to <b>{{appConfigure.app.accessRestriction.users[0]}}</b>.
                             </p>
                         </div>
+                        <div class="form-group" ng-hide="appConfigure.app.manifest.singleUser">
+                            <label class="control-label">Access control</label>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" ng-model="appConfigure.accessRestrictionOption" value="">
+                                    Every Cloudron user
+                                </label>
+                            </div>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" ng-model="appConfigure.accessRestrictionOption" value="restricted">
+                                    Restrict to groups
+                                </label>
+                            </div>
+                            <div>
+                                <span ng-repeat="group in groups">
+                                    <button class="btn btn-default" type="button" ng-disabled="appConfigure.accessRestrictionOption === ''" ng-click="appConfigureToggleGroup(group);" ng-class="{ 'btn-primary': (appConfigure.accessRestriction.groups && appConfigure.accessRestriction.groups.indexOf(group.id) !== -1) }">{{ group.name }}</button>
+                                </span>
+                            </div>
+                        </div>
                         <!-- Not sure if oauthproxy makes any sense with singleuser apps, it certainly looks strange in the UI, so we hide it for now -->
                         <div class="form-group" ng-hide="appConfigure.app.manifest.singleUser">
                             <label class="control-label" for="oauthProxy">Website Visibility</label>
