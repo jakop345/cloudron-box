@@ -230,6 +230,9 @@ function setGroups(req, res, next) {
 
     if (!Array.isArray(req.body.groupIds)) return next(new HttpError(400, 'API call requires a groups array.'));
 
+    // this route is only allowed for admins, so req.user has to be an admin
+    if (req.user.id === req.params.userId && req.body.groupIds.indexOf(groups.ADMIN_GROUP_ID) === -1) return next(new HttpError(403, 'Admin removing itself from admins is not allowed'));
+
     user.setGroups(req.params.userId, req.body.groupIds, function (error) {
         if (error && error.reason === UserError.NOT_FOUND) return next(new HttpError(404, 'One or more groups not found'));
         if (error && error.reason === UserError.NOT_ALLOWED) return next(new HttpError(403, 'Last admin'));

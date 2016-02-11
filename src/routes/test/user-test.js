@@ -271,6 +271,16 @@ describe('User API', function () {
         });
     });
 
+    it('remove itself from admins fails', function (done) {
+        superagent.put(SERVER_URL + '/api/v1/users/' + USERNAME_0 + '/set_groups')
+               .query({ access_token: token })
+               .send({ groupIds: [ 'somegroupid' ] })
+               .end(function (err, res) {
+            expect(res.statusCode).to.equal(403);
+            done();
+        });
+    });
+
     it('create user missing username fails', function (done) {
         superagent.post(SERVER_URL + '/api/v1/users')
                .query({ access_token: token })
