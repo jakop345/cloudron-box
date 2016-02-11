@@ -139,12 +139,13 @@ function del(userId, callback) {
 
     // also cleanup the groupMembers table
     var queries = [];
-    queries.push({ query: 'DELETE from groupMembers WHERE userId = ?', args: [ userId ] });
+    queries.push({ query: 'DELETE FROM groupMembers WHERE userId = ?', args: [ userId ] });
     queries.push({ query: 'DELETE FROM users WHERE id = ?', args: [ userId ] });
 
-    database.transaction(queries, function (error) {
-        if (error && error.code === 'ER_NO_REFERENCED_ROW_2') return callback(new DatabaseError(DatabaseError.NOT_FOUND, error.message));
+    database.transaction(queries, function (error, result) {
+        if (error && error.code === 'ER_NO_REFERENCED_ROW_2') return callback(new DatabaseError(DatabaseError.NOT_FOUND, error));
         if (error) return callback(new DatabaseError(DatabaseError.INTERNAL_ERROR, error));
+        if (result[1].affectedRows !== 1) return callback(new DatabaseError(DatabaseError.NOT_FOUND, error));
 
         callback(error);
     });
