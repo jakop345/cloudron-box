@@ -12,7 +12,6 @@ exports = module.exports = {
     remove: removeUser,
     get: getUser,
     getByResetToken: getByResetToken,
-    changeAdmin: changeAdmin,
     getAllAdmins: getAllAdmins,
     resetPasswordByIdentifier: resetPasswordByIdentifier,
     setPassword: setPassword,
@@ -228,7 +227,7 @@ function listUsers(callback) {
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
 
         var allUsers = result.map(function (obj) {
-            var u = _.pick(obj, 'id', 'username', 'email', 'displayName', 'groupIds'); 
+            var u = _.pick(obj, 'id', 'username', 'email', 'displayName', 'groupIds');
             u.admin = u.groupIds.indexOf(groups.ADMIN_GROUP_ID) !== -1;
             return u;
         });
@@ -286,33 +285,6 @@ function updateUser(userId, username, email, displayName, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new UserError(UserError.NOT_FOUND, error));
         if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
         callback(null);
-    });
-}
-
-function changeAdmin(username, admin, callback) {
-    assert.strictEqual(typeof username, 'string');
-    assert.strictEqual(typeof admin, 'boolean');
-    assert.strictEqual(typeof callback, 'function');
-
-    getUser(username, function (error, user) {
-        if (error) return callback(error);
-
-        userdb.getAllAdmins(function (error, result) {
-            if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
-
-            // protect from a system where there is no admin left
-            if (result.length <= 1 && !admin) return callback(new UserError(UserError.NOT_ALLOWED, 'Only admin'));
-
-            var func = admin ? groups.addMember : groups.removeMember;
-
-            func(groups.ADMIN_GROUP_ID, user.id, function (error) {
-                if (error) return callback(new UserError(UserError.INTERNAL_ERROR, error));
-
-                callback(null);
-
-                mailer.adminChanged(user, admin);
-            });
-        });
     });
 }
 

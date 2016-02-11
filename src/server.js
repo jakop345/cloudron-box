@@ -106,7 +106,6 @@ function initializeExpressSync() {
     router.put ('/api/v1/users/:userId', usersScope, routes.user.verifyPassword, routes.user.update);
     router.del ('/api/v1/users/:userId', usersScope, routes.user.requireAdmin, routes.user.verifyPassword, routes.user.remove);
     router.post('/api/v1/users/:userId/password', usersScope, routes.user.changePassword); // changePassword verifies password
-    router.post('/api/v1/users/:userId/admin', usersScope, routes.user.requireAdmin, routes.user.changeAdmin);
     router.put ('/api/v1/users/:userId/set_groups', usersScope, routes.user.requireAdmin, routes.user.setGroups);
     router.post('/api/v1/users/:userId/invite', usersScope, routes.user.requireAdmin, routes.user.sendInvite);
 

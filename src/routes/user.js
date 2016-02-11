@@ -9,7 +9,6 @@ exports = module.exports = {
     list: listUser,
     create: createUser,
     changePassword: changePassword,
-    changeAdmin: changeAdmin,
     remove: removeUser,
     verifyPassword: verifyPassword,
     requireAdmin: requireAdmin,
@@ -105,20 +104,6 @@ function update(req, res, next) {
 
             next(new HttpSuccess(204));
         });
-    });
-}
-
-function changeAdmin(req, res, next) {
-    assert.strictEqual(typeof req.body, 'object');
-
-    if (typeof req.body.username !== 'string') return next(new HttpError(400, 'API call requires a username.'));
-    if (typeof req.body.admin !== 'boolean') return next(new HttpError(400, 'API call requires an admin setting.'));
-
-    user.changeAdmin(req.body.username, req.body.admin, function (error) {
-        if (error && error.reason === UserError.NOT_ALLOWED) return next(new HttpError(403, 'Last admin'));
-        if (error) return next(new HttpError(500, error));
-
-        next(new HttpSuccess(204));
     });
 }
 
