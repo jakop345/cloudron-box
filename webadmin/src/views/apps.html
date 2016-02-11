@@ -16,7 +16,7 @@
             </div>
             <div class="modal-body">
                 <fieldset>
-                    <form class="form-signin" role="form" name="appConfigureForm" ng-submit="doConfigure()" autocomplete="off">
+                    <form role="form" name="appConfigureForm" ng-submit="doConfigure()" autocomplete="off">
                         <div class="has-error text-center" ng-show="appConfigure.error.other">{{ appConfigure.error.other }}</div>
                         <div class="form-group" ng-class="{ 'has-error': (appConfigureForm.location.$dirty && appConfigureForm.location.$invalid) || (!appConfigureForm.location.$dirty && appConfigure.error.location)  }">
                             <label class="control-label" for="appConfigureLocationInput">Location {{ appConfigure.error.location }} </label>
@@ -117,7 +117,7 @@
                 <p ng-show="appRestore.app.lastBackupId !== null">Restoring the app will lose all content generated since last backup of this app!</p>
                 <p ng-show="appRestore.app.lastBackupId === null">This app was never backed up. Restoring the app will lose all content!</p>
                 <fieldset>
-                    <form class="form-signin" role="form" name="appRestoreForm" ng-submit="doRestore()" autocomplete="off">
+                    <form role="form" name="appRestoreForm" ng-submit="doRestore()" autocomplete="off">
                         <div class="form-group" ng-class="{ 'has-error': (appRestoreForm.password.$dirty && appRestoreForm.password.$invalid) || (!appRestoreForm.password.$dirty && appRestore.error.password) }">
                             <label class="control-label" for="appRestorePasswordInput">Provide your password to confirm this action</label>
                             <div class="control-label" ng-show="(appRestoreForm.password.$dirty && appRestoreForm.password.$invalid) || (!appRestoreForm.password.$dirty && appRestore.error.password)">
@@ -167,7 +167,7 @@
             <div class="modal-body">
                 <p>Deleting the app will also remove all content generated within this app!</p>
                 <fieldset>
-                    <form class="form-signin" role="form" name="appUninstallForm" ng-submit="doUninstall()" autocomplete="off">
+                    <form role="form" name="appUninstallForm" ng-submit="doUninstall()" autocomplete="off">
                         <div class="form-group" ng-class="{ 'has-error': (appUninstallForm.password.$dirty && appUninstallForm.password.$invalid) || (!appUninstallForm.password.$dirty && appUninstall.error.password) }">
                             <label class="control-label" for="appUninstallPasswordInput">Provide your password to confirm this action</label>
                             <div class="control-label" ng-show="(appUninstallForm.password.$dirty && appUninstallForm.password.$invalid) || (!appUninstallForm.password.$dirty && appUninstall.error.password)">
@@ -201,7 +201,7 @@
                 <pre>{{ appUpdate.manifest.changelog }}</pre>
                 <br/>
                 <fieldset>
-                    <form class="form-signin" role="form" name="appUpdateForm" ng-submit="doUpdate(appUpdateForm)" autocomplete="off">
+                    <form role="form" name="appUpdateForm" ng-submit="doUpdate(appUpdateForm)" autocomplete="off">
                         <div ng-repeat="(env, info) in appUpdate.portBindingsInfo" ng-class="{ 'newPort': info.isNew }">
                             <ng-form name="portInfo_form">
                                 <div class="form-group" ng-class="{ 'has-error': portInfo_form.itemName{{$index}}.$dirty && portInfo_form.itemName{{$index}}.$invalid }">

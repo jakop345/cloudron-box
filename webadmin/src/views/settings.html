@@ -7,7 +7,7 @@
                 <h4 class="modal-title" ng-show="config.developerMode">Disable CLI Mode</h4>
             </div>
             <div class="modal-body">
-                <form name="developerModeChangeForm" class="form-signin" role="form" novalidate ng-submit="doChangeDeveloperMode(developerModeChangeForm)" autocomplete="off">
+                <form name="developerModeChangeForm" role="form" novalidate ng-submit="doChangeDeveloperMode(developerModeChangeForm)" autocomplete="off">
                     <fieldset>
                         <div class="form-group" ng-class="{ 'has-error': (!developerModeChangeForm.password.$dirty && developerModeChange.error.password) || (developerModeChangeForm.password.$dirty && developerModeChangeForm.password.$invalid) }">
                             <label class="control-label" for="inputDeveloperModeChangePassword">Give your password to verify that you are performing that action</label>

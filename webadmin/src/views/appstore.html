@@ -13,7 +13,7 @@
             </div>
             <div class="modal-body">
                 <div class="collapse" id="collapseInstallForm" data-toggle="false">
-                    <form class="form-signin" role="form" name="appInstallForm" ng-submit="doInstall()" autocomplete="off">
+                    <form role="form" name="appInstallForm" ng-submit="doInstall()" autocomplete="off">
                         <div class="has-error text-center" ng-show="appInstall.error.other" ng-bind-html="appInstall.error.other"></div>
                         <div class="form-group" ng-class="{ 'has-error': (appInstallForm.location.$dirty && appInstallForm.location.$invalid) || (!appInstallForm.location.$dirty && appInstall.error.location) }">
                             <label class="control-label" for="appInstallLocationInput">Location {{ appInstall.error.location }} </label>

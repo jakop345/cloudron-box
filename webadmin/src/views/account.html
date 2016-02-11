@@ -6,7 +6,7 @@
                 <h4 class="modal-title">Change Your Password</h4>
             </div>
             <div class="modal-body">
-                <form name="passwordchange_form" class="form-signin" role="form" novalidate ng-submit="doChangePassword(passwordchange_form)" autocomplete="off">
+                <form name="passwordchange_form" role="form" novalidate ng-submit="doChangePassword(passwordchange_form)" autocomplete="off">
                     <fieldset>
                         <div class="form-group" ng-class="{ 'has-error': (!passwordchange_form.password.$dirty && passwordchange.error.password) || (passwordchange_form.password.$dirty && passwordchange_form.password.$invalid) }">
                             <label class="control-label" for="inputPasswordChangePassword">Current Password</label>
@@ -52,7 +52,7 @@
                 <h4 class="modal-title">Change Your Email</h4>
             </div>
             <div class="modal-body">
-                <form name="emailchange_form" class="form-signin" role="form" novalidate ng-submit="doChangeEmail(emailchange_form)" autocomplete="off">
+                <form name="emailchange_form" role="form" novalidate ng-submit="doChangeEmail(emailchange_form)" autocomplete="off">
                     <fieldset>
                         <div class="form-group" ng-class="{ 'has-error': (emailchange_form.email.$dirty && emailchange_form.email.$invalid) }">
                             <label class="control-label" for="inputEmailChangeEmail">New Email Address</label>
