@@ -713,6 +713,10 @@ function exec(appId, options, callback) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
         if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
+        if (app.installationState !== appdb.ISTATE_INSTALLED || app.runState !== appdb.RSTATE_RUNNING) {
+            return callback(new AppsError(AppsError.BAD_STATE, 'App not installed or running'));
+        }
+
         var container = docker.connection.getContainer(app.containerId);
 
        var execOptions = {
