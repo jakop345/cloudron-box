@@ -283,10 +283,10 @@
                         <tbody>
                             <tr ng-repeat="group in groups">
                                 <td class="text-overflow: ellipsis; white-space: nowrap;">
-                                    {{ group.name }}
+                                    {{ group.name !== 'admin' ? group.name : 'Admin (manage apps and users on this Cloudron)' }}
                                 </td>
                                 <td class="text-right" style="vertical-align: bottom">
-                                    <button class="btn btn-xs btn-danger" ng-click="groupRemove.show(group)" title="Remove Group"><i class="fa fa-trash-o"></i></button>
+                                    <button class="btn btn-xs btn-danger" ng-hide="group.name === 'admin'" ng-click="groupRemove.show(group)" title="Remove Group"><i class="fa fa-trash-o"></i></button>
                                 </td>
                             </tr>
                         </tbody>
