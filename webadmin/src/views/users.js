@@ -86,6 +86,7 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
         error: {},
         group: null,
         password: '',
+        memberCount: 0,
 
         show: function (group) {
             $scope.groupRemove.busy = false;
@@ -98,7 +99,13 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
             $scope.groupRemoveForm.$setUntouched();
             $scope.groupRemoveForm.$setPristine();
 
-            $('#groupRemoveModal').modal('show');
+            Client.getGroup(group.id, function (error, result) {
+                if (error) return console.error('Unable to fetch group information.', error.statusCode, error.message);
+
+                $scope.groupRemove.memberCount = result.userIds.length;
+
+                $('#groupRemoveModal').modal('show');
+            });
         },
 
         submit: function () {

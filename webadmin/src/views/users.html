@@ -185,6 +185,12 @@
                 <h4 class="modal-title">Delete group {{ groupRemove.group.name }}</h4>
             </div>
             <div class="modal-body">
+                <div ng-show="groupRemove.memberCount" class="text-danger">
+                    <b>This group still has {{ groupRemove.memberCount }} members. Are you sure this group is not used?</b>
+                    <br/>
+                    <br/>
+                </div>
+
                 <form name="groupRemoveForm" role="form" novalidate ng-submit="groupRemove.submit()" autocomplete="off">
                     <input type="password" style="display: none;">
                     <div class="form-group" ng-class="{ 'has-error': (groupRemoveForm.password.$dirty && groupRemoveForm.password.$invalid) || (!groupRemoveForm.password.$dirty && groupRemove.error.password)}">
