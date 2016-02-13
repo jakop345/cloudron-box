@@ -199,13 +199,6 @@ describe('Group membership', function () {
         });
     });
 
-    it('cannot remove group with member', function (done) {
-        groups.remove(GROUP0_ID, function (error) {
-            expect(error.reason).to.be(GroupError.NOT_EMPTY);
-            done();
-        });
-    });
-
     it('can remove member', function (done) {
         groups.removeMember(GROUP0_ID, USER_0.id, function (error) {
             expect(error).to.be(null);
@@ -225,6 +218,21 @@ describe('Group membership', function () {
         groups.remove(GROUP0_ID, function (error) {
             expect(error).to.be(null);
             done();
+        });
+    });
+
+    it('can remove group with member', function (done) {
+        groups.create(GROUP0_NAME, function (error) {
+            expect(error).to.eql(null);
+
+            groups.addMember(GROUP0_ID, USER_0.id, function (error) {
+                expect(error).to.be(null);
+
+                groups.remove(GROUP0_ID, function (error) {
+                    expect(error).to.eql(null);
+                    done();
+                });
+            });
         });
     });
 });
