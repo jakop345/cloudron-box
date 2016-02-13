@@ -58,7 +58,7 @@ describe('Groups', function () {
     });
 
     it('cannot create group - too big', function (done) {
-        groups.create(Array(256).join('a'), function (error) {
+        groups.create(new Array(256).join('a'), function (error) {
             expect(error.reason).to.be(GroupError.BAD_NAME);
             done();
         });
@@ -272,6 +272,24 @@ describe('Set user groups', function () {
                 expect(groupIds[1]).to.be(GROUP1_ID);
                 done();
             });
+        });
+    });
+});
+
+describe('Admin group', function () {
+    before(function (done) {
+        async.series([
+            setup,
+            userdb.add.bind(null, USER_0.id, USER_0)
+        ], done);
+    });
+    after(cleanup);
+
+    it('cannot delete admin group ever', function (done) {
+        groups.remove(groups.ADMIN_GROUP_ID, function (error) {
+            expect(error.reason).to.equal(GroupError.NOT_ALLOWED);
+
+            done();
         });
     });
 });

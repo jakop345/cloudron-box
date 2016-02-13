@@ -53,6 +53,7 @@ GroupError.ALREADY_EXISTS = 'Already Exists';
 GroupError.NOT_FOUND = 'Not Found';
 GroupError.BAD_NAME = 'Bad name';
 GroupError.NOT_EMPTY = 'Not Empty';
+GroupError.NOT_ALLOWED = 'Not Allowed';
 
 function validateGroupname(name) {
     assert.strictEqual(typeof name, 'string');
@@ -87,9 +88,11 @@ function remove(id, callback) {
     assert.strictEqual(typeof id, 'string');
     assert.strictEqual(typeof callback, 'function');
 
+    // never allow admin group to be deleted
+    if (id === exports.ADMIN_GROUP_ID) return callback(new GroupError(GroupError.NOT_ALLOWED));
+
     groupdb.del(id, function (error) {
         if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new GroupError(GroupError.NOT_FOUND));
-        if (error && error.reason === DatabaseError.IN_USE) return callback(new GroupError(GroupError.NOT_EMPTY));
         if (error) return callback(new GroupError(GroupError.INTERNAL_ERROR, error));
 
         callback(null);
