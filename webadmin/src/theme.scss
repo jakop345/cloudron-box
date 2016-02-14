@@ -77,6 +77,12 @@ $table-border-color:                        transparent !default;
     clear: both;
 }
 
+.btn-admin {
+    color: white !important;
+    background-color: $brand-danger !important;
+    border-color: $brand-danger !important;
+}
+
 // ----------------------------
 // Main classes
 // ----------------------------
