@@ -116,7 +116,7 @@ function processApps(callback) {
 
             var alive = apps
                 .filter(function (a) { return a.installationState === appdb.ISTATE_INSTALLED && a.runState === appdb.RSTATE_RUNNING && a.health === appdb.HEALTH_HEALTHY; })
-                .map(function (a) { return a.location; }).join(', ');
+                .map(function (a) { return a.location || 'naked_domain'; }).join(', ');
 
             debug('apps alive: [%s]', alive);
 
