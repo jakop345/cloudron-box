@@ -526,6 +526,7 @@ function update(appId, force, manifest, portBindings, icon, callback) {
             manifest: manifest,
             portBindings: portBindings,
             memoryLimit: memoryLimit,
+
             oldConfig: {
                 manifest: app.manifest,
                 portBindings: app.portBindings,
@@ -617,12 +618,14 @@ function restore(appId, callback) {
             values = {
                 manifest: restoreConfig.manifest,
                 portBindings: restoreConfig.portBindings,
+                memoryLimit: restoreConfig.memoryLimit,
 
                 oldConfig: {
                     location: app.location,
                     accessRestriction: app.accessRestriction,
                     oauthProxy: app.oauthProxy,
                     portBindings: app.portBindings,
+                    memoryLimit: app.memoryLimit,
                     manifest: app.manifest
                 }
             };
@@ -879,7 +882,8 @@ function backupApp(app, addonsToBackup, callback) {
             location: app.location,
             portBindings: app.portBindings,
             accessRestriction: app.accessRestriction,
-            oauthProxy: app.oauthProxy
+            oauthProxy: app.oauthProxy,
+            memoryLimit: app.memoryLimit
         };
         backupFunction = createNewBackup.bind(null, app, addonsToBackup);
 
