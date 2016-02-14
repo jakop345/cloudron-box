@@ -121,8 +121,8 @@
                         <label class="control-label">Groups</label>
                         <div>
                             <span>
-                                <button class="btn btn-default btn-primary" type="button" ng-show="useredit.userInfo.id === userInfo.id" ng-click="showBubble($event)" data-toggle="tooltip" data-trigger="manual" title="Removing yourself from admin group is not allowed">Admin</button>
-                                <button class="btn btn-default btn-primary" type="button" ng-hide="useredit.userInfo.id === userInfo.id" ng-click="userEditToggleGroup({ id: 'admin', name: 'admin' })" ng-class="{ 'btn-primary': (useredit.groupIds.indexOf('admin') !== -1) }">Admin</button>
+                                <button class="btn btn-admin" type="button" ng-show="useredit.userInfo.id === userInfo.id" ng-click="showBubble($event)" data-toggle="tooltip" data-trigger="manual" title="Removing yourself from admin group is not allowed">Admin</button>
+                                <button class="btn btn-default" type="button" ng-hide="useredit.userInfo.id === userInfo.id" ng-click="userEditToggleGroup({ id: 'admin', name: 'admin' })" ng-class="{ 'btn-admin': (useredit.groupIds.indexOf('admin') !== -1) }">Admin</button>
                             </span>
 
                             <span ng-repeat="group in groups" ng-show="group.id !== 'admin'">
