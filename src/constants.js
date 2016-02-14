@@ -7,6 +7,8 @@ exports = module.exports = {
     ADMIN_NAME: 'Settings',
 
     ADMIN_CLIENT_ID: 'webadmin', // oauth client id
-    ADMIN_APPID: 'admin' // admin appid (settingsdb)
+    ADMIN_APPID: 'admin', // admin appid (settingsdb)
+
+    DEFAULT_MEMORY_LIMIT: (256 * 1024 * 1024)
 };
 

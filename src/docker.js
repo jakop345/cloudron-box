@@ -4,6 +4,7 @@ var addons = require('./addons.js'),
     async = require('async'),
     assert = require('assert'),
     config = require('./config.js'),
+    constants = require('./constants.js'),
     debug = require('debug')('box:src/docker.js'),
     Docker = require('dockerode'),
     safe = require('safetydance'),
@@ -160,7 +161,7 @@ function createSubcontainer(app, name, cmd, options, callback) {
     var memoryLimit = app.memoryLimit || manifest.memoryLimit;
 
     // ensure we never go below minimum
-    memoryLimit = memoryLimit < (1024 * 1024 * 256) ? (1024 * 1024 * 256) : memoryLimit; // 256mb by default
+    memoryLimit = memoryLimit < constants.DEFAULT_MEMORY_LIMIT ? constants.DEFAULT_MEMORY_LIMIT : memoryLimit; // 256mb by default
 
     // developerMode does not restrict memory usage
     memoryLimit = developmentMode ? 0 : memoryLimit;

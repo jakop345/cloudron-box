@@ -74,8 +74,6 @@ var BACKUP_APP_CMD = path.join(__dirname, 'scripts/backupapp.sh'),
     RESTORE_APP_CMD = path.join(__dirname, 'scripts/restoreapp.sh'),
     BACKUP_SWAP_CMD = path.join(__dirname, 'scripts/backupswap.sh');
 
-var DEFAULT_MEMORY_LIMIT = (256 * 1024 * 1024);
-
 function debugApp(app, args) {
     assert(!app || typeof app === 'object');
 
@@ -218,7 +216,7 @@ function validateMemoryLimit(manifest, memoryLimit) {
     assert.strictEqual(typeof manifest, 'object');
     assert.strictEqual(typeof memoryLimit, 'number');
 
-    var min = manifest.memoryLimit || DEFAULT_MEMORY_LIMIT;
+    var min = manifest.memoryLimit || constants.DEFAULT_MEMORY_LIMIT;
     var max = (4096 * 1024 * 1024);
 
     // allow 0, which indicates that it is not set, the one from the manifest will be choosen but we don't commit any user value
@@ -380,7 +378,7 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
     if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
     // memoryLimit might come in as 0 if not specified
-    memoryLimit = memoryLimit || manifest.memoryLimit || DEFAULT_MEMORY_LIMIT;
+    memoryLimit = memoryLimit || manifest.memoryLimit || constants.DEFAULT_MEMORY_LIMIT;
 
     // singleUser mode requires accessRestriction to contain exactly one user
     if (manifest.singleUser && accessRestriction === null) return callback(new AppsError(AppsError.USER_REQUIRED));
@@ -450,7 +448,7 @@ function configure(appId, location, portBindings, accessRestriction, oauthProxy,
         if (error) return callback(new AppsError(AppsError.BAD_FIELD, error.message));
 
         // memoryLimit might come in as 0 if not specified
-        memoryLimit = memoryLimit || app.memoryLimit || app.manifest.memoryLimit || DEFAULT_MEMORY_LIMIT;
+        memoryLimit = memoryLimit || app.memoryLimit || app.manifest.memoryLimit || constants.DEFAULT_MEMORY_LIMIT;
 
         // save cert to data/box/certs
         if (cert && key) {
