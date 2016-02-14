@@ -248,7 +248,7 @@
                                     <span class="text-muted">{{ user.email }}</span>
                                     <span ng-show="isMe(user)" class="label label-success">This is you!</span>
                                 </td>
-                                <td class="text-right" style="vertical-align: bottom">
+                                <td class="text-right">
                                     <span ng-repeat="groupId in user.groupIds" class="label label-default" ng-class="{ 'label-danger': groupId === 'admin' }">{{ groupId === 'admin' ? 'Admin' : groupId }}</span>
                                 </td>
                                 <td class="text-right" style="vertical-align: bottom">
