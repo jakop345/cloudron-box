@@ -73,6 +73,12 @@ angular.module('Application').controller('UsersController', ['$scope', '$locatio
                     $('#groupAddName').focus();
                     return;
                 }
+                if (error && error.statusCode === 400) {
+                    $scope.groupAdd.error.name = error.message;
+                    $scope.groupAddForm.name.$setPristine();
+                    $('#groupAddName').focus();
+                    return;
+                }
                 if (error) return console.error('Unable to create group.', error.statusCode, error.message);
 
                 refresh();
