@@ -30,7 +30,7 @@ var GROUP_USERS_DN = 'cn=users,ou=groups,dc=cloudron';
 var GROUP_ADMINS_DN = 'cn=admins,ou=groups,dc=cloudron';
 
 function getAppByRequest(req, callback) {
-    var sourceIp = req.ldap.id.split(':')[0];
+    var sourceIp = req.connection.ldap.id.split(':')[0];
     if (sourceIp.split('.').length !== 4) return callback(new ldap.InsufficientAccessRightsError('Missing source identifier'));
 
     apps.getByIpAddress(sourceIp, function (error, app) {
