@@ -24,7 +24,8 @@ exports = module.exports = {
     deleteContainerByName: deleteContainer,
     deleteImage: deleteImage,
     deleteContainers: deleteContainers,
-    createSubcontainer: createSubcontainer
+    createSubcontainer: createSubcontainer,
+    getContainerIdByIp: getContainerIdByIp
 };
 
 function connectionInstance() {
@@ -353,5 +354,38 @@ function deleteImage(manifest, callback) {
         if (error) debug('Error removing image %s : %j', dockerImage, error);
 
         callback(error);
+    });
+}
+
+function getContainerIdByIp(ip, callback) {
+    assert.strictEqual(typeof ip, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    debug('get container by ip %s', ip);
+
+    var docker = exports.connection;
+
+    docker.listNetworks({}, function (error, result) {
+        if (error) return callback(error);
+
+        var bridge;
+        result.forEach(function (n) {
+            if (n.Name === 'bridge') bridge = n;
+        });
+
+        if (!bridge) return callback(new Error('Unable to find the bridge network'));
+
+        var containerId;
+        for (var id in bridge.Containers) {
+            if (bridge.Containers[id].IPv4Address.indexOf(ip) === 0) {
+                containerId = id;
+                break;
+            }
+        }
+        if (!containerId) return callback(new Error('No container with that ip'));
+
+        debug('found container %s with ip %s', containerId, ip);
+
+        callback(null, containerId);
     });
 }
