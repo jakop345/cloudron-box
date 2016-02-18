@@ -25,8 +25,10 @@ var gDockerEventStream = null;
 function debugApp(app) {
     assert(!app || typeof app === 'object');
 
-    var prefix = app ? app.location : '(no app)';
-    debug(prefix + ' ' + util.format.apply(util, Array.prototype.slice.call(arguments, 1)));
+    var prefix = app ? (app.location || 'naked_domain') : '(no app)';
+    var id = app ? app.id : '';
+
+    debug(prefix + ' ' + util.format.apply(util, Array.prototype.slice.call(arguments, 1)) + ' - ' + id);
 }
 
 function setHealth(app, health, callback) {
