@@ -58,9 +58,15 @@
                                 </label>
                             </div>
                             <div>
-                                <span ng-repeat="group in groups">
-                                    <button class="btn btn-default" type="button" ng-disabled="appConfigure.accessRestrictionOption === ''" ng-click="appConfigureToggleGroup(group);" ng-class="{ 'btn-primary': (appConfigure.accessRestriction.groups && appConfigure.accessRestriction.groups.indexOf(group.id) !== -1) }">{{ group.name }}</button>
-                                </span>
+                                <div>
+                                    <span>
+                                        <button class="btn btn-default" type="button" ng-disabled="appConfigure.accessRestrictionOption === ''" ng-click="appConfigureToggleGroup({ id: 'admin', name: 'admin' })" ng-class="{ 'btn-admin': (appConfigure.accessRestriction.groups && appConfigure.accessRestriction.groups.indexOf('admin') !== -1) }">Admin</button>
+                                    </span>
+
+                                    <span ng-repeat="group in groups" ng-show="group.id !== 'admin'">
+                                        <button class="btn btn-default" type="button" ng-disabled="appConfigure.accessRestrictionOption === ''" ng-click="appConfigureToggleGroup(group);" ng-class="{ 'btn-primary': (appConfigure.accessRestriction.groups && appConfigure.accessRestriction.groups.indexOf(group.id) !== -1) }">{{ group.name }}</button>
+                                    </span>
+                                </div>
                             </div>
                         </div>
                         <!-- Not sure if oauthproxy makes any sense with singleuser apps, it certainly looks strange in the UI, so we hide it for now -->
