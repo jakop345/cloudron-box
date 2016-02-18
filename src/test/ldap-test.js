@@ -6,14 +6,17 @@
 
 'use strict';
 
-var database = require('../database.js'),
-    expect = require('expect.js'),
-    EventEmitter = require('events').EventEmitter,
+var appdb = require('../appdb.js'),
+    assert = require('assert'),
     async = require('async'),
-    user = require('../user.js'),
+    database = require('../database.js'),
     config = require('../config.js'),
+    EventEmitter = require('events').EventEmitter,
+    expect = require('expect.js'),
+    http = require('http'),
     ldapServer = require('../ldap.js'),
-    ldap = require('ldapjs');
+    ldap = require('ldapjs'),
+    user = require('../user.js');
 
 // owner
 var USER_0 = {
@@ -31,14 +34,89 @@ var USER_1 = {
     displayName: 'User 1'
 };
 
+var APP_0 = {
+    id: 'appid-0',
+    appStoreId: 'appStoreId-0',
+    dnsRecordId: null,
+    installationState: appdb.ISTATE_INSTALLED,
+    installationProgress: null,
+    runState: appdb.RSTATE_RUNNING,
+    location: 'some-location-0',
+    manifest: { version: '0.1', dockerImage: 'docker/app0', healthCheckPath: '/', httpPort: 80, title: 'app0' },
+    httpPort: null,
+    containerId: 'someContainerId',
+    portBindings: { port: 5678 },
+    health: null,
+    accessRestriction: null,
+    oauthProxy: false,
+    lastBackupId: null,
+    lastBackupConfig: null,
+    oldConfig: null,
+    memoryLimit: 4294967296
+};
+
+var dockerProxy;
+
+function startDockerProxy(interceptor, callback) {
+    assert.strictEqual(typeof interceptor, 'function');
+    assert.strictEqual(typeof callback, 'function');
+
+    return http.createServer(interceptor).listen(5687, callback);
+}
+
 function setup(done) {
     async.series([
         database.initialize.bind(null),
         database._clear.bind(null),
         ldapServer.start.bind(null),
+        appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, APP_0.oauthProxy, APP_0.memoryLimit),
+        appdb.update.bind(null, APP_0.id, { containerId: APP_0.containerId }),
         user.createOwner.bind(null, USER_0.username, USER_0.password, USER_0.email, USER_0.displayName),
         user.create.bind(null, USER_1.username, USER_1.password, USER_1.email, USER_0.displayName, { invitor: USER_0 })
-    ], done);
+    ], function (error) {
+        if (error) return done(error);
+
+        dockerProxy = startDockerProxy(function interceptor(req, res) {
+            var answer = {};
+            var status = 500;
+
+            if (req.method === 'GET' && req.url === '/networks') {
+                answer = [{
+                    Name: "irrelevant"
+                }, {
+                    Name: "bridge",
+                    Id: "f2de39df4171b0dc801e8002d1d999b77256983dfc63041c0f34030aa3977566",
+                    Scope: "local",
+                    Driver: "bridge",
+                    IPAM: {
+                        Driver: "default",
+                        Config: [{
+                            Subnet: "172.17.0.0/16"
+                        }]
+                    },
+                    "Containers": {
+                        someOtherContainerId: {
+                            "EndpointID": "ed2419a97c1d9954d05b46e462e7002ea552f216e9b136b80a7db8d98b442eda",
+                            "MacAddress": "02:42:ac:11:00:02",
+                            "IPv4Address": "127.0.0.2/16",
+                            "IPv6Address": ""
+                        },
+                        someContainerId: {
+                            "EndpointID": "ed2419a97c1d9954d05b46e462e7002ea552f216e9b136b80a7db8d98b442eda",
+                            "MacAddress": "02:42:ac:11:00:02",
+                            "IPv4Address": "127.0.0.1/16",
+                            "IPv6Address": ""
+                        }
+                    }
+                }];
+                status = 200;
+            }
+
+            res.writeHead(status);
+            res.write(JSON.stringify(answer));
+            res.end();
+        }, done);
+    });
 }
 
 function cleanup(done) {
@@ -68,12 +146,38 @@ describe('Ldap', function () {
             });
         });
 
-        it('succeeds', function (done) {
+        it('succeeds without accessRestriction', function (done) {
             var client = ldap.createClient({ url: 'ldap://127.0.0.1:' + config.get('ldapPort') });
 
             client.bind('cn=' + USER_0.username + ',ou=users,dc=cloudron', USER_0.password, function (error) {
                 expect(error).to.be(null);
                 done();
+            });
+        });
+
+        it('fails with accessRestriction denied', function (done) {
+            var client = ldap.createClient({ url: 'ldap://127.0.0.1:' + config.get('ldapPort') });
+
+            appdb.update(APP_0.id, { accessRestriction: { users: [ USER_1.username ], groups: [] }}, function (error) {
+                expect(error).to.eql(null);
+
+                client.bind('cn=' + USER_0.username + ',ou=users,dc=cloudron', USER_0.password, function (error) {
+                    expect(error).to.be.a(ldap.NoSuchObjectError);
+                    done();
+                });
+            });
+        });
+
+        it('succeeds with accessRestriction allowed', function (done) {
+            var client = ldap.createClient({ url: 'ldap://127.0.0.1:' + config.get('ldapPort') });
+
+            appdb.update(APP_0.id, { accessRestriction: { users: [ USER_1.username, USER_0.username ], groups: [] }}, function (error) {
+                expect(error).to.eql(null);
+
+                client.bind('cn=' + USER_0.username + ',ou=users,dc=cloudron', USER_0.password, function (error) {
+                    expect(error).to.be(null);
+                    done();
+                });
             });
         });
     });
