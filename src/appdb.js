@@ -284,6 +284,7 @@ function updateWithConstraints(id, app, constraints, callback) {
     assert.strictEqual(typeof constraints, 'string');
     assert.strictEqual(typeof callback, 'function');
     assert(!('portBindings' in app) || typeof app.portBindings === 'object');
+    assert(!('accessRestriction' in app) || typeof app.accessRestriction === 'object' || app.accessRestriction === '');
 
     var queries = [ ];
 
