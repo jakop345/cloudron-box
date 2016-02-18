@@ -40,7 +40,7 @@ function initializeExpressSync() {
         urlencoded = middleware.urlencoded({ extended: false, limit: QUERY_LIMIT }); // application/x-www-form-urlencoded
 
     app.set('views', path.join(__dirname, 'oauth2views'));
-    app.set('view options', { layout: true, debug: true });
+    app.set('view options', { layout: true, debug: false });
     app.set('view engine', 'ejs');
 
     if (process.env.BOX_ENV !== 'test') app.use(middleware.morgan('Box :method :url :status :response-time ms - :res[content-length]', { immediate: false }));
