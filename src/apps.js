@@ -9,6 +9,7 @@ exports = module.exports = {
 
     get: get,
     getBySubdomain: getBySubdomain,
+    getByIpAddress: getByIpAddress,
     getAll: getAll,
     purchase: purchase,
     install: install,
@@ -305,6 +306,25 @@ function getBySubdomain(subdomain, callback) {
         app.fqdn = config.appFqdn(app.location);
 
         callback(null, app);
+    });
+}
+
+function getByIpAddress(ip, callback) {
+    assert.strictEqual(typeof ip, 'string');
+    assert.strictEqual(typeof callback, 'function');
+
+    docker.getContainerIdByIp(ip, function (error, containerId) {
+        if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+        appdb.getByContainerId(containerId, function (error, app) {
+            if (error && error.reason === DatabaseError.NOT_FOUND) return callback(new AppsError(AppsError.NOT_FOUND, 'No such app'));
+            if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
+
+            app.iconUrl = getIconUrlSync(app);
+            app.fqdn = config.appFqdn(app.location);
+
+            callback(null, app);
+        });
     });
 }
 
