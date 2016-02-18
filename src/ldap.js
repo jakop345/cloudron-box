@@ -6,6 +6,7 @@ exports = module.exports = {
 };
 
 var assert = require('assert'),
+    apps = require('./apps.js'),
     config = require('./config.js'),
     debug = require('debug')('box:ldap'),
     user = require('./user.js'),
@@ -28,6 +29,16 @@ var gLogger = {
 var GROUP_USERS_DN = 'cn=users,ou=groups,dc=cloudron';
 var GROUP_ADMINS_DN = 'cn=admins,ou=groups,dc=cloudron';
 
+function getAppByRequest(req, callback) {
+    var sourceIp = req.ldap.id.split(':')[0];
+    if (sourceIp.split('.').length !== 4) return callback(new ldap.InsufficientAccessRightsError('Missing source identifier'));
+
+    apps.getByIpAddress(sourceIp, function (error, app) {
+        // we currently allow access in case we can't find the source app
+        callback(null, app || null);
+    });
+}
+
 function start(callback) {
     assert.strictEqual(typeof callback, 'function');
 
@@ -36,7 +47,7 @@ function start(callback) {
     gServer.search('ou=users,dc=cloudron', function (req, res, next) {
         debug('ldap user search: dn %s, scope %s, filter %s', req.dn.toString(), req.scope, req.filter.toString());
 
-        user.list(function (error, result){
+        user.list(function (error, result) {
             if (error) return next(new ldap.OperationsError(error.toString()));
 
             // send user objects
@@ -119,12 +130,26 @@ function start(callback) {
         var commonName = req.dn.rdns[0][Object.keys(req.dn.rdns[0])[0]];
         if (!commonName) return next(new ldap.NoSuchObjectError(req.dn.toString()));
 
-        user.verify(commonName, req.credentials || '', function (error, result) {
+        // TODO this should be done after we verified the app has access to avoid leakage of user existence
+        user.verify(commonName, req.credentials || '', function (error, userObject) {
             if (error && error.reason === UserError.NOT_FOUND) return next(new ldap.NoSuchObjectError(req.dn.toString()));
             if (error && error.reason === UserError.WRONG_PASSWORD) return next(new ldap.InvalidCredentialsError(req.dn.toString()));
             if (error) return next(new ldap.OperationsError(error));
 
-            res.end();
+            getAppByRequest(req, function (error, app) {
+                if (error) return next(error);
+
+                if (!app) return res.end();
+
+                apps.hasAccessTo(app, userObject, function (error, result) {
+                    if (error) return next(new ldap.OperationsError(error.toString()));
+
+                    // we return no such object, to avoid leakage of a users existence
+                    if (!result) return next(new ldap.NoSuchObjectError(req.dn.toString()));
+
+                    res.end();
+                });
+            });
         });
     });
 
