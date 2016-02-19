@@ -43,14 +43,15 @@ function configureAdmin(certFilePath, keyFilePath, callback) {
     reload(callback);
 }
 
-function configureApp(app, certFilePath, keyFilePath, callback) {
+function configureApp(app, oauthProxy, certFilePath, keyFilePath, callback) {
     assert.strictEqual(typeof app, 'object');
+    assert.strictEqual(typeof oauthProxy, 'boolean');
     assert.strictEqual(typeof certFilePath, 'string');
     assert.strictEqual(typeof keyFilePath, 'string');
     assert.strictEqual(typeof callback, 'function');
 
     var sourceDir = path.resolve(__dirname, '..');
-    var endpoint = app.oauthProxy ? 'oauthproxy' : 'app';
+    var endpoint = oauthProxy ? 'oauthproxy' : 'app';
     var vhost = config.appFqdn(app.location);
 
     var data = {
