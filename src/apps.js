@@ -433,7 +433,7 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
     purchase(appStoreId, function (error) {
         if (error) return callback(error);
 
-        appdb.add(appId, appStoreId, manifest, location.toLowerCase(), portBindings, accessRestriction, false, memoryLimit, function (error) {
+        appdb.add(appId, appStoreId, manifest, location.toLowerCase(), portBindings, accessRestriction, memoryLimit, function (error) {
             if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(getDuplicateErrorDetails(location.toLowerCase(), portBindings, error));
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 

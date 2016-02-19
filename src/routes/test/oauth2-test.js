@@ -155,7 +155,6 @@ describe('OAuth2', function () {
             location: 'test',
             portBindings: {},
             accessRestriction: null,
-            oauthProxy: true,
             memoryLimit: 0
         };
 
@@ -166,7 +165,6 @@ describe('OAuth2', function () {
             location: 'test1',
             portBindings: {},
             accessRestriction: { users: [ 'foobar' ] },
-            oauthProxy: true,
             memoryLimit: 0
         };
 
@@ -177,7 +175,6 @@ describe('OAuth2', function () {
             location: 'test2',
             portBindings: {},
             accessRestriction: { users: [ USER_0.id ] },
-            oauthProxy: true,
             memoryLimit: 0
         };
 
@@ -188,7 +185,6 @@ describe('OAuth2', function () {
             location: 'test3',
             portBindings: {},
             accessRestriction: { groups: [ 'someothergroup', 'admin', 'anothergroup' ] },
-            oauthProxy: true,
             memoryLimit: 0
         };
 
@@ -312,10 +308,10 @@ describe('OAuth2', function () {
                 clientdb.add.bind(null, CLIENT_7.id, CLIENT_7.appId, CLIENT_7.type, CLIENT_7.clientSecret, CLIENT_7.redirectURI, CLIENT_7.scope),
                 clientdb.add.bind(null, CLIENT_8.id, CLIENT_8.appId, CLIENT_8.type, CLIENT_8.clientSecret, CLIENT_8.redirectURI, CLIENT_8.scope),
                 clientdb.add.bind(null, CLIENT_9.id, CLIENT_9.appId, CLIENT_9.type, CLIENT_9.clientSecret, CLIENT_9.redirectURI, CLIENT_9.scope),
-                appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, APP_0.oauthProxy, APP_0.memoryLimit),
-                appdb.add.bind(null, APP_1.id, APP_1.appStoreId, APP_1.manifest, APP_1.location, APP_1.portBindings, APP_1.accessRestriction, APP_1.oauthProxy, APP_1.memoryLimit),
-                appdb.add.bind(null, APP_2.id, APP_2.appStoreId, APP_2.manifest, APP_2.location, APP_2.portBindings, APP_2.accessRestriction, APP_2.oauthProxy, APP_2.memoryLimit),
-                appdb.add.bind(null, APP_3.id, APP_3.appStoreId, APP_3.manifest, APP_3.location, APP_3.portBindings, APP_3.accessRestriction, APP_3.oauthProxy, APP_3.memoryLimit),
+                appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, APP_0.memoryLimit),
+                appdb.add.bind(null, APP_1.id, APP_1.appStoreId, APP_1.manifest, APP_1.location, APP_1.portBindings, APP_1.accessRestriction, APP_1.memoryLimit),
+                appdb.add.bind(null, APP_2.id, APP_2.appStoreId, APP_2.manifest, APP_2.location, APP_2.portBindings, APP_2.accessRestriction, APP_2.memoryLimit),
+                appdb.add.bind(null, APP_3.id, APP_3.appStoreId, APP_3.manifest, APP_3.location, APP_3.portBindings, APP_3.accessRestriction, APP_3.memoryLimit),
                 function (callback) {
                     user.create(USER_0.username, USER_0.password, USER_0.email, USER_0.displayName, function (error, userObject) {
                         expect(error).to.not.be.ok();
