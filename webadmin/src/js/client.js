@@ -248,7 +248,6 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             location: config.location,
             portBindings: config.portBindings,
             accessRestriction: config.accessRestriction,
-            oauthProxy: config.oauthProxy,
             cert: config.cert,
             key: config.key
         };
@@ -292,7 +291,6 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
             location: config.location,
             portBindings: config.portBindings,
             accessRestriction: config.accessRestriction,
-            oauthProxy: config.oauthProxy,
             cert: config.cert,
             key: config.key,
             memoryLimit: config.memoryLimit
