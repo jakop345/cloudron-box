@@ -6,6 +6,7 @@ exports = module.exports = {
     AppsError: AppsError,
 
     hasAccessTo: hasAccessTo,
+    requiresOAuthProxy: requiresOAuthProxy,
 
     get: get,
     getBySubdomain: getBySubdomain,
@@ -277,6 +278,19 @@ function hasAccessTo(app, user, callback) {
     }, function (result) {
         callback(null, result);
     });
+}
+
+function requiresOAuthProxy(app) {
+    assert.strictEqual(typeof app, 'object');
+
+    var tmp = app.accessRestriction;
+
+    // if no accessRestriction set, or the app uses one of the auth modules, we do not need the oauth proxy
+    if (tmp === null) return false;
+    if (app.manifest.addons['ldap'] || app.manifest.addons['oauth'] || app.manifest.addons['simpleauth']) return false;
+
+    // check if any restrictions are set
+    return (tmp.users && tmp.users.length) || (tmp.groups && tmp.groups.length);
 }
 
 function get(appId, callback) {
