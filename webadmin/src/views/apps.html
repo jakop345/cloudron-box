@@ -57,6 +57,7 @@
                                     Restrict to groups
                                 </label>
                             </div>
+                            <div class="has-error" ng-show="appConfigure.accessRestrictionOption !== '' && !appConfigure.isAccessRestrictionValid()">Select at least one group</div>
                             <div>
                                 <div>
                                     <span>
@@ -111,13 +112,13 @@
                             </div>
                             <input type="password" class="form-control" ng-model="appConfigure.password" id="appConfigurePasswordInput" name="password" required>
                         </div>
-                        <input class="ng-hide" type="submit" ng-disabled="appConfigureForm.$invalid || busy"/>
+                        <input class="ng-hide" type="submit" ng-disabled="appConfigureForm.$invalid || busy || (appConfigure.accessRestrictionOption !== '' && !appConfigure.isAccessRestrictionValid())"/>
                     </form>
                 </fieldset>
             </div>
             <div class="modal-footer ">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success" ng-click="doConfigure()" ng-disabled="appConfigureForm.$invalid || appConfigure.busy"><i class="fa fa-spinner fa-pulse" ng-show="appConfigure.busy"></i> Save</button>
+                <button type="button" class="btn btn-success" ng-click="doConfigure()" ng-disabled="appConfigureForm.$invalid || appConfigure.busy || (appConfigure.accessRestrictionOption !== '' && !appConfigure.isAccessRestrictionValid())"><i class="fa fa-spinner fa-pulse" ng-show="appConfigure.busy"></i> Save</button>
             </div>
         </div>
     </div>

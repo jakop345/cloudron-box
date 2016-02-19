@@ -32,7 +32,12 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         keyFileName: '',
         memoryLimit: $scope.memoryTicks[0],
         accessRestrictionOption: '',
-        accessRestriction: { users: [], groups: [] }
+        accessRestriction: { users: [], groups: [] },
+
+        isAccessRestrictionValid: function () {
+            var tmp = $scope.appConfigure.accessRestriction;
+            return !!(tmp.users.length || tmp.groups.length);
+        }
     };
 
     $scope.appUninstall = {
