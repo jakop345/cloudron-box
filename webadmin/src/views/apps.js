@@ -26,7 +26,6 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         portBindings: {},
         portBindingsEnabled: {},
         portBindingsInfo: {},
-        oauthProxy: '',
         certificateFile: null,
         certificateFileName: '',
         keyFile: null,
@@ -71,7 +70,6 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         $scope.appConfigure.password = '';
         $scope.appConfigure.portBindings = {};          // This is the actual model holding the env:port pair
         $scope.appConfigure.portBindingsEnabled = {};   // This is the actual model holding the enabled/disabled flag
-        $scope.appConfigure.oauthProxy = '';
         $scope.appConfigure.certificateFile = null;
         $scope.appConfigure.certificateFileName = '';
         $scope.appConfigure.keyFile = null;
@@ -152,7 +150,6 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         // fill relevant info from the app
         $scope.appConfigure.app = app;
         $scope.appConfigure.location = app.location;
-        $scope.appConfigure.oauthProxy = app.oauthProxy ? '1' : '';
         $scope.appConfigure.portBindingsInfo = app.manifest.tcpPorts || {}; // Portbinding map only for information
         $scope.appConfigure.accessRestrictionOption = app.accessRestriction ? 'restricted' : '';
         $scope.appConfigure.accessRestriction = app.accessRestriction || { users: [], groups: [] };
@@ -189,7 +186,6 @@ angular.module('Application').controller('AppsController', ['$scope', '$location
         var data = {
             location: $scope.appConfigure.location || '',
             portBindings: finalPortBindings,
-            oauthProxy: !!$scope.appConfigure.oauthProxy,
             accessRestriction: !$scope.appConfigure.accessRestrictionOption ? null : $scope.appConfigure.accessRestriction,
             cert: $scope.appConfigure.certificateFile,
             key: $scope.appConfigure.keyFile,
