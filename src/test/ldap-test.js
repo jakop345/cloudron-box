@@ -48,7 +48,6 @@ var APP_0 = {
     portBindings: { port: 5678 },
     health: null,
     accessRestriction: null,
-    oauthProxy: false,
     lastBackupId: null,
     lastBackupConfig: null,
     oldConfig: null,
@@ -69,7 +68,7 @@ function setup(done) {
         database.initialize.bind(null),
         database._clear.bind(null),
         ldapServer.start.bind(null),
-        appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, APP_0.oauthProxy, APP_0.memoryLimit),
+        appdb.add.bind(null, APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, APP_0.memoryLimit),
         appdb.update.bind(null, APP_0.id, { containerId: APP_0.containerId }),
         user.createOwner.bind(null, USER_0.username, USER_0.password, USER_0.email, USER_0.displayName),
         user.create.bind(null, USER_1.username, USER_1.password, USER_1.email, USER_0.displayName, { invitor: USER_0 })

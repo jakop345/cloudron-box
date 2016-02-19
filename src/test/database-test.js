@@ -476,7 +476,6 @@ describe('database', function () {
             portBindings: { port: 5678 },
             health: null,
             accessRestriction: null,
-            oauthProxy: false,
             lastBackupId: null,
             lastBackupConfig: null,
             oldConfig: null,
@@ -496,7 +495,6 @@ describe('database', function () {
             portBindings: { },
             health: null,
             accessRestriction: { users: [ 'foobar' ] },
-            oauthProxy: true,
             lastBackupId: null,
             lastBackupConfig: null,
             oldConfig: null,
@@ -517,7 +515,7 @@ describe('database', function () {
         });
 
         it('add succeeds', function (done) {
-            appdb.add(APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, APP_0.oauthProxy, APP_0.memoryLimit, function (error) {
+            appdb.add(APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, APP_0.portBindings, APP_0.accessRestriction, APP_0.memoryLimit, function (error) {
                 expect(error).to.be(null);
                 done();
             });
@@ -541,7 +539,7 @@ describe('database', function () {
         });
 
         it('add of same app fails', function (done) {
-            appdb.add(APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, [ ], APP_0.accessRestriction, APP_0.oauthProxy, APP_0.memoryLimit, function (error) {
+            appdb.add(APP_0.id, APP_0.appStoreId, APP_0.manifest, APP_0.location, [ ], APP_0.accessRestriction, APP_0.memoryLimit, function (error) {
                 expect(error).to.be.a(DatabaseError);
                 expect(error.reason).to.be(DatabaseError.ALREADY_EXISTS);
                 done();
@@ -571,7 +569,6 @@ describe('database', function () {
             APP_0.location = 'some-other-location';
             APP_0.manifest.version = '0.2';
             APP_0.accessRestriction = '';
-            APP_0.oauthProxy = true;
             APP_0.httpPort = 1337;
             APP_0.memoryLimit = 1337;
 
@@ -580,7 +577,6 @@ describe('database', function () {
                 location: APP_0.location,
                 manifest: APP_0.manifest,
                 accessRestriction: APP_0.accessRestriction,
-                oauthProxy: APP_0.oauthProxy,
                 httpPort: APP_0.httpPort,
                 memoryLimit: APP_0.memoryLimit
             };
@@ -615,7 +611,7 @@ describe('database', function () {
         });
 
         it('add second app succeeds', function (done) {
-            appdb.add(APP_1.id, APP_1.appStoreId, APP_1.manifest, APP_1.location, [ ], APP_1.accessRestriction, APP_0.oauthProxy, APP_1.memoryLimit, function (error) {
+            appdb.add(APP_1.id, APP_1.appStoreId, APP_1.manifest, APP_1.location, [ ], APP_1.accessRestriction, APP_1.memoryLimit, function (error) {
                 expect(error).to.be(null);
                 done();
             });

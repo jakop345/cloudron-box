@@ -60,7 +60,6 @@ var APP = {
     httpPort: 4567,
     portBindings: null,
     accessRestriction: null,
-    oauthProxy: false,
     dnsRecordId: 'someDnsRecordId',
     memoryLimit: 0
 };
@@ -85,7 +84,7 @@ describe('apptask', function () {
         config.set('version', '0.5.0');
         async.series([
             database.initialize,
-            appdb.add.bind(null, APP.id, APP.appStoreId, APP.manifest, APP.location, APP.portBindings, APP.accessRestriction, APP.oauthProxy, APP.memoryLimit),
+            appdb.add.bind(null, APP.id, APP.appStoreId, APP.manifest, APP.location, APP.portBindings, APP.accessRestriction, APP.memoryLimit),
             settings.setDnsConfig.bind(null, { provider: 'route53', accessKeyId: 'accessKeyId', secretAccessKey: 'secretAccessKey', endpoint: 'http://localhost:5353' }),
             settings.setTlsConfig.bind(null, { provider: 'caas' })
         ], done);
