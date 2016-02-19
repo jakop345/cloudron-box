@@ -163,7 +163,7 @@ function allocateOAuthProxyCredentials(app, callback) {
     assert.strictEqual(typeof app, 'object');
     assert.strictEqual(typeof callback, 'function');
 
-    if (!app.oauthProxy) return callback(null);
+    if (!apps.requiresOAuthProxy(app)) return callback(null);
 
     var id = 'cid-' + uuid.v4();
     var clientSecret = hat(256);
