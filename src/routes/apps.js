@@ -128,7 +128,7 @@ function installApp(req, res, next) {
 
     debug('Installing app id:%s storeid:%s loc:%s port:%j accessRestriction:%j memoryLimit:%s manifest:%j', appId, data.appStoreId, data.location, data.portBindings, data.accessRestriction, data.memoryLimit, data.manifest);
 
-    apps.install(appId, data.appStoreId, data.manifest, data.location, data.portBindings || null, data.accessRestriction, false, data.icon || null, data.cert || null, data.key || null, data.memoryLimit || 0, function (error) {
+    apps.install(appId, data.appStoreId, data.manifest, data.location, data.portBindings || null, data.accessRestriction, data.icon || null, data.cert || null, data.key || null, data.memoryLimit || 0, function (error) {
         if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, error.message));
         if (error && error.reason === AppsError.PORT_RESERVED) return next(new HttpError(409, 'Port ' + error.message + ' is reserved.'));
         if (error && error.reason === AppsError.PORT_CONFLICT) return next(new HttpError(409, 'Port ' + error.message + ' is already in use.'));
@@ -168,7 +168,7 @@ function configureApp(req, res, next) {
 
     debug('Configuring app id:%s location:%s bindings:%j accessRestriction:%j memoryLimit:%s', req.params.id, data.location, data.portBindings, data.accessRestriction, data.memoryLimit);
 
-    apps.configure(req.params.id, data.location, data.portBindings || null, data.accessRestriction, false, data.cert || null, data.key || null, data.memoryLimit || 0, function (error) {
+    apps.configure(req.params.id, data.location, data.portBindings || null, data.accessRestriction, data.cert || null, data.key || null, data.memoryLimit || 0, function (error) {
         if (error && error.reason === AppsError.ALREADY_EXISTS) return next(new HttpError(409, error.message));
         if (error && error.reason === AppsError.PORT_RESERVED) return next(new HttpError(409, 'Port ' + error.message + ' is reserved.'));
         if (error && error.reason === AppsError.PORT_CONFLICT) return next(new HttpError(409, 'Port ' + error.message + ' is already in use.'));
