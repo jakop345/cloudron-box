@@ -379,14 +379,13 @@ function purchase(appStoreId, callback) {
     });
 }
 
-function install(appId, appStoreId, manifest, location, portBindings, accessRestriction, oauthProxy, icon, cert, key, memoryLimit, callback) {
+function install(appId, appStoreId, manifest, location, portBindings, accessRestriction, icon, cert, key, memoryLimit, callback) {
     assert.strictEqual(typeof appId, 'string');
     assert.strictEqual(typeof appStoreId, 'string');
     assert(manifest && typeof manifest === 'object');
     assert.strictEqual(typeof location, 'string');
     assert.strictEqual(typeof portBindings, 'object');
     assert.strictEqual(typeof accessRestriction, 'object');
-    assert.strictEqual(typeof oauthProxy, 'boolean');
     assert(!icon || typeof icon === 'string');
     assert(cert === null || typeof cert === 'string');
     assert(key === null || typeof key === 'string');
@@ -434,7 +433,7 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
     purchase(appStoreId, function (error) {
         if (error) return callback(error);
 
-        appdb.add(appId, appStoreId, manifest, location.toLowerCase(), portBindings, accessRestriction, oauthProxy, memoryLimit, function (error) {
+        appdb.add(appId, appStoreId, manifest, location.toLowerCase(), portBindings, accessRestriction, false, memoryLimit, function (error) {
             if (error && error.reason === DatabaseError.ALREADY_EXISTS) return callback(getDuplicateErrorDetails(location.toLowerCase(), portBindings, error));
             if (error) return callback(new AppsError(AppsError.INTERNAL_ERROR, error));
 
@@ -451,12 +450,11 @@ function install(appId, appStoreId, manifest, location, portBindings, accessRest
     });
 }
 
-function configure(appId, location, portBindings, accessRestriction, oauthProxy, cert, key, memoryLimit, callback) {
+function configure(appId, location, portBindings, accessRestriction, cert, key, memoryLimit, callback) {
     assert.strictEqual(typeof appId, 'string');
     assert.strictEqual(typeof location, 'string');
     assert.strictEqual(typeof portBindings, 'object');
     assert.strictEqual(typeof accessRestriction, 'object');
-    assert.strictEqual(typeof oauthProxy, 'boolean');
     assert(cert === null || typeof cert === 'string');
     assert(key === null || typeof key === 'string');
     assert.strictEqual(typeof memoryLimit, 'number');
@@ -493,7 +491,6 @@ function configure(appId, location, portBindings, accessRestriction, oauthProxy,
         var values = {
             location: location.toLowerCase(),
             accessRestriction: accessRestriction,
-            oauthProxy: oauthProxy,
             portBindings: portBindings,
             memoryLimit: memoryLimit,
 
@@ -501,7 +498,6 @@ function configure(appId, location, portBindings, accessRestriction, oauthProxy,
                 location: app.location,
                 accessRestriction: app.accessRestriction,
                 portBindings: app.portBindings,
-                oauthProxy: app.oauthProxy,
                 memoryLimit: app.memoryLimit
             }
         };
@@ -563,7 +559,6 @@ function update(appId, force, manifest, portBindings, icon, callback) {
                 manifest: app.manifest,
                 portBindings: app.portBindings,
                 accessRestriction: app.accessRestriction,
-                oauthProxy: app.oauthProxy,
                 memoryLimit: app.memoryLimit
             }
         };
@@ -655,7 +650,6 @@ function restore(appId, callback) {
                 oldConfig: {
                     location: app.location,
                     accessRestriction: app.accessRestriction,
-                    oauthProxy: app.oauthProxy,
                     portBindings: app.portBindings,
                     memoryLimit: app.memoryLimit,
                     manifest: app.manifest
@@ -914,7 +908,6 @@ function backupApp(app, addonsToBackup, callback) {
             location: app.location,
             portBindings: app.portBindings,
             accessRestriction: app.accessRestriction,
-            oauthProxy: app.oauthProxy,
             memoryLimit: app.memoryLimit
         };
         backupFunction = createNewBackup.bind(null, app, addonsToBackup);
