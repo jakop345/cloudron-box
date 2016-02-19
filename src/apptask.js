@@ -101,11 +101,12 @@ function configureNginx(app, callback) {
     assert.strictEqual(typeof callback, 'function');
 
     var vhost = config.appFqdn(app.location);
+    var oauthProxy = apps.requiresOAuthProxy(app);
 
     certificates.ensureCertificate(vhost, function (error, certFilePath, keyFilePath) {
         if (error) return callback(error);
 
-        nginx.configureApp(app, certFilePath, keyFilePath, callback);
+        nginx.configureApp(app, oauthProxy, certFilePath, keyFilePath, callback);
     });
 }
 
