@@ -290,7 +290,7 @@ function requiresOAuthProxy(app) {
     if (app.manifest.addons['ldap'] || app.manifest.addons['oauth'] || app.manifest.addons['simpleauth']) return false;
 
     // check if any restrictions are set
-    return (tmp.users && tmp.users.length) || (tmp.groups && tmp.groups.length);
+    return !!((tmp.users && tmp.users.length) || (tmp.groups && tmp.groups.length));
 }
 
 function get(appId, callback) {
