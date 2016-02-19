@@ -830,7 +830,6 @@ describe('OAuth2', function () {
                     request.get(url, { jar: jar, followRedirect: false }, function (error, response, body) {
                         expect(error).to.not.be.ok();
                         expect(response.statusCode).to.eql(200);
-                        console.log(body);
                         expect(body.indexOf('<!-- error tester -->')).to.not.equal(-1);
                         expect(body.indexOf('No access to this app.')).to.not.equal(-1);
 
