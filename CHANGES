@@ -411,3 +411,6 @@
 - Fix bug in multdb mysql addon backup
 - Add initial user group support
 - Improved app memory limit handling
+
+[0.9.1]
+- Introduce per app group access control
