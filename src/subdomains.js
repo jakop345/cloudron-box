@@ -44,6 +44,7 @@ SubdomainError.EXTERNAL_ERROR = 'External error';
 SubdomainError.STILL_BUSY = 'Still busy';
 SubdomainError.MISSING_CREDENTIALS = 'Missing credentials';
 SubdomainError.INTERNAL_ERROR = 'Missing credentials';
+SubdomainError.ACCESS_DENIED = 'Access denied';
 
 // choose which subdomain backend we use for test purpose we use route53
 function api(provider) {
