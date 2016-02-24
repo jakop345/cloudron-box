@@ -39,8 +39,8 @@ function getZoneByName(dnsConfig, zoneName, callback) {
 
     var route53 = new AWS.Route53(getDnsCredentials(dnsConfig));
     route53.listHostedZones({}, function (error, result) {
-        if (error && error.code === 'AccessDenied') return callback(new SubdomainError(SubdomainError.ACCESS_DENIED, new Error(error)));
-        if (error) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, new Error(error)));
+        if (error && error.code === 'AccessDenied') return callback(new SubdomainError(SubdomainError.ACCESS_DENIED, error.message));
+        if (error) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, error.message));
 
         var zone = result.HostedZones.filter(function (zone) {
             return zone.Name.slice(0, -1) === zoneName;     // aws zone name contains a '.' at the end
@@ -85,7 +85,7 @@ function add(dnsConfig, zoneName, subdomain, type, values, callback) {
 
         var route53 = new AWS.Route53(getDnsCredentials(dnsConfig));
         route53.changeResourceRecordSets(params, function(error, result) {
-            if (error && error.code === 'AccessDenied') return callback(new SubdomainError(SubdomainError.ACCESS_DENIED, new Error(error)));
+            if (error && error.code === 'AccessDenied') return callback(new SubdomainError(SubdomainError.ACCESS_DENIED, error.message));
             if (error && error.code === 'PriorRequestNotComplete') return callback(new SubdomainError(SubdomainError.STILL_BUSY, error.message));
             if (error) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, error.message));
 
@@ -130,8 +130,8 @@ function get(dnsConfig, zoneName, subdomain, type, callback) {
 
         var route53 = new AWS.Route53(getDnsCredentials(dnsConfig));
         route53.listResourceRecordSets(params, function (error, result) {
-            if (error && error.code === 'AccessDenied') return callback(new SubdomainError(SubdomainError.ACCESS_DENIED, new Error(error)));
-            if (error) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, new Error(error)));
+            if (error && error.code === 'AccessDenied') return callback(new SubdomainError(SubdomainError.ACCESS_DENIED, error.message));
+            if (error) return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, error.message));
             if (result.ResourceRecordSets.length === 0) return callback(null, [ ]);
             if (result.ResourceRecordSets[0].Name !== params.StartRecordName && result.ResourceRecordSets[0].Type !== params.StartRecordType) return callback(null, [ ]);
 
@@ -175,22 +175,22 @@ function del(dnsConfig, zoneName, subdomain, type, values, callback) {
 
         var route53 = new AWS.Route53(getDnsCredentials(dnsConfig));
         route53.changeResourceRecordSets(params, function(error, result) {
-            if (error && error.code === 'AccessDenied') return callback(new SubdomainError(SubdomainError.ACCESS_DENIED, new Error(error)));
+            if (error && error.code === 'AccessDenied') return callback(new SubdomainError(SubdomainError.ACCESS_DENIED, error.message));
             if (error && error.message && error.message.indexOf('it was not found') !== -1) {
                 debug('del: resource record set not found.', error);
-                return callback(new SubdomainError(SubdomainError.NOT_FOUND, new Error(error)));
+                return callback(new SubdomainError(SubdomainError.NOT_FOUND, error.message));
             } else if (error && error.code === 'NoSuchHostedZone') {
                 debug('del: hosted zone not found.', error);
-                return callback(new SubdomainError(SubdomainError.NOT_FOUND, new Error(error)));
+                return callback(new SubdomainError(SubdomainError.NOT_FOUND, error.message));
             } else if (error && error.code === 'PriorRequestNotComplete') {
                 debug('del: resource is still busy', error);
-                return callback(new SubdomainError(SubdomainError.STILL_BUSY, new Error(error)));
+                return callback(new SubdomainError(SubdomainError.STILL_BUSY, error.message));
             } else if (error && error.code === 'InvalidChangeBatch') {
                 debug('del: invalid change batch. No such record to be deleted.');
-                return callback(new SubdomainError(SubdomainError.NOT_FOUND, new Error(error)));
+                return callback(new SubdomainError(SubdomainError.NOT_FOUND, error.message));
             } else if (error) {
                 debug('del: error', error);
-                return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, new Error(error)));
+                return callback(new SubdomainError(SubdomainError.EXTERNAL_ERROR, error.message));
             }
 
             callback(null);
@@ -207,7 +207,7 @@ function getChangeStatus(dnsConfig, changeId, callback) {
 
     var route53 = new AWS.Route53(getDnsCredentials(dnsConfig));
     route53.getChange({ Id: changeId }, function (error, result) {
-        if (error && error.code === 'AccessDenied') return callback(new SubdomainError(SubdomainError.ACCESS_DENIED, new Error(error)));
+        if (error && error.code === 'AccessDenied') return callback(new SubdomainError(SubdomainError.ACCESS_DENIED, error.message));
         if (error) return callback(error);
 
         callback(null, result.ChangeInfo.Status);
