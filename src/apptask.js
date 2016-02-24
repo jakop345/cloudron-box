@@ -701,7 +701,13 @@ function uninstall(app, callback) {
 
         updateApp.bind(null, app, { installationProgress: '95, Remove app from database' }),
         appdb.del.bind(null, app.id)
-    ], callback);
+    ], function seriesDone(error) {
+        if (error) {
+            debugApp(app, 'error uninstalling app: %s', error);
+            return updateApp(app, { installationState: appdb.ISTATE_ERROR, installationProgress: error.message }, callback.bind(null, error));
+        }
+        callback(null);
+    });
 }
 
 function runApp(app, callback) {
