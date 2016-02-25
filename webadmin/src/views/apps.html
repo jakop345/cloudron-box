@@ -1,9 +1,18 @@
-<div class="row animateMeOpacity ng-hide" ng-show="installedApps.length === 0">
+<div class="row animateMeOpacity ng-hide" ng-show="installedApps.length === 0 && user.admin">
     <div class="col-lg-6 col-lg-offset-3" style="text-align: center;">
         <br/><br/><br/><br/>
         <h1><i class="fa fa-cloud-download fa-fw"></i> Your Cloudron does not have any apps installed yet!</h1>
         <br/></br>
         <h3>How about installing some? Checkout the <a href="#/appstore">App Store</a></h3>
+    </div>
+</div>
+
+<div class="row animateMeOpacity ng-hide" ng-show="installedApps.length === 0 && !user.admin">
+    <div class="col-lg-6 col-lg-offset-3" style="text-align: center;">
+        <br/><br/><br/><br/>
+        <h1>You don't have access to any apps on this Cloudron yet!</h1>
+        <br/></br>
+        <h3>Once you do, they will show up here.</h3>
     </div>
 </div>
 
