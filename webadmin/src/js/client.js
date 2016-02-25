@@ -766,7 +766,7 @@ angular.module('Application').service('Client', ['$http', 'md5', 'Notification',
         var used = this.getInstalledApps().reduce(function (prev, cur) { return prev + (cur.manifest.memoryLimit || DEFAULT_MEMORY_LIMIT); }, 0);
         var available = (this.getConfig().memory || 0) - used;
 
-        return (available - needed) > 0;
+        return (available - needed) >= 0;
     };
 
     client = new Client();
